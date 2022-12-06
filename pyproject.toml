@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools>=60", "wheel", "build", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kfactory"
+description = "KLayout API implementation of gdsfactory"
+classifiers = [
+	"Programming Language :: Python :: 3.10",
+	"Operating System :: OS Independent",
+]
+dependencies = [
+	"klayout >= 0.27.11",
+	"scipy",
+	"ruamel.yaml",
+	"cachetools >= 5.2.0",
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dev = ["black>=21", "mypy", "pre-commit", "commitizen", "gitpython", "pylsp-mypy", "types-cachetools", "klayout-stubs"]
+docs = ["sphinx", "sphinx-autodoc-typehints", "sphinx_rtd_theme", "sphinxcontrib-video"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]
+write_to = "src/kfactory/_version.py"
+version_scheme = "release-branch-semver"
+
+[tool.setuptools.dynamic]
+version = {attr = "kfactory._version.version"}
+
+
+[tool.black]
+line-length = 88  # Specify the line length
+target-version = ['py310']  # Specify your Python version
+include = '\.pyi?$'
+exclude = '''  # Specify the files/dirs that should be ignored by the black formatter
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | env
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "0.1.0"
+version_files = [
+    "pyproject.toml:version",
+]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+
+[tool.pylsp-mypy]
+enabled = true
+live_mode = true
+strict = true
+
+[[tool.mypy.overrides]]
+module = "kfactory"
+implicit_reexport = true
+
+[tool.isort]
+multi_line_output = 3
+line_length = 88
+include_trailing_comma = true
+skip = ["src/kfactory/__init__.py"]
