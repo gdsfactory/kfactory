@@ -5,14 +5,7 @@ from enum import IntEnum
 from hashlib import sha3_512
 from inspect import signature
 from pathlib import Path
-from typing import (
-    Any,
-    Callable,
-    Iterator,
-    Optional,
-    Union,
-    overload,
-)
+from typing import Any, Callable, Iterator, Optional, Union, overload
 
 import numpy as np
 import ruamel.yaml

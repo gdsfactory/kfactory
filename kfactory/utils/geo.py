@@ -1,9 +1,5 @@
 import warnings
-from typing import (
-    Any,
-    List,
-    Sequence,
-)
+from typing import Any, List, Sequence
 
 import numpy as np
 from numpy.typing import ArrayLike
