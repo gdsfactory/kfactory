@@ -25,7 +25,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["black>=21", "mypy", "pre-commit", "commitizen", "gitpython", "pylsp-mypy", "types-cachetools", "klayout-stubs"]
+dev = ["black>=21", "mypy", "pre-commit", "commitizen", "gitpython", "pylsp-mypy", "types-cachetools"]
 docs = ["sphinx", "sphinx-autodoc-typehints", "sphinx_rtd_theme", "sphinxcontrib-video"]
 
 

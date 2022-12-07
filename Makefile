@@ -4,7 +4,7 @@ help:
 	@echo 'make test-force:       Rebuilds regression test'
 
 install:
-	pip install -e .[dev, docs]
+	pip install -e .[docs,dev]
 	pre-commit install
 
 test:
