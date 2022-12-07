@@ -437,7 +437,8 @@ def place90(
                 if length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
                     wg = c << straight_factory(
                         width=taperp2.width,
-                        length=length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
+                        length=length
+                        - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
                     )
                     _p1, _p2 = (
                         v

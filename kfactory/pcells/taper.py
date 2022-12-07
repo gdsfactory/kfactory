@@ -22,7 +22,9 @@ def taper(
     )
 
     c.create_port(name="W0", trans=kdb.Trans(2, False, 0, 0), width=w1, layer=layer)
-    c.create_port(name="E0", trans=kdb.Trans(0, False, layer_idx, 0), width=w2, layer=layer)
+    c.create_port(
+        name="E0", trans=kdb.Trans(0, False, layer_idx, 0), width=w2, layer=layer
+    )
 
     if enclosure is not None:
         enclosure.apply_minkowski_y(c, kdb.Region(c.bbox()))
