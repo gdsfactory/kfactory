@@ -2,7 +2,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, TypeVar, Union
+from typing import Any, Optional, TypeVar, Union
 
 from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
@@ -19,7 +19,7 @@ PathLike = TypeVar("PathLike", str, Path, None)
 def cells_to_yaml(
     output: PathLike, cells: Union[list[KCell], KCell]
 ) -> None:  # , library: KLib=library):
-    """Convert cell(s) to a yaml represenations
+    """Convert cell(s) to a yaml representations
 
     Args:
         output: A stream or string of a path where to dump the yaml. Can also be set to sys.stdout
@@ -36,8 +36,7 @@ def cells_to_yaml(
 
 
 def get_yaml_obj() -> YAML:
-    yaml = YAML()
-    return yaml
+    return YAML()
 
 
 def register_classes(

@@ -1,17 +1,17 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: afb705d488f95978d2bf1459e05e9b7e3dca03ac
+    rev: a41c4b94b220171e928ff3e6c9bef34e71267f46
     hooks:
       - id: check-yaml
         exclude: ^(conda\.recipe/meta\.yaml|conda_build/templates/.*\.yaml|docs/click/meta\.yaml|conda/meta\.yaml|construct.yaml)
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: requirements-txt-fixer
-  - repo: https://github.com/hakancelikdev/unimport
-    rev: 004b5dd0c8112330275beb52c4ccfce016a4b945
-    hooks:
-      - id: unimport
-        args: [--remove, --include-star-import]
+  # - repo: https://github.com/hakancelikdev/unimport
+  #   rev: 33ead41ee30f1d323a9c2fcfd0114297efbbc4d5
+  #   hooks:
+  #     - id: unimport
+  #       args: [--remove, --include-star-import]
   - repo: https://github.com/pycqa/isort
     rev: 12cc5fbd67eebf92eb2213b03c07b138ae1fb448
     hooks:
@@ -33,24 +33,24 @@ repos:
     hooks:
       - id: blacken-docs
         additional_dependencies: [black==22.3.0]
-  - repo: https://github.com/pycqa/flake8
-    rev: 647996c743f9e77368ce46cc74abe98549dd4c3a
-    hooks:
-      - id: flake8
+  # - repo: https://github.com/pycqa/flake8
+  #   rev: 647996c743f9e77368ce46cc74abe98549dd4c3a
+  #   hooks:
+  #     - id: flake8
   - repo: https://github.com/kynan/nbstripout
-    rev: 4e0f64cf03b52e2aa54f7dd57c722e1a04a439f6
+    rev: 4ff54770b48e3de476bfc02c2b06d5dc6cd5a912
     hooks:
       - id: nbstripout
         files: .ipynb
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: 4c7ee5abff7f53f8be0bacb0974c63cbd413bae6
+    rev: v3.3.1
     hooks:
       - id: pyupgrade
         args: [--py37-plus, --keep-runtime-typing]
 
   - repo: https://github.com/codespell-project/codespell
-    rev: 6a9d7a7a7d0db950a1bd8d5ecdd3298f114d2a12
+    rev: 25227f203012325372cb11a828cf9bd475671b21
     hooks:
       - id: codespell
         args: ["-L TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem"]
@@ -61,7 +61,7 @@ repos:
   #     - id: shellcheck
 
   - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: 7b4409161486c6956bb3206ce96db5d56731b1b9 # Use the ref you want to point at
+    rev: 77c4a0f2d3edd699ff7c2c5e430d46cd85358768 # Use the ref you want to point at
     hooks:
       - id: python-use-type-annotations
 
@@ -107,10 +107,10 @@ repos:
   #   hooks:
   #       - id: darglint
   #
-  - repo: https://github.com/pycqa/pydocstyle
-    rev: "a6fe4222012e990042c86cdaaa904a8d059752ee"
-    hooks:
-        - id: pydocstyle
+  # - repo: https://github.com/pycqa/pydocstyle
+  #   rev: "a6fe4222012e990042c86cdaaa904a8d059752ee"
+  #   hooks:
+  #       - id: pydocstyle
   # - repo: https://github.com/asottile/reorder_python_imports
   #   rev: 2b2f0c74acdb3de316e23ceb7dd0d7945c354050
   #   hooks:

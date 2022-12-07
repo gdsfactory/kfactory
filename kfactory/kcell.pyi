@@ -1,16 +1,18 @@
-from . import kdb
-from _typeshed import Incomplete
-from cachetools import Cache
 from typing import (
     Any,
     Callable,
+    Hashable,
     Iterator,
     Optional,
+    Sequence,
     Union,
     overload,
-    Hashable,
-    Sequence,
 )
+
+from _typeshed import Incomplete
+from cachetools import Cache
+
+from . import kdb
 
 class KLib(kdb.Layout):
     kcells: Incomplete

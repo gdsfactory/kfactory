@@ -3,7 +3,7 @@ help:
 	@echo 'make test:             Run tests with pytest'
 	@echo 'make test-force:       Rebuilds regression test'
 
-install: 
+install:
 	pip install -e .
 	pip install pre-commit
 	pre-commit install
@@ -39,5 +39,7 @@ codestyle:
 git-rm-merged:
 	git branch -D `git branch --merged | grep -v \* | xargs`
 
+update-pre:
+	pre-commit autoupdate --bleeding-edge
 
 .PHONY: build conda
