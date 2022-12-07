@@ -109,10 +109,11 @@ def connect(
     p2.trans.mirror = False
 
     # determine bend90_radius
-    bend90_ports = []
-    for p in bend90_cell.ports.get_all().values():
-        if p.port_type == port_type:
-            bend90_ports.append(p)
+    bend90_ports = [
+        p
+        for p in bend90_cell.ports.get_all().values()
+        if p.port_type == port_type
+    ]
     if len(bend90_ports) != 2:
         raise AttributeError(
             f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
@@ -143,10 +144,11 @@ def connect(
 
     if bend180_cell is not None:
         # Bend 180 is available
-        bend180_ports = []
-        for p in bend180_cell.ports.get_all().values():
-            if p.port_type == port_type:
-                bend180_ports.append(p)
+        bend180_ports = [
+            p
+            for p in bend180_cell.ports.get_all().values()
+            if p.port_type == port_type
+        ]
         if len(bend180_ports) != 2:
             raise AttributeError(
                 f"{bend180_cell.name} should have 2 ports but has {len(bend180_ports)} ports"
