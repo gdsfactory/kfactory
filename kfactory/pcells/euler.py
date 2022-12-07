@@ -1,4 +1,3 @@
-from functools import cache
 from typing import Optional
 
 import numpy as np
@@ -24,7 +23,7 @@ def euler_bend_points(
     """Base euler bend, no transformation, emerging from the origin."""
 
     if angle_amount < 0:
-        raise ValueError("angle_amount should be positive. Got {}".format(angle_amount))
+        raise ValueError(f"angle_amount should be positive. Got {angle_amount}")
     # End angle
     eth = angle_amount * np.pi / 180
 
@@ -82,7 +81,7 @@ def euler_bend_points(
 
     # Generate points
     points = []
-    for i in range(0, int(round(Ltot / step)) + 1):
+    for i in range(int(round(Ltot / step)) + 1):
         points.append(_xy(i * step))
 
     return points
@@ -98,7 +97,7 @@ def euler_endpoint(
 
     th = abs(angle_amount) * np.pi / 180 / 2
     R = radius
-    clockwise = bool(angle_amount < 0)
+    clockwise = angle_amount < 0
 
     (fsin, fcos) = fresnel(np.sqrt(2 * th / np.pi))
 
@@ -110,9 +109,7 @@ def euler_endpoint(
     if clockwise:
         Y *= -1
 
-    pt = (X + start_point[0], Y + start_point[1])
-
-    return pt
+    return X + start_point[0], Y + start_point[1]
 
 
 def euler_sbend_points(
@@ -126,11 +123,7 @@ def euler_sbend_points(
         return 2 * end_point[1] - abs(offset)
 
     # Get direction
-    if offset >= 0:
-        dir = +1
-    else:
-        dir = -1
-
+    dir = +1 if offset >= 0 else -1
     # Check whether offset requires straight section
     a = 0.0
     b = 90.0
@@ -158,7 +151,7 @@ def euler_sbend_points(
         r_pt_y = r_pt_y * dir
         spoints.append(pts)
         right_point.append(kdb.DPoint(r_pt_x, r_pt_y))
-    spoints = spoints + right_point[::-1]
+    spoints += right_point[::-1]
 
     return spoints
 
@@ -250,36 +243,21 @@ def bend_s_euler(
     if v.x > 0:
         p1 = backbone[-1].to_itype(dbu)
         p2 = backbone[0].to_itype(dbu)
-        c.create_port(
-            name="W0",
-            trans=kdb.Trans(2, False, p1.to_v()),
-            width=width,
-            port_type="optical",
-            layer=layer,
-        )
-        c.create_port(
-            name="E0",
-            trans=kdb.Trans(0, False, p2.to_v()),
-            width=width,
-            port_type="optical",
-            layer=layer,
-        )
     else:
         p1 = backbone[0].to_itype(dbu)
         p2 = backbone[-1].to_itype(dbu)
-        c.create_port(
-            name="W0",
-            trans=kdb.Trans(2, False, p1.to_v()),
-            width=width,
-            port_type="optical",
-            layer=layer,
-        )
-        c.create_port(
-            name="E0",
-            trans=kdb.Trans(0, False, p2.to_v()),
-            width=width,
-            port_type="optical",
-            layer=layer,
-        )
-
+    c.create_port(
+        name="W0",
+        trans=kdb.Trans(2, False, p1.to_v()),
+        width=width,
+        port_type="optical",
+        layer=layer,
+    )
+    c.create_port(
+        name="E0",
+        trans=kdb.Trans(0, False, p2.to_v()),
+        width=width,
+        port_type="optical",
+        layer=layer,
+    )
     return c

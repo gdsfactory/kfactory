@@ -14,8 +14,8 @@ def taper(
         kdb.Polygon(
             [
                 kdb.Point(0, int(-w1 / 2)),
-                kdb.Point(0, int(w1 / 2)),
-                kdb.Point(l, int(w2 / 2)),
+                kdb.Point(0, w1 // 2),
+                kdb.Point(l, w2 // 2),
                 kdb.Point(l, int(-w2 / 2)),
             ]
         )

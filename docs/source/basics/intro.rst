@@ -33,8 +33,8 @@ This will allow them depending on the orientation of the port. This will sort th
    :language: python
    :linenos:
 
-The `kf.show` will create a GDS in the temp folder and then send the GDS by klive to KLayout (if klive is installed).
-By running this with `python waveguide.py`, this should show us a wavegduide like this:
+The ``kf.show`` will create a GDS in the temp folder and then send the GDS by klive to KLayout (if klive is installed).
+By running this with ``python waveguide.py``, this should show us a waveguide like this:
 
 .. image:: ../_static/waveguide.png
 

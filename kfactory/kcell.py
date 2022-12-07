@@ -1,8 +1,7 @@
 import functools
 import importlib
 import warnings
-from copy import deepcopy
-from dataclasses import InitVar, dataclass, replace
+from dataclasses import InitVar, dataclass
 from enum import IntEnum
 from hashlib import sha3_512
 from inspect import signature
@@ -14,7 +13,6 @@ from typing import (
     Iterator,
     Optional,
     ParamSpec,
-    TypeVar,
     Union,
     overload,
 )
@@ -23,19 +21,7 @@ import numpy as np
 import ruamel.yaml
 from cachetools import Cache, cached
 
-from . import kdb
-
-__all__ = [
-    "KCell",
-    "Instance",
-    "Port",
-    "Ports",
-    "autocell",
-    "cell",
-    "library",
-    "KLib",
-    "default_save",
-]
+from kfactory import kdb
 
 
 class PortWidthMismatch(ValueError):
@@ -183,8 +169,9 @@ class KLib(kdb.Layout):
 
         if kcell.name in self.kcells and kcell is not self.kcells[kcell.name]:
             raise KeyError(
-                f"Cannot register a new cell with a name that already exists in the library"
+                "Cannot register a new cell with a name that already exists in the library"
             )
+
         else:
             self.kcells[kcell.name] = kcell
 
@@ -208,7 +195,7 @@ class KLib(kdb.Layout):
             lm = kdb.Layout.read(self, fn, options)
 
         if register_cells:
-            new_cells = set(c for c in self.cells("*")) - cells
+            new_cells = set(self.cells("*")) - cells
             for c in new_cells:
                 self.register_cell(KCell(kdb_cell=c, library=self))
 
@@ -302,15 +289,14 @@ class Port:
             self.layer = layer
             self.port_type = port_type
             if trans is not None:
-                if isinstance(trans, str):
-                    self.trans = kdb.Trans.from_s(trans)
-                else:
-                    self.trans = trans.dup()
+                self.trans = (
+                    kdb.Trans.from_s(trans) if isinstance(trans, str) else trans.dup()
+                )
+            elif angle is None or position is None:
+                raise ValueError(
+                    "angle and position must be given if creating a gdsfactory like port"
+                )
             else:
-                if angle is None or position is None:
-                    raise ValueError(
-                        "angle and position must be given if creating a gdsfactory like port"
-                    )
                 self.trans = kdb.Trans(angle, mirror_x, kdb.Vector(*position))
 
     def hash(self) -> bytes:
@@ -328,18 +314,7 @@ class Port:
         return h.digest()
 
     def __repr__(self) -> str:
-        port_repr = (
-            f"Port(\n"
-            f"    name: {self.name}\n"
-            f"    trans: {self.trans}\n"
-            f"    width: {self.width}\n"
-            f"    layer: {self.layer.name + ' (' +str(int(self.layer)) +')' if isinstance(self.layer,IntEnum) else str(self.layer)}\n"
-            f"    port_type: {self.port_type}\n"
-            f")"
-        )
-        return port_repr
-
-        return f"Port(name: {self.name}, trans: {self.trans}, width: {self.width}, layer: {self.layer.name + ' (' +str(int(self.layer)) +')' if isinstance(self.layer,IntEnum) else str(self.layer)} port_type: {self.port_type})"
+        return f"Port(\n    name: {self.name}\n    trans: {self.trans}\n    width: {self.width}\n    layer: {f'{self.layer.name} ({int(self.layer)})' if isinstance(self.layer, IntEnum) else str(self.layer)}\n    port_type: {self.port_type}\n)"
 
     def copy(self, trans: kdb.Trans = kdb.Trans.R0) -> "Port":
         """Get a copy of a port
@@ -361,7 +336,7 @@ class Port:
 
     @property
     def position(self) -> tuple[int, int]:
-        """Gives the x and y coordinates of the Port. This is info stored in the tranformation of the port.
+        """Gives the x and y coordinates of the Port. This is info stored in the transformation of the port.
 
         Returns:
             position: `(self.trans.disp.x, self.trans.disp.y)`
@@ -425,7 +400,7 @@ class Port:
     @classmethod
     def from_yaml(cls, constructor, node):  # type: ignore
         """Internal function used by the placer to convert yaml to a Port"""
-        d = {k: v for k, v in constructor.construct_pairs(node)}
+        d = dict(constructor.construct_pairs(node))
         return cls(**d)
 
 
@@ -447,7 +422,7 @@ class KCell:
         library: KLib = library,
         kdb_cell: Optional[kdb.Cell] = None,
     ) -> None:
-        _name = name if name is not None else f"Unnamed_"
+        _name = name if name is not None else "Unnamed_"
         self.library: KLib = library
         if kdb_cell is None:
             self._kdb_cell: kdb.Cell = self.library.create_cell(self, _name)
@@ -456,10 +431,7 @@ class KCell:
         else:
             self._kdb_cell = kdb_cell
             self.library.register_cell(self)
-            if name is None:
-                self.name = kdb_cell.name
-            else:
-                self.name = name
+            self.name = kdb_cell.name if name is None else name
         self.ports: Ports = Ports()
         self.insts: list[Instance] = []
         self.settings: dict[str, Any] = {}
@@ -587,14 +559,14 @@ class KCell:
 
     def __getattribute__(self, attr_name: str) -> Any:
         """Overwrite the standard getattribute. If the attribute is not set by KCell, go look in the klayout.db.Cell object"""
-        if attr_name in ["name"]:
+        if attr_name in {"name"}:
             return self.__getattr__(attr_name)
         else:
-            return super(KCell, self).__getattribute__(attr_name)
+            return super().__getattribute__(attr_name)
 
     def _get_attr(self, attr_name: str) -> Any:
         """look in the klayout.db.Cell for an attribute, used by settattr to set the name"""
-        return super(KCell, self).__getattribute__(attr_name)
+        return super().__getattribute__(attr_name)
 
     def __getattr__(self, attr_name: str) -> Any:
         """Look in the klayout.db.Cell for attributes"""
@@ -605,12 +577,12 @@ class KCell:
 
         Everything else look first in the klayout.db.Cell whether the attribute exists, otherwise set it in the KCell
         """
-        if attr_name in ["_kdb_cell", "name"]:
-            super(KCell, self).__setattr__(attr_name, attr_value)
+        if attr_name in {"_kdb_cell", "name"}:
+            super().__setattr__(attr_name, attr_value)
         try:
             kdb.Cell.__setattr__(self._get_attr("_kdb_cell"), attr_name, attr_value)
         except AttributeError as a:
-            super(KCell, self).__setattr__(attr_name, attr_value)
+            super().__setattr__(attr_name, attr_value)
 
     def hash(self) -> bytes:
         """Provide a unique hash of the cell"""
@@ -635,13 +607,13 @@ class KCell:
     def autorename_ports(self) -> None:
         """Rename the ports with the schema angle -> "NSWE" and sort by x and y"""
         for angle, name in zip([0, 1, 2, 3], ["E", "N", "W", "S"]):
-            i = 0
-            for port in sorted(
-                filter(lambda port: port.trans.angle == angle, self.ports._ports),
-                key=lambda port: (port.trans.disp.x, port.trans.disp.y),
+            for i, port in enumerate(
+                sorted(
+                    filter(lambda port: port.trans.angle == angle, self.ports._ports),
+                    key=lambda port: (port.trans.disp.x, port.trans.disp.y),
+                )
             ):
                 port.name = f"{name}{i}"
-                i += 1
 
     def flatten(self, prune: bool = True, merge: bool = True) -> None:
         """Flatten the cell. Pruning will delete the klayout.db.Cell if unused, but might cause artifacts at the moment
@@ -694,9 +666,9 @@ class KCell:
             if not node.shapes(layer).is_empty()
         }
 
-        if len(insts) > 0:
+        if insts:
             d["insts"] = insts
-        if len(shapes) > 0:
+        if shapes:
             d["shapes"] = shapes
         if len(node.settings) > 0:
             d["settings"] = node.settings
@@ -763,7 +735,7 @@ class KCell:
                 elif isinstance(ref_yml, int) and len(cell.insts) > 1:
                     ref = cell.insts[ref_yml]
 
-                # margins for x0/y0 need to be in with opposite sign of x/y due to them being substracted later
+                # margins for x0/y0 need to be in with opposite sign of x/y due to them being subtracted later
                 # x0
                 match x0_yml:
                     case "W":
@@ -774,7 +746,7 @@ class KCell:
                         if isinstance(x0_yml, int):
                             x0 = x0_yml
                         else:
-                            NotImplementedError("unkown format for x0")
+                            NotImplementedError("unknown format for x0")
                 # y0
                 match y0_yml:
                     case "S":
@@ -785,7 +757,7 @@ class KCell:
                         if isinstance(y0_yml, int):
                             y0 = y0_yml
                         else:
-                            NotImplementedError("unkown format for y0")
+                            NotImplementedError("unknown format for y0")
                 # x
                 match x_yml:
                     case "W":
@@ -806,7 +778,7 @@ class KCell:
                         if isinstance(x_yml, int):
                             x = x_yml
                         else:
-                            NotImplementedError("unkown format for x")
+                            NotImplementedError("unknown format for x")
                 # y
                 match y_yml:
                     case "S":
@@ -827,7 +799,7 @@ class KCell:
                         if isinstance(y_yml, int):
                             y = y_yml
                         else:
-                            NotImplementedError("unkown format for y")
+                            NotImplementedError("unknown format for y")
                 kinst.transform(kdb.Trans(0, False, x - x0, y - y0))
 
         type_to_class = {
@@ -858,7 +830,7 @@ class Instance:
     Attributes:
         cell: The KCell that is referenced
         instance: The internal klayout.db.Instance reference
-        ports: Transformed ports ot the KCell"""
+        ports: Transformed ports of the KCell"""
 
     yaml_tag = "!Instance"
 
@@ -930,25 +902,25 @@ class Instance:
         elif p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)
         else:
-            conn_trans = kdb.Trans.R180 if not mirror else kdb.Trans.M90
+            conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
             self.instance.trans = op.trans * conn_trans * p.trans.inverted()
 
     def __getattribute__(self, attr_name: str) -> Any:
-        return super(Instance, self).__getattribute__(attr_name)
+        return super().__getattribute__(attr_name)
 
     def _get_attr(self, attr_name: str) -> Any:
-        return super(Instance, self).__getattribute__(attr_name)
+        return super().__getattribute__(attr_name)
 
     def __getattr__(self, attr_name: str) -> Any:
         return kdb.Instance.__getattribute__(self.instance, attr_name)
 
     def __setattr__(self, attr_name: str, attr_value: Any) -> None:
         if attr_name == "instance":
-            super(Instance, self).__setattr__(attr_name, attr_value)
+            super().__setattr__(attr_name, attr_value)
         try:
             kdb.Instance.__setattr__(self._get_attr("instance"), attr_name, attr_value)
         except AttributeError as a:
-            super(Instance, self).__setattr__(attr_name, attr_value)
+            super().__setattr__(attr_name, attr_value)
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore
@@ -978,8 +950,7 @@ class Ports:
         return port.hash() in [v.hash() for v in self._ports]
 
     def each(self) -> Iterator["Port"]:
-        for p in self._ports:
-            yield p
+        yield from self._ports
 
     def add_port(self, port: Port, name: Optional[str] = None) -> None:
         """Add a port object
@@ -1121,8 +1092,8 @@ def autocell(
     set_name: bool = True,
     maxsize: int = 512,
 ) -> Callable[..., KCell]:
-    """Decorator to cache and auto name tthe celll. This will use :py:func:`functools.cache` to cache the function call.
-    Additionally, if enabled this will set the name and from the args/kwargs of the function and als paste them into a setttings dictionary of the :py:class:`~KCell`
+    """Decorator to cache and auto name the celll. This will use :py:func:`functools.cache` to cache the function call.
+    Additionally, if enabled this will set the name and from the args/kwargs of the function and also paste them into a settings dictionary of the :py:class:`~KCell`
 
     Args:
         set_settings: Copy the args & kwargs into the settings dictionary
@@ -1157,7 +1128,7 @@ def autocell(
                 cell = f(**params)
                 if cell.frozen:
                     cell = cell.copy()
-                if set_name == True:
+                if set_name:
                     name = get_component_name(f.__name__, **params)
                     cell.name = name
                 if set_settings:
@@ -1179,10 +1150,7 @@ def autocell(
 
         return wrapper_autocell
 
-    if _func is None:
-        return decorator_autocell  # type: ignore[return-value]
-    else:
-        return decorator_autocell(_func)
+    return decorator_autocell if _func is None else decorator_autocell(_func)
 
 
 def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
@@ -1190,10 +1158,7 @@ def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
 
 
 def frozenset_to_dict(fs: frozenset[tuple[str, Any]]) -> dict[str, Any]:
-    d = {}
-    for (key, value) in fs:
-        d[key] = value
-    return d
+    return dict(fs)
 
 
 def cell(
@@ -1205,13 +1170,10 @@ def cell(
 
 def dict2name(prefix: Optional[str] = None, **kwargs: dict[str, Any]) -> str:
     """returns name from a dict"""
-    if prefix:
-        label = [prefix]
-    else:
-        label = []
+    label = [prefix] if prefix else []
     for key, value in kwargs.items():
         key = join_first_letters(key)
-        label += ["{}{}".format(key.upper(), clean_value(value))]
+        label += [f"{key.upper()}{clean_value(value)}"]
     _label = "_".join(label)
     return clean_name(_label)
 
@@ -1220,7 +1182,7 @@ def get_component_name(component_type: str, **kwargs: dict[str, Any]) -> str:
     name = component_type
 
     if kwargs:
-        name += "_" + dict2name(None, **kwargs)
+        name += f"_{dict2name(None, **kwargs)}"
 
     return name
 
@@ -1260,7 +1222,7 @@ def clean_value(
 
 
 def clean_name(name: str) -> str:
-    """Ensures that gds cells are composed of [a-zA-Z0-9_\-]
+    r"""Ensures that gds cells are composed of [a-zA-Z0-9_\-]
 
     FIXME: only a few characters are currently replaced.
         This function has been updated only on case-by-case basis
@@ -1303,11 +1265,33 @@ def update_default_trans(
     DEFAULT_TRANS.update(new_trans)
 
 
+class KCellCache(Cache[int, Any]):
+    def popitem(self) -> tuple[int, Any]:
+        key, value = super().popitem()
+        warnings.warn(
+            f"KCell {value.name} was evicted from he cache. You probably should increase the cache size"
+        )
+        return key, value
+
+
+__all__ = [
+    "KCell",
+    "Instance",
+    "Port",
+    "Ports",
+    "autocell",
+    "cell",
+    "library",
+    "KLib",
+    "default_save",
+]
+
+
 if __name__ == "__main__":
 
     c1 = KCell("cell_a")
     c1.shapes(c1.layer(1, 0)).insert(
-        kdb.Polygon(([kdb.Point(500, 200), kdb.Point(200, 500), kdb.Point(200, 200)]))
+        kdb.Polygon([kdb.Point(500, 200), kdb.Point(200, 500), kdb.Point(200, 200)])
     )
     c2 = KCell("cell_b")
     c2.shapes(c2.layer(2, 0)).insert(
@@ -1348,15 +1332,7 @@ if __name__ == "__main__":
     saveoptions.format = "GDS2"
 
     c1.layout().write("test.gds", saveoptions)
-    from kfactory import show
+    # from kfactory import show
+    # show("test.gds")
 
-    show("test.gds")
-
-
-class KCellCache(Cache[int, Any]):
-    def popitem(self) -> tuple[int, Any]:
-        key, value = super().popitem()
-        warnings.warn(
-            f"KCell {value.name} was evicted from he cache. You probably should increase the cache size"
-        )
-        return key, value
+    from gdsfactory import show

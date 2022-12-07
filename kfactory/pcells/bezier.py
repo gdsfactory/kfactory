@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Optional
 
 import numpy as np
 
@@ -44,9 +44,9 @@ def bend_s(
         port_type="optical",
     )
 
-    if enclosure is not None:
-        # enclosure.apply_minkowski_y(c,layer)
-        # enclosure.apply_minkowski_custom(c, layer, lambda d: kdb.Polygon(extrude_path(pts, width+d)))
-        pass
-
     return c
+
+
+if __name__ == "__main__":
+    c = bend_s()
+    c.show()

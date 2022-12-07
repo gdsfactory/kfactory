@@ -59,10 +59,7 @@ def clean_points(points: List[kdb.Point]) -> List[kdb.Point]:
     if len(points) < 2:
         return points
     if len(points) == 2:
-        if points[1] != points[0]:
-            return points
-        else:
-            return points[:1]
+        return points if points[1] != points[0] else points[:1]
     p_p = points[0]
     p = points[1]
 
@@ -87,8 +84,7 @@ def clean_points(points: List[kdb.Point]) -> List[kdb.Point]:
 def angles_rad(pts: ArrayLike) -> Any:
     """returns the angles (radians) of the connection between each point and the next"""
     _pts = np.roll(pts, -1, 0)
-    radians = np.arctan2(_pts[:, 1] - pts[:, 1], _pts[:, 0] - pts[:, 0])  # type: ignore[index, call-overload]
-    return radians
+    return np.arctan2(_pts[:, 1] - pts[:, 1], _pts[:, 0] - pts[:, 0])
 
 
 def angles_deg(pts: ArrayLike) -> Any:
@@ -101,18 +97,17 @@ def snap_angle(a: int) -> int:
     a: angle in deg
     Return angle snapped along manhattan angle
     """
-    a = a % 360
+    a %= 360
     if -45 < a < 45:
-        _a = 0
+        return 0
     elif 45 < a < 135:
-        _a = 90
+        return 90
     elif 135 < a < 225:
-        _a = 180
+        return 180
     elif 225 < a < 315:
-        _a = 270
+        return 270
     else:
-        _a = 0
-    return _a
+        return 0
 
 
 def extrude_path(
@@ -152,11 +147,7 @@ def extrude_path_separate(
 
     v = p - p_o
     if snap_to_90:
-        if abs(v.x) > abs(v.y):
-            v = Vec(v.x, 0)
-        else:
-            v = Vec(0, v.y)
-
+        v = Vec(v.x, 0) if abs(v.x) > abs(v.y) else Vec(0, v.y)
     v = R90 * v * width / 2 / v.abs()
 
     points1 = [p_o + v]
@@ -176,11 +167,7 @@ def extrude_path_separate(
 
     v = p - p_o
     if snap_to_90:
-        if abs(v.x) > abs(v.y):
-            v = Vec(v.x, 0)
-        else:
-            v = Vec(0, v.y)
-
+        v = Vec(v.x, 0) if abs(v.x) > abs(v.y) else Vec(0, v.y)
     v = R90 * v * width / 2 / v.abs()
 
     points1.append(p_n + v)
@@ -197,11 +184,7 @@ def extrude_ipath_separate(
         width * dbu,
         snap_to_90,
     )
-    _points = (
-        [p.to_itype(dbu) for p in dpoints[0]],
-        [p.to_itype(dbu) for p in dpoints[1]],
-    )
-    return _points
+    return [p.to_itype(dbu) for p in dpoints[0]], [p.to_itype(dbu) for p in dpoints[1]]
 
 
 # def extrude_path_old(
@@ -313,7 +296,5 @@ def bezier_curve(
         ank = binom(n, k) * (1 - t) ** (n - k) * t**k
         xs += ank * control_points[k][0]
         ys += ank * control_points[k][1]
-
-    breakpoint()
 
     return [kdb.DPoint(p[0], p[1]) for p in np.stack([xs, ys])]
