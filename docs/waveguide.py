@@ -5,7 +5,7 @@ import kfactory as kf
 
 @kf.autocell
 def waveguide(width: int, length: int, width_exclude: int) -> kf.KCell:
-    ### Waveguide: Silicon on 1/0, Silicon exclude on 1/1
+    """Waveguide: Silicon on 1/0, Silicon exclude on 1/1"""
     c = kf.KCell()
     c.shapes(LAYERS["Silicon"]).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
     c.shapes(LAYERS["Silicon.Exclude"]).insert(

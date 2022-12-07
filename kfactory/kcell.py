@@ -116,13 +116,13 @@ def default_save() -> kdb.SaveLayoutOptions:
 
 
 class KLib(kdb.Layout):
-    """This is a small extension to the :py:class:`klayout.db.Layout`. It adds tracking for the :py:class:`~kfactory.kcell.KCell` objects
+    """This is a small extension to the ``klayout.db.Layout``. It adds tracking for the :py:class:`~kfactory.kcell.KCell` objects
     instead of only the :py:class:`klayout.db.Cell` objects. Additionally it allows creation and registration through :py:func:`~create_cell`
 
-    All attributes of :py:class:`~klayout.db.Layout` are transparently accessible
+    All attributes of ``klayout.db.Layout`` are transparently accessible
 
     Attributes:
-        editable: Whether the layout should be opened in editable mode (default: `True`)
+        editable: Whether the layout should be opened in editable mode (default: True)
     """
 
     def __init__(self, editable: bool = True) -> None:
@@ -147,6 +147,7 @@ class KLib(kdb.Layout):
             This will create a cell with the name :py:attr:`name` + `$1` or `2..n` increasing by the number of existing duplicates
             args: additional arguments passed to :py:func:`~klayout.db.Layout.create_cell`
             kwargs: additional keyword arguments passed to :py:func:`klayout.db.Layout.create_cell`
+
         Returns:
             klayout.db.Cell: klayout.db.Cell object created in the Layout
 
@@ -1332,7 +1333,8 @@ if __name__ == "__main__":
     saveoptions.format = "GDS2"
 
     c1.layout().write("test.gds", saveoptions)
-    # from kfactory import show
-    # show("test.gds")
+    from kfactory import show
 
-    from gdsfactory import show
+    show("test.gds")
+
+    # from gdsfactory import show

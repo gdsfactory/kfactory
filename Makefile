@@ -7,6 +7,10 @@ install:
 	pip install -e .[docs,dev]
 	pre-commit install
 
+docs-clean:
+	rm -rf docs/_autosummary/
+	rm -rf docs/build
+
 test:
 	pytest
 

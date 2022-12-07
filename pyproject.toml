@@ -26,7 +26,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["black>=21", "mypy", "pre-commit", "commitizen", "gitpython", "pylsp-mypy", "types-cachetools"]
-docs = ["sphinx", "sphinx-autodoc-typehints", "sphinx_rtd_theme", "sphinxcontrib-video"]
+docs = ["sphinx", "docutils==0.17.1", "sphinx_rtd_theme", "sphinxcontrib-video", "sphinx-autodoc-typehints", "sphinx-book-theme==0.3.3", "sphinx-click", "sphinx-copybutton","sphinx-markdown-tables==0.0.16"]
 
 
 [tool.setuptools.packages]
