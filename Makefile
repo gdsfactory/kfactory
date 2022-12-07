@@ -9,6 +9,9 @@ install:
 	pre-commit install
 	gf tool install
 
+test:
+	pytest
+
 cov:
 	pytest --cov=kfactory
 

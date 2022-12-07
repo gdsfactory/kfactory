@@ -18,8 +18,7 @@ jobs:
       max-parallel: 12
       matrix:
         python-version: [3.7, "3.10"]
-        os: [ubuntu-latest]
-
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}

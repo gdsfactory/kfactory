@@ -23,7 +23,7 @@ import numpy as np
 import ruamel.yaml
 from cachetools import Cache, cached
 
-from . import kdb
+from kfactory import kdb
 
 __all__ = [
     "KCell",
@@ -1279,6 +1279,15 @@ def update_default_trans(
     DEFAULT_TRANS.update(new_trans)
 
 
+class KCellCache(Cache[int, Any]):
+    def popitem(self) -> tuple[int, Any]:
+        key, value = super().popitem()
+        warnings.warn(
+            f"KCell {value.name} was evicted from he cache. You probably should increase the cache size"
+        )
+        return key, value
+
+
 if __name__ == "__main__":
 
     c1 = KCell("cell_a")
@@ -1324,15 +1333,7 @@ if __name__ == "__main__":
     saveoptions.format = "GDS2"
 
     c1.layout().write("test.gds", saveoptions)
-    from kfactory import show
+    # from kfactory import show
+    # show("test.gds")
 
-    show("test.gds")
-
-
-class KCellCache(Cache[int, Any]):
-    def popitem(self) -> tuple[int, Any]:
-        key, value = super().popitem()
-        warnings.warn(
-            f"KCell {value.name} was evicted from he cache. You probably should increase the cache size"
-        )
-        return key, value
+    from gdsfactory import show

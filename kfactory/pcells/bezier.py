@@ -45,3 +45,8 @@ def bend_s(
     )
 
     return c
+
+
+if __name__ == "__main__":
+    c = bend_s()
+    c.show()
