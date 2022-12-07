@@ -116,14 +116,14 @@ repos:
   #   hooks:
   #     - id: reorder-python-imports
 
-#   - repo: https://github.com/pre-commit/pygrep-hooks
-#     rev: "v1.9.0"
-#     hooks:
-#       - id: python-check-blanket-noqa
-#       - id: python-check-blanket-type-ignore
-#       - id: python-no-log-warn
-#       - id: python-no-eval
-#       - id: python-use-type-annotations
-#       - id: rst-backticks
-#       - id: rst-directive-colons
-#       - id: rst-inline-touching-normal
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: "v1.9.0"
+    hooks:
+      - id: python-check-blanket-noqa
+      - id: python-check-blanket-type-ignore
+      - id: python-no-log-warn
+      - id: python-no-eval
+      - id: python-use-type-annotations
+      - id: rst-backticks
+      - id: rst-directive-colons
+      - id: rst-inline-touching-normal
