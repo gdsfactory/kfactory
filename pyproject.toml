@@ -16,6 +16,7 @@ dependencies = [
 	"cachetools >= 5.2.0",
 ]
 dynamic = ["version"]
+version=  "0.0.0"
 
 [project.optional-dependencies]
 dev = ["black>=21", "mypy", "pre-commit", "commitizen", "gitpython", "pylsp-mypy", "types-cachetools", "klayout-stubs"]
