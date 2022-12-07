@@ -20,6 +20,7 @@
 project = "KFactory"
 copyright = "2022, PsiQuantum"
 author = "Sebastian Goeldi"
+release = "0.0.0"
 
 
 # -- General configuration ---------------------------------------------------

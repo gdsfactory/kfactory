@@ -1,29 +1,35 @@
 [build-system]
-requires = ["setuptools>=60", "wheel", "build", "setuptools_scm[toml]>=6.2"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
 
-[project]
+[tool.poetry]
 name = "kfactory"
 description = "KLayout API implementation of gdsfactory"
 classifiers = [
+	"Programming Language :: Python :: 3.7",
+	"Programming Language :: Python :: 3.8",
+	"Programming Language :: Python :: 3.9",
 	"Programming Language :: Python :: 3.10",
+	"Programming Language :: Python :: 3.11",
 	"Operating System :: OS Independent",
 ]
-dependencies = [
-	"klayout >= 0.27.11",
-	"scipy",
-	"ruamel.yaml",
-	"cachetools >= 5.2.0",
-]
-dynamic = ["version"]
-version=  "0.0.0"
+version = "0.0.0"
+authors = ["kfactory community"]
 
-[project.optional-dependencies]
+[tool.poetry.dependencies]
+
+python = ">=3.7,<4.0"
+klayout = "^0.27.11"
+scipy = "*"
+cachetools = "^5.2.0"
+
+[tool.poetry.extras]
 dev = ["black>=21", "mypy", "pre-commit", "commitizen", "gitpython", "pylsp-mypy", "types-cachetools", "klayout-stubs"]
 docs = ["sphinx", "sphinx-autodoc-typehints", "sphinx_rtd_theme", "sphinxcontrib-video"]
 
-[tool.setuptools.packages.find]
-where = ["kfactory"]
+
+[tool.setuptools.packages]
+find = {}
 
 
 [tool.black]
