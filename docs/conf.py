@@ -1,5 +1,3 @@
-from recommonmark.transform import AutoStructify
-
 project = "kfactory"
 version = "0.0.0"
 copyright = "2022"
@@ -50,11 +48,6 @@ exclude_patterns = [
 
 napoleon_use_param = True
 
-source_suffix = {
-    ".rst": "restructuredtext",
-    ".txt": "markdown",
-    ".md": "markdown",
-}
 
 language = "en"
 myst_html_meta = {
