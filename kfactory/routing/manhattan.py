@@ -1,10 +1,9 @@
-import warnings
-from typing import Callable, Dict, Hashable, List, Optional, Union, overload
+from typing import List, Optional, Union
 
 import numpy as np
 
 from .. import kdb
-from ..kcell import KCell, KLib, Port
+from ..kcell import KLib, Port
 from ..utils.geo import clean_points
 
 __all__ = ["route_manhattan", "route_manhattan_180"]

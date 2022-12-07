@@ -1,8 +1,7 @@
 import functools
 import importlib
 import warnings
-from copy import deepcopy
-from dataclasses import InitVar, dataclass, replace
+from dataclasses import InitVar, dataclass
 from enum import IntEnum
 from hashlib import sha3_512
 from inspect import signature
@@ -14,7 +13,6 @@ from typing import (
     Iterator,
     Optional,
     ParamSpec,
-    TypeVar,
     Union,
     overload,
 )
@@ -24,18 +22,6 @@ import ruamel.yaml
 from cachetools import Cache, cached
 
 from kfactory import kdb
-
-__all__ = [
-    "KCell",
-    "Instance",
-    "Port",
-    "Ports",
-    "autocell",
-    "cell",
-    "library",
-    "KLib",
-    "default_save",
-]
 
 
 class PortWidthMismatch(ValueError):
@@ -1286,6 +1272,19 @@ class KCellCache(Cache[int, Any]):
             f"KCell {value.name} was evicted from he cache. You probably should increase the cache size"
         )
         return key, value
+
+
+__all__ = [
+    "KCell",
+    "Instance",
+    "Port",
+    "Ports",
+    "autocell",
+    "cell",
+    "library",
+    "KLib",
+    "default_save",
+]
 
 
 if __name__ == "__main__":

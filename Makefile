@@ -19,13 +19,10 @@ venv:
 	python3 -m venv env
 
 lint:
-	tox -e flake8
+	flake8 .
 
 pylint:
 	pylint kfactory
-
-lintdocs:
-	flake8 --select RST
 
 pydocstyle:
 	pydocstyle kfactory

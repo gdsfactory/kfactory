@@ -10,8 +10,6 @@ from .. import kcell, kdb
 from . import violations
 from .enclosure import Direction, Enclosure
 
-__all__ = ["show", "Enclosure", "violations"]
-
 try:
     from __main__ import __file__ as mf
 except ImportError:
@@ -75,3 +73,6 @@ def show(
 
     if delete:
         Path(gds_file).unlink()
+
+
+__all__ = ["show", "Enclosure", "violations", "Direction"]

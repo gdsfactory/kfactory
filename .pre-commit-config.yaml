@@ -60,10 +60,10 @@ repos:
   #   hooks:
   #     - id: shellcheck
 
-  - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: 77c4a0f2d3edd699ff7c2c5e430d46cd85358768 # Use the ref you want to point at
-    hooks:
-      - id: python-use-type-annotations
+  # - repo: https://github.com/pre-commit/pygrep-hooks
+  #   rev: 77c4a0f2d3edd699ff7c2c5e430d46cd85358768 # Use the ref you want to point at
+  #   hooks:
+  #     - id: python-use-type-annotations
 
   - repo: https://github.com/PyCQA/bandit
     rev: d9fe642e01866e460454641bcd14b9de9d2b1478
@@ -115,3 +115,15 @@ repos:
   #   rev: 2b2f0c74acdb3de316e23ceb7dd0d7945c354050
   #   hooks:
   #     - id: reorder-python-imports
+
+#   - repo: https://github.com/pre-commit/pygrep-hooks
+#     rev: "v1.9.0"
+#     hooks:
+#       - id: python-check-blanket-noqa
+#       - id: python-check-blanket-type-ignore
+#       - id: python-no-log-warn
+#       - id: python-no-eval
+#       - id: python-use-type-annotations
+#       - id: rst-backticks
+#       - id: rst-directive-colons
+#       - id: rst-inline-touching-normal
