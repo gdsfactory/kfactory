@@ -112,12 +112,10 @@ repos:
   #   hooks:
   #       - id: yamlfmt
   # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: "214c33306afe17f1cc7d2d55e4da705b6ebe0627"
+  #   rev: "v0.991"
   #   hooks:
   #     - id: mypy
   #       exclude: ^(docs/|example-plugin/|tests/fixtures)
-  #       additional_dependencies:
-  #         - "pydantic"
   # - repo: https://github.com/terrencepreilly/darglint
   #   rev: master
   #   hooks:
@@ -136,7 +134,7 @@ repos:
     rev: "77c4a0f2d3edd699ff7c2c5e430d46cd85358768"
     hooks:
       - id: python-check-blanket-noqa
-      - id: python-check-blanket-type-ignore
+      # - id: python-check-blanket-type-ignore
       - id: python-no-log-warn
       - id: python-no-eval
       - id: python-use-type-annotations
