@@ -37,11 +37,7 @@ class Enclosure:
         ref: int | kdb.Region,  # layer index or the region
         direction: Direction = Direction.BOTH,
     ) -> None:
-        if isinstance(ref, int):
-            r = kdb.Region(c.begin_shapes_rec(ref))
-        else:
-            r = ref
-
+        r = kdb.Region(c.begin_shapes_rec(ref)) if isinstance(ref, int) else ref
         r.merge()
 
         match direction:
@@ -76,11 +72,7 @@ class Enclosure:
         shape: Callable[[int], kdb.Edge | list[kdb.Point] | kdb.Polygon | kdb.Box],
     ) -> None:
 
-        if isinstance(ref, int):
-            r = kdb.Region(c.begin_shapes_rec(ref))
-        else:
-            r = ref
-
+        r = kdb.Region(c.begin_shapes_rec(ref)) if isinstance(ref, int) else ref
         r.merge()
         for enc, d in self.enclosures:
             c.shapes(enc).insert(r.minkowski_sum(shape(d)).merge())
@@ -102,7 +94,7 @@ class Enclosure:
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
-        d = {k: v for k, v in node.enclosures}
+        d = dict(node.enclosures)
         return representer.represent_mapping(cls.yaml_tag, d)
 
     def __hash__(self) -> int:

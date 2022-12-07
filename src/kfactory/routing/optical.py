@@ -32,24 +32,32 @@ def route_loopback(
 
     pz = kdb.Point(0, 0)
 
-    if start_straight > 0 or bend180_radius is None:
-        if bend180_radius is None:
-            pts_start = [
-                t1 * pz,
-                t1 * kdb.Trans(0, False, start_straight + bend90_radius, 0) * pz,
-            ]
-        else:
-            pts_start = [t1 * pz, t1 * kdb.Trans(0, False, start_straight, 0) * pz]
+    if (
+        start_straight > 0
+        and bend180_radius is None
+        or start_straight <= 0
+        and bend180_radius is None
+    ):
+        pts_start = [
+            t1 * pz,
+            t1 * kdb.Trans(0, False, start_straight + bend90_radius, 0) * pz,
+        ]
+    elif start_straight > 0:
+        pts_start = [t1 * pz, t1 * kdb.Trans(0, False, start_straight, 0) * pz]
     else:
         pts_start = [t1 * pz]
-    if end_straight > 0 or bend180_radius is None:
-        if bend180_radius is None:
-            pts_end = [
-                t2 * kdb.Trans(0, False, end_straight + bend90_radius, 0) * pz,
-                t2 * pz,
-            ]
-        else:
-            pts_end = [t2 * kdb.Trans(0, False, end_straight, 0) * pz, t2 * pz]
+    if (
+        end_straight > 0
+        and bend180_radius is None
+        or end_straight <= 0
+        and bend180_radius is None
+    ):
+        pts_end = [
+            t2 * kdb.Trans(0, False, end_straight + bend90_radius, 0) * pz,
+            t2 * pz,
+        ]
+    elif end_straight > 0:
+        pts_end = [t2 * kdb.Trans(0, False, end_straight, 0) * pz, t2 * pz]
     else:
         pts_end = [t2 * pz]
 
@@ -60,7 +68,7 @@ def route_loopback(
         t1 *= kdb.Trans(2, False, start_straight + bend90_radius, 2 * bend90_radius)
         t2 *= kdb.Trans(2, False, end_straight + bend90_radius, -2 * bend90_radius)
 
-    pts = (
+    return (
         pts_start
         + route_manhattan(
             t1,
@@ -71,7 +79,6 @@ def route_loopback(
         )
         + pts_end
     )
-    return pts
 
 
 def connect(
@@ -106,10 +113,11 @@ def connect(
     p2.trans.mirror = False
 
     # determine bend90_radius
-    bend90_ports = []
-    for p in bend90_cell.ports.get_all().values():
-        if p.port_type == port_type:
-            bend90_ports.append(p)
+    bend90_ports = [
+        p
+        for p in bend90_cell.ports.get_all().values()
+        if p.port_type == port_type
+    ]
     if len(bend90_ports) != 2:
         raise AttributeError(
             f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
@@ -140,10 +148,11 @@ def connect(
 
     if bend180_cell is not None:
         ### Bend 180 is available
-        bend180_ports = []
-        for p in bend180_cell.ports.get_all().values():
-            if p.port_type == port_type:
-                bend180_ports.append(p)
+        bend180_ports = [
+            p
+            for p in bend180_cell.ports.get_all().values()
+            if p.port_type == port_type
+        ]
         if len(bend180_ports) != 2:
             raise AttributeError(
                 f"{bend180_cell.name} should have 2 ports but has {len(bend180_ports)} ports"
@@ -309,10 +318,11 @@ def place90(
     w = p1.width
     old_pt = pts[0]
     old_bend_port = p1
-    bend90_ports = []
-    for p in bend90_cell.ports.get_all().values():
-        if p.port_type == port_type:
-            bend90_ports.append(p)
+    bend90_ports = [
+        p
+        for p in bend90_cell.ports.get_all().values()
+        if p.port_type == port_type
+    ]
     if len(bend90_ports) != 2:
         raise AttributeError(
             f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
@@ -365,7 +375,6 @@ def place90(
         ):
             wg = c << straight_factory(width=w, length=(pts[1] - pts[0]).abs())
             wg.connect("W0", p1)
-            return
         else:
             t1 = c << taper_cell
             t1.connect(taperp1.name, p1)
@@ -383,8 +392,7 @@ def place90(
             else:
                 t2 = c << taper_cell
                 t2.connect(taperp2.name, t1, taperp2.name)
-            return
-
+        return
     for i in range(1, len(pts) - 1):
         pt = pts[i]
         new_pt = pts[i + 1]
@@ -394,8 +402,10 @@ def place90(
                 f"distance between points {str(old_pt)} and {str(pt)} is too small to savely place bends {pt.to_s()=}, {old_pt.to_s()=}, {pt.distance(old_pt)=} < {b90r=}"
             )
         elif (
-            (pt.distance(old_pt) < 2 * b90r) and ((i != 1) and (i != len(pts) - 1))
-        ) and not allow_small_routes:
+            pt.distance(old_pt) < 2 * b90r
+            and i not in [1, len(pts) - 1]
+            and not allow_small_routes
+        ):
             raise ValueError(
                 f"distance between points {str(old_pt)} and {str(pt)} is too small to savely place bends {str(pt)=}, {str(old_pt)=}, {pt.distance(old_pt)=} < {2 * b90r=}"
             )
@@ -404,11 +414,7 @@ def place90(
         vec_n = new_pt - pt
 
         bend90 = c << bend90_cell
-        if (vec_angle(vec_n) - vec_angle(vec)) % 4 == 3:
-            mirror = False
-        else:
-            mirror = True
-
+        mirror = (vec_angle(vec_n) - vec_angle(vec)) % 4 != 3
         if (vec.y != 0) and (vec.x != 0):
             raise ValueError(
                 f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
@@ -453,33 +459,32 @@ def place90(
                     t2.connect(taperp2.name, t1, taperp2.name)
         old_pt = pt
         old_bend_port = bend90.ports[b90p2.name]
-    else:
-        l = (bend90.ports[b90p2.name].trans.disp - p2.trans.disp).abs()
-        if l > 0:
-            if (
-                taper_cell is None
-                or l
-                < (taperp1.trans.disp - taperp2.trans.disp).abs() * 2
-                + min_straight_taper
-            ):
-                wg = c << straight_factory(width=w, length=l)
+    l = (bend90.ports[b90p2.name].trans.disp - p2.trans.disp).abs()
+    if l > 0:
+        if (
+            taper_cell is None
+            or l
+            < (taperp1.trans.disp - taperp2.trans.disp).abs() * 2
+            + min_straight_taper
+        ):
+            wg = c << straight_factory(width=w, length=l)
+            _p1, _p2 = [
+                v for v in wg.ports.get_all().values() if v.port_type == port_type
+            ]
+            wg.connect(_p1.name, bend90, b90p2.name)
+        else:
+            t1 = c << taper_cell
+            t1.connect(taperp1.name, bend90, b90p2.name)
+            if l - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
+                wg = c << straight_factory(
+                    width=taperp2.width,
+                    length=l - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
+                )
                 _p1, _p2 = [
-                    v for v in wg.ports.get_all().values() if v.port_type == port_type
+                    v
+                    for v in wg.ports.get_all().values()
+                    if v.port_type == port_type
                 ]
-                wg.connect(_p1.name, bend90, b90p2.name)
-            else:
-                t1 = c << taper_cell
-                t1.connect(taperp1.name, bend90, b90p2.name)
-                if l - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
-                    wg = c << straight_factory(
-                        width=taperp2.width,
-                        length=l - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
-                    )
-                    _p1, _p2 = [
-                        v
-                        for v in wg.ports.get_all().values()
-                        if v.port_type == port_type
-                    ]
-                    wg.connect(_p1.name, t1, taperp2.name)
-                    t2 = c << taper_cell
-                    t2.connect(taperp2.name, wg, _p2.name)
+                wg.connect(_p1.name, t1, taperp2.name)
+                t2 = c << taper_cell
+                t2.connect(taperp2.name, wg, _p2.name)
