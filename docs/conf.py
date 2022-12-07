@@ -59,10 +59,10 @@ myst_html_meta = {
 
 html_theme_options = {
     "path_to_docs": "docs",
-    "repository_url": "https://github.com/gdsfactory/gdsfactory",
+    "repository_url": "https://github.com/gdsfactory/kfactory",
     "repository_branch": "master",
     "launch_buttons": {
-        "binderhub_url": "https://mybinder.org/v2/gh/gdsfactory/gdsfactory/HEAD",
+        "binderhub_url": "https://mybinder.org/v2/gh/gdsfactory/kfactory/HEAD",
         "notebook_interface": "jupyterlab",
     },
     "use_edit_page_button": True,
