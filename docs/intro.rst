@@ -36,7 +36,7 @@ This will allow them depending on the orientation of the port. This will sort th
 The ``kf.show`` will create a GDS in the temp folder and then send the GDS by klive to KLayout (if klive is installed).
 By running this with ``python waveguide.py``, this should show us a waveguide like this:
 
-.. image:: ../_static/waveguide.png
+.. image:: _static/waveguide.png
 
 Afterwards let's create the composite cell :download:`complex_cell.py`. This one instantiates a waveguide and a circular bend and then connects them.
 
@@ -48,4 +48,4 @@ With :py:func:`~kfactory.kcell.KCell.add_port` an existing port of an instance c
 
 You will get a cell like this:
 
-.. image:: ../_static/complex.png
+.. image:: _static/complex.png

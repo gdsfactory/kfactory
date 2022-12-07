@@ -30,3 +30,4 @@ _version.py
 # Installer logs
 pip-log.txt
 extra/
+docs/_autosummary
