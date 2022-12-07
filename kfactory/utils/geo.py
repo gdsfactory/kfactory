@@ -297,6 +297,4 @@ def bezier_curve(
         xs += ank * control_points[k][0]
         ys += ank * control_points[k][1]
 
-    breakpoint()
-
     return [kdb.DPoint(p[0], p[1]) for p in np.stack([xs, ys])]
