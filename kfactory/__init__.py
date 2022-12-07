@@ -20,7 +20,7 @@ from kfactory.utils import show
 
 # import klayout.lay as klay #<- enable when klayout > 0.28
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 
 __all__ = [
