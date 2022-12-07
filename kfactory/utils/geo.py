@@ -1,15 +1,8 @@
 import warnings
 from typing import (
     Any,
-    Callable,
-    Dict,
-    Hashable,
     List,
-    Literal,
-    Optional,
     Sequence,
-    Union,
-    overload,
 )
 
 import numpy as np

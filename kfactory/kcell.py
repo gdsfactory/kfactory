@@ -1,7 +1,6 @@
 import functools
 import importlib
 import warnings
-from dataclasses import InitVar, dataclass
 from enum import IntEnum
 from hashlib import sha3_512
 from inspect import signature
@@ -9,10 +8,8 @@ from pathlib import Path
 from typing import (
     Any,
     Callable,
-    Concatenate,
     Iterator,
     Optional,
-    ParamSpec,
     Union,
     overload,
 )
@@ -582,7 +579,7 @@ class KCell:
             super().__setattr__(attr_name, attr_value)
         try:
             kdb.Cell.__setattr__(self._get_attr("_kdb_cell"), attr_name, attr_value)
-        except AttributeError as a:
+        except AttributeError:
             super().__setattr__(attr_name, attr_value)
 
     def hash(self) -> bytes:
@@ -590,10 +587,10 @@ class KCell:
         h = sha3_512()
         h.update(self.name.encode("ascii", "ignore"))
 
-        for l in self.layout().layer_indexes():
-            for shape in self.shapes(l).each(kdb.Shapes.SRegions):
+        for layer_idx in self.layout().layer_indexes():
+            for shape in self.shapes(layer_idx).each(kdb.Shapes.SRegions):
                 h.update(shape.polygon.hash().to_bytes(8, "big"))
-            for shape in self.shapes(l).each(kdb.Shapes.STexts):
+            for shape in self.shapes(layer_idx).each(kdb.Shapes.STexts):
                 h.update(shape.text.hash().to_bytes(8, "big"))
 
         for port in sorted(self.ports._ports, key=lambda port: port.hash()):

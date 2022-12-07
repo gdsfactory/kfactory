@@ -2,12 +2,12 @@ import klayout.db as pya
 
 
 def test_shapes():
-    l = pya.Layout()
-    tc = l.create_cell("TOP")
+    layout = pya.Layout()
+    tc = layout.create_cell("TOP")
 
-    tc.shapes(l.layer(1, 0)).insert(pya.Text())
+    tc.shapes(layout.layer(1, 0)).insert(pya.Text())
 
-    for shape in tc.shapes(l.layer(1, 0)).each():
+    for shape in tc.shapes(layout.layer(1, 0)).each():
         print(shape.polygon)
 
 

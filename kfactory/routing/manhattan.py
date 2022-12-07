@@ -27,7 +27,6 @@ def droute_manhattan_180(
         int(end_straight / layout.dbu),
     )
 
-
 def route_manhattan_180(
     port1: Port | kdb.Trans,
     port2: Port | kdb.Trans,
@@ -96,7 +95,7 @@ def route_manhattan(
     in_dbu: bool = True,
     layout: Optional[KLib | kdb.Layout] = None,
 ) -> List[kdb.Point]:
-    """Calculates a  hopefully minimal distance manhattan route (no s-bends)"""
+    """Calculates a hopefully minimal distance manhattan route (no s-bends)"""
 
     t1 = port1.dup() if isinstance(port1, kdb.Trans) else port1.trans.dup()
     t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans.dup()
