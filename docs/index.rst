@@ -13,6 +13,7 @@ kfactory
    intro
    klive
    api
+   CHANGELOG
 
 Indices and tables
 ==================
