@@ -44,4 +44,8 @@ git-rm-merged:
 update-pre:
 	pre-commit autoupdate --bleeding-edge
 
-.PHONY: build conda
+release:
+	git push
+	git push origin --tags
+
+.PHONY: build
