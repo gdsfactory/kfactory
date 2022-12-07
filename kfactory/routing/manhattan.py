@@ -27,6 +27,7 @@ def droute_manhattan_180(
         int(end_straight / layout.dbu),
     )
 
+
 def route_manhattan_180(
     port1: Port | kdb.Trans,
     port2: Port | kdb.Trans,
@@ -131,8 +132,6 @@ def route_manhattan(
     else:
         t2 *= kdb.Trans(end_straight + bend90_radius, 0)
         end_points = [t2 * _p, p2]
-
-    v = t1.inverted() * (t2.disp - t1.disp)
 
     for _ in range(10):
         tv = t1.inverted() * (t2.disp - t1.disp)

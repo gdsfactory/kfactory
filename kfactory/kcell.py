@@ -917,7 +917,7 @@ class Instance:
             super().__setattr__(attr_name, attr_value)
         try:
             kdb.Instance.__setattr__(self._get_attr("instance"), attr_name, attr_value)
-        except AttributeError as a:
+        except AttributeError:
             super().__setattr__(attr_name, attr_value)
 
     @classmethod
