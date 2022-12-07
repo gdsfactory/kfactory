@@ -183,7 +183,7 @@ class KLib(kdb.Layout):
 
         if kcell.name in self.kcells and kcell is not self.kcells[kcell.name]:
             raise KeyError(
-                f"Cannot register a new cell with a name that already exists in the library"
+                "Cannot register a new cell with a name that already exists in the library"
             )
         else:
             self.kcells[kcell.name] = kcell
@@ -208,7 +208,7 @@ class KLib(kdb.Layout):
             lm = kdb.Layout.read(self, fn, options)
 
         if register_cells:
-            new_cells = set(c for c in self.cells("*")) - cells
+            new_cells = set(self.cells("*")) - cells
             for c in new_cells:
                 self.register_cell(KCell(kdb_cell=c, library=self))
 
@@ -302,15 +302,12 @@ class Port:
             self.layer = layer
             self.port_type = port_type
             if trans is not None:
-                if isinstance(trans, str):
-                    self.trans = kdb.Trans.from_s(trans)
-                else:
-                    self.trans = trans.dup()
+                self.trans = kdb.Trans.from_s(trans) if isinstance(trans, str) else trans.dup()
+            elif angle is None or position is None:
+                raise ValueError(
+                    "angle and position must be given if creating a gdsfactory like port"
+                )
             else:
-                if angle is None or position is None:
-                    raise ValueError(
-                        "angle and position must be given if creating a gdsfactory like port"
-                    )
                 self.trans = kdb.Trans(angle, mirror_x, kdb.Vector(*position))
 
     def hash(self) -> bytes:
@@ -328,18 +325,7 @@ class Port:
         return h.digest()
 
     def __repr__(self) -> str:
-        port_repr = (
-            f"Port(\n"
-            f"    name: {self.name}\n"
-            f"    trans: {self.trans}\n"
-            f"    width: {self.width}\n"
-            f"    layer: {self.layer.name + ' (' +str(int(self.layer)) +')' if isinstance(self.layer,IntEnum) else str(self.layer)}\n"
-            f"    port_type: {self.port_type}\n"
-            f")"
-        )
-        return port_repr
-
-        return f"Port(name: {self.name}, trans: {self.trans}, width: {self.width}, layer: {self.layer.name + ' (' +str(int(self.layer)) +')' if isinstance(self.layer,IntEnum) else str(self.layer)} port_type: {self.port_type})"
+        return f"Port(\n    name: {self.name}\n    trans: {self.trans}\n    width: {self.width}\n    layer: {f'{self.layer.name} ({int(self.layer)})' if isinstance(self.layer, IntEnum) else str(self.layer)}\n    port_type: {self.port_type}\n)"
 
     def copy(self, trans: kdb.Trans = kdb.Trans.R0) -> "Port":
         """Get a copy of a port
@@ -423,9 +409,9 @@ class Port:
         )
 
     @classmethod
-    def from_yaml(cls, constructor, node):  # type: ignore
+    def from_yaml(cls, constructor, node):    # type: ignore
         """Internal function used by the placer to convert yaml to a Port"""
-        d = {k: v for k, v in constructor.construct_pairs(node)}
+        d = dict(constructor.construct_pairs(node))
         return cls(**d)
 
 
@@ -447,7 +433,7 @@ class KCell:
         library: KLib = library,
         kdb_cell: Optional[kdb.Cell] = None,
     ) -> None:
-        _name = name if name is not None else f"Unnamed_"
+        _name = name if name is not None else "Unnamed_"
         self.library: KLib = library
         if kdb_cell is None:
             self._kdb_cell: kdb.Cell = self.library.create_cell(self, _name)
@@ -456,10 +442,7 @@ class KCell:
         else:
             self._kdb_cell = kdb_cell
             self.library.register_cell(self)
-            if name is None:
-                self.name = kdb_cell.name
-            else:
-                self.name = name
+            self.name = kdb_cell.name if name is None else name
         self.ports: Ports = Ports()
         self.insts: list[Instance] = []
         self.settings: dict[str, Any] = {}
@@ -587,7 +570,7 @@ class KCell:
 
     def __getattribute__(self, attr_name: str) -> Any:
         """Overwrite the standard getattribute. If the attribute is not set by KCell, go look in the klayout.db.Cell object"""
-        if attr_name in ["name"]:
+        if attr_name in {"name"}:
             return self.__getattr__(attr_name)
         else:
             return super(KCell, self).__getattribute__(attr_name)
@@ -605,7 +588,7 @@ class KCell:
 
         Everything else look first in the klayout.db.Cell whether the attribute exists, otherwise set it in the KCell
         """
-        if attr_name in ["_kdb_cell", "name"]:
+        if attr_name in {"_kdb_cell", "name"}:
             super(KCell, self).__setattr__(attr_name, attr_value)
         try:
             kdb.Cell.__setattr__(self._get_attr("_kdb_cell"), attr_name, attr_value)
@@ -635,13 +618,11 @@ class KCell:
     def autorename_ports(self) -> None:
         """Rename the ports with the schema angle -> "NSWE" and sort by x and y"""
         for angle, name in zip([0, 1, 2, 3], ["E", "N", "W", "S"]):
-            i = 0
-            for port in sorted(
+            for i, port in enumerate(sorted(
                 filter(lambda port: port.trans.angle == angle, self.ports._ports),
                 key=lambda port: (port.trans.disp.x, port.trans.disp.y),
-            ):
+            )):
                 port.name = f"{name}{i}"
-                i += 1
 
     def flatten(self, prune: bool = True, merge: bool = True) -> None:
         """Flatten the cell. Pruning will delete the klayout.db.Cell if unused, but might cause artifacts at the moment
@@ -675,7 +656,7 @@ class KCell:
         return self._kdb_cell.write(str(filename), save_options)
 
     @classmethod
-    def to_yaml(cls, representer, node):  # type: ignore
+    def to_yaml(cls, representer, node):    # type: ignore
         """Internal function to convert the cell to yaml"""
         d = {
             "name": node.name,
@@ -694,9 +675,9 @@ class KCell:
             if not node.shapes(layer).is_empty()
         }
 
-        if len(insts) > 0:
+        if insts:
             d["insts"] = insts
-        if len(shapes) > 0:
+        if shapes:
             d["shapes"] = shapes
         if len(node.settings) > 0:
             d["settings"] = node.settings
@@ -930,7 +911,7 @@ class Instance:
         elif p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)
         else:
-            conn_trans = kdb.Trans.R180 if not mirror else kdb.Trans.M90
+            conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
             self.instance.trans = op.trans * conn_trans * p.trans.inverted()
 
     def __getattribute__(self, attr_name: str) -> Any:
@@ -978,8 +959,7 @@ class Ports:
         return port.hash() in [v.hash() for v in self._ports]
 
     def each(self) -> Iterator["Port"]:
-        for p in self._ports:
-            yield p
+        yield from self._ports
 
     def add_port(self, port: Port, name: Optional[str] = None) -> None:
         """Add a port object
@@ -1130,8 +1110,8 @@ def autocell(
     """
 
     def decorator_autocell(
-        f: Callable[..., KCell]
-    ) -> Callable[..., KCell]:  # -> Callable[[VArg(Any), KWArg(Any)], KCell]:
+            f: Callable[..., KCell]
+        ) -> Callable[..., KCell]:  # -> Callable[[VArg(Any), KWArg(Any)], KCell]:
         sig = signature(f)
 
         cache = KCellCache(maxsize)
@@ -1157,7 +1137,7 @@ def autocell(
                 cell = f(**params)
                 if cell.frozen:
                     cell = cell.copy()
-                if set_name == True:
+                if set_name:
                     name = get_component_name(f.__name__, **params)
                     cell.name = name
                 if set_settings:
@@ -1179,10 +1159,7 @@ def autocell(
 
         return wrapper_autocell
 
-    if _func is None:
-        return decorator_autocell  # type: ignore[return-value]
-    else:
-        return decorator_autocell(_func)
+    return decorator_autocell if _func is None else decorator_autocell(_func)
 
 
 def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
@@ -1190,10 +1167,7 @@ def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
 
 
 def frozenset_to_dict(fs: frozenset[tuple[str, Any]]) -> dict[str, Any]:
-    d = {}
-    for (key, value) in fs:
-        d[key] = value
-    return d
+    return dict(fs)
 
 
 def cell(
@@ -1205,13 +1179,10 @@ def cell(
 
 def dict2name(prefix: Optional[str] = None, **kwargs: dict[str, Any]) -> str:
     """returns name from a dict"""
-    if prefix:
-        label = [prefix]
-    else:
-        label = []
+    label = [prefix] if prefix else []
     for key, value in kwargs.items():
         key = join_first_letters(key)
-        label += ["{}{}".format(key.upper(), clean_value(value))]
+        label += [f"{key.upper()}{clean_value(value)}"]
     _label = "_".join(label)
     return clean_name(_label)
 
@@ -1220,7 +1191,7 @@ def get_component_name(component_type: str, **kwargs: dict[str, Any]) -> str:
     name = component_type
 
     if kwargs:
-        name += "_" + dict2name(None, **kwargs)
+        name += f"_{dict2name(None, **kwargs)}"
 
     return name
 

@@ -36,8 +36,7 @@ def cells_to_yaml(
 
 
 def get_yaml_obj() -> YAML:
-    yaml = YAML()
-    return yaml
+    return YAML()
 
 
 def register_classes(

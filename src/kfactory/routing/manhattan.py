@@ -58,14 +58,8 @@ def route_manhattan_180(
 
     t2 *= kdb.Trans(0, False, start_straight, 0)
 
-    if start_straight != 0:
-        points = [p1]
-    else:
-        points = []
-    if end_straight != 0:
-        end_points = [t2 * _p, p2]
-    else:
-        end_points = [p2]
+    points = [p1] if start_straight != 0 else []
+    end_points = [t2 * _p, p2] if end_straight != 0 else [p2]
     tv = t1.inverted() * (t2.disp - t1.disp)
     if tv.abs() == 0:
         return points + end_points
@@ -94,13 +88,16 @@ def route_manhattan_180(
 
             if start_straight != 0:
                 pts.insert(
-                    0, (t1 * kdb.Trans(0, False, -start_straight, 0)).disp.to_p()
+                    0,
+                    (t1 * kdb.Trans(0, False, -start_straight, 0)).disp.to_p(),
                 )
             if end_straight != 0:
-                pts.append((t2 * kdb.Trans(0, False, -end_straight, 0)).disp.to_p())
+                pts.append(
+                    (t2 * kdb.Trans(0, False, -end_straight, 0)).disp.to_p()
+                )
             return pts
         case _:
-            pts = route_manhattan(
+            return route_manhattan(
                 t1.dup(),
                 t2.dup(),
                 bend90_radius,
@@ -108,8 +105,6 @@ def route_manhattan_180(
                 end_straight=end_straight,
                 in_dbu=True,
             )
-            return pts  # points + pts
-
     raise NotImplementedError(
         "Case not supportedt yet. Please open an issue if you believe this is an error and needs to be implemented ;)"
     )
