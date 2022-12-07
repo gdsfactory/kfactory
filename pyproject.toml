@@ -1,8 +1,8 @@
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=60", "wheel", "build", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
 
-[tool.poetry]
+[project]
 name = "kfactory"
 description = "KLayout API implementation of gdsfactory"
 classifiers = [
@@ -14,16 +14,17 @@ classifiers = [
 	"Operating System :: OS Independent",
 ]
 version = "0.0.0"
-authors = ["kfactory community"]
+authors = [
+    {name = "gdsfactory community", email = "contact@gdsfactory.com"},
+]
+dependencies = [
+	"klayout >= 0.27.11",
+	"scipy",
+	"ruamel.yaml",
+	"cachetools >= 5.2.0",
+]
 
-[tool.poetry.dependencies]
-
-python = ">=3.7,<4.0"
-klayout = "^0.27.11"
-scipy = "*"
-cachetools = "^5.2.0"
-
-[tool.poetry.extras]
+[project.optional-dependencies]
 dev = ["black>=21", "mypy", "pre-commit", "commitizen", "gitpython", "pylsp-mypy", "types-cachetools", "klayout-stubs"]
 docs = ["sphinx", "sphinx-autodoc-typehints", "sphinx_rtd_theme", "sphinxcontrib-video"]
 
