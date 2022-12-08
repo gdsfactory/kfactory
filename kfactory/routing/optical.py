@@ -1,12 +1,9 @@
-import warnings
-from typing import Callable, Dict, Hashable, List, Optional, Sequence, Union
-
-import numpy as np
+from typing import Callable, List, Optional, Sequence, Union
 
 from .. import kdb
-from ..kcell import KCell, KLib, Port
-from ..utils.geo import is_manhattan, t_ang, t_dist, vec_angle  # , clean_points
-from .manhattan import route_manhattan, route_manhattan_180
+from ..kcell import KCell, Port
+from ..utils.geo import vec_angle  # , clean_points
+from .manhattan import route_manhattan
 
 
 def route_loopback(
@@ -99,13 +96,12 @@ def connect(
     allow_small_routes: int = False,
     different_port_width: int = False,
 ) -> None:
-    ### Bend 90 part
+    """Bend 90 part."""
 
     if p1.width != p2.width and not different_port_width:
         raise ValueError(
             f"The ports have different widths {p1.width=} {p2.width=}. If this is intentional, add `different_port_width=True` to override this."
         )
-    w = p1.width
 
     p1 = p1.copy()
     p1.trans.mirror = False
@@ -113,10 +109,11 @@ def connect(
     p2.trans.mirror = False
 
     # determine bend90_radius
-    bend90_ports = []
-    for p in bend90_cell.ports.get_all().values():
-        if p.port_type == port_type:
-            bend90_ports.append(p)
+    bend90_ports = [
+        p
+        for p in bend90_cell.ports.get_all().values()
+        if p.port_type == port_type
+    ]
     if len(bend90_ports) != 2:
         raise AttributeError(
             f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
@@ -146,11 +143,12 @@ def connect(
     )
 
     if bend180_cell is not None:
-        ### Bend 180 is available
-        bend180_ports = []
-        for p in bend180_cell.ports.get_all().values():
-            if p.port_type == port_type:
-                bend180_ports.append(p)
+        # Bend 180 is available
+        bend180_ports = [
+            p
+            for p in bend180_cell.ports.get_all().values()
+            if p.port_type == port_type
+        ]
         if len(bend180_ports) != 2:
             raise AttributeError(
                 f"{bend180_cell.name} should have 2 ports but has {len(bend180_ports)} ports"
@@ -364,10 +362,10 @@ def place90(
             )
 
     if len(pts) == 2:
-        l = (pts[1] - pts[0]).abs()
+        length = (pts[1] - pts[0]).abs()
         if (
             taper_cell is None
-            or l
+            or length
             < (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 + min_straight_taper
         ):
             wg = c << straight_factory(width=w, length=(pts[1] - pts[0]).abs())
@@ -375,10 +373,10 @@ def place90(
         else:
             t1 = c << taper_cell
             t1.connect(taperp1.name, p1)
-            if l - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
+            if length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
                 wg = c << straight_factory(
                     width=taperp2.width,
-                    length=l - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
+                    length=length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
                 )
                 _p1, _p2 = (
                     v for v in wg.ports.get_all().values() if v.port_type == port_type
@@ -422,15 +420,15 @@ def place90(
                 f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
             )
         bend90.transform(kdb.Trans(ang, mirror, pt.x, pt.y) * b90c.inverted())
-        l = (bend90.ports[b90p1.name].trans.disp - old_bend_port.trans.disp).abs()
-        if l > 0:
+        length = (bend90.ports[b90p1.name].trans.disp - old_bend_port.trans.disp).abs()
+        if length > 0:
             if (
                 taper_cell is None
-                or l
+                or length
                 < (taperp1.trans.disp - taperp2.trans.disp).abs() * 2
                 + min_straight_taper
             ):
-                wg = c << straight_factory(width=w, length=l)
+                wg = c << straight_factory(width=w, length=length)
                 _p1, _p2 = (
                     v for v in wg.ports.get_all().values() if v.port_type == port_type
                 )
@@ -438,10 +436,11 @@ def place90(
             else:
                 t1 = c << taper_cell
                 t1.connect(taperp1.name, bend90, b90p1.name)
-                if l - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
+                if length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
                     wg = c << straight_factory(
                         width=taperp2.width,
-                        length=l - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
+                        length=length
+                        - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
                     )
                     _p1, _p2 = (
                         v
@@ -456,14 +455,14 @@ def place90(
                     t2.connect(taperp2.name, t1, taperp2.name)
         old_pt = pt
         old_bend_port = bend90.ports[b90p2.name]
-    l = (bend90.ports[b90p2.name].trans.disp - p2.trans.disp).abs()
-    if l > 0:
+    length = (bend90.ports[b90p2.name].trans.disp - p2.trans.disp).abs()
+    if length > 0:
         if (
             taper_cell is None
-            or l
+            or length
             < (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 + min_straight_taper
         ):
-            wg = c << straight_factory(width=w, length=l)
+            wg = c << straight_factory(width=w, length=length)
             _p1, _p2 = (
                 v for v in wg.ports.get_all().values() if v.port_type == port_type
             )
@@ -471,10 +470,10 @@ def place90(
         else:
             t1 = c << taper_cell
             t1.connect(taperp1.name, bend90, b90p2.name)
-            if l - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
+            if length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
                 wg = c << straight_factory(
                     width=taperp2.width,
-                    length=l - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
+                    length=length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
                 )
                 _p1, _p2 = (
                     v for v in wg.ports.get_all().values() if v.port_type == port_type

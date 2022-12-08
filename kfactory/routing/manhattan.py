@@ -96,7 +96,7 @@ def route_manhattan(
     in_dbu: bool = True,
     layout: Optional[KLib | kdb.Layout] = None,
 ) -> List[kdb.Point]:
-    """Calculates a  hopefully minimal distance manhattan route (no s-bends)"""
+    """Calculates a hopefully minimal distance manhattan route (no s-bends)"""
 
     t1 = port1.dup() if isinstance(port1, kdb.Trans) else port1.trans.dup()
     t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans.dup()
@@ -132,8 +132,6 @@ def route_manhattan(
     else:
         t2 *= kdb.Trans(end_straight + bend90_radius, 0)
         end_points = [t2 * _p, p2]
-
-    v = t1.inverted() * (t2.disp - t1.disp)
 
     for _ in range(10):
         tv = t1.inverted() * (t2.disp - t1.disp)

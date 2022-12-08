@@ -1,6 +1,5 @@
-from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, Hashable, Optional, Sequence, TypeGuard
+from typing import Callable, Sequence, TypeGuard
 
 from .. import kdb
 from ..kcell import KCell
@@ -37,11 +36,7 @@ class Enclosure:
         ref: int | kdb.Region,  # layer index or the region
         direction: Direction = Direction.BOTH,
     ) -> None:
-        if isinstance(ref, int):
-            r = kdb.Region(c.begin_shapes_rec(ref))
-        else:
-            r = ref
-
+        r = kdb.Region(c.begin_shapes_rec(ref)) if isinstance(ref, int) else ref
         r.merge()
 
         match direction:

@@ -1,6 +1,4 @@
-import builtins
 import json
-import os
 import socket
 import warnings
 from pathlib import Path
@@ -29,10 +27,7 @@ def show(
         case str():
             gds_file = Path(gds)
         case kcell.KCell(library=kcell.KLib()):
-            if mf == "<stdin>":
-                _mf = "stdin"
-            else:
-                _mf = mf
+            _mf = "stdin" if mf == "<stdin>" else mf
             tf = Path(gettempdir()) / Path(_mf).with_suffix(".gds")
             gds.write(str(tf), save_options)
             gds_file = tf
