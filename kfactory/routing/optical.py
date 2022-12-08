@@ -110,9 +110,7 @@ def connect(
 
     # determine bend90_radius
     bend90_ports = [
-        p
-        for p in bend90_cell.ports.get_all().values()
-        if p.port_type == port_type
+        p for p in bend90_cell.ports.get_all().values() if p.port_type == port_type
     ]
     if len(bend90_ports) != 2:
         raise AttributeError(
@@ -145,9 +143,7 @@ def connect(
     if bend180_cell is not None:
         # Bend 180 is available
         bend180_ports = [
-            p
-            for p in bend180_cell.ports.get_all().values()
-            if p.port_type == port_type
+            p for p in bend180_cell.ports.get_all().values() if p.port_type == port_type
         ]
         if len(bend180_ports) != 2:
             raise AttributeError(
