@@ -23,6 +23,7 @@ dependencies = [
 	"ruamel.yaml",
 	"cachetools >= 5.2.0",
 ]
+readme = "README.md"
 
 [project.optional-dependencies]
 dev = ["black>=21", "mypy", "pre-commit", "commitizen", "gitpython", "pylsp-mypy", "types-cachetools"]

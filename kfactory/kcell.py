@@ -91,7 +91,7 @@ class PortTypeMismatch(ValueError):
 
 
 class FrozenError(AttributeError):
-    """Raised if a KCell has been frozen and shouldn't be modified anymore"""
+    """Raised if a KCell has been _locked and shouldn't be modified anymore"""
 
     pass
 
@@ -394,6 +394,35 @@ class Port:
         d = dict(constructor.construct_pairs(node))
         return cls(**d)
 
+    @property
+    def orientation(self) -> int:
+        """Returns orientation in degrees for gdsfactory compatibility."""
+        return self.angle * 90
+
+    @orientation.setter
+    def orientation(self, value):
+        self.trans.angle = int(value // 90)
+
+    @property
+    def center(self) -> int:
+        """Returns port position for gdsfactory compatibility."""
+        return self.position
+
+    @center.setter
+    def center(self, value):
+        self.trans.disp = kdb.Vector(*value)
+
+    @classmethod
+    def from_gdsfactory_port(cls, port):
+        return cls(
+            name=port.name,
+            width=port.width,
+            position=port.center,
+            layer=cls.library(*port.layer),
+            port_type=port.port_type,
+            angle=int(port.orientation / 90),
+        )
+
 
 class KCell:
     """Derived from :py:class:`klayout.db.Cell`. Additionally to a standard cell, this one will keep track of :py:class:`Port` and allow to store metadata in a dictionary
@@ -426,7 +455,8 @@ class KCell:
         self.ports: Ports = Ports()
         self.insts: list[Instance] = []
         self.settings: dict[str, Any] = {}
-        self.frozen = False
+        self._locked = False
+        self.info = {}
 
     def copy(self) -> "KCell":
         """Copy the full cell
@@ -439,7 +469,7 @@ class KCell:
         c.ports = self.ports
         for inst in self.insts:
             c.create_inst(inst.cell, inst.instance.trans)
-        c.frozen = False
+        c._locked = False
         return c
 
     @property
@@ -843,9 +873,9 @@ class Instance:
     @overload
     def connect(
         self,
-        portname: str,
-        other: "Instance",
-        other_port_name: str,
+        port: str,
+        destination: "Instance",
+        destination_name: str,
         *,
         mirror: bool = False,
     ) -> None:
@@ -853,9 +883,9 @@ class Instance:
 
     def connect(
         self,
-        portname: str,
-        other: "Instance | Port",
-        other_port_name: Optional[str] = None,
+        port: str,
+        destination: "Instance | Port",
+        destination_name: Optional[str] = None,
         *,
         mirror: bool = False,
         allow_width_mismatch: bool = False,
@@ -870,6 +900,10 @@ class Instance:
             other_port_name: The name of the other port. Ignored if :py:attr:`~other_instance` is a port.
             mirror: Instead of applying klayout.db.Trans.R180 as a connection transformation, use klayout.db.Trans.M90, which effectively means this instance will be mirrored and connected.
         """
+        portname = port
+        other = destination
+        other_port_name = destination_name
+
         if isinstance(other, Instance):
             if other_port_name is None:
                 raise ValueError(
@@ -879,7 +913,12 @@ class Instance:
         elif isinstance(other, Port):
             op = other
         else:
-            raise ValueError("other_instance must be of type Instance or Port")
+            import gdsfactory as gf
+
+            if isinstance(other, gf.Port):
+                op = Port.from_gdsfactory_port(other)
+            else:
+                raise ValueError("other_instance must be of type Instance or Port")
         p = self.cell.ports[portname]
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatch(
@@ -1000,7 +1039,7 @@ class Ports:
             port = Port(
                 name=name, trans=trans, width=width, layer=layer, port_type=port_type
             )
-        if angle is not None and position is not None:
+        elif angle is not None and position is not None:
             port = Port(
                 name=name,
                 width=width,
@@ -1010,6 +1049,11 @@ class Ports:
                 position=position,
                 mirror_x=mirror_x,
             )
+        else:
+            raise ValueError(
+                f"You need to define trans {trans} or angle {angle} and position {position}"
+            )
+
         self._ports.append(port)
         return self._ports[-1]
 
@@ -1117,7 +1161,7 @@ def autocell(
                     if isinstance(value, frozenset):
                         params[key] = frozenset_to_dict(value)
                 cell = f(**params)
-                if cell.frozen:
+                if cell._locked:
                     cell = cell.copy()
                 if set_name:
                     name = get_component_name(f.__name__, **params)
@@ -1134,7 +1178,7 @@ def autocell(
                     else:
                         cell.set_property(i, f"{name}: {str(setting)}")
                     i += 1
-                cell.frozen = True
+                cell._locked = True
                 return cell
 
             return wrapped_cell(**params)

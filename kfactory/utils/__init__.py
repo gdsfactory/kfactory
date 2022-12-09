@@ -28,7 +28,9 @@ def show(
             gds_file = Path(gds)
         case kcell.KCell(library=kcell.KLib()):
             _mf = "stdin" if mf == "<stdin>" else mf
+            dirpath = Path(gettempdir())
             tf = Path(gettempdir()) / Path(_mf).with_suffix(".gds")
+            tf.parent.mkdir(parents=True, exist_ok=True)
             gds.write(str(tf), save_options)
             gds_file = tf
             delete = True
