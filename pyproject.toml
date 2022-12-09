@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "kfactory"
 description = "KLayout API implementation of gdsfactory"
+reamde = "README.md"
 classifiers = [
 	"Programming Language :: Python :: 3.7",
 	"Programming Language :: Python :: 3.8",
