@@ -412,6 +412,17 @@ class Port:
     def center(self, value):
         self.trans.disp = kdb.Vector(*value)
 
+    @classmethod
+    def from_gdsfactory_port(cls, port):
+        return cls(
+            name=port.name,
+            width=port.width,
+            position=port.center,
+            layer=cls.library(*port.layer),
+            port_type=port.port_type,
+            angle=int(port.orientation / 90),
+        )
+
 
 class KCell:
     """Derived from :py:class:`klayout.db.Cell`. Additionally to a standard cell, this one will keep track of :py:class:`Port` and allow to store metadata in a dictionary
@@ -862,9 +873,9 @@ class Instance:
     @overload
     def connect(
         self,
-        portname: str,
-        other: "Instance",
-        other_port_name: str,
+        port: str,
+        destination: "Instance",
+        destination_name: str,
         *,
         mirror: bool = False,
     ) -> None:
@@ -872,9 +883,9 @@ class Instance:
 
     def connect(
         self,
-        portname: str,
-        other: "Instance | Port",
-        other_port_name: Optional[str] = None,
+        port: str,
+        destination: "Instance | Port",
+        destination_name: Optional[str] = None,
         *,
         mirror: bool = False,
         allow_width_mismatch: bool = False,
@@ -889,6 +900,10 @@ class Instance:
             other_port_name: The name of the other port. Ignored if :py:attr:`~other_instance` is a port.
             mirror: Instead of applying klayout.db.Trans.R180 as a connection transformation, use klayout.db.Trans.M90, which effectively means this instance will be mirrored and connected.
         """
+        portname = port
+        other = destination
+        other_port_name = destination_name
+
         if isinstance(other, Instance):
             if other_port_name is None:
                 raise ValueError(
@@ -898,7 +913,12 @@ class Instance:
         elif isinstance(other, Port):
             op = other
         else:
-            raise ValueError("other_instance must be of type Instance or Port")
+            import gdsfactory as gf
+
+            if isinstance(other, gf.Port):
+                op = Port.from_gdsfactory_port(other)
+            else:
+                raise ValueError("other_instance must be of type Instance or Port")
         p = self.cell.ports[portname]
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatch(
