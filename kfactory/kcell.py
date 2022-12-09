@@ -394,6 +394,24 @@ class Port:
         d = dict(constructor.construct_pairs(node))
         return cls(**d)
 
+    @property
+    def orientation(self) -> int:
+        """Returns orientation in degrees for gdsfactory compatibility."""
+        return self.angle * 90
+
+    @orientation.setter
+    def orientation(self, value):
+        self.trans.angle = int(value // 90)
+
+    @property
+    def center(self) -> int:
+        """Returns port position for gdsfactory compatibility."""
+        return self.position
+
+    @center.setter
+    def center(self, value):
+        self.trans.disp = kdb.Vector(*value)
+
 
 class KCell:
     """Derived from :py:class:`klayout.db.Cell`. Additionally to a standard cell, this one will keep track of :py:class:`Port` and allow to store metadata in a dictionary
@@ -427,6 +445,7 @@ class KCell:
         self.insts: list[Instance] = []
         self.settings: dict[str, Any] = {}
         self.frozen = False
+        self.info = {}
 
     def copy(self) -> "KCell":
         """Copy the full cell
@@ -1000,7 +1019,7 @@ class Ports:
             port = Port(
                 name=name, trans=trans, width=width, layer=layer, port_type=port_type
             )
-        if angle is not None and position is not None:
+        elif angle is not None and position is not None:
             port = Port(
                 name=name,
                 width=width,
@@ -1010,6 +1029,11 @@ class Ports:
                 position=position,
                 mirror_x=mirror_x,
             )
+        else:
+            raise ValueError(
+                f"You need to define trans {trans} or angle {angle} and position {position}"
+            )
+
         self._ports.append(port)
         return self._ports[-1]
 
