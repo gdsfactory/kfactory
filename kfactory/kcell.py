@@ -91,7 +91,7 @@ class PortTypeMismatch(ValueError):
 
 
 class FrozenError(AttributeError):
-    """Raised if a KCell has been frozen and shouldn't be modified anymore"""
+    """Raised if a KCell has been _locked and shouldn't be modified anymore"""
 
     pass
 
@@ -444,7 +444,7 @@ class KCell:
         self.ports: Ports = Ports()
         self.insts: list[Instance] = []
         self.settings: dict[str, Any] = {}
-        self.frozen = False
+        self._locked = False
         self.info = {}
 
     def copy(self) -> "KCell":
@@ -458,7 +458,7 @@ class KCell:
         c.ports = self.ports
         for inst in self.insts:
             c.create_inst(inst.cell, inst.instance.trans)
-        c.frozen = False
+        c._locked = False
         return c
 
     @property
@@ -1141,7 +1141,7 @@ def autocell(
                     if isinstance(value, frozenset):
                         params[key] = frozenset_to_dict(value)
                 cell = f(**params)
-                if cell.frozen:
+                if cell._locked:
                     cell = cell.copy()
                 if set_name:
                     name = get_component_name(f.__name__, **params)
@@ -1158,7 +1158,7 @@ def autocell(
                     else:
                         cell.set_property(i, f"{name}: {str(setting)}")
                     i += 1
-                cell.frozen = True
+                cell._locked = True
                 return cell
 
             return wrapped_cell(**params)
