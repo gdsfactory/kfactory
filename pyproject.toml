@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "kfactory"
 description = "KLayout API implementation of gdsfactory"
-reamde = "README.md"
+readme = "README.md"
 classifiers = [
 	"Programming Language :: Python :: 3.7",
 	"Programming Language :: Python :: 3.8",
@@ -19,10 +19,11 @@ authors = [
     {name = "gdsfactory community", email = "contact@gdsfactory.com"},
 ]
 dependencies = [
-	"klayout >= 0.27.11",
+	"klayout >= 0.28",
 	"scipy",
 	"ruamel.yaml",
 	"cachetools >= 5.2.0",
+  "pydantic",
 ]
 
 [project.optional-dependencies]

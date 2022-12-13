@@ -1,1 +1,1 @@
-from klayout.db import *
+from klayout.dbcore import *

@@ -6,22 +6,28 @@ from enum import IntEnum
 from hashlib import sha3_512
 from inspect import signature
 from pathlib import Path
-from typing import (
+from typing import (  # ParamSpec, # >= python 3.10
     Any,
     Callable,
     Concatenate,
     Iterator,
     Optional,
-    ParamSpec,
     Union,
+    cast,
     overload,
 )
 
 import numpy as np
 import ruamel.yaml
 from cachetools import Cache, cached
+from typing_extensions import ParamSpec
 
 from kfactory import kdb
+
+# import klayout.dbcore as kdb
+
+
+KP = ParamSpec("KP")
 
 
 class PortWidthMismatch(ValueError):
@@ -202,10 +208,13 @@ class KLib(kdb.Layout):
 
         return lm
 
-    def write(
-        self, filename: str | Path, save_options: kdb.SaveLayoutOptions = default_save()
+    def write(  # type: ignore[override]
+        self,
+        filename: str | Path,
+        gzip: bool = False,
+        options: kdb.SaveLayoutOptions = default_save(),
     ) -> None:
-        return kdb.Layout.write(self, str(filename), save_options)
+        return kdb.Layout.write(self, str(filename), options)
 
 
 library = (
@@ -1086,13 +1095,29 @@ class InstancePorts:
         )
 
 
+@overload
 def autocell(
-    _func: Optional[Callable[..., KCell]] = None,
+    _func: None = None,
     *,
     set_settings: bool = True,
     set_name: bool = True,
     maxsize: int = 512,
-) -> Callable[..., KCell]:
+) -> Callable[KP, KCell]:
+    ...
+
+
+@overload
+def autocell(_func: Callable[KP, KCell]) -> Callable[KP, KCell]:
+    ...
+
+
+def autocell(
+    _func: Optional[Callable[KP, KCell]] = None,
+    *,
+    set_settings: bool = True,
+    set_name: bool = True,
+    maxsize: int = 512,
+) -> Callable[KP, KCell] | Callable[[Callable[KP, KCell]], Callable[KP, KCell]]:
     """Decorator to cache and auto name the celll. This will use :py:func:`functools.cache` to cache the function call.
     Additionally, if enabled this will set the name and from the args/kwargs of the function and also paste them into a settings dictionary of the :py:class:`~KCell`
 
@@ -1101,16 +1126,16 @@ def autocell(
         set_name: Auto create the name of the cell to the functionname plus a string created from the args/kwargs
     """
 
-    def decorator_autocell(
-        f: Callable[..., KCell]
-    ) -> Callable[..., KCell]:  # -> Callable[[VArg(Any), KWArg(Any)], KCell]:
+    def decorator_autocell(f: Callable[KP, KCell]) -> Callable[KP, KCell]:
         sig = signature(f)
 
         cache = KCellCache(maxsize)
 
         @functools.wraps(f)
-        def wrapper_autocell(*args: Any, **kwargs: dict[str, Any]) -> KCell:
-            params = {p.name: p.default for k, p in sig.parameters.items()}
+        def wrapper_autocell(*args: KP.args, **kwargs: KP.kwargs) -> KCell:
+            params: dict[str, KP.args] = {
+                p.name: p.default for k, p in sig.parameters.items()
+            }
             arg_par = list(sig.parameters.items())[: len(args)]
             for i, (k, v) in enumerate(arg_par):
                 params[k] = args[i]
@@ -1122,7 +1147,7 @@ def autocell(
 
             @cached(cache=cache)
             @functools.wraps(f)
-            def wrapped_cell(**params: dict[str, Any]) -> KCell:
+            def wrapped_cell(**params: KP.kwargs) -> KCell:
                 for key, value in params.items():
                     if isinstance(value, frozenset):
                         params[key] = frozenset_to_dict(value)
@@ -1151,7 +1176,10 @@ def autocell(
 
         return wrapper_autocell
 
-    return decorator_autocell if _func is None else decorator_autocell(_func)
+    if _func is None:
+        return decorator_autocell
+    else:
+        return decorator_autocell(_func)
 
 
 def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
@@ -1163,10 +1191,16 @@ def frozenset_to_dict(fs: frozenset[tuple[str, Any]]) -> dict[str, Any]:
 
 
 def cell(
-    _func: Optional[Callable[..., KCell]] = None, *, set_settings: bool = True
-) -> Callable[..., KCell]:
+    _func: Optional[Callable[..., KCell]] = None,
+    *,
+    set_settings: bool = True,
+    maxsize: int = 512,
+) -> Callable[KP, KCell]:
     """Convenience alias for :py:func:`~autocell` with `(set_name=False)`"""
-    return autocell(_func, set_settings=set_settings, set_name=False)
+    if _func is None:
+        return autocell(_func, set_settings=set_settings, set_name=False)
+    else:
+        return autocell(_func)
 
 
 def dict2name(prefix: Optional[str] = None, **kwargs: dict[str, Any]) -> str:
@@ -1288,53 +1322,53 @@ __all__ = [
 ]
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    c1 = KCell("cell_a")
-    c1.shapes(c1.layer(1, 0)).insert(
-        kdb.Polygon([kdb.Point(500, 200), kdb.Point(200, 500), kdb.Point(200, 200)])
-    )
-    c2 = KCell("cell_b")
-    c2.shapes(c2.layer(2, 0)).insert(
-        kdb.Polygon(
-            [
-                kdb.Point(x, y)
-                for (x, y) in [(0, -250), (0, 250), (-1000, 250), (-1000, -250)]
-            ]
-        )
-    )
-    c2.create_port(position=(0, 0), width=500, angle=0, name="E0", layer=0)
-    i1 = c1 << c2
+#     c1 = KCell("cell_a")
+#     c1.shapes(c1.layer(1, 0)).insert(
+#         kdb.Polygon([kdb.Point(500, 200), kdb.Point(200, 500), kdb.Point(200, 200)])
+#     )
+#     c2 = KCell("cell_b")
+#     c2.shapes(c2.layer(2, 0)).insert(
+#         kdb.Polygon(
+#             [
+#                 kdb.Point(x, y)
+#                 for (x, y) in [(0, -250), (0, 250), (-1000, 250), (-1000, -250)]
+#             ]
+#         )
+#     )
+#     c2.create_port(position=(0, 0), width=500, angle=0, name="E0", layer=0)
+#     i1 = c1 << c2
 
-    # i1.transform(kdb.Trans(kdb.Vector(0,200)))
-    i1.transform(kdb.Trans.M135)
+#     # i1.transform(kdb.Trans(kdb.Vector(0,200)))
+#     i1.transform(kdb.Trans.M135)
 
-    i2 = c1 << c2
-    i2.connect("E0", i1.ports["E0"])
+#     i2 = c1 << c2
+#     i2.connect("E0", i1.ports["E0"])
 
-    c1.name = "bla"
+#     c1.name = "bla"
 
-    @autocell
-    def cell_c(a: str) -> KCell:
-        c = KCell()
-        c.shapes(c.layer(5, 0)).insert(
-            kdb.Polygon(
-                [kdb.Point(x, y) for (x, y) in [(0, 500), (200, 500), (200, 0), (0, 0)]]
-            )
-        )
-        return c
+#     @autocell
+#     def cell_c(a: str) -> KCell:
+#         c = KCell()
+#         c.shapes(c.layer(5, 0)).insert(
+#             kdb.Polygon(
+#                 [kdb.Point(x, y) for (x, y) in [(0, 500), (200, 500), (200, 0), (0, 0)]]
+#             )
+#         )
+#         return c
 
-    c1 << cell_c(5)
-    c1 << cell_c(62)
+#     c1 << cell_c(5)
+#     c1 << cell_c(62)
 
-    i4 = c1 << cell_c(5)
+#     i4 = c1 << cell_c(5)
 
-    saveoptions = kdb.SaveLayoutOptions()
-    saveoptions.format = "GDS2"
+#     saveoptions = kdb.SaveLayoutOptions()
+#     saveoptions.format = "GDS2"
 
-    c1.layout().write("test.gds", saveoptions)
-    from kfactory import show
+#     c1.layout().write("test.gds", saveoptions)
+#     from kfactory import show
 
-    show("test.gds")
+#     show("test.gds")
 
-    # from gdsfactory import show
+#     # from gdsfactory import show
