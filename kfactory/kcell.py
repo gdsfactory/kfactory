@@ -5,7 +5,7 @@ from enum import IntEnum
 from hashlib import sha3_512
 from inspect import signature
 from pathlib import Path
-from typing import Any, Callable, Iterator, Optional, Union, overload
+from typing import Any, Callable, Iterator, Optional, Tuple, Union, overload
 
 import numpy as np
 import ruamel.yaml
@@ -212,7 +212,7 @@ class Port:
     name: str
     width: int
     trans: kdb.Trans
-    layer: int
+    layer: Tuple[int, int]
     port_type: str
 
     # __match_args__ = ('trans', 'width', 'port_type','layer', 'name')
@@ -418,7 +418,7 @@ class Port:
             name=port.name,
             width=port.width,
             position=port.center,
-            layer=cls.library(*port.layer),
+            layer=port.layer,
             port_type=port.port_type,
             angle=int(port.orientation / 90),
         )
@@ -927,7 +927,8 @@ class Instance:
                 p,
                 op,
             )
-        elif int(p.layer) != int(op.layer) and not allow_layer_mismatch:
+        elif p.layer != op.layer and not allow_layer_mismatch:
+            print(p.layer, op.layer)
             raise PortLayerMismatch(self.cell.library, self, other, p, op)
         elif p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)
