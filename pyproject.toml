@@ -5,6 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "kfactory"
 description = "KLayout API implementation of gdsfactory"
+readme = "README.md"
 classifiers = [
 	"Programming Language :: Python :: 3.7",
 	"Programming Language :: Python :: 3.8",
@@ -18,10 +19,11 @@ authors = [
     {name = "gdsfactory community", email = "contact@gdsfactory.com"},
 ]
 dependencies = [
-	"klayout >= 0.27.11",
+	"klayout >= 0.28",
 	"scipy",
 	"ruamel.yaml",
 	"cachetools >= 5.2.0",
+  "pydantic",
 ]
 
 [project.optional-dependencies]
@@ -29,9 +31,8 @@ dev = ["black>=21", "mypy", "pre-commit", "commitizen", "gitpython", "pylsp-mypy
 docs = ["sphinx", "docutils==0.17.1", "sphinx_rtd_theme", "sphinxcontrib-video", "sphinx-autodoc-typehints", "sphinx-book-theme==0.3.3", "sphinx-click", "sphinx-copybutton","sphinx-markdown-tables==0.0.16", "myst-parser", "matplotlib", "nbsphinx", "autodoc_pydantic"]
 
 
-[tool.setuptools.packages]
-find = {}
-
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.black]
 line-length = 88  # Specify the line length
