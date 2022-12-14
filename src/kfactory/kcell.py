@@ -1,3 +1,4 @@
+import abc
 import functools
 import importlib
 import warnings
@@ -12,6 +13,10 @@ from typing import (  # ParamSpec, # >= python 3.10
     Concatenate,
     Iterator,
     Optional,
+    Protocol,
+    Type,
+    TypeAlias,
+    TypeVar,
     Union,
     overload,
 )
@@ -21,10 +26,7 @@ import ruamel.yaml
 from cachetools import Cache, cached
 from typing_extensions import ParamSpec
 
-from kfactory import kdb
-
-# import klayout.dbcore as kdb
-
+import kfactory.kdb as kdb
 
 KP = ParamSpec("KP")
 
@@ -221,27 +223,30 @@ library = (
 )  #: Default library object. :py:class:`~kfactory.kcell.KCell` uses this object unless another one is specified in the constructor
 
 
-class Port:
+TT = TypeVar("TT", bound=kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans)
+TD = TypeVar("TD", bound=kdb.DTrans | kdb.DCplxTrans)
+TI = TypeVar("TI", bound=kdb.Trans | kdb.ICplxTrans)
+TS = TypeVar("TS", bound=kdb.Trans | kdb.DTrans)
+TC = TypeVar("TC", bound=kdb.ICplxTrans | kdb.DCplxTrans)
 
-    """A port is similar to a pin in electronics. In addition to the location and layer
-    that defines a pin, a port also contains an orientation and a width. This can be fully represented with a transformation, integer and layer_index.
-    """
+
+class IPortLike(Protocol[TI]):
+    """Prtocol for integer based ports"""
+
+    yaml_tag: str
 
     name: str
     width: int
-    trans: kdb.Trans
     layer: int
+    trans: TI
     port_type: str
-
-    # __match_args__ = ('trans', 'width', 'port_type','layer', 'name')
-    yaml_tag = "!Port"
 
     @overload
     def __init__(
         self,
         *,
         name: str,
-        trans: kdb.Trans,
+        trans: TI,
         width: int,
         layer: int,
         port_type: str = "optical",
@@ -253,7 +258,7 @@ class Port:
         self,
         *,
         name: Optional[str] = None,
-        port: "Port",
+        port: IPortLike[TI],
     ) -> None:
         ...
 
@@ -270,6 +275,262 @@ class Port:
         mirror_x: bool = False,
     ) -> None:
         ...
+
+    def __init__(
+        self,
+        *,
+        width: Optional[int] = None,
+        layer: Optional[int] = None,
+        name: Optional[str] = None,
+        port_type: str = "optical",
+        trans: Optional[TI | str] = None,
+        angle: Optional[int] = None,
+        position: Optional[tuple[int, int]] = None,
+        mirror_x: bool = False,
+        port: Optional[IPortLike[TI]] = None,
+    ):
+        ...
+
+    def __repr__(self) -> str:
+        return f"Port(\n    name: {self.name}\n    trans: {self.trans}\n    width: {self.width}\n    layer: {f'{self.layer} ({int(self.layer)})' if isinstance(self.layer, IntEnum) else str(self.layer)}\n    port_type: {self.port_type}\n)"
+
+    def copy(self, trans: TI) -> IPortLike[TI]:
+        ...
+
+    @property
+    def position(self) -> tuple[int, int]:
+        """Gives the x and y coordinates of the Port. This is info stored in the transformation of the port.
+
+        Returns:
+            position: `(self.trans.disp.x, self.trans.disp.y)`
+        """
+        return (self.trans.disp.x, self.trans.disp.y)
+
+    @property
+    def mirror(self) -> bool:
+        """Flag to mirror the transformation. Mirroring is in increments of 45° planes.
+        E.g. a rotation of 90° and mirror flag result in a mirroring on the 45° plane.
+        """
+        return self.trans.is_mirror()
+
+    @property
+    def x(self) -> int:
+        """Convenience for :py:attr:`Port.trans.disp.x`"""
+        return self.trans.disp.x
+
+    @property
+    def y(self) -> int:
+        """Convenience for :py:attr:`Port.trans.disp.y`"""
+        return self.trans.disp.y
+
+    def hash(self) -> bytes:
+        """Provides a hash function to provide a (hopefully) unique id of a port
+
+        Returns:
+            hash-digest: A byte representation from sha3_512()
+        """
+        h = sha3_512()
+        h.update(self.name.encode("UTF-8"))
+        h.update(self.trans.hash().to_bytes(8, "big"))
+        h.update(self.width.to_bytes(8, "big"))
+        h.update(self.port_type.encode("UTF-8"))
+        h.update(self.layer.to_bytes(8, "big"))
+        return h.digest()
+
+    @classmethod
+    def to_yaml(cls, representer, node):  # type: ignore
+        """Internal function used by ruamel.yaml to convert Port to yaml"""
+        return representer.represent_mapping(
+            cls.yaml_tag,
+            {
+                "name": node.name,
+                "width": node.width,
+                "layer": node.layer,
+                "port_type": node.port_type,
+                "trans": node.trans.to_s(),
+            },
+        )
+
+    @property
+    def center(self) -> tuple[int, int]:
+        """Returns port position for gdsfactory compatibility."""
+        return self.position
+
+    @center.setter
+    def center(self, value: tuple[int, int]) -> None:
+        self.trans.disp = kdb.Vector(*value)
+
+
+class DPortLike(Protocol[TD]):
+    """Protocol for floating number based ports"""
+
+    yaml_tag: str
+
+    name: str
+    width: float
+    layer: int
+    trans: TD
+    port_type: str
+
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str,
+        trans: TD,
+        width: float,
+        layer: int,
+        port_type: str = "optical",
+    ) -> None:
+        ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        name: Optional[str] = None,
+        port: DPortLike[TD],
+    ) -> None:
+        ...
+
+    def __init__(
+        self,
+        *,
+        width: Optional[float] = None,
+        layer: Optional[int] = None,
+        name: Optional[str] = None,
+        port_type: str = "optical",
+        trans: Optional[TD | str] = None,
+        angle: Optional[int] = None,
+        position: Optional[tuple[float, float]] = None,
+        mirror_x: bool = False,
+        port: Optional[DPortLike[TD]] = None,
+    ):
+        ...
+
+    def __repr__(self) -> str:
+        return f"Port(\n    name: {self.name}\n    trans: {self.trans}\n    width: {self.width}\n    layer: {f'{self.layer} ({int(self.layer)})' if isinstance(self.layer, IntEnum) else str(self.layer)}\n    port_type: {self.port_type}\n)"
+
+    def copy(self, trans: TD) -> DPortLike[TD]:
+        ...
+
+    @property
+    def position(self) -> tuple[float, float]:
+        """Gives the x and y coordinates of the Port. This is info stored in the transformation of the port.
+
+        Returns:
+            position: `(self.trans.disp.x, self.trans.disp.y)`
+        """
+        return (self.trans.disp.x, self.trans.disp.y)
+
+    @property
+    def mirror(self) -> bool:
+        """Flag to mirror the transformation. Mirroring is in increments of 45° planes.
+        E.g. a rotation of 90° and mirror flag result in a mirroring on the 45° plane.
+        """
+        return self.trans.is_mirror()
+
+    @property
+    def x(self) -> float:
+        """Convenience for :py:attr:`Port.trans.disp.x`"""
+        return self.trans.disp.x
+
+    @property
+    def y(self) -> float:
+        """Convenience for :py:attr:`Port.trans.disp.y`"""
+        return self.trans.disp.y
+
+    def hash(self) -> bytes:
+        """Provides a hash function to provide a (hopefully) unique id of a port
+
+        Returns:
+            hash-digest: A byte representation from sha3_512()
+        """
+        h = sha3_512()
+        h.update(self.name.encode("UTF-8"))
+        h.update(self.trans.hash().to_bytes(8, "big"))
+        h.update(self.width.hex().encode("UTF-8"))
+        h.update(self.port_type.encode("UTF-8"))
+        h.update(self.layer.to_bytes(8, "big"))
+        return h.digest()
+
+    @classmethod
+    def to_yaml(cls, representer, node):  # type: ignore
+        """Internal function used by ruamel.yaml to convert Port to yaml"""
+        return representer.represent_mapping(
+            cls.yaml_tag,
+            {
+                "name": node.name,
+                "width": node.width,
+                "layer": node.layer,
+                "port_type": node.port_type,
+                "trans": node.trans.to_s(),
+            },
+        )
+
+    @property
+    def center(self) -> tuple[float, float]:
+        """Returns port position for gdsfactory compatibility."""
+        return self.position
+
+    @center.setter
+    def center(self, value: tuple[float, float]) -> None:
+        self.trans.disp = kdb.DVector(*value)
+
+
+class SPortLike(Protocol[TS]):
+    """Protocol for simple transformation based ports"""
+
+    trans: TS
+
+    @property
+    def angle(self) -> int:
+        """Angle of the transformation. In the range of [0,1,2,3] which are increments in 90°. Not to be confused with `rot`
+        of the transformation which keeps additional info about the mirror flag."""
+        return self.trans.angle
+
+    @property
+    def orientation(self) -> int:
+        """Returns orientation in degrees for gdsfactory compatibility."""
+        return self.trans.angle * 90
+
+    @orientation.setter
+    def orientation(self, value: int) -> None:
+        self.trans.angle = int(value // 90)
+
+
+class CPortLike(Protocol[TC]):
+    """Protocol for complex transformation based ports"""
+
+    trans: TC
+
+    @property
+    def angle(self) -> float:
+        """Angle of the transformation. In the range of [0,1,2,3] which are increments in 90°. Not to be confused with `rot`
+        of the transformation which keeps additional info about the mirror flag."""
+        return self.trans.angle
+
+    @property
+    def orientation(self) -> float:
+        """Returns orientation in degrees for gdsfactory compatibility."""
+        return self.trans.angle
+
+    @orientation.setter
+    def orientation(self, value: float) -> None:
+        self.trans.angle = value
+
+
+class Port(IPortLike[kdb.Trans], SPortLike[kdb.Trans]):
+    """A port is similar to a pin in electronics. In addition to the location and layer
+    that defines a pin, a port also contains an orientation and a width. This can be fully represented with a transformation, integer and layer_index.
+    """
+
+    yaml_tag = "!Port"
+    name: str
+    width: int
+    layer: int
+    trans: kdb.Trans
+    port_type: str
 
     def __init__(
         self,
@@ -308,22 +569,28 @@ class Port:
             else:
                 self.trans = kdb.Trans(angle, mirror_x, kdb.Vector(*position))
 
-    def hash(self) -> bytes:
-        """Provides a hash function to provide a (hopefully) unique id of a port
+    def move(
+        self, origin: tuple[int, int], destination: Optional[tuple[int, int]] = None
+    ) -> None:
+        """Convenience from the equivalent of gdsfactory. Moves the"""
+        dest = kdb.Vector(*(origin if destination is None else destination))
+        org = kdb.Vector(0, 0) if destination is None else kdb.Vector(*origin)
 
-        Returns:
-            hash-digest: A byte representation from sha3_512()
+        self.trans = self.trans * kdb.Trans(dest - org)
+
+    @classmethod
+    def from_yaml(cls, constructor, node):  # type: ignore
+        """Internal function used by the placer to convert yaml to a Port"""
+        d = dict(constructor.construct_pairs(node))
+        return cls(**d)
+
+    def rotate(self, angle: int) -> None:
+        """Rotate the Port
+
+        Args:
+            angle: The angle to rotate in increments of 90°
         """
-        h = sha3_512()
-        h.update(self.name.encode("UTF-8"))
-        h.update(self.trans.hash().to_bytes(8, "big"))
-        h.update(self.width.to_bytes(8, "big"))
-        h.update(self.port_type.encode("UTF-8"))
-        h.update(self.layer.to_bytes(8, "big"))
-        return h.digest()
-
-    def __repr__(self) -> str:
-        return f"Port(\n    name: {self.name}\n    trans: {self.trans}\n    width: {self.width}\n    layer: {f'{self.layer.name} ({int(self.layer)})' if isinstance(self.layer, IntEnum) else str(self.layer)}\n    port_type: {self.port_type}\n)"
+        self.trans = self.trans * kdb.Trans(angle, False, 0, 0)
 
     def copy(self, trans: kdb.Trans = kdb.Trans.R0) -> "Port":
         """Get a copy of a port
@@ -343,68 +610,66 @@ class Port:
             width=self.width,
         )
 
-    @property
-    def position(self) -> tuple[int, int]:
-        """Gives the x and y coordinates of the Port. This is info stored in the transformation of the port.
 
-        Returns:
-            position: `(self.trans.disp.x, self.trans.disp.y)`
-        """
-        return (self.trans.disp.x, self.trans.disp.y)
+class DPort(DPortLike[kdb.DTrans], SPortLike[kdb.DTrans]):
+    """A port is similar to a pin in electronics. In addition to the location and layer
+    that defines a pin, a port also contains an orientation and a width. This can be fully represented with a transformation, integer and layer_index.
+    """
 
-    @property
-    def angle(self) -> int:
-        """Angle of the transformation. In the range of [0,1,2,3] which are increments in 90°. Not to be confused with `rot`
-        of the transformation which keeps additional info about the mirror flag."""
-        return self.trans.angle
+    yaml_tag = "!DPort"
+    name: str
+    width: float
+    layer: int
+    trans: kdb.DTrans
+    port_type: str
 
-    @property
-    def mirror(self) -> bool:
-        """Flag to mirror the transformation. Mirroring is in increments of 45° planes.
-        E.g. a rotation of 90° and mirror flag result in a mirroring on the 45° plane.
-        """
-        return self.trans.is_mirror()
-
-    @property
-    def x(self) -> int:
-        """Convenience for :py:attr:`Port.trans.disp.x`"""
-        return self.trans.disp.x
-
-    @property
-    def y(self) -> int:
-        """Convenience for :py:attr:`Port.trans.disp.y`"""
-        return self.trans.disp.y
+    def __init__(
+        self,
+        *,
+        width: Optional[float] = None,
+        layer: Optional[int] = None,
+        name: Optional[str] = None,
+        port_type: str = "optical",
+        trans: Optional[kdb.DTrans | str] = None,
+        angle: Optional[int] = None,
+        position: Optional[tuple[float, float]] = None,
+        mirror_x: bool = False,
+        port: Optional["DPort"] = None,
+    ):
+        if port is not None:
+            self.name: str = port.name if name is None else name
+            self.trans: kdb.DTrans = port.trans.dup()
+            self.port_type: str = port.port_type
+            self.layer: int = port.layer
+            self.width: float = port.width
+        elif name is None or width is None or layer is None:
+            raise ValueError("name, width, layer must be given if the 'port is None'")
+        else:
+            self.name = name
+            self.width = width
+            self.layer = layer
+            self.port_type = port_type
+            if trans is not None:
+                self.trans = (
+                    kdb.DTrans.from_s(trans) if isinstance(trans, str) else trans.dup()
+                )
+            elif angle is None or position is None:
+                raise ValueError(
+                    "angle and position must be given if creating a gdsfactory like port"
+                )
+            else:
+                self.trans = kdb.DTrans(angle, mirror_x, *position)
 
     def move(
-        self, origin: tuple[int, int], destination: Optional[tuple[int, int]] = None
+        self,
+        origin: tuple[float, float],
+        destination: Optional[tuple[float, float]] = None,
     ) -> None:
         """Convenience from the equivalent of gdsfactory. Moves the"""
-        dest = kdb.Vector(*(origin if destination is None else destination))
-        org = kdb.Vector(0, 0) if destination is None else kdb.Vector(*origin)
+        dest = kdb.DVector(*(origin if destination is None else destination))
+        org = kdb.DVector(0, 0) if destination is None else kdb.DVector(*origin)
 
-        self.trans = self.trans * kdb.Trans(dest - org)
-
-    def rotate(self, angle: int) -> None:
-        """Rotate the Port
-
-        Args:
-            angle: The angle to rotate in increments of 90°
-        """
-        self.trans = self.trans * kdb.Trans(angle, False, 0, 0)
-
-    @classmethod
-    def to_yaml(cls, representer, node):  # type: ignore
-        """Internal function used by ruamel.yaml to convert Port to yaml"""
-        return representer.represent_mapping(
-            cls.yaml_tag,
-            {
-                "name": node.name,
-                "width": node.width,
-                "layer": node.layer,
-                "port_type": node.port_type,
-                "trans": node.trans.to_s(),
-            },
-        )
+        self.trans = self.trans * kdb.DTrans(dest - org)
 
     @classmethod
     def from_yaml(cls, constructor, node):  # type: ignore
@@ -412,23 +677,221 @@ class Port:
         d = dict(constructor.construct_pairs(node))
         return cls(**d)
 
-    @property
-    def orientation(self) -> int:
-        """Returns orientation in degrees for gdsfactory compatibility."""
-        return self.angle * 90
+    def rotate(self, angle: int) -> None:
+        """Rotate the Port
 
-    @orientation.setter
-    def orientation(self, value):
-        self.trans.angle = int(value // 90)
+        Args:
+            angle: The angle to rotate in increments of 90°
+        """
+        self.trans = self.trans * kdb.DTrans(angle, False, 0, 0)
 
-    @property
-    def center(self) -> int:
-        """Returns port position for gdsfactory compatibility."""
-        return self.position
+    def copy(self, trans: kdb.DTrans = kdb.DTrans.R0) -> "DPort":
+        """Get a copy of a port
 
-    @center.setter
-    def center(self, value):
-        self.trans.disp = kdb.Vector(*value)
+        Args:
+            trans: an optional transformation applied to the port to be copied
+
+        Returns:
+            port (:py:class:`Port`): a copy of the port
+        """
+        _trans = trans * self.trans
+        return DPort(
+            name=self.name,
+            trans=_trans,
+            layer=self.layer,
+            port_type=self.port_type,
+            width=self.width,
+        )
+
+
+class ICplxPort:
+    """A port is similar to a pin in electronics. In addition to the location and layer
+    that defines a pin, a port also contains an orientation and a width. This can be fully represented with a transformation, integer and layer_index.
+    """
+
+    yaml_tag = "!DCplxPort"
+    name: str
+    width: int
+    layer: int
+    trans: kdb.ICplxTrans
+    port_type: str
+
+    def __init__(
+        self,
+        *,
+        width: Optional[int] = None,
+        layer: Optional[int] = None,
+        name: Optional[str] = None,
+        port_type: str = "optical",
+        trans: Optional[kdb.ICplxTrans | str] = None,
+        angle: Optional[int] = None,
+        position: Optional[tuple[int, int]] = None,
+        mirror_x: bool = False,
+        port: Optional["ICplxPort"] = None,
+    ):
+        if port is not None:
+            self.name = port.name if name is None else name
+            self.trans = port.trans.dup()
+            self.port_type = port.port_type
+            self.layer = port.layer
+            self.width = port.width
+        elif name is None or width is None or layer is None:
+            raise ValueError("name, width, layer must be given if the 'port is None'")
+        else:
+            self.name = name
+            self.width = width
+            self.layer = layer
+            self.port_type = port_type
+            if trans is not None:
+                self.trans = (
+                    kdb.ICplxTrans.from_s(trans)
+                    if isinstance(trans, str)
+                    else trans.dup()
+                )
+            elif angle is None or position is None:
+                raise ValueError(
+                    "angle and position must be given if creating a gdsfactory like port"
+                )
+            else:
+                self.trans = kdb.ICplxTrans(1, angle, mirror_x, *position)
+
+    def move(
+        self,
+        origin: tuple[int, int],
+        destination: Optional[tuple[int, int]] = None,
+    ) -> None:
+        """Convenience from the equivalent of gdsfactory. Moves the"""
+        dest = kdb.Vector(*(origin if destination is None else destination))
+        org = kdb.Vector(0, 0) if destination is None else kdb.Vector(*origin)
+
+        self.trans = self.trans * kdb.ICplxTrans(dest - org)
+
+    @classmethod
+    def from_yaml(cls, constructor, node):  # type: ignore
+        """Internal function used by the placer to convert yaml to a Port"""
+        d = dict(constructor.construct_pairs(node))
+        return cls(**d)
+
+    def rotate(self, angle: int) -> None:
+        """Rotate the Port
+
+        Args:
+            angle: The angle to rotate in increments of 90°
+        """
+        self.trans = self.trans * kdb.ICplxTrans(1, angle, False, 0, 0)
+
+    def copy(self, trans: kdb.ICplxTrans = kdb.ICplxTrans.R0) -> "ICplxPort":
+        """Get a copy of a port
+
+        Args:
+            trans: an optional transformation applied to the port to be copied
+
+        Returns:
+            port (:py:class:`Port`): a copy of the port
+        """
+        _trans = trans * self.trans
+        return ICplxPort(
+            name=self.name,
+            trans=_trans,
+            layer=self.layer,
+            port_type=self.port_type,
+            width=self.width,
+        )
+
+
+class DCplxPort:
+    """A port is similar to a pin in electronics. In addition to the location and layer
+    that defines a pin, a port also contains an orientation and a width. This can be fully represented with a transformation, integer and layer_index.
+    """
+
+    yaml_tag = "!DCplxPort"
+    name: str
+    width: float
+    layer: int
+    trans: kdb.DCplxTrans
+    port_type: str
+
+    def __init__(
+        self,
+        *,
+        width: Optional[float] = None,
+        layer: Optional[int] = None,
+        name: Optional[str] = None,
+        port_type: str = "optical",
+        trans: Optional[kdb.DCplxTrans | str] = None,
+        angle: Optional[int] = None,
+        position: Optional[tuple[float, float]] = None,
+        mirror_x: bool = False,
+        port: Optional["DCplxPort"] = None,
+    ):
+        if port is not None:
+            self.name: str = port.name if name is None else name
+            self.trans: kdb.DCplxTrans = port.trans.dup()
+            self.port_type: str = port.port_type
+            self.layer: int = port.layer
+            self.width: float = port.width
+        elif name is None or width is None or layer is None:
+            raise ValueError("name, width, layer must be given if the 'port is None'")
+        else:
+            self.name = name
+            self.width = width
+            self.layer = layer
+            self.port_type = port_type
+            if trans is not None:
+                self.trans = (
+                    kdb.DCplxTrans.from_s(trans)
+                    if isinstance(trans, str)
+                    else trans.dup()
+                )
+            elif angle is None or position is None:
+                raise ValueError(
+                    "angle and position must be given if creating a gdsfactory like port"
+                )
+            else:
+                self.trans = kdb.DCplxTrans(1, angle, mirror_x, *position)
+
+    def move(
+        self,
+        origin: tuple[float, float],
+        destination: Optional[tuple[float, float]] = None,
+    ) -> None:
+        """Convenience from the equivalent of gdsfactory. Moves the"""
+        dest = kdb.DVector(*(origin if destination is None else destination))
+        org = kdb.DVector(0, 0) if destination is None else kdb.DVector(*origin)
+
+        self.trans = self.trans * kdb.DCplxTrans(dest - org)
+
+    @classmethod
+    def from_yaml(cls, constructor, node):  # type: ignore
+        """Internal function used by the placer to convert yaml to a Port"""
+        d = dict(constructor.construct_pairs(node))
+        return cls(**d)
+
+    def rotate(self, angle: int) -> None:
+        """Rotate the Port
+
+        Args:
+            angle: The angle to rotate in increments of 90°
+        """
+        self.trans = self.trans * kdb.DCplxTrans(1, angle, False, 0, 0)
+
+    def copy(self, trans: kdb.DCplxTrans = kdb.DCplxTrans.R0) -> "DCplxPort":
+        """Get a copy of a port
+
+        Args:
+            trans: an optional transformation applied to the port to be copied
+
+        Returns:
+            port (:py:class:`Port`): a copy of the port
+        """
+        _trans = trans * self.trans
+        return DCplxPort(
+            name=self.name,
+            trans=_trans,
+            layer=self.layer,
+            port_type=self.port_type,
+            width=self.width,
+        )
 
 
 class KCell:
@@ -462,7 +925,7 @@ class KCell:
         self.ports: Ports = Ports()
         self.insts: list[Instance] = []
         self.settings: dict[str, Any] = {}
-        self.frozen = False
+        self._locked = False
         self.info = {}
 
     def copy(self) -> "KCell":
@@ -476,7 +939,7 @@ class KCell:
         c.ports = self.ports
         for inst in self.insts:
             c.create_inst(inst.cell, inst.instance.trans)
-        c.frozen = False
+        c._locked = False
         return c
 
     @property
@@ -965,7 +1428,7 @@ class Ports:
 
     yaml_tag = "!Ports"
 
-    def __init__(self, ports: list[Port] = []) -> None:
+    def __init__(self, ports: list[Port | DCplxPort] = []) -> None:
         """Constructor"""
         self._ports = list(ports)
 
@@ -977,10 +1440,10 @@ class Ports:
         """Check whether a port is already in the list"""
         return port.hash() in [v.hash() for v in self._ports]
 
-    def each(self) -> Iterator["Port"]:
+    def each(self) -> Iterator[Port | DCplxPort]:
         yield from self._ports
 
-    def add_port(self, port: Port, name: Optional[str] = None) -> None:
+    def add_port(self, port: Port | DCplxPort, name: Optional[str] = None) -> None:
         """Add a port object
 
         Args:
@@ -1114,7 +1577,16 @@ class InstancePorts:
 
     def copy(self) -> Ports:
         return Ports(
-            [port.copy(trans=self.instance.trans) for port in self.cell_ports._ports]
+            [
+                port.copy(trans=self.instance.trans)
+                if isinstance(port, Port)
+                else port.copy(
+                    kdb.DCplxTrans(
+                        self.instance.trans.to_dtype(self.instance.cell.library)
+                    )
+                )
+                for port in self.cell_ports._ports
+            ]
         )
 
 
@@ -1175,7 +1647,7 @@ def autocell(
                     if isinstance(value, frozenset):
                         params[key] = frozenset_to_dict(value)
                 cell = f(**params)
-                if cell.frozen:
+                if cell._locked:
                     cell = cell.copy()
                 if set_name:
                     name = get_component_name(f.__name__, **params)
@@ -1192,7 +1664,7 @@ def autocell(
                     else:
                         cell.set_property(i, f"{name}: {str(setting)}")
                     i += 1
-                cell.frozen = True
+                cell._locked = True
                 return cell
 
             return wrapped_cell(**params)
