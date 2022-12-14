@@ -23,9 +23,8 @@ dependencies = [
 	"scipy",
 	"ruamel.yaml",
 	"cachetools >= 5.2.0",
-  "pydantic",
+    "pydantic",
 ]
-readme = "README.md"
 
 [project.optional-dependencies]
 dev = ["black>=21", "mypy", "pre-commit", "commitizen", "gitpython", "pylsp-mypy", "types-cachetools"]
@@ -80,3 +79,10 @@ multi_line_output = 3
 line_length = 88
 include_trailing_comma = true
 skip = ["kfactory/__init__.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["src", 'tests']
+# addopts = --tb=no
+addopts = '--tb=short'
+python_files = ["src/*.py", "tests/*.py"]
+norecursedirs = ["extra/*.py"]

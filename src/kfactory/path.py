@@ -49,7 +49,90 @@ from kfactory.utils.geo import simplify as _simplify
 #     return np.asarray(ls_simple.coords)
 
 
-class Path(_GeometryHelper):
+def _parse_coordinate(c):
+    """Translates various inputs (lists, tuples, Ports) to an (x,y) coordinate.
+
+    Args:
+        c: array-like[N] or Port
+            Input to translate into a coordinate.
+
+    Returns:
+        c : array-like[2]
+            Parsed coordinate.
+    """
+    if hasattr(c, "center"):
+        return c.center
+    elif np.array(c).size == 2:
+        return c
+    else:
+        raise ValueError(
+            "Could not parse coordinate, input should be array-like (e.g. [1.5,2.3] or a Port"
+        )
+
+
+def _parse_move(origin, destination, axis):
+    """Translates input coordinates to changes in position in the x and y directions.
+
+    Args:
+        origin : array-like[2] of int or float, Port, or key
+            Origin point of the move.
+        destination : array-like[2] of int or float, Port, key, or None
+            Destination point of the move.
+        axis : {'x', 'y'} Direction of move.
+
+    Returns:
+        dx : int or float
+            Change in position in the x-direction.
+        dy : int or float
+            Change in position in the y-direction.
+    """
+    # If only one set of coordinates is defined, make sure it's used to move things
+    if destination is None:
+        destination = origin
+        origin = [0, 0]
+
+    d = _parse_coordinate(destination)
+    o = _parse_coordinate(origin)
+    if axis == "x":
+        d = (d[0], o[1])
+    if axis == "y":
+        d = (o[0], d[1])
+    dx, dy = np.array(d) - o
+
+    return dx, dy
+
+
+def _rotate_points(points, angle: float = 45, center=(0, 0)):
+    """Rotates points around a centerpoint defined by ``center``.
+
+    ``points`` may be input as either single points [1,2] or array-like[N][2],
+    and will return in kind.
+
+    Args:
+        points : array-like[N][2]
+            Coordinates of the element to be rotated.
+        angle : int or float
+            Angle to rotate the points.
+        center : array-like[2]
+            Centerpoint of rotation.
+
+    Returns:
+        A new set of points that are rotated around ``center``.
+    """
+    if angle == 0:
+        return points
+    angle = angle * pi / 180
+    ca = cos(angle)
+    sa = sin(angle)
+    sa = np.array((-sa, sa))
+    c0 = np.array(center)
+    if np.asarray(points).ndim == 2:
+        return (points - c0) * ca + (points - c0)[:, ::-1] * sa + c0
+    if np.asarray(points).ndim == 1:
+        return (points - c0) * ca + (points - c0)[::-1] * sa + c0
+
+
+class Path:
     """Path object for smooth Paths. You can extrude a Path with a CrossSection \
             to create a Component.
 
@@ -412,7 +495,7 @@ class Path(_GeometryHelper):
         simplify: Optional[float] = None,
         shear_angle_start: Optional[float] = None,
         shear_angle_end: Optional[float] = None,
-    ) -> Component:
+    ) -> KCell:
         """Returns Component by extruding a Path with a CrossSection.
 
         A path can be extruded using any CrossSection returning a Component
@@ -692,7 +775,7 @@ def extrude(
     simplify: Optional[float] = None,
     shear_angle_start: Optional[float] = None,
     shear_angle_end: Optional[float] = None,
-) -> Component:
+) -> KCell:
     """Returns Component extruding a Path with a cross_section.
 
     A path can be extruded using any CrossSection returning a Component
@@ -711,12 +794,7 @@ def extrude(
         shear_angle_end: an optional angle to shear the ending face by (in degrees).
 
     """
-    from gdsfactory.pdk import (
-        get_active_pdk,
-        get_cross_section,
-        get_grid_size,
-        get_layer,
-    )
+    from kfactory.pdk import get_active_pdk, get_cross_section, get_grid_size, get_layer
 
     if cross_section is None and layer is None:
         raise ValueError("CrossSection or layer needed")
@@ -735,7 +813,7 @@ def extrude(
         )
 
     xsection_points = []
-    c = Component()
+    c = KCell()
 
     x = get_cross_section(cross_section)
     snap_to_grid_nm = int(1e3 * (x.snap_to_grid or get_grid_size()))
@@ -1322,7 +1400,7 @@ __all__ = [
 def _demo() -> None:
     import gdsfactory as gf
 
-    c = gf.Component()
+    c = gf.KCell()
     X1 = gf.CrossSection()
     X1.add(width=1.2, offset=0, layer=2, name="wg", ports=("in1", "out1"))
     X1.add(width=2.2, offset=0, layer=3, name="etch")
@@ -1397,12 +1475,8 @@ def _demo_variable_offset() -> None:
 
 
 if __name__ == "__main__":
-    import numpy as np
-
-    """
-    init
-    """
     import gdsfactory as gf
+    import numpy as np
 
     points = np.array([(20, 10), (40, 10), (20, 40), (50, 40), (50, 20), (70, 20)])
 

@@ -55,6 +55,7 @@ class Section(BaseModel):
         port_types: optical, electrical, ...
         name: Optional Section name.
         hidden: hide layer.
+
     .. code::
           0   offset
           |<-------------->|
