@@ -18,6 +18,7 @@ from typing import (  # ParamSpec, # >= python 3.10
     TypeAlias,
     TypeVar,
     Union,
+    cast,
     overload,
 )
 
@@ -228,18 +229,50 @@ TD = TypeVar("TD", bound=kdb.DTrans | kdb.DCplxTrans)
 TI = TypeVar("TI", bound=kdb.Trans | kdb.ICplxTrans)
 TS = TypeVar("TS", bound=kdb.Trans | kdb.DTrans)
 TC = TypeVar("TC", bound=kdb.ICplxTrans | kdb.DCplxTrans)
+FI = TypeVar("FI", bound=int | float)
 
 
-class IPortLike(Protocol[TI]):
-    """Prtocol for integer based ports"""
+class PortLike(Protocol[TT, FI]):
 
     yaml_tag: str
-
     name: str
-    width: int
+    width: FI
     layer: int
-    trans: TI
+    trans: TT
     port_type: str
+
+    # def copy(self, trans: TI) -> "PortLike[TT, FI]":
+    #     ...
+
+    def move(
+        self,
+        origin: tuple[FI, FI],
+        destination: tuple[FI, FI] = (cast(FI, 0), cast(FI, 0)),
+    ) -> None:
+        ...
+
+    @property
+    def center(self) -> tuple[FI, FI]:
+        ...
+
+    @center.setter
+    def center(self, value: tuple[FI, FI]) -> None:
+        ...
+
+    @property
+    def x(self) -> FI:
+        ...
+
+    @property
+    def y(self) -> FI:
+        ...
+
+    def hash(self) -> bytes:
+        ...
+
+
+class IPortLike(PortLike[TI, int]):
+    """Protocol for integer based ports"""
 
     @overload
     def __init__(
@@ -258,7 +291,7 @@ class IPortLike(Protocol[TI]):
         self,
         *,
         name: Optional[str] = None,
-        port: IPortLike[TI],
+        port: "IPortLike[TI]",
     ) -> None:
         ...
 
@@ -287,15 +320,12 @@ class IPortLike(Protocol[TI]):
         angle: Optional[int] = None,
         position: Optional[tuple[int, int]] = None,
         mirror_x: bool = False,
-        port: Optional[IPortLike[TI]] = None,
+        port: "Optional[IPortLike[TI]]" = None,
     ):
         ...
 
     def __repr__(self) -> str:
         return f"Port(\n    name: {self.name}\n    trans: {self.trans}\n    width: {self.width}\n    layer: {f'{self.layer} ({int(self.layer)})' if isinstance(self.layer, IntEnum) else str(self.layer)}\n    port_type: {self.port_type}\n)"
-
-    def copy(self, trans: TI) -> IPortLike[TI]:
-        ...
 
     @property
     def position(self) -> tuple[int, int]:
@@ -361,16 +391,8 @@ class IPortLike(Protocol[TI]):
         self.trans.disp = kdb.Vector(*value)
 
 
-class DPortLike(Protocol[TD]):
+class DPortLike(PortLike[TD, float]):
     """Protocol for floating number based ports"""
-
-    yaml_tag: str
-
-    name: str
-    width: float
-    layer: int
-    trans: TD
-    port_type: str
 
     @overload
     def __init__(
@@ -389,7 +411,7 @@ class DPortLike(Protocol[TD]):
         self,
         *,
         name: Optional[str] = None,
-        port: DPortLike[TD],
+        port: "DPortLike[TD]",
     ) -> None:
         ...
 
@@ -404,15 +426,12 @@ class DPortLike(Protocol[TD]):
         angle: Optional[int] = None,
         position: Optional[tuple[float, float]] = None,
         mirror_x: bool = False,
-        port: Optional[DPortLike[TD]] = None,
+        port: "Optional[DPortLike[TD]]" = None,
     ):
         ...
 
     def __repr__(self) -> str:
         return f"Port(\n    name: {self.name}\n    trans: {self.trans}\n    width: {self.width}\n    layer: {f'{self.layer} ({int(self.layer)})' if isinstance(self.layer, IntEnum) else str(self.layer)}\n    port_type: {self.port_type}\n)"
-
-    def copy(self, trans: TD) -> DPortLike[TD]:
-        ...
 
     @property
     def position(self) -> tuple[float, float]:
@@ -478,10 +497,8 @@ class DPortLike(Protocol[TD]):
         self.trans.disp = kdb.DVector(*value)
 
 
-class SPortLike(Protocol[TS]):
+class SPortLike(PortLike[TS, Any]):
     """Protocol for simple transformation based ports"""
-
-    trans: TS
 
     @property
     def angle(self) -> int:
@@ -490,7 +507,7 @@ class SPortLike(Protocol[TS]):
         return self.trans.angle
 
     @property
-    def orientation(self) -> int:
+    def orientation(self) -> float:
         """Returns orientation in degrees for gdsfactory compatibility."""
         return self.trans.angle * 90
 
@@ -499,7 +516,7 @@ class SPortLike(Protocol[TS]):
         self.trans.angle = int(value // 90)
 
 
-class CPortLike(Protocol[TC]):
+class CPortLike(PortLike[TC, Any]):
     """Protocol for complex transformation based ports"""
 
     trans: TC
@@ -704,12 +721,12 @@ class DPort(DPortLike[kdb.DTrans], SPortLike[kdb.DTrans]):
         )
 
 
-class ICplxPort:
+class ICplxPort(IPortLike[kdb.ICplxTrans], CPortLike[kdb.ICplxTrans]):
     """A port is similar to a pin in electronics. In addition to the location and layer
     that defines a pin, a port also contains an orientation and a width. This can be fully represented with a transformation, integer and layer_index.
     """
 
-    yaml_tag = "!DCplxPort"
+    yaml_tag = "!ICplxPort"
     name: str
     width: int
     layer: int
@@ -799,7 +816,7 @@ class ICplxPort:
         )
 
 
-class DCplxPort:
+class DCplxPort(DPortLike[kdb.DCplxTrans], CPortLike[kdb.DCplxTrans]):
     """A port is similar to a pin in electronics. In addition to the location and layer
     that defines a pin, a port also contains an orientation and a width. This can be fully represented with a transformation, integer and layer_index.
     """
@@ -926,7 +943,7 @@ class KCell:
         self.insts: list[Instance] = []
         self.settings: dict[str, Any] = {}
         self._locked = False
-        self.info = {}
+        self.info: dict[str, Any] = {}
 
     def copy(self) -> "KCell":
         """Copy the full cell
@@ -1085,13 +1102,18 @@ class KCell:
                 h.update(shape.polygon.hash().to_bytes(8, "big"))
             for shape in self.shapes(l).each(kdb.Shapes.STexts):
                 h.update(shape.text.hash().to_bytes(8, "big"))
+        port_hashs = list(sorted(p.hash() for p in self.ports._ports))
+        for _hash in port_hashs:
+            h.update(_hash)
+        insts_hashs = list(sorted(inst.hash() for inst in self.insts))
 
-        for port in sorted(self.ports._ports, key=lambda port: port.hash()):
-            h.update(port.name.encode("UTF-8"))
-            h.update(port.trans.hash().to_bytes(8, "big"))
-            h.update(port.width.to_bytes(8, "big"))
-            h.update(port.layer.to_bytes(8, "big"))
-            h.update(port.port_type.encode("UTF-8"))
+        # for port in sorted(self.ports._ports, key=lambda port: port.hash()):
+        #     # h.update(port.name.encode("UTF-8"))
+        #     # h.update(port.trans.hash().to_bytes(8, "big"))
+        #     # h.update(port.width.to_bytes(8, "big"))
+        #     # h.update(port.layer.to_bytes(8, "big"))
+        #     # h.update(port.port_type.encode("UTF-8"))
+        #     h.update(port.hash())
 
         return h.digest()
 
@@ -1125,12 +1147,29 @@ class KCell:
     def draw_ports(self) -> None:
         """Draw all the ports on their respective :py:attr:`Port.layer`:"""
         for port in self.ports._ports:
-            w = port.width
-            poly = kdb.Polygon(
-                [kdb.Point(0, -w // 2), kdb.Point(0, w // 2), kdb.Point(w // 2, 0)]
-            )
-            self.shapes(port.layer).insert(poly.transformed(port.trans))
-            self.shapes(port.layer).insert(kdb.Text(port.name, port.trans))
+
+            if isinstance(port, IPortLike):
+                w = port.width
+                poly = kdb.Polygon(
+                    [kdb.Point(0, -w // 2), kdb.Point(0, w // 2), kdb.Point(w // 2, 0)]
+                )
+                self.shapes(port.layer).insert(poly.transformed(port.trans))
+                self.shapes(port.layer).insert(
+                    kdb.Text(port.name, kdb.Trans(port.trans))
+                )
+            elif isinstance(port, DPortLike):
+                wd = port.width
+                dpoly = kdb.DPolygon(
+                    [
+                        kdb.DPoint(0, -wd / 2),
+                        kdb.DPoint(0, wd / 2),
+                        kdb.DPoint(wd / 2, 0),
+                    ]
+                )
+                self.shapes(port.layer).insert(dpoly.transformed(port.trans))
+                self.shapes(port.layer).insert(
+                    kdb.DText(port.name, kdb.DTrans(port.trans))
+                )
 
     def write(
         self, filename: str | Path, save_options: kdb.SaveLayoutOptions = default_save()
@@ -1354,7 +1393,7 @@ class Instance:
     def connect(
         self,
         portname: str,
-        other: "Instance | Port",
+        other: "Instance | PortLike[TT,FI]",
         other_port_name: Optional[str] = None,
         *,
         mirror: bool = False,
@@ -1376,7 +1415,7 @@ class Instance:
                     "portname cannot be None if an Instance Object is given"
                 )
             op = other.ports[other_port_name]
-        elif isinstance(other, Port):
+        elif isinstance(other, (Port, DPort, ICplxPort, DCplxPort)):
             op = other
         else:
             raise ValueError("other_instance must be of type Instance or Port")
