@@ -1710,10 +1710,7 @@ def autocell(
 
         return wrapper_autocell
 
-    if _func is None:
-        return decorator_autocell
-    else:
-        return decorator_autocell(_func)
+    return decorator_autocell if _func is None else decorator_autocell(_func)
 
 
 def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
