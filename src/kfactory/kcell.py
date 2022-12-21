@@ -22,12 +22,11 @@ from typing import (  # ParamSpec, # >= python 3.10
     overload,
 )
 
+import kdb
 import numpy as np
 import ruamel.yaml
 from cachetools import Cache, cached
 from typing_extensions import ParamSpec
-
-import kfactory.kdb as kdb
 
 KP = ParamSpec("KP")
 
@@ -1393,7 +1392,7 @@ class Instance:
     def connect(
         self,
         portname: str,
-        other: "Instance | PortLike[TT,FI]",
+        other: "Instance | Port",
         other_port_name: Optional[str] = None,
         *,
         mirror: bool = False,
@@ -1412,10 +1411,37 @@ class Instance:
         if isinstance(other, Instance):
             if other_port_name is None:
                 raise ValueError(
+                    "portname cannot be None if an Instance Object is given. For complex connections (non-90 degree and floating point ports) use connect_cplx instead"
+                )
+            op = other.ports[other_port_name]
+        elif isinstance(other, Port):
+            op = other
+        else:
+            raise ValueError("other_instance must be of type Instance or Port")
+        p = self.cell.ports[portname]
+        if p.width != op.width and not allow_width_mismatch:
+            raise PortWidthMismatch(
+                self,
+                other,
+                p,
+                op,
+            )
+        elif int(p.layer) != int(op.layer) and not allow_layer_mismatch:
+            raise PortLayerMismatch(self.cell.library, self, other, p, op)
+        elif p.port_type != op.port_type and not allow_type_mismatch:
+            raise PortTypeMismatch(self, other, p, op)
+        else:
+            conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
+            self.instance.trans = op.trans * conn_trans * p.trans.inverted()
+
+    def connect_cplx(self, portname: str, other: "Instance|Portlike[TT, FI]"):
+        if isinstance(other, Instance):
+            if other_port_name is None:
+                raise ValueError(
                     "portname cannot be None if an Instance Object is given"
                 )
             op = other.ports[other_port_name]
-        elif isinstance(other, (Port, DPort, ICplxPort, DCplxPort)):
+        elif isinstance(other, Port):
             op = other
         else:
             raise ValueError("other_instance must be of type Instance or Port")
