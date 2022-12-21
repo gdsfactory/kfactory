@@ -57,6 +57,7 @@ def test_connection():
         trans=kf.kdb.DCplxTrans(1, 30, False, 5, 10),
     )
     wg1.connect_cplx("o1", port)
+    c.add_port(wg1.ports["o1"])
 
 
 def test_connect_integer(wg):
