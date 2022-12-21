@@ -19,7 +19,7 @@ class LAYER(IntEnum):
 def waveguide(width: int, length: int, layer: int) -> kf.KCell:
     c = kf.KCell()
 
-    c.shapes(LAYER.SI).insert(kf.kdb.Box(-width // 2, 0, width // 2, length // 2))
+    c.shapes(LAYER.SI).insert(kf.kdb.Box(0, -width // 2, length // 2, width // 2))
 
     c.create_port(
         name="o1", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer=layer
@@ -49,6 +49,14 @@ def test_settings():
 
 def test_connection():
     c = kf.KCell()
+    wg1 = c << waveguide(1000, 20000, LAYER.SI)
+    port = kf.kcell.DCplxPort(
+        width=1000,
+        layer=LAYER.SI,
+        name="cplxp1",
+        trans=kf.kdb.DCplxTrans(1, 30, False, 5, 10),
+    )
+    wg1.connect_cplx("o1", port)
 
 
 def test_connect_integer(wg):

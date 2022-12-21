@@ -22,7 +22,7 @@ from typing import (  # ParamSpec, # >= python 3.10
     overload,
 )
 
-import kdb
+import kfactory.kdb as kdb
 import numpy as np
 import ruamel.yaml
 from cachetools import Cache, cached
@@ -269,6 +269,12 @@ class PortLike(Protocol[TT, FI]):
     def hash(self) -> bytes:
         ...
 
+    def complex(self) -> bool:
+        ...
+
+    def int_based(self) -> bool:
+        ...
+
 
 class IPortLike(PortLike[TI, int]):
     """Protocol for integer based ports"""
@@ -389,6 +395,9 @@ class IPortLike(PortLike[TI, int]):
     def center(self, value: tuple[int, int]) -> None:
         self.trans.disp = kdb.Vector(*value)
 
+    def int_based(self) -> bool:
+        return True
+
 
 class DPortLike(PortLike[TD, float]):
     """Protocol for floating number based ports"""
@@ -495,6 +504,9 @@ class DPortLike(PortLike[TD, float]):
     def center(self, value: tuple[float, float]) -> None:
         self.trans.disp = kdb.DVector(*value)
 
+    def int_based(self) -> bool:
+        return False
+
 
 class SPortLike(PortLike[TS, Any]):
     """Protocol for simple transformation based ports"""
@@ -513,6 +525,9 @@ class SPortLike(PortLike[TS, Any]):
     @orientation.setter
     def orientation(self, value: int) -> None:
         self.trans.angle = int(value // 90)
+
+    def complex(self) -> bool:
+        return False
 
 
 class CPortLike(PortLike[TC, Any]):
@@ -534,6 +549,9 @@ class CPortLike(PortLike[TC, Any]):
     @orientation.setter
     def orientation(self, value: float) -> None:
         self.trans.angle = value
+
+    def complex(self) -> bool:
+        return True
 
 
 class Port(IPortLike[kdb.Trans], SPortLike[kdb.Trans]):
@@ -625,6 +643,9 @@ class Port(IPortLike[kdb.Trans], SPortLike[kdb.Trans]):
             port_type=self.port_type,
             width=self.width,
         )
+
+    def dcplx_trans(self, dbu: float) -> kdb.DCplxTrans:
+        return kdb.DCplxTrans(self.trans.to_dtype(dbu))
 
 
 class DPort(DPortLike[kdb.DTrans], SPortLike[kdb.DTrans]):
@@ -718,6 +739,9 @@ class DPort(DPortLike[kdb.DTrans], SPortLike[kdb.DTrans]):
             port_type=self.port_type,
             width=self.width,
         )
+
+    def dcplx_trans(self, dbu: float) -> kdb.DCplxTrans:
+        return kdb.DCplxTrans(self.trans)
 
 
 class ICplxPort(IPortLike[kdb.ICplxTrans], CPortLike[kdb.ICplxTrans]):
@@ -814,6 +838,9 @@ class ICplxPort(IPortLike[kdb.ICplxTrans], CPortLike[kdb.ICplxTrans]):
             width=self.width,
         )
 
+    def dcplx_trans(self, dbu: float) -> kdb.DCplxTrans:
+        return self.trans.to_itrans(dbu)
+
 
 class DCplxPort(DPortLike[kdb.DCplxTrans], CPortLike[kdb.DCplxTrans]):
     """A port is similar to a pin in electronics. In addition to the location and layer
@@ -908,6 +935,9 @@ class DCplxPort(DPortLike[kdb.DCplxTrans], CPortLike[kdb.DCplxTrans]):
             port_type=self.port_type,
             width=self.width,
         )
+
+    def dcplx_trans(self, dbu: float) -> kdb.DCplxTrans:
+        return self.trans.dup()
 
 
 class KCell:
@@ -1154,7 +1184,7 @@ class KCell:
                 )
                 self.shapes(port.layer).insert(poly.transformed(port.trans))
                 self.shapes(port.layer).insert(
-                    kdb.Text(port.name, kdb.Trans(port.trans))
+                    kdb.Text(port.name, kdb.Trans.R0).transformed(port.trans)
                 )
             elif isinstance(port, DPortLike):
                 wd = port.width
@@ -1167,7 +1197,7 @@ class KCell:
                 )
                 self.shapes(port.layer).insert(dpoly.transformed(port.trans))
                 self.shapes(port.layer).insert(
-                    kdb.DText(port.name, kdb.DTrans(port.trans))
+                    kdb.DText(port.name, kdb.DTrans.R0).transformed(port.trans)
                 )
 
     def write(
@@ -1434,14 +1464,24 @@ class Instance:
             conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
             self.instance.trans = op.trans * conn_trans * p.trans.inverted()
 
-    def connect_cplx(self, portname: str, other: "Instance|Portlike[TT, FI]"):
+    def connect_cplx(
+        self,
+        portname: str,
+        other: "Instance|PortLike[TT, FI]",
+        other_port_name: Optional[str] = None,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool = False,
+        allow_layer_mismatch: bool = False,
+        allow_type_mismatch: bool = False,
+    ) -> None:
         if isinstance(other, Instance):
             if other_port_name is None:
                 raise ValueError(
                     "portname cannot be None if an Instance Object is given"
                 )
             op = other.ports[other_port_name]
-        elif isinstance(other, Port):
+        elif isinstance(other, (Port, DPort, ICplxPort, DCplxPort)):
             op = other
         else:
             raise ValueError("other_instance must be of type Instance or Port")
@@ -1458,8 +1498,13 @@ class Instance:
         elif p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)
         else:
-            conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
-            self.instance.trans = op.trans * conn_trans * p.trans.inverted()
+            # reset the transformation
+            self.trans = kdb.Trans.R0
+
+            # apply the transformations piece by piece
+            self.transform(op.trans)
+            self.transform(kdb.Trans.M90 if mirror else kdb.Trans.R180)
+            self.transform(p.trans.inverted())
 
     def __getattribute__(self, attr_name: str) -> Any:
         return super().__getattribute__(attr_name)
@@ -1581,9 +1626,9 @@ class Ports:
             )
 
         self._ports.append(port)
-        return self._ports[-1]
+        return port
 
-    def get_all(self) -> dict[str, Port]:
+    def get_all(self) -> dict[str, PortLike[TT, FI]]:
         """Get all ports in a dictionary with names as keys"""
         return {v.name: v for v in self._ports}
 
@@ -1879,6 +1924,9 @@ __all__ = [
     "library",
     "KLib",
     "default_save",
+    "ICplxPort",
+    "DCplxPort",
+    "DPort",
 ]
 
 
