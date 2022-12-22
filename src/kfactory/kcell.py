@@ -36,7 +36,7 @@ class PortWidthMismatch(ValueError):
     def __init__(
         self,
         inst: "Instance",
-        other_inst: "Instance | Port",
+        other_inst: "Instance | Port | DPort | ICplxPort | DCplxPort",
         p1: "Port",
         p2: "Port",
         *args: Any,
@@ -59,7 +59,7 @@ class PortLayerMismatch(ValueError):
         self,
         lib: "KLib",
         inst: "Instance",
-        other_inst: "Instance | Port",
+        other_inst: "Instance | Port | DPort | ICplxPort | DCplxPort",
         p1: "Port",
         p2: "Port",
         *args: Any,
@@ -91,7 +91,7 @@ class PortTypeMismatch(ValueError):
     def __init__(
         self,
         inst: "Instance",
-        other_inst: "Instance | Port",
+        other_inst: "Instance | Port | DPort | ICplxPort | DCplxPort",
         p1: "Port",
         p2: "Port",
         *args: Any,
@@ -275,6 +275,27 @@ class PortLike(Protocol[TT, FI]):
 
     def int_based(self) -> bool:
         ...
+
+    def dcplx_trans(self, dbu: float) -> kdb.DCplxTrans:
+        ...
+
+    def copy_cplx(self, trans: kdb.DCplxTrans, dbu: float) -> "DCplxPort":
+        if self.int_based():
+            return DCplxPort(
+                width=self.width * dbu,
+                layer=self.layer,
+                name=self.name,
+                port_type=self.port_type,
+                trans=trans * self.dcplx_trans(dbu),
+            )
+        else:
+            return DCplxPort(
+                width=self.width,
+                layer=self.layer,
+                name=self.name,
+                port_type=self.port_type,
+                trans=trans * self.dcplx_trans(dbu),
+            )
 
 
 class IPortLike(PortLike[TI, int]):
@@ -1476,6 +1497,7 @@ class Instance:
         allow_layer_mismatch: bool = False,
         allow_type_mismatch: bool = False,
     ) -> None:
+
         if isinstance(other, Instance):
             if other_port_name is None:
                 raise ValueError(
@@ -1488,24 +1510,34 @@ class Instance:
             raise ValueError("other_instance must be of type Instance or Port")
         p = self.cell.ports[portname]
         if p.width != op.width and not allow_width_mismatch:
-            raise PortWidthMismatch(
-                self,
-                other,
-                p,
-                op,
-            )
-        elif int(p.layer) != int(op.layer) and not allow_layer_mismatch:
-            raise PortLayerMismatch(self.cell.library, self, other, p, op)
-        elif p.port_type != op.port_type and not allow_type_mismatch:
-            raise PortTypeMismatch(self, other, p, op)
-        else:
-            # reset the transformation
-            self.trans = kdb.Trans.R0
+            if p.int_based() != op.int_based():
+                w1 = p.width * self.cell.library.dbu if p.int_based() else p.width
+                w2 = op.width * self.cell.library.dbu if op.int_based() else op.width
+                if w1 != w2:
 
-            # apply the transformations piece by piece
-            self.transform(op.trans)
-            self.transform(kdb.Trans.M90 if mirror else kdb.Trans.R180)
-            self.transform(p.trans.inverted())
+                    raise PortWidthMismatch(
+                        self,
+                        other,
+                        p,
+                        op,
+                    )
+            else:
+                raise PortWidthMismatch(
+                    self,
+                    other,
+                    p,
+                    op,
+                )
+        if int(p.layer) != int(op.layer) and not allow_layer_mismatch:
+            raise PortLayerMismatch(self.cell.library, self, other, p, op)
+        if p.port_type != op.port_type and not allow_type_mismatch:
+            raise PortTypeMismatch(self, other, p, op)
+        # reset the transformation
+        self.trans = kdb.Trans.R0
+        # apply the transformations piece by piece
+        self.transform(op.trans)
+        self.transform(kdb.Trans.M90 if mirror else kdb.Trans.R180)
+        self.transform(p.trans.inverted())
 
     def __getattribute__(self, attr_name: str) -> Any:
         return super().__getattribute__(attr_name)
@@ -1677,8 +1709,20 @@ class InstancePorts:
         self.cell_ports = instance.cell.ports
         self.instance = instance
 
-    def __getitem__(self, key: str) -> Port:
-        return self.cell_ports[key].copy(trans=self.instance.trans)
+    def __getitem__(self, key: str) -> Port | DPort | DCplxPort:
+        p = self.cell_ports[key]
+        if not (p.complex() or self.instance.instance.is_complex()):
+            if p.int_based():
+                instance_port = p.copy(trans=self.instance.trans)
+            else:
+                instance_port = p.copy(trans=self.instance.instance.dtrans)
+        else:
+            instance_port = p.copy_cplx(
+                trans=self.instance.instance.dcplx_trans,
+                dbu=self.instance.cell.library.dbu,
+            )
+
+        return instance_port
 
     def __repr__(self) -> str:
         return repr({v: self.__getitem__(v) for v in self.cell_ports.get_all().keys()})
