@@ -22,11 +22,12 @@ from typing import (  # ParamSpec, # >= python 3.10
     overload,
 )
 
-import kfactory.kdb as kdb
 import numpy as np
 import ruamel.yaml
 from cachetools import Cache, cached
 from typing_extensions import ParamSpec
+
+import kfactory.kdb as kdb
 
 KP = ParamSpec("KP")
 
