@@ -57,7 +57,6 @@ def wg_floating_off_grid():
     c.add_port(p1)
     c.add_port(p2)
 
-    c.draw_ports()
     return c
 
 
