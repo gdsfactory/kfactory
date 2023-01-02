@@ -582,6 +582,6 @@ if __name__ == "__main__":
         LAYER.WG.name,
         LAYER.WG[0],
         LAYER.WG[1],
-        [p for p in LAYER.WG],
+        list(LAYER.WG),
         KCell().shapes(LAYER.WG),
     )
