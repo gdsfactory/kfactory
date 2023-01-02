@@ -102,8 +102,6 @@ def test_floating(wg_floating_off_grid):
     wg1 = c << wg_floating_off_grid
     wg2 = c << wg_floating_off_grid
     wg2.connect("o2", wg1, "o1")
-    # c.flatten()
-    kf.show(c)
 
 
 def test_connect_integer(wg):
