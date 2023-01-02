@@ -11,7 +11,44 @@ module_path = pathlib.Path(__file__).parent.absolute()
 nm = 1e-3
 
 
-from kfactory import KLib, kdb, library
+from enum import Enum, IntEnum
+
+from kfactory import KCell, KLib, kdb, library
+
+
+class LayerEnum(int, Enum):  # IntEnum):
+
+    layer: int
+    datatype: int
+
+    def __new__(
+        cls: LayerMap, layer: int, datatype, *args, lib: KLib = library, **kwargs
+    ) -> LayerMap:
+        obj: int = int.__new__(cls, *args, **kwargs)
+        obj._value_ = lib.layer(layer, datatype)
+        obj.layer = layer
+        obj.datatype = datatype
+        return obj
+
+    def __getitem__(self, key: int) -> int:
+        if key == 0:
+            return self.layer
+        elif key == 1:
+            return self.datatype
+
+        else:
+            raise ValueError(
+                "LayerMap only has two values accessible like a list, layer == [0] and datatype == [1]"
+            )
+
+    def __len__(self) -> int:
+        return 2
+
+    def __iter__(self) -> Iterator[int]:
+        yield from [self.layer, self.datatype]
+
+    # RX = (2, 0)
+
 
 # class Layer(kdb.LayerInfo):
 
@@ -54,71 +91,72 @@ from kfactory import KLib, kdb, library
 # LayerSpec = Union[int, Layer, str, None]
 
 
-# class LayerMap(BaseModel):
-#     """Generic layermap based on book.
+class LAYER(LayerEnum):
+    #     """Generic layermap based on book.
 
-#     Lukas Chrostowski, Michael Hochberg, "Silicon Photonics Design",
-#     Cambridge University Press 2015, page 353
-#     You will need to create a new LayerMap with your specific foundry layers.
-#     """
+    #     Lukas Chrostowski, Michael Hochberg, "Silicon Photonics Design",
+    #     Cambridge University Press 2015, page 353
+    #     You will need to create a new LayerMap with your specific foundry layers.
+    #     """
 
-#     @root_validator(pre=True)
-#     def check_layer(cls, values):
-#         for key, value in values.items():
-#             if key != "Config":
-#                 assert isinstance(value.layer, int)
-#                 assert isinstance(value.datatype, int)
-#                 assert isinstance(value.ind, int)
+    #     @root_validator(pre=True)
+    #     def check_layer(cls, values):
+    #         for key, value in values.items():
+    #             if key != "Config":
+    #                 assert isinstance(value.layer, int)
+    #                 assert isinstance(value.datatype, int)
+    #                 assert isinstance(value.ind, int)
 
-#     WG: Layer = Layer(1, 0)
-#     WGCLAD: Layer = Layer(111, 0)
-#     SLAB150: Layer = Layer(2, 0)
-#     SLAB90: Layer = Layer(3, 0)
-#     DEEPTRENCH: Layer = Layer(4, 0)
-#     GE: Layer = Layer(5, 0)
-#     UNDERCUT: Layer = Layer(6, 0)
-#     WGN: Layer = Layer(34, 0)
-#     WGN_CLAD: Layer = Layer(36, 0)
+    WG = (1, 0)
+    WGCLAD = (111, 0)
+    SLAB150 = (2, 0)
+    SLAB90 = (3, 0)
+    DEEPTRENCH = (4, 0)
+    GE = (5, 0)
+    UNDERCUT = (6, 0)
+    WGN = (34, 0)
+    WGN_CLAD = (36, 0)
 
-#     N: Layer = Layer(20, 0)
-#     NP: Layer = Layer(22, 0)
-#     NPP: Layer = Layer(24, 0)
-#     P: Layer = Layer(21, 0)
-#     PP: Layer = Layer(23, 0)
-#     PPP: Layer = Layer(25, 0)
-#     GEN: Layer = Layer(26, 0)
-#     GEP: Layer = Layer(27, 0)
+    N = (20, 0)
+    NP = (22, 0)
+    NPP = (24, 0)
+    P = (21, 0)
+    PP = (23, 0)
+    PPP = (25, 0)
+    GEN = (26, 0)
+    GEP = (27, 0)
 
-#     HEATER: Layer = Layer(47, 0)
-#     M1: Layer = Layer(41, 0)
-#     M2: Layer = Layer(45, 0)
-#     M3: Layer = Layer(49, 0)
-#     VIAC: Layer = Layer(40, 0)
-#     VIA1: Layer = Layer(44, 0)
-#     VIA2: Layer = Layer(43, 0)
-#     PADOPEN: Layer = Layer(46, 0)
+    HEATER = (47, 0)
+    M1 = (41, 0)
+    M2 = (45, 0)
+    M3 = (49, 0)
+    VIAC = (40, 0)
+    VIA1 = (44, 0)
+    VIA2 = (43, 0)
+    PADOPEN = (46, 0)
 
-#     DICING: Layer = Layer(100, 0)
-#     NO_TILE_SI: Layer = Layer(71, 0)
-#     PADDING: Layer = Layer(67, 0)
-#     DEVREC: Layer = Layer(68, 0)
-#     FLOORPLAN: Layer = Layer(64, 0)
-#     TEXT: Layer = Layer(66, 0)
-#     PORT: Layer = Layer(1, 10)
-#     PORTE: Layer = Layer(1, 11)
-#     PORTH: Layer = Layer(70, 0)
-#     SHOW_PORTS: Layer = Layer(1, 12)
-#     LABEL: Layer = Layer(201, 0)
-#     LABEL_SETTINGS: Layer = Layer(202, 0)
-#     TE: Layer = Layer(203, 0)
-#     TM: Layer = Layer(204, 0)
-#     DRC_MARKER: Layer = Layer(205, 0)
-#     LABEL_INSTANCE: Layer = Layer(206, 0)
-#     ERROR_MARKER: Layer = Layer(207, 0)
-#     ERROR_PATH: Layer = Layer(208, 0)
+    DICING = (100, 0)
+    NO_TILE_SI = (71, 0)
+    PADDING = (67, 0)
+    DEVREC = (68, 0)
+    FLOORPLAN = (64, 0)
+    TEXT = (66, 0)
+    PORT = (1, 10)
+    PORTE = (1, 11)
+    PORTH = (70, 0)
+    SHOW_PORTS = (1, 12)
+    LABEL = (201, 0)
+    LABEL_SETTINGS = (202, 0)
+    TE = (203, 0)
+    TM = (204, 0)
+    DRC_MARKER = (205, 0)
+    LABEL_INSTANCE = (206, 0)
+    ERROR_MARKER = (207, 0)
+    ERROR_PATH = (208, 0)
 
-#     SOURCE: Layer = Layer(110, 0)
-#     MONITOR: Layer = Layer(101, 0)
+    SOURCE = (110, 0)
+    MONITOR = (101, 0)
+
 
 #     class Config:
 #         """pydantic config."""
@@ -128,128 +166,128 @@ from kfactory import KLib, kdb, library
 
 
 # LAYER = LayerMap()
-# PORT_MARKER_LAYER_TO_TYPE = {
-#     LAYER.PORT: "optical",
-#     LAYER.PORTE: "dc",
-#     LAYER.TE: "vertical_te",
-#     LAYER.TM: "vertical_tm",
-# }
+PORT_MARKER_LAYER_TO_TYPE = {
+    LAYER.PORT: "optical",
+    LAYER.PORTE: "dc",
+    LAYER.TE: "vertical_te",
+    LAYER.TM: "vertical_tm",
+}
 
-# PORT_LAYER_TO_TYPE = {
-#     LAYER.WG: "optical",
-#     LAYER.WGN: "optical",
-#     LAYER.SLAB150: "optical",
-#     LAYER.M1: "dc",
-#     LAYER.M2: "dc",
-#     LAYER.M3: "dc",
-#     LAYER.TE: "vertical_te",
-#     LAYER.TM: "vertical_tm",
-# }
+PORT_LAYER_TO_TYPE = {
+    LAYER.WG: "optical",
+    LAYER.WGN: "optical",
+    LAYER.SLAB150: "optical",
+    LAYER.M1: "dc",
+    LAYER.M2: "dc",
+    LAYER.M3: "dc",
+    LAYER.TE: "vertical_te",
+    LAYER.TM: "vertical_tm",
+}
 
-# PORT_TYPE_TO_MARKER_LAYER = {v: k for k, v in PORT_MARKER_LAYER_TO_TYPE.items()}
-
-
-# class LayerLevel(BaseModel):
-#     """Level for 3D LayerStack.
-
-#     Parameters:
-#         layer: (GDSII Layer number, GDSII datatype).
-#         thickness: layer thickness in um.
-#         thickness_tolerance: layer thickness tolerance in um.
-#         zmin: height position where material starts in um.
-#         material: material name.
-#         sidewall_angle: in degrees with respect to normal.
-#         z_to_bias: parametrizes shrinking/expansion of the design GDS layer
-#             when extruding from zmin (0) to zmin + thickness (1).
-#             Defaults no buffering [[0, 1], [0, 0]].
-#         info: simulation_info and other types of metadata.
-#             mesh_order: lower mesh order (1) will have priority over higher
-#                 mesh order (2) in the regions where materials overlap.
-#             refractive_index: refractive_index
-#                 can be int, complex or function that depends on wavelength (um).
-#             type: grow, etch, implant, or background.
-#             mode: octagon, taper, round.
-#                 https://gdsfactory.github.io/klayout_pyxs/DocGrow.html
-#             into: etch into another layer.
-#                 https://gdsfactory.github.io/klayout_pyxs/DocGrow.html
-#             doping_concentration: for implants.
-#             resistivity: for metals.
-#             bias: in um for the etch.
-#     """
-
-#     layer: Optional[Tuple[int, int]]
-#     thickness: float
-#     thickness_tolerance: Optional[float] = None
-#     zmin: float
-#     material: Optional[str] = None
-#     sidewall_angle: float = 0
-#     z_to_bias: Optional[Tuple[List[float], List[float]]] = None
-#     info: Dict[str, Any] = {}
+PORT_TYPE_TO_MARKER_LAYER = {v: k for k, v in PORT_MARKER_LAYER_TO_TYPE.items()}
 
 
-# class LayerStack(BaseModel):
-#     """For simulation and 3D rendering.
+class LayerLevel(BaseModel):
+    """Level for 3D LayerStack.
 
-#     Parameters:
-#         layers: dict of layer_levels.
-#     """
+    Parameters:
+        layer: (GDSII Layer number, GDSII datatype).
+        thickness: layer thickness in um.
+        thickness_tolerance: layer thickness tolerance in um.
+        zmin: height position where material starts in um.
+        material: material name.
+        sidewall_angle: in degrees with respect to normal.
+        z_to_bias: parametrizes shrinking/expansion of the design GDS layer
+            when extruding from zmin (0) to zmin + thickness (1).
+            Defaults no buffering [[0, 1], [0, 0]].
+        info: simulation_info and other types of metadata.
+            mesh_order: lower mesh order (1) will have priority over higher
+                mesh order (2) in the regions where materials overlap.
+            refractive_index: refractive_index
+                can be int, complex or function that depends on wavelength (um).
+            type: grow, etch, implant, or background.
+            mode: octagon, taper, round.
+                https://gdsfactory.github.io/klayout_pyxs/DocGrow.html
+            into: etch into another layer.
+                https://gdsfactory.github.io/klayout_pyxs/DocGrow.html
+            doping_concentration: for implants.
+            resistivity: for metals.
+            bias: in um for the etch.
+    """
 
-#     layers: Dict[str, LayerLevel]
+    layer: Optional[Tuple[int, int]]
+    thickness: float
+    thickness_tolerance: Optional[float] = None
+    zmin: float
+    material: Optional[str] = None
+    sidewall_angle: float = 0
+    z_to_bias: Optional[Tuple[List[float], List[float]]] = None
+    info: Dict[str, Any] = {}
 
-#     def get_layer_to_thickness(self) -> Dict[Tuple[int, int], float]:
-#         """Returns layer tuple to thickness (um)."""
-#         return {
-#             level.layer: level.thickness
-#             for level in self.layers.values()
-#             if level.thickness
-#         }
 
-#     def get_layer_to_zmin(self) -> Dict[Tuple[int, int], float]:
-#         """Returns layer tuple to z min position (um)."""
-#         return {
-#             level.layer: level.zmin for level in self.layers.values() if level.thickness
-#         }
+class LayerStack(BaseModel):
+    """For simulation and 3D rendering.
 
-#     def get_layer_to_material(self) -> Dict[Tuple[int, int], str]:
-#         """Returns layer tuple to material name."""
-#         return {
-#             level.layer: level.material
-#             for level in self.layers.values()
-#             if level.thickness
-#         }
+    Parameters:
+        layers: dict of layer_levels.
+    """
 
-#     def get_layer_to_sidewall_angle(self) -> Dict[Tuple[int, int], str]:
-#         """Returns layer tuple to material name."""
-#         return {
-#             level.layer: level.sidewall_angle
-#             for level in self.layers.values()
-#             if level.thickness
-#         }
+    layers: Dict[str, LayerLevel]
 
-#     def get_layer_to_info(self) -> Dict[Tuple[int, int], Dict]:
-#         """Returns layer tuple to info dict."""
-#         return {level.layer: level.info for level in self.layers.values()}
+    def get_layer_to_thickness(self) -> Dict[Tuple[int, int], float]:
+        """Returns layer tuple to thickness (um)."""
+        return {
+            level.layer: level.thickness
+            for level in self.layers.values()
+            if level.thickness
+        }
 
-#     def to_dict(self) -> Dict[str, Dict[str, Any]]:
-#         return {level_name: dict(level) for level_name, level in self.layers.items()}
+    def get_layer_to_zmin(self) -> Dict[Tuple[int, int], float]:
+        """Returns layer tuple to z min position (um)."""
+        return {
+            level.layer: level.zmin for level in self.layers.values() if level.thickness
+        }
 
-#     def get_klayout_3d_script(self, klayout28: bool = True) -> str:
-#         """Prints script for 2.5 view KLayout information.
+    def get_layer_to_material(self) -> Dict[Tuple[int, int], str]:
+        """Returns layer tuple to material name."""
+        return {
+            level.layer: level.material
+            for level in self.layers.values()
+            if level.thickness
+        }
 
-#         You can add this information in your tech.lyt take a look at
-#         gdsfactory/klayout/tech/tech.lyt
-#         """
-#         for level in self.layers.values():
-#             layer = level.layer
-#             if layer:
-#                 if klayout28:
-#                     print(
-#                         f"z(input({layer[0]}, {layer[1]}), zstart: {level.zmin}, height: {level.zmin+level.thickness}, name: '{level.material} {layer[0]}/{layer[1]}')"
-#                     )
-#                 else:
-#                     print(
-#                         f"{level.layer[0]}/{level.layer[1]}: {level.zmin} {level.zmin+level.thickness}"
-#                     )
+    def get_layer_to_sidewall_angle(self) -> Dict[Tuple[int, int], str]:
+        """Returns layer tuple to material name."""
+        return {
+            level.layer: level.sidewall_angle
+            for level in self.layers.values()
+            if level.thickness
+        }
+
+    def get_layer_to_info(self) -> Dict[Tuple[int, int], Dict]:
+        """Returns layer tuple to info dict."""
+        return {level.layer: level.info for level in self.layers.values()}
+
+    def to_dict(self) -> Dict[str, Dict[str, Any]]:
+        return {level_name: dict(level) for level_name, level in self.layers.items()}
+
+    def get_klayout_3d_script(self, klayout28: bool = True) -> str:
+        """Prints script for 2.5 view KLayout information.
+
+        You can add this information in your tech.lyt take a look at
+        gdsfactory/klayout/tech/tech.lyt
+        """
+        for level in self.layers.values():
+            layer = level.layer
+            if layer:
+                if klayout28:
+                    print(
+                        f"z(input({layer[0]}, {layer[1]}), zstart: {level.zmin}, height: {level.zmin+level.thickness}, name: '{level.material} {layer[0]}/{layer[1]}')"
+                    )
+                else:
+                    print(
+                        f"{level.layer[0]}/{level.layer[1]}: {level.zmin} {level.zmin+level.thickness}"
+                    )
 
 
 # def get_layer_stack_generic(
@@ -512,29 +550,38 @@ from kfactory import KLib, kdb, library
 # SIMULATION_SETTINGS_LUMERICAL_FDTD = SimulationSettingsLumericalFdtd()
 
 
-# def assert_callable(function):
-#     if not callable(function):
-#         raise ValueError(
-#             f"Error: function = {function} with type {type(function)} is not callable"
-#         )
+def assert_callable(function):
+    if not callable(function):
+        raise ValueError(
+            f"Error: function = {function} with type {type(function)} is not callable"
+        )
 
 
-# if __name__ == "__main__":
-#     # import gdsfactory as gf
-#     # from gdsfactory.serialization import clean_value_json
+if __name__ == "__main__":
+    # import gdsfactory as gf
+    # from gdsfactory.serialization import clean_value_json
 
-#     # d = clean_value_json(SIMULATION_SETTINGS_LUMERICAL_FDTD)
+    # d = clean_value_json(SIMULATION_SETTINGS_LUMERICAL_FDTD)
 
-#     # def mmi1x2_longer(length_mmi: float = 25.0, **kwargs):
-#     #     return gf.components.mmi1x2(length_mmi=length_mmi, **kwargs)
+    # def mmi1x2_longer(length_mmi: float = 25.0, **kwargs):
+    #     return gf.components.mmi1x2(length_mmi=length_mmi, **kwargs)
 
-#     # def mzi_longer(**kwargs):
-#     #     return gf.components.mzi(splitter=mmi1x2_longer, **kwargs)
+    # def mzi_longer(**kwargs):
+    #     return gf.components.mzi(splitter=mmi1x2_longer, **kwargs)
 
-#     ls = LAYER_STACK
-#     ls.get_klayout_3d_script()
-#     # print(ls.get_layer_to_material())
-#     # print(ls.get_layer_to_thickness())
+    # ls = LAYER_STACK
+    # ls.get_klayout_3d_script()
+    # print(ls.get_layer_to_material())
+    # print(ls.get_layer_to_thickness())
 
-#     # s = Section(width=1, layer=(1, 0))
-#     # print(s)
+    # s = Section(width=1, layer=(1, 0))
+    # print(s)
+    print(
+        LAYER.WG,
+        int(LAYER.WG),
+        LAYER.WG.name,
+        LAYER.WG[0],
+        LAYER.WG[1],
+        list(LAYER.WG),
+        KCell().shapes(LAYER.WG),
+    )
