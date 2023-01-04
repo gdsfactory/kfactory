@@ -1513,18 +1513,17 @@ class Instance:
             raise ValueError("other_instance must be of type Instance or Port")
         p = self.cell.ports[portname]
         if p.width != op.width and not allow_width_mismatch:
-            if p.int_based() != op.int_based():
-                w1 = p.width * self.cell.library.dbu if p.int_based() else p.width
-                w2 = op.width * self.cell.library.dbu if op.int_based() else op.width
-                if w1 != w2:
+            if p.int_based() == op.int_based():
+                raise PortWidthMismatch(
+                    self,
+                    other,
+                    p,
+                    op,
+                )
+            w1 = p.width * self.cell.library.dbu if p.int_based() else p.width
+            w2 = op.width * self.cell.library.dbu if op.int_based() else op.width
+            if w1 != w2:
 
-                    raise PortWidthMismatch(
-                        self,
-                        other,
-                        p,
-                        op,
-                    )
-            else:
                 raise PortWidthMismatch(
                     self,
                     other,
@@ -1715,17 +1714,16 @@ class InstancePorts:
     def __getitem__(self, key: str) -> Port | DPort | DCplxPort:
         p = self.cell_ports[key]
         if not (p.complex() or self.instance.instance.is_complex()):
-            if p.int_based():
-                instance_port = p.copy(trans=self.instance.trans)
-            else:
-                instance_port = p.copy(trans=self.instance.instance.dtrans)
+            return (
+                p.copy(trans=self.instance.trans)
+                if p.int_based()
+                else p.copy(trans=self.instance.instance.dtrans)
+            )
         else:
-            instance_port = p.copy_cplx(
+            return p.copy_cplx(
                 trans=self.instance.instance.dcplx_trans,
                 dbu=self.instance.cell.library.dbu,
             )
-
-        return instance_port
 
     def __repr__(self) -> str:
         return repr({v: self.__getitem__(v) for v in self.cell_ports.get_all().keys()})
@@ -1829,10 +1827,7 @@ def autocell(
 
         return wrapper_autocell
 
-    if _func is None:
-        return decorator_autocell
-    else:
-        return decorator_autocell(_func)
+    return decorator_autocell if _func is None else decorator_autocell(_func)
 
 
 def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
