@@ -74,6 +74,166 @@ class Port:
     @classmethod
     def from_yaml(cls, constructor, node): ...  # type: ignore[no-untyped-def]
 
+class DPort:
+    name: str
+    width: float
+    trans: kdb.Trans
+    layer: int
+    port_type: str
+    yaml_tag: str
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str,
+        trans: kdb.DTrans,
+        width: float,
+        layer: int,
+        port_type: str = ...,
+    ) -> None: ...
+    @overload
+    def __init__(self, *, name: Optional[str] = ..., port: DPort) -> None: ...
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str,
+        width: float,
+        position: tuple[float, float],
+        angle: int,
+        layer: int,
+        port_type: str = ...,
+        mirror_x: bool = ...,
+    ) -> None: ...
+    def hash(self) -> bytes: ...
+    def copy(self, trans: kdb.DTrans = ...) -> DPort: ...
+    @property
+    def position(self) -> tuple[float, float]: ...
+    @property
+    def angle(self) -> int: ...
+    @property
+    def mirror(self) -> bool: ...
+    @property
+    def x(self) -> float: ...
+    @property
+    def y(self) -> float: ...
+    def move(
+        self,
+        origin: tuple[float, float],
+        destination: Optional[tuple[float, float]] = ...,
+    ) -> None: ...
+    def rotate(self, angle: int) -> None: ...
+    @classmethod
+    def to_yaml(cls, representer, node): ...  # type: ignore[no-untyped-def]
+    @classmethod
+    def from_yaml(cls, constructor, node): ...  # type: ignore[no-untyped-def]
+
+class ICplxPort:
+    name: str
+    width: int
+    trans: kdb.ICplxTrans
+    layer: int
+    port_type: str
+    yaml_tag: str
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str,
+        trans: kdb.ICplxTrans,
+        width: int,
+        layer: int,
+        port_type: str = ...,
+    ) -> None: ...
+    @overload
+    def __init__(self, *, name: Optional[str] = ..., port: ICplxPort) -> None: ...
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str,
+        width: int,
+        position: tuple[int, int],
+        angle: float,
+        layer: int,
+        port_type: str = ...,
+        mirror_x: bool = ...,
+    ) -> None: ...
+    def hash(self) -> bytes: ...
+    def copy(self, trans: kdb.ICplxTrans = ...) -> ICplxPort: ...
+    @property
+    def position(self) -> tuple[int, int]: ...
+    @property
+    def angle(self) -> float: ...
+    @property
+    def mirror(self) -> bool: ...
+    @property
+    def x(self) -> int: ...
+    @property
+    def y(self) -> int: ...
+    def move(
+        self, origin: tuple[int, int], destination: Optional[tuple[int, int]] = ...
+    ) -> None: ...
+    def rotate(self, angle: float) -> None: ...
+    @classmethod
+    def to_yaml(cls, representer, node): ...  # type: ignore[no-untyped-def]
+    @classmethod
+    def from_yaml(cls, constructor, node): ...  # type: ignore[no-untyped-def]
+
+class DCplxPort:
+    name: str
+    width: float
+    trans: kdb.DCplxTrans
+    layer: int
+    port_type: str
+    yaml_tag: str
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str,
+        trans: kdb.DCplxTrans,
+        width: float,
+        layer: int,
+        port_type: str = ...,
+    ) -> None: ...
+    @overload
+    def __init__(self, *, name: Optional[str] = ..., port: DCplxPort) -> None: ...
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str,
+        width: float,
+        position: tuple[float, float],
+        angle: float,
+        layer: int,
+        port_type: str = ...,
+        mirror_x: bool = ...,
+    ) -> None: ...
+    def hash(self) -> bytes: ...
+    def copy(self, trans: kdb.DCplxTrans = ...) -> DCplxPort: ...
+    @property
+    def position(self) -> tuple[float, float]: ...
+    @property
+    def angle(self) -> float: ...
+    @property
+    def mirror(self) -> bool: ...
+    @property
+    def x(self) -> float: ...
+    @property
+    def y(self) -> float: ...
+    def move(
+        self,
+        origin: tuple[float, float],
+        destination: Optional[tuple[float, float]] = ...,
+    ) -> None: ...
+    def rotate(self, angle: float) -> None: ...
+    @classmethod
+    def to_yaml(cls, representer, node): ...  # type: ignore[no-untyped-def]
+    @classmethod
+    def from_yaml(cls, constructor, node): ...  # type: ignore[no-untyped-def]
+
 class KCell:
     yaml_tag: str
     library: Incomplete
@@ -115,7 +275,7 @@ class KCell:
         port_type: str = ...,
         mirror_x: bool = ...,
     ) -> None: ...
-    def add_port(self, port: Port, name: Optional[str] = ...) -> None: ...
+    def add_port(self, port: PortLike[TT, FI], name: Optional[str] = ...) -> None: ...
     def create_inst(self, cell: KCell, trans: kdb.Trans = ...) -> Instance: ...
     def layer(self, *args: Any, **kwargs: Any) -> int: ...
     def __lshift__(self, cell: KCell) -> Instance: ...
@@ -359,7 +519,7 @@ class Ports:
     def copy(self) -> Ports: ...
     def contains(self, port: Port) -> bool: ...
     def each(self) -> Iterator["Port"]: ...
-    def add_port(self, port: Port, name: Optional[str] = ...) -> None: ...
+    def add_port(self, port: PortLike[TT, FI], name: Optional[str] = ...) -> None: ...
     @overload
     def create_port(
         self,

@@ -297,6 +297,9 @@ class PortLike(Protocol[TT, FI]):
                 trans=trans * self.dcplx_trans(dbu),
             )
 
+    def copy(self) -> "PortLike[TT, FI]":
+        ...
+
 
 class IPortLike(PortLike[TI, int]):
     """Protocol for integer based ports"""
@@ -1080,7 +1083,7 @@ class KCell:
         """Create a new port. Equivalent to :py:attr:`~add_port(Port(...))`"""
         self.ports.create_port(**kwargs)
 
-    def add_port(self, port: Port, name: Optional[str] = None) -> None:
+    def add_port(self, port: PortLike[TT, FI], name: Optional[str] = None) -> None:
         """Add an existing port. E.g. from an instance to propagate the port
 
         Args:
@@ -1586,7 +1589,7 @@ class Ports:
     def each(self) -> Iterator[Port | DCplxPort]:
         yield from self._ports
 
-    def add_port(self, port: Port | DCplxPort, name: Optional[str] = None) -> None:
+    def add_port(self, port: PortLike[TT, FI], name: Optional[str] = None) -> None:
         """Add a port object
 
         Args:
