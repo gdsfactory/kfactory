@@ -1,0 +1,29 @@
+﻿kfactory.utils
+==============
+
+.. automodule:: kfactory.utils
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      show
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

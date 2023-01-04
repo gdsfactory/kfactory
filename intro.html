@@ -1,0 +1,497 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Getting Started &#8212; kfactory  documentation</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=5115cc725059bd94278eecd172e13a965bf8f5a9" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=9c920249402e914e316237a7dbc6769907cce411"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="klive" href="klive.html" />
+    <link rel="prev" title="KFactory 0.0.4" href="README.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="index.html">
+      
+      
+      
+      <h1 class="site-logo" id="site-title">kfactory  documentation</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Contents:
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="README.html">
+   KFactory 0.0.4
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Getting Started
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="klive.html">
+   klive
+  </a>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="api.html">
+   API
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/kfactory.kcell.html">
+     kfactory.kcell
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/kfactory.placer.html">
+     kfactory.placer
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/kfactory.kdb.html">
+     kfactory.kdb
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/kfactory.utils.html">
+     kfactory.utils
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="CHANGELOG.html">
+   CHANGELOG
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
+            </div>
+            
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
+
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
+        
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-repository-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Source repositories">
+      <i class="fab fa-github"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="https://github.com/gdsfactory/kfactory"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Source repository"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="headerbtn__text-container">repository</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/gdsfactory/kfactory/issues/new?title=Issue%20on%20page%20%2Fintro.html&body=Your%20issue%20content%20here."
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Open an issue"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="headerbtn__text-container">open issue</span>
+</a>
+
+      </li>
+      
+      <li>
+        <a href="https://github.com/gdsfactory/kfactory/edit/master/docs/intro.rst"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Edit this page"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-pencil-alt"></i>
+  </span>
+<span class="headerbtn__text-container">suggest edit</span>
+</a>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="_sources/intro.rst.txt"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.rst</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+
+    </div>
+</div>
+
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+</div>
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>Getting Started</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                    </div>
+                </div>
+            </div>
+            <main id="main-content" role="main">
+                
+              <div>
+                
+  <section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">#</a></h1>
+<p>As an example we will build a small waveduide and instantiate a circular bend waveguide and connect them.</p>
+<p>First let’s create some layers. We will use the standard library for this.
+Create a <code class="file docutils literal notranslate"><span class="pre">layers.py</span></code>. The full one can be downloaded here: <a class="reference download internal" download="" href="_downloads/7e81115cf79c1edeec1c6ba1082c2d3d/layers.py"><code class="xref download docutils literal notranslate"><span class="pre">layers.py</span></code></a></p>
+<p>Additionally we will create a <a class="reference internal" href="_autosummary/kfactory.utils.html#kfactory.utils.Enclosure" title="kfactory.utils.enclosure.Enclosure"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enclosure</span></code></a>. Enclosures allow to automatically generate claddings with minkosky sums or use a function to apply claddings to a cell or region. This enclosure will add the cladding to the bend we will use later.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">kfactory</span> <span class="k">as</span> <span class="nn">kf</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="n">LAYERS</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos"> 4</span>    <span class="n">name</span><span class="p">:</span> <span class="n">kf</span><span class="o">.</span><span class="n">library</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">LayerInfo</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">datatype</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>  <span class="c1"># type: ignore[call-overload]</span>
+<span class="linenos"> 5</span>    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">datatype</span> <span class="ow">in</span> <span class="p">[</span>
+<span class="linenos"> 6</span>        <span class="p">[</span><span class="s2">&quot;Silicon&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+<span class="linenos"> 7</span>        <span class="p">[</span><span class="s2">&quot;Silicon.Exclude&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+<span class="linenos"> 8</span>    <span class="p">]</span>
+<span class="linenos"> 9</span><span class="p">}</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span><span class="n">si_enc</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">Enclosure</span><span class="p">([(</span><span class="n">LAYERS</span><span class="p">[</span><span class="s2">&quot;Silicon.Exclude&quot;</span><span class="p">],</span> <span class="mi">2000</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>This will use the standard Library of KFactory.
+A Library is the equivalent of a Layout object in KLayout and keeps track of the KCells.
+It mirrors all the other functionalities of a Layout object.</p>
+<p>Ports are created with the <a class="reference internal" href="_autosummary/kfactory.kcell.html#kfactory.kcell.KCell.create_port" title="kfactory.kcell.KCell.create_port"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_port()</span></code></a> function. You can either specify a transformation as here or specify them in a similar manner to gdsfactory. See the API doc for more information.</p>
+<p>Now, let’s create a KCell for a waveguide. We will use the <a class="reference internal" href="_autosummary/kfactory.kcell.html#kfactory.kcell.autocell" title="kfactory.kcell.autocell"><code class="xref py py-func docutils literal notranslate"><span class="pre">autocell()</span></code></a>.
+This will make sure that if we call the function multiple times that we don’t create multiple cells in the layout.
+Addiontally, compared to <a class="reference internal" href="_autosummary/kfactory.kcell.html#kfactory.kcell.cell" title="kfactory.kcell.cell"><code class="xref py py-func docutils literal notranslate"><span class="pre">cell()</span></code></a> it will also automatically name the cells using
+the function name and the arguments and keyword arguments of the function.
+In the end we will let KFactory take care of the naming of the ports we want to add.
+This will allow them depending on the orientation of the port. This will sort the ports by orientation
+(0,1,2,3 -&gt; E,N,W,S) and by ascending x (N/S orientation) respectively y (E/W orientation) coordinates.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">layers</span> <span class="kn">import</span> <span class="n">LAYERS</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">kfactory</span> <span class="k">as</span> <span class="nn">kf</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="nd">@kf</span><span class="o">.</span><span class="n">autocell</span>
+<span class="linenos"> 7</span><span class="k">def</span> <span class="nf">waveguide</span><span class="p">(</span><span class="n">width</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">width_exclude</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Waveguide: Silicon on 1/0, Silicon exclude on 1/1&quot;&quot;&quot;</span>
+<span class="linenos"> 9</span>    <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
+<span class="linenos">10</span>    <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">LAYERS</span><span class="p">[</span><span class="s2">&quot;Silicon&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">))</span>
+<span class="linenos">11</span>    <span class="n">c</span><span class="o">.</span><span class="n">shapes</span><span class="p">(</span><span class="n">LAYERS</span><span class="p">[</span><span class="s2">&quot;Silicon.Exclude&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+<span class="linenos">12</span>        <span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">width_exclude</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">width_exclude</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+<span class="linenos">13</span>    <span class="p">)</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span>    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
+<span class="linenos">16</span>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span>
+<span class="linenos">17</span>        <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="linenos">18</span>        <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+<span class="linenos">19</span>        <span class="n">layer</span><span class="o">=</span><span class="n">LAYERS</span><span class="p">[</span><span class="s2">&quot;Silicon&quot;</span><span class="p">],</span>
+<span class="linenos">20</span>    <span class="p">)</span>
+<span class="linenos">21</span>    <span class="n">c</span><span class="o">.</span><span class="n">create_port</span><span class="p">(</span>
+<span class="linenos">22</span>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;2&quot;</span><span class="p">,</span>
+<span class="linenos">23</span>        <span class="n">trans</span><span class="o">=</span><span class="n">kf</span><span class="o">.</span><span class="n">kdb</span><span class="o">.</span><span class="n">Trans</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="linenos">24</span>        <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span>
+<span class="linenos">25</span>        <span class="n">layer</span><span class="o">=</span><span class="n">LAYERS</span><span class="p">[</span><span class="s2">&quot;Silicon&quot;</span><span class="p">],</span>
+<span class="linenos">26</span>    <span class="p">)</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span>    <span class="n">c</span><span class="o">.</span><span class="n">autorename_ports</span><span class="p">()</span>
+<span class="linenos">29</span>
+<span class="linenos">30</span>    <span class="k">return</span> <span class="n">c</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span>
+<span class="linenos">33</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">34</span>    <span class="n">kf</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">waveguide</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span> <span class="mi">50000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">kf.show</span></code> will create a GDS in the temp folder and then send the GDS by klive to KLayout (if klive is installed).
+By running this with <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">waveguide.py</span></code>, this should show us a waveguide like this:</p>
+<img alt="_images/waveguide.png" src="_images/waveguide.png" />
+<p>Afterwards let’s create the composite cell <a class="reference download internal" download="" href="_downloads/ad9dbf2cd83008ca4253585dc4bb9b5d/complex_cell.py"><code class="xref download docutils literal notranslate"><span class="pre">complex_cell.py</span></code></a>. This one instantiates a waveguide and a circular bend and then connects them.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">layers</span> <span class="kn">import</span> <span class="n">LAYERS</span><span class="p">,</span> <span class="n">si_enc</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">waveguide</span> <span class="kn">import</span> <span class="n">waveguide</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">kfactory</span> <span class="k">as</span> <span class="nn">kf</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="nd">@kf</span><span class="o">.</span><span class="n">autocell</span>
+<span class="linenos"> 8</span><span class="k">def</span> <span class="nf">composite_cell</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">:</span>
+<span class="linenos"> 9</span>    <span class="n">c</span> <span class="o">=</span> <span class="n">kf</span><span class="o">.</span><span class="n">KCell</span><span class="p">()</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span>    <span class="n">bend</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">create_inst</span><span class="p">(</span>
+<span class="linenos">12</span>        <span class="n">kf</span><span class="o">.</span><span class="n">pcells</span><span class="o">.</span><span class="n">circular</span><span class="o">.</span><span class="n">bend_circular</span><span class="p">(</span>
+<span class="linenos">13</span>            <span class="mi">1000</span><span class="p">,</span> <span class="mi">20000</span><span class="p">,</span> <span class="n">LAYERS</span><span class="p">[</span><span class="s2">&quot;Silicon&quot;</span><span class="p">],</span> <span class="n">enclosure</span><span class="o">=</span><span class="n">si_enc</span>
+<span class="linenos">14</span>        <span class="p">)</span>
+<span class="linenos">15</span>    <span class="p">)</span>
+<span class="linenos">16</span>    <span class="n">wg</span> <span class="o">=</span> <span class="n">c</span> <span class="o">&lt;&lt;</span> <span class="n">waveguide</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="mi">3000</span><span class="p">)</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span>    <span class="n">wg</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;W0&quot;</span><span class="p">,</span> <span class="n">bend</span><span class="p">,</span> <span class="s2">&quot;N0&quot;</span><span class="p">)</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span>    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">bend</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;W0&quot;</span><span class="p">])</span>
+<span class="linenos">21</span>    <span class="n">c</span><span class="o">.</span><span class="n">add_port</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">wg</span><span class="o">.</span><span class="n">ports</span><span class="p">[</span><span class="s2">&quot;E0&quot;</span><span class="p">])</span>
+<span class="linenos">22</span>
+<span class="linenos">23</span>    <span class="n">c</span><span class="o">.</span><span class="n">autorename_ports</span><span class="p">()</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>    <span class="n">c</span><span class="o">.</span><span class="n">draw_ports</span><span class="p">()</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>    <span class="k">return</span> <span class="n">c</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>
+<span class="linenos">30</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">31</span>    <span class="n">kf</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">composite_cell</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>With <a class="reference internal" href="_autosummary/kfactory.kcell.html#kfactory.kcell.KCell.add_port" title="kfactory.kcell.KCell.add_port"><code class="xref py py-func docutils literal notranslate"><span class="pre">add_port()</span></code></a> an existing port of an instance can be added to the parent cell. <a class="reference internal" href="_autosummary/kfactory.kcell.html#kfactory.kcell.Instance.connect" title="kfactory.kcell.Instance.connect"><code class="xref py py-func docutils literal notranslate"><span class="pre">connect()</span></code></a> allows an instance to be transformed so that one of its ports is connected to another port.</p>
+<p>You will get a cell like this:</p>
+<img alt="_images/complex.png" src="_images/complex.png" />
+</section>
+
+
+              </div>
+              
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="README.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">KFactory 0.0.4</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="klive.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">klive</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            </footer>
+        </div>
+    </div>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+      &copy; Copyright 2022.<br/>
+</p>
+        </footer>
+    </div>
+    
+</div>
+
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
+
+  </body>
+</html>

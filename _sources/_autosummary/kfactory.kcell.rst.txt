@@ -1,0 +1,74 @@
+﻿kfactory.kcell
+==============
+
+.. automodule:: kfactory.kcell
+
+   
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      library
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      autocell
+      cell
+      clean_name
+      clean_value
+      default_save
+      dict2name
+      dict_to_frozen_set
+      frozenset_to_dict
+      get_component_name
+      join_first_letters
+      update_default_trans
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      CPortLike
+      DCplxPort
+      DPort
+      DPortLike
+      ICplxPort
+      IPortLike
+      Instance
+      InstancePorts
+      KCell
+      KCellCache
+      KLib
+      Port
+      PortLike
+      Ports
+      SPortLike
+   
+   
+
+   
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+   
+      FrozenError
+      PortLayerMismatch
+      PortTypeMismatch
+      PortWidthMismatch
+   
+   
+
+
+
