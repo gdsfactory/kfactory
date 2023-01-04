@@ -168,7 +168,7 @@ def test_spiral():
 
     p = kf.Port(name="start", trans=kf.kdb.Trans.R0, width=1000, layer=LAYER.WG)
 
-    for i in range(10):
+    for _ in range(10):
         r = r1 + r2
         r2 = r1
         r1 = r
@@ -187,7 +187,7 @@ def test_dspiral():
 
     p = kf.DPort(name="start", trans=kf.kdb.DTrans.R0, width=1, layer=LAYER.WG)
 
-    for i in range(10):
+    for _ in range(10):
         r = r1 + r2
         r2 = r1
         r1 = r
