@@ -86,3 +86,11 @@ testpaths = ["src", "tests"]
 addopts = '--tb=short'
 python_files = ["src/*.py", "tests/*.py"]
 norecursedirs = ["extra/*.py"]
+
+# [tool.pytest.ini_options]
+# minversion = "6.0"
+# addopts = "-ra -q"
+# testpaths = [
+#     "tests",
+#     "integration",
+# ]

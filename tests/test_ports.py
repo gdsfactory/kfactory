@@ -1,25 +1,27 @@
 import kfactory as kf
 import pytest
-from enum import IntEnum
+from conftest import LAYER
+
+# from enum import IntEnum
 
 
-def _l(layer: int, datatype: int):
-    return kf.library.layer(layer, datatype)
+# def _l(layer: int, datatype: int):
+#     return kf.library.layer(layer, datatype)
 
 
-class LAYER(IntEnum):
-    SI = _l(1, 0)
-    M1 = _l(2, 0)
+# class LAYER(IntEnum):
+#     SI = _l(1, 0)
+#     M1 = _l(2, 0)
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
 
 
 @kf.autocell
 def waveguide(width: int, length: int, layer: int) -> kf.KCell:
     c = kf.KCell()
 
-    c.shapes(LAYER.SI).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
+    c.shapes(LAYER.WG).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
 
     c.create_port(
         name="o1", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer=layer
@@ -32,7 +34,7 @@ def waveguide(width: int, length: int, layer: int) -> kf.KCell:
 
 @pytest.fixture()
 def wg():
-    return waveguide(1000, 20000, LAYER.SI)
+    return waveguide(1000, 20000, LAYER.WG)
 
 
 @pytest.fixture()
@@ -45,15 +47,15 @@ def wg_floating_off_grid():
         width=10 + dbu / 2,
         name="o1",
         trans=kf.kdb.DTrans(2, False, dbu / 2, 0),
-        layer=LAYER.SI,
+        layer=LAYER.WG,
     )
     p2 = kf.kcell.DPort(
         width=10 + dbu / 2,
         name="o2",
         trans=kf.kdb.DTrans(0, False, 20 + dbu, 0),
-        layer=LAYER.SI,
+        layer=LAYER.WG,
     )
-    c.shapes(LAYER.SI).insert(kf.kdb.DBox(p1.x, -p1.width / 2, p2.x, p1.width / 2))
+    c.shapes(LAYER.WG).insert(kf.kdb.DBox(p1.x, -p1.width / 2, p2.x, p1.width / 2))
     c.add_port(p1)
     c.add_port(p2)
 
@@ -61,23 +63,23 @@ def wg_floating_off_grid():
 
 
 def test_waveguide():
-    waveguide(1000, 20000, LAYER.SI)
+    waveguide(1000, 20000, LAYER.WG)
 
 
 def test_settings():
-    c = waveguide(1000, 20000, LAYER.SI)
+    c = waveguide(1000, 20000, LAYER.WG)
 
     assert c.settings["length"] == 20000
     assert c.settings["width"] == 1000
-    assert c.name == "waveguide_W1000_L20000_LSI"
+    assert c.name == "waveguide_W1000_L20000_LWG"
 
 
 def test_connect_cplx_port():
     c = kf.KCell()
-    wg1 = c << waveguide(1000, 20000, LAYER.SI)
+    wg1 = c << waveguide(1000, 20000, LAYER.WG)
     port = kf.kcell.DCplxPort(
         width=1000,
-        layer=LAYER.SI,
+        layer=LAYER.WG,
         name="cplxp1",
         trans=kf.kdb.DCplxTrans(1, 30, False, 5, 10),
     )
@@ -86,8 +88,8 @@ def test_connect_cplx_port():
 
 def test_connect_cplx_inst():
     c = kf.KCell()
-    wg1 = c << waveguide(1000, 20000, LAYER.SI)
-    wg2 = c << waveguide(1000, 20000, LAYER.SI)
+    wg1 = c << waveguide(1000, 20000, LAYER.WG)
+    wg2 = c << waveguide(1000, 20000, LAYER.WG)
     wg1.transform(kf.kdb.DCplxTrans(1, 30, False, 5, 10))
     wg2.connect_cplx("o1", wg1, "o2")
 

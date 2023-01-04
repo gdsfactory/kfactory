@@ -142,29 +142,35 @@ class Path:
 
     """
 
-    def __init__(self, path: Optional[kdb.Point | kdb.DPoint] = None) -> None:
+    def __init__(self, path: Optional[Union[list[kdb.DPoint], Path]] = None) -> None:
         """Creates an empty path."""
-        self.points = np.array([[0, 0]], dtype=np.float64)
+        self.points: list[kdb.DPoint] = []  # np.array([[0, 0]], dtype=np.float64)
         self.start_angle = 0
         self.end_angle = 0
         self.info: Dict[str, Any] = {}
         if path is not None:
             # If array[N][2]
-            if (
-                (np.asarray(path, dtype=object).ndim == 2)
-                and np.issubdtype(np.array(path).dtype, np.number)
-                and (np.shape(path)[1] == 2)
-            ):
-                self.points = np.array(path, dtype=np.float64)
-                nx1, ny1 = self.points[1] - self.points[0]
-                self.start_angle = np.arctan2(ny1, nx1) / np.pi * 180
-                nx2, ny2 = self.points[-1] - self.points[-2]
-                self.end_angle = np.arctan2(ny2, nx2) / np.pi * 180
-            elif isinstance(path, Path):
-                self.points = np.array(path.points, dtype=np.float64)
-                self.start_angle = path.start_angle
+            # if (
+            #     (np.asarray(path, dtype=object).ndim == 2)
+            #     and np.issubdtype(np.array(path).dtype, np.number)
+            #     and (np.shape(path)[1] == 2)
+            # ):
+            if isinstance(path, Path):
+                self.points = path.points.copy()
+                self.start_angles = path.start_angle
                 self.end_angle = path.end_angle
                 self.info = {}
+            elif isinstance(path, list):
+                self.points = path.copy()
+                v_start = self.points[1] - self.points[0]
+                self.start_angles = np.rad2deg(np.arctan2(v_start.y, v_start.x))
+                v_end = self.points[-1] - self.points[-2]
+                self.end_angle = np.rad2deg(np.arctan2(v_end.y, v_end.x))
+            # elif isinstance(path, Path):
+            #     self.points = #np.array(path.points, dtype=np.float64)
+            #     self.start_angle = path.start_angle
+            #     self.end_angle = path.end_angle
+            #     self.info = {}
             elif np.asarray(path, dtype=object).size > 1:
                 self.append(path)
             else:
@@ -173,318 +179,321 @@ class Path:
                     "an array-like[N][2] list of points, or a list of these"
                 )
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Returns path points."""
         return len(self.points)
 
     @property
-    def bbox(self):
+    def bbox(self) -> kdb.DBox:
         """Returns the bounding box of the Path."""
-        bbox = [
-            (np.min(self.points[:, 0]), np.min(self.points[:, 1])),
-            (np.max(self.points[:, 0]), np.max(self.points[:, 1])),
-        ]
-        return np.array(bbox)
 
-    def append(self, path):
-        """Attach Path to the end of this Path.
+        return kdb.DPolygon(self.points).bbox()
 
-        The input path automatically rotates and translates such that it continues
-        smoothly from the previous segment.
+        # bbox = [
+        #     (np.min(self.points[:, 0]), np.min(self.points[:, 1])),
+        #     (np.max(self.points[:, 0]), np.max(self.points[:, 1])),
+        # ]
+        # return np.array(bbox)
 
-        Args:
-            path : Path, array-like[N][2], or list of Paths
-                The input path that will be appended.
-        """
-        # If appending another Path, load relevant variables
-        if isinstance(path, Path):
-            start_angle = path.start_angle
-            end_angle = path.end_angle
-            points = path.points
-        # If array[N][2]
-        elif (
-            (np.asarray(path, dtype=object).ndim == 2)
-            and np.issubdtype(np.array(path).dtype, np.number)
-            and (np.shape(path)[1] == 2)
-        ):
-            points = np.asfarray(path)
-            nx1, ny1 = points[1] - points[0]
-            start_angle = np.arctan2(ny1, nx1) / np.pi * 180
-            nx2, ny2 = points[-1] - points[-2]
-            end_angle = np.arctan2(ny2, nx2) / np.pi * 180
-        # If list of Paths or arrays
-        elif isinstance(path, (list, tuple)):
-            for p in path:
-                self.append(p)
-            return self
-        else:
-            raise ValueError(
-                "Path.append() the `path` argument must be either "
-                "a Path object, an array-like[N][2] list of points, or a list of these"
-            )
+    # def append(self, path):
+    #     """Attach Path to the end of this Path.
 
-        # Connect beginning of new points with old points
-        points = _rotate_points(points, angle=self.end_angle - start_angle)
-        points += self.points[-1, :] - points[0, :]
+    #     The input path automatically rotates and translates such that it continues
+    #     smoothly from the previous segment.
 
-        # Update end angle
-        self.end_angle = mod(end_angle + self.end_angle - start_angle, 360)
+    #     Args:
+    #         path : Path, array-like[N][2], or list of Paths
+    #             The input path that will be appended.
+    #     """
+    #     # If appending another Path, load relevant variables
+    #     if isinstance(path, Path):
+    #         start_angle = path.start_angle
+    #         end_angle = path.end_angle
+    #         points = path.points
+    #     # If array[N][2]
+    #     elif (
+    #         (np.asarray(path, dtype=object).ndim == 2)
+    #         and np.issubdtype(np.array(path).dtype, np.number)
+    #         and (np.shape(path)[1] == 2)
+    #     ):
+    #         points = np.asfarray(path)
+    #         nx1, ny1 = points[1] - points[0]
+    #         start_angle = np.arctan2(ny1, nx1) / np.pi * 180
+    #         nx2, ny2 = points[-1] - points[-2]
+    #         end_angle = np.arctan2(ny2, nx2) / np.pi * 180
+    #     # If list of Paths or arrays
+    #     elif isinstance(path, (list, tuple)):
+    #         for p in path:
+    #             self.append(p)
+    #         return self
+    #     else:
+    #         raise ValueError(
+    #             "Path.append() the `path` argument must be either "
+    #             "a Path object, an array-like[N][2] list of points, or a list of these"
+    #         )
 
-        # Concatenate old points + new points
-        self.points = np.vstack([self.points, points[1:]])
+    #     # Connect beginning of new points with old points
+    #     points = _rotate_points(points, angle=self.end_angle - start_angle)
+    #     points += self.points[-1, :] - points[0, :]
 
-        return self
+    #     # Update end angle
+    #     self.end_angle = mod(end_angle + self.end_angle - start_angle, 360)
 
-    def offset(self, offset: Union[float, Callable[..., float]] = 0):
-        """Offsets Path so that it follows the Path centerline plus an offset.
+    #     # Concatenate old points + new points
+    #     self.points = np.vstack([self.points, points[1:]])
 
-        The offset can either be a fixed value, or a function
-        of the form my_offset(t) where t goes from 0->1
+    #     return self
 
-        Args:
-            offset: int or float, callable. Magnitude of the offset
-        """
-        if offset == 0:
-            points = self.points
-            start_angle = self.start_angle
-            end_angle = self.end_angle
-        elif callable(offset):
-            # Compute lengths
-            dx = np.diff(self.points[:, 0])
-            dy = np.diff(self.points[:, 1])
-            lengths = np.cumsum(np.sqrt((dx) ** 2 + (dy) ** 2))
-            lengths = np.concatenate([[0], lengths])
-            # Create list of offset points and perform offset
-            points = self._centerpoint_offset_curve(
-                self.points,
-                offset_distance=offset(lengths / lengths[-1]),
-                start_angle=self.start_angle,
-                end_angle=self.end_angle,
-            )
-            # Numerically compute start and end angles
-            tol = 1e-6
-            ds = tol / lengths[-1]
-            ny1 = offset(ds) - offset(0)
-            start_angle = np.arctan2(-ny1, tol) / np.pi * 180 + self.start_angle
-            start_angle = np.round(start_angle, decimals=6)
-            ny2 = offset(1) - offset(1 - ds)
-            end_angle = np.arctan2(-ny2, tol) / np.pi * 180 + self.end_angle
-            end_angle = np.round(end_angle, decimals=6)
-        else:  # Offset is just a number
-            points = self._centerpoint_offset_curve(
-                self.points,
-                offset_distance=offset,
-                start_angle=self.start_angle,
-                end_angle=self.end_angle,
-            )
-            start_angle = self.start_angle
-            end_angle = self.end_angle
+    # def offset(self, offset: Union[float, Callable[..., float]] = 0):
+    #     """Offsets Path so that it follows the Path centerline plus an offset.
 
-        self.points = points
-        self.start_angle = start_angle
-        self.end_angle = end_angle
-        return self
+    #     The offset can either be a fixed value, or a function
+    #     of the form my_offset(t) where t goes from 0->1
 
-    def move(self, origin=(0, 0), destination=None, axis=None):
-        """Moves the Path from the origin point to the destination.
+    #     Args:
+    #         offset: int or float, callable. Magnitude of the offset
+    #     """
+    #     if offset == 0:
+    #         points = self.points
+    #         start_angle = self.start_angle
+    #         end_angle = self.end_angle
+    #     elif callable(offset):
+    #         # Compute lengths
+    #         dx = np.diff(self.points[:, 0])
+    #         dy = np.diff(self.points[:, 1])
+    #         lengths = np.cumsum(np.sqrt((dx) ** 2 + (dy) ** 2))
+    #         lengths = np.concatenate([[0], lengths])
+    #         # Create list of offset points and perform offset
+    #         points = self._centerpoint_offset_curve(
+    #             self.points,
+    #             offset_distance=offset(lengths / lengths[-1]),
+    #             start_angle=self.start_angle,
+    #             end_angle=self.end_angle,
+    #         )
+    #         # Numerically compute start and end angles
+    #         tol = 1e-6
+    #         ds = tol / lengths[-1]
+    #         ny1 = offset(ds) - offset(0)
+    #         start_angle = np.arctan2(-ny1, tol) / np.pi * 180 + self.start_angle
+    #         start_angle = np.round(start_angle, decimals=6)
+    #         ny2 = offset(1) - offset(1 - ds)
+    #         end_angle = np.arctan2(-ny2, tol) / np.pi * 180 + self.end_angle
+    #         end_angle = np.round(end_angle, decimals=6)
+    #     else:  # Offset is just a number
+    #         points = self._centerpoint_offset_curve(
+    #             self.points,
+    #             offset_distance=offset,
+    #             start_angle=self.start_angle,
+    #             end_angle=self.end_angle,
+    #         )
+    #         start_angle = self.start_angle
+    #         end_angle = self.end_angle
 
-        Both origin and destination can be 1x2 array-like or a Port.
+    #     self.points = points
+    #     self.start_angle = start_angle
+    #     self.end_angle = end_angle
+    #     return self
 
-        Args:
-            origin : array-like[2], Port Origin point of the move.
-            destination : array-like[2], Port Destination point of the move.
-            axis : {'x', 'y'} Direction of move.
+    # def move(self, origin=(0, 0), destination=None, axis=None):
+    #     """Moves the Path from the origin point to the destination.
 
-        """
-        dx, dy = _parse_move(origin, destination, axis)
-        self.points += np.array([dx, dy])
+    #     Both origin and destination can be 1x2 array-like or a Port.
 
-        return self
+    #     Args:
+    #         origin : array-like[2], Port Origin point of the move.
+    #         destination : array-like[2], Port Destination point of the move.
+    #         axis : {'x', 'y'} Direction of move.
 
-    def rotate(self, angle: float = 45, center: Optional[Float2] = (0, 0)):
-        """Rotates all Polygons in the Component around the specified center point.
+    #     """
+    #     dx, dy = _parse_move(origin, destination, axis)
+    #     self.points += np.array([dx, dy])
 
-        If no center point specified will rotate around (0,0).
+    #     return self
 
-        Args:
-            angle: Angle to rotate the Component in degrees.
-            center: array-like[2] or None. component of the Component.
-        """
-        if angle == 0:
-            return self
-        self.points = _rotate_points(self.points, angle, center)
-        if self.start_angle is not None:
-            self.start_angle = mod(self.start_angle + angle, 360)
-        if self.end_angle is not None:
-            self.end_angle = mod(self.end_angle + angle, 360)
-        return self
+    # def rotate(self, angle: float = 45, center: Optional[Float2] = (0, 0)):
+    #     """Rotates all Polygons in the Component around the specified center point.
 
-    def mirror(self, p1: Float2 = (0, 1), p2: Float2 = (0, 0)):
-        """Mirrors the Path across the line formed between the two specified points.
+    #     If no center point specified will rotate around (0,0).
 
-        ``points`` may be input as either single points [1,2]
-        or array-like[N][2], and will return in kind.
+    #     Args:
+    #         angle: Angle to rotate the Component in degrees.
+    #         center: array-like[2] or None. component of the Component.
+    #     """
+    #     if angle == 0:
+    #         return self
+    #     self.points = _rotate_points(self.points, angle, center)
+    #     if self.start_angle is not None:
+    #         self.start_angle = mod(self.start_angle + angle, 360)
+    #     if self.end_angle is not None:
+    #         self.end_angle = mod(self.end_angle + angle, 360)
+    #     return self
 
-        Args:
-            p1: First point of the line.
-            p2: Second point of the line.
-        """
-        self.points = _reflect_points(self.points, p1, p2)
-        angle = np.arctan2((p2[1] - p1[1]), (p2[0] - p1[0])) * 180 / pi
-        if self.start_angle is not None:
-            self.start_angle = mod(2 * angle - self.start_angle, 360)
-        if self.end_angle is not None:
-            self.end_angle = mod(2 * angle - self.end_angle, 360)
-        return self
+    # def mirror(self, p1: Float2 = (0, 1), p2: Float2 = (0, 0)):
+    #     """Mirrors the Path across the line formed between the two specified points.
 
-    def _centerpoint_offset_curve(
-        self, points, offset_distance, start_angle, end_angle
-    ):
-        """Creates a offset curve (but does not account for cusps etc)\
-        by computing the centerpoint offset of the supplied x and y points."""
-        new_points = np.array(points, dtype=np.float64)
-        dx = np.diff(points[:, 0])
-        dy = np.diff(points[:, 1])
-        theta = np.arctan2(dy, dx)
-        theta = np.concatenate([theta[:1], theta, theta[-1:]])
-        theta_mid = (np.pi + theta[1:] + theta[:-1]) / 2  # Mean angle between segments
-        dtheta_int = np.pi + theta[:-1] - theta[1:]  # Internal angle between segments
-        offset_distance = offset_distance / np.sin(dtheta_int / 2)
-        new_points[:, 0] -= offset_distance * np.cos(theta_mid)
-        new_points[:, 1] -= offset_distance * np.sin(theta_mid)
-        if start_angle is not None:
-            new_points[0, :] = points[0, :] + (
-                np.sin(start_angle * np.pi / 180) * offset_distance[0],
-                -np.cos(start_angle * np.pi / 180) * offset_distance[0],
-            )
-        if end_angle is not None:
-            new_points[-1, :] = points[-1, :] + (
-                np.sin(end_angle * np.pi / 180) * offset_distance[-1],
-                -np.cos(end_angle * np.pi / 180) * offset_distance[-1],
-            )
-        return new_points
+    #     ``points`` may be input as either single points [1,2]
+    #     or array-like[N][2], and will return in kind.
 
-    def _parametric_offset_curve(self, points, offset_distance, start_angle, end_angle):
-        """Creates a parametric offset (does not account for cusps etc) \
-        by using gradient of the supplied x and y points."""
-        x = points[:, 0]
-        y = points[:, 1]
-        dxdt = np.gradient(x)
-        dydt = np.gradient(y)
-        if start_angle is not None:
-            dxdt[0] = np.cos(start_angle * np.pi / 180)
-            dydt[0] = np.sin(start_angle * np.pi / 180)
-        if end_angle is not None:
-            dxdt[-1] = np.cos(end_angle * np.pi / 180)
-            dydt[-1] = np.sin(end_angle * np.pi / 180)
-        x_offset = x + offset_distance * dydt / np.sqrt(dxdt**2 + dydt**2)
-        y_offset = y - offset_distance * dxdt / np.sqrt(dydt**2 + dxdt**2)
-        return np.array([x_offset, y_offset]).T
+    #     Args:
+    #         p1: First point of the line.
+    #         p2: Second point of the line.
+    #     """
+    #     self.points = _reflect_points(self.points, p1, p2)
+    #     angle = np.arctan2((p2[1] - p1[1]), (p2[0] - p1[0])) * 180 / pi
+    #     if self.start_angle is not None:
+    #         self.start_angle = mod(2 * angle - self.start_angle, 360)
+    #     if self.end_angle is not None:
+    #         self.end_angle = mod(2 * angle - self.end_angle, 360)
+    #     return self
 
-    def length(self) -> float:
-        """Return cumulative length."""
-        x = self.points[:, 0]
-        y = self.points[:, 1]
-        dx = np.diff(x)
-        dy = np.diff(y)
-        return np.sum(np.sqrt((dx) ** 2 + (dy) ** 2))
+    # def _centerpoint_offset_curve(
+    #     self, points, offset_distance, start_angle, end_angle
+    # ):
+    #     """Creates a offset curve (but does not account for cusps etc)\
+    #     by computing the centerpoint offset of the supplied x and y points."""
+    #     new_points = np.array(points, dtype=np.float64)
+    #     dx = np.diff(points[:, 0])
+    #     dy = np.diff(points[:, 1])
+    #     theta = np.arctan2(dy, dx)
+    #     theta = np.concatenate([theta[:1], theta, theta[-1:]])
+    #     theta_mid = (np.pi + theta[1:] + theta[:-1]) / 2  # Mean angle between segments
+    #     dtheta_int = np.pi + theta[:-1] - theta[1:]  # Internal angle between segments
+    #     offset_distance = offset_distance / np.sin(dtheta_int / 2)
+    #     new_points[:, 0] -= offset_distance * np.cos(theta_mid)
+    #     new_points[:, 1] -= offset_distance * np.sin(theta_mid)
+    #     if start_angle is not None:
+    #         new_points[0, :] = points[0, :] + (
+    #             np.sin(start_angle * np.pi / 180) * offset_distance[0],
+    #             -np.cos(start_angle * np.pi / 180) * offset_distance[0],
+    #         )
+    #     if end_angle is not None:
+    #         new_points[-1, :] = points[-1, :] + (
+    #             np.sin(end_angle * np.pi / 180) * offset_distance[-1],
+    #             -np.cos(end_angle * np.pi / 180) * offset_distance[-1],
+    #         )
+    #     return new_points
 
-    def curvature(self):
-        """Calculates Path curvature.
+    # def _parametric_offset_curve(self, points, offset_distance, start_angle, end_angle):
+    #     """Creates a parametric offset (does not account for cusps etc) \
+    #     by using gradient of the supplied x and y points."""
+    #     x = points[:, 0]
+    #     y = points[:, 1]
+    #     dxdt = np.gradient(x)
+    #     dydt = np.gradient(y)
+    #     if start_angle is not None:
+    #         dxdt[0] = np.cos(start_angle * np.pi / 180)
+    #         dydt[0] = np.sin(start_angle * np.pi / 180)
+    #     if end_angle is not None:
+    #         dxdt[-1] = np.cos(end_angle * np.pi / 180)
+    #         dydt[-1] = np.sin(end_angle * np.pi / 180)
+    #     x_offset = x + offset_distance * dydt / np.sqrt(dxdt**2 + dydt**2)
+    #     y_offset = y - offset_distance * dxdt / np.sqrt(dydt**2 + dxdt**2)
+    #     return np.array([x_offset, y_offset]).T
 
-        The curvature is numerically computed so areas where the curvature
-        jumps instantaneously (such as between an arc and a straight segment)
-        will be slightly interpolated, and sudden changes in point density
-        along the curve can cause discontinuities.
+    # def length(self) -> float:
+    #     """Return cumulative length."""
+    #     x = self.points[:, 0]
+    #     y = self.points[:, 1]
+    #     dx = np.diff(x)
+    #     dy = np.diff(y)
+    #     return np.sum(np.sqrt((dx) ** 2 + (dy) ** 2))
 
-        Returns:
-            s : array-like[N]
-                The arc-length of the Path
-            K : array-like[N]
-                The curvature of the Path
-        """
-        x = self.points[:, 0]
-        y = self.points[:, 1]
-        dx = np.diff(x)
-        dy = np.diff(y)
-        ds = np.sqrt((dx) ** 2 + (dy) ** 2)
-        s = np.cumsum(ds)
-        theta = np.arctan2(dy, dx)
+    # def curvature(self):
+    #     """Calculates Path curvature.
 
-        # Fix discontinuities arising from np.arctan2
-        dtheta = np.diff(theta)
-        dtheta[np.where(dtheta > np.pi)] += -2 * np.pi
-        dtheta[np.where(dtheta < -np.pi)] += 2 * np.pi
-        theta = np.concatenate([[0], np.cumsum(dtheta)]) + theta[0]
+    #     The curvature is numerically computed so areas where the curvature
+    #     jumps instantaneously (such as between an arc and a straight segment)
+    #     will be slightly interpolated, and sudden changes in point density
+    #     along the curve can cause discontinuities.
 
-        K = np.gradient(theta, s, edge_order=2)
-        return s, K
+    #     Returns:
+    #         s : array-like[N]
+    #             The arc-length of the Path
+    #         K : array-like[N]
+    #             The curvature of the Path
+    #     """
+    #     x = self.points[:, 0]
+    #     y = self.points[:, 1]
+    #     dx = np.diff(x)
+    #     dy = np.diff(y)
+    #     ds = np.sqrt((dx) ** 2 + (dy) ** 2)
+    #     s = np.cumsum(ds)
+    #     theta = np.arctan2(dy, dx)
 
-    def hash_geometry(self, precision: float = 1e-4) -> str:
-        """Computes an SHA1 hash of the points in the Path and the start_angle and end_angle.
+    #     # Fix discontinuities arising from np.arctan2
+    #     dtheta = np.diff(theta)
+    #     dtheta[np.where(dtheta > np.pi)] += -2 * np.pi
+    #     dtheta[np.where(dtheta < -np.pi)] += 2 * np.pi
+    #     theta = np.concatenate([[0], np.cumsum(dtheta)]) + theta[0]
 
-        Args:
-            precision: Rounding precision for the the objects in the Component.  For instance,
-                a precision of 1e-2 will round a point at (0.124, 1.748) to (0.12, 1.75)
+    #     K = np.gradient(theta, s, edge_order=2)
+    #     return s, K
 
-        Returns:
-            str Hash result in the form of an SHA1 hex digest string.
+    # def hash_geometry(self, precision: float = 1e-4) -> str:
+    #     """Computes an SHA1 hash of the points in the Path and the start_angle and end_angle.
 
-        .. code::
+    #     Args:
+    #         precision: Rounding precision for the the objects in the Component.  For instance,
+    #             a precision of 1e-2 will round a point at (0.124, 1.748) to (0.12, 1.75)
 
-            hash(
-                hash(First layer information: [layer1, datatype1]),
-                hash(Polygon 1 on layer 1 points: [(x1,y1),(x2,y2),(x3,y3)] ),
-                hash(Polygon 2 on layer 1 points: [(x1,y1),(x2,y2),(x3,y3),(x4,y4)] ),
-                hash(Polygon 3 on layer 1 points: [(x1,y1),(x2,y2),(x3,y3)] ),
-                hash(Second layer information: [layer2, datatype2]),
-                hash(Polygon 1 on layer 2 points: [(x1,y1),(x2,y2),(x3,y3),(x4,y4)] ),
-                hash(Polygon 2 on layer 2 points: [(x1,y1),(x2,y2),(x3,y3)] ),
-            )
-        """
-        # A random offset which fixes common rounding errors intrinsic
-        # to floating point math. Example: with a precision of 0.1, the
-        # floating points 7.049999 and 7.050001 round to different values
-        # (7.0 and 7.1), but offset values (7.220485 and 7.220487) don't
-        magic_offset = 0.17048614
+    #     Returns:
+    #         str Hash result in the form of an SHA1 hex digest string.
 
-        final_hash = hashlib.sha1()
-        p = np.ascontiguousarray(
-            (self.points / precision) + magic_offset, dtype=np.int64
-        )
-        final_hash.update(p)
-        p = np.ascontiguousarray((self.start_angle, self.end_angle), dtype=np.float64)
-        final_hash.update(p)
-        return final_hash.hexdigest()
+    #     .. code::
 
-    @classmethod
-    def __get_validators__(cls):
-        """For pydantic."""
-        yield cls._validate
+    #         hash(
+    #             hash(First layer information: [layer1, datatype1]),
+    #             hash(Polygon 1 on layer 1 points: [(x1,y1),(x2,y2),(x3,y3)] ),
+    #             hash(Polygon 2 on layer 1 points: [(x1,y1),(x2,y2),(x3,y3),(x4,y4)] ),
+    #             hash(Polygon 3 on layer 1 points: [(x1,y1),(x2,y2),(x3,y3)] ),
+    #             hash(Second layer information: [layer2, datatype2]),
+    #             hash(Polygon 1 on layer 2 points: [(x1,y1),(x2,y2),(x3,y3),(x4,y4)] ),
+    #             hash(Polygon 2 on layer 2 points: [(x1,y1),(x2,y2),(x3,y3)] ),
+    #         )
+    #     """
+    #     # A random offset which fixes common rounding errors intrinsic
+    #     # to floating point math. Example: with a precision of 0.1, the
+    #     # floating points 7.049999 and 7.050001 round to different values
+    #     # (7.0 and 7.1), but offset values (7.220485 and 7.220487) don't
+    #     magic_offset = 0.17048614
 
-    @classmethod
-    def _validate(cls, v):
-        """Pydantic Path validator."""
-        assert isinstance(v, Path), f"TypeError, Got {type(v)}, expecting Path"
-        return v
+    #     final_hash = hashlib.sha1()
+    #     p = np.ascontiguousarray(
+    #         (self.points / precision) + magic_offset, dtype=np.int64
+    #     )
+    #     final_hash.update(p)
+    #     p = np.ascontiguousarray((self.start_angle, self.end_angle), dtype=np.float64)
+    #     final_hash.update(p)
+    #     return final_hash.hexdigest()
 
-    def to_dict(self):
-        return self.hash_geometry()
+    # @classmethod
+    # def __get_validators__(cls):
+    #     """For pydantic."""
+    #     yield cls._validate
 
-    def plot(self) -> None:
-        """Plot path in matplotlib.
+    # @classmethod
+    # def _validate(cls, v):
+    #     """Pydantic Path validator."""
+    #     assert isinstance(v, Path), f"TypeError, Got {type(v)}, expecting Path"
+    #     return v
 
-        .. plot::
-            :include-source:
+    # def to_dict(self):
+    #     return self.hash_geometry()
 
-            import gdsfactory as gf
+    # def plot(self) -> None:
+    #     """Plot path in matplotlib.
 
-            p = gf.path.euler(radius=10)
-            p.plot()
-        """
-        from gdsfactory.quickplotter import quickplot
+    #     .. plot::
+    #         :include-source:
 
-        return quickplot(self)
+    #         import gdsfactory as gf
+
+    #         p = gf.path.euler(radius=10)
+    #         p.plot()
+    #     """
+    #     from gdsfactory.quickplotter import quickplot
+
+    #     return quickplot(self)
 
     def extrude(
         self,

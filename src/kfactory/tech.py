@@ -47,6 +47,9 @@ class LayerEnum(int, Enum):  # IntEnum):
     def __iter__(self) -> Iterator[int]:
         yield from [self.layer, self.datatype]
 
+    def __str__(self):
+        return self.name
+
     # RX = (2, 0)
 
 
