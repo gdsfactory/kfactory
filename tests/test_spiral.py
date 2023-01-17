@@ -99,7 +99,8 @@ def dbend_circular(
     """
 
     c = kf.KCell()
-    r = radius * c.library.dbu
+    # r = radius * c.library.dbu
+    r = radius
     backbone = [
         kf.kdb.DPoint(x, y)
         for x, y in [
@@ -109,7 +110,7 @@ def dbend_circular(
             )
         ]
     ]
-    pts = kf.utils.geo.extrude_path(backbone, width * c.library.dbu, snap_to_90=True)
+    pts = kf.utils.geo.extrude_path(backbone, width, snap_to_90=True)
 
     c.shapes(layer).insert(kf.kdb.DPolygon(pts))
 
@@ -123,9 +124,7 @@ def dbend_circular(
             lambda d: kf.kdb.Polygon(
                 [
                     p.to_itype(c.library.dbu)
-                    for p in kf.utils.geo.extrude_path(
-                        backbone, (d * 2 + width) * c.library.dbu
-                    )
+                    for p in kf.utils.geo.extrude_path(backbone, (d * 2 + width))
                 ]
             ),
         )
