@@ -23,7 +23,9 @@ dependencies = [
 	"scipy",
 	"ruamel.yaml",
 	"cachetools >= 5.2.0",
-    "pydantic",
+  "pydantic",
+  "omegaconf"
+
 ]
 
 [project.optional-dependencies]
