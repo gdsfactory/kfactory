@@ -1160,15 +1160,6 @@ class KCell:
         for _hash in port_hashs:
             h.update(_hash)
         insts_hashs = list(sorted(inst.hash() for inst in self.insts))
-
-        # for port in sorted(self.ports._ports, key=lambda port: port.hash()):
-        #     # h.update(port.name.encode("UTF-8"))
-        #     # h.update(port.trans.hash().to_bytes(8, "big"))
-        #     # h.update(port.width.to_bytes(8, "big"))
-        #     # h.update(port.layer.to_bytes(8, "big"))
-        #     # h.update(port.port_type.encode("UTF-8"))
-        #     h.update(port.hash())
-
         return h.digest()
 
     def autorename_ports(self) -> None:

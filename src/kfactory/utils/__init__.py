@@ -17,7 +17,7 @@ except ImportError:
 def show(
     gds: str | kcell.KCell | Path,
     keep_position: bool = True,
-    save_options: kdb.SaveLayoutOptions = kcell.default_save(),  # type: ignore[attr-defined]
+    save_options: kdb.SaveLayoutOptions = kcell.default_save(),
 ) -> None:
     """Show GDS in klayout"""
 

@@ -22,8 +22,13 @@ class LayerEnum(int, Enum):  # IntEnum):
     datatype: int
 
     def __new__(
-        cls: LayerMap, layer: int, datatype, *args, lib: KLib = library, **kwargs
-    ) -> LayerMap:
+        cls: LayerEnum,
+        layer: int,
+        datatype: int,
+        *args: Any,
+        lib: KLib = library,
+        **kwargs,
+    ) -> LayerEnum:
         obj: int = int.__new__(cls, *args, **kwargs)
         obj._value_ = lib.layer(layer, datatype)
         obj.layer = layer
@@ -228,69 +233,69 @@ class LayerLevel(BaseModel):
     info: Dict[str, Any] = {}
 
 
-class LayerStack(BaseModel):
-    """For simulation and 3D rendering.
+# class LayerStack(BaseModel):
+#     """For simulation and 3D rendering.
 
-    Parameters:
-        layers: dict of layer_levels.
-    """
+#     Parameters:
+#         layers: dict of layer_levels.
+#     """
 
-    layers: Dict[str, LayerLevel]
+#     layers: Dict[str, LayerLevel]
 
-    def get_layer_to_thickness(self) -> Dict[Tuple[int, int], float]:
-        """Returns layer tuple to thickness (um)."""
-        return {
-            level.layer: level.thickness
-            for level in self.layers.values()
-            if level.thickness
-        }
+#     def get_layer_to_thickness(self) -> Dict[Tuple[int, int], float]:
+#         """Returns layer tuple to thickness (um)."""
+#         return {
+#             level.layer: level.thickness
+#             for level in self.layers.values()
+#             if level.thickness
+#         }
 
-    def get_layer_to_zmin(self) -> Dict[Tuple[int, int], float]:
-        """Returns layer tuple to z min position (um)."""
-        return {
-            level.layer: level.zmin for level in self.layers.values() if level.thickness
-        }
+#     def get_layer_to_zmin(self) -> Dict[Tuple[int, int], float]:
+#         """Returns layer tuple to z min position (um)."""
+#         return {
+#             level.layer: level.zmin for level in self.layers.values() if level.thickness
+#         }
 
-    def get_layer_to_material(self) -> Dict[Tuple[int, int], str]:
-        """Returns layer tuple to material name."""
-        return {
-            level.layer: level.material
-            for level in self.layers.values()
-            if level.thickness
-        }
+#     def get_layer_to_material(self) -> Dict[Tuple[int, int], str]:
+#         """Returns layer tuple to material name."""
+#         return {
+#             level.layer: level.material
+#             for level in self.layers.values()
+#             if level.thickness
+#         }
 
-    def get_layer_to_sidewall_angle(self) -> Dict[Tuple[int, int], str]:
-        """Returns layer tuple to material name."""
-        return {
-            level.layer: level.sidewall_angle
-            for level in self.layers.values()
-            if level.thickness
-        }
+#     def get_layer_to_sidewall_angle(self) -> Dict[Tuple[int, int], str]:
+#         """Returns layer tuple to material name."""
+#         return {
+#             level.layer: level.sidewall_angle
+#             for level in self.layers.values()
+#             if level.thickness
+#         }
 
-    def get_layer_to_info(self) -> Dict[Tuple[int, int], Dict]:
-        """Returns layer tuple to info dict."""
-        return {level.layer: level.info for level in self.layers.values()}
+#     def get_layer_to_info(self) -> Dict[Tuple[int, int], Dict]:
+#         """Returns layer tuple to info dict."""
+#         return {level.layer: level.info for level in self.layers.values()}
 
-    def to_dict(self) -> Dict[str, Dict[str, Any]]:
-        return {level_name: dict(level) for level_name, level in self.layers.items()}
+#     def to_dict(self) -> Dict[str, Dict[str, Any]]:
+#         return {level_name: dict(level) for level_name, level in self.layers.items()}
 
-    def get_klayout_3d_script(self, klayout28: bool = True) -> str:
-        """Prints script for 2.5 view KLayout information.
+#     def get_klayout_3d_script(self, klayout28: bool = True) -> str:
+#         """Prints script for 2.5 view KLayout information.
 
-        You can add this information in your tech.lyt take a look at
-        gdsfactory/klayout/tech/tech.lyt
-        """
-        for level in self.layers.values():
-            layer = level.layer
-            if layer:
-                if klayout28:
-                    print(
-                        f"z(input({layer[0]}, {layer[1]}), zstart: {level.zmin}, height: {level.zmin+level.thickness}, name: '{level.material} {layer[0]}/{layer[1]}')"
-                    )
-                else:
-                    print(
-                        f"{level.layer[0]}/{level.layer[1]}: {level.zmin} {level.zmin+level.thickness}"
-                    )
+#         You can add this information in your tech.lyt take a look at
+#         gdsfactory/klayout/tech/tech.lyt
+#         """
+#         for level in self.layers.values():
+#             layer = level.layer
+#             if layer:
+#                 if klayout28:
+#                     print(
+#                         f"z(input({layer[0]}, {layer[1]}), zstart: {level.zmin}, height: {level.zmin+level.thickness}, name: '{level.material} {layer[0]}/{layer[1]}')"
+#                     )
+#                 else:
+#                     print(
+#                         f"{level.layer[0]}/{level.layer[1]}: {level.zmin} {level.zmin+level.thickness}"
+#                     )
 
 
 # def get_layer_stack_generic(

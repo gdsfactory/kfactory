@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Sequence, TypeGuard
+from typing import Callable, Optional, Sequence, TypeGuard
 
 from .. import kdb
 from ..kcell import KCell
@@ -24,8 +24,11 @@ class Direction(Enum):
 class Enclosure:
     yaml_tag = "!Enclosure"
 
-    def __init__(self, enclosures: Sequence[tuple[int, int]] = []):
+    def __init__(
+        self, enclosures: Sequence[tuple[int, int]] = [], name: Optional[str] = None
+    ):
         self.enclosures = list(enclosures)
+        self._name = name
 
     def add_enclosure(self, enc: tuple[int, int]) -> None:
         self.enclosures.append(enc)
@@ -98,3 +101,14 @@ class Enclosure:
 
     def __hash__(self) -> int:
         return hash(tuple(self.enclosures))
+
+    @property
+    def name(self) -> str:
+        if self._name is None:
+            return f"enc{self.__hash__()}"
+        else:
+            return f"enc{self._name}"
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self._name = value
