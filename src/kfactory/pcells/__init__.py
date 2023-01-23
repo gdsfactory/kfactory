@@ -1,2 +1,2 @@
 # flake8: noqa
-from . import bezier, circular, euler, taper
+from kfactory.pcells import bezier, circular, euler, taper

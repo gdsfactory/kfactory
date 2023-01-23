@@ -4,10 +4,10 @@ import numpy as np
 from scipy.optimize import brentq  # type: ignore[import]
 from scipy.special import fresnel  # type: ignore[import]
 
-from .. import kdb
-from ..kcell import KCell, autocell
-from ..utils.enclosure import Enclosure
-from ..utils.geo import extrude_path
+from kfactory import kdb
+from kfactory.kcell import KCell, autocell
+from kfactory.utils.enclosure import Enclosure
+from kfactory.utils.geo import extrude_path
 
 __all__ = [
     "euler_bend_points",
@@ -261,3 +261,11 @@ def bend_s_euler(
         layer=layer,
     )
     return c
+
+
+if __name__ == "__main__":
+    c = bend_euler(width=1, radius=5, layer=1)
+    c.write("a.gds")
+    import gdsfactory as gf
+
+    gf.show("a.gds")

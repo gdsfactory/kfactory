@@ -2,9 +2,9 @@ from typing import List, Optional, Union
 
 import numpy as np
 
-from .. import kdb
-from ..kcell import KLib, Port
-from ..utils.geo import clean_points
+from kfactory import kdb
+from kfactory.kcell import KLib, Port
+from kfactory.utils.geo import clean_points
 
 __all__ = ["route_manhattan", "route_manhattan_180"]
 

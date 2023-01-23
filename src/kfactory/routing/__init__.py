@@ -1,1 +1,1 @@
-from . import electrical, manhattan, optical
+from kfactory.routing import electrical, manhattan, optical

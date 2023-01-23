@@ -2,9 +2,9 @@ from typing import Optional
 
 import numpy as np
 
-from .. import KCell, autocell, kdb
-from ..utils import Enclosure
-from ..utils.geo import bezier_curve, extrude_path
+from kfactory import KCell, autocell, kdb
+from kfactory.utils import Enclosure
+from kfactory.utils.geo import bezier_curve, extrude_path
 
 __all__ = ["bend_s"]
 

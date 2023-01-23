@@ -7,9 +7,9 @@ from typing import Any, Optional, TypeVar, Union
 from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
 
-from .kcell import KCell, KLib, Port, Ports
-from .kcell import library as stdlib
-from .utils.enclosure import Enclosure
+from kfactory.kcell import KCell, KLib, Port, Ports
+from kfactory.kcell import library as stdlib
+from kfactory.utils.enclosure import Enclosure
 
 __all__ = ["cells_to_yaml", "cells_from_yaml"]
 

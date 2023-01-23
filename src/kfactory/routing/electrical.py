@@ -1,8 +1,8 @@
 from typing import Callable, Optional
 
-from .. import kdb
-from ..kcell import KCell, Port
-from .manhattan import route_manhattan
+from kfactory import kdb
+from kfactory.kcell import KCell, Port
+from kfactory.routing.manhattan import route_manhattan
 
 
 def connect_elec(

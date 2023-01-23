@@ -2,10 +2,10 @@ from typing import Optional
 
 import numpy as np
 
-from .. import kdb
-from ..kcell import KCell, autocell
-from ..utils import Enclosure
-from ..utils.geo import extrude_path
+from kfactory import kdb
+from kfactory.kcell import KCell, autocell
+from kfactory.utils import Enclosure
+from kfactory.utils.geo import extrude_path
 
 __all__ = ["bend_circular"]
 

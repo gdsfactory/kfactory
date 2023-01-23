@@ -1,8 +1,8 @@
 from enum import Enum
 from typing import Callable, Optional, Sequence, TypeGuard
 
-from .. import kdb
-from ..kcell import KCell
+from kfactory import kdb
+from kfactory.kcell import KCell
 
 __all__ = ["Enclosure", "Direction"]
 

@@ -4,9 +4,9 @@ import warnings
 from pathlib import Path
 from tempfile import gettempdir
 
-from .. import kcell, kdb
-from . import violations
-from .enclosure import Direction, Enclosure
+from kfactory import kcell, kdb
+from kfactory.utils import violations
+from kfactory.utils.enclosure import Direction, Enclosure
 
 try:
     from __main__ import __file__ as mf

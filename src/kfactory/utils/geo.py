@@ -5,7 +5,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 from scipy.special import binom  # type: ignore[import]
 
-from .. import kdb
+from kfactory import kdb
 
 __all__ = ["extrude_path"]
 

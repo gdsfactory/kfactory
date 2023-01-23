@@ -1,9 +1,9 @@
 from typing import Callable, List, Optional, Sequence, Union
 
-from .. import kdb
-from ..kcell import KCell, Port
-from ..utils.geo import vec_angle  # , clean_points
-from .manhattan import route_manhattan
+from kfactory import kdb
+from kfactory.kcell import KCell, Port
+from kfactory.routing.manhattan import route_manhattan
+from kfactory.utils.geo import vec_angle  # , clean_points
 
 
 def route_loopback(

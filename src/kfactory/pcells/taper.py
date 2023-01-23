@@ -1,7 +1,7 @@
 from typing import Optional
 
-from .. import KCell, autocell, kdb
-from ..utils import Enclosure
+from kfactory import KCell, autocell, kdb
+from kfactory.utils import Enclosure
 
 
 @autocell
