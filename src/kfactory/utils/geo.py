@@ -109,15 +109,14 @@ def simplify(points: list[kdb.Point], tolerance: float) -> list[kdb.Point]:
     ind_dist = int(np.argmax(dists))
     maxd = dists[ind_dist]
 
-    if maxd <= tolerance:
-        return [points[0], points[-1]]
-    else:
-        return (
+    return (
+        [points[0], points[-1]]
+        if maxd <= tolerance
+        else (
             simplify(points[: ind_dist + 1], tolerance)
             + simplify(points[ind_dist:], tolerance)[1:]
         )
-
-    return simple_pts
+    )
 
 
 def extrude(

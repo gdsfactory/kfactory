@@ -104,10 +104,7 @@ class Enclosure:
 
     @property
     def name(self) -> str:
-        if self._name is None:
-            return f"enc{self.__hash__()}"
-        else:
-            return f"enc{self._name}"
+        return f"enc{self.__hash__()}" if self._name is None else f"enc{self._name}"
 
     @name.setter
     def name(self, value: str) -> None:
