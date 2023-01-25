@@ -7,9 +7,6 @@ name = "kfactory"
 description = "KLayout API implementation of gdsfactory"
 readme = "README.md"
 classifiers = [
-	"Programming Language :: Python :: 3.7",
-	"Programming Language :: Python :: 3.8",
-	"Programming Language :: Python :: 3.9",
 	"Programming Language :: Python :: 3.10",
 	"Programming Language :: Python :: 3.11",
 	"Operating System :: OS Independent",
@@ -88,6 +85,8 @@ testpaths = ["src", "tests"]
 addopts = '--tb=short'
 python_files = ["src/*.py", "tests/*.py"]
 norecursedirs = ["extra/*.py"]
+
+[tool.pylsp]
 
 # [tool.pytest.ini_options]
 # minversion = "6.0"

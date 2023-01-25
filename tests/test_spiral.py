@@ -1,5 +1,4 @@
 import kfactory as kf
-from conftest import LAYER
 import pytest
 import numpy as np
 from typing import Optional
@@ -159,7 +158,7 @@ def dbend_circular(
     return c
 
 
-def test_spiral():
+def test_spiral(LAYER):
     c = kf.KCell()
 
     r1 = 1000
@@ -178,7 +177,7 @@ def test_spiral():
     # kf.show(c)
 
 
-def test_dspiral():
+def test_dspiral(LAYER):
     c = kf.KCell()
 
     r1 = 1

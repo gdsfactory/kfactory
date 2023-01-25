@@ -17,8 +17,8 @@ from kfactory.kcell import (
     KLib,
     default_save,
 )
-from kfactory import kdb, pcells, placer, routing, utils
-from kfactory.utils import show
+from . import kdb, pcells, tech, placer, routing, utils
+from .utils import show
 
 
 # import klayout.lay as klay #<- enable when klayout > 0.28
@@ -30,6 +30,9 @@ __all__ = [
     "KCell",
     "Instance",
     "Port",
+    "DPort",
+    "ICplxPort",
+    "DCplxPort",
     "Ports",
     "autocell",
     "cell",
@@ -42,4 +45,5 @@ __all__ = [
     "routing",
     "utils",
     "show",
+    "tech",
 ]
