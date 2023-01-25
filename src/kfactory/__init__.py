@@ -23,7 +23,7 @@ from .utils import show
 
 # import klayout.lay as klay #<- enable when klayout > 0.28
 
-__version__ = "0.0.5"
+__version__ = "0.0.6"
 
 
 __all__ = [
