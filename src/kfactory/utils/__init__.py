@@ -5,7 +5,7 @@ from pathlib import Path
 from tempfile import gettempdir
 
 from .. import kcell, kdb
-from . import violations
+from . import geo, violations
 from .enclosure import Direction, Enclosure
 
 try:
@@ -72,4 +72,4 @@ def show(
         Path(gds_file).unlink()
 
 
-__all__ = ["show", "Enclosure", "violations", "Direction"]
+__all__ = ["show", "Enclosure", "violations", "Direction", "geo"]

@@ -6,52 +6,9 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 from pydantic import BaseModel
 
-from .kcell import KCell, KLib, library
+from .kcell import KCell, KLib, LayerEnum, library
 
 # from kfactory import KCell, KLib, library
-
-
-class LayerEnum(int, Enum):  # IntEnum):
-
-    layer: int
-    datatype: int
-
-    def __new__(  # type: ignore[misc, no-untyped-def]
-        cls: LayerEnum,
-        layer: int,
-        datatype: int,
-        lib: KLib = library,
-    ) -> LayerEnum:
-        value = lib.layer(layer, datatype)
-        obj: int = int.__new__(cls, value)  # type: ignore[call-overload]
-        obj._value_ = value  # type: ignore[attr-defined]
-        # print(obj._value_)
-        obj.layer = layer  # type: ignore[attr-defined]
-        obj.datatype = datatype  # type: ignore[attr-defined]
-        return obj  # type: ignore[return-value]
-
-    def __getitem__(self, key: int) -> int:
-        if key == 0:
-            return self.layer
-        elif key == 1:
-            return self.datatype
-
-        else:
-            raise ValueError(
-                "LayerMap only has two values accessible like"
-                " a list, layer == [0] and datatype == [1]"
-            )
-
-    def __len__(self) -> int:
-        return 2
-
-    def __iter__(self) -> Iterator[int]:
-        yield from [self.layer, self.datatype]
-
-    def __str__(self) -> str:
-        return self.name
-
-    # RX = (2, 0)
 
 
 class LAYER(LayerEnum):

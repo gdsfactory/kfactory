@@ -1,5 +1,6 @@
 import kfactory as kf
 import pytest
+import warnings
 
 
 @kf.autocell
@@ -41,8 +42,11 @@ def wg_floating_off_grid(LAYER):
         layer=LAYER.WG,
     )
     c.shapes(LAYER.WG).insert(kf.kdb.DBox(p1.x, -p1.width / 2, p2.x, p1.width / 2))
+
+    warnings.filterwarnings("ignore")
     c.add_port(p1)
     c.add_port(p2)
+    warnings.filterwarnings("default")
 
     return c
 
@@ -73,14 +77,18 @@ def test_connect_cplx_port(LAYER):
 
 def test_connect_cplx_inst(LAYER):
     c = kf.KCell()
+
     wg1 = c << waveguide(1000, 20000, LAYER.WG)
     wg2 = c << waveguide(1000, 20000, LAYER.WG)
     wg1.transform(kf.kdb.DCplxTrans(1, 30, False, 5, 10))
     wg2.connect_cplx("o1", wg1, "o2")
 
+    warnings.filterwarnings("ignore")
     c.add_port(wg1.ports["o1"])
     c.add_port(wg2.ports["o2"])
+    warnings.filterwarnings("default")
     c.flatten()
+    kf.show(c)
 
 
 def test_floating(wg_floating_off_grid):

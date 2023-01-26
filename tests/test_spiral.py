@@ -2,6 +2,7 @@ import kfactory as kf
 import pytest
 import numpy as np
 from typing import Optional
+import warnings
 
 
 def bend_circular(
@@ -34,26 +35,8 @@ def bend_circular(
             )
         ]
     ]
-    pts = kf.utils.geo.extrude_path(backbone, width * c.library.dbu, snap_to_90=True)
 
-    c.shapes(layer).insert(kf.kdb.DPolygon(pts))
-
-    for p1, p2 in zip(pts[:-1], pts[1:]):
-        e = kf.kdb.DEdge(p1, p2)
-        c.shapes(layer).insert(e)
-
-    if enclosure is not None:
-        enclosure.apply_custom(
-            c,
-            lambda d: kf.kdb.Polygon(
-                [
-                    p.to_itype(c.library.dbu)
-                    for p in kf.utils.geo.extrude_path(
-                        backbone, (d * 2 + width) * c.library.dbu
-                    )
-                ]
-            ),
-        )
+    kf.utils.geo.extrude_path(c, layer, backbone, width, enclosure, 0, theta)
 
     c.create_port(
         name="W0", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer=layer
@@ -81,7 +64,7 @@ def bend_circular(
 def dbend_circular(
     width: float,
     radius: float,
-    layer: kf.tech.LayerEnum,
+    layer: kf.kcell.LayerEnum,
     enclosure: Optional[kf.utils.Enclosure] = None,
     theta: float = 90,
     theta_step: float = 1,
@@ -98,7 +81,6 @@ def dbend_circular(
     """
 
     c = kf.KCell()
-    # r = radius * c.library.dbu
     r = radius
     backbone = [
         kf.kdb.DPoint(x, y)
@@ -109,32 +91,10 @@ def dbend_circular(
             )
         ]
     ]
-    pts = kf.utils.geo.extrude_path(backbone, width, snap_to_90=True)
-
-    c.shapes(layer).insert(kf.kdb.DPolygon(pts))
-
-    for p1, p2 in zip(pts[:-1], pts[1:]):
-        e = kf.kdb.DEdge(p1, p2)
-        c.shapes(layer).insert(e)
-
-    if enclosure is not None:
-        enclosure.apply_custom(
-            c,
-            lambda d: kf.kdb.Polygon(
-                [
-                    p.to_itype(c.library.dbu)
-                    for p in kf.utils.geo.extrude_path(backbone, (d * 2 + width))
-                ]
-            ),
-        )
-
+    kf.utils.geo.extrude_path(c, layer, backbone, width, enclosure, 0, theta)
     dp1 = kf.kcell.DPort(width=width, layer=layer, name="W0", trans=kf.kdb.DTrans.R180)
-
+    warnings.filterwarnings("ignore")
     c.add_port(dp1)
-
-    # c.create_port(
-    #     name="W0", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer=int(layer)
-    # )
 
     match theta:
         case 90:
@@ -155,6 +115,7 @@ def dbend_circular(
         case _:
             raise ValueError("only support 90/180° bends")
     c.add_port(dp2)
+    warnings.filterwarnings("default")
     return c
 
 
@@ -174,8 +135,6 @@ def test_spiral(LAYER):
         b.connect("W0", p)
         p = b.ports["N0"]
 
-    # kf.show(c)
-
 
 def test_dspiral(LAYER):
     c = kf.KCell()
@@ -192,7 +151,3 @@ def test_dspiral(LAYER):
         b = c << dbend_circular(width=1, radius=r2, layer=LAYER.WG)
         b.connect_cplx("W0", p)
         p = b.ports["N0"]
-
-
-# if __name__ == "__main__":
-#     test_waveguide()

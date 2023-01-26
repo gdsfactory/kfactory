@@ -3,7 +3,9 @@ import functools
 import importlib
 import warnings
 from dataclasses import InitVar, dataclass
-from enum import IntEnum
+
+# from enum import IntEnum
+from enum import Enum
 from hashlib import sha3_512
 from inspect import signature
 from pathlib import Path
@@ -16,6 +18,7 @@ from typing import (  # ParamSpec, # >= python 3.10
     Protocol,
     Type,
     TypeAlias,
+    TypeGuard,
     TypeVar,
     Union,
     cast,
@@ -32,13 +35,17 @@ import kfactory.kdb as kdb
 KP = ParamSpec("KP")
 
 
+def is_simple_port(port: "Port | DPort | ICplxPort | DCplxPort") -> "TypeGuard[Port]":
+    return port.int_based() and not port.complex()
+
+
 class PortWidthMismatch(ValueError):
     def __init__(
         self,
         inst: "Instance",
         other_inst: "Instance | Port | DPort | ICplxPort | DCplxPort",
-        p1: "Port",
-        p2: "Port",
+        p1: "Port | DPort | ICplxPort | DCplxPort",
+        p2: "Port | DPort | ICplxPort | DCplxPort",
         *args: Any,
     ):
 
@@ -60,19 +67,19 @@ class PortLayerMismatch(ValueError):
         lib: "KLib",
         inst: "Instance",
         other_inst: "Instance | Port | DPort | ICplxPort | DCplxPort",
-        p1: "Port",
-        p2: "Port",
+        p1: "Port | DPort | ICplxPort | DCplxPort",
+        p2: "Port | DPort | ICplxPort | DCplxPort",
         *args: Any,
     ):
 
         l1 = (
             f"{p1.layer.name}({p1.layer.__int__()})"
-            if isinstance(p1.layer, IntEnum)
+            if isinstance(p1.layer, LayerEnum)
             else str(lib.get_info(p1.layer))
         )
         l2 = (
             f"{p2.layer.name}({p2.layer.__int__()})"
-            if isinstance(p2.layer, IntEnum)
+            if isinstance(p2.layer, LayerEnum)
             else str(lib.get_info(p2.layer))
         )
         if isinstance(other_inst, Instance):
@@ -92,8 +99,8 @@ class PortTypeMismatch(ValueError):
         self,
         inst: "Instance",
         other_inst: "Instance | Port | DPort | ICplxPort | DCplxPort",
-        p1: "Port",
-        p2: "Port",
+        p1: "Port | DPort | ICplxPort | DCplxPort",
+        p2: "Port | DPort | ICplxPort | DCplxPort",
         *args: Any,
     ):
         if isinstance(other_inst, Instance):
@@ -355,7 +362,7 @@ class IPortLike(PortLike[TI, int]):
         ...
 
     def __repr__(self) -> str:
-        return f"Port(\n    name: {self.name}\n    trans: {self.trans}\n    width: {self.width}\n    layer: {f'{self.layer} ({int(self.layer)})' if isinstance(self.layer, IntEnum) else str(self.layer)}\n    port_type: {self.port_type}\n)"
+        return f"Port(\n    name: {self.name}\n    trans: {self.trans}\n    width: {self.width}\n    layer: {f'{self.layer} ({int(self.layer)})' if isinstance(self.layer, LayerEnum) else str(self.layer)}\n    port_type: {self.port_type}\n)"
 
     @property
     def position(self) -> tuple[int, int]:
@@ -464,7 +471,7 @@ class DPortLike(PortLike[TD, float]):
         ...
 
     def __repr__(self) -> str:
-        return f"Port(\n    name: {self.name}\n    trans: {self.trans}\n    width: {self.width}\n    layer: {f'{self.layer} ({int(self.layer)})' if isinstance(self.layer, IntEnum) else str(self.layer)}\n    port_type: {self.port_type}\n)"
+        return f"Port(\n    name: {self.name}\n    trans: {self.trans}\n    width: {self.width}\n    layer: {f'{self.layer} ({int(self.layer)})' if isinstance(self.layer, LayerEnum) else str(self.layer)}\n    port_type: {self.port_type}\n)"
 
     @property
     def position(self) -> tuple[float, float]:
@@ -965,6 +972,46 @@ class DCplxPort(DPortLike[kdb.DCplxTrans], CPortLike[kdb.DCplxTrans]):
         return self.trans.dup()
 
 
+class LayerEnum(int, Enum):  # IntEnum):
+
+    layer: int
+    datatype: int
+
+    def __new__(  # type: ignore[misc]
+        cls: "LayerEnum",
+        layer: int,
+        datatype: int,
+        lib: KLib = library,
+    ) -> "LayerEnum":
+        value = lib.layer(layer, datatype)
+        obj: int = int.__new__(cls, value)  # type: ignore[call-overload]
+        obj._value_ = value  # type: ignore[attr-defined]
+        obj.layer = layer  # type: ignore[attr-defined]
+        obj.datatype = datatype  # type: ignore[attr-defined]
+        return obj  # type: ignore[return-value]
+
+    def __getitem__(self, key: int) -> int:
+        if key == 0:
+            return self.layer
+        elif key == 1:
+            return self.datatype
+
+        else:
+            raise ValueError(
+                "LayerMap only has two values accessible like"
+                " a list, layer == [0] and datatype == [1]"
+            )
+
+    def __len__(self) -> int:
+        return 2
+
+    def __iter__(self) -> Iterator[int]:
+        yield from [self.layer, self.datatype]
+
+    def __str__(self) -> str:
+        return self.name
+
+
 class KCell:
     """Derived from :py:class:`klayout.db.Cell`. Additionally to a standard cell, this one will keep track of :py:class:`Port` and allow to store metadata in a dictionary
 
@@ -1051,7 +1098,7 @@ class KCell:
         name: str,
         trans: kdb.Trans,
         width: int,
-        layer: int,
+        layer: int | LayerEnum,
         port_type: str = "optical",
     ) -> None:
         ...
@@ -1073,7 +1120,7 @@ class KCell:
         width: int,
         position: tuple[int, int],
         angle: int,
-        layer: int,
+        layer: int | LayerEnum,
         port_type: str = "optical",
         mirror_x: bool = False,
     ) -> None:
@@ -1087,10 +1134,37 @@ class KCell:
         """Add an existing port. E.g. from an instance to propagate the port
 
         Args:
-            port: The port to add
+            port: The port to add. Port should either be a :py:class:`~Port`, or will be converted to an integer based port with 90° increment
             name: Overwrite the name of the port
         """
-        self.ports.add_port(port=port, name=name)
+
+        if isinstance(port, Port):
+            self.ports.add_port(port=port, name=name)
+        else:
+            warnings.warn(
+                f"Port {str(port)} is not an integer based port, converting to integer based"
+            )
+
+            if port.complex():
+                strans = port.trans.s_trans()  # type: ignore[attr-defined]
+            else:
+                strans = port.trans.dup()
+
+            if port.int_based():
+                trans = strans
+            else:
+                trans = strans.to_itype(self.library.dbu)
+
+            _port = Port(
+                name=port.name,
+                width=port.width  # type: ignore[arg-type]
+                if port.int_based()
+                else int(port.width / self.library.dbu),
+                trans=trans,
+                port_type=port.port_type,
+                layer=port.layer,
+            )
+            self.ports.add_port(port=_port, name=name)
 
     def create_inst(self, cell: "KCell", trans: kdb.Trans = kdb.Trans()) -> "Instance":
         """Add an instance of another KCell
@@ -1438,7 +1512,7 @@ class Instance:
     def connect(
         self,
         portname: str,
-        other: "Instance | Port",
+        other: "Instance | Port | DCplxPort",
         other_port_name: Optional[str] = None,
         *,
         mirror: bool = False,
@@ -1477,8 +1551,25 @@ class Instance:
         elif p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)
         else:
-            conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
-            self.instance.trans = op.trans * conn_trans * p.trans.inverted()
+
+            if is_simple_port(op):
+                conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
+                self.instance.trans = op.trans * conn_trans * p.trans.inverted()
+            else:
+                if isinstance(op.trans, DPort):
+                    d_conn_trans = kdb.DTrans.R180
+                    d_p_trans = p.trans.to_dtype(self.cell.library.dbu).inverted()
+                    self.instance.dtrans = op.trans, *d_conn_trans * d_p_trans
+                elif isinstance(op.trans, ICplxPort):
+                    icplx_conn_trans = kdb.ICplxTrans.R180
+                    i_p_trans = kdb.ICplxTrans(p.trans).inverted()
+                    self.instance.cplx_trans = op.trans * icplx_conn_trans * i_p_trans
+                elif isinstance(op.trans, DCplxPort):
+                    d_cplx_conn_trans = kdb.DCplxTrans.R180
+                    d_p_trans = kdb.DCplxTrans(
+                        p.trans.to_dtype(self.cell.library.dbu)
+                    ).inverted()
+                    self.instance.dcplx_trans = op.trans * d_cplx_conn_trans * d_p_trans
 
     def connect_cplx(
         self,
@@ -1564,7 +1655,7 @@ class Ports:
 
     yaml_tag = "!Ports"
 
-    def __init__(self, ports: list[Port | DCplxPort] = []) -> None:
+    def __init__(self, ports: list[Port] = []) -> None:
         """Constructor"""
         self._ports = list(ports)
 
@@ -1576,10 +1667,10 @@ class Ports:
         """Check whether a port is already in the list"""
         return port.hash() in [v.hash() for v in self._ports]
 
-    def each(self) -> Iterator[Port | DCplxPort]:
+    def each(self) -> Iterator[Port]:
         yield from self._ports
 
-    def add_port(self, port: PortLike[TT, FI], name: Optional[str] = None) -> None:
+    def add_port(self, port: Port, name: Optional[str] = None) -> None:
         """Add a port object
 
         Args:
@@ -1654,7 +1745,7 @@ class Ports:
         self._ports.append(port)
         return port
 
-    def get_all(self) -> dict[str, PortLike[TT, FI]]:
+    def get_all(self) -> dict[str, Port]:
         """Get all ports in a dictionary with names as keys"""
         return {v.name: v for v in self._ports}
 
@@ -1702,14 +1793,10 @@ class InstancePorts:
         self.cell_ports = instance.cell.ports
         self.instance = instance
 
-    def __getitem__(self, key: str) -> Port | DPort | DCplxPort:
+    def __getitem__(self, key: str) -> Port | DCplxPort:
         p = self.cell_ports[key]
-        if not (p.complex() or self.instance.instance.is_complex()):
-            return (
-                p.copy(trans=self.instance.trans)
-                if p.int_based()
-                else p.copy(trans=self.instance.instance.dtrans)
-            )
+        if not (self.instance.instance.is_complex()):
+            return p.copy(trans=self.instance.trans)
         else:
             return p.copy_cplx(
                 trans=self.instance.instance.dcplx_trans,
@@ -1719,22 +1806,22 @@ class InstancePorts:
     def __repr__(self) -> str:
         return repr({v: self.__getitem__(v) for v in self.cell_ports.get_all().keys()})
 
-    def get_all(self) -> dict[str, Port]:
+    def get_all(self) -> dict[str, Port | DCplxPort]:
         return {v: self.__getitem__(v) for v in self.cell_ports.get_all().keys()}
 
     def copy(self) -> Ports:
-        return Ports(
-            [
-                port.copy(trans=self.instance.trans)
-                if isinstance(port, Port)
-                else port.copy(
-                    kdb.DCplxTrans(
-                        self.instance.trans.to_dtype(self.instance.cell.library)
-                    )
-                )
-                for port in self.cell_ports._ports
-            ]
-        )
+        if not self.instance.instance.is_complex():
+
+            return Ports(
+                [
+                    port.copy(trans=self.instance.trans)
+                    for port in self.cell_ports._ports
+                ]
+            )
+        else:
+            raise AttributeError(
+                f"The instance is a complex instance, cannot copy the port collection of a complex instance DCplxTrans={self.instance.instance.dcplx_trans}"
+            )
 
 
 @overload
@@ -1961,56 +2048,5 @@ __all__ = [
     "ICplxPort",
     "DCplxPort",
     "DPort",
+    "LayerEnum",
 ]
-
-
-# if __name__ == "__main__":
-
-#     c1 = KCell("cell_a")
-#     c1.shapes(c1.layer(1, 0)).insert(
-#         kdb.Polygon([kdb.Point(500, 200), kdb.Point(200, 500), kdb.Point(200, 200)])
-#     )
-#     c2 = KCell("cell_b")
-#     c2.shapes(c2.layer(2, 0)).insert(
-#         kdb.Polygon(
-#             [
-#                 kdb.Point(x, y)
-#                 for (x, y) in [(0, -250), (0, 250), (-1000, 250), (-1000, -250)]
-#             ]
-#         )
-#     )
-#     c2.create_port(position=(0, 0), width=500, angle=0, name="E0", layer=0)
-#     i1 = c1 << c2
-
-#     # i1.transform(kdb.Trans(kdb.Vector(0,200)))
-#     i1.transform(kdb.Trans.M135)
-
-#     i2 = c1 << c2
-#     i2.connect("E0", i1.ports["E0"])
-
-#     c1.name = "bla"
-
-#     @autocell
-#     def cell_c(a: str) -> KCell:
-#         c = KCell()
-#         c.shapes(c.layer(5, 0)).insert(
-#             kdb.Polygon(
-#                 [kdb.Point(x, y) for (x, y) in [(0, 500), (200, 500), (200, 0), (0, 0)]]
-#             )
-#         )
-#         return c
-
-#     c1 << cell_c(5)
-#     c1 << cell_c(62)
-
-#     i4 = c1 << cell_c(5)
-
-#     saveoptions = kdb.SaveLayoutOptions()
-#     saveoptions.format = "GDS2"
-
-#     c1.layout().write("test.gds", saveoptions)
-#     from kfactory import show
-
-#     show("test.gds")
-
-#     # from gdsfactory import show

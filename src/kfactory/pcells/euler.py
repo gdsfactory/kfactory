@@ -5,9 +5,9 @@ from scipy.optimize import brentq  # type: ignore[import]
 from scipy.special import fresnel  # type: ignore[import]
 
 from .. import kdb
-from ..kcell import KCell, autocell
+from ..kcell import KCell, LayerEnum, autocell
 from ..utils.enclosure import Enclosure
-from ..utils.geo import extrude_path
+from ..utils.geo import extrude_path, extrude_path_dynamic
 
 __all__ = [
     "euler_bend_points",
@@ -158,53 +158,52 @@ def euler_sbend_points(
 
 @autocell
 def bend_euler(
-    width: int,
-    radius: int,
-    layer: int,
+    width: float,
+    radius: float,
+    layer: int | LayerEnum,
     enclosure: Optional[Enclosure] = None,
     theta: float = 90,
     resolution: float = 150,
 ) -> KCell:
     c = KCell()
     dbu = c.layout().dbu
-    backbone = euler_bend_points(theta, radius=radius * dbu, resolution=resolution)
+    backbone = euler_bend_points(theta, radius=radius, resolution=resolution)
+    print(backbone)
 
-    pts = extrude_path(backbone, width * c.layout().dbu)
-
-    c.shapes(layer).insert(kdb.DPolygon(pts))
-
-    if enclosure is not None:
-        enclosure.apply_custom(
-            c,
-            lambda d: kdb.DPolygon(
-                extrude_path(backbone, (2 * d + width) * c.layout().dbu)
-            ).to_itype(c.library.dbu),
-        )
+    extrude_path(
+        target=c,
+        layer=layer,
+        path=backbone,
+        width=width,
+        enclosure=enclosure,
+        start_angle=0,
+        end_angle=theta,
+    )
 
     if theta == 90:
         c.create_port(
             name="W0",
             layer=layer,
-            width=width,
+            width=int(width / c.library.dbu),
             trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
         )
         c.create_port(
             name="N0",
             layer=layer,
-            width=width,
+            width=int(width / c.library.dbu),
             trans=kdb.Trans(1, False, backbone[-1].to_itype(dbu).to_v()),
         )
     elif theta == 180:
         c.create_port(
             name="W0",
             layer=layer,
-            width=width,
+            width=int(width / c.library.dbu),
             trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
         )
         c.create_port(
             name="W1",
             layer=layer,
-            width=width,
+            width=int(width / c.library.dbu),
             trans=kdb.Trans(2, False, backbone[-1].to_itype(dbu).to_v()),
         )
 
@@ -227,19 +226,29 @@ def bend_s_euler(
         radius=radius * c.library.dbu,
         resolution=resolution,
     )
-    pts = extrude_path(backbone, width * c.layout().dbu)
-    pol = kdb.DPolygon(pts)
-    c.shapes(layer).insert(pol)
+    # pts = extrude_path(backbone, width * c.layout().dbu)
+    # pol = kdb.DPolygon(pts)
+    # c.shapes(layer).insert(pol)
 
-    if enclosure is not None:
-        enclosure.apply_custom(
-            c,
-            lambda d: kdb.DPolygon(
-                extrude_path(backbone, (2 * d + width) * c.layout().dbu)
-            ).to_itype(c.library.dbu),
-        )
+    # if enclosure is not None:
+    #     enclosure.apply_custom(
+    #         c,
+    #         lambda d: kdb.DPolygon(
+    #             extrude_path(backbone, (2 * d + width) * c.layout().dbu)
+    #         ).to_itype(c.library.dbu),
+    #     )
 
-    v = pts[-1] - pts[0]
+    extrude_path(
+        target=c,
+        layer=layer,
+        path=backbone,
+        width=width,
+        enclosure=enclosure,
+        start_angle=0,
+        end_angle=0,
+    )
+
+    v = backbone[-1] - backbone[0]
     if v.x > 0:
         p1 = backbone[-1].to_itype(dbu)
         p2 = backbone[0].to_itype(dbu)

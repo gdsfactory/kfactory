@@ -4,6 +4,7 @@ import numpy as np
 
 from .. import kdb
 from ..kcell import KCell, autocell
+from ..tech import LayerEnum
 from ..utils import Enclosure
 from ..utils.geo import extrude_path
 
@@ -12,11 +13,11 @@ __all__ = ["bend_circular"]
 
 @autocell
 def bend_circular(
-    width: int,
-    radius: int,
-    layer: int,
+    width: float,
+    radius: float,
+    layer: int | LayerEnum,
     enclosure: Optional[Enclosure] = None,
-    theta: int = 90,
+    theta: float = 90,
     theta_step: float = 1,
 ) -> KCell:
     """Circular radius bend
@@ -31,7 +32,7 @@ def bend_circular(
     """
 
     c = KCell()
-    r = radius * c.library.dbu
+    r = radius
     backbone = [
         kdb.DPoint(x, y)
         for x, y in [
@@ -41,40 +42,37 @@ def bend_circular(
             )
         ]
     ]
-    pts = extrude_path(backbone, width * c.library.dbu, snap_to_90=True)
 
-    c.shapes(layer).insert(kdb.DPolygon(pts))
+    extrude_path(
+        target=c,
+        layer=layer,
+        path=backbone,
+        width=width,
+        enclosure=enclosure,
+        start_angle=0,
+        end_angle=theta,
+    )
 
-    for p1, p2 in zip(pts[:-1], pts[1:]):
-        e = kdb.DEdge(p1, p2)
-        c.shapes(layer).insert(e)
-
-    if enclosure is not None:
-        enclosure.apply_custom(
-            c,
-            lambda d: kdb.Polygon(
-                [
-                    p.to_itype(c.library.dbu)
-                    for p in extrude_path(backbone, (d * 2 + width) * c.library.dbu)
-                ]
-            ),
-        )
-
-    c.create_port(name="W0", trans=kdb.Trans(2, False, 0, 0), width=width, layer=layer)
+    c.create_port(
+        name="o1",
+        trans=kdb.Trans(2, False, 0, 0),
+        width=int(width * c.library.dbu),
+        layer=layer,
+    )
 
     match theta:
         case 90:
             c.create_port(
-                name="N0",
-                trans=kdb.Trans(1, False, radius, radius),
-                width=width,
+                name="o2",
+                trans=kdb.DTrans(1, False, radius, radius).to_itype(c.library.dbu),
+                width=int(width / c.library.dbu),
                 layer=layer,
             )
         case 180:
             c.create_port(
-                name="W1",
-                trans=kdb.Trans(0, False, 0, 2 * radius),
-                width=width,
+                name="o2",
+                trans=kdb.DTrans(0, False, 0, 2 * radius).to_itype(c.library.dbu),
+                width=int(width / c.library.dbu),
                 layer=layer,
             )
 

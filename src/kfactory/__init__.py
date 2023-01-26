@@ -16,6 +16,7 @@ from kfactory.kcell import (
     library,
     KLib,
     default_save,
+    LayerEnum,
 )
 from . import kdb, pcells, tech, placer, routing, utils
 from .utils import show
