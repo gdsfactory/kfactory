@@ -88,7 +88,6 @@ def test_connect_cplx_inst(LAYER):
     c.add_port(wg2.ports["o2"])
     warnings.filterwarnings("default")
     c.flatten()
-    kf.show(c)
 
 
 def test_floating(wg_floating_off_grid):
