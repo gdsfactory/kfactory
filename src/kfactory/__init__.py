@@ -24,7 +24,7 @@ from .utils import show
 
 # import klayout.lay as klay #<- enable when klayout > 0.28
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 __all__ = [

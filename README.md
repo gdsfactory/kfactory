@@ -1,4 +1,4 @@
-# KFactory 0.1.0
+# KFactory 0.1.1
 
 Kfactory is a klayout backend for gdsfactory
 
