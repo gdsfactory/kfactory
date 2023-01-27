@@ -56,7 +56,7 @@ def bend_circular(
     c.create_port(
         name="o1",
         trans=kdb.Trans(2, False, 0, 0),
-        width=int(width * c.library.dbu),
+        width=int(width / c.library.dbu),
         layer=layer,
     )
 
