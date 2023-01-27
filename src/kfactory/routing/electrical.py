@@ -98,14 +98,14 @@ def connect_bundle(
     """
     input_ports.sort(key=lambda p: p.y)
 
-    y_max = input_ports[-1].y
-    y_min = input_ports[0].y
     x_max = max(p.x for p in input_ports)
-    x_min = min([p.x for p in input_ports])
+    x_min = min(p.x for p in input_ports)
 
     output_ports = []
     input_orientation = input_ports[0].angle if input_ports else 1
     if input_orientation in [1, 3]:
+        y_max = input_ports[-1].y
+        y_min = input_ports[0].y
         for p in input_ports:
             temp_port = p.copy()
             y_shift = y_max if input_orientation == 1 else y_min
