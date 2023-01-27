@@ -26,7 +26,7 @@ import klayout.lay as klay
 
 # import klayout.lay as klay #<- enable when klayout > 0.28
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 
 __all__ = [
