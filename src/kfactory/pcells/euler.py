@@ -168,7 +168,6 @@ def bend_euler(
     c = KCell()
     dbu = c.layout().dbu
     backbone = euler_bend_points(theta, radius=radius, resolution=resolution)
-    print(backbone)
 
     extrude_path(
         target=c,
@@ -212,9 +211,9 @@ def bend_euler(
 
 @autocell
 def bend_s_euler(
-    offset: int,  # =10000,
-    width: int,  # =WY_WIDTH_1560p61,
-    radius: int,  # =WY_RADIUS_EULER,
+    offset: float,
+    width: float,
+    radius: float,
     layer: int,
     enclosure: Optional[Enclosure] = None,
     resolution: float = 150,
@@ -222,22 +221,10 @@ def bend_s_euler(
     c = KCell()
     dbu = c.layout().dbu
     backbone = euler_sbend_points(
-        offset=offset * c.library.dbu,
-        radius=radius * c.library.dbu,
+        offset=offset,
+        radius=radius,
         resolution=resolution,
     )
-    # pts = extrude_path(backbone, width * c.layout().dbu)
-    # pol = kdb.DPolygon(pts)
-    # c.shapes(layer).insert(pol)
-
-    # if enclosure is not None:
-    #     enclosure.apply_custom(
-    #         c,
-    #         lambda d: kdb.DPolygon(
-    #             extrude_path(backbone, (2 * d + width) * c.layout().dbu)
-    #         ).to_itype(c.library.dbu),
-    #     )
-
     extrude_path(
         target=c,
         layer=layer,

@@ -179,10 +179,10 @@ def extrude_path(
         start_angle: optionally specify a custom starting angle if `None` will be autocalculated from the first two elements
         end_angle: optionally specify a custom ending angle if `None` will be autocalculated from the last two elements
     """
-    _layer_list: list[tuple[int, LayerEnum | int]] = (
-        [(0, layer)] if enclosure is None else [(0, layer)] + enclosure.enclosures
+    _layer_list: list[tuple[LayerEnum | int, int]] = (
+        [(layer, 0)] if enclosure is None else [(layer, 0)] + enclosure.enclosures
     )
-    for d, _layer in _layer_list:
+    for _layer, d in _layer_list:
         p_top, p_bot = extrude_path_points(
             path, width + 2 * d * target.library.dbu, start_angle, end_angle
         )
@@ -287,11 +287,11 @@ def extrude_path_dynamic(
         end_angle: optionally specify a custom ending angle if `None` will be autocalculated from the last two elements
     """
 
-    _layer_list: list[tuple[int, LayerEnum | int]] = (
-        [(0, layer)] if enclosure is None else [(0, layer)] + enclosure.enclosures
+    _layer_list: list[tuple[LayerEnum | int, int]] = (
+        [(layer, 0)] if enclosure is None else [(0, layer)] + enclosure.enclosures
     )
     if is_callable_widths(widths):
-        for d, _layer in _layer_list:
+        for _layer, d in _layer_list:
 
             def d_widths(x: float) -> float:
                 return widths(x) + 2 * d * target.library.dbu  # type: ignore[no-any-return, operator]
@@ -302,7 +302,7 @@ def extrude_path_dynamic(
             p_bot.reverse()
             target.shapes(_layer).insert(kdb.DPolygon(p_top + p_bot))
     else:
-        for d, _layer in _layer_list:
+        for _layer, d in _layer_list:
             _widths = [w + d * target.library.dbu for w in widths]  # type: ignore[union-attr]
             p_top, p_bot = extrude_path_dynamic_points(
                 path, _widths, start_angle, end_angle

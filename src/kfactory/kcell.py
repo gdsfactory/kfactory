@@ -13,6 +13,7 @@ from typing import (  # ParamSpec, # >= python 3.10
     Any,
     Callable,
     Concatenate,
+    Iterable,
     Iterator,
     Optional,
     Protocol,
@@ -32,7 +33,10 @@ from typing_extensions import ParamSpec
 
 import kfactory.kdb as kdb
 
+from .port import rename_clockwise
+
 KP = ParamSpec("KP")
+OP = ParamSpec("OP")
 
 
 def is_simple_port(port: "Port | DPort | ICplxPort | DCplxPort") -> "TypeGuard[Port]":
@@ -138,11 +142,13 @@ class KLib(kdb.Layout):
 
     Attributes:
         editable: Whether the layout should be opened in editable mode (default: True)
+        rename_function: function that takes an Iterable[Port] and renames them
     """
 
     def __init__(self, editable: bool = True) -> None:
         self.kcells: dict[str, "KCell"] = {}
         kdb.Layout.__init__(self, editable)
+        self.rename_function: Callable[..., None] = rename_clockwise
 
     def create_cell(  # type: ignore[override]
         self,
@@ -1146,21 +1152,21 @@ class KCell:
             )
 
             if port.complex():
-                strans = port.trans.s_trans()  # type: ignore[attr-defined]
+                strans = port.trans.s_trans()  # type: ignore[union-attr]
             else:
                 strans = port.trans.dup()
 
             if port.int_based():
                 trans = strans
             else:
-                trans = strans.to_itype(self.library.dbu)
+                trans = strans.to_itype(self.library.dbu)  # type: ignore[union-attr]
 
             _port = Port(
                 name=port.name,
                 width=port.width  # type: ignore[arg-type]
                 if port.int_based()
                 else int(port.width / self.library.dbu),
-                trans=trans,
+                trans=trans,  # type: ignore[arg-type]
                 port_type=port.port_type,
                 layer=port.layer,
             )
@@ -1236,16 +1242,19 @@ class KCell:
         insts_hashs = list(sorted(inst.hash() for inst in self.insts))
         return h.digest()
 
-    def autorename_ports(self) -> None:
-        """Rename the ports with the schema angle -> "NSWE" and sort by x and y"""
-        for angle, name in zip([0, 1, 2, 3], ["E", "N", "W", "S"]):
-            for i, port in enumerate(
-                sorted(
-                    filter(lambda port: port.trans.angle == angle, self.ports._ports),
-                    key=lambda port: (port.trans.disp.x, port.trans.disp.y),
-                )
-            ):
-                port.name = f"{name}{i}"
+    def autorename_ports(
+        self, rename_func: Optional[Callable[..., None]] = None
+    ) -> None:
+        """Rename the ports with the schema angle -> "NSWE" and sort by x and y
+
+        Args:
+            rename_func: Function that takes Iterable[Port] and renames them. This can of course contain a filter and only rename some of the ports
+        """
+
+        if rename_func is None:
+            self.library.rename_function(self.ports._ports)
+        else:
+            rename_func(self.ports._ports)
 
     def flatten(self, prune: bool = True, merge: bool = True) -> None:
         """Flatten the cell. Pruning will delete the klayout.db.Cell if unused, but might cause artifacts at the moment

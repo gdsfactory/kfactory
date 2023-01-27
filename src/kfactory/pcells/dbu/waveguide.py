@@ -1,7 +1,7 @@
 from ... import KCell, LayerEnum, autocell, kdb, library
 from ...utils import Enclosure
 
-__all__ = ["waveguide_dbu"]
+__all__ = ["waveguide"]
 
 
 @autocell
