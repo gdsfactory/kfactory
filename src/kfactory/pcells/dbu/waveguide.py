@@ -16,7 +16,7 @@ def waveguide(
     c = KCell()
 
     if width // 2 * 2 != width:
-        raise ValueError(f"The width (w) must be a multiple of 2 database units")
+        raise ValueError("The width (w) must be a multiple of 2 database units")
 
     c.shapes(layer).insert(kdb.Box(0, -width // 2, length, width // 2))
     c.create_port(name="o1", trans=kdb.Trans(2, False, 0, 0), layer=layer, width=width)

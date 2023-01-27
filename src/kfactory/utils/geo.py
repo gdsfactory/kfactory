@@ -81,15 +81,14 @@ def simplify(points: list[kdb.Point], tolerance: float) -> list[kdb.Point]:
     ind_dist = int(np.argmax(dists))
     maxd = dists[ind_dist]
 
-    if maxd <= tolerance:
-        return [points[0], points[-1]]
-    else:
-        return (
+    return (
+        [points[0], points[-1]]
+        if maxd <= tolerance
+        else (
             simplify(points[: ind_dist + 1], tolerance)
             + simplify(points[ind_dist:], tolerance)[1:]
         )
-
-    return simple_pts
+    )
 
 
 def bezier_curve(
@@ -239,9 +238,6 @@ def extrude_path_dynamic_points(
             p_old = p
             p = p_new
         ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / l)))
-        vector_top.append(end_trans * ref_vector)
-        vector_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_vector)
-
     else:
         ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths[0]))
         vector_top = [start_trans * ref_vector]
@@ -259,8 +255,8 @@ def extrude_path_dynamic_points(
             p_old = p
             p = p_new
         ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths[-1]))
-        vector_top.append(end_trans * ref_vector)
-        vector_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_vector)
+    vector_top.append(end_trans * ref_vector)
+    vector_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_vector)
 
     return [v.disp.to_p() for v in vector_top], [v.disp.to_p() for v in vector_bot]
 

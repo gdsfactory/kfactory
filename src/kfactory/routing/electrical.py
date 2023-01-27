@@ -53,7 +53,7 @@ def connect_L_route(
 
     y_max = input_ports[-1].y
     y_min = input_ports[0].y
-    x_max = max([p.x for p in input_ports])
+    x_max = max(p.x for p in input_ports)
     # x_min = min([p.x for p in input_ports])
 
     output_ports = []
@@ -100,15 +100,12 @@ def connect_bundle(
 
     y_max = input_ports[-1].y
     y_min = input_ports[0].y
-    x_max = max([p.x for p in input_ports])
+    x_max = max(p.x for p in input_ports)
     x_min = min([p.x for p in input_ports])
 
     output_ports = []
-    if len(input_ports) > 0:
-        input_orientation = input_ports[0].angle
-    else:
-        input_orientation = 1
-    if input_orientation == 1 or input_orientation == 3:
+    input_orientation = input_ports[0].angle if input_ports else 1
+    if input_orientation in [1, 3]:
         for p in input_ports:
             temp_port = p.copy()
             y_shift = y_max if input_orientation == 1 else y_min
@@ -179,11 +176,7 @@ def connect_bundle(
 
 
 def get_electrical_ports(c: Instance):
-    e_ports_list = []
-    for p in c.ports.get_all().values():
-        if p.port_type == "electrical":
-            e_ports_list.append(p)
-    return e_ports_list
+    return [p for p in c.ports.get_all().values() if p.port_type == "electrical"]
 
 
 def connect_wire(c: KCell, input_port: Port, output_port: Port):
