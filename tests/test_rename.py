@@ -42,7 +42,6 @@ def port_tests(rename_f: Optional[Callable[..., None]] = None) -> kf.KCell:
 @pytest.mark.parametrize("func", [None, port.rename_clockwise])
 def test_rename_default(func) -> None:
     cell = port_tests(func)
-    kf.show(cell)
     port_list = cell.ports._ports
     xl = len(port_x_coords)
 
