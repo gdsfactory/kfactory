@@ -33,7 +33,7 @@ jobs:
         run: |
           pip install -e .[ci]
       - name: Test with pytest
-        run: pytest
+        run: pytest -vv
   test_docs:
     needs: [pre-commit]
     runs-on: ${{ matrix.os }}
