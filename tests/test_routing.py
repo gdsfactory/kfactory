@@ -69,8 +69,7 @@ def test_connect_bend90(bend90, waveguide_factory, LAYER, optical_port, x, y, an
     "x,y,angle2",
     [
         (40000, 40000, 2),
-        # (20000, 20000, 3),
-        # (randint(10001, 20000), randint(10001, 20000), 3),
+        (10000, 10000, 3),
     ],
 )
 def test_connect_bend90_euler(
