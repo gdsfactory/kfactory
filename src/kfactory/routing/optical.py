@@ -365,7 +365,10 @@ def place90(
             < (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 + min_straight_taper
         ):
             wg = c << straight_factory(width=w, length=(pts[1] - pts[0]).abs())
-            wg.connect("W0", p1)
+            _p1, _p2 = (
+                v for v in wg.ports.get_all().values() if v.port_type == port_type
+            )
+            wg.connect(_p1.name, p1)
         else:
             t1 = c << taper_cell
             t1.connect(taperp1.name, p1)
