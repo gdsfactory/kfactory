@@ -168,7 +168,7 @@ def bend_euler(
     c = KCell()
     dbu = c.layout().dbu
     backbone = euler_bend_points(theta, radius=radius, resolution=resolution)
-    print(backbone)
+    # print(backbone)
 
     extrude_path(
         target=c,
