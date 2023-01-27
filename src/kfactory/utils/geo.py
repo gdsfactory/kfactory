@@ -184,7 +184,7 @@ def extrude_path(
     )
     for _layer, d in _layer_list:
         p_top, p_bot = extrude_path_points(
-            path, width + 2 * d * target.library.dbu, start_angle, end_angle
+            path, width / 2 + d * target.library.dbu, start_angle, end_angle
         )
         p_bot.reverse()
         target.shapes(_layer).insert(kdb.DPolygon(p_top + p_bot))

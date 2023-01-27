@@ -236,7 +236,7 @@ def bend_s_euler(
     )
 
     v = backbone[-1] - backbone[0]
-    if v.x > 0:
+    if v.x < 0:
         p1 = backbone[-1].to_itype(dbu)
         p2 = backbone[0].to_itype(dbu)
     else:
@@ -245,14 +245,14 @@ def bend_s_euler(
     c.create_port(
         name="W0",
         trans=kdb.Trans(2, False, p1.to_v()),
-        width=width,
+        width=int(width / c.library.dbu),
         port_type="optical",
         layer=layer,
     )
     c.create_port(
         name="E0",
         trans=kdb.Trans(0, False, p2.to_v()),
-        width=width,
+        width=int(width / c.library.dbu),
         port_type="optical",
         layer=layer,
     )
