@@ -93,9 +93,7 @@ def route_manhattan_180(
                     (t1 * kdb.Trans(0, False, -start_straight, 0)).disp.to_p(),
                 )
             if end_straight != 0:
-                pts.append(
-                    (t2 * kdb.Trans(0, False, -end_straight, 0)).disp.to_p()
-                )
+                pts.append((t2 * kdb.Trans(0, False, -end_straight, 0)).disp.to_p())
             return pts
         case _:
             return route_manhattan(
