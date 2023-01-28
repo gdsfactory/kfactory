@@ -49,8 +49,6 @@ def route_manhattan_180(
     if t2.disp == t1.disp and t2.angle == t1.angle:
         raise ValueError("Identically oriented ports cannot be connected")
 
-    t1 *= kdb.Trans(0, False, start_straight, 0)
-
     tv = t1.inverted() * (t2.disp - t1.disp)
 
     if (t2.angle - t1.angle) % 4 == 2 and tv.y == 0:
@@ -59,7 +57,8 @@ def route_manhattan_180(
         if tv.x == 0:
             return []
 
-    t2 *= kdb.Trans(0, False, start_straight, 0)
+    t1 *= kdb.Trans(0, False, start_straight, 0)
+    # t2 *= kdb.Trans(0, False, end_straight, 0)
 
     if start_straight != 0:
         points = [p1]
@@ -74,7 +73,6 @@ def route_manhattan_180(
         return points + end_points
     if (t2.angle - t1.angle) % 4 == 2 and tv.x > 0 and tv.y == 0:
         return points + end_points
-    # points.append(t1 * _p)
     match (tv.x, tv.y, (t2.angle - t1.angle) % 4):
         case (x, y, 0) if x > 0 and abs(y) == bend180_radius:
             if end_straight > 0:
@@ -155,8 +153,11 @@ def route_manhattan(
     p2 = t2 * _p
     tv = t1.inverted() * (t2.disp - t1.disp)
 
-    if (t2.angle - t1.angle) % 4 == 2 and tv.y == 0 and tv.x > 0:
-        return [p1, p2]
+    if (t2.angle - t1.angle) % 4 == 2 and tv.y == 0:
+        if tv.x > 0:
+            return [p1, p2]
+        if tv.x == 0:
+            return []
     if (
         (np.sign(tv.y) * (t2.angle - t1.angle)) % 4 == 3
         and abs(tv.y) > bend90_radius + end_straight
@@ -201,7 +202,6 @@ def route_manhattan(
             end_points = [t2 * _p, p2]
         else:
             t2 *= kdb.Trans(-int(np.sign(tv.x)), False, end_straight + bend90_radius, 0)
-            # t2 *= kdb.Trans(end_straight + bend90_radius, 0)
             end_points = [t2 * _p, p2]
             t2 *= kdb.Trans(2 * bend90_radius, 0)
             end_points.insert(0, t2 * _p)

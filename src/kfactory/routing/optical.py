@@ -308,6 +308,9 @@ def place90(
     allow_small_routes: bool = False,
 ) -> None:
 
+    if not pts:
+        # Nothing to be placed
+        return
     w = p1.width
     old_pt = pts[0]
     old_bend_port = p1
