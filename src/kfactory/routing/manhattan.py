@@ -53,8 +53,11 @@ def route_manhattan_180(
 
     tv = t1.inverted() * (t2.disp - t1.disp)
 
-    if (t2.angle - t1.angle) % 4 == 2 and tv.y == 0 and tv.x > 0:
-        return [p1, p2]
+    if (t2.angle - t1.angle) % 4 == 2 and tv.y == 0:
+        if tv.x > 0:
+            return [p1, p2]
+        if tv.x == 0:
+            return []
 
     t2 *= kdb.Trans(0, False, start_straight, 0)
 
