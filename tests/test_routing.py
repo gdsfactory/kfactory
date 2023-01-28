@@ -33,7 +33,7 @@ def test_connect_straight(bend90, waveguide_factory, LAYER, optical_port):
     c = kf.KCell()
     p1 = optical_port.copy()
     p2 = optical_port.copy()
-    p2.trans = kf.kdb.Trans(2, False, 10000, 0)
+    p2.trans = kf.kdb.Trans(2, False, 5000, 0)
     kf.routing.optical.connect(
         c,
         p1,
@@ -49,6 +49,8 @@ def test_connect_straight(bend90, waveguide_factory, LAYER, optical_port):
         (20000, 20000, 2),
         (10000, 10000, 3),
         (randint(10001, 20000), randint(10001, 20000), 3),
+        (5000, 10000, 3),  # the mean one where points will collide for radius 10000
+        # (5000, 30000, 3),
     ],
 )
 def test_connect_bend90(bend90, waveguide_factory, LAYER, optical_port, x, y, angle2):
@@ -56,6 +58,10 @@ def test_connect_bend90(bend90, waveguide_factory, LAYER, optical_port, x, y, an
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
+    b90r = abs(bend90.ports._ports[0].x - bend90.ports._ports[1].x)
+    warnings.filterwarnings("error")
+    warnings.filterwarnings("ignore", module="kfactory.routing.manhattan", lineno=178)
+
     kf.routing.optical.connect(
         c,
         p1,
@@ -64,11 +70,21 @@ def test_connect_bend90(bend90, waveguide_factory, LAYER, optical_port, x, y, an
         bend90_cell=bend90,
     )
 
+    warnings.filterwarnings("default", module="kfactory.routing.manhattan")
+    warnings.filterwarnings("default")
+
+    if x == 5000:
+        c.add_port(p1)
+        c.add_port(p2, name="o2")
+        c.draw_ports()
+        kf.show(c)
+
 
 @pytest.mark.parametrize(
     "x,y,angle2",
     [
         (40000, 40000, 2),
+        (20000, 20000, 3),
         (10000, 10000, 3),
     ],
 )
@@ -79,6 +95,9 @@ def test_connect_bend90_euler(
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
+    b90r = abs(bend90_euler.ports._ports[0].x - bend90_euler.ports._ports[1].x)
+    warnings.filterwarnings("error")
+    warnings.filterwarnings("ignore", module="kfactory.routing.manhattan", lineno=178)
     kf.routing.optical.connect(
         c,
         p1,
@@ -86,3 +105,5 @@ def test_connect_bend90_euler(
         straight_factory=waveguide_factory,
         bend90_cell=bend90_euler,
     )
+    warnings.filterwarnings("default", module="kfactory.routing.manhattan")
+    warnings.filterwarnings("default")

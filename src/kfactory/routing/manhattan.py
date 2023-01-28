@@ -1,3 +1,4 @@
+import warnings
 from typing import List, Optional, Union
 
 import numpy as np
@@ -57,14 +58,58 @@ def route_manhattan_180(
 
     t2 *= kdb.Trans(0, False, start_straight, 0)
 
-    points = [p1] if start_straight != 0 else []
-    end_points = [t2 * _p, p2] if end_straight != 0 else [p2]
+    if start_straight != 0:
+        points = [p1]
+    else:
+        points = []
+    if end_straight != 0:
+        end_points = [t2 * _p, p2]
+    else:
+        end_points = [p2]
     tv = t1.inverted() * (t2.disp - t1.disp)
     if tv.abs() == 0:
         return points + end_points
     if (t2.angle - t1.angle) % 4 == 2 and tv.x > 0 and tv.y == 0:
         return points + end_points
-    t1 = port1.dup() if isinstance(port1, kdb.Trans) else port1.trans.dup()
+    # points.append(t1 * _p)
+    match (tv.x, tv.y, (t2.angle - t1.angle) % 4):
+        case (x, y, 0) if x > 0 and abs(y) == bend180_radius:
+            if end_straight > 0:
+                t2 *= kdb.Trans(0, False, end_straight, 0)
+            pts = [t1.disp.to_p(), t2.disp.to_p()]
+            pts[1:1] = [pts[1] + (t2 * kdb.Vector(0, tv.y))]
+            raise NotImplementedError(
+                "`case (x, y, 0) if x > 0 and abs(y) == bend180_radius` not supported yet"
+            )
+        case (x, 0, 2):
+            if start_straight > 0:
+                t1 *= kdb.Trans(0, False, start_straight, 0)
+            if end_straight > 0:
+                t2 *= kdb.Trans(0, False, end_straight, 0)
+            pts = [t1.disp.to_p(), t2.disp.to_p()]
+            pts[1:1] = [
+                pts[0] + t1 * kdb.Vector(0, bend180_radius),
+                pts[1] + t2 * kdb.Vector(0, bend180_radius),
+            ]
+
+            if start_straight != 0:
+                pts.insert(
+                    0, (t1 * kdb.Trans(0, False, -start_straight, 0)).disp.to_p()
+                )
+            if end_straight != 0:
+                pts.append((t2 * kdb.Trans(0, False, -end_straight, 0)).disp.to_p())
+            return pts
+        case _:
+            pts = route_manhattan(
+                t1.dup(),
+                t2.dup(),
+                bend90_radius,
+                start_straight=0,
+                end_straight=end_straight,
+                in_dbu=True,
+            )
+            return pts  # points + pts
+
     raise NotImplementedError(
         "Case not supportedt yet. Please open an issue if you believe this is an error and needs to be implemented ;)"
     )
@@ -95,6 +140,7 @@ def route_manhattan(
     end_straight: int,
     in_dbu: bool = True,
     layout: Optional[KLib | kdb.Layout] = None,
+    max_tries: int = 20,
 ) -> List[kdb.Point]:
     """Calculates a hopefully minimal distance manhattan route (no s-bends)"""
 
@@ -105,6 +151,7 @@ def route_manhattan(
     p1 = t1 * _p
     p2 = t2 * _p
     tv = t1.inverted() * (t2.disp - t1.disp)
+
     if (t2.angle - t1.angle) % 4 == 2 and tv.y == 0 and tv.x > 0:
         return [p1, p2]
     if (
@@ -118,6 +165,18 @@ def route_manhattan(
 
     if t2.disp == t1.disp and t2.angle == t1.angle:
         raise ValueError("Identically oriented ports cannot be connected")
+
+    box = kdb.Box(
+        (t1 * kdb.Trans(0, False, start_straight, 0)).disp.to_p(),
+        (t2 * kdb.Trans(0, False, end_straight, 0)).disp.to_p(),
+    )
+    match (box.height(), box.width()):
+        case (x, y) if (x < bend90_radius and y <= 2 * bend90_radius) or (
+            x <= 2 * bend90_radius and y < bend90_radius
+        ):
+            warnings.warn(
+                f"Potential collision in routing due to small distance between the port in relation to bend radius {x=}/{bend90_radius}, {y=}/{bend90_radius}"
+            )
 
     # we want a straight start and have to add a bend radius if
     t1 *= kdb.Trans(start_straight + bend90_radius, 0)
@@ -133,18 +192,27 @@ def route_manhattan(
         else:
             end_points = [t2 * _p, p2]
     else:
-        t2 *= kdb.Trans(end_straight + bend90_radius, 0)
-        end_points = [t2 * _p, p2]
+
+        if abs(tv.x) >= bend90_radius and abs(tv.y) >= bend90_radius:
+            t2 *= kdb.Trans(end_straight + bend90_radius, 0)
+            end_points = [t2 * _p, p2]
+        else:
+            t2 *= kdb.Trans(-int(np.sign(tv.x)), False, end_straight + bend90_radius, 0)
+            # t2 *= kdb.Trans(end_straight + bend90_radius, 0)
+            end_points = [t2 * _p, p2]
+            t2 *= kdb.Trans(2 * bend90_radius, 0)
+            end_points.insert(0, t2 * _p)
 
     v = t1.inverted() * (t2.disp - t1.disp)
 
-    for i in range(10):
+    for i in range(max_tries):
         tv = t1.inverted() * (t2.disp - t1.disp)
-        if tv.abs() == 0:
+        if tv.abs() == 0 and (t2.angle - t1.angle) % 4 == 2:
             break
         if (t2.angle - t1.angle) % 4 == 2 and tv.x > 0 and tv.y == 0:
             break
         points.append(t1 * _p)
+
         match (int(np.sign(tv.x)), int(np.sign(tv.y)), (t2.angle - t1.angle) % 4):
             case (0, 0, ang):
                 if ang == 0:
@@ -188,7 +256,10 @@ def route_manhattan(
                         t1 *= kdb.Trans(0, False, 2 * bend90_radius + tv.x, 0)
                     else:
                         if abs(tv.y) < 2 * bend90_radius:
-                            t1 *= kdb.Trans((-y) % 4, False, 0, -y * 2 * bend90_radius)
+                            _y = y if y != 0 else 1
+                            t1 *= kdb.Trans(
+                                (-_y) % 4, False, 0, -_y * 2 * bend90_radius
+                            )
                         else:
                             t1 *= kdb.Trans(y % 4, False, 0, y * 2 * bend90_radius)
                 elif (y * ang) % 4 == 3 and x == 1:
