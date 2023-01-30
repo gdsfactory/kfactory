@@ -94,13 +94,6 @@ def test_connect_bend90(bend90, waveguide_factory, LAYER, optical_port, x, y, an
     )
     warnings.filterwarnings("default")
 
-    if (x, y) == (500, 30000):
-        c.add_port(p1)
-        c.add_port(p2, name="o2")
-        c.autorename_ports()
-        c.draw_ports()
-        kf.show(c)
-
 
 @pytest.mark.parametrize(
     "x,y,angle2",
