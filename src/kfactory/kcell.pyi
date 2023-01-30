@@ -57,7 +57,7 @@ TS = TypeVar("TS", bound=kdb.Trans | kdb.DTrans)
 TC = TypeVar("TC", bound=kdb.ICplxTrans | kdb.DCplxTrans)
 FI = TypeVar("FI", bound=int | float)
 
-class PortLike(ABCMeta, Generic[TT, FI]):  # Protocol[TT, FI]):
+class PortLike(ABC, Generic[TT, FI]):  # Protocol[TT, FI]):
 
     yaml_tag: str
     name: str

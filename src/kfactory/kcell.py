@@ -2,7 +2,7 @@ import abc
 import functools
 import importlib
 import warnings
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from dataclasses import InitVar, dataclass
 
 # from enum import IntEnum
@@ -287,7 +287,7 @@ TC = TypeVar("TC", bound=kdb.ICplxTrans | kdb.DCplxTrans)
 FI = TypeVar("FI", bound=int | float)
 
 
-class PortLike(ABCMeta, Generic[TT, FI]):
+class PortLike(ABC, Generic[TT, FI]):
 
     yaml_tag: str
     name: str
@@ -1909,7 +1909,7 @@ def autocell(
             @cached(cache=cache)
             @functools.wraps(f)
             def wrapped_cell(
-                **params: KCellParams.args | KCellParams.kwargs,
+                **params: KCellParams.args,
             ) -> KCell:
                 for key, value in params.items():
                     if isinstance(value, frozenset):
@@ -1950,7 +1950,7 @@ def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
     return frozenset(d.items())
 
 
-def frozenset_to_dict(fs: frozenset[tuple[str, Any]]) -> dict[str, Any]:
+def frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable]:
     return dict(fs)
 
 
