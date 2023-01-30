@@ -316,13 +316,13 @@ class PortLike(ABCMeta, Generic[TT, FI]):
     def center(self, value: tuple[FI, FI]) -> None:
         ...
 
-    @abstractmethod
     @property
+    @abstractmethod
     def x(self) -> FI:
         ...
 
-    @abstractmethod
     @property
+    @abstractmethod
     def y(self) -> FI:
         ...
 
@@ -702,7 +702,7 @@ class Port(IPortLike[kdb.Trans], SPortLike[kdb.Trans]):
         self.trans = self.trans * kdb.Trans(dest - org)
 
     @classmethod
-    def from_yaml(cls, constructor, node):  # type: ignore
+    def from_yaml(cls: "Type[Port]", constructor, node) -> "Port":  # type: ignore
         """Internal function used by the placer to convert yaml to a Port"""
         d = dict(constructor.construct_pairs(node))
         return cls(**d)
@@ -798,7 +798,7 @@ class DPort(DPortLike[kdb.DTrans], SPortLike[kdb.DTrans]):
         self.trans = self.trans * kdb.DTrans(dest - org)
 
     @classmethod
-    def from_yaml(cls, constructor, node):  # type: ignore
+    def from_yaml(cls: "Type[DPort]", constructor: Any, node: Any) -> "DPort":
         """Internal function used by the placer to convert yaml to a Port"""
         d = dict(constructor.construct_pairs(node))
         return cls(**d)
@@ -896,7 +896,7 @@ class ICplxPort(IPortLike[kdb.ICplxTrans], CPortLike[kdb.ICplxTrans]):
         self.trans = self.trans * kdb.ICplxTrans(dest - org)
 
     @classmethod
-    def from_yaml(cls, constructor, node):  # type: ignore
+    def from_yaml(cls: "Type[ICplxPort]", constructor: Any, node: Any) -> "ICplxPort":
         """Internal function used by the placer to convert yaml to a Port"""
         d = dict(constructor.construct_pairs(node))
         return cls(**d)
@@ -994,7 +994,9 @@ class DCplxPort(DPortLike[kdb.DCplxTrans], CPortLike[kdb.DCplxTrans]):
         self.trans = self.trans * kdb.DCplxTrans(dest - org)
 
     @classmethod
-    def from_yaml(cls, constructor, node):  # type: ignore
+    def from_yaml(
+        cls: "Callable[..., DCplxPort]", constructor: Any, node: Any
+    ) -> "DCplxPort":
         """Internal function used by the placer to convert yaml to a Port"""
         d = dict(constructor.construct_pairs(node))
         return cls(**d)
@@ -1344,7 +1346,9 @@ class KCell:
         return representer.represent_mapping(cls.yaml_tag, d)
 
     @classmethod
-    def from_yaml(cls, constructor, node, verbose=False):  # type: ignore
+    def from_yaml(
+        cls: "Callable[..., KCell]", constructor: Any, node: Any, verbose: bool = False
+    ) -> "KCell":
         """Internal function used by the placer to convert yaml to a KCell"""
         d = ruamel.yaml.constructor.SafeConstructor.construct_mapping(
             constructor,
@@ -1661,7 +1665,7 @@ class Instance:
             super().__setattr__(attr_name, attr_value)
 
     @classmethod
-    def to_yaml(cls, representer, node):  # type: ignore
+    def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
         d = {"cellname": node.cell.name, "trans": node.instance.trans}
         return representer.represent_mapping(cls.yaml_tag, d)
 
@@ -1799,11 +1803,11 @@ class Ports:
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
         return representer.represent_sequence(
             cls.yaml_tag,
-            node._ports,  # [Port.to_yaml(representer, p) for p in node._ports]
+            node._ports,
         )
 
     @classmethod
-    def from_yaml(cls, constructor, node):  # type: ignore[no-untyped-def]
+    def from_yaml(cls: "Type[Ports]", constructor: Any, node: Any) -> "Ports":
 
         return cls(constructor.construct_sequence(node))
 
