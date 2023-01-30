@@ -1164,16 +1164,8 @@ class KCell:
                 f"Port {str(port)} is not an integer based port, converting to integer based"
             )
 
-            if port.complex():
-                strans = port.trans.s_trans()  # type: ignore[union-attr]
-            else:
-                strans = port.trans.dup()
-
-            if port.int_based():
-                trans = strans
-            else:
-                trans = strans.to_itype(self.library.dbu)  # type: ignore[union-attr]
-
+            strans = port.trans.s_trans() if port.complex() else port.trans.dup()
+            trans = strans if port.int_based() else strans.to_itype(self.library.dbu)
             _port = Port(
                 name=port.name,
                 width=port.width  # type: ignore[arg-type]
@@ -1819,13 +1811,14 @@ class InstancePorts:
 
     def __getitem__(self, key: str) -> Port | DCplxPort:
         p = self.cell_ports[key]
-        if not (self.instance.instance.is_complex()):
-            return p.copy(trans=self.instance.trans)
-        else:
-            return p.copy_cplx(
+        return (
+            p.copy_cplx(
                 trans=self.instance.instance.dcplx_trans,
                 dbu=self.instance.cell.library.dbu,
             )
+            if (self.instance.instance.is_complex())
+            else p.copy(trans=self.instance.trans)
+        )
 
     def __repr__(self) -> str:
         return repr({v: self.__getitem__(v) for v in self.cell_ports.get_all().keys()})
@@ -1939,11 +1932,7 @@ def autocell(
 
         return wrapper_autocell
 
-    if _func is None:
-
-        return decorator_autocell
-    else:
-        return decorator_autocell(_func)
+    return decorator_autocell if _func is None else decorator_autocell(_func)
 
 
 def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
