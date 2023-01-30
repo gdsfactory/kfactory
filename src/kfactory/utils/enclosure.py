@@ -32,7 +32,7 @@ class Enclosure:
 
     def __init__(
         self,
-        enclosures: Sequence[tuple[int, LayerEnum | int]] = [],
+        enclosures: Sequence[tuple[LayerEnum | int, int]] = [],
         name: Optional[str] = None,
     ):
         self.enclosures = list(enclosures)
@@ -53,7 +53,7 @@ class Enclosure:
         encs.update(other.enclosures)
         self.enclosures = list(encs)
 
-    def add_enclosure(self, enc: tuple[int | LayerEnum, int]) -> None:
+    def add_enclosure(self, enc: tuple[LayerEnum | int, int]) -> None:
         self.enclosures.append(enc)
 
     def apply_minkowski_enc(
@@ -127,7 +127,7 @@ class Enclosure:
 
     @property
     def name(self) -> str:
-        return f"enc{self.__hash__()}" if self._name is None else f"enc{self._name}"
+        return f"{self.__hash__()}" if self._name is None else f"{self._name}"
 
     @name.setter
     def name(self, value: str) -> None:
@@ -186,7 +186,7 @@ def extrude_path_static(
     start_angle: Optional[float] = None,
     end_angle: Optional[float] = None,
 ) -> None:
-    _layer_list: list[tuple[int, LayerEnum | int]] = (
+    _layer_list: list[tuple[LayerEnum | int, int]] = (
         [(layer, 0)] if enclosure is None else [(0, layer)] + enclosure.enclosures
     )
     for _layer, d in _layer_list:
@@ -270,11 +270,11 @@ def extrude_profile(
     end_angle: Optional[float] = None,
 ) -> None:
 
-    _layer_list: list[tuple[int, LayerEnum | int]] = (
+    _layer_list: list[tuple[LayerEnum | int, int]] = (
         [(layer, 0)] if enclosure is None else [(layer, 0)] + enclosure.enclosures
     )
     if isinstance(widths, list):
-        for d, _layer in _layer_list:
+        for _layer, d in _layer_list:
             _widths = [w + d * target.library.dbu for w in widths]
             polygon = extrude_profile_single(path, _widths, start_angle, end_angle)
             target.shapes(_layer).insert(polygon)
