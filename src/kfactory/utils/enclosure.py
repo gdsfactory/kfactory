@@ -115,7 +115,7 @@ class Enclosure:
             _ref = c.bbox_per_layer(ref)
         elif is_Region(ref):
             _ref = ref.bbox()
-        return self.apply_custom(c, lambda d: _ref.enlarged(d, d))
+        self.apply_custom(c, lambda d: _ref.enlarged(d, d))
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]

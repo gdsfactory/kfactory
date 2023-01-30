@@ -12,6 +12,7 @@ from typing import (
 )
 
 if TYPE_CHECKING:
+    from . import kdb
     from .kcell import KCell, LayerEnum, Port
 
 
