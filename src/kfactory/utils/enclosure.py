@@ -127,10 +127,7 @@ class Enclosure:
 
     @property
     def name(self) -> str:
-        if self._name is None:
-            return f"enc{self.__hash__()}"
-        else:
-            return f"enc{self._name}"
+        return f"enc{self.__hash__()}" if self._name is None else f"enc{self._name}"
 
     @name.setter
     def name(self, value: str) -> None:
@@ -177,8 +174,7 @@ def extrude_path_static_single(
     points_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_point)
 
     points_bot.reverse()
-    polygon = kdb.DPolygon(points_top + points_bot)
-    return polygon
+    return kdb.DPolygon(points_top + points_bot)
 
 
 def extrude_path_static(
@@ -240,9 +236,6 @@ def extrude_profile_single(
             p_old = p
             p = p_new
         ref_point = kdb.DPoint(0, width(z / l))
-        points_top.append(end_trans * ref_point)
-        points_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_point)
-
     else:
         ref_point = kdb.DPoint(0, width[0])
         points_top = [start_trans * ref_point]
@@ -260,12 +253,11 @@ def extrude_profile_single(
             p_old = p
             p = p_new
         ref_point = kdb.DPoint(0, width[-1])
-        points_top.append(end_trans * ref_point)
-        points_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_point)
+    points_top.append(end_trans * ref_point)
+    points_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_point)
 
     points_bot.reverse()
-    polygon = kdb.DPolygon(points_top + points_bot)
-    return polygon
+    return kdb.DPolygon(points_top + points_bot)
 
 
 def extrude_profile(

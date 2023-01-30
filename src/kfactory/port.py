@@ -98,10 +98,7 @@ def rename_by_direction(
     _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
 
     for dir in DIRECTION:
-        if dir < 2:
-            dir_2 = -1
-        else:
-            dir_2 = 1
+        dir_2 = -1 if dir < 2 else 1
         if dir % 2:
 
             def key_sort(port: "Port") -> tuple[int, int]:
