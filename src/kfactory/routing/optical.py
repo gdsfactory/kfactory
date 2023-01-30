@@ -136,8 +136,8 @@ def connect(
 
     start_port = p1.copy()
     end_port = p2.copy()
-    b90r = max(
-        (b90p1.trans.disp - b90c.disp).abs(), (b90p2.trans.disp - b90c.disp).abs()
+    b90r = int(
+        max((b90p1.trans.disp - b90c.disp).abs(), (b90p2.trans.disp - b90c.disp).abs())
     )
 
     if bend180_cell is not None:
@@ -161,7 +161,7 @@ def connect(
             )
         )
 
-        b180r = (b180p2.trans.disp - b180p1.trans.disp).abs()
+        b180r = int((b180p2.trans.disp - b180p1.trans.disp).abs())
         start_port = p1.copy()
         end_port = p2.copy()
         pts = route_path_function(
@@ -307,6 +307,10 @@ def place90(
     min_straight_taper: int = 1000,
     allow_small_routes: bool = False,
 ) -> None:
+
+    if not pts:
+        # Nothing to be placed
+        return
     w = p1.width
     old_pt = pts[0]
     old_bend_port = p1

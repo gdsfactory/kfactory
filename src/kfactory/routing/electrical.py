@@ -81,7 +81,9 @@ def connect_L_route(
             temp_port.trans.angle = 3
             output_ports.append(temp_port)
     else:
-        raise ("Invalid L-shape routing. Please change output_orientaion to 1 or 3.")
+        raise ValueError(
+            "Invalid L-shape routing. Please change output_orientaion to 1 or 3."
+        )
     return output_ports
 
 
@@ -90,7 +92,7 @@ def connect_bundle(
     input_ports: list[Port],
     target_ports: list[Port],
     wire_spacing: int = 10000,
-) -> list[Port]:
+) -> None:
     """
     This function takes a list of input ports and assume they are all oriented in the same direction (could be any of W, S, E, N).
     The target ports have the opposite orientation, i.e. if input ports are oriented to north, and target ports should be oriented to south.
@@ -175,40 +177,39 @@ def connect_bundle(
                 B_count = 0
 
 
-def get_electrical_ports(c: Instance):
+def get_electrical_ports(c: Instance) -> list[Port]:
     return [p for p in c.ports.get_all().values() if p.port_type == "electrical"]
 
 
-def connect_wire(c: KCell, input_port: Port, output_port: Port):
+def connect_wire(c: KCell, input_port: Port, output_port: Port) -> None:
     """
     This function mainly implements a connection between two electrical ports.
     Not finished yet. Don't use.
-    Input args:
+    Args:
         input port: kf.Port
         output port: kf.Port
     """
     if (input_port.angle + output_port.angle) % 2 == 0:
         left_corner = (
-            kdb.Point(input_port.x, input_port.y - input_port.width / 2)
+            kdb.Point(input_port.x, input_port.y - input_port.width // 2)
             if input_port.angle % 2 == 0
-            else kdb.Point(input_port.x - input_port.width / 2, input_port.y)
+            else kdb.Point(input_port.x - input_port.width // 2, input_port.y)
         )
         middle_top = (
             kdb.Point(
-                (input_port.x + output_port.x) / 2, input_port.y + input_port.width / 2
+                (input_port.x + output_port.x) // 2,
+                input_port.y + input_port.width // 2,
             )
             if input_port.angle % 2 == 0
             else kdb.Point(
-                input_port.x - input_port.width / 2, (input_port.y + output_port.y)
+                input_port.x - input_port.width // 2, (input_port.y + output_port.y)
             )
         )
         right_corner = (
-            kdb.Point(output_port.x, output_port.y + input_port.width / 2)
+            kdb.Point(output_port.x, output_port.y + input_port.width // 2)
             if input_port.angle % 2 == 0
-            else kdb.Point(output_port.x + input_port.width / 2, output_port.y)
+            else kdb.Point(output_port.x + input_port.width // 2, output_port.y)
         )
-
-    # return c
 
 
 def connect_dual_rails(
@@ -226,13 +227,13 @@ def connect_dual_rails(
     if width is None:
         width = start_port.width
     if hole_width is None:
-        hole_width = start_port.width / 2
+        hole_width = start_port.width // 2
     if layer is None:
         layer = start_port.layer
     if start_straight is None:
-        start_straight = int(width / 2)
+        start_straight = width // 2
     if end_straight is None:
-        end_straight = int(width / 2)
+        end_straight = width // 2
 
     pts = route_path_function(
         start_port.copy(),

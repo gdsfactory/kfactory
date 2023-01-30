@@ -3,8 +3,7 @@ from typing import Optional
 import numpy as np
 
 from .. import kdb
-from ..kcell import KCell, autocell
-from ..tech import LayerEnum
+from ..kcell import KCell, LayerEnum, autocell
 from ..utils import Enclosure
 from ..utils.geo import extrude_path
 
@@ -56,7 +55,7 @@ def bend_circular(
     c.create_port(
         name="o1",
         trans=kdb.Trans(2, False, 0, 0),
-        width=int(width * c.library.dbu),
+        width=int(width / c.library.dbu),
         layer=layer,
     )
 

@@ -26,15 +26,40 @@ def waveguide_factory(LAYER, wg_enc):
 
 @pytest.fixture
 def bend90(LAYER, wg_enc):
-    return kf.pcells.euler.bend_euler(
+    return kf.pcells.circular.bend_circular(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=90
     )
 
 
 @pytest.fixture
 def bend180(LAYER, wg_enc):
+    return kf.pcells.circular.bend_circular(
+        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=180
+    )
+
+
+@pytest.fixture
+def bend90_euler(LAYER, wg_enc):
+    return kf.pcells.euler.bend_euler(
+        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=90
+    )
+
+
+@pytest.fixture
+def bend180_euler(LAYER, wg_enc):
     return kf.pcells.euler.bend_euler(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=180
+    )
+
+
+@pytest.fixture
+def optical_port(LAYER):
+    return kf.Port(
+        name="o1",
+        trans=kf.kdb.Trans.R0,
+        layer=LAYER.WG,
+        width=1000,
+        port_type="optical",
     )
 
 

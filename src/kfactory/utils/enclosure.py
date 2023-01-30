@@ -1,12 +1,10 @@
 from enum import Enum
-from typing import Any, Callable, Optional, Sequence, Set, TypeGuard
+from typing import Any, Callable, Optional, Sequence, Set, TypeGuard, cast
 
 import numpy as np
 
-# import kfactory.kdb as kdb
-import kfactory.kdb as kdb
-from kfactory.kcell import KCell
-from kfactory.tech import LayerEnum
+from .. import kdb
+from ..kcell import KCell, LayerEnum
 
 __all__ = ["Enclosure", "Direction"]
 
@@ -19,7 +17,7 @@ def is_int(r: object) -> TypeGuard[int]:
     return isinstance(r, int)
 
 
-def is_callable(r: object) -> TypeGuard[Callable[..., Any]]:
+def is_callable(r: object) -> TypeGuard[Callable[[float], float]]:
     return callable(r)
 
 
@@ -117,7 +115,7 @@ class Enclosure:
             _ref = c.bbox_per_layer(ref)
         elif is_Region(ref):
             _ref = ref.bbox()
-        return self.apply_custom(c, lambda d: _ref.enlarged(d, d))
+        self.apply_custom(c, lambda d: _ref.enlarged(d, d))
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
@@ -129,10 +127,7 @@ class Enclosure:
 
     @property
     def name(self) -> str:
-        if self._name is None:
-            return f"enc{self.__hash__()}"
-        else:
-            return f"enc{self._name}"
+        return f"enc{self.__hash__()}" if self._name is None else f"enc{self._name}"
 
     @name.setter
     def name(self, value: str) -> None:
@@ -179,8 +174,7 @@ def extrude_path_static_single(
     points_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_point)
 
     points_bot.reverse()
-    polygon = kdb.DPolygon(points_top + points_bot)
-    return polygon
+    return kdb.DPolygon(points_top + points_bot)
 
 
 def extrude_path_static(
@@ -242,9 +236,6 @@ def extrude_profile_single(
             p_old = p
             p = p_new
         ref_point = kdb.DPoint(0, width(z / l))
-        points_top.append(end_trans * ref_point)
-        points_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_point)
-
     else:
         ref_point = kdb.DPoint(0, width[0])
         points_top = [start_trans * ref_point]
@@ -262,12 +253,11 @@ def extrude_profile_single(
             p_old = p
             p = p_new
         ref_point = kdb.DPoint(0, width[-1])
-        points_top.append(end_trans * ref_point)
-        points_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_point)
+    points_top.append(end_trans * ref_point)
+    points_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_point)
 
     points_bot.reverse()
-    polygon = kdb.DPolygon(points_top + points_bot)
-    return polygon
+    return kdb.DPolygon(points_top + points_bot)
 
 
 def extrude_profile(
@@ -283,16 +273,20 @@ def extrude_profile(
     _layer_list: list[tuple[int, LayerEnum | int]] = (
         [(layer, 0)] if enclosure is None else [(layer, 0)] + enclosure.enclosures
     )
-    if callable(widths):
-        for _layer, d in _layer_list:
-
-            def d_widths(x: float) -> float:
-                return widths(x) + d * target.library.dbu
-
-            polygon = extrude_profile_single(path, d_widths, start_angle, end_angle)
-            target.shapes(_layer).insert(polygon)
-    else:
+    if isinstance(widths, list):
         for d, _layer in _layer_list:
             _widths = [w + d * target.library.dbu for w in widths]
             polygon = extrude_profile_single(path, _widths, start_angle, end_angle)
             target.shapes(_layer).insert(polygon)
+    elif callable(widths):
+        for _layer, d in _layer_list:
+
+            def d_widths(x: float) -> float:
+                return widths(x) + d * target.library.dbu  # type: ignore[no-any-return, operator]
+
+            polygon = extrude_profile_single(path, d_widths, start_angle, end_angle)
+            target.shapes(_layer).insert(polygon)
+    else:
+        raise ValueError(
+            f"width must be of type list[float] or Callable[[float], float] in the range of x==0 to x==1, it's type {type(widths)}"
+        )

@@ -28,7 +28,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["black>=21", "mypy", "pre-commit", "commitizen", "gitpython", "pylsp-mypy", "types-cachetools"]
 docs = ["sphinx", "docutils==0.17.1", "sphinx_rtd_theme", "sphinxcontrib-video", "sphinx-autodoc-typehints", "sphinx-book-theme==0.3.3", "sphinx-click", "sphinx-copybutton","sphinx-markdown-tables==0.0.16", "myst-parser", "matplotlib", "nbsphinx", "autodoc_pydantic"]
-ci = ["flake8", "pytest", "pytest_regressions"]
+ci = ["flake8", "pytest", "pytest_regressions", "mypy", "types-cachetools"]
 
 
 [tool.setuptools.packages.find]
@@ -57,6 +57,9 @@ exclude = '''  # Specify the files/dirs that should be ignored by the black form
 [tool.mypy]
 python_version = "3.10"
 strict = true
+exclude = [
+	"tests",
+]
 
 [tool.pylsp-mypy]
 enabled = true

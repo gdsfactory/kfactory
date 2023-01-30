@@ -143,15 +143,3 @@ class LayerLevel(BaseModel):
     sidewall_angle: float = 0
     z_to_bias: Optional[Tuple[List[float], List[float]]] = None
     info: Dict[str, Any] = {}
-
-
-if __name__ == "__main__":
-    print(
-        LAYER.WG,
-        int(LAYER.WG),
-        LAYER.WG.name,
-        LAYER.WG[0],
-        LAYER.WG[1],
-        list(LAYER.WG),
-        KCell().shapes(LAYER.WG),
-    )

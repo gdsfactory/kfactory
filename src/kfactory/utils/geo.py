@@ -159,7 +159,7 @@ def extrude_path_points(
 
 def extrude_path(
     target: KCell,
-    layer: LayerEnum,
+    layer: LayerEnum | int,
     path: list[kdb.DPoint],
     width: float,
     enclosure: Optional[Enclosure] = None,
@@ -263,7 +263,7 @@ def extrude_path_dynamic_points(
 
 def extrude_path_dynamic(
     target: KCell,
-    layer: LayerEnum,
+    layer: LayerEnum | int,
     path: list[kdb.DPoint],
     widths: Callable[[float], float] | list[float],
     enclosure: Optional[Enclosure] = None,
