@@ -2001,7 +2001,7 @@ def clean_value(
             return "_".join(clean_value(v) for v in value)
         elif isinstance(value, dict):
             return dict2name(**value)
-        elif isinstance(value, KCell):
+        elif hasattr(value, "name"):
             return clean_name(value.name)
         elif callable(value):
             return str(value.__name__)
