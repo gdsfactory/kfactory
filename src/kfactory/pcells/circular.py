@@ -3,8 +3,7 @@ from typing import Optional
 import numpy as np
 
 from .. import kdb
-from ..kcell import KCell, autocell
-from ..tech import LayerEnum
+from ..kcell import KCell, LayerEnum, autocell
 from ..utils import Enclosure
 from ..utils.geo import extrude_path
 

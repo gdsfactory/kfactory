@@ -2,6 +2,7 @@ import abc
 import functools
 import importlib
 import warnings
+from abc import ABCMeta, abstractmethod
 from dataclasses import InitVar, dataclass
 
 # from enum import IntEnum
@@ -13,6 +14,8 @@ from typing import (  # ParamSpec, # >= python 3.10
     Any,
     Callable,
     Concatenate,
+    Generic,
+    Hashable,
     Iterable,
     Iterator,
     Optional,
@@ -31,11 +34,10 @@ import ruamel.yaml
 from cachetools import Cache, cached
 from typing_extensions import ParamSpec
 
-import kfactory.kdb as kdb
-
+from . import kdb
 from .port import rename_clockwise
 
-KP = ParamSpec("KP")
+KCellParams = ParamSpec("KCellParams")
 OP = ParamSpec("OP")
 
 
@@ -237,6 +239,46 @@ library = (
 )  #: Default library object. :py:class:`~kfactory.kcell.KCell` uses this object unless another one is specified in the constructor
 
 
+class LayerEnum(int, Enum):
+
+    layer: int
+    datatype: int
+
+    def __new__(  # type: ignore[misc]
+        cls: "LayerEnum",
+        layer: int,
+        datatype: int,
+        lib: KLib = library,
+    ) -> "LayerEnum":
+        value = lib.layer(layer, datatype)
+        obj: int = int.__new__(cls, value)  # type: ignore[call-overload]
+        obj._value_ = value  # type: ignore[attr-defined]
+        obj.layer = layer  # type: ignore[attr-defined]
+        obj.datatype = datatype  # type: ignore[attr-defined]
+        return obj  # type: ignore[return-value]
+
+    def __getitem__(self, key: int) -> int:
+        if key == 0:
+            return self.layer
+        elif key == 1:
+            return self.datatype
+
+        else:
+            raise ValueError(
+                "LayerMap only has two values accessible like"
+                " a list, layer == [0] and datatype == [1]"
+            )
+
+    def __len__(self) -> int:
+        return 2
+
+    def __iter__(self) -> Iterator[int]:
+        yield from [self.layer, self.datatype]
+
+    def __str__(self) -> str:
+        return self.name
+
+
 TT = TypeVar("TT", bound=kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans)
 TD = TypeVar("TD", bound=kdb.DTrans | kdb.DCplxTrans)
 TI = TypeVar("TI", bound=kdb.Trans | kdb.ICplxTrans)
@@ -245,7 +287,7 @@ TC = TypeVar("TC", bound=kdb.ICplxTrans | kdb.DCplxTrans)
 FI = TypeVar("FI", bound=int | float)
 
 
-class PortLike(Protocol[TT, FI]):
+class PortLike(ABCMeta, Generic[TT, FI]):
 
     yaml_tag: str
     name: str
@@ -265,30 +307,38 @@ class PortLike(Protocol[TT, FI]):
         ...
 
     @property
+    @abstractmethod
     def center(self) -> tuple[FI, FI]:
         ...
 
     @center.setter
+    @abstractmethod
     def center(self, value: tuple[FI, FI]) -> None:
         ...
 
+    @abstractmethod
     @property
     def x(self) -> FI:
         ...
 
+    @abstractmethod
     @property
     def y(self) -> FI:
         ...
 
+    @abstractmethod
     def hash(self) -> bytes:
         ...
 
+    @abstractmethod
     def complex(self) -> bool:
         ...
 
+    @abstractmethod
     def int_based(self) -> bool:
         ...
 
+    @abstractmethod
     def dcplx_trans(self, dbu: float) -> kdb.DCplxTrans:
         ...
 
@@ -310,6 +360,7 @@ class PortLike(Protocol[TT, FI]):
                 trans=trans * self.dcplx_trans(dbu),
             )
 
+    @abstractmethod
     def copy(self) -> "PortLike[TT, FI]":
         ...
 
@@ -976,46 +1027,6 @@ class DCplxPort(DPortLike[kdb.DCplxTrans], CPortLike[kdb.DCplxTrans]):
 
     def dcplx_trans(self, dbu: float) -> kdb.DCplxTrans:
         return self.trans.dup()
-
-
-class LayerEnum(int, Enum):  # IntEnum):
-
-    layer: int
-    datatype: int
-
-    def __new__(  # type: ignore[misc]
-        cls: "LayerEnum",
-        layer: int,
-        datatype: int,
-        lib: KLib = library,
-    ) -> "LayerEnum":
-        value = lib.layer(layer, datatype)
-        obj: int = int.__new__(cls, value)  # type: ignore[call-overload]
-        obj._value_ = value  # type: ignore[attr-defined]
-        obj.layer = layer  # type: ignore[attr-defined]
-        obj.datatype = datatype  # type: ignore[attr-defined]
-        return obj  # type: ignore[return-value]
-
-    def __getitem__(self, key: int) -> int:
-        if key == 0:
-            return self.layer
-        elif key == 1:
-            return self.datatype
-
-        else:
-            raise ValueError(
-                "LayerMap only has two values accessible like"
-                " a list, layer == [0] and datatype == [1]"
-            )
-
-    def __len__(self) -> int:
-        return 2
-
-    def __iter__(self) -> Iterator[int]:
-        yield from [self.layer, self.datatype]
-
-    def __str__(self) -> str:
-        return self.name
 
 
 class KCell:
@@ -1834,44 +1845,52 @@ class InstancePorts:
 
 
 @overload
-def autocell(
-    _func: None = None,
-    *,
-    set_settings: bool = True,
-    set_name: bool = True,
-    maxsize: int = 512,
-) -> Callable[KP, KCell]:
+def autocell(_func: Callable[KCellParams, KCell], /) -> Callable[KCellParams, KCell]:
     ...
 
 
 @overload
-def autocell(_func: Callable[KP, KCell]) -> Callable[KP, KCell]:
-    ...
-
-
 def autocell(
-    _func: Optional[Callable[KP, KCell]] = None,
     *,
     set_settings: bool = True,
     set_name: bool = True,
     maxsize: int = 512,
-) -> Callable[KP, KCell] | Callable[[Callable[KP, KCell]], Callable[KP, KCell]]:
+) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]:
+    ...
+
+
+def autocell(
+    _func: Optional[Callable[KCellParams, KCell]] = None,
+    /,
+    *,
+    set_settings: bool = True,
+    set_name: bool = True,
+    maxsize: int = 512,
+) -> Callable[KCellParams, KCell] | Callable[
+    [Callable[KCellParams, KCell]], Callable[KCellParams, KCell]
+]:
     """Decorator to cache and auto name the celll. This will use :py:func:`functools.cache` to cache the function call.
     Additionally, if enabled this will set the name and from the args/kwargs of the function and also paste them into a settings dictionary of the :py:class:`~KCell`
 
     Args:
         set_settings: Copy the args & kwargs into the settings dictionary
         set_name: Auto create the name of the cell to the functionname plus a string created from the args/kwargs
+        maxsize: maximum size of cache, cell parameter sets will be evicted if the cell function is called with more different
+        parameter sets than there are spaces in the cache, in case there are cell calls with existing parameter set calls
     """
 
-    def decorator_autocell(f: Callable[KP, KCell]) -> Callable[KP, KCell]:
+    def decorator_autocell(
+        f: Callable[KCellParams, KCell]
+    ) -> Callable[KCellParams, KCell]:
         sig = signature(f)
 
         cache = KCellCache(maxsize)
 
         @functools.wraps(f)
-        def wrapper_autocell(*args: KP.args, **kwargs: KP.kwargs) -> KCell:
-            params: dict[str, KP.args] = {
+        def wrapper_autocell(
+            *args: KCellParams.args, **kwargs: KCellParams.kwargs
+        ) -> KCell:
+            params: dict[str, KCellParams.args] = {
                 p.name: p.default for k, p in sig.parameters.items()
             }
             arg_par = list(sig.parameters.items())[: len(args)]
@@ -1885,7 +1904,9 @@ def autocell(
 
             @cached(cache=cache)
             @functools.wraps(f)
-            def wrapped_cell(**params: KP.kwargs) -> KCell:
+            def wrapped_cell(
+                **params: KCellParams.args | KCellParams.kwargs,
+            ) -> KCell:
                 for key, value in params.items():
                     if isinstance(value, frozenset):
                         params[key] = frozenset_to_dict(value)
@@ -1914,7 +1935,11 @@ def autocell(
 
         return wrapper_autocell
 
-    return decorator_autocell if _func is None else decorator_autocell(_func)
+    if _func is None:
+
+        return decorator_autocell
+    else:
+        return decorator_autocell(_func)
 
 
 def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
@@ -1930,10 +1955,12 @@ def cell(
     *,
     set_settings: bool = True,
     maxsize: int = 512,
-) -> Callable[KP, KCell]:
+) -> Callable[KCellParams, KCell] | Callable[
+    [Callable[KCellParams, KCell]], Callable[KCellParams, KCell]
+]:
     """Convenience alias for :py:func:`~autocell` with `(set_name=False)`"""
     if _func is None:
-        return autocell(_func, set_settings=set_settings, set_name=False)
+        return autocell(set_settings=set_settings, set_name=False)
     else:
         return autocell(_func)
 

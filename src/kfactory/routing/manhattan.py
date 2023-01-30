@@ -167,7 +167,7 @@ def route_manhattan(
         (t1 * kdb.Trans(0, False, start_straight, 0)).disp.to_p(),
         (t2 * kdb.Trans(0, False, end_straight, 0)).disp.to_p(),
     )
-    match (box.height(), box.width()):
+    match (box.width(), box.height()):
         case (x, y) if (x < bend90_radius and y <= 2 * bend90_radius) or (
             x <= 2 * bend90_radius and y < bend90_radius
         ):
@@ -189,15 +189,20 @@ def route_manhattan(
         else:
             end_points = [t2 * _p, p2]
     else:
+        t2 *= kdb.Trans(end_straight + bend90_radius, 0)
+        end_points = [t2 * _p, p2]
 
-        if abs(tv.x) >= bend90_radius and abs(tv.y) >= bend90_radius:
-            t2 *= kdb.Trans(end_straight + bend90_radius, 0)
-            end_points = [t2 * _p, p2]
-        else:
-            t2 *= kdb.Trans(-int(np.sign(tv.x)), False, end_straight + bend90_radius, 0)
-            end_points = [t2 * _p, p2]
-            t2 *= kdb.Trans(2 * bend90_radius, 0)
-            end_points.insert(0, t2 * _p)
+        # TODO: This works but in some cases makes wrong routes
+        # match (tv.x, tv.y):
+        #     # case (x, y) if -bend90_radius < x < bend90_radius and abs(y) >= bend90_radius:
+        #     #     end_points = [ t2 * _p, p2]
+        #     case (x, y) if -bend90_radius < x < 0:
+        #         # end_points = [t2 * _p, p2]
+        #         t2 *= kdb.Trans(int(np.sign(x)), False, 0, 2 * bend90_radius + abs(x))
+        #         end_points.insert(0, t2 * _p)
+        #     case (x, y) if 0 <= x < bend90_radius:
+        #         t2 *= kdb.Trans(-int(np.sign(x)), False, 0, 2 * bend90_radius)
+        #         end_points.insert(0, t2 * _p)
 
     v = t1.inverted() * (t2.disp - t1.disp)
 

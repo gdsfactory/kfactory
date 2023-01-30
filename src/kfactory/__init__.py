@@ -3,7 +3,9 @@
 isort:skip_file
 """
 
-from kfactory.kcell import (
+import klayout.dbcore as kdb
+import klayout.lay as lay
+from .kcell import (
     KCell,
     Instance,
     Port,
@@ -21,10 +23,7 @@ from kfactory.kcell import (
 from . import kdb, pcells, tech, placer, routing, utils
 from .utils import show
 from . import port
-import klayout.lay as klay
 
-
-# import klayout.lay as klay #<- enable when klayout > 0.28
 
 __version__ = "0.1.2"
 

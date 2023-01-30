@@ -57,7 +57,12 @@ def test_connect_straight(x, bend90, waveguide_factory, LAYER, optical_port):
         (10000, 10000, 3),
         (randint(10001, 20000), randint(10001, 20000), 3),
         (5000, 10000, 3),  # the mean one where points will collide for radius 10000
-        (5000, 30000, 3),
+        (30000, 5000, 3),
+        (500, 500, 3),
+        (-500, 30000, 3),
+        (500, 30000, 3),
+        (-10000, 30000, 3),
+        (0, 0, 2),
     ],
 )
 def test_connect_bend90(bend90, waveguide_factory, LAYER, optical_port, x, y, angle2):
@@ -67,8 +72,13 @@ def test_connect_bend90(bend90, waveguide_factory, LAYER, optical_port, x, y, an
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
     b90r = abs(bend90.ports._ports[0].x - bend90.ports._ports[1].x)
     warnings.filterwarnings("error")
-    warnings.filterwarnings("ignore", module="kfactory.routing.manhattan", lineno=181)
 
+    if abs(x) < b90r or abs(y) < b90r:
+        warnings.filterwarnings(
+            "ignore",
+            module="kfactory.routing.manhattan",
+            message=f"Potential collision in routing due to small distance between the port in relation to bend radius x={x}/{b90r}, y={y}/{b90r}",
+        )
     kf.routing.optical.connect(
         c,
         p1,
@@ -77,8 +87,19 @@ def test_connect_bend90(bend90, waveguide_factory, LAYER, optical_port, x, y, an
         bend90_cell=bend90,
     )
 
-    warnings.filterwarnings("default", module="kfactory.routing.manhattan")
+    warnings.filterwarnings(
+        "default",
+        module="kfactory.routing.manhattan",
+        message=f"Potential collision in routing due to small distance between the port in relation to bend radius x={x}/{b90r}, y={y}/{b90r}",
+    )
     warnings.filterwarnings("default")
+
+    if (x, y) == (500, 30000):
+        c.add_port(p1)
+        c.add_port(p2, name="o2")
+        c.autorename_ports()
+        c.draw_ports()
+        kf.show(c)
 
 
 @pytest.mark.parametrize(
@@ -98,7 +119,12 @@ def test_connect_bend90_euler(
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
     b90r = abs(bend90_euler.ports._ports[0].x - bend90_euler.ports._ports[1].x)
     warnings.filterwarnings("error")
-    warnings.filterwarnings("ignore", module="kfactory.routing.manhattan", lineno=181)
+    if abs(x) < b90r or abs(y) < b90r:
+        warnings.filterwarnings(
+            "ignore",
+            module="kfactory.routing.manhattan",
+            message=f"Potential collision in routing due to small distance between the port in relation to bend radius x={x}/{b90r}, y={y}/{b90r}",
+        )
     kf.routing.optical.connect(
         c,
         p1,
@@ -106,5 +132,9 @@ def test_connect_bend90_euler(
         straight_factory=waveguide_factory,
         bend90_cell=bend90_euler,
     )
-    warnings.filterwarnings("default", module="kfactory.routing.manhattan")
+    warnings.filterwarnings(
+        "default",
+        module="kfactory.routing.manhattan",
+        message=f"Potential collision in routing due to small distance between the port in relation to bend radius x={x}/{b90r}, y={y}/{b90r}",
+    )
     warnings.filterwarnings("default")

@@ -15,9 +15,9 @@ def taper(
     enclosure: Optional[Enclosure] = None,
 ) -> KCell:
     return taper_dbu(
-        width1=width1 * library.dbu,
-        width2=width2 * library.dbu,
-        length=length * library.dbu,
+        width1=int(width1 / library.dbu),
+        width2=int(width2 / library.dbu),
+        length=int(length / library.dbu),
         layer=layer,
         enclosure=enclosure,
     )

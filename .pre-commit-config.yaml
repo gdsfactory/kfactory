@@ -111,11 +111,22 @@ repos:
   #   rev: 0.1.0 # or specific tag
   #   hooks:
   #       - id: yamlfmt
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: "v0.991"
-  #   hooks:
-  #     - id: mypy
-  #       exclude: ^(docs/|example-plugin/|tests/fixtures)
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        language: python
+        entry: bash -c 'mypy -p kfactory'
+        verbose: true
+        always_run: true
+        # args:
+        #   - "--namespace-packages"
+        #   - "--explicit-package-bases"
+        #   - "-p kfactory"
+        # exclude: ^(docs/|example-plugin/|tests/fixtures)
+        # files: ^src/kfactory
+        # additional-dependencies:
+        #   [types-cachetools]
   # - repo: https://github.com/terrencepreilly/darglint
   #   rev: master
   #   hooks:
