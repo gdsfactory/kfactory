@@ -135,7 +135,7 @@ def extrude_path_points(
     start_trans = kdb.DCplxTrans(1, start_angle, False, p_start.x, p_start.y)
     end_trans = kdb.DCplxTrans(1, end_angle, False, p_end.x, p_end.y)
 
-    ref_vector = kdb.DCplxTrans(kdb.DVector(0, width))
+    ref_vector = kdb.DCplxTrans(kdb.DVector(0, width / 2))
     vector_top = [start_trans * ref_vector]
     vector_bot = [(start_trans * kdb.DCplxTrans.R180) * ref_vector]
 
@@ -187,7 +187,7 @@ def extrude_path(
         target.shapes(layer).insert(
             path_pts_to_polygon(
                 *extrude_path_points(
-                    path, width / 2 + d * target.library.dbu, start_angle, end_angle
+                    path, width + d * target.library.dbu, start_angle, end_angle
                 )
             )
         )
@@ -224,14 +224,14 @@ def extrude_path_dynamic_points(
     if callable(widths):
         l = sum(((p2 - p1).abs() for p2, p1 in zip(path[:-1], path[1:])))
         z: float = 0
-        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / l)))
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / l) / 2))
         vector_top = [start_trans * ref_vector]
         vector_bot = [start_trans * kdb.DCplxTrans.R180 * ref_vector]
         p_old = path[0]
         p = path[1]
         z += (p - p_old).abs()
         for point in path[2:]:
-            ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / l)))
+            ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / l) / 2))
             p_new = point
             v = p_new - p_old
             angle = np.rad2deg(np.arctan2(v.y, v.x))
@@ -241,15 +241,15 @@ def extrude_path_dynamic_points(
             z += (p_new - p).abs()
             p_old = p
             p = p_new
-        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / l)))
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / l) / 2))
     else:
-        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths[0]))
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths[0] / 2))
         vector_top = [start_trans * ref_vector]
         vector_bot = [start_trans * kdb.DCplxTrans.R180 * ref_vector]
         p_old = path[0]
         p = path[1]
         for point, w in zip(path[2:], widths[1:-1]):
-            ref_vector = kdb.DCplxTrans(kdb.DVector(0, w))
+            ref_vector = kdb.DCplxTrans(kdb.DVector(0, w / 2))
             p_new = point
             v = p_new - p_old
             angle = np.rad2deg(np.arctan2(v.y, v.x))
@@ -258,7 +258,7 @@ def extrude_path_dynamic_points(
             vector_bot.append(transformation * kdb.DCplxTrans.R180 * ref_vector)
             p_old = p
             p = p_new
-        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths[-1]))
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths[-1] / 2))
     vector_top.append(end_trans * ref_vector)
     vector_bot.append(end_trans * kdb.DCplxTrans.R180 * ref_vector)
 
@@ -308,7 +308,7 @@ def extrude_path_dynamic(
             )
     else:
         for _layer, d in _layer_list:
-            _widths = [w + d * target.library.dbu for w in widths]  # type: ignore[union-attr]
+            _widths = [w + 2 * d * target.library.dbu for w in widths]  # type: ignore[union-attr]
             target.shapes(layer).insert(
                 path_pts_to_polygon(
                     *extrude_path_dynamic_points(
