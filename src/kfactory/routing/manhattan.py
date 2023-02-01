@@ -1,9 +1,9 @@
-import warnings
 from typing import List, Optional, Union
 
 import numpy as np
 
 from .. import kdb
+from ..config import logger
 from ..kcell import KLib, Port
 from ..utils.geo import clean_points
 
@@ -171,8 +171,8 @@ def route_manhattan(
         case (x, y) if (x < bend90_radius and y <= 2 * bend90_radius) or (
             x <= 2 * bend90_radius and y < bend90_radius
         ):
-            warnings.warn(
-                f"Potential collision in routing due to small distance between the port in relation to bend radius {x=}/{bend90_radius}, {y=}/{bend90_radius}"
+            logger.warning(
+                f"Potential collision in routing due to small distance between the port in relation to bend radius {x=}/{bend90_radius}, {y=}/{bend90_radius}",
             )
 
     # we want a straight start and have to add a bend radius if

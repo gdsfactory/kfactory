@@ -105,7 +105,7 @@ class Enclosure:
     def apply_custom(
         self,
         c: KCell,
-        shape: Callable[[int], kdb.Edge | kdb.Polygon | kdb.Box],
+        shape: Callable[[int], kdb.Edge | kdb.Polygon | kdb.Box | kdb.Region],
     ) -> None:
         for enc, d in self.enclosures:
             c.shapes(enc).insert(shape(d))
