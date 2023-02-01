@@ -21,8 +21,7 @@ dependencies = [
 	"ruamel.yaml",
 	"cachetools >= 5.2.0",
   "pydantic",
-  "omegaconf"
-
+	"loguru",
 ]
 
 [project.optional-dependencies]

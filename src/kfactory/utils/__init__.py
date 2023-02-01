@@ -1,10 +1,10 @@
 import json
 import socket
-import warnings
 from pathlib import Path
 from tempfile import gettempdir
 
 from .. import kcell, kdb
+from ..config import logger
 from . import geo, violations
 from .enclosure import Direction, Enclosure
 
@@ -56,7 +56,7 @@ def show(
         conn.sendall(enc_data)
         conn.settimeout(5)
     except OSError:
-        warnings.warn("Could not connect to klive server", UserWarning)
+        logger.warning("Could not connect to klive server")
     else:
         msg = ""
         try:

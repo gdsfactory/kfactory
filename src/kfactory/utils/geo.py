@@ -1,4 +1,3 @@
-import warnings
 from typing import Any, Callable, List, Optional, Sequence, TypeGuard, overload
 
 import numpy as np
@@ -6,6 +5,7 @@ from numpy.typing import ArrayLike
 from scipy.special import binom  # type: ignore[import]
 
 from .. import kdb
+from ..config import logger
 from ..kcell import KCell, LayerEnum
 from .enclosure import Enclosure
 
@@ -33,7 +33,7 @@ def vec_angle(v: kdb.Vector) -> int:
         case (0, y) if y < 0:
             return 3
         case _:
-            warnings.warn(f"{v} is not a manhattan, cannot determine direction")
+            logger.warning(f"{v} is not a manhattan, cannot determine direction")
     return -1
 
 
