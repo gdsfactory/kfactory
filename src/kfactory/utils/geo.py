@@ -14,6 +14,7 @@ __all__ = [
     "extrude_path_points",
     "extrude_path_dynamic_points",
     "extrude_path_dynamic",
+    "path_pts_to_polygon",
 ]
 
 
@@ -182,11 +183,14 @@ def extrude_path(
         [(layer, 0)] if enclosure is None else [(layer, 0)] + enclosure.enclosures
     )
     for _layer, d in _layer_list:
-        p_top, p_bot = extrude_path_points(
-            path, width / 2 + d * target.library.dbu, start_angle, end_angle
+
+        target.shapes(layer).insert(
+            path_pts_to_polygon(
+                *extrude_path_points(
+                    path, width / 2 + d * target.library.dbu, start_angle, end_angle
+                )
+            )
         )
-        p_bot.reverse()
-        target.shapes(_layer).insert(kdb.DPolygon(p_top + p_bot))
 
 
 def extrude_path_dynamic_points(
@@ -292,16 +296,33 @@ def extrude_path_dynamic(
             def d_widths(x: float) -> float:
                 return widths(x) + 2 * d * target.library.dbu  # type: ignore[no-any-return, operator]
 
-            p_top, p_bot = extrude_path_dynamic_points(
-                path, d_widths, start_angle, end_angle
+            target.shapes(_layer).insert(
+                path_pts_to_polygon(
+                    *extrude_path_dynamic_points(
+                        path=path,
+                        widths=d_widths,
+                        start_angle=start_angle,
+                        end_angle=end_angle,
+                    )
+                )
             )
-            p_bot.reverse()
-            target.shapes(_layer).insert(kdb.DPolygon(p_top + p_bot))
     else:
         for _layer, d in _layer_list:
             _widths = [w + d * target.library.dbu for w in widths]  # type: ignore[union-attr]
-            p_top, p_bot = extrude_path_dynamic_points(
-                path, _widths, start_angle, end_angle
+            target.shapes(layer).insert(
+                path_pts_to_polygon(
+                    *extrude_path_dynamic_points(
+                        path=path,
+                        widths=_widths,
+                        start_angle=start_angle,
+                        end_angle=end_angle,
+                    )
+                )
             )
-            p_bot.reverse()
-            target.shapes(_layer).insert(kdb.DPolygon(p_top + p_bot))
+
+
+def path_pts_to_polygon(
+    pts_top: list[kdb.DPoint], pts_bot: list[kdb.DPoint]
+) -> kdb.DPolygon:
+    pts_bot.reverse()
+    return kdb.DPolygon(pts_top + pts_bot)
