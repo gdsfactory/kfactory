@@ -460,6 +460,7 @@ class Enclosure(BaseModel):
         ] = [],
         name: Optional[str] = None,
         warn: bool = True,
+        main_layer: Optional[LayerEnum | int] = None,
     ):
         super().__init__(warn=warn, layer_sections={}, _name=name)
 
@@ -473,6 +474,7 @@ class Enclosure(BaseModel):
                 Section(d_max=sec[2], d_min=sec[1])  # type:ignore[misc]
             )
         self.enc_name = name
+        self.main_layer = main_layer
 
     def __add__(self, other: "Enclosure") -> "Enclosure":
 
