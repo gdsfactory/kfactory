@@ -25,7 +25,7 @@ from .utils import show
 from . import port
 
 
-__version__ = "0.2.1"
+__version__ = "0.2.4"
 
 
 __all__ = [
@@ -49,4 +49,5 @@ __all__ = [
     "show",
     "tech",
     "klay",
+    "LayerEnum",
 ]

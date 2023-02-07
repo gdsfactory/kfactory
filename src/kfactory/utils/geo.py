@@ -490,10 +490,11 @@ class Enclosure(BaseModel):
 
         return enc
 
-    def __iadd__(self, other: "Enclosure") -> None:
+    def __iadd__(self, other: "Enclosure") -> "Enclosure":
         for layer, secs in other.layer_sections.items():
             for sec in secs.sections:
                 self.add_section(layer, sec)
+        return self
 
     def add_section(self, layer: LayerEnum | int, sec: Section) -> None:
         self.layer_sections[layer].add_section(sec)
