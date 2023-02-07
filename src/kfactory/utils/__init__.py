@@ -68,8 +68,8 @@ def show(
         finally:
             conn.close()
 
-    # if delete:
-    #     Path(gds_file).unlink()
+    if delete:
+        Path(gds_file).unlink()
 
 
 __all__ = [
