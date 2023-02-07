@@ -1,13 +1,16 @@
-from typing import Any, Callable, List, Optional, Sequence, TypeGuard, overload
+from enum import Enum
+from typing import Any, Callable, List, Optional, Sequence, TypeGuard, cast, overload
 
 import numpy as np
 from numpy.typing import ArrayLike
+from pydantic import BaseModel
 from scipy.special import binom  # type: ignore[import]
 
 from .. import kdb
 from ..config import logger
 from ..kcell import KCell, LayerEnum
-from .enclosure import Enclosure
+
+# from .enclosure import Enclosure, LayerSection, Section
 
 __all__ = [
     "extrude_path",
@@ -15,6 +18,8 @@ __all__ = [
     "extrude_path_dynamic_points",
     "extrude_path_dynamic",
     "path_pts_to_polygon",
+    "Enclosure",
+    "Direction",
 ]
 
 
@@ -163,7 +168,7 @@ def extrude_path(
     layer: LayerEnum | int,
     path: list[kdb.DPoint],
     width: float,
-    enclosure: Optional[Enclosure] = None,
+    enclosure: Optional["Enclosure"] = None,
     start_angle: Optional[float] = None,
     end_angle: Optional[float] = None,
 ) -> None:
@@ -179,18 +184,43 @@ def extrude_path(
         start_angle: optionally specify a custom starting angle if `None` will be autocalculated from the first two elements
         end_angle: optionally specify a custom ending angle if `None` will be autocalculated from the last two elements
     """
-    _layer_list: list[tuple[LayerEnum | int, int]] = (
-        [(layer, 0)] if enclosure is None else [(layer, 0)] + enclosure.enclosures
-    )
-    for _layer, d in _layer_list:
-
-        target.shapes(layer).insert(
-            path_pts_to_polygon(
-                *extrude_path_points(
-                    path, width + d * target.library.dbu, start_angle, end_angle
-                )
+    layer_list = {layer: LayerSection(sections=[Section(d_max=0)])}
+    if enclosure is not None:
+        if layer not in enclosure.layer_sections:
+            layer_list.update(enclosure.layer_sections)
+        else:
+            ls = layer_list[layer].sections.copy()
+            layer_list = enclosure.layer_sections.copy()
+            layer_list[layer] = LayerSection(
+                sections=[sec for sec in layer_list[layer].sections] + [ls]
             )
-        )
+
+    for layer, layer_sec in layer_list.items():
+        reg = kdb.Region()
+        for section in layer_sec.sections:
+            _r = kdb.Region(
+                path_pts_to_polygon(
+                    *extrude_path_points(
+                        path,
+                        width + section.d_max * target.library.dbu,
+                        start_angle,
+                        end_angle,
+                    )
+                ).to_itype(target.library.dbu)
+            )
+            if section.d_min is not None:
+                _r -= kdb.Region(
+                    path_pts_to_polygon(
+                        *extrude_path_points(
+                            path,
+                            width + section.d_min * target.library.dbu,
+                            start_angle,
+                            end_angle,
+                        )
+                    ).to_itype(target.library.dbu)
+                )
+            reg.insert(_r)
+        target.shapes(layer).insert(reg.merge())
 
 
 def extrude_path_dynamic_points(
@@ -270,7 +300,7 @@ def extrude_path_dynamic(
     layer: LayerEnum | int,
     path: list[kdb.DPoint],
     widths: Callable[[float], float] | list[float],
-    enclosure: Optional[Enclosure] = None,
+    enclosure: Optional["Enclosure"] = None,
     start_angle: Optional[float] = None,
     end_angle: Optional[float] = None,
 ) -> None:
@@ -287,38 +317,81 @@ def extrude_path_dynamic(
         end_angle: optionally specify a custom ending angle if `None` will be autocalculated from the last two elements
     """
 
-    _layer_list: list[tuple[LayerEnum | int, int]] = (
-        [(layer, 0)] if enclosure is None else [(0, layer)] + enclosure.enclosures
-    )
+    layer_list = {layer: LayerSection(sections=[Section(d_max=0)])}
+    if enclosure is not None:
+        if layer not in enclosure.layer_sections:
+            layer_list.update(enclosure.layer_sections)
+        else:
+            ls = layer_list[layer].sections.copy()
+            layer_list = enclosure.layer_sections.copy()
+            layer_list[layer] = LayerSection(
+                sections=[sec for sec in layer_list[layer].sections] + [ls]
+            )
     if is_callable_widths(widths):
-        for _layer, d in _layer_list:
+        for layer, layer_sec in layer_list.items():
+            reg = kdb.Region()
+            for section in layer_sec.sections:
 
-            def d_widths(x: float) -> float:
-                return widths(x) + 2 * d * target.library.dbu  # type: ignore[no-any-return, operator]
+                def w_max(x: float) -> float:
+                    return widths(x) + 2 * section.d_max * target.library.dbu  # type: ignore[operator, no-any-return]
 
-            target.shapes(_layer).insert(
-                path_pts_to_polygon(
-                    *extrude_path_dynamic_points(
-                        path=path,
-                        widths=d_widths,
-                        start_angle=start_angle,
-                        end_angle=end_angle,
-                    )
+                _r = kdb.Region(
+                    path_pts_to_polygon(
+                        *extrude_path_dynamic_points(
+                            path,
+                            w_max,
+                            start_angle,
+                            end_angle,
+                        )
+                    ).to_itype(target.library.dbu)
                 )
-            )
+                if section.d_min is not None:
+
+                    def w_min(x: float) -> float:
+                        return widths(x) + 2 * section.d_min * target.library.dbu  # type: ignore[operator, no-any-return]
+
+                    _r -= kdb.Region(
+                        path_pts_to_polygon(
+                            *extrude_path_dynamic_points(
+                                path,
+                                w_min,
+                                start_angle,
+                                end_angle,
+                            )
+                        ).to_itype(target.library.dbu)
+                    )
+                reg.insert(_r)
+            target.shapes(layer).insert(reg.merge())
+
     else:
-        for _layer, d in _layer_list:
-            _widths = [w + 2 * d * target.library.dbu for w in widths]  # type: ignore[union-attr]
-            target.shapes(layer).insert(
-                path_pts_to_polygon(
-                    *extrude_path_dynamic_points(
-                        path=path,
-                        widths=_widths,
-                        start_angle=start_angle,
-                        end_angle=end_angle,
-                    )
+        for layer, layer_sec in layer_list.items():
+            reg = kdb.Region()
+            for section in layer_sec.sections:
+                max_widths = [w + 2 * section.d_max * target.library.dbu for w in widths]  # type: ignore[union-attr]
+                _r = kdb.Region(
+                    path_pts_to_polygon(
+                        *extrude_path_dynamic_points(
+                            path,
+                            max_widths,
+                            start_angle,
+                            end_angle,
+                        )
+                    ).to_itype(target.library.dbu)
                 )
-            )
+                if section.d_min is not None:
+                    min_widths = [w + 2 * section.d_min * target.library.dbu for w in widths]  # type: ignore[union-attr]
+                    _r -= kdb.Region(
+                        path_pts_to_polygon(
+                            *extrude_path_dynamic_points(
+                                path,
+                                min_widths,
+                                start_angle,
+                                end_angle,
+                            )
+                        ).to_itype(target.library.dbu)
+                    )
+                reg.insert(_r)
+            target.shapes(layer).insert(reg.merge())
 
 
 def path_pts_to_polygon(
@@ -326,3 +399,267 @@ def path_pts_to_polygon(
 ) -> kdb.DPolygon:
     pts_bot.reverse()
     return kdb.DPolygon(pts_top + pts_bot)
+
+
+def is_Region(r: object) -> TypeGuard[kdb.Region]:
+    return isinstance(r, kdb.Region)
+
+
+def is_int(r: object) -> TypeGuard[int]:
+    return isinstance(r, int)
+
+
+def is_callable(r: object) -> TypeGuard[Callable[[float], float]]:
+    return callable(r)
+
+
+class Direction(Enum):
+    X = 1
+    Y = 2
+    BOTH = 3
+
+
+class Section(BaseModel):
+    d_min: Optional[int] = None
+    d_max: int
+
+
+class LayerSection(BaseModel):
+    sections: list[Section] = []
+
+    def add_section(self, sec: Section) -> None:
+        if not self.sections:
+            self.sections.append(sec)
+        else:
+            i = 0
+            if sec.d_min is not None:
+                while i < len(self.sections) and sec.d_min > self.sections[i].d_max:
+                    i += 1
+                while i < len(self.sections) and sec.d_max >= self.sections[i].d_min:  # type: ignore[operator]
+                    sec.d_max = max(self.sections[i].d_max, sec.d_max)
+                    sec.d_min = min(self.sections[i].d_min, sec.d_min)  # type: ignore[type-var]
+                    self.sections.pop(i)
+                    if i == len(self.sections):
+                        break
+            self.sections.insert(i, sec)
+
+
+class Enclosure(BaseModel):
+    layer_sections: dict[LayerEnum | int, LayerSection]
+    enc_name: Optional[str] = None
+    warn: bool = True
+
+    main_layer: Optional[LayerEnum | int]
+
+    yaml_tag: str = "!Enclosure"
+
+    def __init__(
+        self,
+        sections: Sequence[
+            tuple[LayerEnum | int, int] | tuple[LayerEnum | int, int, int]
+        ] = [],
+        name: Optional[str] = None,
+        warn: bool = True,
+    ):
+        super().__init__(warn=warn, layer_sections={}, _name=name)
+
+        for sec in sorted(sections, key=lambda sec: (sec[0], sec[1])):
+            if sec[0] in self.layer_sections:
+                ls = self.layer_sections[sec[0]]
+            else:
+                ls = LayerSection()
+                self.layer_sections[sec[0]] = ls
+            ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
+                Section(d_max=sec[2], d_min=sec[1])  # type:ignore[misc]
+            )
+        self.enc_name = name
+
+    def __add__(self, other: "Enclosure") -> "Enclosure":
+
+        enc = Enclosure()
+
+        for layer, secs in self.layer_sections.items():
+            for sec in secs.sections:
+                enc.add_section(layer, sec)
+
+        for layer, secs in other.layer_sections.items():
+            for sec in secs.sections:
+                enc.add_section(layer, sec)
+
+        return enc
+
+    def __iadd__(self, other: "Enclosure") -> None:
+        for layer, secs in other.layer_sections.items():
+            for sec in secs.sections:
+                self.add_section(layer, sec)
+
+    def add_section(self, layer: LayerEnum | int, sec: Section) -> None:
+        self.layer_sections[layer].add_section(sec)
+
+    def minkowski_region(
+        self,
+        r: kdb.Region,
+        d: Optional[int],
+        shape: Callable[[int], list[kdb.Point] | kdb.Box | kdb.Edge | kdb.Polygon],
+    ) -> kdb.Region:
+        if d is None:
+            return kdb.Region()
+        elif d == 0:
+            return r.dup()
+        elif d > 0:
+            return r.minkowski_sum(shape(d))
+        else:
+            _shape = shape(abs(d))
+            if isinstance(_shape, list):
+                box_shape = kdb.Polygon(_shape)
+                bbox_maxsize = max(
+                    box_shape.bbox().width(),
+                    box_shape.bbox().height(),
+                )
+            else:
+                bbox_maxsize = max(
+                    _shape.bbox().width(),
+                    _shape.bbox().height(),
+                )
+            bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
+            return r - (bbox_r - r).minkowski_sum(_shape)
+
+    def apply_minkowski_enc(
+        self,
+        c: KCell,
+        ref: Optional[int | kdb.Region],  # layer index or the region
+        direction: Direction = Direction.BOTH,
+    ) -> None:
+
+        match direction:
+            case Direction.BOTH:
+
+                def box(d: int) -> kdb.Box:
+                    return kdb.Box(-d, -d, d, d)
+
+                self.apply_minkowski_custom(c, ref=ref, shape=box)
+
+            case Direction.Y:
+
+                def edge(d: int) -> kdb.Edge:
+                    return kdb.Edge(0, -d, 0, d)
+
+                self.apply_minkowski_custom(c, ref=ref, shape=edge)
+
+            case Direction.X:
+
+                def edge(d: int) -> kdb.Edge:
+                    return kdb.Edge(-d, 0, d, 0)
+
+                self.apply_minkowski_custom(c, ref=ref, shape=edge)
+
+            case _:
+                raise ValueError("Undefined direction")
+
+    def apply_minkowski_y(
+        self, c: KCell, ref: Optional[int | kdb.Region] = None
+    ) -> None:
+        return self.apply_minkowski_enc(c, ref=ref, direction=Direction.Y)
+
+    def apply_minkowski_x(self, c: KCell, ref: Optional[int | kdb.Region]) -> None:
+        return self.apply_minkowski_enc(c, ref=ref, direction=Direction.X)
+
+    def apply_minkowski_custom(
+        self,
+        c: KCell,
+        shape: Callable[[int], kdb.Edge | kdb.Polygon | kdb.Box],
+        ref: Optional[int | kdb.Region] = None,
+    ) -> None:
+        if ref is None:
+            ref = self.main_layer
+
+        if ref is None:
+            raise ValueError(
+                f"The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
+            )
+        if isinstance(ref, int):
+            r = kdb.Region(c.begin_shapes_rec(ref))
+        else:
+            r = ref.dup()
+
+        r.merge()
+
+        for layer, layersec in self.layer_sections.items():
+            for section in layersec.sections:
+                c.shapes(layer).insert(
+                    self.minkowski_region(r, section.d_max, shape)
+                    - self.minkowski_region(r, section.d_min, shape)
+                )
+
+    def apply_custom(
+        self,
+        c: KCell,
+        shape: Callable[
+            [int, Optional[int]], kdb.Edge | kdb.Polygon | kdb.Box | kdb.Region
+        ],
+    ) -> None:
+        for layer, layersec in self.layer_sections.items():
+            for sec in layersec.sections:
+                c.shapes(layer).insert(shape(sec.d_max, sec.d_min))
+
+    def apply_bbox(self, c: KCell, ref: int | kdb.Region) -> None:
+        if is_int(ref):
+            _ref = c.bbox_per_layer(ref)
+        elif is_Region(ref):
+            _ref = ref.bbox()
+
+        def bbox_reg(d_max: int, d_min: Optional[int] = None) -> kdb.Region:
+            reg_max = kdb.Region(_ref)
+            reg_max.size(d_max)
+            if d_min is None:
+                return reg_max
+            else:
+                reg_min = kdb.Region(_ref)
+                reg_min.size(d_min)
+                return reg_max - reg_min
+
+        self.apply_custom(c, bbox_reg)
+
+    @classmethod
+    def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
+        d = dict(node.enclosures)
+        return representer.represent_mapping(cls.yaml_tag, d)
+
+    def __hash__(self) -> int:
+        return hash(tuple(self.layer_sections))
+
+    @property
+    def name(self) -> str:
+        return f"{self.__hash__()}" if self.enc_name is None else f"{self.enc_name}"
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self.enc_name = value
+
+    def extrude_path(
+        self,
+        c: KCell,
+        path: list[kdb.DPoint],
+        main_layer: Optional[int | LayerEnum],
+        width: float,
+    ) -> None:
+        if main_layer is None:
+            raise ValueError(
+                f"The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
+            )
+        extrude_path(target=c, layer=main_layer, path=path, width=width, enclosure=self)
+
+    def extrude_path_dynamic(
+        self,
+        c: KCell,
+        path: list[kdb.DPoint],
+        main_layer: Optional[int | LayerEnum],
+        widths: Callable[[float], float] | list[float],
+    ) -> None:
+        if main_layer is None:
+            raise ValueError(
+                f"The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
+            )
+        extrude_path_dynamic(
+            target=c, layer=main_layer, path=path, widths=widths, enclosure=self
+        )

@@ -47,10 +47,3 @@ def bend_s(
     )
 
     return c
-
-
-if __name__ == "__main__":
-    import kfactory as kf
-
-    c = bend_s(width=1, height=5, length=10, layer=kf.library.layer(2, 0))
-    kf.show(c)
