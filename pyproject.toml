@@ -11,7 +11,7 @@ classifiers = [
 	"Programming Language :: Python :: 3.11",
 	"Operating System :: OS Independent",
 ]
-version = "0.1.3"
+version = "0.2.1"
 authors = [
     {name = "gdsfactory community", email = "contact@gdsfactory.com"},
 ]
@@ -21,8 +21,7 @@ dependencies = [
 	"ruamel.yaml",
 	"cachetools >= 5.2.0",
   "pydantic",
-  "omegaconf"
-
+	"loguru",
 ]
 
 [project.optional-dependencies]

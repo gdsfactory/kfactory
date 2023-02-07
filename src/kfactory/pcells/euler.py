@@ -6,7 +6,7 @@ from scipy.special import fresnel  # type: ignore[import]
 
 from .. import kdb
 from ..kcell import KCell, LayerEnum, autocell
-from ..utils.enclosure import Enclosure
+from ..utils import Enclosure
 from ..utils.geo import extrude_path, extrude_path_dynamic
 
 __all__ = [
