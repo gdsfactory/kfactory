@@ -449,6 +449,8 @@ class Enclosure(BaseModel):
     enc_name: Optional[str] = None
     warn: bool = True
 
+    main_layer: Optional[LayerEnum | int]
+
     yaml_tag: str = "!Enclosure"
 
     def __init__(
@@ -525,11 +527,9 @@ class Enclosure(BaseModel):
     def apply_minkowski_enc(
         self,
         c: KCell,
-        ref: int | kdb.Region,  # layer index or the region
+        ref: Optional[int | kdb.Region],  # layer index or the region
         direction: Direction = Direction.BOTH,
     ) -> None:
-        r = kdb.Region(c.begin_shapes_rec(ref)) if isinstance(ref, int) else ref
-        r.merge()
 
         match direction:
             case Direction.BOTH:
@@ -537,41 +537,52 @@ class Enclosure(BaseModel):
                 def box(d: int) -> kdb.Box:
                     return kdb.Box(-d, -d, d, d)
 
-                self.apply_minkowski_custom(c, ref, box)
+                self.apply_minkowski_custom(c, ref=ref, shape=box)
 
             case Direction.Y:
 
                 def edge(d: int) -> kdb.Edge:
                     return kdb.Edge(0, -d, 0, d)
 
-                self.apply_minkowski_custom(c, ref, edge)
+                self.apply_minkowski_custom(c, ref=ref, shape=edge)
 
             case Direction.X:
 
                 def edge(d: int) -> kdb.Edge:
                     return kdb.Edge(-d, 0, d, 0)
 
-                self.apply_minkowski_custom(c, ref, edge)
+                self.apply_minkowski_custom(c, ref=ref, shape=edge)
 
             case _:
                 raise ValueError("Undefined direction")
 
-    def apply_minkowski_y(self, c: KCell, ref: int | kdb.Region) -> None:
-        return self.apply_minkowski_enc(c, ref, Direction.Y)
+    def apply_minkowski_y(
+        self, c: KCell, ref: Optional[int | kdb.Region] = None
+    ) -> None:
+        return self.apply_minkowski_enc(c, ref=ref, direction=Direction.Y)
 
-    def apply_minkowski_x(self, c: KCell, ref: int | kdb.Region) -> None:
-        return self.apply_minkowski_enc(c, ref, Direction.X)
+    def apply_minkowski_x(self, c: KCell, ref: Optional[int | kdb.Region]) -> None:
+        return self.apply_minkowski_enc(c, ref=ref, direction=Direction.X)
 
     def apply_minkowski_custom(
         self,
         c: KCell,
-        ref: int | kdb.Region,
         shape: Callable[[int], kdb.Edge | kdb.Polygon | kdb.Box],
+        ref: Optional[int | kdb.Region] = None,
     ) -> None:
+        if ref is None:
+            ref = self.main_layer
+
+        if ref is None:
+            raise ValueError(
+                f"The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
+            )
         if isinstance(ref, int):
             r = kdb.Region(c.begin_shapes_rec(ref))
         else:
             r = ref.dup()
+
+        r.merge()
 
         for layer, layersec in self.layer_sections.items():
             for section in layersec.sections:
@@ -629,18 +640,26 @@ class Enclosure(BaseModel):
         self,
         c: KCell,
         path: list[kdb.DPoint],
-        main_layer: int | LayerEnum,
+        main_layer: Optional[int | LayerEnum],
         width: float,
     ) -> None:
+        if main_layer is None:
+            raise ValueError(
+                f"The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
+            )
         extrude_path(target=c, layer=main_layer, path=path, width=width, enclosure=self)
 
     def extrude_path_dynamic(
         self,
         c: KCell,
         path: list[kdb.DPoint],
-        main_layer: int | LayerEnum,
+        main_layer: Optional[int | LayerEnum],
         widths: Callable[[float], float] | list[float],
     ) -> None:
+        if main_layer is None:
+            raise ValueError(
+                f"The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
+            )
         extrude_path_dynamic(
             target=c, layer=main_layer, path=path, widths=widths, enclosure=self
         )
