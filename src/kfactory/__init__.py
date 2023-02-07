@@ -49,4 +49,5 @@ __all__ = [
     "show",
     "tech",
     "klay",
+    "LayerEnum",
 ]
