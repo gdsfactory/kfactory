@@ -33,7 +33,6 @@ def taper_static(
 
 def test_dynamic_sine_taper(LAYER, wg_enc):
     _taper = taper_dyn(10, 1, LAYER.WG, wg_enc)
-    kf.show(_taper)
 
 
 def test_static_sine_taper(LAYER, wg_enc):
