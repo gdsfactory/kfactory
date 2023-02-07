@@ -15,7 +15,7 @@ def LAYER():
 
 @pytest.fixture
 def wg_enc(LAYER):
-    return kf.utils.Enclosure(name="WGSTD", enclosures=[(2000, LAYER.WGCLAD)])
+    return kf.utils.Enclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
 
 
 @pytest.fixture

@@ -1,12 +1,12 @@
 import json
 import socket
-import warnings
 from pathlib import Path
 from tempfile import gettempdir
 
 from .. import kcell, kdb
+from ..config import logger
 from . import geo, violations
-from .enclosure import Direction, Enclosure
+from .geo import Direction, Enclosure, extrude_path, extrude_path_dynamic
 
 try:
     from __main__ import __file__ as mf
@@ -56,7 +56,7 @@ def show(
         conn.sendall(enc_data)
         conn.settimeout(5)
     except OSError:
-        warnings.warn("Could not connect to klive server", UserWarning)
+        logger.warning("Could not connect to klive server")
     else:
         msg = ""
         try:
@@ -72,4 +72,12 @@ def show(
         Path(gds_file).unlink()
 
 
-__all__ = ["show", "Enclosure", "violations", "Direction", "geo"]
+__all__ = [
+    "show",
+    "Enclosure",
+    "violations",
+    "Direction",
+    "geo",
+    "extrude_path",
+    "extrude_path_dynamic",
+]

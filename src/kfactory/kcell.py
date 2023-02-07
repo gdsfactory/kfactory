@@ -1,7 +1,6 @@
 import abc
 import functools
 import importlib
-import warnings
 from abc import ABC, abstractmethod
 from dataclasses import InitVar, dataclass
 
@@ -35,6 +34,7 @@ from cachetools import Cache, cached
 from typing_extensions import ParamSpec
 
 from . import kdb
+from .config import logger
 from .port import rename_clockwise
 
 KCellParams = ParamSpec("KCellParams")
@@ -1160,8 +1160,8 @@ class KCell:
         if isinstance(port, Port):
             self.ports.add_port(port=port, name=name)
         else:
-            warnings.warn(
-                f"Port {str(port)} is not an integer based port, converting to integer based"
+            logger.warning(
+                f"Port {str(port)} is not an integer based port, converting to integer based",
             )
 
             strans = port.trans.s_trans() if port.complex() else port.trans.dup()
@@ -2058,8 +2058,8 @@ def update_default_trans(
 class KCellCache(Cache[int, Any]):
     def popitem(self) -> tuple[int, Any]:
         key, value = super().popitem()
-        warnings.warn(
-            f"KCell {value.name} was evicted from he cache. You probably should increase the cache size"
+        logger.warning(
+            f"KCell {value.name} was evicted from he cache. You probably should increase the cache size",
         )
         return key, value
 
