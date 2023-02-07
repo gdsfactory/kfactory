@@ -6,7 +6,7 @@ from tempfile import gettempdir
 from .. import kcell, kdb
 from ..config import logger
 from . import geo, violations
-from .enclosure import Direction, Enclosure
+from .geo import Direction, Enclosure, extrude_path, extrude_path_dynamic
 
 try:
     from __main__ import __file__ as mf
@@ -72,4 +72,12 @@ def show(
         Path(gds_file).unlink()
 
 
-__all__ = ["show", "Enclosure", "violations", "Direction", "geo"]
+__all__ = [
+    "show",
+    "Enclosure",
+    "violations",
+    "Direction",
+    "geo",
+    "extrude_path",
+    "extrude_path_dynamic",
+]
