@@ -1,9 +1,10 @@
 from enum import Enum
+from hashlib import sha1
 from typing import Any, Callable, List, Optional, Sequence, TypeGuard, cast, overload
 
 import numpy as np
 from numpy.typing import ArrayLike
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator, validate_model, validator
 from scipy.special import binom  # type: ignore[import]
 
 from .. import kdb
@@ -446,12 +447,16 @@ class LayerSection(BaseModel):
 
 class Enclosure(BaseModel):
     layer_sections: dict[LayerEnum | int, LayerSection]
-    enc_name: Optional[str] = None
+    name: Optional[str] = None
     warn: bool = True
+    _autoname: bool = True
 
     main_layer: Optional[LayerEnum | int]
 
     yaml_tag: str = "!Enclosure"
+
+    class Config:
+        validate_assignment = True
 
     def __init__(
         self,
@@ -462,7 +467,12 @@ class Enclosure(BaseModel):
         warn: bool = True,
         main_layer: Optional[LayerEnum | int] = None,
     ):
-        super().__init__(warn=warn, layer_sections={}, _name=name)
+        super().__init__(
+            warn=warn,
+            layer_sections={},
+            name=name,
+            main_layer=main_layer,
+        )
 
         for sec in sorted(sections, key=lambda sec: (sec[0], sec[1])):
             if sec[0] in self.layer_sections:
@@ -473,8 +483,6 @@ class Enclosure(BaseModel):
             ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
                 Section(d_max=sec[2], d_min=sec[1])  # type:ignore[misc]
             )
-        self.enc_name = name
-        self.main_layer = main_layer
 
     def __add__(self, other: "Enclosure") -> "Enclosure":
 
@@ -497,7 +505,11 @@ class Enclosure(BaseModel):
         return self
 
     def add_section(self, layer: LayerEnum | int, sec: Section) -> None:
-        self.layer_sections[layer].add_section(sec)
+        if layer in self.layer_sections:
+            self.layer_sections[layer].add_section(sec)
+        else:
+            self.layer_sections[layer] = LayerSection(sections=[sec])
+        self.check()
 
     def minkowski_region(
         self,
@@ -628,16 +640,31 @@ class Enclosure(BaseModel):
         d = dict(node.enclosures)
         return representer.represent_mapping(cls.yaml_tag, d)
 
-    def __hash__(self) -> int:
-        return hash(tuple(self.layer_sections))
+    def check(self) -> None:
+        *_, validation_error = validate_model(self.__class__, self.__dict__)
+        if validation_error:
+            raise validation_error
 
-    @property
-    def name(self) -> str:
-        return f"{self.__hash__()}" if self.enc_name is None else f"{self.enc_name}"
+    @root_validator
+    def name_validate(cls, values: dict[str, Any]) -> Any:
 
-    @name.setter
-    def name(self, value: str) -> None:
-        self.enc_name = value
+        list_to_hash = (
+            [
+                values["main_layer"],
+            ]
+            if "main_layer" in values
+            else []
+        )
+
+        print(list_to_hash)
+        print(values["layer_sections"])
+        for layer, layer_section in values["layer_sections"].items():
+            list_to_hash.append([str(layer), str(layer_section.sections)])
+            print(list_to_hash)
+
+        values["name"] = sha1(str(list_to_hash).encode("UTF-8")).hexdigest()
+        print(list_to_hash)
+        return values
 
     def extrude_path(
         self,
