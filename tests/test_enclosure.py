@@ -33,7 +33,6 @@ def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.utils.Enclosure):
 def test_enclosure(LAYER):
 
     enc = kf.utils.Enclosure([(LAYER.WG, 500, -250)])
-    print(str(enc))
 
 
 def test_enc(LAYER, wg_enc):
@@ -60,6 +59,7 @@ def test_layer_multi_enc(LAYER):
             (LAYER.WGCLAD, -500, -400),
         ]
     )
+    mmi_enc(LAYER.WG, enc)
 
 
 def test_layer_merge_enc(LAYER):
@@ -71,3 +71,4 @@ def test_layer_merge_enc(LAYER):
             (LAYER.WGCLAD, -2000, 1000),
         ]
     )
+    mmi_enc(LAYER.WG, enc)
