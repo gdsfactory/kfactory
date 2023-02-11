@@ -4,14 +4,12 @@ from typing import Any, Callable, List, Optional, Sequence, TypeGuard, cast, ove
 
 import numpy as np
 from numpy.typing import ArrayLike
-from pydantic import BaseModel, PrivateAttr, root_validator, validate_model, validator
+from pydantic import BaseModel, PrivateAttr
 from scipy.special import binom  # type: ignore[import]
 
 from .. import kdb
 from ..config import logger
 from ..kcell import KCell, LayerEnum
-
-# from .enclosure import Enclosure, LayerSection, Section
 
 __all__ = [
     "extrude_path",
@@ -648,11 +646,6 @@ class Enclosure(BaseModel):
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
         d = dict(node.enclosures)
         return representer.represent_mapping(cls.yaml_tag, d)
-
-    def check(self) -> None:
-        *_, validation_error = validate_model(self.__class__, self.__dict__)
-        if validation_error:
-            raise validation_error
 
     def __str__(self) -> str:
         if self._name is not None:
