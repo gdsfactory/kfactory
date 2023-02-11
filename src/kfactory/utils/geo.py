@@ -188,12 +188,12 @@ def extrude_path(
     layer_list = {layer: LayerSection(sections=[Section(d_max=0)])}
     if enclosure is not None:
         if layer not in enclosure.layer_sections:
-            layer_list.update(enclosure.layer_sections)
+            layer_list |= enclosure.layer_sections
         else:
             ls = layer_list[layer].sections.copy()
             layer_list = enclosure.layer_sections.copy()
             layer_list[layer] = LayerSection(
-                sections=[sec for sec in layer_list[layer].sections] + [ls]
+                sections=list(layer_list[layer].sections) + [ls]
             )
 
     for layer, layer_sec in layer_list.items():
@@ -326,7 +326,7 @@ def extrude_path_dynamic(
             ls = layer_list[layer].sections.copy()
             layer_list = enclosure.layer_sections.copy()
             layer_list[layer] = LayerSection(
-                sections=[sec for sec in layer_list[layer].sections] + [ls]
+                sections=list(layer_list[layer].sections) + [ls]
             )
     if is_callable_widths(widths):
         for layer, layer_sec in layer_list.items():
@@ -448,7 +448,7 @@ class LayerSection(BaseModel):
             self.sections.insert(i, sec)
 
     def __hash__(self) -> int:
-        return hash(tuple([(s.d_min, s.d_max) for s in self.sections]))
+        return hash(tuple((s.d_min, s.d_max) for s in self.sections))
 
 
 class Enclosure(BaseModel):
@@ -491,11 +491,7 @@ class Enclosure(BaseModel):
 
     def __hash__(self) -> int:  # make hashable BaseModel subclass
         return hash(
-            (
-                str(self),
-                self.main_layer,
-                tuple([(l, ls) for l, ls in self.layer_sections.items()]),
-            )
+            (str(self), self.main_layer, tuple(list(self.layer_sections.items())))
         )
 
     def __add__(self, other: "Enclosure") -> "Enclosure":
@@ -608,13 +604,9 @@ class Enclosure(BaseModel):
 
         if ref is None:
             raise ValueError(
-                f"The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
+                "The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
             )
-        if isinstance(ref, int):
-            r = kdb.Region(c.begin_shapes_rec(ref))
-        else:
-            r = ref.dup()
-
+        r = kdb.Region(c.begin_shapes_rec(ref)) if isinstance(ref, int) else ref.dup()
         r.merge()
 
         for layer, layersec in self.layer_sections.items():
@@ -646,10 +638,9 @@ class Enclosure(BaseModel):
             reg_max.size(d_max)
             if d_min is None:
                 return reg_max
-            else:
-                reg_min = kdb.Region(_ref)
-                reg_min.size(d_min)
-                return reg_max - reg_min
+            reg_min = kdb.Region(_ref)
+            reg_min.size(d_min)
+            return reg_max - reg_min
 
         self.apply_custom(c, bbox_reg)
 
@@ -664,16 +655,14 @@ class Enclosure(BaseModel):
             raise validation_error
 
     def __str__(self) -> str:
-        if self._name is None:
-            list_to_hash: Any = [
-                self.main_layer,
-            ]
-            for layer, layer_section in self.layer_sections.items():
-                list_to_hash.append([str(layer), str(layer_section.sections)])
-            name = sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]
-        else:
-            name = self._name
-        return name
+        if self._name is not None:
+            return self._name
+        list_to_hash: Any = [
+            self.main_layer,
+        ]
+        for layer, layer_section in self.layer_sections.items():
+            list_to_hash.append([str(layer), str(layer_section.sections)])
+        return sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]
 
     def extrude_path(
         self,
@@ -684,7 +673,7 @@ class Enclosure(BaseModel):
     ) -> None:
         if main_layer is None:
             raise ValueError(
-                f"The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
+                "The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
             )
         extrude_path(target=c, layer=main_layer, path=path, width=width, enclosure=self)
 
@@ -697,7 +686,7 @@ class Enclosure(BaseModel):
     ) -> None:
         if main_layer is None:
             raise ValueError(
-                f"The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
+                "The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
             )
         extrude_path_dynamic(
             target=c, layer=main_layer, path=path, widths=widths, enclosure=self
