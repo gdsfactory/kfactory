@@ -424,6 +424,9 @@ class Section(BaseModel):
     d_min: Optional[int] = None
     d_max: int
 
+    def __hash__(self) -> int:
+        return hash((self.d_min, self.d_max))
+
 
 class LayerSection(BaseModel):
     sections: list[Section] = []
@@ -443,6 +446,9 @@ class LayerSection(BaseModel):
                     if i == len(self.sections):
                         break
             self.sections.insert(i, sec)
+
+    def __hash__(self) -> int:
+        return hash(tuple([(s.d_min, s.d_max) for s in self.sections]))
 
 
 class Enclosure(BaseModel):
@@ -482,6 +488,15 @@ class Enclosure(BaseModel):
             ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
                 Section(d_max=sec[2], d_min=sec[1])  # type:ignore[misc]
             )
+
+    def __hash__(self) -> int:  # make hashable BaseModel subclass
+        return hash(
+            (
+                str(self),
+                self.main_layer,
+                tuple([(l, ls) for l, ls in self.layer_sections.items()]),
+            )
+        )
 
     def __add__(self, other: "Enclosure") -> "Enclosure":
 
