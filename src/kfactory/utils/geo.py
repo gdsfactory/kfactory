@@ -4,7 +4,7 @@ from typing import Any, Callable, List, Optional, Sequence, TypeGuard, cast, ove
 
 import numpy as np
 from numpy.typing import ArrayLike
-from pydantic import BaseModel, root_validator, validate_model, validator
+from pydantic import BaseModel, PrivateAttr, root_validator, validate_model, validator
 from scipy.special import binom  # type: ignore[import]
 
 from .. import kdb
@@ -447,9 +447,8 @@ class LayerSection(BaseModel):
 
 class Enclosure(BaseModel):
     layer_sections: dict[LayerEnum | int, LayerSection]
-    name: Optional[str] = None
+    _name: Optional[str] = PrivateAttr(default=None)
     warn: bool = True
-    _autoname: bool = True
 
     main_layer: Optional[LayerEnum | int]
 
@@ -470,10 +469,10 @@ class Enclosure(BaseModel):
         super().__init__(
             warn=warn,
             layer_sections={},
-            name=name,
             main_layer=main_layer,
         )
 
+        self._name = name
         for sec in sorted(sections, key=lambda sec: (sec[0], sec[1])):
             if sec[0] in self.layer_sections:
                 ls = self.layer_sections[sec[0]]
@@ -505,11 +504,15 @@ class Enclosure(BaseModel):
         return self
 
     def add_section(self, layer: LayerEnum | int, sec: Section) -> None:
+
+        d = self.layer_sections
+
         if layer in self.layer_sections:
-            self.layer_sections[layer].add_section(sec)
+            d[layer].add_section(sec)
         else:
-            self.layer_sections[layer] = LayerSection(sections=[sec])
-        self.check()
+            d[layer] = LayerSection(sections=[sec])
+
+        self.layer_sections = d  # trick pydantic to validate
 
     def minkowski_region(
         self,
@@ -645,26 +648,17 @@ class Enclosure(BaseModel):
         if validation_error:
             raise validation_error
 
-    @root_validator
-    def name_validate(cls, values: dict[str, Any]) -> Any:
-
-        list_to_hash = (
-            [
-                values["main_layer"],
+    def __str__(self) -> str:
+        if self._name is None:
+            list_to_hash: Any = [
+                self.main_layer,
             ]
-            if "main_layer" in values
-            else []
-        )
-
-        print(list_to_hash)
-        print(values["layer_sections"])
-        for layer, layer_section in values["layer_sections"].items():
-            list_to_hash.append([str(layer), str(layer_section.sections)])
-            print(list_to_hash)
-
-        values["name"] = sha1(str(list_to_hash).encode("UTF-8")).hexdigest()
-        print(list_to_hash)
-        return values
+            for layer, layer_section in self.layer_sections.items():
+                list_to_hash.append([str(layer), str(layer_section.sections)])
+            name = sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]
+        else:
+            name = self._name
+        return name
 
     def extrude_path(
         self,
