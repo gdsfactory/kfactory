@@ -33,7 +33,7 @@ def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.utils.Enclosure):
 def test_enclosure(LAYER):
 
     enc = kf.utils.Enclosure([(LAYER.WG, 500, -250)])
-    print(str(enc))
+    print(enc)
 
 
 def test_enc(LAYER, wg_enc):
