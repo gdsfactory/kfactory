@@ -60,6 +60,7 @@ def test_layer_multi_enc(LAYER):
             (LAYER.WGCLAD, -500, -400),
         ]
     )
+    mmi_enc(LAYER.WG, enc)
 
 
 def test_layer_merge_enc(LAYER):
@@ -71,3 +72,4 @@ def test_layer_merge_enc(LAYER):
             (LAYER.WGCLAD, -2000, 1000),
         ]
     )
+    mmi_enc(LAYER.WG, enc)
