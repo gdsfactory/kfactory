@@ -201,7 +201,7 @@ def extrude_path(
                 path_pts_to_polygon(
                     *extrude_path_points(
                         path,
-                        width + section.d_max * target.library.dbu,
+                        width + 2 * section.d_max * target.library.dbu,
                         start_angle,
                         end_angle,
                     )
@@ -212,7 +212,7 @@ def extrude_path(
                     path_pts_to_polygon(
                         *extrude_path_points(
                             path,
-                            width + section.d_min * target.library.dbu,
+                            width + 2 * section.d_min * target.library.dbu,
                             start_angle,
                             end_angle,
                         )
