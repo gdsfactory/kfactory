@@ -20,7 +20,7 @@ from .kcell import (
     default_save,
     LayerEnum,
 )
-from . import kdb, pcells, tech, placer, routing, utils
+from . import pcells, tech, placer, routing, utils
 from .utils import show
 from . import port
 
