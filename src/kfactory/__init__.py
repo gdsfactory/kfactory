@@ -20,12 +20,12 @@ from .kcell import (
     default_save,
     LayerEnum,
 )
-from . import kdb, pcells, tech, placer, routing, utils
+from . import pcells, tech, placer, routing, utils
 from .utils import show
 from . import port
 
 
-__version__ = "0.2.5"
+__version__ = "0.2.6"
 
 
 __all__ = [
