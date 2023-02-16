@@ -1,6 +1,8 @@
 import abc
 import functools
 import importlib
+import json
+import socket
 from abc import ABC, abstractmethod
 from dataclasses import InitVar, dataclass
 
@@ -9,6 +11,7 @@ from enum import Enum
 from hashlib import sha3_512
 from inspect import signature
 from pathlib import Path
+from tempfile import gettempdir
 from typing import (  # ParamSpec, # >= python 3.10
     Any,
     Callable,
@@ -36,6 +39,12 @@ from typing_extensions import ParamSpec
 from . import kdb
 from .config import logger
 from .port import rename_clockwise
+
+try:
+    from __main__ import __file__ as mf
+except ImportError:
+    mf = "shell"
+
 
 KCellParams = ParamSpec("KCellParams")
 OP = ParamSpec("OP")
@@ -148,13 +157,12 @@ class KLib(kdb.Layout):
     """
 
     def __init__(self, editable: bool = True) -> None:
-        self.kcells: dict[str, "KCell"] = {}
+        self.kcells: list["KCell"] = []  # dict[str, "KCell"] = {}
         kdb.Layout.__init__(self, editable)
         self.rename_function: Callable[..., None] = rename_clockwise
 
     def create_cell(  # type: ignore[override]
         self,
-        kcell: "KCell",
         name: str,
         *args: Union[
             list[str], list[Union[str, dict[str, Any]]], list[Union[str, str]]
@@ -177,32 +185,46 @@ class KLib(kdb.Layout):
         """
 
         if allow_duplicate or (self.cell(name) is None):
-            self.kcells[name] = kcell
+            # self.kcells[name] = kcell
             return kdb.Layout.create_cell(self, name, *args)
         else:
             raise ValueError(
                 f"Cellname {name} already exists. Please make sure the cellname is unique or pass `allow_duplicate` when creating the library"
             )
 
-    def register_cell(self, kcell: "KCell") -> None:
+    def register_cell(self, kcell: "KCell", allow_reregister: bool = False) -> None:
         """Register an existing cell in the KLib object
 
         Args:
             kcell: KCell to be registered in the KLib
         """
 
-        if kcell.name in self.kcells and kcell is not self.kcells[kcell.name]:
-            raise KeyError(
-                "Cannot register a new cell with a name that already exists in the library"
-            )
+        def check_name(other: "KCell") -> bool:
+            return other.name == kcell.name
+
+        if any(cell.name == kcell.name for cell in self.kcells):
+            if not allow_reregister:
+                raise ValueError(
+                    "Cannot register a new cell with a name that already exists in the library"
+                )
 
         else:
-            self.kcells[kcell.name] = kcell
+            self.kcells.append(kcell)
 
-    def update_cell_name(self, name: str, new_name: str) -> None:
-        if new_name != name:
-            self.kcells[new_name] = self.kcells[name]
-            del self.kcells[name]
+    def __getitem__(self, obj: str | int) -> "KCell":
+        if isinstance(obj, int):
+            return self.kcells[obj]
+        else:
+            try:
+                for i in filter(lambda kcell: kcell.name == obj, self.kcells):
+                    return i
+                raise ValueError(
+                    "Found something but also not, open an Issue on github"
+                )
+            except StopIteration:
+                raise ValueError(
+                    f"Library doesn't have a KCell named {obj}, available KCells are {[cell.name for cell in self.kcells]}"
+                )
 
     def read(
         self,
@@ -240,6 +262,15 @@ library = (
 
 
 class LayerEnum(int, Enum):
+    """Class for having the layers stored and a mapping int <-> layer,datatype
+
+    This Enum can also be treated as a tuple, i.e. it implements __getitem__ and __len__.
+
+    Attributes:
+        layer: layer number
+        datatype: layer datatype
+        lib: library
+    """
 
     layer: int
     datatype: int
@@ -1031,7 +1062,7 @@ class DCplxPort(DPortLike[kdb.DCplxTrans], CPortLike[kdb.DCplxTrans]):
         return self.trans.dup()
 
 
-class KCell:
+class KCell(kdb.Cell):
     """Derived from :py:class:`klayout.db.Cell`. Additionally to a standard cell, this one will keep track of :py:class:`Port` and allow to store metadata in a dictionary
 
     Attributes:
@@ -1043,39 +1074,58 @@ class KCell:
 
     yaml_tag = "!KCell"
 
+    def __new__(
+        cls,
+        name: Optional[str] = None,
+        library: KLib = library,
+        kdb_cell: Optional[kdb.Cell] = None,
+    ) -> "KCell":
+        """Create a KLayout cell and change its class to KCell
+
+        Args:
+            name: name of the cell, if `None`, it will set the name to "Unnamed_"
+            library: KLib object that stores the layout and metadata about the KCells
+            kdb_cell
+        """
+        if kdb_cell is None:
+            _name = "Unnamed_" if name is None else name
+            cell = library.create_cell(
+                name=_name,
+            )
+        else:
+            cell = kdb_cell
+        cell.__class__ = cls
+        return cell  # type: ignore[return-value]
+
     def __init__(
         self,
         name: Optional[str] = None,
         library: KLib = library,
         kdb_cell: Optional[kdb.Cell] = None,
     ) -> None:
-        _name = name if name is not None else "Unnamed_"
-        self.library: KLib = library
-        if kdb_cell is None:
-            self._kdb_cell: kdb.Cell = self.library.create_cell(self, _name)
-            if name is None:
-                self.name = f"Unnamed_{self.cell_index()}"
-        else:
-            self._kdb_cell = kdb_cell
-            self.library.register_cell(self)
-            self.name = kdb_cell.name if name is None else name
+        self.library: KLib = library  # type: ignore[assignment]
+        if name is None:
+            self.name = f"Unnamed_{self.cell_index()}"
         self.ports: Ports = Ports()
         self.insts: list[Instance] = []
         self.settings: dict[str, Any] = {}
         self._locked = False
         self.info: dict[str, Any] = {}
+        library.register_cell(self, allow_reregister=True)
 
-    def copy(self) -> "KCell":
+    def copy(self) -> "KCell":  # type: ignore[override]
         """Copy the full cell
 
         Returns:
             cell: exact copy of the current cell
         """
-        kdb_copy = self._kdb_cell.dup()
-        c = KCell(library=self.library, kdb_cell=kdb_copy)
+        kdb_copy = self.__deepcopy__()
+        c = KCell(library=self.library)
         c.ports = self.ports
-        for inst in self.insts:
-            c.create_inst(inst.cell, inst.instance.trans)
+        for inst in kdb_copy.each_inst():
+            self.insts.append(
+                Instance(cell=self.library[inst.cell.name], reference=inst)
+            )
         c._locked = False
         return c
 
@@ -1086,29 +1136,6 @@ class KCell:
     @ports.setter
     def ports(self, new_ports: "InstancePorts | Ports") -> None:
         self._ports = new_ports.copy()
-
-    @property
-    def name(self) -> str:
-        """Returns the KLayout Cell name
-
-        Rerturns:
-            name: `klayout.db.Cell.name`
-        """
-        return self._kdb_cell.name
-
-    @name.setter
-    def name(self, new_name: str) -> None:
-        """Setter for the Name
-
-        This will set the name in the KCell library :py:attr:`~library`
-        Also updates the underlying KLayout Cell
-
-        Args:
-            new_name: The new name of the cell
-        """
-        name = self._kdb_cell.name
-        self._kdb_cell.name = new_name
-        self.library.update_cell_name(name, new_name)
 
     @overload
     def create_port(
@@ -1164,8 +1191,8 @@ class KCell:
                 f"Port {str(port)} is not an integer based port, converting to integer based",
             )
 
-            strans = port.trans.s_trans() if port.complex() else port.trans.dup()
-            trans = strans if port.int_based() else strans.to_itype(self.library.dbu)
+            strans = port.trans.s_trans() if port.complex() else port.trans.dup()  # type: ignore[union-attr]
+            trans = strans if port.int_based() else strans.to_itype(self.library.dbu)  # type: ignore[union-attr]
             _port = Port(
                 name=port.name,
                 width=port.width  # type: ignore[arg-type]
@@ -1187,7 +1214,7 @@ class KCell:
         Returns:
             :py:class:`~Instance`: The created instance
         """
-        ca = self.insert(kdb.CellInstArray(cell._kdb_cell.cell_index(), trans))
+        ca = self.insert(kdb.CellInstArray(cell.cell_index(), trans))
         inst = Instance(cell, ca)
         self.insts.append(inst)
         return inst
@@ -1203,33 +1230,6 @@ class KCell:
             cell: The cell to be added as an instance
         """
         return self.create_inst(cell)
-
-    def __getattribute__(self, attr_name: str) -> Any:
-        """Overwrite the standard getattribute. If the attribute is not set by KCell, go look in the klayout.db.Cell object"""
-        if attr_name in {"name"}:
-            return self.__getattr__(attr_name)
-        else:
-            return super().__getattribute__(attr_name)
-
-    def _get_attr(self, attr_name: str) -> Any:
-        """look in the klayout.db.Cell for an attribute, used by settattr to set the name"""
-        return super().__getattribute__(attr_name)
-
-    def __getattr__(self, attr_name: str) -> Any:
-        """Look in the klayout.db.Cell for attributes"""
-        return kdb.Cell.__getattribute__(self._kdb_cell, attr_name)
-
-    def __setattr__(self, attr_name: str, attr_value: Any) -> None:
-        """Custom set attribute function. Name and klayout.db.Cell attribute have to be set manually
-
-        Everything else look first in the klayout.db.Cell whether the attribute exists, otherwise set it in the KCell
-        """
-        if attr_name in {"_kdb_cell", "name"}:
-            super().__setattr__(attr_name, attr_value)
-        try:
-            kdb.Cell.__setattr__(self._get_attr("_kdb_cell"), attr_name, attr_value)
-        except AttributeError as a:
-            super().__setattr__(attr_name, attr_value)
 
     def hash(self) -> bytes:
         """Provide a unique hash of the cell"""
@@ -1261,13 +1261,13 @@ class KCell:
         else:
             rename_func(self.ports._ports)
 
-    def flatten(self, prune: bool = True, merge: bool = True) -> None:
+    def flatten(self, prune: bool = True, merge: bool = True) -> None:  # type: ignore[override]
         """Flatten the cell. Pruning will delete the klayout.db.Cell if unused, but might cause artifacts at the moment
 
         Args:
             prune: Delete unused child cells if they aren't used in any other KCell
             merge: Merge the shapes on all layers"""
-        self._kdb_cell.flatten(False)  # prune)
+        super().flatten(False)  # prune)
         self.insts = []
 
         if merge:
@@ -1307,7 +1307,10 @@ class KCell:
     def write(
         self, filename: str | Path, save_options: kdb.SaveLayoutOptions = default_save()
     ) -> None:
-        return self._kdb_cell.write(str(filename), save_options)
+        return self.write(str(filename), save_options)
+
+    def show(self) -> None:
+        show(self)
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore
@@ -1467,7 +1470,20 @@ class KCell:
                             NotImplementedError("unknown format for y")
                 kinst.transform(kdb.Trans(0, False, x - x0, y - y0))
 
-        type_to_class = {
+        type_to_class: dict[
+            str,
+            Callable[
+                [str],
+                kdb.Box
+                | kdb.DBox
+                | kdb.Polygon
+                | kdb.DPolygon
+                | kdb.Edge
+                | kdb.DEdge
+                | kdb.Text
+                | kdb.DText,
+            ],
+        ] = {
             "box": kdb.Box.from_s,
             "polygon": kdb.Polygon.from_s,
             "edge": kdb.Edge.from_s,
@@ -1511,7 +1527,9 @@ class Instance:
         return h.digest()
 
     @overload
-    def connect(self, portname: str, other: Port, *, mirror: bool = False) -> None:
+    def connect(
+        self, portname: str, other: Port | DCplxPort, *, mirror: bool = False
+    ) -> None:
         ...
 
     @overload
@@ -1770,7 +1788,7 @@ class Ports:
         try:
             return next(filter(lambda port: port.name == key, self._ports))
         except StopIteration:
-            raise StopIteration(
+            raise ValueError(
                 f"{key} is not a port. Available ports: {[v.name for v in self._ports]}"
             )
 
@@ -2062,6 +2080,63 @@ class KCellCache(Cache[int, Any]):
             f"KCell {value.name} was evicted from he cache. You probably should increase the cache size",
         )
         return key, value
+
+
+def show(
+    gds: str | KCell | Path,
+    keep_position: bool = True,
+    save_options: kdb.SaveLayoutOptions = default_save(),
+) -> None:
+    """Show GDS in klayout"""
+
+    delete = False
+
+    match gds:
+        case str():
+            gds_file = Path(gds)
+        case KCell(library=KLib()):
+            _mf = "stdin" if mf == "<stdin>" else mf
+            dirpath = Path(gettempdir())
+            tf = Path(gettempdir()) / Path(_mf).with_suffix(".gds")
+            tf.parent.mkdir(parents=True, exist_ok=True)
+            gds.write(str(tf), save_options)
+            gds_file = tf
+            delete = True
+        case _:
+            if isinstance(gds, Path):
+                gds_file = gds
+            else:
+                raise NotImplementedError(
+                    f"unknown type {type(gds)} for streaming to KLayout"
+                )
+
+    if not gds_file.is_file():
+        raise ValueError(f"{gds_file} does not exist")
+    data_dict = {
+        "gds": str(gds_file),
+        "keep_position": keep_position,
+    }
+    data = json.dumps(data_dict)
+    try:
+        conn = socket.create_connection(("127.0.0.1", 8082), timeout=0.5)
+        data = data + "\n"
+        enc_data = data.encode()  # if hasattr(data, "encode") else data
+        conn.sendall(enc_data)
+        conn.settimeout(5)
+    except OSError:
+        logger.warning("Could not connect to klive server")
+    else:
+        msg = ""
+        try:
+            msg = conn.recv(1024).decode("utf-8")
+            logger.info("Message from klive: " + msg)
+        except OSError:
+            logger.warning("klive didn't send data, closing")
+        finally:
+            conn.close()
+
+    if delete:
+        Path(gds_file).unlink()
 
 
 __all__ = [
