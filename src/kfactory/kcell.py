@@ -31,9 +31,10 @@ from typing import (  # ParamSpec, # >= python 3.10
     overload,
 )
 
+# from cachetools import Cache, cached
+import cachetools.func
 import numpy as np
 import ruamel.yaml
-from cachetools import Cache, cached
 from typing_extensions import ParamSpec
 
 from . import kdb
@@ -215,20 +216,16 @@ class KLib(kdb.Layout):
         if isinstance(obj, int):
             return self.kcells[obj]
         else:
-            try:
-                for i in filter(lambda kcell: kcell.name == obj, self.kcells):
-                    return i
-                raise ValueError(
-                    "Found something but also not, open an Issue on github"
-                )
-            except StopIteration:
+            for i in filter(lambda kcell: kcell.name == obj, self.kcells):
+                return i
+            else:
                 raise ValueError(
                     f"Library doesn't have a KCell named {obj}, available KCells are {[cell.name for cell in self.kcells]}"
                 )
 
     def read(
         self,
-        filename: str,
+        filename: str | Path,
         options: Optional[kdb.LoadLayoutOptions] = None,
         register_cells: bool = True,
     ) -> kdb.LayerMap:
@@ -243,7 +240,7 @@ class KLib(kdb.Layout):
         if register_cells:
             new_cells = set(self.cells("*")) - cells
             for c in new_cells:
-                self.register_cell(KCell(kdb_cell=c, library=self))
+                KCell(kdb_cell=c, library=self).name
 
         return lm
 
@@ -1104,7 +1101,7 @@ class KCell(kdb.Cell):
         kdb_cell: Optional[kdb.Cell] = None,
     ) -> None:
         self.library: KLib = library  # type: ignore[assignment]
-        if name is None:
+        if name is None and kdb_cell is None:
             self.name = f"Unnamed_{self.cell_index()}"
         self.ports: Ports = Ports()
         self.insts: list[Instance] = []
@@ -1119,8 +1116,8 @@ class KCell(kdb.Cell):
         Returns:
             cell: exact copy of the current cell
         """
-        kdb_copy = self.__deepcopy__()
-        c = KCell(library=self.library)
+        kdb_copy = self.dup()
+        c = KCell(library=self.library, kdb_cell=kdb_copy)
         c.ports = self.ports
         for inst in kdb_copy.each_inst():
             self.insts.append(
@@ -1237,6 +1234,7 @@ class KCell(kdb.Cell):
         h.update(self.name.encode("ascii", "ignore"))
 
         for l in self.layout().layer_indexes():
+            h.update(l.to_bytes(8, "big"))
             for shape in self.shapes(l).each(kdb.Shapes.SRegions):
                 h.update(shape.polygon.hash().to_bytes(8, "big"))
             for shape in self.shapes(l).each(kdb.Shapes.STexts):
@@ -1245,6 +1243,8 @@ class KCell(kdb.Cell):
         for _hash in port_hashs:
             h.update(_hash)
         insts_hashs = list(sorted(inst.hash() for inst in self.insts))
+        for _hash in insts_hashs:
+            h.update(_hash)
         return h.digest()
 
     def autorename_ports(
@@ -1307,7 +1307,7 @@ class KCell(kdb.Cell):
     def write(
         self, filename: str | Path, save_options: kdb.SaveLayoutOptions = default_save()
     ) -> None:
-        return self.write(str(filename), save_options)
+        return super().write(str(filename), save_options)
 
     def show(self) -> None:
         show(self)
@@ -1357,7 +1357,7 @@ class KCell(kdb.Cell):
         cell.settings = d.get("settings", {})
         for inst in d.get("insts", []):
             if "cellname" in inst:
-                _cell = cell.library.kcells[inst["cellname"]]
+                _cell = cell.library[inst["cellname"]]
             elif "cellfunction" in inst:
                 module_name, fname = inst["cellfunction"].rsplit(".", 1)
                 module = importlib.import_module(module_name)
@@ -1869,7 +1869,7 @@ def autocell(
     *,
     set_settings: bool = True,
     set_name: bool = True,
-    maxsize: int = 512,
+    maxsize: Optional[int] = None,
 ) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]:
     ...
 
@@ -1880,7 +1880,7 @@ def autocell(
     *,
     set_settings: bool = True,
     set_name: bool = True,
-    maxsize: int = 512,
+    maxsize: Optional[int] = None,
 ) -> Callable[KCellParams, KCell] | Callable[
     [Callable[KCellParams, KCell]], Callable[KCellParams, KCell]
 ]:
@@ -1894,12 +1894,18 @@ def autocell(
         parameter sets than there are spaces in the cache, in case there are cell calls with existing parameter set calls
     """
 
+    if maxsize is not None:
+        logger.warning(
+            "DeprecationWarning: maxsize has no effect on the cache, as it is a simple dict now"
+        )
+
     def decorator_autocell(
         f: Callable[KCellParams, KCell]
     ) -> Callable[KCellParams, KCell]:
         sig = signature(f)
 
-        cache = KCellCache(maxsize)
+        # previously was a KCellCache, but dict should do for most case
+        cache: dict[int, Any] = {}
 
         @functools.wraps(f)
         def wrapper_autocell(
@@ -1917,7 +1923,7 @@ def autocell(
                 if isinstance(value, dict):
                     params[key] = dict_to_frozen_set(value)
 
-            @cached(cache=cache)
+            @cachetools.cached(cache=cache)
             @functools.wraps(f)
             def wrapped_cell(
                 **params: KCellParams.args,
@@ -2071,15 +2077,6 @@ def update_default_trans(
     new_trans: dict[str, Union[str, int, float, dict[str, Union[str, int, float]]]]
 ) -> None:
     DEFAULT_TRANS.update(new_trans)
-
-
-class KCellCache(Cache[int, Any]):
-    def popitem(self) -> tuple[int, Any]:
-        key, value = super().popitem()
-        logger.warning(
-            f"KCell {value.name} was evicted from he cache. You probably should increase the cache size",
-        )
-        return key, value
 
 
 def show(
