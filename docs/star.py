@@ -78,7 +78,7 @@ def sky_with_stars() -> kf.KCell:
     star_layer = LAYER.SI
 
     # create 50 stars
-    for i in range(50):
+    for _ in range(50):
         x = random.uniform(10, 390)
         y = random.uniform(10, 390)
         angle = random.uniform(0, 360)
