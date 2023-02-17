@@ -1,7 +1,7 @@
 from typing import Callable, List, Optional, Sequence, Union
 
 from .. import kdb
-from ..kcell import KCell, Port
+from ..kcell import DCplxPort, KCell, Port
 from ..utils.geo import vec_angle  # , clean_points
 from .manhattan import route_manhattan
 
@@ -134,8 +134,8 @@ def connect(
         b90p2.trans.disp.y if b90p1.trans.angle % 2 else b90p1.trans.disp.y,
     )
 
-    start_port = p1.copy()
-    end_port = p2.copy()
+    start_port: Port | DCplxPort = p1.copy()
+    end_port: Port | DCplxPort = p2.copy()
     b90r = int(
         max((b90p1.trans.disp - b90c.disp).abs(), (b90p2.trans.disp - b90c.disp).abs())
     )
@@ -297,8 +297,8 @@ def connect(
 
 def place90(
     c: KCell,
-    p1: Port,
-    p2: Port,
+    p1: Port | DCplxPort,
+    p2: Port | DCplxPort,
     pts: Sequence[kdb.Point],
     straight_factory: Callable[..., KCell],
     bend90_cell: KCell,
@@ -423,7 +423,7 @@ def place90(
                 f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
             )
         bend90.transform(kdb.Trans(ang, mirror, pt.x, pt.y) * b90c.inverted())
-        length = (bend90.ports[b90p1.name].trans.disp - old_bend_port.trans.disp).abs()
+        length = (bend90.ports[b90p1.name].trans.disp - old_bend_port.trans.disp).abs()  # type: ignore[operator]
         if length > 0:
             if (
                 taper_cell is None
@@ -458,7 +458,9 @@ def place90(
                     t2.connect(taperp2.name, t1, taperp2.name)
         old_pt = pt
         old_bend_port = bend90.ports[b90p2.name]
-    length = (bend90.ports[b90p2.name].trans.disp - p2.trans.disp).abs()
+    length = (
+        bend90.ports[b90p2.name].trans.disp - p2.trans.disp  # type:ignore[operator]
+    ).abs()
     if length > 0:
         if (
             taper_cell is None

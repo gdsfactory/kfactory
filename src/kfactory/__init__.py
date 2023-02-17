@@ -19,9 +19,9 @@ from .kcell import (
     KLib,
     default_save,
     LayerEnum,
+    show,
 )
 from . import pcells, tech, placer, routing, utils
-from .utils import show
 from . import port
 
 
