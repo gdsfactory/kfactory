@@ -215,13 +215,11 @@ class KLib(kdb.Layout):
     def __getitem__(self, obj: str | int) -> "KCell":
         if isinstance(obj, int):
             return self.kcells[obj]
-        else:
-            for i in filter(lambda kcell: kcell.name == obj, self.kcells):
-                return i
-            else:
-                raise ValueError(
-                    f"Library doesn't have a KCell named {obj}, available KCells are {[cell.name for cell in self.kcells]}"
-                )
+        for i in filter(lambda kcell: kcell.name == obj, self.kcells):
+            return i
+        raise ValueError(
+            f"Library doesn't have a KCell named {obj}, available KCells are {[cell.name for cell in self.kcells]}"
+        )
 
     def read(
         self,
@@ -2126,7 +2124,7 @@ def show(
         msg = ""
         try:
             msg = conn.recv(1024).decode("utf-8")
-            logger.info("Message from klive: " + msg)
+            logger.info(f"Message from klive: {msg}")
         except OSError:
             logger.warning("klive didn't send data, closing")
         finally:
