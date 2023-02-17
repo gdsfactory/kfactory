@@ -25,7 +25,7 @@ from . import pcells, tech, placer, routing, utils
 from . import port
 
 
-__version__ = "0.2.6"
+__version__ = "0.3.0"
 
 
 __all__ = [

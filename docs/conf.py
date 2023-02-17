@@ -1,5 +1,5 @@
 project = "kfactory"
-version = "0.2.6"
+version = "0.3.0"
 copyright = "2022"
 # author = "kfactory"
 

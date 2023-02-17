@@ -1,4 +1,4 @@
-# KFactory 0.2.6
+# KFactory 0.3.0
 
 Kfactory is a [gdsfactory](https://github.com/gdsfactory/gdsfactory)-like tool. It is built with [KLayout](https://klayout.de) as a backend instead of gdstk, but aims to offer the similar featuers.
 
