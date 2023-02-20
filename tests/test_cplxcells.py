@@ -39,7 +39,6 @@ def simple_cplx_cell(layer: kf.LayerEnum) -> kf.KCell:
 
 def test_cell(LAYER: kf.LayerEnum):
     c = simple_cplx_cell(LAYER.WG)
-    kf.show(c)
 
 
 def test_connected_cell(LAYER: kf.LayerEnum):

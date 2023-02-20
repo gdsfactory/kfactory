@@ -37,7 +37,6 @@ from typing import (  # ParamSpec, # >= python 3.10
 import cachetools.func
 import numpy as np
 import ruamel.yaml
-from deprecated import deprecated
 from typing_extensions import ParamSpec
 
 from . import kdb
@@ -265,13 +264,12 @@ klib = (
 
 
 def __getattr__(name: str) -> "KLib":
-    if name == "library":
-        logger.opt(ansi=True).warning(
-            "<red>DeprecationWarning</red>: library has been renamed to klib since version 0.3.1 and library will be removed with 0.4.0, update your code to use klib instead"
-        )
-        return klib
-    else:
+    if name != "library":
         raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
+    logger.opt(ansi=True).warning(
+        "<red>DeprecationWarning</red>: library has been renamed to klib since version 0.3.1 and library will be removed with 0.4.0, update your code to use klib instead"
+    )
+    return klib
 
 
 class LayerEnum(int, Enum):
@@ -1242,12 +1240,10 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         """
         if isinstance(cell, KCell):
             ca = self.insert(kdb.CellInstArray(cell, trans))  # type: ignore[arg-type]
-            inst = Instance(cell, ca)
-            self.insts.append(inst)
         else:
             ca = self.insert(kdb.DCellInstArray(cell, trans))  # type: ignore[arg-type]
-            inst = Instance(cell, ca)  # type: ignore[misc]
-            self.insts.append(inst)
+        inst = Instance(cell, ca)  # type: ignore[misc]
+        self.insts.append(inst)
         return inst
 
     def layer(self, *args: Any, **kwargs: Any) -> int:
