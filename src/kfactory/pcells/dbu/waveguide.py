@@ -1,6 +1,6 @@
 from typing import Optional
 
-from ... import KCell, LayerEnum, autocell, kdb, library
+from ... import KCell, LayerEnum, autocell, kdb, klib
 from ...utils import Enclosure
 
 __all__ = ["waveguide"]
@@ -29,8 +29,8 @@ def waveguide(
     c.settings = {
         "width_dbu": width,
         "length_dbu": length,
-        "width_um": width / c.library.dbu,
-        "length_um": length / c.library.dbu,
+        "width_um": width / c.klib.dbu,
+        "length_um": length / c.klib.dbu,
         "layer": layer,
     }
     c.autorename_ports()
