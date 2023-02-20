@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .. import KCell, LayerEnum, autocell, kdb, library
+from .. import KCell, LayerEnum, autocell, kdb, klib
 from ..utils import Enclosure
 from .dbu.taper import taper as taper_dbu
 
@@ -15,9 +15,9 @@ def taper(
     enclosure: Optional[Enclosure] = None,
 ) -> KCell:
     return taper_dbu(
-        width1=int(width1 / library.dbu),
-        width2=int(width2 / library.dbu),
-        length=int(length / library.dbu),
+        width1=int(width1 / klib.dbu),
+        width2=int(width2 / klib.dbu),
+        length=int(length / klib.dbu),
         layer=layer,
         enclosure=enclosure,
     )

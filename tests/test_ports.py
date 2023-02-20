@@ -1,6 +1,7 @@
 import kfactory as kf
 import pytest
 import warnings
+import re
 
 
 @kf.autocell
@@ -27,7 +28,7 @@ def wg(LAYER):
 @kf.autocell
 def wg_floating_off_grid(LAYER):
     c = kf.KCell()
-    dbu = c.library.dbu
+    dbu = c.klib.dbu
 
     p1 = kf.kcell.DPort(
         width=10 + dbu / 2,
@@ -43,10 +44,17 @@ def wg_floating_off_grid(LAYER):
     )
     c.shapes(LAYER.WG).insert(kf.kdb.DBox(p1.x, -p1.width / 2, p2.x, p1.width / 2))
 
-    warnings.filterwarnings("ignore")
+    kf.config.filter.regex = (
+        f"Port ("
+        + re.escape(str(p1))
+        + "|"
+        + re.escape(str(p2))
+        + ") is not an integer based port, converting to integer based"
+    )
     c.add_port(p1)
     c.add_port(p2)
-    warnings.filterwarnings("default")
+
+    kf.config.filter.regex = None
 
     return c
 
@@ -82,12 +90,22 @@ def test_connect_cplx_inst(LAYER):
     wg2 = c << waveguide(1000, 20000, LAYER.WG)
     wg1.transform(kf.kdb.DCplxTrans(1, 30, False, 5, 10))
     wg2.connect_cplx("o1", wg1, "o2")
+    kf.config.filter.regex = (
+        f"Port ("
+        + re.escape(str(wg1.ports["o1"]))
+        + "|"
+        + re.escape(str(wg2.ports["o2"]))
+        + ") is not an integer based port, converting to integer based"
+        # f"is not an integer based port, converting to integer based"
+    )
 
-    warnings.filterwarnings("ignore")
     c.add_port(wg1.ports["o1"])
     c.add_port(wg2.ports["o2"])
-    warnings.filterwarnings("default")
+
+    kf.config.filter.regex = None
     c.flatten()
+
+    c.show()
 
 
 def test_floating(wg_floating_off_grid):

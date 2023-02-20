@@ -31,16 +31,16 @@ def bend_s(
 
     c.create_port(
         name="W0",
-        width=int(width / c.library.dbu),
+        width=int(width / c.klib.dbu),
         trans=kdb.Trans(0, False, 0, 0),
         layer=layer,
         port_type="optical",
     )
     c.create_port(
         name="E0",
-        width=int(width / c.library.dbu),
+        width=int(width / c.klib.dbu),
         trans=kdb.Trans(
-            0, False, c.bbox().right, c.bbox().top - int(width / c.library.dbu) // 2
+            0, False, c.bbox().right, c.bbox().top - int(width / c.klib.dbu) // 2
         ),
         layer=layer,
         port_type="optical",
