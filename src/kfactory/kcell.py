@@ -245,7 +245,7 @@ class KLib(kdb.Layout):
         if register_cells:
             new_cells = set(self.cells("*")) - cells
             for c in new_cells:
-                KCell(kdb_cell=c, library=self).name
+                KCell(kdb_cell=c, klib=self).name
 
         return lm
 
@@ -267,7 +267,7 @@ def __getattr__(name: str) -> "KLib":
     if name != "library":
         raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
     logger.bind(with_backtrace=True).opt(ansi=True).warning(
-        "<red>DeprecationWarning</red>: library has been renamed to klib since version 0.3.1 and library will be removed with 0.4.0, update your code to use klib instead"
+        "<red>DeprecationWarning</red>: library has been renamed to klib since version 0.4.0 and library will be removed with 0.5.0, update your code to use klib instead"
     )
     return klib
 
@@ -1100,7 +1100,8 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
     def __new__(
         cls,
         name: Optional[str] = None,
-        library: KLib = klib,
+        klib: KLib = klib,
+        library: Optional[KLib] = None,
         kdb_cell: Optional[kdb.Cell] = None,
     ) -> "KCell":
         """Create a KLayout cell and change its class to KCell
@@ -1112,7 +1113,7 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         """
         if kdb_cell is None:
             _name = "Unnamed_" if name is None else name
-            cell = library.create_cell(
+            cell = klib.create_cell(
                 name=_name,
             )
         else:
@@ -1127,16 +1128,13 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         library: Optional[KLib] = None,
         kdb_cell: Optional[kdb.Cell] = None,
     ) -> None:
-
-        if klib is not None:
-            self.klib = klib
-
+        self.klib = klib
         # TODO: Remove with 0.5.0
         if library is not None:
             logger.bind(with_backtrace=True).opt(ansi=True).warning(
-                "<red>DeprecationWarning</red>: library will be deprecated in 0.4.0, use klib instead"
+                "<red>DeprecationWarning</red>: library will be deprecated in 0.5.0, use klib instead"
             )
-        #     self.library: KLib = library  # type: ignore[assignment]
+            self.klib = library
         if name is None and kdb_cell is None:
             self.name = f"Unnamed_{self.cell_index()}"
         self.insts: list[Instance] = []
@@ -1401,7 +1399,7 @@ class KCell(ABCKCell[Port]):
             cell: exact copy of the current cell
         """
         kdb_copy = kdb.Cell.dup(self)
-        c = KCell(library=self.klib, kdb_cell=kdb_copy)
+        c = KCell(klib=self.klib, kdb_cell=kdb_copy)
         c.ports = self.ports
         for inst in kdb_copy.each_inst():
             self.insts.append(Instance(cell=self.klib[inst.cell.name], reference=inst))  # type: ignore[misc]
@@ -1409,8 +1407,8 @@ class KCell(ABCKCell[Port]):
         return c
 
     def copy(self) -> "KCell":  # type: ignore[override]
-        logger.opt(ansi=True).warning(
-            "<red>DeprecationWarning:</red> copy will be removed in kfactory 0.5.0. Please use KCell.dup() instead"
+        logger.opt(ansi=True).bind(with_backtrace=True).warning(
+            "<red>DeprecationWarning:</red> copy will be removed in kfactory 0.5.0. Please use KCell.dup() or copy(KCell) instead"
         )
         return self.dup()
 
@@ -1654,7 +1652,9 @@ class CplxKCell(ABCKCell[DCplxPort]):
         if isinstance(port, DCplxPort):
             self.ports.add_port(port=port, name=name)
         else:
-            self.ports.add_port(port=port.copy_cplx(kdb.DCplxTrans.R0, self.klib.dbu))
+            self.ports.add_port(
+                port=port.copy_cplx(kdb.DCplxTrans.R0, self.klib.dbu), name=name
+            )
 
     def dup(self) -> "CplxKCell":
         """Copy the full cell
@@ -1662,8 +1662,8 @@ class CplxKCell(ABCKCell[DCplxPort]):
         Returns:
             cell: exact copy of the current cell
         """
-        kdb_copy = self.dup()
-        c = CplxKCell(library=self.klib, kdb_cell=kdb_copy)
+        kdb_copy = kdb.Cell.dup(self)
+        c = CplxKCell(klib=self.klib, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
         for inst in kdb_copy.each_inst():
             self.insts.append(Instance(cell=self.klib[inst.cell.name], reference=inst))  # type: ignore[misc]
@@ -2413,8 +2413,8 @@ def autocell(
     """
 
     if maxsize is not None:
-        logger.opt(ansi=True).warning(
-            "<red>DeprecationWarning</red>: maxsize has no effect on the cache, as it is a simple dict now"
+        logger.bind(with_backtrace=True).opt(ansi=True).warning(
+            "<red>DeprecationWarning</red>: maxsize has no effect on the cache, as it is a simple dict now. Please remove it, the argument will be removed in 0.5.0"
         )
 
     def decorator_autocell(
