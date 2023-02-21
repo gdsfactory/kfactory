@@ -266,7 +266,7 @@ klib = (
 def __getattr__(name: str) -> "KLib":
     if name != "library":
         raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
-    logger.opt(ansi=True).warning(
+    logger.bind(with_backtrace=True).opt(ansi=True).warning(
         "<red>DeprecationWarning</red>: library has been renamed to klib since version 0.3.1 and library will be removed with 0.4.0, update your code to use klib instead"
     )
     return klib
@@ -1131,10 +1131,10 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         if klib is not None:
             self.klib = klib
 
-        # TODO: Remove with 0.4.0
+        # TODO: Remove with 0.5.0
         if library is not None:
-            logger.warning(
-                "<blue>DeprecationWarning</blue>: library will be deprecated in 0.4.0, use klib instead"
+            logger.bind(with_backtrace=True).opt(ansi=True).warning(
+                "<red>DeprecationWarning</red>: library will be deprecated in 0.4.0, use klib instead"
             )
         #     self.library: KLib = library  # type: ignore[assignment]
         if name is None and kdb_cell is None:
@@ -1400,7 +1400,7 @@ class KCell(ABCKCell[Port]):
         Returns:
             cell: exact copy of the current cell
         """
-        kdb_copy = self.dup()
+        kdb_copy = kdb.Cell.dup(self)
         c = KCell(library=self.klib, kdb_cell=kdb_copy)
         c.ports = self.ports
         for inst in kdb_copy.each_inst():
@@ -1441,6 +1441,13 @@ class KCell(ABCKCell[Port]):
                 layer=port.layer,
             )
             self.ports.add_port(port=_port, name=name)
+
+    @property
+    def library(self) -> KLib:  # type: ignore[override]
+        logger.opt(ansi=True).warning(
+            "<red>DeprecationWarning:</red> library shadows the klayout.dbcore.Cell.library(), please use klib instead. library will be removed in version 0.5.0"
+        )
+        return self.klib
 
     @classmethod
     def from_yaml(
@@ -2444,7 +2451,7 @@ def autocell(
                         params[key] = frozenset_to_dict(value)
                 cell = f(**params)
                 if cell._locked:
-                    cell = cell.copy()
+                    cell = cell.dup()
                 if set_name:
                     name = get_component_name(f.__name__, **params)
                     cell.name = name
