@@ -1,7 +1,7 @@
 from typing import Callable, Optional
 
 from .. import kdb
-from ..kcell import Instance, KCell, Port
+from ..kcell import DCplxPort, Instance, KCell, Port
 from .manhattan import route_manhattan
 
 
@@ -177,7 +177,7 @@ def connect_bundle(
                 B_count = 0
 
 
-def get_electrical_ports(c: Instance) -> list[Port]:
+def get_electrical_ports(c: Instance) -> list[Port | DCplxPort]:
     return [p for p in c.ports.get_all().values() if p.port_type == "electrical"]
 
 

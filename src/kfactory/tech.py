@@ -6,7 +6,7 @@ from typing import Any, Dict, Iterator, List, Optional, Tuple
 
 from pydantic import BaseModel, Field
 
-from .kcell import KCell, KLib, LayerEnum, library
+from .kcell import KCell, KLib, LayerEnum, klib
 
 # from kfactory import KCell, KLib, library
 

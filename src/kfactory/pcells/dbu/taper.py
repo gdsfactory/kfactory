@@ -1,6 +1,6 @@
 from typing import Optional
 
-from ... import KCell, LayerEnum, autocell, kdb, library
+from ... import KCell, LayerEnum, autocell, kdb, klib
 from ...utils import Enclosure
 
 __all__ = ["taper"]
@@ -34,8 +34,8 @@ def taper(
 
     if enclosure is not None:
         enclosure.apply_minkowski_y(c, kdb.Region(c.bbox()))
-    c.settings["width1_um"] = width1 / c.library.dbu
-    c.settings["width2_um"] = width2 / c.library.dbu
-    c.settings["length_um"] = length / c.library.dbu
+    c.settings["width1_um"] = width1 / c.klib.dbu
+    c.settings["width2_um"] = width2 / c.klib.dbu
+    c.settings["length_um"] = length / c.klib.dbu
 
     return c

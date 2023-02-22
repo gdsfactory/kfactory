@@ -183,26 +183,26 @@ def bend_euler(
         c.create_port(
             name="W0",
             layer=layer,
-            width=int(width / c.library.dbu),
+            width=int(width / c.klib.dbu),
             trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
         )
         c.create_port(
             name="N0",
             layer=layer,
-            width=int(width / c.library.dbu),
+            width=int(width / c.klib.dbu),
             trans=kdb.Trans(1, False, backbone[-1].to_itype(dbu).to_v()),
         )
     elif theta == 180:
         c.create_port(
             name="W0",
             layer=layer,
-            width=int(width / c.library.dbu),
+            width=int(width / c.klib.dbu),
             trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
         )
         c.create_port(
             name="W1",
             layer=layer,
-            width=int(width / c.library.dbu),
+            width=int(width / c.klib.dbu),
             trans=kdb.Trans(2, False, backbone[-1].to_itype(dbu).to_v()),
         )
 
@@ -245,14 +245,14 @@ def bend_s_euler(
     c.create_port(
         name="W0",
         trans=kdb.Trans(2, False, p1.to_v()),
-        width=int(width / c.library.dbu),
+        width=int(width / c.klib.dbu),
         port_type="optical",
         layer=layer,
     )
     c.create_port(
         name="E0",
         trans=kdb.Trans(0, False, p2.to_v()),
-        width=int(width / c.library.dbu),
+        width=int(width / c.klib.dbu),
         port_type="optical",
         layer=layer,
     )

@@ -28,8 +28,8 @@ def port_tests(rename_f: Optional[Callable[..., None]] = None) -> kf.KCell:
                     False,
                     point.to_v(),
                 ),
-                layer=c.library.layer(1, 0),
-                width=1 / c.library.dbu,
+                layer=c.klib.layer(1, 0),
+                width=1 / c.klib.dbu,
             )
     if rename_f is None:
         c.autorename_ports()

@@ -1,4 +1,4 @@
-from layers import LAYERS
+from layers import LAYER
 
 import kfactory as kf
 
@@ -7,22 +7,19 @@ import kfactory as kf
 def waveguide(width: int, length: int, width_exclude: int) -> kf.KCell:
     """Waveguide: Silicon on 1/0, Silicon exclude on 1/1"""
     c = kf.KCell()
-    c.shapes(LAYERS["Silicon"]).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
-    c.shapes(LAYERS["Silicon.Exclude"]).insert(
+    c.shapes(LAYER.SI).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
+    c.shapes(LAYER.SIEXCLUDE).insert(
         kf.kdb.Box(0, -width_exclude // 2, length, width_exclude // 2)
     )
 
     c.create_port(
-        name="1",
-        trans=kf.kdb.Trans(2, False, 0, 0),
-        width=width,
-        layer=LAYERS["Silicon"],
+        name="1", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer=LAYER.SI
     )
     c.create_port(
         name="2",
         trans=kf.kdb.Trans(0, False, length, 0),
         width=width,
-        layer=LAYERS["Silicon"],
+        layer=LAYER.SI,
     )
 
     c.autorename_ports()
