@@ -1,6 +1,6 @@
 from typing import Optional
 
-from .. import KCell, LayerEnum, library
+from .. import KCell, LayerEnum, klib
 from ..utils import Enclosure
 from .dbu.waveguide import waveguide as waveguide_dbu
 
@@ -12,5 +12,5 @@ def waveguide(
     enclosure: Optional[Enclosure] = None,
 ) -> KCell:
     return waveguide_dbu(
-        int(width / library.dbu), int(length / library.dbu), layer, enclosure=enclosure
+        int(width / klib.dbu), int(length / klib.dbu), layer, enclosure=enclosure
     )

@@ -201,22 +201,22 @@ def extrude_path(
                 path_pts_to_polygon(
                     *extrude_path_points(
                         path,
-                        width + 2 * section.d_max * target.library.dbu,
+                        width + 2 * section.d_max * target.klib.dbu,
                         start_angle,
                         end_angle,
                     )
-                ).to_itype(target.library.dbu)
+                ).to_itype(target.klib.dbu)
             )
             if section.d_min is not None:
                 _r -= kdb.Region(
                     path_pts_to_polygon(
                         *extrude_path_points(
                             path,
-                            width + 2 * section.d_min * target.library.dbu,
+                            width + 2 * section.d_min * target.klib.dbu,
                             start_angle,
                             end_angle,
                         )
-                    ).to_itype(target.library.dbu)
+                    ).to_itype(target.klib.dbu)
                 )
             reg.insert(_r)
         target.shapes(layer).insert(reg.merge())
@@ -332,7 +332,7 @@ def extrude_path_dynamic(
             for section in layer_sec.sections:
 
                 def w_max(x: float) -> float:
-                    return widths(x) + 2 * section.d_max * target.library.dbu  # type: ignore[operator, no-any-return]
+                    return widths(x) + 2 * section.d_max * target.klib.dbu  # type: ignore[operator]
 
                 _r = kdb.Region(
                     path_pts_to_polygon(
@@ -342,12 +342,12 @@ def extrude_path_dynamic(
                             start_angle,
                             end_angle,
                         )
-                    ).to_itype(target.library.dbu)
+                    ).to_itype(target.klib.dbu)
                 )
                 if section.d_min is not None:
 
                     def w_min(x: float) -> float:
-                        return widths(x) + 2 * section.d_min * target.library.dbu  # type: ignore[operator, no-any-return]
+                        return widths(x) + 2 * section.d_min * target.klib.dbu  # type: ignore[operator]
 
                     _r -= kdb.Region(
                         path_pts_to_polygon(
@@ -357,7 +357,7 @@ def extrude_path_dynamic(
                                 start_angle,
                                 end_angle,
                             )
-                        ).to_itype(target.library.dbu)
+                        ).to_itype(target.klib.dbu)
                     )
                 reg.insert(_r)
             target.shapes(layer).insert(reg.merge())
@@ -366,7 +366,7 @@ def extrude_path_dynamic(
         for layer, layer_sec in layer_list.items():
             reg = kdb.Region()
             for section in layer_sec.sections:
-                max_widths = [w + 2 * section.d_max * target.library.dbu for w in widths]  # type: ignore[union-attr]
+                max_widths = [w + 2 * section.d_max * target.klib.dbu for w in widths]  # type: ignore[union-attr]
                 _r = kdb.Region(
                     path_pts_to_polygon(
                         *extrude_path_dynamic_points(
@@ -375,10 +375,10 @@ def extrude_path_dynamic(
                             start_angle,
                             end_angle,
                         )
-                    ).to_itype(target.library.dbu)
+                    ).to_itype(target.klib.dbu)
                 )
                 if section.d_min is not None:
-                    min_widths = [w + 2 * section.d_min * target.library.dbu for w in widths]  # type: ignore[union-attr]
+                    min_widths = [w + 2 * section.d_min * target.klib.dbu for w in widths]  # type: ignore[union-attr]
                     _r -= kdb.Region(
                         path_pts_to_polygon(
                             *extrude_path_dynamic_points(
@@ -387,7 +387,7 @@ def extrude_path_dynamic(
                                 start_angle,
                                 end_angle,
                             )
-                        ).to_itype(target.library.dbu)
+                        ).to_itype(target.klib.dbu)
                     )
                 reg.insert(_r)
             target.shapes(layer).insert(reg.merge())

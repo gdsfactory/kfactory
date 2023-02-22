@@ -1,14 +1,10 @@
-import klayout.db as pya
+import kfactory as kf
 
 
-def test_shapes():
-    layout = pya.Layout()
-    tc = layout.create_cell("TOP")
+def test_shapes(LAYER):
+    kc = kf.KCell()
 
-    tc.shapes(layout.layer(1, 0)).insert(pya.Text())
-
-    for shape in tc.shapes(layout.layer(1, 0)).each():
-        print(shape.polygon)
+    kc.shapes(LAYER.WG).insert(kf.kdb.Text())
 
 
 if __name__ == "__main__":
