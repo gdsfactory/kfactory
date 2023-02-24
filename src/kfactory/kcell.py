@@ -67,7 +67,6 @@ class PortWidthMismatch(ValueError):
         p2: "Port | DPort | ICplxPort | DCplxPort",
         *args: Any,
     ):
-
         if isinstance(other_inst, Instance):
             super().__init__(
                 f'Width mismatch between the ports {inst.cell.name}["{p1.name}"] and {other_inst.cell.name}["{p2.name}"] ({p1.width}/{p2.width})',
@@ -91,7 +90,6 @@ class PortLayerMismatch(ValueError):
         p2: "Port | DPort | ICplxPort | DCplxPort",
         *args: Any,
     ):
-
         l1 = (
             f"{p1.layer.name}({p1.layer.__int__()})"
             if isinstance(p1.layer, LayerEnum)
@@ -228,6 +226,9 @@ class KLib(kdb.Layout):
             f"Library doesn't have a KCell named {obj}, available KCells are {[cell.name for cell in self.kcells]}"
         )
 
+    def kdb_cell(self, cellname: str) -> kdb.Cell:
+        return super().cell(cellname)
+
     def read(
         self,
         filename: str | Path,
@@ -245,7 +246,7 @@ class KLib(kdb.Layout):
         if register_cells:
             new_cells = set(self.cells("*")) - cells
             for c in new_cells:
-                KCell(kdb_cell=c, klib=self).name
+                KCell(kdb_cell=c, klib=self)
 
         return lm
 
@@ -333,16 +334,12 @@ CellType = TypeVar("CellType", bound="KCell | CplxKCell")
 
 
 class PortLike(ABC, Generic[TT, FI]):
-
     yaml_tag: str
     name: str
     width: FI
     layer: int
     trans: TT
     port_type: str
-
-    # def copy(self, trans: TI) -> "PortLike[TT, FI]":
-    #     ...
 
     def move(
         self,
@@ -1111,6 +1108,10 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
             library: KLib object that stores the layout and metadata about the KCells
             kdb_cell
         """
+
+        if library is not None:
+            klib = library
+
         if kdb_cell is None:
             _name = "Unnamed_" if name is None else name
             cell = klib.create_cell(
@@ -1141,21 +1142,6 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         self.settings: dict[str, Any] = {}
         self._locked = False
         self.info: dict[str, Any] = {}
-
-    @abstractmethod
-    def dup(self) -> "ABCKCell[PT]":
-        """Copy the full cell
-
-        Returns:
-            cell: exact copy of the current cell
-        """
-        ...
-
-    def __copy__(self) -> "ABCKCell[PT]":
-        return self.dup()
-
-    def __deepcopy__(self) -> "ABCKCell[PT]":
-        return self.dup()
 
     @property
     def ports(self) -> "Ports | CplxPorts":
@@ -1309,7 +1295,6 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         """Draw all the ports on their respective :py:attr:`Port.layer`:"""
 
         for port in self.ports._ports:
-
             if isinstance(port, IPortLike):
                 w = port.width
                 poly = kdb.Polygon(
@@ -1398,13 +1383,17 @@ class KCell(ABCKCell[Port]):
         Returns:
             cell: exact copy of the current cell
         """
-        kdb_copy = kdb.Cell.dup(self)
+        kdb_copy = self.klib.kdb_cell(self.name)
+
         c = KCell(klib=self.klib, kdb_cell=kdb_copy)
-        c.ports = self.ports
+        c.ports = self.ports.copy()
         for inst in kdb_copy.each_inst():
-            self.insts.append(Instance(cell=self.klib[inst.cell.name], reference=inst))  # type: ignore[misc]
+            c.insts.append(Instance(cell=self.klib[inst.cell.name], reference=inst))  # type: ignore[misc]
         c._locked = False
         return c
+
+    def __copy__(self) -> "KCell":
+        return self.dup()
 
     def copy(self) -> "KCell":  # type: ignore[override]
         logger.opt(ansi=True).bind(with_backtrace=True).warning(
@@ -1662,13 +1651,17 @@ class CplxKCell(ABCKCell[DCplxPort]):
         Returns:
             cell: exact copy of the current cell
         """
-        kdb_copy = kdb.Cell.dup(self)
+        kdb_copy = self.klib.kdb_cell(self.name)
+
         c = CplxKCell(klib=self.klib, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
         for inst in kdb_copy.each_inst():
-            self.insts.append(Instance(cell=self.klib[inst.cell.name], reference=inst))  # type: ignore[misc]
+            c.insts.append(Instance(cell=self.klib[inst.cell.name], reference=inst))  # type: ignore[misc]
         c._locked = False
         return c
+
+    def __copy__(self) -> "CplxKCell":
+        return self.dup()
 
     def show(self) -> None:
         show(self)
@@ -1974,7 +1967,6 @@ class Instance:
         allow_layer_mismatch: bool = False,
         allow_type_mismatch: bool = False,
     ) -> None:
-
         if isinstance(other, Instance):
             if other_port_name is None:
                 raise ValueError(
@@ -1997,7 +1989,6 @@ class Instance:
             w1 = p.width * self.cell.klib.dbu if p.int_based() else p.width
             w2 = op.width * self.cell.klib.dbu if op.int_based() else op.width
             if w1 != w2:
-
                 raise PortWidthMismatch(
                     self,
                     other,
@@ -2179,7 +2170,6 @@ class Ports:
 
     @classmethod
     def from_yaml(cls: "Type[Ports]", constructor: Any, node: Any) -> "Ports":
-
         return cls(constructor.construct_sequence(node))
 
 
@@ -2322,7 +2312,6 @@ class CplxPorts:
 
     @classmethod
     def from_yaml(cls: "Type[CplxPorts]", constructor: Any, node: Any) -> "CplxPorts":
-
         return cls(constructor.construct_sequence(node))
 
 
@@ -2399,9 +2388,10 @@ def autocell(
     set_settings: bool = True,
     set_name: bool = True,
     maxsize: Optional[int] = None,
-) -> Callable[KCellParams, KCell] | Callable[
-    [Callable[KCellParams, KCell]], Callable[KCellParams, KCell]
-]:
+) -> (
+    Callable[KCellParams, KCell]
+    | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
+):
     """Decorator to cache and auto name the celll. This will use :py:func:`functools.cache` to cache the function call.
     Additionally, if enabled this will set the name and from the args/kwargs of the function and also paste them into a settings dictionary of the :py:class:`~KCell`
 
@@ -2490,9 +2480,10 @@ def cell(
     *,
     set_settings: bool = True,
     maxsize: int = 512,
-) -> Callable[KCellParams, KCell] | Callable[
-    [Callable[KCellParams, KCell]], Callable[KCellParams, KCell]
-]:
+) -> (
+    Callable[KCellParams, KCell]
+    | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
+):
     """Convenience alias for :py:func:`~autocell` with `(set_name=False)`"""
     if _func is None:
         return autocell(set_settings=set_settings, set_name=False)
