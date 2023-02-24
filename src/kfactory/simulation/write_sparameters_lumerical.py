@@ -20,6 +20,7 @@ from .simulation_settings import (
     SIMULATION_SETTINGS_LUMERICAL_FDTD,
     SimulationSettingsLumericalFdtd,
 )
+import gdsfactory as gf
 from gdsfactory.typings import ComponentSpec, PathType
 
 run_false_warning = """
@@ -210,10 +211,12 @@ def write_sparameters_lumerical(
     component_ref = component_extended << component.copy()
     for port in component.ports.get_all().values():
         port: kf.Port
-        extension = component_extended.create_inst(kf.pcells.waveguide.waveguide(2, ss.port_extension, layer=port.layer))
+        extension = component_extended.create_inst(
+            kf.pcells.waveguide.waveguide(2, ss.port_extension, layer=port.layer)
+        )
         output_port = extension.ports["o1"]
         print(type(output_port))
-        component_ref.connect('o1', extension, "o1")
+        component_ref.connect("o1", extension, "o1")
 
     # ports = component_extended.get_ports_list(port_type="optical")
     # if not ports:
@@ -301,6 +304,7 @@ def write_sparameters_lumerical(
 
     try:
         import sys
+
         sys.path.append("C:\\Program Files\\Lumerical\\v231\\api\\python\\")
         import lumapi
     except ModuleNotFoundError as e:
@@ -386,7 +390,6 @@ def write_sparameters_lumerical(
     s.addsweep(3)
     s.setsweep("s-parameter sweep", "Excite all ports", 0)
     s.setsweep("s-parameter sweep", "auto symmetry", True)
-
 
     for i, port in enumerate(component_extended.ports.get_all().values()):
         print(port)
