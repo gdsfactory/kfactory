@@ -322,14 +322,14 @@ c
 # By default the mirror works along the x=0 axis.
 
 # %% vscode={"languageId": "python"}
-c = gf.Component("ref_mirror")
-mmi = c.add_ref(gf.components.mmi1x2())
-bend = c.add_ref(gf.components.bend_circular(layer=(2, 0)))
-c
+# c = gf.Component("ref_mirror")
+# mmi = c.add_ref(gf.components.mmi1x2())
+# bend = c.add_ref(gf.components.bend_circular(layer=(2, 0)))
+# c
 
 # %% vscode={"languageId": "python"}
-mmi.mirror()
-c
+# mmi.mirror()
+# c
 
 # %% [markdown]
 # ## Write GDS
@@ -347,4 +347,4 @@ c.write("demo.gds")
 # Sometimes you also want to save the GDS together with metadata (settings, port names, widths, locations ...) in YAML
 
 # %% vscode={"languageId": "python"}
-# c.write_gds_with_metadata("demo.gds")
+# c.write_gds_with_metadata("demo.gds") # not implemented

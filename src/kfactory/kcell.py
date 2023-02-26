@@ -1228,17 +1228,37 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         ...
 
     @overload
-    def create_inst(self, cell: "KCell", trans: kdb.Trans = kdb.Trans.R0) -> "Instance":
+    def create_inst(
+        self,
+        cell: "KCell",
+        trans: kdb.Trans | kdb.Vector = kdb.Trans.R0,
+        a: Optional[kdb.Vector] = None,
+        b: kdb.Vector = kdb.Vector(),
+        na: int = 1,
+        nb: int = 1,
+    ) -> "Instance":
         ...
 
     @overload
     def create_inst(
-        self, cell: "CplxKCell", trans: kdb.DCplxTrans = kdb.DCplxTrans.R0
+        self,
+        cell: "CplxKCell",
+        trans: kdb.DCplxTrans | kdb.DVector = kdb.DCplxTrans.R0,
+        a: Optional[kdb.DVector] = None,
+        b: kdb.DVector = kdb.DVector(),
+        na: int = 1,
+        nb: int = 1,
     ) -> "Instance":
         ...
 
     def create_inst(
-        self, cell: CellType, trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans()
+        self,
+        cell: CellType,
+        trans: kdb.Trans | kdb.DCplxTrans | kdb.Vector | kdb.DVector = kdb.Trans(),
+        a: Optional[kdb.Vector | kdb.DVector] = None,
+        b: kdb.Vector | kdb.DVector = kdb.Vector(),
+        na: int = 1,
+        nb: int = 1,
     ) -> "Instance":
         """Add an instance of another KCell
 
@@ -1250,9 +1270,18 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
             :py:class:`~Instance`: The created instance
         """
         if isinstance(cell, KCell):
-            ca = self.insert(kdb.CellInstArray(cell, trans))  # type: ignore[arg-type]
+            if a is None:
+                ca = self.insert(kdb.CellInstArray(cell, trans))  # type: ignore[arg-type]
+            else:
+                ca = self.insert(
+                    kdb.CellInstArray(cell, trans, a, b, na, nb)
+                )  # type: ignore[arg-type]
         else:
-            ca = self.insert(kdb.DCellInstArray(cell, trans))  # type: ignore[arg-type]
+            if a is None:
+                ca = self.insert(kdb.DCellInstArray(cell, trans))  # type: ignore[arg-type]
+            else:
+                ca = self.insert(kdb.DCellInstArray(cell, trans, a, b, na, nb))  # type: ignore[arg-type]
+
         inst = Instance(cell, ca)  # type: ignore[misc]
         self.insts.append(inst)
         return inst
@@ -1458,6 +1487,10 @@ class KCell(ABCKCell[Port]):
                 layer=port.layer,
             )
             self.ports.add_port(port=_port, name=name)
+
+    def add_ports(self, ports: Sequence[PortLike[TT, FI]], prefix: str = "") -> None:
+        for port in ports:
+            self.add_port(port, name=prefix + port.name)
 
     @property
     def library(self) -> KLib:  # type: ignore[override]
@@ -2112,8 +2145,11 @@ class Ports:
         """Check whether a port is already in the list"""
         return port.hash() in [v.hash() for v in self._ports]
 
-    def each(self) -> Iterator[Port]:
+    def __iter__(self) -> Iterator[Port]:
         yield from self._ports
+
+    def each(self) -> Iterator[Port]:
+        return self.__iter__()
 
     def add_port(self, port: Port, name: Optional[str] = None) -> None:
         """Add a port object
@@ -2256,8 +2292,11 @@ class CplxPorts:
         """Check whether a port is already in the list"""
         return port.hash() in [v.hash() for v in self._ports]
 
-    def each(self) -> Iterator[DCplxPort]:
+    def __iter__(self) -> Iterator[DCplxPort]:
         yield from self._ports
+
+    def each(sellf) -> Iterator[DCplxPort]:
+        return self.__iter__()
 
     def add_port(self, port: DCplxPort, name: Optional[str] = None) -> None:
         """Add a port object
@@ -2396,6 +2435,9 @@ class InstancePorts:
             )
             else p.copy(trans=self.instance.trans)  # type: ignore[arg-type]
         )
+
+    def __iter__(self):
+        return (self[port.name] for port in self.cell_ports)
 
     def __repr__(self) -> str:
         return repr({v: self.__getitem__(v) for v in self.cell_ports.get_all().keys()})
