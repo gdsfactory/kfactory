@@ -39,7 +39,7 @@ import numpy as np
 import ruamel.yaml
 from typing_extensions import ParamSpec
 
-from . import kdb
+from . import kdb, lay
 from .config import logger
 from .port import rename_clockwise
 
@@ -165,6 +165,17 @@ class KLib(kdb.Layout):
         kdb.Layout.__init__(self, editable)
         self.rename_function: Callable[..., None] = rename_clockwise
 
+    def dup(self, init_cells: bool = True) -> "KLib":
+        klib = KLib()
+        klib.assign(super().dup())
+        if init_cells:
+            klib.kcells = [
+                KCell(name=kc.name, klib=klib, kdb_cell=klib.cell(kc.name))
+                for kc in self.kcells
+            ]
+        klib.rename_function = self.rename_function
+        return klib
+
     def create_cell(  # type: ignore[override]
         self,
         name: str,
@@ -195,6 +206,12 @@ class KLib(kdb.Layout):
             raise ValueError(
                 f"Cellname {name} already exists. Please make sure the cellname is unique or pass `allow_duplicate` when creating the library"
             )
+
+    def delete_cell(self, cell: "KCell | CplxKCell | int") -> None:
+        if isinstance(cell, int):
+            cell = self[self.cell(cell).name]
+        super().delete_cell(cell.cell_index())
+        self.kcells.remove(cell)
 
     def register_cell(
         self, kcell: "KCell | CplxKCell", allow_reregister: bool = False
@@ -1617,6 +1634,37 @@ class KCell(ABCKCell[Port]):
 
     def show(self) -> None:
         show(self)
+
+    def _ipython_display_(self) -> None:
+        from IPython.display import display, Image  # type: ignore
+
+        lv = lay.LayoutView()
+        l = lv.create_layout(False)
+
+        klib_dup = self.klib.dup(init_cells=False)
+        if isinstance(self, KCell):
+            kc = KCell(
+                name=self.name, klib=klib_dup, kdb_cell=klib_dup.kdb_cell(self.name)
+            )
+            kc.ports = self.ports.copy()
+        elif isinstance(self, CplxKCell):
+            kc = CplxKCell(
+                name=self.name, klib=klib_dup, kdb_cell=klib_dup.kdb_cell(self.name)
+            )
+            kc.ports = self.ports.copy()
+        else:
+            raise NotImplementedError
+
+        kc.draw_ports()
+
+        lv.active_cellview().layout().assign(klib_dup)
+        lv.add_missing_layers()
+        lv.active_cellview().cell = kc
+        lv.max_hier()
+        lv.zoom_fit()
+        pb = lv.get_pixels(800, 800)
+        # dup.klib.delete_cell(dup.cell_index())
+        display(Image(data=pb.to_png_data(), format="png"))  # type: ignore[no-untyped-call]
 
 
 class CplxKCell(ABCKCell[DCplxPort]):
