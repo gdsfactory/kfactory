@@ -1671,12 +1671,11 @@ class KCell(ABCKCell[Port]):
         l = lv.create_layout(False)
 
         klib_dup = self.klib.dup(init_cells=False)
-        if isinstance(self, KCell):
-            kc = klib_dup[self.name]
-            kc.ports = self.ports.copy()
-        else:
+        if not isinstance(self, KCell):
             raise NotImplementedError
 
+        kc = klib_dup[self.name]
+        kc.ports = self.ports.copy()
         kc.draw_ports()
 
         lv.active_cellview().layout().assign(klib_dup)
