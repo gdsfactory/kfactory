@@ -237,12 +237,11 @@ class KLib(kdb.Layout):
             try:
                 return self.kcells[obj]
             except KeyError:
-                if self.cell(obj) is not None:
-                    c = self.cell(obj)
-                    return KCell(name=c.name, klib=self, kdb_cell=self.cell(obj))
-                else:
+                if self.cell(obj) is None:
                     raise
 
+                c = self.cell(obj)
+                return KCell(name=c.name, klib=self, kdb_cell=self.cell(obj))
         else:
             if self.cell(obj) is not None:
                 try:
@@ -1270,17 +1269,15 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
             :py:class:`~Instance`: The created instance
         """
         if isinstance(cell, KCell):
-            if a is None:
-                ca = self.insert(kdb.CellInstArray(cell, trans))  # type: ignore[arg-type]
-            else:
-                ca = self.insert(
-                    kdb.CellInstArray(cell, trans, a, b, na, nb)
-                )  # type: ignore[arg-type]
+            ca = (
+                self.insert(kdb.CellInstArray(cell, trans))
+                if a is None
+                else self.insert(kdb.CellInstArray(cell, trans, a, b, na, nb))
+            )
+        elif a is None:
+            ca = self.insert(kdb.DCellInstArray(cell, trans))  # type: ignore[arg-type]
         else:
-            if a is None:
-                ca = self.insert(kdb.DCellInstArray(cell, trans))  # type: ignore[arg-type]
-            else:
-                ca = self.insert(kdb.DCellInstArray(cell, trans, a, b, na, nb))  # type: ignore[arg-type]
+            ca = self.insert(kdb.DCellInstArray(cell, trans, a, b, na, nb))  # type: ignore[arg-type]
 
         inst = Instance(cell, ca)  # type: ignore[misc]
         self.insts.append(inst)
