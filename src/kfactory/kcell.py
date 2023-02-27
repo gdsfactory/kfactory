@@ -161,7 +161,7 @@ class KLib(kdb.Layout):
     """
 
     def __init__(self, editable: bool = True) -> None:
-        self.kcells: list["KCell | CplxKCell"] = []  # dict[str, "KCell"] = {}
+        self.kcells: dict[int, "KCell | CplxKCell"] = {}  # dict[str, "KCell"] = {}
         kdb.Layout.__init__(self, editable)
         self.rename_function: Callable[..., None] = rename_clockwise
 
@@ -208,23 +208,36 @@ class KLib(kdb.Layout):
         def check_name(other: "KCell | CplxKCell") -> bool:
             return other.name == kcell.name
 
-        if any(cell.name == kcell.name for cell in self.kcells):
-            if not allow_reregister:
-                raise ValueError(
-                    "Cannot register a new cell with a name that already exists in the library"
-                )
-
+        if (kcell.cell_index() not in self.kcells) or allow_reregister:
+            self.kcells[kcell.cell_index()] = kcell
         else:
-            self.kcells.append(kcell)
+            raise ValueError(
+                "Cannot register a new cell with a name that already exists in the library"
+            )
 
     def __getitem__(self, obj: str | int) -> "KCell | CplxKCell":
         if isinstance(obj, int):
-            return self.kcells[obj]
-        for i in filter(lambda kcell: kcell.name == obj, self.kcells):
-            return i
-        raise ValueError(
-            f"Library doesn't have a KCell named {obj}, available KCells are {[cell.name for cell in self.kcells]}"
-        )
+            try:
+                return self.kcells[obj]
+            except KeyError:
+                if self.cell(obj) is not None:
+                    c = self.cell(obj)
+                    return KCell(name=c.name, klib=self, kdb_cell=self.cell(obj))
+                else:
+                    raise
+
+        else:
+            if self.cell(obj) is not None:
+                try:
+                    return self.kcells[self.cell(obj).cell_index()]
+                except KeyError:
+                    c = self.cell(obj)
+                    return KCell(name=c.name, klib=self, kdb_cell=self.cell(obj))
+            from pprint import pformat
+
+            raise ValueError(
+                f"Library doesn't have a KCell named {obj}, available KCells are {pformat(sorted([cell.name for cell in self.kcells.values()]))}"
+            )
 
     def read(
         self,
