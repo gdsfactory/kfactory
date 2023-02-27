@@ -164,96 +164,103 @@ c
 #
 # Let's make a new Component and put a big array of our Component `c` in it:
 
-c3 = gf.Component("array_of_references")  # Create a new blank Component
-aref = c3.add_array(
-    c, columns=6, rows=3, spacing=[20, 15]
+# +
+#not converted yet
+
+c3 = kf.KCell("array_of_references")  # Create a new blank Component
+aref = c3.create_inst(
+    c, na=6, nb=3, a=kf.kdb.Vector(20000,0), b=kf.kdb.Vector(0,15000)
 )  # Reference the Component "c" 3 references in it with a 3 rows, 6 columns array
 c3
+# -
 
 # CellArrays don't have ports and there is no way to access/modify individual elements in a GDS cellarray.
 #
 # gdsfactory provides you with similar functions in `gf.components.array` and `gf.components.array_2d`
 
-c4 = gf.Component("demo_array")  # Create a new blank Component
-aref = c4 << gf.components.array(component=c, columns=3, rows=2)
-c4.add_ports(aref.get_ports_list())
-c4
+# +
+# c4 = gf.Component("demo_array")  # Create a new blank Component
+# aref = c4 << gf.components.array(component=c, columns=3, rows=2)
+# c4.add_ports(aref.get_ports_list())
+# c4
 
 
 # +
-# gf.components.array?
+# # gf.components.array?
 # -
 
 # You can also create an array of references for periodic structures. Lets create a [Distributed Bragg Reflector](https://picwriter.readthedocs.io/en/latest/components/dbr.html)
 
 
 # +
-@gf.cell
-def dbr_period(w1=0.5, w2=0.6, l1=0.2, l2=0.4, straight=gf.components.straight):
-    """Return one DBR period."""
-    c = gf.Component()
-    r1 = c << straight(length=l1, width=w1)
-    r2 = c << straight(length=l2, width=w2)
-    r2.connect(port="o1", destination=r1.ports["o2"])
-    c.add_port("o1", port=r1.ports["o1"])
-    c.add_port("o2", port=r2.ports["o2"])
-    return c
+# @gf.cell
+# def dbr_period(w1=0.5, w2=0.6, l1=0.2, l2=0.4, straight=gf.components.straight):
+#     """Return one DBR period."""
+#     c = gf.Component()
+#     r1 = c << straight(length=l1, width=w1)
+#     r2 = c << straight(length=l2, width=w2)
+#     r2.connect(port="o1", destination=r1.ports["o2"])
+#     c.add_port("o1", port=r1.ports["o1"])
+#     c.add_port("o2", port=r2.ports["o2"])
+#     return c
 
 
-l1 = 0.2
-l2 = 0.4
-n = 3
-period = dbr_period(l1=l1, l2=l2)
-period
+# l1 = 0.2
+# l2 = 0.4
+# n = 3
+# period = dbr_period(l1=l1, l2=l2)
+# period
+
+# +
+# dbr = gf.Component("DBR")
+# dbr.add_array(period, columns=n, rows=1, spacing=(l1 + l2, 100))
+# dbr
 # -
-
-dbr = gf.Component("DBR")
-dbr.add_array(period, columns=n, rows=1, spacing=(l1 + l2, 100))
-dbr
 
 # Finally we need to add ports to the new component
 
 # +
-p0 = dbr.add_port("o1", port=period.ports["o1"])
-p1 = dbr.add_port("o2", port=period.ports["o2"])
+# p0 = dbr.add_port("o1", port=period.ports["o1"])
+# p1 = dbr.add_port("o2", port=period.ports["o2"])
 
-p1.center = [(l1 + l2) * n, 0]
-dbr
+# p1.center = [(l1 + l2) * n, 0]
+# dbr
 # -
 
 # ## Connect references
 #
 # We have seen that once you create a reference you can manipulate the reference to move it to a location. Here we are going to connect that reference to a port. Remember that we follow that a certain reference `source` connects to a `destination` port
 
-bend = gf.components.bend_circular()
-bend
+# +
+# bend = gf.components.bend_circular()
+# bend
 
 # +
-c = gf.Component("sample_reference_connect")
+# c = gf.Component("sample_reference_connect")
 
-mmi = c << gf.components.mmi1x2()
-b = c << gf.components.bend_circular()
-b.connect("o1", destination=mmi.ports["o2"])
+# mmi = c << gf.components.mmi1x2()
+# b = c << gf.components.bend_circular()
+# b.connect("o1", destination=mmi.ports["o2"])
 
-c.add_port("o1", port=mmi.ports["o1"])
-c.add_port("o2", port=b.ports["o2"])
-c.add_port("o3", port=mmi.ports["o3"])
-c
+# c.add_port("o1", port=mmi.ports["o1"])
+# c.add_port("o2", port=b.ports["o2"])
+# c.add_port("o3", port=mmi.ports["o3"])
+# c
 # -
 
 # You can also access the ports directly from the references
 
 # +
-c = gf.Component("sample_reference_connect_simpler")
+# c = gf.Component("sample_reference_connect_simpler")
 
-mmi = c << gf.components.mmi1x2()
-b = c << gf.components.bend_circular()
-b.connect("o1", destination=mmi["o2"])
+# mmi = c << gf.components.mmi1x2()
+# b = c << gf.components.bend_circular()
+# b.connect("o1", destination=mmi["o2"])
 
-c.add_port("o1", port=mmi["o1"])
-c.add_port("o2", port=b["o2"])
-c.add_port("o3", port=mmi["o3"])
-c
+# c.add_port("o1", port=mmi["o1"])
+# c.add_port("o2", port=b["o2"])
+# c.add_port("o3", port=mmi["o3"])
+# c
 # -
 
 # ## Port naming
@@ -271,33 +278,44 @@ c
 # - `gdsfactory.cross_section.strip`  has ports `o1` for input and `o2` for output
 # - `gdsfactory.cross_section.metal1` has ports `e1` for input and `e2` for output
 
-size = 4
-c = gf.components.nxn(west=2, south=2, north=2, east=2, xsize=size, ysize=size)
-c
+# +
+# size = 4
+# c = gf.components.nxn(west=2, south=2, north=2, east=2, xsize=size, ysize=size)
+# c
 
-c = gf.components.straight_heater_metal(length=30)
-c
+# +
+# c = gf.components.straight_heater_metal(length=30)
+# c
 
-c.ports
+# +
+# c.ports
+# -
 
 # You can get the optical ports by `layer`
 
-c.get_ports_dict(layer=(1, 0))
+# +
+# c.get_ports_dict(layer=(1, 0))
+# -
 
 # or by `width`
 
-c.get_ports_dict(width=0.5)
+# +
+# c.get_ports_dict(width=0.5)
 
-c0 = gf.components.straight_heater_metal()
-c0.ports
+# +
+# c0 = gf.components.straight_heater_metal()
+# c0.ports
 
-c1 = c0.copy()
-c1.auto_rename_ports_layer_orientation()
-c1.ports
+# +
+# c1 = c0.copy()
+# c1.auto_rename_ports_layer_orientation()
+# c1.ports
 
-c2 = c0.copy()
-c2.auto_rename_ports()
-c2.ports
+# +
+# c2 = c0.copy()
+# c2.auto_rename_ports()
+# c2.ports
+# -
 
 # You can also rename them with a different port naming convention
 #
@@ -320,16 +338,20 @@ c2.ports
 #
 # ```
 
-c = gf.Component("demo_ports")
-nxn = gf.components.nxn(west=2, north=2, east=2, south=2, xsize=4, ysize=4)
-ref = c.add_ref(nxn)
-c.add_ports(ref.ports)
-c
+# +
+# c = gf.Component("demo_ports")
+# nxn = gf.components.nxn(west=2, north=2, east=2, south=2, xsize=4, ysize=4)
+# ref = c.add_ref(nxn)
+# c.add_ports(ref.ports)
+# c
 
-ref.get_ports_list()  # by default returns ports clockwise starting from bottom left west facing port
+# +
+# ref.get_ports_list()  # by default returns ports clockwise starting from bottom left west facing port
 
-c.auto_rename_ports()
-c
+# +
+# c.auto_rename_ports()
+# c
+# -
 
 # You can also get the ports counter-clockwise
 #
@@ -344,35 +366,44 @@ c
 #
 # ```
 
-c.auto_rename_ports_counter_clockwise()
-c
+# +
+# c.auto_rename_ports_counter_clockwise()
+# c
 
-c.get_ports_list(clockwise=False)
+# +
+# c.get_ports_list(clockwise=False)
 
-c.ports_layer
+# +
+# c.ports_layer
 
-c.port_by_orientation_cw("W0")
+# +
+# c.port_by_orientation_cw("W0")
 
-c.port_by_orientation_ccw("W1")
+# +
+# c.port_by_orientation_ccw("W1")
+# -
 
 # Lets extend the East facing ports (orientation = 0 deg)
 
 # +
-cross_section = gf.cross_section.strip()
+# cross_section = gf.cross_section.strip()
 
-nxn = gf.components.nxn(
-    west=2, north=2, east=2, south=2, xsize=4, ysize=4, cross_section=cross_section
-)
-c = gf.components.extension.extend_ports(component=nxn, orientation=0)
-c
+# nxn = gf.components.nxn(
+#     west=2, north=2, east=2, south=2, xsize=4, ysize=4, cross_section=cross_section
+# )
+# c = gf.components.extension.extend_ports(component=nxn, orientation=0)
+# c
+
+# +
+# c.ports
+
+# +
+# df = c.get_ports_pandas()
+# df
+
+# +
+# df[df.port_type == "optical"]
 # -
-
-c.ports
-
-df = c.get_ports_pandas()
-df
-
-df[df.port_type == "optical"]
 
 # ## pins
 #
@@ -386,37 +417,40 @@ df[df.port_type == "optical"]
 #
 # by default Component.show() will add triangular pins, so you can see the direction of the port in Klayout.
 
-gf.components.mmi1x2(decorator=gf.add_pins.add_pins)
+# +
+# gf.components.mmi1x2(decorator=gf.add_pins.add_pins)
 
-gf.components.mmi1x2(decorator=gf.add_pins.add_pins_triangle)
+# +
+# gf.components.mmi1x2(decorator=gf.add_pins.add_pins_triangle)
+# -
 
 # ## component_sequence
 #
 # When you have repetitive connections you can describe the connectivity as an ASCII map
 
 # +
-bend180 = gf.components.bend_circular180()
-wg_pin = gf.components.straight_pin(length=40)
-wg = gf.components.straight()
+# bend180 = gf.components.bend_circular180()
+# wg_pin = gf.components.straight_pin(length=40)
+# wg = gf.components.straight()
 
-# Define a map between symbols and (component, input port, output port)
-symbol_to_component = {
-    "D": (bend180, "o1", "o2"),
-    "C": (bend180, "o2", "o1"),
-    "P": (wg_pin, "o1", "o2"),
-    "-": (wg, "o1", "o2"),
-}
+# # Define a map between symbols and (component, input port, output port)
+# symbol_to_component = {
+#     "D": (bend180, "o1", "o2"),
+#     "C": (bend180, "o2", "o1"),
+#     "P": (wg_pin, "o1", "o2"),
+#     "-": (wg, "o1", "o2"),
+# }
 
-# Generate a sequence
-# This is simply a chain of characters. Each of them represents a component
-# with a given input and and a given output
+# # Generate a sequence
+# # This is simply a chain of characters. Each of them represents a component
+# # with a given input and and a given output
 
-sequence = "DC-P-P-P-P-CD"
-component = gf.components.component_sequence(
-    sequence=sequence, symbol_to_component=symbol_to_component
-)
-component.name = "component_sequence"
-component
+# sequence = "DC-P-P-P-P-CD"
+# component = gf.components.component_sequence(
+#     sequence=sequence, symbol_to_component=symbol_to_component
+# )
+# component.name = "component_sequence"
+# component
 # -
 
 # As the sequence is defined as a string you can use the string operations to easily build complex sequences

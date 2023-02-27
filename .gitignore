@@ -31,3 +31,6 @@ _version.py
 pip-log.txt
 extra/
 docs/_autosummary
+
+# ipython
+.ipynb_checkpoints
