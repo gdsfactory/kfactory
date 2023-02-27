@@ -12,6 +12,7 @@ kfactory
    README
    intro
    klive
+   tutorial
    api
    CHANGELOG
 
