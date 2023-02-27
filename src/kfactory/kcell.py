@@ -1665,7 +1665,7 @@ class KCell(ABCKCell[Port]):
         show(self)
 
     def _ipython_display_(self) -> None:
-        from IPython.display import display, Image  # type: ignore
+        from IPython.display import Image, display  # type: ignore
 
         lv = lay.LayoutView()
         l = lv.create_layout(False)
@@ -1686,7 +1686,7 @@ class KCell(ABCKCell[Port]):
         lv.zoom_fit()
         pb = lv.get_pixels(800, 800)
         # dup.klib.delete_cell(dup.cell_index())
-        display(Image(data=pb.to_png_data(), format="png"))  # type: ignore[no-untyped-call]
+        display(Image(data=pb.to_png_data(), format="png"))
 
 
 class CplxKCell(ABCKCell[DCplxPort]):

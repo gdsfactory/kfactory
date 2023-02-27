@@ -40,7 +40,9 @@ p = kf.KCell()
 # Add a polygon
 xpts = [0, 0, 5, 6, 9, 12]
 ypts = [0, 1, 1, 2, 2, 0]
-p.shapes(p.klib.layer(2,0)).insert(kf.kdb.DPolygon([kf.kdb.DPoint(x,y) for x,y in zip(xpts, ypts)]))
+p.shapes(p.klib.layer(2, 0)).insert(
+    kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip(xpts, ypts)])
+)
 
 # plot the Component with the polygon in it
 p
@@ -70,8 +72,12 @@ c
 # time (`poly_ref`, `poly_ref2`, and `poly_ref3`)?  You can use those variables to
 # reposition the references.
 
-poly_ref2.transform(kf.kdb.DCplxTrans(1, 15, False, 0,0))  # Rotate the 2nd reference we made 15 degrees
-poly_ref3.transform(kf.kdb.DCplxTrans(1, 30, False, 0,0))  # Rotate the 3rd reference we made 30 degrees
+poly_ref2.transform(
+    kf.kdb.DCplxTrans(1, 15, False, 0, 0)
+)  # Rotate the 2nd reference we made 15 degrees
+poly_ref3.transform(
+    kf.kdb.DCplxTrans(1, 30, False, 0, 0)
+)  # Rotate the 3rd reference we made 30 degrees
 c
 
 # Now you're getting somewhere! You've only had to make the polygon once, but you're
@@ -88,7 +94,9 @@ c
 # Add a 2nd polygon to "p"
 xpts = [14, 14, 16, 16]
 ypts = [0, 2, 2, 0]
-p.shapes(p.klib.layer(1,0)).insert(kf.kdb.DPolygon([kf.kdb.DPoint(x,y) for x,y in zip(xpts, ypts)]))
+p.shapes(p.klib.layer(1, 0)).insert(
+    kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip(xpts, ypts)])
+)
 p
 
 # That looks good.  Now let's find out what happened to `c` that contains the
@@ -112,8 +120,8 @@ d_ref1 = c2.create_inst(c)  # Reference the Component "c" that 3 references in i
 d_ref2 = c2 << c  # Use the "<<" operator to create a 2nd reference to c
 d_ref3 = c2 << c  # Use the "<<" operator to create a 3rd reference to c
 
-d_ref1.transform(kf.kdb.DTrans(20., 0.))
-d_ref2.transform(kf.kdb.DTrans(40., 0.))
+d_ref1.transform(kf.kdb.DTrans(20.0, 0.0))
+d_ref2.transform(kf.kdb.DTrans(40.0, 0.0))
 
 c2
 # -
@@ -122,8 +130,8 @@ c2
 #
 # 1. create the reference and add it to the component
 
-c = kf.KCell(name = "reference_sample")
-w = kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1,0))
+c = kf.KCell(name="reference_sample")
+w = kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
 wr = kf.kdb.CellInstArray(w, kf.kdb.Trans.R0)
 c.insert(wr)
 c
@@ -131,15 +139,15 @@ c
 # 2. or do it in a single line
 
 c = kf.KCell(name="reference_sample_shorter_syntax")
-wr = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1,0))
+wr = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
 c
 
 # in both cases you can move the reference `wr` after created
 
 c = kf.KCell(name="two_references")
-wr1 = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1,0))
-wr2 = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1,0))
-wr2.transform(kf.kdb.DTrans(0.,10.))
+wr1 = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
+wr2 = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
+wr2.transform(kf.kdb.DTrans(0.0, 10.0))
 c.add_ports(wr1.ports, prefix="top_")
 c.add_ports(wr2.ports, prefix="bot_")
 
@@ -165,11 +173,11 @@ c
 # Let's make a new Component and put a big array of our Component `c` in it:
 
 # +
-#not converted yet
+# not converted yet
 
 c3 = kf.KCell("array_of_references")  # Create a new blank Component
 aref = c3.create_inst(
-    c, na=6, nb=3, a=kf.kdb.Vector(20000,0), b=kf.kdb.Vector(0,15000)
+    c, na=6, nb=3, a=kf.kdb.Vector(20000, 0), b=kf.kdb.Vector(0, 15000)
 )  # Reference the Component "c" 3 references in it with a 3 rows, 6 columns array
 c3
 # -
