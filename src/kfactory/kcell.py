@@ -1383,7 +1383,7 @@ class KCell(ABCKCell[Port]):
         Returns:
             cell: exact copy of the current cell
         """
-        kdb_copy = self.klib.kdb_cell(self.name)
+        kdb_copy = self.klib.kdb_cell(self.name).dup()
 
         c = KCell(klib=self.klib, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
@@ -1651,7 +1651,7 @@ class CplxKCell(ABCKCell[DCplxPort]):
         Returns:
             cell: exact copy of the current cell
         """
-        kdb_copy = self.klib.kdb_cell(self.name)
+        kdb_copy = self.klib.kdb_cell(self.name).dup()
 
         c = CplxKCell(klib=self.klib, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
