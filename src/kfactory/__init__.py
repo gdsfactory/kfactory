@@ -26,15 +26,15 @@ from . import pcells, tech, placer, routing, utils, port
 from .config import logger
 
 
-__version__ = "0.4.3"
+__version__ = "0.4.4"
 
 
 def __getattr__(name: str) -> "KLib":
-    # TODO: Remove with 0.4.3
+    # TODO: Remove with 0.4.4
     if name != "library":
         raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
     logger.opt(ansi=True).bind(with_backtrace=True).warning(
-        "<red>DeprecationWarning:</red> library has been renamed to klib since version 0.3.1 and library will be removed with 0.4.3, update your code to use klib instead",
+        "<red>DeprecationWarning:</red> library has been renamed to klib since version 0.3.1 and library will be removed with 0.4.4, update your code to use klib instead",
     )
     return klib
 
