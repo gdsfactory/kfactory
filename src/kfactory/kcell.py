@@ -169,10 +169,10 @@ class KLib(kdb.Layout):
         klib = KLib()
         klib.assign(super().dup())
         if init_cells:
-            klib.kcells = [
-                KCell(name=kc.name, klib=klib, kdb_cell=klib.cell(kc.name))
-                for kc in self.kcells
-            ]
+            klib.kcells = {
+                i: KCell(name=kc.name, klib=klib, kdb_cell=klib.cell(kc.name))
+                for i, kc in self.kcells.items()
+            }
         klib.rename_function = self.rename_function
         return klib
 
@@ -211,7 +211,6 @@ class KLib(kdb.Layout):
         if isinstance(cell, int):
             cell = self[self.cell(cell).name]
         super().delete_cell(cell.cell_index())
-        self.kcells.remove(cell)
 
     def register_cell(
         self, kcell: "KCell | CplxKCell", allow_reregister: bool = False
@@ -1270,9 +1269,9 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         """
         if isinstance(cell, KCell):
             ca = (
-                self.insert(kdb.CellInstArray(cell, trans))
+                self.insert(kdb.CellInstArray(cell, trans))  # type: ignore[arg-type]
                 if a is None
-                else self.insert(kdb.CellInstArray(cell, trans, a, b, na, nb))
+                else self.insert(kdb.CellInstArray(cell, trans, a, b, na, nb))  # type: ignore[arg-type]
             )
         elif a is None:
             ca = self.insert(kdb.DCellInstArray(cell, trans))  # type: ignore[arg-type]
@@ -1673,14 +1672,7 @@ class KCell(ABCKCell[Port]):
 
         klib_dup = self.klib.dup(init_cells=False)
         if isinstance(self, KCell):
-            kc = KCell(
-                name=self.name, klib=klib_dup, kdb_cell=klib_dup.kdb_cell(self.name)
-            )
-            kc.ports = self.ports.copy()
-        elif isinstance(self, CplxKCell):
-            kc = CplxKCell(
-                name=self.name, klib=klib_dup, kdb_cell=klib_dup.kdb_cell(self.name)
-            )
+            kc = klib_dup[self.name]
             kc.ports = self.ports.copy()
         else:
             raise NotImplementedError
@@ -2292,7 +2284,7 @@ class CplxPorts:
     def __iter__(self) -> Iterator[DCplxPort]:
         yield from self._ports
 
-    def each(sellf) -> Iterator[DCplxPort]:
+    def each(self) -> Iterator[DCplxPort]:
         return self.__iter__()
 
     def add_port(self, port: DCplxPort, name: Optional[str] = None) -> None:
@@ -2433,7 +2425,7 @@ class InstancePorts:
             else p.copy(trans=self.instance.trans)  # type: ignore[arg-type]
         )
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Port | DCplxPort]:
         return (self[port.name] for port in self.cell_ports)
 
     def __repr__(self) -> str:
