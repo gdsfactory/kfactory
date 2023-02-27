@@ -226,9 +226,6 @@ class KLib(kdb.Layout):
             f"Library doesn't have a KCell named {obj}, available KCells are {[cell.name for cell in self.kcells]}"
         )
 
-    def kdb_cell(self, cellname: str) -> kdb.Cell:
-        return super().cell(cellname)
-
     def read(
         self,
         filename: str | Path,
@@ -1230,6 +1227,9 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         self.insts.append(inst)
         return inst
 
+    def _kdb_copy(self) -> kdb.Cell:
+        return kdb.Cell.dup(self)
+
     def layer(self, *args: Any, **kwargs: Any) -> int:
         """Get the layer info, convenience for klayout.db.Layout.layer"""
         return self.klib.layer(*args, **kwargs)
@@ -1383,7 +1383,7 @@ class KCell(ABCKCell[Port]):
         Returns:
             cell: exact copy of the current cell
         """
-        kdb_copy = self.klib.kdb_cell(self.name).dup()
+        kdb_copy = self._kdb_copy()
 
         c = KCell(klib=self.klib, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
@@ -1651,7 +1651,7 @@ class CplxKCell(ABCKCell[DCplxPort]):
         Returns:
             cell: exact copy of the current cell
         """
-        kdb_copy = self.klib.kdb_cell(self.name).dup()
+        kdb_copy = self._kdb_copy()
 
         c = CplxKCell(klib=self.klib, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
