@@ -58,8 +58,8 @@ jobs:
           activate-environment: anaconda-client-env
       - name: Install dependencies
         run: |
-          python -m pip install -U pip
-          python -m pip install -e .[docs,ci]
+          python -m pip install --user -U pip
+          python -m pip install --user -e .[docs,ci]
           python -m ipykernel install --name python3
           sudo apt install pandoc
           make install
