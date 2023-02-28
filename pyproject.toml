@@ -48,6 +48,7 @@ docs = [
 	"nbsphinx",
 	"autodoc_pydantic",
 	"jupytext",
+	"jupyter"
 ]
 ci = [
 	"flake8",
