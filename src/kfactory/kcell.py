@@ -1673,7 +1673,7 @@ class KCell(ABCKCell[Port]):
         show(self)
 
     def _ipython_display_(self) -> None:
-        from IPython.display import Image, display  # type: ignore
+        from IPython.display import Image, display  # type: ignore[attr-defined]
 
         lv = lay.LayoutView()
         l = lv.create_layout(False)
