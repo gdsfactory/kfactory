@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip
-          python -m pip install -e .[docs]
+          python -m pip install -e .[docs,ci]
           python -m ipykernel install --name python3
           sudo apt install pandoc
           make install
