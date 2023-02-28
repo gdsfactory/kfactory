@@ -66,5 +66,6 @@ jobs:
       - name: Test documentation
         run: |
           cd docs
+          make clean
           make convert
           make html
