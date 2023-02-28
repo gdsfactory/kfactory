@@ -7,3 +7,5 @@ API
 	:recursive:
 
 	kfactory
+	klayout.db
+	klayout.lay
