@@ -54,7 +54,8 @@ ci = [
 	"pytest",
 	"pytest_regressions",
 	"mypy",
-	"types-cachetools"
+	"types-cachetools",
+	"ipython",
 ]
 
 
