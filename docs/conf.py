@@ -32,6 +32,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.extlinks",
     "sphinxcontrib.video",
+    "nbsphinx",
 ]
 
 autodoc_member_order = "bysource"

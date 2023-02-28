@@ -166,6 +166,14 @@ class KLib(kdb.Layout):
         self.rename_function: Callable[..., None] = rename_clockwise
 
     def dup(self, init_cells: bool = True) -> "KLib":
+        """Create a duplication of the `~KLib` object
+
+        Args:
+            init_cells: initialize the all cells in the new KLib object
+
+        Returns:
+            Copy of itself
+        """
         klib = KLib()
         klib.assign(super().dup())
         if init_cells:
@@ -1685,7 +1693,7 @@ class KCell(ABCKCell[Port]):
         lv.zoom_fit()
         pb = lv.get_pixels(800, 800)
         # dup.klib.delete_cell(dup.cell_index())
-        display(Image(data=pb.to_png_data(), format="png"))
+        display(Image(data=pb.to_png_data(), format="png"))  # type: ignore[no-untyped-call]
 
 
 class CplxKCell(ABCKCell[DCplxPort]):
@@ -2636,7 +2644,7 @@ def clean_value(
 
 
 def clean_name(name: str) -> str:
-    r"""Ensures that gds cells are composed of [a-zA-Z0-9_\-]
+    r"""Ensures that gds cells are composed of [a-zA-Z0-9_\-]::
 
     FIXME: only a few characters are currently replaced.
         This function has been updated only on case-by-case basis
