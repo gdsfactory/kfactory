@@ -5,10 +5,13 @@ import shutil
 import time
 from typing import Dict, Optional
 
+import gdsfactory as gf
 import numpy as np
 import omegaconf
+from gdsfactory.types import ComponentSpec, PathType
 
 import kfactory as kf
+
 from ..config import logger
 from ..materials import MaterialSpec
 from ..pdk import get_layer_stack
@@ -20,8 +23,6 @@ from .simulation_settings import (
     SIMULATION_SETTINGS_LUMERICAL_FDTD,
     SimulationSettingsLumericalFdtd,
 )
-import gdsfactory as gf
-from gdsfactory.typings import ComponentSpec, PathType
 
 run_false_warning = """
 You have passed run=False to debug the simulation
