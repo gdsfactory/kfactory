@@ -15,6 +15,9 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
+convert:
+	jupytext --set-formats ipynb,py notebooks/*.py
+
 upload:
 	mkdir -p site
 	rsync -rv build/html/ site/kfactory
