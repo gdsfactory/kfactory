@@ -30,11 +30,11 @@ __version__ = "0.4.6"
 
 
 def __getattr__(name: str) -> "KLib":
-    # TODO: Remove with 0.4.6
+    # TODO: Remove with 0.5
     if name != "library":
         raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
     logger.opt(ansi=True).bind(with_backtrace=True).warning(
-        "<red>DeprecationWarning:</red> library has been renamed to klib since version 0.3.1 and library will be removed with 0.4.6, update your code to use klib instead",
+        "<red>DeprecationWarning:</red> library has been renamed to klib since version 0.3.1 and library will be removed with 0.5, update your code to use klib instead",
     )
     return klib
 
