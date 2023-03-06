@@ -50,6 +50,7 @@ c.shapes(c.klib.layer(1, 0)).insert(poly1)
 # show it in matplotlib and KLayout (you need to have KLayout open and install gdsfactory from the git repo with make install)
 
 c
+
 # -
 
 
@@ -371,4 +372,4 @@ c.write("demo.gds")
 # Sometimes you also want to save the GDS together with metadata (settings, port names, widths, locations ...) in YAML
 
 # + vscode={"languageId": "python"}
-# c.write_gds_with_metadata("demo.gds") # not implemented
+# c.write_gds_with_metadata("demo.gds") # not implemented, normal write writes metadata already

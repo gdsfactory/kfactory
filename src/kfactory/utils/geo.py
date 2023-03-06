@@ -5,7 +5,6 @@ from typing import Any, Callable, List, Optional, Sequence, TypeGuard, cast, ove
 import numpy as np
 from numpy.typing import ArrayLike
 from pydantic import BaseModel, PrivateAttr
-from scipy.special import binom  # type: ignore[import]
 
 from .. import kdb
 from ..config import logger
@@ -94,21 +93,6 @@ def simplify(points: list[kdb.Point], tolerance: float) -> list[kdb.Point]:
             + simplify(points[ind_dist:], tolerance)[1:]
         )
     )
-
-
-def bezier_curve(
-    t: np.typing.NDArray[np.float64],
-    control_points: Sequence[tuple[np.float64 | float, np.float64 | float]],
-) -> list[kdb.DPoint]:
-    xs = np.zeros(t.shape, dtype=np.float64)
-    ys = np.zeros(t.shape, dtype=np.float64)
-    n = len(control_points) - 1
-    for k in range(n + 1):
-        ank = binom(n, k) * (1 - t) ** (n - k) * t**k
-        xs += ank * control_points[k][0]
-        ys += ank * control_points[k][1]
-
-    return [kdb.DPoint(p[0], p[1]) for p in np.stack([xs, ys])]
 
 
 def extrude_path_points(
@@ -493,7 +477,6 @@ class Enclosure(BaseModel):
         )
 
     def __add__(self, other: "Enclosure") -> "Enclosure":
-
         enc = Enclosure()
 
         for layer, secs in self.layer_sections.items():
@@ -513,7 +496,6 @@ class Enclosure(BaseModel):
         return self
 
     def add_section(self, layer: LayerEnum | int, sec: Section) -> None:
-
         d = self.layer_sections
 
         if layer in self.layer_sections:
@@ -557,7 +539,6 @@ class Enclosure(BaseModel):
         ref: Optional[int | kdb.Region],  # layer index or the region
         direction: Direction = Direction.BOTH,
     ) -> None:
-
         match direction:
             case Direction.BOTH:
 
