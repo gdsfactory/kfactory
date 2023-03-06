@@ -1677,7 +1677,10 @@ class KCell(ABCKCell[Port]):
         show(self)
 
     def _ipython_display_(self) -> None:
-        from IPython.display import Image, display  # type: ignore[attr-defined]
+        # try:
+        #     import kweb
+        # except ImportError:
+        from IPython.display import Image, display  # type: ignore
 
         lv = lay.LayoutView()
         l = lv.create_layout(False)
@@ -1690,14 +1693,16 @@ class KCell(ABCKCell[Port]):
         kc.ports = self.ports.copy()
         kc.draw_ports()
 
-        lv.active_cellview().layout().assign(klib_dup)
+        lv.show_layout(klib_dup, False)
+
+        # lv.active_cellview().layout().assign(klib_dup)
         lv.add_missing_layers()
         lv.active_cellview().cell = kc
         lv.max_hier()
         lv.zoom_fit()
         pb = lv.get_pixels(800, 800)
         # dup.klib.delete_cell(dup.cell_index())
-        display(Image(data=pb.to_png_data(), format="png"))  # type: ignore[no-untyped-call]
+        display(Image(data=pb.to_png_data(), format="png"))
 
 
 class CplxKCell(ABCKCell[DCplxPort]):

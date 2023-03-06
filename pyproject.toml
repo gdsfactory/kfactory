@@ -11,7 +11,7 @@ classifiers = [
 	"Programming Language :: Python :: 3.11",
 	"Operating System :: OS Independent",
 ]
-version = "0.4.5"
+version = "0.4.6"
 authors = [
     {name = "gdsfactory community", email = "contact@gdsfactory.com"},
 ]
@@ -66,7 +66,7 @@ where = ["src"]
 
 [tool.black]
 line-length = 88  # Specify the line length
-target-version = ['py310']  # Specify your Python version
+target-version = ['py311']  # Specify your Python version
 include = '\.pyi?$'
 exclude = '''  # Specify the files/dirs that should be ignored by the black formatter
 /(
