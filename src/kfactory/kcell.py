@@ -266,7 +266,7 @@ class KLib(kdb.Layout):
         self,
         filename: str | Path,
         options: Optional[kdb.LoadLayoutOptions] = None,
-        register_cells: bool = True,
+        register_cells: bool = False,
     ) -> kdb.LayerMap:
         if register_cells:
             cells = set(self.cells("*"))
@@ -1163,6 +1163,10 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         kdb_cell: Optional[kdb.Cell] = None,
     ) -> None:
         self.klib = klib
+        self.insts: list[Instance] = []
+        self.settings: dict[str, Any] = {}
+        self._locked = False
+        self.info: dict[str, Any] = {}
         # TODO: Remove with 0.5.0
         if library is not None:
             logger.bind(with_backtrace=True).opt(ansi=True).warning(
@@ -1171,10 +1175,6 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
             self.klib = library
         if name is None and kdb_cell is None:
             self.name = f"Unnamed_{self.cell_index()}"
-        self.insts: list[Instance] = []
-        self.settings: dict[str, Any] = {}
-        self._locked = False
-        self.info: dict[str, Any] = {}
 
     @property
     def ports(self) -> "Ports | CplxPorts":
@@ -1440,6 +1440,10 @@ class KCell(ABCKCell[Port]):
         self.ports: Ports = Ports()
         self.complex = False
 
+        if kdb_cell is not None:
+            for inst in kdb_cell.each_inst():
+                self.insts.append(Instance(self.klib[inst.cell.name], inst))  # type: ignore[misc]
+
     def dup(self) -> "KCell":
         """Copy the full cell
 
@@ -1673,7 +1677,10 @@ class KCell(ABCKCell[Port]):
         show(self)
 
     def _ipython_display_(self) -> None:
-        from IPython.display import Image, display  # type: ignore[attr-defined]
+        # try:
+        #     import kweb
+        # except ImportError:
+        from IPython.display import Image, display  # type: ignore
 
         lv = lay.LayoutView()
         l = lv.create_layout(False)
@@ -1686,14 +1693,16 @@ class KCell(ABCKCell[Port]):
         kc.ports = self.ports.copy()
         kc.draw_ports()
 
-        lv.active_cellview().layout().assign(klib_dup)
+        lv.show_layout(klib_dup, False)
+
+        # lv.active_cellview().layout().assign(klib_dup)
         lv.add_missing_layers()
         lv.active_cellview().cell = kc
         lv.max_hier()
         lv.zoom_fit()
         pb = lv.get_pixels(800, 800)
         # dup.klib.delete_cell(dup.cell_index())
-        display(Image(data=pb.to_png_data(), format="png"))  # type: ignore[no-untyped-call]
+        display(Image(data=pb.to_png_data(), format="png"))
 
 
 class CplxKCell(ABCKCell[DCplxPort]):
@@ -1719,6 +1728,10 @@ class CplxKCell(ABCKCell[DCplxPort]):
         self.klib.register_cell(self, allow_reregister=True)
         self.ports: CplxPorts = CplxPorts()
         self.complex = True
+
+        if kdb_cell is not None:
+            for inst in kdb_cell.each_inst():
+                self.insts.append(Instance(self.klib[kdb_cell.name], inst))  # type: ignore[misc]
 
     def add_port(self, port: PortLike[TT, FI], name: Optional[str] = None) -> None:
         """Add an existing port. E.g. from an instance to propagate the port
@@ -2037,7 +2050,6 @@ class Instance:
             else:
                 cplx_conn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
 
-                print()
                 self.instance.dcplx_trans = (
                     op.copy_cplx(kdb.DCplxTrans.R0, self.cell.klib.dbu).trans
                     * cplx_conn_trans
