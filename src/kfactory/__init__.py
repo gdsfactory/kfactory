@@ -22,7 +22,7 @@ from .kcell import (
     LayerEnum,
     show,
 )
-from . import pcells, tech, placer, routing, utils, port
+from . import pcells, placer, routing, utils, port
 from .config import logger
 
 
@@ -59,7 +59,6 @@ __all__ = [
     "routing",
     "utils",
     "show",
-    "tech",
     "klay",
     "LayerEnum",
 ]

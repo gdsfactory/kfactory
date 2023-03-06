@@ -66,7 +66,7 @@ where = ["src"]
 
 [tool.black]
 line-length = 88  # Specify the line length
-target-version = ['py310']  # Specify your Python version
+target-version = ['py311']  # Specify your Python version
 include = '\.pyi?$'
 exclude = '''  # Specify the files/dirs that should be ignored by the black formatter
 /(
@@ -85,7 +85,7 @@ exclude = '''  # Specify the files/dirs that should be ignored by the black form
 '''
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 strict = true
 exclude = [
 	"tests",
