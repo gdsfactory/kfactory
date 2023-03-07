@@ -1,10 +1,8 @@
 try:
-    import asyncio
     from threading import Timer
     from time import time
     from typing import Any, Callable, Optional
 
-    import klayout.db as db
     import klayout.lay as lay
     from ipyevents import Event  # type: ignore[import]
     from ipywidgets import (  # type: ignore[import]
@@ -16,10 +14,13 @@ try:
         Image,
         Label,
         Layout,
+        Output,
         Tab,
         VBox,
     )
 
+    from .. import kdb, lay
+    from ..config import logger
     from ..kcell import KCell, KLib
 
 except ImportError as e:
@@ -71,17 +72,17 @@ class LayoutWidget:
         hide_unused_layers: bool = True,
         with_layer_selector: bool = True,
     ):
-        global i
         layer_properties = str(layer_properties)
         self.hide_unused_layers = hide_unused_layers
         self.layer_properties = layer_properties
 
         self.layout_view = lay.LayoutView()
         # self.load_layout(filepath, layer_properties)
-        self.layout_view.show_layout(cell.klib, True)
+        self.layout_view.show_layout(cell.klib, False)
+        self.layout_view.active_cellview().cell = cell
         self.layout_view.max_hier()
-        self.layout_view.active_cellview().show_cell(cell)
         self.layout_view.resize(800, 600)
+        self.layout_view.add_missing_layers()
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
 
         # if self.hide_unused_layers:
@@ -92,9 +93,8 @@ class LayoutWidget:
         self.refresh()
         scroll_event = Event(source=self.image, watched_events=["wheel"])
         scroll_event.on_dom_event(self.on_scroll)
-        # self.wheel_info = HTML("Waiting for a scroll...")
-        # self.mouse_info = HTML("Waiting for a mouse event...")
         self.layout_view.on_image_updated_event = self.refresh  # type: ignore[attr-defined]
+
         mouse_event = Event(
             source=self.image, watched_events=["mousedown", "mouseup", "mousemove"]
         )
@@ -124,21 +124,16 @@ class LayoutWidget:
             else button.default_color
         )
 
-        layer_iter = self.layout_view.begin_layers()
-
-        while not layer_iter.at_end():
-            props = layer_iter.current()
-            name = (
-                props.name
-                if props.name
-                else f"{props.source_layer}/{props.source_datatype}"
-            )
-            if name == button.layer_props.name:
+        logger.info("button toggle")
+        for props in self.layout_view.each_layer():
+            if props == button.layer_props:
                 props.visible = not props.visible
-                self.layout_view.set_layer_properties(layer_iter, props)
-                self.layout_view.reload_layout(self.layout_view.current_layer_list)
+                props.name = button.name
+                # self.layout_view.reload_layout(
+                #     self.layout_view.active_cellview().index()
+                # )
+                button.layer_props = props
                 break
-            layer_iter.next()
         self.refresh()
 
     def build_layer_toggle(self, prop_iter: lay.LayerPropertiesIterator) -> HBox:
@@ -150,7 +145,7 @@ class LayoutWidget:
         button_layout = Layout(
             width="5px",
             height="20px",
-            # border=f"solid 2px {layer_color}",
+            border=f"solid 2px {layer_color}",
             display="block",
         )
 
@@ -168,17 +163,32 @@ class LayoutWidget:
             children = []
             for _i in range(n_children):
                 prop_iter = prop_iter.next()
-                children.append(self.build_layer_toggle(prop_iter))
-            layer_label = Accordion([VBox(children)], titles=(props.name,))
-        else:
-            if props.name:
-                layer_label = Label(props.name)
-            else:
-                layer_label = Label(f"{props.source_layer}/{props.source_datatype}")
-        layer_checkbox.label = layer_label
+                _layer_toggle = self.build_layer_toggle(prop_iter)
+                children.append(_layer_toggle)
+                layer_label = Accordion([VBox(children)], titles=(props.name,))
+                layer_checkbox.label = layer_label
+                layer_checkbox.name = layer_label.value
 
-        layer_checkbox.on_click(self.button_toggle)
-        return HBox([layer_checkbox, layer_label])
+                layer_checkbox.on_click(self.button_toggle)
+                return HBox([layer_checkbox, layer_label])
+        else:
+            cell = self.layout_view.active_cellview().cell
+            if (
+                not cell.bbox_per_layer(prop_iter.current().layer_index()).empty()
+                and not prop_iter.current().has_children()
+            ):
+                # all_boxes.append(layer_toggle)
+                if props.name:
+                    layer_label = Label(props.name)
+                else:
+                    layer_label = Label(f"{props.source_layer}/{props.source_datatype}")
+                layer_checkbox.label = layer_label
+                layer_checkbox.name = layer_label.value
+
+                layer_checkbox.on_click(self.button_toggle)
+                return HBox([layer_checkbox, layer_label])
+            else:
+                return None
 
     def build_layer_selector(self, max_height: float) -> Tab:
         """Builds a widget for toggling layer displays.
@@ -191,8 +201,10 @@ class LayoutWidget:
 
         prop_iter = self.layout_view.begin_layers()
         while not prop_iter.at_end():
+            cell = self.layout_view.active_cellview().cell
             layer_toggle = self.build_layer_toggle(prop_iter)
-            all_boxes.append(layer_toggle)
+            if layer_toggle:
+                all_boxes.append(layer_toggle)
             prop_iter.next()
 
         layers_layout = Layout(
@@ -257,7 +269,7 @@ class LayoutWidget:
         y = event["offsetY"]
         buttons = self._get_modifier_buttons(event)
         # TODO: this is what I *want* to respond with, but it doesn't work, so I am using zoom_in/zoom_out instead
-        self.layout_view.send_wheel_event(-delta, False, db.DPoint(x, y), buttons)
+        self.layout_view.send_wheel_event(-delta, False, kdb.DPoint(x, y), buttons)
         self.refresh()
 
     @throttle(0.05)
@@ -270,9 +282,11 @@ class LayoutWidget:
         buttons = self._get_modifier_buttons(event)
         # TODO: this part is also not working. why?
         if event == "mousedown":
-            self.layout_view.send_mouse_press_event(db.DPoint(x, y), buttons)
+            self.layout_view.send_mouse_press_event(kdb.DPoint(x, y), buttons)
         elif event == "mouseup":
-            self.layout_view.send_mouse_release_event(db.DPoint(x, y), buttons)
+            self.layout_view.send_mouse_release_event(kdb.DPoint(x, y), buttons)
         elif event == "mousemove":
-            self.layout_view.send_mouse_move_event(db.DPoint(moved_x, moved_y), buttons)
+            self.layout_view.send_mouse_move_event(
+                kdb.DPoint(moved_x, moved_y), buttons
+            )
         self.refresh()

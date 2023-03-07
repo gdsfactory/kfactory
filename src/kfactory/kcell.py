@@ -1677,8 +1677,6 @@ class KCell(ABCKCell[Port]):
         show(self)
 
     def _ipython_display_(self) -> None:
-        from threading import Thread
-
         from IPython.display import Image, display  # type: ignore
 
         from .widgets.interactive import LayoutWidget
