@@ -14,6 +14,15 @@
 #     name: python3
 # ---
 
+#
+#
+# In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries. The default is 0.001, i.e. 1nm grid size (0.001 microns)
+#
+# Point, Box, Polygon, Edge, Region are in dbu DPoint, DBox, DPolygon, DEdge are in microns
+#
+# Most Shape types are available as microns and dbu parts. They can be converted with <ShapeTypeDBU>.to_dtype(dbu) to microns and with <ShapeTypeMicrons>.to_itype(dbu) where dbu is the the conversion of one database unit to microns
+#
+# Lets add a polygon
 # # KCell
 #
 #
@@ -295,6 +304,11 @@ e2 = kf.kdb.DPolygon.ellipse(kf.kdb.DBox(10, 6), 64).transformed(
 )
 # -
 
+c = kf.KCell()
+c.shapes(c.klib.layer(2, 0)).insert(e1)
+c.shapes(c.klib.layer(3, 0)).insert(e2)
+c
+
 # e1 NOT e2
 c = kf.KCell()
 e3 = kf.kdb.Region(e1.to_itype(c.klib.dbu)) - kf.kdb.Region(e2.to_itype(c.klib.dbu))
@@ -313,7 +327,7 @@ e3 = kf.kdb.Region(e1.to_itype(c.klib.dbu)) + kf.kdb.Region(e2.to_itype(c.klib.d
 c.shapes(c.klib.layer(1, 0)).insert(e3)
 c
 
-# e1 OR e2 (merged
+# e1 OR e2 (merged)
 c = kf.KCell()
 e3 = (
     kf.kdb.Region(e1.to_itype(c.klib.dbu)) + kf.kdb.Region(e2.to_itype(c.klib.dbu))
@@ -373,3 +387,4 @@ c.write("demo.gds")
 
 # + vscode={"languageId": "python"}
 # c.write_gds_with_metadata("demo.gds") # not implemented, normal write writes metadata already
+# -
