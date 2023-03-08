@@ -10,7 +10,7 @@ from typing import Optional
 import numpy as np
 
 import kfactory as kf
-from ..tech import LayerStack
+from ..generic_tech import LayerStack
 from gdsfactory.name import clean_value
 from ..pdk import get_sparameters_path
 from ..types import ComponentSpec
