@@ -3,7 +3,7 @@ import kfactory as kf
 
 @kf.autocell
 def connect_sequence(
-    seq: list[tuple[kf.KCell, str, str]],
+    seq: tuple[tuple[kf.KCell, str, str]],
     port_map: tuple[tuple[str, int, str]],
     input_port_name: str = "W0",
     output_port_name: str = "E0",
@@ -36,6 +36,7 @@ def connect_sequence(
     count = 1
     inst_list = [beg]
     for dev_spec in seq[1:]:
+        print(dev_spec)
         kcell = dev_spec[0]  # ()
         p_1 = dev_spec[1]
         p_2 = dev_spec[2]
