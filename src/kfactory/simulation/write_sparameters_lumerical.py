@@ -18,7 +18,7 @@ from ..pdk import get_layer_stack
 from ..simulation.get_sparameters_path import (
     get_sparameters_path_lumerical as get_sparameters_path,
 )
-from ..tech import LayerStack
+from ..generic_tech import LayerStack
 from .simulation_settings import (
     SIMULATION_SETTINGS_LUMERICAL_FDTD,
     SimulationSettingsLumericalFdtd,
@@ -74,11 +74,11 @@ def set_material(session, structure: str, material: MaterialSpec) -> None:
 
 def write_sparameters_lumerical(
     component: ComponentSpec,
+    layer_stack: LayerStack,
     session: Optional[object] = None,
     run: bool = True,
     overwrite: bool = False,
     dirpath: Optional[PathType] = None,
-    layer_stack: Optional[LayerStack] = None,
     simulation_settings: SimulationSettingsLumericalFdtd = SIMULATION_SETTINGS_LUMERICAL_FDTD,
     material_name_to_lumerical: Optional[Dict[str, MaterialSpec]] = None,
     delete_fsp_files: bool = True,
@@ -188,7 +188,7 @@ def write_sparameters_lumerical(
     component = component
     sim_settings = dict(simulation_settings)
 
-    layer_stack = layer_stack or get_layer_stack()
+    layer_stack = layer_stack
 
     layer_to_thickness = layer_stack.get_layer_to_thickness()
     layer_to_zmin = layer_stack.get_layer_to_zmin()
@@ -215,9 +215,10 @@ def write_sparameters_lumerical(
         extension = component_extended.create_inst(
             kf.pcells.waveguide.waveguide(2, ss.port_extension, layer=port.layer)
         )
-        output_port = extension.ports["o1"]
+        extension.connect('o2', port, port.name)
+        output_port = extension.ports['o1']
         print(type(output_port))
-        component_ref.connect("o1", extension, "o1")
+        component_extended.add_port(extension.ports['o1'], name=port.name)
 
     # ports = component_extended.get_ports_list(port_type="optical")
     # if not ports:
@@ -225,8 +226,10 @@ def write_sparameters_lumerical(
 
     # component.remove_layers(component.layers - set(layer_to_thickness.keys()))
     component._bb_valid = False
-    component.flatten()
+    component_extended.flatten()
     component_extended.name = "top"
+    # component.flatten()
+    component_extended.draw_ports()
     print(component_extended.ports)
 
     filepath_npz = get_sparameters_path(
@@ -242,18 +245,18 @@ def write_sparameters_lumerical(
     filepath_fsp = filepath.with_suffix(".fsp")
     fspdir = filepath.parent / f"{filepath.stem}_s-parametersweep"
 
-    # if run and filepath_npz.exists() and not overwrite:
-    #     logger.info(f"Reading Sparameters from {filepath_npz}")
-    #     return np.load(filepath_npz)
+    if run and filepath_npz.exists() and not overwrite:
+        logger.info(f"Reading Sparameters from {filepath_npz}")
+        return np.load(filepath_npz)
 
     if not run and session is None:
         print(run_false_warning)
 
     logger.info(f"Writing Sparameters to {filepath_npz}")
-    xmin = component_extended.bbox().left
-    xmax = component_extended.bbox().right
-    ymin = component_extended.bbox().bottom
-    ymax = component_extended.bbox().top
+    xmin = component.dbbox().left
+    xmax = component.dbbox().right
+    ymin = component.dbbox().bottom
+    ymax = component.dbbox().top
     x_min = (xmin - ss.xmargin) * 1e-6
     x_max = (xmax + ss.xmargin) * 1e-6
     y_min = (ymin - ss.ymargin) * 1e-6
@@ -354,33 +357,38 @@ def write_sparameters_lumerical(
         simulation_temperature=ss.simulation_temperature,
     )
 
-    for layer, thickness in layer_to_thickness.items():
+    for layer, level in layer_stack.layers.items():
         try:
-            component_extended.layer(layer)
-        except:
-            continue
+            size = kf.kdb.LayerInfo(*level.layer) in component_extended.layer()
+            print(component_extended.layout().layer_infos())
+            if size == 0:
+                print(f"Layer {layer}, {level.layer.layer} not in component {component_extended.name}")
+                # continue
+        except Exception as e:
+            print(f"Layer {layer}, {level.layer.layer} not in component {component_extended.name} {e}")
+            # continue
 
-        if layer not in layer_to_material:
-            raise ValueError(f"{layer} not in {layer_to_material.keys()}")
-
-        material_name = layer_to_material[layer]
+        material_name = layer_to_material[level.layer]
         if material_name not in material_name_to_lumerical:
+            continue
             raise ValueError(
                 f"{material_name!r} not in {list(material_name_to_lumerical.keys())}"
             )
         material = material_name_to_lumerical[material_name]
 
-        if layer not in layer_to_zmin:
-            raise ValueError(f"{layer} not in {list(layer_to_zmin.keys())}")
-
-        zmin = layer_to_zmin[layer]
+        zmin = layer_to_zmin[level.layer]
+        thickness = layer_to_thickness[level.layer]
         zmax = zmin + thickness
         z = (zmax + zmin) / 2
 
         path = gdspath
         print(path)
-        s.gdsimport(str(path), "top", f"{layer[0]}:{layer[1]}")
-        layername = f"GDS_LAYER_{layer[0]}:{layer[1]}"
+        try:
+            s.gdsimport(str(path), "top", f"{level.layer[0]}:{level.layer[1]}")
+        except Exception as e:
+            print(f"Layer {layer}, {level.layer.layer} not in component {component_extended.name} {e}")
+            continue
+        layername = f"GDS_LAYER_{level.layer[0]}:{level.layer[1]}"
         s.setnamed(layername, "z", z * 1e-6)
         s.setnamed(layername, "z span", thickness * 1e-6)
         set_material(session=s, structure=layername, material=material)
@@ -388,9 +396,6 @@ def write_sparameters_lumerical(
 
     s.deletesweep("s-parameter sweep")
 
-    s.addsweep(3)
-    s.setsweep("s-parameter sweep", "Excite all ports", 0)
-    s.setsweep("s-parameter sweep", "auto symmetry", True)
 
     for i, port in enumerate(component_extended.ports.get_all().values()):
         print(port)
@@ -401,9 +406,9 @@ def write_sparameters_lumerical(
 
         s.addport()
         p = f"FDTD::ports::port {i+1}"
-        s.setnamed(p, "x", port.x * 1e-6)
-        s.setnamed(p, "y", port.y * 1e-6)
-        s.setnamed(p, "z", z * 1e-6)
+        s.setnamed(p, "x", port.x * 1e-6 / 1000)
+        s.setnamed(p, "y", port.y * 1e-6 / 1000)
+        s.setnamed(p, "z", z * 1e-6 / 1000)
         s.setnamed(p, "z span", zspan * 1e-6)
         s.setnamed(p, "frequency dependent profile", ss.frequency_dependent_profile)
         s.setnamed(p, "number of field profile samples", ss.field_profile_samples)
@@ -416,21 +421,21 @@ def write_sparameters_lumerical(
             direction = "Backward"
             injection_axis = "x-axis"
             dxp = 0
-            dyp = 2 * ss.port_margin + port.width
+            dyp = 2 * ss.port_margin + port.width / 1000
         elif 45 < deg < 90 + 45:
             direction = "Backward"
             injection_axis = "y-axis"
-            dxp = 2 * ss.port_margin + port.width
+            dxp = 2 * ss.port_margin + port.width / 1000
             dyp = 0
         elif 90 + 45 < deg < 180 + 45:
             direction = "Forward"
             injection_axis = "x-axis"
             dxp = 0
-            dyp = 2 * ss.port_margin + port.width
+            dyp = 2 * ss.port_margin + port.width / 1000
         elif 180 + 45 < deg < 180 + 45 + 90:
             direction = "Forward"
             injection_axis = "y-axis"
-            dxp = 2 * ss.port_margin + port.width
+            dxp = 2 * ss.port_margin + port.width / 1000
             dyp = 0
 
         else:
@@ -451,21 +456,22 @@ def write_sparameters_lumerical(
             f"port {p} {port.name!r}: at ({port.x}, {port.y}, 0)"
             f"size = ({dxp}, {dyp}, {zspan})"
         )
-        s.setnamed(p, "monitor frequency points", ss.wavelength_points)
-        s.addsweepresult("s-parameter sweep", f"{p}::S")
 
     s.setglobalsource("wavelength start", ss.wavelength_start * 1e-6)
     s.setglobalsource("wavelength stop", ss.wavelength_stop * 1e-6)
 
     if run:
+        s.addsweep(3)
+        s.setsweep("s-parameter sweep", "Excite all ports", 0)
+        s.setsweep("s-parameter sweep", "auto symmetry", True)
         s.save(str(filepath_fsp))
         s.runsweep("s-parameter sweep")
-        sp = s.getsweepresult("s-parameter sweep", "new_result")
+        sp = s.getsweepresult("s-parameter sweep", "S parameters")
         s.exportsweep("s-parameter sweep", str(filepath))
         logger.info(f"wrote sparameters to {filepath}")
 
         sp["wavelengths"] = sp.pop("lambda").flatten() * 1e6
-        np.savez_compressed(filepath, **sp)
+        np.savez_compressed(filepath_npz, **sp)
 
         # keys = [key for key in sp.keys() if key.startswith("S")]
         # ra = {
