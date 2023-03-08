@@ -15,12 +15,11 @@ from pathlib import Path
 from .config import logger
 from .kcell import KCell, LayerEnum
 from .events import Event
-from .tech import LAYER, LayerStack, LayerLevel
+from .generic_tech import LAYER, LayerStack, LayerLevel
 from .materials import MaterialSpec
 from .materials import materials_index as materials_index_default
-from .utils import show
 from .utils.geo import Enclosure
-from .tech import LayerStack
+from .generic_tech import LayerStack
 from .types import (
     CellSpec,
     ComponentFactory,
@@ -75,7 +74,7 @@ class Pdk(BaseModel):
     cells: Dict[str, ComponentFactory] = Field(default_factory=dict)
     base_pdk: Optional[Pdk] = None
     default_decorator: Optional[Callable[[KCell], None]] = None
-    layers: Union[int, Enum, LayerEnum, LAYER, dict] = Field(default_factory=LayerEnum)
+    layers: Union[int, Enum, LayerEnum, LAYER, dict] = Field(default_factory=dict)
     layer_stack: Optional[LayerStack] = None
     # layer_views: Optional[LayerViews] = None
     layer_transitions: Dict[Union[LayerEnum, Tuple[LayerEnum, LayerEnum]], ComponentSpec] = Field(
@@ -719,7 +718,7 @@ on_enclosure_registered: Event = Event()
 
 on_container_registered.add_handler(on_cell_registered.fire)
 on_yaml_cell_registered.add_handler(on_cell_registered.fire)
-on_yaml_cell_modified.add_handler(show)
+# on_yaml_cell_modified.add_handler(show)
 
 
 if __name__ == "__main__":
