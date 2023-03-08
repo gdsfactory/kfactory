@@ -1,7 +1,7 @@
 from typing import Callable, List, Optional, Sequence, Union
 
 from .. import kdb
-from ..kcell import DCplxPort, KCell, Port
+from ..kcell import DCplxPort, KCell, Port, IPortLike
 from ..utils.geo import vec_angle  # , clean_points
 from .manhattan import route_manhattan
 
@@ -97,7 +97,7 @@ def connect(
     different_port_width: int = False,
 ) -> None:
     """Bend 90 part."""
-
+    print(p1.width)
     if p1.width != p2.width and not different_port_width:
         raise ValueError(
             f"The ports have different widths {p1.width=} {p2.width=}. If this is intentional, add `different_port_width=True` to override this."
@@ -311,7 +311,7 @@ def place90(
     if not pts:
         # Nothing to be placed
         return
-    w = p1.width
+    w = p1.width * c.library.dbu if isinstance(p1, IPortLike) else p1.width
     old_pt = pts[0]
     old_bend_port = p1
     bend90_ports = [
@@ -435,6 +435,7 @@ def place90(
                 _p1, _p2 = (
                     v for v in wg.ports.get_all().values() if v.port_type == port_type
                 )
+                print(bend90_cell.ports.get_all())
                 wg.connect(_p1.name, bend90, b90p1.name)
             else:
                 t1 = c << taper_cell
