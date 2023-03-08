@@ -34,5 +34,5 @@ def waveguide(
         "layer": layer,
     }
     c.autorename_ports()
-    c.show()
+
     return c
