@@ -644,12 +644,14 @@ class Enclosure(BaseModel):
         path: list[kdb.DPoint],
         main_layer: Optional[int | LayerEnum],
         width: float,
+        start_angle: float = 0,
+        end_angle: float = 0,
     ) -> None:
         if main_layer is None:
             raise ValueError(
                 "The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
             )
-        extrude_path(target=c, layer=main_layer, path=path, width=width, enclosure=self)
+        extrude_path(target=c, layer=main_layer, path=path, width=width, enclosure=self, start_angle=start_angle, end_angle=end_angle)
 
     def extrude_path_dynamic(
         self,
