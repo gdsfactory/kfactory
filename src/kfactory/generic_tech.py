@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -120,7 +120,7 @@ class LayerLevel(BaseModel):
             bias: in um for the etch.
     """
 
-    layer: Optional[Tuple[int, int]]
+    layer: Union[Tuple[int, int], LAYER]
     thickness: float
     thickness_tolerance: Optional[float] = None
     zmin: float
