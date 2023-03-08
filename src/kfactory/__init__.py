@@ -24,6 +24,7 @@ from .kcell import (
 )
 from . import pcells, placer, routing, utils, port
 from .config import logger
+from .get_component import get_component
 
 
 __version__ = "0.4.6"
