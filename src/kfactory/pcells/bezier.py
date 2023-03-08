@@ -52,7 +52,7 @@ def bend_s(
     c.create_port(
         name="W0",
         width=int(width / c.klib.dbu),
-        trans=kdb.Trans(0, False, 0, 0),
+        trans=kdb.Trans(2, True, 0, 0),
         layer=layer,
         port_type="optical",
     )
