@@ -1,6 +1,7 @@
 from typing import Optional
 
 from ... import KCell, LayerEnum, autocell, kdb, klib
+from ...pdk import _ACTIVE_PDK
 from ...utils import Enclosure
 
 __all__ = ["waveguide"]
@@ -10,11 +11,12 @@ __all__ = ["waveguide"]
 def waveguide(
     width: int,
     length: int,
-    layer: int | LayerEnum,
+    layer: int | LayerEnum | str,
     enclosure: Optional[Enclosure] = None,
 ) -> KCell:
     c = KCell()
 
+    layer = _ACTIVE_PDK.get_layer(layer).layer if isinstance(layer, str) else layer
     if width // 2 * 2 != width:
         raise ValueError("The width (w) must be a multiple of 2 database units")
 
@@ -32,4 +34,5 @@ def waveguide(
         "layer": layer,
     }
     c.autorename_ports()
+    c.show()
     return c
