@@ -241,6 +241,8 @@ mwg1_ref.connect("o2", mwg2_ref.ports["o1"])
 c2
 # -
 
+#
+#             self.layout_view.active_cellview().layout().cell(event["owner"].name)
 # ## Labels
 #
 # You can add abstract GDS labels (annotate) to your Components, in order to record information

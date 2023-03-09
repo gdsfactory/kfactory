@@ -59,6 +59,11 @@ ci = [
 	"ipython",
 	"ipykernel",
 ]
+ipy = [
+	"ipython",
+	"ipywidgets",
+	"ipytree",
+]
 
 
 [tool.setuptools.packages.find]

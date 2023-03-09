@@ -7,6 +7,7 @@ try:
     import klayout.lay as lay
     from ipyevents import Event  # type: ignore[import]
     from IPython.display import clear_output
+    from ipytree import Node, Tree  # type: ignore[import]
     from ipywidgets import (  # type: ignore[import]
         HTML,
         Accordion,
@@ -19,6 +20,7 @@ try:
         Output,
         RadioButtons,
         Tab,
+        ToggleButtons,
         VBox,
     )
 
@@ -27,44 +29,8 @@ try:
     from ..kcell import KCell, KLib
 
 except ImportError as e:
-    print(
-        "You need install jupyter notebook plugin with `pip install gdsfactory[full]`"
-    )
+    print("You need install jupyter notebook plugin with `pip install kfactory[ipy]`")
     raise e
-
-# from threading import Thread
-# from time import sleep
-
-
-# def throttle(wait: float) -> Callable[..., Callable[..., None]]:
-#     """Decorator that prevents a function from being called
-#     more than once every wait period."""
-
-#     def decorator(fn: Callable[..., None]) -> Callable[..., None]:
-#         time_of_last_call: float = 0
-#         scheduled, timer = False, None
-#         new_args, new_kwargs = None, None
-
-#         def throttled(*args: Any, **kwargs: Any) -> None:
-#             nonlocal new_args, new_kwargs, time_of_last_call, scheduled, timer
-
-#             def call_it() -> None:
-#                 nonlocal new_args, new_kwargs, time_of_last_call, scheduled, timer
-#                 time_of_last_call = time()
-#                 fn(*new_args, **new_kwargs)  # type: ignore
-#                 scheduled = False
-
-#             time_since_last_call = time() - time_of_last_call
-#             new_args, new_kwargs = args, kwargs
-#             if not scheduled:
-#                 scheduled = True
-#                 new_wait = max(0, wait - time_since_last_call)
-#                 timer = Timer(new_wait, call_it)
-#                 timer.start()
-
-#         return throttled
-
-#     return decorator
 
 
 class LayoutWidget:
@@ -75,21 +41,19 @@ class LayoutWidget:
         hide_unused_layers: bool = True,
         with_layer_selector: bool = True,
     ):
+        # self.debug = Output()
+
         self.hide_unused_layers = hide_unused_layers
 
         self.layout_view = lay.LayoutView()
-        # self.load_layout(filepath, layer_properties)
         self.layout_view.show_layout(cell.klib, False)
-        self.layout_view.active_cellview().cell = cell
-        self.layout_view.max_hier()
-        self.layout_view.resize(800, 600)
-        self.layout_view.add_missing_layers()
         self.layer_properties: Optional[Path] = None
         if layer_properties is not None:
             self.layer_properties = Path(layer_properties)
             if self.layer_properties.exists() and self.layer_properties.is_file():
                 self.layer_properties = self.layer_properties
                 self.layout_view.load_layer_props(str(self.layer_properties))
+        self.show_cell(cell)
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
 
         self.image = Image(value=png_data, format="png")
@@ -110,36 +74,42 @@ class LayoutWidget:
                 "mousedown",
                 "mouseup",
                 "mousemove",
-                "click",
-                "dragstart",
-                "dragend",
                 "contextmenu",
             ],
-            wait=20,
+            wait=10,
             throttle_or_debounce="debounce",
             prevent_default_action=True,
         )
-        mouse_event.on_dom_event(self.on_mouse_down)
+        mouse_event.on_dom_event(self.on_mouse)
 
+        max_height = self.layout_view.viewport_height()
         if with_layer_selector:
-            layer_selector_tabs = self.build_selector(
-                max_height=self.layout_view.viewport_height()
-            )
+            selector_tabs = self.build_selector(max_height=max_height)
         else:
-            layer_selector_tabs = None
+            selector_tabs = None
 
-        self.debug = Output()
+        mode_selector = self.build_modes(max_height)
+
+        def switch_mode(buttons: ToggleButtons) -> None:
+            self.layout_view.switch_mode(buttons.value)
 
         self.widget = AppLayout(
+            left_sidebar=mode_selector,
             center=self.image,
-            right_sidebar=layer_selector_tabs,
-            left_sidebar=None,
+            right_sidebar=selector_tabs,
             align_items="top",
-            justify_items="left",
-            footer=self.debug,
+            justify_items="center",
+            # footer=self.debug,
+            # footer=mode_selector,
+            pane_weights=[1, 3, 1],
         )
 
-        self.layout_view.switch_mode("ruler")
+    def show_cell(self, cell: kdb.Cell) -> None:
+        self.layout_view.active_cellview().cell = cell
+        self.layout_view.max_hier()
+        self.layout_view.resize(800, 600)
+        self.layout_view.add_missing_layers()
+        self.layout_view.zoom_fit()
 
     def button_toggle(self, button: Button) -> None:
         button.style.button_color = (
@@ -198,10 +168,7 @@ class LayoutWidget:
                 return None
         else:
             cell = self.layout_view.active_cellview().cell
-            if (
-                not cell.bbox_per_layer(prop_iter.current().layer_index()).empty()
-                and not prop_iter.current().has_children()
-            ):
+            if not cell.bbox_per_layer(prop_iter.current().layer_index()).empty():
                 if props.name:
                     layer_label = Label(props.name)
                 else:
@@ -214,16 +181,31 @@ class LayoutWidget:
             else:
                 return None
 
-    def build_cell_selector(self, cell: kdb.Cell) -> Accordion | RadioButtons:
+    def build_modes(self, max_height: float) -> VBox:
+        modes = self.layout_view.mode_names()
+        tb = ToggleButtons(options=modes, layout=Layout(width="100px"))
+
+        def switch_mode(mode: dict[str, Any]) -> None:
+            self.layout_view.switch_mode(mode["new"])
+
+        tb.observe(switch_mode, "value")
+        return tb
+
+    def build_cell_selector(self, cell: kdb.Cell) -> Node:
         child_cells = [
             self.build_cell_selector(
                 self.layout_view.active_cellview().layout().cell(_cell)
             )
             for _cell in cell.each_child_cell()
         ]
-        return Accordion(
-            children=child_cells, titles=[_cell.name for _cell in child_cells]
-        )
+
+        node = Node(cell.name, show_icon=False)
+        node.observe(self.on_select_cell, "selected")
+
+        for cc in child_cells:
+            node.add_node(cc)
+
+        return node
 
     def build_selector(self, max_height: float) -> Tab:
         """Builds a widget for toggling layer displays.
@@ -241,18 +223,20 @@ class LayoutWidget:
                 all_boxes.append(layer_toggle)
             prop_iter.next()
 
-        layers_layout = Layout(
+        layout = Layout(
             max_height=f"{max_height}px", overflow_y="auto", display="block"
         )
-        layer_selector = VBox(all_boxes, layout=layers_layout)
+        selector = VBox(all_boxes, layout=layout)
 
         cells: list[RadioButtons | Accordion] = []
 
         for cell in self.layout_view.active_cellview().layout().top_cells():
             cells.append(self.build_cell_selector(cell))
 
+        tree = Tree(cells, multiple_selection=False, stripes=True)
+
         # For when tabs are implemented
-        selector_tabs = Tab([layer_selector, VBox(cells, layout=layers_layout)])
+        selector_tabs = Tab([selector, tree])
         selector_tabs.set_title(0, "Layers")
         selector_tabs.set_title(1, "Cells")
         # selector_tabs.titles = ("Layers",)
@@ -300,12 +284,27 @@ class LayoutWidget:
         if mouse_buttons & 4:
             buttons |= lay.ButtonState.MidButton
 
-        with self.debug:
-            clear_output()  # type: ignore[no-untyped-call]
-            print(type(event))
-            print(event)
-
         return buttons
+
+    def on_select_cell(self, event: Event) -> None:
+        self.show_cell(
+            self.layout_view.active_cellview().layout().cell(event["owner"].name)
+        )
+
+        max_height = self.layout_view.viewport_height()
+
+        all_boxes = []
+        prop_iter = self.layout_view.begin_layers()
+        while not prop_iter.at_end():
+            layer_toggle = self.build_layer_toggle(prop_iter)
+            if layer_toggle:
+                all_boxes.append(layer_toggle)
+            prop_iter.next()
+
+        tabs = self.widget.right_sidebar
+        vbox = tabs.children[0]
+        vbox.children = all_boxes
+        self.refresh()
 
     def on_scroll(self, event: Event) -> None:
         self.layout_view.timer()  # type: ignore[attr-defined]
@@ -316,11 +315,10 @@ class LayoutWidget:
         self.layout_view.send_wheel_event(-delta, False, kdb.DPoint(x, y), buttons)
         self.refresh()
 
-    def on_mouse_down(self, event: Event) -> None:
+    def on_mouse(self, event: Event) -> None:
         self.layout_view.timer()  # type: ignore[attr-defined]
         x = event["relativeX"]
         y = event["relativeY"]
-        y_max = event["boundingRectHeight"]
         moved_x = event["movementX"]
         moved_y = event["movementY"]
         buttons = self._get_modifier_buttons(event)
@@ -343,11 +341,9 @@ class LayoutWidget:
     def on_mouse_enter(self, event: Event) -> None:
         self.layout_view.timer()  # type: ignore[attr-defined]
         self.layout_view.send_enter_event()
-        self.layout_view.timer()  # type: ignore[attr-defined]
         self.refresh()
 
     def on_mouse_leave(self, event: Event) -> None:
         self.layout_view.timer()  # type: ignore[attr-defined]
         self.layout_view.send_leave_event()
-        self.layout_view.timer()  # type: ignore[attr-defined]
         self.refresh()
