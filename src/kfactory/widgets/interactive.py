@@ -26,7 +26,7 @@ try:
 
     from .. import kdb, lay
     from ..config import logger
-    from ..kcell import KCell, KLib
+    from ..kcell import CplxKCell, KCell, KLib
 
 except ImportError as e:
     print("You need install jupyter notebook plugin with `pip install kfactory[ipy]`")
@@ -36,7 +36,7 @@ except ImportError as e:
 class LayoutWidget:
     def __init__(
         self,
-        cell: KCell,
+        cell: KCell | CplxKCell,
         layer_properties: Optional[str] = None,
         hide_unused_layers: bool = True,
         with_layer_selector: bool = True,

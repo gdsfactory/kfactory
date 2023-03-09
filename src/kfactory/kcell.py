@@ -177,10 +177,21 @@ class KLib(kdb.Layout):
         klib = KLib()
         klib.assign(super().dup())
         if init_cells:
-            klib.kcells = {
-                i: KCell(name=kc.name, klib=klib, kdb_cell=klib.cell(kc.name))
-                for i, kc in self.kcells.items()
-            }
+            for i, kc in self.kcells.items():
+                if isinstance(kc, KCell):
+                    klib.kcells[i] = KCell(
+                        name=kc.name,
+                        klib=klib,
+                        kdb_cell=klib.cell(kc.name),
+                        ports=kc.ports,
+                    )
+                else:
+                    klib.kcells[i] = CplxKCell(
+                        name=kc.name,
+                        klib=klib,
+                        kdb_cell=klib.cell(kc.name),
+                        ports=kc.ports,
+                    )
         klib.rename_function = self.rename_function
         return klib
 
@@ -1123,6 +1134,7 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         name: Optional[str] = None,
         klib: KLib = klib,
         kdb_cell: Optional[kdb.Cell] = None,
+        ports: "Optional[CplxPorts | Ports]" = None,
     ) -> "KCell":
         """Create a KLayout cell and change its class to KCell
 
@@ -1147,6 +1159,7 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         name: Optional[str] = None,
         klib: KLib = klib,
         kdb_cell: Optional[kdb.Cell] = None,
+        ports: "Optional[CplxPorts | Ports]" = None,
     ) -> None:
         self.klib = klib
         self.insts: list[Instance] = []
@@ -1413,10 +1426,11 @@ class KCell(ABCKCell[Port]):
         name: Optional[str] = None,
         klib: KLib = klib,
         kdb_cell: Optional[kdb.Cell] = None,
+        ports: "Optional[Ports]" = None,
     ):
         super().__init__(name=name, klib=klib, kdb_cell=kdb_cell)
         self.klib.register_cell(self, allow_reregister=True)
-        self.ports: Ports = Ports()
+        self.ports: Ports = ports if ports else Ports()
         self.complex = False
 
         if kdb_cell is not None:
@@ -1647,7 +1661,10 @@ class KCell(ABCKCell[Port]):
 
         from .widgets.interactive import LayoutWidget
 
-        lw = LayoutWidget(cell=self)
+        cell_dup = self.klib.dup()[self.name]
+        cell_dup.draw_ports()
+
+        lw = LayoutWidget(cell=cell_dup)
         display(lw.widget)  # type: ignore
 
 
@@ -1668,10 +1685,11 @@ class CplxKCell(ABCKCell[DCplxPort]):
         name: Optional[str] = None,
         klib: KLib = klib,
         kdb_cell: Optional[kdb.Cell] = None,
+        ports: "Optional[CplxPorts]" = None,
     ):
         super().__init__(name=name, klib=klib, kdb_cell=kdb_cell)
         self.klib.register_cell(self, allow_reregister=True)
-        self.ports: CplxPorts = CplxPorts()
+        self.ports: CplxPorts = ports if ports else CplxPorts()
         self.complex = True
 
         if kdb_cell is not None:
