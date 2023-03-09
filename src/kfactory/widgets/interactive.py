@@ -157,29 +157,26 @@ class LayoutWidget:
                 if _layer_toggle is not None:
                     children.append(_layer_toggle)
 
-            if children:
-                layer_label = Accordion([VBox(children)], titles=(props.name,))
-                layer_checkbox.label = layer_label
-                layer_checkbox.name = props.name
-
-                layer_checkbox.on_click(self.button_toggle)
-                return HBox([layer_checkbox, layer_label])
-            else:
+            if not children:
                 return None
+            layer_label = Accordion([VBox(children)], titles=(props.name,))
+            layer_checkbox.label = layer_label
+            layer_checkbox.name = props.name
+
         else:
             cell = self.layout_view.active_cellview().cell
-            if not cell.bbox_per_layer(prop_iter.current().layer_index()).empty():
-                if props.name:
-                    layer_label = Label(props.name)
-                else:
-                    layer_label = Label(f"{props.source_layer}/{props.source_datatype}")
-                layer_checkbox.label = layer_label
-                layer_checkbox.name = layer_label.value
-
-                layer_checkbox.on_click(self.button_toggle)
-                return HBox([layer_checkbox, layer_label])
-            else:
+            if cell.bbox_per_layer(prop_iter.current().layer_index()).empty():
                 return None
+            layer_label = (
+                Label(props.name)
+                if props.name
+                else Label(f"{props.source_layer}/{props.source_datatype}")
+            )
+            layer_checkbox.label = layer_label
+            layer_checkbox.name = layer_label.value
+
+        layer_checkbox.on_click(self.button_toggle)
+        return HBox([layer_checkbox, layer_label])
 
     def build_modes(self, max_height: float) -> VBox:
         modes = self.layout_view.mode_names()
@@ -218,8 +215,7 @@ class LayoutWidget:
 
         prop_iter = self.layout_view.begin_layers()
         while not prop_iter.at_end():
-            layer_toggle = self.build_layer_toggle(prop_iter)
-            if layer_toggle:
+            if layer_toggle := self.build_layer_toggle(prop_iter):
                 all_boxes.append(layer_toggle)
             prop_iter.next()
 
@@ -228,11 +224,10 @@ class LayoutWidget:
         )
         selector = VBox(all_boxes, layout=layout)
 
-        cells: list[RadioButtons | Accordion] = []
-
-        for cell in self.layout_view.active_cellview().layout().top_cells():
-            cells.append(self.build_cell_selector(cell))
-
+        cells: list[RadioButtons | Accordion] = [
+            self.build_cell_selector(cell)
+            for cell in self.layout_view.active_cellview().layout().top_cells()
+        ]
         tree = Tree(cells, multiple_selection=False, stripes=True)
 
         # For when tabs are implemented
@@ -296,8 +291,7 @@ class LayoutWidget:
         all_boxes = []
         prop_iter = self.layout_view.begin_layers()
         while not prop_iter.at_end():
-            layer_toggle = self.build_layer_toggle(prop_iter)
-            if layer_toggle:
+            if layer_toggle := self.build_layer_toggle(prop_iter):
                 all_boxes.append(layer_toggle)
             prop_iter.next()
 
