@@ -92,6 +92,7 @@ class LayoutWidget:
 
         def switch_mode(buttons: ToggleButtons) -> None:
             self.layout_view.switch_mode(buttons.value)
+            self.refresh()
 
         self.widget = AppLayout(
             left_sidebar=mode_selector,
