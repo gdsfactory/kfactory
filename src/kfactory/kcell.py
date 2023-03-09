@@ -297,15 +297,6 @@ klib = (
 )  #: Default library object. :py:class:`~kfactory.kcell.KCell` uses this object unless another one is specified in the constructor
 
 
-def __getattr__(name: str) -> "KLib":
-    if name != "library":
-        raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
-    logger.bind(with_backtrace=True).opt(ansi=True).warning(
-        "<red>DeprecationWarning</red>: library has been renamed to klib since version 0.4.0 and library will be removed with 0.5.0, update your code to use klib instead"
-    )
-    return klib
-
-
 class LayerEnum(int, Enum):
     """Class for having the layers stored and a mapping int <-> layer,datatype
 
@@ -1131,7 +1122,6 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         cls,
         name: Optional[str] = None,
         klib: KLib = klib,
-        library: Optional[KLib] = None,
         kdb_cell: Optional[kdb.Cell] = None,
     ) -> "KCell":
         """Create a KLayout cell and change its class to KCell
@@ -1141,9 +1131,6 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
             library: KLib object that stores the layout and metadata about the KCells
             kdb_cell
         """
-
-        if library is not None:
-            klib = library
 
         if kdb_cell is None:
             _name = "Unnamed_" if name is None else name
@@ -1159,7 +1146,6 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         self,
         name: Optional[str] = None,
         klib: KLib = klib,
-        library: Optional[KLib] = None,
         kdb_cell: Optional[kdb.Cell] = None,
     ) -> None:
         self.klib = klib
@@ -1167,12 +1153,6 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         self.settings: dict[str, Any] = {}
         self._locked = False
         self.info: dict[str, Any] = {}
-        # TODO: Remove with 0.5.0
-        if library is not None:
-            logger.bind(with_backtrace=True).opt(ansi=True).warning(
-                "<red>DeprecationWarning</red>: library will be deprecated in 0.5.0, use klib instead"
-            )
-            self.klib = library
         if name is None and kdb_cell is None:
             self.name = f"Unnamed_{self.cell_index()}"
 
@@ -1432,10 +1412,9 @@ class KCell(ABCKCell[Port]):
         self,
         name: Optional[str] = None,
         klib: KLib = klib,
-        library: Optional[KLib] = None,
         kdb_cell: Optional[kdb.Cell] = None,
     ):
-        super().__init__(name=name, klib=klib, library=library, kdb_cell=kdb_cell)
+        super().__init__(name=name, klib=klib, kdb_cell=kdb_cell)
         self.klib.register_cell(self, allow_reregister=True)
         self.ports: Ports = Ports()
         self.complex = False
@@ -1460,12 +1439,6 @@ class KCell(ABCKCell[Port]):
         return c
 
     def __copy__(self) -> "KCell":
-        return self.dup()
-
-    def copy(self) -> "KCell":  # type: ignore[override]
-        logger.opt(ansi=True).bind(with_backtrace=True).warning(
-            "<red>DeprecationWarning:</red> copy will be removed in kfactory 0.5.0. Please use KCell.dup() or copy(KCell) instead"
-        )
         return self.dup()
 
     def add_port(self, port: PortLike[TT, FI], name: Optional[str] = None) -> None:
@@ -1499,13 +1472,6 @@ class KCell(ABCKCell[Port]):
     def add_ports(self, ports: Sequence[PortLike[TT, FI]], prefix: str = "") -> None:
         for port in ports:
             self.add_port(port, name=prefix + port.name)
-
-    @property
-    def library(self) -> KLib:  # type: ignore[override]
-        logger.opt(ansi=True).warning(
-            "<red>DeprecationWarning:</red> library shadows the klayout.dbcore.Cell.library(), please use klib instead. library will be removed in version 0.5.0"
-        )
-        return self.klib
 
     @classmethod
     def from_yaml(
@@ -1677,32 +1643,12 @@ class KCell(ABCKCell[Port]):
         show(self)
 
     def _ipython_display_(self) -> None:
-        # try:
-        #     import kweb
-        # except ImportError:
         from IPython.display import Image, display  # type: ignore
 
-        lv = lay.LayoutView()
-        l = lv.create_layout(False)
+        from .widgets.interactive import LayoutWidget
 
-        klib_dup = self.klib.dup(init_cells=False)
-        if not isinstance(self, KCell):
-            raise NotImplementedError
-
-        kc = klib_dup[self.name]
-        kc.ports = self.ports.copy()
-        kc.draw_ports()
-
-        lv.show_layout(klib_dup, False)
-
-        # lv.active_cellview().layout().assign(klib_dup)
-        lv.add_missing_layers()
-        lv.active_cellview().cell = kc
-        lv.max_hier()
-        lv.zoom_fit()
-        pb = lv.get_pixels(800, 800)
-        # dup.klib.delete_cell(dup.cell_index())
-        display(Image(data=pb.to_png_data(), format="png"))
+        lw = LayoutWidget(cell=self)
+        display(lw.widget)  # type: ignore
 
 
 class CplxKCell(ABCKCell[DCplxPort]):
@@ -1721,10 +1667,9 @@ class CplxKCell(ABCKCell[DCplxPort]):
         self,
         name: Optional[str] = None,
         klib: KLib = klib,
-        library: Optional[KLib] = None,
         kdb_cell: Optional[kdb.Cell] = None,
     ):
-        super().__init__(name=name, klib=klib, library=library, kdb_cell=kdb_cell)
+        super().__init__(name=name, klib=klib, kdb_cell=kdb_cell)
         self.klib.register_cell(self, allow_reregister=True)
         self.ports: CplxPorts = CplxPorts()
         self.complex = True
@@ -2486,7 +2431,6 @@ def autocell(
     *,
     set_settings: bool = True,
     set_name: bool = True,
-    maxsize: Optional[int] = None,
 ) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]:
     ...
 
@@ -2498,7 +2442,6 @@ def autocell(
     *,
     set_settings: bool = True,
     set_name: bool = True,
-    maxsize: Optional[int] = None,
 ) -> (
     Callable[KCellParams, KCell]
     | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
@@ -2512,11 +2455,6 @@ def autocell(
         maxsize: maximum size of cache, cell parameter sets will be evicted if the cell function is called with more different
         parameter sets than there are spaces in the cache, in case there are cell calls with existing parameter set calls
     """
-
-    if maxsize is not None:
-        logger.bind(with_backtrace=True).opt(ansi=True).warning(
-            "<red>DeprecationWarning</red>: maxsize has no effect on the cache, as it is a simple dict now. Please remove it, the argument will be removed in 0.5.0"
-        )
 
     def decorator_autocell(
         f: Callable[KCellParams, KCell]
@@ -2757,7 +2695,7 @@ __all__ = [
     "Ports",
     "autocell",
     "cell",
-    "library",
+    "klib",
     "KLib",
     "default_save",
     "ICplxPort",
