@@ -174,9 +174,7 @@ def extrude_path(
         else:
             ls = layer_list[layer].sections.copy()
             layer_list = enclosure.layer_sections.copy()
-            layer_list[layer] = LayerSection(
-                sections=list(layer_list[layer].sections) + [ls]
-            )
+            layer_list[layer] = LayerSection(sections=layer_list[layer].sections + [ls])
 
     for layer, layer_sec in layer_list.items():
         reg = kdb.Region()
