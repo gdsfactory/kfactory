@@ -116,7 +116,7 @@ repos:
       - id: mypy
         name: mypy
         language: python
-        entry: bash -c 'mypy --strict -p kfactory --warn-unused-ignore'
+        entry: bash -c 'mypy --strict -p kfactory'
         verbose: true
         always_run: true
         # args:
