@@ -49,9 +49,7 @@ docs = [
 	"autodoc_pydantic",
 	"jupytext",
 	"jupyter",
-	"ipython",
-	"ipykernel",
-	"ipyevents",
+	"kfactory[ipy]",
 ]
 ci = [
 	"flake8",
