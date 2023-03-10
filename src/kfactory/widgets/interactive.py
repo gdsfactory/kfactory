@@ -6,12 +6,13 @@ try:
 
     import klayout.lay as lay
     from ipyevents import Event  # type: ignore[import]
-    from IPython.display import Image, clear_output, display  # type: ignore[import]
+    from IPython.display import clear_output, display  # type: ignore[import]
     from ipytree import Node, Tree  # type: ignore[import]
     from ipywidgets import (  # type: ignore[import]
         HTML,
         Accordion,
         AppLayout,
+        Box,
         Button,
         HBox,
         Image,
@@ -49,7 +50,7 @@ class LayoutWidget:
         hide_unused_layers: bool = True,
         with_layer_selector: bool = True,
     ):
-        # self.debug = Output()
+        self.debug = Output()
 
         self.hide_unused_layers = hide_unused_layers
 
@@ -108,7 +109,7 @@ class LayoutWidget:
             right_sidebar=selector_tabs,
             align_items="top",
             justify_items="center",
-            # footer=self.debug,
+            footer=self.debug,
             # footer=mode_selector,
             pane_weights=[1, 3, 1],
         )
@@ -149,12 +150,28 @@ class LayoutWidget:
             display="block",
         )
 
-        layer_checkbox = Button(
-            style={"button_color": layer_color if props.visible else "transparent"},
-            layout=button_layout,
+        # prop_iter.current().visible = False
+
+        image = Image(
+            value=self.layout_view.icon_for_layer(prop_iter, 50, 25, 1).to_png_data(),
+            format="png",
+            width=50,
+            height=25,
         )
-        layer_checkbox.default_color = layer_color
-        layer_checkbox.layer_props = props
+
+        image_event = Event(source=image, watched_events=["click"])
+        _prop = prop_iter.dup()
+
+        def on_layer_click(event: Event) -> None:
+            _prop.current().visible = not _prop.current().visible
+            self.layout_view.timer()  # type: ignore[attr-defined]
+            image.value = self.layout_view.icon_for_layer(
+                _prop, 50, 25, 1
+            ).to_png_data()
+
+            self.refresh()
+
+        image_event.on_dom_event(on_layer_click)
 
         if props.has_children():
             prop_iter = prop_iter.down_first_child()
@@ -169,8 +186,6 @@ class LayoutWidget:
             if not children:
                 return None
             layer_label = Accordion([VBox(children)], titles=(props.name,))
-            layer_checkbox.label = layer_label
-            layer_checkbox.name = props.name
 
         else:
             cell = self.layout_view.active_cellview().cell
@@ -181,21 +196,35 @@ class LayoutWidget:
                 if props.name
                 else Label(f"{props.source_layer}/{props.source_datatype}")
             )
-            layer_checkbox.label = layer_label
-            layer_checkbox.name = layer_label.value
 
-        layer_checkbox.on_click(self.button_toggle)
-        return HBox([layer_checkbox, layer_label])
+        return HBox([Box([image]), layer_label])
 
     def build_modes(self, max_height: float) -> VBox:
+        def clear(event: Event) -> None:
+            self.layout_view.clear_annotations()
+            self.refresh()
+
+        clear_button = Button(description="clear annotations")
+        clear_button.on_click(clear)
+
+        def zoom_fit(even: Event) -> None:
+            self.layout_view.zoom_fit()
+            self.refresh()
+
+        zoom_button = Button(description="zoom fit")
+        zoom_button.on_click(zoom_fit)
+
+        mode_label = Label("mode selection:")
+
         modes = self.layout_view.mode_names()
-        tb = ToggleButtons(options=modes, layout=Layout(width="100px"))
+        tb = ToggleButtons(options=modes)
 
         def switch_mode(mode: dict[str, Any]) -> None:
             self.layout_view.switch_mode(mode["new"])
+            self.refresh()
 
         tb.observe(switch_mode, "value")
-        return tb
+        return VBox(children=(clear_button, zoom_button, mode_label, tb))
 
     def build_cell_selector(self, cell: kdb.Cell) -> Node:
         child_cells = [
