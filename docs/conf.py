@@ -1,5 +1,5 @@
 project = "kfactory"
-version = "0.4.0"
+version = "0.5.6"
 copyright = "2022"
 # author = "kfactory"
 
@@ -32,6 +32,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.extlinks",
     "sphinxcontrib.video",
+    "nbsphinx",
 ]
 
 autodoc_member_order = "bysource"

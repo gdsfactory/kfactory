@@ -22,21 +22,11 @@ from .kcell import (
     LayerEnum,
     show,
 )
-from . import pcells, tech, placer, routing, utils, port
+from . import pcells, placer, routing, utils, port
 from .config import logger
 
 
-__version__ = "0.4.0"
-
-
-def __getattr__(name: str) -> "KLib":
-    # TODO: Remove with 0.4.0
-    if name != "library":
-        raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
-    logger.opt(ansi=True).bind(with_backtrace=True).warning(
-        "<red>DeprecationWarning:</red> library has been renamed to klib since version 0.3.1 and library will be removed with 0.4.0, update your code to use klib instead",
-    )
-    return klib
+__version__ = "0.5.6"
 
 
 __all__ = [
@@ -59,7 +49,6 @@ __all__ = [
     "routing",
     "utils",
     "show",
-    "tech",
     "klay",
     "LayerEnum",
 ]

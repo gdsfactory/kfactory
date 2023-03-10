@@ -27,10 +27,8 @@ def waveguide(
     if enclosure is not None:
         enclosure.apply_minkowski_y(c, layer)
     c.settings = {
-        "width_dbu": width,
-        "length_dbu": length,
-        "width_um": width / c.klib.dbu,
-        "length_um": length / c.klib.dbu,
+        "width_um": width * c.klib.dbu,
+        "length_um": length * c.klib.dbu,
         "layer": layer,
     }
     c.autorename_ports()

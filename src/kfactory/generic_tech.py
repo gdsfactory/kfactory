@@ -19,14 +19,6 @@ class LAYER(LayerEnum):
     #     You will need to create a new LayerMap with your specific foundry layers.
     #     """
 
-    #     @root_validator(pre=True)
-    #     def check_layer(cls, values):
-    #         for key, value in values.items():
-    #             if key != "Config":
-    #                 assert isinstance(value.layer, int)
-    #                 assert isinstance(value.datatype, int)
-    #                 assert isinstance(value.ind, int)
-
     WG = (1, 0)
     WAFER = (50, 0)
     WGCLAD = (111, 0)
@@ -79,14 +71,6 @@ class LAYER(LayerEnum):
     MONITOR = (101, 0)
 
 
-#     class Config:
-#         """pydantic config."""
-
-#         frozen = True
-#         extra = "forbid"
-
-
-# LAYER = LayerMap()
 PORT_MARKER_LAYER_TO_TYPE = {
     LAYER.PORT: "optical",
     LAYER.PORTE: "dc",

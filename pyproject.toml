@@ -11,7 +11,7 @@ classifiers = [
 	"Programming Language :: Python :: 3.11",
 	"Operating System :: OS Independent",
 ]
-version = "0.4.0"
+version = "0.5.6"
 authors = [
     {name = "gdsfactory community", email = "contact@gdsfactory.com"},
 ]
@@ -25,9 +25,45 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["black>=21", "mypy", "pre-commit", "commitizen", "gitpython", "pylsp-mypy", "types-cachetools"]
-docs = ["sphinx", "docutils==0.17.1", "sphinx_rtd_theme", "sphinxcontrib-video", "sphinx-autodoc-typehints", "sphinx-book-theme==0.3.3", "sphinx-click", "sphinx-copybutton","sphinx-markdown-tables==0.0.16", "myst-parser", "matplotlib", "nbsphinx", "autodoc_pydantic"]
-ci = ["flake8", "pytest", "pytest_regressions", "mypy", "types-cachetools"]
+dev = [
+	"black>=21",
+	"mypy",
+	"pre-commit",
+	"gitpython",
+	"pylsp-mypy",
+	"types-cachetools"
+]
+docs = [
+	"sphinx",
+	"docutils==0.17.1",
+	"sphinx_rtd_theme",
+	"sphinxcontrib-video",
+	"sphinx-autodoc-typehints",
+	"sphinx-book-theme>=0.3.3",
+	"sphinx-click",
+	"sphinx-copybutton",
+	"sphinx-markdown-tables",
+	"myst-parser",
+	"matplotlib",
+	"nbsphinx",
+	"autodoc_pydantic",
+	"jupytext",
+	"jupyter",
+	"kfactory[ipy]",
+]
+ci = [
+	"flake8",
+	"pytest",
+	"pytest_regressions",
+	"mypy",
+	"types-cachetools",
+]
+ipy = [
+	"ipython",
+	"ipywidgets",
+	"ipytree",
+	"ipyevents",
+]
 
 
 [tool.setuptools.packages.find]
@@ -35,7 +71,7 @@ where = ["src"]
 
 [tool.black]
 line-length = 88  # Specify the line length
-target-version = ['py310']  # Specify your Python version
+target-version = ['py311']  # Specify your Python version
 include = '\.pyi?$'
 exclude = '''  # Specify the files/dirs that should be ignored by the black formatter
 /(
@@ -58,6 +94,7 @@ python_version = "3.10"
 strict = true
 exclude = [
 	"tests",
+	"src/kfactory/widgets",
 ]
 
 [tool.pylsp-mypy]
@@ -79,7 +116,7 @@ skip = ["kfactory/__init__.py"]
 testpaths = ["src", "tests"]
 # addopts = --tb=no
 addopts = '--tb=short'
-python_files = ["src/*.py", "tests/*.py"]
+# python_files = ["src/*.py", "tests/*.py"]
 norecursedirs = ["extra/*.py"]
 
 # [tool.pytest.ini_options]

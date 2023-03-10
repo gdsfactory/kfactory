@@ -39,7 +39,7 @@ import numpy as np
 import ruamel.yaml
 from typing_extensions import ParamSpec
 
-from . import kdb
+from . import kdb, lay
 from .config import logger
 from .port import rename_clockwise
 
@@ -67,7 +67,6 @@ class PortWidthMismatch(ValueError):
         p2: "Port | DPort | ICplxPort | DCplxPort",
         *args: Any,
     ):
-
         if isinstance(other_inst, Instance):
             super().__init__(
                 f'Width mismatch between the ports {inst.cell.name}["{p1.name}"] and {other_inst.cell.name}["{p2.name}"] ({p1.width}/{p2.width})',
@@ -91,7 +90,6 @@ class PortLayerMismatch(ValueError):
         p2: "Port | DPort | ICplxPort | DCplxPort",
         *args: Any,
     ):
-
         l1 = (
             f"{p1.layer.name}({p1.layer.__int__()})"
             if isinstance(p1.layer, LayerEnum)
@@ -163,9 +161,39 @@ class KLib(kdb.Layout):
     """
 
     def __init__(self, editable: bool = True) -> None:
-        self.kcells: list["KCell | CplxKCell"] = []  # dict[str, "KCell"] = {}
+        self.kcells: dict[int, "KCell | CplxKCell"] = {}  # dict[str, "KCell"] = {}
         kdb.Layout.__init__(self, editable)
         self.rename_function: Callable[..., None] = rename_clockwise
+
+    def dup(self, init_cells: bool = True) -> "KLib":
+        """Create a duplication of the `~KLib` object
+
+        Args:
+            init_cells: initialize the all cells in the new KLib object
+
+        Returns:
+            Copy of itself
+        """
+        klib = KLib()
+        klib.assign(super().dup())
+        if init_cells:
+            for i, kc in self.kcells.items():
+                if isinstance(kc, KCell):
+                    klib.kcells[i] = KCell(
+                        name=kc.name,
+                        klib=klib,
+                        kdb_cell=klib.cell(kc.name),
+                        ports=kc.ports,
+                    )
+                else:
+                    klib.kcells[i] = CplxKCell(
+                        name=kc.name,
+                        klib=klib,
+                        kdb_cell=klib.cell(kc.name),
+                        ports=kc.ports,
+                    )
+        klib.rename_function = self.rename_function
+        return klib
 
     def create_cell(  # type: ignore[override]
         self,
@@ -198,6 +226,11 @@ class KLib(kdb.Layout):
                 f"Cellname {name} already exists. Please make sure the cellname is unique or pass `allow_duplicate` when creating the library"
             )
 
+    def delete_cell(self, cell: "KCell | CplxKCell | int") -> None:
+        if isinstance(cell, int):
+            cell = self[self.cell(cell).name]
+        super().delete_cell(cell.cell_index())
+
     def register_cell(
         self, kcell: "KCell | CplxKCell", allow_reregister: bool = False
     ) -> None:
@@ -210,29 +243,41 @@ class KLib(kdb.Layout):
         def check_name(other: "KCell | CplxKCell") -> bool:
             return other.name == kcell.name
 
-        if any(cell.name == kcell.name for cell in self.kcells):
-            if not allow_reregister:
-                raise ValueError(
-                    "Cannot register a new cell with a name that already exists in the library"
-                )
-
+        if (kcell.cell_index() not in self.kcells) or allow_reregister:
+            self.kcells[kcell.cell_index()] = kcell
         else:
-            self.kcells.append(kcell)
+            raise ValueError(
+                "Cannot register a new cell with a name that already exists in the library"
+            )
 
     def __getitem__(self, obj: str | int) -> "KCell | CplxKCell":
         if isinstance(obj, int):
-            return self.kcells[obj]
-        for i in filter(lambda kcell: kcell.name == obj, self.kcells):
-            return i
-        raise ValueError(
-            f"Library doesn't have a KCell named {obj}, available KCells are {[cell.name for cell in self.kcells]}"
-        )
+            try:
+                return self.kcells[obj]
+            except KeyError:
+                if self.cell(obj) is None:
+                    raise
+
+                c = self.cell(obj)
+                return KCell(name=c.name, klib=self, kdb_cell=self.cell(obj))
+        else:
+            if self.cell(obj) is not None:
+                try:
+                    return self.kcells[self.cell(obj).cell_index()]
+                except KeyError:
+                    c = self.cell(obj)
+                    return KCell(name=c.name, klib=self, kdb_cell=self.cell(obj))
+            from pprint import pformat
+
+            raise ValueError(
+                f"Library doesn't have a KCell named {obj}, available KCells are {pformat(sorted([cell.name for cell in self.kcells.values()]))}"
+            )
 
     def read(
         self,
         filename: str | Path,
         options: Optional[kdb.LoadLayoutOptions] = None,
-        register_cells: bool = True,
+        register_cells: bool = False,
     ) -> kdb.LayerMap:
         if register_cells:
             cells = set(self.cells("*"))
@@ -245,7 +290,7 @@ class KLib(kdb.Layout):
         if register_cells:
             new_cells = set(self.cells("*")) - cells
             for c in new_cells:
-                KCell(kdb_cell=c, klib=self).name
+                KCell(kdb_cell=c, klib=self)
 
         return lm
 
@@ -261,15 +306,6 @@ class KLib(kdb.Layout):
 klib = (
     KLib()
 )  #: Default library object. :py:class:`~kfactory.kcell.KCell` uses this object unless another one is specified in the constructor
-
-
-def __getattr__(name: str) -> "KLib":
-    if name != "library":
-        raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
-    logger.bind(with_backtrace=True).opt(ansi=True).warning(
-        "<red>DeprecationWarning</red>: library has been renamed to klib since version 0.4.0 and library will be removed with 0.5.0, update your code to use klib instead"
-    )
-    return klib
 
 
 class LayerEnum(int, Enum):
@@ -333,16 +369,12 @@ CellType = TypeVar("CellType", bound="KCell | CplxKCell")
 
 
 class PortLike(ABC, Generic[TT, FI]):
-
     yaml_tag: str
     name: str
     width: FI
     layer: int
     trans: TT
     port_type: str
-
-    # def copy(self, trans: TI) -> "PortLike[TT, FI]":
-    #     ...
 
     def move(
         self,
@@ -1101,8 +1133,8 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         cls,
         name: Optional[str] = None,
         klib: KLib = klib,
-        library: Optional[KLib] = None,
         kdb_cell: Optional[kdb.Cell] = None,
+        ports: "Optional[CplxPorts | Ports]" = None,
     ) -> "KCell":
         """Create a KLayout cell and change its class to KCell
 
@@ -1111,6 +1143,7 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
             library: KLib object that stores the layout and metadata about the KCells
             kdb_cell
         """
+
         if kdb_cell is None:
             _name = "Unnamed_" if name is None else name
             cell = klib.create_cell(
@@ -1125,37 +1158,16 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         self,
         name: Optional[str] = None,
         klib: KLib = klib,
-        library: Optional[KLib] = None,
         kdb_cell: Optional[kdb.Cell] = None,
+        ports: "Optional[CplxPorts | Ports]" = None,
     ) -> None:
         self.klib = klib
-        # TODO: Remove with 0.5.0
-        if library is not None:
-            logger.bind(with_backtrace=True).opt(ansi=True).warning(
-                "<red>DeprecationWarning</red>: library will be deprecated in 0.5.0, use klib instead"
-            )
-            self.klib = library
-        if name is None and kdb_cell is None:
-            self.name = f"Unnamed_{self.cell_index()}"
         self.insts: list[Instance] = []
         self.settings: dict[str, Any] = {}
         self._locked = False
         self.info: dict[str, Any] = {}
-
-    @abstractmethod
-    def dup(self) -> "ABCKCell[PT]":
-        """Copy the full cell
-
-        Returns:
-            cell: exact copy of the current cell
-        """
-        ...
-
-    def __copy__(self) -> "ABCKCell[PT]":
-        return self.dup()
-
-    def __deepcopy__(self) -> "ABCKCell[PT]":
-        return self.dup()
+        if name is None and kdb_cell is None:
+            self.name = f"Unnamed_{self.cell_index()}"
 
     @property
     def ports(self) -> "Ports | CplxPorts":
@@ -1215,17 +1227,37 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         ...
 
     @overload
-    def create_inst(self, cell: "KCell", trans: kdb.Trans = kdb.Trans.R0) -> "Instance":
+    def create_inst(
+        self,
+        cell: "KCell",
+        trans: kdb.Trans | kdb.Vector = kdb.Trans.R0,
+        a: Optional[kdb.Vector] = None,
+        b: kdb.Vector = kdb.Vector(),
+        na: int = 1,
+        nb: int = 1,
+    ) -> "Instance":
         ...
 
     @overload
     def create_inst(
-        self, cell: "CplxKCell", trans: kdb.DCplxTrans = kdb.DCplxTrans.R0
+        self,
+        cell: "CplxKCell",
+        trans: kdb.DCplxTrans | kdb.DVector = kdb.DCplxTrans.R0,
+        a: Optional[kdb.DVector] = None,
+        b: kdb.DVector = kdb.DVector(),
+        na: int = 1,
+        nb: int = 1,
     ) -> "Instance":
         ...
 
     def create_inst(
-        self, cell: CellType, trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans()
+        self,
+        cell: CellType,
+        trans: kdb.Trans | kdb.DCplxTrans | kdb.Vector | kdb.DVector = kdb.Trans(),
+        a: Optional[kdb.Vector | kdb.DVector] = None,
+        b: kdb.Vector | kdb.DVector = kdb.Vector(),
+        na: int = 1,
+        nb: int = 1,
     ) -> "Instance":
         """Add an instance of another KCell
 
@@ -1237,12 +1269,22 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
             :py:class:`~Instance`: The created instance
         """
         if isinstance(cell, KCell):
-            ca = self.insert(kdb.CellInstArray(cell, trans))  # type: ignore[arg-type]
-        else:
+            ca = (
+                self.insert(kdb.CellInstArray(cell, trans))  # type: ignore[arg-type]
+                if a is None
+                else self.insert(kdb.CellInstArray(cell, trans, a, b, na, nb))  # type: ignore[arg-type]
+            )
+        elif a is None:
             ca = self.insert(kdb.DCellInstArray(cell, trans))  # type: ignore[arg-type]
+        else:
+            ca = self.insert(kdb.DCellInstArray(cell, trans, a, b, na, nb))  # type: ignore[arg-type]
+
         inst = Instance(cell, ca)  # type: ignore[misc]
         self.insts.append(inst)
         return inst
+
+    def _kdb_copy(self) -> kdb.Cell:
+        return kdb.Cell.dup(self)
 
     def layer(self, *args: Any, **kwargs: Any) -> int:
         """Get the layer info, convenience for klayout.db.Layout.layer"""
@@ -1309,7 +1351,6 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         """Draw all the ports on their respective :py:attr:`Port.layer`:"""
 
         for port in self.ports._ports:
-
             if isinstance(port, IPortLike):
                 w = port.width
                 poly = kdb.Polygon(
@@ -1384,13 +1425,17 @@ class KCell(ABCKCell[Port]):
         self,
         name: Optional[str] = None,
         klib: KLib = klib,
-        library: Optional[KLib] = None,
         kdb_cell: Optional[kdb.Cell] = None,
+        ports: "Optional[Ports]" = None,
     ):
-        super().__init__(name=name, klib=klib, library=library, kdb_cell=kdb_cell)
+        super().__init__(name=name, klib=klib, kdb_cell=kdb_cell)
         self.klib.register_cell(self, allow_reregister=True)
-        self.ports: Ports = Ports()
+        self.ports: Ports = ports or Ports()
         self.complex = False
+
+        if kdb_cell is not None:
+            for inst in kdb_cell.each_inst():
+                self.insts.append(Instance(self.klib[inst.cell.name], inst))  # type: ignore[misc]
 
     def dup(self) -> "KCell":
         """Copy the full cell
@@ -1398,18 +1443,16 @@ class KCell(ABCKCell[Port]):
         Returns:
             cell: exact copy of the current cell
         """
-        kdb_copy = kdb.Cell.dup(self)
+        kdb_copy = self._kdb_copy()
+
         c = KCell(klib=self.klib, kdb_cell=kdb_copy)
-        c.ports = self.ports
+        c.ports = self.ports.copy()
         for inst in kdb_copy.each_inst():
-            self.insts.append(Instance(cell=self.klib[inst.cell.name], reference=inst))  # type: ignore[misc]
+            c.insts.append(Instance(cell=self.klib[inst.cell.name], reference=inst))  # type: ignore[misc]
         c._locked = False
         return c
 
-    def copy(self) -> "KCell":  # type: ignore[override]
-        logger.opt(ansi=True).bind(with_backtrace=True).warning(
-            "<red>DeprecationWarning:</red> copy will be removed in kfactory 0.5.0. Please use KCell.dup() or copy(KCell) instead"
-        )
+    def __copy__(self) -> "KCell":
         return self.dup()
 
     def add_port(self, port: PortLike[TT, FI], name: Optional[str] = None) -> None:
@@ -1440,12 +1483,9 @@ class KCell(ABCKCell[Port]):
             )
             self.ports.add_port(port=_port, name=name)
 
-    @property
-    def library(self) -> KLib:  # type: ignore[override]
-        logger.opt(ansi=True).warning(
-            "<red>DeprecationWarning:</red> library shadows the klayout.dbcore.Cell.library(), please use klib instead. library will be removed in version 0.5.0"
-        )
-        return self.klib
+    def add_ports(self, ports: Sequence[PortLike[TT, FI]], prefix: str = "") -> None:
+        for port in ports:
+            self.add_port(port, name=prefix + port.name)
 
     @classmethod
     def from_yaml(
@@ -1616,6 +1656,12 @@ class KCell(ABCKCell[Port]):
     def show(self) -> None:
         show(self)
 
+    def _ipython_display_(self) -> None:
+        """Display a cell in a Jupyter Cell when it is passed as a last argument alone"""
+        from .widgets.interactive import display_kcell
+
+        display_kcell(self)
+
 
 class CplxKCell(ABCKCell[DCplxPort]):
     """Derived from :py:class:`klayout.db.Cell`. Additionally to a standard cell, this one will keep track of :py:class:`Port` and allow to store metadata in a dictionary
@@ -1633,13 +1679,17 @@ class CplxKCell(ABCKCell[DCplxPort]):
         self,
         name: Optional[str] = None,
         klib: KLib = klib,
-        library: Optional[KLib] = None,
         kdb_cell: Optional[kdb.Cell] = None,
+        ports: "Optional[CplxPorts]" = None,
     ):
-        super().__init__(name=name, klib=klib, library=library, kdb_cell=kdb_cell)
+        super().__init__(name=name, klib=klib, kdb_cell=kdb_cell)
         self.klib.register_cell(self, allow_reregister=True)
-        self.ports: CplxPorts = CplxPorts()
+        self.ports: CplxPorts = ports or CplxPorts()
         self.complex = True
+
+        if kdb_cell is not None:
+            for inst in kdb_cell.each_inst():
+                self.insts.append(Instance(self.klib[kdb_cell.name], inst))  # type: ignore[misc]
 
     def add_port(self, port: PortLike[TT, FI], name: Optional[str] = None) -> None:
         """Add an existing port. E.g. from an instance to propagate the port
@@ -1662,13 +1712,17 @@ class CplxKCell(ABCKCell[DCplxPort]):
         Returns:
             cell: exact copy of the current cell
         """
-        kdb_copy = kdb.Cell.dup(self)
+        kdb_copy = self._kdb_copy()
+
         c = CplxKCell(klib=self.klib, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
         for inst in kdb_copy.each_inst():
-            self.insts.append(Instance(cell=self.klib[inst.cell.name], reference=inst))  # type: ignore[misc]
+            c.insts.append(Instance(cell=self.klib[inst.cell.name], reference=inst))  # type: ignore[misc]
         c._locked = False
         return c
+
+    def __copy__(self) -> "CplxKCell":
+        return self.dup()
 
     def show(self) -> None:
         show(self)
@@ -1954,7 +2008,6 @@ class Instance:
             else:
                 cplx_conn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
 
-                print()
                 self.instance.dcplx_trans = (
                     op.copy_cplx(kdb.DCplxTrans.R0, self.cell.klib.dbu).trans
                     * cplx_conn_trans
@@ -1974,7 +2027,6 @@ class Instance:
         allow_layer_mismatch: bool = False,
         allow_type_mismatch: bool = False,
     ) -> None:
-
         if isinstance(other, Instance):
             if other_port_name is None:
                 raise ValueError(
@@ -1997,7 +2049,6 @@ class Instance:
             w1 = p.width * self.cell.klib.dbu if p.int_based() else p.width
             w2 = op.width * self.cell.klib.dbu if op.int_based() else op.width
             if w1 != w2:
-
                 raise PortWidthMismatch(
                     self,
                     other,
@@ -2060,8 +2111,11 @@ class Ports:
         """Check whether a port is already in the list"""
         return port.hash() in [v.hash() for v in self._ports]
 
-    def each(self) -> Iterator[Port]:
+    def __iter__(self) -> Iterator[Port]:
         yield from self._ports
+
+    def each(self) -> Iterator[Port]:
+        return self.__iter__()
 
     def add_port(self, port: Port, name: Optional[str] = None) -> None:
         """Add a port object
@@ -2179,7 +2233,6 @@ class Ports:
 
     @classmethod
     def from_yaml(cls: "Type[Ports]", constructor: Any, node: Any) -> "Ports":
-
         return cls(constructor.construct_sequence(node))
 
 
@@ -2205,8 +2258,11 @@ class CplxPorts:
         """Check whether a port is already in the list"""
         return port.hash() in [v.hash() for v in self._ports]
 
-    def each(self) -> Iterator[DCplxPort]:
+    def __iter__(self) -> Iterator[DCplxPort]:
         yield from self._ports
+
+    def each(self) -> Iterator[DCplxPort]:
+        return self.__iter__()
 
     def add_port(self, port: DCplxPort, name: Optional[str] = None) -> None:
         """Add a port object
@@ -2322,7 +2378,6 @@ class CplxPorts:
 
     @classmethod
     def from_yaml(cls: "Type[CplxPorts]", constructor: Any, node: Any) -> "CplxPorts":
-
         return cls(constructor.construct_sequence(node))
 
 
@@ -2346,6 +2401,9 @@ class InstancePorts:
             )
             else p.copy(trans=self.instance.trans)  # type: ignore[arg-type]
         )
+
+    def __iter__(self) -> Iterator[Port | DCplxPort]:
+        return (self[port.name] for port in self.cell_ports)
 
     def __repr__(self) -> str:
         return repr({v: self.__getitem__(v) for v in self.cell_ports.get_all().keys()})
@@ -2386,7 +2444,6 @@ def autocell(
     *,
     set_settings: bool = True,
     set_name: bool = True,
-    maxsize: Optional[int] = None,
 ) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]:
     ...
 
@@ -2398,10 +2455,10 @@ def autocell(
     *,
     set_settings: bool = True,
     set_name: bool = True,
-    maxsize: Optional[int] = None,
-) -> Callable[KCellParams, KCell] | Callable[
-    [Callable[KCellParams, KCell]], Callable[KCellParams, KCell]
-]:
+) -> (
+    Callable[KCellParams, KCell]
+    | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
+):
     """Decorator to cache and auto name the celll. This will use :py:func:`functools.cache` to cache the function call.
     Additionally, if enabled this will set the name and from the args/kwargs of the function and also paste them into a settings dictionary of the :py:class:`~KCell`
 
@@ -2411,11 +2468,6 @@ def autocell(
         maxsize: maximum size of cache, cell parameter sets will be evicted if the cell function is called with more different
         parameter sets than there are spaces in the cache, in case there are cell calls with existing parameter set calls
     """
-
-    if maxsize is not None:
-        logger.bind(with_backtrace=True).opt(ansi=True).warning(
-            "<red>DeprecationWarning</red>: maxsize has no effect on the cache, as it is a simple dict now. Please remove it, the argument will be removed in 0.5.0"
-        )
 
     def decorator_autocell(
         f: Callable[KCellParams, KCell]
@@ -2490,9 +2542,10 @@ def cell(
     *,
     set_settings: bool = True,
     maxsize: int = 512,
-) -> Callable[KCellParams, KCell] | Callable[
-    [Callable[KCellParams, KCell]], Callable[KCellParams, KCell]
-]:
+) -> (
+    Callable[KCellParams, KCell]
+    | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
+):
     """Convenience alias for :py:func:`~autocell` with `(set_name=False)`"""
     if _func is None:
         return autocell(set_settings=set_settings, set_name=False)
@@ -2554,7 +2607,7 @@ def clean_value(
 
 
 def clean_name(name: str) -> str:
-    r"""Ensures that gds cells are composed of [a-zA-Z0-9_\-]
+    r"""Ensures that gds cells are composed of [a-zA-Z0-9_\-]::
 
     FIXME: only a few characters are currently replaced.
         This function has been updated only on case-by-case basis
@@ -2655,7 +2708,7 @@ __all__ = [
     "Ports",
     "autocell",
     "cell",
-    "library",
+    "klib",
     "KLib",
     "default_save",
     "ICplxPort",

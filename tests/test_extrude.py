@@ -5,7 +5,7 @@ import numpy as np
 
 @kf.autocell
 def taper_dyn(
-    length: float, width: float, layer: kf.tech.LayerEnum, enclosure: kf.utils.Enclosure
+    length: float, width: float, layer: kf.LayerEnum, enclosure: kf.utils.Enclosure
 ) -> kf.KCell:
     c = kf.KCell()
 
@@ -19,7 +19,7 @@ def taper_dyn(
 
 @kf.autocell
 def taper_static(
-    length: float, width: float, layer: kf.tech.LayerEnum, enclosure: kf.utils.Enclosure
+    length: float, width: float, layer: kf.LayerEnum, enclosure: kf.utils.Enclosure
 ) -> kf.KCell:
     c = kf.KCell()
 
