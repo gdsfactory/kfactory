@@ -48,7 +48,10 @@ docs = [
 	"nbsphinx",
 	"autodoc_pydantic",
 	"jupytext",
-	"jupyter"
+	"jupyter",
+	"ipython",
+	"ipykernel",
+	"ipyevents",
 ]
 ci = [
 	"flake8",
@@ -56,8 +59,6 @@ ci = [
 	"pytest_regressions",
 	"mypy",
 	"types-cachetools",
-	"ipython",
-	"ipykernel",
 ]
 ipy = [
 	"ipython",
