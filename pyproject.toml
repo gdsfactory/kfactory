@@ -63,6 +63,7 @@ ipy = [
 	"ipython",
 	"ipywidgets",
 	"ipytree",
+	"ipyevents",
 ]
 
 
