@@ -1657,15 +1657,10 @@ class KCell(ABCKCell[Port]):
         show(self)
 
     def _ipython_display_(self) -> None:
-        from IPython.display import Image, display  # type: ignore
+        """Display a cell in a Jupyter Cell when it is passed as a last argument alone"""
+        from .widgets.interactive import display_kcell
 
-        from .widgets.interactive import LayoutWidget
-
-        cell_dup = self.klib.dup()[self.name]
-        cell_dup.draw_ports()
-
-        lw = LayoutWidget(cell=cell_dup)
-        display(lw.widget)  # type: ignore
+        display_kcell(self)
 
 
 class CplxKCell(ABCKCell[DCplxPort]):
