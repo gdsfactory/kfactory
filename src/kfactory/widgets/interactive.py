@@ -6,7 +6,7 @@ try:
 
     import klayout.lay as lay
     from ipyevents import Event  # type: ignore[import]
-    from IPython.display import clear_output
+    from IPython.display import Image, clear_output, display  # type: ignore[import]
     from ipytree import Node, Tree  # type: ignore[import]
     from ipywidgets import (  # type: ignore[import]
         HTML,
@@ -31,6 +31,14 @@ try:
 except ImportError as e:
     print("You need install jupyter notebook plugin with `pip install kfactory[ipy]`")
     raise e
+
+
+def display_kcell(kc: KCell) -> None:
+    cell_dup = kc.klib.dup()[kc.name]
+    cell_dup.draw_ports()
+
+    lw = LayoutWidget(cell=cell_dup)
+    display(lw.widget)
 
 
 class LayoutWidget:

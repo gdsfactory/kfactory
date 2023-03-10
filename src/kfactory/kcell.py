@@ -1430,7 +1430,7 @@ class KCell(ABCKCell[Port]):
     ):
         super().__init__(name=name, klib=klib, kdb_cell=kdb_cell)
         self.klib.register_cell(self, allow_reregister=True)
-        self.ports: Ports = ports if ports else Ports()
+        self.ports: Ports = ports or Ports()
         self.complex = False
 
         if kdb_cell is not None:
@@ -1657,15 +1657,10 @@ class KCell(ABCKCell[Port]):
         show(self)
 
     def _ipython_display_(self) -> None:
-        from IPython.display import Image, display  # type: ignore
+        """Display a cell in a Jupyter Cell when it is passed as a last argument alone"""
+        from .widgets.interactive import display_kcell
 
-        from .widgets.interactive import LayoutWidget
-
-        cell_dup = self.klib.dup()[self.name]
-        cell_dup.draw_ports()
-
-        lw = LayoutWidget(cell=cell_dup)
-        display(lw.widget)  # type: ignore
+        display_kcell(self)
 
 
 class CplxKCell(ABCKCell[DCplxPort]):
@@ -1689,7 +1684,7 @@ class CplxKCell(ABCKCell[DCplxPort]):
     ):
         super().__init__(name=name, klib=klib, kdb_cell=kdb_cell)
         self.klib.register_cell(self, allow_reregister=True)
-        self.ports: CplxPorts = ports if ports else CplxPorts()
+        self.ports: CplxPorts = ports or CplxPorts()
         self.complex = True
 
         if kdb_cell is not None:

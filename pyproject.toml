@@ -94,6 +94,7 @@ python_version = "3.10"
 strict = true
 exclude = [
 	"tests",
+	"src/kfactory/widgets",
 ]
 
 [tool.pylsp-mypy]
@@ -115,7 +116,7 @@ skip = ["kfactory/__init__.py"]
 testpaths = ["src", "tests"]
 # addopts = --tb=no
 addopts = '--tb=short'
-python_files = ["src/*.py", "tests/*.py"]
+# python_files = ["src/*.py", "tests/*.py"]
 norecursedirs = ["extra/*.py"]
 
 # [tool.pytest.ini_options]
