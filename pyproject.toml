@@ -94,6 +94,7 @@ python_version = "3.10"
 strict = true
 exclude = [
 	"tests",
+	"src/kfactory/widgets",
 ]
 
 [tool.pylsp-mypy]
