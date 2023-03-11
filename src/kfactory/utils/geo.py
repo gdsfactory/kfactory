@@ -174,9 +174,8 @@ def extrude_path(
         else:
             ls = layer_list[layer].sections.copy()
             layer_list = enclosure.layer_sections.copy()
-            layer_list[layer] = LayerSection(
-                sections=list(layer_list[layer].sections) + [ls]
-            )
+            for section in layer_list[layer].sections:
+                layer_list[layer].add_section(section)
 
     for layer, layer_sec in layer_list.items():
         reg = kdb.Region()
@@ -307,9 +306,8 @@ def extrude_path_dynamic(
         else:
             ls = layer_list[layer].sections.copy()
             layer_list = enclosure.layer_sections.copy()
-            layer_list[layer] = LayerSection(
-                sections=list(layer_list[layer].sections) + [ls]
-            )
+            for section in layer_list[layer].sections:
+                layer_list[layer].add_section(section)
     if is_callable_widths(widths):
         for layer, layer_sec in layer_list.items():
             reg = kdb.Region()

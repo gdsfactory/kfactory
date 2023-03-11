@@ -14,6 +14,15 @@
 #     name: python3
 # ---
 
+#
+#
+# In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries. The default is 0.001, i.e. 1nm grid size (0.001 microns)
+#
+# Point, Box, Polygon, Edge, Region are in dbu DPoint, DBox, DPolygon, DEdge are in microns
+#
+# Most Shape types are available as microns and dbu parts. They can be converted with <ShapeTypeDBU>.to_dtype(dbu) to microns and with <ShapeTypeMicrons>.to_itype(dbu) where dbu is the the conversion of one database unit to microns
+#
+# Lets add a polygon
 # # KCell
 #
 #
@@ -25,8 +34,6 @@
 # `DPoint`, `DBox`, `DPolygon`, `DEdge` are in microns
 #
 # Most Shape types are available as microns and dbu parts. They can be converted with `<ShapeTypeDBU>.to_dtype(dbu)` to microns and with `<ShapeTypeMicrons>.to_itype(dbu)` where `dbu` is the the conversion of one database unit to microns
-
-# Lets add a polygon
 
 # + vscode={"languageId": "python"}
 import kfactory as kf
@@ -59,6 +66,8 @@ c
 # Make a component similar to the one above that has a second polygon in layer (1, 1)
 
 # + vscode={"languageId": "python"}
+import kfactory as kf
+
 c = kf.KCell()
 
 # Create some new geometry from the functions available in the geometry library
@@ -81,8 +90,7 @@ r = kf.kdb.DBox(-2.5, -5, 2.5, 5)
 text1 = t.transformed(
     kf.kdb.DTrans(0.0, 10.0).to_itype(c.klib.dbu)
 )  # DTrans is a transformation in microns with arguments (<rotation in 90° increments>, <mirror boolean>, <x in microns>, <y in microns>)
-### complex transformation example:
-# args:
+### complex transformation example:ce
 #     magnification(float): magnification, DO NOT USE on cells or references, only shapes, most foundries will not allow magnifications on actual cell references or cells
 #     rotation(float): rotation in degrees
 #     mirror(bool): boolean to mirror at x axis and then rotate if true
@@ -103,7 +111,6 @@ c.shapes(c.klib.layer(1, 0)).insert(text1)
 c.shapes(c.klib.layer(2, 0)).insert(text2)
 c.shapes(c.klib.layer(2, 0)).insert(r)
 
-print(c)
 c
 # -
 
@@ -184,16 +191,12 @@ c
 # + vscode={"languageId": "python"}
 c = kf.KCell()
 
-wg1 = c << straight(length=1, layer=(1, 0))
-wg2 = c << straight(length=2, layer=(2, 0))
-wg3 = c << straight(length=3, layer=(3, 0))
 
 # Create and add a polygon from separate lists of x points and y points
 # e.g. [(x1, x2, x3, ...), (y1, y2, y3, ...)]
 c.shapes(c.klib.layer(4, 0)).insert(
     kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip((8, 6, 7, 9), (6, 8, 9, 5))])
 )
-# poly1 = c.add_polygon([(8, 6, 7, 9), (6, 8, 9, 5)], layer=(4, 0))
 
 # Alternatively, create and add a polygon from a list of points
 # e.g. [(x1,y1), (x2,y2), (x3,y3), ...] using the same function
@@ -202,23 +205,7 @@ c.shapes(c.klib.layer(4, 0)).insert(
         [kf.kdb.DPoint(x, y) for (x, y) in ((0, 0), (1, 1), (1, 3), (-3, 3))]
     )
 )
-# poly2 = c.add_polygon([(0, 0), (1, 1), (1, 3), (-3, 3)], layer=(5, 0))
 
-# Shift the first straight we created over by dx = 10, dy = 5
-wg2.transform(kf.kdb.DTrans(10.0, 5.0))
-# wg1.move([10, 5])
-
-# Shift the second straight over by dx = 10, dy = 0
-wg2.transform(kf.kdb.DTrans(10.0, 0.0))
-# wg2.move(origin=[0, 0], destination=[10, 0])
-
-# Shift the third straight over by dx = 0, dy = 4
-wg3.transform(kf.kdb.DTrans(1.0, 1.0).inverted() * kf.kdb.DTrans(5, 5))
-# wg3.move([1, 1], [5, 5], axis="y")
-
-# Move "from" x=0 "to" x=10 (dx=10)
-# wg3.movex(0, 10)
-wg3.transform(kf.kdb.DTrans(10.0 - 0.0, 0.0))
 
 c
 # -
@@ -254,6 +241,8 @@ mwg1_ref.connect("o2", mwg2_ref.ports["o1"])
 c2
 # -
 
+#
+#             self.layout_view.active_cellview().layout().cell(event["owner"].name)
 # ## Labels
 #
 # You can add abstract GDS labels (annotate) to your Components, in order to record information
@@ -270,7 +259,7 @@ c2.shapes(c2.klib.layer(1, 0)).insert(kf.kdb.Text("Second label", mwg2_ref.trans
 # It's very useful for recording information about the devices or layout
 c2.shapes(c2.klib.layer(10, 0)).insert(
     kf.kdb.Text(
-        f"The x size of this\nlayout is {c2.dbbox().width}",
+        f"The x size of this\nlayout is {c2.dbbox().width()}",
         kf.kdb.Trans(c2.bbox().right, c2.bbox().top),
     )
 )
@@ -295,6 +284,11 @@ e2 = kf.kdb.DPolygon.ellipse(kf.kdb.DBox(10, 6), 64).transformed(
 )
 # -
 
+c = kf.KCell()
+c.shapes(c.klib.layer(2, 0)).insert(e1)
+c.shapes(c.klib.layer(3, 0)).insert(e2)
+c
+
 # e1 NOT e2
 c = kf.KCell()
 e3 = kf.kdb.Region(e1.to_itype(c.klib.dbu)) - kf.kdb.Region(e2.to_itype(c.klib.dbu))
@@ -313,7 +307,7 @@ e3 = kf.kdb.Region(e1.to_itype(c.klib.dbu)) + kf.kdb.Region(e2.to_itype(c.klib.d
 c.shapes(c.klib.layer(1, 0)).insert(e3)
 c
 
-# e1 OR e2 (merged
+# e1 OR e2 (merged)
 c = kf.KCell()
 e3 = (
     kf.kdb.Region(e1.to_itype(c.klib.dbu)) + kf.kdb.Region(e2.to_itype(c.klib.dbu))
