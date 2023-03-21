@@ -1,7 +1,7 @@
 from typing import Callable, List, Optional, Sequence, Union
 
 from .. import kdb
-from ..kcell import DCplxPort, KCell, Port, IPortLike
+from ..kcell import DCplxPort, KCell, Port
 from ..utils.geo import vec_angle  # , clean_points
 from .manhattan import route_manhattan
 
@@ -16,7 +16,6 @@ def route_loopback(
     in_dbu: bool = True,
     d_loop: int = 200000,
 ) -> List[kdb.Point]:
-
     t1 = p1 if isinstance(p1, kdb.Trans) else p1.trans
     t2 = p2 if isinstance(p2, kdb.Trans) else p2.trans
 
@@ -97,7 +96,7 @@ def connect(
     different_port_width: int = False,
 ) -> None:
     """Bend 90 part."""
-    print(p1.width)
+
     if p1.width != p2.width and not different_port_width:
         raise ValueError(
             f"The ports have different widths {p1.width=} {p2.width=}. If this is intentional, add `different_port_width=True` to override this."
@@ -281,7 +280,6 @@ def connect(
         )
 
     else:
-
         start_port = p1.copy()
         end_port = p2.copy()
         pts = route_path_function(
@@ -307,11 +305,10 @@ def place90(
     min_straight_taper: int = 1000,
     allow_small_routes: bool = False,
 ) -> None:
-
     if not pts:
         # Nothing to be placed
         return
-    w = p1.width * c.library.dbu if isinstance(p1, IPortLike) else p1.width
+    w = p1.width
     old_pt = pts[0]
     old_bend_port = p1
     bend90_ports = [
@@ -435,7 +432,6 @@ def place90(
                 _p1, _p2 = (
                     v for v in wg.ports.get_all().values() if v.port_type == port_type
                 )
-                print(bend90_cell.ports.get_all())
                 wg.connect(_p1.name, bend90, b90p1.name)
             else:
                 t1 = c << taper_cell
