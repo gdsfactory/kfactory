@@ -129,6 +129,7 @@ class LayerLevel(BaseModel):
     z_to_bias: Optional[Tuple[List[float], List[float]]] = None
     info: Dict[str, Any] = {}
 
+
 class LayerStack(BaseModel):
     """For simulation and 3D rendering.
 
@@ -146,6 +147,8 @@ class LayerStack(BaseModel):
             val = getattr(self, field)
             if isinstance(val, LayerLevel):
                 self.layers[field] = val
+                if isinstance(val.layer, LAYER):
+                    self.layers[field].layer = (val.layer[0], val.layer[1])
 
     def get_layer_to_thickness(self) -> Dict[Tuple[int, int], float]:
         """Returns layer tuple to thickness (um)."""
