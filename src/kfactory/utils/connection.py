@@ -52,7 +52,7 @@ def connect_sequence(
         if count == len(seq):
             c.add_port(name=output_port_name, port=conn_port)
 
-    for (name, alias, alias_port_name) in port_map:
+    for name, alias, alias_port_name in port_map:
         c.add_port(name=name, port=inst_list[alias].ports[alias_port_name])
 
     return c
