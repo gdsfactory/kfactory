@@ -136,6 +136,7 @@ def plot_sparameters_lumerical(
     insts = []
     trans = []
 
+    component = kf.get_component(component)
     def recurse_insts(comp: ComponentSpec, p=None):
         if p:
             comp.transform(p)
@@ -158,8 +159,8 @@ def plot_sparameters_lumerical(
         recurse_insts(component)
     paths = {}
     for inst in insts:
-        component_ = inst.cell
         # paths = {}
+        component_ = inst.cell
         if not overwrite:
             if "components" in component_.info:
                 paths = {}
@@ -207,7 +208,7 @@ def plot_sparameters_lumerical(
                     **settings,
                 )
                 if path.exists():
-                    s_params.append(path)
+                    s_params.append(np.load(path))
                     paths[component_.name] = path
                 else:
                     s_params.append(
@@ -371,7 +372,6 @@ def plot_sparameters_lumerical(
                     and ports_[0].center == component.ports[output_port].center
                     else output
                 )
-                print(input_port, output_port, instances[0].hash())
                 inputs = [instances[0], input_port] if input != input_port else inputs
                 outputs = (
                     [instances[0], output_port] if output != output_port else outputs
