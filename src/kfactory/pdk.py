@@ -77,9 +77,9 @@ class Pdk(BaseModel):
     layers: Union[int, Enum, LayerEnum, LAYER, dict] = Field(default_factory=dict)
     layer_stack: Optional[LayerStack] = None
     # layer_views: Optional[LayerViews] = None
-    layer_transitions: Dict[Union[LayerEnum, Tuple[LayerEnum, LayerEnum]], ComponentSpec] = Field(
-        default_factory=dict
-    )
+    layer_transitions: Dict[
+        Union[LayerEnum, Tuple[LayerEnum, LayerEnum]], ComponentSpec
+    ] = Field(default_factory=dict)
     sparameters_path: Optional[Path] = None
     # modes_path: Optional[Path] = PATH.modes
     interconnect_cml_path: Optional[Path] = None
@@ -91,7 +91,7 @@ class Pdk(BaseModel):
     class Config:
         """Configuration."""
 
-        arbitrary_types_allowed=True
+        arbitrary_types_allowed = True
         extra = "forbid"
         fields = {
             "enclosures": {"exclude": True},
@@ -180,9 +180,7 @@ class Pdk(BaseModel):
             if name in self.enclosures:
                 warnings.warn(f"Overwriting enclosure {name!r}")
             self.enclosures[name] = enclosure
-            on_enclosure_registered.fire(
-                name=name, enclosure=enclosure, pdk=self
-            )
+            on_enclosure_registered.fire(name=name, enclosure=enclosure, pdk=self)
 
     def register_cells_yaml(
         self,
@@ -348,9 +346,7 @@ class Pdk(BaseModel):
                 f"string or dict), got {type(component)}"
             )
 
-    def get_enclosure(
-        self, enclosure: Enclosure, **kwargs
-    ) -> Enclosure:
+    def get_enclosure(self, enclosure: Enclosure, **kwargs) -> Enclosure:
         """Returns enclosure from a enclosure spec."""
         if isinstance(enclosure, Enclosure):
             return enclosure.copy(**kwargs)
@@ -369,17 +365,13 @@ class Pdk(BaseModel):
                         f"Invalid setting {key!r} not in {enclosure_settings}"
                     )
             enclosure_factory_name = enclosure.get("enclosure", None)
-            enclosure_factory_name = (
-                enclosure_factory_name or enclosure.get("function")
-            )
+            enclosure_factory_name = enclosure_factory_name or enclosure.get("function")
             if (
                 not isinstance(enclosure_factory_name, str)
                 or enclosure_factory_name not in self.enclosures
             ):
                 enclosures = list(self.enclosures.keys())
-                raise ValueError(
-                    f"{enclosure_factory_name!r} not in {enclosures}"
-                )
+                raise ValueError(f"{enclosure_factory_name!r} not in {enclosures}")
             enclosure_factory = self.enclosures[enclosure_factory_name]
             settings = dict(enclosure.get("settings", {}))
             settings.update(**kwargs)
@@ -398,6 +390,9 @@ class Pdk(BaseModel):
                 raise ValueError(f"{layer!r} needs two integer numbers.")
             return layer
         elif isinstance(layer, int):
+            if hasattr(layer, "layer"):
+                layer = layer.layer
+                return (layer, 0)
             return (layer, 0)
         elif isinstance(layer, str):
             if layer not in self.layers:
@@ -462,6 +457,7 @@ class Pdk(BaseModel):
 def get_generic_pdk():
     # from .components import cells
     from gdsfactory.config import sparameters_path
+
     # from gdsfactory.enclosure import enclosures
     from .pdk import Pdk
 
@@ -469,12 +465,14 @@ def get_generic_pdk():
         name="generic",
         cells=[],
         enclosures=[],
-        layers=LAYER,
+        layers={layer.name: layer for layer in LAYER},
         layer_stack=LayerStack(),
         # layer_views=LAYER_VIEWS,
         # layer_transitions=LAYER_TRANSITIONS,
         sparameters_path=sparameters_path,
     )
+
+
 GENERIC_PDK = get_generic_pdk()
 _ACTIVE_PDK = GENERIC_PDK
 
@@ -723,6 +721,7 @@ on_yaml_cell_registered.add_handler(on_cell_registered.fire)
 
 if __name__ == "__main__":
     from gdsfactory.components import cells
+
     # from gdsfactory.enclosure import enclosures
 
     # c = _ACTIVE_PDK.get_component("straight")
