@@ -58,6 +58,4 @@ class SimulationSettingsLumericalFdtd(BaseModel):
 SIMULATION_SETTINGS_LUMERICAL_FDTD = SimulationSettingsLumericalFdtd()
 
 if __name__ == "__main__":
-    from gdsfactory.serialization import clean_value_json
-
-    d = clean_value_json(SIMULATION_SETTINGS_LUMERICAL_FDTD)
+    d = SIMULATION_SETTINGS_LUMERICAL_FDTD

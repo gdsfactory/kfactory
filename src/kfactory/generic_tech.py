@@ -180,14 +180,14 @@ class LayerStack(BaseModel):
             if level.thickness
         }
 
-    def get_layer_to_info(self) -> Dict[Tuple[int, int], Dict]:
+    def get_layer_to_info(self) -> Dict[Tuple[int, int], Dict[str, Any]]:
         """Returns layer tuple to info dict."""
         return {level.layer: level.info for level in self.layers.values()}
 
     def to_dict(self) -> Dict[str, Dict[str, Any]]:
         return {level_name: dict(level) for level_name, level in self.layers.items()}
 
-    def __getitem__(self, key) -> LayerLevel:
+    def __getitem__(self, key: str) -> LayerLevel:
         """Access layer stack elements."""
         if key not in self.layers:
             layers = list(self.layers.keys())

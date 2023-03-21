@@ -19,7 +19,7 @@ def coupler(
     width: float = 0.5,
     layer: Union[int, LayerEnum, str] = LAYER.WG,
     enclosure: Enclosure = Enclosure(),
-):
+) -> KCell:
     r"""Symmetric coupler.
     Args:
         gap: between straights in um.

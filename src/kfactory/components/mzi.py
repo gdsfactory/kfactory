@@ -26,7 +26,7 @@ def mzi(
     delta_length: float = 10.0,
     length_y: float = 2.0,
     length_x: Optional[float] = 0.1,
-    bend: ComponentSpec = bend_euler,
+    bend: Callable[Any, kf.KCell] = bend_euler,
     straight: ComponentSpec = straight_function,
     straight_y: Optional[ComponentSpec] = None,
     straight_x_top: Optional[ComponentSpec] = None,

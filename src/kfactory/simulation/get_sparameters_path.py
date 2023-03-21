@@ -5,7 +5,7 @@ import pathlib
 from copy import deepcopy
 from functools import partial
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
 
 import numpy as np
 
@@ -16,7 +16,7 @@ from ..pdk import get_sparameters_path
 from ..types import ComponentSpec
 
 
-def get_kwargs_hash(**kwargs) -> str:
+def get_kwargs_hash(**kwargs: Any) -> str:
     """Returns kwargs parameters hash."""
     kwargs_list = [f"{key}={clean_value(kwargs[key])}" for key in sorted(kwargs.keys())]
     kwargs_string = "_".join(kwargs_list)
@@ -26,7 +26,7 @@ def get_kwargs_hash(**kwargs) -> str:
 def _get_sparameters_path(
     component: ComponentSpec,
     dirpath: Optional[Path] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> Path:
     """Return Sparameters npz filepath hashing simulation settings for \
             a consistent unique name.
@@ -51,7 +51,7 @@ def _get_sparameters_path(
     return dirpath / f"{component.hash().hex()}_{get_kwargs_hash(**kwargs)}.npz"
 
 
-def _get_sparameters_data(component: ComponentSpec, **kwargs) -> np.ndarray:
+def _get_sparameters_data(component: ComponentSpec, **kwargs: Any) -> np.ndarray:
     """Returns Sparameters data in a pandas DataFrame.
 
     Keyword Args:
@@ -104,7 +104,7 @@ def test_get_sparameters_path(test: bool = True) -> None:
 
 
 if __name__ == "__main__":
-    # c = kf.pcells.
+    c = kf.pcells.taper_function(length=1.0, width1=0.5, width2=0.5)
     p = get_sparameters_path_lumerical(c)
 
     sp = np.load(p)

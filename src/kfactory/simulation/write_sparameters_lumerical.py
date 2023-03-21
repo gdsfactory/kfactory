@@ -10,7 +10,7 @@ from yaml.representer import Representer
 import gdsfactory as gf
 import numpy as np
 import omegaconf
-from ..types import ComponentSpec
+from ..types import ComponentSpec, PathType
 
 import kfactory as kf
 

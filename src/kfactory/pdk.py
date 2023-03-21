@@ -14,10 +14,8 @@ from pathlib import Path
 
 from .config import logger
 from .kcell import KCell, LayerEnum
-from .events import Event
 from .generic_tech import LAYER, LayerStack, LayerLevel
 from .materials import MaterialSpec
-from .materials import materials_index as materials_index_default
 from .utils.geo import Enclosure
 from .generic_tech import LayerStack
 from .types import (
@@ -74,7 +72,7 @@ class Pdk(BaseModel):
     cells: Dict[str, ComponentFactory] = Field(default_factory=dict)
     base_pdk: Optional[Pdk] = None
     default_decorator: Optional[Callable[[KCell], None]] = None
-    layers: Union[int, Enum, LayerEnum, LAYER, dict] = Field(default_factory=dict)
+    layers: dict = Field(default_factory=dict)
     layer_stack: Optional[LayerStack] = None
     # layer_views: Optional[LayerViews] = None
     layer_transitions: Dict[
@@ -86,7 +84,6 @@ class Pdk(BaseModel):
     grid_size: float = 0.001
     warn_off_grid_ports: bool = False
     constants: Dict[str, Any] = constants
-    materials_index: Dict[str, MaterialSpec] = materials_index_default
 
     class Config:
         """Configuration."""
@@ -101,10 +98,10 @@ class Pdk(BaseModel):
         }
 
     @validator("sparameters_path")
-    def is_pathlib_path(cls, path):
+    def is_pathlib_path(cls, path: Union[str, Path]) -> Path:
         return pathlib.Path(path)
 
-    def validate_layers(self):
+    def validate_layers(self) -> None:
         for layer in layers_required:
             if layer not in self.layers:
                 raise ValueError(
@@ -113,11 +110,7 @@ class Pdk(BaseModel):
 
     def activate(self) -> None:
         """Set current pdk to as the active pdk."""
-        from gdsfactory.cell import clear_cache
-
         logger.info(f"{self.name!r} PDK is now active")
-
-        clear_cache()
 
         if self.base_pdk:
             enclosures = self.base_pdk.enclosures
@@ -128,10 +121,6 @@ class Pdk(BaseModel):
             cells.update(self.cells)
             self.cells.update(cells)
 
-            containers = self.base_pdk.containers
-            containers.update(self.containers)
-            self.containers.update(containers)
-
             layers = self.base_pdk.layers
             layers.update(self.layers)
             self.layers.update(layers)
@@ -141,7 +130,7 @@ class Pdk(BaseModel):
         self.validate_layers()
         _set_active_pdk(self)
 
-    def register_cells(self, **kwargs) -> None:
+    def register_cells(self, **kwargs: Any) -> None:
         """Register cell factories."""
         for name, cell in kwargs.items():
             if not callable(cell):
@@ -155,7 +144,7 @@ class Pdk(BaseModel):
             self.cells[name] = cell
             on_cell_registered.fire(name=name, cell=cell, pdk=self)
 
-    def register_containers(self, **kwargs) -> None:
+    def register_containers(self, **kwargs: Any) -> None:
         """Register container factories."""
         for name, cell in kwargs.items():
             if not callable(cell):
@@ -163,13 +152,8 @@ class Pdk(BaseModel):
                     f"{cell} is not callable, make sure you register "
                     "cells functions that return a KCell"
                 )
-            if name in self.containers:
-                warnings.warn(f"Overwriting container {name!r}")
 
-            self.containers[name] = cell
-            on_container_registered.fire(name=name, cell=cell, pdk=self)
-
-    def register_enclosures(self, **kwargs) -> None:
+    def register_enclosures(self, **kwargs: Any) -> None:
         """Register enclosures factories."""
         for name, enclosure in kwargs.items():
             if not callable(enclosure):
@@ -180,13 +164,12 @@ class Pdk(BaseModel):
             if name in self.enclosures:
                 warnings.warn(f"Overwriting enclosure {name!r}")
             self.enclosures[name] = enclosure
-            on_enclosure_registered.fire(name=name, enclosure=enclosure, pdk=self)
 
     def register_cells_yaml(
         self,
         dirpath: Optional[Path] = None,
         update: bool = False,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         """Load *.pic.yml YAML files and register them as cells.
 
@@ -198,7 +181,6 @@ class Pdk(BaseModel):
             cell_name: cell function. To update cells dict.
 
         """
-        from gdsfactory.read.from_yaml import from_yaml
 
         message = "Updated" if update else "Registered"
 
@@ -214,8 +196,7 @@ class Pdk(BaseModel):
                     raise ValueError(
                         f"ERROR: Cell name {name!r} from {filepath} already registered."
                     )
-                self.cells[name] = partial(from_yaml, filepath)
-                on_yaml_cell_registered.fire(name=name, cell=self.cells[name], pdk=self)
+                kf.placer.cells_from_yaml(filepath)
                 logger.info(f"{message} cell {name!r}")
 
         for k, v in kwargs.items():
@@ -224,28 +205,26 @@ class Pdk(BaseModel):
             self.cells[k] = v
             logger.info(f"{message} cell {k!r}")
 
-    def remove_cell(self, name: str):
+    def remove_cell(self, name: str) -> None:
         """Removes cell from a PDK."""
         if name not in self.cells:
             raise ValueError(f"{name!r} not in {list(self.cells.keys())}")
         self.cells.pop(name)
         logger.info(f"Removed cell {name!r}")
 
-    def get_cell(self, cell: CellSpec, **kwargs) -> ComponentFactory:
+    def get_cell(self, cell: ComponentSpec, **kwargs: Any) -> ComponentFactory:
         """Returns ComponentFactory from a cell spec."""
-        cells_and_containers = set(self.cells.keys()).union(set(self.containers.keys()))
+        cells_and_containers = set(self.cells.keys())
 
         if callable(cell):
             return cell
         elif isinstance(cell, str):
             if cell not in cells_and_containers:
                 cells = list(self.cells.keys())
-                containers = "\n".join(list(self.containers.keys()))
                 raise ValueError(
                     f"{cell!r} from PDK {self.name!r} not in cells: {cells} "
-                    f"or containers: {containers}"
                 )
-            cell = self.cells[cell] if cell in self.cells else self.containers[cell]
+            cell = self.cells[cell] if cell in self.cells else self.cells[cell]
             return cell
         elif isinstance(cell, (dict, DictConfig)):
             for key in cell.keys():
@@ -276,32 +255,29 @@ class Pdk(BaseModel):
                 f"got {type(cell)}"
             )
 
-    def get_component(self, component: ComponentSpec, **kwargs) -> KCell:
+    def get_component(self, component: ComponentSpec, **kwargs: Any) -> KCell:
         """Returns component from a component spec."""
-        return self._get_component(
-            component=component, cells=self.cells, containers=self.containers, **kwargs
-        )
+        return self._get_component(component=component, cells=self.cells, **kwargs)
 
-    def get_symbol(self, component: ComponentSpec, **kwargs) -> KCell:
+    def get_symbol(self, component: ComponentSpec, **kwargs: Any) -> KCell:
         """Returns a component's symbol from a component spec."""
         # this is a pretty rough first implementation
         try:
-            self._get_component(
-                component=component, cells=self.symbols, containers={}, **kwargs
+            return self._get_component(
+                component=component, cells=self.cells, containers={}, **kwargs
             )
         except ValueError:
             component = self.get_component(component, **kwargs)
-            return self.default_symbol_factory(component)
+            return component
 
     def _get_component(
         self,
         component: ComponentSpec,
-        cells: Dict[str, Callable],
-        containers: Dict[str, Callable],
-        **kwargs,
+        cells: Dict[str, Callable[..., KCell]],
+        **kwargs: Any,
     ) -> KCell:
         """Returns component from a component spec."""
-        cells_and_containers = set(cells.keys()).union(set(containers.keys()))
+        cells_and_containers = set(cells.keys())
 
         if isinstance(component, KCell):
             if kwargs:
@@ -312,12 +288,10 @@ class Pdk(BaseModel):
         elif isinstance(component, str):
             if component not in cells_and_containers:
                 cells = list(cells.keys())
-                containers = list(containers.keys())
                 raise ValueError(
                     f"{component!r} not in PDK {self.name!r} cells: {cells} "
-                    f"or containers: {containers}"
                 )
-            cell = cells[component] if component in cells else containers[component]
+            cell = cells[component] if component in cells else None
             return cell(**kwargs)
         elif isinstance(component, (dict, DictConfig)):
             for key in component.keys():
@@ -332,12 +306,10 @@ class Pdk(BaseModel):
             cell_name = cell_name or component.get("function")
             if not isinstance(cell_name, str) or cell_name not in cells_and_containers:
                 cells = list(cells.keys())
-                containers = list(containers.keys())
                 raise ValueError(
                     f"{cell_name!r} from PDK {self.name!r} not in cells: {cells} "
-                    f"or containers: {containers}"
                 )
-            cell = cells[cell_name] if cell_name in cells else containers[cell_name]
+            cell = cells[cell_name] if cell_name in cells else cells[cell_name]
             component = cell(**settings)
             return component
         else:
@@ -346,7 +318,7 @@ class Pdk(BaseModel):
                 f"string or dict), got {type(component)}"
             )
 
-    def get_enclosure(self, enclosure: Enclosure, **kwargs) -> Enclosure:
+    def get_enclosure(self, enclosure: Enclosure, **kwargs: Any) -> Enclosure:
         """Returns enclosure from a enclosure spec."""
         if isinstance(enclosure, Enclosure):
             return enclosure.copy(**kwargs)
@@ -383,7 +355,7 @@ class Pdk(BaseModel):
                 f"Enclosure, string or dict), got {type(enclosure)}"
             )
 
-    def get_layer(self, layer: LAYER) -> LAYER:
+    def get_layer(self, layer: LAYER) -> Tuple | List:
         """Returns layer from a layer spec."""
         if isinstance(layer, (tuple, list)):
             if len(layer) != 2:
@@ -425,7 +397,7 @@ class Pdk(BaseModel):
             raise ValueError(f"{key!r} not in {constants}")
         return self.constants[key]
 
-    def get_material_index(self, key: str, *args, **kwargs) -> float:
+    def get_material_index(self, key: str, *args, **kwargs: Any) -> float:
         if key not in self.materials_index:
             material_names = list(self.materials_index.keys())
             raise ValueError(f"{key!r} not in {material_names}")
@@ -454,7 +426,7 @@ class Pdk(BaseModel):
     #     return self._on_enclosure_registered
 
 
-def get_generic_pdk():
+def get_generic_pdk() -> Pdk:
     # from .components import cells
     from gdsfactory.config import sparameters_path
 
@@ -477,23 +449,23 @@ GENERIC_PDK = get_generic_pdk()
 _ACTIVE_PDK = GENERIC_PDK
 
 
-def get_material_index(material: MaterialSpec, *args, **kwargs) -> KCell:
+def get_material_index(material: MaterialSpec, *args, **kwargs: Any) -> float:
     return _ACTIVE_PDK.get_material_index(material, *args, **kwargs)
 
 
-def get_component(component: ComponentSpec, **kwargs) -> KCell:
+def get_component(component: ComponentSpec, **kwargs: Any) -> KCell:
     return _ACTIVE_PDK.get_component(component, **kwargs)
 
 
-def get_cell(cell: CellSpec, **kwargs) -> ComponentFactory:
+def get_cell(cell: CellSpec, **kwargs: Any) -> ComponentFactory:
     return _ACTIVE_PDK.get_cell(cell, **kwargs)
 
 
-def get_enclosure(enclosure: Enclosure, **kwargs) -> Enclosure:
+def get_enclosure(enclosure: Enclosure, **kwargs: Any) -> Enclosure:
     return _ACTIVE_PDK.get_enclosure(enclosure, **kwargs)
 
 
-def get_layer(layer: LayerEnum) -> LayerEnum:
+def get_layer(layer: LayerEnum) -> Tuple | List | Any:
     return _ACTIVE_PDK.get_layer(layer)
 
 
@@ -705,18 +677,6 @@ def _set_active_pdk(pdk: Pdk) -> None:
     old_pdk = _ACTIVE_PDK
     _ACTIVE_PDK = pdk
     on_pdk_activated.fire(old_pdk=old_pdk, new_pdk=pdk)
-
-
-on_pdk_activated: Event = Event()
-on_cell_registered: Event = Event()
-on_container_registered: Event = Event()
-on_yaml_cell_registered: Event = Event()
-on_yaml_cell_modified: Event = Event()
-on_enclosure_registered: Event = Event()
-
-on_container_registered.add_handler(on_cell_registered.fire)
-on_yaml_cell_registered.add_handler(on_cell_registered.fire)
-# on_yaml_cell_modified.add_handler(show)
 
 
 if __name__ == "__main__":
