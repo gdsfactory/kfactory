@@ -66,5 +66,5 @@ def bend_s(
         port_type="optical",
     )
 
-    c.info["sim"] = "MODE"
+    c.info["sim"] = "FDTD"
     return c
