@@ -649,7 +649,15 @@ class Enclosure(BaseModel):
             raise ValueError(
                 "The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
             )
-        extrude_path(target=c, layer=main_layer, path=path, width=width, enclosure=self, start_angle=start_angle, end_angle=end_angle)
+        extrude_path(
+            target=c,
+            layer=main_layer,
+            path=path,
+            width=width,
+            enclosure=self,
+            start_angle=start_angle,
+            end_angle=end_angle,
+        )
 
     def extrude_path_dynamic(
         self,
