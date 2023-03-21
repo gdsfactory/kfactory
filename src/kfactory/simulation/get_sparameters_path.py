@@ -48,10 +48,10 @@ def _get_sparameters_path(
         else dirpath
     )
     dirpath.mkdir(exist_ok=True, parents=True)
-    return dirpath / f"{component.name}_{get_kwargs_hash(**kwargs)}.npz"
+    return dirpath / f"{component.hash().hex()}_{get_kwargs_hash(**kwargs)}.npz"
 
 
-def _get_sparameters_data(**kwargs) -> np.ndarray:
+def _get_sparameters_data(component: ComponentSpec, **kwargs) -> np.ndarray:
     """Returns Sparameters data in a pandas DataFrame.
 
     Keyword Args:
@@ -60,7 +60,8 @@ def _get_sparameters_data(**kwargs) -> np.ndarray:
         kwargs: simulation settings.
 
     """
-    filepath = _get_sparameters_path(**kwargs)
+    kwargs.update(component=component)
+    filepath = _get_sparameters_path(component=component, **kwargs)
     return np.load(filepath)
 
 
