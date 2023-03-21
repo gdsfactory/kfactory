@@ -7,7 +7,7 @@ def fix_spacing(
     reg = kdb.Region()
     reg.merged_semantics = False
     reg.insert(c.begin_shapes_rec(layer))
-    sc = reg.space_check(min_space, False, kdb.Region.Metrics.Projection, 80).polygons()
+    sc = reg.space_check(min_space, False, kdb.Metrics.Projection, 80).polygons()
     r_int = reg.interacting(sc)
     r_int += (
         sc.sized(fix_sizing, 5)
