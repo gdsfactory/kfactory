@@ -5,6 +5,7 @@ import kfactory as kf
 from kfactory import autocell
 from kfactory.pcells.euler import bend_euler
 from kfactory.pcells.taper import taper
+from kfactory.pcells.dbu.waveguide import waveguide as waveguide_dbu
 from kfactory.pcells.waveguide import waveguide as straight_function
 from kfactory.routing.optical import connect
 from kfactory.types import ComponentSpec
@@ -13,6 +14,7 @@ from kfactory.utils import Enclosure
 
 ### To do:
 from kfactory.components.DCs import coupler
+
 # from kfactory.pcells.heater import wg_heater_connected
 # from kfactory.tech.layers import LAYER (create some default layer for users)
 # from kfactory.utils.enclosures import LAYER_ENC, WG_STANDARD
@@ -34,8 +36,8 @@ def mzi(
     with_splitter: bool = True,
     port_e1_splitter: str = "o3",
     port_e0_splitter: str = "o4",
-    port_e1_combiner: str = "o4",
-    port_e0_combiner: str = "o3",
+    port_e1_combiner: str = "o2",
+    port_e0_combiner: str = "o1",
     nbends: int = 2,
     width: float = 1.0,
     layer: int | LayerEnum = 0,
@@ -91,17 +93,17 @@ def mzi(
     straight_x_bot = straight_x_bot or straight
     straight_y = straight_y or straight
 
-
     bend_settings = {
         "width": width,
         "layer": layer,
         "radius": radius,
         "enclosure": enclosure,
     }
-    bend_spec = bend
     bend = kf.get_component(bend, **bend_settings)
-    print(bend.ports["W0"].width)
-    c = kf.KCell("mzi")
+    c = kf.KCell()
+    straight_connect = partial(
+        waveguide_dbu, layer=layer, width=width / c.klib.dbu, enclosure=enclosure
+    )
     combiner_settings = {
         "width": width,
         "layer": layer,
@@ -110,12 +112,13 @@ def mzi(
     kwargs.pop("kwargs", "")
     kwargs.update(combiner_settings)
     cp1 = kf.get_component(splitter, **kwargs)
-    cp2 = kf.get_component(combiner, **kwargs) if combiner else cp1.copy()
+    cp1_copy = cp1
+    cp2 = kf.get_component(combiner, **kwargs) if combiner else cp1
 
     if with_splitter:
         cp1 = c << cp1
 
-    cp2 = c << cp2
+    cp2 = c << cp1_copy
     b5 = c << bend
     # b5.transform(kf.kdb.Trans.M90)
     b5.connect("W0", cp1.ports[port_e0_splitter], mirror=True)
@@ -123,16 +126,30 @@ def mzi(
     # b5.transform(kf.kdb.Trans.M90.R180)
 
     syl = c << kf.get_component(
-        straight_y, length=delta_length / 2 + length_y, width=width, layer=layer, enclosure=enclosure
+        straight_y,
+        length=delta_length / 2 + length_y,
+        width=width,
+        layer=layer,
+        enclosure=enclosure,
     )
     syl.connect("o1", b5.ports["N0"])
     b6 = c << bend
     b6.connect("W0", syl.ports["o2"], mirror=True)
     # b6.transform(kf.kdb.Trans.M90.R270)
 
-    straight_x_bot = kf.get_component(
-        straight_x_bot, width=width, length=length_x, layer=layer, enclosure=enclosure
-    ) if length_x else kf.get_component(straight_x_bot, length=10.0, width=width, layer=layer, enclosure=enclosure)
+    straight_x_bot = (
+        kf.get_component(
+            straight_x_bot,
+            width=width,
+            length=length_x,
+            layer=layer,
+            enclosure=enclosure,
+        )
+        if length_x
+        else kf.get_component(
+            straight_x_bot, length=10.0, width=width, layer=layer, enclosure=enclosure
+        )
+    )
 
     sxb = c << straight_x_bot
     sxb.connect("o1", b6.ports["N0"], mirror=True)
@@ -149,37 +166,94 @@ def mzi(
     b2.connect("N0", sytl.ports["o2"])
     straight_x_top = (
         kf.get_component(
-            straight_x_top, length=length_x, width=width, layer=layer, enclosure=enclosure
+            straight_x_top,
+            length=length_x,
+            width=width,
+            layer=layer,
+            enclosure=enclosure,
         )
         if length_x
-        else kf.get_component(straight_x_top, length=10.0, width=width, layer=layer, enclosure=enclosure)
+        else kf.get_component(
+            straight_x_top, length=10.0, width=width, layer=layer, enclosure=enclosure
+        )
     )
     sxt = c << straight_x_top
     sxt.connect("o1", b2.ports["W0"])
 
     # cp2.transform(kf.kdb.Trans.M90)
-    cp2.transform(kf.kdb.Trans(cp2.ports["o3"].x + sxt.ports["o2"].x + radius * nbends + 0.1 / c.library.dbu, 0))
+    cp2.transform(
+        kf.kdb.Trans(
+            2
+            * (
+                sxt.ports["o2"].x
+                + radius * nbends
+                + cp2.instance.dbbox().width()
+                + cp2.ports["o2"].x
+            ),
+            0,
+        )
+    )
 
     connect(
         c,
         cp2.ports["o2"],
         sxt.ports["o2"],
-        straight,
+        straight_connect,
         bend,
     )
     connect(
         c,
         cp2.ports["o1"],
         sxb.ports["o2"],
-        straight,
+        straight_connect,
         bend,
     )
 
     if with_splitter:
-        c.add_ports([port for port in cp1.ports if port.orientation == 180], prefix="in")
+        c.add_ports([port for port in cp1.ports if port.orientation == 180])
     else:
         c.add_port(name="o1", port=b1.ports["W0"])
         c.add_port(name="o2", port=b5.ports["W0"])
-    c.add_ports([port for port in cp2.ports if port.orientation == 0], prefix="out")
+    c.add_ports([port for port in cp2.ports if port.orientation == 0])
     c.autorename_ports()
+
+    c.info["components"] = {
+        "straight1": {
+            "component": straight,
+            "params": {
+                "width": width,
+                "layer": layer,
+                "enclosure": enclosure,
+                "length": length_y,
+            },
+        },
+        "straight2": {
+            "component": straight,
+            "params": {
+                "width": width,
+                "layer": layer,
+                "enclosure": enclosure,
+                "length": length_x,
+            },
+        },
+        "straight3": {
+            "component": straight,
+            "params": {
+                "width": width,
+                "layer": layer,
+                "enclosure": enclosure,
+                "length": delta_length / 2 + length_y,
+            },
+        },
+        "bend": {
+            "component": bend,
+            "params": bend_settings,
+            "sim": "FDTD",
+        },
+        "splitter": {
+            "component": splitter,
+            "params": kwargs,
+            **cp1_copy.info["components"],
+        },
+    }
     return c
