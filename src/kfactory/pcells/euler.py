@@ -206,6 +206,7 @@ def bend_euler(
             trans=kdb.Trans(2, False, backbone[-1].to_itype(dbu).to_v()),
         )
 
+    c.info["sim"] = "FDTD"
     return c
 
 
