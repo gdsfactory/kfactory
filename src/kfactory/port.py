@@ -119,7 +119,6 @@ def filter_layer_pt_reg(
     port_type: Optional[str] = None,
     regex: Optional[str] = None,
 ) -> "Iterable[Port]":
-
     _ports = ports
     if layer is not None:
         _ports = filter_layer(_ports, layer)
