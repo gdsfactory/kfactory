@@ -140,7 +140,7 @@ def grating_coupler_elliptical(
     c.create_port(
         name="FL",
         trans=kf.kdb.Trans(x_fiber_launch, 0),
-        layer=LAYER.CA,
+        layer=LAYER.WG,
         width=100,
         port_type="fibre_launch",
     )
@@ -150,7 +150,7 @@ def grating_coupler_elliptical(
     setattr(c, "p0_overclad", (x0, y0))
 
     if bo_opening:
-        c.shapes(LAYER.BO).insert(
+        c.shapes(LAYER.WGCLAD).insert(
             kf.kdb.Box(-20000, -20000, 20000, 20000).transformed(
                 kf.kdb.Trans(tooth_region.bbox().center().to_v())
             )
