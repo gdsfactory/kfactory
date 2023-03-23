@@ -8,14 +8,13 @@ Features similar to gdsfactory:
 - [x] Simple routing (point to point and simpl bundle routes for electrical routes)
 - [x] Basic cells like euler/circular bends, taper, waveguide
 - [x] Path extrusion (no interface with CrossSections)
+- [x] PDK/package configuration
+- [x] Plugin system (simulations etc.) - Lumerical plugins
 
 
 Notable missing Features:
-- [ ] PDK/package configuration
-- [ ] CrossSection
 - [ ] Netlist/Schematics and LVS
 - [ ] More advanced routing
-- [ ] Plugin system (simulations etc.)
 - [ ] Jupyter integration
 
 
