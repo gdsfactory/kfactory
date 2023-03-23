@@ -1,7 +1,9 @@
-import kfactory as kf
-import pytest
-import warnings
 import re
+import warnings
+
+import pytest
+
+import kfactory as kf
 
 
 @kf.autocell

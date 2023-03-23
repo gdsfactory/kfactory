@@ -1,8 +1,10 @@
-import kfactory as kf
-import pytest
-import numpy as np
-from typing import Optional
 import warnings
+from typing import Optional
+
+import numpy as np
+import pytest
+
+import kfactory as kf
 
 
 def bend_circular(

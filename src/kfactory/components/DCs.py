@@ -1,13 +1,11 @@
-from .. import kdb
+from typing import Union
+
+from .. import KCell, autocell, kdb
+from ..generic_tech import LAYER, LayerEnum
 from ..pcells.bezier import bend_s
 from ..pcells.waveguide import waveguide
 from ..pdk import _ACTIVE_PDK
-from ..generic_tech import LAYER, LayerEnum
 from ..utils import Enclosure
-
-from .. import autocell, KCell
-
-from typing import Union
 
 
 @autocell

@@ -4,10 +4,9 @@ import numpy as np
 from scipy.special import binom  # type: ignore[import]
 
 from .. import KCell, LayerEnum, autocell, kdb
+from ..pdk import _ACTIVE_PDK
 from ..utils import Enclosure
 from ..utils.geo import extrude_path
-
-from ..pdk import _ACTIVE_PDK
 
 __all__ = ["bend_s"]
 

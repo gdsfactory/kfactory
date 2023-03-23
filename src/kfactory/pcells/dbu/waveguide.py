@@ -16,7 +16,9 @@ def waveguide(
 ) -> KCell:
     c = KCell()
 
-    layer_: LayerEnum = _ACTIVE_PDK.get_layer(layer)[0] if isinstance(layer, str) else layer
+    layer_: LayerEnum = (
+        _ACTIVE_PDK.get_layer(layer)[0] if isinstance(layer, str) else layer
+    )
     if width // 2 * 2 != width:
         raise ValueError("The width (w) must be a multiple of 2 database units")
 

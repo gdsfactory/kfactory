@@ -1,26 +1,26 @@
 """Write Sparameters with Lumerical FDTD."""
 from __future__ import annotations
 
+import itertools
 import shutil
 import time
-import itertools
 from typing import Dict, Optional
-from yaml.representer import Representer
 
 import gdsfactory as gf
 import numpy as np
 import omegaconf
-from ..types import ComponentSpec, PathType
+from yaml.representer import Representer
 
 import kfactory as kf
 
 from ..config import logger
+from ..generic_tech import LayerStack
 from ..materials import MaterialSpec
 from ..pdk import get_layer_stack
 from ..simulation.get_sparameters_path import (
     get_sparameters_path_lumerical as get_sparameters_path,
 )
-from ..generic_tech import LayerStack
+from ..types import ComponentSpec, PathType
 from .simulation_settings import (
     SIMULATION_SETTINGS_LUMERICAL_FDTD,
     SimulationSettingsLumericalFdtd,
@@ -137,6 +137,7 @@ def plot_sparameters_lumerical(
     trans = []
 
     component = kf.get_component(component)
+
     def recurse_insts(comp: ComponentSpec, p=None):
         if p:
             comp.transform(p)

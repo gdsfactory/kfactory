@@ -1,12 +1,13 @@
+from typing import Any
+
 from .kcell import KCell
 from .types import ComponentSpec
-from typing import Any
 
 
 def get_component(component_spec: ComponentSpec, **kwargs: Any) -> KCell:
     if isinstance(component_spec, str):
-        from .pcells import pcells
         from .components import components
+        from .pcells import pcells
 
         try:
             return pcells[component_spec](**kwargs)

@@ -1,6 +1,8 @@
-import pytest
-import kfactory as kf
 from functools import partial
+
+import pytest
+
+import kfactory as kf
 
 
 class LAYER_CLASS(kf.LayerEnum):

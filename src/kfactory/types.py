@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict, Type, Union, Callable
+from typing import Any, Callable, Dict, Type, Union
 
 from .kcell import KCell
 

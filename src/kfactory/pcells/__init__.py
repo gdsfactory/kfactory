@@ -1,13 +1,13 @@
 # flake8: noqa
+from typing import Callable
+
+import kfactory as kf
+
 from .bezier import bend_s
 from .circular import bend_circular
 from .euler import bend_euler, bend_s_euler
 from .taper import taper as taper_function
 from .waveguide import waveguide as wg
-
-import kfactory as kf
-
-from typing import Callable
 
 __all__ = [
     "bend_s",

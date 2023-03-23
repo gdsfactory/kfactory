@@ -1,9 +1,10 @@
-import kfactory as kf
-import pytest
 import warnings
 from random import randint
-
 from typing import Callable
+
+import pytest
+
+import kfactory as kf
 
 
 @pytest.mark.parametrize(

@@ -5,13 +5,14 @@ import pathlib
 from copy import deepcopy
 from functools import partial
 from pathlib import Path
-from typing import Optional, Any
+from typing import Any, Optional
 
 import numpy as np
+from gdsfactory.name import clean_value
 
 import kfactory as kf
+
 from ..generic_tech import LayerStack
-from gdsfactory.name import clean_value
 from ..pdk import get_sparameters_path
 from ..types import ComponentSpec
 

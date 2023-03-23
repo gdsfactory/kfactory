@@ -1,29 +1,26 @@
 """PDK stores layers, enclosures, cell functions ..."""
 
 from __future__ import annotations
+
 import pathlib
 import warnings
-from functools import partial
 from enum import Enum
+from functools import partial
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 from omegaconf import DictConfig
 from pydantic import BaseModel, Field, validator
-from pathlib import Path
+
+import kfactory as kf
 
 from .config import logger
+from .generic_tech import LAYER, LayerLevel, LayerStack
 from .kcell import KCell, LayerEnum
-from .generic_tech import LAYER, LayerStack, LayerLevel
 from .materials import MaterialSpec
+from .types import CellSpec, ComponentFactory, ComponentSpec
 from .utils.geo import Enclosure
-from .generic_tech import LayerStack
-from .types import (
-    CellSpec,
-    ComponentFactory,
-    ComponentSpec,
-)
-import kfactory as kf
 
 component_settings = ["function", "component", "settings"]
 enclosure_settings = ["function", "enclosure", "settings"]
@@ -666,7 +663,6 @@ if __name__ == "__main__":
     from kfactory.components import components
 
     # from gdsfactory.enclosure import enclosures
-
     # c = _ACTIVE_PDK.get_component("straight")
     # print(c.settings)
     # on_pdk_activated += print

@@ -3,9 +3,7 @@ from typing import Dict
 from pydantic import BaseModel
 
 from ..materials import MaterialSpec
-from ..materials import (
-    material_name_to_lumerical as material_name_to_lumerical_default,
-)
+from ..materials import material_name_to_lumerical as material_name_to_lumerical_default
 
 
 class SimulationSettingsLumericalFdtd(BaseModel):

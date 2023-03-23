@@ -1,8 +1,9 @@
 from typing import Callable, Dict
-from .DCs import coupler, straight_coupler
-from .mzi import mzi
 
 import kfactory as kf
+
+from .DCs import coupler, straight_coupler
+from .mzi import mzi
 
 __all__ = [
     "coupler",

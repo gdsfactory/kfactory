@@ -1,19 +1,19 @@
-from typing import Any, Callable, Optional, Sequence, Tuple, Union
 from functools import partial
+from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import kfactory as kf
 from kfactory import autocell
-from kfactory.pcells.euler import bend_euler
-from kfactory.pcells.taper import taper
-from kfactory.pcells.dbu.waveguide import waveguide as waveguide_dbu
-from kfactory.pcells.waveguide import waveguide as straight_function
-from kfactory.routing.optical import connect
-from kfactory.types import ComponentSpec
-from kfactory.generic_tech import LayerEnum
-from kfactory.utils import Enclosure
 
 ### To do:
 from kfactory.components.DCs import coupler
+from kfactory.generic_tech import LayerEnum
+from kfactory.pcells.dbu.waveguide import waveguide as waveguide_dbu
+from kfactory.pcells.euler import bend_euler
+from kfactory.pcells.taper import taper
+from kfactory.pcells.waveguide import waveguide as straight_function
+from kfactory.routing.optical import connect
+from kfactory.types import ComponentSpec
+from kfactory.utils import Enclosure
 
 # from kfactory.pcells.heater import wg_heater_connected
 # from kfactory.tech.layers import LAYER (create some default layer for users)
@@ -86,8 +86,16 @@ def mzi(
     """
     combiner = combiner or splitter
 
-    straight_x_top = partial(straight_x_top, layer=layer) if straight_x_top and callable(straight_x_top) else None
-    straight_x_bot = partial(straight_x_bot, layer=layer) if straight_x_bot and callable(straight_x_bot) else None
+    straight_x_top = (
+        partial(straight_x_top, layer=layer)
+        if straight_x_top and callable(straight_x_top)
+        else None
+    )
+    straight_x_bot = (
+        partial(straight_x_bot, layer=layer)
+        if straight_x_bot and callable(straight_x_bot)
+        else None
+    )
     straight_x_top = straight_x_top or straight
     straight_x_bot = straight_x_bot or straight
     straight_y = straight_y or straight

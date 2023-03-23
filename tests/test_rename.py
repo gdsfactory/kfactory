@@ -1,9 +1,10 @@
-import kfactory as kf
-from kfactory import port
-from typing import Iterable, Callable, Optional
+from typing import Callable, Iterable, Optional
+
 import numpy as np
 import pytest
 
+import kfactory as kf
+from kfactory import port
 
 port_x_coords = [-10000, 0, 0, 0, 10000]
 port_y_coords = [0, -10000, 0, 10000, 0]
