@@ -27,7 +27,7 @@ def grating_coupler_elliptical(
     period: Optional[int] = None,
     x_fiber_launch: Optional[int] = None,
 ) -> kf.KCell:
-    
+
     DEG2RAD = np.pi / 180
 
     # Define some constants
@@ -105,14 +105,8 @@ def grating_coupler_elliptical(
         c.create_port(
             name="W0", trans=kf.kdb.Trans.R180, width=wg_width, layer=layer_taper
         )
-    #     _taper = c.add_polygon(taper_pts, layer_taper)
-    #     _taper.movex(taper_offset)
-
-    #     add_tile_excl(c, taper_pts, layers=[LAYER.RXEXCLUD])
 
     c.transform(kf.kdb.Trans(int(-x_output - taper_offset), 0))
-
-    # c.move((-x_output - taper_offset, 0))
 
     # Add port
     c.settings["period"] = _period
