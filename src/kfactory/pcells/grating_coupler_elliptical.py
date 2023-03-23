@@ -26,7 +26,6 @@ def grating_coupler_elliptical(
     taper_extent_n_periods: float | Literal["first"] | Literal["last"] = "last",
     period: Optional[int] = None,
     x_fiber_launch: Optional[int] = None,
-    bo_opening: bool = True,
 ) -> kf.KCell:
     """
 
@@ -148,13 +147,6 @@ def grating_coupler_elliptical(
 
     y0 = 0
     setattr(c, "p0_overclad", (x0, y0))
-
-    if bo_opening:
-        c.shapes(LAYER.WGCLAD).insert(
-            kf.kdb.Box(-20000, -20000, 20000, 20000).transformed(
-                kf.kdb.Trans(tooth_region.bbox().center().to_v())
-            )
-        )
 
     return c
 
