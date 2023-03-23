@@ -31,13 +31,12 @@ def bend_s(
     width: float,
     height: float,
     length: float,
-    layer: int | LayerEnum | str,
+    layer: int | LayerEnum,
     nb_points: int = 99,
     t_start: float = 0,
     t_stop: float = 1,
     enclosure: Optional[Enclosure] = None,
 ) -> KCell:
-    layer = _ACTIVE_PDK.get_layer(layer)[0] if isinstance(layer, str) else layer
     c = KCell()
     l, h = length, height
     pts = bezier_curve(
@@ -48,7 +47,7 @@ def bend_s(
     if enclosure is None:
         enclosure = Enclosure()
 
-    enclosure.extrude_path(c, path=pts, main_layer=layer, width=width, end_angle=0)
+    enclosure.extrude_path(c, path=pts, main_layer=layer, width=width, start_angle=0, end_angle=0)
     # extrude_path(c, layer, pts, width, enclosure, start_angle=180, end_angle=0)
 
     c.create_port(

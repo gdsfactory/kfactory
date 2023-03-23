@@ -15,7 +15,7 @@ def coupler(
     dy: float = 5.0,
     dx: float = 5.0,
     width: float = 0.5,
-    layer: Union[int, LayerEnum, str] = LAYER.WG,
+    layer: Union[int, LayerEnum] = LAYER.WG,
     enclosure: Enclosure = Enclosure(),
 ) -> KCell:
     r"""Symmetric coupler.
@@ -38,7 +38,6 @@ def coupler(
          o1                                          o4
     """
     c = KCell()
-    layer = _ACTIVE_PDK.get_layer(layer) if isinstance(layer, str) else layer
     enclosure = enclosure if enclosure is not None else Enclosure()
     sbend = c << bend_s(
         width=width,
@@ -121,7 +120,7 @@ def straight_coupler(
     gap: float = 0.2,
     length: float = 10.0,
     width: float = 0.5,
-    layer: Union[int, LayerEnum, str] = LAYER.WG,
+    layer: Union[int, LayerEnum] = LAYER.WG,
     enclosure: Enclosure = Enclosure(),
 ) -> KCell:
     """Straight coupler.
@@ -133,7 +132,6 @@ def straight_coupler(
         enclosure: waveguide enclosure.
     """
     c = KCell()
-    layer = _ACTIVE_PDK.get_layer(layer)[0] if isinstance(layer, str) else layer
 
     wg_top = c << waveguide(width, length, layer, enclosure)
     wg_top.trans = kdb.DTrans(0, True, 0, (gap + width) / 2)

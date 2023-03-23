@@ -2669,7 +2669,7 @@ def show(
         tf.parent.mkdir(parents=True, exist_ok=True)
         gds.write(str(tf), save_options)
         gds_file = tf
-        # delete = True
+        delete = True
     elif isinstance(gds, (str, Path)):
         gds_file = Path(gds)
     else:
