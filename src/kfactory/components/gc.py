@@ -1,6 +1,5 @@
 import kfactory as kf
-from kfactory.pcells import grating_coupler_elliptical
-from kfactory.tech import LAYER
+from kfactory.pcells.grating_coupler_elliptical import grating_coupler_elliptical
 
 
 @kf.autocell
@@ -34,7 +33,6 @@ def GC2() -> kf.KCell:
     L1 = 17000
 
     return grating_coupler_elliptical(
-        name="GC2",
         polarization="tm",
         taper_length=L1,
         taper_angle=40.0,

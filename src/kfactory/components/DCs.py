@@ -135,7 +135,7 @@ def straight_coupler(
         enclosure: waveguide enclosure.
     """
     c = KCell()
-    layer = _ACTIVE_PDK.get_layer(layer) if isinstance(layer, str) else layer
+    layer = _ACTIVE_PDK.get_layer(layer)[0] if isinstance(layer, str) else layer
 
     wg_top = c << waveguide(width, length, layer, enclosure)
     wg_top.trans = kdb.DTrans(0, True, 0, (gap + width) / 2)

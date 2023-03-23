@@ -4,7 +4,7 @@ from typing import Callable, Literal, Optional
 import numpy as np
 
 import kfactory as kf
-from kfactory.tech import LAYER
+from kfactory.generic_tech import LAYER
 
 
 @kf.autocell

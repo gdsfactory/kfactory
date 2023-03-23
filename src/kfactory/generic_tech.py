@@ -139,7 +139,7 @@ class LayerStack(BaseModel):
 
     layers: Optional[Dict[str, LayerLevel]] = Field(default_factory=dict)
 
-    def __init__(self, **data: Any):
+    def __init__(self, **data: Any): # type: ignore
         """Add LayerLevels automatically for subclassed LayerStacks."""
         super().__init__(**data)
 
@@ -172,7 +172,7 @@ class LayerStack(BaseModel):
             if level.thickness
         }
 
-    def get_layer_to_sidewall_angle(self) -> Dict[Tuple[int, int], str]:
+    def get_layer_to_sidewall_angle(self) -> Dict[Tuple[int, int], float]:
         """Returns layer tuple to material name."""
         return {
             level.layer: level.sidewall_angle

@@ -8,7 +8,7 @@ from .dbu.waveguide import waveguide as waveguide_dbu
 def waveguide(
     width: float,
     length: float,
-    layer: int | LayerEnum,
+    layer: int | LayerEnum | str,
     enclosure: Optional[Enclosure] = None,
 ) -> KCell:
     return waveguide_dbu(

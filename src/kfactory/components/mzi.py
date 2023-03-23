@@ -26,7 +26,7 @@ def mzi(
     delta_length: float = 10.0,
     length_y: float = 2.0,
     length_x: Optional[float] = 0.1,
-    bend: Callable[Any, kf.KCell] = bend_euler,
+    bend: Callable[..., kf.KCell] = bend_euler,
     straight: ComponentSpec = straight_function,
     straight_y: Optional[ComponentSpec] = None,
     straight_x_top: Optional[ComponentSpec] = None,
@@ -86,9 +86,8 @@ def mzi(
     """
     combiner = combiner or splitter
 
-    straight = partial(straight, layer=layer)
-    straight_x_top = partial(straight_x_top, layer=layer) if straight_x_top else None
-    straight_x_bot = partial(straight_x_bot, layer=layer) if straight_x_bot else None
+    straight_x_top = partial(straight_x_top, layer=layer) if straight_x_top and callable(straight_x_top) else None
+    straight_x_bot = partial(straight_x_bot, layer=layer) if straight_x_bot and callable(straight_x_bot) else None
     straight_x_top = straight_x_top or straight
     straight_x_bot = straight_x_bot or straight
     straight_y = straight_y or straight
@@ -111,12 +110,12 @@ def mzi(
     }
     kwargs.pop("kwargs", "")
     kwargs.update(combiner_settings)
-    cp1 = kf.get_component(splitter, **kwargs)
-    cp1_copy = cp1
-    cp2 = kf.get_component(combiner, **kwargs) if combiner else cp1
+    cp1_ = kf.get_component(splitter, **kwargs)
+    cp1_copy = cp1_
+    cp2_ = kf.get_component(combiner, **kwargs) if combiner else cp1_
 
     if with_splitter:
-        cp1 = c << cp1
+        cp1 = c << cp1_
 
     cp2 = c << cp1_copy
     b5 = c << bend

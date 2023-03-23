@@ -16,18 +16,18 @@ def waveguide(
 ) -> KCell:
     c = KCell()
 
-    layer = _ACTIVE_PDK.get_layer(layer).layer if isinstance(layer, str) else layer
+    layer_: LayerEnum = _ACTIVE_PDK.get_layer(layer)[0] if isinstance(layer, str) else layer
     if width // 2 * 2 != width:
         raise ValueError("The width (w) must be a multiple of 2 database units")
 
-    c.shapes(layer).insert(kdb.Box(0, -width // 2, length, width // 2))
-    c.create_port(name="o1", trans=kdb.Trans(2, False, 0, 0), layer=layer, width=width)
+    c.shapes(layer_).insert(kdb.Box(0, -width // 2, length, width // 2))
+    c.create_port(name="o1", trans=kdb.Trans(2, False, 0, 0), layer=layer_, width=width)
     c.create_port(
-        name="o2", trans=kdb.Trans(0, False, length, 0), layer=layer, width=width
+        name="o2", trans=kdb.Trans(0, False, length, 0), layer=layer_, width=width
     )
 
     if enclosure is not None:
-        enclosure.apply_minkowski_y(c, layer)
+        enclosure.apply_minkowski_y(c, layer_)
     c.settings = {
         "width_um": width * c.klib.dbu,
         "length_um": length * c.klib.dbu,

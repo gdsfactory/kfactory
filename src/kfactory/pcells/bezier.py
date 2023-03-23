@@ -7,6 +7,8 @@ from .. import KCell, LayerEnum, autocell, kdb
 from ..utils import Enclosure
 from ..utils.geo import extrude_path
 
+from ..pdk import _ACTIVE_PDK
+
 __all__ = ["bend_s"]
 
 
@@ -30,12 +32,13 @@ def bend_s(
     width: float,
     height: float,
     length: float,
-    layer: int | LayerEnum,
+    layer: int | LayerEnum | str,
     nb_points: int = 99,
     t_start: float = 0,
     t_stop: float = 1,
     enclosure: Optional[Enclosure] = None,
 ) -> KCell:
+    layer = _ACTIVE_PDK.get_layer(layer)[0] if isinstance(layer, str) else layer
     c = KCell()
     l, h = length, height
     pts = bezier_curve(

@@ -1404,6 +1404,9 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         if shapes:
             d["shapes"] = shapes
         if len(node.settings) > 0:
+            for key, value in node.settings.items():
+                if isinstance(value, Callable): # type: ignore
+                    node.settings[key] = value.__name__
             d["settings"] = node.settings
         return representer.represent_mapping(cls.yaml_tag, d)
 

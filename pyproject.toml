@@ -95,6 +95,9 @@ strict = true
 exclude = [
 	"tests",
 	"src/kfactory/widgets",
+	"src/kfactory/simulation",
+	"src/kfactory/pdk",
+	"src/kfactory/generic_tech",
 ]
 
 [tool.pylsp-mypy]

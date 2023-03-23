@@ -246,7 +246,7 @@ class Pdk(BaseModel):
             cell = (
                 self.cells[cell_name]
                 if cell_name in self.cells
-                else self.containers[cell_name]
+                else self.cells[cell.name]
             )
             return partial(cell, **settings)
         else:
@@ -355,7 +355,7 @@ class Pdk(BaseModel):
                 f"Enclosure, string or dict), got {type(enclosure)}"
             )
 
-    def get_layer(self, layer: LAYER) -> Tuple | List:
+    def get_layer(self, layer: Tuple | List | int | str) -> Tuple | List:
         """Returns layer from a layer spec."""
         if isinstance(layer, (tuple, list)):
             if len(layer) != 2:
@@ -363,8 +363,7 @@ class Pdk(BaseModel):
             return layer
         elif isinstance(layer, int):
             if hasattr(layer, "layer"):
-                layer = layer.layer
-                return (layer, 0)
+                return (layer.layer, 0)
             return (layer, 0)
         elif isinstance(layer, str):
             if layer not in self.layers:
@@ -396,13 +395,6 @@ class Pdk(BaseModel):
             constants = list(self.constants.keys())
             raise ValueError(f"{key!r} not in {constants}")
         return self.constants[key]
-
-    def get_material_index(self, key: str, *args, **kwargs: Any) -> float:
-        if key not in self.materials_index:
-            material_names = list(self.materials_index.keys())
-            raise ValueError(f"{key!r} not in {material_names}")
-        material = self.materials_index[key]
-        return material(*args, **kwargs) if callable(material) else material
 
     # _on_cell_registered = Event()
     # _on_container_registered: Event = Event()
@@ -447,10 +439,6 @@ def get_generic_pdk() -> Pdk:
 
 GENERIC_PDK = get_generic_pdk()
 _ACTIVE_PDK = GENERIC_PDK
-
-
-def get_material_index(material: MaterialSpec, *args, **kwargs: Any) -> float:
-    return _ACTIVE_PDK.get_material_index(material, *args, **kwargs)
 
 
 def get_component(component: ComponentSpec, **kwargs: Any) -> KCell:
@@ -662,10 +650,6 @@ def get_sparameters_path() -> pathlib.Path:
     return _ACTIVE_PDK.sparameters_path
 
 
-def get_modes_path() -> Optional[pathlib.Path]:
-    return _ACTIVE_PDK.modes_path
-
-
 def get_interconnect_cml_path() -> pathlib.Path:
     if _ACTIVE_PDK.interconnect_cml_path is None:
         raise ValueError(f"{_ACTIVE_PDK.name!r} has no interconnect_cml_path")
@@ -676,11 +660,10 @@ def _set_active_pdk(pdk: Pdk) -> None:
     global _ACTIVE_PDK
     old_pdk = _ACTIVE_PDK
     _ACTIVE_PDK = pdk
-    on_pdk_activated.fire(old_pdk=old_pdk, new_pdk=pdk)
 
 
 if __name__ == "__main__":
-    from gdsfactory.components import cells
+    from kfactory.components import components
 
     # from gdsfactory.enclosure import enclosures
 
@@ -690,7 +673,7 @@ if __name__ == "__main__":
     # set_active_pdk(GENERIC)
     c = Pdk(
         name="demo",
-        cells=cells,
+        cells=components,
         enclosures=[],
         # layers=dict(DEVREC=(3, 0), PORTE=(3, 5)),
         sparameters_path="/home",

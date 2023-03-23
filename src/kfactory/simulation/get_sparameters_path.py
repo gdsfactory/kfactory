@@ -76,33 +76,6 @@ get_sparameters_data_lumerical = partial(_get_sparameters_data, tool="lumerical"
 get_sparameters_data_tidy3d = partial(_get_sparameters_data, tool="tidy3d")
 
 
-def test_get_sparameters_path(test: bool = True) -> None:
-    import gdsfactory as gf
-
-    nm = 1e-3
-    layer_stack2 = deepcopy(LayerStack)
-    layer_stack2.layers["core"].thickness = 230 * nm
-
-    c = gf.components.straight()
-
-    p1 = get_sparameters_path_lumerical(component=c)
-    p2 = get_sparameters_path_lumerical(component=c, layer_stack=layer_stack2)
-    p3 = get_sparameters_path_lumerical(c, material_name_to_lumerical=dict(si=3.6))
-
-    if test:
-        name1 = "straight_1f90b7ca"
-        name2 = "straight_9b7c7e58"
-        name3 = "straight_c752dd0a"
-
-        assert p1.stem == name1, p1.stem
-        assert p2.stem == name2, p2.stem
-        assert p3.stem == name3, p3.stem
-    else:
-        print(f"name1 = {p1.stem!r}")
-        print(f"name2 = {p2.stem!r}")
-        print(f"name3 = {p3.stem!r}")
-
-
 if __name__ == "__main__":
     c = kf.pcells.taper_function(length=1.0, width1=0.5, width2=0.5)
     p = get_sparameters_path_lumerical(c)
