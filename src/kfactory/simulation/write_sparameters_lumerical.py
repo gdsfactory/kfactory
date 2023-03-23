@@ -20,7 +20,7 @@ from ..pdk import get_layer_stack
 from ..simulation.get_sparameters_path import (
     get_sparameters_path_lumerical as get_sparameters_path,
 )
-from ..types import ComponentSpec, PathType
+from ..typs import ComponentSpec, PathType
 from .simulation_settings import (
     SIMULATION_SETTINGS_LUMERICAL_FDTD,
     SimulationSettingsLumericalFdtd,
@@ -88,7 +88,7 @@ def plot_sparameters_lumerical(
     input_port: str = "o1",
     output_port: str = "o2",
     **settings,
-) -> np.ndarray:
+) -> str:
     """Plots and returns component s-parameters using Lumerical INTERCONNECT.
 
     If simulation exists it returns the Sparameters directly unless overwrite=True
@@ -127,7 +127,7 @@ def plot_sparameters_lumerical(
         settings: simulation settings
 
     Returns:
-        s-parameters
+        result file path
 
     """
     import matplotlib.pyplot as plt

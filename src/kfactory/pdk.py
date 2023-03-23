@@ -19,7 +19,7 @@ from .config import logger
 from .generic_tech import LAYER, LayerLevel, LayerStack
 from .kcell import KCell, LayerEnum
 from .materials import MaterialSpec
-from .types import CellSpec, ComponentFactory, ComponentSpec
+from .typs import CellSpec, ComponentFactory, ComponentSpec
 from .utils.geo import Enclosure
 
 component_settings = ["function", "component", "settings"]
@@ -53,7 +53,6 @@ class Pdk(BaseModel):
         layer_stack: maps name to layer numbers, thickness, zmin, sidewall_angle.
             if can also contain material properties
             (refractive index, nonlinear coefficient, sheet resistance ...).
-        layer_views: includes layer name to color, opacity and pattern.
         sparameters_path: to store Sparameters simulations.
         modes_path: to store Sparameters simulations.
         interconnect_cml_path: path to interconnect CML (optional).
@@ -139,7 +138,6 @@ class Pdk(BaseModel):
                 warnings.warn(f"Overwriting cell {name!r}")
 
             self.cells[name] = cell
-            on_cell_registered.fire(name=name, cell=cell, pdk=self)
 
     def register_containers(self, **kwargs: Any) -> None:
         """Register container factories."""
@@ -362,10 +360,6 @@ class Pdk(BaseModel):
             if hasattr(layer, "layer"):
                 return (layer.layer, 0)
             return (layer, 0)
-        elif isinstance(layer, str):
-            if layer not in self.layers:
-                raise ValueError(f"{layer!r} not in {self.layers.keys()}")
-            return self.layers[layer]
         elif layer is np.nan:
             return np.nan
         elif layer is None:
@@ -417,7 +411,6 @@ class Pdk(BaseModel):
 
 def get_generic_pdk() -> Pdk:
     # from .components import cells
-    from gdsfactory.config import sparameters_path
 
     # from gdsfactory.enclosure import enclosures
     from .pdk import Pdk
@@ -430,7 +423,7 @@ def get_generic_pdk() -> Pdk:
         layer_stack=LayerStack(),
         # layer_views=LAYER_VIEWS,
         # layer_transitions=LAYER_TRANSITIONS,
-        sparameters_path=sparameters_path,
+        sparameters_path=".",
     )
 
 
@@ -660,7 +653,7 @@ def _set_active_pdk(pdk: Pdk) -> None:
 
 
 if __name__ == "__main__":
-    from kfactory.components import components
+    from kfactory.pcells import pcells
 
     # from gdsfactory.enclosure import enclosures
     # c = _ACTIVE_PDK.get_component("straight")
@@ -669,7 +662,7 @@ if __name__ == "__main__":
     # set_active_pdk(GENERIC)
     c = Pdk(
         name="demo",
-        cells=components,
+        cells=pcells,
         enclosures=[],
         # layers=dict(DEVREC=(3, 0), PORTE=(3, 5)),
         sparameters_path="/home",
