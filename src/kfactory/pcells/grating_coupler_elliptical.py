@@ -27,20 +27,7 @@ def grating_coupler_elliptical(
     period: Optional[int] = None,
     x_fiber_launch: Optional[int] = None,
 ) -> kf.KCell:
-    """
-
-    Args:
-        taper_length: taper length from waveguide I/O
-        taper_angle: grating flare angle
-        lambda_c: grating transmission central wavelength
-        fiber_angle: fibre polish angle in degrees
-        grating_line_width: of the 220 ridge
-        wg_width: waveguide width
-        neff: 2.638  # tooth effective index
-        layer_taper: LAYER.RX
-        p_start: 26  # first tooth
-        n_periods: 16  # number of periods
-    """
+    
     DEG2RAD = np.pi / 180
 
     # Define some constants
