@@ -47,7 +47,9 @@ def bend_s(
     if enclosure is None:
         enclosure = Enclosure()
 
-    enclosure.extrude_path(c, path=pts, main_layer=layer, width=width, start_angle=0, end_angle=0)
+    enclosure.extrude_path(
+        c, path=pts, main_layer=layer, width=width, start_angle=0, end_angle=0
+    )
     # extrude_path(c, layer, pts, width, enclosure, start_angle=180, end_angle=0)
 
     c.create_port(
