@@ -117,7 +117,7 @@ def mzi(
         "enclosure": enclosure,
     }
     kwargs.pop("kwargs", "")
-    kwargs.update(combiner_settings)
+    kwargs |= combiner_settings
     cp1_ = kf.get_component(splitter, **kwargs)
     cp1_copy = cp1_
     cp2_ = kf.get_component(combiner, **kwargs) if combiner else cp1_

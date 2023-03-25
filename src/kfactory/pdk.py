@@ -141,7 +141,7 @@ class Pdk(BaseModel):
 
     def register_containers(self, **kwargs: Any) -> None:
         """Register container factories."""
-        for name, cell in kwargs.items():
+        for cell in kwargs.values():
             if not callable(cell):
                 raise ValueError(
                     f"{cell} is not callable, make sure you register "
@@ -219,7 +219,7 @@ class Pdk(BaseModel):
                 raise ValueError(
                     f"{cell!r} from PDK {self.name!r} not in cells: {cells} "
                 )
-            cell = self.cells[cell] if cell in self.cells else self.cells[cell]
+            cell = self.cells[cell]
             return cell
         elif isinstance(cell, (dict, DictConfig)):
             for key in cell.keys():
@@ -304,7 +304,7 @@ class Pdk(BaseModel):
                 raise ValueError(
                     f"{cell_name!r} from PDK {self.name!r} not in cells: {cells} "
                 )
-            cell = cells[cell_name] if cell_name in cells else cells[cell_name]
+            cell = cells[cell_name]
             component = cell(**settings)
             return component
         else:
@@ -357,9 +357,7 @@ class Pdk(BaseModel):
                 raise ValueError(f"{layer!r} needs two integer numbers.")
             return layer
         elif isinstance(layer, int):
-            if hasattr(layer, "layer"):
-                return (layer.layer, 0)
-            return (layer, 0)
+            return (layer.layer, 0) if hasattr(layer, "layer") else (layer, 0)
         elif layer is np.nan:
             return np.nan
         elif layer is None:

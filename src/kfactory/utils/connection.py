@@ -33,21 +33,16 @@ def connect_sequence(
     port1 = beg.ports[seq[0][1]]
     c.add_port(name=input_port_name, port=port1)
     conn_port = beg.ports[seq[0][2]]
-    count = 1
     inst_list = [beg]
-    for dev_spec in seq[1:]:
+    for count, dev_spec in enumerate(seq[1:], start=2):
         print(dev_spec)
         kcell = dev_spec[0]  # ()
         p_1 = dev_spec[1]
         p_2 = dev_spec[2]
-        if len(dev_spec) >= 4:
-            inv = dev_spec[3]  # type: ignore[misc]
-        else:
-            inv = False
+        inv = dev_spec[3] if len(dev_spec) >= 4 else False
         inst = c << kcell
         inst.connect(p_1, conn_port, mirror=inv)
         conn_port = inst.ports[p_2]
-        count += 1
         inst_list.append(inst)
         if count == len(seq):
             c.add_port(name=output_port_name, port=conn_port)
