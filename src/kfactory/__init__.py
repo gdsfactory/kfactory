@@ -22,7 +22,7 @@ from .kcell import (
     LayerEnum,
     show,
 )
-from . import pcells, placer, routing, utils, port, components
+from . import pcells, placer, routing, utils, port
 from .config import logger
 from .get_component import get_component
 
