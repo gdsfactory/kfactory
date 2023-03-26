@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=60", "wheel", "build", "setuptools_scm[toml]>=6.2"]
+requires = ["setuptools>=60", "wheel", "build", "setuptools_scm[toml]>=7.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,9 +8,11 @@ description = "KLayout API implementation of gdsfactory"
 readme = "README.md"
 classifiers = [
 	"Programming Language :: Python :: 3.10",
-	"Programming Language :: Python :: 3.11",
 	"Operating System :: OS Independent",
 ]
+requires-python = ">=3.10"
+
+
 version = "0.5.7"
 authors = [
     {name = "gdsfactory community", email = "contact@gdsfactory.com"},
@@ -53,6 +55,7 @@ docs = [
 ]
 ci = [
 	"flake8",
+	"flake8-pyproject",
 	"pytest",
 	"pytest_regressions",
 	"mypy",
@@ -71,7 +74,7 @@ where = ["src"]
 
 [tool.black]
 line-length = 88  # Specify the line length
-target-version = ['py311']  # Specify your Python version
+target-version = ['py310']  # Specify your Python version
 include = '\.pyi?$'
 exclude = '''  # Specify the files/dirs that should be ignored by the black formatter
 /(
@@ -114,15 +117,52 @@ skip = ["kfactory/__init__.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["src", "tests"]
-# addopts = --tb=no
 addopts = '--tb=short'
-# python_files = ["src/*.py", "tests/*.py"]
 norecursedirs = ["extra/*.py"]
 
-# [tool.pytest.ini_options]
-# minversion = "6.0"
-# addopts = "-ra -q"
-# testpaths = [
-#     "tests",
-#     "integration",
-# ]
+[tool.flake8]
+max-line-length = 88
+max-complexity = 45
+select = ["B","C","E","F","W","T4","B9"]
+ignore = ["E501", "E503", "E722", "W503", "W503", "E203", "B950", "B902"]
+
+extend-ignore = ["RST303"]
+
+exclude = [
+    ".git",
+    "__pycache__",
+    "docs/source/conf.py",
+    "build",
+    "dist",
+    ".ipynb_checkpoints",
+    ".tox",
+    "extra",
+    "deprecated",
+    "gdslib",
+    ".tox",
+    ".mypy_cache",
+]
+
+[tool.pydocstyle]
+[pydocstyle]
+inherit = false
+match = '(?!test).*\.py'
+add-ignore = ["D100","D101","D102","D103","D104","D203","D405","D417"]
+convention = "google"
+
+
+[tool.doc8]
+ignore-path=["docs/build/html","docs/notebooks/build","cache"]
+max-line-length=99
+verbose=1
+ignore-path-errors="/tmp/other_thing.rst;D001;D002"
+
+[tool.yapf]
+based_on_style = "google"
+allow_multiline_lambdas = true
+
+[tool.coverage.run]
+omit = "**/test_*.py"
+
+[tool.coverage.html]
+directory = "_build/coverage_html_report"
