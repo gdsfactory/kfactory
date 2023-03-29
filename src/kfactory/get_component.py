@@ -1,15 +1,15 @@
 from typing import Any
 
+import kfactory as kf
 from .kcell import KCell
 from .typs import ComponentSpec
 
 
 def get_component(component_spec: ComponentSpec, **kwargs: Any) -> KCell:
     if isinstance(component_spec, str):
-        from .pcells import pcells
 
         try:
-            return pcells[component_spec](**kwargs)
+            return getattr(kf.pcells, component_spec)(**kwargs)
         except KeyError:
             raise ValueError(
                 f"Invalid component_spec: {component_spec}. "
