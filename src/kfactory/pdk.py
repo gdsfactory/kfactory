@@ -557,8 +557,8 @@ def get_layer_stack(
             zmin=-box_thickness,
             material="air",
             z_to_bias=tuple(
-                list([0, 0.3, 0.6, 0.8, 0.9, 1]),
-                list([-0, -0.5, -1, -1.5, -2, -2.5]),
+                list([0., 0.3, 0.6, 0.8, 0.9, 1]),
+                list([-0., -0.5, -1, -1.5, -2, -2.5]),
             ),
             info={"mesh_order": 1},
         )
