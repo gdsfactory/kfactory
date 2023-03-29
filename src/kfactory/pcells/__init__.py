@@ -30,5 +30,4 @@ pcells: dict[str, Callable[..., kf.kcell.KCell]] = {
     "mzi": mzi,
     "taper": taper,
     "waveguide": waveguide,
-    
 }

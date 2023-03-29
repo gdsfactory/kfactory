@@ -348,7 +348,9 @@ class Pdk(BaseModel):
                 f"Enclosure, string or dict), got {type(enclosure)}"
             )
 
-    def get_layer(self, layer: Tuple[int, int] | List[int] | int | str) -> Tuple[int, int] | List[int] | None:
+    def get_layer(
+        self, layer: Tuple[int, int] | List[int] | int | str
+    ) -> Tuple[int, int] | List[int] | None:
         """Returns layer from a layer spec."""
         if isinstance(layer, (tuple, list)):
             if len(layer) != 2:

@@ -27,7 +27,6 @@ def grating_coupler_elliptical(
     period: Optional[int] = None,
     x_fiber_launch: Optional[int] = None,
 ) -> kf.KCell:
-
     DEG2RAD = np.pi / 180
 
     # Define some constants

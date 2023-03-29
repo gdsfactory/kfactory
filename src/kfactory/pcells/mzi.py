@@ -3,11 +3,10 @@ from typing import Any, Callable, Optional, Sequence, Tuple, Union
 
 import kfactory as kf
 from kfactory import autocell
-
-### To do:
-from kfactory.pcells.DCs import coupler
 from kfactory.kcell import LayerEnum
 from kfactory.pcells.dbu.waveguide import waveguide as waveguide_dbu
+### To do:
+from kfactory.pcells.DCs import coupler
 from kfactory.pcells.euler import bend_euler
 from kfactory.pcells.taper import taper
 from kfactory.pcells.waveguide import waveguide as straight_function
@@ -108,9 +107,7 @@ def mzi(
     }
     bend = kf.get_component(bend_component, **bend_settings)
     c = kf.KCell()
-    straight_connect = partial(
-        waveguide_dbu, layer=layer, enclosure=enclosure
-    )
+    straight_connect = partial(waveguide_dbu, layer=layer, enclosure=enclosure)
     combiner_settings = {
         "width": width,
         "layer": layer,

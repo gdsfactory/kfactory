@@ -4,10 +4,10 @@ from __future__ import annotations
 import itertools
 import shutil
 import time
-from typing import Any, Dict, List, Optional
-
 # import gdsfactory as gf
 from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 import omegaconf
 from yaml.representer import Representer
@@ -18,9 +18,8 @@ from ..config import logger
 from ..generic_tech import LayerStack
 from ..materials import MaterialSpec
 from ..pdk import get_layer_stack
-from ..simulation.get_sparameters_path import (
-    get_sparameters_path_lumerical as get_sparameters_path,
-)
+from ..simulation.get_sparameters_path import \
+    get_sparameters_path_lumerical as get_sparameters_path
 from ..typs import ComponentSpec, PathType
 from .simulation_settings import (
     SIMULATION_SETTINGS_LUMERICAL_FDTD,
@@ -36,7 +35,7 @@ To compute the Sparameters you need to pass run=True
 """
 
 
-def set_material(session, structure: str, material: MaterialSpec) -> None: # type: ignore
+def set_material(session, structure: str, material: MaterialSpec) -> None:  # type: ignore
     """Sets the material of a structure.
 
     Args:
@@ -73,7 +72,7 @@ def set_material(session, structure: str, material: MaterialSpec) -> None: # typ
             f"{material!r} needs to be a float refractive index, a complex number or tuple "
             "or a string from lumerical's material database"
         )
-    
+
     return None
 
 
@@ -140,7 +139,7 @@ def plot_sparameters_lumerical(
 
     component = kf.get_component(component)
 
-    def recurse_insts(comp: kf.KCell, p=None): # type: ignore
+    def recurse_insts(comp: kf.KCell, p=None):  # type: ignore
         if p:
             comp.transform(p)
         for inst in comp.insts:
@@ -153,7 +152,7 @@ def plot_sparameters_lumerical(
                     trans.append(inst.trans)
                     insts.append(inst)
                     continue
-                recurse_insts(inst.cell.dup(), inst.instance.trans) # type: ignore
+                recurse_insts(inst.cell.dup(), inst.instance.trans)  # type: ignore
             else:
                 insts.append(inst)
                 trans.append(inst.trans)
@@ -216,7 +215,7 @@ def plot_sparameters_lumerical(
                 else:
                     s_params.append(
                         write_sparameters_lumerical(
-                            component=component_, # type: ignore
+                            component=component_,  # type: ignore
                             layer_stack=layer_stack,
                             session=session,
                             run=run,
@@ -231,10 +230,9 @@ def plot_sparameters_lumerical(
                     )
                 paths[component_.name] = path
         else:
-            
             s_params.append(
                 write_sparameters_lumerical(
-                    component=component_, # type: ignore
+                    component=component_,  # type: ignore
                     layer_stack=layer_stack,
                     session=session,
                     run=run,
@@ -258,7 +256,7 @@ def plot_sparameters_lumerical(
             import sys
 
             sys.path.append("C:\\Program Files\\Lumerical\\v231\\api\\python\\")
-            import lumapi # type: ignore
+            import lumapi  # type: ignore
         except ModuleNotFoundError as e:
             print(
                 "Cannot import lumapi (Python Lumerical API). "
@@ -290,7 +288,7 @@ def plot_sparameters_lumerical(
 
         inputs: List[Any] = []
         input = input_port
-        outputs:  List[Any] = []
+        outputs: List[Any] = []
         output = output_port
         for value in components.values():
             inv_comp = False
@@ -528,13 +526,13 @@ def write_sparameters_lumerical(
     trans = []
     component = kf.get_component(component)
 
-    def recurse_insts(comp: Any, p=None): # type: ignore
+    def recurse_insts(comp: Any, p=None):  # type: ignore
         if p:
             comp.transform(p)
         for inst in comp.insts:
             if inst.trans in trans:
                 continue
-            if inst.cell.name == component.name: # type: ignore
+            if inst.cell.name == component.name:  # type: ignore
                 continue
             if len(inst.cell.insts) > 0:
                 if "sim" in inst.cell.info:
@@ -664,9 +662,7 @@ def write_sparameters_lumerical(
     component_extended = kf.KCell()
     for port in component.ports.get_all().values():
         component_ref = component_extended << component
-        width = (
-            port.width * component.klib.dbu if isinstance(port.width, int) else 1
-        )
+        width = port.width * component.klib.dbu if isinstance(port.width, int) else 1
         extension = component_extended.create_inst(
             kf.pcells.waveguide(width, ss.port_extension, layer=port.layer)
         )
@@ -798,9 +794,7 @@ def write_sparameters_lumerical(
     material_name_to_lumerical.update(**material_name_to_lumerical_new)
 
     material = (
-        material_name_to_lumerical[ss.background_material]
-        if solver == "FDTD"
-        else None
+        material_name_to_lumerical[ss.background_material] if solver == "FDTD" else None
     )
     set_material(
         session=s, structure="clad", material=material
@@ -851,9 +845,7 @@ def write_sparameters_lumerical(
         s.setnamed(layername, "z", z * 1e-6)
         s.setnamed(layername, "z span", thickness * 1e-6)
         set_material(session=s, structure=layername, material=material)
-        logger.info(
-            f"adding {layer}, thickness = {thickness} um, zmin = {zmin} um "
-        )
+        logger.info(f"adding {layer}, thickness = {thickness} um, zmin = {zmin} um ")
 
     s.deletesweep("s-parameter sweep")
 
@@ -865,8 +857,8 @@ def write_sparameters_lumerical(
     for i, port in enumerate(component.ports.get_all().values()):
         from kfactory.pdk import _ACTIVE_PDK
 
-        zmin = layer_to_zmin[_ACTIVE_PDK.get_layer(port.layer)] # type: ignore
-        thickness = layer_to_thickness[_ACTIVE_PDK.get_layer(port.layer)] # type: ignore
+        zmin = layer_to_zmin[_ACTIVE_PDK.get_layer(port.layer)]  # type: ignore
+        thickness = layer_to_thickness[_ACTIVE_PDK.get_layer(port.layer)]  # type: ignore
         z = (zmin + thickness) / 2
         zspan = 2 * ss.port_margin + thickness
 
@@ -887,12 +879,8 @@ def write_sparameters_lumerical(
         s.setnamed(p, "z", z * 1e-6 / 1000)
         s.setnamed(p, "z span", zspan * 1e-6)
         if solver != "MODE":
-            s.setnamed(
-                p, "frequency dependent profile", ss.frequency_dependent_profile
-            )
-            s.setnamed(
-                p, "number of field profile samples", ss.field_profile_samples
-            )
+            s.setnamed(p, "frequency dependent profile", ss.frequency_dependent_profile)
+            s.setnamed(p, "number of field profile samples", ss.field_profile_samples)
 
         deg = int(port.orientation)
         # if port.orientation not in [0, 90, 180, 270]:
@@ -901,23 +889,23 @@ def write_sparameters_lumerical(
         if -45 <= deg <= 45:
             direction = "Backward"
             injection_axis = "x-axis"
-            dxp = 0.
+            dxp = 0.0
             dyp = 2 * ss.port_margin + port.width / 1000
         elif 45 < deg < 90 + 45:
             direction = "Backward"
             injection_axis = "y-axis"
             dxp = 2 * ss.port_margin + port.width / 1000
-            dyp = 0.
+            dyp = 0.0
         elif 90 + 45 < deg < 180 + 45:
             direction = "Forward"
             injection_axis = "x-axis"
-            dxp = 0.
+            dxp = 0.0
             dyp = 2 * ss.port_margin + port.width / 1000
         elif 180 + 45 < deg < 180 + 45 + 90:
             direction = "Forward"
             injection_axis = "y-axis"
             dxp = 2 * ss.port_margin + port.width / 1000
-            dyp = 0.
+            dyp = 0.0
 
         else:
             raise ValueError(
@@ -925,16 +913,12 @@ def write_sparameters_lumerical(
             )
 
         port_location = (
-            "left"
-            if direction == "Forward" and injection_axis == "x-axis"
-            else "right"
+            "left" if direction == "Forward" and injection_axis == "x-axis" else "right"
         )
         s.setnamed(p, "direction", direction) if solver == "FDTD" else s.setnamed(
             p, "port location", port_location
         )
-        s.setnamed(
-            p, "injection axis", injection_axis
-        ) if solver == "FDTD" else None
+        s.setnamed(p, "injection axis", injection_axis) if solver == "FDTD" else None
         s.setnamed(p, "y span", dyp * 1e-6)
         s.setnamed(p, "x span", dxp * 1e-6) if solver == "FDTD" else s.setnamed(
             p, "z span", zspan
@@ -1056,7 +1040,7 @@ if __name__ == "__main__":
     material_name_to_lumerical = dict(si=(3.45, 2))  # or dict(si=3.45+2j)
     r = write_sparameters_lumerical(
         component=component,
-        material_name_to_lumerical=material_name_to_lumerical, # type: ignore
+        material_name_to_lumerical=material_name_to_lumerical,  # type: ignore
         run=False,
         session=s,
     )

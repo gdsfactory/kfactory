@@ -8,11 +8,11 @@ from pathlib import Path
 from typing import Any, Optional
 
 import numpy as np
-from ..kcell import clean_value
 
 import kfactory as kf
 
 from ..generic_tech import LayerStack
+from ..kcell import clean_value
 from ..pdk import get_sparameters_path
 from ..typs import ComponentSpec
 
@@ -52,7 +52,9 @@ def _get_sparameters_path(
     return dirpath / f"{component.hash().hex()}_{get_kwargs_hash(**kwargs)}.npz"
 
 
-def _get_sparameters_data(component: ComponentSpec, **kwargs: Any) -> np.ndarray[str, np.dtype[Any]]:
+def _get_sparameters_data(
+    component: ComponentSpec, **kwargs: Any
+) -> np.ndarray[str, np.dtype[Any]]:
     """Returns Sparameters data in a pandas DataFrame.
 
     Keyword Args:
