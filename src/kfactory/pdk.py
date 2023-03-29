@@ -557,8 +557,8 @@ def get_layer_stack(
             zmin=-box_thickness,
             material="air",
             z_to_bias=tuple(
-                [0, 0.3, 0.6, 0.8, 0.9, 1],
-                [-0, -0.5, -1, -1.5, -2, -2.5],
+                list([0, 0.3, 0.6, 0.8, 0.9, 1]),
+                list([-0, -0.5, -1, -1.5, -2, -2.5]),
             ),
             info={"mesh_order": 1},
         )
@@ -569,7 +569,6 @@ def get_layer_stack(
             material="Aluminum",
             info={"mesh_order": 1},
             sidewall_angle=-10,
-            width_to_z=0,
         )
         metal1 = LayerLevel(
             layer=LAYER.M1,
@@ -630,7 +629,7 @@ def get_constant(constant_name: Any) -> Any:
     return _ACTIVE_PDK.get_constant(constant_name)
 
 
-def get_sparameters_path() -> pathlib.Path:
+def get_sparameters_path() -> pathlib.Path | str:
     if _ACTIVE_PDK.sparameters_path is None:
         raise ValueError(f"{_ACTIVE_PDK.name!r} has no sparameters_path")
     return _ACTIVE_PDK.sparameters_path
@@ -649,7 +648,7 @@ def _set_active_pdk(pdk: Pdk) -> None:
 
 
 if __name__ == "__main__":
-    from kfactory.pcells import pcells
+    import kfactory as kf
 
     # from gdsfactory.enclosure import enclosures
     # c = _ACTIVE_PDK.get_component("straight")
@@ -658,7 +657,7 @@ if __name__ == "__main__":
     # set_active_pdk(GENERIC)
     c = Pdk(
         name="demo",
-        cells=pcells,
+        # cells=pcells,
         # enclosures=[],
         # layers=dict(DEVREC=(3, 0), PORTE=(3, 5)),
         sparameters_path="/home",
