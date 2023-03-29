@@ -665,8 +665,8 @@ class Enclosure(BaseModel):
         path: list[kdb.DPoint],
         main_layer: Optional[int | LayerEnum],
         width: float,
-        start_angle: float = None,
-        end_angle: float = None,
+        start_angle: Optional[float] = None,
+        end_angle: Optional[float] = None,
     ) -> None:
         if main_layer is None:
             raise ValueError(
