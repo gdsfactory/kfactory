@@ -54,9 +54,6 @@ def coupler(
         enclosure=enclosure,
     )
 
-    sbend.transform(kdb.DTrans(0, True, 0, (gap - width + dy)))
-    sbend_2.transform(kdb.DTrans(2, False, 0, -(gap + width + dy)))
-
     wg = c << straight_coupler(gap, length, width, layer, enclosure)
 
     sbend.connect("E0", wg.ports["o1"])
@@ -76,42 +73,18 @@ def coupler(
         enclosure=enclosure,
     )
 
-    sbend_r_top.connect("E0", wg.ports["o2"])
-    sbend_r_bottom.connect("E0", wg.ports["o3"])
-
-    sbend_r_top.transform(kdb.DTrans(0, False, 0, -(gap + width)))
-    sbend_r_bottom.transform(kdb.DTrans(0, False, 0, (gap + width)))
+    sbend_r_top.connect("W0", wg.ports["o3"])
+    sbend_r_bottom.connect("W0", wg.ports["o2"])
 
     # sbend_r_top.transform(kdb.DTrans(0, False, 0, 0))
     # sbend_r_bottom.transform(kdb.DTrans(0, False, 0, 0))
 
     c.add_port(name="o1", port=sbend_2.ports["W0"])
     c.add_port(name="o2", port=sbend.ports["W0"])
-    c.add_port(name="o3", port=sbend_r_bottom.ports["W0"])
-    c.add_port(name="o4", port=sbend_r_top.ports["W0"])
+    c.add_port(name="o3", port=sbend_r_bottom.ports["E0"])
+    c.add_port(name="o4", port=sbend_r_top.ports["E0"])
     c.begin_instances_rec()
-    c.info["components"] = {
-        "sbend": {
-            "component": "bend_s",
-            "params": {
-                "width": width,
-                "height": ((dy) / 2 - gap / 2 - width / 2),
-                "length": dx,
-                "layer": layer,
-                "enclosure": enclosure,
-            },
-        },
-        "straight_coupler": {
-            "component": "straight_coupler",
-            "params": {
-                "gap": gap,
-                "length": length,
-                "width": width,
-                "layer": layer,
-                "enclosure": enclosure,
-            },
-        },
-    }
+
     return c
 
 
