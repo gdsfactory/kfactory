@@ -1,7 +1,6 @@
 from typing import Optional
 
 from ... import KCell, LayerEnum, autocell, kdb, klib
-from ...pdk import _ACTIVE_PDK
 from ...utils import Enclosure
 
 __all__ = ["waveguide"]
