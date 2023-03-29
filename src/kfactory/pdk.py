@@ -68,7 +68,7 @@ class Pdk(BaseModel):
     cells: Dict[str, ComponentFactory] = Field(default_factory=dict)
     base_pdk: Optional[Pdk] = None
     default_decorator: Optional[Callable[[KCell], None]] = None
-    layers: dict = Field(default_factory=dict)
+    layers: dict[str, LAYER] = Field(default_factory=dict)
     layer_stack: Optional[LayerStack] = None
     # layer_views: Optional[LayerViews] = None
     layer_transitions: Dict[
@@ -233,15 +233,13 @@ class Pdk(BaseModel):
             cell_name = cell.get("function")
             if not isinstance(cell_name, str) or cell_name not in cells_and_containers:
                 cells = list(self.cells.keys())
-                containers = list(self.containers.keys())
                 raise ValueError(
                     f"{cell_name!r} from PDK {self.name!r} not in cells: {cells} "
-                    f"or containers: {containers}"
                 )
             cell = (
                 self.cells[cell_name]
                 if cell_name in self.cells
-                else self.cells[cell.name]
+                else self.cells[cell_name]
             )
             return partial(cell, **settings)
         else:
@@ -282,11 +280,11 @@ class Pdk(BaseModel):
             return component(**kwargs)
         elif isinstance(component, str):
             if component not in cells_and_containers:
-                cells = list(cells.keys())
+                cells_ = list(cells.keys())
                 raise ValueError(
-                    f"{component!r} not in PDK {self.name!r} cells: {cells} "
+                    f"{component!r} not in PDK {self.name!r} cells: {cells_} "
                 )
-            cell = cells[component] if component in cells else None
+            cell = cells[component] if component in cells else cells[component]
             return cell(**kwargs)
         elif isinstance(component, (dict, DictConfig)):
             for key in component.keys():
@@ -300,9 +298,9 @@ class Pdk(BaseModel):
             cell_name = component.get("component", None)
             cell_name = cell_name or component.get("function")
             if not isinstance(cell_name, str) or cell_name not in cells_and_containers:
-                cells = list(cells.keys())
+                cells_ = list(cells.keys())
                 raise ValueError(
-                    f"{cell_name!r} from PDK {self.name!r} not in cells: {cells} "
+                    f"{cell_name!r} from PDK {self.name!r} not in cells: {cells_} "
                 )
             cell = cells[cell_name] if cell_name in cells else cells[cell_name]
             component = cell(**settings)
@@ -350,18 +348,14 @@ class Pdk(BaseModel):
                 f"Enclosure, string or dict), got {type(enclosure)}"
             )
 
-    def get_layer(self, layer: Tuple | List | int | str) -> Tuple | List:
+    def get_layer(self, layer: Tuple[int, int] | List[int] | int | str) -> Tuple[int, int] | List[int] | None:
         """Returns layer from a layer spec."""
         if isinstance(layer, (tuple, list)):
             if len(layer) != 2:
                 raise ValueError(f"{layer!r} needs two integer numbers.")
             return layer
         elif isinstance(layer, int):
-            if hasattr(layer, "layer"):
-                return (layer.layer, 0)
             return (layer, 0)
-        elif layer is np.nan:
-            return np.nan
         elif layer is None:
             return
         else:
@@ -435,7 +429,7 @@ def get_component(component: ComponentSpec, **kwargs: Any) -> KCell:
     return _ACTIVE_PDK.get_component(component, **kwargs)
 
 
-def get_cell(cell: CellSpec, **kwargs: Any) -> ComponentFactory:
+def get_cell(cell: ComponentSpec, **kwargs: Any) -> ComponentFactory:
     return _ACTIVE_PDK.get_cell(cell, **kwargs)
 
 
@@ -443,7 +437,7 @@ def get_enclosure(enclosure: Enclosure, **kwargs: Any) -> Enclosure:
     return _ACTIVE_PDK.get_enclosure(enclosure, **kwargs)
 
 
-def get_layer(layer: LayerEnum) -> Tuple | List | Any:
+def get_layer(layer: LayerEnum) -> Tuple[int, int] | List[int] | Any:
     return _ACTIVE_PDK.get_layer(layer)
 
 
