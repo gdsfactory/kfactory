@@ -10,7 +10,6 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 import omegaconf
-from yaml.representer import Representer
 
 import kfactory as kf
 
