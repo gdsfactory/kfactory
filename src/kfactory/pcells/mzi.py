@@ -191,7 +191,7 @@ def mzi(
     cp2.transform(
         kf.kdb.Trans(
             2
-            * (
+            * int(
                 sxt.ports["o2"].x
                 + radius * nbends
                 + cp2.instance.dbbox().width()
