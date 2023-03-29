@@ -6,7 +6,7 @@ from kfactory import autocell
 
 ### To do:
 from kfactory.pcells.DCs import coupler
-from kfactory.generic_tech import LayerEnum
+from kfactory.kcell import LayerEnum
 from kfactory.pcells.dbu.waveguide import waveguide as waveguide_dbu
 from kfactory.pcells.euler import bend_euler
 from kfactory.pcells.taper import taper
@@ -26,7 +26,7 @@ def mzi(
     delta_length: float = 10.0,
     length_y: float = 2.0,
     length_x: Optional[float] = 0.1,
-    bend: Callable[..., kf.KCell] = bend_euler,
+    bend_component: Callable[..., kf.KCell] = bend_euler,
     straight: ComponentSpec = straight_function,
     straight_y: Optional[ComponentSpec] = None,
     straight_x_top: Optional[ComponentSpec] = None,
@@ -106,10 +106,10 @@ def mzi(
         "radius": radius,
         "enclosure": enclosure,
     }
-    bend = kf.get_component(bend, **bend_settings)
+    bend = kf.get_component(bend_component, **bend_settings)
     c = kf.KCell()
     straight_connect = partial(
-        waveguide_dbu, layer=layer, width=width / c.klib.dbu, enclosure=enclosure
+        waveguide_dbu, layer=layer, enclosure=enclosure
     )
     combiner_settings = {
         "width": width,
@@ -128,7 +128,7 @@ def mzi(
     cp2 = c << cp1_copy
     b5 = c << bend
     # b5.transform(kf.kdb.Trans.M90)
-    b5.connect("W0", cp1.ports[port_e0_splitter], mirror=True)
+    b5.connect("W0", cp1.ports[port_e0_splitter])
     # b5.instance.transform(kf.kdb.Trans(1, False, 0, 0))
     # b5.transform(kf.kdb.Trans.M90.R180)
 
@@ -162,7 +162,7 @@ def mzi(
     sxb.connect("o1", b6.ports["N0"], mirror=True)
 
     b1 = c << bend
-    b1.connect("W0", cp1.ports[port_e1_splitter], mirror=True)
+    b1.connect("W0", cp1.ports[port_e1_splitter])
 
     sytl = c << kf.get_component(
         straight_y, length=length_y, width=width, layer=layer, enclosure=enclosure
@@ -224,43 +224,4 @@ def mzi(
     c.add_ports([port for port in cp2.ports if port.orientation == 0])
     c.autorename_ports()
 
-    c.info["components"] = {
-        "straight1": {
-            "component": straight,
-            "params": {
-                "width": width,
-                "layer": layer,
-                "enclosure": enclosure,
-                "length": length_y,
-            },
-        },
-        "straight2": {
-            "component": straight,
-            "params": {
-                "width": width,
-                "layer": layer,
-                "enclosure": enclosure,
-                "length": length_x,
-            },
-        },
-        "straight3": {
-            "component": straight,
-            "params": {
-                "width": width,
-                "layer": layer,
-                "enclosure": enclosure,
-                "length": delta_length / 2 + length_y,
-            },
-        },
-        "bend": {
-            "component": bend,
-            "params": bend_settings,
-            "sim": "FDTD",
-        },
-        "splitter": {
-            "component": splitter,
-            "params": kwargs,
-            **cp1_copy.info["components"],
-        },
-    }
     return c
