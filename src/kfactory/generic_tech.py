@@ -137,9 +137,9 @@ class LayerStack(BaseModel):
         layers: dict of layer_levels.
     """
 
-    layers: Optional[Dict[str, LayerLevel]] = Field(default_factory=dict)
+    layers: Dict[str, LayerLevel] = Field(default_factory=dict)
 
-    def __init__(self, **data: Any):  # type: ignore
+    def __init__(self, **data: Any):
         """Add LayerLevels automatically for subclassed LayerStacks."""
         super().__init__(**data)
 
@@ -150,7 +150,7 @@ class LayerStack(BaseModel):
                 if isinstance(val.layer, LAYER):
                     self.layers[field].layer = (val.layer[0], val.layer[1])
 
-    def get_layer_to_thickness(self) -> Dict[Tuple[int, int], float]:
+    def get_layer_to_thickness(self) -> Dict[Tuple[int, int] | LAYER, float]:
         """Returns layer tuple to thickness (um)."""
         return {
             level.layer: level.thickness
@@ -158,21 +158,21 @@ class LayerStack(BaseModel):
             if level.thickness
         }
 
-    def get_layer_to_zmin(self) -> Dict[Tuple[int, int], float]:
+    def get_layer_to_zmin(self) -> Dict[Tuple[int, int] | LAYER, float]:
         """Returns layer tuple to z min position (um)."""
         return {
             level.layer: level.zmin for level in self.layers.values() if level.thickness
         }
 
-    def get_layer_to_material(self) -> Dict[Tuple[int, int], str]:
+    def get_layer_to_material(self) -> Dict[Tuple[int, int] | LAYER, str]:
         """Returns layer tuple to material name."""
         return {
             level.layer: level.material
             for level in self.layers.values()
-            if level.thickness
+            if level.thickness and level.material
         }
 
-    def get_layer_to_sidewall_angle(self) -> Dict[Tuple[int, int], float]:
+    def get_layer_to_sidewall_angle(self) -> Dict[Tuple[int, int] | LAYER, float]:
         """Returns layer tuple to material name."""
         return {
             level.layer: level.sidewall_angle
@@ -180,7 +180,7 @@ class LayerStack(BaseModel):
             if level.thickness
         }
 
-    def get_layer_to_info(self) -> Dict[Tuple[int, int], Dict[str, Any]]:
+    def get_layer_to_info(self) -> Dict[Tuple[int, int] | LAYER, Dict[str, Any]]:
         """Returns layer tuple to info dict."""
         return {level.layer: level.info for level in self.layers.values()}
 
