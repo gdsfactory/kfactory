@@ -4,6 +4,7 @@ from __future__ import annotations
 import itertools
 import shutil
 import time
+
 # import gdsfactory as gf
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -17,8 +18,9 @@ from ..config import logger
 from ..generic_tech import LayerStack
 from ..materials import MaterialSpec
 from ..pdk import get_layer_stack
-from ..simulation.get_sparameters_path import \
-    get_sparameters_path_lumerical as get_sparameters_path
+from ..simulation.get_sparameters_path import (
+    get_sparameters_path_lumerical as get_sparameters_path,
+)
 from ..typs import ComponentSpec, PathType
 from .simulation_settings import (
     SIMULATION_SETTINGS_LUMERICAL_FDTD,
