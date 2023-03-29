@@ -1,7 +1,8 @@
 from typing import Union
 
 from .. import KCell, autocell, kdb
-from ..generic_tech import LAYER, LayerEnum
+from ..generic_tech import LAYER
+from ..kcell import LayerEnum
 from ..pcells.bezier import bend_s
 from ..pcells.waveguide import waveguide
 from ..pdk import _ACTIVE_PDK
@@ -107,10 +108,10 @@ def straight_coupler(
     c = KCell()
 
     wg_top = c << waveguide(width, length, layer, enclosure)
-    wg_top.trans = kdb.DTrans(0, True, 0, (gap + width) / 2)
+    wg_top.trans = kdb.Trans(0, True, 0, (gap + width) / 2 / c.klib.dbu)
 
     wg_bottom = c << waveguide(width, length, layer, enclosure)
-    wg_bottom.trans = kdb.DTrans(0, False, 0, -(gap + width) / 2)
+    wg_bottom.trans = kdb.Trans(0, False, 0, -(gap + width) / 2 / c.klib.dbu)
 
     c.add_port(name="o1", port=wg_top.ports["o1"])
     c.add_port(name="o2", port=wg_top.ports["o2"])
