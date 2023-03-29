@@ -650,7 +650,7 @@ def write_sparameters_lumerical(
     if hasattr(component.info, "simulation_settings"):
         sim_settings.update(component.info.simulation_settings)
         logger.info(
-            f"Updating {component.name!r} sim settings {component.simulation_settings}"
+            f"Updating {component.name!r} sim settings {component.simulation_settings}"  # type: ignore
         )
     for setting in settings:
         if setting not in sim_settings:
@@ -865,8 +865,8 @@ def write_sparameters_lumerical(
     for i, port in enumerate(component.ports.get_all().values()):
         from kfactory.pdk import _ACTIVE_PDK
 
-        zmin = layer_to_zmin[_ACTIVE_PDK.get_layer(port.layer)] if isinstance(_ACTIVE_PDK.get_layer(port.layer), tuple) else 0.0
-        thickness = layer_to_thickness[_ACTIVE_PDK.get_layer(port.layer)] if isinstance(_ACTIVE_PDK.get_layer(port.layer), tuple) else 0.0
+        zmin = layer_to_zmin[_ACTIVE_PDK.get_layer(port.layer)] # type: ignore
+        thickness = layer_to_thickness[_ACTIVE_PDK.get_layer(port.layer)] # type: ignore
         z = (zmin + thickness) / 2
         zspan = 2 * ss.port_margin + thickness
 
