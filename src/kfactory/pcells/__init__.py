@@ -16,18 +16,9 @@ __all__ = [
     "bend_circular",
     "bend_euler",
     "bend_s_euler",
+    "coupler",
+    "mzi",
+    "straight_coupler",
     "taper",
     "waveguide",
 ]
-
-pcells: dict[str, Callable[..., kf.kcell.KCell]] = {
-    "bend_s": bend_s,
-    "bend_circular": bend_circular,
-    "bend_euler": bend_euler,
-    "bend_s_euler": bend_s_euler,
-    "coupler": coupler,
-    "straight_coupler": straight_coupler,
-    "mzi": mzi,
-    "taper": taper,
-    "waveguide": waveguide,
-}
