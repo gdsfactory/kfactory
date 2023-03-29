@@ -126,7 +126,7 @@ class LayerLevel(BaseModel):
     zmin: float
     material: Optional[str] = None
     sidewall_angle: float = 0
-    z_to_bias: Optional[Tuple[float]] = None
+    z_to_bias: Optional[Tuple[float, ...]] = None
     info: Dict[str, Any] = {}
 
 
