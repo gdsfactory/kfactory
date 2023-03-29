@@ -6,6 +6,7 @@ import socket
 import struct
 from abc import ABC, abstractmethod
 from dataclasses import InitVar, dataclass
+
 # from enum import IntEnum
 from enum import Enum
 from hashlib import sha3_512
