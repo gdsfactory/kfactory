@@ -39,10 +39,10 @@ def _get_sparameters_path(
         kwargs: simulation settings.
 
     """
-    dirpath = dirpath or get_sparameters_path()
+    dirpath_ = dirpath or get_sparameters_path()
     # component = f.get_component(component)
 
-    dirpath = pathlib.Path(dirpath)
+    dirpath = pathlib.Path(dirpath_)
     dirpath = (
         dirpath / component.function_name
         if hasattr(component, "function_name")
