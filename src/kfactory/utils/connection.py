@@ -35,6 +35,7 @@ def connect_sequence(
     conn_port = beg.ports[seq[0][2]]
     count = 1
     inst_list = [beg]
+    dev_spec: tuple[kf.KCell, str, str]
     for dev_spec in seq[1:]:
         print(dev_spec)
         kcell = dev_spec[0]  # ()
