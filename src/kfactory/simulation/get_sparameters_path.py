@@ -8,13 +8,13 @@ from pathlib import Path
 from typing import Any, Optional
 
 import numpy as np
-from gdsfactory.name import clean_value
+from ..kcell import clean_value
 
 import kfactory as kf
 
 from ..generic_tech import LayerStack
 from ..pdk import get_sparameters_path
-from ..types import ComponentSpec
+from ..typs import ComponentSpec
 
 
 def get_kwargs_hash(**kwargs: Any) -> str:
@@ -25,7 +25,7 @@ def get_kwargs_hash(**kwargs: Any) -> str:
 
 
 def _get_sparameters_path(
-    component: ComponentSpec,
+    component: kf.KCell,
     dirpath: Optional[Path] = None,
     **kwargs: Any,
 ) -> Path:
@@ -52,7 +52,7 @@ def _get_sparameters_path(
     return dirpath / f"{component.hash().hex()}_{get_kwargs_hash(**kwargs)}.npz"
 
 
-def _get_sparameters_data(component: ComponentSpec, **kwargs: Any) -> np.ndarray:
+def _get_sparameters_data(component: ComponentSpec, **kwargs: Any) -> np.ndarray[str, np.dtype[Any]]:
     """Returns Sparameters data in a pandas DataFrame.
 
     Keyword Args:
@@ -61,9 +61,10 @@ def _get_sparameters_data(component: ComponentSpec, **kwargs: Any) -> np.ndarray
         kwargs: simulation settings.
 
     """
+    component = kf.get_component(component)
     kwargs.update(component=component)
     filepath = _get_sparameters_path(component=component, **kwargs)
-    return np.load(filepath)
+    return np.ndarray(np.load(filepath))
 
 
 get_sparameters_path_meow = partial(_get_sparameters_path, tool="meow")
@@ -78,12 +79,13 @@ get_sparameters_data_tidy3d = partial(_get_sparameters_data, tool="tidy3d")
 
 
 if __name__ == "__main__":
-    c = kf.pcells.taper_function(length=1.0, width1=0.5, width2=0.5)
-    p = get_sparameters_path_lumerical(c)
+    # c = kf.pcells.taper(length=1.0, width1=0.5, width2=0.5, layer=1)
+    # p = get_sparameters_path_lumerical(c)
 
-    sp = np.load(p)
-    spd = dict(sp)
-    print(spd)
+    # sp = np.load(p)
+    # spd = dict(sp)
+    # print(spd)
 
     # test_get_sparameters_path(test=False)
     # test_get_sparameters_path(test=True)
+    print("")
