@@ -18,8 +18,8 @@ def grating_coupler_elliptical(
     grating_line_width: int = 343,
     wg_width: int = 500,
     neff: float = 2.638,  # tooth effective index
-    layer_taper: Optional[IntEnum] = LAYER.WG,
-    layer_trench: IntEnum = LAYER.UNDERCUT,
+    layer_taper: Optional[LAYER] = LAYER.WG,
+    layer_trench: LAYER = LAYER.UNDERCUT,
     p_start: int = 26,
     n_periods: int = 30,
     taper_offset: int = 0,
