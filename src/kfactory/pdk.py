@@ -74,7 +74,7 @@ class Pdk(BaseModel):
     layer_transitions: Dict[
         Union[LayerEnum, Tuple[LayerEnum, LayerEnum]], ComponentSpec
     ] = Field(default_factory=dict)
-    sparameters_path: Optional[Path] = None
+    sparameters_path: Optional[Path | str] = None
     # modes_path: Optional[Path] = PATH.modes
     interconnect_cml_path: Optional[Path] = None
     grid_size: float = 0.001
@@ -411,8 +411,8 @@ def get_generic_pdk() -> Pdk:
 
     return Pdk(
         name="generic",
-        cells=[],
-        enclosures=[],
+        # cells=[],
+        # enclosures=[],
         layers={layer.name: layer for layer in LAYER},
         layer_stack=LayerStack(),
         # layer_views=LAYER_VIEWS,
@@ -511,7 +511,7 @@ def get_layer_stack(
             material="si",
             info={"mesh_order": 1},
             sidewall_angle=10,
-            width_to_z=0.5,
+            # width_to_z=0.5,
         )
         clad = LayerLevel(
             # layer=LAYER.WGCLAD,
@@ -554,10 +554,10 @@ def get_layer_stack(
             thickness=-undercut_thickness,
             zmin=-box_thickness,
             material="air",
-            z_to_bias=[
+            z_to_bias=tuple(
                 [0, 0.3, 0.6, 0.8, 0.9, 1],
                 [-0, -0.5, -1, -1.5, -2, -2.5],
-            ],
+            ),
             info={"mesh_order": 1},
         )
         via_contact = LayerLevel(
@@ -657,7 +657,7 @@ if __name__ == "__main__":
     c = Pdk(
         name="demo",
         cells=pcells,
-        enclosures=[],
+        # enclosures=[],
         # layers=dict(DEVREC=(3, 0), PORTE=(3, 5)),
         sparameters_path="/home",
     )
