@@ -158,13 +158,19 @@ def plot_sparameters_lumerical(
                 insts.append(inst)
                 trans.append(inst.trans)
 
-    if "sim" not in component.info:
+    if "sim" not in component.info and "sparameters" not in component.info:
         recurse_insts(component)
     paths: dict[str, Path] = {}
     for inst in insts:
         # paths = {}
         component_ = inst.cell
         if not overwrite:
+            if "sparaneters" in component_.info:
+                path = Path(component_.info["sparameters"])
+                if path.exists():
+                    s_params.append(path)
+                    paths[component_.name] = path
+                    continue
             if "components" in component_.info:
                 paths = {}
                 for component2 in component_.info["components"]:
