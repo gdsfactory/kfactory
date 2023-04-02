@@ -1,13 +1,18 @@
-from kfactory import KCell, kdb
+from .. import KCell, kdb
 
 
 def fix_spacing(
-    c: KCell, min_space: int, layer: int, fix_sizing: int = 20, smooth: int = 5
+    c: KCell,
+    min_space: int,
+    layer: int,
+    fix_sizing: int = 20,
+    smooth: int = 5,
+    metrics: kdb.Metrics = kdb.Metrics.Projection,
 ) -> kdb.Region:
     reg = kdb.Region()
     reg.merged_semantics = False
     reg.insert(c.begin_shapes_rec(layer))
-    sc = reg.space_check(min_space, False, kdb.Metrics.Projection, 80).polygons()
+    sc = reg.space_check(min_space, False, metrics, 80).polygons()
     r_int = reg.interacting(sc)
     r_int += (
         sc.sized(fix_sizing, 5)

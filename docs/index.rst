@@ -15,6 +15,12 @@ kfactory
    api
    CHANGELOG
 
+.. autosummary::
+   :toctree: modules
+   :recursive:
+
+   kfactory
+
 Indices and tables
 ==================
 

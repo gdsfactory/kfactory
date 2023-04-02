@@ -4,7 +4,7 @@ from typing import Any, Callable, List, Optional, Sequence, TypeGuard, cast, ove
 
 import numpy as np
 from numpy.typing import ArrayLike
-from pydantic import BaseModel, PrivateAttr
+from pydantic import BaseModel, Field, PrivateAttr
 
 from .. import kdb
 from ..config import logger
@@ -432,7 +432,7 @@ class Section(BaseModel):
 
 
 class LayerSection(BaseModel):
-    sections: list[Section] = []
+    sections: list[Section] = Field(default=[])
 
     def add_section(self, sec: Section) -> None:
         if not self.sections:
