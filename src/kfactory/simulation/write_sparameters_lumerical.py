@@ -165,7 +165,7 @@ def plot_sparameters_lumerical(
         # paths = {}
         component_ = inst.cell
         if not overwrite:
-            if "sparaneters" in component_.info:
+            if "sparameters" in component_.info:
                 path = Path(component_.info["sparameters"])
                 if path.exists():
                     s_params.append(path)
@@ -314,19 +314,31 @@ def plot_sparameters_lumerical(
                     inv_comp = True
                     instances.remove(instance)
                     continue
-                s.addelement("Optical N Port S-Parameter")
-                s.setnamed(f"SPAR_1", "name", f"{instance.cell.name, instance.hash()}")
-                s.setnamed(
-                    f"{instance.cell.name, instance.hash()}", "load from file", True
-                )
-                filepath_component = get_sparameters_path(
-                    instance, dirpath=dirpath, simulation_settings=simulation_settings
-                )
-                s.setnamed(
-                    f"{instance.cell.name, instance.hash()}",
-                    "s parameters filename",
-                    paths[instance.cell.name].as_posix().replace(".npz", ".dat"),
-                )
+                if paths[instance.cell.name].with_suffix('.ldf').exists():
+                    s.addelement("MODE Waveguide")
+                    s.setnamed(f"MODE_1", "name", f"{instance.cell.name, instance.hash()}")
+                    s.setnamed(
+                        f"{instance.cell.name, instance.hash()}", "load from file", True
+                    )
+                    s.setnamed(
+                        f"{instance.cell.name, instance.hash()}",
+                        "mode filename",
+                        paths[instance.cell.name].with_suffix('.ldf').as_posix(),
+                    )
+                else:
+                    s.addelement("Optical N Port S-Parameter")
+                    s.setnamed(f"SPAR_1", "name", f"{instance.cell.name, instance.hash()}")
+                    s.setnamed(
+                        f"{instance.cell.name, instance.hash()}", "load from file", True
+                    )
+                    filepath_component = get_sparameters_path(
+                        instance, dirpath=dirpath, simulation_settings=simulation_settings
+                    )
+                    s.setnamed(
+                        f"{instance.cell.name, instance.hash()}",
+                        "s parameters filename",
+                        paths[instance.cell.name].as_posix().replace(".npz", ".dat"),
+                    )
                 s.setnamed(
                     f"{instance.cell.name, instance.hash()}",
                     "x position",
