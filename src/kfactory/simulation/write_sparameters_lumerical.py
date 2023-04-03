@@ -314,25 +314,31 @@ def plot_sparameters_lumerical(
                     inv_comp = True
                     instances.remove(instance)
                     continue
-                if paths[instance.cell.name].with_suffix('.ldf').exists():
+                if paths[instance.cell.name].with_suffix(".ldf").exists():
                     s.addelement("MODE Waveguide")
-                    s.setnamed(f"MODE_1", "name", f"{instance.cell.name, instance.hash()}")
+                    s.setnamed(
+                        f"MODE_1", "name", f"{instance.cell.name, instance.hash()}"
+                    )
                     s.setnamed(
                         f"{instance.cell.name, instance.hash()}", "load from file", True
                     )
                     s.setnamed(
                         f"{instance.cell.name, instance.hash()}",
                         "mode filename",
-                        paths[instance.cell.name].with_suffix('.ldf').as_posix(),
+                        paths[instance.cell.name].with_suffix(".ldf").as_posix(),
                     )
                 else:
                     s.addelement("Optical N Port S-Parameter")
-                    s.setnamed(f"SPAR_1", "name", f"{instance.cell.name, instance.hash()}")
+                    s.setnamed(
+                        f"SPAR_1", "name", f"{instance.cell.name, instance.hash()}"
+                    )
                     s.setnamed(
                         f"{instance.cell.name, instance.hash()}", "load from file", True
                     )
                     filepath_component = get_sparameters_path(
-                        instance, dirpath=dirpath, simulation_settings=simulation_settings
+                        instance,
+                        dirpath=dirpath,
+                        simulation_settings=simulation_settings,
                     )
                     s.setnamed(
                         f"{instance.cell.name, instance.hash()}",
