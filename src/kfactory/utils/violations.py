@@ -28,46 +28,106 @@ def fix_spacing(
 def fix_spacing_tiled(
     c: KCell,
     min_space: int,
-    layer: LayerEnum,
-    fix_sizing: int = 20,
-    smooth: int = 5,
+    layer: LayerEnum | int,
     metrics: kdb.Metrics = kdb.Metrics.Projection,
     ignore_angle: float = 80,
     size_space_check: int = 5,
     n_threads: int = 4,
+    tile_size: tuple[float, float] = (250, 250),
+    overlap: float = 2,
 ) -> kdb.Region:
+    """Fix min space issues by running a drc check on the input region and merging it with the affcted polygons
+
+    Args:
+        c: Input cell
+        layer: Input layer index
+        metrics: The metrics to use to determine the violation edges
+        ignore_angle: ignore angles greater or equal to this angle
+        size_space_check: Sizing in dbu of the offending edges towards the polygons
+        n_threads: on how many threads to run the check simultaneously
+        tile_size: tuple determining the size of each sub tile (in um), should be big compared to the violation size
+        overlap: how many times bigger to make the tile border in relation to the violation size. Smaller than 1 can lead to errors
+
+    Returns:
+        kdb.Region: Region containing the fixes for the violations
+
+    """
+
     tp = kdb.TilingProcessor()
     tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore
     tp.dbu = c.klib.dbu
     tp.threads = n_threads
-    tp.tile_size(2500, 2500)  # tile size in um
-    tp.input("iter", c.begin_shapes_rec(layer))
+    tp.tile_size(*tile_size)  # tile size in um
+    tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
+    tp.input("reg", c.begin_shapes_rec(layer))
 
-    tp.input("reg", kdb.Region())
     fix_reg = kdb.Region()
 
     tp.output("fix_reg", fix_reg)
 
     queue_str = (
-        "var _iter = iter & (_tile & _frame); reg.merged_semantics = false;"
-        + f"reg = iter.sized({min_space}).sized({-min_space});"
-        + "_output(fix_reg, reg)"
+        "var tile_reg = reg & (_tile & _frame);"
+        + f"var sc = tile_reg.space_check({min_space}, false, Metrics.{metrics.to_s()}, {ignore_angle});"
+        + f"var r_int = (sc.edges().extended(0, 0, 0, {size_space_check}, true) + sc.polygons()); r_int.merge();"
+        + f"r_int.insert(tile_reg.interacting(sc.polygons())); r_int.merge();"
+        + "_output(fix_reg, r_int)"
     )
 
-    ### The no sizing option: Does *not* work yet due to crash
-    # queue_str = (
-    #     "var _iter = iter & (_tile & _frame); reg.merged_semantics = false;"
-    #     + f"var sc = _iter.space_check({min_space}, false);"  # , '{metrics.to_i()}');"  # angle_limit({ignore_angle})); "
-    #     + f"var r_int = (sc.edges().merge().extended(0, 0, 0, {size_space_check}, true).merge() + sc.polygons().merge()).merge();"
-    #     + "var r_int = sc.polygons().merge() & (_tile & _frame);"
-    #     + "_output(fix_reg, r_int)"
-    # )
-
-    # print(queue_str)
+    print(queue_str)
 
     tp.queue(queue_str)
 
-    # c.klib.start_changes()
+    c.klib.start_changes()
     tp.execute("Min Space Fix")
-    # c.klib.end_changes()
+    c.klib.end_changes()
+
+    return fix_reg
+
+
+def fix_spacing_sizing_tiled(
+    c: KCell,
+    min_space: int,
+    layer: LayerEnum,
+    n_threads: int = 4,
+    tile_size: tuple[float, float] = (250, 250),
+    overlap: int = 2,
+) -> kdb.Region:
+    """Fix min space issues by using a dilation & erosion
+
+    Args:
+        c: Input cell
+        layer: Input layer index
+        metrics: The metrics to use to determine the violation edges
+        n_threads: on how many threads to run the check simultaneously
+        tile_size: tuple determining the size of each sub tile (in um), should be big compared to the violation size
+        overlap: how many times bigger to make the tile border in relation to the violation size. Smaller than 1 can lead to errors
+
+    Returns:
+        kdb.Region: Region containing the fixes for the violations
+
+    """
+    tp = kdb.TilingProcessor()
+    tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore
+    tp.dbu = c.klib.dbu
+    tp.threads = n_threads
+    tp.tile_size(*tile_size)  # tile size in um
+    tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
+    tp.input("reg", c.begin_shapes_rec(layer))
+
+    fix_reg = kdb.Region()
+
+    tp.output("fix_reg", fix_reg)
+
+    queue_str = (
+        "var tile_reg= reg & (_tile & _frame);"
+        + f"reg = tile_reg.sized({min_space}).sized({-min_space});"
+        + "_output(fix_reg, reg)"
+    )
+
+    tp.queue(queue_str)
+
+    c.klib.start_changes()
+    tp.execute("Min Space Fix")
+    c.klib.end_changes()
+
     return fix_reg
