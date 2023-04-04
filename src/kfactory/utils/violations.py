@@ -68,12 +68,11 @@ def fix_spacing_tiled(
     queue_str = (
         "var tile_reg = reg & (_tile & _frame);"
         + f"var sc = tile_reg.space_check({min_space}, false, Metrics.{metrics.to_s()}, {ignore_angle});"
-        + f"var r_int = (sc.edges().extended(0, 0, 0, {size_space_check}, true) + sc.polygons()); r_int.merge();"
+        + f"var edges = sc.edges(); edges.merge();"
+        + f"var r_int = (edges.extended(0, 0, 0, {size_space_check}, true) + sc.polygons()); r_int.merge();"
         + f"r_int.insert(tile_reg.interacting(sc.polygons())); r_int.merge();"
         + "_output(fix_reg, r_int)"
     )
-
-    print(queue_str)
 
     tp.queue(queue_str)
 
