@@ -1,3 +1,5 @@
+from typing import Optional
+
 from .. import KCell, LayerEnum, kdb
 
 
@@ -29,7 +31,7 @@ def fix_spacing_tiled(
     c: KCell,
     min_space: int,
     layer: LayerEnum | int,
-    metrics: kdb.Metrics = kdb.Metrics.Projection,
+    metrics: kdb.Metrics = kdb.Metrics.Euclidian,
     ignore_angle: float = 80,
     size_space_check: int = 5,
     n_threads: int = 4,
@@ -88,7 +90,7 @@ def fix_spacing_sizing_tiled(
     min_space: int,
     layer: LayerEnum,
     n_threads: int = 4,
-    tile_size: tuple[float, float] = (250, 250),
+    tile_size: Optional[tuple[float, float]] = None,
     overlap: int = 2,
 ) -> kdb.Region:
     """Fix min space issues by using a dilation & erosion
@@ -106,6 +108,9 @@ def fix_spacing_sizing_tiled(
 
     """
     tp = kdb.TilingProcessor()
+    if tile_size is None:
+        size = min_space * 20 * c.klib.dbu
+        tile_size = (size, size)
     tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore
     tp.dbu = c.klib.dbu
     tp.threads = n_threads
