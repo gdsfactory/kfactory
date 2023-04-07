@@ -68,6 +68,9 @@ ipy = [
 	"ipyevents",
 ]
 
+auto-route = [
+	"jumanji[train"],
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
