@@ -6,9 +6,9 @@ import numpy as np
 from numpy.typing import ArrayLike
 from pydantic import BaseModel, Field, PrivateAttr
 
-from .. import kdb
-from ..config import logger
-from ..kcell import KCell, LayerEnum
+from ... import kdb
+from ...config import logger
+from ...kcell import KCell, LayerEnum
 
 __all__ = [
     "extrude_path",
