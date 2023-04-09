@@ -117,10 +117,6 @@ def fill_tiled(
     )
 
     if layer_names or region_names:
-        print(fill_layers, fill_regions, exclude_regions, exclude_layers)
-
-        for layer_name, (_, size) in zip(exlayer_names, exclude_layers):
-            print(layer_name, size)
         exlayers = " + ".join(
             [
                 layer_name + f".sized({int(size / c.klib.dbu)})" if size else layer_name
@@ -150,7 +146,6 @@ def fill_tiled(
             ]
         )
 
-        print(layers, regions, exlayers, exregions)
         if exlayer_names or exregion_names:
             queue_str = (
                 "var fill= "
@@ -181,7 +176,6 @@ def fill_tiled(
         c.klib.start_changes()
         try:
             logger.info("filling {} with {}", c.name, fill_cell.name)
-            logger.debug("layers: {}", fill_layers)
             logger.debug("fill string: '{}'", queue_str)
             tp.execute(f"Fill {c.name}")
             logger.info("done with filling {}", c.name)
