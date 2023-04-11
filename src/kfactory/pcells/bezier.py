@@ -1,17 +1,17 @@
 from typing import Optional, Sequence
 
 import numpy as np
+import numpy.typing as nty
 from scipy.special import binom  # type: ignore[import]
 
 from .. import KCell, LayerEnum, autocell, kdb
 from ..utils import Enclosure
-from ..utils.geo import extrude_path
 
 __all__ = ["bend_s"]
 
 
 def bezier_curve(
-    t: np.typing.NDArray[np.float64],
+    t: nty.NDArray[np.float64],
     control_points: Sequence[tuple[np.float64 | float, np.float64 | float]],
 ) -> list[kdb.DPoint]:
     xs = np.zeros(t.shape, dtype=np.float64)
@@ -47,7 +47,6 @@ def bend_s(
         enclosure = Enclosure()
 
     enclosure.extrude_path(c, path=pts, main_layer=layer, width=width)
-    # extrude_path(c, layer, pts, width, enclosure, start_angle=180, end_angle=0)
 
     c.create_port(
         name="W0",

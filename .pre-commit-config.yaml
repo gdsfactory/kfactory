@@ -36,7 +36,7 @@ repos:
         args: [--profile, black, --filter-files]
 
   - repo: https://github.com/psf/black
-    rev: 22.12.0
+    rev: 23.3.0
     hooks:
       - id: black
 
@@ -66,10 +66,11 @@ repos:
         args: [--py37-plus, --keep-runtime-typing]
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.2
+    rev: v2.2.4
     hooks:
       - id: codespell
-        args: ["-L TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem"]
+        additional_dependencies:
+          - tomli
 
   # - repo: https://github.com/shellcheck-py/shellcheck-py
   #   rev: 98854f809ca9d0e235c0bd5c0ad5e986e02120a4
@@ -82,7 +83,7 @@ repos:
   #     - id: python-use-type-annotations
 
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.4
+    rev: 1.7.5
     hooks:
       - id: bandit
         args: [--exit-zero]

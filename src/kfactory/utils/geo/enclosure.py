@@ -1,43 +1,26 @@
-from enum import Enum
+from enum import IntEnum
 from hashlib import sha1
-from typing import Any, Callable, List, Optional, Sequence, TypeGuard, cast, overload
+from typing import Any, Callable, Optional, Sequence, TypeGuard
 
 import numpy as np
-from numpy.typing import ArrayLike
-from pydantic import BaseModel, PrivateAttr
+from pydantic import BaseModel, Field, PrivateAttr
 
-from .. import kdb
-from ..config import logger
-from ..kcell import KCell, LayerEnum
+from ... import kdb
+from ...kcell import KCell, LayerEnum
 
 __all__ = [
+    "Enclosure",
     "extrude_path",
     "extrude_path_points",
-    "extrude_path_dynamic_points",
     "extrude_path_dynamic",
-    "path_pts_to_polygon",
-    "Enclosure",
-    "Direction",
+    "extrude_path_dynamic_points",
 ]
 
 
-def vec_angle(v: kdb.Vector) -> int:
-    """Determine vector angle in increments of 90°"""
-    if v.x != 0 and v.y != 0:
-        raise NotImplementedError("only manhattan vectors supported")
-
-    match (v.x, v.y):
-        case (x, 0) if x > 0:
-            return 0
-        case (x, 0) if x < 0:
-            return 2
-        case (0, y) if y > 0:
-            return 1
-        case (0, y) if y < 0:
-            return 3
-        case _:
-            logger.warning(f"{v} is not a manhattan, cannot determine direction")
-    return -1
+class Direction(IntEnum):
+    X = 1
+    Y = 2
+    BOTH = 3
 
 
 def is_callable_widths(
@@ -46,7 +29,26 @@ def is_callable_widths(
     return callable(widths)
 
 
-def clean_points(points: List[kdb.Point]) -> List[kdb.Point]:
+def path_pts_to_polygon(
+    pts_top: list[kdb.DPoint], pts_bot: list[kdb.DPoint]
+) -> kdb.DPolygon:
+    pts_bot.reverse()
+    return kdb.DPolygon(pts_top + pts_bot)
+
+
+def is_Region(r: object) -> TypeGuard[kdb.Region]:
+    return isinstance(r, kdb.Region)
+
+
+def is_int(r: object) -> TypeGuard[int]:
+    return isinstance(r, int)
+
+
+def is_callable(r: object) -> TypeGuard[Callable[[float], float]]:
+    return callable(r)
+
+
+def clean_points(points: list[kdb.Point]) -> list[kdb.Point]:
     if len(points) < 2:
         return points
     if len(points) == 2:
@@ -70,52 +72,6 @@ def clean_points(points: List[kdb.Point]) -> List[kdb.Point]:
         del points[i]
 
     return points
-
-
-def simplify(points: list[kdb.Point], tolerance: float) -> list[kdb.Point]:
-    simple_pts: list[kdb.Point] = [points[0]]
-    if len(points) < 3:
-        return points
-
-    start = 0
-    last = len(points) - 1
-
-    e = kdb.Edge(points[0], points[-1])
-    dists = [e.distance_abs(p) for p in points]
-    ind_dist = int(np.argmax(dists))
-    maxd = dists[ind_dist]
-
-    return (
-        [points[0], points[-1]]
-        if maxd <= tolerance
-        else (
-            simplify(points[: ind_dist + 1], tolerance)
-            + simplify(points[ind_dist:], tolerance)[1:]
-        )
-    )
-
-
-def dsimplify(points: list[kdb.DPoint], tolerance: float) -> list[kdb.DPoint]:
-    if len(points) < 3:
-        return points
-    simple_pts: list[kdb.DPoint] = [points[0]]
-
-    start = 0
-    last = len(points) - 1
-
-    e = kdb.DEdge(points[0], points[-1])
-    dists = [e.distance_abs(p) for p in points]
-    ind_dist = int(np.argmax(dists))
-    maxd = dists[ind_dist]
-
-    return (
-        [points[0], points[-1]]
-        if maxd <= tolerance
-        else (
-            dsimplify(points[: ind_dist + 1], tolerance)
-            + dsimplify(points[ind_dist:], tolerance)[1:]
-        )
-    )
 
 
 def extrude_path_points(
@@ -398,31 +354,6 @@ def extrude_path_dynamic(
             target.shapes(layer).insert(reg.merge())
 
 
-def path_pts_to_polygon(
-    pts_top: list[kdb.DPoint], pts_bot: list[kdb.DPoint]
-) -> kdb.DPolygon:
-    pts_bot.reverse()
-    return kdb.DPolygon(pts_top + pts_bot)
-
-
-def is_Region(r: object) -> TypeGuard[kdb.Region]:
-    return isinstance(r, kdb.Region)
-
-
-def is_int(r: object) -> TypeGuard[int]:
-    return isinstance(r, int)
-
-
-def is_callable(r: object) -> TypeGuard[Callable[[float], float]]:
-    return callable(r)
-
-
-class Direction(Enum):
-    X = 1
-    Y = 2
-    BOTH = 3
-
-
 class Section(BaseModel):
     d_min: Optional[int] = None
     d_max: int
@@ -432,7 +363,7 @@ class Section(BaseModel):
 
 
 class LayerSection(BaseModel):
-    sections: list[Section] = []
+    sections: list[Section] = Field(default=[])
 
     def add_section(self, sec: Section) -> None:
         if not self.sections:

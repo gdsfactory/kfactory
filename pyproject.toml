@@ -24,6 +24,7 @@ dependencies = [
 	"cachetools >= 5.2.0",
   "pydantic",
 	"loguru",
+	"tomli",
 ]
 
 [project.optional-dependencies]
@@ -166,3 +167,7 @@ omit = "**/test_*.py"
 
 [tool.coverage.html]
 directory = "_build/coverage_html_report"
+
+[tool.codespell]
+ignore-words-list = "euclidian,TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem"
+skip = "pyproject.toml"
