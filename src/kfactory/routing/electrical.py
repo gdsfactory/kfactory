@@ -15,7 +15,6 @@ def connect_elec(
     width: Optional[int] = None,
     layer: Optional[int] = None,
 ) -> None:
-
     if width is None:
         width = start_port.width
     if layer is None:
@@ -223,7 +222,6 @@ def connect_dual_rails(
     hole_width: Optional[int] = None,
     layer: Optional[int] = None,
 ) -> None:
-
     if width is None:
         width = start_port.width
     if hole_width is None:

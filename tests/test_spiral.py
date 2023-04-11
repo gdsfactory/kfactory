@@ -98,7 +98,6 @@ def dbend_circular(
 
     match theta:
         case 90:
-
             dp2 = kf.DPort(
                 name="N0",
                 layer=layer,

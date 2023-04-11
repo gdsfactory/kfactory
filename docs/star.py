@@ -8,7 +8,6 @@ import random
 def star(
     size: float, proportion: float, n_diamonds: int = 3, layer: kf.LayerEnum = LAYER.SI
 ) -> kf.KCell:
-
     """Create a diamond star cell
 
     Args:
