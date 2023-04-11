@@ -35,7 +35,7 @@ def fix_spacing_tiled(
     ignore_angle: float = 80,
     size_space_check: int = 5,
     n_threads: int = 4,
-    tile_size: tuple[float, float] = (250, 250),
+    tile_size: Optional[tuple[float, float]] = None,
     overlap: float = 2,
 ) -> kdb.Region:
     """Fix min space issues by running a drc check on the input region and merging it with the affcted polygons
@@ -55,13 +55,17 @@ def fix_spacing_tiled(
 
     """
 
+    if tile_size is None:
+        size = min(25 * min_space, 250)
+        tile_size = (25 * min_space * c.klib.dbu, 25 * min_space * c.klib.dbu)
+
     tp = kdb.TilingProcessor()
     tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore
     tp.dbu = c.klib.dbu
     tp.threads = n_threads
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
-    tp.input("reg", c.begin_shapes_rec(layer))
+    tp.input("reg", c.klib, c.cell_index(), layer)
 
     fix_reg = kdb.Region()
 
@@ -116,7 +120,7 @@ def fix_spacing_sizing_tiled(
     tp.threads = n_threads
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
-    tp.input("reg", c.begin_shapes_rec(layer))
+    tp.input("reg", c.klib, c.cell_index(), layer)
 
     fix_reg = kdb.Region()
 
