@@ -34,7 +34,10 @@ dev = [
 	"pre-commit",
 	"gitpython",
 	"pylsp-mypy",
-	"types-cachetools"
+	"python-lsp-server[all]",
+	"python-lsp-ruff",
+	"types-cachetools",
+	"python-lsp-black",
 ]
 docs = [
 	"sphinx",
@@ -171,3 +174,16 @@ directory = "_build/coverage_html_report"
 [tool.codespell]
 ignore-words-list = "euclidian,TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem"
 skip = "pyproject.toml"
+
+[tool.ruff]
+line-length = 88
+src = ["src"]
+select = [
+  "E",   # pycodestyle
+  "F",   # pyflakes
+  "UP",  # pyupgrade
+  "D",   # pydocstyle
+]
+
+[tool.ruff.pydocstyle]
+convention = "google"
