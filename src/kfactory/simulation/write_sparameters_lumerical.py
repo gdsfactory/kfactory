@@ -149,7 +149,7 @@ def plot_sparameters_lumerical(
             if inst.cell.name == component.name:
                 continue
             if len(inst.cell.insts) > 0:
-                if "sim" in inst.cell.info:
+                if "sim" in inst.cell.info or "sparameters" in inst.cell.info:
                     trans.append(inst.trans)
                     insts.append(inst)
                     continue
@@ -297,6 +297,7 @@ def plot_sparameters_lumerical(
         input = input_port
         outputs: List[Any] = []
         output = output_port
+        idx = 0
         for value in components.values():
             inv_comp = False
             instances = (
@@ -315,18 +316,59 @@ def plot_sparameters_lumerical(
                     instances.remove(instance)
                     continue
                 if paths[instance.cell.name].with_suffix(".ldf").exists():
-                    s.addelement("MODE Waveguide")
-                    s.setnamed(
-                        f"MODE_1", "name", f"{instance.cell.name, instance.hash()}"
-                    )
-                    s.setnamed(
-                        f"{instance.cell.name, instance.hash()}", "load from file", True
-                    )
-                    s.setnamed(
-                        f"{instance.cell.name, instance.hash()}",
-                        "mode filename",
-                        paths[instance.cell.name].with_suffix(".ldf").as_posix(),
-                    )
+                    try:
+                        print(instance.cell.settings["length"])
+                        idx += 1
+                        s.addelement("MODE Waveguide")
+                        s.setnamed(
+                            f"WGD_1", "name", f"{instance.cell.name, instance.hash()}"
+                        )
+                        s.setnamed(
+                            f"{instance.cell.name, instance.hash()}", "load mode profile", False
+                        )
+                        s.setnamed(
+                            f"{instance.cell.name, instance.hash()}", "load from file", True
+                        )
+                        s.setnamed(
+                            f"{instance.cell.name, instance.hash()}",
+                            "ldf filename",
+                            paths[instance.cell.name].with_suffix(".ldf").as_posix(),
+                        )
+                        print(instance.cell.settings)
+                        s.setnamed(
+                            f"{instance.cell.name, instance.hash()}",
+                            "length",
+                            instance.cell.settings["length"] * 1e-6 if instance.cell.settings["length"] < 1000 else instance.cell.settings["length"] * 1e-9,
+                        )
+                    except KeyError:
+                        idx += 1
+                        s.addelement("MODE Waveguide")
+                        s.setnamed(
+                            f"WGD_1", "name", f"{instance.cell.name, instance.hash()}"
+                        )
+                        print(i)
+                        s.setnamed(
+                            f"{instance.cell.name, instance.hash()}", "load mode profile", False
+                        )
+                        s.setnamed(
+                            f"{instance.cell.name, instance.hash()}", "load from file", True
+                        )
+                        s.save("test.ice")
+                        s.setnamed(
+                            f"{instance.cell.name, instance.hash()}",
+                            "ldf filename",
+                            paths[instance.cell.name].with_suffix(".ldf").as_posix(),
+                        )
+                        s.setnamed(
+                            f"{instance.cell.name, instance.hash()}",
+                            "length",
+                            instance.cell.settings["radius"] * np.pi / 2 * 1e-6,
+                        )
+                        # s.setnamed(
+                        #     f"{instance.cell.name, instance.hash()}",
+                        #     "radius",
+                        #     instance.cell.settings["radius"] * 1e-6,
+                        # )
                 else:
                     s.addelement("Optical N Port S-Parameter")
                     s.setnamed(
@@ -379,12 +421,16 @@ def plot_sparameters_lumerical(
             #     settings__ = component.info["components"][component_]["params"]
             #     print(kf.get_component(component__, **settings__).name)
             if len(instances) == 2:
-                s.connect(
-                    f"{instances[0].cell.name, instances[0].hash()}",
-                    ports[0],
-                    f"{instances[1].cell.name, instances[1].hash()}",
-                    ports[1],
-                )
+                try:
+                    s.connect(
+                        f"{instances[0].cell.name, instances[0].hash()}",
+                        ports[0],
+                        f"{instances[1].cell.name, instances[1].hash()}",
+                        ports[1],
+                    )
+                except Exception as e:
+                    print(e)
+                    continue
             else:
                 print(component.ports, value)
                 input_port = (
@@ -413,6 +459,7 @@ def plot_sparameters_lumerical(
             component, dirpath=dirpath, simulation_settings=simulation_settings
         )
         s.save(path3.as_posix().replace(".npz", ".ice"))
+        print(outputs)
         s.connect(
             "ONA",
             "output",
@@ -691,7 +738,7 @@ def write_sparameters_lumerical(
         extension = component_extended.create_inst(
             kf.pcells.waveguide(width, ss.port_extension, layer=port.layer)
         )
-        extension.connect("o2", extension, port.name)
+        extension.connect("o2", component_ref, port.name)
         output_port = extension.ports["o1"]
         component_extended.add_port(extension.ports["o1"], name=port.name)
 
