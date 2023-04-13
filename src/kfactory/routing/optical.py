@@ -1,9 +1,28 @@
 from typing import Callable, List, Optional, Sequence, Union
 
 from .. import kdb
+from ..config import logger
 from ..kcell import DCplxPort, KCell, Port
-from ..utils.geo import vec_angle  # , clean_points
 from .manhattan import route_manhattan
+
+
+def vec_angle(v: kdb.Vector) -> int:
+    """Determine vector angle in increments of 90°"""
+    if v.x != 0 and v.y != 0:
+        raise NotImplementedError("only manhattan vectors supported")
+
+    match (v.x, v.y):
+        case (x, 0) if x > 0:
+            return 0
+        case (x, 0) if x < 0:
+            return 2
+        case (0, y) if y > 0:
+            return 1
+        case (0, y) if y < 0:
+            return 3
+        case _:
+            logger.warning(f"{v} is not a manhattan, cannot determine direction")
+    return -1
 
 
 def route_loopback(
