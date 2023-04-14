@@ -1025,6 +1025,7 @@ class DCplxPort(DPortLike[kdb.DCplxTrans], CPortLike[kdb.DCplxTrans]):
     layer: int
     trans: kdb.DCplxTrans
     port_type: str
+    info: dict[str, Any] = None
 
     def __init__(
         self,
@@ -1038,6 +1039,7 @@ class DCplxPort(DPortLike[kdb.DCplxTrans], CPortLike[kdb.DCplxTrans]):
         position: Optional[tuple[float, float]] = None,
         mirror_x: bool = False,
         port: Optional["DCplxPort"] = None,
+        info: dict[str, Any] = None,
     ):
         if port is not None:
             self.name: str = port.name if name is None else name
@@ -1064,6 +1066,7 @@ class DCplxPort(DPortLike[kdb.DCplxTrans], CPortLike[kdb.DCplxTrans]):
                 )
             else:
                 self.trans = kdb.DCplxTrans(1, angle, mirror_x, *position)
+        self.info = info or {}
 
     def move(
         self,
