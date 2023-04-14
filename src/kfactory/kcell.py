@@ -1258,6 +1258,7 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
         b: kdb.Vector | kdb.DVector = kdb.Vector(),
         na: int = 1,
         nb: int = 1,
+        name: Optional[str] = None,
     ) -> "Instance":
         """Add an instance of another KCell
 
@@ -1281,6 +1282,8 @@ class ABCKCell(kdb.Cell, ABC, Generic[PT]):
 
         inst = Instance(cell, ca)  # type: ignore[misc]
         self.insts.append(inst)
+        if name:
+            self.named_instances[name] = inst
         return inst
 
     def _kdb_copy(self) -> kdb.Cell:
@@ -1432,6 +1435,7 @@ class KCell(ABCKCell[Port]):
         self.klib.register_cell(self, allow_reregister=True)
         self.ports: Ports = ports or Ports()
         self.complex = False
+        self.named_instances = {}
 
         if kdb_cell is not None:
             for inst in kdb_cell.each_inst():
