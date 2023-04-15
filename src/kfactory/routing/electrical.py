@@ -1,7 +1,7 @@
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from .. import kdb
-from ..kcell import DCplxPort, Instance, KCell, Port
+from ..kcell import Instance, KCell, Port
 from .manhattan import route_manhattan
 
 
@@ -9,11 +9,11 @@ def connect_elec(
     c: KCell,
     start_port: Port,
     end_port: Port,
-    start_straight: Optional[int] = None,
-    end_straight: Optional[int] = None,
+    start_straight: int | None = None,
+    end_straight: int | None = None,
     route_path_function: Callable[..., list[kdb.Point]] = route_manhattan,
-    width: Optional[int] = None,
-    layer: Optional[int] = None,
+    width: int | None = None,
+    layer: int | None = None,
 ) -> None:
     if width is None:
         width = start_port.width
@@ -43,8 +43,7 @@ def connect_L_route(
     output_orientation: int = 1,
     wire_spacing: int = 10000,
 ) -> list[Port]:
-    """
-    This function takes a list of input ports and assume they are oriented in the west.
+    """This function takes a list of input ports and assume they are oriented in the west.
     The output will be a list of ports that have the same y coordinates.
     The function will produce a L-shape routing to connect input ports to output ports without any crossings.
     """
@@ -92,8 +91,7 @@ def connect_bundle(
     target_ports: list[Port],
     wire_spacing: int = 10000,
 ) -> None:
-    """
-    This function takes a list of input ports and assume they are all oriented in the same direction (could be any of W, S, E, N).
+    """This function takes a list of input ports and assume they are all oriented in the same direction (could be any of W, S, E, N).
     The target ports have the opposite orientation, i.e. if input ports are oriented to north, and target ports should be oriented to south.
     The function will produce a routing to connect input ports to output ports without any crossings.
     """
@@ -176,25 +174,25 @@ def connect_bundle(
                 B_count = 0
 
 
-def get_electrical_ports(c: Instance) -> list[Port | DCplxPort]:
+def get_electrical_ports(c: Instance) -> list[Port]:
     return [p for p in c.ports.get_all().values() if p.port_type == "electrical"]
 
 
 def connect_wire(c: KCell, input_port: Port, output_port: Port) -> None:
-    """
-    This function mainly implements a connection between two electrical ports.
+    """This function mainly implements a connection between two electrical ports.
     Not finished yet. Don't use.
+
     Args:
         input port: kf.Port
-        output port: kf.Port
+        output port: kf.Port.
     """
     if (input_port.angle + output_port.angle) % 2 == 0:
-        left_corner = (
+        (
             kdb.Point(input_port.x, input_port.y - input_port.width // 2)
             if input_port.angle % 2 == 0
             else kdb.Point(input_port.x - input_port.width // 2, input_port.y)
         )
-        middle_top = (
+        (
             kdb.Point(
                 (input_port.x + output_port.x) // 2,
                 input_port.y + input_port.width // 2,
@@ -204,7 +202,7 @@ def connect_wire(c: KCell, input_port: Port, output_port: Port) -> None:
                 input_port.x - input_port.width // 2, (input_port.y + output_port.y)
             )
         )
-        right_corner = (
+        (
             kdb.Point(output_port.x, output_port.y + input_port.width // 2)
             if input_port.angle % 2 == 0
             else kdb.Point(output_port.x + input_port.width // 2, output_port.y)
@@ -215,12 +213,12 @@ def connect_dual_rails(
     c: KCell,
     start_port: Port,
     end_port: Port,
-    start_straight: Optional[int] = None,
-    end_straight: Optional[int] = None,
+    start_straight: int | None = None,
+    end_straight: int | None = None,
     route_path_function: Callable[..., list[kdb.Point]] = route_manhattan,
-    width: Optional[int] = None,
-    hole_width: Optional[int] = None,
-    layer: Optional[int] = None,
+    width: int | None = None,
+    hole_width: int | None = None,
+    layer: int | None = None,
 ) -> None:
     if width is None:
         width = start_port.width

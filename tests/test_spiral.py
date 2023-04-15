@@ -92,7 +92,9 @@ def dbend_circular(
         ]
     ]
     kf.utils.geo.extrude_path(c, layer, backbone, width, enclosure, 0, theta)
-    dp1 = kf.kcell.DPort(width=width, layer=layer, name="W0", trans=kf.kdb.DTrans.R180)
+    dp1 = kf.kcell.Port(
+        dwidth=width, layer=layer, name="W0", dcplx_trans=kf.kdb.DCplxTrans.R180
+    )
     warnings.filterwarnings("ignore")
     c.add_port(dp1)
 
@@ -141,7 +143,9 @@ def test_dspiral(LAYER):
     r1 = 1
     r2 = 0
 
-    p = kf.DPort(name="start", trans=kf.kdb.DTrans.R0, width=1, layer=LAYER.WG)
+    p = kf.Port(
+        name="start", dcplx_trans=kf.kdb.DCplxTrans.R0, dwidth=1, layer=LAYER.WG
+    )
 
     kf.config.filter.level = "ERROR"
 

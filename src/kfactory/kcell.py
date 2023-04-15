@@ -2,9 +2,7 @@ import functools
 import importlib
 import json
 import socket
-
-# import struct
-# from abc import abstractmethod
+from collections.abc import Callable, Hashable, Iterable, Iterator
 
 # from enum import IntEnum
 from enum import Enum
@@ -12,13 +10,7 @@ from hashlib import sha3_512
 from inspect import signature
 from pathlib import Path
 from tempfile import gettempdir
-from typing import (  # ParamSpec, # >= python 3.10
-    Any,
-    cast,
-    overload,
-)
-
-from collections.abc import Callable, Hashable, Iterable, Iterator
+from typing import Any, Literal, cast, overload  # ParamSpec, # >= python 3.10
 
 # from cachetools import Cache, cached
 import cachetools.func
@@ -29,6 +21,10 @@ from typing_extensions import ParamSpec
 from . import kdb
 from .config import logger
 from .port import rename_clockwise
+
+# import struct
+# from abc import abstractmethod
+
 
 try:
     from __main__ import __file__ as mf
@@ -463,7 +459,9 @@ class Port:
         port: "Port | None" = None,
         klib: KLib = klib,
     ):
+        """Create a port from dbu or um based units."""
         self.klib = klib
+        self.d = DPart(self)
         if port is not None:
             self.name = port.name if name is None else name
 
@@ -475,8 +473,8 @@ class Port:
             self.port_type = port.port_type
             self.layer = port.layer
             self.width = port.width
-        elif name is None or width is None or layer is None:
-            raise ValueError("name, width, layer must be given if the 'port is None'")
+        elif (width is None and dwidth is None) or layer is None:
+            raise ValueError("width, layer must be given if the 'port is None'")
         else:
             if trans is not None:
                 # self.width = cast(int, width)
@@ -493,7 +491,7 @@ class Port:
                 else:
                     self.dcplx_trans = dcplx_trans.dup()
                 assert dwidth is not None
-                self.dwidth = dwidth
+                self.d.width = dwidth
                 assert (
                     self.width * self.klib.dbu == dwidth
                 ), "When converting to dbu the width does not match the desired width!"
@@ -512,15 +510,6 @@ class Port:
             self.name = name
             self.layer = layer
             self.port_type = port_type
-
-    @property
-    def dwidth(self) -> float:
-        """Width of the port in um."""
-        return self.width * self.klib.dbu
-
-    @dwidth.setter
-    def dwidth(self, value: float) -> None:
-        self.width = int(value / self.klib.dbu)
 
     @classmethod
     def from_yaml(cls: "type[Port]", constructor, node) -> "Port":  # type: ignore
@@ -563,35 +552,47 @@ class Port:
             _dtrans = dtrans * self.dcplx_trans
         else:
             _dtrans = trans * self.dcplx_trans
-        self.dwidth
+        self.d.width
         return Port(
             name=self.name,
             dcplx_trans=_dtrans,
-            dwidth=self.dwidth,
+            dwidth=self.d.width,
             layer=self.layer,
             klib=self.klib,
             port_type=self.port_type,
         )
 
-    # def copy_cplx(self, trans: kdb.DCplxTrans = kdb.DCplxTrans.R0) -> "Port":
-    #     """Get a complex copy of a port (complex equivalent of ~:py:attr:`trans`).
+    @property
+    def x(self) -> int:
+        """X coordinate of the port in dbu."""
+        return self.trans.disp.x
 
-    #     Args:
-    #         trans: an optional transformation applied to the port to be copied
+    @x.setter
+    def x(self, value: int) -> None:
+        if self._trans:
+            vec = self._trans.disp
+            vec.x = value
+            self._trans.disp = vec
+        elif self._dcplx_trans:
+            vec = self.trans.disp
+            vec.x = value
+            self._dcplx_trans.disp = vec.to_dtype(self.klib.dbu)
 
-    #     Returns:
-    #         A copy of the port
-    #     """
-    #     _trans = trans * self.dcplx_trans
+    @property
+    def y(self) -> int:
+        """Y coordinate of the port in dbu."""
+        return self.trans.disp.x
 
-    #     return Port(
-    #         name=self.name,
-    #         dwidth=self.dwidth,
-    #         layer=self.layer,
-    #         dcplx_trans=_trans,
-    #         port_type=self.port_type,
-    #         klib=self.klib,
-    #     )
+    @y.setter
+    def y(self, value: int) -> None:
+        if self._trans:
+            vec = self._trans.disp
+            vec.y = value
+            self._trans.disp = vec
+        elif self._dcplx_trans:
+            vec = self.trans.disp
+            vec.y = value
+            self._dcplx_trans.disp = vec.to_dtype(self.klib.dbu)
 
     @property
     def trans(self) -> kdb.Trans:
@@ -624,6 +625,7 @@ class Port:
     @dcplx_trans.setter
     def dcplx_trans(self, value: kdb.DCplxTrans) -> None:
         self._dcplx_trans = value.dup()
+        self._trans = None
 
     @property
     def angle(self) -> int:
@@ -669,6 +671,87 @@ class Port:
         h.update(self.port_type.encode("UTF-8"))
         h.update(self.layer.to_bytes(8, "big"))
         return h.digest()
+
+
+class DPart:
+    """Make the port able to dynamically give um based info."""
+
+    def __init__(self, parent: Port):
+        """Constructor, just needs a pointer to the port.
+
+        Args:
+        parent: port that this should be attached to
+        """
+        self.parent = parent
+
+    @property
+    def x(self) -> float:
+        """X coordinate of the port in um."""
+        return self.parent.dcplx_trans.disp.x
+
+    @x.setter
+    def x(self, value: float) -> None:
+        vec = self.parent.dcplx_trans.disp
+        vec.x = value
+        if self.parent._trans:
+            self.parent._trans.disp = vec.to_itype(self.parent.klib.dbu)
+        elif self.parent._dcplx_trans:
+            self.parent._dcplx_trans.disp = vec
+
+    @property
+    def y(self) -> float:
+        """Y coordinate of the port in um."""
+        return self.parent.dcplx_trans.disp.y
+
+    @y.setter
+    def y(self, value: float) -> None:
+        vec = self.parent.dcplx_trans.disp
+        vec.y = value
+        if self.parent._trans:
+            self.parent._trans.disp = vec.to_itype(self.parent.klib.dbu)
+        elif self.parent._dcplx_trans:
+            self.parent._dcplx_trans.disp = vec
+
+    @property
+    def position(self) -> tuple[float, float]:
+        """Coordinate of the port in um."""
+        vec = self.parent.dcplx_trans.disp
+        return (vec.x, vec.y)
+
+    @position.setter
+    def position(self, pos: tuple[float, float]) -> None:
+        if self.parent._trans:
+            self.parent._trans.disp = kdb.DVector(*pos).to_itype(self.parent.klib.dbu)
+        elif self.parent._dcplx_trans:
+            self.parent._dcplx_trans.disp = kdb.DVector(*pos)
+
+    @property
+    def angle(self) -> float:
+        """Angle of the port in degrees."""
+        return self.parent.dcplx_trans.angle
+
+    @angle.setter
+    def angle(self, value: float) -> None:
+        if value in [0, 90, 180, 270]:
+            if self.parent._trans:
+                self.parent._trans.angle = int(value / 90)
+                return
+
+        trans = self.parent.dcplx_trans
+        trans.angle = value
+        self.parent.dcplx_trans = trans
+
+    @property
+    def width(self) -> float:
+        """Width of the port in um."""
+        return self.parent.width * self.parent.klib.dbu
+
+    @width.setter
+    def width(self, value: float) -> None:
+        self.parent.width = int(value / self.parent.klib.dbu)
+        assert (
+            value * self.parent.klib.dbu == value
+        ), "When converting to dbu the width does not match the desired width!"
 
 
 class KCell(kdb.Cell):
@@ -1506,7 +1589,7 @@ class Ports:
         width: int,
         layer: int,
         position: tuple[int, int],
-        angle: int,
+        angle: Literal[0, 1, 2, 3],
         name: str | None = None,
         port_type: str = "optical",
     ) -> Port:
@@ -1523,7 +1606,7 @@ class Ports:
         trans: kdb.Trans | None = None,
         dcplx_trans: kdb.DCplxTrans | None = None,
         position: tuple[int, int] | None = None,
-        angle: int | None = None,
+        angle: Literal[0, 1, 2, 3] | None = None,
         mirror_x: bool = False,
     ) -> Port:
         """Create a new port in the list."""
@@ -1537,7 +1620,7 @@ class Ports:
                 port_type=port_type,
                 klib=self.klib,
             )
-        if dcplx_trans is not None:
+        elif dcplx_trans is not None:
             assert dwidth is not None
             port = Port(
                 name=name,
@@ -1560,9 +1643,11 @@ class Ports:
                 klib=self.klib,
             )
         else:
+            breakpoint()
             raise ValueError(
-                f"You need to define trans {trans} or angle {angle} and position"
-                f" {position} and width {width}"
+                f"You need to define width {width} and trans {trans} or angle {angle}"
+                f" and position {position} or dcplx_trans {dcplx_trans}"
+                f" and dwidth {dwidth}"
             )
 
         self._ports.append(port)
@@ -1618,7 +1703,7 @@ class InstancePorts:
     def __getitem__(self, key: str) -> Port:
         p = self.cell_ports[key]
         if self.instance.is_complex():
-            return p.copy(self.instance.dcplx_trans())
+            return p.copy(self.instance.dcplx_trans)
         else:
             return p.copy(self.instance.trans)
 
