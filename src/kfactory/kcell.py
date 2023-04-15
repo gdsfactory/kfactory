@@ -244,7 +244,7 @@ class KLib(kdb.Layout):
             )
 
     def __getitem__(self, obj: str | int) -> "KCell":
-        """Retrive a cell by name(str) or index(int).
+        """Retrieve a cell by name(str) or index(int).
 
         Attrs:
             obj: name of cell or cell_index
@@ -1051,7 +1051,7 @@ class KCell(kdb.Cell):
 
     @property
     def ports(self) -> "Ports":
-        """Ports associated witht eh cell."""
+        """Ports associated with the cell."""
         return self._ports
 
     @ports.setter
@@ -1644,7 +1644,6 @@ class Ports:
                 klib=self.klib,
             )
         else:
-            breakpoint()
             raise ValueError(
                 f"You need to define width {width} and trans {trans} or angle {angle}"
                 f" and position {position} or dcplx_trans {dcplx_trans}"
