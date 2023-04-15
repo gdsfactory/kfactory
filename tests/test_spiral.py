@@ -100,18 +100,18 @@ def dbend_circular(
 
     match theta:
         case 90:
-            dp2 = kf.DPort(
+            dp2 = kf.Port(
                 name="N0",
                 layer=layer,
-                width=width,
-                trans=kf.kdb.DTrans(1, False, radius, radius),
+                dwidth=width,
+                dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, radius, radius),
             )
         case 180:
-            dp2 = kf.DPort(
+            dp2 = kf.Port(
                 name="N0",
                 layer=layer,
-                width=width,
-                trans=kf.kdb.DTrans(0, False, 0, 2 * radius),
+                dwidth=width,
+                dcplx_trans=kf.kdb.DTrans(1, 0, False, 0, 2 * radius),
             )
         case _:
             raise ValueError("only support 90/180° bends")
@@ -154,7 +154,7 @@ def test_dspiral(LAYER):
         r2 = r1
         r1 = r
         b = c << dbend_circular(width=1, radius=r2, layer=LAYER.WG)
-        b.connect_cplx("W0", p)
+        b.connect("W0", p)
         p = b.ports["N0"]
 
     kf.config.filter.level = "DEBUG"

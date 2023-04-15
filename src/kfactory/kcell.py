@@ -492,8 +492,8 @@ class Port:
                     self.dcplx_trans = dcplx_trans.dup()
                 assert dwidth is not None
                 self.d.width = dwidth
-                assert (
-                    self.width * self.klib.dbu == dwidth
+                assert self.width * self.klib.dbu == float(
+                    dwidth
                 ), "When converting to dbu the width does not match the desired width!"
             elif width is not None:
                 assert angle is not None
@@ -749,9 +749,10 @@ class DPart:
     @width.setter
     def width(self, value: float) -> None:
         self.parent.width = int(value / self.parent.klib.dbu)
-        assert (
-            value * self.parent.klib.dbu == value
-        ), "When converting to dbu the width does not match the desired width!"
+        assert self.parent.width * self.parent.klib.dbu == float(value), (
+            "When converting to dbu the width does not match the desired width"
+            f"({self.width} / {value})!"
+        )
 
 
 class KCell(kdb.Cell):
