@@ -133,7 +133,7 @@ def test_spiral(LAYER):
         r2 = r1
         r1 = r
         b = c << bend_circular(width=1000, radius=r2, layer=LAYER.WG)
-        b.connect("W0", p)
+        b.align("W0", p)
         p = b.ports["N0"]
 
 
@@ -154,7 +154,7 @@ def test_dspiral(LAYER):
         r2 = r1
         r1 = r
         b = c << dbend_circular(width=1, radius=r2, layer=LAYER.WG)
-        b.connect("W0", p)
+        b.align("W0", p)
         p = b.ports["N0"]
 
     kf.config.filter.level = "DEBUG"
