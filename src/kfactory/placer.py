@@ -80,7 +80,7 @@ def cells_from_yaml(
         inp: Input file path.
         klib: KLib to load the cells into.
         additional_classes: Additional yaml classes that should be registered.
-        This is used for example to enable loading additional yaml files etc.
+            This is used for example to enable loading additional yaml files etc.
         verbose: Print more verbose errors etc.
     """
     yaml = get_yaml_obj()

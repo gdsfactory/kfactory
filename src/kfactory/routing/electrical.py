@@ -29,10 +29,10 @@ def connect_elec(
         start_straight: Minimum length of straight at start port.
         end_straight: Minimum length of straight at end port.
         route_path_function: Function to calculate the path. Signature:
-        `route_path_function(start_port, end_port, bend90_radius, start_straight,
-        end_straight)`
+            `route_path_function(start_port, end_port, bend90_radius, start_straight,
+            end_straight)`
         width: Overwrite the width of the wire. Calculated by the width of the start
-        port if `None`.
+            port if `None`.
         layer: Layer to place the wire on. Calculated from the start port if `None`.
     """
     if width is None:
@@ -261,8 +261,8 @@ def connect_dual_rails(
         start_straight: Minimum straight after the start port.
         end_straight: Minimum straight before end port.
         route_path_function: Function to calculate the path. Signature:
-        `route_path_function(start_port, end_port, bend90_radius, start_straight,
-        end_straight)`
+            `route_path_function(start_port, end_port, bend90_radius, start_straight,
+            end_straight)`
         width: Width of the rail (total). [dbu]
         hole_width: Width of the space between the rails. [dbu]
         layer: layer to place the rail in.

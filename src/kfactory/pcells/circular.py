@@ -29,7 +29,7 @@ def bend_circular(
         radius: Radius of the backbone. [um]
         layer: Layer index of the target layer.
         enclosure: :py:class:`kfactory.utils.Enclosure` object to describe the
-        claddings.
+            claddings.
         theta: Angle amount of the bend.
         theta_step: Angle amount per backbone point of the bend.
     """

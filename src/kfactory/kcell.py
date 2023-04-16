@@ -215,15 +215,13 @@ class KLib(kdb.Layout):
         Args:
             kcell: The KCell to be registered in the Layout.
             name: The (initial) name of the cell. Can be changed through
-            :py:func:`~update_cell_name`
+                :py:func:`~update_cell_name`
             allow_duplicate: Allow the creation of a cell with the same name which
-            already is registered in the Layout.\
-            This will create a cell with the name :py:attr:`name` + `$1` or `2..n`
-            increasing by the number of existing duplicates
+                already is registered in the Layout.
+                This will create a cell with the name :py:attr:`name` + `$1` or `2..n`
+                increasing by the number of existing duplicates
             args: additional arguments passed to
-            :py:func:`~klayout.db.Layout.create_cell`
-            kwargs: additional keyword arguments passed to
-            :py:func:`klayout.db.Layout.create_cell`
+                :py:func:`~klayout.db.Layout.create_cell`
 
         Returns:
             klayout.db.Cell: klayout.db.Cell object created in the Layout
@@ -254,7 +252,7 @@ class KLib(kdb.Layout):
         Args:
             kcell: KCell to be registered in the KLib
             allow_reregister: Overwrite the existing KCell registration with this one.
-            Doesn't allow name duplication.
+                Doesn't allow name duplication.
         """
 
         def check_name(other: "KCell") -> bool:
@@ -309,8 +307,8 @@ class KLib(kdb.Layout):
         Args:
             filename: Path of the GDS file.
             options: KLayout options to load from the GDS. Can determine how merge
-            conflicts are handled for example. See
-            https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
+                conflicts are handled for example. See
+                https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
             register_cells: If `True` create KCells for all cells in the GDS.
         """
         if register_cells:
@@ -340,8 +338,8 @@ class KLib(kdb.Layout):
             filename: Path of the GDS file.
             gzip: directly make the GDS a .gds.gz file.
             options: KLayout options to load from the GDS. Can determine how merge
-            conflicts are handled for example. See
-            https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
+                conflicts are handled for example. See
+                https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
         """
         return kdb.Layout.write(self, str(filename), options)
 
@@ -426,12 +424,12 @@ class Port:
         name: String to name the port.
         width: The width of the port in dbu.
         trans: Transformation in dbu. If the port can be represented in 90° intervals
-        this is the safe way to do so.
+            this is the safe way to do so.
         dcplx_trans: Transformation in micrometer. The port will autoconvert between
-        trans and dcplx_trans on demand.
+            trans and dcplx_trans on demand.
         port_type: A string defining the type of the port
         layer: Index of the layer or a LayerEnum that acts like an integer, but can
-        contain layer number and datatype
+            contain layer number and datatype
     """
 
     yaml_tag = "!Port"
@@ -737,7 +735,7 @@ class DPart:
         """Constructor, just needs a pointer to the port.
 
         Args:
-        parent: port that this should be attached to
+            parent: port that this should be attached to
         """
         self.parent = parent
 
@@ -831,7 +829,7 @@ class KCell(kdb.Cell):
             name: name of the cell, if `None`, it will set the name to "Unnamed_"
             klib: KLib object that stores the layout and metadata about the KCells
             kdb_cell: :py:class:`~klayout.db.Cell` to base the cell on (used when
-            copying or reading a GDS|OAS)
+                copying or reading a GDS|OAS)
             ports: Optionally copy ports into the cell on creation.
         """
         if kdb_cell is None:
@@ -855,12 +853,12 @@ class KCell(kdb.Cell):
 
         Args:
             name: Name of the cell, if None will autogenerate name to
-            "Unnamed_<cell_index>".
+                "Unnamed_<cell_index>".
             klib: KLib the cell should be attached to.
             kdb_cell: If not `None`, a KCell will be created from and existing
-            KLayout Cell
+                KLayout Cell
             ports: Attach an existing :py:class:`~Ports` object to the KCell,
-            if `None` create an empty one.
+                if `None` create an empty one.
         """
         self.klib = klib
         self.insts: list[Instance] = []
@@ -884,7 +882,7 @@ class KCell(kdb.Cell):
 
         Returns:
             cell: Exact copy of the current cell.
-            The name will have `$1` as duplicate naems are not allowed
+                The name will have `$1` as duplicate names are not allowed
         """
         kdb_copy = self._kdb_copy()
 
@@ -904,7 +902,7 @@ class KCell(kdb.Cell):
 
         Args:
             port: The port to add. Port should either be a :py:class:`~Port`,
-            or will be converted to an integer based port with 90° increment
+                or will be converted to an integer based port with 90° increment
             name: Overwrite the name of the port
         """
         self.ports.add_port(port=port, name=name)
@@ -1234,11 +1232,11 @@ class KCell(kdb.Cell):
             cell: The cell to be added
             trans: The integer transformation applied to the reference
             dtrans: um transformation of the reference. If not `None`,
-            will overwrite :py:attr:`trans`
+                will overwrite :py:attr:`trans`
             a: Vector (DVector if trans is um based) for the array.
-            Needs to be in positive X-direction
+                Needs to be in positive X-direction
             b: Vector (DVector if trans is um based) for the array.
-            Needs to be in positive Y-direction
+                Needs to be in positive Y-direction
             na: Number of elements in direction of :py:attr:`a`
             nb: Number of elements in direction of :py:attr:`b`
 
@@ -1508,13 +1506,13 @@ class Instance:
 
         Args:
             port: The name of the port of this instance to be connected, or directly an
-            instance port. Can be `None` because port names can be `None`.
+                instance port. Can be `None` because port names can be `None`.
             other: The other instance or a port. Skip `other_port_name` if it's a port.
             other_port_name: The name of the other port. Ignored if
-            :py:attr:`~other_instance` is a port.
+                :py:attr:`~other_instance` is a port.
             mirror: Instead of applying klayout.db.Trans.R180 as a connection
-            transformation, use klayout.db.Trans.M90, which effectively means this
-            instance will be mirrored and connected.
+                transformation, use klayout.db.Trans.M90, which effectively means this
+                instance will be mirrored and connected.
             allow_width_mismatch: Skip width check between the ports if set.
             allow_layer_mismatch: Skip layer check between the ports if set.
             allow_type_mismatch: Skip port_type check between the ports if set.
@@ -1567,13 +1565,13 @@ class Instance:
 
         Args:
             port: The name of the port of this instance to be connected, or directly an
-            instance port. Can be `None` because port names can be `None`.
+                instance port. Can be `None` because port names can be `None`.
             other: The other instance or a port. Skip `other_port_name` if it's a port.
             other_port_name: The name of the other port. Ignored if
-            :py:attr:`~other_instance` is a port.
+                :py:attr:`~other_instance` is a port.
             mirror: Instead of applying klayout.db.Trans.R180 as a connection
-            transformation, use klayout.db.Trans.M90, which effectively means this
-            instance will be mirrored and connected.
+                transformation, use klayout.db.Trans.M90, which effectively means this
+                instance will be mirrored and connected.
             allow_width_mismatch: Skip width check between the ports if set.
             allow_layer_mismatch: Skip layer check between the ports if set.
             allow_type_mismatch: Skip port_type check between the ports if set.
@@ -1654,7 +1652,7 @@ class Ports:
 
     Attributes:
         _ports: Internal storage of the ports. Normally ports should be retrieved with
-        :py:func:`__getitem__` or with :py:func:`~get_all`
+            :py:func:`__getitem__` or with :py:func:`~get_all`
     """
 
     yaml_tag = "!Ports"
@@ -1752,14 +1750,14 @@ class Ports:
         Args:
             name: Optional name of port.
             width: Width of the port in dbu. If `trans` is set (or the manual creation
-            with `position` and `angle`), this needs to be as well.
+                with `position` and `angle`), this needs to be as well.
             dwidth: Width of the port in um. If `dcplx_trans` is set, this needs to be
-            as well.
+                as well.
             layer: Layer index of the port.
             port_type: Type of the port (electrical, optical, etc.)
             trans: Transformation object of the port. [dbu]
             dcplx_trans: Complex transformation for the port.
-            Use if a non-90° port is necessary.
+                Use if a non-90° port is necessary.
             position: Tuple of the position. [dbu]
             angle: Angle in 90° increments. Used for simple/dbu transformations.
             mirror_x: Mirror the transformation of the port.
@@ -1861,7 +1859,7 @@ class InstancePorts:
     Attributes:
         cell_ports: A pointer to the :py:class:~`Ports` of the cell
         instance: A pointer to the :py:class:~`Instance` related to this.
-        This provides a way to dynamically calculate the ports.
+            This provides a way to dynamically calculate the ports.
     """
 
     def __init__(self, instance: Instance) -> None:
@@ -1946,11 +1944,11 @@ def autocell(
     Args:
         set_settings: Copy the args & kwargs into the settings dictionary
         set_name: Auto create the name of the cell to the functionname plus a
-        string created from the args/kwargs
+            string created from the args/kwargs
         maxsize: maximum size of cache, cell parameter sets will be evicted if the cell
-        function is called with more different
-        parameter sets than there are spaces in the cache, in case there are cell calls
-        with existing parameter set calls
+            function is called with more different
+            parameter sets than there are spaces in the cache, in case there are cell calls
+            with existing parameter set calls
     """
 
     def decorator_autocell(
@@ -2062,7 +2060,8 @@ def get_component_name(component_type: str, **kwargs: dict[str, Any]) -> str:
 def join_first_letters(name: str) -> str:
     """Join the first letter of a name separated with underscores.
 
-    Example:
+    Example::
+
         "TL" == join_first_letters("taper_length")
     """
     return "".join([x[0] for x in name.split("_") if x])

@@ -56,7 +56,7 @@ class LogFilter:
 
         Args:
             level: Minimum log level to print to log. Options:
-            ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+                ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
             regex: Discard messages matching the regex string. Set to `None` to disable.
         """
         self.level = level

@@ -50,7 +50,7 @@ def route_loopback(
         p2: End port.
         bend90_radius: Radius of 90° bend. [dbu]
         bend180_radius: Optional use of 180° bend, distance between two parallel ports.
-        [dbu]
+            [dbu]
         start_straight: Minimal straight segment after `p1`.
         end_straight: Minimal straight segment before `p2`.
         d_loop: Distance of the (vertical) offset of the back of the ports
@@ -361,20 +361,20 @@ def place90(
         p2: End port.
         pts: The points
         straight_factory: A function which takes two keyword arguments `width`
-        and `length`. It returns a :py:class:~`KCell` with two named ports with
-        port_type `port_type` and matching layer as the `bend90_cell` ports.
+            and `length`. It returns a :py:class:~`KCell` with two named ports with
+            port_type `port_type` and matching layer as the `bend90_cell` ports.
         bend90_cell: Bend to use in corners of the `pts`. Must have two named ports on
-        `port_type`
+            `port_type`
         taper_cell: Optional taper cell to use if straights and bends should have a
-        different width on the connection layer. Must have two named ports on
-        `port_type` and share the port layer with `bend90_cell` and
-        `straight_factory`.
+            different width on the connection layer. Must have two named ports on
+            `port_type` and share the port layer with `bend90_cell` and
+            `straight_factory`.
         port_type: Filter the port type by this to e.g. ignore potential electrical
-        ports.
+            ports.
         min_straight_taper: Do not put tapers on a straight if its length
-        is below this minimum length.
+            is below this minimum length.
         allow_small_routes: Don't throw an error if two corners cannot be safely placed
-        due to small space and place them anyway.
+            due to small space and place them anyway.
     """
     if not pts:
         # Nothing to be placed

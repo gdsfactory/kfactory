@@ -86,8 +86,10 @@ def extrude_path_points(
     Args:
         path: list of floating-points points
         width: width in µm
-        start_angle: optionally specify a custom starting angle if `None` will be autocalculated from the first two elements
-        end_angle: optionally specify a custom ending angle if `None` will be autocalculated from the last two elements
+        start_angle: optionally specify a custom starting angle if `None` will
+            be autocalculated from the first two elements
+        end_angle: optionally specify a custom ending angle if `None`
+            will be autocalculated from the last two elements
     """
     start = path[1] - path[0]
     end = path[-1] - path[-2]
@@ -140,9 +142,12 @@ def extrude_path(
         layer: the main layer that should be extruded
         path: list of floating-points points
         width: width in µm
-        enclosure: optoinal enclosure object, specifying necessary layers.this will extrude around the `layer`
-        start_angle: optionally specify a custom starting angle if `None` will be autocalculated from the first two elements
-        end_angle: optionally specify a custom ending angle if `None` will be autocalculated from the last two elements
+        enclosure: optoinal enclosure object, specifying necessary
+            layers.this will extrude around the `layer`
+        start_angle: optionally specify a custom starting angle if `None`
+            will be autocalculated from the first two elements
+        end_angle: optionally specify a custom ending angle if `None` will be
+            autocalculated from the last two elements
     """
     layer_list = {layer: LayerSection(sections=[Section(d_max=0)])}
     if enclosure is not None:
@@ -193,11 +198,11 @@ def extrude_path_dynamic_points(
     Args:
         path: list of floating-points points
         widths: function (from t==0 to t==1) defining a width profile for the path
-        | list with width for the profile (needs same length as path)
+            | list with width for the profile (needs same length as path)
         start_angle: optionally specify a custom starting angle if `None` will be
-        autocalculated from the first two elements
+            autocalculated from the first two elements
         end_angle: optionally specify a custom ending angle if `None` will be
-        autocalculated from the last two elements
+            autocalculated from the last two elements
     """
     start = path[1] - path[0]
     end = path[-1] - path[-2]
@@ -265,16 +270,23 @@ def extrude_path_dynamic(
     start_angle: float | None = None,
     end_angle: float | None = None,
 ) -> None:
-    """Extrude a path with dynamic width from a list of points and a list of widths and add an enclosure if specified.
+    """Extrude a path with dynamic width.
+
+    Extrude from a list of points and a list of widths and add an enclosure if
+        specified.
 
     Args:
         target: the cell where to insert the shapes to (and get the database unit from)
         layer: the main layer that should be extruded
         path: list of floating-points points
-        width: function (from t==0 to t==1) defining a width profile for the path | list with width for the profile (needs same length as path)
-        enclosure: optoinal enclosure object, specifying necessary layers.this will extrude around the `layer`
-        start_angle: optionally specify a custom starting angle if `None` will be autocalculated from the first two elements
-        end_angle: optionally specify a custom ending angle if `None` will be autocalculated from the last two elements
+        widths: function (from t==0 to t==1) defining a width profile for the path |
+            list with width for the profile (needs same length as path)
+        enclosure: optoinal enclosure object, specifying necessary layers.this will
+            extrude around the `layer`
+        start_angle: optionally specify a custom starting angle if `None` will be
+            autocalculated from the first two elements
+        end_angle: optionally specify a custom ending angle if `None` will be
+            autocalculated from the last two elements
     """
     layer_list = {layer: LayerSection(sections=[Section(d_max=0)])}
     if enclosure is not None:
