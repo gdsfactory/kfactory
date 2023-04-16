@@ -48,14 +48,22 @@ def rename_clockwise(
 ) -> None:
     """Sort and return ports in the clockwise direction.
 
-    .. code::
+    Visualization::
              o3  o4
              |___|_
         o2 -|      |- o5
             |      |
         o1 -|______|- o6
              |   |
-            o8  o7.
+            o8  o7
+
+    Args:
+        ports: List of ports to rename.
+        layer: Layer index / LayerEnum of port layer.
+        port_type: Port type to filter the ports by.
+        regex: Regex string to filter the port names by.
+        prefix: Prefix to add to all ports.
+        start: Start index per orientation.
     """
     _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
 
@@ -86,7 +94,7 @@ def rename_by_direction(
 ) -> None:
     """Rename ports by angle of their transformation.
 
-    .. code::
+    Visualization::
              N0  N1
              |___|_
         W1 -|      |- E1

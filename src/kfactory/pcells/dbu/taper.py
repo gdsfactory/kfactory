@@ -19,19 +19,20 @@ def taper(
 ) -> KCell:
     r"""Linear Taper [um].
 
-    .. code::
-           __
-         _/  │ Slab/Exclude
-       _/  __│
-     _/  _/  │
-    │  _/    │
-    │_/      │
-    │_       │ Core
-    │ \_     │
-    │_  \_   │
-      \_  \__│
-        \_   │
-          \__│ Slab/Exclude
+    Visualization::
+
+               __
+             _/  │ Slab/Exclude
+           _/  __│
+         _/  _/  │
+        │  _/    │
+        │_/      │
+        │_       │ Core
+        │ \_     │
+        │_  \_   │
+          \_  \__│
+            \_   │
+              \__│ Slab/Exclude
 
     Args:
         width1: Width of the core on the left side. [dbu]

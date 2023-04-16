@@ -1472,6 +1472,67 @@ class Instance:
         return h.digest()
 
     @overload
+    def connect(
+        self, port: str | Port | None, other: Port, *, mirror: bool = False
+    ) -> None:
+        ...
+
+    @overload
+    def connect(
+        self,
+        port: str | Port | None,
+        other: "Instance",
+        other_port_name: str | None,
+        *,
+        mirror: bool = False,
+    ) -> None:
+        ...
+
+    def connect(
+        self,
+        port: str | Port | None,
+        other: "Instance | Port",
+        other_port_name: str | None = None,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool = False,
+        allow_layer_mismatch: bool = False,
+        allow_type_mismatch: bool = False,
+    ) -> None:
+        """Align port with name ``portname`` to a port.
+
+        .. deprecated:: 0.7.0
+
+        Function to allow to transform this instance so that a port of this instance is
+        aligned (same position with 180° turn) to another instance.
+
+        Args:
+            port: The name of the port of this instance to be connected, or directly an
+            instance port. Can be `None` because port names can be `None`.
+            other: The other instance or a port. Skip `other_port_name` if it's a port.
+            other_port_name: The name of the other port. Ignored if
+            :py:attr:`~other_instance` is a port.
+            mirror: Instead of applying klayout.db.Trans.R180 as a connection
+            transformation, use klayout.db.Trans.M90, which effectively means this
+            instance will be mirrored and connected.
+            allow_width_mismatch: Skip width check between the ports if set.
+            allow_layer_mismatch: Skip layer check between the ports if set.
+            allow_type_mismatch: Skip port_type check between the ports if set.
+        """
+        logger.warning(
+            "Instance.connect will be removed in 0.7.0, please use Instance.align"
+        )
+        self.align(  # type: ignore[call-overload]
+            port=port,
+            other=other,
+            other_port_name=other_port_name,
+            mirror=mirror,
+            allow_width_mismatch=allow_layer_mismatch,
+            allow_layer_mismatch=allow_layer_mismatch,
+            allow_type_mismatch=allow_type_mismatch,
+        )
+
+    @overload
     def align(
         self, port: str | Port | None, other: Port, *, mirror: bool = False
     ) -> None:
