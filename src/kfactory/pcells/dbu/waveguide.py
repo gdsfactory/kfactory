@@ -1,3 +1,20 @@
+"""Straight waveguide in dbu.
+
+A waveguide is a rectangle of material with excludes and/or slab around it.
+
+.. code::
+    ┌──────────────────┐
+    │   Slab/Exclude   │
+    ├──────────────────┤
+    │                  │
+    │       Core       │
+    │                  │
+    ├──────────────────┤
+    │   Slab/Exclude   │
+    └──────────────────┘
+
+The slabs and excludes can be given in the form of an :py:class:~`Enclosure`.
+"""
 
 from ... import KCell, LayerEnum, autocell, kdb
 from ...utils import Enclosure
@@ -12,6 +29,14 @@ def waveguide(
     layer: int | LayerEnum,
     enclosure: Enclosure | None = None,
 ) -> KCell:
+    """Waveguide defined in dbu.
+
+    Args:
+        width: Waveguide width. [dbu]
+        length: Waveguide length. [dbu]
+        layer: Layer index / :py:class:~`LayerEnum`.
+        enclosure: Definition of slab/excludes. [dbu]
+    """
     c = KCell()
 
     if width // 2 * 2 != width:

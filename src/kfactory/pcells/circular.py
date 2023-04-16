@@ -1,3 +1,7 @@
+"""Circular bends.
+
+A circular bend has a constant radius.
+"""
 
 import numpy as np
 
@@ -18,15 +22,16 @@ def bend_circular(
     theta: float = 90,
     theta_step: float = 1,
 ) -> KCell:
-    """Circular radius bend.
+    """Circular radius bend [um].
 
     Args:
-        width: Width in database units
-        radius: Radius in database units
-        layer: Layer index of the target layer
-        enclosure: :py:class:`kfactory.utils.Enclosure` object to describe the claddings
-    Returns:
-        cell (KCell): Circular Bend KCell
+        width: Width of the core. [um]
+        radius: Radius of the backbone. [um]
+        layer: Layer index of the target layer.
+        enclosure: :py:class:`kfactory.utils.Enclosure` object to describe the
+        claddings.
+        theta: Angle amount of the bend.
+        theta_step: Angle amount per backbone point of the bend.
     """
     c = KCell()
     r = radius

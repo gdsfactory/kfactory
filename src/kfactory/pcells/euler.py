@@ -1,3 +1,9 @@
+"""Euler bends.
+
+Euler bends are bends with a constantly changing radius
+from zero to a maximum radius and back to 0 at the other
+end.
+"""
 
 import numpy as np
 from scipy.optimize import brentq  # type: ignore[import]
@@ -162,6 +168,16 @@ def bend_euler(
     theta: float = 90,
     resolution: float = 150,
 ) -> KCell:
+    """Create a euler bend.
+
+    Args:
+        width: Width of the core. [um]
+        radius: Radius off the backbone. [um]
+        layer: Layer index / LayerEnum of the core.
+        enclosure: Slab/exclude definition. [dbu]
+        theta: Angle of the bend.
+        resolution: Angle resolution for the backbone.
+    """
     c = KCell()
     dbu = c.layout().dbu
     backbone = euler_bend_points(theta, radius=radius, resolution=resolution)
@@ -211,10 +227,20 @@ def bend_s_euler(
     offset: float,
     width: float,
     radius: float,
-    layer: int,
+    layer: LayerEnum | int,
     enclosure: Enclosure | None = None,
     resolution: float = 150,
 ) -> KCell:
+    """Create a euler s-bend.
+
+    Args:
+        offset: Offset between left/right. [um]
+        width: Width of the core. [um]
+        radius: Radius off the backbone. [um]
+        layer: Layer index / LayerEnum of the core.
+        enclosure: Slab/exclude definition. [dbu]
+        resolution: Angle resolution for the backbone.
+    """
     c = KCell()
     dbu = c.layout().dbu
     backbone = euler_sbend_points(

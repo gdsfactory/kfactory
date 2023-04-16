@@ -1,11 +1,11 @@
 """Core module of kfactory.
 
 Defines the :py:class:`KCell` providing klayout Cells with Ports
-and other convience functions.
+and other convenience functions.
 
 :py:class:`Instance` are the kfactory instances used to also acquire
 ports etc from instances.
-    
+
 """
 
 import functools
@@ -47,6 +47,8 @@ OP = ParamSpec("OP")
 
 
 class PortWidthMismatch(ValueError):
+    """Error thrown when two ports don't have a matching `width`."""
+
     @logger.catch
     def __init__(
         self,
@@ -56,6 +58,7 @@ class PortWidthMismatch(ValueError):
         p2: "Port",
         *args: Any,
     ):
+        """Throw error for the two ports `p1`/`p1`."""
         if isinstance(other_inst, Instance):
             super().__init__(
                 f'Width mismatch between the ports {inst.cell.name}["{p1.name}"]'
@@ -71,6 +74,8 @@ class PortWidthMismatch(ValueError):
 
 
 class PortLayerMismatch(ValueError):
+    """Error thrown when two ports don't have a matching `layer`."""
+
     @logger.catch
     def __init__(
         self,
@@ -81,6 +86,7 @@ class PortLayerMismatch(ValueError):
         p2: "Port",
         *args: Any,
     ):
+        """Throw error for the two ports `p1`/`p1`."""
         l1 = (
             f"{p1.layer.name}({p1.layer.__int__()})"
             if isinstance(p1.layer, LayerEnum)
@@ -106,6 +112,8 @@ class PortLayerMismatch(ValueError):
 
 
 class PortTypeMismatch(ValueError):
+    """Error thrown when two ports don't have a matching `port_type`."""
+
     @logger.catch
     def __init__(
         self,
@@ -115,10 +123,12 @@ class PortTypeMismatch(ValueError):
         p2: "Port",
         *args: Any,
     ):
+        """Throw error for the two ports `p1`/`p1`."""
         if isinstance(other_inst, Instance):
             super().__init__(
                 f'Type mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f' and {other_inst.cell.name}["{p2.name}"] ({p1.port_type}/{p2.port_type})',
+                f' and {other_inst.cell.name}["{p2.name}"]'
+                f" ({p1.port_type}/{p2.port_type})",
                 *args,
             )
         else:
@@ -160,6 +170,11 @@ class KLib(kdb.Layout):
     """
 
     def __init__(self, editable: bool = True) -> None:
+        """Crete a library of cells.
+
+        Args:
+            editable: Open the KLayout Layout in editable mode if `True`.
+        """
         self.kcells: dict[int, "KCell"] = {}
         kdb.Layout.__init__(self, editable)
         self.rename_function: Callable[..., None] = rename_clockwise
@@ -289,6 +304,15 @@ class KLib(kdb.Layout):
         options: kdb.LoadLayoutOptions | None = None,
         register_cells: bool = False,
     ) -> kdb.LayerMap:
+        """Read a GDS file into the existing Layout.
+
+        Args:
+            filename: Path of the GDS file.
+            options: KLayout options to load from the GDS. Can determine how merge
+            conflicts are handled for example. See
+            https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
+            register_cells: If `True` create KCells for all cells in the GDS.
+        """
         if register_cells:
             cells = set(self.cells("*"))
         fn = str(Path(filename).resolve())
@@ -310,12 +334,23 @@ class KLib(kdb.Layout):
         gzip: bool = False,
         options: kdb.SaveLayoutOptions = default_save(),
     ) -> None:
+        """Write a GDS file into the existing Layout.
+
+        Args:
+            filename: Path of the GDS file.
+            gzip: directly make the GDS a .gds.gz file.
+            options: KLayout options to load from the GDS. Can determine how merge
+            conflicts are handled for example. See
+            https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
+        """
         return kdb.Layout.write(self, str(filename), options)
 
 
-klib = (
-    KLib()
-)  #: Default library object. :py:class:`~kfactory.kcell.KCell` uses this object unless another one is specified in the constructor
+klib = KLib()
+"""Default library object.
+
+:py:class:`~kfactory.kcell.KCell` uses this object unless another one is
+specified in the constructor."""
 
 
 class LayerEnum(int, Enum):
@@ -326,7 +361,6 @@ class LayerEnum(int, Enum):
     Attributes:
         layer: layer number
         datatype: layer datatype
-        lib: library
     """
 
     layer: int
@@ -338,6 +372,15 @@ class LayerEnum(int, Enum):
         datatype: int,
         lib: KLib = klib,
     ) -> "LayerEnum":
+        """Create a new Enum.
+
+        Because it needs to act like an integer an enum is created and expanded.
+
+        Args:
+            layer: Layer number of the layer.
+            datatype: Datatype of the layer.
+            lib: :py:class:~`KLib` to register the layer to.
+        """
         value = lib.layer(layer, datatype)
         obj: int = int.__new__(cls, value)  # type: ignore[call-overload]
         obj._value_ = value  # type: ignore[attr-defined]
@@ -346,6 +389,7 @@ class LayerEnum(int, Enum):
         return obj  # type: ignore[return-value]
 
     def __getitem__(self, key: int) -> int:
+        """Retrieve layer number[0] / datatype[1] of a layer."""
         if key == 0:
             return self.layer
         elif key == 1:
@@ -358,12 +402,15 @@ class LayerEnum(int, Enum):
             )
 
     def __len__(self) -> int:
+        """A layer has length 2, layer number and datatype."""
         return 2
 
     def __iter__(self) -> Iterator[int]:
+        """Allow for loops to iterate over the LayerEnum."""
         yield from [self.layer, self.datatype]
 
     def __str__(self) -> str:
+        """Return the name of the LayerEnum."""
         return self.name
 
 
@@ -1198,17 +1245,6 @@ class KCell(kdb.Cell):
         Returns:
             :py:class:`~Instance`: The created instance
         """
-        # if isinstance(cell, KCell):
-        #     ca = (
-        #         self.insert(kdb.CellInstArray(cell, trans))  # type: ignore[arg-type]
-        #         if a is None
-        #         else self.insert(kdb.CellInstArray(cell, trans, a, b, na, nb))  # type: ignore[arg-type]
-        #     )
-        # elif a is None:
-        #     ca = self.insert(kdb.DCellInstArray(cell, trans))  # type: ignore[arg-type]
-        # else:
-        #     ca = self.insert(kdb.DCellInstArray(cell, trans, a, b, na, nb))  # type: ignore[arg-type]i
-
         if dtrans is None:
             if a is None:
                 ca = self.insert(kdb.CellInstArray(cell, trans))
@@ -1218,7 +1254,9 @@ class KCell(kdb.Cell):
                 cast(kdb.DVector, a)
                 cast(kdb.DVector, b)
                 ca = self.insert(
-                    kdb.CellInstArray(cell, trans, a, b, na, nb)  # type: ignore[arg-type]
+                    kdb.CellInstArray(
+                        cell, trans, a, b, na, nb  # type: ignore[arg-type]
+                    )
                 )
         else:
             if a is None:
@@ -1229,7 +1267,9 @@ class KCell(kdb.Cell):
                 cast(kdb.DVector, a)
                 cast(kdb.DVector, b)
                 ca = self.insert(
-                    kdb.DCellInstArray(cell, dtrans, a, b, na, nb)  # type: ignore[arg-type]
+                    kdb.DCellInstArray(
+                        cell, dtrans, a, b, na, nb  # type: ignore[arg-type]
+                    )
                 )
         inst = Instance(self.klib, ca)
         self.insts.append(inst)
@@ -1350,6 +1390,7 @@ class KCell(kdb.Cell):
     def write(
         self, filename: str | Path, save_options: kdb.SaveLayoutOptions = default_save()
     ) -> None:
+        """Write a KCell to a GDS. See :py:func:`KLib.write` for more info."""
         return super().write(str(filename), save_options)
 
     @classmethod
@@ -1395,6 +1436,7 @@ class Instance:
     yaml_tag = "!Instance"
 
     def __init__(self, klib: KLib, reference: kdb.Instance) -> None:
+        """Create an instance from a KLayout Instance."""
         self.klib = klib
         self.instance = reference
         self.ports = InstancePorts(self)
@@ -1430,15 +1472,17 @@ class Instance:
         return h.digest()
 
     @overload
-    def align(self, port: str | Port, other: Port, *, mirror: bool = False) -> None:
+    def align(
+        self, port: str | Port | None, other: Port, *, mirror: bool = False
+    ) -> None:
         ...
 
     @overload
     def align(
         self,
-        port: str | Port,
+        port: str | Port | None,
         other: "Instance",
-        other_port_name: str,
+        other_port_name: str | None,
         *,
         mirror: bool = False,
     ) -> None:
@@ -1446,7 +1490,7 @@ class Instance:
 
     def align(
         self,
-        port: str | Port,
+        port: str | Port | None,
         other: "Instance | Port",
         other_port_name: str | None = None,
         *,
@@ -1462,7 +1506,7 @@ class Instance:
 
         Args:
             port: The name of the port of this instance to be connected, or directly an
-            instance port.
+            instance port. Can be `None` because port names can be `None`.
             other: The other instance or a port. Skip `other_port_name` if it's a port.
             other_port_name: The name of the other port. Ignored if
             :py:attr:`~other_instance` is a port.
@@ -1485,10 +1529,10 @@ class Instance:
             op = other
         else:
             raise ValueError("other_instance must be of type Instance or Port")
-        if isinstance(port, str):
-            p = self.cell.ports[port]
-        else:
+        if isinstance(port, Port):
             p = port
+        else:
+            p = self.cell.ports[port]
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatch(
                 self,
@@ -1705,7 +1749,7 @@ class Ports:
         """Get all ports in a dictionary with names as keys."""
         return {v.name: v for v in self._ports if v.name is not None}
 
-    def __getitem__(self, key: str) -> Port:
+    def __getitem__(self, key: str | None) -> Port:
         """Get a specific port by name."""
         try:
             return next(filter(lambda port: port.name == key, self._ports))
@@ -1742,6 +1786,7 @@ class Ports:
 
     @classmethod
     def from_yaml(cls: "type[Ports]", constructor: Any, node: Any) -> "Ports":
+        """Load Ports from a yaml representation."""
         return cls(constructor.construct_sequence(node))
 
 
@@ -1754,7 +1799,7 @@ class InstancePorts:
 
     Attributes:
         cell_ports: A pointer to the :py:class:~`Ports` of the cell
-        instance: A pointer to the :py:class:~`Instance` related to thise.
+        instance: A pointer to the :py:class:~`Instance` related to this.
         This provides a way to dynamically calculate the ports.
     """
 
@@ -1767,7 +1812,7 @@ class InstancePorts:
         self.cell_ports = instance.cell.ports
         self.instance = instance
 
-    def __getitem__(self, key: str) -> Port:
+    def __getitem__(self, key: str | None) -> Port:
         """Get a port by name."""
         p = self.cell_ports[key]
         if self.instance.is_complex():
@@ -1783,7 +1828,7 @@ class InstancePorts:
             return (p.copy(self.instance.dcplx_trans) for p in self.cell_ports)
 
     def __repr__(self) -> str:
-        """String represenation.
+        """String representation.
 
         Creates a copy and uses the `__repr__` of
         :py:class:~`Ports`.
