@@ -1,4 +1,3 @@
-from typing import Optional
 
 from .. import KCell, LayerEnum, kdb
 
@@ -35,10 +34,10 @@ def fix_spacing_tiled(
     ignore_angle: float = 80,
     size_space_check: int = 5,
     n_threads: int = 4,
-    tile_size: Optional[tuple[float, float]] = None,
+    tile_size: tuple[float, float] | None = None,
     overlap: float = 2,
 ) -> kdb.Region:
-    """Fix min space issues by running a drc check on the input region and merging it with the affcted polygons
+    """Fix min space issues by running a drc check on the input region and merging it with the affcted polygons.
 
     Args:
         c: Input cell
@@ -54,9 +53,8 @@ def fix_spacing_tiled(
         kdb.Region: Region containing the fixes for the violations
 
     """
-
     if tile_size is None:
-        size = min(25 * min_space, 250)
+        min(25 * min_space, 250)
         tile_size = (25 * min_space * c.klib.dbu, 25 * min_space * c.klib.dbu)
 
     tp = kdb.TilingProcessor()
@@ -74,9 +72,9 @@ def fix_spacing_tiled(
     queue_str = (
         "var tile_reg = reg & (_tile & _frame);"
         + f"var sc = tile_reg.space_check({min_space}, false, Metrics.{metrics.to_s()}, {ignore_angle});"
-        + f"var edges = sc.edges(); edges.merge();"
+        + "var edges = sc.edges(); edges.merge();"
         + f"var r_int = (edges.extended(0, 0, 0, {size_space_check}, true) + sc.polygons()); r_int.merge();"
-        + f"r_int.insert(tile_reg.interacting(sc.polygons())); r_int.merge();"
+        + "r_int.insert(tile_reg.interacting(sc.polygons())); r_int.merge();"
         + "_output(fix_reg, r_int)"
     )
 
@@ -94,10 +92,10 @@ def fix_spacing_sizing_tiled(
     min_space: int,
     layer: LayerEnum,
     n_threads: int = 4,
-    tile_size: Optional[tuple[float, float]] = None,
+    tile_size: tuple[float, float] | None = None,
     overlap: int = 2,
 ) -> kdb.Region:
-    """Fix min space issues by using a dilation & erosion
+    """Fix min space issues by using a dilation & erosion.
 
     Args:
         c: Input cell

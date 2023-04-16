@@ -1,4 +1,3 @@
-from typing import Optional
 
 import numpy as np
 
@@ -15,11 +14,11 @@ def bend_circular(
     width: float,
     radius: float,
     layer: int | LayerEnum,
-    enclosure: Optional[Enclosure] = None,
+    enclosure: Enclosure | None = None,
     theta: float = 90,
     theta_step: float = 1,
 ) -> KCell:
-    """Circular radius bend
+    """Circular radius bend.
 
     Args:
         width: Width in database units
@@ -29,7 +28,6 @@ def bend_circular(
     Returns:
         cell (KCell): Circular Bend KCell
     """
-
     c = KCell()
     r = radius
     backbone = [

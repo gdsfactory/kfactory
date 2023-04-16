@@ -1,6 +1,7 @@
 from enum import IntEnum
 from hashlib import sha1
-from typing import Any, Callable, Optional, Sequence, TypeGuard
+from typing import Any, Optional, TypeGuard
+from collections.abc import Callable, Sequence
 
 import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr
@@ -77,11 +78,10 @@ def clean_points(points: list[kdb.Point]) -> list[kdb.Point]:
 def extrude_path_points(
     path: list[kdb.DPoint],
     width: float,
-    start_angle: Optional[float] = None,
-    end_angle: Optional[float] = None,
+    start_angle: float | None = None,
+    end_angle: float | None = None,
 ) -> tuple[list[kdb.DPoint], list[kdb.DPoint]]:
-    """
-    Extrude a path from a list of points and a static width
+    """Extrude a path from a list of points and a static width.
 
     Args:
         path: list of floating-points points
@@ -89,7 +89,6 @@ def extrude_path_points(
         start_angle: optionally specify a custom starting angle if `None` will be autocalculated from the first two elements
         end_angle: optionally specify a custom ending angle if `None` will be autocalculated from the last two elements
     """
-
     start = path[1] - path[0]
     end = path[-1] - path[-2]
     if start_angle is None:
@@ -131,11 +130,10 @@ def extrude_path(
     path: list[kdb.DPoint],
     width: float,
     enclosure: Optional["Enclosure"] = None,
-    start_angle: Optional[float] = None,
-    end_angle: Optional[float] = None,
+    start_angle: float | None = None,
+    end_angle: float | None = None,
 ) -> None:
-    """
-    Extrude a path from a list of points and a static width
+    """Extrude a path from a list of points and a static width.
 
     Args:
         target: the cell where to insert the shapes to (and get the database unit from)
@@ -151,7 +149,7 @@ def extrude_path(
         if layer not in enclosure.layer_sections:
             layer_list |= enclosure.layer_sections
         else:
-            ls = layer_list[layer].sections.copy()
+            layer_list[layer].sections.copy()
             layer_list = enclosure.layer_sections.copy()
             for section in layer_list[layer].sections:
                 layer_list[layer].add_section(section)
@@ -187,11 +185,10 @@ def extrude_path(
 def extrude_path_dynamic_points(
     path: list[kdb.DPoint],
     widths: Callable[[float], float] | list[float],
-    start_angle: Optional[float] = None,
-    end_angle: Optional[float] = None,
+    start_angle: float | None = None,
+    end_angle: float | None = None,
 ) -> tuple[list[kdb.DPoint], list[kdb.DPoint]]:
-    """
-    Extrude a profile with a list of points and a list of widths
+    """Extrude a profile with a list of points and a list of widths.
 
     Args:
         path: list of floating-points points
@@ -262,11 +259,10 @@ def extrude_path_dynamic(
     path: list[kdb.DPoint],
     widths: Callable[[float], float] | list[float],
     enclosure: Optional["Enclosure"] = None,
-    start_angle: Optional[float] = None,
-    end_angle: Optional[float] = None,
+    start_angle: float | None = None,
+    end_angle: float | None = None,
 ) -> None:
-    """
-    Extrude a path with dynamic width from a list of points and a list of widths and add an enclosure if specified
+    """Extrude a path with dynamic width from a list of points and a list of widths and add an enclosure if specified.
 
     Args:
         target: the cell where to insert the shapes to (and get the database unit from)
@@ -277,13 +273,12 @@ def extrude_path_dynamic(
         start_angle: optionally specify a custom starting angle if `None` will be autocalculated from the first two elements
         end_angle: optionally specify a custom ending angle if `None` will be autocalculated from the last two elements
     """
-
     layer_list = {layer: LayerSection(sections=[Section(d_max=0)])}
     if enclosure is not None:
         if layer not in enclosure.layer_sections:
             layer_list.update(enclosure.layer_sections)
         else:
-            ls = layer_list[layer].sections.copy()
+            layer_list[layer].sections.copy()
             layer_list = enclosure.layer_sections.copy()
             for section in layer_list[layer].sections:
                 layer_list[layer].add_section(section)
@@ -355,7 +350,7 @@ def extrude_path_dynamic(
 
 
 class Section(BaseModel):
-    d_min: Optional[int] = None
+    d_min: int | None = None
     d_max: int
 
     def __hash__(self) -> int:
@@ -387,10 +382,10 @@ class LayerSection(BaseModel):
 
 class Enclosure(BaseModel):
     layer_sections: dict[LayerEnum | int, LayerSection]
-    _name: Optional[str] = PrivateAttr(default=None)
+    _name: str | None = PrivateAttr(default=None)
     warn: bool = True
 
-    main_layer: Optional[LayerEnum | int]
+    main_layer: LayerEnum | int | None
 
     yaml_tag: str = "!Enclosure"
 
@@ -402,9 +397,9 @@ class Enclosure(BaseModel):
         sections: Sequence[
             tuple[LayerEnum | int, int] | tuple[LayerEnum | int, int, int]
         ] = [],
-        name: Optional[str] = None,
+        name: str | None = None,
         warn: bool = True,
-        main_layer: Optional[LayerEnum | int] = None,
+        main_layer: LayerEnum | int | None = None,
     ):
         super().__init__(
             warn=warn,
@@ -460,7 +455,7 @@ class Enclosure(BaseModel):
     def minkowski_region(
         self,
         r: kdb.Region,
-        d: Optional[int],
+        d: int | None,
         shape: Callable[[int], list[kdb.Point] | kdb.Box | kdb.Edge | kdb.Polygon],
     ) -> kdb.Region:
         if d is None:
@@ -488,7 +483,7 @@ class Enclosure(BaseModel):
     def apply_minkowski_enc(
         self,
         c: KCell,
-        ref: Optional[int | kdb.Region],  # layer index or the region
+        ref: int | kdb.Region | None,  # layer index or the region
         direction: Direction = Direction.BOTH,
     ) -> None:
         match direction:
@@ -517,18 +512,18 @@ class Enclosure(BaseModel):
                 raise ValueError("Undefined direction")
 
     def apply_minkowski_y(
-        self, c: KCell, ref: Optional[int | kdb.Region] = None
+        self, c: KCell, ref: int | kdb.Region | None = None
     ) -> None:
         return self.apply_minkowski_enc(c, ref=ref, direction=Direction.Y)
 
-    def apply_minkowski_x(self, c: KCell, ref: Optional[int | kdb.Region]) -> None:
+    def apply_minkowski_x(self, c: KCell, ref: int | kdb.Region | None) -> None:
         return self.apply_minkowski_enc(c, ref=ref, direction=Direction.X)
 
     def apply_minkowski_custom(
         self,
         c: KCell,
         shape: Callable[[int], kdb.Edge | kdb.Polygon | kdb.Box],
-        ref: Optional[int | kdb.Region] = None,
+        ref: int | kdb.Region | None = None,
     ) -> None:
         if ref is None:
             ref = self.main_layer
@@ -551,7 +546,7 @@ class Enclosure(BaseModel):
         self,
         c: KCell,
         shape: Callable[
-            [int, Optional[int]], kdb.Edge | kdb.Polygon | kdb.Box | kdb.Region
+            [int, int | None], kdb.Edge | kdb.Polygon | kdb.Box | kdb.Region
         ],
     ) -> None:
         for layer, layersec in self.layer_sections.items():
@@ -564,7 +559,7 @@ class Enclosure(BaseModel):
         elif is_Region(ref):
             _ref = ref.bbox()
 
-        def bbox_reg(d_max: int, d_min: Optional[int] = None) -> kdb.Region:
+        def bbox_reg(d_max: int, d_min: int | None = None) -> kdb.Region:
             reg_max = kdb.Region(_ref)
             reg_max.size(d_max)
             if d_min is None:
@@ -594,7 +589,7 @@ class Enclosure(BaseModel):
         self,
         c: KCell,
         path: list[kdb.DPoint],
-        main_layer: Optional[int | LayerEnum],
+        main_layer: int | LayerEnum | None,
         width: float,
     ) -> None:
         if main_layer is None:
@@ -607,7 +602,7 @@ class Enclosure(BaseModel):
         self,
         c: KCell,
         path: list[kdb.DPoint],
-        main_layer: Optional[int | LayerEnum],
+        main_layer: int | LayerEnum | None,
         widths: Callable[[float], float] | list[float],
     ) -> None:
         if main_layer is None:

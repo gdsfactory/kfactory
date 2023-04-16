@@ -1,4 +1,4 @@
-from typing import Optional, Sequence
+from collections.abc import Sequence
 
 import numpy as np
 import numpy.typing as nty
@@ -34,7 +34,7 @@ def bend_s(
     nb_points: int = 99,
     t_start: float = 0,
     t_stop: float = 1,
-    enclosure: Optional[Enclosure] = None,
+    enclosure: Enclosure | None = None,
 ) -> KCell:
     c = KCell()
     l, h = length, height

@@ -1,6 +1,5 @@
-from typing import Optional
 
-from ... import KCell, LayerEnum, autocell, kdb, klib
+from ... import KCell, autocell, kdb
 from ...utils import Enclosure
 
 __all__ = ["taper"]
@@ -12,7 +11,7 @@ def taper(
     width2: int,
     length: int,
     layer: int,
-    enclosure: Optional[Enclosure] = None,
+    enclosure: Enclosure | None = None,
 ) -> KCell:
     c = KCell()
 

@@ -1,6 +1,5 @@
-from typing import Optional
 
-from ... import KCell, LayerEnum, autocell, kdb, klib
+from ... import KCell, LayerEnum, autocell, kdb
 from ...utils import Enclosure
 
 __all__ = ["waveguide"]
@@ -11,7 +10,7 @@ def waveguide(
     width: int,
     length: int,
     layer: int | LayerEnum,
-    enclosure: Optional[Enclosure] = None,
+    enclosure: Enclosure | None = None,
 ) -> KCell:
     c = KCell()
 

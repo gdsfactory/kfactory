@@ -7,3 +7,4 @@ Tutorials
 
 	notebooks/00_geometry
 	notebooks/01_references
+	notebooks/02_DRC

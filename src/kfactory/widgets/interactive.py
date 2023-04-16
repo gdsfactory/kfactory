@@ -1,15 +1,12 @@
 try:
     from pathlib import Path
-    from threading import Timer
-    from time import time
-    from typing import Any, Callable, Optional
+    from typing import Any
 
     import klayout.lay as lay
     from ipyevents import Event  # type: ignore[import]
-    from IPython.display import clear_output, display  # type: ignore[import]
+    from IPython.display import display  # type: ignore[import]
     from ipytree import Node, Tree  # type: ignore[import]
     from ipywidgets import (  # type: ignore[import]
-        HTML,
         Accordion,
         AppLayout,
         Box,
@@ -27,7 +24,7 @@ try:
 
     from .. import kdb, lay
     from ..config import logger
-    from ..kcell import CplxKCell, KCell, KLib
+    from ..kcell import KCell
 
 except ImportError as e:
     print("You need install jupyter notebook plugin with `pip install kfactory[ipy]`")
@@ -45,8 +42,8 @@ def display_kcell(kc: KCell) -> None:
 class LayoutWidget:
     def __init__(
         self,
-        cell: KCell | CplxKCell,
-        layer_properties: Optional[str] = None,
+        cell: KCell,
+        layer_properties: str | None = None,
         hide_unused_layers: bool = True,
         with_layer_selector: bool = True,
     ):
@@ -56,7 +53,7 @@ class LayoutWidget:
 
         self.layout_view = lay.LayoutView()
         self.layout_view.show_layout(cell.klib, False)
-        self.layer_properties: Optional[Path] = None
+        self.layer_properties: Path | None = None
         if layer_properties is not None:
             self.layer_properties = Path(layer_properties)
             if self.layer_properties.exists() and self.layer_properties.is_file():
@@ -137,13 +134,11 @@ class LayoutWidget:
                 break
         self.refresh()
 
-    def build_layer_toggle(
-        self, prop_iter: lay.LayerPropertiesIterator
-    ) -> Optional[HBox]:
+    def build_layer_toggle(self, prop_iter: lay.LayerPropertiesIterator) -> HBox | None:
         props = prop_iter.current()
         layer_color = f"#{props.eff_fill_color():06x}"
         # Would be nice to use LayoutView.icon_for_layer() rather than simple colored box
-        button_layout = Layout(
+        Layout(
             width="5px",
             height="20px",
             border=f"solid 2px {layer_color}",
@@ -248,7 +243,6 @@ class LayoutWidget:
         Args:
             max_height: Maximum height to set for the widget (likely the height of the pixel buffer).
         """
-
         all_boxes = []
 
         prop_iter = self.layout_view.begin_layers()
@@ -276,7 +270,7 @@ class LayoutWidget:
 
         return selector_tabs
 
-    def load_layout(self, filepath: str, layer_properties: Optional[str]) -> None:
+    def load_layout(self, filepath: str, layer_properties: str | None) -> None:
         """Loads a GDS layout.
 
         Args:
@@ -324,7 +318,7 @@ class LayoutWidget:
             self.layout_view.active_cellview().layout().cell(event["owner"].name)
         )
 
-        max_height = self.layout_view.viewport_height()
+        self.layout_view.viewport_height()
 
         all_boxes = []
         prop_iter = self.layout_view.begin_layers()
@@ -351,22 +345,24 @@ class LayoutWidget:
         self.layout_view.timer()  # type: ignore[attr-defined]
         x = event["relativeX"]
         y = event["relativeY"]
-        moved_x = event["movementX"]
-        moved_y = event["movementY"]
         buttons = self._get_modifier_buttons(event)
 
-        if event["event"] == "mousedown":
-            self.layout_view.send_mouse_press_event(
-                kdb.DPoint(float(x), float(y)), buttons
-            )
-        elif event["event"] == "mouseup":
-            self.layout_view.send_mouse_release_event(
-                kdb.DPoint(float(x), float(y)), buttons
-            )
-        elif event["event"] == "mousemove":
-            self.layout_view.send_mouse_move_event(
-                kdb.DPoint(float(x), float(y)), buttons
-            )
+        match event["event"]:
+            case "mousedown":
+                # if event["event"] == "mousedown":
+                self.layout_view.send_mouse_press_event(
+                    kdb.DPoint(float(x), float(y)), buttons
+                )
+            # elif event["event"] == "mouseup":
+            case "mouseup":
+                self.layout_view.send_mouse_release_event(
+                    kdb.DPoint(float(x), float(y)), buttons
+                )
+            # elif event["event"] == "mousemove":
+            case "mousemove":
+                self.layout_view.send_mouse_move_event(
+                    kdb.DPoint(float(x), float(y)), buttons
+                )
         self.refresh()
         self.layout_view.timer()  # type: ignore[attr-defined]
 
