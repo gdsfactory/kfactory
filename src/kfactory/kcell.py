@@ -1,3 +1,13 @@
+"""Core module of kfactory.
+
+Defines the :py:class:`KCell` providing klayout Cells with Ports
+and other convience functions.
+
+:py:class:`Instance` are the kfactory instances used to also acquire
+ports etc from instances.
+    
+"""
+
 import functools
 import importlib
 import json
@@ -772,10 +782,10 @@ class KCell(kdb.Cell):
 
         Args:
             name: name of the cell, if `None`, it will set the name to "Unnamed_"
-            library: KLib object that stores the layout and metadata about the KCells
-            kdb_cell
+            klib: KLib object that stores the layout and metadata about the KCells
             kdb_cell: :py:class:`~klayout.db.Cell` to base the cell on (used when
             copying or reading a GDS|OAS)
+            ports: Optionally copy ports into the cell on creation.
         """
         if kdb_cell is None:
             _name = "Unnamed_" if name is None else name
@@ -894,7 +904,8 @@ class KCell(kdb.Cell):
                 del module
             else:
                 raise NotImplementedError(
-                    'To define an instance, either a "cellfunction" or a "cellname" needs to be defined'
+                    'To define an instance, either a "cellfunction" or'
+                    ' a "cellname" needs to be defined'
                 )
             t = inst.get("trans", {})
             if isinstance(t, str):
@@ -916,10 +927,18 @@ class KCell(kdb.Cell):
                 x_yml = t.get("x", DEFAULT_TRANS["x"])
                 y_yml = t.get("y", DEFAULT_TRANS["y"])
                 margin = t.get("margin", DEFAULT_TRANS["margin"])
-                margin_x = margin.get("x", DEFAULT_TRANS["margin"]["x"])  # type: ignore[index]
-                margin_y = margin.get("y", DEFAULT_TRANS["margin"]["y"])  # type: ignore[index]
-                margin_x0 = margin.get("x0", DEFAULT_TRANS["margin"]["x0"])  # type: ignore[index]
-                margin_y0 = margin.get("y0", DEFAULT_TRANS["margin"]["y0"])  # type: ignore[index]
+                margin_x = margin.get(
+                    "x", DEFAULT_TRANS["margin"]["x"]  # type: ignore[index]
+                )
+                margin_y = margin.get(
+                    "y", DEFAULT_TRANS["margin"]["y"]  # type: ignore[index]
+                )
+                margin_x0 = margin.get(
+                    "x0", DEFAULT_TRANS["margin"]["x0"]  # type: ignore[index]
+                )
+                margin_y0 = margin.get(
+                    "y0", DEFAULT_TRANS["margin"]["y0"]  # type: ignore[index]
+                )
                 ref_yml = t.get("ref", DEFAULT_TRANS["ref"])
                 if isinstance(ref_yml, str):
                     for i in reversed(cell.insts):
@@ -1411,13 +1430,13 @@ class Instance:
         return h.digest()
 
     @overload
-    def connect(self, portname: str, other: Port, *, mirror: bool = False) -> None:
+    def align(self, port: str | Port, other: Port, *, mirror: bool = False) -> None:
         ...
 
     @overload
-    def connect(
+    def align(
         self,
-        portname: str,
+        port: str | Port,
         other: "Instance",
         other_port_name: str,
         *,
@@ -1425,9 +1444,9 @@ class Instance:
     ) -> None:
         ...
 
-    def connect(
+    def align(
         self,
-        portname: str,
+        port: str | Port,
         other: "Instance | Port",
         other_port_name: str | None = None,
         *,
@@ -1442,13 +1461,17 @@ class Instance:
         aligned (same position with 180° turn) to another instance.
 
         Args:
-            portname: The name of the port of this instance to be connected
-            other_instance: The other instance or a port
+            port: The name of the port of this instance to be connected, or directly an
+            instance port.
+            other: The other instance or a port. Skip `other_port_name` if it's a port.
             other_port_name: The name of the other port. Ignored if
             :py:attr:`~other_instance` is a port.
             mirror: Instead of applying klayout.db.Trans.R180 as a connection
             transformation, use klayout.db.Trans.M90, which effectively means this
             instance will be mirrored and connected.
+            allow_width_mismatch: Skip width check between the ports if set.
+            allow_layer_mismatch: Skip layer check between the ports if set.
+            allow_type_mismatch: Skip port_type check between the ports if set.
         """
         if isinstance(other, Instance):
             if other_port_name is None:
@@ -1462,7 +1485,10 @@ class Instance:
             op = other
         else:
             raise ValueError("other_instance must be of type Instance or Port")
-        p = self.cell.ports[portname]
+        if isinstance(port, str):
+            p = self.cell.ports[port]
+        else:
+            p = port
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatch(
                 self,
@@ -1485,15 +1511,18 @@ class Instance:
                 )
 
     def __getattribute__(self, attr_name: str) -> Any:
+        """If an attribute isn't present, look in `self.instance`."""
         return super().__getattribute__(attr_name)
 
     def _get_attr(self, attr_name: str) -> Any:
         return super().__getattribute__(attr_name)
 
     def __getattr__(self, attr_name: str) -> Any:
+        """If an attribute isn't present, look in `self.instance`."""
         return kdb.Instance.__getattribute__(self.instance, attr_name)
 
     def __setattr__(self, attr_name: str, attr_value: Any) -> None:
+        """If an attribute isn't present, look in `self.instance`."""
         if attr_name == "instance":
             super().__setattr__(attr_name, attr_value)
         try:
@@ -1503,6 +1532,7 @@ class Instance:
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
+        """Convert the instance to a yaml representation."""
         d = {
             "cellname": node.cell.name,
             "trans": node._trans,
@@ -1518,7 +1548,8 @@ class Ports:
     dictionary. But to keep tabs on names etc, the ports are stored as a list
 
     Attributes:
-        _ports: Internal storage of the ports. Normally ports should be retrieved with :py:func:`__getitem__` or with :py:func:`~get_all`
+        _ports: Internal storage of the ports. Normally ports should be retrieved with
+        :py:func:`__getitem__` or with :py:func:`~get_all`
     """
 
     yaml_tag = "!Ports"
@@ -1537,6 +1568,7 @@ class Ports:
         return port.hash() in [v.hash() for v in self._ports]
 
     def __iter__(self) -> Iterator[Port]:
+        """Iterator, that allows for loops etc to directly access the object."""
         yield from self._ports
 
     # def each(self) -> Iterator[Port]:
@@ -1577,7 +1609,7 @@ class Ports:
         *,
         dcplx_trans: kdb.DCplxTrans,
         dwidth: int,
-        layer: int,
+        layer: LayerEnum | int,
         name: str | None = None,
         port_type: str = "optical",
     ) -> Port:
@@ -1588,7 +1620,7 @@ class Ports:
         self,
         *,
         width: int,
-        layer: int,
+        layer: LayerEnum | int,
         position: tuple[int, int],
         angle: Literal[0, 1, 2, 3],
         name: str | None = None,
@@ -1602,7 +1634,7 @@ class Ports:
         name: str | None = None,
         width: int | None = None,
         dwidth: float | None = None,
-        layer: int,
+        layer: LayerEnum | int,
         port_type: str = "optical",
         trans: kdb.Trans | None = None,
         dcplx_trans: kdb.DCplxTrans | None = None,
@@ -1610,7 +1642,23 @@ class Ports:
         angle: Literal[0, 1, 2, 3] | None = None,
         mirror_x: bool = False,
     ) -> Port:
-        """Create a new port in the list."""
+        """Create a new port in the list.
+
+        Args:
+            name: Optional name of port.
+            width: Width of the port in dbu. If `trans` is set (or the manual creation
+            with `position` and `angle`), this needs to be as well.
+            dwidth: Width of the port in um. If `dcplx_trans` is set, this needs to be
+            as well.
+            layer: Layer index of the port.
+            port_type: Type of the port (electrical, optical, etc.)
+            trans: Transformation object of the port. [dbu]
+            dcplx_trans: Complex transformation for the port.
+            Use if a non-90° port is necessary.
+            position: Tuple of the position. [dbu]
+            angle: Angle in 90° increments. Used for simple/dbu transformations.
+            mirror_x: Mirror the transformation of the port.
+        """
         if trans is not None:
             assert width is not None
             port = Port(
@@ -1681,10 +1729,12 @@ class Ports:
         return h.digest()
 
     def __repr__(self) -> str:
+        """Representation of the Ports as strings."""
         return repr({v.name: v for v in self._ports})
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
+        """Convert the ports to a yaml representations."""
         return representer.represent_sequence(
             cls.yaml_tag,
             node._ports,
@@ -1696,11 +1746,29 @@ class Ports:
 
 
 class InstancePorts:
+    """Ports of an instance.
+
+    These act as virtual ports as the positions needs to change if the
+    instance changes etc.
+
+
+    Attributes:
+        cell_ports: A pointer to the :py:class:~`Ports` of the cell
+        instance: A pointer to the :py:class:~`Instance` related to thise.
+        This provides a way to dynamically calculate the ports.
+    """
+
     def __init__(self, instance: Instance) -> None:
+        """Creates the virtual ports object.
+
+        Args:
+            instance: The related instance
+        """
         self.cell_ports = instance.cell.ports
         self.instance = instance
 
     def __getitem__(self, key: str) -> Port:
+        """Get a port by name."""
         p = self.cell_ports[key]
         if self.instance.is_complex():
             return p.copy(self.instance.dcplx_trans)
@@ -1708,15 +1776,22 @@ class InstancePorts:
             return p.copy(self.instance.trans)
 
     def __iter__(self) -> Iterator[Port]:
+        """Create a copy of the ports to iterate through."""
         if not self.instance.is_complex():
             return (p.copy(self.instance.trans) for p in self.cell_ports)
         else:
             return (p.copy(self.instance.dcplx_trans) for p in self.cell_ports)
 
     def __repr__(self) -> str:
+        """String represenation.
+
+        Creates a copy and uses the `__repr__` of
+        :py:class:~`Ports`.
+        """
         return repr(self.copy())
 
     def copy(self) -> Ports:
+        """Creates a copy and uses the `__repr__` of :py:class:~`Ports`."""
         if not self.instance.instance.is_complex():
             return Ports(
                 klib=self.instance.klib,
@@ -1729,25 +1804,6 @@ class InstancePorts:
                     p.copy(self.instance.dcplx_trans) for p in self.cell_ports._ports
                 ],
             )
-
-        #     and not self.instance.cell.ports.complex
-        #     and not self.instance.cell.complex
-        # ):
-        #     return Ports(
-        #         [
-        #             port.copy(trans=self.instance.trans)  # type: ignore[arg-type, misc]
-        #             for port in self.cell_ports._ports
-        #         ]
-        #     )
-        # else:
-        #     return CplxPorts(
-        #         [
-        #             port.copy_cplx(
-        #                 trans=self.instance.cplx_dtrans, dbu=self.instance.cell.klib.dbu
-        #             )
-        #             for port in self.cell_ports._ports
-        #         ]
-        #     )
 
 
 @overload
@@ -1775,14 +1831,20 @@ def autocell(
     Callable[KCellParams, KCell]
     | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
 ):
-    """Decorator to cache and auto name the celll. This will use :py:func:`functools.cache` to cache the function call.
-    Additionally, if enabled this will set the name and from the args/kwargs of the function and also paste them into a settings dictionary of the :py:class:`~KCell`.
+    """Decorator to cache and auto name the celll.
+
+    This will use :py:func:`functools.cache` to cache the function call.
+    Additionally, if enabled this will set the name and from the args/kwargs of the
+    function and also paste them into a settings dictionary of the :py:class:`~KCell`.
 
     Args:
         set_settings: Copy the args & kwargs into the settings dictionary
-        set_name: Auto create the name of the cell to the functionname plus a string created from the args/kwargs
-        maxsize: maximum size of cache, cell parameter sets will be evicted if the cell function is called with more different
-        parameter sets than there are spaces in the cache, in case there are cell calls with existing parameter set calls
+        set_name: Auto create the name of the cell to the functionname plus a
+        string created from the args/kwargs
+        maxsize: maximum size of cache, cell parameter sets will be evicted if the cell
+        function is called with more different
+        parameter sets than there are spaces in the cache, in case there are cell calls
+        with existing parameter set calls
     """
 
     def decorator_autocell(
@@ -1846,10 +1908,12 @@ def autocell(
 
 
 def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
+    """Convert a `dict` to a `frozenset`."""
     return frozenset(d.items())
 
 
 def frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable]:
+    """Convert `frozenset` to `dict`."""
     return dict(fs)
 
 
@@ -1880,6 +1944,7 @@ def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
 
 
 def get_component_name(component_type: str, **kwargs: dict[str, Any]) -> str:
+    """Convert a component to a string."""
     name = component_type
 
     if kwargs:
@@ -1889,17 +1954,18 @@ def get_component_name(component_type: str, **kwargs: dict[str, Any]) -> str:
 
 
 def join_first_letters(name: str) -> str:
-    """Join the first letter of a name separated with underscores (taper_length -> TL)."""
+    """Join the first letter of a name separated with underscores.
+
+    Example:
+        "TL" == join_first_letters("taper_length")
+    """
     return "".join([x[0] for x in name.split("_") if x])
 
 
 def clean_value(
     value: float | np.float64 | dict[Any, Any] | KCell | Callable[..., Any]
 ) -> str:
-    """Returns more readable value (integer)
-    if number is < 1:
-        returns number units in nm (integer).
-    """
+    """Makes sure a value is representable in a limited character_space."""
     try:
         if isinstance(value, int):  # integer
             return str(value)
@@ -1922,7 +1988,7 @@ def clean_value(
 
 
 def clean_name(name: str) -> str:
-    r"""Ensures that gds cells are composed of [a-zA-Z0-9_\-]::
+    r"""Ensures that gds cells are composed of [a-zA-Z0-9_\-].
 
     FIXME: only a few characters are currently replaced.
         This function has been updated only on case-by-case basis
@@ -1962,6 +2028,7 @@ DEFAULT_TRANS: dict[str, str | int | float | dict[str, str | int | float]] = {
 def update_default_trans(
     new_trans: dict[str, str | int | float | dict[str, str | int | float]]
 ) -> None:
+    """Allows to change the default transformation for reading a yaml file."""
     DEFAULT_TRANS.update(new_trans)
 
 
@@ -1995,7 +2062,7 @@ def show(
     try:
         conn = socket.create_connection(("127.0.0.1", 8082), timeout=0.5)
         data = data + "\n"
-        enc_data = data.encode()  # if hasattr(data, "encode") else data
+        enc_data = data.encode()
         conn.sendall(enc_data)
         conn.settimeout(5)
     except OSError:
