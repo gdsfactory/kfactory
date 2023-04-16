@@ -1,7 +1,11 @@
-"""The import order matters, we need to first import the important stuff.
+"""KFactory package. Utilities for creating photonic devices.
 
-isort:skip_file
+Uses the klayout package as a backend.
+
 """
+
+# The import order matters, we need to first import the important stuff.
+# isort:skip_file
 
 import klayout.dbcore as kdb
 import klayout.lay as lay
@@ -36,11 +40,14 @@ __all__ = [
     "KLib",
     "default_save",
     "kdb",
+    "lay",
+    "port",
     "pcells",
     "placer",
     "routing",
     "utils",
     "show",
     "klay",
+    "logger",
     "LayerEnum",
 ]

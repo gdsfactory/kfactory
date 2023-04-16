@@ -2,7 +2,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional, TypeVar, Union
+from typing import Any, TypeVar
 
 from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
@@ -17,13 +17,15 @@ PathLike = TypeVar("PathLike", str, Path, None)
 
 
 def cells_to_yaml(
-    output: PathLike, cells: Union[list[KCell], KCell]
+    output: PathLike, cells: list[KCell] | KCell
 ) -> None:  # , library: KLib=library):
-    """Convert cell(s) to a yaml representations
+    """Convert cell(s) to a yaml representations.
 
     Args:
         output: A stream or string of a path where to dump the yaml. Can also be set to sys.stdout
         cells: A single :py:class:`~kfactory.kcell.KCell` or a list of them.
+
+
     Returns:
         yaml dump
     """
@@ -36,17 +38,20 @@ def cells_to_yaml(
 
 
 def get_yaml_obj() -> YAML:
+    """New global yaml object."""
     return YAML()
 
 
 def register_classes(
     yaml: YAML,
     library: KLib = stdlib,
-    additional_classes: Optional[list[object]] = None,
+    additional_classes: list[object] | None = None,
     verbose: bool = False,
 ) -> None:
+    """Register a new KCell class compatible with ruamel yaml."""
+
     class ModKCell(KCell):
-        def __init__(self, name: Optional[str] = None, library: KLib = library):
+        def __init__(self, name: str | None = None, library: KLib = library):
             KCell.__init__(self, name, library)
 
         @classmethod
@@ -65,18 +70,27 @@ def register_classes(
 
 def cells_from_yaml(
     inp: Path,
-    library: KLib = stdlib,
-    additional_classes: Optional[list[object]] = None,
+    klib: KLib = stdlib,
+    additional_classes: list[object] | None = None,
     verbose: bool = False,
 ) -> None:
+    """Recreate cells from a yaml file.
+
+    Args:
+        inp: Input file path.
+        klib: KLib to load the cells into.
+        additional_classes: Additional yaml classes that should be registered.
+        This is used for example to enable loading additional yaml files etc.
+        verbose: Print more verbose errors etc.
+    """
     yaml = get_yaml_obj()
     yaml.register_class(
-        include_from_loader(inp.parent, library, additional_classes, verbose)
+        include_from_loader(inp.parent, klib, additional_classes, verbose)
     )
 
     register_classes(
         yaml,
-        library,
+        klib,
         additional_classes,
         verbose,
     )
@@ -86,13 +100,17 @@ def cells_from_yaml(
 def exploded_yaml(
     inp: os.PathLike[Any],
     library: KLib = stdlib,
-    additional_classes: Optional[list[object]] = None,
+    additional_classes: list[object] | None = None,
     verbose: bool = False,
 ) -> Any:
+    """Expanded yaml.
+
+    Expand cross-references. Same syntax as :py:func:~`cells_from_yaml`
+    """
     yaml = YAML(pure=True)
 
     class ModKCell(KCell):
-        def __init__(self, name: Optional[str] = None, library: KLib = library):
+        def __init__(self, name: str | None = None, library: KLib = library):
             KCell.__init__(self, name, library)
 
         @classmethod
@@ -105,9 +123,11 @@ def exploded_yaml(
 def include_from_loader(
     folder: Path,
     library: KLib,
-    additional_classes: Optional[list[object]],
+    additional_classes: list[object] | None,
     verbose: bool,
 ) -> Any:
+    """Expand ruamel to support the `!include` keyword."""
+
     @dataclass
     class Include:
         filename: str

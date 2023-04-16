@@ -1,7 +1,7 @@
+from collections.abc import Callable, Sequence
 from enum import IntEnum
 from hashlib import sha1
 from typing import Any, Optional, TypeGuard
-from collections.abc import Callable, Sequence
 
 import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr
@@ -192,9 +192,12 @@ def extrude_path_dynamic_points(
 
     Args:
         path: list of floating-points points
-        width: function (from t==0 to t==1) defining a width profile for the path | list with width for the profile (needs same length as path)
-        start_angle: optionally specify a custom starting angle if `None` will be autocalculated from the first two elements
-        end_angle: optionally specify a custom ending angle if `None` will be autocalculated from the last two elements
+        widths: function (from t==0 to t==1) defining a width profile for the path
+        | list with width for the profile (needs same length as path)
+        start_angle: optionally specify a custom starting angle if `None` will be
+        autocalculated from the first two elements
+        end_angle: optionally specify a custom ending angle if `None` will be
+        autocalculated from the last two elements
     """
     start = path[1] - path[0]
     end = path[-1] - path[-2]
@@ -210,16 +213,16 @@ def extrude_path_dynamic_points(
     end_trans = kdb.DCplxTrans(1, end_angle, False, p_end.x, p_end.y)
 
     if callable(widths):
-        l = sum(((p2 - p1).abs() for p2, p1 in zip(path[:-1], path[1:])))
+        length = sum(((p2 - p1).abs() for p2, p1 in zip(path[:-1], path[1:])))
         z: float = 0
-        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / l) / 2))
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))
         vector_top = [start_trans * ref_vector]
         vector_bot = [start_trans * kdb.DCplxTrans.R180 * ref_vector]
         p_old = path[0]
         p = path[1]
         z += (p - p_old).abs()
         for point in path[2:]:
-            ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / l) / 2))
+            ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))
             p_new = point
             v = p_new - p_old
             angle = np.rad2deg(np.arctan2(v.y, v.x))
@@ -229,7 +232,7 @@ def extrude_path_dynamic_points(
             z += (p_new - p).abs()
             p_old = p
             p = p_new
-        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / l) / 2))
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))
     else:
         ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths[0] / 2))
         vector_top = [start_trans * ref_vector]
@@ -511,9 +514,7 @@ class Enclosure(BaseModel):
             case _:
                 raise ValueError("Undefined direction")
 
-    def apply_minkowski_y(
-        self, c: KCell, ref: int | kdb.Region | None = None
-    ) -> None:
+    def apply_minkowski_y(self, c: KCell, ref: int | kdb.Region | None = None) -> None:
         return self.apply_minkowski_enc(c, ref=ref, direction=Direction.Y)
 
     def apply_minkowski_x(self, c: KCell, ref: int | kdb.Region | None) -> None:
@@ -592,9 +593,18 @@ class Enclosure(BaseModel):
         main_layer: int | LayerEnum | None,
         width: float,
     ) -> None:
+        """Extrude a path and add it to a main layer.
+
+        Args:
+            c: The cell where to insert the path to
+            path: Backbone of the path. [um]
+            main_layer: Layer index where to put the main part of the path.
+            width: Width of the core of the path
+        """
         if main_layer is None:
             raise ValueError(
-                "The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
+                "The enclosure doesn't have  a reference `main_layer` defined."
+                " Therefore the layer must be defined in calls"
             )
         extrude_path(target=c, layer=main_layer, path=path, width=width, enclosure=self)
 
@@ -605,9 +615,22 @@ class Enclosure(BaseModel):
         main_layer: int | LayerEnum | None,
         widths: Callable[[float], float] | list[float],
     ) -> None:
+        """Extrude a path and add it to a main layer.
+
+        Supports a dynamic width of the path defined by a function
+        returning the width for the interval [0,1], or as a list of
+        widths of the same lengths as the points.
+
+        Args:
+            c: The cell where to insert the path to
+            path: Backbone of the path. [um]
+            main_layer: Layer index where to put the main part of the path.
+            widths: Width of the core of the path
+        """
         if main_layer is None:
             raise ValueError(
-                "The enclosure doesn't have  a reference `main_layer` defined. Therefore the layer must be defined in calls"
+                "The enclosure doesn't have  a reference `main_layer` defined."
+                " Therefore the layer must be defined in calls"
             )
         extrude_path_dynamic(
             target=c, layer=main_layer, path=path, widths=widths, enclosure=self
