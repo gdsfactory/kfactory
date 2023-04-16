@@ -1499,7 +1499,9 @@ class Instance:
     ) -> None:
         """Align port with name ``portname`` to a port.
 
-        .. deprecated:: 0.7.0
+        .. deprecated:: 0.6.0
+            Use :py:func:`align` instead.
+            Will be removed in 0.7.0
 
         Function to allow to transform this instance so that a port of this instance is
         aligned (same position with 180° turn) to another instance.

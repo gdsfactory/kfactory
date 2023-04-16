@@ -13,7 +13,7 @@ min space violations. :py:func:~`fix_spacing_tiled` to fix it using a TilingProc
 from . import geo, violations
 from .geo import Direction, Enclosure, extrude_path, extrude_path_dynamic
 from .geo.fill import fill_tiled
-from .violations import fix_spacing, fix_spacing_tiled
+from .violations import fix_spacing_tiled
 
 __all__ = [
     "Enclosure",
@@ -23,6 +23,5 @@ __all__ = [
     "extrude_path",
     "extrude_path_dynamic",
     "fill_tiled",
-    "fix_spacing",
     "fix_spacing_tiled",
 ]
