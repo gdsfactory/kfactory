@@ -607,7 +607,6 @@ class Port:
             _dtrans = dtrans * self.dcplx_trans
         else:
             _dtrans = trans * self.dcplx_trans
-        self.d.width
         return Port(
             name=self.name,
             dcplx_trans=_dtrans,
@@ -672,10 +671,7 @@ class Port:
         The setter will set a complex transformation and overwrite the internal
         transformation (set simple to `None` and the complex to the provided value.
         """
-        if self._dcplx_trans:
-            return self._dcplx_trans
-        else:
-            return kdb.DCplxTrans(self.trans.to_dtype(self.klib.dbu))
+        return self._dcplx_trans or kdb.DCplxTrans(self.trans.to_dtype(self.klib.dbu))
 
     @dcplx_trans.setter
     def dcplx_trans(self, value: kdb.DCplxTrans) -> None:
@@ -726,6 +722,22 @@ class Port:
         h.update(self.port_type.encode("UTF-8"))
         h.update(self.layer.to_bytes(8, "big"))
         return h.digest()
+
+    def __repr__(self) -> str:
+        """String representation of port."""
+        ln = self.layer.name if isinstance(self.layer, LayerEnum) else self.layer
+        if self._trans:
+            return (
+                f"Port({'name: ' + self.name if self.name else ''}"
+                f", width: {self.width}, trans: {self.trans.to_s()}, layer: "
+                f"{ln}, port_type: {self.port_type})"
+            )
+        else:
+            return (
+                f"Port({'name: ' + self.name if self.name else ''}"
+                f", dwidth: {self.d.width}, trans: {self.dcplx_trans.to_s()}, layer: "
+                f"{ln}, port_type: {self.port_type})"
+            )
 
 
 class DPart:
@@ -916,9 +928,7 @@ class KCell(kdb.Cell):
             ports: list/tuple (anything iterable) of ports.
             prefix: string to add in front of all the port names
         """
-        for port in ports:
-            name = port.name or ""
-            self.add_port(port, name=prefix + name)
+        self.ports.add_ports(ports=ports, prefix=prefix)
 
     @classmethod
     def from_yaml(
@@ -1365,25 +1375,23 @@ class KCell(kdb.Cell):
                     poly -= kdb.Region(
                         kdb.Polygon(
                             [
-                                kdb.Point(5, 5),
-                                kdb.Point(5, w // 2 - 5),
-                                kdb.Point(w // 2 - 5, 5),
+                                kdb.Point(w // 20, 0),
+                                kdb.Point(w // 20, -w // 2 + int(w * 2.5 // 20)),
+                                kdb.Point(w // 2 - int(w * 1.41 / 20), 0),
                             ]
                         )
                     )
-                polys[w] = poly
-                if port._trans:
-                    self.shapes(port.layer).insert(poly.transformed(port.trans))
-                    self.shapes(port.layer).insert(
-                        kdb.Text(port.name if port.name else "", port.trans)
-                    )
-                else:
-                    self.shapes(port.layer).insert(
-                        poly.transformed(port.dcplx_trans.to_itrans(self.klib.dbu))
-                    )
-                    self.shapes(port.layer).insert(
-                        kdb.Text(port.name if port.name else "", port.trans)
-                    )
+            polys[w] = poly
+            if port._trans:
+                self.shapes(port.layer).insert(poly.transformed(port.trans))
+                self.shapes(port.layer).insert(
+                    kdb.Text(port.name if port.name else "", port.trans)
+                )
+            else:
+                self.shapes(port.layer).insert(poly, port.dcplx_trans)
+                self.shapes(port.layer).insert(
+                    kdb.Text(port.name if port.name else "", port.trans)
+                )
 
     def write(
         self, filename: str | Path, save_options: kdb.SaveLayoutOptions = default_save()
@@ -1501,7 +1509,7 @@ class Instance:
 
         .. deprecated:: 0.6.0
             Use :py:func:`align` instead.
-            Will be removed in 0.7.0
+            :py:func:`connect` will be removed in 0.7.0
 
         Function to allow to transform this instance so that a port of this instance is
         aligned (same position with 180° turn) to another instance.
@@ -1606,14 +1614,14 @@ class Instance:
         elif p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)
         else:
-            if not self.instance.is_complex() or p._dcplx_trans or op._dcplx_trans:
-                conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
-                self.instance.trans = op.trans * conn_trans * p.trans.inverted()
-            else:
+            if p._dcplx_trans or op._dcplx_trans:
                 dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
                 self.instance.dcplx_trans = (
                     op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
                 )
+            else:
+                conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
+                self.instance.trans = op.trans * conn_trans * p.trans.inverted()
 
     def __getattribute__(self, attr_name: str) -> Any:
         """If an attribute isn't present, look in `self.instance`."""
@@ -1691,10 +1699,11 @@ class Ports:
             _port.name = name
         self._ports.append(_port)
 
-    def add_ports(self, ports: list[Port], prefix: str = "") -> None:
+    def add_ports(self, ports: Iterable[Port], prefix: str = "") -> None:
         """Append a list of ports."""
         for p in ports:
-            self.add_port(port=p, name=prefix + p.name if p.name else "")
+            name = p.name or ""
+            self.add_port(port=p, name=prefix + name)
 
     @overload
     def create_port(
@@ -1835,7 +1844,7 @@ class Ports:
 
     def __repr__(self) -> str:
         """Representation of the Ports as strings."""
-        return repr({v.name: v for v in self._ports})
+        return repr([repr(p) for p in self._ports])
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
@@ -1884,9 +1893,9 @@ class InstancePorts:
     def __iter__(self) -> Iterator[Port]:
         """Create a copy of the ports to iterate through."""
         if not self.instance.is_complex():
-            return (p.copy(self.instance.trans) for p in self.cell_ports)
+            yield from (p.copy(self.instance.trans) for p in self.cell_ports)
         else:
-            return (p.copy(self.instance.dcplx_trans) for p in self.cell_ports)
+            yield from (p.copy(self.instance.dcplx_trans) for p in self.cell_ports)
 
     def __repr__(self) -> str:
         """String representation.
@@ -1897,7 +1906,7 @@ class InstancePorts:
         return repr(self.copy())
 
     def copy(self) -> Ports:
-        """Creates a copy and uses the `__repr__` of :py:class:~`Ports`."""
+        """Creates a copy in the form of :py:class:~`Ports`."""
         if not self.instance.instance.is_complex():
             return Ports(
                 klib=self.instance.klib,
