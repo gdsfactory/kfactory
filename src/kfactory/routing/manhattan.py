@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+"""Can calculate manhattan routes based on ports/transformations."""
 
 import numpy as np
 
@@ -18,7 +18,21 @@ def droute_manhattan_180(
     start_straight: float,
     end_straight: float,
     layout: KLib | kdb.Layout,
-) -> List[kdb.Point]:
+) -> list[kdb.Point]:
+    """Calculate manhattan route using um based points.
+
+    Args:
+        port1: Transformation of start port.
+        port2: Transformation of end port.
+        bend90_radius: The radius or (symmetrical) dimension of 90° bend. [um]
+        bend180_radius: The distance between the two ports of the 180° bend. [um]
+        start_straight: Minimum straight after the starting port. [um]
+        end_straight: Minimum straight before the end port. [um]
+        layout: Layout/KLib object where to get the dbu info from.
+
+    Returns:
+        route: Calculated route in points in dbu.
+    """
     return route_manhattan_180(
         port1.to_itype(layout.dbu),
         port2.to_itype(layout.dbu),
@@ -36,8 +50,20 @@ def route_manhattan_180(
     bend180_radius: int,
     start_straight: int,
     end_straight: int,
-) -> List[kdb.Point]:
-    """Calculates a  hopefully minimal distance manhattan route (no s-bends)"""
+) -> list[kdb.Point]:
+    """Calculate manhattan route using um based points.
+
+    Args:
+        port1: Transformation of start port.
+        port2: Transformation of end port.
+        bend90_radius: The radius or (symmetrical) dimension of 90° bend. [dbu]
+        bend180_radius: The distance between the two ports of the 180° bend. [dbu]
+        start_straight: Minimum straight after the starting port. [dbu]
+        end_straight: Minimum straight before the end port. [dbu]
+
+    Returns:
+        route: Calculated route in points in dbu.
+    """
     t1 = port1.dup() if isinstance(port1, kdb.Trans) else port1.trans.dup()
     t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans.dup()
 
@@ -74,7 +100,8 @@ def route_manhattan_180(
             pts = [t1.disp.to_p(), t2.disp.to_p()]
             pts[1:1] = [pts[1] + (t2 * kdb.Vector(0, tv.y))]
             raise NotImplementedError(
-                "`case (x, y, 0) if x > 0 and abs(y) == bend180_radius` not supported yet"
+                "`case (x, y, 0) if x > 0 and abs(y) == bend180_radius`"
+                " not supported yet"
             )
         case (x, 0, 2):
             if start_straight > 0:
@@ -102,10 +129,10 @@ def route_manhattan_180(
                 bend90_radius,
                 start_straight=0,
                 end_straight=end_straight,
-                in_dbu=True,
             )
     raise NotImplementedError(
-        "Case not supportedt yet. Please open an issue if you believe this is an error and needs to be implemented ;)"
+        "Case not supportedt yet. Please open an issue if you believe this is an error"
+        " and needs to be implemented ;)"
     )
 
 
@@ -116,7 +143,22 @@ def droute_manhattan(
     start_straight: int,
     end_straight: int,
     layout: KLib | kdb.Layout,
-) -> List[kdb.Point]:
+) -> list[kdb.Point]:
+    """Calculate manhattan route using um based points.
+
+    Doesn't use any non-90° bends.
+
+    Args:
+        port1: Transformation of start port.
+        port2: Transformation of end port.
+        bend90_radius: The radius or (symmetrical) dimension of 90° bend. [um]
+        start_straight: Minimum straight after the starting port. [um]
+        end_straight: Minimum straight before the end port. [um]
+        layout: Layout/KLib object where to get the dbu info from.
+
+    Returns:
+        route: Calculated route in points in dbu.
+    """
     return route_manhattan(
         port1.to_itype(layout.dbu),
         port2.to_itype(layout.dbu),
@@ -127,17 +169,29 @@ def droute_manhattan(
 
 
 def route_manhattan(
-    port1: Union[Port, kdb.Trans],
-    port2: Union[Port, kdb.Trans],
+    port1: Port | kdb.Trans,
+    port2: Port | kdb.Trans,
     bend90_radius: int,
     start_straight: int,
     end_straight: int,
-    in_dbu: bool = True,
-    layout: Optional[KLib | kdb.Layout] = None,
     max_tries: int = 20,
-) -> List[kdb.Point]:
-    """Calculates a hopefully minimal distance manhattan route (no s-bends)"""
+) -> list[kdb.Point]:
+    """Calculate manhattan route using um based points.
 
+    Doesn't use any non-90° bends.
+
+    Args:
+        port1: Transformation of start port.
+        port2: Transformation of end port.
+        bend90_radius: The radius or (symmetrical) dimension of 90° bend. [dbu]
+        start_straight: Minimum straight after the starting port. [dbu]
+        end_straight: Minimum straight before the end port. [dbu]
+        max_tries: Maximum number of tries to calculate a manhattan route before
+        giving up
+
+    Returns:
+        route: Calculated route in points in dbu.
+    """
     t1 = port1.dup() if isinstance(port1, kdb.Trans) else port1.trans.dup()
     t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans.dup()
     _p = kdb.Point(0, 0)
@@ -172,7 +226,8 @@ def route_manhattan(
             x <= 2 * bend90_radius and y < bend90_radius
         ):
             logger.warning(
-                f"Potential collision in routing due to small distance between the port in relation to bend radius {x=}/{bend90_radius}, {y=}/{bend90_radius}",
+                "Potential collision in routing due to small distance between the port "
+                f"in relation to bend radius {x=}/{bend90_radius}, {y=}/{bend90_radius}"
             )
 
     # we want a straight start and have to add a bend radius if
@@ -192,19 +247,7 @@ def route_manhattan(
         t2 *= kdb.Trans(end_straight + bend90_radius, 0)
         end_points = [t2 * _p, p2]
 
-        # TODO: This works but in some cases makes wrong routes
-        # match (tv.x, tv.y):
-        #     # case (x, y) if -bend90_radius < x < bend90_radius and abs(y) >= bend90_radius:
-        #     #     end_points = [ t2 * _p, p2]
-        #     case (x, y) if -bend90_radius < x < 0:
-        #         # end_points = [t2 * _p, p2]
-        #         t2 *= kdb.Trans(int(np.sign(x)), False, 0, 2 * bend90_radius + abs(x))
-        #         end_points.insert(0, t2 * _p)
-        #     case (x, y) if 0 <= x < bend90_radius:
-        #         t2 *= kdb.Trans(-int(np.sign(x)), False, 0, 2 * bend90_radius)
-        #         end_points.insert(0, t2 * _p)
-
-    v = t1.inverted() * (t2.disp - t1.disp)
+    t1.inverted() * (t2.disp - t1.disp)
 
     for i in range(max_tries):
         tv = t1.inverted() * (t2.disp - t1.disp)

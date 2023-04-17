@@ -1,6 +1,21 @@
-from typing import Optional
+"""Straight waveguide in dbu.
 
-from ... import KCell, LayerEnum, autocell, kdb, klib
+A waveguide is a rectangle of material with excludes and/or slab around it::
+
+    ┌──────────────────────────────┐
+    │         Slab/Exclude         │
+    ├──────────────────────────────┤
+    │                              │
+    │             Core             │
+    │                              │
+    ├──────────────────────────────┤
+    │         Slab/Exclude         │
+    └──────────────────────────────┘
+
+The slabs and excludes can be given in the form of an :py:class:~`Enclosure`.
+"""
+
+from ... import KCell, LayerEnum, autocell, kdb
 from ...utils import Enclosure
 
 __all__ = ["waveguide"]
@@ -11,8 +26,27 @@ def waveguide(
     width: int,
     length: int,
     layer: int | LayerEnum,
-    enclosure: Optional[Enclosure] = None,
+    enclosure: Enclosure | None = None,
 ) -> KCell:
+    """Waveguide defined in dbu.
+
+    Visualization::
+
+        ┌──────────────────────────────┐
+        │         Slab/Exclude         │
+        ├──────────────────────────────┤
+        │                              │
+        │             Core             │
+        │                              │
+        ├──────────────────────────────┤
+        │         Slab/Exclude         │
+        └──────────────────────────────┘
+    Args:
+        width: Waveguide width. [dbu]
+        length: Waveguide length. [dbu]
+        layer: Layer index / :py:class:~`LayerEnum`.
+        enclosure: Definition of slab/excludes. [dbu]
+    """
     c = KCell()
 
     if width // 2 * 2 != width:

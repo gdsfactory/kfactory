@@ -4,12 +4,11 @@ from ... import kdb
 
 
 def simplify(points: list[kdb.Point], tolerance: float) -> list[kdb.Point]:
-    simple_pts: list[kdb.Point] = [points[0]]
+    [points[0]]
     if len(points) < 3:
         return points
 
-    start = 0
-    last = len(points) - 1
+    len(points) - 1
 
     e = kdb.Edge(points[0], points[-1])
     dists = [e.distance_abs(p) for p in points]
@@ -29,10 +28,9 @@ def simplify(points: list[kdb.Point], tolerance: float) -> list[kdb.Point]:
 def dsimplify(points: list[kdb.DPoint], tolerance: float) -> list[kdb.DPoint]:
     if len(points) < 3:
         return points
-    simple_pts: list[kdb.DPoint] = [points[0]]
+    [points[0]]
 
-    start = 0
-    last = len(points) - 1
+    len(points) - 1
 
     e = kdb.DEdge(points[0], points[-1])
     dists = [e.distance_abs(p) for p in points]
