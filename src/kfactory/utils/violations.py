@@ -1,6 +1,5 @@
 from .. import KCell, LayerEnum, kdb
 
-
 # def fix_spacing(
 #     c: KCell,
 #     min_space: int,
