@@ -26,13 +26,6 @@ c << triangle
 c << box
 c
 
-c.shapes(c.klib.layer(2, 0)).insert(
-    kf.utils.violations.fix_spacing(
-        c, 1000, c.klib.layer(1, 0), metrics=kf.kdb.Metrics.Euclidian
-    )
-)
-c
-
 # +
 c = kf.KCell("tiled_test")
 
@@ -56,7 +49,7 @@ for i in range(50):
 d2 = datetime.now()
 
 c.shapes(c.klib.layer(2, 0)).insert(
-    kf.utils.violations.fix_spacing_tiled(
+    kf.utils.fix_spacing_tiled(
         c,
         1000,
         c.klib.layer(1, 0),
