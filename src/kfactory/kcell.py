@@ -15,7 +15,7 @@ import socket
 from collections.abc import Callable, Hashable, Iterable, Iterator
 
 # from enum import IntEnum
-from enum import Enum
+from enum import Enum, IntEnum
 from hashlib import sha3_512
 from inspect import signature
 from pathlib import Path
@@ -43,7 +43,12 @@ except ImportError:
 
 
 KCellParams = ParamSpec("KCellParams")
-OP = ParamSpec("OP")
+
+
+class PROPID(IntEnum):
+    """Mapping for GDS properties."""
+
+    NAME = 0
 
 
 class PortWidthMismatch(ValueError):
@@ -430,6 +435,8 @@ class Port:
         port_type: A string defining the type of the port
         layer: Index of the layer or a LayerEnum that acts like an integer, but can
             contain layer number and datatype
+        info: A dictionary with additional info. Not reflected in GDS. Copy will make a
+            (shallow) copy of it.
     """
 
     yaml_tag = "!Port"
@@ -450,6 +457,7 @@ class Port:
         trans: kdb.Trans,
         klib: KLib = klib,
         port_type: str = "optical",
+        info: dict[str, Any] = {},
     ):
         ...
 
@@ -463,6 +471,7 @@ class Port:
         dcplx_trans: kdb.DCplxTrans,
         klib: KLib = klib,
         port_type: str = "optical",
+        info: dict[str, Any] = {},
     ):
         ...
 
@@ -478,6 +487,7 @@ class Port:
         position: tuple[int, int],
         mirror_x: bool = False,
         klib: KLib = klib,
+        info: dict[str, Any] = {},
     ):
         ...
 
@@ -493,6 +503,7 @@ class Port:
         dposition: tuple[float, float],
         mirror_x: bool = False,
         klib: KLib = klib,
+        info: dict[str, Any] = {},
     ):
         ...
 
@@ -513,10 +524,12 @@ class Port:
         mirror_x: bool = False,
         port: "Port | None" = None,
         klib: KLib = klib,
+        info: dict[str, Any] = {},
     ):
         """Create a port from dbu or um based units."""
         self.klib = klib
         self.d = DPart(self)
+        self.info = info.copy()
         if port is not None:
             self.name = port.name if name is None else name
 
@@ -614,6 +627,7 @@ class Port:
             layer=self.layer,
             klib=self.klib,
             port_type=self.port_type,
+            info=self.info,
         )
 
     @property
@@ -873,7 +887,7 @@ class KCell(kdb.Cell):
                 if `None` create an empty one.
         """
         self.klib = klib
-        self.insts: list[Instance] = []
+        self.insts: Instances = Instances()
         self.settings: dict[str, Any] = {}
         self._locked = False
         self.info: dict[str, Any] = {}
@@ -1342,7 +1356,7 @@ class KCell(kdb.Cell):
             merge: Merge the shapes on all layers
         """
         super().flatten(False)  # prune)
-        self.insts = []
+        self.insts = Instances()
 
         if merge:
             for layer in self.layout().layer_indexes():
@@ -1427,8 +1441,46 @@ class KCell(kdb.Cell):
             d["settings"] = node.settings
         return representer.represent_mapping(cls.yaml_tag, d)
 
+    def each_inst(self) -> Iterator["Instance"]:
+        """Iterates over all child instances (which may actually be instance arrays)."""
+        yield from (Instance(self.klib, inst) for inst in super().each_inst())
 
-class Instance:
+    def each_overlapping_inst(self, b: kdb.Box | kdb.DBox) -> Iterator["Instance"]:
+        """Gets the instances overlapping the given rectangle."""
+        yield from (
+            Instance(self.klib, inst) for inst in super().each_overlapping_inst(b)
+        )
+
+    def each_touching_inst(self, b: kdb.Box | kdb.DBox) -> Iterator["Instance"]:
+        """Gets the instances overlapping the given rectangle."""
+        yield from (Instance(self.klib, inst) for inst in super().each_touching_inst(b))
+
+    @overload  # type: ignore[override]
+    def insert(
+        self, inst: "Instance | kdb.CellInstArray | kdb.DCellInstArray"
+    ) -> "Instance":
+        ...
+
+    @overload
+    def insert(
+        self, inst: "kdb.CellInstArray | kdb.DCellInstArray", property_id: int
+    ) -> "Instance":
+        ...
+
+    def insert(
+        self,
+        inst: "Instance | kdb.CellInstArray | kdb.DCellInstArray",
+        property_id: int | None = None,
+    ) -> "Instance":
+        """Inserts a cell instance given by another reference."""
+        if not property_id:
+            return Instance(self.klib, super().insert(inst))
+        else:
+            assert isinstance(inst, kdb.CellInstArray | kdb.DCellInstArray)
+            return Instance(self.klib, super().insert(inst, property_id))
+
+
+class Instance(kdb.Instance):
     """An Instance of a KCell.
 
     An Instance is a reference to a KCell with a transformation.
@@ -1443,38 +1495,37 @@ class Instance:
 
     def __init__(self, klib: KLib, reference: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
+        super().__init__()
+        # self.instance = reference
+        super().assign(reference)
         self.klib = klib
-        self.instance = reference
         self.ports = InstancePorts(self)
 
     @property
-    def cell_index(self) -> int:
-        """Internal index of the cell.
+    def name(self) -> str | None:
+        """Name of instance in GDS."""
+        prop = self.property(PROPID.NAME)
+        return str(prop) if prop is not None else None
 
-        KLayout keeps internal index of all cells created. They are unique for the
-        lifetime of the layout object
-        """
-        return self.instance.cell_index
+    @name.setter
+    def name(self, value: str) -> None:
+        self.set_property(PROPID.NAME, value)
 
-    @cell_index.setter
-    def cell_index(self, value: int) -> None:
-        self.instance.cell_index = value
-
-    @property
+    @property  # type: ignore[override]
     def cell(self) -> KCell:
         """Parent KCell  of the Instance."""
         return self.klib[self.cell_index]
 
     @cell.setter
     def cell(self, value: KCell) -> None:
-        self.instance.cell_index = value.cell_index()
+        self.cell_index = value.cell_index()
 
     @property
     def hash(self) -> bytes:
         """Create a unique hash from the instance."""
         h = sha3_512()
         h.update(self.cell.hash())
-        h.update(self.instance.trans.hash().to_bytes(8, "big"))
+        h.update(self.trans.hash().to_bytes(8, "big"))
         return h.digest()
 
     @overload
@@ -1616,32 +1667,12 @@ class Instance:
         else:
             if p._dcplx_trans or op._dcplx_trans:
                 dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-                self.instance.dcplx_trans = (
+                self.dcplx_trans = (
                     op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
                 )
             else:
                 conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
-                self.instance.trans = op.trans * conn_trans * p.trans.inverted()
-
-    def __getattribute__(self, attr_name: str) -> Any:
-        """If an attribute isn't present, look in `self.instance`."""
-        return super().__getattribute__(attr_name)
-
-    def _get_attr(self, attr_name: str) -> Any:
-        return super().__getattribute__(attr_name)
-
-    def __getattr__(self, attr_name: str) -> Any:
-        """If an attribute isn't present, look in `self.instance`."""
-        return kdb.Instance.__getattribute__(self.instance, attr_name)
-
-    def __setattr__(self, attr_name: str, attr_value: Any) -> None:
-        """If an attribute isn't present, look in `self.instance`."""
-        if attr_name == "instance":
-            super().__setattr__(attr_name, attr_value)
-        try:
-            kdb.Instance.__setattr__(self._get_attr("instance"), attr_name, attr_value)
-        except AttributeError:
-            super().__setattr__(attr_name, attr_value)
+                self.trans = op.trans * conn_trans * p.trans.inverted()
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
@@ -1652,6 +1683,50 @@ class Instance:
             "dcplx_trans": node._dcplx_trans,
         }
         return representer.represent_mapping(cls.yaml_tag, d)
+
+
+class Instances:
+    """Holder for instances.
+
+    Allows retrieval by name or index
+    """
+
+    def __init__(self) -> None:
+        """Constructor."""
+        self._insts: list[Instance] = []
+
+    def append(self, inst: Instance) -> None:
+        """Append a new instance."""
+        self._insts.append(inst)
+
+    def __getitem__(self, key: str | int) -> Instance:
+        """Retrieve instance by index or by name."""
+        if isinstance(key, int):
+            return self._insts[key]
+
+        else:
+            return next(filter(lambda inst: inst.name == key, self._insts))
+
+    def __len__(self) -> int:
+        """Length of the instances."""
+        return self._insts.__len__()
+
+    def __iter__(self) -> Iterator[Instance]:
+        """Get instance iterator."""
+        return self._insts.__iter__()
+
+    def get_inst_names(self) -> dict[str | None, int]:
+        """Get count of names of named instances.
+
+        Not named instances will be added to the `None` key.
+        """
+        names: dict[str | None, int] = {}
+        for inst in self._insts:
+            if inst.name in names:
+                names[inst.name] += 1
+            else:
+                names[inst.name] = 1
+        return names
 
 
 class Ports:
@@ -1683,9 +1758,6 @@ class Ports:
     def __iter__(self) -> Iterator[Port]:
         """Iterator, that allows for loops etc to directly access the object."""
         yield from self._ports
-
-    # def each(self) -> Iterator[Port]:
-    #     return self.__iter__()
 
     def add_port(self, port: Port, name: str | None = None) -> None:
         """Add a port object.
@@ -1907,7 +1979,7 @@ class InstancePorts:
 
     def copy(self) -> Ports:
         """Creates a copy in the form of :py:class:~`Ports`."""
-        if not self.instance.instance.is_complex():
+        if not self.instance.is_complex():
             return Ports(
                 klib=self.instance.klib,
                 ports=[p.copy(self.instance.trans) for p in self.cell_ports._ports],
@@ -1942,6 +2014,8 @@ def autocell(
     *,
     set_settings: bool = True,
     set_name: bool = True,
+    check_ports: bool = True,
+    check_instances: bool = True,
 ) -> (
     Callable[KCellParams, KCell]
     | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
@@ -1956,10 +2030,10 @@ def autocell(
         set_settings: Copy the args & kwargs into the settings dictionary
         set_name: Auto create the name of the cell to the functionname plus a
             string created from the args/kwargs
-        maxsize: maximum size of cache, cell parameter sets will be evicted if the cell
-            function is called with more different
-            parameter sets than there are spaces in the cache, in case there are cell calls
-            with existing parameter set calls
+        check_ports: Check whether there are any non-90° ports in the cell and throw a
+            warning if there are
+        check_instances: Check for any complex instances. A complex instance is a an
+            instance that has a magnification != 1 or non-90° rotation.
     """
 
     def decorator_autocell(
