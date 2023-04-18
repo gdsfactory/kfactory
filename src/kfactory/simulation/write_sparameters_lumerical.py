@@ -278,20 +278,20 @@ def plot_sparameters_lumerical(
         s.deleteall()
         s.addelement("Optical Network Analyzer")
         s.set("name", "ONA")
-        s.set("number of input ports", len(component.ports.get_all()) - 1)
+        s.set("number of input ports", len(component.ports._ports) - 1)
         s.set("input parameter", 2)
         s.set("start frequency", 3e8 / simulation_settings.wavelength_stop / 1e-6)
         s.set("stop frequency", 3e8 / simulation_settings.wavelength_start / 1e-6)
         s.set("number of points", simulation_settings.wavelength_points)
         components: dict[tuple[float, float], Any] = {}
         for instance in insts:
-            for port in instance.ports.get_all().values():
-                if port.center in components:
-                    components[port.center].update(
+            for port in instance.ports:
+                if port.d.position in components:
+                    components[port.d.position].update(
                         {port: port.name, "instance2": instance}
                     )
                 else:
-                    components[port.center] = {port: port.name, "instance1": instance}
+                    components[port.d.position] = {port: port.name, "instance1": instance}
 
         inputs: List[Any] = []
         input = input_port
@@ -308,7 +308,7 @@ def plot_sparameters_lumerical(
                 if instance.cell.name not in paths:
                     value[f"instance{i+1}"] = None
                     for key, val in value.items():
-                        if key in instance.ports.get_all().values():
+                        if key in instance.ports:
                             value[key] = None
                             value.pop(key)
                     inv_comp = True
@@ -317,23 +317,23 @@ def plot_sparameters_lumerical(
                 if paths[instance.cell.name].with_suffix(".ldf").exists():
                     s.addelement("MODE Waveguide")
                     s.setnamed(
-                        f"MODE_1", "name", f"{instance.cell.name, instance.hash()}"
+                        f"WGD_1", "name", f"{instance.cell.name, instance.hash}"
                     )
                     s.setnamed(
-                        f"{instance.cell.name, instance.hash()}", "load from file", True
+                        f"{instance.cell.name, instance.hash}", "load from file", True
                     )
                     s.setnamed(
-                        f"{instance.cell.name, instance.hash()}",
+                        f"{instance.cell.name, instance.hash}",
                         "mode filename",
                         paths[instance.cell.name].with_suffix(".ldf").as_posix(),
                     )
                 else:
                     s.addelement("Optical N Port S-Parameter")
                     s.setnamed(
-                        f"SPAR_1", "name", f"{instance.cell.name, instance.hash()}"
+                        f"SPAR_1", "name", f"{instance.cell.name, instance.hash}"
                     )
                     s.setnamed(
-                        f"{instance.cell.name, instance.hash()}", "load from file", True
+                        f"{instance.cell.name, instance.hash}", "load from file", True
                     )
                     filepath_component = get_sparameters_path(
                         instance,
@@ -341,17 +341,17 @@ def plot_sparameters_lumerical(
                         simulation_settings=simulation_settings,
                     )
                     s.setnamed(
-                        f"{instance.cell.name, instance.hash()}",
+                        f"{instance.cell.name, instance.hash}",
                         "s parameters filename",
                         paths[instance.cell.name].as_posix().replace(".npz", ".dat"),
                     )
                 s.setnamed(
-                    f"{instance.cell.name, instance.hash()}",
+                    f"{instance.cell.name, instance.hash}",
                     "x position",
                     instance.instance.dbbox().center().x * 100,
                 )
                 s.setnamed(
-                    f"{instance.cell.name, instance.hash()}",
+                    f"{instance.cell.name, instance.hash}",
                     "y position",
                     instance.instance.dbbox().center().y * 100,
                 )
@@ -370,7 +370,7 @@ def plot_sparameters_lumerical(
             ]
             # ports.remove(None) if None in ports else None
             if len(ports) > 1 and ports[1] not in [
-                p.name for p in instances[1].ports.get_all().values()
+                p.name for p in instances[1].ports
             ]:
                 ports = ports[::-1]
             # if "components" in component.info:
@@ -380,9 +380,9 @@ def plot_sparameters_lumerical(
             #     print(kf.get_component(component__, **settings__).name)
             if len(instances) == 2:
                 s.connect(
-                    f"{instances[0].cell.name, instances[0].hash()}",
+                    f"{instances[0].cell.name, instances[0].hash}",
                     ports[0],
-                    f"{instances[1].cell.name, instances[1].hash()}",
+                    f"{instances[1].cell.name, instances[1].hash}",
                     ports[1],
                 )
             else:
@@ -406,7 +406,7 @@ def plot_sparameters_lumerical(
         s.connect(
             "ONA",
             f"input 1",
-            f"{inputs[0].cell.name, inputs[0].hash()}",
+            f"{inputs[0].cell.name, inputs[0].hash}",
             f"{inputs[1]}",
         )
         path3 = get_sparameters_path(
@@ -416,7 +416,7 @@ def plot_sparameters_lumerical(
         s.connect(
             "ONA",
             "output",
-            f"{outputs[0].cell.name, outputs[0].hash()}",
+            f"{outputs[0].cell.name, outputs[0].hash}",
             f"{outputs[1]}",
         )
         s.run()
@@ -685,13 +685,13 @@ def write_sparameters_lumerical(
     ss = SimulationSettingsLumericalFdtd(**sim_settings)
 
     component_extended = kf.KCell()
-    for port in component.ports.get_all().values():
+    for port in component.ports:
         component_ref = component_extended << component
         width = port.width * component.klib.dbu if isinstance(port.width, int) else 1
         extension = component_extended.create_inst(
             kf.pcells.waveguide(width, ss.port_extension, layer=port.layer)
         )
-        extension.connect("o2", extension, port.name)
+        extension.connect("o2", component_ref, port.name)
         output_port = extension.ports["o1"]
         component_extended.add_port(extension.ports["o1"], name=port.name)
 
@@ -879,11 +879,11 @@ def write_sparameters_lumerical(
             s.select("EME::Ports::port_1")
             s.delete()
 
-    for i, port in enumerate(component.ports.get_all().values()):
+    for i, port in enumerate(component.ports):
         from kfactory.pdk import _ACTIVE_PDK
 
-        zmin = layer_to_zmin[_ACTIVE_PDK.get_layer(port.layer)]  # type: ignore
-        thickness = layer_to_thickness[_ACTIVE_PDK.get_layer(port.layer)]  # type: ignore
+        zmin = layer_to_zmin[_ACTIVE_PDK.get_layer((1, 0))]  # type: ignore
+        thickness = layer_to_thickness[_ACTIVE_PDK.get_layer((1, 0))]  # type: ignore
         z = (zmin + thickness) / 2
         zspan = 2 * ss.port_margin + thickness
 
@@ -982,7 +982,7 @@ def write_sparameters_lumerical(
         with open(filepath, "r+") as fd:
             data = fd.read()
             diction = {180: "LEFT", 0: "RIGHT", 90: "TOP", 270: "BOTTOM"}
-            for p_ in component.ports.get_all().values():
+            for p_ in component.ports:
                 data = data.replace(
                     f"{p_.name}, LEFT", f"{p_.name}, {diction[int(p_.orientation)]}"
                 )
@@ -1012,7 +1012,7 @@ def write_sparameters_lumerical(
                 "To keep them, use delete_fsp_files=False flag"
             )
 
-        return np.ndarray(sp)
+        return filepath_npz
     elif run and solver == "MODE":
         start = time.time()
         s.run()
@@ -1028,7 +1028,7 @@ def write_sparameters_lumerical(
 
         with open(filepath, "r+") as f:
             text = f.read()
-            for i, val in enumerate(component.ports.get_all().values()):
+            for i, val in enumerate(component.ports):
                 text = text.replace(f"port {i+1}", val.name)
             f.write(text)
         f.close()
