@@ -1311,9 +1311,7 @@ class KCell:
                 cast(kdb.DVector, a)
                 cast(kdb.DVector, b)
                 ca = self._kdb_cell.insert(
-                    kdb.CellInstArray(
-                        cell, trans, a, b, na, nb  # type: ignore[arg-type]
-                    )
+                    kdb.CellInstArray(ci, trans, a, b, na, nb)  # type: ignore[arg-type]
                 )
         else:
             if a is None:
@@ -1325,7 +1323,7 @@ class KCell:
                 cast(kdb.DVector, b)
                 ca = self._kdb_cell.insert(
                     kdb.DCellInstArray(
-                        cell, dtrans, a, b, na, nb  # type: ignore[arg-type]
+                        ci, dtrans, a, b, na, nb  # type: ignore[arg-type]
                     )
                 )
         inst = Instance(self.klib, ca)
