@@ -1,8 +1,7 @@
 """Technology settings."""
 from __future__ import annotations
-from ast import Tuple
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -120,7 +119,7 @@ class LayerLevel(BaseModel):
             bias: in um for the etch.
     """
 
-    layer: tuple[int, int] | None
+    layer: Union[Tuple[int, int], LAYER]
     thickness: float
     thickness_tolerance: float | None = None
     zmin: float
@@ -194,5 +193,3 @@ class LayerStack(BaseModel):
             raise ValueError(f"{key!r} not in {layers}")
 
         return self.layers[key]
-    z_to_bias: tuple[list[float], list[float]] | None = None
-    info: dict[str, Any] = {}
