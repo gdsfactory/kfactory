@@ -193,7 +193,7 @@ def mzi(
                 sxt.ports["o2"].x
                 + radius * nbends
                 + cp2.instance.bbox().width()
-                + cp2.ports["o2"].x
+                + cp2.ports["port2"].x
             ),
             0,
         )
@@ -201,14 +201,14 @@ def mzi(
 
     connect(
         c,
-        cp2.ports["o2"],
+        cp2.ports["port2"],
         sxt.ports["o2"],
         straight_connect,
         bend,
     )
     connect(
         c,
-        cp2.ports["o1"],
+        cp2.ports["port1"],
         sxb.ports["o2"],
         straight_connect,
         bend,
