@@ -26,7 +26,7 @@ from . import pcells, placer, routing, utils, port
 from .config import logger
 
 
-__version__ = "0.5.8"
+__version__ = "0.6.0"
 
 
 __all__ = [
