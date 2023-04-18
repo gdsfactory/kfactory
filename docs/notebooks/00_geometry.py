@@ -97,7 +97,9 @@ text1 = t.transformed(
 #     x(float): x coordinate
 #     y(float): y coordinate
 #
-text2 = t.transformed(kf.kdb.CplxTrans(2.0, 45.0, False, 5.0, 30.0))
+text2 = t.transformed(
+    kf.kdb.DCplxTrans(2.0, 45.0, False, 5.0, 30.0).to_itrans(c.klib.dbu)
+)
 # text1.movey(25)
 # text2.move([5, 30])
 # text2.rotate(45)
@@ -130,11 +132,10 @@ def straight(length=10, width=1, layer=(1, 0)):
     _layer = kf.klib.layer(*layer)
     wg.shapes(_layer).insert(box)
     wg.add_port(
-        kf.DPort(
+        kf.Port(
             name="o1",
-            position=(box.left, box.center().y),
-            width=width,
-            angle=2,
+            dwidth=width,
+            dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, box.left, box.center().y),
             layer=_layer,
         )
     )

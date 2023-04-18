@@ -1,6 +1,9 @@
-from typing import Optional
+"""Taper definitions [dbu].
 
-from ... import KCell, LayerEnum, autocell, kdb, klib
+TODO: Non-linear tapers
+"""
+
+from ... import KCell, autocell, kdb
 from ...utils import Enclosure
 
 __all__ = ["taper"]
@@ -12,8 +15,32 @@ def taper(
     width2: int,
     length: int,
     layer: int,
-    enclosure: Optional[Enclosure] = None,
+    enclosure: Enclosure | None = None,
 ) -> KCell:
+    r"""Linear Taper [um].
+
+    Visualization::
+
+               __
+             _/  │ Slab/Exclude
+           _/  __│
+         _/  _/  │
+        │  _/    │
+        │_/      │
+        │_       │ Core
+        │ \_     │
+        │_  \_   │
+          \_  \__│
+            \_   │
+              \__│ Slab/Exclude
+
+    Args:
+        width1: Width of the core on the left side. [dbu]
+        width2: Width of the core on the right side. [dbu]
+        length: Length of the taper. [dbu]
+        layer: Layer index / :py:class:~`LayerEnum` of the core.
+        enclosure: Definition of the slab/exclude.
+    """
     c = KCell()
 
     c.shapes(layer).insert(

@@ -1,12 +1,12 @@
 """Technology settings."""
 from __future__ import annotations
+from ast import Tuple
 
-from enum import Enum
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, Field
 
-from .kcell import KCell, KLib, LayerEnum, klib
+from .kcell import LayerEnum
 
 # from kfactory import KCell, KLib, library
 
@@ -120,11 +120,11 @@ class LayerLevel(BaseModel):
             bias: in um for the etch.
     """
 
-    layer: Union[Tuple[int, int], LAYER]
+    layer: tuple[int, int] | None
     thickness: float
-    thickness_tolerance: Optional[float] = None
+    thickness_tolerance: float | None = None
     zmin: float
-    material: Optional[str] = None
+    material: str | None = None
     sidewall_angle: float = 0
     z_to_bias: Optional[Tuple[float, ...]] = None
     info: Dict[str, Any] = {}
@@ -194,3 +194,5 @@ class LayerStack(BaseModel):
             raise ValueError(f"{key!r} not in {layers}")
 
         return self.layers[key]
+    z_to_bias: tuple[list[float], list[float]] | None = None
+    info: dict[str, Any] = {}

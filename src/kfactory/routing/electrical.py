@@ -1,7 +1,9 @@
-from typing import Callable, Optional
+"""Utilities for automatically routing electrical connections."""
+
+from collections.abc import Callable
 
 from .. import kdb
-from ..kcell import DCplxPort, Instance, KCell, Port
+from ..kcell import Instance, KCell, Port
 from .manhattan import route_manhattan
 
 
@@ -9,12 +11,30 @@ def connect_elec(
     c: KCell,
     start_port: Port,
     end_port: Port,
-    start_straight: Optional[int] = None,
-    end_straight: Optional[int] = None,
+    start_straight: int | None = None,
+    end_straight: int | None = None,
     route_path_function: Callable[..., list[kdb.Point]] = route_manhattan,
-    width: Optional[int] = None,
-    layer: Optional[int] = None,
+    width: int | None = None,
+    layer: int | None = None,
 ) -> None:
+    """Connect two ports with a wire.
+
+    A wire is a path object on a usually metal layer.
+
+
+    Args:
+        c: KCell to place the wire in.
+        start_port: Beginning
+        end_port: End
+        start_straight: Minimum length of straight at start port.
+        end_straight: Minimum length of straight at end port.
+        route_path_function: Function to calculate the path. Signature:
+            `route_path_function(start_port, end_port, bend90_radius, start_straight,
+            end_straight)`
+        width: Overwrite the width of the wire. Calculated by the width of the start
+            port if `None`.
+        layer: Layer to place the wire on. Calculated from the start port if `None`.
+    """
     if width is None:
         width = start_port.width
     if layer is None:
@@ -43,26 +63,23 @@ def connect_L_route(
     output_orientation: int = 1,
     wire_spacing: int = 10000,
 ) -> list[Port]:
-    """
+    """Route ports towards a bundle in an L shape.
+
     This function takes a list of input ports and assume they are oriented in the west.
     The output will be a list of ports that have the same y coordinates.
-    The function will produce a L-shape routing to connect input ports to output ports without any crossings.
+    The function will produce a L-shape routing to connect input ports to output ports
+    without any crossings.
     """
     input_ports.sort(key=lambda p: p.y)
 
     y_max = input_ports[-1].y
     y_min = input_ports[0].y
     x_max = max(p.x for p in input_ports)
-    # x_min = min([p.x for p in input_ports])
 
     output_ports = []
     if output_orientation == 1:
         for i, p in enumerate(input_ports[::-1]):
             temp_port = p.copy()
-            # temp_port.trans.disp = kf.kdb.Vector(
-            #     x_max - wire_spacing * (i + 1), y_max + wire_spacing
-            # )
-            # temp_port.trans.angle = 3
             temp_port.trans = kdb.Trans(
                 3, False, x_max - wire_spacing * (i + 1), y_max + wire_spacing
             )
@@ -92,10 +109,19 @@ def connect_bundle(
     target_ports: list[Port],
     wire_spacing: int = 10000,
 ) -> None:
-    """
-    This function takes a list of input ports and assume they are all oriented in the same direction (could be any of W, S, E, N).
-    The target ports have the opposite orientation, i.e. if input ports are oriented to north, and target ports should be oriented to south.
-    The function will produce a routing to connect input ports to output ports without any crossings.
+    """Connect multiple input ports to output ports.
+
+    This function takes a list of input ports and assume they are all oriented in the
+    same direction (could be any of W, S, E, N). The target ports have the opposite
+    orientation, i.e. if input ports are oriented to north, and target ports should
+    be oriented to south. The function will produce a routing to connect input ports
+    to output ports without any crossings.
+
+    Args:
+        c: KCell to place the routes in.
+        input_ports; List of start ports.
+        target_ports: List of end ports.
+        wire_spacing: Minimum space between wires. [dbu]
     """
     input_ports.sort(key=lambda p: p.y)
 
@@ -176,25 +202,29 @@ def connect_bundle(
                 B_count = 0
 
 
-def get_electrical_ports(c: Instance) -> list[Port | DCplxPort]:
-    return [p for p in c.ports.get_all().values() if p.port_type == "electrical"]
+def get_electrical_ports(c: Instance, port_type: str = "electrical") -> list[Port]:
+    """Filter list of an instance by electrical ports."""
+    return [p for p in c.ports if p.port_type == port_type]
 
 
 def connect_wire(c: KCell, input_port: Port, output_port: Port) -> None:
-    """
+    """Connection between two electrical ports *DO NOT USE*.
+
     This function mainly implements a connection between two electrical ports.
     Not finished yet. Don't use.
+
     Args:
-        input port: kf.Port
-        output port: kf.Port
+        c: KCell to place connection in.
+        input_port: Start port.
+        output_port: End port.
     """
     if (input_port.angle + output_port.angle) % 2 == 0:
-        left_corner = (
+        (
             kdb.Point(input_port.x, input_port.y - input_port.width // 2)
             if input_port.angle % 2 == 0
             else kdb.Point(input_port.x - input_port.width // 2, input_port.y)
         )
-        middle_top = (
+        (
             kdb.Point(
                 (input_port.x + output_port.x) // 2,
                 input_port.y + input_port.width // 2,
@@ -204,7 +234,7 @@ def connect_wire(c: KCell, input_port: Port, output_port: Port) -> None:
                 input_port.x - input_port.width // 2, (input_port.y + output_port.y)
             )
         )
-        right_corner = (
+        (
             kdb.Point(output_port.x, output_port.y + input_port.width // 2)
             if input_port.angle % 2 == 0
             else kdb.Point(output_port.x + input_port.width // 2, output_port.y)
@@ -215,23 +245,33 @@ def connect_dual_rails(
     c: KCell,
     start_port: Port,
     end_port: Port,
-    start_straight: Optional[int] = None,
-    end_straight: Optional[int] = None,
+    start_straight: int | None = None,
+    end_straight: int | None = None,
     route_path_function: Callable[..., list[kdb.Point]] = route_manhattan,
-    width: Optional[int] = None,
-    hole_width: Optional[int] = None,
-    layer: Optional[int] = None,
+    width: int | None = None,
+    hole_width: int | None = None,
+    layer: int | None = None,
 ) -> None:
-    if width is None:
-        width = start_port.width
-    if hole_width is None:
-        hole_width = start_port.width // 2
-    if layer is None:
-        layer = start_port.layer
-    if start_straight is None:
-        start_straight = width // 2
-    if end_straight is None:
-        end_straight = width // 2
+    """Connect ports with a dual-wire rail.
+
+    Args:
+        c: KCell to place the connection in.
+        start_port: Start
+        end_port: End
+        start_straight: Minimum straight after the start port.
+        end_straight: Minimum straight before end port.
+        route_path_function: Function to calculate the path. Signature:
+            `route_path_function(start_port, end_port, bend90_radius, start_straight,
+            end_straight)`
+        width: Width of the rail (total). [dbu]
+        hole_width: Width of the space between the rails. [dbu]
+        layer: layer to place the rail in.
+    """
+    _width = width or start_port.width
+    _hole_width = hole_width or start_port.width // 2
+    _layer = layer or start_port.layer
+    _start_straight = start_straight or _width // 2
+    _end_straight = end_straight or _width // 2
 
     pts = route_path_function(
         start_port.copy(),
@@ -239,10 +279,9 @@ def connect_dual_rails(
         bend90_radius=0,
         start_straight=start_straight,
         end_straight=end_straight,
-        in_dbu=True,
     )
 
-    path = kdb.Path(pts, width)
-    hole_path = kdb.Path(pts, hole_width)
+    path = kdb.Path(pts, _width)
+    hole_path = kdb.Path(pts, _hole_width)
     final_poly = kdb.Region(path.polygon()) - kdb.Region(hole_path.polygon())
-    c.shapes(layer).insert(final_poly)
+    c.shapes(_layer).insert(final_poly)
