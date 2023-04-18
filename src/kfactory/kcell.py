@@ -649,7 +649,7 @@ class Port:
     @property
     def y(self) -> int:
         """Y coordinate of the port in dbu."""
-        return self.trans.disp.x
+        return self.trans.disp.y
 
     @y.setter
     def y(self, value: int) -> None:
