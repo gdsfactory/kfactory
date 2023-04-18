@@ -1,8 +1,9 @@
+"""Interactivate jupyter widget."""
+
 try:
     from pathlib import Path
     from typing import Any
 
-    import klayout.lay as lay
     from ipyevents import Event  # type: ignore[import]
     from IPython.display import display  # type: ignore[import]
     from ipytree import Node, Tree  # type: ignore[import]
@@ -59,7 +60,7 @@ class LayoutWidget:
             if self.layer_properties.exists() and self.layer_properties.is_file():
                 self.layer_properties = self.layer_properties
                 self.layout_view.load_layer_props(str(self.layer_properties))
-        self.show_cell(cell)
+        self.show_cell(cell._kdb_cell)
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
 
         self.image = Image(value=png_data, format="png")
@@ -349,16 +350,13 @@ class LayoutWidget:
 
         match event["event"]:
             case "mousedown":
-                # if event["event"] == "mousedown":
                 self.layout_view.send_mouse_press_event(
                     kdb.DPoint(float(x), float(y)), buttons
                 )
-            # elif event["event"] == "mouseup":
             case "mouseup":
                 self.layout_view.send_mouse_release_event(
                     kdb.DPoint(float(x), float(y)), buttons
                 )
-            # elif event["event"] == "mousemove":
             case "mousemove":
                 self.layout_view.send_mouse_move_event(
                     kdb.DPoint(float(x), float(y)), buttons
