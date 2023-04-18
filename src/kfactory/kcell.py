@@ -1525,8 +1525,7 @@ class Instance:
     An Instance is a reference to a KCell with a transformation.
 
     Attributes:
-        cell: The KCell that is referenced
-        instance: The internal klayout.db.Instance reference
+        _instance: The internal :py:class:~`kdb.Instance` reference
         ports: Transformed ports of the KCell
     """
 
