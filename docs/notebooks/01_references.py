@@ -133,7 +133,7 @@ c2
 
 c = kf.KCell(name="reference_sample")
 w = kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
-wr = kf.kdb.CellInstArray(w, kf.kdb.Trans.R0)
+wr = kf.kdb.CellInstArray(w._kdb_cell, kf.kdb.Trans.R0)
 c.insert(wr)
 c
 

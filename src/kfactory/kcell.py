@@ -15,7 +15,7 @@ import socket
 from collections.abc import Callable, Hashable, Iterable, Iterator
 
 # from enum import IntEnum
-from enum import Enum
+from enum import Enum, IntEnum
 from hashlib import sha3_512
 from inspect import signature
 from pathlib import Path
@@ -43,7 +43,12 @@ except ImportError:
 
 
 KCellParams = ParamSpec("KCellParams")
-OP = ParamSpec("OP")
+
+
+class PROPID(IntEnum):
+    """Mapping for GDS properties."""
+
+    NAME = 0
 
 
 class PortWidthMismatch(ValueError):
@@ -256,7 +261,7 @@ class KLib(kdb.Layout):
         """
 
         def check_name(other: "KCell") -> bool:
-            return other.name == kcell.name
+            return other._kdb_cell.name == kcell._kdb_cell.name
 
         if (kcell.cell_index() not in self.kcells) or allow_reregister:
             self.kcells[kcell.cell_index()] = kcell
@@ -430,6 +435,8 @@ class Port:
         port_type: A string defining the type of the port
         layer: Index of the layer or a LayerEnum that acts like an integer, but can
             contain layer number and datatype
+        info: A dictionary with additional info. Not reflected in GDS. Copy will make a
+            (shallow) copy of it.
     """
 
     yaml_tag = "!Port"
@@ -450,6 +457,7 @@ class Port:
         trans: kdb.Trans,
         klib: KLib = klib,
         port_type: str = "optical",
+        info: dict[str, Any] = {},
     ):
         ...
 
@@ -463,6 +471,7 @@ class Port:
         dcplx_trans: kdb.DCplxTrans,
         klib: KLib = klib,
         port_type: str = "optical",
+        info: dict[str, Any] = {},
     ):
         ...
 
@@ -478,6 +487,7 @@ class Port:
         position: tuple[int, int],
         mirror_x: bool = False,
         klib: KLib = klib,
+        info: dict[str, Any] = {},
     ):
         ...
 
@@ -493,6 +503,7 @@ class Port:
         dposition: tuple[float, float],
         mirror_x: bool = False,
         klib: KLib = klib,
+        info: dict[str, Any] = {},
     ):
         ...
 
@@ -513,10 +524,12 @@ class Port:
         mirror_x: bool = False,
         port: "Port | None" = None,
         klib: KLib = klib,
+        info: dict[str, Any] = {},
     ):
         """Create a port from dbu or um based units."""
         self.klib = klib
         self.d = DPart(self)
+        self.info = info.copy()
         if port is not None:
             self.name = port.name if name is None else name
 
@@ -614,6 +627,7 @@ class Port:
             layer=self.layer,
             klib=self.klib,
             port_type=self.port_type,
+            info=self.info,
         )
 
     @property
@@ -822,37 +836,31 @@ class DPart:
         )
 
 
-class KCell(kdb.Cell):
-    """KLayout cell and change its class to KCell."""
+class KCell:
+    """KLayout cell and change its class to KCell.
+
+    A KCell is a dynamic proxy for :py:class:~`kdb.Cell`. It has all the
+    attributes of the official KLayout class. Some attributes have been adjusted
+    to return KCell specific sub classes. If the function is listed here in the
+    docs, they have been adjusted for KFactory specifically. This object will
+    transparently proxy to :py:class:`kdb.Cell`. Meaning any attribute not directly
+    defined in this class that are available from the KLayout counter part can
+    still be accessed. The pure KLayout object can be accessed with
+    :py:attr:`KCell._kdb_cell`.
+
+    Attributes:
+        klib: Library object that is the manager of the KLayout
+            :py:class:`kdb.Layout`
+        settings: A dictionary containing settings populated by:py:func:`autocell`
+        info: Dictionary for storing additional info if necessary. This is not
+            passed to the GDS and therefore not reversible.
+        _kdb_cell: Pure KLayout cell object.
+        _locked: If set the cell shouldn't be modified anymore.
+        ports: Manages the ports of the cell.
+    """
 
     yaml_tag = "!KCell"
     _ports: "Ports"
-
-    def __new__(
-        cls,
-        name: str | None = None,
-        klib: KLib = klib,
-        kdb_cell: kdb.Cell | None = None,
-        ports: "Ports | None" = None,
-    ) -> "KCell":
-        """Create a KLayout cell and change its class to KCell.
-
-        Args:
-            name: name of the cell, if `None`, it will set the name to "Unnamed_"
-            klib: KLib object that stores the layout and metadata about the KCells
-            kdb_cell: :py:class:`~klayout.db.Cell` to base the cell on (used when
-                copying or reading a GDS|OAS)
-            ports: Optionally copy ports into the cell on creation.
-        """
-        if kdb_cell is None:
-            _name = "Unnamed_" if name is None else name
-            cell = klib.create_cell(
-                name=_name,
-            )
-        else:
-            cell = kdb_cell
-        cell.__class__ = cls
-        return cell  # type: ignore[return-value]
 
     def __init__(
         self,
@@ -873,12 +881,17 @@ class KCell(kdb.Cell):
                 if `None` create an empty one.
         """
         self.klib = klib
-        self.insts: list[Instance] = []
+        self.insts: Instances = Instances()
         self.settings: dict[str, Any] = {}
-        self._locked = False
         self.info: dict[str, Any] = {}
-        if name is None and kdb_cell is None:
-            self.name = f"Unnamed_{self.cell_index()}"
+        self._locked = False
+        if name is None:
+            _name = "Unnamed_!"
+        else:
+            _name = name
+        self._kdb_cell = kdb_cell or klib.create_cell(_name)
+        if _name == "Unnamed_!":
+            self._kdb_cell.name = f"Unnamed_{self.cell_index()}"
         self.klib.register_cell(self, allow_reregister=True)
         self.ports: Ports = ports or Ports(self.klib)
         self.complex = False
@@ -886,6 +899,37 @@ class KCell(kdb.Cell):
         if kdb_cell is not None:
             for inst in kdb_cell.each_inst():
                 self.insts.append(Instance(self.klib, inst))
+
+    @property
+    def name(self) -> str:
+        """Name of the KCell."""
+        return self._kdb_cell.name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self._kdb_cell.name = value
+
+    @property
+    def prop_id(self) -> int:
+        """Gets the properties ID associated with the cell."""
+        return self._kdb_cell.prop_id
+
+    @prop_id.setter
+    def prop_id(self, value: int) -> None:
+        self._kdb_cell.prop_id = value
+
+    @property
+    def ghost_cell(self) -> bool:
+        """Returns a value indicating whether the cell is a "ghost cell"."""
+        return self._kdb_cell.ghost_cell
+
+    @ghost_cell.setter
+    def ghost_cell(self, value: bool) -> None:
+        self._kdb_cell.ghost_cell = value
+
+    def __getattr__(self, name):  # type: ignore[no-untyped-def]
+        """If KCell doesn't have an attribute, look in the KLayout Cell."""
+        return getattr(self._kdb_cell, name)
 
     def dup(self) -> "KCell":
         """Copy the full cell.
@@ -901,7 +945,7 @@ class KCell(kdb.Cell):
         c = KCell(klib=self.klib, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
         for inst in kdb_copy.each_inst():
-            c.insts.append(Instance(self.klib, reference=inst))
+            c.insts.append(Instance(self.klib, instance=inst))
         c._locked = False
         return c
 
@@ -1253,30 +1297,33 @@ class KCell(kdb.Cell):
         Returns:
             :py:class:`~Instance`: The created instance
         """
+        if isinstance(cell, int):
+            ci = cell
+        else:
+            ci = cell.cell_index()
+
         if dtrans is None:
             if a is None:
-                ca = self.insert(kdb.CellInstArray(cell, trans))
+                ca = self._kdb_cell.insert(kdb.CellInstArray(ci, trans))
             else:
                 if b is None:
                     b = kdb.Vector()
                 cast(kdb.DVector, a)
                 cast(kdb.DVector, b)
-                ca = self.insert(
-                    kdb.CellInstArray(
-                        cell, trans, a, b, na, nb  # type: ignore[arg-type]
-                    )
+                ca = self._kdb_cell.insert(
+                    kdb.CellInstArray(ci, trans, a, b, na, nb)  # type: ignore[arg-type]
                 )
         else:
             if a is None:
-                ca = self.insert(kdb.DCellInstArray(cell, dtrans))
+                ca = self._kdb_cell.insert(kdb.DCellInstArray(ci, dtrans))
             else:
                 if b is None:
                     b = kdb.DVector()
                 cast(kdb.DVector, a)
                 cast(kdb.DVector, b)
-                ca = self.insert(
+                ca = self._kdb_cell.insert(
                     kdb.DCellInstArray(
-                        cell, dtrans, a, b, na, nb  # type: ignore[arg-type]
+                        ci, dtrans, a, b, na, nb  # type: ignore[arg-type]
                     )
                 )
         inst = Instance(self.klib, ca)
@@ -1284,7 +1331,7 @@ class KCell(kdb.Cell):
         return inst
 
     def _kdb_copy(self) -> kdb.Cell:
-        return kdb.Cell.dup(self)
+        return self._kdb_cell.dup()
 
     def layer(self, *args: Any, **kwargs: Any) -> int:
         """Get the layer info, convenience for klayout.db.Layout.layer."""
@@ -1329,9 +1376,7 @@ class KCell(kdb.Cell):
         else:
             rename_func(self.ports._ports)
 
-    def flatten(  # type: ignore[override]
-        self, prune: bool = True, merge: bool = True
-    ) -> None:
+    def flatten(self, prune: bool = True, merge: bool = True) -> None:
         """Flatten the cell.
 
         Pruning will delete the klayout.db.Cell if unused,
@@ -1341,8 +1386,8 @@ class KCell(kdb.Cell):
             prune: Delete unused child cells if they aren't used in any other KCell
             merge: Merge the shapes on all layers
         """
-        super().flatten(False)  # prune)
-        self.insts = []
+        self._kdb_cell.flatten(False)  # prune)
+        self.insts = Instances()
 
         if merge:
             for layer in self.layout().layer_indexes():
@@ -1397,7 +1442,7 @@ class KCell(kdb.Cell):
         self, filename: str | Path, save_options: kdb.SaveLayoutOptions = default_save()
     ) -> None:
         """Write a KCell to a GDS. See :py:func:`KLib.write` for more info."""
-        return super().write(str(filename), save_options)
+        return self._kdb_cell.write(str(filename), save_options)
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore
@@ -1427,6 +1472,50 @@ class KCell(kdb.Cell):
             d["settings"] = node.settings
         return representer.represent_mapping(cls.yaml_tag, d)
 
+    def each_inst(self) -> Iterator["Instance"]:
+        """Iterates over all child instances (which may actually be instance arrays)."""
+        yield from (Instance(self.klib, inst) for inst in self._kdb_cell.each_inst())
+
+    def each_overlapping_inst(self, b: kdb.Box | kdb.DBox) -> Iterator["Instance"]:
+        """Gets the instances overlapping the given rectangle."""
+        yield from (
+            Instance(self.klib, inst)
+            for inst in self._kdb_cell.each_overlapping_inst(b)
+        )
+
+    def each_touching_inst(self, b: kdb.Box | kdb.DBox) -> Iterator["Instance"]:
+        """Gets the instances overlapping the given rectangle."""
+        yield from (
+            Instance(self.klib, inst) for inst in self._kdb_cell.each_touching_inst(b)
+        )
+
+    @overload
+    def insert(
+        self, inst: "Instance | kdb.CellInstArray | kdb.DCellInstArray"
+    ) -> "Instance":
+        ...
+
+    @overload
+    def insert(
+        self, inst: "kdb.CellInstArray | kdb.DCellInstArray", property_id: int
+    ) -> "Instance":
+        ...
+
+    def insert(
+        self,
+        inst: "Instance | kdb.CellInstArray | kdb.DCellInstArray",
+        property_id: int | None = None,
+    ) -> "Instance":
+        """Inserts a cell instance given by another reference."""
+        if isinstance(inst, Instance):
+            return Instance(self.klib, self._kdb_cell.insert(inst._instance))
+        else:
+            if not property_id:
+                return Instance(self.klib, self._kdb_cell.insert(inst))
+            else:
+                assert isinstance(inst, kdb.CellInstArray | kdb.DCellInstArray)
+                return Instance(self.klib, self._kdb_cell.insert(inst, property_id))
+
 
 class Instance:
     """An Instance of a KCell.
@@ -1434,31 +1523,40 @@ class Instance:
     An Instance is a reference to a KCell with a transformation.
 
     Attributes:
-        cell: The KCell that is referenced
-        instance: The internal klayout.db.Instance reference
+        _instance: The internal :py:class:~`kdb.Instance` reference
         ports: Transformed ports of the KCell
     """
 
     yaml_tag = "!Instance"
 
-    def __init__(self, klib: KLib, reference: kdb.Instance) -> None:
+    def __init__(self, klib: KLib, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
+        self._instance = instance
         self.klib = klib
-        self.instance = reference
         self.ports = InstancePorts(self)
+
+    def __getattr__(self, name):  # type: ignore[no-untyped-def]
+        """If we don't have an attribute, get it from the instance."""
+        return getattr(self._instance, name)
+
+    @property
+    def name(self) -> str | None:
+        """Name of instance in GDS."""
+        prop = self.property(PROPID.NAME)
+        return str(prop) if prop is not None else None
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self.set_property(PROPID.NAME, value)
 
     @property
     def cell_index(self) -> int:
-        """Internal index of the cell.
-
-        KLayout keeps internal index of all cells created. They are unique for the
-        lifetime of the layout object
-        """
-        return self.instance.cell_index
+        """Get the index of the cell this instance refers to."""
+        return self._instance.cell_index
 
     @cell_index.setter
     def cell_index(self, value: int) -> None:
-        self.instance.cell_index = value
+        self._instance_.cell_index = value
 
     @property
     def cell(self) -> KCell:
@@ -1467,14 +1565,131 @@ class Instance:
 
     @cell.setter
     def cell(self, value: KCell) -> None:
-        self.instance.cell_index = value.cell_index()
+        self.cell_index = value.cell_index()
+
+    @property
+    def a(self) -> kdb.Vector:
+        """Returns the displacement vector for the 'a' axis."""
+        return self._instance.a
+
+    @a.setter
+    def a(self, vec: kdb.Vector | kdb.DVector) -> None:
+        self._instance.a = vec  # type: ignore[assignment]
+
+    @property
+    def b(self) -> kdb.Vector:
+        """Returns the displacement vector for the 'b' axis."""
+        return self._instance.b
+
+    @b.setter
+    def b(self, vec: kdb.Vector | kdb.DVector) -> None:
+        self._instance.b = vec  # type: ignore[assignment]
+
+    @property
+    def cell_inst(self) -> kdb.CellInstArray:
+        """Gets the basic CellInstArray object associated with this instance."""
+        return self._instance.cell_inst
+
+    @cell_inst.setter
+    def cell_inst(self, cell_inst: kdb.CellInstArray | kdb.DCellInstArray) -> None:
+        self._instance.cell_inst = cell_inst  # type: ignore[assignment]
+
+    @property
+    def cplx_trans(self) -> kdb.ICplxTrans:
+        """Gets the complex transformation of the instance.
+
+        Or the first instance in the array.
+        """
+        return self._instance.cplx_trans
+
+    @cplx_trans.setter
+    def cplx_trans(self, trans: kdb.ICplxTrans | kdb.DCplxTrans) -> None:
+        self._instance.cplx_trans = trans  # type: ignore[assignment]
+
+    @property
+    def dcplx_trans(self) -> kdb.DCplxTrans:
+        """Gets the complex transformation of the instance.
+
+        Or the first instance in the array.
+        """
+        return self._instance.dcplx_trans
+
+    @dcplx_trans.setter
+    def dcplx_trans(self, trans: kdb.DCplxTrans) -> None:
+        self._instance.dcplx_trans = trans
+
+    @property
+    def dtrans(self) -> kdb.DTrans:
+        """Gets the complex transformation of the instance.
+
+        Or the first instance in the array.
+        """
+        return self._instance.dtrans
+
+    @dtrans.setter
+    def dtrans(self, trans: kdb.DTrans) -> None:
+        self._instance.dtrans = trans
+
+    @property
+    def trans(self) -> kdb.Trans:
+        """Gets the complex transformation of the instance.
+
+        Or the first instance in the array.
+        """
+        return self._instance.trans
+
+    @trans.setter
+    def trans(self, trans: kdb.Trans | kdb.DTrans) -> None:
+        self._instance.trans = trans  # type: ignore[assignment]
+
+    @property
+    def na(self) -> int:
+        """Returns the displacement vector for the 'a' axis."""
+        return self._instance.na
+
+    @na.setter
+    def na(self, value: int) -> None:
+        self._instance.na = value
+
+    @property
+    def nb(self) -> int:
+        """Returns the number of instances in the 'b' axis."""
+        return self._instance.nb
+
+    @nb.setter
+    def nb(self, value: int) -> None:
+        self._instance.nb = value
+
+    @property
+    def parent_cell(self) -> KCell:
+        """Gets the cell this instance is contained in."""
+        return self.klib[self._instance.parent_cell.cell_index()]
+
+    @parent_cell.setter
+    def parent_cell(self, cell: KCell | kdb.Cell) -> None:
+        if isinstance(cell, KCell):
+            self._instance.parent_cell = cell._kdb_cell
+        else:
+            self._instance.parent_cell = cell
+
+    @property
+    def prop_id(self) -> int:
+        """Gets the properties ID associated with the instance."""
+        return self._instance.prop_id
+
+    @prop_id.setter
+    def prop_id(self, value: int) -> None:
+        self._instance.prop_id = value
 
     @property
     def hash(self) -> bytes:
-        """Create a unique hash from the instance."""
+        """Hash the instance."""
         h = sha3_512()
         h.update(self.cell.hash())
-        h.update(self.instance.trans.hash().to_bytes(8, "big"))
+        if not self.is_complex():
+            h.update(self.trans.hash().to_bytes(8, "big"))
+        else:
+            h.update(self.dcplx_trans.hash().to_bytes(8, "big"))
         return h.digest()
 
     @overload
@@ -1616,32 +1831,12 @@ class Instance:
         else:
             if p._dcplx_trans or op._dcplx_trans:
                 dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-                self.instance.dcplx_trans = (
+                self.dcplx_trans = (
                     op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
                 )
             else:
                 conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
-                self.instance.trans = op.trans * conn_trans * p.trans.inverted()
-
-    def __getattribute__(self, attr_name: str) -> Any:
-        """If an attribute isn't present, look in `self.instance`."""
-        return super().__getattribute__(attr_name)
-
-    def _get_attr(self, attr_name: str) -> Any:
-        return super().__getattribute__(attr_name)
-
-    def __getattr__(self, attr_name: str) -> Any:
-        """If an attribute isn't present, look in `self.instance`."""
-        return kdb.Instance.__getattribute__(self.instance, attr_name)
-
-    def __setattr__(self, attr_name: str, attr_value: Any) -> None:
-        """If an attribute isn't present, look in `self.instance`."""
-        if attr_name == "instance":
-            super().__setattr__(attr_name, attr_value)
-        try:
-            kdb.Instance.__setattr__(self._get_attr("instance"), attr_name, attr_value)
-        except AttributeError:
-            super().__setattr__(attr_name, attr_value)
+                self.trans = op.trans * conn_trans * p.trans.inverted()
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
@@ -1652,6 +1847,50 @@ class Instance:
             "dcplx_trans": node._dcplx_trans,
         }
         return representer.represent_mapping(cls.yaml_tag, d)
+
+
+class Instances:
+    """Holder for instances.
+
+    Allows retrieval by name or index
+    """
+
+    def __init__(self) -> None:
+        """Constructor."""
+        self._insts: list[Instance] = []
+
+    def append(self, inst: Instance) -> None:
+        """Append a new instance."""
+        self._insts.append(inst)
+
+    def __getitem__(self, key: str | int) -> Instance:
+        """Retrieve instance by index or by name."""
+        if isinstance(key, int):
+            return self._insts[key]
+
+        else:
+            return next(filter(lambda inst: inst.name == key, self._insts))
+
+    def __len__(self) -> int:
+        """Length of the instances."""
+        return self._insts.__len__()
+
+    def __iter__(self) -> Iterator[Instance]:
+        """Get instance iterator."""
+        return self._insts.__iter__()
+
+    def get_inst_names(self) -> dict[str | None, int]:
+        """Get count of names of named instances.
+
+        Not named instances will be added to the `None` key.
+        """
+        names: dict[str | None, int] = {}
+        for inst in self._insts:
+            if inst.name in names:
+                names[inst.name] += 1
+            else:
+                names[inst.name] = 1
+        return names
 
 
 class Ports:
@@ -1683,9 +1922,6 @@ class Ports:
     def __iter__(self) -> Iterator[Port]:
         """Iterator, that allows for loops etc to directly access the object."""
         yield from self._ports
-
-    # def each(self) -> Iterator[Port]:
-    #     return self.__iter__()
 
     def add_port(self, port: Port, name: str | None = None) -> None:
         """Add a port object.
@@ -1907,7 +2143,7 @@ class InstancePorts:
 
     def copy(self) -> Ports:
         """Creates a copy in the form of :py:class:~`Ports`."""
-        if not self.instance.instance.is_complex():
+        if not self.instance.is_complex():
             return Ports(
                 klib=self.instance.klib,
                 ports=[p.copy(self.instance.trans) for p in self.cell_ports._ports],
@@ -1942,6 +2178,8 @@ def autocell(
     *,
     set_settings: bool = True,
     set_name: bool = True,
+    check_ports: bool = True,
+    check_instances: bool = True,
 ) -> (
     Callable[KCellParams, KCell]
     | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
@@ -1956,10 +2194,10 @@ def autocell(
         set_settings: Copy the args & kwargs into the settings dictionary
         set_name: Auto create the name of the cell to the functionname plus a
             string created from the args/kwargs
-        maxsize: maximum size of cache, cell parameter sets will be evicted if the cell
-            function is called with more different
-            parameter sets than there are spaces in the cache, in case there are cell calls
-            with existing parameter set calls
+        check_ports: Check whether there are any non-90° ports in the cell and throw a
+            warning if there are
+        check_instances: Check for any complex instances. A complex instance is a an
+            instance that has a magnification != 1 or non-90° rotation.
     """
 
     def decorator_autocell(
