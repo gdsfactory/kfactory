@@ -192,7 +192,7 @@ def mzi(
             * int(
                 sxt.ports["o2"].x
                 + radius * nbends
-                + cp2.instance.bbox().width()
+                + cp2.bbox().width()
                 + cp2.ports["port2"].x
             ),
             0,
