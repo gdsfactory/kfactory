@@ -953,17 +953,23 @@ class KCell:
         """Enables use of :py:func:`copy.copy` and :py:func:`copy.deep_copy`."""
         return self.dup()
 
-    def add_port(self, port: Port, name: str | None = None) -> None:
+    def add_port(
+        self, port: Port, name: str | None = None, keep_mirror: bool = False
+    ) -> None:
         """Add an existing port. E.g. from an instance to propagate the port.
 
         Args:
             port: The port to add. Port should either be a :py:class:`~Port`,
                 or will be converted to an integer based port with 90° increment
             name: Overwrite the name of the port
+            keep_mirror: Keep the mirror part of the transformation of a port if
+                `True`, else set the mirror flag to `False`.
         """
         self.ports.add_port(port=port, name=name)
 
-    def add_ports(self, ports: Iterable[Port], prefix: str = "") -> None:
+    def add_ports(
+        self, ports: Iterable[Port], prefix: str = "", keep_mirror: bool = False
+    ) -> None:
         """Add a sequence of ports to the cells.
 
         Can be useful to add all ports of a instance for example.
@@ -971,8 +977,10 @@ class KCell:
         Args:
             ports: list/tuple (anything iterable) of ports.
             prefix: string to add in front of all the port names
+            keep_mirror: Keep the mirror part of the transformation of a port if
+                `True`, else set the mirror flag to `False`.
         """
-        self.ports.add_ports(ports=ports, prefix=prefix)
+        self.ports.add_ports(ports=ports, prefix=prefix, keep_mirror=keep_mirror)
 
     @classmethod
     def from_yaml(
@@ -1224,7 +1232,7 @@ class KCell:
         ...
 
     def create_port(self, **kwargs: Any) -> None:
-        """Create a new port. Equivalent to :py:attr:`~add_port(Port(...))`."""
+        """Proxy for :py:func:`Ports.create_port`."""
         self.ports.create_port(**kwargs)
 
     @overload
@@ -1923,19 +1931,31 @@ class Ports:
         """Iterator, that allows for loops etc to directly access the object."""
         yield from self._ports
 
-    def add_port(self, port: Port, name: str | None = None) -> None:
+    def add_port(
+        self, port: Port, name: str | None = None, keep_mirror: bool = False
+    ) -> None:
         """Add a port object.
 
         Args:
             port: The port to add
             name: Overwrite the name of the port
+            keep_mirror: Keep the mirror flag from the original port if `True`,
+                else set :py:attr:~`Port.trans.mirror` (or the complex equivalent)
+                to `False`.
         """
         _port = port.copy()
+        if not keep_mirror:
+            if port._trans:
+                port._trans.mirror = False
+            elif port._dcplx_trans:
+                port._dcplx_trans.mirror = False
         if name is not None:
             _port.name = name
         self._ports.append(_port)
 
-    def add_ports(self, ports: Iterable[Port], prefix: str = "") -> None:
+    def add_ports(
+        self, ports: Iterable[Port], prefix: str = "", keep_mirror: bool = False
+    ) -> None:
         """Append a list of ports."""
         for p in ports:
             name = p.name or ""
