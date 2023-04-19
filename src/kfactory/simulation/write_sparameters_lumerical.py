@@ -134,7 +134,7 @@ def plot_sparameters_lumerical(
 
     """
 
-    s_params: List[np.ndarray[str, np.dtype[Any]]s] = []
+    s_params: List[np.ndarray[str, np.dtype[Any]]] = []
     insts = []
     trans = []
 
