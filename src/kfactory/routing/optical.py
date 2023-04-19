@@ -276,7 +276,7 @@ def connect(
                         place90(
                             c,
                             start_port.copy(),
-                            bend180.port[b180p1.name],
+                            bend180.ports[b180p1.name],
                             pts[j : i - 2],
                             straight_factory,
                             bend90_cell,
@@ -297,7 +297,7 @@ def connect(
                         place90(
                             c,
                             start_port.copy(),
-                            bend180.port[b180p2.name],
+                            bend180.ports[b180p2.name],
                             pts[j : i - 2],
                             straight_factory,
                             bend90_cell,
