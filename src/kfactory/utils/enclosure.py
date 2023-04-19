@@ -2,12 +2,14 @@ from collections.abc import Callable, Sequence
 from enum import IntEnum
 from hashlib import sha1
 from typing import Any, Optional, TypeGuard
+import os
 
 import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr
 
 from .. import kdb
 from ..kcell import KCell, LayerEnum
+from ..config import logger
 
 __all__ = [
     "Enclosure",
@@ -423,6 +425,9 @@ class Enclosure(BaseModel):
         )
 
         self._name = name
+
+        self.layer_sections = {}
+
         for sec in sorted(sections, key=lambda sec: (sec[0], sec[1])):
             if sec[0] in self.layer_sections:
                 ls = self.layer_sections[sec[0]]
@@ -537,6 +542,8 @@ class Enclosure(BaseModel):
         c: KCell,
         shape: Callable[[int], kdb.Edge | kdb.Polygon | kdb.Box],
         ref: int | kdb.Region | None = None,
+        tiled: bool = False,
+        tile_size: float = 250,
     ) -> None:
         if ref is None:
             ref = self.main_layer
@@ -548,12 +555,98 @@ class Enclosure(BaseModel):
         r = kdb.Region(c.begin_shapes_rec(ref)) if isinstance(ref, int) else ref.dup()
         r.merge()
 
-        for layer, layersec in self.layer_sections.items():
-            for section in layersec.sections:
-                c.shapes(layer).insert(
-                    self.minkowski_region(r, section.d_max, shape)
-                    - self.minkowski_region(r, section.d_min, shape)
+        if tiled:
+            tp = kdb.TilingProcessor()
+            tp.frame = c.dbbox()  # type: ignore[misc]
+            tp.dbu = c.klib.dbu
+            tp.threads = len(os.sched_getaffinity(0))
+
+            maxsize = 0
+            for layersection in self.layer_sections.values():
+                maxsize = max(
+                    maxsize, *[section.d_max for section in layersection.sections]
                 )
+
+            min_tile_size_rec = 10 * maxsize * tp.dbu
+
+            if tile_size <= min_tile_size_rec:
+                logger.warning(
+                    "Tile size should be larger than the maximum of "
+                    "the enclosures (recommendation: {} / {})",
+                    tile_size,
+                    min_tile_size_rec,
+                )
+
+            tp.tile_border(2 * maxsize, 2 * maxsize)
+
+            tp.tile_size(tile_size, tile_size)
+            if isinstance(ref, int):
+                tp.input("main_layer", c.klib, c.cell_index(), ref)
+            else:
+                tp.input("main_layer", ref)
+
+            targets = []
+
+            for layer, sections in self.layer_sections.items():
+                target = kdb.Region()
+                tp.output(f"target_{layer}", target)
+                for i, section in enumerate(sections):
+                    queue_str = f"var tile_reg = (_tile & _frame).sized({maxsize});"
+                    max_shape = f"max_reg_{layer}_{i}"
+                    shape_reg = kdb.Region()
+                    shape_reg.insert(shape(section.d_max))
+                    tp.input(max_shape, shape_reg)
+                    queue_str += f"var max_shape = {max_shape}[0];"
+                    match section.d_max:
+                        case d if d > 0:
+                            min_region = (
+                                "var max_reg = main_layer.minkowski_sum(max_shape);"
+                            )
+                        case d if d < 0:
+                            min_region = (
+                                "var max_reg = tile_reg - "
+                                "(tile_reg - main_layer).minkowski_sum(max_shape);"
+                            )
+                    queue_str += min_region
+                    if section.d_min:
+                        min_shape = f"min_reg_{layer}_{i}"
+                        shape_reg = kdb.Region()
+                        shape_reg.insert(shape(section.d_min))
+                        tp.input(min_shape, shape_reg)
+                        queue_str += f"var min_shape = {min_shape}[0];"
+                        match section.d_min:
+                            case d if d > 0:
+                                min_region = (
+                                    "var min_reg = main_layer.minkowski_sum(min_shape);"
+                                )
+                            case d if d < 0:
+                                min_region = (
+                                    "var min_reg = tile_reg - "
+                                    "(tile_reg - main_layer).minkowski_sum(min_shape);"
+                                )
+                        queue_str += min_region
+                        queue_str += f"_output(target_{layer},max_reg - min_reg);"
+                    else:
+                        queue_str += f"_output(target_{layer},max_reg);"
+                    tp.queue(queue_str)
+
+                targets.append((layer, target))
+
+            c.klib.start_changes()
+            tp.execute(f"Minkowski {c.name}")
+            c.klib.end_changes()
+
+            for layer, target in targets:
+                target.merge()
+                c.shapes(layer).insert(target)
+
+        # else:
+        #     for layer, layersec in self.layer_sections.items():
+        #         for section in layersec.sections:
+        #             c.shapes(layer).insert(
+        #                 self.minkowski_region(r, section.d_max, shape)
+        #                 - self.minkowski_region(r, section.d_min, shape)
+        #             )
 
     def apply_custom(
         self,
