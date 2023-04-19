@@ -134,7 +134,7 @@ def plot_sparameters_lumerical(
 
     """
 
-    s_params = []
+    s_params: List[np.ndarray[str, np.dtype[Any]]] = []
     insts = []
     trans = []
 
@@ -153,7 +153,7 @@ def plot_sparameters_lumerical(
                     trans.append(inst.trans)
                     insts.append(inst)
                     continue
-                recurse_insts(inst.cell.dup(), inst.instance.trans)  # type: ignore
+                recurse_insts(inst.cell.dup(), inst.instance.trans)
             else:
                 insts.append(inst)
                 trans.append(inst.trans)
@@ -389,14 +389,14 @@ def plot_sparameters_lumerical(
                 print(component.ports, value)
                 input_port = (
                     ports[0]
-                    if input_port in component.ports.get_all().keys()
-                    and ports_[0].center == component.ports[input_port].center
+                    if input_port in component.ports
+                    and ports_[0].position == component.ports[input_port].position
                     else input
                 )
                 output_port = (
                     ports[0]
-                    if output_port in component.ports.get_all().keys()
-                    and ports_[0].center == component.ports[output_port].center
+                    if output_port in component.ports
+                    and ports_[0].position == component.ports[output_port].position
                     else output
                 )
                 inputs = [instances[0], input_port] if input != input_port else inputs
@@ -1012,7 +1012,7 @@ def write_sparameters_lumerical(
                 "To keep them, use delete_fsp_files=False flag"
             )
 
-        return filepath_npz
+        return sp
     elif run and solver == "MODE":
         start = time.time()
         s.run()
