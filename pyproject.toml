@@ -21,6 +21,7 @@ dependencies = [
 	"klayout >= 0.28.3",
 	"scipy",
 	"ruamel.yaml",
+	"omegaconf",
 	"cachetools >= 5.2.0",
   "pydantic",
 	"loguru",
