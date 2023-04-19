@@ -134,7 +134,7 @@ def plot_sparameters_lumerical(
 
     """
 
-    s_params: List[np.ndarray[str, np.dtype[Any]]] = []
+    s_params: List[np.ndarray[str, np.dtype[Any]]s] = []
     insts = []
     trans = []
 
@@ -168,7 +168,7 @@ def plot_sparameters_lumerical(
             if "sparameters" in component_.info:
                 path = Path(component_.info["sparameters"])
                 if path.exists():
-                    s_params.append(path)
+                    s_params.append(path)  # type: ignore
                     paths[component_.name] = path
                     continue
             if "components" in component_.info:
@@ -222,7 +222,7 @@ def plot_sparameters_lumerical(
                 else:
                     s_params.append(
                         write_sparameters_lumerical(
-                            component=component_,  # type: ignore
+                            component=component_,
                             layer_stack=layer_stack,
                             session=session,
                             run=run,
@@ -239,7 +239,7 @@ def plot_sparameters_lumerical(
         else:
             s_params.append(
                 write_sparameters_lumerical(
-                    component=component_,  # type: ignore
+                    component=component_,
                     layer_stack=layer_stack,
                     session=session,
                     run=run,
@@ -389,14 +389,14 @@ def plot_sparameters_lumerical(
                 print(component.ports, value)
                 input_port = (
                     ports[0]
-                    if input_port in component.ports
-                    and ports_[0].position == component.ports[input_port].position
+                    if input_port in component.ports.get_all_named().keys()
+                    and ports_[0].d.position == component.ports[input_port].d.position
                     else input
                 )
                 output_port = (
                     ports[0]
-                    if output_port in component.ports
-                    and ports_[0].position == component.ports[output_port].position
+                    if output_port in component.ports.get_all_named().keys()
+                    and ports_[0].d.position == component.ports[output_port].d.position
                     else output
                 )
                 inputs = [instances[0], input_port] if input != input_port else inputs
@@ -673,7 +673,7 @@ def write_sparameters_lumerical(
     if hasattr(component.info, "simulation_settings"):
         sim_settings.update(component.info.simulation_settings)
         logger.info(
-            f"Updating {component.name!r} sim settings {component.simulation_settings}"  # type: ignore
+            f"Updating {component.name!r} sim settings {component.simulation_settings}"
         )
     for setting in settings:
         if setting not in sim_settings:
