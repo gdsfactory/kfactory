@@ -13,12 +13,12 @@ min space violations. :py:func:~`fix_spacing_tiled` to fix it using a TilingProc
 from .enclosure import (
     Direction,
     Enclosure,
+    clean_points,
     extrude_path,
     extrude_path_dynamic,
-    clean_points,
 )
 from .fill import fill_tiled
-from .violations import fix_spacing_tiled, fix_spacing_minkowski_tiled
+from .violations import fix_spacing_minkowski_tiled, fix_spacing_tiled
 
 __all__ = [
     "Enclosure",

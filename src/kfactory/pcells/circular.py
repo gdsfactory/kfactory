@@ -7,8 +7,7 @@ import numpy as np
 
 from .. import kdb
 from ..kcell import KCell, LayerEnum, autocell
-from ..utils import Enclosure
-from ..utils import extrude_path
+from ..utils import Enclosure, extrude_path
 
 __all__ = ["bend_circular"]
 
