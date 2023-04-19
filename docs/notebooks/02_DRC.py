@@ -66,6 +66,47 @@ print(f"time to clean: {d3-d2}")
 print(f"total time: {d3-d1}")
 
 c
+
+# +
+c = kf.KCell("minkowski_tiled_test")
+
+
+d1 = datetime.now()
+
+for i in range(50):
+    ellipse = kf.kdb.Polygon.ellipse(kf.kdb.Box(10000, 20000), i * 2)
+
+    x0 = 0
+    for j in range(5000, 30000, 500):
+        c.shapes(c.klib.layer(1, 0)).insert(
+            ellipse.transformed(kf.kdb.Trans(x0, i * 30000))
+        )
+        c.shapes(c.klib.layer(1, 0)).insert(
+            ellipse.transformed(kf.kdb.Trans(x0 + j, i * 30000))
+        )
+
+        x0 += 15000
+
+d2 = datetime.now()
+
+c.shapes(c.klib.layer(2, 0)).insert(
+    kf.utils.fix_spacing_minkowski_tiled(
+        c,
+        1000,
+        c.klib.layer(1, 0),
+        n_threads=32,
+        tile_size=(250, 250),
+        smooth=5,
+    )
+)
+
+d3 = datetime.now()
+
+print(f"time to draw: {d2-d1}")
+print(f"time to clean: {d3-d2}")
+print(f"total time: {d3-d1}")
+
+c
 # -
 
 c = kf.KCell("ToFill")

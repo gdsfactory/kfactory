@@ -87,7 +87,7 @@ def fix_spacing_tiled(
         tile_size = (30 * min_space * c.klib.dbu, 30 * min_space * c.klib.dbu)
 
     tp = kdb.TilingProcessor()
-    tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore
+    tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore[misc]
     tp.dbu = c.klib.dbu
     tp.threads = n_threads
     tp.tile_size(*tile_size)  # tile size in um
@@ -167,7 +167,7 @@ def fix_spacing_sizing_tiled(
     if tile_size is None:
         size = min_space * 20 * c.klib.dbu
         tile_size = (size, size)
-    tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore
+    tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore[misc]
     tp.dbu = c.klib.dbu
     tp.threads = n_threads
     tp.tile_size(*tile_size)  # tile size in um
@@ -188,6 +188,75 @@ def fix_spacing_sizing_tiled(
 
     c.klib.start_changes()
     tp.execute("Min Space Fix")
+    c.klib.end_changes()
+
+    return fix_reg
+
+
+def fix_spacing_minkowski_tiled(
+    c: KCell,
+    min_space: int,
+    layer: LayerEnum,
+    n_threads: int = 4,
+    tile_size: tuple[float, float] | None = None,
+    overlap: int = 2,
+    smooth: int | None = None,
+) -> kdb.Region:
+    """Fix min space issues by using a dilation & erosion.
+
+    Args:
+        c: Input cell
+        min_space: Minimum space rule [dbu]
+        layer: Input layer index
+        metrics: The metrics to use to determine the violation edges
+        n_threads: on how many threads to run the check simultaneously
+        tile_size: tuple determining the size of each sub tile (in um), should be big
+            compared to the violation size
+        overlap: how many times bigger to make the tile border in relation to the
+            violation size. Smaller than 1 can lead to errors
+        smooth: Apply smoothening (simplifying) at the end if > 0
+
+    Returns:
+        kdb.Region: Region containing the fixes for the violations
+
+    """
+    tp = kdb.TilingProcessor()
+    if tile_size is None:
+        size = min_space * 20 * c.klib.dbu
+        tile_size = (size, size)
+    if smooth is None:
+        smooth = max(int(min_space * 0.005), 0)
+    tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore[misc]
+    tp.dbu = c.klib.dbu
+    tp.threads = n_threads
+    tp.tile_size(*tile_size)  # tile size in um
+    tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
+    tp.input("reg", c.klib, c.cell_index(), layer)
+
+    fix_reg = kdb.Region()
+
+    tp.output("fix_reg", fix_reg)
+
+    if smooth:
+        queue_str = (
+            f"var tile_reg= reg & (_tile & _frame); var box = DBox.new({2*min_space});"
+            "var fix = _tile - "
+            f"(_tile.sized({min_space}) - tile_reg.minkowski_sum(box))"
+            ".minkowski_sum(box);"
+            f"fix.smooth({smooth}, true); _output(fix_reg, fix)"
+        )
+    else:
+        queue_str = (
+            f"var tile_reg= reg & (_tile & _frame); var box = DBox.new({2*min_space});"
+            "var fix = _tile - "
+            f"(_tile.sized({min_space}) - tile_reg.minkowski_sum(box))"
+            ".minkowski_sum(box);"
+            f"_output(fix_reg, fix)"
+        )
+    tp.queue(queue_str)
+
+    c.klib.start_changes()
+    tp.execute("Min Space Fix Minkowski")
     c.klib.end_changes()
 
     return fix_reg

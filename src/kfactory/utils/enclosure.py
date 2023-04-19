@@ -6,8 +6,8 @@ from typing import Any, Optional, TypeGuard
 import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr
 
-from ... import kdb
-from ...kcell import KCell, LayerEnum
+from .. import kdb
+from ..kcell import KCell, LayerEnum
 
 __all__ = [
     "Enclosure",

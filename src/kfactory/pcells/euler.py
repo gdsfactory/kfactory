@@ -12,7 +12,7 @@ from scipy.special import fresnel  # type: ignore[import]
 from .. import kdb
 from ..kcell import KCell, LayerEnum, autocell
 from ..utils import Enclosure
-from ..utils.geo import extrude_path
+from ..utils import extrude_path
 
 __all__ = [
     "euler_bend_points",

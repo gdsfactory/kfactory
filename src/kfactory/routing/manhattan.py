@@ -5,7 +5,7 @@ import numpy as np
 from .. import kdb
 from ..config import logger
 from ..kcell import KLib, Port
-from ..utils.geo import clean_points
+from ..utils import clean_points
 
 __all__ = ["route_manhattan", "route_manhattan_180"]
 

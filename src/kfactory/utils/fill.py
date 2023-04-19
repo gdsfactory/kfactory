@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 
-from ... import KCell, KLib, LayerEnum, kdb
-from ...config import logger
+from .. import KCell, KLib, LayerEnum, kdb
+from ..config import logger
 
 
 class FillOperator(kdb.TileOutputReceiver):
