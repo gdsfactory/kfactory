@@ -36,7 +36,7 @@ def bend_circular(
         ]
     ]
 
-    kf.utils.geo.extrude_path(c, layer, backbone, width, enclosure, 0, theta)
+    kf.utils.extrude_path(c, layer, backbone, width, enclosure, 0, theta)
 
     c.create_port(
         name="W0", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer=layer
@@ -91,7 +91,7 @@ def dbend_circular(
             )
         ]
     ]
-    kf.utils.geo.extrude_path(c, layer, backbone, width, enclosure, 0, theta)
+    kf.utils.extrude_path(c, layer, backbone, width, enclosure, 0, theta)
     dp1 = kf.kcell.Port(
         dwidth=width, layer=layer, name="W0", dcplx_trans=kf.kdb.DCplxTrans.R180
     )
