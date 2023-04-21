@@ -5,7 +5,6 @@ shape located on a main_layer or reference layer or region.
 """
 
 import os
-
 from collections.abc import Callable, Sequence
 from enum import IntEnum
 from hashlib import sha1
@@ -15,8 +14,8 @@ import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr
 
 from .. import kdb
-from ..kcell import KCell, LayerEnum
 from ..config import logger
+from ..kcell import KCell, LayerEnum
 
 __all__ = [
     "Enclosure",
@@ -449,7 +448,7 @@ class Section(BaseModel):
 class LayerSection(BaseModel):
     """A collection of sections intended for a layer.
 
-    Adding a section will trigger an evalution to merge
+    Adding a section will trigger an evaluation to merge
     touching or overlapping sections.
     """
 
