@@ -73,7 +73,7 @@ def rectangles(
     def shape(d: int) -> kf.kdb.Polygon:
         return kf.kdb.Polygon.ellipse(kf.kdb.Box(2 * d, 2 * d), 64)
 
-    enclosure.apply_minkowski_custom(c=c, shape=shape, tiled=False, ref=layer)
+    enclosure.apply_minkowski_custom(c=c, shape=shape, ref=layer)
 
     return c
 
@@ -131,11 +131,11 @@ def rectangles_tiled(
     def shape(d: int) -> kf.kdb.Polygon:
         return kf.kdb.Polygon.ellipse(kf.kdb.Box(2 * d, 2 * d), 64)
 
-    enclosure.apply_minkowski_tiled(c=c, ref=layer, n_corners=64)
+    enclosure.apply_minkowski_tiled(c=c, ref=layer, n_pts=64)
 
     return c
 
 
-if __name__ == "__main__":
-    # kf.show(rectangles(500000, 10000, 120000, 15, 1000000, LAYER.WG, enc))
-    kf.show(rectangles_tiled(500000, 10000, 120000, 15, 1000000, LAYER.WG, enc))
+# if __name__ == "__main__":
+#     # kf.show(rectangles(500000, 10000, 120000, 15, 1000000, LAYER.WG, enc))
+#     kf.show(rectangles_tiled(500000, 10000, 120000, 15, 1000000, LAYER.WG, enc))
