@@ -125,7 +125,7 @@ fc.shapes(fc.klib.layer(2, 0)).insert(kf.kdb.DBox(20, 40))
 fc.shapes(fc.klib.layer(3, 0)).insert(kf.kdb.DBox(30, 15))
 fc
 
-import kfactory.utils.geo.fill as fill
+import kfactory.utils.fill as fill
 
 # fill.fill_tiled(c, fc, [(kf.klib.layer(1,0), 0)], exclude_layers = [(kf.klib.layer(10,0), 100), (kf.klib.layer(2,0), 0), (kf.klib.layer(3,0),0)], x_space=5, y_space=5)
 fill.fill_tiled(
