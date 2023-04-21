@@ -57,7 +57,7 @@ def fix_spacing_tiled(
     metrics: kdb.Metrics = kdb.Metrics.Euclidian,
     ignore_angle: float = 80,
     size_space_check: int = 5,
-    n_threads: int = 4,
+    n_threads: int | None = None,
     tile_size: tuple[float, float] | None = None,
     overlap: float = 3,
     smooth_factor: float = 0.05,
@@ -98,10 +98,10 @@ def fix_spacing_tiled(
     tp = kdb.TilingProcessor()
     tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore[misc]
     tp.dbu = c.klib.dbu
-    tp.threads = n_threads
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
     tp.input("reg", c.klib, c.cell_index(), layer)
+    tp.threads = n_threads or len(os.sched_getaffinity(0))
 
     fix_reg = RegionOperator()
     tp.output("fix_reg", fix_reg)
@@ -149,7 +149,7 @@ def fix_spacing_sizing_tiled(
     c: KCell,
     min_space: int,
     layer: LayerEnum,
-    n_threads: int = 4,
+    n_threads: int | None = None,
     tile_size: tuple[float, float] | None = None,
     overlap: int = 2,
 ) -> kdb.Region:
@@ -176,10 +176,10 @@ def fix_spacing_sizing_tiled(
         tile_size = (size, size)
     tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore[misc]
     tp.dbu = c.klib.dbu
-    tp.threads = n_threads
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
     tp.input("reg", c.klib, c.cell_index(), layer)
+    tp.threads = n_threads or len(os.sched_getaffinity(0))
 
     fix_reg = kdb.Region()
 
@@ -204,7 +204,7 @@ def fix_spacing_minkowski_tiled(
     c: KCell,
     min_space: int,
     ref: LayerEnum | kdb.Region,
-    n_threads: int = 4,
+    n_threads: int | None = None,
     tile_size: tuple[float, float] | None = None,
     overlap: int = 2,
     smooth: int | None = None,
@@ -230,7 +230,6 @@ def fix_spacing_minkowski_tiled(
     tp.frame = c.dbbox()  # type: ignore[misc]
     tp.dbu = c.klib.dbu
     tp.threads = n_threads or len(os.sched_getaffinity(0))
-    min_space
 
     min_tile_size_rec = 10 * min_space * tp.dbu
 
