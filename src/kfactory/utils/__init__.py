@@ -10,10 +10,15 @@ sums instead of only vector based sizing.
 min space violations. :py:func:~`fix_spacing_tiled` to fix it using a TilingProcessor.
 """
 
-from . import geo, violations
-from .geo import Direction, Enclosure, extrude_path, extrude_path_dynamic
-from .geo.fill import fill_tiled
-from .violations import fix_spacing_tiled
+from .enclosure import (
+    Direction,
+    Enclosure,
+    clean_points,
+    extrude_path,
+    extrude_path_dynamic,
+)
+from .fill import fill_tiled
+from .violations import fix_spacing_minkowski_tiled, fix_spacing_tiled
 
 __all__ = [
     "Enclosure",
@@ -24,4 +29,6 @@ __all__ = [
     "extrude_path_dynamic",
     "fill_tiled",
     "fix_spacing_tiled",
+    "fix_spacing_minkowski_tiled",
+    "clean_points",
 ]

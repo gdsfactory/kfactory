@@ -11,8 +11,7 @@ from scipy.special import fresnel  # type: ignore[import]
 
 from .. import kdb
 from ..kcell import KCell, LayerEnum, autocell
-from ..utils import Enclosure
-from ..utils.geo import extrude_path
+from ..utils import Enclosure, extrude_path
 
 __all__ = [
     "euler_bend_points",
@@ -194,31 +193,27 @@ def bend_euler(
 
     if theta == 90:
         c.create_port(
-            name="W0",
             layer=layer,
             width=int(width / c.klib.dbu),
             trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
         )
         c.create_port(
-            name="N0",
             layer=layer,
             width=int(width / c.klib.dbu),
             trans=kdb.Trans(1, False, backbone[-1].to_itype(dbu).to_v()),
         )
     elif theta == 180:
         c.create_port(
-            name="W0",
             layer=layer,
             width=int(width / c.klib.dbu),
             trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
         )
         c.create_port(
-            name="W1",
             layer=layer,
             width=int(width / c.klib.dbu),
             trans=kdb.Trans(2, False, backbone[-1].to_itype(dbu).to_v()),
         )
-
+    c.autorename_ports()
     return c
 
 

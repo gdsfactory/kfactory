@@ -1,5 +1,5 @@
 import kfactory as kf
-from kfactory.utils.geo import extrude_path, extrude_path_dynamic
+from kfactory.utils import extrude_path, extrude_path_dynamic
 import numpy as np
 
 
