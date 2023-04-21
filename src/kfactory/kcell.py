@@ -1188,7 +1188,7 @@ class KCell:
     def create_port(
         self,
         *,
-        name: str,
+        name: str | None = None,
         trans: kdb.Trans,
         width: int,
         layer: LayerEnum | int,
@@ -1200,7 +1200,7 @@ class KCell:
     def create_port(
         self,
         *,
-        name: str,
+        name: str | None = None,
         dcplx_trans: kdb.DCplxTrans,
         dwidth: float,
         layer: LayerEnum | int,
@@ -1221,7 +1221,7 @@ class KCell:
     def create_port(
         self,
         *,
-        name: str,
+        name: str | None = None,
         width: int,
         position: tuple[int, int],
         angle: int,
@@ -2075,8 +2075,10 @@ class Ports:
         """Get all ports in a dictionary with names as keys."""
         return {v.name: v for v in self._ports if v.name is not None}
 
-    def __getitem__(self, key: str | None) -> Port:
+    def __getitem__(self, key: int | str | None) -> Port:
         """Get a specific port by name."""
+        if isinstance(key, int):
+            return self._ports[key]
         try:
             return next(filter(lambda port: port.name == key, self._ports))
         except StopIteration:
@@ -2138,7 +2140,7 @@ class InstancePorts:
         self.cell_ports = instance.cell.ports
         self.instance = instance
 
-    def __getitem__(self, key: str | None) -> Port:
+    def __getitem__(self, key: int | str | None) -> Port:
         """Get a port by name."""
         p = self.cell_ports[key]
         if self.instance.is_complex():
