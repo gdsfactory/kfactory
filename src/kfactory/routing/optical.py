@@ -2,10 +2,10 @@
 
 from collections.abc import Callable, Sequence
 
-from .. import kdb
-from ..config import logger
-from ..kcell import KCell, Port
-from .manhattan import route_manhattan
+from kfactory import kdb
+from kfactory.config import logger
+from kfactory.kcell import KCell, Port
+from kfactory.routing.manhattan import route_manhattan
 
 
 def vec_angle(v: kdb.Vector) -> int:
@@ -548,3 +548,17 @@ def place90(
                 wg.align(wg_p1.name, t1, taperp2.name)
                 t2 = c << taper_cell
                 t2.align(taperp2.name, wg, wg_p2.name)
+
+
+if __name__ == "__main__": 
+
+    from kfactory.generic_tech import LAYER
+    import kfactory as kf
+    from kfactory import pcells
+
+    c = kf.KCell()
+    wg1 =c << pcells.waveguide.waveguide(width=2, length=10)
+    wg2 =c << pcells.waveguide.waveguide(width=2, length=10)
+    wg2.movex(100)
+    wg2.movey(100)
+

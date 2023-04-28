@@ -5,9 +5,9 @@ A circular bend has a constant radius.
 
 import numpy as np
 
-from .. import kdb
-from ..kcell import KCell, LayerEnum, pcell
-from ..utils import Enclosure, extrude_path
+from kfactory import kdb
+from kfactory.kcell import KCell, LayerEnum, pcell
+from kfactory.utils import Enclosure, extrude_path
 
 __all__ = ["bend_circular"]
 
@@ -78,3 +78,21 @@ def bend_circular(
             )
 
     return c
+
+if __name__ == "__main__": 
+    from kfactory.generic_tech import LAYER
+    import kfactory as kf
+    um=1e3
+
+    enc = kf.utils.Enclosure(
+    [
+        (LAYER.DEEPTRENCH, 2*um, 3*um),
+        (LAYER.SLAB90, 2*um),
+    ],
+    name="WGSLAB",
+    main_layer=LAYER.WG,
+)
+
+    c = bend_circular(width=0.5, layer=LAYER.WG, radius=10, enclosure=enc)
+    c.draw_ports()
+    c.show()

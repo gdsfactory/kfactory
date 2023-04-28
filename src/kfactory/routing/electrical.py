@@ -2,9 +2,9 @@
 
 from collections.abc import Callable
 
-from .. import kdb
-from ..kcell import Instance, KCell, Port
-from .manhattan import route_manhattan
+from kfactory import kdb
+from kfactory.kcell import Instance, KCell, Port
+from kfactory.routing.manhattan import route_manhattan
 
 
 def connect_elec(
@@ -285,3 +285,15 @@ def connect_dual_rails(
     hole_path = kdb.Path(pts, _hole_width)
     final_poly = kdb.Region(path.polygon()) - kdb.Region(hole_path.polygon())
     c.shapes(_layer).insert(final_poly)
+
+if __name__ == "__main__": 
+    from kfactory.generic_tech import LAYER
+    import kfactory as kf
+    from kfactory import pcells
+
+    c = kf.KCell()
+    wg1 =c << pcells.waveguide.waveguide(width=2, length=10)
+    wg2 =c << pcells.waveguide.waveguide(width=2, length=10)
+    wg2.movex(100)
+    wg2.movey(100)
+

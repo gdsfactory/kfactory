@@ -84,5 +84,9 @@ def compass(
 
 
 if __name__ == "__main__":
-    c = compass(size=(1, 2), layer=1)
+    from kfactory.generic_tech import LAYER
+
+    c = compass(size='a', layer=LAYER.WG)
+    # c = compass(size=(1, 2), layer=LAYER.WG)
+    c.draw_ports()
     c.show()
