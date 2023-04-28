@@ -1,7 +1,7 @@
 import kfactory as kf
 
 
-@kf.autocell
+@kf.pcell
 def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.utils.Enclosure):
     c = kf.KCell()
     c.shapes(layer).insert(kf.kdb.Box(-10000, -6000, 10000, 6000))

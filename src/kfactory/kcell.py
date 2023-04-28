@@ -28,9 +28,9 @@ import numpy as np
 import ruamel.yaml
 from typing_extensions import ParamSpec
 
-from . import kdb
-from .config import logger
-from .port import rename_clockwise
+from kfactory import kdb
+from kfactory.config import logger
+from kfactory.port import rename_clockwise
 
 # import struct
 # from abc import abstractmethod
@@ -851,7 +851,7 @@ class KCell:
     Attributes:
         klib: Library object that is the manager of the KLayout
             :py:class:`kdb.Layout`
-        settings: A dictionary containing settings populated by:py:func:`autocell`
+        settings: A dictionary containing settings populated by:py:func:`pcell`
         info: Dictionary for storing additional info if necessary. This is not
             passed to the GDS and therefore not reversible.
         _kdb_cell: Pure KLayout cell object.
@@ -981,6 +981,19 @@ class KCell:
                 `True`, else set the mirror flag to `False`.
         """
         self.ports.add_ports(ports=ports, prefix=prefix, keep_mirror=keep_mirror)
+
+    def add_polygon(self, points: np.ndarray | kdb.Polygon, layer):
+        """Adds a Polygon to the Component.
+
+        Args:
+            points: Coordinates of the vertices of the Polygon.
+            layer: layer spec to add polygon on.
+        """
+
+        if not isinstance(points, kdb.DPolygon):
+            points = kdb.DPolygon([kdb.DPoint(point[0], point[1]) for point in points])
+
+        self.shapes(layer).insert(points)
 
     @classmethod
     def from_yaml(
@@ -2180,12 +2193,12 @@ class InstancePorts:
 
 
 @overload
-def autocell(_func: Callable[KCellParams, KCell], /) -> Callable[KCellParams, KCell]:
+def pcell(_func: Callable[KCellParams, KCell], /) -> Callable[KCellParams, KCell]:
     ...
 
 
 @overload
-def autocell(
+def pcell(
     *,
     set_settings: bool = True,
     set_name: bool = True,
@@ -2194,7 +2207,7 @@ def autocell(
 
 
 @logger.catch
-def autocell(
+def pcell(
     _func: Callable[KCellParams, KCell] | None = None,
     /,
     *,
@@ -2222,7 +2235,7 @@ def autocell(
             instance that has a magnification != 1 or non-90° rotation.
     """
 
-    def decorator_autocell(
+    def decorator_pcell(
         f: Callable[KCellParams, KCell]
     ) -> Callable[KCellParams, KCell]:
         sig = signature(f)
@@ -2231,7 +2244,7 @@ def autocell(
         cache: dict[int, Any] = {}
 
         @functools.wraps(f)
-        def wrapper_autocell(
+        def wrapper_pcell(
             *args: KCellParams.args, **kwargs: KCellParams.kwargs
         ) -> KCell:
             params: dict[str, KCellParams.args] = {
@@ -2277,9 +2290,9 @@ def autocell(
 
             return wrapped_cell(**params)
 
-        return wrapper_autocell
+        return wrapper_pcell
 
-    return decorator_autocell if _func is None else decorator_autocell(_func)
+    return decorator_pcell if _func is None else decorator_pcell(_func)
 
 
 def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
@@ -2301,11 +2314,11 @@ def cell(
     Callable[KCellParams, KCell]
     | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
 ):
-    """Convenience alias for :py:func:`~autocell` with `(set_name=False)`."""
+    """Convenience alias for :py:func:`~pcell` with `(set_name=False)`."""
     if _func is None:
-        return autocell(set_settings=set_settings, set_name=False)
+        return pcell(set_settings=set_settings, set_name=False)
     else:
-        return autocell(_func)
+        return pcell(_func)
 
 
 def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
@@ -2462,10 +2475,14 @@ __all__ = [
     "Instance",
     "Port",
     "Ports",
-    "autocell",
+    "pcell",
     "cell",
     "klib",
     "KLib",
     "default_save",
     "LayerEnum",
 ]
+
+if __name__ == "__main__": 
+    c = KCell()
+

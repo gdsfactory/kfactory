@@ -124,7 +124,7 @@ c
 
 
 # + vscode={"languageId": "python"}
-@kf.autocell
+@kf.pcell
 def straight(length=10, width=1, layer=(1, 0)):
     wg = kf.KCell()
     box = kf.kdb.DBox(length, width)

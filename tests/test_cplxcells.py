@@ -1,7 +1,7 @@
 import kfactory as kf
 
 
-@kf.autocell
+@kf.pcell
 def simple_cplx_cell(layer: kf.LayerEnum) -> kf.KCell:
     c = kf.KCell()
 

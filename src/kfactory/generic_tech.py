@@ -5,18 +5,16 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from .kcell import LayerEnum
-
-# from kfactory import KCell, KLib, library
+from kfactory.kcell import LayerEnum
 
 
 class LAYER(LayerEnum):
-    #     """Generic layermap based on book.
+    """Generic layermap based on book.
 
-    #     Lukas Chrostowski, Michael Hochberg, "Silicon Photonics Design",
-    #     Cambridge University Press 2015, page 353
-    #     You will need to create a new LayerMap with your specific foundry layers.
-    #     """
+    Lukas Chrostowski, Michael Hochberg, "Silicon Photonics Design",
+    Cambridge University Press 2015, page 353
+    You will need to create a new LayerMap with your specific foundry layers.
+    """
 
     WG = (1, 0)
     WGCLAD = (111, 0)
@@ -126,3 +124,7 @@ class LayerLevel(BaseModel):
     sidewall_angle: float = 0
     z_to_bias: tuple[list[float], list[float]] | None = None
     info: dict[str, Any] = {}
+
+
+if __name__ == "__main__":
+    print(LAYER)

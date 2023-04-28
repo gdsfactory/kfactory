@@ -10,7 +10,7 @@ from scipy.optimize import brentq  # type: ignore[import]
 from scipy.special import fresnel  # type: ignore[import]
 
 from .. import kdb
-from ..kcell import KCell, LayerEnum, autocell
+from ..kcell import KCell, LayerEnum, pcell
 from ..utils import Enclosure, extrude_path
 
 __all__ = [
@@ -158,7 +158,7 @@ def euler_sbend_points(
     return spoints
 
 
-@autocell
+@pcell
 def bend_euler(
     width: float,
     radius: float,
@@ -217,7 +217,7 @@ def bend_euler(
     return c
 
 
-@autocell
+@pcell
 def bend_s_euler(
     offset: float,
     width: float,

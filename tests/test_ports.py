@@ -3,7 +3,7 @@ import pytest
 import re
 
 
-@kf.autocell
+@kf.pcell
 def waveguide(width: int, length: int, layer: int) -> kf.KCell:
     c = kf.KCell()
 
@@ -24,7 +24,7 @@ def wg(LAYER):
 
 
 @pytest.fixture()
-@kf.autocell
+@kf.pcell
 def wg_floating_off_grid(LAYER):
     with pytest.raises(AssertionError):
         c = kf.KCell()

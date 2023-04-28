@@ -21,7 +21,7 @@ It mirrors all the other functionalities of a Layout object.
 
 Ports are created with the :py:func:`~kfactory.kcell.KCell.create_port` function. You can either specify a transformation as here or specify them in a similar manner to gdsfactory. See the API doc for more information.
 
-Now, let's create a KCell for a waveguide. We will use the :py:func:`~kfactory.kcell.autocell`.
+Now, let's create a KCell for a waveguide. We will use the :py:func:`~kfactory.kcell.pcell`.
 This will make sure that if we call the function multiple times that we don't create multiple cells in the layout.
 Addiontally, compared to :py:func:`~kfactory.kcell.cell` it will also automatically name the cells using
 the function name and the arguments and keyword arguments of the function.

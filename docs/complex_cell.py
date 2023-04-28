@@ -4,7 +4,7 @@ from waveguide import waveguide
 import kfactory as kf
 
 
-@kf.autocell
+@kf.pcell
 def composite_cell() -> kf.KCell:
     c = kf.KCell()
 
