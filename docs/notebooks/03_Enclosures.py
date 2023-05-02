@@ -33,7 +33,7 @@ def rectangles(
     """Rectangles with eulerbends as corners."""
     c = kf.KCell()
     bend = kf.cells.euler.bend_euler(
-        width=int(width * c.klib.dbu), radius=int(c.klib.dbu * radius), layer=layer
+        width=int(width * c.kcl.dbu), radius=int(c.kcl.dbu * radius), layer=layer
     )
 
     def wg_f(length: int) -> kf.KCell:
@@ -89,7 +89,7 @@ def rectangles_tiled(
     """Rectangles with eulerbends as corners."""
     c = kf.KCell()
     bend = kf.cells.euler.bend_euler(
-        width=int(width * c.klib.dbu), radius=int(c.klib.dbu * radius), layer=layer
+        width=int(width * c.kcl.dbu), radius=int(c.kcl.dbu * radius), layer=layer
     )
 
     def wg_f(length: int) -> kf.KCell:

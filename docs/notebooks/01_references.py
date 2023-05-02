@@ -41,7 +41,7 @@ p = kf.KCell()
 # Add a polygon
 xpts = [0, 0, 5, 6, 9, 12]
 ypts = [0, 1, 1, 2, 2, 0]
-p.shapes(p.klib.layer(2, 0)).insert(
+p.shapes(p.kcl.layer(2, 0)).insert(
     kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip(xpts, ypts)])
 )
 
@@ -95,7 +95,7 @@ c
 # Add a 2nd polygon to "p"
 xpts = [14, 14, 16, 16]
 ypts = [0, 2, 2, 0]
-p.shapes(p.klib.layer(1, 0)).insert(
+p.shapes(p.kcl.layer(1, 0)).insert(
     kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip(xpts, ypts)])
 )
 p
@@ -132,7 +132,7 @@ c2
 # 1. create the reference and add it to the component
 
 c = kf.KCell(name="reference_sample")
-w = kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
+w = kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 wr = kf.kdb.CellInstArray(w._kdb_cell, kf.kdb.Trans.R0)
 c.insert(wr)
 c
@@ -140,14 +140,14 @@ c
 # 2. or do it in a single line
 
 c = kf.KCell(name="reference_sample_shorter_syntax")
-wr = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
+wr = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 c
 
 # in both cases you can move the reference `wr` after created
 
 c = kf.KCell(name="two_references")
-wr1 = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
-wr2 = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
+wr1 = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
+wr2 = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 wr2.transform(kf.kdb.DTrans(0.0, 10.0))
 c.add_ports(wr1.ports, prefix="top_")
 c.add_ports(wr2.ports, prefix="bot_")

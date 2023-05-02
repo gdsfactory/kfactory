@@ -10,7 +10,7 @@ def composite_cell() -> kf.KCell:
 
     bend = c.create_inst(
         kf.cells.circular.bend_circular(
-            1000 * c.klib.dbu, 20000 * c.klib.dbu, LAYER.SI, enclosure=si_enc
+            1000 * c.kcl.dbu, 20000 * c.kcl.dbu, LAYER.SI, enclosure=si_enc
         )  # the standard kf.cells are in um, so we need to convert to dbu
     )
     wg = c << waveguide(1000, 5000, 5000)
