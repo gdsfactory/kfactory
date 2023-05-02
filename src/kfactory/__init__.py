@@ -21,7 +21,7 @@ from .kcell import (
     LayerEnum,
     show,
 )
-from . import pcells, placer, routing, utils, port
+from . import cells, placer, routing, utils, port
 from .conf import config
 
 
@@ -42,7 +42,7 @@ __all__ = [
     "kdb",
     "lay",
     "port",
-    "pcells",
+    "cells",
     "placer",
     "routing",
     "utils",

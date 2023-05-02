@@ -9,12 +9,12 @@ from .kcell import LayerEnum
 
 
 class LAYER(LayerEnum):
-    #     """Generic layermap based on book.
+    """Generic layermap based on book.
 
-    #     Lukas Chrostowski, Michael Hochberg, "Silicon Photonics Design",
-    #     Cambridge University Press 2015, page 353
-    #     You will need to create a new LayerMap with your specific foundry layers.
-    #     """
+    Lukas Chrostowski, Michael Hochberg, "Silicon Photonics Design",
+    Cambridge University Press 2015, page 353
+    You will need to create a new LayerMap with your specific foundry layers.
+    """
 
     WG = (1, 0)
     WGCLAD = (111, 0)
