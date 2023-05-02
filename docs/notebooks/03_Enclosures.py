@@ -37,9 +37,7 @@ def rectangles(
     )
 
     def wg_f(length: int) -> kf.KCell:
-        return kf.cells.waveguide.waveguide_dbu(
-            width=width, length=length, layer=layer
-        )
+        return kf.cells.waveguide.waveguide_dbu(width=width, length=length, layer=layer)
 
     for i in range(n):
         b1, b2, b3, b4 = (c << bend for _ in range(4))
@@ -95,9 +93,7 @@ def rectangles_tiled(
     )
 
     def wg_f(length: int) -> kf.KCell:
-        return kf.cells.waveguide.waveguide_dbu(
-            width=width, length=length, layer=layer
-        )
+        return kf.cells.waveguide.waveguide_dbu(width=width, length=length, layer=layer)
 
     for i in range(n):
         b1, b2, b3, b4 = (c << bend for _ in range(4))
