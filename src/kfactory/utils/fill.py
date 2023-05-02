@@ -105,9 +105,7 @@ def fill_tiled(
             c,
             fill_cell.cell_index(),
             fc_bbox=fill_cell.bbox(),
-            row_step=kdb.Vector(
-                fill_cell.bbox().width() + int(x_space / c.kcl.dbu), 0
-            ),
+            row_step=kdb.Vector(fill_cell.bbox().width() + int(x_space / c.kcl.dbu), 0),
             column_step=kdb.Vector(
                 0, fill_cell.bbox().height() + int(y_space / c.kcl.dbu)
             ),
