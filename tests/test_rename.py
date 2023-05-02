@@ -10,7 +10,7 @@ port_y_coords = [0, -10000, 0, 10000, 0]
 offset = 50000
 
 
-@kf.autocell
+@kf.cell
 def port_tests(rename_f: Optional[Callable[..., None]] = None) -> kf.KCell:
     c = kf.KCell()
 

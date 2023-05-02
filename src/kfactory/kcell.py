@@ -20,7 +20,7 @@ from hashlib import sha3_512
 from inspect import signature
 from pathlib import Path
 from tempfile import gettempdir
-from typing import Any, Literal, cast, overload  # ParamSpec, # >= python 3.10
+from typing import Any, Literal, TypeVar, cast, overload  # ParamSpec, # >= python 3.10
 
 # from cachetools import Cache, cached
 import cachetools.func
@@ -29,7 +29,7 @@ import ruamel.yaml
 from typing_extensions import ParamSpec
 
 from . import kdb
-from .config import logger
+from .conf import config
 from .port import rename_clockwise
 
 # import struct
@@ -44,6 +44,10 @@ except ImportError:
 
 KCellParams = ParamSpec("KCellParams")
 
+AnyTrans = TypeVar(
+    "AnyTrans", bound=kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans
+)
+
 
 class PROPID(IntEnum):
     """Mapping for GDS properties."""
@@ -51,10 +55,23 @@ class PROPID(IntEnum):
     NAME = 0
 
 
+class LockedError(AttributeError):
+    """Raised when a locked cell is being modified."""
+
+    @config.logger.catch
+    def __init__(self, kcell: "KCell"):
+        """Throw _locked error."""
+        super().__init__(
+            f"KCell {kcell.name} has been locked already."
+            " Modification has been disabled. "
+            "Modify the KCell in its autocell function or make a copy."
+        )
+
+
 class PortWidthMismatch(ValueError):
     """Error thrown when two ports don't have a matching `width`."""
 
-    @logger.catch
+    @config.logger.catch
     def __init__(
         self,
         inst: "Instance",
@@ -81,7 +98,7 @@ class PortWidthMismatch(ValueError):
 class PortLayerMismatch(ValueError):
     """Error thrown when two ports don't have a matching `layer`."""
 
-    @logger.catch
+    @config.logger.catch
     def __init__(
         self,
         lib: "KLib",
@@ -119,7 +136,7 @@ class PortLayerMismatch(ValueError):
 class PortTypeMismatch(ValueError):
     """Error thrown when two ports don't have a matching `port_type`."""
 
-    @logger.catch
+    @config.logger.catch
     def __init__(
         self,
         inst: "Instance",
@@ -437,15 +454,19 @@ class Port:
             contain layer number and datatype
         info: A dictionary with additional info. Not reflected in GDS. Copy will make a
             (shallow) copy of it.
+        d: Access port info in micrometer basis such as width and position / angle.
+        klib: Link to the layout this port resides in.
     """
 
     yaml_tag = "!Port"
     name: str | None
+    klib: KLib
     width: int
     layer: int
     _trans: kdb.Trans | None
     _dcplx_trans: kdb.DCplxTrans | None
     port_type: str
+    d: "DPart"
 
     @overload
     def __init__(
@@ -592,7 +613,7 @@ class Port:
             trans: an optional transformation applied to the port to be copied
 
         Returns:
-            port (:py:class:`Port`): a copy of the port
+            port: a copy of the port
         """
         if self._trans:
             if isinstance(trans, kdb.Trans):
@@ -907,6 +928,8 @@ class KCell:
 
     @name.setter
     def name(self, value: str) -> None:
+        if self._locked:
+            raise LockedError(self)
         self._kdb_cell.name = value
 
     @property
@@ -916,6 +939,8 @@ class KCell:
 
     @prop_id.setter
     def prop_id(self, value: int) -> None:
+        if self._locked:
+            raise LockedError(self)
         self._kdb_cell.prop_id = value
 
     @property
@@ -925,6 +950,8 @@ class KCell:
 
     @ghost_cell.setter
     def ghost_cell(self, value: bool) -> None:
+        if self._locked:
+            raise LockedError(self)
         self._kdb_cell.ghost_cell = value
 
     def __getattr__(self, name):  # type: ignore[no-untyped-def]
@@ -946,7 +973,7 @@ class KCell:
         c.ports = self.ports.copy()
         for inst in kdb_copy.each_inst():
             c.insts.append(Instance(self.klib, instance=inst))
-        c._locked = False
+        # c._locked = False
         return c
 
     def __copy__(self) -> "KCell":
@@ -965,6 +992,8 @@ class KCell:
             keep_mirror: Keep the mirror part of the transformation of a port if
                 `True`, else set the mirror flag to `False`.
         """
+        if self._locked:
+            raise LockedError(self)
         self.ports.add_port(port=port, name=name)
 
     def add_ports(
@@ -980,6 +1009,8 @@ class KCell:
             keep_mirror: Keep the mirror part of the transformation of a port if
                 `True`, else set the mirror flag to `False`.
         """
+        if self._locked:
+            raise LockedError(self)
         self.ports.add_ports(ports=ports, prefix=prefix, keep_mirror=keep_mirror)
 
     @classmethod
@@ -1182,6 +1213,8 @@ class KCell:
 
     @ports.setter
     def ports(self, new_ports: "InstancePorts | Ports") -> None:
+        if self._locked:
+            raise LockedError(self)
         self._ports = new_ports.copy()
 
     @overload
@@ -1233,6 +1266,8 @@ class KCell:
 
     def create_port(self, **kwargs: Any) -> None:
         """Proxy for :py:func:`Ports.create_port`."""
+        if self._locked:
+            raise LockedError(self)
         self.ports.create_port(**kwargs)
 
     @overload
@@ -1305,6 +1340,8 @@ class KCell:
         Returns:
             :py:class:`~Instance`: The created instance
         """
+        if self._locked:
+            raise LockedError(self)
         if isinstance(cell, int):
             ci = cell
         else:
@@ -1379,6 +1416,8 @@ class KCell:
             rename_func: Function that takes Iterable[Port] and renames them.
             This can of course contain a filter and only rename some of the ports
         """
+        if self._locked:
+            raise LockedError(self)
         if rename_func is None:
             self.klib.rename_function(self.ports._ports)
         else:
@@ -1394,6 +1433,8 @@ class KCell:
             prune: Delete unused child cells if they aren't used in any other KCell
             merge: Merge the shapes on all layers
         """
+        if self._locked:
+            raise LockedError(self)
         self._kdb_cell.flatten(False)  # prune)
         self.insts = Instances()
 
@@ -1515,6 +1556,8 @@ class KCell:
         property_id: int | None = None,
     ) -> "Instance":
         """Inserts a cell instance given by another reference."""
+        if self._locked:
+            raise LockedError(self)
         if isinstance(inst, Instance):
             return Instance(self.klib, self._kdb_cell.insert(inst._instance))
         else:
@@ -1523,6 +1566,52 @@ class KCell:
             else:
                 assert isinstance(inst, kdb.CellInstArray | kdb.DCellInstArray)
                 return Instance(self.klib, self._kdb_cell.insert(inst, property_id))
+
+    @overload
+    def transform(
+        self,
+        inst: kdb.Instance,
+        trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
+        /,
+        *,
+        no_warn: bool = False,
+    ) -> "Instance":
+        ...
+
+    @overload
+    def transform(
+        self,
+        trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
+        /,
+        *,
+        no_warn: bool = False,
+    ) -> None:
+        ...
+
+    def transform(
+        self,
+        inst_or_trans: kdb.Instance
+        | kdb.Trans
+        | kdb.DTrans
+        | kdb.ICplxTrans
+        | kdb.DCplxTrans,
+        trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans | None = None,
+        /,
+        *,
+        no_warn: bool = False,
+    ) -> "Instance | None":
+        """Transforms the instance or cell with the transformation given."""
+        if self._locked:
+            raise LockedError(self)
+        if trans:
+            return Instance(
+                self.klib,
+                self._kdb_cell.transform(
+                    inst_or_trans, trans  # type: ignore[arg-type]
+                ),
+            )
+        else:
+            return self._kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
 
 
 class Instance:
@@ -1701,69 +1790,6 @@ class Instance:
         return h.digest()
 
     @overload
-    def connect(
-        self, port: str | Port | None, other: Port, *, mirror: bool = False
-    ) -> None:
-        ...
-
-    @overload
-    def connect(
-        self,
-        port: str | Port | None,
-        other: "Instance",
-        other_port_name: str | None,
-        *,
-        mirror: bool = False,
-    ) -> None:
-        ...
-
-    def connect(
-        self,
-        port: str | Port | None,
-        other: "Instance | Port",
-        other_port_name: str | None = None,
-        *,
-        mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
-    ) -> None:
-        """Align port with name ``portname`` to a port.
-
-        .. deprecated:: 0.6.0
-            Use :py:func:`align` instead.
-            :py:func:`connect` will be removed in 0.7.0
-
-        Function to allow to transform this instance so that a port of this instance is
-        aligned (same position with 180° turn) to another instance.
-
-        Args:
-            port: The name of the port of this instance to be connected, or directly an
-                instance port. Can be `None` because port names can be `None`.
-            other: The other instance or a port. Skip `other_port_name` if it's a port.
-            other_port_name: The name of the other port. Ignored if
-                :py:attr:`~other_instance` is a port.
-            mirror: Instead of applying klayout.db.Trans.R180 as a connection
-                transformation, use klayout.db.Trans.M90, which effectively means this
-                instance will be mirrored and connected.
-            allow_width_mismatch: Skip width check between the ports if set.
-            allow_layer_mismatch: Skip layer check between the ports if set.
-            allow_type_mismatch: Skip port_type check between the ports if set.
-        """
-        logger.warning(
-            "Instance.connect will be removed in 0.7.0, please use Instance.align"
-        )
-        self.align(  # type: ignore[call-overload]
-            port=port,
-            other=other,
-            other_port_name=other_port_name,
-            mirror=mirror,
-            allow_width_mismatch=allow_layer_mismatch,
-            allow_layer_mismatch=allow_layer_mismatch,
-            allow_type_mismatch=allow_type_mismatch,
-        )
-
-    @overload
     def align(
         self, port: str | Port | None, other: Port, *, mirror: bool = False
     ) -> None:
@@ -1839,12 +1865,12 @@ class Instance:
         else:
             if p._dcplx_trans or op._dcplx_trans:
                 dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-                self.dcplx_trans = (
+                self._instance.dcplx_trans = (
                     op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
                 )
             else:
                 conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
-                self.trans = op.trans * conn_trans * p.trans.inverted()
+                self._instance.trans = op.trans * conn_trans * p.trans.inverted()
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
@@ -1913,6 +1939,8 @@ class Ports:
     """
 
     yaml_tag = "!Ports"
+    klib: KLib
+    _locked: bool
 
     def __init__(self, klib: KLib, ports: Iterable[Port] = []) -> None:
         """Constructor."""
@@ -2193,8 +2221,51 @@ def autocell(
     ...
 
 
-@logger.catch
+@config.logger.catch
 def autocell(
+    _func: Callable[KCellParams, KCell] | None = None,
+    /,
+    *,
+    set_settings: bool = True,
+    set_name: bool = True,
+    check_ports: bool = True,
+    check_instances: bool = True,
+) -> (
+    Callable[KCellParams, KCell]
+    | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
+):
+    """Autoname and validate cells.
+
+    .. deprecated:: 0.7.0
+        Use :py:func:`cell` instead.
+        :py:func:`connect` will be removed in 0.8.0
+    """
+    config.logger.warning("autocell is deprecated, use cell instead")
+    return cell(  # type: ignore[no-any-return, call-overload]
+        _func,
+        set_settings=set_settings,
+        set_name=set_name,
+        check_ports=check_ports,
+        check_instances=check_instances,
+    )
+
+
+@overload
+def cell(_func: Callable[KCellParams, KCell], /) -> Callable[KCellParams, KCell]:
+    ...
+
+
+@overload
+def cell(
+    *,
+    set_settings: bool = True,
+    set_name: bool = True,
+) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]:
+    ...
+
+
+@config.logger.catch
+def cell(
     _func: Callable[KCellParams, KCell] | None = None,
     /,
     *,
@@ -2256,12 +2327,20 @@ def autocell(
                         params[key] = frozenset_to_dict(value)
                 cell = f(**params)
                 if cell._locked:
+                    # If the cell is locked, it comes from a cache (most likely)
+                    # and should be copied first
                     cell = cell.dup()
                 if set_name:
                     name = get_component_name(f.__name__, **params)
                     cell.name = name
                 if set_settings:
                     cell.settings.update(params)
+                if check_instances:
+                    if any(inst.is_complex() for inst in cell.each_inst()):
+                        raise ValueError(
+                            "Most foundries will not allow off-grid instances. Please "
+                            "flatten them or add check_instances=False to the decorator"
+                        )
 
                 i = 0
                 for name, setting in cell.settings.items():
@@ -2290,22 +2369,6 @@ def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
 def frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable]:
     """Convert `frozenset` to `dict`."""
     return dict(fs)
-
-
-def cell(
-    _func: Callable[..., KCell] | None = None,
-    *,
-    set_settings: bool = True,
-    maxsize: int = 512,
-) -> (
-    Callable[KCellParams, KCell]
-    | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
-):
-    """Convenience alias for :py:func:`~autocell` with `(set_name=False)`."""
-    if _func is None:
-        return autocell(set_settings=set_settings, set_name=False)
-    else:
-        return autocell(_func)
 
 
 def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
@@ -2442,14 +2505,14 @@ def show(
         conn.sendall(enc_data)
         conn.settimeout(5)
     except OSError:
-        logger.warning("Could not connect to klive server")
+        config.logger.warning("Could not connect to klive server")
     else:
         msg = ""
         try:
             msg = conn.recv(1024).decode("utf-8")
-            logger.info(f"Message from klive: {msg}")
+            config.logger.info(f"Message from klive: {msg}")
         except OSError:
-            logger.warning("klive didn't send data, closing")
+            config.logger.warning("klive didn't send data, closing")
         finally:
             conn.close()
 

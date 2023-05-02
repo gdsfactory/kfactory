@@ -3,7 +3,7 @@
 from collections.abc import Callable, Sequence
 
 from .. import kdb
-from ..config import logger
+from ..conf import config
 from ..kcell import KCell, Port
 from .manhattan import route_manhattan
 
@@ -23,7 +23,7 @@ def vec_angle(v: kdb.Vector) -> int:
         case (0, y) if y < 0:
             return 3
         case _:
-            logger.warning(f"{v} is not a manhattan, cannot determine direction")
+            config.logger.warning(f"{v} is not a manhattan, cannot determine direction")
     return -1
 
 
@@ -120,7 +120,7 @@ def route_loopback(
     )  # end_straight=end_straight# + d_loop,
 
 
-@logger.catch
+@config.logger.catch
 def connect(
     c: KCell,
     p1: Port,
@@ -400,10 +400,10 @@ def place90(
     else:
         b90p1 = bend90_ports[0]
         b90p2 = bend90_ports[1]
-    assert b90p1.name is not None, logger.error(
+    assert b90p1.name is not None, config.logger.error(
         "bend90_cell needs named ports, {}", b90p1
     )
-    assert b90p2.name is not None, logger.error(
+    assert b90p2.name is not None, config.logger.error(
         "bend90_cell needs named ports, {}", b90p2
     )
     b90c = kdb.Trans(

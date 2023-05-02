@@ -6,13 +6,13 @@ A circular bend has a constant radius.
 import numpy as np
 
 from .. import kdb
-from ..kcell import KCell, LayerEnum, autocell
+from ..kcell import KCell, LayerEnum, cell
 from ..utils import Enclosure, extrude_path
 
 __all__ = ["bend_circular"]
 
 
-@autocell
+@cell
 def bend_circular(
     width: float,
     radius: float,

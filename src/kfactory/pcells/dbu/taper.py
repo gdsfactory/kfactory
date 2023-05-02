@@ -3,13 +3,13 @@
 TODO: Non-linear tapers
 """
 
-from ... import KCell, autocell, kdb
+from ... import KCell, cell, kdb
 from ...utils import Enclosure
 
 __all__ = ["taper"]
 
 
-@autocell
+@cell
 def taper(
     width1: int,
     width2: int,

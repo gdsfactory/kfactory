@@ -14,7 +14,7 @@ from .kcell import (
     Instance,
     Port,
     Ports,
-    autocell,
+    cell,
     cell,
     klib,
     KLib,
@@ -23,11 +23,12 @@ from .kcell import (
     show,
 )
 from . import pcells, placer, routing, utils, port
-from .config import logger
+from .conf import config
 
 
 __version__ = "0.6.3"
 
+logger = config.logger
 
 __all__ = [
     "KCell",
@@ -48,6 +49,7 @@ __all__ = [
     "utils",
     "show",
     "klay",
-    "logger",
+    "config",
     "LayerEnum",
+    "logger",
 ]

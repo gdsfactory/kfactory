@@ -2,13 +2,19 @@
 
 from __future__ import annotations
 
+import os
 import re
 import sys
 import traceback
 from itertools import takewhile
+from typing import TYPE_CHECKING, ClassVar
 
 import loguru
 from loguru import logger as logger
+from pydantic import BaseSettings, Field
+
+if TYPE_CHECKING:
+    from loguru import Logger
 
 
 def add_traceback(record: loguru.Record) -> None:
@@ -77,4 +83,36 @@ filter = LogFilter("DEBUG")
 logger.remove()
 logger.add(sys.stdout, format=tracing_formatter, filter=filter)
 
-__all__ = ["logger", "filter"]
+
+def get_affinity() -> int:
+    """Get number of cores/threads available.
+
+    On (most) linux we can get it through the scheduling affinity. Otherwise,
+    fall back to the multiprocessing cpu count.
+    """
+    try:
+        threads = len(os.sched_getaffinity(0))
+    except AttributeError:
+        import multiprocessing
+
+        threads = multiprocessing.cpu_count()
+    finally:
+        return threads
+
+
+class Settings(BaseSettings):
+    """KFactory settings object."""
+
+    n_threads: int = get_affinity()
+    logger: ClassVar[Logger] = logger
+    logfilter: LogFilter = filter
+
+    class Config:
+        validation = False
+        arbitrary_types_allowed = True
+        fields = {"logger": {"exclude": True}}
+
+
+config = Settings()
+
+__all__ = ["config"]

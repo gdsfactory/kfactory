@@ -3,7 +3,7 @@
 import numpy as np
 
 from .. import kdb
-from ..config import logger
+from ..conf import config
 from ..kcell import KLib, Port
 from ..utils import clean_points
 
@@ -225,7 +225,7 @@ def route_manhattan(
         case (x, y) if (x < bend90_radius and y <= 2 * bend90_radius) or (
             x <= 2 * bend90_radius and y < bend90_radius
         ):
-            logger.warning(
+            config.logger.warning(
                 "Potential collision in routing due to small distance between the port "
                 f"in relation to bend radius {x=}/{bend90_radius}, {y=}/{bend90_radius}"
             )

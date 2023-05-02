@@ -6,7 +6,7 @@ import numpy as np
 import numpy.typing as nty
 from scipy.special import binom  # type: ignore[import]
 
-from .. import KCell, LayerEnum, autocell, kdb
+from .. import KCell, LayerEnum, cell, kdb
 from ..utils import Enclosure
 
 __all__ = ["bend_s"]
@@ -28,7 +28,7 @@ def bezier_curve(
     return [kdb.DPoint(float(x), float(y)) for x, y in zip(xs, ys)]
 
 
-@autocell
+@cell
 def bend_s(
     width: float,
     height: float,

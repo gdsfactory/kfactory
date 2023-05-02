@@ -3,7 +3,7 @@ from layers import LAYER
 import kfactory as kf
 
 
-@kf.autocell
+@kf.cell
 def waveguide(width: int, length: int, width_exclude: int) -> kf.KCell:
     """Waveguide: Silicon on 1/0, Silicon exclude on 1/1"""
     c = kf.KCell()

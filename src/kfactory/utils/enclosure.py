@@ -14,7 +14,7 @@ import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr
 
 from .. import kdb
-from ..config import logger
+from ..conf import config
 from ..kcell import KCell, LayerEnum
 
 __all__ = [
@@ -767,7 +767,7 @@ class Enclosure(BaseModel):
             tile_size = min_tile_size_rec * 2
 
         if float(tile_size) <= min_tile_size_rec:
-            logger.warning(
+            config.logger.warning(
                 "Tile size should be larger than the maximum of "
                 "the enclosures (recommendation: {} / {})",
                 tile_size,
@@ -831,14 +831,14 @@ class Enclosure(BaseModel):
                     queue_str += f"_output(target_{layer},max_reg & _tile, true);"
 
                 tp.queue(queue_str)
-                logger.debug(
+                config.logger.debug(
                     "String queued for {} on layer {}: {}", c.name, layer, queue_str
                 )
 
             operators.append((layer, operator))
 
         c.klib.start_changes()
-        logger.info("Starting minkowski on {}", c.name)
+        config.logger.info("Starting minkowski on {}", c.name)
         tp.execute(f"Minkowski {c.name}")
         c.klib.end_changes()
 

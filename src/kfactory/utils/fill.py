@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 
 from .. import KCell, KLib, LayerEnum, kdb
-from ..config import logger
+from ..conf import config
 
 
 class FillOperator(kdb.TileOutputReceiver):
@@ -75,9 +75,9 @@ def fill_tiled(
     tp.tile_size(*tile_size)
 
     layer_names: list[str] = []
-    for l, _ in fill_layers:
-        layer_name = f"layer{l}"
-        tp.input(layer_name, c.klib, c.cell_index(), c.klib.get_info(l))
+    for _length, _ in fill_layers:
+        layer_name = f"layer{_length}"
+        tp.input(layer_name, c.klib, c.cell_index(), c.klib.get_info(_length))
         layer_names.append(layer_name)
 
     region_names: list[str] = []
@@ -87,9 +87,9 @@ def fill_tiled(
         region_names.append(region_name)
 
     exlayer_names: list[str] = []
-    for l, _ in exclude_layers:
-        layer_name = f"layer{l}"
-        tp.input(layer_name, c.klib, c.cell_index(), c.klib.get_info(l))
+    for _length, _ in exclude_layers:
+        layer_name = f"layer{_length}"
+        tp.input(layer_name, c.klib, c.cell_index(), c.klib.get_info(_length))
         exlayer_names.append(layer_name)
 
     exregion_names: list[str] = []
@@ -158,7 +158,8 @@ def fill_tiled(
                     if exregions and exlayers
                     else exregions + exlayers
                 )
-                + "; var fill_region = _tile & _frame & fill - exclude; _output(to_fill, fill_region)"
+                + "; var fill_region = _tile & _frame & fill - exclude;"
+                " _output(to_fill, fill_region)"
             )
         else:
             queue_str = (
@@ -168,14 +169,15 @@ def fill_tiled(
                     if regions and layers
                     else regions + layers
                 )
-                + "; var fill_region = _tile & _frame & fill; _output(to_fill, fill_region)"
+                + "; var fill_region = _tile & _frame & fill;"
+                " _output(to_fill, fill_region)"
             )
         tp.queue(queue_str)
         c.klib.start_changes()
         try:
-            logger.info("filling {} with {}", c.name, fill_cell.name)
-            logger.debug("fill string: '{}'", queue_str)
+            config.logger.info("filling {} with {}", c.name, fill_cell.name)
+            config.logger.debug("fill string: '{}'", queue_str)
             tp.execute(f"Fill {c.name}")
-            logger.info("done with filling {}", c.name)
+            config.logger.info("done with filling {}", c.name)
         finally:
             c.klib.end_changes()

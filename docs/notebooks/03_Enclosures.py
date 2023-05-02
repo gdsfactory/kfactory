@@ -20,7 +20,7 @@ enc = kf.utils.Enclosure(
 )
 
 
-@kf.autocell
+@kf.cell
 def rectangles(
     radius: int,
     width: int,
@@ -78,7 +78,7 @@ def rectangles(
     return c
 
 
-@kf.autocell
+@kf.cell
 def rectangles_tiled(
     radius: int,
     width: int,

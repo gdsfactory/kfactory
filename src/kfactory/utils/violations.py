@@ -8,7 +8,7 @@ import os
 from typing import overload
 
 from .. import KCell, LayerEnum, kdb
-from ..config import logger
+from ..conf import logger
 
 __all__ = [
     "fix_spacing_tiled",
