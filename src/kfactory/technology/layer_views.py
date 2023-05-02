@@ -17,7 +17,7 @@ from pydantic import BaseModel, Field, validator
 from pydantic.color import Color, ColorType
 
 from kfactory.conf import logger
-from kfactory.technology.clean_name import clean_name
+from kfactory.kcell import clean_name
 from kfactory.technology.color_utils import ensure_six_digit_hex_color
 from kfactory.technology.xml_utils import make_pretty_xml
 from kfactory.technology.yaml_utils import (
