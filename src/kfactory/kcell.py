@@ -101,7 +101,7 @@ class PortLayerMismatch(ValueError):
     @config.logger.catch
     def __init__(
         self,
-        lib: "KLib",
+        lib: "KCLayout ",
         inst: "Instance",
         other_inst: "Instance | Port",
         p1: "Port",
@@ -177,7 +177,7 @@ def default_save() -> kdb.SaveLayoutOptions:
     return save
 
 
-class KLib(kdb.Layout):
+class KCLayout(kdb.Layout):
     """Small extension to the ``klayout.db.Layout``.
 
     It adds tracking for the :py:class:`~kfactory.kcell.KCell` objects
@@ -201,27 +201,27 @@ class KLib(kdb.Layout):
         kdb.Layout.__init__(self, editable)
         self.rename_function: Callable[..., None] = rename_clockwise
 
-    def dup(self, init_cells: bool = True) -> "KLib":
-        """Create a duplication of the `~KLib` object.
+    def dup(self, init_cells: bool = True) -> "KCLayout ":
+        """Create a duplication of the `~KCLayout ` object.
 
         Args:
-            init_cells: initialize the all cells in the new KLib object
+            init_cells: initialize the all cells in the new KCLayout  object
 
         Returns:
             Copy of itself
         """
-        klib = KLib()
-        klib.assign(super().dup())
+        kcl = KCLayout()
+        kcl.assign(super().dup())
         if init_cells:
             for i, kc in self.kcells.items():
-                klib.kcells[i] = KCell(
+                kcl.kcells[i] = KCell(
                     name=kc.name,
-                    klib=klib,
-                    kdb_cell=klib.cell(kc.name),
+                    kcl=kcl,
+                    kdb_cell=kcl.cell(kc.name),
                     ports=kc.ports,
                 )
-        klib.rename_function = self.rename_function
-        return klib
+        kcl.rename_function = self.rename_function
+        return kcl
 
     def create_cell(  # type: ignore[override]
         self,
@@ -259,7 +259,7 @@ class KLib(kdb.Layout):
             )
 
     def delete_cell(self, cell: "KCell | int") -> None:
-        """Delete a cell in the klib object."""
+        """Delete a cell in the kcl object."""
         if isinstance(cell, int):
             super().delete_cell(cell)
             del self.kcells[cell]
@@ -269,10 +269,10 @@ class KLib(kdb.Layout):
             del self.kcells[ci]
 
     def register_cell(self, kcell: "KCell", allow_reregister: bool = False) -> None:
-        """Register an existing cell in the KLib object.
+        """Register an existing cell in the KCLayout object.
 
         Args:
-            kcell: KCell to be registered in the KLib
+            kcell: KCell to be registered in the KCLayout
             allow_reregister: Overwrite the existing KCell registration with this one.
                 Doesn't allow name duplication.
         """
@@ -302,14 +302,14 @@ class KLib(kdb.Layout):
                     raise
 
                 c = self.cell(obj)
-                return KCell(name=c.name, klib=self, kdb_cell=self.cell(obj))
+                return KCell(name=c.name, kcl=self, kdb_cell=self.cell(obj))
         else:
             if self.cell(obj) is not None:
                 try:
                     return self.kcells[self.cell(obj).cell_index()]
                 except KeyError:
                     c = self.cell(obj)
-                    return KCell(name=c.name, klib=self, kdb_cell=self.cell(obj))
+                    return KCell(name=c.name, kcl=self, kdb_cell=self.cell(obj))
             from pprint import pformat
 
             raise ValueError(
@@ -344,7 +344,7 @@ class KLib(kdb.Layout):
         if register_cells:
             new_cells = set(self.cells("*")) - cells
             for c in new_cells:
-                KCell(kdb_cell=c, klib=self)
+                KCell(kdb_cell=c, kcl=self)
 
         return lm
 
@@ -366,7 +366,7 @@ class KLib(kdb.Layout):
         return kdb.Layout.write(self, str(filename), options)
 
 
-klib = KLib()
+kcl = KCLayout()
 """Default library object.
 
 :py:class:`~kfactory.kcell.KCell` uses this object unless another one is
@@ -390,7 +390,7 @@ class LayerEnum(int, Enum):
         cls: "LayerEnum",
         layer: int,
         datatype: int,
-        lib: KLib = klib,
+        kcl: KCLayout = kcl,
     ) -> "LayerEnum":
         """Create a new Enum.
 
@@ -399,9 +399,9 @@ class LayerEnum(int, Enum):
         Args:
             layer: Layer number of the layer.
             datatype: Datatype of the layer.
-            lib: :py:class:~`KLib` to register the layer to.
+            kcl: :py:class:~`KCLayout` to register the layer to.
         """
-        value = lib.layer(layer, datatype)
+        value = kcl.layer(layer, datatype)
         obj: int = int.__new__(cls, value)  # type: ignore[call-overload]
         obj._value_ = value  # type: ignore[attr-defined]
         obj.layer = layer  # type: ignore[attr-defined]
@@ -455,12 +455,12 @@ class Port:
         info: A dictionary with additional info. Not reflected in GDS. Copy will make a
             (shallow) copy of it.
         d: Access port info in micrometer basis such as width and position / angle.
-        klib: Link to the layout this port resides in.
+        kcl: Link to the layout this port resides in.
     """
 
     yaml_tag = "!Port"
     name: str | None
-    klib: KLib
+    kcl: KCLayout
     width: int
     layer: int
     _trans: kdb.Trans | None
@@ -476,7 +476,7 @@ class Port:
         width: int,
         layer: LayerEnum | int,
         trans: kdb.Trans,
-        klib: KLib = klib,
+        kcl: KCLayout = kcl,
         port_type: str = "optical",
         info: dict[str, Any] = {},
     ):
@@ -490,7 +490,7 @@ class Port:
         dwidth: float,
         layer: LayerEnum | int,
         dcplx_trans: kdb.DCplxTrans,
-        klib: KLib = klib,
+        kcl: KCLayout = kcl,
         port_type: str = "optical",
         info: dict[str, Any] = {},
     ):
@@ -507,7 +507,7 @@ class Port:
         angle: int,
         position: tuple[int, int],
         mirror_x: bool = False,
-        klib: KLib = klib,
+        kcl: KCLayout = kcl,
         info: dict[str, Any] = {},
     ):
         ...
@@ -523,7 +523,7 @@ class Port:
         dangle: float,
         dposition: tuple[float, float],
         mirror_x: bool = False,
-        klib: KLib = klib,
+        kcl: KCLayout = kcl,
         info: dict[str, Any] = {},
     ):
         ...
@@ -544,11 +544,11 @@ class Port:
         dposition: tuple[float, float] | None = None,
         mirror_x: bool = False,
         port: "Port | None" = None,
-        klib: KLib = klib,
+        kcl: KCLayout = kcl,
         info: dict[str, Any] = {},
     ):
         """Create a port from dbu or um based units."""
-        self.klib = klib
+        self.kcl = kcl
         self.d = DPart(self)
         self.info = info.copy()
         if port is not None:
@@ -581,7 +581,7 @@ class Port:
                     self.dcplx_trans = dcplx_trans.dup()
                 assert dwidth is not None
                 self.d.width = dwidth
-                assert self.width * self.klib.dbu == float(
+                assert self.width * self.kcl.dbu == float(
                     dwidth
                 ), "When converting to dbu the width does not match the desired width!"
             elif width is not None:
@@ -624,20 +624,20 @@ class Port:
                     layer=self.layer,
                     port_type=self.port_type,
                     width=self.width,
-                    klib=self.klib,
+                    kcl=self.kcl,
                 )
             elif not trans.is_complex():
-                _trans = trans.s_trans().to_itype(self.klib.dbu) * self.trans
+                _trans = trans.s_trans().to_itype(self.kcl.dbu) * self.trans
                 return Port(
                     name=self.name,
                     trans=_trans,
                     layer=self.layer,
                     port_type=self.port_type,
                     width=self.width,
-                    klib=self.klib,
+                    kcl=self.kcl,
                 )
         if isinstance(trans, kdb.Trans):
-            dtrans = kdb.DCplxTrans(trans.to_dtype(self.klib.dbu))
+            dtrans = kdb.DCplxTrans(trans.to_dtype(self.kcl.dbu))
             _dtrans = dtrans * self.dcplx_trans
         else:
             _dtrans = trans * self.dcplx_trans
@@ -646,7 +646,7 @@ class Port:
             dcplx_trans=_dtrans,
             dwidth=self.d.width,
             layer=self.layer,
-            klib=self.klib,
+            kcl=self.kcl,
             port_type=self.port_type,
             info=self.info,
         )
@@ -665,7 +665,7 @@ class Port:
         elif self._dcplx_trans:
             vec = self.trans.disp
             vec.x = value
-            self._dcplx_trans.disp = vec.to_dtype(self.klib.dbu)
+            self._dcplx_trans.disp = vec.to_dtype(self.kcl.dbu)
 
     @property
     def y(self) -> int:
@@ -681,7 +681,7 @@ class Port:
         elif self._dcplx_trans:
             vec = self.trans.disp
             vec.y = value
-            self._dcplx_trans.disp = vec.to_dtype(self.klib.dbu)
+            self._dcplx_trans.disp = vec.to_dtype(self.kcl.dbu)
 
     @property
     def trans(self) -> kdb.Trans:
@@ -690,7 +690,7 @@ class Port:
         If this is set with the setter, it will overwrite any transformation or
         dcplx transformation
         """
-        return self._trans or self.dcplx_trans.s_trans().to_itype(self.klib.dbu)
+        return self._trans or self.dcplx_trans.s_trans().to_itype(self.kcl.dbu)
 
     @trans.setter
     def trans(self, value: kdb.Trans) -> None:
@@ -706,7 +706,7 @@ class Port:
         The setter will set a complex transformation and overwrite the internal
         transformation (set simple to `None` and the complex to the provided value.
         """
-        return self._dcplx_trans or kdb.DCplxTrans(self.trans.to_dtype(self.klib.dbu))
+        return self._dcplx_trans or kdb.DCplxTrans(self.trans.to_dtype(self.kcl.dbu))
 
     @dcplx_trans.setter
     def dcplx_trans(self, value: kdb.DCplxTrans) -> None:
@@ -796,7 +796,7 @@ class DPart:
         vec = self.parent.dcplx_trans.disp
         vec.x = value
         if self.parent._trans:
-            self.parent._trans.disp = vec.to_itype(self.parent.klib.dbu)
+            self.parent._trans.disp = vec.to_itype(self.parent.kcl.dbu)
         elif self.parent._dcplx_trans:
             self.parent._dcplx_trans.disp = vec
 
@@ -810,7 +810,7 @@ class DPart:
         vec = self.parent.dcplx_trans.disp
         vec.y = value
         if self.parent._trans:
-            self.parent._trans.disp = vec.to_itype(self.parent.klib.dbu)
+            self.parent._trans.disp = vec.to_itype(self.parent.kcl.dbu)
         elif self.parent._dcplx_trans:
             self.parent._dcplx_trans.disp = vec
 
@@ -823,7 +823,7 @@ class DPart:
     @position.setter
     def position(self, pos: tuple[float, float]) -> None:
         if self.parent._trans:
-            self.parent._trans.disp = kdb.DVector(*pos).to_itype(self.parent.klib.dbu)
+            self.parent._trans.disp = kdb.DVector(*pos).to_itype(self.parent.kcl.dbu)
         elif self.parent._dcplx_trans:
             self.parent._dcplx_trans.disp = kdb.DVector(*pos)
 
@@ -846,12 +846,12 @@ class DPart:
     @property
     def width(self) -> float:
         """Width of the port in um."""
-        return self.parent.width * self.parent.klib.dbu
+        return self.parent.width * self.parent.kcl.dbu
 
     @width.setter
     def width(self, value: float) -> None:
-        self.parent.width = int(value / self.parent.klib.dbu)
-        assert self.parent.width * self.parent.klib.dbu == float(value), (
+        self.parent.width = int(value / self.parent.kcl.dbu)
+        assert self.parent.width * self.parent.kcl.dbu == float(value), (
             "When converting to dbu the width does not match the desired width"
             f"({self.width} / {value})!"
         )
@@ -870,7 +870,7 @@ class KCell:
     :py:attr:`KCell._kdb_cell`.
 
     Attributes:
-        klib: Library object that is the manager of the KLayout
+        kcl : Library object that is the manager of the KLayout
             :py:class:`kdb.Layout`
         settings: A dictionary containing settings populated by:py:func:`autocell`
         info: Dictionary for storing additional info if necessary. This is not
@@ -886,7 +886,7 @@ class KCell:
     def __init__(
         self,
         name: str | None = None,
-        klib: KLib = klib,
+        kcl: KCLayout = kcl,
         kdb_cell: kdb.Cell | None = None,
         ports: "Ports | None" = None,
     ):
@@ -895,13 +895,13 @@ class KCell:
         Args:
             name: Name of the cell, if None will autogenerate name to
                 "Unnamed_<cell_index>".
-            klib: KLib the cell should be attached to.
+            kcl: KCLayout  the cell should be attached to.
             kdb_cell: If not `None`, a KCell will be created from and existing
                 KLayout Cell
             ports: Attach an existing :py:class:`~Ports` object to the KCell,
                 if `None` create an empty one.
         """
-        self.klib = klib
+        self.kcl = kcl
         self.insts: Instances = Instances()
         self.settings: dict[str, Any] = {}
         self.info: dict[str, Any] = {}
@@ -910,16 +910,16 @@ class KCell:
             _name = "Unnamed_!"
         else:
             _name = name
-        self._kdb_cell = kdb_cell or klib.create_cell(_name)
+        self._kdb_cell = kdb_cell or kcl.create_cell(_name)
         if _name == "Unnamed_!":
             self._kdb_cell.name = f"Unnamed_{self.cell_index()}"
-        self.klib.register_cell(self, allow_reregister=True)
-        self.ports: Ports = ports or Ports(self.klib)
+        self.kcl.register_cell(self, allow_reregister=True)
+        self.ports: Ports = ports or Ports(self.kcl)
         self.complex = False
 
         if kdb_cell is not None:
             for inst in kdb_cell.each_inst():
-                self.insts.append(Instance(self.klib, inst))
+                self.insts.append(Instance(self.kcl, inst))
 
     @property
     def name(self) -> str:
@@ -969,10 +969,10 @@ class KCell:
         """
         kdb_copy = self._kdb_copy()
 
-        c = KCell(klib=self.klib, kdb_cell=kdb_copy)
+        c = KCell(kcl=self.kcl, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
         for inst in kdb_copy.each_inst():
-            c.insts.append(Instance(self.klib, instance=inst))
+            c.insts.append(Instance(self.kcl, instance=inst))
         # c._locked = False
         return c
 
@@ -1029,11 +1029,11 @@ class KCell:
         cell = cls(d["name"])
         if verbose:
             print(f"Building {d['name']}")
-        cell.ports = d.get("ports", Ports(ports=[], klib=cell.klib))
+        cell.ports = d.get("ports", Ports(ports=[], kcl=cell.kcl))
         cell.settings = d.get("settings", {})
         for inst in d.get("insts", []):
             if "cellname" in inst:
-                _cell = cell.klib[inst["cellname"]]
+                _cell = cell.kcl[inst["cellname"]]
             elif "cellfunction" in inst:
                 module_name, fname = inst["cellfunction"].rsplit(".", 1)
                 module = importlib.import_module(module_name)
@@ -1371,7 +1371,7 @@ class KCell:
                         ci, dtrans, a, b, na, nb  # type: ignore[arg-type]
                     )
                 )
-        inst = Instance(self.klib, ca)
+        inst = Instance(self.kcl, ca)
         self.insts.append(inst)
         return inst
 
@@ -1380,7 +1380,7 @@ class KCell:
 
     def layer(self, *args: Any, **kwargs: Any) -> int:
         """Get the layer info, convenience for klayout.db.Layout.layer."""
-        return self.klib.layer(*args, **kwargs)
+        return self.kcl.layer(*args, **kwargs)
 
     def __lshift__(self, cell: "KCell") -> "Instance":
         """Convenience function for :py:attr:"~create_inst(cell)`.
@@ -1419,7 +1419,7 @@ class KCell:
         if self._locked:
             raise LockedError(self)
         if rename_func is None:
-            self.klib.rename_function(self.ports._ports)
+            self.kcl.rename_function(self.ports._ports)
         else:
             rename_func(self.ports._ports)
 
@@ -1490,7 +1490,7 @@ class KCell:
     def write(
         self, filename: str | Path, save_options: kdb.SaveLayoutOptions = default_save()
     ) -> None:
-        """Write a KCell to a GDS. See :py:func:`KLib.write` for more info."""
+        """Write a KCell to a GDS. See :py:func:`KCLayout .write` for more info."""
         return self._kdb_cell.write(str(filename), save_options)
 
     @classmethod
@@ -1523,19 +1523,18 @@ class KCell:
 
     def each_inst(self) -> Iterator["Instance"]:
         """Iterates over all child instances (which may actually be instance arrays)."""
-        yield from (Instance(self.klib, inst) for inst in self._kdb_cell.each_inst())
+        yield from (Instance(self.kcl, inst) for inst in self._kdb_cell.each_inst())
 
     def each_overlapping_inst(self, b: kdb.Box | kdb.DBox) -> Iterator["Instance"]:
         """Gets the instances overlapping the given rectangle."""
         yield from (
-            Instance(self.klib, inst)
-            for inst in self._kdb_cell.each_overlapping_inst(b)
+            Instance(self.kcl, inst) for inst in self._kdb_cell.each_overlapping_inst(b)
         )
 
     def each_touching_inst(self, b: kdb.Box | kdb.DBox) -> Iterator["Instance"]:
         """Gets the instances overlapping the given rectangle."""
         yield from (
-            Instance(self.klib, inst) for inst in self._kdb_cell.each_touching_inst(b)
+            Instance(self.kcl, inst) for inst in self._kdb_cell.each_touching_inst(b)
         )
 
     @overload
@@ -1559,13 +1558,13 @@ class KCell:
         if self._locked:
             raise LockedError(self)
         if isinstance(inst, Instance):
-            return Instance(self.klib, self._kdb_cell.insert(inst._instance))
+            return Instance(self.kcl, self._kdb_cell.insert(inst._instance))
         else:
             if not property_id:
-                return Instance(self.klib, self._kdb_cell.insert(inst))
+                return Instance(self.kcl, self._kdb_cell.insert(inst))
             else:
                 assert isinstance(inst, kdb.CellInstArray | kdb.DCellInstArray)
-                return Instance(self.klib, self._kdb_cell.insert(inst, property_id))
+                return Instance(self.kcl, self._kdb_cell.insert(inst, property_id))
 
     @overload
     def transform(
@@ -1605,7 +1604,7 @@ class KCell:
             raise LockedError(self)
         if trans:
             return Instance(
-                self.klib,
+                self.kcl,
                 self._kdb_cell.transform(
                     inst_or_trans, trans  # type: ignore[arg-type]
                 ),
@@ -1626,10 +1625,10 @@ class Instance:
 
     yaml_tag = "!Instance"
 
-    def __init__(self, klib: KLib, instance: kdb.Instance) -> None:
+    def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
         self._instance = instance
-        self.klib = klib
+        self.kcl = kcl
         self.ports = InstancePorts(self)
 
     def __getattr__(self, name):  # type: ignore[no-untyped-def]
@@ -1658,7 +1657,7 @@ class Instance:
     @property
     def cell(self) -> KCell:
         """Parent KCell  of the Instance."""
-        return self.klib[self.cell_index]
+        return self.kcl[self.cell_index]
 
     @cell.setter
     def cell(self, value: KCell) -> None:
@@ -1760,7 +1759,7 @@ class Instance:
     @property
     def parent_cell(self) -> KCell:
         """Gets the cell this instance is contained in."""
-        return self.klib[self._instance.parent_cell.cell_index()]
+        return self.kcl[self._instance.parent_cell.cell_index()]
 
     @parent_cell.setter
     def parent_cell(self, cell: KCell | kdb.Cell) -> None:
@@ -1859,7 +1858,7 @@ class Instance:
                 op,
             )
         elif int(p.layer) != int(op.layer) and not allow_layer_mismatch:
-            raise PortLayerMismatch(self.cell.klib, self, other, p, op)
+            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
         elif p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)
         else:
@@ -1939,17 +1938,17 @@ class Ports:
     """
 
     yaml_tag = "!Ports"
-    klib: KLib
+    kcl: KCLayout
     _locked: bool
 
-    def __init__(self, klib: KLib, ports: Iterable[Port] = []) -> None:
+    def __init__(self, kcl: KCLayout, ports: Iterable[Port] = []) -> None:
         """Constructor."""
         self._ports: list[Port] = list(ports)
-        self.klib = klib
+        self.kcl = kcl
 
     def copy(self) -> "Ports":
         """Get a copy of each port."""
-        return Ports(ports=[p.copy() for p in self._ports], klib=self.klib)
+        return Ports(ports=[p.copy() for p in self._ports], kcl=self.kcl)
 
     def contains(self, port: Port) -> bool:
         """Check whether a port is already in the list."""
@@ -2065,7 +2064,7 @@ class Ports:
                 width=width,
                 layer=layer,
                 port_type=port_type,
-                klib=self.klib,
+                kcl=self.kcl,
             )
         elif dcplx_trans is not None:
             assert dwidth is not None
@@ -2075,7 +2074,7 @@ class Ports:
                 dcplx_trans=dcplx_trans,
                 layer=layer,
                 port_type=port_type,
-                klib=self.klib,
+                kcl=self.kcl,
             )
         elif angle is not None and position is not None:
             assert width is not None
@@ -2087,7 +2086,7 @@ class Ports:
                 angle=angle,
                 position=position,
                 mirror_x=mirror_x,
-                klib=self.klib,
+                kcl=self.kcl,
             )
         else:
             raise ValueError(
@@ -2195,12 +2194,12 @@ class InstancePorts:
         """Creates a copy in the form of :py:class:~`Ports`."""
         if not self.instance.is_complex():
             return Ports(
-                klib=self.instance.klib,
+                kcl=self.instance.kcl,
                 ports=[p.copy(self.instance.trans) for p in self.cell_ports._ports],
             )
         else:
             return Ports(
-                klib=self.instance.klib,
+                kcl=self.instance.kcl,
                 ports=[
                     p.copy(self.instance.dcplx_trans) for p in self.cell_ports._ports
                 ],
@@ -2527,8 +2526,8 @@ __all__ = [
     "Ports",
     "autocell",
     "cell",
-    "klib",
-    "KLib",
+    "kcl ",
+    "KCLayout ",
     "default_save",
     "LayerEnum",
 ]

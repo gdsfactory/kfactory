@@ -25,7 +25,7 @@ def bend_circular(
     """
 
     c = kf.KCell()
-    r = radius * c.klib.dbu
+    r = radius * c.kcl.dbu
     backbone = [
         kf.kdb.DPoint(x, y)
         for x, y in [
@@ -147,7 +147,7 @@ def test_dspiral(LAYER):
         name="start", dcplx_trans=kf.kdb.DCplxTrans.R0, dwidth=1, layer=LAYER.WG
     )
 
-    kf.config.filter.level = "ERROR"
+    kf.config.logfilter.level = "ERROR"
 
     for _ in range(10):
         r = r1 + r2
@@ -157,4 +157,4 @@ def test_dspiral(LAYER):
         b.align("W0", p)
         p = b.ports["N0"]
 
-    kf.config.filter.level = "DEBUG"
+    kf.config.logfilter.level = "DEBUG"

@@ -57,7 +57,7 @@ def bend_circular(
     c.create_port(
         name="o1",
         trans=kdb.Trans(2, False, 0, 0),
-        width=int(width / c.klib.dbu),
+        width=int(width / c.kcl.dbu),
         layer=layer,
     )
 
@@ -65,15 +65,15 @@ def bend_circular(
         case 90:
             c.create_port(
                 name="o2",
-                trans=kdb.DTrans(1, False, radius, radius).to_itype(c.klib.dbu),
-                width=int(width / c.klib.dbu),
+                trans=kdb.DTrans(1, False, radius, radius).to_itype(c.kcl.dbu),
+                width=int(width / c.kcl.dbu),
                 layer=layer,
             )
         case 180:
             c.create_port(
                 name="o2",
-                trans=kdb.DTrans(0, False, 0, 2 * radius).to_itype(c.klib.dbu),
-                width=int(width / c.klib.dbu),
+                trans=kdb.DTrans(0, False, 0, 2 * radius).to_itype(c.kcl.dbu),
+                width=int(width / c.kcl.dbu),
                 layer=layer,
             )
 

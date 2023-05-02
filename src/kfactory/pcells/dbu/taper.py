@@ -61,8 +61,8 @@ def taper(
 
     if enclosure is not None:
         enclosure.apply_minkowski_y(c, kdb.Region(c.bbox()))
-    c.settings["width1_um"] = width1 * c.klib.dbu
-    c.settings["width2_um"] = width2 * c.klib.dbu
-    c.settings["length_um"] = length * c.klib.dbu
+    c.settings["width1_um"] = width1 * c.kcl.dbu
+    c.settings["width2_um"] = width2 * c.kcl.dbu
+    c.settings["length_um"] = length * c.kcl.dbu
 
     return c

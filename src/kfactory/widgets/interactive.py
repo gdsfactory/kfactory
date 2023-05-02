@@ -33,7 +33,7 @@ except ImportError as e:
 
 
 def display_kcell(kc: KCell) -> None:
-    cell_dup = kc.klib.dup()[kc.name]
+    cell_dup = kc.kcl.dup()[kc.name]
     cell_dup.draw_ports()
 
     lw = LayoutWidget(cell=cell_dup)
@@ -53,7 +53,7 @@ class LayoutWidget:
         self.hide_unused_layers = hide_unused_layers
 
         self.layout_view = lay.LayoutView()
-        self.layout_view.show_layout(cell.klib, False)
+        self.layout_view.show_layout(cell.kcl, False)
         self.layer_properties: Path | None = None
         if layer_properties is not None:
             self.layer_properties = Path(layer_properties)

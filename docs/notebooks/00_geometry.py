@@ -129,7 +129,7 @@ def straight(length=10, width=1, layer=(1, 0)):
     wg = kf.KCell()
     box = kf.kdb.DBox(length, width)
     int_box = box.to_itype(wg.klib.dbu)
-    _layer = kf.klib.layer(*layer)
+    _layer = kf.kcl.layer(*layer)
     wg.shapes(_layer).insert(box)
     wg.add_port(
         kf.Port(

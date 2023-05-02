@@ -1,13 +1,13 @@
 from collections.abc import Iterable
 
-from .. import KCell, KLib, LayerEnum, kdb
+from .. import KCell, KCLayout, LayerEnum, kdb
 from ..conf import config
 
 
 class FillOperator(kdb.TileOutputReceiver):
     def __init__(
         self,
-        klib: KLib,
+        kcl: KCLayout,
         top_cell: KCell,
         fill_cell_index: int,
         fc_bbox: kdb.Box,
@@ -16,7 +16,7 @@ class FillOperator(kdb.TileOutputReceiver):
         fill_margin: kdb.Vector = kdb.Vector(0, 0),
         remaining_polygons: kdb.Region | None = None,
     ) -> None:
-        self.klib = klib
+        self.kcl = kcl
         self.top_cell = top_cell
         self.fill_cell_index = fill_cell_index
         self.fc_bbox = fc_bbox
@@ -63,8 +63,8 @@ def fill_tiled(
     y_space: float = 0,
 ) -> None:
     tp = kdb.TilingProcessor()
-    tp.frame = c.bbox().to_dtype(c.klib.dbu)  # type: ignore
-    tp.dbu = c.klib.dbu
+    tp.frame = c.bbox().to_dtype(c.kcl.dbu)  # type: ignore
+    tp.dbu = c.kcl.dbu
     tp.threads = n_threads
 
     if tile_size is None:
@@ -77,7 +77,7 @@ def fill_tiled(
     layer_names: list[str] = []
     for _length, _ in fill_layers:
         layer_name = f"layer{_length}"
-        tp.input(layer_name, c.klib, c.cell_index(), c.klib.get_info(_length))
+        tp.input(layer_name, c.kcl, c.cell_index(), c.kcl.get_info(_length))
         layer_names.append(layer_name)
 
     region_names: list[str] = []
@@ -89,7 +89,7 @@ def fill_tiled(
     exlayer_names: list[str] = []
     for _length, _ in exclude_layers:
         layer_name = f"layer{_length}"
-        tp.input(layer_name, c.klib, c.cell_index(), c.klib.get_info(_length))
+        tp.input(layer_name, c.kcl, c.cell_index(), c.kcl.get_info(_length))
         exlayer_names.append(layer_name)
 
     exregion_names: list[str] = []
@@ -101,15 +101,15 @@ def fill_tiled(
     tp.output(
         "to_fill",
         FillOperator(
-            c.klib,
+            c.kcl,
             c,
             fill_cell.cell_index(),
             fc_bbox=fill_cell.bbox(),
             row_step=kdb.Vector(
-                fill_cell.bbox().width() + int(x_space / c.klib.dbu), 0
+                fill_cell.bbox().width() + int(x_space / c.kcl.dbu), 0
             ),
             column_step=kdb.Vector(
-                0, fill_cell.bbox().height() + int(y_space / c.klib.dbu)
+                0, fill_cell.bbox().height() + int(y_space / c.kcl.dbu)
             ),
         ),
     )
@@ -117,13 +117,13 @@ def fill_tiled(
     if layer_names or region_names:
         exlayers = " + ".join(
             [
-                layer_name + f".sized({int(size / c.klib.dbu)})" if size else layer_name
+                layer_name + f".sized({int(size / c.kcl.dbu)})" if size else layer_name
                 for layer_name, (_, size) in zip(exlayer_names, exclude_layers)
             ]
         )
         exregions = " + ".join(
             [
-                region_name + f".sized({int(size / c.klib.dbu)})"
+                region_name + f".sized({int(size / c.kcl.dbu)})"
                 if size
                 else region_name
                 for region_name, (_, size) in zip(exregion_names, exclude_regions)
@@ -131,13 +131,13 @@ def fill_tiled(
         )
         layers = " + ".join(
             [
-                layer_name + f".sized({int(size / c.klib.dbu)})" if size else layer_name
+                layer_name + f".sized({int(size / c.kcl.dbu)})" if size else layer_name
                 for layer_name, (_, size) in zip(layer_names, fill_layers)
             ]
         )
         regions = " + ".join(
             [
-                region_name + f".sized({int(size / c.klib.dbu)})"
+                region_name + f".sized({int(size / c.kcl.dbu)})"
                 if size
                 else region_name
                 for region_name, (_, size) in zip(region_names, fill_regions)
@@ -173,11 +173,11 @@ def fill_tiled(
                 " _output(to_fill, fill_region)"
             )
         tp.queue(queue_str)
-        c.klib.start_changes()
+        c.kcl.start_changes()
         try:
             config.logger.info("filling {} with {}", c.name, fill_cell.name)
             config.logger.debug("fill string: '{}'", queue_str)
             tp.execute(f"Fill {c.name}")
             config.logger.info("done with filling {}", c.name)
         finally:
-            c.klib.end_changes()
+            c.kcl.end_changes()

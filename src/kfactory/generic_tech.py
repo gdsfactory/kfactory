@@ -7,8 +7,6 @@ from pydantic import BaseModel
 
 from .kcell import LayerEnum
 
-# from kfactory import KCell, KLib, library
-
 
 class LAYER(LayerEnum):
     #     """Generic layermap based on book.

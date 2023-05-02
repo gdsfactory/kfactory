@@ -4,7 +4,7 @@ import numpy as np
 
 from .. import kdb
 from ..conf import config
-from ..kcell import KLib, Port
+from ..kcell import KCLayout, Port
 from ..utils import clean_points
 
 __all__ = ["route_manhattan", "route_manhattan_180"]
@@ -17,7 +17,7 @@ def droute_manhattan_180(
     bend180_radius: float,
     start_straight: float,
     end_straight: float,
-    layout: KLib | kdb.Layout,
+    layout: KCLayout | kdb.Layout,
 ) -> list[kdb.Point]:
     """Calculate manhattan route using um based points.
 
@@ -28,7 +28,7 @@ def droute_manhattan_180(
         bend180_radius: The distance between the two ports of the 180° bend. [um]
         start_straight: Minimum straight after the starting port. [um]
         end_straight: Minimum straight before the end port. [um]
-        layout: Layout/KLib object where to get the dbu info from.
+        layout: Layout/KCLayout object where to get the dbu info from.
 
     Returns:
         route: Calculated route in points in dbu.
@@ -142,7 +142,7 @@ def droute_manhattan(
     bend90_radius: int,
     start_straight: int,
     end_straight: int,
-    layout: KLib | kdb.Layout,
+    layout: KCLayout | kdb.Layout,
 ) -> list[kdb.Point]:
     """Calculate manhattan route using um based points.
 
@@ -154,7 +154,7 @@ def droute_manhattan(
         bend90_radius: The radius or (symmetrical) dimension of 90° bend. [um]
         start_straight: Minimum straight after the starting port. [um]
         end_straight: Minimum straight before the end port. [um]
-        layout: Layout/KLib object where to get the dbu info from.
+        layout: Layout/KCLayout object where to get the dbu info from.
 
     Returns:
         route: Calculated route in points in dbu.

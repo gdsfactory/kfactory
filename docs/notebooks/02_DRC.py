@@ -110,10 +110,10 @@ c
 # -
 
 c = kf.KCell("ToFill")
-c.shapes(kf.klib.layer(1, 0)).insert(
+c.shapes(kf.kcl.layer(1, 0)).insert(
     kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512)
 )
-c.shapes(kf.klib.layer(10, 0)).insert(
+c.shapes(kf.kcl.layer(10, 0)).insert(
     kf.kdb.DPolygon(
         [kf.kdb.DPoint(0, 0), kf.kdb.DPoint(5000, 0), kf.kdb.DPoint(5000, 3000)]
     )
@@ -131,11 +131,11 @@ import kfactory.utils.fill as fill
 fill.fill_tiled(
     c,
     fc,
-    [(kf.klib.layer(1, 0), 0)],
+    [(kf.kcl.layer(1, 0), 0)],
     exclude_layers=[
-        (kf.klib.layer(10, 0), 100),
-        (kf.klib.layer(2, 0), 0),
-        (kf.klib.layer(3, 0), 0),
+        (kf.kcl.layer(10, 0), 100),
+        (kf.kcl.layer(2, 0), 0),
+        (kf.kcl.layer(3, 0), 0),
     ],
     x_space=5,
     y_space=5,
