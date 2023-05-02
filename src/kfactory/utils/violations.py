@@ -7,7 +7,7 @@ minimum space violations and then applies a fix.
 import os
 from typing import overload
 
-from .. import KCell, LayerEnum, kdb
+from .. import Cell, LayerEnum, kdb
 from ..config import logger
 
 __all__ = [
@@ -19,7 +19,7 @@ __all__ = [
 
 @overload
 def fix_spacing_tiled(
-    c: KCell,
+    c: Cell,
     min_space: int,
     layer: LayerEnum | int,
     metrics: kdb.Metrics = kdb.Metrics.Euclidian,
@@ -35,7 +35,7 @@ def fix_spacing_tiled(
 
 @overload
 def fix_spacing_tiled(
-    c: KCell,
+    c: Cell,
     min_space: int,
     layer: LayerEnum | int,
     metrics: kdb.Metrics = kdb.Metrics.Euclidian,
@@ -51,7 +51,7 @@ def fix_spacing_tiled(
 
 
 def fix_spacing_tiled(
-    c: KCell,
+    c: Cell,
     min_space: int,
     layer: LayerEnum | int,
     metrics: kdb.Metrics = kdb.Metrics.Euclidian,
@@ -146,7 +146,7 @@ def fix_spacing_tiled(
 
 
 def fix_spacing_sizing_tiled(
-    c: KCell,
+    c: Cell,
     min_space: int,
     layer: LayerEnum,
     n_threads: int | None = None,
@@ -201,7 +201,7 @@ def fix_spacing_sizing_tiled(
 
 
 def fix_spacing_minkowski_tiled(
-    c: KCell,
+    c: Cell,
     min_space: int,
     ref: LayerEnum | kdb.Region,
     n_threads: int | None = None,

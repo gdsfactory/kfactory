@@ -36,7 +36,7 @@
 import kfactory as kf
 
 # Create a blank Component
-p = kf.KCell()
+p = kf.Cell()
 
 # Add a polygon
 xpts = [0, 0, 5, 6, 9, 12]
@@ -55,7 +55,7 @@ p
 #
 # In this new Component you *reference* our Component `p` which contains our polygon.
 
-c = kf.KCell(name="Component_with_references")  # Create a new blank Component
+c = kf.Cell(name="Component_with_references")  # Create a new blank Component
 poly_ref = c.create_inst(p)  # Reference the Component "p" that has the polygon in it
 c
 
@@ -116,7 +116,7 @@ c
 # exactly equivalent to using `add_ref()`
 
 # +
-c2 = kf.KCell(name="array_sample")  # Create a new blank Component
+c2 = kf.Cell(name="array_sample")  # Create a new blank Component
 d_ref1 = c2.create_inst(c)  # Reference the Component "c" that 3 references in it
 d_ref2 = c2 << c  # Use the "<<" operator to create a 2nd reference to c
 d_ref3 = c2 << c  # Use the "<<" operator to create a 3rd reference to c
@@ -131,23 +131,23 @@ c2
 #
 # 1. create the reference and add it to the component
 
-c = kf.KCell(name="reference_sample")
-w = kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
+c = kf.Cell(name="reference_sample")
+w = kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
 wr = kf.kdb.CellInstArray(w._kdb_cell, kf.kdb.Trans.R0)
 c.insert(wr)
 c
 
 # 2. or do it in a single line
 
-c = kf.KCell(name="reference_sample_shorter_syntax")
-wr = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
+c = kf.Cell(name="reference_sample_shorter_syntax")
+wr = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
 c
 
 # in both cases you can move the reference `wr` after created
 
-c = kf.KCell(name="two_references")
-wr1 = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
-wr2 = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
+c = kf.Cell(name="two_references")
+wr1 = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
+wr2 = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
 wr2.transform(kf.kdb.DTrans(0.0, 10.0))
 c.add_ports(wr1.ports, prefix="top_")
 c.add_ports(wr2.ports, prefix="bot_")
@@ -176,7 +176,7 @@ c
 # +
 # not converted yet
 
-c3 = kf.KCell("array_of_references")  # Create a new blank Component
+c3 = kf.Cell("array_of_references")  # Create a new blank Component
 aref = c3.create_inst(
     c, na=6, nb=3, a=kf.kdb.Vector(20000, 0), b=kf.kdb.Vector(0, 15000)
 )  # Reference the Component "c" 3 references in it with a 3 rows, 6 columns array

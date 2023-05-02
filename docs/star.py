@@ -4,10 +4,10 @@ from layers import LAYER
 import random
 
 
-@kf.pcell
+@kf.cell
 def star(
     size: float, proportion: float, n_diamonds: int = 3, layer: kf.LayerEnum = LAYER.SI
-) -> kf.KCell:
+) -> kf.Cell:
     """Create a diamond star cell
 
     Args:
@@ -19,7 +19,7 @@ def star(
         Star Cell
     """
 
-    c = kf.KCell()
+    c = kf.Cell()
 
     # the first star diamond, we use a box (int based)
 
@@ -44,13 +44,13 @@ def star(
     return c
 
 
-@kf.pcell
+@kf.cell
 def merged_star(
     size: float, proportion: float, n_diamonds: int = 3, layer: kf.LayerEnum = LAYER.SI
-) -> kf.KCell:
+) -> kf.Cell:
     """Same as star but use the star shapes and merge them to one polygon"""
 
-    c = kf.KCell()
+    c = kf.Cell()
 
     _star = star(size, proportion, n_diamonds, layer)
     reg = kf.kdb.Region(_star.begin_shapes_rec(layer))
@@ -63,9 +63,9 @@ def merged_star(
     return c
 
 
-@kf.pcell
-def sky_with_stars() -> kf.KCell:
-    c = kf.KCell()
+@kf.cell
+def sky_with_stars() -> kf.Cell:
+    c = kf.Cell()
 
     box = kf.kdb.Box(0, 0, 400000, 400000)  # 400umx400um sky (default dbu)
     sky = kf.kdb.Region(box)

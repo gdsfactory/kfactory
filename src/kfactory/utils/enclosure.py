@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field, PrivateAttr
 
 from .. import kdb
 from ..config import logger
-from ..kcell import KCell, LayerEnum
+from ..kcell import Cell, LayerEnum
 
 __all__ = [
     "Enclosure",
@@ -150,7 +150,7 @@ def extrude_path_points(
 
 
 def extrude_path(
-    target: KCell,
+    target: Cell,
     layer: LayerEnum | int,
     path: list[kdb.DPoint],
     width: float,
@@ -285,7 +285,7 @@ def extrude_path_dynamic_points(
 
 
 def extrude_path_dynamic(
-    target: KCell,
+    target: Cell,
     layer: LayerEnum | int,
     path: list[kdb.DPoint],
     widths: Callable[[float], float] | list[float],
@@ -618,7 +618,7 @@ class Enclosure(BaseModel):
 
     def apply_minkowski_enc(
         self,
-        c: KCell,
+        c: Cell,
         ref: int | kdb.Region | None,  # layer index or the region
         direction: Direction = Direction.BOTH,
     ) -> None:
@@ -658,7 +658,7 @@ class Enclosure(BaseModel):
             case _:
                 raise ValueError("Undefined direction")
 
-    def apply_minkowski_y(self, c: KCell, ref: int | kdb.Region | None = None) -> None:
+    def apply_minkowski_y(self, c: Cell, ref: int | kdb.Region | None = None) -> None:
         """Apply an enclosure with a vector in y-direction.
 
         This can be used for tapers/
@@ -670,7 +670,7 @@ class Enclosure(BaseModel):
         """
         return self.apply_minkowski_enc(c, ref=ref, direction=Direction.Y)
 
-    def apply_minkowski_x(self, c: KCell, ref: int | kdb.Region | None) -> None:
+    def apply_minkowski_x(self, c: Cell, ref: int | kdb.Region | None) -> None:
         """Apply an enclosure with a vector in x-direction.
 
         This can be used for tapers/
@@ -684,7 +684,7 @@ class Enclosure(BaseModel):
 
     def apply_minkowski_custom(
         self,
-        c: KCell,
+        c: Cell,
         shape: Callable[[int], kdb.Edge | kdb.Polygon | kdb.Box],
         ref: int | kdb.Region | None = None,
     ) -> None:
@@ -719,7 +719,7 @@ class Enclosure(BaseModel):
 
     def apply_minkowski_tiled(
         self,
-        c: KCell,
+        c: Cell,
         ref: int | kdb.Region | None = None,
         tile_size: float | None = None,
         n_pts: int = 64,
@@ -732,7 +732,7 @@ class Enclosure(BaseModel):
         minkowski sum.
 
         Args:
-            c: Target KCell to apply the enclosures into.
+            c: Target Cell to apply the enclosures into.
             ref: The reference shapes to apply the enclosures to.
                 Can be a layer or a region. If `None`, it will trey to use the
                 :py:attr:`main_layer`
@@ -847,7 +847,7 @@ class Enclosure(BaseModel):
 
     def apply_custom(
         self,
-        c: KCell,
+        c: Cell,
         shape: Callable[
             [int, int | None], kdb.Edge | kdb.Polygon | kdb.Box | kdb.Region
         ],
@@ -863,7 +863,7 @@ class Enclosure(BaseModel):
             for sec in layersec.sections:
                 c.shapes(layer).insert(shape(sec.d_max, sec.d_min))
 
-    def apply_bbox(self, c: KCell, ref: int | kdb.Region | None = None) -> None:
+    def apply_bbox(self, c: Cell, ref: int | kdb.Region | None = None) -> None:
         """Apply an enclosure based on a bounding box.
 
         Args:
@@ -918,7 +918,7 @@ class Enclosure(BaseModel):
 
     def extrude_path(
         self,
-        c: KCell,
+        c: Cell,
         path: list[kdb.DPoint],
         main_layer: int | LayerEnum | None,
         width: float,
@@ -940,7 +940,7 @@ class Enclosure(BaseModel):
 
     def extrude_path_dynamic(
         self,
-        c: KCell,
+        c: Cell,
         path: list[kdb.DPoint],
         main_layer: int | LayerEnum | None,
         widths: Callable[[float], float] | list[float],
@@ -970,7 +970,7 @@ class Enclosure(BaseModel):
 class RegionOperator(kdb.TileOutputReceiver):
     """Region collector. Just getst the tile and inserts it into the target cell."""
 
-    def __init__(self, cell: KCell, layer: LayerEnum | int) -> None:
+    def __init__(self, cell: Cell, layer: LayerEnum | int) -> None:
         """Initialization.
 
         Args:

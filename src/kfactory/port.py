@@ -9,7 +9,7 @@ from enum import IntEnum
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from .kcell import KCell, LayerEnum, Port
+    from .kcell import Cell, LayerEnum, Port
 
 
 class DIRECTION(IntEnum):
@@ -22,15 +22,15 @@ class DIRECTION(IntEnum):
 
 
 def autorename(
-    c: "KCell",
+    c: "Cell",
     f: Callable[..., None],
     *args: Any,
     **kwargs: Any,
 ) -> None:
-    """Rename a KCell with a renaming function.
+    """Rename a Cell with a renaming function.
 
     Args:
-        c: KCell to be renamed.
+        c: Cell to be renamed.
         f: Renaming function.
         args: Arguments for the renaming function.
         kwargs: Keyword arguments for the renaming function.

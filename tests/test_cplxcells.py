@@ -1,9 +1,9 @@
 import kfactory as kf
 
 
-@kf.pcell
-def simple_cplx_cell(layer: kf.LayerEnum) -> kf.KCell:
-    c = kf.KCell()
+@kf.cell
+def simple_cplx_cell(layer: kf.LayerEnum) -> kf.Cell:
+    c = kf.Cell()
 
     hh = 2.5
 
@@ -37,7 +37,7 @@ def test_cell(LAYER: kf.LayerEnum):
 
 
 def test_connected_cell(LAYER: kf.LayerEnum):
-    c = kf.KCell()
+    c = kf.Cell()
     layer = LAYER.WG
     sckc1 = c << simple_cplx_cell(layer)
     sckc2 = c << simple_cplx_cell(layer)

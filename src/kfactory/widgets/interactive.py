@@ -25,14 +25,14 @@ try:
 
     from .. import kdb, lay
     from ..config import logger
-    from ..kcell import KCell
+    from ..kcell import Cell
 
 except ImportError as e:
     print("You need install jupyter notebook plugin with `pip install kfactory[ipy]`")
     raise e
 
 
-def display_kcell(kc: KCell) -> None:
+def display_kcell(kc: Cell) -> None:
     cell_dup = kc.klib.dup()[kc.name]
     cell_dup.draw_ports()
 
@@ -43,7 +43,7 @@ def display_kcell(kc: KCell) -> None:
 class LayoutWidget:
     def __init__(
         self,
-        cell: KCell,
+        cell: Cell,
         layer_properties: str | None = None,
         hide_unused_layers: bool = True,
         with_layer_selector: bool = True,

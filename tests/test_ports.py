@@ -3,9 +3,9 @@ import pytest
 import re
 
 
-@kf.pcell
-def waveguide(width: int, length: int, layer: int) -> kf.KCell:
-    c = kf.KCell()
+@kf.cell
+def waveguide(width: int, length: int, layer: int) -> kf.Cell:
+    c = kf.Cell()
 
     c.shapes(layer).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
 
@@ -24,10 +24,10 @@ def wg(LAYER):
 
 
 @pytest.fixture()
-@kf.pcell
+@kf.cell
 def wg_floating_off_grid(LAYER):
     with pytest.raises(AssertionError):
-        c = kf.KCell()
+        c = kf.Cell()
         dbu = c.klib.dbu
 
         p1 = kf.kcell.Port(
@@ -65,7 +65,7 @@ def test_settings(LAYER):
 
 
 def test_connect_cplx_port(LAYER):
-    c = kf.KCell()
+    c = kf.Cell()
     wg1 = c << waveguide(1000, 20000, LAYER.WG)
     port = kf.kcell.Port(
         dwidth=1,
@@ -77,7 +77,7 @@ def test_connect_cplx_port(LAYER):
 
 
 def test_connect_cplx_inst(LAYER):
-    c = kf.KCell()
+    c = kf.Cell()
 
     wg1 = c << waveguide(1000, 20000, LAYER.WG)
     wg2 = c << waveguide(1000, 20000, LAYER.WG)
@@ -93,7 +93,7 @@ def test_connect_cplx_inst(LAYER):
 
 
 # def test_floating(wg_floating_off_grid):
-#     c = kf.KCell()
+#     c = kf.Cell()
 
 #     wg1 = c << wg_floating_off_grid
 #     wg2 = c << wg_floating_off_grid
@@ -101,7 +101,7 @@ def test_connect_cplx_inst(LAYER):
 
 
 def test_connect_integer(wg):
-    c = kf.KCell()
+    c = kf.Cell()
 
     wg1 = c << wg
     wg2 = c << wg

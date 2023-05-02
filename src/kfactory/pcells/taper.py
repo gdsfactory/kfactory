@@ -5,7 +5,7 @@ TODO: Non-linear tapers.
 """
 
 
-from .. import KCell, LayerEnum, klib
+from .. import Cell, LayerEnum, klib
 from ..utils import Enclosure
 from .dbu.taper import taper as taper_dbu
 
@@ -18,7 +18,7 @@ def taper(
     length: float,
     layer: int | LayerEnum,
     enclosure: Enclosure | None = None,
-) -> KCell:
+) -> Cell:
     r"""Linear Taper [um].
 
     Visualization::

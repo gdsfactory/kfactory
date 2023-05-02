@@ -3,20 +3,20 @@
 TODO: Non-linear tapers
 """
 
-from ... import KCell, pcell, kdb
+from ... import Cell, cell, kdb
 from ...utils import Enclosure
 
 __all__ = ["taper"]
 
 
-@pcell
+@cell
 def taper(
     width1: int,
     width2: int,
     length: int,
     layer: int,
     enclosure: Enclosure | None = None,
-) -> KCell:
+) -> Cell:
     r"""Linear Taper [um].
 
     Visualization::
@@ -41,7 +41,7 @@ def taper(
         layer: Layer index / :py:class:~`LayerEnum` of the core.
         enclosure: Definition of the slab/exclude.
     """
-    c = KCell()
+    c = Cell()
 
     c.shapes(layer).insert(
         kdb.Polygon(

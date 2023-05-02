@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 
-from .. import KCell, KLib, LayerEnum, kdb
+from .. import Cell, KLib, LayerEnum, kdb
 from ..config import logger
 
 
@@ -8,7 +8,7 @@ class FillOperator(kdb.TileOutputReceiver):
     def __init__(
         self,
         klib: KLib,
-        top_cell: KCell,
+        top_cell: Cell,
         fill_cell_index: int,
         fc_bbox: kdb.Box,
         row_step: kdb.Vector,
@@ -51,8 +51,8 @@ class FillOperator(kdb.TileOutputReceiver):
 
 
 def fill_tiled(
-    c: KCell,
-    fill_cell: KCell,
+    c: Cell,
+    fill_cell: Cell,
     fill_layers: Iterable[tuple[LayerEnum | int, int]] = [],
     fill_regions: Iterable[tuple[kdb.Region, int]] = [],
     exclude_layers: Iterable[tuple[LayerEnum | int, int]] = [],

@@ -10,11 +10,11 @@ Uses the klayout package as a backend.
 import klayout.dbcore as kdb
 import klayout.lay as lay
 from .kcell import (
-    KCell,
+    Cell,
     Instance,
     Port,
     Ports,
-    pcell,
+    cell,
     cell,
     klib,
     KLib,
@@ -22,7 +22,7 @@ from .kcell import (
     LayerEnum,
     show,
 )
-from . import pcells, placer, routing, utils, port
+from . import cells, placer, routing, utils, port
 from .config import logger
 
 
@@ -30,11 +30,11 @@ __version__ = "0.6.3"
 
 
 __all__ = [
-    "KCell",
+    "Cell",
     "Instance",
     "Port",
     "Ports",
-    "pcell",
+    "cell",
     "cell",
     "klib",
     "KLib",
@@ -42,7 +42,7 @@ __all__ = [
     "kdb",
     "lay",
     "port",
-    "pcells",
+    "cells",
     "placer",
     "routing",
     "utils",

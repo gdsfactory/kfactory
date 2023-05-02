@@ -4,7 +4,7 @@ from collections.abc import Callable, Sequence
 
 from kfactory import kdb
 from kfactory.config import logger
-from kfactory.kcell import KCell, Port
+from kfactory.kcell import Cell, Port
 from kfactory.routing.manhattan import route_manhattan
 
 
@@ -122,13 +122,13 @@ def route_loopback(
 
 @logger.catch
 def connect(
-    c: KCell,
+    c: Cell,
     p1: Port,
     p2: Port,
-    straight_factory: Callable[[int, int], KCell],
-    bend90_cell: KCell,
-    bend180_cell: KCell | None = None,
-    taper_cell: KCell | None = None,
+    straight_factory: Callable[[int, int], Cell],
+    bend90_cell: Cell,
+    bend180_cell: Cell | None = None,
+    taper_cell: Cell | None = None,
     start_straight: int = 0,
     end_straight: int = 0,
     route_path_function: Callable[
@@ -335,13 +335,13 @@ def connect(
 
 
 def place90(
-    c: KCell,
+    c: Cell,
     p1: Port,
     p2: Port,
     pts: Sequence[kdb.Point],
-    straight_factory: Callable[..., KCell],
-    bend90_cell: KCell,
-    taper_cell: KCell | None = None,
+    straight_factory: Callable[..., Cell],
+    bend90_cell: Cell,
+    taper_cell: Cell | None = None,
     port_type: str = "optical",
     min_straight_taper: int = 1000,
     allow_small_routes: bool = False,
@@ -361,7 +361,7 @@ def place90(
         p2: End port.
         pts: The points
         straight_factory: A function which takes two keyword arguments `width`
-            and `length`. It returns a :py:class:~`KCell` with two named ports with
+            and `length`. It returns a :py:class:~`Cell` with two named ports with
             port_type `port_type` and matching layer as the `bend90_cell` ports.
         bend90_cell: Bend to use in corners of the `pts`. Must have two named ports on
             `port_type`
@@ -554,11 +554,11 @@ if __name__ == "__main__":
 
     from kfactory.generic_tech import LAYER
     import kfactory as kf
-    from kfactory import pcells
+    from kfactory import cells
 
-    c = kf.KCell()
-    wg1 =c << pcells.waveguide.waveguide(width=2, length=10)
-    wg2 =c << pcells.waveguide.waveguide(width=2, length=10)
+    c = kf.Cell()
+    wg1 =c << cells.waveguide.waveguide(width=2, length=10)
+    wg2 =c << cells.waveguide.waveguide(width=2, length=10)
     wg2.movex(100)
     wg2.movey(100)
 

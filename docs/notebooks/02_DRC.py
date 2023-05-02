@@ -9,25 +9,25 @@ from datetime import datetime
 
 # -
 
-triangle = kf.KCell("triangle")
+triangle = kf.Cell("triangle")
 triangle_poly = kf.kdb.DPolygon(
     [kf.kdb.DPoint(0, 10), kf.kdb.DPoint(30, 10), kf.kdb.DPoint(30, 0)]
 )
 triangle.shapes(triangle.layer(1, 0)).insert(triangle_poly)
 triangle
 
-box = kf.KCell("Box")
+box = kf.Cell("Box")
 box_rect = kf.kdb.DBox(0, 0, 20, 5)
 box.shapes(box.klib.layer(1, 0)).insert(box_rect)
 box
 
-c = kf.KCell("fix_accute_angle")
+c = kf.Cell("fix_accute_angle")
 c << triangle
 c << box
 c
 
 # +
-c = kf.KCell("tiled_test")
+c = kf.Cell("tiled_test")
 
 
 d1 = datetime.now()
@@ -68,7 +68,7 @@ print(f"total time: {d3-d1}")
 c
 
 # +
-c = kf.KCell("minkowski_tiled_test")
+c = kf.Cell("minkowski_tiled_test")
 
 
 d1 = datetime.now()
@@ -109,7 +109,7 @@ print(f"total time: {d3-d1}")
 c
 # -
 
-c = kf.KCell("ToFill")
+c = kf.Cell("ToFill")
 c.shapes(kf.klib.layer(1, 0)).insert(
     kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512)
 )
@@ -120,7 +120,7 @@ c.shapes(kf.klib.layer(10, 0)).insert(
 )
 c
 
-fc = kf.KCell("fill")
+fc = kf.Cell("fill")
 fc.shapes(fc.klib.layer(2, 0)).insert(kf.kdb.DBox(20, 40))
 fc.shapes(fc.klib.layer(3, 0)).insert(kf.kdb.DBox(30, 15))
 fc

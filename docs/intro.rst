@@ -16,12 +16,12 @@ Additionally we will create a :py:class:`~kfactory.utils.enclosure.Enclosure`. E
    :linenos:
 
 This will use the standard Library of KFactory.
-A Library is the equivalent of a Layout object in KLayout and keeps track of the KCells.
+A Library is the equivalent of a Layout object in KLayout and keeps track of the Cells.
 It mirrors all the other functionalities of a Layout object.
 
-Ports are created with the :py:func:`~kfactory.kcell.KCell.create_port` function. You can either specify a transformation as here or specify them in a similar manner to gdsfactory. See the API doc for more information.
+Ports are created with the :py:func:`~kfactory.kcell.Cell.create_port` function. You can either specify a transformation as here or specify them in a similar manner to gdsfactory. See the API doc for more information.
 
-Now, let's create a KCell for a waveguide. We will use the :py:func:`~kfactory.kcell.pcell`.
+Now, let's create a Cell for a waveguide. We will use the :py:func:`~kfactory.kcell.cell`.
 This will make sure that if we call the function multiple times that we don't create multiple cells in the layout.
 Addiontally, compared to :py:func:`~kfactory.kcell.cell` it will also automatically name the cells using
 the function name and the arguments and keyword arguments of the function.
@@ -44,7 +44,7 @@ Afterwards let's create the composite cell :download:`complex_cell.py`. This one
    :language: python
    :linenos:
 
-With :py:func:`~kfactory.kcell.KCell.add_port` an existing port of an instance can be added to the parent cell. :py:func:`~kfactory.kcell.Instance.connect` allows an instance to be transformed so that one of its ports is connected to another port.
+With :py:func:`~kfactory.kcell.Cell.add_port` an existing port of an instance can be added to the parent cell. :py:func:`~kfactory.kcell.Instance.connect` allows an instance to be transformed so that one of its ports is connected to another port.
 
 You will get a cell like this:
 

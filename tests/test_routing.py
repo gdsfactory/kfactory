@@ -15,12 +15,12 @@ from typing import Callable
 )
 def test_connect_straight(
     x: int,
-    bend90: kf.KCell,
-    waveguide_factory: Callable[..., kf.KCell],
+    bend90: kf.Cell,
+    waveguide_factory: Callable[..., kf.Cell],
     LAYER: kf.LayerEnum,
     optical_port: kf.Port,
 ) -> None:
-    c = kf.KCell()
+    c = kf.Cell()
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(2, False, x, 0)
@@ -49,15 +49,15 @@ def test_connect_straight(
     ],
 )
 def test_connect_bend90(
-    bend90: kf.KCell,
-    waveguide_factory: Callable[..., kf.KCell],
+    bend90: kf.Cell,
+    waveguide_factory: Callable[..., kf.Cell],
     LAYER: kf.LayerEnum,
     optical_port: kf.Port,
     x: int,
     y: int,
     angle2: int,
 ) -> None:
-    c = kf.KCell()
+    c = kf.Cell()
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
@@ -84,15 +84,15 @@ def test_connect_bend90(
     ],
 )
 def test_connect_bend90_euler(
-    bend90_euler: kf.KCell,
-    waveguide_factory: Callable[..., kf.KCell],
+    bend90_euler: kf.Cell,
+    waveguide_factory: Callable[..., kf.Cell],
     LAYER: kf.LayerEnum,
     optical_port: kf.Port,
     x: int,
     y: int,
     angle2: int,
 ) -> None:
-    c = kf.KCell()
+    c = kf.Cell()
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)

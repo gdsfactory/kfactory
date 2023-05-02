@@ -3,12 +3,12 @@
 from collections.abc import Callable
 
 from kfactory import kdb
-from kfactory.kcell import Instance, KCell, Port
+from kfactory.kcell import Instance, Cell, Port
 from kfactory.routing.manhattan import route_manhattan
 
 
 def connect_elec(
-    c: KCell,
+    c: Cell,
     start_port: Port,
     end_port: Port,
     start_straight: int | None = None,
@@ -23,7 +23,7 @@ def connect_elec(
 
 
     Args:
-        c: KCell to place the wire in.
+        c: Cell to place the wire in.
         start_port: Beginning
         end_port: End
         start_straight: Minimum length of straight at start port.
@@ -58,7 +58,7 @@ def connect_elec(
 
 
 def connect_L_route(
-    c: KCell,
+    c: Cell,
     input_ports: list[Port],
     output_orientation: int = 1,
     wire_spacing: int = 10000,
@@ -104,7 +104,7 @@ def connect_L_route(
 
 
 def connect_bundle(
-    c: KCell,
+    c: Cell,
     input_ports: list[Port],
     target_ports: list[Port],
     wire_spacing: int = 10000,
@@ -118,7 +118,7 @@ def connect_bundle(
     to output ports without any crossings.
 
     Args:
-        c: KCell to place the routes in.
+        c: Cell to place the routes in.
         input_ports; List of start ports.
         target_ports: List of end ports.
         wire_spacing: Minimum space between wires. [dbu]
@@ -207,14 +207,14 @@ def get_electrical_ports(c: Instance, port_type: str = "electrical") -> list[Por
     return [p for p in c.ports if p.port_type == port_type]
 
 
-def connect_wire(c: KCell, input_port: Port, output_port: Port) -> None:
+def connect_wire(c: Cell, input_port: Port, output_port: Port) -> None:
     """Connection between two electrical ports *DO NOT USE*.
 
     This function mainly implements a connection between two electrical ports.
     Not finished yet. Don't use.
 
     Args:
-        c: KCell to place connection in.
+        c: Cell to place connection in.
         input_port: Start port.
         output_port: End port.
     """
@@ -242,7 +242,7 @@ def connect_wire(c: KCell, input_port: Port, output_port: Port) -> None:
 
 
 def connect_dual_rails(
-    c: KCell,
+    c: Cell,
     start_port: Port,
     end_port: Port,
     start_straight: int | None = None,
@@ -255,7 +255,7 @@ def connect_dual_rails(
     """Connect ports with a dual-wire rail.
 
     Args:
-        c: KCell to place the connection in.
+        c: Cell to place the connection in.
         start_port: Start
         end_port: End
         start_straight: Minimum straight after the start port.
@@ -289,11 +289,11 @@ def connect_dual_rails(
 if __name__ == "__main__": 
     from kfactory.generic_tech import LAYER
     import kfactory as kf
-    from kfactory import pcells
+    from kfactory import cells
 
-    c = kf.KCell()
-    wg1 =c << pcells.waveguide.waveguide(width=2, length=10)
-    wg2 =c << pcells.waveguide.waveguide(width=2, length=10)
+    c = kf.Cell()
+    wg1 =c << cells.waveguide.waveguide(width=2, length=10)
+    wg2 =c << cells.waveguide.waveguide(width=2, length=10)
     wg2.movex(100)
     wg2.movey(100)
 

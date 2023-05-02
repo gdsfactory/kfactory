@@ -23,7 +23,7 @@
 # Most Shape types are available as microns and dbu parts. They can be converted with <ShapeTypeDBU>.to_dtype(dbu) to microns and with <ShapeTypeMicrons>.to_itype(dbu) where dbu is the the conversion of one database unit to microns
 #
 # Lets add a polygon
-# # KCell
+# # Cell
 #
 #
 # A `Cell` is like an empty canvas, where you can add polygons, references to other Components and ports (to connect to other components)
@@ -39,7 +39,7 @@
 import kfactory as kf
 
 # Create a blank component (essentially an empty GDS cell with some special features)
-c = kf.KCell()
+c = kf.Cell()
 
 # Create and add a polygon from separate lists of x points and y points
 # (Can also be added like [(x1,y1), (x2,y2), (x3,y3), ... ]
@@ -68,7 +68,7 @@ c
 # + vscode={"languageId": "python"}
 import kfactory as kf
 
-c = kf.KCell()
+c = kf.Cell()
 
 # Create some new geometry from the functions available in the geometry library
 textgenerator = kf.kdb.TextGenerator.default_generator()
@@ -124,9 +124,9 @@ c
 
 
 # + vscode={"languageId": "python"}
-@kf.pcell
+@kf.cell
 def straight(length=10, width=1, layer=(1, 0)):
-    wg = kf.KCell()
+    wg = kf.Cell()
     box = kf.kdb.DBox(length, width)
     int_box = box.to_itype(wg.klib.dbu)
     _layer = kf.klib.layer(*layer)
@@ -149,7 +149,7 @@ def straight(length=10, width=1, layer=(1, 0)):
     return wg
 
 
-c = kf.KCell()
+c = kf.Cell()
 
 wg1 = c << straight(length=6, width=2.5, layer=(1, 0))
 wg2 = c << straight(length=11, width=2.5, layer=(1, 0))
@@ -190,7 +190,7 @@ c
 # You can move, rotate, and reflect references to Components.
 
 # + vscode={"languageId": "python"}
-c = kf.KCell()
+c = kf.Cell()
 
 
 # Create and add a polygon from separate lists of x points and y points
@@ -228,7 +228,7 @@ wg2.ports
 # Now that we have your component `c` is a multi-straight component, you can add references to that component in a new blank Component `c2`, then add two references and shift one to see the movement.
 
 # + vscode={"languageId": "python"}
-c2 = kf.KCell(name="MultiMultiWaveguide")
+c2 = kf.Cell(name="MultiMultiWaveguide")
 wg1 = straight(layer=(2, 0))
 wg2 = straight(layer=(2, 0))
 mwg1_ref = c2.create_inst(wg1)
@@ -285,31 +285,31 @@ e2 = kf.kdb.DPolygon.ellipse(kf.kdb.DBox(10, 6), 64).transformed(
 )
 # -
 
-c = kf.KCell()
+c = kf.Cell()
 c.shapes(c.klib.layer(2, 0)).insert(e1)
 c.shapes(c.klib.layer(3, 0)).insert(e2)
 c
 
 # e1 NOT e2
-c = kf.KCell()
+c = kf.Cell()
 e3 = kf.kdb.Region(e1.to_itype(c.klib.dbu)) - kf.kdb.Region(e2.to_itype(c.klib.dbu))
 c.shapes(c.klib.layer(1, 0)).insert(e3)
 c
 
 # e1 AND e2
-c = kf.KCell()
+c = kf.Cell()
 e3 = kf.kdb.Region(e1.to_itype(c.klib.dbu)) & kf.kdb.Region(e2.to_itype(c.klib.dbu))
 c.shapes(c.klib.layer(1, 0)).insert(e3)
 c
 
 # e1 OR e2
-c = kf.KCell()
+c = kf.Cell()
 e3 = kf.kdb.Region(e1.to_itype(c.klib.dbu)) + kf.kdb.Region(e2.to_itype(c.klib.dbu))
 c.shapes(c.klib.layer(1, 0)).insert(e3)
 c
 
 # e1 OR e2 (merged)
-c = kf.KCell()
+c = kf.Cell()
 e3 = (
     kf.kdb.Region(e1.to_itype(c.klib.dbu)) + kf.kdb.Region(e2.to_itype(c.klib.dbu))
 ).merge()
@@ -317,7 +317,7 @@ c.shapes(c.klib.layer(1, 0)).insert(e3)
 c
 
 # e1 XOR e2
-c = kf.KCell()
+c = kf.Cell()
 e3 = kf.kdb.Region(e1.to_itype(c.klib.dbu)) ^ kf.kdb.Region(e2.to_itype(c.klib.dbu))
 c.shapes(c.klib.layer(1, 0)).insert(e3)
 c
@@ -327,7 +327,7 @@ c
 # + vscode={"languageId": "python"}
 # MMI not implemented yet
 
-# c = kf.KCell()
+# c = kf.Cell()
 # mmi = c.add_ref(gf.components.mmi1x2())
 # bend = c.add_ref(gf.components.bend_circular(layer=(2, 0)))
 # c

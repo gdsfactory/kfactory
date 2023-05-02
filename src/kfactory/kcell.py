@@ -1,6 +1,6 @@
 """Core module of kfactory.
 
-Defines the :py:class:`KCell` providing klayout Cells with Ports
+Defines the :py:class:`Cell` providing klayout Cells with Ports
 and other convenience functions.
 
 :py:class:`Instance` are the kfactory instances used to also acquire
@@ -42,7 +42,7 @@ except ImportError:
     mf = "shell"
 
 
-KCellParams = ParamSpec("KCellParams")
+CellParams = ParamSpec("CellParams")
 
 
 class PROPID(IntEnum):
@@ -145,7 +145,7 @@ class PortTypeMismatch(ValueError):
 
 
 class FrozenError(AttributeError):
-    """Raised if a KCell has been frozen and shouldn't be modified anymore."""
+    """Raised if a Cell has been frozen and shouldn't be modified anymore."""
 
     pass
 
@@ -163,7 +163,7 @@ def default_save() -> kdb.SaveLayoutOptions:
 class KLib(kdb.Layout):
     """Small extension to the ``klayout.db.Layout``.
 
-    It adds tracking for the :py:class:`~kfactory.kcell.KCell` objects
+    It adds tracking for the :py:class:`~kfactory.kcell.Cell` objects
     instead of only the :py:class:`klayout.db.Cell` objects.
     Additionally it allows creation and registration through :py:func:`~create_cell`
 
@@ -180,7 +180,7 @@ class KLib(kdb.Layout):
         Args:
             editable: Open the KLayout Layout in editable mode if `True`.
         """
-        self.kcells: dict[int, "KCell"] = {}
+        self.kcells: dict[int, "Cell"] = {}
         kdb.Layout.__init__(self, editable)
         self.rename_function: Callable[..., None] = rename_clockwise
 
@@ -197,7 +197,7 @@ class KLib(kdb.Layout):
         klib.assign(super().dup())
         if init_cells:
             for i, kc in self.kcells.items():
-                klib.kcells[i] = KCell(
+                klib.kcells[i] = Cell(
                     name=kc.name,
                     klib=klib,
                     kdb_cell=klib.cell(kc.name),
@@ -215,10 +215,10 @@ class KLib(kdb.Layout):
         """Create a new cell in the library.
 
         This shouldn't be called manually.
-        The constructor of KCell will call this method.
+        The constructor of Cell will call this method.
 
         Args:
-            kcell: The KCell to be registered in the Layout.
+            kcell: The Cell to be registered in the Layout.
             name: The (initial) name of the cell. Can be changed through
                 :py:func:`~update_cell_name`
             allow_duplicate: Allow the creation of a cell with the same name which
@@ -241,7 +241,7 @@ class KLib(kdb.Layout):
                 " unique or pass `allow_duplicate` when creating the library"
             )
 
-    def delete_cell(self, cell: "KCell | int") -> None:
+    def delete_cell(self, cell: "Cell | int") -> None:
         """Delete a cell in the klib object."""
         if isinstance(cell, int):
             super().delete_cell(cell)
@@ -251,16 +251,16 @@ class KLib(kdb.Layout):
             super().delete_cell(ci)
             del self.kcells[ci]
 
-    def register_cell(self, kcell: "KCell", allow_reregister: bool = False) -> None:
+    def register_cell(self, kcell: "Cell", allow_reregister: bool = False) -> None:
         """Register an existing cell in the KLib object.
 
         Args:
-            kcell: KCell to be registered in the KLib
-            allow_reregister: Overwrite the existing KCell registration with this one.
+            kcell: Cell to be registered in the KLib
+            allow_reregister: Overwrite the existing Cell registration with this one.
                 Doesn't allow name duplication.
         """
 
-        def check_name(other: "KCell") -> bool:
+        def check_name(other: "Cell") -> bool:
             return other._kdb_cell.name == kcell._kdb_cell.name
 
         if (kcell.cell_index() not in self.kcells) or allow_reregister:
@@ -271,7 +271,7 @@ class KLib(kdb.Layout):
                 " exists in the library"
             )
 
-    def __getitem__(self, obj: str | int) -> "KCell":
+    def __getitem__(self, obj: str | int) -> "Cell":
         """Retrieve a cell by name(str) or index(int).
 
         Attrs:
@@ -285,19 +285,19 @@ class KLib(kdb.Layout):
                     raise
 
                 c = self.cell(obj)
-                return KCell(name=c.name, klib=self, kdb_cell=self.cell(obj))
+                return Cell(name=c.name, klib=self, kdb_cell=self.cell(obj))
         else:
             if self.cell(obj) is not None:
                 try:
                     return self.kcells[self.cell(obj).cell_index()]
                 except KeyError:
                     c = self.cell(obj)
-                    return KCell(name=c.name, klib=self, kdb_cell=self.cell(obj))
+                    return Cell(name=c.name, klib=self, kdb_cell=self.cell(obj))
             from pprint import pformat
 
             raise ValueError(
-                f"Library doesn't have a KCell named {obj},"
-                " available KCells are"
+                f"Library doesn't have a Cell named {obj},"
+                " available Cells are"
                 f"{pformat(sorted([cell.name for cell in self.kcells.values()]))}"
             )
 
@@ -314,7 +314,7 @@ class KLib(kdb.Layout):
             options: KLayout options to load from the GDS. Can determine how merge
                 conflicts are handled for example. See
                 https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
-            register_cells: If `True` create KCells for all cells in the GDS.
+            register_cells: If `True` create Cells for all cells in the GDS.
         """
         if register_cells:
             cells = set(self.cells("*"))
@@ -327,7 +327,7 @@ class KLib(kdb.Layout):
         if register_cells:
             new_cells = set(self.cells("*")) - cells
             for c in new_cells:
-                KCell(kdb_cell=c, klib=self)
+                Cell(kdb_cell=c, klib=self)
 
         return lm
 
@@ -352,7 +352,7 @@ class KLib(kdb.Layout):
 klib = KLib()
 """Default library object.
 
-:py:class:`~kfactory.kcell.KCell` uses this object unless another one is
+:py:class:`~kfactory.kcell.Cell` uses this object unless another one is
 specified in the constructor."""
 
 
@@ -836,22 +836,22 @@ class DPart:
         )
 
 
-class KCell:
-    """KLayout cell and change its class to KCell.
+class Cell:
+    """KLayout cell and change its class to Cell.
 
-    A KCell is a dynamic proxy for :py:class:~`kdb.Cell`. It has all the
+    A Cell is a dynamic proxy for :py:class:~`kdb.Cell`. It has all the
     attributes of the official KLayout class. Some attributes have been adjusted
-    to return KCell specific sub classes. If the function is listed here in the
+    to return Cell specific sub classes. If the function is listed here in the
     docs, they have been adjusted for KFactory specifically. This object will
     transparently proxy to :py:class:`kdb.Cell`. Meaning any attribute not directly
     defined in this class that are available from the KLayout counter part can
     still be accessed. The pure KLayout object can be accessed with
-    :py:attr:`KCell._kdb_cell`.
+    :py:attr:`Cell._kdb_cell`.
 
     Attributes:
         klib: Library object that is the manager of the KLayout
             :py:class:`kdb.Layout`
-        settings: A dictionary containing settings populated by:py:func:`pcell`
+        settings: A dictionary containing settings populated by:py:func:`cell`
         info: Dictionary for storing additional info if necessary. This is not
             passed to the GDS and therefore not reversible.
         _kdb_cell: Pure KLayout cell object.
@@ -859,7 +859,7 @@ class KCell:
         ports: Manages the ports of the cell.
     """
 
-    yaml_tag = "!KCell"
+    yaml_tag = "!Cell"
     _ports: "Ports"
 
     def __init__(
@@ -869,15 +869,15 @@ class KCell:
         kdb_cell: kdb.Cell | None = None,
         ports: "Ports | None" = None,
     ):
-        """Constructor of KCell.
+        """Constructor of Cell.
 
         Args:
             name: Name of the cell, if None will autogenerate name to
                 "Unnamed_<cell_index>".
             klib: KLib the cell should be attached to.
-            kdb_cell: If not `None`, a KCell will be created from and existing
+            kdb_cell: If not `None`, a Cell will be created from and existing
                 KLayout Cell
-            ports: Attach an existing :py:class:`~Ports` object to the KCell,
+            ports: Attach an existing :py:class:`~Ports` object to the Cell,
                 if `None` create an empty one.
         """
         self.klib = klib
@@ -902,7 +902,7 @@ class KCell:
 
     @property
     def name(self) -> str:
-        """Name of the KCell."""
+        """Name of the Cell."""
         return self._kdb_cell.name
 
     @name.setter
@@ -928,10 +928,10 @@ class KCell:
         self._kdb_cell.ghost_cell = value
 
     def __getattr__(self, name):  # type: ignore[no-untyped-def]
-        """If KCell doesn't have an attribute, look in the KLayout Cell."""
+        """If Cell doesn't have an attribute, look in the KLayout Cell."""
         return getattr(self._kdb_cell, name)
 
-    def dup(self) -> "KCell":
+    def dup(self) -> "Cell":
         """Copy the full cell.
 
         Sets :py:attr:_locked to `False`
@@ -942,14 +942,14 @@ class KCell:
         """
         kdb_copy = self._kdb_copy()
 
-        c = KCell(klib=self.klib, kdb_cell=kdb_copy)
+        c = Cell(klib=self.klib, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
         for inst in kdb_copy.each_inst():
             c.insts.append(Instance(self.klib, instance=inst))
         c._locked = False
         return c
 
-    def __copy__(self) -> "KCell":
+    def __copy__(self) -> "Cell":
         """Enables use of :py:func:`copy.copy` and :py:func:`copy.deep_copy`."""
         return self.dup()
 
@@ -997,12 +997,12 @@ class KCell:
 
     @classmethod
     def from_yaml(
-        cls: "Callable[..., KCell]",
+        cls: "Callable[..., Cell]",
         constructor: Any,
         node: Any,
         verbose: bool = False,
-    ) -> "KCell":
-        """Internal function used by the placer to convert yaml to a KCell."""
+    ) -> "Cell":
+        """Internal function used by the placer to convert yaml to a Cell."""
         d = ruamel.yaml.constructor.SafeConstructor.construct_mapping(
             constructor,
             node,
@@ -1251,7 +1251,7 @@ class KCell:
     @overload
     def create_inst(
         self,
-        cell: "KCell | int",
+        cell: "Cell | int",
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
     ) -> "Instance":
         ...
@@ -1259,7 +1259,7 @@ class KCell:
     @overload
     def create_inst(
         self,
-        cell: "KCell | int",
+        cell: "Cell | int",
         *,
         dtrans: kdb.DTrans | kdb.DCplxTrans | kdb.DVector,
     ) -> "Instance":
@@ -1268,7 +1268,7 @@ class KCell:
     @overload
     def create_inst(
         self,
-        cell: "KCell | int",
+        cell: "Cell | int",
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector,
         *,
         a: kdb.Vector,
@@ -1281,7 +1281,7 @@ class KCell:
     @overload
     def create_inst(
         self,
-        cell: "KCell | int",
+        cell: "Cell | int",
         *,
         dtrans: kdb.DTrans | kdb.DCplxTrans,
         a: kdb.DVector,
@@ -1293,7 +1293,7 @@ class KCell:
 
     def create_inst(
         self,
-        cell: "KCell | int",
+        cell: "Cell | int",
         trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans = kdb.Trans(),
         dtrans: kdb.DTrans | kdb.DCplxTrans | kdb.DVector | None = None,
         a: kdb.Vector | kdb.DVector | None = None,
@@ -1301,7 +1301,7 @@ class KCell:
         na: int = 1,
         nb: int = 1,
     ) -> "Instance":
-        """Add an instance of another KCell.
+        """Add an instance of another Cell.
 
         Args:
             cell: The cell to be added
@@ -1358,7 +1358,7 @@ class KCell:
         """Get the layer info, convenience for klayout.db.Layout.layer."""
         return self.klib.layer(*args, **kwargs)
 
-    def __lshift__(self, cell: "KCell") -> "Instance":
+    def __lshift__(self, cell: "Cell") -> "Instance":
         """Convenience function for :py:attr:"~create_inst(cell)`.
 
         Args:
@@ -1404,7 +1404,7 @@ class KCell:
         but might cause artifacts at the moment.
 
         Args:
-            prune: Delete unused child cells if they aren't used in any other KCell
+            prune: Delete unused child cells if they aren't used in any other Cell
             merge: Merge the shapes on all layers
         """
         self._kdb_cell.flatten(False)  # prune)
@@ -1462,7 +1462,7 @@ class KCell:
     def write(
         self, filename: str | Path, save_options: kdb.SaveLayoutOptions = default_save()
     ) -> None:
-        """Write a KCell to a GDS. See :py:func:`KLib.write` for more info."""
+        """Write a Cell to a GDS. See :py:func:`KLib.write` for more info."""
         return self._kdb_cell.write(str(filename), save_options)
 
     @classmethod
@@ -1539,13 +1539,13 @@ class KCell:
 
 
 class Instance:
-    """An Instance of a KCell.
+    """An Instance of a Cell.
 
-    An Instance is a reference to a KCell with a transformation.
+    An Instance is a reference to a Cell with a transformation.
 
     Attributes:
         _instance: The internal :py:class:~`kdb.Instance` reference
-        ports: Transformed ports of the KCell
+        ports: Transformed ports of the Cell
     """
 
     yaml_tag = "!Instance"
@@ -1580,12 +1580,12 @@ class Instance:
         self._instance_.cell_index = value
 
     @property
-    def cell(self) -> KCell:
-        """Parent KCell  of the Instance."""
+    def cell(self) -> Cell:
+        """Parent Cell  of the Instance."""
         return self.klib[self.cell_index]
 
     @cell.setter
-    def cell(self, value: KCell) -> None:
+    def cell(self, value: Cell) -> None:
         self.cell_index = value.cell_index()
 
     @property
@@ -1682,13 +1682,13 @@ class Instance:
         self._instance.nb = value
 
     @property
-    def parent_cell(self) -> KCell:
+    def parent_cell(self) -> Cell:
         """Gets the cell this instance is contained in."""
         return self.klib[self._instance.parent_cell.cell_index()]
 
     @parent_cell.setter
-    def parent_cell(self, cell: KCell | kdb.Cell) -> None:
-        if isinstance(cell, KCell):
+    def parent_cell(self, cell: Cell | kdb.Cell) -> None:
+        if isinstance(cell, Cell):
             self._instance.parent_cell = cell._kdb_cell
         else:
             self._instance.parent_cell = cell
@@ -2193,22 +2193,22 @@ class InstancePorts:
 
 
 @overload
-def pcell(_func: Callable[KCellParams, KCell], /) -> Callable[KCellParams, KCell]:
+def cell(_func: Callable[CellParams, Cell], /) -> Callable[CellParams, Cell]:
     ...
 
 
 @overload
-def pcell(
+def cell(
     *,
     set_settings: bool = True,
     set_name: bool = True,
-) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]:
+) -> Callable[[Callable[CellParams, Cell]], Callable[CellParams, Cell]]:
     ...
 
 
 @logger.catch
-def pcell(
-    _func: Callable[KCellParams, KCell] | None = None,
+def cell(
+    _func: Callable[CellParams, Cell] | None = None,
     /,
     *,
     set_settings: bool = True,
@@ -2216,14 +2216,14 @@ def pcell(
     check_ports: bool = True,
     check_instances: bool = True,
 ) -> (
-    Callable[KCellParams, KCell]
-    | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
+    Callable[CellParams, Cell]
+    | Callable[[Callable[CellParams, Cell]], Callable[CellParams, Cell]]
 ):
     """Decorator to cache and auto name the celll.
 
     This will use :py:func:`functools.cache` to cache the function call.
     Additionally, if enabled this will set the name and from the args/kwargs of the
-    function and also paste them into a settings dictionary of the :py:class:`~KCell`.
+    function and also paste them into a settings dictionary of the :py:class:`~Cell`.
 
     Args:
         set_settings: Copy the args & kwargs into the settings dictionary
@@ -2235,19 +2235,19 @@ def pcell(
             instance that has a magnification != 1 or non-90° rotation.
     """
 
-    def decorator_pcell(
-        f: Callable[KCellParams, KCell]
-    ) -> Callable[KCellParams, KCell]:
+    def decorator_cell(
+        f: Callable[CellParams, Cell]
+    ) -> Callable[CellParams, Cell]:
         sig = signature(f)
 
-        # previously was a KCellCache, but dict should do for most case
+        # previously was a CellCache, but dict should do for most case
         cache: dict[int, Any] = {}
 
         @functools.wraps(f)
-        def wrapper_pcell(
-            *args: KCellParams.args, **kwargs: KCellParams.kwargs
-        ) -> KCell:
-            params: dict[str, KCellParams.args] = {
+        def wrapper_cell(
+            *args: CellParams.args, **kwargs: CellParams.kwargs
+        ) -> Cell:
+            params: dict[str, CellParams.args] = {
                 p.name: p.default for k, p in sig.parameters.items()
             }
             arg_par = list(sig.parameters.items())[: len(args)]
@@ -2262,8 +2262,8 @@ def pcell(
             @cachetools.cached(cache=cache)
             @functools.wraps(f)
             def wrapped_cell(
-                **params: KCellParams.args,
-            ) -> KCell:
+                **params: CellParams.args,
+            ) -> Cell:
                 for key, value in params.items():
                     if isinstance(value, frozenset):
                         params[key] = frozenset_to_dict(value)
@@ -2280,7 +2280,7 @@ def pcell(
                 for name, setting in cell.settings.items():
                     while cell.property(i) is not None:
                         i += 1
-                    if isinstance(setting, KCell):
+                    if isinstance(setting, Cell):
                         cell.set_property(i, f"{name}: {setting.name}")
                     else:
                         cell.set_property(i, f"{name}: {str(setting)}")
@@ -2290,9 +2290,9 @@ def pcell(
 
             return wrapped_cell(**params)
 
-        return wrapper_pcell
+        return wrapper_cell
 
-    return decorator_pcell if _func is None else decorator_pcell(_func)
+    return decorator_cell if _func is None else decorator_cell(_func)
 
 
 def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
@@ -2306,19 +2306,19 @@ def frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable
 
 
 def cell(
-    _func: Callable[..., KCell] | None = None,
+    _func: Callable[..., Cell] | None = None,
     *,
     set_settings: bool = True,
     maxsize: int = 512,
 ) -> (
-    Callable[KCellParams, KCell]
-    | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
+    Callable[CellParams, Cell]
+    | Callable[[Callable[CellParams, Cell]], Callable[CellParams, Cell]]
 ):
-    """Convenience alias for :py:func:`~pcell` with `(set_name=False)`."""
+    """Convenience alias for :py:func:`~cell` with `(set_name=False)`."""
     if _func is None:
-        return pcell(set_settings=set_settings, set_name=False)
+        return cell(set_settings=set_settings, set_name=False)
     else:
-        return pcell(_func)
+        return cell(_func)
 
 
 def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
@@ -2352,7 +2352,7 @@ def join_first_letters(name: str) -> str:
 
 
 def clean_value(
-    value: float | np.float64 | dict[Any, Any] | KCell | Callable[..., Any]
+    value: float | np.float64 | dict[Any, Any] | Cell | Callable[..., Any]
 ) -> str:
     """Makes sure a value is representable in a limited character_space."""
     try:
@@ -2422,14 +2422,14 @@ def update_default_trans(
 
 
 def show(
-    gds: str | KCell | Path,
+    gds: str | Cell | Path,
     keep_position: bool = True,
     save_options: kdb.SaveLayoutOptions = default_save(),
 ) -> None:
     """Show GDS in klayout."""
     delete = False
 
-    if isinstance(gds, KCell):
+    if isinstance(gds, Cell):
         _mf = "stdin" if mf == "<stdin>" else mf
         tf = Path(gettempdir()) / Path(_mf).with_suffix(".gds")
         tf.parent.mkdir(parents=True, exist_ok=True)
@@ -2471,11 +2471,11 @@ def show(
 
 
 __all__ = [
-    "KCell",
+    "Cell",
     "Instance",
     "Port",
     "Ports",
-    "pcell",
+    "cell",
     "cell",
     "klib",
     "KLib",
@@ -2484,5 +2484,5 @@ __all__ = [
 ]
 
 if __name__ == "__main__": 
-    c = KCell()
+    c = Cell()
 

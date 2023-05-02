@@ -1,9 +1,9 @@
 import kfactory as kf
 
 
-@kf.pcell
+@kf.cell
 def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.utils.Enclosure):
-    c = kf.KCell()
+    c = kf.Cell()
     c.shapes(layer).insert(kf.kdb.Box(-10000, -6000, 10000, 6000))
 
     taper = kf.kdb.Polygon(

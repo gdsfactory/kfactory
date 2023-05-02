@@ -15,19 +15,19 @@ A waveguide is a rectangle of material with excludes and/or slab around it::
 The slabs and excludes can be given in the form of an :py:class:~`Enclosure`.
 """
 
-from ... import KCell, LayerEnum, pcell, kdb
+from ... import Cell, LayerEnum, cell, kdb
 from ...utils import Enclosure
 
 __all__ = ["waveguide"]
 
 
-@pcell
+@cell
 def waveguide(
     width: int,
     length: int,
     layer: int | LayerEnum,
     enclosure: Enclosure | None = None,
-) -> KCell:
+) -> Cell:
     """Waveguide defined in dbu.
 
     Visualization::
@@ -47,7 +47,7 @@ def waveguide(
         layer: Layer index / :py:class:~`LayerEnum`.
         enclosure: Definition of slab/excludes. [dbu]
     """
-    c = KCell()
+    c = Cell()
 
     if width // 2 * 2 != width:
         raise ValueError("The width (w) must be a multiple of 2 database units")

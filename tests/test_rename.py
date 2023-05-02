@@ -10,9 +10,9 @@ port_y_coords = [0, -10000, 0, 10000, 0]
 offset = 50000
 
 
-@kf.pcell
-def port_tests(rename_f: Optional[Callable[..., None]] = None) -> kf.KCell:
-    c = kf.KCell()
+@kf.cell
+def port_tests(rename_f: Optional[Callable[..., None]] = None) -> kf.Cell:
+    c = kf.Cell()
 
     i = 0
     for angle in range(4):

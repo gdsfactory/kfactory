@@ -10,7 +10,7 @@ from scipy.optimize import brentq  # type: ignore[import]
 from scipy.special import fresnel  # type: ignore[import]
 
 from .. import kdb
-from ..kcell import KCell, LayerEnum, pcell
+from ..kcell import Cell, LayerEnum, cell
 from ..utils import Enclosure, extrude_path
 
 __all__ = [
@@ -158,7 +158,7 @@ def euler_sbend_points(
     return spoints
 
 
-@pcell
+@cell
 def bend_euler(
     width: float,
     radius: float,
@@ -166,7 +166,7 @@ def bend_euler(
     enclosure: Enclosure | None = None,
     theta: float = 90,
     resolution: float = 150,
-) -> KCell:
+) -> Cell:
     """Create a euler bend.
 
     Args:
@@ -177,7 +177,7 @@ def bend_euler(
         theta: Angle of the bend.
         resolution: Angle resolution for the backbone.
     """
-    c = KCell()
+    c = Cell()
     dbu = c.layout().dbu
     backbone = euler_bend_points(theta, radius=radius, resolution=resolution)
 
@@ -217,7 +217,7 @@ def bend_euler(
     return c
 
 
-@pcell
+@cell
 def bend_s_euler(
     offset: float,
     width: float,
@@ -225,7 +225,7 @@ def bend_s_euler(
     layer: LayerEnum | int,
     enclosure: Enclosure | None = None,
     resolution: float = 150,
-) -> KCell:
+) -> Cell:
     """Create a euler s-bend.
 
     Args:
@@ -236,7 +236,7 @@ def bend_s_euler(
         enclosure: Slab/exclude definition. [dbu]
         resolution: Angle resolution for the backbone.
     """
-    c = KCell()
+    c = Cell()
     dbu = c.layout().dbu
     backbone = euler_sbend_points(
         offset=offset,

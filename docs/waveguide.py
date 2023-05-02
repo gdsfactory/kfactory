@@ -3,10 +3,10 @@ from layers import LAYER
 import kfactory as kf
 
 
-@kf.pcell
-def waveguide(width: int, length: int, width_exclude: int) -> kf.KCell:
+@kf.cell
+def waveguide(width: int, length: int, width_exclude: int) -> kf.Cell:
     """Waveguide: Silicon on 1/0, Silicon exclude on 1/1"""
-    c = kf.KCell()
+    c = kf.Cell()
     c.shapes(LAYER.SI).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
     c.shapes(LAYER.SIEXCLUDE).insert(
         kf.kdb.Box(0, -width_exclude // 2, length, width_exclude // 2)

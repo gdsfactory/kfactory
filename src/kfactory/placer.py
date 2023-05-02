@@ -7,7 +7,7 @@ from typing import Any, TypeVar
 from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
 
-from .kcell import KCell, KLib, Port, Ports
+from .kcell import Cell, KLib, Port, Ports
 from .kcell import klib as stdlib
 from .utils import Enclosure
 
@@ -17,20 +17,20 @@ PathLike = TypeVar("PathLike", str, Path, None)
 
 
 def cells_to_yaml(
-    output: PathLike, cells: list[KCell] | KCell
+    output: PathLike, cells: list[Cell] | Cell
 ) -> None:  # , library: KLib=library):
     """Convert cell(s) to a yaml representations.
 
     Args:
         output: A stream or string of a path where to dump the yaml. Can also be set to sys.stdout
-        cells: A single :py:class:`~kfactory.kcell.KCell` or a list of them.
+        cells: A single :py:class:`~kfactory.kcell.Cell` or a list of them.
 
 
     Returns:
         yaml dump
     """
     yaml = YAML()
-    yaml.register_class(KCell)
+    yaml.register_class(Cell)
     yaml.register_class(Port)
     yaml.register_class(Ports)
     yaml.indent(sequence=4, offset=2)
@@ -48,17 +48,17 @@ def register_classes(
     additional_classes: list[object] | None = None,
     verbose: bool = False,
 ) -> None:
-    """Register a new KCell class compatible with ruamel yaml."""
+    """Register a new Cell class compatible with ruamel yaml."""
 
-    class ModKCell(KCell):
+    class ModCell(Cell):
         def __init__(self, name: str | None = None, library: KLib = library):
-            KCell.__init__(self, name, library)
+            Cell.__init__(self, name, library)
 
         @classmethod
         def from_yaml(cls, constructor, node):  # type: ignore[no-untyped-def]
             return super().from_yaml(constructor, node, verbose=verbose)
 
-    yaml.register_class(ModKCell)
+    yaml.register_class(ModCell)
     yaml.register_class(Port)
     yaml.register_class(Ports)
     yaml.register_class(Enclosure)
@@ -109,9 +109,9 @@ def exploded_yaml(
     """
     yaml = YAML(pure=True)
 
-    class ModKCell(KCell):
+    class ModCell(Cell):
         def __init__(self, name: str | None = None, library: KLib = library):
-            KCell.__init__(self, name, library)
+            Cell.__init__(self, name, library)
 
         @classmethod
         def from_yaml(cls, constructor, node):  # type: ignore[no-untyped-def]

@@ -6,13 +6,13 @@ A circular bend has a constant radius.
 import numpy as np
 
 from kfactory import kdb
-from kfactory.kcell import KCell, LayerEnum, pcell
+from kfactory.kcell import Cell, LayerEnum, cell
 from kfactory.utils import Enclosure, extrude_path
 
 __all__ = ["bend_circular"]
 
 
-@pcell
+@cell
 def bend_circular(
     width: float,
     radius: float,
@@ -20,7 +20,7 @@ def bend_circular(
     enclosure: Enclosure | None = None,
     theta: float = 90,
     theta_step: float = 1,
-) -> KCell:
+) -> Cell:
     """Circular radius bend [um].
 
     Args:
@@ -32,7 +32,7 @@ def bend_circular(
         theta: Angle amount of the bend.
         theta_step: Angle amount per backbone point of the bend.
     """
-    c = KCell()
+    c = Cell()
     r = radius
     backbone = [
         kdb.DPoint(x, y)

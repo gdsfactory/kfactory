@@ -12,7 +12,7 @@ def bend_circular(
     enclosure: Optional[kf.utils.Enclosure] = None,
     theta: int = 90,
     theta_step: float = 1,
-) -> kf.KCell:
+) -> kf.Cell:
     """Circular radius bend
 
     Args:
@@ -21,10 +21,10 @@ def bend_circular(
         layer: Layer index of the target layer
         enclosure: :py:class:`kfactory.utils.Enclosure` object to describe the claddings
     Returns:
-        cell (KCell): Circular Bend KCell
+        cell (Cell): Circular Bend Cell
     """
 
-    c = kf.KCell()
+    c = kf.Cell()
     r = radius * c.klib.dbu
     backbone = [
         kf.kdb.DPoint(x, y)
@@ -68,7 +68,7 @@ def dbend_circular(
     enclosure: Optional[kf.utils.Enclosure] = None,
     theta: float = 90,
     theta_step: float = 1,
-) -> kf.KCell:
+) -> kf.Cell:
     """Circular radius bend
 
     Args:
@@ -77,10 +77,10 @@ def dbend_circular(
         layer: Layer index of the target layer
         enclosure: :py:class:`kfactory.utils.Enclosure` object to describe the claddings
     Returns:
-        cell (KCell): Circular Bend KCell
+        cell (Cell): Circular Bend Cell
     """
 
-    c = kf.KCell()
+    c = kf.Cell()
     r = radius
     backbone = [
         kf.kdb.DPoint(x, y)
@@ -121,7 +121,7 @@ def dbend_circular(
 
 
 def test_spiral(LAYER):
-    c = kf.KCell()
+    c = kf.Cell()
 
     r1 = 1000
     r2 = 0
@@ -138,7 +138,7 @@ def test_spiral(LAYER):
 
 
 def test_dspiral(LAYER):
-    c = kf.KCell()
+    c = kf.Cell()
 
     r1 = 1
     r2 = 0

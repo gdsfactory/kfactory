@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from kfactory import KCell, LayerEnum, klib
+from kfactory import Cell, LayerEnum, klib
 import kfactory as kf
 
 
-@kf.pcell
+@kf.cell
 def compass(
     size=(4.0, 2.0),
     layer: int | LayerEnum = 1,
     port_type: None | str = "placement",
     port_inclusion: float = 0.0,
     port_angles=(180, 90, 0, -90),
-) -> kf.KCell:
+) -> kf.Cell:
     """Rectangle with ports on each edge (north, south, east, and west).
 
     Args:
@@ -21,7 +21,7 @@ def compass(
         port_inclusion: from edge.
         port_angles: list of port_angles to add. None add one port only.
     """
-    c = kf.KCell()
+    c = kf.Cell()
     dx, dy = size
 
     points = [
