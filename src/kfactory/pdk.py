@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pathlib
 import warnings
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 from typing import Any
 
@@ -115,7 +115,7 @@ class Pdk(BaseModel):
 
             if not self.default_decorator:
                 self.default_decorator = self.base_pdk.default_decorator
-        _set_active_pdk(self)
+        self.kcl.pdk = self
 
     def register_cells(self, **kwargs: Any) -> None:
         """Register cell factories."""
@@ -177,10 +177,11 @@ class Pdk(BaseModel):
             #             logger.info(f"{message} cell {name!r}")
 
             #     for k, v in kwargs.items():
-            if not update and k in self.cells:
-                raise ValueError(f"ERROR: Cell name {k!r} already registered.")
-            self.cells[k] = v
-            logger.info(f"{message} cell {k!r}")
+
+    #        if not update and k in self.cells:
+    #            raise ValueError(f"ERROR: Cell name {k!r} already registered.")
+    #        self.cells[k] = v
+    #        logger.info(f"{message} cell {k!r}")
 
     def remove_cell(self, name: str) -> None:
         """Removes cell from a PDK."""
@@ -243,11 +244,12 @@ class Pdk(BaseModel):
         if isinstance(enclosure, Enclosure):
             return enclosure.copy(**kwargs)
         elif isinstance(enclosure, str):
-            try:
-                enclosure_factory = self.enclosures[enclosure]
-            except KeyError:
-                raise ValueError(f"{enclosure!r} not in {enclosures}")
-            return enclosure_factory(**kwargs)
+            return self.enclosures[enclosure]
+            # try:
+            #     enclosure_factory = self.enclosures[enclosure]
+            # except KeyError:
+            #     raise ValueError(f"{enclosure!r} not in {enclosures}")
+            # return enclosure_factory(**kwargs)
         # elif isinstance(enclosure, (dict, DictConfig)):
         #     for key in enclosure.keys():
         #         if key not in enclosure_settings:
@@ -275,7 +277,7 @@ class Pdk(BaseModel):
     def get_layer(self, layer: Iterable[int] | int | str) -> LayerEnum:
         """Returns layer from a layer spec."""
         if isinstance(layer, int):
-            return self.layers(layer)
+            return self.layers(layer)  # type: ignore[call-arg]
         elif isinstance(layer, str):
             return self.layers[layer]
         else:
@@ -285,7 +287,7 @@ class Pdk(BaseModel):
                     "layer can only contain 2 elements like (layer, datatype)."
                 )
             layer_idx = self.kcl.layer(*layer)
-            return self.layers(layer_idx)
+            return self.layers(layer_idx)  # type: ignore[call-arg]
 
     # def get_layer_views(self) -> LayerViews:
     #     if self.layer_views is None:
@@ -293,50 +295,50 @@ class Pdk(BaseModel):
     #     return self.layer_views
 
 
-_ACTIVE_PDK = None
+# _ACTIVE_PDK = None
 
 
-def get_cell(cell: CellSpec, **kwargs: Any) -> KCell:
-    return _ACTIVE_PDK.get_cell(cell, **kwargs)
+# def get_cell(cell: CellSpec, **kwargs: Any) -> KCell:
+#     return _ACTIVE_PDK.get_cell(cell, **kwargs)
 
 
-def get_enclosure(enclosure: Enclosure, **kwargs: Any) -> Enclosure:
-    return _ACTIVE_PDK.get_enclosure(enclosure, **kwargs)
+# def get_enclosure(enclosure: Enclosure, **kwargs: Any) -> Enclosure:
+#     return _ACTIVE_PDK.get_enclosure(enclosure, **kwargs)
 
 
-def get_layer(layer: LayerEnum) -> tuple[int, int] | list[int] | Any:
-    return _ACTIVE_PDK.get_layer(layer)
+# def get_layer(layer: LayerEnum) -> tuple[int, int] | list[int] | Any:
+#     return _ACTIVE_PDK.get_layer(layer)
 
 
-# def get_layer_views() -> LayerViews:
-#     return _ACTIVE_PDK.get_layer_views()
+# # def get_layer_views() -> LayerViews:
+# #     return _ACTIVE_PDK.get_layer_views()
 
 
-def get_active_pdk() -> Pdk:
-    return _ACTIVE_PDK
+# def get_active_pdk() -> Pdk:
+#     return _ACTIVE_PDK
 
 
-def get_grid_size() -> float:
-    return _ACTIVE_PDK.grid_size
+# def get_grid_size() -> float:
+#     return _ACTIVE_PDK.grid_size
 
 
-def get_constant(constant_name: Any) -> Any:
-    """If constant_name is a string returns a the value from the dict."""
-    return _ACTIVE_PDK.get_constant(constant_name)
+# def get_constant(constant_name: Any) -> Any:
+#     """If constant_name is a string returns a the value from the dict."""
+#     return _ACTIVE_PDK.get_constant(constant_name)
 
 
-def get_sparameters_path() -> pathlib.Path | str:
-    if _ACTIVE_PDK.sparameters_path is None:
-        raise ValueError(f"{_ACTIVE_PDK.name!r} has no sparameters_path")
-    return _ACTIVE_PDK.sparameters_path
+# def get_sparameters_path() -> pathlib.Path | str:
+#     if _ACTIVE_PDK.sparameters_path is None:
+#         raise ValueError(f"{_ACTIVE_PDK.name!r} has no sparameters_path")
+#     return _ACTIVE_PDK.sparameters_path
 
 
-def get_interconnect_cml_path() -> pathlib.Path:
-    if _ACTIVE_PDK.interconnect_cml_path is None:
-        raise ValueError(f"{_ACTIVE_PDK.name!r} has no interconnect_cml_path")
-    return _ACTIVE_PDK.interconnect_cml_path
+# def get_interconnect_cml_path() -> pathlib.Path:
+#     if _ACTIVE_PDK.interconnect_cml_path is None:
+#         raise ValueError(f"{_ACTIVE_PDK.name!r} has no interconnect_cml_path")
+#     return _ACTIVE_PDK.interconnect_cml_path
 
 
-def _set_active_pdk(pdk: Pdk) -> None:
-    global _ACTIVE_PDK
-    _ACTIVE_PDK = pdk
+# def _set_active_pdk(pdk: Pdk) -> None:
+#     global _ACTIVE_PDK
+#     _ACTIVE_PDK = pdk

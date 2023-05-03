@@ -20,7 +20,14 @@ from hashlib import sha3_512
 from inspect import Parameter, signature
 from pathlib import Path
 from tempfile import gettempdir
-from typing import Any, Literal, TypeVar, cast, overload, TYPE_CHECKING  # ParamSpec, # >= python 3.10
+from typing import (  # ParamSpec, # >= python 3.10
+    TYPE_CHECKING,
+    Any,
+    Literal,
+    TypeVar,
+    cast,
+    overload,
+)
 
 # from cachetools import Cache, cached
 import cachetools.func
