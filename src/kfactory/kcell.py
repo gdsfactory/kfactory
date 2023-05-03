@@ -20,7 +20,7 @@ from hashlib import sha3_512
 from inspect import Parameter, signature
 from pathlib import Path
 from tempfile import gettempdir
-from typing import Any, Literal, TypeVar, cast, overload  # ParamSpec, # >= python 3.10
+from typing import Any, Literal, TypeVar, cast, overload, TYPE_CHECKING  # ParamSpec, # >= python 3.10
 
 # from cachetools import Cache, cached
 import cachetools.func
@@ -35,6 +35,8 @@ from .port import rename_clockwise
 # import struct
 # from abc import abstractmethod
 
+if TYPE_CHECKING:
+    from .pdk import Pdk
 
 try:
     from __main__ import __file__ as mf
@@ -191,15 +193,17 @@ class KCLayout(kdb.Layout):
         rename_function: function that takes an Iterable[Port] and renames them
     """
 
-    def __init__(self, editable: bool = True) -> None:
-        """Crete a library of cells.
+    def __init__(self, editable: bool = True, pdk: "Pdk | None" = None) -> None:
+        """Create a library of cells.
 
         Args:
             editable: Open the KLayout Layout in editable mode if `True`.
+            pdk: Pdk associated with the layout.
         """
         self.kcells: dict[int, "KCell"] = {}
         kdb.Layout.__init__(self, editable)
         self.rename_function: Callable[..., None] = rename_clockwise
+        self.pdk = pdk
 
     def dup(self, init_cells: bool = True) -> "KCLayout":
         """Create a duplication of the `~KCLayout` object.
