@@ -101,7 +101,7 @@ class PortLayerMismatch(ValueError):
     @config.logger.catch
     def __init__(
         self,
-        lib: "KCLayout ",
+        lib: "KCLayout",
         inst: "Instance",
         other_inst: "Instance | Port",
         p1: "Port",
@@ -201,11 +201,11 @@ class KCLayout(kdb.Layout):
         kdb.Layout.__init__(self, editable)
         self.rename_function: Callable[..., None] = rename_clockwise
 
-    def dup(self, init_cells: bool = True) -> "KCLayout ":
-        """Create a duplication of the `~KCLayout ` object.
+    def dup(self, init_cells: bool = True) -> "KCLayout":
+        """Create a duplication of the `~KCLayout` object.
 
         Args:
-            init_cells: initialize the all cells in the new KCLayout  object
+            init_cells: initialize the all cells in the new KCLayout object
 
         Returns:
             Copy of itself
@@ -870,7 +870,7 @@ class KCell:
     :py:attr:`KCell._kdb_cell`.
 
     Attributes:
-        kcl : Library object that is the manager of the KLayout
+        kcl: Library object that is the manager of the KLayout
             :py:class:`kdb.Layout`
         settings: A dictionary containing settings populated by:py:func:`autocell`
         info: Dictionary for storing additional info if necessary. This is not
@@ -895,7 +895,7 @@ class KCell:
         Args:
             name: Name of the cell, if None will autogenerate name to
                 "Unnamed_<cell_index>".
-            kcl: KCLayout  the cell should be attached to.
+            kcl: KCLayout the cell should be attached to.
             kdb_cell: If not `None`, a KCell will be created from and existing
                 KLayout Cell
             ports: Attach an existing :py:class:`~Ports` object to the KCell,
@@ -1490,7 +1490,7 @@ class KCell:
     def write(
         self, filename: str | Path, save_options: kdb.SaveLayoutOptions = default_save()
     ) -> None:
-        """Write a KCell to a GDS. See :py:func:`KCLayout .write` for more info."""
+        """Write a KCell to a GDS. See :py:func:`KCLayout.write` for more info."""
         return self._kdb_cell.write(str(filename), save_options)
 
     @classmethod
@@ -2527,7 +2527,7 @@ __all__ = [
     "autocell",
     "cell",
     "kcl ",
-    "KCLayout ",
+    "KCLayout",
     "default_save",
     "LayerEnum",
 ]
