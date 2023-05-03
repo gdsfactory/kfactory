@@ -7,6 +7,7 @@ import warnings
 from collections.abc import Callable, Iterable
 from pathlib import Path
 from typing import Any
+from inspect import getmembers, signature
 
 from pydantic import BaseModel, Field, validator
 
@@ -28,6 +29,30 @@ constants = {
 }
 
 MaterialSpec = str | float | tuple[float, float] | Callable[[str], float]
+
+
+def get_cells(modules, verbose: bool = False) -> dict[str, CellFactory]:
+    """Returns PCells (component functions) from a module or list of modules.
+
+    Args:
+        modules: module or iterable of modules.
+        verbose: prints in case any errors occur.
+
+    """
+    modules = modules if isinstance(modules, Iterable) else [modules]
+
+    cells = {}
+    for module in modules:
+        for t in getmembers(module):
+            if callable(t[1]) and t[0] != "partial":
+                try:
+                    r = signature(t[1]).return_annotation
+                    if r == KCell or (isinstance(r, str) and r.endswith("KCell")):
+                        cells[t[0]] = t[1]
+                except ValueError:
+                    if verbose:
+                        print(f"error in {t[0]}")
+    return cells
 
 
 class Pdk(BaseModel):
@@ -187,10 +212,10 @@ class Pdk(BaseModel):
 
     def get_cell(self, cell: CellSpec, **cell_kwargs: Any) -> KCell:
         """Returns cell from a cell spec.
-        
-           Args:
-            cell: A CellSpec to get from the Pdk.
-            cell_kwargs: settings for the cell.
+
+        Args:
+         cell: A CellSpec to get from the Pdk.
+         cell_kwargs: settings for the cell.
         """
         return self._get_cell(cell=cell, cells=self.cells, **cell_kwargs)
 
@@ -242,11 +267,11 @@ class Pdk(BaseModel):
     def get_enclosure(self, enclosure: str) -> Enclosure:
         """Returns enclosure from a enclosure spec."""
         return self.enclosures[enclosure]
-            # try:
-            #     enclosure_factory = self.enclosures[enclosure]
-            # except KeyError:
-            #     raise ValueError(f"{enclosure!r} not in {enclosures}")
-            # return enclosure_factory(**kwargs)
+        # try:
+        #     enclosure_factory = self.enclosures[enclosure]
+        # except KeyError:
+        #     raise ValueError(f"{enclosure!r} not in {enclosures}")
+        # return enclosure_factory(**kwargs)
         # elif isinstance(enclosure, (dict, DictConfig)):
         #     for key in enclosure.keys():
         #         if key not in enclosure_settings:
