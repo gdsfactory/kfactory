@@ -5,15 +5,15 @@ This module enables conversion between kfactory settings and KLayout technology.
 
 import pathlib
 import xml.etree.ElementTree as ET
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
 from kfactory.config import PATH
 from kfactory.technology import LayerViews
 
-Layer = Tuple[int, int]
-ConductorViaConductorName = Tuple[str, str, str]
+Layer = tuple[int, int]
+ConductorViaConductorName = tuple[str, str, str]
 
 
 class KLayoutTechnology(BaseModel):
@@ -31,9 +31,9 @@ class KLayoutTechnology(BaseModel):
     import klayout.db as db
 
     name: str
-    layer_views: Optional[LayerViews] = None
+    layer_views: LayerViews | None = None
     technology: db.Technology = Field(default_factory=db.Technology)
-    connectivity: Optional[List[ConductorViaConductorName]] = None
+    connectivity: list[ConductorViaConductorName] | None = None
 
     def export_technology_files(
         self,
@@ -42,7 +42,7 @@ class KLayoutTechnology(BaseModel):
         lyt_filename: str = "tech.lyt",
         d25_filename: str = "generic.lyd25",
         layer_stack: Optional = None,
-        mebes_config: Optional[dict] = None,
+        mebes_config: dict | None = None,
     ) -> None:
         """Write technology files into 'tech_dir'.
 

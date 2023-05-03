@@ -1,10 +1,11 @@
-from typing import Callable, Dict, Tuple, Union
+from collections.abc import Callable
+from typing import Union
 
 from pydantic import BaseModel
 
-MaterialSpec = Union[str, float, Tuple[float, float], Callable]
+MaterialSpec = Union[str, float, tuple[float, float], Callable]
 
-material_name_to_lumerical: Dict[str, MaterialSpec] = {
+material_name_to_lumerical: dict[str, MaterialSpec] = {
     "si": "Si (Silicon) - Palik",
     "sio2": "SiO2 (Glass) - Palik",
     "sin": "Si3N4 (Silicon Nitride) - Phillip",
@@ -45,7 +46,7 @@ class SimulationSettingsLumericalFdtd(BaseModel):
     frequency_dependent_profile: bool = True
     field_profile_samples: int = 15
     distance_monitors_to_pml: float = 0.5
-    material_name_to_lumerical: Dict[str, MaterialSpec] = material_name_to_lumerical
+    material_name_to_lumerical: dict[str, MaterialSpec] = material_name_to_lumerical
 
     class Config:
         """pydantic basemodel config."""

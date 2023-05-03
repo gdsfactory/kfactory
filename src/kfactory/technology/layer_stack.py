@@ -1,12 +1,12 @@
 from collections import defaultdict
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from collections.abc import Callable
+from typing import Any, Literal, Union
 
 from pydantic import BaseModel, Field
-from typing_extensions import Literal
 
 from kfactory.technology.layer_views import LayerViews
 
-MaterialSpec = Union[str, float, Tuple[float, float], Callable]
+MaterialSpec = Union[str, float, tuple[float, float], Callable]
 
 
 class LayerLevel(BaseModel):
@@ -42,25 +42,25 @@ class LayerLevel(BaseModel):
         info: simulation_info and other types of metadata.
     """
 
-    layer: Optional[Tuple[int, int]]
+    layer: tuple[int, int] | None
     thickness: float
-    thickness_tolerance: Optional[float] = None
+    thickness_tolerance: float | None = None
     zmin: float
-    zmin_tolerance: Optional[float] = None
-    material: Optional[str] = None
+    zmin_tolerance: float | None = None
+    material: str | None = None
     sidewall_angle: float = 0.0
-    sidewall_angle_tolerance: Optional[float] = None
+    sidewall_angle_tolerance: float | None = None
     width_to_z: float = 0.0
-    z_to_bias: Optional[Tuple[List[float], List[float]]] = None
+    z_to_bias: tuple[list[float], list[float]] | None = None
     mesh_order: int = 3
     layer_type: Literal["grow", "etch", "implant", "background"] = "grow"
-    mode: Optional[Literal["octagon", "taper", "round"]] = None
-    into: Optional[List[str]] = None
-    doping_concentration: Optional[float] = None
-    resistivity: Optional[float] = None
-    bias: Optional[Union[Tuple[float, float], float]] = None
-    derived_layer: Optional[Tuple[int, int]] = None
-    info: Dict[str, Any] = {}
+    mode: Literal["octagon", "taper", "round"] | None = None
+    into: list[str] | None = None
+    doping_concentration: float | None = None
+    resistivity: float | None = None
+    bias: tuple[float, float] | float | None = None
+    derived_layer: tuple[int, int] | None = None
+    info: dict[str, Any] = {}
 
 
 class LayerStack(BaseModel):
@@ -70,7 +70,7 @@ class LayerStack(BaseModel):
         layers: dict of layer_levels.
     """
 
-    layers: Optional[Dict[str, LayerLevel]] = Field(default_factory=dict)
+    layers: dict[str, LayerLevel] | None = Field(default_factory=dict)
 
     def __init__(self, **data: Any):
         """Add LayerLevels automatically for subclassed LayerStacks."""
@@ -81,7 +81,7 @@ class LayerStack(BaseModel):
             if isinstance(val, LayerLevel):
                 self.layers[field] = val
 
-    def get_layer_to_thickness(self) -> Dict[Tuple[int, int], float]:
+    def get_layer_to_thickness(self) -> dict[tuple[int, int], float]:
         """Returns layer tuple to thickness (um)."""
         layer_to_thickness = {}
 
@@ -175,13 +175,13 @@ class LayerStack(BaseModel):
         cell_derived.name = f"{cell.name}_derived_layers"
         return cell_derived
 
-    def get_layer_to_zmin(self) -> Dict[Tuple[int, int], float]:
+    def get_layer_to_zmin(self) -> dict[tuple[int, int], float]:
         """Returns layer tuple to z min position (um)."""
         return {
             level.layer: level.zmin for level in self.layers.values() if level.thickness
         }
 
-    def get_layer_to_material(self) -> Dict[Tuple[int, int], str]:
+    def get_layer_to_material(self) -> dict[tuple[int, int], str]:
         """Returns layer tuple to material name."""
         return {
             level.layer: level.material
@@ -189,7 +189,7 @@ class LayerStack(BaseModel):
             if level.thickness
         }
 
-    def get_layer_to_sidewall_angle(self) -> Dict[Tuple[int, int], str]:
+    def get_layer_to_sidewall_angle(self) -> dict[tuple[int, int], str]:
         """Returns layer tuple to material name."""
         return {
             level.layer: level.sidewall_angle
@@ -197,11 +197,11 @@ class LayerStack(BaseModel):
             if level.thickness
         }
 
-    def get_layer_to_info(self) -> Dict[Tuple[int, int], Dict]:
+    def get_layer_to_info(self) -> dict[tuple[int, int], dict]:
         """Returns layer tuple to info dict."""
         return {level.layer: level.info for level in self.layers.values()}
 
-    def to_dict(self) -> Dict[str, Dict[str, Any]]:
+    def to_dict(self) -> dict[str, dict[str, Any]]:
         return {level_name: dict(level) for level_name, level in self.layers.items()}
 
     def __getitem__(self, key) -> LayerLevel:
@@ -214,8 +214,8 @@ class LayerStack(BaseModel):
 
     def get_klayout_3d_script(
         self,
-        layer_views: Optional[LayerViews] = None,
-        dbu: Optional[float] = 0.001,
+        layer_views: LayerViews | None = None,
+        dbu: float | None = 0.001,
     ) -> str:
         """Returns script for 2.5D view in KLayout.
 

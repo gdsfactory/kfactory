@@ -4,17 +4,15 @@ from __future__ import annotations
 
 import pathlib
 import warnings
-from enum import Enum
-from functools import partial
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import BaseModel, Field, validator
 
-import kfactory as kf
 from kfactory.conf import logger
-from kfactory.kcell import KCell, LayerEnum, KCLayout, kcl
-from kfactory.technology import LayerLevel, LayerStack
+from kfactory.kcell import KCell, KCLayout, LayerEnum, kcl
+from kfactory.technology import LayerStack
 from kfactory.typings import CellFactory, CellSpec
 from kfactory.utils.enclosure import Enclosure
 
@@ -52,7 +50,7 @@ class Pdk(BaseModel):
         sparameters_path: to store Sparameters simulations.
         interconnect_cml_path: path to interconnect CML (optional).
         grid_size: in um. Defaults to 1nm.
-        kcl: Laout object of the PDK.
+        kcl: Layout object of the PDK.
         constants: dict of constants for the PDK.
 
     """
@@ -144,41 +142,41 @@ class Pdk(BaseModel):
                 warnings.warn(f"Overwriting enclosure {name!r}")
             self.enclosures[name] = enclosure
 
-    # def register_cells_yaml(
-    #     self,
-    #     dirpath: Path | None = None,
-    #     update: bool = False,
-    #     **kwargs: Any,
-    # ) -> None:
-    #     """Load *.pic.yml YAML files and register them as cells.
+            # def register_cells_yaml(
+            #     self,
+            #     dirpath: Path | None = None,
+            #     update: bool = False,
+            #     **kwargs: Any,
+            # ) -> None:
+            #     """Load *.pic.yml YAML files and register them as cells.
 
-    #     Args:
-    #         dirpath: directory to recursive search for YAML cells.
-    #         update: does not raise ValueError if cell already registered.
+            #     Args:
+            #         dirpath: directory to recursive search for YAML cells.
+            #         update: does not raise ValueError if cell already registered.
 
-    #     Keyword Args:
-    #         cell_name: cell function. To update cells dict.
+            #     Keyword Args:
+            #         cell_name: cell function. To update cells dict.
 
-    #     """
+            #     """
 
-    #     message = "Updated" if update else "Registered"
+            #     message = "Updated" if update else "Registered"
 
-    #     if dirpath:
-    #         dirpath = pathlib.Path(dirpath)
+            #     if dirpath:
+            #         dirpath = pathlib.Path(dirpath)
 
-    #         if not dirpath.is_dir():
-    #             raise ValueError(f"{dirpath!r} needs to be a directory.")
+            #         if not dirpath.is_dir():
+            #             raise ValueError(f"{dirpath!r} needs to be a directory.")
 
-    #         for filepath in dirpath.glob("*/**/*.pic.yml"):
-    #             name = filepath.stem.split(".")[0]
-    #             if not update and name in self.cells:
-    #                 raise ValueError(
-    #                     f"ERROR: Cell name {name!r} from {filepath} already registered."
-    #                 )
-    #             kf.placer.cells_from_yaml(filepath)
-    #             logger.info(f"{message} cell {name!r}")
+            #         for filepath in dirpath.glob("*/**/*.pic.yml"):
+            #             name = filepath.stem.split(".")[0]
+            #             if not update and name in self.cells:
+            #                 raise ValueError(
+            #                     f"ERROR: Cell name {name!r} from {filepath} already registered."
+            #                 )
+            #             kf.placer.cells_from_yaml(filepath)
+            #             logger.info(f"{message} cell {name!r}")
 
-    #     for k, v in kwargs.items():
+            #     for k, v in kwargs.items():
             if not update and k in self.cells:
                 raise ValueError(f"ERROR: Cell name {k!r} already registered.")
             self.cells[k] = v
@@ -274,9 +272,7 @@ class Pdk(BaseModel):
                 "get_enclosure expects a str or Enclosure, got {type(enclosure)}"
             )
 
-    def get_layer(
-        self, layer: Iterable[int] | int | str
-    ) -> LayerEnum:
+    def get_layer(self, layer: Iterable[int] | int | str) -> LayerEnum:
         """Returns layer from a layer spec."""
         if isinstance(layer, int):
             return self.layers(layer)
@@ -285,7 +281,9 @@ class Pdk(BaseModel):
         else:
             layer = tuple(layer)
             if len(layer) > 2:
-                raise ValueError("layer can only contain 2 elements like (layer, datatype).")
+                raise ValueError(
+                    "layer can only contain 2 elements like (layer, datatype)."
+                )
             layer_idx = self.kcl.layer(*layer)
             return self.layers(layer_idx)
 
@@ -294,7 +292,9 @@ class Pdk(BaseModel):
     #         raise ValueError(f"layer_views for Pdk {self.name!r} is None")
     #     return self.layer_views
 
+
 _ACTIVE_PDK = None
+
 
 def get_cell(cell: CellSpec, **kwargs: Any) -> KCell:
     return _ACTIVE_PDK.get_cell(cell, **kwargs)
@@ -339,5 +339,4 @@ def get_interconnect_cml_path() -> pathlib.Path:
 
 def _set_active_pdk(pdk: Pdk) -> None:
     global _ACTIVE_PDK
-    old_pdk = _ACTIVE_PDK
     _ACTIVE_PDK = pdk
