@@ -19,6 +19,7 @@ from kfactory.technology import LayerLevel, LayerStack
 from kfactory.typings import CellFactory, CellSpec
 from kfactory.utils.enclosure import Enclosure
 
+nm = 1e-3
 cell_settings = ["function", "cell", "settings"]
 enclosure_settings = ["function", "enclosure", "settings"]
 layers_required = ["DEVREC", "PORT", "PORTE"]
@@ -44,7 +45,6 @@ class Pdk(BaseModel):
         cells: dict of parametric cells that return Cells.
         symbols: dict of symbols names to functions.
         default_symbol_factory:
-        containers: dict of pcells that contain other cells.
         base_pdk: a pdk to copy from and extend.
         default_decorator: decorate all cells, if not otherwise defined on the cell.
         layers: maps name to gdslayer/datatype.
@@ -88,7 +88,6 @@ class Pdk(BaseModel):
         fields = {
             "enclosures": {"exclude": True},
             "cells": {"exclude": True},
-            "containers": {"exclude": True},
             "default_decorator": {"exclude": True},
         }
 
@@ -137,15 +136,6 @@ class Pdk(BaseModel):
                 warnings.warn(f"Overwriting cell {name!r}")
 
             self.cells[name] = cell
-
-    def register_containers(self, **kwargs: Any) -> None:
-        """Register container factories."""
-        for name, cell in kwargs.items():
-            if not callable(cell):
-                raise ValueError(
-                    f"{cell} is not callable, make sure you register "
-                    "cells functions that return a KCell"
-                )
 
     def register_enclosures(self, **kwargs: Any) -> None:
         """Register enclosures factories."""
@@ -206,45 +196,6 @@ class Pdk(BaseModel):
         self.cells.pop(name)
         logger.info(f"Removed cell {name!r}")
 
-    def get_cell(self, cell: CellSpec, **kwargs: Any) -> CellFactory:
-        """Returns CellFactory from a cell spec."""
-        cells_and_containers = set(self.cells.keys())
-
-        if callable(cell):
-            return cell
-        elif isinstance(cell, str):
-            if cell not in cells_and_containers:
-                cells = list(self.cells.keys())
-                raise ValueError(
-                    f"{cell!r} from PDK {self.name!r} not in cells: {cells} "
-                )
-            cell = self.cells[cell] if cell in self.cells else self.cells[cell]
-            return cell
-        elif isinstance(cell, (dict, DictConfig)):
-            for key in cell.keys():
-                if key not in cell_settings:
-                    raise ValueError(f"Invalid setting {key!r} not in {cell_settings}")
-            settings = dict(cell.get("settings", {}))
-            settings.update(**kwargs)
-
-            cell_name = cell.get("function")
-            if not isinstance(cell_name, str) or cell_name not in cells_and_containers:
-                cells = list(self.cells.keys())
-                raise ValueError(
-                    f"{cell_name!r} from PDK {self.name!r} not in cells: {cells} "
-                )
-            cell = (
-                self.cells[cell_name]
-                if cell_name in self.cells
-                else self.cells[cell_name]
-            )
-            return partial(cell, **settings)
-        else:
-            raise ValueError(
-                "get_cell expects a CellSpec (CellFactory, string or dict),"
-                f"got {type(cell)}"
-            )
-
     def get_cell(self, cell: CellSpec, **kwargs: Any) -> KCell:
         """Returns cell from a cell spec."""
         return self._get_cell(cell=cell, cells=self.cells, **kwargs)
@@ -253,7 +204,7 @@ class Pdk(BaseModel):
         """Returns a cell's symbol from a cell spec."""
         # this is a pretty rough first implementation
         try:
-            return self._get_cell(cell=cell, cells=self.cells, containers={}, **kwargs)
+            return self._get_cell(cell=cell, cells=self.cells, **kwargs)
         except ValueError:
             cell = self.get_cell(cell, **kwargs)
             return cell
@@ -265,7 +216,7 @@ class Pdk(BaseModel):
         **kwargs: Any,
     ) -> KCell:
         """Returns cell from a cell spec."""
-        cells_and_containers = set(cells.keys())
+        cell_names = set(cells.keys())
 
         if isinstance(cell, KCell):
             if kwargs:
@@ -274,7 +225,7 @@ class Pdk(BaseModel):
         elif callable(cell):
             return cell(**kwargs)
         elif isinstance(cell, str):
-            if cell not in cells_and_containers:
+            if cell not in cell_names:
                 cells_ = list(cells.keys())
                 raise ValueError(f"{cell!r} not in PDK {self.name!r} cells: {cells_} ")
             cell = cells[cell] if cell in cells else cells[cell]
@@ -288,7 +239,7 @@ class Pdk(BaseModel):
 
             cell_name = cell.get("cell", None)
             cell_name = cell_name or cell.get("function")
-            if not isinstance(cell_name, str) or cell_name not in cells_and_containers:
+            if not isinstance(cell_name, str) or cell_name not in cell_names:
                 cells_ = list(cells.keys())
                 raise ValueError(
                     f"{cell_name!r} from PDK {self.name!r} not in cells: {cells_} "
@@ -374,36 +325,11 @@ class Pdk(BaseModel):
             raise ValueError(f"{key!r} not in {constants}")
         return self.constants[key]
 
-    # _on_cell_registered = Event()
-    # _on_container_registered: Event = Event()
-    # _on_yaml_cell_registered: Event = Event()
-    # _on_enclosure_registered: Event = Event()
-    #
-    # @property
-    # def on_cell_registered(self) -> Event:
-    #     return self._on_cell_registered
-    #
-    # @property
-    # def on_container_registered(self) -> Event:
-    #     return self._on_container_registered
-    #
-    # @property
-    # def on_yaml_cell_registered(self) -> Event:
-    #     return self._on_yaml_cell_registered
-    #
-    # @property
-    # def on_enclosure_registered(self) -> Event:
-    #     return self._on_enclosure_registered
-
 
 _ACTIVE_PDK = None
 
 
 def get_cell(cell: CellSpec, **kwargs: Any) -> KCell:
-    return _ACTIVE_PDK.get_cell(cell, **kwargs)
-
-
-def get_cell(cell: CellSpec, **kwargs: Any) -> CellFactory:
     return _ACTIVE_PDK.get_cell(cell, **kwargs)
 
 
@@ -417,9 +343,6 @@ def get_layer(layer: LayerEnum) -> tuple[int, int] | list[int] | Any:
 
 # def get_layer_views() -> LayerViews:
 #     return _ACTIVE_PDK.get_layer_views()
-
-
-nm = 1e-3
 
 
 def get_active_pdk() -> Pdk:
