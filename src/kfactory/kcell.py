@@ -17,7 +17,7 @@ from collections.abc import Callable, Hashable, Iterable, Iterator
 # from enum import IntEnum
 from enum import Enum, IntEnum
 from hashlib import sha3_512
-from inspect import signature
+from inspect import Parameter, signature
 from pathlib import Path
 from tempfile import gettempdir
 from typing import Any, Literal, TypeVar, cast, overload  # ParamSpec, # >= python 3.10
@@ -2312,9 +2312,16 @@ def cell(
                 params[k] = args[i]
             params.update(kwargs)
 
+            del_parameters: list[str] = []
+
             for key, value in params.items():
                 if isinstance(value, dict):
                     params[key] = dict_to_frozen_set(value)
+                if value == Parameter.empty:
+                    del_parameters.append(key)
+
+            for param in del_parameters:
+                del params[param]
 
             @cachetools.cached(cache=cache)
             @functools.wraps(f)
