@@ -117,7 +117,7 @@ class Pdk(BaseModel):
                 self.default_decorator = self.base_pdk.default_decorator
         self.kcl.pdk = self
 
-    def register_cells(self, **kwargs: Any) -> None:
+    def register_cells(self, **kwargs: Callable[KCell]) -> None:
         """Register cell factories."""
         for name, cell in kwargs.items():
             if not callable(cell):
@@ -130,14 +130,9 @@ class Pdk(BaseModel):
 
             self.cells[name] = cell
 
-    def register_enclosures(self, **kwargs: Any) -> None:
+    def register_enclosures(self, **kwargs: Enclosure) -> None:
         """Register enclosures factories."""
         for name, enclosure in kwargs.items():
-            if not callable(enclosure):
-                raise ValueError(
-                    f"{enclosure} is not callable, make sure you register "
-                    "enclosure functions that return a CrossSection"
-                )
             if name in self.enclosures:
                 warnings.warn(f"Overwriting enclosure {name!r}")
             self.enclosures[name] = enclosure
@@ -190,9 +185,14 @@ class Pdk(BaseModel):
         self.cells.pop(name)
         logger.info(f"Removed cell {name!r}")
 
-    def get_cell(self, cell: CellSpec, **kwargs: Any) -> KCell:
-        """Returns cell from a cell spec."""
-        return self._get_cell(cell=cell, cells=self.cells, **kwargs)
+    def get_cell(self, cell: CellSpec, **cell_kwargs: Any) -> KCell:
+        """Returns cell from a cell spec.
+        
+           Args:
+            cell: A CellSpec to get from the Pdk.
+            cell_kwargs: settings for the cell.
+        """
+        return self._get_cell(cell=cell, cells=self.cells, **cell_kwargs)
 
     def _get_cell(
         self,
@@ -239,12 +239,9 @@ class Pdk(BaseModel):
                 f"string or dict), got {type(cell)}"
             )
 
-    def get_enclosure(self, enclosure: str | Enclosure, **kwargs: Any) -> Enclosure:
+    def get_enclosure(self, enclosure: str) -> Enclosure:
         """Returns enclosure from a enclosure spec."""
-        if isinstance(enclosure, Enclosure):
-            return enclosure.copy(**kwargs)
-        elif isinstance(enclosure, str):
-            return self.enclosures[enclosure]
+        return self.enclosures[enclosure]
             # try:
             #     enclosure_factory = self.enclosures[enclosure]
             # except KeyError:
@@ -269,10 +266,6 @@ class Pdk(BaseModel):
         #     settings.update(**kwargs)
 
         #     return enclosure_factory(**settings)
-        else:
-            raise ValueError(
-                "get_enclosure expects a str or Enclosure, got {type(enclosure)}"
-            )
 
     def get_layer(self, layer: Iterable[int] | int | str) -> LayerEnum:
         """Returns layer from a layer spec."""

@@ -23,6 +23,7 @@ from .kcell import (
 )
 from . import cells, placer, routing, utils, port
 from .conf import config
+from .pdk import Pdk
 
 
 __version__ = "0.6.3"
