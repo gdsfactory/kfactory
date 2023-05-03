@@ -14,20 +14,20 @@ from .kcell import (
     Instance,
     Port,
     Ports,
-    autocell,
     cell,
-    klib,
-    KLib,
+    kcl,
+    KCLayout,
     default_save,
     LayerEnum,
     show,
 )
-from . import pcells, placer, routing, utils, port
-from .config import logger
+from . import cells, placer, routing, utils, port
+from .conf import config
 
 
 __version__ = "0.6.3"
 
+logger = config.logger
 
 __all__ = [
     "KCell",
@@ -36,18 +36,19 @@ __all__ = [
     "Ports",
     "autocell",
     "cell",
-    "klib",
-    "KLib",
+    "kcl",
+    "KCLayout",
     "default_save",
     "kdb",
     "lay",
     "port",
-    "pcells",
+    "cells",
     "placer",
     "routing",
     "utils",
     "show",
     "klay",
-    "logger",
+    "config",
     "LayerEnum",
+    "logger",
 ]

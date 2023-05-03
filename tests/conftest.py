@@ -20,33 +20,33 @@ def wg_enc(LAYER):
 
 @pytest.fixture
 def waveguide_factory(LAYER, wg_enc):
-    return partial(kf.pcells.dbu.waveguide, layer=LAYER.WG, enclosure=wg_enc)
+    return partial(kf.cells.dbu.waveguide, layer=LAYER.WG, enclosure=wg_enc)
 
 
 @pytest.fixture
 def bend90(LAYER, wg_enc):
-    return kf.pcells.circular.bend_circular(
+    return kf.cells.circular.bend_circular(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=90
     )
 
 
 @pytest.fixture
 def bend180(LAYER, wg_enc):
-    return kf.pcells.circular.bend_circular(
+    return kf.cells.circular.bend_circular(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=180
     )
 
 
 @pytest.fixture
 def bend90_euler(LAYER, wg_enc):
-    return kf.pcells.euler.bend_euler(
+    return kf.cells.euler.bend_euler(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=90
     )
 
 
 @pytest.fixture
 def bend180_euler(LAYER, wg_enc):
-    return kf.pcells.euler.bend_euler(
+    return kf.cells.euler.bend_euler(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=180
     )
 

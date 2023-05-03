@@ -63,7 +63,7 @@ def test_connect_bend90(
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
     b90r = abs(bend90.ports._ports[0].x - bend90.ports._ports[1].x)
     if abs(x) < b90r or abs(y) < b90r:
-        kf.config.filter.regex = f"Potential collision in routing due to small distance between the port in relation to bend radius x={x}/{b90r}, y={y}/{b90r}"
+        kf.config.logfilter.regex = f"Potential collision in routing due to small distance between the port in relation to bend radius x={x}/{b90r}, y={y}/{b90r}"
     kf.routing.optical.connect(
         c,
         p1,
@@ -72,7 +72,7 @@ def test_connect_bend90(
         bend90_cell=bend90,
     )
 
-    kf.config.filter.regex = None
+    kf.config.logfilter.regex = None
 
 
 @pytest.mark.parametrize(
@@ -97,9 +97,8 @@ def test_connect_bend90_euler(
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
     b90r = abs(bend90_euler.ports._ports[0].x - bend90_euler.ports._ports[1].x)
-    warnings.filterwarnings("error")
     if abs(x) < b90r or abs(y) < b90r:
-        kf.config.filter.regex = f"Potential collision in routing due to small distance between the port in relation to bend radius x={x}/{b90r}, y={y}/{b90r}"
+        kf.config.logfilter.regex = f"Potential collision in routing due to small distance between the port in relation to bend radius x={x}/{b90r}, y={y}/{b90r}"
     kf.routing.optical.connect(
         c,
         p1,
@@ -107,4 +106,4 @@ def test_connect_bend90_euler(
         straight_factory=waveguide_factory,
         bend90_cell=bend90_euler,
     )
-    kf.config.filter.regex = None
+    kf.config.logfilter.regex = None

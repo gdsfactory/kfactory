@@ -20,7 +20,7 @@ enc = kf.utils.Enclosure(
 )
 
 
-@kf.autocell
+@kf.cell
 def rectangles(
     radius: int,
     width: int,
@@ -32,14 +32,12 @@ def rectangles(
 ) -> kf.KCell:
     """Rectangles with eulerbends as corners."""
     c = kf.KCell()
-    bend = kf.pcells.euler.bend_euler(
-        width=int(width * c.klib.dbu), radius=int(c.klib.dbu * radius), layer=layer
+    bend = kf.cells.euler.bend_euler(
+        width=int(width * c.kcl.dbu), radius=int(c.kcl.dbu * radius), layer=layer
     )
 
     def wg_f(length: int) -> kf.KCell:
-        return kf.pcells.waveguide.waveguide_dbu(
-            width=width, length=length, layer=layer
-        )
+        return kf.cells.waveguide.waveguide_dbu(width=width, length=length, layer=layer)
 
     for i in range(n):
         b1, b2, b3, b4 = (c << bend for _ in range(4))
@@ -78,7 +76,7 @@ def rectangles(
     return c
 
 
-@kf.autocell
+@kf.cell
 def rectangles_tiled(
     radius: int,
     width: int,
@@ -90,14 +88,12 @@ def rectangles_tiled(
 ) -> kf.KCell:
     """Rectangles with eulerbends as corners."""
     c = kf.KCell()
-    bend = kf.pcells.euler.bend_euler(
-        width=int(width * c.klib.dbu), radius=int(c.klib.dbu * radius), layer=layer
+    bend = kf.cells.euler.bend_euler(
+        width=int(width * c.kcl.dbu), radius=int(c.kcl.dbu * radius), layer=layer
     )
 
     def wg_f(length: int) -> kf.KCell:
-        return kf.pcells.waveguide.waveguide_dbu(
-            width=width, length=length, layer=layer
-        )
+        return kf.cells.waveguide.waveguide_dbu(width=width, length=length, layer=layer)
 
     for i in range(n):
         b1, b2, b3, b4 = (c << bend for _ in range(4))

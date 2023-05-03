@@ -10,7 +10,7 @@ from scipy.optimize import brentq  # type: ignore[import]
 from scipy.special import fresnel  # type: ignore[import]
 
 from .. import kdb
-from ..kcell import KCell, LayerEnum, autocell
+from ..kcell import KCell, LayerEnum, cell
 from ..utils import Enclosure, extrude_path
 
 __all__ = [
@@ -158,7 +158,7 @@ def euler_sbend_points(
     return spoints
 
 
-@autocell
+@cell
 def bend_euler(
     width: float,
     radius: float,
@@ -194,30 +194,30 @@ def bend_euler(
     if theta == 90:
         c.create_port(
             layer=layer,
-            width=int(width / c.klib.dbu),
+            width=int(width / c.kcl.dbu),
             trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
         )
         c.create_port(
             layer=layer,
-            width=int(width / c.klib.dbu),
+            width=int(width / c.kcl.dbu),
             trans=kdb.Trans(1, False, backbone[-1].to_itype(dbu).to_v()),
         )
     elif theta == 180:
         c.create_port(
             layer=layer,
-            width=int(width / c.klib.dbu),
+            width=int(width / c.kcl.dbu),
             trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
         )
         c.create_port(
             layer=layer,
-            width=int(width / c.klib.dbu),
+            width=int(width / c.kcl.dbu),
             trans=kdb.Trans(2, False, backbone[-1].to_itype(dbu).to_v()),
         )
     c.autorename_ports()
     return c
 
 
-@autocell
+@cell
 def bend_s_euler(
     offset: float,
     width: float,
@@ -263,14 +263,14 @@ def bend_s_euler(
     c.create_port(
         name="W0",
         trans=kdb.Trans(2, False, p1.to_v()),
-        width=int(width / c.klib.dbu),
+        width=int(width / c.kcl.dbu),
         port_type="optical",
         layer=layer,
     )
     c.create_port(
         name="E0",
         trans=kdb.Trans(0, False, p2.to_v()),
-        width=int(width / c.klib.dbu),
+        width=int(width / c.kcl.dbu),
         port_type="optical",
         layer=layer,
     )

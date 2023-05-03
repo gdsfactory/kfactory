@@ -5,7 +5,7 @@ TODO: Non-linear tapers.
 """
 
 
-from .. import KCell, LayerEnum, klib
+from .. import KCell, LayerEnum, kcl
 from ..utils import Enclosure
 from .dbu.taper import taper as taper_dbu
 
@@ -44,9 +44,9 @@ def taper(
         enclosure: Definition of the slab/exclude.
     """
     return taper_dbu(
-        width1=int(width1 / klib.dbu),
-        width2=int(width2 / klib.dbu),
-        length=int(length / klib.dbu),
+        width1=int(width1 / kcl.dbu),
+        width2=int(width2 / kcl.dbu),
+        length=int(length / kcl.dbu),
         layer=layer,
         enclosure=enclosure,
     )

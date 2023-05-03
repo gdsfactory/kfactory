@@ -41,7 +41,7 @@ p = kf.KCell()
 # Add a polygon
 xpts = [0, 0, 5, 6, 9, 12]
 ypts = [0, 1, 1, 2, 2, 0]
-p.shapes(p.klib.layer(2, 0)).insert(
+p.shapes(p.kcl.layer(2, 0)).insert(
     kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip(xpts, ypts)])
 )
 
@@ -95,7 +95,7 @@ c
 # Add a 2nd polygon to "p"
 xpts = [14, 14, 16, 16]
 ypts = [0, 2, 2, 0]
-p.shapes(p.klib.layer(1, 0)).insert(
+p.shapes(p.kcl.layer(1, 0)).insert(
     kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip(xpts, ypts)])
 )
 p
@@ -132,7 +132,7 @@ c2
 # 1. create the reference and add it to the component
 
 c = kf.KCell(name="reference_sample")
-w = kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
+w = kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 wr = kf.kdb.CellInstArray(w._kdb_cell, kf.kdb.Trans.R0)
 c.insert(wr)
 c
@@ -140,14 +140,14 @@ c
 # 2. or do it in a single line
 
 c = kf.KCell(name="reference_sample_shorter_syntax")
-wr = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
+wr = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 c
 
 # in both cases you can move the reference `wr` after created
 
 c = kf.KCell(name="two_references")
-wr1 = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
-wr2 = c << kf.pcells.waveguide.waveguide(length=10, width=0.6, layer=c.klib.layer(1, 0))
+wr1 = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
+wr2 = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 wr2.transform(kf.kdb.DTrans(0.0, 10.0))
 c.add_ports(wr1.ports, prefix="top_")
 c.add_ports(wr2.ports, prefix="bot_")
@@ -208,7 +208,7 @@ c3
 #     c = gf.Component()
 #     r1 = c << straight(length=l1, width=w1)
 #     r2 = c << straight(length=l2, width=w2)
-#     r2.connect(port="o1", destination=r1.ports["o2"])
+#     r2.align(port="o1", destination=r1.ports["o2"])
 #     c.add_port("o1", port=r1.ports["o1"])
 #     c.add_port("o2", port=r2.ports["o2"])
 #     return c
@@ -236,20 +236,20 @@ c3
 # dbr
 # -
 
-# ## Connect references
+# ## align references
 #
-# We have seen that once you create a reference you can manipulate the reference to move it to a location. Here we are going to connect that reference to a port. Remember that we follow that a certain reference `source` connects to a `destination` port
+# We have seen that once you create a reference you can manipulate the reference to move it to a location. Here we are going to align that reference to a port. Remember that we follow that a certain reference `source` aligns to a `destination` port
 
 # +
 # bend = gf.components.bend_circular()
 # bend
 
 # +
-# c = gf.Component("sample_reference_connect")
+# c = gf.Component("sample_reference_align")
 
 # mmi = c << gf.components.mmi1x2()
 # b = c << gf.components.bend_circular()
-# b.connect("o1", destination=mmi.ports["o2"])
+# b.align("o1", destination=mmi.ports["o2"])
 
 # c.add_port("o1", port=mmi.ports["o1"])
 # c.add_port("o2", port=b.ports["o2"])
@@ -260,11 +260,11 @@ c3
 # You can also access the ports directly from the references
 
 # +
-# c = gf.Component("sample_reference_connect_simpler")
+# c = gf.Component("sample_reference_align_simpler")
 
 # mmi = c << gf.components.mmi1x2()
 # b = c << gf.components.bend_circular()
-# b.connect("o1", destination=mmi["o2"])
+# b.align("o1", destination=mmi["o2"])
 
 # c.add_port("o1", port=mmi["o1"])
 # c.add_port("o2", port=b["o2"])
@@ -435,7 +435,7 @@ c3
 
 # ## component_sequence
 #
-# When you have repetitive connections you can describe the connectivity as an ASCII map
+# When you have repetitive alignions you can describe the connectivity as an ASCII map
 
 # +
 # bend180 = gf.components.bend_circular180()

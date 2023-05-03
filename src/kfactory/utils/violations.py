@@ -8,7 +8,7 @@ import os
 from typing import overload
 
 from .. import KCell, LayerEnum, kdb
-from ..config import logger
+from ..conf import logger
 
 __all__ = [
     "fix_spacing_tiled",
@@ -93,14 +93,14 @@ def fix_spacing_tiled(
     """
     if tile_size is None:
         min(25 * min_space, 250)
-        tile_size = (30 * min_space * c.klib.dbu, 30 * min_space * c.klib.dbu)
+        tile_size = (30 * min_space * c.kcl.dbu, 30 * min_space * c.kcl.dbu)
 
     tp = kdb.TilingProcessor()
-    tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore[misc]
-    tp.dbu = c.klib.dbu
+    tp.frame = c.bbox_per_layer(layer).to_dtype(c.kcl.dbu)  # type: ignore[misc]
+    tp.dbu = c.kcl.dbu
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
-    tp.input("reg", c.klib, c.cell_index(), layer)
+    tp.input("reg", c.kcl, c.cell_index(), layer)
     tp.threads = n_threads or len(os.sched_getaffinity(0))
 
     fix_reg = RegionOperator()
@@ -138,9 +138,9 @@ def fix_spacing_tiled(
 
     tp.queue(queue_str)
 
-    c.klib.start_changes()
+    c.kcl.start_changes()
     tp.execute("Min Space Fix")
-    c.klib.end_changes()
+    c.kcl.end_changes()
 
     return fix_reg.region
 
@@ -172,13 +172,13 @@ def fix_spacing_sizing_tiled(
     """
     tp = kdb.TilingProcessor()
     if tile_size is None:
-        size = min_space * 20 * c.klib.dbu
+        size = min_space * 20 * c.kcl.dbu
         tile_size = (size, size)
-    tp.frame = c.bbox_per_layer(layer).to_dtype(c.klib.dbu)  # type: ignore[misc]
-    tp.dbu = c.klib.dbu
+    tp.frame = c.bbox_per_layer(layer).to_dtype(c.kcl.dbu)  # type: ignore[misc]
+    tp.dbu = c.kcl.dbu
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
-    tp.input("reg", c.klib, c.cell_index(), layer)
+    tp.input("reg", c.kcl, c.cell_index(), layer)
     tp.threads = n_threads or len(os.sched_getaffinity(0))
 
     fix_reg = kdb.Region()
@@ -193,9 +193,9 @@ def fix_spacing_sizing_tiled(
 
     tp.queue(queue_str)
 
-    c.klib.start_changes()
+    c.kcl.start_changes()
     tp.execute("Min Space Fix")
-    c.klib.end_changes()
+    c.kcl.end_changes()
 
     return fix_reg
 
@@ -228,7 +228,7 @@ def fix_spacing_minkowski_tiled(
     """
     tp = kdb.TilingProcessor()
     tp.frame = c.dbbox()  # type: ignore[misc]
-    tp.dbu = c.klib.dbu
+    tp.dbu = c.kcl.dbu
     tp.threads = n_threads or len(os.sched_getaffinity(0))
 
     min_tile_size_rec = 10 * min_space * tp.dbu
@@ -240,7 +240,7 @@ def fix_spacing_minkowski_tiled(
 
     tp.tile_size(*tile_size)
     if isinstance(ref, int):
-        tp.input("main_layer", c.klib, c.cell_index(), ref)
+        tp.input("main_layer", c.kcl, c.cell_index(), ref)
     else:
         tp.input("main_layer", ref)
 
@@ -257,10 +257,10 @@ def fix_spacing_minkowski_tiled(
     tp.queue(queue_str)
     logger.debug("String queued for {}:  {}", c.name, queue_str)
 
-    c.klib.start_changes()
+    c.kcl.start_changes()
     logger.info("Starting minkowski on {}", c.name)
     tp.execute(f"Minkowski {c.name}")
-    c.klib.end_changes()
+    c.kcl.end_changes()
 
     return operator.region
 

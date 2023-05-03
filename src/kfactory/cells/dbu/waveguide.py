@@ -15,13 +15,13 @@ A waveguide is a rectangle of material with excludes and/or slab around it::
 The slabs and excludes can be given in the form of an :py:class:~`Enclosure`.
 """
 
-from ... import KCell, LayerEnum, autocell, kdb
+from ... import KCell, LayerEnum, cell, kdb
 from ...utils import Enclosure
 
 __all__ = ["waveguide"]
 
 
-@autocell
+@cell
 def waveguide(
     width: int,
     length: int,
@@ -61,8 +61,8 @@ def waveguide(
     if enclosure is not None:
         enclosure.apply_minkowski_y(c, layer)
     c.settings = {
-        "width_um": width * c.klib.dbu,
-        "length_um": length * c.klib.dbu,
+        "width_um": width * c.kcl.dbu,
+        "length_um": length * c.kcl.dbu,
         "layer": layer,
     }
     c.autorename_ports()

@@ -6,7 +6,7 @@ import numpy as np
 import numpy.typing as nty
 from scipy.special import binom  # type: ignore[import]
 
-from .. import KCell, LayerEnum, autocell, kdb
+from .. import KCell, LayerEnum, cell, kdb
 from ..utils import Enclosure
 
 __all__ = ["bend_s"]
@@ -28,7 +28,7 @@ def bezier_curve(
     return [kdb.DPoint(float(x), float(y)) for x, y in zip(xs, ys)]
 
 
-@autocell
+@cell
 def bend_s(
     width: float,
     height: float,
@@ -70,16 +70,16 @@ def bend_s(
 
     c.create_port(
         name="W0",
-        width=int(width / c.klib.dbu),
+        width=int(width / c.kcl.dbu),
         trans=kdb.Trans(0, False, 0, 0),
         layer=layer,
         port_type="optical",
     )
     c.create_port(
         name="E0",
-        width=int(width / c.klib.dbu),
+        width=int(width / c.kcl.dbu),
         trans=kdb.Trans(
-            0, False, c.bbox().right, c.bbox().top - int(width / c.klib.dbu) // 2
+            0, False, c.bbox().right, c.bbox().top - int(width / c.kcl.dbu) // 2
         ),
         layer=layer,
         port_type="optical",

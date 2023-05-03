@@ -4,14 +4,14 @@ from waveguide import waveguide
 import kfactory as kf
 
 
-@kf.autocell
+@kf.cell
 def composite_cell() -> kf.KCell:
     c = kf.KCell()
 
     bend = c.create_inst(
-        kf.pcells.circular.bend_circular(
-            1000 * c.klib.dbu, 20000 * c.klib.dbu, LAYER.SI, enclosure=si_enc
-        )  # the standard kf.pcells are in um, so we need to convert to dbu
+        kf.cells.circular.bend_circular(
+            1000 * c.kcl.dbu, 20000 * c.kcl.dbu, LAYER.SI, enclosure=si_enc
+        )  # the standard kf.cells are in um, so we need to convert to dbu
     )
     wg = c << waveguide(1000, 5000, 5000)
 

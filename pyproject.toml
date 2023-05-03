@@ -103,6 +103,7 @@ exclude = [
 	"tests",
 	"src/kfactory/widgets",
 ]
+plugins = "pydantic.mypy"
 
 [tool.pylsp-mypy]
 enabled = true

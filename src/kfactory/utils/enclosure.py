@@ -14,7 +14,7 @@ import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr
 
 from .. import kdb
-from ..config import logger
+from ..conf import config
 from ..kcell import KCell, LayerEnum
 
 __all__ = [
@@ -189,22 +189,22 @@ def extrude_path(
                 path_pts_to_polygon(
                     *extrude_path_points(
                         path,
-                        width + 2 * section.d_max * target.klib.dbu,
+                        width + 2 * section.d_max * target.kcl.dbu,
                         start_angle,
                         end_angle,
                     )
-                ).to_itype(target.klib.dbu)
+                ).to_itype(target.kcl.dbu)
             )
             if section.d_min is not None:
                 _r -= kdb.Region(
                     path_pts_to_polygon(
                         *extrude_path_points(
                             path,
-                            width + 2 * section.d_min * target.klib.dbu,
+                            width + 2 * section.d_min * target.kcl.dbu,
                             start_angle,
                             end_angle,
                         )
-                    ).to_itype(target.klib.dbu)
+                    ).to_itype(target.kcl.dbu)
                 )
             reg.insert(_r)
         target.shapes(layer).insert(reg.merge())
@@ -328,7 +328,7 @@ def extrude_path_dynamic(
                 def w_max(x: float) -> float:
                     return (
                         widths(x)  # type: ignore[operator]
-                        + 2 * section.d_max * target.klib.dbu
+                        + 2 * section.d_max * target.kcl.dbu
                     )
 
                 _r = kdb.Region(
@@ -339,7 +339,7 @@ def extrude_path_dynamic(
                             start_angle,
                             end_angle,
                         )
-                    ).to_itype(target.klib.dbu)
+                    ).to_itype(target.kcl.dbu)
                 )
                 if section.d_min is not None:
 
@@ -348,7 +348,7 @@ def extrude_path_dynamic(
                             widths(x)  # type: ignore[operator]
                             + 2  # type: ignore[operator]
                             * section.d_min
-                            * target.klib.dbu
+                            * target.kcl.dbu
                         )
 
                     _r -= kdb.Region(
@@ -359,7 +359,7 @@ def extrude_path_dynamic(
                                 start_angle,
                                 end_angle,
                             )
-                        ).to_itype(target.klib.dbu)
+                        ).to_itype(target.kcl.dbu)
                     )
                 reg.insert(_r)
             target.shapes(layer).insert(reg.merge())
@@ -369,7 +369,7 @@ def extrude_path_dynamic(
             reg = kdb.Region()
             for section in layer_sec.sections:
                 max_widths = [
-                    w + 2 * section.d_max * target.klib.dbu
+                    w + 2 * section.d_max * target.kcl.dbu
                     for w in widths  # type: ignore[union-attr]
                 ]
                 _r = kdb.Region(
@@ -380,11 +380,11 @@ def extrude_path_dynamic(
                             start_angle,
                             end_angle,
                         )
-                    ).to_itype(target.klib.dbu)
+                    ).to_itype(target.kcl.dbu)
                 )
                 if section.d_min is not None:
                     min_widths = [
-                        w + 2 * section.d_min * target.klib.dbu
+                        w + 2 * section.d_min * target.kcl.dbu
                         for w in widths  # type: ignore[union-attr]
                     ]
                     _r -= kdb.Region(
@@ -395,7 +395,7 @@ def extrude_path_dynamic(
                                 start_angle,
                                 end_angle,
                             )
-                        ).to_itype(target.klib.dbu)
+                        ).to_itype(target.kcl.dbu)
                     )
                 reg.insert(_r)
             target.shapes(layer).insert(reg.merge())
@@ -753,7 +753,7 @@ class Enclosure(BaseModel):
                 )
         tp = kdb.TilingProcessor()
         tp.frame = c.dbbox()  # type: ignore[misc]
-        tp.dbu = c.klib.dbu
+        tp.dbu = c.kcl.dbu
         tp.threads = n_threads or len(os.sched_getaffinity(0))
         maxsize = 0
         for layersection in self.layer_sections.values():
@@ -767,7 +767,7 @@ class Enclosure(BaseModel):
             tile_size = min_tile_size_rec * 2
 
         if float(tile_size) <= min_tile_size_rec:
-            logger.warning(
+            config.logger.warning(
                 "Tile size should be larger than the maximum of "
                 "the enclosures (recommendation: {} / {})",
                 tile_size,
@@ -778,7 +778,7 @@ class Enclosure(BaseModel):
 
         tp.tile_size(tile_size, tile_size)
         if isinstance(ref, int):
-            tp.input("main_layer", c.klib, c.cell_index(), ref)
+            tp.input("main_layer", c.kcl, c.cell_index(), ref)
         else:
             tp.input("main_layer", ref)
 
@@ -831,16 +831,16 @@ class Enclosure(BaseModel):
                     queue_str += f"_output(target_{layer},max_reg & _tile, true);"
 
                 tp.queue(queue_str)
-                logger.debug(
+                config.logger.debug(
                     "String queued for {} on layer {}: {}", c.name, layer, queue_str
                 )
 
             operators.append((layer, operator))
 
-        c.klib.start_changes()
-        logger.info("Starting minkowski on {}", c.name)
+        c.kcl.start_changes()
+        config.logger.info("Starting minkowski on {}", c.name)
         tp.execute(f"Minkowski {c.name}")
-        c.klib.end_changes()
+        c.kcl.end_changes()
 
         for layer, operator in operators:
             operator.insert()
