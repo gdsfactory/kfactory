@@ -19,7 +19,7 @@ from kfactory.technology import LayerLevel, LayerStack
 from kfactory.typings import CellFactory, CellSpec
 from kfactory.utils.enclosure import Enclosure
 
-component_settings = ["function", "component", "settings"]
+cell_settings = ["function", "cell", "settings"]
 enclosure_settings = ["function", "enclosure", "settings"]
 layers_required = ["DEVREC", "PORT", "PORTE"]
 
@@ -41,7 +41,7 @@ class Pdk(BaseModel):
     Parameters:
         name: PDK name.
         enclosures: dict of enclosures factories.
-        cells: dict of parametric cells that return Components.
+        cells: dict of parametric cells that return Cells.
         symbols: dict of symbols names to functions.
         default_symbol_factory:
         containers: dict of pcells that contain other cells.
@@ -222,10 +222,8 @@ class Pdk(BaseModel):
             return cell
         elif isinstance(cell, (dict, DictConfig)):
             for key in cell.keys():
-                if key not in component_settings:
-                    raise ValueError(
-                        f"Invalid setting {key!r} not in {component_settings}"
-                    )
+                if key not in cell_settings:
+                    raise ValueError(f"Invalid setting {key!r} not in {cell_settings}")
             settings = dict(cell.get("settings", {}))
             settings.update(**kwargs)
 
@@ -247,67 +245,61 @@ class Pdk(BaseModel):
                 f"got {type(cell)}"
             )
 
-    def get_component(self, component: CellSpec, **kwargs: Any) -> KCell:
-        """Returns component from a component spec."""
-        return self._get_component(component=component, cells=self.cells, **kwargs)
+    def get_cell(self, cell: CellSpec, **kwargs: Any) -> KCell:
+        """Returns cell from a cell spec."""
+        return self._get_cell(cell=cell, cells=self.cells, **kwargs)
 
-    def get_symbol(self, component: CellSpec, **kwargs: Any) -> KCell:
-        """Returns a component's symbol from a component spec."""
+    def get_symbol(self, cell: CellSpec, **kwargs: Any) -> KCell:
+        """Returns a cell's symbol from a cell spec."""
         # this is a pretty rough first implementation
         try:
-            return self._get_component(
-                component=component, cells=self.cells, containers={}, **kwargs
-            )
+            return self._get_cell(cell=cell, cells=self.cells, containers={}, **kwargs)
         except ValueError:
-            component = self.get_component(component, **kwargs)
-            return component
+            cell = self.get_cell(cell, **kwargs)
+            return cell
 
-    def _get_component(
+    def _get_cell(
         self,
-        component: CellSpec,
+        cell: CellSpec,
         cells: Dict[str, Callable[..., KCell]],
         **kwargs: Any,
     ) -> KCell:
-        """Returns component from a component spec."""
+        """Returns cell from a cell spec."""
         cells_and_containers = set(cells.keys())
 
-        if isinstance(component, KCell):
+        if isinstance(cell, KCell):
             if kwargs:
-                raise ValueError(f"Cannot apply kwargs {kwargs} to {component.name!r}")
-            return component
-        elif callable(component):
-            return component(**kwargs)
-        elif isinstance(component, str):
-            if component not in cells_and_containers:
-                cells_ = list(cells.keys())
-                raise ValueError(
-                    f"{component!r} not in PDK {self.name!r} cells: {cells_} "
-                )
-            cell = cells[component] if component in cells else cells[component]
+                raise ValueError(f"Cannot apply kwargs {kwargs} to {cell.name!r}")
+            return cell
+        elif callable(cell):
             return cell(**kwargs)
-        elif isinstance(component, (dict, DictConfig)):
-            for key in component.keys():
-                if key not in component_settings:
-                    raise ValueError(
-                        f"Invalid setting {key!r} not in {component_settings}"
-                    )
-            settings = dict(component.get("settings", {}))
+        elif isinstance(cell, str):
+            if cell not in cells_and_containers:
+                cells_ = list(cells.keys())
+                raise ValueError(f"{cell!r} not in PDK {self.name!r} cells: {cells_} ")
+            cell = cells[cell] if cell in cells else cells[cell]
+            return cell(**kwargs)
+        elif isinstance(cell, (dict, DictConfig)):
+            for key in cell.keys():
+                if key not in cell_settings:
+                    raise ValueError(f"Invalid setting {key!r} not in {cell_settings}")
+            settings = dict(cell.get("settings", {}))
             settings.update(**kwargs)
 
-            cell_name = component.get("component", None)
-            cell_name = cell_name or component.get("function")
+            cell_name = cell.get("cell", None)
+            cell_name = cell_name or cell.get("function")
             if not isinstance(cell_name, str) or cell_name not in cells_and_containers:
                 cells_ = list(cells.keys())
                 raise ValueError(
                     f"{cell_name!r} from PDK {self.name!r} not in cells: {cells_} "
                 )
             cell = cells[cell_name] if cell_name in cells else cells[cell_name]
-            component = cell(**settings)
-            return component
+            cell = cell(**settings)
+            return cell
         else:
             raise ValueError(
-                "get_component expects a CellSpec (KCell, CellFactory, "
-                f"string or dict), got {type(component)}"
+                "get_cell expects a CellSpec (KCell, CellFactory, "
+                f"string or dict), got {type(cell)}"
             )
 
     def get_enclosure(self, enclosure: Enclosure, **kwargs: Any) -> Enclosure:
@@ -407,8 +399,8 @@ class Pdk(BaseModel):
 _ACTIVE_PDK = None
 
 
-def get_component(component: CellSpec, **kwargs: Any) -> KCell:
-    return _ACTIVE_PDK.get_component(component, **kwargs)
+def get_cell(cell: CellSpec, **kwargs: Any) -> KCell:
+    return _ACTIVE_PDK.get_cell(cell, **kwargs)
 
 
 def get_cell(cell: CellSpec, **kwargs: Any) -> CellFactory:

@@ -940,16 +940,16 @@ class LayerViews(BaseModel):
         self.layer_views = {}
 
     def preview_layerset(self, size: float = 100.0, spacing: float = 100.0) -> object:
-        """Generates a Component with all the layers.
+        """Generates a Cell with all the layers.
 
         Args:
             size: square size in um.
             spacing: spacing between each square in um.
 
         """
-        import kfactory as gf
+        import kfactory as kf
 
-        D = gf.Component(name="layerset", with_uuid=True)
+        D = kf.KCell(name="layerset", with_uuid=True)
         scale = size / 100
         num_layers = len(self.get_layer_views())
         matrix_size = int(np.ceil(np.sqrt(num_layers)))
@@ -958,10 +958,8 @@ class LayerViews(BaseModel):
         )
         for n, layer in enumerate(sorted_layers):
             layer_tuple = layer.layer
-            R = gf.components.rectangle(
-                size=(100 * scale, 100 * scale), layer=layer_tuple
-            )
-            T = gf.components.text(
+            R = kf.cells.rectangle(size=(100 * scale, 100 * scale), layer=layer_tuple)
+            T = kf.cells.text(
                 text=f"{layer.name}\n{layer_tuple[0]} / {layer_tuple[1]}",
                 size=20 * scale,
                 position=(50 * scale, -20 * scale),

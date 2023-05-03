@@ -2337,7 +2337,7 @@ def cell(
                     # and should be copied first
                     cell = cell.dup()
                 if set_name:
-                    name = get_component_name(f.__name__, **params)
+                    name = get_cell_name(f.__name__, **params)
                     cell.name = name
                 if set_settings:
                     cell.settings.update(params)
@@ -2387,9 +2387,9 @@ def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
     return clean_name(_label)
 
 
-def get_component_name(component_type: str, **kwargs: dict[str, Any]) -> str:
-    """Convert a component to a string."""
-    name = component_type
+def get_cell_name(cell_type: str, **kwargs: dict[str, Any]) -> str:
+    """Convert a cell to a string."""
+    name = cell_type
 
     if kwargs:
         name += f"_{dict2name(None, **kwargs)}"

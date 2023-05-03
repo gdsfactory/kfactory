@@ -95,8 +95,8 @@ class LayerStack(BaseModel):
 
         return layer_to_thickness
 
-    def get_component_with_derived_layers(self, component):
-        """Returns component with derived layers."""
+    def get_cell_with_derived_layers(self, cell):
+        """Returns cell with derived layers."""
         import gdstk
 
         unetched_layers = [
@@ -120,26 +120,26 @@ class LayerStack(BaseModel):
                 if layer_name_etched in unetched_layers:
                     unetched_layers.remove(layer_name_etched)
 
-        component_layers = component.get_layers()
+        cell_layers = cell.get_layers()
 
         # Define pure grown layers
         unetched_layer_numbers = [
             self.layers[layer_name].layer
             for layer_name in unetched_layers
-            if self.layers[layer_name].layer in component_layers
+            if self.layers[layer_name].layer in cell_layers
         ]
-        component_derived = component.extract(unetched_layer_numbers)
+        cell_derived = cell.extract(unetched_layer_numbers)
 
         # Define unetched layers
         polygons_to_remove = []
         for unetched_layer_name, unetched_layers in unetched_layers_dict.items():
             layer = self.layers[unetched_layer_name].layer
-            polygons = component.get_polygons(by_spec=layer)
+            polygons = cell.get_polygons(by_spec=layer)
 
             # Add all the etching layers (OR)
             for etching_layers in unetched_layers:
                 layer = self.layers[etching_layers].layer
-                B_polys = component.get_polygons(by_spec=layer)
+                B_polys = cell.get_polygons(by_spec=layer)
                 polygons_to_remove = gdstk.boolean(
                     operand1=polygons_to_remove,
                     operand2=B_polys,
@@ -157,11 +157,11 @@ class LayerStack(BaseModel):
                         layer=derived_layer[0],
                         datatype=derived_layer[1],
                     )
-                    component_derived.add(slab_polygons)
+                    cell_derived.add(slab_polygons)
 
             # Remove all etching layers
             layer = self.layers[unetched_layer_name].layer
-            polygons = component.get_polygons(by_spec=layer)
+            polygons = cell.get_polygons(by_spec=layer)
             unetched_polys = gdstk.boolean(
                 operand1=polygons,
                 operand2=polygons_to_remove,
@@ -169,11 +169,11 @@ class LayerStack(BaseModel):
                 layer=layer[0],
                 datatype=layer[1],
             )
-            component_derived.add(unetched_polys)
+            cell_derived.add(unetched_polys)
 
-        component_derived.add_ports(component.ports)
-        component_derived.name = f"{component.name}_derived_layers"
-        return component_derived
+        cell_derived.add_ports(cell.ports)
+        cell_derived.name = f"{cell.name}_derived_layers"
+        return cell_derived
 
     def get_layer_to_zmin(self) -> Dict[Tuple[int, int], float]:
         """Returns layer tuple to z min position (um)."""
