@@ -63,22 +63,22 @@ class Pdk(BaseModel):
     """
 
     name: str
-    enclosures: Dict[str, Enclosure] = Field(default_factory=dict)
-    cells: Dict[str, CellFactory] = Field(default_factory=dict)
-    base_pdk: Optional[Pdk] = None
-    default_decorator: Optional[Callable[[KCell], None]] = None
+    enclosures: dict[str, Enclosure] = Field(default_factory=dict)
+    cells: dict[str, CellFactory] = Field(default_factory=dict)
+    base_pdk: Pdk | None = None
+    default_decorator: Callable[[KCell], None] | None = None
     layers: type[LayerEnum]
-    layer_stack: Optional[LayerStack] = None
+    layer_stack: LayerStack | None = None
     # layer_views: Optional[LayerViews] = None
-    layer_transitions: Dict[
-        Union[LayerEnum, Tuple[LayerEnum, LayerEnum]], CellSpec
-    ] = Field(default_factory=dict)
-    sparameters_path: Optional[Path | str] = None
+    layer_transitions: dict[LayerEnum | tuple[LayerEnum, LayerEnum], CellSpec] = Field(
+        default_factory=dict
+    )
+    sparameters_path: Path | str | None = None
     # modes_path: Optional[Path] = PATH.modes
-    interconnect_cml_path: Optional[Path] = None
+    interconnect_cml_path: Path | None = None
     grid_size: float = 0.001
     warn_off_grid_ports: bool = False
-    constants: Dict[str, Any] = constants
+    constants: dict[str, Any] = constants
 
     class Config:
         """Configuration."""
@@ -93,7 +93,7 @@ class Pdk(BaseModel):
         }
 
     @validator("sparameters_path")
-    def is_pathlib_path(cls, path: Union[str, Path]) -> Path:
+    def is_pathlib_path(cls, path: str | Path) -> Path:
         return pathlib.Path(path)
 
     def validate_layers(self) -> None:
@@ -161,7 +161,7 @@ class Pdk(BaseModel):
 
     def register_cells_yaml(
         self,
-        dirpath: Optional[Path] = None,
+        dirpath: Path | None = None,
         update: bool = False,
         **kwargs: Any,
     ) -> None:
@@ -261,7 +261,7 @@ class Pdk(BaseModel):
     def _get_cell(
         self,
         cell: CellSpec,
-        cells: Dict[str, Callable[..., KCell]],
+        cells: dict[str, Callable[..., KCell]],
         **kwargs: Any,
     ) -> KCell:
         """Returns cell from a cell spec."""
@@ -340,8 +340,8 @@ class Pdk(BaseModel):
             )
 
     def get_layer(
-        self, layer: Tuple[int, int] | List[int] | int | str
-    ) -> Tuple[int, int] | List[int] | None:
+        self, layer: tuple[int, int] | list[int] | int | str
+    ) -> tuple[int, int] | list[int] | None:
         """Returns layer from a layer spec."""
         if isinstance(layer, (tuple, list)):
             if len(layer) != 2:
@@ -411,7 +411,7 @@ def get_enclosure(enclosure: Enclosure, **kwargs: Any) -> Enclosure:
     return _ACTIVE_PDK.get_enclosure(enclosure, **kwargs)
 
 
-def get_layer(layer: LayerEnum) -> Tuple[int, int] | List[int] | Any:
+def get_layer(layer: LayerEnum) -> tuple[int, int] | list[int] | Any:
     return _ACTIVE_PDK.get_layer(layer)
 
 

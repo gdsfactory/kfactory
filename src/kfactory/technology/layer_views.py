@@ -286,8 +286,8 @@ class HatchPattern(BaseModel):
     """
 
     name: str
-    order: Optional[int] = None
-    custom_pattern: Optional[str] = None
+    order: int | None = None
+    custom_pattern: str | None = None
 
     class Config:
         """YAML output uses name as the key."""
@@ -295,7 +295,7 @@ class HatchPattern(BaseModel):
         fields = {"name": {"exclude": True}}
 
     @validator("custom_pattern")
-    def check_pattern_klayout(cls, pattern: Optional[str], **kwargs) -> Optional[str]:
+    def check_pattern_klayout(cls, pattern: str | None, **kwargs) -> str | None:
         if pattern is None:
             return None
         lines = pattern.splitlines()
@@ -336,8 +336,8 @@ class LineStyle(BaseModel):
     """
 
     name: str
-    order: Optional[int] = None
-    custom_style: Optional[str] = None
+    order: int | None = None
+    custom_style: str | None = None
 
     class Config:
         """YAML output uses name as the key."""
@@ -345,7 +345,7 @@ class LineStyle(BaseModel):
         fields = {"name": {"exclude": True}}
 
     @validator("custom_style")
-    def check_pattern(cls, pattern: Optional[str], **kwargs) -> Optional[str]:
+    def check_pattern(cls, pattern: str | None, **kwargs) -> str | None:
         if pattern is None:
             return None
 
@@ -407,24 +407,24 @@ class LayerView(BaseModel):
         group_members: Add a list of group members to the LayerView.
     """
 
-    name: Optional[str] = None
-    info: Optional[str] = None
-    layer: Optional[Layer] = None
+    name: str | None = None
+    info: str | None = None
+    layer: Layer | None = None
     layer_in_name: bool = False
-    frame_color: Optional[Color] = None
-    fill_color: Optional[Color] = None
+    frame_color: Color | None = None
+    fill_color: Color | None = None
     frame_brightness: int = 0
     fill_brightness: int = 0
-    hatch_pattern: Optional[Union[str, HatchPattern]] = None
-    line_style: Optional[Union[str, LineStyle]] = None
+    hatch_pattern: str | HatchPattern | None = None
+    line_style: str | LineStyle | None = None
     valid: bool = True
     visible: bool = True
     transparent: bool = False
-    width: Optional[int] = None
+    width: int | None = None
     marked: bool = False
     xfill: bool = False
     animation: int = 0
-    group_members: Optional[Dict[str, LayerView]] = Field(default_factory=dict)
+    group_members: dict[str, LayerView] | None = Field(default_factory=dict)
 
     class Config:
         """YAML output uses name as the key."""
@@ -433,10 +433,10 @@ class LayerView(BaseModel):
 
     def __init__(
         self,
-        gds_layer: Optional[int] = None,
-        gds_datatype: Optional[int] = None,
-        color: Optional[ColorType] = None,
-        brightness: Optional[int] = None,
+        gds_layer: int | None = None,
+        gds_datatype: int | None = None,
+        color: ColorType | None = None,
+        brightness: int | None = None,
         **data,
     ):
         """Initialize LayerView object."""
@@ -471,10 +471,10 @@ class LayerView(BaseModel):
     def dict(
         self,
         *,
-        include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
-        exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]] = None,
+        include: AbstractSetIntStr | MappingIntStrAny | None = None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None = None,
         by_alias: bool = False,
-        skip_defaults: Optional[bool] = None,
+        skip_defaults: bool | None = None,
         exclude_unset: bool = False,
         exclude_defaults: bool = False,
         exclude_none: bool = False,
@@ -531,7 +531,7 @@ class LayerView(BaseModel):
         else:
             return 0.3
 
-    def get_color_dict(self) -> Dict[str, str]:
+    def get_color_dict(self) -> dict[str, str]:
         if self.fill_color is not None or self.frame_color is not None:
             return {
                 "fill_color": ensure_six_digit_hex_color(self.fill_color.as_hex()),
@@ -655,8 +655,8 @@ class LayerView(BaseModel):
 
     @staticmethod
     def _process_name(
-        name: str, layer_pattern: Union[str, re.Pattern]
-    ) -> Tuple[Optional[str], Optional[bool]]:
+        name: str, layer_pattern: str | re.Pattern
+    ) -> tuple[str | None, bool | None]:
         """Strip layer info from name if it exists.
 
         Args:
@@ -675,9 +675,7 @@ class LayerView(BaseModel):
         return clean_name(name, remove_dots=True), layer_in_name
 
     @staticmethod
-    def _process_layer(
-        layer: str, layer_pattern: Union[str, re.Pattern]
-    ) -> Optional[Layer]:
+    def _process_layer(layer: str, layer_pattern: str | re.Pattern) -> Layer | None:
         """Convert .lyp XML layer entry to a Layer.
 
         Args:
@@ -692,8 +690,8 @@ class LayerView(BaseModel):
 
     @classmethod
     def from_xml_element(
-        cls, element: ET.Element, layer_pattern: Union[str, re.Pattern]
-    ) -> Optional[LayerView]:
+        cls, element: ET.Element, layer_pattern: str | re.Pattern
+    ) -> LayerView | None:
         """Read properties from .lyp XML and generate LayerViews from them.
 
         Args:
@@ -760,15 +758,15 @@ class LayerViews(BaseModel):
         layer_map: Specify a layer_map to get the layer tuple based on the name of the LayerView, rather than the 'layer' argument.
     """
 
-    layer_views: Dict[str, LayerView] = Field(default_factory=dict)
-    custom_dither_patterns: Dict[str, HatchPattern] = Field(default_factory=dict)
-    custom_line_styles: Dict[str, LineStyle] = Field(default_factory=dict)
-    layer_map: Union[Dict[str, Layer], BaseModel] = Field(default_factory=dict)
+    layer_views: dict[str, LayerView] = Field(default_factory=dict)
+    custom_dither_patterns: dict[str, HatchPattern] = Field(default_factory=dict)
+    custom_line_styles: dict[str, LineStyle] = Field(default_factory=dict)
+    layer_map: dict[str, Layer] | BaseModel = Field(default_factory=dict)
 
     def __init__(
         self,
-        filepath: Optional[PathLike] = None,
-        layer_map: Union[Dict[str, Layer], BaseModel] = None,
+        filepath: PathLike | None = None,
+        layer_map: dict[str, Layer] | BaseModel = None,
         **data,
     ):
         """Initialize LayerViews object.
@@ -812,7 +810,7 @@ class LayerViews(BaseModel):
                 self.add_layer_view(name=name, layer_view=lv)
 
     def add_layer_view(
-        self, name: str, layer_view: Optional[LayerView] = None, **kwargs
+        self, name: str, layer_view: LayerView | None = None, **kwargs
     ) -> None:
         """Adds a layer to LayerViews.
 
@@ -856,7 +854,7 @@ class LayerViews(BaseModel):
         ):
             layer_view.line_style = self.custom_line_styles[line_style]
 
-    def get_layer_views(self, exclude_groups: bool = False) -> Dict[str, LayerView]:
+    def get_layer_views(self, exclude_groups: bool = False) -> dict[str, LayerView]:
         """Return all LayerViews.
 
         Args:
@@ -871,7 +869,7 @@ class LayerViews(BaseModel):
             layers[name] = view
         return layers
 
-    def get_layer_view_groups(self) -> Dict[str, LayerView]:
+    def get_layer_view_groups(self) -> dict[str, LayerView]:
         """Return the LayerViews that contain other LayerViews."""
         return {name: lv for name, lv in self.layer_views.items() if lv.group_members}
 
@@ -931,7 +929,7 @@ class LayerViews(BaseModel):
         name = tuple_to_name[layer_tuple]
         return self.get_layer_views()[name]
 
-    def get_layer_tuples(self) -> Set[Layer]:
+    def get_layer_tuples(self) -> set[Layer]:
         """Returns a tuple for each layer."""
         return {layer.layer for layer in self.get_layer_views().values()}
 
@@ -977,9 +975,7 @@ class LayerViews(BaseModel):
             )
         return D
 
-    def to_lyp(
-        self, filepath: Union[str, pathlib.Path], overwrite: bool = True
-    ) -> None:
+    def to_lyp(self, filepath: str | pathlib.Path, overwrite: bool = True) -> None:
         """Write all layer properties to a KLayout .lyp file.
 
         Args:
@@ -1015,8 +1011,8 @@ class LayerViews(BaseModel):
 
     @staticmethod
     def from_lyp(
-        filepath: Union[str, pathlib.Path],
-        layer_pattern: Optional[Union[str, re.Pattern]] = None,
+        filepath: str | pathlib.Path,
+        layer_pattern: str | re.Pattern | None = None,
     ) -> LayerViews:
         r"""Write all layer properties to a KLayout .lyp file.
 
@@ -1093,7 +1089,7 @@ class LayerViews(BaseModel):
         )
 
     def to_yaml(
-        self, layer_file: Union[str, pathlib.Path], prefer_named_color: bool = True
+        self, layer_file: str | pathlib.Path, prefer_named_color: bool = True
     ) -> None:
         """Export layer properties to a YAML file.
 
@@ -1143,7 +1139,7 @@ class LayerViews(BaseModel):
         )
 
     @staticmethod
-    def from_yaml(layer_file: Union[str, pathlib.Path]) -> LayerViews:
+    def from_yaml(layer_file: str | pathlib.Path) -> LayerViews:
         """Import layer properties from two yaml files.
 
         Args:
