@@ -1,9 +1,8 @@
 from pathlib import Path
-from typing import Any, Callable, Dict, Type, Union
+from typing import Any, Callable, Type, Union
 
 from kfactory.kcell import KCell
 
-CellSpec = Union[Type[str], KCell | Type[Dict[str, Any]]]
-ComponentFactory = Callable[..., KCell]
-ComponentSpec = Union[str, ComponentFactory, KCell, Dict[str, Any]]
-PathType = Union[str, Path]
+CellFactory = Callable[..., KCell]
+CellSpec = str | CellFactory | KCell | dict[str, Any]
+PathType = str | Path

@@ -9,7 +9,6 @@ from functools import partial
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-import numpy as np
 from omegaconf import DictConfig
 from pydantic import BaseModel, Field, validator
 
@@ -17,7 +16,7 @@ import kfactory as kf
 from kfactory.conf import logger
 from kfactory.kcell import KCell, LayerEnum
 from kfactory.technology import LayerLevel, LayerStack
-from kfactory.typings import CellSpec, ComponentFactory, ComponentSpec
+from kfactory.typings import CellFactory, CellSpec
 from kfactory.utils.enclosure import Enclosure
 
 component_settings = ["function", "component", "settings"]
@@ -65,14 +64,14 @@ class Pdk(BaseModel):
 
     name: str
     enclosures: Dict[str, Enclosure] = Field(default_factory=dict)
-    cells: Dict[str, ComponentFactory] = Field(default_factory=dict)
+    cells: Dict[str, CellFactory] = Field(default_factory=dict)
     base_pdk: Optional[Pdk] = None
     default_decorator: Optional[Callable[[KCell], None]] = None
     layers: type[LayerEnum]
     layer_stack: Optional[LayerStack] = None
     # layer_views: Optional[LayerViews] = None
     layer_transitions: Dict[
-        Union[LayerEnum, Tuple[LayerEnum, LayerEnum]], ComponentSpec
+        Union[LayerEnum, Tuple[LayerEnum, LayerEnum]], CellSpec
     ] = Field(default_factory=dict)
     sparameters_path: Optional[Path | str] = None
     # modes_path: Optional[Path] = PATH.modes
@@ -207,8 +206,8 @@ class Pdk(BaseModel):
         self.cells.pop(name)
         logger.info(f"Removed cell {name!r}")
 
-    def get_cell(self, cell: ComponentSpec, **kwargs: Any) -> ComponentFactory:
-        """Returns ComponentFactory from a cell spec."""
+    def get_cell(self, cell: CellSpec, **kwargs: Any) -> CellFactory:
+        """Returns CellFactory from a cell spec."""
         cells_and_containers = set(self.cells.keys())
 
         if callable(cell):
@@ -244,15 +243,15 @@ class Pdk(BaseModel):
             return partial(cell, **settings)
         else:
             raise ValueError(
-                "get_cell expects a CellSpec (ComponentFactory, string or dict),"
+                "get_cell expects a CellSpec (CellFactory, string or dict),"
                 f"got {type(cell)}"
             )
 
-    def get_component(self, component: ComponentSpec, **kwargs: Any) -> KCell:
+    def get_component(self, component: CellSpec, **kwargs: Any) -> KCell:
         """Returns component from a component spec."""
         return self._get_component(component=component, cells=self.cells, **kwargs)
 
-    def get_symbol(self, component: ComponentSpec, **kwargs: Any) -> KCell:
+    def get_symbol(self, component: CellSpec, **kwargs: Any) -> KCell:
         """Returns a component's symbol from a component spec."""
         # this is a pretty rough first implementation
         try:
@@ -265,7 +264,7 @@ class Pdk(BaseModel):
 
     def _get_component(
         self,
-        component: ComponentSpec,
+        component: CellSpec,
         cells: Dict[str, Callable[..., KCell]],
         **kwargs: Any,
     ) -> KCell:
@@ -307,7 +306,7 @@ class Pdk(BaseModel):
             return component
         else:
             raise ValueError(
-                "get_component expects a ComponentSpec (KCell, ComponentFactory, "
+                "get_component expects a CellSpec (KCell, CellFactory, "
                 f"string or dict), got {type(component)}"
             )
 
@@ -408,11 +407,11 @@ class Pdk(BaseModel):
 _ACTIVE_PDK = None
 
 
-def get_component(component: ComponentSpec, **kwargs: Any) -> KCell:
+def get_component(component: CellSpec, **kwargs: Any) -> KCell:
     return _ACTIVE_PDK.get_component(component, **kwargs)
 
 
-def get_cell(cell: ComponentSpec, **kwargs: Any) -> ComponentFactory:
+def get_cell(cell: CellSpec, **kwargs: Any) -> CellFactory:
     return _ACTIVE_PDK.get_cell(cell, **kwargs)
 
 
