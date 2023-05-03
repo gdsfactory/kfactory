@@ -102,6 +102,8 @@ strict = true
 exclude = [
 	"tests",
 	"src/kfactory/widgets",
+	"src/kfactory/technology",
+	"src/kfactory/pdk.py",
 ]
 plugins = "pydantic.mypy"
 
