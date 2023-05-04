@@ -16,7 +16,7 @@ def test_cells(cells):
     settings = {
         "width": 1.0,
         "height": 5.0,
-        "radius": 30.0,
+        "radius": 10.0,
         "length": 10.0,
         "layer": 0,
         "width1": 1.0,
@@ -41,7 +41,7 @@ def test_cells(cells):
             continue
         kcl_ref = kf.KCLayout()
         kcl_ref.read(path.gds_ref / f"{cell}.gds")
-        ref_cell = kcl_ref[0]
+        ref_cell = kcl_ref[kcl_ref.top_cell().name]
 
         for layer in kcl_ref.layer_infos():
             layer = kcl_ref.layer(layer)
@@ -54,9 +54,9 @@ def test_cells(cells):
                 layer_tuple = kcl_ref.layer_infos()[layer]
                 region_xor = region_ref ^ region_run
                 c = kf.KCell(f"{cell}_diffs")
-                c_run = kf.KCell("new")
-                c_ref = kf.KCell("old")
-                c_xor = kf.KCell("xor")
+                c_run = kf.KCell(f"{cell}_new")
+                c_ref = kf.KCell(f"{cell}_old")
+                c_xor = kf.KCell(f"{cell}_xor")
                 c_run.shapes(layer).insert(region_run)
                 c_ref.shapes(layer).insert(region_ref)
                 c_xor.shapes(layer).insert(region_xor)
@@ -69,7 +69,7 @@ def test_cells(cells):
                 val = input("Save current GDS as new reference (Y)? [Y/n]")
                 if not val.upper().startswith("N"):
                     logger.info(f"replacing file {str(ref_file)!r}")
-                    ref_cell.write(ref_file)
+                    run_cell.write(ref_file)
 
                 raise GeometryDifference(
                     f"Differences found in {cell!r} on layer {layer_tuple}"
