@@ -48,4 +48,10 @@ release:
 	git push
 	git push origin --tags
 
+gds-upload:
+	gh release upload v0.0.0 gds/ --clobber
+
+gds-download:
+	gh release download v0.0.0 gds/
+
 .PHONY: build

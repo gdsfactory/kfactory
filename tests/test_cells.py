@@ -2,7 +2,7 @@ from kfactory import kdb
 import kfactory as kf
 
 from inspect import signature
-from pathlib import Path
+from kfactory.conf import path
 
 
 def test_cells(cells):
@@ -22,17 +22,23 @@ def test_cells(cells):
     for cell in cells:
         if cell == "waveguide_dbu" or cell == "taper_dbu":
             continue
-        kcl_ref = kf.KCLayout()
-        kcl_ref.read(Path(f"./tests/ref_cells/{cell}.gds"))
-        ref_cell = kcl_ref[0]
+        gdspath = path.gds_ref / f"{cell}.gds"
+
         settings_ = {
             k: v for k, v in settings.items() if k in signature(cells[cell]).parameters
         }
-        cell_ = cells[cell](**settings_)
+        run_cell = cells[cell](**settings_)
+        if not gdspath.exists():
+            path.gds_ref.mkdir(parents=True, exist_ok=True)
+            run_cell.write(str(gdspath))
+            continue
+        kcl_ref = kf.KCLayout()
+        kcl_ref.read(path.gds_ref / f"{cell}.gds")
+        ref_cell = kcl_ref[0]
 
         for layer in kcl_ref.layer_infos():
             layer = kcl_ref.layer(layer)
-            region_cell = kdb.Region(cell_.begin_shapes_rec(layer))
+            region_cell = kdb.Region(run_cell.begin_shapes_rec(layer))
             region_ref = kdb.Region(ref_cell.begin_shapes_rec(layer))
 
             assert not region_cell - region_ref

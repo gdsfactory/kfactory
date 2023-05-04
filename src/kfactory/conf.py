@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import pathlib
 import re
 import sys
 import traceback
@@ -15,6 +16,14 @@ from pydantic import BaseSettings
 
 if TYPE_CHECKING:
     from loguru import Logger
+
+
+class Path:
+    """Stores paths."""
+
+    module = pathlib.Path(__file__).parent.absolute()
+    repo = module.parent.parent
+    gds_ref = repo / "gds" / "gds_ref"
 
 
 def add_traceback(record: loguru.Record) -> None:
@@ -114,5 +123,9 @@ class Settings(BaseSettings):
 
 
 config = Settings()
+path = Path()
 
 __all__ = ["config"]
+
+if __name__ == "__main__":
+    print(path)

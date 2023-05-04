@@ -6,6 +6,7 @@
 *.tar
 *.zip
 .idea
+gds/
 
 # Packages
 *.egg
