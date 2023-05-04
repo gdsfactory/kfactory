@@ -477,7 +477,7 @@ class Port:
     _trans: kdb.Trans | None
     _dcplx_trans: kdb.DCplxTrans | None
     port_type: str
-    d: "DPart"
+    d: "UMPort"
 
     @overload
     def __init__(
@@ -560,7 +560,7 @@ class Port:
     ):
         """Create a port from dbu or um based units."""
         self.kcl = kcl
-        self.d = DPart(self)
+        self.d = UMPort(self)
         self.info = info.copy()
         if port is not None:
             self.name = port.name if name is None else name
@@ -758,6 +758,13 @@ class Port:
         """Returns `True`/`False` depending on the mirror flag on the transformation."""
         return self.trans.is_mirror()
 
+    @mirror.setter
+    def mirror(self, value: bool) -> None:
+        """Setter for mirror flag on trans."""
+        self._trans = self.trans.dup()
+        self._dcplx_trans = None
+        self._trans.mirror = value
+
     def hash(self) -> bytes:
         """Hash of Port."""
         h = sha3_512()
@@ -786,7 +793,7 @@ class Port:
             )
 
 
-class DPart:
+class UMPort:
     """Make the port able to dynamically give um based info."""
 
     def __init__(self, parent: Port):
@@ -1641,6 +1648,7 @@ class Instance:
         self._instance = instance
         self.kcl = kcl
         self.ports = InstancePorts(self)
+        self.d = UMInstance(self)
 
     def __getattr__(self, name):  # type: ignore[no-untyped-def]
         """If we don't have an attribute, get it from the instance."""
@@ -1891,6 +1899,160 @@ class Instance:
             "dcplx_trans": node._dcplx_trans,
         }
         return representer.represent_mapping(cls.yaml_tag, d)
+
+    @overload
+    def movex(self, destination: int, /) -> None:
+        ...
+
+    @overload
+    def movex(self, origin: int, destination: int) -> None:
+        ...
+
+    def movex(self, origin: int, destination: int | None = None) -> None:
+        """Move the instance in x-direction in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.Trans(origin, 0))
+        else:
+            self.transform(kdb.Trans(destination - origin, 0))
+
+    @overload
+    def movey(self, destination: int, /) -> None:
+        ...
+
+    @overload
+    def movey(self, origin: int, destination: int) -> None:
+        ...
+
+    def movey(self, origin: int, destination: int | None = None) -> None:
+        """Move the instance in y-direction in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.Trans(0, origin))
+        else:
+            self.transform(kdb.Trans(0, destination - origin))
+
+    @overload
+    def move(self, destination: tuple[int, int], /) -> None:
+        ...
+
+    @overload
+    def move(self, origin: tuple[int, int], destination: tuple[int, int]) -> None:
+        ...
+
+    def move(
+        self, origin: tuple[int, int], destination: tuple[int, int] | None = None
+    ) -> None:
+        """Move the instance in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.Trans(*origin))
+        else:
+            self.transform(
+                kdb.Trans(destination[0] - origin[0], destination[1] - origin[1])
+            )
+
+    def rotate(self, angle: Literal[0, 1, 2, 3]) -> None:
+        """Rotate instance in increments of 90°."""
+        self.transform(kdb.Trans(angle, False, 0, 0))
+
+
+class UMInstance:
+    """Make the port able to dynamically give um based info."""
+
+    def __init__(self, parent: Instance):
+        """Constructor, just needs a pointer to the port.
+
+        Args:
+            parent: port that this should be attached to
+        """
+        self.parent = parent
+
+    @overload
+    def movex(self, destination: float, /) -> None:
+        ...
+
+    @overload
+    def movex(self, origin: float, destination: float) -> None:
+        ...
+
+    def movex(self, origin: float, destination: float | None = None) -> None:
+        """Move the instance in x-direction in um.
+
+        Args:
+            origin: reference point to move
+            destination: move origin so that it will land on this coordinate
+        """
+        if destination is None:
+            self.parent.transform(kdb.DTrans(origin, 0))
+        else:
+            self.parent.transform(kdb.DTrans(destination - origin, 0))
+
+    @overload
+    def movey(self, destination: float, /) -> None:
+        ...
+
+    @overload
+    def movey(self, origin: float, destination: float) -> None:
+        ...
+
+    def movey(self, origin: float, destination: float | None = None) -> None:
+        """Move the instance in y-direction in um.
+
+        Args:
+            origin: reference point to move
+            destination: move origin so that it will land on this coordinate
+        """
+        if destination is None:
+            self.parent.transform(kdb.DTrans(0, origin))
+        else:
+            self.parent.transform(kdb.DTrans(0, destination - origin))
+
+    def rotate(self, angle: float) -> None:
+        """Rotate instance in increments of 90°."""
+        self.parent.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
+
+    @overload
+    def move(self, destination: tuple[float, float], /) -> None:
+        ...
+
+    @overload
+    def move(
+        self, origin: tuple[float, float], destination: tuple[float, float]
+    ) -> None:
+        ...
+
+    def move(
+        self,
+        origin: tuple[float, float],
+        destination: tuple[float, float] | None = None,
+    ) -> None:
+        """Move the instance in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.parent.transform(kdb.DTrans(float(origin[1]), float(origin[0])))
+        else:
+            self.parent.transform(
+                kdb.DTrans(
+                    float(destination[0] - origin[0]), float(destination[1] - origin[1])
+                )
+            )
 
 
 class Instances:
@@ -2544,7 +2706,7 @@ __all__ = [
     "Ports",
     "autocell",
     "cell",
-    "kcl ",
+    "kcl",
     "KCLayout",
     "default_save",
     "LayerEnum",
