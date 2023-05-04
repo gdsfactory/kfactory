@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import pathlib
 import re
 import sys
 import traceback

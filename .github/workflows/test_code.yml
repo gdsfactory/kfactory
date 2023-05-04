@@ -18,7 +18,6 @@ jobs:
           python -m pip install -e .[ci]
       - uses: pre-commit/action@v3.0.0
   test_code:
-    needs: [pre-commit]
     runs-on: ${{ matrix.os }}
     strategy:
       max-parallel: 12
@@ -34,12 +33,14 @@ jobs:
           cache: "pip"
           cache-dependency-path: pyproject.toml
       - name: Install dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           pip install -e .[ci]
+          make gds-download
       - name: Test with pytest
         run: pytest -vv
   test_docs:
-    needs: [pre-commit]
     runs-on: ${{ matrix.os }}
     strategy:
       max-parallel: 12
@@ -61,11 +62,7 @@ jobs:
           python -m pip install --user -U pip
           python -m pip install --user -e .[docs,ci]
           python -m ipykernel install --user --name python3
-          sudo apt install pandoc
           make install
       - name: Test documentation
         run: |
-          cd docs
-          make clean
-          make convert
-          make html
+          make docs

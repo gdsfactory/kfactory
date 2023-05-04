@@ -11,8 +11,11 @@ docs-clean:
 	rm -rf docs/_autosummary/
 	rm -rf docs/build
 
+docs:
+	jb build docs
+
 test:
-	pytest
+	pytest -s
 
 cov:
 	pytest --cov=kfactory
@@ -47,5 +50,11 @@ update-pre:
 release:
 	git push
 	git push origin --tags
+
+gds-upload:
+	gh release upload v0.6.0 gds/gds_ref/*.gds --clobber
+
+gds-download:
+	gh release download v0.6.0 -D gds/gds_ref/ --clobber
 
 .PHONY: build
