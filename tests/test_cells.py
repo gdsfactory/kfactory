@@ -2,14 +2,21 @@ from kfactory import kdb
 import kfactory as kf
 
 from inspect import signature
-from kfactory.conf import path
+from kfactory.conf import path, logger
+
+
+class GeometryDifference(ValueError):
+    """Exception for Geometric differences."""
+
+    pass
 
 
 def test_cells(cells):
+    """Ensure cells have the same geometry as their golden references."""
     settings = {
         "width": 1.0,
         "height": 5.0,
-        "radius": 10.0,
+        "radius": 30.0,
         "length": 10.0,
         "layer": 0,
         "width1": 1.0,
@@ -20,17 +27,17 @@ def test_cells(cells):
 
     cells = kf.pdk.get_cells(cells)
     for cell in cells:
-        if cell == "waveguide_dbu" or cell == "taper_dbu":
+        if cell in ["waveguide_dbu", "taper_dbu"]:
             continue
-        gdspath = path.gds_ref / f"{cell}.gds"
+        ref_file = path.gds_ref / f"{cell}.gds"
 
         settings_ = {
             k: v for k, v in settings.items() if k in signature(cells[cell]).parameters
         }
         run_cell = cells[cell](**settings_)
-        if not gdspath.exists():
+        if not ref_file.exists():
             path.gds_ref.mkdir(parents=True, exist_ok=True)
-            run_cell.write(str(gdspath))
+            run_cell.write(str(ref_file))
             continue
         kcl_ref = kf.KCLayout()
         kcl_ref.read(path.gds_ref / f"{cell}.gds")
@@ -41,4 +48,29 @@ def test_cells(cells):
             region_run = kdb.Region(run_cell.begin_shapes_rec(layer))
             region_ref = kdb.Region(ref_cell.begin_shapes_rec(layer))
 
-            assert not region_run - region_ref
+            region_diff = region_run - region_ref
+
+            if not region_diff.is_empty():
+                layer_tuple = kcl_ref.layer_infos()[layer]
+                region_xor = region_ref ^ region_run
+                c = kf.KCell(f"{cell}_diffs")
+                c_run = kf.KCell("new")
+                c_ref = kf.KCell("old")
+                c_xor = kf.KCell("xor")
+                c_run.shapes(layer).insert(region_run)
+                c_ref.shapes(layer).insert(region_ref)
+                c_xor.shapes(layer).insert(region_xor)
+                c << c_run
+                c << c_ref
+                c << c_xor
+                c.show()
+
+                print(f"Differences found in {cell!r} on layer {layer_tuple}")
+                val = input("Save current GDS as new reference (Y)? [Y/n]")
+                if not val.upper().startswith("N"):
+                    logger.info(f"replacing file {str(ref_file)!r}")
+                    ref_cell.write(ref_file)
+
+                raise GeometryDifference(
+                    f"Differences found in {cell!r} on layer {layer_tuple}"
+                )

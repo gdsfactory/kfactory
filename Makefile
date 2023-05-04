@@ -12,7 +12,7 @@ docs-clean:
 	rm -rf docs/build
 
 test:
-	pytest
+	pytest -s
 
 cov:
 	pytest --cov=kfactory

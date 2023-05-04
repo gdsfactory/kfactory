@@ -24,6 +24,7 @@ from .kcell import (
 from . import cells, placer, routing, utils, port, pdk
 from .conf import config
 from .pdk import Pdk
+from .generic_tech import LAYER
 
 __version__ = "0.6.3"
 
@@ -34,7 +35,6 @@ __all__ = [
     "Instance",
     "Port",
     "Ports",
-    "autocell",
     "cell",
     "kcl",
     "KCLayout",
@@ -47,9 +47,9 @@ __all__ = [
     "routing",
     "utils",
     "show",
-    "klay",
     "config",
     "LayerEnum",
     "logger",
     "pdk",
+    "LAYER",
 ]
