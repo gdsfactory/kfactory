@@ -54,14 +54,10 @@ def test_cells(cells):
                 layer_tuple = kcl_ref.layer_infos()[layer]
                 region_xor = region_ref ^ region_run
                 c = kf.KCell(f"{cell}_diffs")
-                c_run = kf.KCell("new")
-                c_ref = kf.KCell("old")
                 c_xor = kf.KCell("xor")
-                c_run.shapes(layer).insert(region_run)
-                c_ref.shapes(layer).insert(region_ref)
                 c_xor.shapes(layer).insert(region_xor)
-                c << c_run
-                c << c_ref
+                c << run_cell
+                c << ref_cell
                 c << c_xor
                 c.show()
 
@@ -69,7 +65,7 @@ def test_cells(cells):
                 val = input("Save current GDS as new reference (Y)? [Y/n]")
                 if not val.upper().startswith("N"):
                     logger.info(f"replacing file {str(ref_file)!r}")
-                    ref_cell.write(ref_file)
+                    run_cell.write(ref_file)
 
                 raise GeometryDifference(
                     f"Differences found in {cell!r} on layer {layer_tuple}"
