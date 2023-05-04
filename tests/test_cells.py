@@ -2,6 +2,7 @@ from kfactory import kdb
 import kfactory as kf
 
 from inspect import signature
+from pathlib import Path
 
 
 def test_cells(cells):
@@ -22,7 +23,7 @@ def test_cells(cells):
         if cell == "waveguide_dbu" or cell == "taper_dbu":
             continue
         kcl_ref = kf.KCLayout()
-        kcl_ref.read(f"./tests/ref_cells/{cell}.gds")
+        kcl_ref.read(Path(f"./tests/ref_cells/{cell}.gds"))
         ref_cell = kcl_ref[0]
         settings_ = {
             k: v for k, v in settings.items() if k in signature(cells[cell]).parameters
