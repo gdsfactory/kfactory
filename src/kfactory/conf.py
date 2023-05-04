@@ -18,14 +18,6 @@ if TYPE_CHECKING:
     from loguru import Logger
 
 
-class Path:
-    """Stores paths."""
-
-    module = pathlib.Path(__file__).parent.absolute()
-    repo = module.parent.parent
-    gds_ref = repo / "gds" / "gds_ref"
-
-
 def add_traceback(record: loguru.Record) -> None:
     """Add a traceback to the logger."""
     extra = record["extra"]
@@ -123,9 +115,5 @@ class Settings(BaseSettings):
 
 
 config = Settings()
-path = Path()
 
 __all__ = ["config"]
-
-if __name__ == "__main__":
-    print(path)

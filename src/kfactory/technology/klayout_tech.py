@@ -9,7 +9,6 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from kfactory.config import PATH
 from kfactory.technology import LayerViews
 
 Layer = tuple[int, int]
@@ -147,45 +146,3 @@ class KLayoutTechnology(BaseModel):
         """Allow db.Technology type."""
 
         arbitrary_types_allowed = True
-
-
-layer_views = LayerViews.from_lyp(str(PATH.klayout_lyp))
-
-
-def yaml_test():
-    tech_dir = PATH.repo / "extra" / "test_tech"
-
-    # Load from existing layer properties file
-    lyp = LayerViews.from_lyp(str(PATH.klayout_lyp))
-    print("Loaded from .lyp", lyp)
-
-    # Export layer properties to yaml files
-    layer_yaml = str(tech_dir / "layers.yml")
-    lyp.to_yaml(layer_yaml)
-
-    # Load layer properties from yaml files and check that they're the same
-    lyp_loaded = LayerViews.from_yaml(layer_yaml)
-    print("Loaded from .yaml", lyp_loaded)
-
-    assert lyp_loaded == lyp
-
-
-if __name__ == "__main__":
-    from kfactory.generic_tech import LAYER_STACK
-
-    lyp = LayerViews.from_lyp(str(PATH.klayout_lyp))
-
-    # str_xml = open(PATH.klayout_tech / "tech.lyt").read()
-    # new_tech = db.Technology.technology_from_xml(str_xml)
-    # generic_tech = KLayoutTechnology(layer_views=lyp)
-    connectivity = [("M1", "VIA1", "M2"), ("M2", "VIA2", "M3")]
-
-    c = generic_tech = KLayoutTechnology(
-        name="test_tech", layer_views=lyp, connectivity=connectivity
-    )
-    tech_dir = PATH.repo / "extra" / "test_tech"
-    # tech_dir = pathlib.Path("/home/jmatres/.klayout/salt/kfactory/tech/")
-    tech_dir.mkdir(exist_ok=True, parents=True)
-    generic_tech.export_technology_files(tech_dir=tech_dir, layer_stack=LAYER_STACK)
-
-    # yaml_test()
