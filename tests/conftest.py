@@ -63,6 +63,17 @@ def optical_port(LAYER):
 
 
 @pytest.fixture
+def cells():
+    return [
+        kf.cells.bezier,
+        kf.cells.euler,
+        kf.cells.circular,
+        kf.cells.taper,
+        kf.cells.waveguide,
+    ]
+
+
+@pytest.fixture
 def pdk(LAYER, waveguide_factory, wg_enc):
     pdk = kf.pdk.Pdk(layers=LAYER, name="TEST_PDK")
     pdk.register_cells(waveguide=waveguide_factory)
