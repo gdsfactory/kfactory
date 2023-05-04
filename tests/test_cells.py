@@ -78,7 +78,7 @@ cell_names = set(cells.keys())
 
 @pytest.fixture(params=cell_names, scope="function")
 def cell_name(request):
-    """returns cell name."""
+    """Returns cell name."""
     return request.param
 
 
