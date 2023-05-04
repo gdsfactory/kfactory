@@ -40,22 +40,12 @@ dev = [
 	"python-lsp-black",
 ]
 docs = [
-	"sphinx",
-	"docutils==0.17.1",
-	"sphinx_rtd_theme",
-	"sphinxcontrib-video",
-	"sphinx-autodoc-typehints",
-	"sphinx-book-theme>=0.3.3",
-	"sphinx-click",
-	"sphinx-copybutton",
-	"sphinx-markdown-tables",
-	"myst-parser",
-	"matplotlib",
-	"nbsphinx",
-	"autodoc_pydantic",
-	"jupytext",
-	"jupyter",
 	"kfactory[ipy]",
+      "autodoc_pydantic",
+      "jupytext",
+      "jupyter-book==0.15.1",
+      "pydata_sphinx_theme==0.13.1",
+	  "sphinxcontrib-video",
 ]
 ci = [
 	"flake8",

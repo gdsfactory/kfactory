@@ -21,17 +21,24 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install -e .[ci,docs]
-          sudo apt install pandoc
-      - name: Clean docs and create notebooks
-        shell: bash -l {0}
-        run: |
-          cd docs
-          make clean
-          make convert
-          cd -
-      - name: Running the Sphinx to gh-pages Action
-        uses: uibcdf/action-sphinx-docs-to-gh-pages@v1.1.0-beta
+          make docs
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          branch: main
-          dir_docs: docs
-          sphinxopts: ""
+          path: "./docs/_build/html/"
+
+  deploy-docs:
+    needs: build-docs
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2

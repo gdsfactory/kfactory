@@ -62,11 +62,7 @@ jobs:
           python -m pip install --user -U pip
           python -m pip install --user -e .[docs,ci]
           python -m ipykernel install --user --name python3
-          sudo apt install pandoc
           make install
       - name: Test documentation
         run: |
-          cd docs
-          make clean
-          make convert
-          make html
+          make docs
