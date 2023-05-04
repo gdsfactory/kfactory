@@ -24,31 +24,52 @@ def waveguide_factory(LAYER, wg_enc):
 
 
 @pytest.fixture
-def bend90(LAYER, wg_enc):
+def waveguide(LAYER, wg_enc) -> kf.KCell:
+    return kf.cells.waveguide.waveguide(
+        width=0.5, length=1, layer=LAYER.WG, enclosure=wg_enc
+    )
+
+
+@pytest.fixture
+def bend90(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.circular.bend_circular(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=90
     )
 
 
 @pytest.fixture
-def bend180(LAYER, wg_enc):
+def bend180(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.circular.bend_circular(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=180
     )
 
 
 @pytest.fixture
-def bend90_euler(LAYER, wg_enc):
+def bend90_euler(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.euler.bend_euler(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=90
     )
 
 
 @pytest.fixture
-def bend180_euler(LAYER, wg_enc):
+def bend180_euler(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.euler.bend_euler(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=180
     )
+
+
+@pytest.fixture
+def taper(LAYER, wg_enc) -> kf.KCell:
+    c = kf.cells.taper.taper(
+        width1=0.5,
+        width2=1,
+        length=10,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
+    )
+    c = c.dup()
+    c.name = "taper"
+    return c
 
 
 @pytest.fixture
@@ -63,13 +84,13 @@ def optical_port(LAYER):
 
 
 @pytest.fixture
-def cells():
+def cells(bend90, bend180, bend90_euler, taper, waveguide) -> list[kf.KCell]:
     return [
-        kf.cells.bezier,
-        kf.cells.euler,
-        kf.cells.circular,
-        kf.cells.taper,
-        kf.cells.waveguide,
+        bend90,
+        bend180,
+        bend90_euler,
+        taper,
+        waveguide,
     ]
 
 
