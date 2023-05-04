@@ -49,9 +49,9 @@ release:
 	git push origin --tags
 
 gds-upload:
-	gh release upload v0.0.0 gds/ --clobber
+	gh release upload v0.6.0 gds/gds_ref/*.gds --clobber
 
 gds-download:
-	gh release download v0.0.0 gds/
+	gh release download v0.6.0 -D gds/gds_ref/
 
 .PHONY: build
