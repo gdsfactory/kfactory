@@ -38,7 +38,7 @@ def test_cells(cells):
 
         for layer in kcl_ref.layer_infos():
             layer = kcl_ref.layer(layer)
-            region_cell = kdb.Region(run_cell.begin_shapes_rec(layer))
+            region_run = kdb.Region(run_cell.begin_shapes_rec(layer))
             region_ref = kdb.Region(ref_cell.begin_shapes_rec(layer))
 
-            assert not region_cell - region_ref
+            assert not region_run - region_ref
