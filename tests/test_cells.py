@@ -1,10 +1,11 @@
-import pytest
 from inspect import signature
+import pathlib
+import pytest
 
 from kfactory import kdb
 import kfactory as kf
 
-from kfactory.conf import path, logger
+from kfactory.conf import logger
 
 
 class GeometryDifference(ValueError):
@@ -84,15 +85,16 @@ def cell_name(request):
 
 def test_cells(cell_name: str) -> None:
     """Ensure cells have the same geometry as their golden references."""
+    gds_ref = pathlib.Path(__file__).parent.parent / "gds" / "gds_ref"
     cell = cells[cell_name]()
-    ref_file = path.gds_ref / f"{cell.name}.gds"
+    ref_file = gds_ref / f"{cell.name}.gds"
     run_cell = cell
     if not ref_file.exists():
-        path.gds_ref.mkdir(parents=True, exist_ok=True)
+        gds_ref.mkdir(parents=True, exist_ok=True)
         run_cell.write(str(ref_file))
         raise FileNotFoundError(f"GDS file not found. Saving it to {ref_file}")
     kcl_ref = kf.KCLayout()
-    kcl_ref.read(path.gds_ref / f"{cell.name}.gds")
+    kcl_ref.read(gds_ref / f"{cell.name}.gds")
     ref_cell = kcl_ref[kcl_ref.top_cell().name]
 
     for layer in kcl_ref.layer_infos():
