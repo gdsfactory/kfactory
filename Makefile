@@ -11,6 +11,9 @@ docs-clean:
 	rm -rf docs/_autosummary/
 	rm -rf docs/build
 
+docs:
+	jb build docs
+
 test:
 	pytest -s
 

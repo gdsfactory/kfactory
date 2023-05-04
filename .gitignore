@@ -7,6 +7,8 @@
 *.zip
 .idea
 gds/
+Pipfile
+docs/_build/
 
 # Packages
 *.egg
