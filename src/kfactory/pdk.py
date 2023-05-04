@@ -75,7 +75,6 @@ class Pdk(BaseModel):
         sparameters_path: to store Sparameters simulations.
         interconnect_cml_path: path to interconnect CML (optional).
         grid_size: in um. Defaults to 1nm.
-        kcl: Layout object of the PDK.
         constants: dict of constants for the PDK.
 
     """
@@ -95,18 +94,22 @@ class Pdk(BaseModel):
     # modes_path: Optional[Path] = PATH.modes
     interconnect_cml_path: Path | None = None
     constants: dict[str, Any] = constants
-    kcl: KCLayout = kcl
 
     class Config:
         """Configuration."""
 
         arbitrary_types_allowed = True
-        extra = "forbid"
+        extra = "allow"
         fields = {
             "enclosures": {"exclude": True},
             "cells": {"exclude": True},
             "default_decorator": {"exclude": True},
         }
+
+    def __init__(self, **data: Any):
+        """Add LayerLevels automatically for subclassed LayerStacks."""
+        super().__init__(**data)
+        self.kcl = kcl
 
     @property
     def grid_size(self) -> float:
