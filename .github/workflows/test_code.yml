@@ -34,6 +34,8 @@ jobs:
           cache: "pip"
           cache-dependency-path: pyproject.toml
       - name: Install dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           pip install -e .[ci]
           make gds-download
