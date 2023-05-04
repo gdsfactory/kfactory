@@ -52,6 +52,6 @@ gds-upload:
 	gh release upload v0.6.0 gds/gds_ref/*.gds --clobber
 
 gds-download:
-	gh release download v0.6.0 -D gds/gds_ref/
+	gh release download v0.6.0 -D gds/gds_ref/ --clobber
 
 .PHONY: build
