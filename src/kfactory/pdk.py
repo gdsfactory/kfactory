@@ -5,9 +5,9 @@ from __future__ import annotations
 import pathlib
 import warnings
 from collections.abc import Callable, Iterable
+from inspect import getmembers, signature
 from pathlib import Path
 from typing import Any
-from inspect import getmembers, signature
 
 from pydantic import BaseModel, Field, validator
 
