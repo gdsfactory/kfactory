@@ -2492,6 +2492,7 @@ def show(
     gds: str | KCell | Path,
     keep_position: bool = True,
     save_options: kdb.SaveLayoutOptions = default_save(),
+    technology: str | None = None,
 ) -> None:
     """Show GDS in klayout."""
     delete = False
@@ -2513,6 +2514,7 @@ def show(
     data_dict = {
         "gds": str(gds_file),
         "keep_position": keep_position,
+        "technology": None,
     }
     data = json.dumps(data_dict)
     try:
@@ -2532,9 +2534,6 @@ def show(
             config.logger.warning("klive didn't send data, closing")
         finally:
             conn.close()
-
-    if delete:
-        Path(gds_file).unlink()
 
 
 __all__ = [
