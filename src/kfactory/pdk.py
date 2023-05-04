@@ -63,8 +63,8 @@ class Pdk(BaseModel):
     Attributes:
         name: PDK name.
         enclosures: dict of enclosures factories.
-        cells: dict of parametric cells that return Cells.
-        default_symbol_factory:
+        cells: dict of str mapping to KCells.
+        cell_factories: dict of str mapping to cell factories.
         base_pdk: a pdk to copy from and extend.
         default_decorator: decorate all cells, if not otherwise defined on the cell.
         layers: maps name to gdslayer/datatype.
@@ -81,7 +81,8 @@ class Pdk(BaseModel):
 
     name: str
     enclosures: dict[str, Enclosure] = Field(default_factory=dict)
-    cells: dict[str, CellFactory] = Field(default_factory=dict)
+    cell_factories: dict[str, CellFactory] = Field(default_factory=dict)
+    cells: dict[str, KCell] = Field(default_factory=dict)
     base_pdk: Pdk | None = None
     default_decorator: Callable[[KCell], None] | None = None
     layers: type[LayerEnum]
@@ -106,6 +107,16 @@ class Pdk(BaseModel):
             "default_decorator": {"exclude": True},
         }
 
+    class PdkCollection(dict):
+        def __setitem__(self, __key, __val) -> None:
+            super().__setitem__(__key, __val)
+            self.__setattr__(__key, __val)
+
+        def update(self, m):
+            super().update(m)
+            for key, val in m.items():
+                self.__setattr__(key, val)
+
     def __init__(self, **data: Any):
         """Add LayerLevels automatically for subclassed LayerStacks."""
         super().__init__(**data)
@@ -127,6 +138,14 @@ class Pdk(BaseModel):
         """Set current pdk to as the active pdk."""
         logger.info(f"{self.name!r} PDK is now active")
 
+        cell = self.PdkCollection()
+        cell.update(self.cells)
+        self.cells = cell
+
+        cell_factories = self.PdkCollection()
+        cell_factories.update(self.cell_factories)
+        self.cell_factories = cell_factories
+
         if self.base_pdk:
             enclosures = self.base_pdk.enclosures
             enclosures.update(self.enclosures)
@@ -136,6 +155,9 @@ class Pdk(BaseModel):
             cells.update(self.cells)
             self.cells.update(cells)
 
+            cell_factories = self.base_pdk.cell_factories
+            cell_factories.update(self.cell_factories)
+            self.cell_factories = cell_factories
             # layers = self.base_pdk.layers
             # TODO dynamic creation
             # class LAYER(BASELAYER):
