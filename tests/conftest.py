@@ -75,7 +75,7 @@ def cells():
 
 @pytest.fixture
 def pdk(LAYER, waveguide_factory, wg_enc):
-    pdk = kf.pdk.Pdk(layers=LAYER, name="TEST_PDK")
+    pdk = kf.pdk.Pdk(layers=LAYER, name="TEST_PDK", cell_factories={"wg": waveguide_factory, "bend": kf.cells.circular.bend_circular, "bend_euler": kf.cells.euler.bend_euler, "taper": kf.cells.taper.taper, "bezier": kf.cells.bezier.bend_s})
     pdk.register_cells(waveguide=waveguide_factory)
     pdk.register_enclosures(wg=wg_enc)
     pdk.activate()
