@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, ClassVar
 
 import loguru
 from loguru import logger as logger
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings
 
 if TYPE_CHECKING:
     from loguru import Logger

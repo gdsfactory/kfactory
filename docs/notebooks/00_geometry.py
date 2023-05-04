@@ -26,7 +26,7 @@
 # # KCell
 #
 #
-# A `Cell` is like an empty canvas, where you can add polygons, references to other Components and ports (to align to other components)
+# A `Cell` is like an empty canvas, where you can add polygons, references to other Cells and ports (to align to other cells)
 #
 # In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries. The default is `0.001`, i.e. 1nm grid size (0.001 microns)
 #
@@ -38,7 +38,7 @@
 # + vscode={"languageId": "python"}
 import kfactory as kf
 
-# Create a blank component (essentially an empty GDS cell with some special features)
+# Create a blank cell (essentially an empty GDS cell with some special features)
 c = kf.KCell()
 
 # Create and add a polygon from separate lists of x points and y points
@@ -63,7 +63,7 @@ c
 
 # **Exercise** :
 #
-# Make a component similar to the one above that has a second polygon in layer (1, 1)
+# Make a cell similar to the one above that has a second polygon in layer (1, 1)
 
 # + vscode={"languageId": "python"}
 import kfactory as kf
@@ -73,12 +73,12 @@ c = kf.KCell()
 # Create some new geometry from the functions available in the geometry library
 textgenerator = kf.kdb.TextGenerator.default_generator()
 t = textgenerator.text("Hello!", c.kcl.dbu)
-# t = gf.components.text("Hello!")
+# t = gf.cells.text("Hello!")
 
 r = kf.kdb.DBox(-2.5, -5, 2.5, 5)
-# r = gf.components.rectangle(size=[5, 10], layer=(2, 0))
+# r = gf.cells.rectangle(size=[5, 10], layer=(2, 0))
 
-# Add references to the new geometry to c, our blank component
+# Add references to the new geometry to c, our blank cell
 
 # c.shapes(layer(1,0)).insert(t)
 # text1 = c.add_ref(t)  # Add the text we created as a reference
@@ -118,7 +118,7 @@ c
 
 # ## align **ports**
 #
-# Components can have a "Port" that allows you to align ComponentReferences together like legos.
+# Cells can have a "Port" that allows you to align Instances together like legos.
 #
 # You can write a simple function to make a rectangular straight, assign ports to the ends, and then align those rectangles together.
 
@@ -182,12 +182,12 @@ c.add_port(name="o2", port=wg3.ports["o2"])
 c
 # -
 
-# As you can see the `red` labels are for the component ports while
+# As you can see the `red` labels are for the cell ports while
 # `blue` labels are for the sub-ports (children ports)
 
 # ## Move and rotate references
 #
-# You can move, rotate, and reflect references to Components.
+# You can move, rotate, and reflect references to Cells.
 
 # + vscode={"languageId": "python"}
 c = kf.KCell()
@@ -213,11 +213,11 @@ c
 
 # ## Ports
 #
-# Your straights wg1/wg2/wg3 are references to other waveguide components.
+# Your straights wg1/wg2/wg3 are references to other waveguide cells.
 #
-# If you want to add ports to the new Component `c` you can use `add_port`, where you can create a new port or use an reference an existing port from the underlying reference.
+# If you want to add ports to the new Cell `c` you can use `add_port`, where you can create a new port or use an reference an existing port from the underlying reference.
 
-# You can access the ports of a Component or ComponentReference
+# You can access the ports of a Cell or Instance
 
 # + vscode={"languageId": "python"}
 wg2.ports
@@ -225,7 +225,7 @@ wg2.ports
 
 # ## References
 #
-# Now that we have your component `c` is a multi-straight component, you can add references to that component in a new blank Component `c2`, then add two references and shift one to see the movement.
+# Now that we have your cell `c` is a multi-straight cell, you can add references to that cell in a new blank Cell `c2`, then add two references and shift one to see the movement.
 
 # + vscode={"languageId": "python"}
 c2 = kf.KCell(name="MultiMultiWaveguide")
@@ -246,10 +246,10 @@ c2
 #             self.layout_view.active_cellview().layout().cell(event["owner"].name)
 # ## Labels
 #
-# You can add abstract GDS labels (annotate) to your Components, in order to record information
+# You can add abstract GDS labels (annotate) to your Cells, in order to record information
 # directly into the final GDS file without putting any extra geometry onto any layer
 # This label will display in a GDS viewer, but will not be rendered or printed
-# like the polygons created by gf.components.text().
+# like the polygons created by gf.cells.text().
 
 # + vscode={"languageId": "python"}
 c2.shapes(c2.kcl.layer(1, 0)).insert(kf.kdb.Text("First label", mwg1_ref.trans))
@@ -328,8 +328,8 @@ c
 # MMI not implemented yet
 
 # c = kf.KCell()
-# mmi = c.add_ref(gf.components.mmi1x2())
-# bend = c.add_ref(gf.components.bend_circular(layer=(2, 0)))
+# mmi = c.add_ref(gf.cells.mmi1x2())
+# bend = c.add_ref(gf.cells.bend_circular(layer=(2, 0)))
 # c
 
 # + vscode={"languageId": "python"}
@@ -342,9 +342,9 @@ c
 # By default the mirror works along the x=0 axis.
 
 # + vscode={"languageId": "python"}
-# c = gf.Component("ref_mirror")
-# mmi = c.add_ref(gf.components.mmi1x2())
-# bend = c.add_ref(gf.components.bend_circular(layer=(2, 0)))
+# c = gf.Cell("ref_mirror")
+# mmi = c.add_ref(gf.cells.mmi1x2())
+# bend = c.add_ref(gf.cells.bend_circular(layer=(2, 0)))
 # c
 
 # + vscode={"languageId": "python"}
@@ -356,7 +356,7 @@ c
 #
 # [GDSII](https://en.wikipedia.org/wiki/GDSII) is the Standard format for exchanging CMOS and Photonic circuits.
 #
-# You can write your Component to GDS file.
+# You can write your Cell to GDS file.
 
 # + vscode={"languageId": "python"}
 c.write("demo.gds")

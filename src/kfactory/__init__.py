@@ -21,9 +21,9 @@ from .kcell import (
     LayerEnum,
     show,
 )
-from . import cells, placer, routing, utils, port
+from . import cells, placer, routing, utils, port, pdk
 from .conf import config
-
+from .pdk import Pdk
 
 __version__ = "0.6.3"
 
@@ -51,4 +51,5 @@ __all__ = [
     "config",
     "LayerEnum",
     "logger",
+    "pdk",
 ]

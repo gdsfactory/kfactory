@@ -15,6 +15,11 @@ repos:
       - id: requirements-txt-fixer
       - id: trailing-whitespace
 
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.3.2
+    hooks:
+      - id: pyupgrade
+
   # - repo: https://github.com/pre-commit/pre-commit-hooks
   #   rev: a41c4b94b220171e928ff3e6c9bef34e71267f46
   #   hooks:
