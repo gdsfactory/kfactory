@@ -21,7 +21,7 @@ def test_cells(cells, LAYER) -> None:
             run_cell.write(str(ref_file))
             continue
         kcl_ref = kf.KCLayout()
-        kcl_ref.read(path.gds_ref / f"{cell}.gds")
+        kcl_ref.read(path.gds_ref / f"{cell.name}.gds")
         ref_cell = kcl_ref[kcl_ref.top_cell().name]
 
         for layer in kcl_ref.layer_infos():
@@ -34,10 +34,10 @@ def test_cells(cells, LAYER) -> None:
             if not region_diff.is_empty():
                 layer_tuple = kcl_ref.layer_infos()[layer]
                 region_xor = region_ref ^ region_run
-                c = kf.KCell(f"{cell}_diffs")
-                c_run = kf.KCell(f"{cell}_new")
-                c_ref = kf.KCell(f"{cell}_old")
-                c_xor = kf.KCell(f"{cell}_xor")
+                c = kf.KCell(f"{cell.name}_diffs")
+                c_run = kf.KCell(f"{cell.name}_new")
+                c_ref = kf.KCell(f"{cell.name}_old")
+                c_xor = kf.KCell(f"{cell.name}_xor")
                 c_run.shapes(layer).insert(region_run)
                 c_ref.shapes(layer).insert(region_ref)
                 c_xor.shapes(layer).insert(region_xor)
