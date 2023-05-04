@@ -11,30 +11,11 @@ class GeometryDifference(ValueError):
     pass
 
 
-def test_cells(cells):
+def test_cells(cells, LAYER) -> None:
     """Ensure cells have the same geometry as their golden references."""
-    settings = {
-        "width": 1.0,
-        "height": 5.0,
-        "radius": 10.0,
-        "length": 10.0,
-        "layer": 0,
-        "width1": 1.0,
-        "width2": 2.0,
-        "offset": 5.0,
-        "enclosure": kf.utils.Enclosure(name="WGSTD", sections=[(111, 0, 2000)]),
-    }
-
-    cells = kf.pdk.get_cells(cells)
     for cell in cells:
-        if cell in ["waveguide_dbu", "taper_dbu"]:
-            continue
-        ref_file = path.gds_ref / f"{cell}.gds"
-
-        settings_ = {
-            k: v for k, v in settings.items() if k in signature(cells[cell]).parameters
-        }
-        run_cell = cells[cell](**settings_)
+        ref_file = path.gds_ref / f"{cell.name}.gds"
+        run_cell = cell
         if not ref_file.exists():
             path.gds_ref.mkdir(parents=True, exist_ok=True)
             run_cell.write(str(ref_file))
@@ -69,7 +50,7 @@ def test_cells(cells):
                 val = input("Save current GDS as new reference (Y)? [Y/n]")
                 if not val.upper().startswith("N"):
                     logger.info(f"replacing file {str(ref_file)!r}")
-                    run_cell.write(ref_file)
+                    run_cell.write(ref_file.name)
 
                 raise GeometryDifference(
                     f"Differences found in {cell!r} on layer {layer_tuple}"
