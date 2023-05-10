@@ -182,6 +182,7 @@ def default_save() -> kdb.SaveLayoutOptions:
     save.gds2_write_cell_properties = True
     save.gds2_write_file_properties = True
     save.gds2_write_timestamps = False
+    # save.write_context_info = False  # True
 
     return save
 
@@ -1629,6 +1630,80 @@ class KCell:
             )
         else:
             return self._kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
+
+    def set_meta_data(self) -> None:
+        for i, port in enumerate(self.ports):
+            if port.name:
+                name_meta = kdb.LayoutMetaInfo(f"kfactory:ports:{i}:name", port.name)
+                name_meta.persisted = True
+                self.add_meta_info(name_meta)
+            layer_meta = kdb.LayoutMetaInfo(
+                f"kfactory:ports:{i}:layer", self.kcl.get_info(port.layer)
+            )
+            layer_meta.persisted = True
+            print(f"{layer_meta.is_persisted()=}")
+            self.add_meta_info(layer_meta)
+            width_meta = kdb.LayoutMetaInfo(f"kfactory:ports:{i}:width", port.width)
+            width_meta.persisted = True
+            self.add_meta_info(width_meta)
+            port_type_meta = kdb.LayoutMetaInfo(
+                f"kfactory:ports:{i}:port_type", port.port_type
+            )
+            port_type_meta.persisted = True
+            self.add_meta_info(port_type_meta)
+            if port._trans:
+                trans_meta = kdb.LayoutMetaInfo(
+                    f"kfactory:ports:{i}:trans", port._trans.to_s()
+                )
+                trans_meta.persisted = True
+                self.add_meta_info(trans_meta)
+            elif port._dcplx_trans:
+                dcplx_trans_meta = kdb.LayoutMetaInfo(
+                    f"kfactory:ports:{i}:dcplx_trans", port._dcplx_trans.to_s()
+                )
+                dcplx_trans_meta.persisted = True
+                self.add_meta_info(dcplx_trans_meta)
+            for name, info in port.info.items():
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo(f"kfactory:ports{i}:info:{name}", info)
+                )
+
+    def get_meta_data(self) -> None:
+        port_dict = {}
+        for meta in self.each_meta_info():
+            if meta.name.startswith("kfactory:ports"):
+                i, _type = meta.name.lstrip("kfactory:ports:").split(":")
+                if i not in port_dict:
+                    port_dict[i] = {_type: meta.value}
+                else:
+                    port_dict[i][_type] = meta.value
+
+        # ports = Ports()
+        self.ports = Ports(self.kcl)
+        for index in sorted(port_dict.keys()):
+            _d = port_dict[index]
+            name = _d.get("name", None)
+            port_type = _d["port_type"]
+            layer = self.kcl.layer(_d["layer"])
+            width = _d["width"]
+            trans = _d.get("trans", None)
+            dcplx_trans = _d.get("dcplx_trans", None)
+            _port = Port(
+                name=name,
+                width=width,
+                layer=layer,
+                trans=kdb.Trans.R0,
+                kcl=self.kcl,
+                port_type=port_type,
+            )
+            if trans:
+                _port.trans = kdb.Trans.from_s(trans)
+            elif dcplx_trans:
+                _port.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
+
+            print(_port, trans)
+
+            self.add_port(_port, keep_mirror=True)
 
 
 class Instance:
