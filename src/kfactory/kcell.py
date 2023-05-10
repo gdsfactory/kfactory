@@ -1858,7 +1858,7 @@ class Instance:
                 raise ValueError(
                     "portname cannot be None if an Instance Object is given. For"
                     "complex connections (non-90 degree and floating point ports) use"
-                    "connect_cplx instead"
+                    "route_cplx instead"
                 )
             op = other.ports[other_port_name]
         elif isinstance(other, Port):
