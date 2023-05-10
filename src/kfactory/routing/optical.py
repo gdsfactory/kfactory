@@ -121,7 +121,7 @@ def route_loopback(
 
 
 @config.logger.catch
-def connect(
+def route(
     c: KCell,
     p1: Port,
     p2: Port,
@@ -136,7 +136,7 @@ def connect(
         list[kdb.Point],
     ] = route_manhattan,
     port_type: str = "optical",
-    allow_small_routes: int = False,
+    allow_small_routes: bool = False,
     different_port_width: int = False,
 ) -> None:
     """Bend 90 part."""
