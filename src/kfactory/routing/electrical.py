@@ -50,7 +50,6 @@ def route_elec(
         bend90_radius=0,
         start_straight=start_straight,
         end_straight=end_straight,
-        in_dbu=True,
     )
 
     path = kdb.Path(pts, width)
