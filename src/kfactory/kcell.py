@@ -1858,7 +1858,7 @@ class Instance:
                 raise ValueError(
                     "portname cannot be None if an Instance Object is given. For"
                     "complex connections (non-90 degree and floating point ports) use"
-                    "connect_cplx instead"
+                    "route_cplx instead"
                 )
             op = other.ports[other_port_name]
         elif isinstance(other, Port):
@@ -1996,9 +1996,9 @@ class UMInstance:
             destination: move origin so that it will land on this coordinate
         """
         if destination is None:
-            self.parent.transform(kdb.DTrans(origin, 0))
+            self.parent.transform(kdb.DTrans(float(origin), 0.0))
         else:
-            self.parent.transform(kdb.DTrans(destination - origin, 0))
+            self.parent.transform(kdb.DTrans(float(destination - origin), 0.0))
 
     @overload
     def movey(self, destination: float, /) -> None:
@@ -2016,12 +2016,12 @@ class UMInstance:
             destination: move origin so that it will land on this coordinate
         """
         if destination is None:
-            self.parent.transform(kdb.DTrans(0, origin))
+            self.parent.transform(kdb.DTrans(0.0, float(origin)))
         else:
-            self.parent.transform(kdb.DTrans(0, destination - origin))
+            self.parent.transform(kdb.DTrans(0.0, float(destination - origin)))
 
     def rotate(self, angle: float) -> None:
-        """Rotate instance in increments of 90°."""
+        """Rotate instance in degrees."""
         self.parent.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
 
     @overload
@@ -2046,7 +2046,7 @@ class UMInstance:
             destination: move origin so that it will land on this coordinate [dbu]
         """
         if destination is None:
-            self.parent.transform(kdb.DTrans(float(origin[1]), float(origin[0])))
+            self.parent.transform(kdb.DTrans(float(origin[0]), float(origin[1])))
         else:
             self.parent.transform(
                 kdb.DTrans(

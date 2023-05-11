@@ -7,7 +7,7 @@ from ..kcell import Instance, KCell, Port
 from .manhattan import route_manhattan
 
 
-def connect_elec(
+def route_elec(
     c: KCell,
     start_port: Port,
     end_port: Port,
@@ -57,7 +57,7 @@ def connect_elec(
     c.shapes(layer).insert(path.polygon())
 
 
-def connect_L_route(
+def route_L(
     c: KCell,
     input_ports: list[Port],
     output_orientation: int = 1,
@@ -84,7 +84,7 @@ def connect_L_route(
                 3, False, x_max - wire_spacing * (i + 1), y_max + wire_spacing
             )
 
-            connect_elec(c, p, temp_port)
+            route_elec(c, p, temp_port)
             temp_port.trans.angle = 1
             output_ports.append(temp_port)
     elif output_orientation == 3:
@@ -93,7 +93,7 @@ def connect_L_route(
             temp_port.trans = kdb.Trans(
                 1, False, x_max - wire_spacing * (i + 1), y_min - wire_spacing
             )
-            connect_elec(c, p, temp_port)
+            route_elec(c, p, temp_port)
             temp_port.trans.angle = 3
             output_ports.append(temp_port)
     else:
@@ -103,7 +103,7 @@ def connect_L_route(
     return output_ports
 
 
-def connect_bundle(
+def route_bundle(
     c: KCell,
     input_ports: list[Port],
     target_ports: list[Port],
@@ -137,7 +137,7 @@ def connect_bundle(
             temp_port = p.copy()
             y_shift = y_max if input_orientation == 1 else y_min
             temp_port.trans = kdb.Trans(4 - input_orientation, False, p.x, y_shift)
-            connect_elec(c, p, temp_port)
+            route_elec(c, p, temp_port)
             temp_port.trans.angle = input_orientation
             output_ports.append(temp_port)
         output_ports.sort(key=lambda p: p.x)
@@ -146,7 +146,7 @@ def connect_bundle(
         for i in range(len(output_ports)):
             if target_ports[i].x > output_ports[i].x:
                 L_count += 1
-                connect_elec(
+                route_elec(
                     c,
                     output_ports[i],
                     target_ports[i],
@@ -157,7 +157,7 @@ def connect_bundle(
                 R_count = 0
             else:
                 R_count += 1
-                connect_elec(
+                route_elec(
                     c,
                     output_ports[i],
                     target_ports[i],
@@ -171,7 +171,7 @@ def connect_bundle(
             temp_port = p.copy()
             x_shift = x_max if input_orientation == 0 else x_min
             temp_port.trans = kdb.Trans(2 - input_orientation, False, x_shift, p.y)
-            connect_elec(c, p, temp_port)
+            route_elec(c, p, temp_port)
             temp_port.trans.angle = input_orientation
             output_ports.append(temp_port)
         output_ports.sort(key=lambda p: p.y)
@@ -180,7 +180,7 @@ def connect_bundle(
         for i in range(len(output_ports)):
             if target_ports[i].y > output_ports[i].y:
                 B_count += 1
-                connect_elec(
+                route_elec(
                     c,
                     output_ports[i],
                     target_ports[i],
@@ -191,7 +191,7 @@ def connect_bundle(
                 T_count = 0
             else:
                 T_count += 1
-                connect_elec(
+                route_elec(
                     c,
                     output_ports[i],
                     target_ports[i],
@@ -207,7 +207,7 @@ def get_electrical_ports(c: Instance, port_type: str = "electrical") -> list[Por
     return [p for p in c.ports if p.port_type == port_type]
 
 
-def connect_wire(c: KCell, input_port: Port, output_port: Port) -> None:
+def route_wire(c: KCell, input_port: Port, output_port: Port) -> None:
     """Connection between two electrical ports *DO NOT USE*.
 
     This function mainly implements a connection between two electrical ports.
@@ -241,7 +241,7 @@ def connect_wire(c: KCell, input_port: Port, output_port: Port) -> None:
         )
 
 
-def connect_dual_rails(
+def route_dual_rails(
     c: KCell,
     start_port: Port,
     end_port: Port,
