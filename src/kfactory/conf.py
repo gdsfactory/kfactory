@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import os
-import pathlib
 import re
 import sys
 import traceback
 from itertools import takewhile
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 import loguru
 from loguru import logger as logger
@@ -107,11 +106,15 @@ class Settings(BaseSettings):
     n_threads: int = get_affinity()
     logger: ClassVar[Logger] = logger
     logfilter: LogFilter = filter
+    display_type: Literal["widget", "image"] = "widget"
 
     class Config:
+        """Pydantic settings."""
+
         validation = False
         arbitrary_types_allowed = True
         fields = {"logger": {"exclude": True}}
+        env_prefix = "kfactory_"
 
 
 config = Settings()

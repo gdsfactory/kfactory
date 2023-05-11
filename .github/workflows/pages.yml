@@ -21,6 +21,7 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install -e .[ci,docs]
+          export KFACTORY_DISPLAY_TYPE="image"
           make docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
