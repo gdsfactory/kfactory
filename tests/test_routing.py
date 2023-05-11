@@ -1,9 +1,8 @@
 import kfactory as kf
 import pytest
-import warnings
 from random import randint
 
-from typing import Callable
+from collections.abc import Callable
 
 
 @pytest.mark.parametrize(
@@ -13,7 +12,7 @@ from typing import Callable
         0,
     ],
 )
-def test_connect_straight(
+def test_route_straight(
     x: int,
     bend90: kf.KCell,
     waveguide_factory: Callable[..., kf.KCell],
@@ -24,7 +23,7 @@ def test_connect_straight(
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(2, False, x, 0)
-    kf.routing.optical.connect(
+    kf.routing.optical.route(
         c,
         p1,
         p2,
@@ -48,7 +47,7 @@ def test_connect_straight(
         (0, 0, 2),
     ],
 )
-def test_connect_bend90(
+def test_route_bend90(
     bend90: kf.KCell,
     waveguide_factory: Callable[..., kf.KCell],
     LAYER: kf.LayerEnum,
@@ -64,7 +63,7 @@ def test_connect_bend90(
     b90r = abs(bend90.ports._ports[0].x - bend90.ports._ports[1].x)
     if abs(x) < b90r or abs(y) < b90r:
         kf.config.logfilter.regex = f"Potential collision in routing due to small distance between the port in relation to bend radius x={x}/{b90r}, y={y}/{b90r}"
-    kf.routing.optical.connect(
+    kf.routing.optical.route(
         c,
         p1,
         p2,
@@ -83,7 +82,7 @@ def test_connect_bend90(
         (10000, 10000, 3),
     ],
 )
-def test_connect_bend90_euler(
+def test_route_bend90_euler(
     bend90_euler: kf.KCell,
     waveguide_factory: Callable[..., kf.KCell],
     LAYER: kf.LayerEnum,
@@ -99,7 +98,7 @@ def test_connect_bend90_euler(
     b90r = abs(bend90_euler.ports._ports[0].x - bend90_euler.ports._ports[1].x)
     if abs(x) < b90r or abs(y) < b90r:
         kf.config.logfilter.regex = f"Potential collision in routing due to small distance between the port in relation to bend radius x={x}/{b90r}, y={y}/{b90r}"
-    kf.routing.optical.connect(
+    kf.routing.optical.route(
         c,
         p1,
         p2,
