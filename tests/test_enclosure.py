@@ -1,4 +1,5 @@
 import kfactory as kf
+import pytest
 
 
 @kf.cell
@@ -65,3 +66,35 @@ def test_layer_merge_enc(LAYER):
         ]
     )
     mmi_enc(LAYER.WG, enc)
+
+
+def test_um_enclosure(LAYER):
+    enc = kf.utils.Enclosure(
+        [
+            (LAYER.WGCLAD, -5000, -3000),
+            (LAYER.WGCLAD, -4000, -2000),
+            (LAYER.WGCLAD, -2000, 1000),
+        ]
+    )
+
+    enc_um = kf.utils.Enclosure(
+        dsections=[
+            (LAYER.WGCLAD, -5, -3),
+            (LAYER.WGCLAD, -4, -2),
+            (LAYER.WGCLAD, -2, 1),
+        ],
+        dbu=0.001,
+    )
+
+    assert enc == enc_um
+
+
+def test_um_enclosure_nodbu(LAYER):
+    with pytest.raises(AssertionError) as ae_info:
+        kf.utils.Enclosure(
+            dsections=[
+                (LAYER.WGCLAD, -5, -3),
+                (LAYER.WGCLAD, -4, -2),
+                (LAYER.WGCLAD, -2, 1),
+            ]
+        )
