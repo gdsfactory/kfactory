@@ -73,7 +73,7 @@ def test_connect_cplx_port(LAYER):
         name="cplxp1",
         dcplx_trans=kf.kdb.DCplxTrans(1, 30, False, 5, 10),
     )
-    wg1.align("o1", port)
+    wg1.transport("o1", port)
 
 
 def test_connect_cplx_inst(LAYER):
@@ -82,7 +82,7 @@ def test_connect_cplx_inst(LAYER):
     wg1 = c << waveguide(1000, 20000, LAYER.WG)
     wg2 = c << waveguide(1000, 20000, LAYER.WG)
     wg1.transform(kf.kdb.DCplxTrans(1, 30, False, 5, 10))
-    wg2.align("o1", wg1, "o2")
+    wg2.transport("o1", wg1, "o2")
     kf.config.logfilter.regex = f"Port ({re.escape(str(wg1.ports['o1']))}|{re.escape(str(wg2.ports['o2']))}) is not an integer based port, converting to integer based"
 
     c.add_port(wg1.ports["o1"])
@@ -97,7 +97,7 @@ def test_connect_cplx_inst(LAYER):
 
 #     wg1 = c << wg_floating_off_grid
 #     wg2 = c << wg_floating_off_grid
-#     wg2.align("o2", wg1, "o1")
+#     wg2.transport("o2", wg1, "o1")
 
 
 def test_connect_integer(wg):
@@ -105,7 +105,7 @@ def test_connect_integer(wg):
 
     wg1 = c << wg
     wg2 = c << wg
-    wg2.align("o1", wg1, "o1")
+    wg2.transport("o1", wg1, "o1")
 
     assert wg2.ports["o1"].trans == kf.kdb.Trans(0, False, 0, 0)
 

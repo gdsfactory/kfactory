@@ -477,6 +477,7 @@ class Port:
     _trans: kdb.Trans | None
     _dcplx_trans: kdb.DCplxTrans | None
     port_type: str
+    _parent: "Instance | None"
     d: "UMPort"
 
     @overload
@@ -791,6 +792,20 @@ class Port:
                 f", dwidth: {self.d.width}, trans: {self.dcplx_trans.to_s()}, layer: "
                 f"{ln}, port_type: {self.port_type})"
             )
+
+    def __rshift__(self, port: "Port") -> None:
+        """Allow `inst1.ports[portname] >> port.
+
+        This is the same as inst1.transport(portname, port).
+        :py:attr:~`_parent` must not be `None` for this to work.
+
+        Args:
+            port: where to transport to.
+        """
+        assert (
+            self._parent is not None
+        ), ">> cannot be used on ports if they are not from an instance."
+        self._parent.transport(self, port)
 
 
 class UMPort:
@@ -1808,13 +1823,13 @@ class Instance:
         return h.digest()
 
     @overload
-    def align(
+    def transport(
         self, port: str | Port | None, other: Port, *, mirror: bool = False
     ) -> None:
         ...
 
     @overload
-    def align(
+    def transport(
         self,
         port: str | Port | None,
         other: "Instance",
@@ -1824,7 +1839,7 @@ class Instance:
     ) -> None:
         ...
 
-    def align(
+    def transport(
         self,
         port: str | Port | None,
         other: "Instance | Port",
@@ -1835,10 +1850,10 @@ class Instance:
         allow_layer_mismatch: bool = False,
         allow_type_mismatch: bool = False,
     ) -> None:
-        """Align port with name ``portname`` to a port.
+        """Trans(form)port with name ``portname`` to another port.
 
         Function to allow to transform this instance so that a port of this instance is
-        aligned (same position with 180° turn) to another instance.
+        aligned (same position with 180° turn) to another port.
 
         Args:
             port: The name of the port of this instance to be connected, or directly an
@@ -1848,7 +1863,7 @@ class Instance:
                 :py:attr:`~other_instance` is a port.
             mirror: Instead of applying klayout.db.Trans.R180 as a connection
                 transformation, use klayout.db.Trans.M90, which effectively means this
-                instance will be mirrored and connected.
+                instance will be mirrored and not only rotated.
             allow_width_mismatch: Skip width check between the ports if set.
             allow_layer_mismatch: Skip layer check between the ports if set.
             allow_type_mismatch: Skip port_type check between the ports if set.

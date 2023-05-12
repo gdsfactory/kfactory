@@ -218,25 +218,25 @@ def route(
                 match (p1.trans.angle - vec_angle(vec)) % 4:
                     case 1:
                         bend180 = c << bend180_cell
-                        bend180.align(b180p1.name, p1)
+                        bend180.transport(b180p1.name, p1)
                         start_port = bend180.ports[b180p2.name]
                         pts = pts[1:]
                     case 3:
                         bend180 = c << bend180_cell
-                        bend180.align(b180p2.name, p1)
+                        bend180.transport(b180p2.name, p1)
                         start_port = bend180.ports[b180p1.name]
                         pts = pts[1:]
             if (vec := pts[-1] - pts[-2]).abs() == b180r:
                 match ((vec_angle(vec) - p2.trans.angle) % 4):
                     case 1:
                         bend180 = c << bend180_cell
-                        bend180.align(b180p1.name, p2)
+                        bend180.transport(b180p1.name, p2)
                         end_port = bend180.ports[b180p2.name]
                         pts = pts[:-1]
                     case 3:
                         bend180 = c << bend180_cell
                         # bend180.mirror = True
-                        bend180.align(b180p2.name, p2)
+                        bend180.transport(b180p2.name, p2)
                         end_port = bend180.ports[b180p1.name]
                         pts = pts[:-1]
 
@@ -257,10 +257,10 @@ def route(
                     if vecp == vec and ang2 - ang1 == 0:
                         bend180 = c << bend180_cell
                         if start_port.name == b180p2.name:
-                            bend180.align(b180p1.name, start_port)
+                            bend180.transport(b180p1.name, start_port)
                             start_port = bend180.ports[b180p2.name]
                         else:
-                            bend180.align(b180p2.name, start_port)
+                            bend180.transport(b180p2.name, start_port)
                             start_port = bend180.ports[b180p1.name]
                         j = i - 1
                     elif (
@@ -444,22 +444,22 @@ def place90(
         ):
             wg = c << straight_factory(width=w, length=(pts[1] - pts[0]).abs())
             wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
-            wg.align(wg_p1, p1)
+            wg.transport(wg_p1, p1)
         else:
             t1 = c << taper_cell
-            t1.align(taperp1.name, p1)
+            t1.transport(taperp1.name, p1)
             if length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
                 wg = c << straight_factory(
                     width=taperp2.width,
                     length=length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
                 )
                 wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
-                wg.align(wg_p1, t1, taperp2.name)
+                wg.transport(wg_p1, t1, taperp2.name)
                 t2 = c << taper_cell
-                t2.align(taperp2.name, wg_p2)
+                t2.transport(taperp2.name, wg_p2)
             else:
                 t2 = c << taper_cell
-                t2.align(taperp2.name, t1, taperp2.name)
+                t2.transport(taperp2.name, t1, taperp2.name)
         return
     for i in range(1, len(pts) - 1):
         pt = pts[i]
@@ -507,10 +507,10 @@ def place90(
             ):
                 wg = c << straight_factory(width=w, length=length)
                 wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
-                wg.align(wg_p1, bend90, b90p1.name)
+                wg.transport(wg_p1, bend90, b90p1.name)
             else:
                 t1 = c << taper_cell
-                t1.align(taperp1.name, bend90, b90p1.name)
+                t1.transport(taperp1.name, bend90, b90p1.name)
                 if length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
                     wg = c << straight_factory(
                         width=taperp2.width,
@@ -518,12 +518,12 @@ def place90(
                         - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
                     )
                     wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
-                    wg.align(wg_p1.name, t1, taperp2.name)
+                    wg.transport(wg_p1.name, t1, taperp2.name)
                     t2 = c << taper_cell
-                    t2.align(taperp2.name, wg, wg_p2.name)
+                    t2.transport(taperp2.name, wg, wg_p2.name)
                 else:
                     t2 = c << taper_cell
-                    t2.align(taperp2.name, t1, taperp2.name)
+                    t2.transport(taperp2.name, t1, taperp2.name)
         old_pt = pt
         old_bend_port = bend90.ports[b90p2.name]
     length = (bend90.ports[b90p2.name].trans.disp - p2.trans.disp).abs()
@@ -535,16 +535,16 @@ def place90(
         ):
             wg = c << straight_factory(width=w, length=length)
             wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
-            wg.align(wg_p1.name, bend90, b90p2.name)
+            wg.transport(wg_p1.name, bend90, b90p2.name)
         else:
             t1 = c << taper_cell
-            t1.align(taperp1.name, bend90, b90p2.name)
+            t1.transport(taperp1.name, bend90, b90p2.name)
             if length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
                 wg = c << straight_factory(
                     width=taperp2.width,
                     length=length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
                 )
                 wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
-                wg.align(wg_p1.name, t1, taperp2.name)
+                wg.transport(wg_p1.name, t1, taperp2.name)
                 t2 = c << taper_cell
-                t2.align(taperp2.name, wg, wg_p2.name)
+                t2.transport(taperp2.name, wg, wg_p2.name)

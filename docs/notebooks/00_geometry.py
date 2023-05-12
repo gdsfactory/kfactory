@@ -26,7 +26,7 @@
 # # KCell
 #
 #
-# A `Cell` is like an empty canvas, where you can add polygons, references to other Cells and ports (to align to other cells)
+# A `Cell` is like an empty canvas, where you can add polygons, references to other Cells and ports (to transport to other cells)
 #
 # In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries. The default is `0.001`, i.e. 1nm grid size (0.001 microns)
 #
@@ -116,11 +116,11 @@ c.shapes(c.kcl.layer(2, 0)).insert(r)
 c
 # -
 
-# ## align **ports**
+# ## transport **ports**
 #
-# Cells can have a "Port" that allows you to align Instances together like legos.
+# Cells can have a "Port" that allows you to transport Instances together like legos.
 #
-# You can write a simple function to make a rectangular straight, assign ports to the ends, and then align those rectangles together.
+# You can write a simple function to make a rectangular straight, assign ports to the ends, and then transport those rectangles together.
 
 
 # + vscode={"languageId": "python"}
@@ -163,16 +163,16 @@ print(c.name)
 c
 
 # + vscode={"languageId": "python"}
-# Now we can align everything together using the ports:
+# Now we can transport everything together using the ports:
 
 # Each straight has two ports: 'W0' and 'E0'.  These are arbitrary
 # names defined in our straight() function above
 
-# Let's keep wg1 in place on the bottom, and align the other straights to it.
-# To do that, on wg2 we'll grab the "W0" port and align it to the "E0" on wg1:
-wg2.align("o1", wg1.ports["o2"])
-# Next, on wg3 let's grab the "W0" port and align it to the "E0" on wg2:
-wg3.align("o1", wg2.ports["o2"])
+# Let's keep wg1 in place on the bottom, and transport the other straights to it.
+# To do that, on wg2 we'll grab the "W0" port and transport it to the "E0" on wg1:
+wg2.transport("o1", wg1.ports["o2"])
+# Next, on wg3 let's grab the "W0" port and transport it to the "E0" on wg2:
+wg3.transport("o1", wg2.ports["o2"])
 
 c
 
@@ -237,8 +237,8 @@ mwg2_ref.transform(kf.kdb.DTrans(10, 10))
 c2
 
 # + vscode={"languageId": "python"}
-# Like before, let's align mwg1 and mwg2 together
-mwg1_ref.align("o2", mwg2_ref.ports["o1"])
+# Like before, let's transport mwg1 and mwg2 together
+mwg1_ref.transport("o2", mwg2_ref.ports["o1"])
 c2
 # -
 
@@ -333,7 +333,7 @@ c
 # c
 
 # + vscode={"languageId": "python"}
-# bend.align("o1", mmi.ports["o2"])  # aligns follow Source, destination syntax
+# bend.transport("o1", mmi.ports["o2"])  # transports follow Source, destination syntax
 # c
 # -
 
