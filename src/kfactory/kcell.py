@@ -477,7 +477,6 @@ class Port:
     _trans: kdb.Trans | None
     _dcplx_trans: kdb.DCplxTrans | None
     port_type: str
-    _parent: "Instance | None"
     d: "UMPort"
 
     @overload
@@ -792,20 +791,6 @@ class Port:
                 f", dwidth: {self.d.width}, trans: {self.dcplx_trans.to_s()}, layer: "
                 f"{ln}, port_type: {self.port_type})"
             )
-
-    def __rshift__(self, port: "Port") -> None:
-        """Allow `inst1.ports[portname] >> port.
-
-        This is the same as inst1.transport(portname, port).
-        :py:attr:~`_parent` must not be `None` for this to work.
-
-        Args:
-            port: where to transport to.
-        """
-        assert (
-            self._parent is not None
-        ), ">> cannot be used on ports if they are not from an instance."
-        self._parent.transport(self, port)
 
 
 class UMPort:
