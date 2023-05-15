@@ -11,7 +11,7 @@ from hashlib import sha1
 from typing import Any, Optional, TypeGuard
 
 import numpy as np
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, Field, PrivateAttr, validator
 
 from .. import kdb
 from ..conf import config
@@ -19,6 +19,7 @@ from ..kcell import KCell, LayerEnum
 
 __all__ = [
     "Enclosure",
+    "PDKEnclosure",
     "extrude_path",
     "extrude_path_points",
     "extrude_path_dynamic",
@@ -787,7 +788,7 @@ class Enclosure(BaseModel):
         tp = kdb.TilingProcessor()
         tp.frame = c.dbbox()  # type: ignore[misc]
         tp.dbu = c.kcl.dbu
-        tp.threads = n_threads or len(os.sched_getaffinity(0))
+        tp.threads = n_threads or config.n_threads
         maxsize = 0
         for layersection in self.layer_sections.values():
             maxsize = max(
@@ -960,11 +961,18 @@ class Enclosure(BaseModel):
     ) -> None:
         """Extrude a path and add it to a main layer.
 
+        Start and end angle should be set in relation to the orientation of the path.
+        If the path for example is starting E->W, the start angle should be 0 (if that
+        that is the desired angle). End angle is the same if the end
+        piece is stopping 2nd-last -> last in E->W.
+
         Args:
             c: The cell where to insert the path to
             path: Backbone of the path. [um]
             main_layer: Layer index where to put the main part of the path.
             width: Width of the core of the path
+            start_angle: angle of the start piece
+            end_angle: angle of the end piece
         """
         if main_layer is None:
             raise ValueError(
@@ -1048,3 +1056,350 @@ class RegionOperator(kdb.TileOutputReceiver):
     def insert(self) -> None:
         """Insert the finished region into the cell."""
         self.kcell.shapes(self.layer).insert(self.region)
+
+
+class RegionTilesOperator(kdb.TileOutputReceiver):
+    """Region collector. Just getst the tile and inserts it into the target cell.
+
+    As it can be used multiple times for the same tile, it needs to merge when
+    inserting.
+    """
+
+    def __init__(self, cell: KCell, layer: LayerEnum | int) -> None:
+        """Initialization.
+
+        Args:
+            cell: Target cell.
+            layer: Target layer.
+        """
+        self.kcell = cell
+        self.layer = layer
+        self.regions: dict[int, dict[int, kdb.Region]] = {}
+
+    def put(
+        self,
+        ix: int,
+        iy: int,
+        tile: kdb.Box,
+        region: kdb.Region,
+        dbu: float,
+        clip: bool,
+    ) -> None:
+        """Tiling Processor output call.
+
+        Args:
+            ix: x-axis index of tile.
+            iy: y_axis index of tile.
+            tile: The bounding box of the tile.
+            region: The target object of the :py:class:~`klayout.db.TilingProcessor`
+            dbu: dbu used by the processor.
+            clip: Whether the target was clipped to the tile or not.
+        """
+        if ix not in self.regions:
+            self.regions[ix] = {}
+        if iy not in self.regions[ix]:
+            self.regions[ix][iy] = kdb.Region()
+        reg = self.regions[ix][iy]
+        reg.insert(region)
+        reg.merge()
+
+    def insert(self) -> None:
+        """Insert the finished region into the cell."""
+        for dicts in self.regions.values():
+            for reg in dicts.values():
+                self.kcell.shapes(self.layer).insert(reg)
+
+
+class PDKEnclosure(BaseModel):
+    """Collection of :py:class:~`Enclosure` for cells."""
+
+    enclosures: list[Enclosure]
+
+    @validator("enclosures", each_item=True)
+    def enclosures_must_have_main_layer(cls, v: Enclosure) -> Enclosure:
+        """The PDK Enclosure must have main layers defined for each Enclosure.
+
+        The PDK Enclosure uses this to automatically apply enclosures.
+        """
+        assert (
+            v.main_layer is not None
+        ), "Enclosure for PDKEnclosure must have a main layer defined"
+        return v
+
+    def minkowski_region(
+        self,
+        r: kdb.Region,
+        d: int | None,
+        shape: Callable[[int], list[kdb.Point] | kdb.Box | kdb.Edge | kdb.Polygon],
+    ) -> kdb.Region:
+        """Calculaste a region from a minkowski sum.
+
+        If the distance is negative, the function will take the inverse region and apply
+        the minkowski and take the inverse again.
+
+        Args:
+            r: Target region.
+            d: Distance to pass to the shape. Can be any integer. [dbu]
+            shape: Function returning a shape for the minkowski region.
+        """
+        if d is None:
+            return kdb.Region()
+        elif d == 0:
+            return r.dup()
+        elif d > 0:
+            return r.minkowski_sum(shape(d))
+        else:
+            _shape = shape(abs(d))
+            if isinstance(_shape, list):
+                box_shape = kdb.Polygon(_shape)
+                bbox_maxsize = max(
+                    box_shape.bbox().width(),
+                    box_shape.bbox().height(),
+                )
+            else:
+                bbox_maxsize = max(
+                    _shape.bbox().width(),
+                    _shape.bbox().height(),
+                )
+            bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
+            return r - (bbox_r - r).minkowski_sum(_shape)
+
+    def apply_minkowski_enc(
+        self,
+        c: KCell,
+        direction: Direction = Direction.BOTH,
+    ) -> None:
+        """Apply an enclosure with a vector in y-direction.
+
+        This can be used for tapers/
+        waveguides or similar that are straight.
+
+        Args:
+            c: Cell to apply the enclosure to.
+            ref: Reference to use as a base for the enclosure.
+            direction: X/Y or both directions, see :py:class:~`DIRECTION`.
+                Uses a box if both directions are selected.
+        """
+        match direction:
+            case Direction.BOTH:
+
+                def box(d: int) -> kdb.Box:
+                    return kdb.Box(-d, -d, d, d)
+
+                self.apply_minkowski_custom(c, shape=box)
+
+            case Direction.Y:
+
+                def edge(d: int) -> kdb.Edge:
+                    return kdb.Edge(0, -d, 0, d)
+
+                self.apply_minkowski_custom(c, shape=edge)
+
+            case Direction.X:
+
+                def edge(d: int) -> kdb.Edge:
+                    return kdb.Edge(-d, 0, d, 0)
+
+                self.apply_minkowski_custom(c, shape=edge)
+
+            case _:
+                raise ValueError("Undefined direction")
+
+    def apply_minkowski_y(self, c: KCell) -> None:
+        """Apply an enclosure with a vector in y-direction.
+
+        This can be used for tapers/
+        waveguides or similar that are straight.
+
+        Args:
+            c: Cell to apply the enclosure to.
+            ref: Reference to use as a base for the enclosure.
+        """
+        return self.apply_minkowski_enc(c, direction=Direction.Y)
+
+    def apply_minkowski_x(self, c: KCell) -> None:
+        """Apply an enclosure with a vector in x-direction.
+
+        This can be used for tapers/
+        waveguides or similar that are straight.
+
+        Args:
+            c: Cell to apply the enclosure to.
+            ref: Reference to use as a base for the enclosure.
+        """
+        return self.apply_minkowski_enc(c, direction=Direction.X)
+
+    def apply_minkowski_custom(
+        self,
+        c: KCell,
+        shape: Callable[[int], kdb.Edge | kdb.Polygon | kdb.Box],
+    ) -> None:
+        """Apply an enclosure with a custom shape.
+
+        This can be used for tapers/
+        waveguides or similar that are straight.
+
+        Args:
+            c: Cell to apply the enclosure to.
+            shape: A function that will return a shape which takes one argument
+                the size of the section in dbu.
+            ref: Reference to use as a base for the enclosure.
+        """
+        regions = {}
+
+        for enc in self.enclosures:
+            if not c.bbox_per_layer(enc.main_layer).empty():
+                rsi = c.begin_shapes_rec(enc.main_layer)
+                for layer, layersec in enc.layer_sections.items():
+                    if layer not in regions:
+                        reg = kdb.Region()
+                        regions[layer] = reg
+                    else:
+                        reg = regions[layer]
+                    for section in layersec.sections:
+                        reg += self.minkowski_region(
+                            rsi, section.d_max, shape
+                        ) - self.minkowski_region(rsi, section.d_min, shape)
+
+                        reg.merge()
+
+        for layer, region in regions.items():
+            c.shapes(layer).insert(region)
+
+    def apply_minkowski_tiled(
+        self,
+        c: KCell,
+        tile_size: float | None = None,
+        n_pts: int = 64,
+        n_threads: int | None = None,
+    ) -> None:
+        """Minkowski regions with tiling processor.
+
+        Useful if the target is a big or complicated enclosure. Will split target ref
+        into tiles and calculate them in parallel. Uses a circle as a shape for the
+        minkowski sum.
+
+        Args:
+            c: Target KCell to apply the enclosures into.
+            ref: The reference shapes to apply the enclosures to.
+                Can be a layer or a region. If `None`, it will trey to use the
+                :py:attr:`main_layer`
+            tile_size: Tile size. This should be in the order off 10+ maximum size
+                of the maximum size of sections.
+            n_pts: Number of points in the circle. < 3 will create a triangle. 4 a
+                diamond, etc.
+            n_threads: Number o threads to use. By default (`None`) it will use as many
+                threads as are set to the process (usually all cores of the machine).
+        """
+        tp = kdb.TilingProcessor()
+        tp.frame = c.dbbox()  # type: ignore[misc]
+        tp.dbu = c.kcl.dbu
+        tp.threads = n_threads or config.n_threads
+        for enc in self.enclosures:
+            maxsize = 0
+            for layersection in enc.layer_sections.values():
+                maxsize = max(
+                    maxsize, *[section.d_max for section in layersection.sections]
+                )
+
+        min_tile_size_rec = 10 * maxsize * tp.dbu
+
+        if tile_size is None:
+            tile_size = min_tile_size_rec * 2
+
+        if float(tile_size) <= min_tile_size_rec:
+            config.logger.warning(
+                "Tile size should be larger than the maximum of "
+                "the enclosures (recommendation: {} / {})",
+                tile_size,
+                min_tile_size_rec,
+            )
+        tp.tile_border(maxsize * tp.dbu, maxsize * tp.dbu)
+        tp.tile_size(tile_size, tile_size)
+
+        operators: dict[int, RegionTilesOperator] = {}
+        inputs: set[int] = set()
+
+        for i, enc in enumerate(self.enclosures):
+            assert enc.main_layer is not None
+            if not c.bbox_per_layer(enc.main_layer).empty():
+                _inp = f"main_layer_{enc.main_layer}"
+                if enc.main_layer not in inputs:
+                    tp.input(f"{_inp}", c.kcl, c.cell_index(), enc.main_layer)
+                    inputs.add(enc.main_layer)
+                    config.logger.debug("Created input {}", _inp)
+
+                for layer, sections in enc.layer_sections.items():
+                    _out = f"target_{layer}"
+                    if layer not in operators:
+                        operator = RegionTilesOperator(cell=c, layer=layer)
+                        operators[layer] = operator
+                        tp.output(_out, operator)
+                        config.logger.debug("Created output {}", _out)
+                    else:
+                        operator = operators[layer]
+                        config.logger.debug("Loaded output {}", _out)
+
+                    for i, section in enumerate(reversed(sections.sections)):
+                        queue_str = (
+                            "var max_shape = Polygon.ellipse("
+                            f"Box.new({section.d_max*2},{section.d_max*2}), {n_pts});"
+                        )
+                        match section.d_max:
+                            case d if d > 0:
+                                max_region = (
+                                    "var max_reg = "
+                                    f"{_inp}.minkowski_sum(max_shape).merged();"
+                                )
+                            case d if d < 0:
+                                max_region = (
+                                    f"var tile_reg = _tile & _frame.sized({maxsize});"
+                                    + "var max_reg = tile_reg - "
+                                    f"(tile_reg - {_inp});"
+                                )
+                            case 0:
+                                max_region = (
+                                    f"var tile_reg = _tile & _frame.sized({maxsize});"
+                                    f"var max_reg = {_inp} & tile_reg;"
+                                )
+                        queue_str += max_region
+                        if section.d_min:
+                            queue_str += (
+                                "var min_shape = Polygon.ellipse("
+                                f"Box.new({section.d_min*2},{section.d_min*2}), 64);"
+                            )
+                            match section.d_min:
+                                case d if d > 0:
+                                    min_region = (
+                                        "var min_reg = "
+                                        f"{_inp}.minkowski_sum(min_shape);"
+                                    )
+                                case d if d < 0:
+                                    min_region = (
+                                        "var min_reg = tile_reg - (tile_reg - "
+                                        f"{_inp}).minkowski_sum(min_shape);"
+                                    )
+                                case 0:
+                                    min_region = f"var min_reg = {_inp} & tile_reg;"
+                            queue_str += min_region
+                            queue_str += (
+                                f"_output({_out}," "(max_reg - min_reg) & _tile, true);"
+                            )
+                        else:
+                            queue_str += f"_output({_out}, max_reg & _tile, true);"
+
+                        tp.queue(queue_str)
+                        config.logger.debug(
+                            "String queued for {} on layer {}: '{}'",
+                            c.name,
+                            layer,
+                            queue_str,
+                        )
+
+        c.kcl.start_changes()
+        config.logger.info("Starting minkowski on {}", c.name)
+        tp.execute(f"Minkowski {c.name}")
+        c.kcl.end_changes()
+
+        for layer, operator in operators.items():
+            operator.insert()

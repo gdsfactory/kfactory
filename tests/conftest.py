@@ -2,10 +2,13 @@ import pytest
 import kfactory as kf
 from functools import partial
 
+kf.config.logfilter.level = "DEGBUG"
+
 
 class LAYER_CLASS(kf.LayerEnum):
     WG = (1, 0)
     WGCLAD = (111, 0)
+    WGEXCLUDE = (1, 1)
 
 
 @pytest.fixture
@@ -28,6 +31,11 @@ def waveguide(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.waveguide.waveguide(
         width=0.5, length=1, layer=LAYER.WG, enclosure=wg_enc
     )
+
+
+@pytest.fixture
+def waveguide_blank(LAYER):
+    return kf.cells.waveguide.waveguide(width=0.5, length=1, layer=LAYER.WG)
 
 
 @pytest.fixture
