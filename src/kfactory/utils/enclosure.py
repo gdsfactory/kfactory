@@ -4,7 +4,6 @@ Enclosures allow to calculate slab/excludes and similar concepts to an arbitrary
 shape located on a main_layer or reference layer or region.
 """
 
-import os
 from collections.abc import Callable, Sequence
 from enum import IntEnum
 from hashlib import sha1
@@ -15,7 +14,7 @@ from pydantic import BaseModel, Field, PrivateAttr, validator
 
 from .. import kdb
 from ..conf import config
-from ..kcell import KCell, LayerEnum
+from ..kcell import KCell, LayerEnum, Ports
 
 __all__ = [
     "Enclosure",
@@ -479,6 +478,10 @@ class LayerSection(BaseModel):
                     if i == len(self.sections):
                         break
             self.sections.insert(i, sec)
+
+    def max_size(self) -> int:
+        """Maximum size of the sections in this layer section."""
+        return self.sections[-1].d_max
 
     def __hash__(self) -> int:
         """Unique hash of LayerSection."""
@@ -1058,6 +1061,39 @@ class RegionOperator(kdb.TileOutputReceiver):
         self.kcell.shapes(self.layer).insert(self.region)
 
 
+class PortHoles(BaseModel):
+    """Calculates a region for holes from sizing and a list of ports."""
+
+    oversize: int
+    ports: Ports
+    region: kdb.Region = Field(default_factory=kdb.Region)
+
+    def __init__(self, oversize: int, ports: Ports):
+        """Initialize variables and set region."""
+        super().__init__(oversize=oversize, ports=ports)
+
+        for port in self.ports:
+            half_width = port.width // 2 + self.oversize
+            if port._trans:
+                self.region.insert(
+                    kdb.Polygon(
+                        kdb.Box(0, -half_width, half_width, half_width)
+                    ).transformed(port.trans)
+                )
+            else:
+                self.region.insert(
+                    kdb.Polygon(
+                        kdb.Box(0, -half_width, half_width, half_width)
+                    ).transformed(port.dcplx_trans.to_itrans(port.kcl.dbu))
+                )
+
+    class Config:
+        """pydantic config."""
+
+        allow_mutation = False
+        arbitrary_types_allowed = True
+
+
 class RegionTilesOperator(kdb.TileOutputReceiver):
     """Region collector. Just getst the tile and inserts it into the target cell.
 
@@ -1065,7 +1101,11 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
     inserting.
     """
 
-    def __init__(self, cell: KCell, layer: LayerEnum | int) -> None:
+    def __init__(
+        self,
+        cell: KCell,
+        layer: LayerEnum | int,
+    ) -> None:
         """Initialization.
 
         Args:
@@ -1103,11 +1143,22 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
         reg.insert(region)
         reg.merge()
 
-    def insert(self) -> None:
-        """Insert the finished region into the cell."""
+    def insert(self, port_holes: PortHoles | None = None) -> None:
+        """Insert the finished region into the cell.
+
+        Args:
+            port_holes: Carve out holes around the ports.
+        """
+        region = kdb.Region()
         for dicts in self.regions.values():
             for reg in dicts.values():
-                self.kcell.shapes(self.layer).insert(reg)
+                region += reg
+        if port_holes:
+            print(region)
+            print(port_holes.region)
+            self.kcell.shapes(self.layer).insert(region - port_holes.region)
+        else:
+            self.kcell.shapes(self.layer).insert(region)
 
 
 class PDKEnclosure(BaseModel):
@@ -1272,6 +1323,7 @@ class PDKEnclosure(BaseModel):
         tile_size: float | None = None,
         n_pts: int = 64,
         n_threads: int | None = None,
+        carve_out_ports: bool = True,
     ) -> None:
         """Minkowski regions with tiling processor.
 
@@ -1290,17 +1342,30 @@ class PDKEnclosure(BaseModel):
                 diamond, etc.
             n_threads: Number o threads to use. By default (`None`) it will use as many
                 threads as are set to the process (usually all cores of the machine).
+            carve_out_ports: Carves out a box of port_width +
         """
         tp = kdb.TilingProcessor()
         tp.frame = c.dbbox()  # type: ignore[misc]
         tp.dbu = c.kcl.dbu
         tp.threads = n_threads or config.n_threads
+        operators: dict[int, RegionTilesOperator] = {}
+        inputs: set[int] = set()
+        port_holes: dict[int, PortHoles] = {}
+        layer_sizes: dict[int, int] = {}
+
         for enc in self.enclosures:
             maxsize = 0
-            for layersection in enc.layer_sections.values():
-                maxsize = max(
-                    maxsize, *[section.d_max for section in layersection.sections]
-                )
+            for layer, layersection in enc.layer_sections.items():
+                size = layersection.sections[-1].d_max
+                maxsize = max(maxsize, size)
+                if layer not in layer_sizes:
+                    layer_sizes[layer] = size
+                else:
+                    layer_sizes[layer] = max(layer_sizes[layer], size)
+
+        for size in layer_sizes.values():
+            if size not in port_holes:
+                port_holes[size] = PortHoles(oversize=size, ports=c.ports)
 
         min_tile_size_rec = 10 * maxsize * tp.dbu
 
@@ -1316,9 +1381,6 @@ class PDKEnclosure(BaseModel):
             )
         tp.tile_border(maxsize * tp.dbu, maxsize * tp.dbu)
         tp.tile_size(tile_size, tile_size)
-
-        operators: dict[int, RegionTilesOperator] = {}
-        inputs: set[int] = set()
 
         for i, enc in enumerate(self.enclosures):
             assert enc.main_layer is not None
@@ -1401,5 +1463,9 @@ class PDKEnclosure(BaseModel):
         tp.execute(f"Minkowski {c.name}")
         c.kcl.end_changes()
 
-        for layer, operator in operators.items():
-            operator.insert()
+        if carve_out_ports:
+            for layer, operator in operators.items():
+                operator.insert(port_holes=port_holes[layer_sizes[layer]])
+        else:
+            for operator in operators.values():
+                operator.insert()
