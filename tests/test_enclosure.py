@@ -103,7 +103,7 @@ def test_um_enclosure_nodbu(LAYER: kf.LayerEnum) -> None:
 
 def test_pdkenclosure(LAYER: kf.LayerEnum, waveguide_blank: kf.KCell) -> None:
     kf.config.logfilter.level = "DEBUG"
-    c = waveguide_blank.dup()
+    c = kf.cells.bezier.bend_s(0.5, 10, 30, LAYER.WG)
 
     enc1 = kf.utils.Enclosure(
         sections=[
