@@ -18,7 +18,7 @@ from ..kcell import KCell, LayerEnum, Ports
 
 __all__ = [
     "Enclosure",
-    "PDKEnclosure",
+    "FullEnclosure",
     "extrude_path",
     "extrude_path_points",
     "extrude_path_dynamic",
@@ -1161,7 +1161,7 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
             self.kcell.shapes(self.layer).insert(region)
 
 
-class PDKEnclosure(BaseModel):
+class FullEnclosure(BaseModel):
     """Collection of :py:class:~`Enclosure` for cells."""
 
     enclosures: list[Enclosure]

@@ -118,8 +118,6 @@ def test_pdkenclosure(LAYER: kf.LayerEnum, waveguide_blank: kf.KCell) -> None:
         name="EXCL", main_layer=LAYER.WG, sections=[(LAYER.WGEXCLUDE, 2500)]
     )
 
-    pdkenc = kf.utils.PDKEnclosure(enclosures=[enc1, enc2])
+    pdkenc = kf.utils.FullEnclosure(enclosures=[enc1, enc2])
 
     pdkenc.apply_minkowski_tiled(c)
-
-    c.show()

@@ -11,13 +11,12 @@ from typing import Any
 
 from pydantic import BaseModel, Field, validator
 
-from kfactory.conf import logger
-from kfactory.kcell import KCell, KCLayout, LayerEnum, kcl
-from kfactory.technology import LayerStack
-from kfactory.typings import CellFactory, CellSpec
-from kfactory.utils.enclosure import Enclosure
+from .conf import logger
+from .kcell import KCell, LayerEnum, kcl
+from .technology import LayerStack
+from .typings import CellFactory, CellSpec
+from .utils.enclosure import Enclosure, FullEnclosure
 
-nm = 1e-3
 cell_settings = ["function", "cell", "settings"]
 enclosure_settings = ["function", "enclosure", "settings"]
 
@@ -80,11 +79,13 @@ class Pdk(BaseModel):
     """
 
     name: str
-    enclosures: dict[str, Enclosure] = Field(default_factory=dict)
+    special_enclosures: dict[str, Enclosure] = Field(default_factory=dict)
+
     cell_factories: dict[str, CellFactory] = Field(default_factory=dict)
     cells: dict[str, KCell] = Field(default_factory=dict)
     base_pdk: Pdk | None = None
     default_decorator: Callable[[KCell], None] | None = None
+    enclosure: FullEnclosure = Field(default=FullEnclosure(enclosures=[]))
     layers: type[LayerEnum]
     layer_stack: LayerStack | None = None
     # layer_views: Optional[LayerViews] = None
@@ -147,9 +148,9 @@ class Pdk(BaseModel):
         self.cell_factories = cell_factories
 
         if self.base_pdk:
-            enclosures = self.base_pdk.enclosures
-            enclosures.update(self.enclosures)
-            self.enclosures = enclosures
+            enclosures = self.base_pdk.special_enclosures
+            enclosures.update(self.special_enclosures)
+            self.special_enclosures = enclosures
 
             cells = self.base_pdk.cells
             cells.update(self.cells)
@@ -183,50 +184,9 @@ class Pdk(BaseModel):
     def register_enclosures(self, **kwargs: Enclosure) -> None:
         """Register enclosures factories."""
         for name, enclosure in kwargs.items():
-            if name in self.enclosures:
+            if name in self.special_enclosures:
                 warnings.warn(f"Overwriting enclosure {name!r}")
-            self.enclosures[name] = enclosure
-
-            # def register_cells_yaml(
-            #     self,
-            #     dirpath: Path | None = None,
-            #     update: bool = False,
-            #     **kwargs: Any,
-            # ) -> None:
-            #     """Load *.pic.yml YAML files and register them as cells.
-
-            #     Args:
-            #         dirpath: directory to recursive search for YAML cells.
-            #         update: does not raise ValueError if cell already registered.
-
-            #     Keyword Args:
-            #         cell_name: cell function. To update cells dict.
-
-            #     """
-
-            #     message = "Updated" if update else "Registered"
-
-            #     if dirpath:
-            #         dirpath = pathlib.Path(dirpath)
-
-            #         if not dirpath.is_dir():
-            #             raise ValueError(f"{dirpath!r} needs to be a directory.")
-
-            #         for filepath in dirpath.glob("*/**/*.pic.yml"):
-            #             name = filepath.stem.split(".")[0]
-            #             if not update and name in self.cells:
-            #                 raise ValueError(
-            #                     f"ERROR: Cell name {name!r} from {filepath} already registered."
-            #                 )
-            #             kf.placer.cells_from_yaml(filepath)
-            #             logger.info(f"{message} cell {name!r}")
-
-            #     for k, v in kwargs.items():
-
-    #        if not update and k in self.cells:
-    #            raise ValueError(f"ERROR: Cell name {k!r} already registered.")
-    #        self.cells[k] = v
-    #        logger.info(f"{message} cell {k!r}")
+            self.special_enclosures[name] = enclosure
 
     def remove_cell(self, name: str) -> None:
         """Removes cell from a PDK."""
@@ -266,23 +226,6 @@ class Pdk(BaseModel):
                 cells_ = list(cells.keys())
                 raise ValueError(f"{cell!r} not in PDK {self.name!r} cells: {cells_} ")
             return cell(**kwargs)
-        # elif isinstance(cell, dict):
-        #     for key in cell:
-        #         if key not in cell_settings:
-        #             raise ValueError(f"Invalid setting {key!r} not in {cell_settings}")
-        #     settings = dict(cell.get("settings", {}))
-        #     settings.update(**kwargs)
-
-        #     cell_name = cell.get("cell", None)
-        #     cell_name = cell_name or cell.get("function")
-        #     if not isinstance(cell_name, str) or cell_name not in cell_names:
-        #         cells_ = list(cells.keys())
-        #         raise ValueError(
-        #             f"{cell_name!r} from PDK {self.name!r} not in cells: {cells_} "
-        #         )
-        #     cell = cells[cell_name] if cell_name in cells else cells[cell_name]
-        #     cell = cell(**settings)
-        #     return cell
         else:
             raise ValueError(
                 "get_cell expects a CellSpec (KCell, CellFactory, "
@@ -291,31 +234,7 @@ class Pdk(BaseModel):
 
     def get_enclosure(self, enclosure: str) -> Enclosure:
         """Returns enclosure from a enclosure spec."""
-        return self.enclosures[enclosure]
-        # try:
-        #     enclosure_factory = self.enclosures[enclosure]
-        # except KeyError:
-        #     raise ValueError(f"{enclosure!r} not in {enclosures}")
-        # return enclosure_factory(**kwargs)
-        # elif isinstance(enclosure, (dict, DictConfig)):
-        #     for key in enclosure.keys():
-        #         if key not in enclosure_settings:
-        #             raise ValueError(
-        #                 f"Invalid setting {key!r} not in {enclosure_settings}"
-        #             )
-        #     enclosure_factory_name = enclosure.get("enclosure", None)
-        #     enclosure_factory_name = enclosure_factory_name or enclosure.get("function")
-        #     if (
-        #         not isinstance(enclosure_factory_name, str)
-        #         or enclosure_factory_name not in self.enclosures
-        #     ):
-        #         enclosures = list(self.enclosures.keys())
-        #         raise ValueError(f"{enclosure_factory_name!r} not in {enclosures}")
-        #     enclosure_factory = self.enclosures[enclosure_factory_name]
-        #     settings = dict(enclosure.get("settings", {}))
-        #     settings.update(**kwargs)
-
-        #     return enclosure_factory(**settings)
+        return self.special_enclosures[enclosure]
 
     def get_layer(self, layer: Iterable[int] | int | str) -> LayerEnum:
         """Returns layer from a layer spec."""
@@ -331,57 +250,3 @@ class Pdk(BaseModel):
                 )
             layer_idx = self.kcl.layer(*layer)
             return self.layers(layer_idx)  # type: ignore[call-arg]
-
-    # def get_layer_views(self) -> LayerViews:
-    #     if self.layer_views is None:
-    #         raise ValueError(f"layer_views for Pdk {self.name!r} is None")
-    #     return self.layer_views
-
-
-# _ACTIVE_PDK = None
-
-
-# def get_cell(cell: CellSpec, **kwargs: Any) -> KCell:
-#     return _ACTIVE_PDK.get_cell(cell, **kwargs)
-
-
-# def get_enclosure(enclosure: Enclosure, **kwargs: Any) -> Enclosure:
-#     return _ACTIVE_PDK.get_enclosure(enclosure, **kwargs)
-
-
-# def get_layer(layer: LayerEnum) -> tuple[int, int] | list[int] | Any:
-#     return _ACTIVE_PDK.get_layer(layer)
-
-
-# # def get_layer_views() -> LayerViews:
-# #     return _ACTIVE_PDK.get_layer_views()
-
-
-# def get_active_pdk() -> Pdk:
-#     return _ACTIVE_PDK
-
-
-# def get_grid_size() -> float:
-#     return _ACTIVE_PDK.grid_size
-
-
-# def get_constant(constant_name: Any) -> Any:
-#     """If constant_name is a string returns a the value from the dict."""
-#     return _ACTIVE_PDK.get_constant(constant_name)
-
-
-# def get_sparameters_path() -> pathlib.Path | str:
-#     if _ACTIVE_PDK.sparameters_path is None:
-#         raise ValueError(f"{_ACTIVE_PDK.name!r} has no sparameters_path")
-#     return _ACTIVE_PDK.sparameters_path
-
-
-# def get_interconnect_cml_path() -> pathlib.Path:
-#     if _ACTIVE_PDK.interconnect_cml_path is None:
-#         raise ValueError(f"{_ACTIVE_PDK.name!r} has no interconnect_cml_path")
-#     return _ACTIVE_PDK.interconnect_cml_path
-
-
-# def _set_active_pdk(pdk: Pdk) -> None:
-#     global _ACTIVE_PDK
-#     _ACTIVE_PDK = pdk
