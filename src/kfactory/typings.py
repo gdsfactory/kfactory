@@ -7,5 +7,5 @@ from typing import TypeAlias
 from kfactory.kcell import KCell
 
 CellFactory = Callable[..., KCell]
-CellSpec = TypeAlias[str | CellFactory | KCell | dict[str, CellFactory | KCell]]
-PathType = TypeAlias[str | Path]
+CellSpec: TypeAlias = str | CellFactory | KCell | dict[str, CellFactory | KCell]
+PathType: TypeAlias = str | Path
