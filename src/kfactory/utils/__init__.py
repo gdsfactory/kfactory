@@ -13,6 +13,7 @@ min space violations. :py:func:~`fix_spacing_tiled` to fix it using a TilingProc
 from .enclosure import (
     Direction,
     Enclosure,
+    PDKEnclosure,
     clean_points,
     extrude_path,
     extrude_path_dynamic,

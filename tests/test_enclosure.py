@@ -89,8 +89,9 @@ def test_um_enclosure(LAYER):
     assert enc == enc_um
 
 
-def test_um_enclosure_nodbu(LAYER):
-    with pytest.raises(AssertionError) as ae_info:
+def test_um_enclosure_nodbu(LAYER: kf.LayerEnum) -> None:
+    """When defining um sections, kcl must be defined."""
+    with pytest.raises(AssertionError) as ae_info:  # noqa: F481
         kf.utils.Enclosure(
             dsections=[
                 (LAYER.WGCLAD, -5, -3),
@@ -98,3 +99,27 @@ def test_um_enclosure_nodbu(LAYER):
                 (LAYER.WGCLAD, -2, 1),
             ]
         )
+
+
+def test_pdkenclosure(LAYER: kf.LayerEnum, waveguide_blank: kf.KCell) -> None:
+    kf.config.logfilter.level = "DEBUG"
+    c = waveguide_blank.dup()
+
+    enc1 = kf.utils.Enclosure(
+        sections=[
+            (LAYER.WGEXCLUDE, 3500),
+            (LAYER.WGCLAD, 2000),
+        ],
+        name="CLAD",
+        main_layer=LAYER.WG,
+    )
+
+    enc2 = kf.utils.Enclosure(
+        name="EXCL", main_layer=LAYER.WG, sections=[(LAYER.WGEXCLUDE, 2500)]
+    )
+
+    pdkenc = kf.utils.PDKEnclosure(enclosures=[enc1, enc2])
+
+    pdkenc.apply_minkowski_tiled(c)
+
+    c.show()
