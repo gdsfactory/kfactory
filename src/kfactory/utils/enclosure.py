@@ -4,7 +4,7 @@ Enclosures allow to calculate slab/excludes and similar concepts to an arbitrary
 shape located on a main_layer or reference layer or region.
 """
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Iterator, Sequence
 from enum import IntEnum
 from hashlib import sha1
 from typing import Any, Optional, TypeGuard
@@ -17,8 +17,8 @@ from ..conf import config
 from ..kcell import KCell, LayerEnum, Ports
 
 __all__ = [
-    "Enclosure",
-    "FullEnclosure",
+    "LayerEnclosure",
+    "KCellEnclosure",
     "extrude_path",
     "extrude_path_points",
     "extrude_path_dynamic",
@@ -154,7 +154,7 @@ def extrude_path(
     layer: LayerEnum | int,
     path: list[kdb.DPoint],
     width: float,
-    enclosure: Optional["Enclosure"] = None,
+    enclosure: Optional["LayerEnclosure"] = None,
     start_angle: float | None = None,
     end_angle: float | None = None,
 ) -> None:
@@ -289,7 +289,7 @@ def extrude_path_dynamic(
     layer: LayerEnum | int,
     path: list[kdb.DPoint],
     widths: Callable[[float], float] | list[float],
-    enclosure: Optional["Enclosure"] = None,
+    enclosure: Optional["LayerEnclosure"] = None,
     start_angle: float | None = None,
     end_angle: float | None = None,
 ) -> None:
@@ -488,7 +488,7 @@ class LayerSection(BaseModel):
         return hash(tuple((s.d_min, s.d_max) for s in self.sections))
 
 
-class Enclosure(BaseModel):
+class LayerEnclosure(BaseModel):
     """Definitions for calculation of enclosing (or smaller) shapes of a reference.
 
     Attributes:
@@ -578,9 +578,9 @@ class Enclosure(BaseModel):
             (str(self), self.main_layer, tuple(list(self.layer_sections.items())))
         )
 
-    def __add__(self, other: "Enclosure") -> "Enclosure":
+    def __add__(self, other: "LayerEnclosure") -> "LayerEnclosure":
         """Returns the merged enclosure of two enclosures."""
-        enc = Enclosure()
+        enc = LayerEnclosure()
 
         for layer, secs in self.layer_sections.items():
             for sec in secs.sections:
@@ -592,7 +592,7 @@ class Enclosure(BaseModel):
 
         return enc
 
-    def __iadd__(self, other: "Enclosure") -> "Enclosure":
+    def __iadd__(self, other: "LayerEnclosure") -> "LayerEnclosure":
         """Allows merging another enclosure into this one."""
         for layer, secs in other.layer_sections.items():
             for sec in secs.sections:
@@ -1021,6 +1021,38 @@ class Enclosure(BaseModel):
         )
 
 
+class LayerEnclosureCollection(BaseModel):
+    """Collection of LayerEnclosures."""
+
+    enclosures: list[LayerEnclosure]
+
+    @validator("enclosures", each_item=True)
+    def enclosures_must_have_main_layer(cls, v: LayerEnclosure) -> LayerEnclosure:
+        """The PDK Enclosure must have main layers defined for each Enclosure.
+
+        The PDK Enclosure uses this to automatically apply enclosures.
+        """
+        assert (
+            v.main_layer is not None
+        ), "Enclosure for PDKEnclosure must have a main layer defined"
+        return v
+
+    def __get_item__(self, key: str | int) -> LayerEnclosure:
+        """Retrieve enclosure by main layer."""
+        try:
+            return next(filter(lambda enc: enc.main_layer == key, self.enclosures))
+        except StopIteration:
+            raise KeyError(f"Unknown key {key}")
+
+    def __iter__(self) -> Iterator[LayerEnclosure]:  # type: ignore[override]
+        """Iterator over the LayerEnclosures."""
+        yield from self.enclosures
+
+    def __len__(self) -> int:
+        """Length of the LayerEnclosure list."""
+        return len(self.enclosures)
+
+
 class RegionOperator(kdb.TileOutputReceiver):
     """Region collector. Just getst the tile and inserts it into the target cell."""
 
@@ -1104,16 +1136,16 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
     def __init__(
         self,
         cell: KCell,
-        layer: LayerEnum | int,
+        layers: list[LayerEnum | int],
     ) -> None:
         """Initialization.
 
         Args:
             cell: Target cell.
-            layer: Target layer.
+            layers: Target layers.
         """
         self.kcell = cell
-        self.layer = layer
+        self.layers = layers
         self.regions: dict[int, dict[int, kdb.Region]] = {}
 
     def put(
@@ -1156,26 +1188,22 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
         if port_holes:
             print(region)
             print(port_holes.region)
-            self.kcell.shapes(self.layer).insert(region - port_holes.region)
+            carved_region = region - port_holes.region
+            for layer in self.layers:
+                self.kcell.shapes(layer).insert(carved_region)
         else:
-            self.kcell.shapes(self.layer).insert(region)
+            for layer in self.layers:
+                self.kcell.shapes(layer).insert(region)
 
 
-class FullEnclosure(BaseModel):
+class KCellEnclosure(BaseModel):
     """Collection of :py:class:~`Enclosure` for cells."""
 
-    enclosures: list[Enclosure]
+    enclosures: LayerEnclosureCollection
 
-    @validator("enclosures", each_item=True)
-    def enclosures_must_have_main_layer(cls, v: Enclosure) -> Enclosure:
-        """The PDK Enclosure must have main layers defined for each Enclosure.
-
-        The PDK Enclosure uses this to automatically apply enclosures.
-        """
-        assert (
-            v.main_layer is not None
-        ), "Enclosure for PDKEnclosure must have a main layer defined"
-        return v
+    def __init__(self, enclosures: Iterable[LayerEnclosure]):
+        """Init. Allow usage of an iterable object instead of a collection."""
+        super().__init__(enclosures=LayerEnclosureCollection(enclosures=enclosures))
 
     def minkowski_region(
         self,
@@ -1348,7 +1376,6 @@ class FullEnclosure(BaseModel):
         tp.frame = c.dbbox()  # type: ignore[misc]
         tp.dbu = c.kcl.dbu
         tp.threads = n_threads or config.n_threads
-        operators: dict[int, RegionTilesOperator] = {}
         inputs: set[int] = set()
         port_holes: dict[int, PortHoles] = {}
         layer_sizes: dict[int, int] = {}
@@ -1391,72 +1418,78 @@ class FullEnclosure(BaseModel):
                     inputs.add(enc.main_layer)
                     config.logger.debug("Created input {}", _inp)
 
-                for layer, sections in enc.layer_sections.items():
-                    _out = f"target_{layer}"
-                    if layer not in operators:
-                        operator = RegionTilesOperator(cell=c, layer=layer)
-                        operators[layer] = operator
+                unique_layersections: dict[LayerSection, RegionTilesOperator] = {}
+
+                for layer, layer_section in enc.layer_sections.items():
+                    if layer_section in unique_layersections:
+                        unique_layersections[layer_section].layers.append(layer)
+                    else:
+                        _out = f"target_{layer}"
+                        operator = RegionTilesOperator(cell=c, layers=[layer])
+                        unique_layersections[layer_section] = operator
                         tp.output(_out, operator)
                         config.logger.debug("Created output {}", _out)
-                    else:
-                        operator = operators[layer]
-                        config.logger.debug("Loaded output {}", _out)
 
-                    for i, section in enumerate(reversed(sections.sections)):
-                        queue_str = (
-                            "var max_shape = Polygon.ellipse("
-                            f"Box.new({section.d_max*2},{section.d_max*2}), {n_pts});"
-                        )
-                        match section.d_max:
-                            case d if d > 0:
-                                max_region = (
-                                    "var max_reg = "
-                                    f"{_inp}.minkowski_sum(max_shape).merged();"
-                                )
-                            case d if d < 0:
-                                max_region = (
-                                    f"var tile_reg = _tile & _frame.sized({maxsize});"
-                                    + "var max_reg = tile_reg - "
-                                    f"(tile_reg - {_inp});"
-                                )
-                            case 0:
-                                max_region = (
-                                    f"var tile_reg = _tile & _frame.sized({maxsize});"
-                                    f"var max_reg = {_inp} & tile_reg;"
-                                )
-                        queue_str += max_region
-                        if section.d_min:
-                            queue_str += (
-                                "var min_shape = Polygon.ellipse("
-                                f"Box.new({section.d_min*2},{section.d_min*2}), 64);"
+                        for i, section in enumerate(reversed(layer_section.sections)):
+                            queue_str = (
+                                "var max_shape = Polygon.ellipse("
+                                f"Box.new({section.d_max*2},{section.d_max*2}),"
+                                f" {n_pts});"
                             )
-                            match section.d_min:
+                            match section.d_max:
                                 case d if d > 0:
-                                    min_region = (
-                                        "var min_reg = "
-                                        f"{_inp}.minkowski_sum(min_shape);"
+                                    max_region = (
+                                        "var max_reg = "
+                                        f"{_inp}.minkowski_sum(max_shape).merged();"
                                     )
                                 case d if d < 0:
-                                    min_region = (
-                                        "var min_reg = tile_reg - (tile_reg - "
-                                        f"{_inp}).minkowski_sum(min_shape);"
+                                    max_region = (
+                                        f"var tile_reg = _tile &"
+                                        f" _frame.sized({maxsize});"
+                                        "var max_reg = tile_reg - "
+                                        f"(tile_reg - {_inp});"
                                     )
                                 case 0:
-                                    min_region = f"var min_reg = {_inp} & tile_reg;"
-                            queue_str += min_region
-                            queue_str += (
-                                f"_output({_out}," "(max_reg - min_reg) & _tile, true);"
-                            )
-                        else:
-                            queue_str += f"_output({_out}, max_reg & _tile, true);"
+                                    max_region = (
+                                        "var tile_reg = _tile & "
+                                        f"_frame.sized({maxsize});"
+                                        f"var max_reg = {_inp} & tile_reg;"
+                                    )
+                            queue_str += max_region
+                            if section.d_min:
+                                queue_str += (
+                                    "var min_shape = Polygon.ellipse("
+                                    f"Box.new({section.d_min*2},{section.d_min*2}),"
+                                    " 64);"
+                                )
+                                match section.d_min:
+                                    case d if d > 0:
+                                        min_region = (
+                                            "var min_reg = "
+                                            f"{_inp}.minkowski_sum(min_shape);"
+                                        )
+                                    case d if d < 0:
+                                        min_region = (
+                                            "var min_reg = tile_reg - (tile_reg - "
+                                            f"{_inp}).minkowski_sum(min_shape);"
+                                        )
+                                    case 0:
+                                        min_region = f"var min_reg = {_inp} & tile_reg;"
+                                queue_str += min_region
+                                queue_str += (
+                                    f"_output({_out},"
+                                    "(max_reg - min_reg) & _tile, true);"
+                                )
+                            else:
+                                queue_str += f"_output({_out}, max_reg & _tile, true);"
 
-                        tp.queue(queue_str)
-                        config.logger.debug(
-                            "String queued for {} on layer {}: '{}'",
-                            c.name,
-                            layer,
-                            queue_str,
-                        )
+                            tp.queue(queue_str)
+                            config.logger.debug(
+                                "String queued for {} on layer {}: '{}'",
+                                c.name,
+                                layer,
+                                queue_str,
+                            )
 
         c.kcl.start_changes()
         config.logger.info("Starting minkowski on {}", c.name)
@@ -1464,8 +1497,8 @@ class FullEnclosure(BaseModel):
         c.kcl.end_changes()
 
         if carve_out_ports:
-            for layer, operator in operators.items():
-                operator.insert(port_holes=port_holes[layer_sizes[layer]])
+            for operator in unique_layersections.values():
+                operator.insert(port_holes=port_holes[layer_sizes[operator.layers[0]]])
         else:
-            for operator in operators.values():
+            for operator in unique_layersections.values():
                 operator.insert()
