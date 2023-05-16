@@ -7,6 +7,7 @@ import warnings
 from collections.abc import Callable, Iterable
 from inspect import getmembers, signature
 from pathlib import Path
+from types import ModuleType
 from typing import Any
 
 from pydantic import BaseModel, Field, validator
@@ -14,8 +15,8 @@ from pydantic import BaseModel, Field, validator
 from .conf import logger
 from .kcell import KCell, LayerEnum, kcl
 from .technology import LayerStack
-from .typings import CellFactory, CellSpec
-from .utils.enclosure import Enclosure, FullEnclosure
+from .typings import CellFactory, CellSpec, PathType
+from .utils.enclosure import KCellEnclosure, LayerEnclosure
 
 cell_settings = ["function", "cell", "settings"]
 enclosure_settings = ["function", "enclosure", "settings"]
@@ -30,16 +31,15 @@ constants = {
 MaterialSpec = str | float | tuple[float, float] | Callable[[str], float]
 
 
-def get_cells(modules, verbose: bool = False) -> dict[str, CellFactory]:
+def get_cells(
+    modules: Iterable[ModuleType], verbose: bool = False
+) -> dict[str, CellFactory]:
     """Returns PCells (component functions) from a module or list of modules.
 
     Args:
         modules: module or iterable of modules.
         verbose: prints in case any errors occur.
-
     """
-    modules = modules if isinstance(modules, Iterable) else [modules]
-
     cells = {}
     for module in modules:
         for t in getmembers(module):
@@ -79,22 +79,22 @@ class Pdk(BaseModel):
     """
 
     name: str
-    special_enclosures: dict[str, Enclosure] = Field(default_factory=dict)
+    layer_enclosures: dict[str, LayerEnclosure] = Field(default_factory=dict)
+    enclosure: KCellEnclosure = Field(default=KCellEnclosure(enclosures=[]))
 
     cell_factories: dict[str, CellFactory] = Field(default_factory=dict)
     cells: dict[str, KCell] = Field(default_factory=dict)
     base_pdk: Pdk | None = None
     default_decorator: Callable[[KCell], None] | None = None
-    enclosure: FullEnclosure = Field(default=FullEnclosure(enclosures=[]))
     layers: type[LayerEnum]
     layer_stack: LayerStack | None = None
     # layer_views: Optional[LayerViews] = None
     layer_transitions: dict[LayerEnum | tuple[LayerEnum, LayerEnum], CellSpec] = Field(
         default_factory=dict
     )
-    sparameters_path: Path | str | None = None
+    sparameters_path: PathType | None = None
     # modes_path: Optional[Path] = PATH.modes
-    interconnect_cml_path: Path | None = None
+    interconnect_cml_path: PathType | None = None
     constants: dict[str, Any] = constants
 
     class Config:
@@ -109,11 +109,11 @@ class Pdk(BaseModel):
         }
 
     class PdkCollection(dict):
-        def __setitem__(self, __key, __val) -> None:
+        def __setitem__(self, __key: str, __val: Any) -> None:
             super().__setitem__(__key, __val)
             self.__setattr__(__key, __val)
 
-        def update(self, m):
+        def update(self, m: dict[str, Any]):
             super().update(m)
             for key, val in m.items():
                 self.__setattr__(key, val)
@@ -148,9 +148,9 @@ class Pdk(BaseModel):
         self.cell_factories = cell_factories
 
         if self.base_pdk:
-            enclosures = self.base_pdk.special_enclosures
-            enclosures.update(self.special_enclosures)
-            self.special_enclosures = enclosures
+            enclosures = self.base_pdk.layer_enclosures
+            enclosures.update(self.layer_enclosures)
+            self.layer_enclosures = enclosures
 
             cells = self.base_pdk.cells
             cells.update(self.cells)
@@ -168,7 +168,7 @@ class Pdk(BaseModel):
                 self.default_decorator = self.base_pdk.default_decorator
         self.kcl.pdk = self
 
-    def register_cells(self, **kwargs: Callable[KCell]) -> None:
+    def register_cells(self, **kwargs: Callable[..., KCell]) -> None:
         """Register cell factories."""
         for name, cell in kwargs.items():
             if not callable(cell):
@@ -181,12 +181,12 @@ class Pdk(BaseModel):
 
             self.cells[name] = cell
 
-    def register_enclosures(self, **kwargs: Enclosure) -> None:
+    def register_enclosures(self, **kwargs: LayerEnclosure) -> None:
         """Register enclosures factories."""
         for name, enclosure in kwargs.items():
-            if name in self.special_enclosures:
+            if name in self.layer_enclosures:
                 warnings.warn(f"Overwriting enclosure {name!r}")
-            self.special_enclosures[name] = enclosure
+            self.layer_enclosures[name] = enclosure
 
     def remove_cell(self, name: str) -> None:
         """Removes cell from a PDK."""
@@ -232,9 +232,9 @@ class Pdk(BaseModel):
                 f"string or dict), got {type(cell)}"
             )
 
-    def get_enclosure(self, enclosure: str) -> Enclosure:
+    def get_enclosure(self, enclosure: str) -> LayerEnclosure:
         """Returns enclosure from a enclosure spec."""
-        return self.special_enclosures[enclosure]
+        return self.layer_enclosures[enclosure]
 
     def get_layer(self, layer: Iterable[int] | int | str) -> LayerEnum:
         """Returns layer from a layer spec."""
