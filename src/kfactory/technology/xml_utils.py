@@ -1,13 +1,14 @@
+"""XML utils."""
+
 import xml.etree.ElementTree as ET
+from xml.dom.minidom import Document, Node
 
 
-def _strip_xml(node):
+def _strip_xml(node: Document) -> None:
     """Strip XML of excess whitespace.
 
     Source: https://stackoverflow.com/a/16919069
     """
-    from xml.dom.minidom import Node
-
     for x in node.childNodes:
         if x.nodeType == Node.TEXT_NODE:
             if x.nodeValue:
@@ -17,6 +18,7 @@ def _strip_xml(node):
 
 
 def make_pretty_xml(root: ET.Element) -> bytes:
+    """Make XML pretty."""
     import xml.dom.minidom
 
     xml_doc = xml.dom.minidom.parseString(ET.tostring(root))
