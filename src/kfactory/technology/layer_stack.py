@@ -1,12 +1,14 @@
 from collections import defaultdict
 from collections.abc import Callable
-from typing import Any, Literal, Union
+from typing import Any, Literal, TypeAlias
 
 from pydantic import BaseModel, Field
 
-from kfactory.technology.layer_views import LayerViews
+from .layer_views import LayerViews
 
-MaterialSpec = Union[str, float, tuple[float, float], Callable]
+MaterialSpec: TypeAlias = (
+    str | float | tuple[float | float] | Callable[..., tuple[float, float]]
+)
 
 
 class LayerLevel(BaseModel):
@@ -38,11 +40,12 @@ class LayerLevel(BaseModel):
         doping_concentration: for implants.
         resistivity: for metals.
         bias: in um for the etch. Can be a single number or 2 numbers (bias_x, bias_y)
-        derived_layer: Optional derived layer, used for layer_type='etch' to define the slab.
+        derived_layer: Optional derived layer, used for layer_type='etch' to define the
+            slab.
         info: simulation_info and other types of metadata.
     """
 
-    layer: tuple[int, int] | None
+    layer: tuple[int, int] = Field(...)
     thickness: float
     thickness_tolerance: float | None = None
     zmin: float
@@ -70,7 +73,7 @@ class LayerStack(BaseModel):
         layers: dict of layer_levels.
     """
 
-    layers: dict[str, LayerLevel] | None = Field(default_factory=dict)
+    layers: dict[str, LayerLevel] = Field(default_factory=dict)
 
     def __init__(self, **data: Any):
         """Add LayerLevels automatically for subclassed LayerStacks."""
@@ -95,85 +98,83 @@ class LayerStack(BaseModel):
 
         return layer_to_thickness
 
-    def get_cell_with_derived_layers(self, cell):
-        """Returns cell with derived layers."""
-        import gdstk
+    # def get_cell_with_derived_layers(self, cell: KCell) -> KCell:
+    #     """Returns cell with derived layers."""
+    #     unetched_layers = [
+    #         layer_name
+    #         for layer_name, level in self.layers.items()
+    #         if level.layer and level.layer_type == "grow"
+    #     ]
+    #     etch_layers = [
+    #         layer_name
+    #         for layer_name, level in self.layers.items()
+    #         if level.layer and level.layer_type == "etch"
+    #     ]
 
-        unetched_layers = [
-            layer_name
-            for layer_name, level in self.layers.items()
-            if level.layer and level.layer_type == "grow"
-        ]
-        etch_layers = [
-            layer_name
-            for layer_name, level in self.layers.items()
-            if level.layer and level.layer_type == "etch"
-        ]
+    #     # remove all etched layers from the grown layers
+    #     unetched_layers_dict = defaultdict(list)
+    #     for layer_name in etch_layers:
+    #         level = self.layers[layer_name]
+    #         into = level.into or []
+    #         for layer_name_etched in into:
+    #             unetched_layers_dict[layer_name_etched].append(layer_name)
+    #             if layer_name_etched in unetched_layers:
+    #                 unetched_layers.remove(layer_name_etched)
 
-        # remove all etched layers from the grown layers
-        unetched_layers_dict = defaultdict(list)
-        for layer_name in etch_layers:
-            level = self.layers[layer_name]
-            into = level.into or []
-            for layer_name_etched in into:
-                unetched_layers_dict[layer_name_etched].append(layer_name)
-                if layer_name_etched in unetched_layers:
-                    unetched_layers.remove(layer_name_etched)
+    #     cell_layers = cell.get_layers()
 
-        cell_layers = cell.get_layers()
+    #     # Define pure grown layers
+    #     unetched_layer_numbers = [
+    #         self.layers[layer_name].layer
+    #         for layer_name in unetched_layers
+    #         if self.layers[layer_name].layer in cell_layers
+    #     ]
+    #     cell_derived = cell.extract(unetched_layer_numbers)
 
-        # Define pure grown layers
-        unetched_layer_numbers = [
-            self.layers[layer_name].layer
-            for layer_name in unetched_layers
-            if self.layers[layer_name].layer in cell_layers
-        ]
-        cell_derived = cell.extract(unetched_layer_numbers)
+    #     # Define unetched layers
+    #     polygons_to_remove = []
+    #     for unetched_layer_name, unetched_layers in unetched_layers_dict.items():
+    #         layer = self.layers[unetched_layer_name].layer
+    #         polygons = cell.get_polygons(by_spec=layer)
 
-        # Define unetched layers
-        polygons_to_remove = []
-        for unetched_layer_name, unetched_layers in unetched_layers_dict.items():
-            layer = self.layers[unetched_layer_name].layer
-            polygons = cell.get_polygons(by_spec=layer)
+    #         # Add all the etching layers (OR)
+    #         for etching_layers in unetched_layers:
+    #             layer = self.layers[etching_layers].layer
+    #             B_polys = cell.get_polygons(by_spec=layer)
+    #             polygons_to_remove = gdstk.boolean(
+    #                 operand1=polygons_to_remove,
+    #                 operand2=B_polys,
+    #                 operation="or",
+    #                 layer=layer[0],
+    #                 datatype=layer[1],
+    #             )
 
-            # Add all the etching layers (OR)
-            for etching_layers in unetched_layers:
-                layer = self.layers[etching_layers].layer
-                B_polys = cell.get_polygons(by_spec=layer)
-                polygons_to_remove = gdstk.boolean(
-                    operand1=polygons_to_remove,
-                    operand2=B_polys,
-                    operation="or",
-                    layer=layer[0],
-                    datatype=layer[1],
-                )
+    #             derived_layer = self.layers[etching_layers].derived_layer
+    #             if derived_layer:
+    #                 slab_polygons = gdstk.boolean(
+    #                     operand1=polygons,
+    #                     operand2=B_polys,
+    #                     operation="and",
+    #                     layer=derived_layer[0],
+    #                     datatype=derived_layer[1],
+    #                 )
+    #                 cell_derived.add(slab_polygons)
 
-                derived_layer = self.layers[etching_layers].derived_layer
-                if derived_layer:
-                    slab_polygons = gdstk.boolean(
-                        operand1=polygons,
-                        operand2=B_polys,
-                        operation="and",
-                        layer=derived_layer[0],
-                        datatype=derived_layer[1],
-                    )
-                    cell_derived.add(slab_polygons)
+    #         # Remove all etching layers
+    #         layer = self.layers[unetched_layer_name].layer
+    #         polygons = cell.get_polygons(by_spec=layer)
+    #         unetched_polys = gdstk.boolean(
+    #             operand1=polygons,
+    #             operand2=polygons_to_remove,
+    #             operation="not",
+    #             layer=layer[0],
+    #             datatype=layer[1],
+    #         )
+    #         cell_derived.add(unetched_polys)
 
-            # Remove all etching layers
-            layer = self.layers[unetched_layer_name].layer
-            polygons = cell.get_polygons(by_spec=layer)
-            unetched_polys = gdstk.boolean(
-                operand1=polygons,
-                operand2=polygons_to_remove,
-                operation="not",
-                layer=layer[0],
-                datatype=layer[1],
-            )
-            cell_derived.add(unetched_polys)
-
-        cell_derived.add_ports(cell.ports)
-        cell_derived.name = f"{cell.name}_derived_layers"
-        return cell_derived
+    #     cell_derived.add_ports(cell.ports)
+    #     cell_derived.name = f"{cell.name}_derived_layers"
+    #     return cell_derived
 
     def get_layer_to_zmin(self) -> dict[tuple[int, int], float]:
         """Returns layer tuple to z min position (um)."""
@@ -186,10 +187,10 @@ class LayerStack(BaseModel):
         return {
             level.layer: level.material
             for level in self.layers.values()
-            if level.thickness
+            if level.thickness and level.material
         }
 
-    def get_layer_to_sidewall_angle(self) -> dict[tuple[int, int], str]:
+    def get_layer_to_sidewall_angle(self) -> dict[tuple[int, int], float]:
         """Returns layer tuple to material name."""
         return {
             level.layer: level.sidewall_angle
@@ -197,14 +198,17 @@ class LayerStack(BaseModel):
             if level.thickness
         }
 
-    def get_layer_to_info(self) -> dict[tuple[int, int], dict]:
+    def get_layer_to_info(
+        self,
+    ) -> dict[tuple[int, int], dict[str, dict[str, Any]]]:
         """Returns layer tuple to info dict."""
         return {level.layer: level.info for level in self.layers.values()}
 
     def to_dict(self) -> dict[str, dict[str, Any]]:
+        """Get mapping of layer_name to LayerLevel."""
         return {level_name: dict(level) for level_name, level in self.layers.items()}
 
-    def __getitem__(self, key) -> LayerLevel:
+    def __getitem__(self, key: str) -> LayerLevel:
         """Access layer stack elements."""
         if key not in self.layers:
             layers = list(self.layers.keys())
@@ -258,9 +262,12 @@ class LayerStack(BaseModel):
         out += "\n"
 
         # define unetched layers
-        for layer_name_etched, etching_layers in unetched_layers_dict.items():
-            etching_layers = " - ".join(etching_layers)
-            out += f"unetched_{layer_name_etched} = {layer_name_etched} - {etching_layers}\n"
+        for layer_name_etched, _etching_layers in unetched_layers_dict.items():
+            etching_layers = " - ".join(_etching_layers)
+            out += (
+                f"unetched_{layer_name_etched} = {layer_name_etched} -"
+                f" {etching_layers}\n"
+            )
 
         out += "\n"
 

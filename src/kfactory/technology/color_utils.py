@@ -1,4 +1,8 @@
+"""Color Utilities."""
+
+
 def ensure_six_digit_hex_color(color: str | int) -> str:
+    """Convert string or int to a full hex color."""
     if isinstance(color, int):
         color = f"#{color:06x}"
 

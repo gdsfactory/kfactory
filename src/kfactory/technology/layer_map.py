@@ -1,15 +1,17 @@
-import pathlib
+from pathlib import Path
 
 from kfactory.technology.layer_views import LayerViews
 
+from ..typings import PathType
 
-def lyp_to_dataclass(lyp_filepath: str | pathlib.Path, overwrite: bool = True) -> str:
+
+def lyp_to_dataclass(lyp_filepath: PathType, overwrite: bool = True) -> str:
     """Returns python LayerMap script from a klayout layer properties file lyp."""
-    filepathin = pathlib.Path(lyp_filepath)
+    filepathin = Path(lyp_filepath)
     filepathout = filepathin.with_suffix(".py")
 
     if filepathout.exists() and not overwrite:
-        raise FileExistsError(f"You can delete {filepathout}")
+        raise FileExistsError(f"You must delete {filepathout} or set overwrite=True")
 
     script = """
 from pydantic import BaseModel
