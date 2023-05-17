@@ -7,14 +7,15 @@ shape located on a main_layer or reference layer or region.
 from collections.abc import Callable, Iterable, Iterator, Sequence
 from enum import IntEnum
 from hashlib import sha1
-from typing import Any, Optional, TypeGuard
+from typing import Any, Optional, TypeGuard, overload
 
 import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr, validator
 
 from .. import kdb
 from ..conf import config
-from ..kcell import KCell, LayerEnum, Ports
+from ..kcell import KCell, LayerEnum, Port
+from ..port import filter_layer
 
 __all__ = [
     "LayerEnclosure",
@@ -1096,16 +1097,12 @@ class RegionOperator(kdb.TileOutputReceiver):
 class PortHoles(BaseModel):
     """Calculates a region for holes from sizing and a list of ports."""
 
-    oversize: int
-    ports: Ports
     region: kdb.Region = Field(default_factory=kdb.Region)
 
-    def __init__(self, oversize: int, ports: Ports):
-        """Initialize variables and set region."""
-        super().__init__(oversize=oversize, ports=ports)
-
-        for port in self.ports:
-            half_width = port.width // 2 + self.oversize
+    def insert_ports(self, oversize: int, ports: Iterable[Port]) -> None:
+        """Add ports to carve out."""
+        for port in ports:
+            half_width = port.width // 2 + oversize
             if port._trans:
                 self.region.insert(
                     kdb.Polygon(
@@ -1118,6 +1115,23 @@ class PortHoles(BaseModel):
                         kdb.Box(0, -half_width, half_width, half_width)
                     ).transformed(port.dcplx_trans.to_itrans(port.kcl.dbu))
                 )
+
+    # def calculate(self) -> None:
+    # """Calculate Region."""
+    # for port in self.ports:
+    #     half_width = port.width // 2 + self.oversize
+    #     if port._trans:
+    #         self.region.insert(
+    #             kdb.Polygon(
+    #                 kdb.Box(0, -half_width, half_width, half_width)
+    #             ).transformed(port.trans)
+    #         )
+    #     else:
+    #         self.region.insert(
+    #             kdb.Polygon(
+    #                 kdb.Box(0, -half_width, half_width, half_width)
+    #             ).transformed(port.dcplx_trans.to_itrans(port.kcl.dbu))
+    #         )
 
     class Config:
         """pydantic config."""
@@ -1147,6 +1161,8 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
         self.kcell = cell
         self.layers = layers
         self.regions: dict[int, dict[int, kdb.Region]] = {}
+        self.merged_region: kdb.Region = kdb.Region()
+        self.merged = False
 
     def put(
         self,
@@ -1175,25 +1191,39 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
         reg.insert(region)
         reg.merge()
 
-    def insert(self, port_holes: PortHoles | None = None) -> None:
+    def merge_region(self) -> None:
+        """Create one region from the individual tiles."""
+        for dicts in self.regions.values():
+            for reg in dicts.values():
+                self.merged_region += reg
+
+    @overload
+    def insert(self) -> None:
+        ...
+
+    @overload
+    def insert(self, port_hole_map: dict[int, PortHoles]) -> None:
+        ...
+
+    def insert(
+        self,
+        port_hole_map: dict[int, PortHoles] | None = None,
+    ) -> None:
         """Insert the finished region into the cell.
 
         Args:
-            port_holes: Carve out holes around the ports.
+            port_hole_map: Carve out holes around the ports.
         """
-        region = kdb.Region()
-        for dicts in self.regions.values():
-            for reg in dicts.values():
-                region += reg
-        if port_holes:
-            print(region)
-            print(port_holes.region)
-            carved_region = region - port_holes.region
+        if not self.merged:
+            self.merge_region()
+
+        if port_hole_map:
             for layer in self.layers:
+                carved_region = self.merged_region - port_hole_map[layer].region
                 self.kcell.shapes(layer).insert(carved_region)
         else:
             for layer in self.layers:
-                self.kcell.shapes(layer).insert(region)
+                self.kcell.shapes(layer).insert(self.merged_region)
 
 
 class KCellEnclosure(BaseModel):
@@ -1377,22 +1407,25 @@ class KCellEnclosure(BaseModel):
         tp.dbu = c.kcl.dbu
         tp.threads = n_threads or config.n_threads
         inputs: set[int] = set()
-        port_holes: dict[int, PortHoles] = {}
-        layer_sizes: dict[int, int] = {}
+        port_hole_map: dict[int, PortHoles] = {}
 
         for enc in self.enclosures:
             maxsize = 0
+            assert enc.main_layer is not None
             for layer, layersection in enc.layer_sections.items():
                 size = layersection.sections[-1].d_max
                 maxsize = max(maxsize, size)
-                if layer not in layer_sizes:
-                    layer_sizes[layer] = size
-                else:
-                    layer_sizes[layer] = max(layer_sizes[layer], size)
 
-        for size in layer_sizes.values():
-            if size not in port_holes:
-                port_holes[size] = PortHoles(oversize=size, ports=c.ports)
+                if layer in port_hole_map:
+                    port_hole_map[layer].insert_ports(
+                        size, filter_layer(c.ports, enc.main_layer)
+                    )
+                else:
+                    _port_holes = PortHoles()
+                    _port_holes.insert_ports(
+                        size, filter_layer(c.ports, enc.main_layer)
+                    )
+                    port_hole_map[layer] = _port_holes
 
         min_tile_size_rec = 10 * maxsize * tp.dbu
 
@@ -1418,15 +1451,15 @@ class KCellEnclosure(BaseModel):
                     inputs.add(enc.main_layer)
                     config.logger.debug("Created input {}", _inp)
 
-                unique_layersections: dict[LayerSection, RegionTilesOperator] = {}
+                layer_regiontilesoperators: dict[LayerSection, RegionTilesOperator] = {}
 
                 for layer, layer_section in enc.layer_sections.items():
-                    if layer_section in unique_layersections:
-                        unique_layersections[layer_section].layers.append(layer)
+                    if layer_section in layer_regiontilesoperators:
+                        layer_regiontilesoperators[layer_section].layers.append(layer)
                     else:
                         _out = f"target_{layer}"
                         operator = RegionTilesOperator(cell=c, layers=[layer])
-                        unique_layersections[layer_section] = operator
+                        layer_regiontilesoperators[layer_section] = operator
                         tp.output(_out, operator)
                         config.logger.debug("Created output {}", _out)
 
@@ -1497,8 +1530,9 @@ class KCellEnclosure(BaseModel):
         c.kcl.end_changes()
 
         if carve_out_ports:
-            for operator in unique_layersections.values():
-                operator.insert(port_holes=port_holes[layer_sizes[operator.layers[0]]])
+            for operator in layer_regiontilesoperators.values():
+                for layer in operator.layers:
+                    operator.insert(port_hole_map=port_hole_map)
         else:
-            for operator in unique_layersections.values():
+            for operator in layer_regiontilesoperators.values():
                 operator.insert()

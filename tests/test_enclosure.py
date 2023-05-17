@@ -123,3 +123,59 @@ def test_pdkenclosure(LAYER: kf.LayerEnum, waveguide_blank: kf.KCell) -> None:
     pdkenc.apply_minkowski_tiled(c)
 
     c.show()
+
+
+def test_pdkenclosure(LAYER: kf.LayerEnum, waveguide_blank: kf.KCell) -> None:
+    kf.config.logfilter.level = "DEBUG"
+    c = kf.KCell("wg_slab")
+
+    wg_box = kf.kdb.Box(10000, 500)
+    c.shapes(LAYER.WG).insert(wg_box)
+    c.shapes(LAYER.WGCLAD).insert(wg_box.enlarged(0, 2500))
+    c.create_port(
+        trans=kf.kdb.Trans(0, False, wg_box.right, 0),
+        width=wg_box.height(),
+        layer=LAYER.WG,
+    )
+    c.create_port(
+        trans=kf.kdb.Trans(2, False, wg_box.left, 0),
+        width=wg_box.height(),
+        layer=LAYER.WG,
+    )
+
+    enc1 = kf.utils.LayerEnclosure(
+        sections=[
+            (LAYER.WGEXCLUDE, 1000),
+        ],
+        name="WGEX",
+        main_layer=LAYER.WG,
+    )
+
+    enc2 = kf.utils.LayerEnclosure(
+        name="CLADEX",
+        main_layer=LAYER.WGCLAD,
+        sections=[(LAYER.WGEXCLUDE, 1000), (LAYER.WGCLADEXCLUDE, 2000)],
+    )
+
+    pdkenc = kf.utils.KCellEnclosure(enclosures=[enc1, enc2])
+
+    pdkenc.apply_minkowski_tiled(c, carve_out_ports=True)
+
+    port_wg_ex = kf.kdb.Region()
+    box = kf.kdb.Polygon(
+        kf.kdb.Box(
+            0,
+            -wg_box.height() // 2 - 1000,
+            wg_box.height() // 2 + 1000,
+            wg_box.height() // 2 + 1000,
+        )
+    )
+    for port in c.ports:
+        port_wg_ex.insert(box.transformed(port.trans))
+
+    port_wg_ex.merge()
+
+    assert (kf.kdb.Region(c.shapes(LAYER.WGEXCLUDE)) & port_wg_ex).is_empty()
+    assert (
+        (kf.kdb.Region(c.shapes(LAYER.WGCLADEXCLUDE)) & port_wg_ex) - port_wg_ex
+    ).is_empty()
