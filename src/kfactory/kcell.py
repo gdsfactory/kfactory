@@ -10,8 +10,10 @@ ports etc from instances.
 
 import functools
 import importlib
+import importlib.util
 import json
 import socket
+import sys
 from collections.abc import Callable, Hashable, Iterable, Iterator
 
 # from enum import IntEnum
@@ -44,11 +46,6 @@ from .port import rename_clockwise
 
 if TYPE_CHECKING:
     from .pdk import Pdk
-
-try:
-    from __main__ import __file__ as mf
-except ImportError:
-    mf = "shell"
 
 
 KCellParams = ParamSpec("KCellParams")
@@ -2656,22 +2653,73 @@ def show(
     save_options: kdb.SaveLayoutOptions = default_save(),
 ) -> None:
     """Show GDS in klayout."""
+    import inspect
+
     delete = False
 
+    # Find the file that calls stack
+    # stk = inspect.stack()[-1]
+
+    try:
+        stk = inspect.getouterframes(inspect.currentframe())
+        frame = stk[2]
+        name = (
+            Path(frame.filename).stem + "_" + frame.function
+            if frame.function != "<module>"
+            else Path(frame.filename).stem
+        )
+    except Exception:
+        try:
+            from __main__ import __file__ as mf
+
+            name = mf
+        except ImportError:
+            name = "shell"
+
     if isinstance(gds, KCell):
-        _mf = "stdin" if mf == "<stdin>" else mf
-        tf = Path(gettempdir()) / Path(_mf).with_suffix(".gds")
-        tf.parent.mkdir(parents=True, exist_ok=True)
-        gds.write(str(tf), save_options)
-        gds_file = tf
-        delete = True
+        gds_file: Path | None = None
+        spec = importlib.util.find_spec("git")
+        if spec is not None:
+            import git
+
+            try:
+                repo = git.repo.Repo(".", search_parent_directories=True)
+            except git.InvalidGitRepositoryError:
+                pass
+            else:
+                wtd = repo.working_tree_dir
+                if wtd is not None:
+                    root = Path(wtd) / "build/gds"
+                    root.mkdir(parents=True, exist_ok=True)
+                    tf = root / Path(name).with_suffix(".gds")
+                    tf.parent.mkdir(parents=True, exist_ok=True)
+                    gds.write(str(tf), save_options)
+                    gds_file = tf
+                    delete = False
+        else:
+            config.logger.info(
+                "git isn't installed. For better file storage, "
+                "please install kfactory[git] or gitpython."
+            )
+        if not gds_file:
+            try:
+                from __main__ import __file__ as mf
+            except ImportError:
+                mf = "shell"
+            _mf = "stdin" if mf == "<stdin>" else mf
+            tf = Path(gettempdir()) / (name + ".gds")
+            tf.parent.mkdir(parents=True, exist_ok=True)
+            gds.write(str(tf), save_options)
+            gds_file = tf
+            delete = True
+
     elif isinstance(gds, str | Path):
         gds_file = Path(gds)
     else:
         raise NotImplementedError(f"unknown type {type(gds)} for streaming to KLayout")
-
     if not gds_file.is_file():
         raise ValueError(f"{gds_file} is not a File")
+    config.logger.debug("klive file: {}", gds_file)
     data_dict = {
         "gds": str(gds_file),
         "keep_position": keep_position,

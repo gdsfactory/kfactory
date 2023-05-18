@@ -7,11 +7,11 @@ import re
 import sys
 import traceback
 from itertools import takewhile
-from typing import TYPE_CHECKING, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import loguru
 from loguru import logger as logger
-from pydantic import BaseSettings
+from pydantic import BaseModel, BaseSettings, Field
 
 if TYPE_CHECKING:
     from loguru import Logger
@@ -51,22 +51,16 @@ def tracing_formatter(record: loguru.Record) -> str:
         )
 
 
-class LogFilter:
+class LogFilter(BaseModel):
     """Filter certain messages by log level or regex.
 
     Filtered messages are not evaluated and discarded.
     """
 
-    def __init__(self, level: str, regex: str | None = None) -> None:
-        """Create new filter.
-
-        Args:
-            level: Minimum log level to print to log. Options:
-                ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-            regex: Discard messages matching the regex string. Set to `None` to disable.
-        """
-        self.level = level
-        self.regex = regex
+    level: Literal[
+        "TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"
+    ] = "INFO"
+    regex: str | None = None
 
     def __call__(self, record: loguru.Record) -> bool:
         """Loguru needs the filter to be callable."""
@@ -79,9 +73,7 @@ class LogFilter:
             )
 
 
-filter = LogFilter("DEBUG")
-logger.remove()
-logger.add(sys.stdout, format=tracing_formatter, filter=filter)
+# filter = LogFilter(level="DEBUG")
 
 
 def get_affinity() -> int:
@@ -105,8 +97,15 @@ class Settings(BaseSettings):
 
     n_threads: int = get_affinity()
     logger: ClassVar[Logger] = logger
-    logfilter: LogFilter = filter
+    logfilter: LogFilter = Field(default_factory=LogFilter)
     display_type: Literal["widget", "image"] = "widget"
+
+    def __init__(self, **data: Any):
+        """Set log filter and run pydantic."""
+        super().__init__(**data)
+        self.logger.remove()
+        self.logger.add(sys.stdout, format=tracing_formatter, filter=self.logfilter)
+        self.logger.info("LogLevel: {}", self.logfilter.level)
 
     class Config:
         """Pydantic settings."""
@@ -115,8 +114,10 @@ class Settings(BaseSettings):
         arbitrary_types_allowed = True
         fields = {"logger": {"exclude": True}}
         env_prefix = "kfactory_"
+        env_nested_delimiter = "__"
 
 
 config = Settings()
+
 
 __all__ = ["config"]

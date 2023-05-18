@@ -28,6 +28,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+git = [
+	"gitpython",
+]
 dev = [
 	"black>=23",
 	"mypy",
@@ -38,14 +41,15 @@ dev = [
 	"python-lsp-ruff",
 	"types-cachetools",
 	"python-lsp-black",
+	"kfactory[git]",
 ]
 docs = [
 	"kfactory[ipy]",
-      "autodoc_pydantic",
-      "jupytext",
-      "jupyter-book==0.15.1",
-      "pydata_sphinx_theme==0.13.1",
-	  "sphinxcontrib-video",
+  "autodoc_pydantic",
+  "jupytext",
+  "jupyter-book==0.15.1",
+  "pydata_sphinx_theme==0.13.1",
+  "sphinxcontrib-video",
 ]
 ci = [
 	"flake8",
@@ -54,6 +58,7 @@ ci = [
 	"pytest_regressions",
 	"mypy",
 	"types-cachetools",
+	"kfactory[git]",
 ]
 ipy = [
 	"ipython",
