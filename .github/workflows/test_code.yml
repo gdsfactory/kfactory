@@ -39,7 +39,7 @@ jobs:
           pip install -e .[ci]
           make gds-download
       - name: Test with pytest
-        run: pytest -vv
+        run: pytest -vv -s
   test_docs:
     runs-on: ${{ matrix.os }}
     strategy:
