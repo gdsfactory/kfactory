@@ -2,7 +2,7 @@ import pytest
 import kfactory as kf
 from functools import partial
 
-kf.config.logfilter.level = "DEGBUG"
+# kf.config.logfilter.level = "ERROR"
 
 
 class LAYER_CLASS(kf.LayerEnum):

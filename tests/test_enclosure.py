@@ -36,13 +36,15 @@ def test_enclosure(LAYER):
 def test_enc(LAYER, wg_enc):
     enc = wg_enc
 
-    mmi_enc(LAYER.WG, wg_enc)
+    c = mmi_enc(LAYER.WG, wg_enc)
+    c.show()
 
 
 def test_neg_enc(LAYER):
     enc = kf.utils.LayerEnclosure([(LAYER.WGCLAD, -1500, 1000)])
 
-    mmi_enc(LAYER.WG, enc)
+    c = mmi_enc(LAYER.WG, enc)
+    c.show()
 
 
 def test_layer_multi_enc(LAYER):
@@ -54,7 +56,8 @@ def test_layer_multi_enc(LAYER):
             (LAYER.WGCLAD, -500, -400),
         ]
     )
-    mmi_enc(LAYER.WG, enc)
+    c = mmi_enc(LAYER.WG, enc)
+    c.show()
 
 
 def test_layer_merge_enc(LAYER):
@@ -65,7 +68,8 @@ def test_layer_merge_enc(LAYER):
             (LAYER.WGCLAD, -2000, 1000),
         ]
     )
-    mmi_enc(LAYER.WG, enc)
+    c = mmi_enc(LAYER.WG, enc)
+    c.show()
 
 
 def test_um_enclosure(LAYER):
@@ -102,31 +106,6 @@ def test_um_enclosure_nodbu(LAYER: kf.LayerEnum) -> None:
 
 
 def test_pdkenclosure(LAYER: kf.LayerEnum, waveguide_blank: kf.KCell) -> None:
-    kf.config.logfilter.level = "DEBUG"
-    c = kf.cells.bezier.bend_s(0.5, 10, 30, LAYER.WG)
-
-    enc1 = kf.utils.LayerEnclosure(
-        sections=[
-            (LAYER.WGEXCLUDE, 3500),
-            (LAYER.WGCLAD, 2000),
-        ],
-        name="CLAD",
-        main_layer=LAYER.WG,
-    )
-
-    enc2 = kf.utils.LayerEnclosure(
-        name="EXCL", main_layer=LAYER.WG, sections=[(LAYER.WGEXCLUDE, 2500)]
-    )
-
-    pdkenc = kf.utils.KCellEnclosure(enclosures=[enc1, enc2])
-
-    pdkenc.apply_minkowski_tiled(c)
-
-    c.show()
-
-
-def test_pdkenclosure(LAYER: kf.LayerEnum, waveguide_blank: kf.KCell) -> None:
-    kf.config.logfilter.level = "DEBUG"
     c = kf.KCell("wg_slab")
 
     wg_box = kf.kdb.Box(10000, 500)
