@@ -7,5 +7,6 @@ chapters:
   - file: intro
   - file: klive
   - file: tutorial
+  - file: config
   - file: api
   - file: CHANGELOG
