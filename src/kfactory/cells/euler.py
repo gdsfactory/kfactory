@@ -11,7 +11,7 @@ from scipy.special import fresnel  # type: ignore[import]
 
 from .. import kdb
 from ..kcell import KCell, LayerEnum, cell
-from ..utils import Enclosure, extrude_path
+from ..utils import LayerEnclosure, extrude_path
 
 __all__ = [
     "euler_bend_points",
@@ -163,7 +163,7 @@ def bend_euler(
     width: float,
     radius: float,
     layer: int | LayerEnum,
-    enclosure: Enclosure | None = None,
+    enclosure: LayerEnclosure | None = None,
     theta: float = 90,
     resolution: float = 150,
 ) -> KCell:
@@ -223,7 +223,7 @@ def bend_s_euler(
     width: float,
     radius: float,
     layer: LayerEnum | int,
-    enclosure: Enclosure | None = None,
+    enclosure: LayerEnclosure | None = None,
     resolution: float = 150,
 ) -> KCell:
     """Create a euler s-bend.
