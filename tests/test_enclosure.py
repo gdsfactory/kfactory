@@ -179,3 +179,5 @@ def test_pdkenclosure(LAYER: kf.LayerEnum, waveguide_blank: kf.KCell) -> None:
     assert (
         (kf.kdb.Region(c.shapes(LAYER.WGCLADEXCLUDE)) & port_wg_ex) - port_wg_ex
     ).is_empty()
+
+    c.show()
