@@ -156,5 +156,3 @@ def test_dspiral(LAYER):
         b = c << dbend_circular(width=1, radius=r2, layer=LAYER.WG)
         b.align("W0", p)
         p = b.ports["N0"]
-
-    kf.config.logfilter.level = "DEBUG"
