@@ -1805,13 +1805,13 @@ class Instance:
         return h.digest()
 
     @overload
-    def align(
+    def chain(
         self, port: str | Port | None, other: Port, *, mirror: bool = False
     ) -> None:
         ...
 
     @overload
-    def align(
+    def chain(
         self,
         port: str | Port | None,
         other: "Instance",
@@ -1821,7 +1821,7 @@ class Instance:
     ) -> None:
         ...
 
-    def align(
+    def chain(
         self,
         port: str | Port | None,
         other: "Instance | Port",
@@ -1835,7 +1835,7 @@ class Instance:
         """Align port with name ``portname`` to a port.
 
         Function to allow to transform this instance so that a port of this instance is
-        aligned (same position with 180° turn) to another instance.
+        chained (same position with 180° turn) to another instance.
 
         Args:
             port: The name of the port of this instance to be connected, or directly an
