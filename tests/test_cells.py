@@ -19,7 +19,7 @@ class LAYER(kf.LayerEnum):
     WGCLAD = (111, 0)
 
 
-wg_enc = kf.utils.Enclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
+wg_enc = kf.utils.LayerEnclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
 
 
 def waveguide() -> kf.KCell:

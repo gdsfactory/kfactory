@@ -17,7 +17,7 @@ The slabs and excludes can be given in the form of an :py:class:~`Enclosure`.
 
 
 from .. import KCell, LayerEnum, kcl
-from ..utils import Enclosure
+from ..utils import LayerEnclosure
 from .dbu.waveguide import waveguide as waveguide_dbu
 
 __all__ = ["waveguide", "waveguide_dbu"]
@@ -27,7 +27,7 @@ def waveguide(
     width: float,
     length: float,
     layer: int | LayerEnum,
-    enclosure: Enclosure | None = None,
+    enclosure: LayerEnclosure | None = None,
 ) -> KCell:
     """Straight waveguide in um.
 

@@ -9,7 +9,7 @@ def bend_circular(
     width: int,
     radius: int,
     layer: int,
-    enclosure: Optional[kf.utils.Enclosure] = None,
+    enclosure: Optional[kf.utils.LayerEnclosure] = None,
     theta: int = 90,
     theta_step: float = 1,
 ) -> kf.KCell:
@@ -65,7 +65,7 @@ def dbend_circular(
     width: float,
     radius: float,
     layer: kf.kcell.LayerEnum,
-    enclosure: Optional[kf.utils.Enclosure] = None,
+    enclosure: Optional[kf.utils.LayerEnclosure] = None,
     theta: float = 90,
     theta_step: float = 1,
 ) -> kf.KCell:
@@ -156,5 +156,3 @@ def test_dspiral(LAYER):
         b = c << dbend_circular(width=1, radius=r2, layer=LAYER.WG)
         b.align("W0", p)
         p = b.ports["N0"]
-
-    kf.config.logfilter.level = "DEBUG"

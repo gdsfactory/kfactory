@@ -8,7 +8,7 @@ class LAYER(kf.LayerEnum):
     SLABEX = (4, 0)
 
 
-enc = kf.utils.Enclosure(
+enc = kf.utils.LayerEnclosure(
     [
         (LAYER.WGEX, 5000),
         (LAYER.SLAB, 5000, 50000),
@@ -28,7 +28,7 @@ def rectangles(
     n: int,
     l_straight: int,
     layer: kf.LayerEnum,
-    enclosure: kf.utils.Enclosure,
+    enclosure: kf.utils.LayerEnclosure,
 ) -> kf.KCell:
     """Rectangles with eulerbends as corners."""
     c = kf.KCell()
@@ -84,7 +84,7 @@ def rectangles_tiled(
     n: int,
     l_straight: int,
     layer: kf.LayerEnum,
-    enclosure: kf.utils.Enclosure,
+    enclosure: kf.utils.LayerEnclosure,
 ) -> kf.KCell:
     """Rectangles with eulerbends as corners."""
     c = kf.KCell()

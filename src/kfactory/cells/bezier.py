@@ -7,7 +7,7 @@ import numpy.typing as nty
 from scipy.special import binom  # type: ignore[import]
 
 from .. import KCell, LayerEnum, cell, kdb
-from ..utils import Enclosure
+from ..utils import LayerEnclosure
 
 __all__ = ["bend_s"]
 
@@ -37,7 +37,7 @@ def bend_s(
     nb_points: int = 99,
     t_start: float = 0,
     t_stop: float = 1,
-    enclosure: Enclosure | None = None,
+    enclosure: LayerEnclosure | None = None,
 ) -> KCell:
     """Creat a bezier bend.
 
@@ -64,19 +64,19 @@ def bend_s(
     )
 
     if enclosure is None:
-        enclosure = Enclosure()
+        enclosure = LayerEnclosure()
 
-    enclosure.extrude_path(c, path=pts, main_layer=layer, width=width)
+    enclosure.extrude_path(
+        c, path=pts, main_layer=layer, width=width, start_angle=0, end_angle=0
+    )
 
     c.create_port(
-        name="W0",
         width=int(width / c.kcl.dbu),
-        trans=kdb.Trans(0, False, 0, 0),
+        trans=kdb.Trans(2, False, 0, 0),
         layer=layer,
         port_type="optical",
     )
     c.create_port(
-        name="E0",
         width=int(width / c.kcl.dbu),
         trans=kdb.Trans(
             0, False, c.bbox().right, c.bbox().top - int(width / c.kcl.dbu) // 2
@@ -84,5 +84,7 @@ def bend_s(
         layer=layer,
         port_type="optical",
     )
+
+    c.autorename_ports()
 
     return c

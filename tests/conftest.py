@@ -2,10 +2,14 @@ import pytest
 import kfactory as kf
 from functools import partial
 
+# kf.config.logfilter.level = "ERROR"
+
 
 class LAYER_CLASS(kf.LayerEnum):
     WG = (1, 0)
     WGCLAD = (111, 0)
+    WGEXCLUDE = (1, 1)
+    WGCLADEXCLUDE = (111, 1)
 
 
 @pytest.fixture
@@ -15,7 +19,7 @@ def LAYER():
 
 @pytest.fixture
 def wg_enc(LAYER):
-    return kf.utils.Enclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
+    return kf.utils.LayerEnclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
 
 
 @pytest.fixture
@@ -28,6 +32,11 @@ def waveguide(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.waveguide.waveguide(
         width=0.5, length=1, layer=LAYER.WG, enclosure=wg_enc
     )
+
+
+@pytest.fixture
+def waveguide_blank(LAYER):
+    return kf.cells.waveguide.waveguide(width=0.5, length=1, layer=LAYER.WG)
 
 
 @pytest.fixture
