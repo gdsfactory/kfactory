@@ -22,11 +22,14 @@ jobs:
         run: |
           pip install -e .[ci,docs]
           export KFACTORY_DISPLAY_TYPE="image"
+          jupytext --to ipynb ./docs/notebooks/*.py
+          jupytext --execute --to md ./docs/*.ipynb
+          python ./docs/gen_ref_pages.py
           make docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: "./docs/_build/html/"
+          path: "./site/"
 
   deploy-docs:
     needs: build-docs
