@@ -1,0 +1,14 @@
+site_name: KFactory 0.6.3
+
+theme:
+  name: "material"
+
+plugins:
+- mkdocstrings:
+    enabled: true
+    custom_templates: templates
+    default_handler: python
+    handlers:
+      python:
+        options:
+          show_source: false
