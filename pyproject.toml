@@ -45,11 +45,11 @@ dev = [
 ]
 docs = [
 	"kfactory[ipy]",
-  "autodoc_pydantic",
   "jupytext",
-  "jupyter-book==0.15.1",
-  "pydata_sphinx_theme==0.13.1",
-  "sphinxcontrib-video",
+  "mkdocs",
+  "mkdocstrings[python]",
+  "mkdocs-material",
+  "mkdocs_gen_files",
 ]
 ci = [
 	"flake8",
