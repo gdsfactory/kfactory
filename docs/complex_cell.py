@@ -1,3 +1,18 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     text_representation:
+#       extension: .py
+#       format_name: light
+#       format_version: '1.5'
+#       jupytext_version: 1.14.5
+#   kernelspec:
+#     display_name: kernel_name
+#     language: python
+#     name: kernel_name
+# ---
+
 from layers import LAYER, si_enc
 from waveguide import waveguide
 
@@ -15,7 +30,7 @@ def composite_cell() -> kf.KCell:
     )
     wg = c << waveguide(1000, 5000, 5000)
 
-    wg.connect("o1", bend, "o2")
+    wg.align("o1", bend, "o2")
 
     c.add_port(name="1", port=bend.ports["o1"])
     c.add_port(name="2", port=wg.ports["o2"])
