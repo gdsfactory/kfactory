@@ -243,7 +243,6 @@ class KCLayout(kdb.Layout):
         The constructor of KCell will call this method.
 
         Args:
-            kcell: The KCell to be registered in the Layout.
             name: The (initial) name of the cell. Can be changed through
                 :py:func:`~update_cell_name`
             allow_duplicate: Allow the creation of a cell with the same name which
@@ -1429,7 +1428,7 @@ class KCell:
 
         Args:
             rename_func: Function that takes Iterable[Port] and renames them.
-            This can of course contain a filter and only rename some of the ports
+                This can of course contain a filter and only rename some of the ports
         """
         if self._locked:
             raise LockedError(self)

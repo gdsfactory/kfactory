@@ -12,3 +12,7 @@ plugins:
       python:
         options:
           show_source: false
+- mkdocs-jupyter:
+    execute: true
+    kernel_name: python3
+    include_requirejs: true

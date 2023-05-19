@@ -1285,7 +1285,6 @@ class KCellEnclosure(BaseModel):
 
         Args:
             c: Cell to apply the enclosure to.
-            ref: Reference to use as a base for the enclosure.
             direction: X/Y or both directions, see :py:class:~`DIRECTION`.
                 Uses a box if both directions are selected.
         """
@@ -1322,7 +1321,6 @@ class KCellEnclosure(BaseModel):
 
         Args:
             c: Cell to apply the enclosure to.
-            ref: Reference to use as a base for the enclosure.
         """
         return self.apply_minkowski_enc(c, direction=Direction.Y)
 
@@ -1334,7 +1332,6 @@ class KCellEnclosure(BaseModel):
 
         Args:
             c: Cell to apply the enclosure to.
-            ref: Reference to use as a base for the enclosure.
         """
         return self.apply_minkowski_enc(c, direction=Direction.X)
 
@@ -1352,7 +1349,7 @@ class KCellEnclosure(BaseModel):
             c: Cell to apply the enclosure to.
             shape: A function that will return a shape which takes one argument
                 the size of the section in dbu.
-            ref: Reference to use as a base for the enclosure.
+            shape: Reference to use as a base for the enclosure.
         """
         regions = {}
 
@@ -1391,9 +1388,6 @@ class KCellEnclosure(BaseModel):
 
         Args:
             c: Target KCell to apply the enclosures into.
-            ref: The reference shapes to apply the enclosures to.
-                Can be a layer or a region. If `None`, it will trey to use the
-                :py:attr:`main_layer`
             tile_size: Tile size. This should be in the order off 10+ maximum size
                 of the maximum size of sections.
             n_pts: Number of points in the circle. < 3 will create a triangle. 4 a
