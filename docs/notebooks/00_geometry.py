@@ -26,7 +26,7 @@
 # # KCell
 #
 #
-# A `Cell` is like an empty canvas, where you can add polygons, references to other Cells and ports (to chain to other cells)
+# A `Cell` is like an empty canvas, where you can add polygons, references to other Cells and ports (to connect to other cells)
 #
 # In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries. The default is `0.001`, i.e. 1nm grid size (0.001 microns)
 #
@@ -116,11 +116,11 @@ c.shapes(c.kcl.layer(2, 0)).insert(r)
 c
 # -
 
-# ## chain **ports**
+# ## connect **ports**
 #
-# Cells can have a "Port" that allows you to chain Instances together like legos.
+# Cells can have a "Port" that allows you to connect Instances together like legos.
 #
-# You can write a simple function to make a rectangular straight, assign ports to the ends, and then chain those rectangles together.
+# You can write a simple function to make a rectangular straight, assign ports to the ends, and then connect those rectangles together.
 
 
 # + vscode={"languageId": "python"}
@@ -163,16 +163,16 @@ print(c.name)
 c
 
 # + vscode={"languageId": "python"}
-# Now we can chain everything together using the ports:
+# Now we can connect everything together using the ports:
 
 # Each straight has two ports: 'W0' and 'E0'.  These are arbitrary
 # names defined in our straight() function above
 
-# Let's keep wg1 in place on the bottom, and chain the other straights to it.
-# To do that, on wg2 we'll grab the "W0" port and chain it to the "E0" on wg1:
-wg2.chain("o1", wg1.ports["o2"])
-# Next, on wg3 let's grab the "W0" port and chain it to the "E0" on wg2:
-wg3.chain("o1", wg2.ports["o2"])
+# Let's keep wg1 in place on the bottom, and connect the other straights to it.
+# To do that, on wg2 we'll grab the "W0" port and connect it to the "E0" on wg1:
+wg2.connect("o1", wg1.ports["o2"])
+# Next, on wg3 let's grab the "W0" port and connect it to the "E0" on wg2:
+wg3.connect("o1", wg2.ports["o2"])
 
 c
 
@@ -237,8 +237,8 @@ mwg2_ref.transform(kf.kdb.DTrans(10, 10))
 c2
 
 # + vscode={"languageId": "python"}
-# Like before, let's chain mwg1 and mwg2 together
-mwg1_ref.chain("o2", mwg2_ref.ports["o1"])
+# Like before, let's connect mwg1 and mwg2 together
+mwg1_ref.connect("o2", mwg2_ref.ports["o1"])
 c2
 # -
 
@@ -333,7 +333,7 @@ c
 # c
 
 # + vscode={"languageId": "python"}
-# bend.chain("o1", mmi.ports["o2"])  # chains follow Source, destination syntax
+# bend.connect("o1", mmi.ports["o2"])  # connects follow Source, destination syntax
 # c
 # -
 
