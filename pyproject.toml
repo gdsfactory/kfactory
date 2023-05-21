@@ -49,6 +49,7 @@ docs = [
   "mkdocs",
   "mkdocstrings[python]",
   "mkdocs-material",
+  "mkdocs-jupyter",
   "mkdocs_gen_files",
 ]
 ci = [

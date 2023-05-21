@@ -146,6 +146,11 @@ repos:
   #   rev: 2b2f0c74acdb3de316e23ceb7dd0d7945c354050
   #   hooks:
   #     - id: reorder-python-imports
+  - repo: https://github.com/mwouts/jupytext
+    rev: 79351dfac9fde7c72cc73d553f662b4887bc63f5  # CURRENT_TAG/COMMIT_HASH
+    hooks:
+    - id: jupytext
+      args: [--from, py, --to, md]
 
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: "v1.10.0"

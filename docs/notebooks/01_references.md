@@ -35,6 +35,8 @@ You can start by making a blank `KFactory` and add a single polygon to it.
 ```python
 import kfactory as kf
 
+kf.config.display_type = "image"
+
 # Create a blank Cell
 p = kf.KCell()
 

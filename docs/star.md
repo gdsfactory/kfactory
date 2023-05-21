@@ -1,13 +1,16 @@
+```python
 import kfactory as kf
 import numpy as np
 import random
+```
 
-
+```python
 class LAYER(kf.LayerEnum):
     SI = (1, 0)
     SIEXCLUDE = (1, 1)
+```
 
-
+```python
 @kf.cell
 def star(
     size: float, proportion: float, n_diamonds: int = 3, layer: kf.LayerEnum = LAYER.SI
@@ -46,8 +49,9 @@ def star(
         )
 
     return c
+```
 
-
+```python
 @kf.cell
 def merged_star(
     size: float, proportion: float, n_diamonds: int = 3, layer: kf.LayerEnum = LAYER.SI
@@ -65,8 +69,9 @@ def merged_star(
     c.shapes(layer).insert(reg)
 
     return c
+```
 
-
+```python
 @kf.cell
 def sky_with_stars() -> kf.KCell:
     c = kf.KCell()
@@ -100,9 +105,11 @@ def sky_with_stars() -> kf.KCell:
     c.shapes(LAYER.SIEXCLUDE).insert(sky)
 
     return c
+```
 
-
+```python
 if __name__ == "__main__":
     # kf.show(merged_star(5, 0.25))
 
     kf.show(sky_with_stars())
+```

@@ -1,11 +1,14 @@
+```python
 import kfactory as kf
+```
 
-
+```python
 class LAYER(kf.LayerEnum):
     SI = (1, 0)
     SIEXCLUDE = (1, 1)
+```
 
-
+```python
 @kf.cell
 def waveguide(width: int, length: int, width_exclude: int) -> kf.KCell:
     """Waveguide: Silicon on 1/0, Silicon exclude on 1/1"""
@@ -28,7 +31,9 @@ def waveguide(width: int, length: int, width_exclude: int) -> kf.KCell:
     c.autorename_ports()
 
     return c
+```
 
-
+```python
 if __name__ == "__main__":
     kf.show(waveguide(2000, 50000, 5000))
+```

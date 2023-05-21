@@ -35,6 +35,8 @@
 # +
 import kfactory as kf
 
+kf.config.display_type = "image"
+
 # Create a blank Cell
 p = kf.KCell()
 
