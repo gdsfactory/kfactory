@@ -1228,6 +1228,11 @@ class KCell:
         """
         self.plot()
 
+    def __repr__(self) -> str:
+        """Return a string representation of the Cell."""
+        port_names = [p.name for p in self.ports]
+        return f"{self.name}: ports {port_names}, {len(self.insts)} instances"
+
     @property
     def ports(self) -> "Ports":
         """Ports associated with the cell."""
@@ -1646,6 +1651,13 @@ class Instance:
     """
 
     yaml_tag = "!Instance"
+
+    def __repr__(self) -> str:
+        """Return a string representation of the instance."""
+        port_names = [p.name for p in self.ports]
+        return (
+            f"{self.parent_cell.name}: ports {port_names}, {self.kcl[self.cell_index]}"
+        )
 
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
