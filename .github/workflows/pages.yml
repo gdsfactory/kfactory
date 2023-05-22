@@ -25,10 +25,10 @@ jobs:
           pip install -e .[ci,docs]
           export KFACTORY_DISPLAY_TYPE="image"
           mkdocs build
-      - uses: actions/upload-artifact@v2
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
         with:
-          name: gh-pages
-          path: "./site"
+          path: "./site/"
 
   deploy-docs:
     needs: build-docs
