@@ -28,7 +28,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: gh-pages
-          path: site
+          path: "./site"
 
   deploy-docs:
     needs: build-docs
