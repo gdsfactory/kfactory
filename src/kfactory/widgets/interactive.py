@@ -42,9 +42,6 @@ def display_kcell(kc: KCell) -> None:
             lw = LayoutWidget(cell=cell_dup)
             display(lw.widget)
         case "image":
-            li = LayoutImage(cell=cell_dup)
-            display(li.image)
-        case "docs":
             lipi = LayoutIPImage(cell=cell_dup)
             display(lipi.image)
 
