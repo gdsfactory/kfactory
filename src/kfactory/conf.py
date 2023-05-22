@@ -111,7 +111,7 @@ class Settings(BaseSettings):
         arbitrary_types_allowed = True
         fields = {"logger": {"exclude": True}}
         env_prefix = "kfactory_"
-        env_nested_delimiter = "__"
+        env_nested_delimiter = "_"
 
 
 config = Settings()
