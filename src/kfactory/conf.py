@@ -98,7 +98,7 @@ class Settings(BaseSettings):
     n_threads: int = get_affinity()
     logger: ClassVar[Logger] = logger
     logfilter: LogFilter = Field(default_factory=LogFilter)
-    display_type: Literal["widget", "image"] = "image"
+    display_type: Literal["widget", "image"] = "widget"
 
     def __init__(self, **data: Any):
         """Set log filter and run pydantic."""
