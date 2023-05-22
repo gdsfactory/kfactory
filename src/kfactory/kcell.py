@@ -1209,14 +1209,26 @@ class KCell:
         """
         show(self)
 
-    def _ipython_display_(self) -> None:
-        """Display a cell in a Jupyter Cell.
+    def plot(self) -> None:
+        """Display cell.
 
         Usage: Pass the kcell variable as an argument in the cell at the end
         """
         from .widgets.interactive import display_kcell
 
         display_kcell(self)
+
+    def _ipython_display_(self) -> None:
+        """Display a cell in a Jupyter Cell.
+
+        Usage: Pass the kcell variable as an argument in the cell at the end
+        """
+        self.plot()
+
+    def __repr__(self) -> str:
+        """Return a string representation of the Cell."""
+        port_names = [p.name for p in self.ports]
+        return f"{self.name}: ports {port_names}, {len(self.insts)} instances"
 
     @property
     def ports(self) -> "Ports":
@@ -1643,11 +1655,11 @@ class Instance:
     """
 
     yaml_tag = "!Instance"
-
     _instance: kdb.Instance
     kcl: KCLayout
     ports: "InstancePorts"
     d: "UMInstance"
+
 
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
@@ -1973,7 +1985,13 @@ class Instance:
     def rotate(self, angle: Literal[0, 1, 2, 3]) -> None:
         """Rotate instance in increments of 90°."""
         self.transform(kdb.Trans(angle, False, 0, 0))
-
+      
+    def __repr__(self) -> str:
+        """Return a string representation of the instance."""
+        port_names = [p.name for p in self.ports]
+        return (
+            f"{self.parent_cell.name}: ports {port_names}, {self.kcl[self.cell_index]}"
+        )
 
 class UMInstance:
     """Make the port able to dynamically give um based info."""
