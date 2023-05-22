@@ -99,7 +99,7 @@ python_version = "3.10"
 strict = true
 exclude = [
 	"tests",
-	"src/kfactory/widgets",
+	"src/kfactory/widgets/interactive.py",
 	"src/kfactory/technology",
 	"src/kfactory/pdk.py",
 ]
