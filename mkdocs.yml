@@ -65,7 +65,6 @@ plugins:
       execute_ignore:
         - "docs/*.py"
       ignore: ["docs/*.py"]
-  - awesome-pages
   - literate-nav:
       nav_file: SUMMARY.md
   - section-index

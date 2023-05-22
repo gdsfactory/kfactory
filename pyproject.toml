@@ -45,12 +45,14 @@ dev = [
 ]
 docs = [
 	"kfactory[ipy]",
-  "jupytext",
   "mkdocs",
 	"mkdocs-jupyter>=0.24",
   "mkdocstrings[python]",
   "mkdocs-material",
   "mkdocs_gen_files",
+	"mkdocs-literate-nav",
+	"mkdocs-section-index",
+	"mkdocs-video",
 ]
 ci = [
 	"flake8",
