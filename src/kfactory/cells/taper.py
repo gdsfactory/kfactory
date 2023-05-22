@@ -40,7 +40,7 @@ def taper(
         width1: Width of the core on the left side. [um]
         width2: Width of the core on the right side. [um]
         length: Length of the taper. [um]
-        layer: Layer index / :py:class:~`LayerEnum` of the core.
+        layer: Main layer of the taper.
         enclosure: Definition of the slab/exclude.
     """
     return taper_dbu(

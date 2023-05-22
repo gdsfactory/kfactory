@@ -19,8 +19,6 @@ def taper(
 ) -> KCell:
     r"""Linear Taper [um].
 
-    Visualization::
-
                __
              _/  │ Slab/Exclude
            _/  __│
@@ -38,7 +36,7 @@ def taper(
         width1: Width of the core on the left side. [dbu]
         width2: Width of the core on the right side. [dbu]
         length: Length of the taper. [dbu]
-        layer: Layer index / :py:class:~`LayerEnum` of the core.
+        layer: Main layer of the taper.
         enclosure: Definition of the slab/exclude.
     """
     c = KCell()

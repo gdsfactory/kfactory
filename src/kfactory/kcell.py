@@ -1,10 +1,10 @@
 """Core module of kfactory.
 
-Defines the :py:class:`KCell` providing klayout Cells with Ports
+Defines the [KCell][kfactory.kcell.KCell] providing klayout Cells with Ports
 and other convenience functions.
 
-:py:class:`Instance` are the kfactory instances used to also acquire
-ports etc from instances.
+[Instance][kfactory.kcell.Instance] are the kfactory instances used to also acquire
+ports and other inf from instances.
 
 """
 
@@ -13,7 +13,6 @@ import importlib
 import importlib.util
 import json
 import socket
-import sys
 from collections.abc import Callable, Hashable, Iterable, Iterator
 
 # from enum import IntEnum
@@ -184,17 +183,17 @@ def default_save() -> kdb.SaveLayoutOptions:
 
 
 class KCLayout(kdb.Layout):
-    """Small extension to the ``klayout.db.Layout``.
+    """Small extension to the klayout.db.Layout.
 
-    It adds tracking for the :py:class:`~kfactory.kcell.KCell` objects
-    instead of only the :py:class:`klayout.db.Cell` objects.
-    Additionally it allows creation and registration through :py:func:`~create_cell`
+    It adds tracking for the [KCell][kfactory.kcell.KCell] objects
+    instead of only the `klayout.db.Cell` objects.
+    Additionally it allows creation and registration through `create_cell`
 
-    All attributes of ``klayout.db.Layout`` are transparently accessible
+    All attributes of `klayout.db.Layout` are transparently accessible
 
     Attributes:
         editable: Whether the layout should be opened in editable mode (default: True)
-        rename_function: function that takes an Iterable[Port] and renames them
+        rename_function: function that takes an iterable object of ports and renames them
     """
 
     def __init__(self, editable: bool = True, pdk: "Pdk | None" = None) -> None:
@@ -243,14 +242,13 @@ class KCLayout(kdb.Layout):
         The constructor of KCell will call this method.
 
         Args:
-            name: The (initial) name of the cell. Can be changed through
-                :py:func:`~update_cell_name`
+            name: The (initial) name of the cell.
             allow_duplicate: Allow the creation of a cell with the same name which
                 already is registered in the Layout.
-                This will create a cell with the name :py:attr:`name` + `$1` or `2..n`
+                This will create a cell with the name `name` + `$1` or `2..n`
                 increasing by the number of existing duplicates
             args: additional arguments passed to
-                :py:func:`~klayout.db.Layout.create_cell`
+                `klayout.db.Layout.create_cell`
 
         Returns:
             klayout.db.Cell: klayout.db.Cell object created in the Layout
@@ -376,14 +374,15 @@ class KCLayout(kdb.Layout):
 kcl = KCLayout()
 """Default library object.
 
-:py:class:`~kfactory.kcell.KCell` uses this object unless another one is
+Any [KCell][kfactory.kcell.KCell] uses this object unless another one is
 specified in the constructor."""
 
 
 class LayerEnum(int, Enum):
     """Class for having the layers stored and a mapping int <-> layer,datatype.
 
-    This Enum can also be treated as a tuple, i.e. it implements __getitem__ and __len__
+    This Enum can also be treated as a tuple, i.e. it implements `__getitem__`
+    and `__len__`.
 
     Attributes:
         layer: layer number
@@ -406,7 +405,7 @@ class LayerEnum(int, Enum):
         Args:
             layer: Layer number of the layer.
             datatype: Datatype of the layer.
-            kcl: :py:class:~`KCLayout` to register the layer to.
+            kcl: Base Layout object to register the layer to.
         """
         value = kcl.layer(layer, datatype)
         obj: int = int.__new__(cls, value)  # type: ignore[call-overload]
@@ -469,7 +468,7 @@ class Port:
     name: str | None
     kcl: KCLayout
     width: int
-    layer: int
+    layer: int | LayerEnum
     _trans: kdb.Trans | None
     _dcplx_trans: kdb.DCplxTrans | None
     port_type: str
@@ -724,7 +723,7 @@ class Port:
     def angle(self) -> int:
         """Angle of the transformation.
 
-        In the range of [0,1,2,3] which are increments in 90°. Not to be confused
+        In the range of `[0,1,2,3]` which are increments in 90°. Not to be confused
         with `rot` of the transformation which keeps additional info about the
         mirror flag.
         """
@@ -874,19 +873,19 @@ class UMPort:
 class KCell:
     """KLayout cell and change its class to KCell.
 
-    A KCell is a dynamic proxy for :py:class:~`kdb.Cell`. It has all the
+    A KCell is a dynamic proxy for kdb.Cell. It has all the
     attributes of the official KLayout class. Some attributes have been adjusted
     to return KCell specific sub classes. If the function is listed here in the
     docs, they have been adjusted for KFactory specifically. This object will
-    transparently proxy to :py:class:`kdb.Cell`. Meaning any attribute not directly
+    transparently proxy to kdb.Cell. Meaning any attribute not directly
     defined in this class that are available from the KLayout counter part can
     still be accessed. The pure KLayout object can be accessed with
-    :py:attr:`KCell._kdb_cell`.
+    `_kdb_cell`.
 
     Attributes:
         kcl: Library object that is the manager of the KLayout
-            :py:class:`kdb.Layout`
-        settings: A dictionary containing settings populated by:py:func:`autocell`
+        settings: A dictionary containing settings populated by the
+            [cell][kfactory.kcell.cell] decorator.
         info: Dictionary for storing additional info if necessary. This is not
             passed to the GDS and therefore not reversible.
         _kdb_cell: Pure KLayout cell object.
@@ -912,7 +911,7 @@ class KCell:
             kcl: KCLayout the cell should be attached to.
             kdb_cell: If not `None`, a KCell will be created from and existing
                 KLayout Cell
-            ports: Attach an existing :py:class:`~Ports` object to the KCell,
+            ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
                 if `None` create an empty one.
         """
         self.kcl = kcl
@@ -975,7 +974,7 @@ class KCell:
     def dup(self) -> "KCell":
         """Copy the full cell.
 
-        Sets :py:attr:_locked to `False`
+        Sets `_locked` to `False`
 
         Returns:
             cell: Exact copy of the current cell.
@@ -991,7 +990,7 @@ class KCell:
         return c
 
     def __copy__(self) -> "KCell":
-        """Enables use of :py:func:`copy.copy` and :py:func:`copy.deep_copy`."""
+        """Enables use of `copy.copy` and `copy.deep_copy`."""
         return self.dup()
 
     def add_port(
@@ -1000,8 +999,7 @@ class KCell:
         """Add an existing port. E.g. from an instance to propagate the port.
 
         Args:
-            port: The port to add. Port should either be a :py:class:`~Port`,
-                or will be converted to an integer based port with 90° increment
+            port: The port to add.
             name: Overwrite the name of the port
             keep_mirror: Keep the mirror part of the transformation of a port if
                 `True`, else set the mirror flag to `False`.
@@ -1279,7 +1277,7 @@ class KCell:
         ...
 
     def create_port(self, **kwargs: Any) -> None:
-        """Proxy for :py:func:`Ports.create_port`."""
+        """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
         if self._locked:
             raise LockedError(self)
         self.ports.create_port(**kwargs)
@@ -1343,16 +1341,18 @@ class KCell:
             cell: The cell to be added
             trans: The integer transformation applied to the reference
             dtrans: um transformation of the reference. If not `None`,
-                will overwrite :py:attr:`trans`
+                will overwrite trans`
             a: Vector (DVector if trans is um based) for the array.
-                Needs to be in positive X-direction
-            b: Vector (DVector if trans is um based) for the array.
-                Needs to be in positive Y-direction
-            na: Number of elements in direction of :py:attr:`a`
-            nb: Number of elements in direction of :py:attr:`b`
+                Needs to be in positive X-direction. Usually this is only a
+                Vector in x-direction. Some foundries won't allow other Vectors.
+            b: Vector (DVector if transs is um based) for the array.
+                Needs to be in positive Y-direction. Usually this is only a
+                Vector in x-direction. Some foundries won't allow other Vectors.
+            na: Number of elements in direction of `a`
+            nb: Number of elements in direction of `b`
 
         Returns:
-            :py:class:`~Instance`: The created instance
+            The created instance
         """
         if self._locked:
             raise LockedError(self)
@@ -1393,11 +1393,11 @@ class KCell:
         return self._kdb_cell.dup()
 
     def layer(self, *args: Any, **kwargs: Any) -> int:
-        """Get the layer info, convenience for klayout.db.Layout.layer."""
+        """Get the layer info, convenience for `klayout.db.Layout.layer`."""
         return self.kcl.layer(*args, **kwargs)
 
     def __lshift__(self, cell: "KCell") -> "Instance":
-        """Convenience function for :py:attr:"~create_inst(cell)`.
+        """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
 
         Args:
             cell: The cell to be added as an instance
@@ -1460,7 +1460,7 @@ class KCell:
                 self.shapes(layer).insert(reg)
 
     def draw_ports(self) -> None:
-        """Draw all the ports on their respective :py:attr:`Port.layer`:."""
+        """Draw all the ports on their respective layer."""
         polys: dict[int, kdb.Region] = {}
 
         for port in self.ports:
@@ -1504,7 +1504,10 @@ class KCell:
     def write(
         self, filename: str | Path, save_options: kdb.SaveLayoutOptions = default_save()
     ) -> None:
-        """Write a KCell to a GDS. See :py:func:`KCLayout.write` for more info."""
+        """Write a KCell to a GDS.
+
+        See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
+        """
         return self._kdb_cell.write(str(filename), save_options)
 
     @classmethod
@@ -1633,11 +1636,18 @@ class Instance:
     An Instance is a reference to a KCell with a transformation.
 
     Attributes:
-        _instance: The internal :py:class:~`kdb.Instance` reference
+        _instance: The internal `kdb.Instance` reference
         ports: Transformed ports of the KCell
+        kcl: Pointer to the layout object holding the instance
+        d: Helper that allows retrieval of instance information in um
     """
 
     yaml_tag = "!Instance"
+
+    _instance: kdb.Instance
+    kcl: KCLayout
+    ports: "InstancePorts"
+    d: "UMInstance"
 
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
@@ -1831,7 +1841,7 @@ class Instance:
         allow_layer_mismatch: bool = False,
         allow_type_mismatch: bool = False,
     ) -> None:
-        """Align port with name ``portname`` to a port.
+        """Align port with name `portname` to a port.
 
         Function to allow to transform this instance so that a port of this instance is
         aligned (same position with 180° turn) to another instance.
@@ -1841,7 +1851,7 @@ class Instance:
                 instance port. Can be `None` because port names can be `None`.
             other: The other instance or a port. Skip `other_port_name` if it's a port.
             other_port_name: The name of the other port. Ignored if
-                :py:attr:`~other_instance` is a port.
+                `other` is a port.
             mirror: Instead of applying klayout.db.Trans.R180 as a connection
                 transformation, use klayout.db.Trans.M90, which effectively means this
                 instance will be mirrored and connected.
@@ -2103,7 +2113,8 @@ class Ports:
 
     Attributes:
         _ports: Internal storage of the ports. Normally ports should be retrieved with
-            :py:func:`__getitem__` or with :py:func:`~get_all`
+            [__getitem__][kfactory.kcell.Ports.__getitem__] or with
+            [get_all_named][kfactory.kcell.Ports.get_all_named]
     """
 
     yaml_tag = "!Ports"
@@ -2136,8 +2147,8 @@ class Ports:
             port: The port to add
             name: Overwrite the name of the port
             keep_mirror: Keep the mirror flag from the original port if `True`,
-                else set :py:attr:~`Port.trans.mirror` (or the complex equivalent)
-                to `False`.
+                else set [Port.trans.mirror][kfactory.kcell.Port.trans] (or the complex
+                equivalent) to `False`.
         """
         _port = port.copy()
         if not keep_mirror:
@@ -2322,10 +2333,14 @@ class InstancePorts:
 
 
     Attributes:
-        cell_ports: A pointer to the :py:class:~`Ports` of the cell
-        instance: A pointer to the :py:class:~`Instance` related to this.
+        cell_ports: A pointer to the [`KCell.ports`][kfactory.kcell.KCell.ports]
+            of the cell
+        instance: A pointer to the Instance related to this.
             This provides a way to dynamically calculate the ports.
     """
+
+    cell_ports: Ports
+    instance: Instance
 
     def __init__(self, instance: Instance) -> None:
         """Creates the virtual ports object.
@@ -2355,12 +2370,12 @@ class InstancePorts:
         """String representation.
 
         Creates a copy and uses the `__repr__` of
-        :py:class:~`Ports`.
+        [Ports][kfactory.kcell.Ports.__repr__].
         """
         return repr(self.copy())
 
     def copy(self) -> Ports:
-        """Creates a copy in the form of :py:class:~`Ports`."""
+        """Creates a copy in the form of [Ports][kfactory.kcell.Ports]."""
         if not self.instance.is_complex():
             return Ports(
                 kcl=self.instance.kcl,
@@ -2405,8 +2420,8 @@ def autocell(
     """Autoname and validate cells.
 
     .. deprecated:: 0.7.0
-        Use :py:func:`cell` instead.
-        :py:func:`connect` will be removed in 0.8.0
+        Use [cell][kfactory.kcell.cell] instead.
+        `connect` will be removed in 0.8.0
     """
     config.logger.warning("autocell is deprecated, use cell instead")
     return cell(  # type: ignore[no-any-return, call-overload]
@@ -2447,9 +2462,10 @@ def cell(
 ):
     """Decorator to cache and auto name the celll.
 
-    This will use :py:func:`functools.cache` to cache the function call.
+    This will use `functools.cache` to cache the function call.
     Additionally, if enabled this will set the name and from the args/kwargs of the
-    function and also paste them into a settings dictionary of the :py:class:`~KCell`.
+    function and also paste them into a settings dictionary of the
+    [KCell][kfactory.kcell.KCell].
 
     Args:
         set_settings: Copy the args & kwargs into the settings dictionary

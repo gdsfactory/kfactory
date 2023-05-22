@@ -405,8 +405,6 @@ def extrude_path_dynamic(
 class Section(BaseModel):
     """Section of an Enclosure.
 
-    Visualization::
-
         Maximum only Section:
             ┌────────────────────────┐  ▲
             │                        │  │
@@ -493,16 +491,14 @@ class LayerEnclosure(BaseModel):
     """Definitions for calculation of enclosing (or smaller) shapes of a reference.
 
     Attributes:
-        layer_sections: Mapping of layers to their :py:class;`LayerSection`
-
+        layer_sections: Mapping of layers to their layer sections.
+        main_layer: Layer which to use unless specified otherwise.
     """
 
     layer_sections: dict[LayerEnum | int, LayerSection]
     _name: str | None = PrivateAttr(default=None)
     warn: bool = True
-
     main_layer: LayerEnum | int | None
-
     yaml_tag: str = "!Enclosure"
 
     class Config:
@@ -530,20 +526,18 @@ class LayerEnclosure(BaseModel):
             sections: tuples containing info for the enclosure.
                 Elements must be of the form (layer, max) or (layer, min, max)
             name: Optional name of the enclosure. If a name is given in the
-                cell name this name will be used for enclosure arguments
+                cell name this name will be used for enclosure arguments.
             warn: pydantic warnings
             main_layer: Main layer used if the functions don't get an explicit layer.
             dsections: Same as sections but min/max defined in um
-            dbu: KCLayout.dbu (conversion dbu -> um). Must be specified if desections is
-                not `None`
+            dbu: `KCLayout.dbu` (conversion dbu -> um). Must be specified if
+                `desections` is not `None`.
         """
         super().__init__(
-            warn=warn,
-            layer_sections={},
-            main_layer=main_layer,
+            warn=warn, layer_sections={}, main_layer=main_layer, _name=name
         )
 
-        self._name = name
+        # self._name = name
 
         self.layer_sections = {}
 
@@ -616,6 +610,11 @@ class LayerEnclosure(BaseModel):
 
         self.layer_sections = d  # trick pydantic to validate
 
+    @property
+    def name(self) -> str:
+        """Get name of the Enclosure."""
+        return self.__str__()
+
     def minkowski_region(
         self,
         r: kdb.Region,
@@ -668,7 +667,7 @@ class LayerEnclosure(BaseModel):
         Args:
             c: Cell to apply the enclosure to.
             ref: Reference to use as a base for the enclosure.
-            direction: X/Y or both directions, see :py:class:~`DIRECTION`.
+            direction: X/Y or both directions.
                 Uses a box if both directions are selected.
         """
         match direction:
@@ -772,8 +771,9 @@ class LayerEnclosure(BaseModel):
         Args:
             c: Target KCell to apply the enclosures into.
             ref: The reference shapes to apply the enclosures to.
-                Can be a layer or a region. If `None`, it will trey to use the
-                :py:attr:`main_layer`
+                Can be a layer or a region. If `None`, it will try to use the
+                `main_layer` of the
+                [enclosure][kfactory.utils.enclosure.LayerEnclosure].
             tile_size: Tile size. This should be in the order off 10+ maximum size
                 of the maximum size of sections.
             n_pts: Number of points in the circle. < 3 will create a triangle. 4 a
@@ -907,7 +907,9 @@ class LayerEnclosure(BaseModel):
         Args:
             c: Target cell.
             ref: Reference layer or region (the bounding box). If `None` use
-                :py:attr:~`main_layer` if defined, else throw an error.
+                the `main_layer` of  the
+                [enclosure][kfactory.utils.enclosure.LayerEnclosure] if defined,
+                else throw an error.
         """
         if ref is None:
             ref = self.main_layer
@@ -941,9 +943,10 @@ class LayerEnclosure(BaseModel):
         return representer.represent_mapping(cls.yaml_tag, d)
 
     def __str__(self) -> str:
-        """String of enclosure. Use :py:attr:~`name`.
+        """String representation of an enclosure.
 
-        Use a hash of the sections and main_layer if the name is `None`.
+        Use [name][kfactory.utils.enclosure.LayerEnclosure.name]
+        if available. Use a hash of the sections and main_layer if the name is `None`.
         """
         if self._name is not None:
             return self._name
@@ -1083,7 +1086,7 @@ class RegionOperator(kdb.TileOutputReceiver):
             ix: x-axis index of tile.
             iy: y_axis index of tile.
             tile: The bounding box of the tile.
-            region: The target object of the :py:class:~`klayout.db.TilingProcessor`
+            region: The target object of the `klayout.db.TilingProcessor`
             dbu: dbu used by the processor.
             clip: Whether the target was clipped to the tile or not.
         """
@@ -1179,7 +1182,7 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
             ix: x-axis index of tile.
             iy: y_axis index of tile.
             tile: The bounding box of the tile.
-            region: The target object of the :py:class:~`klayout.db.TilingProcessor`
+            region: The target object of the `klayout.db.TilingProcessor`
             dbu: dbu used by the processor.
             clip: Whether the target was clipped to the tile or not.
         """
@@ -1227,7 +1230,7 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
 
 
 class KCellEnclosure(BaseModel):
-    """Collection of :py:class:~`Enclosure` for cells."""
+    """Collection of [enclosures][kfactory.utils.enclosure.LayerEnclosure] for cells."""
 
     enclosures: LayerEnclosureCollection
 
@@ -1285,7 +1288,7 @@ class KCellEnclosure(BaseModel):
 
         Args:
             c: Cell to apply the enclosure to.
-            direction: X/Y or both directions, see :py:class:~`DIRECTION`.
+            direction: X/Y or both directions, see [kfactory.utils.enclosure.DIRECTION].
                 Uses a box if both directions are selected.
         """
         match direction:

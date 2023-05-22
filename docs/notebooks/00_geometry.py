@@ -2,7 +2,7 @@
 # jupyter:
 #   jupytext:
 #     custom_cell_magics: kql
-#     formats: ipynb,py
+#     formats: ipynb,py:light
 #     text_representation:
 #       extension: .py
 #       format_name: light
@@ -120,7 +120,6 @@ c
 # Cells can have a "Port" that allows you to align Instances together like legos.
 #
 # You can write a simple function to make a rectangular straight, assign ports to the ends, and then align those rectangles together.
-
 
 
 @kf.cell
