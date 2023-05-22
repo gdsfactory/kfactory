@@ -1660,7 +1660,6 @@ class Instance:
     ports: "InstancePorts"
     d: "UMInstance"
 
-
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
         self._instance = instance
@@ -1985,13 +1984,14 @@ class Instance:
     def rotate(self, angle: Literal[0, 1, 2, 3]) -> None:
         """Rotate instance in increments of 90°."""
         self.transform(kdb.Trans(angle, False, 0, 0))
-      
+
     def __repr__(self) -> str:
         """Return a string representation of the instance."""
         port_names = [p.name for p in self.ports]
         return (
             f"{self.parent_cell.name}: ports {port_names}, {self.kcl[self.cell_index]}"
         )
+
 
 class UMInstance:
     """Make the port able to dynamically give um based info."""
