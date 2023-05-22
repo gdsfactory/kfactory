@@ -496,8 +496,7 @@ class LayerEnclosure(BaseModel):
     """
 
     layer_sections: dict[LayerEnum | int, LayerSection]
-    _name: str | None = PrivateAttr(default=None)
-    warn: bool = True
+    _name: str | None = PrivateAttr()
     main_layer: LayerEnum | int | None
     yaml_tag: str = "!Enclosure"
 
@@ -512,7 +511,6 @@ class LayerEnclosure(BaseModel):
             tuple[LayerEnum | int, int] | tuple[LayerEnum | int, int, int]
         ] = [],
         name: str | None = None,
-        warn: bool = True,
         main_layer: LayerEnum | int | None = None,
         dsections: Sequence[
             tuple[LayerEnum | int, float] | tuple[LayerEnum | int, float, float]
@@ -527,17 +525,17 @@ class LayerEnclosure(BaseModel):
                 Elements must be of the form (layer, max) or (layer, min, max)
             name: Optional name of the enclosure. If a name is given in the
                 cell name this name will be used for enclosure arguments.
-            warn: pydantic warnings
             main_layer: Main layer used if the functions don't get an explicit layer.
             dsections: Same as sections but min/max defined in um
             dbu: `KCLayout.dbu` (conversion dbu -> um). Must be specified if
                 `desections` is not `None`.
         """
         super().__init__(
-            warn=warn, layer_sections={}, main_layer=main_layer, _name=name
+            layer_sections={},
+            _name=name,
+            main_layer=main_layer,
         )
-
-        # self._name = name
+        self._name = name
 
         self.layer_sections = {}
 
