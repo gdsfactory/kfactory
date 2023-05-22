@@ -94,7 +94,6 @@ def rename_by_direction(
 ) -> None:
     """Rename ports by angle of their transformation.
 
-    Visualization::
              N0  N1
              |___|_
         W1 -|      |- E1
@@ -109,7 +108,7 @@ def rename_by_direction(
         port_type: port_type string to filter by
         regex: Regex string to use to filter the ports to be renamed.
         dir_names: Prefixes for the directions (east, north, west, south).
-        prefix: Prefix to add before :py:attr:~`dir_names`
+        prefix: Prefix to add before `dir_names`
     """
     _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
 

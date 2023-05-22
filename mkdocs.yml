@@ -1,0 +1,70 @@
+site_name: KFactory 0.6.3
+
+nav:
+  - Home: index.md
+  - Tutorials:
+    - Basice Geometry in KLayout: notebooks/00_geometry.py
+    - KCell & Instance: notebooks/01_references.py
+    - DRC utils: notebooks/02_DRC.py
+    - Enclosures: notebooks/03_Enclosures.py
+  - API: reference/
+theme:
+  name: "material"
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+
+  markdown_extensions:
+    - pymdownx.superfences
+    - pymdownx.tasklist
+    - pymdownx.tabbed
+  palette:
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+   # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+watch:
+  - src/kfactory
+
+plugins:
+  - mkdocstrings:
+      enabled: true
+      custom_templates: templates
+      default_handler: python
+      handlers:
+        python:
+          options:
+            show_source: true
+            allow_inspection: true
+            docstring_style: google
+            # ignore_init_summary: true
+            separate_signature: true
+            show_signature_annotations: true
+            preload_modules:
+              - klayout.db
+              - klayout.lay
+            members_order: alphabetical
+  - gen-files:
+      scripts:
+        - docs/gen_ref_pages.py
+  - mkdocs-video
+  - search
+  - mkdocs-jupyter:
+      include_source: true
+      # ignore_h1_titles: true
+      include_requirejs: true
+      execute: true
+      allow_errors: false
+      kernel_name: python3
+      execute_ignore:
+        - "docs/*.py"
+      ignore: ["docs/*.py"]
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - section-index

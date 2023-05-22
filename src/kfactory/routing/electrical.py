@@ -118,7 +118,7 @@ def route_bundle(
 
     Args:
         c: KCell to place the routes in.
-        input_ports; List of start ports.
+        input_ports: List of start ports.
         target_ports: List of end ports.
         wire_spacing: Minimum space between wires. [dbu]
     """

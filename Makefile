@@ -12,7 +12,7 @@ docs-clean:
 	rm -rf docs/build
 
 docs:
-	jb build docs
+	mkdocs build
 
 test:
 	pytest -s

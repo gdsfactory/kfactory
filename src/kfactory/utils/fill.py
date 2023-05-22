@@ -1,3 +1,8 @@
+"""ill Utilities.
+
+Filling empty regions in [KCells][kfactory.kcell.KCell] with filling cells.
+"""
+
 from collections.abc import Iterable
 
 from .. import KCell, KCLayout, LayerEnum, kdb
@@ -5,6 +10,8 @@ from ..conf import config
 
 
 class FillOperator(kdb.TileOutputReceiver):
+    """Output Receiver of the TilingProcessor."""
+
     def __init__(
         self,
         kcl: KCLayout,
@@ -16,6 +23,7 @@ class FillOperator(kdb.TileOutputReceiver):
         fill_margin: kdb.Vector = kdb.Vector(0, 0),
         remaining_polygons: kdb.Region | None = None,
     ) -> None:
+        """Initialize the receiver."""
         self.kcl = kcl
         self.top_cell = top_cell
         self.fill_cell_index = fill_cell_index
@@ -35,6 +43,7 @@ class FillOperator(kdb.TileOutputReceiver):
         dbu: float,
         clip: bool,
     ) -> None:
+        """Called by the TilingProcessor."""
         while not region.is_empty():
             self.top_cell.fill_region(
                 region,
@@ -57,11 +66,26 @@ def fill_tiled(
     fill_regions: Iterable[tuple[kdb.Region, int]] = [],
     exclude_layers: Iterable[tuple[LayerEnum | int, int]] = [],
     exclude_regions: Iterable[tuple[kdb.Region, int]] = [],
-    n_threads: int = 4,
+    n_threads: int = config.n_threads,
     tile_size: tuple[float, float] | None = None,
     x_space: float = 0,
     y_space: float = 0,
 ) -> None:
+    """Fill a [KCell][kfactory.kcell.KCell].
+
+    Args:
+        c: Target cell.
+        fill_cell: The cell used as a cell to fill the regions.
+        fill_layers: Tuples of layer and keepout w.r.t. the regions.
+        fill_regions: Specific regions to fill. Also tuples like the layers.
+        exclude_layers: Layers to ignore. Tuples like the fill layers
+        exclude_regions: Specific regions to ignore. Tuples like the fill layers.
+        n_threads: Max number of threads used. Defaults to number of cores of the
+            machine.
+        tile_size: Size of the tiles in um.
+        x_space: Spacing between the fill cell bounding boxes in x-direction.
+        y_space: Spacing between the fill cell bounding boxes in y-direction.
+    """
     tp = kdb.TilingProcessor()
     tp.frame = c.bbox().to_dtype(c.kcl.dbu)  # type: ignore
     tp.dbu = c.kcl.dbu
@@ -75,9 +99,9 @@ def fill_tiled(
     tp.tile_size(*tile_size)
 
     layer_names: list[str] = []
-    for _length, _ in fill_layers:
-        layer_name = f"layer{_length}"
-        tp.input(layer_name, c.kcl, c.cell_index(), c.kcl.get_info(_length))
+    for _layer, _ in fill_layers:
+        layer_name = f"layer{_layer}"
+        tp.input(layer_name, c.kcl, c.cell_index(), c.kcl.get_info(_layer))
         layer_names.append(layer_name)
 
     region_names: list[str] = []
@@ -87,9 +111,9 @@ def fill_tiled(
         region_names.append(region_name)
 
     exlayer_names: list[str] = []
-    for _length, _ in exclude_layers:
-        layer_name = f"layer{_length}"
-        tp.input(layer_name, c.kcl, c.cell_index(), c.kcl.get_info(_length))
+    for _layer, _ in exclude_layers:
+        layer_name = f"layer{_layer}"
+        tp.input(layer_name, c.kcl, c.cell_index(), c.kcl.get_info(_layer))
         exlayer_names.append(layer_name)
 
     exregion_names: list[str] = []

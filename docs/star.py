@@ -87,7 +87,7 @@ def sky_with_stars() -> kf.KCell:
             n_diamonds=random.randint(2, 5),
             layer=star_layer,
         )
-        _star.transform(kf.kdb.DCplxTrans(1, angle, False, x, y))
+        _star.transform(kf.kdb.DTrans(angle, False, x, y))
 
     # remove the stars from the sky
 
