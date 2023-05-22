@@ -24,7 +24,7 @@ def cells_to_yaml(output: PathLike, cells: list[KCell] | KCell) -> None:
     Args:
         output: A stream or string of a path where to dump the yaml. Can also be
             set to sys.stdout
-        cells: A single :py:class:`~kfactory.kcell.KCell` or a list of them.
+        cells: A single [KCell][kfactory.kcell.KCell] or a list of them.
 
 
     Returns:

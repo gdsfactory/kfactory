@@ -2,7 +2,7 @@
 # jupyter:
 #   jupytext:
 #     custom_cell_magics: kql
-#     formats: ipynb,py
+#     formats: ipynb,py:light
 #     text_representation:
 #       extension: .py
 #       format_name: light
@@ -35,7 +35,7 @@
 #
 # Most Shape types are available as microns and dbu parts. They can be converted with `<ShapeTypeDBU>.to_dtype(dbu)` to microns and with `<ShapeTypeMicrons>.to_itype(dbu)` where `dbu` is the the conversion of one database unit to microns
 
-# + vscode={"languageId": "python"}
+
 import kfactory as kf
 
 # Create a blank cell (essentially an empty GDS cell with some special features)
@@ -65,7 +65,6 @@ c
 #
 # Make a cell similar to the one above that has a second polygon in layer (1, 1)
 
-# + vscode={"languageId": "python"}
 import kfactory as kf
 
 c = kf.KCell()
@@ -123,7 +122,6 @@ c
 # You can write a simple function to make a rectangular straight, assign ports to the ends, and then connect those rectangles together.
 
 
-# + vscode={"languageId": "python"}
 @kf.cell
 def straight(length=10, width=1, layer=(1, 0)):
     wg = kf.KCell()
@@ -162,8 +160,7 @@ wg3 = c << straight(length=15, width=2.5, layer=(1, 0))
 print(c.name)
 c
 
-# + vscode={"languageId": "python"}
-# Now we can connect everything together using the ports:
+# Now we can align everything together using the ports:
 
 # Each straight has two ports: 'W0' and 'E0'.  These are arbitrary
 # names defined in our straight() function above
@@ -176,7 +173,7 @@ wg3.connect("o1", wg2.ports["o2"])
 
 c
 
-# + vscode={"languageId": "python"}
+
 c.add_port(name="o1", port=wg1.ports["o1"])
 c.add_port(name="o2", port=wg3.ports["o2"])
 c
@@ -189,7 +186,7 @@ c
 #
 # You can move, rotate, and reflect references to Cells.
 
-# + vscode={"languageId": "python"}
+
 c = kf.KCell()
 
 
@@ -219,7 +216,7 @@ c
 
 # You can access the ports of a Cell or Instance
 
-# + vscode={"languageId": "python"}
+
 wg2.ports
 # -
 
@@ -227,7 +224,7 @@ wg2.ports
 #
 # Now that we have your cell `c` is a multi-straight cell, you can add references to that cell in a new blank Cell `c2`, then add two references and shift one to see the movement.
 
-# + vscode={"languageId": "python"}
+
 c2 = kf.KCell(name="MultiMultiWaveguide")
 wg1 = straight(layer=(2, 0))
 wg2 = straight(layer=(2, 0))
@@ -236,9 +233,9 @@ mwg2_ref = c2.create_inst(wg2)
 mwg2_ref.transform(kf.kdb.DTrans(10, 10))
 c2
 
-# + vscode={"languageId": "python"}
 # Like before, let's connect mwg1 and mwg2 together
 mwg1_ref.connect("o2", mwg2_ref.ports["o1"])
+
 c2
 # -
 
@@ -251,7 +248,7 @@ c2
 # This label will display in a GDS viewer, but will not be rendered or printed
 # like the polygons created by gf.cells.text().
 
-# + vscode={"languageId": "python"}
+
 c2.shapes(c2.kcl.layer(1, 0)).insert(kf.kdb.Text("First label", mwg1_ref.trans))
 # c2.shapes(c2.kcl.layer(1,0).insert(kf.kdb.Text("First label", position=mwg1_ref.center)
 c2.shapes(c2.kcl.layer(1, 0)).insert(kf.kdb.Text("Second label", mwg2_ref.trans))
@@ -278,7 +275,7 @@ c2
 # Note that 'A+B' is equivalent to 'or', 'A-B' is equivalent to 'not', and
 # 'B-A' is equivalent to 'not' with the operands switched
 
-# + vscode={"languageId": "python"}
+
 e1 = kf.kdb.DPolygon.ellipse(kf.kdb.DBox(10, 8), 64)
 e2 = kf.kdb.DPolygon.ellipse(kf.kdb.DBox(10, 6), 64).transformed(
     kf.kdb.DTrans(2.0, 0.0)
@@ -324,7 +321,7 @@ c
 
 # ## Move Reference by port
 
-# + vscode={"languageId": "python"}
+
 # MMI not implemented yet
 
 # c = kf.KCell()
@@ -332,8 +329,8 @@ c
 # bend = c.add_ref(gf.cells.bend_circular(layer=(2, 0)))
 # c
 
-# + vscode={"languageId": "python"}
 # bend.connect("o1", mmi.ports["o2"])  # connects follow Source, destination syntax
+
 # c
 # -
 
@@ -341,13 +338,13 @@ c
 #
 # By default the mirror works along the x=0 axis.
 
-# + vscode={"languageId": "python"}
+
 # c = gf.Cell("ref_mirror")
 # mmi = c.add_ref(gf.cells.mmi1x2())
 # bend = c.add_ref(gf.cells.bend_circular(layer=(2, 0)))
 # c
 
-# + vscode={"languageId": "python"}
+
 # mmi.mirror()
 # c
 # -
@@ -358,7 +355,7 @@ c
 #
 # You can write your Cell to GDS file.
 
-# + vscode={"languageId": "python"}
+
 c.write("demo.gds")
 # -
 
@@ -366,5 +363,5 @@ c.write("demo.gds")
 #
 # Sometimes you also want to save the GDS together with metadata (settings, port names, widths, locations ...) in YAML
 
-# + vscode={"languageId": "python"}
+
 # c.write_gds_with_metadata("demo.gds") # not implemented, normal write writes metadata already

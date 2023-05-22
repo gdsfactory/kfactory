@@ -45,11 +45,14 @@ dev = [
 ]
 docs = [
 	"kfactory[ipy]",
-  "autodoc_pydantic",
-  "jupytext",
-  "jupyter-book==0.15.1",
-  "pydata_sphinx_theme==0.13.1",
-  "sphinxcontrib-video",
+  "mkdocs",
+	"mkdocs-jupyter>=0.24",
+  "mkdocstrings[python]",
+  "mkdocs-material",
+  "mkdocs_gen_files",
+	"mkdocs-literate-nav",
+	"mkdocs-section-index",
+	"mkdocs-video",
 ]
 ci = [
 	"flake8",
@@ -96,7 +99,7 @@ python_version = "3.10"
 strict = true
 exclude = [
 	"tests",
-	"src/kfactory/widgets",
+	"src/kfactory/widgets/interactive.py",
 	"src/kfactory/technology",
 	"src/kfactory/pdk.py",
 ]

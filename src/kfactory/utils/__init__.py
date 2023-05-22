@@ -1,13 +1,13 @@
 """Utilities to provide geometrical, fill and DRC violation help.
 
-:py:class:~`Enclosures can automatically generate slab and excludes based on minkowski
-sums instead of only vector based sizing.
+[Enclosures][kfactory.utils.enclosure.LayerEnclosure] can automatically generate slab
+and excludes based on minkowski sums instead of only vector based sizing.
 
-:py:func:~`fill_tiled` provides a filling algorithm that can use the
-:py:class:~`klayout.db.TilingProcessor` to calculate the regions to fill.
+[fill_tiled][kfactory.utils.fill_tiled] provides a filling algorithm that can use
+the `klayout.db.TilingProcessor` to calculate the regions to fill.
 
-:py:func:~`fix_spacing` uses a region space check to calculate areas that violate
-min space violations. :py:func:~`fix_spacing_tiled` to fix it using a TilingProcessor.
+[fix_spacing][kfactory.utils.violations.fix_spacing_tiled] uses a region space check to
+calculate areas that violate min space violations.
 """
 
 from .enclosure import (

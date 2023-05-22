@@ -46,7 +46,7 @@ def waveguide(
     Args:
         width: Width of the waveguide. [um]
         length: Length of the waveguide. [um]
-        layer: Layer index / :py:class:~`LayerEnum`
+        layer: Main layer of the waveguide.
         enclosure: Definition of slabs/excludes. [um]
     """
     return waveguide_dbu(

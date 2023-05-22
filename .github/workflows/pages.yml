@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    # tags:
+    #   v[0-9]+.[0-9]+.[0-9]+
   workflow_dispatch:
 
 jobs:
@@ -22,12 +24,7 @@ jobs:
         run: |
           pip install -e .[ci,docs]
           export KFACTORY_DISPLAY_TYPE="image"
-          make docs
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
-        with:
-          path: "./docs/_build/html/"
-
+          mkdocs gh-deploy --force
   deploy-docs:
     needs: build-docs
     permissions:

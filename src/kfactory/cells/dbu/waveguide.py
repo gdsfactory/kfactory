@@ -12,7 +12,8 @@ A waveguide is a rectangle of material with excludes and/or slab around it::
     │         Slab/Exclude         │
     └──────────────────────────────┘
 
-The slabs and excludes can be given in the form of an :py:class:~`Enclosure`.
+The slabs and excludes can be given in the form of an
+[Enclosure][kfactory.utils.LayerEnclosure].
 """
 
 from ... import KCell, LayerEnum, cell, kdb
@@ -30,8 +31,6 @@ def waveguide(
 ) -> KCell:
     """Waveguide defined in dbu.
 
-    Visualization::
-
         ┌──────────────────────────────┐
         │         Slab/Exclude         │
         ├──────────────────────────────┤
@@ -44,7 +43,7 @@ def waveguide(
     Args:
         width: Waveguide width. [dbu]
         length: Waveguide length. [dbu]
-        layer: Layer index / :py:class:~`LayerEnum`.
+        layer: Main layer of the waveguide.
         enclosure: Definition of slab/excludes. [dbu]
     """
     c = KCell()
