@@ -16,10 +16,6 @@ theme:
     - navigation.tabs
     - navigation.tabs.sticky
 
-  markdown_extensions:
-    - pymdownx.superfences
-    - pymdownx.tasklist
-    - pymdownx.tabbed
   palette:
     # Palette toggle for dark mode
     - scheme: slate
@@ -33,6 +29,13 @@ theme:
         name: Switch to dark mode
 watch:
   - src/kfactory
+
+markdown_extensions:
+  - pymdownx.superfences
+  - pymdownx.tasklist
+  - pymdownx.tabbed
+  - pymdownx.snippets:
+      check_paths: true
 
 plugins:
   - mkdocstrings:

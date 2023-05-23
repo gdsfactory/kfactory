@@ -53,6 +53,7 @@ docs = [
 	"mkdocs-literate-nav",
 	"mkdocs-section-index",
 	"mkdocs-video",
+	"pymdown-extensions",
 ]
 ci = [
 	"flake8",

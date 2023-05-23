@@ -1,4 +1,4 @@
-# KFactory 0.7.0
+# KFactory 0.6.3
 
 Kfactory is a [gdsfactory](https://github.com/gdsfactory/gdsfactory)-like tool. It is built with [KLayout](https://klayout.de) as a backend instead of gdstk, but aims to offer the similar featuers.
 
@@ -10,8 +10,6 @@ Features similar to gdsfactory:
 - [x] Path extrusion (no interface with CrossSections)
 - [x] Jupyter integration
 - [x] PDK/package configuration
-- [x] Plugin system (simulations etc.) - Check [kplugins](https://github.com/gdsfactory/kplugins)
-- [x] Generic PDK example - Check [kgeneric](https://github.com/gdsfactory/kgeneric)
 
 
 Notable missing Features:
@@ -19,6 +17,7 @@ Notable missing Features:
 - [ ] CrossSection
 - [ ] Netlist/Schematics and LVS
 - [ ] More advanced routing
+- [ ] Plugin system (simulations etc.)
 
 
 New/Improved Features:
