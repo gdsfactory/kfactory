@@ -1,4 +1,6 @@
-site_name: KFactory 0.6.3
+site_name: KFactory
+repo_url: https://github.com/gdsfactory/kfactory
+site_url: https://gdsfactory.github.io/kfactory
 
 nav:
   - Home: index.md
