@@ -1,4 +1,4 @@
-# KFactory 0.7.0
+# KFactory 0.6.3
 
 Kfactory is a [gdsfactory](https://github.com/gdsfactory/gdsfactory)-like tool. It is built with [KLayout](https://klayout.de) as a backend instead of gdstk, but aims to offer the similar featuers.
 
@@ -8,15 +8,15 @@ Features similar to gdsfactory:
 - [x] Simple routing (point to point and simpl bundle routes for electrical routes)
 - [x] Basic cells like euler/circular bends, taper, waveguide
 - [x] Path extrusion (no interface with CrossSections)
+- [x] Jupyter integration
+- [x] PDK/package configuration
 
 
 Notable missing Features:
-- [ ] PDK/package configuration
 - [ ] CrossSection
 - [ ] Netlist/Schematics and LVS
 - [ ] More advanced routing
 - [ ] Plugin system (simulations etc.)
-- [ ] Jupyter integration
 
 
 New/Improved Features:
@@ -33,7 +33,7 @@ New/Improved Features:
 
 kfactory is available on [pypi](https://pypi.org/project/kfactory/)
 
-```
+```bash
 pip install kfactory
 ```
 
@@ -44,8 +44,8 @@ At the moment kfactory works only on python 3.10
 
 A development environment can be installed with
 
-```
-python -m pip install .[dev]
+```bash
+python -m pip install -e .[dev]
 ```
 
 It is defined in `pyproject.toml`. For committing `pre-commit` should be installed with `pre-commit install`.
