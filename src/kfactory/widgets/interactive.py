@@ -166,7 +166,7 @@ class LayoutWidget:
             left_sidebar=mode_selector,
             center=self.image,
             right_sidebar=selector_tabs,
-            align_items="top",
+            connect_items="top",
             justify_items="center",
             footer=self.debug,
             # footer=mode_selector,
