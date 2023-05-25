@@ -92,14 +92,6 @@ def test_connect_cplx_inst(LAYER):
     c.flatten()
 
 
-# def test_floating(wg_floating_off_grid):
-#     c = kf.KCell()
-
-#     wg1 = c << wg_floating_off_grid
-#     wg2 = c << wg_floating_off_grid
-#     wg2.connect("o2", wg1, "o1")
-
-
 def test_connect_integer(wg):
     c = kf.KCell()
 
@@ -108,7 +100,3 @@ def test_connect_integer(wg):
     wg2.connect("o1", wg1, "o1")
 
     assert wg2.ports["o1"].trans == kf.kdb.Trans(0, False, 0, 0)
-
-
-# if __name__ == "__main__":
-#     test_waveguide()

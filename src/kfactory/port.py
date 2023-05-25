@@ -68,7 +68,15 @@ def rename_clockwise(
     _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
 
     def sort_key(port: "Port") -> tuple[int, int, int]:
-        angle = (2 - port.angle) % 4  # angles should follow the order 2, 1, 0, 3
+        match port.angle:
+            case 2:
+                angle = 0
+            case 1:
+                angle = 1
+            case 0:
+                angle = 2
+            case 3:
+                angle = 3
         dir_1 = 1 if angle < 2 else -1
         dir_2 = -1 if port.angle < 2 else 1
         key_1 = dir_1 * (
