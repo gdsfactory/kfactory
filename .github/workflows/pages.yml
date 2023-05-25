@@ -24,7 +24,7 @@ jobs:
         run: |
           pip install -e .[ci,docs]
           export KFACTORY_DISPLAY_TYPE="image"
-          mkdocs build
+          make docs
       - uses: actions/upload-pages-artifact@v1
         with:
           name: github-pages
