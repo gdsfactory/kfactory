@@ -28,7 +28,7 @@ lib64
 __pycache__
 env
 venv
-/site
+docs/site
 _version.py
 
 # Installer logs
