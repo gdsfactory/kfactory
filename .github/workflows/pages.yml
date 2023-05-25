@@ -28,7 +28,7 @@ jobs:
       - uses: actions/upload-pages-artifact@v1
         with:
           name: github-pages
-          path: "./site/"
+          path: ".docs/site/"
 
   deploy-docs:
     needs: build-docs
