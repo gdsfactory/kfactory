@@ -5,11 +5,15 @@ docs_dir: source
 
 nav:
   - Home: index.md
+  - First Steps:
+    - Prerequisites: pre.md
+    - 5min Intro to KFactory: intro.md
   - Tutorials:
     - Basice Geometry in KLayout: notebooks/00_geometry.py
     - KCell & Instance: notebooks/01_references.py
     - DRC utils: notebooks/02_DRC.py
     - Enclosures: notebooks/03_Enclosures.py
+  - Config Class: config.md
   - API: reference/
 theme:
   name: "material"
@@ -61,7 +65,10 @@ plugins:
   - gen-files:
       scripts:
         - source/gen_ref_pages.py
-  - mkdocs-video
+  - mkdocs-video:
+      is_video: true
+      video_type: webm
+      video_muted: true
   - search
   - mkdocs-jupyter:
       include_source: true
