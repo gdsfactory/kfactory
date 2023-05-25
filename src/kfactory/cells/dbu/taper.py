@@ -52,15 +52,15 @@ def taper(
         )
     )
 
-    c.create_port(name="o1", trans=kdb.Trans(2, False, 0, 0), width=width1, layer=layer)
-    c.create_port(
-        name="o2", trans=kdb.Trans(0, False, length, 0), width=width2, layer=layer
-    )
+    c.create_port(trans=kdb.Trans(2, False, 0, 0), width=width1, layer=layer)
+    c.create_port(trans=kdb.Trans(0, False, length, 0), width=width2, layer=layer)
 
     if enclosure is not None:
         enclosure.apply_minkowski_y(c, kdb.Region(c.bbox()))
     c.settings["width1_um"] = width1 * c.kcl.dbu
     c.settings["width2_um"] = width2 * c.kcl.dbu
     c.settings["length_um"] = length * c.kcl.dbu
+
+    c.autorename_ports()
 
     return c
