@@ -1,20 +1,26 @@
 site_name: KFactory
 repo_url: https://github.com/gdsfactory/kfactory
 site_url: https://gdsfactory.github.io/kfactory
+docs_dir: source
 
 nav:
   - Home: index.md
+  - First Steps:
+    - Prerequisites: pre.md
+    - 5min Intro to KFactory: intro.md
   - Tutorials:
     - Basice Geometry in KLayout: notebooks/00_geometry.py
     - KCell & Instance: notebooks/01_references.py
     - DRC utils: notebooks/02_DRC.py
     - Enclosures: notebooks/03_Enclosures.py
+  - Config Class: config.md
   - API: reference/
 theme:
   name: "material"
   features:
     - navigation.tabs
     - navigation.tabs.sticky
+  custom_dir: overrides
 
   palette:
     # Palette toggle for dark mode
@@ -28,7 +34,7 @@ theme:
         icon: material/brightness-7
         name: Switch to dark mode
 watch:
-  - src/kfactory
+  - ../src/kfactory
 
 markdown_extensions:
   - pymdownx.superfences
@@ -58,8 +64,11 @@ plugins:
             members_order: alphabetical
   - gen-files:
       scripts:
-        - docs/gen_ref_pages.py
-  - mkdocs-video
+        - source/gen_ref_pages.py
+  - mkdocs-video:
+      is_video: true
+      video_type: webm
+      video_muted: true
   - search
   - mkdocs-jupyter:
       include_source: true
@@ -69,8 +78,8 @@ plugins:
       allow_errors: false
       kernel_name: python3
       execute_ignore:
-        - "docs/*.py"
-      ignore: ["docs/*.py"]
+        - "source/*.py"
+      ignore: ["source/*.py"]
   - literate-nav:
       nav_file: SUMMARY.md
   - section-index
