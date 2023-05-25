@@ -89,3 +89,31 @@ def test_rename_orientatioin() -> None:
     )
 
     assert [p.name for p in port_list] == names
+
+
+def test_rename_setter():
+    kcl = kf.KCLayout()
+
+    assert kcl.rename_function == kf.port.rename_clockwise
+
+    c1 = kf.KCell(kcl=kcl)
+    c1.create_port(
+        trans=kf.kdb.Trans(2, False, 0, 0), width=1000, layer=kcl.layer(1, 0)
+    )
+    c1.create_port(trans=kf.kdb.Trans(), width=1000, layer=kcl.layer(1, 0))
+    c1.autorename_ports()
+
+    kcl.rename_function = kf.port.rename_by_direction
+
+    c2 = kf.KCell(kcl=kcl)
+    c2.create_port(
+        trans=kf.kdb.Trans(2, False, 0, 0), width=1000, layer=kcl.layer(1, 0)
+    )
+    c2.create_port(trans=kf.kdb.Trans(), width=1000, layer=kcl.layer(1, 0))
+    c2.autorename_ports()
+
+    print(c1.ports)
+    print(c2.ports)
+
+    assert c1.ports[0].name == "o1"
+    assert c2.ports[0].name == "W0"
