@@ -11,7 +11,7 @@ from ruamel.yaml.constructor import SafeConstructor
 
 from .kcell import KCell, KCLayout, Port, Ports
 from .kcell import kcl as stdkcl
-from .utils import Enclosure
+from .utils import LayerEnclosure
 
 __all__ = ["cells_to_yaml", "cells_from_yaml"]
 
@@ -24,7 +24,7 @@ def cells_to_yaml(output: PathLike, cells: list[KCell] | KCell) -> None:
     Args:
         output: A stream or string of a path where to dump the yaml. Can also be
             set to sys.stdout
-        cells: A single :py:class:`~kfactory.kcell.KCell` or a list of them.
+        cells: A single [KCell][kfactory.kcell.KCell] or a list of them.
 
 
     Returns:
@@ -62,7 +62,7 @@ def register_classes(
     yaml.register_class(ModKCell)
     yaml.register_class(Port)
     yaml.register_class(Ports)
-    yaml.register_class(Enclosure)
+    yaml.register_class(LayerEnclosure)
 
     if additional_classes is not None:
         for c in additional_classes:

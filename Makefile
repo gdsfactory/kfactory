@@ -2,17 +2,21 @@ help:
 	@echo 'make install:          Install package, hook, notebooks and gdslib'
 	@echo 'make test:             Run tests with pytest'
 	@echo 'make test-force:       Rebuilds regression test'
+	@echo 'make docs:       	  Build the docs and place them in ./site'
+	@echo 'make docs-serve:       mkdocs serve the docs'
 
 install:
 	pip install -e .[docs,dev]
 	pre-commit install
 
 docs-clean:
-	rm -rf docs/_autosummary/
-	rm -rf docs/build
+	rm -rf site
 
 docs:
-	jb build docs
+	mkdocs build -f docs/mkdocs.yml
+
+docs-serve:
+	mkdocs serve -f docs/mkdocs.yml
 
 test:
 	pytest -s

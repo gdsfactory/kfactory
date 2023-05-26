@@ -33,7 +33,8 @@ def simple_cplx_cell(layer: kf.LayerEnum) -> kf.KCell:
 
 
 def test_cell(LAYER: kf.LayerEnum):
-    simple_cplx_cell(LAYER.WG)
+    c = simple_cplx_cell(LAYER.WG)
+    c.show()
 
 
 def test_connected_cell(LAYER: kf.LayerEnum):
@@ -41,4 +42,5 @@ def test_connected_cell(LAYER: kf.LayerEnum):
     layer = LAYER.WG
     sckc1 = c << simple_cplx_cell(layer)
     sckc2 = c << simple_cplx_cell(layer)
-    sckc2.align("o1", sckc1, "o1")
+    sckc2.connect("o1", sckc1, "o1")
+    c.show()

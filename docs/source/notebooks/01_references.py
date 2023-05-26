@@ -208,7 +208,7 @@ c3
 #     c = gf.Cell()
 #     r1 = c << straight(length=l1, width=w1)
 #     r2 = c << straight(length=l2, width=w2)
-#     r2.align(port="o1", destination=r1.ports["o2"])
+#     r2.connect(port="o1", destination=r1.ports["o2"])
 #     c.add_port("o1", port=r1.ports["o1"])
 #     c.add_port("o2", port=r2.ports["o2"])
 #     return c
@@ -236,20 +236,20 @@ c3
 # dbr
 # -
 
-# ## align references
+# ## connect references
 #
-# We have seen that once you create a reference you can manipulate the reference to move it to a location. Here we are going to align that reference to a port. Remember that we follow that a certain reference `source` aligns to a `destination` port
+# We have seen that once you create a reference you can manipulate the reference to move it to a location. Here we are going to connect that reference to a port. Remember that we follow that a certain reference `source` connects to a `destination` port
 
 # +
 # bend = gf.cells.bend_circular()
 # bend
 
 # +
-# c = gf.Cell("sample_reference_align")
+# c = gf.Cell("sample_reference_connect")
 
 # mmi = c << gf.cells.mmi1x2()
 # b = c << gf.cells.bend_circular()
-# b.align("o1", destination=mmi.ports["o2"])
+# b.connect("o1", destination=mmi.ports["o2"])
 
 # c.add_port("o1", port=mmi.ports["o1"])
 # c.add_port("o2", port=b.ports["o2"])
@@ -260,11 +260,11 @@ c3
 # You can also access the ports directly from the references
 
 # +
-# c = gf.Cell("sample_reference_align_simpler")
+# c = gf.Cell("sample_reference_connect_simpler")
 
 # mmi = c << gf.cells.mmi1x2()
 # b = c << gf.cells.bend_circular()
-# b.align("o1", destination=mmi["o2"])
+# b.connect("o1", destination=mmi["o2"])
 
 # c.add_port("o1", port=mmi["o1"])
 # c.add_port("o2", port=b["o2"])
@@ -435,7 +435,7 @@ c3
 
 # ## cell_sequence
 #
-# When you have repetitive alignions you can describe the connectivity as an ASCII map
+# When you have repetitive connections you can describe the connectivity as an ASCII map
 
 # +
 # bend180 = gf.cells.bend_circular180()
@@ -451,7 +451,7 @@ c3
 # }
 
 # # Generate a sequence
-# # This is simply a chain of characters. Each of them represents a cell
+# # This is simply a connect of characters. Each of them represents a cell
 # # with a given input and and a given output
 
 # sequence = "DC-P-P-P-P-CD"

@@ -159,7 +159,6 @@ def fix_spacing_sizing_tiled(
         c: Input cell
         min_space: Minimum space rule [dbu]
         layer: Input layer index
-        metrics: The metrics to use to determine the violation edges
         n_threads: on how many threads to run the check simultaneously
         tile_size: tuple determining the size of each sub tile (in um), should be big
             compared to the violation size
@@ -215,7 +214,6 @@ def fix_spacing_minkowski_tiled(
         c: Input cell
         min_space: Minimum space rule [dbu]
         ref: Input layer index or region
-        metrics: The metrics to use to determine the violation edges
         n_threads: on how many threads to run the check simultaneously
         tile_size: tuple determining the size of each sub tile (in um), should be big
             compared to the violation size

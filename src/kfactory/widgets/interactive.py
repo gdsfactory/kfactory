@@ -5,7 +5,8 @@ try:
     from typing import Any
 
     from ipyevents import Event  # type: ignore[import]
-    from IPython.display import display  # type: ignore[import]
+    from IPython.display import Image as IPImage  # type: ignore[import]
+    from IPython.display import display
     from ipytree import Node, Tree  # type: ignore[import]
     from ipywidgets import (  # type: ignore[import]
         Accordion,
@@ -36,8 +37,68 @@ def display_kcell(kc: KCell) -> None:
     cell_dup = kc.kcl.dup()[kc.name]
     cell_dup.draw_ports()
 
-    lw = LayoutWidget(cell=cell_dup)
-    display(lw.widget)
+    match config.display_type:
+        case "widget":
+            lw = LayoutWidget(cell=cell_dup)
+            display(lw.widget)
+        case "image":
+            lipi = LayoutIPImage(cell=cell_dup)
+            display(lipi.image)
+
+
+class LayoutImage:
+    def __init__(
+        self,
+        cell: KCell,
+        layer_properties: str | None = None,
+    ):
+        self.layout_view = lay.LayoutView()
+        self.layout_view.show_layout(cell.kcl, False)
+        self.layer_properties: Path | None = None
+        if layer_properties is not None:
+            self.layer_properties = Path(layer_properties)
+            if self.layer_properties.exists() and self.layer_properties.is_file():
+                self.layer_properties = self.layer_properties
+                self.layout_view.load_layer_props(str(self.layer_properties))
+        self.show_cell(cell._kdb_cell)
+        png_data = self.layout_view.get_screenshot_pixels().to_png_data()
+
+        self.image = Image(value=png_data, format="png")
+
+    def show_cell(self, cell: kdb.Cell) -> None:
+        self.layout_view.active_cellview().cell = cell
+        self.layout_view.max_hier()
+        self.layout_view.resize(800, 600)
+        self.layout_view.add_missing_layers()
+        self.layout_view.zoom_fit()
+
+
+class LayoutIPImage:
+    def __init__(
+        self,
+        cell: KCell,
+        layer_properties: str | None = None,
+    ):
+        self.layout_view = lay.LayoutView()
+        self.layout_view.show_layout(cell.kcl, False)
+        self.layer_properties: Path | None = None
+        if layer_properties is not None:
+            self.layer_properties = Path(layer_properties)
+            if self.layer_properties.exists() and self.layer_properties.is_file():
+                self.layer_properties = self.layer_properties
+                self.layout_view.load_layer_props(str(self.layer_properties))
+        self.show_cell(cell._kdb_cell)
+        png_data = self.layout_view.get_screenshot_pixels().to_png_data()
+        self.image = IPImage(
+            data=png_data, format="png", embed=True, width=800, height=600
+        )
+
+    def show_cell(self, cell: kdb.Cell) -> None:
+        self.layout_view.active_cellview().cell = cell
+        self.layout_view.max_hier()
+        self.layout_view.resize(800, 600)
+        self.layout_view.add_missing_layers()
+        self.layout_view.zoom_fit()
 
 
 class LayoutWidget:
@@ -105,7 +166,7 @@ class LayoutWidget:
             left_sidebar=mode_selector,
             center=self.image,
             right_sidebar=selector_tabs,
-            align_items="top",
+            connect_items="top",
             justify_items="center",
             footer=self.debug,
             # footer=mode_selector,

@@ -68,7 +68,15 @@ def rename_clockwise(
     _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
 
     def sort_key(port: "Port") -> tuple[int, int, int]:
-        angle = (2 - port.angle) % 4  # angles should follow the order 2, 1, 0, 3
+        match port.angle:
+            case 2:
+                angle = 0
+            case 1:
+                angle = 1
+            case 0:
+                angle = 2
+            case 3:
+                angle = 3
         dir_1 = 1 if angle < 2 else -1
         dir_2 = -1 if port.angle < 2 else 1
         key_1 = dir_1 * (
@@ -94,7 +102,6 @@ def rename_by_direction(
 ) -> None:
     """Rename ports by angle of their transformation.
 
-    Visualization::
              N0  N1
              |___|_
         W1 -|      |- E1
@@ -109,7 +116,7 @@ def rename_by_direction(
         port_type: port_type string to filter by
         regex: Regex string to use to filter the ports to be renamed.
         dir_names: Prefixes for the directions (east, north, west, south).
-        prefix: Prefix to add before :py:attr:~`dir_names`
+        prefix: Prefix to add before `dir_names`
     """
     _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
 

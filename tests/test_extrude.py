@@ -5,7 +5,7 @@ import numpy as np
 
 @kf.cell
 def taper_dyn(
-    length: float, width: float, layer: kf.LayerEnum, enclosure: kf.utils.Enclosure
+    length: float, width: float, layer: kf.LayerEnum, enclosure: kf.utils.LayerEnclosure
 ) -> kf.KCell:
     c = kf.KCell()
 
@@ -14,12 +14,14 @@ def taper_dyn(
 
     extrude_path_dynamic(c, layer, path, _width, enclosure)
 
+    c.show()
+
     return c
 
 
 @kf.cell
 def taper_static(
-    length: float, width: float, layer: kf.LayerEnum, enclosure: kf.utils.Enclosure
+    length: float, width: float, layer: kf.LayerEnum, enclosure: kf.utils.LayerEnclosure
 ) -> kf.KCell:
     c = kf.KCell()
 
@@ -27,6 +29,7 @@ def taper_static(
 
     _width = [width + np.sin(x * np.pi / 2) for x in [_x / 20 for _x in range(21)]]
     extrude_path_dynamic(c, layer, path, _width, enclosure)
+    c.show()
 
     return c
 
@@ -49,6 +52,7 @@ def test_enc_extrude_dyn(LAYER, wg_enc):
     _width = lambda x: width + width * np.sin(x * np.pi / 2)
 
     enclosure.extrude_path_dynamic(c, path, layer, _width)
+    c.show()
 
 
 def test_enc_extrude_static(LAYER, wg_enc):
@@ -61,3 +65,4 @@ def test_enc_extrude_static(LAYER, wg_enc):
     _width = [width + np.sin(x * np.pi / 2) for x in [_x / 20 for _x in range(21)]]
 
     enclosure.extrude_path_dynamic(c, path, layer, _width)
+    c.show()

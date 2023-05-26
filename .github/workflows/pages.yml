@@ -1,15 +1,17 @@
-name: Sphinx docs to gh-pages
+name: docs to gh-pages
 
 on:
   push:
     branches:
       - main
+#     # tags:
+#     #   v[0-9]+.[0-9]+.[0-9]+
   workflow_dispatch:
 
 jobs:
   build-docs:
     runs-on: ubuntu-latest
-    name: Sphinx docs to gh-pages
+    name: build docs
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
@@ -21,11 +23,12 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install -e .[ci,docs]
+          export KFACTORY_DISPLAY_TYPE="image"
           make docs
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+      - uses: actions/upload-pages-artifact@v1
         with:
-          path: "./docs/_build/html/"
+          name: github-pages
+          path: "./docs/site/"
 
   deploy-docs:
     needs: build-docs

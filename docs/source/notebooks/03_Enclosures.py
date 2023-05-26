@@ -8,7 +8,7 @@ class LAYER(kf.LayerEnum):
     SLABEX = (4, 0)
 
 
-enc = kf.utils.Enclosure(
+enc = kf.utils.LayerEnclosure(
     [
         (LAYER.WGEX, 5000),
         (LAYER.SLAB, 5000, 50000),
@@ -28,7 +28,7 @@ def rectangles(
     n: int,
     l_straight: int,
     layer: kf.LayerEnum,
-    enclosure: kf.utils.Enclosure,
+    enclosure: kf.utils.LayerEnclosure,
 ) -> kf.KCell:
     """Rectangles with eulerbends as corners."""
     c = kf.KCell()
@@ -46,27 +46,27 @@ def rectangles(
         if v:
             wg_v = wg_f(v)
             wg1 = c << wg_v
-            wg1.align("o1", b1, "o2")
-            b2.align("o1", wg1, "o2")
+            wg1.connect("o1", b1, "o2")
+            b2.connect("o1", wg1, "o2")
         else:
-            b2.align("o1", b1, "o2")
+            b2.connect("o1", b1, "o2")
         _l_straight = l_straight + 2 * i * pitch
         if _l_straight:
             wg_h = wg_f(_l_straight)
             wg2 = c << wg_h
-            wg2.align("o1", b2, "o2")
-            b3.align("o1", wg2, "o2")
+            wg2.connect("o1", b2, "o2")
+            b3.connect("o1", wg2, "o2")
         else:
-            b3.align("o1", b2, "o2")
+            b3.connect("o1", b2, "o2")
         if v:
             wg3 = c << wg_v
-            wg3.align("o1", b3, "o2")
-            b4.align("o1", wg3, "o2")
+            wg3.connect("o1", b3, "o2")
+            b4.connect("o1", wg3, "o2")
         else:
-            b4.align("o1", b3, "o2")
+            b4.connect("o1", b3, "o2")
         if _l_straight:
             wg4 = c << wg_h
-            wg4.align("o1", b4, "o2")
+            wg4.connect("o1", b4, "o2")
 
     def shape(d: int) -> kf.kdb.Polygon:
         return kf.kdb.Polygon.ellipse(kf.kdb.Box(2 * d, 2 * d), 64)
@@ -84,7 +84,7 @@ def rectangles_tiled(
     n: int,
     l_straight: int,
     layer: kf.LayerEnum,
-    enclosure: kf.utils.Enclosure,
+    enclosure: kf.utils.LayerEnclosure,
 ) -> kf.KCell:
     """Rectangles with eulerbends as corners."""
     c = kf.KCell()
@@ -102,27 +102,27 @@ def rectangles_tiled(
         if v:
             wg_v = wg_f(v)
             wg1 = c << wg_v
-            wg1.align("o1", b1, "o2")
-            b2.align("o1", wg1, "o2")
+            wg1.connect("o1", b1, "o2")
+            b2.connect("o1", wg1, "o2")
         else:
-            b2.align("o1", b1, "o2")
+            b2.connect("o1", b1, "o2")
         _l_straight = l_straight + 2 * i * pitch
         if _l_straight:
             wg_h = wg_f(_l_straight)
             wg2 = c << wg_h
-            wg2.align("o1", b2, "o2")
-            b3.align("o1", wg2, "o2")
+            wg2.connect("o1", b2, "o2")
+            b3.connect("o1", wg2, "o2")
         else:
-            b3.align("o1", b2, "o2")
+            b3.connect("o1", b2, "o2")
         if v:
             wg3 = c << wg_v
-            wg3.align("o1", b3, "o2")
-            b4.align("o1", wg3, "o2")
+            wg3.connect("o1", b3, "o2")
+            b4.connect("o1", wg3, "o2")
         else:
-            b4.align("o1", b3, "o2")
+            b4.connect("o1", b3, "o2")
         if _l_straight:
             wg4 = c << wg_h
-            wg4.align("o1", b4, "o2")
+            wg4.connect("o1", b4, "o2")
 
     def shape(d: int) -> kf.kdb.Polygon:
         return kf.kdb.Polygon.ellipse(kf.kdb.Box(2 * d, 2 * d), 64)

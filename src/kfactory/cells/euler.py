@@ -11,7 +11,7 @@ from scipy.special import fresnel  # type: ignore[import]
 
 from .. import kdb
 from ..kcell import KCell, LayerEnum, cell
-from ..utils import Enclosure, extrude_path
+from ..utils import LayerEnclosure, extrude_path
 
 __all__ = [
     "euler_bend_points",
@@ -163,7 +163,7 @@ def bend_euler(
     width: float,
     radius: float,
     layer: int | LayerEnum,
-    enclosure: Enclosure | None = None,
+    enclosure: LayerEnclosure | None = None,
     theta: float = 90,
     resolution: float = 150,
 ) -> KCell:
@@ -223,7 +223,7 @@ def bend_s_euler(
     width: float,
     radius: float,
     layer: LayerEnum | int,
-    enclosure: Enclosure | None = None,
+    enclosure: LayerEnclosure | None = None,
     resolution: float = 150,
 ) -> KCell:
     """Create a euler s-bend.
@@ -261,17 +261,17 @@ def bend_s_euler(
         p1 = backbone[0].to_itype(dbu)
         p2 = backbone[-1].to_itype(dbu)
     c.create_port(
-        name="W0",
         trans=kdb.Trans(2, False, p1.to_v()),
         width=int(width / c.kcl.dbu),
         port_type="optical",
         layer=layer,
     )
     c.create_port(
-        name="E0",
         trans=kdb.Trans(0, False, p2.to_v()),
         width=int(width / c.kcl.dbu),
         port_type="optical",
         layer=layer,
     )
+
+    c.autorename_ports()
     return c

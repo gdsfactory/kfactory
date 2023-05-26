@@ -7,7 +7,7 @@ import numpy as np
 
 from .. import kdb
 from ..kcell import KCell, LayerEnum, cell
-from ..utils import Enclosure, extrude_path
+from ..utils import LayerEnclosure, extrude_path
 
 __all__ = ["bend_circular"]
 
@@ -17,7 +17,7 @@ def bend_circular(
     width: float,
     radius: float,
     layer: int | LayerEnum,
-    enclosure: Enclosure | None = None,
+    enclosure: LayerEnclosure | None = None,
     theta: float = 90,
     theta_step: float = 1,
 ) -> KCell:
@@ -27,8 +27,7 @@ def bend_circular(
         width: Width of the core. [um]
         radius: Radius of the backbone. [um]
         layer: Layer index of the target layer.
-        enclosure: :py:class:`kfactory.utils.Enclosure` object to describe the
-            claddings.
+        enclosure: Optional enclosure.
         theta: Angle amount of the bend.
         theta_step: Angle amount per backbone point of the bend.
     """
@@ -55,7 +54,6 @@ def bend_circular(
     )
 
     c.create_port(
-        name="o1",
         trans=kdb.Trans(2, False, 0, 0),
         width=int(width / c.kcl.dbu),
         layer=layer,
@@ -64,17 +62,17 @@ def bend_circular(
     match theta:
         case 90:
             c.create_port(
-                name="o2",
                 trans=kdb.DTrans(1, False, radius, radius).to_itype(c.kcl.dbu),
                 width=int(width / c.kcl.dbu),
                 layer=layer,
             )
         case 180:
             c.create_port(
-                name="o2",
                 trans=kdb.DTrans(0, False, 0, 2 * radius).to_itype(c.kcl.dbu),
                 width=int(width / c.kcl.dbu),
                 layer=layer,
             )
+
+    c.autorename_ports()
 
     return c
