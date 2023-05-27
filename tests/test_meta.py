@@ -34,17 +34,17 @@ def test_metainfo_read(waveguide):
         save = kf.default_save()
         save.write_context_info = True
         waveguide.kcl.write(t.name)
-        for meta in waveguide.kcl.each_meta_info():
-            print(f"{meta.name}: {meta.value}")
 
         kcl = kf.KCLayout()
         kcl.read(t.name)
-        # print([cell.name for cell in kcl.cells("*")], waveguide.name)
-
-        print()
-        for meta in kcl.each_meta_info():
-            print(f"{meta.name}: {meta.value}")
 
         wg_read = kcl[waveguide.name]
         wg_read.get_meta_data()
-        print(wg_read.ports)
+        for i, port in enumerate(waveguide.ports):
+            read_port = wg_read.ports[i]
+
+            assert port.name == read_port.name
+            assert port.trans == read_port.trans
+            assert port.dcplx_trans == read_port.dcplx_trans
+            assert port.port_type == read_port.port_type
+            assert port.width == read_port.width

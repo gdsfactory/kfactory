@@ -1652,7 +1652,6 @@ class KCell:
                 f"kfactory:ports:{i}:layer", self.kcl.get_info(port.layer)
             )
             layer_meta.persisted = True
-            print(f"{layer_meta.is_persisted()=}")
             self.add_meta_info(layer_meta)
             width_meta = kdb.LayoutMetaInfo(f"kfactory:ports:{i}:width", port.width)
             width_meta.persisted = True
@@ -1711,8 +1710,6 @@ class KCell:
                 _port.trans = kdb.Trans.from_s(trans)
             elif dcplx_trans:
                 _port.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
-
-            print(_port, trans)
 
             self.add_port(_port, keep_mirror=True)
 
