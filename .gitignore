@@ -9,6 +9,7 @@
 gds/
 Pipfile
 docs/_build/
+site/
 
 # Packages
 *.egg
