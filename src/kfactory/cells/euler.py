@@ -190,29 +190,18 @@ def bend_euler(
         start_angle=0,
         end_angle=theta,
     )
+    c.create_port(
+        layer=layer,
+        width=int(width / c.kcl.dbu),
+        trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
+    )
 
-    if theta == 90:
-        c.create_port(
-            layer=layer,
-            width=int(width / c.kcl.dbu),
-            trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
-        )
-        c.create_port(
-            layer=layer,
-            width=int(width / c.kcl.dbu),
-            trans=kdb.Trans(1, False, backbone[-1].to_itype(dbu).to_v()),
-        )
-    elif theta == 180:
-        c.create_port(
-            layer=layer,
-            width=int(width / c.kcl.dbu),
-            trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
-        )
-        c.create_port(
-            layer=layer,
-            width=int(width / c.kcl.dbu),
-            trans=kdb.Trans(2, False, backbone[-1].to_itype(dbu).to_v()),
-        )
+    c.create_port(
+        dcplx_trans=kdb.DCplxTrans(1, theta, False, backbone[-1].to_v()),
+        dwidth=width,
+        layer=layer,
+    )
+
     c.autorename_ports()
     return c
 
