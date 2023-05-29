@@ -17,9 +17,9 @@
 # %% [markdown]
 # # Instances and ports
 #
-# GDS allows your the cell once in memory and Reference or Instance the cell multiple times.
+# GDS allows your the cell once in memory and instance or Instance the cell multiple times.
 #
-# `gdstk` and `gdspy` calls it `Reference` and `klayout` calls it `Instance`
+# `gdstk` and `gdspy` calls it `instance` and `klayout` calls it `Instance`
 
 # %% [markdown]
 # As you build cells you can instantiate other cells. Adding an instance is like having a pointer to a cell.
@@ -29,7 +29,7 @@
 #
 # Say you have a ridiculously large polygon with 100 billion vertices that you call BigPolygon. It's huge, and you need to use it in your design 250 times.
 # Well, a single copy of BigPolygon takes up 1MB of memory, so you don't want to make 250 copies of it
-# You can instead *references* the polygon 250 times.
+# You can instead *instances* the polygon 250 times.
 # Each instance only uses a few bytes of memory -- it only needs to know the memory address of BigPolygon, position, rotation and mirror.
 # This way, you can keep one copy of BigPolygon and use it again and again.
 #
@@ -56,37 +56,37 @@ p
 #
 # To do so, you need to make a second blank `Cell`, this time called `c`.
 #
-# In this new Cell you *reference* our Cell `p` which contains our polygon.
+# In this new Cell you *instance* our Cell `p` which contains our polygon.
 
 # %%
-c = kf.KCell(name="Cell_with_references")  # Create a new blank Cell
-poly_ref = c.create_inst(p)  # Reference the Cell "p" that has the polygon in it
+c = kf.KCell(name="Cell_with_instances")  # Create a new blank Cell
+poly_ref = c.create_inst(p)  # instance the Cell "p" that has the polygon in it
 c
 
 # %% [markdown]
 # you just made a copy of your polygon -- but remember, you didn't actually
-# make a second polygon, you just made a reference (aka pointer) to the original
-# polygon.  Let's add two more references to `c`:
+# make a second polygon, you just made a instance (aka pointer) to the original
+# polygon.  Let's add two more instances to `c`:
 
 # %%
-poly_ref2 = c.create_inst(p)  # Reference the Cell "p" that has the polygon in it
-poly_ref3 = c.create_inst(p)  # Reference the Cell "p" that has the polygon in it
+poly_ref2 = c.create_inst(p)  # instance the Cell "p" that has the polygon in it
+poly_ref3 = c.create_inst(p)  # instance the Cell "p" that has the polygon in it
 c
 
 # %% [markdown]
 # Now you have 3x polygons all on top of each other.  Again, this would appear
-# useless, except that you can manipulate each reference independently. Notice that
+# useless, except that you can manipulate each instance independently. Notice that
 # when you called `c.add_ref(p)` above, we saved the result to a new variable each
 # time (`poly_ref`, `poly_ref2`, and `poly_ref3`)?  You can use those variables to
-# reposition the references.
+# reposition the instances.
 
 # %%
 poly_ref2.transform(
     kf.kdb.DCplxTrans(1, 15, False, 0, 0)
-)  # Rotate the 2nd reference we made 15 degrees
+)  # Rotate the 2nd instance we made 15 degrees
 poly_ref3.transform(
     kf.kdb.DCplxTrans(1, 30, False, 0, 0)
-)  # Rotate the 3rd reference we made 30 degrees
+)  # Rotate the 3rd instance we made 30 degrees
 c
 
 # %% [markdown]
@@ -112,7 +112,7 @@ p
 
 # %% [markdown]
 # That looks good.  Now let's find out what happened to `c` that contains the
-# three references.  Keep in mind that you have not modified `c` or executed any
+# three instances.  Keep in mind that you have not modified `c` or executed any
 # functions/operations on `c` -- all you have done is modify `p`.
 
 # %%
@@ -120,19 +120,19 @@ c
 
 # %% [markdown]
 #  **When you modify the original geometry, all of the
-# references automatically reflect the modifications.**  This is very powerful,
+# instances automatically reflect the modifications.**  This is very powerful,
 # because you can use this to make very complicated designs from relatively simple
 # elements in a computation- and memory-efficient way.
 #
-# Let's try making references a level deeper by referencing `c`.  Note here we use
-# the `<<` operator to add the references -- this is just shorthand, and is
+# Let's try making instances a level deeper by referencing `c`.  Note here we use
+# the `<<` operator to add the instances -- this is just shorthand, and is
 # exactly equivalent to using `add_ref()`
 
 # %%
 c2 = kf.KCell(name="array_sample")  # Create a new blank Cell
-d_ref1 = c2.create_inst(c)  # Reference the Cell "c" that 3 references in it
-d_ref2 = c2 << c  # Use the "<<" operator to create a 2nd reference to c
-d_ref3 = c2 << c  # Use the "<<" operator to create a 3rd reference to c
+d_ref1 = c2.create_inst(c)  # instance the Cell "c" that 3 instances in it
+d_ref2 = c2 << c  # Use the "<<" operator to create a 2nd instance to c
+d_ref3 = c2 << c  # Use the "<<" operator to create a 3rd instance to c
 
 d_ref1.transform(kf.kdb.DTrans(20.0, 0.0))
 d_ref2.transform(kf.kdb.DTrans(40.0, 0.0))
@@ -142,10 +142,10 @@ c2
 # %% [markdown]
 # As you've seen you have two ways to add an instance to our cell:
 #
-# 1. create the reference and add it to the cell
+# 1. create the instance and add it to the cell
 
 # %%
-c = kf.KCell(name="reference_sample")
+c = kf.KCell(name="instance_sample")
 w = kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 wr = kf.kdb.CellInstArray(w._kdb_cell, kf.kdb.Trans.R0)
 c.insert(wr)
@@ -155,15 +155,15 @@ c
 # 2. or do it in a single line
 
 # %%
-c = kf.KCell(name="reference_sample_shorter_syntax")
+c = kf.KCell(name="instance_sample_shorter_syntax")
 wr = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 c
 
 # %% [markdown]
-# in both cases you can move the reference `wr` after created
+# in both cases you can move the instance `wr` after created
 
 # %%
-c = kf.KCell(name="two_references")
+c = kf.KCell(name="two_instances")
 wr1 = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 wr2 = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 wr2.transform(kf.kdb.DTrans(0.0, 10.0))
@@ -186,7 +186,7 @@ c.ports
 c
 
 # %% [markdown]
-# ## Arrays of references
+# ## Arrays of instances
 #
 # In GDS, there's a type of structure called a "Instance" which takes a cell and repeats it NxM times on a fixed grid spacing. For convenience, `Cell` includes this functionality with the add_array() function.
 # Note that CellArrays are not compatible with ports (since there is no way to access/modify individual elements in a GDS cellarray)
@@ -200,10 +200,10 @@ c
 # %%
 # not converted yet
 
-c3 = kf.KCell("array_of_references")  # Create a new blank Cell
+c3 = kf.KCell("array_of_instances")  # Create a new blank Cell
 aref = c3.create_inst(
     c, na=6, nb=3, a=kf.kdb.Vector(20000, 0), b=kf.kdb.Vector(0, 15000)
-)  # Reference the Cell "c" 3 references in it with a 3 rows, 6 columns array
+)  # instance the Cell "c" 3 instances in it with a 3 rows, 6 columns array
 c3
 
 # %% [markdown]
@@ -222,7 +222,7 @@ c3
 # # gf.cells.array?
 
 # %% [markdown]
-# You can also create an array of references for periodic structures. Lets create a [Distributed Bragg Reflector](https://picwriter.readthedocs.io/en/latest/cells/dbr.html)
+# You can also create an array of instances for periodic structures. Lets create a [Distributed Bragg Reflector](https://picwriter.readthedocs.io/en/latest/cells/dbr.html)
 
 
 # %%
@@ -260,16 +260,16 @@ c3
 # dbr
 
 # %% [markdown]
-# ## connect references
+# ## connect instances
 #
-# We have seen that once you create a reference you can manipulate the reference to move it to a location. Here we are going to connect that reference to a port. Remember that we follow that a certain reference `source` connects to a `destination` port
+# We have seen that once you create a instance you can manipulate the instance to move it to a location. Here we are going to connect that instance to a port. Remember that we follow that a certain instance `source` connects to a `destination` port
 
 # %%
 # bend = gf.cells.bend_circular()
 # bend
 
 # %%
-# c = gf.Cell("sample_reference_connect")
+# c = gf.Cell("sample_instance_connect")
 
 # mmi = c << gf.cells.mmi1x2()
 # b = c << gf.cells.bend_circular()
@@ -281,10 +281,10 @@ c3
 # c
 
 # %% [markdown]
-# You can also access the ports directly from the references
+# You can also access the ports directly from the instances
 
 # %%
-# c = gf.Cell("sample_reference_connect_simpler")
+# c = gf.Cell("sample_instance_connect_simpler")
 
 # mmi = c << gf.cells.mmi1x2()
 # b = c << gf.cells.bend_circular()

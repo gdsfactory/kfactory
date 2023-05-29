@@ -15,24 +15,14 @@
 # ---
 
 # %% [markdown]
-#
-#
-# In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries. The default is 0.001, i.e. 1nm grid size (0.001 microns)
-#
-# Point, Box, Polygon, Edge, Region are in dbu DPoint, DBox, DPolygon, DEdge are in microns
-#
-# Most Shape types are available as microns and dbu parts. They can be converted with <ShapeTypeDBU>.to_dtype(dbu) to microns and with <ShapeTypeMicrons>.to_itype(dbu) where dbu is the the conversion of one database unit to microns
-#
-# Lets add a polygon
 # # KCell
 #
-#
-# A `Cell` is like an empty canvas, where you can add polygons, references to other Cells and ports (to connect to other cells)
+# A `KCell` is like an empty canvas, where you can add polygons, instances to other Cells and ports (to connect to other cells)
 #
 # In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries. The default is `0.001`, i.e. 1nm grid size (0.001 microns)
 #
-# `Point`, `Box`, `Polygon`, `Edge`, `Region` are in dbu
-# `DPoint`, `DBox`, `DPolygon`, `DEdge` are in microns
+# - `Point`, `Box`, `Polygon`, `Edge`, `Region` are in dbu
+# - `DPoint`, `DBox`, `DPolygon`, `DEdge` are in microns
 #
 # Most Shape types are available as microns and dbu parts. They can be converted with `<ShapeTypeDBU>.to_dtype(dbu)` to microns and with `<ShapeTypeMicrons>.to_itype(dbu)` where `dbu` is the the conversion of one database unit to microns
 
@@ -62,7 +52,8 @@ c.shapes(c.kcl.layer(1, 0)).insert(poly1)
 # show it in matplotlib and KLayout (you need to have KLayout open and install gdsfactory from the git repo with make install)
 
 # %%
-c
+c.show()  # show in klayout
+c.plot()
 
 # %% [markdown]
 # **Exercise** :
@@ -85,11 +76,12 @@ r = kf.kdb.DBox(-2.5, -5, 2.5, 5)
 r
 
 # %% [markdown]
-# Add references to the new geometry to c, our blank cell
+# Add instances to the new geometry to c, our blank cell
 
 # %%
 c.shapes(kf.kcl.layer(1, 0)).insert(t)
-c
+c.show()  # show in klayout
+c.plot()
 
 # %% [markdown]
 # Using the << operator (identical to add_ref()), add the same geometry a second time
@@ -100,7 +92,7 @@ text1 = t.transformed(
     kf.kdb.DTrans(0.0, 10.0).to_itype(c.kcl.dbu)
 )  # DTrans is a transformation in microns with arguments (<rotation in 90° increments>, <mirror boolean>, <x in microns>, <y in microns>)
 ### complex transformation example:ce
-#     magnification(float): magnification, DO NOT USE on cells or references, only shapes, most foundries will not allow magnifications on actual cell references or cells
+#     magnification(float): magnification, DO NOT USE on cells or instances, only shapes, most foundries will not allow magnifications on actual cell instances or cells
 #     rotation(float): rotation in degrees
 #     mirror(bool): boolean to mirror at x axis and then rotate if true
 #     x(float): x coordinate
@@ -124,7 +116,8 @@ c.shapes(c.kcl.layer(2, 0)).insert(text2)
 c.shapes(c.kcl.layer(2, 0)).insert(r)
 
 # %%
-c
+c.show()  # show in klayout
+c.plot()
 
 # %% [markdown]
 # ## connect **ports**
@@ -156,7 +149,6 @@ def straight(length=10, width=1, layer=(1, 0)):
         layer=_layer,
         width=int_box.height(),
     )
-    # wg.draw_ports()
     return wg
 
 
@@ -174,7 +166,8 @@ wg3 = c << straight(length=15, width=2.5, layer=(1, 0))
 # wg2.movey(10).rotate(10)
 # wg3.movey(20).rotate(15)
 print(c.name)
-c
+c.show()  # show in klayout
+c.plot()
 
 # %% [markdown]
 # Now we can align everything together using the ports:
@@ -191,22 +184,24 @@ wg2.connect("o1", wg1.ports["o2"])
 wg3.connect("o1", wg2.ports["o2"])
 
 # %%
-c
+c.show()  # show in klayout
+c.plot()
 
 
 # %%
 c.add_port(name="o1", port=wg1.ports["o1"])
 c.add_port(name="o2", port=wg3.ports["o2"])
-c
+c.show()  # show in klayout
+c.plot()
 
 # %% [markdown]
 # As you can see the `red` labels are for the cell ports while
 # `blue` labels are for the sub-ports (children ports)
 
 # %% [markdown]
-# ## Move and rotate references
+# ## Move and rotate instances
 #
-# You can move, rotate, and reflect references to Cells.
+# You can move, rotate, and reflect instances to Cells.
 
 
 # %%
@@ -231,14 +226,15 @@ c.shapes(c.kcl.layer(4, 0)).insert(
 
 
 # %%
-c
+c.show()  # show in klayout
+c.plot()
 
 # %% [markdown]
 # ## Ports
 #
-# Your straights wg1/wg2/wg3 are references to other waveguide cells.
+# Your straights wg1/wg2/wg3 are instances to other waveguide cells.
 #
-# If you want to add ports to the new Cell `c` you can use `add_port`, where you can create a new port or use an reference an existing port from the underlying reference.
+# If you want to add ports to the new Cell `c` you can use `add_port`, where you can create a new port or use an instance an existing port from the underlying instance.
 
 # %% [markdown]
 # You can access the ports of a Cell or Instance
@@ -248,9 +244,9 @@ c
 wg2.ports
 
 # %% [markdown]
-# ## References
+# ## Instances
 #
-# Now that we have your cell `c` is a multi-straight cell, you can add references to that cell in a new blank Cell `c2`, then add two references and shift one to see the movement.
+# Now that we have your cell `c` is a multi-straight cell, you can add instances to that cell in a new blank Cell `c2`, then add two instances and shift one to see the movement.
 
 
 # %%
@@ -360,7 +356,7 @@ c.shapes(c.kcl.layer(1, 0)).insert(e3)
 c
 
 # %% [markdown]
-# ## Move Reference by port
+# ## Move instance by port
 
 
 # %%
@@ -372,7 +368,7 @@ bend.connect("o1", wg.ports["o2"])  # connects follow Source, destination syntax
 c
 
 # %% [markdown]
-# ## Rotate reference
+# ## Rotate instance
 #
 # You can rotate in degrees using `Instance.d.rotate` or in multiples of 90 deg.
 
