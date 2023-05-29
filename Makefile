@@ -1,9 +1,13 @@
+
+
 help:
-	@echo 'make install:          Install package, hook, notebooks and gdslib'
-	@echo 'make test:             Run tests with pytest'
-	@echo 'make test-force:       Rebuilds regression test'
-	@echo 'make docs:       	  Build the docs and place them in ./site'
-	@echo 'make docs-serve:       mkdocs serve the docs'
+	@echo 'make install:                                Install package, hook, notebooks and gdslib'
+	@echo 'make test:                                   Run tests with pytest'
+	@echo 'make test-force:                             Rebuilds regression test'
+	@echo 'make docs:                                   Build the docs and place them in ./site'
+	@echo 'make docs-serve:                             mkdocs serve the docs'
+	@echo 'make release-dr VERSION=MAJOR.MINOR.PATCH:   Dry run for new release with version number v${MAJOR}.${MINOR}.${PATCH}'
+	@echo 'make release VERSION=MAJOR.MINOR.PATCH:      Dry run for new release with version number v${MAJOR}.${MINOR}.${PATCH}'
 
 install:
 	pip install -e .[docs,dev]
@@ -52,8 +56,9 @@ update-pre:
 	pre-commit autoupdate --bleeding-edge
 
 release:
-	git push
-	git push origin --tags
+	tbump ${VERSION}
+release-dr:
+	tbump --dry-run ${VERSION}
 
 gds-upload:
 	gh release upload v0.6.0 gds/gds_ref/*.gds --clobber
