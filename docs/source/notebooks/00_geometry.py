@@ -2,45 +2,39 @@
 # jupyter:
 #   jupytext:
 #     custom_cell_magics: kql
-#     formats: ipynb,py:light
+#     formats: ipynb,py:percent
 #     text_representation:
 #       extension: .py
-#       format_name: light
-#       format_version: '1.5'
-#       jupytext_version: 1.14.5
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.11.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
 #     name: python3
 # ---
 
-#
-#
-# In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries. The default is 0.001, i.e. 1nm grid size (0.001 microns)
-#
-# Point, Box, Polygon, Edge, Region are in dbu DPoint, DBox, DPolygon, DEdge are in microns
-#
-# Most Shape types are available as microns and dbu parts. They can be converted with <ShapeTypeDBU>.to_dtype(dbu) to microns and with <ShapeTypeMicrons>.to_itype(dbu) where dbu is the the conversion of one database unit to microns
-#
-# Lets add a polygon
+# %% [markdown]
 # # KCell
 #
-#
-# A `Cell` is like an empty canvas, where you can add polygons, references to other Cells and ports (to connect to other cells)
+# A `KCell` is like an empty canvas, where you can add polygons, instances to other Cells and ports (to connect to other cells)
 #
 # In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries. The default is `0.001`, i.e. 1nm grid size (0.001 microns)
 #
-# `Point`, `Box`, `Polygon`, `Edge`, `Region` are in dbu
-# `DPoint`, `DBox`, `DPolygon`, `DEdge` are in microns
+# - `Point`, `Box`, `Polygon`, `Edge`, `Region` are in dbu
+# - `DPoint`, `DBox`, `DPolygon`, `DEdge` are in microns
 #
 # Most Shape types are available as microns and dbu parts. They can be converted with `<ShapeTypeDBU>.to_dtype(dbu)` to microns and with `<ShapeTypeMicrons>.to_itype(dbu)` where `dbu` is the the conversion of one database unit to microns
 
 
+# %%
 import kfactory as kf
 
+# %%
 # Create a blank cell (essentially an empty GDS cell with some special features)
 c = kf.KCell()
 
+# %%
 # Create and add a polygon from separate lists of x points and y points
 # (Can also be added like [(x1,y1), (x2,y2), (x3,y3), ... ]
 poly1 = kf.kdb.DPolygon(
@@ -53,44 +47,52 @@ poly1 = kf.kdb.DPolygon(
 )
 
 
+# %%
 c.shapes(c.kcl.layer(1, 0)).insert(poly1)
 # show it in matplotlib and KLayout (you need to have KLayout open and install gdsfactory from the git repo with make install)
 
-c
+# %%
+c.show()  # show in klayout
+c.plot()
 
-# -
-
-
+# %% [markdown]
 # **Exercise** :
 #
 # Make a cell similar to the one above that has a second polygon in layer (1, 1)
 
+# %%
 import kfactory as kf
 
+# %%
 c = kf.KCell()
 
+# %%
 # Create some new geometry from the functions available in the geometry library
 textgenerator = kf.kdb.TextGenerator.default_generator()
 t = textgenerator.text("Hello!", c.kcl.dbu)
-# t = gf.cells.text("Hello!")
 
+# %%
 r = kf.kdb.DBox(-2.5, -5, 2.5, 5)
-# r = gf.cells.rectangle(size=[5, 10], layer=(2, 0))
+r
 
-# Add references to the new geometry to c, our blank cell
+# %% [markdown]
+# Add instances to the new geometry to c, our blank cell
 
-# c.shapes(layer(1,0)).insert(t)
-# text1 = c.add_ref(t)  # Add the text we created as a reference
+# %%
+c.shapes(kf.kcl.layer(1, 0)).insert(t)
+c.show()  # show in klayout
+c.plot()
+
+# %% [markdown]
 # Using the << operator (identical to add_ref()), add the same geometry a second time
-# text2 = c << t
-# r = c << r  # Add the rectangle we created
 
+# %%
 # Now that the geometry has been added to "c", we can move everything around:
 text1 = t.transformed(
     kf.kdb.DTrans(0.0, 10.0).to_itype(c.kcl.dbu)
 )  # DTrans is a transformation in microns with arguments (<rotation in 90° increments>, <mirror boolean>, <x in microns>, <y in microns>)
 ### complex transformation example:ce
-#     magnification(float): magnification, DO NOT USE on cells or references, only shapes, most foundries will not allow magnifications on actual cell references or cells
+#     magnification(float): magnification, DO NOT USE on cells or instances, only shapes, most foundries will not allow magnifications on actual cell instances or cells
 #     rotation(float): rotation in degrees
 #     mirror(bool): boolean to mirror at x axis and then rotate if true
 #     x(float): x coordinate
@@ -108,13 +110,16 @@ r.move(
 r.move(-5, 0)
 
 
+# %%
 c.shapes(c.kcl.layer(1, 0)).insert(text1)
 c.shapes(c.kcl.layer(2, 0)).insert(text2)
 c.shapes(c.kcl.layer(2, 0)).insert(r)
 
-c
-# -
+# %%
+c.show()  # show in klayout
+c.plot()
 
+# %% [markdown]
 # ## connect **ports**
 #
 # Cells can have a "Port" that allows you to connect Instances together like legos.
@@ -122,6 +127,7 @@ c
 # You can write a simple function to make a rectangular straight, assign ports to the ends, and then connect those rectangles together.
 
 
+# %%
 @kf.cell
 def straight(length=10, width=1, layer=(1, 0)):
     wg = kf.KCell()
@@ -143,59 +149,73 @@ def straight(length=10, width=1, layer=(1, 0)):
         layer=_layer,
         width=int_box.height(),
     )
-    # wg.draw_ports()
     return wg
 
 
+# %%
 c = kf.KCell()
 
+# %%
 wg1 = c << straight(length=6, width=2.5, layer=(1, 0))
 wg2 = c << straight(length=11, width=2.5, layer=(1, 0))
 wg3 = c << straight(length=15, width=2.5, layer=(1, 0))
 
+# %%
 # wg2.transform(kf.kdb.DCplxTrans(1, 10, False, 10, 0))
 # wg3.transform(kf.kdb.DCplxTrans(1, 15, False, 20, 0))
 # wg2.movey(10).rotate(10)
 # wg3.movey(20).rotate(15)
 print(c.name)
-c
+c.show()  # show in klayout
+c.plot()
 
+# %% [markdown]
 # Now we can align everything together using the ports:
 
+# %% [markdown]
 # Each straight has two ports: 'W0' and 'E0'.  These are arbitrary
 # names defined in our straight() function above
 
+# %%
 # Let's keep wg1 in place on the bottom, and connect the other straights to it.
 # To do that, on wg2 we'll grab the "W0" port and connect it to the "E0" on wg1:
 wg2.connect("o1", wg1.ports["o2"])
 # Next, on wg3 let's grab the "W0" port and connect it to the "E0" on wg2:
 wg3.connect("o1", wg2.ports["o2"])
 
-c
+# %%
+c.show()  # show in klayout
+c.plot()
 
 
+# %%
 c.add_port(name="o1", port=wg1.ports["o1"])
 c.add_port(name="o2", port=wg3.ports["o2"])
-c
-# -
+c.show()  # show in klayout
+c.plot()
 
+# %% [markdown]
 # As you can see the `red` labels are for the cell ports while
 # `blue` labels are for the sub-ports (children ports)
 
-# ## Move and rotate references
+# %% [markdown]
+# ## Move and rotate instances
 #
-# You can move, rotate, and reflect references to Cells.
+# You can move, rotate, and reflect instances to Cells.
 
 
+# %%
 c = kf.KCell()
 
 
+# %%
 # Create and add a polygon from separate lists of x points and y points
 # e.g. [(x1, x2, x3, ...), (y1, y2, y3, ...)]
 c.shapes(c.kcl.layer(4, 0)).insert(
     kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip((8, 6, 7, 9), (6, 8, 9, 5))])
 )
 
+# %%
 # Alternatively, create and add a polygon from a list of points
 # e.g. [(x1,y1), (x2,y2), (x3,y3), ...] using the same function
 c.shapes(c.kcl.layer(4, 0)).insert(
@@ -205,26 +225,31 @@ c.shapes(c.kcl.layer(4, 0)).insert(
 )
 
 
-c
-# -
+# %%
+c.show()  # show in klayout
+c.plot()
 
+# %% [markdown]
 # ## Ports
 #
-# Your straights wg1/wg2/wg3 are references to other waveguide cells.
+# Your straights wg1/wg2/wg3 are instances to other waveguide cells.
 #
-# If you want to add ports to the new Cell `c` you can use `add_port`, where you can create a new port or use an reference an existing port from the underlying reference.
+# If you want to add ports to the new Cell `c` you can use `add_port`, where you can create a new port or use an instance an existing port from the underlying instance.
 
+# %% [markdown]
 # You can access the ports of a Cell or Instance
 
 
+# %%
 wg2.ports
-# -
 
-# ## References
+# %% [markdown]
+# ## Instances
 #
-# Now that we have your cell `c` is a multi-straight cell, you can add references to that cell in a new blank Cell `c2`, then add two references and shift one to see the movement.
+# Now that we have your cell `c` is a multi-straight cell, you can add instances to that cell in a new blank Cell `c2`, then add two instances and shift one to see the movement.
 
 
+# %%
 c2 = kf.KCell(name="MultiMultiWaveguide")
 wg1 = straight(layer=(2, 0))
 wg2 = straight(layer=(2, 0))
@@ -233,12 +258,14 @@ mwg2_ref = c2.create_inst(wg2)
 mwg2_ref.transform(kf.kdb.DTrans(10, 10))
 c2
 
+# %%
 # Like before, let's connect mwg1 and mwg2 together
 mwg1_ref.connect("o2", mwg2_ref.ports["o1"])
 
+# %%
 c2
-# -
 
+# %% [markdown]
 #
 #             self.layout_view.active_cellview().layout().cell(event["owner"].name)
 # ## Labels
@@ -249,11 +276,13 @@ c2
 # like the polygons created by gf.cells.text().
 
 
+# %%
 c2.shapes(c2.kcl.layer(1, 0)).insert(kf.kdb.Text("First label", mwg1_ref.trans))
 # c2.shapes(c2.kcl.layer(1,0).insert(kf.kdb.Text("First label", position=mwg1_ref.center)
 c2.shapes(c2.kcl.layer(1, 0)).insert(kf.kdb.Text("Second label", mwg2_ref.trans))
 # c2.add_label(text="Second label", position=mwg2_ref.center)
 
+# %%
 # It's very useful for recording information about the devices or layout
 c2.shapes(c2.kcl.layer(10, 0)).insert(
     kf.kdb.Text(
@@ -262,9 +291,10 @@ c2.shapes(c2.kcl.layer(10, 0)).insert(
     )
 )
 
+# %%
 c2
-# -
 
+# %% [markdown]
 # ## Boolean shapes
 #
 # If you want to subtract one shape from another, merge two shapes, or
@@ -276,35 +306,40 @@ c2
 # 'B-A' is equivalent to 'not' with the operands switched
 
 
+# %%
 e1 = kf.kdb.DPolygon.ellipse(kf.kdb.DBox(10, 8), 64)
 e2 = kf.kdb.DPolygon.ellipse(kf.kdb.DBox(10, 6), 64).transformed(
     kf.kdb.DTrans(2.0, 0.0)
 )
-# -
 
+# %%
 c = kf.KCell()
 c.shapes(c.kcl.layer(2, 0)).insert(e1)
 c.shapes(c.kcl.layer(3, 0)).insert(e2)
 c
 
+# %%
 # e1 NOT e2
 c = kf.KCell()
 e3 = kf.kdb.Region(e1.to_itype(c.kcl.dbu)) - kf.kdb.Region(e2.to_itype(c.kcl.dbu))
 c.shapes(c.kcl.layer(1, 0)).insert(e3)
 c
 
+# %%
 # e1 AND e2
 c = kf.KCell()
 e3 = kf.kdb.Region(e1.to_itype(c.kcl.dbu)) & kf.kdb.Region(e2.to_itype(c.kcl.dbu))
 c.shapes(c.kcl.layer(1, 0)).insert(e3)
 c
 
+# %%
 # e1 OR e2
 c = kf.KCell()
 e3 = kf.kdb.Region(e1.to_itype(c.kcl.dbu)) + kf.kdb.Region(e2.to_itype(c.kcl.dbu))
 c.shapes(c.kcl.layer(1, 0)).insert(e3)
 c
 
+# %%
 # e1 OR e2 (merged)
 c = kf.KCell()
 e3 = (
@@ -313,42 +348,51 @@ e3 = (
 c.shapes(c.kcl.layer(1, 0)).insert(e3)
 c
 
+# %%
 # e1 XOR e2
 c = kf.KCell()
 e3 = kf.kdb.Region(e1.to_itype(c.kcl.dbu)) ^ kf.kdb.Region(e2.to_itype(c.kcl.dbu))
 c.shapes(c.kcl.layer(1, 0)).insert(e3)
 c
 
-# ## Move Reference by port
+# %% [markdown]
+# ## Move instance by port
 
 
-# MMI not implemented yet
+# %%
+c = kf.KCell()
+wg = c << kf.cells.waveguide.waveguide(width=0.5, length=1, layer=0)
+bend = c << kf.cells.euler.bend_euler(width=0.5, radius=1, layer=0)
 
-# c = kf.KCell()
-# mmi = c.add_ref(gf.cells.mmi1x2())
-# bend = c.add_ref(gf.cells.bend_circular(layer=(2, 0)))
-# c
+bend.connect("o1", wg.ports["o2"])  # connects follow Source, destination syntax
+c
 
-# bend.connect("o1", mmi.ports["o2"])  # connects follow Source, destination syntax
-
-# c
-# -
-
-# ## Mirror reference
+# %% [markdown]
+# ## Rotate instance
 #
+# You can rotate in degrees using `Instance.d.rotate` or in multiples of 90 deg.
+
+
+# %%
+c = kf.KCell("mirror_example3")
+bend = kf.cells.euler.bend_euler(width=0.5, radius=1, layer=0)
+b1 = c << bend
+b2 = c << bend
+b2.d.rotate(90)
+c
+
+# %%
+c = kf.KCell("mirror_example4")
+bend = kf.cells.euler.bend_euler(width=0.5, radius=1, layer=0)
+b1 = c << bend
+b2 = c << bend
+b2.rotate(1)
+c
+
+# %% [markdown]
 # By default the mirror works along the x=0 axis.
 
-
-# c = gf.Cell("ref_mirror")
-# mmi = c.add_ref(gf.cells.mmi1x2())
-# bend = c.add_ref(gf.cells.bend_circular(layer=(2, 0)))
-# c
-
-
-# mmi.mirror()
-# c
-# -
-
+# %% [markdown]
 # ## Write GDS
 #
 # [GDSII](https://en.wikipedia.org/wiki/GDSII) is the Standard format for exchanging CMOS and Photonic circuits.
@@ -356,12 +400,10 @@ c
 # You can write your Cell to GDS file.
 
 
+# %%
 c.write("demo.gds")
-# -
 
+# %% [markdown]
 # You can see the GDS file in Klayout viewer.
 #
 # Sometimes you also want to save the GDS together with metadata (settings, port names, widths, locations ...) in YAML
-
-
-# c.write_gds_with_metadata("demo.gds") # not implemented, normal write writes metadata already

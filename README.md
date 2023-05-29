@@ -27,6 +27,7 @@ Notable missing Features:
 
 
 New/Improved Features:
+
 - Fully hierarchical bi-directional conversion to YAML
 - Automatic snapping to grid thanks to KLayout
 - More features for vector geometries due to concept of Point/Edge/Vector/Polygon from Klayout
@@ -44,7 +45,7 @@ kfactory is available on [pypi](https://pypi.org/project/kfactory/)
 pip install kfactory
 ```
 
-At the moment kfactory works only on python 3.10
+At the moment kfactory works only on python 3.10 and above
 
 ### Development Installation
 
