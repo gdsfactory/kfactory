@@ -18,8 +18,6 @@
 # # Instances and ports
 #
 # GDS allows your the cell once in memory and instance or Instance the cell multiple times.
-#
-# `gdstk` and `gdspy` calls it `instance` and `klayout` calls it `Instance`
 
 # %% [markdown]
 # As you build cells you can instantiate other cells. Adding an instance is like having a pointer to a cell.
@@ -265,99 +263,39 @@ c3
 # We have seen that once you create a instance you can manipulate the instance to move it to a location. Here we are going to connect that instance to a port. Remember that we follow that a certain instance `source` connects to a `destination` port
 
 # %%
-# bend = gf.cells.bend_circular()
-# bend
+c = kf.KCell()
+bend = kf.cells.euler.bend_euler(radius=5, width=1, layer=0)
+b1 = c << bend
+b2 = c << bend
+b2.connect("o1", b1.ports["o2"])
+c
 
 # %%
-# c = gf.Cell("sample_instance_connect")
+c = kf.KCell()
+b1 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, theta=30)
+b2 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, theta=30)
+# b2.connect('o1', b1.ports['o2'])
+c.show()
+c
 
-# mmi = c << gf.cells.mmi1x2()
-# b = c << gf.cells.bend_circular()
-# b.connect("o1", destination=mmi.ports["o2"])
-
-# c.add_port("o1", port=mmi.ports["o1"])
-# c.add_port("o2", port=b.ports["o2"])
-# c.add_port("o3", port=mmi.ports["o3"])
-# c
+# %%
+b2.ports
 
 # %% [markdown]
 # You can also access the ports directly from the instances
 
-# %%
-# c = gf.Cell("sample_instance_connect_simpler")
-
-# mmi = c << gf.cells.mmi1x2()
-# b = c << gf.cells.bend_circular()
-# b.connect("o1", destination=mmi["o2"])
-
-# c.add_port("o1", port=mmi["o1"])
-# c.add_port("o2", port=b["o2"])
-# c.add_port("o3", port=mmi["o3"])
-# c
-
 # %% [markdown]
 # ## Port naming
 #
-# You have the freedom to name the ports as you want, and you can use `gf.port.auto_rename_ports(prefix='o')` to rename them later on.
+# You have the freedom to name the ports as you want, and you can use `c.auto_rename_ports` to rename them later on.
 #
 # Here is the default naming convention.
 #
 # Ports are numbered clock-wise starting from the bottom left corner
 #
 # Optical ports have `o` prefix and Electrical ports `e` prefix
-#
-# The port naming comes in most cases from the `gdsfactory.cross_section`. For example
-#
-# - `gdsfactory.cross_section.strip`  has ports `o1` for input and `o2` for output
-# - `gdsfactory.cross_section.metal1` has ports `e1` for input and `e2` for output
-
-# %%
-# size = 4
-# c = gf.cells.nxn(west=2, south=2, north=2, east=2, xsize=size, ysize=size)
-# c
-
-# %%
-# c = gf.cells.straight_heater_metal(length=30)
-# c
-
-# %%
-# c.ports
 
 # %% [markdown]
-# You can get the optical ports by `layer`
-
-# %%
-# c.get_ports_dict(layer=(1, 0))
-
-# %% [markdown]
-# or by `width`
-
-# %%
-# c.get_ports_dict(width=0.5)
-
-# %%
-# c0 = gf.cells.straight_heater_metal()
-# c0.ports
-
-# %%
-# c1 = c0.copy()
-# c1.auto_rename_ports_layer_orientation()
-# c1.ports
-
-# %%
-# c2 = c0.copy()
-# c2.auto_rename_ports()
-# c2.ports
-
-# %% [markdown]
-# You can also rename them with a different port naming convention
-#
-# - prefix: add `e` for electrical `o` for optical
-# - clockwise
-# - counter-clockwise
-# - orientation `E` East, `W` West, `N` North, `S` South
-#
-#
 # Here is the default one we use (clockwise starting from bottom left west facing port)
 #
 # ```
@@ -371,72 +309,6 @@ c3
 #
 # ```
 
-# %%
-# c = gf.Cell("demo_ports")
-# nxn = gf.cells.nxn(west=2, north=2, east=2, south=2, xsize=4, ysize=4)
-# ref = c.add_ref(nxn)
-# c.add_ports(ref.ports)
-# c
-
-# %%
-# ref.get_ports_list()  # by default returns ports clockwise starting from bottom left west facing port
-
-# %%
-# c.auto_rename_ports()
-# c
-
-# %% [markdown]
-# You can also get the ports counter-clockwise
-#
-# ```
-#              4   3
-#              |___|_
-#          5 -|      |- 2
-#             |      |
-#          6 -|______|- 1
-#              |   |
-#              7   8
-#
-# ```
-
-# %%
-# c.auto_rename_ports_counter_clockwise()
-# c
-
-# %%
-# c.get_ports_list(clockwise=False)
-
-# %%
-# c.ports_layer
-
-# %%
-# c.port_by_orientation_cw("W0")
-
-# %%
-# c.port_by_orientation_ccw("W1")
-
-# %% [markdown]
-# Lets extend the East facing ports (orientation = 0 deg)
-
-# %%
-# cross_section = gf.cross_section.strip()
-
-# nxn = gf.cells.nxn(
-#     west=2, north=2, east=2, south=2, xsize=4, ysize=4, cross_section=cross_section
-# )
-# c = gf.cells.extension.extend_ports(cell=nxn, orientation=0)
-# c
-
-# %%
-# c.ports
-
-# %%
-# df = c.get_ports_pandas()
-# df
-
-# %%
-# df[df.port_type == "optical"]
-
 # %% [markdown]
 # ## pins
 #
@@ -448,42 +320,9 @@ c3
 # - path (SiEPIC)
 #
 #
-# by default Cell.show() will add triangular pins, so you can see the direction of the port in Klayout.
+# by default `KCell.show()` will add triangular pins, so you can see the direction of the port in Klayout.
 
 # %%
-# gf.cells.mmi1x2(decorator=gf.add_pins.add_pins)
-
-# %%
-# gf.cells.mmi1x2(decorator=gf.add_pins.add_pins_triangle)
-
-# %% [markdown]
-# ## cell_sequence
-#
-# When you have repetitive connections you can describe the connectivity as an ASCII map
-
-# %%
-# bend180 = gf.cells.bend_circular180()
-# wg_pin = gf.cells.straight_pin(length=40)
-# wg = gf.cells.straight()
-
-# # Define a map between symbols and (cell, input port, output port)
-# symbol_to_cell = {
-#     "D": (bend180, "o1", "o2"),
-#     "C": (bend180, "o2", "o1"),
-#     "P": (wg_pin, "o1", "o2"),
-#     "-": (wg, "o1", "o2"),
-# }
-
-# # Generate a sequence
-# # This is simply a connect of characters. Each of them represents a cell
-# # with a given input and and a given output
-
-# sequence = "DC-P-P-P-P-CD"
-# cell = gf.cells.cell_sequence(
-#     sequence=sequence, symbol_to_cell=symbol_to_cell
-# )
-# cell.name = "cell_sequence"
-# cell
-
-# %% [markdown]
-# As the sequence is defined as a string you can use the string operations to easily build complex sequences
+c = kf.cells.euler.bend_euler(radius=5, width=1, layer=0, theta=90)
+c.draw_ports()
+c
