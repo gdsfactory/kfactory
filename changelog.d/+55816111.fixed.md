@@ -1,0 +1,1 @@
+Fixed changelog and changelog.d links

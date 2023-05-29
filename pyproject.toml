@@ -198,8 +198,8 @@ filename = "CHANGELOG.md"
 start_string = "<!-- towncrier release notes start -->\n"
 underlines = ["", "", ""]
 template = "changelog.d/changelog_template.jinja"
-title_format = "## [{version}](https://github.com/gdsfactory/klive/tree/{version}) - {project_date}"
-issue_format = "[#{issue}](https://github.com/gdsfactory/klive/issues/{issue})"
+title_format = "## [{version}](https://github.com/gdsfactory/kfactory/tree/{version}) - {project_date}"
+issue_format = "[#{issue}](https://github.com/gdsfactory/kfactory/issues/{issue})"
 
 [[tool.towncrier.type]]
 directory = "security"
