@@ -58,21 +58,10 @@ def bend_circular(
         width=int(width / c.kcl.dbu),
         layer=layer,
     )
-
-    match theta:
-        case 90:
-            c.create_port(
-                trans=kdb.DTrans(1, False, radius, radius).to_itype(c.kcl.dbu),
-                width=int(width / c.kcl.dbu),
-                layer=layer,
-            )
-        case 180:
-            c.create_port(
-                trans=kdb.DTrans(0, False, 0, 2 * radius).to_itype(c.kcl.dbu),
-                width=int(width / c.kcl.dbu),
-                layer=layer,
-            )
-
+    c.create_port(
+        dcplx_trans=kdb.DCplxTrans(1, theta, False, backbone[-1].to_v()),
+        dwidth=width,
+        layer=layer,
+    )
     c.autorename_ports()
-
     return c
