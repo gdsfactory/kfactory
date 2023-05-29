@@ -1,3 +1,5 @@
+
+
 help:
 	@echo 'make install:          Install package, hook, notebooks and gdslib'
 	@echo 'make test:             Run tests with pytest'
@@ -52,8 +54,7 @@ update-pre:
 	pre-commit autoupdate --bleeding-edge
 
 release:
-	git push
-	git push origin --tags
+	tbump --dry-run ${VERSION}
 
 gds-upload:
 	gh release upload v0.6.0 gds/gds_ref/*.gds --clobber
