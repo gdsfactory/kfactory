@@ -10,6 +10,7 @@ repos:
         args: []
       - id: debug-statements
       - id: end-of-file-fixer
+        exclude: "changelog.d/.*"
       - id: mixed-line-ending
       - id: name-tests-test
         args: ["--pytest-test-first"]

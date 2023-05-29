@@ -42,6 +42,7 @@ dev = [
 	"types-cachetools",
 	"python-lsp-black",
 	"kfactory[git]",
+	"towncrier",
 ]
 docs = [
 	"kfactory[ipy]",
@@ -267,12 +268,14 @@ src = "src/kfactory/__init__.py"
 # run after the files have been patched
 # and before the git commit is made
 
-[[tbump.before_commit]]
+[[tool.tbump.before_commit]]
 name = "create & check changelog"
-cmd = "towncrier build --yes --version {new_version} && grep -q {new_version} CHANGELOG.md"
+cmd = "towncrier build --yes --version {new_version}"
 
-# Or run some commands after the git tag and the branch
-# have been pushed:
-#  [[after_push]]
-#  name = "publish"
-#  cmd = "./publish.sh"
+[[tool.tbump.before_commit]]
+name = "create & check changelog"
+cmd = "git add CHANGELOG.md"
+
+[[tool.tbump.before_commit]]
+name = "create & check changelog"
+cmd = "grep -q -F {new_version} CHANGELOG.md"
