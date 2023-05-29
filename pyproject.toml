@@ -43,6 +43,7 @@ dev = [
 	"python-lsp-black",
 	"kfactory[git]",
 	"towncrier",
+	"tbump",
 ]
 docs = [
 	"kfactory[ipy]",
