@@ -274,15 +274,28 @@ c
 c = kf.KCell()
 b1 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, theta=30)
 b2 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, theta=30)
-# b2.connect('o1', b1.ports['o2'])
+b2.connect("o1", b1.ports["o2"])
 c.show()
 c
 
+# %% [markdown]
+# ![](https://i.imgur.com/oenlUwg.png)
+#
+# This non-manhattan connect will create less than 1nm gaps that you can fix by flattening the references.
+
 # %%
-b2.ports
+c = kf.KCell()
+b1 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, theta=30)
+b2 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, theta=30)
+b2.connect("o1", b1.ports["o2"])
+b2.flatten()
+c.show()
+c
 
 # %% [markdown]
-# You can also access the ports directly from the instances
+# Which fixes the issue.
+#
+# ![](https://i.imgur.com/t0J31Wg.png)
 
 # %% [markdown]
 # ## Port naming
