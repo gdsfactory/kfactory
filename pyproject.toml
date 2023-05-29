@@ -42,6 +42,8 @@ dev = [
 	"types-cachetools",
 	"python-lsp-black",
 	"kfactory[git]",
+	"towncrier",
+	"tbump",
 ]
 docs = [
 	"kfactory[ipy]",
@@ -189,3 +191,92 @@ select = [
 
 [tool.ruff.pydocstyle]
 convention = "google"
+
+[tool.towncrier]
+directory = "changelog.d"
+filename = "CHANGELOG.md"
+start_string = "<!-- towncrier release notes start -->\n"
+underlines = ["", "", ""]
+template = "changelog.d/changelog_template.jinja"
+title_format = "## [{version}](https://github.com/gdsfactory/klive/tree/{version}) - {project_date}"
+issue_format = "[#{issue}](https://github.com/gdsfactory/klive/issues/{issue})"
+
+[[tool.towncrier.type]]
+directory = "security"
+name = "Security"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "removed"
+name = "Removed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "deprecated"
+name = "Deprecated"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "added"
+name = "Added"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "changed"
+name = "Changed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "fixed"
+name = "Fixed"
+showcontent = true
+
+
+[tool.tbump]
+# Uncomment this if your project is hosted on GitHub:
+# github_url = "https://github.com/<user or organization>/<project>/"
+
+[tool.tbump.version]
+current = "0.7.2"
+
+# Example of a semver regexp.
+# Make sure this matches current_version before
+# using tbump
+regex = '''
+  (?P<major>\d+)
+  \.
+  (?P<minor>\d+)
+  \.
+  (?P<patch>\d+)
+  '''
+
+[tool.tbump.git]
+message_template = "Bump to {new_version}"
+tag_template = "v{new_version}"
+
+# For each file to patch, add a [[file]] config
+# section containing the path of the file, relative to the
+# tbump.toml location.
+[[tool.tbump.file]]
+src = "README.md"
+
+[[tool.tbump.file]]
+src = "pyproject.toml"
+
+[[tool.tbump.file]]
+src = "src/kfactory/__init__.py"
+# You can specify a list of commands to
+# run after the files have been patched
+# and before the git commit is made
+
+[[tool.tbump.before_commit]]
+name = "create & check changelog"
+cmd = "towncrier build --yes --version {new_version}"
+
+[[tool.tbump.before_commit]]
+name = "create & check changelog"
+cmd = "git add CHANGELOG.md"
+
+[[tool.tbump.before_commit]]
+name = "create & check changelog"
+cmd = "grep -q -F {new_version} CHANGELOG.md"
