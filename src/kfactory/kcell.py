@@ -11,6 +11,7 @@ ports and other inf from instances.
 import functools
 import importlib
 import importlib.util
+import inspect
 import json
 import socket
 from collections.abc import Callable, Hashable, Iterable, Iterator
@@ -18,13 +19,13 @@ from collections.abc import Callable, Hashable, Iterable, Iterator
 # from enum import IntEnum
 from enum import Enum, IntEnum
 from hashlib import sha3_512
-from inspect import Parameter, signature
 from pathlib import Path
 from tempfile import gettempdir
 from typing import (  # ParamSpec, # >= python 3.10
     TYPE_CHECKING,
     Any,
     Literal,
+    TypeAlias,
     TypeVar,
     cast,
     overload,
@@ -36,7 +37,7 @@ import numpy as np
 import ruamel.yaml
 from typing_extensions import ParamSpec
 
-from . import kdb
+from . import kdb, lay
 from .conf import config
 from .port import rename_clockwise
 
@@ -48,9 +49,41 @@ if TYPE_CHECKING:
 
 
 KCellParams = ParamSpec("KCellParams")
-
 AnyTrans = TypeVar(
     "AnyTrans", bound=kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans
+)
+SerializableShape: TypeAlias = (
+    kdb.Box
+    | kdb.DBox
+    | kdb.Edge
+    | kdb.DEdge
+    | kdb.EdgePair
+    | kdb.DEdgePair
+    | kdb.EdgePairs
+    | kdb.Edges
+    | lay.LayerProperties
+    | kdb.Matrix2d
+    | kdb.Matrix3d
+    | kdb.Path
+    | kdb.DPath
+    | kdb.Point
+    | kdb.DPoint
+    | kdb.Polygon
+    | kdb.DPolygon
+    | kdb.SimplePolygon
+    | kdb.DSimplePolygon
+    | kdb.Region
+    | kdb.Text
+    | kdb.DText
+    | kdb.Texts
+    | kdb.Trans
+    | kdb.DTrans
+    | kdb.CplxTrans
+    | kdb.ICplxTrans
+    | kdb.DCplxTrans
+    | kdb.VCplxTrans
+    | kdb.Vector
+    | kdb.DVector
 )
 
 
@@ -194,7 +227,8 @@ class KCLayout(kdb.Layout):
 
     Attributes:
         editable: Whether the layout should be opened in editable mode (default: True)
-        rename_function: function that takes an iterable object of ports and renames them
+        rename_function: function that takes an iterable object of ports and renames
+            them
     """
 
     def __init__(self, editable: bool = True, pdk: "Pdk | None" = None) -> None:
@@ -350,7 +384,8 @@ class KCLayout(kdb.Layout):
         if register_cells:
             new_cells = set(self.cells("*")) - cells
             for c in new_cells:
-                KCell(kdb_cell=c, kcl=self)
+                kc = KCell(kdb_cell=c, kcl=self)
+                kc.get_meta_data()
 
         return lm
 
@@ -472,6 +507,7 @@ class Port:
     layer: int | LayerEnum
     _trans: kdb.Trans | None
     _dcplx_trans: kdb.DCplxTrans | None
+    info: dict[str, int | float | str]
     port_type: str
     d: "UMPort"
 
@@ -485,7 +521,7 @@ class Port:
         trans: kdb.Trans,
         kcl: KCLayout = kcl,
         port_type: str = "optical",
-        info: dict[str, Any] = {},
+        info: dict[str, int | float | str] = {},
     ):
         ...
 
@@ -499,7 +535,7 @@ class Port:
         dcplx_trans: kdb.DCplxTrans,
         kcl: KCLayout = kcl,
         port_type: str = "optical",
-        info: dict[str, Any] = {},
+        info: dict[str, int | float | str] = {},
     ):
         ...
 
@@ -515,7 +551,7 @@ class Port:
         position: tuple[int, int],
         mirror_x: bool = False,
         kcl: KCLayout = kcl,
-        info: dict[str, Any] = {},
+        info: dict[str, int | float | str] = {},
     ):
         ...
 
@@ -531,7 +567,7 @@ class Port:
         dposition: tuple[float, float],
         mirror_x: bool = False,
         kcl: KCLayout = kcl,
-        info: dict[str, Any] = {},
+        info: dict[str, int | float | str] = {},
     ):
         ...
 
@@ -552,7 +588,7 @@ class Port:
         mirror_x: bool = False,
         port: "Port | None" = None,
         kcl: KCLayout = kcl,
-        info: dict[str, Any] = {},
+        info: dict[str, int | float | str] = {},
     ):
         """Create a port from dbu or um based units."""
         self.kcl = kcl
@@ -896,6 +932,7 @@ class KCell:
 
     yaml_tag = "!KCell"
     _ports: "Ports"
+    settings: dict[str, str | float | int | SerializableShape]
 
     def __init__(
         self,
@@ -918,7 +955,7 @@ class KCell:
         self.kcl = kcl
         self.insts: Instances = Instances()
         self.settings: dict[str, Any] = {}
-        self.info: dict[str, Any] = {}
+        self.info: dict[str, int | float | str] = {}
         self._locked = False
         if name is None:
             _name = "Unnamed_!"
@@ -2570,7 +2607,7 @@ def cell(
     def decorator_autocell(
         f: Callable[KCellParams, KCell]
     ) -> Callable[KCellParams, KCell]:
-        sig = signature(f)
+        sig = inspect.signature(f)
 
         # previously was a KCellCache, but dict should do for most case
         cache: dict[int, Any] = {}
@@ -2592,7 +2629,7 @@ def cell(
             for key, value in params.items():
                 if isinstance(value, dict):
                     params[key] = dict_to_frozen_set(value)
-                if value == Parameter.empty:
+                if value == inspect.Parameter.empty:
                     del_parameters.append(key)
 
             for param in del_parameters:
@@ -2763,8 +2800,6 @@ def show(
     delete = False
 
     # Find the file that calls stack
-    # stk = inspect.stack()[-1]
-
     try:
         stk = inspect.getouterframes(inspect.currentframe())
         frame = stk[2]
