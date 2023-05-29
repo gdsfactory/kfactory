@@ -934,6 +934,10 @@ class KCell:
             for inst in kdb_cell.each_inst():
                 self.insts.append(Instance(self.kcl, inst))
 
+    def __getitem__(self, key: int | str | None) -> Port:
+        """Returns port from instance."""
+        return self.ports[key]
+
     @property
     def name(self) -> str:
         """Name of the KCell."""
