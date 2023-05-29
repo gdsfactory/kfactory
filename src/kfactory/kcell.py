@@ -1671,12 +1671,8 @@ class Instance:
         """If we don't have an attribute, get it from the instance."""
         return getattr(self._instance, name)
 
-    def __getitem__(self, key: str) -> Port:
-        """Access instance ports."""
-        if key not in self.cell_ports:
-            port_names = [p.name for p in self.ports]
-            raise ValueError(f"{key!r} not in {port_names}")
-
+    def __getitem__(self, key: int | str | None) -> Port:
+        """Returns port from instance."""
         return self.ports[key]
 
     @property
