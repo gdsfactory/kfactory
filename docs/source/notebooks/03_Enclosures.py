@@ -1,24 +1,6 @@
-# ---
-# jupyter:
-#   jupytext:
-#     cell_metadata_filter: -all
-#     custom_cell_magics: kql
-#     text_representation:
-#       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
-#       jupytext_version: 1.11.2
-#   kernelspec:
-#     display_name: base
-#     language: python
-#     name: python3
-# ---
-
-# %%
 import kfactory as kf
 
 
-# %%
 class LAYER(kf.LayerEnum):
     WG = (1, 0)
     WGEX = (2, 0)
@@ -26,7 +8,6 @@ class LAYER(kf.LayerEnum):
     SLABEX = (4, 0)
 
 
-# %%
 enc = kf.utils.LayerEnclosure(
     [
         (LAYER.WGEX, 5000),
@@ -39,7 +20,6 @@ enc = kf.utils.LayerEnclosure(
 )
 
 
-# %%
 @kf.cell
 def rectangles(
     radius: int,
@@ -96,7 +76,6 @@ def rectangles(
     return c
 
 
-# %%
 @kf.cell
 def rectangles_tiled(
     radius: int,
@@ -153,8 +132,6 @@ def rectangles_tiled(
     return c
 
 
-# %%
-c = rectangles(500000, 10000, 120000, 15, 1000000, LAYER.WG, enc)
-c
-
-# %%
+# if __name__ == "__main__":
+#     #     # kf.show(rectangles(500000, 10000, 120000, 15, 1000000, LAYER.WG, enc))
+#     kf.show(rectangles_tiled(500000, 10000, 120000, 15, 1000000, LAYER.WG, enc))
