@@ -1671,10 +1671,6 @@ class Instance:
         """If we don't have an attribute, get it from the instance."""
         return getattr(self._instance, name)
 
-    def __getitem__(self, key: int | str | None) -> Port:
-        """Returns port from instance."""
-        return self.ports[key]
-
     @property
     def name(self) -> str | None:
         """Name of instance in GDS."""
