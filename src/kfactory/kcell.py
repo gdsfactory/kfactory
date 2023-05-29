@@ -329,15 +329,19 @@ class KCLayout(kdb.Layout):
                 if self.cell(obj) is None:
                     raise
 
-                c = self.cell(obj)
-                return KCell(name=c.name, kcl=self, kdb_cell=self.cell(obj))
+                kdb_c = self.cell(obj)
+                c = KCell(name=kdb_c.name, kcl=self, kdb_cell=self.cell(obj))
+                c.get_meta_data()
+                return c
         else:
             if self.cell(obj) is not None:
                 try:
                     return self.kcells[self.cell(obj).cell_index()]
                 except KeyError:
-                    c = self.cell(obj)
-                    return KCell(name=c.name, kcl=self, kdb_cell=self.cell(obj))
+                    kdb_c = self.cell(obj)
+                    c = KCell(name=kdb_c.name, kcl=self, kdb_cell=self.cell(obj))
+                    c.get_meta_data()
+                    return c
             from pprint import pformat
 
             raise ValueError(
@@ -377,21 +381,44 @@ class KCLayout(kdb.Layout):
 
         return lm
 
-    def write(  # type: ignore[override]
+    @overload  # type: ignore[override]
+    def write(self, filename: str | Path) -> None:
+        ...
+
+    @overload
+    def write(
         self,
         filename: str | Path,
-        gzip: bool = False,
+        options: kdb.SaveLayoutOptions,
+    ) -> None:
+        ...
+
+    @overload
+    def write(
+        self,
+        filename: str | Path,
         options: kdb.SaveLayoutOptions = default_save(),
+        set_meta: bool = True,
+    ) -> None:
+        ...
+
+    def write(
+        self,
+        filename: str | Path,
+        options: kdb.SaveLayoutOptions = default_save(),
+        set_meta: bool = True,
     ) -> None:
         """Write a GDS file into the existing Layout.
 
         Args:
             filename: Path of the GDS file.
-            gzip: directly make the GDS a .gds.gz file.
             options: KLayout options to load from the GDS. Can determine how merge
                 conflicts are handled for example. See
                 https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
+            set_meta: Make sure all the cells have their metadata set
         """
+        for kcell in self.kcells.values():
+            kcell.set_meta_data()
         return kdb.Layout.write(self, str(filename), options)
 
 
@@ -1550,6 +1577,8 @@ class KCell:
 
         See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
         """
+        for kcell in (self.kcl[ci] for ci in self.called_cells()):
+            kcell.set_meta_data()
         return self._kdb_cell.write(str(filename), save_options)
 
     @classmethod
@@ -1678,42 +1707,57 @@ class KCell:
 
 
     def set_meta_data(self) -> None:
+        """Set metadata of the Cell.
+
+        Currently, ports, settings and info will be set.
+        """
         for i, port in enumerate(self.ports):
             if port.name:
-                name_meta = kdb.LayoutMetaInfo(f"kfactory:ports:{i}:name", port.name)
-                name_meta.persisted = True
-                self.add_meta_info(name_meta)
-            layer_meta = kdb.LayoutMetaInfo(
-                f"kfactory:ports:{i}:layer", self.kcl.get_info(port.layer)
-            )
-            layer_meta.persisted = True
-            self.add_meta_info(layer_meta)
-            width_meta = kdb.LayoutMetaInfo(f"kfactory:ports:{i}:width", port.width)
-            width_meta.persisted = True
-            self.add_meta_info(width_meta)
-            port_type_meta = kdb.LayoutMetaInfo(
-                f"kfactory:ports:{i}:port_type", port.port_type
-            )
-            port_type_meta.persisted = True
-            self.add_meta_info(port_type_meta)
-            if port._trans:
-                trans_meta = kdb.LayoutMetaInfo(
-                    f"kfactory:ports:{i}:trans", port._trans.to_s()
-                )
-                trans_meta.persisted = True
-                self.add_meta_info(trans_meta)
-            elif port._dcplx_trans:
-                dcplx_trans_meta = kdb.LayoutMetaInfo(
-                    f"kfactory:ports:{i}:dcplx_trans", port._dcplx_trans.to_s()
-                )
-                dcplx_trans_meta.persisted = True
-                self.add_meta_info(dcplx_trans_meta)
-            for name, info in port.info.items():
                 self.add_meta_info(
-                    kdb.LayoutMetaInfo(f"kfactory:ports{i}:info:{name}", info)
+                    kdb.LayoutMetaInfo(
+                        f"kfactory:ports:{i}:name", port.name, None, True
+                    )
+                )
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(
+                    f"kfactory:ports:{i}:layer",
+                    self.kcl.get_info(port.layer),
+                    None,
+                    True,
+                )
+            )
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(f"kfactory:ports:{i}:width", port.width, None, True)
+            )
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(
+                    f"kfactory:ports:{i}:port_type", port.port_type, None, True
+                )
+            )
+            if port._trans:
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo(
+                        f"kfactory:ports:{i}:trans", port._trans, None, True
+                    )
+                )
+            elif port._dcplx_trans:
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo(
+                        f"kfactory:ports:{i}:dcplx_trans", port._dcplx_trans, None, True
+                    )
                 )
 
+        for name, setting in self.settings.items():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
+            )
+        for name, info in self.info.items():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
+            )
+
     def get_meta_data(self) -> None:
+        """Read metadata from the KLayout Layout object."""
         port_dict = {}
         for meta in self.each_meta_info():
             if meta.name.startswith("kfactory:ports"):
@@ -1722,6 +1766,10 @@ class KCell:
                     port_dict[i] = {_type: meta.value}
                 else:
                     port_dict[i][_type] = meta.value
+            elif meta.name.startswith("kfactory:info"):
+                self.info[meta.name.lstrip("kfactory:info:")] = meta.value
+            elif meta.name.startswith("kfactory:settings"):
+                self.settings[meta.name.lstrip("kfactory:settings:")] = meta.value
 
         # ports = Ports()
         self.ports = Ports(self.kcl)
