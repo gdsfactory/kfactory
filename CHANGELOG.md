@@ -7,3 +7,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the changes for the upcoming release can be found in <https://github.com/twisted/my-project/tree/main/changelog.d/>.
 
 <!-- towncrier release notes start -->
+
+## [0.7.4](https://github.com/gdsfactory/klive/tree/0.7.4) - 2023-05-29
+
+
+### Added
+
+- add tbump and towncrier for changelog and bumping [#129](https://github.com/gdsfactory/klive/issues/129)
+
+
+### Fixed
+
+- enable non manhattan bend ports, and document how to get rid of gaps [#131](https://github.com/gdsfactory/klive/issues/131)
