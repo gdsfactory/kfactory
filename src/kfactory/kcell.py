@@ -14,20 +14,12 @@ import importlib.util
 import json
 import socket
 from collections.abc import Callable, Hashable, Iterable, Iterator
-
 from enum import Enum, IntEnum
 from hashlib import sha3_512
 from inspect import Parameter, signature
 from pathlib import Path
 from tempfile import gettempdir
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Literal,
-    TypeVar,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Literal, TypeVar, cast, overload
 
 import cachetools.func
 import numpy as np
@@ -1629,6 +1621,11 @@ class KCell:
         no_warn: bool = False,
     ) -> "Instance | None":
         """Transforms the instance or cell with the transformation given."""
+        config.logger.warning(
+            "You are transforming the KCell {}. It is highly discouraged to do this."
+            " You probably want to transform an instance instead.",
+            self.name,
+        )
         if self._locked:
             raise LockedError(self)
         if trans:
@@ -1640,6 +1637,26 @@ class KCell:
             )
         else:
             return self._kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
+
+    @property
+    def xmin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._kdb_cell.bbox().left
+
+    @property
+    def ymin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._kdb_cell.bbox().bottom
+
+    @property
+    def xmax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._kdb_cell.bbox().right
+
+    @property
+    def ymax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._kdb_cell.bbox().top
 
 
 class Instance:
@@ -1999,6 +2016,46 @@ class Instance:
     def mirror_y(self, y: int = 0) -> None:
         """Mirror the instance at an y-axis."""
         self.transform(kdb.Trans(0, True, 0, 2 * y))
+
+    @property
+    def xmin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().left
+
+    @xmin.setter
+    def xmin(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().left, 0))
+
+    @property
+    def ymin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().bottom
+
+    @ymin.setter
+    def ymin(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(0, __val - self._instance.bbox().bottom))
+
+    @property
+    def xmax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().right
+
+    @xmax.setter
+    def xmax(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().right, 0))
+
+    @property
+    def ymax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().top
+
+    @ymax.setter
+    def ymax(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(0, __val - self._instance.bbox().top))
 
 
 class UMInstance:
