@@ -1996,6 +1996,14 @@ class Instance:
             f"{self.parent_cell.name}: ports {port_names}, {self.kcl[self.cell_index]}"
         )
 
+    def mirror_x(self, x: int = 0) -> None:
+        """Mirror the instance at an x-axis."""
+        self.transform(kdb.Trans(2, True, 2 * x, 0))
+
+    def mirror_y(self, y: int = 0) -> None:
+        """Mirror the instance at an y-axis."""
+        self.transform(kdb.Trans(0, True, 0, 2 * y))
+
 
 class UMInstance:
     """Make the port able to dynamically give um based info."""
@@ -2081,6 +2089,14 @@ class UMInstance:
                     float(destination[0] - origin[0]), float(destination[1] - origin[1])
                 )
             )
+
+    def mirror_x(self, x: float = 0) -> None:
+        """Mirror the instance at an x-axis."""
+        self.parent.transform(kdb.DTrans(2, True, 2 * x, 0))
+
+    def mirror_y(self, y: float = 0) -> None:
+        """Mirror the instance at an y-axis."""
+        self.parent.transform(kdb.DTrans(0, True, 0, 2 * y))
 
 
 class Instances:
