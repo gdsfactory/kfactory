@@ -15,13 +15,12 @@ import json
 import socket
 from collections.abc import Callable, Hashable, Iterable, Iterator
 
-# from enum import IntEnum
 from enum import Enum, IntEnum
 from hashlib import sha3_512
 from inspect import Parameter, signature
 from pathlib import Path
 from tempfile import gettempdir
-from typing import (  # ParamSpec, # >= python 3.10
+from typing import (
     TYPE_CHECKING,
     Any,
     Literal,
@@ -30,7 +29,6 @@ from typing import (  # ParamSpec, # >= python 3.10
     overload,
 )
 
-# from cachetools import Cache, cached
 import cachetools.func
 import numpy as np
 import ruamel.yaml
@@ -39,9 +37,6 @@ from typing_extensions import ParamSpec
 from . import kdb
 from .conf import config
 from .port import rename_clockwise
-
-# import struct
-# from abc import abstractmethod
 
 if TYPE_CHECKING:
     from .pdk import Pdk
@@ -193,7 +188,8 @@ class KCLayout(kdb.Layout):
 
     Attributes:
         editable: Whether the layout should be opened in editable mode (default: True)
-        rename_function: function that takes an iterable object of ports and renames them
+        rename_function: function that takes an iterable object of ports and renames
+            them
     """
 
     def __init__(self, editable: bool = True, pdk: "Pdk | None" = None) -> None:
@@ -2798,6 +2794,22 @@ def show(
 
     if delete:
         Path(gds_file).unlink()
+
+
+def polygon_from_array(array: Iterable[tuple[int, int]]) -> kdb.Polygon:
+    """Create a DPolygon from a 2D array-like structure. (dbu version).
+
+    Array-like: `[[x1,y1],[x2,y2],...]`
+    """
+    return kdb.Polygon([kdb.Point(int(x), int(y)) for (x, y) in array])
+
+
+def dpolygon_from_array(array: Iterable[tuple[float, float]]) -> kdb.DPolygon:
+    """Create a DPolygon from a 2D array-like structure. (um version).
+
+    Array-like: `[[x1,y1],[x2,y2],...]`
+    """
+    return kdb.DPolygon([kdb.DPoint(int(x), int(y)) for (x, y) in array])
 
 
 __all__ = [
