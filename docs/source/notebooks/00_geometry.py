@@ -29,6 +29,7 @@
 
 # %%
 import kfactory as kf
+import numpy as np
 
 # %%
 # Create a blank cell (essentially an empty GDS cell with some special features)
@@ -59,6 +60,14 @@ c.plot()
 # **Exercise** :
 #
 # Make a cell similar to the one above that has a second polygon in layer (1, 1)
+
+# %%
+c = kf.KCell()
+points = np.array([(-8, -6), (6, 8), (7, 17), (9, 5)])
+poly = kf.polygon_from_array(points)
+c.shapes(c.kcl.layer(1, 0)).insert(poly1)
+c.shapes(c.kcl.layer(1, 1)).insert(poly1)
+c
 
 # %%
 import kfactory as kf
@@ -265,9 +274,33 @@ mwg1_ref.connect("o2", mwg2_ref.ports["o1"])
 # %%
 c2
 
+# %%
+c = kf.KCell()
+bend = kf.cells.euler.bend_euler(radius=10, width=1, layer=0)
+b1 = c << bend
+b2 = c << bend
+b2.mirror_x(x=0)
+c
+
+# %%
+c = kf.KCell()
+bend = kf.cells.euler.bend_euler(radius=10, width=1, layer=0)
+b1 = c << bend
+b2 = c << bend
+b2.mirror_y(y=0)
+c
+
+# %%
+c = kf.KCell()
+bend = kf.cells.euler.bend_euler(radius=10, width=1, layer=0)
+b1 = c << bend
+b2 = c << bend
+b2.mirror_y(y=0)
+b1.ymin = b2.ymax
+c
+
 # %% [markdown]
 #
-#             self.layout_view.active_cellview().layout().cell(event["owner"].name)
 # ## Labels
 #
 # You can add abstract GDS labels (annotate) to your Cells, in order to record information
