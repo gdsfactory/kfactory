@@ -17,12 +17,57 @@ kfactory.config.logger.debug("message {}, {}", var1, var2)
 kfactory.config.logger.info(f"f-string message {var}")
 ```
 
-## Log Level
+### Logging Options
 
-The logger's level can be set with `kfactory.config.logfilter.level` or through environment variables, under linux for example
+Below are some basic configurations available in kfactory. loguru also supports various
+advanced ways to log, e.g. lazy evaluation for expensive functions, this is explained excellently in the
+[docs](https://loguru.readthedocs.io/en/stable/overview.html#take-the-tour)
+
+
+#### Log Level
+
+loguru can log in multiple levels. By default the following are available for kfactory
+
+Available log levels are "TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL".
+
+Log outputs can be filtered either by settings a minimum level or by regex. The minimum level is configured in `kfactory.config.logfilter.level`.
+Instead of configuring it through python, it can also be configured from an environment variable. By default the log level is set to "INFO",
+so anything below "INFO" is not output. This can be configured either by setting the level in python, through dotenv
+([untested](https://docs.pydantic.dev/latest/usage/settings/#dotenv-env-support)), or through environment variables.
+
+| Logging Function                  | Minimum `kfactory.config.logfilter.level` |
+|-----------------------------------|-------------------------------------------|
+| `kfactory.config.logger.trace`    | `TRACE`                                   |
+| `kfactory.config.logger.debug`    | `DEBUG`                                   |
+| `kfactory.config.logger.info`     | `INFO`                                    |
+| `kfactory.config.logger.success`  | `SUCCESS`                                 |
+| `kfactory.config.logger.warning`  | `WARNING`                                 |
+| `kfactory.config.logger.error`    | `ERROR`                                   |
+| `kfactory.config.logger.critical` | `CRITICAL`                                |
+
+Alternatively `kfactory.config.logger.log(level: str | int, message: str)` can be used.
+
+Setting the loglevel through environment:
+
+##### Linux/MacOS
 
 ```bash
-export KFACTORY_LOGFILTER__LEVEL="DEBUG"
+export KFACTORY_LOGFILTER_LEVEL="DEBUG"
 ```
 
-Available levels are "TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"
+This can of course also been set one time (under Linux/MacOS): `KFACTORY_LOGFILTER_LEVEL="DEBUG" python my_file.py`
+
+##### Windows
+
+```cmd
+setx KFACTORY_LOGFILTER_LEVEL="DEBUG"
+```
+
+## Jupyter Widget
+
+By default kfactory will provide an interactive Jupyter widget for notebooks. The widget is not very performant and might impact performance for larger
+notebooks. Instead of the widget a simple `IPython.Image` may be used. It can be configured in `kfactory.config.display_type`. Available options are
+`widget` or `image`. The docs for example use `image` as the interactive widget won't work in a standard html page.
+
+Similar to the log level this may also be configured through dotenv or an env variable.
+`export KFACTORY_DISPLAY_TYPE="image"` will set it to display as image by default.
