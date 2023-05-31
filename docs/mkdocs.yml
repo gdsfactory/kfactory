@@ -5,6 +5,7 @@ docs_dir: source
 
 nav:
   - Home: index.md
+  - kfactory vs gdsfactory: gdsfactory.md
   - First Steps:
     - Prerequisites: pre.md
     - 5min Intro to KFactory: intro.md
@@ -38,6 +39,7 @@ watch:
   - ../src/kfactory
 
 markdown_extensions:
+  - admonition
   - pymdownx.superfences
   - pymdownx.tasklist
   - pymdownx.tabbed
