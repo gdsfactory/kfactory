@@ -1,32 +1,51 @@
+# ---
+# jupyter:
+#   jupytext:
+#     cell_metadata_filter: -all
+#     custom_cell_magics: kql
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.11.2
+#   kernelspec:
+#     display_name: base
+#     language: python
+#     name: python3
+# ---
+
+# %% [markdown]
 # # Fixing DRC Errors
 #
+# ## Min space violations
 #
+# You can fix Min space violations.
 
-# +
+# %%
+from datetime import datetime
 import kfactory as kf
 
-from datetime import datetime
-
-# -
-
-triangle = kf.KCell("triangle")
+# %%
+triangle = kf.KCell()
 triangle_poly = kf.kdb.DPolygon(
     [kf.kdb.DPoint(0, 10), kf.kdb.DPoint(30, 10), kf.kdb.DPoint(30, 0)]
 )
 triangle.shapes(triangle.layer(1, 0)).insert(triangle_poly)
 triangle
 
+# %%
 box = kf.KCell("Box")
 box_rect = kf.kdb.DBox(0, 0, 20, 5)
 box.shapes(box.kcl.layer(1, 0)).insert(box_rect)
 box
 
+# %%
 c = kf.KCell("fix_accute_angle")
 c << triangle
 c << box
 c
 
-# +
+# %%
 c = kf.KCell("tiled_test")
 
 
@@ -67,10 +86,8 @@ print(f"total time: {d3-d1}")
 
 c
 
-# +
-c = kf.KCell("minkowski_tiled_test")
-
-
+# %%
+c = kf.KCell()
 d1 = datetime.now()
 
 for i in range(50):
@@ -106,10 +123,16 @@ print(f"time to draw: {d2-d1}")
 print(f"time to clean: {d3-d2}")
 print(f"total time: {d3-d1}")
 
-c
-# -
+c.show()
+c.plot()
 
-c = kf.KCell("ToFill")
+# %% [markdown]
+# ## Dummy fill
+#
+# To keep density constant you can add dummy fill.
+
+# %%
+c = kf.KCell()
 c.shapes(kf.kcl.layer(1, 0)).insert(
     kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512)
 )
@@ -120,13 +143,16 @@ c.shapes(kf.kcl.layer(10, 0)).insert(
 )
 c
 
-fc = kf.KCell("fill")
+# %%
+fc = kf.KCell()
 fc.shapes(fc.kcl.layer(2, 0)).insert(kf.kdb.DBox(20, 40))
 fc.shapes(fc.kcl.layer(3, 0)).insert(kf.kdb.DBox(30, 15))
 fc
 
+# %%
 import kfactory.utils.fill as fill
 
+# %%
 # fill.fill_tiled(c, fc, [(kf.kcl.layer(1,0), 0)], exclude_layers = [(kf.kcl.layer(10,0), 100), (kf.kcl.layer(2,0), 0), (kf.kcl.layer(3,0),0)], x_space=5, y_space=5)
 fill.fill_tiled(
     c,
@@ -141,4 +167,8 @@ fill.fill_tiled(
     y_space=5,
 )
 
-c
+# %%
+c.show()
+c.plot()
+
+# %%

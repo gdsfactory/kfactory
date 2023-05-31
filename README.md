@@ -1,11 +1,11 @@
-# KFactory 0.7.2
+# KFactory 0.7.4
 
 Kfactory is a [gdsfactory](https://github.com/gdsfactory/gdsfactory)-like tool. It is built with [KLayout](https://klayout.de) as a backend instead of gdstk, but aims to offer the similar featuers.
 
 | :exclamation:  KFactory is still experimental, expect API changes without notice (even though we try to keep it to a minimum!)   |
 |---------------------------------------------------------------------------------------------------------------------------------|
 
-It is suggest to pin the version of KFactory in `requirements.txt` or `pyproject.toml` with `kfactory==0.7.2` for example.
+It is suggest to pin the version of KFactory in `requirements.txt` or `pyproject.toml` with `kfactory==0.7.4` for example.
 
 Features similar to gdsfactory:
 
@@ -27,6 +27,7 @@ Notable missing Features:
 
 
 New/Improved Features:
+
 - Fully hierarchical bi-directional conversion to YAML
 - Automatic snapping to grid thanks to KLayout
 - More features for vector geometries due to concept of Point/Edge/Vector/Polygon from Klayout
@@ -44,7 +45,7 @@ kfactory is available on [pypi](https://pypi.org/project/kfactory/)
 pip install kfactory
 ```
 
-At the moment kfactory works only on python 3.10
+At the moment kfactory works only on python 3.10 and above
 
 ### Development Installation
 

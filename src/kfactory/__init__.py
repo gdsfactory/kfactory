@@ -20,12 +20,14 @@ from .kcell import (
     default_save,
     LayerEnum,
     show,
+    polygon_from_array,
+    dpolygon_from_array,
 )
 from . import cells, placer, routing, utils, port, pdk
 from .conf import config
 from .pdk import Pdk
 
-__version__ = "0.7.2"
+__version__ = "0.7.4"
 
 logger = config.logger
 
@@ -50,4 +52,6 @@ __all__ = [
     "LayerEnum",
     "logger",
     "pdk",
+    "polygon_from_array",
+    "dpolygon_from_array",
 ]
