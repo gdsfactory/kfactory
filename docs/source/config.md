@@ -63,6 +63,48 @@ This can of course also been set one time (under Linux/MacOS): `KFACTORY_LOGFILT
 setx KFACTORY_LOGFILTER_LEVEL="DEBUG"
 ```
 
+### Using loguru to give more comprehensive Traceback
+
+loguru's logger offers a catch decorator to catch Exceptions and give a more conprehensive Traceback.
+
+```python
+import kfactory as kf
+
+
+@kf.config.logger.catch
+def test(x: int) -> None:
+    if x != 42:
+        raise ValueError(f"x is not 42, it's {x}")
+
+
+def run_test(x: int) -> None:
+    return test(x)
+
+
+run_test(42)
+run_test(20)
+```
+
+This will produce a traceback with infos about the values:
+
+```
+2023-05-31 17:56:45.816 | INFO     | kfactory.conf:__init__:105 - LogLevel: INFO
+2023-05-31 17:56:45.890 | ERROR    | __main__:run_test:11 - An error has been caught in function 'run_test', process 'MainProcess' (28352), thread 'MainThread' (139734375601984):
+Traceback (most recent call last):
+
+  File "/home/sgoeldi/repos/kfactory/test.py", line 15, in <module>
+    run_test(20)
+    └ <function run_test at 0x7f15c421f100>
+
+> File "/home/sgoeldi/repos/kfactory/test.py", line 11, in run_test
+    return test(x)
+           │    └ 20
+           └ <function test at 0x7f16717d13a0>
+
+  File "/home/sgoeldi/repos/kfactory/test.py", line 7, in test
+    raise ValueError(f"x is not 42, it's {x}")
+```
+
 ## Jupyter Widget
 
 By default kfactory will provide an interactive Jupyter widget for notebooks. The widget is not very performant and might impact performance for larger
