@@ -14,23 +14,13 @@ import importlib.util
 import json
 import socket
 from collections.abc import Callable, Hashable, Iterable, Iterator
-
-# from enum import IntEnum
 from enum import Enum, IntEnum
 from hashlib import sha3_512
 from inspect import Parameter, signature
 from pathlib import Path
 from tempfile import gettempdir
-from typing import (  # ParamSpec, # >= python 3.10
-    TYPE_CHECKING,
-    Any,
-    Literal,
-    TypeVar,
-    cast,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Literal, TypeVar, cast, overload
 
-# from cachetools import Cache, cached
 import cachetools.func
 import numpy as np
 import ruamel.yaml
@@ -39,9 +29,6 @@ from typing_extensions import ParamSpec
 from . import kdb
 from .conf import config
 from .port import rename_clockwise
-
-# import struct
-# from abc import abstractmethod
 
 if TYPE_CHECKING:
     from .pdk import Pdk
@@ -193,7 +180,8 @@ class KCLayout(kdb.Layout):
 
     Attributes:
         editable: Whether the layout should be opened in editable mode (default: True)
-        rename_function: function that takes an iterable object of ports and renames them
+        rename_function: function that takes an iterable object of ports and renames
+            them
     """
 
     def __init__(self, editable: bool = True, pdk: "Pdk | None" = None) -> None:
@@ -1633,6 +1621,11 @@ class KCell:
         no_warn: bool = False,
     ) -> "Instance | None":
         """Transforms the instance or cell with the transformation given."""
+        config.logger.warning(
+            "You are transforming the KCell {}. It is highly discouraged to do this."
+            " You probably want to transform an instance instead.",
+            self.name,
+        )
         if self._locked:
             raise LockedError(self)
         if trans:
@@ -1644,6 +1637,26 @@ class KCell:
             )
         else:
             return self._kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
+
+    @property
+    def xmin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._kdb_cell.bbox().left
+
+    @property
+    def ymin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._kdb_cell.bbox().bottom
+
+    @property
+    def xmax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._kdb_cell.bbox().right
+
+    @property
+    def ymax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._kdb_cell.bbox().top
 
 
 class Instance:
@@ -1996,6 +2009,54 @@ class Instance:
             f"{self.parent_cell.name}: ports {port_names}, {self.kcl[self.cell_index]}"
         )
 
+    def mirror_x(self, x: int = 0) -> None:
+        """Mirror the instance at an x-axis."""
+        self.transform(kdb.Trans(2, True, 2 * x, 0))
+
+    def mirror_y(self, y: int = 0) -> None:
+        """Mirror the instance at an y-axis."""
+        self.transform(kdb.Trans(0, True, 0, 2 * y))
+
+    @property
+    def xmin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().left
+
+    @xmin.setter
+    def xmin(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().left, 0))
+
+    @property
+    def ymin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().bottom
+
+    @ymin.setter
+    def ymin(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(0, __val - self._instance.bbox().bottom))
+
+    @property
+    def xmax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().right
+
+    @xmax.setter
+    def xmax(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().right, 0))
+
+    @property
+    def ymax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().top
+
+    @ymax.setter
+    def ymax(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(0, __val - self._instance.bbox().top))
+
 
 class UMInstance:
     """Make the port able to dynamically give um based info."""
@@ -2081,6 +2142,14 @@ class UMInstance:
                     float(destination[0] - origin[0]), float(destination[1] - origin[1])
                 )
             )
+
+    def mirror_x(self, x: float = 0) -> None:
+        """Mirror the instance at an x-axis."""
+        self.parent.transform(kdb.DTrans(2, True, 2 * x, 0))
+
+    def mirror_y(self, y: float = 0) -> None:
+        """Mirror the instance at an y-axis."""
+        self.parent.transform(kdb.DTrans(0, True, 0, 2 * y))
 
 
 class Instances:
@@ -2782,6 +2851,22 @@ def show(
 
     if delete:
         Path(gds_file).unlink()
+
+
+def polygon_from_array(array: Iterable[tuple[int, int]]) -> kdb.Polygon:
+    """Create a DPolygon from a 2D array-like structure. (dbu version).
+
+    Array-like: `[[x1,y1],[x2,y2],...]`
+    """
+    return kdb.Polygon([kdb.Point(int(x), int(y)) for (x, y) in array])
+
+
+def dpolygon_from_array(array: Iterable[tuple[float, float]]) -> kdb.DPolygon:
+    """Create a DPolygon from a 2D array-like structure. (um version).
+
+    Array-like: `[[x1,y1],[x2,y2],...]`
+    """
+    return kdb.DPolygon([kdb.DPoint(int(x), int(y)) for (x, y) in array])
 
 
 __all__ = [
