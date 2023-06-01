@@ -27,7 +27,7 @@ from . import cells, placer, routing, utils, port, pdk
 from .conf import config
 from .pdk import Pdk
 
-__version__ = "0.7.4"
+__version__ = "0.7.5"
 
 logger = config.logger
 
