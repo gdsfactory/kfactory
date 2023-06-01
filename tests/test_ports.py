@@ -100,3 +100,41 @@ def test_connect_integer(wg):
     wg2.connect("o1", wg1, "o1")
 
     assert wg2.ports["o1"].trans == kf.kdb.Trans(0, False, 0, 0)
+
+
+def test_keep_mirror(LAYER):
+    c = kf.KCell()
+
+    p1 = kf.Port(trans=kf.kdb.Trans.M90, width=1000, layer=LAYER.WG)
+
+    c.add_port(p1, name="o1")
+    c.add_port(p1, name="o2", keep_mirror=True)
+
+    assert c["o1"].trans.is_mirror() is False
+    assert c["o2"].trans.is_mirror() is True
+
+
+def test_addports_keep_mirror(LAYER):
+    c = kf.KCell()
+
+    ports = [
+        kf.Port(
+            name=f"{i}",
+            width=1000,
+            layer=LAYER.WG,
+            trans=kf.kdb.Trans(i, True, 0, 0),
+        )
+        for i in range(4)
+    ]
+
+    c.add_ports(ports, prefix="mirr_", keep_mirror=True)
+    c.add_ports(ports, prefix="nomirr_", keep_mirror=False)
+
+    for i in range(4):
+        t1 = c[f"mirr_{i}"].trans
+        t2 = c[f"nomirr_{i}"].trans
+
+        t2_mirr = t2.dup()
+        t2_mirr.mirror = not t2_mirr.is_mirror()
+
+        assert t1 == t2_mirr
