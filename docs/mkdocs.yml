@@ -4,7 +4,9 @@ site_url: https://gdsfactory.github.io/kfactory
 docs_dir: source
 
 nav:
-  - Home: index.md
+  - Home:
+    - Intro: index.md
+    - gdsfactory.md
   - First Steps:
     - Prerequisites: pre.md
     - 5min Intro to KFactory: intro.md
@@ -38,6 +40,7 @@ watch:
   - ../src/kfactory
 
 markdown_extensions:
+  - admonition
   - pymdownx.superfences
   - pymdownx.tasklist
   - pymdownx.tabbed
