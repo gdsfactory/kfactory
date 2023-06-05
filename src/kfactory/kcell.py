@@ -19,7 +19,7 @@ from hashlib import sha3_512
 from inspect import Parameter, signature
 from pathlib import Path
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, Any, Literal, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, cast, overload
 
 import cachetools.func
 import numpy as np
@@ -1657,6 +1657,131 @@ class KCell:
     def ymax(self) -> int:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self._kdb_cell.bbox().top
+
+    def netlist(self, port_types: tuple[str] = ("optical",)) -> kdb.Netlist:
+        """Return a netlist with this cell as the top cell."""
+        netlist = kdb.Netlist()
+
+        for ci in self.called_cells():
+            self.kcl[ci].circuit(netlist, port_types=port_types)
+
+        # netlist.add(self.circuit(netlist, port_types=port_types))
+        self.circuit(netlist, port_types=port_types)
+
+        return netlist
+
+    @cachetools.cached(cache={})
+    def circuit(
+        self, netlist: kdb.Netlist, port_types: tuple[str] = ("optical",)
+    ) -> None:
+        """Create the circuit of the KCell in the given netlist."""
+
+        def port_filter(num_port: tuple[int, Port]) -> bool:
+            return num_port[1].port_type in port_types
+
+        circ = kdb.Circuit()
+        circ.name = self.name
+        circ.cell_index = self.cell_index()
+
+        print(circ.name, circ.cell_index)
+
+        inst_ports: dict[
+            int, list[tuple[int, int, Instance, Port, kdb.SubCircuit]]
+        ] = {}
+        cell_ports: dict[int, list[Port]] = {}
+
+        for i, port in filter(port_filter, enumerate(self.ports)):
+            _trans = port.trans.dup()
+            _trans.angle = _trans.angle % 2
+            _trans.mirror = False
+            h = _trans.hash()
+            if h not in cell_ports:
+                cell_ports[h] = []
+            cell_ports[h].append(port)
+
+        for h, _ports in cell_ports.items():
+            net = circ.create_net(_ports[0].name)
+            for port in _ports:
+                pin = circ.create_pin(port.name or port.trans.to_s())
+                circ.connect_pin(pin, net)
+
+        for i, inst in enumerate(self.insts):
+            name = inst.name or f"{i}_{inst.cell.name}"
+            subc = circ.create_subcircuit(
+                netlist.circuit_by_cell_index(inst.cell_index), name
+            )
+
+            # ### DEBUG
+            # print(f"{subc.name=}")
+
+            # if len(inst.cell.insts) == 0:
+            #     netlist = kdb.Netlist()
+            #     netlist.add(inst.cell.circuit())
+            #     print(netlist)
+
+            # ### END DEBUG
+            for j, port in filter(port_filter, enumerate(inst.ports)):
+                _trans = port.trans.dup()
+                _trans.angle = _trans.angle % 2
+                _trans.mirror = False
+                h = _trans.hash()
+                if h not in inst_ports:
+                    inst_ports[h] = []
+                inst_ports[h].append((i, j, inst, port, subc))
+
+        for h, ports in inst_ports.items():
+            if h in cell_ports:
+                cellports = cell_ports[h]
+                if len(ports) > 1:
+                    config.logger.warning(
+                        f"Multiple nets connecting to port {cell_ports[h][0]}"
+                    )
+                if len(cellports) > 1:
+                    if len(ports) > 0:
+                        config.logger.warning(
+                            f"Empty net with directly connected ports {cellports}"
+                            f", connected to instance ports"
+                        )
+                i, j, inst, port, subc = ports[0]
+                if port.angle != cell_ports[h][0].angle:
+                    config.logger.warning(
+                        f"inst_port: {inst.name or inst.trans} {port},"
+                        f" cell_port: {cell_ports[h][0]}"
+                    )
+                net = circ.net_by_name(cellports[0].name or cellports[0].trans.to_s())
+                # net = circ.create_net(
+                #     cell_ports[h][0].name or cell_ports[h][0].trans.to_s()
+                # )
+                # for port in cell_ports[h]:
+                #     # pin = circ.create_pin(port.name or port.trans.to_s())
+                #     circ.connect_pin(
+                #         circ.pin_by_name(port.name or port.trans.to_s()), net
+                #     )
+                for i, j, inst, port, subc in ports:
+                    subc.connect_pin(
+                        subc.circuit().pin_by_name(port.name or port.trans.to_s()),
+                        net,
+                    )
+            else:
+                name = "-".join(
+                    [
+                        (inst.name or str(i)) + "_" + (port.name or str(j))
+                        for i, j, inst, port, subc in ports
+                    ]
+                )
+
+                net = circ.create_net(name)
+                if len(ports) > 2:
+                    config.logger.warning(
+                        "Connecting more than two ports to a net "
+                        f"{[port for i,j,inst,port, subc in ports]}"
+                    )
+                for i, j, inst, port, subc in ports:
+                    subc.connect_pin(
+                        subc.circuit().pin_by_name(port.name or str(j)), net
+                    )
+        netlist.add(circ)
+        # return circ
 
 
 class Instance:
