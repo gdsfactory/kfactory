@@ -40,7 +40,7 @@ import kfactory as kf
 
 
 @kf.cell
-def waveguide(width: int, length: int, width_exclude: int) -> kf.KCell:
+def straight(width: int, length: int, width_exclude: int) -> kf.KCell:
     """Waveguide: Silicon on 1/0, Silicon exclude on 1/1"""
     c = kf.KCell()
     c.shapes(LAYER.SI).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
@@ -64,13 +64,13 @@ def waveguide(width: int, length: int, width_exclude: int) -> kf.KCell:
 
 
 if __name__ == "__main__":
-    kf.show(waveguide(2000, 50000, 5000))
+    kf.show(straight(2000, 50000, 5000))
 ```
 
 The ``kf.show`` will create a GDS in the temp folder and then send the GDS by klive to KLayout (if klive is installed).
-By running this with ``python waveguide.py``, this should show us a waveguide like this:
+By running this with ``python straight.py``, this should show us a straight like this:
 
-![waveguide](./_static/waveguide.png)
+![straight](./_static/straight.png)
 
 Afterwards let's create the composite cell [`complex_cell.py`](./complex_cell.py). This one instantiates a waveguide and a circular bend and then connects them.
 
@@ -81,7 +81,7 @@ import kfactory as kf
 
 
 @kf.cell
-def waveguide(width: int, length: int, width_exclude: int) -> kf.KCell:
+def straight(width: int, length: int, width_exclude: int) -> kf.KCell:
     """Waveguide: Silicon on 1/0, Silicon exclude on 1/1"""
     c = kf.KCell()
     c.shapes(LAYER.SI).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
@@ -105,7 +105,7 @@ def waveguide(width: int, length: int, width_exclude: int) -> kf.KCell:
 
 
 if __name__ == "__main__":
-    kf.show(waveguide(2000, 50000, 5000))
+    kf.show(straight(2000, 50000, 5000))
 ```
 
 With `kfactory.kcell.KCell.add_port` an existing port of an instance can be added to the parent cell. `kfactory.kcell.Instance.connect` allows an instance to be transformed so that one of its ports is connected to another port.

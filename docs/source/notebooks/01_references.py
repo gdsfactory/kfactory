@@ -144,7 +144,7 @@ c2
 
 # %%
 c = kf.KCell(name="instance_sample")
-w = kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
+w = kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 wr = kf.kdb.CellInstArray(w._kdb_cell, kf.kdb.Trans.R0)
 c.insert(wr)
 c
@@ -154,7 +154,7 @@ c
 
 # %%
 c = kf.KCell(name="instance_sample_shorter_syntax")
-wr = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
+wr = c << kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 c
 
 # %% [markdown]
@@ -162,8 +162,8 @@ c
 
 # %%
 c = kf.KCell(name="two_instances")
-wr1 = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
-wr2 = c << kf.cells.waveguide.waveguide(length=10, width=0.6, layer=c.kcl.layer(1, 0))
+wr1 = c << kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.layer(1, 0))
+wr2 = c << kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.layer(1, 0))
 wr2.transform(kf.kdb.DTrans(0.0, 10.0))
 c.add_ports(wr1.ports, prefix="top_")
 c.add_ports(wr2.ports, prefix="bot_")
