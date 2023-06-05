@@ -42,28 +42,28 @@ def waveguide_blank(LAYER):
 @pytest.fixture
 def bend90(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=90
+        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
 def bend180(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=180
+        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
     )
 
 
 @pytest.fixture
 def bend90_euler(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=90
+        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
 def bend180_euler(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=180
+        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
     )
 
 

@@ -272,8 +272,8 @@ c
 
 # %%
 c = kf.KCell()
-b1 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, theta=30)
-b2 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, theta=30)
+b1 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, angle=30)
+b2 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, angle=30)
 b2.connect("o1", b1.ports["o2"])
 c.show()
 c
@@ -285,8 +285,8 @@ c
 
 # %%
 c = kf.KCell()
-b1 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, theta=30)
-b2 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, theta=30)
+b1 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, angle=30)
+b2 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, angle=30)
 b2.connect("o1", b1.ports["o2"])
 b2.flatten()
 c.show()
@@ -336,6 +336,6 @@ c
 # by default `KCell.show()` will add triangular pins, so you can see the direction of the port in Klayout.
 
 # %%
-c = kf.cells.euler.bend_euler(radius=5, width=1, layer=0, theta=90)
+c = kf.cells.euler.bend_euler(radius=5, width=1, layer=0, angle=90)
 c.draw_ports()
 c
