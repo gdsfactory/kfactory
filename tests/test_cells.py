@@ -22,8 +22,8 @@ class LAYER(kf.LayerEnum):
 wg_enc = kf.utils.LayerEnclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
 
 
-def waveguide() -> kf.KCell:
-    return kf.cells.waveguide.waveguide(
+def straight() -> kf.KCell:
+    return kf.cells.straight.straight(
         width=0.5, length=1, layer=LAYER.WG, enclosure=wg_enc
     )
 
@@ -71,7 +71,7 @@ cells = dict(
     bend180_euler=bend180_euler,
     bend90_euler=bend90_euler,
     taper=taper,
-    waveguide=waveguide,
+    straight=straight,
 )
 
 cell_names = set(cells.keys())

@@ -105,7 +105,7 @@ def test_um_enclosure_nodbu(LAYER: kf.LayerEnum) -> None:
         )
 
 
-def test_pdkenclosure(LAYER: kf.LayerEnum, waveguide_blank: kf.KCell) -> None:
+def test_pdkenclosure(LAYER: kf.LayerEnum, straight_blank: kf.KCell) -> None:
     c = kf.KCell("wg_slab")
 
     wg_box = kf.kdb.Box(10000, 500)
