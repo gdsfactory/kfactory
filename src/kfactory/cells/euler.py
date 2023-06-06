@@ -169,8 +169,6 @@ def bend_euler(
 ) -> KCell:
     """Create a euler bend.
 
-    Should the ports for the 90° cases land off-grid, they will be forced to be on-grid
-
     Args:
         width: Width of the core. [um]
         radius: Radius off the backbone. [um]
@@ -198,16 +196,8 @@ def bend_euler(
         trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
     )
 
-    match angle:
-        case x if x in [0, 90, 180, 270]:
-            dcplxtrans = kdb.DCplxTrans(
-                1, angle, False, backbone[-1].to_itype(dbu).to_dtype(dbu).to_v()
-            )
-        case _:
-            dcplxtrans = kdb.DCplxTrans(1, angle, False, backbone[-1].to_v())
-
     c.create_port(
-        dcplx_trans=dcplxtrans,
+        dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
         dwidth=width,
         layer=layer,
     )

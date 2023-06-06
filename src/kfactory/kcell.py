@@ -704,7 +704,9 @@ class Port:
 
     @dcplx_trans.setter
     def dcplx_trans(self, value: kdb.DCplxTrans) -> None:
-        if value.is_complex():
+        if value.is_complex() or value.disp != value.disp.to_itype(
+            self.kcl.dbu
+        ).to_dtype(self.kcl.dbu):
             self._dcplx_trans = value.dup()
             self._trans = None
         else:
@@ -2538,6 +2540,9 @@ def cell(
     *,
     set_settings: bool = True,
     set_name: bool = True,
+    check_ports: bool = True,
+    check_instances: bool = True,
+    snap_ports: bool = True,
 ) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]:
     ...
 
@@ -2551,6 +2556,7 @@ def cell(
     set_name: bool = True,
     check_ports: bool = True,
     check_instances: bool = True,
+    snap_ports: bool = True,
 ) -> (
     Callable[KCellParams, KCell]
     | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
@@ -2570,6 +2576,7 @@ def cell(
             warning if there are
         check_instances: Check for any complex instances. A complex instance is a an
             instance that has a magnification != 1 or non-90° rotation.
+        snap_ports: Snap the centers of the ports onto the grid (only x/y, not angle).
     """
 
     def decorator_autocell(
@@ -2612,6 +2619,7 @@ def cell(
                     if isinstance(value, frozenset):
                         params[key] = frozenset_to_dict(value)
                 cell = f(**params)
+                dbu = cell.kcl.dbu
                 if cell._locked:
                     # If the cell is locked, it comes from a cache (most likely)
                     # and should be copied first
@@ -2627,7 +2635,12 @@ def cell(
                             "Most foundries will not allow off-grid instances. Please "
                             "flatten them or add check_instances=False to the decorator"
                         )
-
+                if snap_ports:
+                    for port in cell.ports:
+                        if port._dcplx_trans:
+                            port.dcplx_trans.disp = port._dcplx_trans.disp.to_itype(
+                                dbu
+                            ).to_dtype(dbu)
                 i = 0
                 for name, setting in cell.settings.items():
                     while cell.property(i) is not None:
