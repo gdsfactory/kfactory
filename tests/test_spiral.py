@@ -10,8 +10,8 @@ def bend_circular(
     radius: int,
     layer: int,
     enclosure: Optional[kf.utils.LayerEnclosure] = None,
-    theta: int = 90,
-    theta_step: float = 1,
+    angle: int = 90,
+    angle_step: float = 1,
 ) -> kf.KCell:
     """Circular radius bend
 
@@ -29,20 +29,20 @@ def bend_circular(
     backbone = [
         kf.kdb.DPoint(x, y)
         for x, y in [
-            [np.sin(_theta / 180 * np.pi) * r, (-np.cos(_theta / 180 * np.pi) + 1) * r]
-            for _theta in np.linspace(
-                0, theta, int(theta // theta_step + 0.5), endpoint=True
+            [np.sin(_angle / 180 * np.pi) * r, (-np.cos(_angle / 180 * np.pi) + 1) * r]
+            for _angle in np.linspace(
+                0, angle, int(angle // angle_step + 0.5), endpoint=True
             )
         ]
     ]
 
-    kf.utils.extrude_path(c, layer, backbone, width, enclosure, 0, theta)
+    kf.utils.extrude_path(c, layer, backbone, width, enclosure, 0, angle)
 
     c.create_port(
         name="W0", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer=layer
     )
 
-    match theta:
+    match angle:
         case 90:
             c.create_port(
                 name="N0",
@@ -66,8 +66,8 @@ def dbend_circular(
     radius: float,
     layer: kf.kcell.LayerEnum,
     enclosure: Optional[kf.utils.LayerEnclosure] = None,
-    theta: float = 90,
-    theta_step: float = 1,
+    angle: float = 90,
+    angle_step: float = 1,
 ) -> kf.KCell:
     """Circular radius bend
 
@@ -85,20 +85,20 @@ def dbend_circular(
     backbone = [
         kf.kdb.DPoint(x, y)
         for x, y in [
-            [np.sin(_theta / 180 * np.pi) * r, (-np.cos(_theta / 180 * np.pi) + 1) * r]
-            for _theta in np.linspace(
-                0, theta, int(theta // theta_step + 0.5), endpoint=True
+            [np.sin(_angle / 180 * np.pi) * r, (-np.cos(_angle / 180 * np.pi) + 1) * r]
+            for _angle in np.linspace(
+                0, angle, int(angle // angle_step + 0.5), endpoint=True
             )
         ]
     ]
-    kf.utils.extrude_path(c, layer, backbone, width, enclosure, 0, theta)
+    kf.utils.extrude_path(c, layer, backbone, width, enclosure, 0, angle)
     dp1 = kf.kcell.Port(
         dwidth=width, layer=layer, name="W0", dcplx_trans=kf.kdb.DCplxTrans.R180
     )
     warnings.filterwarnings("ignore")
     c.add_port(dp1)
 
-    match theta:
+    match angle:
         case 90:
             dp2 = kf.Port(
                 name="N0",

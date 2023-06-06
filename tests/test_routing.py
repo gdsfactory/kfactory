@@ -15,7 +15,7 @@ from collections.abc import Callable
 def test_route_straight(
     x: int,
     bend90: kf.KCell,
-    waveguide_factory: Callable[..., kf.KCell],
+    straight_factory: Callable[..., kf.KCell],
     LAYER: kf.LayerEnum,
     optical_port: kf.Port,
 ) -> None:
@@ -27,7 +27,7 @@ def test_route_straight(
         c,
         p1,
         p2,
-        straight_factory=waveguide_factory,
+        straight_factory=straight_factory,
         bend90_cell=bend90,
     )
 
@@ -49,7 +49,7 @@ def test_route_straight(
 )
 def test_route_bend90(
     bend90: kf.KCell,
-    waveguide_factory: Callable[..., kf.KCell],
+    straight_factory: Callable[..., kf.KCell],
     LAYER: kf.LayerEnum,
     optical_port: kf.Port,
     x: int,
@@ -67,7 +67,7 @@ def test_route_bend90(
         c,
         p1,
         p2,
-        straight_factory=waveguide_factory,
+        straight_factory=straight_factory,
         bend90_cell=bend90,
     )
 
@@ -84,7 +84,7 @@ def test_route_bend90(
 )
 def test_route_bend90_euler(
     bend90_euler: kf.KCell,
-    waveguide_factory: Callable[..., kf.KCell],
+    straight_factory: Callable[..., kf.KCell],
     LAYER: kf.LayerEnum,
     optical_port: kf.Port,
     x: int,
@@ -102,7 +102,7 @@ def test_route_bend90_euler(
         c,
         p1,
         p2,
-        straight_factory=waveguide_factory,
+        straight_factory=straight_factory,
         bend90_cell=bend90_euler,
     )
     kf.config.logfilter.regex = None

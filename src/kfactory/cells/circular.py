@@ -18,8 +18,8 @@ def bend_circular(
     radius: float,
     layer: int | LayerEnum,
     enclosure: LayerEnclosure | None = None,
-    theta: float = 90,
-    theta_step: float = 1,
+    angle: float = 90,
+    angle_step: float = 1,
 ) -> KCell:
     """Circular radius bend [um].
 
@@ -28,17 +28,17 @@ def bend_circular(
         radius: Radius of the backbone. [um]
         layer: Layer index of the target layer.
         enclosure: Optional enclosure.
-        theta: Angle amount of the bend.
-        theta_step: Angle amount per backbone point of the bend.
+        angle: Angle amount of the bend.
+        angle_step: Angle amount per backbone point of the bend.
     """
     c = KCell()
     r = radius
     backbone = [
         kdb.DPoint(x, y)
         for x, y in [
-            [np.sin(_theta / 180 * np.pi) * r, (-np.cos(_theta / 180 * np.pi) + 1) * r]
-            for _theta in np.linspace(
-                0, theta, int(theta // theta_step + 0.5), endpoint=True
+            [np.sin(_angle / 180 * np.pi) * r, (-np.cos(_angle / 180 * np.pi) + 1) * r]
+            for _angle in np.linspace(
+                0, angle, int(angle // angle_step + 0.5), endpoint=True
             )
         ]
     ]
@@ -50,7 +50,7 @@ def bend_circular(
         width=width,
         enclosure=enclosure,
         start_angle=0,
-        end_angle=theta,
+        end_angle=angle,
     )
 
     c.create_port(
@@ -59,7 +59,7 @@ def bend_circular(
         layer=layer,
     )
     c.create_port(
-        dcplx_trans=kdb.DCplxTrans(1, theta, False, backbone[-1].to_v()),
+        dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
         dwidth=width,
         layer=layer,
     )

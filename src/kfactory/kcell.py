@@ -1063,7 +1063,7 @@ class KCell:
         """
         if self._locked:
             raise LockedError(self)
-        self.ports.add_port(port=port, name=name)
+        self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
 
     def add_ports(
         self, ports: Iterable[Port], prefix: str = "", keep_mirror: bool = False
@@ -2402,10 +2402,10 @@ class Ports:
         """
         _port = port.copy()
         if not keep_mirror:
-            if port._trans:
-                port._trans.mirror = False
-            elif port._dcplx_trans:
-                port._dcplx_trans.mirror = False
+            if _port._trans:
+                _port._trans.mirror = False
+            elif _port._dcplx_trans:
+                _port._dcplx_trans.mirror = False
         if name is not None:
             _port.name = name
         self._ports.append(_port)
@@ -2416,7 +2416,7 @@ class Ports:
         """Append a list of ports."""
         for p in ports:
             name = p.name or ""
-            self.add_port(port=p, name=prefix + name)
+            self.add_port(port=p, name=prefix + name, keep_mirror=keep_mirror)
 
     @overload
     def create_port(

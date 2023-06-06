@@ -14,7 +14,7 @@
 # ---
 
 from layers import LAYER, si_enc
-from waveguide import waveguide
+from straight import straight
 
 import kfactory as kf
 
@@ -28,7 +28,7 @@ def composite_cell() -> kf.KCell:
             1000 * c.kcl.dbu, 20000 * c.kcl.dbu, LAYER.SI, enclosure=si_enc
         )  # the standard kf.cells are in um, so we need to convert to dbu
     )
-    wg = c << waveguide(1000, 5000, 5000)
+    wg = c << straight(1000, 5000, 5000)
 
     wg.align("o1", bend, "o2")
 

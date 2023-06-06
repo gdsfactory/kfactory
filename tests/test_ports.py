@@ -4,7 +4,7 @@ import re
 
 
 @kf.cell
-def waveguide(width: int, length: int, layer: int) -> kf.KCell:
+def straight(width: int, length: int, layer: int) -> kf.KCell:
     c = kf.KCell()
 
     c.shapes(layer).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
@@ -20,7 +20,7 @@ def waveguide(width: int, length: int, layer: int) -> kf.KCell:
 
 @pytest.fixture()
 def wg(LAYER):
-    return waveguide(1000, 20000, LAYER.WG)
+    return straight(1000, 20000, LAYER.WG)
 
 
 @pytest.fixture()
@@ -52,21 +52,21 @@ def wg_floating_off_grid(LAYER):
     return c
 
 
-def test_waveguide(LAYER):
-    waveguide(1000, 20000, LAYER.WG)
+def test_straight(LAYER):
+    straight(1000, 20000, LAYER.WG)
 
 
 def test_settings(LAYER):
-    c = waveguide(1000, 20000, LAYER.WG)
+    c = straight(1000, 20000, LAYER.WG)
 
     assert c.settings["length"] == 20000
     assert c.settings["width"] == 1000
-    assert c.name == "waveguide_W1000_L20000_LWG"
+    assert c.name == "straight_W1000_L20000_LWG"
 
 
 def test_connect_cplx_port(LAYER):
     c = kf.KCell()
-    wg1 = c << waveguide(1000, 20000, LAYER.WG)
+    wg1 = c << straight(1000, 20000, LAYER.WG)
     port = kf.kcell.Port(
         dwidth=1,
         layer=LAYER.WG,
@@ -79,8 +79,8 @@ def test_connect_cplx_port(LAYER):
 def test_connect_cplx_inst(LAYER):
     c = kf.KCell()
 
-    wg1 = c << waveguide(1000, 20000, LAYER.WG)
-    wg2 = c << waveguide(1000, 20000, LAYER.WG)
+    wg1 = c << straight(1000, 20000, LAYER.WG)
+    wg2 = c << straight(1000, 20000, LAYER.WG)
     wg1.transform(kf.kdb.DCplxTrans(1, 30, False, 5, 10))
     wg2.connect("o1", wg1, "o2")
     kf.config.logfilter.regex = f"Port ({re.escape(str(wg1.ports['o1']))}|{re.escape(str(wg2.ports['o2']))}) is not an integer based port, converting to integer based"
@@ -100,3 +100,41 @@ def test_connect_integer(wg):
     wg2.connect("o1", wg1, "o1")
 
     assert wg2.ports["o1"].trans == kf.kdb.Trans(0, False, 0, 0)
+
+
+def test_keep_mirror(LAYER):
+    c = kf.KCell()
+
+    p1 = kf.Port(trans=kf.kdb.Trans.M90, width=1000, layer=LAYER.WG)
+
+    c.add_port(p1, name="o1")
+    c.add_port(p1, name="o2", keep_mirror=True)
+
+    assert c["o1"].trans.is_mirror() is False
+    assert c["o2"].trans.is_mirror() is True
+
+
+def test_addports_keep_mirror(LAYER):
+    c = kf.KCell()
+
+    ports = [
+        kf.Port(
+            name=f"{i}",
+            width=1000,
+            layer=LAYER.WG,
+            trans=kf.kdb.Trans(i, True, 0, 0),
+        )
+        for i in range(4)
+    ]
+
+    c.add_ports(ports, prefix="mirr_", keep_mirror=True)
+    c.add_ports(ports, prefix="nomirr_", keep_mirror=False)
+
+    for i in range(4):
+        t1 = c[f"mirr_{i}"].trans
+        t2 = c[f"nomirr_{i}"].trans
+
+        t2_mirr = t2.dup()
+        t2_mirr.mirror = not t2_mirr.is_mirror()
+
+        assert t1 == t2_mirr

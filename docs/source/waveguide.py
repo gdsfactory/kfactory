@@ -4,7 +4,7 @@ import kfactory as kf
 
 
 @kf.cell
-def waveguide(width: int, length: int, width_exclude: int) -> kf.KCell:
+def straight(width: int, length: int, width_exclude: int) -> kf.KCell:
     """Waveguide: Silicon on 1/0, Silicon exclude on 1/1"""
     c = kf.KCell()
     c.shapes(LAYER.SI).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
@@ -28,4 +28,4 @@ def waveguide(width: int, length: int, width_exclude: int) -> kf.KCell:
 
 
 if __name__ == "__main__":
-    kf.show(waveguide(2000, 50000, 5000))
+    kf.show(straight(2000, 50000, 5000))
