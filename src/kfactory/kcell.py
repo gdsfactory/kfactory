@@ -704,8 +704,12 @@ class Port:
 
     @dcplx_trans.setter
     def dcplx_trans(self, value: kdb.DCplxTrans) -> None:
-        self._dcplx_trans = value.dup()
-        self._trans = None
+        if value.is_complex():
+            self._dcplx_trans = value.dup()
+            self._trans = None
+        else:
+            self._trans = value.dup().s_trans().to_itype(self.kcl.dbu)
+            self._dcplx_trans = None
 
     @property
     def angle(self) -> int:
