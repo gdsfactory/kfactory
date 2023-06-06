@@ -19,11 +19,11 @@ The slabs and excludes can be given in the form of an
 from ... import KCell, LayerEnum, cell, kdb
 from ...utils import LayerEnclosure
 
-__all__ = ["waveguide"]
+__all__ = ["straight"]
 
 
 @cell
-def waveguide(
+def straight(
     width: int,
     length: int,
     layer: int | LayerEnum,

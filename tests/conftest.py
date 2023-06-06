@@ -23,47 +23,47 @@ def wg_enc(LAYER):
 
 
 @pytest.fixture
-def waveguide_factory(LAYER, wg_enc):
-    return partial(kf.cells.dbu.waveguide, layer=LAYER.WG, enclosure=wg_enc)
+def straight_factory(LAYER, wg_enc):
+    return partial(kf.cells.dbu.straight, layer=LAYER.WG, enclosure=wg_enc)
 
 
 @pytest.fixture
-def waveguide(LAYER, wg_enc) -> kf.KCell:
-    return kf.cells.waveguide.waveguide(
+def straight(LAYER, wg_enc) -> kf.KCell:
+    return kf.cells.straight.straight(
         width=0.5, length=1, layer=LAYER.WG, enclosure=wg_enc
     )
 
 
 @pytest.fixture
-def waveguide_blank(LAYER):
-    return kf.cells.waveguide.waveguide(width=0.5, length=1, layer=LAYER.WG)
+def straight_blank(LAYER):
+    return kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
 
 
 @pytest.fixture
 def bend90(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=90
+        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
 def bend180(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=180
+        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
     )
 
 
 @pytest.fixture
 def bend90_euler(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=90
+        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
 def bend180_euler(LAYER, wg_enc) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, theta=180
+        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
     )
 
 
@@ -93,30 +93,30 @@ def optical_port(LAYER):
 
 
 @pytest.fixture
-def cells(bend90, bend180, bend90_euler, taper, waveguide) -> list[kf.KCell]:
+def cells(bend90, bend180, bend90_euler, taper, straight) -> list[kf.KCell]:
     return [
         bend90,
         bend180,
         bend90_euler,
         taper,
-        waveguide,
+        straight,
     ]
 
 
 @pytest.fixture
-def pdk(LAYER, waveguide_factory, wg_enc):
+def pdk(LAYER, straight_factory, wg_enc):
     pdk = kf.pdk.Pdk(
         layers=LAYER,
         name="TEST_PDK",
         cell_factories={
-            "wg": waveguide_factory,
+            "wg": straight_factory,
             "bend": kf.cells.circular.bend_circular,
             "bend_euler": kf.cells.euler.bend_euler,
             "taper": kf.cells.taper.taper,
             "bezier": kf.cells.bezier.bend_s,
         },
     )
-    pdk.register_cells(waveguide=waveguide_factory)
+    pdk.register_cells(straight=straight_factory)
     pdk.register_enclosures(wg=wg_enc)
     pdk.activate()
     return pdk

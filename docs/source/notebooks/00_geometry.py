@@ -241,7 +241,7 @@ c.plot()
 # %% [markdown]
 # ## Ports
 #
-# Your straights wg1/wg2/wg3 are instances to other waveguide cells.
+# Your straights wg1/wg2/wg3 are instances to other straight cells.
 #
 # If you want to add ports to the new Cell `c` you can use `add_port`, where you can create a new port or use an instance an existing port from the underlying instance.
 
@@ -394,7 +394,7 @@ c
 
 # %%
 c = kf.KCell()
-wg = c << kf.cells.waveguide.waveguide(width=0.5, length=1, layer=0)
+wg = c << kf.cells.straight.straight(width=0.5, length=1, layer=0)
 bend = c << kf.cells.euler.bend_euler(width=0.5, radius=1, layer=0)
 
 bend.connect("o1", wg.ports["o2"])  # connects follow Source, destination syntax
