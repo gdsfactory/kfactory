@@ -22,7 +22,8 @@ dependencies = [
 	"scipy",
 	"ruamel.yaml",
 	"cachetools >= 5.2.0",
-  "pydantic",
+  "pydantic >= 2.0b2",
+	"pydantic-settings >= 2.0b1",
 	"loguru",
 	"tomli",
 ]
@@ -103,8 +104,6 @@ strict = true
 exclude = [
 	"tests",
 	"src/kfactory/widgets/interactive.py",
-	# "src/kfactory/technology",
-	# "src/kfactory/pdk.py",
 ]
 plugins = "pydantic.mypy, numpy.typing.mypy_plugin"
 
