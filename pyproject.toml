@@ -103,8 +103,8 @@ strict = true
 exclude = [
 	"tests",
 	"src/kfactory/widgets/interactive.py",
-	"src/kfactory/technology",
-	"src/kfactory/pdk.py",
+	# "src/kfactory/technology",
+	# "src/kfactory/pdk.py",
 ]
 plugins = "pydantic.mypy, numpy.typing.mypy_plugin"
 

@@ -257,7 +257,7 @@ class KCLayout(kdb.Layout):
         self.kcells: dict[int, "KCell"] = {}
         kdb.Layout.__init__(self, editable)
         self.rename_function: Callable[..., None] = rename_clockwise
-        self.pdk = pdk
+        self.pdk: Pdk | None = pdk
 
     def dup(self, init_cells: bool = True) -> "KCLayout":
         """Create a duplication of the `~KCLayout` object.
