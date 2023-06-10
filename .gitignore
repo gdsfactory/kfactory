@@ -1,4 +1,3 @@
-*.gds
 *.txt
 *.ports
 *.json
@@ -6,7 +5,6 @@
 *.tar
 *.zip
 .idea
-gds/
 Pipfile
 docs/_build/
 site/
