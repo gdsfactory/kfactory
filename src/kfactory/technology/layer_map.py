@@ -2,9 +2,12 @@
 from __future__ import annotations
 
 import pathlib
+from json import loads
+from typing import Any
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, model_validator
 from pydantic.color import Color
+from pydantic.functional_serializers import field_serializer
 from ruamel.yaml import YAML
 
 from .. import lay
@@ -26,6 +29,16 @@ class LayerPropertiesModel(BaseModel):
     transparent: bool = False
     valid: bool = True
 
+    @model_validator(mode="before")
+    def color_to_frame_filll(cls, data: dict[str, Any]) -> dict[str, Any]:
+        if "color" in data:
+            if "fill_color" not in data:
+                data["fill_color"] = data["color"]
+            if "frame_color" not in data:
+                data["frame_color"] = data["color"]
+            del data["color"]
+        return data
+
     @field_validator("dither_pattern", mode="before")
     def dither_to_index(cls, v: str | int) -> int:
         """Convert string to the index with the dict dither2index."""
@@ -33,6 +46,12 @@ class LayerPropertiesModel(BaseModel):
             return dither2index[v]
         else:
             return v
+
+    # @staticmethod
+    @field_serializer("dither_pattern")
+    def dither_to_json(value: int) -> str:  # type: ignore[misc]
+        """Convert dither int to string key on json dump."""
+        return index2dither[value]
 
 
 class LayerGroupModel(BaseModel):
@@ -70,6 +89,68 @@ def yaml_to_lyp(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
     lv.save_layer_props(str(out))
 
 
+def lyp_to_yaml(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
+    """Convert a lyp file to a YAML ffile."""
+    f = pathlib.Path(inp).resolve()
+    assert f.exists()
+
+    yaml = YAML()
+
+    lv = lay.LayoutView()
+    lv.load_layer_props(str(f))
+
+    iter = lv.begin_layers()
+    layers: list[LayerGroupModel | LayerPropertiesModel] = []
+
+    while not iter.at_end():
+        lpnr = iter.current()
+        if lpnr.has_children():
+            layers.append(
+                LayerGroupModel(name=lpnr.name, members=kl2group(iter.first_child()))
+            )
+        else:
+            layers.append(kl2lp(lpnr))
+        iter.next_sibling(1)
+
+    lyp_m = LypModel(layers=layers)
+
+    yaml.dump(loads(lyp_m.model_dump_json()), pathlib.Path(out))
+
+
+def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
+    lp = LayerPropertiesModel(
+        name=kl.name.rstrip(f" - {kl.source_layer}/{kl.source_datatype}"),
+        layer=(kl.source_layer, kl.source_datatype),
+        frame_color=Color(hex(kl.frame_color)) if kl.frame_color else None,
+        fill_color=Color(hex(kl.fill_color)) if kl.fill_color else None,
+        dither_patter=index2dither[kl.dither_pattern],
+        visible=kl.visible,
+        width=kl.width,
+        xfill=kl.width,
+        layer_to_name=kl.name.endswith(f" - {kl.source_layer}/{kl.source_datatype}"),
+        transparent=kl.transparent,
+        valid=kl.valid,
+    )
+
+    return lp
+
+
+def kl2group(
+    iter: lay.LayerPropertiesIterator,
+) -> list[LayerGroupModel | LayerPropertiesModel]:
+    members: list[LayerGroupModel | LayerPropertiesModel] = []
+    while not iter.at_end():
+        lpnr = iter.current()
+        if lpnr.has_children():
+            members.append(
+                LayerGroupModel(name=lpnr.name, members=kl2group(iter.first_child()))
+            )
+        else:
+            members.append(kl2lp(lpnr))
+        iter.next_sibling(1)
+    return members
+
+
 def lp2kl(lp: LayerPropertiesModel) -> lay.LayerPropertiesNode:
     """LayerPropertiesModel to KLayout LayerPropertiesNode."""
     kl_lp = lay.LayerPropertiesNode()
@@ -79,9 +160,16 @@ def lp2kl(lp: LayerPropertiesModel) -> lay.LayerPropertiesNode:
     )
     kl_lp.source = f"{lp.layer[0]}/{lp.layer[1]}"
     if lp.frame_color:
-        kl_lp.frame_color = int(lp.frame_color.as_hex()[1:], 16)
+        hex_n = lp.frame_color.as_hex()[1:]
+        if len(hex_n) < 6:
+            hex_n = "".join(x * 2 for x in hex_n)
+        kl_lp.frame_color = int(hex_n, 16)
     if lp.fill_color:
-        kl_lp.fill_color = int(lp.fill_color.as_hex()[1:], 16)
+        hex_n = lp.fill_color.as_hex()[1:]
+        if len(hex_n) < 6:
+            hex_n = "".join(x * 2 for x in hex_n)
+        kl_lp.fill_color = int(hex_n, 16)
+
     kl_lp.dither_pattern = lp.dither_pattern
     kl_lp.visible = lp.visible
     kl_lp.width = lp.width
