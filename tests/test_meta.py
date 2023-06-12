@@ -9,18 +9,18 @@ from tempfile import NamedTemporaryFile
 #             print(meta.name, meta.value)
 
 
-def test_metainfo_set(waveguide):
-    ports = waveguide.ports.copy()
+def test_metainfo_set(straight):
+    ports = straight.ports.copy()
 
-    waveguide._locked = False
-    waveguide.set_meta_data()
+    straight._locked = False
+    straight.set_meta_data()
 
-    waveguide.ports = kf.Ports(kcl=waveguide.kcl)
+    straight.ports = kf.Ports(kcl=straight.kcl)
 
-    waveguide.get_meta_data()
+    straight.get_meta_data()
 
     for i, port in enumerate(ports):
-        meta_port = waveguide.ports[i]
+        meta_port = straight.ports[i]
 
         assert port.name == meta_port.name
         assert port.width == meta_port.width
@@ -29,18 +29,18 @@ def test_metainfo_set(waveguide):
         assert port.port_type == meta_port.port_type
 
 
-def test_metainfo_read(waveguide):
+def test_metainfo_read(straight):
     with NamedTemporaryFile("a") as t:
         save = kf.default_save()
         save.write_context_info = True
-        waveguide.kcl.write(t.name)
+        straight.kcl.write(t.name)
 
         kcl = kf.KCLayout()
         kcl.read(t.name)
 
-        wg_read = kcl[waveguide.name]
+        wg_read = kcl[straight.name]
         wg_read.get_meta_data()
-        for i, port in enumerate(waveguide.ports):
+        for i, port in enumerate(straight.ports):
             read_port = wg_read.ports[i]
 
             assert port.name == read_port.name

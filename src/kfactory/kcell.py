@@ -19,9 +19,7 @@ from enum import Enum, IntEnum
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
-
-from typing import TYPE_CHECKING, Any, Literal, TypeVar, cast, overload
-
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, cast, overload
 
 import cachetools.func
 import numpy as np
@@ -1711,7 +1709,6 @@ class KCell:
         else:
             return self._kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
 
-
     def set_meta_data(self) -> None:
         """Set metadata of the Cell.
 
@@ -1743,13 +1740,16 @@ class KCell:
             if port._trans:
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
-                        f"kfactory:ports:{i}:trans", port._trans, None, True
+                        f"kfactory:ports:{i}:trans", port._trans.to_s(), None, True
                     )
                 )
             elif port._dcplx_trans:
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
-                        f"kfactory:ports:{i}:dcplx_trans", port._dcplx_trans, None, True
+                        f"kfactory:ports:{i}:dcplx_trans",
+                        port._dcplx_trans.to_s(),
+                        None,
+                        True,
                     )
                 )
 
@@ -1821,7 +1821,6 @@ class KCell:
     def ymax(self) -> int:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self._kdb_cell.bbox().top
-
 
 
 class Instance:
