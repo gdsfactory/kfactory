@@ -74,7 +74,7 @@ def test_rename_default(func) -> None:
     ]
 
 
-def test_rename_orientatioin() -> None:
+def test_rename_orientation() -> None:
     cell = port_tests(port.rename_by_direction)
 
     dir_names = {0: "E", 1: "N", 2: "W", 3: "S"}
@@ -111,9 +111,6 @@ def test_rename_setter():
     )
     c2.create_port(trans=kf.kdb.Trans(), width=1000, layer=kcl.layer(1, 0))
     c2.autorename_ports()
-
-    print(c1.ports)
-    print(c2.ports)
 
     assert c1.ports[0].name == "o1"
     assert c2.ports[0].name == "W0"

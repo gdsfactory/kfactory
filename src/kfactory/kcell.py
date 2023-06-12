@@ -11,22 +11,22 @@ ports and other inf from instances.
 import functools
 import importlib
 import importlib.util
+import inspect
 import json
 import socket
 from collections.abc import Callable, Hashable, Iterable, Iterator
 from enum import Enum, IntEnum
 from hashlib import sha3_512
-from inspect import Parameter, signature
 from pathlib import Path
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, Any, Literal, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, cast, overload
 
 import cachetools.func
 import numpy as np
 import ruamel.yaml
 from typing_extensions import ParamSpec
 
-from . import kdb
+from . import kdb, lay
 from .conf import config
 from .port import rename_clockwise
 
@@ -35,9 +35,41 @@ if TYPE_CHECKING:
 
 
 KCellParams = ParamSpec("KCellParams")
-
 AnyTrans = TypeVar(
     "AnyTrans", bound=kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans
+)
+SerializableShape: TypeAlias = (
+    kdb.Box
+    | kdb.DBox
+    | kdb.Edge
+    | kdb.DEdge
+    | kdb.EdgePair
+    | kdb.DEdgePair
+    | kdb.EdgePairs
+    | kdb.Edges
+    | lay.LayerProperties
+    | kdb.Matrix2d
+    | kdb.Matrix3d
+    | kdb.Path
+    | kdb.DPath
+    | kdb.Point
+    | kdb.DPoint
+    | kdb.Polygon
+    | kdb.DPolygon
+    | kdb.SimplePolygon
+    | kdb.DSimplePolygon
+    | kdb.Region
+    | kdb.Text
+    | kdb.DText
+    | kdb.Texts
+    | kdb.Trans
+    | kdb.DTrans
+    | kdb.CplxTrans
+    | kdb.ICplxTrans
+    | kdb.DCplxTrans
+    | kdb.VCplxTrans
+    | kdb.Vector
+    | kdb.DVector
 )
 
 
@@ -165,6 +197,7 @@ def default_save() -> kdb.SaveLayoutOptions:
     save.gds2_write_cell_properties = True
     save.gds2_write_file_properties = True
     save.gds2_write_timestamps = False
+    # save.write_context_info = False  # True
 
     return save
 
@@ -294,15 +327,19 @@ class KCLayout(kdb.Layout):
                 if self.cell(obj) is None:
                     raise
 
-                c = self.cell(obj)
-                return KCell(name=c.name, kcl=self, kdb_cell=self.cell(obj))
+                kdb_c = self.cell(obj)
+                c = KCell(name=kdb_c.name, kcl=self, kdb_cell=self.cell(obj))
+                c.get_meta_data()
+                return c
         else:
             if self.cell(obj) is not None:
                 try:
                     return self.kcells[self.cell(obj).cell_index()]
                 except KeyError:
-                    c = self.cell(obj)
-                    return KCell(name=c.name, kcl=self, kdb_cell=self.cell(obj))
+                    kdb_c = self.cell(obj)
+                    c = KCell(name=kdb_c.name, kcl=self, kdb_cell=self.cell(obj))
+                    c.get_meta_data()
+                    return c
             from pprint import pformat
 
             raise ValueError(
@@ -337,26 +374,50 @@ class KCLayout(kdb.Layout):
         if register_cells:
             new_cells = set(self.cells("*")) - cells
             for c in new_cells:
-                KCell(kdb_cell=c, kcl=self)
+                kc = KCell(kdb_cell=c, kcl=self)
+                kc.get_meta_data()
 
         return lm
 
-    def write(  # type: ignore[override]
+    @overload  # type: ignore[override]
+    def write(self, filename: str | Path) -> None:
+        ...
+
+    @overload
+    def write(
         self,
         filename: str | Path,
-        gzip: bool = False,
+        options: kdb.SaveLayoutOptions,
+    ) -> None:
+        ...
+
+    @overload
+    def write(
+        self,
+        filename: str | Path,
         options: kdb.SaveLayoutOptions = default_save(),
+        set_meta: bool = True,
+    ) -> None:
+        ...
+
+    def write(
+        self,
+        filename: str | Path,
+        options: kdb.SaveLayoutOptions = default_save(),
+        set_meta: bool = True,
     ) -> None:
         """Write a GDS file into the existing Layout.
 
         Args:
             filename: Path of the GDS file.
-            gzip: directly make the GDS a .gds.gz file.
             options: KLayout options to load from the GDS. Can determine how merge
                 conflicts are handled for example. See
                 https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
+            set_meta: Make sure all the cells have their metadata set
         """
-        return kdb.Layout.write(self, str(filename), options)
+        for kcell in self.kcells.values():
+            kcell.set_meta_data()
+        return super().write(str(filename), options)
 
 
 kcl = KCLayout()
@@ -459,6 +520,7 @@ class Port:
     layer: int | LayerEnum
     _trans: kdb.Trans | None
     _dcplx_trans: kdb.DCplxTrans | None
+    info: dict[str, int | float | str]
     port_type: str
     d: "UMPort"
 
@@ -472,7 +534,7 @@ class Port:
         trans: kdb.Trans,
         kcl: KCLayout = kcl,
         port_type: str = "optical",
-        info: dict[str, Any] = {},
+        info: dict[str, int | float | str] = {},
     ):
         ...
 
@@ -486,7 +548,7 @@ class Port:
         dcplx_trans: kdb.DCplxTrans,
         kcl: KCLayout = kcl,
         port_type: str = "optical",
-        info: dict[str, Any] = {},
+        info: dict[str, int | float | str] = {},
     ):
         ...
 
@@ -502,7 +564,7 @@ class Port:
         position: tuple[int, int],
         mirror_x: bool = False,
         kcl: KCLayout = kcl,
-        info: dict[str, Any] = {},
+        info: dict[str, int | float | str] = {},
     ):
         ...
 
@@ -518,7 +580,7 @@ class Port:
         dposition: tuple[float, float],
         mirror_x: bool = False,
         kcl: KCLayout = kcl,
-        info: dict[str, Any] = {},
+        info: dict[str, int | float | str] = {},
     ):
         ...
 
@@ -539,7 +601,7 @@ class Port:
         mirror_x: bool = False,
         port: "Port | None" = None,
         kcl: KCLayout = kcl,
-        info: dict[str, Any] = {},
+        info: dict[str, int | float | str] = {},
     ):
         """Create a port from dbu or um based units."""
         self.kcl = kcl
@@ -889,6 +951,7 @@ class KCell:
 
     yaml_tag = "!KCell"
     _ports: "Ports"
+    settings: dict[str, str | float | int | SerializableShape]
 
     def __init__(
         self,
@@ -911,7 +974,7 @@ class KCell:
         self.kcl = kcl
         self.insts: Instances = Instances()
         self.settings: dict[str, Any] = {}
-        self.info: dict[str, Any] = {}
+        self.info: dict[str, int | float | str] = {}
         self._locked = False
         if name is None:
             _name = "Unnamed_!"
@@ -1518,6 +1581,8 @@ class KCell:
 
         See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
         """
+        for kcell in (self.kcl[ci] for ci in self.called_cells()):
+            kcell.set_meta_data()
         return self._kdb_cell.write(str(filename), save_options)
 
     @classmethod
@@ -1643,6 +1708,100 @@ class KCell:
             )
         else:
             return self._kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
+
+    def set_meta_data(self) -> None:
+        """Set metadata of the Cell.
+
+        Currently, ports, settings and info will be set.
+        """
+        for i, port in enumerate(self.ports):
+            if port.name:
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo(
+                        f"kfactory:ports:{i}:name", port.name, None, True
+                    )
+                )
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(
+                    f"kfactory:ports:{i}:layer",
+                    self.kcl.get_info(port.layer).to_s(),
+                    None,
+                    True,
+                )
+            )
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(f"kfactory:ports:{i}:width", port.width, None, True)
+            )
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(
+                    f"kfactory:ports:{i}:port_type", port.port_type, None, True
+                )
+            )
+            if port._trans:
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo(
+                        f"kfactory:ports:{i}:trans", port._trans.to_s(), None, True
+                    )
+                )
+                print(self.meta_info(f"kfactory:ports:{i}:trans").value)
+            elif port._dcplx_trans:
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo(
+                        f"kfactory:ports:{i}:dcplx_trans",
+                        port._dcplx_trans.to_s(),
+                        None,
+                        True,
+                    )
+                )
+
+        for name, setting in self.settings.items():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
+            )
+        for name, info in self.info.items():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
+            )
+
+    def get_meta_data(self) -> None:
+        """Read metadata from the KLayout Layout object."""
+        port_dict = {}
+        for meta in self.each_meta_info():
+            if meta.name.startswith("kfactory:ports"):
+                i, _type = meta.name.lstrip("kfactory:ports:").split(":")
+                if i not in port_dict:
+                    port_dict[i] = {_type: meta.value}
+                else:
+                    port_dict[i][_type] = meta.value
+            elif meta.name.startswith("kfactory:info"):
+                self.info[meta.name.lstrip("kfactory:info:")] = meta.value
+            elif meta.name.startswith("kfactory:settings"):
+                self.settings[meta.name.lstrip("kfactory:settings:")] = meta.value
+
+        # ports = Ports()
+        self.ports = Ports(self.kcl)
+        for index in sorted(port_dict.keys()):
+            _d = port_dict[index]
+            name = _d.get("name", None)
+            port_type = _d["port_type"]
+            layer = self.kcl.layer(kdb.LayerInfo.from_string(_d["layer"]))
+            width = _d["width"]
+            trans = _d.get("trans", None)
+            dcplx_trans = _d.get("dcplx_trans", None)
+            _port = Port(
+                name=name,
+                width=width,
+                layer=layer,
+                trans=kdb.Trans.R0,
+                kcl=self.kcl,
+                port_type=port_type,
+            )
+            if trans:
+                _port.trans = kdb.Trans.from_s(trans)
+            elif dcplx_trans:
+                _port.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
+
+            self.add_port(_port, keep_mirror=True)
 
     @property
     def xmin(self) -> int:
@@ -2582,7 +2741,7 @@ def cell(
     def decorator_autocell(
         f: Callable[KCellParams, KCell]
     ) -> Callable[KCellParams, KCell]:
-        sig = signature(f)
+        sig = inspect.signature(f)
 
         # previously was a KCellCache, but dict should do for most case
         cache: dict[int, Any] = {}
@@ -2604,7 +2763,7 @@ def cell(
             for key, value in params.items():
                 if isinstance(value, dict):
                     params[key] = dict_to_frozen_set(value)
-                if value == Parameter.empty:
+                if value == inspect.Parameter.empty:
                     del_parameters.append(key)
 
             for param in del_parameters:
@@ -2781,8 +2940,6 @@ def show(
     delete = False
 
     # Find the file that calls stack
-    # stk = inspect.stack()[-1]
-
     try:
         stk = inspect.getouterframes(inspect.currentframe())
         frame = stk[2]
