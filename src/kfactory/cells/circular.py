@@ -12,7 +12,7 @@ from ..utils import LayerEnclosure, extrude_path
 __all__ = ["bend_circular"]
 
 
-@cell
+@cell(snap_ports=False)
 def bend_circular(
     width: float,
     radius: float,
