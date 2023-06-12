@@ -417,7 +417,7 @@ class KCLayout(kdb.Layout):
         """
         for kcell in self.kcells.values():
             kcell.set_meta_data()
-        return kdb.Layout.write(self, str(filename), options)
+        return super().write(str(filename), options)
 
 
 kcl = KCLayout()
@@ -1724,7 +1724,7 @@ class KCell:
             self.add_meta_info(
                 kdb.LayoutMetaInfo(
                     f"kfactory:ports:{i}:layer",
-                    self.kcl.get_info(port.layer),
+                    self.kcl.get_info(port.layer).to_s(),
                     None,
                     True,
                 )
@@ -1743,6 +1743,7 @@ class KCell:
                         f"kfactory:ports:{i}:trans", port._trans.to_s(), None, True
                     )
                 )
+                print(self.meta_info(f"kfactory:ports:{i}:trans").value)
             elif port._dcplx_trans:
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
@@ -1783,7 +1784,7 @@ class KCell:
             _d = port_dict[index]
             name = _d.get("name", None)
             port_type = _d["port_type"]
-            layer = self.kcl.layer(_d["layer"])
+            layer = self.kcl.layer(kdb.LayerInfo.from_string(_d["layer"]))
             width = _d["width"]
             trans = _d.get("trans", None)
             dcplx_trans = _d.get("dcplx_trans", None)
