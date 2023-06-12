@@ -1583,6 +1583,7 @@ class KCell:
         """
         for kcell in (self.kcl[ci] for ci in self.called_cells()):
             kcell.set_meta_data()
+        self.set_meta_data()
         return self._kdb_cell.write(str(filename), save_options)
 
     @classmethod
