@@ -97,8 +97,8 @@ def test_cells(cell_name: str) -> None:
     kcl_ref.read(gds_ref / f"{cell.name}.gds")
     ref_cell = kcl_ref[kcl_ref.top_cell().name]
 
-    for layer in kcl_ref.layer_infos():
-        layer = kcl_ref.layer(layer)
+    for layerinfo in kcl_ref.layer_infos():
+        layer = kcl_ref.layer(layerinfo)
         region_run = kdb.Region(run_cell.begin_shapes_rec(layer))
         region_ref = kdb.Region(ref_cell.begin_shapes_rec(layer))
 
@@ -119,7 +119,9 @@ def test_cells(cell_name: str) -> None:
             c << c_xor
             c.show()
 
-            print(f"Differences found in {cell!r} on layer {layer_tuple}")
+            kf.config.logger.critical(
+                f"Differences found in {cell!r} on layer {layer_tuple}"
+            )
             val = input("Save current GDS as new reference (Y)? [Y/n]")
             if not val.upper().startswith("N"):
                 logger.info(f"replacing file {str(ref_file)!r}")

@@ -15,7 +15,7 @@ import inspect
 import json
 import socket
 from collections.abc import Callable, Hashable, Iterable, Iterator
-from enum import Enum, IntEnum
+from enum import Enum, IntEnum, IntFlag, auto
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
@@ -82,7 +82,7 @@ class PROPID(IntEnum):
 class LockedError(AttributeError):
     """Raised when a locked cell is being modified."""
 
-    @config.logger.catch
+    @config.logger.catch(reraise=True)
     def __init__(self, kcell: "KCell"):
         """Throw _locked error."""
         super().__init__(
@@ -95,7 +95,7 @@ class LockedError(AttributeError):
 class PortWidthMismatch(ValueError):
     """Error thrown when two ports don't have a matching `width`."""
 
-    @config.logger.catch
+    @config.logger.catch(reraise=True)
     def __init__(
         self,
         inst: "Instance",
@@ -122,7 +122,7 @@ class PortWidthMismatch(ValueError):
 class PortLayerMismatch(ValueError):
     """Error thrown when two ports don't have a matching `layer`."""
 
-    @config.logger.catch
+    @config.logger.catch(reraise=True)
     def __init__(
         self,
         lib: "KCLayout",
@@ -160,7 +160,7 @@ class PortLayerMismatch(ValueError):
 class PortTypeMismatch(ValueError):
     """Error thrown when two ports don't have a matching `port_type`."""
 
-    @config.logger.catch
+    @config.logger.catch(reraise=True)
     def __init__(
         self,
         inst: "Instance",
@@ -200,6 +200,36 @@ def default_save() -> kdb.SaveLayoutOptions:
     # save.write_context_info = False  # True
 
     return save
+
+
+class PortCheck(IntFlag):
+    opposite = auto()
+    width = auto()
+    layer = auto()
+    port_type = auto()
+    all_opposite = opposite + width + port_type + layer
+    all_overlap = width + port_type + layer
+
+
+@config.logger.catch(reraise=True)
+def port_check(
+    p1: "Port", p2: "Port", checks: PortCheck = PortCheck.all_opposite
+) -> None:
+    if checks & PortCheck.opposite:
+        assert (
+            p1.trans == p2.trans * kdb.Trans.R180
+            or p1.trans == p2.trans * kdb.Trans.M90
+        ), ("Transformations of ports not matching for opposite check" f"{p1=} {p2=}")
+    if (checks & PortCheck.opposite) == 0:
+        assert (
+            p1.trans == p2.trans or p1.trans == p2.trans * kdb.Trans.M0
+        ), f"Transformations of ports not matching for overlapping check {p1=} {p2=}"
+    if checks & PortCheck.width:
+        assert p1.width == p2.width, f"Width mismatch for {p1=} {p2=}"
+    if checks & PortCheck.layer:
+        assert p1.layer == p2.layer, f"Layer mismatch for {p1=} {p2=}"
+    if checks & PortCheck.port_type:
+        assert p1.port_type == p2.port_type, f"Port type mismatch for {p1=} {p2=}"
 
 
 class KCLayout(kdb.Layout):
@@ -1744,7 +1774,6 @@ class KCell:
                         f"kfactory:ports:{i}:trans", port._trans.to_s(), None, True
                     )
                 )
-                print(self.meta_info(f"kfactory:ports:{i}:trans").value)
             elif port._dcplx_trans:
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
@@ -1823,6 +1852,143 @@ class KCell:
     def ymax(self) -> int:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self._kdb_cell.bbox().top
+
+    def netlist(self, port_types: tuple[str] = ("optical",)) -> kdb.Netlist:
+        """Return a netlist with this cell as the top cell."""
+        netlist = kdb.Netlist()
+
+        for ci in self.called_cells():
+            self.kcl[ci].circuit(netlist, port_types=port_types)
+
+        self.circuit(netlist, port_types=port_types)
+
+        return netlist
+
+    @cachetools.cached(cache={})
+    def circuit(
+        self, netlist: kdb.Netlist, port_types: tuple[str] = ("optical",)
+    ) -> None:
+        """Create the circuit of the KCell in the given netlist."""
+
+        def port_filter(num_port: tuple[int, Port]) -> bool:
+            return num_port[1].port_type in port_types
+
+        circ = kdb.Circuit()
+        circ.name = self.name
+        circ.cell_index = self.cell_index()
+
+        inst_ports: dict[
+            str, dict[str, list[tuple[int, int, Instance, Port, kdb.SubCircuit]]]
+        ] = {}
+        cell_ports: dict[str, dict[str, list[tuple[int, Port]]]] = {}
+
+        # sort the cell's ports by position and layer
+
+        portnames: set[str] = set()
+
+        for i, port in filter(port_filter, enumerate(self.ports)):
+            _trans = port.trans.dup()
+            _trans.angle = _trans.angle % 2
+            _trans.mirror = False
+            layer_info = self.kcl.get_info(port.layer)
+            layer = f"{layer_info.layer}_{layer_info.datatype}"
+
+            if port.name in portnames:
+                raise ValueError(
+                    "Netlist extraction is not possible with"
+                    f" colliding port names. Duplicate name: {port.name}"
+                )
+
+            v = _trans.disp
+            h = f"{v.x}_{v.y}"
+            if h not in cell_ports:
+                cell_ports[h] = {}
+            if layer not in cell_ports[h]:
+                cell_ports[h][layer] = []
+            cell_ports[h][layer].append((i, port))
+
+            if port.name:
+                portnames.add(port.name)
+
+        # create nets and connect pins for each cell_port
+        for h, layer_dict in cell_ports.items():
+            for layer, _ports in layer_dict.items():
+                net = circ.create_net(
+                    "-".join(_port[1].name or f"{_port[0]}" for _port in _ports)
+                )
+                for i, port in _ports:
+                    pin = circ.create_pin(port.name or f"{i}")
+                    circ.connect_pin(pin, net)
+
+        # sort the ports of all instances by position and layer
+        for i, inst in enumerate(self.insts):
+            name = inst.name or f"{i}_{inst.cell.name}"
+            subc = circ.create_subcircuit(
+                netlist.circuit_by_cell_index(inst.cell_index), name
+            )
+
+            for j, port in filter(port_filter, enumerate(inst.ports)):
+                _trans = port.trans.dup()
+                _trans.angle = _trans.angle % 2
+                _trans.mirror = False
+                v = _trans.disp
+                h = f"{v.x}_{v.y}"
+                layer_info = self.kcl.get_info(port.layer)
+                layer = f"{layer_info.layer}_{layer_info.datatype}"
+                if h not in inst_ports:
+                    inst_ports[h] = {}
+                if layer not in inst_ports[h]:
+                    inst_ports[h][layer] = []
+                inst_ports[h][layer].append((i, j, inst, port, subc))
+
+        # go through each position and layer and connect ports to their matching cell
+        # port or connect the instance ports
+        for h, inst_layer_dict in inst_ports.items():
+            for layer, ports in inst_layer_dict.items():
+                if h in cell_ports and layer in cell_ports[h]:
+                    # connect a cell port to its matching instance port
+                    cellports = cell_ports[h][layer]
+
+                    assert len(cellports) == 1, (
+                        "Netlists with directly connect cell ports"
+                        " are currently not supported"
+                    )
+                    assert len(ports) == 1, (
+                        f"Multiple instance {[port[4] for port in ports]}"
+                        f"ports connected to the cell port {cellports[0]}"
+                        " this is currently not supported and most likely a bug"
+                    )
+
+                    inst_port = ports[0]
+                    port = inst_port[3]
+
+                    port_check(cellports[0][1], port, PortCheck.all_overlap)
+                    subc = inst_port[4]
+                    subc.connect_pin(
+                        subc.circuit_ref().pin_by_name(port.name or str(inst_port[1])),
+                        circ.net_by_name(cellports[0][1].name or f"{cellports[0][0]}"),
+                    )
+                else:
+                    # connect instance ports to each other
+                    name = "-".join(
+                        [
+                            (inst.name or str(i)) + "_" + (port.name or str(j))
+                            for i, j, inst, port, subc in ports
+                        ]
+                    )
+
+                    net = circ.create_net(name)
+                    assert len(ports) <= 2, (
+                        "Optical connection with more than two ports are not supported "
+                        f"{[_port[3] for _port in ports]}"
+                    )
+                    if len(ports) == 2:
+                        port_check(ports[0][3], ports[1][3], PortCheck.all_opposite)
+                        for i, j, inst, port, subc in ports:
+                            subc.connect_pin(
+                                subc.circuit_ref().pin_by_name(port.name or str(j)), net
+                            )
+        netlist.add(circ)
 
 
 class Instance:
@@ -2661,7 +2827,7 @@ def autocell(
     ...
 
 
-@config.logger.catch
+@config.logger.catch(reraise=True)
 def autocell(
     _func: Callable[KCellParams, KCell] | None = None,
     /,
@@ -2707,7 +2873,7 @@ def cell(
     ...
 
 
-@config.logger.catch
+@config.logger.catch(reraise=True)
 def cell(
     _func: Callable[KCellParams, KCell] | None = None,
     /,
