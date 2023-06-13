@@ -1883,12 +1883,22 @@ class KCell:
         cell_ports: dict[str, dict[str, list[tuple[int, Port]]]] = {}
 
         # sort the cell's ports by position and layer
+
+        portnames: set[str] = set()
+
         for i, port in filter(port_filter, enumerate(self.ports)):
             _trans = port.trans.dup()
             _trans.angle = _trans.angle % 2
             _trans.mirror = False
             layer_info = self.kcl.get_info(port.layer)
             layer = f"{layer_info.layer}_{layer_info.datatype}"
+
+            if port.name in portnames:
+                raise ValueError(
+                    "Netlist extraction is not possible with"
+                    f" colliding port names. Duplicate name: {port.name}"
+                )
+
             v = _trans.disp
             h = f"{v.x}_{v.y}"
             if h not in cell_ports:
@@ -1896,6 +1906,9 @@ class KCell:
             if layer not in cell_ports[h]:
                 cell_ports[h][layer] = []
             cell_ports[h][layer].append((i, port))
+
+            if port.name:
+                portnames.add(port.name)
 
         # create nets and connect pins for each cell_port
         for h, layer_dict in cell_ports.items():

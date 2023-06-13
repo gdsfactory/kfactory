@@ -52,8 +52,48 @@ def test_netlist_orientation(straight):
         c.netlist()
 
 
-def test_netlist_layers(LAYER):
+def test_netlist_portnames(LAYER):
+    c = kf.KCell("test_netlist_portnames")
+
+    swg = kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
+    swgclad = kf.cells.straight.straight(width=1, length=10, layer=LAYER.WGCLAD)
+
+    s1 = c << swg
+    s2 = c << swg
+
+    sc1 = c << swgclad
+    sc2 = c << swgclad
+
+    s2.connect("o1", s1, "o2")
+    sc2.connect("o1", sc1, "o2")
+
+    c.add_port(s1.ports["o1"])
+    c.add_port(sc1.ports["o1"])
+
+    with pytest.raises(ValueError):
+        c.netlist()
+
+
+def test_netlist_layer(LAYER):
     c = kf.KCell("test_netlist_layer")
 
     swg = kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
     swgclad = kf.cells.straight.straight(width=1, length=10, layer=LAYER.WGCLAD)
+
+    s1 = c << swg
+    s2 = c << swg
+
+    sc1 = c << swgclad
+    sc2 = c << swgclad
+
+    s2.connect("o1", s1, "o2")
+    sc2.connect("o1", sc1, "o2")
+
+    c.add_port(s1.ports["o1"])
+    c.add_port(sc1.ports["o1"])
+    c.add_port(s2.ports["o2"])
+    c.add_port(sc2.ports["o2"])
+
+    c.autorename_ports()
+
+    print(c.netlist())
