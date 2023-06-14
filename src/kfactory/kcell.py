@@ -7,6 +7,7 @@ and other convenience functions.
 ports and other inf from instances.
 
 """
+from __future__ import annotations
 
 import functools
 import importlib
@@ -19,7 +20,7 @@ from enum import Enum, IntEnum, IntFlag, auto
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, overload
 
 import cachetools.func
 import numpy as np
@@ -83,7 +84,7 @@ class LockedError(AttributeError):
     """Raised when a locked cell is being modified."""
 
     @config.logger.catch(reraise=True)
-    def __init__(self, kcell: "KCell"):
+    def __init__(self, kcell: KCell):
         """Throw _locked error."""
         super().__init__(
             f"KCell {kcell.name} has been locked already."
@@ -98,10 +99,10 @@ class PortWidthMismatch(ValueError):
     @config.logger.catch(reraise=True)
     def __init__(
         self,
-        inst: "Instance",
-        other_inst: "Instance | Port",
-        p1: "Port",
-        p2: "Port",
+        inst: Instance,
+        other_inst: Instance | Port,
+        p1: Port,
+        p2: Port,
         *args: Any,
     ):
         """Throw error for the two ports `p1`/`p1`."""
@@ -125,11 +126,11 @@ class PortLayerMismatch(ValueError):
     @config.logger.catch(reraise=True)
     def __init__(
         self,
-        lib: "KCLayout",
-        inst: "Instance",
-        other_inst: "Instance | Port",
-        p1: "Port",
-        p2: "Port",
+        lib: KCLayout,
+        inst: Instance,
+        other_inst: Instance | Port,
+        p1: Port,
+        p2: Port,
         *args: Any,
     ):
         """Throw error for the two ports `p1`/`p1`."""
@@ -163,10 +164,10 @@ class PortTypeMismatch(ValueError):
     @config.logger.catch(reraise=True)
     def __init__(
         self,
-        inst: "Instance",
-        other_inst: "Instance | Port",
-        p1: "Port",
-        p2: "Port",
+        inst: Instance,
+        other_inst: Instance | Port,
+        p1: Port,
+        p2: Port,
         *args: Any,
     ):
         """Throw error for the two ports `p1`/`p1`."""
@@ -212,9 +213,7 @@ class PortCheck(IntFlag):
 
 
 @config.logger.catch(reraise=True)
-def port_check(
-    p1: "Port", p2: "Port", checks: PortCheck = PortCheck.all_opposite
-) -> None:
+def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -> None:
     if checks & PortCheck.opposite:
         assert (
             p1.trans == p2.trans * kdb.Trans.R180
@@ -247,19 +246,19 @@ class KCLayout(kdb.Layout):
             them
     """
 
-    def __init__(self, editable: bool = True, pdk: "Pdk | None" = None) -> None:
+    def __init__(self, editable: bool = True, pdk: Pdk | None = None) -> None:
         """Create a library of cells.
 
         Args:
             editable: Open the KLayout Layout in editable mode if `True`.
             pdk: Pdk associated with the layout.
         """
-        self.kcells: dict[int, "KCell"] = {}
+        self.kcells: dict[int, KCell] = {}
         kdb.Layout.__init__(self, editable)
         self.rename_function: Callable[..., None] = rename_clockwise
         self.pdk: Pdk | None = pdk
 
-    def dup(self, init_cells: bool = True) -> "KCLayout":
+    def dup(self, init_cells: bool = True) -> KCLayout:
         """Create a duplication of the `~KCLayout` object.
 
         Args:
@@ -314,7 +313,7 @@ class KCLayout(kdb.Layout):
                 " unique or pass `allow_duplicate` when creating the library"
             )
 
-    def delete_cell(self, cell: "KCell | int") -> None:
+    def delete_cell(self, cell: KCell | int) -> None:
         """Delete a cell in the kcl object."""
         if isinstance(cell, int):
             super().delete_cell(cell)
@@ -324,7 +323,7 @@ class KCLayout(kdb.Layout):
             super().delete_cell(ci)
             del self.kcells[ci]
 
-    def register_cell(self, kcell: "KCell", allow_reregister: bool = False) -> None:
+    def register_cell(self, kcell: KCell, allow_reregister: bool = False) -> None:
         """Register an existing cell in the KCLayout object.
 
         Args:
@@ -333,7 +332,7 @@ class KCLayout(kdb.Layout):
                 Doesn't allow name duplication.
         """
 
-        def check_name(other: "KCell") -> bool:
+        def check_name(other: KCell) -> bool:
             return other._kdb_cell.name == kcell._kdb_cell.name
 
         if (kcell.cell_index() not in self.kcells) or allow_reregister:
@@ -344,7 +343,7 @@ class KCLayout(kdb.Layout):
                 " exists in the library"
             )
 
-    def __getitem__(self, obj: str | int) -> "KCell":
+    def __getitem__(self, obj: str | int) -> KCell:
         """Retrieve a cell by name(str) or index(int).
 
         Attrs:
@@ -472,11 +471,11 @@ class LayerEnum(int, Enum):
     datatype: int
 
     def __new__(  # type: ignore[misc]
-        cls: "LayerEnum",
+        cls: LayerEnum,
         layer: int,
         datatype: int,
         kcl: KCLayout = kcl,
-    ) -> "LayerEnum":
+    ) -> LayerEnum:
         """Create a new Enum.
 
         Because it needs to act like an integer an enum is created and expanded.
@@ -552,7 +551,7 @@ class Port:
     _dcplx_trans: kdb.DCplxTrans | None
     info: dict[str, int | float | str]
     port_type: str
-    d: "UMPort"
+    d: UMPort
 
     @overload
     def __init__(
@@ -629,7 +628,7 @@ class Port:
         position: tuple[int, int] | None = None,
         dposition: tuple[float, float] | None = None,
         mirror_x: bool = False,
-        port: "Port | None" = None,
+        port: Port | None = None,
         kcl: KCLayout = kcl,
         info: dict[str, int | float | str] = {},
     ):
@@ -687,12 +686,12 @@ class Port:
             self.port_type = port_type
 
     @classmethod
-    def from_yaml(cls: "type[Port]", constructor, node) -> "Port":  # type: ignore
+    def from_yaml(cls: type[Port], constructor, node) -> Port:  # type: ignore
         """Internal function used by the placer to convert yaml to a Port."""
         d = dict(constructor.construct_pairs(node))
         return cls(**d)
 
-    def copy(self, trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0) -> "Port":
+    def copy(self, trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0) -> Port:
         """Get a copy of a port.
 
         Args:
@@ -980,15 +979,16 @@ class KCell:
     """
 
     yaml_tag = "!KCell"
-    _ports: "Ports"
+    _ports: Ports
     settings: dict[str, str | float | int | SerializableShape]
+    d: UMKCell
 
     def __init__(
         self,
         name: str | None = None,
         kcl: KCLayout = kcl,
         kdb_cell: kdb.Cell | None = None,
-        ports: "Ports | None" = None,
+        ports: Ports | None = None,
     ):
         """Constructor of KCell.
 
@@ -1020,6 +1020,7 @@ class KCell:
         if kdb_cell is not None:
             for inst in kdb_cell.each_inst():
                 self.insts.append(Instance(self.kcl, inst))
+        self.d = UMKCell(self)
 
     def __getitem__(self, key: int | str | None) -> Port:
         """Returns port from instance."""
@@ -1062,7 +1063,7 @@ class KCell:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
         return getattr(self._kdb_cell, name)
 
-    def dup(self) -> "KCell":
+    def dup(self) -> KCell:
         """Copy the full cell.
 
         Sets `_locked` to `False`
@@ -1080,7 +1081,7 @@ class KCell:
         # c._locked = False
         return c
 
-    def __copy__(self) -> "KCell":
+    def __copy__(self) -> KCell:
         """Enables use of `copy.copy` and `copy.deep_copy`."""
         return self.dup()
 
@@ -1118,11 +1119,11 @@ class KCell:
 
     @classmethod
     def from_yaml(
-        cls: "Callable[..., KCell]",
+        cls: Callable[..., KCell],
         constructor: Any,
         node: Any,
         verbose: bool = False,
-    ) -> "KCell":
+    ) -> KCell:
         """Internal function used by the placer to convert yaml to a KCell."""
         d = ruamel.yaml.constructor.SafeConstructor.construct_mapping(
             constructor,
@@ -1322,12 +1323,12 @@ class KCell:
         return f"{self.name}: ports {port_names}, {len(self.insts)} instances"
 
     @property
-    def ports(self) -> "Ports":
+    def ports(self) -> Ports:
         """Ports associated with the cell."""
         return self._ports
 
     @ports.setter
-    def ports(self, new_ports: "InstancePorts | Ports") -> None:
+    def ports(self, new_ports: InstancePorts | Ports) -> None:
         if self._locked:
             raise LockedError(self)
         self._ports = new_ports.copy()
@@ -1388,67 +1389,42 @@ class KCell:
     @overload
     def create_inst(
         self,
-        cell: "KCell | int",
+        cell: KCell | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
-    ) -> "Instance":
+    ) -> Instance:
         ...
 
     @overload
     def create_inst(
         self,
-        cell: "KCell | int",
-        *,
-        dtrans: kdb.DTrans | kdb.DCplxTrans | kdb.DVector,
-    ) -> "Instance":
-        ...
-
-    @overload
-    def create_inst(
-        self,
-        cell: "KCell | int",
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector,
+        cell: KCell | int,
+        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
         *,
         a: kdb.Vector,
         b: kdb.Vector,
         na: int = 1,
         nb: int = 1,
-    ) -> "Instance":
-        ...
-
-    @overload
-    def create_inst(
-        self,
-        cell: "KCell | int",
-        *,
-        dtrans: kdb.DTrans | kdb.DCplxTrans,
-        a: kdb.DVector,
-        b: kdb.DVector,
-        na: int = 1,
-        nb: int = 1,
-    ) -> "Instance":
+    ) -> Instance:
         ...
 
     def create_inst(
         self,
-        cell: "KCell | int",
+        cell: KCell | int,
         trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans = kdb.Trans(),
-        dtrans: kdb.DTrans | kdb.DCplxTrans | kdb.DVector | None = None,
-        a: kdb.Vector | kdb.DVector | None = None,
-        b: kdb.Vector | kdb.DVector | None = None,
+        a: kdb.Vector | None = None,
+        b: kdb.Vector | None = None,
         na: int = 1,
         nb: int = 1,
-    ) -> "Instance":
+    ) -> Instance:
         """Add an instance of another KCell.
 
         Args:
             cell: The cell to be added
             trans: The integer transformation applied to the reference
-            dtrans: um transformation of the reference. If not `None`,
-                will overwrite trans`
-            a: Vector (DVector if trans is um based) for the array.
+            a: Vector for the array.
                 Needs to be in positive X-direction. Usually this is only a
                 Vector in x-direction. Some foundries won't allow other Vectors.
-            b: Vector (DVector if transs is um based) for the array.
+            b: Vector for the array.
                 Needs to be in positive Y-direction. Usually this is only a
                 Vector in x-direction. Some foundries won't allow other Vectors.
             na: Number of elements in direction of `a`
@@ -1464,30 +1440,12 @@ class KCell:
         else:
             ci = cell.cell_index()
 
-        if dtrans is None:
-            if a is None:
-                ca = self._kdb_cell.insert(kdb.CellInstArray(ci, trans))
-            else:
-                if b is None:
-                    b = kdb.Vector()
-                cast(kdb.DVector, a)
-                cast(kdb.DVector, b)
-                ca = self._kdb_cell.insert(
-                    kdb.CellInstArray(ci, trans, a, b, na, nb)  # type: ignore[arg-type]
-                )
+        if a is None:
+            ca = self._kdb_cell.insert(kdb.CellInstArray(ci, trans))
         else:
-            if a is None:
-                ca = self._kdb_cell.insert(kdb.DCellInstArray(ci, dtrans))
-            else:
-                if b is None:
-                    b = kdb.DVector()
-                cast(kdb.DVector, a)
-                cast(kdb.DVector, b)
-                ca = self._kdb_cell.insert(
-                    kdb.DCellInstArray(
-                        ci, dtrans, a, b, na, nb  # type: ignore[arg-type]
-                    )
-                )
+            if b is None:
+                b = kdb.Vector()
+            ca = self._kdb_cell.insert(kdb.CellInstArray(ci, trans, a, b, na, nb))
         inst = Instance(self.kcl, ca)
         self.insts.append(inst)
         return inst
@@ -1499,7 +1457,7 @@ class KCell:
         """Get the layer info, convenience for `klayout.db.Layout.layer`."""
         return self.kcl.layer(*args, **kwargs)
 
-    def __lshift__(self, cell: "KCell") -> "Instance":
+    def __lshift__(self, cell: KCell) -> Instance:
         """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
 
         Args:
@@ -1644,17 +1602,17 @@ class KCell:
             d["settings"] = node.settings
         return representer.represent_mapping(cls.yaml_tag, d)
 
-    def each_inst(self) -> Iterator["Instance"]:
+    def each_inst(self) -> Iterator[Instance]:
         """Iterates over all child instances (which may actually be instance arrays)."""
         yield from (Instance(self.kcl, inst) for inst in self._kdb_cell.each_inst())
 
-    def each_overlapping_inst(self, b: kdb.Box | kdb.DBox) -> Iterator["Instance"]:
+    def each_overlapping_inst(self, b: kdb.Box | kdb.DBox) -> Iterator[Instance]:
         """Gets the instances overlapping the given rectangle."""
         yield from (
             Instance(self.kcl, inst) for inst in self._kdb_cell.each_overlapping_inst(b)
         )
 
-    def each_touching_inst(self, b: kdb.Box | kdb.DBox) -> Iterator["Instance"]:
+    def each_touching_inst(self, b: kdb.Box | kdb.DBox) -> Iterator[Instance]:
         """Gets the instances overlapping the given rectangle."""
         yield from (
             Instance(self.kcl, inst) for inst in self._kdb_cell.each_touching_inst(b)
@@ -1662,21 +1620,21 @@ class KCell:
 
     @overload
     def insert(
-        self, inst: "Instance | kdb.CellInstArray | kdb.DCellInstArray"
-    ) -> "Instance":
+        self, inst: Instance | kdb.CellInstArray | kdb.DCellInstArray
+    ) -> Instance:
         ...
 
     @overload
     def insert(
-        self, inst: "kdb.CellInstArray | kdb.DCellInstArray", property_id: int
-    ) -> "Instance":
+        self, inst: kdb.CellInstArray | kdb.DCellInstArray, property_id: int
+    ) -> Instance:
         ...
 
     def insert(
         self,
-        inst: "Instance | kdb.CellInstArray | kdb.DCellInstArray",
+        inst: Instance | kdb.CellInstArray | kdb.DCellInstArray,
         property_id: int | None = None,
-    ) -> "Instance":
+    ) -> Instance:
         """Inserts a cell instance given by another reference."""
         if self._locked:
             raise LockedError(self)
@@ -1697,7 +1655,7 @@ class KCell:
         /,
         *,
         no_warn: bool = False,
-    ) -> "Instance":
+    ) -> Instance:
         ...
 
     @overload
@@ -1721,7 +1679,7 @@ class KCell:
         /,
         *,
         no_warn: bool = False,
-    ) -> "Instance | None":
+    ) -> Instance | None:
         """Transforms the instance or cell with the transformation given."""
         config.logger.warning(
             "You are transforming the KCell {}. It is highly discouraged to do this."
@@ -1991,6 +1949,106 @@ class KCell:
         netlist.add(circ)
 
 
+class UMKCell:
+    """Make the port able to dynamically give um based info."""
+
+    def __init__(self, parent: KCell):
+        """Constructor, just needs a pointer to the port.
+
+        Args:
+            parent: port that this should be attached to
+        """
+        self.parent = parent
+
+    @property
+    def xmin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.parent._kdb_cell.dbbox().left
+
+    @property
+    def ymin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.parent._kdb_cell.dbbox().bottom
+
+    @property
+    def xmax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.parent._kdb_cell.dbbox().right
+
+    @property
+    def ymax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.parent._kdb_cell.dbbox().top
+
+    @overload
+    def create_inst(
+        self,
+        cell: KCell | int,
+        *,
+        trans: kdb.DTrans | kdb.DCplxTrans | kdb.DVector = kdb.DTrans(),
+    ) -> Instance:
+        ...
+
+    @overload
+    def create_inst(
+        self,
+        cell: KCell | int,
+        *,
+        trans: kdb.DTrans | kdb.DCplxTrans | kdb.DVector = kdb.DTrans(),
+        a: kdb.DVector,
+        b: kdb.DVector,
+        na: int = 1,
+        nb: int = 1,
+    ) -> Instance:
+        ...
+
+    def create_inst(
+        self,
+        cell: KCell | int,
+        *,
+        trans: kdb.DTrans | kdb.DCplxTrans | kdb.DVector = kdb.DTrans(),
+        a: kdb.DVector | None = None,
+        b: kdb.DVector | None = None,
+        na: int = 1,
+        nb: int = 1,
+    ) -> Instance:
+        """Add an instance of another KCell.
+
+        Args:
+            cell: The cell to be added
+            trans: The integer transformation applied to the reference
+            a: Vector for the array.
+                Needs to be in positive X-direction. Usually this is only a
+                Vector in x-direction. Some foundries won't allow other Vectors.
+            b: Vector for the array.
+                Needs to be in positive Y-direction. Usually this is only a
+                Vector in x-direction. Some foundries won't allow other Vectors.
+            na: Number of elements in direction of `a`
+            nb: Number of elements in direction of `b`
+
+        Returns:
+            The created instance
+        """
+        if self.parent._locked:
+            raise LockedError(self.parent)
+        if isinstance(cell, int):
+            ci = cell
+        else:
+            ci = cell.cell_index()
+
+        if a is None:
+            ca = self.parent._kdb_cell.insert(kdb.DCellInstArray(ci, trans))
+        else:
+            if b is None:
+                b = kdb.DVector()
+            ca = self.parent._kdb_cell.insert(
+                kdb.DCellInstArray(ci, trans, a, b, na, nb)
+            )
+        inst = Instance(self.parent.kcl, ca)
+        self.parent.insts.append(inst)
+        return inst
+
+
 class Instance:
     """An Instance of a KCell.
 
@@ -2006,8 +2064,8 @@ class Instance:
     yaml_tag = "!Instance"
     _instance: kdb.Instance
     kcl: KCLayout
-    ports: "InstancePorts"
-    d: "UMInstance"
+    ports: InstancePorts
+    d: UMInstance
 
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
@@ -2183,7 +2241,7 @@ class Instance:
     def connect(
         self,
         port: str | Port | None,
-        other: "Instance",
+        other: Instance,
         other_port_name: str | None,
         *,
         mirror: bool = False,
@@ -2193,7 +2251,7 @@ class Instance:
     def connect(
         self,
         port: str | Port | None,
-        other: "Instance | Port",
+        other: Instance | Port,
         other_port_name: str | None = None,
         *,
         mirror: bool = False,
@@ -2483,6 +2541,48 @@ class UMInstance:
         """Mirror the instance at an y-axis."""
         self.parent.transform(kdb.DTrans(0, True, 0, 2 * y))
 
+    @property
+    def xmin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.parent._instance.dbbox().left
+
+    @xmin.setter
+    def xmin(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.parent.transform(kdb.DTrans(__val - self.parent.dbbox().left, 0))
+
+    @property
+    def ymin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.parent._instance.dbbox().bottom
+
+    @ymin.setter
+    def ymin(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.parent.transform(
+            kdb.DTrans(0, __val - self.parent._instance.dbbox().bottom)
+        )
+
+    @property
+    def xmax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.parent._instance.dbbox().right
+
+    @xmax.setter
+    def xmax(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.parent.transform(kdb.DTrans(__val - self.parent.dbbox().right, 0))
+
+    @property
+    def ymax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.parent._instance.dbbox().top
+
+    @ymax.setter
+    def ymax(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.parent.transform(kdb.DTrans(0, __val - self.parent._instance.dbbox().top))
+
 
 class Instances:
     """Holder for instances.
@@ -2549,7 +2649,7 @@ class Ports:
         self._ports: list[Port] = list(ports)
         self.kcl = kcl
 
-    def copy(self) -> "Ports":
+    def copy(self) -> Ports:
         """Get a copy of each port."""
         return Ports(ports=[p.copy() for p in self._ports], kcl=self.kcl)
 
@@ -2743,7 +2843,7 @@ class Ports:
         )
 
     @classmethod
-    def from_yaml(cls: "type[Ports]", constructor: Any, node: Any) -> "Ports":
+    def from_yaml(cls: type[Ports], constructor: Any, node: Any) -> Ports:
         """Load Ports from a yaml representation."""
         return cls(constructor.construct_sequence(node))
 
