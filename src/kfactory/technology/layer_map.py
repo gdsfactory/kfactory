@@ -22,6 +22,7 @@ class LayerPropertiesModel(BaseModel):
     fill_color: Color | None = None
 
     dither_pattern: int = 1
+    line_style: int = 1
     visible: bool = True
     width: int = 1
     xfill: bool = False
@@ -30,7 +31,7 @@ class LayerPropertiesModel(BaseModel):
     valid: bool = True
 
     @model_validator(mode="before")
-    def color_to_frame_filll(cls, data: dict[str, Any]) -> dict[str, Any]:
+    def color_to_frame_fill(cls, data: dict[str, Any]) -> dict[str, Any]:
         if "color" in data:
             if "fill_color" not in data:
                 data["fill_color"] = data["color"]
@@ -47,11 +48,24 @@ class LayerPropertiesModel(BaseModel):
         else:
             return v
 
+    @field_validator("line_style", mode="before")
+    def line_to_index(cls, v: str | int) -> int:
+        """Convert string to the index with the dict dither2index."""
+        if isinstance(v, str):
+            return line2index[v]
+        else:
+            return v
+
     # @staticmethod
     @field_serializer("dither_pattern")
     def dither_to_json(value: int) -> str:  # type: ignore[misc]
         """Convert dither int to string key on json dump."""
         return index2dither[value]
+
+    @field_serializer("line_style")
+    def line_to_json(value: int) -> str:  # type: ignore[misc]
+        """Convert dither int to string key on json dump."""
+        return index2line[value]
 
 
 class LayerGroupModel(BaseModel):
@@ -124,6 +138,7 @@ def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
         frame_color=Color(hex(kl.frame_color)) if kl.frame_color else None,
         fill_color=Color(hex(kl.fill_color)) if kl.fill_color else None,
         dither_patter=index2dither[kl.dither_pattern],
+        line_style=index2line[kl.line_style],
         visible=kl.visible,
         width=kl.width,
         xfill=kl.width,
@@ -176,6 +191,7 @@ def lp2kl(lp: LayerPropertiesModel) -> lay.LayerPropertiesNode:
     kl_lp.xfill = lp.xfill
     kl_lp.transparent = lp.transparent
     kl_lp.valid = lp.valid
+    kl_lp.line_style = lp.line_style
 
     return kl_lp
 
@@ -425,6 +441,18 @@ dither_patterns = {
     "...**...\n"
     "...**...\n",
 }
+line_styles = {
+    "solid": "",
+    "dotted": "*.",
+    "dashed": "**..**",
+    "dash-dotted": "***..**..***",
+    "short dashed": "*..*",
+    "short dash-dotted": "**.*.*",
+    "long dashed": "*****..*****",
+    "dash-double-dotted": "***..*.*..**",
+}
 
 dither2index = {name: index for index, name in enumerate(dither_patterns)}
 index2dither = {index: name for index, name in enumerate(dither_patterns)}
+line2index = {name: index for index, name in enumerate(line_styles)}
+index2line = {index: name for index, name in enumerate(line_styles)}
