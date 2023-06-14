@@ -16,6 +16,7 @@ repos:
         args: ["--pytest-test-first"]
       - id: requirements-txt-fixer
       - id: trailing-whitespace
+        exclude: "changelog.d/.*"
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.4.0
