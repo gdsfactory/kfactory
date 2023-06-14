@@ -11,7 +11,8 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import loguru
 from loguru import logger as logger
-from pydantic import BaseModel, BaseSettings, Field
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings
 
 if TYPE_CHECKING:
     from loguru import Logger
@@ -109,7 +110,7 @@ class Settings(BaseSettings):
 
         validation = False
         arbitrary_types_allowed = True
-        fields = {"logger": {"exclude": True}}
+        # fields = {"logger": {"exclude": True}}
         env_prefix = "kfactory_"
         env_nested_delimiter = "_"
 

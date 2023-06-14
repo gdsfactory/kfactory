@@ -114,11 +114,13 @@ def pdk(LAYER, straight_factory, wg_enc):
             "bend_euler": kf.cells.euler.bend_euler,
             "taper": kf.cells.taper.taper,
             "bezier": kf.cells.bezier.bend_s,
+            "straight": straight_factory,
         },
+        layer_enclosures={"wg": wg_enc},
     )
-    pdk.register_cells(straight=straight_factory)
-    pdk.register_enclosures(wg=wg_enc)
-    pdk.activate()
+    # pdk.register_cells(straight=straight_factory)
+    # pdk.register_enclosures(wg=wg_enc)
+    # pdk.activate()
     return pdk
 
 
