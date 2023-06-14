@@ -8,6 +8,34 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 
 <!-- towncrier release notes start -->
 
+## [0.8.0](https://github.com/gdsfactory/kfactory/tree/0.8.0) - 2023-06-14
+
+
+### Added
+
+- KCells now store (and retrieve) Ports and settings/info in/from GDS [#106](https://github.com/gdsfactory/kfactory/issues/106)
+- Added docs section about loguru config [#138](https://github.com/gdsfactory/kfactory/issues/138)
+- Added docs section about gdsfactory differences [#140](https://github.com/gdsfactory/kfactory/issues/140)
+- Add Netlist extraction based on klayout.db.Netlist [#147](https://github.com/gdsfactory/kfactory/issues/147)
+- Added UMKCell to allow addressing some parts in um [#158](https://github.com/gdsfactory/kfactory/issues/158)
+- Added snapping of ports to cell decorator [#159](https://github.com/gdsfactory/kfactory/issues/159)
+
+
+### Changed
+
+- KCell.create_inst doesn't take DCellInstArray args anymore, use KCell.d.create_inst instead [#158](https://github.com/gdsfactory/kfactory/issues/158)
+- Updated the Pdk to pydantic 2.0 [PR](https://github.com/gdsfactory/kfactory/pull/157) 
+- renamed waveguide -> straight [PR](https://github.com/gdsfactory/kfactory/pull/152) 
+
+
+### Fixed
+
+- Fixed incompatibility of Pdk and technology with mypy [#108](https://github.com/gdsfactory/kfactory/issues/108)
+- Fixed keep_mirror flag [#143](https://github.com/gdsfactory/kfactory/issues/143)
+- Fixed (ix)90° bends second port off-grid [#153](https://github.com/gdsfactory/kfactory/issues/153)
+- Fixed circular and euler bends having complex ports in the x*90° cases [#159](https://github.com/gdsfactory/kfactory/issues/159)
+
+
 ## [0.7.5](https://github.com/gdsfactory/kfactory/tree/0.7.5) - 2023-06-01
 
 
