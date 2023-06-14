@@ -110,7 +110,7 @@ class Settings(BaseSettings):
 
         validation = False
         arbitrary_types_allowed = True
-        fields = {"logger": {"exclude": True}}
+        # fields = {"logger": {"exclude": True}}
         env_prefix = "kfactory_"
         env_nested_delimiter = "_"
 

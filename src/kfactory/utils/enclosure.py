@@ -1137,7 +1137,6 @@ class PortHoles(BaseModel):
     class Config:
         """pydantic config."""
 
-        allow_mutation = False
         arbitrary_types_allowed = True
 
 
