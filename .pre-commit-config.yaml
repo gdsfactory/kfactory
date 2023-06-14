@@ -10,17 +10,22 @@ repos:
         args: []
       - id: debug-statements
       - id: end-of-file-fixer
-        exclude: "changelog.d/.*"
+        exclude: 'changelog\.d/.*|CHANGLEOG\.md'
       - id: mixed-line-ending
       - id: name-tests-test
         args: ["--pytest-test-first"]
       - id: requirements-txt-fixer
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
+        exclude: 'changelog\.d/.*|CHANGELOG\.md'
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.4.0
     hooks:
       - id: pyupgrade
+  - repo: https://github.com/twisted/towncrier
+    rev: "23.6.0"
+    hooks:
+      - id: towncrier-check
 
   # - repo: https://github.com/pre-commit/pre-commit-hooks
   #   rev: a41c4b94b220171e928ff3e6c9bef34e71267f46
