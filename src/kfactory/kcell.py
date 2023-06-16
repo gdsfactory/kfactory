@@ -1797,11 +1797,15 @@ class KCell:
                     )
                 )
 
-        for name, setting in self.settings.model_dump().items():
+        for name, setting in self.settings.model_copy().model_dump().items():
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
             )
         for name, info in self.info.model_dump().items():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
+            )
+        for name, info in self.info:
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
             )
@@ -3115,6 +3119,10 @@ def cell(
                     settings = cell.settings.model_dump()
                     settings.update(params)
                     cell._settings = KCellSettings(**settings)
+                info = cell.info.model_dump()
+                for name, value in cell.info:
+                    info[name] = value
+                cell.info = KCellInfo(**info)
                 if check_instances:
                     if any(inst.is_complex() for inst in cell.each_inst()):
                         raise ValueError(
