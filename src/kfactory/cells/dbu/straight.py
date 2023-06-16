@@ -17,6 +17,7 @@ The slabs and excludes can be given in the form of an
 """
 
 from ... import KCell, LayerEnum, cell, kdb
+from ...kcell import KCellInfo
 from ...utils import LayerEnclosure
 
 __all__ = ["straight"]
@@ -57,10 +58,13 @@ def straight(
 
     if enclosure is not None:
         enclosure.apply_minkowski_y(c, layer)
-    c.settings = {
-        "width_um": width * c.kcl.dbu,
-        "length_um": length * c.kcl.dbu,
-        "layer": layer,
-    }
+    c.info = KCellInfo(
+        **{
+            "width_um": width * c.kcl.dbu,
+            "length_um": length * c.kcl.dbu,
+            "width_dbu": width,
+            "length_dbu": length,
+        }
+    )
     c.autorename_ports()
     return c

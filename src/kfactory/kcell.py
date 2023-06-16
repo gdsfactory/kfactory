@@ -25,6 +25,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, overload
 import cachetools.func
 import numpy as np
 import ruamel.yaml
+from pydantic import BaseModel, model_validator
 from typing_extensions import ParamSpec
 
 from . import kdb, lay
@@ -277,6 +278,8 @@ class KCLayout(kdb.Layout):
                     kdb_cell=kcl.cell(kc.name),
                     ports=kc.ports,
                 )
+                kcl.kcells[i]._settings = kc.settings.model_copy()
+                kcl.kcells[i].info = kc.info.model_copy()
         kcl.rename_function = self.rename_function
         return kcl
 
@@ -955,6 +958,49 @@ class UMPort:
         )
 
 
+class KCellSettings(BaseModel):
+    class Config:
+        extra = "allow"
+        validate_assignment = True
+        frozen = True
+
+    @model_validator(mode="before")
+    def restrict_types(
+        cls, data: dict[str, Any]
+    ) -> dict[str, int | float | SerializableShape | str]:
+        for name, value in data.items():
+            if not isinstance(value, str | int | float | SerializableShape):
+                data[name] = str(value)
+        return data
+
+    def __getitem__(self, key: str) -> Any:
+        return getattr(self, key)
+
+
+class KCellInfo(BaseModel):
+    class Config:
+        extra = "allow"
+        validate_assignment = True
+
+    @model_validator(mode="before")
+    def restrict_types(
+        cls, data: dict[str, int | float | str]
+    ) -> dict[str, int | float | str]:
+        for name, value in data.items():
+            assert isinstance(value, str | int | float), (
+                "Values of the info dict only support int, float, or strings."
+                f"{name}: {value}, {type(value)}"
+            )
+
+        return data
+
+    def __getitem__(self, __key: str) -> Any:
+        return getattr(self, __key)
+
+    def __setitem__(self, __key: str, __val: str | int | float) -> None:
+        setattr(self, __key, __val)
+
+
 class KCell:
     """KLayout cell and change its class to KCell.
 
@@ -980,7 +1026,8 @@ class KCell:
 
     yaml_tag = "!KCell"
     _ports: Ports
-    settings: dict[str, str | float | int | SerializableShape]
+    _settings: KCellSettings
+    _info: KCellInfo
     d: UMKCell
 
     def __init__(
@@ -1003,8 +1050,8 @@ class KCell:
         """
         self.kcl = kcl
         self.insts: Instances = Instances()
-        self.settings: dict[str, Any] = {}
-        self.info: dict[str, int | float | str] = {}
+        self._settings: KCellSettings = KCellSettings()
+        self.info: KCellInfo = KCellInfo()
         self._locked = False
         if name is None:
             _name = "Unnamed_!"
@@ -1025,6 +1072,11 @@ class KCell:
     def __getitem__(self, key: int | str | None) -> Port:
         """Returns port from instance."""
         return self.ports[key]
+
+    @property
+    def settings(self) -> KCellSettings:
+        """Settings dictionary set by the [@cell][kfactory.kcell.cell] decorator."""
+        return self._settings
 
     @property
     def name(self) -> str:
@@ -1078,7 +1130,10 @@ class KCell:
         c.ports = self.ports.copy()
         for inst in kdb_copy.each_inst():
             c.insts.append(Instance(self.kcl, instance=inst))
-        # c._locked = False
+
+        c._settings = self.settings.model_copy()
+        c.info = self.info.model_copy()
+
         return c
 
     def __copy__(self) -> KCell:
@@ -1134,7 +1189,7 @@ class KCell:
         if verbose:
             print(f"Building {d['name']}")
         cell.ports = d.get("ports", Ports(ports=[], kcl=cell.kcl))
-        cell.settings = d.get("settings", {})
+        cell._settings = KCellSettings(**d.get("settings", {}))
         for inst in d.get("insts", []):
             if "cellname" in inst:
                 _cell = cell.kcl[inst["cellname"]]
@@ -1742,11 +1797,11 @@ class KCell:
                     )
                 )
 
-        for name, setting in self.settings.items():
+        for name, setting in self.settings.model_dump().items():
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
             )
-        for name, info in self.info.items():
+        for name, info in self.info.model_dump().items():
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
             )
@@ -1754,17 +1809,20 @@ class KCell:
     def get_meta_data(self) -> None:
         """Read metadata from the KLayout Layout object."""
         port_dict = {}
+        settings = {}
         for meta in self.each_meta_info():
             if meta.name.startswith("kfactory:ports"):
-                i, _type = meta.name.lstrip("kfactory:ports:").split(":")
+                i, _type = meta.name.removeprefix("kfactory:ports:").split(":")
                 if i not in port_dict:
                     port_dict[i] = {_type: meta.value}
                 else:
                     port_dict[i][_type] = meta.value
             elif meta.name.startswith("kfactory:info"):
-                self.info[meta.name.lstrip("kfactory:info:")] = meta.value
+                self.info[meta.name.removeprefix("kfactory:info:")] = meta.value
             elif meta.name.startswith("kfactory:settings"):
-                self.settings[meta.name.lstrip("kfactory:settings:")] = meta.value
+                settings[meta.name.removeprefix("kfactory:settings:")] = meta.value
+
+        self._settings = KCellSettings(**settings)
 
         # ports = Ports()
         self.ports = Ports(self.kcl)
@@ -3054,7 +3112,9 @@ def cell(
                     name = get_cell_name(f.__name__, **params)
                     cell.name = name
                 if set_settings:
-                    cell.settings.update(params)
+                    settings = cell.settings.model_dump()
+                    settings.update(params)
+                    cell._settings = KCellSettings(**settings)
                 if check_instances:
                     if any(inst.is_complex() for inst in cell.each_inst()):
                         raise ValueError(
@@ -3067,15 +3127,15 @@ def cell(
                             port.dcplx_trans.disp = port._dcplx_trans.disp.to_itype(
                                 dbu
                             ).to_dtype(dbu)
-                i = 0
-                for name, setting in cell.settings.items():
-                    while cell.property(i) is not None:
-                        i += 1
-                    if isinstance(setting, KCell):
-                        cell.set_property(i, f"{name}: {setting.name}")
-                    else:
-                        cell.set_property(i, f"{name}: {str(setting)}")
-                    i += 1
+                # i = 0
+                # for name, setting in cell.settings.model_dump().items():
+                #     while cell.property(i) is not None:
+                #         i += 1
+                #     if isinstance(setting, KCell):
+                #         cell.set_property(i, f"{name}: {setting.name}")
+                #     else:
+                #         cell.set_property(i, f"{name}: {str(setting)}")
+                #     i += 1
                 cell._locked = True
                 return cell
 

@@ -4,6 +4,7 @@ TODO: Non-linear tapers
 """
 
 from ... import KCell, cell, kdb
+from ...kcell import KCellInfo
 from ...utils import LayerEnclosure
 
 __all__ = ["taper"]
@@ -57,10 +58,16 @@ def taper(
 
     if enclosure is not None:
         enclosure.apply_minkowski_y(c, kdb.Region(c.bbox()))
-    c.settings["width1_um"] = width1 * c.kcl.dbu
-    c.settings["width2_um"] = width2 * c.kcl.dbu
-    c.settings["length_um"] = length * c.kcl.dbu
-
+    c.info = KCellInfo(
+        **{
+            "width1_um": width1 * c.kcl.dbu,
+            "width2_um": width2 * c.kcl.dbu,
+            "length_um": length * c.kcl.dbu,
+            "width1_dbu": width1,
+            "width2_dbu": width2,
+            "length_dbu": length,
+        }
+    )
     c.autorename_ports()
 
     return c
