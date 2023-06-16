@@ -1802,6 +1802,20 @@ class KCell:
                     )
                 )
 
+            info = port.info.model_dump()
+            for name, value in port.info:
+                info[name] = value
+
+            for name, value in info.items():
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo(
+                        f"kfactory:ports:{i}:info:{name}",
+                        value,
+                        None,
+                        True,
+                    )
+                )
+
         for name, setting in self.settings.model_copy().model_dump().items():
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
@@ -1817,15 +1831,19 @@ class KCell:
 
     def get_meta_data(self) -> None:
         """Read metadata from the KLayout Layout object."""
-        port_dict = {}
+        port_dict: dict[str, Any] = {}
         settings = {}
         for meta in self.each_meta_info():
             if meta.name.startswith("kfactory:ports"):
-                i, _type = meta.name.removeprefix("kfactory:ports:").split(":")
+                i, _type = meta.name.removeprefix("kfactory:ports:").split(":", 1)
                 if i not in port_dict:
-                    port_dict[i] = {_type: meta.value}
-                else:
+                    port_dict[i] = {}
+                if not _type.startswith("info"):
                     port_dict[i][_type] = meta.value
+                else:
+                    if "info" not in port_dict[i]:
+                        port_dict[i]["info"] = {}
+                    port_dict[i]["info"][_type.removeprefix("info:")] = meta.value
             elif meta.name.startswith("kfactory:info"):
                 self.info[meta.name.removeprefix("kfactory:info:")] = meta.value
             elif meta.name.startswith("kfactory:settings"):
@@ -1850,6 +1868,7 @@ class KCell:
                 trans=kdb.Trans.R0,
                 kcl=self.kcl,
                 port_type=port_type,
+                info=_d.get("info", {}),
             )
             if trans:
                 _port.trans = kdb.Trans.from_s(trans)
