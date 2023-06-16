@@ -28,7 +28,7 @@ from .conf import config
 
 # from .pdk import Pdk
 
-__version__ = "0.8.1"
+__version__ = "0.8.2"
 
 logger = config.logger
 
