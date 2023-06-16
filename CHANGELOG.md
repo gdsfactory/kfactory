@@ -8,6 +8,15 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 
 <!-- towncrier release notes start -->
 
+## [0.8.1](https://github.com/gdsfactory/kfactory/tree/0.8.1) - 2023-06-16
+
+
+### Fixed
+
+- Make settings/infos in cells pydantic models and restrict types [#163](https://github.com/gdsfactory/kfactory/issues/163)
+- adjust minimum version of klayout to 0.28.post2
+
+
 ## [0.8.0](https://github.com/gdsfactory/kfactory/tree/0.8.0) - 2023-06-14
 
 
