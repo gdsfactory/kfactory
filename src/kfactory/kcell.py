@@ -75,6 +75,49 @@ SerializableShape: TypeAlias = (
 )
 
 
+class KCellSettings(BaseModel):
+    class Config:
+        extra = "allow"
+        validate_assignment = True
+        frozen = True
+
+    @model_validator(mode="before")
+    def restrict_types(
+        cls, data: dict[str, Any]
+    ) -> dict[str, int | float | SerializableShape | str]:
+        for name, value in data.items():
+            if not isinstance(value, str | int | float | SerializableShape):
+                data[name] = str(value)
+        return data
+
+    def __getitem__(self, key: str) -> Any:
+        return getattr(self, key)
+
+
+class Info(BaseModel):
+    class Config:
+        extra = "allow"
+        validate_assignment = True
+
+    @model_validator(mode="before")
+    def restrict_types(
+        cls, data: dict[str, int | float | str]
+    ) -> dict[str, int | float | str]:
+        for name, value in data.items():
+            assert isinstance(value, str | int | float), (
+                "Values of the info dict only support int, float, or strings."
+                f"{name}: {value}, {type(value)}"
+            )
+
+        return data
+
+    def __getitem__(self, __key: str) -> Any:
+        return getattr(self, __key)
+
+    def __setitem__(self, __key: str, __val: str | int | float) -> None:
+        setattr(self, __key, __val)
+
+
 class PROPID(IntEnum):
     """Mapping for GDS properties."""
 
@@ -552,7 +595,7 @@ class Port:
     layer: int | LayerEnum
     _trans: kdb.Trans | None
     _dcplx_trans: kdb.DCplxTrans | None
-    info: dict[str, int | float | str]
+    info: Info = Info()
     port_type: str
     d: UMPort
 
@@ -638,7 +681,7 @@ class Port:
         """Create a port from dbu or um based units."""
         self.kcl = kcl
         self.d = UMPort(self)
-        self.info = info.copy()
+        self.info = Info(**info)
         if port is not None:
             self.name = port.name if name is None else name
 
@@ -703,6 +746,9 @@ class Port:
         Returns:
             port: a copy of the port
         """
+        info = self.info.model_dump()
+        for name, value in self.info:
+            info[name] = value
         if self._trans:
             if isinstance(trans, kdb.Trans):
                 _trans = trans * self.trans
@@ -713,6 +759,7 @@ class Port:
                     port_type=self.port_type,
                     width=self.width,
                     kcl=self.kcl,
+                    info=info,
                 )
             elif not trans.is_complex():
                 _trans = trans.s_trans().to_itype(self.kcl.dbu) * self.trans
@@ -723,6 +770,7 @@ class Port:
                     port_type=self.port_type,
                     width=self.width,
                     kcl=self.kcl,
+                    info=info,
                 )
         if isinstance(trans, kdb.Trans):
             dtrans = kdb.DCplxTrans(trans.to_dtype(self.kcl.dbu))
@@ -736,7 +784,7 @@ class Port:
             layer=self.layer,
             kcl=self.kcl,
             port_type=self.port_type,
-            info=self.info,
+            info=info,
         )
 
     @property
@@ -958,49 +1006,6 @@ class UMPort:
         )
 
 
-class KCellSettings(BaseModel):
-    class Config:
-        extra = "allow"
-        validate_assignment = True
-        frozen = True
-
-    @model_validator(mode="before")
-    def restrict_types(
-        cls, data: dict[str, Any]
-    ) -> dict[str, int | float | SerializableShape | str]:
-        for name, value in data.items():
-            if not isinstance(value, str | int | float | SerializableShape):
-                data[name] = str(value)
-        return data
-
-    def __getitem__(self, key: str) -> Any:
-        return getattr(self, key)
-
-
-class KCellInfo(BaseModel):
-    class Config:
-        extra = "allow"
-        validate_assignment = True
-
-    @model_validator(mode="before")
-    def restrict_types(
-        cls, data: dict[str, int | float | str]
-    ) -> dict[str, int | float | str]:
-        for name, value in data.items():
-            assert isinstance(value, str | int | float), (
-                "Values of the info dict only support int, float, or strings."
-                f"{name}: {value}, {type(value)}"
-            )
-
-        return data
-
-    def __getitem__(self, __key: str) -> Any:
-        return getattr(self, __key)
-
-    def __setitem__(self, __key: str, __val: str | int | float) -> None:
-        setattr(self, __key, __val)
-
-
 class KCell:
     """KLayout cell and change its class to KCell.
 
@@ -1027,7 +1032,7 @@ class KCell:
     yaml_tag = "!KCell"
     _ports: Ports
     _settings: KCellSettings
-    _info: KCellInfo
+    _info: Info
     d: UMKCell
 
     def __init__(
@@ -1051,7 +1056,7 @@ class KCell:
         self.kcl = kcl
         self.insts: Instances = Instances()
         self._settings: KCellSettings = KCellSettings()
-        self.info: KCellInfo = KCellInfo()
+        self.info: Info = Info()
         self._locked = False
         if name is None:
             _name = "Unnamed_!"
@@ -3122,7 +3127,7 @@ def cell(
                 info = cell.info.model_dump()
                 for name, value in cell.info:
                     info[name] = value
-                cell.info = KCellInfo(**info)
+                cell.info = Info(**info)
                 if check_instances:
                     if any(inst.is_complex() for inst in cell.each_inst()):
                         raise ValueError(
