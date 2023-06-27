@@ -322,7 +322,9 @@ class KCLayout(kdb.Layout):
                     ports=kc.ports,
                 )
                 kcl.kcells[i]._settings = kc.settings.model_copy()
-                kcl.kcells[i].info = kc.info.model_copy()
+                kcl.kcells[i].info = kc.info.model_copy(
+                    update={n: v for n, v in kc.info}
+                )
         kcl.rename_function = self.rename_function
         return kcl
 
@@ -1816,7 +1818,7 @@ class KCell:
                     )
                 )
 
-        for name, setting in self.settings.model_copy().model_dump().items():
+        for name, setting in self.settings.model_dump().items():
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
             )
