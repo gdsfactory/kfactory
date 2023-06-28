@@ -3228,7 +3228,7 @@ def clean_value(
         if isinstance(value, int):  # integer
             return str(value)
         elif type(value) in [float, np.float64]:  # float
-            return f"{value:.4f}".replace(".", "p").rstrip("0").rstrip("p")
+            return f"{value}".replace(".", "p").rstrip("0").rstrip("p")
         elif isinstance(value, list):
             return "_".join(clean_value(v) for v in value)
         elif isinstance(value, tuple):
