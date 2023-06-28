@@ -8,6 +8,15 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 
 <!-- towncrier release notes start -->
 
+## [0.8.4](https://github.com/gdsfactory/kfactory/tree/0.8.4) - 2023-06-28
+
+
+### Fixed
+
+- Fixed name collisions for floats with long precision [#165](https://github.com/gdsfactory/kfactory/issues/165)
+- Fixed port renaming by direction [#167](https://github.com/gdsfactory/kfactory/issues/167)
+
+
 ## [0.8.3](https://github.com/gdsfactory/kfactory/tree/0.8.3) - 2023-06-28
 
 No significant changes.
