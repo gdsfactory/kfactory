@@ -22,7 +22,7 @@ dependencies = [
 	"scipy",
 	"ruamel.yaml",
 	"cachetools >= 5.2.0",
-  "pydantic >= 2.0b2",
+  "pydantic >= 2.0b3",
 	"pydantic-settings >= 2.0b1",
 	"loguru",
 	"tomli",
