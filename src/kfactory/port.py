@@ -48,7 +48,6 @@ def rename_clockwise(
 ) -> None:
     """Sort and return ports in the clockwise direction.
 
-    Visualization::
              o3  o4
              |___|_
         o2 -|      |- o5
@@ -118,9 +117,9 @@ def rename_by_direction(
         dir_names: Prefixes for the directions (east, north, west, south).
         prefix: Prefix to add before `dir_names`
     """
-    _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
 
     for dir in DIRECTION:
+        _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
         dir_2 = -1 if dir < 2 else 1
         if dir % 2:
 
