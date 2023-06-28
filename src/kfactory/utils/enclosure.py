@@ -327,10 +327,7 @@ def extrude_path_dynamic(
             for section in layer_sec.sections:
 
                 def w_max(x: float) -> float:
-                    return (
-                        widths(x)  # type: ignore[operator]
-                        + 2 * section.d_max * target.kcl.dbu
-                    )
+                    return widths(x) + 2 * section.d_max * target.kcl.dbu
 
                 _r = kdb.Region(
                     path_pts_to_polygon(
@@ -346,7 +343,7 @@ def extrude_path_dynamic(
 
                     def w_min(x: float) -> float:
                         return (
-                            widths(x)  # type: ignore[operator]
+                            widths(x)
                             + 2  # type: ignore[operator]
                             * section.d_min
                             * target.kcl.dbu
