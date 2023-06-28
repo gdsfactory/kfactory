@@ -40,7 +40,7 @@ def port_tests(rename_f: Optional[Callable[..., None]] = None) -> kf.KCell:
 
 
 @pytest.mark.parametrize("func", [None, port.rename_clockwise])
-def test_rename_default(func) -> None:
+def test_rename_default(func: Callable[..., None]) -> None:
     cell = port_tests(func)
     port_list = cell.ports._ports
     xl = len(port_x_coords)
@@ -77,8 +77,6 @@ def test_rename_default(func) -> None:
 def test_rename_orientation() -> None:
     cell = port_tests(port.rename_by_direction)
 
-    dir_names = {0: "E", 1: "N", 2: "W", 3: "S"}
-
     port_list = cell.ports._ports
 
     names = (
@@ -91,26 +89,94 @@ def test_rename_orientation() -> None:
     assert [p.name for p in port_list] == names
 
 
-def test_rename_setter():
+def test_rename_setter() -> None:
     kcl = kf.KCLayout()
 
     assert kcl.rename_function == kf.port.rename_clockwise
 
     c1 = kf.KCell(kcl=kcl)
-    c1.create_port(
-        trans=kf.kdb.Trans(2, False, 0, 0), width=1000, layer=kcl.layer(1, 0)
-    )
-    c1.create_port(trans=kf.kdb.Trans(), width=1000, layer=kcl.layer(1, 0))
+
+    for name, ang, x, y in [
+        ("N0", 2, -100, 0),
+        ("N1", 2, -100, 500),
+        ("N2", 2, -100, 250),
+        ("N3", 2, -100, 1000),
+        ("W0", 1, 0, 100),
+        ("W1", 1, 500, 100),
+        ("W2", 1, 250, 100),
+        ("W3", 1, 1000, 100),
+        ("E0", 0, 100, 1000),
+        ("E1", 0, 100, 250),
+        ("E2", 0, 100, 500),
+        ("E3", 0, 100, 0),
+        ("S0", 3, 1000, -100),
+        ("S1", 3, 250, -100),
+        ("S2", 3, 500, -100),
+        ("S3", 3, 0, -100),
+    ]:
+        c1.create_port(
+            trans=kf.kdb.Trans(ang, False, x, y),
+            width=1000,
+            layer=kcl.layer(1, 0),
+            name=name,
+        )
+
     c1.autorename_ports()
+
+    for i, _port in enumerate(c1.ports):
+        match i % 4:
+            case 1:
+                assert _port.name is not None and _port.name[1:] == str(i + 2)
+            case 2:
+                assert _port.name is not None and _port.name[1:] == str(i)
+            case _:
+                assert _port.name is not None and _port.name[1:] == str(i + 1)
 
     kcl.rename_function = kf.port.rename_by_direction
 
     c2 = kf.KCell(kcl=kcl)
-    c2.create_port(
-        trans=kf.kdb.Trans(2, False, 0, 0), width=1000, layer=kcl.layer(1, 0)
-    )
-    c2.create_port(trans=kf.kdb.Trans(), width=1000, layer=kcl.layer(1, 0))
+    dir_list = [
+        ("N0", 2, -100, 0),
+        ("N1", 2, -100, 500),
+        ("N2", 2, -100, 250),
+        ("N3", 2, -100, 1000),
+        ("W0", 1, 0, 100),
+        ("W1", 1, 500, 100),
+        ("W2", 1, 250, 100),
+        ("W3", 1, 1000, 100),
+        ("E0", 0, 100, 0),
+        ("E2", 0, 100, 500),
+        ("E1", 0, 100, 250),
+        ("E3", 0, 100, 1000),
+        ("S3", 3, 0, -100),
+        ("S2", 3, 500, -100),
+        ("S1", 3, 250, -100),
+        ("S0", 3, 1000, -100),
+    ]
+    for name, ang, x, y in dir_list:
+        c2.create_port(
+            trans=kf.kdb.Trans(ang, False, x, y),
+            width=1000,
+            layer=kcl.layer(1, 0),
+            name=name,
+        )
     c2.autorename_ports()
+    for i, _port in enumerate(c2.ports):
+        match i % 4:
+            case 1:
+                assert _port.name is not None and _port.name[1:] == str(
+                    i % 4 + 1
+                ), f"Expected {str(i % 4 + 1)=}, original name {dir_list[i]}"
+            case 2:
+                assert _port.name is not None and _port.name[1:] == str(
+                    i % 4 - 1
+                ), f"Expected {str(i % 4 - 1)=}, original name {dir_list[i]}"
+            case _:
+                assert _port.name is not None and _port.name[1:] == str(
+                    i % 4
+                ), f"Expected {str(i % 4)=}, original name {dir_list[i]}"
+
+    kcl.rename_function = kf.port.rename_clockwise
 
     assert c1.ports[0].name == "o1"
     assert c2.ports[0].name == "W0"
