@@ -5,7 +5,7 @@ try:
     from typing import Any
 
     from ipyevents import Event  # type: ignore[import]
-    from IPython.display import Image as IPImage  # type: ignore[import]
+    from IPython.display import Image as IPImage  # type: ignore[import, attr-defined]
     from IPython.display import display
     from ipytree import Node, Tree  # type: ignore[import]
     from ipywidgets import (  # type: ignore[import]
@@ -35,15 +35,13 @@ except ImportError as e:
 
 def display_kcell(kc: KCell) -> None:
     cell_dup = kc.kcl.dup()[kc.name]
-    cell_dup.draw_ports()
-
     match config.display_type:
         case "widget":
             lw = LayoutWidget(cell=cell_dup)
-            display(lw.widget)
+            display(lw.widget)  # type: ignore[no-untyped-call]
         case "image":
             lipi = LayoutIPImage(cell=cell_dup)
-            display(lipi.image)
+            display(lipi.image)  # type: ignore[no-untyped-call]
 
 
 class LayoutImage:
@@ -89,7 +87,7 @@ class LayoutIPImage:
                 self.layout_view.load_layer_props(str(self.layer_properties))
         self.show_cell(cell._kdb_cell)
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
-        self.image = IPImage(
+        self.image = IPImage(  # type: ignore[no-untyped-call]
             data=png_data, format="png", embed=True, width=800, height=600
         )
 
@@ -134,7 +132,7 @@ class LayoutWidget:
         enter_event.on_dom_event(self.on_mouse_enter)
         leave_event.on_dom_event(self.on_mouse_leave)
 
-        self.layout_view.on_image_updated_event = self.refresh  # type: ignore[attr-defined]
+        self.layout_view.on_image_updated_event = self.refresh  # type: ignore[assignment]  # noqa: E501
 
         mouse_event = Event(
             source=self.image,
@@ -199,7 +197,6 @@ class LayoutWidget:
     def build_layer_toggle(self, prop_iter: lay.LayerPropertiesIterator) -> HBox | None:
         props = prop_iter.current()
         layer_color = f"#{props.eff_fill_color():06x}"
-        # Would be nice to use LayoutView.icon_for_layer() rather than simple colored box
         Layout(
             width="5px",
             height="20px",
