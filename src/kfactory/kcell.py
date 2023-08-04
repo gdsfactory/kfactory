@@ -3220,6 +3220,14 @@ def join_first_letters(name: str) -> str:
     return "".join([x[0] for x in name.split("_") if x])
 
 
+def clean_dict(d: dict[str, Any]) -> dict[str, Any]:
+    """Cleans dictionary recursively."""
+    return {
+        k: clean_dict(dict(v)) if isinstance(v, dict) else clean_value(v)
+        for k, v in d.items()
+    }
+
+
 def clean_value(
     value: float | np.float64 | dict[Any, Any] | KCell | Callable[..., Any]
 ) -> str:
@@ -3237,6 +3245,21 @@ def clean_value(
             return dict2name(**value)
         elif hasattr(value, "name"):
             return clean_name(value.name)
+        elif callable(value) and isinstance(value, functools.partial):
+            sig = inspect.signature(value.func)
+            args_as_kwargs = dict(zip(sig.parameters.keys(), value.args))
+            args_as_kwargs.update(**value.keywords)
+            args_as_kwargs = clean_dict(args_as_kwargs)
+            # args_as_kwargs.pop("function", None)
+            func = value.func
+            while hasattr(func, "func"):
+                func = func.func
+            v = {
+                "function": func.__name__,
+                "module": func.__module__,
+                "settings": args_as_kwargs,
+            }
+            return clean_value(v)
         elif callable(value):
             return str(value.__name__)
         else:
