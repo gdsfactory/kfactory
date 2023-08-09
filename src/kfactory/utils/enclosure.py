@@ -10,7 +10,7 @@ from hashlib import sha1
 from typing import Any, Optional, TypeGuard, overload
 
 import numpy as np
-from pydantic import BaseModel, Field, PrivateAttr, validator
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
 
 from .. import kdb
 from ..conf import config
@@ -327,7 +327,7 @@ def extrude_path_dynamic(
             for section in layer_sec.sections:
 
                 def w_max(x: float) -> float:
-                    return widths(x) + 2 * section.d_max * target.kcl.dbu
+                    return widths(x) + 2 * section.d_max * target.kcl.layout.dbu
 
                 _r = kdb.Region(
                     path_pts_to_polygon(
@@ -346,7 +346,7 @@ def extrude_path_dynamic(
                             widths(x)
                             + 2  # type: ignore[operator]
                             * section.d_min
-                            * target.kcl.dbu
+                            * target.kcl.layout.dbu
                         )
 
                     _r -= kdb.Region(
@@ -484,7 +484,7 @@ class LayerSection(BaseModel):
         return hash(tuple((s.d_min, s.d_max) for s in self.sections))
 
 
-class LayerEnclosure(BaseModel):
+class LayerEnclosure(BaseModel, validate_assignment=True):
     """Definitions for calculation of enclosing (or smaller) shapes of a reference.
 
     Attributes:
@@ -496,11 +496,6 @@ class LayerEnclosure(BaseModel):
     _name: str | None = PrivateAttr()
     main_layer: LayerEnum | int | None
     yaml_tag: str = "!Enclosure"
-
-    class Config:
-        """pydantic config."""
-
-        validate_assignment = True
 
     def __init__(
         self,
@@ -811,7 +806,7 @@ class LayerEnclosure(BaseModel):
 
         tp.tile_size(tile_size, tile_size)
         if isinstance(ref, int):
-            tp.input("main_layer", c.kcl, c.cell_index(), ref)
+            tp.input("main_layer", c.kcl.layout, c.cell_index(), ref)
         else:
             tp.input("main_layer", ref)
 
@@ -1025,15 +1020,18 @@ class LayerEnclosureCollection(BaseModel):
 
     enclosures: list[LayerEnclosure]
 
-    @validator("enclosures", each_item=True)
-    def enclosures_must_have_main_layer(cls, v: LayerEnclosure) -> LayerEnclosure:
+    @field_validator("enclosures")
+    def enclosures_must_have_main_layer(
+        cls, v: list[LayerEnclosure]
+    ) -> list[LayerEnclosure]:
         """The PDK Enclosure must have main layers defined for each Enclosure.
 
         The PDK Enclosure uses this to automatically apply enclosures.
         """
-        assert (
-            v.main_layer is not None
-        ), "Enclosure for PDKEnclosure must have a main layer defined"
+        for le in v:
+            assert (
+                le.main_layer is not None
+            ), "Enclosure for PDKEnclosure must have a main layer defined"
         return v
 
     def __get_item__(self, key: str | int) -> LayerEnclosure:
@@ -1092,7 +1090,7 @@ class RegionOperator(kdb.TileOutputReceiver):
         self.kcell.shapes(self.layer).insert(self.region)
 
 
-class PortHoles(BaseModel):
+class PortHoles(BaseModel, arbitrary_types_allowed=True):
     """Calculates a region for holes from sizing and a list of ports."""
 
     region: kdb.Region = Field(default_factory=kdb.Region)
@@ -1113,28 +1111,6 @@ class PortHoles(BaseModel):
                         kdb.Box(0, -half_width, half_width, half_width)
                     ).transformed(port.dcplx_trans.to_itrans(port.kcl.dbu))
                 )
-
-    # def calculate(self) -> None:
-    # """Calculate Region."""
-    # for port in self.ports:
-    #     half_width = port.width // 2 + self.oversize
-    #     if port._trans:
-    #         self.region.insert(
-    #             kdb.Polygon(
-    #                 kdb.Box(0, -half_width, half_width, half_width)
-    #             ).transformed(port.trans)
-    #         )
-    #     else:
-    #         self.region.insert(
-    #             kdb.Polygon(
-    #                 kdb.Box(0, -half_width, half_width, half_width)
-    #             ).transformed(port.dcplx_trans.to_itrans(port.kcl.dbu))
-    #         )
-
-    class Config:
-        """pydantic config."""
-
-        arbitrary_types_allowed = True
 
 
 class RegionTilesOperator(kdb.TileOutputReceiver):
@@ -1438,7 +1414,7 @@ class KCellEnclosure(BaseModel):
             if not c.bbox_per_layer(enc.main_layer).empty():
                 _inp = f"main_layer_{enc.main_layer}"
                 if enc.main_layer not in inputs:
-                    tp.input(f"{_inp}", c.kcl, c.cell_index(), enc.main_layer)
+                    tp.input(f"{_inp}", c.kcl.layout, c.cell_index(), enc.main_layer)
                     inputs.add(enc.main_layer)
                     config.logger.debug("Created input {}", _inp)
 

@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+import functools
+from collections.abc import Callable, Iterable
 from inspect import getmembers, signature
 from types import ModuleType
 
@@ -10,6 +11,8 @@ from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
 
 from . import kcell as kcell_mod
+from . import kdb
+from .conf import config
 
 # from .technology import LayerStack
 from .typings import CellFactory, PathType
@@ -55,7 +58,7 @@ class LayerEnclosureModel(BaseModel):
         return self.enclosure_map[__key]
 
 
-class CellModel(BaseModel):
+class CellModel(BaseModel, arbitrary_types_allowed=True):
     """PDK access model for KCell."""
 
     cell_map: dict[str, kcell_mod.KCell] = Field(default={})
@@ -68,16 +71,12 @@ class CellModel(BaseModel):
         """Retrieve attribute by key."""
         return self.cell_map[__key]
 
-    class Config:
-        """Pydantic Config."""
 
-        arbitrary_types_allowed = True
-
-
-class CellFactoryModel(BaseModel):
+class CellFactoryModel(BaseModel, arbitrary_types_allowed=True):
     """PDK access model for KCellFactories."""
 
     cellfactory_map: dict[str, CellFactory] = Field(default={})
+    pdk: Pdk
 
     def __getitem__(self, __key: str) -> CellFactory:
         """Retrieve element by string key."""
@@ -87,11 +86,6 @@ class CellFactoryModel(BaseModel):
         """Retrieve attribute by key."""
         return self.cellfactory_map[__key]
 
-    class Config:
-        """Retrieve element by string key."""
-
-        arbitrary_types_allowed = True
-
 
 class Constants(BaseSettings):
     """Constant Model class."""
@@ -99,7 +93,7 @@ class Constants(BaseSettings):
     pass
 
 
-class Pdk(BaseModel):
+class Pdk(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     """Store layers, enclosures, cell functions, simulation_settings ...
 
     only one Pdk can be active at a given time.
@@ -124,9 +118,10 @@ class Pdk(BaseModel):
     """
 
     name: str | None = None
-    kcl: kcell_mod.KCLayout = kcell_mod.kcl
+    kcl: kcell_mod.KCLayout  # = kcell_mod.KCLayout()
     layer_enclosures: LayerEnclosureModel
     enclosure: KCellEnclosure
+    library: kdb.Library
 
     cell_factories: CellFactoryModel
     cells: CellModel
@@ -135,20 +130,15 @@ class Pdk(BaseModel):
     interconnect_cml_path: PathType | None
     constants: Constants = Field(default_factory=Constants)
 
-    class Config:
-        """Configuration."""
-
-        arbitrary_types_allowed = True
-        extra = "allow"
-
     def __init__(
         self,
         name: str | None = None,
-        kcl: kcell_mod.KCLayout = kcell_mod.kcl,
+        # kcl: kcell_mod.KCLayout = kcell_mod.KCLayout(),
+        # library: kdb.Library = kdb.Library(),
         layer_enclosures: dict[str, LayerEnclosure]
         | LayerEnclosureModel = LayerEnclosureModel(),
         enclosure: KCellEnclosure | None = None,
-        cell_factories: dict[str, CellFactory] | CellFactoryModel = CellFactoryModel(),
+        cell_factories: dict[str, CellFactory] | CellFactoryModel | None = None,
         cells: dict[str, kcell_mod.KCell] | CellModel = CellModel(),
         layers: type[kcell_mod.LayerEnum] | None = None,
         sparameters_path: PathType | None = None,
@@ -160,7 +150,6 @@ class Pdk(BaseModel):
 
         Args:
             name: Name of the PDK.
-            kcl: The layout object the pdk should use.
             layer_enclosures: Additional KCellEnclosures that should be available
                 except the KCellEnclosure
             enclosure: The standard KCellEnclosure of the PDK.
@@ -174,8 +163,18 @@ class Pdk(BaseModel):
         """
         if isinstance(layer_enclosures, dict):
             layer_enclosures = LayerEnclosureModel(enclosure_map=layer_enclosures)
+        _cell_factories: dict[str, CellFactory] = {}
+        if cell_factories is None:
+            cell_factories = CellFactoryModel(pdk=self)
         if isinstance(cell_factories, dict):
-            cell_factories = CellFactoryModel(cellfactory_map=cell_factories)
+            for name, factory in cell_factories.items():
+                _cell_factories[name] = self.pdk_kcell_factory(factory)
+            cell_factories = CellFactoryModel(pdk=self, cellfactory_map=_cell_factories)
+        else:
+            for name, factory in cell_factories.cellfactory_map.items():
+                _cell_factories[name] = self.pdk_kcell_factory(factory)
+            cell_factories = CellFactoryModel(pdk=self, cellfactory_map=_cell_factories)
+
         if isinstance(cells, dict):
             cells = CellModel(cell_map=cells)
 
@@ -187,7 +186,7 @@ class Pdk(BaseModel):
             enclosure = enclosure or base_pdk.enclosure or KCellEnclosure(enclosures=[])
             cfm = base_pdk.cell_factories.cellfactory_map.copy()
             cfm.update(cell_factories)
-            cell_factories = CellFactoryModel(cellfactory_map=cfm)
+            cell_factories = CellFactoryModel(pdk=self, cellfactory_map=cfm)
             cm = base_pdk.cells.cell_map.copy()
             cm.update(cells.cell_map)
             cells = CellModel(cell_map=cm)
@@ -215,6 +214,10 @@ class Pdk(BaseModel):
             interconnect_cml_path = interconnect_cml_path
             _constants = constants() if constants else Constants()
 
+        # self.library.layout().assign(self.kcl)
+        kcl = kcell_mod.KCLayout()
+        library = kcl.library
+
         super().__init__(
             name=name,
             kcl=kcl,
@@ -226,6 +229,7 @@ class Pdk(BaseModel):
             sparameters_path=sparameters_path,
             interconnect_cml_path=interconnect_cml_path,
             constants=_constants,
+            library=library,
         )
 
     def kcell(
@@ -239,3 +243,25 @@ class Pdk(BaseModel):
     ) -> kcell_mod.LayerEnum:
         """Create a new LAYER enum based on the pdk's kcl."""
         return kcell_mod.LayerEnum(name, layers, kcl=self.kcl)  # type: ignore[arg-type]
+
+    def pdk_kcell_factory(
+        self, _func: Callable[kcell_mod.KCellParams, kcell_mod.KCell]
+    ) -> Callable[kcell_mod.KCellParams, kcell_mod.KCell]:
+        """Wraps a generic kcell function using the standard [kcell.kcl][kfactory.kcell.kcl] object.
+
+        The wrapper will replace the standard kcl with the pdk one. This allows to wrap
+        functions not using a pdk [KCell][kfactory.kcell.KCell].
+        """
+
+        @functools.wraps(_func)
+        def pdk_cell_func(
+            *args: kcell_mod.KCellParams.args, **kwargs: kcell_mod.KCellParams.kwargs
+        ) -> kcell_mod.KCell:
+            cell = _func(*args, **kwargs)
+            if cell.kcl is not self.kcl:
+                config.logger.warning(
+                    "KCell {name} is not in the pdk KCLayout object!", name=cell.name
+                )
+            return cell
+
+        return pdk_cell_func

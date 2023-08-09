@@ -75,12 +75,7 @@ SerializableShape: TypeAlias = (
 )
 
 
-class KCellSettings(BaseModel):
-    class Config:
-        extra = "allow"
-        validate_assignment = True
-        frozen = True
-
+class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=True):
     @model_validator(mode="before")
     def restrict_types(
         cls, data: dict[str, Any]
@@ -94,11 +89,7 @@ class KCellSettings(BaseModel):
         return getattr(self, key)
 
 
-class Info(BaseModel):
-    class Config:
-        extra = "allow"
-        validate_assignment = True
-
+class Info(BaseModel, extra="allow", validate_assignment=True):
     @model_validator(mode="before")
     def restrict_types(
         cls, data: dict[str, int | float | str]
@@ -170,7 +161,7 @@ class PortLayerMismatch(ValueError):
     @config.logger.catch(reraise=True)
     def __init__(
         self,
-        lib: KCLayout,
+        kcl: KCLayout,
         inst: Instance,
         other_inst: Instance | Port,
         p1: Port,
@@ -181,12 +172,12 @@ class PortLayerMismatch(ValueError):
         l1 = (
             f"{p1.layer.name}({p1.layer.__int__()})"
             if isinstance(p1.layer, LayerEnum)
-            else str(lib.get_info(p1.layer))
+            else str(kcl.layout.get_info(p1.layer))
         )
         l2 = (
             f"{p2.layer.name}({p2.layer.__int__()})"
             if isinstance(p2.layer, LayerEnum)
-            else str(lib.get_info(p2.layer))
+            else str(kcl.layout.get_info(p2.layer))
         )
         if isinstance(other_inst, Instance):
             super().__init__(
@@ -275,7 +266,7 @@ def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -
         assert p1.port_type == p2.port_type, f"Port type mismatch for {p1=} {p2=}"
 
 
-class KCLayout(kdb.Layout):
+class KCLayout:
     """Small extension to the klayout.db.Layout.
 
     It adds tracking for the [KCell][kfactory.kcell.KCell] objects
@@ -290,7 +281,11 @@ class KCLayout(kdb.Layout):
             them
     """
 
-    def __init__(self, editable: bool = True, pdk: Pdk | None = None) -> None:
+    def __init__(
+        self,
+        editable: bool = True,
+        pdk: Pdk | None = None,
+    ) -> None:
         """Create a library of cells.
 
         Args:
@@ -298,9 +293,15 @@ class KCLayout(kdb.Layout):
             pdk: Pdk associated with the layout.
         """
         self.kcells: dict[int, KCell] = {}
-        kdb.Layout.__init__(self, editable)
+        self.library = kdb.Library()
+        self.layout = self.library.layout()
+        # kdb.Layout.__init__(self, editable)
         self.rename_function: Callable[..., None] = rename_clockwise
         self.pdk: Pdk | None = pdk
+
+    def __getattr__(self, name):  # type: ignore[no-untyped-def]
+        """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
+        return getattr(self.layout, name)
 
     def dup(self, init_cells: bool = True) -> KCLayout:
         """Create a duplication of the `~KCLayout` object.
@@ -312,13 +313,13 @@ class KCLayout(kdb.Layout):
             Copy of itself
         """
         kcl = KCLayout()
-        kcl.assign(super().dup())
+        kcl.layout.assign(self.layout.dup())
         if init_cells:
             for i, kc in self.kcells.items():
                 kcl.kcells[i] = KCell(
                     name=kc.name,
                     kcl=kcl,
-                    kdb_cell=kcl.cell(kc.name),
+                    kdb_cell=kcl.layout.cell(kc.name),
                     ports=kc.ports,
                 )
                 kcl.kcells[i]._settings = kc.settings.model_copy()
@@ -328,7 +329,7 @@ class KCLayout(kdb.Layout):
         kcl.rename_function = self.rename_function
         return kcl
 
-    def create_cell(  # type: ignore[override]
+    def create_cell(
         self,
         name: str,
         *args: str,
@@ -352,9 +353,9 @@ class KCLayout(kdb.Layout):
             klayout.db.Cell: klayout.db.Cell object created in the Layout
 
         """
-        if allow_duplicate or (self.cell(name) is None):
+        if allow_duplicate or (self.layout.cell(name) is None):
             # self.kcells[name] = kcell
-            return kdb.Layout.create_cell(self, name, *args)
+            return self.layout.create_cell(name, *args)
         else:
             raise ValueError(
                 f"Cellname {name} already exists. Please make sure the cellname is"
@@ -364,11 +365,11 @@ class KCLayout(kdb.Layout):
     def delete_cell(self, cell: KCell | int) -> None:
         """Delete a cell in the kcl object."""
         if isinstance(cell, int):
-            super().delete_cell(cell)
+            self.layout.delete_cell(cell)
             del self.kcells[cell]
         else:
             ci = cell.cell_index()
-            super().delete_cell(ci)
+            self.layout.delete_cell(ci)
             del self.kcells[ci]
 
     def register_cell(self, kcell: KCell, allow_reregister: bool = False) -> None:
@@ -401,20 +402,20 @@ class KCLayout(kdb.Layout):
             try:
                 return self.kcells[obj]
             except KeyError:
-                if self.cell(obj) is None:
+                if self.layout.cell(obj) is None:
                     raise
 
-                kdb_c = self.cell(obj)
-                c = KCell(name=kdb_c.name, kcl=self, kdb_cell=self.cell(obj))
+                kdb_c = self.layout.cell(obj)
+                c = KCell(name=kdb_c.name, kcl=self, kdb_cell=self.layout.cell(obj))
                 c.get_meta_data()
                 return c
         else:
-            if self.cell(obj) is not None:
+            if self.layout.cell(obj) is not None:
                 try:
-                    return self.kcells[self.cell(obj).cell_index()]
+                    return self.kcells[self.layout.cell(obj).cell_index()]
                 except KeyError:
-                    kdb_c = self.cell(obj)
-                    c = KCell(name=kdb_c.name, kcl=self, kdb_cell=self.cell(obj))
+                    kdb_c = self.layout.cell(obj)
+                    c = KCell(name=kdb_c.name, kcl=self, kdb_cell=self.layout.cell(obj))
                     c.get_meta_data()
                     return c
             from pprint import pformat
@@ -441,22 +442,22 @@ class KCLayout(kdb.Layout):
             register_cells: If `True` create KCells for all cells in the GDS.
         """
         if register_cells:
-            cells = set(self.cells("*"))
+            cells = set(self.layout.cells("*"))
         fn = str(Path(filename).resolve())
         if options is None:
-            lm = kdb.Layout.read(self, fn)
+            lm = self.layout.read(fn)
         else:
-            lm = kdb.Layout.read(self, fn, options)
+            lm = self.layout.read(fn, options)
 
         if register_cells:
-            new_cells = set(self.cells("*")) - cells
+            new_cells = set(self.layout.cells("*")) - cells
             for c in new_cells:
                 kc = KCell(kdb_cell=c, kcl=self)
                 kc.get_meta_data()
 
         return lm
 
-    @overload  # type: ignore[override]
+    @overload
     def write(self, filename: str | Path) -> None:
         ...
 
@@ -494,7 +495,7 @@ class KCLayout(kdb.Layout):
         """
         for kcell in self.kcells.values():
             kcell.set_meta_data()
-        return super().write(str(filename), options)
+        return self.layout.write(str(filename), options)
 
 
 kcl = KCLayout()
@@ -533,7 +534,7 @@ class LayerEnum(int, Enum):
             datatype: Datatype of the layer.
             kcl: Base Layout object to register the layer to.
         """
-        value = kcl.layer(layer, datatype)
+        value = kcl.layout.layer(layer, datatype)
         obj: int = int.__new__(cls, value)  # type: ignore[call-overload]
         obj._value_ = value  # type: ignore[attr-defined]
         obj.layer = layer  # type: ignore[attr-defined]
@@ -714,7 +715,7 @@ class Port:
                     self.dcplx_trans = dcplx_trans.dup()
                 assert dwidth is not None
                 self.d.width = dwidth
-                assert self.width * self.kcl.dbu == float(
+                assert self.width * self.kcl.layout.dbu == float(
                     dwidth
                 ), "When converting to dbu the width does not match the desired width!"
             elif width is not None:
@@ -764,7 +765,7 @@ class Port:
                     info=info,
                 )
             elif not trans.is_complex():
-                _trans = trans.s_trans().to_itype(self.kcl.dbu) * self.trans
+                _trans = trans.s_trans().to_itype(self.kcl.layout.dbu) * self.trans
                 return Port(
                     name=self.name,
                     trans=_trans,
@@ -775,7 +776,7 @@ class Port:
                     info=info,
                 )
         if isinstance(trans, kdb.Trans):
-            dtrans = kdb.DCplxTrans(trans.to_dtype(self.kcl.dbu))
+            dtrans = kdb.DCplxTrans(trans.to_dtype(self.kcl.layout.dbu))
             _dtrans = dtrans * self.dcplx_trans
         else:
             _dtrans = trans * self.dcplx_trans
@@ -803,7 +804,7 @@ class Port:
         elif self._dcplx_trans:
             vec = self.trans.disp
             vec.x = value
-            self._dcplx_trans.disp = vec.to_dtype(self.kcl.dbu)
+            self._dcplx_trans.disp = vec.to_dtype(self.kcl.layout.dbu)
 
     @property
     def y(self) -> int:
@@ -819,7 +820,7 @@ class Port:
         elif self._dcplx_trans:
             vec = self.trans.disp
             vec.y = value
-            self._dcplx_trans.disp = vec.to_dtype(self.kcl.dbu)
+            self._dcplx_trans.disp = vec.to_dtype(self.kcl.layout.dbu)
 
     @property
     def trans(self) -> kdb.Trans:
@@ -828,7 +829,7 @@ class Port:
         If this is set with the setter, it will overwrite any transformation or
         dcplx transformation
         """
-        return self._trans or self.dcplx_trans.s_trans().to_itype(self.kcl.dbu)
+        return self._trans or self.dcplx_trans.s_trans().to_itype(self.kcl.layout.dbu)
 
     @trans.setter
     def trans(self, value: kdb.Trans) -> None:
@@ -844,17 +845,19 @@ class Port:
         The setter will set a complex transformation and overwrite the internal
         transformation (set simple to `None` and the complex to the provided value.
         """
-        return self._dcplx_trans or kdb.DCplxTrans(self.trans.to_dtype(self.kcl.dbu))
+        return self._dcplx_trans or kdb.DCplxTrans(
+            self.trans.to_dtype(self.kcl.layout.dbu)
+        )
 
     @dcplx_trans.setter
     def dcplx_trans(self, value: kdb.DCplxTrans) -> None:
         if value.is_complex() or value.disp != value.disp.to_itype(
-            self.kcl.dbu
-        ).to_dtype(self.kcl.dbu):
+            self.kcl.layout.dbu
+        ).to_dtype(self.kcl.layout.dbu):
             self._dcplx_trans = value.dup()
             self._trans = None
         else:
-            self._trans = value.dup().s_trans().to_itype(self.kcl.dbu)
+            self._trans = value.dup().s_trans().to_itype(self.kcl.layout.dbu)
             self._dcplx_trans = None
 
     @property
@@ -947,7 +950,7 @@ class UMPort:
         vec = self.parent.dcplx_trans.disp
         vec.x = value
         if self.parent._trans:
-            self.parent._trans.disp = vec.to_itype(self.parent.kcl.dbu)
+            self.parent._trans.disp = vec.to_itype(self.parent.kcl.layout.dbu)
         elif self.parent._dcplx_trans:
             self.parent._dcplx_trans.disp = vec
 
@@ -961,7 +964,7 @@ class UMPort:
         vec = self.parent.dcplx_trans.disp
         vec.y = value
         if self.parent._trans:
-            self.parent._trans.disp = vec.to_itype(self.parent.kcl.dbu)
+            self.parent._trans.disp = vec.to_itype(self.parent.kcl.layout.dbu)
         elif self.parent._dcplx_trans:
             self.parent._dcplx_trans.disp = vec
 
@@ -974,7 +977,9 @@ class UMPort:
     @position.setter
     def position(self, pos: tuple[float, float]) -> None:
         if self.parent._trans:
-            self.parent._trans.disp = kdb.DVector(*pos).to_itype(self.parent.kcl.dbu)
+            self.parent._trans.disp = kdb.DVector(*pos).to_itype(
+                self.parent.kcl.layout.dbu
+            )
         elif self.parent._dcplx_trans:
             self.parent._dcplx_trans.disp = kdb.DVector(*pos)
 
@@ -997,12 +1002,12 @@ class UMPort:
     @property
     def width(self) -> float:
         """Width of the port in um."""
-        return self.parent.width * self.parent.kcl.dbu
+        return self.parent.width * self.parent.kcl.layout.dbu
 
     @width.setter
     def width(self, value: float) -> None:
-        self.parent.width = int(value / self.parent.kcl.dbu)
-        assert self.parent.width * self.parent.kcl.dbu == float(value), (
+        self.parent.width = int(value / self.parent.kcl.layout.dbu)
+        assert self.parent.width * self.parent.kcl.layout.dbu == float(value), (
             "When converting to dbu the width does not match the desired width"
             f"({self.width} / {value})!"
         )
@@ -1477,6 +1482,7 @@ class KCell:
         b: kdb.Vector | None = None,
         na: int = 1,
         nb: int = 1,
+        pdk_as_static: bool = True,
     ) -> Instance:
         """Add an instance of another KCell.
 
@@ -1500,7 +1506,17 @@ class KCell:
         if isinstance(cell, int):
             ci = cell
         else:
-            ci = cell.cell_index()
+            if cell.layout() == self.layout():
+                ci = cell.cell_index()
+            else:
+                assert cell.layout().library() is not None
+                lib_ci = self.kcl.layout.add_lib_cell(
+                    cell.kcl.library, cell.cell_index()
+                )
+                if pdk_as_static:
+                    ci = self.kcl.convert_cell_to_static(lib_ci)
+                else:
+                    ci = lib_ci
 
         if a is None:
             ca = self._kdb_cell.insert(kdb.CellInstArray(ci, trans))
@@ -1517,7 +1533,7 @@ class KCell:
 
     def layer(self, *args: Any, **kwargs: Any) -> int:
         """Get the layer info, convenience for `klayout.db.Layout.layer`."""
-        return self.kcl.layer(*args, **kwargs)
+        return self.kcl.layout.layer(*args, **kwargs)
 
     def __lshift__(self, cell: KCell) -> Instance:
         """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
@@ -1775,7 +1791,7 @@ class KCell:
             self.add_meta_info(
                 kdb.LayoutMetaInfo(
                     f"kfactory:ports:{i}:layer",
-                    self.kcl.get_info(port.layer).to_s(),
+                    self.kcl.layout.get_info(port.layer).to_s(),
                     None,
                     True,
                 )
@@ -1859,7 +1875,7 @@ class KCell:
             _d = port_dict[index]
             name = _d.get("name", None)
             port_type = _d["port_type"]
-            layer = self.kcl.layer(kdb.LayerInfo.from_string(_d["layer"]))
+            layer = self.kcl.layout.layer(kdb.LayerInfo.from_string(_d["layer"]))
             width = _d["width"]
             trans = _d.get("trans", None)
             dcplx_trans = _d.get("dcplx_trans", None)
@@ -1936,7 +1952,7 @@ class KCell:
             _trans = port.trans.dup()
             _trans.angle = _trans.angle % 2
             _trans.mirror = False
-            layer_info = self.kcl.get_info(port.layer)
+            layer_info = self.kcl.layout.get_info(port.layer)
             layer = f"{layer_info.layer}_{layer_info.datatype}"
 
             if port.name in portnames:
@@ -1979,7 +1995,7 @@ class KCell:
                 _trans.mirror = False
                 v = _trans.disp
                 h = f"{v.x}_{v.y}"
-                layer_info = self.kcl.get_info(port.layer)
+                layer_info = self.kcl.layout.get_info(port.layer)
                 layer = f"{layer_info.layer}_{layer_info.datatype}"
                 if h not in inst_ports:
                     inst_ports[h] = {}
@@ -3133,7 +3149,7 @@ def cell(
                     if isinstance(value, frozenset):
                         params[key] = frozenset_to_dict(value)
                 cell = f(**params)
-                dbu = cell.kcl.dbu
+                dbu = cell.kcl.layout.dbu
                 if cell._locked:
                     # If the cell is locked, it comes from a cache (most likely)
                     # and should be copied first
@@ -3161,15 +3177,6 @@ def cell(
                             port.dcplx_trans.disp = port._dcplx_trans.disp.to_itype(
                                 dbu
                             ).to_dtype(dbu)
-                # i = 0
-                # for name, setting in cell.settings.model_dump().items():
-                #     while cell.property(i) is not None:
-                #         i += 1
-                #     if isinstance(setting, KCell):
-                #         cell.set_property(i, f"{name}: {setting.name}")
-                #     else:
-                #         cell.set_property(i, f"{name}: {str(setting)}")
-                #     i += 1
                 cell._locked = True
                 return cell
 
