@@ -23,10 +23,8 @@ from .kcell import (
     polygon_from_array,
     dpolygon_from_array,
 )
-from . import cells, placer, routing, utils, port, pdk, technology
+from . import cells, placer, routing, utils, port, technology
 from .conf import config
-
-# from .pdk import Pdk
 
 __version__ = "0.8.4"
 
@@ -52,7 +50,6 @@ __all__ = [
     "config",
     "LayerEnum",
     "logger",
-    "pdk",
     "polygon_from_array",
     "dpolygon_from_array",
     "technology",
