@@ -116,6 +116,7 @@ def pdk(LAYER, straight_factory, wg_enc):
             "bezier": kf.cells.bezier.bend_s,
             "straight": straight_factory,
         },
+        layer_stack=kf.pdk.GenericLayerStack(),
         layer_enclosures={"wg": wg_enc},
     )
     # pdk.register_cells(straight=straight_factory)
