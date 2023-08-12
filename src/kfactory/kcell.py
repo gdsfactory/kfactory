@@ -3378,7 +3378,7 @@ def show(
             delete = True
 
     elif isinstance(gds, str | Path):
-        gds_file = Path(gds)
+        gds_file = Path(gds).resolve()
     else:
         raise NotImplementedError(f"unknown type {type(gds)} for streaming to KLayout")
     if not gds_file.is_file():
@@ -3401,7 +3401,23 @@ def show(
         msg = ""
         try:
             msg = conn.recv(1024).decode("utf-8")
-            config.logger.info(f"Message from klive: {msg}")
+            try:
+                jmsg = json.loads(msg)
+                match jmsg["type"]:
+                    case "open":
+                        config.logger.info(
+                            "klive v{version}: Opened file '{file}'",
+                            version=jmsg["version"],
+                            file=jmsg["file"],
+                        )
+                    case "reload":
+                        config.logger.info(
+                            "klive v{version}: Reloaded file '{file}'",
+                            version=jmsg["version"],
+                            file=jmsg["file"],
+                        )
+            except json.JSONDecodeError:
+                config.logger.info(f"Message from klive: {msg}")
         except OSError:
             config.logger.warning("klive didn't send data, closing")
         finally:
