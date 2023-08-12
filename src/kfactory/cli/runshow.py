@@ -6,89 +6,75 @@ import importlib
 import os
 import runpy
 import sys
+from enum import Enum
 from pathlib import Path
+from typing import Annotated, Optional
 
-import click
+import typer
 
 from ..conf import logger
 from ..kcell import KCell
 from ..kcell import show as kfshow
 
+# app = typer.Typer(name="show")
+# show = typer.Typer(name="show")
+# run = typer.Typer(name="run")
 
-@click.command()  # type:ignore[arg-type]
-@click.argument(
-    "file",
-    required=True,
-    type=str,
-)
-def show(arg: str, type_: str) -> None:
+
+class RunType(str, Enum):
+    file = "file"
+    module = "module"
+    function = "function"
+
+
+def show(file: str) -> None:
     """Show a GDS or OAS file in KLayout through klive."""
-    path = Path(arg)
+    path = Path(file)
     logger.debug("Path = {}", path.resolve())
     if not path.exists():
-        logger.critical("{type_} does not exist, exiting", type_=type_)
+        logger.critical("{file} does not exist, exiting", file=file)
         return
     if not path.is_file():
-        logger.critical("{type_} is not a file, exiting", type_=type_)
+        logger.critical("{file} is not a file, exiting", file=file)
         return
     if not os.access(path, os.R_OK):
-        logger.critical("No permission to read file {type_}, exiting", type_=type_)
+        logger.critical("No permission to read file {file}, exiting", file=file)
         return
     kfshow(path)
 
 
-@click.command(  # type: ignore[arg-type]
-    context_settings={"ignore_unknown_options": True, "allow_extra_args": True}
-)
-@click.option(
-    "--file",
-    "type_",
-    flag_value="file",
-    help="Run __main__ of a python file",
-    default=True,
-    show_default=True,
-)
-@click.option(
-    "--module",
-    "type_",
-    flag_value="module",
-    help="Run __main__ of a module",
-    show_default=True,
-)
-@click.option(
-    "--function",
-    "type_",
-    flag_value="function",
-    show_default=True,
-)
-@click.argument(
-    "arg",
-    required=True,
-    type=str,
-    # help="Python style module or function to run, e.g 'module.function'",
-)
-@click.option(
-    "--show/--no-show",
-    default=True,
-    help="Show the KCell if one is returned with --function.",
-)
-@click.pass_context
 def run(
-    ctx: click.Context,
-    arg: str,
-    type_: str,
-    show: bool,
+    file: Annotated[
+        str,
+        typer.Argument(default=..., help="The file|module|function to execute"),
+    ],
+    func_kwargs: Annotated[
+        Optional[list[str]],  # noqa: UP007
+        typer.Argument(
+            help="Arguments used for --type function."
+            " Doesn't have any influence for other types"
+        ),
+    ] = None,
+    type: Annotated[
+        RunType,
+        typer.Option(
+            help="Run a file or a module (`python -m <module_name>`) or a function"
+        ),
+    ] = RunType.file,
+    show: Annotated[
+        bool, typer.Option(help="Show the file through klive in KLayout")
+    ] = True,
 ) -> None:
     """Run a python modules __main__ or a function if specified."""
     path = sys.path.copy()
     sys.path.append(os.getcwd())
-    match type_:
-        case "file":
-            runpy.run_path(arg, run_name="__main__")
-        case "module":
-            runpy.run_module(arg, run_name="__main__")
-        case "function":
-            mod, func = arg.rsplit(".", 1)
+    match type:
+        case RunType.file:
+            runpy.run_path(file, run_name="__main__")
+        case RunType.module:
+            runpy.run_module(file, run_name="__main__")
+        case RunType.function:
+            mod, func = file.rsplit(".", 1)
             logger.debug(f"{mod=},{func=}")
             try:
                 spec = importlib.util.find_spec(mod)
@@ -100,18 +86,19 @@ def run(
                 kwargs = {}
 
                 old_arg = ""
-                for i, arg in enumerate(ctx.args):
-                    if i % 2:
-                        try:
-                            value: int | float | str = int(arg)
-                        except ValueError:
+                if func_kwargs is not None:
+                    for i, file in enumerate(func_kwargs):
+                        if i % 2:
                             try:
-                                value = float(arg)
+                                value: int | float | str = int(file)
                             except ValueError:
-                                value = arg
-                        kwargs[old_arg] = value
-                    else:
-                        old_arg = arg
+                                try:
+                                    value = float(file)
+                                except ValueError:
+                                    value = file
+                            kwargs[old_arg] = value
+                        else:
+                            old_arg = file
 
                 cell = getattr(_mod, func)(**kwargs)
                 if show and isinstance(cell, KCell):

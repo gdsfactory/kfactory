@@ -1,30 +1,95 @@
 """CLI interface for kfactory.
 
-Use `kf --help` for more info.
+Use `kf sea --help` for more info.
 """
-import importlib
-import os
-import runpy
-import sys
+import json
 from pathlib import Path
+from typing import Annotated, Optional
 
-import click
-from pydantic import BaseModel
+import requests
+import rich
+import typer
 
-from ..conf import logger
-from ..kcell import KCell
-from ..kcell import show as kfshow
+from ..kcell import KCLayout
 
-
-class Gds(BaseModel):
-    filepath: str
+app = typer.Typer(name="sea")
 
 
-@click.group()
-def sea() -> None:
-    pass
+@app.command()
+def upload(
+    file: str,
+    name: Optional[str] = None,  # noqa: UP007
+    description: Optional[str] = None,  # noqa: UP007
+    base_url: Annotated[
+        str, typer.Option(envvar="GDATASEA_URL")
+    ] = "http://localhost:3131",
+) -> None:
+    """Upload a new eda file to gdatasea."""
+    if name is None:
+        kcl = KCLayout()
+        kcl.read(file)
+        assert len(kcl.top_cells()) > 0, (
+            "Cannot automatically determine name of gdatasea edafile if"
+            " there is no name given and the gds is empty"
+        )
+        name = kcl.top_cells()[0].name
+
+    url = f"{base_url}/edafile"
+    if description:
+        params = {"name": name, "description": description}
+    else:
+        params = {"name": name}
+
+    fp = Path(file)
+    assert fp.exists()
+    with open(fp, "rb") as f:
+        r = requests.post(url, params=params, files={"eda_file": f})
+        msg = f"Response from {url}: "
+        try:
+            msg += rich.pretty.pretty_repr(json.loads(r.text))
+            msg = msg.replace("'success': 200", "[green]success: 200[/green]").replace(
+                "422", "[red]422[/red]"
+            )
+        except json.JSONDecodeError:
+            msg += rich.pretty.pretty_repr(f"[red]{r.text}[/red]")
+        rich.print(msg)
 
 
-@click.command()
-def upload() -> None:
-    pass
+@app.command()
+def update(
+    file: str,
+    edafile_id: Annotated[int, typer.Option("--edafile_id", "--id", "-id")],
+    name: Optional[str] = None,  # noqa: UP007
+    description: Optional[str] = None,  # noqa: UP007
+    base_url: Annotated[
+        str, typer.Option(envvar="GDATASEA_URL")
+    ] = "http://localhost:3131",
+) -> None:
+    """Upload a new eda file to gdatasea."""
+    if name is None:
+        kcl = KCLayout()
+        kcl.read(file)
+        assert len(kcl.top_cells()) > 0, (
+            "Cannot automatically determine name of gdatasea edafile if"
+            " there is no name given and the gds is empty"
+        )
+        name = kcl.top_cells()[0].name
+
+    url = f"{base_url}/edafile/{edafile_id}"
+    params = {"name": name}
+    if description:
+        params["description"] = description
+
+    fp = Path(file)
+    assert fp.exists()
+    with open(fp, "rb") as f:
+        r = requests.put(url, params=params, files={"eda_file": f})
+        msg = f"Response from {url}: "
+        try:
+            msg += rich.pretty.pretty_repr(json.loads(r.text))
+            msg = msg.replace("'success': 200", "[green]success: 200[/green]").replace(
+                "422", "[red]422[/red]"
+            )
+        except json.JSONDecodeError:
+            msg += rich.pretty.pretty_repr(f"[red]{r.text}[/red]")
+        rich.print(msg)
