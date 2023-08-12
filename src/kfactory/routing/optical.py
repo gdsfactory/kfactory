@@ -6,6 +6,8 @@ from .. import kdb
 from ..conf import config
 from ..kcell import KCell, Port
 from .manhattan import route_manhattan
+from ..cells.straight import straight
+from ..cells.euler import bend_euler
 
 
 def vec_angle(v: kdb.Vector) -> int:
@@ -125,8 +127,8 @@ def route(
     c: KCell,
     p1: Port,
     p2: Port,
-    straight_factory: Callable[[int, int], KCell],
-    bend90_cell: KCell,
+    straight_factory: Callable[..., KCell] = straight,
+    bend90_cell: KCell | Callable[..., KCell] = bend_euler,
     bend180_cell: KCell | None = None,
     taper_cell: KCell | None = None,
     start_straight: int = 0,
@@ -139,7 +141,25 @@ def route(
     allow_small_routes: bool = False,
     different_port_width: int = False,
 ) -> None:
-    """Bend 90 part."""
+    """Routes two ports with bends.
+
+    Args:
+        c: Cell to add the route to.
+        p1: Start port.
+        p2: End port.
+        straight_factory: Function to create a straight cell.
+        bend90_cell: Function to create a 90° bend cell.
+        bend180_cell: Function to create a 180° bend cell.
+        taper_cell: Function to create a taper cell.
+        start_straight: Minimal straight segment after `p1`.
+        end_straight: Minimal straight segment before `p2`.
+        route_path_function: Function to create the route path.
+        port_type: Port type to use for the bend cells.
+        allow_small_routes: Allow small routes.
+        different_port_width: Allow different port widths.
+    """
+    bend90_cell = bend90_cell() if callable(bend90_cell) else bend90_cell
+
     if p1.width != p2.width and not different_port_width:
         raise ValueError(
             f"The ports have different widths {p1.width=} {p2.width=}. If this is"
@@ -281,6 +301,8 @@ def route(
                             straight_factory,
                             bend90_cell,
                             taper_cell,
+                            port_type,
+                            allow_small_routes,
                         )
                         j = i - 1
                         start_port = bend180.ports[b180p2.name]
@@ -302,6 +324,8 @@ def route(
                             straight_factory,
                             bend90_cell,
                             taper_cell,
+                            port_type,
+                            allow_small_routes,
                         )
                         j = i - 1
                         start_port = bend180.ports[b180p1.name]
@@ -318,6 +342,8 @@ def route(
             straight_factory,
             bend90_cell,
             taper_cell,
+            port_type,
+            allow_small_routes,
         )
 
     else:
@@ -331,7 +357,17 @@ def route(
             end_straight=end_straight,
         )
 
-        place90(c, p1.copy(), p2.copy(), pts, straight_factory, bend90_cell, taper_cell)
+        place90(
+            c,
+            p1.copy(),
+            p2.copy(),
+            pts,
+            straight_factory,
+            bend90_cell,
+            taper_cell,
+            port_type,
+            allow_small_routes,
+        )
 
 
 def place90(
