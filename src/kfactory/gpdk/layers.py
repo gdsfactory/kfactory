@@ -6,5 +6,3 @@ class LAYER(kf.LayerEnum):
     WGCLAD = (111, 0)
     WGEXCLUDE = (1, 1)
     WGCLADEXCLUDE = (111, 1)
-
-

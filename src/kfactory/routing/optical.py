@@ -3,11 +3,11 @@
 from collections.abc import Callable, Sequence
 
 from .. import kdb
+from ..cells.euler import bend_euler
+from ..cells.straight import straight
 from ..conf import config
 from ..kcell import KCell, Port
 from .manhattan import route_manhattan
-from ..cells.straight import straight
-from ..cells.euler import bend_euler
 
 
 def vec_angle(v: kdb.Vector) -> int:

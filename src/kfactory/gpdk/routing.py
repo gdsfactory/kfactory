@@ -1,11 +1,11 @@
-import kfactory as kf
 from functools import partial
-from kfactory.gpdk import cells
 
+import kfactory as kf
+from kfactory.gpdk import cells
 
 route_sc = partial(
     kf.routing.optical.route,
-    straight_factory=cells.straight_sc,
+    straight_factory=cells.straight_dbu_sc,
     bend90_cell=cells.bend_euler_sc,
 )
 

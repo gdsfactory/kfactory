@@ -108,16 +108,16 @@ def test_route_bend90_euler(
     kf.config.logfilter.regex = None
 
 
-
-if __name__ == "__main__": 
-    from functools import partial 
+if __name__ == "__main__":
+    from functools import partial
     import kfactory as kf
+    from kfactory import gpdk
 
     c = kf.KCell()
-    straight = partial(kf.cells.straight.straight_dbu, length=10, width=1, layer=kf.gpdk)
+    straight = gpdk.cells.straight_sc
     sl = c << straight()
     sr = c << straight()
     sr.move((50, 50))
 
-    kf.routing.optical.route(c, p1=sl.ports["o2"], p2=sr.ports["o1"], straight_factory=straight)
+    gpdk.routing.route_sc(c, p1=sl.ports["o2"], p2=sr.ports["o1"])
     c.show()
