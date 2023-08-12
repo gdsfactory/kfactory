@@ -26,6 +26,7 @@ dependencies = [
 	"pydantic-settings >= 2.0b1",
 	"loguru",
 	"tomli",
+	"requests",
 ]
 
 [project.optional-dependencies]
@@ -45,6 +46,7 @@ dev = [
 	"kfactory[git]",
 	"towncrier",
 	"tbump",
+	"types-reqeusts",
 ]
 docs = [
 	"kfactory[ipy]",
@@ -65,6 +67,7 @@ ci = [
 	"pytest_regressions",
 	"mypy",
 	"types-cachetools",
+	"types-requests",
 	"kfactory[git]",
 ]
 ipy = [
