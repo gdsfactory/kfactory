@@ -20,7 +20,10 @@ straight_sc = partial(
     kf.cells.straight.straight, length=10, width=TECH.width_sc, layer=LAYER.WG
 )
 straight_dbu_sc = partial(
-    kf.cells.straight.straight_dbu, length=10e3, width=int(TECH.width_sc * 1e3), layer=LAYER.WG
+    kf.cells.straight.straight_dbu,
+    length=10e3,
+    width=int(TECH.width_sc * 1e3),
+    layer=LAYER.WG,
 )
 bend_euler_sc = partial(
     kf.cells.euler.bend_euler,
