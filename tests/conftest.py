@@ -5,7 +5,7 @@ from functools import partial
 # kf.config.logfilter.level = "ERROR"
 
 
-class LAYER_CLASS(kf.LayerEnum):
+class LAYER_CLASS(kf.LayerEnum, kcl=kf.kcl):
     WG = (1, 0)
     WGCLAD = (111, 0)
     WGEXCLUDE = (1, 1)

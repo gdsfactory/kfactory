@@ -15,6 +15,7 @@ import importlib.util
 import inspect
 import json
 import socket
+import types
 from collections.abc import Callable, Hashable, Iterable, Iterator
 from enum import Enum, IntEnum, IntFlag, auto
 from hashlib import sha3_512
@@ -38,9 +39,6 @@ from .port import rename_clockwise
 if TYPE_CHECKING:
     # from .pdk import Pdk
     from types import ModuleType
-
-    from .typings import PathType
-
 
 KCellParams = ParamSpec("KCellParams")
 AnyTrans = TypeVar(
@@ -97,12 +95,9 @@ class LayerEnum(int, Enum):
     layer: int
     datatype: int
     kcl: KCLayout
+    _ignore_ = "kcl"
 
-    def __new__(
-        cls: LayerEnum,
-        layer: int,
-        datatype: int,
-    ) -> LayerEnum:
+    def __new__(cls: LayerEnum, layer: int, datatype: int) -> LayerEnum:  # type: ignore
         """Create a new Enum.
 
         Because it needs to act like an integer an enum is created and expanded.
@@ -112,12 +107,16 @@ class LayerEnum(int, Enum):
             datatype: Datatype of the layer.
             kcl: Base Layout object to register the layer to.
         """
-        value = kcl.layout.layer(layer, datatype)
+        value = kcl.layer(layer, datatype)
         obj: int = int.__new__(cls, value)  # type: ignore[call-overload]
         obj._value_ = value  # type: ignore[attr-defined]
         obj.layer = layer  # type: ignore[attr-defined]
         obj.datatype = datatype  # type: ignore[attr-defined]
         return obj  # type: ignore[return-value]
+
+    def __init_subclass__(cls, kcl: KCLayout):
+        """Sets the KCLayout for the class which all layers must be created from."""
+        cls.kcl = kcl
 
     def __getitem__(self, key: int) -> int:
         """Retrieve layer number[0] / datatype[1] of a layer."""
@@ -387,7 +386,7 @@ def get_cells(
 #         return self.cellfactory_map[__key]
 
 
-class KCell(BaseModel, arbitrary_types_allowed=True, extra="allow"):
+class KCell:
     """KLayout cell and change its class to KCell.
 
     A KCell is a dynamic proxy for kdb.Cell. It has all the
@@ -415,12 +414,12 @@ class KCell(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     _settings: KCellSettings
     _info: Info
     d: UMKCell
-    kcl: KCLayout = Field(default_factory=lambda: kcl)
+    kcl: KCLayout
 
     def __init__(
         self,
         name: str | None = None,
-        kcl: KCLayout = kcl,
+        kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Ports | None = None,
     ):
@@ -435,6 +434,8 @@ class KCell(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
                 if `None` create an empty one.
         """
+        if kcl is None:
+            kcl = _get_default_kcl()
         self.kcl = kcl
         self.insts: Instances = Instances()
         self._settings: KCellSettings = KCellSettings()
@@ -857,7 +858,7 @@ class KCell(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         b: kdb.Vector | None = None,
         na: int = 1,
         nb: int = 1,
-        pdk_as_static: bool = True,
+        libcell_as_static: bool = True,
     ) -> Instance:
         """Add an instance of another KCell.
 
@@ -872,6 +873,10 @@ class KCell(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 Vector in x-direction. Some foundries won't allow other Vectors.
             na: Number of elements in direction of `a`
             nb: Number of elements in direction of `b`
+            libcell_as_static: If the cell is a Library cell
+                (different KCLayout object), convert it to a static cell. This can cause
+                name collisions that are automatically resolved by appending $1[..n] on
+                the newly created cell.
 
         Returns:
             The created instance
@@ -888,7 +893,7 @@ class KCell(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 lib_ci = self.kcl.layout.add_lib_cell(
                     cell.kcl.library, cell.cell_index()
                 )
-                if pdk_as_static:
+                if libcell_as_static:
                     ci = self.kcl.convert_cell_to_static(lib_ci)
                 else:
                     ci = lib_ci
@@ -1442,18 +1447,18 @@ class KCellFactories(BaseModel):
     def add(self, name: str, factory: KCellFactory) -> None:
         self.factories[name] = factory
 
-    def __getattr__(self, name: str) -> KCellFactory:
-        """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
-        return self.factories[name]
+    # def __getattr__(self, name: str) -> KCellFactory:
+    #     """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
+    #     return self.factories[name]
 
-    def __getitem__(self, name: str) -> KCellFactory:
-        return self.factories[name]
+    # def __getitem__(self, name: str) -> KCellFactory:
+    #     return self.factories[name]
 
-    def __setitem__(self, name: str, factory: KCellFactory) -> None:
-        self.factories[name] = factory
+    # def __setitem__(self, name: str, factory: KCellFactory) -> None:
+    #     self.factories[name] = factory
 
-    def __setattr__(self, name: str, factory: KCellFactory) -> None:
-        self.factories[name] = factory
+    # def __setattr__(self, name: str, factory: KCellFactory) -> None:
+    #     self.factories[name] = factory
 
 
 class Constants(BaseSettings):
@@ -1506,32 +1511,30 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     # enclosure: KCellEnclosure
     library: kdb.Library
 
-    factories: KCellFactories
+    factories: KCellFactories = KCellFactories()
     kcells: dict[int, KCell]
     layers: type[LayerEnum]
-    sparameters_path: PathType | None
-    interconnect_cml_path: PathType | None
+    sparameters_path: Path | str | None
+    interconnect_cml_path: Path | str | None
     constants: Constants = Field(default_factory=Constants)
     rename_function: Callable[..., None]
 
     def __init__(
         self,
-        editable: bool = True,
         name: str | None = None,
-        # kcl: KCLayout = KCLayout(),
-        # library: kdb.Library = kdb.Library(),
         # layer_enclosures: dict[str, LayerEnclosure]
         # | LayerEnclosureModel = LayerEnclosureModel(),
         # enclosure: KCellEnclosure | None = None,
-        factories: dict[str, KCellFactory] | None = None,
-        layers: type[LayerEnum] | None = None,
-        sparameters_path: PathType | None = None,
-        interconnect_cml_path: PathType | None = None,
+        # factories: dict[str, KCellFactory] | None = None,
+        # layers: type[LayerEnum] | None = None,
+        sparameters_path: Path | str | None = None,
+        interconnect_cml_path: Path | str | None = None,
         constants: type[Constants] | None = None,
         base_kcl: KCLayout | None = None,
-        rename_function: Callable[..., None] = rename_clockwise,
+        port_rename_function: Callable[..., None] = rename_clockwise,
+        copy_base_kcl_layers: bool = True,
     ) -> None:
-        """Create a new pdk. Can be based on an old PDK.
+        """Create a new KCLayout (PDK). Can be based on an old KCLayout.
 
         Args:
             name: Name of the PDK.
@@ -1544,44 +1547,25 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             sparameters_path: Path to the sparameters config file.
             interconnect_cml_path: Path to the interconnect file.
             constants: A model containing all the constants related to the PDK.
-            base_pdk: an optional basis of the PDK.
+            base_kcl: an optional basis of the PDK.
+            port_rename_function: Which function to use for renaming kcell ports.
+            copy_base_kcl_layers: Copy all known layers from the base if any are
+                defined.
         """
-        """Create a library of cells.
-
-        Args:
-            editable: Open the KLayout Layout in editable mode if `True`.
-            pdk: Pdk associated with the layout.
-        """
-        # self.kcells: dict[int, KCell] = {}
-        # self.library = kdb.Library()
-        # self.layout = self.library.layout()
-        # kdb.Layout.__init__(self, editable)
-        # self.rename_function: Callable[..., None] = rename_clockwise
-
-        # if isinstance(layer_enclosures, dict):
-        #     layer_enclosures = LayerEnclosureModel(enclosure_map=layer_enclosures)
-        # _cell_factories: dict[str, KCellFactory] = {}
-        kcell_factories = KCellFactories()
-        if isinstance(factories, dict):
-            for name, factory in factories.items():
-                kcell_factories[name] = KCellFactory(
-                    name=name, factory=self.pdk_kcell_factory(factory)
-                )
-        # else:
-        #     for name, factory in cell_factories.cellfactory_map.items():
-        #         _cell_factories[name] = self.pdk_kcell_factory(factory)
-        #     cell_factories = CellFactoryModel(pdk=self, cellfactory_map=_cell_factories)
-
         if base_kcl:
             name = name or base_kcl.name
-            # cfm = base_kcl.cell_factories.cellfactory_map.copy()
-            # cfm.update(cell_factories)
-            # cell_factories = CellFactoryModel(pdk=self, cellfactory_map=cfm)
-            layers = (
-                layers
-                or base_kcl.layers
-                or LayerEnum("LAYER", {}, kcl=self)  # type: ignore[arg-type, assignment]
-            )
+            # if layers is None:
+            if copy_base_kcl_layers:
+                layers = layerenum_from_dict(
+                    name=base_kcl.layers.__name__,
+                    layers={
+                        _layer.name: (_layer.layer, _layer.datatype)
+                        for _layer in base_kcl.layers
+                    },
+                    kcl=base_kcl.kcl,
+                )
+            else:
+                layers = layerenum_from_dict({}, kcl=self)
             sparameters_path = sparameters_path or base_kcl.sparameters_path
             interconnect_cml_path = (
                 interconnect_cml_path or base_kcl.interconnect_cml_path
@@ -1592,69 +1576,50 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             # layer_enclosures = layer_enclosures
             # enclosure = enclosure or KCellEnclosure(enclosures=[])
             # cell_factories = cell_factories
-            if not layers:
-
-                class LAYER(LayerEnum):
-                    kcl = self
-
-            layers = layers or LayerEnum(
-                "LAYER", {}, kcl=self  # type: ignore[arg-type, assignment]
-            )
+            layers = self.layerenum_from_dict(name="LAYER", layers={})
             sparameters_path = sparameters_path
             interconnect_cml_path = interconnect_cml_path
             _constants = constants() if constants else Constants()
 
         # self.library.layout().assign(self.kcl)
-        kcl = KCLayout()
-        library = kcl.library
+        # kcl = KCLayout()
+        # library = kcl.library
+        library = kdb.Library()
+        layout = library.layout()
 
         super().__init__(
             name=name,
-            kcl=kcl,
             kcells={},
             # layer_enclosures=layer_enclosures,
             # enclosure=enclosure,
-            cell_factories=cell_factories,
+            # cell_factories=cell_factories,
             layers=layers,
             sparameters_path=sparameters_path,
             interconnect_cml_path=interconnect_cml_path,
             constants=_constants,
             library=library,
+            layout=layout,
+            rename_function=port_rename_function,
         )
 
     def kcell(self, name: str | None = None, ports: Ports | None = None) -> KCell:
         """Create a new cell based ont he pdk's layout object."""
         return KCell(name=name, kcl=self.kcl, ports=ports)
 
-    def layer_enum(self, name: str, layers: dict[str, tuple[int, int]]) -> LayerEnum:
+    def layer_enum(
+        self, name: str, layers: dict[str, tuple[int, int]]
+    ) -> type[LayerEnum]:
         """Create a new LAYER enum based on the pdk's kcl."""
-        return LayerEnum(name, layers, kcl=self.kcl)  # type: ignore[arg-type]
-
-    def pdk_kcell_factory(
-        self, _func: Callable[KCellParams, KCell]
-    ) -> Callable[KCellParams, KCell]:
-        """Wraps a generic kcell function using the standard [kcell.kcl][kfactory.kcell.kcl] object.
-
-        The wrapper will replace the standard kcl with the pdk one. This allows to wrap
-        functions not using a pdk [KCell][kfactory.kcell.KCell].
-        """
-
-        @functools.wraps(_func)
-        def pdk_cell_func(
-            *args: KCellParams.args, **kwargs: KCellParams.kwargs
-        ) -> KCell:
-            cell = _func(*args, **kwargs)
-            if cell.kcl is not self.kcl:
-                config.logger.warning(
-                    "KCell {name} is not in the pdk KCLayout object!", name=cell.name
-                )
-            return cell
-
-        return pdk_cell_func
+        return layerenum_from_dict(name=name, layers=layers, kcl=self)
 
     def __getattr__(self, name):  # type: ignore[no-untyped-def]
         """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
         return getattr(self.layout, name)
+
+    def layerenum_from_dict(
+        self, name: str = "LAYER", *, layers: dict[str, tuple[int, int]]
+    ) -> type[LayerEnum]:
+        return layerenum_from_dict(layers=layers, name=name, kcl=self)
 
     def dup(self, init_cells: bool = True) -> KCLayout:
         """Create a duplication of the `~KCLayout` object.
@@ -1851,11 +1816,33 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         return self.layout.write(str(filename), options)
 
 
+def layerenum_from_dict(
+    layers: dict[str, tuple[int, int]], name: str = "LAYER", kcl: KCLayout | None = None
+) -> type[LayerEnum]:
+    if kcl is None:
+        kcl = _get_default_kcl()
+
+    def update_namespace(ns: dict[str, Any]) -> None:
+        ns.update(layers)
+
+    return types.new_class(
+        name=name,
+        bases=(LayerEnum,),
+        kwds={"kcl": kcl},
+        exec_body=update_namespace,
+    )
+
+
 kcl = KCLayout()
 """Default library object.
 
 Any [KCell][kfactory.kcell.KCell] uses this object unless another one is
 specified in the constructor."""
+
+
+def _get_default_kcl() -> KCLayout:
+    """Utility function to get the default kcl object."""
+    return kcl
 
 
 class Port:
@@ -1901,7 +1888,7 @@ class Port:
         width: int,
         layer: LayerEnum | int,
         trans: kdb.Trans,
-        kcl: KCLayout = kcl,
+        kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = {},
     ):
@@ -1915,7 +1902,7 @@ class Port:
         dwidth: float,
         layer: LayerEnum | int,
         dcplx_trans: kdb.DCplxTrans,
-        kcl: KCLayout = kcl,
+        kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = {},
     ):
@@ -1932,7 +1919,7 @@ class Port:
         angle: int,
         position: tuple[int, int],
         mirror_x: bool = False,
-        kcl: KCLayout = kcl,
+        kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
     ):
         ...
@@ -1948,7 +1935,7 @@ class Port:
         dangle: float,
         dposition: tuple[float, float],
         mirror_x: bool = False,
-        kcl: KCLayout = kcl,
+        kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
     ):
         ...
@@ -1969,11 +1956,11 @@ class Port:
         dposition: tuple[float, float] | None = None,
         mirror_x: bool = False,
         port: Port | None = None,
-        kcl: KCLayout = kcl,
+        kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
     ):
         """Create a port from dbu or um based units."""
-        self.kcl = kcl
+        self.kcl = kcl or _get_default_kcl()
         self.d = UMPort(self)
         self.info = Info(**info)
         if port is not None:

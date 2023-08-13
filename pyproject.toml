@@ -48,7 +48,7 @@ dev = [
 	"kfactory[git]",
 	"towncrier",
 	"tbump",
-	"types-reqeusts",
+	"types-requests",
 ]
 docs = [
 	"kfactory[ipy]",

@@ -51,7 +51,7 @@ class LayoutImage:
         layer_properties: str | None = None,
     ):
         self.layout_view = lay.LayoutView()
-        self.layout_view.show_layout(cell.kcl, False)
+        self.layout_view.show_layout(cell.kcl.layout, False)
         self.layer_properties: Path | None = None
         if layer_properties is not None:
             self.layer_properties = Path(layer_properties)
@@ -78,7 +78,7 @@ class LayoutIPImage:
         layer_properties: str | None = None,
     ):
         self.layout_view = lay.LayoutView()
-        self.layout_view.show_layout(cell.kcl, False)
+        self.layout_view.show_layout(cell.kcl.layout, False)
         self.layer_properties: Path | None = None
         if layer_properties is not None:
             self.layer_properties = Path(layer_properties)
@@ -112,7 +112,7 @@ class LayoutWidget:
         self.hide_unused_layers = hide_unused_layers
 
         self.layout_view = lay.LayoutView()
-        self.layout_view.show_layout(cell.kcl, False)
+        self.layout_view.show_layout(cell.kcl.layout, False)
         self.layer_properties: Path | None = None
         if layer_properties is not None:
             self.layer_properties = Path(layer_properties)
