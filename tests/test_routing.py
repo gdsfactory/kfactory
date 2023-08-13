@@ -114,10 +114,12 @@ if __name__ == "__main__":
     from kfactory import gpdk
 
     c = kf.KCell()
-    straight = gpdk.cells.straight_sc
+    straight = gpdk.cells.straight_dbu_sc
     sl = c << straight()
     sr = c << straight()
-    sr.move((50, 50))
+    sr.d.move((100, 50))
 
-    gpdk.routing.route_sc(c, p1=sl.ports["o2"], p2=sr.ports["o1"])
+    gpdk.routing.route_sc(
+        c, p1=sl.ports["o2"], p2=sr.ports["o1"], straight_factory=straight
+    )
     c.show()
