@@ -6,6 +6,7 @@ import os
 import re
 import sys
 import traceback
+from enum import Enum
 from itertools import takewhile
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
@@ -52,15 +53,23 @@ def tracing_formatter(record: loguru.Record) -> str:
         )
 
 
+class LogLevel(str, Enum):
+    TRACE = "TRACE"
+    DEBUG = "DEBUG"
+    INFO = "INFO"
+    SUCCESS = "SUCCESS"
+    WARNING = "WARNING"
+    ERROR = "ERROR"
+    CRITICAL = "CRITICAL"
+
+
 class LogFilter(BaseModel):
     """Filter certain messages by log level or regex.
 
     Filtered messages are not evaluated and discarded.
     """
 
-    level: Literal[
-        "TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"
-    ] = "INFO"
+    level: LogLevel = LogLevel.INFO
     regex: str | None = None
 
     def __call__(self, record: loguru.Record) -> bool:
@@ -111,7 +120,7 @@ class Settings(
         super().__init__(**data)
         self.logger.remove()
         self.logger.add(sys.stdout, format=tracing_formatter, filter=self.logfilter)
-        self.logger.info("LogLevel: {}", self.logfilter.level)
+        self.logger.debug("LogLevel: {}", self.logfilter.level)
 
 
 config = Settings()
