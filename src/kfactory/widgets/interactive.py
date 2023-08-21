@@ -1,5 +1,7 @@
 """Interactivate jupyter widget."""
 
+from __future__ import annotations
+
 try:
     from pathlib import Path
     from typing import Any
@@ -34,7 +36,7 @@ except ImportError as e:
 
 
 def display_kcell(kc: KCell) -> None:
-    cell_dup = kc.kcl.dup()[kc.name]
+    cell_dup = kc.kcl[kc.name]
     match config.display_type:
         case "widget":
             lw = LayoutWidget(cell=cell_dup)
@@ -42,6 +44,9 @@ def display_kcell(kc: KCell) -> None:
         case "image":
             lipi = LayoutIPImage(cell=cell_dup)
             display(lipi.image)  # type: ignore[no-untyped-call]
+
+
+widgets: list[LayerImage | LayerIPImage] = []
 
 
 class LayoutImage:
@@ -62,6 +67,7 @@ class LayoutImage:
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
 
         self.image = Image(value=png_data, format="png")
+        widgets.append(self)
 
     def show_cell(self, cell: kdb.Cell) -> None:
         self.layout_view.active_cellview().cell = cell
@@ -90,6 +96,7 @@ class LayoutIPImage:
         self.image = IPImage(  # type: ignore[no-untyped-call]
             data=png_data, format="png", embed=True, width=800, height=600
         )
+        widgets.append(self)
 
     def show_cell(self, cell: kdb.Cell) -> None:
         self.layout_view.active_cellview().cell = cell
@@ -172,7 +179,7 @@ class LayoutWidget:
         )
 
     def show_cell(self, cell: kdb.Cell) -> None:
-        self.layout_view.active_cellview().cell = cell
+        self.layout_view.active_cellview().cell_index = cell.cell_index()
         self.layout_view.max_hier()
         self.layout_view.resize(800, 600)
         self.layout_view.add_missing_layers()

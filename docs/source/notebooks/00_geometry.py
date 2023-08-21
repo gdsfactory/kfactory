@@ -176,7 +176,7 @@ wg3 = c << straight(length=15, width=2.5, layer=(1, 0))
 # wg3.movey(20).rotate(15)
 print(c.name)
 c.show()  # show in klayout
-c.plot()
+# c.plot()
 
 # %% [markdown]
 # Now we can align everything together using the ports:
@@ -194,14 +194,14 @@ wg3.connect("o1", wg2.ports["o2"])
 
 # %%
 c.show()  # show in klayout
-c.plot()
+# c.plot()
 
 
 # %%
 c.add_port(name="o1", port=wg1.ports["o1"])
 c.add_port(name="o2", port=wg3.ports["o2"])
 c.show()  # show in klayout
-c.plot()
+# c.plot()
 
 # %% [markdown]
 # As you can see the `red` labels are for the cell ports while
@@ -236,7 +236,7 @@ c.shapes(c.kcl.layer(4, 0)).insert(
 
 # %%
 c.show()  # show in klayout
-c.plot()
+# c.plot()
 
 # %% [markdown]
 # ## Ports
