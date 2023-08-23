@@ -1856,6 +1856,8 @@ def layerenum_from_dict(
 
 
 KCLayout.model_rebuild()
+LayerEnclosure.model_rebuild()
+KCellEnclosure.model_rebuild()
 LayerEnclosureModel.model_rebuild()
 LayerEnclosureCollection.model_rebuild()
 kcl = KCLayout()

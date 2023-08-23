@@ -78,7 +78,8 @@ def test_um_enclosure(LAYER):
             (LAYER.WGCLAD, -5000, -3000),
             (LAYER.WGCLAD, -4000, -2000),
             (LAYER.WGCLAD, -2000, 1000),
-        ]
+        ],
+        kcl=kf.kcl,
     )
 
     enc_um = kf.utils.LayerEnclosure(
@@ -87,7 +88,7 @@ def test_um_enclosure(LAYER):
             (LAYER.WGCLAD, -4, -2),
             (LAYER.WGCLAD, -2, 1),
         ],
-        dbu=0.001,
+        kcl=kf.kcl,
     )
 
     assert enc == enc_um
