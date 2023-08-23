@@ -18,8 +18,9 @@ from .enclosure import (
     extrude_path,
     extrude_path_dynamic,
 )
-from .fill import fill_tiled
-from .violations import fix_spacing_minkowski_tiled, fix_spacing_tiled
+
+# from .fill import fill_tiled
+# from .violations import fix_spacing_minkowski_tiled, fix_spacing_tiled
 
 __all__ = [
     "LayerEnclosure",
@@ -29,8 +30,8 @@ __all__ = [
     "geo",
     "extrude_path",
     "extrude_path_dynamic",
-    "fill_tiled",
-    "fix_spacing_tiled",
-    "fix_spacing_minkowski_tiled",
+    # "fill_tiled",
+    # "fix_spacing_tiled",
+    # "fix_spacing_minkowski_tiled",
     "clean_points",
 ]

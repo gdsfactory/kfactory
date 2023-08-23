@@ -4,9 +4,13 @@ Filling empty regions in [KCells][kfactory.kcell.KCell] with filling cells.
 """
 
 from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
-from .. import KCell, KCLayout, LayerEnum, kdb
+from .. import kdb
 from ..conf import config
+
+if TYPE_CHECKING:
+    from .. import KCell, KCLayout, LayerEnum
 
 
 class FillOperator(kdb.TileOutputReceiver):

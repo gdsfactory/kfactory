@@ -3,19 +3,22 @@
 Enclosures allow to calculate slab/excludes and similar concepts to an arbitrary
 shape located on a main_layer or reference layer or region.
 """
+from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator, Sequence
 from enum import IntEnum
 from hashlib import sha1
-from typing import Any, Optional, TypeGuard, overload
+from typing import TYPE_CHECKING, Any, TypeGuard, overload
 
 import numpy as np
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator
 
 from .. import kdb
 from ..conf import config
-from ..kcell import KCell, LayerEnum, Port
 from ..port import filter_layer
+
+if TYPE_CHECKING:
+    from ..kcell import KCell, KCLayout, LayerEnum, Port
 
 __all__ = [
     "LayerEnclosure",
@@ -155,7 +158,7 @@ def extrude_path(
     layer: LayerEnum | int,
     path: list[kdb.DPoint],
     width: float,
-    enclosure: Optional["LayerEnclosure"] = None,
+    enclosure: LayerEnclosure | None = None,
     start_angle: float | None = None,
     end_angle: float | None = None,
 ) -> None:
@@ -290,7 +293,7 @@ def extrude_path_dynamic(
     layer: LayerEnum | int,
     path: list[kdb.DPoint],
     widths: Callable[[float], float] | list[float],
-    enclosure: Optional["LayerEnclosure"] = None,
+    enclosure: LayerEnclosure | None = None,
     start_angle: float | None = None,
     end_angle: float | None = None,
 ) -> None:
@@ -496,6 +499,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
     _name: str | None = PrivateAttr()
     main_layer: LayerEnum | int | None
     yaml_tag: str = "!Enclosure"
+    kcl: KCLayout | None = None
 
     def __init__(
         self,
@@ -508,7 +512,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
             tuple[LayerEnum | int, float] | tuple[LayerEnum | int, float, float]
         ]
         | None = None,
-        dbu: float | None = None,
+        kcl: KCLayout | None = None,
     ):
         """Constructor of new enclosure.
 
@@ -519,20 +523,25 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                 cell name this name will be used for enclosure arguments.
             main_layer: Main layer used if the functions don't get an explicit layer.
             dsections: Same as sections but min/max defined in um
-            dbu: `KCLayout.dbu` (conversion dbu -> um). Must be specified if
-                `desections` is not `None`.
+            kcl: `KCLayout` Used for conversion dbu -> um or when copying.
+                Must be specified if `desections` is not `None`. Also necessary
+                if copying to another layout and not all layers used are LayerEnums.
         """
         super().__init__(
             layer_sections={},
             _name=name,
             main_layer=main_layer,
+            kcl=kcl,
         )
         self._name = name
 
         self.layer_sections = {}
 
         if dsections is not None:
-            assert dbu is not None, "If sections in um are defined, dbu must be set"
+            assert (
+                self.kcl is not None
+            ), "If sections in um are defined, kcl must be set"
+            dbu = self.kcl.dbu
             sections = list(sections)
             for section in dsections:
                 if len(section) == 2:
@@ -563,7 +572,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
             (str(self), self.main_layer, tuple(list(self.layer_sections.items())))
         )
 
-    def __add__(self, other: "LayerEnclosure") -> "LayerEnclosure":
+    def __add__(self, other: LayerEnclosure) -> LayerEnclosure:
         """Returns the merged enclosure of two enclosures."""
         enc = LayerEnclosure()
 
@@ -577,7 +586,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
 
         return enc
 
-    def __iadd__(self, other: "LayerEnclosure") -> "LayerEnclosure":
+    def __iadd__(self, other: LayerEnclosure) -> LayerEnclosure:
         """Allows merging another enclosure into this one."""
         for layer, secs in other.layer_sections.items():
             for sec in secs.sections:
@@ -1013,6 +1022,31 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
         extrude_path_dynamic(
             target=c, layer=main_layer, path=path, widths=widths, enclosure=self
         )
+
+    def copy_to(self, kcl: KCLayout) -> LayerEnclosure:
+        """Creat a copy of the LayerEnclosure in another KCLayout."""
+        layer_enc = LayerEnclosure(
+            [], name=self.name, main_layer=self.main_layer, kcl=kcl
+        )
+        for layer, sections in self.layer_sections.items():
+            if isinstance(layer, LayerEnum):
+                try:
+                    _layer = kcl.layers(layer)  # type: ignore[call-arg]
+                except ValueError:
+                    _layer = kcl.layer(layer.layer, layer.datatype)
+                    config.logger.warning(
+                        "{layer.name} - {layer.layer}/{layer.datatype} is not"
+                        " available in the new KCLayout {kcl.name}, using layer"
+                        " index instead",
+                        layer=layer,
+                        kcl=kcl,
+                    )
+            else:
+                raise NotImplementedError
+
+            for section in sections.sections:
+                layer_enc.add_section(_layer, section)
+        return layer_enc
 
 
 class LayerEnclosureCollection(BaseModel):
@@ -1503,3 +1537,7 @@ class KCellEnclosure(BaseModel):
         else:
             for operator in layer_regiontilesoperators.values():
                 operator.insert()
+
+    def copy_to(self, kcl: KCLayout) -> KCellEnclosure:
+        """Copy the KCellEnclosure to another KCLayout."""
+        return KCellEnclosure([enc.copy_to(kcl) for enc in self.enclosures])

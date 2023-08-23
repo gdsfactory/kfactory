@@ -33,8 +33,12 @@ from typing_extensions import ParamSpec
 from . import kdb, lay
 from .conf import config
 from .port import rename_clockwise
-
-# from .utils.enclosure import LayerEnclosure, KCellEnclosure
+from .utils.enclosure import (
+    KCellEnclosure,
+    LayerEnclosure,
+    LayerEnclosureCollection,
+    LayerSection,
+)
 
 if TYPE_CHECKING:
     # from .pdk import Pdk
@@ -358,18 +362,18 @@ def get_cells(
     return cells
 
 
-# class LayerEnclosureModel(BaseModel):
-#     """PDK access model for LayerEnclsoures."""
+class LayerEnclosureModel(BaseModel):
+    """PDK access model for LayerEnclsoures."""
 
-#     enclosure_map: dict[str, LayerEnclosure] = Field(default={})
+    enclosure_map: dict[str, LayerEnclosure] = Field(default={})
 
-#     def __getitem__(self, __key: str) -> LayerEnclosure:
-#         """Retrieve element by string key."""
-#         return self.enclosure_map[__key]
+    def __getitem__(self, __key: str) -> LayerEnclosure:
+        """Retrieve element by string key."""
+        return self.enclosure_map[__key]
 
-#     def __getattr__(self, __key: str) -> LayerEnclosure:
-#         """Retrieve attribute by key."""
-#         return self.enclosure_map[__key]
+    def __getattr__(self, __key: str) -> LayerEnclosure:
+        """Retrieve attribute by key."""
+        return self.enclosure_map[__key]
 
 
 # class CellFactoryModel(BaseModel, arbitrary_types_allowed=True):
@@ -1507,8 +1511,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
     name: str | None = None
     layout: kdb.Layout
-    # layer_enclosures: LayerEnclosureModel
-    # enclosure: KCellEnclosure
+    layer_enclosures: LayerEnclosureModel
+    enclosure: KCellEnclosure
     library: kdb.Library
 
     factories: KCellFactories = KCellFactories()
@@ -1522,11 +1526,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     def __init__(
         self,
         name: str | None = None,
-        # layer_enclosures: dict[str, LayerEnclosure]
-        # | LayerEnclosureModel = LayerEnclosureModel(),
-        # enclosure: KCellEnclosure | None = None,
+        layer_enclosures: dict[str, LayerEnclosure] | LayerEnclosureModel | None = None,
+        enclosure: KCellEnclosure | None = None,
         # factories: dict[str, KCellFactory] | None = None,
-        # layers: type[LayerEnum] | None = None,
+        layers: type[LayerEnum] | None = None,
         sparameters_path: Path | str | None = None,
         interconnect_cml_path: Path | str | None = None,
         constants: type[Constants] | None = None,
@@ -1552,34 +1555,52 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             copy_base_kcl_layers: Copy all known layers from the base if any are
                 defined.
         """
+        if layers is not None:
+            layer_dict = {
+                _layer.name: (_layer.layer, _layer.datatype) for _layer in layers
+            }
+        else:
+            layer_dict = {}
+
         if base_kcl:
             name = name or base_kcl.name
             # if layers is None:
             if copy_base_kcl_layers:
-                layers = layerenum_from_dict(
+                base_layer_dict = {
+                    _layer.name: (_layer.layer, _layer.datatype)
+                    for _layer in base_kcl.layers
+                }
+                base_layer_dict.update(layer_dict)
+                layer_dict = base_layer_dict
+
+                layers = self.layerenum_from_dict(
                     name=base_kcl.layers.__name__,
-                    layers={
-                        _layer.name: (_layer.layer, _layer.datatype)
-                        for _layer in base_kcl.layers
-                    },
-                    kcl=base_kcl.kcl,
+                    layers=layer_dict,
                 )
             else:
-                layers = layerenum_from_dict({}, kcl=self)
+                layers = layerenum_from_dict(layer_dict, kcl=self)
             sparameters_path = sparameters_path or base_kcl.sparameters_path
             interconnect_cml_path = (
                 interconnect_cml_path or base_kcl.interconnect_cml_path
             )
             _constants = constants() if constants else base_kcl.constants.copy()
+            if enclosure is None:
+                enclosure = base_kcl.enclosure or KCellEnclosure([])
+            if layer_enclosures is None:
+                layer_enclosures = LayerEnclosureModel()
         else:
             name = name
             # layer_enclosures = layer_enclosures
             # enclosure = enclosure or KCellEnclosure(enclosures=[])
             # cell_factories = cell_factories
-            layers = self.layerenum_from_dict(name="LAYER", layers={})
+            layers = self.layerenum_from_dict(name="LAYER", layers=layer_dict)
             sparameters_path = sparameters_path
             interconnect_cml_path = interconnect_cml_path
             _constants = constants() if constants else Constants()
+            if enclosure is None:
+                enclosure = KCellEnclosure([])
+            if layer_enclosures is None:
+                layer_enclosures = LayerEnclosureModel()
 
         # self.library.layout().assign(self.kcl)
         # kcl = KCLayout()
@@ -1590,8 +1611,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         super().__init__(
             name=name,
             kcells={},
-            # layer_enclosures=layer_enclosures,
-            # enclosure=enclosure,
+            layer_enclosures=layer_enclosures,
+            enclosure=enclosure,
             # cell_factories=cell_factories,
             layers=layers,
             sparameters_path=sparameters_path,
@@ -1619,6 +1640,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     def layerenum_from_dict(
         self, name: str = "LAYER", *, layers: dict[str, tuple[int, int]]
     ) -> type[LayerEnum]:
+        """Create a new [LayerEnum][kfactory.kcell.LayerEnum] from this KCLayout."""
         return layerenum_from_dict(layers=layers, name=name, kcl=self)
 
     def dup(self, init_cells: bool = True) -> KCLayout:
@@ -1833,6 +1855,9 @@ def layerenum_from_dict(
     )
 
 
+KCLayout.model_rebuild()
+LayerEnclosureModel.model_rebuild()
+LayerEnclosureCollection.model_rebuild()
 kcl = KCLayout()
 """Default library object.
 
