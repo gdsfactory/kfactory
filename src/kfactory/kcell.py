@@ -1135,8 +1135,6 @@ class KCell:
 
         c = KCell(kcl=self.kcl, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
-        for inst in kdb_copy.each_inst():
-            c.insts.append(Instance(self.kcl, instance=inst))
 
         c._settings = self.settings.model_copy()
         c.info = self.info.model_copy()
