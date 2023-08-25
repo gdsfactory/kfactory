@@ -25,15 +25,15 @@ def test_netlist(LAYER):
 
     print(nl.to_s())
 
-    nl_s = """circuit bend_circular_W1_R10_LWG_ENone_A90_AS1 (o1=o1,o2=o2);
+    nl_s = """circuit BendCircular_W1_R10_LWG_ENone_A90_AS1 (o1=o1,o2=o2);
 end;
-circuit straight_W1000_L20000_LWG_ENone (o1=o1,o2=o2);
+circuit Straight_W1000_L20000_LWG_ENone (o1=o1,o2=o2);
 end;
 circuit netlist_test (o1=o1,'1'='1');
-  subcircuit bend_circular_W1_R10_LWG_ENone_A90_AS1 '0_bend_circular_W1_R10_LWG_ENone_A90_AS1' (o1=o1,o2='0_o2-1_o1');
-  subcircuit bend_circular_W1_R10_LWG_ENone_A90_AS1 '1_bend_circular_W1_R10_LWG_ENone_A90_AS1' (o1='0_o2-1_o1',o2='1_o2-2_o1');
-  subcircuit bend_circular_W1_R10_LWG_ENone_A90_AS1 '2_bend_circular_W1_R10_LWG_ENone_A90_AS1' (o1='1_o2-2_o1',o2='2_o2-3_o1');
-  subcircuit straight_W1000_L20000_LWG_ENone '3_straight_W1000_L20000_LWG_ENone' (o1='2_o2-3_o1',o2='1');
+  subcircuit BendCircular_W1_R10_LWG_ENone_A90_AS1 '0_BendCircular_W1_R10_LWG_ENone_A90_AS1' (o1=o1,o2='0_o2-1_o1');
+  subcircuit BendCircular_W1_R10_LWG_ENone_A90_AS1 '1_BendCircular_W1_R10_LWG_ENone_A90_AS1' (o1='0_o2-1_o1',o2='1_o2-2_o1');
+  subcircuit BendCircular_W1_R10_LWG_ENone_A90_AS1 '2_BendCircular_W1_R10_LWG_ENone_A90_AS1' (o1='1_o2-2_o1',o2='2_o2-3_o1');
+  subcircuit Straight_W1000_L20000_LWG_ENone '3_Straight_W1000_L20000_LWG_ENone' (o1='2_o2-3_o1',o2='1');
 end;
 """
     assert nl.to_s() == nl_s

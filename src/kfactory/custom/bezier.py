@@ -1,56 +1,24 @@
 """Bezier curve based bends and functions."""
 
-from collections.abc import Sequence
+
+from collections.abc import Callable
 
 import numpy as np
-import numpy.typing as nty
-from scipy.special import binom  # type: ignore[import]
 
-from .. import KCell, KCLayout, LayerEnum, cell, kcl, kdb
+from .. import KCell, KCLayout, LayerEnum, cell, kdb
+from ..cells.bezier import bezier_curve
 from ..enclosure import LayerEnclosure
 
-__all__ = ["bend_s"]
+__all__ = ["custom_bend_s"]
 
 
-def bezier_curve(
-    t: nty.NDArray[np.float64],
-    control_points: Sequence[tuple[np.float64 | float, np.float64 | float]],
-) -> list[kdb.DPoint]:
-    """Calculates the backbone of a bezier bend."""
-    xs = np.zeros(t.shape, dtype=np.float64)
-    ys = np.zeros(t.shape, dtype=np.float64)
-    n = len(control_points) - 1
-    for k in range(n + 1):
-        ank = binom(n, k) * (1 - t) ** (n - k) * t**k
-        xs += ank * control_points[k][0]
-        ys += ank * control_points[k][1]
-
-    return [kdb.DPoint(float(x), float(y)) for x, y in zip(xs, ys)]
-
-
-class BendS:
-    """Creat a bezier bend.
-
-    Args:
-        width: Width of the core. [um]
-        height: height difference of left/right. [um]
-        length: Length of the bend. [um]
-        layer: Layer index of the core.
-        nb_points: Number of points of the backbone.
-        t_start: start
-        t_stop: end
-        enclosure: Slab/Exclude definition. [dbu]
-    """
-
-    kcl: KCLayout
-
-    def __init__(self, kcl: KCLayout) -> None:
-        """Bezier bend function on custom KCLayout."""
-        self.kcl = kcl
+def custom_bend_s(
+    kcl: KCLayout,
+) -> Callable[[float, float, float, int | LayerEnum, int, float, float], KCell]:
+    """Bezier cell function with a custom KCLayout object."""
 
     @cell
-    def __call__(
-        self,
+    def bend_s(
         width: float,
         height: float,
         length: float,
@@ -72,7 +40,7 @@ class BendS:
             t_stop: end
             enclosure: Slab/Exclude definition. [dbu]
         """
-        c = KCell()
+        c = kcl.kcell()
         _length, _height = length, height
         pts = bezier_curve(
             control_points=[
@@ -110,5 +78,4 @@ class BendS:
 
         return c
 
-
-bend_s = BendS(kcl)
+    return bend_s

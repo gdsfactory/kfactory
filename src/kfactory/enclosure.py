@@ -13,12 +13,12 @@ from typing import TYPE_CHECKING, Any, TypeGuard, overload
 import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr, field_validator
 
-from .. import kdb
-from ..conf import config
-from ..port import filter_layer
+from . import kdb
+from .conf import config
+from .port import filter_layer
 
 if TYPE_CHECKING:
-    from ..kcell import KCell, KCLayout, LayerEnum, Port
+    from .kcell import KCell, KCLayout, LayerEnum, Port
 
 __all__ = [
     "LayerEnclosure",

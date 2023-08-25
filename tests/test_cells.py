@@ -19,7 +19,7 @@ class LAYER(kf.LayerEnum, kcl=kf.kcl):
     WGCLAD = (111, 0)
 
 
-wg_enc = kf.utils.LayerEnclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
+wg_enc = kf.LayerEnclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
 
 
 def straight() -> kf.KCell:

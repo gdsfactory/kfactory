@@ -3,22 +3,20 @@
 TODO: Non-linear tapers
 """
 
-from ... import KCell, KCLayout, cell, kcl, kdb
+from collections.abc import Callable
+
+from ... import KCell, KCLayout, cell, kdb
 from ...enclosure import LayerEnclosure
 from ...kcell import Info
 
-__all__ = ["taper"]
+__all__ = ["custom_taper"]
 
 
-class Taper:
-    kcl: KCLayout
-
-    def __init__(self, kcl: KCLayout) -> None:
-        self.kcl = kcl
+def custom_taper(kcl: KCLayout) -> Callable[..., KCell]:
+    """Taper in DBU for custom KCLayout."""
 
     @cell
-    def __call__(
-        self,
+    def taper(
         width1: int,
         width2: int,
         length: int,
@@ -79,5 +77,4 @@ class Taper:
 
         return c
 
-
-taper = Taper(kcl)
+    return taper

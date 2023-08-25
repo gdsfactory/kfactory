@@ -3,34 +3,26 @@
 A circular bend has a constant radius.
 """
 
+from collections.abc import Callable
+
 import numpy as np
 
 from .. import kdb
 from ..enclosure import LayerEnclosure, extrude_path
-from ..kcell import KCell, KCLayout, LayerEnum, cell, kcl
+from ..kcell import KCell, KCLayout, LayerEnum, cell
 
-__all__ = ["bend_circular", "BendCircular"]
+__all__ = ["custom_bend_circular"]
 
 
-class BendCircular:
-    """Circular radius bend [um].
-
-    Args:
-        width: Width of the core. [um]
-        radius: Radius of the backbone. [um]
-        layer: Layer index of the target layer.
-        enclosure: Optional enclosure.
-        angle: Angle amount of the bend.
-        angle_step: Angle amount per backbone point of the bend.
-    """
-
-    def __init__(self, kcl: KCLayout):
-        """Set kcl."""
-        self.kcl = kcl
+def custom_bend_circular(
+    kcl: KCLayout,
+) -> Callable[
+    [float, float, int | LayerEnum, LayerEnclosure | None, float, float], KCell
+]:
+    """Circular bend on a custom KClayout."""
 
     @cell(snap_ports=False)
-    def __call__(
-        self,
+    def bend_circular(
         width: float,
         radius: float,
         layer: int | LayerEnum,
@@ -48,7 +40,7 @@ class BendCircular:
             angle: Angle amount of the bend.
             angle_step: Angle amount per backbone point of the bend.
         """
-        c = self.kcl.kcell()
+        c = KCell()
         r = radius
         backbone = [
             kdb.DPoint(x, y)
@@ -86,6 +78,4 @@ class BendCircular:
         c.autorename_ports()
         return c
 
-
-bend_circular = BendCircular(kcl)
-"""Circular bend on the default KCLayout."""
+    return bend_circular

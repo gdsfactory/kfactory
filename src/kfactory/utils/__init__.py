@@ -10,28 +10,20 @@ the `klayout.db.TilingProcessor` to calculate the regions to fill.
 calculate areas that violate min space violations.
 """
 
-from .enclosure import (
-    Direction,
-    KCellEnclosure,
-    LayerEnclosure,
-    clean_points,
-    extrude_path,
-    extrude_path_dynamic,
-)
+# from .enclosure import (
+#     Direction,
+#     KCellEnclosure,
+#     LayerEnclosure,
+#     clean_points,
+#     extrude_path,
+#     extrude_path_dynamic,
+# )
 
-# from .fill import fill_tiled
-# from .violations import fix_spacing_minkowski_tiled, fix_spacing_tiled
+from .fill import fill_tiled
+from .violations import fix_spacing_minkowski_tiled, fix_spacing_tiled
 
 __all__ = [
-    "LayerEnclosure",
-    "KCellEnclosure",
-    "violations",
-    "Direction",
-    "geo",
-    "extrude_path",
-    "extrude_path_dynamic",
-    # "fill_tiled",
-    # "fix_spacing_tiled",
-    # "fix_spacing_minkowski_tiled",
-    "clean_points",
+    "fill_tiled",
+    "fix_spacing_tiled",
+    "fix_spacing_minkowski_tiled",
 ]

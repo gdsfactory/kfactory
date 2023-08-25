@@ -16,41 +16,20 @@ The slabs and excludes can be given in the form of an
 [Enclosure][kfactory.utils.LayerEnclosure].
 """
 
-from ... import KCell, KCLayout, LayerEnum, cell, kcl, kdb
+from collections.abc import Callable
+
+from ... import KCell, KCLayout, LayerEnum, cell, kdb
 from ...enclosure import LayerEnclosure
 from ...kcell import Info
 
-__all__ = ["straight"]
+__all__ = ["custom_straight"]
 
 
-class Straight:
-    """Waveguide defined in dbu.
-
-        ┌──────────────────────────────┐
-        │         Slab/Exclude         │
-        ├──────────────────────────────┤
-        │                              │
-        │             Core             │
-        │                              │
-        ├──────────────────────────────┤
-        │         Slab/Exclude         │
-        └──────────────────────────────┘
-    Args:
-        width: Waveguide width. [dbu]
-        length: Waveguide length. [dbu]
-        layer: Main layer of the waveguide.
-        enclosure: Definition of slab/excludes. [dbu]
-    """
-
-    kcl: KCLayout
-
-    def __init__(self, kcl: KCLayout):
-        """Initialize A straight class on a defined KCLayout."""
-        self.kcl = kcl
+def custom_straight(kcl: KCLayout) -> Callable[..., KCell]:
+    """Straight in DBU with custom KCLayout."""
 
     @cell
-    def __call__(
-        self,
+    def straight(
         width: int,
         length: int,
         layer: int | LayerEnum,
@@ -95,6 +74,4 @@ class Straight:
         c.autorename_ports()
         return c
 
-
-straight = Straight(kcl)
-"""Default straight on the "default" kcl."""
+    return straight

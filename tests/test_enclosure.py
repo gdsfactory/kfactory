@@ -3,7 +3,7 @@ import pytest
 
 
 @kf.cell
-def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.utils.LayerEnclosure):
+def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.LayerEnclosure):
     c = kf.KCell()
     c.shapes(layer).insert(kf.kdb.Box(-10000, -6000, 10000, 6000))
 
@@ -30,7 +30,7 @@ def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.utils.LayerEnclosure):
 
 
 def test_enclosure(LAYER):
-    enc = kf.utils.LayerEnclosure([(LAYER.WG, 500, -250)])
+    enc = kf.LayerEnclosure([(LAYER.WG, 500, -250)])
 
 
 def test_enc(LAYER, wg_enc):
@@ -41,14 +41,14 @@ def test_enc(LAYER, wg_enc):
 
 
 def test_neg_enc(LAYER):
-    enc = kf.utils.LayerEnclosure([(LAYER.WGCLAD, -1500, 1000)])
+    enc = kf.LayerEnclosure([(LAYER.WGCLAD, -1500, 1000)])
 
     c = mmi_enc(LAYER.WG, enc)
     c.show()
 
 
 def test_layer_multi_enc(LAYER):
-    enc = kf.utils.LayerEnclosure(
+    enc = kf.LayerEnclosure(
         [
             (LAYER.WGCLAD, -5000, -5400),
             (LAYER.WGCLAD, -4000, -3900),
@@ -61,7 +61,7 @@ def test_layer_multi_enc(LAYER):
 
 
 def test_layer_merge_enc(LAYER):
-    enc = kf.utils.LayerEnclosure(
+    enc = kf.LayerEnclosure(
         [
             (LAYER.WGCLAD, -5000, -3000),
             (LAYER.WGCLAD, -4000, -2000),
@@ -73,7 +73,7 @@ def test_layer_merge_enc(LAYER):
 
 
 def test_um_enclosure(LAYER):
-    enc = kf.utils.LayerEnclosure(
+    enc = kf.LayerEnclosure(
         [
             (LAYER.WGCLAD, -5000, -3000),
             (LAYER.WGCLAD, -4000, -2000),
@@ -82,7 +82,7 @@ def test_um_enclosure(LAYER):
         kcl=kf.kcl,
     )
 
-    enc_um = kf.utils.LayerEnclosure(
+    enc_um = kf.LayerEnclosure(
         dsections=[
             (LAYER.WGCLAD, -5, -3),
             (LAYER.WGCLAD, -4, -2),
@@ -97,7 +97,7 @@ def test_um_enclosure(LAYER):
 def test_um_enclosure_nodbu(LAYER: kf.LayerEnum) -> None:
     """When defining um sections, kcl must be defined."""
     with pytest.raises(AssertionError) as ae_info:  # noqa: F481
-        kf.utils.LayerEnclosure(
+        kf.LayerEnclosure(
             dsections=[
                 (LAYER.WGCLAD, -5, -3),
                 (LAYER.WGCLAD, -4, -2),
@@ -123,7 +123,7 @@ def test_pdkenclosure(LAYER: kf.LayerEnum, straight_blank: kf.KCell) -> None:
         layer=LAYER.WG,
     )
 
-    enc1 = kf.utils.LayerEnclosure(
+    enc1 = kf.LayerEnclosure(
         sections=[
             (LAYER.WGEXCLUDE, 1000),
         ],
@@ -131,13 +131,13 @@ def test_pdkenclosure(LAYER: kf.LayerEnum, straight_blank: kf.KCell) -> None:
         main_layer=LAYER.WG,
     )
 
-    enc2 = kf.utils.LayerEnclosure(
+    enc2 = kf.LayerEnclosure(
         name="CLADEX",
         main_layer=LAYER.WGCLAD,
         sections=[(LAYER.WGEXCLUDE, 1000), (LAYER.WGCLADEXCLUDE, 2000)],
     )
 
-    pdkenc = kf.utils.KCellEnclosure(enclosures=[enc1, enc2])
+    pdkenc = kf.KCellEnclosure(enclosures=[enc1, enc2])
 
     pdkenc.apply_minkowski_tiled(c, carve_out_ports=True)
 

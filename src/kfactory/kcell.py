@@ -32,13 +32,13 @@ from typing_extensions import ParamSpec
 
 from . import kdb, lay
 from .conf import config
-from .port import rename_clockwise
-from .utils.enclosure import (
+from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
     LayerEnclosureCollection,
     LayerSection,
 )
+from .port import rename_clockwise
 
 if TYPE_CHECKING:
     # from .pdk import Pdk
@@ -789,7 +789,7 @@ class KCell:
         width: int,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> None:
+    ) -> Port:
         ...
 
     @overload
@@ -801,7 +801,7 @@ class KCell:
         dwidth: float,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> None:
+    ) -> Port:
         ...
 
     @overload
@@ -810,7 +810,7 @@ class KCell:
         *,
         name: str | None = None,
         port: Port,
-    ) -> None:
+    ) -> Port:
         ...
 
     @overload
@@ -824,14 +824,14 @@ class KCell:
         layer: LayerEnum | int,
         port_type: str = "optical",
         mirror_x: bool = False,
-    ) -> None:
+    ) -> Port:
         ...
 
-    def create_port(self, **kwargs: Any) -> None:
+    def create_port(self, **kwargs: Any) -> Port:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
         if self._locked:
             raise LockedError(self)
-        self.ports.create_port(**kwargs)
+        return self.ports.create_port(**kwargs)
 
     @overload
     def create_inst(
@@ -1625,7 +1625,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
     def kcell(self, name: str | None = None, ports: Ports | None = None) -> KCell:
         """Create a new cell based ont he pdk's layout object."""
-        return KCell(name=name, kcl=self.kcl, ports=ports)
+        return KCell(name=name, kcl=self, ports=ports)
 
     def layer_enum(
         self, name: str, layers: dict[str, tuple[int, int]]
@@ -1856,6 +1856,7 @@ def layerenum_from_dict(
 
 
 KCLayout.model_rebuild()
+LayerSection.model_rebuild()
 LayerEnclosure.model_rebuild()
 KCellEnclosure.model_rebuild()
 LayerEnclosureModel.model_rebuild()
@@ -3420,7 +3421,12 @@ def cell(
                     # and should be copied first
                     cell = cell.dup()
                 if set_name:
-                    name = get_cell_name(f.__name__, **params)
+                    if "self" in params:
+                        name = get_cell_name(
+                            params["self"].__class__.__name__, **params
+                        )
+                    else:
+                        name = get_cell_name(f.__name__, **params)
                     cell.name = name
                 if set_settings:
                     settings = cell.settings.model_dump()
@@ -3464,6 +3470,7 @@ def frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable
 
 def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
     """Returns name from a dict."""
+    kwargs.pop("self", None)
     label = [prefix] if prefix else []
     for key, value in kwargs.items():
         key = join_first_letters(key)
@@ -3533,7 +3540,7 @@ def clean_value(
             }
             return clean_value(v)
         elif callable(value):
-            return str(value.__name__)
+            return getattr(value, "__name__", value.__class__.__name__)
         else:
             return clean_name(str(value))
     except TypeError:  # use the __str__ method
@@ -3726,4 +3733,5 @@ __all__ = [
     "KCLayout",
     "default_save",
     "LayerEnum",
+    "KCellParams",
 ]
