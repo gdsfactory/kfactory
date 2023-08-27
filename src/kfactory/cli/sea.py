@@ -26,7 +26,7 @@ def upload(
 ) -> None:
     """Upload a new eda file to gdatasea."""
     if name is None:
-        kcl = KCLayout()
+        kcl = KCLayout("SeaUpload")
         kcl.read(file)
         assert len(kcl.top_cells()) > 0, (
             "Cannot automatically determine name of gdatasea edafile if"
@@ -67,7 +67,7 @@ def update(
 ) -> None:
     """Upload a new eda file to gdatasea."""
     if name is None:
-        kcl = KCLayout()
+        kcl = KCLayout("SeaUpdate")
         kcl.read(file)
         assert len(kcl.top_cells()) > 0, (
             "Cannot automatically determine name of gdatasea edafile if"

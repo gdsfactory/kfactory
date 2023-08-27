@@ -16,6 +16,7 @@ import inspect
 import json
 import socket
 import types
+from collections import UserDict
 from collections.abc import Callable, Hashable, Iterable, Iterator
 from enum import Enum, IntEnum, IntFlag, auto
 from hashlib import sha3_512
@@ -26,7 +27,7 @@ from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, overload
 import cachetools.func
 import numpy as np
 import ruamel.yaml
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec
 
@@ -43,6 +44,8 @@ from .port import rename_clockwise
 if TYPE_CHECKING:
     # from .pdk import Pdk
     from types import ModuleType
+
+T = TypeVar("T")
 
 KCellParams = ParamSpec("KCellParams")
 AnyTrans = TypeVar(
@@ -339,27 +342,27 @@ def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -
         assert p1.port_type == p2.port_type, f"Port type mismatch for {p1=} {p2=}"
 
 
-def get_cells(
-    modules: Iterable[ModuleType], verbose: bool = False
-) -> dict[str, KCellFactory]:
-    """Returns KCells (KCell functions) from a module or list of modules.
+# def get_cells(
+#     modules: Iterable[ModuleType], verbose: bool = False
+# ) -> dict[str, KCellFactory]:
+#     """Returns KCells (KCell functions) from a module or list of modules.
 
-    Args:
-        modules: module or iterable of modules.
-        verbose: prints in case any errors occur.
-    """
-    cells = {}
-    for module in modules:
-        for t in inspect.getmembers(module):
-            if callable(t[1]) and t[0] != "partial":
-                try:
-                    r = inspect.signature(t[1]).return_annotation
-                    if r == KCell or (isinstance(r, str) and r.endswith("KCell")):
-                        cells[t[0]] = KCellFactory(name=t[0], factory=t[1])
-                except ValueError:
-                    if verbose:
-                        print(f"error in {t[0]}")
-    return cells
+#     Args:
+#         modules: module or iterable of modules.
+#         verbose: prints in case any errors occur.
+#     """
+#     cells = {}
+#     for module in modules:
+#         for t in inspect.getmembers(module):
+#             if callable(t[1]) and t[0] != "partial":
+#                 try:
+#                     r = inspect.signature(t[1]).return_annotation
+#                     if r == KCell or (isinstance(r, str) and r.endswith("KCell")):
+#                         cells[t[0]] = KCellFactory(name=t[0], factory=t[1])
+#                 except ValueError:
+#                     if verbose:
+#                         print(f"error in {t[0]}")
+#     return cells
 
 
 class LayerEnclosureModel(BaseModel):
@@ -1435,32 +1438,24 @@ class KCell:
         netlist.add(circ)
 
 
-class KCellFactory(BaseModel):
-    name: str
-    factory: Callable[..., KCell]
+# class KCellFactories(BaseModel):
+#     factories: dict[str, KCellFactory] = Field(default={})
 
-    def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KCell:
-        return self.factory(*args, **kwargs)
+#     def add(self, name: str, factory: KCellFactory) -> None:
+#         self.factories[name] = factory
 
+#     # def __getattr__(self, name: str) -> KCellFactory:
+#     #     """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
+#     #     return self.factories[name]
 
-class KCellFactories(BaseModel):
-    factories: dict[str, KCellFactory] = Field(default={})
+#     def __getitem__(self, name: str) -> KCellFactory:
+#         return self.factories[name]
 
-    def add(self, name: str, factory: KCellFactory) -> None:
-        self.factories[name] = factory
+#     def __setitem__(self, name: str, factory: KCellFactory) -> None:
+#         self.factories[name] = factory
 
-    # def __getattr__(self, name: str) -> KCellFactory:
-    #     """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
-    #     return self.factories[name]
-
-    # def __getitem__(self, name: str) -> KCellFactory:
-    #     return self.factories[name]
-
-    # def __setitem__(self, name: str, factory: KCellFactory) -> None:
-    #     self.factories[name] = factory
-
-    # def __setattr__(self, name: str, factory: KCellFactory) -> None:
-    #     self.factories[name] = factory
+#     # def __setattr__(self, name: str, factory: KCellFactory) -> None:
+#     #     self.factories[name] = factory
 
 
 class Constants(BaseSettings):
@@ -1507,13 +1502,15 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
     """
 
-    name: str | None = None
+    # name: str
+    _name: str
     layout: kdb.Layout
     layer_enclosures: LayerEnclosureModel
     enclosure: KCellEnclosure
     library: kdb.Library
 
-    factories: KCellFactories = KCellFactories()
+    factories: KCellFactories
+    # KCellFactories = DictWithAttributes[KCell]  # KCellFactories()
     kcells: dict[int, KCell]
     layers: type[LayerEnum]
     sparameters_path: Path | str | None
@@ -1523,7 +1520,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         layer_enclosures: dict[str, LayerEnclosure] | LayerEnclosureModel | None = None,
         enclosure: KCellEnclosure | None = None,
         # factories: dict[str, KCellFactory] | None = None,
@@ -1561,7 +1558,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             layer_dict = {}
 
         if base_kcl:
-            name = name or base_kcl.name
+            name = name
             # if layers is None:
             if copy_base_kcl_layers:
                 base_layer_dict = {
@@ -1607,12 +1604,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         layout = library.layout()
 
         super().__init__(
-            name=name,
+            _name=name,
             kcells={},
             layer_enclosures=layer_enclosures,
             enclosure=enclosure,
             # cell_factories=cell_factories,
             layers=layers,
+            factories=KCellFactories({}),
             sparameters_path=sparameters_path,
             interconnect_cml_path=interconnect_cml_path,
             constants=_constants,
@@ -1620,6 +1618,19 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             layout=layout,
             rename_function=port_rename_function,
         )
+        self._name = name
+
+        self.library.register(self.name)
+
+    @computed_field  # type: ignore[misc]
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @name.setter
+    def name(self, new_name: str) -> None:
+        self._name = new_name
+        self.library.register(new_name)
 
     def kcell(self, name: str | None = None, ports: Ports | None = None) -> KCell:
         """Create a new cell based ont he pdk's layout object."""
@@ -1633,7 +1644,27 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
     def __getattr__(self, name):  # type: ignore[no-untyped-def]
         """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
-        return getattr(self.layout, name)
+        if name != "_name":
+            return self.layout.__getattribute__(name)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name == "_name":
+            object.__setattr__(self, name, value)
+        else:
+            try:
+                super().__setattr__(name, value)
+            except AttributeError:
+                self.layout.__setattr__(name, value)
+
+        # if getattr(self.layout, name):
+        #     setattr(self.layout, name, value)
+        # else:
+        #     super().__setattr__(name, value)
+        # if name == "_name":
+        #     super().__setattr__(name, value)
+        # elif hasattr(self.layout, name):
+        #     setattr(self.layout, name, value)
+        # else:
 
     def layerenum_from_dict(
         self, name: str = "LAYER", *, layers: dict[str, tuple[int, int]]
@@ -1650,7 +1681,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         Returns:
             Copy of itself
         """
-        kcl = KCLayout()
+        kcl = KCLayout(self.name + "_DUPLICATE")
         kcl.layout.assign(self.layout.dup())
         if init_cells:
             for i, kc in self.kcells.items():
@@ -1853,13 +1884,24 @@ def layerenum_from_dict(
     )
 
 
+class KCellFactories(UserDict[str, Callable[..., KCell]]):
+    def __init__(self, data: dict[str, Callable[..., KCell]]) -> None:
+        super().__init__(data)
+
+    def __getattr__(self, name: str) -> Any:
+        if name != "data":
+            return self.data[name]
+        else:
+            self.__getattribute__(name)
+
+
 KCLayout.model_rebuild()
 LayerSection.model_rebuild()
 LayerEnclosure.model_rebuild()
 KCellEnclosure.model_rebuild()
 LayerEnclosureModel.model_rebuild()
 LayerEnclosureCollection.model_rebuild()
-kcl = KCLayout()
+kcl = KCLayout("DEFAULT")
 """Default library object.
 
 Any [KCell][kfactory.kcell.KCell] uses this object unless another one is

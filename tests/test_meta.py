@@ -35,7 +35,7 @@ def test_metainfo_read(straight):
         save.write_context_info = True
         straight.kcl.write(t.name)
 
-        kcl = kf.KCLayout()
+        kcl = kf.KCLayout("TEST_META")
         kcl.read(t.name)
 
         wg_read = kcl[straight.name]
