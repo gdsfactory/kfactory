@@ -1,3 +1,4 @@
+# type: ignore
 """Interactivate jupyter widget."""
 
 from __future__ import annotations
@@ -33,6 +34,8 @@ try:
 except ImportError as e:
     print("You need install jupyter notebook plugin with `pip install kfactory[ipy]`")
     raise e
+
+__all__ = ["display_kcell"]
 
 
 def display_kcell(kc: KCell) -> None:

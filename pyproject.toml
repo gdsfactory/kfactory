@@ -49,6 +49,9 @@ dev = [
 	"towncrier",
 	"tbump",
 	"types-requests",
+	"types-setuptools",
+	"types-docutils",
+	"types-Pygments",
 ]
 docs = [
 	"kfactory[ipy]",

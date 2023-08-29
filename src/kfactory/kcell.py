@@ -375,20 +375,6 @@ class LayerEnclosureModel(BaseModel):
         return self.enclosure_map[__key]
 
 
-# class CellFactoryModel(BaseModel, arbitrary_types_allowed=True):
-#     """PDK access model for KCellFactories."""
-
-#     cellfactory_map: dict[str, CellFactory] = Field(default={})
-
-#     def __getitem__(self, __key: str) -> CellFactory:
-#         """Retrieve element by string key."""
-#         return self.cellfactory_map[__key]
-
-#     def __getattr__(self, __key: str) -> CellFactory:
-#         """Retrieve attribute by key."""
-#         return self.cellfactory_map[__key]
-
-
 class KCell:
     """KLayout cell and change its class to KCell.
 
@@ -750,7 +736,7 @@ class KCell:
 
         Usage: Pass the kcell variable as an argument in the cell at the end
         """
-        from .widgets.interactive import display_kcell
+        from .widgets.interactive import display_kcell  # type: ignore[attr-defined]
 
         display_kcell(self)
 
