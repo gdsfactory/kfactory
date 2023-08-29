@@ -73,7 +73,7 @@ class Straight:
             layer: Main layer of the waveguide.
             enclosure: Definition of slab/excludes. [dbu]
         """
-        c = KCell()
+        c = self.kcl.kcell()
 
         if width // 2 * 2 != width:
             raise ValueError("The width (w) must be a multiple of 2 database units")

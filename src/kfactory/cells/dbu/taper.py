@@ -47,7 +47,7 @@ class Taper:
             layer: Main layer of the taper.
             enclosure: Definition of the slab/exclude.
         """
-        c = KCell()
+        c = self.kcl.kcell()
 
         c.shapes(layer).insert(
             kdb.Polygon(

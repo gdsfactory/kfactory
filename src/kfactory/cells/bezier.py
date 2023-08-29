@@ -72,7 +72,7 @@ class BendS:
             t_stop: end
             enclosure: Slab/Exclude definition. [dbu]
         """
-        c = KCell()
+        c = self.kcl.kcell()
         _length, _height = length, height
         pts = bezier_curve(
             control_points=[

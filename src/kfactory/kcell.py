@@ -22,7 +22,7 @@ from enum import Enum, IntEnum, IntFlag, auto
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, Any, Literal, TypeAlias, TypeVar, overload
+from typing import Any, Literal, TypeAlias, TypeVar, overload
 
 import cachetools.func
 import numpy as np
@@ -40,10 +40,6 @@ from .enclosure import (
     LayerSection,
 )
 from .port import rename_clockwise
-
-if TYPE_CHECKING:
-    # from .pdk import Pdk
-    from types import ModuleType
 
 T = TypeVar("T")
 
@@ -220,13 +216,13 @@ class PortWidthMismatch(ValueError):
         if isinstance(other_inst, Instance):
             super().__init__(
                 f'Width mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f'and {other_inst.cell.name}["{p2.name}"] ({p1.width}/{p2.width})',
+                f'and {other_inst.cell.name}["{p2.name}"] ("{p1.width}"/"{p2.width}")',
                 *args,
             )
         else:
             super().__init__(
                 f'Width mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f' and Port "{p2.name}" ({p1.width}/{p2.width})',
+                f' and Port "{p2.name}" ("{p1.width}"/"{p2.width}")',
                 *args,
             )
 
@@ -258,13 +254,13 @@ class PortLayerMismatch(ValueError):
         if isinstance(other_inst, Instance):
             super().__init__(
                 f'Layer mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f' and {other_inst.cell.name}["{p2.name}"] ({l1}/{l2})',
+                f' and {other_inst.cell.name}["{p2.name}"] ("{l1}"/"{l2}")',
                 *args,
             )
         else:
             super().__init__(
                 f'Layer mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f' and Port "{p2.name}" ({l1}/{l2})',
+                f' and Port "{p2.name}" ("{l1}"/"{l2}")',
                 *args,
             )
 
@@ -863,7 +859,8 @@ class KCell:
         b: kdb.Vector | None = None,
         na: int = 1,
         nb: int = 1,
-        libcell_as_static: bool = True,
+        libcell_as_static: bool = False,
+        static_name_separator: str = "__",
     ) -> Instance:
         """Add an instance of another KCell.
 
@@ -882,6 +879,9 @@ class KCell:
                 (different KCLayout object), convert it to a static cell. This can cause
                 name collisions that are automatically resolved by appending $1[..n] on
                 the newly created cell.
+            static_name_separator: Stringt to separate the KCLayout name from the cell
+                name when converting library cells (other KCLayout object than the one
+                of this KCell) to static cells (copy them into this KCell's KCLayout).
 
         Returns:
             The created instance
@@ -898,8 +898,37 @@ class KCell:
                 lib_ci = self.kcl.layout.add_lib_cell(
                     cell.kcl.library, cell.cell_index()
                 )
+                kcell = self.kcl[lib_ci]
+                for port in cell.ports:
+                    pl = port.layer
+                    _layer = self.kcl.layer(cell.kcl.get_info(pl))
+                    try:
+                        _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
+                    except ValueError:
+                        pass
+                    kcell.create_port(
+                        name=port.name,
+                        dwidth=port.d.width,
+                        dcplx_trans=port.dcplx_trans,
+                        layer=_layer,
+                    )
                 if libcell_as_static:
                     ci = self.kcl.convert_cell_to_static(lib_ci)
+                    kcell = self.kcl[ci]
+                    for port in cell.ports:
+                        pl = port.layer
+                        _layer = self.kcl.layer(cell.kcl.get_info(pl))
+                        try:
+                            _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
+                        except ValueError:
+                            pass
+                        kcell.create_port(
+                            name=port.name,
+                            dwidth=port.d.width,
+                            dcplx_trans=port.dcplx_trans,
+                            layer=_layer,
+                        )
+                    kcell.name = cell.kcl.name + static_name_separator + cell.name
                 else:
                     ci = lib_ci
 
@@ -1622,15 +1651,15 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
         self.library.register(self.name)
 
+    def _set_name_and_library(self, name: str) -> None:
+        self._name = name
+        self.library.register(name)
+
     @computed_field  # type: ignore[misc]
     @property
     def name(self) -> str:
+        """Name of the KCLayout."""
         return self._name
-
-    @name.setter
-    def name(self, new_name: str) -> None:
-        self._name = new_name
-        self.library.register(new_name)
 
     def kcell(self, name: str | None = None, ports: Ports | None = None) -> KCell:
         """Create a new cell based ont he pdk's layout object."""
@@ -1648,23 +1677,21 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             return self.layout.__getattribute__(name)
 
     def __setattr__(self, name: str, value: Any) -> None:
-        if name == "_name":
-            object.__setattr__(self, name, value)
-        else:
-            try:
-                super().__setattr__(name, value)
-            except AttributeError:
-                self.layout.__setattr__(name, value)
+        """Use a custom setter to automatically set attributes.
 
-        # if getattr(self.layout, name):
-        #     setattr(self.layout, name, value)
-        # else:
-        #     super().__setattr__(name, value)
-        # if name == "_name":
-        #     super().__setattr__(name, value)
-        # elif hasattr(self.layout, name):
-        #     setattr(self.layout, name, value)
-        # else:
+        If the attribute is not in this object, set it on the
+        Layout object.
+        """
+        match name:
+            case "_name":
+                object.__setattr__(self, name, value)
+            case "name":
+                self._set_name_and_library(value)
+            case _:
+                if hasattr(super(), name):
+                    super().__setattr__(name, value)
+                else:
+                    self.layout.__setattr__(name, value)
 
     def layerenum_from_dict(
         self, name: str = "LAYER", *, layers: dict[str, tuple[int, int]]
@@ -2358,6 +2385,19 @@ class UMPort:
             f"({self.width} / {value})!"
         )
 
+    def __repr__(self) -> str:
+        """String representation of port."""
+        ln = (
+            self.parent.layer.name
+            if isinstance(self.parent.layer, LayerEnum)
+            else self.parent.layer
+        )
+        return (
+            f"Port({'name: ' + self.parent.name if self.parent.name else ''}"
+            f", width: {self.width}, position: {self.position}, angle: {self.angle}"
+            f", layer: {ln}, port_type: {self.parent.port_type})"
+        )
+
 
 class UMKCell:
     """Make the port able to dynamically give um based info."""
@@ -2704,25 +2744,26 @@ class Instance:
         else:
             p = self.cell.ports[port]
         if p.width != op.width and not allow_width_mismatch:
+            # The ports are not the same width
             raise PortWidthMismatch(
                 self,
                 other,
                 p,
                 op,
             )
-        elif int(p.layer) != int(op.layer) and not allow_layer_mismatch:
+        if p.layer != op.layer and not allow_layer_mismatch:
+            # The ports are not on the same layer
             raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
-        elif p.port_type != op.port_type and not allow_type_mismatch:
+        if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)
+        if p._dcplx_trans or op._dcplx_trans:
+            dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
+            self._instance.dcplx_trans = (
+                op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+            )
         else:
-            if p._dcplx_trans or op._dcplx_trans:
-                dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-                self._instance.dcplx_trans = (
-                    op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
-                )
-            else:
-                conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
-                self._instance.trans = op.trans * conn_trans * p.trans.inverted()
+            conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
+            self._instance.trans = op.trans * conn_trans * p.trans.inverted()
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
