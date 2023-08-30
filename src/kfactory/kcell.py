@@ -18,7 +18,7 @@ import socket
 import types
 from collections import UserDict
 from collections.abc import Callable, Hashable, Iterable, Iterator
-from enum import IntEnum, IntFlag
+from enum import IntEnum, IntFlag, auto
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
@@ -27,7 +27,7 @@ from typing import Any, Literal, TypeAlias, TypeVar, overload
 import cachetools.func
 import numpy as np
 import ruamel.yaml
-from aenum import Enum, auto, constant  # type: ignore[import]
+from aenum import Enum, constant  # type: ignore[import]
 from pydantic import BaseModel, Field, computed_field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec
@@ -1864,12 +1864,13 @@ def layerenum_from_dict(
         kcl = _get_default_kcl()
 
     def update_namespace(ns: dict[str, Any]) -> None:
+        ns.update({"kcl": constant(kcl)})
         ns.update(layers)
 
     return types.new_class(
         name=name,
         bases=(LayerEnum,),
-        kwds={"kcl": kcl},
+        kwds={},
         exec_body=update_namespace,
     )
 
