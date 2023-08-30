@@ -28,6 +28,7 @@ dependencies = [
 	"tomli",
 	"requests",
 	"typer[all]",
+	"aenum",
 ]
 
 [project.optional-dependencies]

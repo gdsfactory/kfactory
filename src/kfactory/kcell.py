@@ -18,7 +18,7 @@ import socket
 import types
 from collections import UserDict
 from collections.abc import Callable, Hashable, Iterable, Iterator
-from enum import Enum, IntEnum, IntFlag, auto
+from enum import IntEnum, IntFlag
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
@@ -27,6 +27,7 @@ from typing import Any, Literal, TypeAlias, TypeVar, overload
 import cachetools.func
 import numpy as np
 import ruamel.yaml
+from aenum import Enum, auto, constant  # type: ignore[import]
 from pydantic import BaseModel, Field, computed_field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec
@@ -84,7 +85,7 @@ SerializableShape: TypeAlias = (
 kcl: KCLayout
 
 
-class LayerEnum(int, Enum):
+class LayerEnum(int, Enum):  # type: ignore[misc]
     """Class for having the layers stored and a mapping int <-> layer,datatype.
 
     This Enum can also be treated as a tuple, i.e. it implements `__getitem__`
@@ -97,8 +98,7 @@ class LayerEnum(int, Enum):
 
     layer: int
     datatype: int
-    kcl: KCLayout
-    _ignore_ = "kcl"
+    kcl: constant[KCLayout]
 
     def __new__(cls: LayerEnum, layer: int, datatype: int) -> LayerEnum:  # type: ignore
         """Create a new Enum.
@@ -110,16 +110,12 @@ class LayerEnum(int, Enum):
             datatype: Datatype of the layer.
             kcl: Base Layout object to register the layer to.
         """
-        value = kcl.layer(layer, datatype)
-        obj: int = int.__new__(cls, value)  # type: ignore[call-overload]
+        value = cls.kcl.layer(layer, datatype)
+        obj: int = int.__new__(cls, value)
         obj._value_ = value  # type: ignore[attr-defined]
         obj.layer = layer  # type: ignore[attr-defined]
         obj.datatype = datatype  # type: ignore[attr-defined]
         return obj  # type: ignore[return-value]
-
-    def __init_subclass__(cls, kcl: KCLayout):
-        """Sets the KCLayout for the class which all layers must be created from."""
-        cls.kcl = kcl
 
     def __getitem__(self, key: int) -> int:
         """Retrieve layer number[0] / datatype[1] of a layer."""
@@ -144,7 +140,7 @@ class LayerEnum(int, Enum):
 
     def __str__(self) -> str:
         """Return the name of the LayerEnum."""
-        return self.name
+        return self.name  # type: ignore[no-any-return]
 
 
 class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=True):
@@ -1453,26 +1449,6 @@ class KCell:
         netlist.add(circ)
 
 
-# class KCellFactories(BaseModel):
-#     factories: dict[str, KCellFactory] = Field(default={})
-
-#     def add(self, name: str, factory: KCellFactory) -> None:
-#         self.factories[name] = factory
-
-#     # def __getattr__(self, name: str) -> KCellFactory:
-#     #     """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
-#     #     return self.factories[name]
-
-#     def __getitem__(self, name: str) -> KCellFactory:
-#         return self.factories[name]
-
-#     def __setitem__(self, name: str, factory: KCellFactory) -> None:
-#         self.factories[name] = factory
-
-#     # def __setattr__(self, name: str, factory: KCellFactory) -> None:
-#     #     self.factories[name] = factory
-
-
 class Constants(BaseSettings):
     """Constant Model class."""
 
@@ -1567,7 +1543,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """
         if layers is not None:
             layer_dict = {
-                _layer.name: (_layer.layer, _layer.datatype) for _layer in layers
+                _layer.name: (_layer.layer, _layer.datatype)
+                for _layer in layers  # type: ignore[attr-defined]
             }
         else:
             layer_dict = {}
@@ -1578,7 +1555,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             if copy_base_kcl_layers:
                 base_layer_dict = {
                     _layer.name: (_layer.layer, _layer.datatype)
-                    for _layer in base_kcl.layers
+                    for _layer in base_kcl.layers  # type: ignore[attr-defined]
                 }
                 base_layer_dict.update(layer_dict)
                 layer_dict = base_layer_dict

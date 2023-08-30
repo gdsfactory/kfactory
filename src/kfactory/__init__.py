@@ -27,6 +27,8 @@ from . import cells, placer, routing, port, technology, enclosure, utils
 from .conf import config
 from .enclosure import LayerEnclosure, KCellEnclosure
 
+from aenum import constant  # type: ignore[import]
+
 __version__ = "0.8.4"
 
 logger = config.logger
@@ -57,4 +59,5 @@ __all__ = [
     "technology",
     "LayerEnclosure",
     "KCellEnclosure",
+    "constant",
 ]
