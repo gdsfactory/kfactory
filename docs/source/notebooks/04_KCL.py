@@ -87,3 +87,15 @@ si_2 = c << s2
 si_2.connect("o1", si_d, "o2")
 
 c
+
+
+class LAYER2(kf.LayerEnum):
+    kcl = kf.constant(kcl2)
+    WG = (1, 0)
+
+
+kcl2.layers = LAYER2
+
+kcl2.layers
+
+LAYER2

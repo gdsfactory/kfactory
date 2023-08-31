@@ -1501,7 +1501,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     library: kdb.Library
 
     factories: KCellFactories
-    # KCellFactories = DictWithAttributes[KCell]  # KCellFactories()
     kcells: dict[int, KCell]
     layers: type[LayerEnum]
     sparameters_path: Path | str | None
@@ -1577,8 +1576,28 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 layer_enclosures = LayerEnclosureModel()
         else:
             name = name
-            # layer_enclosures = layer_enclosures
-            # enclosure = enclosure or KCellEnclosure(enclosures=[])
+
+            if layer_enclosures:
+                if isinstance(layer_enclosures, LayerEnclosureModel):
+                    layer_enclosures = LayerEnclosureModel(
+                        enclosure_mape={
+                            name: lenc.copy_to(self)
+                            for name, lenc in layer_enclosures.enclosure_map.items()
+                        }
+                    )
+                else:
+                    layer_enclosures = LayerEnclosureModel(
+                        enclosure_mape={
+                            name: lenc.copy_to(self)
+                            for name, lenc in layer_enclosures.items()
+                        }
+                    )
+            else:
+                layer_enclosures = LayerEnclosureModel(enclosure_map={})
+
+            enclosure = (
+                enclosure.copy_to(self) if enclosure else KCellEnclosure(enclosures=[])
+            )
             # cell_factories = cell_factories
             layers = self.layerenum_from_dict(name="LAYER", layers=layer_dict)
             sparameters_path = sparameters_path
@@ -1589,9 +1608,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             if layer_enclosures is None:
                 layer_enclosures = LayerEnclosureModel()
 
-        # self.library.layout().assign(self.kcl)
-        # kcl = KCLayout()
-        # library = kcl.library
         library = kdb.Library()
         layout = library.layout()
 
@@ -1600,7 +1616,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             kcells={},
             layer_enclosures=layer_enclosures,
             enclosure=enclosure,
-            # cell_factories=cell_factories,
             layers=layers,
             factories=KCellFactories({}),
             sparameters_path=sparameters_path,
@@ -1651,7 +1666,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             case "name":
                 self._set_name_and_library(value)
             case _:
-                if hasattr(super(), name):
+                if name in self.model_fields:
                     super().__setattr__(name, value)
                 else:
                     self.layout.__setattr__(name, value)

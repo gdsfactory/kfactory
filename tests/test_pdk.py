@@ -24,3 +24,17 @@ import pytest
 
 #     with pytest.raises(ValueError):
 #         pdk.layers((1, 0))
+
+
+def test_pdk() -> None:
+    pdk = kf.KCLayout("PDK")
+
+    class LAYER(kf.LayerEnum):
+        kcl = kf.constant(pdk)
+        WG = (1, 0)
+        WGEX = (1, 1)
+
+    pdk.layers = LAYER
+
+    assert pdk.layers == LAYER
+    "here"

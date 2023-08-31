@@ -14,7 +14,8 @@ class GeometryDifference(ValueError):
     pass
 
 
-class LAYER(kf.LayerEnum, kcl=kf.kcl):
+class LAYER(kf.LayerEnum):
+    kcl = kf.constant(kf.kcl)
     WG = (1, 0)
     WGCLAD = (111, 0)
 
