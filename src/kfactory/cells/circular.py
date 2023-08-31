@@ -63,7 +63,7 @@ class BendCircular:
             ]
         ]
 
-        extrude_path(
+        center_path = extrude_path(
             target=c,
             layer=layer,
             path=backbone,
@@ -84,6 +84,7 @@ class BendCircular:
             layer=layer,
         )
         c.autorename_ports()
+        c.boundary = center_path
         return c
 
 

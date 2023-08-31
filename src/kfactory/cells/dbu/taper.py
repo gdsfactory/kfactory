@@ -49,7 +49,7 @@ class Taper:
         """
         c = self.kcl.kcell()
 
-        c.shapes(layer).insert(
+        taper = c.shapes(layer).insert(
             kdb.Polygon(
                 [
                     kdb.Point(0, int(-width1 / 2)),
@@ -76,6 +76,7 @@ class Taper:
             }
         )
         c.autorename_ports()
+        c.boundary = taper.dpolygon
 
         return c
 

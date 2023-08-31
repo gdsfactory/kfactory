@@ -92,6 +92,8 @@ class Straight:
                 "length_dbu": length,
             }
         )
+
+        c.boundary = c.dbbox()
         c.autorename_ports()
         return c
 

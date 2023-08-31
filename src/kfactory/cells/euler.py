@@ -189,7 +189,7 @@ class BendEuler:
         dbu = c.layout().dbu
         backbone = euler_bend_points(angle, radius=radius, resolution=resolution)
 
-        extrude_path(
+        center_path = extrude_path(
             target=c,
             layer=layer,
             path=backbone,
@@ -209,6 +209,8 @@ class BendEuler:
             dwidth=width,
             layer=layer,
         )
+
+        c.boundary = center_path
 
         c.autorename_ports()
         return c
@@ -247,7 +249,7 @@ class BendSEuler:
             radius=radius,
             resolution=resolution,
         )
-        extrude_path(
+        center_path = extrude_path(
             target=c,
             layer=layer,
             path=backbone,
@@ -276,6 +278,7 @@ class BendSEuler:
             port_type="optical",
             layer=layer,
         )
+        c.boundary = center_path
 
         c.autorename_ports()
         return c

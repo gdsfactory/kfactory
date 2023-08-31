@@ -400,6 +400,7 @@ class KCell:
     _info: Info
     d: UMKCell
     kcl: KCLayout
+    boundary: kdb.DPolygon | None
 
     def __init__(
         self,
@@ -441,6 +442,8 @@ class KCell:
             for inst in kdb_cell.each_inst():
                 self.insts.append(Instance(self.kcl, inst))
         self.d = UMKCell(self)
+
+        self.boundary = None
 
     def __getitem__(self, key: int | str | None) -> Port:
         """Returns port from instance."""
@@ -1311,22 +1314,43 @@ class KCell:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self._kdb_cell.bbox().top
 
-    def netlist(self, port_types: tuple[str] = ("optical",)) -> kdb.Netlist:
-        """Return a netlist with this cell as the top cell."""
-        netlist = kdb.Netlist()
+    def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
+        l2n = kdb.LayoutToNetlist(self.name, self.kcl.dbu)
+        l2n.extract_netlist()
+
+        il = l2n.internal_layout()
+
+        def filter_port(port: Port) -> bool:
+            return port.port_type in port_types
 
         for ci in self.called_cells():
-            self.kcl[ci].circuit(netlist, port_types=port_types)
+            c = self.kcl[ci]
+            c.circuit(l2n, port_types=port_types)
+        #     if il.cell(c.name) is None:
+        #         il.create_cell(c.name)
+        #     [
+        #         il.cell(c.name)
+        #         .shapes(il.layer(c.kcl.get_info(port.layer)))
+        #         .insert(port_polygon(port.width))
+        #         for port in filter(filter_port, c.ports)
+        #     ]
+        self.circuit(l2n, port_types=port_types)
+        # if il.cell(self.name) is None:
+        #     il.create_cell(self.name)
+        # [
+        #     il.cell(self.name)
+        #     .shapes(il.layer(self.kcl.get_info(port.layer)))
+        #     .insert(port_polygon(port.width))
+        #     for port in filter(filter_port, self.ports)
+        # ]
+        il.assign(self.kcl.layout)
+        return l2n
 
-        self.circuit(netlist, port_types=port_types)
-
-        return netlist
-
-    @cachetools.cached(cache={})
     def circuit(
-        self, netlist: kdb.Netlist, port_types: tuple[str] = ("optical",)
+        self, l2n: kdb.LayoutToNetlist, port_types: Iterable[str] = ("optical",)
     ) -> None:
         """Create the circuit of the KCell in the given netlist."""
+        netlist = l2n.netlist()
 
         def port_filter(num_port: tuple[int, Port]) -> bool:
             return num_port[1].port_type in port_types
@@ -1334,6 +1358,10 @@ class KCell:
         circ = kdb.Circuit()
         circ.name = self.name
         circ.cell_index = self.cell_index()
+        print(self.name)
+        print(circ.boundary)
+        circ.boundary = self.boundary or self.dbbox()
+        print(circ.boundary)
 
         inst_ports: dict[
             str, dict[str, list[tuple[int, int, Instance, Port, kdb.SubCircuit]]]
@@ -1384,6 +1412,7 @@ class KCell:
             subc = circ.create_subcircuit(
                 netlist.circuit_by_cell_index(inst.cell_index), name
             )
+            subc.trans = inst.dcplx_trans
 
             for j, port in filter(port_filter, enumerate(inst.ports)):
                 _trans = port.trans.dup()

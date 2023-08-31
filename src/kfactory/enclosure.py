@@ -161,7 +161,7 @@ def extrude_path(
     enclosure: LayerEnclosure | None = None,
     start_angle: float | None = None,
     end_angle: float | None = None,
-) -> None:
+) -> kdb.DPolygon:
     """Extrude a path from a list of points and a static width.
 
     Args:
@@ -177,41 +177,42 @@ def extrude_path(
             autocalculated from the last two elements
     """
     layer_list = {layer: LayerSection(sections=[Section(d_max=0)])}
+    j = 0
     if enclosure is not None:
         if layer not in enclosure.layer_sections:
             layer_list |= enclosure.layer_sections
+            j = 0
         else:
-            layer_list[layer].sections.copy()
             layer_list = enclosure.layer_sections.copy()
-            for section in layer_list[layer].sections:
-                layer_list[layer].add_section(section)
+            j = layer_list[layer].add_section(Section(d_max=0))
 
-    for layer, layer_sec in layer_list.items():
+    for _layer, layer_sec in layer_list.items():
         reg = kdb.Region()
-        for section in layer_sec.sections:
-            _r = kdb.Region(
-                path_pts_to_polygon(
+        for i, section in enumerate(layer_sec.sections):
+            _path = path_pts_to_polygon(
+                *extrude_path_points(
+                    path,
+                    width + 2 * section.d_max * target.kcl.dbu,
+                    start_angle,
+                    end_angle,
+                )
+            )
+            _r = kdb.Region(_path.to_itype(target.kcl.dbu))
+            if section.d_min is not None:
+                _path = path_pts_to_polygon(
                     *extrude_path_points(
                         path,
-                        width + 2 * section.d_max * target.kcl.dbu,
+                        width + 2 * section.d_min * target.kcl.dbu,
                         start_angle,
                         end_angle,
                     )
-                ).to_itype(target.kcl.dbu)
-            )
-            if section.d_min is not None:
-                _r -= kdb.Region(
-                    path_pts_to_polygon(
-                        *extrude_path_points(
-                            path,
-                            width + 2 * section.d_min * target.kcl.dbu,
-                            start_angle,
-                            end_angle,
-                        )
-                    ).to_itype(target.kcl.dbu)
                 )
+                _r -= kdb.Region(_path.to_itype(target.kcl.dbu))
             reg.insert(_r)
+            if _layer == layer and i == j:
+                ret_path = _path
         target.shapes(layer).insert(reg.merge())
+    return ret_path
 
 
 def extrude_path_dynamic_points(
@@ -453,13 +454,14 @@ class LayerSection(BaseModel):
 
     sections: list[Section] = Field(default=[])
 
-    def add_section(self, sec: Section) -> None:
+    def add_section(self, sec: Section) -> int:
         """Add a new section.
 
         Checks for overlaps after.
         """
         if not self.sections:
             self.sections.append(sec)
+            return 0
         else:
             i = 0
             if sec.d_min is not None:
@@ -477,6 +479,7 @@ class LayerSection(BaseModel):
                     if i == len(self.sections):
                         break
             self.sections.insert(i, sec)
+            return i
 
     def max_size(self) -> int:
         """Maximum size of the sections in this layer section."""
