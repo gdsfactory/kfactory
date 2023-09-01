@@ -1,4 +1,7 @@
+# type: ignore
 """Interactivate jupyter widget."""
+
+from __future__ import annotations
 
 try:
     from pathlib import Path
@@ -32,9 +35,11 @@ except ImportError as e:
     print("You need install jupyter notebook plugin with `pip install kfactory[ipy]`")
     raise e
 
+__all__ = ["display_kcell"]
+
 
 def display_kcell(kc: KCell) -> None:
-    cell_dup = kc.kcl.dup()[kc.name]
+    cell_dup = kc.kcl[kc.name]
     match config.display_type:
         case "widget":
             lw = LayoutWidget(cell=cell_dup)
@@ -44,6 +49,9 @@ def display_kcell(kc: KCell) -> None:
             display(lipi.image)  # type: ignore[no-untyped-call]
 
 
+widgets: list[LayerImage | LayerIPImage] = []
+
+
 class LayoutImage:
     def __init__(
         self,
@@ -51,7 +59,7 @@ class LayoutImage:
         layer_properties: str | None = None,
     ):
         self.layout_view = lay.LayoutView()
-        self.layout_view.show_layout(cell.kcl, False)
+        self.layout_view.show_layout(cell.kcl.layout, False)
         self.layer_properties: Path | None = None
         if layer_properties is not None:
             self.layer_properties = Path(layer_properties)
@@ -62,6 +70,7 @@ class LayoutImage:
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
 
         self.image = Image(value=png_data, format="png")
+        widgets.append(self)
 
     def show_cell(self, cell: kdb.Cell) -> None:
         self.layout_view.active_cellview().cell = cell
@@ -78,7 +87,7 @@ class LayoutIPImage:
         layer_properties: str | None = None,
     ):
         self.layout_view = lay.LayoutView()
-        self.layout_view.show_layout(cell.kcl, False)
+        self.layout_view.show_layout(cell.kcl.layout, False)
         self.layer_properties: Path | None = None
         if layer_properties is not None:
             self.layer_properties = Path(layer_properties)
@@ -90,6 +99,7 @@ class LayoutIPImage:
         self.image = IPImage(  # type: ignore[no-untyped-call]
             data=png_data, format="png", embed=True, width=800, height=600
         )
+        widgets.append(self)
 
     def show_cell(self, cell: kdb.Cell) -> None:
         self.layout_view.active_cellview().cell = cell
@@ -112,7 +122,7 @@ class LayoutWidget:
         self.hide_unused_layers = hide_unused_layers
 
         self.layout_view = lay.LayoutView()
-        self.layout_view.show_layout(cell.kcl, False)
+        self.layout_view.show_layout(cell.kcl.layout, False)
         self.layer_properties: Path | None = None
         if layer_properties is not None:
             self.layer_properties = Path(layer_properties)
@@ -172,7 +182,7 @@ class LayoutWidget:
         )
 
     def show_cell(self, cell: kdb.Cell) -> None:
-        self.layout_view.active_cellview().cell = cell
+        self.layout_view.active_cellview().cell_index = cell.cell_index()
         self.layout_view.max_hier()
         self.layout_view.resize(800, 600)
         self.layout_view.add_missing_layers()

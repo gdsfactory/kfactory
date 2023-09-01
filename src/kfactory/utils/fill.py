@@ -5,8 +5,9 @@ Filling empty regions in [KCells][kfactory.kcell.KCell] with filling cells.
 
 from collections.abc import Iterable
 
-from .. import KCell, KCLayout, LayerEnum, kdb
+from .. import kdb
 from ..conf import config
+from ..kcell import KCell, KCLayout, LayerEnum
 
 
 class FillOperator(kdb.TileOutputReceiver):
@@ -101,7 +102,7 @@ def fill_tiled(
     layer_names: list[str] = []
     for _layer, _ in fill_layers:
         layer_name = f"layer{_layer}"
-        tp.input(layer_name, c.kcl, c.cell_index(), c.kcl.get_info(_layer))
+        tp.input(layer_name, c.kcl.layout, c.cell_index(), c.kcl.get_info(_layer))
         layer_names.append(layer_name)
 
     region_names: list[str] = []
@@ -113,7 +114,7 @@ def fill_tiled(
     exlayer_names: list[str] = []
     for _layer, _ in exclude_layers:
         layer_name = f"layer{_layer}"
-        tp.input(layer_name, c.kcl, c.cell_index(), c.kcl.get_info(_layer))
+        tp.input(layer_name, c.kcl.layout, c.cell_index(), c.kcl.get_info(_layer))
         exlayer_names.append(layer_name)
 
     exregion_names: list[str] = []

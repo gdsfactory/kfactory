@@ -3,19 +3,22 @@
 Enclosures allow to calculate slab/excludes and similar concepts to an arbitrary
 shape located on a main_layer or reference layer or region.
 """
+from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator, Sequence
 from enum import IntEnum
 from hashlib import sha1
-from typing import Any, Optional, TypeGuard, overload
+from typing import TYPE_CHECKING, Any, TypeGuard, overload
 
 import numpy as np
-from pydantic import BaseModel, Field, PrivateAttr, validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator
 
-from .. import kdb
-from ..conf import config
-from ..kcell import KCell, LayerEnum, Port
-from ..port import filter_layer
+from . import kdb
+from .conf import config
+from .port import filter_layer
+
+if TYPE_CHECKING:
+    from .kcell import KCell, KCLayout, LayerEnum, Port
 
 __all__ = [
     "LayerEnclosure",
@@ -155,10 +158,10 @@ def extrude_path(
     layer: LayerEnum | int,
     path: list[kdb.DPoint],
     width: float,
-    enclosure: Optional["LayerEnclosure"] = None,
+    enclosure: LayerEnclosure | None = None,
     start_angle: float | None = None,
     end_angle: float | None = None,
-) -> None:
+) -> kdb.DPolygon:
     """Extrude a path from a list of points and a static width.
 
     Args:
@@ -174,41 +177,42 @@ def extrude_path(
             autocalculated from the last two elements
     """
     layer_list = {layer: LayerSection(sections=[Section(d_max=0)])}
+    j = 0
     if enclosure is not None:
         if layer not in enclosure.layer_sections:
             layer_list |= enclosure.layer_sections
+            j = 0
         else:
-            layer_list[layer].sections.copy()
             layer_list = enclosure.layer_sections.copy()
-            for section in layer_list[layer].sections:
-                layer_list[layer].add_section(section)
+            j = layer_list[layer].add_section(Section(d_max=0))
 
-    for layer, layer_sec in layer_list.items():
+    for _layer, layer_sec in layer_list.items():
         reg = kdb.Region()
-        for section in layer_sec.sections:
-            _r = kdb.Region(
-                path_pts_to_polygon(
+        for i, section in enumerate(layer_sec.sections):
+            _path = path_pts_to_polygon(
+                *extrude_path_points(
+                    path,
+                    width + 2 * section.d_max * target.kcl.dbu,
+                    start_angle,
+                    end_angle,
+                )
+            )
+            _r = kdb.Region(_path.to_itype(target.kcl.dbu))
+            if section.d_min is not None:
+                _path = path_pts_to_polygon(
                     *extrude_path_points(
                         path,
-                        width + 2 * section.d_max * target.kcl.dbu,
+                        width + 2 * section.d_min * target.kcl.dbu,
                         start_angle,
                         end_angle,
                     )
-                ).to_itype(target.kcl.dbu)
-            )
-            if section.d_min is not None:
-                _r -= kdb.Region(
-                    path_pts_to_polygon(
-                        *extrude_path_points(
-                            path,
-                            width + 2 * section.d_min * target.kcl.dbu,
-                            start_angle,
-                            end_angle,
-                        )
-                    ).to_itype(target.kcl.dbu)
                 )
+                _r -= kdb.Region(_path.to_itype(target.kcl.dbu))
             reg.insert(_r)
+            if _layer == layer and i == j:
+                ret_path = _path
         target.shapes(layer).insert(reg.merge())
+    return ret_path
 
 
 def extrude_path_dynamic_points(
@@ -290,7 +294,7 @@ def extrude_path_dynamic(
     layer: LayerEnum | int,
     path: list[kdb.DPoint],
     widths: Callable[[float], float] | list[float],
-    enclosure: Optional["LayerEnclosure"] = None,
+    enclosure: LayerEnclosure | None = None,
     start_angle: float | None = None,
     end_angle: float | None = None,
 ) -> None:
@@ -327,7 +331,7 @@ def extrude_path_dynamic(
             for section in layer_sec.sections:
 
                 def w_max(x: float) -> float:
-                    return widths(x) + 2 * section.d_max * target.kcl.dbu
+                    return widths(x) + 2 * section.d_max * target.kcl.layout.dbu
 
                 _r = kdb.Region(
                     path_pts_to_polygon(
@@ -346,7 +350,7 @@ def extrude_path_dynamic(
                             widths(x)
                             + 2  # type: ignore[operator]
                             * section.d_min
-                            * target.kcl.dbu
+                            * target.kcl.layout.dbu
                         )
 
                     _r -= kdb.Region(
@@ -450,13 +454,14 @@ class LayerSection(BaseModel):
 
     sections: list[Section] = Field(default=[])
 
-    def add_section(self, sec: Section) -> None:
+    def add_section(self, sec: Section) -> int:
         """Add a new section.
 
         Checks for overlaps after.
         """
         if not self.sections:
             self.sections.append(sec)
+            return 0
         else:
             i = 0
             if sec.d_min is not None:
@@ -474,6 +479,7 @@ class LayerSection(BaseModel):
                     if i == len(self.sections):
                         break
             self.sections.insert(i, sec)
+            return i
 
     def max_size(self) -> int:
         """Maximum size of the sections in this layer section."""
@@ -484,7 +490,7 @@ class LayerSection(BaseModel):
         return hash(tuple((s.d_min, s.d_max) for s in self.sections))
 
 
-class LayerEnclosure(BaseModel):
+class LayerEnclosure(BaseModel, validate_assignment=True):
     """Definitions for calculation of enclosing (or smaller) shapes of a reference.
 
     Attributes:
@@ -496,11 +502,7 @@ class LayerEnclosure(BaseModel):
     _name: str | None = PrivateAttr()
     main_layer: LayerEnum | int | None
     yaml_tag: str = "!Enclosure"
-
-    class Config:
-        """pydantic config."""
-
-        validate_assignment = True
+    kcl: KCLayout | None = None
 
     def __init__(
         self,
@@ -513,7 +515,7 @@ class LayerEnclosure(BaseModel):
             tuple[LayerEnum | int, float] | tuple[LayerEnum | int, float, float]
         ]
         | None = None,
-        dbu: float | None = None,
+        kcl: KCLayout | None = None,
     ):
         """Constructor of new enclosure.
 
@@ -524,20 +526,25 @@ class LayerEnclosure(BaseModel):
                 cell name this name will be used for enclosure arguments.
             main_layer: Main layer used if the functions don't get an explicit layer.
             dsections: Same as sections but min/max defined in um
-            dbu: `KCLayout.dbu` (conversion dbu -> um). Must be specified if
-                `desections` is not `None`.
+            kcl: `KCLayout` Used for conversion dbu -> um or when copying.
+                Must be specified if `desections` is not `None`. Also necessary
+                if copying to another layout and not all layers used are LayerEnums.
         """
         super().__init__(
             layer_sections={},
             _name=name,
             main_layer=main_layer,
+            kcl=kcl,
         )
         self._name = name
 
         self.layer_sections = {}
 
         if dsections is not None:
-            assert dbu is not None, "If sections in um are defined, dbu must be set"
+            assert (
+                self.kcl is not None
+            ), "If sections in um are defined, kcl must be set"
+            dbu = self.kcl.dbu
             sections = list(sections)
             for section in dsections:
                 if len(section) == 2:
@@ -568,7 +575,7 @@ class LayerEnclosure(BaseModel):
             (str(self), self.main_layer, tuple(list(self.layer_sections.items())))
         )
 
-    def __add__(self, other: "LayerEnclosure") -> "LayerEnclosure":
+    def __add__(self, other: LayerEnclosure) -> LayerEnclosure:
         """Returns the merged enclosure of two enclosures."""
         enc = LayerEnclosure()
 
@@ -582,7 +589,7 @@ class LayerEnclosure(BaseModel):
 
         return enc
 
-    def __iadd__(self, other: "LayerEnclosure") -> "LayerEnclosure":
+    def __iadd__(self, other: LayerEnclosure) -> LayerEnclosure:
         """Allows merging another enclosure into this one."""
         for layer, secs in other.layer_sections.items():
             for sec in secs.sections:
@@ -811,7 +818,7 @@ class LayerEnclosure(BaseModel):
 
         tp.tile_size(tile_size, tile_size)
         if isinstance(ref, int):
-            tp.input("main_layer", c.kcl, c.cell_index(), ref)
+            tp.input("main_layer", c.kcl.layout, c.cell_index(), ref)
         else:
             tp.input("main_layer", ref)
 
@@ -1019,21 +1026,49 @@ class LayerEnclosure(BaseModel):
             target=c, layer=main_layer, path=path, widths=widths, enclosure=self
         )
 
+    def copy_to(self, kcl: KCLayout) -> LayerEnclosure:
+        """Creat a copy of the LayerEnclosure in another KCLayout."""
+        layer_enc = LayerEnclosure(
+            [], name=self.name, main_layer=self.main_layer, kcl=kcl
+        )
+        for layer, sections in self.layer_sections.items():
+            if isinstance(layer, LayerEnum):
+                try:
+                    _layer = kcl.layers(layer)  # type: ignore[call-arg]
+                except ValueError:
+                    _layer = kcl.layer(layer.layer, layer.datatype)
+                    config.logger.warning(
+                        "{layer.name} - {layer.layer}/{layer.datatype} is not"
+                        " available in the new KCLayout {kcl.name}, using layer"
+                        " index instead",
+                        layer=layer,
+                        kcl=kcl,
+                    )
+            else:
+                raise NotImplementedError
+
+            for section in sections.sections:
+                layer_enc.add_section(_layer, section)
+        return layer_enc
+
 
 class LayerEnclosureCollection(BaseModel):
     """Collection of LayerEnclosures."""
 
     enclosures: list[LayerEnclosure]
 
-    @validator("enclosures", each_item=True)
-    def enclosures_must_have_main_layer(cls, v: LayerEnclosure) -> LayerEnclosure:
+    @field_validator("enclosures")
+    def enclosures_must_have_main_layer(
+        cls, v: list[LayerEnclosure]
+    ) -> list[LayerEnclosure]:
         """The PDK Enclosure must have main layers defined for each Enclosure.
 
         The PDK Enclosure uses this to automatically apply enclosures.
         """
-        assert (
-            v.main_layer is not None
-        ), "Enclosure for PDKEnclosure must have a main layer defined"
+        for le in v:
+            assert (
+                le.main_layer is not None
+            ), "Enclosure for PDKEnclosure must have a main layer defined"
         return v
 
     def __get_item__(self, key: str | int) -> LayerEnclosure:
@@ -1092,7 +1127,7 @@ class RegionOperator(kdb.TileOutputReceiver):
         self.kcell.shapes(self.layer).insert(self.region)
 
 
-class PortHoles(BaseModel):
+class PortHoles(BaseModel, arbitrary_types_allowed=True):
     """Calculates a region for holes from sizing and a list of ports."""
 
     region: kdb.Region = Field(default_factory=kdb.Region)
@@ -1113,28 +1148,6 @@ class PortHoles(BaseModel):
                         kdb.Box(0, -half_width, half_width, half_width)
                     ).transformed(port.dcplx_trans.to_itrans(port.kcl.dbu))
                 )
-
-    # def calculate(self) -> None:
-    # """Calculate Region."""
-    # for port in self.ports:
-    #     half_width = port.width // 2 + self.oversize
-    #     if port._trans:
-    #         self.region.insert(
-    #             kdb.Polygon(
-    #                 kdb.Box(0, -half_width, half_width, half_width)
-    #             ).transformed(port.trans)
-    #         )
-    #     else:
-    #         self.region.insert(
-    #             kdb.Polygon(
-    #                 kdb.Box(0, -half_width, half_width, half_width)
-    #             ).transformed(port.dcplx_trans.to_itrans(port.kcl.dbu))
-    #         )
-
-    class Config:
-        """pydantic config."""
-
-        arbitrary_types_allowed = True
 
 
 class RegionTilesOperator(kdb.TileOutputReceiver):
@@ -1438,7 +1451,7 @@ class KCellEnclosure(BaseModel):
             if not c.bbox_per_layer(enc.main_layer).empty():
                 _inp = f"main_layer_{enc.main_layer}"
                 if enc.main_layer not in inputs:
-                    tp.input(f"{_inp}", c.kcl, c.cell_index(), enc.main_layer)
+                    tp.input(f"{_inp}", c.kcl.layout, c.cell_index(), enc.main_layer)
                     inputs.add(enc.main_layer)
                     config.logger.debug("Created input {}", _inp)
 
@@ -1527,3 +1540,7 @@ class KCellEnclosure(BaseModel):
         else:
             for operator in layer_regiontilesoperators.values():
                 operator.insert()
+
+    def copy_to(self, kcl: KCLayout) -> KCellEnclosure:
+        """Copy the KCellEnclosure to another KCLayout."""
+        return KCellEnclosure([enc.copy_to(kcl) for enc in self.enclosures])

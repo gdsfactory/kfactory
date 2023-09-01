@@ -1,7 +1,5 @@
 import kfactory as kf
-import pytest
 import numpy as np
-from typing import Optional
 import warnings
 
 
@@ -9,21 +7,20 @@ def bend_circular(
     width: int,
     radius: int,
     layer: int,
-    enclosure: Optional[kf.utils.LayerEnclosure] = None,
+    enclosure: kf.enclosure.LayerEnclosure | None = None,
     angle: int = 90,
     angle_step: float = 1,
 ) -> kf.KCell:
-    """Circular radius bend
+    """Circular radius bend.
 
     Args:
         width: Width in database units
         radius: Radius in database units
         layer: Layer index of the target layer
-        enclosure: :py:class:`kfactory.utils.Enclosure` object to describe the claddings
+        enclosure: :py:class:`kfactory.Enclosure` object to describe the claddings
     Returns:
         cell (KCell): Circular Bend KCell
     """
-
     c = kf.KCell()
     r = radius * c.kcl.dbu
     backbone = [
@@ -36,7 +33,7 @@ def bend_circular(
         ]
     ]
 
-    kf.utils.extrude_path(c, layer, backbone, width, enclosure, 0, angle)
+    kf.enclosure.extrude_path(c, layer, backbone, width, enclosure, 0, angle)
 
     c.create_port(
         name="W0", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer=layer
@@ -65,21 +62,20 @@ def dbend_circular(
     width: float,
     radius: float,
     layer: kf.kcell.LayerEnum,
-    enclosure: Optional[kf.utils.LayerEnclosure] = None,
+    enclosure: kf.LayerEnclosure | None = None,
     angle: float = 90,
     angle_step: float = 1,
 ) -> kf.KCell:
-    """Circular radius bend
+    """Circular radius bend.
 
     Args:
         width: Width in database units
         radius: Radius in database units
         layer: Layer index of the target layer
-        enclosure: :py:class:`kfactory.utils.Enclosure` object to describe the claddings
+        enclosure: :py:class:`kfactory.Enclosure` object to describe the claddings
     Returns:
         cell (KCell): Circular Bend KCell
     """
-
     c = kf.KCell()
     r = radius
     backbone = [
@@ -91,7 +87,7 @@ def dbend_circular(
             )
         ]
     ]
-    kf.utils.extrude_path(c, layer, backbone, width, enclosure, 0, angle)
+    kf.enclosure.extrude_path(c, layer, backbone, width, enclosure, 0, angle)
     dp1 = kf.kcell.Port(
         dwidth=width, layer=layer, name="W0", dcplx_trans=kf.kdb.DCplxTrans.R180
     )

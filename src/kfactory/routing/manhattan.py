@@ -4,8 +4,8 @@ import numpy as np
 
 from .. import kdb
 from ..conf import config
+from ..enclosure import clean_points
 from ..kcell import KCLayout, Port
-from ..utils import clean_points
 
 __all__ = ["route_manhattan", "route_manhattan_180"]
 

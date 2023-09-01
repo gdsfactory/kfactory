@@ -6,8 +6,8 @@ import numpy as np
 import numpy.typing as nty
 from scipy.special import binom  # type: ignore[import]
 
-from .. import KCell, LayerEnum, cell, kdb
-from ..utils import LayerEnclosure
+from .. import KCell, KCLayout, LayerEnum, cell, kcl, kdb
+from ..enclosure import LayerEnclosure
 
 __all__ = ["bend_s"]
 
@@ -28,17 +28,7 @@ def bezier_curve(
     return [kdb.DPoint(float(x), float(y)) for x, y in zip(xs, ys)]
 
 
-@cell
-def bend_s(
-    width: float,
-    height: float,
-    length: float,
-    layer: int | LayerEnum,
-    nb_points: int = 99,
-    t_start: float = 0,
-    t_stop: float = 1,
-    enclosure: LayerEnclosure | None = None,
-) -> KCell:
+class BendS:
     """Creat a bezier bend.
 
     Args:
@@ -51,40 +41,74 @@ def bend_s(
         t_stop: end
         enclosure: Slab/Exclude definition. [dbu]
     """
-    c = KCell()
-    _length, _height = length, height
-    pts = bezier_curve(
-        control_points=[
-            (0.0, 0.0),
-            (_length / 2, 0.0),
-            (_length / 2, _height),
-            (_length, _height),
-        ],
-        t=np.linspace(t_start, t_stop, nb_points),
-    )
 
-    if enclosure is None:
-        enclosure = LayerEnclosure()
+    kcl: KCLayout
 
-    enclosure.extrude_path(
-        c, path=pts, main_layer=layer, width=width, start_angle=0, end_angle=0
-    )
+    def __init__(self, kcl: KCLayout) -> None:
+        """Bezier bend function on custom KCLayout."""
+        self.kcl = kcl
 
-    c.create_port(
-        width=int(width / c.kcl.dbu),
-        trans=kdb.Trans(2, False, 0, 0),
-        layer=layer,
-        port_type="optical",
-    )
-    c.create_port(
-        width=int(width / c.kcl.dbu),
-        trans=kdb.Trans(
-            0, False, c.bbox().right, c.bbox().top - int(width / c.kcl.dbu) // 2
-        ),
-        layer=layer,
-        port_type="optical",
-    )
+    @cell
+    def __call__(
+        self,
+        width: float,
+        height: float,
+        length: float,
+        layer: int | LayerEnum,
+        nb_points: int = 99,
+        t_start: float = 0,
+        t_stop: float = 1,
+        enclosure: LayerEnclosure | None = None,
+    ) -> KCell:
+        """Creat a bezier bend.
 
-    c.autorename_ports()
+        Args:
+            width: Width of the core. [um]
+            height: height difference of left/right. [um]
+            length: Length of the bend. [um]
+            layer: Layer index of the core.
+            nb_points: Number of points of the backbone.
+            t_start: start
+            t_stop: end
+            enclosure: Slab/Exclude definition. [dbu]
+        """
+        c = self.kcl.kcell()
+        _length, _height = length, height
+        pts = bezier_curve(
+            control_points=[
+                (0.0, 0.0),
+                (_length / 2, 0.0),
+                (_length / 2, _height),
+                (_length, _height),
+            ],
+            t=np.linspace(t_start, t_stop, nb_points),
+        )
 
-    return c
+        if enclosure is None:
+            enclosure = LayerEnclosure()
+
+        enclosure.extrude_path(
+            c, path=pts, main_layer=layer, width=width, start_angle=0, end_angle=0
+        )
+
+        c.create_port(
+            width=int(width / c.kcl.dbu),
+            trans=kdb.Trans(2, False, 0, 0),
+            layer=layer,
+            port_type="optical",
+        )
+        c.create_port(
+            width=int(width / c.kcl.dbu),
+            trans=kdb.Trans(
+                0, False, c.bbox().right, c.bbox().top - int(width / c.kcl.dbu) // 2
+            ),
+            layer=layer,
+            port_type="optical",
+        )
+
+        c.autorename_ports()
+
+        return c
+
+
+bend_s = BendS(kcl)
