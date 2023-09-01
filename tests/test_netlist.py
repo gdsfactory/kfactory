@@ -120,4 +120,4 @@ def test_l2n(LAYER: kf.LayerEnum) -> None:
 
     c.show()
     nl = c.l2n()
-    nl.write_l2n("/home/sgoeldi/test_netlist.l2n")
+    print(nl)
