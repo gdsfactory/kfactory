@@ -86,7 +86,7 @@ def cell_name(request):
 
 def test_cells(cell_name: str) -> None:
     """Ensure cells have the same geometry as their golden references."""
-    gds_ref = pathlib.Path(__file__).parent.parent / "gds" / "gds_ref"
+    gds_ref = pathlib.Path(__file__).parent / "test_data" / "ref"
     cell = cells[cell_name]()
     ref_file = gds_ref / f"{cell.name}.gds"
     run_cell = cell
