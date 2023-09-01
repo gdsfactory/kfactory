@@ -22,6 +22,7 @@ import kfactory as kf
 
 
 class LAYER(kf.LayerEnum):
+    kcl = kf.constant(kf.kcl)
     WG = (1, 0)
     SLAB = (2, 0)
     NPP = (3, 0)
