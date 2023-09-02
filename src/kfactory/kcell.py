@@ -1315,16 +1315,25 @@ class KCell:
         return self._kdb_cell.bbox().top
 
     def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
-        l2n = kdb.LayoutToNetlist(self.name, self.kcl.dbu)
+        rsi = kdb.RecursiveShapeIterator(
+            self.kcl.layout,
+            self._kdb_cell,
+            list(self.kcl.netlist_layer_mapping.values()),
+        )
+        l2n = kdb.LayoutToNetlist(rsi)
+        l2n.threads = config.n_threads
+        l2n.include_floating_subcircuits = True
 
         for layer in self.kcl.netlist_layer_mapping.values():
-            l2n.make_layer(
+            print(f"{layer=}")
+            l2n_layer = l2n.make_layer(
                 layer,
                 layer.name
                 if isinstance(layer, LayerEnum)
                 else f"{self.kcl.get_info(layer).layer}/"
                 f"{self.kcl.get_info(layer).datatype}",
             )
+            l2n.connect(l2n_layer)
 
         l2n.extract_netlist()
 
@@ -3526,6 +3535,35 @@ def cell(
                             port.dcplx_trans.disp = port._dcplx_trans.disp.to_itype(
                                 dbu
                             ).to_dtype(dbu)
+                if add_port_layers:
+                    for port in cell.ports:
+                        if port.layer in cell.kcl.netlist_layer_mapping:
+                            if port._trans:
+                                edge = kdb.Edge(
+                                    kdb.Point(0, -port.width // 2),
+                                    kdb.Point(0, port.width // 2),
+                                )
+                                cell.shapes(
+                                    cell.kcl.netlist_layer_mapping[port.layer]
+                                ).insert(port.trans * edge)
+                                if port.name:
+                                    cell.shapes(
+                                        cell.kcl.netlist_layer_mapping[port.layer]
+                                    ).insert(kdb.Text(port.name, port.trans))
+                            else:
+                                dedge = kdb.DEdge(
+                                    kdb.DPoint(0, -port.d.width / 2),
+                                    kdb.DPoint(0, port.d.width / 2),
+                                )
+                                cell.shapes(
+                                    cell.kcl.netlist_layer_mapping[port.layer]
+                                ).insert(port.dcplx_trans * dedge)
+                                if port.name:
+                                    cell.shapes(
+                                        cell.kcl.netlist_layer_mapping[port.layer]
+                                    ).insert(
+                                        kdb.DText(port.name, port.dcplx_trans.s_trans())
+                                    )
                 cell._locked = True
                 return cell
 
