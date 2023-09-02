@@ -1316,34 +1316,18 @@ class KCell:
 
     def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
         l2n = kdb.LayoutToNetlist(self.name, self.kcl.dbu)
+
+        for layer in self.kcl.netlist_layer_mapping.values():
+            l2n.make_layer(
+                layer,
+                layer.name
+                if isinstance(layer, LayerEnum)
+                else f"{self.kcl.get_info(layer).layer}/"
+                f"{self.kcl.get_info(layer).datatype}",
+            )
+
         l2n.extract_netlist()
 
-        il = l2n.internal_layout()
-
-        def filter_port(port: Port) -> bool:
-            return port.port_type in port_types
-
-        for ci in self.called_cells():
-            c = self.kcl[ci]
-            c.circuit(l2n, port_types=port_types)
-        #     if il.cell(c.name) is None:
-        #         il.create_cell(c.name)
-        #     [
-        #         il.cell(c.name)
-        #         .shapes(il.layer(c.kcl.get_info(port.layer)))
-        #         .insert(port_polygon(port.width))
-        #         for port in filter(filter_port, c.ports)
-        #     ]
-        self.circuit(l2n, port_types=port_types)
-        # if il.cell(self.name) is None:
-        #     il.create_cell(self.name)
-        # [
-        #     il.cell(self.name)
-        #     .shapes(il.layer(self.kcl.get_info(port.layer)))
-        #     .insert(port_polygon(port.width))
-        #     for port in filter(filter_port, self.ports)
-        # ]
-        il.assign(self.kcl.layout)
         return l2n
 
     def circuit(
@@ -1532,6 +1516,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     factories: KCellFactories
     kcells: dict[int, KCell]
     layers: type[LayerEnum]
+    netlist_layer_mapping: dict[LayerEnum | int, LayerEnum | int] = Field(default={})
     sparameters_path: Path | str | None
     interconnect_cml_path: Path | str | None
     constants: Constants = Field(default_factory=Constants)
@@ -3442,6 +3427,7 @@ def cell(
     check_ports: bool = True,
     check_instances: bool = True,
     snap_ports: bool = True,
+    add_port_layers: bool = True,
 ) -> (
     Callable[KCellParams, KCell]
     | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
@@ -3462,6 +3448,9 @@ def cell(
         check_instances: Check for any complex instances. A complex instance is a an
             instance that has a magnification != 1 or non-90° rotation.
         snap_ports: Snap the centers of the ports onto the grid (only x/y, not angle).
+        add_port_layers: Add special layers of
+            [kfactory.KCLayout.netlist_layer_mapping][netlist_layer_mapping] to the
+            ports if the port layer is in the mapping.
     """
 
     def decorator_autocell(
