@@ -26,8 +26,6 @@ from .kcell import (
 from . import cells, placer, routing, utils, port, pdk, technology
 from .conf import config
 
-# from .pdk import Pdk
-
 __version__ = "0.8.4"
 
 logger = config.logger

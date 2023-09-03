@@ -1135,8 +1135,6 @@ class KCell:
 
         c = KCell(kcl=self.kcl, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
-        for inst in kdb_copy.each_inst():
-            c.insts.append(Instance(self.kcl, instance=inst))
 
         c._settings = self.settings.model_copy()
         c.info = self.info.model_copy()
@@ -3378,7 +3376,7 @@ def show(
             delete = True
 
     elif isinstance(gds, str | Path):
-        gds_file = Path(gds)
+        gds_file = Path(gds).resolve()
     else:
         raise NotImplementedError(f"unknown type {type(gds)} for streaming to KLayout")
     if not gds_file.is_file():
@@ -3401,7 +3399,23 @@ def show(
         msg = ""
         try:
             msg = conn.recv(1024).decode("utf-8")
-            config.logger.info(f"Message from klive: {msg}")
+            try:
+                jmsg = json.loads(msg)
+                match jmsg["type"]:
+                    case "open":
+                        config.logger.info(
+                            "klive v{version}: Opened file '{file}'",
+                            version=jmsg["version"],
+                            file=jmsg["file"],
+                        )
+                    case "reload":
+                        config.logger.info(
+                            "klive v{version}: Reloaded file '{file}'",
+                            version=jmsg["version"],
+                            file=jmsg["file"],
+                        )
+            except json.JSONDecodeError:
+                config.logger.info(f"Message from klive: {msg}")
         except OSError:
             config.logger.warning("klive didn't send data, closing")
         finally:
