@@ -22,13 +22,13 @@ from enum import IntEnum, IntFlag, auto
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
-from typing import Any, Literal, TypeAlias, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Tuple, TypeAlias, TypeVar, Union, overload
 
 import cachetools.func
 import numpy as np
 import ruamel.yaml
 from aenum import Enum, constant  # type: ignore[import]
-from pydantic import BaseModel, Field, computed_field, model_validator
+from pydantic import BaseModel, Field, computed_field, Field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec
 
@@ -1484,6 +1484,316 @@ class Constants(BaseSettings):
     pass
 
 
+
+class LayerLevel(BaseModel):
+    """Level for 3D LayerStack.
+
+    Parameters:
+        layer: (GDSII Layer number, GDSII datatype).
+        thickness: layer thickness in dbu.
+        thickness_tolerance: layer thickness tolerance in dbu.
+        zmin: height position where material starts in dbu.
+        material: material name.
+        sidewall_angle: in degrees with respect to normal.
+        z_to_bias: parametrizes shrinking/expansion of the design GDS layer
+            when extruding from zmin (0) to zmin + thickness (1).
+            Defaults no buffering [[0, 1], [0, 0]].
+        info: simulation_info and other types of metadata.
+            mesh_order: lower mesh order (1) will have priority over higher
+                mesh order (2) in the regions where materials overlap.
+            refractive_index: refractive_index
+                can be int, complex or function that depends on wavelength (um).
+            type: grow, etch, implant, or background.
+            mode: octagon, taper, round.
+                https://gdsfactory.github.io/klayout_pyxs/DocGrow.html
+            into: etch into another layer.
+                https://gdsfactory.github.io/klayout_pyxs/DocGrow.html
+            doping_concentration: for implants.
+            resistivity: for metals.
+            bias: in um for the etch.
+    """
+
+    layer: Union[Tuple[int, int], LayerEnum]
+    thickness: int
+    thickness_tolerance: int | None = None
+    zmin: int
+    material: str | None = None
+    sidewall_angle: int = 0
+    z_to_bias: Optional[Tuple[int, ...]] = None
+    info: Info = {}
+
+
+class LayerStack(BaseModel):
+    """For simulation and 3D rendering.
+
+    Parameters:
+        layers: dict of layer_levels.
+    """
+
+    layers: Dict[str, LayerLevel] = Field(default_factory=dict)
+
+    def __init__(self, **data: Any):
+        """Add LayerLevels automatically for subclassed LayerStacks."""
+        super().__init__(**data)
+
+        for field, val in data.items():
+            if not isinstance(val, LayerLevel):
+                raise TypeError(f"argument should be of type LayerLevel, got type {type(val)}.")
+            self.layers[field] = val
+            if isinstance(val.layer, LayerEnum):
+                self.layers[field].layer = (val.layer[0], val.layer[1])
+
+    def get_layer_to_thickness(self) -> Dict[Tuple[int, int] | LayerEnum, int]:
+        """Returns layer tuple to thickness (um)."""
+        return {
+            level.layer: level.thickness
+            for level in self.layers.values()
+            if level.thickness
+        }
+
+    def get_layer_to_zmin(self) -> Dict[Tuple[int, int] | LayerEnum, int]:
+        """Returns layer tuple to z min position (um)."""
+        return {
+            level.layer: level.zmin for level in self.layers.values() if level.thickness
+        }
+
+    def get_layer_to_material(self) -> Dict[Tuple[int, int] | LayerEnum, str]:
+        """Returns layer tuple to material name."""
+        return {
+            level.layer: level.material
+            for level in self.layers.values()
+            if level.thickness and level.material
+        }
+
+    def get_layer_to_sidewall_angle(self) -> Dict[Tuple[int, int] | LayerEnum, int]:
+        """Returns layer tuple to material name."""
+        return {
+            level.layer: level.sidewall_angle
+            for level in self.layers.values()
+            if level.thickness
+        }
+
+    def get_layer_to_info(self) -> Dict[Tuple[int, int] | LayerEnum, Info]:
+        """Returns layer tuple to info dict."""
+        return {level.layer: level.info for level in self.layers.values()}
+
+    def to_dict(self) -> Dict[str, Dict[str, Any]]:
+        return {level_name: dict(level) for level_name, level in self.layers.items()}
+
+    def __getitem__(self, key: str) -> LayerLevel:
+        """Access layer stack elements."""
+        if key not in self.layers:
+            layers = list(self.layers.keys())
+            raise ValueError(f"{key!r} not in {layers}")
+
+        return self.layers[key]
+
+
+# def get_layer_stack(
+thickness_wg = 220
+thickness_slab_deep_etch = 90
+thickness_clad = 3.0 / 0.001
+thickness_nitride = 350
+thickness_ge = 500
+gap_silicon_to_nitride = 100
+zmin_heater = 1.1 / 0.001
+zmin_metal1 = 1.1 / 0.001
+thickness_metal1 = 700
+zmin_metal2 = 2.3 / 0.001
+thickness_metal2 = 700
+zmin_metal3 = 3.2 / 0.001
+thickness_metal3 = 2000
+substrate_thickness = 10.0 / 0.001
+box_thickness = 3.0 / 0.001
+undercut_thickness = 5.0 / 0.001
+# )
+# -> LayerStack:
+#     """Returns generic LayerStack.
+
+#     based on paper https://www.degruyter.com/document/doi/10.1515/nanoph-2013-0034/html
+
+#     Args:
+#         thickness_wg: straight thickness in um.
+#         thickness_slab_deep_etch: for deep etched slab.
+#         thickness_clad: cladding thickness in um.
+#         thickness_nitride: nitride thickness in um.
+#         thickness_ge: germanium thickness.
+#         gap_silicon_to_nitride: distance from silicon to nitride in um.
+#         zmin_heater: TiN heater.
+#         zmin_metal1: metal1.
+#         thickness_metal1: metal1 thickness.
+#         zmin_metal2: metal2.
+#         thickness_metal2: metal2 thickness.
+#         zmin_metal3: metal3.
+#         thickness_metal3: metal3 thickness.
+#         substrate_thickness: substrate thickness in um.
+#         box_thickness: bottom oxide thickness in um.
+#         undercut_thickness: thickness of the silicon undercut.
+#     """
+
+
+# class LAYER_CLASS(LayerEnum):
+#     kcl = constant(KCLayout)
+#     WAFER = (99999, 0)
+
+#     WG = (1, 0)
+#     WGCLAD = (111, 0)
+#     SLAB150 = (2, 0)
+#     SHALLOW_ETCH = (2, 6)
+#     SLAB90 = (3, 0)
+#     DEEP_ETCH = (3, 6)
+#     DEEPTRENCH = (4, 0)
+#     GE = (5, 0)
+#     UNDERCUT = (6, 0)
+#     WGN = (34, 0)
+#     WGN_CLAD = (36, 0)
+
+#     N = (20, 0)
+#     NP = (22, 0)
+#     NPP = (24, 0)
+#     P = (21, 0)
+#     PP = (23, 0)
+#     PPP = (25, 0)
+#     GEN = (26, 0)
+#     GEP = (27, 0)
+
+#     HEATER = (47, 0)
+#     M1 = (41, 0)
+#     M2 = (45, 0)
+#     M3 = (49, 0)
+#     MTOP = (49, 0)
+#     VIAC = (40, 0)
+#     VIA1 = (44, 0)
+#     VIA2 = (43, 0)
+#     PADOPEN = (46, 0)
+
+
+# class GenericLayerStack(LayerStack):
+#     substrate: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.WAFER,
+#         thickness=substrate_thickness,
+#         zmin=-substrate_thickness - box_thickness,
+#         material="si",
+#         info={"mesh_order": 99},
+#     )
+#     box: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.WAFER,
+#         thickness=box_thickness,
+#         zmin=-box_thickness,
+#         material="sio2",
+#         info={"mesh_order": 99},
+#     )
+#     core: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.WG,
+#         thickness=thickness_wg,
+#         zmin=0.0,
+#         material="si",
+#         info={"mesh_order": 1},
+#         sidewall_angle=10,
+#         # width_to_z=0.5,
+#     )
+#     clad: LayerLevel = LayerLevel(
+#         # layer=LAYER_CLASS.WGCLAD,
+#         layer=LAYER_CLASS.WAFER,
+#         zmin=0.0,
+#         material="sio2",
+#         thickness=thickness_clad,
+#         info={"mesh_order": 10},
+#     )
+#     slab150: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.SLAB150,
+#         thickness=150,
+#         zmin=0,
+#         material="si",
+#         info={"mesh_order": 3},
+#     )
+#     slab90: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.SLAB90,
+#         thickness=thickness_slab_deep_etch,
+#         zmin=0.0,
+#         material="si",
+#         info={"mesh_order": 2},
+#     )
+#     nitride: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.WGN,
+#         thickness=thickness_nitride,
+#         zmin=thickness_wg + gap_silicon_to_nitride,
+#         material="sin",
+#         info={"mesh_order": 2},
+#     )
+#     ge: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.GE,
+#         thickness=thickness_ge,
+#         zmin=thickness_wg,
+#         material="ge",
+#         info={"mesh_order": 1},
+#     )
+#     undercut: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.UNDERCUT,
+#         thickness=-undercut_thickness,
+#         zmin=-box_thickness,
+#         material="air",
+#         # z_to_bias=tuple(
+#         #     list([0, 0.3, 0.6, 0.8, 0.9, 1]),
+#         #     list([-0, -0.5, -1, -1.5, -2, -2.5]),
+#         # ),
+#         info={"mesh_order": 1},
+#     )
+#     via_contact: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.VIAC,
+#         thickness=zmin_metal1 - thickness_slab_deep_etch,
+#         zmin=thickness_slab_deep_etch,
+#         material="Aluminum",
+#         info={"mesh_order": 1},
+#         sidewall_angle=-10,
+#     )
+#     metal1: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.M1,
+#         thickness=thickness_metal1,
+#         zmin=zmin_metal1,
+#         material="Aluminum",
+#         info={"mesh_order": 2},
+#     )
+#     heater: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.HEATER,
+#         thickness=750,
+#         zmin=zmin_heater,
+#         material="TiN",
+#         info={"mesh_order": 1},
+#     )
+#     via1: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.VIA1,
+#         thickness=zmin_metal2 - (zmin_metal1 + thickness_metal1),
+#         zmin=zmin_metal1 + thickness_metal1,
+#         material="Aluminum",
+#         info={"mesh_order": 2},
+#     )
+#     metal2: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.M2,
+#         thickness=thickness_metal2,
+#         zmin=zmin_metal2,
+#         material="Aluminum",
+#         info={"mesh_order": 2},
+#     )
+#     via2: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.VIA2,
+#         thickness=zmin_metal3 - (zmin_metal2 + thickness_metal2),
+#         zmin=zmin_metal2 + thickness_metal2,
+#         material="Aluminum",
+#         info={"mesh_order": 1},
+#     )
+#     metal3: LayerLevel = LayerLevel(
+#         layer=LAYER_CLASS.M3,
+#         thickness=thickness_metal3,
+#         zmin=zmin_metal3,
+#         material="Aluminum",
+#         info={"mesh_order": 2},
+#     )
+
+
+# LAYER_STACK = GenericLayerStack()
+
+
 class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     """Small extension to the klayout.db.Layout.
 
@@ -1532,6 +1842,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     factories: KCellFactories
     kcells: dict[int, KCell]
     layers: type[LayerEnum]
+    layer_stack: LayerStack | None = None
     sparameters_path: Path | str | None
     interconnect_cml_path: Path | str | None
     constants: Constants = Field(default_factory=Constants)
@@ -1546,6 +1857,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         layers: type[LayerEnum] | None = None,
         sparameters_path: Path | str | None = None,
         interconnect_cml_path: Path | str | None = None,
+        layer_stack: LayerStack | None = None,
         constants: type[Constants] | None = None,
         base_kcl: KCLayout | None = None,
         port_rename_function: Callable[..., None] = rename_clockwise,
@@ -1560,7 +1872,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             enclosure: The standard KCellEnclosure of the PDK.
             cell_factories: Functions for creating pcells from the PDK.
             cells: Fixed cells of the PDK.
-            layers: A LayerEnum describing the layerstack of the PDK
+            layers: A LayerEnum describing the layerstack of the PDK.
+            layer_stack: maps name to layer numbers, thickness, zmin, sidewall_angle.
+                if can also contain material properties
+                (refractive index, nonlinear coefficient, sheet resistance ...).
             sparameters_path: Path to the sparameters config file.
             interconnect_cml_path: Path to the interconnect file.
             constants: A model containing all the constants related to the PDK.
@@ -1603,6 +1918,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 enclosure = base_kcl.enclosure or KCellEnclosure([])
             if layer_enclosures is None:
                 layer_enclosures = LayerEnclosureModel()
+            layer_stack_ = base_kcl.layer_stack or layer_stack
+            if copy_base_kcl_layers:
+                layer_stackdict = layer_stack_.model_dump()
+                layer_stackdict.update(layer_stack.model_dump())
+                layer_stack = LayerStack.model_construct(**layer_stackdict)
         else:
             name = name
 
@@ -1651,6 +1971,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             interconnect_cml_path=interconnect_cml_path,
             constants=_constants,
             library=library,
+            layer_stack=layer_stack,
             layout=layout,
             rename_function=port_rename_function,
         )
