@@ -8,6 +8,8 @@ from collections.abc import Callable, Iterable
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any
 
+from . import kdb
+
 if TYPE_CHECKING:
     from .kcell import KCell, LayerEnum, Port
 
@@ -191,3 +193,27 @@ def filter_regex(ports: "Iterable[Port]", regex: str) -> "filter[Port]":
             return False
 
     return filter(regex_filter, ports)
+
+
+polygon_dict: dict[int, kdb.Polygon] = {}
+
+
+def port_polygon(width: int) -> kdb.Polygon:
+    """Gets a polygon representation for a given port width."""
+    if width in polygon_dict:
+        return polygon_dict[width]
+    else:
+        poly = kdb.Polygon(
+            [
+                kdb.Point(0, width // 2),
+                kdb.Point(0, -width // 2),
+                kdb.Point(width // 2, 0),
+            ]
+        )
+
+        hole = kdb.Region(poly).sized(-int(width * 0.05) or -1)
+        hole -= kdb.Region(kdb.Box(0, 0, width // 2, -width // 2))
+
+        poly.insert_hole(list(list(hole.each())[0].each_point_hull()))
+        polygon_dict[width] = poly
+        return poly

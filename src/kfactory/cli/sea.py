@@ -24,9 +24,9 @@ def upload(
         str, typer.Option(envvar="GDATASEA_URL")
     ] = "http://localhost:3131",
 ) -> None:
-    """Upload a new eda file to gdatasea."""
+    """Upload a new project to gdatasea."""
     if name is None:
-        kcl = KCLayout()
+        kcl = KCLayout("SeaUpload")
         kcl.read(file)
         assert len(kcl.top_cells()) > 0, (
             "Cannot automatically determine name of gdatasea edafile if"
@@ -34,7 +34,7 @@ def upload(
         )
         name = kcl.top_cells()[0].name
 
-    url = f"{base_url}/edafile"
+    url = f"{base_url}/project"
     if description:
         params = {"name": name, "description": description}
     else:
@@ -58,16 +58,16 @@ def upload(
 @app.command()
 def update(
     file: str,
-    edafile_id: Annotated[int, typer.Option("--edafile_id", "--id", "-id")],
+    project_id: Annotated[int, typer.Option("--project_id", "--id", "-id")],
     name: Optional[str] = None,  # noqa: UP007
     description: Optional[str] = None,  # noqa: UP007
     base_url: Annotated[
         str, typer.Option(envvar="GDATASEA_URL")
     ] = "http://localhost:3131",
 ) -> None:
-    """Upload a new eda file to gdatasea."""
+    """Update a project on gdatasea."""
     if name is None:
-        kcl = KCLayout()
+        kcl = KCLayout("SeaUpdate")
         kcl.read(file)
         assert len(kcl.top_cells()) > 0, (
             "Cannot automatically determine name of gdatasea edafile if"
@@ -75,7 +75,7 @@ def update(
         )
         name = kcl.top_cells()[0].name
 
-    url = f"{base_url}/edafile/{edafile_id}"
+    url = f"{base_url}/project/{project_id}"
     params = {"name": name}
     if description:
         params["description"] = description

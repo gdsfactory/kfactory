@@ -90,7 +90,7 @@ def test_rename_orientation() -> None:
 
 
 def test_rename_setter() -> None:
-    kcl = kf.KCLayout()
+    kcl = kf.KCLayout("TEST_RENAME")
 
     assert kcl.rename_function == kf.port.rename_clockwise
 

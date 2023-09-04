@@ -169,5 +169,5 @@ about layer, width and port type matching.
 ## LayerEnclosure / KCellEnclosure vs CrossSection
 
 kfactory doesn't have the concept of cross sections. since cross sections are limited to have a path as a backbone, kfactory implemented a more generalized form as enclosures.
-[LayerEnclosures][kfactory.utils.enclosure.LayerEnclosure] can use regions or even entire layers as a basis to apply excludes and claddings (or anythin that depends on the base form). Additionally, kfactory has the extended
-concept of [KCellEnclosure][kfactory.utils.enclosure.KCellEnclosure]. These can apply enclosures to a whole KCell on all layers the KCellEnclosure is aware of. For further info, please head over to the [Tutorial](/kfactory/notebooks/03_Enclosures)
+[LayerEnclosures][kfactory.enclosure.LayerEnclosure] can use regions or even entire layers as a basis to apply excludes and claddings (or anythin that depends on the base form). Additionally, kfactory has the extended
+concept of [KCellEnclosure][kfactory.enclosure.KCellEnclosure]. These can apply enclosures to a whole KCell on all layers the KCellEnclosure is aware of. For further info, please head over to the [Tutorial](/kfactory/notebooks/03_Enclosures)

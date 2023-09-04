@@ -9,9 +9,9 @@ from typing import Any, TypeVar
 from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
 
+from .enclosure import LayerEnclosure
 from .kcell import KCell, KCLayout, Port, Ports
 from .kcell import kcl as stdkcl
-from .utils import LayerEnclosure
 
 __all__ = ["cells_to_yaml", "cells_from_yaml"]
 

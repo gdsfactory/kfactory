@@ -100,7 +100,7 @@ def fix_spacing_tiled(
     tp.dbu = c.kcl.dbu
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
-    tp.input("reg", c.kcl, c.cell_index(), layer)
+    tp.input("reg", c.kcl.layout, c.cell_index(), layer)
     tp.threads = n_threads or len(os.sched_getaffinity(0))
 
     fix_reg = RegionOperator()
@@ -177,7 +177,7 @@ def fix_spacing_sizing_tiled(
     tp.dbu = c.kcl.dbu
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
-    tp.input("reg", c.kcl, c.cell_index(), layer)
+    tp.input("reg", c.kcl.layout, c.cell_index(), layer)
     tp.threads = n_threads or len(os.sched_getaffinity(0))
 
     fix_reg = kdb.Region()
@@ -238,7 +238,7 @@ def fix_spacing_minkowski_tiled(
 
     tp.tile_size(*tile_size)
     if isinstance(ref, int):
-        tp.input("main_layer", c.kcl, c.cell_index(), ref)
+        tp.input("main_layer", c.kcl.layout, c.cell_index(), ref)
     else:
         tp.input("main_layer", ref)
 

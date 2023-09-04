@@ -1,11 +1,11 @@
 import kfactory as kf
-from kfactory.utils import extrude_path, extrude_path_dynamic
+from kfactory.enclosure import extrude_path, extrude_path_dynamic
 import numpy as np
 
 
 @kf.cell
 def taper_dyn(
-    length: float, width: float, layer: kf.LayerEnum, enclosure: kf.utils.LayerEnclosure
+    length: float, width: float, layer: kf.LayerEnum, enclosure: kf.LayerEnclosure
 ) -> kf.KCell:
     c = kf.KCell()
 
@@ -21,7 +21,7 @@ def taper_dyn(
 
 @kf.cell
 def taper_static(
-    length: float, width: float, layer: kf.LayerEnum, enclosure: kf.utils.LayerEnclosure
+    length: float, width: float, layer: kf.LayerEnum, enclosure: kf.LayerEnclosure
 ) -> kf.KCell:
     c = kf.KCell()
 

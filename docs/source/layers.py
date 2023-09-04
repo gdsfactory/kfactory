@@ -21,4 +21,4 @@ class LAYER(kf.LayerEnum):
     SIEXCLUDE = (1, 1)
 
 
-si_enc = kf.utils.LayerEnclosure([(LAYER.SIEXCLUDE, 2000)])
+si_enc = kf.enclosure.LayerEnclosure([(LAYER.SIEXCLUDE, 2000)])

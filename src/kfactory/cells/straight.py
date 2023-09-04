@@ -17,7 +17,7 @@ The slabs and excludes can be given in the form of an :py:class:~`Enclosure`.
 
 
 from .. import KCell, LayerEnum, kcl
-from ..utils import LayerEnclosure
+from ..enclosure import LayerEnclosure
 from .dbu.straight import straight as straight_dbu
 
 __all__ = ["straight", "straight_dbu"]

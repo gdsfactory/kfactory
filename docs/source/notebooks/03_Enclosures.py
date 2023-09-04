@@ -22,13 +22,14 @@ import kfactory as kf
 
 
 class LAYER(kf.LayerEnum):
+    kcl = kf.constant(kf.kcl)
     WG = (1, 0)
     SLAB = (2, 0)
     NPP = (3, 0)
 
 
 # %%
-enc = kf.utils.LayerEnclosure(
+enc = kf.enclosure.LayerEnclosure(
     [
         (LAYER.SLAB, 2000),
     ],
@@ -40,7 +41,7 @@ c.show()
 c.plot()
 
 # %%
-enc = kf.utils.LayerEnclosure(
+enc = kf.enclosure.LayerEnclosure(
     [
         (LAYER.SLAB, 2000),
         (LAYER.NPP, 1000, 2000),
@@ -59,7 +60,7 @@ def two_bends(
     radius: float,
     width: float,
     layer: kf.LayerEnum,
-    enclosure: kf.utils.LayerEnclosure | None = None,
+    enclosure: kf.enclosure.LayerEnclosure | None = None,
 ) -> kf.KCell:
     c = kf.KCell()
     b1 = c << kf.cells.euler.bend_euler(radius=radius, width=width, layer=layer)

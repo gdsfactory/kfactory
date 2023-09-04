@@ -15,11 +15,12 @@ class GeometryDifference(ValueError):
 
 
 class LAYER(kf.LayerEnum):
+    kcl = kf.constant(kf.kcl)
     WG = (1, 0)
     WGCLAD = (111, 0)
 
 
-wg_enc = kf.utils.LayerEnclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
+wg_enc = kf.LayerEnclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
 
 
 def straight() -> kf.KCell:
@@ -85,7 +86,7 @@ def cell_name(request):
 
 def test_cells(cell_name: str) -> None:
     """Ensure cells have the same geometry as their golden references."""
-    gds_ref = pathlib.Path(__file__).parent.parent / "gds" / "gds_ref"
+    gds_ref = pathlib.Path(__file__).parent / "test_data" / "ref"
     cell = cells[cell_name]()
     ref_file = gds_ref / f"{cell.name}.gds"
     run_cell = cell
@@ -93,7 +94,7 @@ def test_cells(cell_name: str) -> None:
         gds_ref.mkdir(parents=True, exist_ok=True)
         run_cell.write(str(ref_file))
         raise FileNotFoundError(f"GDS file not found. Saving it to {ref_file}")
-    kcl_ref = kf.KCLayout()
+    kcl_ref = kf.KCLayout("TEST")
     kcl_ref.read(gds_ref / f"{cell.name}.gds")
     ref_cell = kcl_ref[kcl_ref.top_cell().name]
 

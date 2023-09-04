@@ -10,8 +10,8 @@ from scipy.optimize import brentq  # type: ignore[import]
 from scipy.special import fresnel  # type: ignore[import]
 
 from .. import kdb
-from ..kcell import KCell, LayerEnum, cell
-from ..utils import LayerEnclosure, extrude_path
+from ..enclosure import LayerEnclosure, extrude_path
+from ..kcell import KCell, KCLayout, LayerEnum, cell, kcl
 
 __all__ = [
     "euler_bend_points",
@@ -158,109 +158,131 @@ def euler_sbend_points(
     return spoints
 
 
-@cell
-def bend_euler(
-    width: float,
-    radius: float,
-    layer: int | LayerEnum,
-    enclosure: LayerEnclosure | None = None,
-    angle: float = 90,
-    resolution: float = 150,
-) -> KCell:
-    """Create a euler bend.
+class BendEuler:
+    kcl: KCLayout
 
-    Args:
-        width: Width of the core. [um]
-        radius: Radius off the backbone. [um]
-        layer: Layer index / LayerEnum of the core.
-        enclosure: Slab/exclude definition. [dbu]
-        angle: Angle of the bend.
-        resolution: Angle resolution for the backbone.
-    """
-    c = KCell()
-    dbu = c.layout().dbu
-    backbone = euler_bend_points(angle, radius=radius, resolution=resolution)
+    def __init__(self, kcl: KCLayout) -> None:
+        """Create a euler_bend function on a custom KCLayout."""
+        self.kcl = kcl
 
-    extrude_path(
-        target=c,
-        layer=layer,
-        path=backbone,
-        width=width,
-        enclosure=enclosure,
-        start_angle=0,
-        end_angle=angle,
-    )
-    c.create_port(
-        layer=layer,
-        width=int(width / c.kcl.dbu),
-        trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
-    )
+    @cell
+    def __call__(
+        self,
+        width: float,
+        radius: float,
+        layer: int | LayerEnum,
+        enclosure: LayerEnclosure | None = None,
+        angle: float = 90,
+        resolution: float = 150,
+    ) -> KCell:
+        """Create a euler bend.
 
-    c.create_port(
-        dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
-        dwidth=width,
-        layer=layer,
-    )
+        Args:
+            width: Width of the core. [um]
+            radius: Radius off the backbone. [um]
+            layer: Layer index / LayerEnum of the core.
+            enclosure: Slab/exclude definition. [dbu]
+            angle: Angle of the bend.
+            resolution: Angle resolution for the backbone.
+        """
+        c = KCell()
+        dbu = c.layout().dbu
+        backbone = euler_bend_points(angle, radius=radius, resolution=resolution)
 
-    c.autorename_ports()
-    return c
+        center_path = extrude_path(
+            target=c,
+            layer=layer,
+            path=backbone,
+            width=width,
+            enclosure=enclosure,
+            start_angle=0,
+            end_angle=angle,
+        )
+        c.create_port(
+            layer=layer,
+            width=int(width / c.kcl.dbu),
+            trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
+        )
+
+        c.create_port(
+            dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
+            dwidth=width,
+            layer=layer,
+        )
+
+        c.boundary = center_path
+
+        c.autorename_ports()
+        return c
 
 
-@cell
-def bend_s_euler(
-    offset: float,
-    width: float,
-    radius: float,
-    layer: LayerEnum | int,
-    enclosure: LayerEnclosure | None = None,
-    resolution: float = 150,
-) -> KCell:
-    """Create a euler s-bend.
+class BendSEuler:
+    kcl: KCLayout
 
-    Args:
-        offset: Offset between left/right. [um]
-        width: Width of the core. [um]
-        radius: Radius off the backbone. [um]
-        layer: Layer index / LayerEnum of the core.
-        enclosure: Slab/exclude definition. [dbu]
-        resolution: Angle resolution for the backbone.
-    """
-    c = KCell()
-    dbu = c.layout().dbu
-    backbone = euler_sbend_points(
-        offset=offset,
-        radius=radius,
-        resolution=resolution,
-    )
-    extrude_path(
-        target=c,
-        layer=layer,
-        path=backbone,
-        width=width,
-        enclosure=enclosure,
-        start_angle=0,
-        end_angle=0,
-    )
+    def __init__(self, kcl: KCLayout) -> None:
+        self.kcl = kcl
 
-    v = backbone[-1] - backbone[0]
-    if v.x < 0:
-        p1 = backbone[-1].to_itype(dbu)
-        p2 = backbone[0].to_itype(dbu)
-    else:
-        p1 = backbone[0].to_itype(dbu)
-        p2 = backbone[-1].to_itype(dbu)
-    c.create_port(
-        trans=kdb.Trans(2, False, p1.to_v()),
-        width=int(width / c.kcl.dbu),
-        port_type="optical",
-        layer=layer,
-    )
-    c.create_port(
-        trans=kdb.Trans(0, False, p2.to_v()),
-        width=int(width / c.kcl.dbu),
-        port_type="optical",
-        layer=layer,
-    )
+    @cell
+    def __call__(
+        self,
+        offset: float,
+        width: float,
+        radius: float,
+        layer: LayerEnum | int,
+        enclosure: LayerEnclosure | None = None,
+        resolution: float = 150,
+    ) -> KCell:
+        """Create a euler s-bend.
 
-    c.autorename_ports()
-    return c
+        Args:
+            offset: Offset between left/right. [um]
+            width: Width of the core. [um]
+            radius: Radius off the backbone. [um]
+            layer: Layer index / LayerEnum of the core.
+            enclosure: Slab/exclude definition. [dbu]
+            resolution: Angle resolution for the backbone.
+        """
+        c = KCell()
+        dbu = c.layout().dbu
+        backbone = euler_sbend_points(
+            offset=offset,
+            radius=radius,
+            resolution=resolution,
+        )
+        center_path = extrude_path(
+            target=c,
+            layer=layer,
+            path=backbone,
+            width=width,
+            enclosure=enclosure,
+            start_angle=0,
+            end_angle=0,
+        )
+
+        v = backbone[-1] - backbone[0]
+        if v.x < 0:
+            p1 = backbone[-1].to_itype(dbu)
+            p2 = backbone[0].to_itype(dbu)
+        else:
+            p1 = backbone[0].to_itype(dbu)
+            p2 = backbone[-1].to_itype(dbu)
+        c.create_port(
+            trans=kdb.Trans(2, False, p1.to_v()),
+            width=int(width / c.kcl.dbu),
+            port_type="optical",
+            layer=layer,
+        )
+        c.create_port(
+            trans=kdb.Trans(0, False, p2.to_v()),
+            width=int(width / c.kcl.dbu),
+            port_type="optical",
+            layer=layer,
+        )
+        c.boundary = center_path
+
+        c.autorename_ports()
+        return c
+
+
+bend_euler = BendEuler(kcl)
+bend_s_euler = BendEuler(kcl)

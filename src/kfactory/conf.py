@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal
 import loguru
 from loguru import logger as logger
 from pydantic import BaseModel, Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 if TYPE_CHECKING:
     from loguru import Logger
@@ -99,8 +99,16 @@ def get_affinity() -> int:
         return threads
 
 
-class Settings(BaseSettings):
+class Settings(
+    BaseSettings,
+):
     """KFactory settings object."""
+
+    model_config = SettingsConfigDict(
+        arbitrary_types_allowed=True,
+        env_prefix="kfactory_",
+        env_nested_delimiter="_",
+    )
 
     n_threads: int = get_affinity()
     logger: ClassVar[Logger] = logger
@@ -113,15 +121,6 @@ class Settings(BaseSettings):
         self.logger.remove()
         self.logger.add(sys.stdout, format=tracing_formatter, filter=self.logfilter)
         self.logger.debug("LogLevel: {}", self.logfilter.level)
-
-    class Config:
-        """Pydantic settings."""
-
-        validation = False
-        arbitrary_types_allowed = True
-        # fields = {"logger": {"exclude": True}}
-        env_prefix = "kfactory_"
-        env_nested_delimiter = "_"
 
 
 config = Settings()

@@ -23,8 +23,11 @@ from .kcell import (
     polygon_from_array,
     dpolygon_from_array,
 )
-from . import cells, placer, routing, utils, port, pdk, technology
+from . import cells, placer, routing, port, technology, enclosure, utils
 from .conf import config
+from .enclosure import LayerEnclosure, KCellEnclosure
+
+from aenum import constant  # type: ignore[import]
 
 __version__ = "0.8.4"
 
@@ -48,10 +51,13 @@ __all__ = [
     "utils",
     "show",
     "config",
+    "enclosure",
     "LayerEnum",
     "logger",
-    "pdk",
     "polygon_from_array",
     "dpolygon_from_array",
     "technology",
+    "LayerEnclosure",
+    "KCellEnclosure",
+    "constant",
 ]
