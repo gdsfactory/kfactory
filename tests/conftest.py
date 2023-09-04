@@ -127,7 +127,11 @@ def cells(bend90, bend180, bend90_euler, taper, straight) -> list[kf.KCell]:
 
 @pytest.fixture
 def pdk() -> kf.KCLayout:
-    kcl = kf.KCLayout("Test_PDK")
+    layerstack = kf.LayerStack(
+        wg=kf.kcell.LayerLevel(layer=LAYER_CLASS.WG, thickness=220, zmin=0, material="si", info=kf.kcell.Info(mesh_order=1)),
+        clad=kf.kcell.LayerLevel(layer=LAYER_CLASS.WGCLAD, thickness=3000, zmin=220, material="sio2")
+    )
+    kcl = kf.KCLayout("Test_PDK", layer_stack=layerstack)
     return kcl
 
 
