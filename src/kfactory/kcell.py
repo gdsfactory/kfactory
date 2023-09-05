@@ -22,13 +22,7 @@ from enum import IntEnum, IntFlag, auto
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
-from typing import (
-    Any,
-    Literal,
-    TypeAlias,
-    TypeVar,
-    overload,
-)
+from typing import Any, Literal, TypeAlias, TypeVar, overload
 
 import cachetools.func
 import numpy as np
