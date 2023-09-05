@@ -1525,7 +1525,7 @@ class LayerLevel(BaseModel):
     material: str | None = None
     sidewall_angle: int = 0
     z_to_bias: tuple[int, ...] | None = None
-    info: Info = {}
+    info: Info = Info()
 
 
 class LayerStack(BaseModel):
@@ -1926,7 +1926,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             if layer_enclosures is None:
                 layer_enclosures = LayerEnclosureModel()
             layer_stack_ = base_kcl.layer_stack or layer_stack
-            if copy_base_kcl_layers:
+            if copy_base_kcl_layers and layer_stack_ and layer_stack:
                 layer_stackdict = layer_stack_.model_dump()
                 layer_stackdict.update(layer_stack.model_dump())
                 layer_stack = LayerStack.model_construct(**layer_stackdict)
