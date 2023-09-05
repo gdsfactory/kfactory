@@ -18,7 +18,6 @@ def test_layerstack_layer_material(pdk: kf.KCLayout):
 
 
 def test_layerstack_layer_info(pdk: kf.KCLayout):
-    print(pdk.layer_stack.get_layer_to_info())
     assert isinstance(pdk.layer_stack.get_layer_to_info()[(1, 0)], kf.kcell.Info)
 
 
