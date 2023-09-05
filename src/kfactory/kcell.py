@@ -22,13 +22,19 @@ from enum import IntEnum, IntFlag, auto
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
-from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Tuple, TypeAlias, TypeVar, Union, overload
+from typing import (
+    Any,
+    Literal,
+    TypeAlias,
+    TypeVar,
+    overload,
+)
 
 import cachetools.func
 import numpy as np
 import ruamel.yaml
 from aenum import Enum, constant  # type: ignore[import]
-from pydantic import BaseModel, Field, computed_field, Field, model_validator
+from pydantic import BaseModel, Field, computed_field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec
 
@@ -1484,7 +1490,6 @@ class Constants(BaseSettings):
     pass
 
 
-
 class LayerLevel(BaseModel):
     """Level for 3D LayerStack.
 
@@ -1513,13 +1518,13 @@ class LayerLevel(BaseModel):
             bias: in um for the etch.
     """
 
-    layer: Union[Tuple[int, int], LayerEnum]
+    layer: tuple[int, int] | LayerEnum
     thickness: int
     thickness_tolerance: int | None = None
     zmin: int
     material: str | None = None
     sidewall_angle: int = 0
-    z_to_bias: Optional[Tuple[int, ...]] = None
+    z_to_bias: tuple[int, ...] | None = None
     info: Info = {}
 
 
@@ -1530,7 +1535,7 @@ class LayerStack(BaseModel):
         layers: dict of layer_levels.
     """
 
-    layers: Dict[str, LayerLevel] = Field(default_factory=dict)
+    layers: dict[str, LayerLevel] = Field(default_factory=dict)
 
     def __init__(self, **data: Any):
         """Add LayerLevels automatically for subclassed LayerStacks."""
@@ -1538,12 +1543,14 @@ class LayerStack(BaseModel):
 
         for field, val in data.items():
             if not isinstance(val, LayerLevel):
-                raise TypeError(f"argument should be of type LayerLevel, got type {type(val)}.")
+                raise TypeError(
+                    f"argument should be of type LayerLevel, got type {type(val)}."
+                )
             self.layers[field] = val
             if isinstance(val.layer, LayerEnum):
                 self.layers[field].layer = (val.layer[0], val.layer[1])
 
-    def get_layer_to_thickness(self) -> Dict[Tuple[int, int] | LayerEnum, int]:
+    def get_layer_to_thickness(self) -> dict[tuple[int, int] | LayerEnum, int]:
         """Returns layer tuple to thickness (um)."""
         return {
             level.layer: level.thickness
@@ -1551,13 +1558,13 @@ class LayerStack(BaseModel):
             if level.thickness
         }
 
-    def get_layer_to_zmin(self) -> Dict[Tuple[int, int] | LayerEnum, int]:
+    def get_layer_to_zmin(self) -> dict[tuple[int, int] | LayerEnum, int]:
         """Returns layer tuple to z min position (um)."""
         return {
             level.layer: level.zmin for level in self.layers.values() if level.thickness
         }
 
-    def get_layer_to_material(self) -> Dict[Tuple[int, int] | LayerEnum, str]:
+    def get_layer_to_material(self) -> dict[tuple[int, int] | LayerEnum, str]:
         """Returns layer tuple to material name."""
         return {
             level.layer: level.material
@@ -1565,7 +1572,7 @@ class LayerStack(BaseModel):
             if level.thickness and level.material
         }
 
-    def get_layer_to_sidewall_angle(self) -> Dict[Tuple[int, int] | LayerEnum, int]:
+    def get_layer_to_sidewall_angle(self) -> dict[tuple[int, int] | LayerEnum, int]:
         """Returns layer tuple to material name."""
         return {
             level.layer: level.sidewall_angle
@@ -1573,11 +1580,11 @@ class LayerStack(BaseModel):
             if level.thickness
         }
 
-    def get_layer_to_info(self) -> Dict[Tuple[int, int] | LayerEnum, Info]:
+    def get_layer_to_info(self) -> dict[tuple[int, int] | LayerEnum, Info]:
         """Returns layer tuple to info dict."""
         return {level.layer: level.info for level in self.layers.values()}
 
-    def to_dict(self) -> Dict[str, Dict[str, Any]]:
+    def to_dict(self) -> dict[str, dict[str, Any]]:
         return {level_name: dict(level) for level_name, level in self.layers.items()}
 
     def __getitem__(self, key: str) -> LayerLevel:
