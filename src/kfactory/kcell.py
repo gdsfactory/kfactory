@@ -32,7 +32,7 @@ from pydantic import BaseModel, Field, computed_field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec
 
-from . import kdb, lay
+from . import kdb, lay  # , rdb
 from .conf import config
 from .enclosure import (
     KCellEnclosure,
@@ -1315,28 +1315,18 @@ class KCell:
         return self._kdb_cell.bbox().top
 
     def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
-        rsi = kdb.RecursiveShapeIterator(
-            self.kcl.layout,
-            self._kdb_cell,
-            list(self.kcl.netlist_layer_mapping.values()),
-        )
-        l2n = kdb.LayoutToNetlist(rsi)
-        l2n.threads = config.n_threads
-        l2n.include_floating_subcircuits = True
-
-        for layer in self.kcl.netlist_layer_mapping.values():
-            print(f"{layer=}")
-            l2n_layer = l2n.make_layer(
-                layer,
-                layer.name
-                if isinstance(layer, LayerEnum)
-                else f"{self.kcl.get_info(layer).layer}/"
-                f"{self.kcl.get_info(layer).datatype}",
-            )
-            l2n.connect(l2n_layer)
-
+        l2n = kdb.LayoutToNetlist(self.name, self.kcl.dbu)
         l2n.extract_netlist()
+        il = l2n.internal_layout()
 
+        def filter_port(port: Port) -> bool:
+            return port.port_type in port_types
+
+        for ci in self.called_cells():
+            c = self.kcl[ci]
+            c.circuit(l2n, port_types=port_types)
+        self.circuit(l2n, port_types=port_types)
+        il.assign(self.kcl.layout)
         return l2n
 
     def circuit(
@@ -1351,10 +1341,7 @@ class KCell:
         circ = kdb.Circuit()
         circ.name = self.name
         circ.cell_index = self.cell_index()
-        print(self.name)
-        print(circ.boundary)
         circ.boundary = self.boundary or self.dbbox()
-        print(circ.boundary)
 
         inst_ports: dict[
             str, dict[str, list[tuple[int, int, Instance, Port, kdb.SubCircuit]]]
@@ -1469,6 +1456,8 @@ class KCell:
                                 subc.circuit_ref().pin_by_name(port.name or str(j)), net
                             )
         netlist.add(circ)
+
+    # def connectivity_check(self, layers: list[int] = []) -> rdb.
 
 
 class Constants(BaseSettings):
