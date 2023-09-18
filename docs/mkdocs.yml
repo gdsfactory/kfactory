@@ -16,6 +16,7 @@ nav:
     - KCell & Instance: notebooks/01_references.py
     - DRC utils: notebooks/02_DRC.py
     - Enclosures: notebooks/03_Enclosures.py
+    - Multiple KCLs: notebooks/04_KCL.py
   - Config Class: config.md
   - API: reference/
   - Changelog: changelog.md

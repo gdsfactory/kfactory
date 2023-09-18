@@ -3519,9 +3519,13 @@ def cell(
                     cell.name = name
                 if set_settings:
                     settings = cell.settings.model_dump()
+                    if "self" in params:
+                        settings["function_name"] = params["self"].__class__.__name__
+                    else:
+                        settings["function_name"] = f.__name__
+                    params.pop("self", None)
+                    params.pop("cls", None)
                     settings.update(params)
-                    if set_name:
-                        settings["function_name"] = name
                     cell._settings = KCellSettings(**settings)
                 info = cell.info.model_dump()
                 for name, value in cell.info:
