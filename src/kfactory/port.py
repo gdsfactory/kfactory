@@ -203,6 +203,8 @@ def port_polygon(width: int) -> kdb.Polygon:
     if width in polygon_dict:
         return polygon_dict[width]
     else:
+        if not isinstance(width, int):
+            width = int(width)
         poly = kdb.Polygon(
             [
                 kdb.Point(0, width // 2),

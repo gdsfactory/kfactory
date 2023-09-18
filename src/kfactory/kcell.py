@@ -32,7 +32,7 @@ from pydantic import BaseModel, Field, computed_field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec
 
-from . import kdb, lay  # , rdb
+from . import kdb, lay, rdb
 from .conf import config
 from .enclosure import (
     KCellEnclosure,
@@ -40,7 +40,7 @@ from .enclosure import (
     LayerEnclosureCollection,
     LayerSection,
 )
-from .port import rename_clockwise
+from .port import port_polygon, rename_clockwise
 
 T = TypeVar("T")
 
@@ -516,7 +516,7 @@ class KCell:
 
     def add_port(
         self, port: Port, name: str | None = None, keep_mirror: bool = False
-    ) -> None:
+    ) -> Port:
         """Add an existing port. E.g. from an instance to propagate the port.
 
         Args:
@@ -527,7 +527,7 @@ class KCell:
         """
         if self._locked:
             raise LockedError(self)
-        self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
+        return self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
 
     def add_ports(
         self, ports: Iterable[Port], prefix: str = "", keep_mirror: bool = False
@@ -1457,7 +1457,291 @@ class KCell:
                             )
         netlist.add(circ)
 
-    # def connectivity_check(self, layers: list[int] = []) -> rdb.
+    def connectivity_check(
+        self,
+        port_types: list[str] = [],
+        layers: list[int] = [],
+        db: rdb.ReportDatabase | None = None,
+        recursive: bool = True,
+    ) -> rdb.ReportDatabase:
+        """Create a ReportDatabase for port problems.
+
+        Problems are overlapping ports that aren't aligned, more than two ports
+        overlapping, width mismatch, port_type mismatch.
+
+        Args:
+            port_types: Filter for certain port typers
+            layers: Only create the report for certain layers
+            db: Use an existing ReportDatabase instead of creating a new one
+            recursive: Create the report not only for this cell, but all child cells as
+                well.
+        """
+        if not db:
+            db = rdb.ReportDatabase(f"Connectivity Check {self.name}")
+        if recursive:
+            cc = self.called_cells()
+            for c in self.kcl.each_cell_bottom_up():
+                if c in cc:
+                    self.kcl[c].connectivity_check(
+                        port_types=port_types, db=db, recursive=False
+                    )
+        db_cell = db.create_cell(self.name)
+        cell_ports = {}
+        c_cat = db.category_by_path("CellPorts") or db.create_category("CellPorts")
+        for port in self.ports:
+            if (not port_types or port.port_type in port_types) and (
+                not layers or port.layer in layers
+            ):
+                it = db.create_item(db_cell, c_cat)
+                if port.name:
+                    it.add_value(f"Port name: {port.name}")
+                if port._trans:
+                    it.add_value(
+                        port_polygon(port.width)
+                        .transformed(port.trans)
+                        .to_dtype(self.kcl.dbu)
+                    )
+                else:
+                    it.add_value(
+                        port_polygon(port.width)
+                        .to_dtype(self.kcl.dbu)
+                        .transformed(port.dcplx_trans)
+                    )
+                xy = (port.x, port.y)
+                if port.layer not in cell_ports:
+                    cell_ports[port.layer] = {xy: [port]}
+                else:
+                    if xy not in cell_ports[port.layer]:
+                        cell_ports[port.layer][xy] = [port]
+                    else:
+                        cell_ports[port.layer][xy].append(port)
+
+        inst_ports = {}
+        for inst in self.insts:
+            for port in inst.ports:
+                if (not port_types or port.port_type in port_types) and (
+                    not layers or port.layer in layers
+                ):
+                    xy = (port.x, port.y)
+                    if port.layer not in inst_ports:
+                        inst_ports[port.layer] = {xy: [(port, inst.cell)]}
+                    else:
+                        if xy not in inst_ports[port.layer]:
+                            inst_ports[port.layer][xy] = [(port, inst.cell)]
+                        else:
+                            inst_ports[port.layer][xy].append((port, inst.cell))
+
+        for layer, port_coord_mapping in inst_ports.items():
+            if isinstance(layer, LayerEnum):
+                ln = layer.name
+            else:
+                li = self.kcl.get_info(layer)
+                ln = li.name or str(li).replace("/", "_")
+            lc = db.category_by_path(ln) or db.create_category(ln)
+            for coord, ports in port_coord_mapping.items():
+                match len(ports):
+                    case 1:
+                        if layer in cell_ports and coord in cell_ports[layer]:
+                            ccp = _check_cell_ports(
+                                cell_ports[layer][coord][0], ports[0][0]
+                            )
+                            if ccp & 1:
+                                subc = db.category_by_path(
+                                    lc.path() + ".widthmismatch"
+                                ) or db.create_category(lc, "widthmismatch")
+                                create_port_error(
+                                    ports[0][0],
+                                    cell_ports[layer][coord][0],
+                                    ports[0][1],
+                                    self,
+                                    db,
+                                    db_cell,
+                                    subc,
+                                    self.kcl.dbu,
+                                )
+
+                            if ccp & 2:
+                                subc = db.category_by_path(
+                                    lc.path() + ".anglemismatch"
+                                ) or db.create_category(lc, "anglemismatch")
+                                create_port_error(
+                                    ports[0][0],
+                                    cell_ports[layer][coord][0],
+                                    ports[0][1],
+                                    self,
+                                    db,
+                                    db_cell,
+                                    subc,
+                                    self.kcl.dbu,
+                                )
+                            if ccp & 4:
+                                subc = db.category_by_path(
+                                    lc.path() + ".typemismatch"
+                                ) or db.create_category(lc, "typemismatch")
+                                create_port_error(
+                                    ports[0][0],
+                                    cell_ports[layer][coord][0],
+                                    ports[0][1],
+                                    self,
+                                    db,
+                                    db_cell,
+                                    subc,
+                                    self.kcl.dbu,
+                                )
+                        else:
+                            subc = db.category_by_path(
+                                lc.path() + ".orphanport"
+                            ) or db.create_category(lc, "orphanport")
+                            it = db.create_item(db_cell, subc)
+                            it.add_value(
+                                f"Port Name: {ports[0][1].name}/"
+                                f"{ports[0][0].name or ports[0][0].trans.to_s()})"
+                            )
+                            if ports[0][0]._trans:
+                                it.add_value(
+                                    port_polygon(ports[0][0].width)
+                                    .transformed(ports[0][0]._trans)
+                                    .to_dtype(self.kcl.dbu)
+                                )
+                            else:
+                                it.add_value(
+                                    port_polygon(port.width)
+                                    .to_dtype(self.kcl.dbu)
+                                    .transformed(port.dcplx_trans)
+                                )
+
+                    case 2:
+                        cip = _check_inst_ports(ports[0][0], ports[1][0])
+                        if cip & 1:
+                            subc = db.category_by_path(
+                                lc.path() + ".widthmismatch"
+                            ) or db.create_category(lc, "widthmismatch")
+                            create_port_error(
+                                ports[0][0],
+                                ports[1][0],
+                                ports[0][1],
+                                ports[1][1],
+                                db,
+                                db_cell,
+                                subc,
+                                self.kcl.dbu,
+                            )
+
+                        if cip & 2:
+                            subc = db.category_by_path(
+                                lc.path() + ".anglemismatch"
+                            ) or db.create_category(lc, "anglemismatch")
+                            create_port_error(
+                                ports[0][0],
+                                ports[1][0],
+                                ports[0][1],
+                                ports[1][1],
+                                db,
+                                db_cell,
+                                subc,
+                                self.kcl.dbu,
+                            )
+                        if cip & 4:
+                            subc = db.category_by_path(
+                                lc.path() + ".typemismatch"
+                            ) or db.create_category(lc, "typemismatch")
+                            create_port_error(
+                                ports[0][0],
+                                ports[1][0],
+                                ports[0][1],
+                                ports[1][1],
+                                db,
+                                db_cell,
+                                subc,
+                                self.kcl.dbu,
+                            )
+                        if layer in cell_ports and coord in cell_ports[layer]:
+                            subc = db.category_by_path(
+                                lc.path() + ".portoverlap"
+                            ) or db.create_category(lc, "portoverlap")
+                            it = db.create_item(db_cell, subc)
+                            text = "Port Names: "
+                            values: list[rdb.RdbItemValue] = []
+                            cell_port = cell_ports[layer][coord][0]
+                            text += (
+                                f"{self.name}."
+                                f"{cell_port.name or cell_port.trans.to_s()}/"
+                            )
+                            if cell_port._trans:
+                                values.append(
+                                    rdb.RdbItemValue(
+                                        port_polygon(cell_port.width)
+                                        .transformed(cell_port._trans)
+                                        .to_dtype(self.kcl.dbu)
+                                    )
+                                )
+                            else:
+                                values.append(
+                                    rdb.RdbItemValue(
+                                        port_polygon(cell_port.width)
+                                        .to_dtype(self.kcl.dbu)
+                                        .transformed(cell_port.dcplx_trans)
+                                    )
+                                )
+                            for _port in ports:
+                                text += (
+                                    f"{_port[1].name}."
+                                    f"{_port[0].name or _port[0].trans.to_s()}/"
+                                )
+
+                                values.append(
+                                    rdb.RdbItemValue(
+                                        port_polygon(_port[0].width)
+                                        .transformed(_port[0].trans)
+                                        .to_dtype(self.kcl.dbu)
+                                    )
+                                )
+                            it.add_value(text[:-1])
+                            for value in values:
+                                it.add_value(value)
+
+                    case x if x > 2:
+                        subc = db.category_by_path(
+                            lc.path() + ".portoverlap"
+                        ) or db.create_category(lc, "portoverlap")
+                        it = db.create_item(db_cell, subc)
+                        text = "Port Names: "
+                        values = []
+                        for _port in ports:
+                            text += (
+                                f"{_port[1].name}."
+                                f"{_port[0].name or _port[0].trans.to_s()}/"
+                            )
+
+                            values.append(
+                                rdb.RdbItemValue(
+                                    port_polygon(_port[0].width)
+                                    .transformed(_port[0].trans)
+                                    .to_dtype(self.kcl.dbu)
+                                )
+                            )
+                        it.add_value(text[:-1])
+                        for value in values:
+                            it.add_value(value)
+
+        return db
+
+
+def create_port_error(
+    p1: Port,
+    p2: Port,
+    c1: KCell,
+    c2: KCell,
+    db: rdb.ReportDatabase,
+    db_cell: rdb.RdbCell,
+    cat: rdb.RdbCategory,
+    dbu: float,
+) -> None:
+    it = db.create_item(db_cell, cat)
+    if p1.name and p2.name:
+        it.add_value(f"Port Names: {c1.name}.{p1.name}/" f"{c2.name}.{p2.name}")
+    it.add_value(port_polygon(p1.width).transformed(p1.trans).to_dtype(dbu))
+    it.add_value(port_polygon(p2.width).transformed(p2.trans).to_dtype(dbu))
 
 
 class Constants(BaseSettings):
@@ -1829,7 +2113,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """
         if register_cells:
             cells = set(self.layout.cells("*"))
-        fn = str(Path(filename).resolve())
+        fn = str(Path(filename).expanduser().resolve())
         if options is None:
             lm = self.layout.read(fn)
         else:
@@ -2674,7 +2958,14 @@ class Instance:
 
     @overload
     def connect(
-        self, port: str | Port | None, other: Port, *, mirror: bool = False
+        self,
+        port: str | Port | None,
+        other: Port,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool = False,
+        allow_layer_mismatch: bool = False,
+        allow_type_mismatch: bool = False,
     ) -> None:
         ...
 
@@ -2686,6 +2977,9 @@ class Instance:
         other_port_name: str | None,
         *,
         mirror: bool = False,
+        allow_width_mismatch: bool = False,
+        allow_layer_mismatch: bool = False,
+        allow_type_mismatch: bool = False,
     ) -> None:
         ...
 
@@ -3105,7 +3399,7 @@ class Ports:
 
     def add_port(
         self, port: Port, name: str | None = None, keep_mirror: bool = False
-    ) -> None:
+    ) -> Port:
         """Add a port object.
 
         Args:
@@ -3124,6 +3418,7 @@ class Ports:
         if name is not None:
             _port.name = name
         self._ports.append(_port)
+        return _port
 
     def add_ports(
         self, ports: Iterable[Port], prefix: str = "", keep_mirror: bool = False
@@ -3825,6 +4120,28 @@ def dpolygon_from_array(array: Iterable[tuple[float, float]]) -> kdb.DPolygon:
     Array-like: `[[x1,y1],[x2,y2],...]`
     """
     return kdb.DPolygon([kdb.DPoint(int(x), int(y)) for (x, y) in array])
+
+
+def _check_inst_ports(p1: Port, p2: Port) -> int:
+    check_int = 0
+    if p1.width != p2.width:
+        check_int += 1
+    if p1.angle != ((p2.angle + 2) % 4):
+        check_int += 2
+    if p1.port_type != p2.port_type:
+        check_int += 4
+    return check_int
+
+
+def _check_cell_ports(p1: Port, p2: Port) -> int:
+    check_int = 0
+    if p1.width != p2.width:
+        check_int += 1
+    if p1.angle != p2.angle:
+        check_int += 2
+    if p1.port_type != p2.port_type:
+        check_int += 4
+    return check_int
 
 
 __all__ = [
