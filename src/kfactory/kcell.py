@@ -1843,21 +1843,23 @@ class KCell:
                     inst_regions[i] = _inst_region
                 if not error_region_shapes.is_empty():
                     sc = db.category_by_path(
-                        layer_cat(layer).path() + ".ShapeInstanceOverlap"
-                    ) or db.create_category(layer_cat(layer), "ShapeInstanceOverlap")
+                        layer_cat(layer).path() + ".ShapeInstanceshapeOverlap"
+                    ) or db.create_category(
+                        layer_cat(layer), "ShapeInstanceshapeOverlap"
+                    )
                     it = db.create_item(db_cell, sc)
                     it.add_value("Shapes overlapping with shapes of instances")
-                    for poly in error_region_shapes.each():
+                    for poly in error_region_shapes.merge().each():
                         it.add_value(poly.to_dtype(self.kcl.dbu))
                 if not error_region_instances.is_empty():
                     sc = db.category_by_path(
-                        layer_cat(layer).path() + ".ShapeInstanceOverlap"
-                    ) or db.create_category(layer_cat(layer), "ShapeInstanceOverlap")
+                        layer_cat(layer).path() + ".InstanceshapeOverlap"
+                    ) or db.create_category(layer_cat(layer), "InstanceshapeOverlap")
                     it = db.create_item(db_cell, sc)
                     it.add_value(
                         "Instance shapes overlapping with shapes of other instances"
                     )
-                    for poly in error_region_instances.each():
+                    for poly in error_region_instances.merge().each():
                         it.add_value(poly.to_dtype(self.kcl.dbu))
 
         return db
