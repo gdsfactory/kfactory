@@ -1,1 +1,0 @@
-Added KCell.connectivity_chek to check for port alignments and overlaps

@@ -8,6 +8,23 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 
 <!-- towncrier release notes start -->
 
+## [0.9.0](https://github.com/gdsfactory/kfactory/tree/0.9.0) - 2023-09-25
+
+
+### Added
+
+- Added  to be set by  decorator [#180](https://github.com/gdsfactory/kfactory/issues/180)
+- Added __contains__ to port and __eq__ [#182](https://github.com/gdsfactory/kfactory/issues/182)
+- Add PDK capabilities to KCLayout [#171](https://github.com/gdsfactory/kfactory/pull/171) 
+- Added KCell.connectivity_chek to check for port alignments and overlaps 
+- Added a cli based on [typer](https://typer.tiangolo.com) to allow running of functions (taking int/float/str args) and allow upload/update of gdatasea edafiles 
+
+
+### Fixed
+
+- Fixed throw a critical log message on negative width and angles and convert them to positive ones [#183](https://github.com/gdsfactory/kfactory/issues/183)
+
+
 ## [0.8.4](https://github.com/gdsfactory/kfactory/tree/0.8.4) - 2023-06-28
 
 
