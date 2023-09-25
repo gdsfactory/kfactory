@@ -1464,6 +1464,7 @@ class KCell:
         db: rdb.ReportDatabase | None = None,
         recursive: bool = True,
         add_cell_ports: bool = False,
+        check_layerconnectivity: bool = True,
     ) -> rdb.ReportDatabase:
         """Create a ReportDatabase for port problems.
 
@@ -1476,8 +1477,9 @@ class KCell:
             db: Use an existing ReportDatabase instead of creating a new one
             recursive: Create the report not only for this cell, but all child cells as
                 well.
-            cell_ports: Also add a category "CellPorts" which contains all the cells
+            add_cell_ports: Also add a category "CellPorts" which contains all the cells
                 selected ports.
+            check_layerconnectivity: Check whether the layer overlaps with instances.
         """
         if not db:
             db = rdb.ReportDatabase(f"Connectivity Check {self.name}")
@@ -1792,6 +1794,71 @@ class KCell:
                         it.add_value(text[:-1])
                         for value in values:
                             it.add_value(value)
+            if check_layerconnectivity:
+                error_region_shapes = kdb.Region()
+                error_region_instances = kdb.Region()
+                reg = kdb.Region(self.shapes(layer))
+                inst_regions: dict[int, kdb.Region] = {}
+                inst_region = kdb.Region()
+                for i, inst in enumerate(self.insts):
+                    _inst_region = kdb.Region(inst.bbox(layer))
+                    inst_shapes: kdb.Region | None = None
+                    if not (inst_region & _inst_region).is_empty():
+                        if inst_shapes is None:
+                            inst_shapes = kdb.Region()
+                            shape_it = self.begin_shapes_rec_overlapping(
+                                layer, inst.bbox(layer)
+                            )
+                            shape_it.select_cells([inst.cell.cell_index()])
+                            shape_it.min_depth = 1
+                            for _it in shape_it.each():
+                                if _it.path()[0].inst() == inst._instance:
+                                    inst_shapes.insert(
+                                        _it.shape().polygon.transformed(_it.trans())
+                                    )
+
+                        for j, _reg in inst_regions.items():
+                            if _reg & _inst_region:
+                                __reg = kdb.Region()
+                                shape_it = self.begin_shapes_rec_touching(
+                                    layer, (_reg & _inst_region).bbox()
+                                )
+                                shape_it.select_cells([self.insts[j].cell.cell_index()])
+                                shape_it.min_depth = 1
+                                for _it in shape_it.each():
+                                    if _it.path()[0].inst() == self.insts[j]._instance:
+                                        __reg.insert(
+                                            _it.shape().polygon.transformed(_it.trans())
+                                        )
+
+                                error_region_instances.insert(__reg & inst_shapes)
+
+                    if not (_inst_region & reg).is_empty():
+                        rec_it = self.begin_shapes_rec_touching(
+                            layer, (_inst_region & reg).bbox()
+                        )
+                        rec_it.min_depth = 1
+                        error_region_shapes += kdb.Region(rec_it) & reg
+                    inst_region += _inst_region
+                    inst_regions[i] = _inst_region
+                if not error_region_shapes.is_empty():
+                    sc = db.category_by_path(
+                        layer_cat(layer).path() + ".ShapeInstanceOverlap"
+                    ) or db.create_category(layer_cat(layer), "ShapeInstanceOverlap")
+                    it = db.create_item(db_cell, sc)
+                    it.add_value("Shapes overlapping with shapes of instances")
+                    for poly in error_region_shapes.each():
+                        it.add_value(poly.to_dtype(self.kcl.dbu))
+                if not error_region_instances.is_empty():
+                    sc = db.category_by_path(
+                        layer_cat(layer).path() + ".ShapeInstanceOverlap"
+                    ) or db.create_category(layer_cat(layer), "ShapeInstanceOverlap")
+                    it = db.create_item(db_cell, sc)
+                    it.add_value(
+                        "Instance shapes overlapping with shapes of other instances"
+                    )
+                    for poly in error_region_instances.each():
+                        it.add_value(poly.to_dtype(self.kcl.dbu))
 
         return db
 
