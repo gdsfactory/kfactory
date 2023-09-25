@@ -6,6 +6,7 @@ A circular bend has a constant radius.
 import numpy as np
 
 from .. import kdb
+from ..conf import config
 from ..enclosure import LayerEnclosure, extrude_path
 from ..kcell import KCell, KCLayout, LayerEnum, cell, kcl
 
@@ -50,6 +51,22 @@ class BendCircular:
         """
         c = self.kcl.kcell()
         r = radius
+
+        if angle < 0:
+            config.logger.critical(
+                f"Negative angles are not allowed {angle} as ports"
+                " will be inverted. Please use a positive number. Forcing positive"
+                " lengths."
+            )
+            angle = -angle
+        if width < 0:
+            config.logger.critical(
+                f"Negative widths are not allowed {width} as ports"
+                " will be inverted. Please use a positive number. Forcing positive"
+                " lengths."
+            )
+            width = -width
+
         backbone = [
             kdb.DPoint(x, y)
             for x, y in [
