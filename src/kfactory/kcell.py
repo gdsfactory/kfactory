@@ -1544,7 +1544,7 @@ class KCell:
                     self.kcl.layout,
                     self._kdb_cell,
                     port.layer,
-                    kdb.Box(2, port.width) * port.trans,
+                    kdb.Box(2, port.width).transformed(port.trans),
                 )
                 edges = kdb.Region(rec_it).merge().edges().merge()
                 port_edge = kdb.Edge(0, port.width // 2, 0, -port.width // 2)
@@ -3965,9 +3965,11 @@ def cell(
                 if snap_ports:
                     for port in cell.ports:
                         if port._dcplx_trans:
-                            port.dcplx_trans.disp = port._dcplx_trans.disp.to_itype(
+                            dup = port._dcplx_trans.dup()
+                            dup.disp = port._dcplx_trans.disp.to_itype(dbu).to_dtype(
                                 dbu
-                            ).to_dtype(dbu)
+                            )
+                            port.dcplx_trans = dup
                 if add_port_layers:
                     for port in cell.ports:
                         if port.layer in cell.kcl.netlist_layer_mapping:

@@ -17,6 +17,7 @@ The slabs and excludes can be given in the form of an
 """
 
 from ... import KCell, KCLayout, LayerEnum, cell, kcl, kdb
+from ...conf import config
 from ...enclosure import LayerEnclosure
 from ...kcell import Info
 
@@ -74,6 +75,21 @@ class Straight:
             enclosure: Definition of slab/excludes. [dbu]
         """
         c = self.kcl.kcell()
+
+        if length < 0:
+            config.logger.critical(
+                f"Negative lengths are not allowed {length} as ports"
+                " will be inverted. Please use a positive number. Forcing positive"
+                " lengths."
+            )
+            length = -length
+        if width < 0:
+            config.logger.critical(
+                f"Negative widths are not allowed {width} as ports"
+                " will be inverted. Please use a positive number. Forcing positive"
+                " lengths."
+            )
+            width = -width
 
         if width // 2 * 2 != width:
             raise ValueError("The width (w) must be a multiple of 2 database units")
