@@ -9,6 +9,7 @@ Uses the klayout package as a backend.
 
 import klayout.dbcore as kdb
 import klayout.lay as lay
+import klayout.rdb as rdb
 from .kcell import (
     KCell,
     Instance,
@@ -44,6 +45,7 @@ __all__ = [
     "default_save",
     "kdb",
     "lay",
+    "rdb",
     "port",
     "cells",
     "placer",
