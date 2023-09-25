@@ -8,7 +8,7 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 
 <!-- towncrier release notes start -->
 
-## [0.9.0](https://github.com/gdsfactory/kfactory/tree/0.9.0) - 2023-09-25
+## [0.9.0](https://github.com/gdsfactory/kfactory/releases/v0.9.0) - 2023-09-25
 
 
 ### Added
@@ -25,7 +25,7 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 - Fixed throw a critical log message on negative width and angles and convert them to positive ones [#183](https://github.com/gdsfactory/kfactory/issues/183)
 
 
-## [0.8.4](https://github.com/gdsfactory/kfactory/tree/0.8.4) - 2023-06-28
+## [0.8.4](https://github.com/gdsfactory/kfactory/releases/v0.8.4) - 2023-06-28
 
 
 ### Fixed
@@ -34,12 +34,12 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 - Fixed port renaming by direction [#167](https://github.com/gdsfactory/kfactory/issues/167)
 
 
-## [0.8.3](https://github.com/gdsfactory/kfactory/tree/0.8.3) - 2023-06-28
+## [0.8.3](https://github.com/gdsfactory/kfactory/releases/v0.8.3) - 2023-06-28
 
 No significant changes.
 
 
-## [0.8.2](https://github.com/gdsfactory/kfactory/tree/0.8.2) - 2023-06-16
+## [0.8.2](https://github.com/gdsfactory/kfactory/releases/v0.8.2) - 2023-06-16
 
 
 ### Fixed
@@ -47,7 +47,7 @@ No significant changes.
 - fix info settings
 
 
-## [0.8.1](https://github.com/gdsfactory/kfactory/tree/0.8.1) - 2023-06-16
+## [0.8.1](https://github.com/gdsfactory/kfactory/releases/v0.8.1) - 2023-06-16
 
 
 ### Fixed
@@ -56,7 +56,7 @@ No significant changes.
 - adjust minimum version of klayout to 0.28.post2
 
 
-## [0.8.0](https://github.com/gdsfactory/kfactory/tree/0.8.0) - 2023-06-14
+## [0.8.0](https://github.com/gdsfactory/kfactory/releases/v0.8.0) - 2023-06-14
 
 
 ### Added
@@ -84,7 +84,7 @@ No significant changes.
 - Fixed circular and euler bends having complex ports in the x*90° cases [#159](https://github.com/gdsfactory/kfactory/issues/159)
 
 
-## [0.7.5](https://github.com/gdsfactory/kfactory/tree/0.7.5) - 2023-06-01
+## [0.7.5](https://github.com/gdsfactory/kfactory/releases/v0.7.5) - 2023-06-01
 
 
 ### Added
@@ -101,7 +101,7 @@ No significant changes.
 - Fixed changelog and changelog.d links
 
 
-## [0.7.4](https://github.com/gdsfactory/kfactory/tree/0.7.4) - 2023-05-29
+## [0.7.4](https://github.com/gdsfactory/kfactory/releases/v0.7.4) - 2023-05-29
 
 
 ### Added
