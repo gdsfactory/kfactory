@@ -2531,6 +2531,20 @@ class Port:
         d = dict(constructor.construct_pairs(node))
         return cls(**d)
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, Port):
+            if (
+                self.width == other.width
+                and self._trans == other._trans
+                and self._dcplx_trans == other._dcplx_trans
+                and self.name == other.name
+                and self.layer == other.layer
+                and self.port_type == other.port_type
+                and self.info == other.info
+            ):
+                return True
+        return False
+
     def copy(self, trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0) -> Port:
         """Get a copy of a port.
 
@@ -3539,6 +3553,16 @@ class Ports:
     def __iter__(self) -> Iterator[Port]:
         """Iterator, that allows for loops etc to directly access the object."""
         yield from self._ports
+
+    def __contains__(self, port: str | Port) -> bool:
+        """Check whether a port is in this port collection."""
+        if isinstance(port, Port):
+            return port in self._ports
+        else:
+            for _port in self._ports:
+                if _port.name == port:
+                    return True
+            return False
 
     def add_port(
         self, port: Port, name: str | None = None, keep_mirror: bool = False

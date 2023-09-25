@@ -138,3 +138,10 @@ def test_addports_keep_mirror(LAYER):
         t2_mirr.mirror = not t2_mirr.is_mirror()
 
         assert t1 == t2_mirr
+
+
+def test_contains(LAYER: type[kf.LayerEnum]) -> None:
+    s = kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
+    assert "o1" in s.ports
+    assert s.ports["o1"] in s.ports
+    assert s.ports["o1"].copy() in s.ports
