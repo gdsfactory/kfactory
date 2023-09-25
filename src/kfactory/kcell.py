@@ -1315,6 +1315,11 @@ class KCell:
         return self._kdb_cell.bbox().top
 
     def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
+        """Generate a LayoutToNetlist object from the port types.
+
+        Args:
+            port_types: The port types to consider for the netlist extraction.
+        """
         l2n = kdb.LayoutToNetlist(self.name, self.kcl.dbu)
         l2n.extract_netlist()
         il = l2n.internal_layout()
@@ -1464,7 +1469,7 @@ class KCell:
         db: rdb.ReportDatabase | None = None,
         recursive: bool = True,
         add_cell_ports: bool = False,
-        check_layerconnectivity: bool = True,
+        check_layer_connectivity: bool = True,
     ) -> rdb.ReportDatabase:
         """Create a ReportDatabase for port problems.
 
@@ -1479,7 +1484,7 @@ class KCell:
                 well.
             add_cell_ports: Also add a category "CellPorts" which contains all the cells
                 selected ports.
-            check_layerconnectivity: Check whether the layer overlaps with instances.
+            check_layer_connectivity: Check whether the layer overlaps with instances.
         """
         if not db:
             db = rdb.ReportDatabase(f"Connectivity Check {self.name}")
@@ -1794,7 +1799,7 @@ class KCell:
                         it.add_value(text[:-1])
                         for value in values:
                             it.add_value(value)
-            if check_layerconnectivity:
+            if check_layer_connectivity:
                 error_region_shapes = kdb.Region()
                 error_region_instances = kdb.Region()
                 reg = kdb.Region(self.shapes(layer))
