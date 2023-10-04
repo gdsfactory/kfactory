@@ -22,6 +22,7 @@ from enum import IntEnum, IntFlag, auto
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
+from types import ModuleType
 from typing import Any, Literal, TypeAlias, TypeVar, overload
 
 import cachetools.func
@@ -334,27 +335,27 @@ def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -
         assert p1.port_type == p2.port_type, f"Port type mismatch for {p1=} {p2=}"
 
 
-# def get_cells(
-#     modules: Iterable[ModuleType], verbose: bool = False
-# ) -> dict[str, KCellFactory]:
-#     """Returns KCells (KCell functions) from a module or list of modules.
+def get_cells(
+    modules: Iterable[ModuleType], verbose: bool = False
+) -> dict[str, Callable[..., KCell]]:
+    """Returns KCells (KCell functions) from a module or list of modules.
 
-#     Args:
-#         modules: module or iterable of modules.
-#         verbose: prints in case any errors occur.
-#     """
-#     cells = {}
-#     for module in modules:
-#         for t in inspect.getmembers(module):
-#             if callable(t[1]) and t[0] != "partial":
-#                 try:
-#                     r = inspect.signature(t[1]).return_annotation
-#                     if r == KCell or (isinstance(r, str) and r.endswith("KCell")):
-#                         cells[t[0]] = KCellFactory(name=t[0], factory=t[1])
-#                 except ValueError:
-#                     if verbose:
-#                         print(f"error in {t[0]}")
-#     return cells
+    Args:
+        modules: module or iterable of modules.
+        verbose: prints in case any errors occur.
+    """
+    cells = {}
+    for module in modules:
+        for t in inspect.getmembers(module):
+            if callable(t[1]) and t[0] != "partial":
+                try:
+                    r = inspect.signature(t[1]).return_annotation
+                    if r == KCell or (isinstance(r, str) and r.endswith("KCell")):
+                        cells[t[0]] = t[1]
+                except ValueError:
+                    if verbose:
+                        print(f"error in {t[0]}")
+    return cells
 
 
 class LayerEnclosureModel(BaseModel):
