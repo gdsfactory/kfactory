@@ -8,6 +8,14 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 
 <!-- towncrier release notes start -->
 
+## [0.9.1](https://github.com/gdsfactory/kfactory/releases/v0.9.1) - 2023-10-04
+
+
+### Added
+
+- Added back kf.kcell.get_cells in order to automatically scrape a module for KCell factories [PR](https://github.com/gdsfactory/kfactory/pull/187)
+
+
 ## [0.9.0](https://github.com/gdsfactory/kfactory/releases/v0.9.0) - 2023-09-25
 
 
