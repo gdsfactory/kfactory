@@ -189,10 +189,6 @@ c
 # In GDS, there's a type of structure called a "Instance" which takes a cell and repeats it NxM times on a fixed grid spacing. For convenience, `Cell` includes this functionality with the add_array() function.
 # Note that CellArrays are not compatible with ports (since there is no way to access/modify individual elements in a GDS cellarray)
 #
-# gdsfactory also provides with more flexible arrangement options if desired, see for example `grid()` and `packer()`.
-#
-# As well as `gf.cells.array`
-#
 # Let's make a new Cell and put a big array of our Cell `c` in it:
 
 # %%
@@ -203,59 +199,6 @@ aref = c3.create_inst(
     c, na=6, nb=3, a=kf.kdb.Vector(20000, 0), b=kf.kdb.Vector(0, 15000)
 )  # instance the Cell "c" 3 instances in it with a 3 rows, 6 columns array
 c3
-
-# %% [markdown]
-# CellArrays don't have ports and there is no way to access/modify individual elements in a GDS cellarray.
-#
-# gdsfactory provides you with similar functions in `gf.cells.array` and `gf.cells.array_2d`
-
-# %%
-# c4 = gf.Cell("demo_array")  # Create a new blank Cell
-# aref = c4 << gf.cells.array(cell=c, columns=3, rows=2)
-# c4.add_ports(aref.get_ports_list())
-# c4
-
-
-# %%
-# # gf.cells.array?
-
-# %% [markdown]
-# You can also create an array of instances for periodic structures. Lets create a [Distributed Bragg Reflector](https://picwriter.readthedocs.io/en/latest/cells/dbr.html)
-
-
-# %%
-# @gf.cell
-# def dbr_period(w1=0.5, w2=0.6, l1=0.2, l2=0.4, straight=gf.cells.straight):
-#     """Return one DBR period."""
-#     c = gf.Cell()
-#     r1 = c << straight(length=l1, width=w1)
-#     r2 = c << straight(length=l2, width=w2)
-#     r2.connect(port="o1", destination=r1.ports["o2"])
-#     c.add_port("o1", port=r1.ports["o1"])
-#     c.add_port("o2", port=r2.ports["o2"])
-#     return c
-
-
-# l1 = 0.2
-# l2 = 0.4
-# n = 3
-# period = dbr_period(l1=l1, l2=l2)
-# period
-
-# %%
-# dbr = gf.Cell("DBR")
-# dbr.add_array(period, columns=n, rows=1, spacing=(l1 + l2, 100))
-# dbr
-
-# %% [markdown]
-# Finally we need to add ports to the new cell
-
-# %%
-# p0 = dbr.add_port("o1", port=period.ports["o1"])
-# p1 = dbr.add_port("o2", port=period.ports["o2"])
-
-# p1.center = [(l1 + l2) * n, 0]
-# dbr
 
 # %% [markdown]
 # ## connect instances
@@ -339,3 +282,5 @@ c
 c = kf.cells.euler.bend_euler(radius=5, width=1, layer=0, angle=90)
 c.draw_ports()
 c
+
+# %%
