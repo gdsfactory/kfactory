@@ -3219,14 +3219,14 @@ class Instance:
         return representer.represent_mapping(cls.yaml_tag, d)
 
     @overload
-    def movex(self, destination: int, /) -> None:
+    def movex(self, destination: int, /) -> Instance:
         ...
 
     @overload
-    def movex(self, origin: int, destination: int) -> None:
+    def movex(self, origin: int, destination: int) -> Instance:
         ...
 
-    def movex(self, origin: int, destination: int | None = None) -> None:
+    def movex(self, origin: int, destination: int | None = None) -> Instance:
         """Move the instance in x-direction in dbu.
 
         Args:
@@ -3237,16 +3237,17 @@ class Instance:
             self.transform(kdb.Trans(origin, 0))
         else:
             self.transform(kdb.Trans(destination - origin, 0))
+        return self
 
     @overload
-    def movey(self, destination: int, /) -> None:
+    def movey(self, destination: int, /) -> Instance:
         ...
 
     @overload
-    def movey(self, origin: int, destination: int) -> None:
+    def movey(self, origin: int, destination: int) -> Instance:
         ...
 
-    def movey(self, origin: int, destination: int | None = None) -> None:
+    def movey(self, origin: int, destination: int | None = None) -> Instance:
         """Move the instance in y-direction in dbu.
 
         Args:
@@ -3257,18 +3258,19 @@ class Instance:
             self.transform(kdb.Trans(0, origin))
         else:
             self.transform(kdb.Trans(0, destination - origin))
+        return self
 
     @overload
-    def move(self, destination: tuple[int, int], /) -> None:
+    def move(self, destination: tuple[int, int], /) -> Instance:
         ...
 
     @overload
-    def move(self, origin: tuple[int, int], destination: tuple[int, int]) -> None:
+    def move(self, origin: tuple[int, int], destination: tuple[int, int]) -> Instance:
         ...
 
     def move(
         self, origin: tuple[int, int], destination: tuple[int, int] | None = None
-    ) -> None:
+    ) -> Instance:
         """Move the instance in dbu.
 
         Args:
@@ -3281,10 +3283,12 @@ class Instance:
             self.transform(
                 kdb.Trans(destination[0] - origin[0], destination[1] - origin[1])
             )
+        return self
 
-    def rotate(self, angle: Literal[0, 1, 2, 3]) -> None:
+    def rotate(self, angle: Literal[0, 1, 2, 3]) -> Instance:
         """Rotate instance in increments of 90°."""
         self.transform(kdb.Trans(angle, False, 0, 0))
+        return self
 
     def __repr__(self) -> str:
         """Return a string representation of the instance."""
@@ -3293,13 +3297,15 @@ class Instance:
             f"{self.parent_cell.name}: ports {port_names}, {self.kcl[self.cell_index]}"
         )
 
-    def mirror_x(self, x: int = 0) -> None:
+    def mirror_x(self, x: int = 0) -> Instance:
         """Mirror the instance at an x-axis."""
         self.transform(kdb.Trans(2, True, 2 * x, 0))
+        return self
 
-    def mirror_y(self, y: int = 0) -> None:
+    def mirror_y(self, y: int = 0) -> Instance:
         """Mirror the instance at an y-axis."""
         self.transform(kdb.Trans(0, True, 0, 2 * y))
+        return self
 
     @property
     def xmin(self) -> int:
