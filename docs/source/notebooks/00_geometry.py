@@ -50,7 +50,6 @@ poly1 = kf.kdb.DPolygon(
 
 # %%
 c.shapes(c.kcl.layer(1, 0)).insert(poly1)
-# show it in matplotlib and KLayout (you need to have KLayout open and install gdsfactory from the git repo with make install)
 
 # %%
 c.show()  # show in klayout
@@ -59,26 +58,25 @@ c.plot()
 # %% [markdown]
 # **Exercise** :
 #
-# Make a cell similar to the one above that has a second polygon in layer (1, 1)
+# Make a cell similar to the one above that has a second polygon in layer (2, 0)
+#
+# **Solution** :
 
 # %%
 c = kf.KCell()
 points = np.array([(-8, -6), (6, 8), (7, 17), (9, 5)])
 poly = kf.polygon_from_array(points)
 c.shapes(c.kcl.layer(1, 0)).insert(poly1)
-c.shapes(c.kcl.layer(1, 1)).insert(poly1)
+c.shapes(c.kcl.layer(2, 0)).insert(poly1)
 c
 
 # %%
-import kfactory as kf
-
-# %%
 c = kf.KCell()
-
-# %%
-# Create some new geometry from the functions available in the geometry library
 textgenerator = kf.kdb.TextGenerator.default_generator()
 t = textgenerator.text("Hello!", c.kcl.dbu)
+c.shapes(kf.kcl.layer(1, 0)).insert(t)
+c.show()  # show in klayout
+c.plot()
 
 # %%
 r = kf.kdb.DBox(-2.5, -5, 2.5, 5)
@@ -88,18 +86,21 @@ r
 # Add instances to the new geometry to c, our blank cell
 
 # %%
-c.shapes(kf.kcl.layer(1, 0)).insert(t)
-c.show()  # show in klayout
-c.plot()
-
-# %% [markdown]
-# Using the << operator (identical to add_ref()), add the same geometry a second time
+c = kf.KCell()
+c.shapes(c.kcl.layer(1, 0)).insert(r)
+c.shapes(c.kcl.layer(2, 0)).insert(r)
+c
 
 # %%
-# Now that the geometry has been added to "c", we can move everything around:
+c = kf.KCell()
+textgenerator = kf.kdb.TextGenerator.default_generator()
 text1 = t.transformed(
     kf.kdb.DTrans(0.0, 10.0).to_itype(c.kcl.dbu)
 )  # DTrans is a transformation in microns with arguments (<rotation in 90° increments>, <mirror boolean>, <x in microns>, <y in microns>)
+# Now that the geometry has been added to "c", we can move everything around:
+
+
+# %%
 ### complex transformation example:ce
 #     magnification(float): magnification, DO NOT USE on cells or instances, only shapes, most foundries will not allow magnifications on actual cell instances or cells
 #     rotation(float): rotation in degrees
@@ -117,7 +118,6 @@ r.move(
     -5, 0
 )  # boxes can be moved like this, other shapes and cellss/refs need to be moved with .transform
 r.move(-5, 0)
-
 
 # %%
 c.shapes(c.kcl.layer(1, 0)).insert(text1)
@@ -163,27 +163,16 @@ def straight(length=10, width=1, layer=(1, 0)):
 
 # %%
 c = kf.KCell()
-
-# %%
-wg1 = c << straight(length=6, width=2.5, layer=(1, 0))
-wg2 = c << straight(length=11, width=2.5, layer=(1, 0))
-wg3 = c << straight(length=15, width=2.5, layer=(1, 0))
-
-# %%
-# wg2.transform(kf.kdb.DCplxTrans(1, 10, False, 10, 0))
-# wg3.transform(kf.kdb.DCplxTrans(1, 15, False, 20, 0))
-# wg2.movey(10).rotate(10)
-# wg3.movey(20).rotate(15)
-print(c.name)
-c.show()  # show in klayout
-# c.plot()
+wg1 = c << straight(length=1, width=2.5, layer=(1, 0))
+wg2 = c << straight(length=2, width=2.5, layer=(1, 0))
+wg3 = c << straight(length=3, width=2.5, layer=(1, 0))
+c
 
 # %% [markdown]
 # Now we can align everything together using the ports:
 
 # %% [markdown]
-# Each straight has two ports: 'W0' and 'E0'.  These are arbitrary
-# names defined in our straight() function above
+# Each straight has two ports: 'o1' and 'o2'.  These are arbitrary names defined in our straight() function above
 
 # %%
 # Let's keep wg1 in place on the bottom, and connect the other straights to it.
@@ -191,17 +180,13 @@ c.show()  # show in klayout
 wg2.connect("o1", wg1.ports["o2"])
 # Next, on wg3 let's grab the "W0" port and connect it to the "E0" on wg2:
 wg3.connect("o1", wg2.ports["o2"])
-
-# %%
-c.show()  # show in klayout
-# c.plot()
-
+c
 
 # %%
 c.add_port(name="o1", port=wg1.ports["o1"])
 c.add_port(name="o2", port=wg3.ports["o2"])
 c.show()  # show in klayout
-# c.plot()
+c.plot()
 
 # %% [markdown]
 # As you can see the `red` labels are for the cell ports while
@@ -236,7 +221,7 @@ c.shapes(c.kcl.layer(4, 0)).insert(
 
 # %%
 c.show()  # show in klayout
-# c.plot()
+c.plot()
 
 # %% [markdown]
 # ## Ports
@@ -311,9 +296,7 @@ c
 
 # %%
 c2.shapes(c2.kcl.layer(1, 0)).insert(kf.kdb.Text("First label", mwg1_ref.trans))
-# c2.shapes(c2.kcl.layer(1,0).insert(kf.kdb.Text("First label", position=mwg1_ref.center)
 c2.shapes(c2.kcl.layer(1, 0)).insert(kf.kdb.Text("Second label", mwg2_ref.trans))
-# c2.add_label(text="Second label", position=mwg2_ref.center)
 
 # %%
 # It's very useful for recording information about the devices or layout
@@ -323,9 +306,8 @@ c2.shapes(c2.kcl.layer(10, 0)).insert(
         kf.kdb.Trans(c2.bbox().right, c2.bbox().top),
     )
 )
-
-# %%
-c2
+c2.show()
+c2.plot()
 
 # %% [markdown]
 # ## Boolean shapes
@@ -428,15 +410,10 @@ c
 # %% [markdown]
 # ## Write GDS
 #
-# [GDSII](https://en.wikipedia.org/wiki/GDSII) is the Standard format for exchanging CMOS and Photonic circuits.
+# [GDSII](https://en.wikipedia.org/wiki/GDSII) is the Standard format for exchanging CMOS circuits with foundries
 #
 # You can write your Cell to GDS file.
 
 
 # %%
 c.write("demo.gds")
-
-# %% [markdown]
-# You can see the GDS file in Klayout viewer.
-#
-# Sometimes you also want to save the GDS together with metadata (settings, port names, widths, locations ...) in YAML
