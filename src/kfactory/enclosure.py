@@ -211,7 +211,7 @@ def extrude_path(
             reg.insert(_r)
             if _layer == layer and i == j:
                 ret_path = _path
-        target.shapes(layer).insert(reg.merge())
+        target.shapes(_layer).insert(reg.merge())
     return ret_path
 
 
