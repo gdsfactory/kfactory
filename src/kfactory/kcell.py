@@ -3347,6 +3347,36 @@ class Instance:
         """Moves the instance so that the bbox's left x-coordinate."""
         self.transform(kdb.Trans(0, __val - self._instance.bbox().top))
 
+    @property
+    def x(self) -> int:
+        """Returns the x-coordinate center of the bounding box."""
+        return self._instance.bbox().center().x
+
+    @x.setter
+    def x(self, __val: int) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().center().x, 0))
+
+    @property
+    def y(self) -> int:
+        """Returns the x-coordinate center of the bounding box."""
+        return self._instance.bbox().center().y
+
+    @y.setter
+    def y(self, __val: int) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().center().y, 0))
+
+    @property
+    def center(self) -> kdb.Point:
+        """Returns the coordinate center of the bounding box."""
+        return self._instance.bbox().center()
+
+    @center.setter
+    def center(self, __val: int) -> None:
+        """Moves the instance so that the bbox's center coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().center()))
+
 
 class UMInstance:
     """Make the port able to dynamically give um based info."""
