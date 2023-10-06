@@ -383,4 +383,4 @@ class BendSEuler:
 
 
 bend_euler = BendEuler(kcl)
-bend_s_euler = BendEuler(kcl)
+bend_s_euler = BendSEuler(kcl)
