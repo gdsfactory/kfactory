@@ -428,10 +428,7 @@ class KCell:
         self._settings: KCellSettings = KCellSettings()
         self.info: Info = Info()
         self._locked = False
-        if name is None:
-            _name = "Unnamed_!"
-        else:
-            _name = name
+        _name = "Unnamed_!" if name is None else name
         self._kdb_cell = kdb_cell or kcl.create_cell(_name)
         if _name == "Unnamed_!":
             self._kdb_cell.name = f"Unnamed_{self.cell_index()}"
@@ -2627,6 +2624,16 @@ class Port:
             vec = self.trans.disp
             vec.y = value
             self._dcplx_trans.disp = vec.to_dtype(self.kcl.layout.dbu)
+
+    @property
+    def center(self) -> tuple[int, int]:
+        """Returns port center."""
+        return (self.x, self.y)
+
+    @center.setter
+    def center(self, value: tuple[int, int]) -> None:
+        self.x = value[0]
+        self.y = value[1]
 
     @property
     def trans(self) -> kdb.Trans:
