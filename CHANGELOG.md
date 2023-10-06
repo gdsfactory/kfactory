@@ -8,6 +8,19 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 
 <!-- towncrier release notes start -->
 
+## [0.9.3](https://github.com/gdsfactory/kfactory/releases/v0.9.3) - 2023-10-06
+
+
+### Fixed
+
+- Fixed layer enclosure errors in extrude_path
+
+
+## [0.9.2](https://github.com/gdsfactory/kfactory/releases/v0.9.2) - 2023-10-06
+
+No significant changes.
+
+
 ## [0.9.1](https://github.com/gdsfactory/kfactory/releases/v0.9.1) - 2023-10-04
 
 
