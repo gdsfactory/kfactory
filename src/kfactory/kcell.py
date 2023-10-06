@@ -1312,6 +1312,16 @@ class KCell:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self._kdb_cell.bbox().top
 
+    @property
+    def ysize(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._kdb_cell.bbox().top - self._kdb_cell.bbox().bottom
+
+    @property
+    def xsize(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._kdb_cell.bbox().left - self._kdb_cell.bbox().right
+
     def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
         """Generate a LayoutToNetlist object from the port types.
 
@@ -3353,6 +3363,16 @@ class Instance:
     def ymax(self, __val: int) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
         self.transform(kdb.Trans(0, __val - self._instance.bbox().top))
+
+    @property
+    def ysize(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().top - self._instance.bbox().bottom
+
+    @property
+    def xsize(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().left - self._instance.bbox().right
 
     @property
     def x(self) -> int:
