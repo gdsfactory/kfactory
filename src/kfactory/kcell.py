@@ -3373,7 +3373,7 @@ class Instance:
         return self._instance.bbox().center()
 
     @center.setter
-    def center(self, __val: int) -> None:
+    def center(self, __val: kdb.Point) -> None:
         """Moves the instance so that the bbox's center coordinate."""
         self.transform(kdb.Trans(__val - self.bbox().center()))
 
