@@ -41,7 +41,7 @@ from .enclosure import (
     LayerEnclosureCollection,
     LayerSection,
 )
-from .port import port_polygon, rename_clockwise
+from .port import port_polygon, rename_clockwise_multi
 
 T = TypeVar("T")
 
@@ -1969,7 +1969,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         interconnect_cml_path: Path | str | None = None,
         constants: type[Constants] | None = None,
         base_kcl: KCLayout | None = None,
-        port_rename_function: Callable[..., None] = rename_clockwise,
+        port_rename_function: Callable[..., None] = rename_clockwise_multi,
         copy_base_kcl_layers: bool = True,
     ) -> None:
         """Create a new KCLayout (PDK). Can be based on an old KCLayout.
@@ -2543,6 +2543,7 @@ class Port:
         return cls(**d)
 
     def __eq__(self, other: object) -> bool:
+        """Support for `port1 == port2` comparisons."""
         if isinstance(other, Port):
             if (
                 self.width == other.width
@@ -2883,6 +2884,16 @@ class UMKCell:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self.parent._kdb_cell.dbbox().top
 
+    @property
+    def xsize(self) -> float:
+        """Returns the width of the bounding box."""
+        return self.parent._kdb_cell.dbbox().width()
+
+    @property
+    def ysize(self) -> float:
+        """Returns the height of the bounding box."""
+        return self.parent._kdb_cell.dbbox().height()
+
     @overload
     def create_inst(
         self,
@@ -2976,6 +2987,10 @@ class Instance:
         self.kcl = kcl
         self.ports = InstancePorts(self)
         self.d = UMInstance(self)
+
+    def __getitem__(self, key: int | str | None) -> Port:
+        """Returns port from instance."""
+        return self.ports[key]
 
     def __getattr__(self, name):  # type: ignore[no-untyped-def]
         """If we don't have an attribute, get it from the instance."""
@@ -3369,12 +3384,12 @@ class Instance:
 
     @property
     def ysize(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
+        """Returns the height of the bounding box."""
         return self._instance.bbox().height()
 
     @property
     def xsize(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
+        """Returns the width of the bounding box."""
         return self._instance.bbox().width()
 
     @property
@@ -3405,9 +3420,9 @@ class Instance:
     @center.setter
     def center(self, val: tuple[int, int] | kdb.Vector) -> None:
         """Moves the instance so that the bbox's center coordinate."""
-        if isinstance(val, (kdb.Point, kdb.Vector)):
+        if isinstance(val, kdb.Point | kdb.Vector):
             self.transform(kdb.Trans(val - self.bbox().center()))
-        elif isinstance(val, (tuple, list)):
+        elif isinstance(val, tuple | list):
             self.transform(kdb.Trans(kdb.Vector(val[0], val[1]) - self.bbox().center()))
         else:
             raise ValueError(
@@ -3517,7 +3532,7 @@ class UMInstance:
     @xmin.setter
     def xmin(self, __val: float) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
-        self.parent.transform(kdb.DTrans(__val - self.parent.dbbox().left, 0))
+        self.parent.transform(kdb.DTrans(__val - self.parent.dbbox().left, 0.0))
 
     @property
     def ymin(self) -> float:
@@ -3528,7 +3543,7 @@ class UMInstance:
     def ymin(self, __val: float) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
         self.parent.transform(
-            kdb.DTrans(0, __val - self.parent._instance.dbbox().bottom)
+            kdb.DTrans(0.0, __val - self.parent._instance.dbbox().bottom)
         )
 
     @property
@@ -3539,7 +3554,19 @@ class UMInstance:
     @xmax.setter
     def xmax(self, __val: float) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
-        self.parent.transform(kdb.DTrans(__val - self.parent.dbbox().right, 0))
+        self.parent.transform(
+            kdb.DTrans(__val - self.parent._instance.dbbox().right, 0.0)
+        )
+
+    @property
+    def xsize(self) -> float:
+        """Returns the width of the bounding box."""
+        return self.parent._instance.dbbox().width()
+
+    @property
+    def ysize(self) -> float:
+        """Returns the height of the bounding box."""
+        return self.parent._instance.dbbox().height()
 
     @property
     def ymax(self) -> float:
@@ -3547,9 +3574,11 @@ class UMInstance:
         return self.parent._instance.dbbox().top
 
     @ymax.setter
-    def ymax(self, __val: int) -> None:
+    def ymax(self, __val: float) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
-        self.parent.transform(kdb.DTrans(0, __val - self.parent._instance.dbbox().top))
+        self.parent.transform(
+            kdb.DTrans(0.0, __val - self.parent._instance.dbbox().top)
+        )
 
 
 class Instances:
@@ -4369,7 +4398,7 @@ def dpolygon_from_array(array: Iterable[tuple[float, float]]) -> kdb.DPolygon:
 
     Array-like: `[[x1,y1],[x2,y2],...]`
     """
-    return kdb.DPolygon([kdb.DPoint(int(x), int(y)) for (x, y) in array])
+    return kdb.DPolygon([kdb.DPoint(x, y) for (x, y) in array])
 
 
 def _check_inst_ports(p1: Port, p2: Port) -> int:

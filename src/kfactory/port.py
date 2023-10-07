@@ -41,7 +41,7 @@ def autorename(
 
 
 def rename_clockwise(
-    ports: "list[Port]",
+    ports: "Iterable[Port]",
     layer: "LayerEnum | int | None" = None,
     port_type: str | None = None,
     regex: str | None = None,
@@ -49,6 +49,15 @@ def rename_clockwise(
     start: int = 1,
 ) -> None:
     """Sort and return ports in the clockwise direction.
+
+    Args:
+        ports: List of ports to rename.
+        layer: Layer index / LayerEnum of port layer.
+        port_type: Port type to filter the ports by.
+        regex: Regex string to filter the port names by.
+        prefix: Prefix to add to all ports.
+        start: Start index per orientation.
+
 
              o3  o4
              |___|_
@@ -58,13 +67,6 @@ def rename_clockwise(
              |   |
             o8  o7
 
-    Args:
-        ports: List of ports to rename.
-        layer: Layer index / LayerEnum of port layer.
-        port_type: Port type to filter the ports by.
-        regex: Regex string to filter the port names by.
-        prefix: Prefix to add to all ports.
-        start: Start index per orientation.
     """
     _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
 
@@ -93,6 +95,55 @@ def rename_clockwise(
         p.name = f"{prefix}{i}"
 
 
+def rename_clockwise_multi(
+    ports: "Iterable[Port]",
+    layers: "Iterable[LayerEnum | int] | None" = None,
+    regex: str | None = None,
+    type_prefix_mapping: dict[str, str] = {"optical": "o", "electrical": "e"},
+    start: int = 1,
+) -> None:
+    """Sort and return ports in the clockwise direction.
+
+    Args:
+        ports: List of ports to rename.
+        layers: Layer indexes / LayerEnums of port layers to rename.
+        type_prefix_mapping: Port type to prefix matching in a dictionary.
+        regex: Regex string to filter the port names by.
+        start: Start index per orientation.
+
+
+             o3  o4
+             |___|_
+        o2 -|      |- o5
+            |      |
+        o1 -|______|- o6
+             |   |
+            o8  o7
+
+    """
+    if layers:
+        for p_type, prefix in type_prefix_mapping.items():
+            for layer in layers:
+                rename_clockwise(
+                    ports=ports,
+                    layer=layer,
+                    port_type=p_type,
+                    regex=regex,
+                    prefix=prefix,
+                    start=start,
+                )
+    else:
+        for p_type, prefix in type_prefix_mapping.items():
+            rename_clockwise(
+                ports=ports,
+                layer=None,
+                port_type=p_type,
+                regex=regex,
+                prefix=prefix,
+                start=start,
+            )
+
+
 def rename_by_direction(
     ports: "Iterable[Port]",
     layer: "LayerEnum | int | None" = None,
@@ -103,6 +154,14 @@ def rename_by_direction(
 ) -> None:
     """Rename ports by angle of their transformation.
 
+    Args:
+        ports: list of ports to be renamed
+        layer: A layer index to filter by
+        port_type: port_type string to filter by
+        regex: Regex string to use to filter the ports to be renamed.
+        dir_names: Prefixes for the directions (east, north, west, south).
+        prefix: Prefix to add before `dir_names`
+
              N0  N1
              |___|_
         W1 -|      |- E1
@@ -111,15 +170,7 @@ def rename_by_direction(
              |   |
             S0   S1
 
-    Args:
-        ports: list of ports to be renamed
-        layer: A layer index to filter by
-        port_type: port_type string to filter by
-        regex: Regex string to use to filter the ports to be renamed.
-        dir_names: Prefixes for the directions (east, north, west, south).
-        prefix: Prefix to add before `dir_names`
     """
-
     for dir in DIRECTION:
         _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
         dir_2 = -1 if dir < 2 else 1
