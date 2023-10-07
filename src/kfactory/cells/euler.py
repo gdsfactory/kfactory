@@ -231,7 +231,7 @@ class BendEulerCustom:
 
         c.boundary = center_path
 
-        c.autorename_ports()
+        c.auto_rename_ports()
         return c
 
 
@@ -303,7 +303,7 @@ class BendEuler:
 
         c.boundary = center_path
 
-        c.autorename_ports()
+        c.auto_rename_ports()
         return c
 
 
@@ -378,7 +378,7 @@ class BendSEuler:
         )
         c.boundary = center_path
 
-        c.autorename_ports()
+        c.auto_rename_ports()
         return c
 
 

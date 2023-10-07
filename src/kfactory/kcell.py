@@ -962,7 +962,7 @@ class KCell:
             h.update(_hash)
         return h.digest()
 
-    def autorename_ports(self, rename_func: Callable[..., None] | None = None) -> None:
+    def auto_rename_ports(self, rename_func: Callable[..., None] | None = None) -> None:
         """Rename the ports with the schema angle -> "NSWE" and sort by x and y.
 
         Args:
