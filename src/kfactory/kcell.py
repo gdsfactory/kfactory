@@ -41,7 +41,7 @@ from .enclosure import (
     LayerEnclosureCollection,
     LayerSection,
 )
-from .port import port_polygon, rename_clockwise
+from .port import port_polygon, rename_clockwise_multi
 
 T = TypeVar("T")
 
@@ -1969,7 +1969,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         interconnect_cml_path: Path | str | None = None,
         constants: type[Constants] | None = None,
         base_kcl: KCLayout | None = None,
-        port_rename_function: Callable[..., None] = rename_clockwise,
+        port_rename_function: Callable[..., None] = rename_clockwise_multi,
         copy_base_kcl_layers: bool = True,
     ) -> None:
         """Create a new KCLayout (PDK). Can be based on an old KCLayout.
@@ -2543,6 +2543,7 @@ class Port:
         return cls(**d)
 
     def __eq__(self, other: object) -> bool:
+        """Support for `port1 == port2` comparisons."""
         if isinstance(other, Port):
             if (
                 self.width == other.width
