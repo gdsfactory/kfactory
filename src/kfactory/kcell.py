@@ -3536,7 +3536,7 @@ class UMInstance:
     @xmin.setter
     def xmin(self, __val: float) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
-        self.parent.transform(kdb.DTrans(__val - self.parent.dbbox().left, 0))
+        self.parent.transform(kdb.DTrans(__val - self.parent.dbbox().left, 0.0))
 
     @property
     def ymin(self) -> float:
@@ -3547,7 +3547,7 @@ class UMInstance:
     def ymin(self, __val: float) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
         self.parent.transform(
-            kdb.DTrans(0, __val - self.parent._instance.dbbox().bottom)
+            kdb.DTrans(0.0, __val - self.parent._instance.dbbox().bottom)
         )
 
     @property
@@ -3558,7 +3558,9 @@ class UMInstance:
     @xmax.setter
     def xmax(self, __val: float) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
-        self.parent.transform(kdb.DTrans(__val - self.parent.dbbox().right, 0))
+        self.parent.transform(
+            kdb.DTrans(__val - self.parent._instance.dbbox().right, 0)
+        )
 
     @property
     def xsize(self) -> float:
@@ -3578,7 +3580,9 @@ class UMInstance:
     @ymax.setter
     def ymax(self, __val: int) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
-        self.parent.transform(kdb.DTrans(0, __val - self.parent._instance.dbbox().top))
+        self.parent.transform(
+            kdb.DTrans(0.0, __val - self.parent._instance.dbbox().top)
+        )
 
 
 class Instances:
