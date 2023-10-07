@@ -39,7 +39,7 @@ def port_tests(rename_f: Optional[Callable[..., None]] = None) -> kf.KCell:
     return c
 
 
-@pytest.mark.parametrize("func", [None, port.rename_clockwise])
+@pytest.mark.parametrize("func", [None, port.rename_clockwise_multi])
 def test_rename_default(func: Callable[..., None]) -> None:
     cell = port_tests(func)
     port_list = cell.ports._ports
@@ -92,7 +92,7 @@ def test_rename_orientation() -> None:
 def test_rename_setter() -> None:
     kcl = kf.KCLayout("TEST_RENAME")
 
-    assert kcl.rename_function == kf.port.rename_clockwise
+    assert kcl.rename_function == kf.port.rename_clockwise_multi
 
     c1 = kf.KCell(kcl=kcl)
 
@@ -176,7 +176,7 @@ def test_rename_setter() -> None:
                     i % 4
                 ), f"Expected {str(i % 4)=}, original name {dir_list[i]}"
 
-    kcl.rename_function = kf.port.rename_clockwise
+    kcl.rename_function = kf.port.rename_clockwise_multi
 
     assert c1.ports[0].name == "o1"
     assert c2.ports[0].name == "W0"
