@@ -428,7 +428,10 @@ class KCell:
         self._settings: KCellSettings = KCellSettings()
         self.info: Info = Info()
         self._locked = False
-        _name = "Unnamed_!" if name is None else name
+        if name is None:
+            _name = "Unnamed_!"
+        else:
+            _name = name
         self._kdb_cell = kdb_cell or kcl.create_cell(_name)
         if _name == "Unnamed_!":
             self._kdb_cell.name = f"Unnamed_{self.cell_index()}"
@@ -1315,12 +1318,12 @@ class KCell:
     @property
     def ysize(self) -> int:
         """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._kdb_cell.bbox().top - self._kdb_cell.bbox().bottom
+        return self._kdb_cell.bbox().height()
 
     @property
     def xsize(self) -> int:
         """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._kdb_cell.bbox().left - self._kdb_cell.bbox().right
+        return self._kdb_cell.bbox().width()
 
     def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
         """Generate a LayoutToNetlist object from the port types.
@@ -3367,12 +3370,12 @@ class Instance:
     @property
     def ysize(self) -> int:
         """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._instance.bbox().top - self._instance.bbox().bottom
+        return self._instance.bbox().height()
 
     @property
     def xsize(self) -> int:
         """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._instance.bbox().left - self._instance.bbox().right
+        return self._instance.bbox().width()
 
     @property
     def x(self) -> int:
