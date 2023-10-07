@@ -145,3 +145,14 @@ def test_contains(LAYER: type[kf.LayerEnum]) -> None:
     assert "o1" in s.ports
     assert s.ports["o1"] in s.ports
     assert s.ports["o1"].copy() in s.ports
+
+
+def test_ports_set_center(LAYER: kf.LayerEnum) -> None:
+    c = kf.KCell()
+    p = c.create_port(
+        name="o1",
+        dwidth=1,
+        dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
+        layer=LAYER.WG,
+    )
+    p.center = (0, 0)

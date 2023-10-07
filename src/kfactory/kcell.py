@@ -1315,6 +1315,16 @@ class KCell:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self._kdb_cell.bbox().top
 
+    @property
+    def ysize(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._kdb_cell.bbox().height()
+
+    @property
+    def xsize(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._kdb_cell.bbox().width()
+
     def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
         """Generate a LayoutToNetlist object from the port types.
 
@@ -2629,6 +2639,16 @@ class Port:
             self._dcplx_trans.disp = vec.to_dtype(self.kcl.layout.dbu)
 
     @property
+    def center(self) -> tuple[int, int]:
+        """Returns port center."""
+        return (self.x, self.y)
+
+    @center.setter
+    def center(self, value: tuple[int, int]) -> None:
+        self.x = value[0]
+        self.y = value[1]
+
+    @property
     def trans(self) -> kdb.Trans:
         """Simple Transformation of the Port.
 
@@ -3348,6 +3368,16 @@ class Instance:
         self.transform(kdb.Trans(0, __val - self._instance.bbox().top))
 
     @property
+    def ysize(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().height()
+
+    @property
+    def xsize(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().width()
+
+    @property
     def x(self) -> int:
         """Returns the x-coordinate center of the bounding box."""
         return self._instance.bbox().center().x
@@ -3373,9 +3403,17 @@ class Instance:
         return self._instance.bbox().center()
 
     @center.setter
-    def center(self, __val: kdb.Point) -> None:
+    def center(self, val: tuple[int, int] | kdb.Vector) -> None:
         """Moves the instance so that the bbox's center coordinate."""
-        self.transform(kdb.Trans(__val - self.bbox().center()))
+        if isinstance(val, (kdb.Point, kdb.Vector)):
+            self.transform(kdb.Trans(val - self.bbox().center()))
+        elif isinstance(val, (tuple, list)):
+            self.transform(kdb.Trans(kdb.Vector(val[0], val[1]) - self.bbox().center()))
+        else:
+            raise ValueError(
+                f"Type {type(val)} not supported for center setter {val}. "
+                "Not a tuple, list, kdb.Point or kdb.Vector."
+            )
 
 
 class UMInstance:
