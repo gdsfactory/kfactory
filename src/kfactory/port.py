@@ -45,10 +45,20 @@ def rename_clockwise(
     layer: "LayerEnum | int | None" = None,
     port_type: str | None = None,
     regex: str | None = None,
-    prefix: str = "o",
     start: int = 1,
+    port_types: tuple[str, ...] = ("optical", "electrical"),
 ) -> None:
     """Sort and return ports in the clockwise direction.
+
+    Args:
+        ports: List of ports to rename.
+        layer: Layer index / LayerEnum of port layer.
+        port_type: Port type to filter the ports by.
+        regex: Regex string to filter the port names by.
+        start: Start index per orientation.
+        port_types: Port types to rename.
+
+    .. code::
 
              o3  o4
              |___|_
@@ -57,40 +67,34 @@ def rename_clockwise(
         o1 -|______|- o6
              |   |
             o8  o7
-
-    Args:
-        ports: List of ports to rename.
-        layer: Layer index / LayerEnum of port layer.
-        port_type: Port type to filter the ports by.
-        regex: Regex string to filter the port names by.
-        prefix: Prefix to add to all ports.
-        start: Start index per orientation.
     """
-    _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
+    for port_type in port_types:
+        prefix = port_type[0]
+        _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
 
-    def sort_key(port: "Port") -> tuple[int, int, int]:
-        match port.angle:
-            case 2:
-                angle = 0
-            case 1:
-                angle = 1
-            case 0:
-                angle = 2
-            case 3:
-                angle = 3
-        dir_1 = 1 if angle < 2 else -1
-        dir_2 = -1 if port.angle < 2 else 1
-        key_1 = dir_1 * (
-            port.trans.disp.x if angle % 2 else port.trans.disp.y
-        )  # order should be y, x, -y, -x
-        key_2 = dir_2 * (
-            port.trans.disp.y if angle % 2 else port.trans.disp.x
-        )  # order should be x, -y, -x, y
+        def sort_key(port: "Port") -> tuple[int, int, int]:
+            match port.angle:
+                case 2:
+                    angle = 0
+                case 1:
+                    angle = 1
+                case 0:
+                    angle = 2
+                case 3:
+                    angle = 3
+            dir_1 = 1 if angle < 2 else -1
+            dir_2 = -1 if port.angle < 2 else 1
+            key_1 = dir_1 * (
+                port.trans.disp.x if angle % 2 else port.trans.disp.y
+            )  # order should be y, x, -y, -x
+            key_2 = dir_2 * (
+                port.trans.disp.y if angle % 2 else port.trans.disp.x
+            )  # order should be x, -y, -x, y
 
-        return angle, key_1, key_2
+            return angle, key_1, key_2
 
-    for i, p in enumerate(sorted(_ports, key=sort_key), start=start):
-        p.name = f"{prefix}{i}"
+        for i, p in enumerate(sorted(_ports, key=sort_key), start=start):
+            p.name = f"{prefix}{i}"
 
 
 def rename_by_direction(
@@ -103,14 +107,6 @@ def rename_by_direction(
 ) -> None:
     """Rename ports by angle of their transformation.
 
-             N0  N1
-             |___|_
-        W1 -|      |- E1
-            |      |
-        W0 -|______|- E0
-             |   |
-            S0   S1
-
     Args:
         ports: list of ports to be renamed
         layer: A layer index to filter by
@@ -118,8 +114,17 @@ def rename_by_direction(
         regex: Regex string to use to filter the ports to be renamed.
         dir_names: Prefixes for the directions (east, north, west, south).
         prefix: Prefix to add before `dir_names`
-    """
 
+    .. code::
+
+             N0  N1
+             |___|_
+        W1 -|      |- E1
+            |      |
+        W0 -|______|- E0
+             |   |
+            S0   S1
+    """
     for dir in DIRECTION:
         _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
         dir_2 = -1 if dir < 2 else 1
