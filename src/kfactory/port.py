@@ -58,8 +58,7 @@ def rename_clockwise(
         start: Start index per orientation.
         port_types: Port types to rename.
 
-    .. code::
-
+    ```
              o3  o4
              |___|_
         o2 -|      |- o5
@@ -67,6 +66,7 @@ def rename_clockwise(
         o1 -|______|- o6
              |   |
             o8  o7
+    ```
     """
     for port_type in port_types:
         prefix = port_type[0]
@@ -115,8 +115,8 @@ def rename_by_direction(
         dir_names: Prefixes for the directions (east, north, west, south).
         prefix: Prefix to add before `dir_names`
 
-    .. code::
 
+    ```
              N0  N1
              |___|_
         W1 -|      |- E1
@@ -124,6 +124,7 @@ def rename_by_direction(
         W0 -|______|- E0
              |   |
             S0   S1
+    ```
     """
     for dir in DIRECTION:
         _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
