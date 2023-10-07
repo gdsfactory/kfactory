@@ -3560,7 +3560,7 @@ class UMInstance:
     def xmax(self, __val: float) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
         self.parent.transform(
-            kdb.DTrans(__val - self.parent._instance.dbbox().right, 0)
+            kdb.DTrans(__val - self.parent._instance.dbbox().right, 0.0)
         )
 
     @property
