@@ -3332,11 +3332,6 @@ class Instance:
             f"{self.parent_cell.name}: ports {port_names}, {self.kcl[self.cell_index]}"
         )
 
-    def mirror(self, x: int = 0) -> Instance:
-        """Mirror the instance at an x-axis."""
-        self.transform(kdb.Trans(2, True, 2 * x, 0))
-        return self
-
     def mirror_x(self, x: int = 0) -> Instance:
         """Mirror the instance at an x-axis."""
         self.transform(kdb.Trans(2, True, 2 * x, 0))
