@@ -2883,6 +2883,16 @@ class UMKCell:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self.parent._kdb_cell.dbbox().top
 
+    @property
+    def xsize(self) -> float:
+        """Returns the width of the bounding box."""
+        return self.parent._kdb_cell.dbbox().width()
+
+    @property
+    def ysize(self) -> float:
+        """Returns the height of the bounding box."""
+        return self.parent._kdb_cell.dbbox().height()
+
     @overload
     def create_inst(
         self,
@@ -3378,12 +3388,12 @@ class Instance:
 
     @property
     def ysize(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
+        """Returns the height of the bounding box."""
         return self._instance.bbox().height()
 
     @property
     def xsize(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
+        """Returns the width of the bounding box."""
         return self._instance.bbox().width()
 
     @property
@@ -3414,9 +3424,9 @@ class Instance:
     @center.setter
     def center(self, val: tuple[int, int] | kdb.Vector) -> None:
         """Moves the instance so that the bbox's center coordinate."""
-        if isinstance(val, (kdb.Point, kdb.Vector)):
+        if isinstance(val, kdb.Point | kdb.Vector):
             self.transform(kdb.Trans(val - self.bbox().center()))
-        elif isinstance(val, (tuple, list)):
+        elif isinstance(val, tuple | list):
             self.transform(kdb.Trans(kdb.Vector(val[0], val[1]) - self.bbox().center()))
         else:
             raise ValueError(
@@ -3549,6 +3559,16 @@ class UMInstance:
     def xmax(self, __val: float) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
         self.parent.transform(kdb.DTrans(__val - self.parent.dbbox().right, 0))
+
+    @property
+    def xsize(self) -> float:
+        """Returns the width of the bounding box."""
+        return self.parent._instance.dbbox().width()
+
+    @property
+    def ysize(self) -> float:
+        """Returns the height of the bounding box."""
+        return self.parent._instance.dbbox().height()
 
     @property
     def ymax(self) -> float:
