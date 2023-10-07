@@ -2977,6 +2977,10 @@ class Instance:
         self.ports = InstancePorts(self)
         self.d = UMInstance(self)
 
+    def __getitem__(self, key: int | str | None) -> Port:
+        """Returns port from instance."""
+        return self.ports[key]
+
     def __getattr__(self, name):  # type: ignore[no-untyped-def]
         """If we don't have an attribute, get it from the instance."""
         return getattr(self._instance, name)
