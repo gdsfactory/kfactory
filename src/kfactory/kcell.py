@@ -4403,7 +4403,7 @@ def dpolygon_from_array(array: Iterable[tuple[float, float]]) -> kdb.DPolygon:
 
     Array-like: `[[x1,y1],[x2,y2],...]`
     """
-    return kdb.DPolygon([kdb.DPoint(int(x), int(y)) for (x, y) in array])
+    return kdb.DPolygon([kdb.DPoint(x, y) for (x, y) in array])
 
 
 def _check_inst_ports(p1: Port, p2: Port) -> int:
