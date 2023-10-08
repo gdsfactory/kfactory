@@ -3343,6 +3343,28 @@ class Instance:
             f"{self.parent_cell.name}: ports {port_names}, {self.kcl[self.cell_index]}"
         )
 
+    def mirror(
+        self, p1: kdb.Point = kdb.Point(1, 0), p2: kdb.Point = kdb.Point(0, 0)
+    ) -> Instance:
+        """Mirror the instance at a line."""
+        mirror_v = p2 - p1
+        disp = self.dcplx_trans.disp
+        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
+        dedge = kdb.DEdge(p1.to_dtype(self.kcl.dbu), p2.to_dtype(self.kcl.dbu))
+
+        v = mirror_v.to_dtype(self.kcl.dbu)
+        v = kdb.DVector(-v.y, v.x)
+
+        dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
+
+        cross_point = dedge.cut_point(dedge_disp)
+
+        self.transform(
+            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
+        )
+
+        return self
+
     def mirror_x(self, x: int = 0) -> Instance:
         """Mirror the instance at an x-axis."""
         self.transform(kdb.Trans(2, True, 2 * x, 0))
@@ -3543,6 +3565,25 @@ class UMInstance:
                     float(destination[0] - origin[0]), float(destination[1] - origin[1])
                 )
             )
+
+    def mirror(
+        self, p1: kdb.DPoint = kdb.DPoint(1, 0), p2: kdb.DPoint = kdb.DPoint(0, 0)
+    ) -> Instance:
+        """Mirror the instance at a line."""
+        mirror_v = p2 - p1
+        disp = self.parent.dcplx_trans.disp
+        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
+        dedge = kdb.DEdge(p1, p2)
+
+        v = mirror_v
+        v = kdb.DVector(-v.y, v.x)
+        dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
+        cross_point = dedge.cut_point(dedge_disp)
+        self.parent.transform(
+            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
+        )
+
+        return self.parent
 
     def mirror_x(self, x: float = 0) -> None:
         """Mirror the instance at an x-axis."""
