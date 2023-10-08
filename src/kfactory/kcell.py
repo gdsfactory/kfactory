@@ -3580,6 +3580,54 @@ class UMInstance:
             kdb.DTrans(0.0, __val - self.parent._instance.dbbox().top)
         )
 
+    @property
+    def x(self) -> float:
+        """Returns the x-coordinate center of the bounding box."""
+        return self.parent._instance.dbbox().center().x
+
+    @x.setter
+    def x(self, __val: float) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.parent.transform(
+            kdb.DTrans(__val - self.parent._instance.dbbox().center().x, 0.0)
+        )
+
+    @property
+    def y(self) -> float:
+        """Returns the x-coordinate center of the bounding box."""
+        return self.parent._instance.dbbox().center().y
+
+    @y.setter
+    def y(self, __val: float) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.parent.transform(
+            kdb.DTrans(0.0, __val - self.parent._instance.dbbox().center().y)
+        )
+
+    @property
+    def center(self) -> kdb.DPoint:
+        """Returns the coordinate center of the bounding box."""
+        return self.parent._instance.dbbox().center()
+
+    @center.setter
+    def center(self, val: tuple[float, float] | kdb.DPoint) -> None:
+        """Moves the instance so that the bbox's center coordinate."""
+        if isinstance(val, kdb.DPoint | kdb.DVector):
+            self.parent.transform(
+                kdb.DTrans(val - self.parent._instance.dbbox().center())
+            )
+        elif isinstance(val, tuple | list):
+            self.parent.transform(
+                kdb.DTrans(
+                    kdb.DPoint(val[0], val[1]) - self.parent._instance.dbbox().center()
+                )
+            )
+        else:
+            raise ValueError(
+                f"Type {type(val)} not supported for center setter {val}. "
+                "Not a tuple, list, kdb.Point or kdb.Vector."
+            )
+
 
 class Instances:
     """Holder for instances.
