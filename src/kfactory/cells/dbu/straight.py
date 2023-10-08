@@ -110,7 +110,7 @@ class Straight:
         )
 
         c.boundary = c.dbbox()
-        c.autorename_ports()
+        c.auto_rename_ports()
         return c
 
 

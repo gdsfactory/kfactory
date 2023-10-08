@@ -98,7 +98,7 @@ class Taper:
                 "length_dbu": length,
             }
         )
-        c.autorename_ports()
+        c.auto_rename_ports()
         c.boundary = taper.dpolygon
 
         return c

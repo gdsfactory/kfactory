@@ -808,7 +808,7 @@ class KCell:
         *,
         name: str | None = None,
         width: int,
-        position: tuple[int, int],
+        center: tuple[int, int],
         angle: int,
         layer: LayerEnum | int,
         port_type: str = "optical",
@@ -968,7 +968,7 @@ class KCell:
             h.update(_hash)
         return h.digest()
 
-    def autorename_ports(self, rename_func: Callable[..., None] | None = None) -> None:
+    def auto_rename_ports(self, rename_func: Callable[..., None] | None = None) -> None:
         """Rename the ports with the schema angle -> "NSWE" and sort by x and y.
 
         Args:
@@ -2395,7 +2395,7 @@ class Port:
             contain layer number and datatype
         info: A dictionary with additional info. Not reflected in GDS. Copy will make a
             (shallow) copy of it.
-        d: Access port info in micrometer basis such as width and position / angle.
+        d: Access port info in micrometer basis such as width and center / angle.
         kcl: Link to the layout this port resides in.
     """
 
@@ -2447,7 +2447,7 @@ class Port:
         layer: LayerEnum | int,
         port_type: str = "optical",
         angle: int,
-        position: tuple[int, int],
+        center: tuple[int, int],
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
@@ -2463,7 +2463,7 @@ class Port:
         layer: LayerEnum | int,
         port_type: str = "optical",
         dangle: float,
-        dposition: tuple[float, float],
+        dcenter: tuple[float, float],
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
@@ -2482,8 +2482,8 @@ class Port:
         dcplx_trans: kdb.DCplxTrans | str | None = None,
         angle: int | None = None,
         dangle: float | None = None,
-        position: tuple[int, int] | None = None,
-        dposition: tuple[float, float] | None = None,
+        center: tuple[int, int] | None = None,
+        dcenter: tuple[float, float] | None = None,
         mirror_x: bool = False,
         port: Port | None = None,
         kcl: KCLayout | None = None,
@@ -2528,14 +2528,14 @@ class Port:
                 ), "When converting to dbu the width does not match the desired width!"
             elif width is not None:
                 assert angle is not None
-                assert position is not None
-                self.trans = kdb.Trans(angle, mirror_x, *position)
+                assert center is not None
+                self.trans = kdb.Trans(angle, mirror_x, *center)
                 self.width = width
                 self.port_type = port_type
             elif dwidth is not None:
                 assert dangle is not None
-                assert dposition is not None
-                self.dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dposition)
+                assert dcenter is not None
+                self.dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
 
             assert layer is not None
             self.name = name
@@ -2802,13 +2802,13 @@ class UMPort:
             self.parent._dcplx_trans.disp = vec
 
     @property
-    def position(self) -> tuple[float, float]:
+    def center(self) -> tuple[float, float]:
         """Coordinate of the port in um."""
         vec = self.parent.dcplx_trans.disp
         return (vec.x, vec.y)
 
-    @position.setter
-    def position(self, pos: tuple[float, float]) -> None:
+    @center.setter
+    def center(self, pos: tuple[float, float]) -> None:
         if self.parent._trans:
             self.parent._trans.disp = kdb.DVector(*pos).to_itype(
                 self.parent.kcl.layout.dbu
@@ -2854,7 +2854,7 @@ class UMPort:
         )
         return (
             f"Port({'name: ' + self.parent.name if self.parent.name else ''}"
-            f", width: {self.width}, position: {self.position}, angle: {self.angle}"
+            f", width: {self.width}, center: {self.center}, angle: {self.angle}"
             f", layer: {ln}, port_type: {self.parent.port_type})"
         )
 
@@ -3003,10 +3003,10 @@ class Instance:
         return getattr(self._instance, name)
 
     @property
-    def name(self) -> str | None:
+    def name(self) -> str:
         """Name of instance in GDS."""
         prop = self.property(PROPID.NAME)
-        return str(prop) if prop is not None else None
+        return str(prop) if prop is not None else f"{self.cell.name}_{self.x}_{self.y}"
 
     @name.setter
     def name(self, value: str) -> None:
@@ -3196,7 +3196,7 @@ class Instance:
         """Align port with name `portname` to a port.
 
         Function to allow to transform this instance so that a port of this instance is
-        connected (same position with 180° turn) to another instance.
+        connected (same center with 180° turn) to another instance.
 
         Args:
             port: The name of the port of this instance to be connected, or directly an
@@ -3603,6 +3603,54 @@ class UMInstance:
             kdb.DTrans(0.0, __val - self.parent._instance.dbbox().top)
         )
 
+    @property
+    def x(self) -> float:
+        """Returns the x-coordinate center of the bounding box."""
+        return self.parent._instance.dbbox().center().x
+
+    @x.setter
+    def x(self, __val: float) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.parent.transform(
+            kdb.DTrans(__val - self.parent._instance.dbbox().center().x, 0.0)
+        )
+
+    @property
+    def y(self) -> float:
+        """Returns the x-coordinate center of the bounding box."""
+        return self.parent._instance.dbbox().center().y
+
+    @y.setter
+    def y(self, __val: float) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.parent.transform(
+            kdb.DTrans(0.0, __val - self.parent._instance.dbbox().center().y)
+        )
+
+    @property
+    def center(self) -> kdb.DPoint:
+        """Returns the coordinate center of the bounding box."""
+        return self.parent._instance.dbbox().center()
+
+    @center.setter
+    def center(self, val: tuple[float, float] | kdb.DPoint) -> None:
+        """Moves the instance so that the bbox's center coordinate."""
+        if isinstance(val, kdb.DPoint | kdb.DVector):
+            self.parent.transform(
+                kdb.DTrans(val - self.parent._instance.dbbox().center())
+            )
+        elif isinstance(val, tuple | list):
+            self.parent.transform(
+                kdb.DTrans(
+                    kdb.DPoint(val[0], val[1]) - self.parent._instance.dbbox().center()
+                )
+            )
+        else:
+            raise ValueError(
+                f"Type {type(val)} not supported for center setter {val}. "
+                "Not a tuple, list, kdb.Point or kdb.Vector."
+            )
+
 
 class Instances:
     """Holder for instances.
@@ -3758,7 +3806,7 @@ class Ports:
         *,
         width: int,
         layer: LayerEnum | int,
-        position: tuple[int, int],
+        center: tuple[int, int],
         angle: Literal[0, 1, 2, 3],
         name: str | None = None,
         port_type: str = "optical",
@@ -3775,7 +3823,7 @@ class Ports:
         port_type: str = "optical",
         trans: kdb.Trans | None = None,
         dcplx_trans: kdb.DCplxTrans | None = None,
-        position: tuple[int, int] | None = None,
+        center: tuple[int, int] | None = None,
         angle: Literal[0, 1, 2, 3] | None = None,
         mirror_x: bool = False,
     ) -> Port:
@@ -3784,7 +3832,7 @@ class Ports:
         Args:
             name: Optional name of port.
             width: Width of the port in dbu. If `trans` is set (or the manual creation
-                with `position` and `angle`), this needs to be as well.
+                with `center` and `angle`), this needs to be as well.
             dwidth: Width of the port in um. If `dcplx_trans` is set, this needs to be
                 as well.
             layer: Layer index of the port.
@@ -3792,7 +3840,7 @@ class Ports:
             trans: Transformation object of the port. [dbu]
             dcplx_trans: Complex transformation for the port.
                 Use if a non-90° port is necessary.
-            position: Tuple of the position. [dbu]
+            center: Tuple of the center. [dbu]
             angle: Angle in 90° increments. Used for simple/dbu transformations.
             mirror_x: Mirror the transformation of the port.
         """
@@ -3816,7 +3864,7 @@ class Ports:
                 port_type=port_type,
                 kcl=self.kcl,
             )
-        elif angle is not None and position is not None:
+        elif angle is not None and center is not None:
             assert width is not None
             port = Port(
                 name=name,
@@ -3824,14 +3872,14 @@ class Ports:
                 layer=layer,
                 port_type=port_type,
                 angle=angle,
-                position=position,
+                center=center,
                 mirror_x=mirror_x,
                 kcl=self.kcl,
             )
         else:
             raise ValueError(
                 f"You need to define width {width} and trans {trans} or angle {angle}"
-                f" and position {position} or dcplx_trans {dcplx_trans}"
+                f" and center {center} or dcplx_trans {dcplx_trans}"
                 f" and dwidth {dwidth}"
             )
 
@@ -3888,7 +3936,7 @@ class Ports:
 class InstancePorts:
     """Ports of an instance.
 
-    These act as virtual ports as the positions needs to change if the
+    These act as virtual ports as the centers needs to change if the
     instance changes etc.
 
 

@@ -148,7 +148,7 @@ there is no `add_label` in kfactory. Instead they can be used like any other sha
 kfactory also offers `c.connect(port_name, other_port)` like gdsfactory does. It doesn't exactly do the same thing as in gdsfactory though. A [Port][kfactory.kcell.Port]
 in kfactory will always try to be on grid. Additionally the port is using `kfactory.kdb.Trans` and `kfactory.kdb.DCplxTrans` by default, similar to an instance.
 This also means that a port is aware of mirroring. Since a `connect` can be simplified to `instance.trans = other_port.trans * kfactory.kdb.Trans.R180 * port.trans.inversed()`
-(for the 90° on-grid cases), it can be seen that the position, angle and mirror flag of the `instance` is overwritten. Therefore, any move / rotation / mirror on the instance
+(for the 90° on-grid cases), it can be seen that the center, angle and mirror flag of the `instance` is overwritten. Therefore, any move / rotation / mirror on the instance
 `connect` is called on, will have no influence on the state after the connect.
 
 Also, as with gdsfactory `connect` is not final. It does not imply any shared link between the instances after the `connect`, it is simply a transformation with some checks
