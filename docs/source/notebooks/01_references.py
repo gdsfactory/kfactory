@@ -175,7 +175,7 @@ c.ports
 # You can also auto_rename ports using gdsfactory default convention, where ports are numbered clockwise starting from the bottom left
 
 # %%
-c.autorename_ports()
+c.auto_rename_ports()
 
 # %%
 c.ports

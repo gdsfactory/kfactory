@@ -94,7 +94,7 @@ import pytest
 #     c.add_port(s2.ports["o2"])
 #     c.add_port(sc2.ports["o2"])
 
-#     c.autorename_ports()
+#     c.auto_rename_ports()
 
 #     print(c.netlist())
 

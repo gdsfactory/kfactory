@@ -106,7 +106,7 @@ class BendS:
             port_type="optical",
         )
 
-        c.autorename_ports()
+        c.auto_rename_ports()
 
         return c
 

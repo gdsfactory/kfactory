@@ -100,7 +100,7 @@ class BendCircular:
             dwidth=width,
             layer=layer,
         )
-        c.autorename_ports()
+        c.auto_rename_ports()
         c.boundary = center_path
         return c
 

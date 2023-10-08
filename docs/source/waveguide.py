@@ -22,7 +22,7 @@ def straight(width: int, length: int, width_exclude: int) -> kf.KCell:
         layer=LAYER.SI,
     )
 
-    c.autorename_ports()
+    c.auto_rename_ports()
 
     return c
 

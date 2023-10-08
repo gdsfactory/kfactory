@@ -32,9 +32,9 @@ def port_tests(rename_f: Optional[Callable[..., None]] = None) -> kf.KCell:
                 width=1 / c.kcl.dbu,
             )
     if rename_f is None:
-        c.autorename_ports()
+        c.auto_rename_ports()
     else:
-        c.autorename_ports(rename_f)
+        c.auto_rename_ports(rename_f)
     c.draw_ports()
     return c
 
@@ -121,7 +121,7 @@ def test_rename_setter() -> None:
             name=name,
         )
 
-    c1.autorename_ports()
+    c1.auto_rename_ports()
 
     for i, _port in enumerate(c1.ports):
         match i % 4:
@@ -160,7 +160,7 @@ def test_rename_setter() -> None:
             layer=kcl.layer(1, 0),
             name=name,
         )
-    c2.autorename_ports()
+    c2.auto_rename_ports()
     for i, _port in enumerate(c2.ports):
         match i % 4:
             case 1:
