@@ -3343,7 +3343,9 @@ class Instance:
             f"{self.parent_cell.name}: ports {port_names}, {self.kcl[self.cell_index]}"
         )
 
-    def mirror(self, p1: kdb.Point, p2: kdb.Point) -> Instance:
+    def mirror(
+        self, p1: kdb.Point = kdb.Point(1, 0), p2: kdb.Point = kdb.Point(0, 0)
+    ) -> Instance:
         """Mirror the instance at a line."""
         mirror_v = p2 - p1
         disp = self.dcplx_trans.disp
@@ -3564,7 +3566,9 @@ class UMInstance:
                 )
             )
 
-    def mirror(self, p1: kdb.DPoint, p2: kdb.DPoint) -> Instance:
+    def mirror(
+        self, p1: kdb.DPoint = kdb.DPoint(1, 0), p2: kdb.DPoint = kdb.DPoint(0, 0)
+    ) -> Instance:
         """Mirror the instance at a line."""
         mirror_v = p2 - p1
         disp = self.parent.dcplx_trans.disp
