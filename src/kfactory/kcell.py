@@ -1301,6 +1301,11 @@ class KCell:
         return self._kdb_cell.bbox().left
 
     @property
+    def center(self) -> kdb.Point:
+        """Returns the coordinate center of the bounding box."""
+        return self._kdb_cell.bbox().center()
+
+    @property
     def ymin(self) -> int:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self._kdb_cell.bbox().bottom
