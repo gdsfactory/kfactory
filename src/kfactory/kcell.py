@@ -3000,7 +3000,11 @@ class Instance:
     def name(self) -> str | None:
         """Name of instance in GDS."""
         prop = self.property(PROPID.NAME)
-        return str(prop) if prop is not None else None
+        return (
+            str(prop)
+            if prop is not None
+            else f"{self.kcl[self.cell_index].name}_{self.x}_{self.y}"
+        )
 
     @name.setter
     def name(self, value: str) -> None:
