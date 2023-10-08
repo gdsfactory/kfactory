@@ -35,3 +35,39 @@ def test_instance_d_move(LAYER: kf.LayerEnum) -> None:
 
     ref.d.mirror_y(0)
     ref.d.mirror_x(0)
+
+
+def test_mirror(LAYER: kf.LayerEnum) -> None:
+    """Test arbitrary mirror."""
+    c = kf.KCell()
+    b = kf.cells.euler.bend_euler(width=1, radius=10, layer=LAYER.WG)
+
+    b1 = c << b
+    b2 = c << b
+    disp = kdb.Trans(5000, 5000)
+    # mp1 = kf.kdb.Point(-10000, 10000)
+    mp1 = kf.kdb.Point(50000, 25000)
+    mp2 = -mp1
+
+    b2.mirror(disp * mp1, disp * mp2)
+
+    c.shapes(LAYER.WG).insert(kf.kdb.Edge(mp1, mp2).transformed(disp))
+    c.show()
+
+
+def test_dmirror(LAYER: kf.LayerEnum) -> None:
+    """Test arbitrary mirror."""
+    c = kf.KCell()
+    b = kf.cells.euler.bend_euler(width=1, radius=10, layer=LAYER.WG)
+
+    b1 = c << b
+    b2 = c << b
+    disp = kdb.Trans(5000, 5000).to_dtype(c.kcl.dbu)
+    # mp1 = kf.kdb.Point(-10000, 10000)
+    mp1 = kf.kdb.Point(50000, 25000).to_dtype(c.kcl.dbu)
+    mp2 = -mp1
+
+    b2.d.mirror(disp * mp1, disp * mp2)
+
+    c.shapes(LAYER.WG).insert(kf.kdb.DEdge(mp1, mp2).transformed(disp))
+    c.show()
