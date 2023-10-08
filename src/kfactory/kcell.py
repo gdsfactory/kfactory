@@ -446,6 +446,12 @@ class KCell:
 
         self.boundary = None
 
+    def evaluate_insts(self) -> None:
+        """Check all KLayout instances and create kfactory Instances."""
+        self.insts = Instances()
+        for inst in self._kdb_cell.each_inst():
+            self.insts.append(Instance(self.kcl, inst))
+
     def __getitem__(self, key: int | str | None) -> Port:
         """Returns port from instance."""
         return self.ports[key]
@@ -992,7 +998,7 @@ class KCell:
         self.insts = Instances()
 
         if merge:
-            for layer in self.layout().layer_indexes():
+            for layer in self.kcl.layer_indexes():
                 reg = kdb.Region(self.begin_shapes_rec(layer))
                 reg.merge()
                 self.clear(layer)
@@ -3430,6 +3436,23 @@ class Instance:
                 "Not a tuple, list, kdb.Point or kdb.Vector."
             )
 
+    def flatten(self, levels: int | None = None) -> None:
+        """Flatten all or just certain instances.
+
+        Args:
+            levels: If level < #hierarchy-levels -> pull the sub instances to self,
+                else pull the polygons. None will always flatten all levels.
+        """
+        if levels:
+            pc = self.parent_cell
+            self._instance.flatten(levels)
+            del pc.insts[self]
+            pc.evaluate_insts()
+        else:
+            pc = self.parent_cell
+            self._instance.flatten()
+            del pc.insts[self]
+
 
 class UMInstance:
     """Make the port able to dynamically give um based info."""
@@ -3671,6 +3694,12 @@ class Instances:
             else:
                 names[inst.name] = 1
         return names
+
+    def __delitem__(self, item: Instance | int) -> None:
+        if isinstance(item, int):
+            del self._insts[item]
+        else:
+            self._insts.remove(item)
 
 
 class Ports:
