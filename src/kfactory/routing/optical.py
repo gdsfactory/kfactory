@@ -135,8 +135,8 @@ def route(
         ...,
         list[kdb.Point],
     ] = route_manhattan,
-    waypoints: list[kdb.Point] | None = None,
     port_type: str = "optical",
+    allow_small_routes: bool = False,
     different_port_width: int = False,
 ) -> None:
     """Places a route.
@@ -152,8 +152,9 @@ def route(
         start_straight: Minimal straight segment after `p1`.
         end_straight: Minimal straight segment before `p2`.
         route_path_function: Function to calculate the route path.
-        waypoints: Optional waypoints to use instead of calculating the route path.
         port_type: Port type to use for the bend90_cell.
+        allow_small_routes: Don't throw an error if two corners cannot be safely placed
+            due to small space and place them anyway.
         different_port_width: If True, the width of the ports is ignored.
 
     """
@@ -221,7 +222,7 @@ def route(
         b180r = int((b180p2.trans.disp - b180p1.trans.disp).abs())
         start_port = p1.copy()
         end_port = p2.copy()
-        pts = waypoints or route_path_function(
+        pts = route_path_function(
             start_port,
             end_port,
             bend90_radius=b90r,
@@ -340,7 +341,7 @@ def route(
     else:
         start_port = p1.copy()
         end_port = p2.copy()
-        pts = waypoints or route_path_function(
+        pts = route_path_function(
             start_port,
             end_port,
             bend90_radius=b90r,
@@ -348,7 +349,16 @@ def route(
             end_straight=end_straight,
         )
 
-        place90(c, p1.copy(), p2.copy(), pts, straight_factory, bend90_cell, taper_cell)
+        place90(
+            c,
+            p1.copy(),
+            p2.copy(),
+            pts,
+            straight_factory,
+            bend90_cell,
+            taper_cell,
+            allow_small_routes=allow_small_routes,
+        )
 
 
 def place90(
