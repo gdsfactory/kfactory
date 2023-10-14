@@ -135,11 +135,28 @@ def route(
         ...,
         list[kdb.Point],
     ] = route_manhattan,
+    waypoints: list[kdb.Point] | None = None,
     port_type: str = "optical",
-    allow_small_routes: bool = False,
     different_port_width: int = False,
 ) -> None:
-    """Bend 90 part."""
+    """Places a route.
+
+    Args:
+        c: Cell to place the route in.
+        p1: Start port.
+        p2: End port.
+        straight_factory: Factory function for straight cells. in DBU.
+        bend90_cell: 90° bend cell.
+        bend180_cell: 180° bend cell.
+        taper_cell: Taper cell.
+        start_straight: Minimal straight segment after `p1`.
+        end_straight: Minimal straight segment before `p2`.
+        route_path_function: Function to calculate the route path.
+        waypoints: Optional waypoints to use instead of calculating the route path.
+        port_type: Port type to use for the bend90_cell.
+        different_port_width: If True, the width of the ports is ignored.
+
+    """
     if p1.width != p2.width and not different_port_width:
         raise ValueError(
             f"The ports have different widths {p1.width=} {p2.width=}. If this is"
@@ -204,7 +221,7 @@ def route(
         b180r = int((b180p2.trans.disp - b180p1.trans.disp).abs())
         start_port = p1.copy()
         end_port = p2.copy()
-        pts = route_path_function(
+        pts = waypoints or route_path_function(
             start_port,
             end_port,
             bend90_radius=b90r,
@@ -323,7 +340,7 @@ def route(
     else:
         start_port = p1.copy()
         end_port = p2.copy()
-        pts = route_path_function(
+        pts = waypoints or route_path_function(
             start_port,
             end_port,
             bend90_radius=b90r,
