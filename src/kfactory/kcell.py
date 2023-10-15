@@ -3769,6 +3769,10 @@ class Ports:
         self._ports: list[Port] = list(ports)
         self.kcl = kcl
 
+    def __len__(self) -> int:
+        """Return Port count."""
+        return len(self._ports)
+
     def copy(self) -> Ports:
         """Get a copy of each port."""
         return Ports(ports=[p.copy() for p in self._ports], kcl=self.kcl)
@@ -4004,6 +4008,10 @@ class InstancePorts:
         """
         self.cell_ports = instance.cell.ports
         self.instance = instance
+
+    def __len__(self) -> int:
+        """Return Port count."""
+        return len(self.cell_ports)
 
     def __getitem__(self, key: int | str | None) -> Port:
         """Get a port by name."""
