@@ -4,7 +4,7 @@ from collections.abc import Sequence
 
 import numpy as np
 import numpy.typing as nty
-from scipy.special import binom  # type: ignore[import]
+from scipy.special import binom  # type:ignore[import-untyped]
 
 from .. import KCell, KCLayout, LayerEnum, cell, kcl, kdb
 from ..enclosure import LayerEnclosure

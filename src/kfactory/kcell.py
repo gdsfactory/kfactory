@@ -28,7 +28,7 @@ from typing import Any, Literal, TypeAlias, TypeVar, overload
 import cachetools.func
 import numpy as np
 import ruamel.yaml
-from aenum import Enum, constant  # type: ignore[import]
+from aenum import Enum, constant  # type: ignore[import-untyped]
 from pydantic import BaseModel, Field, computed_field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec
@@ -3751,7 +3751,7 @@ class Instances:
 class Ports:
     """A collection of ports.
 
-    It is not a traditional dictionary. Elements can be retrieved as in a tradional
+    It is not a traditional dictionary. Elements can be retrieved as in a traditional
     dictionary. But to keep tabs on names etc, the ports are stored as a list
 
     Attributes:
@@ -4127,7 +4127,7 @@ def cell(
     Callable[KCellParams, KCell]
     | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
 ):
-    """Decorator to cache and auto name the celll.
+    """Decorator to cache and auto name the cell.
 
     This will use `functools.cache` to cache the function call.
     Additionally, if enabled this will set the name and from the args/kwargs of the

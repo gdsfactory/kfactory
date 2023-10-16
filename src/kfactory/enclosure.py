@@ -169,7 +169,7 @@ def extrude_path(
         layer: the main layer that should be extruded
         path: list of floating-points points
         width: width in µm
-        enclosure: optoinal enclosure object, specifying necessary
+        enclosure: optional enclosure object, specifying necessary
             layers.this will extrude around the `layer`
         start_angle: optionally specify a custom starting angle if `None`
             will be autocalculated from the first two elements
@@ -309,7 +309,7 @@ def extrude_path_dynamic(
         path: list of floating-points points
         widths: function (from t==0 to t==1) defining a width profile for the path |
             list with width for the profile (needs same length as path)
-        enclosure: optoinal enclosure object, specifying necessary layers.this will
+        enclosure: optional enclosure object, specifying necessary layers.this will
             extrude around the `layer`
         start_angle: optionally specify a custom starting angle if `None` will be
             autocalculated from the first two elements
