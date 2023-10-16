@@ -106,3 +106,34 @@ def test_route_bend90_euler(
         bend90_cell=bend90_euler,
     )
     kf.config.logfilter.regex = None
+
+
+def test_route_bundle(
+    LAYER: kf.LayerEnum,
+    optical_port: kf.Port,
+    bend90_euler: kf.KCell,
+) -> None:
+    c = kf.KCell()
+
+    # p1 = optical_port.copy()
+    # p2 = optical_port.copy()
+
+    p_start = [
+        optical_port.copy(kf.kdb.Trans(1, False, i * 10_000, 0)) for i in range(5)
+    ]
+    p_end = [
+        optical_port.copy(kf.kdb.Trans(1, False, i * 10_000 + 1000_000, 0))
+        for i in range(5)
+    ]
+
+    radius = abs(bend90_euler.ports["o1"].x - bend90_euler["o2"].x)
+
+    pts = kf.routing.manhattan.route_bundle_manhattan(
+        p_start,
+        p_end,
+        bend90_radius=radius,
+        spacings=[0],
+        start_straights=[0],
+        end_straights=[0],
+    )
+    print(f"{pts=}")

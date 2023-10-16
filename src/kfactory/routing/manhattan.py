@@ -1,5 +1,8 @@
 """Can calculate manhattan routes based on ports/transformations."""
 
+from functools import partial
+from typing import Literal
+
 import numpy as np
 
 from .. import kdb
@@ -339,3 +342,159 @@ def route_manhattan(
     clean_points(points)
 
     return points
+
+
+@config.logger.catch(reraise=True)
+def route_bundle_manhattan(
+    start_ports: list[Port],
+    end_ports: list[Port] | list[kdb.Trans],
+    bend90_radius: int,
+    spacings: list[int],
+    start_straights: list[int],
+    end_straights: list[int],
+    max_tries: int = 20,
+) -> list[list[kdb.Point]]:
+    """Calculate manhattan route using um based points.
+
+    Doesn't use any non-90° bends.
+
+    Args:
+        start_ports: Transformation of start port.
+        end_ports: Transformation of end port.
+        bend90_radius: The radius or (symmetrical) dimension of 90° bend. [dbu]
+        spacings: Spacings between each route on the bundle path
+        start_straights: Minimum straight after the starting port. [dbu]
+        end_straights: Minimum straight before the end port. [dbu]
+        max_tries: Maximum number of tries to calculate a manhattan route before
+        giving up
+
+    Returns:
+        route: Calculated route in points in dbu.
+    """
+    if len(start_ports) == 0 or len(start_ports) != len(end_ports):
+        raise ValueError(
+            f"Length of start_ports ({len(start_ports)}) and"
+            f" end_ports ({len(end_ports)}) must be the same and not 0"
+        )
+    start_trans = [p if isinstance(p, kdb.Trans) else p.trans for p in start_ports]
+    end_trans = [p if isinstance(p, kdb.Trans) else p.trans for p in end_ports]
+
+    sv = [trans.disp for trans in start_trans]
+    ev = [trans.disp for trans in end_trans]
+
+    s_xmin = min(v.x for v in sv)
+    e_xmin = min(v.x for v in ev)
+    s_xmax = max(v.x for v in sv)
+    e_xmax = max(v.x for v in ev)
+    s_ymin = min(v.y for v in sv)
+    e_ymin = min(v.y for v in ev)
+    s_ymax = max(v.y for v in sv)
+    e_ymax = max(v.y for v in ev)
+
+    s_box = kdb.Box(s_xmin, s_ymin, s_xmax, s_ymax)
+    e_box = kdb.Box(e_xmin, e_ymin, e_xmax, e_ymax)
+
+    s_box.enlarge(bend90_radius)
+    e_box.enlarge(bend90_radius)
+
+    if not (kdb.Region(s_box) & kdb.Region(e_box)).is_empty():
+        raise ValueError(
+            "The bounding boxes of the two port collections are too close"
+            " to each other to safely use bundle routing."
+        )
+
+    route_points: list[list[kdb.Point]] = []
+
+    # avg_center_start = kdb.Vector(0, 0)
+    # for t in start_trans:
+    #     avg_center_start += t.disp
+    # avg_center_start /= len(start_trans)
+
+    start_mean = kdb.Vector(
+        *[
+            int(x)
+            for x in np.mean(
+                [[t.disp.x, t.disp.y] for t in start_trans], axis=0, dtype=int
+            )
+        ]
+    )
+    end_mean = kdb.Vector(
+        *[
+            int(x)
+            for x in np.mean(
+                [[t.disp.x, t.disp.y] for t in end_trans], axis=0, dtype=int
+            )
+        ]
+    )
+
+    start_angle_count = {i: 0 for i in range(4)}
+    end_angle_count = {i: 0 for i in range(4)}
+
+    for t in start_trans:
+        start_angle_count[t.angle] += 1
+    for t in end_trans:
+        end_angle_count[t.angle] += 1
+
+    best_start_angle = [
+        t for t in sorted(start_angle_count.items(), key=lambda x: x[0])
+    ]
+    best_end_angle = [t for t in sorted(end_angle_count.items(), key=lambda x: x[0])]
+
+    v = end_mean - start_mean
+
+    match v.x:
+        case x if x == 0:
+            x_dir = None
+        case x if x > 0:
+            x_dir = 0
+        case _:
+            x_dir = 2
+
+    match v.y:
+        case y if y == 0:
+            y_dir = None
+        case y if y > 0:
+            y_dir = 1
+        case y if y < 0:
+            y_dir = 3
+
+    if best_start_angle[1][1] == 0:
+        dir = best_end_angle[0][0]
+        # all the start ports point in the same direction, so do the standard bundle
+
+        def sort_port(
+            index: int, port: Port, dir: Literal[-1, 1], attr: Literal["x", "y"]
+        ) -> int:
+            return dir * getattr(port.trans, attr)  # type: ignore[no-any-return]
+
+        match dir:
+            case 0:
+                _ports: list[tuple[int, Port]] = list(
+                    sorted(
+                        enumerate(start_ports), key=partial(sort_port, dir=-1, attr="y")
+                    )
+                )
+                left_ports: list[Port] = []
+                left_spacings: list[int] = []
+                right_ports: list[Port] = []
+                right_spacings: list[int] = []
+
+                # for index, _port in _ports:
+                #     if _port.trans.disp.y < start_mean.y:
+                #         left_ports.append[_port]
+            case 1:
+                _ports = sorted(
+                    enumerate(start_ports), key=partial(sort_port, dir=1, attr="x")
+                )
+            case 2:
+                _ports = sorted(
+                    enumerate(start_ports), key=partial(sort_port, dir=1, attr="y")
+                )
+            case _:
+                _ports = sorted(
+                    enumerate(start_ports), key=partial(sort_port, dir=-1, attr="x")
+                )
+
+    # choose a good direction for the bundle
+
+    return route_points
