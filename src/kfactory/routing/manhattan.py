@@ -349,7 +349,7 @@ def route_bundle_manhattan(
     start_ports: list[Port],
     end_ports: list[Port] | list[kdb.Trans],
     bend90_radius: int,
-    spacings: list[int],
+    spacing: int,
     start_straights: list[int],
     end_straights: list[int],
     max_tries: int = 20,
@@ -362,7 +362,8 @@ def route_bundle_manhattan(
         start_ports: Transformation of start port.
         end_ports: Transformation of end port.
         bend90_radius: The radius or (symmetrical) dimension of 90° bend. [dbu]
-        spacings: Spacings between each route on the bundle path
+        spacing: Spacing between each route on the bundle path.
+            (with regard to the main layer)
         start_straights: Minimum straight after the starting port. [dbu]
         end_straights: Minimum straight before the end port. [dbu]
         max_tries: Maximum number of tries to calculate a manhattan route before
@@ -474,27 +475,363 @@ def route_bundle_manhattan(
                         enumerate(start_ports), key=partial(sort_port, dir=-1, attr="y")
                     )
                 )
-                left_ports: list[Port] = []
-                left_spacings: list[int] = []
-                right_ports: list[Port] = []
-                right_spacings: list[int] = []
-
-                # for index, _port in _ports:
-                #     if _port.trans.disp.y < start_mean.y:
-                #         left_ports.append[_port]
             case 1:
-                _ports = sorted(
-                    enumerate(start_ports), key=partial(sort_port, dir=1, attr="x")
+                _ports = list(
+                    sorted(
+                        enumerate(start_ports), key=partial(sort_port, dir=1, attr="x")
+                    )
                 )
             case 2:
-                _ports = sorted(
-                    enumerate(start_ports), key=partial(sort_port, dir=1, attr="y")
+                _ports = list(
+                    sorted(
+                        enumerate(start_ports), key=partial(sort_port, dir=1, attr="y")
+                    )
                 )
             case _:
-                _ports = sorted(
-                    enumerate(start_ports), key=partial(sort_port, dir=-1, attr="x")
+                _ports = list(
+                    sorted(
+                        enumerate(start_ports), key=partial(sort_port, dir=-1, attr="x")
+                    )
                 )
+
+        left_ports: list[Port] = []
+        right_ports: list[Port] = []
+
+        for index, _port in _ports:
+            if _port.trans.disp.y < start_mean.y:
+                left_ports.append(_port)
+            else:
+                right_ports.append(_port)
+
+        start_routes: list[list[kdb.Point]] = []
+
+        min_start = 0
+        for _port in reversed(list(left_ports)):
+            if dir % 2:
+                sx = start_mean.x
+                if len(_ports) % 2:
+                    pass
+                if _port.x == sx:
+                    start_routes.append(
+                        [_port.trans.disp.to_p(), _port.trans.disp.to_p()]
+                    )
+                elif abs(_port.x - sx) < 2 * bend90_radius:
+                    raise NotImplementedError()
+                else:
+                    pts = [
+                        _port.trans.disp.to_p(),
+                        _port.trans.disp.to_p()
+                        + (
+                            kdb.Trans(dir, False, 0, 0)
+                            * kdb.Vector(bend90_radius + min_start, 0)
+                        ),
+                    ]
+                    # pts.append(
+                    #     kdb.Point(
+                    #         pts[-1].x,
+                    #         # ,  # fix
+                    #     )
+                    # )
+
+            else:
+                pass
 
     # choose a good direction for the bundle
 
     return route_points
+
+
+def vec_dir(vec: kdb.Vector) -> int:
+    match (vec.x, vec.y):
+        case (x, 0) if x > 0:
+            return 0
+        case (x, 0) if x < 0:
+            return 2
+        case (0, y) if y > 0:
+            return 1
+        case (0, y) if y < 0:
+            return 3
+        case _:
+            raise ValueError(f"Non-manhattan vectors aren't supported {vec}")
+
+
+def backbone2bundle(
+    backbone: list[kdb.Point],
+    port_widths: list[int],
+    spacing: int,
+) -> list[list[kdb.Point]]:
+    """Used to extract a bundle from a backbone."""
+    pts: list[list[kdb.Point]] = []
+
+    edges: list[kdb.Edge] = []
+    dirs: list[int] = []
+    p1 = backbone[0]
+
+    for p2 in backbone[1:]:
+        edges.append(kdb.Edge(p1, p2))
+        dirs.append(vec_dir(p2 - p1))
+        p1 = p2
+
+    width = sum(port_widths) + (len(port_widths) - 1) * spacing
+
+    x = -width // 2
+
+    for pw in port_widths:
+        x += pw // 2
+
+        _pts = [p.dup() for p in backbone]
+        p1 = _pts[0]
+
+        for p2, e, dir in zip(_pts[1:], edges, dirs):
+            _e = e.shifted(-x)
+            if dir % 2:
+                p1.x = _e.p1.x
+                p2.x = _e.p2.x
+            else:
+                p1.y = _e.p1.y
+                p2.y = _e.p2.y
+            p1 = p2
+
+        x += spacing + pw // 2
+        pts.append(_pts)
+
+    return pts
+
+
+def route_ports_to_bundle(
+    ports_to_route: list[tuple[kdb.Trans, int]],
+    bend_radius: int,
+    bbox: kdb.Box,
+    spacing: int,
+    bundle_base_point: kdb.Point,
+    start_straight: int = 0,
+) -> dict[kdb.Trans, list[kdb.Point]]:
+    dir = ports_to_route[0][0].angle
+    bundle_dir = (dir + 2) % 4
+    sign = -1 if dir // 2 else 1
+    # var_sign = -1 if dir % 2 else 1
+    attr = "x" if dir % 2 else "y"
+    var_attr = "y" if dir % 2 else "x"
+
+    base_attr: int = getattr(bundle_base_point, attr)
+    base_var_attr: int = getattr(bundle_base_point, var_attr)
+
+    def sort_port(port_width: tuple[kdb.Trans, int]) -> int:
+        return sign * getattr(port_width[0].disp, attr)  # type: ignore[no-any-return]
+
+    sorted_ports = list(sorted(ports_to_route, key=sort_port))
+    port_widths = [p[1] for p in sorted_ports]
+    width = sum(port_widths) + (len(port_widths) - 1) * spacing
+
+    port_dict: dict[kdb.Trans, list[kdb.Point]] = {}
+
+    min_var: int = base_var_attr
+    print(f"{min_var=}")
+
+    ### Determine the start_straight (from bundle point of view)
+
+    _attr = base_attr - sign * width // 2
+
+    _start_straight = 0
+
+    _last_sign = False
+
+    straights: list[int] = []
+
+    current_straights: list[int] = []
+    _old_dir = None
+    for i, (_port, _width) in enumerate(sorted_ports):
+        _attr += sign * _width // 2
+        _port_attr = sign * getattr(_port.disp, attr)
+        diff = sign * (_port_attr - _attr)
+
+        match diff:
+            case 0:
+                _dir = 0
+            case x if x > 0:
+                _dir = 1
+            case _:
+                _dir = -1
+
+        if not _old_dir:
+            _old_dir = _dir
+
+        changed = (_dir != _old_dir) or (_dir == 0)
+
+        print(f"{straights=}")
+        print(f"{current_straights=}")
+
+        if abs(diff) < 2 * bend_radius:
+            if changed:
+                current_straights.append(_width)
+                # _old_dir = -_dir
+            else:
+                if _old_dir == 1:
+                    _s = 0
+                    append_list: list[int] = []
+                    for _w in reversed(current_straights[1:]):
+                        append_list.insert(0, _s)
+                        _s += _w + spacing
+                    append_list.insert(0, _s)
+                    straights.extend(append_list)
+                    current_straights = [_width]
+                else:
+                    _s = 0
+                    append_list = []
+                    for _w in current_straights[:-1]:
+                        append_list.append(_s)
+                        _s += _w + spacing
+                    append_list.append(_s)
+                    straights.extend(append_list)
+                    current_straights = [_width]
+                _old_dir = -_dir
+        else:
+            if changed:
+                if _old_dir == 1:
+                    _s = 0
+                    append_list = []
+                    for _w in reversed(current_straights[1:]):
+                        append_list.insert(0, _s)
+                        _s += _w + spacing
+                    append_list.insert(0, _s)
+                    straights.extend(append_list)
+                    current_straights = []
+                else:
+                    _s = 0
+                    append_list = []
+                    for _w in current_straights[:-1]:
+                        append_list.append(_s)
+                        _s += _w + spacing
+                    append_list.append(_s)
+                    straights.extend(append_list)
+                    current_straights = []
+                _old_dir = _dir
+            else:
+                current_straights.append(_width)
+    if _old_dir == 1:
+        _s = 0
+        append_list = []
+        for _w in reversed(current_straights):
+            append_list.insert(0, _s)
+            _s += _w + spacing
+        append_list.insert(0, _s)
+    else:
+        _s = 0
+        append_list = []
+        for _w in current_straights:
+            append_list.append(_s)
+            _s += _w + spacing
+        append_list.append(_s)
+    straights.extend(append_list)
+
+    # _minmax = max if sign else min
+    _minmax = max  # if dir in [0, 2, 3] else max
+
+    ### Calculate the ideal minimum point of the bundle wrt the ports
+    _attr = base_attr - sign * width // 2
+    for i, (_port, _width) in enumerate(sorted_ports):
+        _attr += sign * _width // 2
+        _port_attr = sign * getattr(_port.disp, attr)
+        _port_var_attr = sign * getattr(_port.disp, var_attr)
+        _start_straight = straights[i]
+        _dist = abs(_port_attr - _attr)
+        _var_dist = abs(min_var - _port_var_attr)
+        if _dist >= 2 * bend_radius:
+            min_var = _minmax(
+                _port_var_attr + sign * 2 * bend_radius + sign * _start_straight,
+                min_var,
+            )
+            print(f"{_port_var_attr+ sign * 2 * bend_radius+ sign * _start_straight=}")
+            print(f"{min_var=}")
+            print(f"{_minmax.__name__=}")
+        elif _dist == 0:
+            _start_straight = 0
+            print(f"{min_var=}")
+            print(f"{_minmax.__name__=}")
+            min_var = _minmax(_port_var_attr, min_var)
+        else:
+            min_var = _minmax(
+                _port_var_attr + sign * 4 * bend_radius + sign * _start_straight,
+                min_var,
+            )
+            print(f"{_port_var_attr+ sign * 2 * bend_radius+ sign * _start_straight=}")
+            print(f"{min_var=}")
+    bundle_point = bundle_base_point.dup()
+    setattr(bundle_point, var_attr, min_var)
+
+    w = -sign * width // 2
+    for (_port, _width), straight in zip(sorted_ports, straights):
+        w += sign * _width // 2
+        v = kdb.Vector(bundle_point)
+        setattr(v, attr, getattr(v, attr) + sign * w)
+        t2 = kdb.Trans(bundle_dir, False, v)
+
+        print(f"{v=}")
+        print(f"{bundle_dir=}")
+        print(f"{t2=}")
+
+        port_dict[_port] = route_manhattan(
+            t2,
+            _port,
+            bend_radius,
+            # start_straight=0,
+            end_straight=0,
+            start_straight=straight,
+            # end_straight=straight,
+        )
+        w += sign * _width // 2 + spacing
+
+    print(f"{bundle_point=}")
+
+    return port_dict
+
+
+def route_ports_side(
+    dir: Literal[1, -1],
+    ports_to_route: list[tuple[kdb.Trans, int]],
+    existing_side_ports: list[tuple[kdb.Trans, int]],
+    bend_radius: int,
+    bbox: kdb.Box,
+    spacing: int,
+    start_straight: int = 0,
+) -> dict[kdb.Trans, list[kdb.Point]]:
+    _ports_dir = ports_to_route[0][0].angle
+    _dir = (_ports_dir + dir) % 4
+    _attr = "y" if _ports_dir % 2 else "x"
+    _inv_rot = kdb.Trans(_ports_dir, False, 0, 0).inverted()
+
+    _pts = [
+        kdb.Point(0, 0),
+        kdb.Point(bend_radius, 0),
+        kdb.Point(bend_radius, dir * bend_radius),
+    ]
+
+    def base_pts(trans: kdb.Trans, start_straight: int) -> list[kdb.Point]:
+        pts = [p.dup() for p in _pts]
+        for pt in pts[1:]:
+            pt.x = pt.x + start_straight
+        return [trans * p for p in pts]
+
+    pts_dict: dict[kdb.Trans, list[kdb.Point]] = {}
+
+    # sign = -1 if _ports_dir // 2 else 1
+
+    # start_side = (
+    #     max([sign * getattr(trans.disp, _attr) for trans, _ in existing_side_ports])
+    #     if existing_side_ports
+    #     else None
+    # )
+
+    ports_to_route.sort(key=lambda port_width: -dir * (_inv_rot * port_width[0]).disp.y)
+    # side_ports = existing_side_ports.copy()
+    # side_ports.sort(key= lambda port_width)
+
+    [print((_inv_rot * port_width[0]).disp) for port_width in ports_to_route]
+    start_straight = 0
+
+    for trans, width in ports_to_route:
+        _trans = kdb.Trans(_ports_dir, False, trans.disp.x, trans.disp.y)
+        pts_dict[trans] = base_pts(_trans, start_straight=start_straight)
+        start_straight += width + spacing
+
+    return pts_dict

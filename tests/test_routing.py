@@ -108,10 +108,11 @@ def test_route_bend90_euler(
     kf.config.logfilter.regex = None
 
 
-def test_route_bundle(
+def test_route_backbone_bundle(
     LAYER: kf.LayerEnum,
     optical_port: kf.Port,
     bend90_euler: kf.KCell,
+    straight_factory: Callable[..., kf.KCell],
 ) -> None:
     c = kf.KCell()
 
@@ -128,12 +129,180 @@ def test_route_bundle(
 
     radius = abs(bend90_euler.ports["o1"].x - bend90_euler["o2"].x)
 
-    pts = kf.routing.manhattan.route_bundle_manhattan(
+    # pts = kf.routing.manhattan.route_bundle_manhattan(
+    #     p_start,
+    #     p_end,
+    #     bend90_radius=radius,
+    #     spacings=[0],
+    #     start_straights=[0],
+    #     end_straights=[0],
+    # )
+    # print(f"{pts=}")
+
+    for pts in kf.routing.manhattan.backbone2bundle(
+        [
+            kf.kdb.Point(0, 0),
+            kf.kdb.Point(0, 500_000),
+            kf.kdb.Point(200_000, 500_000),
+            kf.kdb.Point(200_000, -100_000),
+            kf.kdb.Point(500_000, -100_000),
+            kf.kdb.Point(500_000, 200_000),
+            kf.kdb.Point(250_000, 200_000),
+            kf.kdb.Point(250_000, 0),
+        ],
+        [1_000] * 6,
+        spacing=5_000,
+    ):
+        print(pts)
+        kf.routing.optical.place90(
+            c,
+            kf.Port(
+                width=1_000, layer=LAYER.WG, trans=kf.kdb.Trans(1, False, pts[0].to_v())
+            ),
+            kf.Port(
+                width=1_000,
+                layer=LAYER.WG,
+                trans=kf.kdb.Trans(1, False, pts[-1].to_v()),
+            ),
+            pts=pts,
+            straight_factory=straight_factory,
+            bend90_cell=bend90_euler,
+        )
+    c.show()
+
+
+def test_route2bundle(
+    LAYER: kf.LayerEnum,
+    optical_port: kf.Port,
+    bend90_euler: kf.KCell,
+    straight_factory: Callable[..., kf.KCell],
+) -> None:
+    c = kf.KCell()
+
+    # p1 = optical_port.copy()
+    # p2 = optical_port.copy()
+
+    p_start = [
+        optical_port.copy(kf.kdb.Trans(0, False, 0, i * 200_000)) for i in range(5)
+    ]
+    p_end = [
+        optical_port.copy(kf.kdb.Trans(0, False, 500_000, i * 200_000 + 1000_000))
+        for i in range(5)
+    ]
+
+    radius = abs(bend90_euler.ports["o1"].x - bend90_euler["o2"].x)
+
+    routes = kf.routing.manhattan.route_ports_to_bundle(
+        [(p.trans, p.width) for p in p_start],
+        radius,
+        c.bbox(),
+        5_000,
+        bundle_base_point=kf.kdb.Point(375_000, 0),
+    )
+    for (
+        p_s,
+        p_e,
+    ) in zip(
         p_start,
         p_end,
-        bend90_radius=radius,
-        spacings=[0],
-        start_straights=[0],
-        end_straights=[0],
-    )
-    print(f"{pts=}")
+    ):
+        pts = routes[p_s.trans]
+        p = kf.Port(
+            trans=kf.kdb.Trans(3, False, pts[0].to_v()), layer=LAYER.WG, width=1000
+        )
+        print(f"{pts=}")
+        c.add_port(port=p)
+        print(f"{p=}")
+        c.add_port(port=p_s)
+        print(f"{p_s=}")
+        kf.routing.optical.place90(
+            c,
+            p2=p_s,
+            p1=p,
+            pts=pts,
+            straight_factory=straight_factory,
+            bend90_cell=bend90_euler,
+        )
+
+    c.show()
+
+
+# def test_route_side(
+#     LAYER: kf.LayerEnum,
+#     optical_port: kf.Port,
+#     bend90_euler: kf.KCell,
+#     straight_factory: Callable[..., kf.KCell],
+# ) -> None:
+#     c = kf.KCell()
+
+#     # p1 = optical_port.copy()
+#     # p2 = optical_port.copy()
+
+#     p_start = [
+#         optical_port.copy(kf.kdb.Trans(1, False, i * 10_000, 0)) for i in range(5)
+#     ]
+#     p_end = [
+#         optical_port.copy(kf.kdb.Trans(1, False, i * 10_000 + 1000_000, 0))
+#         for i in range(5)
+#     ]
+
+#     radius = abs(bend90_euler.ports["o1"].x - bend90_euler["o2"].x)
+
+#     # pts = kf.routing.manhattan.route_bundle_manhattan(
+#     #     p_start,
+#     #     p_end,
+#     #     bend90_radius=radius,
+#     #     spacings=[0],
+#     #     start_straights=[0],
+#     #     end_straights=[0],
+#     # )
+#     # print(f"{pts=}")
+
+#     # for pts in kf.routing.manhattan.backbone2bundle(
+#     #     [
+#     #         kf.kdb.Point(0, 0),
+#     #         kf.kdb.Point(0, 500_000),
+#     #         kf.kdb.Point(200_000, 500_000),
+#     #         kf.kdb.Point(200_000, -100_000),
+#     #         kf.kdb.Point(500_000, -100_000),
+#     #         kf.kdb.Point(500_000, 200_000),
+#     #         kf.kdb.Point(250_000, 200_000),
+#     #         kf.kdb.Point(250_000, 0),
+#     #     ],
+#     #     [1_000] * 6,
+#     #     spacing=5_000,
+#     # ):
+#     #     print(pts)
+#     #     kf.routing.optical.place90(
+#     #         c,
+#     #         kf.Port(
+#     #             width=1_000, layer=LAYER.WG, trans=kf.kdb.Trans(1, False, pts[0].to_v())
+#     #         ),
+#     #         kf.Port(
+#     #             width=1_000,
+#     #             layer=LAYER.WG,
+#     #             trans=kf.kdb.Trans(1, False, pts[-1].to_v()),
+#     #         ),
+#     #         pts=pts,
+#     #         straight_factory=straight_factory,
+#     #         bend90_cell=bend90_euler,
+#     #     )
+
+#     pts_dict = kf.routing.manhattan.route_ports_side(
+#         1, [(p.trans, p.width) for p in p_start], [], radius, c.bbox(), 5000
+#     )
+
+#     print(f"{pts_dict=}")
+#     print(f"{p_end=}")
+
+#     for port_start, port_end in zip(p_start, p_end):
+#         kf.routing.optical.place90(
+#             c,
+#             port_start,
+#             port_end,
+#             pts_dict[port_start.trans],
+#             straight_factory=straight_factory,
+#             bend90_cell=bend90_euler,
+#         )
+
+#     c.show()
