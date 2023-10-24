@@ -28,7 +28,7 @@ from . import cells, placer, routing, port, technology, enclosure, utils
 from .conf import config
 from .enclosure import LayerEnclosure, KCellEnclosure
 
-from aenum import constant  # type: ignore[import]
+from aenum import constant  # type: ignore[import-untyped]
 
 __version__ = "0.9.3"
 

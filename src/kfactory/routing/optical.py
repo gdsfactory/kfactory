@@ -139,7 +139,25 @@ def route(
     allow_small_routes: bool = False,
     different_port_width: int = False,
 ) -> None:
-    """Bend 90 part."""
+    """Places a route.
+
+    Args:
+        c: Cell to place the route in.
+        p1: Start port.
+        p2: End port.
+        straight_factory: Factory function for straight cells. in DBU.
+        bend90_cell: 90° bend cell.
+        bend180_cell: 180° bend cell.
+        taper_cell: Taper cell.
+        start_straight: Minimal straight segment after `p1`.
+        end_straight: Minimal straight segment before `p2`.
+        route_path_function: Function to calculate the route path.
+        port_type: Port type to use for the bend90_cell.
+        allow_small_routes: Don't throw an error if two corners cannot be safely placed
+            due to small space and place them anyway.
+        different_port_width: If True, the width of the ports is ignored.
+
+    """
     if p1.width != p2.width and not different_port_width:
         raise ValueError(
             f"The ports have different widths {p1.width=} {p2.width=}. If this is"
@@ -331,7 +349,16 @@ def route(
             end_straight=end_straight,
         )
 
-        place90(c, p1.copy(), p2.copy(), pts, straight_factory, bend90_cell, taper_cell)
+        place90(
+            c,
+            p1.copy(),
+            p2.copy(),
+            pts,
+            straight_factory,
+            bend90_cell,
+            taper_cell,
+            allow_small_routes=allow_small_routes,
+        )
 
 
 def place90(

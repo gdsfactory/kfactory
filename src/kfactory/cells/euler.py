@@ -10,8 +10,8 @@ BendEulerCustom(KCell.kcl) and use that one.
 """
 
 import numpy as np
-from scipy.optimize import brentq  # type: ignore[import]
-from scipy.special import fresnel  # type: ignore[import]
+from scipy.optimize import brentq  # type:ignore[import-untyped]
+from scipy.special import fresnel  # type:ignore[import-untyped]
 
 from .. import kdb
 from ..conf import config
