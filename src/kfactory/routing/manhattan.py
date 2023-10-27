@@ -484,7 +484,6 @@ def route_ports_to_bundle(
                     append_straights(straights, current_straights, old_dir == -1)
                     current_straights.append(0)
                     straight = _width + spacing
-                    print(f"{straight=}")
                 else:
                     current_straights.append(straight)
                     straight += _width + spacing
@@ -552,7 +551,6 @@ def route_ports_side(
 
     ports_to_route.sort(key=lambda port_width: -dir * (_inv_rot * port_width[0]).disp.y)
 
-    [print((_inv_rot * port_width[0]).disp) for port_width in ports_to_route]
     start_straight = 0
 
     for trans, width in ports_to_route:
