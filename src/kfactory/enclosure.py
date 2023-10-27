@@ -89,13 +89,14 @@ def clean_points(points: list[kdb.Point]) -> list[kdb.Point]:
     for i, p_n in enumerate(points[2:], 2):
         v2 = p_n - p
         v1 = p - p_p
+
         if (
             (np.sign(v1.x) == np.sign(v2.x)) and (np.sign(v1.y) == np.sign(v2.y))
         ) or v2.abs() == 0:
             del_points.append(i - 1)
-        p_p = p
-        p = p_n
-
+        else:
+            p_p = p
+            p = p_n
     for i in reversed(del_points):
         del points[i]
 

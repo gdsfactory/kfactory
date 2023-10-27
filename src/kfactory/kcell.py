@@ -4566,4 +4566,5 @@ __all__ = [
     "default_save",
     "LayerEnum",
     "KCellParams",
+    "OpticalManhattanRotue",
 ]
