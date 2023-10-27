@@ -2041,14 +2041,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             if layer_enclosures:
                 if isinstance(layer_enclosures, LayerEnclosureModel):
                     layer_enclosures = LayerEnclosureModel(
-                        enclosure_mape={
+                        enclosure_map={
                             name: lenc.copy_to(self)
                             for name, lenc in layer_enclosures.enclosure_map.items()
                         }
                     )
                 else:
                     layer_enclosures = LayerEnclosureModel(
-                        enclosure_mape={
+                        enclosure_map={
                             name: lenc.copy_to(self)
                             for name, lenc in layer_enclosures.items()
                         }
