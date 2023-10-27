@@ -106,3 +106,52 @@ def test_route_bend90_euler(
         bend90_cell=bend90_euler,
     )
     kf.config.logfilter.regex = None
+
+
+def test_route_bundle(
+    LAYER: kf.LayerEnum,
+    optical_port: kf.Port,
+    bend90_euler: kf.KCell,
+    straight_factory: Callable[..., kf.KCell],
+) -> None:
+    c = kf.KCell()
+
+    p_start = [
+        optical_port.copy(
+            kf.kdb.Trans(
+                1,
+                False,
+                i * 200_000 - 50_000,
+                (4 - i) * 6_000 if i < 5 else (i - 5) * 6_000,
+            )
+        )
+        for i in range(10)
+    ]
+    p_end = [
+        optical_port.copy(
+            kf.kdb.Trans(3, False, i * 200_000 + i**2 * 19_000 + 1_000_000, 500_000)
+        )
+        for i in range(10)
+    ]
+
+    c.shapes(kf.kcl.layer(10, 0)).insert(kf.kdb.Box(-50_000, 0, 1_750_000, -100_000))
+    c.shapes(kf.kcl.layer(10, 0)).insert(
+        kf.kdb.Box(1_000_000, 500_000, p_end[-1].x, 600_000)
+    )
+
+    routes = kf.routing.optical.route_bundle(
+        c,
+        p_start,
+        p_end,
+        5_000,
+        straight_factory=straight_factory,
+        bend90_cell=bend90_euler,
+    )
+
+    for route in routes:
+        c.add_port(route.start_port)
+        c.add_port(route.end_port)
+
+    c.auto_rename_ports()
+
+    c.show()
