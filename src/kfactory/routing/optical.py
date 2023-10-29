@@ -1,6 +1,7 @@
 """Optical routing allows the creation of photonic (or any route using bends)."""
 
 from collections.abc import Callable, Sequence
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -154,6 +155,7 @@ def route(
     port_type: str = "optical",
     allow_small_routes: bool = False,
     different_port_width: int = False,
+    route_kwargs: dict[str, Any] | None = {},
 ) -> OpticalManhattanRoute:
     """Places a route.
 
@@ -172,6 +174,7 @@ def route(
         allow_small_routes: Don't throw an error if two corners cannot be safely placed
             due to small space and place them anyway.
         different_port_width: If True, the width of the ports is ignored.
+        route_kwargs: Additional keyword arguments for the route_path_function.
 
     """
     if p1.width != p2.width and not different_port_width:
@@ -357,13 +360,23 @@ def route(
     else:
         start_port = p1.copy()
         end_port = p2.copy()
-        pts = route_path_function(
-            start_port,
-            end_port,
-            bend90_radius=b90r,
-            start_straight=start_straight,
-            end_straight=end_straight,
-        )
+        if not route_kwargs:
+            pts = route_path_function(
+                start_port,
+                end_port,
+                bend90_radius=b90r,
+                start_straight=start_straight,
+                end_straight=end_straight,
+            )
+        else:
+            pts = route_path_function(
+                start_port,
+                end_port,
+                bend90_radius=b90r,
+                start_straight=start_straight,
+                end_straight=end_straight,
+                **route_kwargs,
+            )
 
         route = place90(
             c,
