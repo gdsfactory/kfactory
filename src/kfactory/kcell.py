@@ -297,13 +297,21 @@ class FrozenError(AttributeError):
     pass
 
 
-def default_save() -> kdb.SaveLayoutOptions:
-    """Default options for saving GDS/OAS."""
+def save_layout_options(**attributes: Any) -> kdb.SaveLayoutOptions:
+    """Default options for saving GDS/OAS.
+
+    Args:
+        attributes: Set attributes of the layout save option object. E.g. to save the
+            gds without metadata pass `write_context_info=False`
+    """
     save = kdb.SaveLayoutOptions()
     save.gds2_write_cell_properties = True
     save.gds2_write_file_properties = True
     save.gds2_write_timestamps = False
     # save.write_context_info = False  # True
+
+    for k, v in attributes.items():
+        setattr(save, k, v)
 
     return save
 
@@ -1048,7 +1056,9 @@ class KCell:
                 )
 
     def write(
-        self, filename: str | Path, save_options: kdb.SaveLayoutOptions = default_save()
+        self,
+        filename: str | Path,
+        save_options: kdb.SaveLayoutOptions = save_layout_options(),
     ) -> None:
         """Write a KCell to a GDS.
 
@@ -2309,7 +2319,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     def write(
         self,
         filename: str | Path,
-        options: kdb.SaveLayoutOptions = default_save(),
+        options: kdb.SaveLayoutOptions = save_layout_options(),
         set_meta: bool = True,
     ) -> None:
         ...
@@ -2317,7 +2327,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     def write(
         self,
         filename: str | Path,
-        options: kdb.SaveLayoutOptions = default_save(),
+        options: kdb.SaveLayoutOptions = save_layout_options(),
         set_meta: bool = True,
     ) -> None:
         """Write a GDS file into the existing Layout.
@@ -4409,7 +4419,7 @@ def update_default_trans(
 def show(
     gds: str | KCell | Path,
     keep_position: bool = True,
-    save_options: kdb.SaveLayoutOptions = default_save(),
+    save_options: kdb.SaveLayoutOptions = save_layout_options(),
 ) -> None:
     """Show GDS in klayout."""
     import inspect
@@ -4567,7 +4577,7 @@ __all__ = [
     "cell",
     "kcl",
     "KCLayout",
-    "default_save",
+    "save_layout_options",
     "LayerEnum",
     "KCellParams",
 ]

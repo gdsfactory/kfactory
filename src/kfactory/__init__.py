@@ -18,7 +18,7 @@ from .kcell import (
     cell,
     kcl,
     KCLayout,
-    default_save,
+    save_layout_options,
     LayerEnum,
     show,
     polygon_from_array,
