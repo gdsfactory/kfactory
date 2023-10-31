@@ -4168,7 +4168,7 @@ def cell(
         sig = inspect.signature(f)
 
         # previously was a KCellCache, but dict should do for most case
-        cache: dict[int, Any] | Cache[int, Any] = cache or {}
+        CACHE: dict[int, Any] | Cache[int, Any] = cache or {}
 
         @functools.wraps(f)
         def wrapper_autocell(
@@ -4193,7 +4193,7 @@ def cell(
             for param in del_parameters:
                 del params[param]
 
-            @cachetools.cached(cache=cache)
+            @cachetools.cached(cache=CACHE)
             @functools.wraps(f)
             def wrapped_cell(
                 **params: KCellParams.args,
