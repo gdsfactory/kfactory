@@ -4134,7 +4134,7 @@ def cell(
     check_instances: bool = True,
     snap_ports: bool = True,
     add_port_layers: bool = True,
-    function_cache: Cache[int, Any] | dict[int, Any] | None = None,
+    cache: Cache[int, Any] | dict[int, Any] | None = None,
 ) -> (
     Callable[KCellParams, KCell]
     | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
@@ -4158,7 +4158,7 @@ def cell(
         add_port_layers: Add special layers of
             [kfactory.KCLayout.netlist_layer_mapping][netlist_layer_mapping] to the
             ports if the port layer is in the mapping.
-        function_cache: Provide a user defined cache instead of an internal one. This
+        cache: Provide a user defined cache instead of an internal one. This
             can be used for example to clear the cache.
     """
 
@@ -4168,7 +4168,7 @@ def cell(
         sig = inspect.signature(f)
 
         # previously was a KCellCache, but dict should do for most case
-        cache: dict[int, Any] | Cache[int, Any] = function_cache or {}
+        cache: dict[int, Any] | Cache[int, Any] = cache or {}
 
         @functools.wraps(f)
         def wrapper_autocell(
