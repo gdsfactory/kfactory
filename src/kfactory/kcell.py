@@ -4076,49 +4076,6 @@ class InstancePorts:
 
 
 @overload
-def autocell(_func: Callable[KCellParams, KCell], /) -> Callable[KCellParams, KCell]:
-    ...
-
-
-@overload
-def autocell(
-    *,
-    set_settings: bool = True,
-    set_name: bool = True,
-) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]:
-    ...
-
-
-@config.logger.catch(reraise=True)
-def autocell(
-    _func: Callable[KCellParams, KCell] | None = None,
-    /,
-    *,
-    set_settings: bool = True,
-    set_name: bool = True,
-    check_ports: bool = True,
-    check_instances: bool = True,
-) -> (
-    Callable[KCellParams, KCell]
-    | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
-):
-    """Autoname and validate cells.
-
-    .. deprecated:: 0.7.0
-        Use [cell][kfactory.kcell.cell] instead.
-        `connect` will be removed in 0.8.0
-    """
-    config.logger.warning("autocell is deprecated, use cell instead")
-    return cell(  # type: ignore[no-any-return, call-overload]
-        _func,
-        set_settings=set_settings,
-        set_name=set_name,
-        check_ports=check_ports,
-        check_instances=check_instances,
-    )
-
-
-@overload
 def cell(_func: Callable[KCellParams, KCell], /) -> Callable[KCellParams, KCell]:
     ...
 
@@ -4131,6 +4088,7 @@ def cell(
     check_ports: bool = True,
     check_instances: bool = True,
     snap_ports: bool = True,
+    rec_dicts: bool = False,
 ) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]:
     ...
 
@@ -4147,6 +4105,7 @@ def cell(
     snap_ports: bool = True,
     add_port_layers: bool = True,
     cache: Cache[int, Any] | dict[int, Any] | None = None,
+    rec_dicts: bool = False,
 ) -> (
     Callable[KCellParams, KCell]
     | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
@@ -4172,7 +4131,11 @@ def cell(
             ports if the port layer is in the mapping.
         cache: Provide a user defined cache instead of an internal one. This
             can be used for example to clear the cache.
+        rec_dicts: Allow and inspect recursive dictionaries as parameters (can be
+            expensive if the cell is called often).
     """
+    d2fs = rec_dict_to_frozenset if rec_dicts else dict_to_frozenset
+    fs2d = rec_frozenset_to_dict if rec_dicts else frozenset_to_dict
 
     def decorator_autocell(
         f: Callable[KCellParams, KCell]
@@ -4198,7 +4161,7 @@ def cell(
 
             for key, value in params.items():
                 if isinstance(value, dict):
-                    params[key] = dict_to_frozen_set(value)
+                    params[key] = d2fs(value)
                 if value == inspect.Parameter.empty:
                     del_parameters.append(key)
 
@@ -4212,7 +4175,7 @@ def cell(
             ) -> KCell:
                 for key, value in params.items():
                     if isinstance(value, frozenset):
-                        params[key] = frozenset_to_dict(value)
+                        params[key] = fs2d(value)
                 cell = f(**params)
                 dbu = cell.kcl.layout.dbu
                 if cell._locked:
@@ -4294,7 +4257,7 @@ def cell(
     return decorator_autocell if _func is None else decorator_autocell(_func)
 
 
-def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
+def dict_to_frozenset(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
     """Convert a `dict` to a `frozenset`."""
     return frozenset(d.items())
 
@@ -4302,6 +4265,34 @@ def dict_to_frozen_set(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
 def frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable]:
     """Convert `frozenset` to `dict`."""
     return dict(fs)
+
+
+def rec_dict_to_frozenset(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
+    """Convert a `dict` to a `frozenset`."""
+    frozen_dict: dict[str, Any] = {}
+    for item, value in d.items():
+        if isinstance(value, dict):
+            _value: Any = rec_dict_to_frozenset(value)
+        elif isinstance(value, list):
+            _value = tuple(value)
+        else:
+            _value = value
+        frozen_dict[item] = _value
+
+    return frozenset(frozen_dict.items())
+
+
+def rec_frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable]:
+    """Convert `frozenset` to `dict`."""
+    # return dict(fs)
+    d: dict[str, Any] = {}
+    for k, v in fs:
+        if isinstance(v, frozenset):
+            _v: Any = rec_frozenset_to_dict(v)
+        else:
+            _v = v
+        d[k] = _v
+    return d
 
 
 def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
@@ -4350,11 +4341,9 @@ def clean_value(
     try:
         if isinstance(value, int):  # integer
             return str(value)
-        elif type(value) in [float, np.float64]:  # float
+        elif isinstance(value, float | np.float64):  # float
             return f"{value}".replace(".", "p").rstrip("0").rstrip("p")
-        elif isinstance(value, list):
-            return "_".join(clean_value(v) for v in value)
-        elif isinstance(value, tuple):
+        elif isinstance(value, list | tuple):
             return "_".join(clean_value(v) for v in value)
         elif isinstance(value, dict):
             return dict2name(**value)
