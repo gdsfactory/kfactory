@@ -23,7 +23,7 @@ from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
 from types import ModuleType
-from typing import Any, Literal, TypeAlias, TypeVar, overload
+from typing import Any, Literal, TypeAlias, TypeVar, cast, overload
 
 import cachetools.func
 import numpy as np
@@ -3906,7 +3906,10 @@ class Ports:
             mirror_x: Mirror the transformation of the port.
         """
         if trans is not None:
-            assert width is not None
+            if width is None:
+                raise ValueError("width needs to be set")
+            if width % 2 != 0:
+                raise ValueError(f"width needs to be even to snap to grid. Got {width}")
             port = Port(
                 name=name,
                 trans=trans,
@@ -3916,7 +3919,15 @@ class Ports:
                 kcl=self.kcl,
             )
         elif dcplx_trans is not None:
-            assert dwidth is not None
+            if dwidth is None or dwidth <= 0:
+                raise ValueError("dwidth needs to be set")
+            elif dwidth is not None and dwidth > 0:
+                width = round(dwidth / self.kcl.dbu)
+                width = cast(int, width)
+                if width % 2 != 0:
+                    raise ValueError(
+                        f"dwidth needs to be even to snap to grid. Got {dwidth}"
+                    )
             port = Port(
                 name=name,
                 dwidth=dwidth,
@@ -3927,6 +3938,8 @@ class Ports:
             )
         elif angle is not None and center is not None:
             assert width is not None
+            if width // 2 * 2 != width:
+                raise ValueError(f"width needs to be even to snap to grid. Got {width}")
             port = Port(
                 name=name,
                 width=width,
