@@ -145,6 +145,7 @@ def droute_manhattan(
     start_straight: int,
     end_straight: int,
     layout: KCLayout | kdb.Layout,
+    invert: bool = False,
 ) -> list[kdb.Point]:
     """Calculate manhattan route using um based points.
 
@@ -157,6 +158,9 @@ def droute_manhattan(
         start_straight: Minimum straight after the starting port. [um]
         end_straight: Minimum straight before the end port. [um]
         layout: Layout/KCLayout object where to get the dbu info from.
+        invert: Invert the direction in which to route. In the normal behavior,
+            route manhattan will try to take turns first. If true, it will try
+            to route straight as long as possible
 
     Returns:
         route: Calculated route in points in dbu.
@@ -167,6 +171,7 @@ def droute_manhattan(
         int(bend90_radius / layout.dbu),
         int(start_straight / layout.dbu),
         int(end_straight / layout.dbu),
+        invert=invert,
     )
 
 
