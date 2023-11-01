@@ -23,7 +23,7 @@ from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
 from types import ModuleType
-from typing import Any, Literal, TypeAlias, TypeVar, cast, overload
+from typing import Any, Literal, TypeAlias, TypeVar, overload
 
 import cachetools.func
 import numpy as np
@@ -3922,9 +3922,8 @@ class Ports:
             if dwidth is None or dwidth <= 0:
                 raise ValueError("dwidth needs to be set")
             elif dwidth is not None and dwidth > 0:
-                width = round(dwidth / self.kcl.dbu)
-                width = cast(int, width)
-                if width % 2 != 0:
+                _width = round(dwidth / self.kcl.dbu)
+                if _width % 2 != 0:
                     raise ValueError(
                         f"dwidth needs to be even to snap to grid. Got {dwidth}"
                     )
