@@ -3342,9 +3342,14 @@ class Instance:
             )
         return self
 
-    def rotate(self, angle: Literal[0, 1, 2, 3]) -> Instance:
+    def rotate(self, angle: Literal[0, 1, 2, 3], center: kdb.Point | None) -> Instance:
         """Rotate instance in increments of 90°."""
+        if center:
+            t = kdb.Trans(center.to_v())
+            self.transform(t.inverted())
         self.transform(kdb.Trans(angle, False, 0, 0))
+        if center:
+            self.transform(t)
         return self
 
     def __repr__(self) -> str:
@@ -3543,9 +3548,14 @@ class UMInstance:
         else:
             self.parent.transform(kdb.DTrans(0.0, float(destination - origin)))
 
-    def rotate(self, angle: float) -> None:
+    def rotate(self, angle: float, center: kdb.DPoint | None = None) -> None:
         """Rotate instance in degrees."""
+        if center:
+            t = kdb.DTrans(center.to_v())
+            self.parent.transform(t.inverted())
         self.parent.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
+        if center:
+            self.parent.transform(t)
 
     @overload
     def move(self, destination: tuple[float, float], /) -> None:
