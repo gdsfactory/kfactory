@@ -3342,7 +3342,9 @@ class Instance:
             )
         return self
 
-    def rotate(self, angle: Literal[0, 1, 2, 3], center: kdb.Point | None) -> Instance:
+    def rotate(
+        self, angle: Literal[0, 1, 2, 3], center: kdb.Point | None = None
+    ) -> Instance:
         """Rotate instance in increments of 90°."""
         if center:
             t = kdb.Trans(center.to_v())
