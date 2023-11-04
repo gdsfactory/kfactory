@@ -9,8 +9,8 @@ from .manhattan import route_manhattan
 
 def route_elec(
     c: KCell,
-    start_port: Port,
-    end_port: Port,
+    p1: Port,
+    p2: Port,
     start_straight: int | None = None,
     end_straight: int | None = None,
     route_path_function: Callable[..., list[kdb.Point]] = route_manhattan,
@@ -24,29 +24,29 @@ def route_elec(
 
     Args:
         c: KCell to place the wire in.
-        start_port: Beginning
-        end_port: End
+        p1: Beginning
+        p2: End
         start_straight: Minimum length of straight at start port.
         end_straight: Minimum length of straight at end port.
         route_path_function: Function to calculate the path. Signature:
-            `route_path_function(start_port, end_port, bend90_radius, start_straight,
+            `route_path_function(p1, p2, bend90_radius, start_straight,
             end_straight)`
         width: Overwrite the width of the wire. Calculated by the width of the start
             port if `None`.
         layer: Layer to place the wire on. Calculated from the start port if `None`.
     """
     if width is None:
-        width = start_port.width
+        width = p1.width
     if layer is None:
-        layer = start_port.layer
+        layer = p1.layer
     if start_straight is None:
         start_straight = int(width / 2)
     if end_straight is None:
         end_straight = int(width / 2)
 
     pts = route_path_function(
-        start_port.copy(),
-        end_port.copy(),
+        p1.copy(),
+        p2.copy(),
         bend90_radius=0,
         start_straight=start_straight,
         end_straight=end_straight,
@@ -242,8 +242,8 @@ def route_wire(c: KCell, input_port: Port, output_port: Port) -> None:
 
 def route_dual_rails(
     c: KCell,
-    start_port: Port,
-    end_port: Port,
+    p1: Port,
+    p2: Port,
     start_straight: int | None = None,
     end_straight: int | None = None,
     route_path_function: Callable[..., list[kdb.Point]] = route_manhattan,
@@ -255,26 +255,26 @@ def route_dual_rails(
 
     Args:
         c: KCell to place the connection in.
-        start_port: Start
-        end_port: End
+        p1: Start port.
+        p2: End port.
         start_straight: Minimum straight after the start port.
         end_straight: Minimum straight before end port.
         route_path_function: Function to calculate the path. Signature:
-            `route_path_function(start_port, end_port, bend90_radius, start_straight,
+            `route_path_function(p1, p2, bend90_radius, start_straight,
             end_straight)`
         width: Width of the rail (total). [dbu]
         hole_width: Width of the space between the rails. [dbu]
         layer: layer to place the rail in.
     """
-    _width = width or start_port.width
-    _hole_width = hole_width or start_port.width // 2
-    _layer = layer or start_port.layer
+    _width = width or p1.width
+    _hole_width = hole_width or p1.width // 2
+    _layer = layer or p1.layer
     _start_straight = start_straight or _width // 2
     _end_straight = end_straight or _width // 2
 
     pts = route_path_function(
-        start_port.copy(),
-        end_port.copy(),
+        p1.copy(),
+        p2.copy(),
         bend90_radius=0,
         start_straight=start_straight,
         end_straight=end_straight,
