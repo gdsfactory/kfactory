@@ -556,9 +556,6 @@ def place90(
     route_start_port = p1.copy()
     route_start_port.name = None
     route_start_port.trans.angle = (route_start_port.angle + 2) % 4
-    route_end_port = p1.copy()
-    route_end_port.name = None
-    route_end_port.trans.angle = (route_end_port.angle + 2) % 4
     route = OpticalManhattanRoute(
         parent=c,
         backbone=list(pts).copy(),
