@@ -187,7 +187,7 @@ def route_manhattan(
 ) -> list[kdb.Point]:
     """Calculate manhattan route using um based points.
 
-    Doesn't use any non-90° bends.
+    Only uses 90° bends.
 
     Args:
         port1: Transformation of start port.
@@ -202,7 +202,7 @@ def route_manhattan(
             to route straight as long as possible
 
     Returns:
-        route: Calculated route in points in dbu.
+        route: Calculated route in dbu points.
     """
     if not invert:
         t1 = port1.dup() if isinstance(port1, kdb.Trans) else port1.trans.dup()
@@ -269,7 +269,7 @@ def route_manhattan(
 
     t1.inverted() * (t2.disp - t1.disp)
 
-    for i in range(max_tries):
+    for _ in range(max_tries):
         tv = t1.inverted() * (t2.disp - t1.disp)
         if tv.abs() == 0 and (t2.angle - t1.angle) % 4 == 2:
             break
@@ -358,11 +358,9 @@ def route_manhattan(
     points.extend(end_points)
     clean_points(points)
 
-    if not invert:
-        return points
-    else:
+    if invert:
         points.reverse()
-        return points
+    return points
 
 
 def vec_dir(vec: kdb.Vector) -> int:

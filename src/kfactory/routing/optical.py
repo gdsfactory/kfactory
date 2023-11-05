@@ -191,12 +191,15 @@ def route(
     # determine bend90_radius
     bend90_ports = [p for p in bend90_cell.ports if p.port_type == port_type]
 
-    assert (
-        len(bend90_ports) == 2
-    ), f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
-    assert (
-        abs((bend90_ports[0].trans.angle - bend90_ports[1].trans.angle) % 4) == 1
-    ), f"{bend90_cell.name} bend ports should be 90° apart from each other"
+    if len(bend90_ports) != 2:
+        raise ValueError(
+            f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
+        )
+
+    if abs((bend90_ports[0].trans.angle - bend90_ports[1].trans.angle) % 4) != 1:
+        raise ValueError(
+            f"{bend90_cell.name} bend ports should be 90° apart from each other"
+        )
     if (bend90_ports[1].trans.angle - bend90_ports[0].trans.angle) % 4 == 3:
         b90p1 = bend90_ports[1]
         b90p2 = bend90_ports[0]
@@ -517,7 +520,7 @@ def place90(
     bend90_cell: KCell,
     taper_cell: KCell | None = None,
     port_type: str = "optical",
-    min_straight_taper: int = 1000,
+    min_straight_taper: int = 100000,
     allow_small_routes: bool = False,
 ) -> OpticalManhattanRoute:
     """Place bends and straight waveguides based on a sequence of points.
@@ -559,8 +562,8 @@ def place90(
     route = OpticalManhattanRoute(
         parent=c,
         backbone=list(pts).copy(),
-        start_port=p1,
-        end_port=p2,
+        start_port=route_start_port,
+        end_port=route_end_port,
         instances=[],
     )
     if not pts or len(pts) < 2:
