@@ -1208,7 +1208,7 @@ class KCell:
             self.add_meta_info(
                 kdb.LayoutMetaInfo(
                     f"kfactory:ports:{i}:layer",
-                    self.kcl.layout.get_info(port.layer).to_s(),
+                    self.kcl.layout.get_info(port.layer),
                     None,
                     True,
                 )
@@ -1224,14 +1224,14 @@ class KCell:
             if port._trans:
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
-                        f"kfactory:ports:{i}:trans", port._trans.to_s(), None, True
+                        f"kfactory:ports:{i}:trans", port._trans, None, True
                     )
                 )
             elif port._dcplx_trans:
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
                         f"kfactory:ports:{i}:dcplx_trans",
-                        port._dcplx_trans.to_s(),
+                        port._dcplx_trans,
                         None,
                         True,
                     )
@@ -1292,7 +1292,7 @@ class KCell:
             _d = port_dict[index]
             name = _d.get("name", None)
             port_type = _d["port_type"]
-            layer = self.kcl.layout.layer(kdb.LayerInfo.from_string(_d["layer"]))
+            layer = self.kcl.layout.layer(_d["layer"])
             width = _d["width"]
             trans = _d.get("trans", None)
             dcplx_trans = _d.get("dcplx_trans", None)
@@ -1306,9 +1306,9 @@ class KCell:
                 info=_d.get("info", {}),
             )
             if trans:
-                _port.trans = kdb.Trans.from_s(trans)
+                _port.trans = kdb.Trans(trans)
             elif dcplx_trans:
-                _port.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
+                _port.dcplx_trans = kdb.DCplxTrans(dcplx_trans)
 
             self.add_port(_port, keep_mirror=True)
 
