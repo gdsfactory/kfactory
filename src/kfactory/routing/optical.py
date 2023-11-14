@@ -553,14 +553,14 @@ def place90(
     route_start_port = p1.copy()
     route_start_port.name = None
     route_start_port.trans.angle = (route_start_port.angle + 2) % 4
-    route_end_port = p1.copy()
+    route_end_port = p2.copy()
     route_end_port.name = None
     route_end_port.trans.angle = (route_end_port.angle + 2) % 4
     route = OpticalManhattanRoute(
         parent=c,
         backbone=list(pts).copy(),
-        start_port=p1,
-        end_port=p2,
+        start_port=route_start_port,
+        end_port=route_end_port,
         instances=[],
     )
     if not pts or len(pts) < 2:
