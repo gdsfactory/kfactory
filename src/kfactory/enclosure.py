@@ -469,12 +469,12 @@ class LayerSection(BaseModel):
                 while i < len(self.sections) and sec.d_min > self.sections[i].d_max:
                     i += 1
                 while (
-                    i < len(self.sections)
-                    and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
+                    i < len(self.sections) and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
                 ):
                     sec.d_max = max(self.sections[i].d_max, sec.d_max)
                     sec.d_min = min(
-                        self.sections[i].d_min, sec.d_min  # type: ignore[type-var]
+                        self.sections[i].d_min,
+                        sec.d_min,  # type: ignore[type-var]
                     )
                     self.sections.pop(i)
                     if i == len(self.sections):

@@ -264,7 +264,7 @@ def route(
                         start_port = bend180.ports[b180p1.name]
                         pts = pts[1:]
             if (vec := pts[-1] - pts[-2]).abs() == b180r:
-                match ((vec_angle(vec) - p2.trans.angle) % 4):
+                match (vec_angle(vec) - p2.trans.angle) % 4:
                     case 1:
                         bend180 = c << bend180_cell
                         bend180.connect(b180p1.name, p2)

@@ -345,7 +345,7 @@ def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -
         assert (
             p1.trans == p2.trans * kdb.Trans.R180
             or p1.trans == p2.trans * kdb.Trans.M90
-        ), ("Transformations of ports not matching for opposite check" f"{p1=} {p2=}")
+        ), "Transformations of ports not matching for opposite check" f"{p1=} {p2=}"
     if (checks & PortCheck.opposite) == 0:
         assert (
             p1.trans == p2.trans or p1.trans == p2.trans * kdb.Trans.M0
@@ -1101,9 +1101,9 @@ class KCell:
             for inst in node.insts
         ]
         shapes = {
-            node.layout()
-            .get_info(layer)
-            .to_s(): [shape.to_s() for shape in node.shapes(layer).each()]
+            node.layout().get_info(layer).to_s(): [
+                shape.to_s() for shape in node.shapes(layer).each()
+            ]
             for layer in node.layout().layer_indexes()
             if not node.shapes(layer).is_empty()
         }
@@ -4774,36 +4774,125 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
             for layer, shapes in self.cell._shapes.items():
                 for shape in shapes.transform(trans * self.trans):
                     cell.shapes(layer).insert(shape)
-            for inst in cell.insts:
+            for inst in self.cell.insts:
                 inst.insert_into(cell, flatten=flatten, trans=trans * self.trans)
         else:
             if flatten:
                 for layer in cell.kcl.layer_indexes():
-                    cell.shapes(layer).insert(
-                        kdb.Region(cell.begin_shapes_rec(layer)).transform(
-                            (trans * self.trans).to_itrans(self.cell.dbu)
-                        )
-                    )
+                    reg = kdb.Region(self.cell.begin_shapes_rec(layer))
+                    reg.transform((trans * self.trans).to_itrans(cell.kcl.dbu))
+                    cell.shapes(layer).insert(reg)
             else:
-                lidxs = cell.kcl.layer_indexes()
-                for layer in lidxs:
-                    cell.shapes(layer).insert(self.cell.shapes(layer))
-                for inst in self.cell.insts:
-                    _trans = trans * self.trans
-                    _trans_str = f"_R{_trans.rot}_X{_trans.disp.x}_Y{_trans.disp.y}"
-                    _cell_name = inst.cell.name + _trans_str
-                    if cell.kcl.cell(_cell_name) is None:
-                        _cell = inst.cell.dup()
-                        _cell.name = _cell_name
-                        _cell._settings = inst.cell.settings.model_copy(
-                            update={"original_cell": inst.cell.name}
-                        )
-                        _cell_inst = _cell << inst.cell
-                        _cell_inst.transform(_trans)
-                        _cell.flatten()
-                        cell << _cell
-                    else:
-                        cell << cell.kcl[_cell_name]
+                _trans = trans * self.trans
+                _trans_str = (
+                    f"_R{_trans.rot()}_X{_trans.disp.x}_Y{_trans.disp.y}".replace(
+                        ".", "p"
+                    )
+                )
+                _cell_name = self.cell.name + _trans_str
+                if cell.kcl.cell(_cell_name) is None:
+                    _cell = KCell(kcl=cell.kcl)
+                    _cell.name = _cell_name
+                    _cell._settings = self.cell.settings.model_copy(
+                        update={"original_cell": self.cell.name}
+                    )
+                    _cell.info = self.cell.info.model_copy()
+                    _cell_inst = _cell << self.cell
+                    _cell_inst.transform(_trans)
+                    for port in self.cell.ports:
+                        _cell.add_port(port.copy(_trans))
+                    # _cell.flatten()
+                else:
+                    _cell = cell.kcl[_cell_name]
+                cell << _cell
+
+    @overload
+    def connect(
+        self,
+        port: str | Port | None,
+        other: Port,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool = False,
+        allow_layer_mismatch: bool = False,
+        allow_type_mismatch: bool = False,
+    ) -> None:
+        ...
+
+    @overload
+    def connect(
+        self,
+        port: str | Port | None,
+        other: VInstance,
+        other_port_name: str | None,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool = False,
+        allow_layer_mismatch: bool = False,
+        allow_type_mismatch: bool = False,
+    ) -> None:
+        ...
+
+    def connect(
+        self,
+        port: str | Port | None,
+        other: VInstance | Port,
+        other_port_name: str | None = None,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool = False,
+        allow_layer_mismatch: bool = False,
+        allow_type_mismatch: bool = False,
+    ) -> None:
+        """Align port with name `portname` to a port.
+
+        Function to allow to transform this instance so that a port of this instance is
+        connected (same center with 180° turn) to another instance.
+
+        Args:
+            port: The name of the port of this instance to be connected, or directly an
+                instance port. Can be `None` because port names can be `None`.
+            other: The other instance or a port. Skip `other_port_name` if it's a port.
+            other_port_name: The name of the other port. Ignored if
+                `other` is a port.
+            mirror: Instead of applying klayout.db.Trans.R180 as a connection
+                transformation, use klayout.db.Trans.M90, which effectively means this
+                instance will be mirrored and connected.
+            allow_width_mismatch: Skip width check between the ports if set.
+            allow_layer_mismatch: Skip layer check between the ports if set.
+            allow_type_mismatch: Skip port_type check between the ports if set.
+        """
+        if isinstance(other, VInstance):
+            if other_port_name is None:
+                raise ValueError(
+                    "portname cannot be None if an Instance Object is given. For"
+                    "complex connections (non-90 degree and floating point ports) use"
+                    "route_cplx instead"
+                )
+            op = other.ports[other_port_name]
+        elif isinstance(other, Port):
+            op = other
+        else:
+            raise ValueError("other_instance must be of type Instance or Port")
+        if isinstance(port, Port):
+            p = port
+        else:
+            p = self.cell.ports[port]
+        if p.width != op.width and not allow_width_mismatch:
+            # The ports are not the same width
+            raise PortWidthMismatch(
+                self,  # type: ignore[arg-type]
+                other,  # type: ignore[arg-type]
+                p,
+                op,
+            )
+        if p.layer != op.layer and not allow_layer_mismatch:
+            # The ports are not on the same layer
+            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)  # type: ignore[arg-type]
+        if p.port_type != op.port_type and not allow_type_mismatch:
+            raise PortTypeMismatch(self, other, p, op)  # type: ignore[arg-type]
+        dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
+        self.trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
 
 
 class VShapes(BaseModel, arbitrary_types_allowed=True):
