@@ -1,7 +1,6 @@
 import kfactory as kf
-import pytest
+from functools import partial
 
-from collections.abc import Callable
 
 
 def test_virtual_cell() -> None:
@@ -19,47 +18,65 @@ def test_virtual_inst(straight: kf.KCell) -> None:
     print(inst)
 
 
-def test_virtual_cell_insert(LAYER: kf.LayerEnum) -> None:
+def test_virtual_cell_insert(
+    LAYER: kf.LayerEnum, straight: kf.KCell, wg_enc: kf.LayerEnclosure
+) -> None:
     c = kf.KCell()
 
     vc = kf.VKCell()
 
-    straight = kf.VKCell()
-    straight.shapes(LAYER.WG).insert(
-        kf.kdb.DPolygon(
-            [
-                kf.kdb.DPoint(x, y)
-                for x, y in [(0, -0.25), (0, 0.25), (1.0005, 0.25), (1.0005, -0.25)]
-            ]
-        )
-    )
-    straight.create_port(
-        name="o1",
-        dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, 0, 0),
+    e_bend = kf.cells.virtual.euler.virtual_bend_euler(
+        width=0.5,
+        radius=10,
         layer=LAYER.WG,
-        dwidth=0.5,
+        angle=25,
+        enclosure=wg_enc,
     )
-    straight.create_port(
-        name="o2",
-        dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, 1.0005, 0),
-        layer=LAYER.WG,
-        dwidth=0.5,
+    e1 = vc << e_bend
+    e2 = vc << e_bend
+    e3 = vc << e_bend
+    e4 = vc << e_bend
+    _s = kf.cells.virtual.straight.straight(
+        width=0.5, length=10, layer=LAYER.WG, enclosure=wg_enc
     )
+    s = vc << _s
 
-    # e_bend = kf.cells.euler.bend_euler(width=0.5, radius=10, layer=LAYER.WG, angle=30)
-    # e1 = vc << e_bend
-    # e2 = vc << e_bend
-    s = vc << straight
-    s.trans = kf.kdb.DCplxTrans(1, 30, False, 0, 0)
+    s.connect("o1", e1, "o2")
 
-    for _ in range(10):
-        _s = vc << straight
-        _s.connect("o1", s, "o2")
-        s = _s
+    e2.connect("o1", s, "o2")
+    e3.connect("o1", e2, "o2")
+    e4.connect("o2", e3, "o2")
+    s2 = vc << straight
+    s2.connect("o1", e4, "o1")
 
     vi = kf.VInstance(vc)
     vi.insert_into(c)
 
-    # vi = kf.VInstance(straight, kf.kdb.DCplxTrans(1, 30, False, 0, 0))
+    c.show()
 
+
+def test_all_angle_route(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
+    bb = [kf.kdb.DPoint(x, y) for x, y in [(0, 0), (500, 0), (250, 200), (500, 250)]]
+    c = kf.KCell("test_virtual")
+    vc = kf.VKCell()
+    _r = kf.routing.aa.optical.route(
+        vc,
+        width=5,
+        layer=c.kcl.layer(1, 0),
+        backbone=bb,
+        straight_factory=partial(
+            kf.cells.virtual.straight.straight,
+            layer=c.kcl.layer(1, 0),
+            enclosure=wg_enc,
+        ),
+        bend_factory=partial(
+            kf.cells.virtual.euler.virtual_bend_euler,
+            width=5,
+            radius=20,
+            layer=c.kcl.layer(1, 0),
+            enclosure=wg_enc,
+        ),
+    )
+    kf.VInstance(vc, kf.kdb.DCplxTrans()).insert_into(c)
+    # pprint(_r.model_dump(), indent=2)
     c.show()

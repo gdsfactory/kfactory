@@ -5,7 +5,7 @@ shape located on a main_layer or reference layer or region.
 """
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from enum import IntEnum
 from hashlib import sha1
 from typing import TYPE_CHECKING, Any, TypeGuard, overload
@@ -104,7 +104,7 @@ def clean_points(points: list[kdb.Point]) -> list[kdb.Point]:
 
 
 def extrude_path_points(
-    path: list[kdb.DPoint],
+    path: Sequence[kdb.DPoint],
     width: float,
     start_angle: float | None = None,
     end_angle: float | None = None,
@@ -489,6 +489,12 @@ class LayerSection(BaseModel):
     def __hash__(self) -> int:
         """Unique hash of LayerSection."""
         return hash(tuple((s.d_min, s.d_max) for s in self.sections))
+
+    def __len__(self) -> int:
+        return len(self.sections)
+
+    def __iter__(self) -> Iterable[Section]:  # type:ignore[override]
+        yield from iter(self.sections)
 
 
 class LayerEnclosure(BaseModel, validate_assignment=True):
@@ -1078,14 +1084,6 @@ class LayerEnclosureCollection(BaseModel):
             return next(filter(lambda enc: enc.main_layer == key, self.enclosures))
         except StopIteration:
             raise KeyError(f"Unknown key {key}")
-
-    def __iter__(self) -> Iterator[LayerEnclosure]:  # type: ignore[override]
-        """Iterator over the LayerEnclosures."""
-        yield from self.enclosures
-
-    def __len__(self) -> int:
-        """Length of the LayerEnclosure list."""
-        return len(self.enclosures)
 
 
 class RegionOperator(kdb.TileOutputReceiver):

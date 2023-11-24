@@ -4791,17 +4791,13 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
                 )
                 _cell_name = self.cell.name + _trans_str
                 if cell.kcl.cell(_cell_name) is None:
-                    _cell = KCell(kcl=cell.kcl)
+                    _cell = self.cell.dup()
                     _cell.name = _cell_name
-                    _cell._settings = self.cell.settings.model_copy(
-                        update={"original_cell": self.cell.name}
-                    )
-                    _cell.info = self.cell.info.model_copy()
-                    _cell_inst = _cell << self.cell
-                    _cell_inst.transform(_trans)
+                    _cell.flatten(False)
+                    for layer in _cell.kcl.layer_indexes():
+                        _cell.shapes(layer).transform(_trans)
                     for port in self.cell.ports:
                         _cell.add_port(port.copy(_trans))
-                    # _cell.flatten()
                 else:
                     _cell = cell.kcl[_cell_name]
                 cell << _cell
