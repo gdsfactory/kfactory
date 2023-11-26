@@ -1362,7 +1362,7 @@ class KCellEnclosure(BaseModel):
         """
         regions = {}
 
-        for enc in self.enclosures:
+        for enc in self.enclosures.enclosures:
             if not c.bbox_per_layer(enc.main_layer).empty():
                 rsi = c.begin_shapes_rec(enc.main_layer)
                 for layer, layersec in enc.layer_sections.items():
@@ -1412,7 +1412,7 @@ class KCellEnclosure(BaseModel):
         inputs: set[int] = set()
         port_hole_map: dict[int, PortHoles] = {}
 
-        for enc in self.enclosures:
+        for enc in self.enclosures.enclosures:
             maxsize = 0
             assert enc.main_layer is not None
             for layer, layersection in enc.layer_sections.items():
@@ -1445,7 +1445,7 @@ class KCellEnclosure(BaseModel):
         tp.tile_border(maxsize * tp.dbu, maxsize * tp.dbu)
         tp.tile_size(tile_size, tile_size)
 
-        for i, enc in enumerate(self.enclosures):
+        for i, enc in enumerate(self.enclosures.enclosures):
             assert enc.main_layer is not None
             if not c.bbox_per_layer(enc.main_layer).empty():
                 _inp = f"main_layer_{enc.main_layer}"
@@ -1542,4 +1542,4 @@ class KCellEnclosure(BaseModel):
 
     def copy_to(self, kcl: KCLayout) -> KCellEnclosure:
         """Copy the KCellEnclosure to another KCLayout."""
-        return KCellEnclosure([enc.copy_to(kcl) for enc in self.enclosures])
+        return KCellEnclosure([enc.copy_to(kcl) for enc in self.enclosures.enclosures])

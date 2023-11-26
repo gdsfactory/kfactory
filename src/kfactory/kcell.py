@@ -4689,9 +4689,12 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
 
     def create_port(self, **kwargs: Any) -> Port:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
-        # if self._locked:
-        #     raise LockedError(self)
         return self.ports.create_port(**kwargs)
+
+    def insert_into(
+        self, c: KCell, flatten: bool = False, trans: kdb.DCplxTrans = kdb.DCplxTrans.R0
+    ) -> None:
+        VInstance(c, trans=trans).insert_into(cell=c, flatten=flatten, trans=trans)
 
 
 class VInstancePorts:

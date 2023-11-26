@@ -2,7 +2,6 @@ import kfactory as kf
 from functools import partial
 
 
-
 def test_virtual_cell() -> None:
     c = kf.VKCell()
     c.shapes(kf.kcl.layer(1, 0)).insert(
