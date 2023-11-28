@@ -1307,29 +1307,60 @@ class KCell:
 
         # ports = Ports()
         self.ports = Ports(self.kcl)
-        for index in sorted(port_dict.keys()):
-            _d = port_dict[index]
-            name = _d.get("name", None)
-            port_type = _d["port_type"]
-            layer = self.kcl.layout.layer(_d["layer"])
-            width = _d["width"]
-            trans = _d.get("trans", None)
-            dcplx_trans = _d.get("dcplx_trans", None)
-            _port = Port(
-                name=name,
-                width=width,
-                layer=layer,
-                trans=kdb.Trans.R0,
-                kcl=self.kcl,
-                port_type=port_type,
-                info=_d.get("info", {}),
-            )
-            if trans:
-                _port.trans = kdb.Trans(trans)
-            elif dcplx_trans:
-                _port.dcplx_trans = kdb.DCplxTrans(dcplx_trans)
+        match config.meta_format:
+            case "default":
+                for index in sorted(port_dict.keys()):
+                    _d = port_dict[index]
+                    name = _d.get("name", None)
+                    port_type = _d["port_type"]
+                    layer = self.kcl.layout.layer(_d["layer"])
+                    width = _d["width"]
+                    trans = _d.get("trans", None)
+                    dcplx_trans = _d.get("dcplx_trans", None)
+                    _port = Port(
+                        name=name,
+                        width=width,
+                        layer=layer,
+                        trans=kdb.Trans.R0,
+                        kcl=self.kcl,
+                        port_type=port_type,
+                        info=_d.get("info", {}),
+                    )
+                    if trans:
+                        _port.trans = trans
+                    elif dcplx_trans:
+                        _port.dcplx_trans = dcplx_trans
 
-            self.add_port(_port, keep_mirror=True)
+                    self.add_port(_port, keep_mirror=True)
+            case "string":
+                for index in sorted(port_dict.keys()):
+                    _d = port_dict[index]
+                    name = _d.get("name", None)
+                    port_type = _d["port_type"]
+                    layer = self.kcl.layout.layer(_d["layer"])
+                    width = _d["width"]
+                    trans = _d.get("trans", None)
+                    dcplx_trans = _d.get("dcplx_trans", None)
+                    _port = Port(
+                        name=name,
+                        width=width,
+                        layer=layer,
+                        trans=kdb.Trans.R0,
+                        kcl=self.kcl,
+                        port_type=port_type,
+                        info=_d.get("info", {}),
+                    )
+                    if trans:
+                        _port.trans = trans
+                    elif dcplx_trans:
+                        _port.dcplx_trans = dcplx_trans
+
+                    self.add_port(_port, keep_mirror=True)
+            case _:
+                raise ValueError(
+                    f"Unknown metadata format {config.meta_format}."
+                    f" Available formats are 'default' or 'legacy'."
+                )
 
     @property
     def xmin(self) -> int:

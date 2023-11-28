@@ -14,7 +14,7 @@ import pytest
 )
 def test_rotation(
     center: kf.kdb.Point | None, straight: kf.KCell, LAYER: kf.LayerEnum
-) -> kf.KCell:
+) -> None:
     c = kf.KCell()
 
     wg1 = c << straight
@@ -32,8 +32,6 @@ def test_rotation(
 
     c.show()
 
-    return c
-
 
 @pytest.mark.parametrize(
     "center",
@@ -47,7 +45,7 @@ def test_rotation(
 )
 def test_drotation(
     center: kf.kdb.DPoint | None, straight: kf.KCell, LAYER: kf.LayerEnum
-) -> kf.KCell:
+) -> None:
     c = kf.KCell()
 
     wg1 = c << straight
@@ -64,5 +62,3 @@ def test_drotation(
     c.add_ports(wg2.ports)
 
     c.show()
-
-    return c
