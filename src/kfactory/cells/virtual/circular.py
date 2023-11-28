@@ -1,5 +1,5 @@
 from .utils import extrude_backbone
-from ...kcell import KCLayout, VKCell, kcl
+from ...kcell import KCLayout, VKCell, kcl, vcell
 from ...enclosure import LayerEnclosure
 from ...conf import config
 from ... import kdb
@@ -13,6 +13,7 @@ class VirtualBendCircular:
         """Create a euler_bend function on a custom KCLayout."""
         self.kcl = kcl
 
+    @vcell
     def __call__(
         self,
         width: float,

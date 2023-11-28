@@ -1,6 +1,6 @@
 from .utils import extrude_backbone
 from ... import kdb
-from ...kcell import KCLayout, VKCell, LayerEnum, kcl
+from ...kcell import KCLayout, VKCell, LayerEnum, kcl, vcell
 from ...enclosure import LayerEnclosure
 from ...conf import config
 
@@ -33,6 +33,7 @@ class Straight:
         """Initialize A straight class on a defined KCLayout."""
         self.kcl = kcl
 
+    @vcell
     def __call__(
         self,
         width: float,

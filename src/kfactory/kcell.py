@@ -203,7 +203,7 @@ class LockedError(AttributeError):
     """Raised when a locked cell is being modified."""
 
     @config.logger.catch(reraise=True)
-    def __init__(self, kcell: KCell):
+    def __init__(self, kcell: KCell | VKCell):
         """Throw _locked error."""
         super().__init__(
             f"KCell {kcell.name} has been locked already."
@@ -461,7 +461,6 @@ class KCell:
             self._kdb_cell.name = f"Unnamed_{self.cell_index()}"
         self.kcl.register_cell(self, allow_reregister=True)
         self.ports: Ports = ports or Ports(self.kcl)
-        self.complex = False
 
         if kdb_cell is not None:
             for inst in kdb_cell.each_inst():
@@ -4604,17 +4603,38 @@ def _check_cell_ports(p1: Port, p2: Port) -> int:
 class VKCell(BaseModel, arbitrary_types_allowed=True):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
-    kcl: KCLayout
-    _shapes: dict[int, VShapes]
-    insts: list[VInstance]
     _ports: Ports
+    _shapes: dict[int, VShapes]
+    _locked: bool
+    _settings: KCellSettings
+    info: Info
+    kcl: KCLayout
+    insts: list[VInstance]
+    _name: str | None
 
-    def __init__(self, kcl: KCLayout = kcl) -> None:
-        # self._shapes = {}
-        # self._portts = Ports(kcl)
-        BaseModel.__init__(self, kcl=kcl, insts=[])
+    def __init__(
+        self,
+        name: str | None = None,
+        kcl: KCLayout = kcl,
+        info: dict[str, int | float | str] = {},
+    ) -> None:
+        BaseModel.__init__(self, kcl=kcl, insts=[], info=Info(**info))
         self._shapes = {}
         self._ports = Ports(kcl)
+        self._locked = False
+        self._settings = KCellSettings()
+        self._name = name
+
+    @property
+    def name(self) -> str | None:
+        """Name of the KCell."""
+        return self._name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        if self._locked:
+            raise LockedError(self)
+        self._name = value
 
     def __lshift__(self, cell: KCell | VKCell) -> VInstance:
         return self.create_inst(cell=cell)
@@ -4696,6 +4716,15 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
     ) -> None:
         VInstance(c, trans=trans).insert_into(cell=c, flatten=flatten, trans=trans)
 
+    def __getitem__(self, key: int | str | None) -> Port:
+        """Returns port from instance."""
+        return self.ports[key]
+
+    @property
+    def settings(self) -> KCellSettings:
+        """Settings dictionary set by the [@vcell][kfactory.kcell.vcell] decorator."""
+        return self._settings
+
 
 class VInstancePorts:
     """Ports of an instance.
@@ -4774,11 +4803,43 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
     ) -> None:
         if isinstance(self.cell, VKCell):
-            for layer, shapes in self.cell._shapes.items():
-                for shape in shapes.transform(trans * self.trans):
-                    cell.shapes(layer).insert(shape)
-            for inst in self.cell.insts:
-                inst.insert_into(cell, flatten=flatten, trans=trans * self.trans)
+            if flatten:
+                for layer, shapes in self.cell._shapes.items():
+                    for shape in shapes.transform(trans * self.trans):
+                        cell.shapes(layer).insert(shape)
+                for inst in self.cell.insts:
+                    inst.insert_into(cell, flatten=flatten, trans=trans * self.trans)
+            else:
+                _trans = trans * self.trans
+                _trans_str = (
+                    f"_R{_trans.rot()}_X{_trans.disp.x}_Y{_trans.disp.y}".replace(
+                        ".", "p"
+                    )
+                )
+                _cn = self.cell.name
+                if _cn is None:
+                    raise ValueError(
+                        "Cannot insert a non-flattened VKCell when the name is 'None'"
+                    )
+                _cell_name = _cn + _trans_str
+                if cell.kcl.cell(_cell_name) is None:
+                    _cell = KCell(kcl=self.cell.kcl, name=_cell_name)  # self.cell.dup()
+                    for layer, shapes in self.cell._shapes.items():
+                        for shape in shapes.transform(trans * self.trans):
+                            _cell.shapes(layer).insert(shape)
+                    for inst in self.cell.insts:
+                        inst.insert_into(cell=_cell, flatten=flatten, trans=_trans)
+                    _cell.name = _cell_name
+                    for port in self.cell.ports:
+                        _cell.add_port(port.copy(_trans))
+                    _settings = self.cell.settings.model_dump()
+                    _settings.update({"virtual_trans": _trans})
+                    _cell._settings = KCellSettings(**_settings)
+                    _cell.info = Info(**self.cell.info.model_dump())
+                else:
+                    _cell = cell.kcl[_cell_name]
+                cell << _cell
+
         else:
             if flatten:
                 for layer in cell.kcl.layer_indexes():
@@ -4938,6 +4999,167 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
                 )
 
         return VShapes(cell=self.cell, _shapes=new_shapes)  # type: ignore[arg-type]
+
+
+@overload
+def vcell(_func: Callable[KCellParams, VKCell], /) -> Callable[KCellParams, VKCell]:
+    ...
+
+
+@overload
+def vcell(
+    *,
+    set_settings: bool = True,
+    set_name: bool = True,
+    check_ports: bool = True,
+    rec_dicts: bool = False,
+) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]:
+    ...
+
+
+@config.logger.catch(reraise=True)
+def vcell(
+    _func: Callable[KCellParams, VKCell] | None = None,
+    /,
+    *,
+    set_settings: bool = True,
+    set_name: bool = True,
+    check_ports: bool = True,
+    add_port_layers: bool = True,
+    cache: Cache[int, Any] | dict[int, Any] | None = None,
+    rec_dicts: bool = False,
+) -> (
+    Callable[KCellParams, VKCell]
+    | Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]
+):
+    """Decorator to cache and auto name the cell.
+
+    This will use `functools.cache` to cache the function call.
+    Additionally, if enabled this will set the name and from the args/kwargs of the
+    function and also paste them into a settings dictionary of the
+    [KCell][kfactory.kcell.KCell].
+
+    Args:
+        set_settings: Copy the args & kwargs into the settings dictionary
+        set_name: Auto create the name of the cell to the functionname plus a
+            string created from the args/kwargs
+        check_ports: Check whether there are any non-90° ports in the cell and throw a
+            warning if there are
+        snap_ports: Snap the centers of the ports onto the grid (only x/y, not angle).
+        add_port_layers: Add special layers of
+            [kfactory.KCLayout.netlist_layer_mapping][netlist_layer_mapping] to the
+            ports if the port layer is in the mapping.
+        cache: Provide a user defined cache instead of an internal one. This
+            can be used for example to clear the cache.
+        rec_dicts: Allow and inspect recursive dictionaries as parameters (can be
+            expensive if the cell is called often).
+    """
+    d2fs = rec_dict_to_frozenset if rec_dicts else dict_to_frozenset
+    fs2d = rec_frozenset_to_dict if rec_dicts else frozenset_to_dict
+
+    def decorator_autocell(
+        f: Callable[KCellParams, VKCell]
+    ) -> Callable[KCellParams, VKCell]:
+        sig = inspect.signature(f)
+
+        # previously was a KCellCache, but dict should do for most case
+        _cache = cache or {}
+
+        @functools.wraps(f)
+        def wrapper_autocell(
+            *args: KCellParams.args, **kwargs: KCellParams.kwargs
+        ) -> VKCell:
+            params: dict[str, KCellParams.args] = {
+                p.name: p.default for k, p in sig.parameters.items()
+            }
+            arg_par = list(sig.parameters.items())[: len(args)]
+            for i, (k, v) in enumerate(arg_par):
+                params[k] = args[i]
+            params.update(kwargs)
+
+            del_parameters: list[str] = []
+
+            for key, value in params.items():
+                if isinstance(value, dict):
+                    params[key] = d2fs(value)
+                if value == inspect.Parameter.empty:
+                    del_parameters.append(key)
+
+            for param in del_parameters:
+                del params[param]
+
+            @cachetools.cached(cache=_cache)
+            @functools.wraps(f)
+            def wrapped_cell(
+                **params: KCellParams.args,
+            ) -> VKCell:
+                for key, value in params.items():
+                    if isinstance(value, frozenset):
+                        params[key] = fs2d(value)
+                cell = f(**params)
+                if cell._locked:
+                    raise ValueError(
+                        f"Trying to change a locked VKCell is no allowed. {cell.name=}"
+                    )
+                if set_name:
+                    if "self" in params:
+                        name = get_cell_name(
+                            params["self"].__class__.__name__, **params
+                        )
+                    else:
+                        name = get_cell_name(f.__name__, **params)
+                    cell.name = name
+                if set_settings:
+                    settings = cell.settings.model_dump()
+                    if "self" in params:
+                        settings["function_name"] = params["self"].__class__.__name__
+                    else:
+                        settings["function_name"] = f.__name__
+                    params.pop("self", None)
+                    params.pop("cls", None)
+                    settings.update(params)
+                    cell._settings = KCellSettings(**settings)
+                info = cell.info.model_dump()
+                for name, value in cell.info:
+                    info[name] = value
+                cell.info = Info(**info)
+                if add_port_layers:
+                    for port in cell.ports:
+                        if port.layer in cell.kcl.netlist_layer_mapping:
+                            if port._trans:
+                                edge = kdb.Edge(
+                                    kdb.Point(0, -port.width // 2),
+                                    kdb.Point(0, port.width // 2),
+                                )
+                                cell.shapes(
+                                    cell.kcl.netlist_layer_mapping[port.layer]
+                                ).insert(port.trans * edge)
+                                if port.name:
+                                    cell.shapes(
+                                        cell.kcl.netlist_layer_mapping[port.layer]
+                                    ).insert(kdb.Text(port.name, port.trans))
+                            else:
+                                dedge = kdb.DEdge(
+                                    kdb.DPoint(0, -port.d.width / 2),
+                                    kdb.DPoint(0, port.d.width / 2),
+                                )
+                                cell.shapes(
+                                    cell.kcl.netlist_layer_mapping[port.layer]
+                                ).insert(port.dcplx_trans * dedge)
+                                if port.name:
+                                    cell.shapes(
+                                        cell.kcl.netlist_layer_mapping[port.layer]
+                                    ).insert(
+                                        kdb.DText(port.name, port.dcplx_trans.s_trans())
+                                    )
+                cell._locked = True
+                return cell
+
+            return wrapped_cell(**params)
+
+        return wrapper_autocell
+
+    return decorator_autocell if _func is None else decorator_autocell(_func)
 
 
 VInstance.model_rebuild()

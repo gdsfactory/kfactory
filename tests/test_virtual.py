@@ -22,7 +22,7 @@ def test_virtual_cell_insert(
 ) -> None:
     c = kf.KCell()
 
-    vc = kf.VKCell()
+    vc = kf.VKCell("test_virtual_insert")
 
     e_bend = kf.cells.virtual.euler.virtual_bend_euler(
         width=0.5,
@@ -57,7 +57,7 @@ def test_virtual_cell_insert(
 def test_all_angle_route(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
     bb = [kf.kdb.DPoint(x, y) for x, y in [(0, 0), (500, 0), (250, 200), (500, 250)]]
     c = kf.KCell("test_virtual")
-    vc = kf.VKCell()
+    vc = kf.VKCell("test_all_angle")
     _r = kf.routing.aa.optical.route(
         vc,
         width=5,
