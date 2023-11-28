@@ -201,3 +201,37 @@ def test_route_bundle(
     c.auto_rename_ports()
 
     c.show()
+
+
+def test_route_length(
+    bend90_euler: kf.KCell,
+    straight_factory: Callable[..., kf.KCell],
+    LAYER: kf.LayerEnum,
+    optical_port: kf.Port,
+    taper: kf.KCell,
+) -> None:
+    x, y, angle2 = (70000, 70000, 2)
+
+    c = kf.KCell()
+    p1 = optical_port.copy()
+    p2 = optical_port.copy()
+    p2.trans = kf.kdb.Trans(angle2, False, x, y)
+    b90r = abs(bend90_euler.ports._ports[0].x - bend90_euler.ports._ports[1].x)
+    if abs(x) < b90r or abs(y) < b90r:
+        kf.config.logfilter.regex = f"Potential collision in routing due to small distance between the port in relation to bend radius x={x}/{b90r}, y={y}/{b90r}"
+    route = kf.routing.optical.route(
+        c,
+        p1,
+        p2,
+        straight_factory=straight_factory,
+        bend90_cell=bend90_euler,
+        taper_cell=taper,
+        min_straight_taper=0,
+    )
+    kf.config.logfilter.regex = None
+
+    assert route.length == 65196
+    assert route.length_straights == 25196
+    assert route.length_backbone == 140000
+    assert route.n_bend90 == 2
+    c.show()

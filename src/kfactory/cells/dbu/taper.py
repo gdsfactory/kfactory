@@ -87,7 +87,7 @@ class Taper:
         c.create_port(trans=kdb.Trans(0, False, length, 0), width=width2, layer=layer)
 
         if enclosure is not None:
-            enclosure.apply_minkowski_y(c, kdb.Region(c.bbox()))
+            enclosure.apply_minkowski_y(c, layer)
         c.info = Info(
             **{
                 "width1_um": width1 * c.kcl.dbu,
