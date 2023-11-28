@@ -1,3 +1,4 @@
+"""Virtual circular cells."""
 from .utils import extrude_backbone
 from ...kcell import KCLayout, VKCell, kcl, vcell
 from ...enclosure import LayerEnclosure
@@ -7,10 +8,12 @@ import numpy as np
 
 
 class VirtualBendCircular:
+    """Virtual circular bend."""
+
     kcl: KCLayout
 
     def __init__(self, kcl: KCLayout) -> None:
-        """Create a euler_bend function on a custom KCLayout."""
+        """Create a virtual circular bend function on a custom KCLayout."""
         self.kcl = kcl
 
     @vcell
@@ -23,7 +26,7 @@ class VirtualBendCircular:
         angle: float = 90,
         angle_step: float = 1,
     ) -> VKCell:
-        """Create a circular bend.
+        """Create a virtual circular bend.
 
         Args:
             width: Width of the core. [um]

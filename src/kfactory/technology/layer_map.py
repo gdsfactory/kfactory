@@ -32,6 +32,7 @@ class LayerPropertiesModel(BaseModel):
 
     @model_validator(mode="before")
     def color_to_frame_fill(cls, data: dict[str, Any]) -> dict[str, Any]:
+        """Convert a color string to a frame fill."""
         if "color" in data:
             if "fill_color" not in data:
                 data["fill_color"] = data["color"]
@@ -132,6 +133,7 @@ def lyp_to_yaml(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
 
 
 def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
+    """Convert a KLayout LayerPropertiesNodeRef to a pydantic representation."""
     lp = LayerPropertiesModel(
         name=kl.name.rstrip(f" - {kl.source_layer}/{kl.source_datatype}"),
         layer=(kl.source_layer, kl.source_datatype),
@@ -153,6 +155,7 @@ def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
 def kl2group(
     iter: lay.LayerPropertiesIterator,
 ) -> list[LayerGroupModel | LayerPropertiesModel]:
+    """Convert a full LayerPropertiesIterator to a pydantic representation."""
     members: list[LayerGroupModel | LayerPropertiesModel] = []
     while not iter.at_end():
         lpnr = iter.current()

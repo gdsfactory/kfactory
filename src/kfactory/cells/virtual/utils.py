@@ -1,3 +1,4 @@
+"""Utility functions for virtual cells."""
 from collections.abc import Sequence
 from ... import kdb
 from ...kcell import VKCell
@@ -14,6 +15,18 @@ def extrude_backbone(
     end_angle: float,
     dbu: float,
 ) -> None:
+    """Extrude a backbone into a virtual cell.
+
+    Args:
+        c: target cell
+        backbone: backbone to extrude
+        width: width to extrude (main layer)
+        layer: main layer & reference for enclosure
+        enclosure: enclosure to apply
+        start_angle: force a certain start angle
+        end_angle: force a acertain end angle
+        dbu: database unit to use as a reference
+    """
     center_path_l, center_path_r = extrude_path_points(
         backbone, width=width, start_angle=start_angle, end_angle=end_angle
     )

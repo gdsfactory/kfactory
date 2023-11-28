@@ -191,8 +191,7 @@ skip = "pyproject.toml"
 
 [tool.ruff]
 line-length = 88
-# src = ["src"]
-exclude = ["tests", "docs"]
+exclude = ["tests", "docs", "src/kfactory/widgets/interactive.py"]
 indent-width = 4
 target-version = "py311"
 select = [

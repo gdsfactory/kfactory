@@ -1,3 +1,4 @@
+"""Virtual euler cells."""
 from .utils import extrude_backbone
 from ...kcell import KCLayout, VKCell, kcl, vcell
 from ...enclosure import LayerEnclosure
@@ -7,6 +8,8 @@ from ... import kdb
 
 
 class VirtualBendEuler:
+    """Virtual euler bend on a custom KCLayout."""
+
     kcl: KCLayout
 
     def __init__(self, kcl: KCLayout) -> None:
@@ -23,7 +26,7 @@ class VirtualBendEuler:
         angle: float = 90,
         resolution: float = 150,
     ) -> VKCell:
-        """Create a euler bend.
+        """Create a virtual euler bend.
 
         Args:
             width: Width of the core. [um]

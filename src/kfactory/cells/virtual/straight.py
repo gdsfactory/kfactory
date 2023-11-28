@@ -1,3 +1,5 @@
+"""Straight virtual waveguide cells."""
+
 from .utils import extrude_backbone
 from ... import kdb
 from ...kcell import KCLayout, VKCell, LayerEnum, kcl, vcell
@@ -9,7 +11,7 @@ __all__ = ["Straight", "straight"]
 
 
 class Straight:
-    """Waveguide defined in dbu.
+    """Virtual waveguide defined in um.
 
         ┌──────────────────────────────┐
         │         Slab/Exclude         │
@@ -41,7 +43,7 @@ class Straight:
         layer: int | LayerEnum,
         enclosure: LayerEnclosure | None = None,
     ) -> VKCell:
-        """Waveguide defined in um.
+        """Virtual waveguide defined in um.
 
             ┌──────────────────────────────┐
             │         Slab/Exclude         │
@@ -56,9 +58,9 @@ class Straight:
             width: Waveguide width. [um]
             length: Waveguide length. [um]
             layer: Main layer of the waveguide.
-            enclosure: Definition of slab/excludes. [um]
+            enclosure: Definition of slab/excludes. [dbu]
         """
-        c = VKCell(self.kcl)
+        c = VKCell(kcl=self.kcl)
         if length < 0:
             config.logger.critical(
                 f"Negative lengths are not allowed {length} as ports"
