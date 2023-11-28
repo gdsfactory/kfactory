@@ -233,4 +233,5 @@ def test_route_length(
     assert route.length == 65196
     assert route.length_straights == 25196
     assert route.length_backbone == 140000
+    assert route.n_bend90 == 2
     c.show()

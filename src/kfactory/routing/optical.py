@@ -24,7 +24,7 @@ class OpticalManhattanRoute(BaseModel, arbitrary_types_allowed=True):
         start_port: port at the first instance denoting the start of the route
         end_port: port at the last instance denoting the end of the route
         instances: list of the instances in order from start to end of the route
-        n_bends_90: number of bends used
+        n_bend90: number of bends used
         length: length of the route without the bends
         length_straights: length of the straight_factory elements
     """
@@ -33,7 +33,7 @@ class OpticalManhattanRoute(BaseModel, arbitrary_types_allowed=True):
     start_port: Port
     end_port: Port
     instances: list[Instance]
-    n_bends: int = 0
+    n_bend90: int = 0
     length: int = 0
     length_straights: int = 0
 
@@ -722,6 +722,7 @@ def place90(
         vec_n = new_pt - pt
 
         bend90 = c << bend90_cell
+        route.n_bend90 += 1
         mirror = (vec_angle(vec_n) - vec_angle(vec)) % 4 != 3
         if (vec.y != 0) and (vec.x != 0):
             raise ValueError(
