@@ -7,8 +7,8 @@ name = "kfactory"
 description = "KLayout API implementation of gdsfactory"
 readme = "README.md"
 classifiers = [
-	"Programming Language :: Python :: 3.10",
-	"Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.10",
+  "Operating System :: OS Independent",
 ]
 requires-python = ">=3.10"
 
@@ -18,69 +18,69 @@ authors = [
     {name = "gdsfactory community", email = "contact@gdsfactory.com"},
 ]
 dependencies = [
-	"klayout >= 0.28.12",
-	"scipy",
-	"ruamel.yaml",
-	"cachetools >= 5.2.0",
+  "klayout >= 0.28.13",
+  "scipy",
+  "ruamel.yaml",
+  "cachetools >= 5.2.0",
   "pydantic >= 2.0.2, < 3",
-	"pydantic-settings >= 2.0.1, < 3",
-	"loguru",
-	"tomli",
-	"requests",
-	"typer[all]",
-	"aenum",
+  "pydantic-settings >= 2.0.1, < 3",
+  "loguru",
+  "tomli",
+  "requests",
+  "typer[all]",
+  "aenum",
 ]
 
 [project.optional-dependencies]
 git = [
-	"gitpython",
+  "gitpython",
 ]
 dev = [
-	"black>=23",
-	"mypy",
-	"pre-commit",
-	"gitpython",
-	"pylsp-mypy",
-	"python-lsp-server[all]",
-	"python-lsp-ruff",
-	"types-cachetools",
-	"python-lsp-black",
-	"pytest",
-	"kfactory[git]",
-	"towncrier",
-	"tbump",
-	"types-requests",
-	"types-setuptools",
-	"types-docutils",
-	"types-Pygments",
+  "black>=23",
+  "mypy",
+  "pre-commit",
+  "gitpython",
+  "pylsp-mypy",
+  "python-lsp-server[all]",
+  "python-lsp-ruff",
+  "types-cachetools",
+  "python-lsp-black",
+  "pytest",
+  "kfactory[git]",
+  "towncrier",
+  "tbump",
+  "types-requests",
+  "types-setuptools",
+  "types-docutils",
+  "types-Pygments",
 ]
 docs = [
-	"kfactory[ipy]",
+  "kfactory[ipy]",
   "mkdocs",
-	"mkdocs-jupyter>=0.24",
+  "mkdocs-jupyter>=0.24",
   "mkdocstrings[python]",
   "mkdocs-material",
   "mkdocs_gen_files",
-	"mkdocs-literate-nav",
-	"mkdocs-section-index",
-	"mkdocs-video",
-	"pymdown-extensions",
+  "mkdocs-literate-nav",
+  "mkdocs-section-index",
+  "mkdocs-video",
+  "pymdown-extensions",
 ]
 ci = [
-	"flake8",
-	"flake8-pyproject",
-	"pytest",
-	"pytest_regressions",
-	"mypy",
-	"types-cachetools",
-	"types-requests",
-	"kfactory[git]",
+  "flake8",
+  "flake8-pyproject",
+  "pytest",
+  "pytest_regressions",
+  "mypy",
+  "types-cachetools",
+  "types-requests",
+  "kfactory[git]",
 ]
 ipy = [
-	"ipython",
-	"ipywidgets",
-	"ipytree",
-	"ipyevents",
+  "ipython",
+  "ipywidgets",
+  "ipytree",
+  "ipyevents",
 ]
 
 [project.scripts]
@@ -113,8 +113,8 @@ exclude = '''  # Specify the files/dirs that should be ignored by the black form
 python_version = "3.10"
 strict = true
 exclude = [
-	"tests",
-	"src/kfactory/widgets/interactive.py",
+  "tests",
+  "src/kfactory/widgets/interactive.py",
 ]
 plugins = "pydantic.mypy, numpy.typing.mypy_plugin"
 
@@ -191,13 +191,25 @@ skip = "pyproject.toml"
 
 [tool.ruff]
 line-length = 88
-src = ["src"]
+exclude = ["tests", "docs", "src/kfactory/widgets/interactive.py"]
+indent-width = 4
+target-version = "py311"
 select = [
   "E",   # pycodestyle
   "F",   # pyflakes
   "UP",  # pyupgrade
   "D",   # pydocstyle
 ]
+
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
 
 [tool.ruff.pydocstyle]
 convention = "google"

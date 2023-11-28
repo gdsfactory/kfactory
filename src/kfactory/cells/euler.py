@@ -163,78 +163,6 @@ def euler_sbend_points(
     return spoints
 
 
-class BendEulerCustom:
-    kcl: KCLayout
-
-    def __init__(self, kcl: KCLayout) -> None:
-        """Create a euler_bend function on a custom KCLayout."""
-        self.kcl = kcl
-
-    @cell
-    def __call__(
-        self,
-        width: float,
-        radius: float,
-        layer: int | LayerEnum,
-        enclosure: LayerEnclosure | None = None,
-        angle: float = 90,
-        resolution: float = 150,
-    ) -> KCell:
-        """Create a euler bend.
-
-        Args:
-            width: Width of the core. [um]
-            radius: Radius off the backbone. [um]
-            layer: Layer index / LayerEnum of the core.
-            enclosure: Slab/exclude definition. [dbu]
-            angle: Angle of the bend.
-            resolution: Angle resolution for the backbone.
-        """
-        c = KCell()
-        if angle < 0:
-            config.logger.critical(
-                f"Negative lengths are not allowed {angle} as ports"
-                " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
-            )
-            angle = -angle
-        if width < 0:
-            config.logger.critical(
-                f"Negative widths are not allowed {width} as ports"
-                " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
-            )
-            width = -width
-        dbu = c.layout().dbu
-        backbone = euler_bend_points(angle, radius=radius, resolution=resolution)
-
-        center_path = extrude_path(
-            target=c,
-            layer=layer,
-            path=backbone,
-            width=width,
-            enclosure=enclosure,
-            start_angle=0,
-            end_angle=angle,
-        )
-        c.create_port(
-            layer=layer,
-            width=int(width / c.kcl.dbu),
-            trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
-        )
-
-        c.create_port(
-            dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
-            dwidth=width,
-            layer=layer,
-        )
-
-        c.boundary = center_path
-
-        c.auto_rename_ports()
-        return c
-
-
 class BendEuler:
     kcl: KCLayout
 
@@ -242,7 +170,7 @@ class BendEuler:
         """Create a euler_bend function on a custom KCLayout."""
         self.kcl = kcl
 
-    @cell(snap_ports=True)
+    @cell(snap_ports=False)
     def __call__(
         self,
         width: float,
@@ -291,15 +219,25 @@ class BendEuler:
         )
         c.create_port(
             layer=layer,
-            width=int(width / c.kcl.dbu),
+            width=round(width / c.kcl.dbu),
             trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
         )
 
-        c.create_port(
-            dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
-            dwidth=width,
-            layer=layer,
-        )
+        if abs(angle % 90) < 0.001:
+            _ang = round(angle)
+            c.create_port(
+                trans=kdb.Trans(
+                    _ang // 90, False, backbone[-1].to_itype(c.kcl.dbu).to_v()
+                ),
+                width=round(width / c.kcl.dbu),
+                layer=layer,
+            )
+        else:
+            c.create_port(
+                dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
+                dwidth=width,
+                layer=layer,
+            )
 
         c.boundary = center_path
 

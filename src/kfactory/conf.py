@@ -102,7 +102,23 @@ def get_affinity() -> int:
 class Settings(
     BaseSettings,
 ):
-    """KFactory settings object."""
+    """KFactory settings object.
+
+    Attrs:
+        n_threads: Number of threads to use for tiling processor, defaults
+            to all available cores.
+        logger: The loguru class to use for logging. Shouldn't be necessary
+            to configure by hand.
+        logfilter: The filter to use. Can be configured to set log level and filter
+            messages by regex.
+        display_type: The type of image to show when calling the jupyter display
+            function.
+        meta_format: Metadata format to use for reading KLayout metadata.
+            If set to 'default', metadata will be read as instances such as
+            Trans/DCplxTrans. If the metadata is in the old string format
+            (there was a bug in how to read metadata in some versions), use
+            'string'.
+    """
 
     model_config = SettingsConfigDict(
         arbitrary_types_allowed=True,
@@ -114,6 +130,7 @@ class Settings(
     logger: ClassVar[Logger] = logger
     logfilter: LogFilter = Field(default_factory=LogFilter)
     display_type: Literal["widget", "image", "docs"] = "image"
+    meta_format: Literal["default", "string"] = "default"
 
     def __init__(self, **data: Any):
         """Set log filter and run pydantic."""

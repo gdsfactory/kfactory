@@ -1,9 +1,20 @@
+"""Simplifying functions."""
+
 import numpy as np
 
 from .. import kdb
 
 
 def simplify(points: list[kdb.Point], tolerance: float) -> list[kdb.Point]:
+    """Simplify a list of [Point][klayout.db.Point] to a certain tolerance (in dbu).
+
+    Uses [Ramer-Douglas-Peucker algorithm](https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm)
+
+    Args:
+        points: list of points to simplify
+        tolerance: if two points are > tolerance (in dbu) apart,
+            delete most suitable points.
+    """
     [points[0]]
     if len(points) < 3:
         return points
@@ -26,6 +37,15 @@ def simplify(points: list[kdb.Point], tolerance: float) -> list[kdb.Point]:
 
 
 def dsimplify(points: list[kdb.DPoint], tolerance: float) -> list[kdb.DPoint]:
+    """Simplify a list of um points to a certain tolerance (in um).
+
+    Uses [Ramer-Douglas-Peucker algorithm](https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm)
+
+    Args:
+        points: list of [DPoint][klayout.db.DPoint] to simplify
+        tolerance: if two points are > tolerance (in um) apart,
+            delete most suitable points.
+    """
     if len(points) < 3:
         return points
     [points[0]]

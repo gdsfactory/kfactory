@@ -23,6 +23,8 @@ from .kcell import (
     show,
     polygon_from_array,
     dpolygon_from_array,
+    VKCell,
+    VInstance,
 )
 from . import cells, placer, routing, port, technology, enclosure, utils
 from .conf import config
@@ -62,4 +64,7 @@ __all__ = [
     "LayerEnclosure",
     "KCellEnclosure",
     "constant",
+    "save_layout_options",
+    "VKCell",
+    "VInstance",
 ]

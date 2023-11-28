@@ -86,6 +86,7 @@ def fix_spacing_tiled(
         smooth_absolute: If set will overwrite smooth with an an absolute value, not
             relative to the violation size. If set, this will disable smooth_factor.
             [dbu]
+        smooth_keep_hv: Keep horizontal and vertical vertices when smoothing.
 
     Returns:
         fix: Region containing the fixes for the violations

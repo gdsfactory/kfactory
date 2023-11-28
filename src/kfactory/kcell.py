@@ -83,6 +83,20 @@ SerializableShape: TypeAlias = (
     | kdb.Vector
     | kdb.DVector
 )
+IShapeLike: TypeAlias = (
+    kdb.Polygon
+    | kdb.Edge
+    | kdb.Path
+    | kdb.Box
+    | kdb.Text
+    | kdb.SimplePolygon
+    | kdb.Region
+)
+DShapeLike: TypeAlias = (
+    kdb.DPolygon | kdb.DEdge | kdb.DPath | kdb.DBox | kdb.DText | kdb.DSimplePolygon
+)
+ShapeLike: TypeAlias = IShapeLike | DShapeLike | kdb.Shape
+
 
 kcl: KCLayout
 
@@ -189,7 +203,7 @@ class LockedError(AttributeError):
     """Raised when a locked cell is being modified."""
 
     @config.logger.catch(reraise=True)
-    def __init__(self, kcell: KCell):
+    def __init__(self, kcell: KCell | VKCell):
         """Throw _locked error."""
         super().__init__(
             f"KCell {kcell.name} has been locked already."
@@ -331,7 +345,7 @@ def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -
         assert (
             p1.trans == p2.trans * kdb.Trans.R180
             or p1.trans == p2.trans * kdb.Trans.M90
-        ), ("Transformations of ports not matching for opposite check" f"{p1=} {p2=}")
+        ), "Transformations of ports not matching for opposite check" f"{p1=} {p2=}"
     if (checks & PortCheck.opposite) == 0:
         assert (
             p1.trans == p2.trans or p1.trans == p2.trans * kdb.Trans.M0
@@ -407,10 +421,11 @@ class KCell:
     yaml_tag: str = "!KCell"
     _ports: Ports
     _settings: KCellSettings
-    _info: Info
+    info: Info
     d: UMKCell
     kcl: KCLayout
     boundary: kdb.DPolygon | None
+    insts: Instances
 
     def __init__(
         self,
@@ -433,8 +448,8 @@ class KCell:
         if kcl is None:
             kcl = _get_default_kcl()
         self.kcl = kcl
-        self.insts: Instances = Instances()
-        self._settings: KCellSettings = KCellSettings()
+        self.insts = Instances()
+        self._settings = KCellSettings()
         self.info: Info = Info()
         self._locked = False
         if name is None:
@@ -446,7 +461,6 @@ class KCell:
             self._kdb_cell.name = f"Unnamed_{self.cell_index()}"
         self.kcl.register_cell(self, allow_reregister=True)
         self.ports: Ports = ports or Ports(self.kcl)
-        self.complex = False
 
         if kdb_cell is not None:
             for inst in kdb_cell.each_inst():
@@ -615,16 +629,20 @@ class KCell:
                 y_yml = t.get("y", DEFAULT_TRANS["y"])
                 margin = t.get("margin", DEFAULT_TRANS["margin"])
                 margin_x = margin.get(
-                    "x", DEFAULT_TRANS["margin"]["x"]  # type: ignore[index]
+                    "x",
+                    DEFAULT_TRANS["margin"]["x"],  # type: ignore[index]
                 )
                 margin_y = margin.get(
-                    "y", DEFAULT_TRANS["margin"]["y"]  # type: ignore[index]
+                    "y",
+                    DEFAULT_TRANS["margin"]["y"],  # type: ignore[index]
                 )
                 margin_x0 = margin.get(
-                    "x0", DEFAULT_TRANS["margin"]["x0"]  # type: ignore[index]
+                    "x0",
+                    DEFAULT_TRANS["margin"]["x0"],  # type: ignore[index]
                 )
                 margin_y0 = margin.get(
-                    "y0", DEFAULT_TRANS["margin"]["y0"]  # type: ignore[index]
+                    "y0",
+                    DEFAULT_TRANS["margin"]["y0"],  # type: ignore[index]
                 )
                 ref_yml = t.get("ref", DEFAULT_TRANS["ref"])
                 if isinstance(ref_yml, str):
@@ -991,7 +1009,7 @@ class KCell:
         else:
             rename_func(self.ports._ports)
 
-    def flatten(self, prune: bool = True, merge: bool = True) -> None:
+    def flatten(self, merge: bool = True) -> None:
         """Flatten the cell.
 
         Pruning will delete the klayout.db.Cell if unused,
@@ -1082,9 +1100,9 @@ class KCell:
             for inst in node.insts
         ]
         shapes = {
-            node.layout()
-            .get_info(layer)
-            .to_s(): [shape.to_s() for shape in node.shapes(layer).each()]
+            node.layout().get_info(layer).to_s(): [
+                shape.to_s() for shape in node.shapes(layer).each()
+            ]
             for layer in node.layout().layer_indexes()
             if not node.shapes(layer).is_empty()
         }
@@ -1187,7 +1205,8 @@ class KCell:
             return Instance(
                 self.kcl,
                 self._kdb_cell.transform(
-                    inst_or_trans, trans  # type: ignore[arg-type]
+                    inst_or_trans,  # type: ignore[arg-type]
+                    trans,  # type: ignore[arg-type]
                 ),
             )
         else:
@@ -1208,7 +1227,7 @@ class KCell:
             self.add_meta_info(
                 kdb.LayoutMetaInfo(
                     f"kfactory:ports:{i}:layer",
-                    self.kcl.layout.get_info(port.layer).to_s(),
+                    self.kcl.layout.get_info(port.layer),
                     None,
                     True,
                 )
@@ -1224,14 +1243,14 @@ class KCell:
             if port._trans:
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
-                        f"kfactory:ports:{i}:trans", port._trans.to_s(), None, True
+                        f"kfactory:ports:{i}:trans", port._trans, None, True
                     )
                 )
             elif port._dcplx_trans:
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
                         f"kfactory:ports:{i}:dcplx_trans",
-                        port._dcplx_trans.to_s(),
+                        port._dcplx_trans,
                         None,
                         True,
                     )
@@ -1288,29 +1307,60 @@ class KCell:
 
         # ports = Ports()
         self.ports = Ports(self.kcl)
-        for index in sorted(port_dict.keys()):
-            _d = port_dict[index]
-            name = _d.get("name", None)
-            port_type = _d["port_type"]
-            layer = self.kcl.layout.layer(kdb.LayerInfo.from_string(_d["layer"]))
-            width = _d["width"]
-            trans = _d.get("trans", None)
-            dcplx_trans = _d.get("dcplx_trans", None)
-            _port = Port(
-                name=name,
-                width=width,
-                layer=layer,
-                trans=kdb.Trans.R0,
-                kcl=self.kcl,
-                port_type=port_type,
-                info=_d.get("info", {}),
-            )
-            if trans:
-                _port.trans = kdb.Trans.from_s(trans)
-            elif dcplx_trans:
-                _port.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
+        match config.meta_format:
+            case "default":
+                for index in sorted(port_dict.keys()):
+                    _d = port_dict[index]
+                    name = _d.get("name", None)
+                    port_type = _d["port_type"]
+                    layer = self.kcl.layout.layer(_d["layer"])
+                    width = _d["width"]
+                    trans = _d.get("trans", None)
+                    dcplx_trans = _d.get("dcplx_trans", None)
+                    _port = Port(
+                        name=name,
+                        width=width,
+                        layer=layer,
+                        trans=kdb.Trans.R0,
+                        kcl=self.kcl,
+                        port_type=port_type,
+                        info=_d.get("info", {}),
+                    )
+                    if trans:
+                        _port.trans = trans
+                    elif dcplx_trans:
+                        _port.dcplx_trans = dcplx_trans
 
-            self.add_port(_port, keep_mirror=True)
+                    self.add_port(_port, keep_mirror=True)
+            case "string":
+                for index in sorted(port_dict.keys()):
+                    _d = port_dict[index]
+                    name = _d.get("name", None)
+                    port_type = _d["port_type"]
+                    layer = self.kcl.layout.layer(_d["layer"])
+                    width = _d["width"]
+                    trans = _d.get("trans", None)
+                    dcplx_trans = _d.get("dcplx_trans", None)
+                    _port = Port(
+                        name=name,
+                        width=width,
+                        layer=layer,
+                        trans=kdb.Trans.R0,
+                        kcl=self.kcl,
+                        port_type=port_type,
+                        info=_d.get("info", {}),
+                    )
+                    if trans:
+                        _port.trans = trans
+                    elif dcplx_trans:
+                        _port.dcplx_trans = dcplx_trans
+
+                    self.add_port(_port, keep_mirror=True)
+            case _:
+                raise ValueError(
+                    f"Unknown metadata format {config.meta_format}."
+                    f" Available formats are 'default' or 'legacy'."
+                )
 
     @property
     def xmin(self) -> int:
@@ -4581,12 +4631,576 @@ def _check_cell_ports(p1: Port, p2: Port) -> int:
     return check_int
 
 
+class VKCell(BaseModel, arbitrary_types_allowed=True):
+    """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
+
+    _ports: Ports
+    _shapes: dict[int, VShapes]
+    _locked: bool
+    _settings: KCellSettings
+    info: Info
+    kcl: KCLayout
+    insts: list[VInstance]
+    _name: str | None
+
+    def __init__(
+        self,
+        name: str | None = None,
+        kcl: KCLayout = kcl,
+        info: dict[str, int | float | str] = {},
+    ) -> None:
+        BaseModel.__init__(self, kcl=kcl, insts=[], info=Info(**info))
+        self._shapes = {}
+        self._ports = Ports(kcl)
+        self._locked = False
+        self._settings = KCellSettings()
+        self._name = name
+
+    @property
+    def name(self) -> str | None:
+        """Name of the KCell."""
+        return self._name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        if self._locked:
+            raise LockedError(self)
+        self._name = value
+
+    def __lshift__(self, cell: KCell | VKCell) -> VInstance:
+        return self.create_inst(cell=cell)
+
+    def create_inst(
+        self, cell: KCell | VKCell, trans: kdb.DCplxTrans = kdb.DCplxTrans()
+    ) -> VInstance:
+        inst = VInstance(cell=cell, trans=kdb.DCplxTrans())
+        self.insts.append(inst)
+        return inst
+
+    def shapes(self, layer: int) -> VShapes:
+        if layer not in self._shapes:
+            self._shapes[layer] = VShapes(cell=self, _shapes=[])
+        return self._shapes[layer]
+
+    @property
+    def ports(self) -> Ports:
+        """Ports associated with the cell."""
+        return self._ports
+
+    @ports.setter
+    def ports(self, new_ports: InstancePorts | Ports) -> None:
+        self._ports = new_ports.copy()
+
+    @overload
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        trans: kdb.Trans,
+        width: int,
+        layer: LayerEnum | int,
+        port_type: str = "optical",
+    ) -> Port:
+        ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        dcplx_trans: kdb.DCplxTrans,
+        dwidth: float,
+        layer: LayerEnum | int,
+        port_type: str = "optical",
+    ) -> Port:
+        ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        port: Port,
+    ) -> Port:
+        ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        width: int,
+        center: tuple[int, int],
+        angle: int,
+        layer: LayerEnum | int,
+        port_type: str = "optical",
+        mirror_x: bool = False,
+    ) -> Port:
+        ...
+
+    def create_port(self, **kwargs: Any) -> Port:
+        """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
+        return self.ports.create_port(**kwargs)
+
+    def insert_into(
+        self, c: KCell, flatten: bool = False, trans: kdb.DCplxTrans = kdb.DCplxTrans.R0
+    ) -> None:
+        VInstance(c, trans=trans).insert_into(cell=c, flatten=flatten, trans=trans)
+
+    def __getitem__(self, key: int | str | None) -> Port:
+        """Returns port from instance."""
+        return self.ports[key]
+
+    @property
+    def settings(self) -> KCellSettings:
+        """Settings dictionary set by the [@vcell][kfactory.kcell.vcell] decorator."""
+        return self._settings
+
+
+class VInstancePorts:
+    """Ports of an instance.
+
+    These act as virtual ports as the centers needs to change if the
+    instance changes etc.
+
+
+    Attributes:
+        cell_ports: A pointer to the [`KCell.ports`][kfactory.kcell.KCell.ports]
+            of the cell
+        instance: A pointer to the Instance related to this.
+            This provides a way to dynamically calculate the ports.
+    """
+
+    cell_ports: Ports
+    instance: VInstance
+
+    def __init__(self, instance: VInstance) -> None:
+        """Creates the virtual ports object.
+
+        Args:
+            instance: The related instance
+        """
+        self.cell_ports = instance.cell.ports
+        self.instance = instance
+
+    def __len__(self) -> int:
+        """Return Port count."""
+        return len(self.cell_ports)
+
+    def __getitem__(self, key: int | str | None) -> Port:
+        """Get a port by name."""
+        p = self.cell_ports[key]
+        return p.copy(self.instance.trans)
+
+    def __iter__(self) -> Iterator[Port]:
+        """Create a copy of the ports to iterate through."""
+        yield from (p.copy(self.instance.trans) for p in self.cell_ports)
+
+    def __repr__(self) -> str:
+        """String representation.
+
+        Creates a copy and uses the `__repr__` of
+        [Ports][kfactory.kcell.Ports.__repr__].
+        """
+        return repr(self.copy())
+
+    def copy(self) -> Ports:
+        """Creates a copy in the form of [Ports][kfactory.kcell.Ports]."""
+        return Ports(
+            kcl=self.instance.cell.kcl,
+            ports=[p.copy(self.instance.trans) for p in self.cell_ports._ports],
+        )
+
+
+class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
+    cell: VKCell | KCell
+    trans: kdb.DCplxTrans
+    _ports: VInstancePorts
+
+    def __init__(
+        self, cell: VKCell | KCell, trans: kdb.DCplxTrans = kdb.DCplxTrans()
+    ) -> None:
+        BaseModel.__init__(self, cell=cell, trans=trans)
+        self._ports = VInstancePorts(self)
+
+    @property
+    def ports(self) -> VInstancePorts:
+        return self._ports
+
+    def insert_into(
+        self,
+        cell: KCell,
+        flatten: bool = False,
+        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+    ) -> None:
+        if isinstance(self.cell, VKCell):
+            if flatten:
+                for layer, shapes in self.cell._shapes.items():
+                    for shape in shapes.transform(trans * self.trans):
+                        cell.shapes(layer).insert(shape)
+                for inst in self.cell.insts:
+                    inst.insert_into(cell, flatten=flatten, trans=trans * self.trans)
+            else:
+                _trans = trans * self.trans
+                _trans_str = (
+                    f"_R{_trans.rot()}_X{_trans.disp.x}_Y{_trans.disp.y}".replace(
+                        ".", "p"
+                    )
+                )
+                _cn = self.cell.name
+                if _cn is None:
+                    raise ValueError(
+                        "Cannot insert a non-flattened VKCell when the name is 'None'"
+                    )
+                _cell_name = _cn + _trans_str
+                if cell.kcl.cell(_cell_name) is None:
+                    _cell = KCell(kcl=self.cell.kcl, name=_cell_name)  # self.cell.dup()
+                    for layer, shapes in self.cell._shapes.items():
+                        for shape in shapes.transform(trans * self.trans):
+                            _cell.shapes(layer).insert(shape)
+                    for inst in self.cell.insts:
+                        inst.insert_into(cell=_cell, flatten=flatten, trans=_trans)
+                    _cell.name = _cell_name
+                    for port in self.cell.ports:
+                        _cell.add_port(port.copy(_trans))
+                    _settings = self.cell.settings.model_dump()
+                    _settings.update({"virtual_trans": _trans})
+                    _cell._settings = KCellSettings(**_settings)
+                    _cell.info = Info(**self.cell.info.model_dump())
+                else:
+                    _cell = cell.kcl[_cell_name]
+                cell << _cell
+
+        else:
+            if flatten:
+                for layer in cell.kcl.layer_indexes():
+                    reg = kdb.Region(self.cell.begin_shapes_rec(layer))
+                    reg.transform((trans * self.trans).to_itrans(cell.kcl.dbu))
+                    cell.shapes(layer).insert(reg)
+            else:
+                _trans = trans * self.trans
+                _trans_str = (
+                    f"_R{_trans.rot()}_X{_trans.disp.x}_Y{_trans.disp.y}".replace(
+                        ".", "p"
+                    )
+                )
+                _cell_name = self.cell.name + _trans_str
+                if cell.kcl.cell(_cell_name) is None:
+                    _cell = self.cell.dup()
+                    _cell.name = _cell_name
+                    _cell.flatten(False)
+                    for layer in _cell.kcl.layer_indexes():
+                        _cell.shapes(layer).transform(_trans)
+                    for port in self.cell.ports:
+                        _cell.add_port(port.copy(_trans))
+                else:
+                    _cell = cell.kcl[_cell_name]
+                cell << _cell
+
+    @overload
+    def connect(
+        self,
+        port: str | Port | None,
+        other: Port,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool = False,
+        allow_layer_mismatch: bool = False,
+        allow_type_mismatch: bool = False,
+    ) -> None:
+        ...
+
+    @overload
+    def connect(
+        self,
+        port: str | Port | None,
+        other: VInstance,
+        other_port_name: str | None,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool = False,
+        allow_layer_mismatch: bool = False,
+        allow_type_mismatch: bool = False,
+    ) -> None:
+        ...
+
+    def connect(
+        self,
+        port: str | Port | None,
+        other: VInstance | Port,
+        other_port_name: str | None = None,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool = False,
+        allow_layer_mismatch: bool = False,
+        allow_type_mismatch: bool = False,
+    ) -> None:
+        """Align port with name `portname` to a port.
+
+        Function to allow to transform this instance so that a port of this instance is
+        connected (same center with 180° turn) to another instance.
+
+        Args:
+            port: The name of the port of this instance to be connected, or directly an
+                instance port. Can be `None` because port names can be `None`.
+            other: The other instance or a port. Skip `other_port_name` if it's a port.
+            other_port_name: The name of the other port. Ignored if
+                `other` is a port.
+            mirror: Instead of applying klayout.db.Trans.R180 as a connection
+                transformation, use klayout.db.Trans.M90, which effectively means this
+                instance will be mirrored and connected.
+            allow_width_mismatch: Skip width check between the ports if set.
+            allow_layer_mismatch: Skip layer check between the ports if set.
+            allow_type_mismatch: Skip port_type check between the ports if set.
+        """
+        if isinstance(other, VInstance):
+            if other_port_name is None:
+                raise ValueError(
+                    "portname cannot be None if an Instance Object is given. For"
+                    "complex connections (non-90 degree and floating point ports) use"
+                    "route_cplx instead"
+                )
+            op = other.ports[other_port_name]
+        elif isinstance(other, Port):
+            op = other
+        else:
+            raise ValueError("other_instance must be of type Instance or Port")
+        if isinstance(port, Port):
+            p = port
+        else:
+            p = self.cell.ports[port]
+        if p.width != op.width and not allow_width_mismatch:
+            # The ports are not the same width
+            raise PortWidthMismatch(
+                self,  # type: ignore[arg-type]
+                other,  # type: ignore[arg-type]
+                p,
+                op,
+            )
+        if p.layer != op.layer and not allow_layer_mismatch:
+            # The ports are not on the same layer
+            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)  # type: ignore[arg-type]
+        if p.port_type != op.port_type and not allow_type_mismatch:
+            raise PortTypeMismatch(self, other, p, op)  # type: ignore[arg-type]
+        dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
+        self.trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+
+
+class VShapes(BaseModel, arbitrary_types_allowed=True):
+    """Emulate `[klayout.db.Shapes][klayout.db.Shapes]`."""
+
+    cell: VKCell
+    _shapes: list[ShapeLike]
+
+    def __init__(self, cell: VKCell, _shapes: list[ShapeLike] | None = None):
+        # self._shapes = [_shape for _shape in _shapes] or []
+        BaseModel.__init__(self, cell=cell)
+        self._shapes = _shapes or []
+
+    def insert(self, shape: ShapeLike) -> None:
+        """Emulate `[klayout.db.Shapes][klayout.db.Shapes]'s insert'`."""
+        if (
+            isinstance(shape, kdb.Shape)
+            and shape.cell.layout().dbu != self.cell.kcl.dbu
+        ):
+            raise ValueError()
+        self._shapes.append(shape)
+
+    def __iter__(self) -> Iterator[ShapeLike]:  # type: ignore[override]
+        yield from self._shapes
+
+    def each(self) -> Iterator[ShapeLike]:
+        yield from self._shapes
+
+    def transform(self, trans: kdb.DCplxTrans) -> VShapes:  # noqa: D102
+        new_shapes: list[DShapeLike] = []
+
+        for shape in self._shapes:
+            if isinstance(shape, DShapeLike):  # type: ignore[misc, arg-type]
+                new_shapes.append(shape.transformed(trans))  # type: ignore[union-attr, call-overload]
+            elif isinstance(shape, IShapeLike):  # type: ignore[misc, arg-type]
+                new_shapes.append(
+                    shape.to_dtype(  # type: ignore[union-attr]
+                        self.cell.kcl.dbu
+                    ).transformed(trans)
+                )
+            else:
+                new_shapes.append(
+                    shape.transform(trans)  # type: ignore[union-attr, call-overload, arg-type]
+                )
+
+        return VShapes(cell=self.cell, _shapes=new_shapes)  # type: ignore[arg-type]
+
+
+@overload
+def vcell(_func: Callable[KCellParams, VKCell], /) -> Callable[KCellParams, VKCell]:
+    ...
+
+
+@overload
+def vcell(
+    *,
+    set_settings: bool = True,
+    set_name: bool = True,
+    check_ports: bool = True,
+    rec_dicts: bool = False,
+) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]:
+    ...
+
+
+@config.logger.catch(reraise=True)
+def vcell(
+    _func: Callable[KCellParams, VKCell] | None = None,
+    /,
+    *,
+    set_settings: bool = True,
+    set_name: bool = True,
+    check_ports: bool = True,
+    add_port_layers: bool = True,
+    cache: Cache[int, Any] | dict[int, Any] | None = None,
+    rec_dicts: bool = False,
+) -> (
+    Callable[KCellParams, VKCell]
+    | Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]
+):
+    """Decorator to cache and auto name the cell.
+
+    This will use `functools.cache` to cache the function call.
+    Additionally, if enabled this will set the name and from the args/kwargs of the
+    function and also paste them into a settings dictionary of the
+    [KCell][kfactory.kcell.KCell].
+
+    Args:
+        set_settings: Copy the args & kwargs into the settings dictionary
+        set_name: Auto create the name of the cell to the functionname plus a
+            string created from the args/kwargs
+        check_ports: Check whether there are any non-90° ports in the cell and throw a
+            warning if there are
+        snap_ports: Snap the centers of the ports onto the grid (only x/y, not angle).
+        add_port_layers: Add special layers of
+            [kfactory.KCLayout.netlist_layer_mapping][netlist_layer_mapping] to the
+            ports if the port layer is in the mapping.
+        cache: Provide a user defined cache instead of an internal one. This
+            can be used for example to clear the cache.
+        rec_dicts: Allow and inspect recursive dictionaries as parameters (can be
+            expensive if the cell is called often).
+    """
+    d2fs = rec_dict_to_frozenset if rec_dicts else dict_to_frozenset
+    fs2d = rec_frozenset_to_dict if rec_dicts else frozenset_to_dict
+
+    def decorator_autocell(
+        f: Callable[KCellParams, VKCell]
+    ) -> Callable[KCellParams, VKCell]:
+        sig = inspect.signature(f)
+
+        # previously was a KCellCache, but dict should do for most case
+        _cache = cache or {}
+
+        @functools.wraps(f)
+        def wrapper_autocell(
+            *args: KCellParams.args, **kwargs: KCellParams.kwargs
+        ) -> VKCell:
+            params: dict[str, KCellParams.args] = {
+                p.name: p.default for k, p in sig.parameters.items()
+            }
+            arg_par = list(sig.parameters.items())[: len(args)]
+            for i, (k, v) in enumerate(arg_par):
+                params[k] = args[i]
+            params.update(kwargs)
+
+            del_parameters: list[str] = []
+
+            for key, value in params.items():
+                if isinstance(value, dict):
+                    params[key] = d2fs(value)
+                if value == inspect.Parameter.empty:
+                    del_parameters.append(key)
+
+            for param in del_parameters:
+                del params[param]
+
+            @cachetools.cached(cache=_cache)
+            @functools.wraps(f)
+            def wrapped_cell(
+                **params: KCellParams.args,
+            ) -> VKCell:
+                for key, value in params.items():
+                    if isinstance(value, frozenset):
+                        params[key] = fs2d(value)
+                cell = f(**params)
+                if cell._locked:
+                    raise ValueError(
+                        f"Trying to change a locked VKCell is no allowed. {cell.name=}"
+                    )
+                if set_name:
+                    if "self" in params:
+                        name = get_cell_name(
+                            params["self"].__class__.__name__, **params
+                        )
+                    else:
+                        name = get_cell_name(f.__name__, **params)
+                    cell.name = name
+                if set_settings:
+                    settings = cell.settings.model_dump()
+                    if "self" in params:
+                        settings["function_name"] = params["self"].__class__.__name__
+                    else:
+                        settings["function_name"] = f.__name__
+                    params.pop("self", None)
+                    params.pop("cls", None)
+                    settings.update(params)
+                    cell._settings = KCellSettings(**settings)
+                info = cell.info.model_dump()
+                for name, value in cell.info:
+                    info[name] = value
+                cell.info = Info(**info)
+                if add_port_layers:
+                    for port in cell.ports:
+                        if port.layer in cell.kcl.netlist_layer_mapping:
+                            if port._trans:
+                                edge = kdb.Edge(
+                                    kdb.Point(0, -port.width // 2),
+                                    kdb.Point(0, port.width // 2),
+                                )
+                                cell.shapes(
+                                    cell.kcl.netlist_layer_mapping[port.layer]
+                                ).insert(port.trans * edge)
+                                if port.name:
+                                    cell.shapes(
+                                        cell.kcl.netlist_layer_mapping[port.layer]
+                                    ).insert(kdb.Text(port.name, port.trans))
+                            else:
+                                dedge = kdb.DEdge(
+                                    kdb.DPoint(0, -port.d.width / 2),
+                                    kdb.DPoint(0, port.d.width / 2),
+                                )
+                                cell.shapes(
+                                    cell.kcl.netlist_layer_mapping[port.layer]
+                                ).insert(port.dcplx_trans * dedge)
+                                if port.name:
+                                    cell.shapes(
+                                        cell.kcl.netlist_layer_mapping[port.layer]
+                                    ).insert(
+                                        kdb.DText(port.name, port.dcplx_trans.s_trans())
+                                    )
+                cell._locked = True
+                return cell
+
+            return wrapped_cell(**params)
+
+        return wrapper_autocell
+
+    return decorator_autocell if _func is None else decorator_autocell(_func)
+
+
+VInstance.model_rebuild()
+VKCell.model_rebuild()
+
 __all__ = [
     "KCell",
     "Instance",
     "Port",
     "Ports",
-    "autocell",
     "cell",
     "kcl",
     "KCLayout",

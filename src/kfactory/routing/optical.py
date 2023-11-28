@@ -267,7 +267,7 @@ def route(
                         start_port = bend180.ports[b180p1.name]
                         pts = pts[1:]
             if (vec := pts[-1] - pts[-2]).abs() == b180r:
-                match ((vec_angle(vec) - p2.trans.angle) % 4):
+                match (vec_angle(vec) - p2.trans.angle) % 4:
                     case 1:
                         bend180 = c << bend180_cell
                         bend180.connect(b180p1.name, p2)
@@ -556,7 +556,7 @@ def place90(
     route_start_port = p1.copy()
     route_start_port.name = None
     route_start_port.trans.angle = (route_start_port.angle + 2) % 4
-    route_end_port = p1.copy()
+    route_end_port = p2.copy()
     route_end_port.name = None
     route_end_port.trans.angle = (route_end_port.angle + 2) % 4
     route = OpticalManhattanRoute(

@@ -5,7 +5,7 @@ shape located on a main_layer or reference layer or region.
 """
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from enum import IntEnum
 from hashlib import sha1
 from typing import TYPE_CHECKING, Any, TypeGuard, overload
@@ -104,7 +104,7 @@ def clean_points(points: list[kdb.Point]) -> list[kdb.Point]:
 
 
 def extrude_path_points(
-    path: list[kdb.DPoint],
+    path: Sequence[kdb.DPoint],
     width: float,
     start_angle: float | None = None,
     end_angle: float | None = None,
@@ -469,12 +469,12 @@ class LayerSection(BaseModel):
                 while i < len(self.sections) and sec.d_min > self.sections[i].d_max:
                     i += 1
                 while (
-                    i < len(self.sections)
-                    and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
+                    i < len(self.sections) and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
                 ):
                     sec.d_max = max(self.sections[i].d_max, sec.d_max)
                     sec.d_min = min(
-                        self.sections[i].d_min, sec.d_min  # type: ignore[type-var]
+                        self.sections[i].d_min,
+                        sec.d_min,  # type: ignore[type-var]
                     )
                     self.sections.pop(i)
                     if i == len(self.sections):
@@ -489,6 +489,12 @@ class LayerSection(BaseModel):
     def __hash__(self) -> int:
         """Unique hash of LayerSection."""
         return hash(tuple((s.d_min, s.d_max) for s in self.sections))
+
+    def __len__(self) -> int:
+        return len(self.sections)
+
+    def __iter__(self) -> Iterable[Section]:  # type:ignore[override]
+        yield from iter(self.sections)
 
 
 class LayerEnclosure(BaseModel, validate_assignment=True):
@@ -556,7 +562,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                         (
                             section[0],
                             round(section[1] / dbu),
-                            round(section[2] / dbu),  # type: ignore[misc]
+                            round(section[2] / dbu),
                         )
                     )
 
@@ -567,7 +573,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                 ls = LayerSection()
                 self.layer_sections[sec[0]] = ls
             ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
-                Section(d_max=sec[2], d_min=sec[1])  # type:ignore[misc]
+                Section(d_max=sec[2], d_min=sec[1])
             )
 
     def __hash__(self) -> int:  # make hashable BaseModel subclass
@@ -1079,14 +1085,6 @@ class LayerEnclosureCollection(BaseModel):
         except StopIteration:
             raise KeyError(f"Unknown key {key}")
 
-    def __iter__(self) -> Iterator[LayerEnclosure]:  # type: ignore[override]
-        """Iterator over the LayerEnclosures."""
-        yield from self.enclosures
-
-    def __len__(self) -> int:
-        """Length of the LayerEnclosure list."""
-        return len(self.enclosures)
-
 
 class RegionOperator(kdb.TileOutputReceiver):
     """Region collector. Just getst the tile and inserts it into the target cell."""
@@ -1364,7 +1362,7 @@ class KCellEnclosure(BaseModel):
         """
         regions = {}
 
-        for enc in self.enclosures:
+        for enc in self.enclosures.enclosures:
             if not c.bbox_per_layer(enc.main_layer).empty():
                 rsi = c.begin_shapes_rec(enc.main_layer)
                 for layer, layersec in enc.layer_sections.items():
@@ -1414,7 +1412,7 @@ class KCellEnclosure(BaseModel):
         inputs: set[int] = set()
         port_hole_map: dict[int, PortHoles] = {}
 
-        for enc in self.enclosures:
+        for enc in self.enclosures.enclosures:
             maxsize = 0
             assert enc.main_layer is not None
             for layer, layersection in enc.layer_sections.items():
@@ -1447,7 +1445,7 @@ class KCellEnclosure(BaseModel):
         tp.tile_border(maxsize * tp.dbu, maxsize * tp.dbu)
         tp.tile_size(tile_size, tile_size)
 
-        for i, enc in enumerate(self.enclosures):
+        for i, enc in enumerate(self.enclosures.enclosures):
             assert enc.main_layer is not None
             if not c.bbox_per_layer(enc.main_layer).empty():
                 _inp = f"main_layer_{enc.main_layer}"
@@ -1544,4 +1542,4 @@ class KCellEnclosure(BaseModel):
 
     def copy_to(self, kcl: KCLayout) -> KCellEnclosure:
         """Copy the KCellEnclosure to another KCLayout."""
-        return KCellEnclosure([enc.copy_to(kcl) for enc in self.enclosures])
+        return KCellEnclosure([enc.copy_to(kcl) for enc in self.enclosures.enclosures])

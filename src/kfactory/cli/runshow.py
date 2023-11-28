@@ -22,6 +22,8 @@ from ..kcell import show as kfshow
 
 
 class RunType(str, Enum):
+    """Enum for type of what to run (file/module/function)."""
+
     file = "file"
     module = "module"
     function = "function"
