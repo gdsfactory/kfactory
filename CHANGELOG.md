@@ -8,6 +8,11 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 
 <!-- towncrier release notes start -->
 
+## [0.10.1](https://github.com/gdsfactory/kfactory/releases/v0.10.1) - 2023-12-05
+
+No significant changes.
+
+
 ## [0.10.0](https://github.com/gdsfactory/kfactory/releases/v0.10.0) - 2023-12-05
 
 
