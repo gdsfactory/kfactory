@@ -562,7 +562,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                         (
                             section[0],
                             round(section[1] / dbu),
-                            round(section[2] / dbu),
+                            round(section[2] / dbu),  # type: ignore[misc]
                         )
                     )
 
@@ -573,7 +573,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                 ls = LayerSection()
                 self.layer_sections[sec[0]] = ls
             ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
-                Section(d_max=sec[2], d_min=sec[1])
+                Section(d_max=sec[2], d_min=sec[1])  # type: ignore[misc]
             )
 
     def __hash__(self) -> int:  # make hashable BaseModel subclass

@@ -8,6 +8,31 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 
 <!-- towncrier release notes start -->
 
+## [0.10.0](https://github.com/gdsfactory/kfactory/releases/v0.10.0) - 2023-12-05
+
+
+### Added
+
+- Added `center` to `rotate` to allow rotating around a center point 
+- Added `rec_dict` to `@cell` decorator to allow for recursive dictionaries 
+- Added functionality to `@cell` to allow a user defined cache 
+- Added invert to `route_manhattan` and allow `routing.optical.route` to add routing_kwargs to the routing function 
+- add Instance.mirror Instance.center 
+
+
+### Changed
+
+- Renamed  ->  and allow passing kwargs to set attributes of the  object 
+- Renamed `function_cache` -> `cache` 
+- rename autorename_ports to auto_rename_ports 
+- rename port position to center 
+
+
+### Fixed
+
+- add Instance setter and getter for center [#190](https://github.com/gdsfactory/kfactory/issues/190)
+- Fixed typo `enclosure_mape` -> `enclosure_map` [#211](https://github.com/gdsfactory/kfactory/issues/211)
+
 ## [0.9.3](https://github.com/gdsfactory/kfactory/releases/v0.9.3) - 2023-10-06
 
 
