@@ -1194,11 +1194,12 @@ class KCell:
         no_warn: bool = False,
     ) -> Instance | None:
         """Transforms the instance or cell with the transformation given."""
-        config.logger.warning(
-            "You are transforming the KCell {}. It is highly discouraged to do this."
-            " You probably want to transform an instance instead.",
-            self.name,
-        )
+        if not no_warn:
+            config.logger.warning(
+                "You are transforming the KCell {}. It is highly discouraged to do"
+                " this. You probably want to transform an instance instead.",
+                self.name,
+            )
         if self._locked:
             raise LockedError(self)
         if trans:
@@ -4200,7 +4201,7 @@ def cell(
     fs2d = rec_frozenset_to_dict if rec_dicts else frozenset_to_dict
 
     def decorator_autocell(
-        f: Callable[KCellParams, KCell]
+        f: Callable[KCellParams, KCell],
     ) -> Callable[KCellParams, KCell]:
         sig = inspect.signature(f)
 
@@ -4397,7 +4398,7 @@ def clean_dict(d: dict[str, Any]) -> dict[str, Any]:
 
 
 def clean_value(
-    value: float | np.float64 | dict[Any, Any] | KCell | Callable[..., Any]
+    value: float | np.float64 | dict[Any, Any] | KCell | Callable[..., Any],
 ) -> str:
     """Makes sure a value is representable in a limited character_space."""
     try:
@@ -4473,7 +4474,7 @@ DEFAULT_TRANS: dict[str, str | int | float | dict[str, str | int | float]] = {
 
 
 def update_default_trans(
-    new_trans: dict[str, str | int | float | dict[str, str | int | float]]
+    new_trans: dict[str, str | int | float | dict[str, str | int | float]],
 ) -> None:
     """Allows to change the default transformation for reading a yaml file."""
     DEFAULT_TRANS.update(new_trans)
@@ -5089,7 +5090,7 @@ def vcell(
     fs2d = rec_frozenset_to_dict if rec_dicts else frozenset_to_dict
 
     def decorator_autocell(
-        f: Callable[KCellParams, VKCell]
+        f: Callable[KCellParams, VKCell],
     ) -> Callable[KCellParams, VKCell]:
         sig = inspect.signature(f)
 
