@@ -8,6 +8,13 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 
 <!-- towncrier release notes start -->
 
+## [0.10.2](https://github.com/gdsfactory/kfactory/releases/v0.10.2) - 2023-12-08
+
+
+### Fixed
+
+- Fix no_warn being ignored in transform 
+
 ## [0.10.1](https://github.com/gdsfactory/kfactory/releases/v0.10.1) - 2023-12-05
 
 No significant changes.
