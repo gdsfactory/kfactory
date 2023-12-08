@@ -40,7 +40,7 @@ jobs:
           make gds-download
       - name: Test with pytest
         env:
-          KFACTORY_LOGFILTER__LEVEL: "ERROR"
+          KFACTORY_LOGFILTER_LEVEL: "ERROR"
         run: pytest -vv -s
   test_docs:
     runs-on: ${{ matrix.os }}
