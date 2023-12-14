@@ -9,6 +9,7 @@ Uses the klayout package as a backend.
 
 try:
     import pya
+
     kdb = pya
     lay = pya
     rdb = pya
