@@ -7,9 +7,15 @@ Uses the klayout package as a backend.
 # The import order matters, we need to first import the important stuff.
 # isort:skip_file
 
-import klayout.dbcore as kdb
-import klayout.lay as lay
-import klayout.rdb as rdb
+try:
+    import pya
+    kdb = pya
+    lay = pya
+    rdb = pya
+except ImportError:
+    import klayout.dbcore as kdb
+    import klayout.lay as lay
+    import klayout.rdb as rdb
 from .kcell import (
     KCell,
     Instance,
