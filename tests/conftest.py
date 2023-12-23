@@ -111,13 +111,13 @@ def pdk() -> kf.KCLayout:
     layerstack = kf.LayerStack(
         wg=kf.kcell.LayerLevel(
             layer=LAYER_CLASS.WG,
-            thickness=220,
+            thickness=0.22,
             zmin=0,
             material="si",
             info=kf.kcell.Info(mesh_order=1),
         ),
         clad=kf.kcell.LayerLevel(
-            layer=LAYER_CLASS.WGCLAD, thickness=3000, zmin=220, material="sio2"
+            layer=LAYER_CLASS.WGCLAD, thickness=3, zmin=0.22, material="sio2"
         ),
     )
     kcl = kf.KCLayout("Test_PDK", layer_stack=layerstack)

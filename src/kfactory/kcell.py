@@ -1982,9 +1982,9 @@ class LayerLevel(BaseModel):
 
     Parameters:
         layer: (GDSII Layer number, GDSII datatype).
-        thickness: layer thickness in dbu.
-        thickness_tolerance: layer thickness tolerance in dbu.
-        zmin: height position where material starts in dbu.
+        thickness: layer thickness in um.
+        thickness_tolerance: layer thickness tolerance in um.
+        zmin: height position where material starts in um.
         material: material name.
         sidewall_angle: in degrees with respect to normal.
         z_to_bias: parametrizes shrinking/expansion of the design GDS layer
@@ -2006,11 +2006,11 @@ class LayerLevel(BaseModel):
     """
 
     layer: tuple[int, int] | LayerEnum
-    thickness: int
-    thickness_tolerance: int | None = None
-    zmin: int
+    thickness: float
+    thickness_tolerance: float | None = None
+    zmin: float
     material: str | None = None
-    sidewall_angle: int = 0
+    sidewall_angle: float = 0.0
     z_to_bias: tuple[int, ...] | None = None
     info: Info = Info()
 
@@ -2037,7 +2037,7 @@ class LayerStack(BaseModel):
             if isinstance(val.layer, LayerEnum):
                 self.layers[field].layer = (val.layer[0], val.layer[1])
 
-    def get_layer_to_thickness(self) -> dict[tuple[int, int] | LayerEnum, int]:
+    def get_layer_to_thickness(self) -> dict[tuple[int, int] | LayerEnum, float]:
         """Returns layer tuple to thickness (um)."""
         return {
             level.layer: level.thickness
@@ -2045,7 +2045,7 @@ class LayerStack(BaseModel):
             if level.thickness
         }
 
-    def get_layer_to_zmin(self) -> dict[tuple[int, int] | LayerEnum, int]:
+    def get_layer_to_zmin(self) -> dict[tuple[int, int] | LayerEnum, float]:
         """Returns layer tuple to z min position (um)."""
         return {
             level.layer: level.zmin for level in self.layers.values() if level.thickness
@@ -2059,7 +2059,7 @@ class LayerStack(BaseModel):
             if level.thickness and level.material
         }
 
-    def get_layer_to_sidewall_angle(self) -> dict[tuple[int, int] | LayerEnum, int]:
+    def get_layer_to_sidewall_angle(self) -> dict[tuple[int, int] | LayerEnum, float]:
         """Returns layer tuple to material name."""
         return {
             level.layer: level.sidewall_angle

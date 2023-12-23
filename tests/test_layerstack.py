@@ -6,11 +6,11 @@ def test_layerstack_instance(pdk: kf.KCLayout):
 
 
 def test_layerstack_layer_thickness(pdk: kf.KCLayout):
-    assert isinstance(pdk.layer_stack.get_layer_to_thickness()[(1, 0)], int)
+    assert isinstance(pdk.layer_stack.get_layer_to_thickness()[(1, 0)], float)
 
 
 def test_layerstack_layer_zmin(pdk: kf.KCLayout):
-    assert isinstance(pdk.layer_stack.get_layer_to_zmin()[(1, 0)], int)
+    assert isinstance(pdk.layer_stack.get_layer_to_zmin()[(1, 0)], float)
 
 
 def test_layerstack_layer_material(pdk: kf.KCLayout):
@@ -22,4 +22,4 @@ def test_layerstack_layer_info(pdk: kf.KCLayout):
 
 
 def test_layerstack_layer_sidewall_angle(pdk: kf.KCLayout):
-    assert isinstance(pdk.layer_stack.get_layer_to_sidewall_angle()[(1, 0)], int)
+    assert isinstance(pdk.layer_stack.get_layer_to_sidewall_angle()[(1, 0)], float)
