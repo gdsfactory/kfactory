@@ -7,6 +7,7 @@ nav:
   - Home:
     - Intro: index.md
     - gdsfactory.md
+    - dosdonts.md
   - First Steps:
     - Prerequisites: pre.md
     - 5min Intro to KFactory: intro.md
@@ -15,6 +16,7 @@ nav:
     - KCell & Instance: notebooks/01_references.py
     - DRC utils: notebooks/02_DRC.py
     - Enclosures: notebooks/03_Enclosures.py
+    - Multiple KCLs: notebooks/04_KCL.py
   - Config Class: config.md
   - API: reference/
   - Changelog: changelog.md
@@ -51,7 +53,7 @@ markdown_extensions:
 plugins:
   - mkdocstrings:
       enabled: true
-      custom_templates: templates
+      # custom_templates: templates
       default_handler: python
       handlers:
         python:

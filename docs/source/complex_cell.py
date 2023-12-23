@@ -35,7 +35,7 @@ def composite_cell() -> kf.KCell:
     c.add_port(name="1", port=bend.ports["o1"])
     c.add_port(name="2", port=wg.ports["o2"])
 
-    c.autorename_ports()
+    c.auto_rename_ports()
 
     c.draw_ports()
 

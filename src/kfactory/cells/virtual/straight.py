@@ -1,31 +1,17 @@
-"""Straight waveguide in dbu.
+"""Straight virtual waveguide cells."""
 
-A waveguide is a rectangle of material with excludes and/or slab around it::
-
-    ┌──────────────────────────────┐
-    │         Slab/Exclude         │
-    ├──────────────────────────────┤
-    │                              │
-    │             Core             │
-    │                              │
-    ├──────────────────────────────┤
-    │         Slab/Exclude         │
-    └──────────────────────────────┘
-
-The slabs and excludes can be given in the form of an
-[Enclosure][kfactory.utils.LayerEnclosure].
-"""
-
-from ... import KCell, KCLayout, LayerEnum, cell, kcl, kdb
-from ...conf import config
+from .utils import extrude_backbone
+from ... import kdb
+from ...kcell import KCLayout, VKCell, LayerEnum, kcl, vcell
 from ...enclosure import LayerEnclosure
-from ...kcell import Info
+from ...conf import config
 
-__all__ = ["straight"]
+
+__all__ = ["Straight", "straight"]
 
 
 class Straight:
-    """Waveguide defined in dbu.
+    """Virtual waveguide defined in um.
 
         ┌──────────────────────────────┐
         │         Slab/Exclude         │
@@ -37,8 +23,8 @@ class Straight:
         │         Slab/Exclude         │
         └──────────────────────────────┘
     Args:
-        width: Waveguide width. [dbu]
-        length: Waveguide length. [dbu]
+        width: Waveguide width. [um]
+        length: Waveguide length. [um]
         layer: Main layer of the waveguide.
         enclosure: Definition of slab/excludes. [dbu]
     """
@@ -49,15 +35,15 @@ class Straight:
         """Initialize A straight class on a defined KCLayout."""
         self.kcl = kcl
 
-    @cell
+    @vcell
     def __call__(
         self,
-        width: int,
-        length: int,
+        width: float,
+        length: float,
         layer: int | LayerEnum,
         enclosure: LayerEnclosure | None = None,
-    ) -> KCell:
-        """Waveguide defined in dbu.
+    ) -> VKCell:
+        """Virtual waveguide defined in um.
 
             ┌──────────────────────────────┐
             │         Slab/Exclude         │
@@ -69,13 +55,12 @@ class Straight:
             │         Slab/Exclude         │
             └──────────────────────────────┘
         Args:
-            width: Waveguide width. [dbu]
-            length: Waveguide length. [dbu]
+            width: Waveguide width. [um]
+            length: Waveguide length. [um]
             layer: Main layer of the waveguide.
             enclosure: Definition of slab/excludes. [dbu]
         """
-        c = self.kcl.kcell()
-
+        c = VKCell(kcl=self.kcl)
         if length < 0:
             config.logger.critical(
                 f"Negative lengths are not allowed {length} as ports"
@@ -91,26 +76,29 @@ class Straight:
             )
             width = -width
 
-        if width // 2 * 2 != width:
-            raise ValueError("The width (w) must be a multiple of 2 database units")
-
-        c.shapes(layer).insert(kdb.Box(0, -width // 2, length, width // 2))
-        c.create_port(trans=kdb.Trans(2, False, 0, 0), layer=layer, width=width)
-        c.create_port(trans=kdb.Trans(0, False, length, 0), layer=layer, width=width)
-
-        if enclosure is not None:
-            enclosure.apply_minkowski_y(c, layer)
-        c.info = Info(
-            **{
-                "width_um": width * c.kcl.dbu,
-                "length_um": length * c.kcl.dbu,
-                "width_dbu": width,
-                "length_dbu": length,
-            }
+        extrude_backbone(
+            c,
+            backbone=[kdb.DPoint(0, 0), kdb.DPoint(length, 0)],
+            width=width,
+            layer=layer,
+            enclosure=enclosure,
+            start_angle=0,
+            end_angle=0,
+            dbu=c.kcl.dbu,
         )
 
-        c.boundary = c.dbbox()
-        c.auto_rename_ports()
+        c.create_port(
+            name="o1",
+            dcplx_trans=kdb.DCplxTrans(1, 180, False, 0, 0),
+            layer=layer,
+            dwidth=width,
+        )
+        c.create_port(
+            name="o2",
+            dcplx_trans=kdb.DCplxTrans(1, 0, False, length, 0),
+            layer=layer,
+            dwidth=width,
+        )
         return c
 
 

@@ -41,3 +41,23 @@ def test_namecollision(LAYER: kf.LayerEnum) -> None:
     b2 = kf.cells.circular.bend_circular(width=1, radius=10.5000005, layer=LAYER.WG)
 
     assert b1.name != b2.name
+
+
+def test_nested_dic() -> None:
+    @kf.cell(rec_dicts=True)
+    def recursive_dict_cell(d: dict[str, dict[str, str] | str]) -> kf.KCell:
+        c = kf.KCell()
+        return c
+
+    recursive_dict_cell({"test": {"test2": "test3"}, "test4": "test5"}).show()
+
+
+def test_ports_cell(LAYER: kf.LayerEnum) -> None:
+    c = kf.KCell()
+    c.create_port(
+        name="o1",
+        dwidth=1,
+        dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
+        layer=LAYER.WG,
+    )
+    assert c["o1"]

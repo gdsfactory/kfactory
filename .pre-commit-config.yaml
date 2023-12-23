@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: "v4.4.0"
+    rev: "v4.5.0"
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
@@ -19,52 +19,28 @@ repos:
         args: [--markdown-linebreak-ext=md]
         exclude: 'changelog\.d/.*|CHANGELOG\.md'
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.10.1
+    rev: v3.15.0
     hooks:
       - id: pyupgrade
   - repo: https://github.com/twisted/towncrier
     rev: "23.6.0"
     hooks:
       - id: towncrier-check
-
-  # - repo: https://github.com/pre-commit/pre-commit-hooks
-  #   rev: a41c4b94b220171e928ff3e6c9bef34e71267f46
-  #   hooks:
-  #     - id: check-yaml
-  #       exclude: ^(conda\.recipe/meta\.yaml|conda_build/templates/.*\.yaml|docs/click/meta\.yaml|conda/meta\.yaml|construct.yaml)
-  #     - id: end-of-file-fixer
-  #     - id: trailing-whitespace
-  #     - id: requirements-txt-fixer
-  # - repo: https://github.com/hakancelikdev/unimport
-  #   rev: 33ead41ee30f1d323a9c2fcfd0114297efbbc4d5
-  #   hooks:
-  #     - id: unimport
-  #       args: [--remove, --include-star-import]
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.1.6
     hooks:
-      - id: isort
-        files: src/kfactory/.*
-        args: [--profile, black, --filter-files]
-
-  - repo: https://github.com/psf/black
-    rev: 23.7.0
-    hooks:
-      - id: black
-
-  # - repo: https://github.com/omnilib/ufmt
-  #   rev: v2.0.0b1
-  #   hooks:
-  #     - id: ufmt
+      # Run the linter.
+      - id: ruff
+        exclude: ^tests/
+      # Run the formatter.
+      - id: ruff-format
+        exclude: ^tests/
   - repo: https://github.com/asottile/blacken-docs
-    rev: 1.15.0
+    rev: 1.16.0
     hooks:
       - id: blacken-docs
-        additional_dependencies: [black==22.3.0]
-  # - repo: https://github.com/pycqa/flake8
-  #   rev: 647996c743f9e77368ce46cc74abe98549dd4c3a
-  #   hooks:
-  #     - id: flake8
+        additional_dependencies: [black>=22.3.0]
   - repo: https://github.com/kynan/nbstripout
     rev: 0.6.1
     hooks:
@@ -72,28 +48,17 @@ repos:
         files: .ipynb
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.10.1
+    rev: v3.15.0
     hooks:
       - id: pyupgrade
         args: [--py37-plus, --keep-runtime-typing]
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.5
+    rev: v2.2.6
     hooks:
       - id: codespell
         additional_dependencies:
           - tomli
-
-  # - repo: https://github.com/shellcheck-py/shellcheck-py
-  #   rev: 98854f809ca9d0e235c0bd5c0ad5e986e02120a4
-  #   hooks:
-  #     - id: shellcheck
-
-  # - repo: https://github.com/pre-commit/pygrep-hooks
-  #   rev: 77c4a0f2d3edd699ff7c2c5e430d46cd85358768 # Use the ref you want to point at
-  #   hooks:
-  #     - id: python-use-type-annotations
-
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.5
     hooks:
@@ -101,29 +66,7 @@ repos:
         args: [--exit-zero]
         # ignore all tests, not just tests data
         exclude: ^tests/
-  # - repo: https://github.com/PyCQA/pylint
-  #   rev: v2.14.1
-  #   hooks:
-  #     - id: pylint
-  #       args: [--exit-zero]
-  # - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-  #   rev: 6565d773ca281682d7062d4c0be74538cc474cc9
-  #   hooks:
-  #     - id: pretty-format-java
-  #       args: [--autofix]
-  #     - id: pretty-format-kotlin
-  #       args: [--autofix]
-  #     - id: pretty-format-yaml
-  #       args: [--autofix, --indent, "2"]
-  # - repo: https://github.com/adrienverge/yamllint.git
-  #   rev: v1.21.0 # or higher tag
-  #   hooks:
-  #       - id: yamllint
-  #         args: [--format, parsable, --strict]
-  # - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
-  #   rev: 0.1.0 # or specific tag
-  #   hooks:
-  #       - id: yamlfmt
+
   - repo: local
     hooks:
       - id: mypy
@@ -132,33 +75,10 @@ repos:
         entry: bash -c 'mypy --strict -p kfactory'
         verbose: true
         always_run: true
-        # args:
-        #   - "--namespace-packages"
-        #   - "--explicit-package-bases"
-        #   - "-p kfactory"
-        # exclude: ^(docs/|example-plugin/|tests/fixtures)
-        # files: ^src/kfactory
-        # additional-dependencies:
-        #   [types-cachetools]
-  # - repo: https://github.com/terrencepreilly/darglint
-  #   rev: master
-  #   hooks:
-  #       - id: darglint
-  #
-  # - repo: https://github.com/pycqa/pydocstyle
-  #   rev: "a6fe4222012e990042c86cdaaa904a8d059752ee"
-  #   hooks:
-  #       - id: pydocstyle
-  # - repo: https://github.com/asottile/reorder_python_imports
-  #   rev: 2b2f0c74acdb3de316e23ceb7dd0d7945c354050
-  #   hooks:
-  #     - id: reorder-python-imports
-
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: "v1.10.0"
     hooks:
       - id: python-check-blanket-noqa
-      # - id: python-check-blanket-type-ignore
       - id: python-no-log-warn
       - id: python-no-eval
       - id: python-use-type-annotations

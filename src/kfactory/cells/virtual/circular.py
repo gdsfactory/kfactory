@@ -1,45 +1,32 @@
-"""Circular bends.
-
-A circular bend has a constant radius.
-"""
-
+"""Virtual circular cells."""
+from .utils import extrude_backbone
+from ...kcell import KCLayout, VKCell, kcl, vcell
+from ...enclosure import LayerEnclosure
+from ...conf import config
+from ... import kdb
 import numpy as np
 
-from .. import kdb
-from ..conf import config
-from ..enclosure import LayerEnclosure, extrude_path
-from ..kcell import KCell, KCLayout, LayerEnum, cell, kcl
 
-__all__ = ["bend_circular", "BendCircular"]
+class VirtualBendCircular:
+    """Virtual circular bend."""
 
+    kcl: KCLayout
 
-class BendCircular:
-    """Circular radius bend [um].
-
-    Args:
-        width: Width of the core. [um]
-        radius: Radius of the backbone. [um]
-        layer: Layer index of the target layer.
-        enclosure: Optional enclosure.
-        angle: Angle amount of the bend.
-        angle_step: Angle amount per backbone point of the bend.
-    """
-
-    def __init__(self, kcl: KCLayout):
-        """Set kcl."""
+    def __init__(self, kcl: KCLayout) -> None:
+        """Create a virtual circular bend function on a custom KCLayout."""
         self.kcl = kcl
 
-    @cell(snap_ports=False)
+    @vcell
     def __call__(
         self,
         width: float,
         radius: float,
-        layer: int | LayerEnum,
+        layer: int,
         enclosure: LayerEnclosure | None = None,
         angle: float = 90,
         angle_step: float = 1,
-    ) -> KCell:
-        """Circular radius bend [um].
+    ) -> VKCell:
+        """Create a virtual circular bend.
 
         Args:
             width: Width of the core. [um]
@@ -49,12 +36,10 @@ class BendCircular:
             angle: Angle amount of the bend.
             angle_step: Angle amount per backbone point of the bend.
         """
-        c = self.kcl.kcell()
-        r = radius
-
+        c = VKCell()
         if angle < 0:
             config.logger.critical(
-                f"Negative angles are not allowed {angle} as ports"
+                f"Negative lengths are not allowed {angle} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."
             )
@@ -66,13 +51,13 @@ class BendCircular:
                 " lengths."
             )
             width = -width
-
+        dbu = c.kcl.dbu
         backbone = [
             kdb.DPoint(x, y)
             for x, y in [
                 [
-                    np.sin(_angle / 180 * np.pi) * r,
-                    (-np.cos(_angle / 180 * np.pi) + 1) * r,
+                    np.sin(_angle / 180 * np.pi) * radius,
+                    (-np.cos(_angle / 180 * np.pi) + 1) * radius,
                 ]
                 for _angle in np.linspace(
                     0, angle, int(angle // angle_step + 0.5), endpoint=True
@@ -80,30 +65,30 @@ class BendCircular:
             ]
         ]
 
-        center_path = extrude_path(
-            target=c,
-            layer=layer,
-            path=backbone,
+        extrude_backbone(
+            c=c,
+            backbone=backbone,
             width=width,
+            layer=layer,
             enclosure=enclosure,
             start_angle=0,
             end_angle=angle,
+            dbu=dbu,
         )
 
         c.create_port(
-            trans=kdb.Trans(2, False, 0, 0),
-            width=int(width / c.kcl.dbu),
+            name="o1",
             layer=layer,
+            dwidth=round(width / c.kcl.dbu),
+            dcplx_trans=kdb.DCplxTrans(1, 180, False, backbone[0].to_v()),
         )
         c.create_port(
+            name="o2",
             dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
             dwidth=width,
             layer=layer,
         )
-        c.auto_rename_ports()
-        c.boundary = center_path
         return c
 
 
-bend_circular = BendCircular(kcl)
-"""Circular bend on the default KCLayout."""
+virtual_bend_circular = VirtualBendCircular(kcl)

@@ -39,3 +39,6 @@ docs/modules
 # ipython
 .ipynb_checkpoints
 *.ipynb
+
+
+demo.gds

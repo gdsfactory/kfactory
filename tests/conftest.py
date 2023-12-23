@@ -106,27 +106,6 @@ def cells(bend90, bend180, bend90_euler, taper, straight) -> list[kf.KCell]:
     ]
 
 
-# @pytest.fixture
-# def pdk(LAYER, straight_factory, wg_enc):
-#     pdk = kf.pdk.Pdk(
-#         layers=LAYER,
-#         name="TEST_PDK",
-#         cell_factories={
-#             "wg": straight_factory,
-#             "bend": kf.cells.circular.bend_circular,
-#             "bend_euler": kf.cells.euler.bend_euler,
-#             "taper": kf.cells.taper.taper,
-#             "bezier": kf.cells.bezier.bend_s,
-#             "straight": straight_factory,
-#         },
-#         layer_enclosures={"wg": wg_enc},
-#     )
-#     # pdk.register_cells(straight=straight_factory)
-#     # pdk.register_enclosures(wg=wg_enc)
-#     # pdk.activate()
-#     return pdk
-
-
 @pytest.fixture
 def pdk() -> kf.KCLayout:
     layerstack = kf.LayerStack(
@@ -143,8 +122,3 @@ def pdk() -> kf.KCLayout:
     )
     kcl = kf.KCLayout("Test_PDK", layer_stack=layerstack)
     return kcl
-
-
-# @pytest.fixture
-# def wg():
-#     return LAYER.WG

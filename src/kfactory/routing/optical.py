@@ -1,11 +1,51 @@
 """Optical routing allows the creation of photonic (or any route using bends)."""
 
 from collections.abc import Callable, Sequence
+from typing import Any
+
+from pydantic import BaseModel
 
 from .. import kdb
 from ..conf import config
-from ..kcell import KCell, Port
-from .manhattan import route_manhattan
+from ..kcell import Instance, KCell, Port
+from .manhattan import (
+    backbone2bundle,
+    clean_points,
+    route_manhattan,
+    route_ports_to_bundle,
+)
+
+
+class OpticalManhattanRoute(BaseModel, arbitrary_types_allowed=True):
+    """Optical route containing a connection between two ports.
+
+    Attrs:
+        backbone: backbone points
+        start_port: port at the first instance denoting the start of the route
+        end_port: port at the last instance denoting the end of the route
+        instances: list of the instances in order from start to end of the route
+        n_bend90: number of bends used
+        length: length of the route without the bends
+        length_straights: length of the straight_factory elements
+    """
+
+    backbone: list[kdb.Point]
+    start_port: Port
+    end_port: Port
+    instances: list[Instance]
+    n_bend90: int = 0
+    length: int = 0
+    length_straights: int = 0
+
+    @property
+    def length_backbone(self) -> int:
+        """Length of the backbone in dbu."""
+        length = 0
+        p_old = self.backbone[0]
+        for p in self.backbone[1:]:
+            length += int((p - p_old).length())
+            p_old = p
+        return length
 
 
 def vec_angle(v: kdb.Vector) -> int:
@@ -117,7 +157,7 @@ def route_loopback(
             end_straight=0,
         )
         + pts_end
-    )  # end_straight=end_straight# + d_loop,
+    )
 
 
 @config.logger.catch
@@ -138,8 +178,30 @@ def route(
     port_type: str = "optical",
     allow_small_routes: bool = False,
     different_port_width: int = False,
-) -> None:
-    """Bend 90 part."""
+    route_kwargs: dict[str, Any] | None = {},
+    min_straight_taper: int = 0,
+) -> OpticalManhattanRoute:
+    """Places a route.
+
+    Args:
+        c: Cell to place the route in.
+        p1: Start port.
+        p2: End port.
+        straight_factory: Factory function for straight cells. in DBU.
+        bend90_cell: 90° bend cell.
+        bend180_cell: 180° bend cell.
+        taper_cell: Taper cell.
+        start_straight: Minimal straight segment after `p1`.
+        end_straight: Minimal straight segment before `p2`.
+        route_path_function: Function to calculate the route path.
+        port_type: Port type to use for the bend90_cell.
+        allow_small_routes: Don't throw an error if two corners cannot be safely placed
+            due to small space and place them anyway.
+        different_port_width: If True, the width of the ports is ignored.
+        route_kwargs: Additional keyword arguments for the route_path_function.
+        min_straight_taper: Minimum straight [dbu] before attempting to place tapers.
+
+    """
     if p1.width != p2.width and not different_port_width:
         raise ValueError(
             f"The ports have different widths {p1.width=} {p2.width=}. If this is"
@@ -154,12 +216,15 @@ def route(
     # determine bend90_radius
     bend90_ports = [p for p in bend90_cell.ports if p.port_type == port_type]
 
-    assert (
-        len(bend90_ports) == 2
-    ), f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
-    assert (
-        abs((bend90_ports[0].trans.angle - bend90_ports[1].trans.angle) % 4) == 1
-    ), f"{bend90_cell.name} bend ports should be 90° apart from each other"
+    if len(bend90_ports) != 2:
+        raise ValueError(
+            f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
+        )
+
+    if abs((bend90_ports[0].trans.angle - bend90_ports[1].trans.angle) % 4) != 1:
+        raise ValueError(
+            f"{bend90_cell.name} bend ports should be 90° apart from each other"
+        )
     if (bend90_ports[1].trans.angle - bend90_ports[0].trans.angle) % 4 == 3:
         b90p1 = bend90_ports[1]
         b90p2 = bend90_ports[0]
@@ -177,7 +242,10 @@ def route(
     start_port: Port = p1.copy()
     end_port: Port = p2.copy()
     b90r = int(
-        max((b90p1.trans.disp - b90c.disp).abs(), (b90p2.trans.disp - b90c.disp).abs())
+        max(
+            (b90p1.trans.disp - b90c.disp).length(),
+            (b90p2.trans.disp - b90c.disp).length(),
+        )
     )
 
     if bend180_cell is not None:
@@ -201,7 +269,7 @@ def route(
             )
         )
 
-        b180r = int((b180p2.trans.disp - b180p1.trans.disp).abs())
+        b180r = int((b180p2.trans.disp - b180p1.trans.disp).length())
         start_port = p1.copy()
         end_port = p2.copy()
         pts = route_path_function(
@@ -214,7 +282,7 @@ def route(
         )
 
         if len(pts) > 2:
-            if (vec := pts[1] - pts[0]).abs() == b180r:
+            if (vec := pts[1] - pts[0]).length() == b180r:
                 match (p1.trans.angle - vec_angle(vec)) % 4:
                     case 1:
                         bend180 = c << bend180_cell
@@ -226,8 +294,8 @@ def route(
                         bend180.connect(b180p2.name, p1)
                         start_port = bend180.ports[b180p1.name]
                         pts = pts[1:]
-            if (vec := pts[-1] - pts[-2]).abs() == b180r:
-                match ((vec_angle(vec) - p2.trans.angle) % 4):
+            if (vec := pts[-1] - pts[-2]).length() == b180r:
+                match (vec_angle(vec) - p2.trans.angle) % 4:
                     case 1:
                         bend180 = c << bend180_cell
                         bend180.connect(b180p1.name, p2)
@@ -264,7 +332,7 @@ def route(
                             start_port = bend180.ports[b180p1.name]
                         j = i - 1
                     elif (
-                        vec.abs() == b180r
+                        vec.length() == b180r
                         and (ang2 - ang1) % 4 == 1
                         and (ang3 - ang2) % 4 == 1
                     ):
@@ -285,7 +353,7 @@ def route(
                         j = i - 1
                         start_port = bend180.ports[b180p2.name]
                     elif (
-                        vec.abs() == b180r
+                        vec.length() == b180r
                         and (ang2 - ang1) % 4 == 3
                         and (ang3 - ang2) % 4 == 3
                     ):
@@ -310,7 +378,7 @@ def route(
                     pt2 = pt3
                     pt3 = pt4
 
-        place90(
+        route = place90(
             c,
             start_port.copy(),
             end_port.copy(),
@@ -318,20 +386,159 @@ def route(
             straight_factory,
             bend90_cell,
             taper_cell,
+            min_straight_taper=min_straight_taper,
         )
 
     else:
         start_port = p1.copy()
         end_port = p2.copy()
-        pts = route_path_function(
-            start_port,
-            end_port,
-            bend90_radius=b90r,
-            start_straight=start_straight,
-            end_straight=end_straight,
+        if not route_kwargs:
+            pts = route_path_function(
+                start_port,
+                end_port,
+                bend90_radius=b90r,
+                start_straight=start_straight,
+                end_straight=end_straight,
+            )
+        else:
+            pts = route_path_function(
+                start_port,
+                end_port,
+                bend90_radius=b90r,
+                start_straight=start_straight,
+                end_straight=end_straight,
+                **route_kwargs,
+            )
+
+        route = place90(
+            c,
+            p1.copy(),
+            p2.copy(),
+            pts,
+            straight_factory,
+            bend90_cell,
+            taper_cell,
+            allow_small_routes=allow_small_routes,
+            min_straight_taper=min_straight_taper,
+        )
+    return route
+
+
+def route_bundle(
+    c: KCell,
+    start_ports: list[Port],
+    end_ports: list[Port],
+    spacing: int,
+    straight_factory: Callable[[int, int], KCell],
+    bend90_cell: KCell,
+    start_straight: int = 0,
+    end_straight: int = 0,
+    route_path_function: Callable[
+        ...,
+        list[kdb.Point],
+    ] = route_manhattan,
+    bundle_backbone: list[kdb.Point] | None = None,
+) -> list[OpticalManhattanRoute]:
+    """Route a bundle from starting ports to end_ports."""
+    radius = max(
+        abs(bend90_cell.ports[0].x - bend90_cell.ports[1].x),
+        abs(bend90_cell.ports[0].y - bend90_cell.ports[1].y),
+    )
+
+    sp_dict = {p.trans: i for i, p in enumerate(start_ports)}
+
+    if not (len(start_ports) == len(end_ports) and len(start_ports) > 0):
+        raise ValueError(
+            "For bundle routing the input port list must have"
+            " the same size as the end ports and be the same length."
         )
 
-        place90(c, p1.copy(), p2.copy(), pts, straight_factory, bend90_cell, taper_cell)
+    bundle_point_start = start_ports[0].trans.disp.to_p()
+    for p in start_ports[1:]:
+        bundle_point_start += p.trans.disp
+    bundle_point_start /= len(start_ports)
+    bundle_point_end = end_ports[0].trans.disp.to_p()
+    for p in end_ports[1:]:
+        bundle_point_end += p.trans.disp
+    bundle_point_end /= len(end_ports)
+
+    bundle_width = sum(p.width for p in start_ports) + len(start_ports) * spacing
+
+    start_routes, bundle_start = route_ports_to_bundle(
+        ports_to_route=[(p.trans, p.width) for p in start_ports],
+        bend_radius=radius,
+        bbox=c.bbox(),
+        bundle_base_point=bundle_point_start,
+        start_straight=start_straight,
+        spacing=spacing,
+    )
+
+    end_routes, bundle_end = route_ports_to_bundle(
+        ports_to_route=[(p.trans, p.width) for p in end_ports],
+        bend_radius=radius,
+        bbox=c.bbox(),
+        bundle_base_point=bundle_point_end,
+        start_straight=end_straight,
+        spacing=spacing,
+    )
+
+    start_widths = [start_ports[sp_dict[t]].width for t in start_routes]
+    bundle_radius = bundle_width - start_widths[-1] // 2 - start_widths[0] // 2 + radius
+
+    start_angle = start_ports[0].angle
+    end_angle = end_ports[0].angle
+
+    bundle_start_port = Port(
+        layer=start_ports[0].layer,
+        width=bundle_width,
+        trans=kdb.Trans(start_angle, False, bundle_start.to_v()),
+    )
+
+    bundle_end_port = Port(
+        layer=end_ports[0].layer,
+        width=bundle_width,
+        trans=kdb.Trans(end_angle, False, bundle_end.to_v()),
+    )
+
+    backbone_points = backbone2bundle(
+        backbone=route_manhattan(
+            port1=bundle_start_port,
+            port2=bundle_end_port,
+            bend90_radius=bundle_radius,
+            start_straight=0,
+            end_straight=0,
+        ),
+        port_widths=start_widths,
+        spacings=[spacing] * len(start_widths),
+    )
+
+    routes: list[OpticalManhattanRoute] = []
+
+    end_routes_values = list(end_routes.values())
+
+    for i, (t, start_pts) in enumerate(start_routes.items()):
+        bundle_pts = backbone_points[i]
+        end_pts = list(reversed(end_routes_values[-(i + 1)]))
+
+        pts = clean_points(start_pts + bundle_pts + end_pts)
+
+        s_idx = sp_dict[t]
+        sp = start_ports[s_idx].copy()
+        sp.angle = (sp.trans.angle + 2) % 4
+        ep = end_ports[s_idx].copy()
+        ep.angle = (ep.trans.angle + 2) % 4
+        routes.append(
+            place90(
+                c=c,
+                p1=sp,
+                p2=ep,
+                pts=pts,
+                straight_factory=straight_factory,
+                bend90_cell=bend90_cell,
+            )
+        )
+
+    return routes
 
 
 def place90(
@@ -343,9 +550,9 @@ def place90(
     bend90_cell: KCell,
     taper_cell: KCell | None = None,
     port_type: str = "optical",
-    min_straight_taper: int = 1000,
+    min_straight_taper: int = 0,
     allow_small_routes: bool = False,
-) -> None:
+) -> OpticalManhattanRoute:
     """Place bends and straight waveguides based on a sequence of points.
 
     This version will not take any non-90° bends. If the taper is not `None`, tapers
@@ -376,9 +583,23 @@ def place90(
         allow_small_routes: Don't throw an error if two corners cannot be safely placed
             due to small space and place them anyway.
     """
-    if not pts:
+    route_start_port = p1.copy()
+    route_start_port.name = None
+    route_start_port.trans.angle = (route_start_port.angle + 2) % 4
+    route_end_port = p2.copy()
+    route_end_port.name = None
+    route_end_port.trans.angle = (route_end_port.angle + 2) % 4
+    route = OpticalManhattanRoute(
+        parent=c,
+        backbone=list(pts).copy(),
+        start_port=route_start_port,
+        end_port=route_end_port,
+        instances=[],
+    )
+    if not pts or len(pts) < 2:
         # Nothing to be placed
-        return
+        return route
+
     w = p1.width
     old_pt = pts[0]
     old_bend_port = p1
@@ -413,7 +634,7 @@ def place90(
         b90p2.trans.disp.y if b90p1.trans.angle % 2 else b90p1.trans.disp.y,
     )
     b90r = max(
-        (b90p1.trans.disp - b90c.disp).abs(), (b90p2.trans.disp - b90c.disp).abs()
+        (b90p1.trans.disp - b90c.disp).length(), (b90p2.trans.disp - b90c.disp).length()
     )
     if taper_cell is not None:
         taper_ports = [p for p in taper_cell.ports if p.port_type == "optical"]
@@ -436,31 +657,46 @@ def place90(
             )
 
     if len(pts) == 2:
-        length = (pts[1] - pts[0]).abs()
+        length = (pts[1] - pts[0]).length()
+        route.length += int(length)
         if (
             taper_cell is None
             or length
-            < (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 + min_straight_taper
+            < (taperp1.trans.disp - taperp2.trans.disp).length() * 2
+            + min_straight_taper
         ):
-            wg = c << straight_factory(width=w, length=(pts[1] - pts[0]).abs())
+            wg = c << straight_factory(width=w, length=(pts[1] - pts[0]).length())
             wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
             wg.connect(wg_p1, p1)
+            route.instances.append(wg)
+            route.start_port = wg_p1.copy()
+            route.start_port.name = None
+            route.length_straights += int(length)
         else:
             t1 = c << taper_cell
             t1.connect(taperp1.name, p1)
-            if length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
+            route.instances.append(t1)
+            route.start_port = t1.ports[taperp1.name].copy()
+            route.start_port.name = None
+            _l = int(length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2)
+            if _l != 0:
                 wg = c << straight_factory(
                     width=taperp2.width,
-                    length=length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
+                    length=length
+                    - (taperp1.trans.disp - taperp2.trans.disp).length() * 2,
                 )
                 wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
                 wg.connect(wg_p1, t1, taperp2.name)
+                route.instances.append(wg)
                 t2 = c << taper_cell
                 t2.connect(taperp2.name, wg_p2)
+                route.length_straights += _l
             else:
                 t2 = c << taper_cell
                 t2.connect(taperp2.name, t1, taperp2.name)
-        return
+            route.instances.append(t2)
+            route.end_port = t2.ports[taperp1.name]
+        return route
     for i in range(1, len(pts) - 1):
         pt = pts[i]
         new_pt = pts[i + 1]
@@ -486,6 +722,7 @@ def place90(
         vec_n = new_pt - pt
 
         bend90 = c << bend90_cell
+        route.n_bend90 += 1
         mirror = (vec_angle(vec_n) - vec_angle(vec)) % 4 != 3
         if (vec.y != 0) and (vec.x != 0):
             raise ValueError(
@@ -497,54 +734,89 @@ def place90(
                 f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
             )
         bend90.transform(kdb.Trans(ang, mirror, pt.x, pt.y) * b90c.inverted())
-        length = (bend90.ports[b90p1.name].trans.disp - old_bend_port.trans.disp).abs()
+        length = (
+            bend90.ports[b90p1.name].trans.disp - old_bend_port.trans.disp
+        ).length()
+        route.length += int(length)
         if length > 0:
             if (
                 taper_cell is None
                 or length
-                < (taperp1.trans.disp - taperp2.trans.disp).abs() * 2
+                < (taperp1.trans.disp - taperp2.trans.disp).length() * 2
                 + min_straight_taper
             ):
                 wg = c << straight_factory(width=w, length=length)
                 wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
                 wg.connect(wg_p1, bend90, b90p1.name)
+                route.instances.append(wg)
+                route.length_straights += int(length)
             else:
                 t1 = c << taper_cell
                 t1.connect(taperp1.name, bend90, b90p1.name)
-                if length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
+                route.instances.append(t1)
+                _l = int(
+                    length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2
+                )
+                if length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2 != 0:
                     wg = c << straight_factory(
                         width=taperp2.width,
                         length=length
-                        - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
+                        - (taperp1.trans.disp - taperp2.trans.disp).length() * 2,
                     )
                     wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
                     wg.connect(wg_p1.name, t1, taperp2.name)
+                    route.instances.append(wg)
                     t2 = c << taper_cell
                     t2.connect(taperp2.name, wg, wg_p2.name)
+                    route.length_straights += _l
                 else:
                     t2 = c << taper_cell
                     t2.connect(taperp2.name, t1, taperp2.name)
+                route.instances.append(t2)
+        route.instances.append(bend90)
         old_pt = pt
         old_bend_port = bend90.ports[b90p2.name]
-    length = (bend90.ports[b90p2.name].trans.disp - p2.trans.disp).abs()
+    length = (bend90.ports[b90p2.name].trans.disp - p2.trans.disp).length()
+    route.length += int(length)
     if length > 0:
         if (
             taper_cell is None
             or length
-            < (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 + min_straight_taper
+            < (taperp1.trans.disp - taperp2.trans.disp).length() * 2
+            + min_straight_taper
         ):
             wg = c << straight_factory(width=w, length=length)
             wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
             wg.connect(wg_p1.name, bend90, b90p2.name)
+            route.instances.append(wg)
+            route.end_port = wg.ports[wg_p2.name].copy()
+            route.end_port.name = None
+            route.length_straights += int(length)
         else:
             t1 = c << taper_cell
             t1.connect(taperp1.name, bend90, b90p2.name)
-            if length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2 != 0:
+            route.instances.append(t1)
+            if length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2 != 0:
+                _l = int(
+                    length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2
+                )
                 wg = c << straight_factory(
                     width=taperp2.width,
-                    length=length - (taperp1.trans.disp - taperp2.trans.disp).abs() * 2,
+                    length=_l,
                 )
+                route.instances.append(wg)
                 wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
                 wg.connect(wg_p1.name, t1, taperp2.name)
                 t2 = c << taper_cell
                 t2.connect(taperp2.name, wg, wg_p2.name)
+                route.length_straights += int(_l)
+            else:
+                t2 = c << taper_cell
+                t2.connect(taperp2.name, t1, taperp2.name)
+            route.instances.append(t2)
+            route.end_port = t2.ports[taperp1.name].copy()
+            route.end_port.name = None
+    else:
+        route.end_port = old_bend_port.copy()
+        route.end_port.name = None
+    return route
