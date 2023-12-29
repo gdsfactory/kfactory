@@ -163,26 +163,32 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
     @model_validator(mode="before")
     def restrict_types(
         cls, data: dict[str, Any]
-    ) -> dict[str, int | float | SerializableShape | str]:
+    ) -> dict[str, int | float | SerializableShape | str | tuple[float | int, ...]]:
         for name, value in data.items():
-            if not isinstance(value, str | int | float | SerializableShape):
+            if not isinstance(
+                value, str | int | float | SerializableShape | tuple[int | float, ...]
+            ):
                 data[name] = str(value)
         return data
 
     def __getitem__(self, key: str) -> Any:
         return getattr(self, key)
 
+    def get(self, __key: str, default: Any | None = None) -> Any:
+        return getattr(self, __key) if hasattr(self, __key) else default
+
 
 class Info(BaseModel, extra="allow", validate_assignment=True):
     @model_validator(mode="before")
     def restrict_types(
-        cls, data: dict[str, int | float | str]
-    ) -> dict[str, int | float | str]:
+        cls, data: dict[str, int | float | str | tuple[float | int, ...]]
+    ) -> dict[str, int | float | str | tuple[float | int, ...]]:
         for name, value in data.items():
-            assert isinstance(value, str | int | float), (
-                "Values of the info dict only support int, float, or strings."
-                f"{name}: {value}, {type(value)}"
-            )
+            if not isinstance(value, str | int | float | tuple):
+                raise ValueError(
+                    "Values of the info dict only support int, float, string or tuple."
+                    f"{name}: {value}, {type(value)}"
+                )
 
         return data
 
@@ -191,6 +197,9 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
 
     def __setitem__(self, __key: str, __val: str | int | float) -> None:
         setattr(self, __key, __val)
+
+    def get(self, __key: str, default: Any | None = None) -> Any:
+        return getattr(self, __key) if hasattr(self, __key) else default
 
 
 class PROPID(IntEnum):
