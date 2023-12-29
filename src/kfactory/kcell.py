@@ -165,9 +165,7 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
         cls, data: dict[str, Any]
     ) -> dict[str, int | float | SerializableShape | str | tuple[float | int, ...]]:
         for name, value in data.items():
-            if not isinstance(
-                value, str | int | float | SerializableShape | tuple[int | float, ...]
-            ):
+            if not isinstance(value, str | int | float | SerializableShape | tuple):
                 data[name] = str(value)
         return data
 
