@@ -23,7 +23,7 @@ from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
 from types import ModuleType
-from typing import Any, Literal, TypeAlias, TypeVar, overload
+from typing import Any, Literal, TypeAlias, TypeVar, overload, Sequence
 
 import cachetools.func
 import numpy as np
@@ -165,7 +165,7 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
         cls, data: dict[str, Any]
     ) -> dict[str, int | float | SerializableShape | str | tuple[float | int, ...]]:
         for name, value in data.items():
-            if not isinstance(value, str | int | float | SerializableShape | tuple):
+            if not isinstance(value, str | int | float | SerializableShape | Sequence):
                 data[name] = str(value)
         return data
 
@@ -182,7 +182,7 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
         cls, data: dict[str, int | float | str | tuple[float | int, ...]]
     ) -> dict[str, int | float | str | tuple[float | int, ...]]:
         for name, value in data.items():
-            if not isinstance(value, str | int | float | tuple):
+            if not isinstance(value, str | int | float | Sequence):
                 raise ValueError(
                     "Values of the info dict only support int, float, string or tuple."
                     f"{name}: {value}, {type(value)}"
