@@ -164,9 +164,11 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
     @model_validator(mode="before")
     def restrict_types(
         cls, data: dict[str, Any]
-    ) -> dict[str, int | float | SerializableShape | Sequence | str]:
+    ) -> dict[str, int | float | bool | SerializableShape | Sequence | str]:
         for name, value in data.items():
-            if not isinstance(value, str | int | float | SerializableShape | Sequence):
+            if not isinstance(
+                value, str | int | float | bool | SerializableShape | Sequence
+            ):
                 data[name] = str(value)
         return data
 
@@ -180,8 +182,8 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
 class Info(BaseModel, extra="allow", validate_assignment=True):
     @model_validator(mode="before")
     def restrict_types(
-        cls, data: dict[str, int | float | Sequence | str]
-    ) -> dict[str, int | float | Sequence | str ]:
+        cls, data: dict[str, int | float | bool | Sequence | str]
+    ) -> dict[str, int | float | bool | Sequence | str]:
         for name, value in data.items():
             if not isinstance(value, str | int | float | Sequence):
                 raise ValueError(
