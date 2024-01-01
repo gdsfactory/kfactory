@@ -23,7 +23,8 @@ from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
 from types import ModuleType
-from typing import Any, Literal, TypeAlias, TypeVar, overload, Sequence
+from typing import Any, Literal, TypeAlias, TypeVar, overload
+from collections.abc import Sequence
 
 import cachetools.func
 import numpy as np
