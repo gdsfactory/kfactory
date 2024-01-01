@@ -164,7 +164,7 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
     @model_validator(mode="before")
     def restrict_types(
         cls, data: dict[str, Any]
-    ) -> dict[str, int | float | SerializableShape | str | tuple[float | int, ...]]:
+    ) -> dict[str, int | float | SerializableShape | Sequence | str]:
         for name, value in data.items():
             if not isinstance(value, str | int | float | SerializableShape | Sequence):
                 data[name] = str(value)
@@ -180,8 +180,8 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
 class Info(BaseModel, extra="allow", validate_assignment=True):
     @model_validator(mode="before")
     def restrict_types(
-        cls, data: dict[str, int | float | str | tuple[float | int, ...]]
-    ) -> dict[str, int | float | str | tuple[float | int, ...]]:
+        cls, data: dict[str, int | float | Sequence | str]
+    ) -> dict[str, int | float | Sequence | str ]:
         for name, value in data.items():
             if not isinstance(value, str | int | float | Sequence):
                 raise ValueError(
@@ -194,7 +194,7 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
     def __getitem__(self, __key: str) -> Any:
         return getattr(self, __key)
 
-    def __setitem__(self, __key: str, __val: str | int | float) -> None:
+    def __setitem__(self, __key: str, __val: str | int | float | Sequence) -> None:
         setattr(self, __key, __val)
 
     def get(self, __key: str, default: Any | None = None) -> Any:
