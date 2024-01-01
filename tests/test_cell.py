@@ -27,6 +27,8 @@ def test_settings_and_info():
     assert c.info["f"] == 3.0
     assert c.info["t"] == (2, 3)
 
+    c.info["None"] = None
+
 
 def test_enclosure_name(straight_factory: Callable[..., kf.KCell]) -> None:
     wg = straight_factory(width=1000, length=10000)

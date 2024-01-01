@@ -196,8 +196,9 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
     def __getitem__(self, __key: str) -> Any:
         return getattr(self, __key)
 
-    def __setitem__(self, __key: str, __val: str | int | float | Sequence) -> None:
-        setattr(self, __key, __val)
+    def __setitem__(self, __key: str, __val: str | int | float | Sequence | None) -> None:
+        if __val is not None:
+            setattr(self, __key, __val)
 
     def get(self, __key: str, default: Any | None = None) -> Any:
         return getattr(self, __key) if hasattr(self, __key) else default
