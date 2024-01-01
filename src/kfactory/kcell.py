@@ -173,7 +173,7 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
     def __getitem__(self, key: str) -> Any:
         return getattr(self, key)
 
-    def get(self, __key: str, default: Any | None = None) -> Any:
+    def get(self, __key: str, default: Any = None) -> Any:
         return getattr(self, __key) if hasattr(self, __key) else default
 
 
