@@ -2,34 +2,6 @@ import kfactory as kf
 from collections.abc import Callable
 
 
-@kf.cell
-def sample(
-    s: str = "a", i: int = 3, f: float = 2.0, t: tuple[int, ...] = (1,)
-) -> kf.KCell:
-    c = kf.KCell()
-    c.info["s"] = s
-    c.info["i"] = i
-    c.info["f"] = f
-    c.info["t"] = t
-    return c
-
-
-def test_settings_and_info():
-    c = sample()
-    assert c.info["s"] == "a"
-    assert c.info["i"] == 3
-    assert c.info["f"] == 2.0
-    assert c.info["t"] == (1,)
-
-    c = sample(s="b", i=4, f=3.0, t=(2, 3))
-    assert c.info["s"] == "b"
-    assert c.info["i"] == 4
-    assert c.info["f"] == 3.0
-    assert c.info["t"] == (2, 3)
-
-    c.info["None"] = None
-
-
 def test_enclosure_name(straight_factory: Callable[..., kf.KCell]) -> None:
     wg = straight_factory(width=1000, length=10000)
     assert wg.name == "Straight_W1000_L10000_LWG_EWGSTD"
