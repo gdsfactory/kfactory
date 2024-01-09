@@ -1397,6 +1397,16 @@ class KCell:
                 )
 
     @property
+    def x(self) -> int:
+        """Returns the x-coordinate of the center of the bounding box."""
+        return self._kdb_cell.bbox().center().x
+
+    @property
+    def y(self) -> int:
+        """Returns the y-coordinate of the center of the bounding box."""
+        return self._kdb_cell.bbox().center().y
+
+    @property
     def xmin(self) -> int:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self._kdb_cell.bbox().left
@@ -2999,6 +3009,21 @@ class UMKCell:
     def ysize(self) -> float:
         """Returns the height of the bounding box."""
         return self.parent._kdb_cell.dbbox().height()
+
+    @property
+    def x(self) -> float:
+        """X coordinate of the port in um."""
+        return self.parent._kdb_cell.dbbox().center().x
+
+    @property
+    def y(self) -> float:
+        """Y coordinate of the port in um."""
+        return self.parent._kdb_cell.dbbox().center().y
+
+    @property
+    def center(self) -> kdb.DPoint:
+        """Coordinate of the port in um."""
+        return self.parent._kdb_cell.dbbox().center()
 
     @overload
     def create_inst(
