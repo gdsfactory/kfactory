@@ -2988,10 +2988,9 @@ class UMKCell:
         return self.parent._kdb_cell.dbbox().center().y
 
     @property
-    def center(self) -> tuple[float, float]:
+    def center(self) -> kdb.DPoint:
         """Coordinate of the port in um."""
-        vec = self.parent._kdb_cell.dbbox().center()
-        return (vec.x, vec.y)
+        return self.parent._kdb_cell.dbbox().center()
 
     @overload
     def create_inst(
