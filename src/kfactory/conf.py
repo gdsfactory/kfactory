@@ -54,6 +54,8 @@ def tracing_formatter(record: loguru.Record) -> str:
 
 
 class LogLevel(str, Enum):
+    """KFactory logger levels."""
+
     TRACE = "TRACE"
     DEBUG = "DEBUG"
     INFO = "INFO"
@@ -143,4 +145,4 @@ class Settings(
 config = Settings()
 
 
-__all__ = ["config"]
+__all__ = ["config", "LogLevel"]
