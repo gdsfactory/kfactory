@@ -12,7 +12,7 @@ categories:
   - title: 'Breaking'
     label: 'type: breaking'
   - title: 'New'
-    label: 'type: feature'
+    label: 'type: enhancement'
   - title: 'Bug Fixes'
     label: 'type: bug'
   - title: 'Maintenance'
@@ -32,7 +32,7 @@ version-resolver:
       - 'major'
   minor:
     labels:
-      - 'type: feature'
+      - 'type: enhancement'
       - 'type: minor'
       - 'minor'
   patch:
