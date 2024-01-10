@@ -2272,7 +2272,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 enclosure = base_kcl.enclosure or KCellEnclosure([])
             if layer_enclosures is None:
                 layer_enclosures = LayerEnclosureModel()
-            layer_stack_ = base_kcl.layer_stack or layer_stack or LayerStack()
+            layer_stack_ = layer_stack or base_kcl.layer_stack or LayerStack()
             if copy_base_kcl_layers and layer_stack_ and layer_stack:
                 layer_stackdict = layer_stack_.model_dump()
                 layer_stackdict.update(layer_stack.model_dump())
