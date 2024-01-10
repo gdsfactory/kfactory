@@ -24,6 +24,7 @@ from pathlib import Path
 from tempfile import gettempdir
 from types import ModuleType
 from typing import Any, Literal, TypeAlias, TypeVar, overload
+from collections.abc import Sequence
 
 import cachetools.func
 import numpy as np
@@ -163,34 +164,66 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
     @model_validator(mode="before")
     def restrict_types(
         cls, data: dict[str, Any]
-    ) -> dict[str, int | float | SerializableShape | str]:
+    ) -> dict[
+        str,
+        int
+        | float
+        | bool
+        | SerializableShape
+        | Sequence[int | float | SerializableShape | str]
+        | str,
+    ]:
         for name, value in data.items():
-            if not isinstance(value, str | int | float | SerializableShape):
+            if not isinstance(
+                value, str | int | float | bool | SerializableShape | Sequence
+            ):
                 data[name] = str(value)
         return data
 
     def __getitem__(self, key: str) -> Any:
         return getattr(self, key)
 
+    def get(self, __key: str, default: Any = None) -> Any:
+        return getattr(self, __key) if hasattr(self, __key) else default
+
 
 class Info(BaseModel, extra="allow", validate_assignment=True):
     @model_validator(mode="before")
     def restrict_types(
-        cls, data: dict[str, int | float | str]
-    ) -> dict[str, int | float | str]:
+        cls,
+        data: dict[
+            str,
+            int | float | bool | Sequence[int | float | SerializableShape | str] | str,
+        ],
+    ) -> dict[
+        str, int | float | bool | Sequence[int | float | SerializableShape | str] | str
+    ]:
         for name, value in data.items():
-            assert isinstance(value, str | int | float), (
-                "Values of the info dict only support int, float, or strings."
-                f"{name}: {value}, {type(value)}"
-            )
+            if not isinstance(value, str | int | float | Sequence):
+                raise ValueError(
+                    "Values of the info dict only support int, float, string or tuple."
+                    f"{name}: {value}, {type(value)}"
+                )
 
         return data
 
     def __getitem__(self, __key: str) -> Any:
         return getattr(self, __key)
 
-    def __setitem__(self, __key: str, __val: str | int | float) -> None:
-        setattr(self, __key, __val)
+    def __setitem__(
+        self,
+        __key: str,
+        __val: str
+        | int
+        | float
+        | Sequence[int | float | SerializableShape | str]
+        | None,
+    ) -> None:
+        if __val is not None:
+            setattr(self, __key, __val)
+
+    def get(self, __key: str, default: Any | None = None) -> Any:
+        return getattr(self, __key) if hasattr(self, __key) else default
 
 
 class PROPID(IntEnum):
@@ -1362,6 +1395,16 @@ class KCell:
                     f"Unknown metadata format {config.meta_format}."
                     f" Available formats are 'default' or 'legacy'."
                 )
+
+    @property
+    def x(self) -> int:
+        """Returns the x-coordinate of the center of the bounding box."""
+        return self._kdb_cell.bbox().center().x
+
+    @property
+    def y(self) -> int:
+        """Returns the y-coordinate of the center of the bounding box."""
+        return self._kdb_cell.bbox().center().y
 
     @property
     def xmin(self) -> int:
@@ -3083,6 +3126,21 @@ class UMKCell:
     def ysize(self) -> float:
         """Returns the height of the bounding box."""
         return self.parent._kdb_cell.dbbox().height()
+
+    @property
+    def x(self) -> float:
+        """X coordinate of the port in um."""
+        return self.parent._kdb_cell.dbbox().center().x
+
+    @property
+    def y(self) -> float:
+        """Y coordinate of the port in um."""
+        return self.parent._kdb_cell.dbbox().center().y
+
+    @property
+    def center(self) -> kdb.DPoint:
+        """Coordinate of the port in um."""
+        return self.parent._kdb_cell.dbbox().center()
 
     @overload
     def create_inst(

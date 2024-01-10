@@ -61,3 +61,10 @@ def test_ports_cell(LAYER: kf.LayerEnum) -> None:
         layer=LAYER.WG,
     )
     assert c["o1"]
+
+
+def test_getter(LAYER: kf.LayerEnum) -> None:
+    c = kf.KCell()
+    w = c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
+    assert c.y == 0
+    assert c.d.y == 0

@@ -3,8 +3,9 @@ from functools import partial
 import pytest
 
 import kfactory as kf
+from collections.abc import Callable
 
-# kf.config.logfilter.level = "ERROR"
+kf.config.logfilter.level = kf.conf.LogLevel.ERROR
 
 
 class LAYER_CLASS(kf.LayerEnum):
@@ -16,62 +17,64 @@ class LAYER_CLASS(kf.LayerEnum):
 
 
 @pytest.fixture
-def LAYER():
+def LAYER() -> type[kf.LayerEnum]:
     return LAYER_CLASS
 
 
 @pytest.fixture
-def wg_enc(LAYER):
+def wg_enc(LAYER: kf.LayerEnum) -> kf.LayerEnclosure:
     return kf.LayerEnclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
 
 
 @pytest.fixture
-def straight_factory(LAYER, wg_enc):
+def straight_factory(
+    LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure
+) -> Callable[..., kf.KCell]:
     return partial(kf.cells.dbu.straight, layer=LAYER.WG, enclosure=wg_enc)
 
 
 @pytest.fixture
-def straight(LAYER, wg_enc) -> kf.KCell:
+def straight(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.straight.straight(
         width=0.5, length=1, layer=LAYER.WG, enclosure=wg_enc
     )
 
 
 @pytest.fixture
-def straight_blank(LAYER):
+def straight_blank(LAYER: kf.LayerEnum) -> kf.KCell:
     return kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
 
 
 @pytest.fixture
-def bend90(LAYER, wg_enc) -> kf.KCell:
+def bend90(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnum) -> kf.KCell:
     return kf.cells.circular.bend_circular(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
-def bend180(LAYER, wg_enc) -> kf.KCell:
+def bend180(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.circular.bend_circular(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
     )
 
 
 @pytest.fixture
-def bend90_euler(LAYER, wg_enc) -> kf.KCell:
+def bend90_euler(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.euler.bend_euler(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
-def bend180_euler(LAYER, wg_enc) -> kf.KCell:
+def bend180_euler(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.euler.bend_euler(
         width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
     )
 
 
 @pytest.fixture
-def taper(LAYER, wg_enc) -> kf.KCell:
+def taper(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     c = kf.cells.taper.taper(
         width1=0.5,
         width2=1,
@@ -85,7 +88,7 @@ def taper(LAYER, wg_enc) -> kf.KCell:
 
 
 @pytest.fixture
-def optical_port(LAYER):
+def optical_port(LAYER: kf.LayerEnum) -> kf.Port:
     return kf.Port(
         name="o1",
         trans=kf.kdb.Trans.R0,
@@ -96,7 +99,13 @@ def optical_port(LAYER):
 
 
 @pytest.fixture
-def cells(bend90, bend180, bend90_euler, taper, straight) -> list[kf.KCell]:
+def cells(
+    bend90: kf.KCell,
+    bend180: kf.KCell,
+    bend90_euler: kf.KCell,
+    taper: kf.KCell,
+    straight: kf.KCell,
+) -> list[kf.KCell]:
     return [
         bend90,
         bend180,

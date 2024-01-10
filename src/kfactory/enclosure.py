@@ -46,7 +46,7 @@ class Direction(IntEnum):
 
 
 def is_callable_widths(
-    widths: Callable[[float], float] | list[float]
+    widths: Callable[[float], float] | list[float],
 ) -> TypeGuard[Callable[[float], float]]:
     """Determines whether a width object is callable or a list."""
     return callable(widths)

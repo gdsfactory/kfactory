@@ -190,6 +190,7 @@ ignore-words-list = "euclidian,TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem"
 skip = "pyproject.toml"
 
 [tool.ruff]
+fix = true
 line-length = 88
 exclude = ["tests", "docs", "src/kfactory/widgets/interactive.py"]
 indent-width = 4
