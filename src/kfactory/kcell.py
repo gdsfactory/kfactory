@@ -2048,7 +2048,7 @@ class LayerLevel(BaseModel):
             bias: in um for the etch.
     """
 
-    layer: tuple[int, int] | LayerEnum
+    layer: tuple[int, int]
     thickness: float
     thickness_tolerance: float | None = None
     zmin: float
@@ -2056,6 +2056,30 @@ class LayerLevel(BaseModel):
     sidewall_angle: float = 0.0
     z_to_bias: tuple[int, ...] | None = None
     info: Info = Info()
+
+    def __init__(
+        self,
+        layer: tuple[int, int] | LayerEnum,
+        zmin: float,
+        thickness: float,
+        thickness_tolerance: float | None = None,
+        material: str | None = None,
+        sidewall_angle: float = 0.0,
+        z_to_bias: tuple[int, ...] | None = None,
+        info: Info = Info(),
+    ):
+        if isinstance(layer, LayerEnum):
+            layer = (layer.layer, layer.datatype)
+        super().__init__(
+            layer=layer,
+            zmin=zmin,
+            thickness=thickness,
+            thickness_tolerance=thickness_tolerance,
+            material=material,
+            sidewall_angle=sidewall_angle,
+            z_to_bias=z_to_bias,
+            info=info,
+        )
 
 
 class LayerStack(BaseModel):
@@ -2067,20 +2091,11 @@ class LayerStack(BaseModel):
 
     layers: dict[str, LayerLevel] = Field(default_factory=dict)
 
-    def __init__(self, **data: Any):
+    def __init__(self, **layers: LayerLevel):
         """Add LayerLevels automatically for subclassed LayerStacks."""
-        super().__init__(**data)
+        super().__init__(layers=layers)
 
-        for field, val in data.items():
-            if not isinstance(val, LayerLevel):
-                raise TypeError(
-                    f"argument should be of type LayerLevel, got type {type(val)}."
-                )
-            self.layers[field] = val
-            if isinstance(val.layer, LayerEnum):
-                self.layers[field].layer = (val.layer[0], val.layer[1])
-
-    def get_layer_to_thickness(self) -> dict[tuple[int, int] | LayerEnum, float]:
+    def get_layer_to_thickness(self) -> dict[tuple[int, int], float]:
         """Returns layer tuple to thickness (um)."""
         return {
             level.layer: level.thickness
@@ -2088,13 +2103,13 @@ class LayerStack(BaseModel):
             if level.thickness
         }
 
-    def get_layer_to_zmin(self) -> dict[tuple[int, int] | LayerEnum, float]:
+    def get_layer_to_zmin(self) -> dict[tuple[int, int], float]:
         """Returns layer tuple to z min position (um)."""
         return {
             level.layer: level.zmin for level in self.layers.values() if level.thickness
         }
 
-    def get_layer_to_material(self) -> dict[tuple[int, int] | LayerEnum, str]:
+    def get_layer_to_material(self) -> dict[tuple[int, int], str]:
         """Returns layer tuple to material name."""
         return {
             level.layer: level.material
@@ -2102,7 +2117,7 @@ class LayerStack(BaseModel):
             if level.thickness and level.material
         }
 
-    def get_layer_to_sidewall_angle(self) -> dict[tuple[int, int] | LayerEnum, float]:
+    def get_layer_to_sidewall_angle(self) -> dict[tuple[int, int], float]:
         """Returns layer tuple to material name."""
         return {
             level.layer: level.sidewall_angle
@@ -2110,12 +2125,14 @@ class LayerStack(BaseModel):
             if level.thickness
         }
 
-    def get_layer_to_info(self) -> dict[tuple[int, int] | LayerEnum, Info]:
+    def get_layer_to_info(self) -> dict[tuple[int, int], Info]:
         """Returns layer tuple to info dict."""
         return {level.layer: level.info for level in self.layers.values()}
 
-    def to_dict(self) -> dict[str, dict[str, Any]]:
-        return {level_name: dict(level) for level_name, level in self.layers.items()}
+    def to_dict(self) -> dict[str, dict[str, dict[str, Any]]]:
+        return {
+            level_name: level.model_dump() for level_name, level in self.layers.items()
+        }
 
     def __getitem__(self, key: str) -> LayerLevel:
         """Access layer stack elements."""
@@ -2124,6 +2141,9 @@ class LayerStack(BaseModel):
             raise ValueError(f"{key!r} not in {layers}")
 
         return self.layers[key]
+
+    def __getattr__(self, attr: str) -> Any:
+        return self.layers[attr]
 
 
 class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
@@ -2174,8 +2194,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     factories: KCellFactories
     kcells: dict[int, KCell]
     layers: type[LayerEnum]
-    layer_stack: LayerStack | None = None
-    netlist_layer_mapping: dict[LayerEnum | int, LayerEnum | int] = Field(default={})
+    layer_stack: LayerStack
+    netlist_layer_mapping: dict[LayerEnum | int, LayerEnum | int] = Field(
+        default_factory=dict
+    )
     sparameters_path: Path | str | None
     interconnect_cml_path: Path | str | None
     constants: Constants = Field(default_factory=Constants)
@@ -2186,7 +2208,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         name: str,
         layer_enclosures: dict[str, LayerEnclosure] | LayerEnclosureModel | None = None,
         enclosure: KCellEnclosure | None = None,
-        # factories: dict[str, KCellFactory] | None = None,
         layers: type[LayerEnum] | None = None,
         sparameters_path: Path | str | None = None,
         interconnect_cml_path: Path | str | None = None,
@@ -2251,13 +2272,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 enclosure = base_kcl.enclosure or KCellEnclosure([])
             if layer_enclosures is None:
                 layer_enclosures = LayerEnclosureModel()
-            layer_stack_ = base_kcl.layer_stack or layer_stack
+            layer_stack_ = base_kcl.layer_stack or layer_stack or LayerStack()
             if copy_base_kcl_layers and layer_stack_ and layer_stack:
                 layer_stackdict = layer_stack_.model_dump()
                 layer_stackdict.update(layer_stack.model_dump())
                 layer_stack = LayerStack.model_construct(**layer_stackdict)
         else:
             name = name
+            layer_stack = layer_stack or LayerStack()
 
             if layer_enclosures:
                 if isinstance(layer_enclosures, LayerEnclosureModel):
