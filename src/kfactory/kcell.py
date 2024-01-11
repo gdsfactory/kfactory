@@ -30,6 +30,7 @@ import numpy as np
 import ruamel.yaml
 from aenum import Enum, constant  # type: ignore[import-untyped]
 from cachetools import Cache
+from cachetools.keys import _HashedTuple  # type: ignore[attr-defined]
 from pydantic import BaseModel, Field, computed_field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec
@@ -453,6 +454,7 @@ class KCell:
     yaml_tag: str = "!KCell"
     _ports: Ports
     _settings: KCellSettings
+    _kdb_cell: kdb.Cell
     info: Info
     d: UMKCell
     kcl: KCLayout
@@ -816,6 +818,10 @@ class KCell:
         """Return a string representation of the Cell."""
         port_names = [p.name for p in self.ports]
         return f"{self.name}: ports {port_names}, {len(self.insts)} instances"
+
+    def delete(self) -> None:
+        """Delete the cell."""
+        self.kcl.delete_cell(self)
 
     @property
     def ports(self) -> Ports:
@@ -2008,7 +2014,7 @@ def create_port_error(
 ) -> None:
     it = db.create_item(db_cell, cat)
     if p1.name and p2.name:
-        it.add_value(f"Port Names: {c1.name}.{p1.name}/" f"{c2.name}.{p2.name}")
+        it.add_value(f"Port Names: {c1.name}.{p1.name}/{c2.name}.{p2.name}")
     it.add_value(port_polygon(p1.width).transformed(p1.trans).to_dtype(dbu))
     it.add_value(port_polygon(p2.width).transformed(p2.trans).to_dtype(dbu))
 
@@ -2259,11 +2265,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     for layer_name, layer in self.layers.__members__.items()
                 },
             )
-            # members: dict[str, constant[KCLayout] | tuple[int, int]] = {
-            #     "kcl": constant(self)
-            # }
-            # for layer_name, layer in self.layers.__members__.items():
-            #     members[layer_name] = (layer.layer, layer.datatype)
 
     def dup(self, init_cells: bool = True) -> KCLayout:
         """Create a duplication of the `~KCLayout` object.
@@ -2332,6 +2333,26 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         else:
             ci = cell.cell_index()
             self.layout.delete_cell(ci)
+            del self.kcells[ci]
+
+    def delete_cell_rec(self, cell_index: int) -> None:
+        """Deletes a KCell plus all subcells."""
+        self.layout.delete_cell_rec(cell_index)
+        self.rebuild()
+
+    def delect_cells(self, cell_index_list: Sequence[int]) -> None:
+        """Delete a sequence of cell by indexes."""
+        self.layout.delete_cells(cell_index_list)
+        self.rebuild()
+
+    def rebuild(self) -> None:
+        """Rebuild the KCLayout based on the Layoutt object."""
+        kcells2delete: list[int] = []
+        for ci in self.kcells:
+            if self[ci]._destroyed():
+                kcells2delete.append(ci)
+
+        for ci in kcells2delete:
             del self.kcells[ci]
 
     def register_cell(self, kcell: KCell, allow_reregister: bool = False) -> None:
@@ -3896,6 +3917,14 @@ class Instances:
         else:
             self._insts.remove(item)
 
+    def clean(self) -> None:
+        deletion_list: list[int] = []
+        for i, inst in enumerate(self._insts):
+            if inst._instance._destroyed():
+                deletion_list.insert(0, i)
+        for i in deletion_list:
+            del self._insts[i]
+
 
 class Ports:
     """A collection of ports.
@@ -4281,7 +4310,7 @@ def cell(
         sig = inspect.signature(f)
 
         # previously was a KCellCache, but dict should do for most case
-        _cache = cache or {}
+        _cache: Cache[_HashedTuple, KCell] | dict[_HashedTuple, KCell] = cache or {}
 
         @functools.wraps(f)
         def wrapper_autocell(
@@ -4388,7 +4417,22 @@ def cell(
                 cell._locked = True
                 return cell
 
-            return wrapped_cell(**params)
+            _cell = wrapped_cell(**params)
+
+            if _cell._destroyed():
+                # If the any cell has been destroyed, we should clean up the cache.
+                # Delete all the KCell entrances in the cache which have
+                # `_destroyed() == True`
+                _deleted_cell_hashes: list[_HashedTuple] = [
+                    _hash_item
+                    for _hash_item, _cell_item in _cache.items()
+                    if _cell_item._destroyed()
+                ]
+                for _dch in _deleted_cell_hashes:
+                    del _cache[_dch]
+                _cell = wrapped_cell(**params)
+
+            return _cell
 
         return wrapper_autocell
 
