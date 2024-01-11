@@ -15,7 +15,6 @@ import importlib.util
 import inspect
 import json
 import socket
-import types
 from collections import UserDict
 from collections.abc import Callable, Hashable, Iterable, Iterator
 from enum import IntEnum, IntFlag, auto
@@ -2243,6 +2242,29 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """Create a new [LayerEnum][kfactory.kcell.LayerEnum] from this KCLayout."""
         return layerenum_from_dict(layers=layers, name=name, kcl=self)
 
+    def clear(self, keep_layers: bool = True) -> None:
+        """Clear the Layout.
+
+        If the layout is cleared, all the LayerEnums and
+        """
+        self.layout.clear()
+        self.kcells = {}
+
+        if keep_layers:
+            self.layers = layerenum_from_dict(
+                kcl=self,
+                name=self.layers.__name__,
+                layers={
+                    layer_name: (layer.layer, layer.datatype)
+                    for layer_name, layer in self.layers.__members__.items()
+                },
+            )
+            # members: dict[str, constant[KCLayout] | tuple[int, int]] = {
+            #     "kcl": constant(self)
+            # }
+            # for layer_name, layer in self.layers.__members__.items():
+            #     members[layer_name] = (layer.layer, layer.datatype)
+
     def dup(self, init_cells: bool = True) -> KCLayout:
         """Create a duplication of the `~KCLayout` object.
 
@@ -2441,18 +2463,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 def layerenum_from_dict(
     layers: dict[str, tuple[int, int]], name: str = "LAYER", kcl: KCLayout | None = None
 ) -> type[LayerEnum]:
-    if kcl is None:
-        kcl = _get_default_kcl()
-
-    def update_namespace(ns: dict[str, Any]) -> None:
-        ns.update({"kcl": constant(kcl)})
-        ns.update(layers)
-
-    return types.new_class(
-        name=name,
-        bases=(LayerEnum,),
-        kwds={},
-        exec_body=update_namespace,
+    members: dict[str, constant[KCLayout] | tuple[int, int]] = {
+        "kcl": constant(kcl or _get_default_kcl())
+    }
+    members.update(layers)
+    return LayerEnum(
+        name,  # type: ignore[arg-type]
+        members,  # type: ignore[arg-type]
     )
 
 
