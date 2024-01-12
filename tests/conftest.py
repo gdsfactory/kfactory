@@ -116,10 +116,10 @@ def cells(
 
 
 @pytest.fixture
-def pdk() -> kf.KCLayout:
+def pdk(LAYER: LAYER_CLASS) -> kf.KCLayout:
     layerstack = kf.LayerStack(
         wg=kf.kcell.LayerLevel(
-            layer=LAYER_CLASS.WG,
+            layer=LAYER.WG,
             thickness=0.22,
             zmin=0,
             material="si",
