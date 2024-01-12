@@ -1,6 +1,8 @@
-import pytest
-import kfactory as kf
 from functools import partial
+
+import pytest
+
+import kfactory as kf
 from collections.abc import Callable
 
 kf.config.logfilter.level = kf.conf.LogLevel.ERROR
@@ -114,6 +116,18 @@ def cells(
 
 
 @pytest.fixture
-def pdk() -> kf.KCLayout:
-    kcl = kf.KCLayout("Test_PDK")
+def pdk(LAYER: LAYER_CLASS) -> kf.KCLayout:
+    layerstack = kf.LayerStack(
+        wg=kf.kcell.LayerLevel(
+            layer=LAYER.WG,
+            thickness=0.22,
+            zmin=0,
+            material="si",
+            info=kf.kcell.Info(mesh_order=1),
+        ),
+        clad=kf.kcell.LayerLevel(
+            layer=LAYER_CLASS.WGCLAD, thickness=3, zmin=0.22, material="sio2"
+        ),
+    )
+    kcl = kf.KCLayout("Test_PDK", layer_stack=layerstack)
     return kcl
