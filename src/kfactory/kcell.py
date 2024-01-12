@@ -2020,6 +2020,132 @@ class Constants(BaseSettings):
     pass
 
 
+class LayerLevel(BaseModel):
+    """Level for 3D LayerStack.
+
+    Parameters:
+        layer: (GDSII Layer number, GDSII datatype).
+        thickness: layer thickness in um.
+        thickness_tolerance: layer thickness tolerance in um.
+        zmin: height position where material starts in um.
+        material: material name.
+        sidewall_angle: in degrees with respect to normal.
+        z_to_bias: parametrizes shrinking/expansion of the design GDS layer
+            when extruding from zmin (0) to zmin + thickness (1).
+            Defaults no buffering [[0, 1], [0, 0]].
+        info: simulation_info and other types of metadata.
+            mesh_order: lower mesh order (1) will have priority over higher
+                mesh order (2) in the regions where materials overlap.
+            refractive_index: refractive_index
+                can be int, complex or function that depends on wavelength (um).
+            type: grow, etch, implant, or background.
+            mode: octagon, taper, round.
+                https://gdsfactory.github.io/klayout_pyxs/DocGrow.html
+            into: etch into another layer.
+                https://gdsfactory.github.io/klayout_pyxs/DocGrow.html
+            doping_concentration: for implants.
+            resistivity: for metals.
+            bias: in um for the etch.
+    """
+
+    layer: tuple[int, int]
+    thickness: float
+    thickness_tolerance: float | None = None
+    zmin: float
+    material: str | None = None
+    sidewall_angle: float = 0.0
+    z_to_bias: tuple[int, ...] | None = None
+    info: Info = Info()
+
+    def __init__(
+        self,
+        layer: tuple[int, int] | LayerEnum,
+        zmin: float,
+        thickness: float,
+        thickness_tolerance: float | None = None,
+        material: str | None = None,
+        sidewall_angle: float = 0.0,
+        z_to_bias: tuple[int, ...] | None = None,
+        info: Info = Info(),
+    ):
+        if isinstance(layer, LayerEnum):
+            layer = (layer.layer, layer.datatype)
+        super().__init__(
+            layer=layer,
+            zmin=zmin,
+            thickness=thickness,
+            thickness_tolerance=thickness_tolerance,
+            material=material,
+            sidewall_angle=sidewall_angle,
+            z_to_bias=z_to_bias,
+            info=info,
+        )
+
+
+class LayerStack(BaseModel):
+    """For simulation and 3D rendering.
+
+    Parameters:
+        layers: dict of layer_levels.
+    """
+
+    layers: dict[str, LayerLevel] = Field(default_factory=dict)
+
+    def __init__(self, **layers: LayerLevel):
+        """Add LayerLevels automatically for subclassed LayerStacks."""
+        super().__init__(layers=layers)
+
+    def get_layer_to_thickness(self) -> dict[tuple[int, int], float]:
+        """Returns layer tuple to thickness (um)."""
+        return {
+            level.layer: level.thickness
+            for level in self.layers.values()
+            if level.thickness
+        }
+
+    def get_layer_to_zmin(self) -> dict[tuple[int, int], float]:
+        """Returns layer tuple to z min position (um)."""
+        return {
+            level.layer: level.zmin for level in self.layers.values() if level.thickness
+        }
+
+    def get_layer_to_material(self) -> dict[tuple[int, int], str]:
+        """Returns layer tuple to material name."""
+        return {
+            level.layer: level.material
+            for level in self.layers.values()
+            if level.thickness and level.material
+        }
+
+    def get_layer_to_sidewall_angle(self) -> dict[tuple[int, int], float]:
+        """Returns layer tuple to material name."""
+        return {
+            level.layer: level.sidewall_angle
+            for level in self.layers.values()
+            if level.thickness
+        }
+
+    def get_layer_to_info(self) -> dict[tuple[int, int], Info]:
+        """Returns layer tuple to info dict."""
+        return {level.layer: level.info for level in self.layers.values()}
+
+    def to_dict(self) -> dict[str, dict[str, dict[str, Any]]]:
+        return {
+            level_name: level.model_dump() for level_name, level in self.layers.items()
+        }
+
+    def __getitem__(self, key: str) -> LayerLevel:
+        """Access layer stack elements."""
+        if key not in self.layers:
+            layers = list(self.layers.keys())
+            raise ValueError(f"{key!r} not in {layers}")
+
+        return self.layers[key]
+
+    def __getattr__(self, attr: str) -> Any:
+        return self.layers[attr]
+
+
 class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     """Small extension to the klayout.db.Layout.
 
@@ -2068,7 +2194,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     factories: KCellFactories
     kcells: dict[int, KCell]
     layers: type[LayerEnum]
-    netlist_layer_mapping: dict[LayerEnum | int, LayerEnum | int] = Field(default={})
+    layer_stack: LayerStack
+    netlist_layer_mapping: dict[LayerEnum | int, LayerEnum | int] = Field(
+        default_factory=dict
+    )
     sparameters_path: Path | str | None
     interconnect_cml_path: Path | str | None
     constants: Constants = Field(default_factory=Constants)
@@ -2079,10 +2208,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         name: str,
         layer_enclosures: dict[str, LayerEnclosure] | LayerEnclosureModel | None = None,
         enclosure: KCellEnclosure | None = None,
-        # factories: dict[str, KCellFactory] | None = None,
         layers: type[LayerEnum] | None = None,
         sparameters_path: Path | str | None = None,
         interconnect_cml_path: Path | str | None = None,
+        layer_stack: LayerStack | None = None,
         constants: type[Constants] | None = None,
         base_kcl: KCLayout | None = None,
         port_rename_function: Callable[..., None] = rename_clockwise_multi,
@@ -2097,7 +2226,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             enclosure: The standard KCellEnclosure of the PDK.
             cell_factories: Functions for creating pcells from the PDK.
             cells: Fixed cells of the PDK.
-            layers: A LayerEnum describing the layerstack of the PDK
+            layers: A LayerEnum describing the layerstack of the PDK.
+            layer_stack: maps name to layer numbers, thickness, zmin, sidewall_angle.
+                if can also contain material properties
+                (refractive index, nonlinear coefficient, sheet resistance ...).
             sparameters_path: Path to the sparameters config file.
             interconnect_cml_path: Path to the interconnect file.
             constants: A model containing all the constants related to the PDK.
@@ -2140,8 +2272,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 enclosure = base_kcl.enclosure or KCellEnclosure([])
             if layer_enclosures is None:
                 layer_enclosures = LayerEnclosureModel()
+            layer_stack_ = layer_stack or base_kcl.layer_stack or LayerStack()
+            if copy_base_kcl_layers and layer_stack_ and layer_stack:
+                layer_stackdict = layer_stack_.model_dump()
+                layer_stackdict.update(layer_stack.model_dump())
+                layer_stack = LayerStack.model_construct(**layer_stackdict)
         else:
             name = name
+            layer_stack = layer_stack or LayerStack()
 
             if layer_enclosures:
                 if isinstance(layer_enclosures, LayerEnclosureModel):
@@ -2188,6 +2326,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             interconnect_cml_path=interconnect_cml_path,
             constants=_constants,
             library=library,
+            layer_stack=layer_stack,
             layout=layout,
             rename_function=port_rename_function,
         )
