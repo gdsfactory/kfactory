@@ -8,6 +8,21 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 
 <!-- towncrier release notes start -->
 
+## [0.10.3](https://github.com/gdsfactory/kfactory/releases/v0.10.3) - 2024-01-12
+
+
+### Added
+
+- Added x, y, and center properties to `KCell` and `UMKCell` [#237](https://github.com/gdsfactory/kfactory/issues/237)
+- Added `KCLayout.clear`, `KCLayout.delete_cell` and other `delete_cell` functions. [#239](https://github.com/gdsfactory/kfactory/issues/239)
+- Added get to meta data for KCells (info/settings) [#PR](https://github.com/gdsfactory/kfactory/pull/231) 
+- Allow `Sequence` (list/tuple) types in KCell metadata (info/settings) [#PR](https://github.com/gdsfactory/kfactory/pull/231) 
+
+
+### Changed
+
+- @kf.cell can handle rebuilding deleted KCells [#239](https://github.com/gdsfactory/kfactory/issues/239)
+
 ## [0.10.2](https://github.com/gdsfactory/kfactory/releases/v0.10.2) - 2023-12-08
 
 

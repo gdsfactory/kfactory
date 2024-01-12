@@ -33,7 +33,7 @@ from .enclosure import LayerEnclosure, KCellEnclosure
 
 from aenum import constant  # type: ignore[import-untyped]
 
-__version__ = "0.10.2"
+__version__ = "0.10.3"
 
 logger = config.logger
 
