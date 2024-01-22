@@ -89,31 +89,10 @@ kf = "kfactory.cli:app"
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.black]
-line-length = 88  # Specify the line length
-target-version = ['py310']  # Specify your Python version
-include = '\.pyi?$'
-exclude = '''  # Specify the files/dirs that should be ignored by the black formatter
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | env
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
-
 [tool.mypy]
 python_version = "3.10"
 strict = true
 exclude = [
-  "tests",
   "src/kfactory/widgets/interactive.py",
 ]
 plugins = "pydantic.mypy, numpy.typing.mypy_plugin"
@@ -123,9 +102,9 @@ enabled = true
 live_mode = true
 strict = true
 
-[[tool.mypy.overrides]]
-module = "kfactory"
-implicit_reexport = true
+# [[tool.mypy.overrides]]
+# module = "kfactory"
+# implicit_reexport = true
 
 [tool.isort]
 multi_line_output = 3

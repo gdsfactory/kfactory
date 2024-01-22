@@ -28,9 +28,9 @@ from collections.abc import Sequence
 import cachetools.func
 import numpy as np
 import ruamel.yaml
-from aenum import Enum, constant  # type: ignore[import-untyped]
+from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
 from cachetools import Cache
-from cachetools.keys import _HashedTuple  # type: ignore[attr-defined]
+from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
 from pydantic import BaseModel, Field, computed_field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec

@@ -19,13 +19,13 @@ def straight(width: int, length: int, layer: int) -> kf.KCell:
 
 
 @pytest.fixture()
-def wg(LAYER):
+def wg(LAYER: kf.LayerEnum) -> kf.KCell:
     return straight(1000, 20000, LAYER.WG)
 
 
 @pytest.fixture()
 @kf.cell
-def wg_floating_off_grid(LAYER):
+def wg_floating_off_grid(LAYER: kf.LayerEnum) -> kf.KCell:
     with pytest.raises(AssertionError):
         c = kf.KCell()
         dbu = c.kcl.dbu
@@ -52,11 +52,11 @@ def wg_floating_off_grid(LAYER):
     return c
 
 
-def test_straight(LAYER):
+def test_straight(LAYER: kf.LayerEnum) -> None:
     straight(1000, 20000, LAYER.WG)
 
 
-def test_settings(LAYER):
+def test_settings(LAYER: kf.LayerEnum) -> None:
     c = straight(1000, 20000, LAYER.WG)
 
     assert c.settings["length"] == 20000
@@ -64,7 +64,7 @@ def test_settings(LAYER):
     assert c.name == "straight_W1000_L20000_LWG"
 
 
-def test_connect_cplx_port(LAYER):
+def test_connect_cplx_port(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
     wg1 = c << straight(1000, 20000, LAYER.WG)
     port = kf.kcell.Port(
@@ -76,7 +76,7 @@ def test_connect_cplx_port(LAYER):
     wg1.connect("o1", port)
 
 
-def test_connect_cplx_inst(LAYER):
+def test_connect_cplx_inst(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
 
     wg1 = c << straight(1000, 20000, LAYER.WG)
@@ -92,7 +92,7 @@ def test_connect_cplx_inst(LAYER):
     c.flatten()
 
 
-def test_connect_integer(wg):
+def test_connect_integer(wg: kf.KCell) -> None:
     c = kf.KCell()
 
     wg1 = c << wg
@@ -102,7 +102,7 @@ def test_connect_integer(wg):
     assert wg2.ports["o1"].trans == kf.kdb.Trans(0, False, 0, 0)
 
 
-def test_keep_mirror(LAYER):
+def test_keep_mirror(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
 
     p1 = kf.Port(trans=kf.kdb.Trans.M90, width=1000, layer=LAYER.WG)
@@ -114,7 +114,7 @@ def test_keep_mirror(LAYER):
     assert c["o2"].trans.is_mirror() is True
 
 
-def test_addports_keep_mirror(LAYER):
+def test_addports_keep_mirror(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
 
     ports = [

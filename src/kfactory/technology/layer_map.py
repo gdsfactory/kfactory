@@ -139,7 +139,7 @@ def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
         layer=(kl.source_layer, kl.source_datatype),
         frame_color=Color(hex(kl.frame_color)) if kl.frame_color else None,
         fill_color=Color(hex(kl.fill_color)) if kl.fill_color else None,
-        dither_patter=index2dither[kl.dither_pattern],
+        dither_pattern=index2dither[kl.dither_pattern],
         line_style=index2line[kl.line_style],
         visible=kl.visible,
         width=kl.width,
@@ -455,7 +455,11 @@ line_styles = {
     "dash-double-dotted": "***..*.*..**",
 }
 
-dither2index = {name: index for index, name in enumerate(dither_patterns)}
-index2dither = {index: name for index, name in enumerate(dither_patterns)}
-line2index = {name: index for index, name in enumerate(line_styles)}
-index2line = {index: name for index, name in enumerate(line_styles)}
+dither2index: dict[str, int] = {
+    name: index for index, name in enumerate(dither_patterns)
+}
+index2dither: dict[int, str] = {
+    index: name for index, name in enumerate(dither_patterns)
+}
+line2index: dict[str, int] = {name: index for index, name in enumerate(line_styles)}
+index2line: dict[int, str] = {index: name for index, name in enumerate(line_styles)}

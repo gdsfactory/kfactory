@@ -79,9 +79,9 @@ cell_names = set(cells.keys())
 
 
 @pytest.fixture(params=cell_names, scope="function")
-def cell_name(request):
+def cell_name(request: pytest.FixtureRequest) -> str:
     """Returns cell name."""
-    return request.param
+    return request.param  # type: ignore[no-any-return]
 
 
 def test_cells(cell_name: str) -> None:

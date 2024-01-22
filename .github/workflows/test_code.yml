@@ -12,10 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-      - name: Install ci dependencies
-        run: |
-          python -m pip install -U pip
-          python -m pip install -e .[ci]
       - uses: pre-commit/action@v3.0.0
   test_code:
     runs-on: ${{ matrix.os }}

@@ -34,15 +34,15 @@ def taper_static(
     return c
 
 
-def test_dynamic_sine_taper(LAYER, wg_enc):
+def test_dynamic_sine_taper(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
     _taper = taper_dyn(10, 1, LAYER.WG, wg_enc)
 
 
-def test_static_sine_taper(LAYER, wg_enc):
+def test_static_sine_taper(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
     taper_static(10, 1, LAYER.WG, wg_enc)
 
 
-def test_enc_extrude_dyn(LAYER, wg_enc):
+def test_enc_extrude_dyn(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
     width = 10
     layer = LAYER.WG
     enclosure = wg_enc
@@ -55,7 +55,7 @@ def test_enc_extrude_dyn(LAYER, wg_enc):
     c.show()
 
 
-def test_enc_extrude_static(LAYER, wg_enc):
+def test_enc_extrude_static(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
     width = 10
     layer = LAYER.WG
     enclosure = wg_enc
