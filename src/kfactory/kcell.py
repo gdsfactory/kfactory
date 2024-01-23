@@ -100,6 +100,7 @@ ShapeLike: TypeAlias = IShapeLike | DShapeLike | kdb.Shape
 
 
 kcl: KCLayout
+kcls: dict[str, KCLayout] = {}
 
 
 class LayerEnum(int, Enum):  # type: ignore[misc]
@@ -1069,6 +1070,29 @@ class KCell:
                 self.clear(layer)
                 self.shapes(layer).insert(reg)
 
+    def rebuild(self) -> None:
+        """Rebuild the instances of the KCell."""
+        self.insts.clear()
+        for _inst in self._kdb_cell.each_inst():
+            self.insts.append(Instance(self.kcl, _inst))
+
+    def convert_to_static(self, recursive: bool = True) -> None:
+        """Convert the KCell to a static cell if it is pdk KCell."""
+        if self.library.name == self.kcl.name:
+            raise ValueError(f"KCell {self.qname} is already a static KCell.")
+        _kdb_cell = self.kcl.convert_cell_to_static(self.cell_index())
+        _kdb_cell.name = self.qname
+
+        if recursive:
+            for ci in self.called_cells:
+                kc = self.kcl[ci]
+                if kc.is_library_cell():
+                    kc.convert_to_static(recursive=recursive)
+
+        self.assign(_kdb_cell)
+        self.kcl.layout.delete_cell(_kdb_cell)
+        self.rebuild()
+
     def draw_ports(self) -> None:
         """Draw all the ports on their respective layer."""
         polys: dict[int, kdb.Region] = {}
@@ -1115,15 +1139,34 @@ class KCell:
         self,
         filename: str | Path,
         save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        convert_external_cells: bool = False,
+        set_meta_data: bool = True,
     ) -> None:
         """Write a KCell to a GDS.
 
         See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
         """
-        for kcell in (self.kcl[ci] for ci in self.called_cells()):
-            kcell.set_meta_data()
-        self.set_meta_data()
-        return self._kdb_cell.write(str(filename), save_options)
+        match set_meta_data, convert_external_cells:
+            case True, True:
+                for kcell in (self.kcl[ci] for ci in self.called_cells()):
+                    if kcell.is_library_cell():
+                        kcell.convert_to_static(recursive=True)
+                    kcell.set_meta_data()
+                if self.is_library_cell():
+                    self.convert_to_static(recursive=True)
+                self.set_meta_data()
+            case True, False:
+                for kcell in (self.kcl[ci] for ci in self.called_cells()):
+                    kcell.set_meta_data()
+                self.set_meta_data()
+            case False, True:
+                for kcell in (self.kcl[ci] for ci in self.called_cells()):
+                    if kcell.is_library_cell():
+                        kcell.convert_to_static(recursive=True)
+                if self.is_library_cell():
+                    self.convert_to_static(recursive=True)
+
+        self._kdb_cell.write(str(filename), save_options)
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore
@@ -2188,8 +2231,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         constants: dict of constants for the PDK.
 
     """
-
-    # name: str
     _name: str
     layout: kdb.Layout
     layer_enclosures: LayerEnclosureModel
@@ -2243,6 +2284,35 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             copy_base_kcl_layers: Copy all known layers from the base if any are
                 defined.
         """
+        library = kdb.Library()
+        layout = library.layout()
+        if base_kcl:
+            if copy_base_kcl_layers and layer_stack:
+                layer_stackdict = base_kcl.layer_stack.model_dump()
+                layer_stackdict.update(layer_stack.model_dump())
+                layer_stack = LayerStack.model_construct(**layer_stackdict)
+            else:
+                layer_stack = layer_stack or LayerStack()
+        else:
+            layer_stack = layer_stack or LayerStack()
+        super().__init__(
+            _name=name,
+            kcells={},
+            layer_enclosures=LayerEnclosureModel(enclosure_map={}),
+            enclosure=KCellEnclosure([]),
+            layers=layerenum_from_dict(layers={}, kcl=self),
+            factories=KCellFactories({}),
+            sparameters_path=sparameters_path,
+            interconnect_cml_path=interconnect_cml_path,
+            constants=Constants(),
+            library=library,
+            layer_stack=layer_stack,
+            layout=layout,
+            rename_function=port_rename_function,
+        )
+        self._name = name
+
+        self.library.register(self.name)
         if layers is not None:
             layer_dict = {
                 _layer.name: (_layer.layer, _layer.datatype)
@@ -2252,8 +2322,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             layer_dict = {}
 
         if base_kcl:
-            name = name
-            # if layers is None:
             if copy_base_kcl_layers:
                 base_layer_dict = {
                     _layer.name: (_layer.layer, _layer.datatype)
@@ -2263,51 +2331,41 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 layer_dict = base_layer_dict
 
                 layers = self.layerenum_from_dict(
-                    name=base_kcl.layers.__name__,
-                    layers=layer_dict,
+                    name=base_kcl.layers.__name__, layers=layer_dict
                 )
             else:
-                layers = layerenum_from_dict(layer_dict, kcl=self)
+                layers = self.layerenum_from_dict(layers=layer_dict)
             sparameters_path = sparameters_path or base_kcl.sparameters_path
             interconnect_cml_path = (
                 interconnect_cml_path or base_kcl.interconnect_cml_path
             )
-            _constants = constants() if constants else base_kcl.constants.copy()
+            _constants = constants() if constants else base_kcl.constants.model_copy()
             if enclosure is None:
                 enclosure = base_kcl.enclosure or KCellEnclosure([])
             if layer_enclosures is None:
-                layer_enclosures = LayerEnclosureModel()
-            layer_stack_ = layer_stack or base_kcl.layer_stack or LayerStack()
-            if copy_base_kcl_layers and layer_stack_ and layer_stack:
-                layer_stackdict = layer_stack_.model_dump()
-                layer_stackdict.update(layer_stack.model_dump())
-                layer_stack = LayerStack.model_construct(**layer_stackdict)
+                _layer_enclosures = LayerEnclosureModel()
         else:
-            name = name
-            layer_stack = layer_stack or LayerStack()
-
             if layer_enclosures:
                 if isinstance(layer_enclosures, LayerEnclosureModel):
-                    layer_enclosures = LayerEnclosureModel(
+                    _layer_enclosures = LayerEnclosureModel(
                         enclosure_map={
                             name: lenc.copy_to(self)
                             for name, lenc in layer_enclosures.enclosure_map.items()
                         }
                     )
                 else:
-                    layer_enclosures = LayerEnclosureModel(
+                    _layer_enclosures = LayerEnclosureModel(
                         enclosure_map={
                             name: lenc.copy_to(self)
                             for name, lenc in layer_enclosures.items()
                         }
                     )
             else:
-                layer_enclosures = LayerEnclosureModel(enclosure_map={})
+                _layer_enclosures = LayerEnclosureModel(enclosure_map={})
 
             enclosure = (
                 enclosure.copy_to(self) if enclosure else KCellEnclosure(enclosures=[])
             )
-            # cell_factories = cell_factories
             layers = self.layerenum_from_dict(name="LAYER", layers=layer_dict)
             sparameters_path = sparameters_path
             interconnect_cml_path = interconnect_cml_path
@@ -2315,29 +2373,15 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             if enclosure is None:
                 enclosure = KCellEnclosure([])
             if layer_enclosures is None:
-                layer_enclosures = LayerEnclosureModel()
+                _layer_enclosures = LayerEnclosureModel()
+        self.constants = _constants
+        self.layers = layers
+        self.sparameters_path = sparameters_path
+        self.enclosure = enclosure
+        self.layer_enclosures = _layer_enclosures
+        self.interconnect_cml_path = interconnect_cml_path
 
-        library = kdb.Library()
-        layout = library.layout()
-
-        super().__init__(
-            _name=name,
-            kcells={},
-            layer_enclosures=layer_enclosures,
-            enclosure=enclosure,
-            layers=layers,
-            factories=KCellFactories({}),
-            sparameters_path=sparameters_path,
-            interconnect_cml_path=interconnect_cml_path,
-            constants=_constants,
-            library=library,
-            layer_stack=layer_stack,
-            layout=layout,
-            rename_function=port_rename_function,
-        )
-        self._name = name
-
-        self.library.register(self.name)
+        kcls[self.name] = self
 
     def _set_name_and_library(self, name: str) -> None:
         self._name = name
@@ -2605,6 +2649,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         filename: str | Path,
         options: kdb.SaveLayoutOptions = save_layout_options(),
         set_meta: bool = True,
+        convert_external_cells: bool = False,
     ) -> None:
         """Write a GDS file into the existing Layout.
 
@@ -2614,9 +2659,23 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 conflicts are handled for example. See
                 https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
             set_meta: Make sure all the cells have their metadata set
+            convert_external_cells: Whether to make KCells not in this KCLayout to
+
         """
-        for kcell in self.kcells.values():
-            kcell.set_meta_data()
+        match (set_meta, convert_external_cells):
+            case (True, True):
+                for kcell in self.kcells.values():
+                    kcell.set_meta_data()
+                    if kcell.is_library_cell():
+                        kcell.convert_to_static()
+            case (True, False):
+                for kcell in self.kcells.values():
+                    kcell.set_meta_data()
+            case (False, True):
+                for kcell in self.kcells.values():
+                    if kcell.is_library_cell():
+                        kcell.convert_to_static(recursive=True)
+
         return self.layout.write(str(filename), options)
 
 
@@ -4064,6 +4123,9 @@ class Instances:
         for i in deletion_list:
             del self._insts[i]
 
+    def clear(self) -> None:
+        self._insts.clear()
+
 
 class Ports:
     """A collection of ports.
@@ -4739,9 +4801,10 @@ def update_default_trans(
 
 
 def show(
-    gds: str | KCell | Path,
+    layout: KCLayout | KCell | Path | str,
     keep_position: bool = True,
     save_options: kdb.SaveLayoutOptions = save_layout_options(),
+    use_libraries: bool = True,
 ) -> None:
     """Show GDS in klayout."""
     import inspect
@@ -4765,8 +4828,8 @@ def show(
         except ImportError:
             name = "shell"
 
-    if isinstance(gds, KCell):
-        gds_file: Path | None = None
+    if isinstance(layout, KCLayout):
+        file: Path | None = None
         spec = importlib.util.find_spec("git")
         if spec is not None:
             import git
@@ -4780,17 +4843,53 @@ def show(
                 if wtd is not None:
                     root = Path(wtd) / "build/gds"
                     root.mkdir(parents=True, exist_ok=True)
-                    tf = root / Path(name).with_suffix(".gds")
+                    tf = root / Path(name).with_suffix(".oas")
                     tf.parent.mkdir(parents=True, exist_ok=True)
-                    gds.write(str(tf), save_options)
-                    gds_file = tf
+                    layout.write(str(tf), save_options)
+                    file = tf
                     delete = False
         else:
             config.logger.info(
                 "git isn't installed. For better file storage, "
                 "please install kfactory[git] or gitpython."
             )
-        if not gds_file:
+        if not file:
+            try:
+                from __main__ import __file__ as mf
+            except ImportError:
+                mf = "shell"
+            _mf = "stdin" if mf == "<stdin>" else mf
+            tf = Path(gettempdir()) / (name + ".oas")
+            tf.parent.mkdir(parents=True, exist_ok=True)
+            layout.write(str(tf), save_options)
+            file = tf
+            delete = True
+    elif isinstance(layout, KCell):
+        file = None
+        spec = importlib.util.find_spec("git")
+        if spec is not None:
+            import git
+
+            try:
+                repo = git.repo.Repo(".", search_parent_directories=True)
+            except git.InvalidGitRepositoryError:
+                pass
+            else:
+                wtd = repo.working_tree_dir
+                if wtd is not None:
+                    root = Path(wtd) / "build/gds"
+                    root.mkdir(parents=True, exist_ok=True)
+                    tf = root / Path(name).with_suffix(".oas")
+                    tf.parent.mkdir(parents=True, exist_ok=True)
+                    layout.write(str(tf), save_options)
+                    file = tf
+                    delete = False
+        else:
+            config.logger.info(
+                "git isn't installed. For better file storage, "
+                "please install kfactory[git] or gitpython."
+            )
+        if not file:
             try:
                 from __main__ import __file__ as mf
             except ImportError:
@@ -4798,19 +4897,21 @@ def show(
             _mf = "stdin" if mf == "<stdin>" else mf
             tf = Path(gettempdir()) / (name + ".gds")
             tf.parent.mkdir(parents=True, exist_ok=True)
-            gds.write(str(tf), save_options)
-            gds_file = tf
+            layout.write(str(tf), save_options)
+            file = tf
             delete = True
 
-    elif isinstance(gds, str | Path):
-        gds_file = Path(gds).resolve()
+    elif isinstance(layout, str | Path):
+        file = Path(layout).resolve()
     else:
-        raise NotImplementedError(f"unknown type {type(gds)} for streaming to KLayout")
-    if not gds_file.is_file():
-        raise ValueError(f"{gds_file} is not a File")
-    config.logger.debug("klive file: {}", gds_file)
+        raise NotImplementedError(
+            f"unknown type {type(layout)} for streaming to KLayout"
+        )
+    if not file.is_file():
+        raise ValueError(f"{file} is not a File")
+    config.logger.debug("klive file: {}", file)
     data_dict = {
-        "gds": str(gds_file),
+        "gds": str(file),
         "keep_position": keep_position,
     }
     data = json.dumps(data_dict)
@@ -4849,7 +4950,7 @@ def show(
             conn.close()
 
     if delete:
-        Path(gds_file).unlink()
+        Path(file).unlink()
 
 
 def polygon_from_array(array: Iterable[tuple[int, int]]) -> kdb.Polygon:
