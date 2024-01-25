@@ -1149,19 +1149,21 @@ class KCell:
         match set_meta_data, convert_external_cells:
             case True, True:
                 for kcell in (self.kcl[ci] for ci in self.called_cells()):
-                    if kcell.is_library_cell():
-                        kcell.convert_to_static(recursive=True)
-                    kcell.set_meta_data()
+                    if not kcell._destroyed():
+                        if kcell.is_library_cell():
+                            kcell.convert_to_static(recursive=True)
+                        kcell.set_meta_data()
                 if self.is_library_cell():
                     self.convert_to_static(recursive=True)
                 self.set_meta_data()
             case True, False:
                 for kcell in (self.kcl[ci] for ci in self.called_cells()):
-                    kcell.set_meta_data()
+                    if not kcell._destroyed():
+                        kcell.set_meta_data()
                 self.set_meta_data()
             case False, True:
                 for kcell in (self.kcl[ci] for ci in self.called_cells()):
-                    if kcell.is_library_cell():
+                    if kcell.is_library_cell() and not kcell._destroyed():
                         kcell.convert_to_static(recursive=True)
                 if self.is_library_cell():
                     self.convert_to_static(recursive=True)
@@ -2665,15 +2667,17 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         match (set_meta, convert_external_cells):
             case (True, True):
                 for kcell in self.kcells.values():
-                    kcell.set_meta_data()
-                    if kcell.is_library_cell():
-                        kcell.convert_to_static()
+                    if not kcell._destroyed():
+                        kcell.set_meta_data()
+                        if kcell.is_library_cell():
+                            kcell.convert_to_static()
             case (True, False):
                 for kcell in self.kcells.values():
-                    kcell.set_meta_data()
+                    if not kcell._destroyed():
+                        kcell.set_meta_data()
             case (False, True):
                 for kcell in self.kcells.values():
-                    if kcell.is_library_cell():
+                    if kcell.is_library_cell() and not kcell._destroyed():
                         kcell.convert_to_static(recursive=True)
 
         return self.layout.write(str(filename), options)
@@ -4805,6 +4809,7 @@ def show(
     keep_position: bool = True,
     save_options: kdb.SaveLayoutOptions = save_layout_options(),
     use_libraries: bool = True,
+    library_save_options: kdb.SaveLayoutOptions = save_layout_options(),
 ) -> None:
     """Show GDS in klayout."""
     import inspect
@@ -4861,9 +4866,19 @@ def show(
             _mf = "stdin" if mf == "<stdin>" else mf
             tf = Path(gettempdir()) / (name + ".oas")
             tf.parent.mkdir(parents=True, exist_ok=True)
-            layout.write(str(tf), save_options)
+            layout.write(tf, save_options)
             file = tf
             delete = True
+        if use_libraries:
+            _dir = tf.parent
+            _kcls = list(kcls.values())
+            _kcls.remove(layout)
+            for _kcl in _kcls:
+                _kcl.write(
+                    (_dir / _kcl.name).with_suffix(".oas").resolve(),
+                    library_save_options,
+                )
+
     elif isinstance(layout, KCell):
         file = None
         spec = importlib.util.find_spec("git")
@@ -4897,9 +4912,18 @@ def show(
             _mf = "stdin" if mf == "<stdin>" else mf
             tf = Path(gettempdir()) / (name + ".gds")
             tf.parent.mkdir(parents=True, exist_ok=True)
-            layout.write(str(tf), save_options)
+            layout.write(tf, save_options)
             file = tf
             delete = True
+        if use_libraries:
+            _dir = tf.parent
+            _kcls = list(kcls.values())
+            _kcls.remove(layout.kcl)
+            for _kcl in _kcls:
+                _kcl.write(
+                    (_dir / _kcl.name).with_suffix(".oas").resolve(),
+                    library_save_options,
+                )
 
     elif isinstance(layout, str | Path):
         file = Path(layout).resolve()
