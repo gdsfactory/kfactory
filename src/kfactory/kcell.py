@@ -5658,10 +5658,12 @@ class Diff:
             config.logger.log(self.loglevel, f"Found {poly=} in {self.name_a} only.")
         self.cell_a.shapes(self.layer_a).insert(poly)
 
-    def on_instance_in_a_only(self, inst: kdb.CellInstArray, propid: int) -> None:
+    def on_instance_in_a_only(self, instance: kdb.CellInstArray, propid: int) -> None:
         if self.loglevel is not None:
-            config.logger.log(self.loglevel, f"Found {inst=} in {self.name_a} only.")
-        cell = self.layout_a.cell(inst.cell_index)
+            config.logger.log(
+                self.loglevel, f"Found {instance=} in {self.name_a} only."
+            )
+        cell = self.layout_a.cell(instance.cell_index)
 
         regions: list[kdb.Region] = []
         layers = [layer for layer in cell.layout().layer_indexes()]
@@ -5669,18 +5671,19 @@ class Diff:
 
         for layer in layers:
             r = kdb.Region()
-            r.insert(self.layout_a.cell(inst.cell_index).begin_shapes_rec(layer))
+            r.insert(self.layout_a.cell(instance.cell_index).begin_shapes_rec(layer))
             regions.append(r)
 
-        for trans in inst.each_cplx_trans():
+        for trans in instance.each_cplx_trans():
             for li, r in zip(layer_infos, regions):
-                print(li, r)
                 self.cell_a.shapes(self.diff_a.layer(li)).insert(r.transformed(trans))
 
-    def on_instance_in_b_only(self, inst: kdb.CellInstArray, propid: int) -> None:
+    def on_instance_in_b_only(self, instance: kdb.CellInstArray, propid: int) -> None:
         if self.loglevel is not None:
-            config.logger.log(self.loglevel, f"Found {inst=} in {self.name_b} only.")
-        cell = self.layout_b.cell(inst.cell_index)
+            config.logger.log(
+                self.loglevel, f"Found {instance=} in {self.name_b} only."
+            )
+        cell = self.layout_b.cell(instance.cell_index)
 
         regions: list[kdb.Region] = []
         layers = [layer for layer in cell.layout().layer_indexes()]
@@ -5688,12 +5691,11 @@ class Diff:
 
         for layer in layers:
             r = kdb.Region()
-            r.insert(self.layout_b.cell(inst.cell_index).begin_shapes_rec(layer))
+            r.insert(self.layout_b.cell(instance.cell_index).begin_shapes_rec(layer))
             regions.append(r)
 
-        for trans in inst.each_cplx_trans():
+        for trans in instance.each_cplx_trans():
             for li, r in zip(layer_infos, regions):
-                print(li, r.transformed(trans))
                 self.cell_b.shapes(self.diff_b.layer(li)).insert(r.transformed(trans))
 
     def on_polygon_in_b_only(self, poly: kdb.Polygon, propid: int) -> None:

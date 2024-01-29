@@ -173,7 +173,9 @@ def test_merge_read_shapes() -> None:
         s_copy.name = "Straight"
 
         kcl_2.write("MERGE_READ.oas")
+        kf.config.logfilter.regex = "Found poly"
         kcl_1.read("MERGE_READ.oas")
+        kf.config.logfilter.regex = None
     Path("MERGE_READ.oas").unlink(missing_ok=True)
 
 
@@ -197,5 +199,7 @@ def test_merge_read_instances() -> None:
         copy.movey(-500)
 
         kcl_2.write("MERGE_READ.oas")
+        kf.config.logfilter.regex = "Found instance"
         kcl_1.read("MERGE_READ.oas")
+        kf.config.logfilter.regex = None
     Path("MERGE_READ.oas").unlink(missing_ok=True)

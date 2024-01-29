@@ -113,23 +113,6 @@ testpaths = ["src", "tests"]
 addopts = '--tb=short'
 norecursedirs = ["extra/*.py"]
 
-extend-ignore = ["RST303"]
-
-exclude = [
-    ".git",
-    "__pycache__",
-    "docs/source/conf.py",
-    "build",
-    "dist",
-    ".ipynb_checkpoints",
-    ".tox",
-    "extra",
-    "deprecated",
-    "gdslib",
-    ".tox",
-    ".mypy_cache",
-]
-
 [tool.pydocstyle]
 [pydocstyle]
 inherit = false
