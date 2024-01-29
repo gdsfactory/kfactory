@@ -4,6 +4,7 @@ import pytest
 
 from functools import partial
 from tempfile import NamedTemporaryFile
+from pathlib import Path
 
 
 def test_pdk() -> None:
@@ -153,3 +154,48 @@ def test_multi_pdk_read_write() -> None:
     d2.connect("o1", d1, "o2")
 
     assembly.show()
+
+
+def test_merge_read_shapes() -> None:
+    with pytest.raises(kf.kcell.MergeError):
+        kcl_1 = kf.KCLayout("MERGE_BASE")
+        s_base = kf.cells.dbu.Straight(kcl_1)(
+            width=1000, length=10_000, layer=kcl_1.layer(1, 0)
+        )
+        s_copy = s_base.dup()
+        s_copy.name = "Straight"
+
+        kcl_2 = kf.KCLayout("MERGE_READ")
+        s_base = kf.cells.dbu.Straight(kcl_2)(
+            width=1100, length=10_000, layer=kcl_2.layer(1, 0)
+        )
+        s_copy = s_base.dup()
+        s_copy.name = "Straight"
+
+        kcl_2.write("MERGE_READ.oas")
+        kcl_1.read("MERGE_READ.oas")
+    Path("MERGE_READ.oas").unlink(missing_ok=True)
+
+
+def test_merge_read_instances() -> None:
+    with pytest.raises(kf.kcell.MergeError):
+        kcl_1 = kf.KCLayout("MERGE_BASE")
+        enc1 = kf.LayerEnclosure(sections=[(kcl_1.layer(2, 0), 0, 200)], name="CLAD")
+        s_base = kf.cells.dbu.Straight(kcl_1)(
+            width=1000, length=10_000, layer=kcl_1.layer(1, 0), enclosure=enc1
+        )
+        s_copy = kcl_1.kcell("Straight")
+        s_copy << s_base
+
+        kcl_2 = kf.KCLayout("MERGE_READ")
+        enc2 = kf.LayerEnclosure(sections=[(kcl_2.layer(2, 0), 0, 200)], name="CLAD")
+        s_base = kf.cells.dbu.Straight(kcl_2)(
+            width=1000, length=10_000, layer=kcl_2.layer(1, 0), enclosure=enc2
+        )
+        s_copy = kcl_2.kcell("Straight")
+        copy = s_copy << s_base
+        copy.movey(-500)
+
+        kcl_2.write("MERGE_READ.oas")
+        kcl_1.read("MERGE_READ.oas")
+    Path("MERGE_READ.oas").unlink(missing_ok=True)

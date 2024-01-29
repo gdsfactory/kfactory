@@ -15,6 +15,7 @@ import importlib.util
 import inspect
 import json
 import socket
+from dataclasses import field, dataclass
 from collections import UserDict
 from collections.abc import Callable, Hashable, Iterable, Iterator
 from enum import IntEnum, IntFlag, auto
@@ -36,7 +37,7 @@ from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec
 
 from . import kdb, lay, rdb
-from .conf import config
+from .conf import config, LogLevel
 from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
@@ -244,6 +245,10 @@ class LockedError(AttributeError):
             " Modification has been disabled. "
             "Modify the KCell in its autocell function or make a copy."
         )
+
+
+class MergeError(ValueError):
+    """Raised if two layout's have conflicting cell definitions."""
 
 
 class PortWidthMismatch(ValueError):
@@ -2599,6 +2604,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         filename: str | Path,
         options: kdb.LoadLayoutOptions | None = None,
         register_cells: bool = False,
+        test_merge: bool = True,
     ) -> kdb.LayerMap:
         """Read a GDS file into the existing Layout.
 
@@ -2608,7 +2614,31 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 conflicts are handled for example. See
                 https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
             register_cells: If `True` create KCells for all cells in the GDS.
+            test_merge: Check the layouts first whether they are compatible
+                (no differences).
         """
+        if self.cells() > 0 and test_merge:
+            layout_b = kdb.Layout()
+            layout_b.read(str(filename))
+            diff = Diff(
+                layout_a=self.layout,
+                layout_b=layout_b,
+                name_a=self.name,
+                name_b=Path(filename).stem,
+            )
+            diff.compare()
+
+            if diff.diff_xor.cells() > 0:
+                diff_kcl = KCLayout(self.name + "_XOR")
+                diff_kcl.layout.assign(diff.diff_xor)
+                show(diff_kcl)
+
+                raise MergeError(
+                    f"Layout {self.name} cannot merge with layout "
+                    f"{Path(filename).stem} safely. See the error messages or"
+                    f"or check with KLayout."
+                )
+
         if register_cells:
             cells = set(self.layout.cells("*"))
         fn = str(Path(filename).expanduser().resolve())
@@ -4833,6 +4863,8 @@ def show(
         except ImportError:
             name = "shell"
 
+    _kcl_paths: list[str] = []
+
     if isinstance(layout, KCLayout):
         file: Path | None = None
         spec = importlib.util.find_spec("git")
@@ -4874,10 +4906,9 @@ def show(
             _kcls = list(kcls.values())
             _kcls.remove(layout)
             for _kcl in _kcls:
-                _kcl.write(
-                    (_dir / _kcl.name).with_suffix(".oas").resolve(),
-                    library_save_options,
-                )
+                p = (_dir / _kcl.name).with_suffix(".oas").resolve()
+                _kcl.write(p, library_save_options)
+                _kcl_paths.append(str(p))
 
     elif isinstance(layout, KCell):
         file = None
@@ -4920,10 +4951,9 @@ def show(
             _kcls = list(kcls.values())
             _kcls.remove(layout.kcl)
             for _kcl in _kcls:
-                _kcl.write(
-                    (_dir / _kcl.name).with_suffix(".oas").resolve(),
-                    library_save_options,
-                )
+                p = (_dir / _kcl.name).with_suffix(".oas").resolve()
+                _kcl.write(p, library_save_options)
+                _kcl_paths.append(str(p))
 
     elif isinstance(layout, str | Path):
         file = Path(layout).resolve()
@@ -4937,6 +4967,7 @@ def show(
     data_dict = {
         "gds": str(file),
         "keep_position": keep_position,
+        "libraries": _kcl_paths,
     }
     data = json.dumps(data_dict)
     try:
@@ -5575,6 +5606,129 @@ def vcell(
         return wrapper_autocell
 
     return decorator_autocell if _func is None else decorator_autocell(_func)
+
+
+@dataclass
+class Diff:
+    """Dataclass to hold geometric info about the layout diff."""
+
+    layout_a: kdb.Layout
+    layout_b: kdb.Layout
+    name_a: str
+    name_b: str
+    cell_a: kdb.Cell = field(init=False)
+    cell_b: kdb.Cell = field(init=False)
+    layer: kdb.LayerInfo = field(init=False)
+    layer_a: int = field(init=False)
+    layer_b: int = field(init=False)
+    diff_xor: kdb.Layout = field(init=False)
+    diff_a: kdb.Layout = field(init=False)
+    diff_b: kdb.Layout = field(init=False)
+    kdiff: kdb.LayoutDiff = field(init=False)
+    loglevel: LogLevel | None = field(default=LogLevel.CRITICAL)
+    """Log level at which to log polygon errors."""
+
+    def __post_init__(self) -> None:
+        """Initialize the DiffInfo."""
+        self.diff_xor = kdb.Layout()
+        self.diff_a = kdb.Layout()
+        self.diff_b = kdb.Layout()
+        self.kdiff = kdb.LayoutDiff()
+        self.kdiff.on_begin_cell = self.on_begin_cell  # type: ignore[assignment]
+        self.kdiff.on_begin_layer = self.on_begin_layer  # type: ignore[assignment]
+        self.kdiff.on_end_layer = self.on_end_layer  # type: ignore[assignment]
+        self.kdiff.on_instance_in_a_only = self.on_instance_in_a_only  # type: ignore[assignment]
+        self.kdiff.on_instance_in_b_only = self.on_instance_in_b_only  # type: ignore[assignment]
+        self.kdiff.on_polygon_in_a_only = self.on_polygon_in_a_only  # type: ignore[assignment]
+        self.kdiff.on_polygon_in_b_only = self.on_polygon_in_b_only  # type: ignore[assignment]
+
+    def on_begin_cell(self, cell_a: kdb.Cell, cell_b: kdb.Cell) -> None:
+        """Set the cells to the new cell."""
+        self.cell_a = self.diff_a.create_cell(cell_a.name)
+        self.cell_b = self.diff_b.create_cell(cell_b.name)
+
+    def on_begin_layer(self, layer: kdb.LayerInfo, layer_a: int, layer_b: int) -> None:
+        """Set the layers to the new layer."""
+        self.layer = layer
+        self.layer_a = self.diff_a.layer(layer)
+        self.layer_b = self.diff_b.layer(layer)
+
+    def on_polygon_in_a_only(self, poly: kdb.Polygon, propid: int) -> None:
+        """Called when there is only a polygon in the cell_a."""
+        if self.loglevel is not None:
+            config.logger.log(self.loglevel, f"Found {poly=} in {self.name_a} only.")
+        self.cell_a.shapes(self.layer_a).insert(poly)
+
+    def on_instance_in_a_only(self, inst: kdb.CellInstArray, propid: int) -> None:
+        if self.loglevel is not None:
+            config.logger.log(self.loglevel, f"Found {inst=} in {self.name_a} only.")
+        cell = self.layout_a.cell(inst.cell_index)
+
+        regions: list[kdb.Region] = []
+        layers = [layer for layer in cell.layout().layer_indexes()]
+        layer_infos = [li for li in cell.layout().layer_infos()]
+
+        for layer in layers:
+            r = kdb.Region()
+            r.insert(self.layout_a.cell(inst.cell_index).begin_shapes_rec(layer))
+            regions.append(r)
+
+        for trans in inst.each_cplx_trans():
+            for li, r in zip(layer_infos, regions):
+                print(li, r)
+                self.cell_a.shapes(self.diff_a.layer(li)).insert(r.transformed(trans))
+
+    def on_instance_in_b_only(self, inst: kdb.CellInstArray, propid: int) -> None:
+        if self.loglevel is not None:
+            config.logger.log(self.loglevel, f"Found {inst=} in {self.name_b} only.")
+        cell = self.layout_b.cell(inst.cell_index)
+
+        regions: list[kdb.Region] = []
+        layers = [layer for layer in cell.layout().layer_indexes()]
+        layer_infos = [li for li in cell.layout().layer_infos()]
+
+        for layer in layers:
+            r = kdb.Region()
+            r.insert(self.layout_b.cell(inst.cell_index).begin_shapes_rec(layer))
+            regions.append(r)
+
+        for trans in inst.each_cplx_trans():
+            for li, r in zip(layer_infos, regions):
+                print(li, r.transformed(trans))
+                self.cell_b.shapes(self.diff_b.layer(li)).insert(r.transformed(trans))
+
+    def on_polygon_in_b_only(self, poly: kdb.Polygon, propid: int) -> None:
+        """Called when there is only a polygon in the cell_b."""
+        if self.loglevel is not None:
+            config.logger.log(self.loglevel, f"Found {poly=} in {self.name_b} only.")
+        self.cell_b.shapes(self.layer_b).insert(poly)
+
+    def on_end_layer(self) -> None:
+        """Before switching to a new layer, copy the xor to the xor layout."""
+        if (not self.cell_a.bbox().empty()) or (not self.cell_b.bbox().empty()):
+            c: kdb.Cell = self.diff_xor.cell(self.cell_a.name)
+            if c is None:
+                c = self.diff_xor.create_cell(self.cell_a.name)
+
+            c.shapes(self.diff_xor.layer(self.layer)).insert(
+                kdb.Region(self.cell_a.shapes(self.layer_a))
+                ^ kdb.Region(self.cell_b.shapes(self.layer_b))
+            )
+
+    def compare(self) -> bool:
+        """Run the comparing.
+
+        Returns: True if there are differences, nothing otherwise
+        """
+        return self.kdiff.compare(
+            self.layout_a,
+            self.layout_b,
+            kdb.LayoutDiff.Verbose
+            | kdb.LayoutDiff.NoLayerNames
+            | kdb.LayoutDiff.BoxesAsPolygons
+            | kdb.LayoutDiff.PathsAsPolygons
+            | kdb.LayoutDiff.IgnoreDuplicates,
+        )
 
 
 VInstance.model_rebuild()
