@@ -1,14 +1,15 @@
 """Optical routing allows the creation of photonic (or any route using bends)."""
 
 from collections.abc import Callable, Sequence
-# from typing import Any
 
+import numpy as np
+
+# from typing import Any
 from pydantic import BaseModel
 
 from ... import kdb
 from ...conf import config
-from ...kcell import VInstance, VKCell, Port
-import numpy as np
+from ...kcell import Port, VInstance, VKCell
 
 __all__ = ["OpticalAllAngleRoute", "route"]
 

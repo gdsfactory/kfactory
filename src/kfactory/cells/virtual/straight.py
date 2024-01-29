@@ -1,11 +1,10 @@
 """Straight virtual waveguide cells."""
 
-from .utils import extrude_backbone
 from ... import kdb
-from ...kcell import KCLayout, VKCell, LayerEnum, kcl, vcell
-from ...enclosure import LayerEnclosure
 from ...conf import config
-
+from ...enclosure import LayerEnclosure
+from ...kcell import KCLayout, LayerEnum, VKCell, kcl, vcell
+from .utils import extrude_backbone
 
 __all__ = ["Straight", "straight"]
 

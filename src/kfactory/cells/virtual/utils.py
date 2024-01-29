@@ -1,8 +1,9 @@
 """Utility functions for virtual cells."""
 from collections.abc import Sequence
+
 from ... import kdb
+from ...enclosure import LayerEnclosure, extrude_path_points
 from ...kcell import VKCell
-from ...enclosure import extrude_path_points, LayerEnclosure
 
 
 def extrude_backbone(
