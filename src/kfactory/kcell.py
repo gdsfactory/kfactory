@@ -1099,19 +1099,32 @@ class KCell:
 
     def convert_to_static(self, recursive: bool = True) -> None:
         """Convert the KCell to a static cell if it is pdk KCell."""
-        if self.library.name == self.kcl.name:
-            raise ValueError(f"KCell {self.qname} is already a static KCell.")
-        _kdb_cell = self.kcl.convert_cell_to_static(self.cell_index())
-        _kdb_cell.name = self.qname
+        if self.library().name == self.kcl.name:
+            raise ValueError(f"KCell {self.qname()} is already a static KCell.")
+        _kdb_cell = self.kcl.cell(self.kcl.convert_cell_to_static(self.cell_index()))
+        _kdb_cell.name = self.qname()
+        _ci = _kdb_cell.cell_index()
+        _old_kdb_cell = self._kdb_cell
 
         if recursive:
-            for ci in self.called_cells:
+            for ci in self.called_cells():
                 kc = self.kcl[ci]
                 if kc.is_library_cell():
                     kc.convert_to_static(recursive=recursive)
 
-        self.assign(_kdb_cell)
-        self.kcl.layout.delete_cell(_kdb_cell)
+        self._kdb_cell = _kdb_cell
+        for ci in _old_kdb_cell.caller_cells():
+            c = self.kcl.cell(ci)
+            it = kdb.RecursiveInstanceIterator(self.kcl.layout, c)
+            it.targets = [_old_kdb_cell.cell_index()]
+            it.max_depth = 0
+            insts = [instit.current_inst_element().inst() for instit in it.each()]
+            for inst in insts:
+                ca = inst.cell_inst
+                ca.cell_index = _ci
+                c.replace(inst, ca)
+
+        # self.kcl.layout.delete_cell(_old_kdb_cell.cell_index())
         self.rebuild()
 
     def draw_ports(self) -> None:
@@ -4863,7 +4876,16 @@ def show(
     use_libraries: bool = True,
     library_save_options: kdb.SaveLayoutOptions = save_layout_options(),
 ) -> None:
-    """Show GDS in klayout."""
+    """Show GDS in klayout.
+
+    Args:
+        layout: The object to show. This can be a KCell, KCLayout, Path, or string.
+        keep_position: Keep the current KLayout position if a view is already open.
+        save_options: Custom options for saving the gds/oas.
+        use_libraries: Save other KCLayouts as libraries on write.
+        library_save_options: Specific saving options for Cells which are in a library
+            and not the main KCLayout.
+    """
     import inspect
 
     delete = False
@@ -4885,7 +4907,7 @@ def show(
         except ImportError:
             name = "shell"
 
-    _kcl_paths: list[str] = []
+    _kcl_paths: list[dict[str, str]] = []
 
     if isinstance(layout, KCLayout):
         file: Path | None = None
@@ -4930,7 +4952,7 @@ def show(
             for _kcl in _kcls:
                 p = (_dir / _kcl.name).with_suffix(".oas").resolve()
                 _kcl.write(p, library_save_options)
-                _kcl_paths.append(str(p))
+                _kcl_paths.append({"name": _kcl.name, "file": str(p)})
 
     elif isinstance(layout, KCell):
         file = None
@@ -4975,7 +4997,7 @@ def show(
             for _kcl in _kcls:
                 p = (_dir / _kcl.name).with_suffix(".oas").resolve()
                 _kcl.write(p, library_save_options)
-                _kcl_paths.append(str(p))
+                _kcl_paths.append({"name": _kcl.name, "file": str(p)})
 
     elif isinstance(layout, str | Path):
         file = Path(layout).resolve()
