@@ -173,7 +173,7 @@ def test_merge_read_shapes() -> None:
         s_copy.name = "Straight"
 
         kcl_2.write("MERGE_READ.oas")
-        kf.config.logfilter.regex = "Found poly"
+        kf.config.logfilter.regex = "(?:Found poly)|(?:MetaInfo 'kfactory:)"
         kcl_1.read("MERGE_READ.oas")
         kf.config.logfilter.regex = None
     Path("MERGE_READ.oas").unlink(missing_ok=True)
@@ -200,6 +200,27 @@ def test_merge_read_instances() -> None:
 
         kcl_2.write("MERGE_READ.oas")
         kf.config.logfilter.regex = "Found instance"
+        kcl_1.read("MERGE_READ.oas")
+        kf.config.logfilter.regex = None
+    Path("MERGE_READ.oas").unlink(missing_ok=True)
+
+
+def test_merge_properties() -> None:
+    with pytest.raises(kf.kcell.MergeError):
+        kcl_1 = kf.KCLayout("MERGE_BASE")
+        c = kcl_1.kcell("properties_cell")
+        c.info["test_prop"] = "kcl_1"
+
+        kcl_2 = kf.KCLayout("MERGE_READ")
+        c = kcl_2.kcell("properties_cell")
+        c.info["test_prop"] = "kcl_2"
+
+        kcl_2.write("MERGE_READ.oas")
+        kf.config.logfilter.regex = (
+            "MetaInfo 'kfactory:info:test_prop' exists in cells which are to be merged "
+            "in Layout MERGE_BASE. But their values differ: 'MERGE_BASE': 'kcl_1', "
+            "'MERGE_READ': 'kcl_2'"
+        )
         kcl_1.read("MERGE_READ.oas")
         kf.config.logfilter.regex = None
     Path("MERGE_READ.oas").unlink(missing_ok=True)

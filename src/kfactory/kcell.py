@@ -349,6 +349,23 @@ class FrozenError(AttributeError):
     pass
 
 
+def load_layout_options(**attributes: Any) -> kdb.LoadLayoutOptions:
+    """Default options for loading GDS/OAS.
+
+    Args:
+        attributes: Set attributes of the layout load option object. E.g. to set the
+            handling of cell name conflicts pass
+            `cell_conflict_resolution=kdb.LoadLayoutOptions.CellConflictResolution.OverwriteCell`.
+    """
+    load = kdb.LoadLayoutOptions()
+
+    load.cell_conflict_resolution = (
+        kdb.LoadLayoutOptions.CellConflictResolution.SkipNewCell
+    )
+
+    return load
+
+
 def save_layout_options(**attributes: Any) -> kdb.SaveLayoutOptions:
     """Default options for saving GDS/OAS.
 
@@ -1393,7 +1410,6 @@ class KCell:
 
         self._settings = KCellSettings(**settings)
 
-        # ports = Ports()
         self.ports = Ports(self.kcl)
         match config.meta_format:
             case "default":
@@ -2601,7 +2617,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     def read(
         self,
         filename: str | Path,
-        options: kdb.LoadLayoutOptions | None = None,
+        options: kdb.LoadLayoutOptions = load_layout_options(),
         register_cells: bool = False,
         test_merge: bool = True,
     ) -> kdb.LayerMap:
@@ -2616,18 +2632,28 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             test_merge: Check the layouts first whether they are compatible
                 (no differences).
         """
-        if self.cells() > 0 and test_merge:
+        if (
+            self.cells() > 0
+            and test_merge
+            and (
+                options.cell_conflict_resolution
+                != kdb.LoadLayoutOptions.CellConflictResolution.RenameCell
+            )
+        ):
+            for kcell in self.kcells.values():
+                kcell.set_meta_data()
             layout_b = kdb.Layout()
-            layout_b.read(str(filename))
-            diff = Diff(
+            layout_b.read(str(filename), options)
+            diff = MergeDiff(
                 layout_a=self.layout,
                 layout_b=layout_b,
                 name_a=self.name,
                 name_b=Path(filename).stem,
             )
             diff.compare()
-
-            if diff.diff_xor.cells() > 0:
+            if diff.dbu_differs:
+                raise MergeError("Layouts' DBU differ. Check the log for more info.")
+            elif diff.diff_xor.cells() > 0:
                 diff_kcl = KCLayout(self.name + "_XOR")
                 diff_kcl.layout.assign(diff.diff_xor)
                 show(diff_kcl)
@@ -2641,10 +2667,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         if register_cells:
             cells = set(self.layout.cells("*"))
         fn = str(Path(filename).expanduser().resolve())
-        if options is None:
-            lm = self.layout.read(fn)
-        else:
-            lm = self.layout.read(fn, options)
+        lm = self.layout.read(fn, options)
 
         if register_cells:
             new_cells = set(self.layout.cells("*")) - cells
@@ -5608,13 +5631,14 @@ def vcell(
 
 
 @dataclass
-class Diff:
+class MergeDiff:
     """Dataclass to hold geometric info about the layout diff."""
 
     layout_a: kdb.Layout
     layout_b: kdb.Layout
     name_a: str
     name_b: str
+    dbu_differs: bool = False
     cell_a: kdb.Cell = field(init=False)
     cell_b: kdb.Cell = field(init=False)
     layer: kdb.LayerInfo = field(init=False)
@@ -5641,10 +5665,84 @@ class Diff:
         self.kdiff.on_polygon_in_a_only = self.on_polygon_in_a_only  # type: ignore[assignment]
         self.kdiff.on_polygon_in_b_only = self.on_polygon_in_b_only  # type: ignore[assignment]
 
+    def on_dbu_differs(self, dbu_a: float, dbu_b: float) -> None:
+        if self.loglevel is not None:
+            config.logger.log(
+                self.loglevel,
+                f"DBU differs between existing layout {dbu_a!r}"
+                f" and the new layout {dbu_b!r}.",
+            )
+        self.dbu_differs = True
+
     def on_begin_cell(self, cell_a: kdb.Cell, cell_b: kdb.Cell) -> None:
         """Set the cells to the new cell."""
         self.cell_a = self.diff_a.create_cell(cell_a.name)
         self.cell_b = self.diff_b.create_cell(cell_b.name)
+
+        meta_infos_a = {m.name: m for m in cell_a.each_meta_info()}
+        meta_infos_b = {m.name: m for m in cell_b.each_meta_info()}
+        meta_keys_a = meta_infos_a.keys()
+        meta_keys_b = meta_infos_b.keys()
+
+        for key_a in meta_keys_a - meta_keys_b:
+            m_a = meta_infos_a[key_a]
+            m = kdb.LayoutMetaInfo(key_a, m_a.value, m_a.description, True)
+            self.cell_a.add_meta_info(m)
+            c: kdb.Cell = self.diff_xor.cell(
+                self.cell_a.name
+            ) or self.diff_xor.create_cell(self.cell_a.name)
+            c.add_meta_info(
+                kdb.LayoutMetaInfo(m_a.name + "_a", m_a.value, m_a.description, True)
+            )
+            if self.loglevel is not None:
+                config.logger.log(
+                    self.loglevel,
+                    f"MetaInfo {key_a!r} exists only in cell {cell_a.name!r}"
+                    f" in Layout {self.name_a}",
+                )
+
+        for key_b in meta_keys_b - meta_keys_a:
+            m_b = meta_infos_b[key_b]
+            m = kdb.LayoutMetaInfo(key_b, m_b.value, m_b.description, True)
+            self.cell_b.add_meta_info(m)
+            c = self.diff_xor.cell(self.cell_b.name) or self.diff_xor.create_cell(
+                self.cell_b.name
+            )
+            c.add_meta_info(
+                kdb.LayoutMetaInfo(m_b.name + "_b", m_b.value, m_b.description, True)
+            )
+            if self.loglevel is not None:
+                config.logger.log(
+                    self.loglevel,
+                    f"MetaInfo {key_b!r} exists only in cell {cell_b.name!r}"
+                    f" in Layout {self.name_a}",
+                )
+
+        for key in meta_keys_a & meta_keys_b:
+            m_a = meta_infos_a[key]
+            m_b = meta_infos_b[key]
+            if m_a.value != m_b.value:
+                c = self.diff_xor.cell(self.cell_b.name) or self.diff_xor.create_cell(
+                    self.cell_b.name
+                )
+                c.add_meta_info(
+                    kdb.LayoutMetaInfo(
+                        m_a.name + "_a", m_a.value, m_a.description, True
+                    )
+                )
+                c.add_meta_info(
+                    kdb.LayoutMetaInfo(
+                        m_b.name + "_b", m_b.value, m_b.description, True
+                    )
+                )
+                if self.loglevel is not None:
+                    config.logger.log(
+                        self.loglevel,
+                        f"MetaInfo {key!r} exists in cells which are to be merged"
+                        f" in Layout {self.name_a}. But their values differ: "
+                        f"{self.name_a!r}: {m_a.value!r}, "
+                        f"{self.name_b!r}: {m_b.value!r}",
+                    )
 
     def on_begin_layer(self, layer: kdb.LayerInfo, layer_a: int, layer_b: int) -> None:
         """Set the layers to the new layer."""
