@@ -1124,7 +1124,7 @@ class KCell:
                 ca.cell_index = _ci
                 c.replace(inst, ca)
 
-        # self.kcl.layout.delete_cell(_old_kdb_cell.cell_index())
+        self.kcl.layout.delete_cell(_old_kdb_cell.cell_index())
         self.rebuild()
 
     def draw_ports(self) -> None:
@@ -2735,7 +2735,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if not kcell._destroyed():
                         kcell.set_meta_data()
                         if kcell.is_library_cell():
-                            kcell.convert_to_static()
+                            kcell.convert_to_static(recursive=True)
             case (True, False):
                 for kcell in self.kcells.values():
                     if not kcell._destroyed():
