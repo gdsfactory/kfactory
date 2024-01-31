@@ -89,31 +89,10 @@ kf = "kfactory.cli:app"
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.black]
-line-length = 88  # Specify the line length
-target-version = ['py310']  # Specify your Python version
-include = '\.pyi?$'
-exclude = '''  # Specify the files/dirs that should be ignored by the black formatter
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | env
-  | _build
-  | buck-out
-  | build
-  | dist
-)/
-'''
-
 [tool.mypy]
 python_version = "3.10"
 strict = true
 exclude = [
-  "tests",
   "src/kfactory/widgets/interactive.py",
 ]
 plugins = "pydantic.mypy, numpy.typing.mypy_plugin"
@@ -122,10 +101,6 @@ plugins = "pydantic.mypy, numpy.typing.mypy_plugin"
 enabled = true
 live_mode = true
 strict = true
-
-[[tool.mypy.overrides]]
-module = "kfactory"
-implicit_reexport = true
 
 [tool.isort]
 multi_line_output = 3
@@ -137,29 +112,6 @@ skip = ["kfactory/__init__.py"]
 testpaths = ["src", "tests"]
 addopts = '--tb=short'
 norecursedirs = ["extra/*.py"]
-
-[tool.flake8]
-max-line-length = 88
-max-complexity = 45
-select = ["B","C","E","F","W","T4","B9"]
-ignore = ["E501", "E503", "E722", "W503", "W503", "E203", "B950", "B902"]
-
-extend-ignore = ["RST303"]
-
-exclude = [
-    ".git",
-    "__pycache__",
-    "docs/source/conf.py",
-    "build",
-    "dist",
-    ".ipynb_checkpoints",
-    ".tox",
-    "extra",
-    "deprecated",
-    "gdslib",
-    ".tox",
-    ".mypy_cache",
-]
 
 [tool.pydocstyle]
 [pydocstyle]
@@ -200,6 +152,7 @@ select = [
   "F",   # pyflakes
   "UP",  # pyupgrade
   "D",   # pydocstyle
+  "I",
 ]
 
 [tool.ruff.format]
@@ -220,6 +173,8 @@ directory = "changelog.d"
 filename = "CHANGELOG.md"
 start_string = "<!-- towncrier release notes start -->\n"
 underlines = ["", "", ""]
+package_dir = "src"
+package = "kfactory"
 template = "changelog.d/changelog_template.jinja"
 title_format = "## [{version}](https://github.com/gdsfactory/kfactory/releases/v{version}) - {project_date}"
 issue_format = "[#{issue}](https://github.com/gdsfactory/kfactory/issues/{issue})"

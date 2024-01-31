@@ -1,10 +1,11 @@
 """Virtual circular cells."""
-from .utils import extrude_backbone
-from ...kcell import KCLayout, VKCell, kcl, vcell
-from ...enclosure import LayerEnclosure
-from ...conf import config
-from ... import kdb
 import numpy as np
+
+from ... import kdb
+from ...conf import config
+from ...enclosure import LayerEnclosure
+from ...kcell import KCLayout, VKCell, kcl, vcell
+from .utils import extrude_backbone
 
 
 class VirtualBendCircular:

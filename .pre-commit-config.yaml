@@ -26,6 +26,8 @@ repos:
     rev: 23.11.0
     hooks:
       - id: towncrier-check
+        files: $changelog\.d/
+        args: ['--keep']
   - repo: https://github.com/twisted/towncrier
     rev: 23.11.0  # run 'pre-commit autoupdate' to update
     hooks:
@@ -34,7 +36,7 @@ repos:
         args: ['--keep']
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.1.11
+    rev: v0.1.15
     hooks:
       # Run the linter.
       - id: ruff
@@ -66,21 +68,27 @@ repos:
         additional_dependencies:
           - tomli
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.6
+    rev: 1.7.7
     hooks:
       - id: bandit
         args: [--exit-zero]
         # ignore all tests, not just tests data
         exclude: ^tests/
 
-  - repo: local
+  # - repo: local
+  #   hooks:
+  #     - id: mypy
+  #       name: mypy
+  #       language: python
+  #       entry: bash -c 'mypy --strict -p kfactory'
+  #       verbose: true
+  #       always_run: true
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.8.0'  # Use the sha / tag you want to point at
     hooks:
       - id: mypy
-        name: mypy
-        language: python
-        entry: bash -c 'mypy --strict -p kfactory'
-        verbose: true
-        always_run: true
+        additional_dependencies: [pydantic,numpy,types-cachetools,types-requests,klayout,pydantic-settings,loguru,typer,pytest]
+        exclude: ^docs/
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: "v1.10.0"
     hooks:

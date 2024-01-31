@@ -116,7 +116,7 @@ def dbend_circular(
     return c
 
 
-def test_spiral(LAYER):
+def test_spiral(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
 
     r1 = 1000
@@ -133,7 +133,7 @@ def test_spiral(LAYER):
         p = b.ports["N0"]
 
 
-def test_dspiral(LAYER):
+def test_dspiral(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
 
     r1 = 1
@@ -143,7 +143,7 @@ def test_dspiral(LAYER):
         name="start", dcplx_trans=kf.kdb.DCplxTrans.R0, dwidth=1, layer=LAYER.WG
     )
 
-    kf.config.logfilter.level = "ERROR"
+    kf.config.logfilter.level = kf.conf.LogLevel.ERROR
 
     for _ in range(10):
         r = r1 + r2

@@ -3,7 +3,7 @@ import pytest
 
 
 @kf.cell
-def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.LayerEnclosure):
+def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.LayerEnclosure) -> kf.KCell:
     c = kf.KCell()
     c.shapes(layer).insert(kf.kdb.Box(-10000, -6000, 10000, 6000))
 
@@ -29,25 +29,25 @@ def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.LayerEnclosure):
     return c
 
 
-def test_enclosure(LAYER):
+def test_enclosure(LAYER: kf.LayerEnum) -> None:
     enc = kf.LayerEnclosure([(LAYER.WG, 500, -250)])
 
 
-def test_enc(LAYER, wg_enc):
+def test_enc(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
     enc = wg_enc
 
     c = mmi_enc(LAYER.WG, wg_enc)
     c.show()
 
 
-def test_neg_enc(LAYER):
+def test_neg_enc(LAYER: kf.LayerEnum) -> None:
     enc = kf.LayerEnclosure([(LAYER.WGCLAD, -1500, 1000)])
 
     c = mmi_enc(LAYER.WG, enc)
     c.show()
 
 
-def test_layer_multi_enc(LAYER):
+def test_layer_multi_enc(LAYER: kf.LayerEnum) -> None:
     enc = kf.LayerEnclosure(
         [
             (LAYER.WGCLAD, -5000, -5400),
@@ -60,7 +60,7 @@ def test_layer_multi_enc(LAYER):
     c.show()
 
 
-def test_layer_merge_enc(LAYER):
+def test_layer_merge_enc(LAYER: kf.LayerEnum) -> None:
     enc = kf.LayerEnclosure(
         [
             (LAYER.WGCLAD, -5000, -3000),
@@ -72,7 +72,7 @@ def test_layer_merge_enc(LAYER):
     c.show()
 
 
-def test_um_enclosure(LAYER):
+def test_um_enclosure(LAYER: kf.LayerEnum) -> None:
     enc = kf.LayerEnclosure(
         [
             (LAYER.WGCLAD, -5000, -3000),

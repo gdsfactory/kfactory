@@ -10,8 +10,8 @@ BendEulerCustom(KCell.kcl) and use that one.
 """
 
 import numpy as np
-from scipy.optimize import brentq  # type:ignore[import-untyped]
-from scipy.special import fresnel  # type:ignore[import-untyped]
+from scipy.optimize import brentq  # type:ignore[import-untyped,unused-ignore]
+from scipy.special import fresnel  # type:ignore[import-untyped,unused-ignore]
 
 from .. import kdb
 from ..conf import config
@@ -190,7 +190,7 @@ class BendEuler:
             angle: Angle of the bend.
             resolution: Angle resolution for the backbone.
         """
-        c = KCell()
+        c = self.kcl.kcell()
         if angle < 0:
             config.logger.critical(
                 f"Negative lengths are not allowed {angle} as ports"
@@ -271,7 +271,7 @@ class BendSEuler:
             enclosure: Slab/exclude definition. [dbu]
             resolution: Angle resolution for the backbone.
         """
-        c = KCell()
+        c = self.kcl.kcell()
         if width < 0:
             config.logger.critical(
                 f"Negative widths are not allowed {width} as ports"

@@ -32,12 +32,12 @@ def simple_cplx_cell(layer: kf.LayerEnum) -> kf.KCell:
     return c
 
 
-def test_cell(LAYER: kf.LayerEnum):
+def test_cell(LAYER: kf.LayerEnum) -> None:
     c = simple_cplx_cell(LAYER.WG)
     c.show()
 
 
-def test_connected_cell(LAYER: kf.LayerEnum):
+def test_connected_cell(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
     layer = LAYER.WG
     sckc1 = c << simple_cplx_cell(layer)

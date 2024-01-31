@@ -14,7 +14,7 @@ def test_instance_center(LAYER: kf.LayerEnum) -> None:
     ref2 = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
 
     ref1.center = ref2.center
-    ref2.center = ref1.center + kdb.Point(0, 1000)
+    ref2.center = ref1.center + kdb.Point(0, 1000).to_v()
     ref2.d.move((0, 10))
 
 

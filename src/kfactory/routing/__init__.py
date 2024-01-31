@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from .. import kdb
 from ..kcell import Instance, Port
-from . import electrical, manhattan, optical, aa
+from . import aa, electrical, manhattan, optical
 
 
 class Route(BaseModel, extra="forbid", arbitrary_types_allowed=True):

@@ -1,10 +1,10 @@
 """Virtual euler cells."""
-from .utils import extrude_backbone
-from ...kcell import KCLayout, VKCell, kcl, vcell
-from ...enclosure import LayerEnclosure
-from ...conf import config
-from ..euler import euler_bend_points
 from ... import kdb
+from ...conf import config
+from ...enclosure import LayerEnclosure
+from ...kcell import KCLayout, VKCell, kcl, vcell
+from ..euler import euler_bend_points
+from .utils import extrude_backbone
 
 
 class VirtualBendEuler:

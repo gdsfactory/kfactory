@@ -1242,7 +1242,9 @@ class KCellEnclosure(BaseModel):
 
     def __init__(self, enclosures: Iterable[LayerEnclosure]):
         """Init. Allow usage of an iterable object instead of a collection."""
-        super().__init__(enclosures=LayerEnclosureCollection(enclosures=enclosures))
+        super().__init__(
+            enclosures=LayerEnclosureCollection(enclosures=list(enclosures))
+        )
 
     def minkowski_region(
         self,
