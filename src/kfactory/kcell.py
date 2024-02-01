@@ -35,7 +35,7 @@ from pydantic import BaseModel, Field, computed_field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec
 
-from . import kdb, lay, rdb
+from . import __version__, kdb, lay, rdb
 from .conf import LogLevel, config
 from .enclosure import (
     KCellEnclosure,
@@ -1182,6 +1182,7 @@ class KCell:
         """
         match set_meta_data, convert_external_cells:
             case True, True:
+                self.kcl.set_meta_data()
                 for kcell in (self.kcl[ci] for ci in self.called_cells()):
                     if not kcell._destroyed():
                         if kcell.is_library_cell():
@@ -1191,6 +1192,7 @@ class KCell:
                     self.convert_to_static(recursive=True)
                 self.set_meta_data()
             case True, False:
+                self.kcl.set_meta_data()
                 for kcell in (self.kcl[ci] for ci in self.called_cells()):
                     if not kcell._destroyed():
                         kcell.set_meta_data()
@@ -1401,7 +1403,7 @@ class KCell:
                 kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
             )
 
-    def get_meta_data(self) -> None:
+    def get_meta_data(self, meta_format: Literal["v1", "v2"] = "v2") -> None:
         """Read metadata from the KLayout Layout object."""
         port_dict: dict[str, Any] = {}
         settings = {}
@@ -1424,8 +1426,21 @@ class KCell:
         self._settings = KCellSettings(**settings)
 
         self.ports = Ports(self.kcl)
-        match config.meta_format:
-            case "default":
+
+        # if detect_meta_format:
+        #     kfactory_version = self.settings.get("version")
+        #     settings_meta_format = self.settings.get("meta_format")
+        #     if settings_meta_format is not None:
+        #         meta_format = settings_meta_format
+        #     elif kfactory_version and parse(kfactory_version) >= parse("0.10.0"):
+        #         meta_format = "v2"
+        #     else:
+        #         meta_format = "v1"
+        # else:
+        #     meta_format = config.meta_format
+
+        match meta_format:
+            case "v2":
                 for index in sorted(port_dict.keys()):
                     _d = port_dict[index]
                     name = _d.get("name", None)
@@ -1449,7 +1464,7 @@ class KCell:
                         _port.dcplx_trans = dcplx_trans
 
                     self.add_port(_port, keep_mirror=True)
-            case "string":
+            case "v1":
                 for index in sorted(port_dict.keys()):
                     _d = port_dict[index]
                     name = _d.get("name", None)
@@ -2284,6 +2299,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     constants: Constants = Field(default_factory=Constants)
     rename_function: Callable[..., None]
 
+    info: Info
+    _settings: KCellSettings
+
     def __init__(
         self,
         name: str,
@@ -2344,8 +2362,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             layer_stack=layer_stack,
             layout=layout,
             rename_function=port_rename_function,
+            info=Info(),
         )
         self._name = name
+        self._settings = KCellSettings(
+            version=__version__,
+            klayout_version=kdb.__version__,  # type: ignore[attr-defined]
+            meta_format="v2",
+        )
 
         self.library.register(self.name)
         if layers is not None:
@@ -2427,6 +2451,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     def name(self) -> str:
         """Name of the KCLayout."""
         return self._name
+
+    @property
+    def settings(self) -> KCellSettings:
+        """Settings dictionary set by __init__ with metainfo."""
+        return self._settings
 
     def kcell(self, name: str | None = None, ports: Ports | None = None) -> KCell:
         """Create a new cell based ont he pdk's layout object."""
@@ -2690,6 +2719,32 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
         return lm
 
+    def get_meta_data(self) -> None:
+        """Read KCLayout meta info from the KLayout object."""
+        settings = {}
+        for meta in self.each_meta_info():
+            if meta.name.startswith("kfactory:info"):
+                self.info[meta.name.removeprefix("kfactory:info:")] = meta.value
+            elif meta.name.startswith("kfactory:settings"):
+                settings[meta.name.removeprefix("kfactory:settings:")] = meta.value
+
+        self._settings = KCellSettings(**settings)
+
+    def set_meta_data(self) -> None:
+        """Set the info/settings of the KCLayout."""
+        for name, setting in self.settings.model_dump().items():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
+            )
+        for name, info in self.info.model_dump().items():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
+            )
+        for name, info in self.info:
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
+            )
+
     @overload
     def write(self, filename: str | Path) -> None:
         ...
@@ -2731,12 +2786,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """
         match (set_meta, convert_external_cells):
             case (True, True):
+                self.set_meta_data()
                 for kcell in self.kcells.values():
                     if not kcell._destroyed():
                         kcell.set_meta_data()
                         if kcell.is_library_cell():
                             kcell.convert_to_static(recursive=True)
             case (True, False):
+                self.set_meta_data()
                 for kcell in self.kcells.values():
                     if not kcell._destroyed():
                         kcell.set_meta_data()
