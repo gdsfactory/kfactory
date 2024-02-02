@@ -377,7 +377,7 @@ def save_layout_options(**attributes: Any) -> kdb.SaveLayoutOptions:
     save.gds2_write_cell_properties = True
     save.gds2_write_file_properties = True
     save.gds2_write_timestamps = False
-    # save.write_context_info = False  # True
+    save.write_context_info = True
 
     for k, v in attributes.items():
         setattr(save, k, v)
@@ -1206,6 +1206,115 @@ class KCell:
 
         self._kdb_cell.write(str(filename), save_options)
 
+    def read(
+        self,
+        filename: str | Path,
+        options: kdb.LoadLayoutOptions = load_layout_options(),
+        register_cells: bool = False,
+        test_merge: bool = True,
+        update_kcl_meta_data: Literal["overwrite", "skip", "drop"] = "drop",
+    ) -> list[int]:
+        """Read a GDS file into the existing KCell.
+
+        Any existing meta info (KCell.info and KCell.settings) will be overwritten if
+        a KCell already exists. Instead of overwriting the cells, they can also be
+        loaded into new cells by using the corresponding cell_conflict_resolution.
+
+        Args:
+            filename: Path of the GDS file.
+            options: KLayout options to load from the GDS. Can determine how merge
+                conflicts are handled for example. See
+                https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
+            register_cells: If `True` create KCells for all cells in the GDS.
+            test_merge: Check the layouts first whether they are compatible
+                (no differences).
+            update_kcl_meta_data: How to treat loaded KCLayout info.
+                overwrite: overwrite existing info entries
+                skip: keep existing info values
+                drop: don't add any new info
+        """
+        # see: wait for KLayout update https://github.com/KLayout/klayout/issues/1609
+        config.logger.critical(
+            "KLayout <=0.28.15 (last update 2024-02-02) cannot read LayoutMetaInfo on"
+            " 'Cell.read'. kfactory uses these extensively for ports, info, and "
+            "settings. Therefore proceed at your own risk."
+        )
+        fn = str(Path(filename).expanduser().resolve())
+        if test_merge and (
+            options.cell_conflict_resolution
+            != kdb.LoadLayoutOptions.CellConflictResolution.RenameCell
+        ):
+            for kcell in self.kcl.kcells.values():
+                kcell.set_meta_data()
+            layout_b = kdb.Layout()
+            layout_b.read(fn, options)
+            layout_a = self.kcl.layout.dup()
+            layout_a.delete_cell(layout_a.cell(self.name).cell_index())
+            diff = MergeDiff(
+                layout_a=layout_a,
+                layout_b=layout_b,
+                name_a=self.name,
+                name_b=Path(filename).stem,
+            )
+            diff.compare()
+            if diff.dbu_differs:
+                raise MergeError("Layouts' DBU differ. Check the log for more info.")
+            elif diff.diff_xor.cells() > 0:
+                diff_kcl = KCLayout(self.name + "_XOR")
+                diff_kcl.layout.assign(diff.diff_xor)
+                show(diff_kcl)
+
+                raise MergeError(
+                    f"Layout {self.name} cannot merge with layout "
+                    f"{Path(filename).stem} safely. See the error messages or"
+                    f"or check with KLayout."
+                )
+
+        cell_ids = self._kdb_cell.read(fn, options)
+        info, settings = self.kcl.get_meta_data()
+
+        match update_kcl_meta_data:
+            case "overwrite":
+                for k, v in info.items():
+                    self.info[k] = v
+            case "skip":
+                _info = self.info.model_dump()
+
+                for k, v in self.info:
+                    _info[k] = v
+                info.update(_info)
+                self.info = Info(**info)
+
+            case "drop":
+                pass
+            case _:
+                raise ValueError(
+                    f"Unknown meta update strategy {update_kcl_meta_data=}"
+                    ", available strategies are 'overwrite', 'skip', or 'drop'"
+                )
+        meta_format = settings.get("meta_format") or config.meta_format
+
+        if register_cells:
+            new_cis = set(cell_ids)
+
+            for c in new_cis:
+                kc = self.kcl[c]
+                kc.rebuild()
+                kc.get_meta_data(meta_format=meta_format)
+        else:
+            cis = self.kcl.kcells.keys()
+            new_cis = set(cell_ids)
+
+            for c in new_cis & cis:
+                kc = self.kcl[c]
+                kc.rebuild()
+                kc.get_meta_data(meta_format=meta_format)
+
+        self.rebuild()
+        self.get_meta_data(meta_format=meta_format)
+
+        return cell_ids
+
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore
         """Internal function to convert the cell to yaml."""
@@ -1426,18 +1535,6 @@ class KCell:
         self._settings = KCellSettings(**settings)
 
         self.ports = Ports(self.kcl)
-
-        # if detect_meta_format:
-        #     kfactory_version = self.settings.get("version")
-        #     settings_meta_format = self.settings.get("meta_format")
-        #     if settings_meta_format is not None:
-        #         meta_format = settings_meta_format
-        #     elif kfactory_version and parse(kfactory_version) >= parse("0.10.0"):
-        #         meta_format = "v2"
-        #     else:
-        #         meta_format = "v1"
-        # else:
-        #     meta_format = config.meta_format
 
         match meta_format:
             case "v2":
@@ -2564,7 +2661,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
         """
         if allow_duplicate or (self.layout.cell(name) is None):
-            # self.kcells[name] = kcell
             return self.layout.create_cell(name, *args)
         else:
             raise ValueError(
@@ -2662,8 +2758,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         options: kdb.LoadLayoutOptions = load_layout_options(),
         register_cells: bool = False,
         test_merge: bool = True,
+        update_kcl_meta_data: Literal["overwrite", "skip", "drop"] = "skip",
     ) -> kdb.LayerMap:
         """Read a GDS file into the existing Layout.
+
+        Any existing meta info (KCell.info and KCell.settings) will be overwritten if
+        a KCell already exists. Instead of overwriting the cells, they can also be
+        loaded into new cells by using the corresponding cell_conflict_resolution.
 
         Args:
             filename: Path of the GDS file.
@@ -2673,6 +2774,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             register_cells: If `True` create KCells for all cells in the GDS.
             test_merge: Check the layouts first whether they are compatible
                 (no differences).
+            update_kcl_meta_data: How to treat loaded KCLayout info.
+                overwrite: overwrite existing info entries
+                skip: keep existing info values
+                drop: don't add any new info
         """
         if (
             self.cells() > 0
@@ -2706,29 +2811,57 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     f"or check with KLayout."
                 )
 
-        if register_cells:
-            cells = set(self.layout.cells("*"))
+        cells = set(self.layout.cells("*"))
         fn = str(Path(filename).expanduser().resolve())
         lm = self.layout.read(fn, options)
+        info, settings = self.get_meta_data()
+
+        match update_kcl_meta_data:
+            case "overwrite":
+                for k, v in info.items():
+                    self.info[k] = v
+            case "skip":
+                _info = self.info.model_dump()
+
+                for k, v in self.info:
+                    _info[k] = v
+                info.update(_info)
+                self.info = Info(**info)
+
+            case "drop":
+                pass
+            case _:
+                raise ValueError(
+                    f"Unknown meta update strategy {update_kcl_meta_data=}"
+                    ", available strategies are 'overwrite', 'skip', or 'drop'"
+                )
+        meta_format = settings.get("meta_format") or config.meta_format
+        load_cells = set(self.layout.cells("*"))
+        new_cells = load_cells - cells
 
         if register_cells:
-            new_cells = set(self.layout.cells("*")) - cells
             for c in new_cells:
                 kc = KCell(kdb_cell=c, kcl=self)
-                kc.get_meta_data()
+                kc.get_meta_data(meta_format=meta_format)
+
+        for c in load_cells & cells:
+            kc = self.kcells[c.cell_index()]
+            kc.get_meta_data(meta_format=meta_format)
+            kc.rebuild()
 
         return lm
 
-    def get_meta_data(self) -> None:
+    def get_meta_data(self) -> tuple[dict[str, Any], dict[str, Any]]:
         """Read KCLayout meta info from the KLayout object."""
         settings = {}
+        info = {}
         for meta in self.each_meta_info():
             if meta.name.startswith("kfactory:info"):
-                self.info[meta.name.removeprefix("kfactory:info:")] = meta.value
+                info[meta.name.removeprefix("kfactory:info:")] = meta.value
             elif meta.name.startswith("kfactory:settings"):
                 settings[meta.name.removeprefix("kfactory:settings:")] = meta.value
 
-        self._settings = KCellSettings(**settings)
+        return info, settings
 
     def set_meta_data(self) -> None:
         """Set the info/settings of the KCLayout."""

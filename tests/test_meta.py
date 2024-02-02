@@ -62,7 +62,7 @@ def test_metainfo_set(straight: kf.KCell) -> None:
 
 def test_metainfo_read(straight: kf.KCell) -> None:
     """Test whether we can read written metadata to ports."""
-    with NamedTemporaryFile("a") as t:
+    with NamedTemporaryFile("a", suffix=".oas") as t:
         save = kf.save_layout_options()
         save.write_context_info = True
         straight.kcl.write(t.name)
@@ -80,6 +80,29 @@ def test_metainfo_read(straight: kf.KCell) -> None:
             assert port.dcplx_trans == read_port.dcplx_trans
             assert port.port_type == read_port.port_type
             assert port.width == read_port.width
+
+
+def test_metainfo_read_cell(straight: kf.KCell) -> None:
+    """Test whether we can read written metadata to a cell and its ports."""
+    with NamedTemporaryFile("a", suffix=".oas") as t:
+        save = kf.save_layout_options()
+        save.write_context_info = True
+        straight.write(t.name)
+
+        kcl = kf.KCLayout("TEST_META")
+        kcell = kcl.kcell(straight.name)
+        kcell.read(t.name)
+
+        # TODO: wait for KLayout update https://github.com/KLayout/klayout/issues/1609
+
+        # for i, port in enumerate(straight.ports):
+        #     read_port = kcell.ports[i]
+
+        #     assert port.name == read_port.name
+        #     assert port.trans == read_port.trans
+        #     assert port.dcplx_trans == read_port.dcplx_trans
+        #     assert port.port_type == read_port.port_type
+        #     assert port.width == read_port.width
 
 
 def test_nometainfo_read(straight: kf.KCell) -> None:
