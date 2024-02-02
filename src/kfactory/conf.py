@@ -132,7 +132,13 @@ class Settings(
     logger: ClassVar[Logger] = logger
     logfilter: LogFilter = Field(default_factory=LogFilter)
     display_type: Literal["widget", "image", "docs"] = "image"
-    meta_format: Literal["default", "string"] = "default"
+    meta_format: Literal["v2", "v1"] = "v2"
+    """The format of the saving of metadata.
+
+    v1: Transformations and other KLayout objects are stored as a string. In
+        case of ports they are converted back to KLayout objects on read.
+    v2: All objects can be stored in the nativ KLayout format (klayout>=0.28.13)
+    """
 
     def __init__(self, **data: Any):
         """Set log filter and run pydantic."""

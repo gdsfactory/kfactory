@@ -7,7 +7,9 @@ Uses the klayout package as a backend.
 # The import order matters, we need to first import the important stuff.
 # isort:skip_file
 
-import klayout.dbcore as kdb
+__version__ = "0.10.3"
+
+import klayout.db as kdb
 import klayout.lay as lay
 import klayout.rdb as rdb
 from .kcell import (
@@ -32,8 +34,6 @@ from .conf import config
 from .enclosure import LayerEnclosure, KCellEnclosure
 
 from aenum import constant  # type: ignore[import-untyped,unused-ignore]
-
-__version__ = "0.10.3"
 
 logger = config.logger
 
