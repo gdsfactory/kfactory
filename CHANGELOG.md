@@ -8,6 +8,23 @@ This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the chang
 
 <!-- towncrier release notes start -->
 
+## [0.11.0](https://github.com/gdsfactory/kfactory/releases/v0.11.0) - 2024-02-02
+
+
+### Added
+
+- Added info and settings to KCLayout. Settings contain version numbers and meta_format of kfactory and KLayout [#242](https://github.com/gdsfactory/kfactory/issues/242)
+
+
+### Changed
+
+- Changed `KCLayout.read` to make a merge check before reading other KCLayouts [#241](https://github.com/gdsfactory/kfactory/issues/241)
+
+
+### Fixed
+
+- Fixed BendEuler not using `self.kcl` for creating the kcell [#241](https://github.com/gdsfactory/kfactory/issues/241)
+
 ## [0.10.3](https://github.com/gdsfactory/kfactory/releases/v0.10.3) - 2024-01-12
 
 
