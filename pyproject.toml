@@ -102,34 +102,10 @@ enabled = true
 live_mode = true
 strict = true
 
-[tool.isort]
-multi_line_output = 3
-line_length = 88
-include_trailing_comma = true
-skip = ["kfactory/__init__.py"]
-
 [tool.pytest.ini_options]
 testpaths = ["src", "tests"]
 addopts = '--tb=short'
 norecursedirs = ["extra/*.py"]
-
-[tool.pydocstyle]
-[pydocstyle]
-inherit = false
-match = '(?!test).*\.py'
-add-ignore = ["D100","D101","D102","D103","D104","D203","D405","D417"]
-convention = "google"
-
-
-[tool.doc8]
-ignore-path=["docs/build/html","docs/notebooks/build","cache"]
-max-line-length=99
-verbose=1
-ignore-path-errors="/tmp/other_thing.rst;D001;D002"
-
-[tool.yapf]
-based_on_style = "google"
-allow_multiline_lambdas = true
 
 [tool.coverage.run]
 omit = "**/test_*.py"
@@ -147,6 +123,8 @@ line-length = 88
 exclude = ["tests", "docs", "src/kfactory/widgets/interactive.py"]
 indent-width = 4
 target-version = "py311"
+
+[tool.ruff.lint]
 select = [
   "E",   # pycodestyle
   "F",   # pyflakes
@@ -165,7 +143,7 @@ skip-magic-trailing-comma = false
 # Like Black, automatically detect the appropriate line ending.
 line-ending = "auto"
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "google"
 
 [tool.towncrier]

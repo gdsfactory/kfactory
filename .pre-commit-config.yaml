@@ -18,10 +18,6 @@ repos:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
         exclude: 'changelog\.d/.*|CHANGELOG\.md'
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.0
-    hooks:
-      - id: pyupgrade
   - repo: https://github.com/twisted/towncrier
     rev: 23.11.0
     hooks:
@@ -36,7 +32,7 @@ repos:
         args: ['--keep']
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.1.15
+    rev: v0.2.1
     hooks:
       # Run the linter.
       - id: ruff
@@ -44,22 +40,11 @@ repos:
       # Run the formatter.
       - id: ruff-format
         exclude: ^tests/
-  - repo: https://github.com/asottile/blacken-docs
-    rev: 1.16.0
-    hooks:
-      - id: blacken-docs
-        additional_dependencies: [black>=22.3.0]
   - repo: https://github.com/kynan/nbstripout
-    rev: 0.6.1
+    rev: 0.7.1
     hooks:
       - id: nbstripout
         files: .ipynb
-
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.15.0
-    hooks:
-      - id: pyupgrade
-        args: [--py37-plus, --keep-runtime-typing]
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.2.6
@@ -74,28 +59,9 @@ repos:
         args: [--exit-zero]
         # ignore all tests, not just tests data
         exclude: ^tests/
-
-  # - repo: local
-  #   hooks:
-  #     - id: mypy
-  #       name: mypy
-  #       language: python
-  #       entry: bash -c 'mypy --strict -p kfactory'
-  #       verbose: true
-  #       always_run: true
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'v1.8.0'  # Use the sha / tag you want to point at
     hooks:
       - id: mypy
         additional_dependencies: [pydantic,numpy,types-cachetools,types-requests,klayout,pydantic-settings,loguru,typer,pytest]
         exclude: ^docs/
-  - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: "v1.10.0"
-    hooks:
-      - id: python-check-blanket-noqa
-      - id: python-no-log-warn
-      - id: python-no-eval
-      - id: python-use-type-annotations
-      - id: rst-backticks
-      - id: rst-directive-colons
-      - id: rst-inline-touching-normal
