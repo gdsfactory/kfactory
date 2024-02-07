@@ -118,7 +118,11 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
     datatype: int
     kcl: constant[KCLayout]
 
-    def __new__(cls: LayerEnum, layer: int, datatype: int) -> LayerEnum:  # type: ignore
+    def __new__(  # type: ignore[misc]
+        cls: LayerEnum,
+        layer: int,
+        datatype: int,
+    ) -> LayerEnum:
         """Create a new Enum.
 
         Because it needs to act like an integer an enum is created and expanded.
@@ -521,6 +525,7 @@ class KCell:
         if kdb_cell is not None:
             for inst in kdb_cell.each_inst():
                 self.insts.append(Instance(self.kcl, inst))
+            self.get_meta_data(meta_format=config.meta_format)
         self.d = UMKCell(self)
 
         self.boundary = None
@@ -1887,7 +1892,7 @@ class KCell:
                     it = db.create_item(db_cell, p_cat)
                     it.add_value(
                         "Insufficient overlap, partial overlap with polygon of"
-                        f" {(phys_overlap[0].p1- phys_overlap[0].p2).abs()}/"
+                        f" {(phys_overlap[0].p1 - phys_overlap[0].p2).abs()}/"
                         f"{port.width}"
                     )
                     it.add_value(
@@ -2766,6 +2771,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         a KCell already exists. Instead of overwriting the cells, they can also be
         loaded into new cells by using the corresponding cell_conflict_resolution.
 
+        This will fail if any of the read cells try to load into a locked KCell.
+
         Args:
             filename: Path of the GDS file.
             options: KLayout options to load from the GDS. Can determine how merge
@@ -2779,6 +2786,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 skip: keep existing info values
                 drop: don't add any new info
         """
+        layout_b = kdb.Layout()
+        layout_b.read(str(filename), options)
         if (
             self.cells() > 0
             and test_merge
@@ -2789,8 +2798,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         ):
             for kcell in self.kcells.values():
                 kcell.set_meta_data()
-            layout_b = kdb.Layout()
-            layout_b.read(str(filename), options)
             diff = MergeDiff(
                 layout_a=self.layout,
                 layout_b=layout_b,
@@ -2836,7 +2843,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     ", available strategies are 'overwrite', 'skip', or 'drop'"
                 )
         meta_format = settings.get("meta_format") or config.meta_format
-        load_cells = set(self.layout.cells("*"))
+        load_cells = set(layout_b.cells("*"))
         new_cells = load_cells - cells
 
         if register_cells:
@@ -5129,7 +5136,6 @@ def show(
                 from __main__ import __file__ as mf
             except ImportError:
                 mf = "shell"
-            _mf = "stdin" if mf == "<stdin>" else mf
             tf = Path(gettempdir()) / (name + ".oas")
             tf.parent.mkdir(parents=True, exist_ok=True)
             layout.write(tf, save_options)
@@ -5174,7 +5180,6 @@ def show(
                 from __main__ import __file__ as mf
             except ImportError:
                 mf = "shell"
-            _mf = "stdin" if mf == "<stdin>" else mf
             tf = Path(gettempdir()) / (name + ".gds")
             tf.parent.mkdir(parents=True, exist_ok=True)
             layout.write(tf, save_options)
