@@ -1,61 +1,96 @@
-# Changelog
+<a name="v0.11.2"></a>
+# [v0.11.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.2) - 08 Feb 2024
 
-All notable changes to this project will be documented in this file.
+# What's Changed
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+* No changes
 
-This project uses [*towncrier*](https://towncrier.readthedocs.io/) and the changes for the upcoming release can be found in <https://github.com/gdsfactory/kfactory/tree/main/changelog.d/>.
-
-<!-- towncrier release notes start -->
-
-## [0.11.0](https://github.com/gdsfactory/kfactory/releases/v0.11.0) - 2024-02-02
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.11.1...v0.11.2
 
 
-### Added
-
-- Added info and settings to KCLayout. Settings contain version numbers and meta_format of kfactory and KLayout [#242](https://github.com/gdsfactory/kfactory/issues/242)
+[Changes][v0.11.2]
 
 
-### Changed
+<a name="v0.11.1"></a>
+# [v0.11.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.1) - 08 Feb 2024
 
-- Changed `KCLayout.read` to make a merge check before reading other KCLayouts [#241](https://github.com/gdsfactory/kfactory/issues/241)
+# What's Changed
 
+## Bug Fixes
 
-### Fixed
+- Fix Layout read trying to update ports on locked cells [#244](https://github.com/gdsfactory/kfactory/pull/244)
 
-- Fixed BendEuler not using `self.kcl` for creating the kcell [#241](https://github.com/gdsfactory/kfactory/issues/241)
+## Dependency Updates
 
-## [0.10.3](https://github.com/gdsfactory/kfactory/releases/v0.10.3) - 2024-01-12
+- Update ruff and lsp configs [#243](https://github.com/gdsfactory/kfactory/pull/243)
 
-
-### Added
-
-- Added x, y, and center properties to `KCell` and `UMKCell` [#237](https://github.com/gdsfactory/kfactory/issues/237)
-- Added `KCLayout.clear`, `KCLayout.delete_cell` and other `delete_cell` functions. [#239](https://github.com/gdsfactory/kfactory/issues/239)
-- Added get to meta data for KCells (info/settings) [#PR](https://github.com/gdsfactory/kfactory/pull/231) 
-- Allow `Sequence` (list/tuple) types in KCell metadata (info/settings) [#PR](https://github.com/gdsfactory/kfactory/pull/231) 
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.11.0...v0.11.1
 
 
-### Changed
+[Changes][v0.11.1]
 
-- @kf.cell can handle rebuilding deleted KCells [#239](https://github.com/gdsfactory/kfactory/issues/239)
 
-## [0.10.2](https://github.com/gdsfactory/kfactory/releases/v0.10.2) - 2023-12-08
+<a name="v0.11.0"></a>
+# [v0.11.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.0) - 02 Feb 2024
 
+# What's Changed
+
+## New
+
+- Multi PDK [#241](https://github.com/gdsfactory/kfactory/pull/241)
+
+## Other changes
+
+- Version numbers [#242](https://github.com/gdsfactory/kfactory/pull/242)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.10.3...v0.11.0
+
+
+[Changes][v0.11.0]
+
+
+<a name="v0.10.3"></a>
+# [v0.10.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.10.3) - 12 Jan 2024
+
+# What's Changed
+
+## New
+
+- add x,y center for Cell and UMKCell [#237](https://github.com/gdsfactory/kfactory/pull/237)
+- allow tuples in info and settings [#231](https://github.com/gdsfactory/kfactory/pull/231)
+
+## Other changes
+
+- Implement clean [#240](https://github.com/gdsfactory/kfactory/pull/240)
+- Layerstack [#177](https://github.com/gdsfactory/kfactory/pull/177)
+- some adjustments for layerstack [#238](https://github.com/gdsfactory/kfactory/pull/238)
+
+## Dependency Updates
+
+- Bump actions/setup-python from 4 to 5 [#235](https://github.com/gdsfactory/kfactory/pull/235)
+- Bump actions/upload-pages-artifact from 2 to 3 [#234](https://github.com/gdsfactory/kfactory/pull/234)
+- Bump actions/deploy-pages from 2 to 4 [#233](https://github.com/gdsfactory/kfactory/pull/233)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.10.2...v0.10.3
+
+
+[Changes][v0.10.3]
+
+
+<a name="v0.10.2"></a>
+# [0.10.2 - 2023-12-08 (v0.10.2)](https://github.com/gdsfactory/kfactory/releases/tag/v0.10.2) - 08 Dec 2023
 
 ### Fixed
 
 - Fix no_warn being ignored in transform 
 
-## [0.10.1](https://github.com/gdsfactory/kfactory/releases/v0.10.1) - 2023-12-05
-
-No significant changes.
+[Changes][v0.10.2]
 
 
-## [0.10.0](https://github.com/gdsfactory/kfactory/releases/v0.10.0) - 2023-12-05
+<a name="v0.10.1"></a>
+# [0.10.1 - 2023-12-05 (v0.10.1)](https://github.com/gdsfactory/kfactory/releases/tag/v0.10.1) - 05 Dec 2023
 
-
-### Added
+# Added
 
 - Added `center` to `rotate` to allow rotating around a center point 
 - Added `rec_dict` to `@cell` decorator to allow for recursive dictionaries 
@@ -64,7 +99,7 @@ No significant changes.
 - add Instance.mirror Instance.center 
 
 
-### Changed
+# Changed
 
 - Renamed  ->  and allow passing kwargs to set attributes of the  object 
 - Renamed `function_cache` -> `cache` 
@@ -72,34 +107,17 @@ No significant changes.
 - rename port position to center 
 
 
-### Fixed
+# Fixed
 
 - add Instance setter and getter for center [#190](https://github.com/gdsfactory/kfactory/issues/190)
 - Fixed typo `enclosure_mape` -> `enclosure_map` [#211](https://github.com/gdsfactory/kfactory/issues/211)
 
-## [0.9.3](https://github.com/gdsfactory/kfactory/releases/v0.9.3) - 2023-10-06
+
+[Changes][v0.10.1]
 
 
-### Fixed
-
-- Fixed layer enclosure errors in extrude_path
-
-
-## [0.9.2](https://github.com/gdsfactory/kfactory/releases/v0.9.2) - 2023-10-06
-
-No significant changes.
-
-
-## [0.9.1](https://github.com/gdsfactory/kfactory/releases/v0.9.1) - 2023-10-04
-
-
-### Added
-
-- Added back kf.kcell.get_cells in order to automatically scrape a module for KCell factories [PR](https://github.com/gdsfactory/kfactory/pull/187)
-
-
-## [0.9.0](https://github.com/gdsfactory/kfactory/releases/v0.9.0) - 2023-09-25
-
+<a name="v0.9.0"></a>
+# [v0.9.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.9.0) - 25 Sep 2023
 
 ### Added
 
@@ -115,38 +133,13 @@ No significant changes.
 - Fixed throw a critical log message on negative width and angles and convert them to positive ones [#183](https://github.com/gdsfactory/kfactory/issues/183)
 
 
-## [0.8.4](https://github.com/gdsfactory/kfactory/releases/v0.8.4) - 2023-06-28
+[Changes][v0.9.0]
 
 
-### Fixed
+<a name="v0.8.0"></a>
+# [v0.8.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.8.0) - 14 Jun 2023
 
-- Fixed name collisions for floats with long precision [#165](https://github.com/gdsfactory/kfactory/issues/165)
-- Fixed port renaming by direction [#167](https://github.com/gdsfactory/kfactory/issues/167)
-
-
-## [0.8.3](https://github.com/gdsfactory/kfactory/releases/v0.8.3) - 2023-06-28
-
-No significant changes.
-
-
-## [0.8.2](https://github.com/gdsfactory/kfactory/releases/v0.8.2) - 2023-06-16
-
-
-### Fixed
-
-- fix info settings
-
-
-## [0.8.1](https://github.com/gdsfactory/kfactory/releases/v0.8.1) - 2023-06-16
-
-
-### Fixed
-
-- Make settings/infos in cells pydantic models and restrict types [#163](https://github.com/gdsfactory/kfactory/issues/163)
-- adjust minimum version of klayout to 0.28.post2
-
-
-## [0.8.0](https://github.com/gdsfactory/kfactory/releases/v0.8.0) - 2023-06-14
+## [v0.8.0](https://github.com/gdsfactory/kfactory/tree/0.8.0) - 2023-06-14
 
 
 ### Added
@@ -173,32 +166,100 @@ No significant changes.
 - Fixed (ix)90° bends second port off-grid [#153](https://github.com/gdsfactory/kfactory/issues/153)
 - Fixed circular and euler bends having complex ports in the x*90° cases [#159](https://github.com/gdsfactory/kfactory/issues/159)
 
+[Changes][v0.8.0]
 
-## [0.7.5](https://github.com/gdsfactory/kfactory/releases/v0.7.5) - 2023-06-01
+
+<a name="v0.7.5"></a>
+# [v0.7.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.7.5) - 01 Jun 2023
+
+# [v0.7.5](https://github.com/gdsfactory/kfactory/tree/v0.7.5) - 2023-06-01
 
 
-### Added
+## Added
 
 - Added `mirror_x/mirror_y` to Instance, `xmin/xmax/ymin/ymax` getter & setter to Instance, `xmin/xmax/ymin/ymax` getter to KCell, `polygon_from_array`, `dpolygon_from_arry` [#92](https://github.com/gdsfactory/kfactory/issues/92)
 - Document settings/config better [#138](https://github.com/gdsfactory/kfactory/issues/138)
 - Added docs for people familiar with gdsfactory [#140](https://github.com/gdsfactory/kfactory/issues/140)
 
 
-### Fixed
+## Fixed
 
 - Fixed missing changelog in docs [#136](https://github.com/gdsfactory/kfactory/issues/136)
 - Fixed add_port ignore keep_mirror flag [#143](https://github.com/gdsfactory/kfactory/issues/143)
 - Fixed changelog and changelog.d links
 
+[Changes][v0.7.5]
 
-## [0.7.4](https://github.com/gdsfactory/kfactory/releases/v0.7.4) - 2023-05-29
+
+<a name="v0.7.4"></a>
+# [v0.7.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.7.4) - 29 May 2023
+
+## [0.7.4](https://github.com/gdsfactory/klive/tree/0.7.4) - 2023-05-29
 
 
 ### Added
 
-- add tbump and towncrier for changelog and bumping [#129](https://github.com/gdsfactory/kfactory/issues/129)
+- add tbump and towncrier for changelog and bumping [#129](https://github.com/gdsfactory/klive/issues/129)
 
 
 ### Fixed
 
-- enable non manhattan bend ports, and document how to get rid of gaps [#131](https://github.com/gdsfactory/kfactory/issues/131)
+- enable non manhattan bend ports, and document how to get rid of gaps [#131](https://github.com/gdsfactory/klive/issues/131)
+
+
+[Changes][v0.7.4]
+
+
+<a name="v0.6.0"></a>
+# [0.6.0 (v0.6.0)](https://github.com/gdsfactory/kfactory/releases/tag/v0.6.0) - 18 Apr 2023
+
+# kcell.py
+* KCell and Instance don´t  inherit from `kdb.Cell` / `kdb.Instance` anymore. They should still transparently proxy to them
+* Ports automatically convert um <-> dbu
+  * no more DPort/DCplxPort/ICplxPort
+
+[Changes][v0.6.0]
+
+
+<a name="v0.4.1"></a>
+# [Fix (Cplx)KCell.dup (v0.4.1)](https://github.com/gdsfactory/kfactory/releases/tag/v0.4.1) - 24 Feb 2023
+
+* `KCell` and `CplxKCell` are now properly copying their instances when copied using `dup` https://github.com/KLayout/klayout/issues/1300
+
+[Changes][v0.4.1]
+
+
+<a name="v0.4.0"></a>
+# [Complex Cells (v0.4.0)](https://github.com/gdsfactory/kfactory/releases/tag/v0.4.0) - 21 Feb 2023
+
+* `CplxKCell`:
+    * Use `DCplxPort` by default. These ports can have arbitrary angle and are micrometer based
+      Any other port will be silently converted to `DCplxPort`
+* `library` -> `klib`:
+    Rename `kf.library` -> `kf.klib`, `kf.KCell.library` -> `kf.KCell.klib`, `kf.kcell.library` -> `kf.KCell.klib` in order to not confuse with the
+    KLayout library and shadow it.
+    
+    Put deprecation warning and remove in 0.5.0
+* `autocell`
+    * move cache from `cachetools.Cache[int,Any]` to a dictionary `{}`
+    * deprecate cache `maxsize` for 0.5.0: this is not necessary as a dictionary has infinite size and cache eviction is unwanted
+    
+
+[Changes][v0.4.0]
+
+
+[v0.11.2]: https://github.com/gdsfactory/kfactory/compare/v0.11.1...v0.11.2
+[v0.11.1]: https://github.com/gdsfactory/kfactory/compare/v0.11.0...v0.11.1
+[v0.11.0]: https://github.com/gdsfactory/kfactory/compare/v0.10.3...v0.11.0
+[v0.10.3]: https://github.com/gdsfactory/kfactory/compare/v0.10.2...v0.10.3
+[v0.10.2]: https://github.com/gdsfactory/kfactory/compare/v0.10.1...v0.10.2
+[v0.10.1]: https://github.com/gdsfactory/kfactory/compare/v0.9.0...v0.10.1
+[v0.9.0]: https://github.com/gdsfactory/kfactory/compare/v0.8.0...v0.9.0
+[v0.8.0]: https://github.com/gdsfactory/kfactory/compare/v0.7.5...v0.8.0
+[v0.7.5]: https://github.com/gdsfactory/kfactory/compare/v0.7.4...v0.7.5
+[v0.7.4]: https://github.com/gdsfactory/kfactory/compare/v0.6.0...v0.7.4
+[v0.6.0]: https://github.com/gdsfactory/kfactory/compare/v0.4.1...v0.6.0
+[v0.4.1]: https://github.com/gdsfactory/kfactory/compare/v0.4.0...v0.4.1
+[v0.4.0]: https://github.com/gdsfactory/kfactory/tree/v0.4.0
+
+<!-- Generated by https://github.com/rhysd/changelog-from-release v3.7.2 -->
