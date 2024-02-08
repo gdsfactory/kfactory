@@ -42,7 +42,7 @@ version-resolver:
   default: patch
 
 exclude-labels:
-  - 'skip-changelog'
+  - 'github_actions'
 
 autolabeler:
   - label: 'documentation'
