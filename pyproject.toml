@@ -49,6 +49,7 @@ dev = [
   "types-setuptools",
   "types-docutils",
   "types-Pygments",
+  "tbump",
 ]
 docs = [
   "kfactory[ipy]",
