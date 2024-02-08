@@ -2,7 +2,7 @@ name: Update Changelog
 
 on:
   pull_request:
-    types: [ opened, synchronize, closed ]
+    types: [ closed ]
 
 jobs:
   changelog:
