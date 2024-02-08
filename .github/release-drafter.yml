@@ -1,6 +1,6 @@
 name-template: 'v$RESOLVED_VERSION'
 tag-template: 'v$RESOLVED_VERSION'
-change-template: '- $TITLE [#$NUMBER](https://github.com/doplaydo/dodata/pull/$NUMBER)'
+change-template: '- $TITLE [#$NUMBER](https://github.com/gdsfactory/kfactory/pull/$NUMBER)'
 template: |
   # What's Changed
 
@@ -28,8 +28,6 @@ categories:
 
 # Change major/breaking to major and enhancement/minor to minor after v1.0
 version-resolver:
-  major:
-    labels:
   minor:
     labels:
       - 'breaking'
