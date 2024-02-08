@@ -36,7 +36,6 @@ git = [
   "gitpython",
 ]
 dev = [
-  "black>=23",
   "mypy",
   "pre-commit",
   "gitpython",
@@ -46,8 +45,6 @@ dev = [
   "types-cachetools",
   "pytest",
   "kfactory[git]",
-  "towncrier",
-  "tbump",
   "types-requests",
   "types-setuptools",
   "types-docutils",
@@ -66,11 +63,8 @@ docs = [
   "pymdown-extensions",
 ]
 ci = [
-  "flake8",
-  "flake8-pyproject",
   "pytest",
   "pytest_regressions",
-  "mypy",
   "types-cachetools",
   "types-requests",
   "kfactory[git]",
