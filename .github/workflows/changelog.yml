@@ -1,8 +1,8 @@
-name: release
+name: Update Changelog
 
 on:
-  push:
-    branch: main
+  pull_request:
+    types: [ closed ]
 
 jobs:
   changelog:
@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: rhysd/changelog-from-release/action@v3
         with:
           file: CHANGELOG.md
