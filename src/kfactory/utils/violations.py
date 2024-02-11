@@ -249,7 +249,7 @@ def fix_spacing_minkowski_tiled(
         queue_str = (
             f"var tile_reg = (_tile & _frame).size({min_space});"
             f"var shape = Box.new({min_space},{min_space});"
-            "var reg = main_layer.minkowski_sum(shape).merge();"
+            "var reg = main_layer.minkowski_sum(shape); reg.merge();"
             "reg = tile_reg - (tile_reg - reg).minkowski_sum(shape);"
             "_output(target, reg & _tile, true);"
         )
@@ -257,7 +257,7 @@ def fix_spacing_minkowski_tiled(
         queue_str = (
             f"var tile_reg = (_tile & _frame).size({min_space});"
             f"var shape = Box.new({min_space},{min_space});"
-            "var reg = main_layer.minkowski_sum(shape).merge();"
+            "var reg = main_layer.minkowski_sum(shape); reg.merge();"
             "reg = tile_reg - (tile_reg - reg).minkowski_sum(shape);"
             f"reg.smooth({smooth});"
             "_output(target, reg & _tile, true);"
@@ -324,7 +324,7 @@ def fix_width_minkowski_tiled(
             f"var tile_reg = (_tile & _frame).size({min_width});"
             f"var shape = Box.new({min_width},{min_width});"
             "var reg = tile_reg - (tile_reg - main_layer).minkowski_sum(shape);"
-            "reg = reg.minkowski_sum(shape).merge();"
+            "reg = reg.minkowski_sum(shape); reg.merge();"
             "_output(target, reg & _tile, true);"
         )
     else:
@@ -332,7 +332,7 @@ def fix_width_minkowski_tiled(
             f"var tile_reg = (_tile & _frame).size({min_width});"
             f"var shape = Box.new({min_width},{min_width});"
             "var reg = tile_reg - (tile_reg - main_layer).minkowski_sum(shape);"
-            "reg = reg.minkowski_sum(shape).merge();"
+            "reg = reg.minkowski_sum(shape); reg.merge();"
             f"reg.smooth({smooth});"
             "_output(target, reg & _tile, true);"
         )
@@ -406,7 +406,7 @@ def fix_width_and_spacing_minkowski_tiled(
             f"var space_shape = Box.new({min_space},{min_space});"
             f"var shrink_shape = Box.new({shrink},{shrink});"
             f"var width_shape = Box.new({min_width},{min_width});"
-            "var reg = main_layer.minkowski_sum(space_shape).merge();"
+            "var reg = main_layer.minkowski_sum(space_shape); reg.merge();"
             "reg = tile_reg - (tile_reg - reg).minkowski_sum(shrink_shape);"
             "reg = reg.minkowski_sum(width_shape);"
             "_output(target, reg & _tile, true);"
@@ -417,7 +417,7 @@ def fix_width_and_spacing_minkowski_tiled(
             f"var space_shape = Box.new({min_space},{min_space});"
             f"var shrink_shape = Box.new({shrink},{shrink});"
             f"var width_shape = Box.new({min_width},{min_width});"
-            "var reg = main_layer.minkowski_sum(space_shape).merge();"
+            "var reg = main_layer.minkowski_sum(space_shape); reg.merge();"
             "reg = tile_reg - (tile_reg - reg).minkowski_sum(shrink_shape);"
             "reg = reg.minkowski_sum(width_shape);"
             f"reg.smooth({smooth});"
