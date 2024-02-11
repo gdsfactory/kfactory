@@ -4,11 +4,10 @@
 minimum space violations and then applies a fix.
 """
 
-import os
 from typing import overload
 
 from .. import KCell, LayerEnum, kdb
-from ..conf import logger
+from ..conf import config, logger
 
 __all__ = [
     "fix_spacing_tiled",
@@ -102,7 +101,7 @@ def fix_spacing_tiled(
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
     tp.input("reg", c.kcl.layout, c.cell_index(), layer)
-    tp.threads = n_threads or len(os.sched_getaffinity(0))
+    tp.threads = n_threads or config.n_threads
 
     fix_reg = RegionOperator()
     tp.output("fix_reg", fix_reg)
@@ -179,7 +178,7 @@ def fix_spacing_sizing_tiled(
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
     tp.input("reg", c.kcl.layout, c.cell_index(), layer)
-    tp.threads = n_threads or len(os.sched_getaffinity(0))
+    tp.threads = n_threads or config.n_threads
 
     fix_reg = kdb.Region()
 
@@ -228,7 +227,7 @@ def fix_spacing_minkowski_tiled(
     tp = kdb.TilingProcessor()
     tp.frame = c.dbbox()  # type: ignore[misc]
     tp.dbu = c.kcl.dbu
-    tp.threads = n_threads or len(os.sched_getaffinity(0))
+    tp.threads = n_threads or config.n_threads
 
     min_tile_size_rec = 10 * min_space * tp.dbu
 
@@ -302,7 +301,7 @@ def fix_width_minkowski_tiled(
     tp = kdb.TilingProcessor()
     tp.frame = c.dbbox()  # type: ignore[misc]
     tp.dbu = c.kcl.dbu
-    tp.threads = n_threads or len(os.sched_getaffinity(0))
+    tp.threads = n_threads or config.n_threads
 
     min_tile_size_rec = 10 * min_width * tp.dbu
 
@@ -381,7 +380,7 @@ def fix_width_and_spacing_minkowski_tiled(
     tp = kdb.TilingProcessor()
     tp.frame = c.dbbox()  # type: ignore[misc]
     tp.dbu = c.kcl.dbu
-    tp.threads = n_threads or len(os.sched_getaffinity(0))
+    tp.threads = n_threads or config.n_threads
 
     min_tile_size_rec = 10 * min_space * tp.dbu
 
