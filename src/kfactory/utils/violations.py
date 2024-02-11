@@ -187,7 +187,7 @@ def fix_spacing_sizing_tiled(
 
     queue_str = (
         "var tile_reg= reg & (_tile & _frame);"
-        + f"reg = tile_reg.sized({min_space}).sized({-min_space});"
+        + f"reg = tile_reg.size({min_space}).size({-min_space});"
         + "_output(fix_reg, reg)"
     )
 
@@ -246,10 +246,148 @@ def fix_spacing_minkowski_tiled(
     operator = RegionOperator()
     tp.output("target", operator)
     queue_str = (
-        f"var tile_reg = (_tile & _frame).sized({min_space});"
-        f"var shape = Box.new({2*min_space},{2*min_space});"
-        "var reg = main_layer.minkowski_sum(shape).merged();"
+        f"var tile_reg = (_tile & _frame).size({min_space});"
+        f"var shape = Box.new({min_space},{min_space});"
+        "var reg = main_layer.minkowski_sum(shape).merge();"
         "reg = tile_reg - (tile_reg - reg).minkowski_sum(shape);"
+        "_output(target, reg & _tile, true);"
+    )
+
+    tp.queue(queue_str)
+    logger.debug("String queued for {}:  {}", c.name, queue_str)
+
+    c.kcl.start_changes()
+    logger.info("Starting minkowski on {}", c.name)
+    tp.execute(f"Minkowski {c.name}")
+    c.kcl.end_changes()
+
+    return operator.region
+
+
+def fix_width_minkowski_tiled(
+    c: KCell,
+    min_width: int,
+    ref: LayerEnum | kdb.Region,
+    n_threads: int | None = None,
+    tile_size: tuple[float, float] | None = None,
+    overlap: int = 2,
+    smooth: int | None = None,
+) -> kdb.Region:
+    """Fix min space issues by using a dilation & erosion with a box.
+
+    Args:
+        c: Input cell
+        min_width: Minimum width rule [dbu]
+        ref: Input layer index or region
+        n_threads: on how many threads to run the check simultaneously
+        tile_size: tuple determining the size of each sub tile (in um), should be big
+            compared to the violation size
+        overlap: how many times bigger to make the tile border in relation to the
+            violation size. Smaller than 1 can lead to errors
+        smooth: Apply smoothening (simplifying) at the end if > 0
+
+    Returns:
+        kdb.Region: Region containing the fixes for the violations
+    """
+    tp = kdb.TilingProcessor()
+    tp.frame = c.dbbox()  # type: ignore[misc]
+    tp.dbu = c.kcl.dbu
+    tp.threads = n_threads or len(os.sched_getaffinity(0))
+
+    min_tile_size_rec = 10 * min_width * tp.dbu
+
+    if tile_size is None:
+        tile_size = (min_tile_size_rec * 2, min_tile_size_rec * 2)
+
+    tp.tile_border(min_width * tp.dbu, min_width * tp.dbu)
+
+    tp.tile_size(*tile_size)
+    if isinstance(ref, int):
+        tp.input("main_layer", c.kcl.layout, c.cell_index(), ref)
+    else:
+        tp.input("main_layer", ref)
+
+    operator = RegionOperator()
+    tp.output("target", operator)
+    queue_str = (
+        f"var tile_reg = (_tile & _frame).size({min_width});"
+        f"var shape = Box.new({min_width},{min_width});"
+        "var reg = tile_reg - (tile_reg - main_layer).minkowski_sum(shape);"
+        "reg = reg.minkowski_sum(shape).merge();"
+        "_output(target, reg & _tile, true);"
+    )
+
+    tp.queue(queue_str)
+    logger.debug("String queued for {}:  {}", c.name, queue_str)
+
+    c.kcl.start_changes()
+    logger.info("Starting minkowski on {}", c.name)
+    tp.execute(f"Minkowski {c.name}")
+    c.kcl.end_changes()
+
+    return operator.region
+
+
+def fix_width_and_spacing_minkowski_tiled(
+    c: KCell,
+    min_space: int,
+    min_width: int,
+    ref: LayerEnum | kdb.Region,
+    n_threads: int | None = None,
+    tile_size: tuple[float, float] | None = None,
+    overlap: int = 2,
+    smooth: int | None = None,
+) -> kdb.Region:
+    """Fix min space and width issues by using a dilation & erosion with a box.
+
+    The algorithm will dilate by min_space, erode by min_width + min_space, and
+    finally dilate by min_width
+
+    Args:
+        c: Input cell
+        min_space: Minimum space rule [dbu]
+        min_width: Minimum width rule [dbu]
+        ref: Input layer index or region
+        n_threads: on how many threads to run the check simultaneously
+        tile_size: tuple determining the size of each sub tile (in um), should be big
+            compared to the violation size
+        overlap: how many times bigger to make the tile border in relation to the
+            violation size. Smaller than 1 can lead to errors
+        smooth: Apply smoothening (simplifying) at the end if > 0
+
+    Returns:
+        kdb.Region: Region containing the fixes for the violations
+    """
+    tp = kdb.TilingProcessor()
+    tp.frame = c.dbbox()  # type: ignore[misc]
+    tp.dbu = c.kcl.dbu
+    tp.threads = n_threads or len(os.sched_getaffinity(0))
+
+    min_tile_size_rec = 10 * min_space * tp.dbu
+
+    if tile_size is None:
+        tile_size = (min_tile_size_rec * 2, min_tile_size_rec * 2)
+
+    tp.tile_border(min_space * tp.dbu, min_space * tp.dbu)
+
+    tp.tile_size(*tile_size)
+    if isinstance(ref, int):
+        tp.input("main_layer", c.kcl.layout, c.cell_index(), ref)
+    else:
+        tp.input("main_layer", ref)
+
+    shrink = min_space + min_width
+
+    operator = RegionOperator()
+    tp.output("target", operator)
+    queue_str = (
+        f"var tile_reg = (_tile & _frame).size({min_space});"
+        f"var space_shape = Box.new({min_space},{min_space});"
+        f"var shrink_shape = Box.new({shrink},{shrink});"
+        f"var width_shape = Box.new({min_width},{min_width});"
+        "var reg = main_layer.minkowski_sum(space_shape).merge();"
+        "reg = tile_reg - (tile_reg - reg).minkowski_sum(shrink_shape);"
+        "reg = reg.minkowski_sum(width_shape);"
         "_output(target, reg & _tile, true);"
     )
 
