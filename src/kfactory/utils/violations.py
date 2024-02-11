@@ -206,7 +206,7 @@ def fix_spacing_minkowski_tiled(
     ref: LayerEnum | kdb.Region,
     n_threads: int | None = None,
     tile_size: tuple[float, float] | None = None,
-    overlap: int = 2,
+    overlap: int = 1,
     smooth: int | None = None,
 ) -> kdb.Region:
     """Fix min space issues by using a dilation & erosion with a box.
@@ -235,7 +235,7 @@ def fix_spacing_minkowski_tiled(
     if tile_size is None:
         tile_size = (min_tile_size_rec * 2, min_tile_size_rec * 2)
 
-    tp.tile_border(min_space * tp.dbu, min_space * tp.dbu)
+    tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
 
     tp.tile_size(*tile_size)
     if isinstance(ref, int):
@@ -245,13 +245,23 @@ def fix_spacing_minkowski_tiled(
 
     operator = RegionOperator()
     tp.output("target", operator)
-    queue_str = (
-        f"var tile_reg = (_tile & _frame).size({min_space});"
-        f"var shape = Box.new({min_space},{min_space});"
-        "var reg = main_layer.minkowski_sum(shape).merge();"
-        "reg = tile_reg - (tile_reg - reg).minkowski_sum(shape);"
-        "_output(target, reg & _tile, true);"
-    )
+    if smooth is None:
+        queue_str = (
+            f"var tile_reg = (_tile & _frame).size({min_space});"
+            f"var shape = Box.new({min_space},{min_space});"
+            "var reg = main_layer.minkowski_sum(shape).merge();"
+            "reg = tile_reg - (tile_reg - reg).minkowski_sum(shape);"
+            "_output(target, reg & _tile, true);"
+        )
+    else:
+        queue_str = (
+            f"var tile_reg = (_tile & _frame).size({min_space});"
+            f"var shape = Box.new({min_space},{min_space});"
+            "var reg = main_layer.minkowski_sum(shape).merge();"
+            "reg = tile_reg - (tile_reg - reg).minkowski_sum(shape);"
+            f"reg.smooth({smooth});"
+            "_output(target, reg & _tile, true);"
+        )
 
     tp.queue(queue_str)
     logger.debug("String queued for {}:  {}", c.name, queue_str)
@@ -270,7 +280,7 @@ def fix_width_minkowski_tiled(
     ref: LayerEnum | kdb.Region,
     n_threads: int | None = None,
     tile_size: tuple[float, float] | None = None,
-    overlap: int = 2,
+    overlap: int = 1,
     smooth: int | None = None,
 ) -> kdb.Region:
     """Fix min space issues by using a dilation & erosion with a box.
@@ -299,7 +309,7 @@ def fix_width_minkowski_tiled(
     if tile_size is None:
         tile_size = (min_tile_size_rec * 2, min_tile_size_rec * 2)
 
-    tp.tile_border(min_width * tp.dbu, min_width * tp.dbu)
+    tp.tile_border(min_width * overlap * tp.dbu, min_width * overlap * tp.dbu)
 
     tp.tile_size(*tile_size)
     if isinstance(ref, int):
@@ -309,13 +319,23 @@ def fix_width_minkowski_tiled(
 
     operator = RegionOperator()
     tp.output("target", operator)
-    queue_str = (
-        f"var tile_reg = (_tile & _frame).size({min_width});"
-        f"var shape = Box.new({min_width},{min_width});"
-        "var reg = tile_reg - (tile_reg - main_layer).minkowski_sum(shape);"
-        "reg = reg.minkowski_sum(shape).merge();"
-        "_output(target, reg & _tile, true);"
-    )
+    if smooth is None:
+        queue_str = (
+            f"var tile_reg = (_tile & _frame).size({min_width});"
+            f"var shape = Box.new({min_width},{min_width});"
+            "var reg = tile_reg - (tile_reg - main_layer).minkowski_sum(shape);"
+            "reg = reg.minkowski_sum(shape).merge();"
+            "_output(target, reg & _tile, true);"
+        )
+    else:
+        queue_str = (
+            f"var tile_reg = (_tile & _frame).size({min_width});"
+            f"var shape = Box.new({min_width},{min_width});"
+            "var reg = tile_reg - (tile_reg - main_layer).minkowski_sum(shape);"
+            "reg = reg.minkowski_sum(shape).merge();"
+            f"reg.smooth({smooth});"
+            "_output(target, reg & _tile, true);"
+        )
 
     tp.queue(queue_str)
     logger.debug("String queued for {}:  {}", c.name, queue_str)
@@ -335,7 +355,7 @@ def fix_width_and_spacing_minkowski_tiled(
     ref: LayerEnum | kdb.Region,
     n_threads: int | None = None,
     tile_size: tuple[float, float] | None = None,
-    overlap: int = 2,
+    overlap: int = 1,
     smooth: int | None = None,
 ) -> kdb.Region:
     """Fix min space and width issues by using a dilation & erosion with a box.
@@ -352,7 +372,7 @@ def fix_width_and_spacing_minkowski_tiled(
         tile_size: tuple determining the size of each sub tile (in um), should be big
             compared to the violation size
         overlap: how many times bigger to make the tile border in relation to the
-            violation size. Smaller than 1 can lead to errors
+            violation size. Smaller than 1 can lead to errors (overlap*min_space)
         smooth: Apply smoothening (simplifying) at the end if > 0
 
     Returns:
@@ -380,16 +400,29 @@ def fix_width_and_spacing_minkowski_tiled(
 
     operator = RegionOperator()
     tp.output("target", operator)
-    queue_str = (
-        f"var tile_reg = (_tile & _frame).size({min_space});"
-        f"var space_shape = Box.new({min_space},{min_space});"
-        f"var shrink_shape = Box.new({shrink},{shrink});"
-        f"var width_shape = Box.new({min_width},{min_width});"
-        "var reg = main_layer.minkowski_sum(space_shape).merge();"
-        "reg = tile_reg - (tile_reg - reg).minkowski_sum(shrink_shape);"
-        "reg = reg.minkowski_sum(width_shape);"
-        "_output(target, reg & _tile, true);"
-    )
+    if smooth is None:
+        queue_str = (
+            f"var tile_reg = (_tile & _frame).size({min_space});"
+            f"var space_shape = Box.new({min_space},{min_space});"
+            f"var shrink_shape = Box.new({shrink},{shrink});"
+            f"var width_shape = Box.new({min_width},{min_width});"
+            "var reg = main_layer.minkowski_sum(space_shape).merge();"
+            "reg = tile_reg - (tile_reg - reg).minkowski_sum(shrink_shape);"
+            "reg = reg.minkowski_sum(width_shape);"
+            "_output(target, reg & _tile, true);"
+        )
+    else:
+        queue_str = (
+            f"var tile_reg = (_tile & _frame).size({min_space});"
+            f"var space_shape = Box.new({min_space},{min_space});"
+            f"var shrink_shape = Box.new({shrink},{shrink});"
+            f"var width_shape = Box.new({min_width},{min_width});"
+            "var reg = main_layer.minkowski_sum(space_shape).merge();"
+            "reg = tile_reg - (tile_reg - reg).minkowski_sum(shrink_shape);"
+            "reg = reg.minkowski_sum(width_shape);"
+            f"reg.smooth({smooth});"
+            "_output(target, reg & _tile, true);"
+        )
 
     tp.queue(queue_str)
     logger.debug("String queued for {}:  {}", c.name, queue_str)
