@@ -186,8 +186,8 @@ def fix_spacing_sizing_tiled(
     tp.output("fix_reg", fix_reg)
 
     queue_str = (
-        "var tile_reg= reg & (_tile & _frame);"
-        + f"reg = tile_reg.sized({min_space}).size({-min_space});"
+        "var tile_reg=reg & (_tile & _frame);"
+        + f"reg = tile_reg.sized({min_space}).sized({-min_space});"
         + "_output(fix_reg, reg)"
     )
 
