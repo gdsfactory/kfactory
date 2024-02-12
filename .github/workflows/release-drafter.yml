@@ -1,11 +1,11 @@
-name: Release Drafter
+name: Release Drafter and Labels
 
 on:
   push:
     branches:
       - main
   pull_request:
-    types: [edited, opened, reopened, synchronize]
+    types: [edited, opened, reopened, synchronize, unlabeled, labeled]
 
 permissions:
   contents: read
@@ -21,3 +21,17 @@ jobs:
       - uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  require_label:
+    if: github.event.pull_request
+    needs: update_release_draft
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: mheap/github-action-required-labels@v5
+        with:
+          mode: minimum
+          count: 1
+          labels: "breaking, bug, github_actions, documentation, dependencies, enhancement, feature, maintenance, security"
+          add_comment: true
