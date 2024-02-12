@@ -1,3 +1,18 @@
+<a name="v0.11.2"></a>
+# [v0.11.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.2) - 12 Feb 2024
+
+# What's Changed
+
+## New
+
+- Improve minkowski algorithms for violation fixing [#248](https://github.com/gdsfactory/kfactory/pull/248)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.11.1...v0.11.2
+
+
+[Changes][v0.11.2]
+
+
 <a name="v0.11.1"></a>
 # [v0.11.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.1) - 08 Feb 2024
 
@@ -235,6 +250,7 @@
 [Changes][v0.4.0]
 
 
+[v0.11.2]: https://github.com/gdsfactory/kfactory/compare/v0.11.1...v0.11.2
 [v0.11.1]: https://github.com/gdsfactory/kfactory/compare/v0.11.0...v0.11.1
 [v0.11.0]: https://github.com/gdsfactory/kfactory/compare/v0.10.3...v0.11.0
 [v0.10.3]: https://github.com/gdsfactory/kfactory/compare/v0.10.2...v0.10.3
