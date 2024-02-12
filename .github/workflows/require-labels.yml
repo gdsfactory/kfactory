@@ -4,6 +4,7 @@ on:
     types: [opened, labeled, unlabeled, synchronize]
 jobs:
   label:
+    needs: update_release_draft
     runs-on: ubuntu-latest
     permissions:
       issues: write
