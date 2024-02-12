@@ -68,3 +68,6 @@ autolabeler:
   - label: 'cells'
     files:
       - 'src/kfactory/cells/**/*.py'
+  - label: 'github_actions'
+    files:
+      - '.github/**/*.yml'
