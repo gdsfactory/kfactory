@@ -74,6 +74,32 @@ class Straight:
             layer: Main layer of the waveguide.
             enclosure: Definition of slab/excludes. [dbu]
         """
+        return self._kcell(width=width, length=length, layer=layer, enclosure=enclosure)
+
+    def _kcell(
+        self,
+        width: int,
+        length: int,
+        layer: int | LayerEnum,
+        enclosure: LayerEnclosure | None = None,
+    ) -> KCell:
+        """Waveguide defined in dbu.
+
+            ┌──────────────────────────────┐
+            │         Slab/Exclude         │
+            ├──────────────────────────────┤
+            │                              │
+            │             Core             │
+            │                              │
+            ├──────────────────────────────┤
+            │         Slab/Exclude         │
+            └──────────────────────────────┘
+        Args:
+            width: Waveguide width. [dbu]
+            length: Waveguide length. [dbu]
+            layer: Main layer of the waveguide.
+            enclosure: Definition of slab/excludes. [dbu]
+        """
         c = self.kcl.kcell()
 
         if length < 0:

@@ -190,6 +190,34 @@ class BendEuler:
             angle: Angle of the bend.
             resolution: Angle resolution for the backbone.
         """
+        return self._kcell(
+            width=width,
+            radius=radius,
+            layer=layer,
+            enclosure=enclosure,
+            angle=angle,
+            resolution=resolution,
+        )
+
+    def _kcell(
+        self,
+        width: float,
+        radius: float,
+        layer: int | LayerEnum,
+        enclosure: LayerEnclosure | None = None,
+        angle: float = 90,
+        resolution: float = 150,
+    ) -> KCell:
+        """Create a euler bend.
+
+        Args:
+            width: Width of the core. [um]
+            radius: Radius off the backbone. [um]
+            layer: Layer index / LayerEnum of the core.
+            enclosure: Slab/exclude definition. [dbu]
+            angle: Angle of the bend.
+            resolution: Angle resolution for the backbone.
+        """
         c = self.kcl.kcell()
         if angle < 0:
             config.logger.critical(
@@ -253,6 +281,34 @@ class BendSEuler:
 
     @cell
     def __call__(
+        self,
+        offset: float,
+        width: float,
+        radius: float,
+        layer: LayerEnum | int,
+        enclosure: LayerEnclosure | None = None,
+        resolution: float = 150,
+    ) -> KCell:
+        """Create a euler s-bend.
+
+        Args:
+            offset: Offset between left/right. [um]
+            width: Width of the core. [um]
+            radius: Radius off the backbone. [um]
+            layer: Layer index / LayerEnum of the core.
+            enclosure: Slab/exclude definition. [dbu]
+            resolution: Angle resolution for the backbone.
+        """
+        return self._kcell(
+            offset=offset,
+            width=width,
+            radius=radius,
+            layer=layer,
+            enclosure=enclosure,
+            resolution=resolution,
+        )
+
+    def _kcell(
         self,
         offset: float,
         width: float,
