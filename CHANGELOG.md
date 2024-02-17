@@ -5,6 +5,7 @@
 
 ## New
 
+- Allow inheritance from standard cells [#249](https://github.com/gdsfactory/kfactory/pull/249)
 - Improve minkowski algorithms for violation fixing [#248](https://github.com/gdsfactory/kfactory/pull/248)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.11.1...v0.11.2
