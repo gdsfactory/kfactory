@@ -72,6 +72,40 @@ class BendS:
             t_stop: end
             enclosure: Slab/Exclude definition. [dbu]
         """
+        return self._kcell(
+            width=width,
+            height=height,
+            length=length,
+            layer=layer,
+            nb_points=nb_points,
+            t_start=t_start,
+            t_stop=t_stop,
+            enclosure=enclosure,
+        )
+
+    def _kcell(
+        self,
+        width: float,
+        height: float,
+        length: float,
+        layer: int | LayerEnum,
+        nb_points: int = 99,
+        t_start: float = 0,
+        t_stop: float = 1,
+        enclosure: LayerEnclosure | None = None,
+    ) -> KCell:
+        """Creat a bezier bend.
+
+        Args:
+            width: Width of the core. [um]
+            height: height difference of left/right. [um]
+            length: Length of the bend. [um]
+            layer: Layer index of the core.
+            nb_points: Number of points of the backbone.
+            t_start: start
+            t_stop: end
+            enclosure: Slab/Exclude definition. [dbu]
+        """
         c = self.kcl.kcell()
         _length, _height = length, height
         pts = bezier_curve(

@@ -1,8 +1,6 @@
-from inspect import signature
 import pathlib
 import pytest
 
-from kfactory import kdb
 import kfactory as kf
 
 from kfactory.conf import logger
@@ -14,7 +12,7 @@ class GeometryDifference(ValueError):
     pass
 
 
-class LAYER(kf.LayerEnum):
+class LAYER(kf.LayerEnum):  # type: ignore[unused-ignore, misc]
     kcl = kf.constant(kf.kcl)
     WG = (1, 0)
     WGCLAD = (111, 0)
@@ -100,8 +98,8 @@ def test_cells(cell_name: str) -> None:
 
     for layerinfo in kcl_ref.layer_infos():
         layer = kcl_ref.layer(layerinfo)
-        region_run = kdb.Region(run_cell.begin_shapes_rec(layer))
-        region_ref = kdb.Region(ref_cell.begin_shapes_rec(layer))
+        region_run = kf.kdb.Region(run_cell.begin_shapes_rec(layer))
+        region_ref = kf.kdb.Region(ref_cell.begin_shapes_rec(layer))
 
         region_diff = region_run - region_ref
 
@@ -131,3 +129,28 @@ def test_cells(cell_name: str) -> None:
             raise GeometryDifference(
                 f"Differences found in {cell!r} on layer {layer_tuple}"
             )
+
+
+def test_inheritance(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
+    class TestBendEuler(kf.cells.euler.BendEuler):  # type: ignore[unused-ignore, misc]
+        def __init__(self) -> None:
+            super().__init__(kf.kcl)
+
+        @kf.cell  # type: ignore[misc, unused-ignore]
+        def __call__(self, width: float) -> kf.KCell:  # type: ignore[override, unused-ignore]
+            c = self._kcell(
+                width=width,
+                radius=30,
+                layer=LAYER.WG,
+                enclosure=wg_enc,
+                angle=90,
+                resolution=150,
+            )
+            c.info.creation_time = "2023-02-12Z23:00:00"
+
+            return c
+
+    bend = TestBendEuler()(width=1)
+
+    assert bend._locked is True
+    assert bend.info.creation_time == "2023-02-12Z23:00:00"  # type: ignore[attr-defined, unused-ignore]

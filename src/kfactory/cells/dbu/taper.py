@@ -48,6 +48,44 @@ class Taper:
             layer: Main layer of the taper.
             enclosure: Definition of the slab/exclude.
         """
+        return self._kcell(
+            width1=width1,
+            width2=width2,
+            length=length,
+            layer=layer,
+            enclosure=enclosure,
+        )
+
+    def _kcell(
+        self,
+        width1: int,
+        width2: int,
+        length: int,
+        layer: int,
+        enclosure: LayerEnclosure | None = None,
+    ) -> KCell:
+        r"""Linear Taper [um].
+
+                   __
+                 _/  │ Slab/Exclude
+               _/  __│
+             _/  _/  │
+            │  _/    │
+            │_/      │
+            │_       │ Core
+            │ \_     │
+            │_  \_   │
+              \_  \__│
+                \_   │
+                  \__│ Slab/Exclude
+
+        Args:
+            width1: Width of the core on the left side. [dbu]
+            width2: Width of the core on the right side. [dbu]
+            length: Length of the taper. [dbu]
+            layer: Main layer of the taper.
+            enclosure: Definition of the slab/exclude.
+        """
         c = self.kcl.kcell()
         if length < 0:
             config.logger.critical(
