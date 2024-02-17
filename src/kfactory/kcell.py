@@ -2944,6 +2944,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
         return self.layout.write(str(filename), options)
 
+    def top_kcells(self) -> list[KCell]:
+        """Return the top KCells."""
+        return [self[tc.cell_index()] for tc in self.top_cells()]
+
+    def top_kcell(self) -> KCell:
+        """Return the top KCell if there is a single one."""
+        return self[self.top_cell().cell_index()]
+
 
 def layerenum_from_dict(
     layers: dict[str, tuple[int, int]], name: str = "LAYER", kcl: KCLayout | None = None
@@ -4654,7 +4662,6 @@ class InstancePorts:
             This provides a way to dynamically calculate the ports.
     """
 
-    cell_ports: Ports
     instance: Instance
 
     def __init__(self, instance: Instance) -> None:
@@ -4663,7 +4670,6 @@ class InstancePorts:
         Args:
             instance: The related instance
         """
-        self.cell_ports = instance.cell.ports
         self.instance = instance
 
     def __len__(self) -> int:
@@ -4677,6 +4683,10 @@ class InstancePorts:
             return p.copy(self.instance.dcplx_trans)
         else:
             return p.copy(self.instance.trans)
+
+    @property
+    def cell_ports(self) -> Ports:
+        return self.instance.cell.ports
 
     def __iter__(self) -> Iterator[Port]:
         """Create a copy of the ports to iterate through."""
