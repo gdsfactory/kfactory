@@ -5,6 +5,7 @@
 
 ## New
 
+- Add top_kcell(s) functions and fix Instance creation [#251](https://github.com/gdsfactory/kfactory/pull/251)
 - Allow inheritance from standard cells [#249](https://github.com/gdsfactory/kfactory/pull/249)
 - Improve minkowski algorithms for violation fixing [#248](https://github.com/gdsfactory/kfactory/pull/248)
 
