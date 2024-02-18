@@ -84,6 +84,8 @@ def test_array(straight: kf.KCell) -> None:
             wg_array["o1", a, b]
             wg_array["o1", a, b]
 
+    wg_array.ports[0].print()
+
 
 def test_array_indexerror(straight: kf.KCell) -> None:
     c = kf.KCell()

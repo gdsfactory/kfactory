@@ -27,6 +27,7 @@ from typing import Any, Literal, TypeAlias, TypeVar, cast, overload
 
 import cachetools.func
 import numpy as np
+import rich
 import ruamel.yaml
 from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
 from cachetools import Cache
@@ -3381,6 +3382,10 @@ class Port:
                 f"{ln}, port_type: {self.port_type})"
             )
 
+    def print(self) -> None:
+        """Print the port pretty."""
+        config.console.print(pprint_ports([self]))
+
 
 class UMPort:
     """Make the port able to dynamically give um based info."""
@@ -3464,6 +3469,15 @@ class UMPort:
             "When converting to dbu the width does not match the desired width"
             f"({self.width} / {value})!"
         )
+
+    @property
+    def mirror(self) -> bool:
+        """Mirror flag of the port."""
+        return self.parent.mirror
+
+    @mirror.setter
+    def mirror(self, value: bool) -> None:
+        self.parent.mirror = value
 
     def __repr__(self) -> str:
         """String representation of port."""
@@ -4650,6 +4664,10 @@ class Ports:
         """Representation of the Ports as strings."""
         return repr([repr(p) for p in self._ports])
 
+    def print(self) -> None:
+        """Pretty print ports."""
+        config.console.print(pprint_ports(self))
+
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
         """Convert the ports to a yaml representations."""
@@ -4690,7 +4708,10 @@ class InstancePorts:
 
     def __len__(self) -> int:
         """Return Port count."""
-        return len(self.cell_ports)
+        if not self.instance.is_regular_array():
+            return len(self.cell_ports)
+        else:
+            return len(self.cell_ports) * self.instance.na * self.instance.nb
 
     @config.logger.catch(reraise=True)
     def __getitem__(
@@ -4753,10 +4774,34 @@ class InstancePorts:
 
     def __iter__(self) -> Iterator[Port]:
         """Create a copy of the ports to iterate through."""
-        if not self.instance.is_complex():
-            yield from (p.copy(self.instance.trans) for p in self.cell_ports)
+        if not self.instance.is_regular_array():
+            if not self.instance.is_complex():
+                yield from (p.copy(self.instance.trans) for p in self.cell_ports)
+            else:
+                yield from (p.copy(self.instance.dcplx_trans) for p in self.cell_ports)
         else:
-            yield from (p.copy(self.instance.dcplx_trans) for p in self.cell_ports)
+            if not self.instance.is_complex():
+                yield from (
+                    p.copy(
+                        self.instance.trans
+                        * kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                    )
+                    for i_a in range(self.instance.na)
+                    for i_b in range(self.instance.nb)
+                    for p in self.cell_ports
+                )
+            else:
+                yield from (
+                    p.copy(
+                        self.instance.dcplx_trans
+                        * kdb.DCplxTrans(
+                            self.instance.da * i_a + self.instance.db * i_b
+                        )
+                    )
+                    for i_a in range(self.instance.na)
+                    for i_b in range(self.instance.nb)
+                    for p in self.cell_ports
+                )
 
     def __repr__(self) -> str:
         """String representation.
@@ -4766,20 +4811,54 @@ class InstancePorts:
         """
         return repr(self.copy())
 
+    def print(self) -> None:
+        config.console.print(pprint_ports(self.copy()))
+
     def copy(self) -> Ports:
         """Creates a copy in the form of [Ports][kfactory.kcell.Ports]."""
-        if not self.instance.is_complex():
-            return Ports(
-                kcl=self.instance.kcl,
-                ports=[p.copy(self.instance.trans) for p in self.cell_ports._ports],
-            )
+        if not self.instance.is_regular_array():
+            if not self.instance.is_complex():
+                return Ports(
+                    kcl=self.instance.kcl,
+                    ports=[p.copy(self.instance.trans) for p in self.cell_ports._ports],
+                )
+            else:
+                return Ports(
+                    kcl=self.instance.kcl,
+                    ports=[
+                        p.copy(self.instance.dcplx_trans)
+                        for p in self.cell_ports._ports
+                    ],
+                )
         else:
-            return Ports(
-                kcl=self.instance.kcl,
-                ports=[
-                    p.copy(self.instance.dcplx_trans) for p in self.cell_ports._ports
-                ],
-            )
+            if not self.instance.is_complex():
+                return Ports(
+                    kcl=self.instance.kcl,
+                    ports=[
+                        p.copy(
+                            self.instance.trans
+                            * kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                        )
+                        for i_a in range(self.instance.na)
+                        for i_b in range(self.instance.nb)
+                        for p in self.cell_ports._ports
+                    ],
+                )
+            else:
+                return Ports(
+                    kcl=self.instance.kcl,
+                    ports=[
+                        p.copy(
+                            self.instance.dcplx_trans
+                            * kdb.DCplxTrans(
+                                self.instance.db * i_a + self.instance.db * i_b
+                            )
+                        )
+                        for i_a in range(self.instance.na)
+                        for i_b in range(self.instance.nb)
+                        for p in self.cell_ports._ports
+                    ],
+                )
 
 
 @overload
@@ -5137,6 +5216,47 @@ def update_default_trans(
 ) -> None:
     """Allows to change the default transformation for reading a yaml file."""
     DEFAULT_TRANS.update(new_trans)
+
+
+def pprint_ports(
+    ports: Iterable[Port], type: Literal["dbu", "um", None] = None
+) -> rich.table.Table:
+    """Print ports as a table."""
+    table = rich.table.Table()
+
+    table.add_column("Name")
+    table.add_column("Width")
+    table.add_column("Layer")
+    table.add_column("X")
+    table.add_column("Y")
+    table.add_column("Angle")
+    table.add_column("Mirror")
+
+    match type:
+        case None:
+            for port in ports:
+                if port._trans is not None:
+                    table.add_row(
+                        str(port.name) + " [dbu]",
+                        str(port.width),
+                        port.kcl.get_info(port.layer).to_s(),
+                        str(port.x),
+                        str(port.y),
+                        str(port.angle),
+                        str(port.mirror),
+                    )
+                else:
+                    table.add_row(
+                        str(port.name) + " [um]",
+                        str(port.d.width),
+                        port.kcl.get_info(port.layer).to_s(),
+                        str(port.d.x),
+                        str(port.d.y),
+                        str(port.d.angle),
+                        str(port.d.mirror),
+                    )
+
+    return table
 
 
 def show(

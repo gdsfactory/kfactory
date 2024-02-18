@@ -11,6 +11,7 @@ from itertools import takewhile
 from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import loguru
+import rich.console
 from loguru import logger as logger
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -133,6 +134,7 @@ class Settings(
     logfilter: LogFilter = Field(default_factory=LogFilter)
     display_type: Literal["widget", "image", "docs"] = "image"
     meta_format: Literal["v2", "v1"] = "v2"
+    console: rich.console.Console = Field(default_factory=rich.console.Console)
     """The format of the saving of metadata.
 
     v1: Transformations and other KLayout objects are stored as a string. In
