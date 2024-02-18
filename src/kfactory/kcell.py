@@ -3632,7 +3632,20 @@ class Instance:
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]
     ) -> Port:
-        """Returns port from instance."""
+        """Returns port from instance.
+
+        The key can either be an integer, in which case the nth port is
+        returned, or a string in which case the first port with a matching
+        name is returned.
+
+        If the instance is an array, the key can also be a tuple in the
+        form of `c.ports[key_name, i_a, i_b]`, where `i_a` is the index in
+        the `instance.a` direction and `i_b` the `instance.b` direction.
+
+        E.g. `c.ports["a", 3, 5]`, accesses the ports of the instance which is
+        3 times in `a` direction (4th index in the array), and 5 times in `b` direction
+        (5th index in the array).
+        """
         return self.ports[key]
 
     def __getattr__(self, name):  # type: ignore[no-untyped-def]
@@ -4683,7 +4696,20 @@ class InstancePorts:
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]
     ) -> Port:
-        """Get a port by name."""
+        """Returns port from instance.
+
+        The key can either be an integer, in which case the nth port is
+        returned, or a string in which case the first port with a matching
+        name is returned.
+
+        If the instance is an array, the key can also be a tuple in the
+        form of `c.ports[key_name, i_a, i_b]`, where `i_a` is the index in
+        the `instance.a` direction and `i_b` the `instance.b` direction.
+
+        E.g. `c.ports["a", 3, 5]`, accesses the ports of the instance which is
+        3 times in `a` direction (4th index in the array), and 5 times in `b` direction
+        (5th index in the array).
+        """
         if not self.instance.is_regular_array():
             try:
                 p = self.cell_ports[cast(int | str | None, key)]
