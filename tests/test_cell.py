@@ -1,5 +1,9 @@
+import pytest
 import kfactory as kf
 from collections.abc import Callable
+from typing import Any
+import io
+import sys
 
 
 def test_enclosure_name(straight_factory: Callable[..., kf.KCell]) -> None:
@@ -65,6 +69,53 @@ def test_ports_cell(LAYER: kf.LayerEnum) -> None:
 
 def test_getter(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
-    w = c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
+    c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
     assert c.y == 0
     assert c.d.y == 0
+
+
+def test_array(straight: kf.KCell) -> None:
+    c = kf.KCell()
+    wg_array = c.create_inst(
+        straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
+    )
+    for b in range(5):
+        for a in range(3):
+            wg_array["o1", a, b]
+            wg_array["o1", a, b]
+    c.show()
+
+
+# def test_invalid_array(straight: kf.KCell, monkeypatch: pytest.MonkeyPatch) -> None:
+#     # Define a mock function that does nothing
+#     def mock_print(*args: Any, **kwargs: Any) -> None:
+#         "Suppress stdout for catching the loguru output"
+#         pass
+
+#     # Monkeypatch the print function to use the mock function
+#     monkeypatch.setattr("builtins.print", mock_print)
+#     monkeypatch.setattr("sys.stderr", mock_print)
+#     monkeypatch.setattr("sys.std", mock_print)
+
+#     c = kf.KCell()
+#     wg = c.create_inst(straight)
+#     with pytest.raises(KeyError):
+#         for b in range(1):
+#             for a in range(1):
+#                 wg["o1", a, b]
+#                 wg["o1", a, b]
+#     c.show()
+
+
+def test_invalid_array(monkeypatch: pytest.MonkeyPatch, straight: kf.KCell) -> None:
+    c = kf.KCell()
+    wg = c.create_inst(straight)
+    regex = kf.config.logfilter.regex
+    kf.config.logfilter.regex = r"^An error has been caught in function '__getitem__'"
+    with pytest.raises(KeyError):
+        for b in range(1):
+            for a in range(1):
+                wg["o1", a, b]
+                wg["o1", a, b]
+    kf.config.logfilter.regex = regex
+    c.show()

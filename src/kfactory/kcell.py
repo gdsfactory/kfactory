@@ -23,7 +23,7 @@ from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
 from types import ModuleType
-from typing import Any, Literal, TypeAlias, TypeVar, overload
+from typing import Any, Literal, TypeAlias, TypeVar, cast, overload
 
 import cachetools.func
 import numpy as np
@@ -3629,7 +3629,9 @@ class Instance:
         self.ports = InstancePorts(self)
         self.d = UMInstance(self)
 
-    def __getitem__(self, key: int | str | None) -> Port:
+    def __getitem__(
+        self, key: int | str | None | tuple[int | str | None, int, int]
+    ) -> Port:
         """Returns port from instance."""
         return self.ports[key]
 
@@ -4612,8 +4614,9 @@ class Ports:
         try:
             return next(filter(lambda port: port.name == key, self._ports))
         except StopIteration:
-            raise ValueError(
-                f"{key} is not a port. Available ports: {[v.name for v in self._ports]}"
+            raise KeyError(
+                f"{key=} is not a valid port name or index. "
+                f"Available ports: {[v.name for v in self._ports]}"
             )
 
     def hash(self) -> bytes:
@@ -4676,13 +4679,41 @@ class InstancePorts:
         """Return Port count."""
         return len(self.cell_ports)
 
-    def __getitem__(self, key: int | str | None) -> Port:
+    @config.logger.catch(reraise=True)
+    def __getitem__(
+        self, key: int | str | None | tuple[int | str | None, int, int]
+    ) -> Port:
         """Get a port by name."""
-        p = self.cell_ports[key]
-        if self.instance.is_complex():
-            return p.copy(self.instance.dcplx_trans)
+        if not self.instance.is_regular_array():
+            try:
+                p = self.cell_ports[cast(int | str | None, key)]
+                if not self.instance.is_complex():
+                    return p.copy(self.instance.trans)
+                else:
+                    return p.copy(self.instance.dcplx_trans)
+            except KeyError as e:
+                raise KeyError(
+                    f"{key=} is not a valid port name or index. "
+                    "Make sure the instance is an array when giving it a tuple. "
+                    f"Available ports: {[v.name for v in self.cell_ports]}"
+                ) from e
         else:
-            return p.copy(self.instance.trans)
+            if isinstance(key, tuple):
+                key, i_a, i_b = key
+            else:
+                i_a = 0
+                i_b = 0
+            p = self.cell_ports[key]
+            if not self.instance.is_complex():
+                return p.copy(
+                    self.instance.trans
+                    * kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                )
+            else:
+                return p.copy(
+                    self.instance.dcplx_trans
+                    * kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
+                )
 
     @property
     def cell_ports(self) -> Ports:

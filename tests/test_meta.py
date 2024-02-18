@@ -91,7 +91,9 @@ def test_metainfo_read_cell(straight: kf.KCell) -> None:
 
         kcl = kf.KCLayout("TEST_META")
         kcell = kcl.kcell(straight.name)
+        kf.config.logfilter.regex = r"KLayout <=0.28.15 \(last update 2024-02-02\) cannot read LayoutMetaInfo on 'Cell.read'. kfactory uses these extensively for ports, info, and settings. Therefore proceed at your own risk."
         kcell.read(t.name)
+        kf.config.logfilter.regex = ""
 
         # TODO: wait for KLayout update https://github.com/KLayout/klayout/issues/1609
 
