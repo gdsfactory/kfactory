@@ -83,28 +83,16 @@ def test_array(straight: kf.KCell) -> None:
         for a in range(3):
             wg_array["o1", a, b]
             wg_array["o1", a, b]
-    c.show()
 
 
-# def test_invalid_array(straight: kf.KCell, monkeypatch: pytest.MonkeyPatch) -> None:
-#     # Define a mock function that does nothing
-#     def mock_print(*args: Any, **kwargs: Any) -> None:
-#         "Suppress stdout for catching the loguru output"
-#         pass
-
-#     # Monkeypatch the print function to use the mock function
-#     monkeypatch.setattr("builtins.print", mock_print)
-#     monkeypatch.setattr("sys.stderr", mock_print)
-#     monkeypatch.setattr("sys.std", mock_print)
-
-#     c = kf.KCell()
-#     wg = c.create_inst(straight)
-#     with pytest.raises(KeyError):
-#         for b in range(1):
-#             for a in range(1):
-#                 wg["o1", a, b]
-#                 wg["o1", a, b]
-#     c.show()
+def test_array_indexerror(straight: kf.KCell) -> None:
+    c = kf.KCell()
+    wg_array = c.create_inst(
+        straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
+    )
+    with pytest.raises(IndexError):
+        wg_array["o1", 3, 5]
+        wg_array["o1", 3, 5]
 
 
 def test_invalid_array(monkeypatch: pytest.MonkeyPatch, straight: kf.KCell) -> None:
@@ -118,4 +106,3 @@ def test_invalid_array(monkeypatch: pytest.MonkeyPatch, straight: kf.KCell) -> N
                 wg["o1", a, b]
                 wg["o1", a, b]
     kf.config.logfilter.regex = regex
-    c.show()

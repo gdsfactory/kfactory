@@ -4726,6 +4726,12 @@ class InstancePorts:
         else:
             if isinstance(key, tuple):
                 key, i_a, i_b = key
+                if i_a >= self.instance.na or i_b >= self.instance.nb:
+                    raise IndexError(
+                        f"The indexes {i_a=} and {i_b=} must be within the array size"
+                        f" instance.na={self.instance.na} and"
+                        f" instance.nb={self.instance.nb}"
+                    )
             else:
                 i_a = 0
                 i_b = 0
