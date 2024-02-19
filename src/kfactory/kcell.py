@@ -28,6 +28,7 @@ from typing import Any, Literal, TypeAlias, TypeVar, cast, overload
 import cachetools.func
 import numpy as np
 import rich
+import rich.json
 import ruamel.yaml
 from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
 from cachetools import Cache
@@ -5222,7 +5223,7 @@ def pprint_ports(
     ports: Iterable[Port], type: Literal["dbu", "um", None] = None
 ) -> rich.table.Table:
     """Print ports as a table."""
-    table = rich.table.Table()
+    table = rich.table.Table(show_lines=True)
 
     table.add_column("Name")
     table.add_column("Width")
@@ -5231,6 +5232,7 @@ def pprint_ports(
     table.add_column("Y")
     table.add_column("Angle")
     table.add_column("Mirror")
+    table.add_column("Info")
 
     match type:
         case None:
@@ -5244,6 +5246,7 @@ def pprint_ports(
                         str(port.y),
                         str(port.angle),
                         str(port.mirror),
+                        rich.json.JSON.from_data(port.info.model_dump()),
                     )
                 else:
                     table.add_row(
@@ -5254,6 +5257,7 @@ def pprint_ports(
                         str(port.d.y),
                         str(port.d.angle),
                         str(port.d.mirror),
+                        rich.json.JSON.from_data(port.info.model_dump()),
                     )
 
     return table

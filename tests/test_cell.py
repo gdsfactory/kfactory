@@ -84,17 +84,18 @@ def test_array(straight: kf.KCell) -> None:
             wg_array["o1", a, b]
             wg_array["o1", a, b]
 
-    wg_array.ports[0].print()
-
 
 def test_array_indexerror(straight: kf.KCell) -> None:
     c = kf.KCell()
     wg_array = c.create_inst(
         straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
     )
+    regex = kf.config.logfilter.regex
+    kf.config.logfilter.regex = r"^An error has been caught in function '__getitem__'"
     with pytest.raises(IndexError):
         wg_array["o1", 3, 5]
         wg_array["o1", 3, 5]
+    kf.config.logfilter.regex = regex
 
 
 def test_invalid_array(monkeypatch: pytest.MonkeyPatch, straight: kf.KCell) -> None:
