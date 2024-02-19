@@ -7,6 +7,10 @@
 
 - Add port access for instance arrays and pretty print for ports [#252](https://github.com/gdsfactory/kfactory/pull/252)
 
+## Dependency Updates
+
+- update min klayout version [#254](https://github.com/gdsfactory/kfactory/pull/254)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.11.2...v0.11.3
 
 
