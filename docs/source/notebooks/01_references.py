@@ -192,13 +192,27 @@ c
 # Let's make a new Cell and put a big array of our Cell `c` in it:
 
 # %%
-# not converted yet
+import kfactory as kf
 
-c3 = kf.KCell("array_of_instances")  # Create a new blank Cell
+print(kf.__version__)
+c = kf.cells.straight.straight(length=10, width=0.6, layer=kf.kcl.layer(1, 0))
+c3 = kf.KCell()  # Create a new blank Cell
 aref = c3.create_inst(
-    c, na=6, nb=3, a=kf.kdb.Vector(20000, 0), b=kf.kdb.Vector(0, 15000)
-)  # instance the Cell "c" 3 instances in it with a 3 rows, 6 columns array
-c3
+    c, na=1, nb=3, a=kf.kdb.Vector(20000, 0), b=kf.kdb.Vector(0, 15000)
+)  # instance the Cell "c" 3 instances in it with a 3 rows, 1 columns array
+
+c3.add_ports(aref.ports)
+c3.draw_ports()
+c3.plot()
+
+# %% [markdown]
+# You can still access the ports for each instance
+
+# %%
+aref['o1', 0, 1]
+
+# %%
+c.ports
 
 # %% [markdown]
 # ## connect instances
