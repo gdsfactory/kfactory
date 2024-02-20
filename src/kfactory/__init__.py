@@ -32,6 +32,7 @@ from .kcell import (
 from . import cells, placer, routing, port, technology, enclosure, utils
 from .conf import config
 from .enclosure import LayerEnclosure, KCellEnclosure
+from .grid import grid
 
 from aenum import constant  # type: ignore[import-untyped,unused-ignore]
 
@@ -51,6 +52,7 @@ __all__ = [
     "rdb",
     "port",
     "cells",
+    "grid",
     "placer",
     "routing",
     "utils",
