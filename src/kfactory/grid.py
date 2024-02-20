@@ -1,4 +1,4 @@
-"""Allows placing KCell instances a static or flexible grid."""
+"""Create 1D or 2D (flex) grids in KCells."""
 from __future__ import annotations
 
 from collections.abc import Iterable
@@ -12,12 +12,12 @@ from .kcell import Instance, KCell
 
 def grid(
     target: KCell,
-    kcells: Iterable[KCell] | Iterable[Iterable[KCell]],
+    kcells: Iterable[KCell] | Iterable[list[KCell]],
     spacing: int,
     target_trans: kdb.Trans = kdb.Trans(),
     shape: tuple[int, int] | None = None,
-    align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
-    align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
+    align_x: Literal["origin", "xmin", "xmax", "center"] | int = "center",
+    align_y: Literal["origin", "ymin", "ymax", "center"] | int = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
     mirror: bool = False,
     add_port_prefix: bool = True,
@@ -51,13 +51,6 @@ def grid(
                         at = kdb.Trans(-bbox.center().x, 0)
                     case _:
                         at = kdb.Trans(0, 0)
-                match align_y:
-                    case "ymin":
-                        at.disp = kdb.Vector(at.disp.x, -bbox.bottom)
-                    case "ymax":
-                        at.disp = kdb.Vector(at.disp.x, -bbox.top)
-                    case "center":
-                        at.disp = kdb.Vector(at.disp.x, -bbox.center().y)
 
                 insts.append(target.create_inst(kcell, trans * at))
                 target.shapes(target.kcl.layer(1, 0)).insert(_bbox.transformed(trans))
@@ -90,13 +83,6 @@ def grid(
                             at = kdb.Trans(-bbox.center().x, 0)
                         case _:
                             at = kdb.Trans(0, 0)
-                    match align_y:
-                        case "ymin":
-                            at.disp = kdb.Vector(at.disp.x, -bbox.bottom)
-                        case "ymax":
-                            at.disp = kdb.Vector(at.disp.x, -bbox.top)
-                        case "center":
-                            at.disp = kdb.Vector(at.disp.x, -bbox.center().y)
 
                     insts.append(target.create_inst(kcell, _trans * at))
                     target.shapes(target.kcl.layer(1, 0)).insert(
@@ -112,5 +98,33 @@ def grid(
             "grid() shape argument must be None or"
             f" have a length of 2, for example shape=(4,6), got {shape}"
         )
+    else:
+        _kcells = []
+        for array in kcells:
+            if isinstance(array, list):
+                _kcells.extend(array)
+
+        if shape[0] * shape[1] < len(_kcells):
+            raise ValueError(
+                f"The shape given to the grid len={shape[0] * shape[1]} must have at "
+                f"least as many slots as the amount of KCells passed, {len(_kcells)}."
+            )
+        bboxes = [c.bbox() for c in _kcells]
+        bboxes_heights = [box.height() for box in bboxes]
+        bboxes_widths = [box.width() for box in bboxes]
+        _bbox = kdb.Box(
+            max(bboxes_widths),
+            max(bboxes_heights),
+        )
+        w = _bbox.width() + spacing
+        h = _bbox.width() + spacing
+
+        for i, kcell in enumerate(_kcells):
+            x = i % shape[1]
+            y = i // shape[1]
+
+            insts.append(
+                target.create_inst(kcell, trans=target_trans * kdb.Trans(x * w, y * h))
+            )
 
     return insts
