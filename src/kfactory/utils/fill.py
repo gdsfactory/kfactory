@@ -157,15 +157,13 @@ def fill_tiled(
         )
         layers = " + ".join(
             [
-                layer_name + f".sized({int(size / c.kcl.dbu)}) & (_tile & _frame)"
-                if size
-                else layer_name
+                layer_name + f".sized({int(size / c.kcl.dbu)})" if size else layer_name
                 for layer_name, (_, size) in zip(layer_names, fill_layers)
             ]
         )
         regions = " + ".join(
             [
-                region_name + f".sized({int(size / c.kcl.dbu)}) & (_tile & _frame)"
+                region_name + f".sized({int(size / c.kcl.dbu)})"
                 if size
                 else region_name
                 for region_name, (_, size) in zip(region_names, fill_regions)
