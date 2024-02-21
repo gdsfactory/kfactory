@@ -7,6 +7,10 @@
 
 - Add port access for instance arrays and pretty print for ports [#252](https://github.com/gdsfactory/kfactory/pull/252)
 
+## Bug Fixes
+
+- Fix tiling border problems [#256](https://github.com/gdsfactory/kfactory/pull/256)
+
 ## Dependency Updates
 
 - update min klayout version [#254](https://github.com/gdsfactory/kfactory/pull/254)
