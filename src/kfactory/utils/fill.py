@@ -71,6 +71,7 @@ def fill_tiled(
     tile_size: tuple[float, float] | None = None,
     x_space: float = 0,
     y_space: float = 0,
+    tile_border: tuple[float, float] = (20, 20),
 ) -> None:
     """Fill a [KCell][kfactory.kcell.KCell].
 
@@ -86,6 +87,7 @@ def fill_tiled(
         tile_size: Size of the tiles in um.
         x_space: Spacing between the fill cell bounding boxes in x-direction.
         y_space: Spacing between the fill cell bounding boxes in y-direction.
+        tile_border: The tile border to consider for excludes
     """
     tp = kdb.TilingProcessor()
     tp.frame = c.bbox().to_dtype(c.kcl.dbu)  # type: ignore
@@ -98,6 +100,7 @@ def fill_tiled(
             100 * (fill_cell.dbbox().height() + y_space),
         )
     tp.tile_size(*tile_size)
+    tp.tile_border(*tile_border)
 
     layer_names: list[str] = []
     for _layer, _ in fill_layers:
