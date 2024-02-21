@@ -6,8 +6,8 @@ import io
 import sys
 
 
-def test_enclosure_name(straight_factory: Callable[..., kf.KCell]) -> None:
-    wg = straight_factory(width=1000, length=10000)
+def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+    wg = straight_factory_dbu(width=1000, length=10000)
     assert wg.name == "Straight_W1000_L10000_LWG_EWGSTD"
     wg.show()
 

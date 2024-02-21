@@ -15,7 +15,7 @@ from collections.abc import Callable
 def test_route_straight(
     x: int,
     bend90: kf.KCell,
-    straight_factory: Callable[..., kf.KCell],
+    straight_factory_dbu: Callable[..., kf.KCell],
     LAYER: kf.LayerEnum,
     optical_port: kf.Port,
 ) -> None:
@@ -27,7 +27,7 @@ def test_route_straight(
         c,
         p1,
         p2,
-        straight_factory=straight_factory,
+        straight_factory=straight_factory_dbu,
         bend90_cell=bend90,
     )
 
