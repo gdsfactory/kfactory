@@ -2755,6 +2755,16 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                                             )
                                         )
                     cell._locked = True
+                    if cell.kcl != self:
+                        raise ValueError(
+                            "The KCell created must be using the same"
+                            " KCLayout object as the @cell decorator. "
+                            f"{self.name!r} != {cell.kcl.name!r}. Please make sure to "
+                            "use @kcl.cell and only use @cell for cells which are"
+                            " created through kfactory.kcl. To create KCells not in "
+                            "the standard KCLayout, use either custom_kcl.kcell() or "
+                            "KCell(kcl=custom_kcl)."
+                        )
                     return cell
 
                 _cell = wrapped_cell(**params)

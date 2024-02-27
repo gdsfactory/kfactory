@@ -109,3 +109,15 @@ def test_invalid_array(monkeypatch: pytest.MonkeyPatch, straight: kf.KCell) -> N
                 wg["o1", a, b]
                 wg["o1", a, b]
     kf.config.logfilter.regex = regex
+
+
+def test_cell_decorator_error() -> None:
+    kcl2 = kf.KCLayout("decorator_test")
+
+    @kf.cell
+    def wrong_cell() -> kf.KCell:
+        c = kcl2.kcell("wrong_test")
+        return c
+
+    with pytest.raises(ValueError):
+        wrong_cell()
