@@ -27,10 +27,17 @@ def wg_enc(LAYER: kf.LayerEnum) -> kf.LayerEnclosure:
 
 
 @pytest.fixture
-def straight_factory(
+def straight_factory_dbu(
     LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure
 ) -> Callable[..., kf.KCell]:
     return partial(kf.cells.dbu.straight, layer=LAYER.WG, enclosure=wg_enc)
+
+
+@pytest.fixture
+def straight_factory(
+    LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure
+) -> Callable[..., kf.KCell]:
+    return partial(kf.cells.straight.straight, layer=LAYER.WG, enclosure=wg_enc)
 
 
 @pytest.fixture

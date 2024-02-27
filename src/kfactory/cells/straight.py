@@ -50,5 +50,5 @@ def straight(
         enclosure: Definition of slabs/excludes. [um]
     """
     return straight_dbu(
-        int(width / kcl.dbu), int(length / kcl.dbu), layer, enclosure=enclosure
+        round(width / kcl.dbu), round(length / kcl.dbu), layer, enclosure=enclosure
     )
