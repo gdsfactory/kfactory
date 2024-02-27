@@ -5,12 +5,17 @@
 
 ## New
 
+- KCLayout cell decorator [#260](https://github.com/gdsfactory/kfactory/pull/260)
 - Implement Grid [#255](https://github.com/gdsfactory/kfactory/pull/255)
 - Add port access for instance arrays and pretty print for ports [#252](https://github.com/gdsfactory/kfactory/pull/252)
 
 ## Bug Fixes
 
 - Fix tiling border problems [#256](https://github.com/gdsfactory/kfactory/pull/256)
+
+## Documentation
+
+- KCLayout cell decorator [#260](https://github.com/gdsfactory/kfactory/pull/260)
 
 ## Dependency Updates
 
