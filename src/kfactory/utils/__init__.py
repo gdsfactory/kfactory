@@ -1,8 +1,5 @@
 """Utilities to provide geometrical, fill and DRC violation help.
 
-[Enclosures][kfactory.utils.enclosure.LayerEnclosure] can automatically generate slab
-and excludes based on minkowski sums instead of only vector based sizing.
-
 [fill_tiled][kfactory.utils.fill_tiled] provides a filling algorithm that can use
 the `klayout.db.TilingProcessor` to calculate the regions to fill.
 

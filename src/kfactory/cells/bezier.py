@@ -1,12 +1,13 @@
 """Bezier curve based bends and functions."""
 
 from collections.abc import Sequence
+from typing import Any
 
 import numpy as np
 import numpy.typing as nty
 from scipy.special import binom  # type:ignore[import-untyped,unused-ignore]
 
-from .. import KCell, KCLayout, LayerEnum, cell, kcl, kdb
+from .. import KCell, KCLayout, LayerEnum, kcl, kdb
 from ..enclosure import LayerEnclosure
 
 __all__ = ["bend_s"]
@@ -44,11 +45,15 @@ class BendS:
 
     kcl: KCLayout
 
-    def __init__(self, kcl: KCLayout) -> None:
+    def __init__(
+        self, kcl: KCLayout, basename: str | None = None, **cell_kwargs: Any
+    ) -> None:
         """Bezier bend function on custom KCLayout."""
         self.kcl = kcl
+        self._cell = self.kcl.cell(
+            basename=basename or self.__class__.__name__, **cell_kwargs
+        )(self._kcell)
 
-    @cell
     def __call__(
         self,
         width: float,
@@ -72,7 +77,7 @@ class BendS:
             t_stop: end
             enclosure: Slab/Exclude definition. [dbu]
         """
-        return self._kcell(
+        return self._cell(
             width=width,
             height=height,
             length=length,

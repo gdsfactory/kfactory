@@ -58,7 +58,7 @@ def rename_clockwise(
         prefix: Prefix to add to all ports.
         start: Start index per orientation.
 
-
+    ```
              o3  o4
              |___|_
         o2 -|      |- o5
@@ -66,7 +66,7 @@ def rename_clockwise(
         o1 -|______|- o6
              |   |
             o8  o7
-
+    ```
     """
     _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
 
@@ -111,7 +111,7 @@ def rename_clockwise_multi(
         regex: Regex string to filter the port names by.
         start: Start index per orientation.
 
-
+    ```
              o3  o4
              |___|_
         o2 -|      |- o5
@@ -119,7 +119,7 @@ def rename_clockwise_multi(
         o1 -|______|- o6
              |   |
             o8  o7
-
+    ```
     """
     if layers:
         for p_type, prefix in type_prefix_mapping.items():
@@ -162,6 +162,7 @@ def rename_by_direction(
         dir_names: Prefixes for the directions (east, north, west, south).
         prefix: Prefix to add before `dir_names`
 
+    ```
              N0  N1
              |___|_
         W1 -|      |- E1
@@ -169,7 +170,7 @@ def rename_by_direction(
         W0 -|______|- E0
              |   |
             S0   S1
-
+    ```
     """
     for dir in DIRECTION:
         _ports = filter_layer_pt_reg(ports, layer, port_type, regex)

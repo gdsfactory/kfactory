@@ -8,6 +8,7 @@ There are two kinds of euler bends. One that snaps the ports and one that doesn'
 All the default bends use snapping. To use no snapping make an instance of
 BendEulerCustom(KCell.kcl) and use that one.
 """
+from typing import Any
 
 import numpy as np
 from scipy.optimize import brentq  # type:ignore[import-untyped,unused-ignore]
@@ -166,11 +167,21 @@ def euler_sbend_points(
 class BendEuler:
     kcl: KCLayout
 
-    def __init__(self, kcl: KCLayout) -> None:
+    def __init__(
+        self,
+        kcl: KCLayout,
+        basename: str | None = None,
+        snap_ports: bool = False,
+        **cell_kwargs: Any,
+    ) -> None:
         """Create a euler_bend function on a custom KCLayout."""
         self.kcl = kcl
+        self._cell = self.kcl.cell(
+            snap_ports=snap_ports,
+            basename=basename or self.__class__.__name__,
+            **cell_kwargs,
+        )(self._kcell)
 
-    @cell(snap_ports=False)
     def __call__(
         self,
         width: float,
@@ -190,7 +201,7 @@ class BendEuler:
             angle: Angle of the bend.
             resolution: Angle resolution for the backbone.
         """
-        return self._kcell(
+        return self._cell(
             width=width,
             radius=radius,
             layer=layer,
@@ -276,8 +287,13 @@ class BendEuler:
 class BendSEuler:
     kcl: KCLayout
 
-    def __init__(self, kcl: KCLayout) -> None:
+    def __init__(
+        self, kcl: KCLayout, basename: str | None = None, **cell_kwargs: Any
+    ) -> None:
         self.kcl = kcl
+        self._cell = self.kcl.cell(
+            basename=basename or self.__class__.__name__, **cell_kwargs
+        )(self._kcell)
 
     @cell
     def __call__(
@@ -299,7 +315,7 @@ class BendSEuler:
             enclosure: Slab/exclude definition. [dbu]
             resolution: Angle resolution for the backbone.
         """
-        return self._kcell(
+        return self._cell(
             offset=offset,
             width=width,
             radius=radius,

@@ -13,10 +13,11 @@ A waveguide is a rectangle of material with excludes and/or slab around it::
     └──────────────────────────────┘
 
 The slabs and excludes can be given in the form of an
-[Enclosure][kfactory.utils.LayerEnclosure].
+[Enclosure][kfactory.enclosure.LayerEnclosure].
 """
+from typing import Any
 
-from ... import KCell, KCLayout, LayerEnum, cell, kcl, kdb
+from ... import KCell, KCLayout, LayerEnum, kcl, kdb
 from ...conf import config
 from ...enclosure import LayerEnclosure
 from ...kcell import Info
@@ -45,11 +46,13 @@ class Straight:
 
     kcl: KCLayout
 
-    def __init__(self, kcl: KCLayout):
+    def __init__(self, kcl: KCLayout, basename: str | None = None, **cell_kwargs: Any):
         """Initialize A straight class on a defined KCLayout."""
         self.kcl = kcl
+        self._cell = self.kcl.cell(
+            basename=basename or self.__class__.__name__, **cell_kwargs
+        )(self._kcell)
 
-    @cell
     def __call__(
         self,
         width: int,
@@ -74,7 +77,7 @@ class Straight:
             layer: Main layer of the waveguide.
             enclosure: Definition of slab/excludes. [dbu]
         """
-        return self._kcell(width=width, length=length, layer=layer, enclosure=enclosure)
+        return self._cell(width=width, length=length, layer=layer, enclosure=enclosure)
 
     def _kcell(
         self,
