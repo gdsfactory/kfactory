@@ -1,7 +1,8 @@
 """Enclosure module.
 
-Enclosures allow to calculate slab/excludes and similar concepts to an arbitrary
-shape located on a main_layer or reference layer or region.
+[Enclosures][kfactory.enclosure.LayerEnclosure] allow to calculate slab/excludes and
+similar concepts to an arbitrary shape located on a main_layer or reference layer or
+region.
 """
 from __future__ import annotations
 
@@ -782,7 +783,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
             ref: The reference shapes to apply the enclosures to.
                 Can be a layer or a region. If `None`, it will try to use the
                 `main_layer` of the
-                [enclosure][kfactory.utils.enclosure.LayerEnclosure].
+                [enclosure][kfactory.enclosure.LayerEnclosure].
             tile_size: Tile size. This should be in the order off 10+ maximum size
                 of the maximum size of sections.
             n_pts: Number of points in the circle. < 3 will create a triangle. 4 a
@@ -917,7 +918,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
             c: Target cell.
             ref: Reference layer or region (the bounding box). If `None` use
                 the `main_layer` of  the
-                [enclosure][kfactory.utils.enclosure.LayerEnclosure] if defined,
+                [enclosure][kfactory.enclosure.LayerEnclosure] if defined,
                 else throw an error.
         """
         if ref is None:
@@ -954,7 +955,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
     def __str__(self) -> str:
         """String representation of an enclosure.
 
-        Use [name][kfactory.utils.enclosure.LayerEnclosure.name]
+        Use [name][kfactory.enclosure.LayerEnclosure.name]
         if available. Use a hash of the sections and main_layer if the name is `None`.
         """
         if self._name is not None:
@@ -1236,7 +1237,7 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
 
 
 class KCellEnclosure(BaseModel):
-    """Collection of [enclosures][kfactory.utils.enclosure.LayerEnclosure] for cells."""
+    """Collection of [enclosures][kfactory.enclosure.LayerEnclosure] for cells."""
 
     enclosures: LayerEnclosureCollection
 
@@ -1296,7 +1297,7 @@ class KCellEnclosure(BaseModel):
 
         Args:
             c: Cell to apply the enclosure to.
-            direction: X/Y or both directions, see [kfactory.utils.enclosure.DIRECTION].
+            direction: X/Y or both directions, see [kfactory.enclosure.DIRECTION].
                 Uses a box if both directions are selected.
         """
         match direction:

@@ -13,7 +13,7 @@ A waveguide is a rectangle of material with excludes and/or slab around it::
     └──────────────────────────────┘
 
 The slabs and excludes can be given in the form of an
-[Enclosure][kfactory.utils.LayerEnclosure].
+[Enclosure][kfactory.enclosure.LayerEnclosure].
 """
 from typing import Any
 

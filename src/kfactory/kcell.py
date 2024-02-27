@@ -2623,8 +2623,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             snap_ports: Snap the centers of the ports onto the grid
                 (only x/y, not angle).
             add_port_layers: Add special layers of
-                [kfactory.KCLayout.netlist_layer_mapping][netlist_layer_mapping] to the
-                ports if the port layer is in the mapping.
+                [netlist_layer_mapping][kfactory.kcell.KCLayout.netlist_layer_mapping]
+                to the ports if the port layer is in the mapping.
             cache: Provide a user defined cache instead of an internal one. This
                 can be used for example to clear the cache.
             rec_dicts: Allow and inspect recursive dictionaries as parameters (can be
@@ -5952,8 +5952,8 @@ def vcell(
             warning if there are
         snap_ports: Snap the centers of the ports onto the grid (only x/y, not angle).
         add_port_layers: Add special layers of
-            [kfactory.KCLayout.netlist_layer_mapping][netlist_layer_mapping] to the
-            ports if the port layer is in the mapping.
+            [netlist_layer_mapping][kfactory.kcell.KCLayout.netlist_layer_mapping] to
+            the ports if the port layer is in the mapping.
         cache: Provide a user defined cache instead of an internal one. This
             can be used for example to clear the cache.
         rec_dicts: Allow and inspect recursive dictionaries as parameters (can be
