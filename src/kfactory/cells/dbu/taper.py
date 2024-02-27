@@ -3,7 +3,9 @@
 TODO: Non-linear tapers
 """
 
-from ... import KCell, KCLayout, cell, kcl, kdb
+from typing import Any
+
+from ... import KCell, KCLayout, kcl, kdb
 from ...conf import config
 from ...enclosure import LayerEnclosure
 from ...kcell import Info
@@ -14,10 +16,14 @@ __all__ = ["taper"]
 class Taper:
     kcl: KCLayout
 
-    def __init__(self, kcl: KCLayout) -> None:
+    def __init__(
+        self, kcl: KCLayout, basename: str | None = None, **cell_kwargs: Any
+    ) -> None:
         self.kcl = kcl
+        self._cell = self.kcl.cell(
+            basename=basename or self.__class__.__name__, **cell_kwargs
+        )(self._kcell)
 
-    @cell
     def __call__(
         self,
         width1: int,
@@ -48,7 +54,7 @@ class Taper:
             layer: Main layer of the taper.
             enclosure: Definition of the slab/exclude.
         """
-        return self._kcell(
+        return self._cell(
             width1=width1,
             width2=width2,
             length=length,

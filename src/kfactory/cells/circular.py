@@ -2,13 +2,14 @@
 
 A circular bend has a constant radius.
 """
+from typing import Any
 
 import numpy as np
 
 from .. import kdb
 from ..conf import config
 from ..enclosure import LayerEnclosure, extrude_path
-from ..kcell import KCell, KCLayout, LayerEnum, cell, kcl
+from ..kcell import KCell, KCLayout, LayerEnum, kcl
 
 __all__ = ["bend_circular", "BendCircular"]
 
@@ -25,12 +26,50 @@ class BendCircular:
         angle_step: Angle amount per backbone point of the bend.
     """
 
-    def __init__(self, kcl: KCLayout):
+    def __init__(
+        self,
+        kcl: KCLayout,
+        basename: str | None = None,
+        snap_ports: bool = False,
+        **cell_kwargs: Any,
+    ):
         """Set kcl."""
         self.kcl = kcl
+        self._cell = self.kcl.cell(
+            basename=basename or self.__class__.__name__,
+            snap_ports=snap_ports,
+            **cell_kwargs,
+        )(self._kcell)
 
-    @cell(snap_ports=False)
     def __call__(
+        self,
+        width: float,
+        radius: float,
+        layer: int | LayerEnum,
+        enclosure: LayerEnclosure | None = None,
+        angle: float = 90,
+        angle_step: float = 1,
+    ) -> KCell:
+        """Circular radius bend [um].
+
+        Args:
+            width: Width of the core. [um]
+            radius: Radius of the backbone. [um]
+            layer: Layer index of the target layer.
+            enclosure: Optional enclosure.
+            angle: Angle amount of the bend.
+            angle_step: Angle amount per backbone point of the bend.
+        """
+        return self._cell(
+            width=width,
+            radius=radius,
+            layer=layer,
+            enclosure=enclosure,
+            angle=angle,
+            angle_step=angle_step,
+        )
+
+    def _kcell(
         self,
         width: float,
         radius: float,
