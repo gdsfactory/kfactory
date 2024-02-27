@@ -5,6 +5,7 @@
 
 ## New
 
+- Implement Grid [#255](https://github.com/gdsfactory/kfactory/pull/255)
 - Add port access for instance arrays and pretty print for ports [#252](https://github.com/gdsfactory/kfactory/pull/252)
 
 ## Bug Fixes
