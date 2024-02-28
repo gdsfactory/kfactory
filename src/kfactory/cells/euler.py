@@ -17,7 +17,7 @@ from scipy.special import fresnel  # type:ignore[import-untyped,unused-ignore]
 from .. import kdb
 from ..conf import config
 from ..enclosure import LayerEnclosure, extrude_path
-from ..kcell import KCell, KCLayout, LayerEnum, cell, kcl
+from ..kcell import KCell, KCLayout, LayerEnum, kcl
 
 __all__ = [
     "euler_bend_points",
@@ -295,7 +295,6 @@ class BendSEuler:
             basename=basename or self.__class__.__name__, **cell_kwargs
         )(self._kcell)
 
-    @cell
     def __call__(
         self,
         offset: float,

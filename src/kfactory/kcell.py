@@ -2404,6 +2404,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     interconnect_cml_path: Path | str | None
     constants: Constants = Field(default_factory=Constants)
     rename_function: Callable[..., None]
+    _registered_functions: dict[int, Callable[..., KCell]]
 
     info: Info
     _settings: KCellSettings
@@ -2583,6 +2584,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         snap_ports: bool = True,
         rec_dicts: bool = False,
         basename: str | None = None,
+        drop_params: list[str] = ["self", "cls"],
     ) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]:
         ...
 
@@ -2601,6 +2603,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         cache: Cache[int, Any] | dict[int, Any] | None = None,
         rec_dicts: bool = False,
         basename: str | None = None,
+        drop_params: list[str] = ["self", "cls"],
+        register_factory: bool = True,
     ) -> (
         Callable[KCellParams, KCell]
         | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
@@ -2631,6 +2635,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 expensive if the cell is called often).
             basename: Overwrite the name normally inferred from the function or class
                 name.
+            drop_params: Drop these parameters before writing the
+                [settings][kfactory.kcell.KCell.settings]
+            register_factory: Register the resulting KCell-function to the
+                [factories][kfactory.kcell.KCLayout.factories]
         """
         d2fs = rec_dict_to_frozenset if rec_dicts else dict_to_frozenset
         fs2d = rec_frozenset_to_dict if rec_dicts else frozenset_to_dict
@@ -2683,10 +2691,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if set_name:
                         if basename is not None:
                             name = get_cell_name(basename, **params)
-                        elif "self" in params:
-                            name = get_cell_name(
-                                params["self"].__class__.__name__, **params
-                            )
                         else:
                             name = get_cell_name(f.__name__, **params)
                         cell.name = name
@@ -2694,14 +2698,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         settings = cell.settings.model_dump()
                         if basename is not None:
                             settings["function_name"] = basename
-                        elif "self" in params:
-                            settings["function_name"] = params[
-                                "self"
-                            ].__class__.__name__
                         else:
                             settings["function_name"] = f.__name__
-                        params.pop("self", None)
-                        params.pop("cls", None)
+
+                        for param in drop_params:
+                            params.pop(param, None)
                         settings.update(params)
                         cell._settings = KCellSettings(**settings)
                     info = cell.info.model_dump()
@@ -2784,6 +2785,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
                 return _cell
 
+            if register_factory:
+                self.factories[basename or f.__name__] = wrapper_autocell
             return wrapper_autocell
 
         return decorator_autocell if _func is None else decorator_autocell(_func)
