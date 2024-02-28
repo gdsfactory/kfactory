@@ -2,6 +2,7 @@
 
 A circular bend has a constant radius.
 """
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
@@ -9,7 +10,7 @@ import numpy as np
 from .. import kdb
 from ..conf import config
 from ..enclosure import LayerEnclosure, extrude_path
-from ..kcell import KCell, KCLayout, LayerEnum, kcl
+from ..kcell import Info, KCell, KCLayout, LayerEnum, MetaData, kcl
 
 __all__ = ["bend_circular", "BendCircular"]
 
@@ -29,6 +30,12 @@ class BendCircular:
     def __init__(
         self,
         kcl: KCLayout,
+        additional_info: Callable[
+            ...,
+            dict[str, MetaData],
+        ]
+        | dict[str, MetaData]
+        | None = None,
         basename: str | None = None,
         snap_ports: bool = False,
         **cell_kwargs: Any,
@@ -40,6 +47,21 @@ class BendCircular:
             snap_ports=snap_ports,
             **cell_kwargs,
         )(self._kcell)
+        if callable(additional_info) and additional_info is not None:
+            self._additional_info_func: Callable[
+                ...,
+                dict[str, MetaData],
+            ] = additional_info
+            self._additional_info: dict[str, MetaData] = {}
+        else:
+
+            def additional_info_func(
+                **kwargs: Any,
+            ) -> dict[str, MetaData]:
+                return {}
+
+            self._additional_info_func = additional_info_func
+            self._additional_info = additional_info or {}
 
     def __call__(
         self,
@@ -141,6 +163,19 @@ class BendCircular:
         )
         c.auto_rename_ports()
         c.boundary = center_path
+        _info: dict[str, MetaData] = {}
+        _info.update(
+            self._additional_info_func(
+                width=width,
+                radius=radius,
+                layer=layer,
+                enclosure=enclosure,
+                angle=angle,
+                angle_step=angle_step,
+            )
+        )
+        _info.update(self._additional_info)
+        c.info = Info(**_info)
         return c
 
 

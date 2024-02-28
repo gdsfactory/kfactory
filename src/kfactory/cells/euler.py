@@ -8,6 +8,7 @@ There are two kinds of euler bends. One that snaps the ports and one that doesn'
 All the default bends use snapping. To use no snapping make an instance of
 BendEulerCustom(KCell.kcl) and use that one.
 """
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
@@ -17,7 +18,7 @@ from scipy.special import fresnel  # type:ignore[import-untyped,unused-ignore]
 from .. import kdb
 from ..conf import config
 from ..enclosure import LayerEnclosure, extrude_path
-from ..kcell import KCell, KCLayout, LayerEnum, kcl
+from ..kcell import Info, KCell, KCLayout, LayerEnum, MetaData, kcl
 
 __all__ = [
     "euler_bend_points",
@@ -170,6 +171,12 @@ class BendEuler:
     def __init__(
         self,
         kcl: KCLayout,
+        additional_info: Callable[
+            ...,
+            dict[str, MetaData],
+        ]
+        | dict[str, MetaData]
+        | None = None,
         basename: str | None = None,
         snap_ports: bool = False,
         **cell_kwargs: Any,
@@ -181,6 +188,21 @@ class BendEuler:
             basename=basename or self.__class__.__name__,
             **cell_kwargs,
         )(self._kcell)
+        if callable(additional_info) and additional_info is not None:
+            self._additional_info_func: Callable[
+                ...,
+                dict[str, MetaData],
+            ] = additional_info
+            self._additional_info: dict[str, MetaData] = {}
+        else:
+
+            def additional_info_func(
+                **kwargs: Any,
+            ) -> dict[str, MetaData]:
+                return {}
+
+            self._additional_info_func = additional_info_func
+            self._additional_info = additional_info or {}
 
     def __call__(
         self,
@@ -277,7 +299,19 @@ class BendEuler:
                 dwidth=width,
                 layer=layer,
             )
-
+        _info: dict[str, MetaData] = {}
+        _info.update(
+            self._additional_info_func(
+                width=width,
+                radius=radius,
+                layer=layer,
+                enclosure=enclosure,
+                angle=angle,
+                resolution=resolution,
+            )
+        )
+        _info.update(self._additional_info)
+        c.info = Info(**_info)
         c.boundary = center_path
 
         c.auto_rename_ports()
@@ -288,12 +322,36 @@ class BendSEuler:
     kcl: KCLayout
 
     def __init__(
-        self, kcl: KCLayout, basename: str | None = None, **cell_kwargs: Any
+        self,
+        kcl: KCLayout,
+        additional_info: Callable[
+            ...,
+            dict[str, MetaData],
+        ]
+        | dict[str, MetaData]
+        | None = None,
+        basename: str | None = None,
+        **cell_kwargs: Any,
     ) -> None:
         self.kcl = kcl
         self._cell = self.kcl.cell(
             basename=basename or self.__class__.__name__, **cell_kwargs
         )(self._kcell)
+        if callable(additional_info) and additional_info is not None:
+            self._additional_info_func: Callable[
+                ...,
+                dict[str, MetaData],
+            ] = additional_info
+            self._additional_info: dict[str, MetaData] = {}
+        else:
+
+            def additional_info_func(
+                **kwargs: Any,
+            ) -> dict[str, MetaData]:
+                return {}
+
+            self._additional_info_func = additional_info_func
+            self._additional_info = additional_info or {}
 
     def __call__(
         self,
@@ -386,6 +444,19 @@ class BendSEuler:
             layer=layer,
         )
         c.boundary = center_path
+        _info: dict[str, MetaData] = {}
+        _info.update(
+            self._additional_info_func(
+                offset=offset,
+                width=width,
+                radius=radius,
+                layer=layer,
+                enclosure=enclosure,
+                resolution=resolution,
+            )
+        )
+        _info.update(self._additional_info)
+        c.info = Info(**_info)
 
         c.auto_rename_ports()
         return c

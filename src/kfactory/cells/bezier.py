@@ -1,14 +1,15 @@
 """Bezier curve based bends and functions."""
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from typing import Any
 
 import numpy as np
 import numpy.typing as nty
 from scipy.special import binom  # type:ignore[import-untyped,unused-ignore]
 
-from .. import KCell, KCLayout, LayerEnum, kcl, kdb
+from .. import kdb
 from ..enclosure import LayerEnclosure
+from ..kcell import Info, KCell, KCLayout, LayerEnum, MetaData, kcl
 
 __all__ = ["bend_s"]
 
@@ -46,13 +47,37 @@ class BendS:
     kcl: KCLayout
 
     def __init__(
-        self, kcl: KCLayout, basename: str | None = None, **cell_kwargs: Any
+        self,
+        kcl: KCLayout,
+        additional_info: Callable[
+            ...,
+            dict[str, MetaData],
+        ]
+        | dict[str, MetaData]
+        | None = None,
+        basename: str | None = None,
+        **cell_kwargs: Any,
     ) -> None:
         """Bezier bend function on custom KCLayout."""
         self.kcl = kcl
         self._cell = self.kcl.cell(
             basename=basename or self.__class__.__name__, **cell_kwargs
         )(self._kcell)
+        if callable(additional_info) and additional_info is not None:
+            self._additional_info_func: Callable[
+                ...,
+                dict[str, MetaData],
+            ] = additional_info
+            self._additional_info: dict[str, MetaData] = {}
+        else:
+
+            def additional_info_func(
+                **kwargs: Any,
+            ) -> dict[str, MetaData]:
+                return {}
+
+            self._additional_info_func = additional_info_func
+            self._additional_info = additional_info or {}
 
     def __call__(
         self,
@@ -144,6 +169,21 @@ class BendS:
             layer=layer,
             port_type="optical",
         )
+        _info: dict[str, MetaData] = {}
+        _info.update(
+            self._additional_info_func(
+                width=width,
+                height=height,
+                length=length,
+                layer=layer,
+                nb_points=nb_points,
+                t_start=t_start,
+                t_stop=t_stop,
+                enclosure=enclosure,
+            )
+        )
+        _info.update(self._additional_info)
+        c.info = Info(**_info)
 
         c.auto_rename_ports()
 
