@@ -100,6 +100,9 @@ DShapeLike: TypeAlias = (
 )
 ShapeLike: TypeAlias = IShapeLike | DShapeLike | kdb.Shape
 
+MetaData: TypeAlias = (
+    int | float | bool | Sequence[int | float | SerializableShape | str] | str
+)
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -169,17 +172,7 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
 
 class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=True):
     @model_validator(mode="before")
-    def restrict_types(
-        cls, data: dict[str, Any]
-    ) -> dict[
-        str,
-        int
-        | float
-        | bool
-        | SerializableShape
-        | Sequence[int | float | SerializableShape | str]
-        | str,
-    ]:
+    def restrict_types(cls, data: dict[str, Any]) -> dict[str, MetaData]:
         for name, value in data.items():
             if not isinstance(
                 value, str | int | float | bool | SerializableShape | Sequence
@@ -198,13 +191,8 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
     @model_validator(mode="before")
     def restrict_types(
         cls,
-        data: dict[
-            str,
-            int | float | bool | Sequence[int | float | SerializableShape | str] | str,
-        ],
-    ) -> dict[
-        str, int | float | bool | Sequence[int | float | SerializableShape | str] | str
-    ]:
+        data: dict[str, MetaData],
+    ) -> dict[str, MetaData]:
         for name, value in data.items():
             if not isinstance(value, str | int | float | Sequence):
                 raise ValueError(

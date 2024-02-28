@@ -15,12 +15,13 @@ A waveguide is a rectangle of material with excludes and/or slab around it::
 The slabs and excludes can be given in the form of an
 [Enclosure][kfactory.enclosure.LayerEnclosure].
 """
+from collections.abc import Callable
 from typing import Any
 
-from ... import KCell, KCLayout, LayerEnum, kcl, kdb
+from ... import kdb
 from ...conf import config
 from ...enclosure import LayerEnclosure
-from ...kcell import Info
+from ...kcell import Info, KCell, KCLayout, LayerEnum, MetaData, kcl
 
 __all__ = ["straight"]
 
@@ -46,12 +47,38 @@ class Straight:
 
     kcl: KCLayout
 
-    def __init__(self, kcl: KCLayout, basename: str | None = None, **cell_kwargs: Any):
+    def __init__(
+        self,
+        kcl: KCLayout,
+        additional_info: Callable[
+            ...,
+            dict[str, MetaData],
+        ]
+        | dict[str, MetaData]
+        | None = None,
+        basename: str | None = None,
+        **cell_kwargs: Any,
+    ):
         """Initialize A straight class on a defined KCLayout."""
         self.kcl = kcl
         self._cell = self.kcl.cell(
             basename=basename or self.__class__.__name__, **cell_kwargs
         )(self._kcell)
+        if callable(additional_info) and additional_info is not None:
+            self._additional_info_func: Callable[
+                ...,
+                dict[str, MetaData],
+            ] = additional_info
+            self._additional_info: dict[str, MetaData] = {}
+        else:
+
+            def additional_info_func(
+                **kwargs: Any,
+            ) -> dict[str, MetaData]:
+                return {}
+
+            self._additional_info_func = additional_info_func
+            self._additional_info = additional_info or {}
 
     def __call__(
         self,
@@ -129,14 +156,19 @@ class Straight:
 
         if enclosure is not None:
             enclosure.apply_minkowski_y(c, layer)
-        c.info = Info(
-            **{
-                "width_um": width * c.kcl.dbu,
-                "length_um": length * c.kcl.dbu,
-                "width_dbu": width,
-                "length_dbu": length,
-            }
+        _info: dict[str, MetaData] = {
+            "width_um": width * c.kcl.dbu,
+            "length_um": length * c.kcl.dbu,
+            "width_dbu": width,
+            "length_dbu": length,
+        }
+        _info.update(
+            self._additional_info_func(
+                width=width, length=length, layer=layer, enclosure=enclosure
+            )
         )
+        _info.update(self._additional_info)
+        c.info = Info(**_info)
 
         c.boundary = c.dbbox()
         c.auto_rename_ports()

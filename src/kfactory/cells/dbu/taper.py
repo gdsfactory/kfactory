@@ -2,13 +2,13 @@
 
 TODO: Non-linear tapers
 """
-
+from collections.abc import Callable
 from typing import Any
 
-from ... import KCell, KCLayout, kcl, kdb
+from ... import kdb
 from ...conf import config
 from ...enclosure import LayerEnclosure
-from ...kcell import Info
+from ...kcell import Info, KCell, KCLayout, LayerEnum, MetaData, kcl
 
 __all__ = ["taper"]
 
@@ -17,12 +17,36 @@ class Taper:
     kcl: KCLayout
 
     def __init__(
-        self, kcl: KCLayout, basename: str | None = None, **cell_kwargs: Any
+        self,
+        kcl: KCLayout,
+        basename: str | None = None,
+        additional_info: Callable[
+            ...,
+            dict[str, MetaData],
+        ]
+        | dict[str, MetaData]
+        | None = None,
+        **cell_kwargs: Any,
     ) -> None:
         self.kcl = kcl
         self._cell = self.kcl.cell(
             basename=basename or self.__class__.__name__, **cell_kwargs
         )(self._kcell)
+        if callable(additional_info) and additional_info is not None:
+            self._additional_info_func: Callable[
+                ...,
+                dict[str, MetaData],
+            ] = additional_info
+            self._additional_info: dict[str, MetaData] = {}
+        else:
+
+            def additional_info_func(
+                **kwargs: Any,
+            ) -> dict[str, MetaData]:
+                return {}
+
+            self._additional_info_func = additional_info_func
+            self._additional_info = additional_info or {}
 
     def __call__(
         self,
@@ -67,7 +91,7 @@ class Taper:
         width1: int,
         width2: int,
         length: int,
-        layer: int,
+        layer: int | LayerEnum,
         enclosure: LayerEnclosure | None = None,
     ) -> KCell:
         r"""Linear Taper [um].
@@ -132,16 +156,25 @@ class Taper:
 
         if enclosure is not None:
             enclosure.apply_minkowski_y(c, layer)
-        c.info = Info(
-            **{
-                "width1_um": width1 * c.kcl.dbu,
-                "width2_um": width2 * c.kcl.dbu,
-                "length_um": length * c.kcl.dbu,
-                "width1_dbu": width1,
-                "width2_dbu": width2,
-                "length_dbu": length,
-            }
+        _info: dict[str, MetaData] = {
+            "width1_um": width1 * c.kcl.dbu,
+            "width2_um": width2 * c.kcl.dbu,
+            "length_um": length * c.kcl.dbu,
+            "width1_dbu": width1,
+            "width2_dbu": width2,
+            "length_dbu": length,
+        }
+        _info.update(
+            self._additional_info_func(
+                width1=width1,
+                width2=width2,
+                length=length,
+                layer=layer,
+                enclosure=enclosure,
+            )
         )
+        _info.update(self._additional_info)
+        c.info = Info(**_info)
         c.auto_rename_ports()
         c.boundary = taper.dpolygon
 
