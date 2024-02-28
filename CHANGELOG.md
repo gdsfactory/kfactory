@@ -1,3 +1,33 @@
+<a name="v0.11.5"></a>
+# [v0.11.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.5) - 28 Feb 2024
+
+# What's Changed
+
+## New
+
+- Add 'additional_info' to constructor for standard cells [#262](https://github.com/gdsfactory/kfactory/pull/262)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.11.4...v0.11.5
+
+
+[Changes][v0.11.5]
+
+
+<a name="v0.11.4"></a>
+# [v0.11.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.4) - 28 Feb 2024
+
+# What's Changed
+
+## New
+
+- Add automatic registering of KCell-functions to the KCLayout.factories [#261](https://github.com/gdsfactory/kfactory/pull/261)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.11.3...v0.11.4
+
+
+[Changes][v0.11.4]
+
+
 <a name="v0.11.3"></a>
 # [v0.11.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.3) - 27 Feb 2024
 
@@ -281,6 +311,8 @@
 [Changes][v0.4.0]
 
 
+[v0.11.5]: https://github.com/gdsfactory/kfactory/compare/v0.11.4...v0.11.5
+[v0.11.4]: https://github.com/gdsfactory/kfactory/compare/v0.11.3...v0.11.4
 [v0.11.3]: https://github.com/gdsfactory/kfactory/compare/v0.11.2...v0.11.3
 [v0.11.2]: https://github.com/gdsfactory/kfactory/compare/v0.11.1...v0.11.2
 [v0.11.1]: https://github.com/gdsfactory/kfactory/compare/v0.11.0...v0.11.1
