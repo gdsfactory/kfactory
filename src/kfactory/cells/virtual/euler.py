@@ -2,8 +2,8 @@
 from ... import kdb
 from ...conf import config
 from ...enclosure import LayerEnclosure
+from ...factories.euler import euler_bend_points
 from ...kcell import KCLayout, VKCell, kcl, vcell
-from ..euler import euler_bend_points
 from .utils import extrude_backbone
 
 

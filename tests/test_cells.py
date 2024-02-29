@@ -3,6 +3,7 @@ import pytest
 
 import kfactory as kf
 
+from functools import partial
 from kfactory.conf import logger
 
 
@@ -131,26 +132,16 @@ def test_cells(cell_name: str) -> None:
             )
 
 
-def test_inheritance(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
-    class TestBendEuler(kf.cells.euler.BendEuler):  # type: ignore[unused-ignore, misc]
-        def __init__(self) -> None:
-            super().__init__(kf.kcl)
+def test_additional_info(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
+    test_bend_euler = partial(
+        kf.factories.euler.bend_euler_factory(
+            kcl=kf.kcl, additional_info={"creation_time": "2023-02-12Z23:00:00"}
+        ),
+        layer=kf.kcl.layer(1, 0),
+        radius=10,
+    )
 
-        @kf.cell  # type: ignore[misc, unused-ignore]
-        def __call__(self, width: float) -> kf.KCell:  # type: ignore[override, unused-ignore]
-            c = self._kcell(
-                width=width,
-                radius=30,
-                layer=LAYER.WG,
-                enclosure=wg_enc,
-                angle=90,
-                resolution=150,
-            )
-            c.info.creation_time = "2023-02-12Z23:00:00"
-
-            return c
-
-    bend = TestBendEuler()(width=1)
+    bend = test_bend_euler(width=1)
 
     assert bend._locked is True
     assert bend.info.creation_time == "2023-02-12Z23:00:00"  # type: ignore[attr-defined, unused-ignore]

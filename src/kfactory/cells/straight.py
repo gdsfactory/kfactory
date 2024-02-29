@@ -14,13 +14,13 @@ A waveguide is a rectangle of material with excludes and/or slab around it::
 
 The slabs and excludes can be given in the form of an :py:class:~`Enclosure`.
 """
-
-
 from .. import KCell, LayerEnum, kcl
 from ..enclosure import LayerEnclosure
-from .dbu.straight import straight as straight_dbu
+from ..factories.straight import straight_dbu_factory
 
 __all__ = ["straight", "straight_dbu"]
+
+straight_dbu = straight_dbu_factory(kcl)
 
 
 def straight(
@@ -50,5 +50,8 @@ def straight(
         enclosure: Definition of slabs/excludes. [um]
     """
     return straight_dbu(
-        round(width / kcl.dbu), round(length / kcl.dbu), layer, enclosure=enclosure
+        width=round(width / kcl.dbu),
+        length=round(length / kcl.dbu),
+        layer=layer,
+        enclosure=enclosure,
     )

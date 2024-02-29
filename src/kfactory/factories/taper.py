@@ -3,60 +3,26 @@
 TODO: Non-linear tapers
 """
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Protocol
 
-from ... import kdb
-from ...conf import config
-from ...enclosure import LayerEnclosure
-from ...kcell import Info, KCell, KCLayout, LayerEnum, MetaData, kcl
+from .. import kdb
+from ..conf import config
+from ..enclosure import LayerEnclosure
+from ..kcell import Info, KCell, KCLayout, LayerEnum, MetaData, kcl
 
 __all__ = ["taper"]
 
 
-class Taper:
-    kcl: KCLayout
-
-    def __init__(
-        self,
-        kcl: KCLayout,
-        basename: str | None = None,
-        additional_info: Callable[
-            ...,
-            dict[str, MetaData],
-        ]
-        | dict[str, MetaData]
-        | None = None,
-        **cell_kwargs: Any,
-    ) -> None:
-        self.kcl = kcl
-        self._cell = self.kcl.cell(
-            basename=basename or self.__class__.__name__, **cell_kwargs
-        )(self._kcell)
-        if callable(additional_info) and additional_info is not None:
-            self._additional_info_func: Callable[
-                ...,
-                dict[str, MetaData],
-            ] = additional_info
-            self._additional_info: dict[str, MetaData] = {}
-        else:
-
-            def additional_info_func(
-                **kwargs: Any,
-            ) -> dict[str, MetaData]:
-                return {}
-
-            self._additional_info_func = additional_info_func
-            self._additional_info = additional_info or {}
-
+class TaperFactory(Protocol):
     def __call__(
         self,
         width1: int,
         width2: int,
         length: int,
-        layer: int,
+        layer: int | LayerEnum,
         enclosure: LayerEnclosure | None = None,
     ) -> KCell:
-        r"""Linear Taper [um].
+        r"""Linear Taper [dbu].
 
                    __
                  _/  │ Slab/Exclude
@@ -78,16 +44,63 @@ class Taper:
             layer: Main layer of the taper.
             enclosure: Definition of the slab/exclude.
         """
-        return self._cell(
-            width1=width1,
-            width2=width2,
-            length=length,
-            layer=layer,
-            enclosure=enclosure,
-        )
+        ...
 
-    def _kcell(
-        self,
+
+def taper_factory(
+    kcl: KCLayout,
+    basename: str | None = None,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    **cell_kwargs: Any,
+) -> TaperFactory:
+    r"""Returns a function generating linear tapers [dbu].
+
+               __
+             _/  │ Slab/Exclude
+           _/  __│
+         _/  _/  │
+        │  _/    │
+        │_/      │
+        │_       │ Core
+        │ \_     │
+        │_  \_   │
+          \_  \__│
+            \_   │
+              \__│ Slab/Exclude
+
+    Args:
+        kcl: The KCLayout which will be owned
+        additional_info: Add additional key/values to the
+            [`KCell.info`][kfactory.kcell.KCell.info]. Can be a static dict
+            mapping info name to info value. Or can a callable which takes the straight
+            functions' parameters as kwargs and returns a dict with the mapping.
+        basename: Overwrite the prefix of the resulting KCell's name. By default
+            the KCell will be named 'straight_dbu[...]'.
+        cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
+    """
+    if callable(additional_info) and additional_info is not None:
+        _additional_info_func: Callable[
+            ...,
+            dict[str, MetaData],
+        ] = additional_info
+        _additional_info: dict[str, MetaData] = {}
+    else:
+
+        def additional_info_func(
+            **kwargs: Any,
+        ) -> dict[str, MetaData]:
+            return {}
+
+        _additional_info_func = additional_info_func
+        _additional_info = additional_info or {}
+
+    @kcl.cell(**cell_kwargs)
+    def taper(
         width1: int,
         width2: int,
         length: int,
@@ -116,7 +129,7 @@ class Taper:
             layer: Main layer of the taper.
             enclosure: Definition of the slab/exclude.
         """
-        c = self.kcl.kcell()
+        c = kcl.kcell()
         if length < 0:
             config.logger.critical(
                 f"Negative lengths are not allowed {length} as ports"
@@ -165,7 +178,7 @@ class Taper:
             "length_dbu": length,
         }
         _info.update(
-            self._additional_info_func(
+            _additional_info_func(
                 width1=width1,
                 width2=width2,
                 length=length,
@@ -173,12 +186,14 @@ class Taper:
                 enclosure=enclosure,
             )
         )
-        _info.update(self._additional_info)
+        _info.update(_additional_info)
         c.info = Info(**_info)
         c.auto_rename_ports()
         c.boundary = taper.dpolygon
 
         return c
 
+    return taper
 
-taper = Taper(kcl)
+
+taper = taper_factory(kcl)
