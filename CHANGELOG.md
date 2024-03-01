@@ -1,16 +1,3 @@
-<a name="v0.11.6"></a>
-# [v0.11.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.6) - 01 Mar 2024
-
-# What's Changed
-
-
-
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.11.5...v0.11.6
-
-
-[Changes][v0.11.6]
-
-
 <a name="v0.11.5"></a>
 # [v0.11.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.5) - 01 Mar 2024
 
@@ -18,7 +5,7 @@
 
 ## New
 
-- Move `@vcell` to KCLayout [#264](https://github.com/gdsfactory/kfactory/pull/264)
+- Move [@vcell](https://github.com/vcell) to KCLayout [#264](https://github.com/gdsfactory/kfactory/pull/264)
 - Add 'additional_info' to constructor for standard cells [#262](https://github.com/gdsfactory/kfactory/pull/262)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.11.4...v0.11.5
@@ -325,7 +312,6 @@
 [Changes][v0.4.0]
 
 
-[v0.11.6]: https://github.com/gdsfactory/kfactory/compare/v0.11.5...v0.11.6
 [v0.11.5]: https://github.com/gdsfactory/kfactory/compare/v0.11.4...v0.11.5
 [v0.11.4]: https://github.com/gdsfactory/kfactory/compare/v0.11.3...v0.11.4
 [v0.11.3]: https://github.com/gdsfactory/kfactory/compare/v0.11.2...v0.11.3
