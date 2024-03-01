@@ -5,6 +5,7 @@
 
 ## New
 
+- Move [@vcell](https://github.com/vcell) to KCLayout [#264](https://github.com/gdsfactory/kfactory/pull/264)
 - Add 'additional_info' to constructor for standard cells [#262](https://github.com/gdsfactory/kfactory/pull/262)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.11.4...v0.11.5
