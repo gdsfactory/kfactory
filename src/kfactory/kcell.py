@@ -2453,7 +2453,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             virtual_factories=Factories({}),
             sparameters_path=sparameters_path,
             interconnect_cml_path=interconnect_cml_path,
-            constants=Constants(),
+            constants=constants or Constants(),
             library=library,
             layer_stack=layer_stack,
             layout=layout,
