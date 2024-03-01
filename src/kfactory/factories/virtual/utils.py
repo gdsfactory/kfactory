@@ -11,10 +11,10 @@ def extrude_backbone(
     backbone: Sequence[kdb.DPoint],
     width: float,
     layer: int,
-    enclosure: LayerEnclosure | None,
     start_angle: float,
     end_angle: float,
     dbu: float,
+    enclosure: LayerEnclosure | None = None,
 ) -> None:
     """Extrude a backbone into a virtual cell.
 

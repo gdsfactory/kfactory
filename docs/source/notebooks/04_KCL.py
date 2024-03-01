@@ -62,15 +62,7 @@ kcl2
 
 # %%
 # Create an parametric KCell-Function for straights on the new pdk
-sf2 = kf.cells.dbu.Straight(kcl=kcl2)
-
-# %%
-# The function hasn't been added to the function yes, so it's still empty
-sf2.kcl
-
-# %%
-# Add it to the pdk factories
-kcl2.factories.update({"straight": kf.cells.dbu.Straight(kcl2)})
+sf2 = kf.factories.straight.straight_dbu_factory(kcl=kcl2)
 
 # %%
 # Make an instance with
