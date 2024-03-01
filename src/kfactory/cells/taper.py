@@ -7,9 +7,11 @@ TODO: Non-linear tapers.
 
 from .. import KCell, LayerEnum, kcl
 from ..enclosure import LayerEnclosure
-from .dbu.taper import taper as taper_dbu
+from ..factories.taper import taper_factory
 
 __all__ = ["taper", "taper_dbu"]
+
+taper_dbu = taper_factory(kcl)
 
 
 def taper(

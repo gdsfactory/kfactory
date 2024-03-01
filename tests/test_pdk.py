@@ -22,7 +22,7 @@ def test_pdk() -> None:
 
 def test_clear() -> None:
     kcl = kf.KCLayout("CLEAR")
-    layer = kcl.layer(500, 0)
+    kcl.layer(500, 0)
     kcl.layers = kf.kcell.layerenum_from_dict(kcl=kcl, layers={"WG": (1, 0)})
     assert kcl.layers.WG == 1
     kcl.clear(keep_layers=True)
@@ -36,14 +36,19 @@ def test_kcell_delete() -> None:
         kcl = kf.constant(_kcl)
         WG = (1, 0)
 
-    s = partial(kf.cells.dbu.Straight(_kcl), width=1000, length=10_000, layer=LAYER.WG)
+    s = partial(
+        kf.factories.straight.straight_dbu_factory(_kcl),
+        width=1000,
+        length=10_000,
+        layer=LAYER.WG,
+    )
 
     s1 = s()
     _kcl.delete_cell(s1)
-    assert s1._destroyed() == True
+    assert s1._destroyed() is True
 
     s1 = s()
-    assert s1._destroyed() == False
+    assert s1._destroyed() is False
 
 
 def test_multi_pdk() -> None:
@@ -57,9 +62,9 @@ def test_multi_pdk() -> None:
     doe_pdk2 = kf.KCLayout(name="DOE2", base_kcl=base_pdk)
     assembly_pdk = kf.KCLayout(name="ASSEMBLY", base_kcl=base_pdk)
 
-    wg = kf.cells.dbu.Straight(base_pdk)
-    bend90_pdk1 = kf.cells.euler.BendEuler(doe_pdk1)
-    bend90_pdk2 = kf.cells.euler.BendEuler(doe_pdk2)
+    wg = kf.factories.straight.straight_dbu_factory(base_pdk)
+    bend90_pdk1 = kf.factories.euler.bend_euler_factory(doe_pdk1)
+    bend90_pdk2 = kf.factories.euler.bend_euler_factory(doe_pdk2)
 
     doe1 = doe_pdk1.kcell("DOE1")
     doe1_wg = doe1 << wg(width=1000, length=10_000, layer=base_pdk.layers.WG)
@@ -107,9 +112,9 @@ def test_multi_pdk_convert() -> None:
     doe_pdk2 = kf.KCLayout(name="DOE2", base_kcl=base_pdk)
     assembly_pdk = kf.KCLayout(name="ASSEMBLY", base_kcl=base_pdk)
 
-    wg = kf.cells.dbu.Straight(base_pdk)
-    bend90_pdk1 = kf.cells.euler.BendEuler(doe_pdk1)
-    bend90_pdk2 = kf.cells.euler.BendEuler(doe_pdk2)
+    wg = kf.factories.straight.straight_dbu_factory(base_pdk)
+    bend90_pdk1 = kf.factories.euler.bend_euler_factory(doe_pdk1)
+    bend90_pdk2 = kf.factories.euler.bend_euler_factory(doe_pdk2)
 
     doe1 = doe_pdk1.kcell("DOE1")
     doe1_wg = doe1 << wg(width=1000, length=10_000, layer=base_pdk.layers.WG)
@@ -160,9 +165,9 @@ def test_multi_pdk_read_write() -> None:
     doe_pdk2_write = kf.KCLayout(name="DOE2_WRITE", base_kcl=base_pdk)
     assembly_pdk = kf.KCLayout(name="ASSEMBLY", base_kcl=base_pdk)
 
-    wg = kf.cells.dbu.Straight(base_pdk)
-    bend90_pdk1 = kf.cells.euler.BendEuler(doe_pdk1_write)
-    bend90_pdk2 = kf.cells.euler.BendEuler(doe_pdk2_write)
+    wg = kf.factories.straight.straight_dbu_factory(base_pdk)
+    bend90_pdk1 = kf.factories.euler.bend_euler_factory(doe_pdk1_write)
+    bend90_pdk2 = kf.factories.euler.bend_euler_factory(doe_pdk2_write)
 
     doe1 = doe_pdk1_write.kcell("DOE1")
     doe1_wg = doe1 << wg(width=1000, length=10_000, layer=base_pdk.layers.WG)
@@ -212,14 +217,14 @@ def test_multi_pdk_read_write() -> None:
 def test_merge_read_shapes() -> None:
     with pytest.raises(kf.kcell.MergeError):
         kcl_1 = kf.KCLayout("MERGE_BASE")
-        s_base = kf.cells.dbu.Straight(kcl_1)(
+        s_base = kf.factories.straight.straight_dbu_factory(kcl_1)(
             width=1000, length=10_000, layer=kcl_1.layer(1, 0)
         )
         s_copy = s_base.dup()
         s_copy.name = "Straight"
 
         kcl_2 = kf.KCLayout("MERGE_READ")
-        s_base = kf.cells.dbu.Straight(kcl_2)(
+        s_base = kf.factories.straight.straight_dbu_factory(kcl_2)(
             width=1100, length=10_000, layer=kcl_2.layer(1, 0)
         )
         s_copy = s_base.dup()
@@ -236,7 +241,7 @@ def test_merge_read_instances() -> None:
     with pytest.raises(kf.kcell.MergeError):
         kcl_1 = kf.KCLayout("MERGE_BASE")
         enc1 = kf.LayerEnclosure(sections=[(kcl_1.layer(2, 0), 0, 200)], name="CLAD")
-        s_base = kf.cells.dbu.Straight(kcl_1)(
+        s_base = kf.factories.straight.straight_dbu_factory(kcl_1)(
             width=1000, length=10_000, layer=kcl_1.layer(1, 0), enclosure=enc1
         )
         s_copy = kcl_1.kcell("Straight")
@@ -244,7 +249,7 @@ def test_merge_read_instances() -> None:
 
         kcl_2 = kf.KCLayout("MERGE_READ")
         enc2 = kf.LayerEnclosure(sections=[(kcl_2.layer(2, 0), 0, 200)], name="CLAD")
-        s_base = kf.cells.dbu.Straight(kcl_2)(
+        s_base = kf.factories.straight.straight_dbu_factory(kcl_2)(
             width=1000, length=10_000, layer=kcl_2.layer(1, 0), enclosure=enc2
         )
         s_copy = kcl_2.kcell("Straight")

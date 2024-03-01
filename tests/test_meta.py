@@ -126,7 +126,7 @@ def test_nometainfo_read(straight: kf.KCell) -> None:
         assert straight.settings.model_dump() == {
             "length": 1000,
             "width": 500,
-            "function_name": "Straight",
+            "function_name": "straight",
             "enclosure": "WGSTD",
             "layer": 0,
         }

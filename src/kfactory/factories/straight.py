@@ -16,70 +16,17 @@ The slabs and excludes can be given in the form of an
 [Enclosure][kfactory.enclosure.LayerEnclosure].
 """
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Protocol
 
-from ... import kdb
-from ...conf import config
-from ...enclosure import LayerEnclosure
-from ...kcell import Info, KCell, KCLayout, LayerEnum, MetaData, kcl
+from .. import kdb
+from ..conf import config
+from ..enclosure import LayerEnclosure
+from ..kcell import Info, KCell, KCLayout, LayerEnum, MetaData
 
-__all__ = ["straight"]
+__all__ = ["straight_dbu_factory"]
 
 
-class Straight:
-    """Waveguide defined in dbu.
-
-        ┌──────────────────────────────┐
-        │         Slab/Exclude         │
-        ├──────────────────────────────┤
-        │                              │
-        │             Core             │
-        │                              │
-        ├──────────────────────────────┤
-        │         Slab/Exclude         │
-        └──────────────────────────────┘
-    Args:
-        width: Waveguide width. [dbu]
-        length: Waveguide length. [dbu]
-        layer: Main layer of the waveguide.
-        enclosure: Definition of slab/excludes. [dbu]
-    """
-
-    kcl: KCLayout
-
-    def __init__(
-        self,
-        kcl: KCLayout,
-        additional_info: Callable[
-            ...,
-            dict[str, MetaData],
-        ]
-        | dict[str, MetaData]
-        | None = None,
-        basename: str | None = None,
-        **cell_kwargs: Any,
-    ):
-        """Initialize A straight class on a defined KCLayout."""
-        self.kcl = kcl
-        self._cell = self.kcl.cell(
-            basename=basename or self.__class__.__name__, **cell_kwargs
-        )(self._kcell)
-        if callable(additional_info) and additional_info is not None:
-            self._additional_info_func: Callable[
-                ...,
-                dict[str, MetaData],
-            ] = additional_info
-            self._additional_info: dict[str, MetaData] = {}
-        else:
-
-            def additional_info_func(
-                **kwargs: Any,
-            ) -> dict[str, MetaData]:
-                return {}
-
-            self._additional_info_func = additional_info_func
-            self._additional_info = additional_info or {}
-
+class StraightKCellFactory(Protocol):
     def __call__(
         self,
         width: int,
@@ -104,10 +51,59 @@ class Straight:
             layer: Main layer of the waveguide.
             enclosure: Definition of slab/excludes. [dbu]
         """
-        return self._cell(width=width, length=length, layer=layer, enclosure=enclosure)
+        ...
 
-    def _kcell(
-        self,
+
+def straight_dbu_factory(
+    kcl: KCLayout,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    basename: str | None = None,
+    **cell_kwargs: Any,
+) -> StraightKCellFactory:
+    """Returns a function generating straights [dbu].
+
+        ┌──────────────────────────────┐
+        │         Slab/Exclude         │
+        ├──────────────────────────────┤
+        │                              │
+        │             Core             │
+        │                              │
+        ├──────────────────────────────┤
+        │         Slab/Exclude         │
+        └──────────────────────────────┘
+    Args:
+        kcl: The KCLayout which will be owned
+        additional_info: Add additional key/values to the
+            [`KCell.info`][kfactory.kcell.KCell.info]. Can be a static dict
+            mapping info name to info value. Or can a callable which takes the straight
+            functions' parameters as kwargs and returns a dict with the mapping.
+        basename: Overwrite the prefix of the resulting KCell's name. By default
+            the KCell will be named 'straight_dbu[...]'.
+        cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
+    """
+    if callable(additional_info) and additional_info is not None:
+        _additional_info_func: Callable[
+            ...,
+            dict[str, MetaData],
+        ] = additional_info
+        _additional_info: dict[str, MetaData] = {}
+    else:
+
+        def additional_info_func(
+            **kwargs: Any,
+        ) -> dict[str, MetaData]:
+            return {}
+
+        _additional_info_func = additional_info_func
+        _additional_info = additional_info or {}
+
+    @kcl.cell(basename=basename, **cell_kwargs)
+    def straight(
         width: int,
         length: int,
         layer: int | LayerEnum,
@@ -130,7 +126,7 @@ class Straight:
             layer: Main layer of the waveguide.
             enclosure: Definition of slab/excludes. [dbu]
         """
-        c = self.kcl.kcell()
+        c = kcl.kcell()
 
         if length < 0:
             config.logger.critical(
@@ -163,17 +159,15 @@ class Straight:
             "length_dbu": length,
         }
         _info.update(
-            self._additional_info_func(
+            _additional_info_func(
                 width=width, length=length, layer=layer, enclosure=enclosure
             )
         )
-        _info.update(self._additional_info)
+        _info.update(_additional_info)
         c.info = Info(**_info)
 
         c.boundary = c.dbbox()
         c.auto_rename_ports()
         return c
 
-
-straight = Straight(kcl)
-"""Default straight on the "default" kcl."""
+    return straight
