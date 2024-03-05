@@ -99,7 +99,7 @@ def taper_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @kcl.cell(**cell_kwargs)
+    @kcl.cell(basename=basename, **cell_kwargs)
     def taper(
         width1: int,
         width2: int,
