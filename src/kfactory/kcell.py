@@ -2394,7 +2394,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     rename_function: Callable[..., None]
     _registered_functions: dict[int, Callable[..., KCell]]
 
-    info: Info
+    info: Info = Field(default_factory=Info)
     _settings: KCellSettings
 
     def __init__(
@@ -2410,7 +2410,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         base_kcl: KCLayout | None = None,
         port_rename_function: Callable[..., None] = rename_clockwise_multi,
         copy_base_kcl_layers: bool = True,
-        info: dict[str, MetaData] = Field(default_factory=dict),
+        info: dict[str, MetaData] | None = None,
     ) -> None:
         """Create a new KCLayout (PDK). Can be based on an old KCLayout.
 
@@ -2462,7 +2462,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             layer_stack=layer_stack,
             layout=layout,
             rename_function=port_rename_function,
-            info=Info(**info),
+            info=Info(**info) if info else Info(),
         )
         self._name = name
         self._settings = KCellSettings(
