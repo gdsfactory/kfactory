@@ -253,7 +253,7 @@ class LayoutWidget:
 
         else:
             cell = self.layout_view.active_cellview().cell
-            if cell.bbox_per_layer(prop_iter.current().layer_index()).empty():
+            if cell.bbox(prop_iter.current().layer_index()).empty():
                 return None
             layer_label = (
                 Label(props.name)

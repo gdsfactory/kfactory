@@ -931,7 +931,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                 )
 
         if _is_int(ref):
-            _ref = c.bbox_per_layer(ref)
+            _ref = c.bbox(ref)
         elif _is_Region(ref):
             _ref = ref.bbox()
 
@@ -1366,8 +1366,9 @@ class KCellEnclosure(BaseModel):
         regions = {}
 
         for enc in self.enclosures.enclosures:
-            if not c.bbox_per_layer(enc.main_layer).empty():
+            if not c.bbox(enc.main_layer).empty():
                 rsi = c.begin_shapes_rec(enc.main_layer)
+                r = kdb.Region(rsi)
                 for layer, layersec in enc.layer_sections.items():
                     if layer not in regions:
                         reg = kdb.Region()
@@ -1376,8 +1377,8 @@ class KCellEnclosure(BaseModel):
                         reg = regions[layer]
                     for section in layersec.sections:
                         reg += self.minkowski_region(
-                            rsi, section.d_max, shape
-                        ) - self.minkowski_region(rsi, section.d_min, shape)
+                            r, section.d_max, shape
+                        ) - self.minkowski_region(r, section.d_min, shape)
 
                         reg.merge()
 
@@ -1450,7 +1451,7 @@ class KCellEnclosure(BaseModel):
 
         for i, enc in enumerate(self.enclosures.enclosures):
             assert enc.main_layer is not None
-            if not c.bbox_per_layer(enc.main_layer).empty():
+            if not c.bbox(enc.main_layer).empty():
                 _inp = f"main_layer_{enc.main_layer}"
                 if enc.main_layer not in inputs:
                     tp.input(f"{_inp}", c.kcl.layout, c.cell_index(), enc.main_layer)
