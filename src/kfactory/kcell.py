@@ -220,6 +220,19 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
     def get(self, __key: str, default: Any | None = None) -> Any:
         return getattr(self, __key) if hasattr(self, __key) else default
 
+    def update(self, data: Info | dict | Iterable[tuple[str, Any]]) -> None:
+        if isinstance(data, dict):
+            for key, value in data.items():
+                self.__setitem__(key, value)
+        elif isinstance(data, Info):
+            for key, value in data.model_dump().items():
+                self.__setitem__(key, value)
+        elif isinstance(data, Iterable):
+            for key, value in data:
+                self.__setitem__(key, value)
+        else:
+            raise TypeError("Unsupported data type for update")
+
 
 class PROPID(IntEnum):
     """Mapping for GDS properties."""
