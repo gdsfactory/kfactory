@@ -1,3 +1,19 @@
+<a name="v0.12.1"></a>
+# [v0.12.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.1) - 01 Mar 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- Fix factories for euler and taper [#268](https://github.com/gdsfactory/kfactory/pull/268)
+- fix KCLayout not allowing constants in the constructor [#267](https://github.com/gdsfactory/kfactory/pull/267)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.12.0...v0.12.1
+
+
+[Changes][v0.12.1]
+
+
 <a name="v0.12.0"></a>
 # [v0.12.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.0) - 01 Mar 2024
 
@@ -320,6 +336,7 @@
 [Changes][v0.4.0]
 
 
+[v0.12.1]: https://github.com/gdsfactory/kfactory/compare/v0.12.0...v0.12.1
 [v0.12.0]: https://github.com/gdsfactory/kfactory/compare/v0.11.4...v0.12.0
 [v0.11.4]: https://github.com/gdsfactory/kfactory/compare/v0.11.3...v0.11.4
 [v0.11.3]: https://github.com/gdsfactory/kfactory/compare/v0.11.2...v0.11.3
