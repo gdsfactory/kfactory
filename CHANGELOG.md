@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- Fix initialization of KCLayout.constants [#269](https://github.com/gdsfactory/kfactory/pull/269)
 - Fix factories for euler and taper [#268](https://github.com/gdsfactory/kfactory/pull/268)
 - fix KCLayout not allowing constants in the constructor [#267](https://github.com/gdsfactory/kfactory/pull/267)
 
