@@ -2394,7 +2394,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     rename_function: Callable[..., None]
     _registered_functions: dict[int, Callable[..., KCell]]
 
-    info: Info
+    info: Info = Field(default_factory=Info)
     _settings: KCellSettings
 
     def __init__(
@@ -2410,6 +2410,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         base_kcl: KCLayout | None = None,
         port_rename_function: Callable[..., None] = rename_clockwise_multi,
         copy_base_kcl_layers: bool = True,
+        info: dict[str, MetaData] | None = None,
     ) -> None:
         """Create a new KCLayout (PDK). Can be based on an old KCLayout.
 
@@ -2431,6 +2432,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             port_rename_function: Which function to use for renaming kcell ports.
             copy_base_kcl_layers: Copy all known layers from the base if any are
                 defined.
+            info: Additional metadata to put into info attribute.
         """
         library = kdb.Library()
         layout = library.layout()
@@ -2441,8 +2443,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 layer_stack = LayerStack.model_construct(**layer_stackdict)
             else:
                 layer_stack = layer_stack or LayerStack()
+            _constants = constants() if constants else base_kcl.constants.model_copy()
         else:
             layer_stack = layer_stack or LayerStack()
+            _constants = constants() if constants else Constants()
         super().__init__(
             _name=name,
             kcells={},
@@ -2453,12 +2457,12 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             virtual_factories=Factories({}),
             sparameters_path=sparameters_path,
             interconnect_cml_path=interconnect_cml_path,
-            constants=constants or Constants(),
+            constants=_constants,
             library=library,
             layer_stack=layer_stack,
             layout=layout,
             rename_function=port_rename_function,
-            info=Info(),
+            info=Info(**info) if info else Info(),
         )
         self._name = name
         self._settings = KCellSettings(
@@ -2494,7 +2498,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             interconnect_cml_path = (
                 interconnect_cml_path or base_kcl.interconnect_cml_path
             )
-            _constants = constants() if constants else base_kcl.constants.model_copy()
             if enclosure is None:
                 enclosure = base_kcl.enclosure or KCellEnclosure([])
             if layer_enclosures is None:
@@ -2524,12 +2527,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             layers = self.layerenum_from_dict(name="LAYER", layers=layer_dict)
             sparameters_path = sparameters_path
             interconnect_cml_path = interconnect_cml_path
-            _constants = constants() if constants else Constants()
             if enclosure is None:
                 enclosure = KCellEnclosure([])
             if layer_enclosures is None:
                 _layer_enclosures = LayerEnclosureModel()
-        self.constants = _constants
         self.layers = layers
         self.sparameters_path = sparameters_path
         self.enclosure = enclosure
