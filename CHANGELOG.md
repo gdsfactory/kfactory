@@ -1,5 +1,20 @@
-<a name="v0.12.1"></a>
-# [v0.12.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.1) - 01 Mar 2024
+<a name="v0.12.3"></a>
+# [v0.12.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.3) - 06 Mar 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- Fix KCellEnclosure and rename bbox_per_layer to bbox [#270](https://github.com/gdsfactory/kfactory/pull/270)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.12.2...v0.12.3
+
+
+[Changes][v0.12.3]
+
+
+<a name="v0.12.2"></a>
+# [v0.12.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.2) - 06 Mar 2024
 
 # What's Changed
 
@@ -9,10 +24,10 @@
 - Fix factories for euler and taper [#268](https://github.com/gdsfactory/kfactory/pull/268)
 - fix KCLayout not allowing constants in the constructor [#267](https://github.com/gdsfactory/kfactory/pull/267)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.12.0...v0.12.1
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.12.0...v0.12.2
 
 
-[Changes][v0.12.1]
+[Changes][v0.12.2]
 
 
 <a name="v0.12.0"></a>
@@ -337,7 +352,8 @@
 [Changes][v0.4.0]
 
 
-[v0.12.1]: https://github.com/gdsfactory/kfactory/compare/v0.12.0...v0.12.1
+[v0.12.3]: https://github.com/gdsfactory/kfactory/compare/v0.12.2...v0.12.3
+[v0.12.2]: https://github.com/gdsfactory/kfactory/compare/v0.12.0...v0.12.2
 [v0.12.0]: https://github.com/gdsfactory/kfactory/compare/v0.11.4...v0.12.0
 [v0.11.4]: https://github.com/gdsfactory/kfactory/compare/v0.11.3...v0.11.4
 [v0.11.3]: https://github.com/gdsfactory/kfactory/compare/v0.11.2...v0.11.3
