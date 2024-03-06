@@ -386,6 +386,7 @@ def bend_s_euler_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
+    @kcl.cell(basename=basename, **cell_kwargs)
     def bend_s_euler(
         offset: float,
         width: float,
