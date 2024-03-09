@@ -2595,6 +2595,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
+        info: dict[str, MetaData] | None = None,
+        post_process: Iterable[Callable] | None = None,
     ) -> (
         Callable[KCellParams, KCell]
         | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
@@ -2759,6 +2761,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     return cell
 
                 _cell = wrapped_cell(**params)
+                _cell.info.update(info or {})
+                for pp in post_process or []:
+                    pp(_cell)
 
                 if _cell._destroyed():
                     # If the any cell has been destroyed, we should clean up the cache.
