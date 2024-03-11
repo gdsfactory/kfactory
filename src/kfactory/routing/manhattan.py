@@ -280,7 +280,7 @@ def route_manhattan(
         match (int(np.sign(tv.x)), int(np.sign(tv.y)), (t2.angle - t1.angle) % 4):
             case (0, 0, ang):
                 if ang == 0:
-                    raise ValueError("Something weird happened")
+                    raise ValueError("This should never happen. Please open an issue!")
                 else:
                     break
             case (x, y, 2) if x == -1 and y != abs(tv.y) > 4 * bend90_radius:
@@ -289,7 +289,7 @@ def route_manhattan(
                 ang != 2 or x != -1
             ) and ang != 0:
                 break
-            case (0, y, ang) if (y * ang) % 4 != 1:
+            case (0, y, ang) if (y * ang) % 4 not in [0, 1]:
                 break
             case (0, y, ang) if (y * ang) % 4 == 3:
                 t1 *= kdb.Trans(0, False, 2 * bend90_radius, 0)
