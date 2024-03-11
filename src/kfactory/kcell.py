@@ -220,7 +220,7 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
     def get(self, __key: str, default: Any | None = None) -> Any:
         return getattr(self, __key) if hasattr(self, __key) else default
 
-    def update(self, __d: dict[str, int|float|str]) -> None:
+    def update(self, __d: dict[str, int | float | str]) -> None:
         for k, v in __d.items():
             setattr(self, k, v)
 
