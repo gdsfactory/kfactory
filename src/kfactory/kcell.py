@@ -2600,7 +2600,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[KCellParams, None]] | None = None,
+        post_process: Iterable[Callable[[Any], None]] = [],
     ) -> (
         Callable[KCellParams, KCell]
         | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
@@ -2635,6 +2635,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 [settings][kfactory.kcell.KCell.settings]
             register_factory: Register the resulting KCell-function to the
                 [factories][kfactory.kcell.KCLayout.factories]
+            info: Additional metadata to put into info attribute.
+            post_process: List of functions to call after the cell has been created.
         """
         d2fs = rec_dict_to_frozenset if rec_dicts else dict_to_frozenset
         fs2d = rec_frozenset_to_dict if rec_dicts else frozenset_to_dict
