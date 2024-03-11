@@ -1,3 +1,18 @@
+<a name="v0.12.4"></a>
+# [v0.12.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.4) - 11 Mar 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix manahattan router terminating routing too early [#275](https://github.com/gdsfactory/kfactory/pull/275)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.12.3...v0.12.4
+
+
+[Changes][v0.12.4]
+
+
 <a name="v0.12.3"></a>
 # [v0.12.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.3) - 06 Mar 2024
 
@@ -352,6 +367,7 @@
 [Changes][v0.4.0]
 
 
+[v0.12.4]: https://github.com/gdsfactory/kfactory/compare/v0.12.3...v0.12.4
 [v0.12.3]: https://github.com/gdsfactory/kfactory/compare/v0.12.2...v0.12.3
 [v0.12.2]: https://github.com/gdsfactory/kfactory/compare/v0.12.0...v0.12.2
 [v0.12.0]: https://github.com/gdsfactory/kfactory/compare/v0.11.4...v0.12.0
