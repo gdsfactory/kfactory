@@ -220,7 +220,7 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
     def get(self, __key: str, default: Any | None = None) -> Any:
         return getattr(self, __key) if hasattr(self, __key) else default
 
-    def update(self, __d: dict[str, int | float | str]) -> None:
+    def update(self, __d: dict[str, MetaData]) -> None:
         for k, v in __d.items():
             setattr(self, k, v)
 
@@ -2600,7 +2600,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable] | None = None,
+        post_process: Iterable[Callable[KCellParams, None]] | None = None,
     ) -> (
         Callable[KCellParams, KCell]
         | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
