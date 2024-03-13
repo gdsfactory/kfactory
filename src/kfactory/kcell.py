@@ -7,6 +7,7 @@ and other convenience functions.
 ports and other inf from instances.
 
 """
+
 from __future__ import annotations
 
 import functools
@@ -985,6 +986,8 @@ class KCell:
                         dcplx_trans=port.dcplx_trans,
                         layer=_layer,
                     )
+                kcell._settings = cell.settings.model_copy()
+                kcell.info = cell.info.model_copy()
                 if libcell_as_static:
                     ci = self.kcl.convert_cell_to_static(lib_ci)
                     kcell = self.kcl[ci]
@@ -1500,10 +1503,6 @@ class KCell:
                 kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
             )
         for name, info in self.info.model_dump().items():
-            self.add_meta_info(
-                kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
-            )
-        for name, info in self.info:
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
             )
@@ -3298,10 +3297,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
             )
         for name, info in self.info.model_dump().items():
-            self.add_meta_info(
-                kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
-            )
-        for name, info in self.info:
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
             )
