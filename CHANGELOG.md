@@ -8,6 +8,10 @@
 - Fix proxy KCells [#278](https://github.com/gdsfactory/kfactory/pull/278)
 - fix manahattan router terminating routing too early [#275](https://github.com/gdsfactory/kfactory/pull/275)
 
+## Dependency Updates
+
+- Ruff formatting [#279](https://github.com/gdsfactory/kfactory/pull/279)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.12.3...v0.12.4
 
 
