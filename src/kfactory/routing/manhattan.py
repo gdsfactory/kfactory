@@ -1,6 +1,6 @@
 """Can calculate manhattan routes based on ports/transformations."""
 
-from typing import Literal
+from typing import Literal, Protocol
 
 import numpy as np
 
@@ -9,7 +9,44 @@ from ..conf import config
 from ..enclosure import clean_points
 from ..kcell import KCLayout, Port
 
-__all__ = ["route_manhattan", "route_manhattan_180", "clean_points"]
+__all__ = [
+    "route_manhattan",
+    "route_manhattan_180",
+    "clean_points",
+    "ManhattanRoutePathFunction",
+    "ManhattanRoutePathFunction180",
+]
+
+
+class ManhattanRoutePathFunction(Protocol):
+    """Minimal signature of a manhattan function."""
+
+    def __call__(
+        self,
+        port1: Port | kdb.Trans,
+        port2: Port | kdb.Trans,
+        bend90_radius: int,
+        start_straight: int,
+        end_straight: int,
+    ) -> list[kdb.Point]:
+        """Minimal kwargs of a manhattan route function."""
+        ...
+
+
+class ManhattanRoutePathFunction180(Protocol):
+    """Minimal signature of a manhattan function with 180° bend routing."""
+
+    def __call__(
+        self,
+        port1: Port | kdb.Trans,
+        port2: Port | kdb.Trans,
+        bend90_radius: int,
+        bend180_radius: int,
+        start_straight: int,
+        end_straight: int,
+    ) -> list[kdb.Point]:
+        """Minimal kwargs of a manhattan route function with 180° bend."""
+        ...
 
 
 def droute_manhattan_180(

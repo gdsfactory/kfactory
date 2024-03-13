@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from .. import kdb
 from ..kcell import Instance, KCell, Port
-from .manhattan import route_manhattan
+from .manhattan import ManhattanRoutePathFunction, route_manhattan
 
 
 def route_elec(
@@ -13,7 +13,7 @@ def route_elec(
     p2: Port,
     start_straight: int | None = None,
     end_straight: int | None = None,
-    route_path_function: Callable[..., list[kdb.Point]] = route_manhattan,
+    route_path_function: ManhattanRoutePathFunction = route_manhattan,
     width: int | None = None,
     layer: int | None = None,
 ) -> None:
@@ -269,8 +269,6 @@ def route_dual_rails(
     _width = width or p1.width
     _hole_width = hole_width or p1.width // 2
     _layer = layer or p1.layer
-    _start_straight = start_straight or _width // 2
-    _end_straight = end_straight or _width // 2
 
     pts = route_path_function(
         p1.copy(),
