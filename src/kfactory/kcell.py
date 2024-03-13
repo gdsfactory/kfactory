@@ -3979,55 +3979,164 @@ class Port:
                 return True
         return False
 
-    def copy(self, trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0) -> Port:
+    def copy(
+        self,
+        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        post_trans: kdb.Trans | kdb.DCplxTrans | None = None,
+    ) -> Port:
         """Get a copy of a port.
 
+        Transformation order which results in `copy.trans`:
+            - Trans: `trans * port.trans * post_trans`
+            - DCplxTrans: `trans * port.dcplx_trans * post_trans`
+
         Args:
-            trans: an optional transformation applied to the port to be copied
+            trans: an optional transformation applied to the port to be copied.
+            post_trans: transformation to apply to the port after copying.
 
         Returns:
             port: a copy of the port
         """
         info = self.info.model_dump()
-        for name, value in self.info:
-            info[name] = value
-        if self._trans:
+        if post_trans is None:
+            if self._trans:
+                if isinstance(trans, kdb.Trans):
+                    _trans = trans * self.trans
+                    return Port(
+                        name=self.name,
+                        trans=_trans,
+                        layer=self.layer,
+                        port_type=self.port_type,
+                        width=self.width,
+                        kcl=self.kcl,
+                        info=info,
+                    )
+                elif not trans.is_complex():
+                    _trans = trans.s_trans().to_itype(self.kcl.layout.dbu) * self.trans
+                    return Port(
+                        name=self.name,
+                        trans=_trans,
+                        layer=self.layer,
+                        port_type=self.port_type,
+                        width=self.width,
+                        kcl=self.kcl,
+                        info=info,
+                    )
             if isinstance(trans, kdb.Trans):
-                _trans = trans * self.trans
-                return Port(
-                    name=self.name,
-                    trans=_trans,
-                    layer=self.layer,
-                    port_type=self.port_type,
-                    width=self.width,
-                    kcl=self.kcl,
-                    info=info,
-                )
-            elif not trans.is_complex():
-                _trans = trans.s_trans().to_itype(self.kcl.layout.dbu) * self.trans
-                return Port(
-                    name=self.name,
-                    trans=_trans,
-                    layer=self.layer,
-                    port_type=self.port_type,
-                    width=self.width,
-                    kcl=self.kcl,
-                    info=info,
-                )
-        if isinstance(trans, kdb.Trans):
-            dtrans = kdb.DCplxTrans(trans.to_dtype(self.kcl.layout.dbu))
-            _dtrans = dtrans * self.dcplx_trans
+                dtrans = kdb.DCplxTrans(trans.to_dtype(self.kcl.layout.dbu))
+                _dtrans = dtrans * self.dcplx_trans
+            else:
+                _dtrans = trans * self.dcplx_trans
+            return Port(
+                name=self.name,
+                dcplx_trans=_dtrans,
+                dwidth=self.d.width,
+                layer=self.layer,
+                kcl=self.kcl,
+                port_type=self.port_type,
+                info=info,
+            )
         else:
-            _dtrans = trans * self.dcplx_trans
-        return Port(
-            name=self.name,
-            dcplx_trans=_dtrans,
-            dwidth=self.d.width,
-            layer=self.layer,
-            kcl=self.kcl,
-            port_type=self.port_type,
-            info=info,
-        )
+            if self._trans:
+                match isinstance(trans, kdb.Trans), isinstance(post_trans, kdb.Trans):
+                    case True, True:
+                        return Port(
+                            name=self.name,
+                            trans=trans * self.trans * post_trans,  # type: ignore[operator]
+                            layer=self.layer,
+                            port_type=self.port_type,
+                            width=self.width,
+                            kcl=self.kcl,
+                            info=info,
+                        )
+                    case False, True:
+                        if not trans.is_complex():  # type: ignore[union-attr]
+                            _trans = (
+                                trans.s_trans().to_itype(self.kcl.layout.dbu)  # type: ignore[operator, union-attr]
+                                * self.trans
+                                * post_trans
+                            )
+                            return Port(
+                                name=self.name,
+                                trans=_trans,
+                                layer=self.layer,
+                                port_type=self.port_type,
+                                width=self.width,
+                                kcl=self.kcl,
+                                info=info,
+                            )
+                        else:
+                            _dcplxtrans = (
+                                trans
+                                * self.dcplx_trans  # type: ignore[operator]
+                                * kdb.DCplxTrans(
+                                    post_trans.to_dtype(self.kcl.layout.dbu)  # type: ignore[union-attr]
+                                )
+                            )
+                            return Port(
+                                name=self.name,
+                                dcplx_trans=_dcplxtrans,
+                                layer=self.layer,
+                                port_type=self.port_type,
+                                dwidth=self.d.width,
+                                kcl=self.kcl,
+                                info=info,
+                            )
+                    case True, False:
+                        _dcplxtrans = (
+                            (
+                                kdb.DCplxTrans(  # type: ignore[operator]
+                                    trans.to_dtype(self.kcl.layout.dbu)  # type: ignore[union-attr]
+                                )
+                            )
+                            * self.dcplx_trans
+                            * post_trans
+                        )
+                        return Port(
+                            name=self.name,
+                            dcplx_trans=_dcplxtrans,
+                            layer=self.layer,
+                            port_type=self.port_type,
+                            dwidth=self.d.width,
+                            kcl=self.kcl,
+                            info=info,
+                        )
+            if isinstance(trans, kdb.Trans):
+                dtrans = kdb.DCplxTrans(trans.to_dtype(self.kcl.layout.dbu))
+                _dtrans = dtrans * self.dcplx_trans
+            else:
+                _dtrans = trans * self.dcplx_trans
+            if isinstance(post_trans, kdb.Trans):
+                _dposttrans = kdb.DCplxTrans(post_trans.to_dtype(self.kcl.layout.dbu))
+            else:
+                _dposttrans = post_trans or kdb.DCplxTrans()
+
+            return Port(
+                name=self.name,
+                dcplx_trans=_dtrans * _dposttrans,
+                dwidth=self.d.width,
+                layer=self.layer,
+                kcl=self.kcl,
+                port_type=self.port_type,
+                info=info,
+            )
+
+    def copy_polar(
+        self, d: int = 0, d_orth: int = 0, angle: int = 2, mirror: bool = False
+    ) -> Port:
+        """Get a polar copy of the port.
+
+        This will return a port which is transformed relatively to the original port's
+        transformation (orientation, angle and position).
+
+        Args:
+            d: The distance to the old port
+            d_orth: Orthogonal distance (positive is positive y for a port which is
+                facing angle=0°)
+            angle: Relative angle to the original port (0=0°,1=90°,2=180°,3=270°).
+            mirror: Whether to mirror the port relative to the original port.
+        """
+        return self.copy(post_trans=kdb.Trans(angle, mirror, d, d_orth))
 
     @property
     def x(self) -> int:

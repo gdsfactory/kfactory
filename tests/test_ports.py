@@ -156,3 +156,35 @@ def test_ports_set_center(LAYER: kf.LayerEnum) -> None:
         layer=LAYER.WG,
     )
     p.center = (0, 0)
+    assert p.dcplx_trans.disp == kf.kdb.DVector(0, 0)
+
+
+def test_polar_copy(LAYER: kf.LayerEnum) -> None:
+    c = kf.KCell()
+    p = c.create_port(
+        name="o1",
+        width=1000,
+        trans=kf.kdb.Trans(1, False, 0, 0),
+        layer=LAYER.WG,
+    )
+
+    p2 = p.copy_polar(500, 500, 2, True)
+    assert p2.trans == kf.kdb.Trans(3, True, -500, 500)
+    c.add_port(name="o2", port=p2)
+
+
+def test_polar_copy_complex(LAYER: kf.LayerEnum) -> None:
+    c = kf.KCell()
+    p = c.create_port(
+        name="o1",
+        dwidth=1,
+        dcplx_trans=kf.kdb.DCplxTrans(1, 30, False, 0.755, 0),
+        layer=LAYER.WG,
+    )
+
+    p2 = p.copy_polar(500, 500, 2, True)
+    c.add_port(name="o2", port=p2)
+
+    assert p2.dcplx_trans == kf.kdb.DCplxTrans(
+        1, 210, True, 0.938012701892, 0.683012701892
+    )
