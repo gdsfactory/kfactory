@@ -4,6 +4,7 @@
 similar concepts to an arbitrary shape located on a main_layer or reference layer or
 region.
 """
+
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Sequence
@@ -1208,12 +1209,10 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
                 self.merged_region += reg
 
     @overload
-    def insert(self) -> None:
-        ...
+    def insert(self) -> None: ...
 
     @overload
-    def insert(self, port_hole_map: dict[int, PortHoles]) -> None:
-        ...
+    def insert(self, port_hole_map: dict[int, PortHoles]) -> None: ...
 
     def insert(
         self,

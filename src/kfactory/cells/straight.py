@@ -12,8 +12,10 @@ A waveguide is a rectangle of material with excludes and/or slab around it::
     │        Slab/Exclude         │
     └─────────────────────────────┘
 
-The slabs and excludes can be given in the form of an :py:class:~`Enclosure`.
+The slabs and excludes can be given in the form of an
+[Enclosure][kfactory.enclosure.LayerEncolosure].
 """
+
 from .. import KCell, LayerEnum, kcl
 from ..enclosure import LayerEnclosure
 from ..factories.straight import straight_dbu_factory
