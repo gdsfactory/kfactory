@@ -8,6 +8,7 @@ There are two kinds of euler bends. One that snaps the ports and one that doesn'
 All the default bends use snapping. To use no snapping make an instance of
 BendEulerCustom(KCell.kcl) and use that one.
 """
+
 from ..factories.euler import bend_euler_factory, bend_s_euler_factory
 from ..kcell import kcl
 

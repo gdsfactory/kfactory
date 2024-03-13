@@ -28,8 +28,7 @@ def fix_spacing_tiled(
     tile_size: tuple[float, float] | None = None,
     overlap: float = 3,
     smooth_factor: float = 0.05,
-) -> kdb.Region:
-    ...
+) -> kdb.Region: ...
 
 
 @overload
@@ -45,8 +44,7 @@ def fix_spacing_tiled(
     overlap: float = 3,
     *,
     smooth_absolute: int,
-) -> kdb.Region:
-    ...
+) -> kdb.Region: ...
 
 
 def fix_spacing_tiled(

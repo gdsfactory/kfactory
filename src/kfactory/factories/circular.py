@@ -2,6 +2,7 @@
 
 A circular bend has a constant radius.
 """
+
 from collections.abc import Callable
 from typing import Any, Protocol
 

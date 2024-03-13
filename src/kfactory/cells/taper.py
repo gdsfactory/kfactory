@@ -4,7 +4,6 @@ TODO: Non-linear tapers.
 
 """
 
-
 from .. import KCell, LayerEnum, kcl
 from ..enclosure import LayerEnclosure
 from ..factories.taper import taper_factory

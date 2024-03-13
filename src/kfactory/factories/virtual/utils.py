@@ -1,4 +1,5 @@
 """Utility functions for virtual cells."""
+
 from collections.abc import Sequence
 
 from ... import kdb

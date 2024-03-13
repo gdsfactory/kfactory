@@ -860,8 +860,7 @@ class KCell:
         width: int,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> Port:
-        ...
+    ) -> Port: ...
 
     @overload
     def create_port(
@@ -872,8 +871,7 @@ class KCell:
         dwidth: float,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> Port:
-        ...
+    ) -> Port: ...
 
     @overload
     def create_port(
@@ -881,8 +879,7 @@ class KCell:
         *,
         name: str | None = None,
         port: Port,
-    ) -> Port:
-        ...
+    ) -> Port: ...
 
     @overload
     def create_port(
@@ -895,8 +892,7 @@ class KCell:
         layer: LayerEnum | int,
         port_type: str = "optical",
         mirror_x: bool = False,
-    ) -> Port:
-        ...
+    ) -> Port: ...
 
     def create_port(self, **kwargs: Any) -> Port:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
@@ -909,8 +905,7 @@ class KCell:
         self,
         cell: KCell | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
-    ) -> Instance:
-        ...
+    ) -> Instance: ...
 
     @overload
     def create_inst(
@@ -922,8 +917,7 @@ class KCell:
         b: kdb.Vector,
         na: int = 1,
         nb: int = 1,
-    ) -> Instance:
-        ...
+    ) -> Instance: ...
 
     def create_inst(
         self,
@@ -1361,14 +1355,12 @@ class KCell:
     @overload
     def insert(
         self, inst: Instance | kdb.CellInstArray | kdb.DCellInstArray
-    ) -> Instance:
-        ...
+    ) -> Instance: ...
 
     @overload
     def insert(
         self, inst: kdb.CellInstArray | kdb.DCellInstArray, property_id: int
-    ) -> Instance:
-        ...
+    ) -> Instance: ...
 
     def insert(
         self,
@@ -1395,8 +1387,7 @@ class KCell:
         /,
         *,
         no_warn: bool = False,
-    ) -> Instance:
-        ...
+    ) -> Instance: ...
 
     @overload
     def transform(
@@ -1405,8 +1396,7 @@ class KCell:
         /,
         *,
         no_warn: bool = False,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def transform(
         self,
@@ -2558,8 +2548,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         self,
         _func: Callable[KCellParams, KCell],
         /,
-    ) -> Callable[KCellParams, KCell]:
-        ...
+    ) -> Callable[KCellParams, KCell]: ...
 
     @overload
     def cell(
@@ -2574,8 +2563,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         rec_dicts: bool = False,
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
-    ) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]:
-        ...
+    ) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]: ...
 
     @config.logger.catch(reraise=True)
     def cell(
@@ -2785,8 +2773,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         self,
         _func: Callable[KCellParams, VKCell],
         /,
-    ) -> Callable[KCellParams, VKCell]:
-        ...
+    ) -> Callable[KCellParams, VKCell]: ...
 
     @overload
     def vcell(
@@ -2800,8 +2787,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
-    ) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]:
-        ...
+    ) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]: ...
 
     @config.logger.catch(reraise=True)
     def vcell(
@@ -3302,16 +3288,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             )
 
     @overload
-    def write(self, filename: str | Path) -> None:
-        ...
+    def write(self, filename: str | Path) -> None: ...
 
     @overload
     def write(
         self,
         filename: str | Path,
         options: kdb.SaveLayoutOptions,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def write(
@@ -3319,8 +3303,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         filename: str | Path,
         options: kdb.SaveLayoutOptions = save_layout_options(),
         set_meta: bool = True,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def write(
         self,
@@ -3463,8 +3446,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         width: int,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> Port:
-        ...
+    ) -> Port: ...
 
     @overload
     def create_port(
@@ -3475,8 +3457,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         dwidth: float,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> Port:
-        ...
+    ) -> Port: ...
 
     @overload
     def create_port(
@@ -3484,8 +3465,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         *,
         name: str | None = None,
         port: Port,
-    ) -> Port:
-        ...
+    ) -> Port: ...
 
     @overload
     def create_port(
@@ -3498,8 +3478,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         layer: LayerEnum | int,
         port_type: str = "optical",
         mirror_x: bool = False,
-    ) -> Port:
-        ...
+    ) -> Port: ...
 
     def create_port(self, **kwargs: Any) -> Port:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
@@ -3670,8 +3649,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         allow_width_mismatch: bool = False,
         allow_layer_mismatch: bool = False,
         allow_type_mismatch: bool = False,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def connect(
@@ -3684,8 +3662,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         allow_width_mismatch: bool = False,
         allow_layer_mismatch: bool = False,
         allow_type_mismatch: bool = False,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def connect(
         self,
@@ -3864,8 +3841,7 @@ class Port:
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = {},
-    ):
-        ...
+    ): ...
 
     @overload
     def __init__(
@@ -3878,8 +3854,7 @@ class Port:
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = {},
-    ):
-        ...
+    ): ...
 
     @overload
     def __init__(
@@ -3894,8 +3869,7 @@ class Port:
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
-    ):
-        ...
+    ): ...
 
     @overload
     def __init__(
@@ -3910,8 +3884,7 @@ class Port:
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
-    ):
-        ...
+    ): ...
 
     def __init__(
         self,
@@ -4377,8 +4350,7 @@ class UMKCell:
         cell: KCell | int,
         *,
         trans: kdb.DTrans | kdb.DCplxTrans | kdb.DVector = kdb.DTrans(),
-    ) -> Instance:
-        ...
+    ) -> Instance: ...
 
     @overload
     def create_inst(
@@ -4390,8 +4362,7 @@ class UMKCell:
         b: kdb.DVector,
         na: int = 1,
         nb: int = 1,
-    ) -> Instance:
-        ...
+    ) -> Instance: ...
 
     def create_inst(
         self,
@@ -4651,8 +4622,7 @@ class Instance:
         allow_width_mismatch: bool = False,
         allow_layer_mismatch: bool = False,
         allow_type_mismatch: bool = False,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def connect(
@@ -4665,8 +4635,7 @@ class Instance:
         allow_width_mismatch: bool = False,
         allow_layer_mismatch: bool = False,
         allow_type_mismatch: bool = False,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def connect(
         self,
@@ -4746,12 +4715,10 @@ class Instance:
         return representer.represent_mapping(cls.yaml_tag, d)
 
     @overload
-    def movex(self, destination: int, /) -> Instance:
-        ...
+    def movex(self, destination: int, /) -> Instance: ...
 
     @overload
-    def movex(self, origin: int, destination: int) -> Instance:
-        ...
+    def movex(self, origin: int, destination: int) -> Instance: ...
 
     def movex(self, origin: int, destination: int | None = None) -> Instance:
         """Move the instance in x-direction in dbu.
@@ -4767,12 +4734,10 @@ class Instance:
         return self
 
     @overload
-    def movey(self, destination: int, /) -> Instance:
-        ...
+    def movey(self, destination: int, /) -> Instance: ...
 
     @overload
-    def movey(self, origin: int, destination: int) -> Instance:
-        ...
+    def movey(self, origin: int, destination: int) -> Instance: ...
 
     def movey(self, origin: int, destination: int | None = None) -> Instance:
         """Move the instance in y-direction in dbu.
@@ -4788,12 +4753,12 @@ class Instance:
         return self
 
     @overload
-    def move(self, destination: tuple[int, int], /) -> Instance:
-        ...
+    def move(self, destination: tuple[int, int], /) -> Instance: ...
 
     @overload
-    def move(self, origin: tuple[int, int], destination: tuple[int, int]) -> Instance:
-        ...
+    def move(
+        self, origin: tuple[int, int], destination: tuple[int, int]
+    ) -> Instance: ...
 
     def move(
         self, origin: tuple[int, int], destination: tuple[int, int] | None = None
@@ -4981,12 +4946,10 @@ class UMInstance:
         self.parent = parent
 
     @overload
-    def movex(self, destination: float, /) -> None:
-        ...
+    def movex(self, destination: float, /) -> None: ...
 
     @overload
-    def movex(self, origin: float, destination: float) -> None:
-        ...
+    def movex(self, origin: float, destination: float) -> None: ...
 
     def movex(self, origin: float, destination: float | None = None) -> None:
         """Move the instance in x-direction in um.
@@ -5001,12 +4964,10 @@ class UMInstance:
             self.parent.transform(kdb.DTrans(float(destination - origin), 0.0))
 
     @overload
-    def movey(self, destination: float, /) -> None:
-        ...
+    def movey(self, destination: float, /) -> None: ...
 
     @overload
-    def movey(self, origin: float, destination: float) -> None:
-        ...
+    def movey(self, origin: float, destination: float) -> None: ...
 
     def movey(self, origin: float, destination: float | None = None) -> None:
         """Move the instance in y-direction in um.
@@ -5030,14 +4991,12 @@ class UMInstance:
             self.parent.transform(t)
 
     @overload
-    def move(self, destination: tuple[float, float], /) -> None:
-        ...
+    def move(self, destination: tuple[float, float], /) -> None: ...
 
     @overload
     def move(
         self, origin: tuple[float, float], destination: tuple[float, float]
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def move(
         self,
@@ -5339,8 +5298,7 @@ class Ports:
         layer: int,
         name: str | None = None,
         port_type: str = "optical",
-    ) -> Port:
-        ...
+    ) -> Port: ...
 
     @overload
     def create_port(
@@ -5351,8 +5309,7 @@ class Ports:
         layer: LayerEnum | int,
         name: str | None = None,
         port_type: str = "optical",
-    ) -> Port:
-        ...
+    ) -> Port: ...
 
     @overload
     def create_port(
@@ -5364,8 +5321,7 @@ class Ports:
         angle: Literal[0, 1, 2, 3],
         name: str | None = None,
         port_type: str = "optical",
-    ) -> Port:
-        ...
+    ) -> Port: ...
 
     def create_port(
         self,

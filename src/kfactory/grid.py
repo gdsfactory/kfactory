@@ -1,4 +1,5 @@
 """Create 1D or 2D (flex) grids in KCells."""
+
 from __future__ import annotations
 
 from collections.abc import Sequence
