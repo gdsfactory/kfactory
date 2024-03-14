@@ -3,6 +3,10 @@
 
 # What's Changed
 
+## New
+
+- Add `copy_polar` to `Port` [#282](https://github.com/gdsfactory/kfactory/pull/282)
+
 ## Bug Fixes
 
 - Fix proxy KCells [#278](https://github.com/gdsfactory/kfactory/pull/278)
