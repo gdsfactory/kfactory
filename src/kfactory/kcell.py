@@ -2767,8 +2767,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     return cell
 
                 _cell = wrapped_cell(**params)
-                _cell.info.update(info or {})
-                for pp in post_process or []:
+                if info is not None:
+                    _cell.info.update(info)
+                for pp in post_process:
                     pp(_cell)
 
                 if _cell._destroyed():
