@@ -1,8 +1,7 @@
 """Can calculate manhattan routes based on ports/transformations."""
 
+from dataclasses import InitVar, dataclass, field
 from typing import Literal, Protocol
-
-import numpy as np
 
 from .. import kdb
 from ..conf import config
@@ -212,7 +211,168 @@ def droute_manhattan(
     )
 
 
-@config.logger.catch(reraise=True)
+_p = kdb.Point()
+
+
+@dataclass
+class ManhattanRouter:
+    bend90_radius: int
+    t1: kdb.Trans
+    t2: kdb.Trans = field(default_factory=kdb.Trans)
+    pts: list[kdb.Point] = field(default_factory=list)
+    start_straight: InitVar[int] = 0
+    end_straight: InitVar[int] = 0
+
+    def __post_init__(self, start_straight: int, end_straight: int) -> None:
+        self.t1 = self.t1.dup()
+        self.t2 = self.t2.dup()
+        self.pts.append(self.t1 * _p)
+        self.end_pt = self.t2 * _p
+        self.t2 *= kdb.Trans(end_straight, 0)
+        self.t1.mirror = False
+        self.t2.mirror = False
+        self.straight(start_straight)
+        assert start_straight >= 0, "Start straight must be >= 0"
+        assert end_straight >= 0, "End straight must be >= 0"
+
+    @property
+    def tv(self) -> kdb.Vector:
+        return self.t1.inverted() * (self.t2.disp - self.t1.disp)
+
+    @property
+    def ta(self) -> Literal[0, 1, 2, 3]:
+        return (self.t2.angle - self.t1.angle) % 4  # type: ignore[return-value]
+
+    def right(self) -> None:
+        self.pts.append((self.t1 * kdb.Trans(0, False, self.bend90_radius, 0)) * _p)
+        self.t1 *= kdb.Trans(3, False, self.bend90_radius, -self.bend90_radius)
+
+    def left(self) -> None:
+        self.pts.append((self.t1 * kdb.Trans(0, False, self.bend90_radius, 0)) * _p)
+        self.t1 *= kdb.Trans(1, False, self.bend90_radius, self.bend90_radius)
+
+    def straight(self, d: int) -> None:
+        self.t1 *= kdb.Trans(0, False, d, 0)
+
+    def straight_nobend(self, d: int) -> None:
+        if d < self.bend90_radius:
+            raise ValueError(
+                f"Router cannot go backwards, {d=} must be bigger "
+                f"than {self.bend90_radius=}"
+            )
+        self.t1 *= kdb.Trans(0, False, d - self.bend90_radius, 0)
+
+    def auto_route(self, max_try: int = 20) -> list[kdb.Point]:
+        if max_try <= 0:
+            raise ValueError("Router was not able to find a possible route")
+        tv = self.tv
+        x = tv.x
+        y = tv.y
+        y_abs = abs(y)
+        ta = self.ta
+        match ta:
+            case 0:
+                match x, y:
+                    case _ if y_abs >= 2 * self.bend90_radius:
+                        if x > 0:
+                            self.straight(x)
+                        if y > 0:
+                            self.left()
+                        else:
+                            self.right()
+                        return self.auto_route(max_try - 1)
+                    case _:
+                        # ports are close to each other ,so need to
+                        # route like a P
+                        if x < 0:
+                            # the straight part of the P is on our side
+                            self.straight(max(2 * self.bend90_radius + x, 0))
+                        if y > 0:
+                            self.right()
+                        else:
+                            self.left()
+                        return self.auto_route(max_try - 1)
+            case 2:
+                match y:
+                    case 0:
+                        return self.finish()
+                    case y if y_abs < 2 * self.bend90_radius:
+                        self.right() if y > 0 else self.left()
+                        return self.auto_route(max_try - 1)
+                    case _:
+                        if y > 0:
+                            self.left()
+                            self.straight(y_abs - 2 * self.bend90_radius)
+                            self.right()
+                        else:
+                            self.right()
+                            self.straight(y_abs - 2 * self.bend90_radius)
+                            self.left()
+                        return self.finish()
+            case _:
+                # 1/3 cases are just one to the other
+                # with flipped y value and right/left flipped
+                if ta == 3:
+                    right = self.right
+                    left = self.left
+                    _y = y
+                else:
+                    right = self.left
+                    left = self.right
+                    _y = -y
+                if x >= self.bend90_radius and _y >= self.bend90_radius:
+                    # straight forward can connect with a single bend
+                    self.straight(x - self.bend90_radius)
+                    left()
+                    return self.finish()
+                if x >= 3 * self.bend90_radius:
+                    # enough space to route but need to first make sure we have enough
+                    # vertical way (seen from t1)
+                    right()
+                    return self.auto_route(max_try - 1)
+                if _y >= 3 * self.bend90_radius:
+                    # enough to route in the other side
+                    left()
+                    return self.auto_route(max_try - 1)
+                if _y <= 0 or x <= 0:
+                    self.straight(max(x + self.bend90_radius, 0))
+                    right()
+                    return self.auto_route(max_try - 1)
+
+                # attempt small routing
+                config.logger.warning(
+                    "route is too small, potential collisions: "
+                    f"{self.t1=}; {self.t2=}; {self.pts=}"
+                )
+
+                right()
+                self.straight(max(self.bend90_radius - _y, 0))
+                left()
+                return self.auto_route(max_try - 1)
+
+        raise ValueError(
+            "Route couldn't find a possible route, please open an issue on Github."
+            f"{self.t1=!r}, {self.t2=!r}, {self.bend90_radius=}\n"
+            f"{self.ta=}, {self.tv=!r}\n"
+            f"{self.pts=}"
+        )
+
+    def finish(self) -> list[kdb.Point]:
+        tv = self.tv
+        if self.ta != 2:
+            raise ValueError(
+                "Route is not finished. The transformations must be facing each other"
+            )
+        if tv.y != 0:
+            raise ValueError(
+                "Route  is not finished. The transformations are not properly aligned: "
+                f"Vector (as seen from t1): {tv.x=}, {tv.y=}"
+            )
+        if self.end_pt != self.pts[-1]:
+            self.pts.append(self.end_pt)
+        return self.pts
+
+
 def route_manhattan(
     port1: Port | kdb.Trans,
     port2: Port | kdb.Trans,
@@ -242,162 +402,27 @@ def route_manhattan(
         route: Calculated route in dbu points.
     """
     if not invert:
-        t1 = port1.dup() if isinstance(port1, kdb.Trans) else port1.trans.dup()
-        t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans.dup()
+        t1 = port1 if isinstance(port1, kdb.Trans) else port1.trans
+        t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans
         _start_straight = start_straight
         _end_straight = end_straight
     else:
-        t2 = port1.dup() if isinstance(port1, kdb.Trans) else port1.trans.dup()
-        t1 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans.dup()
+        t2 = port1 if isinstance(port1, kdb.Trans) else port1.trans
+        t1 = port2 if isinstance(port2, kdb.Trans) else port2.trans
         _end_straight = start_straight
         _start_straight = end_straight
-    _p = kdb.Point(0, 0)
 
-    p1 = t1 * _p
-    p2 = t2 * _p
-    tv = t1.inverted() * (t2.disp - t1.disp)
-
-    if (t2.angle - t1.angle) % 4 == 2 and tv.y == 0:
-        if tv.x > 0:
-            return [p1, p2]
-        if tv.x == 0:
-            return []
-    if (
-        (np.sign(tv.y) * (t2.angle - t1.angle)) % 4 == 3
-        and abs(tv.y) > bend90_radius + _end_straight
-        and tv.x >= bend90_radius + _start_straight
-        and _end_straight == 0
-        and _start_straight == 0
-    ):
-        return [p1, p1 + (t1 * kdb.Vector(tv.x, 0)), p2]
-
-    if t2.disp == t1.disp and t2.angle == t1.angle:
-        raise ValueError("Identically oriented ports cannot be connected")
-
-    box = kdb.Box(
-        (t1 * kdb.Trans(0, False, _start_straight, 0)).disp.to_p(),
-        (t2 * kdb.Trans(0, False, _end_straight, 0)).disp.to_p(),
+    router = ManhattanRouter(
+        bend90_radius=bend90_radius,
+        t1=t1,
+        t2=t2,
+        start_straight=_start_straight,
+        end_straight=_end_straight,
     )
-    match (box.width(), box.height()):
-        case (x, y) if (x < bend90_radius and y <= 2 * bend90_radius) or (
-            x <= 2 * bend90_radius and y < bend90_radius
-        ):
-            config.logger.warning(
-                "Potential collision in routing due to small distance between the port "
-                f"in relation to bend radius {x=}/{bend90_radius}, {y=}/{bend90_radius}"
-            )
 
-    # we want a straight start and have to add a bend radius if
-    t1 *= kdb.Trans(_start_straight + bend90_radius, 0)
-    tv = t1.inverted() * (t2.disp - t1.disp)
+    pts = router.auto_route()
 
-    points = [p1]
-    end_points = None
-
-    if t2.angle == t1.angle == 0 and tv.x < 0 and abs(tv.y) >= 2 * bend90_radius:
-        t2 *= kdb.Trans(_end_straight, 0)
-        if _end_straight == 0:
-            end_points = [p2]
-        else:
-            end_points = [t2 * _p, p2]
-    else:
-        t2 *= kdb.Trans(_end_straight + bend90_radius, 0)
-        end_points = [t2 * _p, p2]
-
-    t1.inverted() * (t2.disp - t1.disp)
-
-    for _ in range(max_tries):
-        tv = t1.inverted() * (t2.disp - t1.disp)
-        if tv.abs() == 0 and (t2.angle - t1.angle) % 4 == 2:
-            break
-        if (t2.angle - t1.angle) % 4 == 2 and tv.x > 0 and tv.y == 0:
-            break
-        points.append(t1 * _p)
-
-        match (int(np.sign(tv.x)), int(np.sign(tv.y)), (t2.angle - t1.angle) % 4):
-            case (0, 0, ang):
-                if ang == 0:
-                    raise ValueError("This should never happen. Please open an issue!")
-                else:
-                    break
-            case (x, y, 2) if x == -1 and y != abs(tv.y) > 4 * bend90_radius:
-                t1 *= kdb.Trans(-y % 4, False, 0, -y * 2 * bend90_radius)
-            case (x, 0, ang) if abs(tv.x) > 2 * bend90_radius and (
-                ang != 2 or x != -1
-            ) and ang != 0:
-                break
-            case (0, y, ang) if (y * ang) % 4 not in [0, 1]:
-                break
-            case (0, y, ang) if (y * ang) % 4 == 3:
-                t1 *= kdb.Trans(0, False, 2 * bend90_radius, 0)
-            case (x, y, 0):
-                if abs(tv.y) < 2 * bend90_radius:
-                    d = -y if y != 0 else -1
-                    t1 *= kdb.Trans(d % 4, False, 0, d * 2 * bend90_radius)
-                else:
-                    if x == 1:
-                        t1 *= kdb.Trans(0, False, tv.x, 0)
-                    else:
-                        t1 *= kdb.Trans(y, False, 0, tv.y)
-            case (-1, y, 2):
-                if abs(tv.y) > 4 * bend90_radius:
-                    t1 *= kdb.Trans(2, False, 0, y * 2 * bend90_radius)
-                else:
-                    t1 *= kdb.Trans(
-                        2, False, 0, (-y if y != 0 else 1) * 2 * bend90_radius
-                    )
-            case (x, y, 2):
-                if abs(tv.y) < 2 * bend90_radius:
-                    t1 *= kdb.Trans(-y, False, 0, -y * 2 * bend90_radius)
-                else:
-                    t1 *= kdb.Trans(y % 4, False, 0, tv.y)
-            case (x, y, ang) if ang in [1, 3]:
-                if x == -1:
-                    if tv.x > -2 * bend90_radius:
-                        t1 *= kdb.Trans(0, False, 2 * bend90_radius + tv.x, 0)
-                    else:
-                        if abs(tv.y) < 2 * bend90_radius:
-                            _y = y if y != 0 else 1
-                            t1 *= kdb.Trans(
-                                (-_y) % 4, False, 0, -_y * 2 * bend90_radius
-                            )
-                        else:
-                            t1 *= kdb.Trans(y % 4, False, 0, y * 2 * bend90_radius)
-                elif (y * ang) % 4 == 3 and x == 1:
-                    if tv.x < 2 * bend90_radius:
-                        t1 *= kdb.Trans(y, False, tv.x + 2 * bend90_radius, 0)
-                    else:
-                        t1 *= kdb.Trans(0, False, tv.x, 0)
-                else:
-                    if abs(tv.x) < 2 * bend90_radius:
-                        if abs(tv.y) < 2 * bend90_radius:
-                            t1 *= kdb.Trans(-y, False, 0, -y * 2 * bend90_radius)
-                            points.append(t1 * _p)
-                            t1 *= kdb.Trans(
-                                y,
-                                False,
-                                0,
-                                y * 2 * bend90_radius + (tv.y if tv.y > 0 else 0),
-                            )
-                        else:
-                            t1 *= kdb.Trans(0, False, 2 * bend90_radius + tv.x, 0)
-                    else:
-                        if y != 0 and abs(tv.y) < 2 * bend90_radius:
-                            if y > 0:
-                                t1 *= kdb.Trans(
-                                    y, False, 0, tv.y + y * 2 * bend90_radius
-                                )
-                            else:
-                                t1 *= kdb.Trans(y, False, 0, y * 2 * bend90_radius)
-                        else:
-                            t1 *= kdb.Trans(y, False, 0, tv.y)
-    clean_points(points)
-    points.extend(end_points)
-    clean_points(points)
-
-    if invert:
-        points.reverse()
-    return points
+    return pts
 
 
 def vec_dir(vec: kdb.Vector) -> int:
@@ -414,7 +439,6 @@ def vec_dir(vec: kdb.Vector) -> int:
             raise ValueError(f"Non-manhattan vectors aren't supported {vec}")
 
 
-@config.logger.catch(reraise=True)
 def backbone2bundle(
     backbone: list[kdb.Point],
     port_widths: list[int],

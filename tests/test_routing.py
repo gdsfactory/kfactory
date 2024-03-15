@@ -114,9 +114,7 @@ def test_route_bend90_invert(
         bend90_cell=bend90,
         route_kwargs={"invert": True},
     )
-
     kf.config.logfilter.regex = None
-    c.show()
 
 
 @pytest.mark.parametrize(
@@ -151,7 +149,6 @@ def test_route_bend90_euler(
         bend90_cell=bend90_euler,
     )
     kf.config.logfilter.regex = None
-    c.show()
 
 
 def test_route_bundle(
@@ -200,8 +197,6 @@ def test_route_bundle(
 
     c.auto_rename_ports()
 
-    c.show()
-
 
 def test_route_length(
     bend90_euler: kf.KCell,
@@ -234,4 +229,3 @@ def test_route_length(
     assert route.length_straights == 25196
     assert route.length_backbone == 140000
     assert route.n_bend90 == 2
-    c.show()
