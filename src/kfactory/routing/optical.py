@@ -171,7 +171,7 @@ def route_loopback(
     )
 
 
-@config.logger.catch
+@config.logger.catch(reraise=True)
 def route(
     c: KCell,
     p1: Port,
