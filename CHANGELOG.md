@@ -5,10 +5,12 @@
 
 ## New
 
+- Fix routing issues [#284](https://github.com/gdsfactory/kfactory/pull/284)
 - Add `copy_polar` to `Port` [#282](https://github.com/gdsfactory/kfactory/pull/282)
 
 ## Bug Fixes
 
+- Fix routing issues [#284](https://github.com/gdsfactory/kfactory/pull/284)
 - Fix proxy KCells [#278](https://github.com/gdsfactory/kfactory/pull/278)
 - fix manahattan router terminating routing too early [#275](https://github.com/gdsfactory/kfactory/pull/275)
 
