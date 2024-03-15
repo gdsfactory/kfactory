@@ -356,7 +356,6 @@ class ManhattanRouter:
             f"{self.ta=}, {self.tv=!r}\n"
             f"{self.pts=}"
         )
-        # return self.finish()
 
     def finish(self) -> list[kdb.Point]:
         tv = self.tv
