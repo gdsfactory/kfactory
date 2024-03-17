@@ -245,10 +245,7 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
         return self
 
     def __add__(self, other: Info) -> Info:
-        info_dict: dict[str, MetaData] = {}
-        info_dict.update(self.model_dump())
-        info_dict.update(other.model_dump())
-        return Info(**info_dict)
+        return self.model_copy(update=other.model_dump())
 
 
 class PROPID(IntEnum):
@@ -2782,8 +2779,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
                 _cell = wrapped_cell(**params)
 
-                _info = info or {}
-                _cell.info.update(_info)
+                if info is not None:
+                    _cell.info.update(info)
 
                 for pp in post_process:
                     pp(_cell)
