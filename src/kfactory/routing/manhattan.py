@@ -1,11 +1,9 @@
 """Can calculate manhattan routes based on ports/transformations."""
 
 from collections import Counter
-from collections.abc import Iterable, Sequence
+from collections.abc import Sequence
 from dataclasses import InitVar, dataclass, field
 from typing import Literal, Protocol
-
-import numpy as np
 
 from .. import kdb
 from ..conf import config
@@ -536,7 +534,6 @@ def route_smart(
     invert: Sequence[bool] = [False],
 ) -> list[ManhattanRouter]:
     length = len(start_ports)
-    dbr = 2 * bend90_radius
 
     assert len(end_ports) == length, (
         f"Length of starting ports {len(start_ports)=} does not match length of "
@@ -563,6 +560,7 @@ def route_smart(
     end_ts = [p.trans if isinstance(p, Port) else p for p in end_ports]
 
     routers: list[ManhattanRouter] = []
+    # dbr = 2 * bend90_radius
 
     for ts, te, ss, es in zip(start_ts, end_ts, start_straights, end_straights):
         routers.append(
@@ -600,8 +598,8 @@ def route_smart(
             bundle.append(router)
             bundle_bbox += bbox
     for router_bundle in bundled_routers:
-        v1_list: list[tuple[int, int]] = []
-        v2_list: list[tuple[int, int]] = []
+        # v1_list: list[tuple[int, int]] = []
+        # v2_list: list[tuple[int, int]] = []
         a1_list: list[int] = []
         a2_list: list[int] = []
 
