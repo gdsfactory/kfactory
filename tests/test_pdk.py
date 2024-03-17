@@ -282,3 +282,12 @@ def test_merge_properties() -> None:
         kcl_1.read("MERGE_READ.oas")
         kf.config.logfilter.regex = None
     Path("MERGE_READ.oas").unlink(missing_ok=True)
+
+
+def test_pdk_cell_infosettings(straight: kf.KCell) -> None:
+    kcl = kf.KCLayout("INFOSETTINGS")
+    c = kcl.kcell()
+    _wg = c << straight
+    _wg.cell
+    assert _wg.cell.settings == straight.settings
+    assert _wg.cell.info == straight.info

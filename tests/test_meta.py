@@ -1,4 +1,5 @@
 """Tests for read and write of metadata."""
+
 import kfactory as kf
 from tempfile import NamedTemporaryFile
 
@@ -130,3 +131,13 @@ def test_nometainfo_read(straight: kf.KCell) -> None:
             "enclosure": "WGSTD",
             "layer": 0,
         }
+
+
+def test_info_dump() -> None:
+    c = kf.KCell()
+    c.info = kf.Info(a="A")
+    c.info.b = "B"
+    c._settings = kf.KCellSettings(a="A", c="C")
+
+    assert c.info == c.info.model_copy()
+    assert c.settings == c.settings.model_copy()

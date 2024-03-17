@@ -1,4 +1,5 @@
 """Virtual euler cell factories."""
+
 from collections.abc import Callable
 from typing import Any, Protocol
 

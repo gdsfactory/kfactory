@@ -4,6 +4,7 @@
 similar concepts to an arbitrary shape located on a main_layer or reference layer or
 region.
 """
+
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Sequence
@@ -839,7 +840,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                 queue_str = f"var tile_reg = (_tile & _frame).sized({maxsize});"
                 queue_str += (
                     "var max_shape = Polygon.ellipse("
-                    f"Box.new({section.d_max*2},{section.d_max*2}), {n_pts});"
+                    f"Box.new({section.d_max * 2},{section.d_max * 2}), {n_pts});"
                 )
                 match section.d_max:
                     case d if d > 0:
@@ -857,7 +858,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                 if section.d_min:
                     queue_str += (
                         "var min_shape = Polygon.ellipse("
-                        f"Box.new({section.d_min*2},{section.d_min*2}), 64);"
+                        f"Box.new({section.d_min * 2},{section.d_min * 2}), 64);"
                     )
                     match section.d_min:
                         case d if d > 0:
@@ -1208,12 +1209,10 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
                 self.merged_region += reg
 
     @overload
-    def insert(self) -> None:
-        ...
+    def insert(self) -> None: ...
 
     @overload
-    def insert(self, port_hole_map: dict[int, PortHoles]) -> None:
-        ...
+    def insert(self, port_hole_map: dict[int, PortHoles]) -> None: ...
 
     def insert(
         self,
@@ -1473,7 +1472,7 @@ class KCellEnclosure(BaseModel):
                         for i, section in enumerate(reversed(layer_section.sections)):
                             queue_str = (
                                 "var max_shape = Polygon.ellipse("
-                                f"Box.new({section.d_max*2},{section.d_max*2}),"
+                                f"Box.new({section.d_max * 2},{section.d_max * 2}),"
                                 f" {n_pts});"
                             )
                             match section.d_max:
@@ -1499,7 +1498,7 @@ class KCellEnclosure(BaseModel):
                             if section.d_min:
                                 queue_str += (
                                     "var min_shape = Polygon.ellipse("
-                                    f"Box.new({section.d_min*2},{section.d_min*2}),"
+                                    f"Box.new({section.d_min * 2},{section.d_min * 2}),"
                                     " 64);"
                                 )
                                 match section.d_min:

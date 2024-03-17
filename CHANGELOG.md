@@ -1,3 +1,33 @@
+<a name="v0.12.4"></a>
+# [v0.12.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.4) - 11 Mar 2024
+
+# What's Changed
+
+## New
+
+- Fix routing issues [#284](https://github.com/gdsfactory/kfactory/pull/284)
+- Add `copy_polar` to `Port` [#282](https://github.com/gdsfactory/kfactory/pull/282)
+
+## Bug Fixes
+
+- Fix routing issues [#284](https://github.com/gdsfactory/kfactory/pull/284)
+- Fix proxy KCells [#278](https://github.com/gdsfactory/kfactory/pull/278)
+- fix manahattan router terminating routing too early [#275](https://github.com/gdsfactory/kfactory/pull/275)
+
+## Documentation
+
+- Implement protocols for routing functions [#280](https://github.com/gdsfactory/kfactory/pull/280)
+
+## Dependency Updates
+
+- Ruff formatting [#279](https://github.com/gdsfactory/kfactory/pull/279)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.12.3...v0.12.4
+
+
+[Changes][v0.12.4]
+
+
 <a name="v0.12.3"></a>
 # [v0.12.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.3) - 06 Mar 2024
 
@@ -352,6 +382,7 @@
 [Changes][v0.4.0]
 
 
+[v0.12.4]: https://github.com/gdsfactory/kfactory/compare/v0.12.3...v0.12.4
 [v0.12.3]: https://github.com/gdsfactory/kfactory/compare/v0.12.2...v0.12.3
 [v0.12.2]: https://github.com/gdsfactory/kfactory/compare/v0.12.0...v0.12.2
 [v0.12.0]: https://github.com/gdsfactory/kfactory/compare/v0.11.4...v0.12.0

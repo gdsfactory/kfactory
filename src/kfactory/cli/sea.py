@@ -2,6 +2,7 @@
 
 Use `kf sea --help` for more info.
 """
+
 import json
 from pathlib import Path
 from typing import Annotated, Optional
