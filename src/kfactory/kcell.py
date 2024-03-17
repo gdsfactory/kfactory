@@ -24,7 +24,7 @@ from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
 from types import ModuleType
-from typing import Any, Literal, TypeAlias, TypeVar, cast, overload
+from typing import Any, Literal, Protocol, TypeAlias, TypeVar, cast, overload
 
 import cachetools.func
 import numpy as np
@@ -107,6 +107,20 @@ MetaData: TypeAlias = (
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
+
+
+class KCellFunc(Protocol[KCellParams]):
+    def __call__(
+        self, *args: KCellParams.args, **kwargs: KCellParams.kwargs
+    ) -> KCell: ...
+
+
+class AddInfoFunc(Protocol[KCellParams]):
+    def __call__(
+        self, c: KCell, *args: KCellParams.args, **kwargs: KCellParams.kwargs
+    ) -> dict[str, MetaData]:
+        """Computes additional infos from KCell function args and kwargs."""
+        ...
 
 
 class LayerEnum(int, Enum):  # type: ignore[misc]
@@ -221,9 +235,20 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
     def get(self, __key: str, default: Any | None = None) -> Any:
         return getattr(self, __key) if hasattr(self, __key) else default
 
-    def update(self, __d: dict[str, MetaData]) -> None:
-        for k, v in __d.items():
-            setattr(self, k, v)
+    def update(self, data: dict[str, MetaData]) -> None:
+        for key, value in data.items():
+            setattr(self, key, value)
+
+    def __iadd__(self, other: Info) -> Info:
+        for key, value in other.model_dump().items():
+            setattr(self, key, value)
+        return self
+
+    def __add__(self, other: Info) -> Info:
+        info_dict: dict[str, MetaData] = {}
+        info_dict.update(self.model_dump())
+        info_dict.update(other.model_dump())
+        return Info(**info_dict)
 
 
 class PROPID(IntEnum):
@@ -2567,12 +2592,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         rec_dicts: bool = False,
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
+        info: dict[str, MetaData] | None = None,
+        post_process: Iterable[Callable[[KCell], None]] = [],
     ) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]: ...
 
     @config.logger.catch(reraise=True)
     def cell(
         self,
-        _func: Callable[KCellParams, KCell] | None = None,
+        _func: KCellFunc[KCellParams] | None = None,
         /,
         *,
         set_settings: bool = True,
@@ -2587,7 +2614,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[Any], None]] = [],
+        post_process: Iterable[Callable[[KCell], None]] = [],
     ) -> (
         Callable[KCellParams, KCell]
         | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
@@ -2640,7 +2667,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             def wrapper_autocell(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
             ) -> KCell:
-                params: dict[str, KCellParams.args] = {
+                params: dict[str, KCellParams.kwargs | KCellParams.args] = {
                     p.name: p.default for k, p in sig.parameters.items()
                 }
                 arg_par = list(sig.parameters.items())[: len(args)]
@@ -2662,7 +2689,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 @cachetools.cached(cache=_cache)
                 @functools.wraps(f)
                 def wrapped_cell(
-                    **params: KCellParams.args,
+                    **params: KCellParams.args | KCellParams.kwargs,
                 ) -> KCell:
                     for key, value in params.items():
                         if isinstance(value, frozenset):
@@ -2690,10 +2717,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                             params.pop(param, None)
                         settings.update(params)
                         cell._settings = KCellSettings(**settings)
-                    info = cell.info.model_dump()
+                    cell_info = cell.info.model_dump()
                     for name, value in cell.info:
-                        info[name] = value
-                    cell.info = Info(**info)
+                        cell_info[name] = value
+                    cell.info = Info(**cell_info)
                     if check_instances:
                         if any(inst.is_complex() for inst in cell.each_inst()):
                             raise ValueError(
@@ -2754,8 +2781,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     return cell
 
                 _cell = wrapped_cell(**params)
-                if info is not None:
-                    _cell.info.update(info)
+
+                _info = info or {}
+                _cell.info.update(_info)
+
                 for pp in post_process:
                     pp(_cell)
 
