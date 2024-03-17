@@ -29,6 +29,7 @@ dependencies = [
   "requests",
   "typer[all]",
   "aenum",
+  "toolz",
 ]
 
 [project.optional-dependencies]
