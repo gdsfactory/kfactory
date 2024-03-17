@@ -115,14 +115,6 @@ class KCellFunc(Protocol[KCellParams]):
     ) -> KCell: ...
 
 
-class AddInfoFunc(Protocol[KCellParams]):
-    def __call__(
-        self, c: KCell, *args: KCellParams.args, **kwargs: KCellParams.kwargs
-    ) -> dict[str, MetaData]:
-        """Computes additional infos from KCell function args and kwargs."""
-        ...
-
-
 class LayerEnum(int, Enum):  # type: ignore[misc]
     """Class for having the layers stored and a mapping int <-> layer,datatype.
 
@@ -2572,9 +2564,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     @overload
     def cell(
         self,
-        _func: Callable[KCellParams, KCell],
+        _func: KCellFunc[KCellParams],
         /,
-    ) -> Callable[KCellParams, KCell]: ...
+    ) -> KCellFunc[KCellParams]: ...
 
     @overload
     def cell(
@@ -2591,7 +2583,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         drop_params: list[str] = ["self", "cls"],
         info: dict[str, MetaData] | None = None,
         post_process: Iterable[Callable[[KCell], None]] = [],
-    ) -> Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]: ...
+    ) -> Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]: ...
 
     @config.logger.catch(reraise=True)
     def cell(
@@ -2613,8 +2605,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         info: dict[str, MetaData] | None = None,
         post_process: Iterable[Callable[[KCell], None]] = [],
     ) -> (
-        Callable[KCellParams, KCell]
-        | Callable[[Callable[KCellParams, KCell]], Callable[KCellParams, KCell]]
+        KCellFunc[KCellParams]
+        | Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]
     ):
         """Decorator to cache and auto name the cell.
 
