@@ -23,7 +23,7 @@ from enum import IntEnum, IntFlag, auto
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
-from types import ModuleType
+from types import FunctionType, ModuleType
 from typing import Any, Literal, TypeAlias, TypeVar, cast, overload
 
 import cachetools.func
@@ -31,6 +31,7 @@ import numpy as np
 import rich
 import rich.json
 import ruamel.yaml
+import toolz
 from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
 from cachetools import Cache
 from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
@@ -178,7 +179,7 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
             if not isinstance(
                 value, str | int | float | bool | SerializableShape | Sequence
             ):
-                data[name] = str(value)
+                data[name] = clean_value(value)
         return data
 
     def __getitem__(self, key: str) -> Any:
@@ -5829,37 +5830,47 @@ def clean_value(
     value: float | np.float64 | dict[Any, Any] | KCell | Callable[..., Any],
 ) -> str:
     """Makes sure a value is representable in a limited character_space."""
-    try:
-        if isinstance(value, int):  # integer
-            return str(value)
-        elif isinstance(value, float | np.float64):  # float
-            return f"{value}".replace(".", "p").rstrip("0").rstrip("p")
-        elif isinstance(value, list | tuple):
-            return "_".join(clean_value(v) for v in value)
-        elif isinstance(value, dict):
-            return dict2name(**value)
-        elif hasattr(value, "name"):
-            return clean_name(value.name)
-        elif callable(value) and isinstance(value, functools.partial):
-            sig = inspect.signature(value.func)
-            args_as_kwargs = dict(zip(sig.parameters.keys(), value.args))
-            args_as_kwargs.update(**value.keywords)
-            args_as_kwargs = clean_dict(args_as_kwargs)
-            # args_as_kwargs.pop("function", None)
-            func = value.func
-            while hasattr(func, "func"):
-                func = func.func
-            v = {
-                "function": func.__name__,
-                "module": func.__module__,
-                "settings": args_as_kwargs,
-            }
-            return clean_value(v)
-        elif callable(value):
-            return getattr(value, "__name__", value.__class__.__name__)
-        else:
-            return clean_name(str(value))
-    except TypeError:  # use the __str__ method
+    if isinstance(value, int):  # integer
+        return str(value)
+    elif isinstance(value, float | np.float64):  # float
+        return f"{value}".replace(".", "p").rstrip("0").rstrip("p")
+    elif isinstance(value, list | tuple):
+        return "_".join(clean_value(v) for v in value)
+    elif isinstance(value, dict):
+        return dict2name(**value)
+    elif hasattr(value, "name"):
+        return clean_name(value.name)
+    elif (
+        callable(value)
+        and isinstance(value, FunctionType)
+        and value.__name__ == "<lambda>"
+    ):
+        raise ValueError(
+            "Unable to serialize lambda function. Use a named function instead."
+        )
+    elif callable(value) and isinstance(value, functools.partial):
+        sig = inspect.signature(value.func)
+        args_as_kwargs = dict(zip(sig.parameters.keys(), value.args))
+        args_as_kwargs.update(**value.keywords)
+        args_as_kwargs = clean_dict(args_as_kwargs)
+        # args_as_kwargs.pop("function", None)
+        func = value.func
+        while hasattr(func, "func"):
+            func = func.func
+        v = {
+            "function": func.__name__,
+            "module": func.__module__,
+            "settings": args_as_kwargs,
+        }
+        return clean_value(v)
+    elif callable(value) and isinstance(value, toolz.functoolz.Compose):
+        return "_".join(
+            [clean_value(value.first)] + [clean_value(func) for func in value.funcs]
+        )
+
+    elif callable(value):
+        return getattr(value, "__name__", value.__class__.__name__)
+    else:
         return clean_name(str(value))
 
 
