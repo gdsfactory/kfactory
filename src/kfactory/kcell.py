@@ -25,7 +25,6 @@ from pathlib import Path
 from tempfile import gettempdir
 from types import FunctionType, ModuleType
 from typing import Any, Literal, Protocol, TypeAlias, TypeVar, cast, overload
- 
 
 import cachetools.func
 import numpy as np
