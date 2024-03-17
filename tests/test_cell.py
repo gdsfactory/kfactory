@@ -118,3 +118,12 @@ def test_cell_decorator_error() -> None:
 
     with pytest.raises(ValueError):
         wrong_cell()
+
+
+def test_info() -> None:
+    @kf.kcl.cell(info={"test": 42})
+    def test_info_cell(test: int) -> kf.KCell:
+        return kf.kcl.kcell()
+
+    c = test_info_cell(42)
+    assert c.info["test"] == 42
