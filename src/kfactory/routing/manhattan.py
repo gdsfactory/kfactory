@@ -1,5 +1,7 @@
 """Can calculate manhattan routes based on ports/transformations."""
 
+from __future__ import annotations
+
 from collections import Counter
 from collections.abc import Sequence
 from dataclasses import InitVar, dataclass, field
@@ -217,77 +219,108 @@ _p = kdb.Point()
 
 
 @dataclass
-class ManhattanRouter:
-    bend90_radius: int
-    start: kdb.Trans
-    end: kdb.Trans = field(default_factory=kdb.Trans)
-    pts: list[kdb.Point] = field(default_factory=list)
-    start_straight: InitVar[int] = 0
-    end_straight: InitVar[int] = 0
+class ManhattanRouterSide:
+    router: ManhattanRouter
+    _t: kdb.Trans
+    ot: kdb.Trans
+    pts: list[kdb.Point]
 
-    def __post_init__(self, start_straight: int, end_straight: int) -> None:
-        self.start = self.start.dup()
-        self.start.mirror = False
-        self.end = self.end.dup()
-        self.end.mirror = False
-        self.pts.append(self.start * _p)
-        self.pts_end = [self.end * _p]
-        self.end *= kdb.Trans(end_straight, 0)
-        self.start.mirror = False
-        self.end.mirror = False
-        self.straight(start_straight)
-        assert start_straight >= 0, "Start straight must be >= 0"
-        assert end_straight >= 0, "End straight must be >= 0"
+    def __post_init__(self) -> None:
+        self.pts = self.pts.copy()
+        if not self.pts:
+            self.pts.append(self._t.disp.to_p())
+
+    @property
+    def t(self) -> kdb.Trans:
+        return self._t
+
+    @t.setter
+    def t(self, __t: kdb.Trans) -> None:
+        self._t.assign(__t)
 
     @property
     def tv(self) -> kdb.Vector:
-        return self.start.inverted() * (self.end.disp - self.start.disp)
+        return self.t.inverted() * (self.ot.disp - self.t.disp)
 
     @property
     def ta(self) -> Literal[0, 1, 2, 3]:
-        return (self.end.angle - self.start.angle) % 4  # type: ignore[return-value]
+        return (self.ot.angle - self.t.angle) % 4  # type: ignore[return-value]
 
     def right(self) -> None:
-        self.pts.append((self.start * kdb.Trans(0, False, self.bend90_radius, 0)) * _p)
-        self.start *= kdb.Trans(3, False, self.bend90_radius, -self.bend90_radius)
+        self.pts.append(
+            (self.t * kdb.Trans(0, False, self.router.bend90_radius, 0)) * _p
+        )
+        self.t *= kdb.Trans(
+            3, False, self.router.bend90_radius, -self.router.bend90_radius
+        )
 
     def left(self) -> None:
-        self.pts.append((self.start * kdb.Trans(0, False, self.bend90_radius, 0)) * _p)
-        self.start *= kdb.Trans(1, False, self.bend90_radius, self.bend90_radius)
+        self.pts.append(
+            (self.t * kdb.Trans(0, False, self.router.bend90_radius, 0)) * _p
+        )
+        self.t *= kdb.Trans(
+            1, False, self.router.bend90_radius, self.router.bend90_radius
+        )
 
     def straight(self, d: int) -> None:
-        self.start *= kdb.Trans(0, False, d, 0)
+        self.t *= kdb.Trans(0, False, d, 0)
 
     def straight_nobend(self, d: int) -> None:
-        if d < self.bend90_radius:
+        if d < self.router.bend90_radius:
             raise ValueError(
                 f"Router cannot go backwards, {d=} must be bigger "
-                f"than {self.bend90_radius=}"
+                f"than {self.router.bend90_radius=}"
             )
-        self.start *= kdb.Trans(0, False, d - self.bend90_radius, 0)
+        self.t *= kdb.Trans(0, False, d - self.router.bend90_radius, 0)
 
-    def right_end(self) -> None:
-        self.pts_end.append(
-            (self.end * kdb.Trans(0, False, self.bend90_radius, 0)) * _p
+    def reset(self) -> None:
+        self.pts = [self.t.disp.to_p()]
+
+
+@dataclass
+class ManhattanRouter:
+    bend90_radius: int
+    start: ManhattanRouterSide = field(init=False)
+    end: ManhattanRouterSide = field(init=False)
+    start_transformation: InitVar[kdb.Trans]
+    end_transformation: InitVar[kdb.Trans] = kdb.Trans()
+    start_straight: InitVar[int] = 0
+    end_straight: InitVar[int] = 0
+    width: int = 0
+    start_points: InitVar[list[kdb.Point]] = field(default=[])
+    end_points: InitVar[list[kdb.Point]] = field(default=[])
+
+    def __post_init__(
+        self,
+        start_transformation: kdb.Trans,
+        end_transformation: kdb.Trans,
+        start_straight: int,
+        end_straight: int,
+        start_points: list[kdb.Point],
+        end_points: list[kdb.Point],
+    ) -> None:
+        assert start_straight >= 0, "Start straight must be >= 0"
+        assert end_straight >= 0, "End straight must be >= 0"
+
+        _start = start_transformation.dup()
+        _start.mirror = False
+        _end = end_transformation.dup()
+        _end.mirror = False
+
+        self.start = ManhattanRouterSide(
+            router=self,
+            _t=_start,
+            ot=_end,
+            pts=start_points,
         )
-        self.end *= kdb.Trans(3, False, self.bend90_radius, -self.bend90_radius)
-
-    def left_end(self) -> None:
-        self.pts_end.append(
-            (self.end * kdb.Trans(0, False, self.bend90_radius, 0)) * _p
+        self.end = ManhattanRouterSide(
+            router=self,
+            _t=_end,
+            ot=_start,
+            pts=end_points,
         )
-        self.end *= kdb.Trans(1, False, self.bend90_radius, self.bend90_radius)
-
-    def straight_end(self, d: int) -> None:
-        self.end *= kdb.Trans(0, False, d, 0)
-
-    def straight_nobend_end(self, d: int) -> None:
-        if d < self.bend90_radius:
-            raise ValueError(
-                f"Router cannot go backwards, {d=} must be bigger "
-                f"than {self.bend90_radius=}"
-            )
-        self.end *= kdb.Trans(0, False, d - self.bend90_radius, 0)
+        self.start.straight(start_straight)
+        self.end.straight(end_straight)
 
     def auto_route(
         self,
@@ -297,32 +330,32 @@ class ManhattanRouter:
     ) -> list[kdb.Point]:
         if max_try <= 0:
             raise ValueError("Router was not able to find a possible route")
-        tv = self.tv
+        tv = self.start.tv
         x = tv.x
         y = tv.y
         y_abs = abs(y)
-        ta = self.ta
+        ta = self.start.ta
         match ta:
             case 0:
                 match x, y:
                     case _ if y_abs >= 2 * self.bend90_radius:
                         if x > 0:
-                            self.straight(x)
+                            self.start.straight(x)
                         if y > 0:
-                            self.left()
+                            self.start.left()
                         else:
-                            self.right()
+                            self.start.right()
                         return self.auto_route(max_try - 1)
                     case _:
                         # ports are close to each other ,so need to
                         # route like a P
                         if x > 0:
                             # the straight part of the P is on our side
-                            self.straight(max(2 * self.bend90_radius - x, 0))
+                            self.start.straight(max(2 * self.bend90_radius - x, 0))
                         if y > 0:
-                            self.right()
+                            self.start.right()
                         else:
-                            self.left()
+                            self.start.left()
                         return self.auto_route(max_try - 1)
             case 2:
                 match y:
@@ -330,34 +363,27 @@ class ManhattanRouter:
                         return self.finish()
                     case y if y_abs < 2 * self.bend90_radius:
                         if straight_s_bend_strategy == "short":
-                            self.right() if y > 0 else self.left()
+                            self.start.right() if y > 0 else self.start.left()
                         else:
-                            self.left() if y > 0 else self.right()
+                            self.start.left() if y > 0 else self.start.right()
                         return self.auto_route(max_try - 1)
                     case _:
-                        if y > 0:
-                            self.left()
-                            self.straight(y_abs - 2 * self.bend90_radius)
-                            self.right()
-                        else:
-                            self.right()
-                            self.straight(y_abs - 2 * self.bend90_radius)
-                            self.left()
-                        return self.finish()
+                        self.start.left() if y > 0 else self.start.right()
+                        return self.auto_route(max_try - 1)
             case _:
                 # 1/3 cases are just one to the other
                 # with flipped y value and right/left flipped
                 if ta == 3:
-                    right = self.right
-                    left = self.left
+                    right = self.start.right
+                    left = self.start.left
                     _y = y
                 else:
-                    right = self.left
-                    left = self.right
+                    right = self.start.left
+                    left = self.start.right
                     _y = -y
                 if x >= self.bend90_radius and _y >= self.bend90_radius:
                     # straight forward can connect with a single bend
-                    self.straight(x - self.bend90_radius)
+                    self.start.straight(x - self.bend90_radius)
                     left()
                     return self.finish()
                 if x >= 3 * self.bend90_radius:
@@ -367,11 +393,11 @@ class ManhattanRouter:
                     return self.auto_route(max_try - 1)
                 if _y >= 3 * self.bend90_radius:
                     # enough to route in the other side
-                    self.straight(max(self.bend90_radius + x, 0))
+                    self.start.straight(max(self.bend90_radius + x, 0))
                     left()
                     return self.auto_route(max_try - 1)
                 if _y <= -self.bend90_radius or x <= 0:
-                    self.straight(max(x + self.bend90_radius, 0))
+                    self.start.straight(max(x + self.bend90_radius, 0))
                     right()
                     return self.auto_route(max_try - 1)
 
@@ -379,34 +405,14 @@ class ManhattanRouter:
                 if x < self.bend90_radius and y_abs < self.bend90_radius:
                     config.logger.warning(
                         "route is too small, potential collisions: "
-                        f"{self.start=}; {self.end=}; {self.pts=}"
+                        f"{self.start=}; {self.end=}; {self.start.pts=}"
                     )
                     right()
-                    self.straight(max(self.bend90_radius - _y, 0))
+                    self.start.straight(max(self.bend90_radius - _y, 0))
                     left()
                 else:
                     right()
                 return self.auto_route(max_try - 1)
-
-        def collisions(self, log_errors: bool = True) -> kdb.Edges:
-            p_start = self.pts[0]
-            edges = kdb.Edges()
-            has_collisions = False
-            collisions = kdb.Edges()
-
-            for p in self.pts[1:]:
-                _edges = kdb.Edges([kdb.Edge(p_start, p)])
-                potential_collisions = edges.interacting(_edges)
-                if not potential_collisions.is_empty():
-                    has_collisions = True
-                    collisions += potential_collisions
-
-            if has_collisions and log_errors:
-                config.logger.error(
-                    f"Router {self.t1=},{self.t2=},{self.pts=} "
-                    "has collisions in the manhattan route.\n"
-                    f"{collisions=}"
-                )
 
         raise ValueError(
             "Route couldn't find a possible route, please open an issue on Github."
@@ -415,9 +421,30 @@ class ManhattanRouter:
             f"{self.pts=}"
         )
 
+    def collisions(self, log_errors: bool = True) -> kdb.Edges:
+        p_start = self.start.pts[0]
+        edges = kdb.Edges()
+        has_collisions = False
+        collisions = kdb.Edges()
+
+        for p in self.start.pts[1:]:
+            _edges = kdb.Edges([kdb.Edge(p_start, p)])
+            potential_collisions = edges.interacting(_edges)
+            if not potential_collisions.is_empty():
+                has_collisions = True
+                collisions += potential_collisions
+
+        if has_collisions and log_errors:
+            config.logger.error(
+                f"Router {self.start.t=}, {self.end.t=}, {self.start.pts=},"
+                f" {self.end.pts=} has collisions in the manhattan route.\n"
+                f"{collisions=}"
+            )
+        return collisions
+
     def finish(self) -> list[kdb.Point]:
-        tv = self.tv
-        if self.ta != 2:
+        tv = self.start.tv
+        if self.start.ta != 2:
             raise ValueError(
                 "Route is not finished. The transformations must be facing each other"
             )
@@ -426,23 +453,32 @@ class ManhattanRouter:
                 "Route  is not finished. The transformations are not properly aligned: "
                 f"Vector (as seen from t1): {tv.x=}, {tv.y=}"
             )
-        if self.pts_end[-1] != self.pts[-1]:
-            self.pts.extend(reversed(self.pts_end))
-        return self.pts
-
-    def reset_end(self) -> None:
-        self.pts_end = [self.end.disp.to_p()]
-
-    def reset_start(self) -> None:
-        self.pts = [self.start.disp.to_p()]
+        if self.end.pts[-1] != self.start.pts[-1]:
+            self.start.pts.extend(reversed(self.end.pts))
+        return self.start.pts
 
 
 @dataclass(kw_only=True)
 class ManhattanRouter180(ManhattanRouter):
     bend180_radius: int
 
-    def __post_init__(self, start_straight: int, end_straight: int) -> None:
-        super().__post_init__(start_straight=start_straight, end_straight=end_straight)
+    def __post_init__(
+        self,
+        start_transformation: kdb.Trans,
+        end_transformation: kdb.Trans,
+        start_straight: int,
+        end_straight: int,
+        start_points: list[kdb.Point],
+        end_points: list[kdb.Point],
+    ) -> None:
+        super().__post_init__(
+            start_transformation=start_transformation,
+            end_transformation=end_transformation,
+            start_straight=start_straight,
+            end_straight=end_straight,
+            start_points=start_points,
+            end_points=end_points,
+        )
         if self.bend180_radius < self.bend90_radius:
             raise AttributeError(
                 "A router with a bend180_radius bigger than bend90_radius is "
@@ -450,24 +486,24 @@ class ManhattanRouter180(ManhattanRouter):
             )
 
     def right_around(self) -> None:
-        self.pts.append(self.start.disp.to_p())
-        self.start *= kdb.Trans(2, False, 0, -self.bend180_radius)
-        self.pts.append(self.start.disp.to_p())
+        self.start.pts.append(self.start.t.disp.to_p())
+        self.start.t *= kdb.Trans(2, False, 0, -self.bend180_radius)
+        self.start.pts.append(self.start.t.disp.to_p())
 
     def left_around(self) -> None:
-        self.pts.append(self.start.disp.to_p())
-        self.start *= kdb.Trans(2, False, 0, self.bend180_radius)
-        self.pts.append(self.start.disp.to_p())
+        self.start.pts.append(self.start.t.disp.to_p())
+        self.start.t *= kdb.Trans(2, False, 0, self.bend180_radius)
+        self.start.pts.append(self.start.t.disp.to_p())
 
     def right_around_end(self) -> None:
-        self.pts.append(self.end.disp.to_p())
-        self.end *= kdb.Trans(2, False, 0, -self.bend180_radius)
-        self.pts.append(self.end.disp.to_p())
+        self.start.pts.append(self.end.t.disp.to_p())
+        self.end.t *= kdb.Trans(2, False, 0, -self.bend180_radius)
+        self.start.pts.append(self.end.t.disp.to_p())
 
     def left_around_end(self) -> None:
-        self.pts.append(self.end.disp.to_p())
-        self.end *= kdb.Trans(2, False, 0, self.bend180_radius)
-        self.pts.append(self.end.disp.to_p())
+        self.start.pts.append(self.end.t.disp.to_p())
+        self.end.t *= kdb.Trans(2, False, 0, self.bend180_radius)
+        self.start.pts.append(self.end.t.disp.to_p())
 
 
 def route_manhattan(
@@ -511,8 +547,8 @@ def route_manhattan(
 
     router = ManhattanRouter(
         bend90_radius=bend90_radius,
-        start=t1,
-        end=t2,
+        start_transformation=t1,
+        end_transformation=t2,
         start_straight=_start_straight,
         end_straight=_end_straight,
     )
@@ -532,6 +568,8 @@ def route_smart(
     start_straights: list[int] = [0],
     end_straights: list[int] = [0],
     invert: Sequence[bool] = [False],
+    start_bbox: kdb.Box | None = None,
+    end_bbox: kdb.Box | None = None,
 ) -> list[ManhattanRouter]:
     length = len(start_ports)
 
@@ -558,6 +596,16 @@ def route_smart(
 
     start_ts = [p.trans if isinstance(p, Port) else p for p in start_ports]
     end_ts = [p.trans if isinstance(p, Port) else p for p in end_ports]
+    if start_bbox is None:
+        p1 = start_ts[0].disp.to_p()
+        start_bbox = kdb.Box(p1, p1)
+        for t in start_ts:
+            start_bbox += t.disp.to_p()
+    if end_bbox is None:
+        p1 = start_ts[0].disp.to_p()
+        end_bbox = kdb.Box(p1, p1)
+        for t in end_ts:
+            end_bbox += t.disp.to_p()
 
     routers: list[ManhattanRouter] = []
     # dbr = 2 * bend90_radius
@@ -566,15 +614,16 @@ def route_smart(
         routers.append(
             ManhattanRouter(
                 bend90_radius=bend90_radius,
-                start=ts,
-                end=te,
+                start_transformation=ts,
+                end_transformation=te,
                 start_straight=ss,
                 end_straight=es,
             )
         )
 
     router_bboxes: list[kdb.Box] = [
-        kdb.Box(router.start.disp.to_p(), router.end.disp.to_p()) for router in routers
+        kdb.Box(router.start.t.disp.to_p(), router.end.t.disp.to_p())
+        for router in routers
     ]
     complete_bbox = router_bboxes[0].dup().enlarged(separation)
     bundled_bboxes: list[kdb.Box] = [complete_bbox]
@@ -610,15 +659,17 @@ def route_smart(
         for router in router_bundle:
             # v1_list.append((router.start.disp.x, router.start.disp.y))
             # v2_list.append((router.end.disp.x, router.end.disp.y))
-            tv += router.end.disp
-            tv -= router.start.disp
-            a1_list.append(router.start.angle)
-            a2_list.append(router.end.angle)
+            tv += router.end.t.disp
+            tv -= router.start.t.disp
+            a1_list.append(router.start.t.angle)
+            a2_list.append(router.end.t.angle)
 
         # _tv = np.average(v2_list, axis=0) - np.average(v1_list, axis=0)
 
         a1 = Counter(a1_list).most_common()[0][0]
         a1_inverse = kdb.Trans(-a1, False, 0, 0)
+        a2 = Counter(a2_list).most_common()[0][0]
+        a2_inverse = kdb.Trans(-a2, False, 0, 0)
 
         tv = a1_inverse * tv
 
@@ -630,16 +681,50 @@ def route_smart(
 
         if tv.y > 0:
             _routers = sorted(
-                router_bundle, key=lambda router: -(a1_inverse * router.tv.y)
+                router_bundle, key=lambda router: -(a1_inverse * router.start.tv.y)
             )
         else:
             _routers = sorted(
-                router_bundle, key=lambda router: (a1_inverse * router.tv.y)
+                router_bundle, key=lambda router: (a1_inverse * router.start.tv.y)
             )
         _separation = 0
-        for router in _routers:
+        min_y = 0
+        min_x = (a1_inverse * _routers[0].end.t.disp).x
+        # for router in _routers:
+        #     _ta1 = (a1 - router.start.t.angle) % 4
+        #     if _ta1 != 0:
+        #         match _ta1:
+        #             case 1:
+        #                 router.start.left()
+        #             case 2:
+        #                 router.start.left()
+        #                 router.start.left()
+        #             case 3:
+        #                 router.start.right()
+
+        #     _ta2 = (a2 - router.end.t.angle) % 4
+        #     if _ta2 != 0:
+        #         match _ta2:
+        #             case 1:
+        #                 router.end.left()
+        #             case 2:
+        #                 router.end.left()
+        #                 router.end.left()
+        #             case 3:
+        #                 router.end.right()
+        for router in reversed(_routers):
+            # print(router.start.t.disp)
+            # _tv = a1_inverse * router.end.t.disp
+            # if _tv.x < min_x:
+            #     router.start.straight(
+            #         max(min_x - (a1_inverse * router.start.t.disp.x) + _separation, 0)
+            #     )
+            #     router.start.left() if _tv.y > 0 else router.start.right()
+            #     router.start.straight(max(abs(_tv.y) - min_y + _separation, 0))
+            #     _tv = a1_inverse * router.start.t.disp
+            #     min_x = _tv.x + router.bend90_radius + _separation
+            #     min_x = _tv.y + router.bend90_radius + _separation
             # TODO: remove
-            router.straight(_separation)
             router.auto_route(straight_s_bend_strategy="short")
             _separation += separation
 
