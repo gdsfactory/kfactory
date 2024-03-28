@@ -26,7 +26,8 @@ for angle in [-1, 0, 1, 2]:
             )
         )
         te = kf.kdb.Trans(2, False, 250_000, 50_000 * angle) * kf.kdb.Trans(
-            randint(0, 100), randint(0, 100) - xi * 10_000
+            randint(0, 100),
+            randint(0, 100) - xi * 10_000,  # + 100_000
         )
         pe.append(
             c.create_port(
@@ -46,6 +47,7 @@ routers = kf.routing.manhattan.route_smart(
 )
 
 for p1, p2, router in zip(ps, pe, routers):
+    print(router.start.pts)
     kf.routing.optical.place90(
         c, p1=p1, p2=p2, pts=router.start.pts, straight_factory=s, bend90_cell=b
     )
