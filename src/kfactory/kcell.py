@@ -5086,12 +5086,12 @@ class UMInstance:
         self.parent = parent
 
     @overload
-    def movex(self, destination: float, /) -> UMInstance: ...
+    def movex(self, destination: float, /) -> Instance: ...
 
     @overload
-    def movex(self, origin: float, destination: float) -> UMInstance: ...
+    def movex(self, origin: float, destination: float) -> Instance: ...
 
-    def movex(self, origin: float, destination: float | None = None) -> UMInstance:
+    def movex(self, origin: float, destination: float | None = None) -> Instance:
         """Move the instance in x-direction in um.
 
         Args:
@@ -5102,15 +5102,15 @@ class UMInstance:
             self.parent.transform(kdb.DTrans(float(origin), 0.0))
         else:
             self.parent.transform(kdb.DTrans(float(destination - origin), 0.0))
-        return self
+        return self.parent
 
     @overload
-    def movey(self, destination: float, /) -> UMInstance: ...
+    def movey(self, destination: float, /) -> Instance: ...
 
     @overload
-    def movey(self, origin: float, destination: float) -> UMInstance: ...
+    def movey(self, origin: float, destination: float) -> Instance: ...
 
-    def movey(self, origin: float, destination: float | None = None) -> UMInstance:
+    def movey(self, origin: float, destination: float | None = None) -> Instance:
         """Move the instance in y-direction in um.
 
         Args:
@@ -5121,9 +5121,9 @@ class UMInstance:
             self.parent.transform(kdb.DTrans(0.0, float(origin)))
         else:
             self.parent.transform(kdb.DTrans(0.0, float(destination - origin)))
-        return self
+        return self.parent
 
-    def rotate(self, angle: float, center: kdb.DPoint | None = None) -> UMInstance:
+    def rotate(self, angle: float, center: kdb.DPoint | None = None) -> Instance:
         """Rotate instance in degrees."""
         if center:
             t = kdb.DTrans(center.to_v())
@@ -5131,21 +5131,21 @@ class UMInstance:
         self.parent.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
         if center:
             self.parent.transform(t)
-        return self
+        return self.parent
 
     @overload
-    def move(self, destination: tuple[float, float], /) -> UMInstance: ...
+    def move(self, destination: tuple[float, float], /) -> Instance: ...
 
     @overload
     def move(
         self, origin: tuple[float, float], destination: tuple[float, float]
-    ) -> UMInstance: ...
+    ) -> Instance: ...
 
     def move(
         self,
         origin: tuple[float, float],
         destination: tuple[float, float] | None = None,
-    ) -> UMInstance:
+    ) -> Instance:
         """Move the instance in dbu.
 
         Args:
@@ -5160,7 +5160,7 @@ class UMInstance:
                     float(destination[0] - origin[0]), float(destination[1] - origin[1])
                 )
             )
-        return self
+        return self.parent
 
     def mirror(
         self, p1: kdb.DPoint = kdb.DPoint(1, 0), p2: kdb.DPoint = kdb.DPoint(0, 0)
@@ -5181,15 +5181,15 @@ class UMInstance:
 
         return self.parent
 
-    def mirror_x(self, x: float = 0) -> UMInstance:
+    def mirror_x(self, x: float = 0) -> Instance:
         """Mirror the instance at an x-axis."""
         self.parent.transform(kdb.DTrans(2, True, 2 * x, 0))
-        return self
+        return self.parent
 
-    def mirror_y(self, y: float = 0) -> UMInstance:
+    def mirror_y(self, y: float = 0) -> Instance:
         """Mirror the instance at an y-axis."""
         self.parent.transform(kdb.DTrans(0, True, 0, 2 * y))
-        return self
+        return self.parent
 
     @property
     def xmin(self) -> float:
