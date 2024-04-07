@@ -27,6 +27,8 @@ def test_instance_d_move(LAYER: kf.LayerEnum) -> None:
 
     ref.d.movey(10)
     ref.d.movey(10.0)
+    ref.d.movex(10).movey(10)
+    ref.d.rotate(45).movey(10)
 
     ref.d.xmin = 0
     ref.d.xmax = 0
