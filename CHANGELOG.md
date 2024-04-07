@@ -5,6 +5,8 @@
 
 ## New
 
+- return uminstance with moving references [#287](https://github.com/gdsfactory/kfactory/pull/287)
+- Add post process [#273](https://github.com/gdsfactory/kfactory/pull/273)
 - serialize settings [#285](https://github.com/gdsfactory/kfactory/pull/285)
 - Fix routing issues [#284](https://github.com/gdsfactory/kfactory/pull/284)
 - Add `copy_polar` to `Port` [#282](https://github.com/gdsfactory/kfactory/pull/282)
