@@ -183,7 +183,7 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
     def restrict_types(cls, data: dict[str, Any]) -> dict[str, MetaData]:
         for name, value in data.items():
             if not isinstance(
-                value, str | int | float | bool | SerializableShape | Sequence
+                value, str | int | float | bool | SerializableShape | Sequence | None
             ):
                 data[name] = clean_value(value)
         return data
