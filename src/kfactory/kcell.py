@@ -4312,18 +4312,11 @@ class Port:
     def __repr__(self) -> str:
         """String representation of port."""
         ln = self.layer.name if isinstance(self.layer, LayerEnum) else self.layer
-        if self._trans:
-            return (
-                f"Port({'name: ' + self.name if self.name else ''}"
-                f", width: {self.width}, trans: {self.trans.to_s()}, layer: "
-                f"{ln}, port_type: {self.port_type})"
-            )
-        else:
-            return (
-                f"Port({'name: ' + self.name if self.name else ''}"
-                f", dwidth: {self.d.width}, trans: {self.dcplx_trans.to_s()}, layer: "
-                f"{ln}, port_type: {self.port_type})"
-            )
+        return (
+            f"Port({'name: ' + self.name if self.name else ''}"
+            f", dwidth: {self.d.width}, trans: {self.dcplx_trans.to_s()}, layer: "
+            f"{ln}, port_type: {self.port_type})"
+        )
 
     def print(self) -> None:
         """Print the port pretty."""
