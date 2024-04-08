@@ -5578,6 +5578,36 @@ class Ports:
                 f"Available ports: {[v.name for v in self._ports]}"
             )
 
+    def filter(
+        self,
+        angle: int | None = None,
+        orientation: float | None = None,
+        layer: LayerEnum | int | None = None,
+        port_type: str | None = None,
+        regex: str | None = None,
+    ) -> Iterable[Port]:
+        """Filter ports by name.
+
+        Args:
+            angle: Filter by angle. 0, 1, 2, 3.
+            orientation: Filter by orientation in degrees.
+            layer: Filter by layer.
+            port_type: Filter by port type.
+            regex: Filter by regex of the name.
+        """
+        ports: Iterable[Port] = self._ports
+        if regex:
+            ports = filter_regex(ports, regex)
+        if layer is not None:
+            ports = filter_layer(ports, layer)
+        if port_type:
+            ports = filter_port_type(ports, port_type)
+        if angle is not None:
+            ports = filter_direction(ports, angle)
+        if orientation is not None:
+            ports = filter_orientation(ports, orientation)
+        return ports
+
     def hash(self) -> bytes:
         """Get a hash of the port to compare."""
         h = sha3_512()
