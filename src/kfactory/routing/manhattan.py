@@ -421,6 +421,8 @@ def route_manhattan(
     )
 
     pts = router.auto_route()
+    if invert:
+        pts.reverse()
 
     return pts
 

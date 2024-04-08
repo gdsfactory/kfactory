@@ -13,6 +13,7 @@
 
 ## Bug Fixes
 
+- fix invert for route_manhattan [#288](https://github.com/gdsfactory/kfactory/pull/288)
 - Fix routing issues [#284](https://github.com/gdsfactory/kfactory/pull/284)
 - Fix proxy KCells [#278](https://github.com/gdsfactory/kfactory/pull/278)
 - fix manahattan router terminating routing too early [#275](https://github.com/gdsfactory/kfactory/pull/275)
