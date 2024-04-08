@@ -216,6 +216,15 @@ def filter_direction(ports: "Iterable[Port]", direction: int) -> "filter[Port]":
     return filter(f_func, ports)
 
 
+def filter_orientation(ports: "Iterable[Port]", orientation: float) -> "filter[Port]":
+    """Filter iterable/sequence of ports by direction :py:class:~`DIRECTION`."""
+
+    def f_func(p: "Port") -> bool:
+        return p.dcplx_trans.angle == orientation
+
+    return filter(f_func, ports)
+
+
 def filter_port_type(ports: "Iterable[Port]", port_type: str) -> "filter[Port]":
     """Filter iterable/sequence of ports by port_type."""
 

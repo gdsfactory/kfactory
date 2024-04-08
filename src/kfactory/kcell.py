@@ -47,7 +47,15 @@ from .enclosure import (
     LayerEnclosureCollection,
     LayerSection,
 )
-from .port import port_polygon, rename_clockwise_multi
+from .port import (
+    filter_direction,
+    filter_layer,
+    filter_orientation,
+    filter_port_type,
+    filter_regex,
+    port_polygon,
+    rename_clockwise_multi,
+)
 
 T = TypeVar("T")
 
@@ -5636,6 +5644,36 @@ class InstancePorts:
             return len(self.cell_ports)
         else:
             return len(self.cell_ports) * self.instance.na * self.instance.nb
+
+    def filter(
+        self,
+        angle: int | None = None,
+        orientation: float | None = None,
+        layer: LayerEnum | int | None = None,
+        port_type: str | None = None,
+        regex: str | None = None,
+    ) -> Iterable[Port]:
+        """Filter ports by name.
+
+        Args:
+            angle: Filter by angle. 0, 1, 2, 3.
+            orientation: Filter by orientation in degrees.
+            layer: Filter by layer.
+            port_type: Filter by port type.
+            regex: Filter by regex of the name.
+        """
+        ports: Iterable[Port] = list(self.instance.ports)
+        if regex:
+            ports = filter_regex(ports, regex)
+        if layer is not None:
+            ports = filter_layer(ports, layer)
+        if port_type:
+            ports = filter_port_type(ports, port_type)
+        if angle is not None:
+            ports = filter_direction(ports, angle)
+        if orientation is not None:
+            ports = filter_orientation(ports, orientation)
+        return ports
 
     @config.logger.catch(reraise=True)
     def __getitem__(
