@@ -47,7 +47,15 @@ from .enclosure import (
     LayerEnclosureCollection,
     LayerSection,
 )
-from .port import port_polygon, rename_clockwise_multi
+from .port import (
+    filter_direction,
+    filter_layer,
+    filter_orientation,
+    filter_port_type,
+    filter_regex,
+    port_polygon,
+    rename_clockwise_multi,
+)
 
 T = TypeVar("T")
 
@@ -183,7 +191,7 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
     def restrict_types(cls, data: dict[str, Any]) -> dict[str, MetaData]:
         for name, value in data.items():
             if not isinstance(
-                value, str | int | float | bool | SerializableShape | Sequence
+                value, str | int | float | bool | SerializableShape | Sequence | None
             ):
                 data[name] = clean_value(value)
         return data
@@ -5563,6 +5571,36 @@ class Ports:
                 f"Available ports: {[v.name for v in self._ports]}"
             )
 
+    def filter(
+        self,
+        angle: int | None = None,
+        orientation: float | None = None,
+        layer: LayerEnum | int | None = None,
+        port_type: str | None = None,
+        regex: str | None = None,
+    ) -> Iterable[Port]:
+        """Filter ports by name.
+
+        Args:
+            angle: Filter by angle. 0, 1, 2, 3.
+            orientation: Filter by orientation in degrees.
+            layer: Filter by layer.
+            port_type: Filter by port type.
+            regex: Filter by regex of the name.
+        """
+        ports: Iterable[Port] = self._ports
+        if regex:
+            ports = filter_regex(ports, regex)
+        if layer is not None:
+            ports = filter_layer(ports, layer)
+        if port_type:
+            ports = filter_port_type(ports, port_type)
+        if angle is not None:
+            ports = filter_direction(ports, angle)
+        if orientation is not None:
+            ports = filter_orientation(ports, orientation)
+        return ports
+
     def hash(self) -> bytes:
         """Get a hash of the port to compare."""
         h = sha3_512()
@@ -5629,6 +5667,36 @@ class InstancePorts:
             return len(self.cell_ports)
         else:
             return len(self.cell_ports) * self.instance.na * self.instance.nb
+
+    def filter(
+        self,
+        angle: int | None = None,
+        orientation: float | None = None,
+        layer: LayerEnum | int | None = None,
+        port_type: str | None = None,
+        regex: str | None = None,
+    ) -> Iterable[Port]:
+        """Filter ports by name.
+
+        Args:
+            angle: Filter by angle. 0, 1, 2, 3.
+            orientation: Filter by orientation in degrees.
+            layer: Filter by layer.
+            port_type: Filter by port type.
+            regex: Filter by regex of the name.
+        """
+        ports: Iterable[Port] = list(self.instance.ports)
+        if regex:
+            ports = filter_regex(ports, regex)
+        if layer is not None:
+            ports = filter_layer(ports, layer)
+        if port_type:
+            ports = filter_port_type(ports, port_type)
+        if angle is not None:
+            ports = filter_direction(ports, angle)
+        if orientation is not None:
+            ports = filter_orientation(ports, orientation)
+        return ports
 
     @config.logger.catch(reraise=True)
     def __getitem__(
