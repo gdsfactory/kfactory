@@ -5,6 +5,7 @@
 
 ## New
 
+- print ports in um [#289](https://github.com/gdsfactory/kfactory/pull/289)
 - return uminstance with moving references [#287](https://github.com/gdsfactory/kfactory/pull/287)
 - Add post process [#273](https://github.com/gdsfactory/kfactory/pull/273)
 - serialize settings [#285](https://github.com/gdsfactory/kfactory/pull/285)
