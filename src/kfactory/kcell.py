@@ -3133,7 +3133,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         self.layout.delete_cell_rec(cell_index)
         self.rebuild()
 
-    def delect_cells(self, cell_index_list: Sequence[int]) -> None:
+    def delete_cells(self, cell_index_list: Sequence[int]) -> None:
         """Delete a sequence of cell by indexes."""
         self.layout.delete_cells(cell_index_list)
         self.rebuild()
