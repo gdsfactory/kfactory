@@ -210,7 +210,7 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
         data: dict[str, MetaData],
     ) -> dict[str, MetaData]:
         for name, value in data.items():
-            if not isinstance(value, str | int | float | Sequence):
+            if not isinstance(value, str | int | float | Sequence | dict | None):
                 raise ValueError(
                     "Values of the info dict only support int, float, string or tuple."
                     f"{name}: {value}, {type(value)}"
