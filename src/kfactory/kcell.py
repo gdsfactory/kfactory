@@ -111,7 +111,12 @@ DShapeLike: TypeAlias = (
 ShapeLike: TypeAlias = IShapeLike | DShapeLike | kdb.Shape
 
 MetaData: TypeAlias = (
-    int | float | bool | Sequence[int | float | SerializableShape | str] | str
+    int
+    | float
+    | bool
+    | Sequence[int | float | SerializableShape | str]
+    | str
+    | dict[str, int | float | int | Sequence]
 )
 
 kcl: KCLayout

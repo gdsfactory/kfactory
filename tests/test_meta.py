@@ -13,6 +13,7 @@ def sample(
     c.info["i"] = i
     c.info["f"] = f
     c.info["t"] = t
+    c.info["d"] = {"a": 1, "b": 2}
     return c
 
 
@@ -137,7 +138,19 @@ def test_info_dump() -> None:
     c = kf.KCell()
     c.info = kf.Info(a="A")
     c.info.b = "B"
+    c.info['d'] = {"a": 1, "b": 2}
     c._settings = kf.KCellSettings(a="A", c="C")
 
     assert c.info == c.info.model_copy()
     assert c.settings == c.settings.model_copy()
+
+    with NamedTemporaryFile("a") as t:
+        # save = kf.save_layout_options()
+        # save.write_context_info = True
+        c.kcl.write(t.name)
+        kcl = kf.KCLayout("TEST_META2")
+        kcl.read(t.name)
+        wg_read = kcl[c.name]
+        wg_read.get_meta_data()
+        assert wg_read.info == c.info
+        assert wg_read.info['d'] == {"a": 1, "b": 2}
