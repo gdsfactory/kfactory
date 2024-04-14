@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from dataclasses import InitVar, dataclass, field
 from typing import Literal, Protocol
+
+import numpy as np
 
 from .. import kdb
 from ..conf import config
@@ -221,7 +223,7 @@ _p = kdb.Point()
 class ManhattanRouterSide:
     router: ManhattanRouter
     _t: kdb.Trans
-    ot: kdb.Trans
+    _ot: kdb.Trans
     pts: list[kdb.Point]
 
     def __post_init__(self) -> None:
@@ -239,11 +241,11 @@ class ManhattanRouterSide:
 
     @property
     def tv(self) -> kdb.Vector:
-        return self.t.inverted() * (self.ot.disp - self.t.disp)
+        return self.t.inverted() * (self._ot.disp - self.t.disp)
 
     @property
     def ta(self) -> Literal[0, 1, 2, 3]:
-        return (self.ot.angle - self.t.angle) % 4  # type: ignore[return-value]
+        return (self._ot.angle - self.t.angle) % 4  # type: ignore[return-value]
 
     def right(self) -> None:
         self.pts.append(
@@ -304,13 +306,13 @@ class ManhattanRouter:
         self.start = ManhattanRouterSide(
             router=self,
             _t=_start,
-            ot=_end,
+            _ot=_end,
             pts=start_points,
         )
         self.end = ManhattanRouterSide(
             router=self,
             _t=_end,
-            ot=_start,
+            _ot=_start,
             pts=end_points,
         )
         self.start.straight(start_straight)
@@ -564,6 +566,7 @@ def route_smart(
     invert: Sequence[bool] = [False],
     start_bbox: kdb.Box | None = None,
     end_bbox: kdb.Box | None = None,
+    widths: list[int] | None = None,
 ) -> list[ManhattanRouter]:
     length = len(start_ports)
 
@@ -619,110 +622,234 @@ def route_smart(
         kdb.Box(router.start.t.disp.to_p(), router.end.t.disp.to_p())
         for router in routers
     ]
-    complete_bbox = router_bboxes[0].dup().enlarged(separation)
+    complete_bbox = router_bboxes[0].dup().enlarged(separation + routers[0].width)
     bundled_bboxes: list[kdb.Box] = [complete_bbox]
     bundled_routers: list[list[ManhattanRouter]] = [[routers[0]]]
     bundle = bundled_routers[0]
     bundle_bbox = complete_bbox.dup()
     for router, bbox in zip(routers[1:], router_bboxes[1:]):
-        dbrbox = bbox.enlarged(separation)
+        dbrbox = bbox.enlarged(separation + router.width // 2)
         overlap_box = dbrbox & bundle_bbox
 
         if overlap_box.empty():
             overlap_complete = dbrbox & complete_bbox
             if overlap_complete.empty():
-                bundle_bbox = bbox.dup()
                 bundled_bboxes.append(bundle_bbox)
+                bundle_bbox = bbox.dup()
                 bundle = [router]
                 bundled_routers.append(bundle)
             else:
-                raise NotImplementedError()
+                for i in range(len(bundled_bboxes)):
+                    bundled_bbox = bundled_bboxes[i]
+                    if not (dbrbox & bundled_bbox).empty():
+                        bb = bundled_bboxes[i]
+                        bundled_routers[i].append(router)
+                        bundled_bboxes[i] = bb + bbox.enlarged(router.width // 2)
+                        break
         else:
             bundle.append(router)
             bundle_bbox += bbox
+
+    merge_bboxes: list[tuple[int, int]] = []
+    for i in range(len(bundled_bboxes)):
+        for j in range(0, i):
+            if not (bundled_bboxes[j] & bundled_bboxes[i]).empty():
+                merge_bboxes.append((i, j))
+                break
+    for i, j in reversed(merge_bboxes):
+        bundled_bboxes[j] = bundled_bboxes[i] + bundled_bboxes[j]
+        bundled_routers[j] = bundled_routers[i] + bundled_routers[j]
+    for i, _ in reversed(merge_bboxes):
+        del bundled_bboxes[i]
+        del bundled_routers[i]
     for router_bundle in bundled_routers:
-        sorted_routers: Sequence[ManhattanRouter]
+        sorted_routers = _sort_routers(router_bundle)
 
-        # best_start_angles = {i: 0 for i in range(4)}
-        # best_end_angles = best_start_angles.copy()
-        # for router in router_bundle:
-        #     sta = router.start.t.angle
-        #     eta = router.end.t.angle
+        # simple (maybe error-prone) way to determine the ideal routing angle
+        angle = router_bundle[0].end.t.angle
 
-        #     for i in range(4):
-        #         _sta = (i - sta) % 4
-        #         if _sta == 3:
-        #             _sta = 1
+        disp_to_bbox = kdb.Trans(-angle, False, 0, 0) * (
+            start_bbox.center().to_v() - router_bundle[0].end.t.disp
+        )
 
-        #         _eta = (i - eta) % 4
-        #         if _eta == 3:
-        #             _eta = 1
-        #         best_start_angles[i] += _sta
-        #         best_end_angles[i] += _eta
+        if disp_to_bbox.x > 0:
+            target_angle = (angle - 2) % 4
+        else:
+            target_angle = angle
 
-        # side = sorted(best_start_angles.items(), key=lambda item: item[1])[0][0]
-        # atv = kdb.Vector()
-        # for router in router_bundle:
-        #     atv += kdb.Trans(side - router.start.t.angle) * router.start.tv
+        router_groups: list[tuple[int, list[ManhattanRouter]]] = []
+        group_angle: int | None = None
+        current_group: list[ManhattanRouter] = []
+        for router in sorted_routers:
+            _ang = router.start.t.angle
+            if _ang != group_angle:
+                if group_angle is not None:
+                    router_groups.append(
+                        ((group_angle - target_angle) % 4, current_group)
+                    )
+                group_angle = _ang
+                current_group = []
+            current_group.append(router)
+        else:
+            if group_angle is not None:
+                router_groups.append(((target_angle - group_angle) % 4, current_group))
 
-        # def _sort_route(rs: ManhattanRouterSide) -> tuple[int, int]:  # type:ignore[return]
-        #     _side = (rs.t.angle - side + 1) % 4
-        #     match _side, (kdb.Trans(-rs.t.angle, False, 0, 0) * rs.t.disp).y:
-        #         case 0, y:
-        #             return _side, -y
-        #         case 1, y if rs.tv.y < 0:
-        #             return _side, y
-        #         case 1, y:
-        #             return _side, -y
-        #         case 2, y:
-        #             return _side, y
-        #         case _, y:
-        #             return _side, y
+        total_bbox = start_bbox
 
-        # for router in sorted(router_bundle, key=_sort_route):
-        #     rs = router.start
-        #     _side = (rs.t.angle - side + 1) % 4
-        #     match rs.t.angle:
-        #         case 0:
-        #             rs.straight_nobend(bbox.right + rs.router.width // 2 - rs.t.disp.x)
-        #         case 1:
-        #             rs.straight_nobend(bbox.top + rs.router.width // 2 - rs.t.disp.y)
-        #         case 2:
-        #             rs.straight_nobend(rs.t.disp.x - bbox.left - rs.router.width // 2)
-        #         case 3:
-        #             rs.straight_nobend(rs.t.disp.y - bbox.bottom - rs.router.width // 2)
+        if len(router_groups) > 1:
+            passes0 = False
+            start_angle = router_groups[0][0]
+            end_angle = router_groups[-1][0]
 
-        #     # match _side:
-        #     # case 0:
-        #     # if rs.tv.y < -rs.router.bend90_radius:
-        #     # rs.straight_nobend(2 * rs.router.bend90_radius - )
-        #     match rs.t.angle:
-        #         case 0:
-        #             rs.straight(bbox.right + rs.router.width // 2 + separation)
-        #         case 1:
-        #             rs.straight(bbox.top + rs.router.width // 2 + separation)
-        #         case 2:
-        #             rs.straight(bbox.left - rs.router.width // 2 - separation)
-        #         case 3:
-        #             rs.straight(bbox.bottom - rs.router.width // 2 - separation)
+            if end_angle <= start_angle and end_angle != 0:
+                passes0 = True
+            else:
+                passes0 = False
 
-        # # for router in router_bundle:
-        # #     router.end.t = router.start.t * kdb.Trans.R180
-        # #     router.finish()
-
-        # # _separation = 0
-
-        # # for router in router_bundle:
-        # #     #     router.start.straight(_separation)
-        # #     router.auto_route(straight_s_bend_strategy="short")
-        # #     _separation += separation + router.width
-
-        # # if tv.y > 0:
-        # #     _routers: Iterable[ManhattanRouter] = reversed(router_bundle)
-        # # else:
-        # #     _routers = router_bundle
+            if passes0:
+                angle = router_groups[0][0]
+                routers_clockwise: list[ManhattanRouter]
+                routers_clockwise = router_groups[0][1].copy()
+                for i in range(1, len(router_groups)):
+                    new_angle, new_routers = router_groups[i]
+                    a = angle
+                    if routers_clockwise:
+                        while a != new_angle:
+                            a = (a + 1) % 4
+                            total_bbox += _route_to_side(
+                                routers=[router.start for router in routers_clockwise],
+                                clockwise=True,
+                                bbox=start_bbox,
+                                separation=separation,
+                            )
+                    if new_angle <= angle:
+                        break
+                    routers_clockwise.extend(new_routers)
+                    angle = new_angle
+                angle = router_groups[-1][0]
+                routers_anticlockwise: list[ManhattanRouter]
+                routers_anticlockwise = router_groups[-1][1].copy()
+                if router_groups[-1][0] != 0:
+                    for i in range(len(router_groups) - 2, -1, -1):
+                        new_angle, new_routers = router_groups[i]
+                        a = angle
+                        if routers_anticlockwise:
+                            while a != new_angle:
+                                a = (a - 1) % 4
+                                total_bbox += _route_to_side(
+                                    routers=[
+                                        router.start for router in routers_anticlockwise
+                                    ],
+                                    clockwise=False,
+                                    bbox=start_bbox,
+                                    separation=separation,
+                                )
+                        if new_angle == 0:
+                            routers_anticlockwise.extend(new_routers)
+                            break
+                        if new_angle >= angle:
+                            break
+                        routers_anticlockwise.extend(new_routers)
+                        angle = new_angle
+            else:
+                if router_groups[0][1][0].end.tv.y > 0:
+                    for i in range(len(router_groups) - 1, -1):
+                        new_angle, new_routers = router_groups[i]
+                        a = angle
+                        if routers_anticlockwise:
+                            while a != new_angle:
+                                a = (a + 1) % 4
+                                total_bbox += _route_to_side(
+                                    routers=[
+                                        router.start for router in routers_anticlockwise
+                                    ],
+                                    clockwise=False,
+                                    bbox=start_bbox,
+                                    separation=separation,
+                                )
+                        if new_angle == 0 or (new_angle - angle) % 4 <= 0:
+                            break
+                        routers_anticlockwise.extend(new_routers)
+                        angle = new_angle
+                else:
+                    for i in range(len(router_groups) - 1, -1):
+                        new_angle, new_routers = router_groups[i]
+                        a = angle
+                        if routers_anticlockwise:
+                            while a != new_angle:
+                                a = (a + 1) % 4
+                                total_bbox += _route_to_side(
+                                    routers=[
+                                        router.start for router in routers_anticlockwise
+                                    ],
+                                    clockwise=False,
+                                    bbox=start_bbox,
+                                    separation=separation,
+                                )
+                        if new_angle == 0 or (new_angle - angle) % 4 <= 0:
+                            break
+                        routers_anticlockwise.extend(new_routers)
+                        angle = new_angle
+        route_to_bbox([router.start for router in router_bundle], total_bbox)
+        route_loosely(routers, separation=separation)
 
     return routers
+
+
+def route_to_bbox(routers: Iterable[ManhattanRouterSide], bbox: kdb.Box) -> None:
+    for router in routers:
+        match router.t.angle:
+            case 0:
+                router.straight(bbox.right - router.t.disp.x)
+            case 1:
+                router.straight(bbox.top - router.t.disp.y)
+            case 2:
+                router.straight(-bbox.left + router.t.disp.x)
+            case 3:
+                router.straight(-bbox.bottom + router.t.disp.y)
+
+
+def route_loosely(routers: Sequence[ManhattanRouter], separation: int) -> None:
+    if routers:
+        sign = np.sign(routers[0].start.tv.y)
+        group = [routers[0]]
+        i = 1
+        sorted_rotuers = _sort_routers(routers)
+        while i != len(routers):
+            r = sorted_rotuers[i]
+            _s = np.sign(r.start.tv.y)
+            if sign == _s:
+                group.append(r)
+            else:
+                match sign:
+                    case -1:
+                        start_straight = 0
+                        for j, _r in enumerate(group):
+                            _r.start.straight(start_straight)
+                            _r.auto_route()
+                            start_straight += separation + _r.width
+                    case _:
+                        start_straight = 0
+                        for j, _r in enumerate(reversed(group)):
+                            _r.start.straight(start_straight)
+                            _r.auto_route()
+                            start_straight += separation + _r.width
+                group = [r]
+                sign = _s
+            i += 1
+        match sign:
+            case -1:
+                start_straight = 0
+                for j, _r in enumerate(group):
+                    _r.start.straight(start_straight)
+                    _r.auto_route()
+                    start_straight += separation + _r.width
+            case _:
+                start_straight = 0
+                for j, _r in enumerate(reversed(group)):
+                    _r.start.straight(start_straight)
+                    _r.auto_route()
+                    start_straight += separation + _r.width
 
 
 def vec_dir(vec: kdb.Vector) -> int:
@@ -739,18 +866,29 @@ def vec_dir(vec: kdb.Vector) -> int:
             raise ValueError(f"Non-manhattan vectors aren't supported {vec}")
 
 
+def _sort_routers(routes: Sequence[ManhattanRouter]) -> Sequence[ManhattanRouter]:
+    angle = routes[0].end.t.angle
+    match angle:
+        case 0:
+            return sorted(routes, key=lambda route: -route.end.t.disp.y)
+        case 1:
+            return sorted(routes, key=lambda route: route.end.t.disp.x)
+        case 2:
+            return sorted(routes, key=lambda route: route.end.t.disp.y)
+        case _:
+            return sorted(routes, key=lambda route: -route.end.t.disp.x)
+
+
 def _route_to_side(
-    side: Literal[0, 1, 2, 3],
     routers: list[ManhattanRouterSide],
     clockwise: bool,
     bbox: kdb.Box,
     separation: int,
-) -> None:
+    until_bbox: bool = False,
+) -> kdb.Box:
     bbox = bbox.enlarged(separation // 2)
 
-    atv = kdb.Vector()
-    for router in routers:
-        atv += kdb.Trans(side - router.t.angle) * router.tv
+    side = routers[0].t.angle
 
     def _sort_route(router: ManhattanRouterSide) -> tuple[int, int]:  # type:ignore[return]
         _side = (router.t.angle - side + 1) % 4
@@ -766,31 +904,40 @@ def _route_to_side(
             case _, y:
                 return _side, y
 
-    for rs in sorted(routers, key=_sort_route):
-        _side = (rs.t.angle - side + 1) % 4
+    sorted_rs = sorted(routers, key=_sort_route)
+    for rs in sorted_rs:
+        hw1 = rs.router.width // 2
+        hw2 = rs.router.width - hw1
         match rs.t.angle:
             case 0:
-                rs.straight_nobend(bbox.right + rs.router.width // 2 - rs.t.disp.x)
+                s = bbox.right + hw1 - rs.t.disp.x - rs.router.bend90_radius
             case 1:
-                rs.straight_nobend(bbox.top + rs.router.width // 2 - rs.t.disp.y)
+                s = bbox.top + hw1 - rs.t.disp.y - rs.router.bend90_radius
             case 2:
-                rs.straight_nobend(rs.t.disp.x - bbox.left - rs.router.width // 2)
-            case 3:
-                rs.straight_nobend(rs.t.disp.y - bbox.bottom - rs.router.width // 2)
+                s = rs.t.disp.x - (bbox.left - hw1) - rs.router.bend90_radius
+            case _:
+                s = rs.t.disp.y - (bbox.bottom - hw1) - rs.router.bend90_radius
+        rs.straight(s)
+        if clockwise:
+            x = rs.tv.x
+            if rs.ta == 3:
+                if x >= rs.router.bend90_radius:
+                    rs.straight_nobend(x)
+                elif x > -rs.router.bend90_radius:
+                    rs.straight(rs.router.bend90_radius + x)
+            rs.left()
+            bbox += rs.t * kdb.Point(0, -hw2 - separation)
+        else:
+            x = rs.tv.x
+            if rs.ta == 1:
+                if x >= rs.router.bend90_radius:
+                    rs.straight_nobend(x)
+                elif x > -rs.router.bend90_radius:
+                    rs.straight(rs.router.bend90_radius + x)
+            rs.right()
+            bbox += rs.t * kdb.Point(0, hw2 + separation)
 
-        # match _side:
-        # case 0:
-        # if rs.tv.y < -rs.router.bend90_radius:
-        # rs.straight_nobend(2 * rs.router.bend90_radius - )
-        match rs.t.angle:
-            case 0:
-                rs.straight(bbox.right + rs.router.width // 2 + separation)
-            case 1:
-                rs.straight(bbox.top + rs.router.width // 2 + separation)
-            case 2:
-                rs.straight(bbox.left - rs.router.width // 2 - separation)
-            case 3:
-                rs.straight(bbox.bottom - rs.router.width // 2 - separation)
+    return bbox
 
 
 def backbone2bundle(
