@@ -11,10 +11,8 @@ from ..factories import StraightFactory
 from ..kcell import Instance, KCell, Port
 from .manhattan import (
     ManhattanRoutePathFunction,
-    backbone2bundle,
-    clean_points,
     route_manhattan,
-    route_ports_to_bundle,
+    route_smart,
 )
 
 __all__ = [
@@ -439,110 +437,51 @@ def route_bundle(
     c: KCell,
     start_ports: list[Port],
     end_ports: list[Port],
-    spacing: int,
+    separation: int,
     straight_factory: StraightFactory,
     bend90_cell: KCell,
-    start_straight: int = 0,
-    end_straight: int = 0,
-    route_path_function: ManhattanRoutePathFunction = route_manhattan,
-    bundle_backbone: list[kdb.Point] | None = None,
+    taper_cell: KCell | None = None,
+    start_straights: int | list[int] = 0,
+    end_straights: int | list[int] = 0,
+    min_straight_taper: int = 0,
 ) -> list[OpticalManhattanRoute]:
     """Route a bundle from starting ports to end_ports."""
     radius = max(
         abs(bend90_cell.ports[0].x - bend90_cell.ports[1].x),
         abs(bend90_cell.ports[0].y - bend90_cell.ports[1].y),
     )
-
-    sp_dict = {p.trans: i for i, p in enumerate(start_ports)}
-
     if not (len(start_ports) == len(end_ports) and len(start_ports) > 0):
         raise ValueError(
             "For bundle routing the input port list must have"
             " the same size as the end ports and be the same length."
         )
 
-    bundle_point_start = start_ports[0].trans.disp.to_p()
-    for p in start_ports[1:]:
-        bundle_point_start += p.trans.disp
-    bundle_point_start /= len(start_ports)
-    bundle_point_end = end_ports[0].trans.disp.to_p()
-    for p in end_ports[1:]:
-        bundle_point_end += p.trans.disp
-    bundle_point_end /= len(end_ports)
+    if isinstance(start_straights, int):
+        start_straights = [start_straights] * len(start_ports)
+    if isinstance(end_straights, int):
+        end_straights = [end_straights] * len(start_ports)
 
-    bundle_width = sum(p.width for p in start_ports) + len(start_ports) * spacing
-
-    start_routes, bundle_start = route_ports_to_bundle(
-        ports_to_route=[(p.trans, p.width) for p in start_ports],
-        bend_radius=radius,
-        bbox=c.bbox(),
-        bundle_base_point=bundle_point_start,
-        start_straight=start_straight,
-        spacing=spacing,
-    )
-
-    end_routes, bundle_end = route_ports_to_bundle(
-        ports_to_route=[(p.trans, p.width) for p in end_ports],
-        bend_radius=radius,
-        bbox=c.bbox(),
-        bundle_base_point=bundle_point_end,
-        start_straight=end_straight,
-        spacing=spacing,
-    )
-
-    start_widths = [start_ports[sp_dict[t]].width for t in start_routes]
-    bundle_radius = bundle_width - start_widths[-1] // 2 - start_widths[0] // 2 + radius
-
-    start_angle = start_ports[0].angle
-    end_angle = end_ports[0].angle
-
-    bundle_start_port = Port(
-        layer=start_ports[0].layer,
-        width=bundle_width,
-        trans=kdb.Trans(start_angle, False, bundle_start.to_v()),
-    )
-
-    bundle_end_port = Port(
-        layer=end_ports[0].layer,
-        width=bundle_width,
-        trans=kdb.Trans(end_angle, False, bundle_end.to_v()),
-    )
-
-    backbone_points = backbone2bundle(
-        backbone=route_manhattan(
-            port1=bundle_start_port,
-            port2=bundle_end_port,
-            bend90_radius=bundle_radius,
-            start_straight=0,
-            end_straight=0,
-        ),
-        port_widths=start_widths,
-        spacings=[spacing] * len(start_widths),
+    routers = route_smart(
+        start_ports=start_ports,
+        end_ports=end_ports,
+        bend90_radius=radius,
+        separation=separation,
+        start_straights=start_straights,
+        end_straights=end_straights,
     )
 
     routes: list[OpticalManhattanRoute] = []
-
-    end_routes_values = list(end_routes.values())
-
-    for i, (t, start_pts) in enumerate(start_routes.items()):
-        bundle_pts = backbone_points[i]
-        end_pts = list(reversed(end_routes_values[-(i + 1)]))
-
-        pts = clean_points(start_pts + bundle_pts + end_pts)
-
-        s_idx = sp_dict[t]
-        sp = start_ports[s_idx].copy()
-        sp.angle = (sp.trans.angle + 2) % 4
-        ep = end_ports[s_idx].copy()
-        ep.angle = (ep.trans.angle + 2) % 4
+    for ps, pe, router in zip(start_ports, end_ports, routers):
         routes.append(
             place90(
-                c=c,
-                p1=sp,
-                p2=ep,
-                pts=pts,
+                c,
+                p1=ps,
+                p2=pe,
+                pts=router.start.pts,
                 straight_factory=straight_factory,
                 bend90_cell=bend90_cell,
+                taper_cell=taper_cell,
+                min_straight_taper=min_straight_taper,
             )
         )
 

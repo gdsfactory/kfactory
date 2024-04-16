@@ -563,7 +563,6 @@ def route_smart(
     separation: int,
     start_straights: list[int] = [0],
     end_straights: list[int] = [0],
-    invert: Sequence[bool] = [False],
     bboxes: list[kdb.Box] | None = None,
     widths: list[int] | None = None,
 ) -> list[ManhattanRouter]:
@@ -578,8 +577,6 @@ def route_smart(
         start_straights = [start_straights[0]] * length
     if len(end_straights) == 1:
         end_straights = [end_straights[0]] * length
-    if len(invert) == 1:
-        invert = [invert[0]] * length
 
     assert len(start_straights) == length, (
         "start_straights does have too few or too"
