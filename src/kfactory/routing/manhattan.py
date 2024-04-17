@@ -762,27 +762,27 @@ def route_smart(
             angle = (r.end.t.angle - 2 - r.start.t.angle) % 4
             match angle:
                 case 1:
-                    _route_to_side(
+                    total_bbox = _route_to_side(
                         [r.start for r in routers],
                         clockwise=True,
                         bbox=total_bbox,
                         separation=separation,
                     )
                 case 2:
-                    _route_to_side(
+                    total_bbox = _route_to_side(
                         [r.start for r in routers],
                         clockwise=routers[0].start.tv.y > 0,
                         bbox=total_bbox,
                         separation=separation,
                     )
-                    _route_to_side(
+                    total_bbox = _route_to_side(
                         [r.start for r in routers],
                         clockwise=routers[0].start.tv.y > 0,
                         bbox=total_bbox,
                         separation=separation,
                     )
                 case 3:
-                    _route_to_side(
+                    total_bbox = _route_to_side(
                         [r.start for r in routers],
                         clockwise=False,
                         bbox=total_bbox,
@@ -818,9 +818,9 @@ def route_loosely(
             routers[0].start.t.disp.to_p(), routers[0].end.t.disp.to_p()
         )
         i = 1
-        sorted_rotuers = _sort_routers(routers)
+        sorted_routers = _sort_routers(routers)
         while i != len(routers):
-            r = sorted_rotuers[i]
+            r = sorted_routers[i]
             _s = np.sign(r.start.tv.y)
             box = kdb.Box(r.start.t.disp.to_p(), r.end.t.disp.to_p())
             if sign == _s and not (box & group_box).empty():
@@ -830,20 +830,20 @@ def route_loosely(
                 match sign:
                     case -1:
                         for j, _r in enumerate(group):
-                            delta = kdb.Vector(
+                            delta = kdb.Point(
                                 separation + _r.width, 0
                             )  # start_straight equivalent
                             route_to_bbox([_r.start], router_box)
+                            router_box += _r.start.t * delta
                             _r.auto_route(straight_s_bend_strategy="short")
-                            router_box += (_r.start.t * delta).to_p()
                     case _:
                         for j, _r in enumerate(reversed(group)):
-                            delta = kdb.Vector(
+                            delta = kdb.Point(
                                 separation + _r.width, 0
                             )  # start_straight equivalent
                             route_to_bbox([_r.start], router_box)
+                            router_box += _r.start.t * delta
                             _r.auto_route(straight_s_bend_strategy="short")
-                            router_box += (_r.start.t * delta).to_p()
                 # for j, _r in enumerate(reversed(group)):
                 #     delta = kdb.Vector(
                 #         separation + _r.width, 0
@@ -859,20 +859,20 @@ def route_loosely(
         match sign:
             case -1:
                 for j, _r in enumerate(group):
-                    delta = kdb.Vector(
+                    delta = kdb.Point(
                         separation + _r.width, 0
                     )  # start_straight equivalent
                     route_to_bbox([_r.start], router_box)
+                    router_box += _r.start.t * delta
                     _r.auto_route(straight_s_bend_strategy="short")
-                    router_box += (_r.start.t * delta).to_p()
             case _:
                 for j, _r in enumerate(reversed(group)):
-                    delta = kdb.Vector(
+                    delta = kdb.Point(
                         separation + _r.width, 0
                     )  # start_straight equivalent
                     route_to_bbox([_r.start], router_box)
+                    router_box += _r.start.t * delta
                     _r.auto_route(straight_s_bend_strategy="short")
-                    router_box += (_r.start.t * delta).to_p()
         # for j, _r in enumerate(reversed(group)):
         #     delta = kdb.Vector(separation + _r.width, 0)  # start_straight equivalent
         #     route_to_bbox([_r.start], router_box)
