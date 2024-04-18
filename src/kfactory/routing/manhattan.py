@@ -729,7 +729,7 @@ def route_smart(
                         break
                     routers_clockwise.extend(new_routers)
                     angle = new_angle
-                angle = router_groups[-1][0]
+            angle = router_groups[-1][0]
             routers_anticlockwise: list[ManhattanRouter]
             routers_anticlockwise = router_groups[-1][1].copy()
             if router_groups[-1][0] != 0:
