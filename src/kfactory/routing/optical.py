@@ -444,8 +444,26 @@ def route_bundle(
     start_straights: int | list[int] = 0,
     end_straights: int | list[int] = 0,
     min_straight_taper: int = 0,
+    place_port_type: str = "optical",
+    place_allow_small_routes: bool = False,
 ) -> list[OpticalManhattanRoute]:
-    """Route a bundle from starting ports to end_ports."""
+    """Route a bundle from starting ports to end_ports.
+
+    Args:
+        c: Cell to place the route in.
+        start_ports: List of start ports.
+        end_ports: List of end ports.
+        separation: Separation between the routes.
+        straight_factory: Factory function for straight cells. in DBU.
+        bend90_cell: 90° bend cell.
+        taper_cell: Taper cell.
+        start_straights: Minimal straight segment after `p1`.
+        end_straights: Minimal straight segment before `p2`.
+        min_straight_taper: Minimum straight [dbu] before attempting to place tapers.
+        place_port_type: Port type to use for the bend90_cell.
+        place_allow_small_routes: Don't throw an error if two corners cannot be placed.
+
+    """
     radius = max(
         abs(bend90_cell.ports[0].x - bend90_cell.ports[1].x),
         abs(bend90_cell.ports[0].y - bend90_cell.ports[1].y),
@@ -482,6 +500,8 @@ def route_bundle(
                 bend90_cell=bend90_cell,
                 taper_cell=taper_cell,
                 min_straight_taper=min_straight_taper,
+                allow_small_routes=place_allow_small_routes,
+                port_type=place_port_type,
             )
         )
 
