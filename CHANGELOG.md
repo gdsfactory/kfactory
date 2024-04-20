@@ -5,6 +5,7 @@
 
 ## New
 
+- Add (ly)rdb and l2n to show [#296](https://github.com/gdsfactory/kfactory/pull/296)
 - Add filter orientation [#291](https://github.com/gdsfactory/kfactory/pull/291)
 - print ports in um [#289](https://github.com/gdsfactory/kfactory/pull/289)
 - return uminstance with moving references [#287](https://github.com/gdsfactory/kfactory/pull/287)
