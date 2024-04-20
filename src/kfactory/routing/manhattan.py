@@ -434,7 +434,7 @@ class ManhattanRouter:
 
     def collisions(
         self, log_errors: None | Literal["warn", "error"] = "error"
-    ) -> kdb.Edges:
+    ) -> tuple[kdb.Edges, kdb.Edges]:
         """Finds collisions.
 
         A collision is if the router crosses itself in it's route (`self.start.pts`).
@@ -442,6 +442,9 @@ class ManhattanRouter:
         Args:
             log_errors: sends the an error or a warning to the kfactory logger if not
                 `None`.
+
+        Returns:
+            tuple containing the collisions and all edges of the router
         """
         p_start = self.start.pts[1]
         edges = kdb.Edges()
@@ -461,6 +464,8 @@ class ManhattanRouter:
             last_edge = new_edge
             p_start = p
 
+        edges.insert(last_edge)
+
         if has_collisions and log_errors is not None:
             match log_errors:
                 case "error":
@@ -475,7 +480,7 @@ class ManhattanRouter:
                         f" {self.end.pts=} has collisions in the manhattan route.\n"
                         f"{collisions=}"
                     )
-        return collisions
+        return collisions, edges
 
     def finish(self) -> list[kdb.Point]:
         """Determines whether the routing was successful.
