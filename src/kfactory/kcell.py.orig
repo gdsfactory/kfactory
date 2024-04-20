@@ -110,11 +110,18 @@ DShapeLike: TypeAlias = (
 )
 ShapeLike: TypeAlias = IShapeLike | DShapeLike | kdb.Shape
 
+<<<<<<< HEAD
 MetaData: TypeAlias = (
-    "int | float | bool | str | SerializableShape | None |"
-    " list[MetaData] | tuple[MetaData, ...] | dict[str, MetaData]"
+    int
+    | float
+    | bool
+    | Sequence[int | float | SerializableShape | str]
+    | str
+    | dict[str, int | float | int | Sequence]
 )
-
+=======
+MetaData: TypeAlias = "int | float | bool | str | SerializableShape | None | list[MetaData] | tuple[MetaData, ...] | dict[str, MetaData]"
+>>>>>>> 76577a3 (fix dict/list/tuple handling in metadata)
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -204,7 +211,7 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
 
 def convert_metadata_type(value: Any) -> MetaData:
     if isinstance(value, int | float | bool | str | SerializableShape | None):
-        return value  # type: ignore[no-any-return]
+        return value
     else:
         if isinstance(value, tuple):
             return tuple(convert_metadata_type(tv) for tv in value)

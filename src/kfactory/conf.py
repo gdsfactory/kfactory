@@ -93,7 +93,7 @@ def get_affinity() -> int:
     fall back to the multiprocessing cpu count.
     """
     try:
-        threads = len(os.sched_getaffinity(0))
+        threads = len(os.sched_getaffinity(0))  # type: ignore[attr-defined,unused-ignore]
     except AttributeError:
         import multiprocessing
 
