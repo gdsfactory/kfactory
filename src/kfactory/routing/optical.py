@@ -318,7 +318,6 @@ def route(
                         pts = pts[:-1]
 
             if len(pts) > 3:
-                # TODO 180 stuff
                 pt1, pt2, pt3 = pts[:3]
                 j = 0
                 for i in range(3, len(pts) - 2):
@@ -589,8 +588,7 @@ def route_bundle(
                         it.add_value(poly.to_dtype(c.kcl.dbu))
 
         if any_layer_collision:
-            # TODO show lyrdb
-            pass
+            c.show(lyrdb=db)
 
     return routes
 
