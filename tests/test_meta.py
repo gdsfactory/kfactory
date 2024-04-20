@@ -4,7 +4,7 @@ import kfactory as kf
 from tempfile import NamedTemporaryFile
 
 
-@kf.cell
+@kf.cell  # type: ignore[misc, unused-ignore]
 def sample(
     s: str = "a", i: int = 3, f: float = 2.0, t: tuple[int, ...] = (1,)
 ) -> kf.KCell:
@@ -137,7 +137,7 @@ def test_nometainfo_read(straight: kf.KCell) -> None:
 def test_info_dump() -> None:
     c = kf.KCell()
     c.info = kf.Info(a="A")
-    c.info.b = "B"
+    c.info.b = "B"  # type: ignore[attr-defined, unused-ignore]
     c.info['d'] = {"a": 1, "b": 2}
     c._settings = kf.KCellSettings(a="A", c="C")
 

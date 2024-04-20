@@ -840,12 +840,28 @@ class KCell:
 
         return cell
 
-    def show(self) -> None:
+    def show(
+        self,
+        lyrdb: rdb.ReportDatabase | Path | str | None = None,
+        l2n: kdb.LayoutToNetlist | Path | str | None = None,
+        keep_position: bool = True,
+        save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        use_libraries: bool = True,
+        library_save_options: kdb.SaveLayoutOptions = save_layout_options(),
+    ) -> None:
         """Stream the gds to klive.
 
         Will create a temporary file of the gds and load it in KLayout via klive
         """
-        show(self)
+        show(
+            self,
+            lyrdb=lyrdb,
+            l2n=l2n,
+            keep_position=keep_position,
+            save_options=save_options,
+            use_libraries=use_libraries,
+            library_save_options=library_save_options,
+        )
 
     def plot(self) -> None:
         """Display cell.
@@ -3138,7 +3154,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         self.layout.delete_cell_rec(cell_index)
         self.rebuild()
 
-    def delect_cells(self, cell_index_list: Sequence[int]) -> None:
+    def delete_cells(self, cell_index_list: Sequence[int]) -> None:
         """Delete a sequence of cell by indexes."""
         self.layout.delete_cells(cell_index_list)
         self.rebuild()
@@ -4317,18 +4333,11 @@ class Port:
     def __repr__(self) -> str:
         """String representation of port."""
         ln = self.layer.name if isinstance(self.layer, LayerEnum) else self.layer
-        if self._trans:
-            return (
-                f"Port({'name: ' + self.name if self.name else ''}"
-                f", width: {self.width}, trans: {self.trans.to_s()}, layer: "
-                f"{ln}, port_type: {self.port_type})"
-            )
-        else:
-            return (
-                f"Port({'name: ' + self.name if self.name else ''}"
-                f", dwidth: {self.d.width}, trans: {self.dcplx_trans.to_s()}, layer: "
-                f"{ln}, port_type: {self.port_type})"
-            )
+        return (
+            f"Port({'name: ' + self.name if self.name else ''}"
+            f", dwidth: {self.d.width}, trans: {self.dcplx_trans.to_s()}, layer: "
+            f"{ln}, port_type: {self.port_type})"
+        )
 
     def print(self) -> None:
         """Print the port pretty."""
@@ -6074,6 +6083,8 @@ def pprint_ports(
 
 def show(
     layout: KCLayout | KCell | Path | str,
+    lyrdb: rdb.ReportDatabase | Path | str | None = None,
+    l2n: kdb.LayoutToNetlist | Path | str | None = None,
     keep_position: bool = True,
     save_options: kdb.SaveLayoutOptions = save_layout_options(),
     use_libraries: bool = True,
@@ -6083,6 +6094,9 @@ def show(
 
     Args:
         layout: The object to show. This can be a KCell, KCLayout, Path, or string.
+        lyrdb: A KLayout report database (.lyrdb/.rdb) file or object to show with the
+            layout.
+        l2n: A KLayout LayoutToNetlist object or file (.l2n) to show with the layout.
         keep_position: Keep the current KLayout position if a view is already open.
         save_options: Custom options for saving the gds/oas.
         use_libraries: Save other KCLayouts as libraries on write.
@@ -6092,6 +6106,8 @@ def show(
     import inspect
 
     delete = False
+    delete_lyrdb = False
+    delete_l2n = False
 
     # Find the file that calls stack
     try:
@@ -6201,10 +6217,10 @@ def show(
                 _kcl_paths.append({"name": _kcl.name, "file": str(p)})
 
     elif isinstance(layout, str | Path):
-        file = Path(layout).resolve()
+        file = Path(layout).expanduser().resolve()
     else:
         raise NotImplementedError(
-            f"unknown type {type(layout)} for streaming to KLayout"
+            f"Unknown type {type(layout)} for streaming to KLayout"
         )
     if not file.is_file():
         raise ValueError(f"{file} is not a File")
@@ -6214,6 +6230,99 @@ def show(
         "keep_position": keep_position,
         "libraries": _kcl_paths,
     }
+
+    if lyrdb is not None:
+        if isinstance(lyrdb, rdb.ReportDatabase):
+            lyrdbfile: Path | None = None
+            spec = importlib.util.find_spec("git")
+            if spec is not None:
+                import git
+
+                try:
+                    repo = git.repo.Repo(".", search_parent_directories=True)
+                except git.InvalidGitRepositoryError:
+                    pass
+                else:
+                    wtd = repo.working_tree_dir
+                    if wtd is not None:
+                        root = Path(wtd) / "build/gds"
+                        root.mkdir(parents=True, exist_ok=True)
+                        tf = root / Path(name).with_suffix(".lyrdb")
+                        tf.parent.mkdir(parents=True, exist_ok=True)
+                        lyrdb.save(str(tf))
+                        lyrdbfile = tf
+                        delete_lyrdb = False
+            else:
+                config.logger.info(
+                    "git isn't installed. For better file storage, "
+                    "please install kfactory[git] or gitpython."
+                )
+            if not lyrdbfile:
+                try:
+                    from __main__ import __file__ as mf
+                except ImportError:
+                    mf = "shell"
+                tf = Path(gettempdir()) / (name + ".lyrdb")
+                tf.parent.mkdir(parents=True, exist_ok=True)
+                lyrdb.save(str(tf))
+                lyrdbfile = tf
+                delete_lyrdb = True
+        elif isinstance(lyrdb, str | Path):
+            lyrdbfile = Path(lyrdb).expanduser().resolve()
+        else:
+            raise NotImplementedError(
+                f"Unknown type {type(lyrdb)} for streaming to KLayout"
+            )
+        if not lyrdbfile.is_file():
+            raise ValueError(f"{lyrdbfile} is not a File")
+        data_dict["lyrdb"] = str(lyrdbfile)
+
+    if l2n is not None:
+        if isinstance(l2n, kdb.LayoutToNetlist):
+            l2nfile: Path | None = None
+            spec = importlib.util.find_spec("git")
+            if spec is not None:
+                import git
+
+                try:
+                    repo = git.repo.Repo(".", search_parent_directories=True)
+                except git.InvalidGitRepositoryError:
+                    pass
+                else:
+                    wtd = repo.working_tree_dir
+                    if wtd is not None:
+                        root = Path(wtd) / "build/gds"
+                        root.mkdir(parents=True, exist_ok=True)
+                        tf = root / Path(name).with_suffix(".l2n")
+                        tf.parent.mkdir(parents=True, exist_ok=True)
+                        l2n.write(str(tf))
+                        l2nfile = tf
+                        delete_l2n = False
+            else:
+                config.logger.info(
+                    "git isn't installed. For better file storage, "
+                    "please install kfactory[git] or gitpython."
+                )
+            if not l2nfile:
+                try:
+                    from __main__ import __file__ as mf
+                except ImportError:
+                    mf = "shell"
+                tf = Path(gettempdir()) / (name + ".l2n")
+                tf.parent.mkdir(parents=True, exist_ok=True)
+                l2n.write(str(tf))
+                l2nfile = tf
+                delete_l2n = True
+        elif isinstance(l2n, str | Path):
+            l2nfile = Path(l2n).expanduser().resolve()
+        else:
+            raise NotImplementedError(
+                f"Unknown type {type(l2n)} for streaming to KLayout"
+            )
+        if not l2nfile.is_file():
+            raise ValueError(f"{lyrdbfile} is not a File")
+        data_dict["l2n"] = str(l2nfile)
+
     data = json.dumps(data_dict)
     try:
         conn = socket.create_connection(("127.0.0.1", 8082), timeout=0.5)
@@ -6251,6 +6360,10 @@ def show(
 
     if delete:
         Path(file).unlink()
+    if delete_lyrdb and lyrdb is not None:
+        Path(lyrdbfile).unlink()  # type: ignore[arg-type]
+    if delete_l2n and l2n is not None:
+        Path(l2nfile).unlink()  # type: ignore[arg-type]
 
 
 def polygon_from_array(array: Iterable[tuple[int, int]]) -> kdb.Polygon:
