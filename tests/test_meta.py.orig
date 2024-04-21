@@ -15,6 +15,9 @@ def sample(
     c.info["i"] = i
     c.info["f"] = f
     c.info["t"] = t
+<<<<<<< HEAD
+    c.info["d"] = {"a": 1, "b": 2}
+=======
     c.info["d"] = {
         "a": 1,
         "b": 2,
@@ -25,8 +28,6 @@ def sample(
             ),
         },
     }
-    c.info["e"] = None
-    c.show()
     c.write("_test_meta_sample.oas")
 
     kcl2=kf.KCLayout("TEST_META_SAMPLE")
@@ -38,7 +39,7 @@ def sample(
     assert kcl2[c.name].info["d"]["c"]["polygon"] == c.info["d"]["c"][
         "polygon"
     ]
-    assert kcl2[c.name].info["e"] is None
+>>>>>>> 76577a3 (fix dict/list/tuple handling in metadata)
     return c
 
 
@@ -163,7 +164,11 @@ def test_info_dump() -> None:
     c = kf.KCell()
     c.info = kf.Info(a="A")
     c.info.b = "B"  # type: ignore[attr-defined, unused-ignore]
+<<<<<<< HEAD
+    c.info['d'] = {"a": 1, "b": 2}
+=======
     c.info["d"] = {"a": 1, "b": 2}
+>>>>>>> 76577a3 (fix dict/list/tuple handling in metadata)
     c._settings = kf.KCellSettings(a="A", c="C")
 
     assert c.info == c.info.model_copy()
@@ -178,4 +183,8 @@ def test_info_dump() -> None:
         wg_read = kcl[c.name]
         wg_read.get_meta_data()
         assert wg_read.info == c.info
+<<<<<<< HEAD
+        assert wg_read.info['d'] == {"a": 1, "b": 2}
+=======
         assert wg_read.info["d"] == {"a": 1, "b": 2}
+>>>>>>> 76577a3 (fix dict/list/tuple handling in metadata)
