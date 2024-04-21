@@ -5,6 +5,7 @@
 
 ## New
 
+- Allow dicts in info [#293](https://github.com/gdsfactory/kfactory/pull/293)
 - Add smart routing [#295](https://github.com/gdsfactory/kfactory/pull/295)
 - Add (ly)rdb and l2n to show [#296](https://github.com/gdsfactory/kfactory/pull/296)
 - Add filter orientation [#291](https://github.com/gdsfactory/kfactory/pull/291)
