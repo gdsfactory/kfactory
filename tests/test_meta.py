@@ -25,6 +25,8 @@ def sample(
             ),
         },
     }
+    c.info["e"] = None
+    c.show()
     c.write("_test_meta_sample.oas")
 
     kcl2=kf.KCLayout("TEST_META_SAMPLE")
@@ -36,6 +38,7 @@ def sample(
     assert kcl2[c.name].info["d"]["c"]["polygon"] == c.info["d"]["c"][
         "polygon"
     ]
+    assert kcl2[c.name].info["e"] is None
     return c
 
 

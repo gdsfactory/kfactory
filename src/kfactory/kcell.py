@@ -188,6 +188,39 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
         return self.name  # type: ignore[no-any-return]
 
 
+def convert_metadata_type(value: Any) -> MetaData:
+    """Recursively clean up a MetaData for KCellSettings."""
+    if isinstance(value, int | float | bool | str | SerializableShape):
+        return value  # type: ignore[no-any-return]
+    elif value is None:
+        return None
+    elif isinstance(value, tuple):
+        return tuple(convert_metadata_type(tv) for tv in value)
+    elif isinstance(value, list):
+        return list(convert_metadata_type(tv) for tv in value)
+    elif isinstance(value, dict):
+        return {k: convert_metadata_type(v) for k, v in value.items()}
+    return clean_value(value)
+
+
+def check_metatadata_type(value: MetaData) -> MetaData:
+    """Recursively check an info value whether it can be stored."""
+    if value is None:
+        return None
+    elif isinstance(value, str | int | float | bool | SerializableShape):
+        return value
+    elif isinstance(value, tuple):
+        return tuple(convert_metadata_type(tv) for tv in value)
+    elif isinstance(value, list):
+        return list(convert_metadata_type(tv) for tv in value)
+    elif isinstance(value, dict):
+        return {k: convert_metadata_type(v) for k, v in value.items()}
+    raise ValueError(
+        "Values of the info dict only support int, float, string, tuple or list."
+        f"{value=}, {type(value)=}"
+    )
+
+
 class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=True):
     @model_validator(mode="before")
     def restrict_types(cls, data: dict[str, Any]) -> dict[str, MetaData]:
@@ -202,34 +235,6 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
         return getattr(self, __key) if hasattr(self, __key) else default
 
 
-def convert_metadata_type(value: Any) -> MetaData:
-    if isinstance(value, int | float | bool | str | SerializableShape | None):
-        return value  # type: ignore[no-any-return]
-    else:
-        if isinstance(value, tuple):
-            return tuple(convert_metadata_type(tv) for tv in value)
-        elif isinstance(value, list):
-            return list(convert_metadata_type(tv) for tv in value)
-        elif isinstance(value, dict):
-            return {k: convert_metadata_type(v) for k, v in value.items()}
-        return clean_value(value)
-
-
-def check_metatadata_type(value: MetaData) -> MetaData:
-    if not isinstance(value, str | int | float | bool | SerializableShape | None):
-        if isinstance(value, tuple):
-            return tuple(convert_metadata_type(tv) for tv in value)
-        elif isinstance(value, list):
-            return list(convert_metadata_type(tv) for tv in value)
-        elif isinstance(value, dict):
-            return {k: convert_metadata_type(v) for k, v in value.items()}
-        raise ValueError(
-            "Values of the info dict only support int, float, string, tuple or list."
-            f"{value=}, {type(value)=}"
-        )
-    return value
-
-
 class Info(BaseModel, extra="allow", validate_assignment=True):
     @model_validator(mode="before")
     def restrict_types(
@@ -241,7 +246,8 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
                 data[name] = check_metatadata_type(value)
         except KeyError as e:
             raise ValueError(
-                "Values of the info dict only support int, float, string or tuple."
+                "Values of the info dict only support int, float, string ,tuple"
+                ", list, dict or None."
                 f"{name}: {value}, {type(value)}"
             ) from e
 
@@ -251,8 +257,7 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
         return getattr(self, __key)
 
     def __setitem__(self, __key: str, __val: MetaData) -> None:
-        if __val is not None:
-            setattr(self, __key, __val)
+        setattr(self, __key, __val)
 
     def get(self, __key: str, default: Any | None = None) -> Any:
         return getattr(self, __key) if hasattr(self, __key) else default
@@ -1577,7 +1582,7 @@ class KCell:
                         port_dict[i]["info"] = {}
                     port_dict[i]["info"][_type.removeprefix("info:")] = meta.value
             elif meta.name.startswith("kfactory:info"):
-                self.info[meta.name.removeprefix("kfactory:info:")] = meta.value
+                setattr(self.info, meta.name.removeprefix("kfactory:info:"), meta.value)
             elif meta.name.startswith("kfactory:settings"):
                 settings[meta.name.removeprefix("kfactory:settings:")] = meta.value
 
