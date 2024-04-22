@@ -357,6 +357,7 @@ def route(
                             straight_factory,
                             bend90_cell,
                             taper_cell,
+                            port_type=port_type,
                         )
                         j = i - 1
                         start_port = bend180.ports[b180p2.name]
@@ -378,6 +379,7 @@ def route(
                             straight_factory,
                             bend90_cell,
                             taper_cell,
+                            port_type=port_type,
                         )
                         j = i - 1
                         start_port = bend180.ports[b180p1.name]
@@ -395,6 +397,7 @@ def route(
             bend90_cell,
             taper_cell,
             min_straight_taper=min_straight_taper,
+            port_type=port_type,
         )
 
     else:
@@ -428,6 +431,7 @@ def route(
             taper_cell,
             allow_small_routes=allow_small_routes,
             min_straight_taper=min_straight_taper,
+            port_type=port_type,
         )
     return route
 
