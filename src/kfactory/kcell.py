@@ -1141,8 +1141,6 @@ class KCell:
         """
         if self._locked:
             raise LockedError(self)
-        self._kdb_cell.flatten(False)  # prune)
-        self.insts = Instances()
 
         if merge:
             for layer in self.kcl.layer_indexes():
@@ -1150,6 +1148,9 @@ class KCell:
                 reg.merge()
                 self.clear(layer)
                 self.shapes(layer).insert(reg)
+
+        self._kdb_cell.flatten(False)  # prune)
+        self.insts.clear()
 
     def rebuild(self) -> None:
         """Rebuild the instances of the KCell."""
