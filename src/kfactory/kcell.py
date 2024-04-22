@@ -1132,25 +1132,22 @@ class KCell:
     def flatten(self, merge: bool = True) -> None:
         """Flatten the cell.
 
-        Pruning will delete the klayout.db.Cell if unused,
-        but might cause artifacts at the moment.
-
         Args:
-            prune: Delete unused child cells if they aren't used in any other KCell
-            merge: Merge the shapes on all layers
+            merge: Merge the shapes on all layers.
         """
+
         if self._locked:
             raise LockedError(self)
+        self._kdb_cell.flatten(False)
+        self.insts = Instances()
 
         if merge:
             for layer in self.kcl.layer_indexes():
-                reg = kdb.Region(self.begin_shapes_rec(layer))
-                reg.merge()
+                reg = kdb.Region(self.shapes(layer))
+                reg = reg.merge()
                 self.clear(layer)
                 self.shapes(layer).insert(reg)
 
-        self._kdb_cell.flatten(False)  # prune)
-        self.insts.clear()
 
     def rebuild(self) -> None:
         """Rebuild the instances of the KCell."""
