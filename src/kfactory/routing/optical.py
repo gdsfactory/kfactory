@@ -448,6 +448,7 @@ def route_bundle(
     place_allow_small_routes: bool = False,
     collision_check_layers: Sequence[int] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
+    bboxes: list[kdb.Box] = [],
 ) -> list[OpticalManhattanRoute]:
     """Route a bundle from starting ports to end_ports.
 
@@ -469,6 +470,8 @@ def route_bundle(
         on_collision: Define what to do on routing collision. Default behaviour is to
             open send the layout of c to klive and open an error lyrdb with the
             collisions. "error" will simply raise an error. None will ignore any error.
+        bboxes: List of boxes to consider. Currently only boxes overlapping ports will
+            be considered.
     """
     radius = max(
         abs(bend90_cell.ports[0].x - bend90_cell.ports[1].x),
@@ -492,6 +495,7 @@ def route_bundle(
         separation=separation,
         start_straights=start_straights,
         end_straights=end_straights,
+        bboxes=bboxes.copy(),
     )
 
     routes: list[OpticalManhattanRoute] = []
