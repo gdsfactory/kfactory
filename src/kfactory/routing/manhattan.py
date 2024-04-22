@@ -567,6 +567,7 @@ def route_smart(
     end_straights: list[int] = [0],
     bboxes: list[kdb.Box] | None = None,
     widths: list[int] | None = None,
+    reorder_ports: bool = True,
 ) -> list[ManhattanRouter]:
     length = len(start_ports)
 
@@ -600,7 +601,6 @@ def route_smart(
             box_region.merge()
 
     all_routers: list[ManhattanRouter] = []
-    # dbr = 2 * bend90_radius
 
     for ts, te, w, ss, es in zip(
         start_ts, end_ts, widths, start_straights, end_straights
@@ -615,6 +615,41 @@ def route_smart(
                 width=w,
             )
         )
+
+    # make sure the endports are one bank and check whether we need to turn around
+    if len(all_routers) > 0:
+        router = all_routers[0]
+        tv = router.end.tv.dup()
+        end_angle = router.end.t.angle
+        for router in all_routers:
+            tv += router.end.tv
+            if router.end.t.angle != end_angle:
+                raise ValueError(
+                    "All ports at the target (end) must have the same angle. "
+                    f"{router.start.t=}/{router.end.t=}"
+                )
+        if tv.x < 0:
+            end_box = kdb.Box()
+            _end_routers: list[ManhattanRouterSide] = []
+            for r in all_routers:
+                _end_routers.append(r.end)
+                end_box += r.end.t.disp.to_p()
+
+            _bbox = box_region.interacting(kdb.Region(end_box)).bbox() + end_box
+            if tv.y < 0:
+                _bbox = _route_to_side(
+                    routers=_end_routers,
+                    clockwise=False,
+                    bbox=_bbox,
+                    separation=separation,
+                )
+            else:
+                _bbox = _route_to_side(
+                    routers=_end_routers,
+                    clockwise=True,
+                    bbox=_bbox,
+                    separation=separation,
+                )
 
     router_bboxes: list[kdb.Box] = [
         kdb.Box(router.start.t.disp.to_p(), router.end.t.disp.to_p())
