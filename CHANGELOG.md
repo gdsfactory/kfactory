@@ -18,6 +18,7 @@
 
 ## Bug Fixes
 
+- fix flatten [#300](https://github.com/gdsfactory/kfactory/pull/300)
 - fix typos [#292](https://github.com/gdsfactory/kfactory/pull/292)
 - fix invert for route_manhattan [#288](https://github.com/gdsfactory/kfactory/pull/288)
 - Fix routing issues [#284](https://github.com/gdsfactory/kfactory/pull/284)
