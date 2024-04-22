@@ -1135,7 +1135,6 @@ class KCell:
         Args:
             merge: Merge the shapes on all layers.
         """
-
         if self._locked:
             raise LockedError(self)
         self._kdb_cell.flatten(False)
@@ -1147,7 +1146,6 @@ class KCell:
                 reg = reg.merge()
                 self.clear(layer)
                 self.shapes(layer).insert(reg)
-
 
     def rebuild(self) -> None:
         """Rebuild the instances of the KCell."""
