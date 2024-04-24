@@ -127,3 +127,11 @@ def test_info() -> None:
 
     c = test_info_cell(42)
     assert c.info["test"] == 42
+
+
+def test_flatten(LAYER: kf.LayerEnum) -> None:
+    c = kf.KCell()
+    _ = c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
+    assert len(c.insts) == 1, 'c.insts should have 1 inst after adding a cell'
+    c.flatten()
+    assert len(c.insts) == 0, 'c.insts should have 0 insts after flatten()'
