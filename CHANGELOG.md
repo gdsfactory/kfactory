@@ -5,6 +5,7 @@
 
 ## New
 
+- Add indirect routing of endpoints [#301](https://github.com/gdsfactory/kfactory/pull/301)
 - Allow dicts in info [#293](https://github.com/gdsfactory/kfactory/pull/293)
 - Add smart routing [#295](https://github.com/gdsfactory/kfactory/pull/295)
 - Add (ly)rdb and l2n to show [#296](https://github.com/gdsfactory/kfactory/pull/296)
@@ -18,6 +19,7 @@
 
 ## Bug Fixes
 
+- Fix passing port_type to route_single [#298](https://github.com/gdsfactory/kfactory/pull/298)
 - fix flatten [#300](https://github.com/gdsfactory/kfactory/pull/300)
 - fix typos [#292](https://github.com/gdsfactory/kfactory/pull/292)
 - fix invert for route_manhattan [#288](https://github.com/gdsfactory/kfactory/pull/288)
