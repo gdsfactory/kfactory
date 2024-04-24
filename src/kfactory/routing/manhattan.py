@@ -620,14 +620,8 @@ def route_smart(
     if len(all_routers) > 0:
         router = all_routers[0]
         tv = router.end.tv.dup()
-        end_angle = router.end.t.angle
         for router in all_routers:
             tv += router.end.tv
-            if router.end.t.angle != end_angle:
-                raise ValueError(
-                    "All ports at the target (end) must have the same angle. "
-                    f"{router.start.t=}/{router.end.t=}"
-                )
         if tv.x < 0:
             end_box = kdb.Box()
             _end_routers: list[ManhattanRouterSide] = []
@@ -704,12 +698,18 @@ def route_smart(
         angle = router_bundle[0].end.t.angle
 
         r = router_bundle[0]
+        end_angle = r.end.t.angle
         re = router_bundle[-1]
         start_bbox = kdb.Box(r.start.t.disp.to_p(), re.start.t.disp.to_p())
         end_bbox = kdb.Box(r.end.t.disp.to_p(), re.end.t.disp.to_p())
         for r in router_bundle:
             start_bbox += r.start.t.disp.to_p()
             end_bbox += r.end.t.disp.to_p()
+            if r.end.t.angle != end_angle:
+                raise ValueError(
+                    "All ports at the target (end) must have the same angle. "
+                    f"{router.start.t=}/{router.end.t=}"
+                )
 
         if box_region:
             start_bbox = (
