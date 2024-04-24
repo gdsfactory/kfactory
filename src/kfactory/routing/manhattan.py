@@ -833,16 +833,17 @@ def route_smart(
 
 
 def route_to_bbox(routers: Iterable[ManhattanRouterSide], bbox: kdb.Box) -> None:
-    for router in routers:
-        match router.t.angle:
-            case 0:
-                router.straight(bbox.right - router.t.disp.x)
-            case 1:
-                router.straight(bbox.top - router.t.disp.y)
-            case 2:
-                router.straight(-bbox.left + router.t.disp.x)
-            case 3:
-                router.straight(-bbox.bottom + router.t.disp.y)
+    if not bbox.empty():
+        for router in routers:
+            match router.t.angle:
+                case 0:
+                    router.straight(bbox.right - router.t.disp.x)
+                case 1:
+                    router.straight(bbox.top - router.t.disp.y)
+                case 2:
+                    router.straight(-bbox.left + router.t.disp.x)
+                case 3:
+                    router.straight(-bbox.bottom + router.t.disp.y)
 
 
 def route_loosely(
