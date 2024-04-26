@@ -24,7 +24,17 @@ from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
 from types import FunctionType, ModuleType
-from typing import Any, Literal, Protocol, TypeAlias, TypeVar, cast, overload
+from typing import (
+    Annotated,
+    Any,
+    Literal,
+    Protocol,
+    TypeAlias,
+    TypeVar,
+    cast,
+    get_origin,
+    overload,
+)
 
 import cachetools.func
 import numpy as np
@@ -233,6 +243,22 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
 
     def get(self, __key: str, default: Any = None) -> Any:
         return getattr(self, __key) if hasattr(self, __key) else default
+
+
+class KCellSettingsUnits(
+    BaseModel, extra="allow", validate_assignment=True, frozen=True
+):
+    @model_validator(mode="before")
+    def restrict_types(cls, data: dict[str, str]) -> dict[str, str]:
+        for name, value in data.items():
+            data[name] = str(value)
+        return data
+
+    def __getitem__(self, key: str) -> str | None:
+        return getattr(self, key, None)
+
+    def get(self, __key: str, default: str | None = None) -> str | None:
+        return getattr(self, __key, None)
 
 
 class Info(BaseModel, extra="allow", validate_assignment=True):
@@ -524,6 +550,7 @@ class KCell:
     yaml_tag: str = "!KCell"
     _ports: Ports
     _settings: KCellSettings
+    _settings_units: KCellSettingsUnits
     _kdb_cell: kdb.Cell
     info: Info
     d: UMKCell
@@ -553,6 +580,7 @@ class KCell:
         self.kcl = kcl
         self.insts = Instances()
         self._settings = KCellSettings()
+        self._settings_units = KCellSettingsUnits()
         self.info: Info = Info()
         self._locked = False
         if name is None:
@@ -585,8 +613,19 @@ class KCell:
 
     @property
     def settings(self) -> KCellSettings:
-        """Settings dictionary set by the [@cell][kfactory.kcell.cell] decorator."""
+        """Settings dictionary.
+
+        Set by the [@cell][kfactory.kcell.KCLayout.cell] decorator.
+        """
         return self._settings
+
+    @property
+    def settings_units(self) -> KCellSettingsUnits:
+        """Dictionary containing the units of the settings.
+
+        Set by the [@cell][kfactory.kcell.KCLayout.cell] decorator.
+        """
+        return self._settings_units
 
     @property
     def name(self) -> str:
@@ -1540,9 +1579,6 @@ class KCell:
                 )
 
             info = port.info.model_dump()
-            for name, value in port.info:
-                info[name] = value
-
             for name, value in info.items():
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
@@ -1561,11 +1597,18 @@ class KCell:
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
             )
+        for name, setting_unit in self.settings_units.model_dump().items():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(
+                    f"kfactory:settings_units:{name}", setting_unit, None, True
+                )
+            )
 
     def get_meta_data(self, meta_format: Literal["v1", "v2"] = "v2") -> None:
         """Read metadata from the KLayout Layout object."""
         port_dict: dict[str, Any] = {}
-        settings = {}
+        settings: dict[str, MetaData] = {}
+        settings_units: dict[str, str] = {}
         for meta in self.each_meta_info():
             if meta.name.startswith("kfactory:ports"):
                 i, _type = meta.name.removeprefix("kfactory:ports:").split(":", 1)
@@ -1579,10 +1622,15 @@ class KCell:
                     port_dict[i]["info"][_type.removeprefix("info:")] = meta.value
             elif meta.name.startswith("kfactory:info"):
                 setattr(self.info, meta.name.removeprefix("kfactory:info:"), meta.value)
+            elif meta.name.startswith("kfactory:settings_units"):
+                settings_units[meta.name.removeprefix("kfactory:settings_units:")] = (
+                    meta.value
+                )
             elif meta.name.startswith("kfactory:settings"):
                 settings[meta.name.removeprefix("kfactory:settings:")] = meta.value
 
         self._settings = KCellSettings(**settings)
+        self._settings_units = KCellSettingsUnits(**settings_units)
 
         self.ports = Ports(self.kcl)
 
@@ -2706,6 +2754,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 params: dict[str, KCellParams.kwargs | KCellParams.args] = {
                     p.name: p.default for k, p in sig.parameters.items()
                 }
+                param_units: dict[str, str] = {
+                    p.name: p.annotation.__metadata__[0]
+                    for p in sig.parameters.values()
+                    if get_origin(p.annotation) is Annotated
+                }
                 arg_par = list(sig.parameters.items())[: len(args)]
                 for i, (k, v) in enumerate(arg_par):
                     params[k] = args[i]
@@ -2720,7 +2773,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         del_parameters.append(key)
 
                 for param in del_parameters:
-                    del params[param]
+                    params.pop(param, None)
+                    param_units.pop(param, None)
 
                 @cachetools.cached(cache=_cache)
                 @functools.wraps(f)
@@ -2744,6 +2798,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         cell.name = name
                     if set_settings:
                         settings = cell.settings.model_dump()
+                        settings_units = cell.settings_units.model_dump()
                         if basename is not None:
                             settings["function_name"] = basename
                         else:
@@ -2751,8 +2806,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
                         for param in drop_params:
                             params.pop(param, None)
+                            param_units.pop(param, None)
                         settings.update(params)
+                        settings_units.update(param_units)
                         cell._settings = KCellSettings(**settings)
+                        cell._settings_units = KCellSettingsUnits(**settings_units)
                     cell_info = cell.info.model_dump()
                     for name, value in cell.info:
                         cell_info[name] = value
@@ -2930,7 +2988,12 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
             ) -> VKCell:
                 params: dict[str, KCellParams.args] = {
-                    p.name: p.default for k, p in sig.parameters.items()
+                    p.name: p.default for p in sig.parameters.values()
+                }
+                param_units: dict[str, str] = {
+                    p.name: p.annotation.__metadata__[0]
+                    for p in sig.parameters.values()
+                    if get_origin(p.annotation) is Annotated
                 }
                 arg_par = list(sig.parameters.items())[: len(args)]
                 for i, (k, v) in enumerate(arg_par):
@@ -2946,7 +3009,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         del_parameters.append(key)
 
                 for param in del_parameters:
-                    del params[param]
+                    params.pop(param, None)
+                    param_units.pop(param, None)
 
                 @cachetools.cached(cache=_cache)
                 @functools.wraps(f)
@@ -2982,8 +3046,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                             ].__class__.__name__
                         else:
                             settings["function_name"] = f.__name__
-                        params.pop("self", None)
-                        params.pop("cls", None)
+                        for param in drop_params:
+                            params.pop(param, None)
+                            param_units.pop(param, None)
                         settings.update(params)
                         cell._settings = KCellSettings(**settings)
                     info = cell.info.model_dump()

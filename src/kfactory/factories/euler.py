@@ -16,10 +16,10 @@ import numpy as np
 from scipy.optimize import brentq  # type:ignore[import-untyped,unused-ignore]
 from scipy.special import fresnel  # type:ignore[import-untyped,unused-ignore]
 
-from .. import kdb
+from .. import kdb, kf_types
 from ..conf import config
 from ..enclosure import LayerEnclosure, extrude_path
-from ..kcell import Info, KCell, KCLayout, LayerEnum, MetaData
+from ..kcell import Info, KCell, KCLayout, MetaData
 
 __all__ = [
     "euler_bend_points",
@@ -32,11 +32,11 @@ __all__ = [
 class BendEulerFactory(Protocol):
     def __call__(
         self,
-        width: float,
-        radius: float,
-        layer: int | LayerEnum,
+        width: kf_types.um,
+        radius: kf_types.um,
+        layer: kf_types.layer,
         enclosure: LayerEnclosure | None = None,
-        angle: float = 90,
+        angle: kf_types.deg = 90,
         resolution: float = 150,
     ) -> KCell:
         """Create a euler bend.
@@ -55,10 +55,10 @@ class BendEulerFactory(Protocol):
 class BendSEulerFactory(Protocol):
     def __call__(
         self,
-        offset: float,
-        width: float,
-        radius: float,
-        layer: LayerEnum | int,
+        offset: kf_types.um,
+        width: kf_types.um,
+        radius: kf_types.um,
+        layer: kf_types.layer,
         enclosure: LayerEnclosure | None = None,
         resolution: float = 150,
     ) -> KCell:
@@ -76,7 +76,7 @@ class BendSEulerFactory(Protocol):
 
 
 def euler_bend_points(
-    angle_amount: float = 90, radius: float = 100, resolution: float = 150
+    angle_amount: kf_types.deg = 90, radius: kf_types.um = 100, resolution: float = 150
 ) -> list[kdb.DPoint]:
     """Base euler bend, no transformation, emerging from the origin."""
     if angle_amount < 0:
@@ -146,9 +146,9 @@ def euler_bend_points(
 
 def euler_endpoint(
     start_point: tuple[float, float] = (0.0, 0.0),
-    radius: float = 10.0,
-    input_angle: float = 0.0,
-    angle_amount: float = 90.0,
+    radius: kf_types.um = 10.0,
+    input_angle: kf_types.deg = 0.0,
+    angle_amount: kf_types.deg = 90.0,
 ) -> tuple[float, float]:
     """Gives the end point of a simple Euler bend as a i3.Coord2."""
     th = abs(angle_amount) * np.pi / 180 / 2
@@ -169,7 +169,7 @@ def euler_endpoint(
 
 
 def euler_sbend_points(
-    offset: float = 5.0, radius: float = 10.0e-6, resolution: float = 150
+    offset: kf_types.um = 5.0, radius: kf_types.um = 10.0e-6, resolution: float = 150
 ) -> list[kdb.DPoint]:
     """An Euler s-bend with parallel input and output, separated by an offset."""
 
@@ -261,11 +261,11 @@ def bend_euler_factory(
         **cell_kwargs,
     )
     def bend_euler(
-        width: float,
-        radius: float,
-        layer: int | LayerEnum,
+        width: kf_types.um,
+        radius: kf_types.um,
+        layer: kf_types.layer,
         enclosure: LayerEnclosure | None = None,
-        angle: float = 90,
+        angle: kf_types.deg = 90,
         resolution: float = 150,
     ) -> KCell:
         """Create a euler bend.
@@ -389,10 +389,10 @@ def bend_s_euler_factory(
 
     @kcl.cell(basename=basename, **cell_kwargs)
     def bend_s_euler(
-        offset: float,
-        width: float,
-        radius: float,
-        layer: LayerEnum | int,
+        offset: kf_types.um,
+        width: kf_types.um,
+        radius: kf_types.um,
+        layer: kf_types.layer,
         enclosure: LayerEnclosure | None = None,
         resolution: float = 150,
     ) -> KCell:
