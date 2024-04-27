@@ -19,10 +19,10 @@ The slabs and excludes can be given in the form of an
 from collections.abc import Callable
 from typing import Any, Protocol
 
-from .. import kdb
+from .. import kdb, kf_types
 from ..conf import config
 from ..enclosure import LayerEnclosure
-from ..kcell import Info, KCell, KCLayout, LayerEnum, MetaData
+from ..kcell import Info, KCell, KCLayout, MetaData
 
 __all__ = ["straight_dbu_factory"]
 
@@ -30,9 +30,9 @@ __all__ = ["straight_dbu_factory"]
 class StraightKCellFactory(Protocol):
     def __call__(
         self,
-        width: int,
-        length: int,
-        layer: int | LayerEnum,
+        width: kf_types.dbu,
+        length: kf_types.dbu,
+        layer: kf_types.dbu,
         enclosure: LayerEnclosure | None = None,
     ) -> KCell:
         """Waveguide defined in dbu.
@@ -105,9 +105,9 @@ def straight_dbu_factory(
 
     @kcl.cell(basename=basename, **cell_kwargs)
     def straight(
-        width: int,
-        length: int,
-        layer: int | LayerEnum,
+        width: kf_types.dbu,
+        length: kf_types.dbu,
+        layer: kf_types.layer,
         enclosure: LayerEnclosure | None = None,
     ) -> KCell:
         """Waveguide defined in dbu.

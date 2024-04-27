@@ -16,7 +16,7 @@ The slabs and excludes can be given in the form of an
 [Enclosure][kfactory.enclosure.LayerEncolosure].
 """
 
-from .. import KCell, LayerEnum, kcl
+from .. import KCell, kcl, kf_types
 from ..enclosure import LayerEnclosure
 from ..factories.straight import straight_dbu_factory
 
@@ -26,9 +26,9 @@ straight_dbu = straight_dbu_factory(kcl)
 
 
 def straight(
-    width: float,
-    length: float,
-    layer: int | LayerEnum,
+    width: kf_types.um,
+    length: kf_types.um,
+    layer: kf_types.layer,
     enclosure: LayerEnclosure | None = None,
 ) -> KCell:
     """Straight waveguide in um.

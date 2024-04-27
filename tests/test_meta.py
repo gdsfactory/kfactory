@@ -29,15 +29,11 @@ def sample(
     c.show()
     c.write("_test_meta_sample.oas")
 
-    kcl2=kf.KCLayout("TEST_META_SAMPLE")
+    kcl2 = kf.KCLayout("TEST_META_SAMPLE")
     kcl2.read("_test_meta_sample.oas")
     Path("_test_meta_sample.oas").unlink()
-    assert kcl2[c.name].info["d"]["c"]["dbox"] == c.info["d"]["c"][
-        "dbox"
-    ]
-    assert kcl2[c.name].info["d"]["c"]["polygon"] == c.info["d"]["c"][
-        "polygon"
-    ]
+    assert kcl2[c.name].info["d"]["c"]["dbox"] == c.info["d"]["c"]["dbox"]
+    assert kcl2[c.name].info["d"]["c"]["polygon"] == c.info["d"]["c"]["polygon"]
     assert kcl2[c.name].info["e"] is None
     return c
 
@@ -107,6 +103,7 @@ def test_metainfo_read(straight: kf.KCell) -> None:
             assert port.dcplx_trans == read_port.dcplx_trans
             assert port.port_type == read_port.port_type
             assert port.width == read_port.width
+        assert wg_read.settings_units["length"] == "dbu"
 
 
 def test_metainfo_read_cell(straight: kf.KCell) -> None:
