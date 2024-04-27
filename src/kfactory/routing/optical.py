@@ -84,14 +84,22 @@ def route_loopback(
     start_straight: int = 0,
     end_straight: int = 0,
     d_loop: int = 200000,
+    inside: bool = False,
 ) -> list[kdb.Point]:
     r"""Create a loopback on two parallel ports.
 
+        inside == False
         ╭----╮            ╭----╮
         |    |            |    |
         |  -----        -----  |
         |  port1        port2  |
         ╰----------------------╯
+        inside == True
+            ╭---╮     ╭---╮
+            |   |     |   |
+          ----- |     | -----
+          port1 |     | port2
+                ╰-----╯
 
 
     Args:
@@ -103,6 +111,7 @@ def route_loopback(
         start_straight: Minimal straight segment after `p1`.
         end_straight: Minimal straight segment before `p2`.
         d_loop: Distance of the (vertical) offset of the back of the ports
+        inside: Route the loopback inside the array or outside
 
     Returns:
         points: List of the calculated points (starting/ending at p1/p2).
@@ -149,12 +158,22 @@ def route_loopback(
     else:
         pts_end = [t2 * pz]
 
-    if bend180_radius is not None:
-        t1 *= kdb.Trans(2, False, start_straight, bend180_radius)
-        t2 *= kdb.Trans(2, False, end_straight, -bend180_radius)
+    if inside:
+        if bend180_radius is not None:
+            t1 *= kdb.Trans(2, False, start_straight, -bend180_radius)
+            t2 *= kdb.Trans(2, False, end_straight, bend180_radius)
+        else:
+            t1 *= kdb.Trans(
+                2, False, start_straight + bend90_radius, -2 * bend90_radius
+            )
+            t2 *= kdb.Trans(2, False, end_straight + bend90_radius, 2 * bend90_radius)
     else:
-        t1 *= kdb.Trans(2, False, start_straight + bend90_radius, 2 * bend90_radius)
-        t2 *= kdb.Trans(2, False, end_straight + bend90_radius, -2 * bend90_radius)
+        if bend180_radius is not None:
+            t1 *= kdb.Trans(2, False, start_straight, bend180_radius)
+            t2 *= kdb.Trans(2, False, end_straight, -bend180_radius)
+        else:
+            t1 *= kdb.Trans(2, False, start_straight + bend90_radius, 2 * bend90_radius)
+            t2 *= kdb.Trans(2, False, end_straight + bend90_radius, -2 * bend90_radius)
 
     return (
         pts_start
