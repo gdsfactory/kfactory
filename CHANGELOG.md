@@ -5,6 +5,7 @@
 
 ## New
 
+- Add optional  type for settings to KCell to annotate units of parameters [#302](https://github.com/gdsfactory/kfactory/pull/302)
 - Add indirect routing of endpoints [#301](https://github.com/gdsfactory/kfactory/pull/301)
 - Allow dicts in info [#293](https://github.com/gdsfactory/kfactory/pull/293)
 - Add smart routing [#295](https://github.com/gdsfactory/kfactory/pull/295)
