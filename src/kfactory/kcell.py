@@ -258,7 +258,7 @@ class KCellSettingsUnits(
         return getattr(self, key, None)
 
     def get(self, __key: str, default: str | None = None) -> str | None:
-        return getattr(self, __key, None)
+        return getattr(self, __key, default)
 
 
 class Info(BaseModel, extra="allow", validate_assignment=True):
