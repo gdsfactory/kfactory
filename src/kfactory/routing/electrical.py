@@ -16,6 +16,7 @@ def route_elec(
     route_path_function: ManhattanRoutePathFunction = route_manhattan,
     width: int | None = None,
     layer: int | None = None,
+    minimum_straight: int | None = None,
 ) -> None:
     """Connect two ports with a wire.
 
@@ -34,23 +35,36 @@ def route_elec(
         width: Overwrite the width of the wire. Calculated by the width of the start
             port if `None`.
         layer: Layer to place the wire on. Calculated from the start port if `None`.
+        minimum_straight: require a minimum straight
     """
     if width is None:
         width = p1.width
     if layer is None:
         layer = p1.layer
     if start_straight is None:
-        start_straight = int(width / 2)
+        start_straight = round(width / 2)
     if end_straight is None:
-        end_straight = int(width / 2)
+        end_straight = round(width / 2)
 
-    pts = route_path_function(
-        p1.copy(),
-        p2.copy(),
-        bend90_radius=0,
-        start_straight=start_straight,
-        end_straight=end_straight,
-    )
+    if minimum_straight is not None:
+        start_straight = min(minimum_straight // 2, start_straight)
+        end_straight = min(minimum_straight // 2, end_straight)
+
+        pts = route_path_function(
+            p1.copy(),
+            p2.copy(),
+            bend90_radius=minimum_straight,
+            start_straight=start_straight,
+            end_straight=end_straight,
+        )
+    else:
+        pts = route_path_function(
+            p1.copy(),
+            p2.copy(),
+            bend90_radius=0,
+            start_straight=start_straight,
+            end_straight=end_straight,
+        )
 
     path = kdb.Path(pts, width)
     c.shapes(layer).insert(path.polygon())
