@@ -3667,7 +3667,8 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         c = KCell()
         if self.name is not None:
             c.name = self.name
-        VInstance(self).insert_into(c)
+        VInstance(self).insert_into_flat(c, levels=0)
+        c.add_ports(self.ports)
         show(
             c,
             lyrdb=lyrdb,
@@ -4084,17 +4085,47 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
             _inst.transform(base_trans)
             return _inst
 
+    @overload
     def insert_into_flat(
         self,
         cell: KCell | VKCell,
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        *,
+        levels: None = None,
+    ) -> None: ...
+
+    @overload
+    def insert_into_flat(
+        self,
+        cell: KCell | VKCell,
+        *,
+        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        levels: int,
+    ) -> None: ...
+
+    def insert_into_flat(
+        self,
+        cell: KCell | VKCell,
+        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        *,
+        levels: int | None = None,
     ) -> None:
         if isinstance(self.cell, VKCell):
             for layer, shapes in self.cell._shapes.items():
                 for shape in shapes.transform(trans * self.trans):
                     cell.shapes(layer).insert(shape)
             for inst in self.cell.insts:
-                inst.insert_into_flat(cell, trans=trans * self.trans)
+                if levels is not None:
+                    if levels > 0:
+                        inst.insert_into_flat(
+                            cell, trans=trans * self.trans, levels=levels - 1
+                        )
+                    else:
+                        assert isinstance(cell, KCell)
+                        inst.insert_into(cell, trans=trans * self.trans)
+                else:
+                    inst.insert_into_flat(cell, trans=trans * self.trans)
+
         else:
             for layer in cell.kcl.layer_indexes():
                 reg = kdb.Region(self.cell.begin_shapes_rec(layer))

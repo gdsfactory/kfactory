@@ -134,7 +134,7 @@ def euler_bend_points(
         return kdb.DPoint(X, Y)
 
     # Parametric step size
-    step = Ltot / int(th * resolution)
+    step = Ltot / max(int(th * resolution), 1)
 
     # Generate points
     points = []
