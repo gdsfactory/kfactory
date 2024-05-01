@@ -77,7 +77,7 @@ def route(
         e_v = new_pt - pt
         s_a = _angle(s_v)
         e_a = _angle(e_v)
-        _a = e_a - s_a
+        _a = (e_a - s_a + 180) % 360 - 180
 
         if _a != 0:
             # create a virtual bend with the angle if non-existent
