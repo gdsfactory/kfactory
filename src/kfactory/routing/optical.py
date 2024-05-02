@@ -480,6 +480,7 @@ def route_bundle(
     on_collision: Literal["error", "show_error"] | None = "show_error",
     bboxes: list[kdb.Box] = [],
     allow_different_port_widths: bool = False,
+    route_width: int | list[int] | None = None,
 ) -> list[OpticalManhattanRoute]:
     """Route a bundle from starting ports to end_ports.
 
@@ -505,6 +506,7 @@ def route_bundle(
         bboxes: List of boxes to consider. Currently only boxes overlapping ports will
             be considered.
         allow_different_port_widths: If True, the width of the ports is ignored.
+        route_width: Width of the route. If None, the width of the ports is used.
     """
     radius = max(
         abs(bend90_cell.ports[0].x - bend90_cell.ports[1].x),
@@ -521,6 +523,14 @@ def route_bundle(
     if isinstance(end_straights, int):
         end_straights = [end_straights] * len(start_ports)
 
+    if route_width:
+        if isinstance(route_width, int):
+            widths = [route_width] * len(start_ports)
+        else:
+            widths = route_width
+    else:
+        widths = [p.width for p in start_ports]
+
     routers = route_smart(
         start_ports=start_ports,
         end_ports=end_ports,
@@ -529,10 +539,11 @@ def route_bundle(
         start_straights=start_straights,
         end_straights=end_straights,
         bboxes=bboxes.copy(),
+        widths=widths,
     )
 
     routes: list[OpticalManhattanRoute] = []
-    for ps, pe, router in zip(start_ports, end_ports, routers):
+    for ps, pe, router, route_width in zip(start_ports, end_ports, routers, widths):
         routes.append(
             place90(
                 c,
@@ -546,6 +557,7 @@ def route_bundle(
                 allow_small_routes=place_allow_small_routes,
                 port_type=place_port_type,
                 allow_different_port_widths=allow_different_port_widths,
+                route_width=route_width,
             )
         )
 
@@ -640,9 +652,9 @@ def route_bundle(
             match on_collision:
                 case "show_error":
                     c.show(lyrdb=db)
-                    raise RuntimeError("Routing collision in " + c.name)
+                    raise RuntimeError(f"Routing collision in {c.name}")
                 case "error":
-                    raise RuntimeError("Routing collision in " + c.name)
+                    raise RuntimeError(f"Routing collision in {c.name}")
 
     return routes
 
@@ -659,6 +671,7 @@ def place90(
     min_straight_taper: int = 0,
     allow_small_routes: bool = False,
     allow_different_port_widths: bool = False,
+    route_width: int | None = None,
 ) -> OpticalManhattanRoute:
     """Place bends and straight waveguides based on a sequence of points.
 
@@ -690,6 +703,7 @@ def place90(
         allow_small_routes: Don't throw an error if two corners cannot be safely placed
             due to small space and place them anyway.
         allow_different_port_widths: If True, the width of the ports is ignored.
+        route_width: Width of the route. If None, the width of the ports is used.
     """
     route_start_port = p1.copy()
     route_start_port.name = None
@@ -708,7 +722,7 @@ def place90(
         # Nothing to be placed
         return route
 
-    w = p1.width
+    w = route_width or p1.width
     old_pt = pts[0]
     old_bend_port = p1
     bend90_ports = [p for p in bend90_cell.ports if p.port_type == port_type]
