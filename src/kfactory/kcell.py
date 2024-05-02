@@ -6144,7 +6144,7 @@ def pprint_ports(
             for port in ports:
                 if port._trans is not None:
                     table.add_row(
-                        str(port.name) + " [dbu]",
+                        str(port.name) + " [um]",
                         str(port.d.width),
                         port.kcl.get_info(port.layer).to_s(),
                         str(port.d.x),
