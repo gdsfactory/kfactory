@@ -5,6 +5,7 @@
 
 ## New
 
+- Improve VKCell/VInstance [#305](https://github.com/gdsfactory/kfactory/pull/305)
 - allow_different_port_widths for electrical routing [#307](https://github.com/gdsfactory/kfactory/pull/307)
 - add minimum_straight [#304](https://github.com/gdsfactory/kfactory/pull/304)
 - add inside flag to route_loopback [#303](https://github.com/gdsfactory/kfactory/pull/303)
