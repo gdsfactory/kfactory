@@ -202,9 +202,9 @@ def route(
     route_path_function: ManhattanRoutePathFunction = route_manhattan,
     port_type: str = "optical",
     allow_small_routes: bool = False,
-    different_port_width: int = False,
     route_kwargs: dict[str, Any] | None = {},
     min_straight_taper: int = 0,
+    allow_different_port_widths: bool = False,
 ) -> OpticalManhattanRoute:
     """Places a route.
 
@@ -225,15 +225,15 @@ def route(
         port_type: Port type to use for the bend90_cell.
         allow_small_routes: Don't throw an error if two corners cannot be safely placed
             due to small space and place them anyway.
-        different_port_width: If True, the width of the ports is ignored.
         route_kwargs: Additional keyword arguments for the route_path_function.
         min_straight_taper: Minimum straight [dbu] before attempting to place tapers.
+        allow_different_port_widths: If True, the width of the ports is ignored.
 
     """
-    if p1.width != p2.width and not different_port_width:
+    if p1.width != p2.width and not allow_different_port_widths:
         raise ValueError(
             f"The ports have different widths {p1.width=} {p2.width=}. If this is"
-            "intentional, add `different_port_width=True` to override this."
+            "intentional, add `allow_different_port_widths=True` to override this."
         )
 
     p1 = p1.copy()
@@ -377,6 +377,8 @@ def route(
                             bend90_cell,
                             taper_cell,
                             port_type=port_type,
+                            allow_small_routes=allow_small_routes,
+                            allow_different_port_widths=allow_different_port_widths,
                         )
                         j = i - 1
                         start_port = bend180.ports[b180p2.name]
@@ -399,6 +401,8 @@ def route(
                             bend90_cell,
                             taper_cell,
                             port_type=port_type,
+                            allow_small_routes=allow_small_routes,
+                            allow_different_port_widths=allow_different_port_widths,
                         )
                         j = i - 1
                         start_port = bend180.ports[b180p1.name]
@@ -417,6 +421,8 @@ def route(
             taper_cell,
             min_straight_taper=min_straight_taper,
             port_type=port_type,
+            allow_small_routes=allow_small_routes,
+            allow_different_port_widths=allow_different_port_widths,
         )
 
     else:
@@ -451,6 +457,7 @@ def route(
             allow_small_routes=allow_small_routes,
             min_straight_taper=min_straight_taper,
             port_type=port_type,
+            allow_different_port_widths=allow_different_port_widths,
         )
     return route
 
@@ -472,6 +479,8 @@ def route_bundle(
     collision_check_layers: Sequence[int] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     bboxes: list[kdb.Box] = [],
+    allow_different_port_widths: bool = False,
+    route_width: int | list[int] | None = None,
 ) -> list[OpticalManhattanRoute]:
     """Route a bundle from starting ports to end_ports.
 
@@ -493,8 +502,11 @@ def route_bundle(
         on_collision: Define what to do on routing collision. Default behaviour is to
             open send the layout of c to klive and open an error lyrdb with the
             collisions. "error" will simply raise an error. None will ignore any error.
+
         bboxes: List of boxes to consider. Currently only boxes overlapping ports will
             be considered.
+        allow_different_port_widths: If True, the width of the ports is ignored.
+        route_width: Width of the route. If None, the width of the ports is used.
     """
     radius = max(
         abs(bend90_cell.ports[0].x - bend90_cell.ports[1].x),
@@ -511,6 +523,14 @@ def route_bundle(
     if isinstance(end_straights, int):
         end_straights = [end_straights] * len(start_ports)
 
+    if route_width:
+        if isinstance(route_width, int):
+            widths = [route_width] * len(start_ports)
+        else:
+            widths = route_width
+    else:
+        widths = [p.width for p in start_ports]
+
     routers = route_smart(
         start_ports=start_ports,
         end_ports=end_ports,
@@ -519,10 +539,11 @@ def route_bundle(
         start_straights=start_straights,
         end_straights=end_straights,
         bboxes=bboxes.copy(),
+        widths=widths,
     )
 
     routes: list[OpticalManhattanRoute] = []
-    for ps, pe, router in zip(start_ports, end_ports, routers):
+    for ps, pe, router, route_width in zip(start_ports, end_ports, routers, widths):
         routes.append(
             place90(
                 c,
@@ -535,6 +556,8 @@ def route_bundle(
                 min_straight_taper=min_straight_taper,
                 allow_small_routes=place_allow_small_routes,
                 port_type=place_port_type,
+                allow_different_port_widths=allow_different_port_widths,
+                route_width=route_width,
             )
         )
 
@@ -629,9 +652,9 @@ def route_bundle(
             match on_collision:
                 case "show_error":
                     c.show(lyrdb=db)
-                    raise RuntimeError("Routing collision in " + c.name)
+                    raise RuntimeError(f"Routing collision in {c.name}")
                 case "error":
-                    raise RuntimeError("Routing collision in " + c.name)
+                    raise RuntimeError(f"Routing collision in {c.name}")
 
     return routes
 
@@ -647,6 +670,8 @@ def place90(
     port_type: str = "optical",
     min_straight_taper: int = 0,
     allow_small_routes: bool = False,
+    allow_different_port_widths: bool = False,
+    route_width: int | None = None,
 ) -> OpticalManhattanRoute:
     """Place bends and straight waveguides based on a sequence of points.
 
@@ -677,6 +702,8 @@ def place90(
             is below this minimum length.
         allow_small_routes: Don't throw an error if two corners cannot be safely placed
             due to small space and place them anyway.
+        allow_different_port_widths: If True, the width of the ports is ignored.
+        route_width: Width of the route. If None, the width of the ports is used.
     """
     route_start_port = p1.copy()
     route_start_port.name = None
@@ -695,7 +722,7 @@ def place90(
         # Nothing to be placed
         return route
 
-    w = p1.width
+    w = route_width or p1.width
     old_pt = pts[0]
     old_bend_port = p1
     bend90_ports = [p for p in bend90_cell.ports if p.port_type == port_type]
@@ -842,7 +869,12 @@ def place90(
             ):
                 wg = c << straight_factory(width=w, length=length)
                 wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
-                wg.connect(wg_p1, bend90, b90p1.name)
+                wg.connect(
+                    wg_p1,
+                    bend90,
+                    b90p1.name,
+                    allow_width_mismatch=allow_different_port_widths,
+                )
                 route.instances.append(wg)
                 route.length_straights += int(length)
             else:
@@ -884,7 +916,12 @@ def place90(
         ):
             wg = c << straight_factory(width=w, length=length)
             wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
-            wg.connect(wg_p1.name, bend90, b90p2.name)
+            wg.connect(
+                wg_p1.name,
+                bend90,
+                b90p2.name,
+                allow_width_mismatch=allow_different_port_widths,
+            )
             route.instances.append(wg)
             route.end_port = wg.ports[wg_p2.name].copy()
             route.end_port.name = None
@@ -903,13 +940,28 @@ def place90(
                 )
                 route.instances.append(wg)
                 wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
-                wg.connect(wg_p1.name, t1, taperp2.name)
+                wg.connect(
+                    wg_p1.name,
+                    t1,
+                    taperp2.name,
+                    allow_width_mismatch=allow_different_port_widths,
+                )
                 t2 = c << taper_cell
-                t2.connect(taperp2.name, wg, wg_p2.name)
+                t2.connect(
+                    taperp2.name,
+                    wg,
+                    wg_p2.name,
+                    allow_width_mismatch=allow_different_port_widths,
+                )
                 route.length_straights += int(_l)
             else:
                 t2 = c << taper_cell
-                t2.connect(taperp2.name, t1, taperp2.name)
+                t2.connect(
+                    taperp2.name,
+                    t1,
+                    taperp2.name,
+                    allow_width_mismatch=allow_different_port_widths,
+                )
             route.instances.append(t2)
             route.end_port = t2.ports[taperp1.name].copy()
             route.end_port.name = None
