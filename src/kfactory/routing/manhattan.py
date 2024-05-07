@@ -597,7 +597,7 @@ def route_smart(
     box_region = kdb.Region()
     if bboxes:
         for box in bboxes:
-            box_region.insert(box)
+            box_region.insert(box.enlarged(separation))
             box_region.merge()
 
     all_routers: list[ManhattanRouter] = []
@@ -791,7 +791,7 @@ def route_smart(
                     routers_anticlockwise.extend(new_routers)
                     angle = new_angle
             route_to_bbox([router.start for router in sorted_routers], total_bbox)
-            route_loosely(sorted_routers, separation=separation)
+            route_loosely(sorted_routers, separation=separation, end_bbox=end_bbox)
         else:
             routers = router_groups[0][1]
             r = routers[0]
@@ -826,7 +826,7 @@ def route_smart(
                     )
 
             route_to_bbox([router.start for router in router_bundle], total_bbox)
-            route_loosely(routers, separation=separation)
+            route_loosely(routers, separation=separation, end_bbox=end_bbox)
 
     return all_routers
 
