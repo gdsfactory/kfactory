@@ -3502,7 +3502,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if kcell.is_library_cell() and not kcell._destroyed():
                         kcell.convert_to_static(recursive=True)
 
-        for kc in self._kcells:
+        for kc in self.kcells.values():
             kc.insert_vinsts()
 
         return self.layout.write(str(filename), options)
