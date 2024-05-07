@@ -6698,9 +6698,17 @@ def update_default_trans(
 
 
 def pprint_ports(
-    ports: Iterable[Port], type: Literal["dbu", "um", None] = "um"
+    ports: Iterable[Port], type: Literal["dbu", "um", None] = None
 ) -> rich.table.Table:
-    """Print ports as a table."""
+    """Print ports as a table.
+
+    Args:
+        ports: The ports which should be printed.
+        type: Define the print type of the ports. If None, any port
+            which can be represented accurately by a dbu representation
+            will be printed in dbu otherwise in um. 'dbu'/'um' will force
+            the printing to enforce one or the other representation
+    """
     table = rich.table.Table(show_lines=True)
 
     table.add_column("Name")
