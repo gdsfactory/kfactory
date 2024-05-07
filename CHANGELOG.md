@@ -24,6 +24,7 @@
 
 ## Bug Fixes
 
+- `pprint_ports` add missing type switch [#306](https://github.com/gdsfactory/kfactory/pull/306)
 - Fix route_smart ignoring bounding boxes at the end of the routes [#309](https://github.com/gdsfactory/kfactory/pull/309)
 - Fix passing port_type to route_single [#298](https://github.com/gdsfactory/kfactory/pull/298)
 - fix flatten [#300](https://github.com/gdsfactory/kfactory/pull/300)
