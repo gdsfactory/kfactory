@@ -192,8 +192,17 @@ for angle in [0]:
 b = kf.cells.circular.bend_circular(width=1, radius=10, layer=kf.kcl.layer(1, 0))
 s = partial(kf.cells.straight.straight_dbu, width=1000, layer=kf.kcl.layer(1, 0))
 
+c.shapes(kf.kcl.layer(5, 0)).insert(kf.kdb.Box(1_900_000, -102_000, 2_100_000, 175_000))
+c.shapes(kf.kcl.layer(6, 0)).insert(kf.kdb.Box(-1_300_000, 300_000, -900_000, 450_000))
+
 routes = kf.routing.optical.route_bundle(
-    c, start_ports=ps, end_ports=pe, bend90_cell=b, separation=2000, straight_factory=s
+    c,
+    start_ports=ps,
+    end_ports=pe,
+    bend90_cell=b,
+    separation=2000,
+    straight_factory=s,
+    bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))],
 )
 
 # routers = kf.routing.manhattan.route_smart(
