@@ -37,7 +37,6 @@ class BendFactory(Protocol):
     def __call__(self, width: float, angle: float) -> VKCell: ...
 
 
-@config.logger.catch(reraise=True)
 def route(
     c: VKCell,
     width: float,
