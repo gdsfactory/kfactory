@@ -6698,14 +6698,9 @@ def update_default_trans(
 
 
 def pprint_ports(
-    ports: Iterable[Port], type: Literal["dbu", "um", None] = None
+    ports: Iterable[Port], type: Literal["dbu", "um", None] = "um"
 ) -> rich.table.Table:
-    """Print ports as a table.
-
-    Args:
-        ports: The ports to print.
-        type: The type of the port. If `None`, the type will be determined by the
-    """
+    """Print ports as a table."""
     table = rich.table.Table(show_lines=True)
 
     table.add_column("Name")
@@ -6722,26 +6717,50 @@ def pprint_ports(
             for port in ports:
                 if port._trans is not None:
                     table.add_row(
-                        str(port.name) + " [um]",
-                        str(port.d.width),
+                        str(port.name) + " [dbu]",
+                        f"{port.width:_}",
                         port.kcl.get_info(port.layer).to_s(),
-                        str(port.d.x),
-                        str(port.d.y),
-                        str(port.d.angle),
+                        f"{port.x:_}",
+                        f"{port.y:_}",
+                        str(port.angle),
                         str(port.mirror),
                         rich.json.JSON.from_data(port.info.model_dump()),
                     )
                 else:
                     table.add_row(
                         str(port.name) + " [um]",
-                        str(port.d.width),
+                        f"{port.d.width:_}",
                         port.kcl.get_info(port.layer).to_s(),
-                        str(port.d.x),
-                        str(port.d.y),
+                        f"{port.d.x:_}",
+                        f"{port.d.y:_}",
                         str(port.d.angle),
                         str(port.d.mirror),
                         rich.json.JSON.from_data(port.info.model_dump()),
                     )
+        case "um":
+            for port in ports:
+                table.add_row(
+                    str(port.name) + " [um]",
+                    f"{port.d.width:_}",
+                    port.kcl.get_info(port.layer).to_s(),
+                    f"{port.d.x:_}",
+                    f"{port.d.y:_}",
+                    str(port.d.angle),
+                    str(port.d.mirror),
+                    rich.json.JSON.from_data(port.info.model_dump()),
+                )
+        case "dbu":
+            for port in ports:
+                table.add_row(
+                    str(port.name) + " [dbu]",
+                    f"{port.width:_}",
+                    port.kcl.get_info(port.layer).to_s(),
+                    f"{port.x:_}",
+                    f"{port.y:_}",
+                    str(port.angle),
+                    str(port.mirror),
+                    rich.json.JSON.from_data(port.info.model_dump()),
+                )
 
     return table
 
