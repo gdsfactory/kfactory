@@ -1303,6 +1303,11 @@ class KCell:
                 if self.is_library_cell():
                     self.convert_to_static(recursive=True)
 
+        self.insert_vinsts()
+        for kci in set(self._kdb_cell.called_cells()) & self.kcl.kcells.keys():
+            kc = self.kcl[kci]
+            kc.insert_vinsts()
+
         self._kdb_cell.write(str(filename), save_options)
 
     def read(
@@ -2295,11 +2300,12 @@ class KCell:
         """Insert all virtual instances and create Instances of real KCells."""
         for vi in self.vinsts:
             vi.insert_into(self)
+        self.vinsts.clear()
 
-    def __rshift__(self, other: VKCell | KCell) -> VInstance:
+    def create_vinst(self, cell: VKCell | KCell) -> VInstance:
         """Insert the KCell as a VInstance into a VKCell or KCell."""
         vi = VInstance(self)
-        other.vinsts.append(vi)
+        cell.vinsts.append(vi)
         return vi
 
 
@@ -3496,6 +3502,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if kcell.is_library_cell() and not kcell._destroyed():
                         kcell.convert_to_static(recursive=True)
 
+        for kc in self._kcells:
+            kc.insert_vinsts()
+
         return self.layout.write(str(filename), options)
 
     def top_kcells(self) -> list[KCell]:
@@ -3791,9 +3800,9 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
     def __lshift__(self, cell: KCell | VKCell) -> VInstance:
         return self.create_inst(cell=cell)
 
-    def __rshift__(self, other: KCell | VKCell) -> VInstance:
+    def create_vinst(self, cell: KCell | VKCell) -> VInstance:
         vi = VInstance(self)
-        other.vinsts.append(vi)
+        cell.vinsts.append(vi)
         return vi
 
     def shapes(self, layer: int) -> VShapes:
