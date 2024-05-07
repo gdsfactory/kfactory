@@ -1,6 +1,7 @@
 from functools import partial
 import kfactory as kf
 import numpy as np
+from random import randint
 
 
 def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
@@ -15,8 +16,9 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
     end_ports: list[kf.Port] = []
     r = 50
     n = 3
+    _l = 9
 
-    for i in range(7):
+    for i in range(_l):
         # for i in range(1):
         a = (n - i) * 15
         a_rad = np.deg2rad(a)
@@ -26,7 +28,7 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
             vc.create_port(
                 name="s0",
                 dcplx_trans=kf.kdb.DCplxTrans(
-                    1, a, False, -100 + r * np.cos(a_rad), -100 + r * np.sin(a_rad)
+                    1, a, False, -500 + r * np.cos(a_rad), -100 + r * np.sin(a_rad)
                 ),
                 layer=LAYER.WG,
                 dwidth=1,
@@ -48,7 +50,7 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
         start_ports=start_ports,
         end_ports=end_ports,
         backbone=[kf.kdb.DPoint(550, 550), kf.kdb.DPoint(950, 950)],
-        spacings=[2, 5, 8, 10, 15, 5, 7],
+        spacings=[randint(1, 5) for _ in range(_l)],
         radius_estimate=lambda angle: 60,
         straight_factory=sf,
         bend_factory=bf,
