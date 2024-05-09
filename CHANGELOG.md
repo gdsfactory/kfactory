@@ -1,5 +1,20 @@
-<a name="v0.12.4"></a>
-# [v0.12.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.4) - 11 Mar 2024
+<a name="v0.13.1"></a>
+# [v0.13.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.1) - 09 May 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix grid instance array not properly setting up the array [#310](https://github.com/gdsfactory/kfactory/pull/310)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.13.0...v0.13.1
+
+
+[Changes][v0.13.1]
+
+
+<a name="v0.13.0"></a>
+# [v0.13.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.0) - 07 May 2024
 
 # What's Changed
 
@@ -42,10 +57,10 @@
 
 - Ruff formatting [#279](https://github.com/gdsfactory/kfactory/pull/279)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.12.3...v0.12.4
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.12.3...v0.13.0
 
 
-[Changes][v0.12.4]
+[Changes][v0.13.0]
 
 
 <a name="v0.12.3"></a>
@@ -402,7 +417,8 @@
 [Changes][v0.4.0]
 
 
-[v0.12.4]: https://github.com/gdsfactory/kfactory/compare/v0.12.3...v0.12.4
+[v0.13.1]: https://github.com/gdsfactory/kfactory/compare/v0.13.0...v0.13.1
+[v0.13.0]: https://github.com/gdsfactory/kfactory/compare/v0.12.3...v0.13.0
 [v0.12.3]: https://github.com/gdsfactory/kfactory/compare/v0.12.2...v0.12.3
 [v0.12.2]: https://github.com/gdsfactory/kfactory/compare/v0.12.0...v0.12.2
 [v0.12.0]: https://github.com/gdsfactory/kfactory/compare/v0.11.4...v0.12.0
