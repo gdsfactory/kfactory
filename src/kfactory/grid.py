@@ -166,7 +166,11 @@ def grid_dbu(
             else target.create_inst(kcell, kdb.Trans(rotation, mirror, 0, 0))
             for kcell in _kcells
         ]
-        insts = [[None] * shape[1]] * shape[0]
+
+        insts = []
+        for _ in range(shape[0]):
+            insts.append([None] * shape[1])
+
         shape_bboxes = [None if inst is None else inst.bbox() for inst in _insts]
         shape_bboxes_heights = [
             0 if box is None else box.height() for box in shape_bboxes
@@ -420,7 +424,10 @@ def flexgrid_dbu(
                 )
                 ymax[i_y] = max(ymax.get(i_y, None) or bbox.top, bbox.top)
 
-        insts = [[None] * shape[1]] * shape[0]
+        insts = []
+        for _ in range(shape[0]):
+            insts.append([None] * shape[1])
+
         for i, inst in enumerate(_insts):
             i_x = i % shape[1]
             i_y = i // shape[1]
@@ -600,7 +607,11 @@ def grid(
             else target.create_inst(kcell, kdb.ICplxTrans(1, rotation, mirror, 0, 0))
             for kcell in _kcells
         ]
-        insts = [[None] * shape[1]] * shape[0]
+
+        insts = []
+        for _ in range(shape[0]):
+            insts.append([None] * shape[1])
+
         shape_bboxes = [None if inst is None else inst.dbbox() for inst in _insts]
         shape_bboxes_heights = [
             0 if box is None else box.height() for box in shape_bboxes
@@ -857,7 +868,10 @@ def flexgrid(
                 )
                 ymax[i_y] = max(ymax.get(i_y, None) or bbox.top, bbox.top)
 
-        insts = [[None] * shape[1]] * shape[0]
+        insts = []
+        for _ in range(shape[0]):
+            insts.append([None] * shape[1])
+
         for i, inst in enumerate(_insts):
             i_x = i % shape[1]
             i_y = i // shape[1]
