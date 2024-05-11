@@ -207,7 +207,7 @@ def convert_metadata_type(value: Any) -> MetaData:
     elif isinstance(value, tuple):
         return tuple(convert_metadata_type(tv) for tv in value)
     elif isinstance(value, list):
-        return list(convert_metadata_type(tv) for tv in value)
+        return [convert_metadata_type(tv) for tv in value]
     elif isinstance(value, dict):
         return {k: convert_metadata_type(v) for k, v in value.items()}
     return clean_value(value)
@@ -222,7 +222,7 @@ def check_metatadata_type(value: MetaData) -> MetaData:
     elif isinstance(value, tuple):
         return tuple(convert_metadata_type(tv) for tv in value)
     elif isinstance(value, list):
-        return list(convert_metadata_type(tv) for tv in value)
+        return [convert_metadata_type(tv) for tv in value]
     elif isinstance(value, dict):
         return {k: convert_metadata_type(v) for k, v in value.items()}
     raise ValueError(
@@ -2711,7 +2711,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         check_instances: bool = True,
         snap_ports: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[int, Any] | dict[int, Any] = {},
         rec_dicts: bool = False,
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
@@ -2803,6 +2803,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     for key, value in params.items():
                         if isinstance(value, frozenset):
                             params[key] = fs2d(value)
+                    print(f"Creating cell {f.__name__!r} with {key=} {params}\n")
                     cell = f(**params)
                     dbu = cell.kcl.layout.dbu
                     if cell._locked:
@@ -2834,13 +2835,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     for name, value in cell.info:
                         cell_info[name] = value
                     cell.info = Info(**cell_info)
-                    if check_instances:
-                        if any(inst.is_complex() for inst in cell.each_inst()):
-                            raise ValueError(
-                                "Most foundries will not allow off-grid instances. "
-                                "Please flatten them or add check_instances=False to"
-                                " the decorator."
-                            )
+                    if check_instances and any(
+                        inst.is_complex() for inst in cell.each_inst()
+                    ):
+                        raise ValueError(
+                            "Most foundries will not allow off-grid instances. "
+                            "Please flatten them or add check_instances=False to"
+                            " the decorator."
+                        )
                     if snap_ports:
                         for port in cell.ports:
                             if port._dcplx_trans:
@@ -6616,6 +6618,8 @@ def clean_value(
         return "_".join(clean_value(v) for v in value)
     elif isinstance(value, dict):
         return dict2name(**value)
+    elif isinstance(value, BaseModel):
+        return clean_value(value.model_dump())
     elif hasattr(value, "name"):
         return clean_name(value.name)
     elif (
