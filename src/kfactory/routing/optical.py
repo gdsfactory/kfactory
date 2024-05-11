@@ -1,19 +1,20 @@
 """Optical routing allows the creation of photonic (or any route using bends)."""
 
 from collections.abc import Sequence
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel
 
 from .. import kdb, rdb
 from ..conf import config
-from ..factories import StraightFactory
 from ..kcell import Instance, KCell, LayerEnum, Port
 from .manhattan import (
-    ManhattanRoutePathFunction,
     route_manhattan,
     route_smart,
 )
+
+if TYPE_CHECKING:
+    from ..kf_types import ManhattanRoutePathFunction, StraightFactory
 
 __all__ = [
     "OpticalManhattanRoute",
@@ -193,13 +194,13 @@ def route(
     c: KCell,
     p1: Port,
     p2: Port,
-    straight_factory: StraightFactory,
+    straight_factory: "StraightFactory",
     bend90_cell: KCell,
     bend180_cell: KCell | None = None,
     taper_cell: KCell | None = None,
     start_straight: int = 0,
     end_straight: int = 0,
-    route_path_function: ManhattanRoutePathFunction = route_manhattan,
+    route_path_function: "ManhattanRoutePathFunction" = route_manhattan,
     port_type: str = "optical",
     allow_small_routes: bool = False,
     route_kwargs: dict[str, Any] | None = {},
@@ -468,7 +469,7 @@ def route_bundle(
     start_ports: list[Port],
     end_ports: list[Port],
     separation: int,
-    straight_factory: StraightFactory,
+    straight_factory: "StraightFactory",
     bend90_cell: KCell,
     taper_cell: KCell | None = None,
     start_straights: int | list[int] = 0,
@@ -664,7 +665,7 @@ def place90(
     p1: Port,
     p2: Port,
     pts: Sequence[kdb.Point],
-    straight_factory: StraightFactory,
+    straight_factory: "StraightFactory",
     bend90_cell: KCell,
     taper_cell: KCell | None = None,
     port_type: str = "optical",

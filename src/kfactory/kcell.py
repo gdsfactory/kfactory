@@ -16,7 +16,7 @@ import importlib.util
 import inspect
 import json
 import socket
-from collections import UserDict
+from collections import UserDict, defaultdict
 from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
 from enum import IntEnum, IntFlag, auto
@@ -25,6 +25,7 @@ from pathlib import Path
 from tempfile import gettempdir
 from types import FunctionType, ModuleType
 from typing import (
+    TYPE_CHECKING,
     Annotated,
     Any,
     Literal,
@@ -67,9 +68,14 @@ from .port import (
     rename_clockwise_multi,
 )
 
+if TYPE_CHECKING:
+    from kf_types import RouteFunction
+
 T = TypeVar("T")
 
 KCellParams = ParamSpec("KCellParams")
+SchematicCellParams = ParamSpec("SchematicCellParams")
+
 AnyTrans = TypeVar(
     "AnyTrans", bound=kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans
 )
@@ -133,6 +139,12 @@ kcls: dict[str, KCLayout] = {}
 class KCellFunc(Protocol[KCellParams]):
     def __call__(
         self, *args: KCellParams.args, **kwargs: KCellParams.kwargs
+    ) -> KCell: ...
+
+
+class SchmeaticCellFunc(Protocol[SchematicCellParams]):
+    def __call__(
+        self, *args: SchematicCellParams.args, **kwargs: SchematicCellParams.kwargs
     ) -> KCell: ...
 
 
@@ -2921,6 +2933,32 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             return wrapper_autocell
 
         return decorator_autocell if _func is None else decorator_autocell(_func)
+
+    @config.logger.catch(reraise=True)
+    def schematic_cell(
+        self,
+        _func: SchmeaticCellFunc[SchematicCellParams] | None = None,
+        /,
+        *,
+        set_settings: bool = True,
+        set_name: bool = True,
+        check_ports: bool = True,
+        check_instances: bool = True,
+        snap_ports: bool = True,
+        add_port_layers: bool = True,
+        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        rec_dicts: bool = False,
+        basename: str | None = None,
+        drop_params: list[str] = ["self", "cls"],
+        register_factory: bool = True,
+        info: dict[str, MetaData] | None = None,
+        post_process: Iterable[Callable[[KCell], None]] = [],
+    ) -> (
+        KCellFunc[KCellParams]
+        | Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]
+    ):
+        """Cell decorator for schematic cells."""
+        return _func().assembly()  # type: ignore[no-any-return,misc]
 
     @overload
     def vcell(
@@ -7294,6 +7332,110 @@ class MergeDiff:
             | kdb.LayoutDiff.PathsAsPolygons
             | kdb.LayoutDiff.IgnoreDuplicates,
         )
+
+
+class SchematicConnection(BaseModel):
+    p1: str | int
+    p2: str | int
+    inst1: SchematicInstance
+    inst2: SchematicInstance
+
+    def other(self, inst: SchematicInstance) -> tuple[SchematicInstance, str | int]:
+        if inst == self.inst1:
+            return self.inst2, self.p2
+        else:
+            return self.inst1, self.p1
+
+
+class SchematicInstance(BaseModel):
+    cell_index: int
+    connections: dict[int, list[SchematicConnection]] = Field(default=defaultdict(list))
+    placed: bool = False
+    name: str | None = None
+
+    def __init__(self, cell_index: int, name: str) -> None:
+        super().__init__(cell_index=cell_index, name=name)
+
+
+class SchematicRoute(BaseModel):
+    route_function: RouteFunction
+    start_ports: list[str | int]
+    end_ports: list[str | int]
+    start_inst: SchematicInstance
+    end_inst: SchematicInstance
+
+
+class SchematicCell(BaseModel):
+    insts: dict[int, SchematicInstance]
+    anchors: list[tuple[SchematicInstance, kdb.Trans]]
+    routes: list[SchematicRoute]
+    kcl: KCLayout = kcl
+    default_route_function: RouteFunction
+
+    def add_connection(
+        self,
+        inst1: SchematicInstance,
+        p1: str | int,
+        inst2: SchematicInstance,
+        p2: str | int,
+    ) -> None:
+        conn = SchematicConnection(inst1=inst1, inst2=inst2, p1=p1, p2=p2)
+        inst1.connections[id(inst2)].append(conn)
+        inst2.connections[id(inst1)].append(conn)
+
+    def add_route(
+        self,
+        inst1: SchematicInstance,
+        p1: str | int,
+        inst2: SchematicInstance,
+        p2: str | int,
+        route_function: RouteFunction | None = None,
+        start_straight: int = 0,
+        end_straight: int = 0,
+    ) -> None:
+        self.routes.append(
+            SchematicRoute(
+                route_function=route_function or self.default_route_function,
+                start_ports=[p1],
+                end_ports=[p2],
+                start_inst=inst1,
+                end_inst=inst2,
+                start_straight=start_straight,
+            )
+        )
+
+    def anchor(
+        self,
+        instance: SchematicInstance,
+        destination: kdb.Trans = kdb.Trans(0, 0),
+        source: kdb.Trans = kdb.Trans(0, 0),
+    ) -> None:
+        self.anchors.append((instance, source.inverted() * destination))
+
+    def assembly(self) -> KCell:
+        c = self.kcl.kcell()
+        for anchor_inst, trans in self.anchors:
+            if anchor_inst.placed:
+                raise RuntimeError(
+                    "Cannot anchor an instance which has already been placed."
+                )
+            place_from_connections(anchor_inst, c)
+        return c
+
+
+def place_from_connections(
+    inst: SchematicInstance,
+    c: KCell,
+    raise_on_placed: bool = True,
+    trans: kdb.Trans = kdb.Trans(0, 0),
+) -> Instance:
+    c_inst = c.create_inst(inst.cell_index, trans=trans)
+    # check and place connections
+    # TODO
+    # place all routes
+    # TODO
+
+    return c_inst
 
 
 __all__ = [
