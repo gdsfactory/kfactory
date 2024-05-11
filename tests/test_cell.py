@@ -1,5 +1,6 @@
 import pytest
 import kfactory as kf
+from functools import partial
 from collections.abc import Callable
 
 
@@ -132,6 +133,38 @@ def test_info() -> None:
 def test_flatten(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
     _ = c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
-    assert len(c.insts) == 1, 'c.insts should have 1 inst after adding a cell'
+    assert len(c.insts) == 1, "c.insts should have 1 inst after adding a cell"
     c.flatten()
-    assert len(c.insts) == 0, 'c.insts should have 0 insts after flatten()'
+    assert len(c.insts) == 0, "c.insts should have 0 insts after flatten()"
+
+
+def test_cell_decorator_float() -> None:
+    @kf.cell
+    def cell_float(length: float = 5, width: float = 1) -> kf.KCell:
+        return kf.KCell(f"length_{length}_width_{width}")
+
+    c1 = cell_float(length=5, width=1)
+    c2 = cell_float(width=1, length=5)
+    assert id(c1) == id(c2)
+
+
+def test_cell_decorator_partial() -> None:
+    def multiply(number: float = 1, multiplier: float = 1) -> float:
+        return number * multiplier
+
+    double = partial(multiply, multiplier=2)
+    triple = partial(multiply, multiplier=3)
+
+    @kf.cell
+    def cell_partial(
+        length: float = 5, multiplier: Callable[..., float] = double
+    ) -> kf.KCell:
+        return kf.KCell(f"length_{multiplier(length)}")
+
+    cell_double = partial(cell_partial, multiplier=double)
+    cell_triple = partial(cell_partial, multiplier=triple)
+
+    c1 = cell_double(length=5)
+    c2 = cell_triple(length=5)
+    assert id(c1) != id(c2)
+    assert c1.name == "cell_partial_L5_MFmultiply_M__main___SM2"

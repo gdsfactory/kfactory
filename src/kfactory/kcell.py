@@ -2803,7 +2803,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     for key, value in params.items():
                         if isinstance(value, frozenset):
                             params[key] = fs2d(value)
-                    print(f"Creating cell {f.__name__!r} with {key=} {params}\n")
                     cell = f(**params)
                     dbu = cell.kcl.layout.dbu
                     if cell._locked:
