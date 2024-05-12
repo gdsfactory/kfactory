@@ -7,6 +7,7 @@ region.
 
 from __future__ import annotations
 
+import hashlib
 from collections.abc import Callable, Iterable, Sequence
 from enum import IntEnum
 from hashlib import sha1
@@ -580,9 +581,15 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
 
     def __hash__(self) -> int:  # make hashable BaseModel subclass
         """Calculate a unique hash of the enclosure."""
-        return hash(
-            (str(self), self.main_layer, tuple(list(self.layer_sections.items())))
+        hasher = hashlib.sha256()
+        # Create a consistent string representation of the object
+        state_str = (
+            f"{str(self)} {self.main_layer} {sorted(self.layer_sections.items())}"
         )
+        # Update the hasher with the string encoded to bytes
+        hasher.update(state_str.encode("utf-8"))
+        # Convert the hash to an integer
+        return int.from_bytes(hasher.digest(), byteorder="big")
 
     def __add__(self, other: LayerEnclosure) -> LayerEnclosure:
         """Returns the merged enclosure of two enclosures."""

@@ -11,6 +11,7 @@ ports and other inf from instances.
 from __future__ import annotations
 
 import functools
+import hashlib
 import importlib
 import importlib.util
 import inspect
@@ -2711,7 +2712,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         check_instances: bool = True,
         snap_ports: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] = {},
+        cache: Cache[int, Any] | dict[int, Any] | None = None,
         rec_dicts: bool = False,
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
@@ -2794,6 +2795,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 for param in del_parameters:
                     params.pop(param, None)
                     param_units.pop(param, None)
+
+                # from pprint import pprint
+                # print(f.__name__)
+                # pprint(params)
 
                 @cachetools.cached(cache=_cache)
                 @functools.wraps(f)
@@ -6577,6 +6582,14 @@ def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
     return clean_name(_label)
 
 
+def dict2hash(prefix: str | None = None, **kwargs: dict[str, Any]) -> int:
+    """Returns hash from a dict."""
+    hasher = hashlib.sha256()
+    state_str = dict2name(prefix, **kwargs)
+    hasher.update(state_str.encode("utf-8"))
+    return int.from_bytes(hasher.digest(), byteorder="big")
+
+
 def get_cell_name(cell_type: str, **kwargs: dict[str, Any]) -> str:
     """Convert a cell to a string."""
     name = cell_type
@@ -6618,7 +6631,9 @@ def clean_value(
     elif isinstance(value, dict):
         return dict2name(**value)
     elif isinstance(value, BaseModel):
-        return clean_value(value.model_dump())
+        if hasattr(value, "name") and value.name is not None:
+            return clean_name(value.name)
+        return str(hash(value))
     elif hasattr(value, "name"):
         return clean_name(value.name)
     elif (
