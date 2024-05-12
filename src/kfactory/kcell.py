@@ -6631,8 +6631,6 @@ def clean_value(
     elif isinstance(value, dict):
         return dict2name(**value)
     elif isinstance(value, BaseModel):
-        if hasattr(value, "name") and value.name is not None:
-            return clean_name(value.name)
         return str(hash(value))
     elif hasattr(value, "name"):
         return clean_name(value.name)

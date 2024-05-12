@@ -169,18 +169,3 @@ def test_cell_decorator_partial() -> None:
 
     assert id(c1) != id(c2)
     assert c1.name == name_expected, c1.name
-
-
-if __name__ == "__main__":
-    class LAYER(kf.LayerEnum):
-        kcl = kf.constant(kf.kcl)
-        WG = (1, 0)
-        WGCLAD = (111, 0)
-        WGEXCLUDE = (1, 1)
-        WGCLADEXCLUDE = (111, 1)
-
-    enc= kf.LayerEnclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
-    print(hash(enc))
-    print(str(enc))
-    wg = kf.cells.straight.straight_dbu(width=1000, length=10000, layer=LAYER.WG, enclosure=enc)
-    assert wg.name == "straight_W1000_L10000_LWG_EWGSTD", wg.name
