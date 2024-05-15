@@ -45,19 +45,18 @@ class FillOperator(kdb.TileOutputReceiver):
         clip: bool,
     ) -> None:
         """Called by the TilingProcessor."""
-        while not region.is_empty():
-            self.top_cell.fill_region(
-                region,
-                self.fill_cell_index,
-                self.fc_bbox,
-                self.row_step,
-                self.column_step,
-                tile.p1,
-                region,
-                self.fill_margin,
-                None,
-                self.glue_box,
-            )
+        self.top_cell.fill_region(
+            region=region,
+            fill_cell_index=self.fill_cell_index,
+            fc_bbox=self.fc_bbox,
+            row_step=self.row_step,
+            column_step=self.column_step,
+            origin=self.glue_box.p1,
+            remaining_parts=None,
+            fill_margin=self.fill_margin,
+            remaining_polygons=None,
+            glue_box=self.glue_box,
+        )
 
 
 def fill_tiled(
@@ -69,6 +68,8 @@ def fill_tiled(
     exclude_regions: Iterable[tuple[kdb.Region, int]] = [],
     n_threads: int = config.n_threads,
     tile_size: tuple[float, float] | None = None,
+    row_step: kdb.DVector | None = None,
+    col_step: kdb.DVector | None = None,
     x_space: float = 0,
     y_space: float = 0,
     tile_border: tuple[float, float] = (20, 20),
@@ -85,6 +86,10 @@ def fill_tiled(
         n_threads: Max number of threads used. Defaults to number of cores of the
             machine.
         tile_size: Size of the tiles in um.
+        row_step: DVector for steping to the next instance position in the row.
+            x-coordinate must be >= 0.
+        col_step: DVector for steping to the next instance position in the column.
+            y-coordinate must be >= 0.
         x_space: Spacing between the fill cell bounding boxes in x-direction.
         y_space: Spacing between the fill cell bounding boxes in y-direction.
         tile_border: The tile border to consider for excludes
@@ -126,17 +131,24 @@ def fill_tiled(
         tp.input(region_name, r)
         exregion_names.append(region_name)
 
+    if row_step is None:
+        _row_step = kdb.Vector(fill_cell.bbox().width() + int(x_space / c.kcl.dbu), 0)
+    else:
+        _row_step = row_step.to_itype(c.kcl.dbu)
+    if col_step is None:
+        _col_step = kdb.Vector(0, fill_cell.bbox().height() + int(y_space / c.kcl.dbu))
+    else:
+        _col_step = col_step.to_itype(c.kcl.dbu)
+    fc_bbox = fill_cell.bbox()
     tp.output(
         "to_fill",
         FillOperator(
             c.kcl,
             c,
             fill_cell.cell_index(),
-            fc_bbox=fill_cell.bbox(),
-            row_step=kdb.Vector(fill_cell.bbox().width() + int(x_space / c.kcl.dbu), 0),
-            column_step=kdb.Vector(
-                0, fill_cell.bbox().height() + int(y_space / c.kcl.dbu)
-            ),
+            fc_bbox=fc_bbox,
+            row_step=_row_step,
+            column_step=_col_step,
         ),
     )
 
@@ -184,8 +196,9 @@ def fill_tiled(
                     if exregions and exlayers
                     else exregions + exlayers
                 )
-                + "; var fill_region = _tile & _frame & fill - exclude;"
-                " _output(to_fill, fill_region)"
+                + "; var fill_region = _tile.minkowski_sum(Box.new("
+                f"0,0,{fc_bbox.width() - 1},{fc_bbox.height() - 1}))"
+                " & _frame & fill - exclude; _output(to_fill, fill_region)"
             )
         else:
             queue_str = (
@@ -195,7 +208,8 @@ def fill_tiled(
                     if regions and layers
                     else regions + layers
                 )
-                + "; var fill_region = _tile & _frame & fill;"
+                + "; var fill_region = _tile.sized("
+                f"{_row_step.x // 2},{_col_step.y // 2}) & _frame & fill;"
                 " _output(to_fill, fill_region)"
             )
         tp.queue(queue_str)
