@@ -6349,6 +6349,16 @@ class InstancePorts:
         else:
             return len(self.cell_ports) * self.instance.na * self.instance.nb
 
+    def __contains__(self, port: str | Port) -> bool:
+        """Check whether a port is in this port collection."""
+        if isinstance(port, Port):
+            return port in self.instance.ports
+        else:
+            for _port in self.instance.ports:
+                if _port.name == port:
+                    return True
+            return False
+
     def filter(
         self,
         angle: int | None = None,
