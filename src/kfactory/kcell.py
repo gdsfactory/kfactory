@@ -130,6 +130,32 @@ kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
 
 
+class SizeInfo:
+    def __init__(self, bbox: kdb.DBox | kdb.Box) -> None:
+        """Initialize this object."""
+        self.west = bbox.left
+        self.east = bbox.right
+        self.south = bbox.bottom
+        self.north = bbox.top
+
+        self.width = self.east - self.west
+        self.height = self.north - self.south
+
+        xc = 0.5 * (self.east + self.west)
+        yc = 0.5 * (self.north + self.south)
+
+        self.sw = np.array([self.west, self.south])
+        self.se = np.array([self.east, self.south])
+        self.nw = np.array([self.west, self.north])
+        self.ne = np.array([self.east, self.north])
+
+        self.cw = np.array([self.west, yc])
+        self.ce = np.array([self.east, yc])
+        self.nc = np.array([xc, self.north])
+        self.sc = np.array([xc, self.south])
+        self.cc = self.center = np.array([xc, yc])
+
+
 class KCellFunc(Protocol[KCellParams]):
     def __call__(
         self, *args: KCellParams.args, **kwargs: KCellParams.kwargs
@@ -5651,6 +5677,11 @@ class Instance:
         return self
 
     @property
+    def size_info(self) -> SizeInfo:
+        """Returns the size information of the instance."""
+        return SizeInfo(self.bbox)
+
+    @property
     def xmin(self) -> int:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self._instance.bbox().left
@@ -5766,6 +5797,10 @@ class UMInstance:
             parent: port that this should be attached to
         """
         self.parent = parent
+
+    @property
+    def size_info(self) -> SizeInfo:
+        return SizeInfo(self.parent.dbbox)
 
     @overload
     def movex(self, destination: float, /) -> UMInstance: ...
