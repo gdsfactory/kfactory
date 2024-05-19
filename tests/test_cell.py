@@ -62,6 +62,23 @@ def test_ports_cell(LAYER: kf.LayerEnum) -> None:
         layer=LAYER.WG,
     )
     assert c["o1"]
+    assert 'o1' in c.ports
+
+
+def test_ports_instance(LAYER: kf.LayerEnum) -> None:
+    c = kf.KCell()
+    c.create_port(
+        name="o1",
+        dwidth=1,
+        dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
+        layer=LAYER.WG,
+    )
+    c2 = kf.KCell()
+    ref = c2 << c
+    assert c["o1"]
+    assert 'o1' in c.ports
+    assert ref["o1"]
+    assert 'o1' in ref.ports
 
 
 def test_getter(LAYER: kf.LayerEnum) -> None:
