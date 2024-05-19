@@ -1,7 +1,11 @@
 <a name="v0.13.1"></a>
-# [v0.13.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.1) - 09 May 2024
+# [v0.13.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.1) - 10 May 2024
 
 # What's Changed
+
+## New
+
+- Improve fill tiled with row/column vectors [#314](https://github.com/gdsfactory/kfactory/pull/314)
 
 ## Bug Fixes
 

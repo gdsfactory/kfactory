@@ -6628,36 +6628,32 @@ def clean_value(
         return dict2name(**value)
     elif hasattr(value, "name"):
         return clean_name(value.name)
-    elif (
-        callable(value)
-        and isinstance(value, FunctionType)
-        and value.__name__ == "<lambda>"
-    ):
-        raise ValueError(
-            "Unable to serialize lambda function. Use a named function instead."
-        )
-    elif callable(value) and isinstance(value, functools.partial):
-        sig = inspect.signature(value.func)
-        args_as_kwargs = dict(zip(sig.parameters.keys(), value.args))
-        args_as_kwargs.update(**value.keywords)
-        args_as_kwargs = clean_dict(args_as_kwargs)
-        # args_as_kwargs.pop("function", None)
-        func = value.func
-        while hasattr(func, "func"):
-            func = func.func
-        v = {
-            "function": func.__name__,
-            "module": func.__module__,
-            "settings": args_as_kwargs,
-        }
-        return clean_value(v)
-    elif callable(value) and isinstance(value, toolz.functoolz.Compose):
-        return "_".join(
-            [clean_value(value.first)] + [clean_value(func) for func in value.funcs]
-        )
-
     elif callable(value):
-        return getattr(value, "__name__", value.__class__.__name__)
+        if isinstance(value, FunctionType) and value.__name__ == "<lambda>":
+            raise ValueError(
+                "Unable to serialize lambda function. Use a named function instead."
+            )
+        if isinstance(value, functools.partial):
+            sig = inspect.signature(value.func)
+            args_as_kwargs = dict(zip(sig.parameters.keys(), value.args))
+            args_as_kwargs.update(**value.keywords)
+            args_as_kwargs = clean_dict(args_as_kwargs)
+            # args_as_kwargs.pop("function", None)
+            func = value.func
+            while hasattr(func, "func"):
+                func = func.func
+            v = {
+                "function": func.__name__,
+                "module": func.__module__,
+                "settings": args_as_kwargs,
+            }
+            return clean_value(v)
+        elif isinstance(value, toolz.functoolz.Compose):
+            return "_".join(
+                [clean_value(value.first)] + [clean_value(func) for func in value.funcs]
+            )
+        else:
+            return getattr(value, "__name__", value.__class__.__name__)
     else:
         return clean_name(str(value))
 

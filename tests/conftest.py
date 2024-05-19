@@ -141,3 +141,12 @@ def pdk(LAYER: LAYER_CLASS) -> kf.KCLayout:
     )
     kcl = kf.KCLayout("Test_PDK", layer_stack=layerstack)
     return kcl
+
+
+@pytest.fixture
+@kf.cell
+def fill_cell() -> kf.KCell:
+    fc = kf.KCell()
+    fc.shapes(fc.kcl.layer(2, 0)).insert(kf.kdb.DBox(20, 40))
+    fc.shapes(fc.kcl.layer(3, 0)).insert(kf.kdb.DBox(30, 15))
+    return fc
