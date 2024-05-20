@@ -130,6 +130,180 @@ kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
 
 
+class SizeInfo:
+    def __init__(self, bbox: Callable[..., kdb.Box]) -> None:
+        """Initialize this object."""
+        self._bf = bbox
+
+    def __str__(self) -> str:
+        return (
+            f"SizeInfo: {self.width=}, {self.height=}, {self.west=}, {self.east=},"
+            f" {self.south=}, {self.north=}"
+        )
+
+    def __call__(self, layer: int | LayerEnum) -> SizeInfo:
+        def layer_bbox() -> kdb.Box:
+            return self._bf(layer)
+
+        return SizeInfo(layer_bbox)
+
+    @property
+    def west(self) -> int:
+        return self._bf().left
+
+    @property
+    def east(self) -> int:
+        return self._bf().right
+
+    @property
+    def south(self) -> int:
+        return self._bf().bottom
+
+    @property
+    def north(self) -> int:
+        return self._bf().top
+
+    @property
+    def width(self) -> int:
+        return self._bf().width()
+
+    @property
+    def height(self) -> int:
+        return self._bf().height()
+
+    @property
+    def sw(self) -> tuple[int, int]:
+        bb = self._bf()
+        return (bb.left, bb.bottom)
+
+    @property
+    def nw(self) -> tuple[int, int]:
+        bb = self._bf()
+        return (bb.left, bb.top)
+
+    @property
+    def se(self) -> tuple[int, int]:
+        bb = self._bf()
+        return (bb.right, bb.bottom)
+
+    @property
+    def ne(self) -> tuple[int, int]:
+        bb = self._bf()
+        return (bb.right, bb.top)
+
+    @property
+    def cw(self) -> tuple[int, int]:
+        bb = self._bf()
+        return (bb.left, bb.center().y)
+
+    @property
+    def ce(self) -> tuple[int, int]:
+        bb = self._bf()
+        return (bb.right, bb.center().y)
+
+    @property
+    def sc(self) -> tuple[int, int]:
+        bb = self._bf()
+        return (bb.center().x, bb.bottom)
+
+    @property
+    def nc(self) -> tuple[int, int]:
+        bb = self._bf()
+        return (bb.center().x, bb.top)
+
+    @property
+    def cc(self) -> tuple[int, int]:
+        c = self._bf().center()
+        return (c.x, c.y)
+
+
+class DSizeInfo:
+    def __init__(self, bbox: Callable[..., kdb.DBox]) -> None:
+        """Initialize this object."""
+        self._bf = bbox
+
+    def __str__(self) -> str:
+        return (
+            f"SizeInfo: {self.width=}, {self.height=}, {self.west=}, {self.east=},"
+            f" {self.south=}, {self.north=}"
+        )
+
+    def __call__(self, layer: int | LayerEnum) -> DSizeInfo:
+        def layer_bbox() -> kdb.DBox:
+            return self._bf(layer)
+
+        return DSizeInfo(layer_bbox)
+
+    @property
+    def west(self) -> float:
+        return self._bf().left
+
+    @property
+    def east(self) -> float:
+        return self._bf().right
+
+    @property
+    def south(self) -> float:
+        return self._bf().bottom
+
+    @property
+    def north(self) -> float:
+        return self._bf().top
+
+    @property
+    def width(self) -> float:
+        return self._bf().width()
+
+    @property
+    def height(self) -> float:
+        return self._bf().height()
+
+    @property
+    def sw(self) -> tuple[float, float]:
+        bb = self._bf()
+        return (bb.left, bb.bottom)
+
+    @property
+    def nw(self) -> tuple[float, float]:
+        bb = self._bf()
+        return (bb.left, bb.top)
+
+    @property
+    def se(self) -> tuple[float, float]:
+        bb = self._bf()
+        return (bb.right, bb.bottom)
+
+    @property
+    def ne(self) -> tuple[float, float]:
+        bb = self._bf()
+        return (bb.left, bb.top)
+
+    @property
+    def cw(self) -> tuple[float, float]:
+        bb = self._bf()
+        return (bb.left, bb.center().y)
+
+    @property
+    def ce(self) -> tuple[float, float]:
+        bb = self._bf()
+        return (bb.left, bb.bottom)
+
+    @property
+    def sc(self) -> tuple[float, float]:
+        bb = self._bf()
+        return (bb.center().x, bb.bottom)
+
+    @property
+    def nc(self) -> tuple[float, float]:
+        bb = self._bf()
+        return (bb.center().x, bb.top)
+
+    @property
+    def cc(self) -> tuple[float, float]:
+        c = self._bf().center()
+        return (c.x, c.y)
+
+
 class KCellFunc(Protocol[KCellParams]):
     def __call__(
         self, *args: KCellParams.args, **kwargs: KCellParams.kwargs
@@ -558,6 +732,7 @@ class KCell:
     boundary: kdb.DPolygon | None
     insts: Instances
     vinsts: list[VInstance]
+    size_info: SizeInfo
 
     def __init__(
         self,
@@ -602,6 +777,7 @@ class KCell:
         self.d = UMKCell(self)
 
         self.boundary = None
+        self.size_info = SizeInfo(self._kdb_cell.bbox)
 
     def evaluate_insts(self) -> None:
         """Check all KLayout instances and create kfactory Instances."""
@@ -5120,6 +5296,7 @@ class UMKCell:
             parent: port that this should be attached to
         """
         self.parent = parent
+        self.size_info = DSizeInfo(parent.dbbox)
 
     @property
     def xmin(self) -> float:
@@ -5257,6 +5434,7 @@ class Instance:
         self.kcl = kcl
         self.ports = InstancePorts(self)
         self.d = UMInstance(self)
+        self.size_info = SizeInfo(self.bbox)
 
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]
@@ -5766,6 +5944,7 @@ class UMInstance:
             parent: port that this should be attached to
         """
         self.parent = parent
+        self.size_info = SizeInfo(self.parent.dbbox)
 
     @overload
     def movex(self, destination: float, /) -> UMInstance: ...
