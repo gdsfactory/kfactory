@@ -1,5 +1,34 @@
+<a name="v0.13.3"></a>
+# [v0.13.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.3) - 15 May 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- ports in instance [#316](https://github.com/gdsfactory/kfactory/pull/316)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.13.2...v0.13.3
+
+
+[Changes][v0.13.3]
+
+
+<a name="v0.13.2"></a>
+# [v0.13.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.2) - 15 May 2024
+
+# What's Changed
+
+## New
+
+- Improve fill tiled with row/column vectors [#314](https://github.com/gdsfactory/kfactory/pull/314)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.13.1...v0.13.2
+
+[Changes][v0.13.2]
+
+
 <a name="v0.13.1"></a>
-# [v0.13.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.1) - 09 May 2024
+# [v0.13.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.1) - 15 May 2024
 
 # What's Changed
 
@@ -417,6 +446,8 @@
 [Changes][v0.4.0]
 
 
+[v0.13.3]: https://github.com/gdsfactory/kfactory/compare/v0.13.2...v0.13.3
+[v0.13.2]: https://github.com/gdsfactory/kfactory/compare/v0.13.1...v0.13.2
 [v0.13.1]: https://github.com/gdsfactory/kfactory/compare/v0.13.0...v0.13.1
 [v0.13.0]: https://github.com/gdsfactory/kfactory/compare/v0.12.3...v0.13.0
 [v0.12.3]: https://github.com/gdsfactory/kfactory/compare/v0.12.2...v0.12.3
