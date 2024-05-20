@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from dataclasses import InitVar, dataclass, field
+from functools import partial
 from typing import Literal, Protocol
 
 import numpy as np
@@ -567,7 +569,8 @@ def route_smart(
     end_straights: list[int] = [0],
     bboxes: list[kdb.Box] | None = None,
     widths: list[int] | None = None,
-    reorder_ports: bool = True,
+    reorder_ports: bool = False,
+    waypoints: list[kdb.Point] | None = None,
 ) -> list[ManhattanRouter]:
     length = len(start_ports)
 
@@ -597,8 +600,88 @@ def route_smart(
     box_region = kdb.Region()
     if bboxes:
         for box in bboxes:
-            box_region.insert(box.enlarged(separation))
+            box_region.insert(box)
             box_region.merge()
+
+    if reorder_ports:
+        if bboxes is None:
+            config.logger.warning(
+                "No bounding boxes were given but route_smart was configured to reorder"
+                " the ports. Without bounding boxes route_smart cannot determine "
+                "whether ports belong to specific bundles or they should build one "
+                "bounding box. Therefore, all ports will be assigned to one bounding"
+                " box. If this is the intended behavior, pass `[]` to the bboxes "
+                "parameter to disable this warning."
+            )
+            bboxes = []
+        default_start_bundle: list[kdb.Trans] = []
+        start_bundles: dict[kdb.Box, list[kdb.Trans]] = defaultdict(list)
+
+        index = 0
+        for ts in start_ts:
+            p = ts.disp.to_p()
+            b = bboxes[index]
+            if b.contains(p):
+                start_bundles[b]
+            for i, b in enumerate(bboxes):
+                if b.contains(p):
+                    start_bundles[b].append(ts)
+                    index = i
+                    break
+            else:
+                default_start_bundle.append(ts)
+        if default_start_bundle:
+            b = kdb.Box()
+            for ts in default_start_bundle:
+                b += ts.disp.to_p()
+            start_bundles[b] = default_start_bundle
+
+        default_end_bundle: list[kdb.Trans] = []
+        end_bundles: dict[kdb.Box, list[kdb.Trans]] = defaultdict(list)
+
+        index = 0
+        for ts in end_ts:
+            p = ts.disp.to_p()
+            b = bboxes[index]
+            if b.contains(p):
+                end_bundles[b]
+            for i, b in enumerate(bboxes):
+                if b.contains(p):
+                    end_bundles[b].append(ts)
+                    index = i
+                    break
+            else:
+                default_end_bundle.append(ts)
+        if default_end_bundle:
+            b = kdb.Box()
+            for ts in default_end_bundle:
+                b += ts.disp.to_p()
+            end_bundles[b] = default_end_bundle
+
+        # matching bundles together
+        bundle_matches: list[tuple[kdb.Box, kdb.Box]] = []
+
+        def dist(b1: kdb.Box, b2: kdb.Box) -> float:
+            return (b2.center() - b1.center()).length()
+
+        end_match_lengths: dict[kdb.Box, int] = defaultdict(int)
+        for box, potential_bundle in start_bundles.items():
+            d = partial(dist, b2=box)
+            end_box = min(end_bundles, key=d)
+            bundle_matches.append((box, end_box))
+            match_length = end_match_lengths[end_box]
+            if match_length:
+                if match_length + len(potential_bundle) > len(end_bundles[end_box]):
+                    raise NotImplementedError(
+                        "sorting of route_bundle cannot handle the case yet where the "
+                        "ideal matching of ports are not closest to their connecting "
+                        "starting ports."
+                    )
+            end_match_lengths[end_box] += len(potential_bundle)
+
+        for b1, b2 in bundle_matches:
+            # TODO: sort end ports and then start ports and add them to the start/end lists
+            raise NotImplementedError()
 
     all_routers: list[ManhattanRouter] = []
 
@@ -790,8 +873,13 @@ def route_smart(
                         break
                     routers_anticlockwise.extend(new_routers)
                     angle = new_angle
+
             route_to_bbox([router.start for router in sorted_routers], total_bbox)
-            route_loosely(sorted_routers, separation=separation, end_bbox=end_bbox)
+            if waypoints is None:
+                route_loosely(sorted_routers, separation=separation, end_bbox=end_bbox)
+            else:
+                pass
+
         else:
             routers = router_groups[0][1]
             r = routers[0]
@@ -824,9 +912,11 @@ def route_smart(
                         bbox=total_bbox,
                         separation=separation,
                     )
-
-            route_to_bbox([router.start for router in router_bundle], total_bbox)
-            route_loosely(routers, separation=separation, end_bbox=end_bbox)
+            if waypoints is None:
+                route_to_bbox([router.start for router in router_bundle], total_bbox)
+                route_loosely(routers, separation=separation, end_bbox=end_bbox)
+            else:
+                pass
 
     return all_routers
 
