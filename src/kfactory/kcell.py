@@ -131,7 +131,7 @@ kcls: dict[str, KCLayout] = {}
 
 
 class SizeInfo:
-    def __init__(self, bbox: kdb.DBox | kdb.Box) -> None:
+    def __init__(self, bbox: kdb.Box | kdb.DBox) -> None:
         """Initialize this object."""
         self.west = bbox.left
         self.east = bbox.right
@@ -154,6 +154,12 @@ class SizeInfo:
         self.nc = np.array([xc, self.north])
         self.sc = np.array([xc, self.south])
         self.cc = self.center = np.array([xc, yc])
+
+    def __str__(self) -> str:
+        return (
+            f"SizeInfo: {self.width=}, {self.height=}, {self.west=}, {self.east=},"
+            f" {self.south=}, {self.north=}"
+        )
 
 
 class KCellFunc(Protocol[KCellParams]):
@@ -638,6 +644,11 @@ class KCell:
     def __getitem__(self, key: int | str | None) -> Port:
         """Returns port from instance."""
         return self.ports[key]
+
+    @property
+    def size_info(self) -> SizeInfo:
+        """Return the size information of the cell."""
+        return SizeInfo(self.bbox())
 
     @property
     def settings(self) -> KCellSettings:
@@ -5148,6 +5159,11 @@ class UMKCell:
         self.parent = parent
 
     @property
+    def size_info(self) -> SizeInfo:
+        """Return the size information of the cell."""
+        return SizeInfo(self.parent.bbox())
+
+    @property
     def xmin(self) -> float:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self.parent._kdb_cell.dbbox().left
@@ -5679,7 +5695,7 @@ class Instance:
     @property
     def size_info(self) -> SizeInfo:
         """Returns the size information of the instance."""
-        return SizeInfo(self.bbox)
+        return SizeInfo(self.bbox())
 
     @property
     def xmin(self) -> int:
@@ -5800,7 +5816,8 @@ class UMInstance:
 
     @property
     def size_info(self) -> SizeInfo:
-        return SizeInfo(self.parent.dbbox)
+        """Returns the size information of the instance."""
+        return SizeInfo(self.parent.dbbox())
 
     @overload
     def movex(self, destination: float, /) -> UMInstance: ...
