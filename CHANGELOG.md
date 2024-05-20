@@ -3,6 +3,10 @@
 
 # What's Changed
 
+## New
+
+- add instance.size_info [#317](https://github.com/gdsfactory/kfactory/pull/317)
+
 ## Bug Fixes
 
 - ports in instance [#316](https://github.com/gdsfactory/kfactory/pull/316)
