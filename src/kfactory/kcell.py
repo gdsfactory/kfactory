@@ -68,8 +68,6 @@ from .port import (
 )
 
 T = TypeVar("T")
-BB = TypeVar("BB", bound=Callable[[], kdb.Box] | Callable[[], kdb.DBox])
-U = TypeVar("U", bound=int | float)
 
 KCellParams = ParamSpec("KCellParams")
 AnyTrans = TypeVar(
