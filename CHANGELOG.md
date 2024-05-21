@@ -5,6 +5,7 @@
 
 ## New
 
+- add write configs and connection behavior [#323](https://github.com/gdsfactory/kfactory/pull/323)
 - add instance.size_info [#317](https://github.com/gdsfactory/kfactory/pull/317)
 
 ## Bug Fixes
