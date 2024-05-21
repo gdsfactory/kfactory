@@ -129,6 +129,7 @@ class Settings(
         arbitrary_types_allowed=True,
         env_prefix="kfactory_",
         env_nested_delimiter="_",
+        extra="allow",
     )
 
     n_threads: int = get_affinity()
