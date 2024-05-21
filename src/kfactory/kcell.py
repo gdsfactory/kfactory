@@ -3692,6 +3692,12 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """Return the top KCell if there is a single one."""
         return self[self.top_cell().cell_index()]
 
+    def clear_kcells(self) -> None:
+        """Clears all cells in the Layout object."""
+        for tc in self.top_kcells():
+            tc.prune_cell()
+        self.kcells = {}
+
 
 def layerenum_from_dict(
     layers: dict[str, tuple[int, int]], name: str = "LAYER", kcl: KCLayout | None = None
