@@ -626,6 +626,7 @@ def save_layout_options(**attributes: Any) -> kdb.SaveLayoutOptions:
     save.gds2_write_file_properties = True
     save.gds2_write_timestamps = False
     save.write_context_info = True
+    save.gds2_max_cellname_length = config.max_cellname_length
 
     for k, v in attributes.items():
         setattr(save, k, v)
@@ -4330,9 +4331,9 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         other: Port,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
+        allow_width_mismatch: bool = config.allow_width_mismatch,
+        allow_layer_mismatch: bool = config.allow_layer_mismatch,
+        allow_type_mismatch: bool = config.allow_type_mismatch,
     ) -> None: ...
 
     @overload
@@ -4343,9 +4344,9 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         other_port_name: str | None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
+        allow_width_mismatch: bool = config.allow_width_mismatch,
+        allow_layer_mismatch: bool = config.allow_layer_mismatch,
+        allow_type_mismatch: bool = config.allow_type_mismatch,
     ) -> None: ...
 
     def connect(
@@ -4355,9 +4356,9 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         other_port_name: str | None = None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
+        allow_width_mismatch: bool = config.allow_width_mismatch,
+        allow_layer_mismatch: bool = config.allow_layer_mismatch,
+        allow_type_mismatch: bool = config.allow_type_mismatch,
     ) -> None:
         """Align port with name `portname` to a port.
 
@@ -5625,9 +5626,9 @@ class Instance:
         other: Port,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
+        allow_width_mismatch: bool = config.allow_width_mismatch,
+        allow_layer_mismatch: bool = config.allow_layer_mismatch,
+        allow_type_mismatch: bool = config.allow_type_mismatch,
     ) -> None: ...
 
     @overload
@@ -5638,9 +5639,9 @@ class Instance:
         other_port_name: str | None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
+        allow_width_mismatch: bool = config.allow_width_mismatch,
+        allow_layer_mismatch: bool = config.allow_layer_mismatch,
+        allow_type_mismatch: bool = config.allow_type_mismatch,
     ) -> None: ...
 
     def connect(
@@ -5650,9 +5651,9 @@ class Instance:
         other_port_name: str | None = None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
+        allow_width_mismatch: bool = config.allow_width_mismatch,
+        allow_layer_mismatch: bool = config.allow_layer_mismatch,
+        allow_type_mismatch: bool = config.allow_type_mismatch,
     ) -> None:
         """Align port with name `portname` to a port.
 
@@ -7051,7 +7052,14 @@ def show(
             _kcls = list(kcls.values())
             _kcls.remove(layout)
             for _kcl in _kcls:
-                p = (_dir / _kcl.name).with_suffix(".oas").resolve()
+                if save_options.gds2_max_cellname_length:
+                    p = (
+                        (_dir / _kcl.name[: save_options.gds2_max_cellname_length])
+                        .with_suffix(".oas")
+                        .resolve()
+                    )
+                else:
+                    p = (_dir / _kcl.name).with_suffix(".oas").resolve()
                 _kcl.write(p, library_save_options)
                 _kcl_paths.append({"name": _kcl.name, "file": str(p)})
 
