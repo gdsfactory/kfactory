@@ -138,6 +138,12 @@ class Settings(
     meta_format: Literal["v2", "v1"] = "v2"
     console: rich.console.Console = Field(default_factory=rich.console.Console)
     max_cellname_length: int = 99
+    write_context_info: bool = True
+    write_cell_properties: bool = True
+    wrtie_file_properties: bool = True
+    allow_width_mismatch: bool = False
+    allow_layer_mismatch: bool = False
+    allow_type_mismatch: bool = False
     """The format of the saving of metadata.
 
     v1: Transformations and other KLayout objects are stored as a string. In

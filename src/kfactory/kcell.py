@@ -4325,9 +4325,9 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         other: Port,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
+        allow_width_mismatch: bool = config.allow_width_mismatch,
+        allow_layer_mismatch: bool = config.allow_layer_mismatch,
+        allow_type_mismatch: bool = config.allow_type_mismatch,
     ) -> None: ...
 
     @overload
@@ -4338,9 +4338,9 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         other_port_name: str | None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
+        allow_width_mismatch: bool = config.allow_width_mismatch,
+        allow_layer_mismatch: bool = config.allow_layer_mismatch,
+        allow_type_mismatch: bool = config.allow_type_mismatch,
     ) -> None: ...
 
     def connect(
@@ -4350,9 +4350,9 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         other_port_name: str | None = None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
+        allow_width_mismatch: bool = config.allow_width_mismatch,
+        allow_layer_mismatch: bool = config.allow_layer_mismatch,
+        allow_type_mismatch: bool = config.allow_type_mismatch,
     ) -> None:
         """Align port with name `portname` to a port.
 
@@ -5620,9 +5620,9 @@ class Instance:
         other: Port,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
+        allow_width_mismatch: bool = config.allow_width_mismatch,
+        allow_layer_mismatch: bool = config.allow_layer_mismatch,
+        allow_type_mismatch: bool = config.allow_type_mismatch,
     ) -> None: ...
 
     @overload
@@ -5633,9 +5633,9 @@ class Instance:
         other_port_name: str | None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
+        allow_width_mismatch: bool = config.allow_width_mismatch,
+        allow_layer_mismatch: bool = config.allow_layer_mismatch,
+        allow_type_mismatch: bool = config.allow_type_mismatch,
     ) -> None: ...
 
     def connect(
@@ -5645,9 +5645,9 @@ class Instance:
         other_port_name: str | None = None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = False,
-        allow_layer_mismatch: bool = False,
-        allow_type_mismatch: bool = False,
+        allow_width_mismatch: bool = config.allow_width_mismatch,
+        allow_layer_mismatch: bool = config.allow_layer_mismatch,
+        allow_type_mismatch: bool = config.allow_type_mismatch,
     ) -> None:
         """Align port with name `portname` to a port.
 
