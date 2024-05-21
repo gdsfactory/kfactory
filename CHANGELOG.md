@@ -11,6 +11,10 @@
 
 - ports in instance [#316](https://github.com/gdsfactory/kfactory/pull/316)
 
+## Documentation
+
+- rename allow_width_mismatch [#319](https://github.com/gdsfactory/kfactory/pull/319)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.13.2...v0.13.3
 
 
