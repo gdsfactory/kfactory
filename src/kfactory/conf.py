@@ -121,6 +121,8 @@ class Settings(
             Trans/DCplxTrans. If the metadata is in the old string format
             (there was a bug in how to read metadata in some versions), use
             'string'.
+        console: The rich console to use for displaying rich content.
+        max_cellname_length: The maximum length of a cell name.
     """
 
     model_config = SettingsConfigDict(
@@ -135,6 +137,7 @@ class Settings(
     display_type: Literal["widget", "image", "docs"] = "image"
     meta_format: Literal["v2", "v1"] = "v2"
     console: rich.console.Console = Field(default_factory=rich.console.Console)
+    max_cellname_length: int = 99
     """The format of the saving of metadata.
 
     v1: Transformations and other KLayout objects are stored as a string. In

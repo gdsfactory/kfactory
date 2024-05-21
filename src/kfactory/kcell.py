@@ -626,6 +626,7 @@ def save_layout_options(**attributes: Any) -> kdb.SaveLayoutOptions:
     save.gds2_write_file_properties = True
     save.gds2_write_timestamps = False
     save.write_context_info = True
+    save.gds2_max_cellname_length = config.max_cellname_length
 
     for k, v in attributes.items():
         setattr(save, k, v)
@@ -7045,7 +7046,14 @@ def show(
             _kcls = list(kcls.values())
             _kcls.remove(layout)
             for _kcl in _kcls:
-                p = (_dir / _kcl.name).with_suffix(".oas").resolve()
+                if save_options.gds2_max_cellname_length:
+                    p = (
+                        (_dir / _kcl.name[: save_options.gds2_max_cellname_length])
+                        .with_suffix(".oas")
+                        .resolve()
+                    )
+                else:
+                    p = (_dir / _kcl.name).with_suffix(".oas").resolve()
                 _kcl.write(p, library_save_options)
                 _kcl_paths.append({"name": _kcl.name, "file": str(p)})
 
