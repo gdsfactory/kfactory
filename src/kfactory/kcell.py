@@ -4270,7 +4270,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
                 for layer in _cell.kcl.layer_indexes():
                     _cell.shapes(layer).transform(_trans)
                 for port in self.cell.ports:
-                    _cell.add_port(port.copy(_trans))
+                    _cell.add_port(port=port.copy(_trans))
             else:
                 _cell = cell.kcl[_cell_name]
             _inst = cell << _cell
