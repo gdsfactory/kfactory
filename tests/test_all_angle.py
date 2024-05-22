@@ -26,7 +26,7 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
         ae_rad = np.deg2rad(ae)
         start_ports.append(
             vc.create_port(
-                name="s0",
+                name=f"s{i}",
                 dcplx_trans=kf.kdb.DCplxTrans(
                     1, a, False, -500 + r * np.cos(a_rad), -100 + r * np.sin(a_rad)
                 ),
@@ -36,7 +36,7 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
         )
         end_ports.append(
             vc.create_port(
-                name="s0",
+                name=f"s{i + _l}",
                 dcplx_trans=kf.kdb.DCplxTrans(
                     1, ae, False, 1510 + r * np.cos(ae_rad), 1410 + r * np.sin(ae_rad)
                 ),

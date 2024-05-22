@@ -11,7 +11,7 @@ from scipy.optimize import minimize_scalar  # type: ignore[import-untyped,unused
 
 from ... import kdb
 from ...conf import config
-from ...kcell import Port, VInstance, VKCell
+from ...kcell import KCell, Port, VInstance, VKCell
 
 __all__ = ["OpticalAllAngleRoute", "route"]
 
@@ -38,7 +38,7 @@ class BendFactory(Protocol):
 
 
 def route(
-    c: VKCell,
+    c: VKCell | KCell,
     width: float,
     layer: int,
     backbone: Sequence[kdb.DPoint],
@@ -121,13 +121,13 @@ def route(
         # calculate and place the resulting straight if != 0
         _l = (pt - old_pt).length() - effective_radius - start_offset
         if _l > 0:
-            s = c << straight_factory(width=width, length=_l)
+            s = c.create_vinst(straight_factory(width=width, length=_l))
             s.connect(straight_ports[0], _port)
             _port = s.ports[straight_ports[1]]
             insts.append(s)
         if _a != 0:
             # after the straight place the bend
-            b = c << bend
+            b = c.create_vinst(bend)
             if _a < 0:
                 b.connect(bend_ports[1], _port)
                 _port = b.ports[bend_ports[0]]
@@ -149,7 +149,7 @@ def route(
             f"space={(pt - old_pt).length()}"
         )
     if _l > 0:
-        s = c << straight_factory(width=width, length=_l)
+        s = c.create_vinst(straight_factory(width=width, length=_l))
         s.connect(straight_ports[0], _port)
         _port = s.ports[straight_ports[1]]
         insts.append(s)
@@ -162,7 +162,7 @@ def route(
 
 @config.logger.catch(reraise=True)
 def route_bundle(
-    c: VKCell,
+    c: VKCell | KCell,
     start_ports: list[Port],
     end_ports: list[Port],
     backbone: Sequence[kdb.DPoint],

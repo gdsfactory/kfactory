@@ -2481,8 +2481,8 @@ class KCell:
 
     def create_vinst(self, cell: VKCell | KCell) -> VInstance:
         """Insert the KCell as a VInstance into a VKCell or KCell."""
-        vi = VInstance(self)
-        cell.vinsts.append(vi)
+        vi = VInstance(cell)
+        self.vinsts.append(vi)
         return vi
 
 
@@ -3984,8 +3984,8 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         return self.create_inst(cell=cell)
 
     def create_vinst(self, cell: KCell | VKCell) -> VInstance:
-        vi = VInstance(self)
-        cell.vinsts.append(vi)
+        vi = VInstance(cell)
+        self.vinsts.append(vi)
         return vi
 
     def shapes(self, layer: int) -> VShapes:
