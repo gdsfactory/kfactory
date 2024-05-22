@@ -7,6 +7,10 @@
 
 - allow new conf fields [#325](https://github.com/gdsfactory/kfactory/pull/325)
 
+## Bug Fixes
+
+- fix add port [#326](https://github.com/gdsfactory/kfactory/pull/326)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.13.3...v0.13.4
 
 
