@@ -160,27 +160,24 @@ def route(
     return route
 
 
-class RadiusEstimate(Protocol):
-    def __call__(self, angle: float) -> float: ...
-
-
 @config.logger.catch(reraise=True)
 def route_bundle(
     c: VKCell,
     start_ports: list[Port],
     end_ports: list[Port],
     backbone: Sequence[kdb.DPoint],
-    spacings: list[float],
-    radius_estimate: RadiusEstimate,
+    separation: float | list[float],
     straight_factory: StraightFactory,
     bend_factory: BendFactory,
     bend_ports: tuple[str, str] = ("o1", "o2"),
     straight_ports: tuple[str, str] = ("o1", "o2"),
 ) -> list[OpticalAllAngleRoute]:
+    if isinstance(separation, int | float):
+        separation = [separation] * len(start_ports)
     pts_list = backbone2bundle(
         backbone=backbone,
         port_widths=[p.d.width for p in start_ports],
-        spacings=spacings,
+        spacings=separation,
     )
 
     routes: list[OpticalAllAngleRoute] = []

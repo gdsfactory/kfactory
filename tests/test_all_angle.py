@@ -50,8 +50,7 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
         start_ports=start_ports,
         end_ports=end_ports,
         backbone=[kf.kdb.DPoint(550, 550), kf.kdb.DPoint(950, 950)],
-        spacings=[randint(1, 5) for _ in range(_l)],
-        radius_estimate=lambda angle: 60,
+        separation=[randint(1, 5) for _ in range(_l)],
         straight_factory=sf,
         bend_factory=bf,
     )
