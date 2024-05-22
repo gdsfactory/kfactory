@@ -6445,7 +6445,7 @@ class Ports:
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> Iterable[Port]:
+    ) -> list[Port]:
         """Filter ports by name.
 
         Args:
@@ -6466,7 +6466,7 @@ class Ports:
             ports = filter_direction(ports, angle)
         if orientation is not None:
             ports = filter_orientation(ports, orientation)
-        return ports
+        return list(ports)
 
     def hash(self) -> bytes:
         """Get a hash of the port to compare."""
@@ -6552,7 +6552,7 @@ class InstancePorts:
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> Iterable[Port]:
+    ) -> list[Port]:
         """Filter ports by name.
 
         Args:
@@ -6573,7 +6573,7 @@ class InstancePorts:
             ports = filter_direction(ports, angle)
         if orientation is not None:
             ports = filter_orientation(ports, orientation)
-        return ports
+        return list(ports)
 
     @config.logger.catch(reraise=True)
     def __getitem__(
