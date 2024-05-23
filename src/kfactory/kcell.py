@@ -712,14 +712,21 @@ class KCell:
     `_kdb_cell`.
 
     Attributes:
-        kcl: Library object that is the manager of the KLayout
+        yaml_tag: Tag for yaml serialization.
+        ports: Manages the ports of the cell.
         settings: A dictionary containing settings populated by the
             [cell][kfactory.kcell.cell] decorator.
         info: Dictionary for storing additional info if necessary. This is not
             passed to the GDS and therefore not reversible.
+        d: UMKCell object for easy access to the KCell in um units.
+        kcl: Library object that is the manager of the KLayout
+        boundary: Boundary of the cell.
+        insts: List of instances in the cell.
+        vinsts: List of virtual instances in the cell.
+        size_info: Size information of the cell.
         _kdb_cell: Pure KLayout cell object.
         _locked: If set the cell shouldn't be modified anymore.
-        ports: Manages the ports of the cell.
+        function_name: Name of the function that created the cell.
     """
 
     yaml_tag: str = "!KCell"
@@ -734,6 +741,7 @@ class KCell:
     insts: Instances
     vinsts: list[VInstance]
     size_info: SizeInfo
+    function_name: str = ""
 
     def __init__(
         self,
@@ -2995,10 +3003,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if set_settings:
                         settings = cell.settings.model_dump()
                         settings_units = cell.settings_units.model_dump()
-                        if basename is not None:
-                            settings["function_name"] = basename
-                        else:
-                            settings["function_name"] = f.__name__
+                        cell.function_name = basename if basename else f.__name__
 
                         for param in drop_params:
                             params.pop(param, None)
