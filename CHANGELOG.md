@@ -5,6 +5,7 @@
 
 ## New
 
+- Separate function name [#331](https://github.com/gdsfactory/kfactory/pull/331)
 - allow new conf fields [#325](https://github.com/gdsfactory/kfactory/pull/325)
 
 ## Bug Fixes
