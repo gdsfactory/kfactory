@@ -3003,7 +3003,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if set_settings:
                         settings = cell.settings.model_dump()
                         settings_units = cell.settings_units.model_dump()
-                        cell.function_name = basename if basename else f.__name__
+                        cell.function_name = basename or f.__name__
 
                         for param in drop_params:
                             params.pop(param, None)
