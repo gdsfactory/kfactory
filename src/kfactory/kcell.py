@@ -4360,6 +4360,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         allow_width_mismatch: bool = config.allow_width_mismatch,
         allow_layer_mismatch: bool = config.allow_layer_mismatch,
         allow_type_mismatch: bool = config.allow_type_mismatch,
+        use_mirror: bool = config.connect_use_mirror,
+        use_angle: bool = config.connect_use_angle,
     ) -> None: ...
 
     @overload
@@ -4373,6 +4375,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         allow_width_mismatch: bool = config.allow_width_mismatch,
         allow_layer_mismatch: bool = config.allow_layer_mismatch,
         allow_type_mismatch: bool = config.allow_type_mismatch,
+        use_mirror: bool = config.connect_use_mirror,
+        use_angle: bool = config.connect_use_angle,
     ) -> None: ...
 
     def connect(
@@ -4385,6 +4389,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         allow_width_mismatch: bool = config.allow_width_mismatch,
         allow_layer_mismatch: bool = config.allow_layer_mismatch,
         allow_type_mismatch: bool = config.allow_type_mismatch,
+        use_mirror: bool = config.connect_use_mirror,
+        use_angle: bool = config.connect_use_angle,
     ) -> None:
         """Align port with name `portname` to a port.
 
@@ -4403,6 +4409,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
             allow_width_mismatch: Skip width check between the ports if set.
             allow_layer_mismatch: Skip layer check between the ports if set.
             allow_type_mismatch: Skip port_type check between the ports if set.
+            use_mirror: If False mirror flag does not get applied from the connection.
+            use_angle: If False the angle does not get applied from the connection.
         """
         if isinstance(other, VInstance):
             if other_port_name is None:
@@ -4434,7 +4442,23 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)  # type: ignore[arg-type]
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-        self.trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+        match (use_mirror, use_angle):
+            case True, True:
+                _trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                self.trans = _trans
+            case False, True:
+                dconn_trans = (
+                    kdb.DCplxTrans.M90
+                    if mirror ^ self.trans.mirror
+                    else kdb.DCplxTrans.R180
+                )
+                _dcplx_trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                self.trans = _dcplx_trans
+            case False, False:
+                self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+            case True, False:
+                self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+                self.mirror_y(op.dcplx_trans.disp.y)
 
     def transform(self, trans: kdb.DTrans | kdb.DCplxTrans) -> Self:
         self.trans = kdb.DCplxTrans(trans) * self.trans
@@ -5655,6 +5679,8 @@ class Instance:
         allow_width_mismatch: bool = config.allow_width_mismatch,
         allow_layer_mismatch: bool = config.allow_layer_mismatch,
         allow_type_mismatch: bool = config.allow_type_mismatch,
+        use_mirror: bool = config.connect_use_mirror,
+        use_angle: bool = config.connect_use_angle,
     ) -> None: ...
 
     @overload
@@ -5668,6 +5694,8 @@ class Instance:
         allow_width_mismatch: bool = config.allow_width_mismatch,
         allow_layer_mismatch: bool = config.allow_layer_mismatch,
         allow_type_mismatch: bool = config.allow_type_mismatch,
+        use_mirror: bool = config.connect_use_mirror,
+        use_angle: bool = config.connect_use_angle,
     ) -> None: ...
 
     def connect(
@@ -5680,6 +5708,8 @@ class Instance:
         allow_width_mismatch: bool = config.allow_width_mismatch,
         allow_layer_mismatch: bool = config.allow_layer_mismatch,
         allow_type_mismatch: bool = config.allow_type_mismatch,
+        use_mirror: bool = config.connect_use_mirror,
+        use_angle: bool = config.connect_use_angle,
     ) -> None:
         """Align port with name `portname` to a port.
 
@@ -5698,6 +5728,8 @@ class Instance:
             allow_width_mismatch: Skip width check between the ports if set.
             allow_layer_mismatch: Skip layer check between the ports if set.
             allow_type_mismatch: Skip port_type check between the ports if set.
+            use_mirror: If False mirror flag does not get applied from the connection.
+            use_angle: If False the angle does not get applied from the connection.
         """
         if isinstance(other, Instance):
             if other_port_name is None:
@@ -5730,12 +5762,49 @@ class Instance:
             raise PortTypeMismatch(self, other, p, op)
         if p._dcplx_trans or op._dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-            self._instance.dcplx_trans = (
-                op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
-            )
+            match (use_mirror, use_angle):
+                case True, True:
+                    _dcplx_trans = (
+                        op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                    )
+                    self._instance.dcplx_trans = _dcplx_trans
+                case False, True:
+                    dconn_trans = (
+                        kdb.DCplxTrans.M90
+                        if mirror ^ self.dcplx_trans.mirror
+                        else kdb.DCplxTrans.R180
+                    )
+                    _dcplx_trans = (
+                        op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                    )
+                    self._instance.dcplx_trans = _dcplx_trans
+                case False, False:
+                    self._instance.dcplx_trans = kdb.DCplxTrans(
+                        op.dcplx_trans.disp - p.dcplx_trans.disp
+                    )
+                case True, False:
+                    self._instance.dcplx_trans = kdb.DCplxTrans(
+                        op.dcplx_trans.disp - p.dcplx_trans.disp
+                    )
+                    self.d.mirror_y(op.dcplx_trans.disp.y)
+
         else:
             conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
-            self._instance.trans = op.trans * conn_trans * p.trans.inverted()
+            match (use_mirror, use_angle):
+                case True, True:
+                    _trans = op.trans * conn_trans * p.trans.inverted()
+                    self._instance.trans = _trans
+                case False, True:
+                    conn_trans = (
+                        kdb.Trans.M90 if mirror ^ self.trans.mirror else kdb.Trans.R180
+                    )
+                    _trans = op.trans * conn_trans * p.trans.inverted()
+                    self._instance.trans = _trans
+                case False, False:
+                    self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
+                case True, False:
+                    self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
+                    self.mirror_y(op.trans.disp.y)
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
@@ -5852,12 +5921,12 @@ class Instance:
         return self
 
     def mirror_x(self, x: int = 0) -> Instance:
-        """Mirror the instance at an x-axis."""
+        """Mirror the instance at an y-axis at position x."""
         self.transform(kdb.Trans(2, True, 2 * x, 0))
         return self
 
     def mirror_y(self, y: int = 0) -> Instance:
-        """Mirror the instance at an y-axis."""
+        """Mirror the instance at an x-axis at position y."""
         self.transform(kdb.Trans(0, True, 0, 2 * y))
         return self
 
