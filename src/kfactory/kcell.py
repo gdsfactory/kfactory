@@ -4416,12 +4416,23 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)  # type: ignore[arg-type]
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-        _trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
-        if not use_mirror:
-            _trans.mirror = self.trans.mirror
-        if not use_angle:
-            _trans.angle = self.trans.angle
-        self.dcplx_trans = _trans
+        match (use_mirror, use_angle):
+            case True, True:
+                _trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                self.trans = _trans
+            case False, True:
+                dconn_trans = (
+                    kdb.DCplxTrans.M90
+                    if mirror ^ self.trans.mirror
+                    else kdb.DCplxTrans.R180
+                )
+                _dcplx_trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                self.trans = _dcplx_trans
+            case False, False:
+                self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+            case True, False:
+                self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+                self.mirror_y(op.dcplx_trans.disp.y)
 
     def transform(self, trans: kdb.DTrans | kdb.DCplxTrans) -> Self:
         self.trans = kdb.DCplxTrans(trans) * self.trans
