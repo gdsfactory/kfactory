@@ -5,6 +5,7 @@
 
 ## New
 
+- Add global flags for connection to not carry over rotation or angle [#332](https://github.com/gdsfactory/kfactory/pull/332)
 - Separate function name [#331](https://github.com/gdsfactory/kfactory/pull/331)
 - allow new conf fields [#325](https://github.com/gdsfactory/kfactory/pull/325)
 
