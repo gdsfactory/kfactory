@@ -4412,6 +4412,9 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
             raise PortLayerMismatch(self.cell.kcl, self, other, p, op)  # type: ignore[arg-type]
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)  # type: ignore[arg-type]
+
+        mirror = self.trans.mirror ^ mirror
+
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
         self.trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
 
@@ -5707,6 +5710,8 @@ class Instance:
             raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)
+        mirror = self.trans.mirror ^ mirror
+
         if p._dcplx_trans or op._dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
             self._instance.dcplx_trans = (
