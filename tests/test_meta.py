@@ -150,10 +150,11 @@ def test_nometainfo_read(straight: kf.KCell) -> None:
         assert straight.settings.model_dump() == {
             "length": 1000,
             "width": 500,
-            "function_name": "straight",
             "enclosure": "WGSTD",
             "layer": 0,
         }
+        assert straight.function_name == "straight"
+        assert straight.basename is None
 
 
 def test_info_dump() -> None:

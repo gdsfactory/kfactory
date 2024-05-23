@@ -741,7 +741,8 @@ class KCell:
     insts: Instances
     vinsts: list[VInstance]
     size_info: SizeInfo
-    function_name: str = ""
+    function_name: str | None = None
+    basename: str | None = None
 
     def __init__(
         self,
@@ -787,6 +788,8 @@ class KCell:
 
         self.boundary = None
         self.size_info = SizeInfo(self._kdb_cell.bbox)
+        self.function_name = None
+        self.basename = None
 
     def evaluate_insts(self) -> None:
         """Check all KLayout instances and create kfactory Instances."""
@@ -1795,6 +1798,17 @@ class KCell:
                     f"kfactory:settings_units:{name}", setting_unit, None, True
                 )
             )
+        if self.function_name is not None:
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(
+                    "kfactory:info:function_name", self.function_name, None, True
+                )
+            )
+
+        if self.basename is not None:
+            self.add_meta_info(
+                kdb.LayoutMetaInfo("kfactory:info:basename", self.basename, None, True)
+            )
 
     def get_meta_data(self, meta_format: Literal["v1", "v2"] = "v2") -> None:
         """Read metadata from the KLayout Layout object."""
@@ -1820,6 +1834,12 @@ class KCell:
                 )
             elif meta.name.startswith("kfactory:settings"):
                 settings[meta.name.removeprefix("kfactory:settings:")] = meta.value
+
+            elif meta.name == "kfactory:function_name":
+                self.function_name = meta.value
+
+            elif meta.name == "kfactory:basename":
+                self.basename = meta.value
 
         self._settings = KCellSettings(**settings)
         self._settings_units = KCellSettingsUnits(**settings_units)
@@ -3003,7 +3023,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if set_settings:
                         settings = cell.settings.model_dump()
                         settings_units = cell.settings_units.model_dump()
-                        cell.function_name = basename if basename else f.__name__
+                        cell.function_name = f.__name__
+                        cell.basename = basename
 
                         for param in drop_params:
                             params.pop(param, None)
