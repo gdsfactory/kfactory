@@ -5806,6 +5806,16 @@ class Instance:
             self.transform(t)
         return self
 
+    @property
+    def rotation(self) -> float:
+        """Returns the rotation of the instance in degrees."""
+        return self.dcplx_trans.angle
+
+    @property
+    def x_reflection(self) -> bool:
+        """Returns `True` if the instance is reflected at the x-axis."""
+        return self.dcplx_trans.mirror
+
     def __repr__(self) -> str:
         """Return a string representation of the instance."""
         port_names = [p.name for p in self.ports]
