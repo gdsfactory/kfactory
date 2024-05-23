@@ -491,6 +491,7 @@ def route_bundle(
     allow_layer_mismatch: bool = config.allow_layer_mismatch,
     allow_type_mismatch: bool = config.allow_type_mismatch,
     route_width: int | list[int] | None = None,
+    sort_ports: bool = False,
 ) -> list[OpticalManhattanRoute]:
     """Route a bundle from starting ports to end_ports.
 
@@ -522,6 +523,7 @@ def route_bundle(
         allow_type_mismatch: If True, the type of the ports is ignored
             (config default: False).
         route_width: Width of the route. If None, the width of the ports is used.
+        sort_ports: Automatically sort ports.
     """
     radius = max(
         abs(bend90_cell.ports[0].x - bend90_cell.ports[1].x),
@@ -555,6 +557,7 @@ def route_bundle(
         end_straights=end_straights,
         bboxes=bboxes.copy(),
         widths=widths,
+        sort_ports=sort_ports,
     )
 
     routes: list[OpticalManhattanRoute] = []

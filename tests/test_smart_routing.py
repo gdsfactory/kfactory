@@ -9,7 +9,11 @@ pe: list[kf.Port] = []
 
 c = kf.KCell()
 
+bboxes: list[kf.kdb.Box] = []
+
 # for angle in [1, 2, 3, 0]:
+sb = kf.kdb.Box()
+eb = kf.kdb.Box()
 for angle in [1, 2, 3, 0]:
     for xi in range(5):
         ts = (
@@ -45,7 +49,12 @@ for angle in [1, 2, 3, 0]:
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
-
+        sb += ts.disp.to_p()
+        eb += te.disp.to_p()
+bboxes.append(sb)
+bboxes.append(eb)
+sb = kf.kdb.Box()
+eb = kf.kdb.Box()
 for angle in [1, 2, 3, 0]:
     for xi in range(5):
         ts = (
@@ -81,6 +90,12 @@ for angle in [1, 2, 3, 0]:
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
+        sb += ts.disp.to_p()
+        eb += te.disp.to_p()
+bboxes.append(sb)
+bboxes.append(eb)
+sb = kf.kdb.Box()
+eb = kf.kdb.Box()
 for angle in [-2, -1, 0, 1]:
     for xi in range(5):
         ts = (
@@ -116,8 +131,14 @@ for angle in [-2, -1, 0, 1]:
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
+        sb += ts.disp.to_p()
+        eb += te.disp.to_p()
 
 
+bboxes.append(sb)
+bboxes.append(eb)
+sb = kf.kdb.Box()
+eb = kf.kdb.Box()
 for angle in [0]:
     for xi in range(5):
         ts = (
@@ -153,6 +174,8 @@ for angle in [0]:
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
+        sb += ts.disp.to_p()
+        eb += te.disp.to_p()
 # for angle in [0]:
 #     for xi in range(5):
 #         ts = (
@@ -189,6 +212,10 @@ for angle in [0]:
 #             )
 #         )
 
+bboxes.append(sb)
+bboxes.append(eb)
+
+
 b = kf.cells.circular.bend_circular(width=1, radius=10, layer=kf.kcl.layer(1, 0))
 s = partial(kf.cells.straight.straight_dbu, width=1000, layer=kf.kcl.layer(1, 0))
 
@@ -202,7 +229,8 @@ routes = kf.routing.optical.route_bundle(
     bend90_cell=b,
     separation=2000,
     straight_factory=s,
-    bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))],
+    bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))] + bboxes,
+    sort_ports=True,
 )
 
 # routers = kf.routing.manhattan.route_smart(

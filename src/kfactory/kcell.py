@@ -2888,7 +2888,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         check_instances: bool = True,
         snap_ports: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[_HashedTuple, KCell] | dict[_HashedTuple, KCell] = Cache(
+            maxsize=float("inf")
+        ),
         rec_dicts: bool = False,
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
@@ -2940,9 +2942,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         ) -> Callable[KCellParams, KCell]:
             sig = inspect.signature(f)
 
-            # previously was a KCellCache, but dict should do for most case
-            _cache: Cache[_HashedTuple, KCell] | dict[_HashedTuple, KCell] = cache or {}
-
             @functools.wraps(f)
             def wrapper_autocell(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
@@ -2972,7 +2971,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     params.pop(param, None)
                     param_units.pop(param, None)
 
-                @cachetools.cached(cache=_cache)
+                @cachetools.cached(cache=cache)
                 @functools.wraps(f)
                 def wrapped_cell(
                     **params: KCellParams.args | KCellParams.kwargs,
@@ -3084,11 +3083,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     # `_destroyed() == True`
                     _deleted_cell_hashes: list[_HashedTuple] = [
                         _hash_item
-                        for _hash_item, _cell_item in _cache.items()
+                        for _hash_item, _cell_item in cache.items()
                         if _cell_item._destroyed()
                     ]
                     for _dch in _deleted_cell_hashes:
-                        del _cache[_dch]
+                        del cache[_dch]
                     _cell = wrapped_cell(**params)
 
                 return _cell
