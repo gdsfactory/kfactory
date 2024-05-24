@@ -11,6 +11,7 @@
 
 ## Bug Fixes
 
+- Fix all angle bundle router [#334](https://github.com/gdsfactory/kfactory/pull/334)
 - fix add port [#326](https://github.com/gdsfactory/kfactory/pull/326)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.13.3...v0.13.4
