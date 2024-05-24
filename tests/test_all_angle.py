@@ -44,12 +44,15 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
                 dwidth=1,
             )
         )
-
+    backbone = [kf.kdb.DPoint(550, 550), kf.kdb.DPoint(950, 950)]
+    e = kf.kdb.DEdge(backbone[0], backbone[1])
+    e.shift(100)
+    backbone[1:-1] = [(e.p1 + e.p2.to_v()) / 2]
     kf.routing.aa.optical.route_bundle(
         vc,
         start_ports=start_ports,
         end_ports=end_ports,
-        backbone=[kf.kdb.DPoint(550, 550), kf.kdb.DPoint(950, 950)],
+        backbone=backbone,
         separation=[randint(1, 5) for _ in range(_l)],
         straight_factory=sf,
         bend_factory=bf,

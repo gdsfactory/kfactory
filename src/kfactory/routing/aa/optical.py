@@ -47,6 +47,7 @@ def route(
     bend_ports: tuple[str, str] = ("o1", "o2"),
     straight_ports: tuple[str, str] = ("o1", "o2"),
     tolerance: float = 0.1,
+    angle_tolerance: float = 0.0001,
 ) -> OpticalAllAngleRoute:
     """Places a route."""
     if len(backbone) < 3:
@@ -91,7 +92,7 @@ def route(
         e_a = _angle(e_v)
         _a = (e_a - s_a + 180) % 360 - 180
 
-        if _a != 0:
+        if abs(_a) >= angle_tolerance:
             # create a virtual bend with the angle if non-existent
             if _a not in bends:
                 bends[_a] = bend_factory(width=width, angle=abs(_a))
@@ -117,6 +118,7 @@ def route(
                 )
         else:
             effective_radius = 0
+            _a = 0
 
         # calculate and place the resulting straight if != 0
         _l = (pt - old_pt).length() - effective_radius - start_offset
@@ -462,7 +464,19 @@ def _get_effective_radius(
     xp = e1.cut_point(e2)
 
     if xp is None:
-        return np.inf
+        return float("inf")
+    return (xp - port1.dcplx_trans.disp.to_p()).abs()  # type: ignore[no-any-return]
+
+
+def _get_effective_radius_debug(
+    port1: Port, port2: Port, _p1: kdb.DPoint, _p2: kdb.DPoint
+) -> float:
+    e1 = kdb.DEdge(port1.dcplx_trans * _p1, port1.dcplx_trans * _p2)
+    e2 = kdb.DEdge(port2.dcplx_trans * _p1, port2.dcplx_trans * _p2)
+    xp = e1.cut_point(e2)
+
+    if xp is None:
+        return float("inf")
     return (xp - port1.dcplx_trans.disp.to_p()).abs()  # type: ignore[no-any-return]
 
 
