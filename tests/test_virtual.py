@@ -58,7 +58,6 @@ def test_all_angle_route(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None
     kf.routing.aa.optical.route(
         vc,
         width=5,
-        layer=c.kcl.layer(1, 0),
         backbone=bb,
         straight_factory=partial(
             kf.cells.virtual.straight.virtual_straight,
