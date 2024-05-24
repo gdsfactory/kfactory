@@ -175,10 +175,9 @@ def route(
         _port = s.ports[straight_ports[1]]
         insts.append(s)
 
-    route = OpticalAllAngleRoute(
+    return OpticalAllAngleRoute(
         backbone=backbone, start_port=start_port, end_port=end_port, instances=insts
     )
-    return route
 
 
 @config.logger.catch(reraise=True)
