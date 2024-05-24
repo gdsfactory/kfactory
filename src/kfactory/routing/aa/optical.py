@@ -40,19 +40,39 @@ class BendFactory(Protocol):
 def route(
     c: VKCell | KCell,
     width: float,
-    layer: int,
     backbone: Sequence[kdb.DPoint],
     straight_factory: StraightFactory,
     bend_factory: BendFactory,
     bend_ports: tuple[str, str] = ("o1", "o2"),
     straight_ports: tuple[str, str] = ("o1", "o2"),
     tolerance: float = 0.1,
+    angle_tolerance: float = 0.0001,
 ) -> OpticalAllAngleRoute:
-    """Places a route."""
+    """Places an all-angle route.
+
+    Args:
+        c: The virtual or real KCell to place the route in.
+        width: width of the rotue (passed to straight_factory and bend_factory).
+            The layer the route ports will be extracted from bend port layers.
+        backbone: The points of the route.
+        straight_factory: Function to create straights from length and width.
+            [um]
+        bend_factory: Function to  create bends from length and width. [um]
+        bend_ports: Names of the ports of the bend to use for connecting
+            straights and bends.
+        straight_ports: Names of the ports of the straight to use for connecting
+            straights and bends.
+        tolerance: Allow for a small tolerance when placing bends and straights. If
+            the distance is below this tolerance, the route will be placed.
+        angle_tolerance: If a resulting bend from a point in the backbone would have an
+            angle below this tolerance, the point will be skipped and a straight between
+            the point before and the following will be created.
+    """
     if len(backbone) < 3:
         raise ValueError("All angle routes with less than 3 points are not supported.")
 
-    bends: dict[float, VKCell] = {}
+    bends: dict[float, VKCell] = {90: bend_factory(width=width, angle=90)}
+    layer = bends[90].ports[bend_ports[0]].layer
 
     _p0 = kdb.DPoint(0, 0)
     _p1 = kdb.DPoint(1, 0)
@@ -91,7 +111,7 @@ def route(
         e_a = _angle(e_v)
         _a = (e_a - s_a + 180) % 360 - 180
 
-        if _a != 0:
+        if abs(_a) >= angle_tolerance:
             # create a virtual bend with the angle if non-existent
             if _a not in bends:
                 bends[_a] = bend_factory(width=width, angle=abs(_a))
@@ -117,6 +137,7 @@ def route(
                 )
         else:
             effective_radius = 0
+            _a = 0
 
         # calculate and place the resulting straight if != 0
         _l = (pt - old_pt).length() - effective_radius - start_offset
@@ -154,10 +175,9 @@ def route(
         _port = s.ports[straight_ports[1]]
         insts.append(s)
 
-    route = OpticalAllAngleRoute(
+    return OpticalAllAngleRoute(
         backbone=backbone, start_port=start_port, end_port=end_port, instances=insts
     )
-    return route
 
 
 @config.logger.catch(reraise=True)
@@ -172,6 +192,30 @@ def route_bundle(
     bend_ports: tuple[str, str] = ("o1", "o2"),
     straight_ports: tuple[str, str] = ("o1", "o2"),
 ) -> list[OpticalAllAngleRoute]:
+    """Places all-angle routes.
+
+    Args:
+        c: The virtual or real KCell to place the route in.
+        start_ports: Ports denoting the beginning of each route. Must be
+            sorted in anti-clockwise orientation with regards to the desired
+            bundle order.
+        end_ports: Ports denoting the end of each route. Must be
+            sorted in clockwise orientation with regards to the desired
+            bundle order.
+        backbone: The points of the route. The router will route to the first point
+            and then create a bundle which follows this points as a backbone. Bends
+            leading the first or following the last backbone point are guaranteed to be
+            outside the backbone.
+        separation: Minimal separation between each piece of the bundle.
+            This is only guaranteed from the backbone start to backbone end.
+        straight_factory: Function to create straights from length and width.
+            [um]
+        bend_factory: Function to  create bends from length and width. [um]
+        bend_ports: Names of the ports of the bend to use for connecting
+            straights and bends.
+        straight_ports: Names of the ports of the straight to use for connecting
+            straights and bends.
+    """
     if isinstance(separation, int | float):
         separation = [separation] * len(start_ports)
     pts_list = backbone2bundle(
@@ -315,7 +359,6 @@ def route_bundle(
             route(
                 c,
                 ps.d.width,
-                ps.layer,
                 pts,
                 straight_factory=straight_factory,
                 bend_factory=bend_factory,
@@ -462,7 +505,19 @@ def _get_effective_radius(
     xp = e1.cut_point(e2)
 
     if xp is None:
-        return np.inf
+        return float("inf")
+    return (xp - port1.dcplx_trans.disp.to_p()).abs()  # type: ignore[no-any-return]
+
+
+def _get_effective_radius_debug(
+    port1: Port, port2: Port, _p1: kdb.DPoint, _p2: kdb.DPoint
+) -> float:
+    e1 = kdb.DEdge(port1.dcplx_trans * _p1, port1.dcplx_trans * _p2)
+    e2 = kdb.DEdge(port2.dcplx_trans * _p1, port2.dcplx_trans * _p2)
+    xp = e1.cut_point(e2)
+
+    if xp is None:
+        return float("inf")
     return (xp - port1.dcplx_trans.disp.to_p()).abs()  # type: ignore[no-any-return]
 
 
