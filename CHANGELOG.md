@@ -1,5 +1,27 @@
+<a name="v0.13.4"></a>
+# [v0.13.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.4) - 21 May 2024
+
+# What's Changed
+
+## New
+
+- Add global flags for connection to not carry over rotation or angle [#332](https://github.com/gdsfactory/kfactory/pull/332)
+- Separate function name [#331](https://github.com/gdsfactory/kfactory/pull/331)
+- allow new conf fields [#325](https://github.com/gdsfactory/kfactory/pull/325)
+
+## Bug Fixes
+
+- Fix all angle bundle router [#334](https://github.com/gdsfactory/kfactory/pull/334)
+- fix add port [#326](https://github.com/gdsfactory/kfactory/pull/326)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.13.3...v0.13.4
+
+
+[Changes][v0.13.4]
+
+
 <a name="v0.13.3"></a>
-# [v0.13.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.3) - 15 May 2024
+# [v0.13.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.3) - 21 May 2024
 
 # What's Changed
 
@@ -456,6 +478,7 @@
 [Changes][v0.4.0]
 
 
+[v0.13.4]: https://github.com/gdsfactory/kfactory/compare/v0.13.3...v0.13.4
 [v0.13.3]: https://github.com/gdsfactory/kfactory/compare/v0.13.2...v0.13.3
 [v0.13.2]: https://github.com/gdsfactory/kfactory/compare/v0.13.1...v0.13.2
 [v0.13.1]: https://github.com/gdsfactory/kfactory/compare/v0.13.0...v0.13.1

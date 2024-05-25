@@ -712,14 +712,21 @@ class KCell:
     `_kdb_cell`.
 
     Attributes:
-        kcl: Library object that is the manager of the KLayout
+        yaml_tag: Tag for yaml serialization.
+        ports: Manages the ports of the cell.
         settings: A dictionary containing settings populated by the
             [cell][kfactory.kcell.cell] decorator.
         info: Dictionary for storing additional info if necessary. This is not
             passed to the GDS and therefore not reversible.
+        d: UMKCell object for easy access to the KCell in um units.
+        kcl: Library object that is the manager of the KLayout
+        boundary: Boundary of the cell.
+        insts: List of instances in the cell.
+        vinsts: List of virtual instances in the cell.
+        size_info: Size information of the cell.
         _kdb_cell: Pure KLayout cell object.
         _locked: If set the cell shouldn't be modified anymore.
-        ports: Manages the ports of the cell.
+        function_name: Name of the function that created the cell.
     """
 
     yaml_tag: str = "!KCell"
@@ -734,6 +741,8 @@ class KCell:
     insts: Instances
     vinsts: list[VInstance]
     size_info: SizeInfo
+    function_name: str | None = None
+    basename: str | None = None
 
     def __init__(
         self,
@@ -779,6 +788,8 @@ class KCell:
 
         self.boundary = None
         self.size_info = SizeInfo(self._kdb_cell.bbox)
+        self.function_name = None
+        self.basename = None
 
     def evaluate_insts(self) -> None:
         """Check all KLayout instances and create kfactory Instances."""
@@ -1787,6 +1798,17 @@ class KCell:
                     f"kfactory:settings_units:{name}", setting_unit, None, True
                 )
             )
+        if self.function_name is not None:
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(
+                    "kfactory:info:function_name", self.function_name, None, True
+                )
+            )
+
+        if self.basename is not None:
+            self.add_meta_info(
+                kdb.LayoutMetaInfo("kfactory:info:basename", self.basename, None, True)
+            )
 
     def get_meta_data(self, meta_format: Literal["v1", "v2"] = "v2") -> None:
         """Read metadata from the KLayout Layout object."""
@@ -1812,6 +1834,12 @@ class KCell:
                 )
             elif meta.name.startswith("kfactory:settings"):
                 settings[meta.name.removeprefix("kfactory:settings:")] = meta.value
+
+            elif meta.name == "kfactory:function_name":
+                self.function_name = meta.value
+
+            elif meta.name == "kfactory:basename":
+                self.basename = meta.value
 
         self._settings = KCellSettings(**settings)
         self._settings_units = KCellSettingsUnits(**settings_units)
@@ -2481,8 +2509,8 @@ class KCell:
 
     def create_vinst(self, cell: VKCell | KCell) -> VInstance:
         """Insert the KCell as a VInstance into a VKCell or KCell."""
-        vi = VInstance(self)
-        cell.vinsts.append(vi)
+        vi = VInstance(cell)
+        self.vinsts.append(vi)
         return vi
 
 
@@ -2994,10 +3022,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if set_settings:
                         settings = cell.settings.model_dump()
                         settings_units = cell.settings_units.model_dump()
-                        if basename is not None:
-                            settings["function_name"] = basename
-                        else:
-                            settings["function_name"] = f.__name__
+                        cell.function_name = f.__name__
+                        cell.basename = basename
 
                         for param in drop_params:
                             params.pop(param, None)
@@ -3983,8 +4009,8 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         return self.create_inst(cell=cell)
 
     def create_vinst(self, cell: KCell | VKCell) -> VInstance:
-        vi = VInstance(self)
-        cell.vinsts.append(vi)
+        vi = VInstance(cell)
+        self.vinsts.append(vi)
         return vi
 
     def shapes(self, layer: int) -> VShapes:
@@ -4269,7 +4295,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
                 for layer in _cell.kcl.layer_indexes():
                     _cell.shapes(layer).transform(_trans)
                 for port in self.cell.ports:
-                    _cell.add_port(port.copy(_trans))
+                    _cell.add_port(port=port.copy(_trans))
             else:
                 _cell = cell.kcl[_cell_name]
             _inst = cell << _cell
@@ -4333,6 +4359,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         allow_width_mismatch: bool = config.allow_width_mismatch,
         allow_layer_mismatch: bool = config.allow_layer_mismatch,
         allow_type_mismatch: bool = config.allow_type_mismatch,
+        use_mirror: bool = config.connect_use_mirror,
+        use_angle: bool = config.connect_use_angle,
     ) -> None: ...
 
     @overload
@@ -4346,6 +4374,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         allow_width_mismatch: bool = config.allow_width_mismatch,
         allow_layer_mismatch: bool = config.allow_layer_mismatch,
         allow_type_mismatch: bool = config.allow_type_mismatch,
+        use_mirror: bool = config.connect_use_mirror,
+        use_angle: bool = config.connect_use_angle,
     ) -> None: ...
 
     def connect(
@@ -4358,6 +4388,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         allow_width_mismatch: bool = config.allow_width_mismatch,
         allow_layer_mismatch: bool = config.allow_layer_mismatch,
         allow_type_mismatch: bool = config.allow_type_mismatch,
+        use_mirror: bool = config.connect_use_mirror,
+        use_angle: bool = config.connect_use_angle,
     ) -> None:
         """Align port with name `portname` to a port.
 
@@ -4376,6 +4408,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
             allow_width_mismatch: Skip width check between the ports if set.
             allow_layer_mismatch: Skip layer check between the ports if set.
             allow_type_mismatch: Skip port_type check between the ports if set.
+            use_mirror: If False mirror flag does not get applied from the connection.
+            use_angle: If False the angle does not get applied from the connection.
         """
         if isinstance(other, VInstance):
             if other_port_name is None:
@@ -4407,7 +4441,23 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)  # type: ignore[arg-type]
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-        self.trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+        match (use_mirror, use_angle):
+            case True, True:
+                _trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                self.trans = _trans
+            case False, True:
+                dconn_trans = (
+                    kdb.DCplxTrans.M90
+                    if mirror ^ self.trans.mirror
+                    else kdb.DCplxTrans.R180
+                )
+                _dcplx_trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                self.trans = _dcplx_trans
+            case False, False:
+                self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+            case True, False:
+                self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+                self.mirror_y(op.dcplx_trans.disp.y)
 
     def transform(self, trans: kdb.DTrans | kdb.DCplxTrans) -> Self:
         self.trans = kdb.DCplxTrans(trans) * self.trans
@@ -5628,6 +5678,8 @@ class Instance:
         allow_width_mismatch: bool = config.allow_width_mismatch,
         allow_layer_mismatch: bool = config.allow_layer_mismatch,
         allow_type_mismatch: bool = config.allow_type_mismatch,
+        use_mirror: bool = config.connect_use_mirror,
+        use_angle: bool = config.connect_use_angle,
     ) -> None: ...
 
     @overload
@@ -5641,6 +5693,8 @@ class Instance:
         allow_width_mismatch: bool = config.allow_width_mismatch,
         allow_layer_mismatch: bool = config.allow_layer_mismatch,
         allow_type_mismatch: bool = config.allow_type_mismatch,
+        use_mirror: bool = config.connect_use_mirror,
+        use_angle: bool = config.connect_use_angle,
     ) -> None: ...
 
     def connect(
@@ -5653,6 +5707,8 @@ class Instance:
         allow_width_mismatch: bool = config.allow_width_mismatch,
         allow_layer_mismatch: bool = config.allow_layer_mismatch,
         allow_type_mismatch: bool = config.allow_type_mismatch,
+        use_mirror: bool = config.connect_use_mirror,
+        use_angle: bool = config.connect_use_angle,
     ) -> None:
         """Align port with name `portname` to a port.
 
@@ -5671,6 +5727,8 @@ class Instance:
             allow_width_mismatch: Skip width check between the ports if set.
             allow_layer_mismatch: Skip layer check between the ports if set.
             allow_type_mismatch: Skip port_type check between the ports if set.
+            use_mirror: If False mirror flag does not get applied from the connection.
+            use_angle: If False the angle does not get applied from the connection.
         """
         if isinstance(other, Instance):
             if other_port_name is None:
@@ -5703,12 +5761,49 @@ class Instance:
             raise PortTypeMismatch(self, other, p, op)
         if p._dcplx_trans or op._dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-            self._instance.dcplx_trans = (
-                op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
-            )
+            match (use_mirror, use_angle):
+                case True, True:
+                    _dcplx_trans = (
+                        op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                    )
+                    self._instance.dcplx_trans = _dcplx_trans
+                case False, True:
+                    dconn_trans = (
+                        kdb.DCplxTrans.M90
+                        if mirror ^ self.dcplx_trans.mirror
+                        else kdb.DCplxTrans.R180
+                    )
+                    _dcplx_trans = (
+                        op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                    )
+                    self._instance.dcplx_trans = _dcplx_trans
+                case False, False:
+                    self._instance.dcplx_trans = kdb.DCplxTrans(
+                        op.dcplx_trans.disp - p.dcplx_trans.disp
+                    )
+                case True, False:
+                    self._instance.dcplx_trans = kdb.DCplxTrans(
+                        op.dcplx_trans.disp - p.dcplx_trans.disp
+                    )
+                    self.d.mirror_y(op.dcplx_trans.disp.y)
+
         else:
             conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
-            self._instance.trans = op.trans * conn_trans * p.trans.inverted()
+            match (use_mirror, use_angle):
+                case True, True:
+                    _trans = op.trans * conn_trans * p.trans.inverted()
+                    self._instance.trans = _trans
+                case False, True:
+                    conn_trans = (
+                        kdb.Trans.M90 if mirror ^ self.trans.mirror else kdb.Trans.R180
+                    )
+                    _trans = op.trans * conn_trans * p.trans.inverted()
+                    self._instance.trans = _trans
+                case False, False:
+                    self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
+                case True, False:
+                    self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
+                    self.mirror_y(op.trans.disp.y)
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
@@ -5825,12 +5920,12 @@ class Instance:
         return self
 
     def mirror_x(self, x: int = 0) -> Instance:
-        """Mirror the instance at an x-axis."""
+        """Mirror the instance at an y-axis at position x."""
         self.transform(kdb.Trans(2, True, 2 * x, 0))
         return self
 
     def mirror_y(self, y: int = 0) -> Instance:
-        """Mirror the instance at an y-axis."""
+        """Mirror the instance at an x-axis at position y."""
         self.transform(kdb.Trans(0, True, 0, 2 * y))
         return self
 
@@ -6444,7 +6539,7 @@ class Ports:
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> Iterable[Port]:
+    ) -> list[Port]:
         """Filter ports by name.
 
         Args:
@@ -6465,7 +6560,7 @@ class Ports:
             ports = filter_direction(ports, angle)
         if orientation is not None:
             ports = filter_orientation(ports, orientation)
-        return ports
+        return list(ports)
 
     def hash(self) -> bytes:
         """Get a hash of the port to compare."""
@@ -6551,7 +6646,7 @@ class InstancePorts:
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> Iterable[Port]:
+    ) -> list[Port]:
         """Filter ports by name.
 
         Args:
@@ -6572,7 +6667,7 @@ class InstancePorts:
             ports = filter_direction(ports, angle)
         if orientation is not None:
             ports = filter_orientation(ports, orientation)
-        return ports
+        return list(ports)
 
     @config.logger.catch(reraise=True)
     def __getitem__(

@@ -129,6 +129,7 @@ class Settings(
         arbitrary_types_allowed=True,
         env_prefix="kfactory_",
         env_nested_delimiter="_",
+        extra="allow",
     )
 
     n_threads: int = get_affinity()
@@ -144,6 +145,8 @@ class Settings(
     allow_width_mismatch: bool = False
     allow_layer_mismatch: bool = False
     allow_type_mismatch: bool = False
+    connect_use_mirror: bool = True
+    connect_use_angle: bool = True
     """The format of the saving of metadata.
 
     v1: Transformations and other KLayout objects are stored as a string. In
