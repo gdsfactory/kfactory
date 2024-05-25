@@ -561,23 +561,44 @@ def route_bundle(
     )
 
     routes: list[OpticalManhattanRoute] = []
-    for ps, pe, router, route_width in zip(start_ports, end_ports, routers, widths):
-        routes.append(
-            place90(
-                c,
-                p1=ps,
-                p2=pe,
-                pts=router.start.pts,
-                straight_factory=straight_factory,
-                bend90_cell=bend90_cell,
-                taper_cell=taper_cell,
-                min_straight_taper=min_straight_taper,
-                allow_small_routes=place_allow_small_routes,
-                port_type=place_port_type,
-                allow_width_mismatch=allow_width_mismatch,
-                route_width=route_width,
+    if sort_ports:
+        start_mapping = {sp.trans.disp.to_p(): sp for sp in start_ports}
+        end_mapping = {ep.trans.disp.to_p(): ep for ep in end_ports}
+        for router in routers:
+            routes.append(
+                place90(
+                    c,
+                    p1=start_mapping[router.start.pts[0]],
+                    p2=end_mapping[router.start.pts[-1]],
+                    pts=router.start.pts,
+                    straight_factory=straight_factory,
+                    bend90_cell=bend90_cell,
+                    taper_cell=taper_cell,
+                    min_straight_taper=min_straight_taper,
+                    allow_small_routes=place_allow_small_routes,
+                    port_type=place_port_type,
+                    allow_width_mismatch=allow_width_mismatch,
+                    route_width=router.width,
+                )
             )
-        )
+    else:
+        for router, ps, pe in zip(routers, start_ports, end_ports):
+            routes.append(
+                place90(
+                    c,
+                    p1=ps,
+                    p2=pe,
+                    pts=router.start.pts,
+                    straight_factory=straight_factory,
+                    bend90_cell=bend90_cell,
+                    taper_cell=taper_cell,
+                    min_straight_taper=min_straight_taper,
+                    allow_small_routes=place_allow_small_routes,
+                    port_type=place_port_type,
+                    allow_width_mismatch=allow_width_mismatch,
+                    route_width=router.width,
+                )
+            )
 
     collision_edges: dict[str, kdb.Edges] = {}
     inter_route_collisions = kdb.Edges()

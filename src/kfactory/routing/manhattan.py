@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from dataclasses import InitVar, dataclass, field
-from functools import partial
 from typing import Literal, Protocol
 
 import numpy as np
@@ -571,6 +570,7 @@ def route_smart(
     widths: list[int] | None = None,
     sort_ports: bool = False,
     waypoints: list[kdb.Point] | None = None,
+    split_back: bool = True,
 ) -> list[ManhattanRouter]:
     length = len(start_ports)
 
@@ -661,191 +661,198 @@ def route_smart(
                 b += ts.disp.to_p()
             end_bundles[b] = default_end_bundle
 
-        # matching bundles together
-        start_bundle_matches: dict[kdb.Box, list[tuple[kdb.Box, int]]] = defaultdict(
-            list
-        )
-        end_bundle_matches: dict[kdb.Box, list[tuple[kdb.Box, int]]] = defaultdict(list)
+        # try to match start_bundles with end_bundles which have the same size
 
-        def dist(b1: kdb.Box, b2: kdb.Box) -> float:
-            return (b2.center() - b1.center()).length()
+        matches: list[tuple[kdb.Box, kdb.Box, int]] = []
+        allowed_matches: list[tuple[kdb.Box, int]] = [
+            (b, len(bundle)) for b, bundle in end_bundles.items()
+        ]
 
-        for box, potential_bundle in sorted(
-            start_bundles.items(),
-            key=lambda item: (item[0].p1.y, item[0].p1.x),
+        for box, s_bundle in sorted(
+            start_bundles.items(), key=lambda item: (item[0].left, item[0].bottom)
         ):
-            end_boxes = sorted(end_bundles, key=partial(dist, b2=box))
-            _l = len(start_bundles[box])
-            for eb in end_boxes:
-                if end_bundle_matches[eb]:
-                    d = len(end_bundles[eb]) - sum(
-                        item[1] for item in end_bundle_matches[eb]
-                    )
-                else:
-                    d = len(end_bundles[eb])
-                if d > 0:
-                    if _l >= d:
-                        end_bundle_matches[eb].append((box, _l))
-                        start_bundle_matches[box].append((eb, _l))
-                        break
-                    else:
-                        end_bundle_matches[eb].append((box, d))
-                        start_bundle_matches[box].append((eb, d))
-                        _l = _l - d
+            bl = len(s_bundle)
+            bc = box.center()
+            potential_matches = [x for x in allowed_matches if x[1] == bl]
 
-        # sorted_start_trans: dict[kdb.Box, list[kdb.Trans]] = {}
-        sorted_end_trans: dict[kdb.Box, list[kdb.Trans]] = {}
-        vx = kdb.DVector(1, 0)
-        vy = kdb.DVector(0, 1)
-        start_ts = []
-        end_ts = []
-        for end_box, start_bundle_match in end_bundle_matches.items():
-            ec = end_box.center()
-            v = kdb.DVector()
-            for sb, d in start_bundle_match:
-                dv = sb.center() - ec
-                if abs(dv.x) > abs(dv.y):
-                    if dv.x > 0:
-                        _v = vx
-                    else:
-                        _v = -vx
-                else:
-                    if dv.y > 0:
-                        _v = vy
-                    else:
-                        _v = -vy
-                v += _v * d
-            v /= len(start_bundles[end_box])
-            avx = abs(v.x)
-            avy = abs(v.y)
-            if avx > avy:
-                if v.x > 0:
-                    primary_direction = 0
-                    vp = v.x
-                else:
-                    primary_direction = 2
-                    vp = -v.x
-                if v.y > 0:
-                    vs = v.y
-                else:
-                    vs = -v.y
+            if potential_matches:
+                match = min(
+                    potential_matches,
+                    key=lambda x: (bc - x[0].center()).abs(),
+                )
+                matches.append((box, match[0], bl))
+                allowed_matches.remove(match)
             else:
-                if v.y > 0:
-                    primary_direction = 1
-                    vp = v.y
-                else:
-                    primary_direction = 3
-                    vp = v.y
-                if v.x > 0:
-                    vs = v.x
-                else:
-                    vs = -v.x
-
-            if 5 * vs <= vp:
-                sorted_end_trans[end_box] = _sort_transformations(
-                    transformations=start_bundles[end_box],
-                    target_side=primary_direction,
-                    box=end_box,
-                    split=0,
-                    clockwise=True,
+                raise ValueError(
+                    "The sorting algorithm currently doesn't support if multiple "
+                    "bundles are conflicting with each other. Offending bundle at"
+                    " starting port positions "
+                    f"{box.left=},{box.bottom=},{box.right=},{box.top=}[dbu]"
                 )
-            elif (vs - vp) % 4 == 1:
-                sorted_end_trans[end_box] = _sort_transformations(
-                    transformations=start_bundles[end_box],
-                    target_side=primary_direction,
-                    box=end_box,
-                    split=-1,
-                    clockwise=True,
-                )
-            else:
-                sorted_end_trans[end_box] = _sort_transformations(
-                    transformations=start_bundles[end_box],
-                    target_side=primary_direction,
-                    box=end_box,
-                    split=1,
-                    clockwise=True,
-                )
-        for start_box, end_bundle_match in start_bundle_matches.items():
-            sc = start_box.center()
-            v = kdb.DVector()
-            for eb, d in end_bundle_match:
-                dv = eb.center() - sc
-                if abs(dv.x) > abs(dv.y):
-                    if dv.x > 0:
-                        _v = vx
-                    else:
-                        _v = -vx
-                else:
-                    if dv.y > 0:
-                        _v = vy
-                    else:
-                        _v = -vy
-                v += _v * d
-            v /= len(start_bundles[start_box])
-            avx = abs(v.x)
-            avy = abs(v.y)
-            if avx > avy:
-                if v.x > 0:
-                    primary_direction = 0
-                    vp = v.x
-                else:
-                    primary_direction = 2
-                    vp = -v.x
-                if v.y > 0:
-                    vs = v.y
-                else:
-                    vs = -v.y
-            else:
-                if v.y > 0:
-                    primary_direction = 1
-                    vp = v.y
-                else:
-                    primary_direction = 3
-                    vp = v.y
-                if v.x > 0:
-                    vs = v.x
-                else:
-                    vs = -v.x
-
-            if 5 * vs <= vp:
-                sorted_start_trans = _sort_transformations(
-                    transformations=start_bundles[start_box],
-                    target_side=primary_direction,
-                    box=start_box,
-                    split=0,
-                    clockwise=True,
-                )
-            elif (vs - vp) % 4 == 1:
-                sorted_start_trans = _sort_transformations(
-                    transformations=start_bundles[start_box],
-                    target_side=primary_direction,
-                    box=start_box,
-                    split=-1,
-                    clockwise=True,
-                )
-            else:
-                sorted_start_trans = _sort_transformations(
-                    transformations=start_bundles[start_box],
-                    target_side=primary_direction,
-                    box=start_box,
-                    split=1,
-                    clockwise=True,
-                )
-            start_ts.extend(sorted_start_trans)
-            for eb, d in end_bundle_match:
-                start_index = 0
-                for sb, d in end_bundle_matches[eb]:
-                    if sb == start_box:
-                        break
-                    start_index += d
-                else:
-                    continue
-                end_ts.extend(sorted_end_trans[eb][start_index : start_index + d])
-
-        # TODO find matching bundles and look from both sides
-        # if they match in length on both sides, just place them
-        # if not check which matching box bundle should start with the placing
-        # start from there
+            start_ts = []
+            end_ts = []
+            for start_box, end_box, _bl in matches:
+                end_bundle = end_bundles[end_box]
+                start_bundle = start_bundles[start_box]
+                v = start_box.center() - end_box.center()
+                end_angle = end_bundle[0].angle
+                match end_angle:
+                    case 0:
+                        if v.x < 0:
+                            end_ts.extend(
+                                _sort_transformations(
+                                    end_bundle,
+                                    target_side=0,
+                                    box=end_box,
+                                    split=1,
+                                    clockwise=False,
+                                )
+                            )
+                            start_ts.extend(
+                                _sort_transformations(
+                                    transformations=start_bundle,
+                                    target_side=0,
+                                    box=start_box,
+                                    split=1,
+                                    clockwise=True,
+                                )
+                            )
+                        else:
+                            end_ts.extend(
+                                _sort_transformations(
+                                    transformations=end_bundle,
+                                    target_side=0,
+                                    box=end_box,
+                                    split=1,
+                                    clockwise=False,
+                                )
+                            )
+                            start_ts.extend(
+                                _sort_transformations(
+                                    transformations=start_bundle,
+                                    target_side=2,
+                                    box=start_box,
+                                    split=1,
+                                    clockwise=True,
+                                )
+                            )
+                    case 1:
+                        if v.y < 0:
+                            end_ts.extend(
+                                _sort_transformations(
+                                    end_bundle,
+                                    target_side=1,
+                                    box=end_box,
+                                    split=1,
+                                    clockwise=False,
+                                )
+                            )
+                            start_ts.extend(
+                                _sort_transformations(
+                                    transformations=start_bundle,
+                                    target_side=1,
+                                    box=start_box,
+                                    split=1,
+                                    clockwise=True,
+                                )
+                            )
+                        else:
+                            end_ts.extend(
+                                _sort_transformations(
+                                    transformations=end_bundle,
+                                    target_side=1,
+                                    box=end_box,
+                                    split=1,
+                                    clockwise=False,
+                                )
+                            )
+                            start_ts.extend(
+                                _sort_transformations(
+                                    transformations=start_bundle,
+                                    target_side=3,
+                                    box=start_box,
+                                    split=1,
+                                    clockwise=True,
+                                )
+                            )
+                    case 2:
+                        if v.x > 0:
+                            end_ts.extend(
+                                _sort_transformations(
+                                    end_bundle,
+                                    target_side=2,
+                                    box=end_box,
+                                    split=1,
+                                    clockwise=False,
+                                )
+                            )
+                            start_ts.extend(
+                                _sort_transformations(
+                                    transformations=start_bundle,
+                                    target_side=2,
+                                    box=start_box,
+                                    split=1,
+                                    clockwise=True,
+                                )
+                            )
+                        else:
+                            end_ts.extend(
+                                _sort_transformations(
+                                    transformations=end_bundle,
+                                    target_side=2,
+                                    box=end_box,
+                                    split=1,
+                                    clockwise=False,
+                                )
+                            )
+                            start_ts.extend(
+                                _sort_transformations(
+                                    transformations=start_bundle,
+                                    target_side=0,
+                                    box=start_box,
+                                    split=1,
+                                    clockwise=True,
+                                )
+                            )
+                    case 3:
+                        if v.y > 0:
+                            end_ts.extend(
+                                _sort_transformations(
+                                    end_bundle,
+                                    target_side=3,
+                                    box=end_box,
+                                    split=1,
+                                    clockwise=False,
+                                )
+                            )
+                            start_ts.extend(
+                                _sort_transformations(
+                                    transformations=start_bundle,
+                                    target_side=3,
+                                    box=start_box,
+                                    split=1,
+                                    clockwise=True,
+                                )
+                            )
+                        else:
+                            end_ts.extend(
+                                _sort_transformations(
+                                    transformations=end_bundle,
+                                    target_side=3,
+                                    box=end_box,
+                                    split=1,
+                                    clockwise=False,
+                                )
+                            )
+                            start_ts.extend(
+                                _sort_transformations(
+                                    transformations=start_bundle,
+                                    target_side=1,
+                                    box=start_box,
+                                    split=1,
+                                    clockwise=True,
+                                )
+                            )
 
     all_routers: list[ManhattanRouter] = []
 
@@ -863,44 +870,18 @@ def route_smart(
             )
         )
 
-    # make sure the endports are one bank and check whether we need to turn around
-    if len(all_routers) > 0:
-        router = all_routers[0]
-        tv = router.end.tv.dup()
-        for router in all_routers:
-            tv += router.end.tv
-        if tv.x < 0:
-            end_box = kdb.Box()
-            _end_routers: list[ManhattanRouterSide] = []
-            for r in all_routers:
-                _end_routers.append(r.end)
-                end_box += r.end.t.disp.to_p()
-
-            _bbox = box_region.interacting(kdb.Region(end_box)).bbox() + end_box
-            if tv.y < 0:
-                _bbox = _route_to_side(
-                    routers=_end_routers,
-                    clockwise=False,
-                    bbox=_bbox,
-                    separation=separation,
-                )
-            else:
-                _bbox = _route_to_side(
-                    routers=_end_routers,
-                    clockwise=True,
-                    bbox=_bbox,
-                    separation=separation,
-                )
-
     router_bboxes: list[kdb.Box] = [
         kdb.Box(router.start.t.disp.to_p(), router.end.t.disp.to_p())
         for router in all_routers
     ]
-    complete_bbox = router_bboxes[0].dup().enlarged(separation + all_routers[0].width)
+    complete_bbox = router_bboxes[
+        0
+    ].dup()  # .enlarged(separation + all_routers[0].width)
     bundled_bboxes: list[kdb.Box] = []
     bundled_routers: list[list[ManhattanRouter]] = [[all_routers[0]]]
     bundle = bundled_routers[0]
     bundle_bbox = complete_bbox.dup()
+
     for router, bbox in zip(all_routers[1:], router_bboxes[1:]):
         dbrbox = bbox.enlarged(separation + router.width // 2)
         overlap_box = dbrbox & bundle_bbox
@@ -963,7 +944,6 @@ def route_smart(
                 box_region.interacting(kdb.Region(start_bbox)).bbox() + start_bbox
             )
             end_bbox = box_region.interacting(kdb.Region(end_bbox)).bbox() + end_bbox
-
         disp_to_bbox = kdb.Trans(-angle, False, 0, 0) * (
             start_bbox.center().to_v() - router_bundle[0].end.t.disp
         )
@@ -1037,12 +1017,11 @@ def route_smart(
                         break
                     routers_anticlockwise.extend(new_routers)
                     angle = new_angle
-
             route_to_bbox([router.start for router in sorted_routers], total_bbox)
             if waypoints is None:
                 route_loosely(sorted_routers, separation=separation, end_bbox=end_bbox)
             else:
-                pass
+                route_loosely(sorted_routers, separation=separation, end_bbox=end_bbox)
 
         else:
             routers = router_groups[0][1]
@@ -1078,9 +1057,9 @@ def route_smart(
                     )
             if waypoints is None:
                 route_to_bbox([router.start for router in router_bundle], total_bbox)
-                route_loosely(routers, separation=separation, end_bbox=end_bbox)
             else:
-                pass
+                route_to_bbox([router.start for router in router_bundle], total_bbox)
+            route_loosely(routers, separation=separation, end_bbox=end_bbox)
 
     return all_routers
 
@@ -1217,17 +1196,17 @@ def vec_dir(vec: kdb.Vector) -> int:
             raise ValueError(f"Non-manhattan vectors aren't supported {vec}")
 
 
-def _sort_routers(routes: Sequence[ManhattanRouter]) -> Sequence[ManhattanRouter]:
-    angle = routes[0].end.t.angle
+def _sort_routers(routers: Sequence[ManhattanRouter]) -> Sequence[ManhattanRouter]:
+    angle = routers[0].end.t.angle
     match angle:
         case 0:
-            return sorted(routes, key=lambda route: -route.end.t.disp.y)
+            return sorted(routers, key=lambda route: -route.end.t.disp.y)
         case 1:
-            return sorted(routes, key=lambda route: route.end.t.disp.x)
+            return sorted(routers, key=lambda route: route.end.t.disp.x)
         case 2:
-            return sorted(routes, key=lambda route: route.end.t.disp.y)
+            return sorted(routers, key=lambda route: route.end.t.disp.y)
         case _:
-            return sorted(routes, key=lambda route: -route.end.t.disp.x)
+            return sorted(routers, key=lambda route: -route.end.t.disp.x)
 
 
 def _sort_transformations(
@@ -1263,10 +1242,10 @@ def _sort_transformations(
                         )
                     case 1:
                         start_transformations = _sort_trans_bank(
-                            [t for t in back if t.disp.y < box.center().y]
+                            [t for t in back if t.disp.x < box.center().x]
                         )
                         end_transformations = _sort_trans_bank(
-                            [t for t in back if t.disp.y >= box.center().y]
+                            [t for t in back if t.disp.x >= box.center().x]
                         )
                     case 2:
                         start_transformations = _sort_trans_bank(
@@ -1277,16 +1256,16 @@ def _sort_transformations(
                         )
                     case 3:
                         start_transformations = _sort_trans_bank(
-                            [t for t in back if t.disp.y < box.center().y]
+                            [t for t in back if t.disp.x > box.center().x]
                         )
                         end_transformations = _sort_trans_bank(
-                            [t for t in back if t.disp.y >= box.center().y]
+                            [t for t in back if t.disp.x >= box.center().x]
                         )
                 end_transformations.reverse()
             case 1:
                 start_transformations = []
                 end_transformations = _sort_trans_bank(back)
-                end_transformations.reverse()
+                # end_transformations.reverse()
     for angle in [-1, 0, 1]:
         start_transformations.extend(
             _sort_trans_bank(trans_by_dir[(target_side + angle) % 4])
@@ -1303,13 +1282,13 @@ def _sort_trans_bank(transformations: Sequence[kdb.Trans]) -> list[kdb.Trans]:
         angle = transformations[0].angle
         match angle:
             case 0:
-                return list(sorted(transformations, key=lambda t: -t.disp.y))
-            case 1:
-                return list(sorted(transformations, key=lambda t: t.disp.x))
-            case 2:
                 return list(sorted(transformations, key=lambda t: t.disp.y))
-            case _:
+            case 1:
                 return list(sorted(transformations, key=lambda t: -t.disp.x))
+            case 2:
+                return list(sorted(transformations, key=lambda t: -t.disp.y))
+            case _:
+                return list(sorted(transformations, key=lambda t: t.disp.x))
     else:
         return []
 
@@ -1322,6 +1301,7 @@ def _route_to_side(
     until_bbox: bool = False,
 ) -> kdb.Box:
     # bbox = bbox.enlarged(separation // 2)
+    bbox = bbox.dup()
 
     def _sort_route(router: ManhattanRouterSide) -> int:
         y = (kdb.Trans(-router.t.angle, False, 0, 0) * router.t.disp).y

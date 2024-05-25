@@ -11,7 +11,6 @@ c = kf.KCell()
 
 bboxes: list[kf.kdb.Box] = []
 
-# for angle in [1, 2, 3, 0]:
 sb = kf.kdb.Box()
 eb = kf.kdb.Box()
 for angle in [1, 2, 3, 0]:
@@ -70,15 +69,18 @@ for angle in [1, 2, 3, 0]:
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
-        # te = kf.kdb.Trans(0, False, -500_000, 200_000 - 50_000 * angle) * kf.kdb.Trans(
+        # te = kf.kdb.Trans(0, False, 500_000, 200_000 - 50_000 * angle) * kf.kdb.Trans(
         #     randint(0, 100), randint(0, 100) - xi * 10_000
         # )
-        # te = kf.kdb.Trans(2, False, 500_000, -000_000 + 50_000 * angle) * kf.kdb.Trans(
-        #     randint(0, 100), randint(0, 100) - xi * 10_000
+        # te = kf.kdb.Trans(2, False, 500_000, -75_000 + 50_000 * angle) * kf.kdb.Trans(
+        #     randint(0, 100), randint(0, 100) - xi * 5_000
         # )
-        te = kf.kdb.Trans(1, False, -200_000 + 50_000 * angle, -200_000) * kf.kdb.Trans(
+        te = kf.kdb.Trans(3, False, 150_000 - 50_000 * angle, 200_000) * kf.kdb.Trans(
             randint(0, 100), randint(0, 100) - xi * 10_000
-        )
+        )  # orig
+        # te = kf.kdb.Trans(3, False, 50_000 + 50_000 * angle, 700_000) * kf.kdb.Trans(
+        #     randint(0, 100), randint(0, 100) - xi * 10_000
+        # )  # orig
         # te = kf.kdb.Trans(3, False, 500_000 - 50_000 * angle, 500_000) * kf.kdb.Trans(
         #     randint(0, 100), randint(0, 100) - xi * 10_000
         # )
@@ -114,9 +116,12 @@ for angle in [-2, -1, 0, 1]:
         # te = kf.kdb.Trans(0, False, 1_500_000, 200_000 - 50_000 * angle) * kf.kdb.Trans(
         #     randint(0, 100), randint(0, 100) - xi * 10_000
         # )
-        te = kf.kdb.Trans(2, False, 2_500_000, 00_000 + 50_000 * angle) * kf.kdb.Trans(
+        te = kf.kdb.Trans(2, False, 2_500_000, 100_000 + 50_000 * angle) * kf.kdb.Trans(
             randint(0, 100), randint(0, 100) - xi * 10_000
         )
+        # te = kf.kdb.Trans(2, False, 2_500_000, 00_000 + 50_000 * angle) * kf.kdb.Trans(
+        #     randint(0, 100), randint(0, 100) - xi * 10_000
+        # )  # fails
         # te = kf.kdb.Trans(
         #     1, False, 1_500_000 + 50_000 * angle, -200_000
         # ) * kf.kdb.Trans(randint(0, 100), randint(0, 100) - xi * 10_000)
@@ -221,14 +226,18 @@ s = partial(kf.cells.straight.straight_dbu, width=1000, layer=kf.kcl.layer(1, 0)
 
 c.shapes(kf.kcl.layer(5, 0)).insert(kf.kdb.Box(1_900_000, -102_000, 2_100_000, 175_000))
 c.shapes(kf.kcl.layer(6, 0)).insert(kf.kdb.Box(-1_300_000, 300_000, -900_000, 450_000))
+for box in bboxes:
+    c.shapes(kf.kcl.layer(10, 0)).insert(box)
 
 routes = kf.routing.optical.route_bundle(
     c,
     start_ports=ps,
+    # start_ports=list(reversed(ps)),
     end_ports=pe,
     bend90_cell=b,
     separation=2000,
     straight_factory=s,
+    # bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))],  # + bboxes,
     bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))] + bboxes,
     sort_ports=True,
 )
