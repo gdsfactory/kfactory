@@ -1,5 +1,20 @@
-<a name="v0.13.4"></a>
-# [v0.13.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.4) - 21 May 2024
+<a name="v0.14.1"></a>
+# [v0.14.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.14.1) - 25 May 2024
+
+# What's Changed
+
+## New
+
+- Add `route_smart` and `route_bundle` port sort [#335](https://github.com/gdsfactory/kfactory/pull/335)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.14.0...v0.14.1
+
+
+[Changes][v0.14.1]
+
+
+<a name="v0.14.0"></a>
+# [v0.14.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.14.0) - 24 May 2024
 
 # What's Changed
 
@@ -14,10 +29,10 @@
 - Fix all angle bundle router [#334](https://github.com/gdsfactory/kfactory/pull/334)
 - fix add port [#326](https://github.com/gdsfactory/kfactory/pull/326)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.13.3...v0.13.4
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.13.3...v0.14.0
 
 
-[Changes][v0.13.4]
+[Changes][v0.14.0]
 
 
 <a name="v0.13.3"></a>
@@ -478,7 +493,8 @@
 [Changes][v0.4.0]
 
 
-[v0.13.4]: https://github.com/gdsfactory/kfactory/compare/v0.13.3...v0.13.4
+[v0.14.1]: https://github.com/gdsfactory/kfactory/compare/v0.14.0...v0.14.1
+[v0.14.0]: https://github.com/gdsfactory/kfactory/compare/v0.13.3...v0.14.0
 [v0.13.3]: https://github.com/gdsfactory/kfactory/compare/v0.13.2...v0.13.3
 [v0.13.2]: https://github.com/gdsfactory/kfactory/compare/v0.13.1...v0.13.2
 [v0.13.1]: https://github.com/gdsfactory/kfactory/compare/v0.13.0...v0.13.1
