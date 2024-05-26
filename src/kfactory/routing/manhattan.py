@@ -618,17 +618,16 @@ def route_smart(
         default_start_bundle: list[kdb.Trans] = []
         start_bundles: dict[kdb.Box, list[kdb.Trans]] = defaultdict(list)
 
-        index = 0
+        b = kdb.Box()
         for ts in start_ts:
             p = ts.disp.to_p()
-            b = bboxes[index]
             if b.contains(p):
                 start_bundles[b].append(ts)
             else:
-                for i, b in enumerate(bboxes):
-                    if b.contains(p):
-                        start_bundles[b].append(ts)
-                        index = i
+                for i, _b in enumerate(bboxes):
+                    if _b.contains(p):
+                        start_bundles[_b].append(ts)
+                        b = _b
                         break
                 else:
                     default_start_bundle.append(ts)
@@ -641,17 +640,15 @@ def route_smart(
         default_end_bundle: list[kdb.Trans] = []
         end_bundles: dict[kdb.Box, list[kdb.Trans]] = defaultdict(list)
 
-        index = 0
         for ts in end_ts:
             p = ts.disp.to_p()
-            b = bboxes[index]
             if b.contains(p):
                 end_bundles[b].append(ts)
             else:
-                for i, b in enumerate(bboxes):
-                    if b.contains(p):
-                        end_bundles[b].append(ts)
-                        index = i
+                for i, _b in enumerate(bboxes):
+                    if _b.contains(p):
+                        end_bundles[_b].append(ts)
+                        b = _b
                         break
                 else:
                     default_end_bundle.append(ts)
