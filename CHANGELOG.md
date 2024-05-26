@@ -7,6 +7,10 @@
 
 - Add `route_smart` and `route_bundle` port sort [#335](https://github.com/gdsfactory/kfactory/pull/335)
 
+## Bug Fixes
+
+- Fix route_bundle requiring a non-empty list of bounding boxes [#336](https://github.com/gdsfactory/kfactory/pull/336)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.14.0...v0.14.1
 
 
