@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- Fix metaformat [#338](https://github.com/gdsfactory/kfactory/pull/338)
 - Fix single bundle case for route_bundle [#337](https://github.com/gdsfactory/kfactory/pull/337)
 - Fix route_bundle requiring a non-empty list of bounding boxes [#336](https://github.com/gdsfactory/kfactory/pull/336)
 
