@@ -1505,6 +1505,7 @@ class KCell:
         register_cells: bool = False,
         test_merge: bool = True,
         update_kcl_meta_data: Literal["overwrite", "skip", "drop"] = "drop",
+        meta_format: Literal["v1", "v2"] = config.meta_format,
     ) -> list[int]:
         """Read a GDS file into the existing KCell.
 
@@ -1524,6 +1525,9 @@ class KCell:
                 overwrite: overwrite existing info entries
                 skip: keep existing info values
                 drop: don't add any new info
+            meta_format: How to read KCell metainfo from the gds. `v1` had stored port
+                transformations as strings, never versions have them stored and loaded
+                in their native KLayout formats.
         """
         # see: wait for KLayout update https://github.com/KLayout/klayout/issues/1609
         config.logger.critical(
@@ -1810,7 +1814,9 @@ class KCell:
                 kdb.LayoutMetaInfo("kfactory:info:basename", self.basename, None, True)
             )
 
-    def get_meta_data(self, meta_format: Literal["v1", "v2"] = "v2") -> None:
+    def get_meta_data(
+        self, meta_format: Literal["v1", "v2"] = config.meta_format
+    ) -> None:
         """Read metadata from the KLayout Layout object."""
         port_dict: dict[str, Any] = {}
         settings: dict[str, MetaData] = {}
@@ -1890,9 +1896,9 @@ class KCell:
                         info=_d.get("info", {}),
                     )
                     if trans:
-                        _port.trans = trans
+                        _port.trans = trans.from_s()
                     elif dcplx_trans:
-                        _port.dcplx_trans = dcplx_trans
+                        _port.dcplx_trans = dcplx_trans.from_s()
 
                     self.add_port(_port, keep_mirror=True)
             case _:
@@ -3534,6 +3540,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         register_cells: bool = False,
         test_merge: bool = True,
         update_kcl_meta_data: Literal["overwrite", "skip", "drop"] = "skip",
+        meta_format: Literal["v1", "v2"] = config.meta_format,
     ) -> kdb.LayerMap:
         """Read a GDS file into the existing Layout.
 
@@ -3555,6 +3562,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 overwrite: overwrite existing info entries
                 skip: keep existing info values
                 drop: don't add any new info
+            meta_format: How to read KCell metainfo from the gds. `v1` had stored port
+                transformations as strings, never versions have them stored and loaded
+                in their native KLayout formats.
         """
         layout_b = kdb.Layout()
         layout_b.read(str(filename), options)
