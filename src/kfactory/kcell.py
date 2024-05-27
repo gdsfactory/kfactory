@@ -5347,7 +5347,7 @@ class Port:
     def hash(self) -> bytes:
         """Hash of Port."""
         h = sha3_512()
-        name = self.name if self.name else ""
+        name = self.name or ""
         h.update(name.encode("UTF-8"))
         h.update(self.trans.hash().to_bytes(8, "big"))
         h.update(self.width.to_bytes(8, "big"))
