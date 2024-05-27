@@ -5313,10 +5313,9 @@ class Port:
 
     @dangle.setter
     def dangle(self, value: float) -> None:
-        if value in [0, 90, 180, 270]:
-            if self._trans:
-                self._trans.angle = int(value / 90)
-                return
+        if value in [0, 90, 180, 270] and self._trans:
+            self._trans.angle = round(value / 90)
+            return
 
         trans = self.dcplx_trans
         trans.angle = value
