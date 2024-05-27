@@ -1,7 +1,11 @@
-<a name="v0.14.1"></a>
-# [v0.14.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.14.1) - 25 May 2024
+<a name="v0.15.0"></a>
+# [v0.15.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.15.0) - 25 May 2024
 
 # What's Changed
+
+## Breaking
+
+- Change to  `d{key}` instead of `d.{key}` [#339](https://github.com/gdsfactory/kfactory/pull/339)
 
 ## New
 
@@ -13,10 +17,14 @@
 - Fix single bundle case for route_bundle [#337](https://github.com/gdsfactory/kfactory/pull/337)
 - Fix route_bundle requiring a non-empty list of bounding boxes [#336](https://github.com/gdsfactory/kfactory/pull/336)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.14.0...v0.14.1
+## Documentation
+
+- Change to  `d{key}` instead of `d.{key}` [#339](https://github.com/gdsfactory/kfactory/pull/339)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.14.0...v0.15.0
 
 
-[Changes][v0.14.1]
+[Changes][v0.15.0]
 
 
 <a name="v0.14.0"></a>
@@ -499,7 +507,7 @@
 [Changes][v0.4.0]
 
 
-[v0.14.1]: https://github.com/gdsfactory/kfactory/compare/v0.14.0...v0.14.1
+[v0.15.0]: https://github.com/gdsfactory/kfactory/compare/v0.14.0...v0.15.0
 [v0.14.0]: https://github.com/gdsfactory/kfactory/compare/v0.13.3...v0.14.0
 [v0.13.3]: https://github.com/gdsfactory/kfactory/compare/v0.13.2...v0.13.3
 [v0.13.2]: https://github.com/gdsfactory/kfactory/compare/v0.13.1...v0.13.2
