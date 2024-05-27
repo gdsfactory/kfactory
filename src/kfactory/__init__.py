@@ -59,7 +59,6 @@ __all__ = [
     "cells",
     "config",
     "constant",
-    "default_save",
     "dpolygon_from_array",
     "enclosure",
     "flexgrid",

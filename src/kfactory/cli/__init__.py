@@ -10,14 +10,12 @@ import typer
 
 from .. import __version__
 from .runshow import run, show
-from .sea import app as sea
 
 app = typer.Typer(name="kf")
 
 
 app.command()(run)
 app.command()(show)
-app.add_typer(sea)
 
 
 @app.callback(invoke_without_command=True)
