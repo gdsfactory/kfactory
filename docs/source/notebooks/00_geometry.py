@@ -385,7 +385,7 @@ c
 # %% [markdown]
 # ## Rotate instance
 #
-# You can rotate in degrees using `Instance.d.rotate` or in multiples of 90 deg.
+# You can rotate in degrees using `Instance.drotate` or in multiples of 90 deg.
 
 
 # %%
@@ -393,7 +393,7 @@ c = kf.KCell("mirror_example3")
 bend = kf.cells.euler.bend_euler(width=0.5, radius=1, layer=0)
 b1 = c << bend
 b2 = c << bend
-b2.d.rotate(90)
+b2.drotate(90)
 c
 
 # %%
