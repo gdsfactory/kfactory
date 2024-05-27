@@ -83,11 +83,11 @@ print(f"{s2.dbbox().width()=}")
 
 # %%
 # The ports of the default kcl also have different dbu dimensions, but are the same in um
-print(f"{s_default.ports=}")
-print(f"{s2.ports=}")
+print(f"{s_default.ports.pformat()=}")
+print(f"{s2.ports.pformat()=}")
 # But in um they are the same
-print(f"{[port.d for port in s_default.ports]=}")
-print(f"{[port.d for port in s2.ports]=}")
+print(f"{s_default.ports.pformat(unit='um')}")
+print(f"{s2.ports.pformat(unit='um')}")
 
 # %%
 # Both can be instantiated into the same KCell

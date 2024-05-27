@@ -15,28 +15,28 @@ def test_instance_center(LAYER: kf.LayerEnum) -> None:
 
     ref1.center = ref2.center
     ref2.center = ref1.center + kdb.Point(0, 1000).to_v()
-    ref2.d.move((0, 10))
+    ref2.dmove((0, 10))
 
 
 def test_instance_d_move(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
     ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
 
-    ref.d.movex(10)
-    ref.d.movex(10.0)
+    ref.dmovex(10)
+    ref.dmovex(10.0)
 
-    ref.d.movey(10)
-    ref.d.movey(10.0)
-    ref.d.movex(10).movey(10)
-    ref.d.rotate(45).movey(10)
+    ref.dmovey(10)
+    ref.dmovey(10.0)
+    ref.dmovex(10).movey(10)
+    ref.drotate(45).movey(10)
 
-    ref.d.xmin = 0
-    ref.d.xmax = 0
-    ref.d.ymin = 0
-    ref.d.ymax = 0
+    ref.dxmin = 0
+    ref.dxmax = 0
+    ref.dymin = 0
+    ref.dymax = 0
 
-    ref.d.mirror_y(0)
-    ref.d.mirror_x(0)
+    ref.dmirror_y(0)
+    ref.dmirror_x(0)
 
 
 def test_mirror(LAYER: kf.LayerEnum) -> None:
@@ -44,7 +44,7 @@ def test_mirror(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
     b = kf.cells.euler.bend_euler(width=1, radius=10, layer=LAYER.WG)
 
-    b1 = c << b
+    c << b
     b2 = c << b
     disp = kdb.Trans(5000, 5000)
     # mp1 = kf.kdb.Point(-10000, 10000)
@@ -62,14 +62,14 @@ def test_dmirror(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
     b = kf.cells.euler.bend_euler(width=1, radius=10, layer=LAYER.WG)
 
-    b1 = c << b
+    c << b
     b2 = c << b
     disp = kdb.Trans(5000, 5000).to_dtype(c.kcl.dbu)
     # mp1 = kf.kdb.Point(-10000, 10000)
     mp1 = kf.kdb.Point(50000, 25000).to_dtype(c.kcl.dbu)
     mp2 = -mp1
 
-    b2.d.mirror(disp * mp1, disp * mp2)
+    b2.dmirror(disp * mp1, disp * mp2)
 
     c.shapes(LAYER.WG).insert(kf.kdb.DEdge(mp1, mp2).transformed(disp))
     c.show()

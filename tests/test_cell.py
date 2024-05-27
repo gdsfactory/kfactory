@@ -62,7 +62,7 @@ def test_ports_cell(LAYER: kf.LayerEnum) -> None:
         layer=LAYER.WG,
     )
     assert c["o1"]
-    assert 'o1' in c.ports
+    assert "o1" in c.ports
 
 
 def test_ports_instance(LAYER: kf.LayerEnum) -> None:
@@ -76,16 +76,16 @@ def test_ports_instance(LAYER: kf.LayerEnum) -> None:
     c2 = kf.KCell()
     ref = c2 << c
     assert c["o1"]
-    assert 'o1' in c.ports
+    assert "o1" in c.ports
     assert ref["o1"]
-    assert 'o1' in ref.ports
+    assert "o1" in ref.ports
 
 
 def test_getter(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
     c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
     assert c.y == 0
-    assert c.d.y == 0
+    assert c.dy == 0
 
 
 def test_array(straight: kf.KCell) -> None:
@@ -149,13 +149,13 @@ def test_info() -> None:
 def test_flatten(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
     _ = c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
-    assert len(c.insts) == 1, 'c.insts should have 1 inst after adding a cell'
+    assert len(c.insts) == 1, "c.insts should have 1 inst after adding a cell"
     c.flatten()
-    assert len(c.insts) == 0, 'c.insts should have 0 insts after flatten()'
+    assert len(c.insts) == 0, "c.insts should have 0 insts after flatten()"
 
 
 def test_size_info(LAYER: kf.LayerEnum) -> None:
     c = kf.KCell()
     ref = c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
     assert ref.size_info.ne[0] == 10000
-    assert ref.d.size_info.ne[0] == 10
+    assert ref.dsize_info.ne[0] == 10

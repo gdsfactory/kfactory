@@ -51,7 +51,7 @@ def test_drotation(
     wg1 = c << straight
     wg2 = c << straight
 
-    wg2.d.rotate(30, center=center)
+    wg2.drotate(30, center=center)
 
     if center:
         c.shapes(LAYER.WGCLAD).insert(

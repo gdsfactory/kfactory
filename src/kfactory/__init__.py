@@ -13,23 +13,24 @@ import klayout.db as kdb
 import klayout.lay as lay
 import klayout.rdb as rdb
 from .kcell import (
-    KCell,
-    Instance,
-    Port,
-    Ports,
-    cell,
-    kcl,
     Info,
+    Instance,
     KCLayout,
-    save_layout_options,
+    KCell,
     KCellSettings,
     LayerEnum,
     LayerStack,
-    show,
-    polygon_from_array,
-    dpolygon_from_array,
+    Port,
+    Ports,
     VKCell,
     VInstance,
+    cell,
+    dpolygon_from_array,
+    kcl,
+    polygon_from_array,
+    pprint_ports,
+    save_layout_options,
+    show,
 )
 from . import cells, enclosure, kf_types, placer, port, routing, technology, utils
 from .conf import config
@@ -72,6 +73,7 @@ __all__ = [
     "placer",
     "polygon_from_array",
     "port",
+    "pprint_ports",
     "rdb",
     "routing",
     "save_layout_options",

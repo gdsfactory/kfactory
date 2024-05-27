@@ -220,7 +220,7 @@ def route_bundle(
         separation = [separation] * len(start_ports)
     pts_list = backbone2bundle(
         backbone=backbone,
-        port_widths=[p.d.width for p in start_ports],
+        port_widths=[p.dwidth for p in start_ports],
         spacings=separation,
     )
 
@@ -358,7 +358,7 @@ def route_bundle(
         routes.append(
             route(
                 c,
-                ps.d.width,
+                ps.dwidth,
                 pts,
                 straight_factory=straight_factory,
                 bend_factory=bend_factory,
