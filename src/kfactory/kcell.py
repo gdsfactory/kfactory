@@ -3390,7 +3390,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """Create a new LAYER enum based on the pdk's kcl."""
         return layerenum_from_dict(name=name, layers=layers, kcl=self)
 
-    def __getattr__(self, name):  # type: ignore[no-untyped-def]
+    def __getattr__(self, name: str) -> Any:
         """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
         if name != "_name":
             return self.layout.__getattribute__(name)
@@ -5415,7 +5415,7 @@ class Instance:
         """
         return self.ports[key]
 
-    def __getattr__(self, name):  # type: ignore[no-untyped-def]
+    def __getattr__(self, name: str) -> Any:
         """If we don't have an attribute, get it from the instance."""
         return getattr(self._instance, name)
 
