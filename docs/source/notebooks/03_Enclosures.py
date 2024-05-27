@@ -65,9 +65,9 @@ def two_bends(
     c = kf.KCell()
     b1 = c << kf.cells.euler.bend_euler(radius=radius, width=width, layer=layer)
     b2 = c << kf.cells.euler.bend_euler(radius=radius, width=width, layer=layer)
-    b2.d.rotate(90)
-    b2.d.movey(-11)
-    b2.d.movex(+9)
+    b2.drotate(90)
+    b2.dmovey(-11)
+    b2.dmovex(+9)
 
     if enclosure:
         enclosure.apply_minkowski_tiled(c)
