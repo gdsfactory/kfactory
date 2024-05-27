@@ -18,21 +18,9 @@ repos:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
         exclude: 'changelog\.d/.*|CHANGELOG\.md'
-  - repo: https://github.com/twisted/towncrier
-    rev: 23.11.0
-    hooks:
-      - id: towncrier-check
-        files: $changelog\.d/
-        args: ['--keep']
-  - repo: https://github.com/twisted/towncrier
-    rev: 23.11.0  # run 'pre-commit autoupdate' to update
-    hooks:
-      - id: towncrier-update
-        files: $changelog\.d/
-        args: ['--keep']
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.4.1
+    rev: v0.4.5
     hooks:
       # Run the linter.
       - id: ruff
@@ -47,7 +35,7 @@ repos:
         files: .ipynb
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.6
+    rev: v2.3.0
     hooks:
       - id: codespell
         additional_dependencies:
@@ -60,7 +48,7 @@ repos:
         # ignore all tests, not just tests data
         exclude: ^tests/
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.9.0'  # Use the sha / tag you want to point at
+    rev: 'v1.10.0'  # Use the sha / tag you want to point at
     hooks:
       - id: mypy
         additional_dependencies: [pydantic,numpy,types-cachetools,types-requests,klayout,pydantic-settings,loguru,typer,pytest]

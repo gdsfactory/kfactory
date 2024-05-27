@@ -42,7 +42,7 @@ dev = [
   "gitpython",
   "pylsp-mypy",
   "python-lsp-server[all]",
-  "ruff-lsp",
+  "ruff",
   "types-cachetools",
   "pytest",
   "kfactory[git]",

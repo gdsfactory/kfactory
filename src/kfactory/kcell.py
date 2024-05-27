@@ -5363,7 +5363,7 @@ class Port:
             f"{ln}, port_type: {self.port_type})"
         )
 
-    def print(self) -> None:
+    def print(self, type: Literal["dbu", "um", None] = None) -> None:
         """Print the port pretty."""
         config.console.print(pprint_ports([self]))
 
@@ -6456,9 +6456,15 @@ class Ports:
         """Representation of the Ports as strings."""
         return repr([repr(p) for p in self._ports])
 
-    def print(self) -> None:
+    def print(self, unit: Literal["dbu", "um", None] = None) -> None:
         """Pretty print ports."""
-        config.console.print(pprint_ports(self))
+        config.console.print(pprint_ports(self, unit=unit))
+
+    def pformat(self, unit: Literal["dbu", "um", None] = None) -> str:
+        """Pretty print ports."""
+        with config.console.capture() as capture:
+            config.console.print(pprint_ports(self, unit=unit))
+        return capture.get()
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
@@ -6860,13 +6866,13 @@ def update_default_trans(
 
 
 def pprint_ports(
-    ports: Iterable[Port], type: Literal["dbu", "um", None] = None
+    ports: Iterable[Port], unit: Literal["dbu", "um", None] = None
 ) -> rich.table.Table:
     """Print ports as a table.
 
     Args:
         ports: The ports which should be printed.
-        type: Define the print type of the ports. If None, any port
+        unit: Define the print type of the ports. If None, any port
             which can be represented accurately by a dbu representation
             will be printed in dbu otherwise in um. 'dbu'/'um' will force
             the printing to enforce one or the other representation
@@ -6882,7 +6888,7 @@ def pprint_ports(
     table.add_column("Mirror")
     table.add_column("Info")
 
-    match type:
+    match unit:
         case None:
             for port in ports:
                 if port._trans is not None:
