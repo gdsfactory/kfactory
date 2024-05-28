@@ -69,7 +69,7 @@ class LogLevel(str, Enum):
 class CHECK_INSTANCES(str, Enum):
     ERROR = "error"
     FLATTEN = "flatten"
-    VINSTANCE = "vinstance"
+    VINSTANCES = "vinstances"
     NONE = "none"
 
 

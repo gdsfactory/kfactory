@@ -3112,7 +3112,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         case CHECK_INSTANCES.FLATTEN:
                             if any(inst.is_complex() for inst in cell.each_inst()):
                                 cell.flatten()
-                        case CHECK_INSTANCES.VINSTANCE:
+                        case CHECK_INSTANCES.VINSTANCES:
                             if any(inst.is_complex() for inst in cell.each_inst()):
                                 complex_insts = [
                                     inst
