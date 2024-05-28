@@ -50,7 +50,7 @@ from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec, Self  # noqa: UP035
 
 from . import __version__, kdb, lay, rdb
-from .conf import LogLevel, config
+from .conf import CHECK_INSTANCES, LogLevel, config
 from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
@@ -775,7 +775,7 @@ class KCell:
         kcl = kcl or _get_default_kcl()
         self.kcl = kcl
         self.insts = Instances()
-        self.vinsts = []
+        self.vinsts: list[VInstance] = []
         self._settings = KCellSettings()
         self._settings_units = KCellSettingsUnits()
         self.info: Info = Info()
@@ -2956,7 +2956,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         set_settings: bool = True,
         set_name: bool = True,
         check_ports: bool = True,
-        check_instances: bool = True,
+        check_instances: CHECK_INSTANCES = config.check_instances,
         snap_ports: bool = True,
         rec_dicts: bool = False,
         basename: str | None = None,
@@ -2974,7 +2974,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         set_settings: bool = True,
         set_name: bool = True,
         check_ports: bool = True,
-        check_instances: bool = True,
+        check_instances: CHECK_INSTANCES = config.check_instances,
         snap_ports: bool = True,
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
@@ -3003,6 +3003,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 a warning if there are.
             check_instances: Check for any complex instances. A complex instance is a an
                 instance that has a magnification != 1 or non-90° rotation.
+                Depending on the setting, an error is raised, the cell is flattened,
+                a VInstance is created instead of a regular instance, or they are
+                ignored.
             snap_ports: Snap the centers of the ports onto the grid
                 (only x/y, not angle).
             add_port_layers: Add special layers of
@@ -3098,13 +3101,31 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     for name, value in cell.info:
                         cell_info[name] = value
                     cell.info = Info(**cell_info)
-                    if check_instances:
-                        if any(inst.is_complex() for inst in cell.each_inst()):
-                            raise ValueError(
-                                "Most foundries will not allow off-grid instances. "
-                                "Please flatten them or add check_instances=False to"
-                                " the decorator."
-                            )
+                    match check_instances:
+                        case CHECK_INSTANCES.ERROR:
+                            if any(inst.is_complex() for inst in cell.each_inst()):
+                                raise ValueError(
+                                    "Most foundries will not allow off-grid instances. "
+                                    "Please flatten them or add check_instances=False"
+                                    " to the decorator."
+                                )
+                        case CHECK_INSTANCES.FLATTEN:
+                            if any(inst.is_complex() for inst in cell.each_inst()):
+                                cell.flatten()
+                        case CHECK_INSTANCES.VINSTANCE:
+                            if any(inst.is_complex() for inst in cell.each_inst()):
+                                complex_insts = [
+                                    inst
+                                    for inst in cell.each_inst()
+                                    if inst.is_complex()
+                                ]
+                                for inst in complex_insts:
+                                    vinst = cell.create_vinst(
+                                        self[inst.cell.cell_index()]
+                                    )
+                                    vinst.trans = inst.dcplx_trans
+                                    inst.delete()
+                    cell.insert_vinsts()
                     if snap_ports:
                         for port in cell.ports:
                             if port._dcplx_trans:
@@ -4360,8 +4381,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
                 _cell.flatten(False)
                 for layer in _cell.kcl.layer_indexes():
                     _cell.shapes(layer).transform(_trans)
-                for port in self.cell.ports:
-                    _cell.add_port(port=port.copy(_trans))
+                for port in _cell.ports:
+                    port.dcplx_trans = _trans * port.dcplx_trans
             else:
                 _cell = cell.kcl[_cell_name]
             _inst = cell << _cell

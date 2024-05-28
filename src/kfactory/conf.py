@@ -66,6 +66,13 @@ class LogLevel(str, Enum):
     CRITICAL = "CRITICAL"
 
 
+class CHECK_INSTANCES(str, Enum):
+    ERROR = "error"
+    FLATTEN = "flatten"
+    VINSTANCE = "vinstance"
+    NONE = "none"
+
+
 class LogFilter(BaseModel):
     """Filter certain messages by log level or regex.
 
@@ -102,9 +109,7 @@ def get_affinity() -> int:
         return threads
 
 
-class Settings(
-    BaseSettings,
-):
+class Settings(BaseSettings):
     """KFactory settings object.
 
     Attrs:
@@ -145,6 +150,7 @@ class Settings(
     allow_width_mismatch: bool = False
     allow_layer_mismatch: bool = False
     allow_type_mismatch: bool = False
+    check_instances: CHECK_INSTANCES = CHECK_INSTANCES.ERROR
     connect_use_mirror: bool = True
     connect_use_angle: bool = True
     """The format of the saving of metadata.
