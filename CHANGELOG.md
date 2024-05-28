@@ -5,6 +5,7 @@
 
 ## New
 
+- add route_width to `optical.route` [#342](https://github.com/gdsfactory/kfactory/pull/342)
 - Add enum for handling check_instances [#341](https://github.com/gdsfactory/kfactory/pull/341)
 - add center to SizeInfo [#340](https://github.com/gdsfactory/kfactory/pull/340)
 
