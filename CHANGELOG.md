@@ -1,3 +1,19 @@
+<a name="v0.15.1"></a>
+# [v0.15.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.15.1) - 28 May 2024
+
+# What's Changed
+
+## New
+
+- Add enum for handling check_instances [#341](https://github.com/gdsfactory/kfactory/pull/341)
+- add center to SizeInfo [#340](https://github.com/gdsfactory/kfactory/pull/340)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.15.0...v0.15.1
+
+
+[Changes][v0.15.1]
+
+
 <a name="v0.15.0"></a>
 # [v0.15.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.15.0) - 27 May 2024
 
@@ -507,6 +523,7 @@
 [Changes][v0.4.0]
 
 
+[v0.15.1]: https://github.com/gdsfactory/kfactory/compare/v0.15.0...v0.15.1
 [v0.15.0]: https://github.com/gdsfactory/kfactory/compare/v0.14.0...v0.15.0
 [v0.14.0]: https://github.com/gdsfactory/kfactory/compare/v0.13.3...v0.14.0
 [v0.13.3]: https://github.com/gdsfactory/kfactory/compare/v0.13.2...v0.13.3
