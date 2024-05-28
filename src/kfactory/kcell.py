@@ -216,6 +216,11 @@ class SizeInfo:
         c = self._bf().center()
         return (c.x, c.y)
 
+    @property
+    def center(self) -> tuple[int, int]:
+        c = self._bf().center()
+        return (c.x, c.y)
+
 
 class DSizeInfo:
     def __init__(self, bbox: Callable[..., kdb.DBox]) -> None:
@@ -300,6 +305,11 @@ class DSizeInfo:
 
     @property
     def cc(self) -> tuple[float, float]:
+        c = self._bf().center()
+        return (c.x, c.y)
+
+    @property
+    def center(self) -> tuple[float, float]:
         c = self._bf().center()
         return (c.x, c.y)
 
