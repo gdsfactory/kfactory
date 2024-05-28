@@ -203,6 +203,7 @@ def route(
     port_type: str = "optical",
     allow_small_routes: bool = False,
     route_kwargs: dict[str, Any] | None = {},
+    route_width: int | None = None,
     min_straight_taper: int = 0,
     allow_width_mismatch: bool = config.allow_width_mismatch,
     allow_layer_mismatch: bool = config.allow_layer_mismatch,
@@ -228,6 +229,7 @@ def route(
         allow_small_routes: Don't throw an error if two corners cannot be safely placed
             due to small space and place them anyway.
         route_kwargs: Additional keyword arguments for the route_path_function.
+        route_width: Width of the route. If None, the width of the ports is used.
         min_straight_taper: Minimum straight [dbu] before attempting to place tapers.
         allow_width_mismatch: If True, the width of the ports is ignored
             (config default: False).
@@ -387,6 +389,7 @@ def route(
                             allow_width_mismatch=allow_width_mismatch,
                             allow_layer_mismatch=allow_layer_mismatch,
                             allow_type_mismatch=allow_type_mismatch,
+                            route_width=route_width,
                         )
                         j = i - 1
                         start_port = bend180.ports[b180p2.name]
@@ -411,6 +414,7 @@ def route(
                             port_type=port_type,
                             allow_small_routes=allow_small_routes,
                             allow_width_mismatch=allow_width_mismatch,
+                            route_width=route_width,
                         )
                         j = i - 1
                         start_port = bend180.ports[b180p1.name]
@@ -431,6 +435,7 @@ def route(
             port_type=port_type,
             allow_small_routes=allow_small_routes,
             allow_width_mismatch=allow_width_mismatch,
+            route_width=route_width,
         )
 
     else:
@@ -466,6 +471,7 @@ def route(
             min_straight_taper=min_straight_taper,
             port_type=port_type,
             allow_width_mismatch=allow_width_mismatch,
+            route_width=route_width,
         )
     return route
 
