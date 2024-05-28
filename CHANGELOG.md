@@ -9,6 +9,10 @@
 - Add enum for handling check_instances [#341](https://github.com/gdsfactory/kfactory/pull/341)
 - add center to SizeInfo [#340](https://github.com/gdsfactory/kfactory/pull/340)
 
+## Bug Fixes
+
+- fix basename and function_name metainfo [#343](https://github.com/gdsfactory/kfactory/pull/343)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.15.0...v0.15.1
 
 
