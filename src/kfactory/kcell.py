@@ -1815,13 +1815,13 @@ class KCell:
         if self.function_name is not None:
             self.add_meta_info(
                 kdb.LayoutMetaInfo(
-                    "kfactory:info:function_name", self.function_name, None, True
+                    "kfactory:function_name", self.function_name, None, True
                 )
             )
 
         if self.basename is not None:
             self.add_meta_info(
-                kdb.LayoutMetaInfo("kfactory:info:basename", self.basename, None, True)
+                kdb.LayoutMetaInfo("kfactory:basename", self.basename, None, True)
             )
 
     def get_meta_data(
