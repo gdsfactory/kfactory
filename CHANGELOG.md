@@ -5,12 +5,14 @@
 
 ## New
 
+- Add `multi` option to fill and fix bugs [#344](https://github.com/gdsfactory/kfactory/pull/344)
 - add route_width to `optical.route` [#342](https://github.com/gdsfactory/kfactory/pull/342)
 - Add enum for handling check_instances [#341](https://github.com/gdsfactory/kfactory/pull/341)
 - add center to SizeInfo [#340](https://github.com/gdsfactory/kfactory/pull/340)
 
 ## Bug Fixes
 
+- Add `multi` option to fill and fix bugs [#344](https://github.com/gdsfactory/kfactory/pull/344)
 - fix basename and function_name metainfo [#343](https://github.com/gdsfactory/kfactory/pull/343)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.15.0...v0.15.1
