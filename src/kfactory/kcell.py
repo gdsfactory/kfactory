@@ -6019,7 +6019,12 @@ class Instance:
     def drotate(
         self,
         angle: float,
-        center: kdb.DPoint | tuple[float, float] | Port | str | None = None,
+        center: kdb.DPoint
+        | kdb.DVector
+        | tuple[float, float]
+        | Port
+        | str
+        | None = None,
     ) -> Instance:
         """Rotate instance in degrees.
 
@@ -6030,13 +6035,16 @@ class Instance:
                 if a tuple is given, the center is the tuple.
         """
         if center:
+            _center: kdb.DVector | kdb.DPoint
             if isinstance(center, str):
-                center = self.ports[center].dcenter
-            if isinstance(center, Port):
-                center = center.dcenter
-            if isinstance(center, tuple | list):
-                center = kdb.DPoint(*center)
-            t = kdb.DTrans(center.to_v())
+                _center = self.ports[center].dcplx_trans.disp
+            elif isinstance(center, Port):
+                _center = center.dcplx_trans.disp
+            elif isinstance(center, tuple | list):
+                _center = kdb.DVector(*center)
+            else:
+                _center = center
+            t = kdb.DTrans(_center)  # type: ignore[arg-type]
             self.transform(t.inverted())
         self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
         if center:
