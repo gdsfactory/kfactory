@@ -11,6 +11,10 @@
 
 - `mirror` and `dmirror` M90 by default [#350](https://github.com/gdsfactory/kfactory/pull/350)
 
+## Bug Fixes
+
+- Improve drotate [#349](https://github.com/gdsfactory/kfactory/pull/349)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.15.2...v0.16.0
 
 
