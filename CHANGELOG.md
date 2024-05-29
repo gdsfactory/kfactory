@@ -9,6 +9,7 @@
 
 ## New
 
+- Add hash to long automatic cell name [#346](https://github.com/gdsfactory/kfactory/pull/346)
 - `mirror` and `dmirror` M90 by default [#350](https://github.com/gdsfactory/kfactory/pull/350)
 
 ## Bug Fixes
