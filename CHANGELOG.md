@@ -14,6 +14,7 @@
 
 ## Bug Fixes
 
+- fix typo [#351](https://github.com/gdsfactory/kfactory/pull/351)
 - Improve drotate [#349](https://github.com/gdsfactory/kfactory/pull/349)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.15.2...v0.16.0
