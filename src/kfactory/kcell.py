@@ -11,7 +11,6 @@ ports and other inf from instances.
 from __future__ import annotations
 
 import functools
-import hashlib
 import importlib
 import importlib.util
 import inspect
@@ -6843,7 +6842,7 @@ def get_cell_name(
         name += f"_{dict2name(None, **kwargs)}"
 
     if len(name) > max_cellname_length:
-        name_hash = hashlib.md5(name.encode()).hexdigest()[:8]
+        name_hash = sha3_512(name.encode()).hexdigest()[:8]
         name = f"{name[:(max_cellname_length - 9)]}_{name_hash}"
 
     return name
