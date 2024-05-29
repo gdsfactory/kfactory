@@ -4644,7 +4644,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         return self
 
     def mirror(
-        self, p1: kdb.DPoint = kdb.DPoint(1, 0), p2: kdb.DPoint = kdb.DPoint(0, 0)
+        self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
     ) -> Self:
         """Mirror the instance at a line."""
         mirror_v = p2 - p1
@@ -6056,7 +6056,7 @@ class Instance:
         return self
 
     def dmirror(
-        self, p1: kdb.DPoint = kdb.DPoint(1, 0), p2: kdb.DPoint = kdb.DPoint(0, 0)
+        self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
     ) -> Instance:
         """Mirror the instance at a line."""
         mirror_v = p2 - p1
