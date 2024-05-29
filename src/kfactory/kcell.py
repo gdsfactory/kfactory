@@ -6016,9 +6016,17 @@ class Instance:
             self.transform(kdb.DTrans(0.0, float(destination - origin)))
         return self
 
-    def drotate(self, angle: float, center: kdb.DPoint | None = None) -> Instance:
+    def drotate(
+        self,
+        angle: float,
+        center: kdb.DPoint | tuple[float, float] | Port | None = None,
+    ) -> Instance:
         """Rotate instance in degrees."""
         if center:
+            if isinstance(center, Port):
+                center = center.dcenter
+            if isinstance(center, tuple | list):
+                center = kdb.DPoint(*center)
             t = kdb.DTrans(center.to_v())
             self.transform(t.inverted())
         self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
