@@ -6831,12 +6831,19 @@ def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
     return clean_name(_label)
 
 
-def get_cell_name(cell_type: str, **kwargs: dict[str, Any]) -> str:
+def get_cell_name(
+    cell_type: str, max_cellname_length: int | None = None, **kwargs: dict[str, Any]
+) -> str:
     """Convert a cell to a string."""
     name = cell_type
+    max_cellname_length = max_cellname_length or config.max_cellname_length
 
     if kwargs:
         name += f"_{dict2name(None, **kwargs)}"
+
+    if len(name) > max_cellname_length:
+        name_hash = sha3_512(name.encode()).hexdigest()[:8]
+        name = f"{name[:(max_cellname_length - 9)]}_{name_hash}"
 
     return name
 
