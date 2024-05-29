@@ -5682,9 +5682,9 @@ class Instance:
             use_angle: If False the angle does not get applied from the connection.
         """
         if allow_width_mismatch is None:
-            allow_layer_mismatch = config.allow_layer_mismatch
-        if allow_width_mismatch is None:
             allow_width_mismatch = config.allow_width_mismatch
+        if allow_layer_mismatch is None:
+            allow_layer_mismatch = config.allow_layer_mismatch
         if allow_type_mismatch is None:
             allow_type_mismatch = config.allow_type_mismatch
         if use_mirror is None:
