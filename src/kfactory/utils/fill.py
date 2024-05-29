@@ -85,7 +85,7 @@ def fill_tiled(
     fill_regions: Iterable[tuple[kdb.Region, int]] = [],
     exclude_layers: Iterable[tuple[LayerEnum | int, int]] = [],
     exclude_regions: Iterable[tuple[kdb.Region, int]] = [],
-    n_threads: int = config.n_threads,
+    n_threads: int | None = None,
     tile_size: tuple[float, float] | None = None,
     row_step: kdb.DVector | None = None,
     col_step: kdb.DVector | None = None,
@@ -115,6 +115,8 @@ def fill_tiled(
         tile_border: The tile border to consider for excludes
         multi: Use the region_fill_multi strategy instead of single fill.
     """
+    if n_threads is None:
+        n_threads = config.n_threads
     tp = kdb.TilingProcessor()
     tp.frame = c.bbox().to_dtype(c.kcl.dbu)  # type: ignore
     tp.dbu = c.kcl.dbu

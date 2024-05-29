@@ -1515,7 +1515,7 @@ class KCell:
         register_cells: bool = False,
         test_merge: bool = True,
         update_kcl_meta_data: Literal["overwrite", "skip", "drop"] = "drop",
-        meta_format: Literal["v1", "v2"] = config.meta_format,
+        meta_format: Literal["v1", "v2"] | None = None,
     ) -> list[int]:
         """Read a GDS file into the existing KCell.
 
@@ -1545,6 +1545,8 @@ class KCell:
             " 'Cell.read'. kfactory uses these extensively for ports, info, and "
             "settings. Therefore proceed at your own risk."
         )
+        if meta_format is None:
+            meta_format = config.meta_format
         fn = str(Path(filename).expanduser().resolve())
         if test_merge and (
             options.cell_conflict_resolution
@@ -1598,7 +1600,7 @@ class KCell:
                     f"Unknown meta update strategy {update_kcl_meta_data=}"
                     ", available strategies are 'overwrite', 'skip', or 'drop'"
                 )
-        meta_format = settings.get("meta_format") or config.meta_format
+        meta_format = settings.get("meta_format") or meta_format
 
         if register_cells:
             new_cis = set(cell_ids)
@@ -1824,10 +1826,10 @@ class KCell:
                 kdb.LayoutMetaInfo("kfactory:basename", self.basename, None, True)
             )
 
-    def get_meta_data(
-        self, meta_format: Literal["v1", "v2"] = config.meta_format
-    ) -> None:
+    def get_meta_data(self, meta_format: Literal["v1", "v2"] | None = None) -> None:
         """Read metadata from the KLayout Layout object."""
+        if meta_format is None:
+            meta_format = config.meta_format
         port_dict: dict[str, Any] = {}
         settings: dict[str, MetaData] = {}
         settings_units: dict[str, str] = {}
@@ -2956,7 +2958,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         set_settings: bool = True,
         set_name: bool = True,
         check_ports: bool = True,
-        check_instances: CHECK_INSTANCES = config.check_instances,
+        check_instances: CHECK_INSTANCES | None = None,
         snap_ports: bool = True,
         rec_dicts: bool = False,
         basename: str | None = None,
@@ -2974,7 +2976,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         set_settings: bool = True,
         set_name: bool = True,
         check_ports: bool = True,
-        check_instances: CHECK_INSTANCES = config.check_instances,
+        check_instances: CHECK_INSTANCES | None = None,
         snap_ports: bool = True,
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
@@ -3026,6 +3028,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """
         d2fs = rec_dict_to_frozenset if rec_dicts else dict_to_frozenset
         fs2d = rec_frozenset_to_dict if rec_dicts else frozenset_to_dict
+
+        if check_instances is None:
+            check_instances = config.check_instances
 
         def decorator_autocell(
             f: Callable[KCellParams, KCell],
@@ -3616,7 +3621,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         register_cells: bool = False,
         test_merge: bool = True,
         update_kcl_meta_data: Literal["overwrite", "skip", "drop"] = "skip",
-        meta_format: Literal["v1", "v2"] = config.meta_format,
+        meta_format: Literal["v1", "v2"] | None = None,
     ) -> kdb.LayerMap:
         """Read a GDS file into the existing Layout.
 
@@ -3642,6 +3647,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 transformations as strings, never versions have them stored and loaded
                 in their native KLayout formats.
         """
+        if meta_format is None:
+            meta_format = config.meta_format
         layout_b = kdb.Layout()
         layout_b.read(str(filename), options)
         if (
@@ -4443,11 +4450,11 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         other: Port,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = config.allow_width_mismatch,
-        allow_layer_mismatch: bool = config.allow_layer_mismatch,
-        allow_type_mismatch: bool = config.allow_type_mismatch,
-        use_mirror: bool = config.connect_use_mirror,
-        use_angle: bool = config.connect_use_angle,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
     ) -> None: ...
 
     @overload
@@ -4458,11 +4465,11 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         other_port_name: str | None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = config.allow_width_mismatch,
-        allow_layer_mismatch: bool = config.allow_layer_mismatch,
-        allow_type_mismatch: bool = config.allow_type_mismatch,
-        use_mirror: bool = config.connect_use_mirror,
-        use_angle: bool = config.connect_use_angle,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
     ) -> None: ...
 
     def connect(
@@ -4472,11 +4479,11 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         other_port_name: str | None = None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = config.allow_width_mismatch,
-        allow_layer_mismatch: bool = config.allow_layer_mismatch,
-        allow_type_mismatch: bool = config.allow_type_mismatch,
-        use_mirror: bool = config.connect_use_mirror,
-        use_angle: bool = config.connect_use_angle,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
     ) -> None:
         """Align port with name `portname` to a port.
 
@@ -4498,6 +4505,16 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
             use_mirror: If False mirror flag does not get applied from the connection.
             use_angle: If False the angle does not get applied from the connection.
         """
+        if allow_width_mismatch is None:
+            allow_layer_mismatch = config.allow_layer_mismatch
+        if allow_width_mismatch is None:
+            allow_width_mismatch = config.allow_width_mismatch
+        if allow_type_mismatch is None:
+            allow_type_mismatch = config.allow_type_mismatch
+        if use_mirror is None:
+            use_mirror = config.connect_use_mirror
+        if use_angle is None:
+            use_angle = config.connect_use_angle
         if isinstance(other, VInstance):
             if other_port_name is None:
                 raise ValueError(
@@ -5609,11 +5626,11 @@ class Instance:
         other: Port,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = config.allow_width_mismatch,
-        allow_layer_mismatch: bool = config.allow_layer_mismatch,
-        allow_type_mismatch: bool = config.allow_type_mismatch,
-        use_mirror: bool = config.connect_use_mirror,
-        use_angle: bool = config.connect_use_angle,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
     ) -> None: ...
 
     @overload
@@ -5624,11 +5641,11 @@ class Instance:
         other_port_name: str | None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = config.allow_width_mismatch,
-        allow_layer_mismatch: bool = config.allow_layer_mismatch,
-        allow_type_mismatch: bool = config.allow_type_mismatch,
-        use_mirror: bool = config.connect_use_mirror,
-        use_angle: bool = config.connect_use_angle,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
     ) -> None: ...
 
     def connect(
@@ -5638,11 +5655,11 @@ class Instance:
         other_port_name: str | None = None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = config.allow_width_mismatch,
-        allow_layer_mismatch: bool = config.allow_layer_mismatch,
-        allow_type_mismatch: bool = config.allow_type_mismatch,
-        use_mirror: bool = config.connect_use_mirror,
-        use_angle: bool = config.connect_use_angle,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
     ) -> None:
         """Align port with name `portname` to a port.
 
@@ -5664,6 +5681,16 @@ class Instance:
             use_mirror: If False mirror flag does not get applied from the connection.
             use_angle: If False the angle does not get applied from the connection.
         """
+        if allow_width_mismatch is None:
+            allow_layer_mismatch = config.allow_layer_mismatch
+        if allow_width_mismatch is None:
+            allow_width_mismatch = config.allow_width_mismatch
+        if allow_type_mismatch is None:
+            allow_type_mismatch = config.allow_type_mismatch
+        if use_mirror is None:
+            use_mirror = config.connect_use_mirror
+        if use_angle is None:
+            use_angle = config.connect_use_angle
         if isinstance(other, Instance):
             if other_port_name is None:
                 raise ValueError(

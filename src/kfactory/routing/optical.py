@@ -205,9 +205,9 @@ def route(
     route_kwargs: dict[str, Any] | None = {},
     route_width: int | None = None,
     min_straight_taper: int = 0,
-    allow_width_mismatch: bool = config.allow_width_mismatch,
-    allow_layer_mismatch: bool = config.allow_layer_mismatch,
-    allow_type_mismatch: bool = config.allow_type_mismatch,
+    allow_width_mismatch: bool | None = None,
+    allow_layer_mismatch: bool | None = None,
+    allow_type_mismatch: bool | None = None,
 ) -> OpticalManhattanRoute:
     """Places a route.
 
@@ -238,6 +238,12 @@ def route(
         allow_type_mismatch: If True, the type of the ports is ignored
             (config default: False).
     """
+    if allow_width_mismatch is None:
+        allow_width_mismatch = config.allow_width_mismatch
+    if allow_layer_mismatch is None:
+        allow_layer_mismatch = config.allow_layer_mismatch
+    if allow_type_mismatch is None:
+        allow_type_mismatch = config.allow_type_mismatch
     if p1.width != p2.width and not allow_width_mismatch:
         raise ValueError(
             f"The ports have different widths {p1.width=} {p2.width=}. If this is"
@@ -493,9 +499,9 @@ def route_bundle(
     collision_check_layers: Sequence[int] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     bboxes: list[kdb.Box] = [],
-    allow_width_mismatch: bool = config.allow_width_mismatch,
-    allow_layer_mismatch: bool = config.allow_layer_mismatch,
-    allow_type_mismatch: bool = config.allow_type_mismatch,
+    allow_width_mismatch: bool | None = None,
+    allow_layer_mismatch: bool | None = None,
+    allow_type_mismatch: bool | None = None,
     route_width: int | list[int] | None = None,
     sort_ports: bool = False,
 ) -> list[OpticalManhattanRoute]:
@@ -531,6 +537,12 @@ def route_bundle(
         route_width: Width of the route. If None, the width of the ports is used.
         sort_ports: Automatically sort ports.
     """
+    if allow_width_mismatch is None:
+        allow_width_mismatch = config.allow_width_mismatch
+    if allow_layer_mismatch is None:
+        allow_layer_mismatch = config.allow_layer_mismatch
+    if allow_type_mismatch is None:
+        allow_type_mismatch = config.allow_type_mismatch
     radius = max(
         abs(bend90_cell.ports[0].x - bend90_cell.ports[1].x),
         abs(bend90_cell.ports[0].y - bend90_cell.ports[1].y),
@@ -715,9 +727,9 @@ def place90(
     port_type: str = "optical",
     min_straight_taper: int = 0,
     allow_small_routes: bool = False,
-    allow_width_mismatch: bool = config.allow_width_mismatch,
-    allow_layer_mismatch: bool = config.allow_layer_mismatch,
-    allow_type_mismatch: bool = config.allow_type_mismatch,
+    allow_width_mismatch: bool | None = None,
+    allow_layer_mismatch: bool | None = None,
+    allow_type_mismatch: bool | None = None,
     route_width: int | None = None,
 ) -> OpticalManhattanRoute:
     """Place bends and straight waveguides based on a sequence of points.
@@ -757,6 +769,12 @@ def place90(
             (config default: False).
         route_width: Width of the route. If None, the width of the ports is used.
     """
+    if allow_width_mismatch is None:
+        allow_width_mismatch = config.allow_width_mismatch
+    if allow_layer_mismatch is None:
+        allow_layer_mismatch = config.allow_layer_mismatch
+    if allow_type_mismatch is None:
+        allow_type_mismatch = config.allow_type_mismatch
     route_start_port = p1.copy()
     route_start_port.name = None
     route_start_port.trans.angle = (route_start_port.angle + 2) % 4
