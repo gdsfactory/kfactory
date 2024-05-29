@@ -1,5 +1,39 @@
+<a name="v0.16.0"></a>
+# [v0.16.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.16.0) - 29 May 2024
+
+# What's Changed
+
+## Breaking
+
+- `mirror` and `dmirror` M90 by default [#350](https://github.com/gdsfactory/kfactory/pull/350)
+
+## New
+
+- `mirror` and `dmirror` M90 by default [#350](https://github.com/gdsfactory/kfactory/pull/350)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.15.2...v0.16.0
+
+
+[Changes][v0.16.0]
+
+
+<a name="v0.15.2"></a>
+# [v0.15.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.15.2) - 29 May 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix global config settings only being set on first import [#345](https://github.com/gdsfactory/kfactory/pull/345)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.15.1...v0.15.2
+
+
+[Changes][v0.15.2]
+
+
 <a name="v0.15.1"></a>
-# [v0.15.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.15.1) - 28 May 2024
+# [v0.15.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.15.1) - 29 May 2024
 
 # What's Changed
 
@@ -530,6 +564,8 @@
 [Changes][v0.4.0]
 
 
+[v0.16.0]: https://github.com/gdsfactory/kfactory/compare/v0.15.2...v0.16.0
+[v0.15.2]: https://github.com/gdsfactory/kfactory/compare/v0.15.1...v0.15.2
 [v0.15.1]: https://github.com/gdsfactory/kfactory/compare/v0.15.0...v0.15.1
 [v0.15.0]: https://github.com/gdsfactory/kfactory/compare/v0.14.0...v0.15.0
 [v0.14.0]: https://github.com/gdsfactory/kfactory/compare/v0.13.3...v0.14.0
