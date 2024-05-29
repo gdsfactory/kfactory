@@ -5609,11 +5609,11 @@ class Instance:
         other: Port,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = config.allow_width_mismatch,
-        allow_layer_mismatch: bool = config.allow_layer_mismatch,
-        allow_type_mismatch: bool = config.allow_type_mismatch,
-        use_mirror: bool = config.connect_use_mirror,
-        use_angle: bool = config.connect_use_angle,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
     ) -> None: ...
 
     @overload
@@ -5624,11 +5624,11 @@ class Instance:
         other_port_name: str | None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = config.allow_width_mismatch,
-        allow_layer_mismatch: bool = config.allow_layer_mismatch,
-        allow_type_mismatch: bool = config.allow_type_mismatch,
-        use_mirror: bool = config.connect_use_mirror,
-        use_angle: bool = config.connect_use_angle,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
     ) -> None: ...
 
     def connect(
@@ -5638,11 +5638,11 @@ class Instance:
         other_port_name: str | None = None,
         *,
         mirror: bool = False,
-        allow_width_mismatch: bool = config.allow_width_mismatch,
-        allow_layer_mismatch: bool = config.allow_layer_mismatch,
-        allow_type_mismatch: bool = config.allow_type_mismatch,
-        use_mirror: bool = config.connect_use_mirror,
-        use_angle: bool = config.connect_use_angle,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
     ) -> None:
         """Align port with name `portname` to a port.
 
@@ -5663,7 +5663,23 @@ class Instance:
             allow_type_mismatch: Skip port_type check between the ports if set.
             use_mirror: If False mirror flag does not get applied from the connection.
             use_angle: If False the angle does not get applied from the connection.
+
         """
+        if allow_width_mismatch is None:
+            allow_width_mismatch = config.allow_width_mismatch
+
+        if allow_layer_mismatch is None:
+            allow_layer_mismatch = config.allow_layer_mismatch
+
+        if allow_type_mismatch is None:
+            allow_type_mismatch = config.allow_type_mismatch
+
+        if use_mirror is None:
+            use_mirror = config.connect_use_mirror
+
+        if use_angle is None:
+            use_angle = config.connect_use_angle
+
         if isinstance(other, Instance):
             if other_port_name is None:
                 raise ValueError(
