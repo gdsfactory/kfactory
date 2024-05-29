@@ -9,6 +9,8 @@ from .. import kdb
 from ..conf import config
 from ..kcell import KCell, KCLayout, LayerEnum
 
+stop = False
+
 
 class FillOperator(kdb.TileOutputReceiver):
     """Output Receiver of the TilingProcessor."""
@@ -23,6 +25,7 @@ class FillOperator(kdb.TileOutputReceiver):
         column_step: kdb.Vector,
         fill_margin: kdb.Vector = kdb.Vector(0, 0),
         remaining_polygons: kdb.Region | None = None,
+        multi: bool = False,
     ) -> None:
         """Initialize the receiver."""
         self.kcl = kcl
@@ -33,7 +36,7 @@ class FillOperator(kdb.TileOutputReceiver):
         self.column_step = column_step
         self.fill_margin = fill_margin
         self.remaining_polygons = remaining_polygons
-        self.glue_box = self.top_cell.bbox()
+        self.multi = multi
 
     def put(
         self,
@@ -45,18 +48,34 @@ class FillOperator(kdb.TileOutputReceiver):
         clip: bool,
     ) -> None:
         """Called by the TilingProcessor."""
-        self.top_cell.fill_region(
-            region=region,
-            fill_cell_index=self.fill_cell_index,
-            fc_bbox=self.fc_bbox,
-            row_step=self.row_step,
-            column_step=self.column_step,
-            origin=self.glue_box.p1,
-            remaining_parts=None,
-            fill_margin=self.fill_margin,
-            remaining_polygons=None,
-            glue_box=self.glue_box,
-        )
+        if self.multi:
+            self.top_cell.fill_region_multi(
+                region=region,
+                fill_cell_index=self.fill_cell_index,
+                fc_bbox=self.fc_bbox,
+                row_step=self.row_step,
+                column_step=self.column_step,
+                remaining_parts=None,
+                fill_margin=kdb.Vector(
+                    self.row_step.x - self.fc_bbox.width(),
+                    self.column_step.y - self.fc_bbox.height(),
+                ),
+                remaining_polygons=None,
+                glue_box=tile,
+            )
+        else:
+            self.top_cell.fill_region(
+                region=region,
+                fill_cell_index=self.fill_cell_index,
+                fc_bbox=self.fc_bbox,
+                row_step=self.row_step,
+                column_step=self.column_step,
+                origin=self.top_cell.bbox().p1,
+                remaining_parts=None,
+                fill_margin=self.fill_margin,
+                remaining_polygons=None,
+                glue_box=tile,
+            )
 
 
 def fill_tiled(
@@ -73,6 +92,7 @@ def fill_tiled(
     x_space: float = 0,
     y_space: float = 0,
     tile_border: tuple[float, float] = (20, 20),
+    multi: bool = False,
 ) -> None:
     """Fill a [KCell][kfactory.kcell.KCell].
 
@@ -93,6 +113,7 @@ def fill_tiled(
         x_space: Spacing between the fill cell bounding boxes in x-direction.
         y_space: Spacing between the fill cell bounding boxes in y-direction.
         tile_border: The tile border to consider for excludes
+        multi: Use the region_fill_multi strategy instead of single fill.
     """
     tp = kdb.TilingProcessor()
     tp.frame = c.bbox().to_dtype(c.kcl.dbu)  # type: ignore
@@ -208,8 +229,7 @@ def fill_tiled(
                     if regions and layers
                     else regions + layers
                 )
-                + "; var fill_region = _tile.sized("
-                f"{_row_step.x // 2},{_col_step.y // 2}) & _frame & fill;"
+                + "; var fill_region = _tile & _frame & fill;"
                 " _output(to_fill, fill_region)"
             )
         tp.queue(queue_str)
