@@ -6019,10 +6019,19 @@ class Instance:
     def drotate(
         self,
         angle: float,
-        center: kdb.DPoint | tuple[float, float] | Port | None = None,
+        center: kdb.DPoint | tuple[float, float] | Port | str | None = None,
     ) -> Instance:
-        """Rotate instance in degrees."""
+        """Rotate instance in degrees.
+
+        Args:
+            angle: angle in degrees.
+            center: center of rotation. If a port is given, the center is the port's.
+                if a string is given, the center is the port with the name.
+                if a tuple is given, the center is the tuple.
+        """
         if center:
+            if isinstance(center, str):
+                center = self.ports[center].dcenter
             if isinstance(center, Port):
                 center = center.dcenter
             if isinstance(center, tuple | list):
