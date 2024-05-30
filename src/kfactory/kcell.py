@@ -3866,6 +3866,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         self._ports = Ports(kcl)
         self._locked = False
         self._settings = KCellSettings()
+        self._settings_units = KCellSettingsUnits()
         self._name = name
 
     def bbox(self, layers: Iterable[int | LayerEnum] | None = None) -> kdb.DBox:
@@ -4390,8 +4391,10 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
                     _cell.add_port(port.copy(_trans))
                 _settings = self.cell.settings.model_dump()
                 _settings.update({"virtual_trans": _trans})
+                _settings_units = self.cell.settings_units.model_copy()
                 _cell._settings = KCellSettings(**_settings)
                 _cell.info = Info(**self.cell.info.model_dump())
+                _cell._settings_units = _settings_units
             else:
                 _cell = cell.kcl[_cell_name]
             _inst = cell << _cell
