@@ -4000,7 +4000,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         c = KCell()
         if self.name is not None:
             c.name = self.name
-        VInstance(self).insert_into(c)
+        VInstance(self).insert_into_flat(c, levels=0)
 
         display_kcell(c)
 
