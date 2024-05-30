@@ -18,7 +18,7 @@ for angle in [1, 2, 3, 0]:
         ts = (
             kf.kdb.Trans(angle, False, -1_000_000, 0)
             * kf.kdb.Trans(100_000, -50_000)
-            * kf.kdb.Trans(randint(0, 100), randint(0, 100) + xi * 10_000)
+            * kf.kdb.Trans(0, 100 + xi * 10_000)
         )
         ps.append(
             c.create_port(
@@ -36,7 +36,7 @@ for angle in [1, 2, 3, 0]:
         # )
         te = kf.kdb.Trans(
             1, False, -1_200_000 + 50_000 * angle, 400_000
-        ) * kf.kdb.Trans(randint(0, 100), randint(0, 100) - xi * 10_000)
+        ) * kf.kdb.Trans(100, 0 - xi * 10_000)
         # te = kf.kdb.Trans(3, False, 500_000 - 50_000 * angle, 500_000) * kf.kdb.Trans(
         #     randint(0, 100), randint(0, 100) - xi * 10_000
         # )
@@ -59,7 +59,7 @@ for angle in [1, 2, 3, 0]:
         ts = (
             kf.kdb.Trans(angle, False, 0, 0)
             * kf.kdb.Trans(100_000, -50_000)
-            * kf.kdb.Trans(randint(0, 100), randint(0, 100) + xi * 10_000)
+            * kf.kdb.Trans(100, 0 + xi * 10_000)
         )
         ps.append(
             c.create_port(
@@ -76,7 +76,7 @@ for angle in [1, 2, 3, 0]:
         #     randint(0, 100), randint(0, 100) - xi * 5_000
         # )
         te = kf.kdb.Trans(3, False, 150_000 - 50_000 * angle, 200_000) * kf.kdb.Trans(
-            randint(0, 100), randint(0, 100) - xi * 10_000
+            0, 100 - xi * 10_000
         )  # orig
         # te = kf.kdb.Trans(3, False, 50_000 + 50_000 * angle, 700_000) * kf.kdb.Trans(
         #     randint(0, 100), randint(0, 100) - xi * 10_000
@@ -117,7 +117,7 @@ for angle in [-2, -1, 0, 1]:
         #     randint(0, 100), randint(0, 100) - xi * 10_000
         # )
         te = kf.kdb.Trans(2, False, 2_500_000, 100_000 + 50_000 * angle) * kf.kdb.Trans(
-            randint(0, 100), randint(0, 100) - xi * 10_000
+            55, 70 - xi * 10_000
         )
         # te = kf.kdb.Trans(2, False, 2_500_000, 00_000 + 50_000 * angle) * kf.kdb.Trans(
         #     randint(0, 100), randint(0, 100) - xi * 10_000
@@ -167,7 +167,7 @@ for angle in [0]:
         # )
         te = kf.kdb.Trans(
             1, False, 3_500_000 + 50_000 * angle, -200_000
-        ) * kf.kdb.Trans(randint(0, 100), randint(0, 100) - xi * 10_000)
+        ) * kf.kdb.Trans(23, 55 - xi * 10_000)
         # te = kf.kdb.Trans(3, False, 4_500_000 - 50_000 * angle, 500_000) * kf.kdb.Trans(
         #     randint(0, 100), randint(0, 100) - xi * 10_000
         # )
