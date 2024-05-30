@@ -15,6 +15,7 @@
 
 ## Bug Fixes
 
+- fix virtual cell show hierarchy error [#358](https://github.com/gdsfactory/kfactory/pull/358)
 - Fix VKCell Setting Units [#355](https://github.com/gdsfactory/kfactory/pull/355)
 - fix typo [#351](https://github.com/gdsfactory/kfactory/pull/351)
 - Improve drotate [#349](https://github.com/gdsfactory/kfactory/pull/349)
