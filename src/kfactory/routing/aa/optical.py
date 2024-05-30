@@ -216,158 +216,180 @@ def route_bundle(
         straight_ports: Names of the ports of the straight to use for connecting
             straights and bends.
     """
-    if isinstance(separation, int | float):
-        separation = [separation] * len(start_ports)
-    pts_list = backbone2bundle(
-        backbone=backbone,
-        port_widths=[p.dwidth for p in start_ports],
-        spacings=separation,
-    )
-
     routes: list[OpticalAllAngleRoute] = []
-    _p0 = kdb.DPoint(0, 0)
-    _p1 = kdb.DPoint(1, 0)
 
-    for ps, pe, pts in zip(start_ports, end_ports, pts_list):
-        # use edges and transformation to get distances to calculate crossings
-        # and types of crossings
-        vector_bundle_start = pts[0] - pts[1]
-        vector_bundle_end = pts[-1] - pts[-2]
-        trans_bundle_start = kdb.DCplxTrans(
-            1,
-            np.rad2deg(np.arctan2(vector_bundle_start.y, vector_bundle_start.x)),
-            False,
-            pts[0].to_v(),
-        )
-        trans_bundle_end = kdb.DCplxTrans(
-            1,
-            np.rad2deg(np.arctan2(vector_bundle_end.y, vector_bundle_end.x)),
-            False,
-            pts[-1].to_v(),
-        )
-        edge_start = kdb.DEdge(ps.dcplx_trans * _p0, ps.dcplx_trans * _p1)
-        edge_bundle_start = kdb.DEdge(
-            trans_bundle_start * _p0, trans_bundle_start * _p1
-        )
-        xing_start = edge_start.cut_point(edge_bundle_start)
+    if backbone:
+        if len(backbone) < 2:
+            raise NotImplementedError(
+                "A bundle with less than two points has no orientation. "
+                "Cannot automatically determine orientation."
+            )
 
-        edge_end = kdb.DEdge(pe.dcplx_trans * _p0, pe.dcplx_trans * _p1)
-        edge_bundle_end = kdb.DEdge(trans_bundle_end * _p0, trans_bundle_end * _p1)
-        xing_end = edge_end.cut_point(edge_bundle_end)
+        if isinstance(separation, int | float):
+            separation = [separation] * len(start_ports)
+        pts_list = backbone2bundle(
+            backbone=backbone,
+            port_widths=[p.dwidth for p in start_ports],
+            spacings=separation,
+        )
 
-        psb = ps.copy()
-        psb.dcplx_trans = trans_bundle_start
-        peb = pe.copy()
-        peb.dcplx_trans = trans_bundle_end
-        if xing_start is not None:
-            # if the crossings point to each other use one bend, otherwise use two
-            vector_xing_start = ps.dcplx_trans.inverted() * xing_start
-            vector_xing_bundle_start = trans_bundle_start.inverted() * xing_start
-            if vector_xing_start.x > 0 and vector_xing_bundle_start.x > 0:
-                pts[:0] = [ps.dcplx_trans.disp.to_p(), xing_start]
-            else:
-                v = psb.dcplx_trans.disp - ps.dcplx_trans.disp
-                result = optimize_route(
+        for ps, pe, pts in zip(start_ports, end_ports, pts_list):
+            # use edges and transformation to get distances to calculate crossings
+            # and types of crossings
+            vector_bundle_start = pts[0] - pts[1]
+            vector_bundle_end = pts[-1] - pts[-2]
+            trans_bundle_start = kdb.DCplxTrans(
+                1,
+                np.rad2deg(np.arctan2(vector_bundle_start.y, vector_bundle_start.x)),
+                False,
+                pts[0].to_v(),
+            )
+            trans_bundle_end = kdb.DCplxTrans(
+                1,
+                np.rad2deg(np.arctan2(vector_bundle_end.y, vector_bundle_end.x)),
+                False,
+                pts[-1].to_v(),
+            )
+            psb = ps.copy()
+            psb.dcplx_trans = trans_bundle_start
+            peb = pe.copy()
+            peb.dcplx_trans = trans_bundle_end
+
+            pts = _get_connection_between_ports(
+                port_start=ps,
+                port_end=psb,
+                bend_factory=bend_factory,
+                bend_ports=bend_ports,
+                backbone=pts,
+            )
+
+            pts.reverse()
+            pts = _get_connection_between_ports(
+                port_start=pe,
+                port_end=peb,
+                bend_factory=bend_factory,
+                backbone=pts,
+                bend_ports=bend_ports,
+            )
+            pts.reverse()
+            routes.append(
+                route(
+                    c,
+                    ps.dwidth,
+                    pts,
+                    straight_factory=straight_factory,
                     bend_factory=bend_factory,
                     bend_ports=bend_ports,
-                    start_port=ps,
-                    end_port=psb,
-                    angle=np.arctan2(v.y, v.x),
-                    _p0=_p0,
-                    _p1=_p1,
+                    straight_ports=straight_ports,
                 )
-                if result is None:
-                    raise RuntimeError(
-                        f"Cannot find an automatic route from {ps} to bundle port {psb}"
-                    )
-                p_start_port, p_start_bundle = result
-                pts[:1] = [
-                    ps.dcplx_trans.disp.to_p(),
-                    p_start_port,
-                    p_start_bundle,
-                ]
+            )
+    else:
+        for ps, pe in zip(start_ports, end_ports):
+            pts = _get_connection_between_ports(
+                port_start=ps,
+                port_end=pe,
+                bend_factory=bend_factory,
+                bend_ports=bend_ports,
+                backbone=[],
+            )
+            # the connection will not write the end point
+            pts.append(pe.dcplx_trans.disp.to_p())
+            routes.append(
+                route(
+                    c,
+                    ps.dwidth,
+                    pts,
+                    straight_factory=straight_factory,
+                    bend_factory=bend_factory,
+                    bend_ports=bend_ports,
+                    straight_ports=straight_ports,
+                )
+            )
+
+    return routes
+
+
+def _get_connection_between_ports(
+    port_start: Port,
+    port_end: Port,
+    bend_factory: BendFactory,
+    backbone: list[kdb.DPoint],
+    bend_ports: tuple[str, str] = ("o1", "o2"),
+) -> list[kdb.DPoint]:
+    """Modify route backbone for proper connection to a port.
+
+    This will connect the start_port to the end_port and in the process
+    modify the backbone points to reflect this connection in the points. The resulting
+    new connection can cause that the first point in the backbone must be moved. It is
+    Guaranteed to be further away from the bundle though, it will not move into the
+    bundle.
+
+    Args:
+        port_start: Start Port
+        port_end: Target Port
+        bend_factory: Needed to optimize the bends.
+        backbone: The backbone to be modified.
+        bend_ports: Names of the ports created by the bend_factory.
+    """
+    _p0 = kdb.DPoint(0, 0)
+    _p1 = kdb.DPoint(1, 0)
+    trans_start = port_start.dcplx_trans
+    trans_end = port_end.dcplx_trans
+    edge_start = kdb.DEdge(trans_start * _p0, trans_start * _p1)
+    edge_end = kdb.DEdge(trans_end * _p0, trans_end * _p1)
+    xing = edge_start.cut_point(edge_end)
+    if xing is not None:
+        # if the crossings point to each other use one bend, otherwise use two
+        vector_xing = trans_start.inverted() * xing
+        vector_xing_bundle_start = trans_end.inverted() * xing
+        if vector_xing.x > 0 and vector_xing_bundle_start.x > 0:
+            backbone[:0] = [trans_start.disp.to_p(), xing]
         else:
-            v = psb.dcplx_trans.disp - ps.dcplx_trans.disp
+            v = trans_end.disp - trans_start.disp
             result = optimize_route(
                 bend_factory=bend_factory,
                 bend_ports=bend_ports,
-                start_port=ps,
-                end_port=psb,
+                start_port=port_start,
+                end_port=port_end,
                 angle=np.arctan2(v.y, v.x),
                 _p0=_p0,
                 _p1=_p1,
             )
             if result is None:
                 raise RuntimeError(
-                    f"Cannot find an automatic route from {ps} to bundle port {psb}"
+                    f"Cannot find an automatic route from {port_start}"
+                    f" to bundle port {port_end}"
                 )
             p_start_port, p_start_bundle = result
-            pts[:1] = [
-                ps.dcplx_trans.disp.to_p(),
+            backbone[:1] = [
+                trans_start.disp.to_p(),
                 p_start_port,
                 p_start_bundle,
             ]
-        if xing_end is not None:
-            vector_xing_end = pe.dcplx_trans.inverted() * xing_end
-            vector_xing_bundle_end = trans_bundle_end.inverted() * xing_end
-            if vector_xing_end.x > 0 and vector_xing_bundle_end.x > 0:
-                pts.extend([xing_end, pe.dcplx_trans.disp.to_p()])
-            else:
-                v = peb.dcplx_trans.disp - pe.dcplx_trans.disp
-                result = optimize_route(
-                    bend_factory=bend_factory,
-                    bend_ports=bend_ports,
-                    start_port=pe,
-                    end_port=peb,
-                    angle=np.arctan2(v.y, v.x),
-                    _p0=_p0,
-                    _p1=_p1,
-                )
-                if result is None:
-                    raise RuntimeError(
-                        f"Cannot find an automatic route from {pe} to bundle port {peb}"
-                    )
-                p_end_port, p_end_bundle = result
-                pts[-1:] = [
-                    p_end_bundle,
-                    p_end_port,
-                    pe.dcplx_trans.disp.to_p(),
-                ]
-        else:
-            v = peb.dcplx_trans.disp - pe.dcplx_trans.disp
-            result = optimize_route(
-                bend_factory=bend_factory,
-                bend_ports=bend_ports,
-                start_port=pe,
-                end_port=peb,
-                angle=np.arctan2(v.y, v.x),
-                _p0=_p0,
-                _p1=_p1,
-            )
-            if result is None:
-                raise RuntimeError(
-                    f"Cannot find an automatic route from {pe} to bundle port {peb}"
-                )
-            p_end_port, p_end_bundle = result
-            pts[-1:] = [
-                p_end_bundle,
-                p_end_port,
-                pe.dcplx_trans.disp.to_p(),
-            ]
-
-        routes.append(
-            route(
-                c,
-                ps.dwidth,
-                pts,
-                straight_factory=straight_factory,
-                bend_factory=bend_factory,
-                bend_ports=bend_ports,
-                straight_ports=straight_ports,
-            )
+    else:
+        v = trans_end.disp - trans_start.disp
+        result = optimize_route(
+            bend_factory=bend_factory,
+            bend_ports=bend_ports,
+            start_port=port_start,
+            end_port=port_end,
+            angle=np.arctan2(v.y, v.x),
+            _p0=_p0,
+            _p1=_p1,
         )
+        if result is None:
+            raise RuntimeError(
+                f"Cannot find an automatic route from {port_start}"
+                f" to bundle port {port_end}"
+            )
+        p_start_port, p_start_bundle = result
+        backbone[:1] = [
+            trans_start.disp.to_p(),
+            p_start_port,
+            p_start_bundle,
+        ]
 
-    return routes
+    return backbone
 
 
 def _get_partial_route(
