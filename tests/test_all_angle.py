@@ -10,7 +10,8 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
         kf.cells.virtual.euler.virtual_bend_euler, layer=LAYER.WG, radius=10, width=1
     )
 
-    vc = kf.VKCell("test_all_angle")
+    # vc = kf.VKCell("test_all_angle")
+    c = kf.KCell("test_all_angle")
 
     start_ports: list[kf.Port] = []
     end_ports: list[kf.Port] = []
@@ -25,7 +26,7 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
         ae = 270 - n + i * 15
         ae_rad = np.deg2rad(ae)
         start_ports.append(
-            vc.create_port(
+            c.create_port(
                 name=f"s{i}",
                 dcplx_trans=kf.kdb.DCplxTrans(
                     1, a, False, -500 + r * np.cos(a_rad), -100 + r * np.sin(a_rad)
@@ -35,7 +36,7 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
             )
         )
         end_ports.append(
-            vc.create_port(
+            c.create_port(
                 name=f"s{i + _l}",
                 dcplx_trans=kf.kdb.DCplxTrans(
                     1, ae, False, 2510 + r * np.cos(ae_rad), 2410 + r * np.sin(ae_rad)
@@ -51,7 +52,7 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
         kf.kdb.DPoint(2800, 1950),
     ]
     kf.routing.aa.optical.route_bundle(
-        vc,
+        c,
         start_ports=start_ports,
         end_ports=end_ports,
         backbone=backbone,
@@ -60,4 +61,4 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
         bend_factory=bf,
     )
 
-    vc.show()
+    c.show()

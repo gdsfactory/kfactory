@@ -1376,6 +1376,9 @@ class KCell:
         """
         if self._locked:
             raise LockedError(self)
+        for vinst in self.vinsts:
+            vinst.insert_into_flat(self)
+        self.vinsts = []
         self._kdb_cell.flatten(False)
         self.insts = Instances()
 
@@ -1477,6 +1480,7 @@ class KCell:
 
         See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
         """
+        self.insert_vinsts()
         match set_meta_data, convert_external_cells:
             case True, True:
                 self.kcl.set_meta_data()
@@ -1501,7 +1505,6 @@ class KCell:
                 if self.is_library_cell():
                     self.convert_to_static(recursive=True)
 
-        self.insert_vinsts()
         for kci in set(self._kdb_cell.called_cells()) & self.kcl.kcells.keys():
             kc = self.kcl[kci]
             kc.insert_vinsts()
@@ -3347,14 +3350,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         cell.name = name
                     if set_settings:
                         settings = cell.settings.model_dump()
-                        if basename is not None:
-                            settings["function_name"] = basename
-                        elif "self" in params:
-                            settings["function_name"] = params[
-                                "self"
-                            ].__class__.__name__
-                        else:
-                            settings["function_name"] = f.__name__
+                        cell.function_name = f.__name__
+                        cell.basename = basename
                         for param in drop_params:
                             params.pop(param, None)
                             param_units.pop(param, None)
@@ -3854,6 +3851,8 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
     kcl: KCLayout
     insts: list[VInstance]
     _name: str | None
+    basename: str | None = None
+    function_name: str | None = None
 
     def __init__(
         self,
@@ -4273,6 +4272,36 @@ class VInstancePorts:
         [Ports][kfactory.kcell.Ports.__repr__].
         """
         return repr(self.copy())
+
+    def filter(
+        self,
+        angle: int | None = None,
+        orientation: float | None = None,
+        layer: LayerEnum | int | None = None,
+        port_type: str | None = None,
+        regex: str | None = None,
+    ) -> list[Port]:
+        """Filter ports by name.
+
+        Args:
+            angle: Filter by angle. 0, 1, 2, 3.
+            orientation: Filter by orientation in degrees.
+            layer: Filter by layer.
+            port_type: Filter by port type.
+            regex: Filter by regex of the name.
+        """
+        ports: Iterable[Port] = list(self.instance.ports)
+        if regex:
+            ports = filter_regex(ports, regex)
+        if layer is not None:
+            ports = filter_layer(ports, layer)
+        if port_type:
+            ports = filter_port_type(ports, port_type)
+        if angle is not None:
+            ports = filter_direction(ports, angle)
+        if orientation is not None:
+            ports = filter_orientation(ports, orientation)
+        return list(ports)
 
     def copy(self) -> Ports:
         """Creates a copy in the form of [Ports][kfactory.kcell.Ports]."""
