@@ -5,7 +5,7 @@ import pytest
 import kfactory as kf
 from collections.abc import Callable
 
-kf.config.logfilter.level = kf.conf.LogLevel.ERROR
+# kf.config.logfilter.level = kf.conf.LogLevel.ERROR
 
 
 class LAYER_CLASS(kf.LayerEnum):

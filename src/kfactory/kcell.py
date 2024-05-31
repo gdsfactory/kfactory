@@ -3104,6 +3104,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         else:
                             name = get_cell_name(f.__name__, **params)
                         self.future_cell_name = name
+                        config.logger.debug(
+                            "Concstructing or retrieving Cell {}", self.future_cell_name
+                        )
                         if layout_cache:
                             c = self.layout.cell(self.future_cell_name)
                             if c is not None:
@@ -3114,7 +3117,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         self.future_cell_name = None
                     if overwrite_existing:
                         for c in list(self.layout.cells(cell.name)):
-                            if cell is not cell:
+                            if c is not cell._kdb_cell:
                                 self[cell.cell_index()].delete()
                     dbu = cell.kcl.layout.dbu
                     if cell._locked:

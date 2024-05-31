@@ -159,3 +159,24 @@ def test_size_info(LAYER: kf.LayerEnum) -> None:
     ref = c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
     assert ref.size_info.ne[0] == 10000
     assert ref.dsize_info.ne[0] == 10
+
+
+def test_overwrite() -> None:
+    kcl = kf.KCLayout("CELL_OVERWRITE")
+
+    @kcl.cell
+    def test_overwrite_cell() -> kf.KCell:
+        c = kcl.kcell()
+        return c
+
+    c1 = test_overwrite_cell()
+
+    @kcl.cell(overwrite_existing=True)  # type: ignore[no-redef]
+    def test_overwrite_cell() -> kf.KCell:
+        c = kcl.kcell()
+        return c
+
+    c2 = test_overwrite_cell()
+
+    assert c2 is not c1
+    assert c1._destroyed()
