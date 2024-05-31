@@ -153,6 +153,8 @@ class Settings(BaseSettings):
     check_instances: CHECK_INSTANCES = CHECK_INSTANCES.ERROR
     connect_use_mirror: bool = True
     connect_use_angle: bool = True
+    cell_overwrite_existing: bool = False
+    cell_layout_cache: bool = False
     """The format of the saving of metadata.
 
     v1: Transformations and other KLayout objects are stored as a string. In

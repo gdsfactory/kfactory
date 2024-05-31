@@ -2788,6 +2788,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
     info: Info = Field(default_factory=Info)
     _settings: KCellSettings
+    _future_cell_name: str | None
 
     def __init__(
         self,
@@ -2928,6 +2929,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         self.enclosure = enclosure
         self.layer_enclosures = _layer_enclosures
         self.interconnect_cml_path = interconnect_cml_path
+        self.future_cell_name: str | None = None
 
         kcls[self.name] = self
 
@@ -2966,6 +2968,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         rec_dicts: bool = False,
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
+        register_factory: bool = True,
+        overwrite_existing: bool | None = None,
+        layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
         post_process: Iterable[Callable[[KCell], None]] = [],
     ) -> Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]: ...
@@ -2987,6 +2992,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
+        overwrite_existing: bool | None = None,
+        layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
         post_process: Iterable[Callable[[KCell], None]] = [],
     ) -> (
@@ -3026,6 +3033,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 [settings][kfactory.kcell.KCell.settings]
             register_factory: Register the resulting KCell-function to the
                 [factories][kfactory.kcell.KCLayout.factories]
+            layout_cache: If true, treat the layout like a cache, if a cell with the
+                same name exists already, pick that one instead of using running the
+                function. This only works if `set_name` is true. Can be globally
+                configured through `config.cell_layout_cache`.
+            overwrite_existing: If cells were created with the same name, delete other
+                cells with the same name. Can be globally configured through
+                `config.cell_overwrite_existing`.
             info: Additional metadata to put into info attribute.
             post_process: List of functions to call after the cell has been created.
         """
@@ -3034,6 +3048,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
         if check_instances is None:
             check_instances = config.check_instances
+        if overwrite_existing is None:
+            overwrite_existing = config.cell_overwrite_existing
+        if layout_cache is None:
+            layout_cache = config.cell_layout_cache
 
         def decorator_autocell(
             f: Callable[KCellParams, KCell],
@@ -3080,18 +3098,29 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     for key, value in params.items():
                         if isinstance(value, frozenset):
                             params[key] = fs2d(value)
-                    cell = f(**params)
-                    dbu = cell.kcl.layout.dbu
-                    if cell._locked:
-                        # If the cell is locked, it comes from a cache (most likely)
-                        # and should be copied first
-                        cell = cell.dup()
                     if set_name:
                         if basename is not None:
                             name = get_cell_name(basename, **params)
                         else:
                             name = get_cell_name(f.__name__, **params)
+                        self.future_cell_name = name
+                        if layout_cache:
+                            c = self.layout.cell(self.future_cell_name)
+                            if c is not None:
+                                return self[c.cell_index()]
+                    cell = f(**params)
+                    if set_name:
                         cell.name = name
+                        self.future_cell_name = None
+                    if overwrite_existing:
+                        for c in list(self.layout.cells(cell.name)):
+                            if cell is not cell:
+                                self[cell.cell_index()].delete()
+                    dbu = cell.kcl.layout.dbu
+                    if cell._locked:
+                        # If the cell is locked, it comes from a cache (most likely)
+                        # and should be copied first
+                        cell = cell.dup()
                     if set_settings:
                         settings = cell.settings.model_dump()
                         settings_units = cell.settings_units.model_dump()
