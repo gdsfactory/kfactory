@@ -23,6 +23,8 @@ class OpticalAllAngleRoute(BaseModel, arbitrary_types_allowed=True):
     start_port: Port
     end_port: Port
     instances: list[VInstance]
+    length: float = 0
+    length_straights: float = 0
 
 
 def _angle(v: kdb.DVector) -> float:
@@ -103,10 +105,14 @@ def route(
     _port = start_port
     insts: list[VInstance] = []
 
+    length = (pt - old_pt).abs()
+    length_straights: float = 0
+
     for new_pt in backbone[2:]:
         # Calculate (4 quadrant) angle between the three points
         s_v = pt - old_pt
         e_v = new_pt - pt
+        length += e_v.abs()
         s_a = _angle(s_v)
         e_a = _angle(e_v)
         _a = (e_a - s_a + 180) % 360 - 180
@@ -143,6 +149,7 @@ def route(
         _l = (pt - old_pt).length() - effective_radius - start_offset
         if _l > 0:
             s = c.create_vinst(straight_factory(width=width, length=_l))
+            length_straights += _l
             s.connect(straight_ports[0], _port)
             _port = s.ports[straight_ports[1]]
             insts.append(s)
@@ -171,6 +178,7 @@ def route(
         )
     if _l > 0:
         s = c.create_vinst(straight_factory(width=width, length=_l))
+        length_straights += _l
         s.connect(straight_ports[0], _port)
         _port = s.ports[straight_ports[1]]
         insts.append(s)
@@ -180,6 +188,8 @@ def route(
         start_port=start_port,
         end_port=end_port,
         instances=insts,
+        length=length,
+        length_straights=length_straights,
     )
 
 
