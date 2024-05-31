@@ -9,6 +9,7 @@
 
 ## New
 
+- Add length and length_straights to OpticalAllAngleRoute [#361](https://github.com/gdsfactory/kfactory/pull/361)
 - Add all easy access properties to VKCell and VInstance [#360](https://github.com/gdsfactory/kfactory/pull/360)
 - Add lyrdb option to `plot` [#359](https://github.com/gdsfactory/kfactory/pull/359)
 - Improve all-angle route_bundle to allow no backbone [#353](https://github.com/gdsfactory/kfactory/pull/353)
