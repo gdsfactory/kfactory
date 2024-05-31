@@ -41,7 +41,7 @@ import numpy as np
 import rich
 import rich.json
 import ruamel.yaml
-import toolz
+import toolz  # type: ignore[import-untyped,unused-ignore]
 from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
 from cachetools import Cache
 from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
@@ -1123,14 +1123,14 @@ class KCell:
             library_save_options=library_save_options,
         )
 
-    def plot(self) -> None:
+    def plot(self, lyrdb: Path | str | None = None) -> None:
         """Display cell.
 
         Usage: Pass the kcell variable as an argument in the cell at the end
         """
-        from .widgets.interactive import display_kcell  # type: ignore[attr-defined]
+        from .widgets.interactive import display_kcell
 
-        display_kcell(self)
+        display_kcell(self, lyrdb=lyrdb)
 
     def _ipython_display_(self) -> None:
         """Display a cell in a Jupyter Cell.
@@ -3995,7 +3995,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
 
         Usage: Pass the vkcell variable as an argument in the cell at the end
         """
-        from .widgets.interactive import display_kcell  # type: ignore[attr-defined]
+        from .widgets.interactive import display_kcell
 
         c = KCell()
         if self.name is not None:

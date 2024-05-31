@@ -176,7 +176,10 @@ def route(
         insts.append(s)
 
     return OpticalAllAngleRoute(
-        backbone=backbone, start_port=start_port, end_port=end_port, instances=insts
+        backbone=list(backbone),
+        start_port=start_port,
+        end_port=end_port,
+        instances=insts,
     )
 
 

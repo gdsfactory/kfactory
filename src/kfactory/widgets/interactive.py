@@ -1,4 +1,3 @@
-# type: ignore
 """Interactivate jupyter widget."""
 
 from __future__ import annotations
@@ -7,11 +6,11 @@ try:
     from pathlib import Path
     from typing import Any
 
-    from ipyevents import Event  # type: ignore[import]
-    from IPython.display import Image as IPImage  # type: ignore[import, attr-defined]
+    from ipyevents import Event  # type: ignore[import-untyped,unused-ignore]
+    from IPython.display import Image as IPImage
     from IPython.display import display
-    from ipytree import Node, Tree  # type: ignore[import]
-    from ipywidgets import (  # type: ignore[import]
+    from ipytree import Node, Tree  # type: ignore[import-untyped,unused-ignore]
+    from ipywidgets import (  # type: ignore[import-untyped,unused-ignore]
         Accordion,
         AppLayout,
         Box,
@@ -38,18 +37,19 @@ except ImportError as e:
 __all__ = ["display_kcell"]
 
 
-def display_kcell(kc: KCell) -> None:
+def display_kcell(kc: KCell, lyrdb: Path | str | None = None) -> None:
+    """Display a KCell in a jupyter widget or an image."""
     cell_dup = kc.kcl[kc.name]
     match config.display_type:
         case "widget":
-            lw = LayoutWidget(cell=cell_dup)
-            display(lw.widget)  # type: ignore[no-untyped-call]
+            lw = LayoutWidget(cell=cell_dup, layer_properties=lyrdb)
+            display(lw.widget)  # type: ignore[no-untyped-call,unused-ignore]
         case "image":
-            lipi = LayoutIPImage(cell=cell_dup)
-            display(lipi.image)  # type: ignore[no-untyped-call]
+            lipi = LayoutIPImage(cell=cell_dup, layer_properties=lyrdb)
+            display(lipi.image)  # type: ignore[no-untyped-call,unused-ignore]
 
 
-widgets: list[LayerImage | LayerIPImage] = []
+widgets: list[LayoutImage | LayoutIPImage] = []
 
 
 class LayoutImage:
@@ -84,7 +84,7 @@ class LayoutIPImage:
     def __init__(
         self,
         cell: KCell,
-        layer_properties: str | None = None,
+        layer_properties: Path | str | None = None,
     ):
         self.layout_view = lay.LayoutView()
         self.layout_view.show_layout(cell.kcl.layout, False)
@@ -96,7 +96,7 @@ class LayoutIPImage:
                 self.layout_view.load_layer_props(str(self.layer_properties))
         self.show_cell(cell._kdb_cell)
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
-        self.image = IPImage(  # type: ignore[no-untyped-call]
+        self.image = IPImage(  # type: ignore[no-untyped-call,unused-ignore]
             data=png_data, format="png", embed=True, width=800, height=600
         )
         widgets.append(self)
@@ -113,7 +113,7 @@ class LayoutWidget:
     def __init__(
         self,
         cell: KCell,
-        layer_properties: str | None = None,
+        layer_properties: Path | str | None = None,
         hide_unused_layers: bool = True,
         with_layer_selector: bool = True,
     ):
@@ -228,7 +228,7 @@ class LayoutWidget:
 
         def on_layer_click(event: Event) -> None:
             _prop.current().visible = not _prop.current().visible
-            self.layout_view.timer()  # type: ignore[attr-defined]
+            self.layout_view.timer()
             image.value = self.layout_view.icon_for_layer(
                 _prop, 50, 25, 1
             ).to_png_data()
@@ -310,7 +310,8 @@ class LayoutWidget:
         """Builds a widget for toggling layer displays.
 
         Args:
-            max_height: Maximum height to set for the widget (likely the height of the pixel buffer).
+            max_height: Maximum height to set for the widget (likely the height of the
+                pixel buffer).
         """
         all_boxes = []
 
@@ -352,10 +353,10 @@ class LayoutWidget:
             self.layout_view.load_layer_props(layer_properties)
 
     def refresh(self) -> None:
-        self.layout_view.timer()  # type: ignore[attr-defined]
+        self.layout_view.timer()
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
         self.image.value = png_data
-        self.layout_view.timer()  # type: ignore[attr-defined]
+        self.layout_view.timer()
 
     def _get_modifier_buttons(self, event: Event) -> int:
         shift = event["shiftKey"]
@@ -402,7 +403,7 @@ class LayoutWidget:
         self.refresh()
 
     def on_scroll(self, event: Event) -> None:
-        self.layout_view.timer()  # type: ignore[attr-defined]
+        self.layout_view.timer()
         delta = int(event["deltaY"])
         x = event["relativeX"]
         y = event["relativeY"]
@@ -411,7 +412,7 @@ class LayoutWidget:
         self.refresh()
 
     def on_mouse(self, event: Event) -> None:
-        self.layout_view.timer()  # type: ignore[attr-defined]
+        self.layout_view.timer()
         x = event["relativeX"]
         y = event["relativeY"]
         buttons = self._get_modifier_buttons(event)
@@ -430,14 +431,14 @@ class LayoutWidget:
                     kdb.DPoint(float(x), float(y)), buttons
                 )
         self.refresh()
-        self.layout_view.timer()  # type: ignore[attr-defined]
+        self.layout_view.timer()
 
     def on_mouse_enter(self, event: Event) -> None:
-        self.layout_view.timer()  # type: ignore[attr-defined]
+        self.layout_view.timer()
         self.layout_view.send_enter_event()
         self.refresh()
 
     def on_mouse_leave(self, event: Event) -> None:
-        self.layout_view.timer()  # type: ignore[attr-defined]
+        self.layout_view.timer()
         self.layout_view.send_leave_event()
         self.refresh()
