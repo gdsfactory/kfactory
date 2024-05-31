@@ -4003,6 +4003,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         VInstance(self).insert_into_flat(c, levels=0)
 
         display_kcell(c)
+        c.delete()
 
     def _ipython_display_(self) -> None:
         """Display a cell in a Jupyter Cell.
