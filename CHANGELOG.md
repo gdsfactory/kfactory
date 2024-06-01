@@ -9,6 +9,7 @@
 
 ## New
 
+- Better error prints [#366](https://github.com/gdsfactory/kfactory/pull/366)
 - Add length and length_straights to OpticalAllAngleRoute [#361](https://github.com/gdsfactory/kfactory/pull/361)
 - Add all easy access properties to VKCell and VInstance [#360](https://github.com/gdsfactory/kfactory/pull/360)
 - Add lyrdb option to `plot` [#359](https://github.com/gdsfactory/kfactory/pull/359)
