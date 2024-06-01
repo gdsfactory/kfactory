@@ -3118,7 +3118,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if overwrite_existing:
                         for c in list(self.layout.cells(cell.name)):
                             if c is not cell._kdb_cell:
-                                self[cell.cell_index()].delete()
+                                self[c.cell_index()].delete()
                     dbu = cell.kcl.layout.dbu
                     if cell._locked:
                         # If the cell is locked, it comes from a cache (most likely)
