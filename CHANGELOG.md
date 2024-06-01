@@ -18,6 +18,7 @@
 
 ## Bug Fixes
 
+- fix dy for VInstance [#365](https://github.com/gdsfactory/kfactory/pull/365)
 - typo [#364](https://github.com/gdsfactory/kfactory/pull/364)
 - fix virtual cell show hierarchy error [#358](https://github.com/gdsfactory/kfactory/pull/358)
 - Fix VKCell Setting Units [#355](https://github.com/gdsfactory/kfactory/pull/355)
