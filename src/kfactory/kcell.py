@@ -4638,7 +4638,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
             use_mirror: If False mirror flag does not get applied from the connection.
             use_angle: If False the angle does not get applied from the connection.
         """
-        if allow_width_mismatch is None:
+        if allow_layer_mismatch is None:
             allow_layer_mismatch = config.allow_layer_mismatch
         if allow_width_mismatch is None:
             allow_width_mismatch = config.allow_width_mismatch
