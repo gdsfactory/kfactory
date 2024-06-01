@@ -4876,7 +4876,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     @y.setter
     def y(self, __val: float) -> None:
         """Moves the instance so that the bbox's center x-coordinate."""
-        self.transform(kdb.DCplxTrans(__val - self.bbox().center().y, 0))
+        self.transform(kdb.DCplxTrans(0, __val - self.bbox().center().y))
 
     @property
     def center(self) -> kdb.DPoint:
@@ -5062,7 +5062,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     @dy.setter
     def dy(self, __val: float) -> None:
         """Moves the instance so that the bbox's center x-coordinate."""
-        self.transform(kdb.DCplxTrans(__val - self.bbox().center().y, 0))
+        self.transform(kdb.DCplxTrans(0, __val - self.bbox().center().y))
 
     @property
     def dcenter(self) -> kdb.DPoint:
