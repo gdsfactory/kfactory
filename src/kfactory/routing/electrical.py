@@ -4,7 +4,8 @@ from collections.abc import Callable
 
 from .. import kdb
 from ..kcell import Instance, KCell, Port
-from .manhattan import ManhattanRoutePathFunction, route_manhattan
+from ..kf_types import ManhattanRoutePathFunction
+from .manhattan import route_manhattan
 
 
 def route_elec(
