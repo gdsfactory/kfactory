@@ -3058,8 +3058,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         ) -> Callable[KCellParams, KCell]:
             sig = inspect.signature(f)
 
-            # previously was a KCellCache, but dict should do for most case
-            _cache: Cache[_HashedTuple, KCell] | dict[_HashedTuple, KCell] = cache or {}
+            _cache: Cache[_HashedTuple, KCell] | dict[_HashedTuple, KCell] = (
+                cache or Cache(maxsize=float("inf"))
+            )
 
             @functools.wraps(f)
             def wrapper_autocell(
