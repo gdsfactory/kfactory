@@ -3881,6 +3881,9 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         for _layer in layers:
             box += self.shapes(_layer).bbox()
 
+        for vinst in self.insts:
+            box += vinst.bbox()
+
         return box
 
     def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
@@ -4571,10 +4574,21 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
                     inst.insert_into_flat(cell, trans=trans * self.trans)
 
         else:
-            for layer in cell.kcl.layer_indexes():
-                reg = kdb.Region(self.cell.begin_shapes_rec(layer))
-                reg.transform((trans * self.trans).to_itrans(cell.kcl.dbu))
-                cell.shapes(layer).insert(reg)
+            if levels:
+                config.logger.warning(
+                    "Levels are not supported if the inserted Instance is a KCell."
+                )
+            if isinstance(cell, KCell):
+                for layer in cell.kcl.layer_indexes():
+                    reg = kdb.Region(self.cell.begin_shapes_rec(layer))
+                    reg.transform((trans * self.trans).to_itrans(cell.kcl.dbu))
+                    cell.shapes(layer).insert(reg)
+            else:
+                for layer, shapes in self.cell._shapes.items():
+                    for shape in shapes.transform(trans * self.trans):
+                        cell.shapes(layer).insert(shape)
+                for vinst in self.cell.insts:
+                    vinst.insert_into_flat(cell, trans=trans * self.trans)
 
     @overload
     def connect(
