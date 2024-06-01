@@ -3147,7 +3147,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                                 raise ValueError(
                                     "Most foundries will not allow off-grid instances. "
                                     "Please flatten them or add check_instances=False"
-                                    " to the decorator."
+                                    " to the decorator.\n"
+                                    "Cellnames of instances affected by this:"
+                                    + "\n".join(
+                                        inst.cell.name
+                                        for inst in cell.each_inst()
+                                        if inst.is_complex()
+                                    )
                                 )
                         case CHECK_INSTANCES.FLATTEN:
                             if any(inst.is_complex() for inst in cell.each_inst()):
@@ -3913,6 +3919,9 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         for _layer in layers:
             box += self.shapes(_layer).bbox()
 
+        for vinst in self.insts:
+            box += vinst.bbox()
+
         return box
 
     def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
@@ -4504,7 +4513,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
             if _cell_name is None:
                 raise ValueError(
                     "Cannot insert a non-flattened VInstance into a VKCell when the"
-                    " name is 'None'"
+                    f" name is 'None'. VKCell at {self.trans}"
                 )
             if _trans != kdb.DCplxTrans():
                 _trans_str = (
@@ -4603,10 +4612,21 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
                     inst.insert_into_flat(cell, trans=trans * self.trans)
 
         else:
-            for layer in cell.kcl.layer_indexes():
-                reg = kdb.Region(self.cell.begin_shapes_rec(layer))
-                reg.transform((trans * self.trans).to_itrans(cell.kcl.dbu))
-                cell.shapes(layer).insert(reg)
+            if levels:
+                config.logger.warning(
+                    "Levels are not supported if the inserted Instance is a KCell."
+                )
+            if isinstance(cell, KCell):
+                for layer in cell.kcl.layer_indexes():
+                    reg = kdb.Region(self.cell.begin_shapes_rec(layer))
+                    reg.transform((trans * self.trans).to_itrans(cell.kcl.dbu))
+                    cell.shapes(layer).insert(reg)
+            else:
+                for layer, shapes in self.cell._shapes.items():
+                    for shape in shapes.transform(trans * self.trans):
+                        cell.shapes(layer).insert(shape)
+                for vinst in self.cell.insts:
+                    vinst.insert_into_flat(cell, trans=trans * self.trans)
 
     @overload
     def connect(
@@ -4670,7 +4690,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
             use_mirror: If False mirror flag does not get applied from the connection.
             use_angle: If False the angle does not get applied from the connection.
         """
-        if allow_width_mismatch is None:
+        if allow_layer_mismatch is None:
             allow_layer_mismatch = config.allow_layer_mismatch
         if allow_width_mismatch is None:
             allow_width_mismatch = config.allow_width_mismatch
@@ -4908,7 +4928,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     @y.setter
     def y(self, __val: float) -> None:
         """Moves the instance so that the bbox's center x-coordinate."""
-        self.transform(kdb.DCplxTrans(__val - self.bbox().center().y, 0))
+        self.transform(kdb.DCplxTrans(0, __val - self.bbox().center().y))
 
     @property
     def center(self) -> kdb.DPoint:
@@ -5094,7 +5114,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     @dy.setter
     def dy(self, __val: float) -> None:
         """Moves the instance so that the bbox's center x-coordinate."""
-        self.transform(kdb.DCplxTrans(__val - self.bbox().center().y, 0))
+        self.transform(kdb.DCplxTrans(0, __val - self.bbox().center().y))
 
     @property
     def dcenter(self) -> kdb.DPoint:
