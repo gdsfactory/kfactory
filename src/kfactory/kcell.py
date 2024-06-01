@@ -3115,7 +3115,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                                 raise ValueError(
                                     "Most foundries will not allow off-grid instances. "
                                     "Please flatten them or add check_instances=False"
-                                    " to the decorator."
+                                    " to the decorator.\n"
+                                    "Cellnames of instances affected by this:"
+                                    + "\n".join(
+                                        inst.cell.name
+                                        for inst in cell.each_inst()
+                                        if inst.is_complex()
+                                    )
                                 )
                         case CHECK_INSTANCES.FLATTEN:
                             if any(inst.is_complex() for inst in cell.each_inst()):
@@ -4475,7 +4481,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
             if _cell_name is None:
                 raise ValueError(
                     "Cannot insert a non-flattened VInstance into a VKCell when the"
-                    " name is 'None'"
+                    f" name is 'None'. VKCell at {self.trans}"
                 )
             if _trans != kdb.DCplxTrans():
                 _trans_str = (
