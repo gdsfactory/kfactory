@@ -1,3 +1,26 @@
+<a name="v0.16.1"></a>
+# [v0.16.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.16.1) - 02 Jun 2024
+
+# What's Changed
+
+## New
+
+- Improve logger [#368](https://github.com/gdsfactory/kfactory/pull/368)
+
+## Bug Fixes
+
+- fix locked cell error [#367](https://github.com/gdsfactory/kfactory/pull/367)
+
+## Documentation
+
+- Improve logger [#368](https://github.com/gdsfactory/kfactory/pull/368)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.16.0...v0.16.1
+
+
+[Changes][v0.16.1]
+
+
 <a name="v0.16.0"></a>
 # [v0.16.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.16.0) - 02 Jun 2024
 
@@ -580,6 +603,7 @@
 [Changes][v0.4.0]
 
 
+[v0.16.1]: https://github.com/gdsfactory/kfactory/compare/v0.16.0...v0.16.1
 [v0.16.0]: https://github.com/gdsfactory/kfactory/compare/v0.15.2...v0.16.0
 [v0.15.2]: https://github.com/gdsfactory/kfactory/compare/v0.15.1...v0.15.2
 [v0.15.1]: https://github.com/gdsfactory/kfactory/compare/v0.15.0...v0.15.1
