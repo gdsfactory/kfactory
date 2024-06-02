@@ -3117,6 +3117,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                             self.future_cell_name,
                         )
                     cell = f(**params)
+                    if cell._locked:
+                        # If the cell is locked, it comes from a cache (most likely)
+                        # and should be copied first
+                        cell = cell.dup()
                     if set_name:
                         cell.name = name
                         self.future_cell_name = None
@@ -3125,10 +3129,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                             if c is not cell._kdb_cell:
                                 self[c.cell_index()].delete()
                     dbu = cell.kcl.layout.dbu
-                    if cell._locked:
-                        # If the cell is locked, it comes from a cache (most likely)
-                        # and should be copied first
-                        cell = cell.dup()
                     if set_settings:
                         settings = cell.settings.model_dump()
                         settings_units = cell.settings_units.model_dump()
