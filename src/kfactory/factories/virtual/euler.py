@@ -4,7 +4,7 @@ from collections.abc import Callable
 from typing import Any, Protocol
 
 from ... import kdb
-from ...conf import config
+from ...conf import logger
 from ...enclosure import LayerEnclosure
 from ...factories.euler import euler_bend_points
 from ...kcell import Info, KCLayout, MetaData, VKCell
@@ -99,14 +99,14 @@ def virtual_bend_euler_factory(
         """
         c = VKCell()
         if angle < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative lengths are not allowed {angle} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."
             )
             angle = -angle
         if width < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative widths are not allowed {width} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."

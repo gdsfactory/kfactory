@@ -10,7 +10,7 @@ from typing import Literal, Protocol
 import numpy as np
 
 from .. import kdb
-from ..conf import config
+from ..conf import logger
 from ..enclosure import clean_points
 from ..kcell import KCLayout, Port
 
@@ -415,7 +415,7 @@ class ManhattanRouter:
 
                 # attempt small routing
                 if x < self.bend90_radius and y_abs < self.bend90_radius:
-                    config.logger.warning(
+                    logger.warning(
                         "route is too small, potential collisions: "
                         f"{self.start=}; {self.end=}; {self.start.pts=}"
                     )
@@ -470,13 +470,13 @@ class ManhattanRouter:
         if has_collisions and log_errors is not None:
             match log_errors:
                 case "error":
-                    config.logger.error(
+                    logger.error(
                         f"Router {self.start.t=}, {self.end.t=}, {self.start.pts=},"
                         f" {self.end.pts=} has collisions in the manhattan route.\n"
                         f"{collisions=}"
                     )
                 case "warn":
-                    config.logger.warning(
+                    logger.warning(
                         f"Router {self.start.t=}, {self.end.t=}, {self.start.pts=},"
                         f" {self.end.pts=} has collisions in the manhattan route.\n"
                         f"{collisions=}"
@@ -606,7 +606,7 @@ def route_smart(
             box_region.merge()
     if sort_ports:
         if bboxes is None:
-            config.logger.warning(
+            logger.warning(
                 "No bounding boxes were given but route_smart was configured to reorder"
                 " the ports. Without bounding boxes route_smart cannot determine "
                 "whether ports belong to specific bundles or they should build one "

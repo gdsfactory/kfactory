@@ -4,7 +4,7 @@ from collections.abc import Callable
 from typing import Any, Protocol
 
 from ... import kdb
-from ...conf import config
+from ...conf import logger
 from ...enclosure import LayerEnclosure
 from ...kcell import Info, KCLayout, LayerEnum, MetaData, VKCell, vcell
 from .utils import extrude_backbone
@@ -105,14 +105,14 @@ def virtual_straight_factory(
         """
         c = VKCell(kcl=kcl)
         if length < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative lengths are not allowed {length} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."
             )
             length = -length
         if width < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative widths are not allowed {width} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."

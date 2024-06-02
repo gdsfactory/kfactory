@@ -16,7 +16,7 @@ import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr, field_validator
 
 from . import kdb
-from .conf import config
+from .conf import config, logger
 from .port import filter_layer
 
 if TYPE_CHECKING:
@@ -816,7 +816,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
             tile_size = min_tile_size_rec * 2
 
         if float(tile_size) <= min_tile_size_rec:
-            config.logger.warning(
+            logger.warning(
                 "Tile size should be larger than the maximum of "
                 "the enclosures (recommendation: {} / {})",
                 tile_size,
@@ -880,14 +880,14 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                     queue_str += f"_output(target_{layer},max_reg & _tile, true);"
 
                 tp.queue(queue_str)
-                config.logger.debug(
+                logger.debug(
                     "String queued for {} on layer {}: {}", c.name, layer, queue_str
                 )
 
             operators.append((layer, operator))
 
         c.kcl.start_changes()
-        config.logger.info("Starting minkowski on {}", c.name)
+        logger.info("Starting minkowski on {}", c.name)
         tp.execute(f"Minkowski {c.name}")
         c.kcl.end_changes()
 
@@ -1046,7 +1046,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                     _layer = kcl.layers(layer)  # type: ignore[call-arg]
                 except ValueError:
                     _layer = kcl.layer(layer.layer, layer.datatype)
-                    config.logger.warning(
+                    logger.warning(
                         "{layer.name} - {layer.layer}/{layer.datatype} is not"
                         " available in the new KCLayout {kcl.name}, using layer"
                         " index instead",
@@ -1439,7 +1439,7 @@ class KCellEnclosure(BaseModel):
             tile_size = min_tile_size_rec * 2
 
         if float(tile_size) <= min_tile_size_rec:
-            config.logger.warning(
+            logger.warning(
                 "Tile size should be larger than the maximum of "
                 "the enclosures (recommendation: {} / {})",
                 tile_size,
@@ -1455,7 +1455,7 @@ class KCellEnclosure(BaseModel):
                 if enc.main_layer not in inputs:
                     tp.input(f"{_inp}", c.kcl.layout, c.cell_index(), enc.main_layer)
                     inputs.add(enc.main_layer)
-                    config.logger.debug("Created input {}", _inp)
+                    logger.debug("Created input {}", _inp)
 
                 layer_regiontilesoperators: dict[LayerSection, RegionTilesOperator] = {}
 
@@ -1467,7 +1467,7 @@ class KCellEnclosure(BaseModel):
                         operator = RegionTilesOperator(cell=c, layers=[layer])
                         layer_regiontilesoperators[layer_section] = operator
                         tp.output(_out, operator)
-                        config.logger.debug("Created output {}", _out)
+                        logger.debug("Created output {}", _out)
 
                         for i, section in enumerate(reversed(layer_section.sections)):
                             queue_str = (
@@ -1523,7 +1523,7 @@ class KCellEnclosure(BaseModel):
                                 queue_str += f"_output({_out}, max_reg & _tile, true);"
 
                             tp.queue(queue_str)
-                            config.logger.debug(
+                            logger.debug(
                                 "String queued for {} on layer {}: '{}'",
                                 c.name,
                                 layer,
@@ -1531,7 +1531,7 @@ class KCellEnclosure(BaseModel):
                             )
 
         c.kcl.start_changes()
-        config.logger.info("Starting minkowski on {}", c.name)
+        logger.info("Starting minkowski on {}", c.name)
         tp.execute(f"Minkowski {c.name}")
         c.kcl.end_changes()
 

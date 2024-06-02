@@ -6,7 +6,7 @@ from typing import Any, Literal
 from pydantic import BaseModel
 
 from .. import kdb, rdb
-from ..conf import config
+from ..conf import config, logger
 from ..factories import StraightFactory
 from ..kcell import Instance, KCell, LayerEnum, Port
 from .manhattan import (
@@ -72,7 +72,7 @@ def vec_angle(v: kdb.Vector) -> int:
         case (0, y) if y < 0:
             return 3
         case _:
-            config.logger.warning(f"{v} is not a manhattan, cannot determine direction")
+            logger.warning(f"{v} is not a manhattan, cannot determine direction")
     return -1
 
 
@@ -188,7 +188,7 @@ def route_loopback(
     )
 
 
-@config.logger.catch(reraise=True)
+@logger.catch(reraise=True)
 def route(
     c: KCell,
     p1: Port,
@@ -482,7 +482,7 @@ def route(
     return route
 
 
-@config.logger.catch(reraise=True)
+@logger.catch(reraise=True)
 def route_bundle(
     c: KCell,
     start_ports: list[Port],
@@ -812,10 +812,10 @@ def place90(
     else:
         b90p1 = bend90_ports[0]
         b90p2 = bend90_ports[1]
-    assert b90p1.name is not None, config.logger.error(
+    assert b90p1.name is not None, logger.error(
         "bend90_cell needs named ports, {}", b90p1
     )
-    assert b90p2.name is not None, config.logger.error(
+    assert b90p2.name is not None, logger.error(
         "bend90_cell needs named ports, {}", b90p2
     )
     b90c = kdb.Trans(

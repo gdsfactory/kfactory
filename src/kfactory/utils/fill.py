@@ -6,7 +6,7 @@ Filling empty regions in [KCells][kfactory.kcell.KCell] with filling cells.
 from collections.abc import Iterable
 
 from .. import kdb
-from ..conf import config
+from ..conf import config, logger
 from ..kcell import KCell, KCLayout, LayerEnum
 
 stop = False
@@ -237,11 +237,11 @@ def fill_tiled(
         tp.queue(queue_str)
         c.kcl.start_changes()
         try:
-            config.logger.debug(
+            logger.debug(
                 "Filling {} with {}", c.kcl.future_cell_name or c.name, fill_cell.name
             )
-            config.logger.debug("fill string: '{}'", queue_str)
+            logger.debug("fill string: '{}'", queue_str)
             tp.execute(f"Fill {c.name}")
-            config.logger.info("done with filling {}", c.name)
+            logger.info("done with filling {}", c.name)
         finally:
             c.kcl.end_changes()
