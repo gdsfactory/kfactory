@@ -13,8 +13,8 @@ Logging is done through [`loguru`](https://github.com/Delgan/loguru). KFactory a
 The logger can be used to log message to the console.
 
 ```python
-kfactory.config.logger.debug("message {}, {}", var1, var2)
-kfactory.config.logger.info(f"f-string message {var}")
+kfactory.logger.debug("message {}, {}", var1, var2)
+kfactory.logger.info(f"f-string message {var}")
 ```
 
 ### Logging Options
@@ -37,15 +37,15 @@ so anything below "INFO" is not output. This can be configured either by setting
 
 | Logging Function                  | Minimum `kfactory.config.logfilter.level` |
 |-----------------------------------|-------------------------------------------|
-| `kfactory.config.logger.trace`    | `TRACE`                                   |
-| `kfactory.config.logger.debug`    | `DEBUG`                                   |
-| `kfactory.config.logger.info`     | `INFO`                                    |
-| `kfactory.config.logger.success`  | `SUCCESS`                                 |
-| `kfactory.config.logger.warning`  | `WARNING`                                 |
-| `kfactory.config.logger.error`    | `ERROR`                                   |
-| `kfactory.config.logger.critical` | `CRITICAL`                                |
+| `kfactory.logger.trace`    | `TRACE`                                   |
+| `kfactory.logger.debug`    | `DEBUG`                                   |
+| `kfactory.logger.info`     | `INFO`                                    |
+| `kfactory.logger.success`  | `SUCCESS`                                 |
+| `kfactory.logger.warning`  | `WARNING`                                 |
+| `kfactory.logger.error`    | `ERROR`                                   |
+| `kfactory.logger.critical` | `CRITICAL`                                |
 
-Alternatively `kfactory.config.logger.log(level: str | int, message: str)` can be used.
+Alternatively `kfactory.logger.log(level: str | int, message: str)` can be used.
 
 Setting the loglevel through environment:
 
@@ -71,7 +71,7 @@ loguru's logger offers a catch decorator to catch Exceptions and give a more con
 import kfactory as kf
 
 
-@kf.config.logger.catch
+@kf.logger.catch
 def test(x: int) -> None:
     if x != 42:
         raise ValueError(f"x is not 42, it's {x}")

@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from scipy.optimize import minimize_scalar  # type: ignore[import-untyped,unused-ignore]
 
 from ... import kdb
-from ...conf import config
+from ...conf import logger
 from ...kcell import KCell, Port, VInstance, VKCell
 
 __all__ = ["OpticalAllAngleRoute", "route"]
@@ -193,7 +193,7 @@ def route(
     )
 
 
-@config.logger.catch(reraise=True)
+@logger.catch(reraise=True)
 def route_bundle(
     c: VKCell | KCell,
     start_ports: list[Port],

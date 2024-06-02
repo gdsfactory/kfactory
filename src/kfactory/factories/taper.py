@@ -7,7 +7,7 @@ from collections.abc import Callable
 from typing import Any, Protocol
 
 from .. import kdb, kf_types
-from ..conf import config
+from ..conf import logger
 from ..enclosure import LayerEnclosure
 from ..kcell import Info, KCell, KCLayout, MetaData, kcl
 
@@ -132,14 +132,14 @@ def taper_factory(
         """
         c = kcl.kcell()
         if length < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative lengths are not allowed {length} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."
             )
             length = -length
         if width1 < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative widths are not allowed {width1} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."
@@ -147,7 +147,7 @@ def taper_factory(
             width1 = -width1
 
         if width2 < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative widths are not allowed {width2} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."

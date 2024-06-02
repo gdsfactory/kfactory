@@ -50,7 +50,7 @@ from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec, Self  # noqa: UP035
 
 from . import __version__, kdb, lay, rdb
-from .conf import CHECK_INSTANCES, LogLevel, config
+from .conf import CHECK_INSTANCES, LogLevel, config, logger
 from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
@@ -494,7 +494,7 @@ class PROPID(IntEnum):
 class LockedError(AttributeError):
     """Raised when a locked cell is being modified."""
 
-    @config.logger.catch(reraise=True)
+    @logger.catch(reraise=True)
     def __init__(self, kcell: KCell | VKCell):
         """Throw _locked error."""
         super().__init__(
@@ -511,7 +511,7 @@ class MergeError(ValueError):
 class PortWidthMismatch(ValueError):
     """Error thrown when two ports don't have a matching `width`."""
 
-    @config.logger.catch(reraise=True)
+    @logger.catch(reraise=True)
     def __init__(
         self,
         inst: Instance,
@@ -538,7 +538,7 @@ class PortWidthMismatch(ValueError):
 class PortLayerMismatch(ValueError):
     """Error thrown when two ports don't have a matching `layer`."""
 
-    @config.logger.catch(reraise=True)
+    @logger.catch(reraise=True)
     def __init__(
         self,
         kcl: KCLayout,
@@ -576,7 +576,7 @@ class PortLayerMismatch(ValueError):
 class PortTypeMismatch(ValueError):
     """Error thrown when two ports don't have a matching `port_type`."""
 
-    @config.logger.catch(reraise=True)
+    @logger.catch(reraise=True)
     def __init__(
         self,
         inst: Instance,
@@ -653,7 +653,7 @@ class PortCheck(IntFlag):
     all_overlap = width + port_type + layer
 
 
-@config.logger.catch(reraise=True)
+@logger.catch(reraise=True)
 def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -> None:
     if checks & PortCheck.opposite:
         assert (
@@ -1543,7 +1543,7 @@ class KCell:
                 in their native KLayout formats.
         """
         # see: wait for KLayout update https://github.com/KLayout/klayout/issues/1609
-        config.logger.critical(
+        logger.critical(
             "KLayout <=0.28.15 (last update 2024-02-02) cannot read LayoutMetaInfo on"
             " 'Cell.read'. kfactory uses these extensively for ports, info, and "
             "settings. Therefore proceed at your own risk."
@@ -1730,7 +1730,7 @@ class KCell:
     ) -> Instance | None:
         """Transforms the instance or cell with the transformation given."""
         if not no_warn:
-            config.logger.warning(
+            logger.warning(
                 "You are transforming the KCell {}. It is highly discouraged to do"
                 " this. You probably want to transform an instance instead.",
                 self.name,
@@ -3090,6 +3090,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     params.pop(param, None)
                     param_units.pop(param, None)
 
+                @logger.catch(reraise=True)
                 @cachetools.cached(cache=_cache)
                 @functools.wraps(f)
                 def wrapped_cell(
@@ -3105,13 +3106,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                             name = get_cell_name(f.__name__, **params)
                         self.future_cell_name = name
                         if layout_cache:
-                            config.logger.debug(
+                            logger.debug(
                                 "Loading {} from layout cache", self.future_cell_name
                             )
                             c = self.layout.cell(self.future_cell_name)
                             if c is not None:
                                 return self[c.cell_index()]
-                        config.logger.debug(
+                        logger.debug(
                             "Constructing {}",
                             self.future_cell_name,
                         )
@@ -3278,7 +3279,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         register_factory: bool = True,
     ) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]: ...
 
-    @config.logger.catch(reraise=True)
+    @logger.catch(reraise=True)
     def vcell(
         self,
         _func: Callable[KCellParams, VKCell] | None = None,
@@ -4617,7 +4618,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
 
         else:
             if levels:
-                config.logger.warning(
+                logger.warning(
                     "Levels are not supported if the inserted Instance is a KCell."
                 )
             if isinstance(cell, KCell):
@@ -6997,7 +6998,7 @@ class InstancePorts:
             ports = filter_orientation(ports, orientation)
         return list(ports)
 
-    @config.logger.catch(reraise=True)
+    @logger.catch(reraise=True)
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]
     ) -> Port:
@@ -7462,7 +7463,7 @@ def show(
                     file = tf
                     delete = False
         else:
-            config.logger.info(
+            logger.info(
                 "git isn't installed. For better file storage, "
                 "please install kfactory[git] or gitpython."
             )
@@ -7513,7 +7514,7 @@ def show(
                     file = tf
                     delete = False
         else:
-            config.logger.info(
+            logger.info(
                 "git isn't installed. For better file storage, "
                 "please install kfactory[git] or gitpython."
             )
@@ -7544,7 +7545,7 @@ def show(
         )
     if not file.is_file():
         raise ValueError(f"{file} is not a File")
-    config.logger.debug("klive file: {}", file)
+    logger.debug("klive file: {}", file)
     data_dict = {
         "gds": str(file),
         "keep_position": keep_position,
@@ -7573,7 +7574,7 @@ def show(
                         lyrdbfile = tf
                         delete_lyrdb = False
             else:
-                config.logger.info(
+                logger.info(
                     "git isn't installed. For better file storage, "
                     "please install kfactory[git] or gitpython."
                 )
@@ -7619,7 +7620,7 @@ def show(
                         l2nfile = tf
                         delete_l2n = False
             else:
-                config.logger.info(
+                logger.info(
                     "git isn't installed. For better file storage, "
                     "please install kfactory[git] or gitpython."
                 )
@@ -7651,7 +7652,7 @@ def show(
         conn.sendall(enc_data)
         conn.settimeout(5)
     except OSError:
-        config.logger.warning("Could not connect to klive server")
+        logger.warning("Could not connect to klive server")
     else:
         msg = ""
         try:
@@ -7660,21 +7661,21 @@ def show(
                 jmsg = json.loads(msg)
                 match jmsg["type"]:
                     case "open":
-                        config.logger.info(
+                        logger.info(
                             "klive v{version}: Opened file '{file}'",
                             version=jmsg["version"],
                             file=jmsg["file"],
                         )
                     case "reload":
-                        config.logger.info(
+                        logger.info(
                             "klive v{version}: Reloaded file '{file}'",
                             version=jmsg["version"],
                             file=jmsg["file"],
                         )
             except json.JSONDecodeError:
-                config.logger.info(f"Message from klive: {msg}")
+                logger.info(f"Message from klive: {msg}")
         except OSError:
-            config.logger.warning("klive didn't send data, closing")
+            logger.warning("klive didn't send data, closing")
         finally:
             conn.close()
 
@@ -7761,7 +7762,7 @@ class MergeDiff:
 
     def on_dbu_differs(self, dbu_a: float, dbu_b: float) -> None:
         if self.loglevel is not None:
-            config.logger.log(
+            logger.log(
                 self.loglevel,
                 f"DBU differs between existing layout {dbu_a!r}"
                 f" and the new layout {dbu_b!r}.",
@@ -7789,7 +7790,7 @@ class MergeDiff:
                 kdb.LayoutMetaInfo(m_a.name + "_a", m_a.value, m_a.description, True)
             )
             if self.loglevel is not None:
-                config.logger.log(
+                logger.log(
                     self.loglevel,
                     f"MetaInfo {key_a!r} exists only in cell {cell_a.name!r}"
                     f" in Layout {self.name_a}",
@@ -7806,7 +7807,7 @@ class MergeDiff:
                 kdb.LayoutMetaInfo(m_b.name + "_b", m_b.value, m_b.description, True)
             )
             if self.loglevel is not None:
-                config.logger.log(
+                logger.log(
                     self.loglevel,
                     f"MetaInfo {key_b!r} exists only in cell {cell_b.name!r}"
                     f" in Layout {self.name_a}",
@@ -7830,7 +7831,7 @@ class MergeDiff:
                     )
                 )
                 if self.loglevel is not None:
-                    config.logger.log(
+                    logger.log(
                         self.loglevel,
                         f"MetaInfo {key!r} exists in cells which are to be merged"
                         f" in Layout {self.name_a}. But their values differ: "
@@ -7847,14 +7848,12 @@ class MergeDiff:
     def on_polygon_in_a_only(self, poly: kdb.Polygon, propid: int) -> None:
         """Called when there is only a polygon in the cell_a."""
         if self.loglevel is not None:
-            config.logger.log(self.loglevel, f"Found {poly=} in {self.name_a} only.")
+            logger.log(self.loglevel, f"Found {poly=} in {self.name_a} only.")
         self.cell_a.shapes(self.layer_a).insert(poly)
 
     def on_instance_in_a_only(self, instance: kdb.CellInstArray, propid: int) -> None:
         if self.loglevel is not None:
-            config.logger.log(
-                self.loglevel, f"Found {instance=} in {self.name_a} only."
-            )
+            logger.log(self.loglevel, f"Found {instance=} in {self.name_a} only.")
         cell = self.layout_a.cell(instance.cell_index)
 
         regions: list[kdb.Region] = []
@@ -7872,9 +7871,7 @@ class MergeDiff:
 
     def on_instance_in_b_only(self, instance: kdb.CellInstArray, propid: int) -> None:
         if self.loglevel is not None:
-            config.logger.log(
-                self.loglevel, f"Found {instance=} in {self.name_b} only."
-            )
+            logger.log(self.loglevel, f"Found {instance=} in {self.name_b} only.")
         cell = self.layout_b.cell(instance.cell_index)
 
         regions: list[kdb.Region] = []
@@ -7893,7 +7890,7 @@ class MergeDiff:
     def on_polygon_in_b_only(self, poly: kdb.Polygon, propid: int) -> None:
         """Called when there is only a polygon in the cell_b."""
         if self.loglevel is not None:
-            config.logger.log(self.loglevel, f"Found {poly=} in {self.name_b} only.")
+            logger.log(self.loglevel, f"Found {poly=} in {self.name_b} only.")
         self.cell_b.shapes(self.layer_b).insert(poly)
 
     def on_end_layer(self) -> None:

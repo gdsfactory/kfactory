@@ -17,7 +17,7 @@ from scipy.optimize import brentq  # type:ignore[import-untyped,unused-ignore]
 from scipy.special import fresnel  # type:ignore[import-untyped,unused-ignore]
 
 from .. import kdb, kf_types
-from ..conf import config
+from ..conf import logger
 from ..enclosure import LayerEnclosure, extrude_path
 from ..kcell import Info, KCell, KCLayout, MetaData
 
@@ -280,14 +280,14 @@ def bend_euler_factory(
         """
         c = kcl.kcell()
         if angle < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative lengths are not allowed {angle} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."
             )
             angle = -angle
         if width < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative widths are not allowed {width} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."
@@ -408,7 +408,7 @@ def bend_s_euler_factory(
         """
         c = kcl.kcell()
         if width < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative widths are not allowed {width} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."

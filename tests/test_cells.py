@@ -119,9 +119,7 @@ def test_cells(cell_name: str) -> None:
             c << c_xor
             c.show()
 
-            kf.config.logger.critical(
-                f"Differences found in {cell!r} on layer {layer_tuple}"
-            )
+            kf.logger.critical(f"Differences found in {cell!r} on layer {layer_tuple}")
             val = input("Save current GDS as new reference (Y)? [Y/n]")
             if not val.upper().startswith("N"):
                 logger.info(f"replacing file {str(ref_file)!r}")

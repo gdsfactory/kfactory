@@ -9,7 +9,7 @@ from typing import Any, Protocol
 import numpy as np
 
 from .. import kdb, kf_types
-from ..conf import config
+from ..conf import logger
 from ..enclosure import LayerEnclosure, extrude_path
 from ..kcell import Info, KCell, KCLayout, MetaData
 
@@ -107,14 +107,14 @@ def bend_circular_factory(
         r = radius
 
         if angle < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative angles are not allowed {angle} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."
             )
             angle = -angle
         if width < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative widths are not allowed {width} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."

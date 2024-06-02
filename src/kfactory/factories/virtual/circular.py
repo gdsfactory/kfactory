@@ -6,7 +6,7 @@ from typing import Any, Protocol
 import numpy as np
 
 from ... import kdb
-from ...conf import config
+from ...conf import logger
 from ...enclosure import LayerEnclosure
 from ...kcell import Info, KCLayout, MetaData, VKCell
 from .utils import extrude_backbone
@@ -102,14 +102,14 @@ def virtual_bend_circular_factory(
         """
         c = VKCell()
         if angle < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative lengths are not allowed {angle} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."
             )
             angle = -angle
         if width < 0:
-            config.logger.critical(
+            logger.critical(
                 f"Negative widths are not allowed {width} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
                 " lengths."

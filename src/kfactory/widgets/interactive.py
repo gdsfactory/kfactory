@@ -27,7 +27,7 @@ try:
     )
 
     from .. import kdb, lay
-    from ..conf import config
+    from ..conf import config, logger
     from ..kcell import KCell
 
 except ImportError as e:
@@ -195,7 +195,7 @@ class LayoutWidget:
             else button.default_color
         )
 
-        config.logger.info("button toggle")
+        logger.info("button toggle")
         for props in self.layout_view.each_layer():
             if props == button.layer_props:
                 props.visible = not props.visible

@@ -8,16 +8,13 @@ import sys
 import traceback
 from enum import Enum
 from itertools import takewhile
-from typing import TYPE_CHECKING, Any, ClassVar, Literal
+from typing import Any, Literal
 
 import loguru
 import rich.console
 from loguru import logger as logger
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-if TYPE_CHECKING:
-    from loguru import Logger
 
 
 def add_traceback(record: loguru.Record) -> None:
@@ -50,7 +47,7 @@ def tracing_formatter(record: loguru.Record) -> str:
         return (
             "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}"
             "</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan>"
-            " - <level>{message}</level>"
+            " - <level>{message}</level>\n{exception}"
         )
 
 
@@ -140,8 +137,6 @@ class Settings(BaseSettings):
 
     n_threads: int = get_affinity()
     """Number of threads to use for multithreaded operations."""
-    logger: ClassVar[Logger] = logger
-    """Logger used by kfactory."""
     logfilter: LogFilter = Field(default_factory=LogFilter)
     """Can configure the logger to ignore certain levels or by regex."""
     display_type: Literal["widget", "image", "docs"] = "image"
@@ -166,6 +161,22 @@ class Settings(BaseSettings):
     connect_use_angle: bool = True
     cell_overwrite_existing: bool = False
     cell_layout_cache: bool = False
+
+    @field_validator("logfilter")
+    @classmethod
+    def _validate_logfilter(cls, logfilter: LogFilter) -> LogFilter:
+        logger.remove()
+        logger.add(
+            sys.stdout,
+            format=tracing_formatter,
+            filter=logfilter,
+            enqueue=True,
+            backtrace=True,
+        )
+        logger.debug("LogLevel: {}", logfilter.level)
+        logger.patch(add_traceback)
+
+        return logfilter
 
     @field_validator("cell_overwrite_existing")
     @classmethod
@@ -203,10 +214,6 @@ class Settings(BaseSettings):
     def __init__(self, **data: Any):
         """Set log filter and run pydantic."""
         super().__init__(**data)
-        self.logger.remove()
-        self.logger.add(sys.stdout, format=tracing_formatter, filter=self.logfilter)
-        self.logger.debug("LogLevel: {}", self.logfilter.level)
-        self.logger.patch(add_traceback)
 
 
 config = Settings()

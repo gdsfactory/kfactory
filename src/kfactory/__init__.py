@@ -33,13 +33,12 @@ from .kcell import (
     show,
 )
 from . import cells, enclosure, kf_types, placer, port, routing, technology, utils
-from .conf import config
+from .conf import config, logger
 from .enclosure import LayerEnclosure, KCellEnclosure
 from .grid import flexgrid_dbu, flexgrid, grid_dbu, grid
 
 from aenum import constant  # type: ignore[import-untyped,unused-ignore]
 
-logger = config.logger
 
 __all__ = [
     "Info",
