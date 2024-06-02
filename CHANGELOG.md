@@ -9,6 +9,7 @@
 
 ## New
 
+- Add `overwrite_existing` and `layout_cache` options to the cell decorator [#362](https://github.com/gdsfactory/kfactory/pull/362)
 - Better error prints [#366](https://github.com/gdsfactory/kfactory/pull/366)
 - Add length and length_straights to OpticalAllAngleRoute [#361](https://github.com/gdsfactory/kfactory/pull/361)
 - Add all easy access properties to VKCell and VInstance [#360](https://github.com/gdsfactory/kfactory/pull/360)
