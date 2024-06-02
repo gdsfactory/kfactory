@@ -3090,7 +3090,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     params.pop(param, None)
                     param_units.pop(param, None)
 
-                @config.logger.catch(reraise=True)
                 @cachetools.cached(cache=_cache)
                 @functools.wraps(f)
                 def wrapped_cell(
