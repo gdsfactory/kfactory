@@ -2975,7 +2975,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         post_process: Iterable[Callable[[KCell], None]] = [],
     ) -> Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]: ...
 
-    @config.logger.catch(reraise=True)
     def cell(
         self,
         _func: KCellFunc[KCellParams] | None = None,
@@ -3091,6 +3090,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     params.pop(param, None)
                     param_units.pop(param, None)
 
+                @config.logger.catch(reraise=True)
                 @cachetools.cached(cache=_cache)
                 @functools.wraps(f)
                 def wrapped_cell(
@@ -3105,13 +3105,17 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         else:
                             name = get_cell_name(f.__name__, **params)
                         self.future_cell_name = name
-                        config.logger.debug(
-                            "Concstructing or retrieving Cell {}", self.future_cell_name
-                        )
                         if layout_cache:
+                            config.logger.debug(
+                                "Loading {} from layout cache", self.future_cell_name
+                            )
                             c = self.layout.cell(self.future_cell_name)
                             if c is not None:
                                 return self[c.cell_index()]
+                        config.logger.debug(
+                            "Constructing {}",
+                            self.future_cell_name,
+                        )
                     cell = f(**params)
                     if set_name:
                         cell.name = name
@@ -3143,7 +3147,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         cell_info[name] = value
                     cell.info = Info(**cell_info)
                     match check_instances:
-                        case CHECK_INSTANCES.ERROR:
+                        case CHECK_INSTANCES.RAISE:
                             if any(inst.is_complex() for inst in cell.each_inst()):
                                 raise ValueError(
                                     "Most foundries will not allow off-grid instances. "

@@ -134,8 +134,13 @@ def test_cell_decorator_error() -> None:
         c = kcl2.kcell("wrong_test")
         return c
 
+    regex = kf.config.logfilter.regex
+    kf.config.logfilter.regex = (
+        r"^An error has been caught in function 'wrapper_autocell'"
+    )
     with pytest.raises(ValueError):
         wrong_cell()
+    kf.config.logfilter.regex = regex
 
 
 def test_info() -> None:
