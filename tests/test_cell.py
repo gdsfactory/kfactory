@@ -1,6 +1,7 @@
 import pytest
 import kfactory as kf
 from collections.abc import Callable
+from tempfile import NamedTemporaryFile
 
 
 def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
@@ -133,8 +134,13 @@ def test_cell_decorator_error() -> None:
         c = kcl2.kcell("wrong_test")
         return c
 
+    regex = kf.config.logfilter.regex
+    kf.config.logfilter.regex = (
+        r"^An error has been caught in function 'wrapper_autocell'"
+    )
     with pytest.raises(ValueError):
         wrong_cell()
+    kf.config.logfilter.regex = regex
 
 
 def test_info() -> None:
@@ -159,3 +165,49 @@ def test_size_info(LAYER: kf.LayerEnum) -> None:
     ref = c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
     assert ref.size_info.ne[0] == 10000
     assert ref.dsize_info.ne[0] == 10
+
+
+def test_overwrite() -> None:
+    kcl = kf.KCLayout("CELL_OVERWRITE")
+
+    @kcl.cell
+    def test_overwrite_cell() -> kf.KCell:
+        c = kcl.kcell()
+        return c
+
+    c1 = test_overwrite_cell()
+
+    @kcl.cell(overwrite_existing=True)  # type: ignore[no-redef]
+    def test_overwrite_cell() -> kf.KCell:
+        c = kcl.kcell()
+        return c
+
+    c2 = test_overwrite_cell()
+
+    assert c2 is not c1
+    assert c1._destroyed()
+
+
+def test_layout_cache() -> None:
+    kcl_write = kf.KCLayout("TEST_LAYOUT_CACHE_WRITE")
+    kcl_read = kf.KCLayout("TEST_LAYOUT_CACHE_READ")
+
+    @kcl_write.cell(basename="straight")
+    def write_straight() -> kf.KCell:
+        c = kcl_write.kcell()
+        c.shapes(kcl_write.layer(1, 0)).insert(kf.kdb.Box(10_000, 1000))
+        return c
+
+    s_write = write_straight()
+    tf = NamedTemporaryFile(suffix=".gds.gz")
+    kcl_write.write(tf.name)
+    kcl_read.read(tf.name)
+
+    @kcl_read.cell(basename="straight", layout_cache=True)
+    def read_straight() -> kf.KCell:
+        c = kcl_read.kcell()
+        c.shapes(kcl_read.layer(1, 0)).insert(kf.kdb.Box(5000, 1000))
+        return c
+
+    s_read = read_straight()
+    assert s_write.bbox() == s_read.bbox()

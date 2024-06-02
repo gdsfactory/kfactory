@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal
 import loguru
 import rich.console
 from loguru import logger as logger
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 if TYPE_CHECKING:
@@ -50,7 +50,7 @@ def tracing_formatter(record: loguru.Record) -> str:
         return (
             "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}"
             "</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan>"
-            " - <level>{message}</level>\n{exception}"
+            " - <level>{message}</level>"
         )
 
 
@@ -67,10 +67,10 @@ class LogLevel(str, Enum):
 
 
 class CHECK_INSTANCES(str, Enum):
-    ERROR = "error"
+    RAISE = "error"
     FLATTEN = "flatten"
     VINSTANCES = "vinstances"
-    NONE = "none"
+    IGNORE = "ignore"
 
 
 class LogFilter(BaseModel):
@@ -135,13 +135,24 @@ class Settings(BaseSettings):
         env_prefix="kfactory_",
         env_nested_delimiter="_",
         extra="allow",
+        validate_assignment=True,
     )
 
     n_threads: int = get_affinity()
+    """Number of threads to use for multithreaded operations."""
     logger: ClassVar[Logger] = logger
+    """Logger used by kfactory."""
     logfilter: LogFilter = Field(default_factory=LogFilter)
+    """Can configure the logger to ignore certain levels or by regex."""
     display_type: Literal["widget", "image", "docs"] = "image"
+    """The default behavior for displaying cells in jupyter."""
     meta_format: Literal["v2", "v1"] = "v2"
+    """The format of the saving of metadata.
+
+    v1: Transformations and other KLayout objects are stored as a string. In
+        case of ports they are converted back to KLayout objects on read.
+    v2: All objects can be stored in the nativ KLayout format (klayout>=0.28.13)
+    """
     console: rich.console.Console = Field(default_factory=rich.console.Console)
     max_cellname_length: int = 99
     write_context_info: bool = True
@@ -150,15 +161,44 @@ class Settings(BaseSettings):
     allow_width_mismatch: bool = False
     allow_layer_mismatch: bool = False
     allow_type_mismatch: bool = False
-    check_instances: CHECK_INSTANCES = CHECK_INSTANCES.ERROR
+    check_instances: CHECK_INSTANCES = CHECK_INSTANCES.RAISE
     connect_use_mirror: bool = True
     connect_use_angle: bool = True
-    """The format of the saving of metadata.
+    cell_overwrite_existing: bool = False
+    cell_layout_cache: bool = False
 
-    v1: Transformations and other KLayout objects are stored as a string. In
-        case of ports they are converted back to KLayout objects on read.
-    v2: All objects can be stored in the nativ KLayout format (klayout>=0.28.13)
-    """
+    @field_validator("cell_overwrite_existing")
+    @classmethod
+    def _validate_overwrite_and_cache(cls, v: bool, info: ValidationInfo) -> bool:
+        if v is True:
+            logger.warning(
+                "'overwrite_existing' has been set to True. This might cause "
+                "unintended behavior when overwriting existing cells and delete any "
+                "existing instances of them."
+            )
+        return v
+
+    @field_validator("cell_layout_cache")
+    @classmethod
+    def _validate_layout_cache(cls, v: bool, info: ValidationInfo) -> bool:
+        if v is True:
+            logger.warning(
+                "'cell_layout_cache' has been set to True. This might cause when "
+                "as any cell names generated automatically are loaded from the layout"
+                " instead of created. This could happen e.g. after reading a gds file"
+                " into the layout."
+            )
+        return v
+
+    @field_validator(
+        "allow_width_mismatch", "allow_layer_mismatch", "allow_type_mismatch"
+    )
+    @classmethod
+    def _debug_info_on_global_setting(cls, v: Any, info: ValidationInfo) -> Any:
+        logger.bind(with_traceback=True).debug(
+            "'{}' set globally to '{}'", info.field_name, v
+        )
+        return v
 
     def __init__(self, **data: Any):
         """Set log filter and run pydantic."""
@@ -166,6 +206,7 @@ class Settings(BaseSettings):
         self.logger.remove()
         self.logger.add(sys.stdout, format=tracing_formatter, filter=self.logfilter)
         self.logger.debug("LogLevel: {}", self.logfilter.level)
+        self.logger.patch(add_traceback)
 
 
 config = Settings()

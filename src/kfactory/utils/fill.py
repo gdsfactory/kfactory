@@ -237,7 +237,9 @@ def fill_tiled(
         tp.queue(queue_str)
         c.kcl.start_changes()
         try:
-            config.logger.info("filling {} with {}", c.name, fill_cell.name)
+            config.logger.debug(
+                "Filling {} with {}", c.kcl.future_cell_name or c.name, fill_cell.name
+            )
             config.logger.debug("fill string: '{}'", queue_str)
             tp.execute(f"Fill {c.name}")
             config.logger.info("done with filling {}", c.name)
