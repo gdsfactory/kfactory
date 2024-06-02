@@ -1,5 +1,5 @@
 <a name="v0.16.0"></a>
-# [v0.16.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.16.0) - 29 May 2024
+# [v0.16.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.16.0) - 02 Jun 2024
 
 # What's Changed
 
