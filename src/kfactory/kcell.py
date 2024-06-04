@@ -1631,11 +1631,11 @@ class KCell:
         """Internal function to convert the cell to yaml."""
         d = {
             "name": node.name,
-            "ports": node.ports,  # Ports.to_yaml(representer, node.ports),
+            # "ports": node.ports,  # Ports.to_yaml(representer, node.ports),
         }
 
         insts = [
-            {"cellname": inst.cell.name, "trans": inst.instance.trans.to_s()}
+            {"cellname": inst.cell.name, "trans": inst._instance.trans.to_s()}
             for inst in node.insts
         ]
         shapes = {
@@ -1645,13 +1645,26 @@ class KCell:
             for layer in node.layout().layer_indexes()
             if not node.shapes(layer).is_empty()
         }
+        ports: list[Any] = []
+        for port in node.ports:
+            _l = node.kcl.get_info(port.layer)
+            p = {"name": port.name, "layer": [_l.layer, _l.datatype]}
+            if port._trans:
+                p["trans"] = port._trans.to_s()
+                p["width"] = port.width
+            else:
+                p["dcplx_trans"] = port._dcplx_trans.to_s()
+                p["dwidth"] = port.dwidth
+            p["info"] = node.info.model_dump()
+            ports.append(p)
+
+        d["ports"] = ports
 
         if insts:
             d["insts"] = insts
         if shapes:
             d["shapes"] = shapes
-        if len(node.settings) > 0:
-            d["settings"] = node.settings
+        d["settings"] = node.settings.model_dump()
         return representer.represent_mapping(cls.yaml_tag, d)
 
     def each_inst(self) -> Iterator[Instance]:
