@@ -51,5 +51,6 @@ repos:
     rev: 'v1.10.0'  # Use the sha / tag you want to point at
     hooks:
       - id: mypy
-        additional_dependencies: [pydantic,numpy,types-cachetools,types-requests,klayout,pydantic-settings,loguru,typer,typeguard]
+        require_serial: true
+        language: system
         exclude: ^docs/

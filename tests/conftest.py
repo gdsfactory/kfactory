@@ -144,7 +144,7 @@ def pdk(LAYER: LAYER_CLASS) -> kf.KCLayout:
 
 
 @pytest.fixture
-@kf.cell
+@kf.kcl.cell
 def fill_cell() -> kf.KCell:
     fc = kf.KCell()
     fc.shapes(fc.kcl.layer(2, 0)).insert(kf.kdb.DBox(20, 40))
