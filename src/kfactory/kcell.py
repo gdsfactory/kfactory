@@ -2965,7 +2965,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         check_ports: bool = True,
         check_instances: CHECK_INSTANCES | None = None,
         snap_ports: bool = True,
-        rec_dicts: bool = True,
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
@@ -2987,7 +2986,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         snap_ports: bool = True,
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
-        rec_dicts: bool = True,
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
@@ -3024,7 +3022,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 to the ports if the port layer is in the mapping.
             cache: Provide a user defined cache instead of an internal one. This
                 can be used for example to clear the cache.
-            rec_dicts: Allow and inspect recursive dictionaries as parameters (can be
                 expensive if the cell is called often).
             basename: Overwrite the name normally inferred from the function or class
                 name.
@@ -3042,8 +3039,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             info: Additional metadata to put into info attribute.
             post_process: List of functions to call after the cell has been created.
         """
-        d2fs = rec_dict_to_frozenset if rec_dicts else dict_to_frozenset
-        fs2d = rec_frozenset_to_dict if rec_dicts else frozenset_to_dict
+        d2fs = rec_dict_to_frozenset
+        fs2d = rec_frozenset_to_dict
 
         if check_instances is None:
             check_instances = config.check_instances
@@ -3273,7 +3270,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         set_settings: bool = True,
         set_name: bool = True,
         check_ports: bool = True,
-        rec_dicts: bool = True,
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
@@ -3290,7 +3286,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         check_ports: bool = True,
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
-        rec_dicts: bool = True,
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
@@ -3327,8 +3322,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             register_factory: Register the resulting KCell-function to the
                 [factories][kfactory.kcell.KCLayout.factories]
         """
-        d2fs = rec_dict_to_frozenset if rec_dicts else dict_to_frozenset
-        fs2d = rec_frozenset_to_dict if rec_dicts else frozenset_to_dict
+        d2fs = rec_dict_to_frozenset
+        fs2d = rec_frozenset_to_dict
 
         def decorator_autocell(
             f: Callable[KCellParams, VKCell],
