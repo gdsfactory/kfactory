@@ -20,7 +20,7 @@ repos:
         exclude: 'changelog\.d/.*|CHANGELOG\.md'
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.4.6
+    rev: v0.4.7
     hooks:
       # Run the linter.
       - id: ruff
@@ -51,5 +51,5 @@ repos:
     rev: 'v1.10.0'  # Use the sha / tag you want to point at
     hooks:
       - id: mypy
-        additional_dependencies: [pydantic,numpy,types-cachetools,types-requests,klayout,pydantic-settings,loguru,typer,pytest]
+        additional_dependencies: [pydantic,numpy,types-cachetools,types-requests,klayout,pydantic-settings,loguru,typer,typeguard]
         exclude: ^docs/
