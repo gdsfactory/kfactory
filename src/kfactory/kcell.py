@@ -2801,7 +2801,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
     info: Info = Field(default_factory=Info)
     _settings: KCellSettings
-    _future_cell_name: str | None
+    future_cell_name: str | None
 
     def __init__(
         self,
@@ -2869,6 +2869,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             layout=layout,
             rename_function=port_rename_function,
             info=Info(**info) if info else Info(),
+            future_cell_name=None,
         )
         self._name = name
         self._settings = KCellSettings(
@@ -2942,7 +2943,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         self.enclosure = enclosure
         self.layer_enclosures = _layer_enclosures
         self.interconnect_cml_path = interconnect_cml_path
-        self.future_cell_name: str | None = None
 
         kcls[self.name] = self
 
@@ -3112,11 +3112,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     for key, value in params.items():
                         if isinstance(value, frozenset):
                             params[key] = fs2d(value)
+
                     if set_name:
                         if basename is not None:
                             name = get_cell_name(basename, **params)
                         else:
                             name = get_cell_name(f.__name__, **params)
+                        old_future_name = self.future_cell_name
                         self.future_cell_name = name
                         if layout_cache:
                             logger.debug(
@@ -3136,7 +3138,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         cell = cell.dup()
                     if set_name:
                         cell.name = name
-                        self.future_cell_name = None
+                        self.future_cell_name = old_future_name
                     if overwrite_existing:
                         for c in list(self.layout.cells(cell.name)):
                             if c is not cell._kdb_cell:

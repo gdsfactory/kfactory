@@ -1196,9 +1196,11 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
         """
         self.kcell = cell
         self.layers = layers
-        self.regions: dict[int, dict[int, kdb.Region]] = {}
         self.merged_region: kdb.Region = kdb.Region()
         self.merged = False
+        self.regions: dict[int, dict[int, kdb.Region]] = defaultdict(
+            lambda: defaultdict(kdb.Region)
+        )
 
     def put(
         self,
@@ -1219,19 +1221,14 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
             dbu: dbu used by the processor.
             clip: Whether the target was clipped to the tile or not.
         """
-        if ix not in self.regions:
-            self.regions[ix] = {}
-        if iy not in self.regions[ix]:
-            self.regions[ix][iy] = kdb.Region()
-        reg = self.regions[ix][iy]
-        reg.insert(region)
-        reg.merge()
+        # self.region.insert(region)
+        self.regions[ix][iy].insert(region)
 
     def merge_region(self) -> None:
         """Create one region from the individual tiles."""
         for dicts in self.regions.values():
             for reg in dicts.values():
-                self.merged_region += reg
+                self.merged_region.insert(reg)
 
     @overload
     def insert(self) -> None: ...
@@ -1254,7 +1251,7 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
         if port_hole_map:
             for layer in self.layers:
                 self.merged_region -= port_hole_map[layer]
-                self.kcell.shapes(layer).insert(self.merged_region)
+            self.kcell.shapes(layer).insert(self.merged_region)
         else:
             for layer in self.layers:
                 self.kcell.shapes(layer).insert(self.merged_region)
@@ -1432,7 +1429,9 @@ class KCellEnclosure(BaseModel):
         Args:
             c: Target KCell to apply the enclosures into.
             tile_size: Tile size. This should be in the order off 10+ maximum size
-                of the maximum size of sections.
+                of the maximum size of sections. [um]
+                If None is set, the minimum size is set to 10xmax(d_max) of all sections
+                or 200um whichever is bigger.
             n_pts: Number of points in the circle. < 3 will create a triangle. 4 a
                 diamond, etc.
             n_threads: Number o threads to use. By default (`None`) it will use as many
@@ -1449,8 +1448,8 @@ class KCellEnclosure(BaseModel):
         for port in c.ports:
             ports_by_layer[port.layer].append(port)
 
+        maxsize = 0
         for enc in self.enclosures.enclosures:
-            maxsize = 0
             assert enc.main_layer is not None
             for layer, layersection in enc.layer_sections.items():
                 size = layersection.sections[-1].d_max
@@ -1471,7 +1470,7 @@ class KCellEnclosure(BaseModel):
         min_tile_size_rec = 10 * maxsize * tp.dbu
 
         if tile_size is None:
-            tile_size = min_tile_size_rec * 2
+            tile_size = max(min_tile_size_rec * 2, 200)
 
         if float(tile_size) <= min_tile_size_rec:
             logger.warning(
@@ -1482,96 +1481,120 @@ class KCellEnclosure(BaseModel):
             )
         tp.tile_border(maxsize * tp.dbu, maxsize * tp.dbu)
         tp.tile_size(tile_size, tile_size)
-        layer_regiontilesoperators: dict[LayerSection, RegionTilesOperator] = {}
+        layer_regiontilesoperators: dict[
+            tuple[int, LayerSection], RegionTilesOperator
+        ] = {}
+
+        logger.debug("Starting KCellEnclosure on {}", c.kcl.future_cell_name or c.name)
+
+        n_enc = len(self.enclosures.enclosures)
 
         for i, enc in enumerate(self.enclosures.enclosures):
             assert enc.main_layer is not None
+            print(i, enc.main_layer)
             if not c.bbox(enc.main_layer).empty():
-                _inp = f"main_layer_{enc.main_layer}"
+                _inp = f"main_layer_{int(enc.main_layer)}"
                 if enc.main_layer not in inputs:
-                    tp.input(f"{_inp}", c.kcl.layout, c.cell_index(), enc.main_layer)
+                    tp.input(_inp, c.kcl.layout, c.cell_index(), enc.main_layer)
+                    logger.critical(
+                        "tp.input({}, {}, {}, {})",
+                        _inp,
+                        c.kcl.layout,
+                        c.cell_index(),
+                        int(enc.main_layer),
+                    )
                     inputs.add(enc.main_layer)
                     logger.debug("Created input {}", _inp)
 
                 for layer, layer_section in enc.layer_sections.items():
-                    if layer_section in layer_regiontilesoperators:
-                        layer_regiontilesoperators[layer_section].layers.append(layer)
+                    if (enc.main_layer, layer_section) in layer_regiontilesoperators:
+                        layer_regiontilesoperators[
+                            (enc.main_layer, layer_section)
+                        ].layers.append(layer)
                     else:
                         _out = f"target_{layer}"
                         operator = RegionTilesOperator(cell=c, layers=[layer])
-                        layer_regiontilesoperators[layer_section] = operator
+                        layer_regiontilesoperators[(enc.main_layer, layer_section)] = (
+                            operator
+                        )
                         tp.output(_out, operator)
                         logger.debug("Created output {}", _out)
 
-                        for i, section in enumerate(reversed(layer_section.sections)):
-                            queue_str = (
-                                "var max_shape = Polygon.ellipse("
-                                f"Box.new({section.d_max * 2},{section.d_max * 2}),"
-                                f" {n_pts});"
-                                f"var tile_reg = _tile &"
-                                f" _frame.sized({maxsize});"
+                    for section in reversed(layer_section.sections):
+                        queue_str = (
+                            "var max_shape = Polygon.ellipse("
+                            f"Box.new({section.d_max * 2},{section.d_max * 2}),"
+                            f" {n_pts});"
+                            # f"var tile_reg = (_tile & _frame).sized({maxsize});"
+                            f"var tile_reg = _tile & _frame.sized({maxsize});"
+                        )
+                        match section.d_max:
+                            case d if d > 0:
+                                max_region = (
+                                    "var max_reg = "
+                                    f"{_inp}.minkowski_sum(max_shape).merged();"
+                                )
+                            case d if d < 0:
+                                max_region = (
+                                    "var max_reg = tile_reg - " f"(tile_reg - {_inp});"
+                                )
+                            case 0:
+                                max_region = f"var max_reg = {_inp} & tile_reg;"
+                        queue_str += max_region
+                        if section.d_min is not None:
+                            queue_str += (
+                                "var min_shape = Polygon.ellipse("
+                                f"Box.new({section.d_min * 2},{section.d_min * 2}),"
+                                " 64);"
                             )
-                            match section.d_max:
+                            match section.d_min:
                                 case d if d > 0:
-                                    max_region = (
-                                        "var max_reg = "
-                                        f"{_inp}.minkowski_sum(max_shape).merged();"
+                                    min_region = (
+                                        "var min_reg = "
+                                        f"{_inp}.minkowski_sum(min_shape);"
                                     )
                                 case d if d < 0:
-                                    max_region = (
-                                        "var max_reg = tile_reg - "
-                                        f"(tile_reg - {_inp});"
+                                    min_region = (
+                                        "var min_reg = tile_reg - (tile_reg - "
+                                        f"{_inp}).minkowski_sum(min_shape);"
                                     )
                                 case 0:
-                                    max_region = f"var max_reg = {_inp} & tile_reg;"
-                            queue_str += max_region
-                            if section.d_min is not None:
-                                queue_str += (
-                                    "var min_shape = Polygon.ellipse("
-                                    f"Box.new({section.d_min * 2},{section.d_min * 2}),"
-                                    " 64);"
-                                )
-                                match section.d_min:
-                                    case d if d > 0:
-                                        min_region = (
-                                            "var min_reg = "
-                                            f"{_inp}.minkowski_sum(min_shape);"
-                                        )
-                                    case d if d < 0:
-                                        min_region = (
-                                            "var min_reg = tile_reg - (tile_reg - "
-                                            f"{_inp}).minkowski_sum(min_shape);"
-                                        )
-                                    case 0:
-                                        min_region = f"var min_reg = {_inp} & tile_reg;"
-                                queue_str += min_region
-                                queue_str += (
-                                    f"_output({_out},"
-                                    "(max_reg - min_reg) & _tile, true);"
-                                )
-                            else:
-                                queue_str += f"_output({_out}, max_reg & _tile, true);"
-
-                            logger.debug(
-                                "Queuing string for {} on layer {}: '{}'",
-                                c.kcl.future_cell_name or c.name,
-                                layer,
-                                queue_str,
+                                    min_region = f"var min_reg = {_inp} & tile_reg;"
+                            queue_str += min_region
+                            queue_str += (
+                                f"_output({_out}," "(max_reg - min_reg) & _tile, true);"
                             )
-                            tp.queue(queue_str)
+                        else:
+                            queue_str += f"_output({_out}, max_reg & _tile, true);"
+
+                        logger.debug(
+                            "{}/{}: Queuing string for {} on layer {}: '{}'",
+                            i + 1,
+                            n_enc,
+                            c.kcl.future_cell_name or c.name,
+                            layer,
+                            queue_str,
+                        )
+                        tp.queue(queue_str)
 
         c.kcl.start_changes()
-        logger.info("Starting minkowski on {}", c.name)
+        logger.debug(
+            "Starting enclosure {}",
+            c.kcl.future_cell_name or c.name,
+            enc.name,
+        )
         tp.execute(f"Minkowski {c.name}")
         c.kcl.end_changes()
+        logger.debug("Finished enclosure {}", enc.name)
 
         if carve_out_ports:
             for operator in layer_regiontilesoperators.values():
-                for layer in operator.layers:
-                    operator.insert(port_hole_map=port_hole_map)
+                # for layer in operator.layers:
+                operator.insert(port_hole_map=port_hole_map)
         else:
             for operator in layer_regiontilesoperators.values():
                 operator.insert()
+        logger.debug("Finished KCellEnclosure on {}", c.kcl.future_cell_name or c.name)
 
     def copy_to(self, kcl: KCLayout) -> KCellEnclosure:
         """Copy the KCellEnclosure to another KCLayout."""
