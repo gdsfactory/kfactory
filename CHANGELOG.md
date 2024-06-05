@@ -1,3 +1,18 @@
+<a name="v0.16.2"></a>
+# [v0.16.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.16.2) - 05 Jun 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- Improve and fix enclosure_tiled for KCellEnclosure and LayerEnclosure [#374](https://github.com/gdsfactory/kfactory/pull/374)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.16.1...v0.16.2
+
+
+[Changes][v0.16.2]
+
+
 <a name="v0.16.1"></a>
 # [v0.16.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.16.1) - 02 Jun 2024
 
@@ -603,6 +618,7 @@
 [Changes][v0.4.0]
 
 
+[v0.16.2]: https://github.com/gdsfactory/kfactory/compare/v0.16.1...v0.16.2
 [v0.16.1]: https://github.com/gdsfactory/kfactory/compare/v0.16.0...v0.16.1
 [v0.16.0]: https://github.com/gdsfactory/kfactory/compare/v0.15.2...v0.16.0
 [v0.15.2]: https://github.com/gdsfactory/kfactory/compare/v0.15.1...v0.15.2
