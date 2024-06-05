@@ -12,6 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+      - name: setup-mypy
+        run: |
+          pip install -e .[ci] mypy
+          mypy --install-types
       - uses: pre-commit/action@v3.0.1
   test_code:
     runs-on: ${{ matrix.os }}

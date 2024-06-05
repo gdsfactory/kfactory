@@ -70,7 +70,6 @@ ci = [
   "types-cachetools",
   "types-requests",
   "kfactory[git]",
-  "mypy",
 ]
 ipy = [
   "ipython",
