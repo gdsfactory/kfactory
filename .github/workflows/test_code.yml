@@ -20,7 +20,7 @@ jobs:
         run: |
           python -m pip install -U --upgrade-strategy eager -e .[ci] mypy
           mypy -p kfactory
-          mypy --install-types
+          mypy --install-types --non-interactive
       - uses: pre-commit/action@v3.0.1
   test_code:
     runs-on: ${{ matrix.os }}
