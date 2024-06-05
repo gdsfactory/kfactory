@@ -46,7 +46,7 @@ def test_namecollision(LAYER: kf.LayerEnum) -> None:
 
 
 def test_nested_dic() -> None:
-    @kf.cell(rec_dicts=True)
+    @kf.kcl.cell
     def recursive_dict_cell(d: dict[str, dict[str, str] | str]) -> kf.KCell:
         c = kf.KCell()
         return c
@@ -129,7 +129,7 @@ def test_invalid_array(monkeypatch: pytest.MonkeyPatch, straight: kf.KCell) -> N
 def test_cell_decorator_error() -> None:
     kcl2 = kf.KCLayout("decorator_test")
 
-    @kf.cell
+    @kf.kcl.cell
     def wrong_cell() -> kf.KCell:
         c = kcl2.kcell("wrong_test")
         return c
