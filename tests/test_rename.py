@@ -70,7 +70,7 @@ def test_rename_default(func: Callable[..., None]) -> None:
     )
 
     assert [p.name for p in port_list] == [
-        f"o{i+1}" for i in inds_east + inds_north + inds_west + inds_south
+        f"o{i + 1}" for i in inds_east + inds_north + inds_west + inds_south
     ]
 
 

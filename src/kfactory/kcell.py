@@ -1631,11 +1631,11 @@ class KCell:
         """Internal function to convert the cell to yaml."""
         d = {
             "name": node.name,
-            "ports": node.ports,  # Ports.to_yaml(representer, node.ports),
+            # "ports": node.ports,  # Ports.to_yaml(representer, node.ports),
         }
 
         insts = [
-            {"cellname": inst.cell.name, "trans": inst.instance.trans.to_s()}
+            {"cellname": inst.cell.name, "trans": inst._instance.trans.to_s()}
             for inst in node.insts
         ]
         shapes = {
@@ -1645,13 +1645,26 @@ class KCell:
             for layer in node.layout().layer_indexes()
             if not node.shapes(layer).is_empty()
         }
+        ports: list[Any] = []
+        for port in node.ports:
+            _l = node.kcl.get_info(port.layer)
+            p = {"name": port.name, "layer": [_l.layer, _l.datatype]}
+            if port._trans:
+                p["trans"] = port._trans.to_s()
+                p["width"] = port.width
+            else:
+                p["dcplx_trans"] = port._dcplx_trans.to_s()
+                p["dwidth"] = port.dwidth
+            p["info"] = node.info.model_dump()
+            ports.append(p)
+
+        d["ports"] = ports
 
         if insts:
             d["insts"] = insts
         if shapes:
             d["shapes"] = shapes
-        if len(node.settings) > 0:
-            d["settings"] = node.settings
+        d["settings"] = node.settings.model_dump()
         return representer.represent_mapping(cls.yaml_tag, d)
 
     def each_inst(self) -> Iterator[Instance]:
@@ -2788,7 +2801,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
     info: Info = Field(default_factory=Info)
     _settings: KCellSettings
-    _future_cell_name: str | None
+    future_cell_name: str | None
 
     def __init__(
         self,
@@ -2812,14 +2825,12 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             layer_enclosures: Additional KCellEnclosures that should be available
                 except the KCellEnclosure
             enclosure: The standard KCellEnclosure of the PDK.
-            cell_factories: Functions for creating pcells from the PDK.
-            cells: Fixed cells of the PDK.
             layers: A LayerEnum describing the layerstack of the PDK.
+            sparameters_path: Path to the sparameters config file.
+            interconnect_cml_path: Path to the interconnect file.
             layer_stack: maps name to layer numbers, thickness, zmin, sidewall_angle.
                 if can also contain material properties
                 (refractive index, nonlinear coefficient, sheet resistance ...).
-            sparameters_path: Path to the sparameters config file.
-            interconnect_cml_path: Path to the interconnect file.
             constants: A model containing all the constants related to the PDK.
             base_kcl: an optional basis of the PDK.
             port_rename_function: Which function to use for renaming kcell ports.
@@ -2856,6 +2867,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             layout=layout,
             rename_function=port_rename_function,
             info=Info(**info) if info else Info(),
+            future_cell_name=None,
         )
         self._name = name
         self._settings = KCellSettings(
@@ -2929,7 +2941,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         self.enclosure = enclosure
         self.layer_enclosures = _layer_enclosures
         self.interconnect_cml_path = interconnect_cml_path
-        self.future_cell_name: str | None = None
 
         kcls[self.name] = self
 
@@ -3096,11 +3107,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     for key, value in params.items():
                         if isinstance(value, frozenset):
                             params[key] = fs2d(value)
+
                     if set_name:
                         if basename is not None:
                             name = get_cell_name(basename, **params)
                         else:
                             name = get_cell_name(f.__name__, **params)
+                        old_future_name = self.future_cell_name
                         self.future_cell_name = name
                         if layout_cache:
                             logger.debug(
@@ -3120,7 +3133,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         cell = cell.dup()
                     if set_name:
                         cell.name = name
-                        self.future_cell_name = None
+                        self.future_cell_name = old_future_name
                     if overwrite_existing:
                         for c in list(self.layout.cells(cell.name)):
                             if c is not cell._kdb_cell:
