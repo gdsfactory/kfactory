@@ -1,16 +1,20 @@
-<a name="v0.16.2"></a>
-# [v0.16.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.16.2) - 05 Jun 2024
+<a name="v0.17.0"></a>
+# [v0.17.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.0) - 05 Jun 2024
 
 # What's Changed
+
+## Breaking
+
+- Drop rec_dicts flag and make it default to use rec dict inspection [#375](https://github.com/gdsfactory/kfactory/pull/375)
 
 ## Bug Fixes
 
 - Improve and fix enclosure_tiled for KCellEnclosure and LayerEnclosure [#374](https://github.com/gdsfactory/kfactory/pull/374)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.16.1...v0.16.2
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.16.1...v0.17.0
 
 
-[Changes][v0.16.2]
+[Changes][v0.17.0]
 
 
 <a name="v0.16.1"></a>
@@ -618,7 +622,7 @@
 [Changes][v0.4.0]
 
 
-[v0.16.2]: https://github.com/gdsfactory/kfactory/compare/v0.16.1...v0.16.2
+[v0.17.0]: https://github.com/gdsfactory/kfactory/compare/v0.16.1...v0.17.0
 [v0.16.1]: https://github.com/gdsfactory/kfactory/compare/v0.16.0...v0.16.1
 [v0.16.0]: https://github.com/gdsfactory/kfactory/compare/v0.15.2...v0.16.0
 [v0.15.2]: https://github.com/gdsfactory/kfactory/compare/v0.15.1...v0.15.2
