@@ -1496,13 +1496,6 @@ class KCellEnclosure(BaseModel):
                 _inp = f"main_layer_{int(enc.main_layer)}"
                 if enc.main_layer not in inputs:
                     tp.input(_inp, c.kcl.layout, c.cell_index(), enc.main_layer)
-                    logger.critical(
-                        "tp.input({}, {}, {}, {})",
-                        _inp,
-                        c.kcl.layout,
-                        c.cell_index(),
-                        int(enc.main_layer),
-                    )
                     inputs.add(enc.main_layer)
                     logger.debug("Created input {}", _inp)
 

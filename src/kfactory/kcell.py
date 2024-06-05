@@ -2825,14 +2825,12 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             layer_enclosures: Additional KCellEnclosures that should be available
                 except the KCellEnclosure
             enclosure: The standard KCellEnclosure of the PDK.
-            cell_factories: Functions for creating pcells from the PDK.
-            cells: Fixed cells of the PDK.
             layers: A LayerEnum describing the layerstack of the PDK.
+            sparameters_path: Path to the sparameters config file.
+            interconnect_cml_path: Path to the interconnect file.
             layer_stack: maps name to layer numbers, thickness, zmin, sidewall_angle.
                 if can also contain material properties
                 (refractive index, nonlinear coefficient, sheet resistance ...).
-            sparameters_path: Path to the sparameters config file.
-            interconnect_cml_path: Path to the interconnect file.
             constants: A model containing all the constants related to the PDK.
             base_kcl: an optional basis of the PDK.
             port_rename_function: Which function to use for renaming kcell ports.
