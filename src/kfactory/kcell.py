@@ -2233,15 +2233,15 @@ class KCell:
                         it.add_value(f"Port name: {port.name}")
                     if port._trans:
                         it.add_value(
-                            port_polygon(port.width)
-                            .transformed(port.trans)
-                            .to_dtype(self.kcl.dbu)
+                            self.kcl.to_um(
+                                port_polygon(port.width).transformed(port.trans)
+                            )
                         )
                     else:
                         it.add_value(
-                            port_polygon(port.width)
-                            .to_dtype(self.kcl.dbu)
-                            .transformed(port.dcplx_trans)
+                            self.kcl.to_um(port_polygon(port.width)).transformed(
+                                port.dcplx_trans
+                            )
                         )
                 xy = (port.x, port.y)
                 if port.layer not in cell_ports:
@@ -2263,7 +2263,7 @@ class KCell:
                     port_edge = port_edge.transformed(port.trans)
                 else:
                     port_edge = port_edge.transformed(
-                        port.dcplx_trans.to_itrans(self.kcl.dbu)
+                        kdb.ICplxTrans(port.dcplx_trans, self.kcl.dbu)
                     )
                 p_edges = kdb.Edges([port_edge])
                 phys_overlap = p_edges & edges
@@ -2280,13 +2280,11 @@ class KCell:
                         f"{port.width}"
                     )
                     it.add_value(
-                        port_polygon(port.width)
-                        .transformed(port.trans)
-                        .to_dtype(self.kcl.dbu)
+                        self.kcl.to_um(port_polygon(port.width).transformed(port.trans))
                         if port._trans
-                        else port_polygon(port.width)
-                        .to_dtype(self.kcl.dbu)
-                        .transformed(port.dcplx_trans)
+                        else self.kcl.to_um(port_polygon(port.width)).transformed(
+                            port.dcplx_trans
+                        )
                     )
                 elif phys_overlap.is_empty():
                     p_cat = db.category_by_path(
@@ -2299,13 +2297,11 @@ class KCell:
                         f"Found no overlapping Edge with Port {port.name or str(port)}"
                     )
                     it.add_value(
-                        port_polygon(port.width)
-                        .transformed(port.trans)
-                        .to_dtype(self.kcl.dbu)
+                        self.kcl.to_um(port_polygon(port.width).transformed(port.trans))
                         if port._trans
-                        else port_polygon(port.width)
-                        .to_dtype(self.kcl.dbu)
-                        .transformed(port.dcplx_trans)
+                        else self.kcl.to_um(port_polygon(port.width)).transformed(
+                            port.dcplx_trans
+                        )
                     )
 
         inst_ports = {}
@@ -2386,15 +2382,17 @@ class KCell:
                             )
                             if ports[0][0]._trans:
                                 it.add_value(
-                                    port_polygon(ports[0][0].width)
-                                    .transformed(ports[0][0]._trans)
-                                    .to_dtype(self.kcl.dbu)
+                                    self.kcl.to_um(
+                                        port_polygon(ports[0][0].width).transformed(
+                                            ports[0][0]._trans
+                                        )
+                                    )
                                 )
                             else:
                                 it.add_value(
-                                    port_polygon(port.width)
-                                    .to_dtype(self.kcl.dbu)
-                                    .transformed(port.dcplx_trans)
+                                    self.kcl.to_um(
+                                        port_polygon(port.width)
+                                    ).transformed(port.dcplx_trans)
                                 )
 
                     case 2:
@@ -2457,17 +2455,19 @@ class KCell:
                             if cell_port._trans:
                                 values.append(
                                     rdb.RdbItemValue(
-                                        port_polygon(cell_port.width)
-                                        .transformed(cell_port._trans)
-                                        .to_dtype(self.kcl.dbu)
+                                        self.kcl.to_um(
+                                            port_polygon(cell_port.width).transformed(
+                                                cell_port._trans
+                                            )
+                                        )
                                     )
                                 )
                             else:
                                 values.append(
                                     rdb.RdbItemValue(
-                                        port_polygon(cell_port.width)
-                                        .to_dtype(self.kcl.dbu)
-                                        .transformed(cell_port.dcplx_trans)
+                                        self.kcl.to_um(
+                                            port_polygon(cell_port.width)
+                                        ).transformed(cell_port.dcplx_trans)
                                     )
                                 )
                             for _port in ports:
@@ -2478,9 +2478,11 @@ class KCell:
 
                                 values.append(
                                     rdb.RdbItemValue(
-                                        port_polygon(_port[0].width)
-                                        .transformed(_port[0].trans)
-                                        .to_dtype(self.kcl.dbu)
+                                        self.kcl.to_um(
+                                            port_polygon(_port[0].width).transformed(
+                                                _port[0].trans
+                                            )
+                                        )
                                     )
                                 )
                             it.add_value(text[:-1])
@@ -2502,9 +2504,11 @@ class KCell:
 
                             values.append(
                                 rdb.RdbItemValue(
-                                    port_polygon(_port[0].width)
-                                    .transformed(_port[0].trans)
-                                    .to_dtype(self.kcl.dbu)
+                                    self.kcl.to_um(
+                                        port_polygon(_port[0].width).transformed(
+                                            _port[0].trans
+                                        )
+                                    )
                                 )
                             )
                         it.add_value(text[:-1])
@@ -2566,7 +2570,7 @@ class KCell:
                     it = db.create_item(db_cell, sc)
                     it.add_value("Shapes overlapping with shapes of instances")
                     for poly in error_region_shapes.merge().each():
-                        it.add_value(poly.to_dtype(self.kcl.dbu))
+                        it.add_value(self.kcl.to_um(poly))
                 if not error_region_instances.is_empty():
                     sc = db.category_by_path(
                         layer_cat(layer).path() + ".InstanceshapeOverlap"
@@ -2576,7 +2580,7 @@ class KCell:
                         "Instance shapes overlapping with shapes of other instances"
                     )
                     for poly in error_region_instances.merge().each():
-                        it.add_value(poly.to_dtype(self.kcl.dbu))
+                        it.add_value(self.kcl.to_um(poly))
 
         return db
 
@@ -2948,6 +2952,70 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         self._name = name
         self.library.register(name)
 
+    @overload
+    def to_um(self, other: int) -> float: ...
+    @overload
+    def to_um(self, other: kdb.Point) -> kdb.DPoint: ...
+    @overload
+    def to_um(self, other: kdb.Vector) -> kdb.DVector: ...
+    @overload
+    def to_um(self, other: kdb.Box) -> kdb.DBox: ...
+    @overload
+    def to_um(self, other: kdb.Polygon) -> kdb.DPolygon: ...
+    @overload
+    def to_um(self, other: kdb.Path) -> kdb.DPath: ...
+    @overload
+    def to_um(self, other: kdb.Text) -> kdb.DText: ...
+
+    def to_um(
+        self,
+        other: int
+        | kdb.Point
+        | kdb.Vector
+        | kdb.Box
+        | kdb.Polygon
+        | kdb.Path
+        | kdb.Text,
+    ) -> (
+        float
+        | kdb.DPoint
+        | kdb.DVector
+        | kdb.DBox
+        | kdb.DPolygon
+        | kdb.DPath
+        | kdb.DText
+    ):
+        """Convert Shapes or values in dbu to DShapes or floats in um."""
+        return kdb.CplxTrans(self.layout.dbu) * other
+
+    @overload
+    def to_dbu(self, other: float) -> int: ...
+    @overload
+    def to_dbu(self, other: kdb.DPoint) -> kdb.Point: ...
+    @overload
+    def to_dbu(self, other: kdb.DVector) -> kdb.Vector: ...
+    @overload
+    def to_dbu(self, other: kdb.DBox) -> kdb.Box: ...
+    @overload
+    def to_dbu(self, other: kdb.DPolygon) -> kdb.Polygon: ...
+    @overload
+    def to_dbu(self, other: kdb.DPath) -> kdb.Path: ...
+    @overload
+    def to_dbu(self, other: kdb.DText) -> kdb.Text: ...
+
+    def to_dbu(
+        self,
+        other: float
+        | kdb.DPoint
+        | kdb.DVector
+        | kdb.DBox
+        | kdb.DPolygon
+        | kdb.DPath
+        | kdb.DText,
+    ) -> int | kdb.Point | kdb.Vector | kdb.Box | kdb.Polygon | kdb.Path | kdb.Text:
+        """Convert Shapes or values in dbu to DShapes or floats in um."""
+        return kdb.CplxTrans(self.layout.dbu).inverted() * other
+
     @computed_field  # type: ignore[misc]
     @property
     def name(self) -> str:
@@ -3138,7 +3206,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         for c in list(self.layout.cells(cell.name)):
                             if c is not cell._kdb_cell:
                                 self[c.cell_index()].delete()
-                    dbu = cell.kcl.layout.dbu
                     if set_settings:
                         if hasattr(f, "__name__"):
                             cell.function_name = f.__name__
@@ -3188,9 +3255,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         for port in cell.ports:
                             if port._dcplx_trans:
                                 dup = port._dcplx_trans.dup()
-                                dup.disp = port._dcplx_trans.disp.to_itype(
-                                    dbu
-                                ).to_dtype(dbu)
+                                dup.disp = self.to_um(
+                                    self.to_dbu(port._dcplx_trans.disp)
+                                )
                                 port.dcplx_trans = dup
                     if add_port_layers:
                         for port in cell.ports:
@@ -4516,7 +4583,11 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         if isinstance(self.cell, VKCell):
             _trans = trans * self.trans
             base_trans = kdb.DCplxTrans(
-                _trans.s_trans().to_itype(cell.kcl.dbu).to_dtype(cell.kcl.dbu)
+                kdb.DCplxTrans(
+                    kdb.ICplxTrans(_trans, cell.kcl.dbu)
+                    .s_trans()
+                    .to_dtype(cell.kcl.dbu)
+                )
             )
             _trans = base_trans.inverted() * _trans
             _cell_name = self.cell.name
@@ -4556,7 +4627,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         else:
             _trans = trans * self.trans
             base_trans = kdb.DCplxTrans(
-                _trans.s_trans().to_itype(cell.kcl.dbu).to_dtype(cell.kcl.dbu)
+                kdb.ICplxTrans(_trans, cell.kcl.dbu).s_trans().to_dtype(cell.kcl.dbu)
             )
             _trans = base_trans.inverted() * _trans
             _cell_name = self.cell.name
@@ -4629,7 +4700,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
             if isinstance(cell, KCell):
                 for layer in cell.kcl.layer_indexes():
                     reg = kdb.Region(self.cell.begin_shapes_rec(layer))
-                    reg.transform((trans * self.trans).to_itrans(cell.kcl.dbu))
+                    reg.transform(kdb.ICplxTrans((trans * self.trans), cell.kcl.dbu))
                     cell.shapes(layer).insert(reg)
             else:
                 for layer, shapes in self.cell._shapes.items():
@@ -5159,11 +5230,11 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
         if isinstance(shape, kdb.DBox):
             shape = kdb.DPolygon(shape)
         elif isinstance(shape, kdb.Box):
-            shape = kdb.DPolygon(shape.to_dtype(self.cell.kcl.dbu))
+            shape = self.cell.kcl.to_um(shape)
         self._shapes.append(shape)
         b = shape.bbox()
         if isinstance(b, kdb.Box):
-            self._bbox += b.to_dtype(self.cell.kcl.dbu)
+            self._bbox += self.cell.kcl.to_um(b)
         else:
             self._bbox += b
 
@@ -5434,7 +5505,7 @@ class Port:
                         info=info,
                     )
                 elif not trans.is_complex():
-                    _trans = trans.s_trans().to_itype(self.kcl.layout.dbu) * self.trans
+                    _trans = kdb.ICplxTrans(trans, self.kcl.dbu).s_trans() * self.trans
                     return Port(
                         name=self.name,
                         trans=_trans,
@@ -5474,7 +5545,7 @@ class Port:
                     case False, True:
                         if not trans.is_complex():  # type: ignore[union-attr]
                             _trans = (
-                                trans.s_trans().to_itype(self.kcl.layout.dbu)  # type: ignore[operator, union-attr]
+                                kdb.ICplxTrans(trans, self.kcl.layout.dbu).s_trans()  # type: ignore[operator]
                                 * self.trans
                                 * post_trans
                             )
@@ -5574,7 +5645,7 @@ class Port:
         elif self._dcplx_trans:
             vec = self.trans.disp
             vec.x = value
-            self._dcplx_trans.disp = vec.to_dtype(self.kcl.layout.dbu)
+            self._dcplx_trans.disp = self.kcl.to_um(vec)
 
     @property
     def y(self) -> int:
@@ -5590,7 +5661,7 @@ class Port:
         elif self._dcplx_trans:
             vec = self.trans.disp
             vec.y = value
-            self._dcplx_trans.disp = vec.to_dtype(self.kcl.layout.dbu)
+            self._dcplx_trans.disp = self.kcl.to_um(vec)
 
     @property
     def center(self) -> tuple[int, int]:
@@ -5609,7 +5680,10 @@ class Port:
         If this is set with the setter, it will overwrite any transformation or
         dcplx transformation
         """
-        return self._trans or self.dcplx_trans.s_trans().to_itype(self.kcl.layout.dbu)
+        return (
+            self._trans
+            or kdb.ICplxTrans(self.dcplx_trans, self.kcl.layout.dbu).s_trans()
+        )
 
     @trans.setter
     def trans(self, value: kdb.Trans) -> None:
@@ -5631,13 +5705,13 @@ class Port:
 
     @dcplx_trans.setter
     def dcplx_trans(self, value: kdb.DCplxTrans) -> None:
-        if value.is_complex() or value.disp != value.disp.to_itype(
-            self.kcl.layout.dbu
-        ).to_dtype(self.kcl.layout.dbu):
+        if value.is_complex() or value.disp != self.kcl.to_um(
+            self.kcl.to_dbu(value.disp)
+        ):
             self._dcplx_trans = value.dup()
             self._trans = None
         else:
-            self._trans = value.dup().s_trans().to_itype(self.kcl.layout.dbu)
+            self._trans = kdb.CplxTrans(value.dup(), self.kcl.dbu).s_trans()
             self._dcplx_trans = None
 
     @property
@@ -5692,7 +5766,7 @@ class Port:
         vec = self.dcplx_trans.disp
         vec.x = value
         if self._trans:
-            self._trans.disp = vec.to_itype(self.kcl.layout.dbu)
+            self._trans.disp = self.kcl.to_dbu(vec)
         elif self._dcplx_trans:
             self._dcplx_trans.disp = vec
 
@@ -5706,7 +5780,7 @@ class Port:
         vec = self.dcplx_trans.disp
         vec.y = value
         if self._trans:
-            self._trans.disp = vec.to_itype(self.kcl.layout.dbu)
+            self._trans.disp = self.kcl.to_dbu(vec)
         elif self._dcplx_trans:
             self._dcplx_trans.disp = vec
 
@@ -5719,7 +5793,7 @@ class Port:
     @dcenter.setter
     def dcenter(self, pos: tuple[float, float]) -> None:
         if self._trans:
-            self._trans.disp = kdb.DVector(*pos).to_itype(self.kcl.layout.dbu)
+            self._trans.disp = self.kcl.to_dbu(kdb.DVector(*pos))
         elif self._dcplx_trans:
             self._dcplx_trans.disp = kdb.DVector(*pos)
 
@@ -6234,9 +6308,9 @@ class Instance:
         mirror_v = p2 - p1
         disp = self.dcplx_trans.disp
         angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
-        dedge = kdb.DEdge(p1.to_dtype(self.kcl.dbu), p2.to_dtype(self.kcl.dbu))
+        dedge = kdb.DEdge(self.kcl.to_um(p1), self.kcl.to_um(p2))
 
-        v = mirror_v.to_dtype(self.kcl.dbu)
+        v = self.kcl.to_um(mirror_v)
         v = kdb.DVector(-v.y, v.x)
 
         dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())

@@ -293,7 +293,6 @@ def bend_euler_factory(
                 " lengths."
             )
             width = -width
-        dbu = c.layout().dbu
         backbone = euler_bend_points(angle, radius=radius, resolution=resolution)
 
         center_path = extrude_path(
@@ -307,16 +306,14 @@ def bend_euler_factory(
         )
         c.create_port(
             layer=layer,
-            width=round(width / c.kcl.dbu),
-            trans=kdb.Trans(2, False, backbone[0].to_itype(dbu).to_v()),
+            width=c.kcl.to_dbu(width),
+            trans=kdb.Trans(2, False, c.kcl.to_dbu(backbone[0]).to_v()),
         )
 
         if abs(angle % 90) < 0.001:
             _ang = round(angle)
             c.create_port(
-                trans=kdb.Trans(
-                    _ang // 90, False, backbone[-1].to_itype(c.kcl.dbu).to_v()
-                ),
+                trans=kdb.Trans(_ang // 90, False, c.kcl.to_dbu(backbone[-1]).to_v()),
                 width=round(width / c.kcl.dbu),
                 layer=layer,
             )
@@ -414,7 +411,6 @@ def bend_s_euler_factory(
                 " lengths."
             )
             width = -width
-        dbu = c.layout().dbu
         backbone = euler_sbend_points(
             offset=offset,
             radius=radius,
@@ -432,20 +428,20 @@ def bend_s_euler_factory(
 
         v = backbone[-1] - backbone[0]
         if v.x < 0:
-            p1 = backbone[-1].to_itype(dbu)
-            p2 = backbone[0].to_itype(dbu)
+            p1 = c.kcl.to_dbu(backbone[-1])
+            p2 = c.kcl.to_dbu(backbone[0])
         else:
-            p1 = backbone[0].to_itype(dbu)
-            p2 = backbone[-1].to_itype(dbu)
+            p1 = c.kcl.to_dbu(backbone[0])
+            p2 = c.kcl.to_dbu(backbone[-1])
         c.create_port(
             trans=kdb.Trans(2, False, p1.to_v()),
-            width=int(width / c.kcl.dbu),
+            width=c.kcl.to_dbu(width),
             port_type="optical",
             layer=layer,
         )
         c.create_port(
             trans=kdb.Trans(0, False, p2.to_v()),
-            width=int(width / c.kcl.dbu),
+            width=c.kcl.to_dbu(width),
             port_type="optical",
             layer=layer,
         )

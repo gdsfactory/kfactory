@@ -703,7 +703,7 @@ def route_bundle(
                         "Instance shapes overlapping with shapes of other instances"
                     )
                     for poly in error_region_instances.merge().each():
-                        it.add_value(poly.to_dtype(c.kcl.dbu))
+                        it.add_value(c.kcl.to_um(poly))
 
         if any_layer_collision:
             match on_collision:

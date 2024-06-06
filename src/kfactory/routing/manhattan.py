@@ -61,7 +61,7 @@ def droute_manhattan_180(
     bend180_radius: float,
     start_straight: float,
     end_straight: float,
-    layout: KCLayout | kdb.Layout,
+    layout: KCLayout,
 ) -> list[kdb.Point]:
     """Calculate manhattan route using um based points.
 
