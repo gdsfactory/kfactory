@@ -1,3 +1,18 @@
+<a name="v0.17.1"></a>
+# [v0.17.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.1) - 06 Jun 2024
+
+# What's Changed
+
+## New
+
+- add func.__name__ for partials [#378](https://github.com/gdsfactory/kfactory/pull/378)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.0...v0.17.1
+
+
+[Changes][v0.17.1]
+
+
 <a name="v0.17.0"></a>
 # [v0.17.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.0) - 05 Jun 2024
 
@@ -622,6 +637,7 @@
 [Changes][v0.4.0]
 
 
+[v0.17.1]: https://github.com/gdsfactory/kfactory/compare/v0.17.0...v0.17.1
 [v0.17.0]: https://github.com/gdsfactory/kfactory/compare/v0.16.1...v0.17.0
 [v0.16.1]: https://github.com/gdsfactory/kfactory/compare/v0.16.0...v0.16.1
 [v0.16.0]: https://github.com/gdsfactory/kfactory/compare/v0.15.2...v0.16.0
