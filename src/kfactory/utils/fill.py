@@ -157,11 +157,11 @@ def fill_tiled(
     if row_step is None:
         _row_step = kdb.Vector(fill_cell.bbox().width() + int(x_space / c.kcl.dbu), 0)
     else:
-        _row_step = row_step.to_itype(c.kcl.dbu)
+        _row_step = c.kcl.to_dbu(row_step)
     if col_step is None:
         _col_step = kdb.Vector(0, fill_cell.bbox().height() + int(y_space / c.kcl.dbu))
     else:
-        _col_step = col_step.to_itype(c.kcl.dbu)
+        _col_step = c.kcl.to_dbu(col_step)
     fc_bbox = fill_cell.bbox()
     tp.output(
         "to_fill",

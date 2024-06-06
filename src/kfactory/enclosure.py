@@ -205,7 +205,7 @@ def extrude_path(
                     end_angle,
                 )
             )
-            _r = kdb.Region(_path.to_itype(target.kcl.dbu))
+            _r = kdb.Region(target.kcl.to_dbu(_path))
             if section.d_min is not None:
                 _path = path_pts_to_polygon(
                     *extrude_path_points(
@@ -215,7 +215,7 @@ def extrude_path(
                         end_angle,
                     )
                 )
-                _r -= kdb.Region(_path.to_itype(target.kcl.dbu))
+                _r -= kdb.Region(target.kcl.to_dbu(_path))
             reg.insert(_r)
             if _layer == layer and i == j:
                 ret_path = _path
@@ -342,14 +342,16 @@ def extrude_path_dynamic(
                     return widths(x) + 2 * section.d_max * target.kcl.layout.dbu
 
                 _r = kdb.Region(
-                    path_pts_to_polygon(
-                        *extrude_path_dynamic_points(
-                            path,
-                            w_max,
-                            start_angle,
-                            end_angle,
+                    target.kcl.to_dbu(
+                        path_pts_to_polygon(
+                            *extrude_path_dynamic_points(
+                                path,
+                                w_max,
+                                start_angle,
+                                end_angle,
+                            )
                         )
-                    ).to_itype(target.kcl.dbu)
+                    )
                 )
                 if section.d_min is not None:
 
@@ -362,14 +364,16 @@ def extrude_path_dynamic(
                         )
 
                     _r -= kdb.Region(
-                        path_pts_to_polygon(
-                            *extrude_path_dynamic_points(
-                                path,
-                                w_min,
-                                start_angle,
-                                end_angle,
+                        target.kcl.to_dbu(
+                            path_pts_to_polygon(
+                                *extrude_path_dynamic_points(
+                                    path,
+                                    w_min,
+                                    start_angle,
+                                    end_angle,
+                                )
                             )
-                        ).to_itype(target.kcl.dbu)
+                        )
                     )
                 reg.insert(_r)
             target.shapes(layer).insert(reg.merge())
@@ -383,14 +387,16 @@ def extrude_path_dynamic(
                     for w in widths  # type: ignore[union-attr]
                 ]
                 _r = kdb.Region(
-                    path_pts_to_polygon(
-                        *extrude_path_dynamic_points(
-                            path,
-                            max_widths,
-                            start_angle,
-                            end_angle,
+                    target.kcl.to_dbu(
+                        path_pts_to_polygon(
+                            *extrude_path_dynamic_points(
+                                path,
+                                max_widths,
+                                start_angle,
+                                end_angle,
+                            )
                         )
-                    ).to_itype(target.kcl.dbu)
+                    )
                 )
                 if section.d_min is not None:
                     min_widths = [
@@ -398,14 +404,16 @@ def extrude_path_dynamic(
                         for w in widths  # type: ignore[union-attr]
                     ]
                     _r -= kdb.Region(
-                        path_pts_to_polygon(
-                            *extrude_path_dynamic_points(
-                                path,
-                                min_widths,
-                                start_angle,
-                                end_angle,
+                        target.kcl.to_dbu(
+                            path_pts_to_polygon(
+                                *extrude_path_dynamic_points(
+                                    path,
+                                    min_widths,
+                                    start_angle,
+                                    end_angle,
+                                )
                             )
-                        ).to_itype(target.kcl.dbu)
+                        )
                     )
                 reg.insert(_r)
             target.shapes(layer).insert(reg.merge())

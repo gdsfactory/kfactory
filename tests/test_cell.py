@@ -12,16 +12,12 @@ def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
 
 def test_circular_snapping(LAYER: kf.LayerEnum) -> None:
     b = kf.cells.circular.bend_circular(width=1, radius=10, layer=LAYER.WG, angle=90)
-    assert b.ports["o2"].dcplx_trans.disp == b.ports["o2"].trans.disp.to_dtype(
-        b.kcl.dbu
-    )
+    assert b.ports["o2"].dcplx_trans.disp == kf.kcl.to_um(b.ports["o2"].trans.disp)
 
 
 def test_euler_snapping(LAYER: kf.LayerEnum) -> None:
     b = kf.cells.euler.bend_euler(width=1, radius=10, layer=LAYER.WG, angle=90)
-    assert b.ports["o2"].dcplx_trans.disp == b.ports["o2"].trans.disp.to_dtype(
-        b.kcl.dbu
-    )
+    assert b.ports["o2"].dcplx_trans.disp == kf.kcl.to_um(b.ports["o2"].trans.disp)
 
 
 def test_no_snap(LAYER: kf.LayerEnum) -> None:
@@ -35,7 +31,7 @@ def test_no_snap(LAYER: kf.LayerEnum) -> None:
 
     p = c.ports[0]
 
-    assert p.dcplx_trans.disp != p.trans.disp.to_dtype(c.kcl.dbu)
+    assert p.dcplx_trans.disp != c.kcl.to_um(p.trans.disp)
 
 
 def test_namecollision(LAYER: kf.LayerEnum) -> None:

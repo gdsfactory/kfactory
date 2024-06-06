@@ -66,7 +66,7 @@ def test_dmirror(LAYER: kf.LayerEnum) -> None:
     b2 = c << b
     disp = kdb.Trans(5000, 5000).to_dtype(c.kcl.dbu)
     # mp1 = kf.kdb.Point(-10000, 10000)
-    mp1 = kf.kdb.Point(50000, 25000).to_dtype(c.kcl.dbu)
+    mp1 = c.kcl.to_um(kf.kdb.Point(50000, 25000))
     mp2 = -mp1
 
     b2.dmirror(disp * mp1, disp * mp2)

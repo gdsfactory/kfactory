@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.11.2
+#       jupytext_version: 1.16.2
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -24,7 +24,8 @@
 # - `Point`, `Box`, `Polygon`, `Edge`, `Region` are in dbu
 # - `DPoint`, `DBox`, `DPolygon`, `DEdge` are in microns
 #
-# Most Shape types are available as microns and dbu parts. They can be converted with `<ShapeTypeDBU>.to_dtype(dbu)` to microns and with `<ShapeTypeMicrons>.to_itype(dbu)` where `dbu` is the the conversion of one database unit to microns
+# Most Shape types are available as microns and dbu parts. They can be converted with `<ShapeTypeDBU>.to_dtype(dbu)` to microns and with `<ShapeTypeMicrons>.to_itype(dbu)` where `dbu` is the the conversion of one database unit to microns.
+# Alternatively they can be converted with `c.kcl.to_um(<ShapeTypeDBU>)` or `c.kcl.to_dbu(<ShapeTypeMicrons>)` where `c.kcl` is the KCell and `kcl` is the `KCLayout` which owns the KCell.
 
 
 # %%
@@ -141,7 +142,7 @@ c.plot()
 def straight(length=10, width=1, layer=(1, 0)):
     wg = kf.KCell()
     box = kf.kdb.DBox(length, width)
-    int_box = box.to_itype(wg.kcl.dbu)
+    int_box = wg.kcl.to_dbu(box)
     _layer = kf.kcl.layer(*layer)
     wg.shapes(_layer).insert(box)
     wg.add_port(
@@ -336,21 +337,21 @@ c
 # %%
 # e1 NOT e2
 c = kf.KCell()
-e3 = kf.kdb.Region(e1.to_itype(c.kcl.dbu)) - kf.kdb.Region(e2.to_itype(c.kcl.dbu))
+e3 = kf.kdb.Region(c.kcl.to_dbu(e1)) - kf.kdb.Region(c.kcl.to_dbu(e2))
 c.shapes(c.kcl.layer(1, 0)).insert(e3)
 c
 
 # %%
 # e1 AND e2
 c = kf.KCell()
-e3 = kf.kdb.Region(e1.to_itype(c.kcl.dbu)) & kf.kdb.Region(e2.to_itype(c.kcl.dbu))
+e3 = kf.kdb.Region(c.kcl.to_dbu(e1)) & kf.kdb.Region(c.kcl.to_dbu(e2))
 c.shapes(c.kcl.layer(1, 0)).insert(e3)
 c
 
 # %%
 # e1 OR e2
 c = kf.KCell()
-e3 = kf.kdb.Region(e1.to_itype(c.kcl.dbu)) + kf.kdb.Region(e2.to_itype(c.kcl.dbu))
+e3 = kf.kdb.Region(c.kcl.to_dbu(e1)) + kf.kdb.Region(c.kcl.to_dbu(e2))
 c.shapes(c.kcl.layer(1, 0)).insert(e3)
 c
 
@@ -358,7 +359,7 @@ c
 # e1 OR e2 (merged)
 c = kf.KCell()
 e3 = (
-    kf.kdb.Region(e1.to_itype(c.kcl.dbu)) + kf.kdb.Region(e2.to_itype(c.kcl.dbu))
+    kf.kdb.Region(c.kcl.to_dbu(e1)) + kf.kdb.Region(c.kcl.to_dbu(e2))
 ).merge()
 c.shapes(c.kcl.layer(1, 0)).insert(e3)
 c
@@ -366,7 +367,7 @@ c
 # %%
 # e1 XOR e2
 c = kf.KCell()
-e3 = kf.kdb.Region(e1.to_itype(c.kcl.dbu)) ^ kf.kdb.Region(e2.to_itype(c.kcl.dbu))
+e3 = kf.kdb.Region(c.kcl.to_dbu(e1)) ^ kf.kdb.Region(c.kcl.to_dbu(e2))
 c.shapes(c.kcl.layer(1, 0)).insert(e3)
 c
 
