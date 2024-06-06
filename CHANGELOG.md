@@ -7,6 +7,10 @@
 
 - add func.__name__ for partials [#378](https://github.com/gdsfactory/kfactory/pull/378)
 
+## Bug Fixes
+
+- Fix cells duplicated by  having settings and info [#379](https://github.com/gdsfactory/kfactory/pull/379)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.0...v0.17.1
 
 
