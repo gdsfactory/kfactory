@@ -3142,7 +3142,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if set_settings:
                         settings = cell.settings.model_dump()
                         settings_units = cell.settings_units.model_dump()
-                        cell.function_name = f.__name__
+                        if hasattr(f, "__name__"):
+                            cell.function_name = f.__name__
+                        elif hasattr(f, "func"):
+                            cell.function_name = f.func.__name__
+                        else:
+                            raise ValueError(f"Function {f} has no name.")
+
                         cell.basename = basename
 
                         for param in drop_params:
