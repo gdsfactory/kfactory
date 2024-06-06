@@ -11,7 +11,7 @@ import sys
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
 from enum import IntEnum
-from functools import lru_cache
+from functools import cache, lru_cache
 from hashlib import sha1
 from typing import TYPE_CHECKING, Any, TypeGuard, overload
 
@@ -171,6 +171,8 @@ def extrude_path(
     end_angle: float | None = None,
 ) -> kdb.DPolygon:
     """Extrude a path from a list of points and a static width.
+
+    This function will return the DPolygon extruded for the (main) layer.
 
     Args:
         target: the cell where to insert the shapes to (and get the database unit from)
@@ -512,7 +514,7 @@ class LayerSection(BaseModel):
         yield from iter(self.sections)
 
 
-class LayerEnclosure(BaseModel, validate_assignment=True):
+class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
     """Definitions for calculation of enclosing (or smaller) shapes of a reference.
 
     Attributes:
@@ -559,8 +561,6 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
             kcl=kcl,
         )
         self._name = name
-
-        self.layer_sections = {}
 
         if dsections is not None:
             assert (
@@ -1599,3 +1599,56 @@ class KCellEnclosure(BaseModel):
     def copy_to(self, kcl: KCLayout) -> KCellEnclosure:
         """Copy the KCellEnclosure to another KCLayout."""
         return KCellEnclosure([enc.copy_to(kcl) for enc in self.enclosures.enclosures])
+
+
+class CrossSection(BaseModel, frozen=True):
+    main_layer: LayerEnum
+    width: int
+    enclosure: LayerEnclosure
+
+    def extrude_path(
+        self,
+        target: KCell,
+        path: list[kdb.DPoint],
+        start_angle: float | None = None,
+        end_angle: float | None = None,
+    ) -> kdb.DPolygon:
+        return extrude_path(
+            target=target,
+            layer=self.main_layer,
+            path=path,
+            width=self.width,
+            enclosure=self.enclosure,
+            start_angle=start_angle,
+            end_angle=end_angle,
+        )
+
+    def transition(
+        self,
+        target: KCell,
+        target_cs: CrossSection,
+        path: list[kdb.DPoint],
+        start_angle: float | None = None,
+        end_angle: float | None = None,
+    ) -> None:
+        if target_cs.enclosure is not self.enclosure:
+            raise ValueError(
+                "The two cross_sections must share the same cross_section for a"
+                "transition!"
+            )
+        extrude_path_dynamic(
+            target=target,
+            path=path,
+            layer=self.main_layer,
+            enclosure=self.enclosure,
+            widths=[self.width, target_cs.width],
+            start_angle=start_angle,
+            end_angle=end_angle,
+        )
+
+    @cache
+    @classmethod
+    def from_width_and_layer(cls, width: int, layer: LayerEnum) -> CrossSection:
+        return cls(
+            main_layer=layer, kcl=layer.kcl, enclosure=LayerEnclosure(), width=width
+        )
