@@ -5,6 +5,7 @@
 
 ## New
 
+- add to_um and to_dbu into KCLayout [#380](https://github.com/gdsfactory/kfactory/pull/380)
 - add func.__name__ for partials [#378](https://github.com/gdsfactory/kfactory/pull/378)
 
 ## Bug Fixes
