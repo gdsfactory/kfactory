@@ -3140,7 +3140,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                                 self[c.cell_index()].delete()
                     dbu = cell.kcl.layout.dbu
                     if set_settings:
-                        cell.function_name = f.__name__
+                        settings = cell.settings.model_dump()
+                        settings_units = cell.settings_units.model_dump()
+                        if hasattr(f, "__name__"):
+                            cell.function_name = f.__name__
+                        elif hasattr(f, "func"):
+                            cell.function_name = f.func.__name__
+                        else:
+                            raise ValueError(f"Function {f} has no name.")
                         cell.basename = basename
 
                         for param in drop_params:
