@@ -3140,28 +3140,19 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                                 self[c.cell_index()].delete()
                     dbu = cell.kcl.layout.dbu
                     if set_settings:
-                        settings = cell.settings.model_dump()
-                        settings_units = cell.settings_units.model_dump()
                         if hasattr(f, "__name__"):
                             cell.function_name = f.__name__
                         elif hasattr(f, "func"):
                             cell.function_name = f.func.__name__
                         else:
                             raise ValueError(f"Function {f} has no name.")
-
                         cell.basename = basename
 
                         for param in drop_params:
                             params.pop(param, None)
                             param_units.pop(param, None)
-                        settings.update(params)
-                        settings_units.update(param_units)
-                        cell._settings = KCellSettings(**settings)
-                        cell._settings_units = KCellSettingsUnits(**settings_units)
-                    cell_info = cell.info.model_dump()
-                    for name, value in cell.info:
-                        cell_info[name] = value
-                    cell.info = Info(**cell_info)
+                        cell._settings = KCellSettings(**params)
+                        cell._settings_units = KCellSettingsUnits(**param_units)
                     match check_instances:
                         case CHECK_INSTANCES.RAISE:
                             if any(inst.is_complex() for inst in cell.each_inst()):
@@ -3406,18 +3397,18 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                             name = get_cell_name(f.__name__, **params)
                         cell.name = name
                     if set_settings:
-                        settings = cell.settings.model_dump()
-                        cell.function_name = f.__name__
+                        if hasattr(f, "__name__"):
+                            cell.function_name = f.__name__
+                        elif hasattr(f, "func"):
+                            cell.function_name = f.func.__name__
+                        else:
+                            raise ValueError(f"Function {f} has no name.")
                         cell.basename = basename
                         for param in drop_params:
                             params.pop(param, None)
                             param_units.pop(param, None)
-                        settings.update(params)
-                        cell._settings = KCellSettings(**settings)
-                    info = cell.info.model_dump()
-                    for name, value in cell.info:
-                        info[name] = value
-                    cell.info = Info(**info)
+                        cell._settings = KCellSettings(**params)
+                        cell._settings_units = KCellSettingsUnits(**param_units)
                     if add_port_layers:
                         for port in cell.ports:
                             if port.layer in cell.kcl.netlist_layer_mapping:
