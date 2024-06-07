@@ -22,6 +22,7 @@ dependencies = [
   "scipy",
   "ruamel.yaml",
   "cachetools >= 5.2.0",
+  "gitpython",
   "pydantic >= 2.0.2, < 3",
   "pydantic-settings >= 2.0.1, < 3",
   "loguru",
@@ -39,7 +40,6 @@ git = [
 dev = [
   "mypy",
   "pre-commit",
-  "gitpython",
   "pylsp-mypy",
   "python-lsp-server[all]",
   "ruff",

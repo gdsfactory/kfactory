@@ -5711,7 +5711,7 @@ class Port:
             self._dcplx_trans = value.dup()
             self._trans = None
         else:
-            self._trans = kdb.CplxTrans(value.dup(), self.kcl.dbu).s_trans()
+            self._trans = kdb.ICplxTrans(value.dup(), self.kcl.dbu).s_trans()
             self._dcplx_trans = None
 
     @property
@@ -5815,12 +5815,12 @@ class Port:
     @property
     def dwidth(self) -> float:
         """Width of the port in um."""
-        return self.width * self.kcl.layout.dbu
+        return self.kcl.to_um(self.width)
 
     @dwidth.setter
     def dwidth(self, value: float) -> None:
-        self.width = int(value / self.kcl.layout.dbu)
-        assert self.width * self.kcl.layout.dbu == float(value), (
+        self.width = self.kcl.to_dbu(value)
+        assert self.kcl.to_um(self.width) == float(value), (
             "When converting to dbu the width does not match the desired width"
             f"({self.width} / {value})!"
         )

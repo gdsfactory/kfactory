@@ -188,3 +188,10 @@ def test_polar_copy_complex(LAYER: kf.LayerEnum) -> None:
     assert p2.dcplx_trans == kf.kdb.DCplxTrans(
         1, 210, True, 0.938012701892, 0.683012701892
     )
+
+
+def test_dplx_port_dbu_port_conversion(LAYER: kf.LayerEnum) -> None:
+    t1 = kf.kdb.DCplxTrans(1, 90, False, 10, 10)
+    t2 = kf.kdb.Trans(1, False, 10_000, 10_000)
+    p = kf.Port(dwidth=1, dcplx_trans=t1, layer=LAYER.WG, kcl=kf.kcl)
+    assert p.trans == t2
