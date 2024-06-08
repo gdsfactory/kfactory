@@ -10,6 +10,7 @@
 
 ## Bug Fixes
 
+- pass flags to connect [#384](https://github.com/gdsfactory/kfactory/pull/384)
 - Fix dcplx_trans setter on Port [#383](https://github.com/gdsfactory/kfactory/pull/383)
 - Fix cells duplicated by  having settings and info [#379](https://github.com/gdsfactory/kfactory/pull/379)
 
