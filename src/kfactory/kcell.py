@@ -881,6 +881,8 @@ class KCell:
         c._settings = self.settings.model_copy()
         c.info = self.info.model_copy()
 
+        c.vinsts = self.vinsts.copy()
+
         return c
 
     def __copy__(self) -> KCell:

@@ -39,7 +39,8 @@ __all__ = ["display_kcell"]
 
 def display_kcell(kc: KCell, lyrdb: Path | str | None = None) -> None:
     """Display a KCell in a jupyter widget or an image."""
-    cell_dup = kc.kcl[kc.name]
+    cell_dup = kc.kcl[kc.name].dup()
+    cell_dup.insert_vinsts()
     match config.display_type:
         case "widget":
             lw = LayoutWidget(cell=cell_dup, layer_properties=lyrdb)
@@ -47,6 +48,7 @@ def display_kcell(kc: KCell, lyrdb: Path | str | None = None) -> None:
         case "image":
             lipi = LayoutIPImage(cell=cell_dup, layer_properties=lyrdb)
             display(lipi.image)  # type: ignore[no-untyped-call,unused-ignore]
+    cell_dup.delete()
 
 
 widgets: list[LayoutImage | LayoutIPImage] = []
