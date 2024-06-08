@@ -858,14 +858,26 @@ def place90(
         ):
             wg = c << straight_factory(width=w, length=int((pts[1] - pts[0]).length()))
             wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
-            wg.connect(wg_p1, p1)
+            wg.connect(
+                wg_p1,
+                p1,
+                allow_width_mismatch=allow_width_mismatch,
+                allow_layer_mismatch=allow_layer_mismatch,
+                allow_type_mismatch=allow_type_mismatch,
+            )
             route.instances.append(wg)
             route.start_port = wg_p1.copy()
             route.start_port.name = None
             route.length_straights += int(length)
         else:
             t1 = c << taper_cell
-            t1.connect(taperp1.name, p1)
+            t1.connect(
+                taperp1.name,
+                p1,
+                allow_width_mismatch=allow_width_mismatch,
+                allow_layer_mismatch=allow_layer_mismatch,
+                allow_type_mismatch=allow_type_mismatch,
+            )
             route.instances.append(t1)
             route.start_port = t1.ports[taperp1.name].copy()
             route.start_port.name = None
@@ -877,14 +889,34 @@ def place90(
                     - int((taperp1.trans.disp - taperp2.trans.disp).length() * 2),
                 )
                 wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
-                wg.connect(wg_p1, t1, taperp2.name)
+                wg.connect(
+                    wg_p1,
+                    t1,
+                    taperp2.name,
+                    allow_width_mismatch=allow_width_mismatch,
+                    allow_layer_mismatch=allow_layer_mismatch,
+                    allow_type_mismatch=allow_type_mismatch,
+                )
                 route.instances.append(wg)
                 t2 = c << taper_cell
-                t2.connect(taperp2.name, wg_p2)
+                t2.connect(
+                    taperp2.name,
+                    wg_p2,
+                    allow_width_mismatch=allow_width_mismatch,
+                    allow_layer_mismatch=allow_layer_mismatch,
+                    allow_type_mismatch=allow_type_mismatch,
+                )
                 route.length_straights += _l
             else:
                 t2 = c << taper_cell
-                t2.connect(taperp2.name, t1, taperp2.name)
+                t2.connect(
+                    taperp2.name,
+                    t1,
+                    taperp2.name,
+                    allow_width_mismatch=allow_width_mismatch,
+                    allow_layer_mismatch=allow_layer_mismatch,
+                    allow_type_mismatch=allow_type_mismatch,
+                )
             route.instances.append(t2)
             route.end_port = t2.ports[taperp1.name]
         return route
@@ -950,7 +982,14 @@ def place90(
                 route.length_straights += int(length)
             else:
                 t1 = c << taper_cell
-                t1.connect(taperp1.name, bend90, b90p1.name)
+                t1.connect(
+                    taperp1.name,
+                    bend90,
+                    b90p1.name,
+                    allow_width_mismatch=allow_width_mismatch,
+                    allow_layer_mismatch=allow_layer_mismatch,
+                    allow_type_mismatch=allow_type_mismatch,
+                )
                 route.instances.append(t1)
                 _l = int(
                     length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2
@@ -964,14 +1003,35 @@ def place90(
                         ),
                     )
                     wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
-                    wg.connect(wg_p1.name, t1, taperp2.name)
+                    wg.connect(
+                        wg_p1.name,
+                        t1,
+                        taperp2.name,
+                        allow_width_mismatch=allow_width_mismatch,
+                        allow_layer_mismatch=allow_layer_mismatch,
+                        allow_type_mismatch=allow_type_mismatch,
+                    )
                     route.instances.append(wg)
                     t2 = c << taper_cell
-                    t2.connect(taperp2.name, wg, wg_p2.name)
+                    t2.connect(
+                        taperp2.name,
+                        wg,
+                        wg_p2.name,
+                        allow_width_mismatch=allow_width_mismatch,
+                        allow_layer_mismatch=allow_layer_mismatch,
+                        allow_type_mismatch=allow_type_mismatch,
+                    )
                     route.length_straights += _l
                 else:
                     t2 = c << taper_cell
-                    t2.connect(taperp2.name, t1, taperp2.name)
+                    t2.connect(
+                        taperp2.name,
+                        t1,
+                        taperp2.name,
+                        allow_width_mismatch=allow_width_mismatch,
+                        allow_layer_mismatch=allow_layer_mismatch,
+                        allow_type_mismatch=allow_type_mismatch,
+                    )
                 route.instances.append(t2)
         route.instances.append(bend90)
         old_pt = pt
@@ -1001,7 +1061,14 @@ def place90(
             route.length_straights += int(length)
         else:
             t1 = c << taper_cell
-            t1.connect(taperp1.name, bend90, b90p2.name)
+            t1.connect(
+                taperp1.name,
+                bend90,
+                b90p2.name,
+                allow_width_mismatch=allow_width_mismatch,
+                allow_layer_mismatch=allow_layer_mismatch,
+                allow_type_mismatch=allow_type_mismatch,
+            )
             route.instances.append(t1)
             if length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2 != 0:
                 _l = int(
