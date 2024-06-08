@@ -29,7 +29,6 @@ __all__ = [
     "KCellEnclosure",
     "extrude_path",
     "extrude_path_points",
-    "extrude_path_dynamic",
     "extrude_path_dynamic_points",
 ]
 
@@ -163,13 +162,13 @@ def extrude_path_points(
 
 def extrude_path(
     target: KCell,
-    layer: LayerEnum | int,
+    layer: str,
     path: list[kdb.DPoint],
     width: float,
-    enclosure: LayerEnclosure | None = None,
+    enclosure: LayerEnclosure,
     start_angle: float | None = None,
     end_angle: float | None = None,
-) -> kdb.DPolygon:
+) -> dict[str, list[kdb.DPolygon]]:
     """Extrude a path from a list of points and a static width.
 
     This function will return the DPolygon extruded for the (main) layer.
@@ -186,43 +185,56 @@ def extrude_path(
         end_angle: optionally specify a custom ending angle if `None` will be
             autocalculated from the last two elements
     """
-    layer_list = {layer: LayerSection(sections=[Section(d_max=0)])}
-    j = 0
-    if enclosure is not None:
-        if layer not in enclosure.layer_sections:
-            layer_list |= enclosure.layer_sections
-            j = 0
-        else:
-            layer_list = enclosure.layer_sections.copy()
-            j = layer_list[layer].add_section(Section(d_max=0))
+    assert width / 2 == enclosure.kcl.to_um(enclosure.kcl.to_dbu(width / 2)), (
+        "If the path width is not a multiple of the database unit, asymmetric "
+        "paths could be produced during extrusion"
+    )
+    sections_per_layer: dict[str, LayerSections] = {
+        layer: sections for layer, sections in enclosure.layer_sections.items()
+    }
+    if enclosure.main_layer in sections_per_layer:
+        sections_per_layer[enclosure.main_layer] = LayerSections(
+            sections=sections_per_layer[enclosure.main_layer].sections
+            + [Section(d_max=width)]
+        )
 
-    for _layer, layer_sec in layer_list.items():
-        reg = kdb.Region()
-        for i, section in enumerate(layer_sec.sections):
-            _path = path_pts_to_polygon(
-                *extrude_path_points(
-                    path,
-                    width + 2 * section.d_max * target.kcl.dbu,
-                    start_angle,
-                    end_angle,
-                )
+    paths: dict[str, list[kdb.DPolygon]] = defaultdict(list)
+
+    for layer, layersections in sections_per_layer.items():
+        for section in layersections.sections:
+            _w = width / 2 + enclosure.kcl.to_um(section.d_max)
+            _w_inner = (
+                None
+                if section.d_min is None or width / 2 + section.d_min < 0
+                else width / 2 + enclosure.kcl.to_um(section.d_min)
             )
-            _r = kdb.Region(target.kcl.to_dbu(_path))
-            if section.d_min is not None:
-                _path = path_pts_to_polygon(
-                    *extrude_path_points(
-                        path,
-                        width + 2 * section.d_min * target.kcl.dbu,
-                        start_angle,
-                        end_angle,
+            if _w_inner is None:
+                paths[layer].append(
+                    path_pts_to_polygon(
+                        *extrude_path_points(
+                            path=path,
+                            width=_w,
+                            start_angle=start_angle,
+                            end_angle=end_angle,
+                        )
                     )
                 )
-                _r -= kdb.Region(target.kcl.to_dbu(_path))
-            reg.insert(_r)
-            if _layer == layer and i == j:
-                ret_path = _path
-        target.shapes(_layer).insert(reg.merge())
-    return ret_path
+            else:
+                outer_path = extrude_path_points(
+                    path=path, width=_w, start_angle=start_angle, end_angle=end_angle
+                )
+                inner_path = extrude_path_points(
+                    path=path,
+                    width=_w_inner,
+                    start_angle=start_angle,
+                    end_angle=end_angle,
+                )
+                outer_path[1].reverse()
+                inner_path[0].reverse()
+                paths[layer].append(kdb.DPolygon(outer_path[0] + inner_path[0]))
+                paths[layer].append(kdb.DPolygon(inner_path[1] + outer_path[1]))
+
+    return paths
 
 
 def extrude_path_dynamic_points(
@@ -299,128 +311,6 @@ def extrude_path_dynamic_points(
     return [v.disp.to_p() for v in vector_top], [v.disp.to_p() for v in vector_bot]
 
 
-def extrude_path_dynamic(
-    target: KCell,
-    layer: LayerEnum | int,
-    path: list[kdb.DPoint],
-    widths: Callable[[float], float] | list[float],
-    enclosure: LayerEnclosure | None = None,
-    start_angle: float | None = None,
-    end_angle: float | None = None,
-) -> None:
-    """Extrude a path with dynamic width.
-
-    Extrude from a list of points and a list of widths and add an enclosure if
-        specified.
-
-    Args:
-        target: the cell where to insert the shapes to (and get the database unit from)
-        layer: the main layer that should be extruded
-        path: list of floating-points points
-        widths: function (from t==0 to t==1) defining a width profile for the path |
-            list with width for the profile (needs same length as path)
-        enclosure: optional enclosure object, specifying necessary layers.this will
-            extrude around the `layer`
-        start_angle: optionally specify a custom starting angle if `None` will be
-            autocalculated from the first two elements
-        end_angle: optionally specify a custom ending angle if `None` will be
-            autocalculated from the last two elements
-    """
-    layer_list = {layer: LayerSection(sections=[Section(d_max=0)])}
-    if enclosure is not None:
-        if layer not in enclosure.layer_sections:
-            layer_list.update(enclosure.layer_sections)
-        else:
-            layer_list[layer].sections.copy()
-            layer_list = enclosure.layer_sections.copy()
-            for section in layer_list[layer].sections:
-                layer_list[layer].add_section(section)
-    if is_callable_widths(widths):
-        for layer, layer_sec in layer_list.items():
-            reg = kdb.Region()
-            for section in layer_sec.sections:
-
-                def w_max(x: float) -> float:
-                    return widths(x) + 2 * section.d_max * target.kcl.layout.dbu
-
-                _r = kdb.Region(
-                    target.kcl.to_dbu(
-                        path_pts_to_polygon(
-                            *extrude_path_dynamic_points(
-                                path,
-                                w_max,
-                                start_angle,
-                                end_angle,
-                            )
-                        )
-                    )
-                )
-                if section.d_min is not None:
-
-                    def w_min(x: float) -> float:
-                        return (
-                            widths(x)
-                            + 2  # type: ignore[operator]
-                            * section.d_min
-                            * target.kcl.layout.dbu
-                        )
-
-                    _r -= kdb.Region(
-                        target.kcl.to_dbu(
-                            path_pts_to_polygon(
-                                *extrude_path_dynamic_points(
-                                    path,
-                                    w_min,
-                                    start_angle,
-                                    end_angle,
-                                )
-                            )
-                        )
-                    )
-                reg.insert(_r)
-            target.shapes(layer).insert(reg.merge())
-
-    else:
-        for layer, layer_sec in layer_list.items():
-            reg = kdb.Region()
-            for section in layer_sec.sections:
-                max_widths = [
-                    w + 2 * section.d_max * target.kcl.dbu
-                    for w in widths  # type: ignore[union-attr]
-                ]
-                _r = kdb.Region(
-                    target.kcl.to_dbu(
-                        path_pts_to_polygon(
-                            *extrude_path_dynamic_points(
-                                path,
-                                max_widths,
-                                start_angle,
-                                end_angle,
-                            )
-                        )
-                    )
-                )
-                if section.d_min is not None:
-                    min_widths = [
-                        w + 2 * section.d_min * target.kcl.dbu
-                        for w in widths  # type: ignore[union-attr]
-                    ]
-                    _r -= kdb.Region(
-                        target.kcl.to_dbu(
-                            path_pts_to_polygon(
-                                *extrude_path_dynamic_points(
-                                    path,
-                                    min_widths,
-                                    start_angle,
-                                    end_angle,
-                                )
-                            )
-                        )
-                    )
-                reg.insert(_r)
-            target.shapes(layer).insert(reg.merge())
-
-
 class Section(BaseModel):
     """Section of an Enclosure.
 
@@ -463,7 +353,15 @@ class Section(BaseModel):
         return hash((self.d_min, self.d_max))
 
 
-class LayerSection(BaseModel):
+def sort_sections(s1: Section, s2: Section) -> bool:
+    if s1.d_min is None:
+        return True
+    if s2.d_min is None:
+        return False
+    return s1.d_min < s2.d_min
+
+
+class LayerSections(BaseModel, frozen=True):
     """A collection of sections intended for a layer.
 
     Adding a section will trigger an evaluation to merge
@@ -472,32 +370,19 @@ class LayerSection(BaseModel):
 
     sections: list[Section] = Field(default=[])
 
-    def add_section(self, sec: Section) -> int:
-        """Add a new section.
+    def __init__(self, sections: list[Section]):
+        _sections: list[Section] = []
+        sorted_sections = list(sorted(sections, key=lambda sec: sec.d_min or _min_size))
+        d_max = sorted_sections[0].d_max
+        d_min = sorted_sections[0].d_min
+        for s in sorted_sections:
+            if s.d_min and s.d_min < d_max:
+                d_max = max(s.d_max, d_max)
+            else:
+                _sections.append(Section(d_min=d_min, d_max=d_max))
+        _sections.append(Section(d_min=d_min, d_max=d_max))
 
-        Checks for overlaps after.
-        """
-        if not self.sections:
-            self.sections.append(sec)
-            return 0
-        else:
-            i = 0
-            if sec.d_min is not None:
-                while i < len(self.sections) and sec.d_min > self.sections[i].d_max:
-                    i += 1
-                while (
-                    i < len(self.sections) and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
-                ):
-                    sec.d_max = max(self.sections[i].d_max, sec.d_max)
-                    sec.d_min = min(
-                        self.sections[i].d_min,
-                        sec.d_min,  # type: ignore[type-var]
-                    )
-                    self.sections.pop(i)
-                    if i == len(self.sections):
-                        break
-            self.sections.insert(i, sec)
-            return i
+        super().__init__(sections=_sections)
 
     def max_size(self) -> int:
         """Maximum size of the sections in this layer section."""
@@ -522,24 +407,19 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
         main_layer: Layer which to use unless specified otherwise.
     """
 
-    layer_sections: dict[LayerEnum | int, LayerSection]
+    layer_sections: dict[LayerEnum, LayerSections]
     _name: str | None = PrivateAttr()
-    main_layer: LayerEnum | int | None
+    main_layer: str
     yaml_tag: str = "!Enclosure"
-    kcl: KCLayout | None = None
+    kcl: KCLayout
 
     def __init__(
         self,
-        sections: Sequence[
-            tuple[LayerEnum | int, int] | tuple[LayerEnum | int, int, int]
-        ] = [],
+        main_layer: str,
+        kcl: KCLayout,
+        sections: Sequence[tuple[str | int, int] | tuple[str, int, int]] = [],
         name: str | None = None,
-        main_layer: LayerEnum | int | None = None,
-        dsections: Sequence[
-            tuple[LayerEnum | int, float] | tuple[LayerEnum | int, float, float]
-        ]
-        | None = None,
-        kcl: KCLayout | None = None,
+        dsections: Sequence[tuple[str, float] | tuple[str, float, float]] | None = None,
     ):
         """Constructor of new enclosure.
 
@@ -566,29 +446,26 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
             assert (
                 self.kcl is not None
             ), "If sections in um are defined, kcl must be set"
-            dbu = self.kcl.dbu
             sections = list(sections)
             for section in dsections:
                 if len(section) == 2:
-                    sections.append((section[0], round(section[1] / dbu)))
+                    sections.append((section[0], self.kcl.to_dbu(section[1])))
 
                 elif len(section) == 3:
                     sections.append(
                         (
                             section[0],
-                            round(section[1] / dbu),
-                            round(section[2] / dbu),
+                            self.kcl.to_dbu(section[1]),
+                            self.kcl.to_dbu(section[2]),
                         )
                     )
 
-        for sec in sorted(sections, key=lambda sec: (sec[0], sec[1])):
-            if sec[0] in self.layer_sections:
-                ls = self.layer_sections[sec[0]]
-            else:
-                ls = LayerSection()
-                self.layer_sections[sec[0]] = ls
-            ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
-                Section(d_max=sec[2], d_min=sec[1])
+        _secs = defaultdict(list)
+        for sec in sections:
+            _secs[sec[0]].append(
+                Section(d_max=sec[1])
+                if len(sec) < 3
+                else Section(d_min=sec[1], d_max=sec[2])
             )
 
     def __hash__(self) -> int:  # make hashable BaseModel subclass
@@ -596,43 +473,6 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
         return hash(
             (str(self), self.main_layer, tuple(list(self.layer_sections.items())))
         )
-
-    def __add__(self, other: LayerEnclosure) -> LayerEnclosure:
-        """Returns the merged enclosure of two enclosures."""
-        enc = LayerEnclosure()
-
-        for layer, secs in self.layer_sections.items():
-            for sec in secs.sections:
-                enc.add_section(layer, sec)
-
-        for layer, secs in other.layer_sections.items():
-            for sec in secs.sections:
-                enc.add_section(layer, sec)
-
-        return enc
-
-    def __iadd__(self, other: LayerEnclosure) -> LayerEnclosure:
-        """Allows merging another enclosure into this one."""
-        for layer, secs in other.layer_sections.items():
-            for sec in secs.sections:
-                self.add_section(layer, sec)
-        return self
-
-    def add_section(self, layer: LayerEnum | int, sec: Section) -> None:
-        """Add a new section to the the enclosure.
-
-        Args:
-            layer: Target layer.
-            sec: New section to add.
-        """
-        d = self.layer_sections
-
-        if layer in self.layer_sections:
-            d[layer].add_section(sec)
-        else:
-            d[layer] = LayerSection(sections=[sec])
-
-        self.layer_sections = d  # trick pydantic to validate
 
     @property
     def name(self) -> str:
@@ -680,7 +520,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
     def apply_minkowski_enc(
         self,
         c: KCell,
-        ref: int | kdb.Region | None,  # layer index or the region
+        ref: str | kdb.Region | None,  # layer index or the region
         direction: Direction = Direction.BOTH,
     ) -> None:
         """Apply an enclosure with a vector in y-direction.
@@ -719,7 +559,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
             case _:
                 raise ValueError("Undefined direction")
 
-    def apply_minkowski_y(self, c: KCell, ref: int | kdb.Region | None = None) -> None:
+    def apply_minkowski_y(self, c: KCell, ref: str | kdb.Region | None = None) -> None:
         """Apply an enclosure with a vector in y-direction.
 
         This can be used for tapers/
@@ -731,7 +571,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
         """
         return self.apply_minkowski_enc(c, ref=ref, direction=Direction.Y)
 
-    def apply_minkowski_x(self, c: KCell, ref: int | kdb.Region | None) -> None:
+    def apply_minkowski_x(self, c: KCell, ref: str | kdb.Region | None) -> None:
         """Apply an enclosure with a vector in x-direction.
 
         This can be used for tapers/
@@ -747,7 +587,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
         self,
         c: KCell,
         shape: Callable[[int], kdb.Edge | kdb.Polygon | kdb.Box],
-        ref: int | kdb.Region | None = None,
+        ref: str | kdb.Region | None = None,
     ) -> None:
         """Apply an enclosure with a custom shape.
 
@@ -768,7 +608,11 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
                     "The enclosure doesn't have  a reference `main_layer` defined."
                     " Therefore the layer must be defined in calls"
                 )
-        r = kdb.Region(c.begin_shapes_rec(ref)) if isinstance(ref, int) else ref.dup()
+        r = (
+            kdb.Region(c.begin_shapes_rec(self.kcl.get_layer(ref)))
+            if isinstance(ref, str)
+            else ref.dup()
+        )
         r.merge()
 
         for layer, layersec in reversed(self.layer_sections.items()):
@@ -781,7 +625,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
     def apply_minkowski_tiled(
         self,
         c: KCell,
-        ref: int | kdb.Region | None = None,
+        ref: str | kdb.Region | None = None,
         tile_size: float | None = None,
         n_pts: int = 64,
         n_threads: int | None = None,
@@ -841,8 +685,10 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
         tp.tile_border(maxsize * tp.dbu, maxsize * tp.dbu)
 
         tp.tile_size(tile_size, tile_size)
-        if isinstance(ref, int):
-            tp.input("main_layer", c.kcl.layout, c.cell_index(), ref)
+        if isinstance(ref, str):
+            tp.input(
+                "main_layer", c.kcl.layout, c.cell_index(), c.kcl.layers.value[ref]
+            )
         else:
             tp.input("main_layer", ref)
 
@@ -953,7 +799,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
             for sec in layersec.sections:
                 c.shapes(layer).insert(shape(sec.d_max, sec.d_min))
 
-    def apply_bbox(self, c: KCell, ref: int | kdb.Region | None = None) -> None:
+    def apply_bbox(self, c: KCell, ref: str | kdb.Region | None = None) -> None:
         """Apply an enclosure based on a bounding box.
 
         Args:
@@ -1013,7 +859,6 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
         self,
         c: KCell,
         path: list[kdb.DPoint],
-        main_layer: int | LayerEnum | None,
         width: float,
         start_angle: float | None = None,
         end_angle: float | None = None,
@@ -1033,73 +878,15 @@ class LayerEnclosure(BaseModel, validate_assignment=True, frozen=True):
             start_angle: angle of the start piece
             end_angle: angle of the end piece
         """
-        if main_layer is None:
-            raise ValueError(
-                "The enclosure doesn't have  a reference `main_layer` defined."
-                " Therefore the layer must be defined in calls"
-            )
         extrude_path(
             target=c,
-            layer=main_layer,
+            layer=self.main_layer,
             path=path,
             width=width,
             enclosure=self,
             start_angle=start_angle,
             end_angle=end_angle,
         )
-
-    def extrude_path_dynamic(
-        self,
-        c: KCell,
-        path: list[kdb.DPoint],
-        main_layer: int | LayerEnum | None,
-        widths: Callable[[float], float] | list[float],
-    ) -> None:
-        """Extrude a path and add it to a main layer.
-
-        Supports a dynamic width of the path defined by a function
-        returning the width for the interval [0,1], or as a list of
-        widths of the same lengths as the points.
-
-        Args:
-            c: The cell where to insert the path to
-            path: Backbone of the path. [um]
-            main_layer: Layer index where to put the main part of the path.
-            widths: Width of the core of the path
-        """
-        if main_layer is None:
-            raise ValueError(
-                "The enclosure doesn't have  a reference `main_layer` defined."
-                " Therefore the layer must be defined in calls"
-            )
-        extrude_path_dynamic(
-            target=c, layer=main_layer, path=path, widths=widths, enclosure=self
-        )
-
-    def copy_to(self, kcl: KCLayout) -> LayerEnclosure:
-        """Creat a copy of the LayerEnclosure in another KCLayout."""
-        layer_enc = LayerEnclosure(
-            [], name=self.name, main_layer=self.main_layer, kcl=kcl
-        )
-        for layer, sections in self.layer_sections.items():
-            if isinstance(layer, LayerEnum):
-                try:
-                    _layer = kcl.layers(layer)  # type: ignore[call-arg]
-                except ValueError:
-                    _layer = kcl.layer(layer.layer, layer.datatype)
-                    logger.warning(
-                        "{layer.name} - {layer.layer}/{layer.datatype} is not"
-                        " available in the new KCLayout {kcl.name}, using layer"
-                        " index instead",
-                        layer=layer,
-                        kcl=kcl,
-                    )
-            else:
-                raise NotImplementedError
-
-            for section in sections.sections:
-                layer_enc.add_section(_layer, section)
-        return layer_enc
 
 
 class LayerEnclosureCollection(BaseModel):
@@ -1275,6 +1062,7 @@ class KCellEnclosure(BaseModel):
     """Collection of [enclosures][kfactory.enclosure.LayerEnclosure] for cells."""
 
     enclosures: LayerEnclosureCollection
+    kcl: KCLayout
 
     def __init__(self, enclosures: Iterable[LayerEnclosure]):
         """Init. Allow usage of an iterable object instead of a collection."""
@@ -1450,7 +1238,7 @@ class KCellEnclosure(BaseModel):
         tp.frame = c.dbbox()  # type: ignore[misc]
         tp.dbu = c.kcl.dbu
         tp.threads = n_threads or config.n_threads
-        inputs: set[int] = set()
+        inputs: set[str] = set()
         port_hole_map: dict[int, kdb.Region] = defaultdict(kdb.Region)
         ports_by_layer: dict[int, list[Port]] = defaultdict(list)
         for port in c.ports:
@@ -1463,7 +1251,7 @@ class KCellEnclosure(BaseModel):
                 size = layersection.sections[-1].d_max
                 maxsize = max(maxsize, size)
 
-                for port in ports_by_layer[enc.main_layer]:
+                for port in ports_by_layer[self.kcl.get_layer(enc.main_layer)]:
                     if port._trans:
                         port_hole_map[layer].insert(
                             port_hole(port.width, size).transformed(port.trans)
@@ -1490,7 +1278,7 @@ class KCellEnclosure(BaseModel):
         tp.tile_border(maxsize * tp.dbu, maxsize * tp.dbu)
         tp.tile_size(tile_size, tile_size)
         layer_regiontilesoperators: dict[
-            tuple[int, LayerSection], RegionTilesOperator
+            tuple[int, LayerSections], RegionTilesOperator
         ] = {}
 
         logger.debug("Starting KCellEnclosure on {}", c.kcl.future_cell_name or c.name)
@@ -1498,25 +1286,28 @@ class KCellEnclosure(BaseModel):
         n_enc = len(self.enclosures.enclosures)
 
         for i, enc in enumerate(self.enclosures.enclosures):
-            assert enc.main_layer is not None
+            mi = self.kcl.get_layer(enc.main_layer)
             if not c.bbox(enc.main_layer).empty():
-                _inp = f"main_layer_{int(enc.main_layer)}"
+                _inp = f"main_layer_{enc.main_layer}"
                 if enc.main_layer not in inputs:
-                    tp.input(_inp, c.kcl.layout, c.cell_index(), enc.main_layer)
+                    tp.input(
+                        _inp,
+                        c.kcl.layout,
+                        c.cell_index(),
+                        self.kcl.get_layer(enc.main_layer),
+                    )
                     inputs.add(enc.main_layer)
                     logger.debug("Created input {}", _inp)
 
                 for layer, layer_section in enc.layer_sections.items():
-                    if (enc.main_layer, layer_section) in layer_regiontilesoperators:
-                        layer_regiontilesoperators[
-                            (enc.main_layer, layer_section)
-                        ].layers.append(layer)
+                    if (mi, layer_section) in layer_regiontilesoperators:
+                        layer_regiontilesoperators[(mi, layer_section)].layers.append(
+                            layer
+                        )
                     else:
                         _out = f"target_{layer}"
                         operator = RegionTilesOperator(cell=c, layers=[layer])
-                        layer_regiontilesoperators[(enc.main_layer, layer_section)] = (
-                            operator
-                        )
+                        layer_regiontilesoperators[(mi, layer_section)] = operator
                         tp.output(_out, operator)
                         logger.debug("Created output {}", _out)
 
@@ -1596,15 +1387,24 @@ class KCellEnclosure(BaseModel):
                 operator.insert()
         logger.debug("Finished KCellEnclosure on {}", c.kcl.future_cell_name or c.name)
 
-    def copy_to(self, kcl: KCLayout) -> KCellEnclosure:
-        """Copy the KCellEnclosure to another KCLayout."""
-        return KCellEnclosure([enc.copy_to(kcl) for enc in self.enclosures.enclosures])
-
 
 class CrossSection(BaseModel, frozen=True):
-    main_layer: LayerEnum
+    main_layer: str
     width: int
     enclosure: LayerEnclosure
+    kcl: KCLayout
+    name: str
+
+    def __init__(
+        self,
+        main_layer: str,
+        width: int,
+        enclosure: LayerEnclosure,
+        kcl: KCLayout,
+        name: str | None = None,
+    ):
+        if name is None:
+            name = f"{main_layer}_{width}_{enclosure.name or hash(enclosure)}"
 
     def extrude_path(
         self,
@@ -1612,7 +1412,7 @@ class CrossSection(BaseModel, frozen=True):
         path: list[kdb.DPoint],
         start_angle: float | None = None,
         end_angle: float | None = None,
-    ) -> kdb.DPolygon:
+    ) -> dict[str, list[kdb.DPolygon]]:
         return extrude_path(
             target=target,
             layer=self.main_layer,
@@ -1623,32 +1423,14 @@ class CrossSection(BaseModel, frozen=True):
             end_angle=end_angle,
         )
 
-    def transition(
-        self,
-        target: KCell,
-        target_cs: CrossSection,
-        path: list[kdb.DPoint],
-        start_angle: float | None = None,
-        end_angle: float | None = None,
-    ) -> None:
-        if target_cs.enclosure is not self.enclosure:
-            raise ValueError(
-                "The two cross_sections must share the same cross_section for a"
-                "transition!"
-            )
-        extrude_path_dynamic(
-            target=target,
-            path=path,
-            layer=self.main_layer,
-            enclosure=self.enclosure,
-            widths=[self.width, target_cs.width],
-            start_angle=start_angle,
-            end_angle=end_angle,
-        )
-
     @cache
     @classmethod
-    def from_width_and_layer(cls, width: int, layer: LayerEnum) -> CrossSection:
+    def from_width_and_layer(
+        cls, width: int, layer: str, kcl: KCLayout
+    ) -> CrossSection:
         return cls(
-            main_layer=layer, kcl=layer.kcl, enclosure=LayerEnclosure(), width=width
+            main_layer=layer,
+            kcl=kcl,
+            enclosure=LayerEnclosure(kcl=kcl, main_layer=layer),
+            width=width,
         )

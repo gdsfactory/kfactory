@@ -53,10 +53,11 @@ from typing_extensions import ParamSpec, Self  # noqa: UP035
 from . import __version__, kdb, lay, rdb
 from .conf import CHECK_INSTANCES, LogLevel, config, logger
 from .enclosure import (
+    CrossSection,
     KCellEnclosure,
     LayerEnclosure,
     LayerEnclosureCollection,
-    LayerSection,
+    LayerSections,
 )
 from .port import (
     filter_direction,
@@ -357,18 +358,18 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
         obj.datatype = datatype  # type: ignore[attr-defined]
         return obj  # type: ignore[return-value]
 
-    def __getitem__(self, key: int) -> int:
-        """Retrieve layer number[0] / datatype[1] of a layer."""
-        if key == 0:
-            return self.layer
-        elif key == 1:
-            return self.datatype
+    # def __getitem__(self, key: int) -> int:
+    #     """Retrieve layer number[0] / datatype[1] of a layer."""
+    #     if key == 0:
+    #         return self.layer
+    #     elif key == 1:
+    #         return self.datatype
 
-        else:
-            raise ValueError(
-                "LayerMap only has two values accessible like"
-                " a list, layer == [0] and datatype == [1]"
-            )
+    #     else:
+    #         raise ValueError(
+    #             "LayerMap only has two values accessible like"
+    #             " a list, layer == [0] and datatype == [1]"
+    #         )
 
     def __len__(self) -> int:
         """A layer has length 2, layer number and datatype."""
@@ -3005,6 +3006,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         self._name = name
         self.library.register(name)
 
+    def get_layer(self, layer: str) -> LayerEnum:
+        """Get a layer index by name."""
+        return self.layers[layer]  # type: ignore[no-any-return,index]
+
     @overload
     def to_um(self, other: int) -> float: ...
     @overload
@@ -5363,7 +5368,7 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
 VInstance.model_rebuild()
 VKCell.model_rebuild()
 KCLayout.model_rebuild()
-LayerSection.model_rebuild()
+LayerSections.model_rebuild()
 LayerEnclosure.model_rebuild()
 KCellEnclosure.model_rebuild()
 LayerEnclosureModel.model_rebuild()
@@ -5410,8 +5415,7 @@ class Port:
     yaml_tag = "!Port"
     name: str | None
     kcl: KCLayout
-    width: int
-    layer: int | LayerEnum
+    cross_section: CrossSection
     _trans: kdb.Trans | None
     _dcplx_trans: kdb.DCplxTrans | None
     info: Info = Info()
@@ -5422,8 +5426,7 @@ class Port:
         self,
         *,
         name: str | None = None,
-        width: int,
-        layer: LayerEnum | int,
+        cross_section: CrossSection,
         trans: kdb.Trans,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
@@ -5435,8 +5438,7 @@ class Port:
         self,
         *,
         name: str | None = None,
-        dwidth: float,
-        layer: LayerEnum | int,
+        cross_section: CrossSection,
         dcplx_trans: kdb.DCplxTrans,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
@@ -5448,8 +5450,7 @@ class Port:
         self,
         *,
         name: str | None = None,
-        width: int,
-        layer: LayerEnum | int,
+        cross_section: CrossSection,
         port_type: str = "optical",
         angle: int,
         center: tuple[int, int],
@@ -5463,8 +5464,7 @@ class Port:
         self,
         *,
         name: str | None = None,
-        dwidth: float,
-        layer: LayerEnum | int,
+        cross_section: CrossSection,
         port_type: str = "optical",
         dangle: float,
         dcenter: tuple[float, float],
@@ -5477,8 +5477,7 @@ class Port:
         self,
         *,
         name: str | None = None,
-        width: int | None = None,
-        dwidth: float | None = None,
+        cross_section: CrossSection,
         layer: int | None = None,
         port_type: str = "optical",
         trans: kdb.Trans | str | None = None,
@@ -5504,8 +5503,6 @@ class Port:
                 self.trans = port.trans
 
             self.port_type = port.port_type
-            self.layer = port.layer
-            self.width = port.width
         elif (width is None and dwidth is None) or layer is None:
             raise ValueError("width, layer must be given if the 'port is None'")
         else:
@@ -5543,6 +5540,16 @@ class Port:
             self.name = name
             self.layer = layer
             self.port_type = port_type
+
+    @property
+    def width(self) -> int:
+        """Width of the port."""
+        return self.cross_section.width
+
+    @property
+    def layer(self) -> int:
+        """Width of the port."""
+        return self.cross_section.main_layer
 
     @classmethod
     def from_yaml(cls: type[Port], constructor, node) -> Port:  # type: ignore
