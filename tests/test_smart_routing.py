@@ -224,8 +224,15 @@ bboxes.append(eb)
 b = kf.cells.circular.bend_circular(width=1, radius=10, layer=kf.kcl.layer(1, 0))
 s = partial(kf.cells.straight.straight_dbu, width=1000, layer=kf.kcl.layer(1, 0))
 
-c.shapes(kf.kcl.layer(5, 0)).insert(kf.kdb.Box(1_900_000, -102_000, 2_100_000, 175_000))
-c.shapes(kf.kcl.layer(6, 0)).insert(kf.kdb.Box(-1_300_000, 300_000, -900_000, 450_000))
+b1 = c.shapes(kf.kcl.layer(5, 0)).insert(
+    kf.kdb.Box(1_900_000, -102_000, 2_100_000, 175_000)
+)
+b2 = c.shapes(kf.kcl.layer(6, 0)).insert(
+    kf.kdb.Box(-1_300_000, 300_000, -900_000, 450_000)
+)
+b3 = c.shapes(kf.kcl.layer(5, 0)).insert(
+    kf.kdb.Box(3_300_000, -250_000, 3_600_000, -50_000)
+)
 for box in bboxes:
     c.shapes(kf.kcl.layer(10, 0)).insert(box)
 
@@ -238,7 +245,7 @@ routes = kf.routing.optical.route_bundle(
     separation=2000,
     straight_factory=s,
     # bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))],  # + bboxes,
-    bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))] + bboxes,
+    bboxes=[b1.box, b2.box, b3.box] + bboxes,
     sort_ports=True,
 )
 

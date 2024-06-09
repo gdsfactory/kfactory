@@ -602,7 +602,7 @@ def route_smart(
     box_region = kdb.Region()
     if bboxes:
         for box in bboxes:
-            box_region.insert(box)
+            box_region.insert(kdb.Polygon(box))
             box_region.merge()
     if sort_ports:
         if bboxes is None:
@@ -925,8 +925,8 @@ def route_smart(
         r = router_bundle[0]
         end_angle = r.end.t.angle
         re = router_bundle[-1]
-        start_bbox = kdb.Box(r.start.t.disp.to_p(), re.start.t.disp.to_p())
-        end_bbox = kdb.Box(r.end.t.disp.to_p(), re.end.t.disp.to_p())
+        start_bbox = kdb.Box(r.start.t.disp.to_p(), re.start.t * kdb.Point(-1, 0))
+        end_bbox = kdb.Box(r.end.t.disp.to_p(), re.end.t * kdb.Point(-1, 0))
         for r in router_bundle:
             start_bbox += r.start.t.disp.to_p()
             end_bbox += r.end.t.disp.to_p()
@@ -941,6 +941,8 @@ def route_smart(
                 box_region.interacting(kdb.Region(start_bbox)).bbox() + start_bbox
             )
             end_bbox = box_region.interacting(kdb.Region(end_bbox)).bbox() + end_bbox
+        route_to_bbox((router.start for router in sorted_routers), start_bbox)
+        route_to_bbox((router.end for router in sorted_routers), end_bbox)
         disp_to_bbox = kdb.Trans(-angle, False, 0, 0) * (
             start_bbox.center().to_v() - router_bundle[0].end.t.disp
         )
