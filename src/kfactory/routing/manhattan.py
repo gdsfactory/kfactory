@@ -602,7 +602,7 @@ def route_smart(
     box_region = kdb.Region()
     if bboxes:
         for box in bboxes:
-            box_region.insert(kdb.Polygon(box))
+            box_region.insert(box)
             box_region.merge()
     if sort_ports:
         if bboxes is None:
