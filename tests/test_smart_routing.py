@@ -231,7 +231,10 @@ b2 = c.shapes(kf.kcl.layer(6, 0)).insert(
     kf.kdb.Box(-1_300_000, 300_000, -900_000, 450_000)
 )
 b3 = c.shapes(kf.kcl.layer(5, 0)).insert(
-    kf.kdb.Box(3_300_000, -250_000, 3_600_000, -50_000)
+    kf.kdb.Box(3_300_000, -250_000, 3_600_000, 150_000)
+)
+b4 = c.shapes(kf.kcl.layer(6, 0)).insert(
+    kf.kdb.Box(-200_000, -200_000, 120_000, 120_000)
 )
 for box in bboxes:
     c.shapes(kf.kcl.layer(10, 0)).insert(box)
@@ -245,8 +248,9 @@ routes = kf.routing.optical.route_bundle(
     separation=2000,
     straight_factory=s,
     # bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))],  # + bboxes,
-    bboxes=[b1.box, b2.box, b3.box] + bboxes,
+    bboxes=[b1.box, b2.box, b3.box, b4.box] + bboxes,
     sort_ports=True,
+    bbox_routing="full",
 )
 
 # routers = kf.routing.manhattan.route_smart(

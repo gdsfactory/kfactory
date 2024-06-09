@@ -504,6 +504,7 @@ def route_bundle(
     allow_type_mismatch: bool | None = None,
     route_width: int | list[int] | None = None,
     sort_ports: bool = False,
+    bbox_routing: Literal["minimal", "full"] = "minimal",
 ) -> list[OpticalManhattanRoute]:
     """Route a bundle from starting ports to end_ports.
 
@@ -536,6 +537,9 @@ def route_bundle(
             (config default: False).
         route_width: Width of the route. If None, the width of the ports is used.
         sort_ports: Automatically sort ports.
+        bbox_routing: "minimal": only route to the bbox so that it can be safely routed
+            around, but start or end bends might encroach on the bounding boxes when
+            leaving them.
     """
     if allow_width_mismatch is None:
         allow_width_mismatch = config.allow_width_mismatch
@@ -576,6 +580,7 @@ def route_bundle(
         bboxes=bboxes.copy(),
         widths=widths,
         sort_ports=sort_ports,
+        bbox_routing=bbox_routing,
     )
 
     routes: list[OpticalManhattanRoute] = []
