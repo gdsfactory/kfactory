@@ -1,12 +1,27 @@
+<a name="v0.17.2"></a>
+# [v0.17.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.2) - 09 Jun 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix cases in bundle routing [#387](https://github.com/gdsfactory/kfactory/pull/387)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.1...v0.17.2
+
+
+[Changes][v0.17.2]
+
+
 <a name="v0.17.1"></a>
-# [v0.17.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.1) - 06 Jun 2024
+# [v0.17.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.1) - 08 Jun 2024
 
 # What's Changed
 
 ## New
 
 - add to_um and to_dbu into KCLayout [#380](https://github.com/gdsfactory/kfactory/pull/380)
-- add func.__name__ for partials [#378](https://github.com/gdsfactory/kfactory/pull/378)
+- add `func.__name__` for partials [#378](https://github.com/gdsfactory/kfactory/pull/378)
 
 ## Bug Fixes
 
@@ -645,6 +660,7 @@
 [Changes][v0.4.0]
 
 
+[v0.17.2]: https://github.com/gdsfactory/kfactory/compare/v0.17.1...v0.17.2
 [v0.17.1]: https://github.com/gdsfactory/kfactory/compare/v0.17.0...v0.17.1
 [v0.17.0]: https://github.com/gdsfactory/kfactory/compare/v0.16.1...v0.17.0
 [v0.16.1]: https://github.com/gdsfactory/kfactory/compare/v0.16.0...v0.16.1
