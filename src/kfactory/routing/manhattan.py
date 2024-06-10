@@ -1057,6 +1057,7 @@ def route_smart(
                 route_loosely(
                     sorted_routers,
                     separation=separation,
+                    start_bbox=total_bbox,
                     end_bbox=end_bbox,
                     bbox_routing=bbox_routing,
                 )
@@ -1064,6 +1065,7 @@ def route_smart(
                 route_loosely(
                     sorted_routers,
                     separation=separation,
+                    start_bbox=total_bbox,
                     end_bbox=end_bbox,
                     bbox_routing=bbox_routing,
                 )
@@ -1116,6 +1118,7 @@ def route_smart(
             route_loosely(
                 routers,
                 separation=separation,
+                start_bbox=total_bbox,
                 end_bbox=end_bbox,
                 bbox_routing=bbox_routing,
             )
@@ -1132,7 +1135,7 @@ def route_to_bbox(
     if bbox_routing == "minimal":
         if not bbox.empty():
             for router in routers:
-                hw1 = router.router.width // 1 + separation
+                hw1 = router.router.width // 2 + separation
                 match router.t.angle:
                     case 0:
                         router.straight_nobend(bbox.right + hw1 - router.t.disp.x)
@@ -1222,7 +1225,7 @@ def route_loosely(
                                 )  # start_straight equivalent
                             else:
                                 delta = kdb.Point(
-                                    _r.width + separation, 0
+                                    _r.width // 2 + separation, 0
                                 )  # start_straight equivalent
                             router_start_box = route_to_bbox(
                                 [_r.start],
@@ -1248,7 +1251,7 @@ def route_loosely(
                                 )  # start_straight equivalent
                             else:
                                 delta = kdb.Point(
-                                    _r.width + separation, 0
+                                    _r.width // 2 + separation, 0
                                 )  # start_straight equivalent
                             router_start_box = route_to_bbox(
                                 [_r.start],
@@ -1272,8 +1275,6 @@ def route_loosely(
                 router_start_box = start_bbox.dup()
                 router_end_box = end_bbox.dup()
             i += 1
-        if group[0].start.tv.y != 0:
-            router_start_box += group[0].start.t * kdb.Point(group[0].width // 2, 0)
         match sign:
             case -1:
                 for j, _r in enumerate(group):
@@ -1283,7 +1284,7 @@ def route_loosely(
                         )  # start_straight equivalent
                     else:
                         delta = kdb.Point(
-                            _r.width + separation, 0
+                            _r.width // 2 + separation, 0
                         )  # start_straight equivalent
                     router_start_box = route_to_bbox(
                         [_r.start],
@@ -1309,7 +1310,7 @@ def route_loosely(
                         )  # start_straight equivalent
                     else:
                         delta = kdb.Point(
-                            _r.width + separation, 0
+                            _r.width // 2 + separation, 0
                         )  # start_straight equivalent
                     router_start_box = route_to_bbox(
                         [_r.start],
