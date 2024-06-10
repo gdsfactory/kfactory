@@ -3,6 +3,10 @@
 
 # What's Changed
 
+## New
+
+- Add functional `check_ports` to `@cell` decorators [#389](https://github.com/gdsfactory/kfactory/pull/389)
+
 ## Bug Fixes
 
 - fix routing issues with bounding boxes [#388](https://github.com/gdsfactory/kfactory/pull/388)
