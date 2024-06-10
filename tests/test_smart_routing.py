@@ -220,6 +220,89 @@ for angle in [0]:
 bboxes.append(sb)
 bboxes.append(eb)
 
+sb = kf.kdb.Box()
+eb = kf.kdb.Box()
+for angle in [0]:
+    for xi in range(5):
+        ts = (
+            kf.kdb.Trans(angle, False, 6_000_000, 0)
+            * kf.kdb.Trans(100_000, -50_000)
+            * kf.kdb.Trans(0, xi * 10_000)
+        )
+        ps.append(
+            c.create_port(
+                name="i" + str((angle + 1) * 5 + xi),
+                trans=ts,
+                width=1000,
+                layer=kf.kcl.layout.layer(1, 0),
+            )
+        )
+        te = (
+            kf.kdb.Trans(angle, False, 6_500_000, 0)
+            * kf.kdb.Trans(100_000, -50_000)
+            * kf.kdb.Trans(0, xi * 10_000)
+        )
+        # te = kf.kdb.Trans(0, False, 4_500_000, 200_000 - 50_000 * angle) * kf.kdb.Trans(
+        #     randint(0, 100), randint(0, 100) - xi * 10_000
+        # )
+        # te = kf.kdb.Trans(2, False, 4_500_000, 00_000 + 50_000 * angle) * kf.kdb.Trans(
+        #     randint(0, 100), randint(0, 100) - xi * 10_000
+        # )
+        # te = kf.kdb.Trans(
+        #     1, False, 5_500_000 + 50_000 * angle, -200_000
+        # ) * kf.kdb.Trans(23, 55 - xi * 10_000)
+        # te = kf.kdb.Trans(3, False, 4_500_000 - 50_000 * angle, 500_000) * kf.kdb.Trans(
+        #     randint(0, 100), randint(0, 100) - xi * 10_000
+        # )
+        pe.append(
+            c.create_port(
+                name="o" + str((angle + 1) * 5 + xi),
+                trans=te,
+                width=1000,
+                layer=kf.kcl.layout.layer(1, 0),
+            )
+        )
+        sb += ts.disp.to_p()
+        eb += te.disp.to_p()
+# for angle in [0]:
+#     for xi in range(5):
+#         ts = (
+#             kf.kdb.Trans(angle, False, 5_000_000, 0)
+#             * kf.kdb.Trans(100_000, -50_000)
+#             * kf.kdb.Trans(randint(0, 100), randint(0, 100) + xi * 10_000)
+#         )
+#         pe.append(
+#             c.create_port(
+#                 name="i" + str((angle + 1) * 5 + xi),
+#                 trans=ts,
+#                 width=1000,
+#                 layer=kf.kcl.layout.layer(1, 0),
+#             )
+#         )
+#         # te = kf.kdb.Trans(0, False, 4_500_000, 200_000 - 50_000 * angle) * kf.kdb.Trans(
+#         #     randint(0, 100), randint(0, 100) - xi * 10_000
+#         # )
+#         # te = kf.kdb.Trans(2, False, 4_500_000, 00_000 + 50_000 * angle) * kf.kdb.Trans(
+#         #     randint(0, 100), randint(0, 100) - xi * 10_000
+#         # )
+#         te = kf.kdb.Trans(
+#             1, False, 4_500_000 + 50_000 * angle, -200_000
+#         ) * kf.kdb.Trans(randint(0, 100), randint(0, 100) - xi * 10_000)
+#         # te = kf.kdb.Trans(3, False, 4_500_000 - 50_000 * angle, 500_000) * kf.kdb.Trans(
+#         #     randint(0, 100), randint(0, 100) - xi * 10_000
+#         # )
+#         ps.append(
+#             c.create_port(
+#                 name="o" + str((angle + 1) * 5 + xi),
+#                 trans=te,
+#                 width=1000,
+#                 layer=kf.kcl.layout.layer(1, 0),
+#             )
+#         )
+
+bboxes.append(sb)
+bboxes.append(eb)
+
 
 b = kf.cells.circular.bend_circular(width=1, radius=10, layer=kf.kcl.layer(1, 0))
 s = partial(kf.cells.straight.straight_dbu, width=1000, layer=kf.kcl.layer(1, 0))
@@ -250,7 +333,7 @@ routes = kf.routing.optical.route_bundle(
     # bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))],  # + bboxes,
     bboxes=[b1.box, b2.box, b3.box, b4.box] + bboxes,
     sort_ports=True,
-    bbox_routing="full",
+    bbox_routing="minimal",
 )
 
 # routers = kf.routing.manhattan.route_smart(
