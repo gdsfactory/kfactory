@@ -223,11 +223,11 @@ bboxes.append(eb)
 sb = kf.kdb.Box()
 eb = kf.kdb.Box()
 for angle in [0]:
-    for xi in range(5):
+    for xi in range(10):
         ts = (
             kf.kdb.Trans(angle, False, 6_000_000, 0)
             * kf.kdb.Trans(100_000, -50_000)
-            * kf.kdb.Trans(0, xi * 10_000)
+            * kf.kdb.Trans(0, xi * 100_000)
         )
         ps.append(
             c.create_port(
@@ -238,9 +238,9 @@ for angle in [0]:
             )
         )
         te = (
-            kf.kdb.Trans(angle, False, 6_500_000, 0)
-            * kf.kdb.Trans(100_000, -50_000)
-            * kf.kdb.Trans(0, xi * 10_000)
+            kf.kdb.Trans(angle - 2, False, 6_500_000, 0)
+            * kf.kdb.Trans(100_000, -500_000)
+            * kf.kdb.Trans(0, (10 - xi) * 10_000 + 45000)
         )
         # te = kf.kdb.Trans(0, False, 4_500_000, 200_000 - 50_000 * angle) * kf.kdb.Trans(
         #     randint(0, 100), randint(0, 100) - xi * 10_000
