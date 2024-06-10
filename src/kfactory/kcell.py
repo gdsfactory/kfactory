@@ -16,7 +16,7 @@ import importlib.util
 import inspect
 import json
 import socket
-from collections import UserDict
+from collections import UserDict, defaultdict
 from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
 from enum import IntEnum, IntFlag, auto
@@ -3089,8 +3089,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             set_settings: Copy the args & kwargs into the settings dictionary
             set_name: Auto create the name of the cell to the functionname plus a
                 string created from the args/kwargs
-            check_ports: Check whether there are any non-90° ports in the cell and throw
-                a warning if there are.
+            check_ports: Check uniqueness of port names.
             check_instances: Check for any complex instances. A complex instance is a an
                 instance that has a magnification != 1 or non-90° rotation.
                 Depending on the setting, an error is raised, the cell is flattened,
@@ -3222,6 +3221,22 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                             param_units.pop(param, None)
                         cell._settings = KCellSettings(**params)
                         cell._settings_units = KCellSettingsUnits(**param_units)
+                    if check_ports:
+                        port_names: dict[str | None, int] = defaultdict(int)
+                        for port in cell.ports:
+                            port_names[port.name] += 1
+                        duplicate_names = [
+                            (name, n) for name, n in port_names.items() if n > 1
+                        ]
+                        if duplicate_names:
+                            raise ValueError(
+                                "Found duplicate port names: "
+                                + ", ".join(
+                                    [f"{name}: {n}" for name, n in duplicate_names]
+                                )
+                                + " If this intentional, please pass "
+                                "`check_ports=False` to the @cell decorator"
+                            )
                     match check_instances:
                         case CHECK_INSTANCES.RAISE:
                             if any(inst.is_complex() for inst in cell.each_inst()):

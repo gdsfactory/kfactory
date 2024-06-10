@@ -207,3 +207,26 @@ def test_layout_cache() -> None:
 
     s_read = read_straight()
     assert s_write.bbox() == s_read.bbox()
+
+
+def test_check_ports() -> None:
+    kcl = kf.KCLayout("CHECK_PORTS")
+
+    @kcl.cell
+    def test_multi_ports() -> kf.KCell:
+        c = kcl.kcell()
+        c.create_port(
+            name="a", trans=kf.kdb.Trans.R0, width=1000, layer=kcl.layer(1, 0)
+        )
+        c.create_port(
+            name="a", trans=kf.kdb.Trans.R180, width=1000, layer=kcl.layer(1, 0)
+        )
+        return c
+
+    regex = kf.config.logfilter.regex
+    kf.config.logfilter.regex = "^An error has been caught in function 'wrapper_autocell', process 'MainProcess'"
+
+    with pytest.raises(ValueError):
+        test_multi_ports()
+
+    kf.config.logfilter.regex = regex
