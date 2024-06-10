@@ -24,7 +24,7 @@ for angle in [1, 2, 3, 0]:
             c.create_port(
                 name="i" + str((angle + 1) * 5 + xi),
                 trans=ts,
-                width=1000,
+                width=500,
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
@@ -44,7 +44,7 @@ for angle in [1, 2, 3, 0]:
             c.create_port(
                 name="o" + str((angle + 1) * 5 + xi),
                 trans=te,
-                width=1000,
+                width=500,
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
@@ -65,7 +65,7 @@ for angle in [1, 2, 3, 0]:
             c.create_port(
                 name="i" + str((angle + 1) * 5 + xi),
                 trans=ts,
-                width=1000,
+                width=500,
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
@@ -88,7 +88,7 @@ for angle in [1, 2, 3, 0]:
             c.create_port(
                 name="o" + str((angle + 1) * 5 + xi),
                 trans=te,
-                width=1000,
+                width=500,
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
@@ -109,7 +109,7 @@ for angle in [-2, -1, 0, 1]:
             c.create_port(
                 name="i" + str((angle + 1) * 5 + xi),
                 trans=ts,
-                width=1000,
+                width=500,
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
@@ -132,7 +132,7 @@ for angle in [-2, -1, 0, 1]:
             c.create_port(
                 name="o" + str((angle + 1) * 5 + xi),
                 trans=te,
-                width=1000,
+                width=500,
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
@@ -155,7 +155,7 @@ for angle in [0]:
             c.create_port(
                 name="i" + str((angle + 1) * 5 + xi),
                 trans=ts,
-                width=1000,
+                width=500,
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
@@ -175,7 +175,7 @@ for angle in [0]:
             c.create_port(
                 name="o" + str((angle + 1) * 5 + xi),
                 trans=te,
-                width=1000,
+                width=500,
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
@@ -233,7 +233,7 @@ for angle in [0]:
             c.create_port(
                 name="i" + str((angle + 1) * 5 + xi),
                 trans=ts,
-                width=1000,
+                width=500,
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
@@ -258,7 +258,7 @@ for angle in [0]:
             c.create_port(
                 name="o" + str((angle + 1) * 5 + xi),
                 trans=te,
-                width=1000,
+                width=500,
                 layer=kf.kcl.layout.layer(1, 0),
             )
         )
@@ -304,8 +304,8 @@ bboxes.append(sb)
 bboxes.append(eb)
 
 
-b = kf.cells.circular.bend_circular(width=1, radius=10, layer=kf.kcl.layer(1, 0))
-s = partial(kf.cells.straight.straight_dbu, width=1000, layer=kf.kcl.layer(1, 0))
+b = kf.cells.circular.bend_circular(width=0.5, radius=10, layer=kf.kcl.layer(1, 0))
+s = partial(kf.cells.straight.straight_dbu, width=500, layer=kf.kcl.layer(1, 0))
 
 b1 = c.shapes(kf.kcl.layer(5, 0)).insert(
     kf.kdb.Box(1_900_000, -102_000, 2_100_000, 175_000)
