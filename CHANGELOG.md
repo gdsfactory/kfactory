@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- fix routing issues with bounding boxes [#388](https://github.com/gdsfactory/kfactory/pull/388)
 - fix cases in bundle routing [#387](https://github.com/gdsfactory/kfactory/pull/387)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.1...v0.17.2
