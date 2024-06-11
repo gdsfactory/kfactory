@@ -3,6 +3,10 @@
 
 # What's Changed
 
+## New
+
+- add __contains__ to settings/units/info [#395](https://github.com/gdsfactory/kfactory/pull/395)
+
 ## Bug Fixes
 
 - fix connect when using port objects on self [#393](https://github.com/gdsfactory/kfactory/pull/393)
