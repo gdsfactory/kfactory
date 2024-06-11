@@ -4811,7 +4811,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         else:
             raise ValueError("other_instance must be of type Instance or Port")
         if isinstance(port, Port):
-            p = port
+            p = port.copy(self.trans.inverted())
         else:
             p = self.cell.ports[port]
         if p.width != op.width and not allow_width_mismatch:
@@ -6164,7 +6164,7 @@ class Instance:
         else:
             raise ValueError("other_instance must be of type Instance or Port")
         if isinstance(port, Port):
-            p = port
+            p = port.copy(self.dcplx_trans.inverted())
         else:
             p = self.cell.ports[port]
         if p.width != op.width and not allow_width_mismatch:
