@@ -55,28 +55,28 @@ def straight_blank(LAYER: kf.LayerEnum) -> kf.KCell:
 @pytest.fixture
 def bend90(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnum) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
+        width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
 def bend180(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
+        width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
     )
 
 
 @pytest.fixture
 def bend90_euler(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
+        width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
 def bend180_euler(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
+        width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
     )
 
 
@@ -103,7 +103,7 @@ def optical_port(LAYER: kf.LayerEnum) -> kf.Port:
         name="o1",
         trans=kf.kdb.Trans.R0,
         layer=LAYER.WG,
-        width=1000,
+        width=500,
         port_type="optical",
     )
 
