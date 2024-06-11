@@ -4813,7 +4813,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         if isinstance(port, Port):
             p = port
         else:
-            p = self.cell.ports[port]
+            p = self.ports[port]
         if p.width != op.width and not allow_width_mismatch:
             # The ports are not the same width
             raise PortWidthMismatch(
@@ -6166,7 +6166,7 @@ class Instance:
         if isinstance(port, Port):
             p = port
         else:
-            p = self.cell.ports[port]
+            p = self.ports[port]
         if p.width != op.width and not allow_width_mismatch:
             # The ports are not the same width
             raise PortWidthMismatch(
