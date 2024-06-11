@@ -49,6 +49,9 @@ def test_settings_and_info() -> None:
     assert c.settings["f"] == 2.0
     assert c.settings["t"] == (1,)
 
+    assert "s" in c.info
+    assert "s" in c.settings
+
     c = sample(s="b", i=4, f=3.0, t=(2, 3))
     assert c.info["s"] == "b"
     assert c.info["i"] == 4
