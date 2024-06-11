@@ -62,3 +62,39 @@ def test_drotation(
     c.add_ports(wg2.ports)
 
     c.show()
+
+
+@pytest.mark.parametrize(
+    "from_name,use_mirror,apply_mirror,expected_transformation",
+    [
+        (True, True, True, kf.kdb.Trans(1, False, 11_000, -10_000)),
+        (True, True, False, kf.kdb.Trans(1, False, 11_000, -10_000)),
+        (True, False, True, kf.kdb.Trans(3, True, 11_000, 10_000)),
+        (True, False, False, kf.kdb.Trans(1, False, 11_000, -10_000)),
+        (False, True, True, kf.kdb.Trans(1, False, 11_000, -10_000)),
+        (False, True, False, kf.kdb.Trans(1, False, 11_000, -10_000)),
+        (False, False, True, kf.kdb.Trans(3, True, 11_000, 10_000)),
+        (False, False, False, kf.kdb.Trans(1, False, 11_000, -10_000)),
+    ],
+)
+def test_connection_flags(
+    straight: kf.KCell,
+    bend90: kf.KCell,
+    from_name: bool,
+    use_mirror: bool,
+    apply_mirror: bool,
+    expected_transformation: kf.kdb.Trans,
+) -> None:
+    """Tests all the (relevant) connection flags."""
+    c = kf.KCell(f"{from_name=}_{use_mirror=}_{apply_mirror=}")
+    i1 = c << straight
+    i2 = c << bend90
+
+    if apply_mirror:
+        i2.mirror()
+
+    port: str | kf.Port = "o2" if from_name else i2.ports["o2"]
+
+    i2.connect(port, i1, "o2", use_mirror=use_mirror)
+
+    assert i2.trans == expected_transformation
