@@ -1,6 +1,7 @@
 import kfactory as kf
 import pytest
 from random import randint
+from functools import partial
 
 from collections.abc import Callable
 
@@ -229,3 +230,92 @@ def test_route_length(
     assert route.length_straights == 25196
     assert route.length_backbone == 140000
     assert route.n_bend90 == 2
+
+
+@pytest.mark.parametrize(
+    "start_bbox,start_angle,n_angles",
+    [
+        (start_bbox, start_angle, n_angles)
+        for start_bbox in (False, True)
+        for start_angle in (-2, -1, 0, 1, 2)
+        for n_angles in [1, 4]
+        # for n_angles in [2]
+    ],
+)
+def test_smart_routing(
+    bend90: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    start_bbox: bool,
+    start_angle: int,
+    n_angles: int,
+) -> None:
+    c = kf.KCell(f"test_smart_routing_{start_bbox=}_{start_angle=}_{n_angles=}")
+
+    i = 0
+
+    base_t = kf.kdb.Trans.R0
+
+    _port = partial(c.create_port, width=500, layer=kf.kcl.layer(1, 0))
+
+    start_ports: list[kf.Port] = []
+    end_ports: list[kf.Port] = []
+    start_boxes: list[kf.kdb.Box] = []
+    end_boxes: list[kf.kdb.Box] = []
+    start_bboxes: list[kf.kdb.Box] = []
+    end_bboxes: list[kf.kdb.Box] = []
+
+    for a in range(4):
+        t = base_t * kf.kdb.Trans(a * 1_000_000, 0)
+        if start_bbox:
+            start_box = t * kf.kdb.Box(350_000)
+        else:
+            start_box = kf.kdb.Box()
+        end_box = kf.kdb.Box()
+        for i in range(n_angles):
+            angle = a - 2 - start_angle + i
+            for j in range(10):
+                ps = _port(
+                    name=f"start_{a=}_{i=}_{j=}",
+                    trans=t
+                    * kf.kdb.Trans(angle, False, 0, 0)
+                    * kf.kdb.Trans(100_000, j * 10_000 - 50_000),
+                )
+                pe = _port(
+                    name=f"end_{a=}_{i=}_{j=}",
+                    trans=t
+                    * kf.kdb.Trans(a, False, 0, 0)
+                    * kf.kdb.Trans(-400_000, -(i * 10 + j) * 20_000 + 600_000),
+                )
+                start_ports.append(ps)
+                end_ports.append(pe)
+                start_box += ps.trans.disp.to_p()
+                end_box += pe.trans.disp.to_p()
+
+        start_boxes.append(start_box)
+        end_boxes.append(end_box)
+    for box in start_boxes + end_boxes:
+        c.shapes(kf.kcl.layer(10, 0)).insert(box)
+
+    for box in start_bboxes:
+        c.shapes(kf.kcl.layer(11, 0)).insert(box)
+    for box in end_bboxes:
+        c.shapes(kf.kcl.layer(12, 0)).insert(box)
+
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports=start_ports,
+        # start_ports=list(reversed(ps)),
+        end_ports=end_ports,
+        bend90_cell=bend90,
+        separation=2000,
+        straight_factory=straight_factory_dbu,
+        # bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))],  # + bboxes,
+        bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
+        # sort_ports=True,
+        bbox_routing="minimal",
+    )
+
+    c.show()
+
+
+# breakpoint()
