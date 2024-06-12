@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- fix routing errors and add a better test [#397](https://github.com/gdsfactory/kfactory/pull/397)
 - fix connect when using port objects on self [#393](https://github.com/gdsfactory/kfactory/pull/393)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.3...v0.17.4
