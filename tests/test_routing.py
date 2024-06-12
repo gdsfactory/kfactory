@@ -266,10 +266,7 @@ def test_smart_routing(
 
     for a in range(4):
         t = base_t * kf.kdb.Trans(a * 1_000_000, 0)
-        if start_bbox:
-            start_box = t * kf.kdb.Box(350_000)
-        else:
-            start_box = kf.kdb.Box()
+        start_box = t * kf.kdb.Box(350_000) if start_bbox else kf.kdb.Box()
         end_box = kf.kdb.Box()
         for i in range(n_angles):
             angle = a - 2 - start_angle + i
