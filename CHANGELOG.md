@@ -1,3 +1,23 @@
+<a name="v0.17.4"></a>
+# [v0.17.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.4) - 11 Jun 2024
+
+# What's Changed
+
+## New
+
+- add __contains__ to settings/units/info [#395](https://github.com/gdsfactory/kfactory/pull/395)
+
+## Bug Fixes
+
+- fix routing errors and add a better test [#397](https://github.com/gdsfactory/kfactory/pull/397)
+- fix connect when using port objects on self [#393](https://github.com/gdsfactory/kfactory/pull/393)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.3...v0.17.4
+
+
+[Changes][v0.17.4]
+
+
 <a name="v0.17.3"></a>
 # [v0.17.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.3) - 10 Jun 2024
 
@@ -680,6 +700,7 @@
 [Changes][v0.4.0]
 
 
+[v0.17.4]: https://github.com/gdsfactory/kfactory/compare/v0.17.3...v0.17.4
 [v0.17.3]: https://github.com/gdsfactory/kfactory/compare/v0.17.2...v0.17.3
 [v0.17.2]: https://github.com/gdsfactory/kfactory/compare/v0.17.1...v0.17.2
 [v0.17.1]: https://github.com/gdsfactory/kfactory/compare/v0.17.0...v0.17.1

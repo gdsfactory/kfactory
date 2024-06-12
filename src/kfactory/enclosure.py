@@ -1499,7 +1499,6 @@ class KCellEnclosure(BaseModel):
 
         for i, enc in enumerate(self.enclosures.enclosures):
             assert enc.main_layer is not None
-            print(i, enc.main_layer)
             if not c.bbox(enc.main_layer).empty():
                 _inp = f"main_layer_{int(enc.main_layer)}"
                 if enc.main_layer not in inputs:

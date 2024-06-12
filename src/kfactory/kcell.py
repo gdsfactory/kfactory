@@ -428,6 +428,9 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
     def get(self, __key: str, default: Any = None) -> Any:
         return getattr(self, __key) if hasattr(self, __key) else default
 
+    def __contains__(self, __key: str) -> bool:
+        return hasattr(self, __key)
+
 
 class KCellSettingsUnits(
     BaseModel, extra="allow", validate_assignment=True, frozen=True
@@ -443,6 +446,9 @@ class KCellSettingsUnits(
 
     def get(self, __key: str, default: str | None = None) -> str | None:
         return getattr(self, __key, default)
+
+    def __contains__(self, __key: str) -> bool:
+        return hasattr(self, __key)
 
 
 class Info(BaseModel, extra="allow", validate_assignment=True):
@@ -483,6 +489,9 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
 
     def __add__(self, other: Info) -> Info:
         return self.model_copy(update=other.model_dump())
+
+    def __contains__(self, __key: str) -> bool:
+        return hasattr(self, __key)
 
 
 class PROPID(IntEnum):
@@ -4816,7 +4825,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         else:
             raise ValueError("other_instance must be of type Instance or Port")
         if isinstance(port, Port):
-            p = port
+            p = port.copy(self.trans.inverted())
         else:
             p = self.cell.ports[port]
         if p.width != op.width and not allow_width_mismatch:
@@ -6169,7 +6178,7 @@ class Instance:
         else:
             raise ValueError("other_instance must be of type Instance or Port")
         if isinstance(port, Port):
-            p = port
+            p = port.copy(self.dcplx_trans.inverted())
         else:
             p = self.cell.ports[port]
         if p.width != op.width and not allow_width_mismatch:
