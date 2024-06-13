@@ -1134,14 +1134,21 @@ class KCell:
             library_save_options=library_save_options,
         )
 
-    def plot(self, lyrdb: Path | str | None = None) -> None:
+    def plot(
+        self,
+        lyrdb: Path | str | None = None,
+        display_type: Literal["image", "widget"] | None = None,
+    ) -> None:
         """Display cell.
 
-        Usage: Pass the kcell variable as an argument in the cell at the end
+        Args:
+            lyrdb: Path to the lyrdb file.
+            display_type: Type of display. Options are "widget" or "image".
+
         """
         from .widgets.interactive import display_kcell
 
-        display_kcell(self, lyrdb=lyrdb)
+        display_kcell(self, lyrdb=lyrdb, display_type=display_type)
 
     def _ipython_display_(self) -> None:
         """Display a cell in a Jupyter Cell.

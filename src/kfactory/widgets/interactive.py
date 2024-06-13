@@ -29,6 +29,7 @@ try:
     from .. import kdb, lay
     from ..conf import config, logger
     from ..kcell import KCell
+    from typing import Literal
 
 except ImportError as e:
     print("You need install jupyter notebook plugin with `pip install kfactory[ipy]`")
@@ -37,11 +38,16 @@ except ImportError as e:
 __all__ = ["display_kcell"]
 
 
-def display_kcell(kc: KCell, lyrdb: Path | str | None = None) -> None:
+def display_kcell(
+    kc: KCell,
+    lyrdb: Path | str | None = None,
+    display_type: Literal["image", "widget"] | None = None,
+) -> None:
     """Display a KCell in a jupyter widget or an image."""
     cell_dup = kc.kcl[kc.name].dup()
     cell_dup.insert_vinsts()
-    match config.display_type:
+    display_type = display_type or config.display_type
+    match display_type:
         case "widget":
             lw = LayoutWidget(cell=cell_dup, layer_properties=lyrdb)
             display(lw.widget)  # type: ignore[no-untyped-call,unused-ignore]

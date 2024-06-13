@@ -139,7 +139,7 @@ class Settings(BaseSettings):
     """Number of threads to use for multithreaded operations."""
     logfilter: LogFilter = Field(default_factory=LogFilter)
     """Can configure the logger to ignore certain levels or by regex."""
-    display_type: Literal["widget", "image", "docs"] = "image"
+    display_type: Literal["widget", "image"] = "image"
     """The default behavior for displaying cells in jupyter."""
     meta_format: Literal["v2", "v1"] = "v2"
     """The format of the saving of metadata.
