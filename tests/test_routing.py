@@ -233,23 +233,27 @@ def test_route_length(
 
 
 @pytest.mark.parametrize(
-    "start_bbox,start_angle,n_angles",
+    "sort_ports,start_bbox,start_angle,n_angles",
     [
-        (start_bbox, start_angle, n_angles)
+        (sort_ports, start_bbox, start_angle, n_angles)
+        for sort_ports in (False, True)
         for start_bbox in (False, True)
         for start_angle in (-2, -1, 0, 1, 2)
-        for n_angles in [1, 4]
-        # for n_angles in [2]
+        for n_angles in [1, 2, 3, 4]
     ],
 )
 def test_smart_routing(
-    bend90: kf.KCell,
+    bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     start_bbox: bool,
     start_angle: int,
     n_angles: int,
+    sort_ports: bool,
 ) -> None:
-    c = kf.KCell(f"test_smart_routing_{start_bbox=}_{start_angle=}_{n_angles=}")
+    """Tests all possible smart routing configs."""
+    c = kf.KCell(
+        f"test_smart_routing_{sort_ports=}_{start_bbox=}_{start_angle=}_{n_angles=}"
+    )
 
     i = 0
 
@@ -265,7 +269,7 @@ def test_smart_routing(
     end_bboxes: list[kf.kdb.Box] = []
 
     for a in range(4):
-        t = base_t * kf.kdb.Trans(a * 1_000_000, 0)
+        t = base_t * kf.kdb.Trans(a * 1_500_000, 0)
         start_box = t * kf.kdb.Box(350_000) if start_bbox else kf.kdb.Box()
         end_box = kf.kdb.Box()
         for i in range(n_angles):
@@ -275,13 +279,13 @@ def test_smart_routing(
                     name=f"start_{a=}_{i=}_{j=}",
                     trans=t
                     * kf.kdb.Trans(angle, False, 0, 0)
-                    * kf.kdb.Trans(100_000, j * 10_000 - 50_000),
+                    * kf.kdb.Trans(100_000, j * 15_000 - 50_000),
                 )
                 pe = _port(
                     name=f"end_{a=}_{i=}_{j=}",
                     trans=t
                     * kf.kdb.Trans(a, False, 0, 0)
-                    * kf.kdb.Trans(-400_000, -(i * 10 + j) * 20_000 + 600_000),
+                    * kf.kdb.Trans(-400_000, -(i * 10 + j) * 40_000 + 600_000),
                 )
                 start_ports.append(ps)
                 end_ports.append(pe)
@@ -303,12 +307,12 @@ def test_smart_routing(
         start_ports=start_ports,
         # start_ports=list(reversed(ps)),
         end_ports=end_ports,
-        bend90_cell=bend90,
-        separation=2000,
+        bend90_cell=bend90_small,
+        separation=4000,
         straight_factory=straight_factory_dbu,
         # bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))],  # + bboxes,
         bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
-        # sort_ports=True,
+        sort_ports=sort_ports,
         bbox_routing="minimal",
     )
 

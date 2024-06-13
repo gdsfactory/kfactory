@@ -7,8 +7,6 @@ from collections.abc import Iterable, Sequence
 from dataclasses import InitVar, dataclass, field
 from typing import Literal, Protocol
 
-import numpy as np
-
 from .. import kdb
 from ..conf import logger
 from ..enclosure import clean_points
@@ -294,6 +292,7 @@ class ManhattanRouter:
     width: int = 0
     start_points: InitVar[list[kdb.Point]] = field(default=[])
     end_points: InitVar[list[kdb.Point]] = field(default=[])
+    finished: bool = False
 
     def __post_init__(
         self,
@@ -502,6 +501,7 @@ class ManhattanRouter:
             )
         if self.end.pts[-1] != self.start.pts[-1]:
             self.start.pts.extend(reversed(self.end.pts))
+        self.finished = True
         return self.start.pts
 
 
@@ -917,6 +917,11 @@ def route_smart(
                         bundled_routers[i].append(router)
                         bundled_bboxes[i] = bb + bbox.enlarged(router.width // 2)
                         break
+                bundled_bboxes.append(bundle_bbox)
+                bundle_bbox = bbox.dup()
+                bundle = [router]
+                bundled_routers.append(bundle)
+
         else:
             bundle.append(router)
             bundle_bbox += bbox
@@ -1002,12 +1007,15 @@ def route_smart(
 
         total_bbox = start_bbox
 
+        print(f"{len(router_groups)=}")
         if len(router_groups) > 1:
+            i = 0
             angle = router_groups[0][0]
             routers_clockwise: list[ManhattanRouter]
             routers_clockwise = router_groups[0][1].copy()
-            if router_groups[0][0] != 0:
+            if angle != 0 and router_groups[1][0] > angle:
                 for i in range(1, len(router_groups)):
+                    print(f"cw: {angle=}")
                     new_angle, new_routers = router_groups[i]
                     a = angle
                     if routers_clockwise:
@@ -1023,11 +1031,22 @@ def route_smart(
                         break
                     routers_clockwise.extend(new_routers)
                     angle = new_angle
+                else:
+                    while a != 0:
+                        a = (a + 1) % 4
+                        total_bbox += _route_to_side(
+                            routers=[router.start for router in routers_clockwise],
+                            clockwise=True,
+                            bbox=start_bbox,
+                            separation=separation,
+                        )
+
             angle = router_groups[-1][0]
             routers_anticlockwise: list[ManhattanRouter]
             routers_anticlockwise = router_groups[-1][1].copy()
-            if router_groups[-1][0] != 0:
+            if angle != 0 and i < len(router_groups) - 1:
                 for i in range(len(router_groups) - 2, -1, -1):
+                    print(f"acw: {angle=}")
                     new_angle, new_routers = router_groups[i]
                     a = angle
                     if routers_anticlockwise:
@@ -1048,6 +1067,15 @@ def route_smart(
                         break
                     routers_anticlockwise.extend(new_routers)
                     angle = new_angle
+                else:
+                    while a != 0:
+                        a = (a + 1) % 4
+                        total_bbox += _route_to_side(
+                            routers=[router.start for router in routers_clockwise],
+                            clockwise=False,
+                            bbox=start_bbox,
+                            separation=separation,
+                        )
             route_to_bbox(
                 [router.start for router in sorted_routers],
                 total_bbox,
@@ -1181,158 +1209,100 @@ def route_loosely(
     choose the shortest path.
     """
     router_start_box = start_bbox.dup()
-    router_end_box = end_bbox.dup()
+    # router_end_box = end_bbox.dup()
+
     if routers:
-        x_sign = np.sign(routers[0].end.tv.x)
-        _y = 0
-        for router in routers:
-            _y += router.end.tv.y
-
+        angle = (routers[0].end.t.angle - 2) % 4
         sorted_routers = _sort_routers(routers)
-        if x_sign == -1:
-            end_bbox = _route_to_side(
-                routers=[r.end for r in routers],
-                clockwise=_y > 0,
-                bbox=end_bbox,
-                separation=separation,
-            )
-            end_bbox = _route_to_side(
-                routers=[r.end for r in routers],
-                clockwise=_y > 0,
-                bbox=end_bbox,
-                separation=separation,
-            )
 
-        sign = np.sign(sorted_routers[0].start.tv.y)
-        group = [sorted_routers[0]]
-        group_box = kdb.Box(
-            sorted_routers[0].start.t.disp.to_p(), sorted_routers[0].end.t.disp.to_p()
+        routers_per_angle: dict[int, list[ManhattanRouter]] = defaultdict(list)
+        route_to_bbox(
+            routers=(r.start for r in sorted_routers),
+            bbox=start_bbox,
+            separation=separation,
+            bbox_routing=bbox_routing,
         )
-        i = 1
-        while i != len(routers):
-            r = sorted_routers[i]
-            _s = np.sign(r.start.tv.y)
-            box = kdb.Box(r.start.t.disp.to_p(), r.end.t.disp.to_p())
-            if sign == _s and not (box & group_box).empty():
-                group.append(r)
-                group_box += box
-            else:
-                match sign:
-                    case -1:
-                        for j, _r in enumerate(group):
-                            if bbox_routing == "minimal":
-                                delta = kdb.Point(
-                                    router.bend90_radius + _r.width - _r.width // 2,
-                                    0,
-                                )  # start_straight equivalent
-                            else:
-                                delta = kdb.Point(
-                                    _r.width + separation, 0
-                                )  # start_straight equivalent
-                            route_to_bbox(
-                                [_r.start],
-                                router_start_box,
-                                bbox_routing=bbox_routing,
-                                separation=separation,
-                            )
-                            router_start_box += _r.start.t * delta
-                            route_to_bbox(
-                                [_r.end],
-                                router_end_box,
-                                bbox_routing=bbox_routing,
-                                separation=separation,
-                            )
-                            if _r.end.tv.x <= _r.bend90_radius:
-                                router_end_box += _r.end.t * delta
-                            _r.auto_route(straight_s_bend_strategy="short")
-                    case _:
-                        for j, _r in enumerate(reversed(group)):
-                            if bbox_routing == "minimal":
-                                delta = kdb.Point(
-                                    router.bend90_radius + _r.width - _r.width // 2,
-                                    0,
-                                )  # start_straight equivalent
-                            else:
-                                delta = kdb.Point(
-                                    _r.width + separation, 0
-                                )  # start_straight equivalent
-                            route_to_bbox(
-                                [_r.start],
-                                router_start_box,
-                                bbox_routing=bbox_routing,
-                                separation=separation,
-                            )
-                            router_start_box += _r.start.t * delta
-                            route_to_bbox(
-                                [_r.end],
-                                router_end_box,
-                                bbox_routing=bbox_routing,
-                                separation=separation,
-                            )
-                            if _r.end.tv.x <= _r.bend90_radius:
-                                router_end_box += _r.end.t * delta
-                            _r.auto_route(straight_s_bend_strategy="short")
-                group = [r]
-                group_box = box
-                sign = _s
-            router_start_box = start_bbox.dup()
-            router_end_box = end_bbox.dup()
-            i += 1
-        match sign:
-            case -1:
-                for j, _r in enumerate(group):
-                    if bbox_routing == "minimal":
-                        delta = kdb.Point(
-                            router.bend90_radius + _r.width - _r.width // 2,
-                            0,
-                        )  # start_straight equivalent
-                    else:
-                        delta = kdb.Point(
-                            _r.width + separation, 0
-                        )  # start_straight equivalent
-                    route_to_bbox(
-                        [_r.start],
-                        router_start_box,
-                        bbox_routing=bbox_routing,
-                        separation=separation,
-                    )
-                    router_start_box += _r.start.t * delta
-                    route_to_bbox(
-                        [_r.end],
-                        router_end_box,
-                        bbox_routing=bbox_routing,
-                        separation=separation,
-                    )
-                    if _r.end.tv.x <= _r.bend90_radius:
-                        router_end_box += _r.end.t * delta
-                    _r.auto_route(straight_s_bend_strategy="short")
-            case _:
-                for j, _r in enumerate(reversed(group)):
-                    if bbox_routing == "minimal":
-                        delta = kdb.Point(
-                            router.bend90_radius + _r.width - _r.width // 2,
-                            0,
-                        )  # start_straight equivalent
-                    else:
-                        delta = kdb.Point(
-                            _r.width + separation, 0
-                        )  # start_straight equivalent
-                    route_to_bbox(
-                        [_r.start],
-                        router_start_box,
-                        bbox_routing=bbox_routing,
-                        separation=separation,
-                    )
-                    router_start_box += _r.start.t * delta
-                    route_to_bbox(
-                        [_r.end],
-                        router_end_box,
-                        bbox_routing=bbox_routing,
-                        separation=separation,
-                    )
-                    if _r.end.tv.x <= _r.bend90_radius:
-                        router_end_box += _r.end.t * delta
-                    _r.auto_route(straight_s_bend_strategy="short")
+
+        for router in sorted_routers:
+            routers_per_angle[(router.start.t.angle - angle + 2) % 4].append(router)
+
+        if 1 in routers_per_angle:
+            r_list = list(reversed(routers_per_angle[1]))
+            delta = -r_list[0].width // 2
+            for router in r_list:
+                route_to_bbox(
+                    routers=[router.start],
+                    bbox=router_start_box,
+                    separation=separation,
+                    bbox_routing=bbox_routing,
+                )
+                tv = router.start.tv
+                s = max(router.bend90_radius, router.width + separation)
+                if tv.x >= s:
+                    router.auto_route()
+                    continue
+                delta += router.width // 2
+                router.start.straight(s + tv.x)
+                router_start_box += router.start.t * kdb.Point(
+                    router.width + separation, 0
+                )
+                router.start.left()
+                route_to_bbox(
+                    routers=[router.start],
+                    bbox=router_start_box,
+                    separation=separation,
+                    bbox_routing=bbox_routing,
+                )
+                router_start_box += router.start.t * kdb.Point(
+                    router.bend90_radius + router.width + separation, 0
+                )
+                delta += router.width - router.width // 2 + separation
+
+        if 3 in routers_per_angle:
+            r_list = list(routers_per_angle[3])
+            delta = -r_list[0].width // 2
+            for router in r_list:
+                route_to_bbox(
+                    routers=[router.start],
+                    bbox=router_start_box,
+                    separation=separation,
+                    bbox_routing=bbox_routing,
+                )
+                tv = router.start.tv
+                s = max(router.bend90_radius, router.width + separation)
+                if tv.x >= s:
+                    router.auto_route()
+                    continue
+                delta += router.width // 2
+                router.start.straight(s + tv.x)
+                router_start_box += router.start.t * kdb.Point(
+                    router.width + separation, 0
+                )
+                router.start.right()
+                route_to_bbox(
+                    routers=[router.start],
+                    bbox=router_start_box,
+                    separation=separation,
+                    bbox_routing=bbox_routing,
+                )
+                router_start_box += router.start.t * kdb.Point(
+                    router.bend90_radius + router.width + separation, 0
+                )
+                delta += router.width - router.width // 2 + separation
+        delta = 0
+        for i, router in enumerate(sorted_routers):
+            if not router.finished:
+                if router.start.tv.y > 0:
+                    break
+                router.start.straight(delta)
+                delta += router.width + separation
+                router.auto_route()
+        delta = 0
+        for router in reversed(sorted_routers[i:]):
+            if not router.finished:
+                router.start.straight(delta)
+                delta += router.width + separation
+                router.auto_route()
 
 
 def vec_dir(vec: kdb.Vector) -> int:
