@@ -1135,7 +1135,9 @@ class KCell:
         )
 
     def plot(
-        self, lyrdb: Path | str | None = None, display_type: Literal["image", "widget"] | None = None
+        self,
+        lyrdb: Path | str | None = None,
+        display_type: Literal["image", "widget"] | None = None,
     ) -> None:
         """Display cell.
 
