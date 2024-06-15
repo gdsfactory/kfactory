@@ -551,7 +551,9 @@ def route_bundle(
         abs(bend90_cell.ports[0].x - bend90_cell.ports[1].x),
         abs(bend90_cell.ports[0].y - bend90_cell.ports[1].y),
     )
-    if not (len(start_ports) == len(end_ports) and start_ports):
+    if not start_ports:
+        return []
+    if not (len(start_ports) == len(end_ports)):
         raise ValueError(
             "For bundle routing the input port list must have"
             " the same size as the end ports and be the same length."
@@ -582,6 +584,9 @@ def route_bundle(
         sort_ports=sort_ports,
         bbox_routing=bbox_routing,
     )
+
+    if not routers:
+        return []
 
     routes: list[OpticalManhattanRoute] = []
     if sort_ports:

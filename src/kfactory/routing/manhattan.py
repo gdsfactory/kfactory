@@ -941,6 +941,8 @@ def route_smart(
         del bundled_bboxes[i]
         del bundled_routers[i]
 
+    print(f"{len(bundled_routers)=}")
+
     for router_bundle in bundled_routers:
         sorted_routers = _sort_routers(router_bundle)
 
@@ -962,6 +964,19 @@ def route_smart(
                     "All ports at the target (end) must have the same angle. "
                     f"{r.start.t=}/{r.end.t=}"
                 )
+        if bbox_routing == "minimal":
+            route_to_bbox(
+                (router.start for router in sorted_routers),
+                start_bbox,
+                bbox_routing="full",
+                separation=separation,
+            )
+            route_to_bbox(
+                (router.end for router in sorted_routers),
+                end_bbox,
+                bbox_routing="full",
+                separation=separation,
+            )
 
         if box_region:
             start_bbox = (
@@ -1008,30 +1023,54 @@ def route_smart(
         total_bbox = start_bbox
 
         print(f"{len(router_groups)=}")
+
         if len(router_groups) > 1:
             i = 0
-            angle = router_groups[0][0]
-            routers_clockwise: list[ManhattanRouter]
-            routers_clockwise = router_groups[0][1].copy()
-            if angle != 0 and router_groups[1][0] > angle:
+            rg_angles = [rg[0] for rg in router_groups]
+            traverses0 = False
+            a = rg_angles[0]
+
+            for _a in rg_angles[1:-1]:
+                if _a <= a:
+                    traverses0 = True
+                a = _a
+            angle = rg_angles[0]
+
+            if traverses0 or rg_angles[-1] in (0, 3):
+                routers_clockwise: list[ManhattanRouter]
+                routers_clockwise = router_groups[0][1].copy()
                 for i in range(1, len(router_groups)):
-                    print(f"cw: {angle=}")
                     new_angle, new_routers = router_groups[i]
                     a = angle
                     if routers_clockwise:
-                        while a != new_angle:
-                            a = (a + 1) % 4
-                            total_bbox += _route_to_side(
-                                routers=[router.start for router in routers_clockwise],
-                                clockwise=True,
-                                bbox=start_bbox,
-                                separation=separation,
-                            )
+                        if traverses0:
+                            while a not in (new_angle, 0):
+                                a = (a + 1) % 4
+                                total_bbox += _route_to_side(
+                                    routers=[
+                                        router.start for router in routers_clockwise
+                                    ],
+                                    clockwise=True,
+                                    bbox=start_bbox,
+                                    separation=separation,
+                                )
+                        else:
+                            while a != new_angle:
+                                a = (a + 1) % 4
+                                total_bbox += _route_to_side(
+                                    routers=[
+                                        router.start for router in routers_clockwise
+                                    ],
+                                    clockwise=True,
+                                    bbox=start_bbox,
+                                    separation=separation,
+                                )
                     if new_angle <= angle:
                         break
                     routers_clockwise.extend(new_routers)
                     angle = new_angle
                 else:
+                    a = angle
                     while a != 0:
                         a = (a + 1) % 4
                         total_bbox += _route_to_side(
@@ -1040,17 +1079,15 @@ def route_smart(
                             bbox=start_bbox,
                             separation=separation,
                         )
-
-            angle = router_groups[-1][0]
-            routers_anticlockwise: list[ManhattanRouter]
-            routers_anticlockwise = router_groups[-1][1].copy()
-            if angle != 0 and i < len(router_groups) - 1:
+            angle = rg_angles[-1]
+            if i < len(router_groups) - 1:
+                routers_anticlockwise: list[ManhattanRouter]
+                routers_anticlockwise = router_groups[-1][1].copy()
                 for i in range(len(router_groups) - 2, -1, -1):
-                    print(f"acw: {angle=}")
                     new_angle, new_routers = router_groups[i]
                     a = angle
                     if routers_anticlockwise:
-                        while a != new_angle:
+                        while a not in (new_angle, 0):
                             a = (a - 1) % 4
                             total_bbox += _route_to_side(
                                 routers=[
@@ -1068,10 +1105,11 @@ def route_smart(
                     routers_anticlockwise.extend(new_routers)
                     angle = new_angle
                 else:
+                    a = angle
                     while a != 0:
-                        a = (a + 1) % 4
+                        a = (a - 1) % 4
                         total_bbox += _route_to_side(
-                            routers=[router.start for router in routers_clockwise],
+                            routers=[router.start for router in routers_anticlockwise],
                             clockwise=False,
                             bbox=start_bbox,
                             separation=separation,
@@ -1294,12 +1332,20 @@ def route_loosely(
             if not router.finished:
                 if router.start.tv.y > 0:
                     break
+                elif router.start.tv.y == 0:
+                    router.auto_route()
+                    delta = 0
+                    continue
                 router.start.straight(delta)
                 delta += router.width + separation
                 router.auto_route()
         delta = 0
         for router in reversed(sorted_routers[i:]):
             if not router.finished:
+                if router.start.tv.y == 0:
+                    router.auto_route()
+                    delta = 0
+                    continue
                 router.start.straight(delta)
                 delta += router.width + separation
                 router.auto_route()
