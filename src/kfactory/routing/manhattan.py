@@ -1030,7 +1030,9 @@ def route_smart(
             traverses0 = False
             a = rg_angles[0]
 
-            for _a in rg_angles[1:-1]:
+            for _a in rg_angles[1:]:
+                if _a == 0:
+                    continue
                 if _a <= a:
                     traverses0 = True
                 a = _a
@@ -1066,6 +1068,8 @@ def route_smart(
                                     separation=separation,
                                 )
                     if new_angle <= angle:
+                        if new_angle != 0:
+                            i -= 1
                         break
                     routers_clockwise.extend(new_routers)
                     angle = new_angle
@@ -1079,11 +1083,13 @@ def route_smart(
                             bbox=start_bbox,
                             separation=separation,
                         )
-            angle = rg_angles[-1]
             if i < len(router_groups) - 1:
+                angle = rg_angles[-1]
                 routers_anticlockwise: list[ManhattanRouter]
                 routers_anticlockwise = router_groups[-1][1].copy()
-                for i in range(len(router_groups) - 2, -1, -1):
+                # for i in range(len(router_groups) - 2, -1, -1):
+                for i in reversed(range(i, len(router_groups) - 1)):
+                    # breakpoint()
                     new_angle, new_routers = router_groups[i]
                     a = angle
                     if routers_anticlockwise:

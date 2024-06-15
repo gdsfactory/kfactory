@@ -264,6 +264,7 @@ def test_smart_routing(
         f"test_smart_routing_{sort_ports=}_{start_bbox=}_{start_angle=}"
         f"{m2=}_{m1=}_{z=}_{p1=}_{p2=}"
     )
+    c.name = c.name.replace("=", "")
 
     i = 0
 
