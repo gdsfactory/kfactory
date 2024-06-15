@@ -3360,7 +3360,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 return _cell
 
             if register_factory:
-                self.factories[basename or f.__name__] = wrapper_autocell
+                function_name = f.func.__name__ if hasattr(f, "func") else f.__name__
+                self.factories[basename or function_name] = wrapper_autocell
             return wrapper_autocell
 
         return decorator_autocell if _func is None else decorator_autocell(_func)
