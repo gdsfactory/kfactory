@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- works with partials [#399](https://github.com/gdsfactory/kfactory/pull/399)
 - full test suite for smart routing and error fixes [#398](https://github.com/gdsfactory/kfactory/pull/398)
 - fix basename usage in cell decorator [#400](https://github.com/gdsfactory/kfactory/pull/400)
 
