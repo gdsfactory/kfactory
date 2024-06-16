@@ -339,6 +339,8 @@ class ManhattanRouter:
             straight_s_bend_strategy: When emulating an s-bend (build a large S out of
                 90deg bends), use the short or the longer route.
         """
+        if self.finished:
+            return self.start.pts
         if max_try <= 0:
             raise ValueError("Router was not able to find a possible route")
         tv = self.start.tv
@@ -501,6 +503,7 @@ class ManhattanRouter:
             )
         if self.end.pts[-1] != self.start.pts[-1]:
             self.start.pts.extend(reversed(self.end.pts))
+            self.end.pts = []
         self.finished = True
         return self.start.pts
 
@@ -1001,6 +1004,27 @@ def route_smart(
             target_angle = (angle - 2) % 4
         else:
             target_angle = angle
+            avg = kdb.Vector()
+            end_routers = [r.end for r in sorted_routers]
+            for rs in end_routers:
+                avg += rs.tv
+            route_to_bbox(
+                end_routers, end_bbox, separation=separation, bbox_routing=bbox_routing
+            )
+            _route_to_side(
+                end_routers,
+                clockwise=avg.y > 0,
+                bbox=end_bbox,
+                separation=separation,
+                bbox_routing=bbox_routing,
+            )
+            _route_to_side(
+                end_routers,
+                clockwise=avg.y > 0,
+                bbox=end_bbox,
+                separation=separation,
+                bbox_routing=bbox_routing,
+            )
         router_groups: list[tuple[int, list[ManhattanRouter]]] = []
         group_angle: int | None = None
         current_group: list[ManhattanRouter] = []
@@ -1408,16 +1432,18 @@ def route_loosely(
         for router_group in forward_groups:
             delta = 0
             for router in reversed(router_group):
-                router.start.straight(delta)
-                delta += router.width + separation
-                router.auto_route()
+                if not router.finished:
+                    router.start.straight(delta)
+                    delta += router.width + separation
+                    router.auto_route()
 
         for router_group in reverse_groups:
             delta = 0
             for router in router_group:
-                router.start.straight(delta)
-                delta += router.width + separation
-                router.auto_route()
+                if not router.finished:
+                    router.start.straight(delta)
+                    delta += router.width + separation
+                    router.auto_route()
 
 
 def vec_dir(vec: kdb.Vector) -> int:
