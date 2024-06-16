@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- full test suite for smart routing and error fixes [#398](https://github.com/gdsfactory/kfactory/pull/398)
 - fix basename usage in cell decorator [#400](https://github.com/gdsfactory/kfactory/pull/400)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.4...v0.17.5
