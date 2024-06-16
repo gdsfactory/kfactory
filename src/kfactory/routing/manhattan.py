@@ -1400,11 +1400,10 @@ def route_loosely(
                     group = [router]
                     group_bbox = r_bbox
                 s = -1
-        else:
-            if s == 1 and group:
-                forward_groups.append(group)
-            elif s == -1 and group:
-                reverse_groups.append(group)
+        if s == 1 and group:
+            forward_groups.append(group)
+        elif s == -1 and group:
+            reverse_groups.append(group)
 
         for router_group in forward_groups:
             delta = 0
