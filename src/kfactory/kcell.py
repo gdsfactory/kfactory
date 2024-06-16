@@ -3371,7 +3371,12 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 return _cell
 
             if register_factory:
-                function_name = f.func.__name__ if hasattr(f, "func") else f.__name__
+                if hasattr(f, "__name__"):
+                    function_name = f.__name__
+                elif hasattr(f, "func"):
+                    function_name = f.func.__name__
+                else:
+                    raise ValueError(f"Function {f} has no name.")
                 self.factories[basename or function_name] = wrapper_autocell
             return wrapper_autocell
 
@@ -3568,7 +3573,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 return wrapped_cell(**params)
 
             if register_factory:
-                self.virtual_factories[basename or f.__name__] = wrapper_autocell
+                if hasattr(f, "__name__"):
+                    function_name = f.__name__
+                elif hasattr(f, "func"):
+                    function_name = f.func.__name__
+                else:
+                    raise ValueError(f"Function {f} has no name.")
+                self.virtual_factories[basename or function_name] = wrapper_autocell
             return wrapper_autocell
 
         return decorator_autocell if _func is None else decorator_autocell(_func)
