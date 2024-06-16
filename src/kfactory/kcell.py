@@ -6937,8 +6937,8 @@ class Ports:
             if dwidth is None or dwidth <= 0:
                 raise ValueError("dwidth needs to be set")
             elif dwidth is not None and dwidth > 0:
-                _width = round(dwidth / self.kcl.dbu)
-                if _width % 2 != 0:
+                _width = self.kcl.to_dbu(dwidth)
+                if _width % 2:
                     raise ValueError(
                         f"dwidth needs to be even to snap to grid. Got {dwidth}"
                     )

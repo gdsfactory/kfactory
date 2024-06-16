@@ -173,7 +173,7 @@ def test_route_bundle(
     ]
     p_end = [
         optical_port.copy(
-            kf.kdb.Trans(3, False, i * 200_000 + i**2 * 19_000 + 1_000_000, 500_000)
+            kf.kdb.Trans(3, False, i * 200_000 + i**2 * 19_000 + 500_000, 300_000)
         )
         for i in range(10)
     ]
@@ -233,23 +233,37 @@ def test_route_length(
 
 
 @pytest.mark.parametrize(
-    "start_bbox,start_angle,n_angles",
+    "sort_ports,start_bbox,start_angle,m2,m1,z,p1,p2",
     [
-        (start_bbox, start_angle, n_angles)
+        (sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
+        for sort_ports in (False, True)
         for start_bbox in (False, True)
         for start_angle in (-2, -1, 0, 1, 2)
-        for n_angles in [1, 4]
-        # for n_angles in [2]
+        for m2 in (True, False)
+        for m1 in (True, False)
+        for z in (True, False)
+        for p1 in (True, False)
+        for p2 in (True, False)
     ],
 )
 def test_smart_routing(
-    bend90: kf.KCell,
+    bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     start_bbox: bool,
+    sort_ports: bool,
     start_angle: int,
-    n_angles: int,
+    m2: bool,
+    m1: bool,
+    z: bool,
+    p1: bool,
+    p2: bool,
 ) -> None:
-    c = kf.KCell(f"test_smart_routing_{start_bbox=}_{start_angle=}_{n_angles=}")
+    """Tests all possible smart routing configs."""
+    c = kf.KCell(
+        f"test_smart_routing_{sort_ports=}_{start_bbox=}_{start_angle=}"
+        f"{m2=}_{m1=}_{z=}_{p1=}_{p2=}"
+    )
+    c.name = c.name.replace("=", "")
 
     i = 0
 
@@ -264,29 +278,82 @@ def test_smart_routing(
     start_bboxes: list[kf.kdb.Box] = []
     end_bboxes: list[kf.kdb.Box] = []
 
-    for a in range(4):
-        t = base_t * kf.kdb.Trans(a * 1_000_000, 0)
+    angles: list[int] = []
+    if m2 and (m1 or z):
+        angles.append(-2)
+    if m1:
+        angles.append(-1)
+    if z:
+        angles.append(0)
+    if p1:
+        angles.append(1)
+    if p2 and (p1 or z):
+        angles.append(2)
+
+    for a in range(1):
+        t = base_t * kf.kdb.Trans(a * 1_750_000, 0)
         start_box = t * kf.kdb.Box(350_000) if start_bbox else kf.kdb.Box()
         end_box = kf.kdb.Box()
-        for i in range(n_angles):
-            angle = a - 2 - start_angle + i
-            for j in range(10):
-                ps = _port(
-                    name=f"start_{a=}_{i=}_{j=}",
-                    trans=t
-                    * kf.kdb.Trans(angle, False, 0, 0)
-                    * kf.kdb.Trans(100_000, j * 10_000 - 50_000),
-                )
-                pe = _port(
-                    name=f"end_{a=}_{i=}_{j=}",
-                    trans=t
-                    * kf.kdb.Trans(a, False, 0, 0)
-                    * kf.kdb.Trans(-400_000, -(i * 10 + j) * 20_000 + 600_000),
-                )
-                start_ports.append(ps)
-                end_ports.append(pe)
-                start_box += ps.trans.disp.to_p()
-                end_box += pe.trans.disp.to_p()
+        n = 0
+        for i in angles:
+            angle = a + start_angle + i
+            if i == 2:
+                for j in range(5):
+                    ps = _port(
+                        name=f"start_{a=}_{i=}_{j=}",
+                        trans=t
+                        * kf.kdb.Trans(angle, False, 0, 0)
+                        * kf.kdb.Trans(100_000, (1 - j) * 15_000 - 50_000),
+                    )
+                    pe = _port(
+                        name=f"end_{a=}_{i=}_{j=}",
+                        trans=t
+                        * kf.kdb.Trans(a, False, 0, 0)
+                        * kf.kdb.Trans(-400_000, (-n - 4 + j * 2) * 40_000 + 600_000),
+                    )
+                    start_ports.append(ps)
+                    end_ports.append(pe)
+                    start_box += ps.trans.disp.to_p()
+                    end_box += pe.trans.disp.to_p()
+                    n += 1
+            elif i == -2:
+                for j in range(5):
+                    ps = _port(
+                        name=f"start_{a=}_{i=}_{j=}",
+                        trans=t
+                        * kf.kdb.Trans(angle, False, 0, 0)
+                        * kf.kdb.Trans(100_000, j * 15_000 + 50_000),
+                    )
+                    pe = _port(
+                        name=f"end_{a=}_{i=}_{j=}",
+                        trans=t
+                        * kf.kdb.Trans(a, False, 0, 0)
+                        * kf.kdb.Trans(-400_000, -n * 40_000 + 600_000),
+                    )
+                    start_ports.append(ps)
+                    end_ports.append(pe)
+                    start_box += ps.trans.disp.to_p()
+                    end_box += pe.trans.disp.to_p()
+                    n += 1
+            else:
+                for j in range(10):
+                    ps = _port(
+                        name=f"start_{a=}_{i=}_{j=}",
+                        trans=t
+                        * kf.kdb.Trans(angle, False, 0, 0)
+                        * kf.kdb.Trans(100_000, j * 15_000 - 50_000),
+                    )
+                    pe = _port(
+                        name=f"end_{a=}_{i=}_{j=}",
+                        trans=t
+                        * kf.kdb.Trans(a, False, 0, 0)
+                        * kf.kdb.Trans(-400_000, -n * 40_000 + 600_000),
+                    )
+                    start_ports.append(ps)
+                    end_ports.append(pe)
+                    start_box += ps.trans.disp.to_p()
+                    end_box += pe.trans.disp.to_p()
+                    n += 1
 
         start_boxes.append(start_box)
         end_boxes.append(end_box)
@@ -301,18 +368,13 @@ def test_smart_routing(
     kf.routing.optical.route_bundle(
         c,
         start_ports=start_ports,
-        # start_ports=list(reversed(ps)),
         end_ports=end_ports,
-        bend90_cell=bend90,
-        separation=2000,
+        bend90_cell=bend90_small,
+        separation=4000,
         straight_factory=straight_factory_dbu,
-        # bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))],  # + bboxes,
         bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
-        # sort_ports=True,
+        sort_ports=sort_ports,
         bbox_routing="minimal",
     )
 
     c.show()
-
-
-# breakpoint()
