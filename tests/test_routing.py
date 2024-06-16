@@ -244,7 +244,6 @@ def test_route_length(
         for z in (True, False)
         for p1 in (True, False)
         for p2 in (True, False)
-        # for n_angles in [1, 2, 3, 4]
     ],
 )
 def test_smart_routing(
@@ -369,16 +368,13 @@ def test_smart_routing(
     kf.routing.optical.route_bundle(
         c,
         start_ports=start_ports,
-        # start_ports=list(reversed(ps)),
         end_ports=end_ports,
         bend90_cell=bend90_small,
         separation=4000,
         straight_factory=straight_factory_dbu,
-        # bboxes=[c.bbox(kf.kcl.layer(5, 0)), c.bbox(kf.kcl.layer(6, 0))],  # + bboxes,
         bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
         sort_ports=sort_ports,
         bbox_routing="minimal",
     )
 
     c.show()
-    # breakpoint()
