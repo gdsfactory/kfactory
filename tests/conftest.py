@@ -60,6 +60,13 @@ def bend90(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnum) -> kf.KCell:
 
 
 @pytest.fixture
+def bend90_small(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnum) -> kf.KCell:
+    return kf.cells.circular.bend_circular(
+        width=0.5, radius=5, layer=LAYER.WG, enclosure=wg_enc, angle=90
+    )
+
+
+@pytest.fixture
 def bend180(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.circular.bend_circular(
         width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
@@ -82,7 +89,7 @@ def bend180_euler(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> kf.KCell:
 
 @pytest.fixture
 def taper(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> kf.KCell:
-    if kf.kcl.layout.cell("taper") is not None:
+    if kf.kcl.layout.cell("taper") is None:
         c = kf.cells.taper.taper(
             width1=0.5,
             width2=1,
