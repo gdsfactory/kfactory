@@ -941,8 +941,6 @@ def route_smart(
         del bundled_bboxes[i]
         del bundled_routers[i]
 
-    print(f"{len(bundled_routers)=}")
-
     for router_bundle in bundled_routers:
         sorted_routers = _sort_routers(router_bundle)
 
@@ -1022,8 +1020,6 @@ def route_smart(
 
         total_bbox = start_bbox
 
-        print(f"{len(router_groups)=}")
-
         if len(router_groups) > 1:
             i = 0
             rg_angles = [rg[0] for rg in router_groups]
@@ -1037,6 +1033,13 @@ def route_smart(
                     traverses0 = True
                 a = _a
             angle = rg_angles[0]
+
+            # Find out whether we are passing the angle where no side routing is
+            # necessary and if we do, we need to start routing clockwise until we
+            # pass 0. Otherwise test on which side of the bounding box we land
+
+            # Routing clock-wise (the order of the routers, the actual routings are
+            # anti-clockwise and vice-versa)
 
             if traverses0 or rg_angles[-1] in (0, 3):
                 routers_clockwise: list[ManhattanRouter]
@@ -1083,13 +1086,13 @@ def route_smart(
                             bbox=start_bbox,
                             separation=separation,
                         )
+
+            # Route the rest of the groups anti-clockwise
             if i < len(router_groups) - 1:
                 angle = rg_angles[-1]
                 routers_anticlockwise: list[ManhattanRouter]
                 routers_anticlockwise = router_groups[-1][1].copy()
-                # for i in range(len(router_groups) - 2, -1, -1):
                 for i in reversed(range(i, len(router_groups) - 1)):
-                    # breakpoint()
                     new_angle, new_routers = router_groups[i]
                     a = angle
                     if routers_anticlockwise:
@@ -1253,7 +1256,6 @@ def route_loosely(
     choose the shortest path.
     """
     router_start_box = start_bbox.dup()
-    # router_end_box = end_bbox.dup()
 
     if routers:
         angle = (routers[0].end.t.angle - 2) % 4
@@ -1333,25 +1335,87 @@ def route_loosely(
                     router.bend90_radius + router.width + separation, 0
                 )
                 delta += router.width - router.width // 2 + separation
+
+        reverse_groups: list[list[ManhattanRouter]] = []
+        forward_groups: list[list[ManhattanRouter]] = []
+        s = 0
         delta = 0
-        for i, router in enumerate(sorted_routers):
-            if not router.finished:
-                if router.start.tv.y > 0:
-                    break
-                elif router.start.tv.y == 0:
-                    router.auto_route()
-                    delta = 0
-                    continue
+        group: list[ManhattanRouter] = []
+        group_bbox = kdb.Box()
+
+        for router in sorted_routers:
+            tv = router.start.tv
+            if tv.y == 0:
+                if group:
+                    if s == -1:
+                        reverse_groups.append(group)
+                        group = []
+                    else:
+                        forward_groups.append(group)
+                delta = 0
+                router.auto_route()
+                s = 0
+            elif tv.y > 0:
+                r_bbox = kdb.Box(
+                    router.start.t.disp.to_p(), router.end.t.disp.to_p()
+                ).enlarged(router.width)
+                if s == -1:
+                    if group:
+                        reverse_groups.append(group)
+                    group = []
+                    group_bbox = r_bbox
+                elif s == 0:
+                    if group:
+                        reverse_groups.append(group)
+                    group = []
+                if not (r_bbox & group_bbox.enlarged(separation)).empty():
+                    group_bbox += r_bbox
+                    group.append(router)
+                else:
+                    if group:
+                        forward_groups.append(group)
+                    group = [router]
+                    group_bbox = r_bbox
+                s = 1
+            else:
+                r_bbox = kdb.Box(
+                    router.start.t.disp.to_p(), router.end.t.disp.to_p()
+                ).enlarged(router.width)
+                if s == 1:
+                    if group:
+                        forward_groups.append(group)
+                    group = [router]
+                    group_bbox = r_bbox
+                elif s == 0:
+                    if group:
+                        forward_groups.append(group)
+                    group = [router]
+                    group_bbox = r_bbox
+                if not (r_bbox & group_bbox.enlarged(separation)).empty():
+                    group_bbox += r_bbox
+                    group.append(router)
+                else:
+                    if group:
+                        reverse_groups.append(group)
+                    group = [router]
+                    group_bbox = r_bbox
+                s = -1
+        else:
+            if s == 1 and group:
+                forward_groups.append(group)
+            elif s == -1 and group:
+                reverse_groups.append(group)
+
+        for router_group in forward_groups:
+            delta = 0
+            for router in reversed(router_group):
                 router.start.straight(delta)
                 delta += router.width + separation
                 router.auto_route()
-        delta = 0
-        for router in reversed(sorted_routers[i:]):
-            if not router.finished:
-                if router.start.tv.y == 0:
-                    router.auto_route()
-                    delta = 0
-                    continue
+
+        for router_group in reverse_groups:
+            delta = 0
+            for router in router_group:
                 router.start.straight(delta)
                 delta += router.width + separation
                 router.auto_route()
@@ -1475,6 +1539,11 @@ def _route_to_side(
     separation: int,
     bbox_routing: Literal["minimal", "full"] = "minimal",
 ) -> kdb.Box:
+    """Route a list of routers either clockwise or anti-clockwise one 90° corner.
+
+    "minimal" will only route so far around that the routers are one separation of their
+    width away from the bbbox. "full" will first route all routers outside of the bbox.
+    """
     bbox = bbox.dup()
 
     def _sort_route(router: ManhattanRouterSide) -> int:
