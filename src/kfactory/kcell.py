@@ -1954,6 +1954,17 @@ class KCell:
                 )
 
     @property
+    def factory_name(self) -> str:
+        """Return the name under which the factory was registered."""
+        factory_name = self.basename or self.function_name
+        if factory_name is not None:
+            return factory_name
+        raise ValueError(
+            f"KCell {self.name} has most likely not been registered automatically as a"
+            " factory. Therefore it doesn't have an associated name."
+        )
+
+    @property
     def x(self) -> int:
         """Returns the x-coordinate of the center of the bounding box."""
         return self._kdb_cell.bbox().center().x
@@ -4387,6 +4398,17 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         vi = VInstance(cell)
         self.insts.append(vi)
         return vi
+
+    @property
+    def factory_name(self) -> str:
+        """Return the name under which the factory was registered."""
+        factory_name = self.basename or self.function_name
+        if factory_name is not None:
+            return factory_name
+        raise ValueError(
+            f"VKCell {self.name} has most likely not been registered automatically as a"
+            " factory. Therefore it doesn't have an associated name."
+        )
 
     @property
     def x(self) -> float:

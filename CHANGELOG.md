@@ -7,6 +7,10 @@
 
 - add display_kcell display_type [#396](https://github.com/gdsfactory/kfactory/pull/396)
 
+## Bug Fixes
+
+- fix basename usage in cell decorator [#400](https://github.com/gdsfactory/kfactory/pull/400)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.4...v0.17.5
 
 
