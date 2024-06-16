@@ -1,5 +1,20 @@
+<a name="v0.17.6"></a>
+# [v0.17.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.6) - 16 Jun 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix indirect routing [#402](https://github.com/gdsfactory/kfactory/pull/402)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.5...v0.17.6
+
+
+[Changes][v0.17.6]
+
+
 <a name="v0.17.5"></a>
-# [v0.17.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.5) - 13 Jun 2024
+# [v0.17.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.5) - 16 Jun 2024
 
 # What's Changed
 
@@ -589,6 +604,58 @@
 [Changes][v0.10.1]
 
 
+<a name="v0.10.0"></a>
+# [v0.10.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.10.0) - 16 Jun 2024
+
+## What's Changed
+* add Instance setter and getter for center by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/191
+* Add port center setter getter by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/192
+* improve instance setters by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/193
+* rename autorename_ports to auto_rename_ports by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/195
+* rename port position to center by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/199
+* Make Instance.flatten(<int|None>) work correctly with KCell/Instance by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/202
+* add kf.KCell.center property by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/200
+* add Instance.mirror and Instance.d.mirror by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/204
+* add towncrier news by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/205
+* route optical uses allow_small_routes by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/209
+* add ports length by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/210
+* (Basic) Bundle routing by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/212
+* Fixed typo `enclosure_mape` -> `enclosure_map` by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/213
+* remove debug prints by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/214
+* use image by default by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/215
+* add invert to droute_manhattan by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/217
+* better_odd_port_width_message by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/220
+* Added `rec_dict` to `@cell` decorator to allow for recursive dictionaries by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/221
+* more consitent names for routes by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/226
+* Virtual Cells by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/228
+
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.9.3...v0.10.0
+
+[Changes][v0.10.0]
+
+
+<a name="v0.9.3"></a>
+# [v0.9.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.9.3) - 16 Jun 2024
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.9.2...v0.9.3
+
+[Changes][v0.9.3]
+
+
+<a name="v0.9.1"></a>
+# [v0.9.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.9.1) - 16 Jun 2024
+
+## What's Changed
+* Bump actions/checkout from 3 to 4 by [@dependabot](https://github.com/dependabot) in https://github.com/gdsfactory/kfactory/pull/186
+* get_cells by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/187
+
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.9.0...v0.9.1
+
+[Changes][v0.9.1]
+
+
 <a name="v0.9.0"></a>
 # [v0.9.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.9.0) - 25 Sep 2023
 
@@ -721,6 +788,7 @@
 [Changes][v0.4.0]
 
 
+[v0.17.6]: https://github.com/gdsfactory/kfactory/compare/v0.17.5...v0.17.6
 [v0.17.5]: https://github.com/gdsfactory/kfactory/compare/v0.17.4...v0.17.5
 [v0.17.4]: https://github.com/gdsfactory/kfactory/compare/v0.17.3...v0.17.4
 [v0.17.3]: https://github.com/gdsfactory/kfactory/compare/v0.17.2...v0.17.3
@@ -747,7 +815,10 @@
 [v0.11.0]: https://github.com/gdsfactory/kfactory/compare/v0.10.3...v0.11.0
 [v0.10.3]: https://github.com/gdsfactory/kfactory/compare/v0.10.2...v0.10.3
 [v0.10.2]: https://github.com/gdsfactory/kfactory/compare/v0.10.1...v0.10.2
-[v0.10.1]: https://github.com/gdsfactory/kfactory/compare/v0.9.0...v0.10.1
+[v0.10.1]: https://github.com/gdsfactory/kfactory/compare/v0.10.0...v0.10.1
+[v0.10.0]: https://github.com/gdsfactory/kfactory/compare/v0.9.3...v0.10.0
+[v0.9.3]: https://github.com/gdsfactory/kfactory/compare/v0.9.1...v0.9.3
+[v0.9.1]: https://github.com/gdsfactory/kfactory/compare/v0.9.0...v0.9.1
 [v0.9.0]: https://github.com/gdsfactory/kfactory/compare/v0.8.0...v0.9.0
 [v0.8.0]: https://github.com/gdsfactory/kfactory/compare/v0.7.5...v0.8.0
 [v0.7.5]: https://github.com/gdsfactory/kfactory/compare/v0.7.4...v0.7.5
