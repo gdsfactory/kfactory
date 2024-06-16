@@ -233,9 +233,10 @@ def test_route_length(
 
 
 @pytest.mark.parametrize(
-    "sort_ports,start_bbox,start_angle,m2,m1,z,p1,p2",
+    "indirect,sort_ports,start_bbox,start_angle,m2,m1,z,p1,p2",
     [
-        (sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
+        (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
+        for indirect in (True, False)
         for sort_ports in (False, True)
         for start_bbox in (False, True)
         for start_angle in (-2, -1, 0, 1, 2)
@@ -251,6 +252,7 @@ def test_smart_routing(
     straight_factory_dbu: Callable[..., kf.KCell],
     start_bbox: bool,
     sort_ports: bool,
+    indirect: bool,
     start_angle: int,
     m2: bool,
     m1: bool,
@@ -290,11 +292,16 @@ def test_smart_routing(
     if p2 and (p1 or z):
         angles.append(2)
 
-    for a in range(1):
-        t = base_t * kf.kdb.Trans(a * 1_750_000, 0)
+    for a in range(4):
+        t = base_t * kf.kdb.Trans(a // 2 * 3_000_000, a % 2 * 3_000_000)
         start_box = t * kf.kdb.Box(350_000) if start_bbox else kf.kdb.Box()
         end_box = kf.kdb.Box()
         n = 0
+        te = (
+            kf.kdb.Trans(2, False, -400_000, -800_000)
+            if indirect
+            else kf.kdb.Trans(-400_000, 0)
+        )
         for i in angles:
             angle = a + start_angle + i
             if i == 2:
@@ -309,7 +316,8 @@ def test_smart_routing(
                         name=f"end_{a=}_{i=}_{j=}",
                         trans=t
                         * kf.kdb.Trans(a, False, 0, 0)
-                        * kf.kdb.Trans(-400_000, (-n - 4 + j * 2) * 40_000 + 600_000),
+                        * te
+                        * kf.kdb.Trans(0, (-n - 4 + j * 2) * 40_000 + 600_000),
                     )
                     start_ports.append(ps)
                     end_ports.append(pe)
@@ -328,7 +336,8 @@ def test_smart_routing(
                         name=f"end_{a=}_{i=}_{j=}",
                         trans=t
                         * kf.kdb.Trans(a, False, 0, 0)
-                        * kf.kdb.Trans(-400_000, -n * 40_000 + 600_000),
+                        * te
+                        * kf.kdb.Trans(0, -n * 40_000 + 600_000),
                     )
                     start_ports.append(ps)
                     end_ports.append(pe)
@@ -347,7 +356,8 @@ def test_smart_routing(
                         name=f"end_{a=}_{i=}_{j=}",
                         trans=t
                         * kf.kdb.Trans(a, False, 0, 0)
-                        * kf.kdb.Trans(-400_000, -n * 40_000 + 600_000),
+                        * te
+                        * kf.kdb.Trans(0, -n * 40_000 + 600_000),
                     )
                     start_ports.append(ps)
                     end_ports.append(pe)
@@ -376,5 +386,3 @@ def test_smart_routing(
         sort_ports=sort_ports,
         bbox_routing="minimal",
     )
-
-    c.show()
