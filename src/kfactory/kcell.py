@@ -6270,6 +6270,7 @@ class Instance:
                     conn_trans = (
                         kdb.Trans.M90 if mirror ^ self.trans.mirror else kdb.Trans.R180
                     )
+                    op = op.copy()
                     op.trans.mirror = False
                     _trans = op.trans * conn_trans * p.trans.inverted()
                     self._instance.trans = _trans
