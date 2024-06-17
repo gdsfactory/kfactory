@@ -4888,7 +4888,9 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
                     if mirror ^ self.trans.mirror
                     else kdb.DCplxTrans.R180
                 )
-                _dcplx_trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                opt = op.dcplx_trans
+                opt.mirror = False
+                _dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
                 self.trans = _dcplx_trans
             case False, False:
                 self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
@@ -6244,10 +6246,9 @@ class Instance:
                         if mirror ^ self.dcplx_trans.mirror
                         else kdb.DCplxTrans.R180
                     )
-                    op.dcplx_trans.mirror = False
-                    _dcplx_trans = (
-                        op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
-                    )
+                    opt = op.dcplx_trans
+                    opt.mirror = False
+                    _dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
                     self._instance.dcplx_trans = _dcplx_trans
                 case False, False:
                     self._instance.dcplx_trans = kdb.DCplxTrans(
