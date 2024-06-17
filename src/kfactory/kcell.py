@@ -4885,7 +4885,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
             case False, True:
                 dconn_trans = (
                     kdb.DCplxTrans.M90
-                    if mirror ^ self.trans.mirror ^ op.trans.mirror
+                    if mirror ^ self.trans.mirror
                     else kdb.DCplxTrans.R180
                 )
                 _dcplx_trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
