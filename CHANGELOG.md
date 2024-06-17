@@ -5,7 +5,12 @@
 
 ## Bug Fixes
 
+- fix connection issue caring about mirror when it should not [#403](https://github.com/gdsfactory/kfactory/pull/403)
 - fix indirect routing [#402](https://github.com/gdsfactory/kfactory/pull/402)
+
+## Documentation
+
+- fix connection issue caring about mirror when it should not [#403](https://github.com/gdsfactory/kfactory/pull/403)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.5...v0.17.6
 
@@ -626,7 +631,7 @@
 * add invert to droute_manhattan by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/217
 * better_odd_port_width_message by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/220
 * Added `rec_dict` to `@cell` decorator to allow for recursive dictionaries by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/221
-* more consistent names for routes by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/226
+* more consitent names for routes by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/226
 * Virtual Cells by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/228
 
 
