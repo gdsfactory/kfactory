@@ -386,3 +386,5 @@ def test_smart_routing(
         sort_ports=sort_ports,
         bbox_routing="minimal",
     )
+    c.show()
+    breakpoint()

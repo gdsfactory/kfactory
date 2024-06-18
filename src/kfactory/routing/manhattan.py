@@ -1003,14 +1003,18 @@ def route_smart(
         if disp_to_bbox.x > 0:
             target_angle = (angle - 2) % 4
         else:
-            target_angle = angle
             avg = kdb.Vector()
             end_routers = [r.end for r in sorted_routers]
             for rs in end_routers:
                 avg += rs.tv
-            route_to_bbox(
-                end_routers, end_bbox, separation=separation, bbox_routing=bbox_routing
-            )
+            # if avg.y > 0:
+            #     target_angle = (angle + 1) % 4
+            # else:
+            #     target_angle = (angle - 1) % 4
+            target_angle = angle
+            # route_to_bbox(
+            #     end_routers, end_bbox, separation=separation, bbox_routing=bbox_routing
+            # )
             _route_to_side(
                 end_routers,
                 clockwise=avg.y > 0,
@@ -1018,13 +1022,29 @@ def route_smart(
                 separation=separation,
                 bbox_routing=bbox_routing,
             )
-            _route_to_side(
-                end_routers,
-                clockwise=avg.y > 0,
-                bbox=end_bbox,
-                separation=separation,
-                bbox_routing=bbox_routing,
-            )
+            delta = 0
+            if avg.y > 0:
+                for rs in end_routers:
+                    route_to_bbox(
+                        [rs],
+                        bbox=end_bbox,
+                        separation=separation,
+                        bbox_routing="full",
+                    )
+                    rs.straight(delta)
+                    end_bbox += rs.t.disp.to_p()
+                    delta = rs.router.width + separation
+            else:
+                for rs in reversed(end_routers):
+                    route_to_bbox(
+                        [rs],
+                        bbox=end_bbox,
+                        separation=separation,
+                        bbox_routing="full",
+                    )
+                    rs.straight(delta)
+                    end_bbox += rs.t.disp.to_p()
+                    delta = rs.router.width + separation
         router_groups: list[tuple[int, list[ManhattanRouter]]] = []
         group_angle: int | None = None
         current_group: list[ManhattanRouter] = []
@@ -1048,13 +1068,15 @@ def route_smart(
             i = 0
             rg_angles = [rg[0] for rg in router_groups]
             traverses0 = False
+            ind0 = 0
             a = rg_angles[0]
 
-            for _a in rg_angles[1:]:
+            for i, _a in enumerate(rg_angles[1:]):
                 if _a == 0:
                     continue
                 if _a <= a:
                     traverses0 = True
+                    ind0 = i + 1
                 a = _a
             angle = rg_angles[0]
 
@@ -1075,6 +1097,7 @@ def route_smart(
                         if traverses0:
                             while a not in (new_angle, 0):
                                 a = (a + 1) % 4
+                                # if i == ind0 and a == 0:
                                 total_bbox += _route_to_side(
                                     routers=[
                                         router.start for router in routers_clockwise
@@ -1082,6 +1105,7 @@ def route_smart(
                                     clockwise=True,
                                     bbox=start_bbox,
                                     separation=separation,
+                                    allow_direct=a == 0 and i == ind0,
                                 )
                         else:
                             while a != new_angle:
@@ -1093,6 +1117,7 @@ def route_smart(
                                     clockwise=True,
                                     bbox=start_bbox,
                                     separation=separation,
+                                    allow_direct=False,
                                 )
                     if new_angle <= angle:
                         if new_angle != 0:
@@ -1109,6 +1134,7 @@ def route_smart(
                             clockwise=True,
                             bbox=start_bbox,
                             separation=separation,
+                            allow_direct=a == 0,
                         )
 
             # Route the rest of the groups anti-clockwise
@@ -1129,6 +1155,7 @@ def route_smart(
                                 clockwise=False,
                                 bbox=start_bbox,
                                 separation=separation,
+                                allow_direct=False,
                             )
                     if new_angle == 0:
                         routers_anticlockwise.extend(new_routers)
@@ -1146,13 +1173,14 @@ def route_smart(
                             clockwise=False,
                             bbox=start_bbox,
                             separation=separation,
+                            allow_direct=False,  # a == 0 and not traverses0,
                         )
-            route_to_bbox(
-                [router.start for router in sorted_routers],
-                total_bbox,
-                bbox_routing=bbox_routing,
-                separation=separation,
-            )
+            # route_to_bbox(
+            #     [router.start for router in sorted_routers],
+            #     total_bbox,
+            #     bbox_routing=bbox_routing,
+            #     separation=separation,
+            # )
             if waypoints is None:
                 route_loosely(
                     sorted_routers,
@@ -1279,6 +1307,7 @@ def route_loosely(
     This will not result in a tight bundle but use all the space available and
     choose the shortest path.
     """
+    breakpoint()
     router_start_box = start_bbox.dup()
 
     if routers:
@@ -1563,6 +1592,7 @@ def _route_to_side(
     bbox: kdb.Box,
     separation: int,
     bbox_routing: Literal["minimal", "full"] = "minimal",
+    allow_direct: bool = False,
 ) -> kdb.Box:
     """Route a list of routers either clockwise or anti-clockwise one 90° corner.
 
@@ -1577,6 +1607,8 @@ def _route_to_side(
             return -y
         else:
             return y
+
+    allow_direct = True
 
     sorted_rs = sorted(routers, key=_sort_route)
     for rs in sorted_rs:
@@ -1608,22 +1640,37 @@ def _route_to_side(
         rs.straight(s)
         if clockwise:
             x = rs.tv.x
-            if rs.ta == 3:
+            if rs.ta == 3 and allow_direct:
                 if x >= rs.router.bend90_radius:
                     rs.straight_nobend(x)
                 elif x > -rs.router.bend90_radius:
                     rs.straight(rs.router.bend90_radius + x)
-            rs.left()
-            bbox += rs.t * kdb.Point(0, -hw2)
+                rs.left()
+                bbox += rs.t * kdb.Point(0, -hw2)
+            elif allow_direct and rs.ta == 1 and rs.tv.y <= -rs.router.bend90_radius:
+                pass
+            # elif rs.ta == 2:
+            #     bbox += rs.t * kdb.Point(rs.router.bend90_radius + hw2, 0)
+            else:
+                rs.left()
+                bbox += rs.t * kdb.Point(0, -hw2)
         else:
             x = rs.tv.x
-            if rs.ta == 1:
+            if rs.ta == 1 and allow_direct:
                 if x >= rs.router.bend90_radius:
                     rs.straight_nobend(x)
                 elif x > -rs.router.bend90_radius:
                     rs.straight(rs.router.bend90_radius + x)
-            rs.right()
-            bbox += rs.t * kdb.Point(0, hw2)
+                rs.right()
+                bbox += rs.t * kdb.Point(0, hw2)
+            elif allow_direct and rs.ta == 3 and rs.tv.y >= rs.router.bend90_radius:
+                # rs.right()
+                pass
+            # elif rs.ta == 2:
+            #     bbox += rs.t * kdb.Point(rs.router.bend90_radius + hw2, 0)
+            else:
+                rs.right()
+                bbox += rs.t * kdb.Point(0, hw2)
 
     return bbox
 
