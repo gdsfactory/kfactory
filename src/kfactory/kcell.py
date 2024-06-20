@@ -7568,6 +7568,7 @@ def show(
             and not the main KCLayout.
     """
     import inspect
+    import tempfile
 
     delete = False
     delete_lyrdb = False
@@ -7577,11 +7578,15 @@ def show(
     try:
         stk = inspect.getouterframes(inspect.currentframe())
         frame = stk[2]
-        name = (
-            Path(frame.filename).stem + "_" + frame.function
-            if frame.function != "<module>"
-            else Path(frame.filename).stem
-        )
+        frame_filename_stem = Path(frame.filename).stem
+        if frame_filename_stem.startswith("<ipython-input"):    # IPython Case
+            ipython_shell_id = frame_filename_stem.rstrip(">").split("-")[-1]
+            name = f"ipython-{ipython_shell_id}"
+        else:                                                   # Normal Python kernel case
+            if frame.function != "<module>":
+                name = frame_filename_stem + "_" + frame.function
+            else:
+                name = frame_filename_stem
     except Exception:
         try:
             from __main__ import __file__ as mf
@@ -7593,6 +7598,7 @@ def show(
     _kcl_paths: list[dict[str, str]] = []
 
     if isinstance(layout, KCLayout):
+        # print("\tCase 1: type(layout)==KCLayout")
         file: Path | None = None
         spec = importlib.util.find_spec("git")
         if spec is not None:
@@ -7656,7 +7662,10 @@ def show(
             else:
                 wtd = repo.working_tree_dir
                 if wtd is not None:
-                    root = Path(wtd) / "build/gds"
+                    if name.startswith("ipython-"):         # IPython Case: use tempfile
+                        root = Path(tempfile.gettempdir()) / "gdsfactory"
+                    else:                                   # Normal Python Kernel Case: use build directory
+                        root = Path(wtd) / "build/gds"
                     root.mkdir(parents=True, exist_ok=True)
                     tf = root / Path(name).with_suffix(".oas")
                     tf.parent.mkdir(parents=True, exist_ok=True)
