@@ -793,6 +793,8 @@ class KCell:
             _name = "Unnamed_!"
         else:
             _name = name
+
+        _name = get_cell_name(_name)
         self._kdb_cell = kdb_cell or kcl.create_cell(_name)
         if _name == "Unnamed_!":
             self._kdb_cell.name = f"Unnamed_{self.cell_index()}"
