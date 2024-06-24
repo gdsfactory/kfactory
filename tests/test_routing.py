@@ -236,8 +236,7 @@ def test_route_length(
     "indirect,sort_ports,start_bbox,start_angle,m2,m1,z,p1,p2",
     [
         (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
-        # for indirect in (True, False)
-        for indirect in (False,)
+        for indirect in (True, False)
         for sort_ports in (False, True)
         for start_bbox in (False, True)
         for start_angle in (-2, -1, 0, 1, 2)
