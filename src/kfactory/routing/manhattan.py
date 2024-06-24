@@ -1093,6 +1093,7 @@ def route_smart(
                 for i in range(1, len(router_groups)):
                     new_angle, new_routers = router_groups[i]
                     a = angle
+                    print(f"{a=}")
                     if routers_clockwise:
                         if traverses0:
                             while a not in (new_angle, 0):
@@ -1117,7 +1118,7 @@ def route_smart(
                                     clockwise=True,
                                     bbox=start_bbox,
                                     separation=separation,
-                                    allow_direct=False,
+                                    allow_direct=a == 0,
                                 )
                     if new_angle <= angle:
                         if new_angle != 0:
@@ -1139,10 +1140,12 @@ def route_smart(
 
             # Route the rest of the groups anti-clockwise
             if i < len(router_groups) - 1:
+                breakpoint()
                 angle = rg_angles[-1]
                 routers_anticlockwise: list[ManhattanRouter]
                 routers_anticlockwise = router_groups[-1][1].copy()
                 for i in reversed(range(i, len(router_groups) - 1)):
+                    print(f"{i=}")
                     new_angle, new_routers = router_groups[i]
                     a = angle
                     if routers_anticlockwise:
@@ -1157,24 +1160,27 @@ def route_smart(
                                 separation=separation,
                                 allow_direct=False,
                             )
-                    if new_angle == 0:
-                        routers_anticlockwise.extend(new_routers)
-                        break
-                    if new_angle >= angle:
-                        break
+                    breakpoint()
+                    # if new_angle == 0:
+                    #     routers_anticlockwise.extend(new_routers)
+                    #     break
+                    # if new_angle >= angle:
+                    #     break
                     routers_anticlockwise.extend(new_routers)
                     angle = new_angle
-                else:
-                    a = angle
-                    while a != 0:
-                        a = (a - 1) % 4
-                        total_bbox += _route_to_side(
-                            routers=[router.start for router in routers_anticlockwise],
-                            clockwise=False,
-                            bbox=start_bbox,
-                            separation=separation,
-                            allow_direct=False,  # a == 0 and not traverses0,
-                        )
+                breakpoint()
+                a = angle
+                while a != 0:
+                    a = (a - 1) % 4
+                    print(len(routers_anticlockwise))
+                    total_bbox += _route_to_side(
+                        routers=[router.start for router in routers_anticlockwise],
+                        clockwise=False,
+                        bbox=start_bbox,
+                        separation=separation,
+                        allow_direct=False,  # a == 0 and not traverses0,
+                    )
+            breakpoint()
             # route_to_bbox(
             #     [router.start for router in sorted_routers],
             #     total_bbox,
@@ -1307,7 +1313,6 @@ def route_loosely(
     This will not result in a tight bundle but use all the space available and
     choose the shortest path.
     """
-    breakpoint()
     router_start_box = start_bbox.dup()
 
     if routers:

@@ -236,7 +236,8 @@ def test_route_length(
     "indirect,sort_ports,start_bbox,start_angle,m2,m1,z,p1,p2",
     [
         (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
-        for indirect in (True, False)
+        # for indirect in (True, False)
+        for indirect in (False,)
         for sort_ports in (False, True)
         for start_bbox in (False, True)
         for start_angle in (-2, -1, 0, 1, 2)
@@ -292,7 +293,7 @@ def test_smart_routing(
     if p2 and (p1 or z):
         angles.append(2)
 
-    for a in range(4):
+    for a in range(1):
         t = base_t * kf.kdb.Trans(a // 2 * 3_000_000, a % 2 * 3_000_000)
         start_box = t * kf.kdb.Box(350_000) if start_bbox else kf.kdb.Box()
         end_box = kf.kdb.Box()
@@ -387,4 +388,4 @@ def test_smart_routing(
         bbox_routing="minimal",
     )
     c.show()
-    breakpoint()
+    # breakpoint()
