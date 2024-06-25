@@ -923,12 +923,24 @@ def route_smart(
                     if not (dbrbox & bundled_bbox).empty():
                         bb = bundled_bboxes[i]
                         bundled_routers[i].append(router)
-                        bundled_bboxes[i] = bb + bbox.enlarged(router.width // 2)
+                        bundled_bboxes[i] = bb + bbox
+                        bundle_bbox = bundled_bboxes[i]
+                        bundle = bundled_routers[i]
                         break
-                bundled_bboxes.append(bundle_bbox)
-                bundle_bbox = bbox.dup()
-                bundle = [router]
-                bundled_routers.append(bundle)
+                else:
+                    bundled_bboxes.append(bundle_bbox)
+                    bundle_bbox = bbox.dup()
+                    bundle_region = kdb.Region(bundle_bbox)
+                    if not (bundle_region & box_region).is_empty():
+                        bundle_bbox += box_region.interacting(bundle_region).bbox()
+                    bundle = [router]
+                    bundled_routers.append(bundle)
+                    continue
+
+                # bundled_bboxes.append(bundle_bbox)
+                # bundle_bbox = bbox.dup()
+                # bundle = [router]
+                # bundled_routers.append(bundle)
 
         else:
             bundle.append(router)
@@ -948,7 +960,6 @@ def route_smart(
     for i, _ in reversed(merge_bboxes):
         del bundled_bboxes[i]
         del bundled_routers[i]
-
     for router_bundle in bundled_routers:
         sorted_routers = _sort_routers(router_bundle)
 
