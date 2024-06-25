@@ -7580,8 +7580,7 @@ def show(
         frame = stk[2]
         frame_filename_stem = Path(frame.filename).stem
         if frame_filename_stem.startswith("<ipython-input"):    # IPython Case
-            ipython_shell_id = frame_filename_stem.rstrip(">").split("-")[-1]
-            name = f"ipython-{ipython_shell_id}"
+            name = "ipython"
         else:                                                   # Normal Python kernel case
             if frame.function != "<module>":
                 name = frame_filename_stem + "_" + frame.function
@@ -7662,10 +7661,7 @@ def show(
             else:
                 wtd = repo.working_tree_dir
                 if wtd is not None:
-                    if name.startswith("ipython-"):         # IPython Case: use tempfile
-                        root = Path(tempfile.gettempdir()) / "gdsfactory"
-                    else:                                   # Normal Python Kernel Case: use build directory
-                        root = Path(wtd) / "build/gds"
+                    root = Path(wtd) / "build/gds"
                     root.mkdir(parents=True, exist_ok=True)
                     tf = root / Path(name).with_suffix(".oas")
                     tf.parent.mkdir(parents=True, exist_ok=True)
