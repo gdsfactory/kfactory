@@ -890,7 +890,9 @@ def route_smart(
         )
 
     router_bboxes: list[kdb.Box] = [
-        kdb.Box(router.start.t.disp.to_p(), router.end.t.disp.to_p())
+        kdb.Box(router.start.t.disp.to_p(), router.end.t.disp.to_p()).enlarged(
+            router.width // 2
+        )
         for router in all_routers
     ]
     complete_bbox = router_bboxes[
@@ -910,6 +912,9 @@ def route_smart(
             if overlap_complete.empty():
                 bundled_bboxes.append(bundle_bbox)
                 bundle_bbox = bbox.dup()
+                bundle_region = kdb.Region(bundle_bbox)
+                if not (bundle_region & box_region).is_empty():
+                    bundle_bbox += box_region.interacting(bundle_region).bbox()
                 bundle = [router]
                 bundled_routers.append(bundle)
             else:
@@ -1234,17 +1239,21 @@ def route_to_bbox(
 ) -> None:
     if not bbox.empty():
         if bbox_routing == "minimal":
+            bb = bbox.dup()
+            for router in routers:
+                hw1 = router.router.width // 2 + separation
+                bb += router.t * kdb.Point(router.router.bend90_radius - hw1, 0)
             for router in routers:
                 hw1 = router.router.width // 2 + separation
                 match router.t.angle:
                     case 0:
-                        router.straight_nobend(bbox.right + hw1 - router.t.disp.x)
+                        router.straight_nobend(bb.right + hw1 - router.t.disp.x)
                     case 1:
-                        router.straight_nobend(bbox.top + hw1 - router.t.disp.y)
+                        router.straight_nobend(bb.top + hw1 - router.t.disp.y)
                     case 2:
-                        router.straight_nobend(-bbox.left + hw1 + router.t.disp.x)
+                        router.straight_nobend(-bb.left + hw1 + router.t.disp.x)
                     case 3:
-                        router.straight_nobend(-bbox.bottom + hw1 + router.t.disp.y)
+                        router.straight_nobend(-bb.bottom + hw1 + router.t.disp.y)
         elif bbox_routing == "full":
             for router in routers:
                 hw1 = max(

@@ -292,13 +292,13 @@ def test_smart_routing(
     if p2 and (p1 or z):
         angles.append(2)
 
-    for a in range(1):
+    for a in range(4):
         t = base_t * kf.kdb.Trans(a // 2 * 3_000_000, a % 2 * 3_000_000)
         start_box = t * kf.kdb.Box(350_000) if start_bbox else kf.kdb.Box()
         end_box = kf.kdb.Box()
         n = 0
         te = (
-            kf.kdb.Trans(2, False, -400_000, -800_000)
+            kf.kdb.Trans(2, False, -400_000, 400_000)
             if indirect
             else kf.kdb.Trans(-400_000, 0)
         )
