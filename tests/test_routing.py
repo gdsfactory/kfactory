@@ -400,7 +400,7 @@ def test_smart_routing(
                     straight_factory=straight_factory_dbu,
                     bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
                     sort_ports=sort_ports,
-                    bbox_routing="minimal",
+                    bbox_routing="full",
                     on_collision="error",
                 )
         case _:
@@ -413,7 +413,5 @@ def test_smart_routing(
                 straight_factory=straight_factory_dbu,
                 bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
                 sort_ports=sort_ports,
-                bbox_routing="minimal",
+                bbox_routing="full",
             )
-    c.show()
-    # breakpoint()
