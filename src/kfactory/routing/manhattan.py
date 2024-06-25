@@ -936,12 +936,6 @@ def route_smart(
                     bundle = [router]
                     bundled_routers.append(bundle)
                     continue
-
-                # bundled_bboxes.append(bundle_bbox)
-                # bundle_bbox = bbox.dup()
-                # bundle = [router]
-                # bundled_routers.append(bundle)
-
         else:
             bundle.append(router)
             bundle_bbox += bbox
