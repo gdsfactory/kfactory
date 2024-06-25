@@ -46,7 +46,7 @@ jobs:
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
-        run: pytest -vv -s
+        run: pytest
   test_docs:
     runs-on: ${{ matrix.os }}
     strategy:
