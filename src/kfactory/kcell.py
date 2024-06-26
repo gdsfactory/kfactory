@@ -7568,7 +7568,6 @@ def show(
             and not the main KCLayout.
     """
     import inspect
-    import tempfile
 
     delete = False
     delete_lyrdb = False
@@ -7579,9 +7578,9 @@ def show(
         stk = inspect.getouterframes(inspect.currentframe())
         frame = stk[2]
         frame_filename_stem = Path(frame.filename).stem
-        if frame_filename_stem.startswith("<ipython-input"):    # IPython Case
+        if frame_filename_stem.startswith("<ipython-input"):  # IPython Case
             name = "ipython"
-        else:                                                   # Normal Python kernel case
+        else:  # Normal Python kernel case
             if frame.function != "<module>":
                 name = frame_filename_stem + "_" + frame.function
             else:
