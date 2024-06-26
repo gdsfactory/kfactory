@@ -890,7 +890,9 @@ def route_smart(
         )
 
     router_bboxes: list[kdb.Box] = [
-        kdb.Box(router.start.t.disp.to_p(), router.end.t.disp.to_p())
+        kdb.Box(router.start.t.disp.to_p(), router.end.t.disp.to_p()).enlarged(
+            router.width // 2
+        )
         for router in all_routers
     ]
     complete_bbox = router_bboxes[
@@ -910,6 +912,9 @@ def route_smart(
             if overlap_complete.empty():
                 bundled_bboxes.append(bundle_bbox)
                 bundle_bbox = bbox.dup()
+                bundle_region = kdb.Region(bundle_bbox)
+                if not (bundle_region & box_region).is_empty():
+                    bundle_bbox += box_region.interacting(bundle_region).bbox()
                 bundle = [router]
                 bundled_routers.append(bundle)
             else:
@@ -918,13 +923,19 @@ def route_smart(
                     if not (dbrbox & bundled_bbox).empty():
                         bb = bundled_bboxes[i]
                         bundled_routers[i].append(router)
-                        bundled_bboxes[i] = bb + bbox.enlarged(router.width // 2)
+                        bundled_bboxes[i] = bb + bbox
+                        bundle_bbox = bundled_bboxes[i]
+                        bundle = bundled_routers[i]
                         break
-                bundled_bboxes.append(bundle_bbox)
-                bundle_bbox = bbox.dup()
-                bundle = [router]
-                bundled_routers.append(bundle)
-
+                else:
+                    bundled_bboxes.append(bundle_bbox)
+                    bundle_bbox = bbox.dup()
+                    bundle_region = kdb.Region(bundle_bbox)
+                    if not (bundle_region & box_region).is_empty():
+                        bundle_bbox += box_region.interacting(bundle_region).bbox()
+                    bundle = [router]
+                    bundled_routers.append(bundle)
+                    continue
         else:
             bundle.append(router)
             bundle_bbox += bbox
@@ -943,7 +954,6 @@ def route_smart(
     for i, _ in reversed(merge_bboxes):
         del bundled_bboxes[i]
         del bundled_routers[i]
-
     for router_bundle in bundled_routers:
         sorted_routers = _sort_routers(router_bundle)
 
@@ -1234,17 +1244,21 @@ def route_to_bbox(
 ) -> None:
     if not bbox.empty():
         if bbox_routing == "minimal":
+            bb = bbox.dup()
+            for router in routers:
+                hw1 = router.router.width // 2 + separation
+                bb += router.t * kdb.Point(router.router.bend90_radius - hw1, 0)
             for router in routers:
                 hw1 = router.router.width // 2 + separation
                 match router.t.angle:
                     case 0:
-                        router.straight_nobend(bbox.right + hw1 - router.t.disp.x)
+                        router.straight_nobend(bb.right + hw1 - router.t.disp.x)
                     case 1:
-                        router.straight_nobend(bbox.top + hw1 - router.t.disp.y)
+                        router.straight_nobend(bb.top + hw1 - router.t.disp.y)
                     case 2:
-                        router.straight_nobend(-bbox.left + hw1 + router.t.disp.x)
+                        router.straight_nobend(-bb.left + hw1 + router.t.disp.x)
                     case 3:
-                        router.straight_nobend(-bbox.bottom + hw1 + router.t.disp.y)
+                        router.straight_nobend(-bb.bottom + hw1 + router.t.disp.y)
         elif bbox_routing == "full":
             for router in routers:
                 hw1 = max(
@@ -1613,6 +1627,8 @@ def _route_to_side(
                     rs.straight_nobend(x)
                 elif x > -rs.router.bend90_radius:
                     rs.straight(rs.router.bend90_radius + x)
+            if rs.ta == 0 and x > 0:
+                rs.straight(x)
             rs.left()
             bbox += rs.t * kdb.Point(0, -hw2)
         else:
@@ -1622,6 +1638,8 @@ def _route_to_side(
                     rs.straight_nobend(x)
                 elif x > -rs.router.bend90_radius:
                     rs.straight(rs.router.bend90_radius + x)
+            if rs.ta == 0 and x > 0:
+                rs.straight(x)
             rs.right()
             bbox += rs.t * kdb.Point(0, hw2)
 

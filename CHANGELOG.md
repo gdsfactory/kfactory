@@ -3,6 +3,10 @@
 
 # What's Changed
 
+## New
+
+- Routing indirect fixes [#409](https://github.com/gdsfactory/kfactory/pull/409)
+
 ## Bug Fixes
 
 - fix connection issue caring about mirror when it should not [#403](https://github.com/gdsfactory/kfactory/pull/403)
@@ -10,6 +14,7 @@
 
 ## Documentation
 
+- Routing indirect fixes [#409](https://github.com/gdsfactory/kfactory/pull/409)
 - fix connection issue caring about mirror when it should not [#403](https://github.com/gdsfactory/kfactory/pull/403)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.5...v0.17.6

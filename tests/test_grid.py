@@ -1,5 +1,4 @@
 import kfactory as kf
-import pytest
 from collections.abc import Callable
 from random import randint, uniform
 
@@ -18,8 +17,6 @@ def test_grid_dbu_1d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         spacing=5000,
         align_x="origin",
     )
-
-    c.show()
 
 
 def test_grid_dbu_2d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
@@ -40,8 +37,6 @@ def test_grid_dbu_2d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         align_x="origin",
     )
 
-    c.show()
-
 
 def test_grid_dbu_2d_uneven(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
     c = kf.KCell()
@@ -61,8 +56,6 @@ def test_grid_dbu_2d_uneven(straight_factory_dbu: Callable[..., kf.KCell]) -> No
         align_x="xmin",
         align_y="ymax",
     )
-
-    c.show()
 
 
 def test_grid_dbu_2d_rotation(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
@@ -85,8 +78,6 @@ def test_grid_dbu_2d_rotation(straight_factory_dbu: Callable[..., kf.KCell]) -> 
         align_y="ymin",
     )
 
-    c.show()
-
 
 def test_grid_dbu_1d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
     c = kf.KCell()
@@ -103,8 +94,6 @@ def test_grid_dbu_1d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> Non
         align_x="origin",
         shape=(1, 10),
     )
-
-    c.show()
 
 
 def test_grid_dbu_2d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
@@ -125,8 +114,6 @@ def test_grid_dbu_2d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> Non
         align_x="origin",
         shape=(4, 5),
     )
-
-    c.show()
 
 
 def test_grid_dbu_2d_shape_rotation(
@@ -151,8 +138,6 @@ def test_grid_dbu_2d_shape_rotation(
         shape=(3, 7),
     )
 
-    c.show()
-
 
 def test_flexgrid_dbu_1d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
     c = kf.KCell()
@@ -168,8 +153,6 @@ def test_flexgrid_dbu_1d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         spacing=5000,
         align_x="origin",
     )
-
-    c.show()
 
 
 def test_flexgrid_dbu_2d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
@@ -189,8 +172,6 @@ def test_flexgrid_dbu_2d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         spacing=5000,
         align_x="origin",
     )
-
-    c.show()
 
 
 def test_flexgrid_dbu_2d_rotation(
@@ -214,8 +195,6 @@ def test_flexgrid_dbu_2d_rotation(
         align_x="center",
     )
 
-    c.show()
-
 
 def test_flexgrid_dbu_1d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
     c = kf.KCell()
@@ -232,8 +211,6 @@ def test_flexgrid_dbu_1d_shape(straight_factory_dbu: Callable[..., kf.KCell]) ->
         align_x="origin",
         shape=(1, 10),
     )
-
-    c.show()
 
 
 def test_flexgrid_dbu_2d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
@@ -254,8 +231,6 @@ def test_flexgrid_dbu_2d_shape(straight_factory_dbu: Callable[..., kf.KCell]) ->
         align_x="origin",
         shape=(4, 5),
     )
-
-    c.show()
 
 
 def test_flexgrid_dbu_2d_shape_rotation(
@@ -279,8 +254,6 @@ def test_flexgrid_dbu_2d_shape_rotation(
         align_x="origin",
         shape=(3, 7),
     )
-
-    c.show()
 
 
 def test_grid_2d_shape_rotation(
@@ -306,8 +279,6 @@ def test_grid_2d_shape_rotation(
         target_trans=kf.kdb.DCplxTrans(1, 37, False, 0, 0),
     )
 
-    c.show()
-
 
 def test_flexgrid_2d_shape_rotation(
     straight_factory: Callable[..., kf.KCell],
@@ -331,5 +302,3 @@ def test_flexgrid_2d_shape_rotation(
         shape=(3, 7),
         target_trans=kf.kdb.DCplxTrans(1, 37, False, 0, 0),
     )
-
-    c.show()

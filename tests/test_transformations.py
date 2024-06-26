@@ -30,8 +30,6 @@ def test_rotation(
     c.add_ports(wg1.ports)
     c.add_ports(wg2.ports)
 
-    c.show()
-
 
 @pytest.mark.parametrize(
     "center",
@@ -60,8 +58,6 @@ def test_drotation(
 
     c.add_ports(wg1.ports)
     c.add_ports(wg2.ports)
-
-    c.show()
 
 
 @pytest.mark.parametrize(

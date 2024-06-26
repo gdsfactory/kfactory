@@ -117,7 +117,6 @@ def test_cells(cell_name: str) -> None:
             c << c_run
             c << c_ref
             c << c_xor
-            c.show()
 
             kf.logger.critical(f"Differences found in {cell!r} on layer {layer_tuple}")
             val = input("Save current GDS as new reference (Y)? [Y/n]")

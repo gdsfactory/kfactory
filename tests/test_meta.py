@@ -4,6 +4,7 @@ from tempfile import NamedTemporaryFile
 
 import kfactory as kf
 from pathlib import Path
+import pytest
 
 
 @kf.cell  # type: ignore[misc, unused-ignore]
@@ -26,7 +27,6 @@ def sample(
         },
     }
     c.info["e"] = None
-    c.show()
     c.write("_test_meta_sample.oas")
 
     kcl2 = kf.KCLayout("TEST_META_SAMPLE")
