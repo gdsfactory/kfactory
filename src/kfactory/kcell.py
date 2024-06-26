@@ -7597,7 +7597,6 @@ def show(
     _kcl_paths: list[dict[str, str]] = []
 
     if isinstance(layout, KCLayout):
-        # print("\tCase 1: type(layout)==KCLayout")
         file: Path | None = None
         spec = importlib.util.find_spec("git")
         if spec is not None:
