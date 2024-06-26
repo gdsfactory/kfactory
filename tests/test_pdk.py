@@ -98,8 +98,6 @@ def test_multi_pdk() -> None:
     d2 = assembly << doe2
     d2.connect("o1", d1, "o2")
 
-    assembly.show()
-
 
 def test_multi_pdk_convert() -> None:
     base_pdk = kf.KCLayout("BASE")
@@ -150,7 +148,6 @@ def test_multi_pdk_convert() -> None:
 
     p = Path("ASSEMBLY.oas")
     assembly.write(p, convert_external_cells=True)
-    kf.show(p)
     p.unlink()
 
 
@@ -210,8 +207,6 @@ def test_multi_pdk_read_write() -> None:
     d1 = assembly << doe_pdk1_read[doe1.name]
     d2 = assembly << doe_pdk2_read[doe2.name]
     d2.connect("o1", d1, "o2")
-
-    assembly.show()
 
 
 def test_merge_read_shapes() -> None:

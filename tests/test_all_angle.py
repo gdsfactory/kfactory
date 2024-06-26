@@ -60,5 +60,3 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
         straight_factory=sf,
         bend_factory=bf,
     )
-
-    c.show()

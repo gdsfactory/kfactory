@@ -7,7 +7,6 @@ from tempfile import NamedTemporaryFile
 def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
     wg = straight_factory_dbu(width=1000, length=10000)
     assert wg.name == "straight_W1000_L10000_LWG_EWGSTD"
-    wg.show()
 
 
 def test_circular_snapping(LAYER: kf.LayerEnum) -> None:
@@ -47,7 +46,7 @@ def test_nested_dic() -> None:
         c = kf.KCell()
         return c
 
-    recursive_dict_cell({"test": {"test2": "test3"}, "test4": "test5"}).show()
+    recursive_dict_cell({"test": {"test2": "test3"}, "test4": "test5"})
 
 
 def test_ports_cell(LAYER: kf.LayerEnum) -> None:

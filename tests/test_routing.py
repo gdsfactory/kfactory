@@ -293,12 +293,13 @@ def test_smart_routing(
         angles.append(2)
 
     for a in range(4):
+        # for a in [3, 1, 2, 0]:
         t = base_t * kf.kdb.Trans(a // 2 * 3_000_000, a % 2 * 3_000_000)
         start_box = t * kf.kdb.Box(350_000) if start_bbox else kf.kdb.Box()
         end_box = kf.kdb.Box()
         n = 0
         te = (
-            kf.kdb.Trans(2, False, -400_000, -800_000)
+            kf.kdb.Trans(2, False, -400_000, 400_000)
             if indirect
             else kf.kdb.Trans(-400_000, 0)
         )
@@ -375,14 +376,42 @@ def test_smart_routing(
     for box in end_bboxes:
         c.shapes(kf.kcl.layer(12, 0)).insert(box)
 
-    kf.routing.optical.route_bundle(
-        c,
-        start_ports=start_ports,
-        end_ports=end_ports,
-        bend90_cell=bend90_small,
-        separation=4000,
-        straight_factory=straight_factory_dbu,
-        bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
-        sort_ports=sort_ports,
-        bbox_routing="minimal",
-    )
+    # (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
+    match (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2):
+        case (
+            (True, False, False, -1, True, False, False, True, False)
+            | (True, False, False, -1, False, False, False, True, False)
+            | (True, False, False, 0, False, False, True, False, False)
+            | (True, False, False, 1, False, True, False, False, True)
+            | (True, False, False, 1, False, True, False, False, False)
+            | (True, True, False, -1, True, False, False, True, False)
+            | (True, True, False, -1, False, False, False, True, False)
+            | (True, True, False, 0, False, False, True, False, False)
+            | (True, True, False, 1, False, True, False, False, True)
+            | (True, True, False, 1, False, True, False, False, False)
+        ):
+            with pytest.raises(RuntimeError):  # , match="Routing Collision"):
+                kf.routing.optical.route_bundle(
+                    c,
+                    start_ports=start_ports,
+                    end_ports=end_ports,
+                    bend90_cell=bend90_small,
+                    separation=4000,
+                    straight_factory=straight_factory_dbu,
+                    bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
+                    sort_ports=sort_ports,
+                    bbox_routing="full",
+                    on_collision="error",
+                )
+        case _:
+            kf.routing.optical.route_bundle(
+                c,
+                start_ports=start_ports,
+                end_ports=end_ports,
+                bend90_cell=bend90_small,
+                separation=4000,
+                straight_factory=straight_factory_dbu,
+                bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
+                sort_ports=sort_ports,
+                bbox_routing="full",
+            )

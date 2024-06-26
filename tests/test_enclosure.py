@@ -30,21 +30,19 @@ def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.LayerEnclosure) -> kf.KCell
 
 
 def test_enclosure(LAYER: kf.LayerEnum) -> None:
-    enc = kf.LayerEnclosure([(LAYER.WG, 500, -250)])
+    kf.LayerEnclosure([(LAYER.WG, 500, -250)])
 
 
 def test_enc(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
-    enc = wg_enc
+    wg_enc
 
-    c = mmi_enc(LAYER.WG, wg_enc)
-    c.show()
+    mmi_enc(LAYER.WG, wg_enc)
 
 
 def test_neg_enc(LAYER: kf.LayerEnum) -> None:
     enc = kf.LayerEnclosure([(LAYER.WGCLAD, -1500, 1000)])
 
-    c = mmi_enc(LAYER.WG, enc)
-    c.show()
+    mmi_enc(LAYER.WG, enc)
 
 
 def test_layer_multi_enc(LAYER: kf.LayerEnum) -> None:
@@ -56,8 +54,7 @@ def test_layer_multi_enc(LAYER: kf.LayerEnum) -> None:
             (LAYER.WGCLAD, -500, -400),
         ]
     )
-    c = mmi_enc(LAYER.WG, enc)
-    c.show()
+    mmi_enc(LAYER.WG, enc)
 
 
 def test_layer_merge_enc(LAYER: kf.LayerEnum) -> None:
@@ -68,8 +65,7 @@ def test_layer_merge_enc(LAYER: kf.LayerEnum) -> None:
             (LAYER.WGCLAD, -2000, 1000),
         ]
     )
-    c = mmi_enc(LAYER.WG, enc)
-    c.show()
+    mmi_enc(LAYER.WG, enc)
 
 
 def test_um_enclosure(LAYER: kf.LayerEnum) -> None:
@@ -159,5 +155,3 @@ def test_pdkenclosure(LAYER: kf.LayerEnum, straight_blank: kf.KCell) -> None:
     assert (
         (kf.kdb.Region(c.shapes(LAYER.WGCLADEXCLUDE)) & port_wg_ex) - port_wg_ex
     ).is_empty()
-
-    c.show()

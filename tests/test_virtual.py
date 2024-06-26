@@ -48,8 +48,6 @@ def test_virtual_cell_insert(
     vi = kf.VInstance(vc)
     vi.insert_into(c)
 
-    c.show()
-
 
 def test_all_angle_route(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
     bb = [kf.kdb.DPoint(x, y) for x, y in [(0, 0), (500, 0), (250, 200), (500, 250)]]
@@ -73,4 +71,3 @@ def test_all_angle_route(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None
         ),
     )
     kf.VInstance(vc, kf.kdb.DCplxTrans()).insert_into(c)
-    c.show()
