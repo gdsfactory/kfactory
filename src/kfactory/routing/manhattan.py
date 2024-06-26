@@ -1627,6 +1627,8 @@ def _route_to_side(
                     rs.straight_nobend(x)
                 elif x > -rs.router.bend90_radius:
                     rs.straight(rs.router.bend90_radius + x)
+            if rs.ta == 0 and x > 0:
+                rs.straight(x)
             rs.left()
             bbox += rs.t * kdb.Point(0, -hw2)
         else:
@@ -1636,6 +1638,8 @@ def _route_to_side(
                     rs.straight_nobend(x)
                 elif x > -rs.router.bend90_radius:
                     rs.straight(rs.router.bend90_radius + x)
+            if rs.ta == 0 and x > 0:
+                rs.straight(x)
             rs.right()
             bbox += rs.t * kdb.Point(0, hw2)
 
