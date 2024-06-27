@@ -80,11 +80,17 @@ def mzi() -> kf.KCell:
     b_bot[2].connect("o2", b_bot[1], "o1")
     s_bot[1].connect("o1", b_bot[2], "o1")
     b_bot[3].connect("o1", s_bot[1], "o2")
+    c.add_port(mmi1.ports["o1"])
+    c.add_port(mmi2.ports["o1"])
+    c.auto_rename_ports()
 
     return c
 
 
 def test_l2n() -> None:
     c = kf.KCell("L2N_TEST")
-    c << mzi()
-    c.show(l2n=c.l2n())
+    mzi1 = c << mzi()
+    mzi2 = c << mzi()
+    mzi2.connect("o1", mzi1, "o2")
+    c.show()
+    c.l2n()

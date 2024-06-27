@@ -1293,22 +1293,43 @@ class KCell:
                 lib_ci = self.kcl.layout.add_lib_cell(
                     cell.kcl.library, cell.cell_index()
                 )
-                kcell = self.kcl[lib_ci]
-                for port in cell.ports:
-                    pl = port.layer
-                    _layer = self.kcl.layer(cell.kcl.get_info(pl))
-                    try:
-                        _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
-                    except ValueError:
-                        pass
-                    kcell.create_port(
-                        name=port.name,
-                        dwidth=port.dwidth,
-                        dcplx_trans=port.dcplx_trans,
-                        layer=_layer,
-                    )
-                kcell._settings = cell.settings.model_copy()
-                kcell.info = cell.info.model_copy()
+                if lib_ci not in self.kcl.kcells:
+                    kcell = self.kcl[lib_ci]
+                    for port in cell.ports:
+                        pl = port.layer
+                        _layer = self.kcl.layer(cell.kcl.get_info(pl))
+                        try:
+                            _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
+                        except ValueError:
+                            pass
+                        kcell.create_port(
+                            name=port.name,
+                            dwidth=port.dwidth,
+                            dcplx_trans=port.dcplx_trans,
+                            layer=_layer,
+                        )
+                    kcell._settings = cell.settings.model_copy()
+                    kcell.info = cell.info.model_copy()
+                    called_ci = kcell.called_cells()
+                    for lci in set(called_ci) - self.kcl.kcells.keys():
+                        kcell = self.kcl[lci]
+                        lib_kcell = cell.kcl[kcell.library_cell_index()]
+                        for port in lib_kcell.ports:
+                            pl = port.layer
+                            _layer = self.kcl.layer(lib_kcell.kcl.get_info(pl))
+                            try:
+                                _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
+                            except ValueError:
+                                pass
+                            kcell.create_port(
+                                name=port.name,
+                                dwidth=port.dwidth,
+                                dcplx_trans=port.dcplx_trans,
+                                layer=_layer,
+                            )
+                        kcell._settings = lib_kcell.settings.model_copy()
+                        kcell.info = lib_kcell.info.model_copy()
+
                 if libcell_as_static:
                     ci = self.kcl.convert_cell_to_static(lib_ci)
                     kcell = self.kcl[ci]
