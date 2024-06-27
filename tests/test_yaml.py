@@ -95,4 +95,4 @@ def test_yaml() -> None:
         pdk2 = kf.KCLayout("YAML_READ")
         kf.placer.cells_from_yaml(Path(tf.name), kcl=pdk2)
     finally:
-        Path(tf).unlink()
+        Path(tf.name).unlink()
