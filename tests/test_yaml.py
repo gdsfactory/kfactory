@@ -1,5 +1,6 @@
-from pathlib import Path
+import pytest
 import kfactory as kf
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 pdk = kf.KCLayout("YAML")
@@ -88,8 +89,10 @@ def mzi() -> kf.KCell:
 
 def test_yaml() -> None:
     mzi()
-
-    with NamedTemporaryFile(mode="w", delete=True) as tf:
+    tf = NamedTemporaryFile(mode="w", delete=False)
+    try:
         kf.placer.cells_to_yaml(Path(tf.name), cells=list(pdk.kcells.values()))
         pdk2 = kf.KCLayout("YAML_READ")
         kf.placer.cells_from_yaml(Path(tf.name), kcl=pdk2)
+    finally:
+        Path(tf).unlink()
