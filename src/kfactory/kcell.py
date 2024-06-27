@@ -1313,7 +1313,7 @@ class KCell:
                     called_ci = kcell.called_cells()
                     for lci in set(called_ci) - self.kcl.kcells.keys():
                         kcell = self.kcl[lci]
-                        lib_kcell = cell.kcl[kcell.name]
+                        lib_kcell = cell.kcl[kcell.library_cell_index()]
                         for port in lib_kcell.ports:
                             pl = port.layer
                             _layer = self.kcl.layer(lib_kcell.kcl.get_info(pl))
