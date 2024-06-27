@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- fix kclayout nested cells and ports/metainfo issues [#414](https://github.com/gdsfactory/kfactory/pull/414)
 - fix hierarchy of yaml parser and add test [#413](https://github.com/gdsfactory/kfactory/pull/413)
 - fix l2n extraction and add test [#412](https://github.com/gdsfactory/kfactory/pull/412)
 
