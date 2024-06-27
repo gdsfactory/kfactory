@@ -2068,8 +2068,10 @@ class KCell:
         def filter_port(port: Port) -> bool:
             return port.port_type in port_types
 
-        for ci in self.called_cells():
-            c = self.kcl[ci]
+        called_kcells = [self.kcl[ci] for ci in self.called_cells()]
+        called_kcells.sort(key=lambda c: c.hierarchy_levels())
+
+        for c in called_kcells:
             c.circuit(l2n, port_types=port_types)
         self.circuit(l2n, port_types=port_types)
         il.assign(self.kcl.layout)
