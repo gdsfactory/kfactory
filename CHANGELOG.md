@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- fix hierarchy of yaml parser and add test [#413](https://github.com/gdsfactory/kfactory/pull/413)
 - fix l2n extraction and add test [#412](https://github.com/gdsfactory/kfactory/pull/412)
 
 ## Documentation
@@ -660,7 +661,7 @@
 * add invert to droute_manhattan by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/217
 * better_odd_port_width_message by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/220
 * Added `rec_dict` to `@cell` decorator to allow for recursive dictionaries by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/221
-* more consistent names for routes by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/226
+* more consitent names for routes by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/226
 * Virtual Cells by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/228
 
 
