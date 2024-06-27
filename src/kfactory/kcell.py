@@ -45,6 +45,7 @@ import toolz  # type: ignore[import-untyped,unused-ignore]
 from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
 from cachetools import Cache
 from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
+from klayout import __version__ as _klayout_version  # type: ignore[attr-defined]
 from pydantic import BaseModel, Field, computed_field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec, Self  # noqa: UP035
@@ -7825,6 +7826,51 @@ def show(
                             version=jmsg["version"],
                             file=jmsg["file"],
                         )
+                # check klive version
+                klive_version = [int(s) for s in jmsg["version"].split(".")]
+                rec_klive_version = (0, 3, 3)
+                klive_ok = True
+                for dv in (
+                    kv - rkv
+                    for kv, rkv in zip(klive_version, rec_klive_version, strict=True)
+                ):
+                    if dv > 0:
+                        break
+                    if dv < 0:
+                        logger.warning(
+                            f"klive is out of date. Installed:{jmsg['version']}/"
+                            "Recommended:"
+                            f"{'.'.join(str(s) for s in rec_klive_version)}. Please "
+                            "update it in KLayout"
+                        )
+                        klive_ok = False
+                        break
+
+                if klive_ok:
+                    klayout_version = [
+                        int(s) for s in jmsg["klayout_version"].split(".")
+                    ]
+                    kfactory_version = [int(s) for s in _klayout_version.split(".")]
+
+                    for dv in (
+                        kv - kfkv
+                        for kv, kfkv in zip(
+                            klayout_version, kfactory_version, strict=True
+                        )
+                    ):
+                        if dv > 0:
+                            break
+                        if dv < 0:
+                            logger.warning(
+                                "KLayout GUI version is older than the python klayout."
+                                f"GUI:{jmsg['klayout_version']} Python:"
+                                f"{_klayout_version}. This might cause missing,"
+                                "unfunctional, or erroneous features. Please "
+                                "update your GUI to a version equal or higher "
+                                "than the python version for optimal performance."
+                            )
+                            break
+
             except json.JSONDecodeError:
                 logger.info(f"Message from klive: {msg}")
         except OSError:
