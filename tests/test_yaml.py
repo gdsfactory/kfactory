@@ -89,10 +89,7 @@ def mzi() -> kf.KCell:
 
 def test_yaml() -> None:
     mzi()
-    tf = NamedTemporaryFile(mode="w", delete=False)
-    try:
-        kf.placer.cells_to_yaml(Path(tf.name), cells=list(pdk.kcells.values()))
-        pdk2 = kf.KCLayout("YAML_READ")
-        kf.placer.cells_from_yaml(Path(tf.name), kcl=pdk2)
-    finally:
-        Path(tf.name).unlink()
+    tf = NamedTemporaryFile(mode="w", delete=True)
+    kf.placer.cells_to_yaml(Path(tf.name), cells=list(pdk.kcells.values()))
+    pdk2 = kf.KCLayout("YAML_READ")
+    kf.placer.cells_from_yaml(Path(tf.name), kcl=pdk2)
