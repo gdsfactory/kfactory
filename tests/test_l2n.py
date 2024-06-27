@@ -85,4 +85,6 @@ def mzi() -> kf.KCell:
 
 
 def test_l2n() -> None:
-    mzi().l2n()
+    c = kf.KCell("L2N_TEST")
+    c << mzi()
+    c.show(l2n=c.l2n())
