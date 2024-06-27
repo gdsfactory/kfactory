@@ -1,11 +1,33 @@
-<a name="v0.17.6"></a>
-# [v0.17.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.6) - 26 Jun 2024
+<a name="v0.17.7"></a>
+# [v0.17.7](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.7) - 27 Jun 2024
 
 # What's Changed
 
 ## New
 
 - Add check for klayout/klive version vs kfactory [#411](https://github.com/gdsfactory/kfactory/pull/411)
+
+## Bug Fixes
+
+- fix l2n extraction and add test [#412](https://github.com/gdsfactory/kfactory/pull/412)
+
+## Documentation
+
+- fix l2n extraction and add test [#412](https://github.com/gdsfactory/kfactory/pull/412)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.6...v0.17.7
+
+
+[Changes][v0.17.7]
+
+
+<a name="v0.17.6"></a>
+# [v0.17.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.6) - 27 Jun 2024
+
+# What's Changed
+
+## New
+
 - Use tempfile if called from IPython [#405](https://github.com/gdsfactory/kfactory/pull/405)
 - Routing indirect fixes [#409](https://github.com/gdsfactory/kfactory/pull/409)
 
@@ -638,7 +660,7 @@
 * add invert to droute_manhattan by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/217
 * better_odd_port_width_message by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/220
 * Added `rec_dict` to `@cell` decorator to allow for recursive dictionaries by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/221
-* more consistent names for routes by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/226
+* more consitent names for routes by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/226
 * Virtual Cells by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/228
 
 
@@ -800,6 +822,7 @@
 [Changes][v0.4.0]
 
 
+[v0.17.7]: https://github.com/gdsfactory/kfactory/compare/v0.17.6...v0.17.7
 [v0.17.6]: https://github.com/gdsfactory/kfactory/compare/v0.17.5...v0.17.6
 [v0.17.5]: https://github.com/gdsfactory/kfactory/compare/v0.17.4...v0.17.5
 [v0.17.4]: https://github.com/gdsfactory/kfactory/compare/v0.17.3...v0.17.4
