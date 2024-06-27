@@ -7863,7 +7863,7 @@ def show(
                         if dv < 0:
                             logger.warning(
                                 "KLayout GUI version is older than the python klayout."
-                                f"GUI:{jmsg["klayout_version"]} Python:"
+                                f"GUI:{jmsg['klayout_version']} Python:"
                                 f"{_klayout_version}. This might cause missing,"
                                 "unfunctional, or erroneous features. Please "
                                 "update your GUI to a version equal or higher "
