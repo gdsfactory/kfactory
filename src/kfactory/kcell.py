@@ -7838,7 +7838,7 @@ def show(
                         break
                     if dv < 0:
                         logger.warning(
-                            f"klive is out of date. Installed:{jmsg["version"]}/"
+                            f"klive is out of date. Installed:{jmsg['version']}/"
                             "Recommended:"
                             f"{'.'.join(str(s) for s in rec_klive_version)}. Please "
                             "update it in KLayout"
