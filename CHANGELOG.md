@@ -1,10 +1,12 @@
 <a name="v0.17.6"></a>
-# [v0.17.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.6) - 16 Jun 2024
+# [v0.17.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.6) - 26 Jun 2024
 
 # What's Changed
 
 ## New
 
+- Add check for klayout/klive version vs kfactory [#411](https://github.com/gdsfactory/kfactory/pull/411)
+- Use tempfile if called from IPython [#405](https://github.com/gdsfactory/kfactory/pull/405)
 - Routing indirect fixes [#409](https://github.com/gdsfactory/kfactory/pull/409)
 
 ## Bug Fixes
@@ -636,7 +638,7 @@
 * add invert to droute_manhattan by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/217
 * better_odd_port_width_message by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/220
 * Added `rec_dict` to `@cell` decorator to allow for recursive dictionaries by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/221
-* more consistent names for routes by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/226
+* more consitent names for routes by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/226
 * Virtual Cells by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/228
 
 
