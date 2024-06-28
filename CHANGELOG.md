@@ -1,3 +1,18 @@
+<a name="v0.17.8"></a>
+# [v0.17.8](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.8) - 27 Jun 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix kclayout nested cells and ports/metainfo issues [#414](https://github.com/gdsfactory/kfactory/pull/414)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.7...v0.17.8
+
+
+[Changes][v0.17.8]
+
+
 <a name="v0.17.7"></a>
 # [v0.17.7](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.7) - 27 Jun 2024
 
@@ -9,7 +24,6 @@
 
 ## Bug Fixes
 
-- fix kclayout nested cells and ports/metainfo issues [#414](https://github.com/gdsfactory/kfactory/pull/414)
 - fix hierarchy of yaml parser and add test [#413](https://github.com/gdsfactory/kfactory/pull/413)
 - fix l2n extraction and add test [#412](https://github.com/gdsfactory/kfactory/pull/412)
 
@@ -824,6 +838,7 @@
 [Changes][v0.4.0]
 
 
+[v0.17.8]: https://github.com/gdsfactory/kfactory/compare/v0.17.7...v0.17.8
 [v0.17.7]: https://github.com/gdsfactory/kfactory/compare/v0.17.6...v0.17.7
 [v0.17.6]: https://github.com/gdsfactory/kfactory/compare/v0.17.5...v0.17.6
 [v0.17.5]: https://github.com/gdsfactory/kfactory/compare/v0.17.4...v0.17.5
