@@ -12,6 +12,7 @@ from typing import Any, Literal
 
 import loguru
 import rich.console
+from dotenv import find_dotenv
 from loguru import logger as logger
 from pydantic import BaseModel, Field, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -106,6 +107,9 @@ def get_affinity() -> int:
         return threads
 
 
+dotenv_path = find_dotenv(usecwd=True)
+
+
 class Settings(BaseSettings):
     """KFactory settings object.
 
@@ -133,6 +137,7 @@ class Settings(BaseSettings):
         env_nested_delimiter="_",
         extra="allow",
         validate_assignment=True,
+        env_file=dotenv_path,
     )
 
     n_threads: int = get_affinity()
