@@ -8,7 +8,7 @@ import numpy.typing as nty
 from scipy.special import binom  # type:ignore[import-untyped,unused-ignore]
 
 from .. import kdb, kf_types
-from ..enclosure import LayerEnclosure
+from ..enclosure import CrossSection, LayerEnclosure
 from ..kcell import Info, KCell, KCLayout, MetaData
 
 __all__ = ["bend_s_bezier_factory"]
@@ -17,10 +17,9 @@ __all__ = ["bend_s_bezier_factory"]
 class BezierKCell(Protocol):
     def __call__(
         self,
-        width: kf_types.um,
+        cross_section: CrossSection,
         height: kf_types.um,
         length: kf_types.um,
-        layer: kf_types.layer,
         nb_points: int = 99,
         t_start: float = 0,
         t_stop: float = 1,
@@ -29,10 +28,9 @@ class BezierKCell(Protocol):
         """Creat a bezier bend.
 
         Args:
-            width: Width of the core. [um]
+            cross_section: The cross-section to build the bend from.
             height: height difference of left/right. [um]
             length: Length of the bend. [um]
-            layer: Layer index of the core.
             nb_points: Number of points of the backbone.
             t_start: start
             t_stop: end
@@ -98,22 +96,19 @@ def bend_s_bezier_factory(
 
     @kcl.cell(basename=basename, **cell_kwargs)
     def bend_s_bezier(
-        width: kf_types.um,
+        cross_section: CrossSection,
         height: kf_types.um,
         length: kf_types.um,
-        layer: kf_types.layer,
         nb_points: int = 99,
         t_start: float = 0,
         t_stop: float = 1,
-        enclosure: LayerEnclosure | None = None,
     ) -> KCell:
         """Creat a bezier bend.
 
         Args:
-            width: Width of the core. [um]
+            cross_section: The cross-section to build the bend from.
             height: height difference of left/right. [um]
             length: Length of the bend. [um]
-            layer: Layer index of the core.
             nb_points: Number of points of the backbone.
             t_start: start
             t_stop: end
@@ -131,38 +126,28 @@ def bend_s_bezier_factory(
             t=np.linspace(t_start, t_stop, nb_points),
         )
 
-        if enclosure is None:
-            enclosure = LayerEnclosure()
-
-        enclosure.extrude_path(
-            c, path=pts, main_layer=layer, width=width, start_angle=0, end_angle=0
-        )
+        cross_section.extrude_path(target=c, path=pts, start_angle=0, end_angle=0)
 
         c.create_port(
-            width=int(width / c.kcl.dbu),
+            cross_section=cross_section,
             trans=kdb.Trans(2, False, 0, 0),
-            layer=layer,
             port_type="optical",
         )
         c.create_port(
-            width=int(width / c.kcl.dbu),
+            cross_section=cross_section,
             trans=kdb.Trans(
-                0, False, c.bbox().right, c.bbox().top - int(width / c.kcl.dbu) // 2
+                0, False, c.bbox().right, c.bbox().top - cross_section.width
             ),
-            layer=layer,
             port_type="optical",
         )
         _info: dict[str, MetaData] = {}
         _info.update(
             _additional_info_func(
-                width=width,
                 height=height,
                 length=length,
-                layer=layer,
                 nb_points=nb_points,
                 t_start=t_start,
                 t_stop=t_stop,
-                enclosure=enclosure,
             )
         )
         _info.update(_additional_info)
