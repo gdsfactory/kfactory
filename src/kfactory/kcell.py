@@ -2926,11 +2926,15 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             info=Info(**info) if info else Info(),
             future_cell_name=None,
         )
-        self._name = name
-        self._settings = KCellSettings(
-            version=__version__,
-            klayout_version=kdb.__version__,  # type: ignore[attr-defined]
-            meta_format="v2",
+        object.__setattr__(self, "_name", name)
+        object.__setattr__(
+            self,
+            "_settings",
+            KCellSettings(
+                version=__version__,
+                klayout_version=kdb.__version__,  # type: ignore[attr-defined]
+                meta_format="v2",
+            ),
         )
 
         self.library.register(self.name)
