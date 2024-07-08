@@ -43,7 +43,11 @@ class OpticalManhattanRoute(BaseModel, arbitrary_types_allowed=True):
     end_port: Port
     instances: list[Instance]
     n_bend90: int = 0
+    n_taper: int = 0
+    bend90_radius: int
+    taper_length: int
     length: int = 0
+    """Length of backbone without the bends."""
     length_straights: int = 0
 
     @property
@@ -800,15 +804,6 @@ def place90(
     route_end_port = p2.copy()
     route_end_port.name = None
     route_end_port.trans.angle = (route_end_port.angle + 2) % 4
-    route = OpticalManhattanRoute(
-        backbone=list(pts).copy(),
-        start_port=route_start_port,
-        end_port=route_end_port,
-        instances=[],
-    )
-    if not pts or len(pts) < 2:
-        # Nothing to be placed
-        return route
 
     w = route_width or p1.width
     old_pt = pts[0]
@@ -865,6 +860,27 @@ def place90(
                 "At least one optical ports of the taper must be the same width as"
                 " the bend's ports"
             )
+        route = OpticalManhattanRoute(
+            backbone=list(pts).copy(),
+            start_port=route_start_port,
+            end_port=route_end_port,
+            instances=[],
+            bend90_radius=b90r,
+            taper_length=int((taperp1.trans.disp - taperp2.trans.disp).length()),
+        )
+    else:
+        route = OpticalManhattanRoute(
+            backbone=list(pts).copy(),
+            start_port=route_start_port,
+            end_port=route_end_port,
+            instances=[],
+            bend90_radius=b90r,
+            taper_length=0,
+        )
+
+    if not pts or len(pts) < 2:
+        # Nothing to be placed
+        return route
 
     if len(pts) == 2:
         length = int((pts[1] - pts[0]).length())
@@ -926,6 +942,7 @@ def place90(
                     allow_type_mismatch=allow_type_mismatch,
                 )
                 route.length_straights += _l
+                route.n_taper += 2
             else:
                 t2 = c << taper_cell
                 t2.connect(
@@ -1051,6 +1068,7 @@ def place90(
                         allow_layer_mismatch=allow_layer_mismatch,
                         allow_type_mismatch=allow_type_mismatch,
                     )
+                route.n_taper += 2
                 route.instances.append(t2)
         route.instances.append(bend90)
         old_pt = pt
@@ -1127,6 +1145,7 @@ def place90(
                     allow_layer_mismatch=allow_layer_mismatch,
                     allow_type_mismatch=allow_type_mismatch,
                 )
+            route.n_taper += 2
             route.instances.append(t2)
             route.end_port = t2.ports[taperp1.name].copy()
             route.end_port.name = None
