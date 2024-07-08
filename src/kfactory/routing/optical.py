@@ -976,10 +976,10 @@ def place90(
                 f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
             )
         bend90.transform(kdb.Trans(ang, mirror, pt.x, pt.y) * b90c.inverted())
-        length = int(
-            (bend90.ports[b90p1.name].trans.disp - old_bend_port.trans.disp).length()
-        )
-        route.length += int(length) * 2
+        if "length" not in bend90_cell.info:
+            raise ValueError(f"{bend90_cell.name} does not have a length info")
+        length = bend90_cell.info["length"]
+        route.length += int(length)
         if length > 0:
             if (
                 taper_cell is None
