@@ -979,7 +979,7 @@ def place90(
         length = int(
             (bend90.ports[b90p1.name].trans.disp - old_bend_port.trans.disp).length()
         )
-        route.length += int(length) * 2
+        route.length += int(length)
         if length > 0:
             if (
                 taper_cell is None
