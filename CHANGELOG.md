@@ -11,6 +11,10 @@
 
 - find dotenv [#415](https://github.com/gdsfactory/kfactory/pull/415)
 
+## Dependency Updates
+
+- update klayout and pre-commit [#419](https://github.com/gdsfactory/kfactory/pull/419)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.8...v0.17.9
 
 
