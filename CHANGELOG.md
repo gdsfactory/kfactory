@@ -1,3 +1,22 @@
+<a name="v0.17.9"></a>
+# [v0.17.9](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.9) - 28 Jun 2024
+
+# What's Changed
+
+## New
+
+- make OpticalManhattanRoute better [#418](https://github.com/gdsfactory/kfactory/pull/418)
+
+## Bug Fixes
+
+- find dotenv [#415](https://github.com/gdsfactory/kfactory/pull/415)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.8...v0.17.9
+
+
+[Changes][v0.17.9]
+
+
 <a name="v0.17.8"></a>
 # [v0.17.8](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.8) - 27 Jun 2024
 
@@ -838,6 +857,7 @@
 [Changes][v0.4.0]
 
 
+[v0.17.9]: https://github.com/gdsfactory/kfactory/compare/v0.17.8...v0.17.9
 [v0.17.8]: https://github.com/gdsfactory/kfactory/compare/v0.17.7...v0.17.8
 [v0.17.7]: https://github.com/gdsfactory/kfactory/compare/v0.17.6...v0.17.7
 [v0.17.6]: https://github.com/gdsfactory/kfactory/compare/v0.17.5...v0.17.6
