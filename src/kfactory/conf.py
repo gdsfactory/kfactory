@@ -153,19 +153,25 @@ class Settings(BaseSettings):
         case of ports they are converted back to KLayout objects on read.
     v2: All objects can be stored in the nativ KLayout format (klayout>=0.28.13)
     """
+    # console for printing
     console: rich.console.Console = Field(default_factory=rich.console.Console)
-    max_cellname_length: int = 99
-    write_context_info: bool = True
-    write_cell_properties: bool = True
-    wrtie_file_properties: bool = True
+
+    # cell decorator settings
     allow_width_mismatch: bool = False
     allow_layer_mismatch: bool = False
     allow_type_mismatch: bool = False
-    check_instances: CHECK_INSTANCES = CHECK_INSTANCES.RAISE
-    connect_use_mirror: bool = True
-    connect_use_angle: bool = True
-    cell_overwrite_existing: bool = False
     cell_layout_cache: bool = False
+    cell_overwrite_existing: bool = False
+    connect_use_angle: bool = True
+    connect_use_mirror: bool = True
+    check_instances: CHECK_INSTANCES = CHECK_INSTANCES.RAISE
+    max_cellname_length: int = 99
+    debug_names: bool = False
+
+    # default write settings
+    write_cell_properties: bool = True
+    write_context_info: bool = True
+    write_file_properties: bool = True
 
     @field_validator("logfilter")
     @classmethod
