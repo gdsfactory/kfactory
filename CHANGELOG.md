@@ -5,6 +5,7 @@
 
 ## New
 
+- Add name debugging config [#421](https://github.com/gdsfactory/kfactory/pull/421)
 - make OpticalManhattanRoute better [#418](https://github.com/gdsfactory/kfactory/pull/418)
 
 ## Bug Fixes
