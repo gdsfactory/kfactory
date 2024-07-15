@@ -3264,14 +3264,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         # and should be copied first
                         cell = cell.dup()
                     if set_name:
-                        if debug_names:
-                            if cell.kcl.layout.cell(name) is not None:
-                                logger.opt(depth=4).error(
-                                    "KCell with name {name} exists already.", name=name
-                                )
-                                raise CellNameError(
-                                    f"KCell with name {name} exists already."
-                                )
+                        if debug_names and cell.kcl.layout.cell(name) is not None:
+                            logger.opt(depth=4).error(
+                                "KCell with name {name} exists already.", name=name
+                            )
+                            raise CellNameError(
+                                f"KCell with name {name} exists already."
+                            )
+
                         cell.name = name
                         self.future_cell_name = old_future_name
                     if overwrite_existing:
