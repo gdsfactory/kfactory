@@ -614,7 +614,9 @@ class PortTypeMismatch(ValueError):
 class FrozenError(AttributeError):
     """Raised if a KCell has been frozen and shouldn't be modified anymore."""
 
-    pass
+
+class CellNameError(ValueError):
+    """Raised if a KCell is created and the automatic assigned name is taken."""
 
 
 def load_layout_options(**attributes: Any) -> kdb.LoadLayoutOptions:
@@ -3108,6 +3110,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
         post_process: Iterable[Callable[[KCell], None]] = [],
+        debug_names: bool | None = None,
     ) -> Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]: ...
 
     def cell(
@@ -3129,6 +3132,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
         post_process: Iterable[Callable[[KCell], None]] = [],
+        debug_names: bool | None = None,
     ) -> (
         KCellFunc[KCellParams]
         | Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]
@@ -3173,6 +3177,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 `config.cell_overwrite_existing`.
             info: Additional metadata to put into info attribute.
             post_process: List of functions to call after the cell has been created.
+            debug_names: Check on setting the name whether a cell with this name already
+                exists.
         """
         d2fs = rec_dict_to_frozenset
         fs2d = rec_frozenset_to_dict
@@ -3183,6 +3189,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             overwrite_existing = config.cell_overwrite_existing
         if layout_cache is None:
             layout_cache = config.cell_layout_cache
+        if debug_names is None:
+            debug_names = config.debug_names
 
         def decorator_autocell(
             f: Callable[KCellParams, KCell],
@@ -3222,7 +3230,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     params.pop(param, None)
                     param_units.pop(param, None)
 
-                @logger.catch(reraise=True)
+                @logger.catch(reraise=True, exclude=CellNameError)
                 @cachetools.cached(cache=_cache)
                 @functools.wraps(f)
                 def wrapped_cell(
@@ -3256,6 +3264,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         # and should be copied first
                         cell = cell.dup()
                     if set_name:
+                        if debug_names and cell.kcl.layout.cell(name) is not None:
+                            logger.opt(depth=4).error(
+                                "KCell with name {name} exists already.", name=name
+                            )
+                            raise CellNameError(
+                                f"KCell with name {name} exists already."
+                            )
+
                         cell.name = name
                         self.future_cell_name = old_future_name
                     if overwrite_existing:
