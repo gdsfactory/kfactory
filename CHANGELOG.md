@@ -1,5 +1,5 @@
-<a name="v0.17.9"></a>
-# [v0.17.9](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.9) - 28 Jun 2024
+<a name="v0.18.0"></a>
+# [v0.18.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.0) - 16 Jul 2024
 
 # What's Changed
 
@@ -16,10 +16,10 @@
 
 - update klayout and pre-commit [#419](https://github.com/gdsfactory/kfactory/pull/419)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.8...v0.17.9
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.17.8...v0.18.0
 
 
-[Changes][v0.17.9]
+[Changes][v0.18.0]
 
 
 <a name="v0.17.8"></a>
@@ -862,7 +862,7 @@
 [Changes][v0.4.0]
 
 
-[v0.17.9]: https://github.com/gdsfactory/kfactory/compare/v0.17.8...v0.17.9
+[v0.18.0]: https://github.com/gdsfactory/kfactory/compare/v0.17.8...v0.18.0
 [v0.17.8]: https://github.com/gdsfactory/kfactory/compare/v0.17.7...v0.17.8
 [v0.17.7]: https://github.com/gdsfactory/kfactory/compare/v0.17.6...v0.17.7
 [v0.17.6]: https://github.com/gdsfactory/kfactory/compare/v0.17.5...v0.17.6
