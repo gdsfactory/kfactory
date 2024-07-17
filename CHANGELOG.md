@@ -1,3 +1,18 @@
+<a name="v0.18.1"></a>
+# [v0.18.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.1) - 17 Jul 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- Fix `KCLayout.read(..., register_cells=True)` [#426](https://github.com/gdsfactory/kfactory/pull/426)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.18.0...v0.18.1
+
+
+[Changes][v0.18.1]
+
+
 <a name="v0.18.0"></a>
 # [v0.18.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.0) - 16 Jul 2024
 
@@ -862,6 +877,7 @@
 [Changes][v0.4.0]
 
 
+[v0.18.1]: https://github.com/gdsfactory/kfactory/compare/v0.18.0...v0.18.1
 [v0.18.0]: https://github.com/gdsfactory/kfactory/compare/v0.17.8...v0.18.0
 [v0.17.8]: https://github.com/gdsfactory/kfactory/compare/v0.17.7...v0.17.8
 [v0.17.7]: https://github.com/gdsfactory/kfactory/compare/v0.17.6...v0.17.7
