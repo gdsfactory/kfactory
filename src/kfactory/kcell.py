@@ -45,6 +45,7 @@ import toolz  # type: ignore[import-untyped,unused-ignore]
 from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
 from cachetools import Cache
 from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
+from klayout import __version__ as _klayout_version  # type: ignore[attr-defined]
 from pydantic import BaseModel, Field, computed_field, model_validator
 from pydantic_settings import BaseSettings
 from typing_extensions import ParamSpec, Self  # noqa: UP035
@@ -613,7 +614,9 @@ class PortTypeMismatch(ValueError):
 class FrozenError(AttributeError):
     """Raised if a KCell has been frozen and shouldn't be modified anymore."""
 
-    pass
+
+class CellNameError(ValueError):
+    """Raised if a KCell is created and the automatic assigned name is taken."""
 
 
 def load_layout_options(**attributes: Any) -> kdb.LoadLayoutOptions:
@@ -790,13 +793,15 @@ class KCell:
         self.info: Info = Info()
         self._locked = False
         if name is None:
-            _name = "Unnamed_!"
+            _name = "Unnamed_!" if kdb_cell is None else kdb_cell.name
         else:
             _name = name
+            if kdb_cell is not None:
+                kdb_cell.name = name
         self._kdb_cell = kdb_cell or kcl.create_cell(_name)
         if _name == "Unnamed_!":
             self._kdb_cell.name = f"Unnamed_{self.cell_index()}"
-        self.kcl.register_cell(self, allow_reregister=True)
+        self.kcl.register_cell(self)
         self.ports: Ports = ports or Ports(self.kcl)
 
         if kdb_cell is not None:
@@ -1292,22 +1297,43 @@ class KCell:
                 lib_ci = self.kcl.layout.add_lib_cell(
                     cell.kcl.library, cell.cell_index()
                 )
-                kcell = self.kcl[lib_ci]
-                for port in cell.ports:
-                    pl = port.layer
-                    _layer = self.kcl.layer(cell.kcl.get_info(pl))
-                    try:
-                        _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
-                    except ValueError:
-                        pass
-                    kcell.create_port(
-                        name=port.name,
-                        dwidth=port.dwidth,
-                        dcplx_trans=port.dcplx_trans,
-                        layer=_layer,
-                    )
-                kcell._settings = cell.settings.model_copy()
-                kcell.info = cell.info.model_copy()
+                if lib_ci not in self.kcl.kcells:
+                    kcell = self.kcl[lib_ci]
+                    for port in cell.ports:
+                        pl = port.layer
+                        _layer = self.kcl.layer(cell.kcl.get_info(pl))
+                        try:
+                            _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
+                        except ValueError:
+                            pass
+                        kcell.create_port(
+                            name=port.name,
+                            dwidth=port.dwidth,
+                            dcplx_trans=port.dcplx_trans,
+                            layer=_layer,
+                        )
+                    kcell._settings = cell.settings.model_copy()
+                    kcell.info = cell.info.model_copy()
+                    called_ci = kcell.called_cells()
+                    for lci in set(called_ci) - self.kcl.kcells.keys():
+                        kcell = self.kcl[lci]
+                        lib_kcell = cell.kcl[kcell.library_cell_index()]
+                        for port in lib_kcell.ports:
+                            pl = port.layer
+                            _layer = self.kcl.layer(lib_kcell.kcl.get_info(pl))
+                            try:
+                                _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
+                            except ValueError:
+                                pass
+                            kcell.create_port(
+                                name=port.name,
+                                dwidth=port.dwidth,
+                                dcplx_trans=port.dcplx_trans,
+                                layer=_layer,
+                            )
+                        kcell._settings = lib_kcell.settings.model_copy()
+                        kcell.info = lib_kcell.info.model_copy()
+
                 if libcell_as_static:
                     ci = self.kcl.convert_cell_to_static(lib_ci)
                     kcell = self.kcl[ci]
@@ -2067,8 +2093,10 @@ class KCell:
         def filter_port(port: Port) -> bool:
             return port.port_type in port_types
 
-        for ci in self.called_cells():
-            c = self.kcl[ci]
+        called_kcells = [self.kcl[ci] for ci in self.called_cells()]
+        called_kcells.sort(key=lambda c: c.hierarchy_levels())
+
+        for c in called_kcells:
             c.circuit(l2n, port_types=port_types)
         self.circuit(l2n, port_types=port_types)
         il.assign(self.kcl.layout)
@@ -2902,11 +2930,15 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             info=Info(**info) if info else Info(),
             future_cell_name=None,
         )
-        self._name = name
-        self._settings = KCellSettings(
-            version=__version__,
-            klayout_version=kdb.__version__,  # type: ignore[attr-defined]
-            meta_format="v2",
+        object.__setattr__(self, "_name", name)
+        object.__setattr__(
+            self,
+            "_settings",
+            KCellSettings(
+                version=__version__,
+                klayout_version=kdb.__version__,  # type: ignore[attr-defined]
+                meta_format="v2",
+            ),
         )
 
         self.library.register(self.name)
@@ -3080,6 +3112,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
         post_process: Iterable[Callable[[KCell], None]] = [],
+        debug_names: bool | None = None,
     ) -> Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]: ...
 
     def cell(
@@ -3101,6 +3134,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
         post_process: Iterable[Callable[[KCell], None]] = [],
+        debug_names: bool | None = None,
     ) -> (
         KCellFunc[KCellParams]
         | Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]
@@ -3145,6 +3179,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 `config.cell_overwrite_existing`.
             info: Additional metadata to put into info attribute.
             post_process: List of functions to call after the cell has been created.
+            debug_names: Check on setting the name whether a cell with this name already
+                exists.
         """
         d2fs = rec_dict_to_frozenset
         fs2d = rec_frozenset_to_dict
@@ -3155,6 +3191,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             overwrite_existing = config.cell_overwrite_existing
         if layout_cache is None:
             layout_cache = config.cell_layout_cache
+        if debug_names is None:
+            debug_names = config.debug_names
 
         def decorator_autocell(
             f: Callable[KCellParams, KCell],
@@ -3194,7 +3232,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     params.pop(param, None)
                     param_units.pop(param, None)
 
-                @logger.catch(reraise=True)
+                @logger.catch(reraise=True, exclude=CellNameError)
                 @cachetools.cached(cache=_cache)
                 @functools.wraps(f)
                 def wrapped_cell(
@@ -3228,6 +3266,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         # and should be copied first
                         cell = cell.dup()
                     if set_name:
+                        if debug_names and cell.kcl.layout.cell(name) is not None:
+                            logger.opt(depth=4).error(
+                                "KCell with name {name} exists already.", name=name
+                            )
+                            raise CellNameError(
+                                f"KCell with name {name} exists already."
+                            )
+
                         cell.name = name
                         self.future_cell_name = old_future_name
                     if overwrite_existing:
@@ -3758,20 +3804,19 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             try:
                 return self.kcells[obj]
             except KeyError:
-                if self.layout.cell(obj) is None:
-                    raise
-
                 kdb_c = self.layout.cell(obj)
-                c = KCell(name=kdb_c.name, kcl=self, kdb_cell=self.layout.cell(obj))
+                if kdb_c is None:
+                    raise
+                c = KCell(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
                 c.get_meta_data()
                 return c
         else:
-            if self.layout.cell(obj) is not None:
+            kdb_c = self.layout.cell(obj)
+            if kdb_c is not None:
                 try:
-                    return self.kcells[self.layout.cell(obj).cell_index()]
+                    return self.kcells[kdb_c.cell_index()]
                 except KeyError:
-                    kdb_c = self.layout.cell(obj)
-                    c = KCell(name=kdb_c.name, kcl=self, kdb_cell=self.layout.cell(obj))
+                    c = KCell(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
                     c.get_meta_data()
                     return c
             from pprint import pformat
@@ -3878,7 +3923,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         new_cells = load_cells - cells
 
         if register_cells:
-            for c in new_cells:
+            for c in sorted(new_cells, key=lambda _c: _c.hierarchy_levels()):
                 kc = KCell(kdb_cell=c, kcl=self)
                 kc.get_meta_data(meta_format=meta_format)
 
@@ -3966,7 +4011,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if kcell.is_library_cell() and not kcell._destroyed():
                         kcell.convert_to_static(recursive=True)
 
-        for kc in self.kcells.values():
+        for kc in list(self.kcells.values()):
             kc.insert_vinsts()
 
         return self.layout.write(str(filename), options)
@@ -7577,11 +7622,14 @@ def show(
     try:
         stk = inspect.getouterframes(inspect.currentframe())
         frame = stk[2]
-        name = (
-            Path(frame.filename).stem + "_" + frame.function
-            if frame.function != "<module>"
-            else Path(frame.filename).stem
-        )
+        frame_filename_stem = Path(frame.filename).stem
+        if frame_filename_stem.startswith("<ipython-input"):  # IPython Case
+            name = "ipython"
+        else:  # Normal Python kernel case
+            if frame.function != "<module>":
+                name = frame_filename_stem + "_" + frame.function
+            else:
+                name = frame_filename_stem
     except Exception:
         try:
             from __main__ import __file__ as mf
@@ -7822,6 +7870,51 @@ def show(
                             version=jmsg["version"],
                             file=jmsg["file"],
                         )
+                # check klive version
+                klive_version = [int(s) for s in jmsg["version"].split(".")]
+                rec_klive_version = (0, 3, 3)
+                klive_ok = True
+                for dv in (
+                    kv - rkv
+                    for kv, rkv in zip(klive_version, rec_klive_version, strict=True)
+                ):
+                    if dv > 0:
+                        break
+                    if dv < 0:
+                        logger.warning(
+                            f"klive is out of date. Installed:{jmsg['version']}/"
+                            "Recommended:"
+                            f"{'.'.join(str(s) for s in rec_klive_version)}. Please "
+                            "update it in KLayout"
+                        )
+                        klive_ok = False
+                        break
+
+                if klive_ok:
+                    klayout_version = [
+                        int(s) for s in jmsg["klayout_version"].split(".")
+                    ]
+                    kfactory_version = [int(s) for s in _klayout_version.split(".")]
+
+                    for dv in (
+                        kv - kfkv
+                        for kv, kfkv in zip(
+                            klayout_version, kfactory_version, strict=True
+                        )
+                    ):
+                        if dv > 0:
+                            break
+                        if dv < 0:
+                            logger.warning(
+                                "KLayout GUI version is older than the python klayout."
+                                f"GUI:{jmsg['klayout_version']} Python:"
+                                f"{_klayout_version}. This might cause missing,"
+                                "unfunctional, or erroneous features. Please "
+                                "update your GUI to a version equal or higher "
+                                "than the python version for optimal performance."
+                            )
+                            break
+
             except json.JSONDecodeError:
                 logger.info(f"Message from klive: {msg}")
         except OSError:

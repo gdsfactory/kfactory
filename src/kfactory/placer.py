@@ -30,6 +30,8 @@ def cells_to_yaml(output: PathLike, cells: list[KCell] | KCell) -> None:
     Returns:
         yaml dump
     """
+    cells = list(cells)
+    cells.sort(key=lambda c: c.hierarchy_levels())
     yaml = YAML()
     yaml.register_class(KCell)
     yaml.register_class(Port)
