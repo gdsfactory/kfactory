@@ -793,13 +793,18 @@ class KCell:
         self.info: Info = Info()
         self._locked = False
         if name is None:
-            _name = "Unnamed_!"
+            if kdb_cell is None:
+                _name = "Unnamed_!"
+            else:
+                _name = kdb_cell.name
         else:
             _name = name
+            if kdb_cell is not None:
+                kdb_cell.name = name
         self._kdb_cell = kdb_cell or kcl.create_cell(_name)
         if _name == "Unnamed_!":
             self._kdb_cell.name = f"Unnamed_{self.cell_index()}"
-        self.kcl.register_cell(self, allow_reregister=True)
+        self.kcl.register_cell(self)
         self.ports: Ports = ports or Ports(self.kcl)
 
         if kdb_cell is not None:
@@ -3802,20 +3807,19 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             try:
                 return self.kcells[obj]
             except KeyError:
-                if self.layout.cell(obj) is None:
-                    raise
-
                 kdb_c = self.layout.cell(obj)
-                c = KCell(name=kdb_c.name, kcl=self, kdb_cell=self.layout.cell(obj))
+                if kdb_c is None:
+                    raise
+                c = KCell(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
                 c.get_meta_data()
                 return c
         else:
-            if self.layout.cell(obj) is not None:
+            kdb_c = self.layout.cell(obj)
+            if kdb_c is not None:
                 try:
-                    return self.kcells[self.layout.cell(obj).cell_index()]
+                    return self.kcells[kdb_c.cell_index()]
                 except KeyError:
-                    kdb_c = self.layout.cell(obj)
-                    c = KCell(name=kdb_c.name, kcl=self, kdb_cell=self.layout.cell(obj))
+                    c = KCell(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
                     c.get_meta_data()
                     return c
             from pprint import pformat
@@ -3922,7 +3926,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         new_cells = load_cells - cells
 
         if register_cells:
-            for c in new_cells:
+            for c in sorted(new_cells, key=lambda _c: _c.hierarchy_levels()):
                 kc = KCell(kdb_cell=c, kcl=self)
                 kc.get_meta_data(meta_format=meta_format)
 
