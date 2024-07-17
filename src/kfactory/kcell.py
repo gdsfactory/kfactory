@@ -793,10 +793,7 @@ class KCell:
         self.info: Info = Info()
         self._locked = False
         if name is None:
-            if kdb_cell is None:
-                _name = "Unnamed_!"
-            else:
-                _name = kdb_cell.name
+            _name = "Unnamed_!" if kdb_cell is None else kdb_cell.name
         else:
             _name = name
             if kdb_cell is not None:
