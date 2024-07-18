@@ -8164,6 +8164,38 @@ class MergeDiff:
         )
 
 
+class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
+    insts: list[Instance]
+
+    def transform(
+        self,
+        trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
+    ) -> None:
+        for inst in self.insts:
+            inst.transform(trans)
+
+    def bbox(self, layer: int | None = None) -> kdb.Box:
+        bb = kdb.Box()
+        if layer is not None:
+            for _bb in (inst.bbox(layer) for inst in self.insts):
+                bb += _bb
+        else:
+            for _bb in (inst.bbox() for inst in self.insts):
+                bb += _bb
+
+        return bb
+
+    def dbbox(self, layer: int | None = None) -> kdb.DBox:
+        bb = kdb.DBox()
+        if layer is not None:
+            for _bb in (inst.dbbox(layer) for inst in self.insts):
+                bb += _bb
+        else:
+            for _bb in (inst.dbbox() for inst in self.insts):
+                bb += _bb
+        return bb
+
+
 __all__ = [
     "KCell",
     "Instance",
