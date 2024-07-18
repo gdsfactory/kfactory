@@ -8195,6 +8195,414 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
                 bb += _bb
         return bb
 
+    @overload
+    def movex(self, destination: int, /) -> InstanceGroup: ...
+
+    @overload
+    def movex(self, origin: int, destination: int) -> InstanceGroup: ...
+
+    def movex(self, origin: int, destination: int | None = None) -> InstanceGroup:
+        """Move the instance in x-direction in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.Trans(origin, 0))
+        else:
+            self.transform(kdb.Trans(destination - origin, 0))
+        return self
+
+    @overload
+    def movey(self, destination: int, /) -> InstanceGroup: ...
+
+    @overload
+    def movey(self, origin: int, destination: int) -> InstanceGroup: ...
+
+    def movey(self, origin: int, destination: int | None = None) -> InstanceGroup:
+        """Move the instance in y-direction in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.Trans(0, origin))
+        else:
+            self.transform(kdb.Trans(0, destination - origin))
+        return self
+
+    @overload
+    def move(self, destination: tuple[int, int], /) -> InstanceGroup: ...
+
+    @overload
+    def move(
+        self, origin: tuple[int, int], destination: tuple[int, int]
+    ) -> InstanceGroup: ...
+
+    def move(
+        self, origin: tuple[int, int], destination: tuple[int, int] | None = None
+    ) -> InstanceGroup:
+        """Move the instance in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.Trans(*origin))
+        else:
+            self.transform(
+                kdb.Trans(destination[0] - origin[0], destination[1] - origin[1])
+            )
+        return self
+
+    def rotate(
+        self, angle: Literal[0, 1, 2, 3], center: kdb.Point | None = None
+    ) -> InstanceGroup:
+        """Rotate instance in increments of 90°."""
+        if center:
+            t = kdb.Trans(center.to_v())
+            self.transform(t.inverted())
+        self.transform(kdb.Trans(angle, False, 0, 0))
+        if center:
+            self.transform(t)
+        return self
+
+    def mirror(
+        self, p1: kdb.Point = kdb.Point(1, 0), p2: kdb.Point = kdb.Point(0, 0)
+    ) -> InstanceGroup:
+        """Mirror the instance at a line."""
+        mirror_v = p2 - p1
+        dedge = kdb.DEdge(self.insts[0].kcl.to_um(p1), self.insts[0].kcl.to_um(p2))
+        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
+        v = self.insts[0].kcl.to_um(mirror_v)
+        v = kdb.DVector(-v.y, v.x)
+        for inst in self.insts:
+            disp = inst.dcplx_trans.disp
+            dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
+            cross_point = dedge.cut_point(dedge_disp)
+            inst.transform(
+                kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
+            )
+
+        return self
+
+    def mirror_x(self, x: int = 0) -> InstanceGroup:
+        """Mirror the instance at an y-axis at position x."""
+        self.transform(kdb.Trans(2, True, 2 * x, 0))
+        return self
+
+    def mirror_y(self, y: int = 0) -> InstanceGroup:
+        """Mirror the instance at an x-axis at position y."""
+        self.transform(kdb.Trans(0, True, 0, 2 * y))
+        return self
+
+    @property
+    def xmin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().left
+
+    @xmin.setter
+    def xmin(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().left, 0))
+
+    @property
+    def ymin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().bottom
+
+    @ymin.setter
+    def ymin(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(0, __val - self.bbox().bottom))
+
+    @property
+    def xmax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().right
+
+    @xmax.setter
+    def xmax(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().right, 0))
+
+    @property
+    def ymax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().top
+
+    @ymax.setter
+    def ymax(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(0, __val - self.bbox().top))
+
+    @property
+    def ysize(self) -> int:
+        """Returns the height of the bounding box."""
+        return self.bbox().height()
+
+    @property
+    def xsize(self) -> int:
+        """Returns the width of the bounding box."""
+        return self.bbox().width()
+
+    @property
+    def x(self) -> int:
+        """Returns the x-coordinate center of the bounding box."""
+        return self.bbox().center().x
+
+    @x.setter
+    def x(self, __val: int) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().center().x, 0))
+
+    @property
+    def y(self) -> int:
+        """Returns the x-coordinate center of the bounding box."""
+        return self.bbox().center().y
+
+    @y.setter
+    def y(self, __val: int) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().center().y, 0))
+
+    @property
+    def center(self) -> kdb.Point:
+        """Returns the coordinate center of the bounding box."""
+        return self.bbox().center()
+
+    @center.setter
+    def center(self, val: tuple[int, int] | kdb.Vector) -> None:
+        """Moves the instance so that the bbox's center coordinate."""
+        if isinstance(val, kdb.Point | kdb.Vector):
+            self.transform(kdb.Trans(val - self.bbox().center().to_v()))
+        elif isinstance(val, tuple | list):
+            self.transform(
+                kdb.Trans(kdb.Vector(val[0], val[1]) - self.bbox().center().to_v())
+            )
+        else:
+            raise ValueError(
+                f"Type {type(val)} not supported for center setter {val}. "
+                "Not a tuple, list, kdb.Point or kdb.Vector."
+            )
+
+    @overload
+    def dmovex(self, destination: float, /) -> InstanceGroup: ...
+
+    @overload
+    def dmovex(self, origin: float, destination: float) -> InstanceGroup: ...
+
+    def dmovex(self, origin: float, destination: float | None = None) -> InstanceGroup:
+        """Move the instance in x-direction in um.
+
+        Args:
+            origin: reference point to move
+            destination: move origin so that it will land on this coordinate
+        """
+        if destination is None:
+            self.transform(kdb.DTrans(float(origin), 0.0))
+        else:
+            self.transform(kdb.DTrans(float(destination - origin), 0.0))
+        return self
+
+    @overload
+    def dmovey(self, destination: float, /) -> InstanceGroup: ...
+
+    @overload
+    def dmovey(self, origin: float, destination: float) -> InstanceGroup: ...
+
+    def dmovey(self, origin: float, destination: float | None = None) -> InstanceGroup:
+        """Move the instance in y-direction in um.
+
+        Args:
+            origin: reference point to move
+            destination: move origin so that it will land on this coordinate
+        """
+        if destination is None:
+            self.transform(kdb.DTrans(0.0, float(origin)))
+        else:
+            self.transform(kdb.DTrans(0.0, float(destination - origin)))
+        return self
+
+    def drotate(
+        self,
+        angle: float,
+        center: kdb.DPoint | kdb.DVector | tuple[float, float] | Port | None = None,
+    ) -> InstanceGroup:
+        """Rotate instance in degrees.
+
+        Args:
+            angle: angle in degrees.
+            center: center of rotation. If a port is given, the center is the port's.
+                if a string is given, the center is the port with the name.
+                if a tuple is given, the center is the tuple.
+        """
+        if center:
+            _center: kdb.DVector | kdb.DPoint
+            if isinstance(center, Port):
+                _center = center.dcplx_trans.disp
+            elif isinstance(center, tuple | list):
+                _center = kdb.DVector(*center)
+            else:
+                _center = center
+            t = kdb.DTrans(_center)  # type: ignore[arg-type]
+            self.transform(t.inverted())
+        self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
+        if center:
+            self.transform(t)
+        return self
+
+    @overload
+    def dmove(self, destination: tuple[float, float], /) -> InstanceGroup: ...
+
+    @overload
+    def dmove(
+        self, origin: tuple[float, float], destination: tuple[float, float]
+    ) -> InstanceGroup: ...
+
+    def dmove(
+        self,
+        origin: tuple[float, float],
+        destination: tuple[float, float] | None = None,
+    ) -> InstanceGroup:
+        """Move the instance in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.DTrans(float(origin[0]), float(origin[1])))
+        else:
+            self.transform(
+                kdb.DTrans(
+                    float(destination[0] - origin[0]), float(destination[1] - origin[1])
+                )
+            )
+        return self
+
+    def dmirror(
+        self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
+    ) -> InstanceGroup:
+        """Mirror the instance at a line."""
+        mirror_v = p2 - p1
+        dedge = kdb.DEdge(p1, p2)
+        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
+        v = mirror_v
+        v = kdb.DVector(-v.y, v.x)
+        for inst in self.insts:
+            disp = inst.dcplx_trans.disp
+            dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
+            cross_point = dedge.cut_point(dedge_disp)
+            inst.transform(
+                kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
+            )
+
+        return self
+
+    def dmirror_x(self, x: float = 0) -> InstanceGroup:
+        """Mirror the instance at an x-axis."""
+        self.transform(kdb.DTrans(2, True, 2 * x, 0))
+        return self
+
+    def dmirror_y(self, y: float = 0) -> InstanceGroup:
+        """Mirror the instance at an y-axis."""
+        self.transform(kdb.DTrans(0, True, 0, 2 * y))
+        return self
+
+    @property
+    def dxmin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dbbox().left
+
+    @dxmin.setter
+    def dxmin(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DTrans(__val - self.dbbox().left, 0.0))
+
+    @property
+    def dymin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dbbox().bottom
+
+    @dymin.setter
+    def dymin(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DTrans(0.0, __val - self.dbbox().bottom))
+
+    @property
+    def dxmax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dbbox().right
+
+    @dxmax.setter
+    def dxmax(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DTrans(__val - self.dbbox().right, 0.0))
+
+    @property
+    def dxsize(self) -> float:
+        """Returns the width of the bounding box."""
+        return self.dbbox().width()
+
+    @property
+    def dysize(self) -> float:
+        """Returns the height of the bounding box."""
+        return self.dbbox().height()
+
+    @property
+    def dymax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dbbox().top
+
+    @dymax.setter
+    def dymax(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DTrans(0.0, __val - self.dbbox().top))
+
+    @property
+    def dx(self) -> float:
+        """Returns the x-coordinate center of the bounding box."""
+        return self.dbbox().center().x
+
+    @dx.setter
+    def dx(self, __val: float) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.DTrans(__val - self.dbbox().center().x, 0.0))
+
+    @property
+    def dy(self) -> float:
+        """Returns the x-coordinate center of the bounding box."""
+        return self.dbbox().center().y
+
+    @dy.setter
+    def dy(self, __val: float) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.DTrans(0.0, __val - self.dbbox().center().y))
+
+    @property
+    def dcenter(self) -> kdb.DPoint:
+        """Returns the coordinate center of the bounding box."""
+        return self.dbbox().center()
+
+    @dcenter.setter
+    def dcenter(self, val: tuple[float, float] | kdb.DPoint) -> None:
+        """Moves the instance so that the bbox's center coordinate."""
+        if isinstance(val, kdb.DPoint | kdb.DVector):
+            self.transform(kdb.DTrans(val - self.dbbox().center()))
+        elif isinstance(val, tuple | list):
+            self.transform(
+                kdb.DTrans(kdb.DPoint(val[0], val[1]) - self.dbbox().center())
+            )
+        else:
+            raise ValueError(
+                f"Type {type(val)} not supported for center setter {val}. "
+                "Not a tuple, list, kdb.Point or kdb.Vector."
+            )
+
 
 __all__ = [
     "KCell",
