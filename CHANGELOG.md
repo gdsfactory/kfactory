@@ -1,3 +1,26 @@
+<a name="v0.18.2"></a>
+# [v0.18.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.2) - 18 Jul 2024
+
+# What's Changed
+
+## New
+
+- Add InstanceGroup [#430](https://github.com/gdsfactory/kfactory/pull/430)
+
+## Bug Fixes
+
+- fix error message [#432](https://github.com/gdsfactory/kfactory/pull/432)
+
+## Other changes
+
+- Fixed double `or` print statement [#428](https://github.com/gdsfactory/kfactory/pull/428)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.18.1...v0.18.2
+
+
+[Changes][v0.18.2]
+
+
 <a name="v0.18.1"></a>
 # [v0.18.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.1) - 17 Jul 2024
 
@@ -877,6 +900,7 @@
 [Changes][v0.4.0]
 
 
+[v0.18.2]: https://github.com/gdsfactory/kfactory/compare/v0.18.1...v0.18.2
 [v0.18.1]: https://github.com/gdsfactory/kfactory/compare/v0.18.0...v0.18.1
 [v0.18.0]: https://github.com/gdsfactory/kfactory/compare/v0.17.8...v0.18.0
 [v0.17.8]: https://github.com/gdsfactory/kfactory/compare/v0.17.7...v0.17.8
