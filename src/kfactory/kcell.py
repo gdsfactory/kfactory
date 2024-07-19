@@ -5937,7 +5937,7 @@ class Port:
         self.width = self.kcl.to_dbu(value)
         assert self.kcl.to_um(self.width) == float(value), (
             "When converting to dbu the width does not match the desired width"
-            f"({self.width} / {value})!"
+            f"({self.dwidth} / {value})!"
         )
 
     @property
