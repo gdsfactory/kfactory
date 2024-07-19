@@ -5559,6 +5559,7 @@ class Port:
                 assert dangle is not None
                 assert dcenter is not None
                 self.dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
+                self.dwidth = dwidth
 
             assert layer is not None
             self.name = name
