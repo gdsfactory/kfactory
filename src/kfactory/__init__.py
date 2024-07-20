@@ -15,6 +15,7 @@ import klayout.rdb as rdb
 from .kcell import (
     Info,
     Instance,
+    InstanceGroup,
     KCLayout,
     KCell,
     KCellSettings,
@@ -32,7 +33,17 @@ from .kcell import (
     save_layout_options,
     show,
 )
-from . import cells, enclosure, kf_types, placer, port, routing, technology, utils
+from . import (
+    cells,
+    enclosure,
+    kf_types,
+    packing,
+    placer,
+    port,
+    routing,
+    technology,
+    utils,
+)
 from .conf import config, logger
 from .enclosure import LayerEnclosure, KCellEnclosure
 from .grid import flexgrid_dbu, flexgrid, grid_dbu, grid
@@ -43,6 +54,7 @@ from aenum import constant  # type: ignore[import-untyped,unused-ignore]
 __all__ = [
     "Info",
     "Instance",
+    "InstanceGroup",
     "KCLayout",
     "KCell",
     "KCellEnclosure",
@@ -68,6 +80,7 @@ __all__ = [
     "kdb",
     "lay",
     "logger",
+    "packing",
     "placer",
     "polygon_from_array",
     "port",

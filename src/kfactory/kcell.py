@@ -8166,16 +8166,27 @@ class MergeDiff:
 
 
 class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
+    """Group of Instances.
+
+    The instance group can be treated similar to a single instance
+    with regards to transformation functions and bounding boxes.
+
+    Args:
+        insts: List of the instances of the group.
+    """
+
     insts: list[Instance]
 
     def transform(
         self,
         trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
     ) -> None:
+        """Transform the instance group."""
         for inst in self.insts:
             inst.transform(trans)
 
     def bbox(self, layer: int | None = None) -> kdb.Box:
+        """Get the total bounding box or the bounding box of a layer in dbu."""
         bb = kdb.Box()
         if layer is not None:
             for _bb in (inst.bbox(layer) for inst in self.insts):
@@ -8187,6 +8198,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         return bb
 
     def dbbox(self, layer: int | None = None) -> kdb.DBox:
+        """Get the total bounding box or the bounding box of a layer in um."""
         bb = kdb.DBox()
         if layer is not None:
             for _bb in (inst.dbbox(layer) for inst in self.insts):
@@ -8222,7 +8234,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
     def movey(self, origin: int, destination: int) -> InstanceGroup: ...
 
     def movey(self, origin: int, destination: int | None = None) -> InstanceGroup:
-        """Move the instance in y-direction in dbu.
+        """Move the instance group in y-direction in dbu.
 
         Args:
             origin: reference point to move [dbu]
@@ -8245,7 +8257,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
     def move(
         self, origin: tuple[int, int], destination: tuple[int, int] | None = None
     ) -> InstanceGroup:
-        """Move the instance in dbu.
+        """Move the instance group in dbu.
 
         Args:
             origin: reference point to move [dbu]
@@ -8262,7 +8274,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
     def rotate(
         self, angle: Literal[0, 1, 2, 3], center: kdb.Point | None = None
     ) -> InstanceGroup:
-        """Rotate instance in increments of 90°."""
+        """Rotate instance group in increments of 90°."""
         if center:
             t = kdb.Trans(center.to_v())
             self.transform(t.inverted())
@@ -8274,7 +8286,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
     def mirror(
         self, p1: kdb.Point = kdb.Point(1, 0), p2: kdb.Point = kdb.Point(0, 0)
     ) -> InstanceGroup:
-        """Mirror the instance at a line."""
+        """Mirror the instance group at a line."""
         mirror_v = p2 - p1
         dedge = kdb.DEdge(self.insts[0].kcl.to_um(p1), self.insts[0].kcl.to_um(p2))
         angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
@@ -8291,12 +8303,12 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         return self
 
     def mirror_x(self, x: int = 0) -> InstanceGroup:
-        """Mirror the instance at an y-axis at position x."""
+        """Mirror the instance group at an y-axis at position x."""
         self.transform(kdb.Trans(2, True, 2 * x, 0))
         return self
 
     def mirror_y(self, y: int = 0) -> InstanceGroup:
-        """Mirror the instance at an x-axis at position y."""
+        """Mirror the instance group at an x-axis at position y."""
         self.transform(kdb.Trans(0, True, 0, 2 * y))
         return self
 
@@ -8307,7 +8319,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @xmin.setter
     def xmin(self, __val: int) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
+        """Moves the instance group so that the bbox's left x-coordinate."""
         self.transform(kdb.Trans(__val - self.bbox().left, 0))
 
     @property
@@ -8317,7 +8329,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @ymin.setter
     def ymin(self, __val: int) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
+        """Moves the instance group so that the bbox's left x-coordinate."""
         self.transform(kdb.Trans(0, __val - self.bbox().bottom))
 
     @property
@@ -8327,7 +8339,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @xmax.setter
     def xmax(self, __val: int) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
+        """Moves the instance group so that the bbox's left x-coordinate."""
         self.transform(kdb.Trans(__val - self.bbox().right, 0))
 
     @property
@@ -8337,7 +8349,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @ymax.setter
     def ymax(self, __val: int) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
+        """Moves the instance group so that the bbox's left x-coordinate."""
         self.transform(kdb.Trans(0, __val - self.bbox().top))
 
     @property
@@ -8357,7 +8369,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @x.setter
     def x(self, __val: int) -> None:
-        """Moves the instance so that the bbox's center x-coordinate."""
+        """Moves the instance group so that the bbox's center x-coordinate."""
         self.transform(kdb.Trans(__val - self.bbox().center().x, 0))
 
     @property
@@ -8367,7 +8379,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @y.setter
     def y(self, __val: int) -> None:
-        """Moves the instance so that the bbox's center x-coordinate."""
+        """Moves the instance group so that the bbox's center x-coordinate."""
         self.transform(kdb.Trans(__val - self.bbox().center().y, 0))
 
     @property
@@ -8377,7 +8389,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @center.setter
     def center(self, val: tuple[int, int] | kdb.Vector) -> None:
-        """Moves the instance so that the bbox's center coordinate."""
+        """Moves the instance group so that the bbox's center coordinate."""
         if isinstance(val, kdb.Point | kdb.Vector):
             self.transform(kdb.Trans(val - self.bbox().center().to_v()))
         elif isinstance(val, tuple | list):
@@ -8397,7 +8409,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
     def dmovex(self, origin: float, destination: float) -> InstanceGroup: ...
 
     def dmovex(self, origin: float, destination: float | None = None) -> InstanceGroup:
-        """Move the instance in x-direction in um.
+        """Move the instance group in x-direction in um.
 
         Args:
             origin: reference point to move
@@ -8416,7 +8428,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
     def dmovey(self, origin: float, destination: float) -> InstanceGroup: ...
 
     def dmovey(self, origin: float, destination: float | None = None) -> InstanceGroup:
-        """Move the instance in y-direction in um.
+        """Move the instance group in y-direction in um.
 
         Args:
             origin: reference point to move
@@ -8433,7 +8445,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         angle: float,
         center: kdb.DPoint | kdb.DVector | tuple[float, float] | Port | None = None,
     ) -> InstanceGroup:
-        """Rotate instance in degrees.
+        """Rotate instance group in degrees.
 
         Args:
             angle: angle in degrees.
@@ -8469,7 +8481,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         origin: tuple[float, float],
         destination: tuple[float, float] | None = None,
     ) -> InstanceGroup:
-        """Move the instance in dbu.
+        """Move the instance group in dbu.
 
         Args:
             origin: reference point to move [dbu]
@@ -8488,7 +8500,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
     def dmirror(
         self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
     ) -> InstanceGroup:
-        """Mirror the instance at a line."""
+        """Mirror the instance group at a line."""
         mirror_v = p2 - p1
         dedge = kdb.DEdge(p1, p2)
         angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
@@ -8505,12 +8517,12 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         return self
 
     def dmirror_x(self, x: float = 0) -> InstanceGroup:
-        """Mirror the instance at an x-axis."""
+        """Mirror the instance group at an x-axis."""
         self.transform(kdb.DTrans(2, True, 2 * x, 0))
         return self
 
     def dmirror_y(self, y: float = 0) -> InstanceGroup:
-        """Mirror the instance at an y-axis."""
+        """Mirror the instance group at an y-axis."""
         self.transform(kdb.DTrans(0, True, 0, 2 * y))
         return self
 
@@ -8521,7 +8533,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @dxmin.setter
     def dxmin(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
+        """Moves the instance group so that the bbox's left x-coordinate."""
         self.transform(kdb.DTrans(__val - self.dbbox().left, 0.0))
 
     @property
@@ -8531,7 +8543,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @dymin.setter
     def dymin(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
+        """Moves the instance group so that the bbox's left x-coordinate."""
         self.transform(kdb.DTrans(0.0, __val - self.dbbox().bottom))
 
     @property
@@ -8541,7 +8553,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @dxmax.setter
     def dxmax(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
+        """Moves the instance group so that the bbox's left x-coordinate."""
         self.transform(kdb.DTrans(__val - self.dbbox().right, 0.0))
 
     @property
@@ -8561,7 +8573,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @dymax.setter
     def dymax(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
+        """Moves the instance group so that the bbox's left x-coordinate."""
         self.transform(kdb.DTrans(0.0, __val - self.dbbox().top))
 
     @property
@@ -8571,7 +8583,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @dx.setter
     def dx(self, __val: float) -> None:
-        """Moves the instance so that the bbox's center x-coordinate."""
+        """Moves the instance group so that the bbox's center x-coordinate."""
         self.transform(kdb.DTrans(__val - self.dbbox().center().x, 0.0))
 
     @property
@@ -8581,7 +8593,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @dy.setter
     def dy(self, __val: float) -> None:
-        """Moves the instance so that the bbox's center x-coordinate."""
+        """Moves the instance group so that the bbox's center x-coordinate."""
         self.transform(kdb.DTrans(0.0, __val - self.dbbox().center().y))
 
     @property
@@ -8591,7 +8603,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     @dcenter.setter
     def dcenter(self, val: tuple[float, float] | kdb.DPoint) -> None:
-        """Moves the instance so that the bbox's center coordinate."""
+        """Moves the instance group so that the bbox's center coordinate."""
         if isinstance(val, kdb.DPoint | kdb.DVector):
             self.transform(kdb.DTrans(val - self.dbbox().center()))
         elif isinstance(val, tuple | list):
@@ -8608,6 +8620,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 __all__ = [
     "KCell",
     "Instance",
+    "InstanceGroup",
     "Port",
     "Ports",
     "cell",
