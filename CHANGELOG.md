@@ -5,6 +5,7 @@
 
 ## New
 
+- add packing functions for Instances and KCells [#431](https://github.com/gdsfactory/kfactory/pull/431)
 - Add InstanceGroup [#430](https://github.com/gdsfactory/kfactory/pull/430)
 
 ## Bug Fixes
