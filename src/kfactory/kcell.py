@@ -336,6 +336,10 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
     datatype: int
     kcl: constant[KCLayout]
 
+    def __init__(self, layer: int, datatype: int) -> None:
+        """Just here to make sure klayout knows the layer name."""
+        self.kcl.set_info(self, kdb.LayerInfo(self.layer, self.datatype, self.name))
+
     def __new__(  # type: ignore[misc]
         cls: LayerEnum,
         layer: int,
@@ -5437,6 +5441,7 @@ class Port:
     _dcplx_trans: kdb.DCplxTrans | None
     info: Info = Info()
     port_type: str
+    layer_info: kdb.LayerInfo
 
     @overload
     def __init__(
@@ -6911,14 +6916,27 @@ class Ports:
             dcplx_trans = port.dcplx_trans.dup()
             if not keep_mirror:
                 dcplx_trans.mirror = False
-            _port = Port(
-                kcl=self.kcl,
-                name=name or port.name,
-                dcplx_trans=port.dcplx_trans,
-                info=_port.info.model_dump(),
-                dwidth=port.dwidth,
-                layer=port.layer,
-            )
+            _li = self.kcl.get_info(port.layer)
+            _l = self.kcl.layer(_li)
+            if _li is not None and _li.name is not None:
+                _port = Port(
+                    kcl=self.kcl,
+                    name=name or port.name,
+                    dcplx_trans=port.dcplx_trans,
+                    info=_port.info.model_dump(),
+                    dwidth=port.dwidth,
+                    layer=self.kcl.layers(_l) if _l in self.kcl.layers else _l,  # type: ignore[operator, call-arg]
+                )
+            else:
+                _port = Port(
+                    kcl=self.kcl,
+                    name=name or port.name,
+                    dcplx_trans=port.dcplx_trans,
+                    info=_port.info.model_dump(),
+                    dwidth=port.dwidth,
+                    layer=_l,
+                )
+
             self._ports.append(_port)
         return _port
 
