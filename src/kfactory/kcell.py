@@ -3081,8 +3081,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """Convert Shapes or values in dbu to DShapes or floats in um."""
         return kdb.CplxTrans(self.layout.dbu).inverted() * other
 
+    @computed_field  # type: ignore[prop-decorator]
     @property
-    @computed_field
     def name(self) -> str:
         """Name of the KCLayout."""
         return self._name
