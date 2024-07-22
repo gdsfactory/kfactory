@@ -336,6 +336,10 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
     datatype: int
     kcl: constant[KCLayout]
 
+    def __init__(self, layer: int, datatype: int) -> None:
+        """Just here to make sure klayout knows the layer name."""
+        self.kcl.set_info(self, kdb.LayerInfo(self.layer, self.datatype, self.name))
+
     def __new__(  # type: ignore[misc]
         cls: LayerEnum,
         layer: int,
@@ -386,7 +390,7 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
 def convert_metadata_type(value: Any) -> MetaData:
     """Recursively clean up a MetaData for KCellSettings."""
     if isinstance(value, int | float | bool | str | SerializableShape):
-        return value  # type: ignore[no-any-return]
+        return value
     elif value is None:
         return None
     elif isinstance(value, tuple):
@@ -3077,7 +3081,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """Convert Shapes or values in dbu to DShapes or floats in um."""
         return kdb.CplxTrans(self.layout.dbu).inverted() * other
 
-    @computed_field  # type: ignore[misc]
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def name(self) -> str:
         """Name of the KCLayout."""
@@ -5365,18 +5369,18 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
         new_shapes: list[DShapeLike] = []
 
         for shape in self._shapes:
-            if isinstance(shape, DShapeLike):  # type: ignore[misc, arg-type]
-                new_shapes.append(shape.transformed(trans))  # type: ignore[union-attr, call-overload]
-            elif isinstance(shape, IShapeLike):  # type: ignore[misc, arg-type]
-                new_shapes.append(
-                    shape.to_dtype(  # type: ignore[union-attr]
-                        self.cell.kcl.dbu
-                    ).transformed(trans)
-                )
+            if isinstance(shape, DShapeLike):
+                new_shapes.append(shape.transformed(trans))
+            elif isinstance(shape, IShapeLike):
+                if isinstance(shape, kdb.Region):
+                    for poly in shape.each():
+                        new_shapes.append(poly.to_dtype(self.cell.kcl.dbu))
+                else:
+                    new_shapes.append(
+                        shape.to_dtype(self.cell.kcl.dbu).transformed(trans)
+                    )
             else:
-                new_shapes.append(
-                    shape.transform(trans)  # type: ignore[union-attr, call-overload, arg-type]
-                )
+                new_shapes.append(shape.dpolygon.transform(trans))
 
         return VShapes(cell=self.cell, _shapes=new_shapes)  # type: ignore[arg-type]
 
@@ -6897,15 +6901,42 @@ class Ports:
                 else set [Port.trans.mirror][kfactory.kcell.Port.trans] (or the complex
                 equivalent) to `False`.
         """
-        _port = port.copy()
-        if not keep_mirror:
-            if _port._trans:
-                _port._trans.mirror = False
-            elif _port._dcplx_trans:
-                _port._dcplx_trans.mirror = False
-        if name is not None:
-            _port.name = name
-        self._ports.append(_port)
+        if port.kcl == self.kcl:
+            _port = port.copy()
+            if not keep_mirror:
+                if _port._trans:
+                    _port._trans.mirror = False
+                elif _port._dcplx_trans:
+                    _port._dcplx_trans.mirror = False
+            if name is not None:
+                _port.name = name
+            self._ports.append(_port)
+        else:
+            dcplx_trans = port.dcplx_trans.dup()
+            if not keep_mirror:
+                dcplx_trans.mirror = False
+            _li = self.kcl.get_info(port.layer)
+            _l = self.kcl.layer(_li)
+            if _li is not None and _li.name is not None:
+                _port = Port(
+                    kcl=self.kcl,
+                    name=name or port.name,
+                    dcplx_trans=port.dcplx_trans,
+                    info=_port.info.model_dump(),
+                    dwidth=port.dwidth,
+                    layer=self.kcl.layers(_l) if _l in self.kcl.layers else _l,  # type: ignore[operator, call-arg]
+                )
+            else:
+                _port = Port(
+                    kcl=self.kcl,
+                    name=name or port.name,
+                    dcplx_trans=port.dcplx_trans,
+                    info=_port.info.model_dump(),
+                    dwidth=port.dwidth,
+                    layer=_l,
+                )
+
+            self._ports.append(_port)
         return _port
 
     def add_ports(
