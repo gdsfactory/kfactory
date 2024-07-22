@@ -5441,7 +5441,6 @@ class Port:
     _dcplx_trans: kdb.DCplxTrans | None
     info: Info = Info()
     port_type: str
-    layer_info: kdb.LayerInfo
 
     @overload
     def __init__(
