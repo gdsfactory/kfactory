@@ -5,11 +5,13 @@
 
 ## New
 
+- fix add_ports in case port.kcl is not ports.kcl [#434](https://github.com/gdsfactory/kfactory/pull/434)
 - add packing functions for Instances and KCells [#431](https://github.com/gdsfactory/kfactory/pull/431)
 - Add InstanceGroup [#430](https://github.com/gdsfactory/kfactory/pull/430)
 
 ## Bug Fixes
 
+- fix add_ports in case port.kcl is not ports.kcl [#434](https://github.com/gdsfactory/kfactory/pull/434)
 - fix error message [#432](https://github.com/gdsfactory/kfactory/pull/432)
 
 ## Other changes
