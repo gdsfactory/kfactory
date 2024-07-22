@@ -390,7 +390,7 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
 def convert_metadata_type(value: Any) -> MetaData:
     """Recursively clean up a MetaData for KCellSettings."""
     if isinstance(value, int | float | bool | str | SerializableShape):
-        return value  # type: ignore[no-any-return]
+        return value
     elif value is None:
         return None
     elif isinstance(value, tuple):
@@ -3081,8 +3081,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """Convert Shapes or values in dbu to DShapes or floats in um."""
         return kdb.CplxTrans(self.layout.dbu).inverted() * other
 
-    @computed_field  # type: ignore[misc]
     @property
+    @computed_field
     def name(self) -> str:
         """Name of the KCLayout."""
         return self._name
@@ -5369,18 +5369,18 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
         new_shapes: list[DShapeLike] = []
 
         for shape in self._shapes:
-            if isinstance(shape, DShapeLike):  # type: ignore[misc, arg-type]
-                new_shapes.append(shape.transformed(trans))  # type: ignore[union-attr, call-overload]
-            elif isinstance(shape, IShapeLike):  # type: ignore[misc, arg-type]
-                new_shapes.append(
-                    shape.to_dtype(  # type: ignore[union-attr]
-                        self.cell.kcl.dbu
-                    ).transformed(trans)
-                )
+            if isinstance(shape, DShapeLike):
+                new_shapes.append(shape.transformed(trans))
+            elif isinstance(shape, IShapeLike):
+                if isinstance(shape, kdb.Region):
+                    for poly in shape.each():
+                        new_shapes.append(poly.to_dtype(self.cell.kcl.dbu))
+                else:
+                    new_shapes.append(
+                        shape.to_dtype(self.cell.kcl.dbu).transformed(trans)
+                    )
             else:
-                new_shapes.append(
-                    shape.transform(trans)  # type: ignore[union-attr, call-overload, arg-type]
-                )
+                new_shapes.append(shape.dpolygon.transform(trans))
 
         return VShapes(cell=self.cell, _shapes=new_shapes)  # type: ignore[arg-type]
 
