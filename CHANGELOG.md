@@ -1,11 +1,36 @@
+<a name="v0.18.4"></a>
+# [v0.18.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.4) - 23 Jul 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix the other case of model_dump [#436](https://github.com/gdsfactory/kfactory/pull/436)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.18.3...v0.18.4
+
+
+[Changes][v0.18.4]
+
+
+<a name="v0.18.3"></a>
+# [v0.18.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.3) - 23 Jul 2024
+
+## What's Changed
+* fix _port by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/435
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.18.2...v0.18.3
+
+[Changes][v0.18.3]
+
+
 <a name="v0.18.2"></a>
-# [v0.18.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.2) - 22 Jul 2024
+# [v0.18.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.2) - 23 Jul 2024
 
 # What's Changed
 
 ## New
 
-- fix add_ports in case port.kcl is not ports.kcl [#434](https://github.com/gdsfactory/kfactory/pull/434)
 - add packing functions for Instances and KCells [#431](https://github.com/gdsfactory/kfactory/pull/431)
 - Add InstanceGroup [#430](https://github.com/gdsfactory/kfactory/pull/430)
 
@@ -904,6 +929,8 @@
 [Changes][v0.4.0]
 
 
+[v0.18.4]: https://github.com/gdsfactory/kfactory/compare/v0.18.3...v0.18.4
+[v0.18.3]: https://github.com/gdsfactory/kfactory/compare/v0.18.2...v0.18.3
 [v0.18.2]: https://github.com/gdsfactory/kfactory/compare/v0.18.1...v0.18.2
 [v0.18.1]: https://github.com/gdsfactory/kfactory/compare/v0.18.0...v0.18.1
 [v0.18.0]: https://github.com/gdsfactory/kfactory/compare/v0.17.8...v0.18.0
