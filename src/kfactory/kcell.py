@@ -6922,7 +6922,7 @@ class Ports:
                     kcl=self.kcl,
                     name=name or port.name,
                     dcplx_trans=port.dcplx_trans,
-                    info=_port.info.model_dump(),
+                    info=port.info.model_dump(),
                     dwidth=port.dwidth,
                     layer=self.kcl.layers(_l) if _l in self.kcl.layers else _l,  # type: ignore[operator, call-arg]
                 )
