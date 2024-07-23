@@ -6901,8 +6901,8 @@ class Ports:
                 else set [Port.trans.mirror][kfactory.kcell.Port.trans] (or the complex
                 equivalent) to `False`.
         """
+        _port = port.copy()
         if port.kcl == self.kcl:
-            _port = port.copy()
             if not keep_mirror:
                 if _port._trans:
                     _port._trans.mirror = False
