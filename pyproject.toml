@@ -13,7 +13,7 @@ classifiers = [
 requires-python = ">=3.10"
 
 
-version = "0.18.3"
+version = "0.18.4"
 authors = [
     {name = "gdsfactory community", email = "contact@gdsfactory.com"},
 ]
@@ -145,7 +145,7 @@ convention = "google"
 # github_url = "https://github.com/<user or organization>/<project>/"
 
 [tool.tbump.version]
-current = "0.18.3"
+current = "0.18.4"
 
 # Example of a semver regexp.
 # Make sure this matches current_version before
