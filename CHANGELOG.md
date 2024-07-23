@@ -1,5 +1,5 @@
 <a name="v0.18.2"></a>
-# [v0.18.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.2) - 18 Jul 2024
+# [v0.18.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.2) - 22 Jul 2024
 
 # What's Changed
 
@@ -11,6 +11,7 @@
 
 ## Bug Fixes
 
+- fix _port [#435](https://github.com/gdsfactory/kfactory/pull/435)
 - fix add_ports in case port.kcl is not ports.kcl [#434](https://github.com/gdsfactory/kfactory/pull/434)
 - fix error message [#432](https://github.com/gdsfactory/kfactory/pull/432)
 
