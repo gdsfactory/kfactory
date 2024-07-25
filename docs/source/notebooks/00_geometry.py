@@ -50,7 +50,7 @@ poly1 = kf.kdb.DPolygon(
 
 
 # %%
-c.shapes(c.kcl.layer(1, 0)).insert(poly1)
+c.shapes(c.kcl.find_layer(1, 0)).insert(poly1)
 
 # %%
 c.show()  # show in klayout
@@ -67,15 +67,15 @@ c.plot()
 c = kf.KCell()
 points = np.array([(-8, -6), (6, 8), (7, 17), (9, 5)])
 poly = kf.polygon_from_array(points)
-c.shapes(c.kcl.layer(1, 0)).insert(poly1)
-c.shapes(c.kcl.layer(2, 0)).insert(poly1)
+c.shapes(c.kcl.find_layer(1, 0)).insert(poly1)
+c.shapes(c.kcl.find_layer(2, 0)).insert(poly1)
 c
 
 # %%
 c = kf.KCell()
 textgenerator = kf.kdb.TextGenerator.default_generator()
 t = textgenerator.text("Hello!", c.kcl.dbu)
-c.shapes(kf.kcl.layer(1, 0)).insert(t)
+c.shapes(kf.kcl.find_layer(1, 0)).insert(t)
 c.show()  # show in klayout
 c.plot()
 
@@ -88,8 +88,8 @@ r
 
 # %%
 c = kf.KCell()
-c.shapes(c.kcl.layer(1, 0)).insert(r)
-c.shapes(c.kcl.layer(2, 0)).insert(r)
+c.shapes(c.kcl.find_layer(1, 0)).insert(r)
+c.shapes(c.kcl.find_layer(2, 0)).insert(r)
 c
 
 # %%
@@ -121,9 +121,9 @@ r.move(
 r.move(-5, 0)
 
 # %%
-c.shapes(c.kcl.layer(1, 0)).insert(text1)
-c.shapes(c.kcl.layer(2, 0)).insert(text2)
-c.shapes(c.kcl.layer(2, 0)).insert(r)
+c.shapes(c.kcl.find_layer(1, 0)).insert(text1)
+c.shapes(c.kcl.find_layer(2, 0)).insert(text2)
+c.shapes(c.kcl.find_layer(2, 0)).insert(r)
 
 # %%
 c.show()  # show in klayout
@@ -143,7 +143,7 @@ def straight(length=10, width=1, layer=(1, 0)):
     wg = kf.KCell()
     box = kf.kdb.DBox(length, width)
     int_box = wg.kcl.to_dbu(box)
-    _layer = kf.kcl.layer(*layer)
+    _layer = kf.kcl.find_layer(*layer)
     wg.shapes(_layer).insert(box)
     wg.add_port(
         kf.Port(
@@ -206,14 +206,14 @@ c = kf.KCell()
 # %%
 # Create and add a polygon from separate lists of x points and y points
 # e.g. [(x1, x2, x3, ...), (y1, y2, y3, ...)]
-c.shapes(c.kcl.layer(4, 0)).insert(
+c.shapes(c.kcl.find_layer(4, 0)).insert(
     kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip((8, 6, 7, 9), (6, 8, 9, 5))])
 )
 
 # %%
 # Alternatively, create and add a polygon from a list of points
 # e.g. [(x1,y1), (x2,y2), (x3,y3), ...] using the same function
-c.shapes(c.kcl.layer(4, 0)).insert(
+c.shapes(c.kcl.find_layer(4, 0)).insert(
     kf.kdb.DPolygon(
         [kf.kdb.DPoint(x, y) for (x, y) in ((0, 0), (1, 1), (1, 3), (-3, 3))]
     )
@@ -296,12 +296,12 @@ c
 
 
 # %%
-c2.shapes(c2.kcl.layer(1, 0)).insert(kf.kdb.Text("First label", mwg1_ref.trans))
-c2.shapes(c2.kcl.layer(1, 0)).insert(kf.kdb.Text("Second label", mwg2_ref.trans))
+c2.shapes(c2.kcl.find_layer(1, 0)).insert(kf.kdb.Text("First label", mwg1_ref.trans))
+c2.shapes(c2.kcl.find_layer(1, 0)).insert(kf.kdb.Text("Second label", mwg2_ref.trans))
 
 # %%
 # It's very useful for recording information about the devices or layout
-c2.shapes(c2.kcl.layer(10, 0)).insert(
+c2.shapes(c2.kcl.find_layer(10, 0)).insert(
     kf.kdb.Text(
         f"The x size of this\nlayout is {c2.dbbox().width()}",
         kf.kdb.Trans(c2.bbox().right, c2.bbox().top),
@@ -330,29 +330,29 @@ e2 = kf.kdb.DPolygon.ellipse(kf.kdb.DBox(10, 6), 64).transformed(
 
 # %%
 c = kf.KCell()
-c.shapes(c.kcl.layer(2, 0)).insert(e1)
-c.shapes(c.kcl.layer(3, 0)).insert(e2)
+c.shapes(c.kcl.find_layer(2, 0)).insert(e1)
+c.shapes(c.kcl.find_layer(3, 0)).insert(e2)
 c
 
 # %%
 # e1 NOT e2
 c = kf.KCell()
 e3 = kf.kdb.Region(c.kcl.to_dbu(e1)) - kf.kdb.Region(c.kcl.to_dbu(e2))
-c.shapes(c.kcl.layer(1, 0)).insert(e3)
+c.shapes(c.kcl.find_layer(1, 0)).insert(e3)
 c
 
 # %%
 # e1 AND e2
 c = kf.KCell()
 e3 = kf.kdb.Region(c.kcl.to_dbu(e1)) & kf.kdb.Region(c.kcl.to_dbu(e2))
-c.shapes(c.kcl.layer(1, 0)).insert(e3)
+c.shapes(c.kcl.find_layer(1, 0)).insert(e3)
 c
 
 # %%
 # e1 OR e2
 c = kf.KCell()
 e3 = kf.kdb.Region(c.kcl.to_dbu(e1)) + kf.kdb.Region(c.kcl.to_dbu(e2))
-c.shapes(c.kcl.layer(1, 0)).insert(e3)
+c.shapes(c.kcl.find_layer(1, 0)).insert(e3)
 c
 
 # %%
@@ -361,14 +361,14 @@ c = kf.KCell()
 e3 = (
     kf.kdb.Region(c.kcl.to_dbu(e1)) + kf.kdb.Region(c.kcl.to_dbu(e2))
 ).merge()
-c.shapes(c.kcl.layer(1, 0)).insert(e3)
+c.shapes(c.kcl.find_layer(1, 0)).insert(e3)
 c
 
 # %%
 # e1 XOR e2
 c = kf.KCell()
 e3 = kf.kdb.Region(c.kcl.to_dbu(e1)) ^ kf.kdb.Region(c.kcl.to_dbu(e2))
-c.shapes(c.kcl.layer(1, 0)).insert(e3)
+c.shapes(c.kcl.find_layer(1, 0)).insert(e3)
 c
 
 # %% [markdown]

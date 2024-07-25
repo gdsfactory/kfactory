@@ -11,7 +11,7 @@ def extrude_backbone(
     c: VKCell,
     backbone: Sequence[kdb.DPoint],
     width: float,
-    layer: int,
+    layer: kdb.LayerInfo,
     start_angle: float,
     end_angle: float,
     dbu: float,
@@ -33,10 +33,13 @@ def extrude_backbone(
         backbone, width=width, start_angle=start_angle, end_angle=end_angle
     )
     center_path_r.reverse()
-    c.shapes(layer).insert(kdb.DPolygon(center_path_l + center_path_r))
+    c.shapes(c.kcl.find_layer(layer)).insert(
+        kdb.DPolygon(center_path_l + center_path_r)
+    )
 
     if enclosure:
         for _layer, sections in enclosure.layer_sections.items():
+            _li = c.kcl.find_layer(_layer)
             for section in sections.sections:
                 if section.d_min is not None:
                     inner_l, inner_r = extrude_path_points(
@@ -53,8 +56,8 @@ def extrude_backbone(
                     )
                     inner_l.reverse()
                     outer_r.reverse()
-                    c.shapes(_layer).insert(kdb.DPolygon(outer_l + inner_l))
-                    c.shapes(_layer).insert(kdb.DPolygon(inner_r + outer_r))
+                    c.shapes(_li).insert(kdb.DPolygon(outer_l + inner_l))
+                    c.shapes(_li).insert(kdb.DPolygon(inner_r + outer_r))
                 else:
                     outer_l, outer_r = extrude_path_points(
                         backbone,
@@ -63,4 +66,4 @@ def extrude_backbone(
                         end_angle=end_angle,
                     )
                     outer_r.reverse()
-                    c.shapes(_layer).insert(kdb.DPolygon(outer_l + outer_r))
+                    c.shapes(_li).insert(kdb.DPolygon(outer_l + outer_r))

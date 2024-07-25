@@ -21,7 +21,7 @@ class BendCircularVKCell(Protocol):
         self,
         width: float,
         radius: float,
-        layer: int,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         angle: float = 90,
         angle_step: float = 1,
@@ -85,7 +85,7 @@ def virtual_bend_circular_factory(
     def virtual_bend_circular(
         width: float,
         radius: float,
-        layer: int,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         angle: float = 90,
         angle_step: float = 1,
@@ -155,7 +155,7 @@ def virtual_bend_circular_factory(
 
         c.create_port(
             name="o1",
-            layer=layer,
+            layer=c.kcl.find_layer(layer),
             dwidth=round(width / c.kcl.dbu),
             dcplx_trans=kdb.DCplxTrans(1, 180, False, backbone[0].to_v()),
         )
@@ -163,7 +163,7 @@ def virtual_bend_circular_factory(
             name="o2",
             dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
             dwidth=width,
-            layer=layer,
+            layer=c.kcl.find_layer(layer),
         )
         return c
 

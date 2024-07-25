@@ -1,11 +1,13 @@
 import kfactory as kf
 import pytest
+from conftest import Layers
 
 
 @kf.cell
-def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.LayerEnclosure) -> kf.KCell:
+def mmi_enc(layer: kf.kdb.LayerInfo, enclosure: kf.LayerEnclosure) -> kf.KCell:
     c = kf.KCell()
-    c.shapes(layer).insert(kf.kdb.Box(-10000, -6000, 10000, 6000))
+    li = c.kcl.find_layer(layer)
+    c.shapes(li).insert(kf.kdb.Box(-10000, -6000, 10000, 6000))
 
     taper = kf.kdb.Polygon(
         [
@@ -22,7 +24,7 @@ def mmi_enc(layer: kf.kcell.LayerEnum, enclosure: kf.LayerEnclosure) -> kf.KCell
         kf.kdb.Trans(2, False, -10000, -4000),
         kf.kdb.Trans(2, False, -10000, 4000),
     ]:
-        c.shapes(layer).insert(taper.transformed(t))
+        c.shapes(li).insert(taper.transformed(t))
 
     enclosure.apply_minkowski_enc(c, layer)
 
@@ -92,7 +94,7 @@ def test_um_enclosure(LAYER: kf.LayerEnum) -> None:
 
 def test_um_enclosure_nodbu(LAYER: kf.LayerEnum) -> None:
     """When defining um sections, kcl must be defined."""
-    with pytest.raises(AssertionError) as ae_info:  # noqa: F481
+    with pytest.raises(AssertionError):
         kf.LayerEnclosure(
             dsections=[
                 (LAYER.WGCLAD, -5, -3),
@@ -102,21 +104,21 @@ def test_um_enclosure_nodbu(LAYER: kf.LayerEnum) -> None:
         )
 
 
-def test_pdkenclosure(LAYER: kf.LayerEnum, straight_blank: kf.KCell) -> None:
+def test_pdkenclosure(LAYER: Layers, straight_blank: kf.KCell) -> None:
     c = kf.KCell("wg_slab")
 
     wg_box = kf.kdb.Box(10000, 500)
-    c.shapes(LAYER.WG).insert(wg_box)
-    c.shapes(LAYER.WGCLAD).insert(wg_box.enlarged(0, 2500))
+    c.shapes(c.kcl.find_layer(LAYER.WG)).insert(wg_box)
+    c.shapes(c.kcl.find_layer(LAYER.WGCLAD)).insert(wg_box.enlarged(0, 2500))
     c.create_port(
         trans=kf.kdb.Trans(0, False, wg_box.right, 0),
         width=wg_box.height(),
-        layer=LAYER.WG,
+        layer=c.kcl.find_layer(LAYER.WG),
     )
     c.create_port(
         trans=kf.kdb.Trans(2, False, wg_box.left, 0),
         width=wg_box.height(),
-        layer=LAYER.WG,
+        layer=c.kcl.find_layer(LAYER.WG),
     )
 
     enc1 = kf.LayerEnclosure(
@@ -151,7 +153,10 @@ def test_pdkenclosure(LAYER: kf.LayerEnum, straight_blank: kf.KCell) -> None:
 
     port_wg_ex.merge()
 
-    assert (kf.kdb.Region(c.shapes(LAYER.WGEXCLUDE)) & port_wg_ex).is_empty()
     assert (
-        (kf.kdb.Region(c.shapes(LAYER.WGCLADEXCLUDE)) & port_wg_ex) - port_wg_ex
+        kf.kdb.Region(c.shapes(c.kcl.find_layer(LAYER.WGEXCLUDE))) & port_wg_ex
+    ).is_empty()
+    assert (
+        (kf.kdb.Region(c.shapes(c.kcl.find_layer(LAYER.WGCLADEXCLUDE))) & port_wg_ex)
+        - port_wg_ex
     ).is_empty()

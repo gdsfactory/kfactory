@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 
 import kfactory as kf
 from pathlib import Path
-import pytest
+from conftest import Layers
 
 
 @kf.cell  # type: ignore[misc, unused-ignore]
@@ -86,7 +86,7 @@ def test_metainfo_set(straight: kf.KCell) -> None:
         assert port.port_type == meta_port.port_type
 
 
-def test_metainfo_read(straight: kf.KCell) -> None:
+def test_metainfo_read(LAYER: Layers, straight: kf.KCell) -> None:
     """Test whether we can read written metadata to ports."""
     with NamedTemporaryFile("a", suffix=".oas") as t:
         save = kf.save_layout_options()
@@ -94,6 +94,7 @@ def test_metainfo_read(straight: kf.KCell) -> None:
         straight.kcl.write(t.name)
 
         kcl = kf.KCLayout("TEST_META")
+        kcl.layers = kcl.layerenum_from_dict(layers=LAYER.asdict())
         kcl.read(t.name)
 
         wg_read = kcl[straight.name]
@@ -154,7 +155,7 @@ def test_nometainfo_read(straight: kf.KCell) -> None:
             "length": 1000,
             "width": 500,
             "enclosure": "WGSTD",
-            "layer": 0,
+            "layer": Layers().WG,
         }
         assert straight.function_name == "straight"
         assert straight.basename is None

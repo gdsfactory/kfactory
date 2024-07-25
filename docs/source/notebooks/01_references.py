@@ -42,7 +42,7 @@ p = kf.KCell()
 # Add a polygon
 xpts = [0, 0, 5, 6, 9, 12]
 ypts = [0, 1, 1, 2, 2, 0]
-p.shapes(p.kcl.layer(2, 0)).insert(
+p.shapes(p.kcl.find_layer(2, 0)).insert(
     kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip(xpts, ypts)])
 )
 
@@ -103,7 +103,7 @@ c
 # Add a 2nd polygon to "p"
 xpts = [14, 14, 16, 16]
 ypts = [0, 2, 2, 0]
-p.shapes(p.kcl.layer(1, 0)).insert(
+p.shapes(p.kcl.find_layer(1, 0)).insert(
     kf.kdb.DPolygon([kf.kdb.DPoint(x, y) for x, y in zip(xpts, ypts)])
 )
 p
@@ -144,7 +144,7 @@ c2
 
 # %%
 c = kf.KCell(name="instance_sample")
-w = kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.layer(1, 0))
+w = kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.find_layer(1, 0))
 wr = kf.kdb.CellInstArray(w._kdb_cell, kf.kdb.Trans.R0)
 c.insert(wr)
 c
@@ -154,7 +154,7 @@ c
 
 # %%
 c = kf.KCell(name="instance_sample_shorter_syntax")
-wr = c << kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.layer(1, 0))
+wr = c << kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.find_layer(1, 0))
 c
 
 # %% [markdown]
@@ -162,8 +162,8 @@ c
 
 # %%
 c = kf.KCell(name="two_instances")
-wr1 = c << kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.layer(1, 0))
-wr2 = c << kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.layer(1, 0))
+wr1 = c << kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.find_layer(1, 0))
+wr2 = c << kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.find_layer(1, 0))
 wr2.transform(kf.kdb.DTrans(0.0, 10.0))
 c.add_ports(wr1.ports, prefix="top_")
 c.add_ports(wr2.ports, prefix="bot_")
@@ -195,7 +195,7 @@ c
 import kfactory as kf
 
 print(kf.__version__)
-c = kf.cells.straight.straight(length=10, width=0.6, layer=kf.kcl.layer(1, 0))
+c = kf.cells.straight.straight(length=10, width=0.6, layer=kf.kcl.find_layer(1, 0))
 c3 = kf.KCell()  # Create a new blank Cell
 aref = c3.create_inst(
     c, na=1, nb=3, a=kf.kdb.Vector(20000, 0), b=kf.kdb.Vector(0, 15000)

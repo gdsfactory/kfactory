@@ -1,9 +1,8 @@
 import kfactory as kf
 from kfactory import port
-from typing import Iterable, Callable, Optional
-import numpy as np
 import pytest
-
+from conftest import Layers
+from collections.abc import Callable
 
 port_x_coords = [-10000, 0, 0, 0, 10000]
 port_y_coords = [0, -10000, 0, 10000, 0]
@@ -11,7 +10,7 @@ offset = 50000
 
 
 @kf.cell
-def port_tests(rename_f: Optional[Callable[..., None]] = None) -> kf.KCell:
+def port_tests(rename_f: Callable[..., None] | None = None) -> kf.KCell:
     c = kf.KCell()
 
     i = 0
@@ -28,7 +27,7 @@ def port_tests(rename_f: Optional[Callable[..., None]] = None) -> kf.KCell:
                     False,
                     point.to_v(),
                 ),
-                layer=c.kcl.layer(1, 0),
+                layer=c.kcl.find_layer(1, 0),
                 width=1 / c.kcl.dbu,
             )
     if rename_f is None:
@@ -89,8 +88,9 @@ def test_rename_orientation() -> None:
     assert [p.name for p in port_list] == names
 
 
-def test_rename_setter() -> None:
+def test_rename_setter(LAYER: Layers) -> None:
     kcl = kf.KCLayout("TEST_RENAME")
+    kcl.layers = kcl.layerenum_from_dict(layers=LAYER.asdict())
 
     assert kcl.rename_function == kf.port.rename_clockwise_multi
 
@@ -117,7 +117,7 @@ def test_rename_setter() -> None:
         c1.create_port(
             trans=kf.kdb.Trans(ang, False, x, y),
             width=1000,
-            layer=kcl.layer(1, 0),
+            layer=kcl.find_layer(1, 0),
             name=name,
         )
 
@@ -157,7 +157,7 @@ def test_rename_setter() -> None:
         c2.create_port(
             trans=kf.kdb.Trans(ang, False, x, y),
             width=1000,
-            layer=kcl.layer(1, 0),
+            layer=kcl.find_layer(1, 0),
             name=name,
         )
     c2.auto_rename_ports()
