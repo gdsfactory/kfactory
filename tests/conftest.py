@@ -33,8 +33,7 @@ kf.kcl.layers = kf.kcl.layerenum_from_dict(layers=Layers().asdict())
 
 @pytest.fixture(scope="module")
 def LAYER() -> Layers:
-    layers = Layers()
-    return layers
+    return Layers()
 
 
 @pytest.fixture
