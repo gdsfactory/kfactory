@@ -7574,7 +7574,7 @@ def clean_value(
     elif isinstance(value, float | np.float64):  # float
         return f"{value}".replace(".", "p").rstrip("0").rstrip("p")
     elif isinstance(value, kdb.LayerInfo):
-        return f"{value.name or str(value.layer) + "_" + str(value.datatype)}"
+        return f"{value.name or str(value.layer) + '_' + str(value.datatype)}"
     elif isinstance(value, list | tuple):
         return "_".join(clean_value(v) for v in value)
     elif isinstance(value, dict):
