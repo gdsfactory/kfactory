@@ -857,7 +857,7 @@ def place90(
             taperp1, taperp2 = taper_ports
         else:
             raise AttributeError(
-                "At least one optical ports of the taper must be the same width as"
+                "At least one of the taper's optical ports must be the same width as"
                 " the bend's ports"
             )
         route = OpticalManhattanRoute(
