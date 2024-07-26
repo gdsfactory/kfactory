@@ -1434,8 +1434,10 @@ class KCell:
             for layer in self.kcl.layer_indexes():
                 reg = kdb.Region(self.shapes(layer))
                 reg = reg.merge()
+                texts = kdb.Texts(self.shapes(layer))
                 self.clear(layer)
                 self.shapes(layer).insert(reg)
+                self.shapes(layer).insert(texts)
 
     def rebuild(self) -> None:
         """Rebuild the instances of the KCell."""
