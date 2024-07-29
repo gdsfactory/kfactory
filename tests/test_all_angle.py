@@ -2,9 +2,10 @@ from functools import partial
 import kfactory as kf
 import numpy as np
 from random import randint
+from conftest import Layers
 
 
-def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
+def test_all_angle_bundle(LAYER: Layers) -> None:
     sf = partial(kf.cells.virtual.straight.virtual_straight, layer=LAYER.WG)
     bf = partial(
         kf.cells.virtual.euler.virtual_bend_euler, layer=LAYER.WG, radius=10, width=1
@@ -31,7 +32,7 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
                 dcplx_trans=kf.kdb.DCplxTrans(
                     1, a, False, -500 + r * np.cos(a_rad), -100 + r * np.sin(a_rad)
                 ),
-                layer=LAYER.WG,
+                layer=c.kcl.find_layer(LAYER.WG),
                 dwidth=1,
             )
         )
@@ -41,7 +42,7 @@ def test_all_angle_bundle(LAYER: kf.LayerEnum) -> None:
                 dcplx_trans=kf.kdb.DCplxTrans(
                     1, ae, False, 2510 + r * np.cos(ae_rad), 2410 + r * np.sin(ae_rad)
                 ),
-                layer=LAYER.WG,
+                layer=c.kcl.find_layer(LAYER.WG),
                 dwidth=1,
             )
         )

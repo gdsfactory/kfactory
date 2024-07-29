@@ -6,7 +6,7 @@ from typing import Any, Protocol
 from ... import kdb
 from ...conf import logger
 from ...enclosure import LayerEnclosure
-from ...kcell import Info, KCLayout, LayerEnum, MetaData, VKCell, vcell
+from ...kcell import Info, KCLayout, MetaData, VKCell, vcell
 from .utils import extrude_backbone
 
 __all__ = ["virtual_straight_factory"]
@@ -17,7 +17,7 @@ class StraightVKCell(Protocol):
         self,
         width: float,
         length: float,
-        layer: int | LayerEnum,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
     ) -> VKCell:
         """Virtual straight waveguide defined in um.
@@ -83,7 +83,7 @@ def virtual_straight_factory(
     def virtual_straight(
         width: float,
         length: float,
-        layer: int | LayerEnum,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
     ) -> VKCell:
         """Virtual waveguide defined in um.
@@ -145,13 +145,13 @@ def virtual_straight_factory(
         c.create_port(
             name="o1",
             dcplx_trans=kdb.DCplxTrans(1, 180, False, 0, 0),
-            layer=layer,
+            layer=c.kcl.find_layer(layer),
             dwidth=width,
         )
         c.create_port(
             name="o2",
             dcplx_trans=kdb.DCplxTrans(1, 0, False, length, 0),
-            layer=layer,
+            layer=c.kcl.find_layer(layer),
             dwidth=width,
         )
         return c

@@ -33,7 +33,9 @@ def bend_circular(
         ]
     ]
 
-    kf.enclosure.extrude_path(c, layer, backbone, width, enclosure, 0, angle)
+    kf.enclosure.extrude_path(
+        c, c.kcl.get_info(layer), backbone, width, enclosure, 0, angle
+    )
 
     c.create_port(
         name="W0", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer=layer

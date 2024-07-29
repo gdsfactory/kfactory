@@ -18,7 +18,7 @@ class BendEulerVKCell(Protocol):
         self,
         width: float,
         radius: float,
-        layer: int,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         angle: float = 90,
         resolution: float = 150,
@@ -82,7 +82,7 @@ def virtual_bend_euler_factory(
     def bend_euler(
         width: float,
         radius: float,
-        layer: int,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         angle: float = 90,
         resolution: float = 150,
@@ -140,7 +140,7 @@ def virtual_bend_euler_factory(
 
         c.create_port(
             name="o1",
-            layer=layer,
+            layer=c.kcl.find_layer(layer),
             dwidth=width,
             dcplx_trans=kdb.DCplxTrans(1, 180, False, backbone[0].to_v()),
         )
@@ -148,7 +148,7 @@ def virtual_bend_euler_factory(
             name="o2",
             dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
             dwidth=width,
-            layer=layer,
+            layer=c.kcl.find_layer(layer),
         )
         return c
 

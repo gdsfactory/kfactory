@@ -34,7 +34,7 @@ class BendEulerFactory(Protocol):
         self,
         width: kf_types.um,
         radius: kf_types.um,
-        layer: kf_types.layer,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         angle: kf_types.deg = 90,
         resolution: float = 150,
@@ -58,7 +58,7 @@ class BendSEulerFactory(Protocol):
         offset: kf_types.um,
         width: kf_types.um,
         radius: kf_types.um,
-        layer: kf_types.layer,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         resolution: float = 150,
     ) -> KCell:
@@ -263,7 +263,7 @@ def bend_euler_factory(
     def bend_euler(
         width: kf_types.um,
         radius: kf_types.um,
-        layer: kf_types.layer,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         angle: kf_types.deg = 90,
         resolution: float = 150,
@@ -304,8 +304,9 @@ def bend_euler_factory(
             start_angle=0,
             end_angle=angle,
         )
+        li = c.kcl.find_layer(layer)
         c.create_port(
-            layer=layer,
+            layer=li,
             width=c.kcl.to_dbu(width),
             trans=kdb.Trans(2, False, c.kcl.to_dbu(backbone[0]).to_v()),
         )
@@ -315,20 +316,20 @@ def bend_euler_factory(
             c.create_port(
                 trans=kdb.Trans(_ang // 90, False, c.kcl.to_dbu(backbone[-1]).to_v()),
                 width=round(width / c.kcl.dbu),
-                layer=layer,
+                layer=li,
             )
         else:
             c.create_port(
                 dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
                 dwidth=width,
-                layer=layer,
+                layer=li,
             )
         _info: dict[str, MetaData] = {}
         _info.update(
             _additional_info_func(
                 width=width,
                 radius=radius,
-                layer=layer,
+                layer=li,
                 enclosure=enclosure,
                 angle=angle,
                 resolution=resolution,
@@ -389,7 +390,7 @@ def bend_s_euler_factory(
         offset: kf_types.um,
         width: kf_types.um,
         radius: kf_types.um,
-        layer: kf_types.layer,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         resolution: float = 150,
     ) -> KCell:
@@ -433,17 +434,18 @@ def bend_s_euler_factory(
         else:
             p1 = c.kcl.to_dbu(backbone[0])
             p2 = c.kcl.to_dbu(backbone[-1])
+        li = c.kcl.find_layer(layer)
         c.create_port(
             trans=kdb.Trans(2, False, p1.to_v()),
             width=c.kcl.to_dbu(width),
             port_type="optical",
-            layer=layer,
+            layer=li,
         )
         c.create_port(
             trans=kdb.Trans(0, False, p2.to_v()),
             width=c.kcl.to_dbu(width),
             port_type="optical",
-            layer=layer,
+            layer=li,
         )
         c.boundary = center_path
         _info: dict[str, MetaData] = {}

@@ -3,10 +3,10 @@ import kfactory as kf
 
 def test_tiled_fill_space(fill_cell: kf.KCell) -> None:
     c = kf.KCell()
-    c.shapes(kf.kcl.layer(1, 0)).insert(
+    c.shapes(kf.kcl.find_layer(1, 0)).insert(
         kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512)
     )
-    c.shapes(kf.kcl.layer(10, 0)).insert(
+    c.shapes(kf.kcl.find_layer(10, 0)).insert(
         kf.kdb.DPolygon(
             [kf.kdb.DPoint(0, 0), kf.kdb.DPoint(5000, 0), kf.kdb.DPoint(5000, 3000)]
         )
@@ -14,11 +14,11 @@ def test_tiled_fill_space(fill_cell: kf.KCell) -> None:
     kf.utils.fill_tiled(
         c,
         fill_cell,
-        [(kf.kcl.layer(1, 0), 0)],
+        [(kf.kcl.find_layer(1, 0), 0)],
         exclude_layers=[
-            (kf.kcl.layer(10, 0), 100),
-            (kf.kcl.layer(2, 0), 0),
-            (kf.kcl.layer(3, 0), 0),
+            (kf.kcl.find_layer(10, 0), 100),
+            (kf.kcl.find_layer(2, 0), 0),
+            (kf.kcl.find_layer(3, 0), 0),
         ],
         x_space=5,
         y_space=5,
@@ -28,10 +28,10 @@ def test_tiled_fill_space(fill_cell: kf.KCell) -> None:
 
 def test_tiled_fill_vector(fill_cell: kf.KCell) -> None:
     c = kf.KCell()
-    c.shapes(kf.kcl.layer(1, 0)).insert(
+    c.shapes(kf.kcl.find_layer(1, 0)).insert(
         kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512)
     )
-    c.shapes(kf.kcl.layer(10, 0)).insert(
+    c.shapes(kf.kcl.find_layer(10, 0)).insert(
         kf.kdb.DPolygon(
             [kf.kdb.DPoint(0, 0), kf.kdb.DPoint(5000, 0), kf.kdb.DPoint(5000, 3000)]
         )
@@ -48,15 +48,15 @@ def test_tiled_fill_vector(fill_cell: kf.KCell) -> None:
 
     poly.insert_hole(kf.kdb.DBox(-1800, -200, -1200, 200))
 
-    c.shapes(kf.kcl.layer(10, 0)).insert(poly)
+    c.shapes(kf.kcl.find_layer(10, 0)).insert(poly)
     kf.utils.fill_tiled(
         c,
         fill_cell,
-        [(kf.kcl.layer(1, 0), 0)],
+        [(kf.kcl.find_layer(1, 0), 0)],
         exclude_layers=[
-            (kf.kcl.layer(10, 0), 100),
-            (kf.kcl.layer(2, 0), 0),
-            (kf.kcl.layer(3, 0), 0),
+            (kf.kcl.find_layer(10, 0), 100),
+            (kf.kcl.find_layer(2, 0), 0),
+            (kf.kcl.find_layer(3, 0), 0),
         ],
         row_step=kf.kdb.DVector(35, 5),
         col_step=kf.kdb.DVector(-5, 50),

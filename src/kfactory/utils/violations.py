@@ -6,7 +6,7 @@ minimum space violations and then applies a fix.
 
 from typing import overload
 
-from .. import KCell, LayerEnum, kdb
+from .. import KCell, kdb
 from ..conf import config, logger
 
 __all__ = [
@@ -20,7 +20,7 @@ __all__ = [
 def fix_spacing_tiled(
     c: KCell,
     min_space: int,
-    layer: LayerEnum | int,
+    layer: kdb.LayerInfo,
     metrics: kdb.Metrics = kdb.Metrics.Euclidian,
     ignore_angle: float = 80,
     size_space_check: int = 5,
@@ -35,7 +35,7 @@ def fix_spacing_tiled(
 def fix_spacing_tiled(
     c: KCell,
     min_space: int,
-    layer: LayerEnum | int,
+    layer: kdb.LayerInfo,
     metrics: kdb.Metrics = kdb.Metrics.Euclidian,
     ignore_angle: float = 80,
     size_space_check: int = 5,
@@ -50,7 +50,7 @@ def fix_spacing_tiled(
 def fix_spacing_tiled(
     c: KCell,
     min_space: int,
-    layer: LayerEnum | int,
+    layer: kdb.LayerInfo,
     metrics: kdb.Metrics = kdb.Metrics.Euclidian,
     ignore_angle: float = 80,
     size_space_check: int = 5,
@@ -92,13 +92,13 @@ def fix_spacing_tiled(
     if tile_size is None:
         min(25 * min_space, 250)
         tile_size = (30 * min_space * c.kcl.dbu, 30 * min_space * c.kcl.dbu)
-
+    li = c.kcl.find_layer(layer)
     tp = kdb.TilingProcessor()
-    tp.frame = c.kcl.to_um(c.bbox(layer))  # type: ignore[misc]
+    tp.frame = c.kcl.to_um(c.bbox(li))  # type: ignore[misc]
     tp.dbu = c.kcl.dbu
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
-    tp.input("reg", c.kcl.layout, c.cell_index(), layer)
+    tp.input("reg", c.kcl.layout, c.cell_index(), li)
     tp.threads = n_threads or config.n_threads
 
     fix_reg = RegionOperator()
@@ -146,7 +146,7 @@ def fix_spacing_tiled(
 def fix_spacing_sizing_tiled(
     c: KCell,
     min_space: int,
-    layer: LayerEnum,
+    layer: kdb.LayerInfo,
     n_threads: int | None = None,
     tile_size: tuple[float, float] | None = None,
     overlap: int = 2,
@@ -156,7 +156,7 @@ def fix_spacing_sizing_tiled(
     Args:
         c: Input cell
         min_space: Minimum space rule [dbu]
-        layer: Input layer index
+        layer: Input layer
         n_threads: on how many threads to run the check simultaneously
         tile_size: tuple determining the size of each sub tile (in um), should be big
             compared to the violation size
@@ -171,11 +171,12 @@ def fix_spacing_sizing_tiled(
     if tile_size is None:
         size = min_space * 20 * c.kcl.dbu
         tile_size = (size, size)
-    tp.frame = c.kcl.to_um(c.bbox(layer))  # type: ignore[misc]
+    li = c.kcl.find_layer(layer)
+    tp.frame = c.kcl.to_um(c.bbox(li))  # type: ignore[misc]
     tp.dbu = c.kcl.dbu
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
-    tp.input("reg", c.kcl.layout, c.cell_index(), layer)
+    tp.input("reg", c.kcl.layout, c.cell_index(), li)
     tp.threads = n_threads or config.n_threads
 
     fix_reg = kdb.Region()
@@ -200,7 +201,7 @@ def fix_spacing_sizing_tiled(
 def fix_spacing_minkowski_tiled(
     c: KCell,
     min_space: int,
-    ref: LayerEnum | kdb.Region,
+    ref: kdb.LayerInfo | kdb.Region,
     n_threads: int | None = None,
     tile_size: tuple[float, float] | None = None,
     overlap: int = 1,
@@ -235,8 +236,8 @@ def fix_spacing_minkowski_tiled(
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
 
     tp.tile_size(*tile_size)
-    if isinstance(ref, int):
-        tp.input("main_layer", c.kcl.layout, c.cell_index(), ref)
+    if isinstance(ref, kdb.LayerInfo):
+        tp.input("main_layer", c.kcl.layout, c.cell_index(), c.kcl.find_layer(ref))
     else:
         tp.input("main_layer", ref)
 
@@ -274,7 +275,7 @@ def fix_spacing_minkowski_tiled(
 def fix_width_minkowski_tiled(
     c: KCell,
     min_width: int,
-    ref: LayerEnum | kdb.Region,
+    ref: kdb.LayerInfo | kdb.Region,
     n_threads: int | None = None,
     tile_size: tuple[float, float] | None = None,
     overlap: int = 1,
@@ -309,8 +310,8 @@ def fix_width_minkowski_tiled(
     tp.tile_border(min_width * overlap * tp.dbu, min_width * overlap * tp.dbu)
 
     tp.tile_size(*tile_size)
-    if isinstance(ref, int):
-        tp.input("main_layer", c.kcl.layout, c.cell_index(), ref)
+    if isinstance(ref, kdb.LayerInfo):
+        tp.input("main_layer", c.kcl.layout, c.cell_index(), c.kcl.find_layer(ref))
     else:
         tp.input("main_layer", ref)
 
@@ -349,7 +350,7 @@ def fix_width_and_spacing_minkowski_tiled(
     c: KCell,
     min_space: int,
     min_width: int,
-    ref: LayerEnum | kdb.Region,
+    ref: kdb.LayerInfo | kdb.Region,
     n_threads: int | None = None,
     tile_size: tuple[float, float] | None = None,
     overlap: int = 1,
@@ -389,8 +390,8 @@ def fix_width_and_spacing_minkowski_tiled(
     tp.tile_border(border, border)
 
     tp.tile_size(*tile_size)
-    if isinstance(ref, int):
-        tp.input("main_layer", c.kcl.layout, c.cell_index(), ref)
+    if isinstance(ref, kdb.LayerInfo):
+        tp.input("main_layer", c.kcl.layout, c.cell_index(), c.kcl.find_layer(ref))
     else:
         tp.input("main_layer", ref)
 

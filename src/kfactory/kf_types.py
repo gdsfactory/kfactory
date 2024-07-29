@@ -17,3 +17,4 @@ rad = Annotated[float, "rad"]
 """Float in radians."""
 layer = Annotated[int | LayerEnum, "layer"]
 """Integer or enum index of a Layer."""
+layer_info = Annotated[str, "layer info"]

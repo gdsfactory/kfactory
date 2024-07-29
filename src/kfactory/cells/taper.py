@@ -4,7 +4,7 @@ TODO: Non-linear tapers.
 
 """
 
-from .. import KCell, kcl, kf_types
+from .. import KCell, kcl, kdb, kf_types
 from ..enclosure import LayerEnclosure
 from ..factories.taper import taper_factory
 
@@ -17,7 +17,7 @@ def taper(
     width1: kf_types.um,
     width2: kf_types.um,
     length: kf_types.um,
-    layer: kf_types.layer,
+    layer: kdb.LayerInfo,
     enclosure: LayerEnclosure | None = None,
 ) -> KCell:
     r"""Linear Taper [um].

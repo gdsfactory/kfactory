@@ -21,7 +21,7 @@ class BendCircularKCell(Protocol):
         self,
         width: kf_types.um,
         radius: kf_types.um,
-        layer: kf_types.layer,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         angle: kf_types.deg = 90,
         angle_step: kf_types.deg = 1,
@@ -88,7 +88,7 @@ def bend_circular_factory(
     def bend_circular(
         width: kf_types.um,
         radius: kf_types.um,
-        layer: kf_types.layer,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         angle: kf_types.deg = 90,
         angle_step: kf_types.deg = 1,
@@ -147,12 +147,12 @@ def bend_circular_factory(
         c.create_port(
             trans=kdb.Trans(2, False, 0, 0),
             width=int(width / c.kcl.dbu),
-            layer=layer,
+            layer=c.kcl.find_layer(layer),
         )
         c.create_port(
             dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
             dwidth=width,
-            layer=layer,
+            layer=c.kcl.find_layer(layer),
         )
         c.auto_rename_ports()
         c.boundary = center_path

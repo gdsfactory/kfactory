@@ -53,7 +53,7 @@ def test_mirror(LAYER: kf.LayerEnum) -> None:
 
     b2.mirror(disp * mp1, disp * mp2)
 
-    c.shapes(LAYER.WG).insert(kf.kdb.Edge(mp1, mp2).transformed(disp))
+    c.shapes(c.kcl.find_layer(LAYER.WG)).insert(kf.kdb.Edge(mp1, mp2).transformed(disp))
 
 
 def test_dmirror(LAYER: kf.LayerEnum) -> None:
@@ -70,4 +70,6 @@ def test_dmirror(LAYER: kf.LayerEnum) -> None:
 
     b2.dmirror(disp * mp1, disp * mp2)
 
-    c.shapes(LAYER.WG).insert(kf.kdb.DEdge(mp1, mp2).transformed(disp))
+    c.shapes(c.kcl.find_layer(LAYER.WG)).insert(
+        kf.kdb.DEdge(mp1, mp2).transformed(disp)
+    )

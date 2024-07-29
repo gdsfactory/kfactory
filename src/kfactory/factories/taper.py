@@ -20,7 +20,7 @@ class TaperFactory(Protocol):
         width1: kf_types.dbu,
         width2: kf_types.dbu,
         length: kf_types.dbu,
-        layer: kf_types.layer,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
     ) -> KCell:
         r"""Linear Taper [dbu].
@@ -105,7 +105,7 @@ def taper_factory(
         width1: kf_types.dbu,
         width2: kf_types.dbu,
         length: kf_types.dbu,
-        layer: kf_types.layer,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
     ) -> KCell:
         r"""Linear Taper [um].
@@ -154,7 +154,8 @@ def taper_factory(
             )
             width2 = -width2
 
-        taper = c.shapes(layer).insert(
+        li = c.kcl.find_layer(layer)
+        taper = c.shapes(li).insert(
             kdb.Polygon(
                 [
                     kdb.Point(0, int(-width1 / 2)),
@@ -165,8 +166,8 @@ def taper_factory(
             )
         )
 
-        c.create_port(trans=kdb.Trans(2, False, 0, 0), width=width1, layer=layer)
-        c.create_port(trans=kdb.Trans(0, False, length, 0), width=width2, layer=layer)
+        c.create_port(trans=kdb.Trans(2, False, 0, 0), width=width1, layer=li)
+        c.create_port(trans=kdb.Trans(0, False, length, 0), width=width2, layer=li)
 
         if enclosure is not None:
             enclosure.apply_minkowski_y(c, layer)

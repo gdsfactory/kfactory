@@ -163,7 +163,7 @@ def extrude_path_points(
 
 def extrude_path(
     target: KCell,
-    layer: LayerEnum | int,
+    layer: kdb.LayerInfo,  # LayerEnum | int,
     path: list[kdb.DPoint],
     width: float,
     enclosure: LayerEnclosure | None = None,
@@ -219,7 +219,7 @@ def extrude_path(
             reg.insert(_r)
             if _layer == layer and i == j:
                 ret_path = _path
-        target.shapes(_layer).insert(reg.merge())
+        target.shapes(target.kcl.find_layer(_layer)).insert(reg.merge())
     return ret_path
 
 
@@ -299,7 +299,7 @@ def extrude_path_dynamic_points(
 
 def extrude_path_dynamic(
     target: KCell,
-    layer: LayerEnum | int,
+    layer: kdb.LayerInfo,
     path: list[kdb.DPoint],
     widths: Callable[[float], float] | list[float],
     enclosure: LayerEnclosure | None = None,
@@ -376,7 +376,7 @@ def extrude_path_dynamic(
                         )
                     )
                 reg.insert(_r)
-            target.shapes(layer).insert(reg.merge())
+            target.shapes(target.kcl.find_layer(layer)).insert(reg.merge())
 
     else:
         for layer, layer_sec in layer_list.items():
@@ -416,7 +416,7 @@ def extrude_path_dynamic(
                         )
                     )
                 reg.insert(_r)
-            target.shapes(layer).insert(reg.merge())
+            target.shapes(target.kcl.find_layer(layer)).insert(reg.merge())
 
 
 class Section(BaseModel):
@@ -512,7 +512,7 @@ class LayerSection(BaseModel):
         yield from iter(self.sections)
 
 
-class LayerEnclosure(BaseModel, validate_assignment=True):
+class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowed=True):
     """Definitions for calculation of enclosing (or smaller) shapes of a reference.
 
     Attributes:
@@ -520,21 +520,21 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
         main_layer: Layer which to use unless specified otherwise.
     """
 
-    layer_sections: dict[LayerEnum | int, LayerSection]
+    layer_sections: dict[kdb.LayerInfo, LayerSection]
     _name: str | None = PrivateAttr()
-    main_layer: LayerEnum | int | None
+    main_layer: kdb.LayerInfo | None
     yaml_tag: str = "!Enclosure"
     kcl: KCLayout | None = None
 
     def __init__(
         self,
         sections: Sequence[
-            tuple[LayerEnum | int, int] | tuple[LayerEnum | int, int, int]
+            tuple[kdb.LayerInfo, int] | tuple[kdb.LayerInfo, int, int]
         ] = [],
         name: str | None = None,
-        main_layer: LayerEnum | int | None = None,
+        main_layer: kdb.LayerInfo | None = None,
         dsections: Sequence[
-            tuple[LayerEnum | int, float] | tuple[LayerEnum | int, float, float]
+            tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]
         ]
         | None = None,
         kcl: KCLayout | None = None,
@@ -566,22 +566,24 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
             assert (
                 self.kcl is not None
             ), "If sections in um are defined, kcl must be set"
-            dbu = self.kcl.dbu
             sections = list(sections)
             for section in dsections:
                 if len(section) == 2:
-                    sections.append((section[0], round(section[1] / dbu)))
+                    sections.append((section[0], self.kcl.to_dbu(section[1])))
 
                 elif len(section) == 3:
                     sections.append(
                         (
                             section[0],
-                            round(section[1] / dbu),
-                            round(section[2] / dbu),
+                            self.kcl.to_dbu(section[1]),
+                            self.kcl.to_dbu(section[2]),
                         )
                     )
 
-        for sec in sorted(sections, key=lambda sec: (sec[0], sec[1])):
+        for sec in sorted(
+            sections,
+            key=lambda sec: (sec[0].name, sec[0].layer, sec[0].datatype, sec[1]),
+        ):
             if sec[0] in self.layer_sections:
                 ls = self.layer_sections[sec[0]]
             else:
@@ -618,7 +620,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                 self.add_section(layer, sec)
         return self
 
-    def add_section(self, layer: LayerEnum | int, sec: Section) -> None:
+    def add_section(self, layer: kdb.LayerInfo, sec: Section) -> None:
         """Add a new section to the the enclosure.
 
         Args:
@@ -680,7 +682,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
     def apply_minkowski_enc(
         self,
         c: KCell,
-        ref: int | kdb.Region | None,  # layer index or the region
+        ref: kdb.LayerInfo | kdb.Region | None,  # layer index or the region
         direction: Direction = Direction.BOTH,
     ) -> None:
         """Apply an enclosure with a vector in y-direction.
@@ -719,7 +721,9 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
             case _:
                 raise ValueError("Undefined direction")
 
-    def apply_minkowski_y(self, c: KCell, ref: int | kdb.Region | None = None) -> None:
+    def apply_minkowski_y(
+        self, c: KCell, ref: kdb.LayerInfo | kdb.Region | None = None
+    ) -> None:
         """Apply an enclosure with a vector in y-direction.
 
         This can be used for tapers/
@@ -731,7 +735,9 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
         """
         return self.apply_minkowski_enc(c, ref=ref, direction=Direction.Y)
 
-    def apply_minkowski_x(self, c: KCell, ref: int | kdb.Region | None) -> None:
+    def apply_minkowski_x(
+        self, c: KCell, ref: kdb.LayerInfo | kdb.Region | None
+    ) -> None:
         """Apply an enclosure with a vector in x-direction.
 
         This can be used for tapers/
@@ -747,7 +753,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
         self,
         c: KCell,
         shape: Callable[[int], kdb.Edge | kdb.Polygon | kdb.Box],
-        ref: int | kdb.Region | None = None,
+        ref: kdb.LayerInfo | kdb.Region | None = None,
     ) -> None:
         """Apply an enclosure with a custom shape.
 
@@ -768,12 +774,16 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                     "The enclosure doesn't have  a reference `main_layer` defined."
                     " Therefore the layer must be defined in calls"
                 )
-        r = kdb.Region(c.begin_shapes_rec(ref)) if isinstance(ref, int) else ref.dup()
+        r = (
+            kdb.Region(c.begin_shapes_rec(c.kcl.find_layer(ref)))
+            if isinstance(ref, kdb.LayerInfo)
+            else ref.dup()
+        )
         r.merge()
 
         for layer, layersec in reversed(self.layer_sections.items()):
             for section in layersec.sections:
-                c.shapes(layer).insert(
+                c.shapes(c.kcl.find_layer(layer)).insert(
                     self.minkowski_region(r, section.d_max, shape)
                     - self.minkowski_region(r, section.d_min, shape)
                 )
@@ -781,7 +791,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
     def apply_minkowski_tiled(
         self,
         c: KCell,
-        ref: int | kdb.Region | None = None,
+        ref: kdb.LayerInfo | kdb.Region | None = None,
         tile_size: float | None = None,
         n_pts: int = 64,
         n_threads: int | None = None,
@@ -841,8 +851,8 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
         tp.tile_border(maxsize * tp.dbu, maxsize * tp.dbu)
 
         tp.tile_size(tile_size, tile_size)
-        if isinstance(ref, int):
-            tp.input("main_layer", c.kcl.layout, c.cell_index(), ref)
+        if isinstance(ref, kdb.LayerInfo):
+            tp.input("main_layer", c.kcl.layout, c.cell_index(), c.kcl.find_layer(ref))
         else:
             tp.input("main_layer", ref)
 
@@ -853,8 +863,9 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
             ports_by_layer[port.layer].append(port)
 
         for layer, sections in self.layer_sections.items():
-            operator = RegionOperator(cell=c, layer=layer)
-            tp.output(f"target_{layer}", operator)
+            layer_index = c.kcl.find_layer(layer)
+            operator = RegionOperator(cell=c, layer=layer_index)
+            tp.output(f"target_{layer_index}", operator)
             max_size: int = _min_size
             for i, section in enumerate(reversed(sections.sections)):
                 max_size = max(max_size, section.d_max)
@@ -895,19 +906,20 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                             min_region = "var min_reg = main_layer & tile_reg;"
                     queue_str += min_region
                     queue_str += (
-                        f"_output(target_{layer}," "(max_reg - min_reg)& _tile, true);"
+                        f"_output(target_{layer_index},"
+                        "(max_reg - min_reg)& _tile, true);"
                     )
                 else:
-                    queue_str += f"_output(target_{layer},max_reg & _tile, true);"
+                    queue_str += f"_output(target_{layer_index},max_reg & _tile, true);"
 
                 tp.queue(queue_str)
                 logger.debug(
                     "String queued for {} on layer {}: {}", c.name, layer, queue_str
                 )
 
-            operators.append((layer, operator))
+            operators.append((layer_index, operator))
             if carve_out_ports:
-                r = port_holes[layer]
+                r = port_holes[layer_index]
                 for port in carve_out_ports:
                     if port._trans:
                         r.insert(
@@ -919,7 +931,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                                 kdb.ICplxTrans(port.dcplx_trans, c.kcl.dbu)
                             )
                         )
-                port_holes[layer] = r
+                port_holes[layer_index] = r
 
         c.kcl.start_changes()
         logger.info("Starting minkowski on {}", c.name)
@@ -929,8 +941,8 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
         # for layer, operator in operators:
         #     operator.insert()
         if carve_out_ports:
-            for layer, operator in operators:
-                operator.insert(port_holes=port_holes[layer])
+            for layer_index, operator in operators:
+                operator.insert(port_holes=port_holes[layer_index])
         else:
             for _, operator in operators:
                 operator.insert()
@@ -950,10 +962,13 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
                 full enclosure.
         """
         for layer, layersec in self.layer_sections.items():
+            layer_index = c.kcl.find_layer(layer)
             for sec in layersec.sections:
-                c.shapes(layer).insert(shape(sec.d_max, sec.d_min))
+                c.shapes(layer_index).insert(shape(sec.d_max, sec.d_min))
 
-    def apply_bbox(self, c: KCell, ref: int | kdb.Region | None = None) -> None:
+    def apply_bbox(
+        self, c: KCell, ref: kdb.LayerInfo | kdb.Region | None = None
+    ) -> None:
         """Apply an enclosure based on a bounding box.
 
         Args:
@@ -1013,7 +1028,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
         self,
         c: KCell,
         path: list[kdb.DPoint],
-        main_layer: int | LayerEnum | None,
+        main_layer: kdb.LayerInfo | None,
         width: float,
         start_angle: float | None = None,
         end_angle: float | None = None,
@@ -1052,7 +1067,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
         self,
         c: KCell,
         path: list[kdb.DPoint],
-        main_layer: int | LayerEnum | None,
+        main_layer: kdb.LayerInfo | None,
         widths: Callable[[float], float] | list[float],
     ) -> None:
         """Extrude a path and add it to a main layer.
@@ -1084,9 +1099,9 @@ class LayerEnclosure(BaseModel, validate_assignment=True):
         for layer, sections in self.layer_sections.items():
             if isinstance(layer, LayerEnum):
                 try:
-                    _layer = kcl.layers(layer)  # type: ignore[call-arg]
+                    _layer = kcl.find_layers(layer)
                 except ValueError:
-                    _layer = kcl.layer(layer.layer, layer.datatype)
+                    _layer = kcl.find_layer(layer.layer, layer.datatype)
                     logger.warning(
                         "{layer.name} - {layer.layer}/{layer.datatype} is not"
                         " available in the new KCLayout {kcl.name}, using layer"
@@ -1194,7 +1209,7 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
     def __init__(
         self,
         cell: KCell,
-        layers: list[LayerEnum | int],
+        layers: list[LayerEnum],
     ) -> None:
         """Initialization.
 
@@ -1242,11 +1257,11 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
     def insert(self) -> None: ...
 
     @overload
-    def insert(self, port_hole_map: dict[int, kdb.Region]) -> None: ...
+    def insert(self, port_hole_map: dict[LayerEnum, kdb.Region]) -> None: ...
 
     def insert(
         self,
-        port_hole_map: dict[int, kdb.Region] | None = None,
+        port_hole_map: dict[LayerEnum, kdb.Region] | None = None,
     ) -> None:
         """Insert the finished region into the cell.
 
@@ -1450,26 +1465,28 @@ class KCellEnclosure(BaseModel):
         tp.frame = c.dbbox()  # type: ignore[misc]
         tp.dbu = c.kcl.dbu
         tp.threads = n_threads or config.n_threads
-        inputs: set[int] = set()
-        port_hole_map: dict[int, kdb.Region] = defaultdict(kdb.Region)
-        ports_by_layer: dict[int, list[Port]] = defaultdict(list)
+        inputs: set[str] = set()
+        port_hole_map: dict[LayerEnum, kdb.Region] = defaultdict(kdb.Region)
+        ports_by_layer: dict[LayerEnum, list[Port]] = defaultdict(list)
         for port in c.ports:
-            ports_by_layer[port.layer].append(port)
+            ports_by_layer[c.kcl.find_layer(c.kcl.get_info(port.layer))].append(port)
 
         maxsize = 0
         for enc in self.enclosures.enclosures:
             assert enc.main_layer is not None
+            main_layer = c.kcl.find_layer(enc.main_layer)
             for layer, layersection in enc.layer_sections.items():
+                li = c.kcl.find_layer(layer)
                 size = layersection.sections[-1].d_max
                 maxsize = max(maxsize, size)
 
-                for port in ports_by_layer[enc.main_layer]:
+                for port in ports_by_layer[main_layer]:
                     if port._trans:
-                        port_hole_map[layer].insert(
+                        port_hole_map[li].insert(
                             port_hole(port.width, size).transformed(port.trans)
                         )
                     else:
-                        port_hole_map[layer].insert(
+                        port_hole_map[li].insert(
                             port_hole(port.width, size).transformed(
                                 kdb.ICplxTrans(port.dcplx_trans, port.kcl.dbu)
                             )
@@ -1499,22 +1516,29 @@ class KCellEnclosure(BaseModel):
 
         for i, enc in enumerate(self.enclosures.enclosures):
             assert enc.main_layer is not None
-            if not c.bbox(enc.main_layer).empty():
-                _inp = f"main_layer_{int(enc.main_layer)}"
+            if not c.bbox(c.kcl.find_layer(enc.main_layer)).empty():
+                main_layer = c.kcl.find_layer(enc.main_layer)
+                _inp = f"main_layer_{main_layer}"
                 if enc.main_layer not in inputs:
-                    tp.input(_inp, c.kcl.layout, c.cell_index(), enc.main_layer)
-                    inputs.add(enc.main_layer)
+                    tp.input(
+                        _inp,
+                        c.kcl.layout,
+                        c.cell_index(),
+                        main_layer,
+                    )
+                    inputs.add(main_layer)
                     logger.debug("Created input {}", _inp)
 
                 for layer, layer_section in enc.layer_sections.items():
-                    if (enc.main_layer, layer_section) in layer_regiontilesoperators:
+                    li = c.kcl.find_layer(layer)
+                    if (main_layer, layer_section) in layer_regiontilesoperators:
                         layer_regiontilesoperators[
-                            (enc.main_layer, layer_section)
-                        ].layers.append(layer)
+                            (main_layer, layer_section)
+                        ].layers.append(li)
                     else:
-                        _out = f"target_{layer}"
-                        operator = RegionTilesOperator(cell=c, layers=[layer])
-                        layer_regiontilesoperators[(enc.main_layer, layer_section)] = (
+                        _out = f"target_{li}"
+                        operator = RegionTilesOperator(cell=c, layers=[li])
+                        layer_regiontilesoperators[(main_layer, layer_section)] = (
                             operator
                         )
                         tp.output(_out, operator)
