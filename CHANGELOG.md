@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- ensure cell decorated functions return component [#443](https://github.com/gdsfactory/kfactory/pull/443)
 - fix c.flatten(merge=True) deleting texts [#441](https://github.com/gdsfactory/kfactory/pull/441)
 - Adjust AttributeError text in optical routing for taper and bend [#438](https://github.com/gdsfactory/kfactory/pull/438)
 
