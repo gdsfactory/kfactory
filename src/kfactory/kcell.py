@@ -18,7 +18,6 @@ import json
 import socket
 from collections import UserDict, defaultdict
 from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
-from dataclasses import asdict as _asdict
 from dataclasses import dataclass, field
 from enum import IntEnum, IntFlag, auto
 from hashlib import sha3_512
@@ -28,6 +27,7 @@ from types import FunctionType, ModuleType
 from typing import (
     Annotated,
     Any,
+    Generic,
     Literal,
     Protocol,
     TypeAlias,
@@ -47,8 +47,15 @@ from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
 from cachetools import Cache
 from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
 from klayout import __version__ as _klayout_version  # type: ignore[attr-defined]
-from pydantic import BaseModel, Field, computed_field, model_validator
-from pydantic_settings import BaseSettings
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    RootModel,
+    ValidationError,
+    computed_field,
+    model_validator,
+)
 from typing_extensions import ParamSpec, Self  # noqa: UP035
 
 from . import __version__, kdb, lay, rdb
@@ -70,6 +77,8 @@ from .port import (
 )
 
 T = TypeVar("T")
+L = TypeVar("L", bound="LayerInfos")
+C = TypeVar("C", bound="Constants")
 
 KCellParams = ParamSpec("KCellParams")
 AnyTrans = TypeVar(
@@ -129,8 +138,8 @@ MetaData: TypeAlias = (
 )
 
 
-kcl: KCLayout
-kcls: dict[str, KCLayout] = {}
+kcl: KCLayout[LayerInfos, Constants]
+kcls: dict[str, KCLayout[Any, Any]] = {}
 
 
 class SizeInfo:
@@ -317,17 +326,33 @@ class DSizeInfo:
         return (c.x, c.y)
 
 
-class KCellFunc(Protocol[KCellParams]):
+class KCellFunc(Protocol[KCellParams, L, C]):
     def __call__(
         self, *args: KCellParams.args, **kwargs: KCellParams.kwargs
-    ) -> KCell: ...
+    ) -> KCell[L, C]: ...
 
 
-@dataclass
-class Layers:
-    def asdict(self) -> dict[str, tuple[int, int]]:
-        d = _asdict(self)
-        return {name: (layer.layer, layer.datatype) for name, layer in d.items()}
+class LayerInfos(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_layers(
+        cls, data: dict[str, kdb.LayerInfo]
+    ) -> dict[str, kdb.LayerInfo]:
+        for name, info in data.items():
+            if not isinstance(info, kdb.LayerInfo):
+                raise ValidationError(
+                    f"Layer {name} must be a `kf.kdb.LayerInfo` instance"
+                )
+                if info.name is None:
+                    info.name = name
+                if info.layer is None or info.datatype is None:
+                    raise ValidationError(
+                        f"Layer {name}: Layers without layer and datatype set are not "
+                        "allowed"
+                    )
+        return data
 
 
 class LayerEnum(int, Enum):  # type: ignore[misc]
@@ -343,11 +368,11 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
 
     layer: int
     datatype: int
-    kcl: constant[KCLayout]
+    layout: constant[kdb.Layout]
 
     def __init__(self, layer: int, datatype: int) -> None:
         """Just here to make sure klayout knows the layer name."""
-        self.kcl.set_info(self, kdb.LayerInfo(self.layer, self.datatype, self.name))
+        self.layout.set_info(self, kdb.LayerInfo(self.layer, self.datatype, self.name))
 
     def __new__(  # type: ignore[misc]
         cls: LayerEnum,
@@ -363,7 +388,7 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
             datatype: Datatype of the layer.
             kcl: Base Layout object to register the layer to.
         """
-        value = cls.kcl.layout.layer(layer, datatype)
+        value = cls.layout.layer(layer, datatype)
         obj: int = int.__new__(cls, value)
         obj._value_ = value  # type: ignore[attr-defined]
         obj.layer = layer  # type: ignore[attr-defined]
@@ -514,11 +539,11 @@ class PROPID(IntEnum):
     NAME = 0
 
 
-class LockedError(AttributeError):
+class LockedError(AttributeError, Generic[L, C]):
     """Raised when a locked cell is being modified."""
 
     @logger.catch(reraise=True)
-    def __init__(self, kcell: KCell | VKCell):
+    def __init__(self, kcell: KCell[L, C] | VKCell[L, C]):
         """Throw _locked error."""
         super().__init__(
             f"KCell {kcell.name} has been locked already."
@@ -537,10 +562,10 @@ class PortWidthMismatch(ValueError):
     @logger.catch(reraise=True)
     def __init__(
         self,
-        inst: Instance,
-        other_inst: Instance | Port,
-        p1: Port,
-        p2: Port,
+        inst: Instance[L, C],
+        other_inst: Instance[L, C] | Port[L, C],
+        p1: Port[L, C],
+        p2: Port[L, C],
         *args: Any,
     ):
         """Throw error for the two ports `p1`/`p1`."""
@@ -558,17 +583,17 @@ class PortWidthMismatch(ValueError):
             )
 
 
-class PortLayerMismatch(ValueError):
+class PortLayerMismatch(ValueError, Generic[L, C]):
     """Error thrown when two ports don't have a matching `layer`."""
 
     @logger.catch(reraise=True)
     def __init__(
         self,
-        kcl: KCLayout,
-        inst: Instance,
-        other_inst: Instance | Port,
-        p1: Port,
-        p2: Port,
+        kcl: KCLayout[L, C],
+        inst: Instance[L, C],
+        other_inst: Instance[L, C] | Port[L, C],
+        p1: Port[L, C],
+        p2: Port[L, C],
         *args: Any,
     ):
         """Throw error for the two ports `p1`/`p1`."""
@@ -602,10 +627,10 @@ class PortTypeMismatch(ValueError):
     @logger.catch(reraise=True)
     def __init__(
         self,
-        inst: Instance,
-        other_inst: Instance | Port,
-        p1: Port,
-        p2: Port,
+        inst: Instance[L, C],
+        other_inst: Instance[L, C] | Port[L, C],
+        p1: Port[L, C],
+        p2: Port[L, C],
         *args: Any,
     ):
         """Throw error for the two ports `p1`/`p1`."""
@@ -679,7 +704,9 @@ class PortCheck(IntFlag):
 
 
 @logger.catch(reraise=True)
-def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -> None:
+def port_check(
+    p1: Port[L, C], p2: Port[L, C], checks: PortCheck = PortCheck.all_opposite
+) -> None:
     if checks & PortCheck.opposite:
         assert (
             p1.trans == p2.trans * kdb.Trans.R180
@@ -699,7 +726,7 @@ def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -
 
 def get_cells(
     modules: Iterable[ModuleType], verbose: bool = False
-) -> dict[str, Callable[..., KCell]]:
+) -> dict[str, Callable[..., KCell[LayerInfos, Constants]]]:
     """Returns KCells (KCell functions) from a module or list of modules.
 
     Args:
@@ -734,7 +761,7 @@ class LayerEnclosureModel(BaseModel):
         return self.enclosure_map[__key]
 
 
-class KCell:
+class KCell(Generic[L, C]):
     """KLayout cell and change its class to KCell.
 
     A KCell is a dynamic proxy for kdb.Cell. It has all the
@@ -765,15 +792,15 @@ class KCell:
     """
 
     yaml_tag: str = "!KCell"
-    _ports: Ports
+    _ports: Ports[L, C]
     _settings: KCellSettings
     _settings_units: KCellSettingsUnits
     _kdb_cell: kdb.Cell
     info: Info
-    kcl: KCLayout
+    kcl: KCLayout[L, C]
     boundary: kdb.DPolygon | None
-    insts: Instances
-    vinsts: list[VInstance]
+    insts: Instances[L, C]
+    vinsts: list[VInstance[L, C]]
     size_info: SizeInfo
     dsize_info: DSizeInfo
     function_name: str | None = None
@@ -782,9 +809,9 @@ class KCell:
     def __init__(
         self,
         name: str | None = None,
-        kcl: KCLayout | None = None,
+        kcl: KCLayout[L, C] | None = None,
         kdb_cell: kdb.Cell | None = None,
-        ports: Ports | None = None,
+        ports: Ports[L, C] | None = None,
     ):
         """Constructor of KCell.
 
@@ -797,10 +824,10 @@ class KCell:
             ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
                 if `None` create an empty one.
         """
-        kcl = kcl or _get_default_kcl()
-        self.kcl = kcl
+        _kcl: KCLayout[L, C] = kcl or _get_default_kcl()  # type: ignore[assignment]
+        self.kcl = _kcl
         self.insts = Instances()
-        self.vinsts: list[VInstance] = []
+        self.vinsts: list[VInstance[L, C]] = []
         self._settings = KCellSettings()
         self._settings_units = KCellSettingsUnits()
         self.info: Info = Info()
@@ -811,11 +838,11 @@ class KCell:
             _name = name
             if kdb_cell is not None:
                 kdb_cell.name = name
-        self._kdb_cell = kdb_cell or kcl.create_cell(_name)
+        self._kdb_cell = kdb_cell or _kcl.create_cell(_name)
         if _name == "Unnamed_!":
             self._kdb_cell.name = f"Unnamed_{self.cell_index()}"
         self.kcl.register_cell(self)
-        self.ports: Ports = ports or Ports(self.kcl)
+        self.ports: Ports[L, C] = ports or Ports(self.kcl)
 
         if kdb_cell is not None:
             for inst in kdb_cell.each_inst():
@@ -834,7 +861,7 @@ class KCell:
         for inst in self._kdb_cell.each_inst():
             self.insts.append(Instance(self.kcl, inst))
 
-    def __getitem__(self, key: int | str | None) -> Port:
+    def __getitem__(self, key: int | str | None) -> Port[L, C]:
         """Returns port from instance."""
         return self.ports[key]
 
@@ -891,7 +918,7 @@ class KCell:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
         return getattr(self._kdb_cell, name)
 
-    def dup(self) -> KCell:
+    def dup(self) -> KCell[L, C]:
         """Copy the full cell.
 
         Sets `_locked` to `False`
@@ -912,13 +939,13 @@ class KCell:
 
         return c
 
-    def __copy__(self) -> KCell:
+    def __copy__(self) -> KCell[L, C]:
         """Enables use of `copy.copy` and `copy.deep_copy`."""
         return self.dup()
 
     def add_port(
-        self, port: Port, name: str | None = None, keep_mirror: bool = False
-    ) -> Port:
+        self, port: Port[L, C], name: str | None = None, keep_mirror: bool = False
+    ) -> Port[L, C]:
         """Add an existing port. E.g. from an instance to propagate the port.
 
         Args:
@@ -932,7 +959,7 @@ class KCell:
         return self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
 
     def add_ports(
-        self, ports: Iterable[Port], prefix: str = "", keep_mirror: bool = False
+        self, ports: Iterable[Port[L, C]], prefix: str = "", keep_mirror: bool = False
     ) -> None:
         """Add a sequence of ports to the cells.
 
@@ -950,11 +977,11 @@ class KCell:
 
     @classmethod
     def from_yaml(
-        cls: Callable[..., KCell],
+        cls: Callable[..., KCell[L, C]],
         constructor: Any,
         node: Any,
         verbose: bool = False,
-    ) -> KCell:
+    ) -> KCell[L, C]:
         """Internal function used by the placer to convert yaml to a KCell."""
         d = ruamel.yaml.constructor.SafeConstructor.construct_mapping(
             constructor,
@@ -1051,6 +1078,7 @@ class KCell:
                 )
                 ref_yml = t.get("ref", DEFAULT_TRANS["ref"])
                 if isinstance(ref_yml, str):
+                    i: Instance[L, C]
                     for i in reversed(cell.insts):
                         if i.cell.name == ref_yml:
                             ref = i
@@ -1218,12 +1246,12 @@ class KCell:
         self.kcl.delete_cell(self)
 
     @property
-    def ports(self) -> Ports:
+    def ports(self) -> Ports[L, C]:
         """Ports associated with the cell."""
         return self._ports
 
     @ports.setter
-    def ports(self, new_ports: InstancePorts | Ports) -> None:
+    def ports(self, new_ports: InstancePorts[L, C] | Ports[L, C]) -> None:
         if self._locked:
             raise LockedError(self)
         self._ports = new_ports.copy()
@@ -1237,7 +1265,7 @@ class KCell:
         width: int,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> Port[L, C]: ...
 
     @overload
     def create_port(
@@ -1248,15 +1276,15 @@ class KCell:
         dwidth: float,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> Port[L, C]: ...
 
     @overload
     def create_port(
         self,
         *,
         name: str | None = None,
-        port: Port,
-    ) -> Port: ...
+        port: Port[L, C],
+    ) -> Port[L, C]: ...
 
     @overload
     def create_port(
@@ -1269,9 +1297,9 @@ class KCell:
         layer: LayerEnum | int,
         port_type: str = "optical",
         mirror_x: bool = False,
-    ) -> Port: ...
+    ) -> Port[L, C]: ...
 
-    def create_port(self, **kwargs: Any) -> Port:
+    def create_port(self, **kwargs: Any) -> Port[L, C]:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
         if self._locked:
             raise LockedError(self)
@@ -1280,25 +1308,25 @@ class KCell:
     @overload
     def create_inst(
         self,
-        cell: KCell | int,
+        cell: KCell[L, C] | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
-    ) -> Instance: ...
+    ) -> Instance[L, C]: ...
 
     @overload
     def create_inst(
         self,
-        cell: KCell | int,
+        cell: KCell[L, C] | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
         *,
         a: kdb.Vector,
         b: kdb.Vector,
         na: int = 1,
         nb: int = 1,
-    ) -> Instance: ...
+    ) -> Instance[L, C]: ...
 
     def create_inst(
         self,
-        cell: KCell | int,
+        cell: KCell[L, C] | int,
         trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans = kdb.Trans(),
         a: kdb.Vector | None = None,
         b: kdb.Vector | None = None,
@@ -1306,7 +1334,7 @@ class KCell:
         nb: int = 1,
         libcell_as_static: bool = False,
         static_name_separator: str = "__",
-    ) -> Instance:
+    ) -> Instance[L, C]:
         """Add an instance of another KCell.
 
         Args:
@@ -1406,7 +1434,7 @@ class KCell:
             if b is None:
                 b = kdb.Vector()
             ca = self._kdb_cell.insert(kdb.CellInstArray(ci, trans, a, b, na, nb))
-        inst = Instance(self.kcl, ca)
+        inst: Instance[L, C] = Instance(self.kcl, ca)
         self.insts.append(inst)
         return inst
 
@@ -1417,7 +1445,7 @@ class KCell:
         """Get the layer info, convenience for `klayout.db.Layout.layer`."""
         return self.kcl.layout.layer(*args, **kwargs)
 
-    def __lshift__(self, cell: KCell) -> Instance:
+    def __lshift__(self, cell: KCell[L, C]) -> Instance[L, C]:
         """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
 
         Args:
@@ -1661,7 +1689,7 @@ class KCell:
             if diff.dbu_differs:
                 raise MergeError("Layouts' DBU differ. Check the log for more info.")
             elif diff.diff_xor.cells() > 0:
-                diff_kcl = KCLayout(self.name + "_XOR")
+                diff_kcl = KCLayout[LayerInfos, Constants](self.name + "_XOR")
                 diff_kcl.layout.assign(diff.diff_xor)
                 show(diff_kcl)
 
@@ -1771,17 +1799,17 @@ class KCell:
         }
         return representer.represent_mapping(cls.yaml_tag, d)
 
-    def each_inst(self) -> Iterator[Instance]:
+    def each_inst(self) -> Iterator[Instance[L, C]]:
         """Iterates over all child instances (which may actually be instance arrays)."""
         yield from (Instance(self.kcl, inst) for inst in self._kdb_cell.each_inst())
 
-    def each_overlapping_inst(self, b: kdb.Box | kdb.DBox) -> Iterator[Instance]:
+    def each_overlapping_inst(self, b: kdb.Box | kdb.DBox) -> Iterator[Instance[L, C]]:
         """Gets the instances overlapping the given rectangle."""
         yield from (
             Instance(self.kcl, inst) for inst in self._kdb_cell.each_overlapping_inst(b)
         )
 
-    def each_touching_inst(self, b: kdb.Box | kdb.DBox) -> Iterator[Instance]:
+    def each_touching_inst(self, b: kdb.Box | kdb.DBox) -> Iterator[Instance[L, C]]:
         """Gets the instances overlapping the given rectangle."""
         yield from (
             Instance(self.kcl, inst) for inst in self._kdb_cell.each_touching_inst(b)
@@ -1789,19 +1817,19 @@ class KCell:
 
     @overload
     def insert(
-        self, inst: Instance | kdb.CellInstArray | kdb.DCellInstArray
-    ) -> Instance: ...
+        self, inst: Instance[L, C] | kdb.CellInstArray | kdb.DCellInstArray
+    ) -> Instance[L, C]: ...
 
     @overload
     def insert(
         self, inst: kdb.CellInstArray | kdb.DCellInstArray, property_id: int
-    ) -> Instance: ...
+    ) -> Instance[L, C]: ...
 
     def insert(
         self,
-        inst: Instance | kdb.CellInstArray | kdb.DCellInstArray,
+        inst: Instance[L, C] | kdb.CellInstArray | kdb.DCellInstArray,
         property_id: int | None = None,
-    ) -> Instance:
+    ) -> Instance[L, C]:
         """Inserts a cell instance given by another reference."""
         if self._locked:
             raise LockedError(self)
@@ -1822,7 +1850,7 @@ class KCell:
         /,
         *,
         no_warn: bool = False,
-    ) -> Instance: ...
+    ) -> Instance[L, C]: ...
 
     @overload
     def transform(
@@ -1844,7 +1872,7 @@ class KCell:
         /,
         *,
         no_warn: bool = False,
-    ) -> Instance | None:
+    ) -> Instance[L, C] | None:
         """Transforms the instance or cell with the transformation given."""
         if not no_warn:
             logger.warning(
@@ -2150,7 +2178,7 @@ class KCell:
         l2n.extract_netlist()
         il = l2n.internal_layout()
 
-        def filter_port(port: Port) -> bool:
+        def filter_port(port: Port[L, C]) -> bool:
             return port.port_type in port_types
 
         called_kcells = [self.kcl[ci] for ci in self.called_cells()]
@@ -2168,7 +2196,7 @@ class KCell:
         """Create the circuit of the KCell in the given netlist."""
         netlist = l2n.netlist()
 
-        def port_filter(num_port: tuple[int, Port]) -> bool:
+        def port_filter(num_port: tuple[int, Port[L, C]]) -> bool:
             return num_port[1].port_type in port_types
 
         circ = kdb.Circuit()
@@ -2177,9 +2205,12 @@ class KCell:
         circ.boundary = self.boundary or self.dbbox()
 
         inst_ports: dict[
-            str, dict[str, list[tuple[int, int, Instance, Port, kdb.SubCircuit]]]
+            str,
+            dict[
+                str, list[tuple[int, int, Instance[L, C], Port[L, C], kdb.SubCircuit]]
+            ],
         ] = {}
-        cell_ports: dict[str, dict[str, list[tuple[int, Port]]]] = {}
+        cell_ports: dict[str, dict[str, list[tuple[int, Port[L, C]]]]] = {}
 
         # sort the cell's ports by position and layer
 
@@ -2707,7 +2738,7 @@ class KCell:
             vi.insert_into(self)
         self.vinsts.clear()
 
-    def create_vinst(self, cell: VKCell | KCell) -> VInstance:
+    def create_vinst(self, cell: VKCell[L, C] | KCell[L, C]) -> VInstance[L, C]:
         """Insert the KCell as a VInstance into a VKCell or KCell."""
         vi = VInstance(cell)
         self.vinsts.append(vi)
@@ -2715,10 +2746,10 @@ class KCell:
 
 
 def create_port_error(
-    p1: Port,
-    p2: Port,
-    c1: KCell,
-    c2: KCell,
+    p1: Port[L, C],
+    p2: Port[L, C],
+    c1: KCell[L, C],
+    c2: KCell[L, C],
     db: rdb.ReportDatabase,
     db_cell: rdb.RdbCell,
     cat: rdb.RdbCategory,
@@ -2731,10 +2762,10 @@ def create_port_error(
     it.add_value(port_polygon(p2.width).transformed(p2.trans).to_dtype(dbu))
 
 
-class Constants(BaseSettings):
+class Constants(BaseModel):
     """Constant Model class."""
 
-    pass
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class LayerLevel(BaseModel):
@@ -2863,7 +2894,7 @@ class LayerStack(BaseModel):
         return self.layers[attr]
 
 
-class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
+class KCLayout(BaseModel, Generic[L, C], arbitrary_types_allowed=True, extra="allow"):
     """Small extension to the klayout.db.Layout.
 
     It adds tracking for the [KCell][kfactory.kcell.KCell] objects
@@ -2906,19 +2937,20 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     enclosure: KCellEnclosure
     library: kdb.Library
 
-    factories: Factories[KCell]
-    virtual_factories: Factories[VKCell]
-    kcells: dict[int, KCell]
+    factories: Factories[KCell[L, C]]
+    virtual_factories: Factories[VKCell[L, C]]
+    kcells: dict[int, KCell[L, C]]
     layers: type[LayerEnum]
+    layer_infos: L
     layer_stack: LayerStack
     netlist_layer_mapping: dict[LayerEnum | int, LayerEnum | int] = Field(
         default_factory=dict
     )
     sparameters_path: Path | str | None
     interconnect_cml_path: Path | str | None
-    constants: Constants = Field(default_factory=Constants)
+    constants: C
     rename_function: Callable[..., None]
-    _registered_functions: dict[int, Callable[..., KCell]]
+    _registered_functions: dict[int, Callable[..., KCell[L, C]]]
 
     info: Info = Field(default_factory=Info)
     _settings: KCellSettings
@@ -2929,12 +2961,12 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         name: str,
         layer_enclosures: dict[str, LayerEnclosure] | LayerEnclosureModel | None = None,
         enclosure: KCellEnclosure | None = None,
-        layers: type[LayerEnum] | None = None,
+        layer_infos: type[LayerInfos] | None = None,
         sparameters_path: Path | str | None = None,
         interconnect_cml_path: Path | str | None = None,
         layer_stack: LayerStack | None = None,
         constants: type[Constants] | None = None,
-        base_kcl: KCLayout | None = None,
+        base_kcl: KCLayout[LayerInfos, Constants] | None = None,
         port_rename_function: Callable[..., None] = rename_clockwise_multi,
         copy_base_kcl_layers: bool = True,
         info: dict[str, MetaData] | None = None,
@@ -2972,12 +3004,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         else:
             layer_stack = layer_stack or LayerStack()
             _constants = constants() if constants else Constants()
+        infos = layer_infos() if layer_infos else LayerInfos()
         super().__init__(
             _name=name,
             kcells={},
             layer_enclosures=LayerEnclosureModel(enclosure_map={}),
             enclosure=KCellEnclosure([]),
-            layers=layerenum_from_dict(layers={}, kcl=self),
+            layer_infos=infos,
+            layers=layerenum_from_dict(layers=infos, layout=layout),
             factories=Factories({}),
             virtual_factories=Factories({}),
             sparameters_path=sparameters_path,
@@ -3002,13 +3036,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         )
 
         self.library.register(self.name)
-        if layers is not None:
-            layer_dict = {
-                _layer.name: (_layer.layer, _layer.datatype)
-                for _layer in layers  # type: ignore[attr-defined]
-            }
-        else:
-            layer_dict = {}
 
         if base_kcl:
             if copy_base_kcl_layers:
@@ -3054,7 +3081,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             enclosure = (
                 enclosure.copy_to(self) if enclosure else KCellEnclosure(enclosures=[])
             )
-            layers = self.layerenum_from_dict(name="LAYER", layers=layer_dict)
+            layers = self.layerenum_from_dict(
+                name="LAYER", layers=RootModel[LayerInfos](infos).model_dump()
+            )
             sparameters_path = sparameters_path
             interconnect_cml_path = interconnect_cml_path
             if enclosure is None:
@@ -3176,9 +3205,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     @overload
     def cell(
         self,
-        _func: KCellFunc[KCellParams],
+        _func: KCellFunc[KCellParams, L, C],
         /,
-    ) -> KCellFunc[KCellParams]: ...
+    ) -> KCellFunc[KCellParams, L, C]: ...
 
     @overload
     def cell(
@@ -3196,13 +3225,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KCell], None]] = [],
+        post_process: Iterable[Callable[[KCell[L, C]], None]] = [],
         debug_names: bool | None = None,
-    ) -> Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]: ...
+    ) -> Callable[[KCellFunc[KCellParams, L, C]], KCellFunc[KCellParams, L, C]]: ...
 
     def cell(
         self,
-        _func: KCellFunc[KCellParams] | None = None,
+        _func: KCellFunc[KCellParams, L, C] | None = None,
         /,
         *,
         set_settings: bool = True,
@@ -3218,11 +3247,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KCell], None]] = [],
+        post_process: Iterable[Callable[[KCell[L, C]], None]] = [],
         debug_names: bool | None = None,
     ) -> (
-        KCellFunc[KCellParams]
-        | Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]
+        KCellFunc[KCellParams, L, C]
+        | Callable[[KCellFunc[KCellParams, L, C]], KCellFunc[KCellParams, L, C]]
     ):
         """Decorator to cache and auto name the cell.
 
@@ -3280,18 +3309,18 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             debug_names = config.debug_names
 
         def decorator_autocell(
-            f: Callable[KCellParams, KCell],
-        ) -> Callable[KCellParams, KCell]:
+            f: Callable[KCellParams, KCell[L, C]],
+        ) -> Callable[KCellParams, KCell[L, C]]:
             sig = inspect.signature(f)
 
-            _cache: Cache[_HashedTuple, KCell] | dict[_HashedTuple, KCell] = (
-                cache or Cache(maxsize=float("inf"))
-            )
+            _cache: (
+                Cache[_HashedTuple, KCell[L, C]] | dict[_HashedTuple, KCell[L, C]]
+            ) = cache or Cache(maxsize=float("inf"))
 
             @functools.wraps(f)
             def wrapper_autocell(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
-            ) -> KCell:
+            ) -> KCell[L, C]:
                 params: dict[str, KCellParams.kwargs | KCellParams.args] = {
                     p.name: p.default for k, p in sig.parameters.items()
                 }
@@ -3322,7 +3351,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 @functools.wraps(f)
                 def wrapped_cell(
                     **params: KCellParams.args | KCellParams.kwargs,
-                ) -> KCell:
+                ) -> KCell[L, C]:
                     for key, value in params.items():
                         if isinstance(value, frozenset):
                             params[key] = fs2d(value)
@@ -3541,9 +3570,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     @overload
     def vcell(
         self,
-        _func: Callable[KCellParams, VKCell],
+        _func: Callable[KCellParams, VKCell[L, C]],
         /,
-    ) -> Callable[KCellParams, VKCell]: ...
+    ) -> Callable[KCellParams, VKCell[L, C]]: ...
 
     @overload
     def vcell(
@@ -3556,12 +3585,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
-    ) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]: ...
+    ) -> Callable[
+        [Callable[KCellParams, VKCell[L, C]]], Callable[KCellParams, VKCell[L, C]]
+    ]: ...
 
     @logger.catch(reraise=True)
     def vcell(
         self,
-        _func: Callable[KCellParams, VKCell] | None = None,
+        _func: Callable[KCellParams, VKCell[L, C]] | None = None,
         /,
         *,
         set_settings: bool = True,
@@ -3573,8 +3604,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
     ) -> (
-        Callable[KCellParams, VKCell]
-        | Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]
+        Callable[KCellParams, VKCell[L, C]]
+        | Callable[
+            [Callable[KCellParams, VKCell[L, C]]], Callable[KCellParams, VKCell[L, C]]
+        ]
     ):
         """Decorator to cache and auto name the cell.
 
@@ -3609,8 +3642,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         fs2d = rec_frozenset_to_dict
 
         def decorator_autocell(
-            f: Callable[KCellParams, VKCell],
-        ) -> Callable[KCellParams, VKCell]:
+            f: Callable[KCellParams, VKCell[L, C]],
+        ) -> Callable[KCellParams, VKCell[L, C]]:
             sig = inspect.signature(f)
 
             # previously was a KCellCache, but dict should do for most case
@@ -3619,7 +3652,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             @functools.wraps(f)
             def wrapper_autocell(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
-            ) -> VKCell:
+            ) -> VKCell[L, C]:
                 params: dict[str, KCellParams.args] = {
                     p.name: p.default for p in sig.parameters.values()
                 }
@@ -3651,7 +3684,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 @functools.wraps(f)
                 def wrapped_cell(
                     **params: KCellParams.args,
-                ) -> VKCell:
+                ) -> VKCell[L, C]:
                     for key, value in params.items():
                         if isinstance(value, frozenset):
                             params[key] = fs2d(value)
@@ -3742,15 +3775,15 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
         return decorator_autocell if _func is None else decorator_autocell(_func)
 
-    def kcell(self, name: str | None = None, ports: Ports | None = None) -> KCell:
+    def kcell(
+        self, name: str | None = None, ports: Ports[L, C] | None = None
+    ) -> KCell[L, C]:
         """Create a new cell based ont he pdk's layout object."""
         return KCell(name=name, kcl=self, ports=ports)
 
-    def layer_enum(
-        self, name: str, layers: dict[str, tuple[int, int]]
-    ) -> type[LayerEnum]:
+    def set_layers_from_infos(self, name: str, layers: LayerInfos) -> type[LayerEnum]:
         """Create a new LAYER enum based on the pdk's kcl."""
-        return layerenum_from_dict(name=name, layers=layers, kcl=self)
+        return layerenum_from_dict(name=name, layers=layers, layout=self.layout)
 
     def __getattr__(self, name: str) -> Any:
         """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
@@ -3775,10 +3808,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     self.layout.__setattr__(name, value)
 
     def layerenum_from_dict(
-        self, name: str = "LAYER", *, layers: dict[str, tuple[int, int]]
+        self, name: str = "LAYER", *, layers: LayerInfos
     ) -> type[LayerEnum]:
         """Create a new [LayerEnum][kfactory.kcell.LayerEnum] from this KCLayout."""
-        return layerenum_from_dict(layers=layers, name=name, kcl=self)
+        return layerenum_from_dict(layers=layers, name=name, layout=self.layout)
 
     def clear(self, keep_layers: bool = True) -> None:
         """Clear the Layout.
@@ -3790,15 +3823,12 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
         if keep_layers:
             self.layers = layerenum_from_dict(
-                kcl=self,
+                layout=self.layout,
                 name=self.layers.__name__,
-                layers={
-                    layer_name: (layer.layer, layer.datatype)
-                    for layer_name, layer in self.layers.__members__.items()
-                },
+                layers=self.layer_infos,
             )
 
-    def dup(self, init_cells: bool = True) -> KCLayout:
+    def dup(self, init_cells: bool = True) -> KCLayout[L, C]:
         """Create a duplication of the `~KCLayout` object.
 
         Args:
@@ -3807,7 +3837,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         Returns:
             Copy of itself
         """
-        kcl = KCLayout(self.name + "_DUPLICATE")
+        kcl = KCLayout[L, C](self.name + "_DUPLICATE")
         kcl.layout.assign(self.layout.dup())
         if init_cells:
             for i, kc in self.kcells.items():
@@ -3856,7 +3886,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 " unique or pass `allow_duplicate` when creating the library"
             )
 
-    def delete_cell(self, cell: KCell | int) -> None:
+    def delete_cell(self, cell: KCell[L, C] | int) -> None:
         """Delete a cell in the kcl object."""
         if isinstance(cell, int):
             self.layout.delete_cell(cell)
@@ -3886,7 +3916,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         for ci in kcells2delete:
             del self.kcells[ci]
 
-    def register_cell(self, kcell: KCell, allow_reregister: bool = False) -> None:
+    def register_cell(self, kcell: KCell[L, C], allow_reregister: bool = False) -> None:
         """Register an existing cell in the KCLayout object.
 
         Args:
@@ -3895,7 +3925,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 Doesn't allow name duplication.
         """
 
-        def check_name(other: KCell) -> bool:
+        def check_name(other: KCell[L, C]) -> bool:
             return other._kdb_cell.name == kcell._kdb_cell.name
 
         if (kcell.cell_index() not in self.kcells) or allow_reregister:
@@ -3906,7 +3936,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 " exists in the library"
             )
 
-    def __getitem__(self, obj: str | int) -> KCell:
+    def __getitem__(self, obj: str | int) -> KCell[L, C]:
         """Retrieve a cell by name(str) or index(int).
 
         Attrs:
@@ -3996,7 +4026,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             if diff.dbu_differs:
                 raise MergeError("Layouts' DBU differ. Check the log for more info.")
             elif diff.diff_xor.cells() > 0:
-                diff_kcl = KCLayout(self.name + "_XOR")
+                diff_kcl = KCLayout[LayerInfos, Constants](self.name + "_XOR")
                 diff_kcl.layout.assign(diff.diff_xor)
                 show(diff_kcl)
 
@@ -4128,11 +4158,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
         return self.layout.write(str(filename), options)
 
-    def top_kcells(self) -> list[KCell]:
+    def top_kcells(self) -> list[KCell[L, C]]:
         """Return the top KCells."""
         return [self[tc.cell_index()] for tc in self.top_cells()]
 
-    def top_kcell(self) -> KCell:
+    def top_kcell(self) -> KCell[L, C]:
         """Return the top KCell if there is a single one."""
         return self[self.top_cell().cell_index()]
 
@@ -4144,12 +4174,15 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
 
 def layerenum_from_dict(
-    layers: dict[str, tuple[int, int]], name: str = "LAYER", kcl: KCLayout | None = None
+    layers: LayerInfos,
+    name: str = "LAYER",
+    layout: kdb.Layout | None = None,
 ) -> type[LayerEnum]:
-    members: dict[str, constant[KCLayout] | tuple[int, int]] = {
-        "kcl": constant(kcl or _get_default_kcl())
+    members: dict[str, constant[KCLayout[L, C]] | tuple[int, int]] = {
+        "layout": constant(layout or _get_default_kcl().layout)
     }
-    members.update(layers)
+    for li in RootModel[LayerInfos](layers).model_dump().values():
+        members[li.name] = li.layer, li.datatype
     return LayerEnum(
         name,  # type: ignore[arg-type]
         members,  # type: ignore[arg-type]
@@ -4167,17 +4200,17 @@ class Factories(UserDict[str, Callable[..., T]]):
             self.__getattribute__(name)
 
 
-class VKCell(BaseModel, arbitrary_types_allowed=True):
+class VKCell(BaseModel, Generic[L, C], arbitrary_types_allowed=True):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
-    _ports: Ports
-    _shapes: dict[int, VShapes]
+    _ports: Ports[L, C]
+    _shapes: dict[int, VShapes[L, C]]
     _locked: bool
     _settings: KCellSettings
     _settings_units: KCellSettingsUnits
     info: Info
-    kcl: KCLayout
-    insts: list[VInstance]
+    kcl: KCLayout[L, C]
+    insts: list[VInstance[L, C]]
     _name: str | None
     basename: str | None = None
     function_name: str | None = None
@@ -4186,15 +4219,15 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
     def __init__(
         self,
         name: str | None = None,
-        kcl: KCLayout | None = None,
+        kcl: KCLayout[L, C] | None = None,
         info: dict[str, int | float | str] = {},
     ) -> None:
-        kcl = kcl or _get_default_kcl()
+        _kcl: KCLayout[L, C] = kcl or _get_default_kcl()  # type: ignore[assignment, unused-ignore]
         BaseModel.__init__(
             self, kcl=kcl, insts=[], info=Info(**info), size_info=DSizeInfo(self.bbox)
         )
         self._shapes = {}
-        self._ports = Ports(kcl)
+        self._ports = Ports(_kcl)
         self._locked = False
         self._settings = KCellSettings()
         self._settings_units = KCellSettingsUnits()
@@ -4217,7 +4250,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
     def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
         return self.bbox(layer=layer)
 
-    def __getitem__(self, key: int | str | None) -> Port:
+    def __getitem__(self, key: int | str | None) -> Port[L, C]:
         """Returns port from instance."""
         return self.ports[key]
 
@@ -4226,7 +4259,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         return self.size_info
 
     @property
-    def vinsts(self) -> list[VInstance]:
+    def vinsts(self) -> list[VInstance[L, C]]:
         return self.insts
 
     @property
@@ -4253,7 +4286,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
             raise LockedError(self)
         self._name = value
 
-    def dup(self) -> VKCell:
+    def dup(self) -> VKCell[L, C]:
         """Copy the full cell.
 
         Removes lock if the original cell was locked.
@@ -4272,8 +4305,8 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         return c
 
     def add_port(
-        self, port: Port, name: str | None = None, keep_mirror: bool = False
-    ) -> Port:
+        self, port: Port[L, C], name: str | None = None, keep_mirror: bool = False
+    ) -> Port[L, C]:
         """Add an existing port. E.g. from an instance to propagate the port.
 
         Args:
@@ -4287,7 +4320,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         return self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
 
     def add_ports(
-        self, ports: Iterable[Port], prefix: str = "", keep_mirror: bool = False
+        self, ports: Iterable[Port[L, C]], prefix: str = "", keep_mirror: bool = False
     ) -> None:
         """Add a sequence of ports to the cells.
 
@@ -4316,7 +4349,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
 
         Will create a temporary file of the gds and load it in KLayout via klive
         """
-        c = KCell()
+        c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
         VInstance(self).insert_into_flat(c, levels=0)
@@ -4338,7 +4371,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         """
         from .widgets.interactive import display_kcell
 
-        c = KCell()
+        c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
         VInstance(self).insert_into_flat(c, levels=0)
@@ -4359,12 +4392,12 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         return f"{self.name}: ports {port_names}, {len(self.insts)} instances"
 
     @property
-    def ports(self) -> Ports:
+    def ports(self) -> Ports[L, C]:
         """Ports associated with the cell."""
         return self._ports
 
     @ports.setter
-    def ports(self, new_ports: InstancePorts | Ports) -> None:
+    def ports(self, new_ports: InstancePorts[L, C] | Ports[L, C]) -> None:
         if not self._locked:
             raise LockedError(self)
         self._ports = new_ports.copy()
@@ -4378,7 +4411,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         width: int,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> Port[L, C]: ...
 
     @overload
     def create_port(
@@ -4389,15 +4422,15 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         dwidth: float,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> Port[L, C]: ...
 
     @overload
     def create_port(
         self,
         *,
         name: str | None = None,
-        port: Port,
-    ) -> Port: ...
+        port: Port[L, C],
+    ) -> Port[L, C]: ...
 
     @overload
     def create_port(
@@ -4410,9 +4443,9 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         layer: LayerEnum | int,
         port_type: str = "optical",
         mirror_x: bool = False,
-    ) -> Port: ...
+    ) -> Port[L, C]: ...
 
-    def create_port(self, **kwargs: Any) -> Port:
+    def create_port(self, **kwargs: Any) -> Port[L, C]:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
         return self.ports.create_port(**kwargs)
 
@@ -4421,8 +4454,8 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         return self.kcl.layout.layer(*args, **kwargs)
 
     def create_inst(
-        self, cell: KCell | VKCell, trans: kdb.DCplxTrans = kdb.DCplxTrans()
-    ) -> VInstance:
+        self, cell: KCell[L, C] | VKCell[L, C], trans: kdb.DCplxTrans = kdb.DCplxTrans()
+    ) -> VInstance[L, C]:
         inst = VInstance(cell=cell, trans=kdb.DCplxTrans())
         self.insts.append(inst)
         return inst
@@ -4441,15 +4474,15 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         else:
             rename_func(self.ports._ports)
 
-    def __lshift__(self, cell: KCell | VKCell) -> VInstance:
+    def __lshift__(self, cell: KCell[L, C] | VKCell[L, C]) -> VInstance[L, C]:
         return self.create_inst(cell=cell)
 
-    def create_vinst(self, cell: KCell | VKCell) -> VInstance:
+    def create_vinst(self, cell: KCell[L, C] | VKCell[L, C]) -> VInstance[L, C]:
         vi = VInstance(cell)
         self.vinsts.append(vi)
         return vi
 
-    def shapes(self, layer: int) -> VShapes:
+    def shapes(self, layer: int) -> VShapes[L, C]:
         if layer not in self._shapes:
             self._shapes[layer] = VShapes(cell=self, _shapes=[])
         return self._shapes[layer]
@@ -4506,7 +4539,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
 
         See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
         """
-        c = KCell()
+        c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
         c._settings = self._settings
@@ -4523,13 +4556,13 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
 
     def l2n(
         self, port_types: Iterable[str] = ("optical",)
-    ) -> tuple[KCell, kdb.LayoutToNetlist]:
+    ) -> tuple[KCell[L, C], kdb.LayoutToNetlist]:
         """Generate a LayoutToNetlist object from the port types.
 
         Args:
             port_types: The port types to consider for the netlist extraction.
         """
-        c = KCell()
+        c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
         c._settings = self._settings
@@ -4546,8 +4579,8 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         recursive: bool = True,
         add_cell_ports: bool = False,
         check_layer_connectivity: bool = True,
-    ) -> tuple[KCell, rdb.ReportDatabase]:
-        c = KCell()
+    ) -> tuple[KCell[L, C], rdb.ReportDatabase]:
+        c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
         c._settings = self._settings
@@ -4563,7 +4596,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
             check_layer_connectivity=check_layer_connectivity,
         )
 
-    def insert(self, cell: KCell | VKCell) -> VInstance:
+    def insert(self, cell: KCell[L, C] | VKCell[L, C]) -> VInstance[L, C]:
         vi = VInstance(cell)
         self.insts.append(vi)
         return vi
@@ -4670,7 +4703,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         return self.bbox().center()
 
 
-class VInstancePorts:
+class VInstancePorts(Generic[L, C]):
     """Ports of an instance.
 
     These act as virtual ports as the centers needs to change if the
@@ -4684,10 +4717,10 @@ class VInstancePorts:
             This provides a way to dynamically calculate the ports.
     """
 
-    cell_ports: Ports
-    instance: VInstance
+    cell_ports: Ports[L, C]
+    instance: VInstance[L, C]
 
-    def __init__(self, instance: VInstance) -> None:
+    def __init__(self, instance: VInstance[L, C]) -> None:
         """Creates the virtual ports object.
 
         Args:
@@ -4700,12 +4733,12 @@ class VInstancePorts:
         """Return Port count."""
         return len(self.cell_ports)
 
-    def __getitem__(self, key: int | str | None) -> Port:
+    def __getitem__(self, key: int | str | None) -> Port[L, C]:
         """Get a port by name."""
         p = self.cell_ports[key]
         return p.copy(self.instance.trans)
 
-    def __iter__(self) -> Iterator[Port]:
+    def __iter__(self) -> Iterator[Port[L, C]]:
         """Create a copy of the ports to iterate through."""
         yield from (p.copy(self.instance.trans) for p in self.cell_ports)
 
@@ -4724,7 +4757,7 @@ class VInstancePorts:
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> list[Port]:
+    ) -> list[Port[L, C]]:
         """Filter ports by name.
 
         Args:
@@ -4734,7 +4767,7 @@ class VInstancePorts:
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-        ports: Iterable[Port] = list(self.instance.ports)
+        ports: Iterable[Port[L, C]] = list(self.instance.ports)
         if regex:
             ports = filter_regex(ports, regex)
         if layer is not None:
@@ -4747,7 +4780,7 @@ class VInstancePorts:
             ports = filter_orientation(ports, orientation)
         return list(ports)
 
-    def copy(self) -> Ports:
+    def copy(self) -> Ports[L, C]:
         """Creates a copy in the form of [Ports][kfactory.kcell.Ports]."""
         return Ports(
             kcl=self.instance.cell.kcl,
@@ -4755,15 +4788,15 @@ class VInstancePorts:
         )
 
 
-class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
+class VInstance(BaseModel, Generic[L, C], arbitrary_types_allowed=True):  # noqa: E999,D101
     name: str | None
-    cell: VKCell | KCell
+    cell: VKCell[L, C] | KCell[L, C]
     trans: kdb.DCplxTrans
-    _ports: VInstancePorts
+    _ports: VInstancePorts[L, C]
 
     def __init__(
         self,
-        cell: VKCell | KCell,
+        cell: VKCell[L, C] | KCell[L, C],
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
         name: str | None = None,
     ) -> None:
@@ -4773,7 +4806,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     def bbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
         return self.cell.bbox().transformed(self.trans)
 
-    def __getitem__(self, key: int | str | None) -> Port:
+    def __getitem__(self, key: int | str | None) -> Port[L, C]:
         """Returns port from instance.
 
         The key can either be an integer, in which case the nth port is
@@ -4791,7 +4824,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         return self.ports[key]
 
     @property
-    def ports(self) -> VInstancePorts:
+    def ports(self) -> VInstancePorts[L, C]:
         return self._ports
 
     def __repr__(self) -> str:
@@ -4801,9 +4834,9 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
 
     def insert_into(
         self,
-        cell: KCell,
+        cell: KCell[L, C],
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
-    ) -> Instance:
+    ) -> Instance[L, C]:
         if isinstance(self.cell, VKCell):
             _trans = trans * self.trans
             base_trans = kdb.DCplxTrans(
@@ -4878,7 +4911,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     @overload
     def insert_into_flat(
         self,
-        cell: KCell | VKCell,
+        cell: KCell[L, C] | VKCell[L, C],
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
         *,
         levels: None = None,
@@ -4887,7 +4920,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     @overload
     def insert_into_flat(
         self,
-        cell: KCell | VKCell,
+        cell: KCell[L, C] | VKCell[L, C],
         *,
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
         levels: int,
@@ -4895,7 +4928,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
 
     def insert_into_flat(
         self,
-        cell: KCell | VKCell,
+        cell: KCell[L, C] | VKCell[L, C],
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
         *,
         levels: int | None = None,
@@ -4936,8 +4969,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     @overload
     def connect(
         self,
-        port: str | Port | None,
-        other: Port,
+        port: str | Port[L, C] | None,
+        other: Port[L, C],
         *,
         mirror: bool = False,
         allow_width_mismatch: bool | None = None,
@@ -4950,8 +4983,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     @overload
     def connect(
         self,
-        port: str | Port | None,
-        other: VInstance,
+        port: str | Port[L, C] | None,
+        other: VInstance[L, C],
         other_port_name: str | None,
         *,
         mirror: bool = False,
@@ -4964,8 +4997,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
 
     def connect(
         self,
-        port: str | Port | None,
-        other: VInstance | Port,
+        port: str | Port[L, C] | None,
+        other: VInstance[L, C] | Port[L, C],
         other_port_name: str | None = None,
         *,
         mirror: bool = False,
@@ -5434,14 +5467,14 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         self.center = val  # type: ignore[assignment]
 
 
-class VShapes(BaseModel, arbitrary_types_allowed=True):
+class VShapes(BaseModel, Generic[L, C], arbitrary_types_allowed=True):
     """Emulate `[klayout.db.Shapes][klayout.db.Shapes]`."""
 
-    cell: VKCell
+    cell: VKCell[L, C]
     _shapes: list[ShapeLike]
     _bbox: kdb.DBox = kdb.DBox()
 
-    def __init__(self, cell: VKCell, _shapes: list[ShapeLike] | None = None):
+    def __init__(self, cell: VKCell[L, C], _shapes: list[ShapeLike] | None = None):
         # self._shapes = [_shape for _shape in _shapes] or []
         BaseModel.__init__(self, cell=cell)
         self._shapes = _shapes or []
@@ -5473,7 +5506,7 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
     def each(self) -> Iterator[ShapeLike]:
         yield from self._shapes
 
-    def transform(self, trans: kdb.DCplxTrans) -> VShapes:  # noqa: D102
+    def transform(self, trans: kdb.DCplxTrans) -> VShapes[L, C]:  # noqa: D102
         new_shapes: list[DShapeLike] = []
 
         for shape in self._shapes:
@@ -5511,12 +5544,12 @@ cell = kcl.cell
 vcell = kcl.vcell
 
 
-def _get_default_kcl() -> KCLayout:
+def _get_default_kcl() -> KCLayout[LayerInfos, Constants]:
     """Utility function to get the default kcl object."""
     return kcl
 
 
-class Port:
+class Port(Generic[L, C]):
     """A port is the photonics equivalent to a pin in electronics.
 
     In addition to the location and layer
@@ -5542,7 +5575,7 @@ class Port:
 
     yaml_tag = "!Port"
     name: str | None
-    kcl: KCLayout
+    kcl: KCLayout[L, C]
     width: int
     layer: int | LayerEnum
     _trans: kdb.Trans | None
@@ -5558,7 +5591,7 @@ class Port:
         width: int,
         layer: LayerEnum | int,
         trans: kdb.Trans,
-        kcl: KCLayout | None = None,
+        kcl: KCLayout[L, C] | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = {},
     ): ...
@@ -5571,7 +5604,7 @@ class Port:
         dwidth: float,
         layer: LayerEnum | int,
         dcplx_trans: kdb.DCplxTrans,
-        kcl: KCLayout | None = None,
+        kcl: KCLayout[L, C] | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = {},
     ): ...
@@ -5587,7 +5620,7 @@ class Port:
         angle: int,
         center: tuple[int, int],
         mirror_x: bool = False,
-        kcl: KCLayout | None = None,
+        kcl: KCLayout[L, C] | None = None,
         info: dict[str, int | float | str] = {},
     ): ...
 
@@ -5602,7 +5635,7 @@ class Port:
         dangle: float,
         dcenter: tuple[float, float],
         mirror_x: bool = False,
-        kcl: KCLayout | None = None,
+        kcl: KCLayout[L, C] | None = None,
         info: dict[str, int | float | str] = {},
     ): ...
 
@@ -5621,12 +5654,12 @@ class Port:
         center: tuple[int, int] | None = None,
         dcenter: tuple[float, float] | None = None,
         mirror_x: bool = False,
-        port: Port | None = None,
-        kcl: KCLayout | None = None,
+        port: Port[L, C] | None = None,
+        kcl: KCLayout[L, C] | None = None,
         info: dict[str, int | float | str] = {},
     ):
         """Create a port from dbu or um based units."""
-        self.kcl = kcl or _get_default_kcl()
+        self.kcl = kcl or _get_default_kcl()  # type: ignore[assignment]
         self.info = Info(**info)
         if port is not None:
             self.name = port.name if name is None else name
@@ -5703,7 +5736,7 @@ class Port:
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans | None = None,
-    ) -> Port:
+    ) -> Port[L, C]:
         """Get a copy of a port.
 
         Transformation order which results in `copy.trans`:
@@ -5843,7 +5876,7 @@ class Port:
 
     def copy_polar(
         self, d: int = 0, d_orth: int = 0, angle: int = 2, mirror: bool = False
-    ) -> Port:
+    ) -> Port[L, C]:
         """Get a polar copy of the port.
 
         This will return a port which is transformed relatively to the original port's
@@ -6086,7 +6119,7 @@ class Port:
         config.console.print(pprint_ports([self]))
 
 
-class Instance:
+class Instance(Generic[L, C]):
     """An Instance of a KCell.
 
     An Instance is a reference to a KCell with a transformation.
@@ -6100,12 +6133,12 @@ class Instance:
 
     yaml_tag = "!Instance"
     _instance: kdb.Instance
-    kcl: KCLayout
-    ports: InstancePorts
+    kcl: KCLayout[L, C]
+    ports: InstancePorts[L, C]
     size_info: SizeInfo
     dsize_info: DSizeInfo
 
-    def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
+    def __init__(self, kcl: KCLayout[L, C], instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
         self._instance = instance
         self.kcl = kcl
@@ -6115,7 +6148,7 @@ class Instance:
 
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]
-    ) -> Port:
+    ) -> Port[L, C]:
         """Returns port from instance.
 
         The key can either be an integer, in which case the nth port is
@@ -6156,12 +6189,12 @@ class Instance:
         self._instance_.cell_index = value
 
     @property
-    def cell(self) -> KCell:
+    def cell(self) -> KCell[L, C]:
         """Parent KCell  of the Instance."""
         return self.kcl[self.cell_index]
 
     @cell.setter
-    def cell(self, value: KCell) -> None:
+    def cell(self, value: KCell[L, C]) -> None:
         self.cell_index = value.cell_index()
 
     @property
@@ -6258,12 +6291,12 @@ class Instance:
         self._instance.nb = value
 
     @property
-    def parent_cell(self) -> KCell:
+    def parent_cell(self) -> KCell[L, C]:
         """Gets the cell this instance is contained in."""
         return self.kcl[self._instance.parent_cell.cell_index()]
 
     @parent_cell.setter
-    def parent_cell(self, cell: KCell | kdb.Cell) -> None:
+    def parent_cell(self, cell: KCell[L, C] | kdb.Cell) -> None:
         if isinstance(cell, KCell):
             self._instance.parent_cell = cell._kdb_cell
         else:
@@ -6292,8 +6325,8 @@ class Instance:
     @overload
     def connect(
         self,
-        port: str | Port | None,
-        other: Port,
+        port: str | Port[L, C] | None,
+        other: Port[L, C],
         *,
         mirror: bool = False,
         allow_width_mismatch: bool | None = None,
@@ -6306,8 +6339,8 @@ class Instance:
     @overload
     def connect(
         self,
-        port: str | Port | None,
-        other: Instance,
+        port: str | Port[L, C] | None,
+        other: Instance[L, C],
         other_port_name: str | None,
         *,
         mirror: bool = False,
@@ -6320,8 +6353,8 @@ class Instance:
 
     def connect(
         self,
-        port: str | Port | None,
-        other: Instance | Port,
+        port: str | Port[L, C] | None,
+        other: Instance[L, C] | Port[L, C],
         other_port_name: str | None = None,
         *,
         mirror: bool = False,
@@ -6449,12 +6482,12 @@ class Instance:
         return representer.represent_mapping(cls.yaml_tag, d)
 
     @overload
-    def movex(self, destination: int, /) -> Instance: ...
+    def movex(self, destination: int, /) -> Instance[L, C]: ...
 
     @overload
-    def movex(self, origin: int, destination: int) -> Instance: ...
+    def movex(self, origin: int, destination: int) -> Instance[L, C]: ...
 
-    def movex(self, origin: int, destination: int | None = None) -> Instance:
+    def movex(self, origin: int, destination: int | None = None) -> Instance[L, C]:
         """Move the instance in x-direction in dbu.
 
         Args:
@@ -6468,12 +6501,12 @@ class Instance:
         return self
 
     @overload
-    def movey(self, destination: int, /) -> Instance: ...
+    def movey(self, destination: int, /) -> Instance[L, C]: ...
 
     @overload
-    def movey(self, origin: int, destination: int) -> Instance: ...
+    def movey(self, origin: int, destination: int) -> Instance[L, C]: ...
 
-    def movey(self, origin: int, destination: int | None = None) -> Instance:
+    def movey(self, origin: int, destination: int | None = None) -> Instance[L, C]:
         """Move the instance in y-direction in dbu.
 
         Args:
@@ -6487,16 +6520,16 @@ class Instance:
         return self
 
     @overload
-    def move(self, destination: tuple[int, int], /) -> Instance: ...
+    def move(self, destination: tuple[int, int], /) -> Instance[L, C]: ...
 
     @overload
     def move(
         self, origin: tuple[int, int], destination: tuple[int, int]
-    ) -> Instance: ...
+    ) -> Instance[L, C]: ...
 
     def move(
         self, origin: tuple[int, int], destination: tuple[int, int] | None = None
-    ) -> Instance:
+    ) -> Instance[L, C]:
         """Move the instance in dbu.
 
         Args:
@@ -6513,7 +6546,7 @@ class Instance:
 
     def rotate(
         self, angle: Literal[0, 1, 2, 3], center: kdb.Point | None = None
-    ) -> Instance:
+    ) -> Instance[L, C]:
         """Rotate instance in increments of 90°."""
         if center:
             t = kdb.Trans(center.to_v())
@@ -6532,7 +6565,7 @@ class Instance:
 
     def mirror(
         self, p1: kdb.Point = kdb.Point(1, 0), p2: kdb.Point = kdb.Point(0, 0)
-    ) -> Instance:
+    ) -> Instance[L, C]:
         """Mirror the instance at a line."""
         mirror_v = p2 - p1
         disp = self.dcplx_trans.disp
@@ -6552,12 +6585,12 @@ class Instance:
 
         return self
 
-    def mirror_x(self, x: int = 0) -> Instance:
+    def mirror_x(self, x: int = 0) -> Instance[L, C]:
         """Mirror the instance at an y-axis at position x."""
         self.transform(kdb.Trans(2, True, 2 * x, 0))
         return self
 
-    def mirror_y(self, y: int = 0) -> Instance:
+    def mirror_y(self, y: int = 0) -> Instance[L, C]:
         """Mirror the instance at an x-axis at position y."""
         self.transform(kdb.Trans(0, True, 0, 2 * y))
         return self
@@ -6651,12 +6684,12 @@ class Instance:
             )
 
     @overload
-    def dmovex(self, destination: float, /) -> Instance: ...
+    def dmovex(self, destination: float, /) -> Instance[L, C]: ...
 
     @overload
-    def dmovex(self, origin: float, destination: float) -> Instance: ...
+    def dmovex(self, origin: float, destination: float) -> Instance[L, C]: ...
 
-    def dmovex(self, origin: float, destination: float | None = None) -> Instance:
+    def dmovex(self, origin: float, destination: float | None = None) -> Instance[L, C]:
         """Move the instance in x-direction in um.
 
         Args:
@@ -6670,12 +6703,12 @@ class Instance:
         return self
 
     @overload
-    def dmovey(self, destination: float, /) -> Instance: ...
+    def dmovey(self, destination: float, /) -> Instance[L, C]: ...
 
     @overload
-    def dmovey(self, origin: float, destination: float) -> Instance: ...
+    def dmovey(self, origin: float, destination: float) -> Instance[L, C]: ...
 
-    def dmovey(self, origin: float, destination: float | None = None) -> Instance:
+    def dmovey(self, origin: float, destination: float | None = None) -> Instance[L, C]:
         """Move the instance in y-direction in um.
 
         Args:
@@ -6694,10 +6727,10 @@ class Instance:
         center: kdb.DPoint
         | kdb.DVector
         | tuple[float, float]
-        | Port
+        | Port[L, C]
         | str
         | None = None,
-    ) -> Instance:
+    ) -> Instance[L, C]:
         """Rotate instance in degrees.
 
         Args:
@@ -6724,18 +6757,18 @@ class Instance:
         return self
 
     @overload
-    def dmove(self, destination: tuple[float, float], /) -> Instance: ...
+    def dmove(self, destination: tuple[float, float], /) -> Instance[L, C]: ...
 
     @overload
     def dmove(
         self, origin: tuple[float, float], destination: tuple[float, float]
-    ) -> Instance: ...
+    ) -> Instance[L, C]: ...
 
     def dmove(
         self,
         origin: tuple[float, float],
         destination: tuple[float, float] | None = None,
-    ) -> Instance:
+    ) -> Instance[L, C]:
         """Move the instance in dbu.
 
         Args:
@@ -6754,7 +6787,7 @@ class Instance:
 
     def dmirror(
         self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
-    ) -> Instance:
+    ) -> Instance[L, C]:
         """Mirror the instance at a line."""
         mirror_v = p2 - p1
         disp = self.dcplx_trans.disp
@@ -6771,12 +6804,12 @@ class Instance:
 
         return self
 
-    def dmirror_x(self, x: float = 0) -> Instance:
+    def dmirror_x(self, x: float = 0) -> Instance[L, C]:
         """Mirror the instance at an x-axis."""
         self.transform(kdb.DTrans(2, True, 2 * x, 0))
         return self
 
-    def dmirror_y(self, y: float = 0) -> Instance:
+    def dmirror_y(self, y: float = 0) -> Instance[L, C]:
         """Mirror the instance at an y-axis."""
         self.transform(kdb.DTrans(0, True, 0, 2 * y))
         return self
@@ -6889,7 +6922,7 @@ class Instance:
             del pc.insts[self]
 
 
-class Instances:
+class Instances(Generic[L, C]):
     """Holder for instances.
 
     Allows retrieval by name or index
@@ -6897,13 +6930,13 @@ class Instances:
 
     def __init__(self) -> None:
         """Constructor."""
-        self._insts: list[Instance] = []
+        self._insts: list[Instance[L, C]] = []
 
-    def append(self, inst: Instance) -> None:
+    def append(self, inst: Instance[L, C]) -> None:
         """Append a new instance."""
         self._insts.append(inst)
 
-    def __getitem__(self, key: str | int) -> Instance:
+    def __getitem__(self, key: str | int) -> Instance[L, C]:
         """Retrieve instance by index or by name."""
         if isinstance(key, int):
             return self._insts[key]
@@ -6915,7 +6948,7 @@ class Instances:
         """Length of the instances."""
         return self._insts.__len__()
 
-    def __iter__(self) -> Iterator[Instance]:
+    def __iter__(self) -> Iterator[Instance[L, C]]:
         """Get instance iterator."""
         return self._insts.__iter__()
 
@@ -6932,7 +6965,7 @@ class Instances:
                 names[inst.name] = 1
         return names
 
-    def __delitem__(self, item: Instance | int) -> None:
+    def __delitem__(self, item: Instance[L, C] | int) -> None:
         if isinstance(item, int):
             del self._insts[item]
         else:
@@ -6950,7 +6983,7 @@ class Instances:
         self._insts.clear()
 
 
-class Ports:
+class Ports(Generic[L, C]):
     """A collection of ports.
 
     It is not a traditional dictionary. Elements can be retrieved as in a traditional
@@ -6963,31 +6996,31 @@ class Ports:
     """
 
     yaml_tag = "!Ports"
-    kcl: KCLayout
+    kcl: KCLayout[L, C]
     _locked: bool
 
-    def __init__(self, kcl: KCLayout, ports: Iterable[Port] = []) -> None:
+    def __init__(self, kcl: KCLayout[L, C], ports: Iterable[Port[L, C]] = []) -> None:
         """Constructor."""
-        self._ports: list[Port] = list(ports)
+        self._ports: list[Port[L, C]] = list(ports)
         self.kcl = kcl
 
     def __len__(self) -> int:
         """Return Port count."""
         return len(self._ports)
 
-    def copy(self) -> Ports:
+    def copy(self) -> Ports[L, C]:
         """Get a copy of each port."""
         return Ports(ports=[p.copy() for p in self._ports], kcl=self.kcl)
 
-    def contains(self, port: Port) -> bool:
+    def contains(self, port: Port[L, C]) -> bool:
         """Check whether a port is already in the list."""
         return port.hash() in [v.hash() for v in self._ports]
 
-    def __iter__(self) -> Iterator[Port]:
+    def __iter__(self) -> Iterator[Port[L, C]]:
         """Iterator, that allows for loops etc to directly access the object."""
         yield from self._ports
 
-    def __contains__(self, port: str | Port) -> bool:
+    def __contains__(self, port: str | Port[L, C]) -> bool:
         """Check whether a port is in this port collection."""
         if isinstance(port, Port):
             return port in self._ports
@@ -6998,8 +7031,8 @@ class Ports:
             return False
 
     def add_port(
-        self, port: Port, name: str | None = None, keep_mirror: bool = False
-    ) -> Port:
+        self, port: Port[L, C], name: str | None = None, keep_mirror: bool = False
+    ) -> Port[L, C]:
         """Add a port object.
 
         Args:
@@ -7048,7 +7081,7 @@ class Ports:
         return _port
 
     def add_ports(
-        self, ports: Iterable[Port], prefix: str = "", keep_mirror: bool = False
+        self, ports: Iterable[Port[L, C]], prefix: str = "", keep_mirror: bool = False
     ) -> None:
         """Append a list of ports."""
         for p in ports:
@@ -7064,7 +7097,7 @@ class Ports:
         layer: int,
         name: str | None = None,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> Port[L, C]: ...
 
     @overload
     def create_port(
@@ -7075,7 +7108,7 @@ class Ports:
         layer: LayerEnum | int,
         name: str | None = None,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> Port[L, C]: ...
 
     @overload
     def create_port(
@@ -7087,7 +7120,7 @@ class Ports:
         angle: Literal[0, 1, 2, 3],
         name: str | None = None,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> Port[L, C]: ...
 
     def create_port(
         self,
@@ -7102,7 +7135,7 @@ class Ports:
         center: tuple[int, int] | None = None,
         angle: Literal[0, 1, 2, 3] | None = None,
         mirror_x: bool = False,
-    ) -> Port:
+    ) -> Port[L, C]:
         """Create a new port in the list.
 
         Args:
@@ -7174,11 +7207,11 @@ class Ports:
         self._ports.append(port)
         return port
 
-    def get_all_named(self) -> dict[str, Port]:
+    def get_all_named(self) -> dict[str, Port[L, C]]:
         """Get all ports in a dictionary with names as keys."""
         return {v.name: v for v in self._ports if v.name is not None}
 
-    def __getitem__(self, key: int | str | None) -> Port:
+    def __getitem__(self, key: int | str | None) -> Port[L, C]:
         """Get a specific port by name."""
         if isinstance(key, int):
             return self._ports[key]
@@ -7197,7 +7230,7 @@ class Ports:
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> list[Port]:
+    ) -> list[Port[L, C]]:
         """Filter ports by name.
 
         Args:
@@ -7207,7 +7240,7 @@ class Ports:
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-        ports: Iterable[Port] = self._ports
+        ports: Iterable[Port[L, C]] = self._ports
         if regex:
             ports = filter_regex(ports, regex)
         if layer is not None:
@@ -7257,12 +7290,12 @@ class Ports:
         )
 
     @classmethod
-    def from_yaml(cls: type[Ports], constructor: Any, node: Any) -> Ports:
+    def from_yaml(cls: type[Ports[L, C]], constructor: Any, node: Any) -> Ports[L, C]:
         """Load Ports from a yaml representation."""
         return cls(constructor.construct_sequence(node))
 
 
-class InstancePorts:
+class InstancePorts(Generic[L, C]):
     """Ports of an instance.
 
     These act as virtual ports as the centers needs to change if the
@@ -7276,9 +7309,9 @@ class InstancePorts:
             This provides a way to dynamically calculate the ports.
     """
 
-    instance: Instance
+    instance: Instance[L, C]
 
-    def __init__(self, instance: Instance) -> None:
+    def __init__(self, instance: Instance[L, C]) -> None:
         """Creates the virtual ports object.
 
         Args:
@@ -7293,7 +7326,7 @@ class InstancePorts:
         else:
             return len(self.cell_ports) * self.instance.na * self.instance.nb
 
-    def __contains__(self, port: str | Port) -> bool:
+    def __contains__(self, port: str | Port[L, C]) -> bool:
         """Check whether a port is in this port collection."""
         if isinstance(port, Port):
             return port in self.instance.ports
@@ -7310,7 +7343,7 @@ class InstancePorts:
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> list[Port]:
+    ) -> list[Port[L, C]]:
         """Filter ports by name.
 
         Args:
@@ -7320,7 +7353,7 @@ class InstancePorts:
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-        ports: Iterable[Port] = list(self.instance.ports)
+        ports: Iterable[Port[L, C]] = list(self.instance.ports)
         if regex:
             ports = filter_regex(ports, regex)
         if layer is not None:
@@ -7336,7 +7369,7 @@ class InstancePorts:
     @logger.catch(reraise=True)
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]
-    ) -> Port:
+    ) -> Port[L, C]:
         """Returns port from instance.
 
         The key can either be an integer, in which case the nth port is
@@ -7389,10 +7422,10 @@ class InstancePorts:
                 )
 
     @property
-    def cell_ports(self) -> Ports:
+    def cell_ports(self) -> Ports[L, C]:
         return self.instance.cell.ports
 
-    def __iter__(self) -> Iterator[Port]:
+    def __iter__(self) -> Iterator[Port[L, C]]:
         """Create a copy of the ports to iterate through."""
         if not self.instance.is_regular_array():
             if not self.instance.is_complex():
@@ -7434,7 +7467,7 @@ class InstancePorts:
     def print(self) -> None:
         config.console.print(pprint_ports(self.copy()))
 
-    def copy(self) -> Ports:
+    def copy(self) -> Ports[L, C]:
         """Creates a copy in the form of [Ports][kfactory.kcell.Ports]."""
         if not self.instance.is_regular_array():
             if not self.instance.is_complex():
@@ -7566,7 +7599,7 @@ def clean_dict(d: dict[str, Any]) -> dict[str, Any]:
 
 
 def clean_value(
-    value: float | np.float64 | dict[Any, Any] | KCell | Callable[..., Any],
+    value: float | np.float64 | dict[Any, Any] | KCell[L, C] | Callable[..., Any],
 ) -> str:
     """Makes sure a value is representable in a limited character_space."""
     if isinstance(value, int):  # integer
@@ -7657,7 +7690,7 @@ def update_default_trans(
 
 
 def pprint_ports(
-    ports: Iterable[Port], unit: Literal["dbu", "um", None] = None
+    ports: Iterable[Port[L, C]], unit: Literal["dbu", "um", None] = None
 ) -> rich.table.Table:
     """Print ports as a table.
 
@@ -7733,7 +7766,7 @@ def pprint_ports(
 
 
 def show(
-    layout: KCLayout | KCell | Path | str,
+    layout: KCLayout[L, C] | KCell[L, C] | Path | str,
     lyrdb: rdb.ReportDatabase | Path | str | None = None,
     l2n: kdb.LayoutToNetlist | Path | str | None = None,
     keep_position: bool = True,
@@ -8088,7 +8121,7 @@ def dpolygon_from_array(array: Iterable[tuple[float, float]]) -> kdb.DPolygon:
     return kdb.DPolygon([kdb.DPoint(x, y) for (x, y) in array])
 
 
-def _check_inst_ports(p1: Port, p2: Port) -> int:
+def _check_inst_ports(p1: Port[L, C], p2: Port[L, C]) -> int:
     check_int = 0
     if p1.width != p2.width:
         check_int += 1
@@ -8099,7 +8132,7 @@ def _check_inst_ports(p1: Port, p2: Port) -> int:
     return check_int
 
 
-def _check_cell_ports(p1: Port, p2: Port) -> int:
+def _check_cell_ports(p1: Port[L, C], p2: Port[L, C]) -> int:
     check_int = 0
     if p1.width != p2.width:
         check_int += 1
@@ -8113,6 +8146,8 @@ def _check_cell_ports(p1: Port, p2: Port) -> int:
 @dataclass
 class MergeDiff:
     """Dataclass to hold geometric info about the layout diff."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     layout_a: kdb.Layout
     layout_b: kdb.Layout
@@ -8306,7 +8341,7 @@ class MergeDiff:
         )
 
 
-class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
+class InstanceGroup(BaseModel, Generic[L, C], arbitrary_types_allowed=True):
     """Group of Instances.
 
     The instance group can be treated similar to a single instance
@@ -8316,7 +8351,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         insts: List of the instances of the group.
     """
 
-    insts: list[Instance]
+    insts: list[Instance[L, C]]
 
     def transform(
         self,
@@ -8350,12 +8385,12 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         return bb
 
     @overload
-    def movex(self, destination: int, /) -> InstanceGroup: ...
+    def movex(self, destination: int, /) -> InstanceGroup[L, C]: ...
 
     @overload
-    def movex(self, origin: int, destination: int) -> InstanceGroup: ...
+    def movex(self, origin: int, destination: int) -> InstanceGroup[L, C]: ...
 
-    def movex(self, origin: int, destination: int | None = None) -> InstanceGroup:
+    def movex(self, origin: int, destination: int | None = None) -> InstanceGroup[L, C]:
         """Move the instance in x-direction in dbu.
 
         Args:
@@ -8369,12 +8404,12 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         return self
 
     @overload
-    def movey(self, destination: int, /) -> InstanceGroup: ...
+    def movey(self, destination: int, /) -> InstanceGroup[L, C]: ...
 
     @overload
-    def movey(self, origin: int, destination: int) -> InstanceGroup: ...
+    def movey(self, origin: int, destination: int) -> InstanceGroup[L, C]: ...
 
-    def movey(self, origin: int, destination: int | None = None) -> InstanceGroup:
+    def movey(self, origin: int, destination: int | None = None) -> InstanceGroup[L, C]:
         """Move the instance group in y-direction in dbu.
 
         Args:
@@ -8388,16 +8423,16 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         return self
 
     @overload
-    def move(self, destination: tuple[int, int], /) -> InstanceGroup: ...
+    def move(self, destination: tuple[int, int], /) -> InstanceGroup[L, C]: ...
 
     @overload
     def move(
         self, origin: tuple[int, int], destination: tuple[int, int]
-    ) -> InstanceGroup: ...
+    ) -> InstanceGroup[L, C]: ...
 
     def move(
         self, origin: tuple[int, int], destination: tuple[int, int] | None = None
-    ) -> InstanceGroup:
+    ) -> InstanceGroup[L, C]:
         """Move the instance group in dbu.
 
         Args:
@@ -8414,7 +8449,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     def rotate(
         self, angle: Literal[0, 1, 2, 3], center: kdb.Point | None = None
-    ) -> InstanceGroup:
+    ) -> InstanceGroup[L, C]:
         """Rotate instance group in increments of 90°."""
         if center:
             t = kdb.Trans(center.to_v())
@@ -8426,7 +8461,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     def mirror(
         self, p1: kdb.Point = kdb.Point(1, 0), p2: kdb.Point = kdb.Point(0, 0)
-    ) -> InstanceGroup:
+    ) -> InstanceGroup[L, C]:
         """Mirror the instance group at a line."""
         mirror_v = p2 - p1
         dedge = kdb.DEdge(self.insts[0].kcl.to_um(p1), self.insts[0].kcl.to_um(p2))
@@ -8443,12 +8478,12 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
         return self
 
-    def mirror_x(self, x: int = 0) -> InstanceGroup:
+    def mirror_x(self, x: int = 0) -> InstanceGroup[L, C]:
         """Mirror the instance group at an y-axis at position x."""
         self.transform(kdb.Trans(2, True, 2 * x, 0))
         return self
 
-    def mirror_y(self, y: int = 0) -> InstanceGroup:
+    def mirror_y(self, y: int = 0) -> InstanceGroup[L, C]:
         """Mirror the instance group at an x-axis at position y."""
         self.transform(kdb.Trans(0, True, 0, 2 * y))
         return self
@@ -8544,12 +8579,14 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
             )
 
     @overload
-    def dmovex(self, destination: float, /) -> InstanceGroup: ...
+    def dmovex(self, destination: float, /) -> InstanceGroup[L, C]: ...
 
     @overload
-    def dmovex(self, origin: float, destination: float) -> InstanceGroup: ...
+    def dmovex(self, origin: float, destination: float) -> InstanceGroup[L, C]: ...
 
-    def dmovex(self, origin: float, destination: float | None = None) -> InstanceGroup:
+    def dmovex(
+        self, origin: float, destination: float | None = None
+    ) -> InstanceGroup[L, C]:
         """Move the instance group in x-direction in um.
 
         Args:
@@ -8563,12 +8600,14 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         return self
 
     @overload
-    def dmovey(self, destination: float, /) -> InstanceGroup: ...
+    def dmovey(self, destination: float, /) -> InstanceGroup[L, C]: ...
 
     @overload
-    def dmovey(self, origin: float, destination: float) -> InstanceGroup: ...
+    def dmovey(self, origin: float, destination: float) -> InstanceGroup[L, C]: ...
 
-    def dmovey(self, origin: float, destination: float | None = None) -> InstanceGroup:
+    def dmovey(
+        self, origin: float, destination: float | None = None
+    ) -> InstanceGroup[L, C]:
         """Move the instance group in y-direction in um.
 
         Args:
@@ -8584,8 +8623,12 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
     def drotate(
         self,
         angle: float,
-        center: kdb.DPoint | kdb.DVector | tuple[float, float] | Port | None = None,
-    ) -> InstanceGroup:
+        center: kdb.DPoint
+        | kdb.DVector
+        | tuple[float, float]
+        | Port[L, C]
+        | None = None,
+    ) -> InstanceGroup[L, C]:
         """Rotate instance group in degrees.
 
         Args:
@@ -8610,18 +8653,18 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         return self
 
     @overload
-    def dmove(self, destination: tuple[float, float], /) -> InstanceGroup: ...
+    def dmove(self, destination: tuple[float, float], /) -> InstanceGroup[L, C]: ...
 
     @overload
     def dmove(
         self, origin: tuple[float, float], destination: tuple[float, float]
-    ) -> InstanceGroup: ...
+    ) -> InstanceGroup[L, C]: ...
 
     def dmove(
         self,
         origin: tuple[float, float],
         destination: tuple[float, float] | None = None,
-    ) -> InstanceGroup:
+    ) -> InstanceGroup[L, C]:
         """Move the instance group in dbu.
 
         Args:
@@ -8640,7 +8683,7 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
     def dmirror(
         self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
-    ) -> InstanceGroup:
+    ) -> InstanceGroup[L, C]:
         """Mirror the instance group at a line."""
         mirror_v = p2 - p1
         dedge = kdb.DEdge(p1, p2)
@@ -8657,12 +8700,12 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
         return self
 
-    def dmirror_x(self, x: float = 0) -> InstanceGroup:
+    def dmirror_x(self, x: float = 0) -> InstanceGroup[L, C]:
         """Mirror the instance group at an x-axis."""
         self.transform(kdb.DTrans(2, True, 2 * x, 0))
         return self
 
-    def dmirror_y(self, y: float = 0) -> InstanceGroup:
+    def dmirror_y(self, y: float = 0) -> InstanceGroup[L, C]:
         """Mirror the instance group at an y-axis."""
         self.transform(kdb.DTrans(0, True, 0, 2 * y))
         return self
@@ -8759,13 +8802,13 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
 
 
 def _filter_ports(
-    ports: Iterable[Port],
+    ports: Iterable[Port[L, C]],
     angle: int | None = None,
     orientation: float | None = None,
     layer: LayerEnum | int | None = None,
     port_type: str | None = None,
     regex: str | None = None,
-) -> list[Port]:
+) -> list[Port[L, C]]:
     if regex:
         ports = filter_regex(ports, regex)
     if layer is not None:

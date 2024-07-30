@@ -6,12 +6,12 @@ from collections.abc import Sequence
 from typing import Literal, cast
 
 from . import kdb
-from .kcell import Instance, KCell
+from .kcell import C, Instance, KCell, L
 
 
 def grid_dbu(
-    target: KCell,
-    kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
+    target: KCell[L, C],
+    kcells: Sequence[KCell[L, C] | None] | Sequence[Sequence[KCell[L, C] | None]],
     spacing: int | tuple[int, int],
     target_trans: kdb.Trans = kdb.Trans(),
     shape: tuple[int, int] | None = None,
@@ -19,7 +19,7 @@ def grid_dbu(
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
     mirror: bool = False,
-) -> list[list[Instance | None]]:
+) -> list[list[Instance[L, C] | None]]:
     """Create a grid of instances.
 
     A grid uses the bounding box of the biggest width and biggest height of any bounding
@@ -84,8 +84,8 @@ def grid_dbu(
         spacing_x = spacing
         spacing_y = spacing
 
-    insts: list[list[Instance | None]]
-    kcell_array: Sequence[Sequence[KCell]]
+    insts: list[list[Instance[L, C] | None]]
+    kcell_array: Sequence[Sequence[KCell[L, C]]]
 
     if shape is None:
         if isinstance(kcells[0], KCell):
@@ -145,7 +145,7 @@ def grid_dbu(
             x0 = 0
         return insts
     else:
-        _kcells: list[KCell | None]
+        _kcells: list[KCell[L, C] | None]
         if isinstance(kcells[0], KCell):
             _kcells = kcells  # type:ignore[assignment]
         else:
@@ -221,8 +221,8 @@ def grid_dbu(
 
 
 def flexgrid_dbu(
-    target: KCell,
-    kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
+    target: KCell[L, C],
+    kcells: Sequence[KCell[L, C] | None] | Sequence[Sequence[KCell[L, C] | None]],
     spacing: int | tuple[int, int],
     target_trans: kdb.Trans = kdb.Trans(),
     shape: tuple[int, int] | None = None,
@@ -230,7 +230,7 @@ def flexgrid_dbu(
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
     mirror: bool = False,
-) -> list[list[Instance | None]]:
+) -> list[list[Instance[L, C] | None]]:
     """Create a grid of instances.
 
     A grid uses the bounding box of the biggest width per column and biggest height per
@@ -290,14 +290,14 @@ def flexgrid_dbu(
         spacing_x = spacing
         spacing_y = spacing
 
-    insts: list[list[Instance | None]]
-    kcell_array: Sequence[Sequence[KCell]]
+    insts: list[list[Instance[L, C] | None]]
+    kcell_array: Sequence[Sequence[KCell[L, C]]]
 
     if shape is None:
         if isinstance(kcells[0], KCell):
-            kcell_array = cast(Sequence[list[KCell]], [list(kcells)])
+            kcell_array = cast(Sequence[list[KCell[L, C]]], [list(kcells)])
         else:
-            kcell_array = cast(Sequence[Sequence[KCell]], kcells)
+            kcell_array = cast(Sequence[Sequence[KCell[L, C]]], kcells)
 
         x0 = 0
         y0 = 0
@@ -364,7 +364,7 @@ def flexgrid_dbu(
             x0 = 0
         return insts
     else:
-        _kcells: list[KCell | None]
+        _kcells: list[KCell[L, C] | None]
         if isinstance(kcells[0], KCell):
             _kcells = kcells  # type:ignore[assignment]
         else:
@@ -450,8 +450,8 @@ def flexgrid_dbu(
 
 
 def grid(
-    target: KCell,
-    kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
+    target: KCell[L, C],
+    kcells: Sequence[KCell[L, C] | None] | Sequence[Sequence[KCell[L, C] | None]],
     spacing: int | tuple[float, float],
     target_trans: kdb.DCplxTrans = kdb.DCplxTrans(),
     shape: tuple[int, int] | None = None,
@@ -459,7 +459,7 @@ def grid(
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
     mirror: bool = False,
-) -> list[list[Instance | None]]:
+) -> list[list[Instance[L, C] | None]]:
     """Create a grid of instances.
 
     A grid uses the bounding box of the biggest width and biggest height of any bounding
@@ -524,8 +524,8 @@ def grid(
         spacing_x = spacing
         spacing_y = spacing
 
-    insts: list[list[Instance | None]]
-    kcell_array: Sequence[Sequence[KCell]]
+    insts: list[list[Instance[L, C] | None]]
+    kcell_array: Sequence[Sequence[KCell[L, C]]]
 
     if shape is None:
         if isinstance(kcells[0], KCell):
@@ -586,7 +586,7 @@ def grid(
             x0 = 0
         return insts
     else:
-        _kcells: list[KCell | None]
+        _kcells: list[KCell[L, C] | None]
         if isinstance(kcells[0], KCell):
             _kcells = kcells  # type:ignore[assignment]
         else:
@@ -662,8 +662,8 @@ def grid(
 
 
 def flexgrid(
-    target: KCell,
-    kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
+    target: KCell[L, C],
+    kcells: Sequence[KCell[L, C] | None] | Sequence[Sequence[KCell[L, C] | None]],
     spacing: int | tuple[int, int],
     target_trans: kdb.DCplxTrans = kdb.DCplxTrans(),
     shape: tuple[int, int] | None = None,
@@ -671,7 +671,7 @@ def flexgrid(
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
     mirror: bool = False,
-) -> list[list[Instance | None]]:
+) -> list[list[Instance[L, C] | None]]:
     """Create a grid of instances.
 
     A grid uses the bounding box of the biggest width per column and biggest height per
@@ -731,14 +731,14 @@ def flexgrid(
         spacing_x = spacing
         spacing_y = spacing
 
-    insts: list[list[Instance | None]]
-    kcell_array: Sequence[Sequence[KCell]]
+    insts: list[list[Instance[L, C] | None]]
+    kcell_array: Sequence[Sequence[KCell[L, C]]]
 
     if shape is None:
         if isinstance(kcells[0], KCell):
-            kcell_array = cast(Sequence[list[KCell]], [list(kcells)])
+            kcell_array = cast(Sequence[list[KCell[L, C]]], [list(kcells)])
         else:
-            kcell_array = cast(Sequence[Sequence[KCell]], kcells)
+            kcell_array = cast(Sequence[Sequence[KCell[L, C]]], kcells)
 
         x0 = 0
         y0 = 0
@@ -808,7 +808,7 @@ def flexgrid(
             x0 = 0
         return insts
     else:
-        _kcells: list[KCell | None]
+        _kcells: list[KCell[L, C] | None]
         if isinstance(kcells[0], KCell):
             _kcells = kcells  # type:ignore[assignment]
         else:

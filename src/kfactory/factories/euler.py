@@ -19,7 +19,7 @@ from scipy.special import fresnel  # type:ignore[import-untyped,unused-ignore]
 from .. import kdb, kf_types
 from ..conf import logger
 from ..enclosure import LayerEnclosure, extrude_path
-from ..kcell import Info, KCell, KCLayout, MetaData
+from ..kcell import C, Info, KCell, KCLayout, L, MetaData
 
 __all__ = [
     "euler_bend_points",
@@ -29,7 +29,7 @@ __all__ = [
 ]
 
 
-class BendEulerFactory(Protocol):
+class BendEulerFactory(Protocol[L, C]):
     def __call__(
         self,
         width: kf_types.um,
@@ -38,7 +38,7 @@ class BendEulerFactory(Protocol):
         enclosure: LayerEnclosure | None = None,
         angle: kf_types.deg = 90,
         resolution: float = 150,
-    ) -> KCell:
+    ) -> KCell[L, C]:
         """Create a euler bend.
 
         Args:
@@ -52,7 +52,7 @@ class BendEulerFactory(Protocol):
         ...
 
 
-class BendSEulerFactory(Protocol):
+class BendSEulerFactory(Protocol[L, C]):
     def __call__(
         self,
         offset: kf_types.um,
@@ -61,7 +61,7 @@ class BendSEulerFactory(Protocol):
         layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         resolution: float = 150,
-    ) -> KCell:
+    ) -> KCell[L, C]:
         """Create a euler s-bend.
 
         Args:
@@ -213,7 +213,7 @@ def euler_sbend_points(
 
 
 def bend_euler_factory(
-    kcl: KCLayout,
+    kcl: KCLayout[L, C],
     additional_info: Callable[
         ...,
         dict[str, MetaData],
@@ -223,7 +223,7 @@ def bend_euler_factory(
     basename: str | None = None,
     snap_ports: bool = False,
     **cell_kwargs: Any,
-) -> BendEulerFactory:
+) -> BendEulerFactory[L, C]:
     """Returns a function generating euler bends.
 
     Args:
@@ -267,7 +267,7 @@ def bend_euler_factory(
         enclosure: LayerEnclosure | None = None,
         angle: kf_types.deg = 90,
         resolution: float = 150,
-    ) -> KCell:
+    ) -> KCell[L, C]:
         """Create a euler bend.
 
         Args:
@@ -346,7 +346,7 @@ def bend_euler_factory(
 
 
 def bend_s_euler_factory(
-    kcl: KCLayout,
+    kcl: KCLayout[L, C],
     additional_info: Callable[
         ...,
         dict[str, MetaData],
@@ -355,7 +355,7 @@ def bend_s_euler_factory(
     | None = None,
     basename: str | None = None,
     **cell_kwargs: Any,
-) -> BendSEulerFactory:
+) -> BendSEulerFactory[L, C]:
     """Returns a function generating euler s-bends.
 
     Args:
@@ -393,7 +393,7 @@ def bend_s_euler_factory(
         layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         resolution: float = 150,
-    ) -> KCell:
+    ) -> KCell[L, C]:
         """Create a euler s-bend.
 
         Args:

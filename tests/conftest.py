@@ -18,7 +18,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class Layers(kf.kcell.Layers):
+class Layers(kf.kcell.LayerInfos):
     WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0, "WG")
     WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0, "WGCLAD")
     WGEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1, "WGEXCLUDE")
@@ -28,7 +28,7 @@ class Layers(kf.kcell.Layers):
     FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0, "FILL3")
 
 
-kf.kcl.layers = kf.kcl.layerenum_from_dict(layers=Layers().asdict())
+kf.kcl.layers = kf.kcl.layerenum_from_dict(layers=Layers())
 
 
 @pytest.fixture(scope="module")

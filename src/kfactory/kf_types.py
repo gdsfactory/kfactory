@@ -5,7 +5,9 @@ Mainly units for annotating types.
 
 from typing import Annotated
 
-from .kcell import LayerEnum
+from .kcell import (
+    LayerEnum,
+)
 
 um = Annotated[float, "um"]
 """Float in micrometer."""

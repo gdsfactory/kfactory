@@ -5,16 +5,16 @@ from collections.abc import Sequence
 import rpack  # type: ignore[import-untyped,unused-ignore]
 
 from . import kdb
-from .kcell import Instance, InstanceGroup, KCell
+from .kcell import C, Instance, InstanceGroup, KCell, L
 
 
 def pack_kcells(
-    target: KCell,
-    kcells: Sequence[KCell],
+    target: KCell[L, C],
+    kcells: Sequence[KCell[L, C]],
     max_width: int | None = None,
     max_height: int | None = None,
     spacing: int = 0,
-) -> InstanceGroup:
+) -> InstanceGroup[L, C]:
     """Pack KCells.
 
     Args:
@@ -45,12 +45,12 @@ def pack_kcells(
 
 
 def pack_instances(
-    target: KCell,
-    instances: Sequence[Instance],
+    target: KCell[L, C],
+    instances: Sequence[Instance[L, C]],
     max_width: int | None = None,
     max_height: int | None = None,
     spacing: int = 0,
-) -> InstanceGroup:
+) -> InstanceGroup[L, C]:
     """Pack KCells.
 
     Args:
