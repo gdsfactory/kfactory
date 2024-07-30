@@ -3267,6 +3267,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                             self.future_cell_name,
                         )
                     cell = f(**params)
+                    if not isinstance(cell, KCell):
+                        raise ValueError(
+                            f"Function did not return a KCell, but {type(cell)}"
+                        )
+
                     if cell._locked:
                         # If the cell is locked, it comes from a cache (most likely)
                         # and should be copied first
