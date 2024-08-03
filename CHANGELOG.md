@@ -5,6 +5,8 @@
 
 ## Bug Fixes
 
+- fix write_context_info [#448](https://github.com/gdsfactory/kfactory/pull/448)
+- Add missing space in KLayout version warning [#447](https://github.com/gdsfactory/kfactory/pull/447)
 - ensure cell decorated functions return component [#443](https://github.com/gdsfactory/kfactory/pull/443)
 - fix c.flatten(merge=True) deleting texts [#441](https://github.com/gdsfactory/kfactory/pull/441)
 - Adjust AttributeError text in optical routing for taper and bend [#438](https://github.com/gdsfactory/kfactory/pull/438)
