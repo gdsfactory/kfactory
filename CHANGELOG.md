@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- better instance default name using trans instead of .x [#450](https://github.com/gdsfactory/kfactory/pull/450)
 - fix write_context_info [#448](https://github.com/gdsfactory/kfactory/pull/448)
 - Add missing space in KLayout version warning [#447](https://github.com/gdsfactory/kfactory/pull/447)
 - ensure cell decorated functions return component [#443](https://github.com/gdsfactory/kfactory/pull/443)
