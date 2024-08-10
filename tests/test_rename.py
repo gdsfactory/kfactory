@@ -90,7 +90,7 @@ def test_rename_orientation() -> None:
 
 def test_rename_setter(LAYER: Layers) -> None:
     kcl = kf.KCLayout("TEST_RENAME")
-    kcl.layers = kcl.layerenum_from_dict(layers=LAYER.asdict())
+    kcl.layers = kcl.layerenum_from_dict(layers=LAYER)
 
     assert kcl.rename_function == kf.port.rename_clockwise_multi
 

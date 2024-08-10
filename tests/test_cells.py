@@ -94,11 +94,11 @@ def test_cells(cell_name: str, LAYER: Layers) -> None:
         gds_ref.mkdir(parents=True, exist_ok=True)
         run_cell.write(str(ref_file))
         raise FileNotFoundError(f"GDS file not found. Saving it to {ref_file}")
-    kcl_ref = kf.KCLayout("TEST")
+    kcl_ref = kf.KCLayout("TEST", layer_infos=Layers)
     kcl_ref.read(gds_ref / f"{cell.name}.gds")
     ref_cell = kcl_ref[kcl_ref.top_cell().name]
 
-    for layerinfo in kcl_ref.layer_infos():
+    for layerinfo in kcl_ref.layout.layer_infos():
         layer = kcl_ref.layer(layerinfo)
         region_run = kf.kdb.Region(run_cell.begin_shapes_rec(layer))
         region_ref = kf.kdb.Region(ref_cell.begin_shapes_rec(layer))
@@ -106,7 +106,7 @@ def test_cells(cell_name: str, LAYER: Layers) -> None:
         region_diff = region_run - region_ref
 
         if not region_diff.is_empty():
-            layer_tuple = kcl_ref.layer_infos()[layer]
+            layer_tuple = kcl_ref.layout.layer_infos()[layer]
             region_xor = region_ref ^ region_run
             c = kf.KCell(f"{cell.name}_diffs")
             c_run = kf.KCell(f"{cell.name}_new")

@@ -22,7 +22,7 @@ from . import kdb
 from .conf import config, logger
 
 if TYPE_CHECKING:
-    from .kcell import C, KCell, KCLayout, L, LayerEnum, Port
+    from .kcell import KCell, KCLayout, LayerEnum, Port
 
 __all__ = [
     "LayerEnclosure",
@@ -162,7 +162,7 @@ def extrude_path_points(
 
 
 def extrude_path(
-    target: KCell[L, C],
+    target: KCell,
     layer: kdb.LayerInfo,  # LayerEnum | int,
     path: list[kdb.DPoint],
     width: float,
@@ -298,7 +298,7 @@ def extrude_path_dynamic_points(
 
 
 def extrude_path_dynamic(
-    target: KCell[L, C],
+    target: KCell,
     layer: kdb.LayerInfo,
     path: list[kdb.DPoint],
     widths: Callable[[float], float] | list[float],
@@ -524,7 +524,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
     _name: str | None = PrivateAttr()
     main_layer: kdb.LayerInfo | None
     yaml_tag: str = "!Enclosure"
-    kcl: KCLayout[Any, Any] | None = None
+    kcl: KCLayout | None = None
 
     def __init__(
         self,
@@ -537,7 +537,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]
         ]
         | None = None,
-        kcl: KCLayout[L, C] | None = None,
+        kcl: KCLayout | None = None,
     ):
         """Constructor of new enclosure.
 
@@ -681,7 +681,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
 
     def apply_minkowski_enc(
         self,
-        c: KCell[L, C],
+        c: KCell,
         ref: kdb.LayerInfo | kdb.Region | None,  # layer index or the region
         direction: Direction = Direction.BOTH,
     ) -> None:
@@ -722,7 +722,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                 raise ValueError("Undefined direction")
 
     def apply_minkowski_y(
-        self, c: KCell[L, C], ref: kdb.LayerInfo | kdb.Region | None = None
+        self, c: KCell, ref: kdb.LayerInfo | kdb.Region | None = None
     ) -> None:
         """Apply an enclosure with a vector in y-direction.
 
@@ -736,7 +736,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         return self.apply_minkowski_enc(c, ref=ref, direction=Direction.Y)
 
     def apply_minkowski_x(
-        self, c: KCell[L, C], ref: kdb.LayerInfo | kdb.Region | None
+        self, c: KCell, ref: kdb.LayerInfo | kdb.Region | None
     ) -> None:
         """Apply an enclosure with a vector in x-direction.
 
@@ -751,7 +751,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
 
     def apply_minkowski_custom(
         self,
-        c: KCell[L, C],
+        c: KCell,
         shape: Callable[[int], kdb.Edge | kdb.Polygon | kdb.Box],
         ref: kdb.LayerInfo | kdb.Region | None = None,
     ) -> None:
@@ -790,12 +790,12 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
 
     def apply_minkowski_tiled(
         self,
-        c: KCell[L, C],
+        c: KCell,
         ref: kdb.LayerInfo | kdb.Region | None = None,
         tile_size: float | None = None,
         n_pts: int = 64,
         n_threads: int | None = None,
-        carve_out_ports: Iterable[Port[L, C]] = [],
+        carve_out_ports: Iterable[Port] = [],
     ) -> None:
         """Minkowski regions with tiling processor.
 
@@ -858,7 +858,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
 
         operators = []
         port_holes: dict[int, kdb.Region] = defaultdict(kdb.Region)
-        ports_by_layer: dict[int, list[Port[L, C]]] = defaultdict(list)
+        ports_by_layer: dict[int, list[Port]] = defaultdict(list)
         for port in c.ports:
             ports_by_layer[port.layer].append(port)
 
@@ -949,7 +949,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
 
     def apply_custom(
         self,
-        c: KCell[L, C],
+        c: KCell,
         shape: Callable[
             [int, int | None], kdb.Edge | kdb.Polygon | kdb.Box | kdb.Region
         ],
@@ -967,7 +967,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                 c.shapes(layer_index).insert(shape(sec.d_max, sec.d_min))
 
     def apply_bbox(
-        self, c: KCell[L, C], ref: kdb.LayerInfo | kdb.Region | None = None
+        self, c: KCell, ref: kdb.LayerInfo | kdb.Region | None = None
     ) -> None:
         """Apply an enclosure based on a bounding box.
 
@@ -1026,7 +1026,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
 
     def extrude_path(
         self,
-        c: KCell[L, C],
+        c: KCell,
         path: list[kdb.DPoint],
         main_layer: kdb.LayerInfo | None,
         width: float,
@@ -1065,7 +1065,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
 
     def extrude_path_dynamic(
         self,
-        c: KCell[L, C],
+        c: KCell,
         path: list[kdb.DPoint],
         main_layer: kdb.LayerInfo | None,
         widths: Callable[[float], float] | list[float],
@@ -1091,7 +1091,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             target=c, layer=main_layer, path=path, widths=widths, enclosure=self
         )
 
-    def copy_to(self, kcl: KCLayout[L, C]) -> LayerEnclosure:
+    def copy_to(self, kcl: KCLayout) -> LayerEnclosure:
         """Creat a copy of the LayerEnclosure in another KCLayout."""
         layer_enc = LayerEnclosure(
             [], name=self.name, main_layer=self.main_layer, kcl=kcl
@@ -1147,7 +1147,7 @@ class LayerEnclosureCollection(BaseModel):
 class RegionOperator(kdb.TileOutputReceiver):
     """Region collector. Just getst the tile and inserts it into the target cell."""
 
-    def __init__(self, cell: KCell[L, C], layer: LayerEnum | int) -> None:
+    def __init__(self, cell: KCell, layer: LayerEnum | int) -> None:
         """Initialization.
 
         Args:
@@ -1208,7 +1208,7 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
 
     def __init__(
         self,
-        cell: KCell[L, C],
+        cell: KCell,
         layers: list[LayerEnum],
     ) -> None:
         """Initialization.
@@ -1337,7 +1337,7 @@ class KCellEnclosure(BaseModel):
 
     def apply_minkowski_enc(
         self,
-        c: KCell[L, C],
+        c: KCell,
         direction: Direction = Direction.BOTH,
     ) -> None:
         """Apply an enclosure with a vector in y-direction.
@@ -1375,7 +1375,7 @@ class KCellEnclosure(BaseModel):
             case _:
                 raise ValueError("Undefined direction")
 
-    def apply_minkowski_y(self, c: KCell[L, C]) -> None:
+    def apply_minkowski_y(self, c: KCell) -> None:
         """Apply an enclosure with a vector in y-direction.
 
         This can be used for tapers/
@@ -1386,7 +1386,7 @@ class KCellEnclosure(BaseModel):
         """
         return self.apply_minkowski_enc(c, direction=Direction.Y)
 
-    def apply_minkowski_x(self, c: KCell[L, C]) -> None:
+    def apply_minkowski_x(self, c: KCell) -> None:
         """Apply an enclosure with a vector in x-direction.
 
         This can be used for tapers/
@@ -1399,7 +1399,7 @@ class KCellEnclosure(BaseModel):
 
     def apply_minkowski_custom(
         self,
-        c: KCell[L, C],
+        c: KCell,
         shape: Callable[[int], kdb.Edge | kdb.Polygon | kdb.Box],
     ) -> None:
         """Apply an enclosure with a custom shape.
@@ -1437,7 +1437,7 @@ class KCellEnclosure(BaseModel):
 
     def apply_minkowski_tiled(
         self,
-        c: KCell[L, C],
+        c: KCell,
         tile_size: float | None = None,
         n_pts: int = 64,
         n_threads: int | None = None,
@@ -1467,7 +1467,7 @@ class KCellEnclosure(BaseModel):
         tp.threads = n_threads or config.n_threads
         inputs: set[str] = set()
         port_hole_map: dict[LayerEnum, kdb.Region] = defaultdict(kdb.Region)
-        ports_by_layer: dict[LayerEnum, list[Port[L, C]]] = defaultdict(list)
+        ports_by_layer: dict[LayerEnum, list[Port]] = defaultdict(list)
         for port in c.ports:
             ports_by_layer[c.kcl.find_layer(c.kcl.get_info(port.layer))].append(port)
 
@@ -1620,6 +1620,6 @@ class KCellEnclosure(BaseModel):
                 operator.insert()
         logger.debug("Finished KCellEnclosure on {}", c.kcl.future_cell_name or c.name)
 
-    def copy_to(self, kcl: KCLayout[L, C]) -> KCellEnclosure:
+    def copy_to(self, kcl: KCLayout) -> KCellEnclosure:
         """Copy the KCellEnclosure to another KCLayout."""
         return KCellEnclosure([enc.copy_to(kcl) for enc in self.enclosures.enclosures])

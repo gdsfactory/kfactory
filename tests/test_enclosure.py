@@ -31,23 +31,23 @@ def mmi_enc(layer: kf.kdb.LayerInfo, enclosure: kf.LayerEnclosure) -> kf.KCell:
     return c
 
 
-def test_enclosure(LAYER: kf.LayerEnum) -> None:
+def test_enclosure(LAYER: Layers) -> None:
     kf.LayerEnclosure([(LAYER.WG, 500, -250)])
 
 
-def test_enc(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
+def test_enc(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
     wg_enc
 
     mmi_enc(LAYER.WG, wg_enc)
 
 
-def test_neg_enc(LAYER: kf.LayerEnum) -> None:
+def test_neg_enc(LAYER: Layers) -> None:
     enc = kf.LayerEnclosure([(LAYER.WGCLAD, -1500, 1000)])
 
     mmi_enc(LAYER.WG, enc)
 
 
-def test_layer_multi_enc(LAYER: kf.LayerEnum) -> None:
+def test_layer_multi_enc(LAYER: Layers) -> None:
     enc = kf.LayerEnclosure(
         [
             (LAYER.WGCLAD, -5000, -5400),
@@ -59,7 +59,7 @@ def test_layer_multi_enc(LAYER: kf.LayerEnum) -> None:
     mmi_enc(LAYER.WG, enc)
 
 
-def test_layer_merge_enc(LAYER: kf.LayerEnum) -> None:
+def test_layer_merge_enc(LAYER: Layers) -> None:
     enc = kf.LayerEnclosure(
         [
             (LAYER.WGCLAD, -5000, -3000),
@@ -70,7 +70,7 @@ def test_layer_merge_enc(LAYER: kf.LayerEnum) -> None:
     mmi_enc(LAYER.WG, enc)
 
 
-def test_um_enclosure(LAYER: kf.LayerEnum) -> None:
+def test_um_enclosure(LAYER: Layers) -> None:
     enc = kf.LayerEnclosure(
         [
             (LAYER.WGCLAD, -5000, -3000),
@@ -92,7 +92,7 @@ def test_um_enclosure(LAYER: kf.LayerEnum) -> None:
     assert enc == enc_um
 
 
-def test_um_enclosure_nodbu(LAYER: kf.LayerEnum) -> None:
+def test_um_enclosure_nodbu(LAYER: Layers) -> None:
     """When defining um sections, kcl must be defined."""
     with pytest.raises(AssertionError):
         kf.LayerEnclosure(

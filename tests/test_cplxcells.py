@@ -39,7 +39,7 @@ def test_cell(LAYER: Layers) -> None:
     simple_cplx_cell(LAYER.WG)
 
 
-def test_connected_cell(LAYER: kf.LayerEnum) -> None:
+def test_connected_cell(LAYER: Layers) -> None:
     c = kf.KCell()
     layer = LAYER.WG
     sckc1 = c << simple_cplx_cell(layer)

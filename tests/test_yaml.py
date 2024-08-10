@@ -6,7 +6,7 @@ from conftest import Layers
 
 pdk = kf.KCLayout("YAML")
 
-pdk.layers = pdk.layerenum_from_dict(layers=Layers().asdict())
+pdk.layers = pdk.layerenum_from_dict(layers=Layers())
 
 taper = kf.factories.taper.taper_factory(kcl=pdk)
 bend = kf.factories.euler.bend_euler_factory(kcl=pdk)

@@ -160,6 +160,7 @@ class Settings(BaseSettings):
     allow_width_mismatch: bool = False
     allow_layer_mismatch: bool = False
     allow_type_mismatch: bool = False
+    allow_undefined_layers: bool = False
     cell_layout_cache: bool = False
     cell_overwrite_existing: bool = False
     connect_use_angle: bool = True

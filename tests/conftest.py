@@ -17,18 +17,18 @@ from dataclasses import dataclass
 #     WGCLADEXCLUDE = (111, 1)
 
 
-@dataclass
 class Layers(kf.kcell.LayerInfos):
-    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0, "WG")
-    WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0, "WGCLAD")
-    WGEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1, "WGEXCLUDE")
-    WGCLADEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1, "WGCLADEXCLUDE")
-    FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0, "FILL1")
-    FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0, "FILL2")
-    FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0, "FILL3")
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+    WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
+    WGEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
+    WGCLADEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1)
+    FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
+    FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
+    FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
 
 
-kf.kcl.layers = kf.kcl.layerenum_from_dict(layers=Layers())
+kf.kcl.layers = kf.kcl.set_layers_from_infos(name="LAYER", layers=Layers())
+kf.kcl.layer_infos = Layers()
 
 
 @pytest.fixture(scope="module")
@@ -151,17 +151,17 @@ def cells(
 def pdk() -> kf.KCLayout:
     layerstack = kf.LayerStack(
         wg=kf.kcell.LayerLevel(
-            layer=Layers.WG,
+            layer=Layers().WG,
             thickness=0.22,
             zmin=0,
             material="si",
             info=kf.kcell.Info(mesh_order=1),
         ),
         clad=kf.kcell.LayerLevel(
-            layer=Layers.WGCLAD, thickness=3, zmin=0.22, material="sio2"
+            layer=Layers().WGCLAD, thickness=3, zmin=0.22, material="sio2"
         ),
     )
-    kcl = kf.KCLayout("Test_PDK", layer_stack=layerstack)
+    kcl = kf.KCLayout("Test_PDK", layer_infos=Layers, layer_stack=layerstack)
     return kcl
 
 

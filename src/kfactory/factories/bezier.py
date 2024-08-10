@@ -9,12 +9,12 @@ from scipy.special import binom  # type:ignore[import-untyped,unused-ignore]
 
 from .. import kdb, kf_types
 from ..enclosure import LayerEnclosure
-from ..kcell import C, Info, KCell, KCLayout, L, MetaData
+from ..kcell import Info, KCell, KCLayout, MetaData
 
 __all__ = ["bend_s_bezier_factory"]
 
 
-class BezierKCell(Protocol[L, C]):
+class BezierKCell(Protocol):
     def __call__(
         self,
         width: kf_types.um,
@@ -25,7 +25,7 @@ class BezierKCell(Protocol[L, C]):
         t_start: float = 0,
         t_stop: float = 1,
         enclosure: LayerEnclosure | None = None,
-    ) -> KCell[L, C]:
+    ) -> KCell:
         """Creat a bezier bend.
 
         Args:
@@ -58,7 +58,7 @@ def bezier_curve(
 
 
 def bend_s_bezier_factory(
-    kcl: KCLayout[L, C],
+    kcl: KCLayout,
     additional_info: Callable[
         ...,
         dict[str, MetaData],
@@ -67,7 +67,7 @@ def bend_s_bezier_factory(
     | None = None,
     basename: str | None = None,
     **cell_kwargs: Any,
-) -> BezierKCell[L, C]:
+) -> BezierKCell:
     """Returns a function generating bezier s-bends.
 
     Args:
@@ -106,7 +106,7 @@ def bend_s_bezier_factory(
         t_start: float = 0,
         t_stop: float = 1,
         enclosure: LayerEnclosure | None = None,
-    ) -> KCell[L, C]:
+    ) -> KCell:
         """Creat a bezier bend.
 
         Args:

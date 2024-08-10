@@ -1,12 +1,13 @@
 import kfactory as kf
 import numpy as np
 import warnings
+from conftest import Layers
 
 
 def bend_circular(
     width: int,
     radius: int,
-    layer: int,
+    layer: kf.kdb.LayerInfo,
     enclosure: kf.enclosure.LayerEnclosure | None = None,
     angle: int = 90,
     angle_step: float = 1,
@@ -33,12 +34,13 @@ def bend_circular(
         ]
     ]
 
-    kf.enclosure.extrude_path(
-        c, c.kcl.get_info(layer), backbone, width, enclosure, 0, angle
-    )
+    kf.enclosure.extrude_path(c, layer, backbone, width, enclosure, 0, angle)
 
     c.create_port(
-        name="W0", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer=layer
+        name="W0",
+        trans=kf.kdb.Trans(2, False, 0, 0),
+        width=width,
+        layer=c.kcl.find_layer(layer),
     )
 
     match angle:
@@ -47,14 +49,14 @@ def bend_circular(
                 name="N0",
                 trans=kf.kdb.Trans(1, False, radius, radius),
                 width=width,
-                layer=layer,
+                layer=c.kcl.find_layer(layer),
             )
         case 180:
             c.create_port(
                 name="W1",
                 trans=kf.kdb.Trans(0, False, 0, 2 * radius),
                 width=width,
-                layer=layer,
+                layer=c.kcl.find_layer(layer),
             )
 
     return c
@@ -63,7 +65,7 @@ def bend_circular(
 def dbend_circular(
     width: float,
     radius: float,
-    layer: kf.kcell.LayerEnum,
+    layer: kf.kdb.LayerInfo,
     enclosure: kf.LayerEnclosure | None = None,
     angle: float = 90,
     angle_step: float = 1,
@@ -91,7 +93,10 @@ def dbend_circular(
     ]
     kf.enclosure.extrude_path(c, layer, backbone, width, enclosure, 0, angle)
     dp1 = kf.kcell.Port(
-        dwidth=width, layer=layer, name="W0", dcplx_trans=kf.kdb.DCplxTrans.R180
+        dwidth=width,
+        layer=c.kcl.find_layer(layer),
+        name="W0",
+        dcplx_trans=kf.kdb.DCplxTrans.R180,
     )
     warnings.filterwarnings("ignore")
     c.add_port(dp1)
@@ -100,14 +105,14 @@ def dbend_circular(
         case 90:
             dp2 = kf.Port(
                 name="N0",
-                layer=layer,
+                layer=c.kcl.find_layer(layer),
                 dwidth=width,
                 dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, radius, radius),
             )
         case 180:
             dp2 = kf.Port(
                 name="N0",
-                layer=layer,
+                layer=c.kcl.find_layer(layer),
                 dwidth=width,
                 dcplx_trans=kf.kdb.DTrans(1, 0, False, 0, 2 * radius),
             )
@@ -118,13 +123,18 @@ def dbend_circular(
     return c
 
 
-def test_spiral(LAYER: kf.LayerEnum) -> None:
+def test_spiral(LAYER: Layers) -> None:
     c = kf.KCell()
 
     r1 = 1000
     r2 = 0
 
-    p = kf.Port(name="start", trans=kf.kdb.Trans.R0, width=1000, layer=LAYER.WG)
+    p = kf.Port(
+        name="start",
+        trans=kf.kdb.Trans.R0,
+        width=1000,
+        layer=c.kcl.find_layer(LAYER.WG),
+    )
 
     for _ in range(10):
         r = r1 + r2
@@ -135,14 +145,17 @@ def test_spiral(LAYER: kf.LayerEnum) -> None:
         p = b.ports["N0"]
 
 
-def test_dspiral(LAYER: kf.LayerEnum) -> None:
+def test_dspiral(LAYER: Layers) -> None:
     c = kf.KCell()
 
     r1 = 1
     r2 = 0
 
     p = kf.Port(
-        name="start", dcplx_trans=kf.kdb.DCplxTrans.R0, dwidth=1, layer=LAYER.WG
+        name="start",
+        dcplx_trans=kf.kdb.DCplxTrans.R0,
+        dwidth=1,
+        layer=c.kcl.find_layer(LAYER.WG),
     )
 
     kf.config.logfilter.level = kf.conf.LogLevel.ERROR
