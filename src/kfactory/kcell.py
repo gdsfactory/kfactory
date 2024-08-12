@@ -704,7 +704,7 @@ def save_layout_options(**attributes: Any) -> kdb.SaveLayoutOptions:
     save.gds2_write_cell_properties = True
     save.gds2_write_file_properties = True
     save.gds2_write_timestamps = False
-    save.write_context_info = True
+    save.write_context_info = config.write_context_info
     save.gds2_max_cellname_length = config.max_cellname_length
 
     for k, v in attributes.items():
@@ -1529,8 +1529,10 @@ class KCell:
             for layer in self.kcl.layer_indexes():
                 reg = kdb.Region(self.shapes(layer))
                 reg = reg.merge()
+                texts = kdb.Texts(self.shapes(layer))
                 self.clear(layer)
                 self.shapes(layer).insert(reg)
+                self.shapes(layer).insert(texts)
 
     def rebuild(self) -> None:
         """Rebuild the instances of the KCell."""
@@ -3440,6 +3442,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     else:
                         _name = None
                     cell = f(**params)
+                    if not isinstance(cell, KCell):
+                        raise ValueError(
+                            f"Function did not return a KCell, but {type(cell)}"
+                        )
                     logger.debug("Constructed {}", _name or cell.name)
 
                     if cell._locked:
@@ -6281,7 +6287,11 @@ class Instance:
     def name(self) -> str:
         """Name of instance in GDS."""
         prop = self.property(PROPID.NAME)
-        return str(prop) if prop is not None else f"{self.cell.name}_{self.x}_{self.y}"
+        return (
+            str(prop)
+            if prop is not None
+            else f"{self.cell.name}_{self.trans.disp.x}_{self.trans.disp.y}"
+        )
 
     @name.setter
     def name(self, value: str) -> None:
@@ -8269,7 +8279,7 @@ def show(
                             logger.warning(
                                 "KLayout GUI version is older than the python klayout."
                                 f"GUI:{jmsg['klayout_version']} Python:"
-                                f"{_klayout_version}. This might cause missing,"
+                                f"{_klayout_version}. This might cause missing, "
                                 "unfunctional, or erroneous features. Please "
                                 "update your GUI to a version equal or higher "
                                 "than the python version for optimal performance."
