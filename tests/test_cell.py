@@ -20,6 +20,36 @@ def test_euler_snapping(LAYER: Layers) -> None:
     assert b.ports["o2"].dcplx_trans.disp == kf.kcl.to_um(b.ports["o2"].trans.disp)
 
 
+@kf.cell
+def unnamed_cell(name: str = "a") -> kf.KCell:
+    c = kf.kcl.kcell(name)
+    return c
+
+
+def test_unnamed_cell() -> None:
+    c1 = unnamed_cell("test")
+    c2 = unnamed_cell("test")
+    assert c1 is c2
+
+
+@kf.cell
+def nested_list_dict(
+    arg1: dict[str, list[dict[str, str | int] | int] | int],
+) -> kf.KCell:
+    c = kf.kcl.kcell()
+    return c
+
+
+def test_nested_dict_list() -> None:
+    dl: dict[str, list[dict[str, str | int] | int] | int] = {
+        "a": 5,
+        "b": [5, {"c": "d", "e": 6}],
+    }
+    c = nested_list_dict(dl)
+    assert dl == c.settings["arg1"]
+    assert dl is not c.settings["arg1"]
+
+
 def test_no_snap(LAYER: Layers) -> None:
     c = kf.KCell()
 

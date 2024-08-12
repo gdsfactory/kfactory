@@ -16,7 +16,7 @@ import importlib.util
 import inspect
 import json
 import socket
-from collections import UserDict, defaultdict
+from collections import UserDict, UserList, defaultdict
 from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
 from enum import IntEnum, IntFlag, auto
@@ -3358,9 +3358,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             debug_names: Check on setting the name whether a cell with this name already
                 exists.
         """
-        d2fs = rec_dict_to_frozenset
-        fs2d = rec_frozenset_to_dict
-
         if check_instances is None:
             check_instances = config.check_instances
         if overwrite_existing is None:
@@ -3399,8 +3396,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 del_parameters: list[str] = []
 
                 for key, value in params.items():
-                    if isinstance(value, dict):
-                        params[key] = d2fs(value)
+                    if isinstance(value, dict | list):
+                        params[key] = _to_hashable(value)
+                    elif isinstance(value, kdb.LayerInfo):
+                        params[key] = self.get_info(self.layer(value))
                     if value is inspect.Parameter.empty:
                         del_parameters.append(key)
 
@@ -3415,8 +3414,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     **params: KCellParams.args | KCellParams.kwargs,
                 ) -> KC:
                     for key, value in params.items():
-                        if isinstance(value, frozenset):
-                            params[key] = fs2d(value)
+                        if isinstance(value, frozenset | DecoratorList):
+                            params[key] = _hashable_to_original(value)
 
                     if set_name:
                         if basename is not None:
@@ -3426,43 +3425,29 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         old_future_name = self.future_cell_name
                         self.future_cell_name = name
                         if layout_cache:
-                            logger.debug(
-                                "Loading {} from layout cache", self.future_cell_name
-                            )
                             c = self.layout.cell(self.future_cell_name)
                             if c is not None:
+                                logger.debug(
+                                    "Loading {} from layout cache",
+                                    self.future_cell_name,
+                                )
                                 return self[c.cell_index()]  # type: ignore[return-value]
                         logger.debug(
                             "Constructing {}",
                             self.future_cell_name,
                         )
-                    cell = f(**params)
-                    if set_name:
-                        if basename is not None:
-                            name = get_cell_name(basename, **params)
-                        else:
-                            name = get_cell_name(f.__name__, **params)
-                        old_future_name = self.future_cell_name
-                        self.future_cell_name = name
-                        if layout_cache:
-                            logger.debug(
-                                "Loading {} from layout cache", self.future_cell_name
-                            )
-                            c = self.layout.cell(self.future_cell_name)
-                            if c is not None:
-                                return self[c.cell_index()]  # type: ignore[return-value]
-                        logger.debug(
-                            "Constructing {}",
-                            self.future_cell_name,
-                        )
+                        _name: str | None = name
                     else:
-                        name = cell.name
+                        _name = None
+                    cell = f(**params)
+                    logger.debug("Constructed {}", _name or cell.name)
+
                     if cell._locked:
                         # If the cell is locked, it comes from a cache (most likely)
                         # and should be copied first
                         cell = cell.dup()  # type: ignore[assignment]
                     if overwrite_existing:
-                        for c in list(self.layout.cells(name)):
+                        for c in list(self.layout.cells(_name or cell.name)):
                             if c is not cell._kdb_cell:
                                 self[c.cell_index()].delete()
                     if set_name:
@@ -3696,8 +3681,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             register_factory: Register the resulting KCell-function to the
                 [factories][kfactory.kcell.KCLayout.factories]
         """
-        d2fs = rec_dict_to_frozenset
-        fs2d = rec_frozenset_to_dict
 
         def decorator_autocell(
             f: Callable[KCellParams, VKCell],
@@ -3727,8 +3710,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 del_parameters: list[str] = []
 
                 for key, value in params.items():
-                    if isinstance(value, dict):
-                        params[key] = d2fs(value)
+                    if isinstance(value, dict | list):
+                        params[key] = _to_hashable(value)
                     elif isinstance(value, kdb.LayerInfo):
                         params[key] = self.get_info(self.layer(value))
                     if value is inspect.Parameter.empty:
@@ -3744,8 +3727,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     **params: KCellParams.args,
                 ) -> VKCell:
                     for key, value in params.items():
-                        if isinstance(value, frozenset):
-                            params[key] = fs2d(value)
+                        if isinstance(value, frozenset | DecoratorList):
+                            params[key] = _hashable_to_original(value)
                     cell = f(**params)
                     if cell._locked:
                         raise ValueError(
@@ -3755,10 +3738,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if set_name:
                         if basename is not None:
                             name = get_cell_name(basename, **params)
-                        elif "self" in params:
-                            name = get_cell_name(
-                                params["self"].__class__.__name__, **params
-                            )
                         else:
                             name = get_cell_name(f.__name__, **params)
                         cell.name = name
@@ -7685,6 +7664,11 @@ class InstancePorts:
                 )
 
 
+class DecoratorList(UserList[Any]):
+    def __hash__(self) -> int:
+        return hash(tuple(self.data))
+
+
 def dict_to_frozenset(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
     """Convert a `dict` to a `frozenset`."""
     return frozenset(d.items())
@@ -7695,32 +7679,63 @@ def frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable
     return dict(fs)
 
 
-def rec_dict_to_frozenset(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
+@overload
+def _to_hashable(d: dict[str, Any]) -> frozenset[tuple[str, Any]]: ...
+@overload
+def _to_hashable(d: list[Any]) -> DecoratorList: ...
+
+
+def _to_hashable(
+    d: dict[str, Any] | list[Any],
+) -> frozenset[tuple[str, Any]] | DecoratorList:
     """Convert a `dict` to a `frozenset`."""
-    frozen_dict: dict[str, Any] = {}
-    for item, value in d.items():
-        if isinstance(value, dict):
-            _value: Any = rec_dict_to_frozenset(value)
-        elif isinstance(value, list):
-            _value = tuple(value)
-        else:
-            _value = value
-        frozen_dict[item] = _value
+    if isinstance(d, dict):
+        frozen_dict: dict[str, Any] = {}
+        for item, value in d.items():
+            if isinstance(value, dict | list):
+                _value: Any = _to_hashable(value)
+            else:
+                _value = value
+            frozen_dict[item] = _value
+        return frozenset(frozen_dict.items())
+    else:
+        ul = DecoratorList([])
+        for index, value in enumerate(d):
+            if isinstance(value, dict | list):
+                _value = _to_hashable(value)
+            else:
+                _value = value
+            ul.append(_value)
+        return ul
 
-    return frozenset(frozen_dict.items())
+
+@overload
+def _hashable_to_original(fs: frozenset[tuple[str, Any]]) -> dict[str, Any]: ...
+@overload
+def _hashable_to_original(fs: DecoratorList) -> list[Any]: ...
 
 
-def rec_frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable]:
+def _hashable_to_original(
+    fs: frozenset[tuple[str, Any]] | DecoratorList,
+) -> dict[str, Any] | list[Any]:
     """Convert `frozenset` to `dict`."""
-    # return dict(fs)
-    d: dict[str, Any] = {}
-    for k, v in fs:
-        if isinstance(v, frozenset):
-            _v: Any = rec_frozenset_to_dict(v)
-        else:
-            _v = v
-        d[k] = _v
-    return d
+    if isinstance(fs, frozenset):
+        d: dict[str, Any] = {}
+        for k, v in fs:
+            if isinstance(v, frozenset | DecoratorList):
+                _v: Any = _hashable_to_original(v)
+            else:
+                _v = v
+            d[k] = _v
+        return d
+    else:
+        _list = []
+        for v in fs:
+            if isinstance(v, frozenset | DecoratorList):
+                _list.append(_hashable_to_original(v))
+            else:
+                _list.append(v)
+        return _list
 
 
 def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
