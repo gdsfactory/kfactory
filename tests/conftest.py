@@ -27,8 +27,10 @@ class Layers(kf.kcell.LayerInfos):
     FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
 
 
-kf.kcl.layers = kf.kcl.set_layers_from_infos(name="LAYER", layers=Layers())
-kf.kcl.layer_infos = Layers()
+# kf.kcl.layers = kf.kcl.set_layers_from_infos(name="LAYER", layers=Layers())
+# kf.kcl.layer_infos = Layers()
+
+kf.kcl.infos = Layers()
 
 
 @pytest.fixture(scope="module")
@@ -161,7 +163,7 @@ def pdk() -> kf.KCLayout:
             layer=Layers().WGCLAD, thickness=3, zmin=0.22, material="sio2"
         ),
     )
-    kcl = kf.KCLayout("Test_PDK", layer_infos=Layers, layer_stack=layerstack)
+    kcl = kf.KCLayout("Test_PDK", infos=Layers, layer_stack=layerstack)
     return kcl
 
 

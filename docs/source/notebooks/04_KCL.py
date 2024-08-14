@@ -27,6 +27,16 @@
 # %%
 import kfactory as kf
 
+class LayerInfos(kf.LayerInfos):
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1,0)
+    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2,0) # WG Exclude
+    CLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4,0) # cladding
+    FLOORPLAN: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10,0)
+
+# Make the layout object aware of the new layers:
+LAYER = LayerInfos()
+kf.kcl.infos = LAYER
+
 kcl_default = kf.kcl
 
 # %% [markdown]
@@ -38,7 +48,7 @@ kcl_default.kcells
 # %%
 # Create a default straight waveguide in the default KCLayout with dbu==0.001 (1nm grid)
 s_default = kf.cells.straight.straight(
-    width=1, length=10, layer=kcl_default.layer(1, 0)
+    width=1, length=10, layer=LAYER.WG
 )
 
 # %%
@@ -51,7 +61,7 @@ kcl_default.dbu
 
 # %%
 # Create a new KCLayout to simulate pdk (could be package with e.g. `from test_pdk import kcl as pdk` or similar)
-kcl2 = kf.KCLayout("TEST_PDK")
+kcl2 = kf.KCLayout("TEST_PDK", infos=LayerInfos)
 # Set the dbu to 0.005 (5nm)
 kcl2.dbu = 0.005
 kcl2.layout.dbu
@@ -66,7 +76,7 @@ sf2 = kf.factories.straight.straight_dbu_factory(kcl=kcl2)
 
 # %%
 # Make an instance with
-s2 = kcl2.factories["straight"](length=10000, width=200, layer=kcl2.layer(1, 0))
+s2 = kcl2.factories["straight"](length=10000, width=200, layer=LAYER.WG)
 s2.settings
 
 # %%
@@ -82,12 +92,12 @@ print(f"{s2.bbox().width()=}")
 print(f"{s2.dbbox().width()=}")
 
 # %%
-# The ports of the default kcl also have different dbu dimensions, but are the same in um
-print(f"{s_default.ports.pformat()=}")
-print(f"{s2.ports.pformat()=}")
+# The ports of the default kcl also have different width dbu dimensions, but are the same in um
+s_default.ports.print()
+s2.ports.print()
 # But in um they are the same
-print(f"{s_default.ports.pformat(unit='um')}")
-print(f"{s2.ports.pformat(unit='um')}")
+s_default.ports.print(unit="um")
+s2.ports.print(unit="um")
 
 # %%
 # Both can be instantiated into the same KCell
@@ -100,16 +110,3 @@ si_2.connect("o1", si_d, "o2")
 
 # %%
 c
-
-
-# %%
-class LAYER2(kf.LayerEnum):
-    kcl = kf.constant(kcl2)
-    WG = (1, 0)
-
-
-# %%
-kcl2.layers = LAYER2
-
-# %%
-kcl2.layers

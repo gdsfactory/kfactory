@@ -117,6 +117,5 @@ def test_l2n(LAYER: Layers) -> None:
     p.name = None
     c.add_port(p)
 
-    c.show()
-    nl = c.l2n()
+    c.l2n()
     # print(nl)

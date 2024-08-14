@@ -36,6 +36,19 @@
 # %%
 import kfactory as kf
 
+# Define Layers
+
+class LayerInfos(kf.LayerInfos):
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1,0)
+    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2,0) # WG Exclude
+    CLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4,0) # cladding
+    FLOORPLAN: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10,0)
+
+# Make the layout object aware of the new layers:
+LAYER = LayerInfos()
+kf.kcl.infos = LAYER
+
+# %%
 # Create a blank Cell
 p = kf.KCell()
 
@@ -144,7 +157,7 @@ c2
 
 # %%
 c = kf.KCell(name="instance_sample")
-w = kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.find_layer(1, 0))
+w = kf.cells.straight.straight(length=10, width=0.6, layer=LAYER.WG)
 wr = kf.kdb.CellInstArray(w._kdb_cell, kf.kdb.Trans.R0)
 c.insert(wr)
 c
@@ -154,7 +167,7 @@ c
 
 # %%
 c = kf.KCell(name="instance_sample_shorter_syntax")
-wr = c << kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.find_layer(1, 0))
+wr = c << kf.cells.straight.straight(length=10, width=0.6, layer=LAYER.WG)
 c
 
 # %% [markdown]
@@ -162,8 +175,8 @@ c
 
 # %%
 c = kf.KCell(name="two_instances")
-wr1 = c << kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.find_layer(1, 0))
-wr2 = c << kf.cells.straight.straight(length=10, width=0.6, layer=c.kcl.find_layer(1, 0))
+wr1 = c << kf.cells.straight.straight(length=10, width=0.6, layer=LAYER.WG)
+wr2 = c << kf.cells.straight.straight(length=10, width=0.6, layer=LAYER.WG)
 wr2.transform(kf.kdb.DTrans(0.0, 10.0))
 c.add_ports(wr1.ports, prefix="top_")
 c.add_ports(wr2.ports, prefix="bot_")
@@ -195,7 +208,7 @@ c
 import kfactory as kf
 
 print(kf.__version__)
-c = kf.cells.straight.straight(length=10, width=0.6, layer=kf.kcl.find_layer(1, 0))
+c = kf.cells.straight.straight(length=10, width=0.6, layer=LAYER.WG)
 c3 = kf.KCell()  # Create a new blank Cell
 aref = c3.create_inst(
     c, na=1, nb=3, a=kf.kdb.Vector(20000, 0), b=kf.kdb.Vector(0, 15000)
@@ -221,7 +234,7 @@ c.ports
 
 # %%
 c = kf.KCell()
-bend = kf.cells.euler.bend_euler(radius=5, width=1, layer=0)
+bend = kf.cells.euler.bend_euler(radius=5, width=1, layer=LAYER.WG)
 b1 = c << bend
 b2 = c << bend
 b2.connect("o1", b1.ports["o2"])
@@ -229,8 +242,8 @@ c
 
 # %%
 c = kf.KCell()
-b1 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, angle=30)
-b2 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, angle=30)
+b1 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=LAYER.WG, angle=30)
+b2 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=LAYER.WG, angle=30)
 b2.connect("o1", b1.ports["o2"])
 c.show()
 c
@@ -242,8 +255,8 @@ c
 
 # %%
 c = kf.KCell()
-b1 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, angle=30)
-b2 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=0, angle=30)
+b1 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=LAYER.WG, angle=30)
+b2 = c << kf.cells.euler.bend_euler(radius=5, width=1, layer=LAYER.WG, angle=30)
 b2.connect("o1", b1.ports["o2"])
 b2.flatten()
 c.show()
@@ -293,7 +306,7 @@ c
 # by default `KCell.show()` will add triangular pins, so you can see the direction of the port in Klayout.
 
 # %%
-c = kf.cells.euler.bend_euler(radius=5, width=1, layer=0, angle=90)
+c = kf.cells.euler.bend_euler(radius=5, width=1, layer=LAYER.WG, angle=90)
 c.draw_ports()
 c
 

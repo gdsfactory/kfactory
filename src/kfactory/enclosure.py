@@ -1122,6 +1122,9 @@ class LayerEnclosureCollection(BaseModel):
 
     enclosures: list[LayerEnclosure]
 
+    def __hash__(self) -> int:
+        return hash(tuple(self.enclosures))
+
     @field_validator("enclosures")
     def enclosures_must_have_main_layer(
         cls, v: list[LayerEnclosure]
@@ -1296,6 +1299,10 @@ class KCellEnclosure(BaseModel):
         super().__init__(
             enclosures=LayerEnclosureCollection(enclosures=list(enclosures))
         )
+
+    def __hash__(self) -> int:
+        """Hash of the KCellEnclosure."""
+        return hash(tuple(self.enclosures.enclosures))
 
     def minkowski_region(
         self,

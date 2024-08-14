@@ -1,8 +1,7 @@
 import kfactory as kf
 from conftest import Layers
 
-pdk = kf.KCLayout("L2N")
-pdk.layers = pdk.layerenum_from_dict(layers=Layers())
+pdk = kf.KCLayout("L2N", infos=Layers)
 
 taper = kf.factories.taper.taper_factory(kcl=pdk)
 bend = kf.factories.euler.bend_euler_factory(kcl=pdk)
@@ -94,5 +93,4 @@ def test_l2n() -> None:
     mzi1 = c << mzi()
     mzi2 = c << mzi()
     mzi2.connect("o1", mzi1, "o2")
-    c.show()
     c.l2n()

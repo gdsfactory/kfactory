@@ -62,4 +62,3 @@ def test_enc_extrude_static(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
     _width = [width + np.sin(x * np.pi / 2) for x in [_x / 20 for _x in range(21)]]
 
     enclosure.extrude_path_dynamic(c, path, layer, _width)
-    c.show()

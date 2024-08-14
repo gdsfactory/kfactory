@@ -16,9 +16,11 @@
 import kfactory as kf
 
 
-class LAYER(kf.LayerEnum):
-    SI = (1, 0)
-    SIEXCLUDE = (1, 1)
+class LayerInfos(kf.LayerInfos):
+    SI: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+    SIEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
 
 
-si_enc = kf.enclosure.LayerEnclosure([(LAYER.SIEXCLUDE, 2000)])
+kf.kcl.infos = LayerInfos()
+LAYER = LayerInfos()
+si_enc = kf.enclosure.LayerEnclosure([(kf.kcl.infos.SIEXCLUDE, 2000)])

@@ -93,8 +93,7 @@ def test_metainfo_read(LAYER: Layers, straight: kf.KCell) -> None:
         save.write_context_info = True
         straight.kcl.write(t.name)
 
-        kcl = kf.KCLayout("TEST_META")
-        kcl.layers = kcl.layerenum_from_dict(layers=LAYER)
+        kcl = kf.KCLayout("TEST_META", infos=Layers)
         kcl.read(t.name)
 
         wg_read = kcl[straight.name]
@@ -117,7 +116,7 @@ def test_metainfo_read_cell(straight: kf.KCell) -> None:
         save.write_context_info = True
         straight.write(t.name)
 
-        kcl = kf.KCLayout("TEST_META", layer_infos=Layers)
+        kcl = kf.KCLayout("TEST_META", infos=Layers)
         kcell = kcl.kcell(straight.name)
         kf.config.logfilter.regex = r"KLayout <=0.28.15 \(last update 2024-02-02\) cannot read LayoutMetaInfo on 'Cell.read'. kfactory uses these extensively for ports, info, and settings. Therefore proceed at your own risk."
         kcell.read(t.name)

@@ -242,7 +242,7 @@ def test_layout_cache(LAYER: Layers) -> None:
 
 
 def test_check_ports(LAYER: Layers) -> None:
-    kcl = kf.KCLayout("CHECK_PORTS")
+    kcl = kf.KCLayout("CHECK_PORTS", infos=Layers)
     kcl.layers = kcl.layerenum_from_dict(layers=LAYER)
 
     @kcl.cell

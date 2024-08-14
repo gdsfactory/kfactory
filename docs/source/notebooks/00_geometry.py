@@ -32,6 +32,20 @@
 import kfactory as kf
 import numpy as np
 
+
+# %%
+# Define Layers
+
+class LayerInfos(kf.LayerInfos):
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1,0)
+    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2,0) # WG Exclude
+    CLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4,0) # cladding
+    FLOORPLAN: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10,0)
+
+# Make the layout object aware of the new layers:
+LAYER = LayerInfos()
+kf.kcl.infos = LAYER
+
 # %%
 # Create a blank cell (essentially an empty GDS cell with some special features)
 c = kf.KCell()
@@ -262,7 +276,7 @@ c2
 
 # %%
 c = kf.KCell()
-bend = kf.cells.euler.bend_euler(radius=10, width=1, layer=0)
+bend = kf.cells.euler.bend_euler(radius=10, width=1, layer=LAYER.WG)
 b1 = c << bend
 b2 = c << bend
 b2.mirror_x(x=0)
@@ -270,7 +284,7 @@ c
 
 # %%
 c = kf.KCell()
-bend = kf.cells.euler.bend_euler(radius=10, width=1, layer=0)
+bend = kf.cells.euler.bend_euler(radius=10, width=1, layer=LAYER.WG)
 b1 = c << bend
 b2 = c << bend
 b2.mirror_y(y=0)
@@ -278,7 +292,7 @@ c
 
 # %%
 c = kf.KCell()
-bend = kf.cells.euler.bend_euler(radius=10, width=1, layer=0)
+bend = kf.cells.euler.bend_euler(radius=10, width=1, layer=LAYER.WG)
 b1 = c << bend
 b2 = c << bend
 b2.mirror_y(y=0)
@@ -331,7 +345,7 @@ e2 = kf.kdb.DPolygon.ellipse(kf.kdb.DBox(10, 6), 64).transformed(
 # %%
 c = kf.KCell()
 c.shapes(c.kcl.find_layer(2, 0)).insert(e1)
-c.shapes(c.kcl.find_layer(3, 0)).insert(e2)
+c.shapes(c.kcl.find_layer(4, 0)).insert(e2)
 c
 
 # %%
@@ -377,8 +391,8 @@ c
 
 # %%
 c = kf.KCell()
-wg = c << kf.cells.straight.straight(width=0.5, length=1, layer=0)
-bend = c << kf.cells.euler.bend_euler(width=0.5, radius=1, layer=0)
+wg = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+bend = c << kf.cells.euler.bend_euler(width=0.5, radius=1, layer=LAYER.WG)
 
 bend.connect("o1", wg.ports["o2"])  # connects follow Source, destination syntax
 c
@@ -391,7 +405,7 @@ c
 
 # %%
 c = kf.KCell("mirror_example3")
-bend = kf.cells.euler.bend_euler(width=0.5, radius=1, layer=0)
+bend = kf.cells.euler.bend_euler(width=0.5, radius=1, layer=LAYER.WG)
 b1 = c << bend
 b2 = c << bend
 b2.drotate(90)
@@ -399,7 +413,7 @@ c
 
 # %%
 c = kf.KCell("mirror_example4")
-bend = kf.cells.euler.bend_euler(width=0.5, radius=1, layer=0)
+bend = kf.cells.euler.bend_euler(width=0.5, radius=1, layer=LAYER.WG)
 b1 = c << bend
 b2 = c << bend
 b2.rotate(1)

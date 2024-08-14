@@ -52,7 +52,6 @@ from pydantic import (
     Field,
     RootModel,
     ValidationError,
-    computed_field,
     model_validator,
 )
 from typing_extensions import ParamSpec, Self  # noqa: UP035
@@ -2922,7 +2921,9 @@ class LayerStack(BaseModel):
         return self.layers[attr]
 
 
-class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
+class KCLayout(
+    BaseModel, arbitrary_types_allowed=True, extra="allow", validate_assignment=True
+):
     """Small extension to the klayout.db.Layout.
 
     It adds tracking for the [KCell][kfactory.kcell.KCell] objects
@@ -2959,7 +2960,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         constants: dict of constants for the PDK.
 
     """
-    _name: str
+    name: str
     layout: kdb.Layout
     layer_enclosures: LayerEnclosureModel
     enclosure: KCellEnclosure
@@ -2969,7 +2970,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     virtual_factories: Factories[VKCell]
     kcells: dict[int, KCell]
     layers: type[LayerEnum]
-    layer_infos: LayerInfos
+    infos: LayerInfos
     layer_stack: LayerStack
     netlist_layer_mapping: dict[LayerEnum | int, LayerEnum | int] = Field(
         default_factory=dict
@@ -2981,7 +2982,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     _registered_functions: dict[int, Callable[..., KCell]]
 
     info: Info = Field(default_factory=Info)
-    _settings: KCellSettings
+    settings: KCellSettings = Field(frozen=True)
     future_cell_name: str | None
 
     def __init__(
@@ -2989,7 +2990,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         name: str,
         layer_enclosures: dict[str, LayerEnclosure] | LayerEnclosureModel | None = None,
         enclosure: KCellEnclosure | None = None,
-        layer_infos: type[LayerInfos] | None = None,
+        infos: type[LayerInfos] | None = None,
         sparameters_path: Path | str | None = None,
         interconnect_cml_path: Path | str | None = None,
         layer_stack: LayerStack | None = None,
@@ -3006,7 +3007,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             layer_enclosures: Additional KCellEnclosures that should be available
                 except the KCellEnclosure
             enclosure: The standard KCellEnclosure of the PDK.
-            layer_infos: A LayerInfos describing the layerstack of the PDK.
+            infos: A LayerInfos describing the layerstack of the PDK.
             sparameters_path: Path to the sparameters config file.
             interconnect_cml_path: Path to the interconnect file.
             layer_stack: maps name to layer numbers, thickness, zmin, sidewall_angle.
@@ -3023,14 +3024,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         layout = library.layout()
         layer_stack = layer_stack or LayerStack()
         _constants = constants() if constants else Constants()
-        infos = layer_infos() if layer_infos else LayerInfos()
+        _infos = infos() if infos else LayerInfos()
         super().__init__(
-            _name=name,
+            name=name,
             kcells={},
             layer_enclosures=LayerEnclosureModel(dict()),
             enclosure=KCellEnclosure([]),
-            layer_infos=infos,
-            layers=layerenum_from_dict(layers=infos, layout=layout),
+            infos=_infos,
+            layers=LayerEnum,
             factories=Factories({}),
             virtual_factories=Factories({}),
             sparameters_path=sparameters_path,
@@ -3042,17 +3043,22 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             rename_function=port_rename_function,
             info=Info(**info) if info else Info(),
             future_cell_name=None,
-        )
-        object.__setattr__(self, "_name", name)
-        object.__setattr__(
-            self,
-            "_settings",
-            KCellSettings(
+            settings=KCellSettings(
                 version=__version__,
                 klayout_version=kdb.__version__,  # type: ignore[attr-defined]
                 meta_format="v2",
             ),
         )
+        # object.__setattr__(self, "_name", name)
+        # object.__setattr__(
+        #     self,
+        #     "_settings",
+        #     KCellSettings(
+        #         version=__version__,
+        #         klayout_version=kdb.__version__,  # type: ignore[attr-defined]
+        #         meta_format="v2",
+        #     ),
+        # )
 
         self.library.register(self.name)
 
@@ -3077,14 +3083,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         enclosure = (
             enclosure.copy_to(self) if enclosure else KCellEnclosure(enclosures=[])
         )
-        layers = self.layerenum_from_dict(name="LAYER", layers=infos)
+        # layers = self.layerenum_from_dict(name="LAYER", layers=infos)
         sparameters_path = sparameters_path
         interconnect_cml_path = interconnect_cml_path
         if enclosure is None:
             enclosure = KCellEnclosure([])
         if layer_enclosures is None:
             _layer_enclosures = LayerEnclosureModel()
-        self.layers = layers
+        # self.layers = layers
         self.sparameters_path = sparameters_path
         self.enclosure = enclosure
         self.layer_enclosures = _layer_enclosures
@@ -3092,9 +3098,18 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
         kcls[self.name] = self
 
-    def _set_name_and_library(self, name: str) -> None:
-        self._name = name
-        self.library.register(name)
+    @model_validator(mode="before")
+    def _validate_layers(cls, data: dict[str, Any]) -> dict[str, Any]:
+        data["layers"] = layerenum_from_dict(
+            layers=data["infos"], layout=data["library"].layout()
+        )
+        data["library"].register(data["name"])
+        return data
+
+    # @field_validator("name", mode="after")
+    # @classmethod
+    # def _set_name_and_library(cls, name: str) -> None:
+    #     cls.library.register(name)
 
     def create_layer_enclosure(
         self,
@@ -3255,16 +3270,16 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """Convert Shapes or values in dbu to DShapes or floats in um."""
         return kdb.CplxTrans(self.layout.dbu).inverted() * other
 
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def name(self) -> str:
-        """Name of the KCLayout."""
-        return self._name
+    # @computed_field  # type: ignore[prop-decorator]
+    # @property
+    # def name(self) -> str:
+    #     """Name of the KCLayout."""
+    #     return self._name
 
-    @property
-    def settings(self) -> KCellSettings:
-        """Settings dictionary set by __init__ with metainfo."""
-        return self._settings
+    # @property
+    # def settings(self) -> KCellSettings:
+    #     """Settings dictionary set by __init__ with metainfo."""
+    #     return self._settings
 
     @overload
     def cell(
@@ -3828,7 +3843,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
     def __getattr__(self, name: str) -> Any:
         """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
-        if name != "_name":
+        if name != "_name" and name not in self.model_fields:
             return self.layout.__getattribute__(name)
 
     def __setattr__(self, name: str, value: Any) -> None:
@@ -3838,14 +3853,14 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         Layout object.
         """
         match name:
-            case "_name":
-                object.__setattr__(self, name, value)
-            case "name":
-                self._set_name_and_library(value)
+            # case "_name":
+            #     object.__setattr__(self, name, value)
+            # case "name":
+            #     self._set_name_and_library(value)
             case _:
                 if name in self.model_fields:
                     super().__setattr__(name, value)
-                else:
+                elif hasattr(self.layout, name):
                     self.layout.__setattr__(name, value)
 
     def layerenum_from_dict(
@@ -3863,10 +3878,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         self.kcells = {}
 
         if keep_layers:
-            self.layers = self.layerenum_from_dict(
-                name=self.layers.__name__,
-                layers=self.layer_infos,
-            )
+            self.layers = self.layerenum_from_dict(layers=self.infos)
+        else:
+            self.layers = self.layerenum_from_dict(layers=LayerInfos())
 
     def dup(self, init_cells: bool = True) -> KCLayout:
         """Create a duplication of the `~KCLayout` object.
