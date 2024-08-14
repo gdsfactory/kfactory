@@ -2,6 +2,7 @@ import kfactory as kf
 import pytest
 from random import randint
 from functools import partial
+from conftest import Layers
 
 from collections.abc import Callable
 
@@ -17,7 +18,7 @@ def test_route_straight(
     x: int,
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: kf.LayerEnum,
+    LAYER: Layers,
     optical_port: kf.Port,
 ) -> None:
     c = kf.KCell()
@@ -51,7 +52,7 @@ def test_route_straight(
 def test_route_bend90(
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: kf.LayerEnum,
+    LAYER: Layers,
     optical_port: kf.Port,
     x: int,
     y: int,
@@ -94,7 +95,7 @@ def test_route_bend90(
 def test_route_bend90_invert(
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: kf.LayerEnum,
+    LAYER: Layers,
     optical_port: kf.Port,
     x: int,
     y: int,
@@ -129,7 +130,7 @@ def test_route_bend90_invert(
 def test_route_bend90_euler(
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: kf.LayerEnum,
+    LAYER: Layers,
     optical_port: kf.Port,
     x: int,
     y: int,
@@ -153,7 +154,7 @@ def test_route_bend90_euler(
 
 
 def test_route_bundle(
-    LAYER: kf.LayerEnum,
+    LAYER: Layers,
     optical_port: kf.Port,
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
@@ -178,8 +179,10 @@ def test_route_bundle(
         for i in range(10)
     ]
 
-    c.shapes(kf.kcl.layer(10, 0)).insert(kf.kdb.Box(-50_000, 0, 1_750_000, -100_000))
-    c.shapes(kf.kcl.layer(10, 0)).insert(
+    c.shapes(kf.kcl.find_layer(10, 0)).insert(
+        kf.kdb.Box(-50_000, 0, 1_750_000, -100_000)
+    )
+    c.shapes(kf.kcl.find_layer(10, 0)).insert(
         kf.kdb.Box(1_000_000, 500_000, p_end[-1].x, 600_000)
     )
 
@@ -202,7 +205,7 @@ def test_route_bundle(
 def test_route_length(
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: kf.LayerEnum,
+    LAYER: Layers,
     optical_port: kf.Port,
     taper: kf.KCell,
 ) -> None:
@@ -271,7 +274,7 @@ def test_smart_routing(
 
     base_t = kf.kdb.Trans.R0
 
-    _port = partial(c.create_port, width=500, layer=kf.kcl.layer(1, 0))
+    _port = partial(c.create_port, width=500, layer=kf.kcl.find_layer(1, 0))
 
     start_ports: list[kf.Port] = []
     end_ports: list[kf.Port] = []
@@ -369,12 +372,12 @@ def test_smart_routing(
         start_boxes.append(start_box)
         end_boxes.append(end_box)
     for box in start_boxes + end_boxes:
-        c.shapes(kf.kcl.layer(10, 0)).insert(box)
+        c.shapes(kf.kcl.find_layer(10, 0)).insert(box)
 
     for box in start_bboxes:
-        c.shapes(kf.kcl.layer(11, 0)).insert(box)
+        c.shapes(kf.kcl.find_layer(11, 0)).insert(box)
     for box in end_bboxes:
-        c.shapes(kf.kcl.layer(12, 0)).insert(box)
+        c.shapes(kf.kcl.find_layer(12, 0)).insert(box)
 
     # (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
     match (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2):

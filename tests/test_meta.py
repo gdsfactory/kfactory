@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 
 import kfactory as kf
 from pathlib import Path
-import pytest
+from conftest import Layers
 
 
 @kf.cell  # type: ignore[misc, unused-ignore]
@@ -86,14 +86,14 @@ def test_metainfo_set(straight: kf.KCell) -> None:
         assert port.port_type == meta_port.port_type
 
 
-def test_metainfo_read(straight: kf.KCell) -> None:
+def test_metainfo_read(LAYER: Layers, straight: kf.KCell) -> None:
     """Test whether we can read written metadata to ports."""
     with NamedTemporaryFile("a", suffix=".oas") as t:
         save = kf.save_layout_options()
         save.write_context_info = True
         straight.kcl.write(t.name)
 
-        kcl = kf.KCLayout("TEST_META")
+        kcl = kf.KCLayout("TEST_META", infos=Layers)
         kcl.read(t.name)
 
         wg_read = kcl[straight.name]
@@ -116,7 +116,7 @@ def test_metainfo_read_cell(straight: kf.KCell) -> None:
         save.write_context_info = True
         straight.write(t.name)
 
-        kcl = kf.KCLayout("TEST_META")
+        kcl = kf.KCLayout("TEST_META", infos=Layers)
         kcell = kcl.kcell(straight.name)
         kf.config.logfilter.regex = r"KLayout <=0.28.15 \(last update 2024-02-02\) cannot read LayoutMetaInfo on 'Cell.read'. kfactory uses these extensively for ports, info, and settings. Therefore proceed at your own risk."
         kcell.read(t.name)
@@ -154,7 +154,7 @@ def test_nometainfo_read(straight: kf.KCell) -> None:
             "length": 1000,
             "width": 500,
             "enclosure": "WGSTD",
-            "layer": 0,
+            "layer": Layers().WG,
         }
         assert straight.function_name == "straight"
         assert straight.basename is None

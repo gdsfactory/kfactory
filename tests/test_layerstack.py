@@ -1,4 +1,5 @@
 import kfactory as kf
+from conftest import Layers
 
 
 def test_layerstack_instance(pdk: kf.KCLayout) -> None:
@@ -25,7 +26,7 @@ def test_layerstack_layer_sidewall_angle(pdk: kf.KCLayout) -> None:
     assert isinstance(pdk.layer_stack.get_layer_to_sidewall_angle()[(1, 0)], float)
 
 
-def test_layerstack_layer_getattr(pdk: kf.KCLayout, LAYER: kf.LayerEnum) -> None:
+def test_layerstack_layer_getattr(pdk: kf.KCLayout, LAYER: Layers) -> None:
     assert pdk.layer_stack.wg == kf.kcell.LayerLevel(
         layer=LAYER.WG,
         thickness=0.22,
@@ -35,7 +36,7 @@ def test_layerstack_layer_getattr(pdk: kf.KCLayout, LAYER: kf.LayerEnum) -> None
     )
 
 
-def test_layerstack_layer_getitem(pdk: kf.KCLayout, LAYER: kf.LayerEnum) -> None:
+def test_layerstack_layer_getitem(pdk: kf.KCLayout, LAYER: Layers) -> None:
     assert pdk.layer_stack["wg"] == kf.kcell.LayerLevel(
         layer=LAYER.WG,
         thickness=0.22,

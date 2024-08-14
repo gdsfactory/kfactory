@@ -21,12 +21,13 @@
 import kfactory as kf
 
 
-class LAYER(kf.LayerEnum):
-    kcl = kf.constant(kf.kcl)
-    WG = (1, 0)
-    SLAB = (2, 0)
-    NPP = (3, 0)
+class LayerInfos(kf.LayerInfos):
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+    SLAB: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
+    NPP: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
 
+LAYER = LayerInfos()
+kf.kcl.infos = LAYER
 
 # %%
 enc = kf.enclosure.LayerEnclosure(
@@ -53,27 +54,34 @@ c = kf.cells.euler.bend_euler(radius=5, width=1, layer=LAYER.WG, enclosure=enc)
 c.show()
 c.plot()
 
-
 # %%
+kcell_enc = kf.KCellEnclosure([enc])
+
 @kf.cell
 def two_bends(
     radius: float,
     width: float,
-    layer: kf.LayerEnum,
-    enclosure: kf.enclosure.LayerEnclosure | None = None,
+    layer: kf.kdb.LayerInfo,
+    enclosure: kf.KCellEnclosure | None = None,
 ) -> kf.KCell:
     c = kf.KCell()
     b1 = c << kf.cells.euler.bend_euler(radius=radius, width=width, layer=layer)
     b2 = c << kf.cells.euler.bend_euler(radius=radius, width=width, layer=layer)
     b2.drotate(90)
     b2.dmovey(-11)
-    b2.dmovex(+9)
+    b2.dmovex(b2.dxmin, 0)
+
+    c.add_ports(b1.ports)
+    c.add_ports(b2.ports)
+    c.auto_rename_ports()
 
     if enclosure:
         enclosure.apply_minkowski_tiled(c)
     return c
 
 
-c = two_bends(radius=5, width=1, layer=LAYER.WG, enclosure=enc)
+c = two_bends(radius=5, width=1, layer=LAYER.WG, enclosure=kcell_enc)
 c.show()
 c.plot()
+
+# %%

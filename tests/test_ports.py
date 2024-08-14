@@ -1,31 +1,40 @@
 import kfactory as kf
 import pytest
 import re
+from conftest import Layers
 
 
 @kf.cell
-def straight(width: int, length: int, layer: int) -> kf.KCell:
+def straight(width: int, length: int, layer: kf.kdb.LayerInfo) -> kf.KCell:
     c = kf.KCell()
 
-    c.shapes(layer).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
+    c.shapes(c.kcl.find_layer(layer)).insert(
+        kf.kdb.Box(0, -width // 2, length, width // 2)
+    )
 
     c.create_port(
-        name="o1", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer=layer
+        name="o1",
+        trans=kf.kdb.Trans(2, False, 0, 0),
+        width=width,
+        layer=c.kcl.find_layer(layer),
     )
     c.create_port(
-        name="o2", trans=kf.kdb.Trans(0, False, length, 0), width=width, layer=layer
+        name="o2",
+        trans=kf.kdb.Trans(0, False, length, 0),
+        width=width,
+        layer=c.kcl.find_layer(layer),
     )
     return c
 
 
 @pytest.fixture()
-def wg(LAYER: kf.LayerEnum) -> kf.KCell:
+def wg(LAYER: Layers) -> kf.KCell:
     return straight(1000, 20000, LAYER.WG)
 
 
 @pytest.fixture()
 @kf.cell
-def wg_floating_off_grid(LAYER: kf.LayerEnum) -> kf.KCell:
+def wg_floating_off_grid(LAYER: Layers) -> kf.KCell:
     with pytest.raises(AssertionError):
         c = kf.KCell()
         dbu = c.kcl.dbu
@@ -34,13 +43,13 @@ def wg_floating_off_grid(LAYER: kf.LayerEnum) -> kf.KCell:
             dwidth=10 + dbu / 2,
             name="o1",
             dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, dbu / 2, 0),
-            layer=LAYER.WG,
+            layer=c.kcl.find_layer(LAYER.WG),
         )
         p2 = kf.kcell.Port(
             dwidth=10 + dbu / 2,
             name="o2",
             dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, 20 + dbu, 0),
-            layer=LAYER.WG,
+            layer=c.kcl.find_layer(LAYER.WG),
         )
         c.shapes(LAYER.WG).insert(kf.kdb.DBox(p1.x, -p1.width / 2, p2.x, p1.width / 2))
 
@@ -52,11 +61,11 @@ def wg_floating_off_grid(LAYER: kf.LayerEnum) -> kf.KCell:
     return c
 
 
-def test_straight(LAYER: kf.LayerEnum) -> None:
+def test_straight(LAYER: Layers) -> None:
     straight(1000, 20000, LAYER.WG)
 
 
-def test_settings(LAYER: kf.LayerEnum) -> None:
+def test_settings(LAYER: Layers) -> None:
     c = straight(1000, 20000, LAYER.WG)
 
     assert c.settings["length"] == 20000
@@ -64,19 +73,19 @@ def test_settings(LAYER: kf.LayerEnum) -> None:
     assert c.name == "straight_W1000_L20000_LWG"
 
 
-def test_connect_cplx_port(LAYER: kf.LayerEnum) -> None:
+def test_connect_cplx_port(LAYER: Layers) -> None:
     c = kf.KCell()
     wg1 = c << straight(1000, 20000, LAYER.WG)
     port = kf.kcell.Port(
         dwidth=1,
-        layer=LAYER.WG,
+        layer=c.kcl.find_layer(LAYER.WG),
         name="cplxp1",
         dcplx_trans=kf.kdb.DCplxTrans(1, 30, False, 5, 10),
     )
     wg1.connect("o1", port)
 
 
-def test_connect_cplx_inst(LAYER: kf.LayerEnum) -> None:
+def test_connect_cplx_inst(LAYER: Layers) -> None:
     c = kf.KCell()
 
     wg1 = c << straight(1000, 20000, LAYER.WG)
@@ -102,10 +111,12 @@ def test_connect_integer(wg: kf.KCell) -> None:
     assert wg2.ports["o1"].trans == kf.kdb.Trans(0, False, 0, 0)
 
 
-def test_keep_mirror(LAYER: kf.LayerEnum) -> None:
+def test_keep_mirror(LAYER: Layers) -> None:
     c = kf.KCell()
 
-    p1 = kf.Port(trans=kf.kdb.Trans.M90, width=1000, layer=LAYER.WG)
+    p1 = kf.Port(
+        trans=kf.kdb.Trans.M90, width=1000, layer=c.kcl.find_layer(LAYER.WG), kcl=c.kcl
+    )
 
     c.add_port(p1, name="o1")
     c.add_port(p1, name="o2", keep_mirror=True)
@@ -114,14 +125,14 @@ def test_keep_mirror(LAYER: kf.LayerEnum) -> None:
     assert c["o2"].trans.is_mirror() is True
 
 
-def test_addports_keep_mirror(LAYER: kf.LayerEnum) -> None:
+def test_addports_keep_mirror(LAYER: Layers) -> None:
     c = kf.KCell()
 
     ports = [
         kf.Port(
             name=f"{i}",
             width=1000,
-            layer=LAYER.WG,
+            layer=c.kcl.find_layer(LAYER.WG),
             trans=kf.kdb.Trans(i, True, 0, 0),
         )
         for i in range(4)
@@ -140,32 +151,32 @@ def test_addports_keep_mirror(LAYER: kf.LayerEnum) -> None:
         assert t1 == t2_mirr
 
 
-def test_contains(LAYER: type[kf.LayerEnum]) -> None:
+def test_contains(LAYER: Layers) -> None:
     s = kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
     assert "o1" in s.ports
     assert s.ports["o1"] in s.ports
     assert s.ports["o1"].copy() in s.ports
 
 
-def test_ports_set_center(LAYER: kf.LayerEnum) -> None:
+def test_ports_set_center(LAYER: Layers) -> None:
     c = kf.KCell()
     p = c.create_port(
         name="o1",
         dwidth=1,
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
-        layer=LAYER.WG,
+        layer=c.kcl.find_layer(LAYER.WG),
     )
     p.center = (0, 0)
     assert p.dcplx_trans.disp == kf.kdb.DVector(0, 0)
 
 
-def test_polar_copy(LAYER: kf.LayerEnum) -> None:
+def test_polar_copy(LAYER: Layers) -> None:
     c = kf.KCell()
     p = c.create_port(
         name="o1",
         width=1000,
         trans=kf.kdb.Trans(1, False, 0, 0),
-        layer=LAYER.WG,
+        layer=c.kcl.find_layer(LAYER.WG),
     )
 
     p2 = p.copy_polar(500, 500, 2, True)
@@ -173,13 +184,13 @@ def test_polar_copy(LAYER: kf.LayerEnum) -> None:
     c.add_port(name="o2", port=p2)
 
 
-def test_polar_copy_complex(LAYER: kf.LayerEnum) -> None:
+def test_polar_copy_complex(LAYER: Layers) -> None:
     c = kf.KCell()
     p = c.create_port(
         name="o1",
         dwidth=1,
         dcplx_trans=kf.kdb.DCplxTrans(1, 30, False, 0.755, 0),
-        layer=LAYER.WG,
+        layer=c.kcl.find_layer(LAYER.WG),
     )
 
     p2 = p.copy_polar(500, 500, 2, True)
@@ -190,8 +201,8 @@ def test_polar_copy_complex(LAYER: kf.LayerEnum) -> None:
     )
 
 
-def test_dplx_port_dbu_port_conversion(LAYER: kf.LayerEnum) -> None:
+def test_dplx_port_dbu_port_conversion(LAYER: Layers) -> None:
     t1 = kf.kdb.DCplxTrans(1, 90, False, 10, 10)
     t2 = kf.kdb.Trans(1, False, 10_000, 10_000)
-    p = kf.Port(dwidth=1, dcplx_trans=t1, layer=LAYER.WG, kcl=kf.kcl)
+    p = kf.Port(dwidth=1, dcplx_trans=t1, layer=kf.kcl.find_layer(LAYER.WG), kcl=kf.kcl)
     assert p.trans == t2

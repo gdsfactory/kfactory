@@ -7,19 +7,19 @@ import kfactory as kf
 def straight(width: int, length: int, width_exclude: int) -> kf.KCell:
     """Waveguide: Silicon on 1/0, Silicon exclude on 1/1"""
     c = kf.KCell()
-    c.shapes(LAYER.SI).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
-    c.shapes(LAYER.SIEXCLUDE).insert(
+    c.shapes(c.kcl.find_layer(LAYER.SI)).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
+    c.shapes(c.kcl.find_layer(LAYER.SIEXCLUDE)).insert(
         kf.kdb.Box(0, -width_exclude // 2, length, width_exclude // 2)
     )
 
     c.create_port(
-        name="1", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer=LAYER.SI
+        name="1", trans=kf.kdb.Trans(2, False, 0, 0), width=width, layer_info=LAYER.SI
     )
     c.create_port(
         name="2",
         trans=kf.kdb.Trans(0, False, length, 0),
         width=width,
-        layer=LAYER.SI,
+        layer_info=LAYER.SI,
     )
 
     c.auto_rename_ports()

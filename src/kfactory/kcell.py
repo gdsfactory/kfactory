@@ -16,7 +16,7 @@ import importlib.util
 import inspect
 import json
 import socket
-from collections import UserDict, defaultdict
+from collections import UserDict, UserList, defaultdict
 from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
 from enum import IntEnum, IntFlag, auto
@@ -46,8 +46,14 @@ from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
 from cachetools import Cache
 from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
 from klayout import __version__ as _klayout_version  # type: ignore[attr-defined]
-from pydantic import BaseModel, Field, computed_field, model_validator
-from pydantic_settings import BaseSettings
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    RootModel,
+    ValidationError,
+    model_validator,
+)
 from typing_extensions import ParamSpec, Self  # noqa: UP035
 
 from . import __version__, kdb, lay, rdb
@@ -69,6 +75,9 @@ from .port import (
 )
 
 T = TypeVar("T")
+KC = TypeVar("KC", bound="KCell", covariant=True)
+LI = TypeVar("LI", bound="LayerInfos", covariant=True)
+C = TypeVar("C", bound="Constants", covariant=True)
 
 KCellParams = ParamSpec("KCellParams")
 AnyTrans = TypeVar(
@@ -106,6 +115,7 @@ SerializableShape: TypeAlias = (
     | kdb.VCplxTrans
     | kdb.Vector
     | kdb.DVector
+    | kdb.LayerInfo
 )
 IShapeLike: TypeAlias = (
     kdb.Polygon
@@ -315,10 +325,52 @@ class DSizeInfo:
         return (c.x, c.y)
 
 
-class KCellFunc(Protocol[KCellParams]):
-    def __call__(
-        self, *args: KCellParams.args, **kwargs: KCellParams.kwargs
-    ) -> KCell: ...
+class KCellFunc(Protocol[KCellParams, KC]):
+    def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC: ...
+
+
+class LayerInfos(BaseModel):
+    """Class to store and serialize LayerInfos used in KCLayout.
+
+    Args:
+        kwargs: kdb.LayerInfo . if any extra field is not a kdb.LayerInfo,
+            the validator will raise a ValidationError.
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True, extra="allow")
+
+    @model_validator(mode="after")
+    def _validate_layers(self) -> LayerInfos:
+        for field_name in self.model_fields.keys():
+            f = getattr(self, field_name)
+            if not isinstance(f, kdb.LayerInfo):
+                raise ValidationError(
+                    "All fields in LayerInfos must be of type kdb.LayerInfo. "
+                    f"Field {field_name} is of type {type(f)}"
+                )
+            if not f.is_named():
+                f.name = field_name
+            if f.layer == -1 or f.datatype == -1:
+                raise ValidationError(
+                    "Layers must specify layer number and datatype."
+                    f" {field_name} didn't specify them"
+                )
+        if self.model_extra is not None:
+            for field_name in self.model_extra.keys():
+                f = getattr(self, field_name)
+                if not isinstance(f, kdb.LayerInfo):
+                    raise ValidationError(
+                        "All fields in LayerInfos must be of type kdb.LayerInfo. "
+                        f"Field {field_name} is of type {type(f)}"
+                    )
+                if not f.is_named():
+                    f.name = field_name
+                if f.layer == -1 or f.datatype == -1:
+                    raise ValidationError(
+                        "Layers must specify layer number and datatype."
+                        f" {field_name} didn't specify them"
+                    )
+        return self
 
 
 class LayerEnum(int, Enum):  # type: ignore[misc]
@@ -334,11 +386,11 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
 
     layer: int
     datatype: int
-    kcl: constant[KCLayout]
+    layout: constant[kdb.Layout]
 
     def __init__(self, layer: int, datatype: int) -> None:
         """Just here to make sure klayout knows the layer name."""
-        self.kcl.set_info(self, kdb.LayerInfo(self.layer, self.datatype, self.name))
+        self.layout.set_info(self, kdb.LayerInfo(self.layer, self.datatype, self.name))
 
     def __new__(  # type: ignore[misc]
         cls: LayerEnum,
@@ -354,7 +406,7 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
             datatype: Datatype of the layer.
             kcl: Base Layout object to register the layer to.
         """
-        value = cls.kcl.layer(layer, datatype)
+        value = cls.layout.layer(layer, datatype)
         obj: int = int.__new__(cls, value)
         obj._value_ = value  # type: ignore[attr-defined]
         obj.layer = layer  # type: ignore[attr-defined]
@@ -711,18 +763,26 @@ def get_cells(
     return cells
 
 
-class LayerEnclosureModel(BaseModel):
+class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
     """PDK access model for LayerEnclsoures."""
 
-    enclosure_map: dict[str, LayerEnclosure] = Field(default={})
+    root: dict[str, LayerEnclosure] = Field(default={})
 
     def __getitem__(self, __key: str) -> LayerEnclosure:
         """Retrieve element by string key."""
-        return self.enclosure_map[__key]
+        return self.root[__key]
 
     def __getattr__(self, __key: str) -> LayerEnclosure:
         """Retrieve attribute by key."""
-        return self.enclosure_map[__key]
+        return self.root[__key]
+
+    def __setattr__(self, __key: str, __val: LayerEnclosure) -> None:
+        """Add a new LayerEnclosure."""
+        self.root[__key] = __val
+
+    def __setitem__(self, __key: str, __val: LayerEnclosure) -> None:
+        """Add a new LayerEnclosure."""
+        self.root[__key] = __val
 
 
 class KCell:
@@ -788,8 +848,8 @@ class KCell:
             ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
                 if `None` create an empty one.
         """
-        kcl = kcl or _get_default_kcl()
-        self.kcl = kcl
+        _kcl: KCLayout = kcl or _get_default_kcl()
+        self.kcl = _kcl
         self.insts = Instances()
         self.vinsts: list[VInstance] = []
         self._settings = KCellSettings()
@@ -802,7 +862,7 @@ class KCell:
             _name = name
             if kdb_cell is not None:
                 kdb_cell.name = name
-        self._kdb_cell = kdb_cell or kcl.create_cell(_name)
+        self._kdb_cell = kdb_cell or _kcl.create_cell(_name)
         if _name == "Unnamed_!":
             self._kdb_cell.name = f"Unnamed_{self.cell_index()}"
         self.kcl.register_cell(self)
@@ -955,8 +1015,41 @@ class KCell:
         cell = cls(d["name"])
         if verbose:
             print(f"Building {d['name']}")
-        cell.ports = d.get("ports", Ports(ports=[], kcl=cell.kcl))
-        cell._settings = KCellSettings(**d.get("settings", {}))
+        for _d in d.get("ports", Ports(ports=[], kcl=cell.kcl)):
+            if "dcplx_trans" in _d:
+                p = cell.create_port(
+                    name=str(_d["name"]),
+                    dcplx_trans=kdb.DCplxTrans.from_s(_d["dcplx_trans"]),
+                    dwidth=float(_d["dwidth"]),
+                    layer=cell.kcl.layer(kdb.LayerInfo.from_string(_d["layer"])),
+                    port_type=_d["port_type"],
+                )
+            else:
+                p = cell.create_port(
+                    name=str(_d["name"]),
+                    trans=kdb.Trans.from_s(_d["trans"]),
+                    width=int(_d["width"]),
+                    layer=cell.kcl.layer(kdb.LayerInfo.from_string(_d["layer"])),
+                    port_type=_d["port_type"],
+                )
+            p.info = Info(
+                **{
+                    name: _deserialize_setting(setting)
+                    for name, setting in _d["info"].items()
+                }
+            )
+        cell._settings = KCellSettings(
+            **{
+                name: _deserialize_setting(setting)
+                for name, setting in d.get("settings", {}).items()
+            }
+        )
+        cell.info = Info(
+            **{
+                name: _deserialize_setting(setting)
+                for name, setting in d.get("info", {}).items()
+            }
+        )
         for inst in d.get("insts", []):
             if "cellname" in inst:
                 _cell = cell.kcl[inst["cellname"]]
@@ -1009,6 +1102,7 @@ class KCell:
                 )
                 ref_yml = t.get("ref", DEFAULT_TRANS["ref"])
                 if isinstance(ref_yml, str):
+                    i: Instance
                     for i in reversed(cell.insts):
                         if i.cell.name == ref_yml:
                             ref = i
@@ -1305,7 +1399,7 @@ class KCell:
                     kcell = self.kcl[lib_ci]
                     for port in cell.ports:
                         pl = port.layer
-                        _layer = self.kcl.layer(cell.kcl.get_info(pl))
+                        _layer = self.kcl.find_layer(cell.kcl.get_info(pl))
                         try:
                             _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
                         except ValueError:
@@ -1324,7 +1418,7 @@ class KCell:
                         lib_kcell = cell.kcl[kcell.library_cell_index()]
                         for port in lib_kcell.ports:
                             pl = port.layer
-                            _layer = self.kcl.layer(lib_kcell.kcl.get_info(pl))
+                            _layer = self.kcl.find_layer(lib_kcell.kcl.get_info(pl))
                             try:
                                 _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
                             except ValueError:
@@ -1343,7 +1437,7 @@ class KCell:
                     kcell = self.kcl[ci]
                     for port in cell.ports:
                         pl = port.layer
-                        _layer = self.kcl.layer(cell.kcl.get_info(pl))
+                        _layer = self.kcl.find_layer(cell.kcl.get_info(pl))
                         try:
                             _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
                         except ValueError:
@@ -1364,7 +1458,7 @@ class KCell:
             if b is None:
                 b = kdb.Vector()
             ca = self._kdb_cell.insert(kdb.CellInstArray(ci, trans, a, b, na, nb))
-        inst = Instance(self.kcl, ca)
+        inst: Instance = Instance(self.kcl, ca)
         self.insts.append(inst)
         return inst
 
@@ -1698,14 +1792,21 @@ class KCell:
         ports: list[Any] = []
         for port in node.ports:
             _l = node.kcl.get_info(port.layer)
-            p = {"name": port.name, "layer": [_l.layer, _l.datatype]}
+            p = {
+                "name": port.name,
+                "layer": [_l.layer, _l.datatype],
+                "port_type": port.port_type,
+            }
             if port._trans:
                 p["trans"] = port._trans.to_s()
                 p["width"] = port.width
             else:
                 p["dcplx_trans"] = port._dcplx_trans.to_s()
                 p["dwidth"] = port.dwidth
-            p["info"] = node.info.model_dump()
+            p["info"] = {
+                name: _serialize_setting(setting)
+                for name, setting in node.info.model_dump().items()
+            }
             ports.append(p)
 
         d["ports"] = ports
@@ -1714,7 +1815,14 @@ class KCell:
             d["insts"] = insts
         if shapes:
             d["shapes"] = shapes
-        d["settings"] = node.settings.model_dump()
+        d["settings"] = {
+            name: _serialize_setting(setting)
+            for name, setting in node.settings.model_dump().items()
+        }
+        d["info"] = {
+            name: _serialize_setting(info)
+            for name, info in node.info.model_dump().items()
+        }
         return representer.represent_mapping(cls.yaml_tag, d)
 
     def each_inst(self) -> Iterator[Instance]:
@@ -1826,7 +1934,7 @@ class KCell:
             self.add_meta_info(
                 kdb.LayoutMetaInfo(
                     f"kfactory:ports:{i}:layer",
-                    self.kcl.layout.get_info(port.layer),
+                    port.layer_info,
                     None,
                     True,
                 )
@@ -1892,7 +2000,10 @@ class KCell:
                 kdb.LayoutMetaInfo("kfactory:basename", self.basename, None, True)
             )
 
-    def get_meta_data(self, meta_format: Literal["v1", "v2"] | None = None) -> None:
+    def get_meta_data(
+        self,
+        meta_format: Literal["v1", "v2"] | None = None,
+    ) -> None:
         """Read metadata from the KLayout Layout object."""
         if meta_format is None:
             meta_format = config.meta_format
@@ -1936,14 +2047,14 @@ class KCell:
                     _d = port_dict[index]
                     name = _d.get("name", None)
                     port_type = _d["port_type"]
-                    layer = self.kcl.layout.layer(_d["layer"])
+                    layer_info = _d["layer"]
                     width = _d["width"]
                     trans = _d.get("trans", None)
                     dcplx_trans = _d.get("dcplx_trans", None)
                     _port = Port(
                         name=name,
                         width=width,
-                        layer=layer,
+                        layer_info=layer_info,
                         trans=kdb.Trans.R0,
                         kcl=self.kcl,
                         port_type=port_type,
@@ -1960,14 +2071,14 @@ class KCell:
                     _d = port_dict[index]
                     name = _d.get("name", None)
                     port_type = _d["port_type"]
-                    layer = self.kcl.layout.layer(_d["layer"])
+                    layer = _d["layer"]
                     width = _d["width"]
                     trans = _d.get("trans", None)
                     dcplx_trans = _d.get("dcplx_trans", None)
                     _port = Port(
                         name=name,
                         width=width,
-                        layer=layer,
+                        layer_info=layer,
                         trans=kdb.Trans.R0,
                         kcl=self.kcl,
                         port_type=port_type,
@@ -2123,7 +2234,8 @@ class KCell:
         circ.boundary = self.boundary or self.dbbox()
 
         inst_ports: dict[
-            str, dict[str, list[tuple[int, int, Instance, Port, kdb.SubCircuit]]]
+            str,
+            dict[str, list[tuple[int, int, Instance, Port, kdb.SubCircuit]]],
         ] = {}
         cell_ports: dict[str, dict[str, list[tuple[int, Port]]]] = {}
 
@@ -2677,10 +2789,10 @@ def create_port_error(
     it.add_value(port_polygon(p2.width).transformed(p2.trans).to_dtype(dbu))
 
 
-class Constants(BaseSettings):
+class Constants(BaseModel):
     """Constant Model class."""
 
-    pass
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class LayerLevel(BaseModel):
@@ -2722,7 +2834,7 @@ class LayerLevel(BaseModel):
 
     def __init__(
         self,
-        layer: tuple[int, int] | LayerEnum,
+        layer: tuple[int, int] | kdb.LayerInfo,
         zmin: float,
         thickness: float,
         thickness_tolerance: float | None = None,
@@ -2731,7 +2843,7 @@ class LayerLevel(BaseModel):
         z_to_bias: tuple[int, ...] | None = None,
         info: Info = Info(),
     ):
-        if isinstance(layer, LayerEnum):
+        if isinstance(layer, kdb.LayerInfo):
             layer = (layer.layer, layer.datatype)
         super().__init__(
             layer=layer,
@@ -2809,7 +2921,9 @@ class LayerStack(BaseModel):
         return self.layers[attr]
 
 
-class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
+class KCLayout(
+    BaseModel, arbitrary_types_allowed=True, extra="allow", validate_assignment=True
+):
     """Small extension to the klayout.db.Layout.
 
     It adds tracking for the [KCell][kfactory.kcell.KCell] objects
@@ -2846,7 +2960,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         constants: dict of constants for the PDK.
 
     """
-    _name: str
+    name: str
     layout: kdb.Layout
     layer_enclosures: LayerEnclosureModel
     enclosure: KCellEnclosure
@@ -2856,18 +2970,19 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
     virtual_factories: Factories[VKCell]
     kcells: dict[int, KCell]
     layers: type[LayerEnum]
+    infos: LayerInfos
     layer_stack: LayerStack
     netlist_layer_mapping: dict[LayerEnum | int, LayerEnum | int] = Field(
         default_factory=dict
     )
     sparameters_path: Path | str | None
     interconnect_cml_path: Path | str | None
-    constants: Constants = Field(default_factory=Constants)
+    constants: Constants
     rename_function: Callable[..., None]
     _registered_functions: dict[int, Callable[..., KCell]]
 
     info: Info = Field(default_factory=Info)
-    _settings: KCellSettings
+    settings: KCellSettings = Field(frozen=True)
     future_cell_name: str | None
 
     def __init__(
@@ -2875,7 +2990,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         name: str,
         layer_enclosures: dict[str, LayerEnclosure] | LayerEnclosureModel | None = None,
         enclosure: KCellEnclosure | None = None,
-        layers: type[LayerEnum] | None = None,
+        infos: type[LayerInfos] | None = None,
         sparameters_path: Path | str | None = None,
         interconnect_cml_path: Path | str | None = None,
         layer_stack: LayerStack | None = None,
@@ -2892,7 +3007,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             layer_enclosures: Additional KCellEnclosures that should be available
                 except the KCellEnclosure
             enclosure: The standard KCellEnclosure of the PDK.
-            layers: A LayerEnum describing the layerstack of the PDK.
+            infos: A LayerInfos describing the layerstack of the PDK.
             sparameters_path: Path to the sparameters config file.
             interconnect_cml_path: Path to the interconnect file.
             layer_stack: maps name to layer numbers, thickness, zmin, sidewall_angle.
@@ -2907,23 +3022,16 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """
         library = kdb.Library()
         layout = library.layout()
-        if base_kcl:
-            if copy_base_kcl_layers and layer_stack:
-                layer_stackdict = base_kcl.layer_stack.model_dump()
-                layer_stackdict.update(layer_stack.model_dump())
-                layer_stack = LayerStack.model_construct(**layer_stackdict)
-            else:
-                layer_stack = layer_stack or LayerStack()
-            _constants = constants() if constants else base_kcl.constants.model_copy()
-        else:
-            layer_stack = layer_stack or LayerStack()
-            _constants = constants() if constants else Constants()
+        layer_stack = layer_stack or LayerStack()
+        _constants = constants() if constants else Constants()
+        _infos = infos() if infos else LayerInfos()
         super().__init__(
-            _name=name,
+            name=name,
             kcells={},
-            layer_enclosures=LayerEnclosureModel(enclosure_map={}),
+            layer_enclosures=LayerEnclosureModel(dict()),
             enclosure=KCellEnclosure([]),
-            layers=layerenum_from_dict(layers={}, kcl=self),
+            infos=_infos,
+            layers=LayerEnum,
             factories=Factories({}),
             virtual_factories=Factories({}),
             sparameters_path=sparameters_path,
@@ -2935,79 +3043,54 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             rename_function=port_rename_function,
             info=Info(**info) if info else Info(),
             future_cell_name=None,
-        )
-        object.__setattr__(self, "_name", name)
-        object.__setattr__(
-            self,
-            "_settings",
-            KCellSettings(
+            settings=KCellSettings(
                 version=__version__,
                 klayout_version=kdb.__version__,  # type: ignore[attr-defined]
                 meta_format="v2",
             ),
         )
+        # object.__setattr__(self, "_name", name)
+        # object.__setattr__(
+        #     self,
+        #     "_settings",
+        #     KCellSettings(
+        #         version=__version__,
+        #         klayout_version=kdb.__version__,  # type: ignore[attr-defined]
+        #         meta_format="v2",
+        #     ),
+        # )
 
         self.library.register(self.name)
-        if layers is not None:
-            layer_dict = {
-                _layer.name: (_layer.layer, _layer.datatype)
-                for _layer in layers  # type: ignore[attr-defined]
-            }
-        else:
-            layer_dict = {}
 
-        if base_kcl:
-            if copy_base_kcl_layers:
-                base_layer_dict = {
-                    _layer.name: (_layer.layer, _layer.datatype)
-                    for _layer in base_kcl.layers  # type: ignore[attr-defined]
-                }
-                base_layer_dict.update(layer_dict)
-                layer_dict = base_layer_dict
-
-                layers = self.layerenum_from_dict(
-                    name=base_kcl.layers.__name__, layers=layer_dict
+        if layer_enclosures:
+            if isinstance(layer_enclosures, LayerEnclosureModel):
+                _layer_enclosures = LayerEnclosureModel(
+                    {
+                        name: lenc.copy_to(self)
+                        for name, lenc in layer_enclosures.root.items()
+                    }
                 )
             else:
-                layers = self.layerenum_from_dict(layers=layer_dict)
-            sparameters_path = sparameters_path or base_kcl.sparameters_path
-            interconnect_cml_path = (
-                interconnect_cml_path or base_kcl.interconnect_cml_path
-            )
-            if enclosure is None:
-                enclosure = base_kcl.enclosure or KCellEnclosure([])
-            if layer_enclosures is None:
-                _layer_enclosures = LayerEnclosureModel()
+                _layer_enclosures = LayerEnclosureModel(
+                    {
+                        name: lenc.copy_to(self)
+                        for name, lenc in layer_enclosures.items()
+                    }
+                )
         else:
-            if layer_enclosures:
-                if isinstance(layer_enclosures, LayerEnclosureModel):
-                    _layer_enclosures = LayerEnclosureModel(
-                        enclosure_map={
-                            name: lenc.copy_to(self)
-                            for name, lenc in layer_enclosures.enclosure_map.items()
-                        }
-                    )
-                else:
-                    _layer_enclosures = LayerEnclosureModel(
-                        enclosure_map={
-                            name: lenc.copy_to(self)
-                            for name, lenc in layer_enclosures.items()
-                        }
-                    )
-            else:
-                _layer_enclosures = LayerEnclosureModel(enclosure_map={})
+            _layer_enclosures = LayerEnclosureModel({})
 
-            enclosure = (
-                enclosure.copy_to(self) if enclosure else KCellEnclosure(enclosures=[])
-            )
-            layers = self.layerenum_from_dict(name="LAYER", layers=layer_dict)
-            sparameters_path = sparameters_path
-            interconnect_cml_path = interconnect_cml_path
-            if enclosure is None:
-                enclosure = KCellEnclosure([])
-            if layer_enclosures is None:
-                _layer_enclosures = LayerEnclosureModel()
-        self.layers = layers
+        enclosure = (
+            enclosure.copy_to(self) if enclosure else KCellEnclosure(enclosures=[])
+        )
+        # layers = self.layerenum_from_dict(name="LAYER", layers=infos)
+        sparameters_path = sparameters_path
+        interconnect_cml_path = interconnect_cml_path
+        if enclosure is None:
+            enclosure = KCellEnclosure([])
+        if layer_enclosures is None:
+            _layer_enclosures = LayerEnclosureModel()
+        # self.layers = layers
         self.sparameters_path = sparameters_path
         self.enclosure = enclosure
         self.layer_enclosures = _layer_enclosures
@@ -3015,9 +3098,113 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
         kcls[self.name] = self
 
-    def _set_name_and_library(self, name: str) -> None:
-        self._name = name
-        self.library.register(name)
+    @model_validator(mode="before")
+    def _validate_layers(cls, data: dict[str, Any]) -> dict[str, Any]:
+        data["layers"] = layerenum_from_dict(
+            layers=data["infos"], layout=data["library"].layout()
+        )
+        data["library"].register(data["name"])
+        return data
+
+    # @field_validator("name", mode="after")
+    # @classmethod
+    # def _set_name_and_library(cls, name: str) -> None:
+    #     cls.library.register(name)
+
+    def create_layer_enclosure(
+        self,
+        sections: Sequence[
+            tuple[kdb.LayerInfo, int] | tuple[kdb.LayerInfo, int, int]
+        ] = [],
+        name: str | None = None,
+        main_layer: kdb.LayerInfo | None = None,
+        dsections: Sequence[
+            tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]
+        ]
+        | None = None,
+    ) -> LayerEnclosure:
+        """Create a new LayerEnclosure in the KCLayout."""
+        if name is None:
+            if main_layer is not None and main_layer.name != "":
+                name = main_layer.name
+        enc = LayerEnclosure(
+            sections=sections,
+            dsections=dsections,
+            name=name,
+            main_layer=main_layer,
+            kcl=self,
+        )
+
+        self.layer_enclosures[enc.name] = enc
+        return enc
+
+    @overload
+    def find_layer(self, name: str) -> LayerEnum: ...
+
+    @overload
+    def find_layer(self, info: kdb.LayerInfo) -> LayerEnum: ...
+
+    @overload
+    def find_layer(
+        self,
+        layer: int,
+        datatype: int,
+    ) -> LayerEnum: ...
+
+    @overload
+    def find_layer(
+        self,
+        layer: int,
+        dataytpe: int,
+        name: str,
+    ) -> LayerEnum: ...
+
+    @overload
+    def find_layer(
+        self, name: str, *, allow_undefined_layers: Literal[True] = True
+    ) -> LayerEnum | int: ...
+
+    @overload
+    def find_layer(
+        self, info: kdb.LayerInfo, *, allow_undefined_layers: Literal[True] = True
+    ) -> LayerEnum | int: ...
+
+    @overload
+    def find_layer(
+        self, layer: int, datatype: int, *, allow_undefined_layers: Literal[True] = True
+    ) -> LayerEnum | int: ...
+
+    @overload
+    def find_layer(
+        self,
+        layer: int,
+        dataytpe: int,
+        name: str,
+        allow_undefined_layers: Literal[True] = True,
+    ) -> LayerEnum | int: ...
+
+    def find_layer(
+        self,
+        *args: int | str | kdb.LayerInfo,
+        **kwargs: int | str | kdb.LayerInfo | bool,
+    ) -> LayerEnum | int:
+        """Try to find a registered layer. Throws a KeyError if it cannot find it.
+
+        Can find a layer either by name, layer and datatype (two args), LayerInfo, or
+        all three of layer, datatype, and name.
+        """
+        info = self.layout.get_info(self.layout.layer(*args, **kwargs))
+        try:
+            return self.layers[info.name]  # type:ignore[no-any-return, index]
+        except KeyError:
+            allow_undefined_layers = kwargs.pop(
+                "allow_undefined_layers", config.allow_undefined_layers
+            )
+            if allow_undefined_layers:
+                return self.layout.layer(info)
+            raise KeyError(
+                f"Layer '{args=}, {kwargs=}' has not beend defined in the " "KCLayout."
+            )
 
     @overload
     def to_um(self, other: int) -> float: ...
@@ -3083,23 +3270,23 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """Convert Shapes or values in dbu to DShapes or floats in um."""
         return kdb.CplxTrans(self.layout.dbu).inverted() * other
 
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def name(self) -> str:
-        """Name of the KCLayout."""
-        return self._name
+    # @computed_field  # type: ignore[prop-decorator]
+    # @property
+    # def name(self) -> str:
+    #     """Name of the KCLayout."""
+    #     return self._name
 
-    @property
-    def settings(self) -> KCellSettings:
-        """Settings dictionary set by __init__ with metainfo."""
-        return self._settings
+    # @property
+    # def settings(self) -> KCellSettings:
+    #     """Settings dictionary set by __init__ with metainfo."""
+    #     return self._settings
 
     @overload
     def cell(
         self,
-        _func: KCellFunc[KCellParams],
+        _func: KCellFunc[KCellParams, KC],
         /,
-    ) -> KCellFunc[KCellParams]: ...
+    ) -> KCellFunc[KCellParams, KC]: ...
 
     @overload
     def cell(
@@ -3119,11 +3306,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         info: dict[str, MetaData] | None = None,
         post_process: Iterable[Callable[[KCell], None]] = [],
         debug_names: bool | None = None,
-    ) -> Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]: ...
+    ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]: ...
 
     def cell(
         self,
-        _func: KCellFunc[KCellParams] | None = None,
+        _func: KCellFunc[KCellParams, KC] | None = None,
         /,
         *,
         set_settings: bool = True,
@@ -3139,11 +3326,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KCell], None]] = [],
+        post_process: Iterable[Callable[[KC], None]] = [],
         debug_names: bool | None = None,
     ) -> (
-        KCellFunc[KCellParams]
-        | Callable[[KCellFunc[KCellParams]], KCellFunc[KCellParams]]
+        KCellFunc[KCellParams, KC]
+        | Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]
     ):
         """Decorator to cache and auto name the cell.
 
@@ -3188,9 +3375,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             debug_names: Check on setting the name whether a cell with this name already
                 exists.
         """
-        d2fs = rec_dict_to_frozenset
-        fs2d = rec_frozenset_to_dict
-
         if check_instances is None:
             check_instances = config.check_instances
         if overwrite_existing is None:
@@ -3201,18 +3385,18 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             debug_names = config.debug_names
 
         def decorator_autocell(
-            f: Callable[KCellParams, KCell],
-        ) -> Callable[KCellParams, KCell]:
+            f: Callable[KCellParams, KC],
+        ) -> Callable[KCellParams, KC]:
             sig = inspect.signature(f)
 
-            _cache: Cache[_HashedTuple, KCell] | dict[_HashedTuple, KCell] = (
-                cache or Cache(maxsize=float("inf"))
+            _cache: Cache[_HashedTuple, KC] | dict[_HashedTuple, KC] = cache or Cache(
+                maxsize=float("inf")
             )
 
             @functools.wraps(f)
             def wrapper_autocell(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
-            ) -> KCell:
+            ) -> KC:
                 params: dict[str, KCellParams.kwargs | KCellParams.args] = {
                     p.name: p.default for k, p in sig.parameters.items()
                 }
@@ -3229,9 +3413,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 del_parameters: list[str] = []
 
                 for key, value in params.items():
-                    if isinstance(value, dict):
-                        params[key] = d2fs(value)
-                    if value == inspect.Parameter.empty:
+                    if isinstance(value, dict | list):
+                        params[key] = _to_hashable(value)
+                    elif isinstance(value, kdb.LayerInfo):
+                        params[key] = self.get_info(self.layer(value))
+                    if value is inspect.Parameter.empty:
                         del_parameters.append(key)
 
                 for param in del_parameters:
@@ -3243,10 +3429,10 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 @functools.wraps(f)
                 def wrapped_cell(
                     **params: KCellParams.args | KCellParams.kwargs,
-                ) -> KCell:
+                ) -> KC:
                     for key, value in params.items():
-                        if isinstance(value, frozenset):
-                            params[key] = fs2d(value)
+                        if isinstance(value, frozenset | DecoratorList):
+                            params[key] = _hashable_to_original(value)
 
                     if set_name:
                         if basename is not None:
@@ -3256,30 +3442,45 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                         old_future_name = self.future_cell_name
                         self.future_cell_name = name
                         if layout_cache:
-                            logger.debug(
-                                "Loading {} from layout cache", self.future_cell_name
-                            )
                             c = self.layout.cell(self.future_cell_name)
                             if c is not None:
-                                return self[c.cell_index()]
+                                logger.debug(
+                                    "Loading {} from layout cache",
+                                    self.future_cell_name,
+                                )
+                                return self[c.cell_index()]  # type: ignore[return-value]
                         logger.debug(
                             "Constructing {}",
                             self.future_cell_name,
                         )
+                        _name: str | None = name
+                    else:
+                        _name = None
                     cell = f(**params)
                     if not isinstance(cell, KCell):
                         raise ValueError(
                             f"Function did not return a KCell, but {type(cell)}"
                         )
+                    logger.debug("Constructed {}", _name or cell.name)
 
                     if cell._locked:
                         # If the cell is locked, it comes from a cache (most likely)
                         # and should be copied first
-                        cell = cell.dup()
+                        cell = cell.dup()  # type: ignore[assignment]
+                    if overwrite_existing:
+                        for c in list(self.layout.cells(_name or cell.name)):
+                            if c is not cell._kdb_cell:
+                                self[c.cell_index()].delete()
                     if set_name:
                         if debug_names and cell.kcl.layout.cell(name) is not None:
                             logger.opt(depth=4).error(
-                                "KCell with name {name} exists already.", name=name
+                                "KCell with name {name} exists already. Duplicate "
+                                "occurrence in module '{module}' at "
+                                "line {lno}",
+                                name=name,
+                                module=f.__module__,
+                                function_name=f.__name__,
+                                lno=inspect.getsourcelines(f)[1],
                             )
                             raise CellNameError(
                                 f"KCell with name {name} exists already."
@@ -3287,10 +3488,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
                         cell.name = name
                         self.future_cell_name = old_future_name
-                    if overwrite_existing:
-                        for c in list(self.layout.cells(cell.name)):
-                            if c is not cell._kdb_cell:
-                                self[c.cell_index()].delete()
                     if set_settings:
                         if hasattr(f, "__name__"):
                             cell.function_name = f.__name__
@@ -3405,13 +3602,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     return cell
 
                 _cell = wrapped_cell(**params)
-
-                if info is not None:
-                    _cell.info.update(info)
-
-                for pp in post_process:
-                    pp(_cell)
-
                 if _cell._destroyed():
                     # If the any cell has been destroyed, we should clean up the cache.
                     # Delete all the KCell entrances in the cache which have
@@ -3424,6 +3614,12 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     for _dch in _deleted_cell_hashes:
                         del _cache[_dch]
                     _cell = wrapped_cell(**params)
+
+                if info is not None:
+                    _cell.info.update(info)
+
+                for pp in post_process:
+                    pp(_cell)
 
                 return _cell
 
@@ -3506,8 +3702,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
             register_factory: Register the resulting KCell-function to the
                 [factories][kfactory.kcell.KCLayout.factories]
         """
-        d2fs = rec_dict_to_frozenset
-        fs2d = rec_frozenset_to_dict
 
         def decorator_autocell(
             f: Callable[KCellParams, VKCell],
@@ -3537,9 +3731,11 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                 del_parameters: list[str] = []
 
                 for key, value in params.items():
-                    if isinstance(value, dict):
-                        params[key] = d2fs(value)
-                    if value == inspect.Parameter.empty:
+                    if isinstance(value, dict | list):
+                        params[key] = _to_hashable(value)
+                    elif isinstance(value, kdb.LayerInfo):
+                        params[key] = self.get_info(self.layer(value))
+                    if value is inspect.Parameter.empty:
                         del_parameters.append(key)
 
                 for param in del_parameters:
@@ -3552,8 +3748,8 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     **params: KCellParams.args,
                 ) -> VKCell:
                     for key, value in params.items():
-                        if isinstance(value, frozenset):
-                            params[key] = fs2d(value)
+                        if isinstance(value, frozenset | DecoratorList):
+                            params[key] = _hashable_to_original(value)
                     cell = f(**params)
                     if cell._locked:
                         raise ValueError(
@@ -3563,10 +3759,6 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
                     if set_name:
                         if basename is not None:
                             name = get_cell_name(basename, **params)
-                        elif "self" in params:
-                            name = get_cell_name(
-                                params["self"].__class__.__name__, **params
-                            )
                         else:
                             name = get_cell_name(f.__name__, **params)
                         cell.name = name
@@ -3645,15 +3837,13 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         """Create a new cell based ont he pdk's layout object."""
         return KCell(name=name, kcl=self, ports=ports)
 
-    def layer_enum(
-        self, name: str, layers: dict[str, tuple[int, int]]
-    ) -> type[LayerEnum]:
+    def set_layers_from_infos(self, name: str, layers: LayerInfos) -> type[LayerEnum]:
         """Create a new LAYER enum based on the pdk's kcl."""
-        return layerenum_from_dict(name=name, layers=layers, kcl=self)
+        return layerenum_from_dict(name=name, layers=layers, layout=self.layout)
 
     def __getattr__(self, name: str) -> Any:
         """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
-        if name != "_name":
+        if name != "_name" and name not in self.model_fields:
             return self.layout.__getattribute__(name)
 
     def __setattr__(self, name: str, value: Any) -> None:
@@ -3663,21 +3853,21 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         Layout object.
         """
         match name:
-            case "_name":
-                object.__setattr__(self, name, value)
-            case "name":
-                self._set_name_and_library(value)
+            # case "_name":
+            #     object.__setattr__(self, name, value)
+            # case "name":
+            #     self._set_name_and_library(value)
             case _:
                 if name in self.model_fields:
                     super().__setattr__(name, value)
-                else:
+                elif hasattr(self.layout, name):
                     self.layout.__setattr__(name, value)
 
     def layerenum_from_dict(
-        self, name: str = "LAYER", *, layers: dict[str, tuple[int, int]]
+        self, name: str = "LAYER", *, layers: LayerInfos
     ) -> type[LayerEnum]:
         """Create a new [LayerEnum][kfactory.kcell.LayerEnum] from this KCLayout."""
-        return layerenum_from_dict(layers=layers, name=name, kcl=self)
+        return layerenum_from_dict(layers=layers, name=name, layout=self.layout)
 
     def clear(self, keep_layers: bool = True) -> None:
         """Clear the Layout.
@@ -3688,14 +3878,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         self.kcells = {}
 
         if keep_layers:
-            self.layers = layerenum_from_dict(
-                kcl=self,
-                name=self.layers.__name__,
-                layers={
-                    layer_name: (layer.layer, layer.datatype)
-                    for layer_name, layer in self.layers.__members__.items()
-                },
-            )
+            self.layers = self.layerenum_from_dict(layers=self.infos)
+        else:
+            self.layers = self.layerenum_from_dict(layers=LayerInfos())
 
     def dup(self, init_cells: bool = True) -> KCLayout:
         """Create a duplication of the `~KCLayout` object.
@@ -3936,7 +4121,9 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
         if register_cells:
             for c in sorted(new_cells, key=lambda _c: _c.hierarchy_levels()):
                 kc = KCell(kdb_cell=c, kcl=self)
-                kc.get_meta_data(meta_format=meta_format)
+                kc.get_meta_data(
+                    meta_format=meta_format,
+                )
 
         for c in load_cells & cells:
             kc = self.kcells[c.cell_index()]
@@ -4043,12 +4230,15 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
 
 def layerenum_from_dict(
-    layers: dict[str, tuple[int, int]], name: str = "LAYER", kcl: KCLayout | None = None
+    layers: LayerInfos,
+    name: str = "LAYER",
+    layout: kdb.Layout | None = None,
 ) -> type[LayerEnum]:
     members: dict[str, constant[KCLayout] | tuple[int, int]] = {
-        "kcl": constant(kcl or _get_default_kcl())
+        "layout": constant(layout or _get_default_kcl().layout)
     }
-    members.update(layers)
+    for li in layers.model_dump().values():
+        members[li.name] = li.layer, li.datatype
     return LayerEnum(
         name,  # type: ignore[arg-type]
         members,  # type: ignore[arg-type]
@@ -4088,12 +4278,12 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
     ) -> None:
-        kcl = kcl or _get_default_kcl()
+        _kcl: KCLayout = kcl or _get_default_kcl()  # type: ignore[assignment, unused-ignore]
         BaseModel.__init__(
-            self, kcl=kcl, insts=[], info=Info(**info), size_info=DSizeInfo(self.bbox)
+            self, kcl=_kcl, insts=[], info=Info(**info), size_info=DSizeInfo(self.bbox)
         )
         self._shapes = {}
-        self._ports = Ports(kcl)
+        self._ports = Ports(_kcl)
         self._locked = False
         self._settings = KCellSettings()
         self._settings_units = KCellSettingsUnits()
@@ -4215,7 +4405,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
 
         Will create a temporary file of the gds and load it in KLayout via klive
         """
-        c = KCell()
+        c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
         VInstance(self).insert_into_flat(c, levels=0)
@@ -4237,7 +4427,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         """
         from .widgets.interactive import display_kcell
 
-        c = KCell()
+        c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
         VInstance(self).insert_into_flat(c, levels=0)
@@ -4405,7 +4595,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
 
         See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
         """
-        c = KCell()
+        c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
         c._settings = self._settings
@@ -4428,7 +4618,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         Args:
             port_types: The port types to consider for the netlist extraction.
         """
-        c = KCell()
+        c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
         c._settings = self._settings
@@ -4446,7 +4636,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         add_cell_ports: bool = False,
         check_layer_connectivity: bool = True,
     ) -> tuple[KCell, rdb.ReportDatabase]:
-        c = KCell()
+        c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
         c._settings = self._settings
@@ -5505,6 +5695,62 @@ class Port:
         info: dict[str, int | float | str] = {},
     ): ...
 
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        width: int,
+        layer_info: kdb.LayerInfo,
+        trans: kdb.Trans,
+        kcl: KCLayout | None = None,
+        port_type: str = "optical",
+        info: dict[str, int | float | str] = {},
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        dwidth: float,
+        layer_info: kdb.LayerInfo,
+        dcplx_trans: kdb.DCplxTrans,
+        kcl: KCLayout | None = None,
+        port_type: str = "optical",
+        info: dict[str, int | float | str] = {},
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        width: int,
+        layer_info: kdb.LayerInfo,
+        port_type: str = "optical",
+        angle: int,
+        center: tuple[int, int],
+        mirror_x: bool = False,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = {},
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        dwidth: float,
+        layer_info: kdb.LayerInfo,
+        port_type: str = "optical",
+        dangle: float,
+        dcenter: tuple[float, float],
+        mirror_x: bool = False,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = {},
+    ): ...
+
     def __init__(
         self,
         *,
@@ -5512,6 +5758,7 @@ class Port:
         width: int | None = None,
         dwidth: float | None = None,
         layer: int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
         port_type: str = "optical",
         trans: kdb.Trans | str | None = None,
         dcplx_trans: kdb.DCplxTrans | str | None = None,
@@ -5525,7 +5772,6 @@ class Port:
         info: dict[str, int | float | str] = {},
     ):
         """Create a port from dbu or um based units."""
-        self.kcl = kcl or _get_default_kcl()
         self.info = Info(**info)
         if port is not None:
             self.name = port.name if name is None else name
@@ -5538,9 +5784,13 @@ class Port:
             self.port_type = port.port_type
             self.layer = port.layer
             self.width = port.width
-        elif (width is None and dwidth is None) or layer is None:
+            self.kcl = port.kcl
+        elif (width is None and dwidth is None) or (
+            layer is None and layer_info is None
+        ):
             raise ValueError("width, layer must be given if the 'port is None'")
         else:
+            self.kcl = kcl or _get_default_kcl()
             if trans is not None:
                 # self.width = cast(int, width)
                 if isinstance(trans, str):
@@ -5572,10 +5822,22 @@ class Port:
                 self.dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
                 self.dwidth = dwidth
 
-            assert layer is not None
             self.name = name
+            if layer is None:
+                if layer_info is None:
+                    raise ValueError("layer or layer_info for a port must be defined")
+                layer = self.kcl.find_layer(layer_info)
             self.layer = layer
             self.port_type = port_type
+
+    @property
+    def layer_info(self) -> kdb.LayerInfo:
+        """Get the corresponding layer info of the layer of the port."""
+        return self.kcl.layout.get_info(self.layer)
+
+    @layer_info.setter
+    def layer_info(self, layer_info: kdb.LayerInfo) -> None:
+        self.layer = self.kcl.find_layer(layer_info)
 
     @classmethod
     def from_yaml(cls: type[Port], constructor, node) -> Port:  # type: ignore
@@ -6927,7 +7189,7 @@ class Ports:
             if not keep_mirror:
                 dcplx_trans.mirror = False
             _li = self.kcl.get_info(port.layer)
-            _l = self.kcl.layer(_li)
+            _l = self.kcl.find_layer(_li)
             if _li is not None and _li.name is not None:
                 _port = Port(
                     kcl=self.kcl,
@@ -6992,13 +7254,48 @@ class Ports:
         port_type: str = "optical",
     ) -> Port: ...
 
+    @overload
+    def create_port(
+        self,
+        *,
+        trans: kdb.Trans,
+        width: int,
+        layer_info: kdb.LayerInfo,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        dwidth: int,
+        layer_info: kdb.LayerInfo,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        width: int,
+        layer_info: kdb.LayerInfo,
+        center: tuple[int, int],
+        angle: Literal[0, 1, 2, 3],
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
     def create_port(
         self,
         *,
         name: str | None = None,
         width: int | None = None,
         dwidth: float | None = None,
-        layer: LayerEnum | int,
+        layer: LayerEnum | int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
         port_type: str = "optical",
         trans: kdb.Trans | None = None,
         dcplx_trans: kdb.DCplxTrans | None = None,
@@ -7015,6 +7312,7 @@ class Ports:
             dwidth: Width of the port in um. If `dcplx_trans` is set, this needs to be
                 as well.
             layer: Layer index of the port.
+            layer_info: Layer definition of the port.
             port_type: Type of the port (electrical, optical, etc.)
             trans: Transformation object of the port. [dbu]
             dcplx_trans: Complex transformation for the port.
@@ -7023,6 +7321,12 @@ class Ports:
             angle: Angle in 90° increments. Used for simple/dbu transformations.
             mirror_x: Mirror the transformation of the port.
         """
+        if layer is None:
+            if layer_info is None:
+                raise ValueError(
+                    "layer or layer_info must be defined to create a port."
+                )
+            layer = self.kcl.find_layer(layer_info)
         if trans is not None:
             if width is None:
                 raise ValueError("width needs to be set")
@@ -7384,6 +7688,11 @@ class InstancePorts:
                 )
 
 
+class DecoratorList(UserList[Any]):
+    def __hash__(self) -> int:
+        return hash(tuple(self.data))
+
+
 def dict_to_frozenset(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
     """Convert a `dict` to a `frozenset`."""
     return frozenset(d.items())
@@ -7394,32 +7703,63 @@ def frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable
     return dict(fs)
 
 
-def rec_dict_to_frozenset(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
+@overload
+def _to_hashable(d: dict[str, Any]) -> frozenset[tuple[str, Any]]: ...
+@overload
+def _to_hashable(d: list[Any]) -> DecoratorList: ...
+
+
+def _to_hashable(
+    d: dict[str, Any] | list[Any],
+) -> frozenset[tuple[str, Any]] | DecoratorList:
     """Convert a `dict` to a `frozenset`."""
-    frozen_dict: dict[str, Any] = {}
-    for item, value in d.items():
-        if isinstance(value, dict):
-            _value: Any = rec_dict_to_frozenset(value)
-        elif isinstance(value, list):
-            _value = tuple(value)
-        else:
-            _value = value
-        frozen_dict[item] = _value
+    if isinstance(d, dict):
+        frozen_dict: dict[str, Any] = {}
+        for item, value in d.items():
+            if isinstance(value, dict | list):
+                _value: Any = _to_hashable(value)
+            else:
+                _value = value
+            frozen_dict[item] = _value
+        return frozenset(frozen_dict.items())
+    else:
+        ul = DecoratorList([])
+        for index, value in enumerate(d):
+            if isinstance(value, dict | list):
+                _value = _to_hashable(value)
+            else:
+                _value = value
+            ul.append(_value)
+        return ul
 
-    return frozenset(frozen_dict.items())
+
+@overload
+def _hashable_to_original(fs: frozenset[tuple[str, Any]]) -> dict[str, Any]: ...
+@overload
+def _hashable_to_original(fs: DecoratorList) -> list[Any]: ...
 
 
-def rec_frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable]:
+def _hashable_to_original(
+    fs: frozenset[tuple[str, Any]] | DecoratorList,
+) -> dict[str, Any] | list[Any]:
     """Convert `frozenset` to `dict`."""
-    # return dict(fs)
-    d: dict[str, Any] = {}
-    for k, v in fs:
-        if isinstance(v, frozenset):
-            _v: Any = rec_frozenset_to_dict(v)
-        else:
-            _v = v
-        d[k] = _v
-    return d
+    if isinstance(fs, frozenset):
+        d: dict[str, Any] = {}
+        for k, v in fs:
+            if isinstance(v, frozenset | DecoratorList):
+                _v: Any = _hashable_to_original(v)
+            else:
+                _v = v
+            d[k] = _v
+        return d
+    else:
+        _list = []
+        for v in fs:
+            if isinstance(v, frozenset | DecoratorList):
+                _list.append(_hashable_to_original(v))
+            else:
+                _list.append(v)
+        return _list
 
 
 def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
@@ -7476,6 +7816,8 @@ def clean_value(
         return str(value)
     elif isinstance(value, float | np.float64):  # float
         return f"{value}".replace(".", "p").rstrip("0").rstrip("p")
+    elif isinstance(value, kdb.LayerInfo):
+        return f"{value.name or str(value.layer) + '_' + str(value.datatype)}"
     elif isinstance(value, list | tuple):
         return "_".join(clean_value(v) for v in value)
     elif isinstance(value, dict):
@@ -8014,6 +8356,8 @@ def _check_cell_ports(p1: Port, p2: Port) -> int:
 @dataclass
 class MergeDiff:
     """Dataclass to hold geometric info about the layout diff."""
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     layout_a: kdb.Layout
     layout_b: kdb.Layout
@@ -8659,6 +9003,27 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
             )
 
 
+def _filter_ports(
+    ports: Iterable[Port],
+    angle: int | None = None,
+    orientation: float | None = None,
+    layer: LayerEnum | int | None = None,
+    port_type: str | None = None,
+    regex: str | None = None,
+) -> list[Port]:
+    if regex:
+        ports = filter_regex(ports, regex)
+    if layer is not None:
+        ports = filter_layer(ports, layer)
+    if port_type:
+        ports = filter_port_type(ports, port_type)
+    if angle is not None:
+        ports = filter_direction(ports, angle)
+    if orientation is not None:
+        ports = filter_orientation(ports, orientation)
+    return list(ports)
+
+
 __all__ = [
     "KCell",
     "Instance",
@@ -8672,3 +9037,36 @@ __all__ = [
     "LayerEnum",
     "KCellParams",
 ]
+
+
+def _serialize_setting(setting: MetaData) -> MetaData:
+    if isinstance(setting, dict):
+        return {
+            name: _serialize_setting(_setting) for name, _setting in setting.items()
+        }
+    elif isinstance(setting, list):
+        return [_serialize_setting(s) for s in setting]
+    elif isinstance(setting, tuple):
+        return tuple(_serialize_setting(s) for s in setting)
+    elif isinstance(setting, SerializableShape):
+        return f"!#{setting.__class__.__name__} {str(setting)}"
+    return setting
+
+
+def _deserialize_setting(setting: MetaData) -> MetaData:
+    if isinstance(setting, dict):
+        return {
+            name: _deserialize_setting(_setting) for name, _setting in setting.items()
+        }
+    elif isinstance(setting, list):
+        return [_deserialize_setting(s) for s in setting]
+    elif isinstance(setting, tuple):
+        return tuple(_deserialize_setting(s) for s in setting)
+    elif isinstance(setting, str) and setting.startswith("!#"):
+        cls_name, value = setting.removeprefix("!#").split(" ", 1)
+        match cls_name:
+            case "LayerInfo":
+                return getattr(kdb, cls_name).from_string(value)  # type: ignore[no-any-return]
+            case _:
+                return getattr(kdb, cls_name).from_s(value)  # type: ignore[no-any-return]
+    return setting

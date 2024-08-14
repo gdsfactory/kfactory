@@ -1,6 +1,5 @@
 import kfactory as kf
-import pytest
-
+from conftest import Layers
 
 # def test_netlist(LAYER):
 #     c = kf.KCell("netlist_test")
@@ -99,7 +98,7 @@ import pytest
 #     print(c.netlist())
 
 
-def test_l2n(LAYER: kf.LayerEnum) -> None:
+def test_l2n(LAYER: Layers) -> None:
     c = kf.KCell("netlist_test")
 
     b = kf.cells.circular.bend_circular(width=1, radius=10, layer=LAYER.WG)
@@ -118,6 +117,5 @@ def test_l2n(LAYER: kf.LayerEnum) -> None:
     p.name = None
     c.add_port(p)
 
-    c.show()
-    nl = c.l2n()
+    c.l2n()
     # print(nl)

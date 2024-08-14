@@ -20,7 +20,7 @@ class BezierKCell(Protocol):
         width: kf_types.um,
         height: kf_types.um,
         length: kf_types.um,
-        layer: kf_types.layer,
+        layer: kdb.LayerInfo,
         nb_points: int = 99,
         t_start: float = 0,
         t_stop: float = 1,
@@ -101,7 +101,7 @@ def bend_s_bezier_factory(
         width: kf_types.um,
         height: kf_types.um,
         length: kf_types.um,
-        layer: kf_types.layer,
+        layer: kdb.LayerInfo,
         nb_points: int = 99,
         t_start: float = 0,
         t_stop: float = 1,
@@ -141,7 +141,7 @@ def bend_s_bezier_factory(
         c.create_port(
             width=int(width / c.kcl.dbu),
             trans=kdb.Trans(2, False, 0, 0),
-            layer=layer,
+            layer=c.kcl.find_layer(layer),
             port_type="optical",
         )
         c.create_port(
@@ -149,7 +149,7 @@ def bend_s_bezier_factory(
             trans=kdb.Trans(
                 0, False, c.bbox().right, c.bbox().top - int(width / c.kcl.dbu) // 2
             ),
-            layer=layer,
+            layer=c.kcl.find_layer(layer),
             port_type="optical",
         )
         _info: dict[str, MetaData] = {}
