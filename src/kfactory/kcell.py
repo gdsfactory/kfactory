@@ -58,6 +58,7 @@ from typing_extensions import ParamSpec, Self  # noqa: UP035
 
 from . import __version__, kdb, lay, rdb
 from .conf import CHECK_INSTANCES, LogLevel, config, logger
+from .decorators import Decorators
 from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
@@ -73,6 +74,22 @@ from .port import (
     port_polygon,
     rename_clockwise_multi,
 )
+
+__all__ = [
+    "CHECK_INSTANCES",
+    "KCell",
+    "Instance",
+    "InstanceGroup",
+    "Port",
+    "Ports",
+    "cell",
+    "kcl",
+    "KCLayout",
+    "save_layout_options",
+    "LayerEnum",
+    "KCellParams",
+]
+
 
 T = TypeVar("T")
 KC = TypeVar("KC", bound="KCell", covariant=True)
@@ -327,6 +344,60 @@ class DSizeInfo:
 
 class KCellFunc(Protocol[KCellParams, KC]):
     def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC: ...
+
+
+class KCellDecorator(Protocol):
+    @overload
+    def __call__(
+        self,
+        _func: KCellFunc[KCellParams, KC],
+        /,
+    ) -> KCellFunc[KCellParams, KC]: ...
+
+    @overload
+    def __call__(
+        self,
+        /,
+        *,
+        set_settings: bool = True,
+        set_name: bool = True,
+        check_ports: bool = True,
+        check_instances: CHECK_INSTANCES | None = None,
+        snap_ports: bool = True,
+        basename: str | None = None,
+        drop_params: list[str] = ["self", "cls"],
+        register_factory: bool = True,
+        overwrite_existing: bool | None = None,
+        layout_cache: bool | None = None,
+        info: dict[str, MetaData] | None = None,
+        post_process: Iterable[Callable[[KCell], None]] = [],
+        debug_names: bool | None = None,
+    ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]: ...
+
+    def __call__(
+        self,
+        _func: KCellFunc[KCellParams, KC] | None = None,
+        /,
+        *,
+        set_settings: bool = True,
+        set_name: bool = True,
+        check_ports: bool = True,
+        check_instances: CHECK_INSTANCES | None = None,
+        snap_ports: bool = True,
+        add_port_layers: bool = True,
+        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        basename: str | None = None,
+        drop_params: list[str] = ["self", "cls"],
+        register_factory: bool = True,
+        overwrite_existing: bool | None = None,
+        layout_cache: bool | None = None,
+        info: dict[str, MetaData] | None = None,
+        post_process: Iterable[Callable[[KC], None]] = [],
+        debug_names: bool | None = None,
+    ) -> (
+        KCellFunc[KCellParams, KC]
+        | Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]
+    ): ...
 
 
 class LayerInfos(BaseModel):
@@ -2985,6 +3056,8 @@ class KCLayout(
     settings: KCellSettings = Field(frozen=True)
     future_cell_name: str | None
 
+    decorators: Decorators
+
     def __init__(
         self,
         name: str,
@@ -3048,6 +3121,7 @@ class KCLayout(
                 klayout_version=kdb.__version__,  # type: ignore[attr-defined]
                 meta_format="v2",
             ),
+            decorators=Decorators(self),
         )
         # object.__setattr__(self, "_name", name)
         # object.__setattr__(
@@ -9022,21 +9096,6 @@ def _filter_ports(
     if orientation is not None:
         ports = filter_orientation(ports, orientation)
     return list(ports)
-
-
-__all__ = [
-    "KCell",
-    "Instance",
-    "InstanceGroup",
-    "Port",
-    "Ports",
-    "cell",
-    "kcl",
-    "KCLayout",
-    "save_layout_options",
-    "LayerEnum",
-    "KCellParams",
-]
 
 
 def _serialize_setting(setting: MetaData) -> MetaData:
