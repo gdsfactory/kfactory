@@ -39,6 +39,7 @@ docs/modules
 # ipython
 .ipynb_checkpoints
 *.ipynb
+.virtual_documents
 
 
 demo.gds

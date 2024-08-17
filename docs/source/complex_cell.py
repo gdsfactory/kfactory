@@ -6,11 +6,11 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.16.2
 #   kernelspec:
-#     display_name: kernel_name
+#     display_name: Python 3 (ipykernel)
 #     language: python
-#     name: kernel_name
+#     name: python3
 # ---
 
 from layers import LAYER, si_enc
@@ -30,7 +30,7 @@ def composite_cell() -> kf.KCell:
     )
     wg = c << straight(1000, 5000, 5000)
 
-    wg.align("o1", bend, "o2")
+    wg.connect("o1", bend, "o2")
 
     c.add_port(name="1", port=bend.ports["o1"])
     c.add_port(name="2", port=wg.ports["o2"])

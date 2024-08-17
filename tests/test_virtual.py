@@ -1,10 +1,11 @@
 import kfactory as kf
 from functools import partial
+from conftest import Layers
 
 
 def test_virtual_cell() -> None:
     c = kf.VKCell()
-    c.shapes(kf.kcl.layer(1, 0)).insert(
+    c.shapes(kf.kcl.find_layer(1, 0)).insert(
         kf.kdb.DPolygon([kf.kdb.DPoint(0, 0), kf.kdb.DPoint(1, 0), kf.kdb.DPoint(0, 1)])
     )
 
@@ -15,7 +16,7 @@ def test_virtual_inst(straight: kf.KCell) -> None:
 
 
 def test_virtual_cell_insert(
-    LAYER: kf.LayerEnum, straight: kf.KCell, wg_enc: kf.LayerEnclosure
+    LAYER: Layers, straight: kf.KCell, wg_enc: kf.LayerEnclosure
 ) -> None:
     c = kf.KCell()
 
@@ -49,7 +50,7 @@ def test_virtual_cell_insert(
     vi.insert_into(c)
 
 
-def test_all_angle_route(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None:
+def test_all_angle_route(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
     bb = [kf.kdb.DPoint(x, y) for x, y in [(0, 0), (500, 0), (250, 200), (500, 250)]]
     c = kf.KCell("test_virtual")
     vc = kf.VKCell("test_all_angle")
@@ -59,14 +60,14 @@ def test_all_angle_route(LAYER: kf.LayerEnum, wg_enc: kf.LayerEnclosure) -> None
         backbone=bb,
         straight_factory=partial(
             kf.cells.virtual.straight.virtual_straight,
-            layer=c.kcl.layer(1, 0),
+            layer=LAYER.WG,
             enclosure=wg_enc,
         ),
         bend_factory=partial(
             kf.cells.virtual.euler.virtual_bend_euler,
             width=5,
             radius=20,
-            layer=c.kcl.layer(1, 0),
+            layer=LAYER.WG,
             enclosure=wg_enc,
         ),
     )

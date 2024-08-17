@@ -6,7 +6,7 @@ import random
 
 @kf.cell
 def star(
-    size: float, proportion: float, n_diamonds: int = 3, layer: kf.LayerEnum = LAYER.SI
+    size: float, proportion: float, n_diamonds: int = 3, layer: kf.kdb.LayerInfo = LAYER.SI
 ) -> kf.KCell:
     """Create a diamond star cell
 
@@ -32,12 +32,13 @@ def star(
         ]
     )
 
-    c.shapes(layer).insert(diamond)  # place base diamond
+    li = c.kcl.find_layer(layer)
+    c.shapes(li).insert(diamond)  # place base diamond
 
     for i in range(1, n_diamonds):
         angle = 180 / (n_diamonds) * i
 
-        c.shapes(layer).insert(
+        c.shapes(li).insert(
             diamond.transformed(kf.kdb.DCplxTrans(1, angle, False, 0, 0))
         )
 
@@ -46,19 +47,19 @@ def star(
 
 @kf.cell
 def merged_star(
-    size: float, proportion: float, n_diamonds: int = 3, layer: kf.LayerEnum = LAYER.SI
+    size: float, proportion: float, n_diamonds: int = 3, layer: kf.kdb.LayerInfo = LAYER.SI
 ) -> kf.KCell:
     """Same as star but use the star shapes and merge them to one polygon"""
 
     c = kf.KCell()
 
     _star = star(size, proportion, n_diamonds, layer)
-    reg = kf.kdb.Region(_star.begin_shapes_rec(layer))
+    reg = kf.kdb.Region(_star.begin_shapes_rec(c.kcl.find_layer(layer)))
     reg.merge()  # merge the region
 
     # Insert the region
 
-    c.shapes(layer).insert(reg)
+    c.shapes(c.kcl.find_layer(layer)).insert(reg)
 
     return c
 
@@ -91,9 +92,9 @@ def sky_with_stars() -> kf.KCell:
 
     # remove the stars from the sky
 
-    sky -= kf.kdb.Region(c.begin_shapes_rec(star_layer))
+    sky -= kf.kdb.Region(c.begin_shapes_rec(c.kcl.find_layer(star_layer)))
 
-    c.shapes(LAYER.SIEXCLUDE).insert(sky)
+    c.shapes(c.kcl.find_layer(LAYER.SIEXCLUDE)).insert(sky)
 
     return c
 

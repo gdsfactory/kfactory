@@ -7,7 +7,7 @@ Uses the klayout package as a backend.
 # The import order matters, we need to first import the important stuff.
 # isort:skip_file
 
-__version__ = "0.18.4"
+__version__ = "0.19.0"
 
 import klayout.db as kdb
 import klayout.lay as lay
@@ -19,7 +19,8 @@ from .kcell import (
     KCLayout,
     KCell,
     KCellSettings,
-    LayerEnum,
+    LayerInfos,
+    Constants,
     LayerStack,
     Port,
     Ports,
@@ -52,6 +53,7 @@ from aenum import constant  # type: ignore[import-untyped,unused-ignore]
 
 
 __all__ = [
+    "Constants",
     "Info",
     "Instance",
     "InstanceGroup",
@@ -60,7 +62,7 @@ __all__ = [
     "KCellEnclosure",
     "KCellSettings",
     "LayerEnclosure",
-    "LayerEnum",
+    "LayerInfos",
     "LayerStack",
     "Port",
     "Ports",

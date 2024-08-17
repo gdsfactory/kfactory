@@ -7,7 +7,7 @@ from collections.abc import Iterable
 
 from .. import kdb
 from ..conf import config, logger
-from ..kcell import KCell, KCLayout, LayerEnum
+from ..kcell import KCell, KCLayout
 
 stop = False
 
@@ -81,9 +81,9 @@ class FillOperator(kdb.TileOutputReceiver):
 def fill_tiled(
     c: KCell,
     fill_cell: KCell,
-    fill_layers: Iterable[tuple[LayerEnum | int, int]] = [],
+    fill_layers: Iterable[tuple[kdb.LayerInfo, int]] = [],
     fill_regions: Iterable[tuple[kdb.Region, int]] = [],
-    exclude_layers: Iterable[tuple[LayerEnum | int, int]] = [],
+    exclude_layers: Iterable[tuple[kdb.LayerInfo, int]] = [],
     exclude_regions: Iterable[tuple[kdb.Region, int]] = [],
     n_threads: int | None = None,
     tile_size: tuple[float, float] | None = None,
@@ -132,8 +132,12 @@ def fill_tiled(
 
     layer_names: list[str] = []
     for _layer, _ in fill_layers:
-        layer_name = f"layer{_layer}"
-        tp.input(layer_name, c.kcl.layout, c.cell_index(), c.kcl.get_info(_layer))
+        layer_name = (
+            f"layer{_layer.name}"
+            if _layer.is_named()
+            else f"layer_{_layer.layer}_{_layer.datatype}"
+        )
+        tp.input(layer_name, c.kcl.layout, c.cell_index(), _layer)
         layer_names.append(layer_name)
 
     region_names: list[str] = []
@@ -144,8 +148,12 @@ def fill_tiled(
 
     exlayer_names: list[str] = []
     for _layer, _ in exclude_layers:
-        layer_name = f"layer{_layer}"
-        tp.input(layer_name, c.kcl.layout, c.cell_index(), c.kcl.get_info(_layer))
+        layer_name = (
+            f"layer{_layer.name}"
+            if _layer.is_named()
+            else f"layer_{_layer.layer}_{_layer.datatype}"
+        )
+        tp.input(layer_name, c.kcl.layout, c.cell_index(), _layer)
         exlayer_names.append(layer_name)
 
     exregion_names: list[str] = []

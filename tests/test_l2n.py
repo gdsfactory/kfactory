@@ -1,12 +1,13 @@
 import kfactory as kf
+from conftest import Layers
 
-pdk = kf.KCLayout("L2N")
+pdk = kf.KCLayout("L2N", infos=Layers)
 
 taper = kf.factories.taper.taper_factory(kcl=pdk)
 bend = kf.factories.euler.bend_euler_factory(kcl=pdk)
 straight = kf.factories.straight.straight_dbu_factory(kcl=pdk)
 
-b90 = bend(width=0.5, radius=10, layer=pdk.layer(1, 0))
+b90 = bend(width=0.5, radius=10, layer=Layers().WG)
 
 
 @pdk.cell
@@ -43,7 +44,7 @@ def mmi() -> kf.KCell:
 
     body = c << mmi_body()
     t = [
-        c << taper(width1=500, width2=1000, length=15000, layer=pdk.layer(1, 0))
+        c << taper(width1=500, width2=1000, length=15000, layer=Layers().WG)
         for _ in range(3)
     ]
     t[0].connect("o2", body, "o1")
@@ -71,7 +72,7 @@ def mzi() -> kf.KCell:
     b_top[3].connect("o1", b_top[2], "o1")
     mmi2.connect("o3", b_top[3], "o2")
     # bot arm
-    s = straight(width=500, length=10_000, layer=pdk.layer(1, 0))
+    s = straight(width=500, length=10_000, layer=Layers().WG)
     s_bot = [c << s for _ in range(2)]
     b_bot = [c << b90 for _ in range(4)]
     b_bot[0].connect("o1", mmi1, "o3", mirror=True)
@@ -92,5 +93,4 @@ def test_l2n() -> None:
     mzi1 = c << mzi()
     mzi2 = c << mzi()
     mzi2.connect("o1", mzi1, "o2")
-    c.show()
     c.l2n()

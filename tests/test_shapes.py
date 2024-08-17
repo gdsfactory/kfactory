@@ -1,7 +1,8 @@
 import kfactory as kf
+from conftest import Layers
 
 
-def test_shapes(LAYER: kf.LayerEnum) -> None:
+def test_shapes(LAYER: Layers) -> None:
     kc = kf.KCell()
 
-    kc.shapes(LAYER.WG).insert(kf.kdb.Text())
+    kc.shapes(kc.kcl.find_layer(LAYER.WG)).insert(kf.kdb.Text())

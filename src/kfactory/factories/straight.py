@@ -32,7 +32,7 @@ class StraightKCellFactory(Protocol):
         self,
         width: kf_types.dbu,
         length: kf_types.dbu,
-        layer: kf_types.dbu,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
     ) -> KCell:
         """Waveguide defined in dbu.
@@ -107,7 +107,7 @@ def straight_dbu_factory(
     def straight(
         width: kf_types.dbu,
         length: kf_types.dbu,
-        layer: kf_types.layer,
+        layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
     ) -> KCell:
         """Waveguide defined in dbu.
@@ -147,9 +147,10 @@ def straight_dbu_factory(
         if width // 2 * 2 != width:
             raise ValueError("The width (w) must be a multiple of 2 database units")
 
-        c.shapes(layer).insert(kdb.Box(0, -width // 2, length, width // 2))
-        c.create_port(trans=kdb.Trans(2, False, 0, 0), layer=layer, width=width)
-        c.create_port(trans=kdb.Trans(0, False, length, 0), layer=layer, width=width)
+        li = c.kcl.find_layer(layer)
+        c.shapes(li).insert(kdb.Box(0, -width // 2, length, width // 2))
+        c.create_port(trans=kdb.Trans(2, False, 0, 0), layer=li, width=width)
+        c.create_port(trans=kdb.Trans(0, False, length, 0), layer=li, width=width)
 
         if enclosure is not None:
             enclosure.apply_minkowski_y(c, layer)

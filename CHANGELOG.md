@@ -1,20 +1,29 @@
-<a name="v0.18.5"></a>
-# [v0.18.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.5) - 23 Jul 2024
+<a name="v0.19.0"></a>
+# [v0.19.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.0) - 23 Jul 2024
 
 # What's Changed
 
+## Breaking
+
+- Improve layers so that they can be passed easily by LayerInfo and not only by index [#439](https://github.com/gdsfactory/kfactory/pull/439)
+
+## New
+
+- Improve layers so that they can be passed easily by LayerInfo and not only by index [#439](https://github.com/gdsfactory/kfactory/pull/439)
+
 ## Bug Fixes
 
+- better instance default name using trans instead of .x [#450](https://github.com/gdsfactory/kfactory/pull/450)
 - fix write_context_info [#448](https://github.com/gdsfactory/kfactory/pull/448)
 - Add missing space in KLayout version warning [#447](https://github.com/gdsfactory/kfactory/pull/447)
 - ensure cell decorated functions return component [#443](https://github.com/gdsfactory/kfactory/pull/443)
 - fix c.flatten(merge=True) deleting texts [#441](https://github.com/gdsfactory/kfactory/pull/441)
 - Adjust AttributeError text in optical routing for taper and bend [#438](https://github.com/gdsfactory/kfactory/pull/438)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.18.4...v0.18.5
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.18.4...v0.19.0
 
 
-[Changes][v0.18.5]
+[Changes][v0.19.0]
 
 
 <a name="v0.18.4"></a>
@@ -948,7 +957,7 @@
 [Changes][v0.4.0]
 
 
-[v0.18.5]: https://github.com/gdsfactory/kfactory/compare/v0.18.4...v0.18.5
+[v0.19.0]: https://github.com/gdsfactory/kfactory/compare/v0.18.4...v0.19.0
 [v0.18.4]: https://github.com/gdsfactory/kfactory/compare/v0.18.3...v0.18.4
 [v0.18.3]: https://github.com/gdsfactory/kfactory/compare/v0.18.2...v0.18.3
 [v0.18.2]: https://github.com/gdsfactory/kfactory/compare/v0.18.1...v0.18.2
