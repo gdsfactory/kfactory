@@ -93,6 +93,7 @@ __all__ = [
 
 T = TypeVar("T")
 KC = TypeVar("KC", bound="KCell", covariant=True)
+K = TypeVar("K", bound="KCell")
 LI = TypeVar("LI", bound="LayerInfos", covariant=True)
 C = TypeVar("C", bound="Constants", covariant=True)
 
@@ -343,61 +344,9 @@ class DSizeInfo:
 
 
 class KCellFunc(Protocol[KCellParams, KC]):
+    __name__: str
+
     def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC: ...
-
-
-class KCellDecorator(Protocol):
-    @overload
-    def __call__(
-        self,
-        _func: KCellFunc[KCellParams, KC],
-        /,
-    ) -> KCellFunc[KCellParams, KC]: ...
-
-    @overload
-    def __call__(
-        self,
-        /,
-        *,
-        set_settings: bool = True,
-        set_name: bool = True,
-        check_ports: bool = True,
-        check_instances: CHECK_INSTANCES | None = None,
-        snap_ports: bool = True,
-        basename: str | None = None,
-        drop_params: list[str] = ["self", "cls"],
-        register_factory: bool = True,
-        overwrite_existing: bool | None = None,
-        layout_cache: bool | None = None,
-        info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KCell], None]] = [],
-        debug_names: bool | None = None,
-    ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]: ...
-
-    def __call__(
-        self,
-        _func: KCellFunc[KCellParams, KC] | None = None,
-        /,
-        *,
-        set_settings: bool = True,
-        set_name: bool = True,
-        check_ports: bool = True,
-        check_instances: CHECK_INSTANCES | None = None,
-        snap_ports: bool = True,
-        add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
-        basename: str | None = None,
-        drop_params: list[str] = ["self", "cls"],
-        register_factory: bool = True,
-        overwrite_existing: bool | None = None,
-        layout_cache: bool | None = None,
-        info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KC], None]] = [],
-        debug_names: bool | None = None,
-    ) -> (
-        KCellFunc[KCellParams, KC]
-        | Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]
-    ): ...
 
 
 class LayerInfos(BaseModel):
@@ -3372,13 +3321,15 @@ class KCLayout(
         check_ports: bool = True,
         check_instances: CHECK_INSTANCES | None = None,
         snap_ports: bool = True,
+        add_port_layers: bool = True,
+        cache: Cache[int, Any] | dict[int, Any] | None = None,
         basename: str | None = None,
         drop_params: list[str] = ["self", "cls"],
         register_factory: bool = True,
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KCell], None]] = [],
+        post_process: Iterable[Callable[[KC], None]] = [],
         debug_names: bool | None = None,
     ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]: ...
 
@@ -3459,8 +3410,8 @@ class KCLayout(
             debug_names = config.debug_names
 
         def decorator_autocell(
-            f: Callable[KCellParams, KC],
-        ) -> Callable[KCellParams, KC]:
+            f: KCellFunc[KCellParams, KC],
+        ) -> KCellFunc[KCellParams, KC]:
             sig = inspect.signature(f)
 
             _cache: Cache[_HashedTuple, KC] | dict[_HashedTuple, KC] = cache or Cache(
