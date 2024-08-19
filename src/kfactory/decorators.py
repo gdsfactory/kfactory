@@ -86,15 +86,16 @@ def _module_cell(
     /,
     **kwargs: Unpack[ModuleCellKWargs],
 ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]:
+    """Constructs the actual decorator.
+
+    Modifies the basename to the module if the module is not the main one.
+    """
+
     def decorator_cell(
         f: KCellFunc[KCellParams, K],
     ) -> KCellFunc[KCellParams, K]:
         mod = f.__module__
-        if mod != "__main__":
-            basename = mod + "_" + f.__name__
-        else:
-            basename = f.__name__
-
+        basename = f.__name__ if mod == "__main" else f"{mod}_{f.__name__}"
         return cell_decorator(basename=basename, **kwargs)(f)
 
     return decorator_cell
