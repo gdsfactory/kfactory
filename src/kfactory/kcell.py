@@ -3890,7 +3890,7 @@ class KCLayout(BaseModel, arbitrary_types_allowed=True, extra="allow"):
 
                 raise MergeError(
                     f"Layout {self.name} cannot merge with layout "
-                    f"{Path(filename).stem} safely. See the error messages or"
+                    f"{Path(filename).stem} safely. See the error messages "
                     f"or check with KLayout."
                 )
 
