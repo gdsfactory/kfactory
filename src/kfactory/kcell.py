@@ -708,6 +708,8 @@ def load_layout_options(**attributes: Any) -> kdb.LoadLayoutOptions:
     load.cell_conflict_resolution = (
         kdb.LoadLayoutOptions.CellConflictResolution.SkipNewCell
     )
+    for k, v in attributes.items():
+        setattr(load, k, v)
 
     return load
 

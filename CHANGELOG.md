@@ -1,5 +1,20 @@
+<a name="v0.19.1"></a>
+# [v0.19.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.1) - 14 Aug 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix load_layout_options [#453](https://github.com/gdsfactory/kfactory/pull/453)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.19.0...v0.19.1
+
+
+[Changes][v0.19.1]
+
+
 <a name="v0.19.0"></a>
-# [v0.19.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.0) - 23 Jul 2024
+# [v0.19.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.0) - 14 Aug 2024
 
 # What's Changed
 
@@ -957,6 +972,7 @@
 [Changes][v0.4.0]
 
 
+[v0.19.1]: https://github.com/gdsfactory/kfactory/compare/v0.19.0...v0.19.1
 [v0.19.0]: https://github.com/gdsfactory/kfactory/compare/v0.18.4...v0.19.0
 [v0.18.4]: https://github.com/gdsfactory/kfactory/compare/v0.18.3...v0.18.4
 [v0.18.3]: https://github.com/gdsfactory/kfactory/compare/v0.18.2...v0.18.3
