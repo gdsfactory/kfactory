@@ -31,7 +31,7 @@ dependencies = [
   "scipy",
   "tomli",
   "toolz",
-  "typer[all]",
+  "typer",
 ]
 
 [project.optional-dependencies]

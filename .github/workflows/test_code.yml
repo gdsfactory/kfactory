@@ -41,7 +41,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          pip install -e .[ci]
+          pip install -e .[ci] pytest
           make gds-download
       - name: Test with pytest
         env:
