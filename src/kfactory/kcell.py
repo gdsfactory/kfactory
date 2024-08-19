@@ -3615,6 +3615,9 @@ class KCLayout(
                                                 port.name, port.dcplx_trans.s_trans()
                                             )
                                         )
+                    # post process the cell
+                    for pp in post_process:
+                        pp(cell)
                     cell._locked = True
                     if cell.kcl != self:
                         raise ValueError(
@@ -3644,9 +3647,6 @@ class KCLayout(
 
                 if info is not None:
                     _cell.info.update(info)
-
-                for pp in post_process:
-                    pp(_cell)
 
                 return _cell
 
