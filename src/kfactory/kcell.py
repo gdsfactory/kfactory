@@ -93,7 +93,6 @@ __all__ = [
 
 T = TypeVar("T")
 KC = TypeVar("KC", bound="KCell", covariant=True)
-K = TypeVar("K", bound="KCell")
 LI = TypeVar("LI", bound="LayerInfos", covariant=True)
 C = TypeVar("C", bound="Constants", covariant=True)
 
@@ -3313,6 +3312,7 @@ class KCLayout(
         /,
     ) -> KCellFunc[KCellParams, KC]: ...
 
+    # TODO: Fix to support KC once mypy supports it https://github.com/python/mypy/issues/17621
     @overload
     def cell(
         self,
@@ -3331,9 +3331,9 @@ class KCLayout(
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KC], None]] = [],
+        post_process: Iterable[Callable[[KCell], None]] = tuple(),
         debug_names: bool | None = None,
-    ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]: ...
+    ) -> Callable[[KCellFunc[KCellParams, KCell]], KCellFunc[KCellParams, KCell]]: ...
 
     def cell(
         self,
@@ -3353,11 +3353,11 @@ class KCLayout(
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KC], None]] = [],
+        post_process: Iterable[Callable[[KC], None]] = tuple(),
         debug_names: bool | None = None,
     ) -> (
         KCellFunc[KCellParams, KC]
-        | Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]
+        | Callable[[KCellFunc[KCellParams, KCell]], KCellFunc[KCellParams, KCell]]
     ):
         """Decorator to cache and auto name the cell.
 
@@ -3660,7 +3660,16 @@ class KCLayout(
                 self.factories[basename or function_name] = wrapper_autocell
             return wrapper_autocell
 
-        return decorator_autocell if _func is None else decorator_autocell(_func)
+        return (
+            cast(
+                Callable[
+                    [KCellFunc[KCellParams, KCell]], KCellFunc[KCellParams, KCell]
+                ],
+                decorator_autocell,
+            )
+            if _func is None
+            else decorator_autocell(_func)
+        )
 
     @overload
     def vcell(
