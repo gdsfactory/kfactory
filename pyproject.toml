@@ -13,43 +13,42 @@ classifiers = [
 requires-python = ">=3.10"
 
 
-version = "0.18.1"
+version = "0.19.0"
 authors = [
     {name = "gdsfactory community", email = "contact@gdsfactory.com"},
 ]
 dependencies = [
-  "klayout >= 0.29.3",
-  "scipy",
-  "ruamel.yaml",
+  "aenum",
   "cachetools >= 5.2.0",
   "gitpython",
+  "loguru",
+  "klayout >= 0.29.6",
   "pydantic >= 2.0.2, < 3",
   "pydantic-settings >= 2.0.1, < 3",
-  "loguru",
-  "tomli",
+  "rectangle-packer",
   "requests",
-  "typer[all]",
-  "aenum",
+  "ruamel.yaml",
+  "scipy",
+  "tomli",
   "toolz",
+  "typer",
 ]
 
 [project.optional-dependencies]
-git = [
-  "gitpython",
-]
+
 dev = [
+  "kfactory[full]",
+  "ruff",
   "mypy",
   "pre-commit",
   "pylsp-mypy",
   "python-lsp-server[all]",
-  "ruff",
   "types-cachetools",
   "pytest",
-  "kfactory[git]",
-  "types-requests",
-  "types-setuptools",
   "types-docutils",
   "types-Pygments",
+  "types-requests",
+  "types-setuptools",
   "tbump",
 ]
 docs = [
@@ -69,7 +68,7 @@ ci = [
   "pytest_regressions",
   "types-cachetools",
   "types-requests",
-  "kfactory[git]",
+  "kfactory[full]",
 ]
 ipy = [
   "ipython",
@@ -146,7 +145,7 @@ convention = "google"
 # github_url = "https://github.com/<user or organization>/<project>/"
 
 [tool.tbump.version]
-current = "0.18.1"
+current = "0.19.0"
 
 # Example of a semver regexp.
 # Make sure this matches current_version before

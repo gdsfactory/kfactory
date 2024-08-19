@@ -1,14 +1,15 @@
 import kfactory as kf
 import klayout.db as kdb
+from conftest import Layers
 
 
-def test_instance_xsize(LAYER: kf.LayerEnum) -> None:
+def test_instance_xsize(LAYER: Layers) -> None:
     c = kf.KCell()
     ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
     assert ref.xsize
 
 
-def test_instance_center(LAYER: kf.LayerEnum) -> None:
+def test_instance_center(LAYER: Layers) -> None:
     c = kf.KCell()
     ref1 = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
     ref2 = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
@@ -18,7 +19,7 @@ def test_instance_center(LAYER: kf.LayerEnum) -> None:
     ref2.dmove((0, 10))
 
 
-def test_instance_d_move(LAYER: kf.LayerEnum) -> None:
+def test_instance_d_move(LAYER: Layers) -> None:
     c = kf.KCell()
     ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
 
@@ -39,7 +40,7 @@ def test_instance_d_move(LAYER: kf.LayerEnum) -> None:
     ref.dmirror_x(0)
 
 
-def test_mirror(LAYER: kf.LayerEnum) -> None:
+def test_mirror(LAYER: Layers) -> None:
     """Test arbitrary mirror."""
     c = kf.KCell()
     b = kf.cells.euler.bend_euler(width=1, radius=10, layer=LAYER.WG)
@@ -53,10 +54,10 @@ def test_mirror(LAYER: kf.LayerEnum) -> None:
 
     b2.mirror(disp * mp1, disp * mp2)
 
-    c.shapes(LAYER.WG).insert(kf.kdb.Edge(mp1, mp2).transformed(disp))
+    c.shapes(c.kcl.find_layer(LAYER.WG)).insert(kf.kdb.Edge(mp1, mp2).transformed(disp))
 
 
-def test_dmirror(LAYER: kf.LayerEnum) -> None:
+def test_dmirror(LAYER: Layers) -> None:
     """Test arbitrary mirror."""
     c = kf.KCell()
     b = kf.cells.euler.bend_euler(width=1, radius=10, layer=LAYER.WG)
@@ -70,4 +71,6 @@ def test_dmirror(LAYER: kf.LayerEnum) -> None:
 
     b2.dmirror(disp * mp1, disp * mp2)
 
-    c.shapes(LAYER.WG).insert(kf.kdb.DEdge(mp1, mp2).transformed(disp))
+    c.shapes(c.kcl.find_layer(LAYER.WG)).insert(
+        kf.kdb.DEdge(mp1, mp2).transformed(disp)
+    )

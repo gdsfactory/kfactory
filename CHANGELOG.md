@@ -1,3 +1,99 @@
+<a name="v0.19.1"></a>
+# [v0.19.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.1) - 14 Aug 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix [#452](https://github.com/gdsfactory/kfactory/issues/452) [#454](https://github.com/gdsfactory/kfactory/pull/454)
+- fix load_layout_options [#453](https://github.com/gdsfactory/kfactory/pull/453)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.19.0...v0.19.1
+
+
+[Changes][v0.19.1]
+
+
+<a name="v0.19.0"></a>
+# [v0.19.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.0) - 14 Aug 2024
+
+# What's Changed
+
+## Breaking
+
+- Improve layers so that they can be passed easily by LayerInfo and not only by index [#439](https://github.com/gdsfactory/kfactory/pull/439)
+
+## New
+
+- Improve layers so that they can be passed easily by LayerInfo and not only by index [#439](https://github.com/gdsfactory/kfactory/pull/439)
+
+## Bug Fixes
+
+- better instance default name using trans instead of .x [#450](https://github.com/gdsfactory/kfactory/pull/450)
+- fix write_context_info [#448](https://github.com/gdsfactory/kfactory/pull/448)
+- Add missing space in KLayout version warning [#447](https://github.com/gdsfactory/kfactory/pull/447)
+- ensure cell decorated functions return component [#443](https://github.com/gdsfactory/kfactory/pull/443)
+- fix c.flatten(merge=True) deleting texts [#441](https://github.com/gdsfactory/kfactory/pull/441)
+- Adjust AttributeError text in optical routing for taper and bend [#438](https://github.com/gdsfactory/kfactory/pull/438)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.18.4...v0.19.0
+
+
+[Changes][v0.19.0]
+
+
+<a name="v0.18.4"></a>
+# [v0.18.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.4) - 23 Jul 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix the other case of model_dump [#436](https://github.com/gdsfactory/kfactory/pull/436)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.18.3...v0.18.4
+
+
+[Changes][v0.18.4]
+
+
+<a name="v0.18.3"></a>
+# [v0.18.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.3) - 23 Jul 2024
+
+## What's Changed
+* fix _port by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/435
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.18.2...v0.18.3
+
+[Changes][v0.18.3]
+
+
+<a name="v0.18.2"></a>
+# [v0.18.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.2) - 23 Jul 2024
+
+# What's Changed
+
+## New
+
+- add packing functions for Instances and KCells [#431](https://github.com/gdsfactory/kfactory/pull/431)
+- Add InstanceGroup [#430](https://github.com/gdsfactory/kfactory/pull/430)
+
+## Bug Fixes
+
+- fix _port [#435](https://github.com/gdsfactory/kfactory/pull/435)
+- fix add_ports in case port.kcl is not ports.kcl [#434](https://github.com/gdsfactory/kfactory/pull/434)
+- fix error message [#432](https://github.com/gdsfactory/kfactory/pull/432)
+
+## Other changes
+
+- Fixed double `or` print statement [#428](https://github.com/gdsfactory/kfactory/pull/428)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.18.1...v0.18.2
+
+
+[Changes][v0.18.2]
+
+
 <a name="v0.18.1"></a>
 # [v0.18.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.1) - 17 Jul 2024
 
@@ -877,6 +973,11 @@
 [Changes][v0.4.0]
 
 
+[v0.19.1]: https://github.com/gdsfactory/kfactory/compare/v0.19.0...v0.19.1
+[v0.19.0]: https://github.com/gdsfactory/kfactory/compare/v0.18.4...v0.19.0
+[v0.18.4]: https://github.com/gdsfactory/kfactory/compare/v0.18.3...v0.18.4
+[v0.18.3]: https://github.com/gdsfactory/kfactory/compare/v0.18.2...v0.18.3
+[v0.18.2]: https://github.com/gdsfactory/kfactory/compare/v0.18.1...v0.18.2
 [v0.18.1]: https://github.com/gdsfactory/kfactory/compare/v0.18.0...v0.18.1
 [v0.18.0]: https://github.com/gdsfactory/kfactory/compare/v0.17.8...v0.18.0
 [v0.17.8]: https://github.com/gdsfactory/kfactory/compare/v0.17.7...v0.17.8

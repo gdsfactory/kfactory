@@ -1,5 +1,6 @@
 import kfactory as kf
 import pytest
+from conftest import Layers
 
 
 @pytest.mark.parametrize(
@@ -13,7 +14,7 @@ import pytest
     ],
 )
 def test_rotation(
-    center: kf.kdb.Point | None, straight: kf.KCell, LAYER: kf.LayerEnum
+    center: kf.kdb.Point | None, straight: kf.KCell, LAYER: Layers
 ) -> None:
     c = kf.KCell()
 
@@ -23,7 +24,7 @@ def test_rotation(
     wg2.rotate(2, center=center)
 
     if center:
-        c.shapes(LAYER.WGCLAD).insert(
+        c.shapes(c.kcl.find_layer(LAYER.WGCLAD)).insert(
             kf.kdb.Box(10).transformed(kf.kdb.Trans(center.to_v()))
         )
 
@@ -42,7 +43,7 @@ def test_rotation(
     ],
 )
 def test_drotation(
-    center: kf.kdb.DPoint | None, straight: kf.KCell, LAYER: kf.LayerEnum
+    center: kf.kdb.DPoint | None, straight: kf.KCell, LAYER: Layers
 ) -> None:
     c = kf.KCell()
 
@@ -52,7 +53,7 @@ def test_drotation(
     wg2.drotate(30, center=center)
 
     if center:
-        c.shapes(LAYER.WGCLAD).insert(
+        c.shapes(c.kcl.find_layer(LAYER.WGCLAD)).insert(
             kf.kdb.DBox(0.01).transformed(kf.kdb.DCplxTrans(center.to_v()))
         )
 
