@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- fix [#452](https://github.com/gdsfactory/kfactory/issues/452) [#454](https://github.com/gdsfactory/kfactory/pull/454)
 - fix load_layout_options [#453](https://github.com/gdsfactory/kfactory/pull/453)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.19.0...v0.19.1
