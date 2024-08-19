@@ -5,6 +5,7 @@ Mainly units for annotating types.
 
 from typing import Annotated
 
+from . import kdb
 from .kcell import (
     LayerEnum,
 )
@@ -19,4 +20,4 @@ rad = Annotated[float, "rad"]
 """Float in radians."""
 layer = Annotated[int | LayerEnum, "layer"]
 """Integer or enum index of a Layer."""
-layer_info = Annotated[str, "layer info"]
+layer_info = Annotated[kdb.LayerInfo, "layer info"]
