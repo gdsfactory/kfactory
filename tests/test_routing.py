@@ -191,8 +191,12 @@ def test_route_bundle(
         p_start,
         p_end,
         5_000,
-        straight_factory=straight_factory_dbu,
-        bend90_cell=bend90_euler,
+        bend90_radius=kf.routing.optical.get_radius(bend90_euler),
+        placer_function=kf.routing.optical.place90,
+        placer_kwargs={
+            "straight_factory": straight_factory_dbu,
+            "bend90_cell": bend90_euler,
+        },
     )
 
     for route in routes:
@@ -398,23 +402,37 @@ def test_smart_routing(
                     c,
                     start_ports=start_ports,
                     end_ports=end_ports,
-                    bend90_cell=bend90_small,
                     separation=4000,
-                    straight_factory=straight_factory_dbu,
                     bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
                     sort_ports=sort_ports,
                     bbox_routing="full",
                     on_collision="error",
+                    bend90_radius=kf.routing.optical.get_radius(
+                        kf.port.filter_port_type(
+                            bend90_small.ports, port_type="optical"
+                        )
+                    ),
+                    placer_function=kf.routing.optical.place90,
+                    placer_kwargs={
+                        "straight_factory": straight_factory_dbu,
+                        "bend90_cell": bend90_small,
+                    },
                 )
         case _:
             kf.routing.optical.route_bundle(
                 c,
                 start_ports=start_ports,
                 end_ports=end_ports,
-                bend90_cell=bend90_small,
                 separation=4000,
-                straight_factory=straight_factory_dbu,
                 bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
                 sort_ports=sort_ports,
                 bbox_routing="full",
+                bend90_radius=kf.routing.optical.get_radius(
+                    kf.port.filter_port_type(bend90_small.ports, port_type="optical")
+                ),
+                placer_function=kf.routing.optical.place90,
+                placer_kwargs={
+                    "straight_factory": straight_factory_dbu,
+                    "bend90_cell": bend90_small,
+                },
             )

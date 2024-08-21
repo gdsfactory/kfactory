@@ -1,28 +1,49 @@
 """Optical routing allows the creation of photonic (or any route using bends)."""
 
-from collections.abc import Sequence
-from typing import Any, Literal
+from __future__ import annotations
+
+from collections.abc import Callable, Iterable, Sequence
+from typing import Any, Literal, Required, TypedDict
 
 from pydantic import BaseModel
 
 from .. import kdb, rdb
 from ..conf import config, logger
 from ..factories import StraightFactory
-from ..kcell import Instance, KCell, LayerEnum, Port
+from ..kcell import Instance, KCell, Port
 from .manhattan import (
     ManhattanRoutePathFunction,
+    ManhattanRouter,
     route_manhattan,
     route_smart,
 )
 
 __all__ = [
     "OpticalManhattanRoute",
-    "vec_angle",
+    "get_radius",
+    "place90",
     "route_loopback",
     "route",
     "route_bundle",
-    "place90",
+    "vec_angle",
 ]
+
+
+class PlacerKwargs(TypedDict):
+    pass
+
+
+class Place90(PlacerKwargs, total=False):
+    straight_factory: Required[StraightFactory]
+    bend90_cell: Required[KCell]
+    taper_cell: KCell | None
+    port_type: str
+    min_straight_taper: int
+    allow_small_routes: bool
+    allow_width_mismatch: bool | None
+    allow_layer_mismatch: bool | None
+    allow_type_mismatch: bool | None
+    route_width: int | None
 
 
 class OpticalManhattanRoute(BaseModel, arbitrary_types_allowed=True):
@@ -59,6 +80,301 @@ class OpticalManhattanRoute(BaseModel, arbitrary_types_allowed=True):
             length += int((p - p_old).length())
             p_old = p
         return length
+
+
+def get_radius(
+    ports: Iterable[Port],
+) -> int:
+    """Calculates a radius between two ports.
+
+    This can be used to determine the radius of two bend ports.
+    """
+    ports = tuple(ports)
+    if len(ports) != 2:
+        raise ValueError(
+            "Cannot determine the maximal radius of a bend with more than two ports."
+        )
+    p1, p2 = ports
+    if p1.angle == p2.angle:
+        return int((p1.trans.disp - p2.trans.disp).length())
+    _p = kdb.Point(1, 0)
+    e1 = kdb.Edge(p1.trans.disp.to_p(), p1.trans * _p)
+    e2 = kdb.Edge(p2.trans.disp.to_p(), p2.trans * _p)
+
+    center = e1.cut_point(e2)
+    if center is None:
+        raise ValueError("Could not determine the radius. Something went very wrong.")
+    return int(
+        max((p1.trans.disp - center).length(), (p2.trans.disp - center).length())
+    )
+
+
+def route_bundle(
+    c: KCell,
+    start_ports: list[Port],
+    end_ports: list[Port],
+    separation: int,
+    bend90_radius: int,
+    placer_function: Callable[..., OpticalManhattanRoute],
+    start_straights: int | list[int] = 0,
+    end_straights: int | list[int] = 0,
+    route_width: int | list[int] | None = None,
+    sort_ports: bool = False,
+    bboxes: Sequence[kdb.Box] = tuple(),
+    bbox_routing: Literal["minimal", "full"] = "minimal",
+    on_collision: Literal["error", "show_error"] | None = "show_error",
+    collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
+    placer_kwargs: dict[str, Any] = {},
+) -> list[OpticalManhattanRoute]:
+    """Route a bundle from starting ports to end_ports.
+
+    Args:
+        c: Cell to place the route in.
+        start_ports: List of start ports.
+        end_ports: List of end ports.
+        separation: Separation between the routes.
+        start_straights: Minimal straight segment after `p1`.
+        end_straights: Minimal straight segment before `p2`.
+        collision_check_layers: Layers to check for actual errors if manhattan routes
+            detect potential collisions.
+        on_collision: Define what to do on routing collision. Default behaviour is to
+            open send the layout of c to klive and open an error lyrdb with the
+            collisions. "error" will simply raise an error. None will ignore any error.
+        bboxes: List of boxes to consider. Currently only boxes overlapping ports will
+            be considered.
+        route_width: Width of the route. If None, the width of the ports is used.
+        sort_ports: Automatically sort ports.
+        bbox_routing: "minimal": only route to the bbox so that it can be safely routed
+            around, but start or end bends might encroach on the bounding boxes when
+            leaving them.
+        bend90_radius: The radius with which the router will try to router. This should
+            normally be the maximal radius used.
+        placer_function: Function to place the routes. Must return a corresponding list
+            of OpticalManhattan routes.
+            Must accept the following protocol:
+            ```
+            placerfunction(
+                c: KCell, p1: Port, p2: Port, pts: list[Point], **placer_kwargs
+            )
+            ```
+        placer_kwargs: Additional kwargs passed to the placer_function.
+    """
+    if not start_ports:
+        return []
+    if not (len(start_ports) == len(end_ports)):
+        raise ValueError(
+            "For bundle routing the input port list must have"
+            " the same size as the end ports and be the same length."
+        )
+
+    bboxes = list(bboxes)
+
+    if isinstance(start_straights, int):
+        start_straights = [start_straights] * len(start_ports)
+    if isinstance(end_straights, int):
+        end_straights = [end_straights] * len(start_ports)
+
+    if route_width:
+        if isinstance(route_width, int):
+            widths = [route_width] * len(start_ports)
+        else:
+            widths = route_width
+    else:
+        widths = [p.width for p in start_ports]
+
+    routers = route_smart(
+        start_ports=start_ports,
+        end_ports=end_ports,
+        bend90_radius=bend90_radius,
+        separation=separation,
+        start_straights=start_straights,
+        end_straights=end_straights,
+        bboxes=bboxes.copy(),
+        widths=widths,
+        sort_ports=sort_ports,
+        bbox_routing=bbox_routing,
+    )
+
+    if not routers:
+        return []
+
+    routes: list[OpticalManhattanRoute] = []
+    if sort_ports:
+        start_mapping = {sp.trans.disp.to_p(): sp for sp in start_ports}
+        end_mapping = {ep.trans.disp.to_p(): ep for ep in end_ports}
+        for router in routers:
+            routes.append(
+                placer_function(
+                    c,
+                    start_mapping[router.start.pts[0]],
+                    end_mapping[router.start.pts[-1]],
+                    router.start.pts,
+                    **placer_kwargs,
+                )
+                # place90(
+                #     c,
+                #     p1=start_mapping[router.start.pts[0]],
+                #     p2=end_mapping[router.start.pts[-1]],
+                #     pts=router.start.pts,
+                #     straight_factory=straight_factory,
+                #     bend90_cell=bend90_cell,
+                #     taper_cell=taper_cell,
+                #     min_straight_taper=min_straight_taper,
+                #     allow_small_routes=place_allow_small_routes,
+                #     port_type=place_port_type,
+                #     allow_width_mismatch=allow_width_mismatch,
+                #     route_width=router.width,
+                # )
+            )
+    else:
+        for router, ps, pe in zip(routers, start_ports, end_ports):
+            routes.append(
+                placer_function(
+                    c,
+                    ps,
+                    pe,
+                    router.start.pts,
+                    **placer_kwargs,
+                )
+                # place90(
+                #     c,
+                #     pts=router.start.pts,
+                #     straight_factory=straight_factory,
+                #     bend90_cell=bend90_cell,
+                #     taper_cell=taper_cell,
+                #     min_straight_taper=min_straight_taper,
+                #     allow_small_routes=place_allow_small_routes,
+                #     port_type=place_port_type,
+                #     allow_width_mismatch=allow_width_mismatch,
+                #     route_width=router.width,
+                # )
+            )
+    check_collisions(
+        c=c,
+        start_ports=start_ports,
+        end_ports=end_ports,
+        on_collision=on_collision,
+        collision_check_layers=collision_check_layers,
+        routers=routers,
+        routes=routes,
+    )
+    return routes
+
+
+def check_collisions(
+    c: KCell,
+    start_ports: list[Port],
+    end_ports: list[Port],
+    routers: list[ManhattanRouter],
+    routes: list[OpticalManhattanRoute],
+    on_collision: Literal["error", "show_error"] | None = "show_error",
+    collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
+) -> None:
+    if on_collision is not None:
+        collision_edges: dict[str, kdb.Edges] = {}
+        inter_route_collisions = kdb.Edges()
+        all_router_edges = kdb.Edges()
+        for i, (ps, pe, router) in enumerate(zip(start_ports, end_ports, routers)):
+            _edges, router_edges = router.collisions(log_errors=None)
+            if not _edges.is_empty():
+                collision_edges[f"{ps.name} - {pe.name} (index: {i})"] = _edges
+            inter_route_collision = all_router_edges.interacting(router_edges)
+            if not inter_route_collision.is_empty():
+                inter_route_collisions.join_with(inter_route_collision)
+            all_router_edges.join_with(router_edges)
+
+        if collision_edges or not inter_route_collisions.is_empty():
+            if collision_check_layers is None:
+                collision_check_layers = list(set(p.layer_info for p in start_ports))
+            dbu = c.kcl.dbu
+            db = rdb.ReportDatabase("Routing Errors")
+            cat = db.create_category("Manhattan Routing Collisions")
+            cell = db.create_cell(c.name)
+            for name, edges in collision_edges.items():
+                item = db.create_item(cell, cat)
+                item.add_value(name)
+                for edge in edges.each():
+                    item.add_value(edge.to_dtype(dbu))
+            insts = [inst for route in routes for inst in route.instances]
+            layer_cats: dict[kdb.LayerInfo, rdb.RdbCategory] = {}
+
+            def layer_cat(layer_info: kdb.LayerInfo) -> rdb.RdbCategory:
+                if layer_info not in layer_cats:
+                    # if isinstance(layer, LayerEnum):
+                    #     ln = layer.name
+                    # else:
+                    #     li = c.kcl.get_info(layer)
+                    #     ln = str(li).replace("/", "_")
+                    layer_cats[layer_info] = db.category_by_path(
+                        layer_info.to_s()
+                    ) or db.create_category(layer_info.to_s())
+                return layer_cats[layer]
+
+            any_layer_collision = False
+
+            for layer_info in collision_check_layers:
+                layer = c.kcl.layer(layer_info)
+                error_region_instances = kdb.Region()
+                inst_regions: dict[int, kdb.Region] = {}
+                inst_region = kdb.Region()
+                for i, inst in enumerate(insts):
+                    _inst_region = kdb.Region(inst.bbox(layer))
+                    # inst_shapes: kdb.Region | None = None
+                    if not (inst_region & _inst_region).is_empty():
+                        # if inst_shapes is None:
+                        inst_shapes = kdb.Region()
+                        shape_it = c.begin_shapes_rec_overlapping(
+                            layer, inst.bbox(layer)
+                        )
+                        shape_it.select_cells([inst.cell.cell_index()])
+                        shape_it.min_depth = 1
+                        for _it in shape_it.each():
+                            if _it.path()[0].inst() == inst._instance:
+                                inst_shapes.insert(
+                                    _it.shape().polygon.transformed(_it.trans())
+                                )
+                        for j, _reg in inst_regions.items():
+                            if _reg & _inst_region:
+                                __reg = kdb.Region()
+                                shape_it = c.begin_shapes_rec_touching(
+                                    layer, (_reg & _inst_region).bbox()
+                                )
+                                shape_it.select_cells([insts[j].cell.cell_index()])
+                                shape_it.min_depth = 1
+                                for _it in shape_it.each():
+                                    if _it.path()[0].inst() == insts[j]._instance:
+                                        __reg.insert(
+                                            _it.shape().polygon.transformed(_it.trans())
+                                        )
+
+                                error_region_instances.insert(__reg & inst_shapes)
+                    inst_region += _inst_region
+                    inst_regions[i] = _inst_region
+
+                if not error_region_instances.is_empty():
+                    any_layer_collision = True
+                    if on_collision == "error":
+                        continue
+                    cat = layer_cat(layer_info)
+                    sc = db.category_by_path(
+                        f"{cat.path()}.RoutingErrors"
+                    ) or db.create_category(layer_cat(layer), "RoutingErrors")
+                    for poly in error_region_instances.merge().each():
+                        it = db.create_item(cell, sc)
+                        it.add_value("Route instances overlapping with other instances")
+                        it.add_value(c.kcl.to_um(poly))
+
+            if any_layer_collision:
+                match on_collision:
+                    case "show_error":
+                        c.show(lyrdb=db)
+                        raise RuntimeError(
+                            f"Routing collision in {c.kcl.future_cell_name or c.name}"
+                        )
+                    case "error":
+                        raise RuntimeError(
+                            f"Routing collision in {c.kcl.future_cell_name or c.name}"
+                        )
 
 
 def vec_angle(v: kdb.Vector) -> int:
@@ -484,259 +800,6 @@ def route(
             route_width=route_width,
         )
     return route
-
-
-@logger.catch(reraise=True)
-def route_bundle(
-    c: KCell,
-    start_ports: list[Port],
-    end_ports: list[Port],
-    separation: int,
-    straight_factory: StraightFactory,
-    bend90_cell: KCell,
-    taper_cell: KCell | None = None,
-    start_straights: int | list[int] = 0,
-    end_straights: int | list[int] = 0,
-    min_straight_taper: int = 0,
-    place_port_type: str = "optical",
-    place_allow_small_routes: bool = False,
-    collision_check_layers: Sequence[int] | None = None,
-    on_collision: Literal["error", "show_error"] | None = "show_error",
-    bboxes: list[kdb.Box] = [],
-    allow_width_mismatch: bool | None = None,
-    allow_layer_mismatch: bool | None = None,
-    allow_type_mismatch: bool | None = None,
-    route_width: int | list[int] | None = None,
-    sort_ports: bool = False,
-    bbox_routing: Literal["minimal", "full"] = "minimal",
-) -> list[OpticalManhattanRoute]:
-    """Route a bundle from starting ports to end_ports.
-
-    Args:
-        c: Cell to place the route in.
-        start_ports: List of start ports.
-        end_ports: List of end ports.
-        separation: Separation between the routes.
-        straight_factory: Factory function for straight cells. in DBU.
-        bend90_cell: 90° bend cell.
-        taper_cell: Taper cell.
-        start_straights: Minimal straight segment after `p1`.
-        end_straights: Minimal straight segment before `p2`.
-        min_straight_taper: Minimum straight [dbu] before attempting to place tapers.
-        place_port_type: Port type to use for the bend90_cell.
-        place_allow_small_routes: Don't throw an error if two corners cannot be placed.
-        collision_check_layers: Layers to check for actual errors if manhattan routes
-            detect potential collisions.
-        on_collision: Define what to do on routing collision. Default behaviour is to
-            open send the layout of c to klive and open an error lyrdb with the
-            collisions. "error" will simply raise an error. None will ignore any error.
-
-        bboxes: List of boxes to consider. Currently only boxes overlapping ports will
-            be considered.
-        allow_width_mismatch: If True, the width of the ports is ignored
-            (config default: False).
-        allow_layer_mismatch: If True, the layer of the ports is ignored
-            (config default: False).
-        allow_type_mismatch: If True, the type of the ports is ignored
-            (config default: False).
-        route_width: Width of the route. If None, the width of the ports is used.
-        sort_ports: Automatically sort ports.
-        bbox_routing: "minimal": only route to the bbox so that it can be safely routed
-            around, but start or end bends might encroach on the bounding boxes when
-            leaving them.
-    """
-    if allow_width_mismatch is None:
-        allow_width_mismatch = config.allow_width_mismatch
-    if allow_layer_mismatch is None:
-        allow_layer_mismatch = config.allow_layer_mismatch
-    if allow_type_mismatch is None:
-        allow_type_mismatch = config.allow_type_mismatch
-    radius = max(
-        abs(bend90_cell.ports[0].x - bend90_cell.ports[1].x),
-        abs(bend90_cell.ports[0].y - bend90_cell.ports[1].y),
-    )
-    if not start_ports:
-        return []
-    if not (len(start_ports) == len(end_ports)):
-        raise ValueError(
-            "For bundle routing the input port list must have"
-            " the same size as the end ports and be the same length."
-        )
-
-    if isinstance(start_straights, int):
-        start_straights = [start_straights] * len(start_ports)
-    if isinstance(end_straights, int):
-        end_straights = [end_straights] * len(start_ports)
-
-    if route_width:
-        if isinstance(route_width, int):
-            widths = [route_width] * len(start_ports)
-        else:
-            widths = route_width
-    else:
-        widths = [p.width for p in start_ports]
-
-    routers = route_smart(
-        start_ports=start_ports,
-        end_ports=end_ports,
-        bend90_radius=radius,
-        separation=separation,
-        start_straights=start_straights,
-        end_straights=end_straights,
-        bboxes=bboxes.copy(),
-        widths=widths,
-        sort_ports=sort_ports,
-        bbox_routing=bbox_routing,
-    )
-
-    if not routers:
-        return []
-
-    routes: list[OpticalManhattanRoute] = []
-    if sort_ports:
-        start_mapping = {sp.trans.disp.to_p(): sp for sp in start_ports}
-        end_mapping = {ep.trans.disp.to_p(): ep for ep in end_ports}
-        for router in routers:
-            routes.append(
-                place90(
-                    c,
-                    p1=start_mapping[router.start.pts[0]],
-                    p2=end_mapping[router.start.pts[-1]],
-                    pts=router.start.pts,
-                    straight_factory=straight_factory,
-                    bend90_cell=bend90_cell,
-                    taper_cell=taper_cell,
-                    min_straight_taper=min_straight_taper,
-                    allow_small_routes=place_allow_small_routes,
-                    port_type=place_port_type,
-                    allow_width_mismatch=allow_width_mismatch,
-                    route_width=router.width,
-                )
-            )
-    else:
-        for router, ps, pe in zip(routers, start_ports, end_ports):
-            routes.append(
-                place90(
-                    c,
-                    p1=ps,
-                    p2=pe,
-                    pts=router.start.pts,
-                    straight_factory=straight_factory,
-                    bend90_cell=bend90_cell,
-                    taper_cell=taper_cell,
-                    min_straight_taper=min_straight_taper,
-                    allow_small_routes=place_allow_small_routes,
-                    port_type=place_port_type,
-                    allow_width_mismatch=allow_width_mismatch,
-                    route_width=router.width,
-                )
-            )
-
-    if on_collision is not None:
-        collision_edges: dict[str, kdb.Edges] = {}
-        inter_route_collisions = kdb.Edges()
-        all_router_edges = kdb.Edges()
-        for i, (ps, pe, router) in enumerate(zip(start_ports, end_ports, routers)):
-            _edges, router_edges = router.collisions(log_errors=None)
-            if not _edges.is_empty():
-                collision_edges[f"{ps.name} - {pe.name} (index: {i})"] = _edges
-            inter_route_collision = all_router_edges.interacting(router_edges)
-            if not inter_route_collision.is_empty():
-                inter_route_collisions.join_with(inter_route_collision)
-            all_router_edges.join_with(router_edges)
-
-        if collision_edges or not inter_route_collisions.is_empty():
-            if collision_check_layers is None:
-                collision_check_layers = list(set(p.layer for p in start_ports))
-            dbu = c.kcl.dbu
-            db = rdb.ReportDatabase("Routing Errors")
-            cat = db.create_category("Manhattan Routing Collisions")
-            cell = db.create_cell(c.name)
-            for name, edges in collision_edges.items():
-                item = db.create_item(cell, cat)
-                item.add_value(name)
-                for edge in edges.each():
-                    item.add_value(edge.to_dtype(dbu))
-            insts = [inst for route in routes for inst in route.instances]
-            layer_cats: dict[int, rdb.RdbCategory] = {}
-
-            def layer_cat(layer: int) -> rdb.RdbCategory:
-                if layer not in layer_cats:
-                    if isinstance(layer, LayerEnum):
-                        ln = layer.name
-                    else:
-                        li = c.kcl.get_info(layer)
-                        ln = str(li).replace("/", "_")
-                    layer_cats[layer] = db.category_by_path(ln) or db.create_category(
-                        ln
-                    )
-                return layer_cats[layer]
-
-            any_layer_collision = False
-
-            for layer in collision_check_layers:
-                error_region_instances = kdb.Region()
-                inst_regions: dict[int, kdb.Region] = {}
-                inst_region = kdb.Region()
-                for i, inst in enumerate(insts):
-                    _inst_region = kdb.Region(inst.bbox(layer))
-                    # inst_shapes: kdb.Region | None = None
-                    if not (inst_region & _inst_region).is_empty():
-                        # if inst_shapes is None:
-                        inst_shapes = kdb.Region()
-                        shape_it = c.begin_shapes_rec_overlapping(
-                            layer, inst.bbox(layer)
-                        )
-                        shape_it.select_cells([inst.cell.cell_index()])
-                        shape_it.min_depth = 1
-                        for _it in shape_it.each():
-                            if _it.path()[0].inst() == inst._instance:
-                                inst_shapes.insert(
-                                    _it.shape().polygon.transformed(_it.trans())
-                                )
-                        for j, _reg in inst_regions.items():
-                            if _reg & _inst_region:
-                                __reg = kdb.Region()
-                                shape_it = c.begin_shapes_rec_touching(
-                                    layer, (_reg & _inst_region).bbox()
-                                )
-                                shape_it.select_cells([insts[j].cell.cell_index()])
-                                shape_it.min_depth = 1
-                                for _it in shape_it.each():
-                                    if _it.path()[0].inst() == insts[j]._instance:
-                                        __reg.insert(
-                                            _it.shape().polygon.transformed(_it.trans())
-                                        )
-
-                                error_region_instances.insert(__reg & inst_shapes)
-                    inst_region += _inst_region
-                    inst_regions[i] = _inst_region
-
-                if not error_region_instances.is_empty():
-                    any_layer_collision = True
-                    if on_collision == "error":
-                        continue
-                    sc = db.category_by_path(
-                        f"{layer_cat(layer).path()}.RoutingErrors"
-                    ) or db.create_category(layer_cat(layer), "RoutingErrors")
-                    for poly in error_region_instances.merge().each():
-                        it = db.create_item(cell, sc)
-                        it.add_value("Route instances overlapping with other instances")
-                        it.add_value(c.kcl.to_um(poly))
-
-            if any_layer_collision:
-                match on_collision:
-                    case "show_error":
-                        c.show(lyrdb=db)
-                        raise RuntimeError(
-                            f"Routing collision in {c.kcl.future_cell_name or c.name}"
-                        )
-                    case "error":
-                        raise RuntimeError(
-                            f"Routing collision in {c.kcl.future_cell_name or c.name}"
-                        )
-
-    return routes
 
 
 def place90(
