@@ -105,13 +105,13 @@ def bend180_euler(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
 
 
 @pytest.fixture
-def taper(wg_enc: kf.LayerEnclosure) -> kf.KCell:
+def taper(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     if kf.kcl.layout.cell("taper") is None:
         c = kf.cells.taper.taper(
             width1=0.5,
             width2=1,
             length=10,
-            layer=Layers.WG,
+            layer=LAYER.WG,
             enclosure=wg_enc,
         )
         c = c.dup()

@@ -197,6 +197,7 @@ def test_route_bundle(
             "straight_factory": straight_factory_dbu,
             "bend90_cell": bend90_euler,
         },
+        on_collision=None,
     )
 
     for route in routes:
@@ -229,7 +230,6 @@ def test_route_length(
         straight_factory=straight_factory_dbu,
         bend90_cell=bend90_euler,
         taper_cell=taper,
-        min_straight_taper=0,
     )
     kf.config.logfilter.regex = None
 
@@ -435,4 +435,7 @@ def test_smart_routing(
                     "straight_factory": straight_factory_dbu,
                     "bend90_cell": bend90_small,
                 },
+                on_collision=None,
             )
+            c.show()
+            breakpoint()

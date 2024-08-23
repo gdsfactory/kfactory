@@ -277,6 +277,17 @@ class ManhattanRouterSide:
     def reset(self) -> None:
         self.pts = [self.t.disp.to_p()]
 
+    @property
+    def path_length(self) -> int:
+        pl: int = 0
+        _l = len(self.pts)
+        if _l > 0:
+            p1 = self.pts[0]
+            for i in range(1, _l):
+                p2 = self.pts[i]
+                pl += int((p2 - p1).length())
+        return pl
+
 
 @dataclass
 class ManhattanRouter:
@@ -325,6 +336,14 @@ class ManhattanRouter:
         )
         self.start.straight(start_straight)
         self.end.straight(end_straight)
+
+    @property
+    def path_length(self) -> int:
+        if not self.finished:
+            raise ValueError(
+                "Router is not finished yet, path_length will be inaccurate."
+            )
+        return self.start.path_length
 
     def auto_route(
         self,
@@ -562,6 +581,79 @@ def route_manhattan(
     return pts
 
 
+def pathlength_match_manhattan_route(
+    router: ManhattanRouter,
+    bend90_radius: int,
+    path_length: int,
+) -> ManhattanRouter:
+    position = -3
+    path_loops = 1
+    direction = 1
+
+    match position:
+        case 0:
+            modify_pts = router.start.pts[:2]
+        case -1:
+            modify_pts = router.start.pts[-2:]
+        case x if x > 0:
+            modify_pts = router.start.pts[position : position + 2]
+        case _:
+            modify_pts = router.start.pts[position - 1 : position + 1]
+
+    # if position > 0:
+    #     modify_pts = router.start.pts[position : position + 2]
+    # elif postion == -1:
+    #     modify_pts = router.start.pts[position - 1 : position + 1]
+
+    v = modify_pts[1] - modify_pts[0]
+    vl = v.length()
+    # if position not in [0, -1]:
+    if vl < (2 + path_loops * 4) * bend90_radius:
+        return router
+        # raise ValueError(
+        #     f"Not enough space to place {path_loops} path length matching segments"
+        #     f" on {modify_pts[0]} to {modify_pts[1]}"
+        # )
+    match (v.x, v.y):
+        case (x, 0) if x > 0:
+            angle = 0
+        case (x, 0) if x < 0:
+            angle = 2
+        case (0, y) if y > 0:
+            angle = 1
+        case (0, y) if y < 0:
+            angle = 3
+
+    t = kdb.Trans(angle, False, modify_pts[0].to_v()) * kdb.Trans(
+        kdb.Vector(bend90_radius * 2, 0)
+    )
+    _r = kdb.Trans(1, False, bend90_radius, bend90_radius)
+    _rr = kdb.Trans(3, False, bend90_radius, -bend90_radius)
+    _p = kdb.Point(bend90_radius, 0)
+
+    dl = path_length - router.start.path_length
+    # assert (
+    #     dl // 2 * 2 == dl
+    # ), "Cannot pathlength match if the path length difference is not a multiple of 2 dbu."
+
+    _pts: list[kdb.Point] = []
+
+    _dl = kdb.Trans(dl // (path_loops * 2), 0)
+    for _ in range(path_loops):
+        _pts.append(t * _p)
+        t *= _r * _dl
+        _pts.append(t * _p)
+        t *= _rr
+        _pts.append(t * _p)
+        t *= _rr * _dl
+        _pts.append(t * _p)
+        t *= _r
+
+    router.start.pts[position:position] = _pts
+
+    return router
+
+
 def route_smart(
     start_ports: Sequence[Port | kdb.Trans],
     end_ports: Sequence[Port | kdb.Trans],
@@ -574,6 +666,7 @@ def route_smart(
     sort_ports: bool = False,
     waypoints: list[kdb.Point] | None = None,
     bbox_routing: Literal["minimal", "full"] = "minimal",
+    path_length_match: int | bool = False,
 ) -> list[ManhattanRouter]:
     """Route around start or end bboxes (obstacles on the way not implemented yet).
 
@@ -1232,6 +1325,12 @@ def route_smart(
                 end_bbox=end_bbox,
                 bbox_routing=bbox_routing,
             )
+
+    path_length = max(r.path_length for r in all_routers)
+    for router in all_routers:
+        pathlength_match_manhattan_route(router, bend90_radius, path_length)
+
+    breakpoint()
 
     return all_routers
 

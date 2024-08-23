@@ -308,7 +308,7 @@ def check_collisions(
                     layer_cats[layer_info] = db.category_by_path(
                         layer_info.to_s()
                     ) or db.create_category(layer_info.to_s())
-                return layer_cats[layer]
+                return layer_cats[layer_info]
 
             any_layer_collision = False
 
@@ -358,7 +358,7 @@ def check_collisions(
                     cat = layer_cat(layer_info)
                     sc = db.category_by_path(
                         f"{cat.path()}.RoutingErrors"
-                    ) or db.create_category(layer_cat(layer), "RoutingErrors")
+                    ) or db.create_category(layer_cat(layer_info), "RoutingErrors")
                     for poly in error_region_instances.merge().each():
                         it = db.create_item(cell, sc)
                         it.add_value("Route instances overlapping with other instances")
