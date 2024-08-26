@@ -5,8 +5,13 @@
 
 ## Bug Fixes
 
+- relax  to  in Port and Ports when finding layers [#459](https://github.com/gdsfactory/kfactory/pull/459)
 - fix [#452](https://github.com/gdsfactory/kfactory/issues/452) [#454](https://github.com/gdsfactory/kfactory/pull/454)
 - fix load_layout_options [#453](https://github.com/gdsfactory/kfactory/pull/453)
+
+## Other changes
+
+- Fixed another `oror` output [#455](https://github.com/gdsfactory/kfactory/pull/455)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.19.0...v0.19.1
 
