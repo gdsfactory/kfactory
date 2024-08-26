@@ -3227,7 +3227,7 @@ class KCLayout(
             if allow_undefined_layers:
                 return self.layout.layer(info)
             raise KeyError(
-                f"Layer '{args=}, {kwargs=}' has not beend defined in the " "KCLayout."
+                f"Layer '{args=}, {kwargs=}' has not been defined in the " "KCLayout."
             )
 
     @overload
