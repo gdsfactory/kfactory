@@ -3227,7 +3227,7 @@ class KCLayout(
             if allow_undefined_layers:
                 return self.layout.layer(info)
             raise KeyError(
-                f"Layer '{args=}, {kwargs=}' has not beend defined in the " "KCLayout."
+                f"Layer '{args=}, {kwargs=}' has not been defined in the " "KCLayout."
             )
 
     @overload
@@ -5862,7 +5862,7 @@ class Port:
             if layer is None:
                 if layer_info is None:
                     raise ValueError("layer or layer_info for a port must be defined")
-                layer = self.kcl.find_layer(layer_info)
+                layer = self.kcl.layer(layer_info)
             self.layer = layer
             self.port_type = port_type
 
@@ -7225,7 +7225,7 @@ class Ports:
             if not keep_mirror:
                 dcplx_trans.mirror = False
             _li = self.kcl.get_info(port.layer)
-            _l = self.kcl.find_layer(_li)
+            _l = self.kcl.layer(_li)
             if _li is not None and _li.name is not None:
                 _port = Port(
                     kcl=self.kcl,
