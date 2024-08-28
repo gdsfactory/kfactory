@@ -22,7 +22,7 @@ from . import kdb
 from .conf import config, logger
 
 if TYPE_CHECKING:
-    from .kcell import KCell, KCLayout, LayerEnum, Port
+    from .kcell import KCell, KCLayout, Port
 
 __all__ = [
     "LayerEnclosure",
@@ -1097,7 +1097,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             [], name=self.name, main_layer=self.main_layer, kcl=kcl
         )
         for layer, sections in self.layer_sections.items():
-            if isinstance(layer, LayerEnum):
+            if isinstance(layer, kdb.LayerInfo):
                 try:
                     _layer = kcl.find_layers(layer)
                 except ValueError:
@@ -1150,7 +1150,7 @@ class LayerEnclosureCollection(BaseModel):
 class RegionOperator(kdb.TileOutputReceiver):
     """Region collector. Just getst the tile and inserts it into the target cell."""
 
-    def __init__(self, cell: KCell, layer: LayerEnum | int) -> None:
+    def __init__(self, cell: KCell, layer: kdb.LayerInfo) -> None:
         """Initialization.
 
         Args:
@@ -1212,7 +1212,7 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
     def __init__(
         self,
         cell: KCell,
-        layers: list[LayerEnum],
+        layers: list[kdb.LayerInfo],
     ) -> None:
         """Initialization.
 
@@ -1260,11 +1260,11 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
     def insert(self) -> None: ...
 
     @overload
-    def insert(self, port_hole_map: dict[LayerEnum, kdb.Region]) -> None: ...
+    def insert(self, port_hole_map: dict[kdb.LayerInfo, kdb.Region]) -> None: ...
 
     def insert(
         self,
-        port_hole_map: dict[LayerEnum, kdb.Region] | None = None,
+        port_hole_map: dict[kdb.LayerInfo, kdb.Region] | None = None,
     ) -> None:
         """Insert the finished region into the cell.
 
@@ -1473,8 +1473,8 @@ class KCellEnclosure(BaseModel):
         tp.dbu = c.kcl.dbu
         tp.threads = n_threads or config.n_threads
         inputs: set[str] = set()
-        port_hole_map: dict[LayerEnum, kdb.Region] = defaultdict(kdb.Region)
-        ports_by_layer: dict[LayerEnum, list[Port]] = defaultdict(list)
+        port_hole_map: dict[kdb.LayerInfo, kdb.Region] = defaultdict(kdb.Region)
+        ports_by_layer: dict[kdb.LayerInfo, list[Port]] = defaultdict(list)
         for port in c.ports:
             ports_by_layer[c.kcl.find_layer(c.kcl.get_info(port.layer))].append(port)
 

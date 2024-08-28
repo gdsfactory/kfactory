@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from dataclasses import InitVar, dataclass, field
-from typing import Literal, Protocol
+from typing import Any, Literal, ParamSpec, Protocol, TypedDict
 
 from .. import kdb
 from ..conf import logger
@@ -19,6 +19,8 @@ __all__ = [
     "ManhattanRoutePathFunction",
     "ManhattanRoutePathFunction180",
 ]
+
+P = ParamSpec("P")
 
 
 class ManhattanRoutePathFunction(Protocol):
@@ -50,6 +52,24 @@ class ManhattanRoutePathFunction180(Protocol):
     ) -> list[kdb.Point]:
         """Minimal kwargs of a manhattan route function with 180° bend."""
         ...
+
+
+class ManhattanBundleFunction(Protocol):
+    def __call__(
+        self,
+        start_ports: Sequence[Port | kdb.Trans],
+        end_ports: Sequence[Port | kdb.Trans],
+        widths: list[int] | None = None,
+        **kwargs: Any,
+    ) -> list[ManhattanRouter]: ...
+
+
+class PathLengthMatchingFunction(Protocol):
+    """Function for path length matching in route_smart."""
+
+    def __call__(
+        self, routers: list[ManhattanRouter], bend90_radius: int, separation: int
+    ) -> Any: ...
 
 
 def droute_manhattan_180(
@@ -581,92 +601,191 @@ def route_manhattan(
     return pts
 
 
-def pathlength_match_manhattan_route(
-    router: ManhattanRouter,
+class PathMatchDict(TypedDict):
+    angle: Literal[0, 1, 2, 3]
+    pts: tuple[kdb.Point, kdb.Point]
+    dl: int
+
+
+def path_length_match_manhattan_route(
+    routers: list[ManhattanRouter],
     bend90_radius: int,
-    path_length: int,
-) -> ManhattanRouter:
-    position = -3
+    separation: int,
+    path_length: int | None = None,
+) -> None:
+    position = -1
     path_loops = 1
-    direction = 1
 
-    match position:
-        case 0:
-            modify_pts = router.start.pts[:2]
-        case -1:
-            modify_pts = router.start.pts[-2:]
-        case x if x > 0:
-            modify_pts = router.start.pts[position : position + 2]
-        case _:
-            modify_pts = router.start.pts[position - 1 : position + 1]
+    path_length = path_length or max(r.path_length for r in routers)
+    match_dict: dict[
+        Literal[0, 1, 2, 3], list[tuple[ManhattanRouter, PathMatchDict]]
+    ] = {
+        0: [],
+        1: [],
+        2: [],
+        3: [],
+    }
+    modify_pts: tuple[kdb.Point, kdb.Point]
 
-    # if position > 0:
-    #     modify_pts = router.start.pts[position : position + 2]
-    # elif postion == -1:
-    #     modify_pts = router.start.pts[position - 1 : position + 1]
+    for router in routers:
+        match position:
+            case -1:
+                modify_pts = tuple(router.start.pts[-2:])  # type: ignore[assignment]
+            case x if x >= 0:
+                modify_pts = tuple(router.start.pts[position : position + 2])  # type: ignore[assignment]
+            case _:
+                modify_pts = tuple(router.start.pts[position - 1 : position + 1])  # type: ignore[assignment]
+        v = modify_pts[1] - modify_pts[0]
+        match (v.x, v.y):
+            case (x, 0) if x > 0:
+                angle: Literal[0, 1, 2, 3] = 0
+            case (x, 0) if x < 0:
+                angle = 2
+            case (0, y) if y > 0:
+                angle = 1
+            case _:
+                angle = 3
+        # vl = v.length()
 
-    v = modify_pts[1] - modify_pts[0]
-    vl = v.length()
-    # if position not in [0, -1]:
-    if vl < (2 + path_loops * 4) * bend90_radius:
-        return router
-        # raise ValueError(
-        #     f"Not enough space to place {path_loops} path length matching segments"
-        #     f" on {modify_pts[0]} to {modify_pts[1]}"
-        # )
-    match (v.x, v.y):
-        case (x, 0) if x > 0:
-            angle = 0
-        case (x, 0) if x < 0:
-            angle = 2
-        case (0, y) if y > 0:
-            angle = 1
-        case (0, y) if y < 0:
-            angle = 3
+        match_dict[angle].append(
+            (
+                router,
+                PathMatchDict(
+                    angle=angle, pts=modify_pts, dl=path_length - router.path_length
+                ),
+            )
+        )
 
-    t = kdb.Trans(angle, False, modify_pts[0].to_v()) * kdb.Trans(
-        kdb.Vector(bend90_radius * 2, 0)
-    )
-    _r = kdb.Trans(1, False, bend90_radius, bend90_radius)
-    _rr = kdb.Trans(3, False, bend90_radius, -bend90_radius)
-    _p = kdb.Point(bend90_radius, 0)
+    match_dict[0].sort(key=lambda t: t[1]["pts"][0].y)
+    match_dict[1].sort(key=lambda t: -t[1]["pts"][0].x)
+    match_dict[2].sort(key=lambda t: -t[1]["pts"][0].y)
+    match_dict[3].sort(key=lambda t: t[1]["pts"][0].x)
 
-    dl = path_length - router.start.path_length
-    # assert (
-    #     dl // 2 * 2 == dl
-    # ), "Cannot pathlength match if the path length difference is not a multiple of 2 dbu."
+    for angle in match_dict:
+        routers_settings = match_dict[angle]
+        router_group: list[tuple[ManhattanRouter, PathMatchDict]] = []
+        if len(routers_settings) > 0:
+            increasing: bool | None = None
+            old_router, old_settings = routers_settings[0]
+            router_group.append((old_router, old_settings))
+            for router, settings in routers_settings[1:]:
+                _increasing = settings["dl"] > old_settings["dl"]
+                if increasing is not None and _increasing != increasing:
+                    if increasing is True:
+                        _place_dl_path_length(
+                            routers=router_group,
+                            angle=angle,
+                            direction=-1,
+                            separation=separation,
+                            bend90_radius=bend90_radius,
+                            path_loops=path_loops,
+                            path_length=path_length,
+                            index=position,
+                        )
+                    elif increasing is False:
+                        _place_dl_path_length(
+                            routers=router_group,
+                            angle=angle,
+                            direction=1,
+                            separation=separation,
+                            bend90_radius=bend90_radius,
+                            path_loops=path_loops,
+                            path_length=path_length,
+                            index=position,
+                        )
+                    router_group = [(router, settings)]
+                else:
+                    router_group.append((router, settings))
+                old_router = router
+                old_settings = settings
+                increasing = _increasing
+            _place_dl_path_length(
+                routers=router_group,
+                angle=angle,
+                direction=-1 if increasing else 1,
+                separation=separation,
+                bend90_radius=bend90_radius,
+                path_loops=path_loops,
+                path_length=path_length,
+                index=position,
+            )
 
-    _pts: list[kdb.Point] = []
 
-    _dl = kdb.Trans(dl // (path_loops * 2), 0)
-    for _ in range(path_loops):
-        _pts.append(t * _p)
-        t *= _r * _dl
-        _pts.append(t * _p)
-        t *= _rr
-        _pts.append(t * _p)
-        t *= _rr * _dl
-        _pts.append(t * _p)
-        t *= _r
+def _place_dl_path_length(
+    routers: list[tuple[ManhattanRouter, PathMatchDict]],
+    angle: Literal[0, 1, 2, 3],
+    direction: Literal[-1, 1],
+    separation: int,
+    bend90_radius: int,
+    path_loops: int,
+    path_length: int,
+    index: int,
+    position: Literal["center", "corner_start", "corner_end"] = "center",
+) -> None:
+    _l = len(routers) - 1
+    _t = kdb.Trans(angle, False, 0, 0)
+    _tinv = _t.inverted()
 
-    router.start.pts[position:position] = _pts
+    pmin = max((_tinv * settings["pts"][0]).x for _, settings in routers)
+    # pmax = min((_tinv * settings["pts"][1]).x for _, settings in routers)
 
-    return router
+    for i, (router, settings) in enumerate(routers):
+        pts = settings["pts"]
+        v = pts[1] - pts[0]
+        vl = v.length()
+        # if position not in [0, -1]:
+        if vl < (2 + path_loops * 4) * bend90_radius:
+            raise ValueError(
+                f"Not enough space to place {path_loops} path length matching segments"
+                f" on {pts[0]} to {pts[1]}"
+            )
+
+        t = kdb.Trans(
+            angle, False, (_t * kdb.Point(pmin, (_tinv * pts[0]).y)).to_v()
+        ) * kdb.Trans(kdb.Vector(bend90_radius, 0))
+        if direction == 1:
+            _r = kdb.Trans(3, False, bend90_radius, -bend90_radius)
+            _rr = kdb.Trans(1, False, bend90_radius, bend90_radius)
+        else:
+            _r = kdb.Trans(1, False, bend90_radius, bend90_radius)
+            _rr = kdb.Trans(3, False, bend90_radius, -bend90_radius)
+
+        _p = kdb.Point(bend90_radius, 0)
+
+        dl = path_length - router.start.path_length
+
+        _pts: list[kdb.Point] = []
+
+        _dl = kdb.Trans(dl // (path_loops * 2), 0)
+        for _ in range(path_loops):
+            _pts.append(t * _p)
+            t *= _r
+            t *= _dl
+            _pts.append(t * _p)
+            t *= _rr
+            t *= kdb.Trans((_l - i) * separation * 2, 0)
+            _pts.append(t * _p)
+            t *= _rr
+            t *= _dl
+            _pts.append(t * _p)
+            t *= _r
+        # breakpoint()
+        router.start.pts[index:index] = _pts
 
 
 def route_smart(
     start_ports: Sequence[Port | kdb.Trans],
     end_ports: Sequence[Port | kdb.Trans],
-    bend90_radius: int,
-    separation: int,
+    widths: list[int] | None = None,
+    bend90_radius: int | None = None,
+    separation: int | None = None,
     start_straights: list[int] = [0],
     end_straights: list[int] = [0],
     bboxes: list[kdb.Box] | None = None,
-    widths: list[int] | None = None,
     sort_ports: bool = False,
     waypoints: list[kdb.Point] | None = None,
     bbox_routing: Literal["minimal", "full"] = "minimal",
-    path_length_match: int | bool = False,
+    **kwargs: Any,
 ) -> list[ManhattanRouter]:
     """Route around start or end bboxes (obstacles on the way not implemented yet).
 
@@ -686,8 +805,22 @@ def route_smart(
         bbox_routing: "minimal": only route to the bbox so that it can be safely routed
             around, but start or end bends might encroach on the bounding boxes when
             leaving them.
+        kwargs: Additional kwargs. Compatibility for type checking. If any kwargs are
+            passed an error is raised.
     """
     length = len(start_ports)
+    if len(kwargs) > 0:
+        raise ValueError(
+            "Additional args and kwargs are not allowed for route_smart." f"{kwargs=}"
+        )
+
+    if bend90_radius is None or separation is None:
+        raise ValueError(
+            "route_smart needs to have 'bend90_radius' and 'separation' "
+            "defined as kwargs. Please pass them or if using a "
+            "'route_bundle' function using this, make sure the bundle router"
+            " has the kwargs."
+        )
 
     assert len(end_ports) == length, (
         f"Length of starting ports {len(start_ports)=} does not match length of "
@@ -1326,11 +1459,11 @@ def route_smart(
                 bbox_routing=bbox_routing,
             )
 
-    path_length = max(r.path_length for r in all_routers)
-    for router in all_routers:
-        pathlength_match_manhattan_route(router, bend90_radius, path_length)
-
-    breakpoint()
+    # path_length = max(r.path_length for r in all_routers)
+    # for router in all_routers:
+    # path_length_match_manhattan_route(
+    #     routers=all_routers, bend90_radius=bend90_radius, separation=separation
+    # )
 
     return all_routers
 

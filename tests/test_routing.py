@@ -191,12 +191,8 @@ def test_route_bundle(
         p_start,
         p_end,
         5_000,
-        bend90_radius=kf.routing.optical.get_radius(bend90_euler),
-        placer_function=kf.routing.optical.place90,
-        placer_kwargs={
-            "straight_factory": straight_factory_dbu,
-            "bend90_cell": bend90_euler,
-        },
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_euler,
         on_collision=None,
     )
 
@@ -407,16 +403,8 @@ def test_smart_routing(
                     sort_ports=sort_ports,
                     bbox_routing="full",
                     on_collision="error",
-                    bend90_radius=kf.routing.optical.get_radius(
-                        kf.port.filter_port_type(
-                            bend90_small.ports, port_type="optical"
-                        )
-                    ),
-                    placer_function=kf.routing.optical.place90,
-                    placer_kwargs={
-                        "straight_factory": straight_factory_dbu,
-                        "bend90_cell": bend90_small,
-                    },
+                    bend90_cell=bend90_small,
+                    straight_factory=straight_factory_dbu,
                 )
         case _:
             kf.routing.optical.route_bundle(
@@ -427,15 +415,7 @@ def test_smart_routing(
                 bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
                 sort_ports=sort_ports,
                 bbox_routing="full",
-                bend90_radius=kf.routing.optical.get_radius(
-                    kf.port.filter_port_type(bend90_small.ports, port_type="optical")
-                ),
-                placer_function=kf.routing.optical.place90,
-                placer_kwargs={
-                    "straight_factory": straight_factory_dbu,
-                    "bend90_cell": bend90_small,
-                },
-                on_collision=None,
+                bend90_cell=bend90_small,
+                straight_factory=straight_factory_dbu,
+                on_collision="error",
             )
-            c.show()
-            breakpoint()
