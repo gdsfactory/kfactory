@@ -1343,6 +1343,40 @@ class KCell:
         port_type: str = "optical",
         mirror_x: bool = False,
     ) -> Port: ...
+    @overload
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        trans: kdb.Trans,
+        width: int,
+        layer_info: kdb.LayerInfo,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        dcplx_trans: kdb.DCplxTrans,
+        dwidth: float,
+        layer_info: kdb.LayerInfo,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        width: int,
+        center: tuple[int, int],
+        angle: int,
+        layer_info: kdb.LayerInfo,
+        port_type: str = "optical",
+        mirror_x: bool = False,
+    ) -> Port: ...
 
     def create_port(self, **kwargs: Any) -> Port:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
@@ -1419,17 +1453,12 @@ class KCell:
                 if lib_ci not in self.kcl.kcells:
                     kcell = self.kcl[lib_ci]
                     for port in cell.ports:
-                        pl = port.layer
-                        _layer = self.kcl.find_layer(cell.kcl.get_info(pl))
-                        try:
-                            _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
-                        except ValueError:
-                            pass
+                        kcell.kcl.layer(port.layer_info)
                         kcell.create_port(
                             name=port.name,
                             dwidth=port.dwidth,
                             dcplx_trans=port.dcplx_trans,
-                            layer=_layer,
+                            layer_info=port.layer_info,
                         )
                     kcell._settings = cell.settings.model_copy()
                     kcell.info = cell.info.model_copy()
@@ -1438,17 +1467,13 @@ class KCell:
                         kcell = self.kcl[lci]
                         lib_kcell = cell.kcl[kcell.library_cell_index()]
                         for port in lib_kcell.ports:
-                            pl = port.layer
-                            _layer = self.kcl.find_layer(lib_kcell.kcl.get_info(pl))
-                            try:
-                                _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
-                            except ValueError:
-                                pass
+                            pl = port.layer_info
+                            self.kcl.layer(pl)
                             kcell.create_port(
                                 name=port.name,
                                 dwidth=port.dwidth,
                                 dcplx_trans=port.dcplx_trans,
-                                layer=_layer,
+                                layer_info=pl,
                             )
                         kcell._settings = lib_kcell.settings.model_copy()
                         kcell.info = lib_kcell.info.model_copy()
@@ -1457,17 +1482,12 @@ class KCell:
                     ci = self.kcl.convert_cell_to_static(lib_ci)
                     kcell = self.kcl[ci]
                     for port in cell.ports:
-                        pl = port.layer
-                        _layer = self.kcl.find_layer(cell.kcl.get_info(pl))
-                        try:
-                            _layer = self.kcl.layers(_layer)  # type: ignore[call-arg]
-                        except ValueError:
-                            pass
+                        self.kcl.layer(port.layer_info)
                         kcell.create_port(
                             name=port.name,
                             dwidth=port.dwidth,
                             dcplx_trans=port.dcplx_trans,
-                            layer=_layer,
+                            layer_info=port.layer_info,
                         )
                     kcell.name = cell.kcl.name + static_name_separator + cell.name
                 else:
@@ -5873,7 +5893,7 @@ class Port:
 
     @layer_info.setter
     def layer_info(self, layer_info: kdb.LayerInfo) -> None:
-        self.layer = self.kcl.find_layer(layer_info)
+        self.layer = self.kcl.layer(layer_info)
 
     @classmethod
     def from_yaml(cls: type[Port], constructor, node) -> Port:  # type: ignore
@@ -7362,7 +7382,7 @@ class Ports:
                 raise ValueError(
                     "layer or layer_info must be defined to create a port."
                 )
-            layer = self.kcl.find_layer(layer_info)
+            layer = self.kcl.layer(layer_info)
         if trans is not None:
             if width is None:
                 raise ValueError("width needs to be set")
