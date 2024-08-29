@@ -54,7 +54,7 @@ class ManhattanRoutePathFunction180(Protocol):
         ...
 
 
-class ManhattanBundleFunction(Protocol):
+class ManhattanBundleRoutingFunction(Protocol):
     def __call__(
         self,
         start_ports: Sequence[Port | kdb.Trans],

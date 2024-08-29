@@ -1,10 +1,24 @@
 """Utilities for automatically routing electrical connections."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
+from typing import Any, Literal
 
 from .. import kdb
-from ..kcell import Instance, KCell, Port
-from .manhattan import ManhattanRoutePathFunction, route_manhattan
+from ..kcell import KCell, Port
+from ..kf_types import dbu
+from .generic import ManhattanRoute
+from .generic import route_bundle as route_bundle_generic
+from .manhattan import ManhattanRoutePathFunction, route_manhattan, route_smart
+
+__all__ = [
+    "route_elec",
+    "route_L",
+    "route_bundle",
+    "route_bundle_dual_rails",
+    "route_dual_rails",
+    "place_single_wire",
+    "place_dual_rails",
+]
 
 
 def route_elec(
@@ -14,7 +28,7 @@ def route_elec(
     start_straight: int | None = None,
     end_straight: int | None = None,
     route_path_function: ManhattanRoutePathFunction = route_manhattan,
-    width: int | None = None,
+    width: dbu | None = None,
     layer: int | None = None,
     minimum_straight: int | None = None,
 ) -> None:
@@ -74,7 +88,7 @@ def route_L(
     c: KCell,
     input_ports: list[Port],
     output_orientation: int = 1,
-    wire_spacing: int = 10000,
+    wire_spacing: dbu = 10000,
 ) -> list[Port]:
     """Route ports towards a bundle in an L shape.
 
@@ -118,10 +132,19 @@ def route_L(
 
 def route_bundle(
     c: KCell,
-    input_ports: list[Port],
-    target_ports: list[Port],
-    wire_spacing: int = 10000,
-) -> None:
+    start_ports: list[Port],
+    end_ports: list[Port],
+    separation: dbu,
+    start_straights: dbu | list[dbu] = 0,
+    end_straights: dbu | list[dbu] = 0,
+    place_layer: kdb.LayerInfo | None = None,
+    route_width: dbu | None = None,
+    bboxes: list[kdb.Box] = [],
+    bbox_routing: Literal["minimal", "full"] = "minimal",
+    sort_ports: bool = False,
+    collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
+    on_collision: Literal["error", "show_error"] | None = "show_error",
+) -> list[ManhattanRoute]:
     """Connect multiple input ports to output ports.
 
     This function takes a list of input ports and assume they are all oriented in the
@@ -132,137 +155,123 @@ def route_bundle(
 
     Args:
         c: KCell to place the routes in.
-        input_ports: List of start ports.
-        target_ports: List of end ports.
-        wire_spacing: Minimum space between wires. [dbu]
+        start_ports: List of start ports.
+        end_ports: List of end ports.
+        separation: Minimum space between wires. [dbu]
+        start_straights: Minimal straight segment after `p1`.
+        end_straights: Minimal straight segment before `p2`.
+        place_layer: Override automatic detection of layers with specific layer.
+        route_width: Width of the route. If None, the width of the ports is used.
+        bboxes: List of boxes to consider. Currently only boxes overlapping ports will
+            be considered.
+        bbox_routing: "minimal": only route to the bbox so that it can be safely routed
+            around, but start or end bends might encroach on the bounding boxes when
+            leaving them.
+        sort_ports: Automatically sort ports.
+        collision_check_layers: Layers to check for actual errors if manhattan routes
+            detect potential collisions.
+        on_collision: Define what to do on routing collision. Default behaviour is to
+            open send the layout of c to klive and open an error lyrdb with the
+            collisions. "error" will simply raise an error. None will ignore any error.
     """
-    input_ports.sort(key=lambda p: p.y)
-
-    x_max = max(p.x for p in input_ports)
-    x_min = min(p.x for p in input_ports)
-
-    output_ports = []
-    input_orientation = input_ports[0].angle if input_ports else 1
-    if input_orientation in [1, 3]:
-        y_max = input_ports[-1].y
-        y_min = input_ports[0].y
-        for p in input_ports:
-            temp_port = p.copy()
-            y_shift = y_max if input_orientation == 1 else y_min
-            temp_port.trans = kdb.Trans(4 - input_orientation, False, p.x, y_shift)
-            route_elec(c, p, temp_port)
-            temp_port.trans.angle = input_orientation
-            output_ports.append(temp_port)
-        output_ports.sort(key=lambda p: p.x)
-        L_count = 0
-        R_count = 0
-        for i in range(len(output_ports)):
-            if target_ports[i].x > output_ports[i].x:
-                L_count += 1
-                route_elec(
-                    c,
-                    output_ports[i],
-                    target_ports[i],
-                    start_straight=abs(target_ports[i].y - output_ports[i].y)
-                    - L_count * wire_spacing,
-                    end_straight=L_count * wire_spacing,
-                )
-                R_count = 0
-            else:
-                R_count += 1
-                route_elec(
-                    c,
-                    output_ports[i],
-                    target_ports[i],
-                    start_straight=R_count * wire_spacing,
-                    end_straight=abs(target_ports[i].y - output_ports[i].y)
-                    - R_count * wire_spacing,
-                )
-                L_count = 0
-    else:
-        for p in input_ports:
-            temp_port = p.copy()
-            x_shift = x_max if input_orientation == 0 else x_min
-            temp_port.trans = kdb.Trans(2 - input_orientation, False, x_shift, p.y)
-            route_elec(c, p, temp_port)
-            temp_port.trans.angle = input_orientation
-            output_ports.append(temp_port)
-        output_ports.sort(key=lambda p: p.y)
-        T_count = 0
-        B_count = 0
-        for i in range(len(output_ports)):
-            if target_ports[i].y > output_ports[i].y:
-                B_count += 1
-                route_elec(
-                    c,
-                    output_ports[i],
-                    target_ports[i],
-                    start_straight=abs(target_ports[i].x - output_ports[i].x)
-                    - B_count * wire_spacing,
-                    end_straight=B_count * wire_spacing,
-                )
-                T_count = 0
-            else:
-                T_count += 1
-                route_elec(
-                    c,
-                    output_ports[i],
-                    target_ports[i],
-                    start_straight=T_count * wire_spacing,
-                    end_straight=abs(target_ports[i].y - output_ports[i].y)
-                    - T_count * wire_spacing,
-                )
-                B_count = 0
+    return route_bundle_generic(
+        c=c,
+        start_ports=start_ports,
+        end_ports=end_ports,
+        routing_function=route_smart,
+        routing_kwargs={
+            "separation": separation,
+            "sort_ports": sort_ports,
+            "bbox_routing": bbox_routing,
+            "bboxes": list(bboxes),
+            "bend90_radius": 0,
+        },
+        placer_function=place_single_wire,
+        placer_kwargs={"width": route_width},
+        sort_ports=sort_ports,
+        on_collision=on_collision,
+        collision_check_layers=collision_check_layers,
+    )
 
 
-def get_electrical_ports(c: Instance, port_type: str = "electrical") -> list[Port]:
-    """Filter list of an instance by electrical ports."""
-    return [p for p in c.ports if p.port_type == port_type]
+def route_bundle_dual_rails(
+    c: KCell,
+    start_ports: list[Port],
+    end_ports: list[Port],
+    separation: dbu,
+    start_straights: dbu | list[dbu] = 0,
+    end_straights: dbu | list[dbu] = 0,
+    place_layer: kdb.LayerInfo | None = None,
+    width_rails: dbu | None = None,
+    separation_rails: dbu | None = None,
+    bboxes: list[kdb.Box] = [],
+    bbox_routing: Literal["minimal", "full"] = "minimal",
+    sort_ports: bool = False,
+    collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
+    on_collision: Literal["error", "show_error"] | None = "show_error",
+) -> list[ManhattanRoute]:
+    """Connect multiple input ports to output ports.
 
-
-def route_wire(c: KCell, input_port: Port, output_port: Port) -> None:
-    """Connection between two electrical ports *DO NOT USE*.
-
-    This function mainly implements a connection between two electrical ports.
-    Not finished yet. Don't use.
+    This function takes a list of input ports and assume they are all oriented in the
+    same direction (could be any of W, S, E, N). The target ports have the opposite
+    orientation, i.e. if input ports are oriented to north, and target ports should
+    be oriented to south. The function will produce a routing to connect input ports
+    to output ports without any crossings.
 
     Args:
-        c: KCell to place connection in.
-        input_port: Start port.
-        output_port: End port.
+        c: KCell to place the routes in.
+        start_ports: List of start ports.
+        end_ports: List of end ports.
+        separation: Minimum space between wires. [dbu]
+        start_straights: Minimal straight segment after `p1`.
+        end_straights: Minimal straight segment before `p2`.
+        place_layer: Override automatic detection of layers with specific layer.
+        width_rails: Total width of the rails.
+        separation_rails: Separation between the two rails.
+        bboxes: List of boxes to consider. Currently only boxes overlapping ports will
+            be considered.
+        bbox_routing: "minimal": only route to the bbox so that it can be safely routed
+            around, but start or end bends might encroach on the bounding boxes when
+            leaving them.
+        sort_ports: Automatically sort ports.
+        collision_check_layers: Layers to check for actual errors if manhattan routes
+            detect potential collisions.
+        on_collision: Define what to do on routing collision. Default behaviour is to
+            open send the layout of c to klive and open an error lyrdb with the
+            collisions. "error" will simply raise an error. None will ignore any error.
     """
-    if (input_port.angle + output_port.angle) % 2 == 0:
-        (
-            kdb.Point(input_port.x, input_port.y - input_port.width // 2)
-            if input_port.angle % 2 == 0
-            else kdb.Point(input_port.x - input_port.width // 2, input_port.y)
-        )
-        (
-            kdb.Point(
-                (input_port.x + output_port.x) // 2,
-                input_port.y + input_port.width // 2,
-            )
-            if input_port.angle % 2 == 0
-            else kdb.Point(
-                input_port.x - input_port.width // 2, (input_port.y + output_port.y)
-            )
-        )
-        (
-            kdb.Point(output_port.x, output_port.y + input_port.width // 2)
-            if input_port.angle % 2 == 0
-            else kdb.Point(output_port.x + input_port.width // 2, output_port.y)
-        )
+    return route_bundle_generic(
+        c=c,
+        start_ports=start_ports,
+        end_ports=end_ports,
+        routing_function=route_smart,
+        routing_kwargs={
+            "separation": separation,
+            "sort_ports": sort_ports,
+            "bbox_routing": bbox_routing,
+            "bboxes": list(bboxes),
+            "bend90_radius": 0,
+        },
+        placer_function=place_dual_rails,
+        placer_kwargs={
+            "separation_rails": separation_rails,
+            "width_rails": width_rails,
+        },
+        sort_ports=sort_ports,
+        on_collision=on_collision,
+        collision_check_layers=collision_check_layers,
+    )
 
 
 def route_dual_rails(
     c: KCell,
     p1: Port,
     p2: Port,
-    start_straight: int | None = None,
-    end_straight: int | None = None,
+    start_straight: dbu | None = None,
+    end_straight: dbu | None = None,
     route_path_function: Callable[..., list[kdb.Point]] = route_manhattan,
-    width: int | None = None,
-    hole_width: int | None = None,
+    width: dbu | None = None,
+    hole_width: dbu | None = None,
     layer: int | None = None,
 ) -> None:
     """Connect ports with a dual-wire rail.
@@ -296,3 +305,101 @@ def route_dual_rails(
     hole_path = kdb.Path(pts, _hole_width)
     final_poly = kdb.Region(path.polygon()) - kdb.Region(hole_path.polygon())
     c.shapes(_layer).insert(final_poly)
+
+
+def place_single_wire(
+    c: KCell,
+    p1: Port,
+    p2: Port,
+    pts: Sequence[kdb.Point],
+    layer_info: kdb.LayerInfo | None = None,
+    width: dbu | None = None,
+    **kwargs: Any,
+) -> ManhattanRoute:
+    """Placer function for a single wire.
+
+    Args:
+        c: KCell to place the route in.
+        p1: Start port.
+        p2: End port.
+        pts: Route backbone.
+        layer_info: Place on a specific layer. Otherwise, use
+            `p1.layer_info`.
+        width: Place a route with a specific width. Otherwise, use
+            `p2.width`.
+        kwargs: Compatibility for type checkers. Throws an error if not empty.
+    """
+    if layer_info is None:
+        layer_info = p1.layer_info
+    if width is None:
+        width = p1.width
+
+    shape = (
+        c.shapes(c.layer(layer_info))
+        .insert(kdb.Path(pts, width=width).polygon())
+        .polygon
+    )
+
+    return ManhattanRoute(
+        backbone=pts,
+        start_port=p1,
+        end_port=p2,
+        taper_length=0,
+        bend90_radius=0,
+        polygons={layer_info: [shape]},
+        instances=[],
+    )
+
+
+def place_dual_rails(
+    c: KCell,
+    p1: Port,
+    p2: Port,
+    pts: Sequence[kdb.Point],
+    layer_info: kdb.LayerInfo | None = None,
+    width_rails: dbu | None = None,
+    separation_rails: dbu | None = None,
+    **kwargs: Any,
+) -> ManhattanRoute:
+    """Placer function for a single wire.
+
+    Args:
+        c: KCell to place the route in.
+        p1: Start port.
+        p2: End port.
+        pts: Route backbone.
+        layer_info: Place on a specific layer. Otherwise, use
+            `p1.layer_info`.
+        width_rails: Total width of the rails.
+        separation_rails: Separation between the two rails.
+        kwargs: Compatibility for type checkers. Throws an error if not empty.
+    """
+    if len(kwargs) > 0:
+        raise ValueError(f"No kwargs are allowed in place_dual_rails. Given {kwargs=}")
+    if layer_info is None:
+        layer_info = p1.layer_info
+    if width_rails is None:
+        width_rails = p1.width
+    if separation_rails is None:
+        raise ValueError("Must specify a separation between the two rails.")
+    if separation_rails >= width_rails:
+        raise ValueError(f"{separation_rails=} must be smaller than the {width_rails}")
+
+    region = kdb.Region(kdb.Path(pts, width_rails)) - kdb.Region(
+        kdb.Path(pts, separation_rails)
+    )
+
+    shapes = [
+        c.shapes(c.layer(layer_info)).insert(region[0]).polygon,
+        c.shapes(c.layer(layer_info)).insert(region[1]).polygon,
+    ]
+
+    return ManhattanRoute(
+        backbone=pts,
+        start_port=p1,
+        end_port=p2,
+        taper_length=0,
+        bend90_radius=0,
+        polygons={layer_info: shapes},
+        instances=[],
+    )

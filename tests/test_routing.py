@@ -296,7 +296,6 @@ def test_smart_routing(
         angles.append(2)
 
     for a in range(4):
-        # for a in [3, 1, 2, 0]:
         t = base_t * kf.kdb.Trans(a // 2 * 3_000_000, a % 2 * 3_000_000)
         start_box = t * kf.kdb.Box(350_000) if start_bbox else kf.kdb.Box()
         end_box = kf.kdb.Box()
@@ -379,6 +378,47 @@ def test_smart_routing(
     for box in end_bboxes:
         c.shapes(kf.kcl.find_layer(12, 0)).insert(box)
 
+    match (m1, p1):
+        case (True, False):
+            rf = partial(
+                kf.routing.electrical.route_bundle,
+                c,
+                start_ports=start_ports,
+                end_ports=end_ports,
+                separation=4000,
+                bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
+                sort_ports=sort_ports,
+                bbox_routing="full",
+                on_collision="error",
+            )
+        case (False, True):
+            rf = partial(
+                kf.routing.electrical.route_bundle_dual_rails,
+                c,
+                start_ports=start_ports,
+                end_ports=end_ports,
+                separation=4000,
+                bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
+                sort_ports=sort_ports,
+                bbox_routing="full",
+                on_collision="error",
+                separation_rails=100,
+            )
+        case _:
+            rf = partial(
+                kf.routing.optical.route_bundle,
+                c,
+                start_ports=start_ports,
+                end_ports=end_ports,
+                separation=4000,
+                bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
+                sort_ports=sort_ports,
+                bbox_routing="full",
+                on_collision="error",
+                bend90_cell=bend90_small,
+                straight_factory=straight_factory_dbu,
+            )
+
     # (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
     match (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2):
         case (
@@ -393,29 +433,7 @@ def test_smart_routing(
             | (True, True, False, 1, False, True, False, False, True)
             | (True, True, False, 1, False, True, False, False, False)
         ):
-            with pytest.raises(RuntimeError):  # , match="Routing Collision"):
-                kf.routing.optical.route_bundle(
-                    c,
-                    start_ports=start_ports,
-                    end_ports=end_ports,
-                    separation=4000,
-                    bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
-                    sort_ports=sort_ports,
-                    bbox_routing="full",
-                    on_collision="error",
-                    bend90_cell=bend90_small,
-                    straight_factory=straight_factory_dbu,
-                )
+            with pytest.raises(RuntimeError):  # , match="Routing Collision"):i
+                rf()
         case _:
-            kf.routing.optical.route_bundle(
-                c,
-                start_ports=start_ports,
-                end_ports=end_ports,
-                separation=4000,
-                bboxes=start_boxes + end_boxes + start_bboxes + end_bboxes,
-                sort_ports=sort_ports,
-                bbox_routing="full",
-                bend90_cell=bend90_small,
-                straight_factory=straight_factory_dbu,
-                on_collision="error",
-            )
+            rf()
