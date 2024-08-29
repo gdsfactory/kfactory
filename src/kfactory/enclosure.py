@@ -163,7 +163,7 @@ def extrude_path_points(
 
 def extrude_path(
     target: KCell,
-    layer: kdb.LayerInfo,  # LayerEnum | int,
+    layer: kdb.LayerInfo,
     path: list[kdb.DPoint],
     width: float,
     enclosure: LayerEnclosure | None = None,
@@ -219,7 +219,7 @@ def extrude_path(
             reg.insert(_r)
             if _layer == layer and i == j:
                 ret_path = _path
-        target.shapes(target.kcl.find_layer(_layer)).insert(reg.merge())
+        target.shapes(target.kcl.layer(_layer)).insert(reg.merge())
     return ret_path
 
 
@@ -376,7 +376,7 @@ def extrude_path_dynamic(
                         )
                     )
                 reg.insert(_r)
-            target.shapes(target.kcl.find_layer(layer)).insert(reg.merge())
+            target.shapes(target.kcl.layer(layer)).insert(reg.merge())
 
     else:
         for layer, layer_sec in layer_list.items():
@@ -416,7 +416,7 @@ def extrude_path_dynamic(
                         )
                     )
                 reg.insert(_r)
-            target.shapes(target.kcl.find_layer(layer)).insert(reg.merge())
+            target.shapes(target.kcl.layer(layer)).insert(reg.merge())
 
 
 class Section(BaseModel):
@@ -550,7 +550,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             dsections: Same as sections but min/max defined in um
             kcl: `KCLayout` Used for conversion dbu -> um or when copying.
                 Must be specified if `desections` is not `None`. Also necessary
-                if copying to another layout and not all layers used are LayerEnums.
+                if copying to another layout and not all layers used are LayerInfos.
         """
         super().__init__(
             layer_sections={},
@@ -775,7 +775,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                     " Therefore the layer must be defined in calls"
                 )
         r = (
-            kdb.Region(c.begin_shapes_rec(c.kcl.find_layer(ref)))
+            kdb.Region(c.begin_shapes_rec(c.kcl.layer(ref)))
             if isinstance(ref, kdb.LayerInfo)
             else ref.dup()
         )
@@ -783,7 +783,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
 
         for layer, layersec in reversed(self.layer_sections.items()):
             for section in layersec.sections:
-                c.shapes(c.kcl.find_layer(layer)).insert(
+                c.shapes(c.kcl.layer(layer)).insert(
                     self.minkowski_region(r, section.d_max, shape)
                     - self.minkowski_region(r, section.d_min, shape)
                 )
@@ -852,7 +852,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
 
         tp.tile_size(tile_size, tile_size)
         if isinstance(ref, kdb.LayerInfo):
-            tp.input("main_layer", c.kcl.layout, c.cell_index(), c.kcl.find_layer(ref))
+            tp.input("main_layer", c.kcl.layout, c.cell_index(), c.kcl.layer(ref))
         else:
             tp.input("main_layer", ref)
 
@@ -863,7 +863,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             ports_by_layer[port.layer].append(port)
 
         for layer, sections in self.layer_sections.items():
-            layer_index = c.kcl.find_layer(layer)
+            layer_index = c.kcl.layer(layer)
             operator = RegionOperator(cell=c, layer=layer_index)
             tp.output(f"target_{layer_index}", operator)
             max_size: int = _min_size
@@ -938,8 +938,6 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         tp.execute(f"Minkowski {c.name}")
         c.kcl.end_changes()
 
-        # for layer, operator in operators:
-        #     operator.insert()
         if carve_out_ports:
             for layer_index, operator in operators:
                 operator.insert(port_holes=port_holes[layer_index])
@@ -962,7 +960,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                 full enclosure.
         """
         for layer, layersec in self.layer_sections.items():
-            layer_index = c.kcl.find_layer(layer)
+            layer_index = c.kcl.layer(layer)
             for sec in layersec.sections:
                 c.shapes(layer_index).insert(shape(sec.d_max, sec.d_min))
 
@@ -1099,9 +1097,9 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         for layer, sections in self.layer_sections.items():
             if isinstance(layer, kdb.LayerInfo):
                 try:
-                    _layer = kcl.find_layers(layer)
+                    _layer = kcl.layer(layer)
                 except ValueError:
-                    _layer = kcl.find_layer(layer.layer, layer.datatype)
+                    _layer = kcl.layer(layer.layer, layer.datatype)
                     logger.warning(
                         "{layer.name} - {layer.layer}/{layer.datatype} is not"
                         " available in the new KCLayout {kcl.name}, using layer"
@@ -1113,7 +1111,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                 raise NotImplementedError
 
             for section in sections.sections:
-                layer_enc.add_section(_layer, section)
+                layer_enc.add_section(layer, section)
         return layer_enc
 
 
@@ -1421,10 +1419,10 @@ class KCellEnclosure(BaseModel):
             shape: Reference to use as a base for the enclosure.
         """
         regions = {}
-
         for enc in self.enclosures.enclosures:
-            if not c.bbox(enc.main_layer).empty():
-                rsi = c.begin_shapes_rec(enc.main_layer)
+            _main_layer = c.kcl.layer(enc.main_layer)
+            if not c.bbox(_main_layer).empty():
+                rsi = c.begin_shapes_rec(_main_layer)
                 r = kdb.Region(rsi)
                 for layer, layersec in enc.layer_sections.items():
                     if layer not in regions:
@@ -1440,7 +1438,7 @@ class KCellEnclosure(BaseModel):
                         reg.merge()
 
         for layer, region in regions.items():
-            c.shapes(layer).insert(region)
+            c.shapes(c.kcl.layer(layer)).insert(region)
 
     def apply_minkowski_tiled(
         self,
@@ -1476,14 +1474,14 @@ class KCellEnclosure(BaseModel):
         port_hole_map: dict[kdb.LayerInfo, kdb.Region] = defaultdict(kdb.Region)
         ports_by_layer: dict[kdb.LayerInfo, list[Port]] = defaultdict(list)
         for port in c.ports:
-            ports_by_layer[c.kcl.find_layer(c.kcl.get_info(port.layer))].append(port)
+            ports_by_layer[c.kcl.layer(c.kcl.get_info(port.layer))].append(port)
 
         maxsize = 0
         for enc in self.enclosures.enclosures:
             assert enc.main_layer is not None
-            main_layer = c.kcl.find_layer(enc.main_layer)
+            main_layer = c.kcl.layer(enc.main_layer)
             for layer, layersection in enc.layer_sections.items():
-                li = c.kcl.find_layer(layer)
+                li = c.kcl.layer(layer)
                 size = layersection.sections[-1].d_max
                 maxsize = max(maxsize, size)
 
@@ -1523,8 +1521,8 @@ class KCellEnclosure(BaseModel):
 
         for i, enc in enumerate(self.enclosures.enclosures):
             assert enc.main_layer is not None
-            if not c.bbox(c.kcl.find_layer(enc.main_layer)).empty():
-                main_layer = c.kcl.find_layer(enc.main_layer)
+            if not c.bbox(c.kcl.layer(enc.main_layer)).empty():
+                main_layer = c.kcl.layer(enc.main_layer)
                 _inp = f"main_layer_{main_layer}"
                 if enc.main_layer not in inputs:
                     tp.input(
@@ -1537,7 +1535,7 @@ class KCellEnclosure(BaseModel):
                     logger.debug("Created input {}", _inp)
 
                 for layer, layer_section in enc.layer_sections.items():
-                    li = c.kcl.find_layer(layer)
+                    li = c.kcl.layer(layer)
                     if (main_layer, layer_section) in layer_regiontilesoperators:
                         layer_regiontilesoperators[
                             (main_layer, layer_section)
