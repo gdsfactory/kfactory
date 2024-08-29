@@ -1,3 +1,16 @@
+<a name="v0.19.3"></a>
+# [v0.19.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.3) - 29 Aug 2024
+
+# What's Changed
+
+
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.19.2...v0.19.3
+
+
+[Changes][v0.19.3]
+
+
 <a name="v0.19.2"></a>
 # [v0.19.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.2) - 29 Aug 2024
 
@@ -993,6 +1006,7 @@
 [Changes][v0.4.0]
 
 
+[v0.19.3]: https://github.com/gdsfactory/kfactory/compare/v0.19.2...v0.19.3
 [v0.19.2]: https://github.com/gdsfactory/kfactory/compare/v0.19.1...v0.19.2
 [v0.19.1]: https://github.com/gdsfactory/kfactory/compare/v0.19.0...v0.19.1
 [v0.19.0]: https://github.com/gdsfactory/kfactory/compare/v0.18.4...v0.19.0
