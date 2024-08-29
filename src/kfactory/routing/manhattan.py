@@ -661,8 +661,7 @@ def path_length_match_manhattan_route(
     match_dict[2].sort(key=lambda t: -t[1]["pts"][0].y)
     match_dict[3].sort(key=lambda t: t[1]["pts"][0].x)
 
-    for angle in match_dict:
-        routers_settings = match_dict[angle]
+    for angle, routers_settings in match_dict.items():
         router_group: list[tuple[ManhattanRouter, PathMatchDict]] = []
         if len(routers_settings) > 0:
             increasing: bool | None = None
