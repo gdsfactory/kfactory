@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 from .. import kdb
 from ..kcell import Instance, Port
-from . import aa, electrical, manhattan, optical
+from . import aa, electrical, generic, manhattan, optical
 
 
 class Route(BaseModel, extra="forbid", arbitrary_types_allowed=True):
@@ -15,4 +15,4 @@ class Route(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     length_um: float
 
 
-__all__ = ["electrical", "manhattan", "optical", "aa"]
+__all__ = ["electrical", "manhattan", "optical", "aa", "generic"]

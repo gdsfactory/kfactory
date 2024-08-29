@@ -10,7 +10,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Operating System :: OS Independent",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 
 version = "0.19.2"
@@ -84,7 +84,7 @@ kf = "kfactory.cli:app"
 where = ["src"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 strict = true
 exclude = [
   "src/kfactory/widgets/interactive.py",
