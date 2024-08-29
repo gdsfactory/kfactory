@@ -1,5 +1,20 @@
+<a name="v0.19.2"></a>
+# [v0.19.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.2) - 29 Aug 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix errors in enclosures and relax some port layer constraints [#460](https://github.com/gdsfactory/kfactory/pull/460)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.19.1...v0.19.2
+
+
+[Changes][v0.19.2]
+
+
 <a name="v0.19.1"></a>
-# [v0.19.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.1) - 14 Aug 2024
+# [v0.19.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.1) - 26 Aug 2024
 
 # What's Changed
 
@@ -978,6 +993,7 @@
 [Changes][v0.4.0]
 
 
+[v0.19.2]: https://github.com/gdsfactory/kfactory/compare/v0.19.1...v0.19.2
 [v0.19.1]: https://github.com/gdsfactory/kfactory/compare/v0.19.0...v0.19.1
 [v0.19.0]: https://github.com/gdsfactory/kfactory/compare/v0.18.4...v0.19.0
 [v0.18.4]: https://github.com/gdsfactory/kfactory/compare/v0.18.3...v0.18.4
