@@ -374,7 +374,7 @@ def place_dual_rails(
         separation_rails: Separation between the two rails.
         kwargs: Compatibility for type checkers. Throws an error if not empty.
     """
-    if len(kwargs) > 0:
+    if kwargs:
         raise ValueError(f"No kwargs are allowed in place_dual_rails. Given {kwargs=}")
     if layer_info is None:
         layer_info = p1.layer_info
