@@ -488,4 +488,3 @@ def test_custom_router(
             "separation": 5000,
         },
     )
-    c.show()
