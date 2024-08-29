@@ -10,7 +10,7 @@ from typing import Any, Literal, ParamSpec, Protocol, TypedDict
 from .. import kdb
 from ..conf import logger
 from ..enclosure import clean_points
-from ..kcell import KCLayout, Port
+from ..kcell import KCell, KCLayout, Port
 
 __all__ = [
     "route_manhattan",
@@ -57,19 +57,14 @@ class ManhattanRoutePathFunction180(Protocol):
 class ManhattanBundleRoutingFunction(Protocol):
     def __call__(
         self,
+        *,
         start_ports: Sequence[Port | kdb.Trans],
         end_ports: Sequence[Port | kdb.Trans],
+        start_straights: list[int],
+        end_straights: list[int],
         widths: list[int] | None = None,
         **kwargs: Any,
     ) -> list[ManhattanRouter]: ...
-
-
-class PathLengthMatchingFunction(Protocol):
-    """Function for path length matching in route_smart."""
-
-    def __call__(
-        self, routers: list[ManhattanRouter], bend90_radius: int, separation: int
-    ) -> Any: ...
 
 
 def droute_manhattan_180(
@@ -608,11 +603,45 @@ class PathMatchDict(TypedDict):
 
 
 def path_length_match_manhattan_route(
+    *,
+    c: KCell,
     routers: list[ManhattanRouter],
-    bend90_radius: int,
-    separation: int,
+    start_ports: list[Port],
+    end_ports: list[Port],
+    bend90_radius: int | None = None,
+    separation: int | None = None,
     path_length: int | None = None,
+    **kwargs: Any,
 ) -> None:
+    """Simple path length matching router postprocess.
+
+    Args:
+        c: KCell where the routes are placed into.
+        routers: List of the manhattan routers to be modified.
+        start_ports: The start ports of the routes.
+        end_ports: The end ports of the routes.
+        bend90_radius: Radius of a bend in the routes.
+        separation: Separation between the routes.
+        path_length: Match to a certain path length instead of the maximum
+            of all routers.
+        kwargs: Compatibility with type checkers. Throws an error if defined.
+    """
+    if kwargs:
+        raise ValueError(
+            f"Additional kwargs aren't supported in route_dual_rails {kwargs=}"
+        )
+    if bend90_radius is None:
+        raise ValueError(
+            "bend90_radius must be passed to the function, please pass it"
+            " through the router_post_process_kwargs if using the "
+            "generic route_bunle"
+        )
+    if separation is None:
+        raise ValueError(
+            "separation must be passed to the function, please pass it"
+            " through the router_post_process_kwargs if using the "
+            "generic route_bunle"
+        )
     position = -1
     path_loops = 1
 
@@ -674,7 +703,7 @@ def path_length_match_manhattan_route(
                         _place_dl_path_length(
                             routers=router_group,
                             angle=angle,
-                            direction=-1,
+                            direction=1,
                             separation=separation,
                             bend90_radius=bend90_radius,
                             path_loops=path_loops,
@@ -682,10 +711,11 @@ def path_length_match_manhattan_route(
                             index=position,
                         )
                     elif increasing is False:
+                        router_group.reverse()
                         _place_dl_path_length(
                             routers=router_group,
                             angle=angle,
-                            direction=1,
+                            direction=-1,
                             separation=separation,
                             bend90_radius=bend90_radius,
                             path_loops=path_loops,
@@ -698,10 +728,12 @@ def path_length_match_manhattan_route(
                 old_router = router
                 old_settings = settings
                 increasing = _increasing
+            if not increasing:
+                router_group.reverse()
             _place_dl_path_length(
                 routers=router_group,
                 angle=angle,
-                direction=-1 if increasing else 1,
+                direction=1 if increasing else -1,
                 separation=separation,
                 bend90_radius=bend90_radius,
                 path_loops=path_loops,
@@ -729,6 +761,7 @@ def _place_dl_path_length(
     # pmax = min((_tinv * settings["pts"][1]).x for _, settings in routers)
 
     for i, (router, settings) in enumerate(routers):
+        pmin += router.width // 2
         pts = settings["pts"]
         v = pts[1] - pts[0]
         vl = v.length()
@@ -770,9 +803,11 @@ def _place_dl_path_length(
             t *= _r
         # breakpoint()
         router.start.pts[index:index] = _pts
+        pmin += separation + router.width // 2
 
 
 def route_smart(
+    *,
     start_ports: Sequence[Port | kdb.Trans],
     end_ports: Sequence[Port | kdb.Trans],
     widths: list[int] | None = None,

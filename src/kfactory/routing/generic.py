@@ -42,10 +42,11 @@ class RouterPostProcessFunction(Protocol):
 
     def __call__(
         self,
+        *,
         c: KCell,
+        routers: list[ManhattanRouter],
         start_ports: list[Port],
         end_ports: list[Port],
-        routers: list[ManhattanRouter],
         **kwargs: Any,
     ) -> None:
         """Implementation of post process function."""
@@ -354,6 +355,8 @@ def route_bundle(
         start_ports=start_ports,
         end_ports=end_ports,
         widths=widths,
+        start_straights=start_straights,
+        end_straights=end_straights,
         **routing_kwargs,
     )
 
@@ -387,6 +390,14 @@ def route_bundle(
                 )
             )
     else:
+        if router_post_process_function is not None:
+            router_post_process_function(
+                c=c,
+                start_ports=start_ports,
+                end_ports=end_ports,
+                routers=routers,
+                **router_post_process_kwargs,
+            )
         for router, ps, pe in zip(routers, start_ports, end_ports):
             routes.append(
                 placer_function(

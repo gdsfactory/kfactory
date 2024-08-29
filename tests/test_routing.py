@@ -437,3 +437,55 @@ def test_smart_routing(
                 rf()
         case _:
             rf()
+
+
+def test_custom_router(
+    LAYER: Layers,
+) -> None:
+    c = kf.kcl.kcell("CustomRouter")
+    bend90 = kf.cells.circular.bend_circular(width=1, radius=10, layer=LAYER.WG)
+    b90r = kf.routing.generic.get_radius(bend90.ports)
+    sf = partial(kf.cells.straight.straight_dbu, layer=LAYER.WG)
+
+    start_ports = [
+        kf.Port(
+            name="in{i}",
+            width=1000,
+            layer_info=LAYER.WG,
+            trans=kf.kdb.Trans(1, False, -850_000 + i * 200_000, 0),
+            kcl=c.kcl,
+        )
+        for i in range(10)
+    ]
+    end_ports = [
+        kf.Port(
+            name="in{i}",
+            width=1000,
+            layer_info=LAYER.WG,
+            trans=kf.kdb.Trans(3, False, -400_000 + i * 100_000, 200_000),
+            kcl=c.kcl,
+        )
+        for i in range(10)
+    ]
+
+    kf.routing.generic.route_bundle(
+        c=c,
+        start_ports=start_ports,
+        end_ports=end_ports,
+        end_straights=50_000,
+        start_straights=50_000,
+        routing_function=kf.routing.manhattan.route_smart,
+        routing_kwargs={
+            "bend90_radius": b90r,
+            "separation": 4000,
+            # "bbox_routing": "full",
+        },
+        placer_function=kf.routing.optical.place90,
+        placer_kwargs={"bend90_cell": bend90, "straight_factory": sf},
+        router_post_process_function=kf.routing.manhattan.path_length_match_manhattan_route,
+        router_post_process_kwargs={
+            "bend90_radius": b90r,
+            "separation": 5000,
+        },
+    )
+    c.show()

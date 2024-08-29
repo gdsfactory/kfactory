@@ -333,6 +333,10 @@ def place_single_wire(
         layer_info = p1.layer_info
     if width is None:
         width = p1.width
+    if kwargs:
+        raise ValueError(
+            f"Additional kwargs aren't supported in route_single_wire {kwargs=}"
+        )
 
     shape = (
         c.shapes(c.layer(layer_info))
@@ -375,7 +379,9 @@ def place_dual_rails(
         kwargs: Compatibility for type checkers. Throws an error if not empty.
     """
     if kwargs:
-        raise ValueError(f"No kwargs are allowed in place_dual_rails. Given {kwargs=}")
+        raise ValueError(
+            f"Additional kwargs aren't supported in route_dual_rails {kwargs=}"
+        )
     if layer_info is None:
         layer_info = p1.layer_info
     if width_rails is None:
