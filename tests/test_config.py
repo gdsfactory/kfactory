@@ -21,7 +21,7 @@ def test_custom_show() -> None:
     _show = kf.config.show_function
     kf.config.show_function = show
     c.show()
-    assert showed is True
+    assert showed
     kf.config.show_function = _show
 
 
