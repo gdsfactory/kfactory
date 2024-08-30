@@ -2,20 +2,42 @@
 
 from __future__ import annotations
 
+import importlib
 import os
 import re
 import sys
 import traceback
-from enum import Enum
+from enum import StrEnum
 from itertools import takewhile
-from typing import Any, Literal
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast, runtime_checkable
 
 import loguru
 import rich.console
 from dotenv import find_dotenv
 from loguru import logger as logger
-from pydantic import BaseModel, Field, ValidationInfo, field_validator
+from pydantic import BaseModel, Field, ValidationError, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from . import kdb, rdb
+
+if TYPE_CHECKING:
+    from .kcell import KCell, KCLayout
+
+
+@runtime_checkable
+class ShowFunction(Protocol):
+    def __call__(
+        self,
+        layout: KCLayout | KCell | Path | str,
+        *,
+        lyrdb: rdb.ReportDatabase | Path | str | None,
+        l2n: kdb.LayoutToNetlist | Path | str | None,
+        keep_position: bool,
+        save_options: kdb.SaveLayoutOptions,
+        use_libraries: bool,
+        library_save_options: kdb.SaveLayoutOptions,
+    ) -> None: ...
 
 
 def add_traceback(record: loguru.Record) -> None:
@@ -52,7 +74,7 @@ def tracing_formatter(record: loguru.Record) -> str:
         )
 
 
-class LogLevel(str, Enum):
+class LogLevel(StrEnum):
     """KFactory logger levels."""
 
     TRACE = "TRACE"
@@ -64,7 +86,7 @@ class LogLevel(str, Enum):
     CRITICAL = "CRITICAL"
 
 
-class CHECK_INSTANCES(str, Enum):
+class CHECK_INSTANCES(StrEnum):
     RAISE = "error"
     FLATTEN = "flatten"
     VINSTANCES = "vinstances"
@@ -89,6 +111,14 @@ class LogFilter(BaseModel):
             return record["level"].no >= levelno and not bool(
                 re.search(self.regex, record["message"])
             )
+
+
+def get_show_function(value: str | ShowFunction) -> ShowFunction:
+    if isinstance(value, str):
+        mod, f = value.rsplit(".", 1)
+        loaded_mod = importlib.import_module(mod)
+        return loaded_mod.__getattribute__(f)  # type: ignore[no-any-return]
+    return value
 
 
 def get_affinity() -> int:
@@ -173,6 +203,22 @@ class Settings(BaseSettings):
     write_cell_properties: bool = True
     write_context_info: bool = True
     write_file_properties: bool = True
+
+    show_function: ShowFunction | None = None
+
+    @field_validator("show_function", mode="before")
+    @classmethod
+    def _validate_show_function(
+        cls, show: ShowFunction | str | None
+    ) -> ShowFunction | None:
+        if isinstance(show, str):
+            mod, f = show.rsplit(".", 1)
+            loaded_mod = importlib.import_module(mod)
+            _show = cast(ShowFunction, loaded_mod.__getattribute__(f))
+            if not isinstance(_show, ShowFunction):
+                raise ValidationError(f"{show=} is not a ShowFunction.")
+            show = _show
+        return show
 
     @field_validator("logfilter")
     @classmethod
