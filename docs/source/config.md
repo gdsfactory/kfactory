@@ -23,6 +23,47 @@ Below are some basic configurations available in kfactory. loguru also supports 
 advanced ways to log, e.g. lazy evaluation for expensive functions, this is explained excellently in the
 [docs](https://loguru.readthedocs.io/en/stable/overview.html#take-the-tour)
 
+#### Show Function
+
+The default show function can be overridden to allow usage in another framework, for example if klive/KLayout are not available.
+If the show_function is set as a string, there is a validator which automatically imports the function. E.g. `"my_package.my_show_function"`
+will automatically do `from my_package import my_show_function`. The string must be an absolute import.
+
+
+!!! warning
+
+    If the show function is set as an environment variable, the custom show function **must not** contain any default values depending on
+    kfactory as that will cause a circular import error due to the config being set up early on in the initialization of kfactory. An example to
+    solve this can look as following:
+
+    ```python
+    from __future__ import annotations
+    from typing import TYPE_CHECKING
+    from pathlib import Path
+
+    if TYPE_CHECKING:
+        import kfactory
+
+
+    def show(
+        layout: kfactory.KCLayout | kfactory.KCell | Path | str,
+        *,
+        lyrdb: kfactory.rdb.ReportDatabase | Path | str | None = None,
+        l2n: kfactory.kdb.LayoutToNetlist | Path | str | None = None,
+        keep_position: bool = True,
+        save_options: kfactory.kdb.SaveLayoutOptions | None = None,
+        use_libraries: bool = True,
+        library_save_options: kfactory.kdb.SaveLayoutOptions | None = None,
+    ) -> None:
+        import kfactory as kf
+
+        if save_options is None:
+            save_options = kf.save_layout_options()
+        if library_save_options is None:
+            library_save_options = kf.save_layout_options()
+    ```
+
+    This can then be used with `KFACTORY_SHOW_FUNCTION="custom.show.show" python ...`
 
 #### Log Level
 
