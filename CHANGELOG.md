@@ -1,14 +1,35 @@
-<a name="v0.19.3"></a>
-# [v0.19.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.3) - 29 Aug 2024
+<a name="v0.20.1"></a>
+# [v0.20.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.1) - 30 Aug 2024
 
 # What's Changed
 
+## New
+
+- add config option for custom show functions  [#461](https://github.com/gdsfactory/kfactory/pull/461)
+
+## Documentation
+
+- add config option for custom show functions  [#461](https://github.com/gdsfactory/kfactory/pull/461)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.0...v0.20.1
 
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.19.2...v0.19.3
+[Changes][v0.20.1]
 
 
-[Changes][v0.19.3]
+<a name="v0.20.0"></a>
+# [v0.20.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.0) - 29 Aug 2024
+
+# What's Changed
+
+## New
+
+- clean up route_bundle and add a generic version [#456](https://github.com/gdsfactory/kfactory/pull/456)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.19.2...v0.20.0
+
+
+[Changes][v0.20.0]
 
 
 <a name="v0.19.2"></a>
@@ -1006,7 +1027,8 @@
 [Changes][v0.4.0]
 
 
-[v0.19.3]: https://github.com/gdsfactory/kfactory/compare/v0.19.2...v0.19.3
+[v0.20.1]: https://github.com/gdsfactory/kfactory/compare/v0.20.0...v0.20.1
+[v0.20.0]: https://github.com/gdsfactory/kfactory/compare/v0.19.2...v0.20.0
 [v0.19.2]: https://github.com/gdsfactory/kfactory/compare/v0.19.1...v0.19.2
 [v0.19.1]: https://github.com/gdsfactory/kfactory/compare/v0.19.0...v0.19.1
 [v0.19.0]: https://github.com/gdsfactory/kfactory/compare/v0.18.4...v0.19.0
