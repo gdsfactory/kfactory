@@ -25,6 +25,7 @@ from pathlib import Path
 from tempfile import gettempdir
 from types import FunctionType, ModuleType
 from typing import (
+    TYPE_CHECKING,
     Annotated,
     Any,
     Literal,
@@ -75,6 +76,8 @@ from .port import (
     rename_clockwise_multi,
 )
 
+if TYPE_CHECKING:
+    from .conf import ShowFunction
 __all__ = [
     "CHECK_INSTANCES",
     "KCell",
@@ -1248,7 +1251,8 @@ class KCell:
 
         Will create a temporary file of the gds and load it in KLayout via klive
         """
-        show(
+        show_f: ShowFunction = config.show_function or show
+        show_f(
             self,
             lyrdb=lyrdb,
             l2n=l2n,
@@ -1343,6 +1347,7 @@ class KCell:
         port_type: str = "optical",
         mirror_x: bool = False,
     ) -> Port: ...
+
     @overload
     def create_port(
         self,
@@ -4466,7 +4471,8 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
             c.name = self.name
         VInstance(self).insert_into_flat(c, levels=0)
         c.add_ports(self.ports)
-        show(
+        show_f: ShowFunction = config.show_function or show
+        show_f(
             c,
             lyrdb=lyrdb,
             l2n=l2n,
