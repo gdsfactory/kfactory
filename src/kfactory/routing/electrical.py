@@ -187,7 +187,6 @@ def route_bundle(
             "bend90_radius": 0,
         },
         placer_function=place_single_wire,
-        placer_kwargs={"width": route_width},
         sort_ports=sort_ports,
         on_collision=on_collision,
         collision_check_layers=collision_check_layers,
@@ -255,7 +254,6 @@ def route_bundle_dual_rails(
         placer_function=place_dual_rails,
         placer_kwargs={
             "separation_rails": separation_rails,
-            "width_rails": width_rails,
         },
         sort_ports=sort_ports,
         on_collision=on_collision,
@@ -312,8 +310,8 @@ def place_single_wire(
     p1: Port,
     p2: Port,
     pts: Sequence[kdb.Point],
+    route_width: dbu | None = None,
     layer_info: kdb.LayerInfo | None = None,
-    width: dbu | None = None,
     **kwargs: Any,
 ) -> ManhattanRoute:
     """Placer function for a single wire.
@@ -323,6 +321,7 @@ def place_single_wire(
         p1: Start port.
         p2: End port.
         pts: Route backbone.
+        route_width: Overwrite automatic detection of wire width.
         layer_info: Place on a specific layer. Otherwise, use
             `p1.layer_info`.
         width: Place a route with a specific width. Otherwise, use
@@ -331,8 +330,8 @@ def place_single_wire(
     """
     if layer_info is None:
         layer_info = p1.layer_info
-    if width is None:
-        width = p1.width
+    if route_width is None:
+        route_width = p1.width
     if kwargs:
         raise ValueError(
             f"Additional kwargs aren't supported in route_single_wire {kwargs=}"
@@ -340,7 +339,7 @@ def place_single_wire(
 
     shape = (
         c.shapes(c.layer(layer_info))
-        .insert(kdb.Path(pts, width=width).polygon())
+        .insert(kdb.Path(pts, width=route_width).polygon())
         .polygon
     )
 
@@ -360,8 +359,8 @@ def place_dual_rails(
     p1: Port,
     p2: Port,
     pts: Sequence[kdb.Point],
+    route_width: dbu | None = None,
     layer_info: kdb.LayerInfo | None = None,
-    width_rails: dbu | None = None,
     separation_rails: dbu | None = None,
     **kwargs: Any,
 ) -> ManhattanRoute:
@@ -372,6 +371,8 @@ def place_dual_rails(
         p1: Start port.
         p2: End port.
         pts: Route backbone.
+        route_width: Overwrite automatic detection of wire width.
+            Total width of all rails.
         layer_info: Place on a specific layer. Otherwise, use
             `p1.layer_info`.
         width_rails: Total width of the rails.
@@ -384,14 +385,14 @@ def place_dual_rails(
         )
     if layer_info is None:
         layer_info = p1.layer_info
-    if width_rails is None:
-        width_rails = p1.width
+    if route_width is None:
+        route_width = p1.width
     if separation_rails is None:
         raise ValueError("Must specify a separation between the two rails.")
-    if separation_rails >= width_rails:
-        raise ValueError(f"{separation_rails=} must be smaller than the {width_rails}")
+    if separation_rails >= route_width:
+        raise ValueError(f"{separation_rails=} must be smaller than the {route_width}")
 
-    region = kdb.Region(kdb.Path(pts, width_rails)) - kdb.Region(
+    region = kdb.Region(kdb.Path(pts, route_width)) - kdb.Region(
         kdb.Path(pts, separation_rails)
     )
 
