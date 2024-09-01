@@ -32,7 +32,6 @@ class PlacerFunction(Protocol):
         p1: Port,
         p2: Port,
         pts: Sequence[kdb.Point],
-        *,
         route_width: dbu | None = None,
         **kwargs: Any,
     ) -> ManhattanRoute:
