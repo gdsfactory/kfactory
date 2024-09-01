@@ -135,6 +135,7 @@ def place90(
     taper_cell: KCell | None = None,
     port_type: str = "optical",
     min_straight_taper: dbu = 0,
+    *,
     allow_small_routes: bool = False,
     allow_width_mismatch: bool | None = None,
     allow_layer_mismatch: bool | None = None,

@@ -18,6 +18,7 @@ __all__ = [
     "clean_points",
     "ManhattanRoutePathFunction",
     "ManhattanRoutePathFunction180",
+    "route_smart",
 ]
 
 P = ParamSpec("P")
@@ -801,7 +802,6 @@ def _place_dl_path_length(
             t *= _dl
             _pts.append(t * _p)
             t *= _r
-        # breakpoint()
         router.start.pts[index:index] = _pts
         pmin += separation + router.width // 2
 
