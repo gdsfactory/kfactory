@@ -7,6 +7,10 @@
 
 - add config option for custom show functions  [#461](https://github.com/gdsfactory/kfactory/pull/461)
 
+## Bug Fixes
+
+- fix errors for `kf run` not finding modules. Change syntax [#462](https://github.com/gdsfactory/kfactory/pull/462)
+
 ## Documentation
 
 - add config option for custom show functions  [#461](https://github.com/gdsfactory/kfactory/pull/461)
