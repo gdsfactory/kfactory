@@ -9,12 +9,12 @@ from typing import Annotated
 import typer
 
 from .. import __version__
-from .runshow import run, show
+from .build import build, show
 
 app = typer.Typer(name="kf")
 
 
-app.command()(run)
+app.command()(build)
 app.command()(show)
 
 
