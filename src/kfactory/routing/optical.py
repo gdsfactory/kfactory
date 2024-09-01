@@ -130,6 +130,7 @@ def place90(
     p1: Port,
     p2: Port,
     pts: Sequence[kdb.Point],
+    route_width: dbu | None = None,
     straight_factory: StraightFactory | None = None,
     bend90_cell: KCell | None = None,
     taper_cell: KCell | None = None,
@@ -139,7 +140,6 @@ def place90(
     allow_width_mismatch: bool | None = None,
     allow_layer_mismatch: bool | None = None,
     allow_type_mismatch: bool | None = None,
-    route_width: dbu | None = None,
     **kwargs: Any,
 ) -> ManhattanRoute:
     """Place bends and straight waveguides based on a sequence of points.
@@ -867,13 +867,13 @@ def route(
                             * b180p1.trans.inverted()
                         )
                         place90(
-                            c,
-                            start_port.copy(),
-                            bend180.ports[b180p1.name],
-                            pts[j : i - 2],
-                            straight_factory,
-                            bend90_cell,
-                            taper_cell,
+                            c=c,
+                            p1=start_port.copy(),
+                            p2=bend180.ports[b180p1.name],
+                            pts=pts[j : i - 2],
+                            straight_factory=straight_factory,
+                            bend90_cell=bend90_cell,
+                            taper_cell=taper_cell,
                             port_type=port_type,
                             allow_small_routes=allow_small_routes,
                             allow_width_mismatch=allow_width_mismatch,
@@ -894,13 +894,13 @@ def route(
                             * b180p2.trans.inverted()
                         )
                         place90(
-                            c,
-                            start_port.copy(),
-                            bend180.ports[b180p2.name],
-                            pts[j : i - 2],
-                            straight_factory,
-                            bend90_cell,
-                            taper_cell,
+                            c=c,
+                            p1=start_port.copy(),
+                            p2=bend180.ports[b180p2.name],
+                            pts=pts[j : i - 2],
+                            straight_factory=straight_factory,
+                            bend90_cell=bend90_cell,
+                            taper_cell=taper_cell,
                             port_type=port_type,
                             allow_small_routes=allow_small_routes,
                             allow_width_mismatch=allow_width_mismatch,
@@ -914,13 +914,13 @@ def route(
                     pt3 = pt4
 
         route = place90(
-            c,
-            start_port.copy(),
-            end_port.copy(),
-            pts,
-            straight_factory,
-            bend90_cell,
-            taper_cell,
+            c=c,
+            p1=start_port.copy(),
+            p2=end_port.copy(),
+            pts=pts,
+            straight_factory=straight_factory,
+            bend90_cell=bend90_cell,
+            taper_cell=taper_cell,
             min_straight_taper=min_straight_taper,
             port_type=port_type,
             allow_small_routes=allow_small_routes,
@@ -950,13 +950,13 @@ def route(
             )
 
         route = place90(
-            c,
-            p1.copy(),
-            p2.copy(),
-            pts,
-            straight_factory,
-            bend90_cell,
-            taper_cell,
+            c=c,
+            p1=p1.copy(),
+            p2=p2.copy(),
+            pts=pts,
+            straight_factory=straight_factory,
+            bend90_cell=bend90_cell,
+            taper_cell=taper_cell,
             allow_small_routes=allow_small_routes,
             min_straight_taper=min_straight_taper,
             port_type=port_type,

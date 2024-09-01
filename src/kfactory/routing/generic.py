@@ -32,6 +32,7 @@ class PlacerFunction(Protocol):
         p1: Port,
         p2: Port,
         pts: Sequence[kdb.Point],
+        route_width: dbu | None = None,
         **kwargs: Any,
     ) -> ManhattanRoute:
         """Implementation of the function."""
@@ -379,13 +380,16 @@ def route_bundle(
                 **router_post_process_kwargs,
             )
 
-        for sp, ep, router in zip(sorted_start_ports, sorted_end_ports, routers):
+        for sp, ep, w, router in zip(
+            sorted_start_ports, sorted_end_ports, widths, routers
+        ):
             routes.append(
                 placer_function(
                     c,
                     sp,
                     ep,
                     router.start.pts,
+                    route_width=w,
                     **placer_kwargs,
                 )
             )

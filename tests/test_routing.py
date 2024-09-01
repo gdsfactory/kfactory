@@ -478,7 +478,6 @@ def test_custom_router(
         routing_kwargs={
             "bend90_radius": b90r,
             "separation": 4000,
-            # "bbox_routing": "full",
         },
         placer_function=kf.routing.optical.place90,
         placer_kwargs={"bend90_cell": bend90, "straight_factory": sf},
