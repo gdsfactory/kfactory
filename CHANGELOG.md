@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- fix generic route not passing routing width to placer_function [#463](https://github.com/gdsfactory/kfactory/pull/463)
 - fix errors for `kf run` not finding modules. Change syntax [#462](https://github.com/gdsfactory/kfactory/pull/462)
 
 ## Documentation
