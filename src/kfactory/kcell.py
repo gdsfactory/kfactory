@@ -2033,6 +2033,9 @@ class KCell:
                     kcell = self.kcl[lib_ci]
                     kcell.copy_meta_info(cell._kdb_cell)
                     kcell.rebuild()
+                    if cell.kcl.dbu != self.kcl.dbu:
+                        for port, lib_port in zip(kcell.ports, cell.ports):
+                            port.width = self.kcl.to_dbu(cell.kcl.to_um(lib_port.width))
                 if libcell_as_static:
                     cell.set_meta_data()
                     ci = self.kcl.convert_cell_to_static(lib_ci)
@@ -2040,6 +2043,9 @@ class KCell:
                     kcell.copy_meta_info(cell._kdb_cell)
                     kcell.rebuild()
                     kcell.name = cell.kcl.name + static_name_separator + cell.name
+                    if cell.kcl.dbu != self.kcl.dbu:
+                        for port, lib_port in zip(kcell.ports, cell.ports):
+                            port.width = self.kcl.to_dbu(cell.kcl.to_um(lib_port.width))
                 else:
                     ci = lib_ci
 
