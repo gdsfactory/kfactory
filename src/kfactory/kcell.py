@@ -1456,44 +1456,16 @@ class KCell:
                     cell.kcl.library, cell.cell_index()
                 )
                 if lib_ci not in self.kcl.kcells:
+                    cell.set_meta_data()
                     kcell = self.kcl[lib_ci]
-                    for port in cell.ports:
-                        kcell.kcl.layer(port.layer_info)
-                        kcell.create_port(
-                            name=port.name,
-                            dwidth=port.dwidth,
-                            dcplx_trans=port.dcplx_trans,
-                            layer_info=port.layer_info,
-                        )
-                    kcell._settings = cell.settings.model_copy()
-                    kcell.info = cell.info.model_copy()
-                    called_ci = kcell.called_cells()
-                    for lci in set(called_ci) - self.kcl.kcells.keys():
-                        kcell = self.kcl[lci]
-                        lib_kcell = cell.kcl[kcell.library_cell_index()]
-                        for port in lib_kcell.ports:
-                            pl = port.layer_info
-                            self.kcl.layer(pl)
-                            kcell.create_port(
-                                name=port.name,
-                                dwidth=port.dwidth,
-                                dcplx_trans=port.dcplx_trans,
-                                layer_info=pl,
-                            )
-                        kcell._settings = lib_kcell.settings.model_copy()
-                        kcell.info = lib_kcell.info.model_copy()
-
+                    kcell.copy_meta_info(cell._kdb_cell)
+                    kcell.rebuild()
                 if libcell_as_static:
+                    cell.set_meta_data()
                     ci = self.kcl.convert_cell_to_static(lib_ci)
                     kcell = self.kcl[ci]
-                    for port in cell.ports:
-                        self.kcl.layer(port.layer_info)
-                        kcell.create_port(
-                            name=port.name,
-                            dwidth=port.dwidth,
-                            dcplx_trans=port.dcplx_trans,
-                            layer_info=port.layer_info,
-                        )
+                    kcell.copy_meta_info(cell._kdb_cell)
+                    kcell.rebuild()
                     kcell.name = cell.kcl.name + static_name_separator + cell.name
                 else:
                     ci = lib_ci
@@ -1579,11 +1551,12 @@ class KCell:
                 self.shapes(layer).insert(reg)
                 self.shapes(layer).insert(texts)
 
-    def rebuild(self) -> None:
+    def rebuild(self, meta_format: Literal["v1", "v2"] | None = None) -> None:
         """Rebuild the instances of the KCell."""
         self.insts.clear()
         for _inst in self._kdb_cell.each_inst():
             self.insts.append(Instance(self.kcl, _inst))
+        self.get_meta_data(meta_format=meta_format)
 
     def convert_to_static(self, recursive: bool = True) -> None:
         """Convert the KCell to a static cell if it is pdk KCell."""
@@ -1745,6 +1718,7 @@ class KCell:
             options.cell_conflict_resolution
             != kdb.LoadLayoutOptions.CellConflictResolution.RenameCell
         ):
+            self.kcl.set_meta_data()
             for kcell in self.kcl.kcells.values():
                 kcell.set_meta_data()
             layout_b = kdb.Layout()
@@ -4129,6 +4103,7 @@ class KCLayout(
                 != kdb.LoadLayoutOptions.CellConflictResolution.RenameCell
             )
         ):
+            self.set_meta_data()
             for kcell in self.kcells.values():
                 kcell.set_meta_data()
             diff = MergeDiff(
@@ -8451,6 +8426,7 @@ class MergeDiff:
         self.kdiff.on_instance_in_b_only = self.on_instance_in_b_only  # type: ignore[assignment]
         self.kdiff.on_polygon_in_a_only = self.on_polygon_in_a_only  # type: ignore[assignment]
         self.kdiff.on_polygon_in_b_only = self.on_polygon_in_b_only  # type: ignore[assignment]
+        self.kdiff.on_layout_meta_info_differs = self.on_meta_info_differs  # type: ignore[assignment]
 
     def on_dbu_differs(self, dbu_a: float, dbu_b: float) -> None:
         if self.loglevel is not None:
@@ -8597,6 +8573,31 @@ class MergeDiff:
                 ^ kdb.Region(self.cell_b.shapes(self.layer_b))
             )
 
+    def on_meta_info_differs(
+        self,
+        name: str,
+        meta_a: kdb.LayoutMetaInfo | None,
+        meta_b: kdb.LayoutMetaInfo | None,
+    ) -> None:
+        """Called when there is a difference in meta infos."""
+        if meta_a is None:
+            assert meta_b is not None
+            logger.error(
+                f"Found {name} MetaInfo in new Layout with value "
+                f"{meta_b!s} but it's not in the existing Layout."
+            )
+        if meta_b is None:
+            assert meta_b is not None
+            logger.error(
+                f"Found {name} MetaInfo in existing Layout with value "
+                f"{meta_a!s} but it's not in the loaded Layout."
+            )
+        assert meta_a is not None and meta_b is not None
+        logger.error(
+            f"{name} MetaInfo differs between existing {meta_a.value!s} and"
+            f" loaded {meta_b.value!s}"
+        )
+
     def compare(self) -> bool:
         """Run the comparing.
 
@@ -8609,7 +8610,8 @@ class MergeDiff:
             | kdb.LayoutDiff.NoLayerNames
             | kdb.LayoutDiff.BoxesAsPolygons
             | kdb.LayoutDiff.PathsAsPolygons
-            | kdb.LayoutDiff.IgnoreDuplicates,
+            | kdb.LayoutDiff.IgnoreDuplicates
+            | kdb.LayoutDiff.WithMetaInfo,
         )
 
 
