@@ -27,7 +27,7 @@ dependencies = [
   "pydantic-settings >= 2.0.1, < 3",
   "rectangle-packer",
   "requests",
-  "ruamel.yaml",
+  "ruamel.yaml.string",
   "scipy",
   "tomli",
   "toolz",

@@ -261,14 +261,13 @@ def test_merge_properties() -> None:
         c.info["test_prop"] = "kcl_2"
 
         kcl_2.write("MERGE_READ.oas")
+        regex = kf.config.logfilter.regex
         kf.config.logfilter.regex = (
-            "MetaInfo 'kfactory:info:test_prop' exists in cells which are to be merged "
-            "in Layout MERGE_BASE. But their values differ: 'MERGE_BASE': 'kcl_1', "
-            "'MERGE_READ': 'kcl_2'"
+            "MetaInfo differs between existing 'kcl_1' and loaded 'kcl_2'"
         )
         kcl_1.read("MERGE_READ.oas")
-        kf.config.logfilter.regex = None
-    Path("MERGE_READ.oas").unlink(missing_ok=True)
+        kf.config.logfilter.regex = regex
+        Path("MERGE_READ.oas").unlink(missing_ok=True)
 
 
 def test_pdk_cell_infosettings(straight: kf.KCell, LAYER: Layers) -> None:
