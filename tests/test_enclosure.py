@@ -4,7 +4,7 @@ from conftest import Layers
 
 
 @kf.cell
-def mmi_enc(layer: kf.kdb.LayerInfo, enclosure: kf.LayerEnclosure) -> kf.KCell:
+def mmi_enc(layer: kf.kdb.LayerInfo, enclosure: kf.LayerEnclosure, apply_bbox=False) -> kf.KCell:
     c = kf.KCell()
     li = c.kcl.find_layer(layer)
     c.shapes(li).insert(kf.kdb.Box(-10000, -6000, 10000, 6000))
@@ -26,9 +26,18 @@ def mmi_enc(layer: kf.kdb.LayerInfo, enclosure: kf.LayerEnclosure) -> kf.KCell:
     ]:
         c.shapes(li).insert(taper.transformed(t))
 
-    enclosure.apply_minkowski_enc(c, layer)
+    if apply_bbox:
+        enclosure.apply_bbox(c, layer)
+    else:
+        enclosure.apply_minkowski_enc(c, layer)
 
     return c
+
+
+def test_bbox(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
+    wg_enc
+
+    mmi_enc(LAYER.WG, wg_enc, apply_bbox=True)
 
 
 def test_enclosure(LAYER: Layers) -> None:
