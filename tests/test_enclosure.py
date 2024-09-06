@@ -59,6 +59,20 @@ def test_layer_multi_enc(LAYER: Layers) -> None:
     mmi_enc(LAYER.WG, enc)
 
 
+def test_bbox_enc(LAYER: Layers) -> None:
+    enc = kf.LayerEnclosure(
+        [
+            (LAYER.WGCLAD, -5000, -5400),
+            (LAYER.WGCLAD, -4000, -3900),
+            (LAYER.WGCLAD, -100, 100),
+            (LAYER.WGCLAD, -500, -400),
+        ],
+        main_layer=LAYER.WG,
+    )
+    c = kf.KCell("BBOX_ENC")
+    enc.apply_bbox(c, ref=LAYER.WG)
+
+
 def test_layer_merge_enc(LAYER: Layers) -> None:
     enc = kf.LayerEnclosure(
         [
