@@ -1,3 +1,18 @@
+<a name="v0.20.4"></a>
+# [v0.20.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.4) - 06 Sep 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix apply_bbox for LayerInfo objects [#469](https://github.com/gdsfactory/kfactory/pull/469)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.3...v0.20.4
+
+
+[Changes][v0.20.4]
+
+
 <a name="v0.20.3"></a>
 # [v0.20.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.3) - 06 Sep 2024
 
@@ -1062,6 +1077,7 @@
 [Changes][v0.4.0]
 
 
+[v0.20.4]: https://github.com/gdsfactory/kfactory/compare/v0.20.3...v0.20.4
 [v0.20.3]: https://github.com/gdsfactory/kfactory/compare/v0.20.2...v0.20.3
 [v0.20.2]: https://github.com/gdsfactory/kfactory/compare/v0.20.1...v0.20.2
 [v0.20.1]: https://github.com/gdsfactory/kfactory/compare/v0.20.0...v0.20.1
