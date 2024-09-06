@@ -994,7 +994,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         elif _is_Region(ref):
             _ref = ref.bbox()
         elif _is_LayerInfo(ref):
-            _ref = ref.bbox(c.kcl.layer(ref))
+            _ref = c.bbox(c.kcl.layer(ref))
 
         def bbox_reg(d_max: int, d_min: int | None = None) -> kdb.Region:
             reg_max = kdb.Region(_ref)
