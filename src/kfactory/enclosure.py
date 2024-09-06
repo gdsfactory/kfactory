@@ -67,18 +67,6 @@ def path_pts_to_polygon(
     return kdb.DPolygon(pts_top + pts_bot)
 
 
-def _is_Region(r: object) -> TypeGuard[kdb.Region]:
-    return isinstance(r, kdb.Region)
-
-
-def _is_int(r: object) -> TypeGuard[int]:
-    return isinstance(r, int)
-
-
-def _is_callable(r: object) -> TypeGuard[Callable[[float], float]]:
-    return callable(r)
-
-
 def clean_points(points: list[kdb.Point]) -> list[kdb.Point]:
     """Remove useless points from a manhattan type of list.
 
@@ -985,9 +973,9 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                     " Therefore the layer must be defined in calls"
                 )
 
-        if _is_int(ref):
-            _ref = c.bbox(ref)
-        elif _is_Region(ref):
+        if isinstance(ref, kdb.LayerInfo):
+            _ref = c.bbox(c.kcl.layer(ref))
+        elif isinstance(ref, kdb.Region):
             _ref = ref.bbox()
 
         def bbox_reg(d_max: int, d_min: int | None = None) -> kdb.Region:
@@ -1095,21 +1083,6 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             [], name=self.name, main_layer=self.main_layer, kcl=kcl
         )
         for layer, sections in self.layer_sections.items():
-            if isinstance(layer, kdb.LayerInfo):
-                try:
-                    _layer = kcl.layer(layer)
-                except ValueError:
-                    _layer = kcl.layer(layer.layer, layer.datatype)
-                    logger.warning(
-                        "{layer.name} - {layer.layer}/{layer.datatype} is not"
-                        " available in the new KCLayout {kcl.name}, using layer"
-                        " index instead",
-                        layer=layer,
-                        kcl=kcl,
-                    )
-            else:
-                raise NotImplementedError
-
             for section in sections.sections:
                 layer_enc.add_section(layer, section)
         return layer_enc
