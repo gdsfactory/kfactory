@@ -2681,7 +2681,7 @@ class KCell:
                     elif dcplx_trans:
                         _port.dcplx_trans = dcplx_trans
 
-                    self.add_port(_port, keep_mirror=True)
+                    self.add_port(port=_port, keep_mirror=True)
             case "v1":
                 for index in sorted(port_dict.keys()):
                     _d = port_dict[index]
@@ -2705,7 +2705,7 @@ class KCell:
                     elif dcplx_trans:
                         _port.dcplx_trans = dcplx_trans.from_s()
 
-                    self.add_port(_port, keep_mirror=True)
+                    self.add_port(port=_port, keep_mirror=True)
             case _:
                 raise ValueError(
                     f"Unknown metadata format {config.meta_format}."
