@@ -75,6 +75,10 @@ def _is_int(r: object) -> TypeGuard[int]:
     return isinstance(r, int)
 
 
+def _is_LayerInfo(r: object) -> TypeGuard[kdb.LayerInfo]:
+    return isinstance(r, kdb.LayerInfo)
+
+
 def _is_callable(r: object) -> TypeGuard[Callable[[float], float]]:
     return callable(r)
 
@@ -989,6 +993,8 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             _ref = c.bbox(ref)
         elif _is_Region(ref):
             _ref = ref.bbox()
+        elif _is_LayerInfo(ref):
+            _ref = ref.bbox(c.kcl.layer(ref))
 
         def bbox_reg(d_max: int, d_min: int | None = None) -> kdb.Region:
             reg_max = kdb.Region(_ref)
