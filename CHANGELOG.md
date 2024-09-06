@@ -1,3 +1,18 @@
+<a name="v0.20.3"></a>
+# [v0.20.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.3) - 06 Sep 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix add_port using arg call instead of kwarg call [#466](https://github.com/gdsfactory/kfactory/pull/466)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.2...v0.20.3
+
+
+[Changes][v0.20.3]
+
+
 <a name="v0.20.2"></a>
 # [v0.20.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.2) - 05 Sep 2024
 
@@ -1047,6 +1062,7 @@
 [Changes][v0.4.0]
 
 
+[v0.20.3]: https://github.com/gdsfactory/kfactory/compare/v0.20.2...v0.20.3
 [v0.20.2]: https://github.com/gdsfactory/kfactory/compare/v0.20.1...v0.20.2
 [v0.20.1]: https://github.com/gdsfactory/kfactory/compare/v0.20.0...v0.20.1
 [v0.20.0]: https://github.com/gdsfactory/kfactory/compare/v0.19.2...v0.20.0
