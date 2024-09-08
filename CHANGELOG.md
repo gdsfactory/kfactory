@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- fix layout-cache not honoring overwrite-existing [#470](https://github.com/gdsfactory/kfactory/pull/470)
 - fix apply_bbox for LayerInfo objects [#469](https://github.com/gdsfactory/kfactory/pull/469)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.3...v0.20.4
