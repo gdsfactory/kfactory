@@ -4064,13 +4064,17 @@ class KCLayout(
                         old_future_name = self.future_cell_name
                         self.future_cell_name = name
                         if layout_cache:
-                            c = self.layout.cell(self.future_cell_name)
-                            if c is not None:
-                                logger.debug(
-                                    "Loading {} from layout cache",
-                                    self.future_cell_name,
-                                )
-                                return self[c.cell_index()]  # type: ignore[return-value]
+                            if overwrite_existing:
+                                for c in list(self.layout.cells(self.future_cell_name)):
+                                    self[c.cell_index()].delete()
+                            else:
+                                c = self.layout.cell(self.future_cell_name)
+                                if c is not None:
+                                    logger.debug(
+                                        "Loading {} from layout cache",
+                                        self.future_cell_name,
+                                    )
+                                    return self[c.cell_index()]  # type: ignore[return-value]
                         logger.debug(
                             "Constructing {}",
                             self.future_cell_name,
