@@ -164,9 +164,18 @@ def build(
                                 kcls[lib].write(root / f"{lib}.{suffix}")
                         cell.write(root / f"{cell.name}.{suffix}")
                     if write_static:
-                        cell.write(root / f"{cell.name}_STATIC.{suffix}")
+                        cell.write(
+                            root / f"{cell.name}_STATIC.{suffix}",
+                            convert_external_cells=True,
+                        )
                     if write_nocontext:
-                        cell.write(root / f"{cell.name}_NOCONT.{suffix}")
+                        saveopts = save_layout_options()
+                        saveopts.write_context_info = False
+                        cell.write(
+                            root / f"{cell.name}_NOCONT.{suffix}",
+                            save_options=saveopts,
+                            convert_external_cells=True,
+                        )
 
             except ImportError:
                 logger.critical(
@@ -229,7 +238,9 @@ def build(
                         saveopts = save_layout_options()
                         saveopts.write_context_info = False
                         cell.write(
-                            root / f"{cell.name}_NOCONT.{suffix}", save_options=saveopts
+                            root / f"{cell.name}_NOCONT.{suffix}",
+                            save_options=saveopts,
+                            convert_external_cells=True,
                         )
             except ImportError:
                 logger.critical(
