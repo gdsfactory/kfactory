@@ -1,5 +1,20 @@
+<a name="v0.20.5"></a>
+# [v0.20.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.5) - 13 Sep 2024
+
+# What's Changed
+
+## New
+
+- Better build cli [#471](https://github.com/gdsfactory/kfactory/pull/471)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.4...v0.20.5
+
+
+[Changes][v0.20.5]
+
+
 <a name="v0.20.4"></a>
-# [v0.20.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.4) - 06 Sep 2024
+# [v0.20.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.4) - 12 Sep 2024
 
 # What's Changed
 
@@ -1078,6 +1093,7 @@
 [Changes][v0.4.0]
 
 
+[v0.20.5]: https://github.com/gdsfactory/kfactory/compare/v0.20.4...v0.20.5
 [v0.20.4]: https://github.com/gdsfactory/kfactory/compare/v0.20.3...v0.20.4
 [v0.20.3]: https://github.com/gdsfactory/kfactory/compare/v0.20.2...v0.20.3
 [v0.20.2]: https://github.com/gdsfactory/kfactory/compare/v0.20.1...v0.20.2
