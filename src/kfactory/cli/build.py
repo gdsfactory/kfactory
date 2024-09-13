@@ -16,13 +16,15 @@ import git
 import typer
 
 from ..conf import logger
-from ..kcell import KCell, kcls
+from ..kcell import KCell, kcls, save_layout_options
 from ..kcell import show as kfshow
 
 __all__ = ["show", "build"]
 
 
-def show(file: str) -> None:
+def show(
+    file: Path,
+) -> None:
     """Show a GDS or OAS file in KLayout through klive."""
     path = Path(file)
     logger.debug("Path = {}", path.resolve())
@@ -35,7 +37,7 @@ def show(file: str) -> None:
     if not os.access(path, os.R_OK):
         logger.critical("No permission to read file {file}, exiting", file=file)
         return
-    kfshow(path)
+    kfshow(path, use_libraries=True)
 
 
 class LayoutSuffix(StrEnum):
@@ -152,11 +154,6 @@ def build(
                         if wtd is not None:
                             root = Path(wtd) / "build/gds"
                             root.mkdir(parents=True, exist_ok=True)
-                            # tf = root / Path(name).with_suffix(".oas")
-                            # tf.parent.mkdir(parents=True, exist_ok=True)
-                            # layout.write(str(tf), save_options)
-                            # file = tf
-                            # delete = False
                         else:
                             root = Path()
                     if show:
@@ -204,8 +201,36 @@ def build(
                             old_arg = kwarg
 
                 cell = getattr(_mod, func)(**kwargs)
-                if show and isinstance(cell, KCell):
-                    cell.show()
+                if isinstance(cell, KCell):
+                    try:
+                        repo = git.repo.Repo(".", search_parent_directories=True)
+                    except git.InvalidGitRepositoryError:
+                        pass
+                    else:
+                        wtd = repo.working_tree_dir
+                        if wtd is not None:
+                            root = Path(wtd) / "build/gds"
+                            root.mkdir(parents=True, exist_ok=True)
+                        else:
+                            root = Path()
+                    if show:
+                        cell.show()
+                    if write_full:
+                        if library is not None:
+                            for lib in library:
+                                kcls[lib].write(root / f"{lib}.{suffix}")
+                        cell.write(root / f"{cell.name}.{suffix}")
+                    if write_static:
+                        cell.write(
+                            root / f"{cell.name}_STATIC.{suffix}",
+                            convert_external_cells=True,
+                        )
+                    if write_nocontext:
+                        saveopts = save_layout_options()
+                        saveopts.write_context_info = False
+                        cell.write(
+                            root / f"{cell.name}_NOCONT.{suffix}", save_options=saveopts
+                        )
             except ImportError:
                 logger.critical(
                     f"Couldn't import function '{func}' from module '{mod_file}'"
