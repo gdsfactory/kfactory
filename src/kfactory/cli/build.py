@@ -2,19 +2,24 @@
 
 Use `kf --help` for more info.
 """
+# ruff: noqa: UP007
 
 import importlib
 import os
 import runpy
 import sys
+from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, Optional
 
+import git
 import typer
 
 from ..conf import logger
-from ..kcell import KCell
+from ..kcell import KCell, kcls
 from ..kcell import show as kfshow
+
+__all__ = ["show", "build"]
 
 
 def show(file: str) -> None:
@@ -31,6 +36,12 @@ def show(file: str) -> None:
         logger.critical("No permission to read file {file}, exiting", file=file)
         return
     kfshow(path)
+
+
+class LayoutSuffix(StrEnum):
+    gds = "gds"
+    gdsgz = "gds.gz"
+    oas = "oas"
 
 
 def build(
@@ -55,6 +66,37 @@ def build(
     show: Annotated[
         bool, typer.Option(help="Show the file through klive in KLayout")
     ] = True,
+    library: Annotated[
+        Optional[list[str]],
+        typer.Option(
+            help="Library(s) used by the main layout file. Only works for functions,"
+            " not for '__main__' modules"
+        ),
+    ] = None,
+    suffix: Annotated[
+        LayoutSuffix, typer.Option(help="Format of the layout files")
+    ] = LayoutSuffix.oas,
+    write_full: Annotated[
+        bool,
+        typer.Option(
+            help="Write the gds with full library support. Uses libraries passed with"
+            " --library. Only works in function mode not on modules"
+        ),
+    ] = True,
+    write_static: Annotated[
+        bool,
+        typer.Option(
+            help="Write a layout where all cells are converted to static (non-library)"
+            " cells."
+        ),
+    ] = False,
+    write_nocontext: Annotated[
+        bool,
+        typer.Option(
+            help="Write the layout without any meta infos. This is useful for "
+            "submitting the GDS to fabs."
+        ),
+    ] = False,
 ) -> None:
     """Run a python modules __main__ or a function if specified."""
     path = sys.path.copy()
@@ -100,8 +142,35 @@ def build(
                             old_arg = kwarg
 
                 cell = getattr(_mod, func)(**kwargs)
-                if show and isinstance(cell, KCell):
-                    cell.show()
+                if isinstance(cell, KCell):
+                    try:
+                        repo = git.repo.Repo(".", search_parent_directories=True)
+                    except git.InvalidGitRepositoryError:
+                        pass
+                    else:
+                        wtd = repo.working_tree_dir
+                        if wtd is not None:
+                            root = Path(wtd) / "build/gds"
+                            root.mkdir(parents=True, exist_ok=True)
+                            # tf = root / Path(name).with_suffix(".oas")
+                            # tf.parent.mkdir(parents=True, exist_ok=True)
+                            # layout.write(str(tf), save_options)
+                            # file = tf
+                            # delete = False
+                        else:
+                            root = Path()
+                    if show:
+                        cell.show()
+                    if write_full:
+                        if library is not None:
+                            for lib in library:
+                                kcls[lib].write(root / f"{lib}.{suffix}")
+                        cell.write(root / f"{cell.name}.{suffix}")
+                    if write_static:
+                        cell.write(root / f"{cell.name}_STATIC.{suffix}")
+                    if write_nocontext:
+                        cell.write(root / f"{cell.name}_NOCONT.{suffix}")
+
             except ImportError:
                 logger.critical(
                     f"Couldn't import function '{func}' from module '"
