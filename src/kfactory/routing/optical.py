@@ -191,9 +191,7 @@ def place90(
     """
     if len(kwargs) > 0:
         raise ValueError(
-            "Additional args and kwargs are not allowed for route_smart."
-            f"{
-                kwargs=}"
+            "Additional args and kwargs are not allowed for route_smart." f"{kwargs=}"
         )
     if allow_width_mismatch is None:
         allow_width_mismatch = config.allow_width_mismatch
@@ -225,8 +223,7 @@ def place90(
 
     if len(bend90_ports) != 2:
         raise AttributeError(
-            f"{bend90_cell.name} should have 2 ports but has {
-                len(bend90_ports)} ports"
+            f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
             f"with {port_type=}"
         )
     if abs((bend90_ports[0].trans.angle - bend90_ports[1].trans.angle) % 4) != 1:
@@ -376,8 +373,7 @@ def place90(
 
         if (pt.distance(old_pt) < b90r) and not allow_small_routes:
             raise ValueError(
-                f"distance between points {str(old_pt)} and {
-                    str(pt)} is too small to"
+                f"distance between points {str(old_pt)} and {str(pt)} is too small to"
                 f" safely place bends {pt.to_s()=}, {old_pt.to_s()=},"
                 f" {pt.distance(old_pt)=} < {b90r=}"
             )
@@ -387,8 +383,7 @@ def place90(
             and not allow_small_routes
         ):
             raise ValueError(
-                f"distance between points {str(old_pt)} and {
-                    str(pt)} is too small to"
+                f"distance between points {str(old_pt)} and {str(pt)} is too small to"
                 f" safely place bends {str(pt)=}, {str(old_pt)=},"
                 f" {pt.distance(old_pt)=} < {2 * b90r=}"
             )
@@ -401,14 +396,12 @@ def place90(
         mirror = (vec_angle(vec_n) - vec_angle(vec)) % 4 != 3
         if (vec.y != 0) and (vec.x != 0):
             raise ValueError(
-                f"The vector between manhattan points is not manhattan {
-                    old_pt}, {pt}"
+                f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
             )
         ang = (vec_angle(vec) + 2) % 4
         if ang is None:
             raise ValueError(
-                f"The vector between manhattan points is not manhattan {
-                    old_pt}, {pt}"
+                f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
             )
         bend90.transform(kdb.Trans(ang, mirror, pt.x, pt.y) * b90c.inverted())
         length = int(
@@ -743,8 +736,7 @@ def route(
         allow_type_mismatch = config.allow_type_mismatch
     if p1.width != p2.width and not allow_width_mismatch:
         raise ValueError(
-            f"The ports have different widths {
-                p1.width=} {p2.width=}. If this is"
+            f"The ports have different widths {p1.width=} {p2.width=}. If this is"
             "intentional, add `allow_width_mismatch=True` to override this."
         )
 
@@ -758,8 +750,7 @@ def route(
 
     if len(bend90_ports) != 2:
         raise ValueError(
-            f"{bend90_cell.name} should have 2 ports but has {
-                len(bend90_ports)} ports"
+            f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
         )
 
     if abs((bend90_ports[0].trans.angle - bend90_ports[1].trans.angle) % 4) != 1:
@@ -794,8 +785,7 @@ def route(
         bend180_ports = [p for p in bend180_cell.ports if p.port_type == port_type]
         if len(bend180_ports) != 2:
             raise AttributeError(
-                f"{bend180_cell.name} should have 2 ports but has {
-                    len(bend180_ports)}"
+                f"{bend180_cell.name} should have 2 ports but has {len(bend180_ports)}"
                 " ports"
             )
         if abs((bend180_ports[0].trans.angle - bend180_ports[1].trans.angle) % 4) != 0:
