@@ -232,8 +232,7 @@ def check_collisions(
                     case "show_error":
                         c.show(lyrdb=db)
                         raise RuntimeError(
-                            f"Routing collision in {
-                                c.kcl.future_cell_name or c.name}"
+f"Routing collision in {c.kcl.future_cell_name or c.name}"
                         )
                     case "error":
                         raise RuntimeError(
