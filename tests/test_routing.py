@@ -522,7 +522,6 @@ def test_route_smart_waypoints_trans_sort(
         waypoints=kf.kdb.Trans(250_000, 0),
         sort_ports=True,
     )
-    c.show()
 
 
 def test_route_smart_waypoints_pts_sort(
@@ -558,7 +557,6 @@ def test_route_smart_waypoints_pts_sort(
         waypoints=[kf.kdb.Point(250_000, 0), kf.kdb.Point(250_000, 100_000)],
         sort_ports=True,
     )
-    c.show()
 
 
 def test_route_smart_waypoints_trans(
@@ -593,7 +591,6 @@ def test_route_smart_waypoints_trans(
         bend90_cell=bend90_small,
         waypoints=kf.kdb.Trans(250_000, 0),
     )
-    c.show()
 
 
 def test_route_smart_waypoints_pts(
@@ -628,4 +625,3 @@ def test_route_smart_waypoints_pts(
         bend90_cell=bend90_small,
         waypoints=[kf.kdb.Point(250_000, 0), kf.kdb.Point(250_000, 100_000)],
     )
-    c.show()
