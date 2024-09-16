@@ -236,7 +236,7 @@ def check_collisions(
                         )
                     case "error":
                         raise RuntimeError(
-                            f"Routing collision in {c.kcl.future_cellname or c.name}"
+                            f"Routing collision in {c.kcl.future_cell_name or c.name}"
                         )
 
 
