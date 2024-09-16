@@ -144,6 +144,7 @@ def route_bundle(
     sort_ports: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
+    waypoints: kdb.Trans | list[kdb.Point] | None = None,
 ) -> list[ManhattanRoute]:
     """Connect multiple input ports to output ports.
 
@@ -173,6 +174,10 @@ def route_bundle(
         on_collision: Define what to do on routing collision. Default behaviour is to
             open send the layout of c to klive and open an error lyrdb with the
             collisions. "error" will simply raise an error. None will ignore any error.
+        waypoints: Bundle the ports and route them with minimal separation through
+            the waypoints. The waypoints can either be a list of at least two points
+            or a single transformation. If it's a transformation, the points will be
+            routed through it as if it were a tunnel with length 0.
     """
     return route_bundle_generic(
         c=c,
@@ -185,6 +190,7 @@ def route_bundle(
             "bbox_routing": bbox_routing,
             "bboxes": list(bboxes),
             "bend90_radius": 0,
+            "waypoints": waypoints,
         },
         placer_function=place_single_wire,
         sort_ports=sort_ports,
@@ -208,6 +214,7 @@ def route_bundle_dual_rails(
     sort_ports: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
+    waypoints: kdb.Trans | list[kdb.Point] | None = None,
 ) -> list[ManhattanRoute]:
     """Connect multiple input ports to output ports.
 
@@ -238,6 +245,10 @@ def route_bundle_dual_rails(
         on_collision: Define what to do on routing collision. Default behaviour is to
             open send the layout of c to klive and open an error lyrdb with the
             collisions. "error" will simply raise an error. None will ignore any error.
+        waypoints: Bundle the ports and route them with minimal separation through
+            the waypoints. The waypoints can either be a list of at least two points
+            or a single transformation. If it's a transformation, the points will be
+            routed through it as if it were a tunnel with length 0.
     """
     return route_bundle_generic(
         c=c,
@@ -250,6 +261,7 @@ def route_bundle_dual_rails(
             "bbox_routing": bbox_routing,
             "bboxes": list(bboxes),
             "bend90_radius": 0,
+            "waypoints": waypoints,
         },
         placer_function=place_dual_rails,
         placer_kwargs={

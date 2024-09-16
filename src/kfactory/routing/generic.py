@@ -232,11 +232,13 @@ def check_collisions(
                     case "show_error":
                         c.show(lyrdb=db)
                         raise RuntimeError(
-                            f"Routing collision in {c.kcl.future_cell_name or c.name}"
+                            f"Routing collision in {
+                                c.kcl.future_cell_name or c.name}"
                         )
                     case "error":
                         raise RuntimeError(
-                            f"Routing collision in {c.kcl.future_cell_name or c.name}"
+                            f"Routing collision in {
+                                c.kcl.future_cell_name or c.name}"
                         )
 
 
@@ -364,54 +366,46 @@ def route_bundle(
     if not routers:
         return []
 
+    start_mapping = {sp.trans: sp for sp in start_ports}
+    end_mapping = {ep.trans: ep for ep in end_ports}
     routes: list[ManhattanRoute] = []
-    if sort_ports:
-        start_mapping = {sp.trans.disp.to_p(): sp for sp in start_ports}
-        end_mapping = {ep.trans.disp.to_p(): ep for ep in end_ports}
+    start_ports = []
+    end_ports = []
 
-        sorted_start_ports = [start_mapping[router.start.pts[0]] for router in routers]
-        sorted_end_ports = [end_mapping[router.start.pts[-1]] for router in routers]
+    for router in routers:
+        sp = start_mapping[router.start_transformation]
+        ep = end_mapping[router.end_transformation]
+        routes.append(
+            placer_function(
+                c,
+                sp,
+                ep,
+                router.start.pts,
+                route_width=router.width,
+                **placer_kwargs,
+            )
+        )
+        start_ports.append(sp)
+        end_ports.append(ep)
 
-        if router_post_process_function is not None:
-            router_post_process_function(
-                c=c,
-                start_ports=sorted_start_ports,
-                end_ports=sorted_end_ports,
-                **router_post_process_kwargs,
+    if router_post_process_function is not None:
+        router_post_process_function(
+            c=c,
+            start_ports=start_ports,
+            end_ports=end_ports,
+            routers=routers,
+            **router_post_process_kwargs,
+        )
+    for router, ps, pe in zip(routers, start_ports, end_ports):
+        routes.append(
+            placer_function(
+                c,
+                ps,
+                pe,
+                router.start.pts,
+                **placer_kwargs,
             )
-
-        for sp, ep, w, router in zip(
-            sorted_start_ports, sorted_end_ports, widths, routers
-        ):
-            routes.append(
-                placer_function(
-                    c,
-                    sp,
-                    ep,
-                    router.start.pts,
-                    route_width=w,
-                    **placer_kwargs,
-                )
-            )
-    else:
-        if router_post_process_function is not None:
-            router_post_process_function(
-                c=c,
-                start_ports=start_ports,
-                end_ports=end_ports,
-                routers=routers,
-                **router_post_process_kwargs,
-            )
-        for router, ps, pe in zip(routers, start_ports, end_ports):
-            routes.append(
-                placer_function(
-                    c,
-                    ps,
-                    pe,
-                    router.start.pts,
-                    **placer_kwargs,
-                )
-            )
+        )
     check_collisions(
         c=c,
         start_ports=start_ports,

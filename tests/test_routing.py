@@ -487,3 +487,145 @@ def test_custom_router(
             "separation": 5000,
         },
     )
+
+
+def test_route_smart_waypoints_trans_sort(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    LAYER: Layers,
+) -> None:
+    c = kf.KCell("TEST_SMART_ROUTE_WAYPOINTS_TRANS_SORT")
+    _l = 15
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
+        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
+    ]
+    start_ports = [
+        kf.Port(width=500, layer_info=LAYER.WG, kcl=c.kcl, trans=trans)
+        for trans in transformations
+    ]
+    end_ports = [
+        kf.Port(
+            width=500,
+            layer_info=LAYER.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
+        )
+        for trans in transformations
+    ]
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        waypoints=kf.kdb.Trans(250_000, 0),
+        sort_ports=True,
+    )
+    c.show()
+
+
+def test_route_smart_waypoints_pts_sort(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    LAYER: Layers,
+) -> None:
+    c = kf.KCell("TEST_SMART_ROUTE_WAYPOINTS_PTS_SORT")
+    _l = 15
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
+        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
+    ]
+    start_ports = [
+        kf.Port(width=500, layer_info=LAYER.WG, kcl=c.kcl, trans=trans)
+        for trans in transformations
+    ]
+    end_ports = [
+        kf.Port(
+            width=500,
+            layer_info=LAYER.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
+        )
+        for trans in transformations
+    ]
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        waypoints=[kf.kdb.Point(250_000, 0), kf.kdb.Point(250_000, 100_000)],
+        sort_ports=True,
+    )
+    c.show()
+
+
+def test_route_smart_waypoints_trans(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    LAYER: Layers,
+) -> None:
+    c = kf.KCell("TEST_SMART_ROUTE_WAYPOINTS_TRANS")
+    _l = 15
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
+        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
+    ]
+    start_ports = [
+        kf.Port(width=500, layer_info=LAYER.WG, kcl=c.kcl, trans=trans)
+        for trans in transformations
+    ]
+    end_ports = [
+        kf.Port(
+            width=500,
+            layer_info=LAYER.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
+        )
+        for trans in transformations
+    ]
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        waypoints=kf.kdb.Trans(250_000, 0),
+    )
+    c.show()
+
+
+def test_route_smart_waypoints_pts(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    LAYER: Layers,
+) -> None:
+    c = kf.KCell("TEST_SMART_ROUTE_WAYPOINTS_PTS")
+    _l = 15
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
+        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
+    ]
+    start_ports = [
+        kf.Port(width=500, layer_info=LAYER.WG, kcl=c.kcl, trans=trans)
+        for trans in transformations
+    ]
+    end_ports = [
+        kf.Port(
+            width=500,
+            layer_info=LAYER.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
+        )
+        for trans in transformations
+    ]
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        waypoints=[kf.kdb.Point(250_000, 0), kf.kdb.Point(250_000, 100_000)],
+    )
+    c.show()
