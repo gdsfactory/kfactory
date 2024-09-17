@@ -56,6 +56,7 @@ def route_bundle(
     route_width: dbu | list[dbu] | None = None,
     sort_ports: bool = False,
     bbox_routing: Literal["minimal", "full"] = "minimal",
+    waypoints: kdb.Trans | list[kdb.Point] | None = None,
 ) -> list[ManhattanRoute]:
     """Route a bundle from starting ports to end_ports.
 
@@ -90,6 +91,10 @@ def route_bundle(
         bbox_routing: "minimal": only route to the bbox so that it can be safely routed
             around, but start or end bends might encroach on the bounding boxes when
             leaving them.
+        waypoints: Bundle the ports and route them with minimal separation through
+            the waypoints. The waypoints can either be a list of at least two points
+            or a single transformation. If it's a transformation, the points will be
+            routed through it as if it were a tunnel with length 0.
     """
     bend90_radius = get_radius(bend90_cell.ports.filter(port_type=place_port_type))
     return route_bundle_generic(
@@ -109,6 +114,7 @@ def route_bundle(
             "sort_ports": sort_ports,
             "bbox_routing": bbox_routing,
             "bboxes": list(bboxes),
+            "waypoints": waypoints,
         },
         placer_function=place90,
         placer_kwargs={
