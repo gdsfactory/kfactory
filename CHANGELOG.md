@@ -1,3 +1,18 @@
+<a name="v0.20.6"></a>
+# [v0.20.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.6) - 17 Sep 2024
+
+# What's Changed
+
+## New
+
+- add waypoint routing [#473](https://github.com/gdsfactory/kfactory/pull/473)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.5...v0.20.6
+
+
+[Changes][v0.20.6]
+
+
 <a name="v0.20.5"></a>
 # [v0.20.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.5) - 13 Sep 2024
 
@@ -1093,6 +1108,7 @@
 [Changes][v0.4.0]
 
 
+[v0.20.6]: https://github.com/gdsfactory/kfactory/compare/v0.20.5...v0.20.6
 [v0.20.5]: https://github.com/gdsfactory/kfactory/compare/v0.20.4...v0.20.5
 [v0.20.4]: https://github.com/gdsfactory/kfactory/compare/v0.20.3...v0.20.4
 [v0.20.3]: https://github.com/gdsfactory/kfactory/compare/v0.20.2...v0.20.3
