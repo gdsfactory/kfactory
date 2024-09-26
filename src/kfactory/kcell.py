@@ -834,9 +834,14 @@ class Ports:
         """Return Port count."""
         return len(self._ports)
 
-    def copy(self) -> Ports:
+    def copy(
+        self, rename_funciton: Callable[[list[Port]], None] | None = None
+    ) -> Ports:
         """Get a copy of each port."""
-        return Ports(ports=[p.copy() for p in self._ports], kcl=self.kcl)
+        _ports = [p.copy() for p in self._ports]
+        if rename_funciton is not None:
+            rename_funciton(_ports)
+        return Ports(ports=_ports, kcl=self.kcl)
 
     def contains(self, port: Port) -> bool:
         """Check whether a port is already in the list."""
@@ -1335,7 +1340,9 @@ class InstancePorts:
     def print(self) -> None:
         config.console.print(pprint_ports(self.copy()))
 
-    def copy(self) -> Ports:
+    def copy(
+        self, rename_function: Callable[[list[Port]], None] | None = None
+    ) -> Ports:
         """Creates a copy in the form of [Ports][kfactory.kcell.Ports]."""
         if not self.instance.is_regular_array():
             if not self.instance.is_complex():
@@ -2267,6 +2274,8 @@ class KCell:
         Any existing meta info (KCell.info and KCell.settings) will be overwritten if
         a KCell already exists. Instead of overwriting the cells, they can also be
         loaded into new cells by using the corresponding cell_conflict_resolution.
+
+        Layout meta infos are ignored from the loaded layout.
 
         Args:
             filename: Path of the GDS file.
@@ -3827,16 +3836,22 @@ class KCLayout(
 
     @overload
     def to_um(self, other: int) -> float: ...
+
     @overload
     def to_um(self, other: kdb.Point) -> kdb.DPoint: ...
+
     @overload
     def to_um(self, other: kdb.Vector) -> kdb.DVector: ...
+
     @overload
     def to_um(self, other: kdb.Box) -> kdb.DBox: ...
+
     @overload
     def to_um(self, other: kdb.Polygon) -> kdb.DPolygon: ...
+
     @overload
     def to_um(self, other: kdb.Path) -> kdb.DPath: ...
+
     @overload
     def to_um(self, other: kdb.Text) -> kdb.DText: ...
 
@@ -3863,16 +3878,22 @@ class KCLayout(
 
     @overload
     def to_dbu(self, other: float) -> int: ...
+
     @overload
     def to_dbu(self, other: kdb.DPoint) -> kdb.Point: ...
+
     @overload
     def to_dbu(self, other: kdb.DVector) -> kdb.Vector: ...
+
     @overload
     def to_dbu(self, other: kdb.DBox) -> kdb.Box: ...
+
     @overload
     def to_dbu(self, other: kdb.DPolygon) -> kdb.Polygon: ...
+
     @overload
     def to_dbu(self, other: kdb.DPath) -> kdb.Path: ...
+
     @overload
     def to_dbu(self, other: kdb.DText) -> kdb.Text: ...
 
@@ -4674,6 +4695,8 @@ class KCLayout(
         loaded into new cells by using the corresponding cell_conflict_resolution.
 
         This will fail if any of the read cells try to load into a locked KCell.
+
+        Layout meta infos are ignored from the loaded layout.
 
         Args:
             filename: Path of the GDS file.
@@ -6603,10 +6626,10 @@ class Port:
                             )
                         else:
                             _dcplxtrans = (
-                                trans
-                                * self.dcplx_trans  # type: ignore[operator]
+                                trans  # type: ignore[operator]
+                                * self.dcplx_trans
                                 * kdb.DCplxTrans(
-                                    post_trans.to_dtype(self.kcl.layout.dbu)  # type: ignore[union-attr]
+                                    post_trans.to_dtype(self.kcl.layout.dbu)  # type: ignore[union-attr,operator]
                                 )
                             )
                             return Port(
@@ -6620,8 +6643,8 @@ class Port:
                             )
                     case True, False:
                         _dcplxtrans = (
-                            (
-                                kdb.DCplxTrans(  # type: ignore[operator]
+                            (  # type: ignore[operator]
+                                kdb.DCplxTrans(
                                     trans.to_dtype(self.kcl.layout.dbu)  # type: ignore[union-attr]
                                 )
                             )
@@ -7787,6 +7810,8 @@ def frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable
 
 @overload
 def _to_hashable(d: dict[str, Any]) -> frozenset[tuple[str, Any]]: ...
+
+
 @overload
 def _to_hashable(d: list[Any]) -> DecoratorList: ...
 
@@ -7817,6 +7842,8 @@ def _to_hashable(
 
 @overload
 def _hashable_to_original(fs: frozenset[tuple[str, Any]]) -> dict[str, Any]: ...
+
+
 @overload
 def _hashable_to_original(fs: DecoratorList) -> list[Any]: ...
 
@@ -8475,7 +8502,6 @@ class MergeDiff:
         self.kdiff.on_instance_in_b_only = self.on_instance_in_b_only  # type: ignore[assignment]
         self.kdiff.on_polygon_in_a_only = self.on_polygon_in_a_only  # type: ignore[assignment]
         self.kdiff.on_polygon_in_b_only = self.on_polygon_in_b_only  # type: ignore[assignment]
-        self.kdiff.on_layout_meta_info_differs = self.on_layout_meta_info_differs  # type: ignore[assignment]
         self.kdiff.on_cell_meta_info_differs = self.on_cell_meta_info_differs  # type: ignore[assignment]
 
     def on_dbu_differs(self, dbu_a: float, dbu_b: float) -> None:
@@ -8557,38 +8583,6 @@ class MergeDiff:
                 kdb.Region(self.cell_a.shapes(self.layer_a))
                 ^ kdb.Region(self.cell_b.shapes(self.layer_b))
             )
-
-    def on_layout_meta_info_differs(
-        self,
-        name: str,
-        meta_a: MetaData | None,
-        meta_b: MetaData | None,
-    ) -> None:
-        """Called when there is a difference in meta infos."""
-        if meta_a is None:
-            assert meta_b is not None
-            logger.error(
-                f"Found '{name}' MetaInfo in new Layout with value "
-                f"'{meta_b!s}' but it's not in the existing Layout."
-            )
-        if meta_b is None:
-            assert meta_b is not None
-            logger.error(
-                f"Found '{name}' MetaInfo in existing Layout with value "
-                f"'{meta_a!s}' but it's not in the loaded Layout."
-            )
-        assert meta_a is not None and meta_b is not None
-        logger.error(
-            f"'{name}' MetaInfo differs between existing {meta_a!s} and"
-            f" loaded '{meta_b!s}'"
-        )
-        self.diff_xor.add_meta_info(
-            kdb.LayoutMetaInfo(
-                name, {"existing": meta_a, "loaded": meta_b}, persisted=True
-            )
-        )
-        self.layout_meta_diff[name] = {"existing": str(meta_a), "loaded": str(meta_b)}
-        self.diff_xor
 
     def on_cell_meta_info_differs(
         self,
