@@ -7,6 +7,10 @@
 
 - add waypoint routing [#473](https://github.com/gdsfactory/kfactory/pull/473)
 
+## Bug Fixes
+
+- readd LayerEnum to be available as kf.LayerEnum [#476](https://github.com/gdsfactory/kfactory/pull/476)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.5...v0.20.6
 
 
