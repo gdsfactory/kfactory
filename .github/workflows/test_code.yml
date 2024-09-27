@@ -29,8 +29,7 @@ jobs:
       max-parallel: 12
       matrix:
         python-version: ["3.11", "3.12"]
-        # os: [ubuntu-latest, windows-latest, macos-latest]
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
