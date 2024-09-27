@@ -11,6 +11,10 @@
 
 - re-add LayerEnum to be available as kf.LayerEnum [#476](https://github.com/gdsfactory/kfactory/pull/476)
 
+## Dependency Updates
+
+- bump klayout to 0.29.7 [#478](https://github.com/gdsfactory/kfactory/pull/478)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.5...v0.20.6
 
 
