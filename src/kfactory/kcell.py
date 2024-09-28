@@ -8399,7 +8399,7 @@ def show(
                         if dv > 0:
                             break
                         if dv < 0:
-                            logger.warning(
+                            logger.debug(
                                 "KLayout GUI version is older than the python klayout."
                                 f"GUI:{jmsg['klayout_version']} Python:"
                                 f"{_klayout_version}. This might cause missing, "

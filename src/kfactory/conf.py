@@ -251,7 +251,7 @@ class Settings(BaseSettings):
     @classmethod
     def _validate_layout_cache(cls, v: bool, info: ValidationInfo) -> bool:
         if v is True:
-            logger.warning(
+            logger.debug(
                 "'cell_layout_cache' has been set to True. This might cause when "
                 "as any cell names generated automatically are loaded from the layout"
                 " instead of created. This could happen e.g. after reading a gds file"
