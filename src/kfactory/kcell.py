@@ -8400,17 +8400,15 @@ def show(
                             break
                         if dv < 0:
                             if klayout_version < [0, 28, 13]:
-                                log = logger.info
+                                log = logger.error
                             else:
                                 log = logger.debug
 
                             log(
-                                "KLayout GUI version is older than the python klayout."
-                                f"GUI:{jmsg['klayout_version']} Python:"
-                                f"{_klayout_version}. This might cause missing, "
-                                "unfunctional, or erroneous features. Please "
-                                "update your GUI to a version equal or higher "
-                                "than the python version for optimal performance."
+                                f"KLayout GUI version ({jmsg['klayout_version']}) "
+                                "is older than the Python version "
+                                f"({_klayout_version}). This may cause issues. Please "
+                                "update the GUI to match or exceed the Python version."
                             )
                             break
 
