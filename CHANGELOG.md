@@ -1,5 +1,20 @@
+<a name="v0.20.7"></a>
+# [v0.20.7](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.7) - 29 Sep 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- decrease log level of layout_cache and klayout version mismatch log messages [#480](https://github.com/gdsfactory/kfactory/pull/480)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.6...v0.20.7
+
+
+[Changes][v0.20.7]
+
+
 <a name="v0.20.6"></a>
-# [v0.20.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.6) - 17 Sep 2024
+# [v0.20.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.6) - 27 Sep 2024
 
 # What's Changed
 
@@ -1116,6 +1131,7 @@
 [Changes][v0.4.0]
 
 
+[v0.20.7]: https://github.com/gdsfactory/kfactory/compare/v0.20.6...v0.20.7
 [v0.20.6]: https://github.com/gdsfactory/kfactory/compare/v0.20.5...v0.20.6
 [v0.20.5]: https://github.com/gdsfactory/kfactory/compare/v0.20.4...v0.20.5
 [v0.20.4]: https://github.com/gdsfactory/kfactory/compare/v0.20.3...v0.20.4
