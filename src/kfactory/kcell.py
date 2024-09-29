@@ -8399,8 +8399,8 @@ def show(
                         if dv > 0:
                             break
                         if dv < 0:
-                            if klayout_version[1] <= 27:
-                                log = logger.warning
+                            if klayout_version < [0, 28, 13]:
+                                log = logger.info
                             else:
                                 log = logger.debug
 
