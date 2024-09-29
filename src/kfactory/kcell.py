@@ -59,6 +59,7 @@ from typing_extensions import ParamSpec, Self  # noqa: UP035
 
 from . import __version__, kdb, lay, rdb
 from .conf import CHECK_INSTANCES, LogLevel, config, logger
+from .cross_section import SymmetricalCrossSection
 from .decorators import Decorators
 from .enclosure import (
     KCellEnclosure,
@@ -6268,6 +6269,7 @@ LayerEnclosure.model_rebuild()
 KCellEnclosure.model_rebuild()
 LayerEnclosureModel.model_rebuild()
 LayerEnclosureCollection.model_rebuild()
+SymmetricalCrossSection.model_rebuild()
 kcl = KCLayout("DEFAULT")
 """Default library object.
 
@@ -6310,8 +6312,9 @@ class Port:
     yaml_tag = "!Port"
     name: str | None
     kcl: KCLayout
-    width: int
-    layer: int | LayerEnum
+    # width: int
+    # layer: int | LayerEnum
+    cross_section: SymmetricalCrossSection
     _trans: kdb.Trans | None
     _dcplx_trans: kdb.DCplxTrans | None
     info: Info = Info()
@@ -6460,8 +6463,7 @@ class Port:
                 self.trans = port.trans
 
             self.port_type = port.port_type
-            self.layer = port.layer
-            self.width = port.width
+            self.cross_section = port.cross_section
             self.kcl = port.kcl
         elif (width is None and dwidth is None) or (
             layer is None and layer_info is None
@@ -6508,14 +6510,26 @@ class Port:
             self.layer = layer
             self.port_type = port_type
 
+    # @property
+    # def layer_info(self) -> kdb.LayerInfo:
+    #     """Get the corresponding layer info of the layer of the port."""
+    #     return self.kcl.layout.get_info(self.layer)
+
+    # @layer_info.setter
+    # def layer_info(self, layer_info: kdb.LayerInfo) -> None:
+    #     self.layer = self.kcl.layer(layer_info)
+
+    @property
+    def layer(self) -> int:
+        return self.kcl.layer(self.cross_section.main_layer)
+
     @property
     def layer_info(self) -> kdb.LayerInfo:
-        """Get the corresponding layer info of the layer of the port."""
-        return self.kcl.layout.get_info(self.layer)
+        return self.cross_section.main_layer
 
-    @layer_info.setter
-    def layer_info(self, layer_info: kdb.LayerInfo) -> None:
-        self.layer = self.kcl.layer(layer_info)
+    @property
+    def width(self) -> int:
+        return self.cross_section.width
 
     @classmethod
     def from_yaml(cls: type[Port], constructor, node) -> Port:  # type: ignore

@@ -500,6 +500,17 @@ class LayerSection(BaseModel):
         yield from iter(self.sections)
 
 
+class DLayerEnclosure(BaseModel, arbitrary_types_allowed=True):
+    sections: list[tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]]
+    name: str | None = None
+    main_layer: kdb.LayerInfo
+
+    def to_itype(self, kcl: KCLayout) -> LayerEnclosure:
+        return LayerEnclosure(
+            dsections=self.sections, name=self.name, main_layer=self.main_layer
+        )
+
+
 class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowed=True):
     """Definitions for calculation of enclosing (or smaller) shapes of a reference.
 
@@ -512,7 +523,6 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
     _name: str | None = PrivateAttr()
     main_layer: kdb.LayerInfo | None
     yaml_tag: str = "!Enclosure"
-    kcl: KCLayout | None = None
 
     def __init__(
         self,
@@ -551,20 +561,18 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         self.layer_sections = {}
 
         if dsections is not None:
-            assert (
-                self.kcl is not None
-            ), "If sections in um are defined, kcl must be set"
+            assert kcl is not None, "If sections in um are defined, kcl must be set"
             sections = list(sections)
             for section in dsections:
                 if len(section) == 2:
-                    sections.append((section[0], self.kcl.to_dbu(section[1])))
+                    sections.append((section[0], kcl.to_dbu(section[1])))
 
                 elif len(section) == 3:
                     sections.append(
                         (
                             section[0],
-                            self.kcl.to_dbu(section[1]),
-                            self.kcl.to_dbu(section[2]),
+                            kcl.to_dbu(section[1]),
+                            kcl.to_dbu(section[2]),
                         )
                     )
 
@@ -600,6 +608,22 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                 enc.add_section(layer, sec)
 
         return enc
+
+    def to_dtype(self, kcl: KCLayout) -> DLayerEnclosure:
+        """Convert the enclosure to a um based enclosure."""
+        if self.main_layer is None:
+            raise ValueError("um based enclosures must have a main_layer")
+        return DLayerEnclosure(
+            name=self._name,
+            sections=[
+                (layer, kcl.to_um(section.d_max))
+                if section.d_min is None
+                else (layer, kcl.to_um(section.d_min), kcl.to_um(section.d_max))
+                for layer, layer_section in self.layer_sections.items()
+                for section in layer_section.sections
+            ],
+            main_layer=self.main_layer,
+        )
 
     def __iadd__(self, other: LayerEnclosure) -> LayerEnclosure:
         """Allows merging another enclosure into this one."""
