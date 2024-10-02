@@ -1309,8 +1309,8 @@ class InstancePorts:
             if not self.instance.is_complex():
                 yield from (
                     p.copy(
-                        self.instance.trans
-                        * kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                        kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                        * self.instance.trans
                     )
                     for i_a in range(self.instance.na)
                     for i_b in range(self.instance.nb)
@@ -1319,10 +1319,8 @@ class InstancePorts:
             else:
                 yield from (
                     p.copy(
-                        self.instance.dcplx_trans
-                        * kdb.DCplxTrans(
-                            self.instance.da * i_a + self.instance.db * i_b
-                        )
+                        kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
+                        * self.instance.dcplx_trans
                     )
                     for i_a in range(self.instance.na)
                     for i_b in range(self.instance.nb)
