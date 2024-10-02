@@ -29,8 +29,10 @@ from typing import (
     Annotated,
     Any,
     Literal,
+    NotRequired,
     Protocol,
     TypeAlias,
+    TypedDict,
     TypeVar,
     cast,
     get_origin,
@@ -59,12 +61,12 @@ from typing_extensions import ParamSpec, Self  # noqa: UP035
 
 from . import __version__, kdb, lay, rdb
 from .conf import CHECK_INSTANCES, LogLevel, config, logger
-from .cross_section import SymmetricalCrossSection
+from .cross_section import DSymmetricalCrossSection, SymmetricalCrossSection
 from .decorators import Decorators
 from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
-    LayerEnclosureCollection,
+    LayerEnclosureSpec,
     LayerSection,
 )
 from .port import (
@@ -808,6 +810,33 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
     def __setitem__(self, __key: str, __val: LayerEnclosure) -> None:
         """Add a new LayerEnclosure."""
         self.root[__key] = __val
+
+    def get_enclosure(
+        self,
+        enclosure: str | LayerEnclosure | LayerEnclosureSpec,
+        kcl: KCLayout,
+    ) -> LayerEnclosure:
+        if isinstance(enclosure, str):
+            return self[enclosure]
+        if isinstance(enclosure, dict):
+            if enclosure.get("dsections") is None:
+                enclosure = LayerEnclosure(
+                    dsections=enclosure.get("sections", []),
+                    name=enclosure.get("name"),
+                    main_layer=enclosure["main_layer"],
+                    kcl=kcl,
+                )
+            else:
+                enclosure = LayerEnclosure(
+                    sections=enclosure.get("sections", []),
+                    name=enclosure.get("name"),
+                    main_layer=enclosure["main_layer"],
+                    kcl=kcl,
+                )
+
+        if enclosure not in self.root.values():
+            self.root[enclosure.name] = enclosure
+        return enclosure
 
 
 class Ports:
@@ -2043,7 +2072,9 @@ class KCell:
                     kcell.rebuild()
                     if cell.kcl.dbu != self.kcl.dbu:
                         for port, lib_port in zip(kcell.ports, cell.ports):
-                            port.width = self.kcl.to_dbu(cell.kcl.to_um(lib_port.width))
+                            port.cross_section = cell.kcl.get_cross_section(
+                                lib_port.cross_section.to_dtype(cell.kcl)
+                            )
                 if libcell_as_static:
                     cell.set_meta_data()
                     ci = self.kcl.convert_cell_to_static(lib_ci)
@@ -2053,7 +2084,9 @@ class KCell:
                     kcell.name = cell.kcl.name + static_name_separator + cell.name
                     if cell.kcl.dbu != self.kcl.dbu:
                         for port, lib_port in zip(kcell.ports, cell.ports):
-                            port.width = self.kcl.to_dbu(cell.kcl.to_um(lib_port.width))
+                            port.cross_section = cell.kcl.get_cross_section(
+                                lib_port.cross_section.to_dtype(cell.kcl)
+                            )
                 else:
                     ci = lib_ci
 
@@ -3415,6 +3448,67 @@ def create_port_error(
     it.add_value(port_polygon(p2.width).transformed(p2.trans).to_dtype(dbu))
 
 
+class CrossSectionSpec(TypedDict):
+    name: NotRequired[str]
+    sections: NotRequired[
+        list[tuple[kdb.LayerInfo, int] | tuple[kdb.LayerInfo, int, int]]
+    ]
+    main_layer: kdb.LayerInfo
+    width: int | float
+    dsections: NotRequired[
+        list[tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]]
+    ]
+
+
+class CrossSectionModel(BaseModel):
+    cross_sections: dict[str, SymmetricalCrossSection] = Field(default_factory=dict)
+    kcl: KCLayout
+
+    def get_cross_section(
+        self,
+        cross_section: str
+        | SymmetricalCrossSection
+        | CrossSectionSpec
+        | DSymmetricalCrossSection,
+    ) -> SymmetricalCrossSection:
+        if isinstance(cross_section, str):
+            return self.cross_sections[cross_section]
+        elif isinstance(cross_section, DSymmetricalCrossSection):
+            cross_section = cross_section.to_itype(self.kcl)
+        elif isinstance(cross_section, dict):
+            cast(CrossSectionSpec, cross_section)
+            if "dsections" in cross_section:
+                cross_section = SymmetricalCrossSection(
+                    width=self.kcl.to_dbu(cross_section["width"]),
+                    enclosure=self.kcl.layer_enclosures.get_enclosure(
+                        enclosure=LayerEnclosureSpec(
+                            dsections=cross_section["dsections"],
+                            main_layer=cross_section["main_layer"],
+                        ),
+                        kcl=self.kcl,
+                    ),
+                )
+            else:
+                w = cross_section["width"]
+                if not isinstance(w, int) and not w.is_integer():
+                    raise ValueError(
+                        "A CrossSectionSpec with 'sections' must have a width in dbu."
+                    )
+                cross_section = SymmetricalCrossSection(
+                    width=int(w),
+                    enclosure=self.kcl.layer_enclosures.get_enclosure(
+                        LayerEnclosureSpec(
+                            sections=cross_section["sections"],
+                            main_layer=cross_section["main_layer"],
+                        ),
+                        kcl=self.kcl,
+                    ),
+                )
+        if cross_section not in self.cross_sections.values():
+            self.cross_sections[cross_section.name] = cross_section
+        return cross_section
+
+
 class Constants(BaseModel):
     """Constant Model class."""
 
@@ -3589,6 +3683,7 @@ class KCLayout(
     name: str
     layout: kdb.Layout
     layer_enclosures: LayerEnclosureModel
+    cross_sections: CrossSectionModel
     enclosure: KCellEnclosure
     library: kdb.Library
 
@@ -3657,6 +3752,7 @@ class KCLayout(
             name=name,
             kcells={},
             layer_enclosures=LayerEnclosureModel(dict()),
+            cross_sections=CrossSectionModel(kcl=self),
             enclosure=KCellEnclosure([]),
             infos=_infos,
             layers=LayerEnum,
@@ -4904,6 +5000,22 @@ class KCLayout(
         for tc in self.top_kcells():
             tc.prune_cell()
         self.kcells = {}
+
+    def get_enclosure(
+        self, enclosure: str | LayerEnclosure | LayerEnclosureSpec
+    ) -> LayerEnclosure:
+        """Gets a layer enclosure by name specification or the layerenclosure itself."""
+        return self.layer_enclosures.get_enclosure(enclosure, self)
+
+    def get_cross_section(
+        self,
+        cross_section: str
+        | SymmetricalCrossSection
+        | CrossSectionSpec
+        | DSymmetricalCrossSection,
+    ) -> SymmetricalCrossSection:
+        """Get a cross section by name or specification."""
+        return self.cross_sections.get_cross_section(cross_section)
 
 
 def layerenum_from_dict(
@@ -6268,7 +6380,6 @@ LayerSection.model_rebuild()
 LayerEnclosure.model_rebuild()
 KCellEnclosure.model_rebuild()
 LayerEnclosureModel.model_rebuild()
-LayerEnclosureCollection.model_rebuild()
 SymmetricalCrossSection.model_rebuild()
 kcl = KCLayout("DEFAULT")
 """Default library object.
@@ -6453,6 +6564,10 @@ class Port:
         info: dict[str, int | float | str] = {},
     ):
         """Create a port from dbu or um based units."""
+        if layer_info is None:
+            if layer is None:
+                raise ValueError("layer or layer_info for a port must be defined")
+            layer_info = self.kcl.get_info(layer)
         self.info = Info(**info)
         if port is not None:
             self.name = port.name if name is None else name
@@ -6478,7 +6593,9 @@ class Port:
                 else:
                     self.trans = trans.dup()
                 assert width is not None
-                self.width = width
+                self.cross_section = self.kcl.get_cross_section(
+                    CrossSectionSpec(main_layer=layer_info, width=width)
+                )
                 self.port_type = port_type
             elif dcplx_trans is not None:
                 if isinstance(dcplx_trans, str):
@@ -6486,7 +6603,12 @@ class Port:
                 else:
                     self.dcplx_trans = dcplx_trans.dup()
                 assert dwidth is not None
-                self.dwidth = dwidth
+                # self.dwidth = dwidth
+                self.cross_section = self.kcl.get_cross_section(
+                    CrossSectionSpec(
+                        main_layer=layer_info, width=self.kcl.to_dbu(dwidth)
+                    )
+                )
                 assert self.width * self.kcl.layout.dbu == float(
                     dwidth
                 ), "When converting to dbu the width does not match the desired width!"
@@ -6494,41 +6616,44 @@ class Port:
                 assert angle is not None
                 assert center is not None
                 self.trans = kdb.Trans(angle, mirror_x, *center)
-                self.width = width
+                self.cross_section = self.kcl.get_cross_section(
+                    CrossSectionSpec(main_layer=layer_info, width=width)
+                )
                 self.port_type = port_type
             elif dwidth is not None:
                 assert dangle is not None
                 assert dcenter is not None
                 self.dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
-                self.dwidth = dwidth
+                self.cross_section = self.kcl.get_cross_section(
+                    CrossSectionSpec(
+                        main_layer=layer_info,
+                        width=self.kcl.to_dbu(dwidth),
+                    )
+                )
 
             self.name = name
-            if layer is None:
-                if layer_info is None:
-                    raise ValueError("layer or layer_info for a port must be defined")
-                layer = self.kcl.layer(layer_info)
-            self.layer = layer
             self.port_type = port_type
-
-    # @property
-    # def layer_info(self) -> kdb.LayerInfo:
-    #     """Get the corresponding layer info of the layer of the port."""
-    #     return self.kcl.layout.get_info(self.layer)
-
-    # @layer_info.setter
-    # def layer_info(self, layer_info: kdb.LayerInfo) -> None:
-    #     self.layer = self.kcl.layer(layer_info)
 
     @property
     def layer(self) -> int:
-        return self.kcl.layer(self.cross_section.main_layer)
+        """Get the layer index of the port.
+
+        This corresponds to the port's cross section's main layer converted to the
+        index.
+        """
+        return self.kcl.layout.layer(self.cross_section.main_layer)
 
     @property
     def layer_info(self) -> kdb.LayerInfo:
+        """Get the layer info of the port.
+
+        This corresponds to the port's cross section's main layer.
+        """
         return self.cross_section.main_layer
 
     @property
     def width(self) -> int:
+        """Width of the port. This corresponds to the width of the cross section."""
         return self.cross_section.width
 
     @classmethod
@@ -6897,13 +7022,13 @@ class Port:
         """Width of the port in um."""
         return self.kcl.to_um(self.width)
 
-    @dwidth.setter
-    def dwidth(self, value: float) -> None:
-        self.width = self.kcl.to_dbu(value)
-        assert self.kcl.to_um(self.width) == float(value), (
-            "When converting to dbu the width does not match the desired width"
-            f"({self.dwidth} / {value})!"
-        )
+    # @dwidth.setter
+    # def dwidth(self, value: float) -> None:
+    #     self.width = self.kcl.to_dbu(value)
+    #     assert self.kcl.to_um(self.width) == float(value), (
+    #         "When converting to dbu the width does not match the desired width"
+    #         f"({self.dwidth} / {value})!"
+    #     )
 
     @property
     def dmirror(self) -> bool:

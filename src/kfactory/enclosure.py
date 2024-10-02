@@ -13,7 +13,7 @@ from collections.abc import Callable, Iterable, Sequence
 from enum import IntEnum
 from functools import lru_cache
 from hashlib import sha1
-from typing import TYPE_CHECKING, Any, TypeGuard, overload
+from typing import TYPE_CHECKING, Any, NotRequired, TypedDict, TypeGuard, overload
 
 import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr, field_validator
@@ -1112,7 +1112,34 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         return layer_enc
 
 
+class LayerEnclosureSpec(TypedDict):
+    main_layer: kdb.LayerInfo
+    name: NotRequired[str]
+    sections: NotRequired[
+        list[tuple[kdb.LayerInfo, int] | tuple[kdb.LayerInfo, int, int]]
+    ]
+    dsections: NotRequired[
+        list[tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]]
+    ]
+
+
 class LayerEnclosureCollection(BaseModel):
+    """Collection of LayerEnclosures."""
+
+    enclosures: list[LayerEnclosure]
+
+    def __hash__(self) -> int:
+        return hash(tuple(self.enclosures))
+
+    def __getitem__(self, key: str | int) -> LayerEnclosure:
+        """Retrieve enclosure by main layer."""
+        try:
+            return next(filter(lambda enc: enc.main_layer == key, self.enclosures))
+        except StopIteration:
+            raise KeyError(f"Unknown key {key}")
+
+
+class KCellLayerEnclosures(BaseModel):
     """Collection of LayerEnclosures."""
 
     enclosures: list[LayerEnclosure]
@@ -1134,12 +1161,29 @@ class LayerEnclosureCollection(BaseModel):
             ), "Enclosure for PDKEnclosure must have a main layer defined"
         return v
 
-    def __get_item__(self, key: str | int) -> LayerEnclosure:
+    def __getitem__(self, key: str | int) -> LayerEnclosure:
         """Retrieve enclosure by main layer."""
         try:
             return next(filter(lambda enc: enc.main_layer == key, self.enclosures))
         except StopIteration:
             raise KeyError(f"Unknown key {key}")
+
+    def get_enclosure(
+        self,
+        enclosure: str | LayerEnclosure | LayerEnclosureSpec,
+    ) -> LayerEnclosure:
+        if isinstance(enclosure, str):
+            return self[enclosure]
+        if isinstance(enclosure, dict):
+            if enclosure.get("dsections") is None:
+                enclosure = LayerEnclosure(
+                    sections=enclosure.get("sections", []),
+                    name=enclosure.get("name"),
+                    main_layer=enclosure["main_layer"],
+                )
+        if enclosure not in self.enclosures:
+            self.enclosures.append(enclosure)  # type: ignore[arg-type]
+        return enclosure  # type: ignore[return-value]
 
 
 class RegionOperator(kdb.TileOutputReceiver):
