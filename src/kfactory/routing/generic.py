@@ -373,16 +373,6 @@ def route_bundle(
     for router in routers:
         sp = start_mapping[router.start_transformation]
         ep = end_mapping[router.end_transformation]
-        routes.append(
-            placer_function(
-                c,
-                sp,
-                ep,
-                router.start.pts,
-                route_width=router.width,
-                **placer_kwargs,
-            )
-        )
         start_ports.append(sp)
         end_ports.append(ep)
 

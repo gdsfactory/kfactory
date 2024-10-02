@@ -1285,13 +1285,13 @@ class InstancePorts:
             p = self.cell_ports[key]
             if not self.instance.is_complex():
                 return p.copy(
-                    self.instance.trans
-                    * kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                    kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                    * self.instance.trans
                 )
             else:
                 return p.copy(
-                    self.instance.dcplx_trans
-                    * kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
+                    kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
+                    * self.instance.dcplx_trans
                 )
 
     @property
