@@ -1,3 +1,18 @@
+<a name="v0.20.8"></a>
+# [v0.20.8](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.8) - 02 Oct 2024
+
+# What's Changed
+
+## Bug Fixes
+
+- fix AREF ports [#483](https://github.com/gdsfactory/kfactory/pull/483)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.7...v0.20.8
+
+
+[Changes][v0.20.8]
+
+
 <a name="v0.20.7"></a>
 # [v0.20.7](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.7) - 29 Sep 2024
 
@@ -1131,6 +1146,7 @@
 [Changes][v0.4.0]
 
 
+[v0.20.8]: https://github.com/gdsfactory/kfactory/compare/v0.20.7...v0.20.8
 [v0.20.7]: https://github.com/gdsfactory/kfactory/compare/v0.20.6...v0.20.7
 [v0.20.6]: https://github.com/gdsfactory/kfactory/compare/v0.20.5...v0.20.6
 [v0.20.5]: https://github.com/gdsfactory/kfactory/compare/v0.20.4...v0.20.5
