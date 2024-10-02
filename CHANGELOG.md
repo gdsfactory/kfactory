@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- fix AREF __getitem__ for instance ports and generic route_bundle [#484](https://github.com/gdsfactory/kfactory/pull/484)
 - fix AREF ports [#483](https://github.com/gdsfactory/kfactory/pull/483)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.7...v0.20.8
