@@ -3498,7 +3498,7 @@ class CrossSectionModel(BaseModel):
                     width=int(w),
                     enclosure=self.kcl.layer_enclosures.get_enclosure(
                         LayerEnclosureSpec(
-                            sections=cross_section["sections"],
+                            sections=cross_section.get("sections", []),
                             main_layer=cross_section["main_layer"],
                         ),
                         kcl=self.kcl,
@@ -6564,6 +6564,10 @@ class Port:
         info: dict[str, int | float | str] = {},
     ):
         """Create a port from dbu or um based units."""
+        if port is not None:
+            self.kcl = port.kcl
+        else:
+            self.kcl = kcl or _get_default_kcl()
         if layer_info is None:
             if layer is None:
                 raise ValueError("layer or layer_info for a port must be defined")
@@ -6579,13 +6583,11 @@ class Port:
 
             self.port_type = port.port_type
             self.cross_section = port.cross_section
-            self.kcl = port.kcl
         elif (width is None and dwidth is None) or (
             layer is None and layer_info is None
         ):
             raise ValueError("width, layer must be given if the 'port is None'")
         else:
-            self.kcl = kcl or _get_default_kcl()
             if trans is not None:
                 # self.width = cast(int, width)
                 if isinstance(trans, str):
