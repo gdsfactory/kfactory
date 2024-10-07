@@ -16,7 +16,7 @@ from hashlib import sha1
 from typing import TYPE_CHECKING, Any, NotRequired, TypedDict, TypeGuard, overload
 
 import numpy as np
-from pydantic import BaseModel, Field, PrivateAttr, field_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_serializer
 
 from . import kdb
 from .conf import config, logger
@@ -588,6 +588,18 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
                 Section(d_max=sec[2], d_min=sec[1])
             )
+
+    @model_serializer
+    def _serialize(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "sections": [
+                (layer, s.d_max) if s.d_min is None else (layer, s.d_min, s.d_max)
+                for layer, sections in self.layer_sections.items()
+                for s in sections.sections
+            ],
+            "main_layer": self.main_layer,
+        }
 
     def __hash__(self) -> int:  # make hashable BaseModel subclass
         """Calculate a unique hash of the enclosure."""

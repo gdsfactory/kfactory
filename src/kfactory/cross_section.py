@@ -33,6 +33,12 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
     def _validate_enclosure_main_layer(self) -> Self:
         if self.enclosure.main_layer is None:
             raise ValueError("Enclosures of cross sections must have a main layer.")
+        if (self.width // 2) * 2 != self.width:
+            raise ValueError(
+                "Width of symmetrical cross sections must have be a multiple of 2. "
+                "This could cause cross sections and extrusions to become unsymmetrical"
+                " otherwise."
+            )
         return self
 
     @cached_property
@@ -60,6 +66,6 @@ class DSymmetricalCrossSection(BaseModel):
         """Convert to a dbu based CrossSection."""
         return SymmetricalCrossSection(
             width=kcl.to_dbu(self.width),
-            enclosure=self.enclosure.to_itype(kcl),
+            enclosure=kcl.get_enclosure(self.enclosure.to_itype(kcl)),
             name=self.name,
         )

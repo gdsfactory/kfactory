@@ -819,7 +819,7 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
         if isinstance(enclosure, str):
             return self[enclosure]
         if isinstance(enclosure, dict):
-            if enclosure.get("dsections") is None:
+            if "dsections" not in enclosure:
                 enclosure = LayerEnclosure(
                     dsections=enclosure.get("sections", []),
                     name=enclosure.get("name"),
@@ -834,9 +834,10 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
                     kcl=kcl,
                 )
 
-        if enclosure not in self.root.values():
+        if enclosure.name not in self.root:
             self.root[enclosure.name] = enclosure
-        return enclosure
+            return enclosure
+        return self.root[enclosure.name]
 
 
 class Ports:
@@ -1031,6 +1032,7 @@ class Ports:
         center: tuple[int, int] | None = None,
         angle: Literal[0, 1, 2, 3] | None = None,
         mirror_x: bool = False,
+        cross_section: SymmetricalCrossSection | None = None,
     ) -> Port:
         """Create a new port in the list.
 
@@ -1049,52 +1051,62 @@ class Ports:
             center: Tuple of the center. [dbu]
             angle: Angle in 90° increments. Used for simple/dbu transformations.
             mirror_x: Mirror the transformation of the port.
+            cross_section: Cross section of the port. If set, overwrites width and layer
+                (info).
         """
-        if layer is None:
-            if layer_info is None:
+        if cross_section is None:
+            if width is None and dwidth is None:
                 raise ValueError(
-                    "layer or layer_info must be defined to create a port."
+                    "Either width or dwidth must be set. It can be set through"
+                    " a cross section as well."
                 )
-            layer = self.kcl.layer(layer_info)
-        if trans is not None:
+            if layer_info is None:
+                if layer is None:
+                    raise ValueError(
+                        "layer or layer_info must be defined to create a port."
+                    )
+                layer_info = self.kcl.get_info(layer)
             if width is None:
-                raise ValueError("width needs to be set")
-            if width % 2 != 0:
-                raise ValueError(f"width needs to be even to snap to grid. Got {width}")
+                dwidth = cast(float, dwidth)
+                if dwidth <= 0:
+                    raise ValueError("dwidth needs to be set and be >0")
+                _width = self.kcl.to_dbu(dwidth)
+                if _width % 2:
+                    raise ValueError(
+                        f"dwidth needs to be even to snap to grid. Got {dwidth}."
+                        "Ports must have a grid width of multiples of 2."
+                    )
+                cross_section = self.kcl.get_cross_section(
+                    CrossSectionSpec(
+                        main_layer=layer_info,
+                        width=_width,
+                    )
+                )
+            else:
+                cross_section = self.kcl.get_cross_section(
+                    CrossSectionSpec(main_layer=layer_info, width=width)
+                )
+        if trans is not None:
             port = Port(
                 name=name,
                 trans=trans,
-                width=width,
-                layer=layer,
+                cross_section=cross_section,
                 port_type=port_type,
                 kcl=self.kcl,
             )
         elif dcplx_trans is not None:
-            if dwidth is None or dwidth <= 0:
-                raise ValueError("dwidth needs to be set")
-            elif dwidth is not None and dwidth > 0:
-                _width = self.kcl.to_dbu(dwidth)
-                if _width % 2:
-                    raise ValueError(
-                        f"dwidth needs to be even to snap to grid. Got {dwidth}"
-                    )
             port = Port(
                 name=name,
-                dwidth=dwidth,
                 dcplx_trans=dcplx_trans,
-                layer=layer,
                 port_type=port_type,
+                cross_section=cross_section,
                 kcl=self.kcl,
             )
         elif angle is not None and center is not None:
-            assert width is not None
-            if width // 2 * 2 != width:
-                raise ValueError(f"width needs to be even to snap to grid. Got {width}")
             port = Port(
                 name=name,
-                width=width,
-                layer=layer,
                 port_type=port_type,
+                cross_section=cross_section,
                 angle=angle,
                 center=center,
                 mirror_x=mirror_x,
@@ -1991,6 +2003,26 @@ class KCell:
         layer_info: kdb.LayerInfo,
         port_type: str = "optical",
         mirror_x: bool = False,
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        cross_section: SymmetricalCrossSection,
+        trans: kdb.Trans,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        cross_section: SymmetricalCrossSection,
+        dcplx_trans: kdb.DCplxTrans,
+        port_type: str = "optical",
     ) -> Port: ...
 
     def create_port(self, **kwargs: Any) -> Port:
@@ -3471,6 +3503,18 @@ class CrossSectionModel(BaseModel):
         | CrossSectionSpec
         | DSymmetricalCrossSection,
     ) -> SymmetricalCrossSection:
+        if isinstance(cross_section, SymmetricalCrossSection):
+            if cross_section.enclosure != self.kcl.get_enclosure(
+                cross_section.enclosure
+            ):
+                return self.get_cross_section(
+                    CrossSectionSpec(
+                        sections=cross_section.enclosure.model_dump()["sections"],
+                        main_layer=cross_section.main_layer,
+                        name=cross_section.name,
+                        width=cross_section.width,
+                    )
+                )
         if isinstance(cross_section, str):
             return self.cross_sections[cross_section]
         elif isinstance(cross_section, DSymmetricalCrossSection):
@@ -3504,9 +3548,10 @@ class CrossSectionModel(BaseModel):
                         kcl=self.kcl,
                     ),
                 )
-        if cross_section not in self.cross_sections.values():
+        if cross_section.name not in self.cross_sections:
             self.cross_sections[cross_section.name] = cross_section
-        return cross_section
+            return cross_section
+        return self.cross_sections[cross_section.name]
 
 
 class Constants(BaseModel):
@@ -4926,6 +4971,27 @@ class KCLayout(
         for name, info in self.info.model_dump().items():
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
+            )
+        for enclosure in self.layer_enclosures.root.values():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(
+                    f"kfactory:layer_enclosure:{enclosure.name}",
+                    enclosure.model_dump(),
+                    None,
+                    True,
+                )
+            )
+        for cross_section in self.cross_sections.cross_sections.values():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(
+                    f"kfactory:cross_section:{cross_section.name}",
+                    {
+                        "width": cross_section.width,
+                        "layer_enclsoure": cross_section.enclosure.name,
+                    },
+                    None,
+                    True,
+                )
             )
 
     @overload
@@ -6542,6 +6608,57 @@ class Port:
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
     ): ...
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        cross_section: SymmetricalCrossSection,
+        port_type: str = "optical",
+        angle: int,
+        center: tuple[int, int],
+        mirror_x: bool = False,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = {},
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        cross_section: SymmetricalCrossSection,
+        port_type: str = "optical",
+        dangle: float,
+        dcenter: tuple[float, float],
+        mirror_x: bool = False,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = {},
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        cross_section: SymmetricalCrossSection,
+        trans: kdb.Trans,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = {},
+        port_type: str = "optical",
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        cross_section: SymmetricalCrossSection,
+        dcplx_trans: kdb.DCplxTrans,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = {},
+        port_type: str = "optical",
+    ): ...
 
     def __init__(
         self,
@@ -6562,17 +6679,9 @@ class Port:
         port: Port | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
+        cross_section: SymmetricalCrossSection | None = None,
     ):
         """Create a port from dbu or um based units."""
-        if port is not None:
-            self.kcl = port.kcl
-        else:
-            self.kcl = kcl or _get_default_kcl()
-        if layer_info is None:
-            if layer is None:
-                raise ValueError("layer or layer_info for a port must be defined")
-            layer_info = self.kcl.get_info(layer)
-        self.info = Info(**info)
         if port is not None:
             self.name = port.name if name is None else name
 
@@ -6583,58 +6692,48 @@ class Port:
 
             self.port_type = port.port_type
             self.cross_section = port.cross_section
-        elif (width is None and dwidth is None) or (
-            layer is None and layer_info is None
-        ):
-            raise ValueError("width, layer must be given if the 'port is None'")
-        else:
-            if trans is not None:
-                # self.width = cast(int, width)
-                if isinstance(trans, str):
-                    self.trans = kdb.Trans.from_s(trans)
-                else:
-                    self.trans = trans.dup()
-                assert width is not None
-                self.cross_section = self.kcl.get_cross_section(
-                    CrossSectionSpec(main_layer=layer_info, width=width)
-                )
-                self.port_type = port_type
-            elif dcplx_trans is not None:
-                if isinstance(dcplx_trans, str):
-                    self.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
-                else:
-                    self.dcplx_trans = dcplx_trans.dup()
-                assert dwidth is not None
-                # self.dwidth = dwidth
-                self.cross_section = self.kcl.get_cross_section(
-                    CrossSectionSpec(
-                        main_layer=layer_info, width=self.kcl.to_dbu(dwidth)
-                    )
-                )
-                assert self.width * self.kcl.layout.dbu == float(
-                    dwidth
-                ), "When converting to dbu the width does not match the desired width!"
-            elif width is not None:
-                assert angle is not None
-                assert center is not None
-                self.trans = kdb.Trans(angle, mirror_x, *center)
-                self.cross_section = self.kcl.get_cross_section(
-                    CrossSectionSpec(main_layer=layer_info, width=width)
-                )
-                self.port_type = port_type
-            elif dwidth is not None:
-                assert dangle is not None
-                assert dcenter is not None
-                self.dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
-                self.cross_section = self.kcl.get_cross_section(
+            return
+        self.kcl = kcl or _get_default_kcl()
+        if cross_section is None:
+            if layer_info is None:
+                if layer is None:
+                    raise ValueError("layer or layer_info for a port must be defined")
+                layer_info = self.kcl.get_info(layer)
+            if width is None and dwidth is None:
+                raise ValueError("width, layer must be given if the 'port is None'")
+            elif width is None:
+                cross_section = self.kcl.get_cross_section(
                     CrossSectionSpec(
                         main_layer=layer_info,
-                        width=self.kcl.to_dbu(dwidth),
+                        width=self.kcl.to_dbu(dwidth),  # type: ignore[arg-type]
                     )
                 )
-
-            self.name = name
+            else:
+                cross_section = self.kcl.get_cross_section(
+                    CrossSectionSpec(main_layer=layer_info, width=width)
+                )
+        self.cross_section = cross_section
+        self.info = Info(**info)
+        if trans is not None:
+            # self.width = cast(int, width)
+            if isinstance(trans, str):
+                self.trans = kdb.Trans.from_s(trans)
+            else:
+                self.trans = trans.dup()
+        elif dcplx_trans is not None:
+            if isinstance(dcplx_trans, str):
+                self.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
+            else:
+                self.dcplx_trans = dcplx_trans.dup()
+        elif angle is not None:
+            assert center is not None
+            self.trans = kdb.Trans(angle, mirror_x, *center)
             self.port_type = port_type
+        elif dangle is not None:
+            assert dcenter is not None
+            self.dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
+        self.name = name
+        self.port_type = port_type
 
     @property
     def layer(self) -> int:
