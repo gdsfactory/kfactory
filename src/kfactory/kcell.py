@@ -1327,13 +1327,13 @@ class InstancePorts:
             p = self.cell_ports[key]
             if not self.instance.is_complex():
                 return p.copy(
-                    self.instance.trans
-                    * kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                    kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                    * self.instance.trans
                 )
             else:
                 return p.copy(
-                    self.instance.dcplx_trans
-                    * kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
+                    kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
+                    * self.instance.dcplx_trans
                 )
 
     @property
@@ -1351,8 +1351,8 @@ class InstancePorts:
             if not self.instance.is_complex():
                 yield from (
                     p.copy(
-                        self.instance.trans
-                        * kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                        kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                        * self.instance.trans
                     )
                     for i_a in range(self.instance.na)
                     for i_b in range(self.instance.nb)
@@ -1361,10 +1361,8 @@ class InstancePorts:
             else:
                 yield from (
                     p.copy(
-                        self.instance.dcplx_trans
-                        * kdb.DCplxTrans(
-                            self.instance.da * i_a + self.instance.db * i_b
-                        )
+                        kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
+                        * self.instance.dcplx_trans
                     )
                     for i_a in range(self.instance.na)
                     for i_b in range(self.instance.nb)
@@ -8639,13 +8637,16 @@ def show(
                         if dv > 0:
                             break
                         if dv < 0:
-                            logger.warning(
-                                "KLayout GUI version is older than the python klayout."
-                                f"GUI:{jmsg['klayout_version']} Python:"
-                                f"{_klayout_version}. This might cause missing, "
-                                "unfunctional, or erroneous features. Please "
-                                "update your GUI to a version equal or higher "
-                                "than the python version for optimal performance."
+                            if klayout_version < [0, 28, 13]:
+                                log = logger.error
+                            else:
+                                log = logger.debug
+
+                            log(
+                                f"KLayout GUI version ({jmsg['klayout_version']}) "
+                                "is older than the Python version "
+                                f"({_klayout_version}). This may cause issues. Please "
+                                "update the GUI to match or exceed the Python version."
                             )
                             break
 
