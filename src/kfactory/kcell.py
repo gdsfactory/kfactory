@@ -2103,12 +2103,6 @@ class KCell:
                     kcell = self.kcl[lib_ci]
                     kcell.rebuild()
                     kcell.get_meta_data()
-
-                    if cell.kcl.dbu != self.kcl.dbu:
-                        for port, lib_port in zip(kcell.ports, cell.ports):
-                            port.cross_section = cell.kcl.get_cross_section(
-                                lib_port.cross_section.to_dtype(cell.kcl)
-                            )
                 if libcell_as_static:
                     cell.set_meta_data()
                     ci = self.kcl.convert_cell_to_static(lib_ci)
@@ -2738,18 +2732,19 @@ class KCell:
                     for index in sorted(port_dict.keys()):
                         _v = port_dict[index]
                         _trans = _v.get("trans")
+                        lib_kcl = kcls[lib_name]
                         cs = self.kcl.get_cross_section(
-                            kcls[lib_name]
-                            .get_cross_section(_v["cross_section"])
-                            .to_dtype(self.kcl)
+                            lib_kcl.get_cross_section(_v["cross_section"]).to_dtype(
+                                lib_kcl
+                            )
                         )
 
                         if _trans is not None:
                             self.create_port(
                                 name=_v.get("name"),
-                                trans=_trans.to_dtype(
-                                    self.library().layout().dbu
-                                ).to_itype(self.kcl.dbu),
+                                trans=_trans.to_dtype(lib_kcl.dbu).to_itype(
+                                    self.kcl.dbu
+                                ),
                                 cross_section=cs,
                                 port_type=_v["port_type"],
                             )
@@ -3660,6 +3655,9 @@ class CrossSectionModel(BaseModel):
             self.cross_sections[cross_section.name] = cross_section
             return cross_section
         return self.cross_sections[cross_section.name]
+
+    def __repr__(self) -> str:
+        return repr(self.cross_sections)
 
 
 class Constants(BaseModel):
@@ -6738,6 +6736,7 @@ class Port:
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
     ): ...
+
     @overload
     def __init__(
         self,
