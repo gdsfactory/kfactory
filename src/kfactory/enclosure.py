@@ -13,10 +13,10 @@ from collections.abc import Callable, Iterable, Sequence
 from enum import IntEnum
 from functools import lru_cache
 from hashlib import sha1
-from typing import TYPE_CHECKING, Any, TypeGuard, overload
+from typing import TYPE_CHECKING, Any, NotRequired, TypedDict, TypeGuard, overload
 
 import numpy as np
-from pydantic import BaseModel, Field, PrivateAttr, field_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_serializer
 
 from . import kdb
 from .conf import config, logger
@@ -500,6 +500,17 @@ class LayerSection(BaseModel):
         yield from iter(self.sections)
 
 
+class DLayerEnclosure(BaseModel, arbitrary_types_allowed=True):
+    sections: list[tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]]
+    name: str | None = None
+    main_layer: kdb.LayerInfo
+
+    def to_itype(self, kcl: KCLayout) -> LayerEnclosure:
+        return LayerEnclosure(
+            dsections=self.sections, name=self.name, main_layer=self.main_layer, kcl=kcl
+        )
+
+
 class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowed=True):
     """Definitions for calculation of enclosing (or smaller) shapes of a reference.
 
@@ -512,7 +523,6 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
     _name: str | None = PrivateAttr()
     main_layer: kdb.LayerInfo | None
     yaml_tag: str = "!Enclosure"
-    kcl: KCLayout | None = None
 
     def __init__(
         self,
@@ -551,20 +561,18 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         self.layer_sections = {}
 
         if dsections is not None:
-            assert (
-                self.kcl is not None
-            ), "If sections in um are defined, kcl must be set"
+            assert kcl is not None, "If sections in um are defined, kcl must be set"
             sections = list(sections)
             for section in dsections:
                 if len(section) == 2:
-                    sections.append((section[0], self.kcl.to_dbu(section[1])))
+                    sections.append((section[0], kcl.to_dbu(section[1])))
 
                 elif len(section) == 3:
                     sections.append(
                         (
                             section[0],
-                            self.kcl.to_dbu(section[1]),
-                            self.kcl.to_dbu(section[2]),
+                            kcl.to_dbu(section[1]),
+                            kcl.to_dbu(section[2]),
                         )
                     )
 
@@ -580,6 +588,18 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
                 Section(d_max=sec[2], d_min=sec[1])
             )
+
+    @model_serializer
+    def _serialize(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "sections": [
+                (layer, s.d_max) if s.d_min is None else (layer, s.d_min, s.d_max)
+                for layer, sections in self.layer_sections.items()
+                for s in sections.sections
+            ],
+            "main_layer": self.main_layer,
+        }
 
     def __hash__(self) -> int:  # make hashable BaseModel subclass
         """Calculate a unique hash of the enclosure."""
@@ -600,6 +620,22 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                 enc.add_section(layer, sec)
 
         return enc
+
+    def to_dtype(self, kcl: KCLayout) -> DLayerEnclosure:
+        """Convert the enclosure to a um based enclosure."""
+        if self.main_layer is None:
+            raise ValueError("um based enclosures must have a main_layer")
+        return DLayerEnclosure(
+            name=self._name,
+            sections=[
+                (layer, kcl.to_um(section.d_max))
+                if section.d_min is None
+                else (layer, kcl.to_um(section.d_min), kcl.to_um(section.d_max))
+                for layer, layer_section in self.layer_sections.items()
+                for section in layer_section.sections
+            ],
+            main_layer=self.main_layer,
+        )
 
     def __iadd__(self, other: LayerEnclosure) -> LayerEnclosure:
         """Allows merging another enclosure into this one."""
@@ -1088,7 +1124,34 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         return layer_enc
 
 
+class LayerEnclosureSpec(TypedDict):
+    main_layer: kdb.LayerInfo
+    name: NotRequired[str]
+    sections: NotRequired[
+        list[tuple[kdb.LayerInfo, int] | tuple[kdb.LayerInfo, int, int]]
+    ]
+    dsections: NotRequired[
+        list[tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]]
+    ]
+
+
 class LayerEnclosureCollection(BaseModel):
+    """Collection of LayerEnclosures."""
+
+    enclosures: list[LayerEnclosure]
+
+    def __hash__(self) -> int:
+        return hash(tuple(self.enclosures))
+
+    def __getitem__(self, key: str | int) -> LayerEnclosure:
+        """Retrieve enclosure by main layer."""
+        try:
+            return next(filter(lambda enc: enc.main_layer == key, self.enclosures))
+        except StopIteration as e:
+            raise KeyError(f"Unknown key {key}") from e
+
+
+class KCellLayerEnclosures(BaseModel):
     """Collection of LayerEnclosures."""
 
     enclosures: list[LayerEnclosure]
@@ -1110,12 +1173,29 @@ class LayerEnclosureCollection(BaseModel):
             ), "Enclosure for PDKEnclosure must have a main layer defined"
         return v
 
-    def __get_item__(self, key: str | int) -> LayerEnclosure:
+    def __getitem__(self, key: str | int) -> LayerEnclosure:
         """Retrieve enclosure by main layer."""
         try:
             return next(filter(lambda enc: enc.main_layer == key, self.enclosures))
         except StopIteration:
             raise KeyError(f"Unknown key {key}")
+
+    def get_enclosure(
+        self,
+        enclosure: str | LayerEnclosure | LayerEnclosureSpec,
+    ) -> LayerEnclosure:
+        if isinstance(enclosure, str):
+            return self[enclosure]
+        if isinstance(enclosure, dict) and enclosure.get("dsections") is None:
+            enclosure = LayerEnclosure(
+                sections=enclosure.get("sections", []),
+                name=enclosure.get("name"),
+                main_layer=enclosure["main_layer"],
+            )
+
+        if enclosure not in self.enclosures:
+            self.enclosures.append(enclosure)  # type: ignore[arg-type]
+        return enclosure  # type: ignore[return-value]
 
 
 class RegionOperator(kdb.TileOutputReceiver):

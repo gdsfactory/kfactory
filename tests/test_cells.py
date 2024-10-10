@@ -95,7 +95,7 @@ def test_cells(cell_name: str, LAYER: Layers) -> None:
         run_cell.write(str(ref_file))
         raise FileNotFoundError(f"GDS file not found. Saving it to {ref_file}")
     kcl_ref = kf.KCLayout("TEST", infos=Layers)
-    kcl_ref.read(gds_ref / f"{cell.name}.gds")
+    kcl_ref.read(gds_ref / f"{cell.name}.gds", meta_format="v2", register_cells=True)
     ref_cell = kcl_ref[kcl_ref.top_cell().name]
 
     for layerinfo in kcl_ref.layout.layer_infos():

@@ -29,8 +29,10 @@ from typing import (
     Annotated,
     Any,
     Literal,
+    NotRequired,
     Protocol,
     TypeAlias,
+    TypedDict,
     TypeVar,
     cast,
     get_origin,
@@ -59,11 +61,12 @@ from typing_extensions import ParamSpec, Self  # noqa: UP035
 
 from . import __version__, kdb, lay, rdb
 from .conf import CHECK_INSTANCES, LogLevel, config, logger
+from .cross_section import DSymmetricalCrossSection, SymmetricalCrossSection
 from .decorators import Decorators
 from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
-    LayerEnclosureCollection,
+    LayerEnclosureSpec,
     LayerSection,
 )
 from .port import (
@@ -808,6 +811,34 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
         """Add a new LayerEnclosure."""
         self.root[__key] = __val
 
+    def get_enclosure(
+        self,
+        enclosure: str | LayerEnclosure | LayerEnclosureSpec,
+        kcl: KCLayout,
+    ) -> LayerEnclosure:
+        if isinstance(enclosure, str):
+            return self[enclosure]
+        if isinstance(enclosure, dict):
+            if "dsections" not in enclosure:
+                enclosure = LayerEnclosure(
+                    dsections=enclosure.get("sections", []),
+                    name=enclosure.get("name"),
+                    main_layer=enclosure["main_layer"],
+                    kcl=kcl,
+                )
+            else:
+                enclosure = LayerEnclosure(
+                    sections=enclosure.get("sections", []),
+                    name=enclosure.get("name"),
+                    main_layer=enclosure["main_layer"],
+                    kcl=kcl,
+                )
+
+        if enclosure.name not in self.root:
+            self.root[enclosure.name] = enclosure
+            return enclosure
+        return self.root[enclosure.name]
+
 
 class Ports:
     """A collection of ports.
@@ -860,6 +891,10 @@ class Ports:
                 if _port.name == port:
                     return True
             return False
+
+    def clear(self) -> None:
+        """Deletes all ports."""
+        self._ports.clear()
 
     def add_port(
         self, port: Port, name: str | None = None, keep_mirror: bool = False
@@ -1001,6 +1036,7 @@ class Ports:
         center: tuple[int, int] | None = None,
         angle: Literal[0, 1, 2, 3] | None = None,
         mirror_x: bool = False,
+        cross_section: SymmetricalCrossSection | None = None,
     ) -> Port:
         """Create a new port in the list.
 
@@ -1019,52 +1055,62 @@ class Ports:
             center: Tuple of the center. [dbu]
             angle: Angle in 90° increments. Used for simple/dbu transformations.
             mirror_x: Mirror the transformation of the port.
+            cross_section: Cross section of the port. If set, overwrites width and layer
+                (info).
         """
-        if layer is None:
-            if layer_info is None:
+        if cross_section is None:
+            if width is None and dwidth is None:
                 raise ValueError(
-                    "layer or layer_info must be defined to create a port."
+                    "Either width or dwidth must be set. It can be set through"
+                    " a cross section as well."
                 )
-            layer = self.kcl.layer(layer_info)
-        if trans is not None:
+            if layer_info is None:
+                if layer is None:
+                    raise ValueError(
+                        "layer or layer_info must be defined to create a port."
+                    )
+                layer_info = self.kcl.get_info(layer)
             if width is None:
-                raise ValueError("width needs to be set")
-            if width % 2 != 0:
-                raise ValueError(f"width needs to be even to snap to grid. Got {width}")
+                dwidth = cast(float, dwidth)
+                if dwidth <= 0:
+                    raise ValueError("dwidth needs to be set and be >0")
+                _width = self.kcl.to_dbu(dwidth)
+                if _width % 2:
+                    raise ValueError(
+                        f"dwidth needs to be even to snap to grid. Got {dwidth}."
+                        "Ports must have a grid width of multiples of 2."
+                    )
+                cross_section = self.kcl.get_cross_section(
+                    CrossSectionSpec(
+                        main_layer=layer_info,
+                        width=_width,
+                    )
+                )
+            else:
+                cross_section = self.kcl.get_cross_section(
+                    CrossSectionSpec(main_layer=layer_info, width=width)
+                )
+        if trans is not None:
             port = Port(
                 name=name,
                 trans=trans,
-                width=width,
-                layer=layer,
+                cross_section=cross_section,
                 port_type=port_type,
                 kcl=self.kcl,
             )
         elif dcplx_trans is not None:
-            if dwidth is None or dwidth <= 0:
-                raise ValueError("dwidth needs to be set")
-            elif dwidth is not None and dwidth > 0:
-                _width = self.kcl.to_dbu(dwidth)
-                if _width % 2:
-                    raise ValueError(
-                        f"dwidth needs to be even to snap to grid. Got {dwidth}"
-                    )
             port = Port(
                 name=name,
-                dwidth=dwidth,
                 dcplx_trans=dcplx_trans,
-                layer=layer,
                 port_type=port_type,
+                cross_section=cross_section,
                 kcl=self.kcl,
             )
         elif angle is not None and center is not None:
-            assert width is not None
-            if width // 2 * 2 != width:
-                raise ValueError(f"width needs to be even to snap to grid. Got {width}")
             port = Port(
                 name=name,
-                width=width,
-                layer=layer,
                 port_type=port_type,
+                cross_section=cross_section,
                 angle=angle,
                 center=center,
                 mirror_x=mirror_x,
@@ -1473,7 +1519,6 @@ class KCell:
         if kdb_cell is not None:
             for inst in kdb_cell.each_inst():
                 self.insts.append(Instance(self.kcl, inst))
-            self.get_meta_data(meta_format=config.meta_format)
 
         self.boundary = None
         self.size_info = SizeInfo(self._kdb_cell.bbox)
@@ -1961,6 +2006,26 @@ class KCell:
         mirror_x: bool = False,
     ) -> Port: ...
 
+    @overload
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        cross_section: SymmetricalCrossSection,
+        trans: kdb.Trans,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        cross_section: SymmetricalCrossSection,
+        dcplx_trans: kdb.DCplxTrans,
+        port_type: str = "optical",
+    ) -> Port: ...
+
     def create_port(self, **kwargs: Any) -> Port:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
         if self._locked:
@@ -2036,11 +2101,8 @@ class KCell:
                 if lib_ci not in self.kcl.kcells:
                     cell.set_meta_data()
                     kcell = self.kcl[lib_ci]
-                    kcell.copy_meta_info(cell._kdb_cell)
                     kcell.rebuild()
-                    if cell.kcl.dbu != self.kcl.dbu:
-                        for port, lib_port in zip(kcell.ports, cell.ports):
-                            port.width = self.kcl.to_dbu(cell.kcl.to_um(lib_port.width))
+                    kcell.get_meta_data()
                 if libcell_as_static:
                     cell.set_meta_data()
                     ci = self.kcl.convert_cell_to_static(lib_ci)
@@ -2050,7 +2112,9 @@ class KCell:
                     kcell.name = cell.kcl.name + static_name_separator + cell.name
                     if cell.kcl.dbu != self.kcl.dbu:
                         for port, lib_port in zip(kcell.ports, cell.ports):
-                            port.width = self.kcl.to_dbu(cell.kcl.to_um(lib_port.width))
+                            port.cross_section = cell.kcl.get_cross_section(
+                                lib_port.cross_section.to_dtype(cell.kcl)
+                            )
                 else:
                     ci = lib_ci
 
@@ -2135,12 +2199,11 @@ class KCell:
                 self.shapes(layer).insert(reg)
                 self.shapes(layer).insert(texts)
 
-    def rebuild(self, meta_format: Literal["v1", "v2"] | None = None) -> None:
+    def rebuild(self) -> None:
         """Rebuild the instances of the KCell."""
         self.insts.clear()
         for _inst in self._kdb_cell.each_inst():
             self.insts.append(Instance(self.kcl, _inst))
-        self.get_meta_data(meta_format=meta_format)
 
     def convert_to_static(self, recursive: bool = True) -> None:
         """Convert the KCell to a static cell if it is pdk KCell."""
@@ -2265,7 +2328,7 @@ class KCell:
         register_cells: bool = False,
         test_merge: bool = True,
         update_kcl_meta_data: Literal["overwrite", "skip", "drop"] = "drop",
-        meta_format: Literal["v1", "v2"] | None = None,
+        meta_format: Literal["v1", "v2", "v3"] | None = None,
     ) -> list[int]:
         """Read a GDS file into the existing KCell.
 
@@ -2354,14 +2417,12 @@ class KCell:
         match update_kcl_meta_data:
             case "overwrite":
                 for k, v in info.items():
-                    self.info[k] = v
+                    self.kcl.info[k] = v
             case "skip":
                 _info = self.info.model_dump()
 
-                for k, v in self.info:
-                    _info[k] = v
                 info.update(_info)
-                self.info = Info(**info)
+                self.kcl.info = Info(**info)
 
             case "drop":
                 pass
@@ -2547,85 +2608,69 @@ class KCell:
 
         Currently, ports, settings and info will be set.
         """
-        for i, port in enumerate(self.ports):
-            if port.name:
-                self.add_meta_info(
-                    kdb.LayoutMetaInfo(
-                        f"kfactory:ports:{i}:name", port.name, None, True
+        self.clear_meta_info()
+        if not self.is_library_cell():
+            for i, port in enumerate(self.ports):
+                if port._trans is not None:
+                    meta_info: dict[str, MetaData] = {
+                        "name": port.name,
+                        "cross_section": port.cross_section.name,
+                        "trans": port._trans,
+                        "port_type": port.port_type,
+                        "info": port.info.model_dump(),
+                    }
+
+                    self.add_meta_info(
+                        kdb.LayoutMetaInfo(f"kfactory:ports:{i}", meta_info, None, True)
                     )
-                )
-            self.add_meta_info(
-                kdb.LayoutMetaInfo(
-                    f"kfactory:ports:{i}:layer",
-                    port.layer_info,
-                    None,
-                    True,
-                )
-            )
-            self.add_meta_info(
-                kdb.LayoutMetaInfo(f"kfactory:ports:{i}:width", port.width, None, True)
-            )
-            self.add_meta_info(
-                kdb.LayoutMetaInfo(
-                    f"kfactory:ports:{i}:port_type", port.port_type, None, True
-                )
-            )
-            if port._trans:
-                self.add_meta_info(
-                    kdb.LayoutMetaInfo(
-                        f"kfactory:ports:{i}:trans", port._trans, None, True
+                else:
+                    meta_info = {
+                        "name": port.name,
+                        "cross_section": port.cross_section.name,
+                        "dcplx_trans": port.dcplx_trans,
+                        "port_type": port.port_type,
+                        "info": port.info.model_dump(),
+                    }
+
+                    self.add_meta_info(
+                        kdb.LayoutMetaInfo(f"kfactory:ports:{i}", meta_info, None, True)
                     )
+            settings = self.settings.model_dump()
+            if settings:
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo("kfactory:settings", settings, None, True)
                 )
-            elif port._dcplx_trans:
+            info = self.info.model_dump()
+            if info:
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo("kfactory:info", info, None, True)
+                )
+            settings_units = self.settings_units.model_dump()
+            if settings_units:
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
-                        f"kfactory:ports:{i}:dcplx_trans",
-                        port._dcplx_trans,
+                        "kfactory:settings_units",
+                        settings_units,
                         None,
                         True,
                     )
                 )
 
-            info = port.info.model_dump()
-            for name, value in info.items():
+            if self.function_name is not None:
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
-                        f"kfactory:ports:{i}:info:{name}",
-                        value,
-                        None,
-                        True,
+                        "kfactory:function_name", self.function_name, None, True
                     )
                 )
 
-        for name, setting in self.settings.model_dump().items():
-            self.add_meta_info(
-                kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
-            )
-        for name, info in self.info.model_dump().items():
-            self.add_meta_info(
-                kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
-            )
-        for name, setting_unit in self.settings_units.model_dump().items():
-            self.add_meta_info(
-                kdb.LayoutMetaInfo(
-                    f"kfactory:settings_units:{name}", setting_unit, None, True
+            if self.basename is not None:
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo("kfactory:basename", self.basename, None, True)
                 )
-            )
-        if self.function_name is not None:
-            self.add_meta_info(
-                kdb.LayoutMetaInfo(
-                    "kfactory:function_name", self.function_name, None, True
-                )
-            )
-
-        if self.basename is not None:
-            self.add_meta_info(
-                kdb.LayoutMetaInfo("kfactory:basename", self.basename, None, True)
-            )
 
     def get_meta_data(
         self,
-        meta_format: Literal["v1", "v2"] | None = None,
+        meta_format: Literal["v1", "v2", "v3"] | None = None,
     ) -> None:
         """Read metadata from the KLayout Layout object."""
         if meta_format is None:
@@ -2633,39 +2678,125 @@ class KCell:
         port_dict: dict[str, Any] = {}
         settings: dict[str, MetaData] = {}
         settings_units: dict[str, str] = {}
-        for meta in self.each_meta_info():
-            if meta.name.startswith("kfactory:ports"):
-                i, _type = meta.name.removeprefix("kfactory:ports:").split(":", 1)
-                if i not in port_dict:
-                    port_dict[i] = {}
-                if not _type.startswith("info"):
-                    port_dict[i][_type] = meta.value
-                else:
-                    if "info" not in port_dict[i]:
-                        port_dict[i]["info"] = {}
-                    port_dict[i]["info"][_type.removeprefix("info:")] = meta.value
-            elif meta.name.startswith("kfactory:info"):
-                setattr(self.info, meta.name.removeprefix("kfactory:info:"), meta.value)
-            elif meta.name.startswith("kfactory:settings_units"):
-                settings_units[meta.name.removeprefix("kfactory:settings_units:")] = (
-                    meta.value
-                )
-            elif meta.name.startswith("kfactory:settings"):
-                settings[meta.name.removeprefix("kfactory:settings:")] = meta.value
-
-            elif meta.name == "kfactory:function_name":
-                self.function_name = meta.value
-
-            elif meta.name == "kfactory:basename":
-                self.basename = meta.value
-
-        self._settings = KCellSettings(**settings)
-        self._settings_units = KCellSettingsUnits(**settings_units)
-
-        self.ports = Ports(self.kcl)
 
         match meta_format:
+            case "v3":
+                self.ports.clear()
+                meta_iter = (
+                    kcls[self.library().name()][
+                        self.library_cell_index()
+                    ].each_meta_info()
+                    if self.is_library_cell()
+                    else self.each_meta_info()
+                )
+                for meta in meta_iter:
+                    if meta.name.startswith("kfactory:ports"):
+                        i = meta.name.removeprefix("kfactory:ports:")
+                        port_dict[i] = meta.value
+                    elif meta.name.startswith("kfactory:info"):
+                        self.info = Info(**meta.value)
+                    elif meta.name.startswith("kfactory:settings_units"):
+                        self._settings_units = KCellSettingsUnits(**meta.value)
+                    elif meta.name.startswith("kfactory:settings"):
+                        self._settings = KCellSettings(**meta.value)
+                    elif meta.name == "kfactory:function_name":
+                        self.function_name = meta.value
+                    elif meta.name == "kfactory:basename":
+                        self.basename = meta.value
+
+                self.ports = Ports(self.kcl)
+                if not self.is_library_cell():
+                    for index in sorted(port_dict.keys()):
+                        _v = port_dict[index]
+                        _trans: kdb.Trans | None = _v.get("trans")
+                        if _trans is not None:
+                            self.create_port(
+                                name=_v.get("name"),
+                                trans=_trans,
+                                cross_section=self.kcl.get_cross_section(
+                                    _v["cross_section"]
+                                ),
+                                port_type=_v["port_type"],
+                            )
+                        else:
+                            self.create_port(
+                                name=_v.get("name"),
+                                dcplx_trans=_v["dcplx_trans"],
+                                cross_section=self.kcl.get_cross_section(
+                                    _v["cross_section"]
+                                ),
+                                port_type=_v["port_type"],
+                            )
+                else:
+                    lib_name = self.library().name()
+                    for index in sorted(port_dict.keys()):
+                        _v = port_dict[index]
+                        _trans = _v.get("trans")
+                        lib_kcl = kcls[lib_name]
+                        cs = self.kcl.get_cross_section(
+                            lib_kcl.get_cross_section(_v["cross_section"]).to_dtype(
+                                lib_kcl
+                            )
+                        )
+
+                        if _trans is not None:
+                            self.create_port(
+                                name=_v.get("name"),
+                                trans=_trans.to_dtype(lib_kcl.dbu).to_itype(
+                                    self.kcl.dbu
+                                ),
+                                cross_section=cs,
+                                port_type=_v["port_type"],
+                            )
+                        else:
+                            self.create_port(
+                                name=_v.get("name"),
+                                dcplx_trans=_v["dcplx_trans"],
+                                cross_section=cs,
+                                port_type=_v["port_type"],
+                            )
+
             case "v2":
+                for meta in self.each_meta_info():
+                    if meta.name.startswith("kfactory:ports"):
+                        i, _type = meta.name.removeprefix("kfactory:ports:").split(
+                            ":", 1
+                        )
+                        if i not in port_dict:
+                            port_dict[i] = {}
+                        if not _type.startswith("info"):
+                            port_dict[i][_type] = meta.value
+                        else:
+                            if "info" not in port_dict[i]:
+                                port_dict[i]["info"] = {}
+                            port_dict[i]["info"][_type.removeprefix("info:")] = (
+                                meta.value
+                            )
+                    elif meta.name.startswith("kfactory:info"):
+                        setattr(
+                            self.info,
+                            meta.name.removeprefix("kfactory:info:"),
+                            meta.value,
+                        )
+                    elif meta.name.startswith("kfactory:settings_units"):
+                        settings_units[
+                            meta.name.removeprefix("kfactory:settings_units:")
+                        ] = meta.value
+                    elif meta.name.startswith("kfactory:settings"):
+                        settings[meta.name.removeprefix("kfactory:settings:")] = (
+                            meta.value
+                        )
+
+                    elif meta.name == "kfactory:function_name":
+                        self.function_name = meta.value
+
+                    elif meta.name == "kfactory:basename":
+                        self.basename = meta.value
+
+                self._settings = KCellSettings(**settings)
+                self._settings_units = KCellSettingsUnits(**settings_units)
+
+                self.ports = Ports(self.kcl)
                 for index in sorted(port_dict.keys()):
                     _d = port_dict[index]
                     name = _d.get("name", None)
@@ -2690,6 +2821,46 @@ class KCell:
 
                     self.add_port(port=_port, keep_mirror=True)
             case "v1":
+                for meta in self.each_meta_info():
+                    if meta.name.startswith("kfactory:ports"):
+                        i, _type = meta.name.removeprefix("kfactory:ports:").split(
+                            ":", 1
+                        )
+                        if i not in port_dict:
+                            port_dict[i] = {}
+                        if not _type.startswith("info"):
+                            port_dict[i][_type] = meta.value
+                        else:
+                            if "info" not in port_dict[i]:
+                                port_dict[i]["info"] = {}
+                            port_dict[i]["info"][_type.removeprefix("info:")] = (
+                                meta.value
+                            )
+                    elif meta.name.startswith("kfactory:info"):
+                        setattr(
+                            self.info,
+                            meta.name.removeprefix("kfactory:info:"),
+                            meta.value,
+                        )
+                    elif meta.name.startswith("kfactory:settings_units"):
+                        settings_units[
+                            meta.name.removeprefix("kfactory:settings_units:")
+                        ] = meta.value
+                    elif meta.name.startswith("kfactory:settings"):
+                        settings[meta.name.removeprefix("kfactory:settings:")] = (
+                            meta.value
+                        )
+
+                    elif meta.name == "kfactory:function_name":
+                        self.function_name = meta.value
+
+                    elif meta.name == "kfactory:basename":
+                        self.basename = meta.value
+
+                self._settings = KCellSettings(**settings)
+                self._settings_units = KCellSettingsUnits(**settings_units)
+
+                self.ports = Ports(self.kcl)
                 for index in sorted(port_dict.keys()):
                     _d = port_dict[index]
                     name = _d.get("name", None)
@@ -2708,9 +2879,9 @@ class KCell:
                         info=_d.get("info", {}),
                     )
                     if trans:
-                        _port.trans = trans.from_s()
+                        _port.trans = kdb.Trans.from_s(trans)
                     elif dcplx_trans:
-                        _port.dcplx_trans = dcplx_trans.from_s()
+                        _port.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
 
                     self.add_port(port=_port, keep_mirror=True)
             case _:
@@ -3412,6 +3583,83 @@ def create_port_error(
     it.add_value(port_polygon(p2.width).transformed(p2.trans).to_dtype(dbu))
 
 
+class CrossSectionSpec(TypedDict):
+    name: NotRequired[str]
+    sections: NotRequired[
+        list[tuple[kdb.LayerInfo, int] | tuple[kdb.LayerInfo, int, int]]
+    ]
+    main_layer: kdb.LayerInfo
+    width: int | float
+    dsections: NotRequired[
+        list[tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]]
+    ]
+
+
+class CrossSectionModel(BaseModel):
+    cross_sections: dict[str, SymmetricalCrossSection] = Field(default_factory=dict)
+    kcl: KCLayout
+
+    def get_cross_section(
+        self,
+        cross_section: str
+        | SymmetricalCrossSection
+        | CrossSectionSpec
+        | DSymmetricalCrossSection,
+    ) -> SymmetricalCrossSection:
+        if isinstance(cross_section, SymmetricalCrossSection):
+            if cross_section.enclosure != self.kcl.get_enclosure(
+                cross_section.enclosure
+            ):
+                return self.get_cross_section(
+                    CrossSectionSpec(
+                        sections=cross_section.enclosure.model_dump()["sections"],
+                        main_layer=cross_section.main_layer,
+                        name=cross_section.name,
+                        width=cross_section.width,
+                    )
+                )
+        if isinstance(cross_section, str):
+            return self.cross_sections[cross_section]
+        elif isinstance(cross_section, DSymmetricalCrossSection):
+            cross_section = cross_section.to_itype(self.kcl)
+        elif isinstance(cross_section, dict):
+            cast(CrossSectionSpec, cross_section)
+            if "dsections" in cross_section:
+                cross_section = SymmetricalCrossSection(
+                    width=self.kcl.to_dbu(cross_section["width"]),
+                    enclosure=self.kcl.layer_enclosures.get_enclosure(
+                        enclosure=LayerEnclosureSpec(
+                            dsections=cross_section["dsections"],
+                            main_layer=cross_section["main_layer"],
+                        ),
+                        kcl=self.kcl,
+                    ),
+                )
+            else:
+                w = cross_section["width"]
+                if not isinstance(w, int) and not w.is_integer():
+                    raise ValueError(
+                        "A CrossSectionSpec with 'sections' must have a width in dbu."
+                    )
+                cross_section = SymmetricalCrossSection(
+                    width=int(w),
+                    enclosure=self.kcl.layer_enclosures.get_enclosure(
+                        LayerEnclosureSpec(
+                            sections=cross_section.get("sections", []),
+                            main_layer=cross_section["main_layer"],
+                        ),
+                        kcl=self.kcl,
+                    ),
+                )
+        if cross_section.name not in self.cross_sections:
+            self.cross_sections[cross_section.name] = cross_section
+            return cross_section
+        return self.cross_sections[cross_section.name]
+
+    def __repr__(self) -> str:
+        return repr(self.cross_sections)
+
+
 class Constants(BaseModel):
     """Constant Model class."""
 
@@ -3586,6 +3834,7 @@ class KCLayout(
     name: str
     layout: kdb.Layout
     layer_enclosures: LayerEnclosureModel
+    cross_sections: CrossSectionModel
     enclosure: KCellEnclosure
     library: kdb.Library
 
@@ -3654,6 +3903,7 @@ class KCLayout(
             name=name,
             kcells={},
             layer_enclosures=LayerEnclosureModel(dict()),
+            cross_sections=CrossSectionModel(kcl=self),
             enclosure=KCellEnclosure([]),
             infos=_infos,
             layers=LayerEnum,
@@ -3671,7 +3921,7 @@ class KCLayout(
             settings=KCellSettings(
                 version=__version__,
                 klayout_version=kdb.__version__,  # type: ignore[attr-defined]
-                meta_format="v2",
+                meta_format="v3",
             ),
             decorators=Decorators(self),
         )
@@ -4681,10 +4931,10 @@ class KCLayout(
         self,
         filename: str | Path,
         options: kdb.LoadLayoutOptions = load_layout_options(),
-        register_cells: bool = False,
+        register_cells: bool | None = None,
         test_merge: bool = True,
         update_kcl_meta_data: Literal["overwrite", "skip", "drop"] = "skip",
-        meta_format: Literal["v1", "v2"] | None = None,
+        meta_format: Literal["v1", "v2", "v3"] | None = None,
     ) -> kdb.LayerMap:
         """Read a GDS file into the existing Layout.
 
@@ -4714,6 +4964,8 @@ class KCLayout(
         """
         if meta_format is None:
             meta_format = config.meta_format
+        if register_cells is None:
+            register_cells = meta_format == config.meta_format
         layout_b = kdb.Layout()
         layout_b.read(str(filename), options)
         if (
@@ -4776,8 +5028,8 @@ class KCLayout(
             case "skip":
                 _info = self.info.model_dump()
 
-                for k, v in self.info:
-                    _info[k] = v
+                # for k, v in self.info:
+                #     _info[k] = v
                 info.update(_info)
                 self.info = Info(**info)
 
@@ -4789,7 +5041,7 @@ class KCLayout(
                     ", available strategies are 'overwrite', 'skip', or 'drop'"
                 )
         meta_format = settings.get("meta_format") or config.meta_format
-        load_cells = set(layout_b.cells("*"))
+        load_cells = set(self.layout.cell(c.name) for c in layout_b.cells("*"))
         new_cells = load_cells - cells
 
         if register_cells:
@@ -4801,8 +5053,8 @@ class KCLayout(
 
         for c in load_cells & cells:
             kc = self.kcells[c.cell_index()]
-            kc.get_meta_data(meta_format=meta_format)
             kc.rebuild()
+            kc.get_meta_data(meta_format=meta_format)
 
         return lm
 
@@ -4810,11 +5062,34 @@ class KCLayout(
         """Read KCLayout meta info from the KLayout object."""
         settings = {}
         info = {}
+        cross_sections: list[dict[str, Any]] = []
         for meta in self.each_meta_info():
             if meta.name.startswith("kfactory:info"):
                 info[meta.name.removeprefix("kfactory:info:")] = meta.value
             elif meta.name.startswith("kfactory:settings"):
                 settings[meta.name.removeprefix("kfactory:settings:")] = meta.value
+            elif meta.name.startswith("kfactory:layer_enclosure:"):
+                self.get_enclosure(
+                    LayerEnclosure(
+                        **meta.value,
+                    )
+                )
+            elif meta.name.startswith("kfactory:cross_section:"):
+                cross_sections.append(
+                    {
+                        "name": meta.name.removeprefix("kfactory:cross_section:"),
+                        **meta.value,
+                    }
+                )
+
+        for cs in cross_sections:
+            self.get_cross_section(
+                SymmetricalCrossSection(
+                    width=cs["width"],
+                    enclosure=self.get_enclosure(cs["layer_enclosure"]),
+                    name=cs["name"],
+                )
+            )
 
         return info, settings
 
@@ -4827,6 +5102,27 @@ class KCLayout(
         for name, info in self.info.model_dump().items():
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
+            )
+        for enclosure in self.layer_enclosures.root.values():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(
+                    f"kfactory:layer_enclosure:{enclosure.name}",
+                    enclosure.model_dump(),
+                    None,
+                    True,
+                )
+            )
+        for cross_section in self.cross_sections.cross_sections.values():
+            self.add_meta_info(
+                kdb.LayoutMetaInfo(
+                    f"kfactory:cross_section:{cross_section.name}",
+                    {
+                        "width": cross_section.width,
+                        "layer_enclosure": cross_section.enclosure.name,
+                    },
+                    None,
+                    True,
+                )
             )
 
     @overload
@@ -4865,6 +5161,8 @@ class KCLayout(
             convert_external_cells: Whether to make KCells not in this KCLayout to
 
         """
+        for kc in list(self.kcells.values()):
+            kc.insert_vinsts()
         match (set_meta, convert_external_cells):
             case (True, True):
                 self.set_meta_data()
@@ -4883,9 +5181,6 @@ class KCLayout(
                     if kcell.is_library_cell() and not kcell._destroyed():
                         kcell.convert_to_static(recursive=True)
 
-        for kc in list(self.kcells.values()):
-            kc.insert_vinsts()
-
         return self.layout.write(str(filename), options)
 
     def top_kcells(self) -> list[KCell]:
@@ -4901,6 +5196,22 @@ class KCLayout(
         for tc in self.top_kcells():
             tc.prune_cell()
         self.kcells = {}
+
+    def get_enclosure(
+        self, enclosure: str | LayerEnclosure | LayerEnclosureSpec
+    ) -> LayerEnclosure:
+        """Gets a layer enclosure by name specification or the layerenclosure itself."""
+        return self.layer_enclosures.get_enclosure(enclosure, self)
+
+    def get_cross_section(
+        self,
+        cross_section: str
+        | SymmetricalCrossSection
+        | CrossSectionSpec
+        | DSymmetricalCrossSection,
+    ) -> SymmetricalCrossSection:
+        """Get a cross section by name or specification."""
+        return self.cross_sections.get_cross_section(cross_section)
 
 
 def layerenum_from_dict(
@@ -6265,7 +6576,7 @@ LayerSection.model_rebuild()
 LayerEnclosure.model_rebuild()
 KCellEnclosure.model_rebuild()
 LayerEnclosureModel.model_rebuild()
-LayerEnclosureCollection.model_rebuild()
+SymmetricalCrossSection.model_rebuild()
 kcl = KCLayout("DEFAULT")
 """Default library object.
 
@@ -6308,8 +6619,7 @@ class Port:
     yaml_tag = "!Port"
     name: str | None
     kcl: KCLayout
-    width: int
-    layer: int | LayerEnum
+    cross_section: SymmetricalCrossSection
     _trans: kdb.Trans | None
     _dcplx_trans: kdb.DCplxTrans | None
     info: Info = Info()
@@ -6427,6 +6737,58 @@ class Port:
         info: dict[str, int | float | str] = {},
     ): ...
 
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        cross_section: SymmetricalCrossSection,
+        port_type: str = "optical",
+        angle: int,
+        center: tuple[int, int],
+        mirror_x: bool = False,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = {},
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        cross_section: SymmetricalCrossSection,
+        port_type: str = "optical",
+        dangle: float,
+        dcenter: tuple[float, float],
+        mirror_x: bool = False,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = {},
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        cross_section: SymmetricalCrossSection,
+        trans: kdb.Trans,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = {},
+        port_type: str = "optical",
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        cross_section: SymmetricalCrossSection,
+        dcplx_trans: kdb.DCplxTrans,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = {},
+        port_type: str = "optical",
+    ): ...
+
     def __init__(
         self,
         *,
@@ -6446,9 +6808,9 @@ class Port:
         port: Port | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
+        cross_section: SymmetricalCrossSection | None = None,
     ):
         """Create a port from dbu or um based units."""
-        self.info = Info(**info)
         if port is not None:
             self.name = port.name if name is None else name
 
@@ -6458,62 +6820,71 @@ class Port:
                 self.trans = port.trans
 
             self.port_type = port.port_type
-            self.layer = port.layer
-            self.width = port.width
-            self.kcl = port.kcl
-        elif (width is None and dwidth is None) or (
-            layer is None and layer_info is None
-        ):
-            raise ValueError("width, layer must be given if the 'port is None'")
-        else:
-            self.kcl = kcl or _get_default_kcl()
-            if trans is not None:
-                # self.width = cast(int, width)
-                if isinstance(trans, str):
-                    self.trans = kdb.Trans.from_s(trans)
-                else:
-                    self.trans = trans.dup()
-                assert width is not None
-                self.width = width
-                self.port_type = port_type
-            elif dcplx_trans is not None:
-                if isinstance(dcplx_trans, str):
-                    self.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
-                else:
-                    self.dcplx_trans = dcplx_trans.dup()
-                assert dwidth is not None
-                self.dwidth = dwidth
-                assert self.width * self.kcl.layout.dbu == float(
-                    dwidth
-                ), "When converting to dbu the width does not match the desired width!"
-            elif width is not None:
-                assert angle is not None
-                assert center is not None
-                self.trans = kdb.Trans(angle, mirror_x, *center)
-                self.width = width
-                self.port_type = port_type
-            elif dwidth is not None:
-                assert dangle is not None
-                assert dcenter is not None
-                self.dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
-                self.dwidth = dwidth
-
-            self.name = name
-            if layer is None:
-                if layer_info is None:
+            self.cross_section = port.cross_section
+            return
+        self.kcl = kcl or _get_default_kcl()
+        if cross_section is None:
+            if layer_info is None:
+                if layer is None:
                     raise ValueError("layer or layer_info for a port must be defined")
-                layer = self.kcl.layer(layer_info)
-            self.layer = layer
+                layer_info = self.kcl.get_info(layer)
+            if width is None and dwidth is None:
+                raise ValueError("width, layer must be given if the 'port is None'")
+            elif width is None:
+                cross_section = self.kcl.get_cross_section(
+                    CrossSectionSpec(
+                        main_layer=layer_info,
+                        width=self.kcl.to_dbu(dwidth),  # type: ignore[arg-type]
+                    )
+                )
+            else:
+                cross_section = self.kcl.get_cross_section(
+                    CrossSectionSpec(main_layer=layer_info, width=width)
+                )
+        self.cross_section = cross_section
+        self.info = Info(**info)
+        if trans is not None:
+            # self.width = cast(int, width)
+            if isinstance(trans, str):
+                self.trans = kdb.Trans.from_s(trans)
+            else:
+                self.trans = trans.dup()
+        elif dcplx_trans is not None:
+            if isinstance(dcplx_trans, str):
+                self.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
+            else:
+                self.dcplx_trans = dcplx_trans.dup()
+        elif angle is not None:
+            assert center is not None
+            self.trans = kdb.Trans(angle, mirror_x, *center)
             self.port_type = port_type
+        elif dangle is not None:
+            assert dcenter is not None
+            self.dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
+        self.name = name
+        self.port_type = port_type
+
+    @property
+    def layer(self) -> int:
+        """Get the layer index of the port.
+
+        This corresponds to the port's cross section's main layer converted to the
+        index.
+        """
+        return self.kcl.layout.layer(self.cross_section.main_layer)
 
     @property
     def layer_info(self) -> kdb.LayerInfo:
-        """Get the corresponding layer info of the layer of the port."""
-        return self.kcl.layout.get_info(self.layer)
+        """Get the layer info of the port.
 
-    @layer_info.setter
-    def layer_info(self, layer_info: kdb.LayerInfo) -> None:
-        self.layer = self.kcl.layer(layer_info)
+        This corresponds to the port's cross section's main layer.
+        """
+        return self.cross_section.main_layer
+
+    @property
+    def width(self) -> int:
+        """Width of the port. This corresponds to the width of the cross section."""
+        return self.cross_section.width
 
     @classmethod
     def from_yaml(cls: type[Port], constructor, node) -> Port:  # type: ignore
@@ -6881,13 +7252,13 @@ class Port:
         """Width of the port in um."""
         return self.kcl.to_um(self.width)
 
-    @dwidth.setter
-    def dwidth(self, value: float) -> None:
-        self.width = self.kcl.to_dbu(value)
-        assert self.kcl.to_um(self.width) == float(value), (
-            "When converting to dbu the width does not match the desired width"
-            f"({self.dwidth} / {value})!"
-        )
+    # @dwidth.setter
+    # def dwidth(self, value: float) -> None:
+    #     self.width = self.kcl.to_dbu(value)
+    #     assert self.kcl.to_um(self.width) == float(value), (
+    #         "When converting to dbu the width does not match the desired width"
+    #         f"({self.dwidth} / {value})!"
+    #     )
 
     @property
     def dmirror(self) -> bool:
