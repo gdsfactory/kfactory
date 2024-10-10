@@ -1502,8 +1502,12 @@ def route_smart(
         start_bbox += re.start.t * kdb.Point(-1, 0)
         end_bbox += re.end.t * kdb.Point(-1, 0)
         for r in router_bundle:
-            start_bbox += kdb.Box(r.start.pts[0], r.start.t.disp.to_p())
-            end_bbox += kdb.Box(r.end.pts[0], r.end.t.disp.to_p())
+            start_bbox += kdb.Box(r.start.pts[0], r.start.t.disp.to_p()) + kdb.Box(
+                0, -r.width // 2, 0, r.width // 2
+            ).transformed(r.start.t)
+            end_bbox += kdb.Box(r.end.pts[0], r.end.t.disp.to_p()) + kdb.Box(
+                0, -r.width // 2, 0, r.width // 2
+            ).transformed(r.end.t)
             if r.end.t.angle != end_angle:
                 raise ValueError(
                     "All ports at the target (end) must have the same angle. "
@@ -1697,23 +1701,13 @@ def route_smart(
                 bbox_routing=bbox_routing,
                 separation=separation,
             )
-            if waypoints is None:
-                route_loosely(
-                    sorted_routers,
-                    separation=separation,
-                    start_bbox=total_bbox,
-                    end_bbox=end_bbox,
-                    bbox_routing=bbox_routing,
-                )
-            else:
-                route_loosely(
-                    sorted_routers,
-                    separation=separation,
-                    start_bbox=total_bbox,
-                    end_bbox=end_bbox,
-                    bbox_routing=bbox_routing,
-                )
-
+            route_loosely(
+                sorted_routers,
+                separation=separation,
+                start_bbox=total_bbox,
+                end_bbox=end_bbox,
+                bbox_routing=bbox_routing,
+            )
         else:
             routers = router_groups[0][1]
             r = routers[0]
