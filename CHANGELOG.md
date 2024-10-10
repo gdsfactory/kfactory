@@ -7,6 +7,11 @@
 
 - Add SymmetricalCrossSection [#481](https://github.com/gdsfactory/kfactory/pull/481)
 
+## Bug Fixes
+
+- fix naming of cells from vinsts [#489](https://github.com/gdsfactory/kfactory/pull/489)
+- fix route_bundle bbox ignore for single route (or matching opposite side) [#488](https://github.com/gdsfactory/kfactory/pull/488)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.8...v0.20.9
 
 
