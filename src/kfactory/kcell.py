@@ -4069,13 +4069,13 @@ class KCLayout(
         Can find a layer either by name, layer and datatype (two args), LayerInfo, or
         all three of layer, datatype, and name.
         """
+        allow_undefined_layers = kwargs.pop(
+            "allow_undefined_layers", config.allow_undefined_layers
+        )
         info = self.layout.get_info(self.layout.layer(*args, **kwargs))
         try:
             return self.layers[info.name]  # type:ignore[no-any-return, index]
         except KeyError:
-            allow_undefined_layers = kwargs.pop(
-                "allow_undefined_layers", config.allow_undefined_layers
-            )
             if allow_undefined_layers:
                 return self.layout.layer(info)
             raise KeyError(
@@ -6865,13 +6865,15 @@ class Port:
         self.port_type = port_type
 
     @property
-    def layer(self) -> int:
+    def layer(self) -> LayerEnum | int:
         """Get the layer index of the port.
 
         This corresponds to the port's cross section's main layer converted to the
         index.
         """
-        return self.kcl.layout.layer(self.cross_section.main_layer)
+        return self.kcl.find_layer(
+            self.cross_section.main_layer, allow_undefined_layers=True
+        )
 
     @property
     def layer_info(self) -> kdb.LayerInfo:
