@@ -507,7 +507,7 @@ class DLayerEnclosure(BaseModel, arbitrary_types_allowed=True):
 
     def to_itype(self, kcl: KCLayout) -> LayerEnclosure:
         return LayerEnclosure(
-            dsections=self.sections, name=self.name, main_layer=self.main_layer
+            dsections=self.sections, name=self.name, main_layer=self.main_layer, kcl=kcl
         )
 
 

@@ -176,7 +176,7 @@ class Settings(BaseSettings):
     """Can configure the logger to ignore certain levels or by regex."""
     display_type: Literal["widget", "image"] = "image"
     """The default behavior for displaying cells in jupyter."""
-    meta_format: Literal["v2", "v1"] = "v2"
+    meta_format: Literal["v3", "v2", "v1"] = "v3"
     """The format of the saving of metadata.
 
     v1: Transformations and other KLayout objects are stored as a string. In
