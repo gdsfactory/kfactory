@@ -1147,8 +1147,8 @@ class LayerEnclosureCollection(BaseModel):
         """Retrieve enclosure by main layer."""
         try:
             return next(filter(lambda enc: enc.main_layer == key, self.enclosures))
-        except StopIteration:
-            raise KeyError(f"Unknown key {key}")
+        except StopIteration as e:
+            raise KeyError(f"Unknown key {key}") from e
 
 
 class KCellLayerEnclosures(BaseModel):
@@ -1186,13 +1186,13 @@ class KCellLayerEnclosures(BaseModel):
     ) -> LayerEnclosure:
         if isinstance(enclosure, str):
             return self[enclosure]
-        if isinstance(enclosure, dict):
-            if enclosure.get("dsections") is None:
-                enclosure = LayerEnclosure(
-                    sections=enclosure.get("sections", []),
-                    name=enclosure.get("name"),
-                    main_layer=enclosure["main_layer"],
-                )
+        if isinstance(enclosure, dict) and enclosure.get("dsections") is None:
+            enclosure = LayerEnclosure(
+                sections=enclosure.get("sections", []),
+                name=enclosure.get("name"),
+                main_layer=enclosure["main_layer"],
+            )
+
         if enclosure not in self.enclosures:
             self.enclosures.append(enclosure)  # type: ignore[arg-type]
         return enclosure  # type: ignore[return-value]
