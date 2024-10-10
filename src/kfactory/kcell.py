@@ -2689,7 +2689,9 @@ class KCell:
             case "v3":
                 self.ports.clear()
                 meta_iter = (
-                    kcls[self.library().name()][self.name].each_meta_info()
+                    kcls[self.library().name()][
+                        self.library_cell_index()
+                    ].each_meta_info()
                     if self.is_library_cell()
                     else self.each_meta_info()
                 )
