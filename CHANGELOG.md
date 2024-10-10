@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- fix layerenum [#490](https://github.com/gdsfactory/kfactory/pull/490)
 - fix naming of cells from vinsts [#489](https://github.com/gdsfactory/kfactory/pull/489)
 - fix route_bundle bbox ignore for single route (or matching opposite side) [#488](https://github.com/gdsfactory/kfactory/pull/488)
 
