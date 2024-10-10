@@ -1,3 +1,18 @@
+<a name="v0.20.9"></a>
+# [v0.20.9](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.9) - 10 Oct 2024
+
+# What's Changed
+
+## New
+
+- Add SymmetricalCrossSection [#481](https://github.com/gdsfactory/kfactory/pull/481)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.8...v0.20.9
+
+
+[Changes][v0.20.9]
+
+
 <a name="v0.20.8"></a>
 # [v0.20.8](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.8) - 02 Oct 2024
 
@@ -1147,6 +1162,7 @@
 [Changes][v0.4.0]
 
 
+[v0.20.9]: https://github.com/gdsfactory/kfactory/compare/v0.20.8...v0.20.9
 [v0.20.8]: https://github.com/gdsfactory/kfactory/compare/v0.20.7...v0.20.8
 [v0.20.7]: https://github.com/gdsfactory/kfactory/compare/v0.20.6...v0.20.7
 [v0.20.6]: https://github.com/gdsfactory/kfactory/compare/v0.20.5...v0.20.6
