@@ -5,12 +5,14 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from dataclasses import InitVar, dataclass, field
-from typing import Any, Literal, ParamSpec, Protocol, TypedDict
+from typing import TYPE_CHECKING, Any, Literal, ParamSpec, Protocol, TypedDict
 
 from .. import kdb
 from ..conf import logger
 from ..enclosure import clean_points
 from ..kcell import KCell, KCLayout, Port
+from .steps import Step, Steps
+
 
 __all__ = [
     "route_manhattan",
@@ -314,8 +316,8 @@ class ManhattanRouter:
     end_transformation: kdb.Trans
     start: ManhattanRouterSide = field(init=False)
     end: ManhattanRouterSide = field(init=False)
-    start_straight: InitVar[int] = 0
-    end_straight: InitVar[int] = 0
+    start_straight: InitVar[int | list[Step]] = 0
+    end_straight: InitVar[int | list[Step]] = 0
     width: int = 0
     start_points: InitVar[list[kdb.Point]] = field(default=[])
     end_points: InitVar[list[kdb.Point]] = field(default=[])
@@ -323,14 +325,11 @@ class ManhattanRouter:
 
     def __post_init__(
         self,
-        start_straight: int,
-        end_straight: int,
+        start_straight: int | list[Step],
+        end_straight: int | list[Step],
         start_points: list[kdb.Point],
         end_points: list[kdb.Point],
     ) -> None:
-        assert start_straight >= 0, "Start straight must be >= 0"
-        assert end_straight >= 0, "End straight must be >= 0"
-
         _start = self.start_transformation.dup()
         _start.mirror = False
         _end = self.end_transformation.dup()
@@ -348,8 +347,18 @@ class ManhattanRouter:
             _ot=_start,
             pts=end_points,
         )
-        self.start.straight(start_straight)
-        self.end.straight(end_straight)
+        if isinstance(start_straight, int):
+            if start_straight < 0:
+                raise ValueError("Start straight must be >= 0")
+            self.start.straight(start_straight)
+        else:
+            Steps(start_straight).execute(self.start)
+        if isinstance(end_straight, int):
+            if end_straight < 0:
+                raise ValueError("End straight must be >= 0")
+            self.end.straight(end_straight)
+        else:
+            Steps(end_straight).execute(self.end)
 
     @property
     def path_length(self) -> int:
@@ -811,8 +820,8 @@ def route_smart(
     widths: list[int] | None = None,
     bend90_radius: int | None = None,
     separation: int | None = None,
-    start_straights: list[int] = [0],
-    end_straights: list[int] = [0],
+    start_straights: list[int | list[Step]] = [0],
+    end_straights: list[int | list[Step]] = [0],
     bboxes: list[kdb.Box] | None = None,
     sort_ports: bool = False,
     waypoints: list[kdb.Point] | kdb.Trans | None = None,

@@ -2,17 +2,23 @@
 
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from typing import Any, Literal, Protocol
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 
 from .. import kdb, rdb
 from ..conf import config
 from ..kcell import Instance, KCell, Port
 from ..kf_types import dbu
-from .manhattan import ManhattanBundleRoutingFunction, ManhattanRouter, route_smart
+from .manhattan import (
+    ManhattanBundleRoutingFunction,
+    ManhattanRouter,
+    ManhattanRouterSide,
+    route_smart,
+)
 
 __all__ = [
     "PlacerFunction",
