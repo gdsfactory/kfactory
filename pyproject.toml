@@ -8,9 +8,11 @@ description = "KLayout API implementation of gdsfactory"
 readme = "README.md"
 classifiers = [
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Operating System :: OS Independent",
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 
 
 version = "0.21.0"
@@ -84,7 +86,7 @@ kf = "kfactory.cli:app"
 where = ["src"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.10"
 strict = true
 exclude = [
   "src/kfactory/widgets/interactive.py",
@@ -116,7 +118,7 @@ fix = true
 line-length = 88
 exclude = ["tests", "docs", "src/kfactory/widgets/interactive.py"]
 indent-width = 4
-target-version = "py311"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [

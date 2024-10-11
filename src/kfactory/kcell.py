@@ -29,10 +29,8 @@ from typing import (
     Annotated,
     Any,
     Literal,
-    NotRequired,
     Protocol,
     TypeAlias,
-    TypedDict,
     TypeVar,
     cast,
     get_origin,
@@ -57,7 +55,7 @@ from pydantic import (
     ValidationError,
     model_validator,
 )
-from typing_extensions import ParamSpec, Self  # noqa: UP035
+from typing_extensions import NotRequired, ParamSpec, Self, TypedDict
 
 from . import __version__, kdb, lay, rdb
 from .conf import CHECK_INSTANCES, LogLevel, config, logger

@@ -13,10 +13,11 @@ from collections.abc import Callable, Iterable, Sequence
 from enum import IntEnum
 from functools import lru_cache
 from hashlib import sha1
-from typing import TYPE_CHECKING, Any, NotRequired, TypedDict, TypeGuard, overload
+from typing import TYPE_CHECKING, Any, TypeGuard, overload
 
 import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_serializer
+from typing_extensions import NotRequired, TypedDict
 
 from . import kdb
 from .conf import config, logger
