@@ -1373,6 +1373,48 @@ class InstancePorts:
                     for p in self.cell_ports
                 )
 
+    def each_by_array_coord(self) -> Iterator[tuple[int, int, Port]]:
+        if not self.instance.is_regular_array():
+            if not self.instance.is_complex():
+                yield from (
+                    (0, 0, p.copy(self.instance.trans)) for p in self.cell_ports
+                )
+            else:
+                yield from (
+                    (0, 0, p.copy(self.instance.dcplx_trans)) for p in self.cell_ports
+                )
+        else:
+            if not self.instance.is_complex():
+                yield from (
+                    (
+                        i_a,
+                        i_b,
+                        p.copy(
+                            kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                            * self.instance.trans
+                        ),
+                    )
+                    for i_a in range(self.instance.na)
+                    for i_b in range(self.instance.nb)
+                    for p in self.cell_ports
+                )
+            else:
+                yield from (
+                    (
+                        i_a,
+                        i_b,
+                        p.copy(
+                            kdb.DCplxTrans(
+                                self.instance.da * i_a + self.instance.db * i_b
+                            )
+                            * self.instance.dcplx_trans
+                        ),
+                    )
+                    for i_a in range(self.instance.na)
+                    for i_b in range(self.instance.nb)
+                    for p in self.cell_ports
+                )
+
     def __repr__(self) -> str:
         """String representation.
 
