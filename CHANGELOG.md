@@ -1,5 +1,20 @@
-<a name="v0.20.9"></a>
-# [v0.20.9](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.9) - 10 Oct 2024
+<a name="v0.21.1"></a>
+# [v0.21.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.1) - 11 Oct 2024
+
+# What's Changed
+
+## New
+
+- add instance iterator which returns coord plus port [#491](https://github.com/gdsfactory/kfactory/pull/491)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.0...v0.21.1
+
+
+[Changes][v0.21.1]
+
+
+<a name="v0.21.0"></a>
+# [v0.21.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.0) - 10 Oct 2024
 
 # What's Changed
 
@@ -13,10 +28,10 @@
 - fix naming of cells from vinsts [#489](https://github.com/gdsfactory/kfactory/pull/489)
 - fix route_bundle bbox ignore for single route (or matching opposite side) [#488](https://github.com/gdsfactory/kfactory/pull/488)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.8...v0.20.9
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.20.8...v0.21.0
 
 
-[Changes][v0.20.9]
+[Changes][v0.21.0]
 
 
 <a name="v0.20.8"></a>
@@ -1168,7 +1183,8 @@
 [Changes][v0.4.0]
 
 
-[v0.20.9]: https://github.com/gdsfactory/kfactory/compare/v0.20.8...v0.20.9
+[v0.21.1]: https://github.com/gdsfactory/kfactory/compare/v0.21.0...v0.21.1
+[v0.21.0]: https://github.com/gdsfactory/kfactory/compare/v0.20.8...v0.21.0
 [v0.20.8]: https://github.com/gdsfactory/kfactory/compare/v0.20.7...v0.20.8
 [v0.20.7]: https://github.com/gdsfactory/kfactory/compare/v0.20.6...v0.20.7
 [v0.20.6]: https://github.com/gdsfactory/kfactory/compare/v0.20.5...v0.20.6
