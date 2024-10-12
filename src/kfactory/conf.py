@@ -7,7 +7,7 @@ import os
 import re
 import sys
 import traceback
-from enum import StrEnum
+from enum import Enum
 from itertools import takewhile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol, cast, runtime_checkable
@@ -74,7 +74,7 @@ def tracing_formatter(record: loguru.Record) -> str:
         )
 
 
-class LogLevel(StrEnum):
+class LogLevel(str, Enum):
     """KFactory logger levels."""
 
     TRACE = "TRACE"
@@ -86,7 +86,7 @@ class LogLevel(StrEnum):
     CRITICAL = "CRITICAL"
 
 
-class CHECK_INSTANCES(StrEnum):
+class CHECK_INSTANCES(str, Enum):
     RAISE = "error"
     FLATTEN = "flatten"
     VINSTANCES = "vinstances"
