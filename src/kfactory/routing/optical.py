@@ -23,6 +23,7 @@ from .manhattan import (
     route_manhattan,
     route_smart,
 )
+from .steps import Step, Straight
 
 __all__ = [
     "get_radius",
@@ -42,8 +43,8 @@ def route_bundle(
     straight_factory: StraightFactory,
     bend90_cell: KCell,
     taper_cell: KCell | None = None,
-    start_straights: dbu | list[dbu] = 0,
-    end_straights: dbu | list[dbu] = 0,
+    start_straights: dbu | list[dbu] | None = None,
+    end_straights: dbu | list[dbu] | None = None,
     min_straight_taper: dbu = 0,
     place_port_type: str = "optical",
     place_allow_small_routes: bool = False,
@@ -57,6 +58,8 @@ def route_bundle(
     sort_ports: bool = False,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
 ) -> list[ManhattanRoute]:
     """Route a bundle from starting ports to end_ports.
 
@@ -68,8 +71,10 @@ def route_bundle(
         straight_factory: Factory function for straight cells. in DBU.
         bend90_cell: 90° bend cell.
         taper_cell: Taper cell.
-        start_straights: Minimal straight segment after `p1`.
-        end_straights: Minimal straight segment before `p2`.
+        start_straights: DEPRECATED[Use starts instead] Minimal straight segment after
+            `p1`.
+        end_straights: DEPRECATED[Use ends instead] Minimal straight segment before
+            `p2`.
         min_straight_taper: Minimum straight [dbu] before attempting to place tapers.
         place_port_type: Port type to use for the bend90_cell.
         place_allow_small_routes: Don't throw an error if two corners cannot be placed.
@@ -96,13 +101,19 @@ def route_bundle(
             or a single transformation. If it's a transformation, the points will be
             routed through it as if it were a tunnel with length 0.
     """
+    if start_straights is not None:
+        logger.warning("start_straights is deprecated. Use `starts` instead.")
+        starts = start_straights
+    if end_straights is not None:
+        logger.warning("end_straights is deprecated. Use `starts` instead.")
+        ends = end_straights
     bend90_radius = get_radius(bend90_cell.ports.filter(port_type=place_port_type))
     return route_bundle_generic(
         c=c,
         start_ports=start_ports,
         end_ports=end_ports,
-        start_straights=start_straights,
-        end_straights=end_straights,
+        starts=starts,
+        ends=ends,
         route_width=route_width,
         sort_ports=sort_ports,
         on_collision=on_collision,
@@ -671,8 +682,7 @@ def route_loopback(
             t1,
             t2,
             bend90_radius,
-            start_straight=start_straight + d_loop,
-            end_straight=0,
+            start_steps=[Straight(size=start_straight + d_loop)],
         )
         + pts_end
     )
@@ -942,16 +952,16 @@ def route(
                 start_port,
                 end_port,
                 bend90_radius=b90r,
-                start_straight=start_straight,
-                end_straight=end_straight,
+                start_steps=[Straight(size=start_straight)],
+                end_steps=[Straight(size=end_straight)],
             )
         else:
             pts = route_path_function(
                 start_port,
                 end_port,
                 bend90_radius=b90r,
-                start_straight=start_straight,
-                end_straight=end_straight,
+                start_steps=[Straight(size=start_straight)],
+                end_steps=[Straight(size=end_straight)],
                 **route_kwargs,
             )
 

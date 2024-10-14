@@ -4,11 +4,13 @@ from collections.abc import Callable, Sequence
 from typing import Any, Literal
 
 from .. import kdb
+from ..conf import logger
 from ..kcell import KCell, Port
 from ..kf_types import dbu
 from .generic import ManhattanRoute
 from .generic import route_bundle as route_bundle_generic
 from .manhattan import ManhattanRoutePathFunction, route_manhattan, route_smart
+from .steps import Step, Straight
 
 __all__ = [
     "route_elec",
@@ -68,16 +70,16 @@ def route_elec(
             p1.copy(),
             p2.copy(),
             bend90_radius=minimum_straight,
-            start_straight=start_straight,
-            end_straight=end_straight,
+            start_steps=[Straight(size=start_straight)],
+            end_steps=[Straight(size=end_straight)],
         )
     else:
         pts = route_path_function(
             p1.copy(),
             p2.copy(),
             bend90_radius=0,
-            start_straight=start_straight,
-            end_straight=end_straight,
+            start_steps=[Straight(size=start_straight)],
+            end_steps=[Straight(size=end_straight)],
         )
 
     path = kdb.Path(pts, width)
@@ -145,6 +147,8 @@ def route_bundle(
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
 ) -> list[ManhattanRoute]:
     """Connect multiple input ports to output ports.
 
@@ -183,6 +187,8 @@ def route_bundle(
         c=c,
         start_ports=start_ports,
         end_ports=end_ports,
+        starts=starts,
+        ends=ends,
         routing_function=route_smart,
         routing_kwargs={
             "separation": separation,
@@ -215,6 +221,8 @@ def route_bundle_dual_rails(
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
 ) -> list[ManhattanRoute]:
     """Connect multiple input ports to output ports.
 
@@ -250,11 +258,19 @@ def route_bundle_dual_rails(
             or a single transformation. If it's a transformation, the points will be
             routed through it as if it were a tunnel with length 0.
     """
+    if start_straights is not None:
+        logger.warning("start_straights is deprecated. Use `starts` instead.")
+        starts = start_straights
+    if end_straights is not None:
+        logger.warning("end_straights is deprecated. Use `starts` instead.")
+        ends = end_straights
     return route_bundle_generic(
         c=c,
         start_ports=start_ports,
         end_ports=end_ports,
         routing_function=route_smart,
+        starts=starts,
+        ends=ends,
         routing_kwargs={
             "separation": separation,
             "sort_ports": sort_ports,

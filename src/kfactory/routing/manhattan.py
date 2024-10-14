@@ -5,14 +5,14 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from dataclasses import InitVar, dataclass, field
-from typing import TYPE_CHECKING, Any, Literal, ParamSpec, Protocol, TypedDict
+from functools import cached_property
+from typing import Any, Literal, ParamSpec, Protocol, TypedDict
 
 from .. import kdb
 from ..conf import logger
 from ..enclosure import clean_points
 from ..kcell import KCell, KCLayout, Port
-from .steps import Step, Steps
-
+from .steps import Step, Steps, Straight
 
 __all__ = [
     "route_manhattan",
@@ -34,8 +34,8 @@ class ManhattanRoutePathFunction(Protocol):
         port1: Port | kdb.Trans,
         port2: Port | kdb.Trans,
         bend90_radius: int,
-        start_straight: int,
-        end_straight: int,
+        start_steps: list[Step] = [],
+        end_steps: list[Step] = [],
     ) -> list[kdb.Point]:
         """Minimal kwargs of a manhattan route function."""
         ...
@@ -50,8 +50,8 @@ class ManhattanRoutePathFunction180(Protocol):
         port2: Port | kdb.Trans,
         bend90_radius: int,
         bend180_radius: int,
-        start_straight: int,
-        end_straight: int,
+        start_steps: list[Step] = [],
+        end_steps: list[Step] = [],
     ) -> list[kdb.Point]:
         """Minimal kwargs of a manhattan route function with 180° bend."""
         ...
@@ -63,8 +63,8 @@ class ManhattanBundleRoutingFunction(Protocol):
         *,
         start_ports: Sequence[Port | kdb.Trans],
         end_ports: Sequence[Port | kdb.Trans],
-        start_straights: list[int],
-        end_straights: list[int],
+        starts: list[list[Step]],
+        ends: list[list[Step]],
         widths: list[int] | None = None,
         **kwargs: Any,
     ) -> list[ManhattanRouter]: ...
@@ -187,8 +187,8 @@ def route_manhattan_180(
                 t1.dup(),
                 t2.dup(),
                 bend90_radius,
-                start_straight=0,
-                end_straight=end_straight,
+                start_steps=[],
+                end_steps=[Straight(size=end_straight)],
             )
     raise NotImplementedError(
         "Case not supportedt yet. Please open an issue if you believe this is an error"
@@ -227,8 +227,8 @@ def droute_manhattan(
         port1.to_itype(layout.dbu),
         port2.to_itype(layout.dbu),
         int(bend90_radius / layout.dbu),
-        int(start_straight / layout.dbu),
-        int(end_straight / layout.dbu),
+        [Straight(size=round(start_straight / layout.dbu))],
+        [Straight(size=round(end_straight / layout.dbu))],
         invert=invert,
     )
 
@@ -246,13 +246,16 @@ class ManhattanRouterSide:
 
     router: ManhattanRouter
     _t: kdb.Trans
-    _ot: kdb.Trans
     pts: list[kdb.Point]
 
     def __post_init__(self) -> None:
         self.pts = self.pts.copy()
         if not self.pts:
             self.pts.append(self._t.disp.to_p())
+
+    @cached_property
+    def other(self) -> ManhattanRouterSide:
+        return self.router.end if self == self.router.start else self.router.start
 
     @property
     def t(self) -> kdb.Trans:
@@ -264,11 +267,11 @@ class ManhattanRouterSide:
 
     @property
     def tv(self) -> kdb.Vector:
-        return self.t.inverted() * (self._ot.disp - self.t.disp)
+        return self.t.inverted() * (self.other.t.disp - self.t.disp)
 
     @property
     def ta(self) -> Literal[0, 1, 2, 3]:
-        return (self._ot.angle - self.t.angle) % 4  # type: ignore[return-value]
+        return (self.other.t.angle - self.t.angle) % 4  # type: ignore[return-value]
 
     def right(self) -> None:
         self.pts.append(
@@ -316,8 +319,8 @@ class ManhattanRouter:
     end_transformation: kdb.Trans
     start: ManhattanRouterSide = field(init=False)
     end: ManhattanRouterSide = field(init=False)
-    start_straight: InitVar[int | list[Step]] = 0
-    end_straight: InitVar[int | list[Step]] = 0
+    start_steps: InitVar[list[Step]] = field(default=[])
+    end_steps: InitVar[list[Step]] = field(default=[])
     width: int = 0
     start_points: InitVar[list[kdb.Point]] = field(default=[])
     end_points: InitVar[list[kdb.Point]] = field(default=[])
@@ -325,8 +328,8 @@ class ManhattanRouter:
 
     def __post_init__(
         self,
-        start_straight: int | list[Step],
-        end_straight: int | list[Step],
+        start_steps: int | list[Step],
+        end_steps: int | list[Step],
         start_points: list[kdb.Point],
         end_points: list[kdb.Point],
     ) -> None:
@@ -338,27 +341,25 @@ class ManhattanRouter:
         self.start = ManhattanRouterSide(
             router=self,
             _t=_start,
-            _ot=_end,
             pts=start_points,
         )
         self.end = ManhattanRouterSide(
             router=self,
             _t=_end,
-            _ot=_start,
             pts=end_points,
         )
-        if isinstance(start_straight, int):
-            if start_straight < 0:
+        if isinstance(start_steps, int):
+            if start_steps < 0:
                 raise ValueError("Start straight must be >= 0")
-            self.start.straight(start_straight)
+            self.start.straight(start_steps)
         else:
-            Steps(start_straight).execute(self.start)
-        if isinstance(end_straight, int):
-            if end_straight < 0:
+            Steps(start_steps).execute(self.start)
+        if isinstance(end_steps, int):
+            if end_steps < 0:
                 raise ValueError("End straight must be >= 0")
-            self.end.straight(end_straight)
+            self.end.straight(end_steps)
         else:
-            Steps(end_straight).execute(self.end)
+            Steps(end_steps).execute(self.end)
 
     @property
     def path_length(self) -> int:
@@ -554,8 +555,8 @@ def route_manhattan(
     port1: Port | kdb.Trans,
     port2: Port | kdb.Trans,
     bend90_radius: int,
-    start_straight: int,
-    end_straight: int,
+    start_steps: list[Step] = [],
+    end_steps: list[Step] = [],
     max_tries: int = 20,
     invert: bool = False,
 ) -> list[kdb.Point]:
@@ -567,8 +568,8 @@ def route_manhattan(
         port1: Transformation of start port.
         port2: Transformation of end port.
         bend90_radius: The radius or (symmetrical) dimension of 90° bend. [dbu]
-        start_straight: Minimum straight after the starting port. [dbu]
-        end_straight: Minimum straight before the end port. [dbu]
+        start_steps: Steps to take at the beginning of the route. [dbu]
+        end_steps: Steps to take at the end of the route. [dbu]
         max_tries: Maximum number of tries to calculate a manhattan route before
             giving up
         invert: Invert the direction in which to route. In the normal behavior,
@@ -581,20 +582,20 @@ def route_manhattan(
     if not invert:
         t1 = port1 if isinstance(port1, kdb.Trans) else port1.trans
         t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans
-        _start_straight = start_straight
-        _end_straight = end_straight
+        _start_steps = start_steps
+        _end_steps = end_steps
     else:
         t2 = port1 if isinstance(port1, kdb.Trans) else port1.trans
         t1 = port2 if isinstance(port2, kdb.Trans) else port2.trans
-        _end_straight = start_straight
-        _start_straight = end_straight
+        _end_steps = end_steps
+        _start_steps = end_steps
 
     router = ManhattanRouter(
         bend90_radius=bend90_radius,
         start_transformation=t1,
         end_transformation=t2,
-        start_straight=_start_straight,
-        end_straight=_end_straight,
+        start_steps=_start_steps,
+        end_steps=_end_steps,
     )
 
     pts = router.auto_route()
@@ -820,8 +821,8 @@ def route_smart(
     widths: list[int] | None = None,
     bend90_radius: int | None = None,
     separation: int | None = None,
-    start_straights: list[int | list[Step]] = [0],
-    end_straights: list[int | list[Step]] = [0],
+    starts: list[list[Step]] = [],
+    ends: list[list[Step]] = [],
     bboxes: list[kdb.Box] | None = None,
     sort_ports: bool = False,
     waypoints: list[kdb.Point] | kdb.Trans | None = None,
@@ -837,8 +838,8 @@ def route_smart(
             with other routers of the other groups) they must have the same angle.
         bend90_radius: The radius for 90° bends in dbu.
         separation: Separation which should be maintained between the routers in dbu.
-        start_straights: Add straights at the beginning of each route in dbu.
-        end_straights: Add straights in dbu at the end of all routes.
+        starts: Add straights at the beginning of each route in dbu.
+        ends: Add straights in dbu at the end of all routes.
         bboxes: List of bounding boxes used to denote obstacles.
         widths: Defines the width of the core material of each route.
         sort_ports: Whether to allow rearranging of ports given as inputs or outputs.
@@ -871,18 +872,13 @@ def route_smart(
         f"end ports {len(end_ports)}"
     )
 
-    if len(start_straights) == 1:
-        start_straights = [start_straights[0]] * length
-    if len(end_straights) == 1:
-        end_straights = [end_straights[0]] * length
-
-    assert len(start_straights) == length, (
+    assert len(starts) == length, (
         "start_straights does have too few or too"
-        f"many elements {len(start_straights)=}, {len(start_straights)=}"
+        f"many elements {len(starts)=}, {len(starts)=}"
     )
-    assert len(end_straights) == length, (
+    assert len(ends) == length, (
         "end_straights does have too few or too"
-        f"many elements {len(start_straights)=}, {len(start_straights)=}"
+        f"many elements {len(starts)=}, {len(starts)=}"
     )
     if length == 0:
         return []
@@ -934,8 +930,8 @@ def route_smart(
                     widths=widths,
                     bend90_radius=bend90_radius,
                     separation=separation,
-                    start_straights=start_straights,
-                    end_straights=[0] * len(start_straights),
+                    starts=starts,
+                    ends=[[]] * len(starts),
                     bboxes=bboxes,
                     sort_ports=True,
                     waypoints=None,
@@ -947,8 +943,8 @@ def route_smart(
                     widths=widths,
                     bend90_radius=bend90_radius,
                     separation=separation,
-                    start_straights=end_straights,
-                    end_straights=[0] * len(end_straights),
+                    starts=ends,
+                    ends=[[]] * len(ends),
                     bboxes=bboxes,
                     sort_ports=True,
                     waypoints=None,
@@ -996,8 +992,8 @@ def route_smart(
                     widths=widths,
                     bend90_radius=bend90_radius,
                     separation=separation,
-                    start_straights=start_straights,
-                    end_straights=[0] * len(start_straights),
+                    starts=starts,
+                    ends=[[]] * len(starts),
                     bboxes=bboxes,
                     sort_ports=True,
                     waypoints=None,
@@ -1012,8 +1008,8 @@ def route_smart(
                     widths=widths,
                     bend90_radius=bend90_radius,
                     separation=separation,
-                    start_straights=end_straights,
-                    end_straights=[0] * len(end_straights),
+                    starts=ends,
+                    ends=[[]] * len(ends),
                     bboxes=bboxes,
                     sort_ports=True,
                     waypoints=None,
@@ -1304,8 +1300,8 @@ def route_smart(
                     widths=widths,
                     bend90_radius=bend90_radius,
                     separation=separation,
-                    start_straights=start_straights,
-                    end_straights=[0] * len(start_straights),
+                    starts=starts,
+                    ends=[[]] * len(starts),
                     bboxes=bboxes,
                     sort_ports=True,
                     waypoints=None,
@@ -1317,8 +1313,8 @@ def route_smart(
                     widths=widths,
                     bend90_radius=bend90_radius,
                     separation=separation,
-                    start_straights=end_straights,
-                    end_straights=[0] * len(end_straights),
+                    starts=ends,
+                    ends=[[]] * len(ends),
                     bboxes=bboxes,
                     sort_ports=True,
                     waypoints=None,
@@ -1366,8 +1362,8 @@ def route_smart(
                     widths=widths,
                     bend90_radius=bend90_radius,
                     separation=separation,
-                    start_straights=start_straights,
-                    end_straights=[0] * len(start_straights),
+                    starts=starts,
+                    ends=[[]] * len(starts),
                     bboxes=bboxes,
                     sort_ports=True,
                     waypoints=None,
@@ -1382,8 +1378,8 @@ def route_smart(
                     widths=widths,
                     bend90_radius=bend90_radius,
                     separation=separation,
-                    start_straights=end_straights,
-                    end_straights=[0] * len(end_straights),
+                    starts=ends,
+                    ends=[[]] * len(ends),
                     bboxes=bboxes,
                     sort_ports=True,
                     waypoints=None,
@@ -1420,16 +1416,14 @@ def route_smart(
 
     all_routers = []
 
-    for ts, te, w, ss, es in zip(
-        start_ts, end_ts, widths, start_straights, end_straights
-    ):
+    for ts, te, w, ss, es in zip(start_ts, end_ts, widths, starts, ends):
         all_routers.append(
             ManhattanRouter(
                 bend90_radius=bend90_radius,
                 start_transformation=ts,
                 end_transformation=te,
-                start_straight=ss,
-                end_straight=es,
+                start_steps=ss,
+                end_steps=es,
                 width=w,
             )
         )
@@ -2334,8 +2328,8 @@ def route_ports_to_bundle(
                 t_e,
                 _trans,
                 bend90_radius=bend_radius,
-                start_straight=_end_straight + end_straight,
-                end_straight=start_straight,
+                start_steps=[Straight(size=end_straight + end_straight)],
+                end_steps=[Straight(size=start_straight)],
             )
         ]
         pts.reverse()

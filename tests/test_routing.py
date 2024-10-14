@@ -472,8 +472,8 @@ def test_custom_router(
         c=c,
         start_ports=start_ports,
         end_ports=end_ports,
-        end_straights=50_000,
-        start_straights=50_000,
+        ends=50_000,
+        starts=50_000,
         routing_function=kf.routing.manhattan.route_smart,
         routing_kwargs={
             "bend90_radius": b90r,
