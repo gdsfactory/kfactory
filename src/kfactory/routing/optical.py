@@ -244,7 +244,6 @@ def place90(
         kwargs: Additional kwargs. Compatibility for type checking. If any kwargs are
             passed an error is raised.
     """
-    breakpoint()
     if len(kwargs) > 0:
         raise ValueError(
             "Additional args and kwargs are not allowed for route_smart." f"{kwargs=}"

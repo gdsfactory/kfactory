@@ -1220,18 +1220,6 @@ def route_smart(
                 )
             )
 
-    # for ts, te, w, ss, es in zip(start_ts, end_ts, widths, starts, ends):
-    #     all_routers.append(
-    #         ManhattanRouter(
-    #             bend90_radius=bend90_radius,
-    #             start_transformation=ts,
-    #             end_transformation=te,
-    #             start_steps=ss,
-    #             end_steps=es,
-    #             width=w,
-    #         )
-    #     )
-
     router_bboxes: list[kdb.Box] = [
         kdb.Box(router.start.t.disp.to_p(), router.end.t.disp.to_p()).enlarged(
             router.width // 2
@@ -1345,17 +1333,12 @@ def route_smart(
             bbox_routing=bbox_routing,
             separation=separation,
         )
-        # if router == all_routers[8]:
-        breakpoint()
         route_to_bbox(
             (router.end for router in sorted_routers),
             end_bbox,
             bbox_routing=bbox_routing,
             separation=separation,
         )
-        # disp_to_bbox = kdb.Trans(-angle - 2, False, 0, 0) * (
-        #     start_bbox.center().to_v() - router_bundle[0].end.t.disp
-        # )
         bb_start2end = kdb.Trans(-angle, False, 0, 0) * start_bbox
         bb_end2start = kdb.Trans(-angle, False, 0, 0) * end_bbox
 
@@ -1370,7 +1353,6 @@ def route_smart(
             route_to_bbox(
                 end_routers, end_bbox, separation=separation, bbox_routing=bbox_routing
             )
-            breakpoint()
             _route_to_side(
                 end_routers,
                 clockwise=avg.y > 0,
@@ -1378,7 +1360,6 @@ def route_smart(
                 separation=separation,
                 bbox_routing=bbox_routing,
             )
-            breakpoint()
             _route_to_side(
                 end_routers,
                 clockwise=avg.y > 0,
@@ -1390,8 +1371,6 @@ def route_smart(
         group_angle: int | None = None
         current_group: list[ManhattanRouter] = []
         for router in sorted_routers:
-            if router == all_routers[8]:
-                breakpoint()
             _ang = router.start.t.angle
             if _ang != group_angle:
                 if group_angle is not None:
@@ -1629,7 +1608,6 @@ def route_loosely(
     choose the shortest path.
     """
     router_start_box = start_bbox.dup()
-    breakpoint()
 
     if routers:
         angle = (routers[0].end.t.angle - 2) % 4
@@ -1956,27 +1934,32 @@ def _route_to_side(
                     - rs.router.bend90_radius
                 )
         rs.straight(s)
+        tv = rs.tv
+        x = tv.x
+        y = tv.y
         if clockwise:
-            x = rs.tv.x
-            if rs.ta == 3:
-                if x >= rs.router.bend90_radius:
-                    rs.straight_nobend(x)
-                elif x > -rs.router.bend90_radius:
-                    rs.straight(rs.router.bend90_radius + x)
-            if rs.ta == 0 and x > 0:
-                rs.straight(x)
-            rs.left()
+            match rs.ta:
+                case 3:
+                    if x >= rs.router.bend90_radius:
+                        rs.straight_nobend(x)
+                    elif x > -rs.router.bend90_radius:
+                        rs.straight(rs.router.bend90_radius + x)
+                case 0 if x > 0:
+                    rs.straight(x)
+            if not (y == 0 and rs.ta == 2 and x > 0):
+                rs.left()
             bbox += rs.t * kdb.Point(0, -hw2)
         else:
-            x = rs.tv.x
-            if rs.ta == 1:
-                if x >= rs.router.bend90_radius:
-                    rs.straight_nobend(x)
-                elif x > -rs.router.bend90_radius:
-                    rs.straight(rs.router.bend90_radius + x)
-            if rs.ta == 0 and x > 0:
-                rs.straight(x)
-            rs.right()
+            match rs.ta:
+                case 1:
+                    if x >= rs.router.bend90_radius:
+                        rs.straight_nobend(x)
+                    elif x > -rs.router.bend90_radius:
+                        rs.straight(rs.router.bend90_radius + x)
+                case 0 if x > 0:
+                    rs.straight(x)
+            if not (y == 0 and rs.ta == 2 and x > 0):
+                rs.right()
             bbox += rs.t * kdb.Point(0, hw2)
 
     return bbox
