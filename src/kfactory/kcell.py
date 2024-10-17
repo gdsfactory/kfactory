@@ -2600,6 +2600,7 @@ class KCell:
         /,
         *,
         no_warn: bool = False,
+        transform_ports: bool = False,
     ) -> Instance: ...
 
     @overload
@@ -2609,6 +2610,7 @@ class KCell:
         /,
         *,
         no_warn: bool = False,
+        transform_ports: bool = False,
     ) -> None: ...
 
     def transform(
@@ -2622,6 +2624,7 @@ class KCell:
         /,
         *,
         no_warn: bool = False,
+        transform_ports: bool = False,
     ) -> Instance | None:
         """Transforms the instance or cell with the transformation given."""
         if not no_warn:
@@ -2641,6 +2644,18 @@ class KCell:
                 ),
             )
         else:
+            if transform_ports:
+                if isinstance(inst_or_trans, kdb.DTrans):
+                    inst_or_trans = kdb.DCplxTrans(inst_or_trans)
+                elif isinstance(inst_or_trans, kdb.ICplxTrans):
+                    inst_or_trans = kdb.DCplxTrans(inst_or_trans, self.kcl.dbu)
+
+                if isinstance(inst_or_trans, kdb.Trans):
+                    for port in self.ports:
+                        port.trans = inst_or_trans * port.trans
+                else:
+                    for port in self.ports:
+                        port.dcplx_trans = inst_or_trans * port.dcplx_trans  # type: ignore[operator]
             return self._kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
 
     def set_meta_data(self) -> None:
