@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Iterable, Sequence
-from typing import Any, Literal, Protocol
+from typing import Any, Literal, Protocol, cast
 
 from pydantic import BaseModel, Field
 
@@ -12,7 +12,12 @@ from .. import kdb, rdb
 from ..conf import config
 from ..kcell import Instance, KCell, Port
 from ..kf_types import dbu
-from .manhattan import ManhattanBundleRoutingFunction, ManhattanRouter, route_smart
+from .manhattan import (
+    ManhattanBundleRoutingFunction,
+    ManhattanRouter,
+    route_smart,
+)
+from .steps import Step, Straight
 
 __all__ = [
     "PlacerFunction",
@@ -114,130 +119,129 @@ def check_collisions(
             overlaps to determine error. If not defined, all layers occurring in
             ports will be used.
     """
-    if on_collision is not None:
-        collision_edges: dict[str, kdb.Edges] = {}
-        inter_route_collisions = kdb.Edges()
-        all_router_edges = kdb.Edges()
-        for i, (ps, pe, router) in enumerate(zip(start_ports, end_ports, routers)):
-            _edges, router_edges = router.collisions(log_errors=None)
-            if not _edges.is_empty():
-                collision_edges[f"{ps.name} - {pe.name} (index: {i})"] = _edges
-            inter_route_collision = all_router_edges.interacting(router_edges)
-            if not inter_route_collision.is_empty():
-                inter_route_collisions.join_with(inter_route_collision)
-            all_router_edges.join_with(router_edges)
+    if on_collision is None:
+        return
+    collision_edges: dict[str, kdb.Edges] = {}
+    inter_route_collisions = kdb.Edges()
+    all_router_edges = kdb.Edges()
+    for i, (ps, pe, router) in enumerate(zip(start_ports, end_ports, routers)):
+        _edges, router_edges = router.collisions(log_errors=None)
+        if not _edges.is_empty():
+            collision_edges[f"{ps.name} - {pe.name} (index: {i})"] = _edges
+        inter_route_collision = all_router_edges.interacting(router_edges)
+        if not inter_route_collision.is_empty():
+            inter_route_collisions.join_with(inter_route_collision)
+        all_router_edges.join_with(router_edges)
 
-        if collision_edges or not inter_route_collisions.is_empty():
-            if collision_check_layers is None:
-                collision_check_layers = list(set(p.layer_info for p in start_ports))
-            dbu = c.kcl.dbu
-            db = rdb.ReportDatabase("Routing Errors")
-            cat = db.create_category("Manhattan Routing Collisions")
-            c.name = c.name[: config.max_cellname_length]
-            cell = db.create_cell(c.name)
-            for name, edges in collision_edges.items():
-                item = db.create_item(cell, cat)
-                item.add_value(name)
-                for edge in edges.each():
-                    item.add_value(edge.to_dtype(dbu))
-            insts = [inst for route in routes for inst in route.instances]
-            shapes: dict[kdb.LayerInfo, list[kdb.Region]] = defaultdict(list)
-            for route in routes:
-                for layer, _shapes in route.polygons.items():
-                    shapes[layer].append(kdb.Region(_shapes))
-            layer_cats: dict[kdb.LayerInfo, rdb.RdbCategory] = {}
+    if collision_edges or not inter_route_collisions.is_empty():
+        if collision_check_layers is None:
+            collision_check_layers = list({p.layer_info for p in start_ports})
+        dbu = c.kcl.dbu
+        db = rdb.ReportDatabase("Routing Errors")
+        cat = db.create_category("Manhattan Routing Collisions")
+        c.name = c.name[: config.max_cellname_length]
+        cell = db.create_cell(c.name)
+        for name, edges in collision_edges.items():
+            item = db.create_item(cell, cat)
+            item.add_value(name)
+            for edge in edges.each():
+                item.add_value(edge.to_dtype(dbu))
+        insts = [inst for route in routes for inst in route.instances]
+        shapes: dict[kdb.LayerInfo, list[kdb.Region]] = defaultdict(list)
+        for route in routes:
+            for layer, _shapes in route.polygons.items():
+                shapes[layer].append(kdb.Region(_shapes))
+        layer_cats: dict[kdb.LayerInfo, rdb.RdbCategory] = {}
 
-            def layer_cat(layer_info: kdb.LayerInfo) -> rdb.RdbCategory:
-                if layer_info not in layer_cats:
-                    layer_cats[layer_info] = db.category_by_path(
-                        layer_info.to_s()
-                    ) or db.create_category(layer_info.to_s())
-                return layer_cats[layer_info]
+        def layer_cat(layer_info: kdb.LayerInfo) -> rdb.RdbCategory:
+            if layer_info not in layer_cats:
+                layer_cats[layer_info] = db.category_by_path(
+                    layer_info.to_s()
+                ) or db.create_category(layer_info.to_s())
+            return layer_cats[layer_info]
 
-            any_layer_collision = False
+        any_layer_collision = False
 
-            for layer_info in collision_check_layers:
-                shapes_regions = shapes[layer_info]
-                layer = c.kcl.layer(layer_info)
-                error_region_instances = kdb.Region()
-                error_region_shapes = kdb.Region()
-                inst_regions: dict[int, kdb.Region] = {}
-                inst_region = kdb.Region()
-                shape_region = kdb.Region()
-                for r in shapes_regions:
-                    if not (shape_region & r).is_empty():
-                        error_region_shapes.insert(shape_region & r)
-                    shape_region.insert(r)
-                for i, inst in enumerate(insts):
-                    _inst_region = kdb.Region(inst.bbox(layer))
-                    # inst_shapes: kdb.Region | None = None
-                    if not (inst_region & _inst_region).is_empty():
-                        # if inst_shapes is None:
-                        inst_shapes = kdb.Region()
-                        shape_it = c.begin_shapes_rec_overlapping(
-                            layer, inst.bbox(layer)
-                        )
-                        shape_it.select_cells([inst.cell.cell_index()])
-                        shape_it.min_depth = 1
-                        for _it in shape_it.each():
-                            if _it.path()[0].inst() == inst._instance:
-                                inst_shapes.insert(
-                                    _it.shape().polygon.transformed(_it.trans())
-                                )
-                        for j, _reg in inst_regions.items():
-                            if _reg & _inst_region:
-                                __reg = kdb.Region()
-                                shape_it = c.begin_shapes_rec_touching(
-                                    layer, (_reg & _inst_region).bbox()
-                                )
-                                shape_it.select_cells([insts[j].cell.cell_index()])
-                                shape_it.min_depth = 1
-                                for _it in shape_it.each():
-                                    if _it.path()[0].inst() == insts[j]._instance:
-                                        __reg.insert(
-                                            _it.shape().polygon.transformed(_it.trans())
-                                        )
+        for layer_info in collision_check_layers:
+            shapes_regions = shapes[layer_info]
+            layer = c.kcl.layer(layer_info)
+            error_region_instances = kdb.Region()
+            error_region_shapes = kdb.Region()
+            inst_regions: dict[int, kdb.Region] = {}
+            inst_region = kdb.Region()
+            shape_region = kdb.Region()
+            for r in shapes_regions:
+                if not (shape_region & r).is_empty():
+                    error_region_shapes.insert(shape_region & r)
+                shape_region.insert(r)
+            for i, inst in enumerate(insts):
+                _inst_region = kdb.Region(inst.bbox(layer))
+                # inst_shapes: kdb.Region | None = None
+                if not (inst_region & _inst_region).is_empty():
+                    # if inst_shapes is None:
+                    inst_shapes = kdb.Region()
+                    shape_it = c.begin_shapes_rec_overlapping(layer, inst.bbox(layer))
+                    shape_it.select_cells([inst.cell.cell_index()])
+                    shape_it.min_depth = 1
+                    for _it in shape_it.each():
+                        if _it.path()[0].inst() == inst._instance:
+                            inst_shapes.insert(
+                                _it.shape().polygon.transformed(_it.trans())
+                            )
+                    for j, _reg in inst_regions.items():
+                        if _reg & _inst_region:
+                            __reg = kdb.Region()
+                            shape_it = c.begin_shapes_rec_touching(
+                                layer, (_reg & _inst_region).bbox()
+                            )
+                            shape_it.select_cells([insts[j].cell.cell_index()])
+                            shape_it.min_depth = 1
+                            for _it in shape_it.each():
+                                if _it.path()[0].inst() == insts[j]._instance:
+                                    __reg.insert(
+                                        _it.shape().polygon.transformed(_it.trans())
+                                    )
 
-                                error_region_instances.insert(__reg & inst_shapes)
-                    inst_region += _inst_region
-                    inst_regions[i] = _inst_region
+                            error_region_instances.insert(__reg & inst_shapes)
+                inst_region += _inst_region
+                inst_regions[i] = _inst_region
 
-                if not error_region_shapes.is_empty():
-                    any_layer_collision = True
-                    if on_collision == "error":
-                        continue
-                    cat = layer_cat(layer_info)
-                    sc = db.category_by_path(
-                        f"{cat.path()}.RoutingErrors"
-                    ) or db.create_category(layer_cat(layer_info), "RoutingErrors")
-                    for poly in error_region_shapes.merge().each():
-                        it = db.create_item(cell, sc)
-                        it.add_value("Route shapes overlapping with other shapes")
-                        it.add_value(c.kcl.to_um(poly))
-                if not error_region_instances.is_empty():
-                    any_layer_collision = True
-                    if on_collision == "error":
-                        continue
-                    cat = layer_cat(layer_info)
-                    sc = db.category_by_path(
-                        f"{cat.path()}.RoutingErrors"
-                    ) or db.create_category(layer_cat(layer_info), "RoutingErrors")
-                    for poly in error_region_instances.merge().each():
-                        it = db.create_item(cell, sc)
-                        it.add_value("Route instances overlapping with other instances")
-                        it.add_value(c.kcl.to_um(poly))
+            if not error_region_shapes.is_empty():
+                any_layer_collision = True
+                if on_collision == "error":
+                    continue
+                cat = layer_cat(layer_info)
+                sc = db.category_by_path(
+                    f"{cat.path()}.RoutingErrors"
+                ) or db.create_category(layer_cat(layer_info), "RoutingErrors")
+                for poly in error_region_shapes.merge().each():
+                    it = db.create_item(cell, sc)
+                    it.add_value("Route shapes overlapping with other shapes")
+                    it.add_value(c.kcl.to_um(poly))
+            if not error_region_instances.is_empty():
+                any_layer_collision = True
+                if on_collision == "error":
+                    continue
+                cat = layer_cat(layer_info)
+                sc = db.category_by_path(
+                    f"{cat.path()}.RoutingErrors"
+                ) or db.create_category(layer_cat(layer_info), "RoutingErrors")
+                for poly in error_region_instances.merge().each():
+                    it = db.create_item(cell, sc)
+                    it.add_value("Route instances overlapping with other instances")
+                    it.add_value(c.kcl.to_um(poly))
 
-            if any_layer_collision:
-                match on_collision:
-                    case "show_error":
-                        c.show(lyrdb=db)
-                        raise RuntimeError(
-                            f"Routing collision in {c.kcl.future_cell_name or c.name}"
-                        )
-                    case "error":
-                        raise RuntimeError(
-                            f"Routing collision in {c.kcl.future_cell_name or c.name}"
-                        )
+        if any_layer_collision:
+            match on_collision:
+                case "show_error":
+                    c.show(lyrdb=db)
+                    raise RuntimeError(
+                        f"Routing collision in {c.kcl.future_cell_name or c.name}"
+                    )
+                case "error":
+                    raise RuntimeError(
+                        f"Routing collision in {c.kcl.future_cell_name or c.name}"
+                    )
 
 
 def get_radius(
@@ -272,8 +276,6 @@ def route_bundle(
     c: KCell,
     start_ports: list[Port],
     end_ports: list[Port],
-    start_straights: dbu | list[dbu] = 0,
-    end_straights: dbu | list[dbu] = 0,
     route_width: dbu | list[dbu] | None = None,
     sort_ports: bool = False,
     on_collision: Literal["error", "show_error"] | None = "show_error",
@@ -284,16 +286,60 @@ def route_bundle(
     placer_kwargs: dict[str, Any] = {},
     router_post_process_function: RouterPostProcessFunction | None = None,
     router_post_process_kwargs: dict[str, Any] = {},
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
 ) -> list[ManhattanRoute]:
-    """Route a bundle from starting ports to end_ports.
+    r"""Route a bundle from starting ports to end_ports.
+
+    Waypoints will create a front which will create ports in a 1D array. If waypoints
+    are a transformation it will be like a point with a direction. If multiple points
+    are passed, the direction will be invfered.
+    For orientation of 0 degrees it will create the following front for 4 ports:
+
+    ```
+          │
+          │
+          │
+          p1 ->
+          │
+          │
+          │
+
+
+          │
+          │
+          │
+          p2 ->
+          │
+          │
+          │
+      ___\waypoint
+         /
+          │
+          │
+          │
+          p3 ->
+          │
+          │
+          │
+
+
+          │
+          │
+          │
+          p4 ->
+          │
+          │
+          │
+    ```
 
     Args:
         c: Cell to place the route in.
         start_ports: List of start ports.
         end_ports: List of end ports.
         separation: Separation between the routes.
-        start_straights: Minimal straight segment after `p1`.
-        end_straights: Minimal straight segment before `p2`.
+        starts: List of steps to use on each starting port or all of them.
+        ends: List of steps to use on each end port or all of them.
         collision_check_layers: Layers to check for actual errors if manhattan routes
             detect potential collisions.
         on_collision: Define what to do on routing collision. Default behaviour is to
@@ -338,11 +384,19 @@ def route_bundle(
             "For bundle routing the input port list must have"
             " the same size as the end ports and be the same length."
         )
-
-    if isinstance(start_straights, int):
-        start_straights = [start_straights] * len(start_ports)
-    if isinstance(end_straights, int):
-        end_straights = [end_straights] * len(start_ports)
+    length = len(start_ports)
+    if starts == []:
+        starts = [starts] * length  # type: ignore[assignment]
+    elif isinstance(starts, int):
+        starts = [[Straight(dist=starts)] for _ in range(length)]  # type: ignore[assignment]
+    elif isinstance(starts[0], Step):
+        starts = [starts for _ in range(len(start_ports))]  # type: ignore[assignment]
+    if ends == []:
+        ends = [ends] * length  # type: ignore[assignment]
+    elif isinstance(ends, int):
+        ends = [[Straight(dist=ends)] for _ in range(length)]  # type: ignore[assignment]
+    elif isinstance(ends[0], Step):
+        ends = [ends for _ in range(len(start_ports))]  # type: ignore[assignment]
 
     if route_width:
         if isinstance(route_width, int):
@@ -356,8 +410,8 @@ def route_bundle(
         start_ports=start_ports,
         end_ports=end_ports,
         widths=widths,
-        start_straights=start_straights,
-        end_straights=end_straights,
+        starts=cast(list[list[Step]], starts),
+        ends=cast(list[list[Step]], ends),
         **routing_kwargs,
     )
 

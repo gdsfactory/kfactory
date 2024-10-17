@@ -472,8 +472,8 @@ def test_custom_router(
         c=c,
         start_ports=start_ports,
         end_ports=end_ports,
-        end_straights=50_000,
-        start_straights=50_000,
+        ends=50_000,
+        starts=50_000,
         routing_function=kf.routing.manhattan.route_smart,
         routing_kwargs={
             "bend90_radius": b90r,
@@ -573,6 +573,7 @@ def test_route_smart_waypoints_trans(
         kf.Port(width=500, layer_info=LAYER.WG, kcl=c.kcl, trans=trans)
         for trans in transformations
     ]
+    start_ports.reverse()
     end_ports = [
         kf.Port(
             width=500,
@@ -607,6 +608,7 @@ def test_route_smart_waypoints_pts(
         kf.Port(width=500, layer_info=LAYER.WG, kcl=c.kcl, trans=trans)
         for trans in transformations
     ]
+    start_ports.reverse()
     end_ports = [
         kf.Port(
             width=500,
