@@ -1,5 +1,20 @@
+<a id="v0.21.2"></a>
+# [v0.21.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.2) - 2024-10-17
+
+# What's Changed
+
+## New
+
+- Add Router start/end straight steps [#493](https://github.com/gdsfactory/kfactory/pull/493)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.1...v0.21.2
+
+
+[Changes][v0.21.2]
+
+
 <a id="v0.21.1"></a>
-# [v0.21.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.1) - 2024-10-11
+# [v0.21.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.1) - 2024-10-17
 
 # What's Changed
 
@@ -1184,6 +1199,7 @@
 [Changes][v0.4.0]
 
 
+[v0.21.2]: https://github.com/gdsfactory/kfactory/compare/v0.21.1...v0.21.2
 [v0.21.1]: https://github.com/gdsfactory/kfactory/compare/v0.21.0...v0.21.1
 [v0.21.0]: https://github.com/gdsfactory/kfactory/compare/v0.20.8...v0.21.0
 [v0.20.8]: https://github.com/gdsfactory/kfactory/compare/v0.20.7...v0.20.8
