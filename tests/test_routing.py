@@ -5,6 +5,7 @@ from functools import partial
 from conftest import Layers
 
 from collections.abc import Callable
+from typing import Literal
 
 
 @pytest.mark.parametrize(
@@ -626,4 +627,46 @@ def test_route_smart_waypoints_pts(
         straight_factory=straight_factory_dbu,
         bend90_cell=bend90_small,
         waypoints=[kf.kdb.Point(250_000, 0), kf.kdb.Point(250_000, 100_000)],
+    )
+
+
+def test_route_generic_reorient(
+    bend90_small: kf.KCell, straight_factory_dbu: Callable[..., kf.KCell], LAYER: Layers
+) -> None:
+    c = kf.KCell()
+
+    start_ports = [
+        c.create_port(
+            name=f"bot_{i}",
+            trans=kf.kdb.Trans(i, False, i * 30_000, 0),
+            layer_info=kf.kdb.LayerInfo(1, 0),
+            width=500,
+        )
+        for i in range(10)
+    ]
+    end_ports = [
+        c.create_port(
+            name=f"top_{i}",
+            trans=kf.kdb.Trans(1, False, i * 30_000, 500_000),
+            layer_info=kf.kdb.LayerInfo(i, 0),
+            width=500,
+        )
+        for i in range(10)
+    ]
+    # end_ports.reverse()
+
+    c.add_ports(start_ports + end_ports)
+
+    start_angles = [2, 1, 1, 1, 1, 1, 1, 1, 1, 0]
+    end_angles = 3
+
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports=start_ports,
+        end_ports=end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        start_angles=start_angles,
+        end_angles=end_angles,
     )

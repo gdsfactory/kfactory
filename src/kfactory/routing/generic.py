@@ -288,6 +288,8 @@ def route_bundle(
     router_post_process_kwargs: dict[str, Any] = {},
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    start_angles: int | list[int] | None = None,
+    end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
 
@@ -376,6 +378,10 @@ def route_bundle(
             the routing function. This is particularly useful for operations such as
             path length matching.
         router_post_process_kwargs: Kwargs for router_post_process_function.
+        start_angles: Overwrite the port orientation of all start_ports together
+            (single value) or each one (list of values which is as long as start_ports).
+        end_angles: Overwrite the port orientation of all start_ports together
+            (single value) or each one (list of values which is as long as end_ports).
     """
     if not start_ports:
         return []
@@ -397,6 +403,40 @@ def route_bundle(
         ends = [[Straight(dist=ends)] for _ in range(length)]  # type: ignore[assignment]
     elif isinstance(ends[0], Step):
         ends = [ends for _ in range(len(start_ports))]  # type: ignore[assignment]
+
+    if start_angles is not None:
+        if isinstance(start_angles, int):
+            start_ports = [
+                p.copy(post_trans=kdb.Trans(start_angles - p.trans.angle))
+                for p in start_ports
+            ]
+        else:
+            if not len(start_angles) == len(start_ports):
+                raise ValueError(
+                    "If more than one end port should be rotated,"
+                    " a rotation for all ports must be provided."
+                )
+            start_ports = [
+                p.copy(post_trans=kdb.Trans(a - p.trans.angle))
+                for a, p in zip(start_angles, start_ports)
+            ]
+
+    if end_angles is not None:
+        if isinstance(end_angles, int):
+            end_ports = [
+                p.copy(post_trans=kdb.Trans(end_angles - p.trans.angle))
+                for p in end_ports
+            ]
+        else:
+            if not len(end_angles) == len(end_ports):
+                raise ValueError(
+                    "If more than one end port should be rotated,"
+                    " a rotation for all ports must be provided."
+                )
+            end_ports = [
+                p.copy(post_trans=kdb.Trans(a - p.trans.angle))
+                for a, p in zip(end_angles, start_ports)
+            ]
 
     if route_width:
         if isinstance(route_width, int):
