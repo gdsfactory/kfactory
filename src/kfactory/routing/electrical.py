@@ -149,6 +149,8 @@ def route_bundle(
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    start_angles: int | list[int] | None = None,
+    end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:
     r"""Connect multiple input ports to output ports.
 
@@ -226,6 +228,12 @@ def route_bundle(
             the waypoints. The waypoints can either be a list of at least two points
             or a single transformation. If it's a transformation, the points will be
             routed through it as if it were a tunnel with length 0.
+        start_angles: Overwrite the port orientation of all start_ports together
+            (single value) or each one (list of values which is as long as start_ports).
+        end_angles: Overwrite the port orientation of all start_ports together
+            (single value) or each one (list of values which is as long as end_ports).
+            If no waypoints are set, the target angles of all ends muts be the same
+            (after the steps).
     """
     return route_bundle_generic(
         c=c,
@@ -246,6 +254,8 @@ def route_bundle(
         sort_ports=sort_ports,
         on_collision=on_collision,
         collision_check_layers=collision_check_layers,
+        start_angles=start_angles,
+        end_angles=end_angles,
     )
 
 
@@ -267,6 +277,8 @@ def route_bundle_dual_rails(
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    start_angles: int | list[int] | None = None,
+    end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:
     r"""Connect multiple input ports to output ports.
 
@@ -345,6 +357,12 @@ def route_bundle_dual_rails(
             the waypoints. The waypoints can either be a list of at least two points
             or a single transformation. If it's a transformation, the points will be
             routed through it as if it were a tunnel with length 0.
+        start_angles: Overwrite the port orientation of all start_ports together
+            (single value) or each one (list of values which is as long as start_ports).
+        end_angles: Overwrite the port orientation of all start_ports together
+            (single value) or each one (list of values which is as long as end_ports).
+            If no waypoints are set, the target angles of all ends muts be the same
+            (after the steps).
     """
     if start_straights is not None:
         logger.warning("start_straights is deprecated. Use `starts` instead.")
@@ -374,6 +392,8 @@ def route_bundle_dual_rails(
         sort_ports=sort_ports,
         on_collision=on_collision,
         collision_check_layers=collision_check_layers,
+        start_angles=start_angles,
+        end_angles=end_angles,
     )
 
 
