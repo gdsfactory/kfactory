@@ -161,18 +161,18 @@ def build(
                     if write_full:
                         if library is not None:
                             for lib in library:
-                                kcls[lib].write(root / f"{lib}.{suffix}")
-                        cell.write(root / f"{cell.name}.{suffix}")
+                                kcls[lib].write(root / f"{lib}.{suffix.value}")
+                        cell.write(root / f"{cell.name}.{suffix.value}")
                     if write_static:
                         cell.write(
-                            root / f"{cell.name}_STATIC.{suffix}",
+                            root / f"{cell.name}_STATIC.{suffix.value}",
                             convert_external_cells=True,
                         )
                     if write_nocontext:
                         saveopts = save_layout_options()
                         saveopts.write_context_info = False
                         cell.write(
-                            root / f"{cell.name}_NOCONT.{suffix}",
+                            root / f"{cell.name}_NOCONT.{suffix.value}",
                             save_options=saveopts,
                             convert_external_cells=True,
                         )
@@ -227,18 +227,18 @@ def build(
                     if write_full:
                         if library is not None:
                             for lib in library:
-                                kcls[lib].write(root / f"{lib}.{suffix}")
-                        cell.write(root / f"{cell.name}.{suffix}")
+                                kcls[lib].write(root / f"{lib}.{suffix.value}")
+                        cell.write(root / f"{cell.name}.{suffix.value}")
                     if write_static:
                         cell.write(
-                            root / f"{cell.name}_STATIC.{suffix}",
+                            root / f"{cell.name}_STATIC.{suffix.value}",
                             convert_external_cells=True,
                         )
                     if write_nocontext:
                         saveopts = save_layout_options()
                         saveopts.write_context_info = False
                         cell.write(
-                            root / f"{cell.name}_NOCONT.{suffix}",
+                            root / f"{cell.name}_NOCONT.{suffix.value}",
                             save_options=saveopts,
                             convert_external_cells=True,
                         )
