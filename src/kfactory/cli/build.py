@@ -8,7 +8,7 @@ import importlib
 import os
 import runpy
 import sys
-from enum import StrEnum
+from enum import Enum
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -40,7 +40,7 @@ def show(
     kfshow(path, use_libraries=True)
 
 
-class LayoutSuffix(StrEnum):
+class LayoutSuffix(str, Enum):
     gds = "gds"
     gdsgz = "gds.gz"
     oas = "oas"

@@ -29,10 +29,8 @@ from typing import (
     Annotated,
     Any,
     Literal,
-    NotRequired,
     Protocol,
     TypeAlias,
-    TypedDict,
     TypeVar,
     cast,
     get_origin,
@@ -57,7 +55,7 @@ from pydantic import (
     ValidationError,
     model_validator,
 )
-from typing_extensions import ParamSpec, Self  # noqa: UP035
+from typing_extensions import NotRequired, ParamSpec, Self, TypedDict
 
 from . import __version__, kdb, lay, rdb
 from .conf import CHECK_INSTANCES, LogLevel, config, logger
@@ -2602,6 +2600,7 @@ class KCell:
         /,
         *,
         no_warn: bool = False,
+        transform_ports: bool = False,
     ) -> Instance: ...
 
     @overload
@@ -2611,6 +2610,7 @@ class KCell:
         /,
         *,
         no_warn: bool = False,
+        transform_ports: bool = False,
     ) -> None: ...
 
     def transform(
@@ -2624,6 +2624,7 @@ class KCell:
         /,
         *,
         no_warn: bool = False,
+        transform_ports: bool = False,
     ) -> Instance | None:
         """Transforms the instance or cell with the transformation given."""
         if not no_warn:
@@ -2643,6 +2644,18 @@ class KCell:
                 ),
             )
         else:
+            if transform_ports:
+                if isinstance(inst_or_trans, kdb.DTrans):
+                    inst_or_trans = kdb.DCplxTrans(inst_or_trans)
+                elif isinstance(inst_or_trans, kdb.ICplxTrans):
+                    inst_or_trans = kdb.DCplxTrans(inst_or_trans, self.kcl.dbu)
+
+                if isinstance(inst_or_trans, kdb.Trans):
+                    for port in self.ports:
+                        port.trans = inst_or_trans * port.trans
+                else:
+                    for port in self.ports:
+                        port.dcplx_trans = inst_or_trans * port.dcplx_trans  # type: ignore[operator]
             return self._kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
 
     def set_meta_data(self) -> None:
@@ -4393,7 +4406,7 @@ class KCLayout(
                         _name: str | None = name
                     else:
                         _name = None
-                    cell = f(**params)
+                    cell = f(**params)  # type: ignore[call-arg]
                     if not isinstance(cell, KCell):
                         raise ValueError(
                             f"Function did not return a KCell, but {type(cell)}"
@@ -4696,7 +4709,7 @@ class KCLayout(
                     for key, value in params.items():
                         if isinstance(value, frozenset | DecoratorList):
                             params[key] = _hashable_to_original(value)
-                    cell = f(**params)
+                    cell = f(**params)  # type: ignore[call-arg]
                     if cell._locked:
                         raise ValueError(
                             "Trying to change a locked VKCell is no allowed. "

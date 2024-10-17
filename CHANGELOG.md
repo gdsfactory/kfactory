@@ -1,10 +1,11 @@
-<a name="v0.21.1"></a>
-# [v0.21.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.1) - 11 Oct 2024
+<a id="v0.21.1"></a>
+# [v0.21.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.1) - 2024-10-11
 
 # What's Changed
 
 ## New
 
+- add transform_ports option to KCell.transform [#495](https://github.com/gdsfactory/kfactory/pull/495)
 - add instance iterator which returns coord plus port [#491](https://github.com/gdsfactory/kfactory/pull/491)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.0...v0.21.1
@@ -13,8 +14,8 @@
 [Changes][v0.21.1]
 
 
-<a name="v0.21.0"></a>
-# [v0.21.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.0) - 10 Oct 2024
+<a id="v0.21.0"></a>
+# [v0.21.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.0) - 2024-10-10
 
 # What's Changed
 
@@ -34,8 +35,8 @@
 [Changes][v0.21.0]
 
 
-<a name="v0.20.8"></a>
-# [v0.20.8](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.8) - 02 Oct 2024
+<a id="v0.20.8"></a>
+# [v0.20.8](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.8) - 2024-10-02
 
 # What's Changed
 
@@ -50,8 +51,8 @@
 [Changes][v0.20.8]
 
 
-<a name="v0.20.7"></a>
-# [v0.20.7](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.7) - 29 Sep 2024
+<a id="v0.20.7"></a>
+# [v0.20.7](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.7) - 2024-09-29
 
 # What's Changed
 
@@ -65,8 +66,8 @@
 [Changes][v0.20.7]
 
 
-<a name="v0.20.6"></a>
-# [v0.20.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.6) - 27 Sep 2024
+<a id="v0.20.6"></a>
+# [v0.20.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.6) - 2024-09-27
 
 # What's Changed
 
@@ -88,8 +89,8 @@
 [Changes][v0.20.6]
 
 
-<a name="v0.20.5"></a>
-# [v0.20.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.5) - 13 Sep 2024
+<a id="v0.20.5"></a>
+# [v0.20.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.5) - 2024-09-13
 
 # What's Changed
 
@@ -103,8 +104,8 @@
 [Changes][v0.20.5]
 
 
-<a name="v0.20.4"></a>
-# [v0.20.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.4) - 12 Sep 2024
+<a id="v0.20.4"></a>
+# [v0.20.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.4) - 2024-09-12
 
 # What's Changed
 
@@ -119,8 +120,8 @@
 [Changes][v0.20.4]
 
 
-<a name="v0.20.3"></a>
-# [v0.20.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.3) - 06 Sep 2024
+<a id="v0.20.3"></a>
+# [v0.20.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.3) - 2024-09-06
 
 # What's Changed
 
@@ -134,8 +135,8 @@
 [Changes][v0.20.3]
 
 
-<a name="v0.20.2"></a>
-# [v0.20.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.2) - 05 Sep 2024
+<a id="v0.20.2"></a>
+# [v0.20.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.2) - 2024-09-05
 
 # What's Changed
 
@@ -149,8 +150,8 @@
 [Changes][v0.20.2]
 
 
-<a name="v0.20.1"></a>
-# [v0.20.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.1) - 01 Sep 2024
+<a id="v0.20.1"></a>
+# [v0.20.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.1) - 2024-09-01
 
 # What's Changed
 
@@ -173,8 +174,8 @@
 [Changes][v0.20.1]
 
 
-<a name="v0.20.0"></a>
-# [v0.20.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.0) - 29 Aug 2024
+<a id="v0.20.0"></a>
+# [v0.20.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.20.0) - 2024-08-29
 
 # What's Changed
 
@@ -188,8 +189,8 @@
 [Changes][v0.20.0]
 
 
-<a name="v0.19.2"></a>
-# [v0.19.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.2) - 29 Aug 2024
+<a id="v0.19.2"></a>
+# [v0.19.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.2) - 2024-08-29
 
 # What's Changed
 
@@ -203,8 +204,8 @@
 [Changes][v0.19.2]
 
 
-<a name="v0.19.1"></a>
-# [v0.19.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.1) - 26 Aug 2024
+<a id="v0.19.1"></a>
+# [v0.19.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.1) - 2024-08-26
 
 # What's Changed
 
@@ -224,8 +225,8 @@
 [Changes][v0.19.1]
 
 
-<a name="v0.19.0"></a>
-# [v0.19.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.0) - 14 Aug 2024
+<a id="v0.19.0"></a>
+# [v0.19.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.19.0) - 2024-08-14
 
 # What's Changed
 
@@ -252,8 +253,8 @@
 [Changes][v0.19.0]
 
 
-<a name="v0.18.4"></a>
-# [v0.18.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.4) - 23 Jul 2024
+<a id="v0.18.4"></a>
+# [v0.18.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.4) - 2024-07-23
 
 # What's Changed
 
@@ -267,19 +268,19 @@
 [Changes][v0.18.4]
 
 
-<a name="v0.18.3"></a>
-# [v0.18.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.3) - 23 Jul 2024
+<a id="v0.18.3"></a>
+# [v0.18.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.3) - 2024-07-23
 
 ## What's Changed
-* fix _port by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/435
+* fix _port by [@joamatab](https://github.com/joamatab) in [#435](https://github.com/gdsfactory/kfactory/pull/435)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.18.2...v0.18.3
 
 [Changes][v0.18.3]
 
 
-<a name="v0.18.2"></a>
-# [v0.18.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.2) - 23 Jul 2024
+<a id="v0.18.2"></a>
+# [v0.18.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.2) - 2024-07-23
 
 # What's Changed
 
@@ -304,8 +305,8 @@
 [Changes][v0.18.2]
 
 
-<a name="v0.18.1"></a>
-# [v0.18.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.1) - 17 Jul 2024
+<a id="v0.18.1"></a>
+# [v0.18.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.1) - 2024-07-17
 
 # What's Changed
 
@@ -319,8 +320,8 @@
 [Changes][v0.18.1]
 
 
-<a name="v0.18.0"></a>
-# [v0.18.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.0) - 16 Jul 2024
+<a id="v0.18.0"></a>
+# [v0.18.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.18.0) - 2024-07-16
 
 # What's Changed
 
@@ -343,8 +344,8 @@
 [Changes][v0.18.0]
 
 
-<a name="v0.17.8"></a>
-# [v0.17.8](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.8) - 27 Jun 2024
+<a id="v0.17.8"></a>
+# [v0.17.8](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.8) - 2024-06-27
 
 # What's Changed
 
@@ -358,8 +359,8 @@
 [Changes][v0.17.8]
 
 
-<a name="v0.17.7"></a>
-# [v0.17.7](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.7) - 27 Jun 2024
+<a id="v0.17.7"></a>
+# [v0.17.7](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.7) - 2024-06-27
 
 # What's Changed
 
@@ -382,8 +383,8 @@
 [Changes][v0.17.7]
 
 
-<a name="v0.17.6"></a>
-# [v0.17.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.6) - 27 Jun 2024
+<a id="v0.17.6"></a>
+# [v0.17.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.6) - 2024-06-27
 
 # What's Changed
 
@@ -408,8 +409,8 @@
 [Changes][v0.17.6]
 
 
-<a name="v0.17.5"></a>
-# [v0.17.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.5) - 16 Jun 2024
+<a id="v0.17.5"></a>
+# [v0.17.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.5) - 2024-06-16
 
 # What's Changed
 
@@ -429,8 +430,8 @@
 [Changes][v0.17.5]
 
 
-<a name="v0.17.4"></a>
-# [v0.17.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.4) - 12 Jun 2024
+<a id="v0.17.4"></a>
+# [v0.17.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.4) - 2024-06-12
 
 # What's Changed
 
@@ -449,8 +450,8 @@
 [Changes][v0.17.4]
 
 
-<a name="v0.17.3"></a>
-# [v0.17.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.3) - 10 Jun 2024
+<a id="v0.17.3"></a>
+# [v0.17.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.3) - 2024-06-10
 
 # What's Changed
 
@@ -464,8 +465,8 @@
 [Changes][v0.17.3]
 
 
-<a name="v0.17.2"></a>
-# [v0.17.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.2) - 10 Jun 2024
+<a id="v0.17.2"></a>
+# [v0.17.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.2) - 2024-06-10
 
 # What's Changed
 
@@ -484,8 +485,8 @@
 [Changes][v0.17.2]
 
 
-<a name="v0.17.1"></a>
-# [v0.17.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.1) - 08 Jun 2024
+<a id="v0.17.1"></a>
+# [v0.17.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.1) - 2024-06-08
 
 # What's Changed
 
@@ -507,8 +508,8 @@
 [Changes][v0.17.1]
 
 
-<a name="v0.17.0"></a>
-# [v0.17.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.0) - 05 Jun 2024
+<a id="v0.17.0"></a>
+# [v0.17.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.17.0) - 2024-06-05
 
 # What's Changed
 
@@ -526,8 +527,8 @@
 [Changes][v0.17.0]
 
 
-<a name="v0.16.1"></a>
-# [v0.16.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.16.1) - 02 Jun 2024
+<a id="v0.16.1"></a>
+# [v0.16.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.16.1) - 2024-06-02
 
 # What's Changed
 
@@ -549,8 +550,8 @@
 [Changes][v0.16.1]
 
 
-<a name="v0.16.0"></a>
-# [v0.16.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.16.0) - 02 Jun 2024
+<a id="v0.16.0"></a>
+# [v0.16.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.16.0) - 2024-06-02
 
 # What's Changed
 
@@ -584,8 +585,8 @@
 [Changes][v0.16.0]
 
 
-<a name="v0.15.2"></a>
-# [v0.15.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.15.2) - 29 May 2024
+<a id="v0.15.2"></a>
+# [v0.15.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.15.2) - 2024-05-29
 
 # What's Changed
 
@@ -599,8 +600,8 @@
 [Changes][v0.15.2]
 
 
-<a name="v0.15.1"></a>
-# [v0.15.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.15.1) - 29 May 2024
+<a id="v0.15.1"></a>
+# [v0.15.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.15.1) - 2024-05-29
 
 # What's Changed
 
@@ -622,8 +623,8 @@
 [Changes][v0.15.1]
 
 
-<a name="v0.15.0"></a>
-# [v0.15.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.15.0) - 27 May 2024
+<a id="v0.15.0"></a>
+# [v0.15.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.15.0) - 2024-05-27
 
 # What's Changed
 
@@ -651,8 +652,8 @@
 [Changes][v0.15.0]
 
 
-<a name="v0.14.0"></a>
-# [v0.14.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.14.0) - 24 May 2024
+<a id="v0.14.0"></a>
+# [v0.14.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.14.0) - 2024-05-24
 
 # What's Changed
 
@@ -673,8 +674,8 @@
 [Changes][v0.14.0]
 
 
-<a name="v0.13.3"></a>
-# [v0.13.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.3) - 21 May 2024
+<a id="v0.13.3"></a>
+# [v0.13.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.3) - 2024-05-21
 
 # What's Changed
 
@@ -698,8 +699,8 @@
 [Changes][v0.13.3]
 
 
-<a name="v0.13.2"></a>
-# [v0.13.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.2) - 15 May 2024
+<a id="v0.13.2"></a>
+# [v0.13.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.2) - 2024-05-15
 
 # What's Changed
 
@@ -712,8 +713,8 @@
 [Changes][v0.13.2]
 
 
-<a name="v0.13.1"></a>
-# [v0.13.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.1) - 15 May 2024
+<a id="v0.13.1"></a>
+# [v0.13.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.1) - 2024-05-15
 
 # What's Changed
 
@@ -727,8 +728,8 @@
 [Changes][v0.13.1]
 
 
-<a name="v0.13.0"></a>
-# [v0.13.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.0) - 07 May 2024
+<a id="v0.13.0"></a>
+# [v0.13.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.13.0) - 2024-05-07
 
 # What's Changed
 
@@ -777,8 +778,8 @@
 [Changes][v0.13.0]
 
 
-<a name="v0.12.3"></a>
-# [v0.12.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.3) - 06 Mar 2024
+<a id="v0.12.3"></a>
+# [v0.12.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.3) - 2024-03-06
 
 # What's Changed
 
@@ -792,8 +793,8 @@
 [Changes][v0.12.3]
 
 
-<a name="v0.12.2"></a>
-# [v0.12.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.2) - 06 Mar 2024
+<a id="v0.12.2"></a>
+# [v0.12.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.2) - 2024-03-06
 
 # What's Changed
 
@@ -809,8 +810,8 @@
 [Changes][v0.12.2]
 
 
-<a name="v0.12.0"></a>
-# [v0.12.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.0) - 01 Mar 2024
+<a id="v0.12.0"></a>
+# [v0.12.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.12.0) - 2024-03-01
 
 # What's Changed
 
@@ -833,8 +834,8 @@
 [Changes][v0.12.0]
 
 
-<a name="v0.11.4"></a>
-# [v0.11.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.4) - 28 Feb 2024
+<a id="v0.11.4"></a>
+# [v0.11.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.4) - 2024-02-28
 
 # What's Changed
 
@@ -848,8 +849,8 @@
 [Changes][v0.11.4]
 
 
-<a name="v0.11.3"></a>
-# [v0.11.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.3) - 27 Feb 2024
+<a id="v0.11.3"></a>
+# [v0.11.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.3) - 2024-02-27
 
 # What's Changed
 
@@ -877,8 +878,8 @@
 [Changes][v0.11.3]
 
 
-<a name="v0.11.2"></a>
-# [v0.11.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.2) - 17 Feb 2024
+<a id="v0.11.2"></a>
+# [v0.11.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.2) - 2024-02-17
 
 # What's Changed
 
@@ -894,8 +895,8 @@
 [Changes][v0.11.2]
 
 
-<a name="v0.11.1"></a>
-# [v0.11.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.1) - 08 Feb 2024
+<a id="v0.11.1"></a>
+# [v0.11.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.1) - 2024-02-08
 
 # What's Changed
 
@@ -913,8 +914,8 @@
 [Changes][v0.11.1]
 
 
-<a name="v0.11.0"></a>
-# [v0.11.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.0) - 02 Feb 2024
+<a id="v0.11.0"></a>
+# [v0.11.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.11.0) - 2024-02-02
 
 # What's Changed
 
@@ -932,8 +933,8 @@
 [Changes][v0.11.0]
 
 
-<a name="v0.10.3"></a>
-# [v0.10.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.10.3) - 12 Jan 2024
+<a id="v0.10.3"></a>
+# [v0.10.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.10.3) - 2024-01-12
 
 # What's Changed
 
@@ -960,8 +961,8 @@
 [Changes][v0.10.3]
 
 
-<a name="v0.10.2"></a>
-# [0.10.2 - 2023-12-08 (v0.10.2)](https://github.com/gdsfactory/kfactory/releases/tag/v0.10.2) - 08 Dec 2023
+<a id="v0.10.2"></a>
+# [0.10.2 - 2023-12-08 (v0.10.2)](https://github.com/gdsfactory/kfactory/releases/tag/v0.10.2) - 2023-12-08
 
 ### Fixed
 
@@ -970,8 +971,8 @@
 [Changes][v0.10.2]
 
 
-<a name="v0.10.1"></a>
-# [0.10.1 - 2023-12-05 (v0.10.1)](https://github.com/gdsfactory/kfactory/releases/tag/v0.10.1) - 05 Dec 2023
+<a id="v0.10.1"></a>
+# [0.10.1 - 2023-12-05 (v0.10.1)](https://github.com/gdsfactory/kfactory/releases/tag/v0.10.1) - 2023-12-05
 
 # Added
 
@@ -999,30 +1000,30 @@
 [Changes][v0.10.1]
 
 
-<a name="v0.10.0"></a>
-# [v0.10.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.10.0) - 16 Jun 2024
+<a id="v0.10.0"></a>
+# [v0.10.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.10.0) - 2024-06-16
 
 ## What's Changed
-* add Instance setter and getter for center by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/191
-* Add port center setter getter by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/192
-* improve instance setters by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/193
-* rename autorename_ports to auto_rename_ports by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/195
-* rename port position to center by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/199
-* Make Instance.flatten(<int|None>) work correctly with KCell/Instance by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/202
-* add kf.KCell.center property by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/200
-* add Instance.mirror and Instance.d.mirror by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/204
-* add towncrier news by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/205
-* route optical uses allow_small_routes by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/209
-* add ports length by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/210
-* (Basic) Bundle routing by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/212
-* Fixed typo `enclosure_mape` -> `enclosure_map` by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/213
-* remove debug prints by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/214
-* use image by default by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/215
-* add invert to droute_manhattan by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/217
-* better_odd_port_width_message by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/220
-* Added `rec_dict` to `@cell` decorator to allow for recursive dictionaries by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/221
-* more consistent names for routes by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/226
-* Virtual Cells by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in https://github.com/gdsfactory/kfactory/pull/228
+* add Instance setter and getter for center by [@joamatab](https://github.com/joamatab) in [#191](https://github.com/gdsfactory/kfactory/pull/191)
+* Add port center setter getter by [@joamatab](https://github.com/joamatab) in [#192](https://github.com/gdsfactory/kfactory/pull/192)
+* improve instance setters by [@joamatab](https://github.com/joamatab) in [#193](https://github.com/gdsfactory/kfactory/pull/193)
+* rename autorename_ports to auto_rename_ports by [@joamatab](https://github.com/joamatab) in [#195](https://github.com/gdsfactory/kfactory/pull/195)
+* rename port position to center by [@joamatab](https://github.com/joamatab) in [#199](https://github.com/gdsfactory/kfactory/pull/199)
+* Make Instance.flatten(<int|None>) work correctly with KCell/Instance by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in [#202](https://github.com/gdsfactory/kfactory/pull/202)
+* add kf.KCell.center property by [@joamatab](https://github.com/joamatab) in [#200](https://github.com/gdsfactory/kfactory/pull/200)
+* add Instance.mirror and Instance.d.mirror by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in [#204](https://github.com/gdsfactory/kfactory/pull/204)
+* add towncrier news by [@joamatab](https://github.com/joamatab) in [#205](https://github.com/gdsfactory/kfactory/pull/205)
+* route optical uses allow_small_routes by [@joamatab](https://github.com/joamatab) in [#209](https://github.com/gdsfactory/kfactory/pull/209)
+* add ports length by [@joamatab](https://github.com/joamatab) in [#210](https://github.com/gdsfactory/kfactory/pull/210)
+* (Basic) Bundle routing by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in [#212](https://github.com/gdsfactory/kfactory/pull/212)
+* Fixed typo `enclosure_mape` -> `enclosure_map` by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in [#213](https://github.com/gdsfactory/kfactory/pull/213)
+* remove debug prints by [@joamatab](https://github.com/joamatab) in [#214](https://github.com/gdsfactory/kfactory/pull/214)
+* use image by default by [@joamatab](https://github.com/joamatab) in [#215](https://github.com/gdsfactory/kfactory/pull/215)
+* add invert to droute_manhattan by [@joamatab](https://github.com/joamatab) in [#217](https://github.com/gdsfactory/kfactory/pull/217)
+* better_odd_port_width_message by [@joamatab](https://github.com/joamatab) in [#220](https://github.com/gdsfactory/kfactory/pull/220)
+* Added `rec_dict` to `@cell` decorator to allow for recursive dictionaries by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in [#221](https://github.com/gdsfactory/kfactory/pull/221)
+* more consistent names for routes by [@joamatab](https://github.com/joamatab) in [#226](https://github.com/gdsfactory/kfactory/pull/226)
+* Virtual Cells by [@sebastian-goeldi](https://github.com/sebastian-goeldi) in [#228](https://github.com/gdsfactory/kfactory/pull/228)
 
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.9.3...v0.10.0
@@ -1030,20 +1031,20 @@
 [Changes][v0.10.0]
 
 
-<a name="v0.9.3"></a>
-# [v0.9.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.9.3) - 16 Jun 2024
+<a id="v0.9.3"></a>
+# [v0.9.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.9.3) - 2024-06-16
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.9.2...v0.9.3
 
 [Changes][v0.9.3]
 
 
-<a name="v0.9.1"></a>
-# [v0.9.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.9.1) - 16 Jun 2024
+<a id="v0.9.1"></a>
+# [v0.9.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.9.1) - 2024-06-16
 
 ## What's Changed
-* Bump actions/checkout from 3 to 4 by [@dependabot](https://github.com/dependabot) in https://github.com/gdsfactory/kfactory/pull/186
-* get_cells by [@joamatab](https://github.com/joamatab) in https://github.com/gdsfactory/kfactory/pull/187
+* Bump actions/checkout from 3 to 4 by [@dependabot](https://github.com/dependabot) in [#186](https://github.com/gdsfactory/kfactory/pull/186)
+* get_cells by [@joamatab](https://github.com/joamatab) in [#187](https://github.com/gdsfactory/kfactory/pull/187)
 
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.9.0...v0.9.1
@@ -1051,8 +1052,8 @@
 [Changes][v0.9.1]
 
 
-<a name="v0.9.0"></a>
-# [v0.9.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.9.0) - 25 Sep 2023
+<a id="v0.9.0"></a>
+# [v0.9.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.9.0) - 2023-09-25
 
 ### Added
 
@@ -1071,8 +1072,8 @@
 [Changes][v0.9.0]
 
 
-<a name="v0.8.0"></a>
-# [v0.8.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.8.0) - 14 Jun 2023
+<a id="v0.8.0"></a>
+# [v0.8.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.8.0) - 2023-06-14
 
 ## [v0.8.0](https://github.com/gdsfactory/kfactory/tree/0.8.0) - 2023-06-14
 
@@ -1104,8 +1105,8 @@
 [Changes][v0.8.0]
 
 
-<a name="v0.7.5"></a>
-# [v0.7.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.7.5) - 01 Jun 2023
+<a id="v0.7.5"></a>
+# [v0.7.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.7.5) - 2023-06-01
 
 # [v0.7.5](https://github.com/gdsfactory/kfactory/tree/v0.7.5) - 2023-06-01
 
@@ -1126,8 +1127,8 @@
 [Changes][v0.7.5]
 
 
-<a name="v0.7.4"></a>
-# [v0.7.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.7.4) - 29 May 2023
+<a id="v0.7.4"></a>
+# [v0.7.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.7.4) - 2023-05-29
 
 ## [0.7.4](https://github.com/gdsfactory/klive/tree/0.7.4) - 2023-05-29
 
@@ -1145,8 +1146,8 @@
 [Changes][v0.7.4]
 
 
-<a name="v0.6.0"></a>
-# [0.6.0 (v0.6.0)](https://github.com/gdsfactory/kfactory/releases/tag/v0.6.0) - 18 Apr 2023
+<a id="v0.6.0"></a>
+# [0.6.0 (v0.6.0)](https://github.com/gdsfactory/kfactory/releases/tag/v0.6.0) - 2023-04-18
 
 # kcell.py
 * KCell and Instance don´t  inherit from `kdb.Cell` / `kdb.Instance` anymore. They should still transparently proxy to them
@@ -1156,16 +1157,16 @@
 [Changes][v0.6.0]
 
 
-<a name="v0.4.1"></a>
-# [Fix (Cplx)KCell.dup (v0.4.1)](https://github.com/gdsfactory/kfactory/releases/tag/v0.4.1) - 24 Feb 2023
+<a id="v0.4.1"></a>
+# [Fix (Cplx)KCell.dup (v0.4.1)](https://github.com/gdsfactory/kfactory/releases/tag/v0.4.1) - 2023-02-24
 
-* `KCell` and `CplxKCell` are now properly copying their instances when copied using `dup` https://github.com/KLayout/klayout/issues/1300
+* `KCell` and `CplxKCell` are now properly copying their instances when copied using `dup` [KLayout/klayout#1300](https://github.com/KLayout/klayout/issues/1300)
 
 [Changes][v0.4.1]
 
 
-<a name="v0.4.0"></a>
-# [Complex Cells (v0.4.0)](https://github.com/gdsfactory/kfactory/releases/tag/v0.4.0) - 21 Feb 2023
+<a id="v0.4.0"></a>
+# [Complex Cells (v0.4.0)](https://github.com/gdsfactory/kfactory/releases/tag/v0.4.0) - 2023-02-21
 
 * `CplxKCell`:
     * Use `DCplxPort` by default. These ports can have arbitrary angle and are micrometer based
@@ -1243,4 +1244,4 @@
 [v0.4.1]: https://github.com/gdsfactory/kfactory/compare/v0.4.0...v0.4.1
 [v0.4.0]: https://github.com/gdsfactory/kfactory/tree/v0.4.0
 
-<!-- Generated by https://github.com/rhysd/changelog-from-release v3.7.2 -->
+<!-- Generated by https://github.com/rhysd/changelog-from-release v3.8.0 -->
