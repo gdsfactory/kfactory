@@ -452,7 +452,7 @@ def flexgrid_dbu(
 def grid(
     target: KCell,
     kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
-    spacing: int | tuple[float, float],
+    spacing: float | tuple[float, float],
     target_trans: kdb.DCplxTrans = kdb.DCplxTrans(),
     shape: tuple[int, int] | None = None,
     align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
@@ -533,8 +533,8 @@ def grid(
         else:
             kcell_array = kcells  # type: ignore[assignment]
 
-        x0 = 0
-        y0 = 0
+        x0: float = 0
+        y0: float = 0
 
         insts = [
             [
@@ -547,18 +547,18 @@ def grid(
             [None if inst is None else inst.dbbox() for inst in array]
             for array in insts
         ]
-        w = max(
+        w: float = max(
             max(0 if bbox is None else bbox.width() + spacing_x for bbox in box_array)
             for box_array in bboxes
         )
-        h = max(
+        h: float = max(
             max(0 if bbox is None else bbox.height() + spacing_y for bbox in box_array)
             for box_array in bboxes
         )
         for array, bbox_array in zip(insts, bboxes):
-            y0 += h - h // 2
+            y0 += h - h / 2
             for bbox, inst in zip(bbox_array, array):
-                x0 += w - w // 2
+                x0 += w - w / 2
                 if bbox is not None and inst is not None:
                     match align_x:
                         case "xmin":
@@ -581,8 +581,8 @@ def grid(
                     at = kdb.DCplxTrans(x0 + x, y0 + y)
 
                     inst.transform(target_trans * at)
-                x0 += w // 2
-            y0 += h // 2
+                x0 += w / 2
+            y0 += h / 2
             x0 = 0
         return insts
     else:
@@ -626,10 +626,10 @@ def grid(
             i_y = i // shape[1]
             insts[i_y][i_x] = inst
             if i_x == 0:
-                y0 += h - h // 2
+                y0 += h - h / 2
                 x0 = 0
             else:
-                x0 += w - w // 2
+                x0 += w - w / 2
 
             if bbox is not None and inst is not None:
                 match align_x:
@@ -654,17 +654,17 @@ def grid(
 
                 inst.transform(target_trans * at)
             if i_x == shape[1] - 1:
-                y0 += h // 2
+                y0 += h / 2
                 x0 = 0
             else:
-                x0 += w // 2
+                x0 += w / 2
         return insts
 
 
 def flexgrid(
     target: KCell,
     kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
-    spacing: int | tuple[int, int],
+    spacing: float | tuple[float, float],
     target_trans: kdb.DCplxTrans = kdb.DCplxTrans(),
     shape: tuple[int, int] | None = None,
     align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
@@ -740,8 +740,8 @@ def flexgrid(
         else:
             kcell_array = cast(Sequence[Sequence[KCell]], kcells)
 
-        x0 = 0
-        y0 = 0
+        x0: float = 0
+        y0: float = 0
 
         insts = [
             [
@@ -758,10 +758,10 @@ def flexgrid(
             [None if inst is None else inst.dbbox() for inst in array]
             for array in insts
         ]
-        xmin: dict[int, int] = {}
-        ymin: dict[int, int] = {}
-        ymax: dict[int, int] = {}
-        xmax: dict[int, int] = {}
+        xmin: dict[float, float] = {}
+        ymin: dict[float, float] = {}
+        ymax: dict[float, float] = {}
+        xmax: dict[float, float] = {}
         for i_y, (array, box_array) in enumerate(zip(insts, bboxes)):
             for i_x, (inst, bbox) in enumerate(zip(array, box_array)):
                 if inst is not None and bbox is not None:
