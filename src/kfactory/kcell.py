@@ -4213,17 +4213,6 @@ class KCLayout(
         """Convert Shapes or values in dbu to DShapes or floats in um."""
         return kdb.CplxTrans(self.layout.dbu).inverted() * other
 
-    # @computed_field  # type: ignore[prop-decorator]
-    # @property
-    # def name(self) -> str:
-    #     """Name of the KCLayout."""
-    #     return self._name
-
-    # @property
-    # def settings(self) -> KCellSettings:
-    #     """Settings dictionary set by __init__ with metainfo."""
-    #     return self._settings
-
     @overload
     def cell(
         self,
@@ -4252,6 +4241,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = None,
         post_process: Iterable[Callable[[KCell], None]] = tuple(),
         debug_names: bool | None = None,
+        tags: list[str] | None = None,
     ) -> Callable[[KCellFunc[KCellParams, KCell]], KCellFunc[KCellParams, KCell]]: ...
 
     def cell(
@@ -4274,6 +4264,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = None,
         post_process: Iterable[Callable[[KC], None]] = tuple(),
         debug_names: bool | None = None,
+        tags: list[str] | None = None,
     ) -> (
         KCellFunc[KCellParams, KC]
         | Callable[[KCellFunc[KCellParams, KCell]], KCellFunc[KCellParams, KCell]]
@@ -4320,6 +4311,9 @@ class KCLayout(
             post_process: List of functions to call after the cell has been created.
             debug_names: Check on setting the name whether a cell with this name already
                 exists.
+            tags: Tag cell functions with user defined tags. With this, cell functions
+                can then be retrieved with `kcl.factories.tags[my_tag]` or if filtered
+                for multiple `kcl.factories.for_tags([my_tag1, my_tag2, ...])`.
         """
         if check_instances is None:
             check_instances = config.check_instances
@@ -4580,6 +4574,9 @@ class KCLayout(
                     function_name = f.func.__name__
                 else:
                     raise ValueError(f"Function {f} has no name.")
+                if tags:
+                    for tag in tags:
+                        self.factories.tags[tag].append(wrapper_autocell)
                 self.factories[basename or function_name] = wrapper_autocell
             return wrapper_autocell
 
@@ -5286,14 +5283,24 @@ def layerenum_from_dict(
 
 
 class Factories(UserDict[str, Callable[..., T]]):
+    tags: dict[str, list[Callable[..., T]]]
+
     def __init__(self, data: dict[str, Callable[..., T]]) -> None:
         super().__init__(data)
+        self.tags = defaultdict(list)
 
     def __getattr__(self, name: str) -> Any:
         if name != "data":
             return self.data[name]
         else:
             self.__getattribute__(name)
+
+    def for_tags(self, tags: list[str]) -> list[Callable[..., T]]:
+        if len(tags) > 0:
+            tag_set = set(self.tags[tags[0]])
+            for tag in tags[1:]:
+                tag_set &= set(self.tags[tag])
+        return list(tag_set)
 
 
 class VShapes(BaseModel, arbitrary_types_allowed=True):
@@ -5304,7 +5311,6 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
     _bbox: kdb.DBox = kdb.DBox()
 
     def __init__(self, cell: VKCell, _shapes: list[ShapeLike] | None = None):
-        # self._shapes = [_shape for _shape in _shapes] or []
         BaseModel.__init__(self, cell=cell)
         self._shapes = _shapes or []
 
@@ -6899,7 +6905,6 @@ class Port:
         self.cross_section = cross_section
         self.info = Info(**info)
         if trans is not None:
-            # self.width = cast(int, width)
             if isinstance(trans, str):
                 self.trans = kdb.Trans.from_s(trans)
             else:
@@ -7308,14 +7313,6 @@ class Port:
     def dwidth(self) -> float:
         """Width of the port in um."""
         return self.kcl.to_um(self.width)
-
-    # @dwidth.setter
-    # def dwidth(self, value: float) -> None:
-    #     self.width = self.kcl.to_dbu(value)
-    #     assert self.kcl.to_um(self.width) == float(value), (
-    #         "When converting to dbu the width does not match the desired width"
-    #         f"({self.dwidth} / {value})!"
-    #     )
 
     @property
     def dmirror(self) -> bool:
