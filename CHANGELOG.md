@@ -1,3 +1,18 @@
+<a id="v0.21.3"></a>
+# [v0.21.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.3) - 2024-10-17
+
+# What's Changed
+
+## New
+
+- add saveoptions to build cli [#497](https://github.com/gdsfactory/kfactory/pull/497)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.2...v0.21.3
+
+
+[Changes][v0.21.3]
+
+
 <a id="v0.21.2"></a>
 # [v0.21.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.2) - 2024-10-17
 
@@ -1200,6 +1215,7 @@
 [Changes][v0.4.0]
 
 
+[v0.21.3]: https://github.com/gdsfactory/kfactory/compare/v0.21.2...v0.21.3
 [v0.21.2]: https://github.com/gdsfactory/kfactory/compare/v0.21.1...v0.21.2
 [v0.21.1]: https://github.com/gdsfactory/kfactory/compare/v0.21.0...v0.21.1
 [v0.21.0]: https://github.com/gdsfactory/kfactory/compare/v0.20.8...v0.21.0
