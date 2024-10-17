@@ -1,3 +1,18 @@
+<a id="v0.21.4"></a>
+# [v0.21.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.4) - 2024-10-17
+
+# What's Changed
+
+## New
+
+- add port reorientation for route_bundle [#498](https://github.com/gdsfactory/kfactory/pull/498)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.3...v0.21.4
+
+
+[Changes][v0.21.4]
+
+
 <a id="v0.21.3"></a>
 # [v0.21.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.3) - 2024-10-17
 
@@ -1215,6 +1230,7 @@
 [Changes][v0.4.0]
 
 
+[v0.21.4]: https://github.com/gdsfactory/kfactory/compare/v0.21.3...v0.21.4
 [v0.21.3]: https://github.com/gdsfactory/kfactory/compare/v0.21.2...v0.21.3
 [v0.21.2]: https://github.com/gdsfactory/kfactory/compare/v0.21.1...v0.21.2
 [v0.21.1]: https://github.com/gdsfactory/kfactory/compare/v0.21.0...v0.21.1
