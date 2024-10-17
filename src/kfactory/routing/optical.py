@@ -157,7 +157,7 @@ def route_bundle(
         logger.warning("start_straights is deprecated. Use `starts` instead.")
         starts = start_straights
     if end_straights is not None:
-        logger.warning("end_straights is deprecated. Use `starts` instead.")
+        logger.warning("end_straights is deprecated. Use `ends` instead.")
         ends = end_straights
     bend90_radius = get_radius(bend90_cell.ports.filter(port_type=place_port_type))
     return route_bundle_generic(
