@@ -4406,7 +4406,7 @@ class KCLayout(
                         _name: str | None = name
                     else:
                         _name = None
-                    cell = f(**params)
+                    cell = f(**params)  # type: ignore[call-arg]
                     if not isinstance(cell, KCell):
                         raise ValueError(
                             f"Function did not return a KCell, but {type(cell)}"
@@ -4709,7 +4709,7 @@ class KCLayout(
                     for key, value in params.items():
                         if isinstance(value, frozenset | DecoratorList):
                             params[key] = _hashable_to_original(value)
-                    cell = f(**params)
+                    cell = f(**params)  # type: ignore[call-arg]
                     if cell._locked:
                         raise ValueError(
                             "Trying to change a locked VKCell is no allowed. "
