@@ -99,10 +99,19 @@ def build(
             "submitting the GDS to fabs."
         ),
     ] = False,
+    max_vertex_count: Annotated[
+        int, typer.Option(help="Maximum number of vertices per polygon.")
+    ] = 4000,
+    max_cellname_length: Annotated[
+        int, typer.Option("Maximum number of characters in a cell name.")
+    ] = 99,
 ) -> None:
     """Run a python modules __main__ or a function if specified."""
     path = sys.path.copy()
     sys.path.append(os.getcwd())
+    saveopts = save_layout_options()
+    saveopts.gds2_max_cellname_length = max_cellname_length
+    saveopts.gds2_max_vertex_count = max_vertex_count
 
     build_split = build_ref.rsplit("::", 1)
     if len(build_split) == 1:
@@ -162,14 +171,17 @@ def build(
                         if library is not None:
                             for lib in library:
                                 kcls[lib].write(root / f"{lib}.{suffix.value}")
-                        cell.write(root / f"{cell.name}.{suffix.value}")
+                        cell.write(
+                            root / f"{cell.name}.{suffix.value}",
+                            save_options=saveopts,
+                        )
                     if write_static:
                         cell.write(
                             root / f"{cell.name}_STATIC.{suffix.value}",
                             convert_external_cells=True,
+                            save_options=saveopts,
                         )
                     if write_nocontext:
-                        saveopts = save_layout_options()
                         saveopts.write_context_info = False
                         cell.write(
                             root / f"{cell.name}_NOCONT.{suffix.value}",
@@ -228,11 +240,15 @@ def build(
                         if library is not None:
                             for lib in library:
                                 kcls[lib].write(root / f"{lib}.{suffix.value}")
-                        cell.write(root / f"{cell.name}.{suffix.value}")
+                        cell.write(
+                            root / f"{cell.name}.{suffix.value}",
+                            save_options=saveopts,
+                        )
                     if write_static:
                         cell.write(
                             root / f"{cell.name}_STATIC.{suffix.value}",
                             convert_external_cells=True,
+                            save_options=saveopts,
                         )
                     if write_nocontext:
                         saveopts = save_layout_options()
