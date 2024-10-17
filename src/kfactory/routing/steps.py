@@ -2,30 +2,33 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Self
 
-from pydantic import ConfigDict, RootModel, dataclasses
+from pydantic import ConfigDict, RootModel, model_validator
 
 if TYPE_CHECKING:
     from .manhattan import ManhattanRouterSide
 
 
-@dataclasses.dataclass
-class Step:
+@dataclass
+class Step(ABC):
     """Abstract base for a routing step."""
 
-    model_config = ConfigDict(extra="allow")
-
-    include_bend: bool | None = None
-
+    @abstractmethod
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Executes the step."""
-        raise NotImplementedError(
-            "This function must be implemented in the child class."
-        )
+        ...
+
+    @property
+    @abstractmethod
+    def include_bend(self) -> bool | None:
+        """Whether the execute should leave space at the end of the step for a bend."""
+        ...
 
 
-@dataclasses.dataclass
+@dataclass
 class Left(Step):
     """Let the router go left.
 
@@ -36,6 +39,7 @@ class Left(Step):
     """
 
     dist: int | None = None
+    include_bend: bool | None = None
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Make the router turn left and go straight if necessary."""
@@ -60,7 +64,7 @@ class Left(Step):
                 router.straight(self.dist)
 
 
-@dataclasses.dataclass
+@dataclass
 class Right(Step):
     """Let the router go right.
 
@@ -71,6 +75,7 @@ class Right(Step):
     """
 
     dist: int | None = None
+    include_bend: bool | None = None
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Adds the bend and potential straight after."""
@@ -92,11 +97,12 @@ class Right(Step):
                 router.straight(self.dist)
 
 
-@dataclasses.dataclass
+@dataclass
 class Straight(Step):
     """Adds a straight section to the router."""
 
     dist: int | None = None
+    include_bend: bool | None = None
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Adds a straight section to the router."""
@@ -108,11 +114,12 @@ class Straight(Step):
                 router.straight(self.dist)
 
 
-@dataclasses.dataclass(kw_only=True)
+@dataclass
 class X(Step):
     """Go to an absolute X coordinate."""
 
     x: int
+    include_bend: bool | None = None
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Adds a straight section to the router."""
@@ -130,11 +137,12 @@ class X(Step):
                 router.straight(self.x - router.t.disp.x)
 
 
-@dataclasses.dataclass(kw_only=True)
+@dataclass
 class Y(Step):
     """Go to an absolute X coordinate."""
 
     y: int
+    include_bend: bool | None = None
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Adds a straight section to the router."""
@@ -152,18 +160,145 @@ class Y(Step):
                 router.straight(self.y - router.t.disp.y)
 
 
-class Steps(RootModel[list[Step]]):
+@dataclass
+class XY(Step):
+    """Go to an absolute XY coordinate."""
+
+    x: int
+    y: int
+    include_bend: bool | None = None
+
+    def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
+        """Executes the step on a router."""
+        _ib = include_bend if self.include_bend is None else self.include_bend
+        dx = self.x - router.t.disp.x
+        dy = self.y - router.t.disp.y
+        a = router.t.angle
+        match a:
+            case 0 | 2:
+                if self.y == router.t.disp.x:
+                    sign = -1 if a == 2 else 1
+                    if sign * dx < 0:
+                        raise ValueError(
+                            "XY step cannot go back. It is current pointing at 0"
+                            " degrees.\n"
+                            f"Current position: {router.t.disp!r}.\n"
+                            f"Target Position ({self.x},{self.y})"
+                        )
+                        if _ib:
+                            router.straight_nobend(abs(dx))
+                        else:
+                            router.straight(abs(dx))
+                    else:
+                        if sign * dx < router.t.disp.x + router.router.bend90_radius:
+                            raise ValueError("XY step cannot go back")
+                        router.straight_nobend(abs(dx))
+                        if self.y > router.t.disp.y:
+                            if a == 0:
+                                router.left()
+                            else:
+                                router.right()
+                        dy = self.y - router.t.disp.y
+                        if _ib:
+                            if abs(dy) < 0:
+                                raise ValueError(
+                                    "XY's y-step is too small. It is current pointing"
+                                    f" at {router.t.angle * 90}"
+                                    " degrees.\n"
+                                    f"Current position: {router.t.disp!r}.\n"
+                                    f"Target Position ({self.x},{self.y})"
+                                )
+                            router.straight(abs(dy))
+                        else:
+                            if abs(dy) < router.router.bend90_radius:
+                                raise ValueError(
+                                    "XY's y-step is too small. It is current pointing"
+                                    f" at {router.t.angle * 90}"
+                                    " degrees.\n"
+                                    f"Current position: {router.t.disp!r}.\n"
+                                    f"Target Position ({self.x},{self.y})\n"
+                                    "Too small distance to place bend of "
+                                    f"{router.router.bend90_radius} size"
+                                )
+                            router.straight_nobend(abs(dy))
+
+            case 1 | 3:
+                if self.x == router.t.disp.x:
+                    sign = -1 if a == 3 else 1
+                    if sign * dy < 0:
+                        raise ValueError(
+                            "XY step cannot go back. It is current pointing at 0"
+                            " degrees.\n"
+                            f"Current position: {router.t.disp!r}.\n"
+                            f"Target Position ({self.x},{self.y})"
+                        )
+                        if _ib:
+                            router.straight_nobend(abs(dy))
+                        else:
+                            router.straight(abs(dy))
+                    else:
+                        if sign * dy < router.t.disp.y + router.router.bend90_radius:
+                            raise ValueError("XY step cannot go back")
+                        router.straight_nobend(abs(dx))
+                        if self.x > router.t.disp.x:
+                            if a == 3:
+                                router.left()
+                            else:
+                                router.right()
+                        dx = self.x - router.t.disp.x
+                        if _ib:
+                            if abs(dy) < 0:
+                                raise ValueError(
+                                    "XY's y-step is too small. It is current pointing"
+                                    f" at {router.t.angle * 90}"
+                                    " degrees.\n"
+                                    f"Current position: {router.t.disp!r}.\n"
+                                    f"Target Position ({self.x},{self.y})"
+                                )
+                            router.straight(abs(dy))
+                        else:
+                            if abs(dy) < router.router.bend90_radius:
+                                raise ValueError(
+                                    "XY's y-step is too small. It is current pointing"
+                                    f" at {router.t.angle * 90}"
+                                    " degrees.\n"
+                                    f"Current position: {router.t.disp!r}.\n"
+                                    f"Target Position ({self.x},{self.y})\n"
+                                    "Too small distance to place bend of "
+                                    f"{router.router.bend90_radius} size"
+                                )
+                            router.straight_nobend(abs(dy))
+
+
+class Steps(RootModel[list[Any]]):
     """Collection of steps. Runs the execution on them."""
 
-    root: list[Step]
+    root: list[Any]
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @model_validator(mode="after")
+    def _check_steps(self) -> Self:
+        for step in self.root:
+            if not isinstance(step, Step):
+                raise ValueError(
+                    "All Steps must implement an "
+                    "'execute(self, router: ManhattanRouterSide, include_bend: bool)"
+                )
+        return self
 
     def execute(self, router: ManhattanRouterSide) -> None:
         """Run all the steps on the given router."""
         try:
+            # print(router.t)
             i = 0
-            for i, step in enumerate(self.root[:-1]):
-                step.execute(router, True)
-            i += i
-            step.execute(router, False)
+            if self.root:
+                for i, step in enumerate(self.root[:-1]):
+                    step.execute(router, True)
+                i += i
+                step = self.root[-1]
+                step.execute(router, False)
+            # print(router.t)
+
         except Exception as e:
             raise ValueError(f"Error in step {i}, {step=}. Error: {str(e)}") from e

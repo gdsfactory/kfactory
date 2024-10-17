@@ -70,16 +70,16 @@ def route_elec(
             p1.copy(),
             p2.copy(),
             bend90_radius=minimum_straight,
-            start_steps=[Straight(size=start_straight)],
-            end_steps=[Straight(size=end_straight)],
+            start_steps=[Straight(dist=start_straight)],
+            end_steps=[Straight(dist=end_straight)],
         )
     else:
         pts = route_path_function(
             p1.copy(),
             p2.copy(),
             bend90_radius=0,
-            start_steps=[Straight(size=start_straight)],
-            end_steps=[Straight(size=end_straight)],
+            start_steps=[Straight(dist=start_straight)],
+            end_steps=[Straight(dist=end_straight)],
         )
 
     path = kdb.Path(pts, width)
@@ -150,7 +150,7 @@ def route_bundle(
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
 ) -> list[ManhattanRoute]:
-    """Connect multiple input ports to output ports.
+    r"""Connect multiple input ports to output ports.
 
     This function takes a list of input ports and assume they are all oriented in the
     same direction (could be any of W, S, E, N). The target ports have the opposite
@@ -158,13 +158,57 @@ def route_bundle(
     be oriented to south. The function will produce a routing to connect input ports
     to output ports without any crossings.
 
+    Waypoints will create a front which will create ports in a 1D array. If waypoints
+    are a transformation it will be like a point with a direction. If multiple points
+    are passed, the direction will be invfered.
+    For orientation of 0 degrees it will create the following front for 4 ports:
+
+    ```
+          │
+          │
+          │
+          p1 ->
+          │
+          │
+          │
+
+
+          │
+          │
+          │
+          p2 ->
+          │
+          │
+          │
+      ___\waypoint
+         /
+          │
+          │
+          │
+          p3 ->
+          │
+          │
+          │
+
+
+          │
+          │
+          │
+          p4 ->
+          │
+          │
+          │
+    ```
+
     Args:
         c: KCell to place the routes in.
         start_ports: List of start ports.
         end_ports: List of end ports.
         separation: Minimum space between wires. [dbu]
-        start_straights: Minimal straight segment after `p1`.
-        end_straights: Minimal straight segment before `p2`.
+        starts: Minimal straight segment after `start_ports`.
+        ends: Minimal straight segment before `end_ports`.
+        start_straights: Deprecated, use starts instead.
+        end_straights: Deprecated, use ends instead.
         place_layer: Override automatic detection of layers with specific layer.
         route_width: Width of the route. If None, the width of the ports is used.
         bboxes: List of boxes to consider. Currently only boxes overlapping ports will
@@ -224,7 +268,7 @@ def route_bundle_dual_rails(
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
 ) -> list[ManhattanRoute]:
-    """Connect multiple input ports to output ports.
+    r"""Connect multiple input ports to output ports.
 
     This function takes a list of input ports and assume they are all oriented in the
     same direction (could be any of W, S, E, N). The target ports have the opposite
@@ -232,13 +276,57 @@ def route_bundle_dual_rails(
     be oriented to south. The function will produce a routing to connect input ports
     to output ports without any crossings.
 
+    Waypoints will create a front which will create ports in a 1D array. If waypoints
+    are a transformation it will be like a point with a direction. If multiple points
+    are passed, the direction will be invfered.
+    For orientation of 0 degrees it will create the following front for 4 ports:
+
+    ```
+          │
+          │
+          │
+          p1 ->
+          │
+          │
+          │
+
+
+          │
+          │
+          │
+          p2 ->
+          │
+          │
+          │
+      ___\waypoint
+         /
+          │
+          │
+          │
+          p3 ->
+          │
+          │
+          │
+
+
+          │
+          │
+          │
+          p4 ->
+          │
+          │
+          │
+    ```
+
     Args:
         c: KCell to place the routes in.
         start_ports: List of start ports.
         end_ports: List of end ports.
         separation: Minimum space between wires. [dbu]
-        start_straights: Minimal straight segment after `p1`.
-        end_straights: Minimal straight segment before `p2`.
+        starts: Minimal straight segment after `start_ports`.
+        ends: Minimal straight segment before `end_ports`.
+        start_straights: Deprecated, use starts instead.
+        end_straights: Deprecated, use ends instead.
         place_layer: Override automatic detection of layers with specific layer.
         width_rails: Total width of the rails.
         separation_rails: Separation between the two rails.

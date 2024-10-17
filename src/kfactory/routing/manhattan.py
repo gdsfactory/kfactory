@@ -188,7 +188,7 @@ def route_manhattan_180(
                 t2.dup(),
                 bend90_radius,
                 start_steps=[],
-                end_steps=[Straight(size=end_straight)],
+                end_steps=[Straight(dist=end_straight)],
             )
     raise NotImplementedError(
         "Case not supportedt yet. Please open an issue if you believe this is an error"
@@ -227,8 +227,8 @@ def droute_manhattan(
         port1.to_itype(layout.dbu),
         port2.to_itype(layout.dbu),
         int(bend90_radius / layout.dbu),
-        [Straight(size=round(start_straight / layout.dbu))],
-        [Straight(size=round(end_straight / layout.dbu))],
+        [Straight(dist=round(start_straight / layout.dbu))],
+        [Straight(dist=round(end_straight / layout.dbu))],
         invert=invert,
     )
 
@@ -319,8 +319,8 @@ class ManhattanRouter:
     end_transformation: kdb.Trans
     start: ManhattanRouterSide = field(init=False)
     end: ManhattanRouterSide = field(init=False)
-    start_steps: InitVar[list[Step]] = field(default=[])
-    end_steps: InitVar[list[Step]] = field(default=[])
+    start_steps: InitVar[Sequence[Step]] = field(default=[])
+    end_steps: InitVar[Sequence[Step]] = field(default=[])
     width: int = 0
     start_points: InitVar[list[kdb.Point]] = field(default=[])
     end_points: InitVar[list[kdb.Point]] = field(default=[])
@@ -328,8 +328,8 @@ class ManhattanRouter:
 
     def __post_init__(
         self,
-        start_steps: int | list[Step],
-        end_steps: int | list[Step],
+        start_steps: int | Sequence[Step],
+        end_steps: int | Sequence[Step],
         start_points: list[kdb.Point],
         end_points: list[kdb.Point],
     ) -> None:
@@ -353,13 +353,13 @@ class ManhattanRouter:
                 raise ValueError("Start straight must be >= 0")
             self.start.straight(start_steps)
         else:
-            Steps(start_steps).execute(self.start)
+            Steps(list(start_steps)).execute(self.start)
         if isinstance(end_steps, int):
             if end_steps < 0:
                 raise ValueError("End straight must be >= 0")
             self.end.straight(end_steps)
         else:
-            Steps(end_steps).execute(self.end)
+            Steps(list(end_steps)).execute(self.end)
 
     @property
     def path_length(self) -> int:
@@ -547,6 +547,9 @@ class ManhattanRouter:
         if self.end.pts[-1] != self.start.pts[-1]:
             self.start.pts.extend(reversed(self.end.pts))
             self.end.pts = []
+        else:
+            self.start.pts.extend(reversed(self.end.pts[:-1]))
+            self.end.pts = []
         self.finished = True
         return self.start.pts
 
@@ -555,7 +558,7 @@ def route_manhattan(
     port1: Port | kdb.Trans,
     port2: Port | kdb.Trans,
     bend90_radius: int,
-    start_steps: list[Step] = [],
+    start_steps: Sequence[Step] = [],
     end_steps: list[Step] = [],
     max_tries: int = 20,
     invert: bool = False,
@@ -909,143 +912,36 @@ def route_smart(
                 f"'sort_ports=True' with variable widths is not supported: {widths=}"
             )
         if waypoints is not None:
-            if isinstance(waypoints, kdb.Trans):
-                _hw0_0 = _w0 // 2
-                length_widths = len(widths)
-                half_width = (
-                    length_widths * _w0 + (length_widths - 1) * separation
-                ) // 2
-                backbone_start_trans: list[kdb.Trans] = []
-                backbone_end_trans: list[kdb.Trans] = []
-                _w = -half_width + _hw0_0
-                rot_t = waypoints * kdb.Trans.R180
-                rot_t.mirror = False
-                for i in range(length_widths):
-                    backbone_start_trans.append(rot_t * kdb.Trans(0, _w))
-                    backbone_end_trans.append(rot_t * kdb.Trans(2, False, 0, _w))
-                    _w += _w0 + separation
-                start_manhattan_routers = route_smart(
-                    start_ports=start_ts,
-                    end_ports=backbone_start_trans,
-                    widths=widths,
-                    bend90_radius=bend90_radius,
-                    separation=separation,
-                    starts=starts,
-                    ends=[[]] * len(starts),
-                    bboxes=bboxes,
-                    sort_ports=True,
-                    waypoints=None,
-                    bbox_routing=bbox_routing,
-                )
-                end_manhattan_routers = route_smart(
-                    start_ports=end_ts,
-                    end_ports=backbone_end_trans,
-                    widths=widths,
-                    bend90_radius=bend90_radius,
-                    separation=separation,
-                    starts=ends,
-                    ends=[[]] * len(ends),
-                    bboxes=bboxes,
-                    sort_ports=True,
-                    waypoints=None,
-                    bbox_routing=bbox_routing,
-                )
-                all_routers: list[ManhattanRouter] = []
-                start_manhattan_routers.sort(key=lambda sr: sr.end_transformation)
-                end_manhattan_routers.sort(
-                    key=lambda er: er.end_transformation * kdb.Trans.R180
-                )
-
-                for sr, er in zip(start_manhattan_routers, end_manhattan_routers):
-                    router = ManhattanRouter(
-                        bend90_radius=bend90_radius,
-                        start_transformation=sr.start_transformation,
-                        end_transformation=er.start_transformation,
-                        start_points=sr.start.pts[:-1]
-                        + list(reversed(er.start.pts[:-1])),
-                    )
-                    router.start.t = router.end_transformation * kdb.Trans.R180
-                    router.finished = True
-                    all_routers.append(router)
-                return all_routers
-            else:
-                if len(waypoints) < 2:
-                    raise ValueError(
-                        "If the waypoints should only contain one point, a direction "
-                        "for the waypoint must be indicated, please pass a 'kdb.Trans'"
-                        " object instead."
-                    )
-                start_angle = vec_dir(waypoints[0] - waypoints[1])
-                end_angle = vec_dir(waypoints[-1] - waypoints[-2])
-                all_routers = []
-                bundle_points = _backbone2bundle(
-                    backbone=waypoints,
-                    port_widths=widths,
-                    spacing=separation,
-                )
-                start_manhattan_routers = route_smart(
-                    start_ports=start_ts,
-                    end_ports=[
-                        kdb.Trans(start_angle, False, _bb[0].to_v())
-                        for _bb in bundle_points
-                    ],
-                    widths=widths,
-                    bend90_radius=bend90_radius,
-                    separation=separation,
-                    starts=starts,
-                    ends=[[]] * len(starts),
-                    bboxes=bboxes,
-                    sort_ports=True,
-                    waypoints=None,
-                    bbox_routing=bbox_routing,
-                )
-                end_manhattan_routers = route_smart(
-                    end_ports=[
-                        kdb.Trans(end_angle, False, _bb[-1].to_v())
-                        for _bb in bundle_points
-                    ],
-                    start_ports=end_ts,
-                    widths=widths,
-                    bend90_radius=bend90_radius,
-                    separation=separation,
-                    starts=ends,
-                    ends=[[]] * len(ends),
-                    bboxes=bboxes,
-                    sort_ports=True,
-                    waypoints=None,
-                    bbox_routing=bbox_routing,
-                )
-                start_manhattan_routers.sort(key=lambda sr: sr.start.pts[-1])
-                end_manhattan_routers.sort(key=lambda er: er.start.pts[-1])
-                bundle_points.sort(key=lambda _bb: _bb[0])
-                end_manhattan_routers = list(
-                    er
-                    for _, er in sorted(
-                        zip(
-                            sorted(bundle_points, key=lambda _bb: _bb[-1]),
-                            end_manhattan_routers,
-                        ),
-                        key=lambda pair: pair[0][0],
-                    )
-                )
-                for sr, _bb, er in zip(
-                    start_manhattan_routers, bundle_points, end_manhattan_routers
-                ):
-                    router = ManhattanRouter(
-                        bend90_radius=bend90_radius,
-                        start_transformation=sr.start_transformation,
-                        end_transformation=er.start_transformation,
-                        start_points=sr.start.pts[:-1]
-                        + _bb[1:-1]
-                        + list(reversed(er.start.pts[:-1])),
-                    )
-                    router.start.t = router.end.t * kdb.Trans.R180
-                    router.finished = True
-                    all_routers.append(router)
-                return all_routers
-
+            return _route_waypoints(
+                waypoints=waypoints,
+                widths=[_w0 for _ in range(len(start_ts))],
+                separation=separation,
+                bend90_radius=bend90_radius,
+                start_ts=start_ts,
+                end_ts=end_ts,
+                starts=starts,
+                ends=ends,
+                bboxes=bboxes,
+                sort_ports=True,
+                bbox_routing=bbox_routing,
+            )
         default_start_bundle: list[kdb.Trans] = []
         start_bundles: dict[kdb.Box, list[kdb.Trans]] = defaultdict(list)
+        mh_routers: list[ManhattanRouter] = []
+        for s, s_t, e, e_t in zip(starts, start_ts, ends, end_ts):
+            mh_routers.append(
+                ManhattanRouter(
+                    bend90_radius=bend90_radius,
+                    start_transformation=s_t,
+                    end_transformation=e_t,
+                    start_steps=s,
+                    end_steps=e,
+                )
+            )
+        start_ts = [r.start.t for r in mh_routers]
+        end_ts = [r.end.t for r in mh_routers]
+        start_mapping = {r.start.t: r.start_transformation for r in mh_routers}
+        end_mapping = {r.end.t: r.end_transformation for r in mh_routers}
 
         b = kdb.Box()
         for ts in start_ts:
@@ -1279,154 +1175,62 @@ def route_smart(
                                     clockwise=True,
                                 )
                             )
+
+        all_routers = []
+        for ts, te, w, ss, es in zip(start_ts, end_ts, widths, starts, ends):
+            start_t = start_mapping[ts]
+            end_t = end_mapping[te]
+            all_routers.append(
+                ManhattanRouter(
+                    bend90_radius=bend90_radius,
+                    start_transformation=start_t,
+                    end_transformation=end_t,
+                    start_steps=ss,
+                    end_steps=es,
+                    width=w,
+                )
+            )
+
     else:
         if waypoints is not None:
-            if isinstance(waypoints, kdb.Trans):
-                length_widths = len(widths)
-                half_width = (sum(widths) + (len(widths) - 1) * separation) // 2
-                backbone_start_trans = []
-                backbone_end_trans = []
-                rot_t = waypoints * kdb.Trans.R180
-                rot_t.mirror = False
-                _w = -half_width
-                for i in range(length_widths):
-                    _w += widths[i] // 2
-                    backbone_start_trans.append(rot_t * kdb.Trans(0, _w))
-                    backbone_end_trans.append(rot_t * kdb.Trans(2, False, 0, _w))
-                    _w += widths[i] - widths[i] // 3 + separation
-                start_manhattan_routers = route_smart(
-                    start_ports=start_ts,
-                    end_ports=backbone_start_trans,
-                    widths=widths,
-                    bend90_radius=bend90_radius,
-                    separation=separation,
-                    starts=starts,
-                    ends=[[]] * len(starts),
-                    bboxes=bboxes,
-                    sort_ports=True,
-                    waypoints=None,
-                    bbox_routing=bbox_routing,
-                )
-                end_manhattan_routers = route_smart(
-                    start_ports=end_ts,
-                    end_ports=backbone_end_trans,
-                    widths=widths,
-                    bend90_radius=bend90_radius,
-                    separation=separation,
-                    starts=ends,
-                    ends=[[]] * len(ends),
-                    bboxes=bboxes,
-                    sort_ports=True,
-                    waypoints=None,
-                    bbox_routing=bbox_routing,
-                )
-                all_routers = []
-                start_manhattan_routers.sort(key=lambda sr: sr.end_transformation)
-                end_manhattan_routers.sort(
-                    key=lambda er: er.end_transformation * kdb.Trans.R180
-                )
-
-                for sr, er in zip(start_manhattan_routers, end_manhattan_routers):
-                    router = ManhattanRouter(
-                        bend90_radius=bend90_radius,
-                        start_transformation=sr.start_transformation,
-                        end_transformation=er.start_transformation,
-                        start_points=sr.start.pts[:-1]
-                        + list(reversed(er.start.pts[:-1])),
-                    )
-                    router.start.t = router.end_transformation * kdb.Trans.R180
-                    router.finished = True
-                    all_routers.append(router)
-                return all_routers
-            else:
-                if len(waypoints) < 2:
-                    raise ValueError(
-                        "If the waypoints should only contain one point, a direction "
-                        "for the waypoint must be indicated, please pass a 'kdb.Trans'"
-                        " object instead."
-                    )
-                start_angle = vec_dir(waypoints[0] - waypoints[1])
-                end_angle = vec_dir(waypoints[-1] - waypoints[-2])
-                all_routers = []
-                bundle_points = _backbone2bundle(
-                    backbone=waypoints,
-                    port_widths=widths,
-                    spacing=separation,
-                )
-                start_manhattan_routers = route_smart(
-                    start_ports=start_ts,
-                    end_ports=[
-                        kdb.Trans(start_angle, False, _bb[0].to_v())
-                        for _bb in bundle_points
-                    ],
-                    widths=widths,
-                    bend90_radius=bend90_radius,
-                    separation=separation,
-                    starts=starts,
-                    ends=[[]] * len(starts),
-                    bboxes=bboxes,
-                    sort_ports=True,
-                    waypoints=None,
-                    bbox_routing=bbox_routing,
-                )
-                end_manhattan_routers = route_smart(
-                    end_ports=[
-                        kdb.Trans(end_angle, False, _bb[-1].to_v())
-                        for _bb in bundle_points
-                    ],
-                    start_ports=end_ts,
-                    widths=widths,
-                    bend90_radius=bend90_radius,
-                    separation=separation,
-                    starts=ends,
-                    ends=[[]] * len(ends),
-                    bboxes=bboxes,
-                    sort_ports=True,
-                    waypoints=None,
-                    bbox_routing=bbox_routing,
-                )
-                start_manhattan_routers.sort(key=lambda sr: sr.start.pts[-1])
-                end_manhattan_routers.sort(key=lambda er: er.start.pts[-1])
-                bundle_points.sort(key=lambda _bb: _bb[0])
-                end_manhattan_routers = list(
-                    er
-                    for _, er in sorted(
-                        zip(
-                            sorted(bundle_points, key=lambda _bb: _bb[-1]),
-                            end_manhattan_routers,
-                        ),
-                        key=lambda pair: pair[0][0],
-                    )
-                )
-                for sr, _bb, er in zip(
-                    start_manhattan_routers, bundle_points, end_manhattan_routers
-                ):
-                    router = ManhattanRouter(
-                        bend90_radius=bend90_radius,
-                        start_transformation=sr.start_transformation,
-                        end_transformation=er.start_transformation,
-                        start_points=sr.start.pts[:-1]
-                        + _bb[1:-1]
-                        + list(reversed(er.start.pts[:-1])),
-                    )
-                    router.start.t = router.end.t * kdb.Trans.R180
-                    router.finished = True
-                    all_routers.append(router)
-                return all_routers
-
-    all_routers = []
-
-    for ts, te, w, ss, es in zip(start_ts, end_ts, widths, starts, ends):
-        all_routers.append(
-            ManhattanRouter(
+            return _route_waypoints(
+                waypoints=waypoints,
+                widths=widths,
+                separation=separation,
+                start_ts=start_ts,
+                end_ts=end_ts,
+                starts=starts,
+                ends=ends,
+                bboxes=bboxes,
+                bbox_routing=bbox_routing,
                 bend90_radius=bend90_radius,
-                start_transformation=ts,
-                end_transformation=te,
-                start_steps=ss,
-                end_steps=es,
-                width=w,
+                sort_ports=False,
             )
-        )
+
+        all_routers = []
+        for ts, te, w, ss, es in zip(start_ts, end_ts, widths, starts, ends):
+            all_routers.append(
+                ManhattanRouter(
+                    bend90_radius=bend90_radius,
+                    start_transformation=ts,
+                    end_transformation=te,
+                    start_steps=ss,
+                    end_steps=es,
+                    width=w,
+                )
+            )
+
+    # for ts, te, w, ss, es in zip(start_ts, end_ts, widths, starts, ends):
+    #     all_routers.append(
+    #         ManhattanRouter(
+    #             bend90_radius=bend90_radius,
+    #             start_transformation=ts,
+    #             end_transformation=te,
+    #             start_steps=ss,
+    #             end_steps=es,
+    #             width=w,
+    #         )
+    #     )
 
     router_bboxes: list[kdb.Box] = [
         kdb.Box(router.start.t.disp.to_p(), router.end.t.disp.to_p()).enlarged(
@@ -1541,17 +1345,21 @@ def route_smart(
             bbox_routing=bbox_routing,
             separation=separation,
         )
+        # if router == all_routers[8]:
+        breakpoint()
         route_to_bbox(
             (router.end for router in sorted_routers),
             end_bbox,
             bbox_routing=bbox_routing,
             separation=separation,
         )
-        disp_to_bbox = kdb.Trans(-angle, False, 0, 0) * (
-            start_bbox.center().to_v() - router_bundle[0].end.t.disp
-        )
+        # disp_to_bbox = kdb.Trans(-angle - 2, False, 0, 0) * (
+        #     start_bbox.center().to_v() - router_bundle[0].end.t.disp
+        # )
+        bb_start2end = kdb.Trans(-angle, False, 0, 0) * start_bbox
+        bb_end2start = kdb.Trans(-angle, False, 0, 0) * end_bbox
 
-        if disp_to_bbox.x > 0:
+        if bb_start2end.left - bb_end2start.right > bend90_radius + sum(widths):
             target_angle = (angle - 2) % 4
         else:
             target_angle = angle
@@ -1562,6 +1370,7 @@ def route_smart(
             route_to_bbox(
                 end_routers, end_bbox, separation=separation, bbox_routing=bbox_routing
             )
+            breakpoint()
             _route_to_side(
                 end_routers,
                 clockwise=avg.y > 0,
@@ -1569,6 +1378,7 @@ def route_smart(
                 separation=separation,
                 bbox_routing=bbox_routing,
             )
+            breakpoint()
             _route_to_side(
                 end_routers,
                 clockwise=avg.y > 0,
@@ -1580,6 +1390,8 @@ def route_smart(
         group_angle: int | None = None
         current_group: list[ManhattanRouter] = []
         for router in sorted_routers:
+            if router == all_routers[8]:
+                breakpoint()
             _ang = router.start.t.angle
             if _ang != group_angle:
                 if group_angle is not None:
@@ -1742,20 +1554,12 @@ def route_smart(
                         bbox=total_bbox,
                         separation=separation,
                     )
-            if waypoints is None:
-                route_to_bbox(
-                    [router.start for router in router_bundle],
-                    total_bbox,
-                    bbox_routing=bbox_routing,
-                    separation=separation,
-                )
-            else:
-                route_to_bbox(
-                    [router.start for router in router_bundle],
-                    total_bbox,
-                    bbox_routing=bbox_routing,
-                    separation=separation,
-                )
+            route_to_bbox(
+                [router.start for router in router_bundle],
+                total_bbox,
+                bbox_routing=bbox_routing,
+                separation=separation,
+            )
             route_loosely(
                 routers,
                 separation=separation,
@@ -1825,6 +1629,7 @@ def route_loosely(
     choose the shortest path.
     """
     router_start_box = start_bbox.dup()
+    breakpoint()
 
     if routers:
         angle = (routers[0].end.t.angle - 2) % 4
@@ -2328,8 +2133,8 @@ def route_ports_to_bundle(
                 t_e,
                 _trans,
                 bend90_radius=bend_radius,
-                start_steps=[Straight(size=end_straight + end_straight)],
-                end_steps=[Straight(size=start_straight)],
+                start_steps=[Straight(dist=end_straight + end_straight)],
+                end_steps=[Straight(dist=start_straight)],
             )
         ]
         pts.reverse()
@@ -2337,3 +2142,146 @@ def route_ports_to_bundle(
         bundle_route_y -= _width - _width // 2 + spacing
 
     return port_dict, dir_trans * bundle_position
+
+
+def _route_waypoints(
+    waypoints: kdb.Trans | list[kdb.Point],
+    widths: list[int],
+    separation: int,
+    bend90_radius: int,
+    start_ts: list[kdb.Trans],
+    end_ts: list[kdb.Trans],
+    starts: list[list[Step]],
+    ends: list[list[Step]],
+    bboxes: list[kdb.Box] | None,
+    bbox_routing: Literal["minimal", "full"] = "minimal",
+    sort_ports: bool = False,
+) -> list[ManhattanRouter]:
+    if isinstance(waypoints, kdb.Trans):
+        length_widths = len(widths)
+        half_width = (sum(widths) + (len(widths) - 1) * separation) // 2
+        backbone_start_trans = []
+        backbone_end_trans = []
+        rot_t = waypoints * kdb.Trans.R180
+        rot_t.mirror = False
+        _w = -half_width
+        for i in range(length_widths):
+            _w += widths[i] // 2
+            backbone_start_trans.append(rot_t * kdb.Trans(0, _w))
+            backbone_end_trans.append(rot_t * kdb.Trans(2, False, 0, _w))
+            _w += widths[i] - widths[i] // 3 + separation
+        start_manhattan_routers = route_smart(
+            start_ports=start_ts,
+            end_ports=backbone_start_trans,
+            widths=widths,
+            bend90_radius=bend90_radius,
+            separation=separation,
+            starts=starts,
+            ends=[[]] * len(starts),
+            bboxes=bboxes,
+            waypoints=None,
+            bbox_routing=bbox_routing,
+            sort_ports=sort_ports,
+        )
+        end_manhattan_routers = route_smart(
+            start_ports=end_ts,
+            end_ports=backbone_end_trans,
+            widths=widths,
+            bend90_radius=bend90_radius,
+            separation=separation,
+            starts=ends,
+            ends=[[]] * len(ends),
+            bboxes=bboxes,
+            waypoints=None,
+            bbox_routing=bbox_routing,
+        )
+        all_routers = []
+        start_manhattan_routers.sort(key=lambda sr: sr.end_transformation)
+        end_manhattan_routers.sort(
+            key=lambda er: er.end_transformation * kdb.Trans.R180
+        )
+
+        for sr, er in zip(start_manhattan_routers, end_manhattan_routers):
+            router = ManhattanRouter(
+                bend90_radius=bend90_radius,
+                start_transformation=sr.start_transformation,
+                end_transformation=er.start_transformation,
+                start_points=sr.start.pts[:-1] + list(reversed(er.start.pts[:-1])),
+            )
+            router.start.t = router.end_transformation * kdb.Trans.R180
+            router.finished = True
+            all_routers.append(router)
+        return all_routers
+    else:
+        if len(waypoints) < 2:
+            raise ValueError(
+                "If the waypoints should only contain one point, a direction "
+                "for the waypoint must be indicated, please pass a 'kdb.Trans'"
+                " object instead."
+            )
+        start_angle = vec_dir(waypoints[0] - waypoints[1])
+        end_angle = vec_dir(waypoints[-1] - waypoints[-2])
+        all_routers = []
+        bundle_points = _backbone2bundle(
+            backbone=waypoints,
+            port_widths=widths,
+            spacing=separation,
+        )
+        start_manhattan_routers = route_smart(
+            start_ports=start_ts,
+            end_ports=[
+                kdb.Trans(start_angle, False, _bb[0].to_v()) for _bb in bundle_points
+            ],
+            widths=widths,
+            bend90_radius=bend90_radius,
+            separation=separation,
+            starts=starts,
+            ends=[[]] * len(starts),
+            bboxes=bboxes,
+            sort_ports=sort_ports,
+            waypoints=None,
+            bbox_routing=bbox_routing,
+        )
+        end_manhattan_routers = route_smart(
+            end_ports=[
+                kdb.Trans(end_angle, False, _bb[-1].to_v()) for _bb in bundle_points
+            ],
+            start_ports=end_ts,
+            widths=widths,
+            bend90_radius=bend90_radius,
+            separation=separation,
+            starts=ends,
+            ends=[[]] * len(ends),
+            bboxes=bboxes,
+            sort_ports=sort_ports,
+            waypoints=None,
+            bbox_routing=bbox_routing,
+        )
+        start_manhattan_routers.sort(key=lambda sr: sr.start.pts[-1])
+        end_manhattan_routers.sort(key=lambda er: er.start.pts[-1])
+        bundle_points.sort(key=lambda _bb: _bb[0])
+        end_manhattan_routers = list(
+            er
+            for _, er in sorted(
+                zip(
+                    sorted(bundle_points, key=lambda _bb: _bb[-1]),
+                    end_manhattan_routers,
+                ),
+                key=lambda pair: pair[0][0],
+            )
+        )
+        for sr, _bb, er in zip(
+            start_manhattan_routers, bundle_points, end_manhattan_routers
+        ):
+            router = ManhattanRouter(
+                bend90_radius=bend90_radius,
+                start_transformation=sr.start_transformation,
+                end_transformation=er.start_transformation,
+                start_points=sr.start.pts[:-1]
+                + _bb[1:-1]
+                + list(reversed(er.start.pts[:-1])),
+            )
+            router.start.t = router.end.t * kdb.Trans.R180
+            router.finished = True
+            all_routers.append(router)
+        return all_routers

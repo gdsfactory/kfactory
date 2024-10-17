@@ -289,7 +289,49 @@ def route_bundle(
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
 ) -> list[ManhattanRoute]:
-    """Route a bundle from starting ports to end_ports.
+    r"""Route a bundle from starting ports to end_ports.
+
+    Waypoints will create a front which will create ports in a 1D array. If waypoints
+    are a transformation it will be like a point with a direction. If multiple points
+    are passed, the direction will be invfered.
+    For orientation of 0 degrees it will create the following front for 4 ports:
+
+    ```
+          │
+          │
+          │
+          p1 ->
+          │
+          │
+          │
+
+
+          │
+          │
+          │
+          p2 ->
+          │
+          │
+          │
+      ___\waypoint
+         /
+          │
+          │
+          │
+          p3 ->
+          │
+          │
+          │
+
+
+          │
+          │
+          │
+          p4 ->
+          │
+          │
+          │
+    ```
 
     Args:
         c: Cell to place the route in.
@@ -346,13 +388,13 @@ def route_bundle(
     if starts == []:
         starts = [starts] * length  # type: ignore[assignment]
     elif isinstance(starts, int):
-        starts = [[Straight(size=starts)] for _ in range(length)]  # type: ignore[assignment]
+        starts = [[Straight(dist=starts)] for _ in range(length)]  # type: ignore[assignment]
     elif isinstance(starts[0], Step):
         starts = [starts for _ in range(len(start_ports))]  # type: ignore[assignment]
     if ends == []:
         ends = [ends] * length  # type: ignore[assignment]
     elif isinstance(ends, int):
-        ends = [[Straight(size=ends)] for _ in range(length)]  # type: ignore[assignment]
+        ends = [[Straight(dist=ends)] for _ in range(length)]  # type: ignore[assignment]
     elif isinstance(ends[0], Step):
         ends = [ends for _ in range(len(start_ports))]  # type: ignore[assignment]
 

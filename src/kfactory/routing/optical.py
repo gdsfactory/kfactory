@@ -61,7 +61,49 @@ def route_bundle(
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
 ) -> list[ManhattanRoute]:
-    """Route a bundle from starting ports to end_ports.
+    r"""Route a bundle from starting ports to end_ports.
+
+    Waypoints will create a front which will create ports in a 1D array. If waypoints
+    are a transformation it will be like a point with a direction. If multiple points
+    are passed, the direction will be invfered.
+    For orientation of 0 degrees it will create the following front for 4 ports:
+
+    ```
+          │
+          │
+          │
+          p1 ->
+          │
+          │
+          │
+
+
+          │
+          │
+          │
+          p2 ->
+          │
+          │
+          │
+      ___\waypoint
+         /
+          │
+          │
+          │
+          p3 ->
+          │
+          │
+          │
+
+
+          │
+          │
+          │
+          p4 ->
+          │
+          │
+          │
+    ```
 
     Args:
         c: Cell to place the route in.
@@ -71,10 +113,12 @@ def route_bundle(
         straight_factory: Factory function for straight cells. in DBU.
         bend90_cell: 90° bend cell.
         taper_cell: Taper cell.
-        start_straights: DEPRECATED[Use starts instead] Minimal straight segment after
+        start_straights: DEPRECATED[Use starts instead]
             `p1`.
-        end_straights: DEPRECATED[Use ends instead] Minimal straight segment before
+        end_straights: DEPRECATED[Use ends instead]
             `p2`.
+        starts: Minimal straight segment after `start_ports`.
+        ends: Minimal straight segment before `end_ports`.
         min_straight_taper: Minimum straight [dbu] before attempting to place tapers.
         place_port_type: Port type to use for the bend90_cell.
         place_allow_small_routes: Don't throw an error if two corners cannot be placed.
@@ -200,6 +244,7 @@ def place90(
         kwargs: Additional kwargs. Compatibility for type checking. If any kwargs are
             passed an error is raised.
     """
+    breakpoint()
     if len(kwargs) > 0:
         raise ValueError(
             "Additional args and kwargs are not allowed for route_smart." f"{kwargs=}"
@@ -682,7 +727,7 @@ def route_loopback(
             t1,
             t2,
             bend90_radius,
-            start_steps=[Straight(size=start_straight + d_loop)],
+            start_steps=[Straight(dist=start_straight + d_loop)],
         )
         + pts_end
     )
@@ -952,16 +997,16 @@ def route(
                 start_port,
                 end_port,
                 bend90_radius=b90r,
-                start_steps=[Straight(size=start_straight)],
-                end_steps=[Straight(size=end_straight)],
+                start_steps=[Straight(dist=start_straight)],
+                end_steps=[Straight(dist=end_straight)],
             )
         else:
             pts = route_path_function(
                 start_port,
                 end_port,
                 bend90_radius=b90r,
-                start_steps=[Straight(size=start_straight)],
-                end_steps=[Straight(size=end_straight)],
+                start_steps=[Straight(dist=start_straight)],
+                end_steps=[Straight(dist=end_straight)],
                 **route_kwargs,
             )
 

@@ -573,6 +573,7 @@ def test_route_smart_waypoints_trans(
         kf.Port(width=500, layer_info=LAYER.WG, kcl=c.kcl, trans=trans)
         for trans in transformations
     ]
+    start_ports.reverse()
     end_ports = [
         kf.Port(
             width=500,
@@ -591,6 +592,7 @@ def test_route_smart_waypoints_trans(
         bend90_cell=bend90_small,
         waypoints=kf.kdb.Trans(250_000, 0),
     )
+    c.show()
 
 
 def test_route_smart_waypoints_pts(
@@ -607,6 +609,7 @@ def test_route_smart_waypoints_pts(
         kf.Port(width=500, layer_info=LAYER.WG, kcl=c.kcl, trans=trans)
         for trans in transformations
     ]
+    start_ports.reverse()
     end_ports = [
         kf.Port(
             width=500,
@@ -625,3 +628,4 @@ def test_route_smart_waypoints_pts(
         bend90_cell=bend90_small,
         waypoints=[kf.kdb.Point(250_000, 0), kf.kdb.Point(250_000, 100_000)],
     )
+    c.show()
