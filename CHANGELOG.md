@@ -5,6 +5,7 @@
 
 ## New
 
+- add tag support for cell decorator [#496](https://github.com/gdsfactory/kfactory/pull/496)
 - Add Router start/end straight steps [#493](https://github.com/gdsfactory/kfactory/pull/493)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.1...v0.21.2
