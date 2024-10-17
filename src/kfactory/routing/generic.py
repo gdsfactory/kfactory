@@ -135,7 +135,7 @@ def check_collisions(
 
     if collision_edges or not inter_route_collisions.is_empty():
         if collision_check_layers is None:
-            collision_check_layers = list(set(p.layer_info for p in start_ports))
+            collision_check_layers = list({p.layer_info for p in start_ports})
         dbu = c.kcl.dbu
         db = rdb.ReportDatabase("Routing Errors")
         cat = db.create_category("Manhattan Routing Collisions")

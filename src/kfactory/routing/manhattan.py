@@ -546,10 +546,9 @@ class ManhattanRouter:
             )
         if self.end.pts[-1] != self.start.pts[-1]:
             self.start.pts.extend(reversed(self.end.pts))
-            self.end.pts = []
         else:
             self.start.pts.extend(reversed(self.end.pts[:-1]))
-            self.end.pts = []
+        self.end.pts = []
         self.finished = True
         return self.start.pts
 
