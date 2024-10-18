@@ -1,3 +1,18 @@
+<a id="v0.21.5"></a>
+# [v0.21.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.5) - 2024-10-17
+
+# What's Changed
+
+## Bug Fixes
+
+- fix typo [#499](https://github.com/gdsfactory/kfactory/pull/499)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.4...v0.21.5
+
+
+[Changes][v0.21.5]
+
+
 <a id="v0.21.4"></a>
 # [v0.21.4](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.4) - 2024-10-17
 
@@ -1230,6 +1245,7 @@
 [Changes][v0.4.0]
 
 
+[v0.21.5]: https://github.com/gdsfactory/kfactory/compare/v0.21.4...v0.21.5
 [v0.21.4]: https://github.com/gdsfactory/kfactory/compare/v0.21.3...v0.21.4
 [v0.21.3]: https://github.com/gdsfactory/kfactory/compare/v0.21.2...v0.21.3
 [v0.21.2]: https://github.com/gdsfactory/kfactory/compare/v0.21.1...v0.21.2
