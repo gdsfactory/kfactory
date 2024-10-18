@@ -479,6 +479,11 @@ def place_single_wire(
         .polygon
     )
 
+    _length = 0.0
+    pt1 = pts[0]
+    for pt2 in pts[1:]:
+        _length += (pt2 - pt1).length()
+
     return ManhattanRoute(
         backbone=pts,
         start_port=p1,
@@ -487,6 +492,8 @@ def place_single_wire(
         bend90_radius=0,
         polygons={layer_info: [shape]},
         instances=[],
+        length=round(_length),
+        length_straight=round(_length),
     )
 
 
