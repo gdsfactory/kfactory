@@ -928,8 +928,9 @@ class Ports:
                     name=name or port.name,
                     dcplx_trans=port.dcplx_trans,
                     info=port.info.model_dump(),
-                    dwidth=port.dwidth,
-                    layer=self.kcl.layers(_l) if _l in self.kcl.layers else _l,  # type: ignore[operator, call-arg]
+                    cross_section=self.kcl.get_cross_section(
+                        port.cross_section.to_dtype(port.kcl)
+                    ),
                 )
             else:
                 _port = Port(
@@ -937,8 +938,9 @@ class Ports:
                     name=name or port.name,
                     dcplx_trans=port.dcplx_trans,
                     info=port.info.model_dump(),
-                    dwidth=port.dwidth,
-                    layer=_l,
+                    cross_section=self.kcl.get_cross_section(
+                        port.cross_section.to_dtype(port.kcl)
+                    ),
                 )
 
             self._ports.append(_port)
