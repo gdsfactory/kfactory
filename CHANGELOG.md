@@ -3,6 +3,10 @@
 
 # What's Changed
 
+## New
+
+- add length and length_straight to electrical routes [#502](https://github.com/gdsfactory/kfactory/pull/502)
+
 ## Bug Fixes
 
 - fix typo [#499](https://github.com/gdsfactory/kfactory/pull/499)
