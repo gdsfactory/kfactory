@@ -5,6 +5,7 @@
 
 ## New
 
+- make add_ports agnostic to kcl [#501](https://github.com/gdsfactory/kfactory/pull/501)
 - add length and length_straight to electrical routes [#502](https://github.com/gdsfactory/kfactory/pull/502)
 
 ## Bug Fixes
