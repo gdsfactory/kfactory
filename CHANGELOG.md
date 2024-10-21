@@ -10,6 +10,7 @@
 
 ## Bug Fixes
 
+- fix missing arg [#503](https://github.com/gdsfactory/kfactory/pull/503)
 - fix typo [#499](https://github.com/gdsfactory/kfactory/pull/499)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.4...v0.21.5
