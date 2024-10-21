@@ -7347,7 +7347,7 @@ class Port:
 
     def print(self, type: Literal["dbu", "um", None] = None) -> None:
         """Print the port pretty."""
-        config.console.print(pprint_ports([self]))
+        config.console.print(pprint_ports([self], unit=type))
 
 
 class Instance:
