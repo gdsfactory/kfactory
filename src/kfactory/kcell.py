@@ -947,12 +947,16 @@ class Ports:
         return _port
 
     def add_ports(
-        self, ports: Iterable[Port], prefix: str = "", keep_mirror: bool = False
+        self,
+        ports: Iterable[Port],
+        prefix: str = "",
+        keep_mirror: bool = False,
+        suffix: str = "",
     ) -> None:
         """Append a list of ports."""
         for p in ports:
             name = p.name or ""
-            self.add_port(port=p, name=prefix + name, keep_mirror=keep_mirror)
+            self.add_port(port=p, name=prefix + name + suffix, keep_mirror=keep_mirror)
 
     @overload
     def create_port(
@@ -1672,7 +1676,11 @@ class KCell:
         return self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
 
     def add_ports(
-        self, ports: Iterable[Port], prefix: str = "", keep_mirror: bool = False
+        self,
+        ports: Iterable[Port],
+        prefix: str = "",
+        suffix: str = "",
+        keep_mirror: bool = False,
     ) -> None:
         """Add a sequence of ports to the cells.
 
@@ -1681,12 +1689,15 @@ class KCell:
         Args:
             ports: list/tuple (anything iterable) of ports.
             prefix: string to add in front of all the port names
+            suffix: string to add the end of all the port names.
             keep_mirror: Keep the mirror part of the transformation of a port if
                 `True`, else set the mirror flag to `False`.
         """
         if self._locked:
             raise LockedError(self)
-        self.ports.add_ports(ports=ports, prefix=prefix, keep_mirror=keep_mirror)
+        self.ports.add_ports(
+            ports=ports, prefix=prefix, suffix=suffix, keep_mirror=keep_mirror
+        )
 
     @classmethod
     def from_yaml(
