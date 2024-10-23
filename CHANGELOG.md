@@ -1,5 +1,20 @@
+<a id="v0.21.6"></a>
+# [v0.21.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.6) - 2024-10-23
+
+# What's Changed
+
+## New
+
+- add suffix [#504](https://github.com/gdsfactory/kfactory/pull/504)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.5...v0.21.6
+
+
+[Changes][v0.21.6]
+
+
 <a id="v0.21.5"></a>
-# [v0.21.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.5) - 2024-10-17
+# [v0.21.5](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.5) - 2024-10-21
 
 # What's Changed
 
@@ -1251,6 +1266,7 @@
 [Changes][v0.4.0]
 
 
+[v0.21.6]: https://github.com/gdsfactory/kfactory/compare/v0.21.5...v0.21.6
 [v0.21.5]: https://github.com/gdsfactory/kfactory/compare/v0.21.4...v0.21.5
 [v0.21.4]: https://github.com/gdsfactory/kfactory/compare/v0.21.3...v0.21.4
 [v0.21.3]: https://github.com/gdsfactory/kfactory/compare/v0.21.2...v0.21.3
