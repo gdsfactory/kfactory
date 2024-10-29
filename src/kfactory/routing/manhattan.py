@@ -1986,7 +1986,7 @@ def _backbone2bundle(
     x = -width // 2
 
     for pw in port_widths:
-        x += pw // 2 + spacing // 2
+        x += pw // 2
 
         _pts = [p.dup() for p in backbone]
         p1 = _pts[0]
@@ -2001,7 +2001,7 @@ def _backbone2bundle(
                 p2.y = _e.p2.y
             p1 = p2
 
-        x += spacing - spacing // 2 + pw - pw // 2
+        x += spacing + pw - pw // 2
         pts.append(_pts)
 
     return pts
@@ -2151,7 +2151,7 @@ def _route_waypoints(
             _w += widths[i] // 2
             backbone_start_trans.append(rot_t * kdb.Trans(0, _w))
             backbone_end_trans.append(rot_t * kdb.Trans(2, False, 0, _w))
-            _w += widths[i] - widths[i] // 3 + separation
+            _w += widths[i] - widths[i] // 2 + separation
         start_manhattan_routers = route_smart(
             start_ports=start_ts,
             end_ports=backbone_start_trans,
