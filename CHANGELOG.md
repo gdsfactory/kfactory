@@ -7,6 +7,10 @@
 
 - add suffix [#504](https://github.com/gdsfactory/kfactory/pull/504)
 
+## Bug Fixes
+
+- fix error in width calculation of waypoints [#505](https://github.com/gdsfactory/kfactory/pull/505)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.5...v0.21.6
 
 
