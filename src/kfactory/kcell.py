@@ -2262,7 +2262,7 @@ class KCell:
         """Convert the KCell to a static cell if it is pdk KCell."""
         if self.library().name == self.kcl.name:
             raise ValueError(f"KCell {self.qname()} is already a static KCell.")
-        _lib_cell = kcls[self.library.name][self.library_cell_index()]
+        _lib_cell = kcls[self.library().name][self.library_cell_index()]
         _lib_cell.set_meta_data()
         _kdb_cell = self.kcl.layout.cell(
             self.kcl.convert_cell_to_static(self.cell_index())
