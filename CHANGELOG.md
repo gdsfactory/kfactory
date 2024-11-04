@@ -1,5 +1,20 @@
+<a id="v0.21.7"></a>
+# [v0.21.7](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.7) - 2024-10-29
+
+# What's Changed
+
+## Bug Fixes
+
+- fix convert to static not taking all metainfo [#507](https://github.com/gdsfactory/kfactory/pull/507)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.6...v0.21.7
+
+
+[Changes][v0.21.7]
+
+
 <a id="v0.21.6"></a>
-# [v0.21.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.6) - 2024-10-23
+# [v0.21.6](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.6) - 2024-10-29
 
 # What's Changed
 
@@ -1270,6 +1285,7 @@
 [Changes][v0.4.0]
 
 
+[v0.21.7]: https://github.com/gdsfactory/kfactory/compare/v0.21.6...v0.21.7
 [v0.21.6]: https://github.com/gdsfactory/kfactory/compare/v0.21.5...v0.21.6
 [v0.21.5]: https://github.com/gdsfactory/kfactory/compare/v0.21.4...v0.21.5
 [v0.21.4]: https://github.com/gdsfactory/kfactory/compare/v0.21.3...v0.21.4
