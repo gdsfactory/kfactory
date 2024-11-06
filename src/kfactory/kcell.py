@@ -8769,7 +8769,7 @@ def show(
         enc_data = data.encode()
         conn.sendall(enc_data)
         conn.settimeout(5)
-    except ConnectionRefusedError:
+    except (ConnectionRefusedError, OSError):
         logger.error(
             "klive is not running or accepting connections on localhost:8082. "
             "Is KLayout running with klive accepting connections?"
