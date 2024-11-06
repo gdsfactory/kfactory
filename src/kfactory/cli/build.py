@@ -103,7 +103,7 @@ def build(
         int, typer.Option(help="Maximum number of vertices per polygon.")
     ] = 4000,
     max_cellname_length: Annotated[
-        int, typer.Option("Maximum number of characters in a cell name.")
+        int, typer.Option(help="Maximum number of characters in a cell name.")
     ] = 99,
 ) -> None:
     """Run a python modules __main__ or a function if specified."""
