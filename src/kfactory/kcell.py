@@ -16,6 +16,7 @@ import importlib.util
 import inspect
 import json
 import socket
+import subprocess
 from collections import UserDict, UserList, defaultdict
 from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
@@ -23,6 +24,7 @@ from enum import IntEnum, IntFlag, auto
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
+from time import sleep
 from types import FunctionType, ModuleType
 from typing import (
     TYPE_CHECKING,
@@ -39,6 +41,7 @@ from typing import (
 
 import cachetools.func
 import numpy as np
+import psutil
 import rich
 import rich.json
 import ruamel.yaml
@@ -920,28 +923,15 @@ class Ports:
             dcplx_trans = port.dcplx_trans.dup()
             if not keep_mirror:
                 dcplx_trans.mirror = False
-            _li = self.kcl.get_info(port.layer)
-            _l = self.kcl.layer(_li)
-            if _li is not None and _li.name is not None:
-                _port = Port(
-                    kcl=self.kcl,
-                    name=name or port.name,
-                    dcplx_trans=port.dcplx_trans,
-                    info=port.info.model_dump(),
-                    cross_section=self.kcl.get_cross_section(
-                        port.cross_section.to_dtype(port.kcl)
-                    ),
-                )
-            else:
-                _port = Port(
-                    kcl=self.kcl,
-                    name=name or port.name,
-                    dcplx_trans=port.dcplx_trans,
-                    info=port.info.model_dump(),
-                    cross_section=self.kcl.get_cross_section(
-                        port.cross_section.to_dtype(port.kcl)
-                    ),
-                )
+            _port = Port(
+                kcl=self.kcl,
+                name=name or port.name,
+                dcplx_trans=port.dcplx_trans,
+                info=port.info.model_dump(),
+                cross_section=self.kcl.get_cross_section(
+                    port.cross_section.to_dtype(port.kcl)
+                ),
+            )
 
             self._ports.append(_port)
         return _port
@@ -8779,6 +8769,51 @@ def show(
         enc_data = data.encode()
         conn.sendall(enc_data)
         conn.settimeout(5)
+    except ConnectionRefusedError:
+        logger.error(
+            "klive is not running or accepting connections on localhost:8082. "
+            "Is KLayout running with klive accepting connections?"
+        )
+
+        filtered_processes = [
+            proc
+            for proc in psutil.process_iter(["pid", "name"])
+            if "klayout" in proc.info["name"].lower()
+        ]
+
+        if filtered_processes:
+            for proc in filtered_processes:
+                connections = [
+                    conn
+                    for conn in psutil.net_connections(kind="tcp")
+                    if conn.pid == proc.info["pid"]
+                ]
+                msg = (
+                    "Found klayout running at "
+                    f"pid={proc.info["pid"]} name={proc.info["name"]}. "
+                    "KLayout is listening on the following ports:\n"
+                    + "\n".join(
+                        {f"{conn.laddr.ip}:{conn.laddr.port}" for conn in connections}  # type: ignore[union-attr]
+                    )
+                )
+                logger.error(msg)
+                logger.error(
+                    "Please make sure klive runs properly. "
+                    "To install klive and metaport-info you can run `klayout -y klive` "
+                    ""
+                )
+
+        elif config.interactive:
+            sleep(0.1)
+            start_klayout = input("Start klayout? [Y/n]")
+            if start_klayout.lower() in ["y", "yes"]:
+                subprocess.Popen("klayout")
+                sleep(1)
+                conn = socket.create_connection(("127.0.0.1", 8082), timeout=0.5)
+                data = data + "\n"
+                enc_data = data.encode()
+                conn.sendall(enc_data)
+                conn.settimeout(5)
     except OSError:
         logger.warning("Could not connect to klive server")
     else:

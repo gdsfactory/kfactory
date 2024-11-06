@@ -198,6 +198,7 @@ class Settings(BaseSettings):
     check_instances: CHECK_INSTANCES = CHECK_INSTANCES.RAISE
     max_cellname_length: int = 99
     debug_names: bool = False
+    interactive: bool = True
 
     # default write settings
     write_cell_properties: bool = True
