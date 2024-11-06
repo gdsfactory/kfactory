@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- fix cli arg [#508](https://github.com/gdsfactory/kfactory/pull/508)
 - fix convert to static not taking all metainfo [#507](https://github.com/gdsfactory/kfactory/pull/507)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.6...v0.21.7
