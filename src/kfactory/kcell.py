@@ -7353,11 +7353,10 @@ class Port:
 
     def __repr__(self) -> str:
         """String representation of port."""
-        ln = self.layer.name if isinstance(self.layer, LayerEnum) else self.layer
         return (
             f"Port({'name: ' + self.name if self.name else ''}"
             f", dwidth: {self.dwidth}, trans: {self.dcplx_trans.to_s()}, layer: "
-            f"{ln}, port_type: {self.port_type})"
+            f"{self.layer_info}, port_type: {self.port_type})"
         )
 
     def print(self, type: Literal["dbu", "um", None] = None) -> None:
