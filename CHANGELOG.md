@@ -1,5 +1,20 @@
+<a id="v0.21.8"></a>
+# [v0.21.8](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.8) - 2024-11-13
+
+# What's Changed
+
+## Bug Fixes
+
+- fix str(Port) [#512](https://github.com/gdsfactory/kfactory/pull/512)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.7...v0.21.8
+
+
+[Changes][v0.21.8]
+
+
 <a id="v0.21.7"></a>
-# [v0.21.7](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.7) - 2024-10-29
+# [v0.21.7](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.7) - 2024-11-06
 
 # What's Changed
 
@@ -1286,6 +1301,7 @@
 [Changes][v0.4.0]
 
 
+[v0.21.8]: https://github.com/gdsfactory/kfactory/compare/v0.21.7...v0.21.8
 [v0.21.7]: https://github.com/gdsfactory/kfactory/compare/v0.21.6...v0.21.7
 [v0.21.6]: https://github.com/gdsfactory/kfactory/compare/v0.21.5...v0.21.6
 [v0.21.5]: https://github.com/gdsfactory/kfactory/compare/v0.21.4...v0.21.5
