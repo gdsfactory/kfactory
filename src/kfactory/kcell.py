@@ -578,6 +578,9 @@ class PROPID(IntEnum):
     """Mapping for GDS properties."""
 
     NAME = 0
+    """Instance name."""
+    PURPOSE = 1
+    """Instance purpose (e.g. 'routing')."""
 
 
 class LockedError(AttributeError):
@@ -921,7 +924,6 @@ class Ports:
             if not keep_mirror:
                 dcplx_trans.mirror = False
             _li = self.kcl.get_info(port.layer)
-            _l = self.kcl.layer(_li)
             if _li is not None and _li.name is not None:
                 _port = Port(
                     kcl=self.kcl,
@@ -7427,6 +7429,15 @@ class Instance:
     @name.setter
     def name(self, value: str) -> None:
         self.set_property(PROPID.NAME, value)
+
+    @property
+    def purpose(self) -> str | None:
+        """Purpose value of instance in GDS."""
+        return self.property(PROPID.PURPOSE)  # type: ignore[no-any-return]
+
+    @purpose.setter
+    def purpose(self, value: str | None) -> None:
+        self.set_property(PROPID.PURPOSE, value)
 
     @property
     def cell_index(self) -> int:
