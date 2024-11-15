@@ -62,6 +62,7 @@ def route_bundle(
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
+    purpose: str | None = "routing",
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
 
@@ -152,6 +153,8 @@ def route_bundle(
             (single value) or each one (list of values which is as long as end_ports).
             If no waypoints are set, the target angles of all ends muts be the same
             (after the steps).
+        purpose: Set the property "purpose" (at id kf.kcell.PROPID.PURPOSE) to the
+            value. Not set if None.
     """
     if start_straights is not None:
         logger.warning("start_straights is deprecated. Use `starts` instead.")
@@ -190,6 +193,7 @@ def route_bundle(
             "allow_width_mismatch": allow_width_mismatch,
             "allow_layer_mismatch": allow_width_mismatch,
             "allow_type_mismatch": allow_type_mismatch,
+            "purpose": purpose,
         },
         start_angles=start_angles,
         end_angles=end_angles,
@@ -211,6 +215,7 @@ def place90(
     allow_width_mismatch: bool | None = None,
     allow_layer_mismatch: bool | None = None,
     allow_type_mismatch: bool | None = None,
+    purpose: str | None = "routing",
     **kwargs: Any,
 ) -> ManhattanRoute:
     """Place bends and straight waveguides based on a sequence of points.
@@ -249,6 +254,8 @@ def place90(
         allow_type_mismatch: If True, the type of the ports is ignored
             (config default: False).
         route_width: Width of the route. If None, the width of the ports is used.
+        purpose: Set the property "purpose" (at id kf.kcell.PROPID.PURPOSE) to the
+            value. Not set if None.
         args: Additional args. Compatibility for type checking. If any args are passed
             an error is raised.
         kwargs: Additional kwargs. Compatibility for type checking. If any kwargs are
@@ -368,6 +375,7 @@ def place90(
             + min_straight_taper
         ):
             wg = c << straight_factory(width=w, length=int((pts[1] - pts[0]).length()))
+            wg.purpose = purpose
             wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
             wg.connect(
                 wg_p1,
@@ -382,6 +390,7 @@ def place90(
             route.length_straights += int(length)
         else:
             t1 = c << taper_cell
+            t1.purpose = purpose
             t1.connect(
                 taperp1.name,
                 p1,
@@ -399,6 +408,7 @@ def place90(
                     length=length
                     - int((taperp1.trans.disp - taperp2.trans.disp).length() * 2),
                 )
+                wg.purpose = purpose
                 wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
                 wg.connect(
                     wg_p1,
@@ -410,6 +420,7 @@ def place90(
                 )
                 route.instances.append(wg)
                 t2 = c << taper_cell
+                t2.purpose = purpose
                 t2.connect(
                     taperp2.name,
                     wg_p2,
@@ -421,6 +432,7 @@ def place90(
                 route.n_taper += 2
             else:
                 t2 = c << taper_cell
+                t2.purpose = purpose
                 t2.connect(
                     taperp2.name,
                     t1,
@@ -457,6 +469,7 @@ def place90(
         vec_n = new_pt - pt
 
         bend90 = c << bend90_cell
+        bend90.purpose = purpose
         route.n_bend90 += 1
         mirror = (vec_angle(vec_n) - vec_angle(vec)) % 4 != 3
         if (vec.y != 0) and (vec.x != 0):
@@ -481,6 +494,7 @@ def place90(
                 + min_straight_taper
             ):
                 wg = c << straight_factory(width=w, length=length)
+                wg.purpose = purpose
                 wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
                 wg.connect(
                     wg_p1,
@@ -494,6 +508,7 @@ def place90(
                 route.length_straights += int(length)
             else:
                 t1 = c << taper_cell
+                t1.purpose = purpose
                 t1.connect(
                     taperp1.name,
                     bend90,
@@ -514,6 +529,7 @@ def place90(
                             - (taperp1.trans.disp - taperp2.trans.disp).length() * 2,
                         ),
                     )
+                    wg.purpose = purpose
                     wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
                     wg.connect(
                         wg_p1.name,
@@ -525,6 +541,7 @@ def place90(
                     )
                     route.instances.append(wg)
                     t2 = c << taper_cell
+                    t2.purpose = purpose
                     t2.connect(
                         taperp2.name,
                         wg,
@@ -536,6 +553,7 @@ def place90(
                     route.length_straights += _l
                 else:
                     t2 = c << taper_cell
+                    t2.purpose = purpose
                     t2.connect(
                         taperp2.name,
                         t1,
@@ -559,6 +577,7 @@ def place90(
             + min_straight_taper
         ):
             wg = c << straight_factory(width=w, length=length)
+            wg.purpose = purpose
             wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
             wg.connect(
                 wg_p1.name,
@@ -574,6 +593,7 @@ def place90(
             route.length_straights += int(length)
         else:
             t1 = c << taper_cell
+            t1.purpose = purpose
             t1.connect(
                 taperp1.name,
                 bend90,
@@ -591,6 +611,7 @@ def place90(
                     width=taperp2.width,
                     length=_l,
                 )
+                wg.purpose = purpose
                 route.instances.append(wg)
                 wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
                 wg.connect(
@@ -602,6 +623,7 @@ def place90(
                     allow_type_mismatch=allow_type_mismatch,
                 )
                 t2 = c << taper_cell
+                t2.purpose = purpose
                 t2.connect(
                     taperp2.name,
                     wg,
@@ -613,6 +635,7 @@ def place90(
                 route.length_straights += int(_l)
             else:
                 t2 = c << taper_cell
+                t2.purpose = purpose
                 t2.connect(
                     taperp2.name,
                     t1,
@@ -762,6 +785,7 @@ def route(
     allow_width_mismatch: bool | None = None,
     allow_layer_mismatch: bool | None = None,
     allow_type_mismatch: bool | None = None,
+    purpose: str | None = "routing",
 ) -> ManhattanRoute:
     """Places a route.
 
@@ -791,6 +815,8 @@ def route(
             (config default: False).
         allow_type_mismatch: If True, the type of the ports is ignored
             (config default: False).
+        purpose: Set the property "purpose" (at id kf.kcell.PROPID.PURPOSE) to the
+            value. Not set if None.
     """
     if allow_width_mismatch is None:
         allow_width_mismatch = config.allow_width_mismatch
@@ -882,11 +908,13 @@ def route(
                 match (p1.trans.angle - vec_angle(vec)) % 4:
                     case 1:
                         bend180 = c << bend180_cell
+                        bend180.purpose = purpose
                         bend180.connect(b180p1.name, p1)
                         start_port = bend180.ports[b180p2.name]
                         pts = pts[1:]
                     case 3:
                         bend180 = c << bend180_cell
+                        bend180.purpose = purpose
                         bend180.connect(b180p2.name, p1)
                         start_port = bend180.ports[b180p1.name]
                         pts = pts[1:]
@@ -894,11 +922,13 @@ def route(
                 match (vec_angle(vec) - p2.trans.angle) % 4:
                     case 1:
                         bend180 = c << bend180_cell
+                        bend180.purpose = purpose
                         bend180.connect(b180p1.name, p2)
                         end_port = bend180.ports[b180p2.name]
                         pts = pts[:-1]
                     case 3:
                         bend180 = c << bend180_cell
+                        bend180.purpose = purpose
                         # bend180.mirror = True
                         bend180.connect(b180p2.name, p2)
                         end_port = bend180.ports[b180p1.name]
@@ -919,6 +949,7 @@ def route(
 
                     if vecp == vec and ang2 - ang1 == 0:
                         bend180 = c << bend180_cell
+                        bend180.purpose = purpose
                         if start_port.name == b180p2.name:
                             bend180.connect(b180p1.name, start_port)
                             start_port = bend180.ports[b180p2.name]
@@ -932,6 +963,7 @@ def route(
                         and (ang3 - ang2) % 4 == 1
                     ):
                         bend180 = c << bend180_cell
+                        bend180.purpose = purpose
                         bend180.transform(
                             kdb.Trans((ang1 + 2) % 4, False, pt2.x, pt2.y)
                             * b180p1.trans.inverted()
@@ -959,6 +991,7 @@ def route(
                         and (ang3 - ang2) % 4 == 3
                     ):
                         bend180 = c << bend180_cell
+                        bend180.purpose = purpose
                         bend180.transform(
                             kdb.Trans((ang1 + 2) % 4, False, pt2.x, pt2.y)
                             * b180p2.trans.inverted()
