@@ -92,6 +92,7 @@ __all__ = [
     "save_layout_options",
     "LayerEnum",
     "KCellParams",
+    "MetaData",
 ]
 
 
@@ -153,8 +154,15 @@ DShapeLike: TypeAlias = (
 ShapeLike: TypeAlias = IShapeLike | DShapeLike | kdb.Shape
 
 MetaData: TypeAlias = (
-    "int | float | bool | str | SerializableShape | None |"
-    " list[MetaData] | tuple[MetaData, ...] | dict[str, MetaData]"
+    int
+    | float
+    | bool
+    | str
+    | SerializableShape
+    | None
+    | list["MetaData"]
+    | tuple["MetaData", ...]
+    | dict[str, "MetaData"]
 )
 
 
