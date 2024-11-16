@@ -3,8 +3,13 @@
 
 # What's Changed
 
+## New
+
+- Add Instance.purpose [#514](https://github.com/gdsfactory/kfactory/pull/514)
+
 ## Bug Fixes
 
+- fix: MetaData type alias and __all__ exports [#516](https://github.com/gdsfactory/kfactory/pull/516)
 - fix str(Port) [#512](https://github.com/gdsfactory/kfactory/pull/512)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.7...v0.21.8
