@@ -153,8 +153,15 @@ DShapeLike: TypeAlias = (
 ShapeLike: TypeAlias = IShapeLike | DShapeLike | kdb.Shape
 
 MetaData: TypeAlias = (
-    "int | float | bool | str | SerializableShape | None |"
-    " list[MetaData] | tuple[MetaData, ...] | dict[str, MetaData]"
+    int
+    | float
+    | bool
+    | str
+    | SerializableShape
+    | None
+    | list["MetaData"]
+    | tuple["MetaData", ...]
+    | dict[str, "MetaData"]
 )
 
 
@@ -921,7 +928,6 @@ class Ports:
             if not keep_mirror:
                 dcplx_trans.mirror = False
             _li = self.kcl.get_info(port.layer)
-            _l = self.kcl.layer(_li)
             if _li is not None and _li.name is not None:
                 _port = Port(
                     kcl=self.kcl,
