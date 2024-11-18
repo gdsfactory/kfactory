@@ -21,6 +21,7 @@ class FillOperator(kdb.TileOutputReceiver):
         top_cell: KCell,
         fill_cell_index: int,
         fc_bbox: kdb.Box,
+        origin: kdb.Point,
         row_step: kdb.Vector,
         column_step: kdb.Vector,
         fill_margin: kdb.Vector = kdb.Vector(0, 0),
@@ -37,6 +38,7 @@ class FillOperator(kdb.TileOutputReceiver):
         self.fill_margin = fill_margin
         self.remaining_polygons = remaining_polygons
         self.multi = multi
+        self.origin = origin
 
     def put(
         self,
@@ -55,6 +57,7 @@ class FillOperator(kdb.TileOutputReceiver):
                 fc_bbox=self.fc_bbox,
                 row_step=self.row_step,
                 column_step=self.column_step,
+                origin=self.origin,
                 remaining_parts=None,
                 fill_margin=kdb.Vector(
                     self.row_step.x - self.fc_bbox.width(),
@@ -70,7 +73,7 @@ class FillOperator(kdb.TileOutputReceiver):
                 fc_bbox=self.fc_bbox,
                 row_step=self.row_step,
                 column_step=self.column_step,
-                origin=self.top_cell.bbox().p1,
+                origin=self.origin,
                 remaining_parts=None,
                 fill_margin=self.fill_margin,
                 remaining_polygons=None,
@@ -183,6 +186,7 @@ def fill_tiled(
             fc_bbox=fc_bbox,
             row_step=_row_step,
             column_step=_col_step,
+            origin=c.bbox().p1,
         ),
     )
 
@@ -238,7 +242,9 @@ def fill_tiled(
                     if regions and layers
                     else regions + layers
                 )
-                + "; var fill_region = _tile & _frame & fill;"
+                + "; var fill_region = _tile.minkowski_sum(Box.new("
+                f"0,0,{fc_bbox.width() - 1},{fc_bbox.height() - 1}))"
+                " & _frame & fill;"
                 " _output(to_fill, fill_region)"
             )
         tp.queue(queue_str)
