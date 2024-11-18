@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- at least partially fix the fill_tiled error [#518](https://github.com/gdsfactory/kfactory/pull/518)
 - fix: MetaData type alias and __all__ exports [#516](https://github.com/gdsfactory/kfactory/pull/516)
 - fix str(Port) [#512](https://github.com/gdsfactory/kfactory/pull/512)
 
