@@ -118,7 +118,10 @@ def fill_tiled(
     if n_threads is None:
         n_threads = config.n_threads
     tp = kdb.TilingProcessor()
-    tp.frame = c.bbox().to_dtype(c.kcl.dbu)  # type: ignore
+    dbb = c.dbbox()
+    for r, ext in fill_regions:
+        dbb += r.bbox().to_dtype(c.kcl.dbu).enlarged(ext)
+    tp.frame = dbb  # type: ignore
     tp.dbu = c.kcl.dbu
     tp.threads = n_threads
 
@@ -186,29 +189,25 @@ def fill_tiled(
     if layer_names or region_names:
         exlayers = " + ".join(
             [
-                layer_name + f".sized({int(size / c.kcl.dbu)})" if size else layer_name
+                layer_name + f".sized({c.kcl.to_dbu(size)})" if size else layer_name
                 for layer_name, (_, size) in zip(exlayer_names, exclude_layers)
             ]
         )
         exregions = " + ".join(
             [
-                region_name + f".sized({int(size / c.kcl.dbu)})"
-                if size
-                else region_name
+                region_name + f".sized({c.kcl.to_dbu(size)})" if size else region_name
                 for region_name, (_, size) in zip(exregion_names, exclude_regions)
             ]
         )
         layers = " + ".join(
             [
-                layer_name + f".sized({int(size / c.kcl.dbu)})" if size else layer_name
+                layer_name + f".sized({c.kcl.to_dbu(size)})" if size else layer_name
                 for layer_name, (_, size) in zip(layer_names, fill_layers)
             ]
         )
         regions = " + ".join(
             [
-                region_name + f".sized({int(size / c.kcl.dbu)})"
-                if size
-                else region_name
+                region_name + f".sized({c.kcl.to_dbu(size)})" if size else region_name
                 for region_name, (_, size) in zip(region_names, fill_regions)
             ]
         )
