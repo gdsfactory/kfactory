@@ -8438,6 +8438,8 @@ def clean_name(name: str) -> str:
         "[": "",
         "]": "",
         " ": "_",
+        "<": "",
+        ">": "",
     }
     for k, v in list(replace_map.items()):
         name = name.replace(k, v)
