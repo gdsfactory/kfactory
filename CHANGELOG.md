@@ -1,5 +1,20 @@
+<a id="v0.21.9"></a>
+# [v0.21.9](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.9) - 2024-11-19
+
+# What's Changed
+
+## Bug Fixes
+
+- clean the name in kf show [#519](https://github.com/gdsfactory/kfactory/pull/519)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.8...v0.21.9
+
+
+[Changes][v0.21.9]
+
+
 <a id="v0.21.8"></a>
-# [v0.21.8](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.8) - 2024-11-13
+# [v0.21.8](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.8) - 2024-11-18
 
 # What's Changed
 
@@ -1307,6 +1322,7 @@
 [Changes][v0.4.0]
 
 
+[v0.21.9]: https://github.com/gdsfactory/kfactory/compare/v0.21.8...v0.21.9
 [v0.21.8]: https://github.com/gdsfactory/kfactory/compare/v0.21.7...v0.21.8
 [v0.21.7]: https://github.com/gdsfactory/kfactory/compare/v0.21.6...v0.21.7
 [v0.21.6]: https://github.com/gdsfactory/kfactory/compare/v0.21.5...v0.21.6
