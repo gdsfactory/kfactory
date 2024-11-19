@@ -1,5 +1,20 @@
-<a id="v0.21.9"></a>
-# [v0.21.9](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.9) - 2024-11-19
+<a id="v0.21.11"></a>
+# [v0.21.11](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.11) - 2024-11-19
+
+# What's Changed
+
+## Bug Fixes
+
+- Remove  loguru catch [#520](https://github.com/gdsfactory/kfactory/pull/520)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.10...v0.21.11
+
+
+[Changes][v0.21.11]
+
+
+<a id="v0.21.10"></a>
+# [v0.21.10](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.10) - 2024-11-19
 
 # What's Changed
 
@@ -7,10 +22,10 @@
 
 - clean the name in kf show [#519](https://github.com/gdsfactory/kfactory/pull/519)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.8...v0.21.9
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.8...v0.21.10
 
 
-[Changes][v0.21.9]
+[Changes][v0.21.10]
 
 
 <a id="v0.21.8"></a>
@@ -1322,7 +1337,8 @@
 [Changes][v0.4.0]
 
 
-[v0.21.9]: https://github.com/gdsfactory/kfactory/compare/v0.21.8...v0.21.9
+[v0.21.11]: https://github.com/gdsfactory/kfactory/compare/v0.21.10...v0.21.11
+[v0.21.10]: https://github.com/gdsfactory/kfactory/compare/v0.21.8...v0.21.10
 [v0.21.8]: https://github.com/gdsfactory/kfactory/compare/v0.21.7...v0.21.8
 [v0.21.7]: https://github.com/gdsfactory/kfactory/compare/v0.21.6...v0.21.7
 [v0.21.6]: https://github.com/gdsfactory/kfactory/compare/v0.21.5...v0.21.6
