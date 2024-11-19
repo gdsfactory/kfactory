@@ -8438,6 +8438,8 @@ def clean_name(name: str) -> str:
         "[": "",
         "]": "",
         " ": "_",
+        "<": "",
+        ">": "",
     }
     for k, v in list(replace_map.items()):
         name = name.replace(k, v)
@@ -8579,14 +8581,14 @@ def show(
             name = "ipython"
         else:  # Normal Python kernel case
             if frame.function != "<module>":
-                name = frame_filename_stem + "_" + frame.function
+                name = clean_name(frame_filename_stem + "_" + frame.function)
             else:
-                name = frame_filename_stem
+                name = clean_name(frame_filename_stem)
     except Exception:
         try:
             from __main__ import __file__ as mf
 
-            name = mf
+            name = clean_name(mf)
         except ImportError:
             name = "shell"
 
