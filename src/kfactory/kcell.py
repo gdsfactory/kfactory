@@ -594,7 +594,6 @@ class PROPID(IntEnum):
 class LockedError(AttributeError):
     """Raised when a locked cell is being modified."""
 
-    @logger.catch(reraise=True)
     def __init__(self, kcell: KCell | VKCell):
         """Throw _locked error."""
         super().__init__(
@@ -611,7 +610,6 @@ class MergeError(ValueError):
 class PortWidthMismatch(ValueError):
     """Error thrown when two ports don't have a matching `width`."""
 
-    @logger.catch(reraise=True)
     def __init__(
         self,
         inst: Instance,
@@ -638,7 +636,6 @@ class PortWidthMismatch(ValueError):
 class PortLayerMismatch(ValueError):
     """Error thrown when two ports don't have a matching `layer`."""
 
-    @logger.catch(reraise=True)
     def __init__(
         self,
         kcl: KCLayout,
@@ -676,7 +673,6 @@ class PortLayerMismatch(ValueError):
 class PortTypeMismatch(ValueError):
     """Error thrown when two ports don't have a matching `port_type`."""
 
-    @logger.catch(reraise=True)
     def __init__(
         self,
         inst: Instance,
@@ -757,7 +753,6 @@ class PortCheck(IntFlag):
     all_overlap = width + port_type + layer
 
 
-@logger.catch(reraise=True)
 def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -> None:
     if checks & PortCheck.opposite:
         assert (
@@ -1299,7 +1294,6 @@ class InstancePorts:
             ports = filter_orientation(ports, orientation)
         return list(ports)
 
-    @logger.catch(reraise=True)
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]
     ) -> Port:
@@ -4391,7 +4385,6 @@ class KCLayout(
                     params.pop(param, None)
                     param_units.pop(param, None)
 
-                @logger.catch(reraise=True, exclude=CellNameError)
                 @cachetools.cached(cache=_cache)
                 @functools.wraps(f)
                 def wrapped_cell(
@@ -4638,7 +4631,6 @@ class KCLayout(
         register_factory: bool = True,
     ) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]: ...
 
-    @logger.catch(reraise=True)
     def vcell(
         self,
         _func: Callable[KCellParams, VKCell] | None = None,

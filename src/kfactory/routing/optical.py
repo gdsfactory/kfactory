@@ -765,7 +765,6 @@ def route_loopback(
     )
 
 
-@logger.catch(reraise=True)
 def route(
     c: KCell,
     p1: Port,
