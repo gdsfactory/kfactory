@@ -4,10 +4,8 @@ from conftest import Layers
 
 def test_tiled_fill_space(fill_cell: kf.KCell, LAYER: Layers) -> None:
     c = kf.KCell()
-    c.shapes(kf.kcl.find_layer(1, 0)).insert(
-        kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512)
-    )
-    c.shapes(kf.kcl.find_layer(10, 0)).insert(
+    c.shapes(LAYER.WG).insert(kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512))
+    c.shapes(LAYER.WGCLAD).insert(
         kf.kdb.DPolygon(
             [kf.kdb.DPoint(0, 0), kf.kdb.DPoint(5000, 0), kf.kdb.DPoint(5000, 3000)]
         )
@@ -28,10 +26,8 @@ def test_tiled_fill_space(fill_cell: kf.KCell, LAYER: Layers) -> None:
 
 def test_tiled_fill_vector(fill_cell: kf.KCell, LAYER: Layers) -> None:
     c = kf.KCell()
-    c.shapes(kf.kcl.find_layer(1, 0)).insert(
-        kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512)
-    )
-    c.shapes(kf.kcl.find_layer(10, 0)).insert(
+    c.shapes(LAYER.WG).insert(kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512))
+    c.shapes(LAYER.WGCLAD).insert(
         kf.kdb.DPolygon(
             [kf.kdb.DPoint(0, 0), kf.kdb.DPoint(5000, 0), kf.kdb.DPoint(5000, 3000)]
         )
@@ -48,7 +44,7 @@ def test_tiled_fill_vector(fill_cell: kf.KCell, LAYER: Layers) -> None:
 
     poly.insert_hole(kf.kdb.DBox(-1800, -200, -1200, 200))
 
-    c.shapes(kf.kcl.find_layer(10, 0)).insert(poly)
+    c.shapes(LAYER.WGEXCLUDE).insert(poly)
     kf.utils.fill_tiled(
         c,
         fill_cell,
