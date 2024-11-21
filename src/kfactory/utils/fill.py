@@ -39,6 +39,14 @@ class FillOperator(kdb.TileOutputReceiver):
         self.remaining_polygons = remaining_polygons
         self.multi = multi
         self.origin = origin
+        self.filled_cells: list[kdb.Cell] = []
+        self.temp_ly = kdb.Layout()
+        self.temp_tc = self.temp_ly.cell(top_cell.name)
+        fc = kcl.layout.cell(fill_cell_index)
+        self.temp_fc = self.temp_ly.cell(fc.name)
+        self.temp_fc_ind = self.temp_fc.cell_index()
+        self.temp_fc.copy_shapes(fc)
+        self.temp_ly.start_changes()
 
     def put(
         self,
@@ -51,14 +59,12 @@ class FillOperator(kdb.TileOutputReceiver):
     ) -> None:
         """Called by the TilingProcessor."""
         if self.multi:
-            self.top_cell.fill_region_multi(
+            self.temp_tc.fill_region_multi(
                 region=region,
-                fill_cell_index=self.fill_cell_index,
+                fill_cell_index=self.temp_fc_ind,
                 fc_bbox=self.fc_bbox,
                 row_step=self.row_step,
                 column_step=self.column_step,
-                origin=self.origin,
-                remaining_parts=None,
                 fill_margin=kdb.Vector(
                     self.row_step.x - self.fc_bbox.width(),
                     self.column_step.y - self.fc_bbox.height(),
@@ -67,9 +73,9 @@ class FillOperator(kdb.TileOutputReceiver):
                 glue_box=tile,
             )
         else:
-            self.top_cell.fill_region(
+            self.temp_tc.fill_region(
                 region=region,
-                fill_cell_index=self.fill_cell_index,
+                fill_cell_index=self.temp_fc_ind,
                 fc_bbox=self.fc_bbox,
                 row_step=self.row_step,
                 column_step=self.column_step,
@@ -79,6 +85,14 @@ class FillOperator(kdb.TileOutputReceiver):
                 remaining_polygons=None,
                 glue_box=tile,
             )
+
+    def insert_fill(self) -> None:
+        """Insert fill cell into the regions."""
+        self.temp_ly.end_changes()
+        for inst in self.temp_tc.each_inst():
+            cell_inst_array = inst.cell_inst
+            cell_inst_array.cell_index = self.fill_cell_index
+            self.top_cell.insert(cell_inst_array)
 
 
 def fill_tiled(
@@ -177,17 +191,18 @@ def fill_tiled(
     else:
         _col_step = c.kcl.to_dbu(col_step)
     fc_bbox = fill_cell.bbox()
+    operator = FillOperator(
+        c.kcl,
+        c,
+        fill_cell.cell_index(),
+        fc_bbox=fc_bbox,
+        row_step=_row_step,
+        column_step=_col_step,
+        origin=c.bbox().p1,
+    )
     tp.output(
         "to_fill",
-        FillOperator(
-            c.kcl,
-            c,
-            fill_cell.cell_index(),
-            fc_bbox=fc_bbox,
-            row_step=_row_step,
-            column_step=_col_step,
-            origin=c.bbox().p1,
-        ),
+        operator,
     )
 
     if layer_names or region_names:
@@ -255,6 +270,7 @@ def fill_tiled(
             )
             logger.debug("fill string: '{}'", queue_str)
             tp.execute(f"Fill {c.name}")
-            logger.info("done with filling {}", c.name)
+            logger.info("done with calculating fill regions for {}", c.name)
+            operator.insert_fill()
         finally:
             c.kcl.end_changes()
