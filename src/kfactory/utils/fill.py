@@ -41,9 +41,9 @@ class FillOperator(kdb.TileOutputReceiver):
         self.origin = origin
         self.filled_cells: list[kdb.Cell] = []
         self.temp_ly = kdb.Layout()
-        self.temp_tc = self.temp_ly.cell(top_cell.name)
+        self.temp_tc = self.temp_ly.create_cell(top_cell.name)
         fc = kcl.layout.cell(fill_cell_index)
-        self.temp_fc = self.temp_ly.cell(fc.name)
+        self.temp_fc = self.temp_ly.create_cell(fc.name)
         self.temp_fc_ind = self.temp_fc.cell_index()
         self.temp_fc.copy_shapes(fc)
         self.temp_ly.start_changes()
