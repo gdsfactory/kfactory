@@ -1,3 +1,18 @@
+<a id="v0.21.12"></a>
+# [v0.21.12](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.12) - 2024-11-21
+
+# What's Changed
+
+## Bug Fixes
+
+- Fix fill_tiled segfault [#521](https://github.com/gdsfactory/kfactory/pull/521)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.11...v0.21.12
+
+
+[Changes][v0.21.12]
+
+
 <a id="v0.21.11"></a>
 # [v0.21.11](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.11) - 2024-11-19
 
@@ -1337,6 +1352,7 @@
 [Changes][v0.4.0]
 
 
+[v0.21.12]: https://github.com/gdsfactory/kfactory/compare/v0.21.11...v0.21.12
 [v0.21.11]: https://github.com/gdsfactory/kfactory/compare/v0.21.10...v0.21.11
 [v0.21.10]: https://github.com/gdsfactory/kfactory/compare/v0.21.8...v0.21.10
 [v0.21.8]: https://github.com/gdsfactory/kfactory/compare/v0.21.7...v0.21.8
