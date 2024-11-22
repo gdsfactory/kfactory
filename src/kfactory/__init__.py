@@ -36,10 +36,9 @@ from .kcell import (
     show,
 )
 from . import (
-    cells,
     enclosure,
     kf_types,
-    packing,
+    # packing,
     placer,
     port,
     routing,
@@ -51,6 +50,15 @@ from .enclosure import LayerEnclosure, KCellEnclosure
 from .grid import flexgrid_dbu, flexgrid, grid_dbu, grid
 
 from aenum import constant  # type: ignore[import-untyped,unused-ignore]
+from types import ModuleType
+
+import importlib
+
+
+def __getattr__(name: str) -> ModuleType | None:
+    if name in ["packing", "cells"]:
+        return importlib.import_module("." + name, __name__)
+    raise AttributeError()
 
 
 __all__ = [
@@ -71,7 +79,6 @@ __all__ = [
     "VInstance",
     "VKCell",
     "cell",
-    "cells",
     "config",
     "constant",
     "dpolygon_from_array",
@@ -84,7 +91,6 @@ __all__ = [
     "kdb",
     "lay",
     "logger",
-    "packing",
     "placer",
     "polygon_from_array",
     "port",
