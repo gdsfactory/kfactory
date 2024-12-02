@@ -4234,6 +4234,102 @@ class KCLayout(
         """Convert Shapes or values in dbu to DShapes or floats in um."""
         return kdb.CplxTrans(self.layout.dbu).inverted() * other
 
+    def pcell(
+        self,
+        _func: KCellFunc[KCellParams, None],
+    ) -> kdb.PCellDeclarationHelper:
+        """Decorator to cache and auto name the cell.
+
+        This will use `functools.cache` to cache the function call.
+        Additionally, if enabled this will set the name and from the args/kwargs of the
+        function and also paste them into a settings dictionary of the
+        [KCell][kfactory.kcell.KCell].
+
+        Args:
+            set_settings: Copy the args & kwargs into the settings dictionary
+            set_name: Auto create the name of the cell to the functionname plus a
+                string created from the args/kwargs
+            check_ports: Check uniqueness of port names.
+            check_instances: Check for any complex instances. A complex instance is a an
+                instance that has a magnification != 1 or non-90° rotation.
+                Depending on the setting, an error is raised, the cell is flattened,
+                a VInstance is created instead of a regular instance, or they are
+                ignored.
+            snap_ports: Snap the centers of the ports onto the grid
+                (only x/y, not angle).
+            add_port_layers: Add special layers of
+                [netlist_layer_mapping][kfactory.kcell.KCLayout.netlist_layer_mapping]
+                to the ports if the port layer is in the mapping.
+            cache: Provide a user defined cache instead of an internal one. This
+                can be used for example to clear the cache.
+                expensive if the cell is called often).
+            basename: Overwrite the name normally inferred from the function or class
+                name.
+            drop_params: Drop these parameters before writing the
+                [settings][kfactory.kcell.KCell.settings]
+            register_factory: Register the resulting KCell-function to the
+                [factories][kfactory.kcell.KCLayout.factories]
+            layout_cache: If true, treat the layout like a cache, if a cell with the
+                same name exists already, pick that one instead of using running the
+                function. This only works if `set_name` is true. Can be globally
+                configured through `config.cell_layout_cache`.
+            overwrite_existing: If cells were created with the same name, delete other
+                cells with the same name. Can be globally configured through
+                `config.cell_overwrite_existing`.
+            info: Additional metadata to put into info attribute.
+            post_process: List of functions to call after the cell has been created.
+            debug_names: Check on setting the name whether a cell with this name already
+                exists.
+            tags: Tag cell functions with user defined tags. With this, cell functions
+                can then be retrieved with `kcl.factories.tags[my_tag]` or if filtered
+                for multiple `kcl.factories.for_tags([my_tag1, my_tag2, ...])`.
+        """
+        sig = inspect.signature(_func)
+        params: dict[str, KCellParams.kwargs | KCellParams.args] = {
+            p.name: (p.annotation, p.default)
+            for k, p in sig.parameters.items()
+            if p.name != "self"
+        }
+
+        class KPCell(kdb.PCellDeclarationHelper):
+            def __init__(self) -> None:
+                kdb.PCellDeclarationHelper.__init__(self)
+                for name, (_type, default) in params.items():
+                    _t = get_origin(_type)
+                    if _t is None:
+                        _t = _type
+                    if _t is float:
+                        t = self.TypeDouble
+                    elif _t is int:
+                        t = self.TypeInt
+                    elif _t is bool:
+                        t = self.TypeBoolean
+                    elif _t is list:
+                        t = self.TypeList
+                    elif _t is str:
+                        t = self.TypeString
+                    elif _t is kdb.Shape:
+                        t = self.TypeShape
+                    elif _t is None:
+                        t = self.TypeNone
+                    else:
+                        raise AttributeError(f"Unsupported type {_type!r}")
+                    self.param(
+                        name,
+                        t,
+                        "",
+                        default=default
+                        if default is not inspect.Parameter.empty
+                        else None,
+                    )
+
+            def produce_impl(self) -> None:
+                _func(self, **{name: getattr(self, name) for name in params.keys()})
+
+        self.register_pcell(_func.__name__, KPCell())
+
+        return KPCell
+
     @overload
     def cell(
         self,
