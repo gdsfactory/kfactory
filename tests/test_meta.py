@@ -139,7 +139,7 @@ def test_metainfo_read_cell(straight: kf.KCell) -> None:
 
 def test_nometainfo_read(straight: kf.KCell) -> None:
     """Test whether we can turn of metadata writing."""
-    with NamedTemporaryFile("a") as t:
+    with NamedTemporaryFile("a", suffix=".oas") as t:
         # save = kf.save_layout_options()
         # save.write_context_info = True
         straight.kcl.write(t.name, kf.save_layout_options(write_context_info=False))
@@ -173,7 +173,7 @@ def test_info_dump() -> None:
     assert c.info == c.info.model_copy()
     assert c.settings == c.settings.model_copy()
 
-    with NamedTemporaryFile("a") as t:
+    with NamedTemporaryFile("a", suffix=".oas") as t:
         # save = kf.save_layout_options()
         # save.write_context_info = True
         c.kcl.write(t.name)
