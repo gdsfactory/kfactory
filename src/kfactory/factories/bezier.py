@@ -42,7 +42,7 @@ class BezierKCell(Protocol):
 
 
 def bezier_curve(
-    t: nty.NDArray[np.float64],
+    t: nty.NDArray[np.floating[Any]],
     control_points: Sequence[tuple[np.float64 | float, np.float64 | float]],
 ) -> list[kdb.DPoint]:
     """Calculates the backbone of a bezier bend."""
