@@ -2346,6 +2346,7 @@ class KCell:
         save_options: kdb.SaveLayoutOptions = save_layout_options(),
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
+        autoformat_from_file: bool = True,
     ) -> None:
         """Write a KCell to a GDS.
 
@@ -5196,30 +5197,13 @@ class KCLayout(
                 )
             )
 
-    @overload
-    def write(self, filename: str | Path) -> None: ...
-
-    @overload
-    def write(
-        self,
-        filename: str | Path,
-        options: kdb.SaveLayoutOptions,
-    ) -> None: ...
-
-    @overload
     def write(
         self,
         filename: str | Path,
         options: kdb.SaveLayoutOptions = save_layout_options(),
-        set_meta: bool = True,
-    ) -> None: ...
-
-    def write(
-        self,
-        filename: str | Path,
-        options: kdb.SaveLayoutOptions = save_layout_options(),
-        set_meta: bool = True,
+        set_meta_data: bool = True,
         convert_external_cells: bool = False,
+        autoformat_from_file_extension: bool = True,
     ) -> None:
         """Write a GDS file into the existing Layout.
 
@@ -5228,13 +5212,17 @@ class KCLayout(
             options: KLayout options to load from the GDS. Can determine how merge
                 conflicts are handled for example. See
                 https://www.klayout.de/doc-qt5/code/class_LoadLayoutOptions.html
-            set_meta: Make sure all the cells have their metadata set
+            set_meta_data: Make sure all the cells have their metadata set
             convert_external_cells: Whether to make KCells not in this KCLayout to
-
+            autoformat_from_file_extension: Set the format of the output file
+                automatically from the file extension of `filename`. This is necessary
+                for the options. If not set, this will default to `GDSII`.
         """
+        if isinstance(filename, Path):
+            filename = str(filename.resolve())
         for kc in list(self.kcells.values()):
             kc.insert_vinsts()
-        match (set_meta, convert_external_cells):
+        match (set_meta_data, convert_external_cells):
             case (True, True):
                 self.set_meta_data()
                 for kcell in self.kcells.values():
@@ -5252,7 +5240,10 @@ class KCLayout(
                     if kcell.is_library_cell() and not kcell._destroyed():
                         kcell.convert_to_static(recursive=True)
 
-        return self.layout.write(str(filename), options)
+        if autoformat_from_file_extension:
+            options.set_format_from_filename(filename)
+
+        return self.layout.write(filename, options)
 
     def top_kcells(self) -> list[KCell]:
         """Return the top KCells."""
