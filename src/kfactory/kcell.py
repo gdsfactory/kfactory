@@ -5570,7 +5570,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
 
     @ports.setter
     def ports(self, new_ports: InstancePorts | Ports) -> None:
-        if not self._locked:
+        if self._locked:
             raise LockedError(self)
         self._ports = new_ports.copy()
 
