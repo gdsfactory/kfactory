@@ -13,13 +13,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
           cache: "pip"
           cache-dependency-path: pyproject.toml
       - name: setup-mypy
         run: |
-          python -m pip install wheel
-          python -m pip install -U --upgrade-strategy eager -e .[ci] mypy
+          python -m pip install uv wheel
+          uv pip install --system -U -e .[ci] mypy
           mypy -p kfactory
           mypy --install-types --non-interactive
       - uses: pre-commit/action@v3.0.1
@@ -32,6 +32,7 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
       - uses: actions/checkout@v4
@@ -45,8 +46,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          python -m pip install wheel
-          python -m pip install -e .[ci] pytest
+          python -m pip install wheel uv
+          uv pip install --system -e .[ci] pytest
           make gds-download
       - name: Test with pytest
         env:
@@ -58,7 +59,7 @@ jobs:
       max-parallel: 12
       matrix:
         python-version:
-          - "3.12"
+          - "3.13"
         os: [ubuntu-latest]
 
     steps:
@@ -72,8 +73,8 @@ jobs:
           activate-environment: anaconda-client-env
       - name: Install dependencies
         run: |
-          python -m pip install --user -U pip wheel
-          python -m pip install --user -e .[docs,ci]
+          python -m pip install --user -U uv wheel
+          uv pip install --system -e .[docs,ci]
           python -m ipykernel install --user --name python3
           make install
       - name: Test documentation
