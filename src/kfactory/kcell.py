@@ -4399,7 +4399,7 @@ class KCLayout(
                     **params: KCellParams.args | KCellParams.kwargs,
                 ) -> KC:
                     for key, value in params.items():
-                        if isinstance(value, frozenset | DecoratorList):
+                        if isinstance(value, DecoratorDict | DecoratorList):
                             params[key] = _hashable_to_original(value)
 
                     if set_name:
@@ -4731,7 +4731,7 @@ class KCLayout(
                     **params: KCellParams.args,
                 ) -> VKCell:
                     for key, value in params.items():
-                        if isinstance(value, frozenset | DecoratorList):
+                        if isinstance(value, DecoratorDict | DecoratorList):
                             params[key] = _hashable_to_original(value)
                     cell = f(**params)  # type: ignore[call-arg]
                     if cell._locked:
@@ -5577,7 +5577,7 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
 
     @ports.setter
     def ports(self, new_ports: InstancePorts | Ports) -> None:
-        if not self._locked:
+        if self._locked:
             raise LockedError(self)
         self._ports = new_ports.copy()
 
@@ -8246,18 +8246,13 @@ class DecoratorList(UserList[Any]):
         return hash(tuple(self.data))
 
 
-def dict_to_frozenset(d: dict[str, Any]) -> frozenset[tuple[str, Any]]:
-    """Convert a `dict` to a `frozenset`."""
-    return frozenset(d.items())
-
-
-def frozenset_to_dict(fs: frozenset[tuple[str, Hashable]]) -> dict[str, Hashable]:
-    """Convert `frozenset` to `dict`."""
-    return dict(fs)
+class DecoratorDict(UserDict[Hashable, Any]):
+    def __hash__(self) -> int:
+        return hash(tuple(sorted(self.data.items())))
 
 
 @overload
-def _to_hashable(d: dict[str, Any]) -> frozenset[tuple[str, Any]]: ...
+def _to_hashable(d: dict[Hashable, Any]) -> DecoratorDict: ...
 
 
 @overload
@@ -8265,18 +8260,18 @@ def _to_hashable(d: list[Any]) -> DecoratorList: ...
 
 
 def _to_hashable(
-    d: dict[str, Any] | list[Any],
-) -> frozenset[tuple[str, Any]] | DecoratorList:
-    """Convert a `dict` to a `frozenset`."""
+    d: dict[Hashable, Any] | list[Any],
+) -> DecoratorDict | DecoratorList:
+    """Convert a `dict` to a `DecoratorDict`."""
     if isinstance(d, dict):
-        frozen_dict: dict[str, Any] = {}
-        for item, value in d.items():
+        ud = DecoratorDict()
+        for item, value in sorted(d.items()):
             if isinstance(value, dict | list):
                 _value: Any = _to_hashable(value)
             else:
                 _value = value
-            frozen_dict[item] = _value
-        return frozenset(frozen_dict.items())
+            ud[item] = _value
+        return ud
     else:
         ul = DecoratorList([])
         for index, value in enumerate(d):
@@ -8289,34 +8284,34 @@ def _to_hashable(
 
 
 @overload
-def _hashable_to_original(fs: frozenset[tuple[str, Any]]) -> dict[str, Any]: ...
+def _hashable_to_original(udl: DecoratorDict) -> dict[Hashable, Any]: ...
 
 
 @overload
-def _hashable_to_original(fs: DecoratorList) -> list[Any]: ...
+def _hashable_to_original(udl: DecoratorList) -> list[Hashable]: ...
+
+
+@overload
+def _hashable_to_original(udl: Any) -> Any: ...
 
 
 def _hashable_to_original(
-    fs: frozenset[tuple[str, Any]] | DecoratorList,
-) -> dict[str, Any] | list[Any]:
-    """Convert `frozenset` to `dict`."""
-    if isinstance(fs, frozenset):
-        d: dict[str, Any] = {}
-        for k, v in fs:
-            if isinstance(v, frozenset | DecoratorList):
-                _v: Any = _hashable_to_original(v)
-            else:
-                _v = v
-            d[k] = _v
-        return d
-    else:
+    udl: DecoratorDict | DecoratorList | Any,
+) -> dict[str, Any] | list[Any] | Any:
+    """Convert `DecoratorDict` to `dict`."""
+    if isinstance(udl, DecoratorDict):
+        for item, value in udl.items():
+            udl[item] = _hashable_to_original(value)
+        return udl.data
+    elif isinstance(udl, DecoratorList):
         _list = []
-        for v in fs:
-            if isinstance(v, frozenset | DecoratorList):
+        for v in udl:
+            if isinstance(v, DecoratorDict | DecoratorList):
                 _list.append(_hashable_to_original(v))
             else:
                 _list.append(v)
         return _list
+    return udl
 
 
 def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
