@@ -145,11 +145,15 @@ def grid_dbu(
             x0 = 0
         return insts
     else:
-        _kcells: list[KCell | None]
+        _kcells: Sequence[KCell | None]
         if isinstance(kcells[0], KCell):
-            _kcells = kcells  # type:ignore[assignment]
+            _kcells = cast(Sequence[KCell | None], kcells)
         else:
-            _kcells = [kcell for array in kcells for kcell in array]  # type: ignore[union-attr]
+            _kcells = [
+                kcell
+                for array in cast(Sequence[Sequence[KCell | None]], kcells)
+                for kcell in array
+            ]
 
         if len(_kcells) > shape[0] * shape[1]:
             raise ValueError(
@@ -364,11 +368,15 @@ def flexgrid_dbu(
             x0 = 0
         return insts
     else:
-        _kcells: list[KCell | None]
+        _kcells: Sequence[KCell | None]
         if isinstance(kcells[0], KCell):
-            _kcells = kcells  # type:ignore[assignment]
+            _kcells = cast(Sequence[KCell | None], kcells)
         else:
-            _kcells = [kcell for array in kcells for kcell in array]  # type: ignore[union-attr]
+            _kcells = [
+                kcell
+                for array in cast(Sequence[Sequence[KCell | None]], kcells)
+                for kcell in array
+            ]
 
         if len(_kcells) > shape[0] * shape[1]:
             raise ValueError(
@@ -586,11 +594,15 @@ def grid(
             x0 = 0
         return insts
     else:
-        _kcells: list[KCell | None]
+        _kcells: Sequence[KCell | None]
         if isinstance(kcells[0], KCell):
-            _kcells = kcells  # type:ignore[assignment]
+            _kcells = cast(Sequence[KCell | None], kcells)
         else:
-            _kcells = [kcell for array in kcells for kcell in array]  # type: ignore[union-attr]
+            _kcells = [
+                kcell
+                for array in cast(Sequence[Sequence[KCell | None]], kcells)
+                for kcell in array
+            ]
 
         if len(_kcells) > shape[0] * shape[1]:
             raise ValueError(
@@ -808,11 +820,15 @@ def flexgrid(
             x0 = 0
         return insts
     else:
-        _kcells: list[KCell | None]
+        _kcells: Sequence[KCell | None]
         if isinstance(kcells[0], KCell):
-            _kcells = kcells  # type:ignore[assignment]
+            _kcells = cast(Sequence[KCell | None], kcells)
         else:
-            _kcells = [kcell for array in kcells for kcell in array]  # type: ignore[union-attr]
+            _kcells = [
+                kcell
+                for array in cast(Sequence[Sequence[KCell | None]], kcells)
+                for kcell in array
+            ]
 
         if len(_kcells) > shape[0] * shape[1]:
             raise ValueError(
