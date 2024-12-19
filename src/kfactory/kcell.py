@@ -3630,11 +3630,18 @@ class KCell:
 
         return db
 
-    def insert_vinsts(self) -> None:
+    def insert_vinsts(self, recursive: bool = True) -> None:
         """Insert all virtual instances and create Instances of real KCells."""
         for vi in self.vinsts:
             vi.insert_into(self)
         self.vinsts.clear()
+        for c in sorted(
+            set(self.kcl[ci] for ci in self.called_cells()) & self.kcl.kcells.keys(),
+            key=lambda c: c.hierarchy_levels(),
+        ):
+            for vi in c.vinsts:
+                vi.insert_into(c)
+            c.vinsts.clear()
 
     def create_vinst(self, cell: VKCell | KCell) -> VInstance:
         """Insert the KCell as a VInstance into a VKCell or KCell."""
@@ -4513,7 +4520,7 @@ class KCLayout(
                                     )
                                     vinst.trans = inst.dcplx_trans
                                     inst.delete()
-                    cell.insert_vinsts()
+                    cell.insert_vinsts(recursive=False)
                     if snap_ports:
                         for port in cell.ports:
                             if port._dcplx_trans:

@@ -9,7 +9,7 @@ from typing import Any, Literal, Protocol, cast
 from pydantic import BaseModel, Field
 
 from .. import kdb, rdb
-from ..conf import config
+from ..conf import config, logger
 from ..kcell import Instance, KCell, Port
 from ..kf_types import dbu
 from .manhattan import (
@@ -26,6 +26,10 @@ __all__ = [
     "get_radius",
     "route_bundle",
 ]
+
+
+class PlacerError(ValueError):
+    pass
 
 
 class PlacerFunction(Protocol):
@@ -279,6 +283,7 @@ def route_bundle(
     route_width: dbu | list[dbu] | None = None,
     sort_ports: bool = False,
     on_collision: Literal["error", "show_error"] | None = "show_error",
+    on_placer_error: Literal["error", "show_error"] | None = "show_error",
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     routing_function: ManhattanBundleRoutingFunction = route_smart,
     routing_kwargs: dict[str, Any] = {"bbox_routing": "minimal"},
@@ -347,6 +352,10 @@ def route_bundle(
         on_collision: Define what to do on routing collision. Default behaviour is to
             open send the layout of c to klive and open an error lyrdb with the
             collisions. "error" will simply raise an error. None will ignore any error.
+        on_placer_error: If a placing of the components fails, use the strategy above to
+            handle the error. show_error will visualize it in klayout with the intended
+            route along the already placed parts of c. Error will just throw an error.
+            None will ignore the error.
         bboxes: List of boxes to consider. Currently only boxes overlapping ports will
             be considered.
         route_width: Width of the route. If None, the width of the ports is used.
@@ -478,16 +487,49 @@ def route_bundle(
             routers=routers,
             **router_post_process_kwargs,
         )
+    placer_errors: list[Exception] = []
+    error_routes: list[tuple[Port, Port, list[kdb.Point], int]] = []
     for router, ps, pe in zip(routers, start_ports, end_ports):
-        routes.append(
-            placer_function(
+        try:
+            route = placer_function(
                 c,
                 ps,
                 pe,
                 router.start.pts,
                 **placer_kwargs,
             )
+            routes.append(route)
+        except Exception as e:
+            placer_errors.append(e)
+            error_routes.append((ps, pe, router.start.pts, router.width))
+    if placer_errors and on_placer_error == "show_error":
+        print(len(placer_errors))
+        db = rdb.ReportDatabase("Route Placing Errors")
+        cell = db.create_cell(
+            c.name
+            if not c.name.startswith("Unnamed_")
+            else c.kcl.future_cell_name or c.name
         )
+        for error, (ps, pe, pts, width) in zip(placer_errors, error_routes):
+            cat = db.create_category(f"{ps.name} - {pe.name}")
+            it = db.create_item(cell=cell, category=cat)
+            it.add_value(
+                f"Error while trying to place route from {ps.name} to {pe.name} at"
+                f" points (dbu): {pts}"
+            )
+            it.add_value(f"Exception: {error}")
+            path = kdb.Path(pts, width or ps.width)
+            print(f"{width=}")
+            it.add_value(c.kcl.to_um(path.polygon()))
+        c.show(lyrdb=db)
+    if placer_errors and on_placer_error is not None:
+        for error in placer_errors:
+            logger.error(error)
+        raise PlacerError(
+            "Failed to place routes for bundle routing from "
+            f"{[p.name for p in start_ports]} to {[p.name for p in end_ports]}"
+        )
+
     check_collisions(
         c=c,
         start_ports=start_ports,

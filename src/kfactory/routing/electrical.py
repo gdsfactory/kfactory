@@ -146,6 +146,7 @@ def route_bundle(
     sort_ports: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
+    on_placer_error: Literal["error", "show_error"] | None = "show_error",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
@@ -224,6 +225,10 @@ def route_bundle(
         on_collision: Define what to do on routing collision. Default behaviour is to
             open send the layout of c to klive and open an error lyrdb with the
             collisions. "error" will simply raise an error. None will ignore any error.
+        on_placer_error: If a placing of the components fails, use the strategy above to
+            handle the error. show_error will visualize it in klayout with the intended
+            route along the already placed parts of c. Error will just throw an error.
+            None will ignore the error.
         waypoints: Bundle the ports and route them with minimal separation through
             the waypoints. The waypoints can either be a list of at least two points
             or a single transformation. If it's a transformation, the points will be
@@ -251,8 +256,12 @@ def route_bundle(
             "waypoints": waypoints,
         },
         placer_function=place_single_wire,
+        placer_kwargs={
+            "route_width": route_width,
+        },
         sort_ports=sort_ports,
         on_collision=on_collision,
+        on_placer_error=on_placer_error,
         collision_check_layers=collision_check_layers,
         start_angles=start_angles,
         end_angles=end_angles,
@@ -264,8 +273,8 @@ def route_bundle_dual_rails(
     start_ports: list[Port],
     end_ports: list[Port],
     separation: dbu,
-    start_straights: dbu | list[dbu] = 0,
-    end_straights: dbu | list[dbu] = 0,
+    start_straights: dbu | list[dbu] | None = None,
+    end_straights: dbu | list[dbu] | None = None,
     place_layer: kdb.LayerInfo | None = None,
     width_rails: dbu | None = None,
     separation_rails: dbu | None = None,
@@ -274,6 +283,7 @@ def route_bundle_dual_rails(
     sort_ports: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
+    on_placer_error: Literal["error", "show_error"] | None = "show_error",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
@@ -353,6 +363,10 @@ def route_bundle_dual_rails(
         on_collision: Define what to do on routing collision. Default behaviour is to
             open send the layout of c to klive and open an error lyrdb with the
             collisions. "error" will simply raise an error. None will ignore any error.
+        on_placer_error: If a placing of the components fails, use the strategy above to
+            handle the error. show_error will visualize it in klayout with the intended
+            route along the already placed parts of c. Error will just throw an error.
+            None will ignore the error.
         waypoints: Bundle the ports and route them with minimal separation through
             the waypoints. The waypoints can either be a list of at least two points
             or a single transformation. If it's a transformation, the points will be
@@ -388,9 +402,11 @@ def route_bundle_dual_rails(
         placer_function=place_dual_rails,
         placer_kwargs={
             "separation_rails": separation_rails,
+            "route_width": width_rails,
         },
         sort_ports=sort_ports,
         on_collision=on_collision,
+        on_placer_error=on_placer_error,
         collision_check_layers=collision_check_layers,
         start_angles=start_angles,
         end_angles=end_angles,

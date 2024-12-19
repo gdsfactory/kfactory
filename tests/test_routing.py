@@ -633,7 +633,7 @@ def test_route_smart_waypoints_pts(
 def test_route_generic_reorient(
     bend90_small: kf.KCell, straight_factory_dbu: Callable[..., kf.KCell], LAYER: Layers
 ) -> None:
-    c = kf.KCell()
+    c = kf.KCell("test_route_generic_reorient")
 
     start_ports = [
         c.create_port(
@@ -670,3 +670,54 @@ def test_route_generic_reorient(
         start_angles=start_angles,
         end_angles=end_angles,
     )
+
+
+def test_placer_error(
+    bend90_small: kf.KCell, straight_factory_dbu: Callable[..., kf.KCell], LAYER: Layers
+) -> None:
+    c = kf.KCell("test_placer_error")
+
+    ps = kf.Port(name="start", width=500, layer_info=LAYER.WG, trans=kf.kdb.Trans.R0)
+    pe = kf.Port(
+        name="end",
+        width=500,
+        layer_info=LAYER.WG,
+        trans=kf.kdb.Trans(2, False, 200_000, 0),
+    )
+    ps2 = kf.Port(
+        name="start2", width=500, layer_info=LAYER.WG, trans=kf.kdb.Trans(0, 5_000)
+    )
+    pe2 = kf.Port(
+        name="end2",
+        width=500,
+        layer_info=LAYER.WG,
+        trans=kf.kdb.Trans(2, False, 200_000, 5_000),
+    )
+    ps3 = kf.Port(
+        name="start3", width=500, layer_info=LAYER.WG, trans=kf.kdb.Trans(0, 10_000)
+    )
+    pe3 = kf.Port(
+        name="end3",
+        width=500,
+        layer_info=LAYER.WG,
+        trans=kf.kdb.Trans(2, False, 200_000, 10_000),
+    )
+
+    with pytest.raises(kf.routing.generic.PlacerError):
+        kf.routing.optical.route_bundle(
+            c,
+            start_ports=[ps3, ps2, ps],
+            end_ports=[pe3, pe2, pe],
+            waypoints=[
+                kf.kdb.Point(50_000, 5_000),
+                kf.kdb.Point(55_000, 5_000),
+                kf.kdb.Point(55_000, 15_000),
+                kf.kdb.Point(60_000, 15_000),
+                kf.kdb.Point(60_000, 5_000),
+                kf.kdb.Point(65_000, 5_000),
+            ],
+            separation=5_000,
+            straight_factory=straight_factory_dbu,
+            bend90_cell=bend90_small,
+            on_placer_error="error",
+        )
