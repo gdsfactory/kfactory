@@ -16,13 +16,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.13"
           cache: "pip"
           cache-dependency-path: pyproject.toml
       - name: Installing the library
         shell: bash -l {0}
         run: |
-          pip install -e .[ci,docs]
+          python -m pip install uv
+          uv pip install -e .[ci,docs]
           export KFACTORY_DISPLAY_TYPE="image"
           make docs
       - uses: actions/upload-pages-artifact@v3
