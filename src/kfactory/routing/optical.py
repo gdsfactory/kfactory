@@ -50,6 +50,7 @@ def route_bundle(
     place_allow_small_routes: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
+    on_placer_error: Literal["error", "show_error"] | None = "show_error",
     bboxes: list[kdb.Box] = [],
     allow_width_mismatch: bool | None = None,
     allow_layer_mismatch: bool | None = None,
@@ -130,6 +131,10 @@ def route_bundle(
         on_collision: Define what to do on routing collision. Default behaviour is to
             open send the layout of c to klive and open an error lyrdb with the
             collisions. "error" will simply raise an error. None will ignore any error.
+        on_placer_error: If a placing of the components fails, use the strategy above to
+            handle the error. show_error will visualize it in klayout with the intended
+            route along the already placed parts of c. Error will just throw an error.
+            None will ignore the error.
         bboxes: List of boxes to consider. Currently only boxes overlapping ports will
             be considered.
         allow_width_mismatch: If True, the width of the ports is ignored
@@ -172,6 +177,7 @@ def route_bundle(
         route_width=route_width,
         sort_ports=sort_ports,
         on_collision=on_collision,
+        on_placer_error=on_placer_error,
         collision_check_layers=collision_check_layers,
         routing_function=route_smart,
         routing_kwargs={
@@ -844,7 +850,8 @@ def route(
 
     if abs((bend90_ports[0].trans.angle - bend90_ports[1].trans.angle) % 4) != 1:
         raise ValueError(
-            f"{bend90_cell.name} bend ports should be 90° apart from each other"
+            f"{bend90_cell.name} bend ports should be 90° apart from each other. "
+            f"{bend90_ports[0]=} {bend90_ports[1]=}"
         )
     if (bend90_ports[1].trans.angle - bend90_ports[0].trans.angle) % 4 == 3:
         b90p1 = bend90_ports[1]
@@ -871,7 +878,7 @@ def route(
 
     if bend180_cell is not None:
         # Bend 180 is available
-        bend180_ports = [p for p in bend180_cell.ports if p.port_type == port_type]
+        bend180_ports = [p for p in bend180_cell.ports.filter(port_type=port_type)]
         if len(bend180_ports) != 2:
             raise AttributeError(
                 f"{bend180_cell.name} should have 2 ports but has {len(bend180_ports)}"
@@ -880,7 +887,7 @@ def route(
         if abs((bend180_ports[0].trans.angle - bend180_ports[1].trans.angle) % 4) != 0:
             raise AttributeError(
                 f"{bend180_cell.name} bend ports for bend180 should be 0° apart from"
-                " each other"
+                f" each other, {bend180_ports[0]=} {bend180_ports[1]=}"
             )
         d = 1 if bend180_ports[0].trans.angle in [0, 3] else -1
         b180p1, b180p2 = list(
@@ -1071,7 +1078,7 @@ def route(
 def vec_angle(v: kdb.Vector) -> int:
     """Determine vector angle in increments of 90°."""
     if v.x != 0 and v.y != 0:
-        raise NotImplementedError("only manhattan vectors supported")
+        raise ValueError("Non-manhattan vectors are not supported")
 
     match (v.x, v.y):
         case (x, 0) if x > 0:

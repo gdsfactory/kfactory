@@ -5,6 +5,8 @@
 
 ## Bug Fixes
 
+- fix dict serialization [#531](https://github.com/gdsfactory/kfactory/pull/531)
+- Fix ports setter for VKCell [#529](https://github.com/gdsfactory/kfactory/pull/529)
 - fix writer using gdsii always [#526](https://github.com/gdsfactory/kfactory/pull/526)
 - Fix fill_tiled segfault [#521](https://github.com/gdsfactory/kfactory/pull/521)
 
