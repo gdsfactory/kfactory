@@ -30,7 +30,7 @@ def cells_to_yaml(output: PathLike, cells: list[KCell] | KCell) -> None:
     Returns:
         yaml dump
     """
-    cells = list(cells)
+    cells = [cells] if isinstance(cells, KCell) else cells
     cells.sort(key=lambda c: c.hierarchy_levels())
     yaml = YAML()
     yaml.register_class(KCell)
