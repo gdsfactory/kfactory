@@ -29,6 +29,7 @@ from typing import (
     TYPE_CHECKING,
     Annotated,
     Any,
+    ClassVar,
     Literal,
     Protocol,
     TypeAlias,
@@ -3271,7 +3272,7 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
     """
 
     _kdb_cell: kdb.Cell = PrivateAttr()
-    yaml_tag: str = "!KCell"
+    yaml_tag: ClassVar[str] = "!KCell"
     boundary: kdb.DPolygon | None = None
     insts: Instances = Field(default_factory=Instances)
     size_info: SizeInfo
@@ -4247,6 +4248,7 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
             name: _serialize_setting(info)
             for name, info in node.info.model_dump().items()
         }
+        print(cls)
         return representer.represent_mapping(cls.yaml_tag, d)
 
     def each_inst(self) -> Iterator[Instance]:
