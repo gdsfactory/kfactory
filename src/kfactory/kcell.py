@@ -7064,6 +7064,7 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
         super().__init__(kcl=_kcl, info=info, size_info=DSizeInfo(self.bbox))
         self._shapes = {}
         self._ports = Ports(self.kcl)
+        self._name = name
 
     def bbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
         _layers = set(self._shapes.keys())
