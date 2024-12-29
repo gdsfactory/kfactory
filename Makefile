@@ -9,8 +9,16 @@ help:
 	@echo 'make release-dr VERSION=MAJOR.MINOR.PATCH:   Dry run for new release with version number v${MAJOR}.${MINOR}.${PATCH}'
 	@echo 'make release VERSION=MAJOR.MINOR.PATCH:      Dry run for new release with version number v${MAJOR}.${MINOR}.${PATCH}'
 
+uv:
+	curl -LsSf https://astral.sh/uv/0.4.30/install.sh | sh
+
 install:
-	pip install -e .[docs,dev]
+	uv sync --extra docs --extra dev
+	uv pip install -e .
+
+dev:
+	uv sync --all-extras
+	uv pip install -e .
 	pre-commit install
 
 docs-clean:
@@ -23,13 +31,13 @@ docs-serve:
 	mkdocs serve -f docs/mkdocs.yml
 
 test:
-	pytest -s
+	uv run pytest -s
 
 cov:
-	pytest --cov=kfactory
+	uv run pytest --cov=kfactory
 
 venv:
-	python3 -m venv env
+	uv venv -p 3.13
 
 lint:
 	flake8 .
