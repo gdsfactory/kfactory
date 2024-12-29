@@ -71,6 +71,8 @@ ci = [
   "types-cachetools",
   "types-requests",
   "kfactory[full]",
+  "pytest-randomly>=3.16.0",
+  "pytest-xdist>=3.6.1",
 ]
 ipy = [
   "ipython",

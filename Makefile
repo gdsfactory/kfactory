@@ -36,6 +36,9 @@ test:
 cov:
 	uv run pytest --cov=kfactory
 
+uv-test:
+	uv run pytest -s -n logical
+
 venv:
 	uv venv -p 3.13
 
