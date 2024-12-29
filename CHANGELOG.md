@@ -1,3 +1,18 @@
+<a id="v0.22.1"></a>
+# [v0.22.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.22.1) - 2024-12-29
+
+# What's Changed
+
+## New
+
+- better LockedError message [#536](https://github.com/gdsfactory/kfactory/pull/536)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.22.0...v0.22.1
+
+
+[Changes][v0.22.1]
+
+
 <a id="v0.22.0"></a>
 # [v0.22.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.22.0) - 2024-12-19
 
@@ -1359,6 +1374,7 @@
 [Changes][v0.4.0]
 
 
+[v0.22.1]: https://github.com/gdsfactory/kfactory/compare/v0.22.0...v0.22.1
 [v0.22.0]: https://github.com/gdsfactory/kfactory/compare/v0.21.11...v0.22.0
 [v0.21.11]: https://github.com/gdsfactory/kfactory/compare/v0.21.10...v0.21.11
 [v0.21.10]: https://github.com/gdsfactory/kfactory/compare/v0.21.8...v0.21.10
