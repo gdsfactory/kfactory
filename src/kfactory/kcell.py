@@ -597,9 +597,10 @@ class LockedError(AttributeError):
     def __init__(self, kcell: KCell | VKCell):
         """Throw _locked error."""
         super().__init__(
-            f"KCell {kcell.name} has been locked already."
-            " Modification has been disabled. "
-            "Modify the KCell in its autocell function or make a copy."
+            f"{kcell.name!r} is locked and likely stored in cache. Modifications are "
+            "disabled as its associated function is decorated with `cell`. To modify, "
+            "update the code in the function or create a copy of "
+            f"the {kcell.__class__.__name__}."
         )
 
 
@@ -749,8 +750,8 @@ class PortCheck(IntFlag):
     width = auto()
     layer = auto()
     port_type = auto()
-    all_opposite = opposite + width + port_type + layer
-    all_overlap = width + port_type + layer
+    all_opposite = opposite + width + port_type + layer  # type: ignore[operator]
+    all_overlap = width + port_type + layer  # type: ignore[operator]
 
 
 def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -> None:
