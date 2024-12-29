@@ -1599,6 +1599,12 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
             " automatically as a factory. Therefore it doesn't have an associated name."
         )
 
+    def create_vinst(self, cell: VKCell | KCell) -> VInstance:
+        """Insert the KCell as a VInstance into a VKCell or KCell."""
+        vi = VInstance(cell)
+        self.vinsts.append(vi)
+        return vi
+
 
 class KCell(BaseKCell, arbitrary_types_allowed=True):
     """KLayout cell and change its class to KCell.
@@ -1690,7 +1696,7 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
 
     def __hash__(self) -> int:
         """Hash the KCell."""
-        return hash(self._kdb_cell)
+        return hash((self.kcl.library.name(), self._kdb_cell.cell_index()))
 
     @property
     def name(self) -> str:
@@ -1763,7 +1769,7 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
         constructor: Any,
         node: Any,
         verbose: bool = False,
-    ) -> KCell:
+    ) -> Self:
         """Internal function used by the placer to convert yaml to a KCell."""
         d = ruamel.yaml.constructor.SafeConstructor.construct_mapping(
             constructor,
@@ -2608,7 +2614,6 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
             name: _serialize_setting(info)
             for name, info in node.info.model_dump().items()
         }
-        print(cls)
         return representer.represent_mapping(cls.yaml_tag, d)
 
     def each_inst(self) -> Iterator[Instance]:
@@ -3671,12 +3676,6 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
                 for vi in c.vinsts:
                     vi.insert_into(c)
                 c.vinsts.clear()
-
-    def create_vinst(self, cell: VKCell | KCell) -> VInstance:
-        """Insert the KCell as a VInstance into a VKCell or KCell."""
-        vi = VInstance(cell)
-        self.vinsts.append(vi)
-        return vi
 
 
 def create_port_error(
@@ -5821,11 +5820,6 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
     def dcenter(self) -> kdb.DPoint:
         """Coordinate of the port in um."""
         return self.bbox().center()
-
-    def insert(self, cell: KCell | VKCell) -> VInstance:
-        vi = VInstance(cell)
-        self.insts.append(vi)
-        return vi
 
 
 class VInstancePorts:
