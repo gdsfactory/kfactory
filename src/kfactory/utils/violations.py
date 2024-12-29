@@ -94,7 +94,7 @@ def fix_spacing_tiled(
         tile_size = (30 * min_space * c.kcl.dbu, 30 * min_space * c.kcl.dbu)
     li = c.kcl.find_layer(layer)
     tp = kdb.TilingProcessor()
-    tp.frame = c.kcl.to_um(c.bbox(li))  # type: ignore[assignment, misc]
+    tp.frame = c.kcl.to_um(c.bbox(li))  # type: ignore[misc]
     tp.dbu = c.kcl.dbu
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
@@ -172,7 +172,7 @@ def fix_spacing_sizing_tiled(
         size = min_space * 20 * c.kcl.dbu
         tile_size = (size, size)
     li = c.kcl.find_layer(layer)
-    tp.frame = c.kcl.to_um(c.bbox(li))  # type: ignore[assignment, misc]
+    tp.frame = c.kcl.to_um(c.bbox(li))  # type: ignore[misc]
     tp.dbu = c.kcl.dbu
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
