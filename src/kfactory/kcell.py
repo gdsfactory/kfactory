@@ -752,8 +752,8 @@ class PortCheck(IntFlag):
     width = auto()
     layer = auto()
     port_type = auto()
-    all_opposite = opposite + width + port_type + layer
-    all_overlap = width + port_type + layer
+    all_opposite = opposite + width + port_type + layer  # type: ignore[operator]
+    all_overlap = width + port_type + layer  # type: ignore[operator]
 
 
 def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -> None:
