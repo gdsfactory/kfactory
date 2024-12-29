@@ -1486,1647 +1486,6 @@ class InstancePorts:
                 )
 
 
-class VInstancePorts:
-    """Ports of an instance.
-
-    These act as virtual ports as the centers needs to change if the
-    instance changes etc.
-
-
-    Attributes:
-        cell_ports: A pointer to the [`KCell.ports`][kfactory.kcell.KCell.ports]
-            of the cell
-        instance: A pointer to the Instance related to this.
-            This provides a way to dynamically calculate the ports.
-    """
-
-    cell_ports: Ports
-    instance: VInstance
-
-    def __init__(self, instance: VInstance) -> None:
-        """Creates the virtual ports object.
-
-        Args:
-            instance: The related instance
-        """
-        self.cell_ports = instance.cell.ports
-        self.instance = instance
-
-    def __len__(self) -> int:
-        """Return Port count."""
-        return len(self.cell_ports)
-
-    def __getitem__(self, key: int | str | None) -> Port:
-        """Get a port by name."""
-        p = self.cell_ports[key]
-        return p.copy(self.instance.trans)
-
-    def __iter__(self) -> Iterator[Port]:
-        """Create a copy of the ports to iterate through."""
-        yield from (p.copy(self.instance.trans) for p in self.cell_ports)
-
-    def __repr__(self) -> str:
-        """String representation.
-
-        Creates a copy and uses the `__repr__` of
-        [Ports][kfactory.kcell.Ports.__repr__].
-        """
-        return repr(self.copy())
-
-    def filter(
-        self,
-        angle: int | None = None,
-        orientation: float | None = None,
-        layer: LayerEnum | int | None = None,
-        port_type: str | None = None,
-        regex: str | None = None,
-    ) -> list[Port]:
-        """Filter ports by name.
-
-        Args:
-            angle: Filter by angle. 0, 1, 2, 3.
-            orientation: Filter by orientation in degrees.
-            layer: Filter by layer.
-            port_type: Filter by port type.
-            regex: Filter by regex of the name.
-        """
-        ports: Iterable[Port] = list(self.instance.ports)
-        if regex:
-            ports = filter_regex(ports, regex)
-        if layer is not None:
-            ports = filter_layer(ports, layer)
-        if port_type:
-            ports = filter_port_type(ports, port_type)
-        if angle is not None:
-            ports = filter_direction(ports, angle)
-        if orientation is not None:
-            ports = filter_orientation(ports, orientation)
-        return list(ports)
-
-    def copy(self) -> Ports:
-        """Creates a copy in the form of [Ports][kfactory.kcell.Ports]."""
-        return Ports(
-            kcl=self.instance.cell.kcl,
-            ports=[p.copy(self.instance.trans) for p in self.cell_ports._ports],
-        )
-
-
-class Instance:
-    """An Instance of a KCell.
-
-    An Instance is a reference to a KCell with a transformation.
-
-    Attributes:
-        _instance: The internal `kdb.Instance` reference
-        ports: Transformed ports of the KCell
-        kcl: Pointer to the layout object holding the instance
-        d: Helper that allows retrieval of instance information in um
-    """
-
-    yaml_tag = "!Instance"
-    _instance: kdb.Instance
-    kcl: KCLayout
-    ports: InstancePorts
-    size_info: SizeInfo
-    dsize_info: DSizeInfo
-
-    def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
-        """Create an instance from a KLayout Instance."""
-        self._instance = instance
-        self.kcl = kcl
-        self.ports = InstancePorts(self)
-        self.size_info = SizeInfo(self.bbox)
-        self.dsize_info = DSizeInfo(self.dbbox)
-
-    def __getitem__(
-        self, key: int | str | None | tuple[int | str | None, int, int]
-    ) -> Port:
-        """Returns port from instance.
-
-        The key can either be an integer, in which case the nth port is
-        returned, or a string in which case the first port with a matching
-        name is returned.
-
-        If the instance is an array, the key can also be a tuple in the
-        form of `c.ports[key_name, i_a, i_b]`, where `i_a` is the index in
-        the `instance.a` direction and `i_b` the `instance.b` direction.
-
-        E.g. `c.ports["a", 3, 5]`, accesses the ports of the instance which is
-        3 times in `a` direction (4th index in the array), and 5 times in `b` direction
-        (5th index in the array).
-        """
-        return self.ports[key]
-
-    def __getattr__(self, name: str) -> Any:
-        """If we don't have an attribute, get it from the instance."""
-        return getattr(self._instance, name)
-
-    @property
-    def name(self) -> str:
-        """Name of instance in GDS."""
-        prop = self.property(PROPID.NAME)
-        return (
-            str(prop)
-            if prop is not None
-            else f"{self.cell.name}_{self.trans.disp.x}_{self.trans.disp.y}"
-        )
-
-    @name.setter
-    def name(self, value: str) -> None:
-        self.set_property(PROPID.NAME, value)
-
-    @property
-    def purpose(self) -> str | None:
-        """Purpose value of instance in GDS."""
-        return self.property(PROPID.PURPOSE)  # type: ignore[no-any-return]
-
-    @purpose.setter
-    def purpose(self, value: str | None) -> None:
-        self.set_property(PROPID.PURPOSE, value)
-
-    @property
-    def cell_index(self) -> int:
-        """Get the index of the cell this instance refers to."""
-        return self._instance.cell_index
-
-    @cell_index.setter
-    def cell_index(self, value: int) -> None:
-        self._instance_.cell_index = value
-
-    @property
-    def cell(self) -> KCell:
-        """Parent KCell  of the Instance."""
-        return self.kcl[self.cell_index]
-
-    @cell.setter
-    def cell(self, value: KCell) -> None:
-        self.cell_index = value.cell_index()
-
-    @property
-    def a(self) -> kdb.Vector:
-        """Returns the displacement vector for the 'a' axis."""
-        return self._instance.a
-
-    @a.setter
-    def a(self, vec: kdb.Vector | kdb.DVector) -> None:
-        self._instance.a = vec  # type: ignore[assignment]
-
-    @property
-    def b(self) -> kdb.Vector:
-        """Returns the displacement vector for the 'b' axis."""
-        return self._instance.b
-
-    @b.setter
-    def b(self, vec: kdb.Vector | kdb.DVector) -> None:
-        self._instance.b = vec  # type: ignore[assignment]
-
-    @property
-    def cell_inst(self) -> kdb.CellInstArray:
-        """Gets the basic CellInstArray object associated with this instance."""
-        return self._instance.cell_inst
-
-    @cell_inst.setter
-    def cell_inst(self, cell_inst: kdb.CellInstArray | kdb.DCellInstArray) -> None:
-        self._instance.cell_inst = cell_inst  # type: ignore[assignment]
-
-    @property
-    def cplx_trans(self) -> kdb.ICplxTrans:
-        """Gets the complex transformation of the instance.
-
-        Or the first instance in the array.
-        """
-        return self._instance.cplx_trans
-
-    @cplx_trans.setter
-    def cplx_trans(self, trans: kdb.ICplxTrans | kdb.DCplxTrans) -> None:
-        self._instance.cplx_trans = trans  # type: ignore[assignment]
-
-    @property
-    def dcplx_trans(self) -> kdb.DCplxTrans:
-        """Gets the complex transformation of the instance.
-
-        Or the first instance in the array.
-        """
-        return self._instance.dcplx_trans
-
-    @dcplx_trans.setter
-    def dcplx_trans(self, trans: kdb.DCplxTrans) -> None:
-        self._instance.dcplx_trans = trans
-
-    @property
-    def dtrans(self) -> kdb.DTrans:
-        """Gets the complex transformation of the instance.
-
-        Or the first instance in the array.
-        """
-        return self._instance.dtrans
-
-    @dtrans.setter
-    def dtrans(self, trans: kdb.DTrans) -> None:
-        self._instance.dtrans = trans
-
-    @property
-    def trans(self) -> kdb.Trans:
-        """Gets the complex transformation of the instance.
-
-        Or the first instance in the array.
-        """
-        return self._instance.trans
-
-    @trans.setter
-    def trans(self, trans: kdb.Trans | kdb.DTrans) -> None:
-        self._instance.trans = trans  # type: ignore[assignment]
-
-    @property
-    def na(self) -> int:
-        """Returns the displacement vector for the 'a' axis."""
-        return self._instance.na
-
-    @na.setter
-    def na(self, value: int) -> None:
-        self._instance.na = value
-
-    @property
-    def nb(self) -> int:
-        """Returns the number of instances in the 'b' axis."""
-        return self._instance.nb
-
-    @nb.setter
-    def nb(self, value: int) -> None:
-        self._instance.nb = value
-
-    @property
-    def parent_cell(self) -> KCell:
-        """Gets the cell this instance is contained in."""
-        return self.kcl[self._instance.parent_cell.cell_index()]
-
-    @parent_cell.setter
-    def parent_cell(self, cell: KCell | kdb.Cell) -> None:
-        if isinstance(cell, KCell):
-            self._instance.parent_cell = cell._kdb_cell
-        else:
-            self._instance.parent_cell = cell
-
-    @property
-    def prop_id(self) -> int:
-        """Gets the properties ID associated with the instance."""
-        return self._instance.prop_id
-
-    @prop_id.setter
-    def prop_id(self, value: int) -> None:
-        self._instance.prop_id = value
-
-    @property
-    def hash(self) -> bytes:
-        """Hash the instance."""
-        h = sha3_512()
-        h.update(self.cell.hash())
-        if not self.is_complex():
-            h.update(self.trans.hash().to_bytes(8, "big"))
-        else:
-            h.update(self.dcplx_trans.hash().to_bytes(8, "big"))
-        return h.digest()
-
-    @overload
-    def connect(
-        self,
-        port: str | Port | None,
-        other: Port,
-        *,
-        mirror: bool = False,
-        allow_width_mismatch: bool | None = None,
-        allow_layer_mismatch: bool | None = None,
-        allow_type_mismatch: bool | None = None,
-        use_mirror: bool | None = None,
-        use_angle: bool | None = None,
-    ) -> None: ...
-
-    @overload
-    def connect(
-        self,
-        port: str | Port | None,
-        other: Instance,
-        other_port_name: str | None,
-        *,
-        mirror: bool = False,
-        allow_width_mismatch: bool | None = None,
-        allow_layer_mismatch: bool | None = None,
-        allow_type_mismatch: bool | None = None,
-        use_mirror: bool | None = None,
-        use_angle: bool | None = None,
-    ) -> None: ...
-
-    def connect(
-        self,
-        port: str | Port | None,
-        other: Instance | Port,
-        other_port_name: str | None = None,
-        *,
-        mirror: bool = False,
-        allow_width_mismatch: bool | None = None,
-        allow_layer_mismatch: bool | None = None,
-        allow_type_mismatch: bool | None = None,
-        use_mirror: bool | None = None,
-        use_angle: bool | None = None,
-    ) -> None:
-        """Align port with name `portname` to a port.
-
-        Function to allow to transform this instance so that a port of this instance is
-        connected (same center with 180° turn) to another instance.
-
-        Args:
-            port: The name of the port of this instance to be connected, or directly an
-                instance port. Can be `None` because port names can be `None`.
-            other: The other instance or a port. Skip `other_port_name` if it's a port.
-            other_port_name: The name of the other port. Ignored if
-                `other` is a port.
-            mirror: Instead of applying klayout.db.Trans.R180 as a connection
-                transformation, use klayout.db.Trans.M90, which effectively means this
-                instance will be mirrored and connected.
-            allow_width_mismatch: Skip width check between the ports if set.
-            allow_layer_mismatch: Skip layer check between the ports if set.
-            allow_type_mismatch: Skip port_type check between the ports if set.
-            use_mirror: If False mirror flag does not get applied from the connection.
-            use_angle: If False the angle does not get applied from the connection.
-        """
-        if allow_width_mismatch is None:
-            allow_width_mismatch = config.allow_width_mismatch
-        if allow_layer_mismatch is None:
-            allow_layer_mismatch = config.allow_layer_mismatch
-        if allow_type_mismatch is None:
-            allow_type_mismatch = config.allow_type_mismatch
-        if use_mirror is None:
-            use_mirror = config.connect_use_mirror
-        if use_angle is None:
-            use_angle = config.connect_use_angle
-        if isinstance(other, Instance):
-            if other_port_name is None:
-                raise ValueError(
-                    "portname cannot be None if an Instance Object is given. For"
-                    "complex connections (non-90 degree and floating point ports) use"
-                    "route_cplx instead"
-                )
-            op = other.ports[other_port_name]
-        elif isinstance(other, Port):
-            op = other
-        else:
-            raise ValueError("other_instance must be of type Instance or Port")
-        if isinstance(port, Port):
-            p = port.copy(self.dcplx_trans.inverted())
-        else:
-            p = self.cell.ports[port]
-        if p.width != op.width and not allow_width_mismatch:
-            # The ports are not the same width
-            raise PortWidthMismatch(
-                self,
-                other,
-                p,
-                op,
-            )
-        if p.layer != op.layer and not allow_layer_mismatch:
-            # The ports are not on the same layer
-            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
-        if p.port_type != op.port_type and not allow_type_mismatch:
-            raise PortTypeMismatch(self, other, p, op)
-        if p._dcplx_trans or op._dcplx_trans:
-            dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-            match (use_mirror, use_angle):
-                case True, True:
-                    _dcplx_trans = (
-                        op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
-                    )
-                    self._instance.dcplx_trans = _dcplx_trans
-                case False, True:
-                    dconn_trans = (
-                        kdb.DCplxTrans.M90
-                        if mirror ^ self.dcplx_trans.mirror
-                        else kdb.DCplxTrans.R180
-                    )
-                    opt = op.dcplx_trans
-                    opt.mirror = False
-                    _dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
-                    self._instance.dcplx_trans = _dcplx_trans
-                case False, False:
-                    self._instance.dcplx_trans = kdb.DCplxTrans(
-                        op.dcplx_trans.disp - p.dcplx_trans.disp
-                    )
-                case True, False:
-                    self._instance.dcplx_trans = kdb.DCplxTrans(
-                        op.dcplx_trans.disp - p.dcplx_trans.disp
-                    )
-                    self.d.mirror_y(op.dcplx_trans.disp.y)
-
-        else:
-            conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
-            match (use_mirror, use_angle):
-                case True, True:
-                    _trans = op.trans * conn_trans * p.trans.inverted()
-                    self._instance.trans = _trans
-                case False, True:
-                    conn_trans = (
-                        kdb.Trans.M90 if mirror ^ self.trans.mirror else kdb.Trans.R180
-                    )
-                    op = op.copy()
-                    op.trans.mirror = False
-                    _trans = op.trans * conn_trans * p.trans.inverted()
-                    self._instance.trans = _trans
-                case False, False:
-                    self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
-                case True, False:
-                    self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
-                    self.mirror_y(op.trans.disp.y)
-
-    @classmethod
-    def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
-        """Convert the instance to a yaml representation."""
-        d = {
-            "cellname": node.cell.name,
-            "trans": node._trans,
-            "dcplx_trans": node._dcplx_trans,
-        }
-        return representer.represent_mapping(cls.yaml_tag, d)
-
-    @overload
-    def movex(self, destination: int, /) -> Instance: ...
-
-    @overload
-    def movex(self, origin: int, destination: int) -> Instance: ...
-
-    def movex(self, origin: int, destination: int | None = None) -> Instance:
-        """Move the instance in x-direction in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        if destination is None:
-            self.transform(kdb.Trans(origin, 0))
-        else:
-            self.transform(kdb.Trans(destination - origin, 0))
-        return self
-
-    @overload
-    def movey(self, destination: int, /) -> Instance: ...
-
-    @overload
-    def movey(self, origin: int, destination: int) -> Instance: ...
-
-    def movey(self, origin: int, destination: int | None = None) -> Instance:
-        """Move the instance in y-direction in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        if destination is None:
-            self.transform(kdb.Trans(0, origin))
-        else:
-            self.transform(kdb.Trans(0, destination - origin))
-        return self
-
-    @overload
-    def move(self, destination: tuple[int, int], /) -> Instance: ...
-
-    @overload
-    def move(
-        self, origin: tuple[int, int], destination: tuple[int, int]
-    ) -> Instance: ...
-
-    def move(
-        self, origin: tuple[int, int], destination: tuple[int, int] | None = None
-    ) -> Instance:
-        """Move the instance in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        if destination is None:
-            self.transform(kdb.Trans(*origin))
-        else:
-            self.transform(
-                kdb.Trans(destination[0] - origin[0], destination[1] - origin[1])
-            )
-        return self
-
-    def rotate(
-        self, angle: Literal[0, 1, 2, 3], center: kdb.Point | None = None
-    ) -> Instance:
-        """Rotate instance in increments of 90°."""
-        if center:
-            t = kdb.Trans(center.to_v())
-            self.transform(t.inverted())
-        self.transform(kdb.Trans(angle, False, 0, 0))
-        if center:
-            self.transform(t)
-        return self
-
-    def __repr__(self) -> str:
-        """Return a string representation of the instance."""
-        port_names = [p.name for p in self.ports]
-        return (
-            f"{self.parent_cell.name}: ports {port_names}, {self.kcl[self.cell_index]}"
-        )
-
-    def mirror(
-        self, p1: kdb.Point = kdb.Point(1, 0), p2: kdb.Point = kdb.Point(0, 0)
-    ) -> Instance:
-        """Mirror the instance at a line."""
-        mirror_v = p2 - p1
-        disp = self.dcplx_trans.disp
-        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
-        dedge = kdb.DEdge(self.kcl.to_um(p1), self.kcl.to_um(p2))
-
-        v = self.kcl.to_um(mirror_v)
-        v = kdb.DVector(-v.y, v.x)
-
-        dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
-
-        cross_point = dedge.cut_point(dedge_disp)
-
-        self.transform(
-            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
-        )
-
-        return self
-
-    def mirror_x(self, x: int = 0) -> Instance:
-        """Mirror the instance at an y-axis at position x."""
-        self.transform(kdb.Trans(2, True, 2 * x, 0))
-        return self
-
-    def mirror_y(self, y: int = 0) -> Instance:
-        """Mirror the instance at an x-axis at position y."""
-        self.transform(kdb.Trans(0, True, 0, 2 * y))
-        return self
-
-    @property
-    def xmin(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._instance.bbox().left
-
-    @xmin.setter
-    def xmin(self, __val: int) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.Trans(__val - self.bbox().left, 0))
-
-    @property
-    def ymin(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._instance.bbox().bottom
-
-    @ymin.setter
-    def ymin(self, __val: int) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.Trans(0, __val - self._instance.bbox().bottom))
-
-    @property
-    def xmax(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._instance.bbox().right
-
-    @xmax.setter
-    def xmax(self, __val: int) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.Trans(__val - self.bbox().right, 0))
-
-    @property
-    def ymax(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._instance.bbox().top
-
-    @ymax.setter
-    def ymax(self, __val: int) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.Trans(0, __val - self._instance.bbox().top))
-
-    @property
-    def ysize(self) -> int:
-        """Returns the height of the bounding box."""
-        return self._instance.bbox().height()
-
-    @property
-    def xsize(self) -> int:
-        """Returns the width of the bounding box."""
-        return self._instance.bbox().width()
-
-    @property
-    def x(self) -> int:
-        """Returns the x-coordinate center of the bounding box."""
-        return self._instance.bbox().center().x
-
-    @x.setter
-    def x(self, __val: int) -> None:
-        """Moves the instance so that the bbox's center x-coordinate."""
-        self.transform(kdb.Trans(__val - self.bbox().center().x, 0))
-
-    @property
-    def y(self) -> int:
-        """Returns the x-coordinate center of the bounding box."""
-        return self._instance.bbox().center().y
-
-    @y.setter
-    def y(self, __val: int) -> None:
-        """Moves the instance so that the bbox's center x-coordinate."""
-        self.transform(kdb.Trans(__val - self.bbox().center().y, 0))
-
-    @property
-    def center(self) -> kdb.Point:
-        """Returns the coordinate center of the bounding box."""
-        return self._instance.bbox().center()
-
-    @center.setter
-    def center(self, val: tuple[int, int] | kdb.Vector) -> None:
-        """Moves the instance so that the bbox's center coordinate."""
-        if isinstance(val, kdb.Point | kdb.Vector):
-            self.transform(kdb.Trans(val - self.bbox().center()))
-        elif isinstance(val, tuple | list):
-            self.transform(kdb.Trans(kdb.Vector(val[0], val[1]) - self.bbox().center()))
-        else:
-            raise ValueError(
-                f"Type {type(val)} not supported for center setter {val}. "
-                "Not a tuple, list, kdb.Point or kdb.Vector."
-            )
-
-    @overload
-    def dmovex(self, destination: float, /) -> Instance: ...
-
-    @overload
-    def dmovex(self, origin: float, destination: float) -> Instance: ...
-
-    def dmovex(self, origin: float, destination: float | None = None) -> Instance:
-        """Move the instance in x-direction in um.
-
-        Args:
-            origin: reference point to move
-            destination: move origin so that it will land on this coordinate
-        """
-        if destination is None:
-            self.transform(kdb.DTrans(float(origin), 0.0))
-        else:
-            self.transform(kdb.DTrans(float(destination - origin), 0.0))
-        return self
-
-    @overload
-    def dmovey(self, destination: float, /) -> Instance: ...
-
-    @overload
-    def dmovey(self, origin: float, destination: float) -> Instance: ...
-
-    def dmovey(self, origin: float, destination: float | None = None) -> Instance:
-        """Move the instance in y-direction in um.
-
-        Args:
-            origin: reference point to move
-            destination: move origin so that it will land on this coordinate
-        """
-        if destination is None:
-            self.transform(kdb.DTrans(0.0, float(origin)))
-        else:
-            self.transform(kdb.DTrans(0.0, float(destination - origin)))
-        return self
-
-    def drotate(
-        self,
-        angle: float,
-        center: kdb.DPoint
-        | kdb.DVector
-        | tuple[float, float]
-        | Port
-        | str
-        | None = None,
-    ) -> Instance:
-        """Rotate instance in degrees.
-
-        Args:
-            angle: angle in degrees.
-            center: center of rotation. If a port is given, the center is the port's.
-                if a string is given, the center is the port with the name.
-                if a tuple is given, the center is the tuple.
-        """
-        if center:
-            _center: kdb.DVector | kdb.DPoint
-            if isinstance(center, str):
-                _center = self.ports[center].dcplx_trans.disp
-            elif isinstance(center, Port):
-                _center = center.dcplx_trans.disp
-            elif isinstance(center, tuple | list):
-                _center = kdb.DVector(*center)
-            else:
-                _center = center
-            t = kdb.DTrans(_center)  # type: ignore[arg-type]
-            self.transform(t.inverted())
-        self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
-        if center:
-            self.transform(t)
-        return self
-
-    @overload
-    def dmove(self, destination: tuple[float, float], /) -> Instance: ...
-
-    @overload
-    def dmove(
-        self, origin: tuple[float, float], destination: tuple[float, float]
-    ) -> Instance: ...
-
-    def dmove(
-        self,
-        origin: tuple[float, float],
-        destination: tuple[float, float] | None = None,
-    ) -> Instance:
-        """Move the instance in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        if destination is None:
-            self.transform(kdb.DTrans(float(origin[0]), float(origin[1])))
-        else:
-            self.transform(
-                kdb.DTrans(
-                    float(destination[0] - origin[0]), float(destination[1] - origin[1])
-                )
-            )
-        return self
-
-    def dmirror(
-        self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
-    ) -> Instance:
-        """Mirror the instance at a line."""
-        mirror_v = p2 - p1
-        disp = self.dcplx_trans.disp
-        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
-        dedge = kdb.DEdge(p1, p2)
-
-        v = mirror_v
-        v = kdb.DVector(-v.y, v.x)
-        dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
-        cross_point = dedge.cut_point(dedge_disp)
-        self.transform(
-            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
-        )
-
-        return self
-
-    def dmirror_x(self, x: float = 0) -> Instance:
-        """Mirror the instance at an x-axis."""
-        self.transform(kdb.DTrans(2, True, 2 * x, 0))
-        return self
-
-    def dmirror_y(self, y: float = 0) -> Instance:
-        """Mirror the instance at an y-axis."""
-        self.transform(kdb.DTrans(0, True, 0, 2 * y))
-        return self
-
-    @property
-    def dxmin(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._instance.dbbox().left
-
-    @dxmin.setter
-    def dxmin(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.DTrans(__val - self.dbbox().left, 0.0))
-
-    @property
-    def dymin(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._instance.dbbox().bottom
-
-    @dymin.setter
-    def dymin(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.DTrans(0.0, __val - self._instance.dbbox().bottom))
-
-    @property
-    def dxmax(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._instance.dbbox().right
-
-    @dxmax.setter
-    def dxmax(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.DTrans(__val - self._instance.dbbox().right, 0.0))
-
-    @property
-    def dxsize(self) -> float:
-        """Returns the width of the bounding box."""
-        return self._instance.dbbox().width()
-
-    @property
-    def dysize(self) -> float:
-        """Returns the height of the bounding box."""
-        return self._instance.dbbox().height()
-
-    @property
-    def dymax(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._instance.dbbox().top
-
-    @dymax.setter
-    def dymax(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.DTrans(0.0, __val - self._instance.dbbox().top))
-
-    @property
-    def dx(self) -> float:
-        """Returns the x-coordinate center of the bounding box."""
-        return self._instance.dbbox().center().x
-
-    @dx.setter
-    def dx(self, __val: float) -> None:
-        """Moves the instance so that the bbox's center x-coordinate."""
-        self.transform(kdb.DTrans(__val - self._instance.dbbox().center().x, 0.0))
-
-    @property
-    def dy(self) -> float:
-        """Returns the x-coordinate center of the bounding box."""
-        return self._instance.dbbox().center().y
-
-    @dy.setter
-    def dy(self, __val: float) -> None:
-        """Moves the instance so that the bbox's center x-coordinate."""
-        self.transform(kdb.DTrans(0.0, __val - self._instance.dbbox().center().y))
-
-    @property
-    def dcenter(self) -> kdb.DPoint:
-        """Returns the coordinate center of the bounding box."""
-        return self._instance.dbbox().center()
-
-    @dcenter.setter
-    def dcenter(self, val: tuple[float, float] | kdb.DPoint) -> None:
-        """Moves the instance so that the bbox's center coordinate."""
-        if isinstance(val, kdb.DPoint | kdb.DVector):
-            self.transform(kdb.DTrans(val - self._instance.dbbox().center()))
-        elif isinstance(val, tuple | list):
-            self.transform(
-                kdb.DTrans(kdb.DPoint(val[0], val[1]) - self._instance.dbbox().center())
-            )
-        else:
-            raise ValueError(
-                f"Type {type(val)} not supported for center setter {val}. "
-                "Not a tuple, list, kdb.Point or kdb.Vector."
-            )
-
-    def flatten(self, levels: int | None = None) -> None:
-        """Flatten all or just certain instances.
-
-        Args:
-            levels: If level < #hierarchy-levels -> pull the sub instances to self,
-                else pull the polygons. None will always flatten all levels.
-        """
-        if levels:
-            pc = self.parent_cell
-            self._instance.flatten(levels)
-            del pc.insts[self]
-            pc.evaluate_insts()
-        else:
-            pc = self.parent_cell
-            self._instance.flatten()
-            del pc.insts[self]
-
-
-class Instances:
-    """Holder for instances.
-
-    Allows retrieval by name or index
-    """
-
-    def __init__(self) -> None:
-        """Constructor."""
-        self._insts: list[Instance] = []
-
-    def append(self, inst: Instance) -> None:
-        """Append a new instance."""
-        self._insts.append(inst)
-
-    def __getitem__(self, key: str | int) -> Instance:
-        """Retrieve instance by index or by name."""
-        if isinstance(key, int):
-            return self._insts[key]
-
-        else:
-            return next(filter(lambda inst: inst.name == key, self._insts))
-
-    def __len__(self) -> int:
-        """Length of the instances."""
-        return self._insts.__len__()
-
-    def __iter__(self) -> Iterator[Instance]:
-        """Get instance iterator."""
-        return self._insts.__iter__()
-
-    def get_inst_names(self) -> dict[str | None, int]:
-        """Get count of names of named instances.
-
-        Not named instances will be added to the `None` key.
-        """
-        names: dict[str | None, int] = {}
-        for inst in self._insts:
-            if inst.name in names:
-                names[inst.name] += 1
-            else:
-                names[inst.name] = 1
-        return names
-
-    def __delitem__(self, item: Instance | int) -> None:
-        if isinstance(item, int):
-            del self._insts[item]
-        else:
-            self._insts.remove(item)
-
-    def clean(self) -> None:
-        deletion_list: list[int] = []
-        for i, inst in enumerate(self._insts):
-            if inst._instance._destroyed():
-                deletion_list.insert(0, i)
-        for i in deletion_list:
-            del self._insts[i]
-
-    def clear(self) -> None:
-        self._insts.clear()
-
-
-class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
-    name: str | None
-    cell: VKCell | KCell
-    trans: kdb.DCplxTrans
-    _ports: VInstancePorts
-
-    def __init__(
-        self,
-        cell: VKCell | KCell,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
-        name: str | None = None,
-    ) -> None:
-        BaseModel.__init__(self, cell=cell, trans=trans, name=name)
-        self._ports = VInstancePorts(self)
-
-    def bbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
-        return self.cell.bbox().transformed(self.trans)
-
-    def __getitem__(self, key: int | str | None) -> Port:
-        """Returns port from instance.
-
-        The key can either be an integer, in which case the nth port is
-        returned, or a string in which case the first port with a matching
-        name is returned.
-
-        If the instance is an array, the key can also be a tuple in the
-        form of `c.ports[key_name, i_a, i_b]`, where `i_a` is the index in
-        the `instance.a` direction and `i_b` the `instance.b` direction.
-
-        E.g. `c.ports["a", 3, 5]`, accesses the ports of the instance which is
-        3 times in `a` direction (4th index in the array), and 5 times in `b` direction
-        (5th index in the array).
-        """
-        return self.ports[key]
-
-    @property
-    def ports(self) -> VInstancePorts:
-        return self._ports
-
-    def __repr__(self) -> str:
-        """Return a string representation of the instance."""
-        port_names = [p.name for p in self.ports]
-        return f"{self.cell.name}: ports {port_names}, transformation {self.trans}"
-
-    def insert_into(
-        self,
-        cell: KCell,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
-    ) -> Instance:
-        if isinstance(self.cell, VKCell):
-            _trans = trans * self.trans
-            base_trans = kdb.DCplxTrans(
-                kdb.DCplxTrans(
-                    kdb.ICplxTrans(_trans, cell.kcl.dbu)
-                    .s_trans()
-                    .to_dtype(cell.kcl.dbu)
-                )
-            )
-            _trans = base_trans.inverted() * _trans
-            _cell_name = self.cell.name
-            if _cell_name is None:
-                raise ValueError(
-                    "Cannot insert a non-flattened VInstance into a VKCell when the"
-                    f" name is 'None'. VKCell at {self.trans}"
-                )
-            if _trans != kdb.DCplxTrans():
-                _trans_str = (
-                    f"_M{_trans.mirror}_S{_trans.angle}"
-                    f"_X{_trans.disp.x}_Y{_trans.disp.y}"
-                ).replace(".", "p")
-                _cell_name = _cell_name + clean_name(_trans_str)
-            if cell.kcl.layout.cell(_cell_name) is None:
-                _cell = KCell(kcl=self.cell.kcl, name=_cell_name)  # self.cell.dup()
-                for layer, shapes in self.cell._shapes.items():
-                    for shape in shapes.transform(_trans):
-                        _cell.shapes(layer).insert(shape)
-                for inst in self.cell.insts:
-                    inst.insert_into(cell=_cell, trans=_trans)
-                _cell.name = _cell_name
-                for port in self.cell.ports:
-                    _cell.add_port(port.copy(_trans))
-                _settings = self.cell.settings.model_dump()
-                _settings.update({"virtual_trans": _trans})
-                _settings_units = self.cell.settings_units.model_copy()
-                _cell._settings = KCellSettings(**_settings)
-                _cell.info = Info(**self.cell.info.model_dump())
-                _cell._settings_units = _settings_units
-            else:
-                _cell = cell.kcl[_cell_name]
-            _inst = cell << _cell
-            _inst.transform(base_trans)
-            return _inst
-
-        else:
-            _trans = trans * self.trans
-            base_trans = kdb.DCplxTrans(
-                kdb.ICplxTrans(_trans, cell.kcl.dbu).s_trans().to_dtype(cell.kcl.dbu)
-            )
-            _trans = base_trans.inverted() * _trans
-            _cell_name = self.cell.name
-            if _trans != kdb.DCplxTrans():
-                _trans_str = (
-                    f"_M{_trans.mirror}_S{_trans.angle}"
-                    f"_X{_trans.disp.x}_Y{_trans.disp.y}"
-                ).replace(".", "p")
-                _cell_name = _cell_name + _trans_str
-            if cell.kcl.layout.cell(_cell_name) is None:
-                _cell = self.cell.dup()
-                _cell.name = _cell_name
-                _cell.flatten(False)
-                for layer in _cell.kcl.layer_indexes():
-                    _cell.shapes(layer).transform(_trans)
-                for port in _cell.ports:
-                    port.dcplx_trans = _trans * port.dcplx_trans
-            else:
-                _cell = cell.kcl[_cell_name]
-            _inst = cell << _cell
-            _inst.transform(base_trans)
-            return _inst
-
-    @overload
-    def insert_into_flat(
-        self,
-        cell: KCell | VKCell,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
-        *,
-        levels: None = None,
-    ) -> None: ...
-
-    @overload
-    def insert_into_flat(
-        self,
-        cell: KCell | VKCell,
-        *,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
-        levels: int,
-    ) -> None: ...
-
-    def insert_into_flat(
-        self,
-        cell: KCell | VKCell,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
-        *,
-        levels: int | None = None,
-    ) -> None:
-        if isinstance(self.cell, VKCell):
-            for layer, shapes in self.cell._shapes.items():
-                for shape in shapes.transform(trans * self.trans):
-                    cell.shapes(layer).insert(shape)
-            for inst in self.cell.insts:
-                if levels is not None:
-                    if levels > 0:
-                        inst.insert_into_flat(
-                            cell, trans=trans * self.trans, levels=levels - 1
-                        )
-                    else:
-                        assert isinstance(cell, KCell)
-                        inst.insert_into(cell, trans=trans * self.trans)
-                else:
-                    inst.insert_into_flat(cell, trans=trans * self.trans)
-
-        else:
-            if levels:
-                logger.warning(
-                    "Levels are not supported if the inserted Instance is a KCell."
-                )
-            if isinstance(cell, KCell):
-                for layer in cell.kcl.layer_indexes():
-                    reg = kdb.Region(self.cell.begin_shapes_rec(layer))
-                    reg.transform(kdb.ICplxTrans((trans * self.trans), cell.kcl.dbu))
-                    cell.shapes(layer).insert(reg)
-            else:
-                for layer, shapes in self.cell._shapes.items():
-                    for shape in shapes.transform(trans * self.trans):
-                        cell.shapes(layer).insert(shape)
-                for vinst in self.cell.insts:
-                    vinst.insert_into_flat(cell, trans=trans * self.trans)
-
-    @overload
-    def connect(
-        self,
-        port: str | Port | None,
-        other: Port,
-        *,
-        mirror: bool = False,
-        allow_width_mismatch: bool | None = None,
-        allow_layer_mismatch: bool | None = None,
-        allow_type_mismatch: bool | None = None,
-        use_mirror: bool | None = None,
-        use_angle: bool | None = None,
-    ) -> None: ...
-
-    @overload
-    def connect(
-        self,
-        port: str | Port | None,
-        other: VInstance,
-        other_port_name: str | None,
-        *,
-        mirror: bool = False,
-        allow_width_mismatch: bool | None = None,
-        allow_layer_mismatch: bool | None = None,
-        allow_type_mismatch: bool | None = None,
-        use_mirror: bool | None = None,
-        use_angle: bool | None = None,
-    ) -> None: ...
-
-    def connect(
-        self,
-        port: str | Port | None,
-        other: VInstance | Port,
-        other_port_name: str | None = None,
-        *,
-        mirror: bool = False,
-        allow_width_mismatch: bool | None = None,
-        allow_layer_mismatch: bool | None = None,
-        allow_type_mismatch: bool | None = None,
-        use_mirror: bool | None = None,
-        use_angle: bool | None = None,
-    ) -> None:
-        """Align port with name `portname` to a port.
-
-        Function to allow to transform this instance so that a port of this instance is
-        connected (same center with 180° turn) to another instance.
-
-        Args:
-            port: The name of the port of this instance to be connected, or directly an
-                instance port. Can be `None` because port names can be `None`.
-            other: The other instance or a port. Skip `other_port_name` if it's a port.
-            other_port_name: The name of the other port. Ignored if
-                `other` is a port.
-            mirror: Instead of applying klayout.db.Trans.R180 as a connection
-                transformation, use klayout.db.Trans.M90, which effectively means this
-                instance will be mirrored and connected.
-            allow_width_mismatch: Skip width check between the ports if set.
-            allow_layer_mismatch: Skip layer check between the ports if set.
-            allow_type_mismatch: Skip port_type check between the ports if set.
-            use_mirror: If False mirror flag does not get applied from the connection.
-            use_angle: If False the angle does not get applied from the connection.
-        """
-        if allow_layer_mismatch is None:
-            allow_layer_mismatch = config.allow_layer_mismatch
-        if allow_width_mismatch is None:
-            allow_width_mismatch = config.allow_width_mismatch
-        if allow_type_mismatch is None:
-            allow_type_mismatch = config.allow_type_mismatch
-        if use_mirror is None:
-            use_mirror = config.connect_use_mirror
-        if use_angle is None:
-            use_angle = config.connect_use_angle
-        if isinstance(other, VInstance):
-            if other_port_name is None:
-                raise ValueError(
-                    "portname cannot be None if an Instance Object is given. For"
-                    "complex connections (non-90 degree and floating point ports) use"
-                    "route_cplx instead"
-                )
-            op = other.ports[other_port_name]
-        elif isinstance(other, Port):
-            op = other
-        else:
-            raise ValueError("other_instance must be of type Instance or Port")
-        if isinstance(port, Port):
-            p = port.copy(self.trans.inverted())
-        else:
-            p = self.cell.ports[port]
-        if p.width != op.width and not allow_width_mismatch:
-            # The ports are not the same width
-            raise PortWidthMismatch(
-                self,  # type: ignore[arg-type]
-                other,  # type: ignore[arg-type]
-                p,
-                op,
-            )
-        if p.layer != op.layer and not allow_layer_mismatch:
-            # The ports are not on the same layer
-            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)  # type: ignore[arg-type]
-        if p.port_type != op.port_type and not allow_type_mismatch:
-            raise PortTypeMismatch(self, other, p, op)  # type: ignore[arg-type]
-        dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
-        match (use_mirror, use_angle):
-            case True, True:
-                _trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
-                self.trans = _trans
-            case False, True:
-                dconn_trans = (
-                    kdb.DCplxTrans.M90
-                    if mirror ^ self.trans.mirror
-                    else kdb.DCplxTrans.R180
-                )
-                opt = op.dcplx_trans
-                opt.mirror = False
-                _dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
-                self.trans = _dcplx_trans
-            case False, False:
-                self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
-            case True, False:
-                self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
-                self.mirror_y(op.dcplx_trans.disp.y)
-
-    def transform(self, trans: kdb.DTrans | kdb.DCplxTrans) -> Self:
-        self.trans = kdb.DCplxTrans(trans) * self.trans
-        return self
-
-    @overload
-    def movex(self, destination: float, /) -> Self: ...
-
-    @overload
-    def movex(self, origin: float, destination: float | None) -> Self: ...
-
-    def movex(self, origin: float, destination: float | None = None) -> Self:
-        """Move the instance in x-direction in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        if destination is None:
-            self.transform(kdb.DCplxTrans(origin, 0))
-        else:
-            self.transform(kdb.DCplxTrans(destination - origin, 0))
-        return self
-
-    @overload
-    def movey(self, destination: float, /) -> Self: ...
-
-    @overload
-    def movey(self, origin: float, destination: float | None) -> Self: ...
-
-    def movey(self, origin: float, destination: float | None = None) -> Self:
-        """Move the instance in y-direction in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        if destination is None:
-            self.transform(kdb.DCplxTrans(0, origin))
-        else:
-            self.transform(kdb.DCplxTrans(0, destination - origin))
-        return self
-
-    @overload
-    def move(self, destination: tuple[float, float], /) -> Self: ...
-
-    @overload
-    def move(
-        self, origin: tuple[float, float], destination: tuple[float, float] | None
-    ) -> Self: ...
-
-    def move(
-        self,
-        origin: tuple[float, float],
-        destination: tuple[float, float] | None = None,
-    ) -> Self:
-        """Move the instance in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        if destination is None:
-            self.transform(kdb.DCplxTrans(*origin))
-        else:
-            self.transform(
-                kdb.DCplxTrans(destination[0] - origin[0], destination[1] - origin[1])
-            )
-        return self
-
-    def rotate(self, angle: float, center: kdb.DPoint | None = None) -> Self:
-        """Rotate instance in increments of 90°."""
-        if not center:
-            self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
-        else:
-            t = kdb.DCplxTrans(center.to_v())
-            self.transform(t.inverted())
-            self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
-            self.transform(t)
-        return self
-
-    def mirror(
-        self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
-    ) -> Self:
-        """Mirror the instance at a line."""
-        mirror_v = p2 - p1
-        disp = self.trans.disp
-        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
-        dedge = kdb.DEdge(p1, p2)
-
-        v = mirror_v
-        v = kdb.DVector(-v.y, v.x)
-
-        dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
-
-        cross_point = dedge.cut_point(dedge_disp)
-
-        self.transform(
-            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
-        )
-
-        return self
-
-    def mirror_x(self, x: float = 0) -> Self:
-        """Mirror the instance at an x-axis."""
-        self.transform(kdb.DCplxTrans(1, 180, True, 2 * x, 0))
-        return self
-
-    def mirror_y(self, y: float = 0) -> Self:
-        """Mirror the instance at an y-axis."""
-        self.transform(kdb.DCplxTrans(1, 0, True, 0, 2 * y))
-        return self
-
-    @property
-    def xmin(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self.bbox().left
-
-    @xmin.setter
-    def xmin(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.DCplxTrans(__val - self.bbox().left, 0))
-
-    @property
-    def ymin(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self.bbox().bottom
-
-    @ymin.setter
-    def ymin(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.DCplxTrans(0, __val - self.bbox().bottom))
-
-    @property
-    def xmax(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self.bbox().right
-
-    @xmax.setter
-    def xmax(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.DCplxTrans(__val - self.bbox().right, 0))
-
-    @property
-    def ymax(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self.bbox().top
-
-    @ymax.setter
-    def ymax(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.DCplxTrans(0, __val - self.bbox().top))
-
-    @property
-    def ysize(self) -> float:
-        """Returns the height of the bounding box."""
-        return self.bbox().height()
-
-    @property
-    def xsize(self) -> float:
-        """Returns the width of the bounding box."""
-        return self.bbox().width()
-
-    @property
-    def x(self) -> float:
-        """Returns the x-coordinate center of the bounding box."""
-        return self.bbox().center().x
-
-    @x.setter
-    def x(self, __val: float) -> None:
-        """Moves the instance so that the bbox's center x-coordinate."""
-        self.transform(kdb.DCplxTrans(__val - self.bbox().center().x, 0))
-
-    @property
-    def y(self) -> float:
-        """Returns the x-coordinate center of the bounding box."""
-        return self.bbox().center().y
-
-    @y.setter
-    def y(self, __val: float) -> None:
-        """Moves the instance so that the bbox's center x-coordinate."""
-        self.transform(kdb.DCplxTrans(0, __val - self.bbox().center().y))
-
-    @property
-    def center(self) -> kdb.DPoint:
-        """Returns the coordinate center of the bounding box."""
-        return self.bbox().center()
-
-    @center.setter
-    def center(self, val: tuple[float, float] | kdb.DVector) -> None:
-        """Moves the instance so that the bbox's center coordinate."""
-        if isinstance(val, kdb.DVector):
-            self.transform(kdb.DCplxTrans(val - self.bbox().center().to_v()))
-        elif isinstance(val, tuple | list):
-            self.transform(
-                kdb.DCplxTrans(
-                    kdb.DVector(val[0], val[1]) - self.bbox().center().to_v()
-                )
-            )
-        else:
-            raise ValueError(
-                f"Type {type(val)} not supported for center setter {val}. "
-                "Not a tuple, list, kdb.Point or kdb.Vector."
-            )
-
-    @overload
-    def dmovex(self, destination: float, /) -> Self: ...
-
-    @overload
-    def dmovex(self, origin: float, destination: float | None) -> Self: ...
-
-    def dmovex(self, origin: float, destination: float | None = None) -> Self:
-        """Move the instance in x-direction in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        return self.movex(origin=origin, destination=destination)
-
-    @overload
-    def dmovey(self, destination: float, /) -> Self: ...
-
-    @overload
-    def dmovey(self, origin: float, destination: float) -> Self: ...
-
-    def dmovey(self, origin: float, destination: float | None = None) -> Self:
-        """Move the instance in y-direction in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        return self.movey(origin=origin, destination=destination)
-
-    @overload
-    def dmove(self, destination: tuple[float, float], /) -> Self: ...
-
-    @overload
-    def dmove(
-        self, origin: tuple[float, float], destination: tuple[float, float]
-    ) -> Self: ...
-
-    def dmove(
-        self,
-        origin: tuple[float, float],
-        destination: tuple[float, float] | None = None,
-    ) -> Self:
-        """Move the instance in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        return self.move(origin=origin, destination=destination)
-
-    def drotate(self, angle: float, center: kdb.DPoint | None = None) -> Self:
-        """Rotate instance in increments of 90°."""
-        if not center:
-            self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
-        else:
-            t = kdb.DCplxTrans(center.to_v())
-            self.transform(t.inverted())
-            self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
-            self.transform(t)
-        return self
-
-    def dmirror(
-        self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
-    ) -> Self:
-        """Mirror the instance at a line."""
-        mirror_v = p2 - p1
-        disp = self.trans.disp
-        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
-        dedge = kdb.DEdge(p1, p2)
-
-        v = mirror_v
-        v = kdb.DVector(-v.y, v.x)
-
-        dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
-
-        cross_point = dedge.cut_point(dedge_disp)
-
-        self.transform(
-            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
-        )
-
-        return self
-
-    def dmirror_x(self, x: float = 0) -> Self:
-        """Mirror the instance at an x-axis."""
-        self.transform(kdb.DCplxTrans(1, 180, True, 2 * x, 0))
-        return self
-
-    def dmirror_y(self, y: float = 0) -> Self:
-        """Mirror the instance at an y-axis."""
-        self.transform(kdb.DCplxTrans(1, 0, True, 0, 2 * y))
-        return self
-
-    @property
-    def dxmin(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self.bbox().left
-
-    @dxmin.setter
-    def dxmin(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.DCplxTrans(__val - self.bbox().left, 0))
-
-    @property
-    def dymin(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self.bbox().bottom
-
-    @dymin.setter
-    def dymin(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.DCplxTrans(0, __val - self.bbox().bottom))
-
-    @property
-    def dxmax(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self.bbox().right
-
-    @dxmax.setter
-    def dxmax(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.DCplxTrans(__val - self.bbox().right, 0))
-
-    @property
-    def dymax(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self.bbox().top
-
-    @dymax.setter
-    def dymax(self, __val: float) -> None:
-        """Moves the instance so that the bbox's left x-coordinate."""
-        self.transform(kdb.DCplxTrans(0, __val - self.bbox().top))
-
-    @property
-    def dysize(self) -> float:
-        """Returns the height of the bounding box."""
-        return self.bbox().height()
-
-    @property
-    def dxsize(self) -> float:
-        """Returns the width of the bounding box."""
-        return self.bbox().width()
-
-    @property
-    def dx(self) -> float:
-        """Returns the x-coordinate center of the bounding box."""
-        return self.bbox().center().x
-
-    @dx.setter
-    def dx(self, __val: float) -> None:
-        """Moves the instance so that the bbox's center x-coordinate."""
-        self.transform(kdb.DCplxTrans(__val - self.bbox().center().x, 0))
-
-    @property
-    def dy(self) -> float:
-        """Returns the x-coordinate center of the bounding box."""
-        return self.bbox().center().y
-
-    @dy.setter
-    def dy(self, __val: float) -> None:
-        """Moves the instance so that the bbox's center x-coordinate."""
-        self.transform(kdb.DCplxTrans(0, __val - self.bbox().center().y))
-
-    @property
-    def dcenter(self) -> kdb.DPoint:
-        """Returns the coordinate center of the bounding box."""
-        return self.bbox().center()
-
-    @dcenter.setter
-    def dcenter(self, val: tuple[float, float] | kdb.DVector) -> None:
-        """Moves the instance so that the bbox's center coordinate."""
-        self.center = val  # type: ignore[assignment]
-
-
 class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     """Base class for shared attributes between VKCell and KCell."""
 
@@ -3274,7 +1633,7 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
     _kdb_cell: kdb.Cell = PrivateAttr()
     yaml_tag: ClassVar[str] = "!KCell"
     boundary: kdb.DPolygon | None = None
-    insts: Instances = Field(default_factory=Instances)
+    insts: Instances
     size_info: SizeInfo
     dsize_info: DSizeInfo
 
@@ -3308,6 +1667,7 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
             kcl=_kcl,
             size_info=SizeInfo(_kdb_cell.bbox),
             dsize_info=DSizeInfo(_kdb_cell.dbbox),
+            insts=Instances(),
         )
         self._kdb_cell = _kdb_cell
         if _name == "Unnamed_!":
@@ -7466,6 +5826,1647 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
         vi = VInstance(cell)
         self.insts.append(vi)
         return vi
+
+
+class VInstancePorts:
+    """Ports of an instance.
+
+    These act as virtual ports as the centers needs to change if the
+    instance changes etc.
+
+
+    Attributes:
+        cell_ports: A pointer to the [`KCell.ports`][kfactory.kcell.KCell.ports]
+            of the cell
+        instance: A pointer to the Instance related to this.
+            This provides a way to dynamically calculate the ports.
+    """
+
+    cell_ports: Ports
+    instance: VInstance
+
+    def __init__(self, instance: VInstance) -> None:
+        """Creates the virtual ports object.
+
+        Args:
+            instance: The related instance
+        """
+        self.cell_ports = instance.cell.ports
+        self.instance = instance
+
+    def __len__(self) -> int:
+        """Return Port count."""
+        return len(self.cell_ports)
+
+    def __getitem__(self, key: int | str | None) -> Port:
+        """Get a port by name."""
+        p = self.cell_ports[key]
+        return p.copy(self.instance.trans)
+
+    def __iter__(self) -> Iterator[Port]:
+        """Create a copy of the ports to iterate through."""
+        yield from (p.copy(self.instance.trans) for p in self.cell_ports)
+
+    def __repr__(self) -> str:
+        """String representation.
+
+        Creates a copy and uses the `__repr__` of
+        [Ports][kfactory.kcell.Ports.__repr__].
+        """
+        return repr(self.copy())
+
+    def filter(
+        self,
+        angle: int | None = None,
+        orientation: float | None = None,
+        layer: LayerEnum | int | None = None,
+        port_type: str | None = None,
+        regex: str | None = None,
+    ) -> list[Port]:
+        """Filter ports by name.
+
+        Args:
+            angle: Filter by angle. 0, 1, 2, 3.
+            orientation: Filter by orientation in degrees.
+            layer: Filter by layer.
+            port_type: Filter by port type.
+            regex: Filter by regex of the name.
+        """
+        ports: Iterable[Port] = list(self.instance.ports)
+        if regex:
+            ports = filter_regex(ports, regex)
+        if layer is not None:
+            ports = filter_layer(ports, layer)
+        if port_type:
+            ports = filter_port_type(ports, port_type)
+        if angle is not None:
+            ports = filter_direction(ports, angle)
+        if orientation is not None:
+            ports = filter_orientation(ports, orientation)
+        return list(ports)
+
+    def copy(self) -> Ports:
+        """Creates a copy in the form of [Ports][kfactory.kcell.Ports]."""
+        return Ports(
+            kcl=self.instance.cell.kcl,
+            ports=[p.copy(self.instance.trans) for p in self.cell_ports._ports],
+        )
+
+
+class Instance:
+    """An Instance of a KCell.
+
+    An Instance is a reference to a KCell with a transformation.
+
+    Attributes:
+        _instance: The internal `kdb.Instance` reference
+        ports: Transformed ports of the KCell
+        kcl: Pointer to the layout object holding the instance
+        d: Helper that allows retrieval of instance information in um
+    """
+
+    yaml_tag = "!Instance"
+    _instance: kdb.Instance
+    kcl: KCLayout
+    ports: InstancePorts
+    size_info: SizeInfo
+    dsize_info: DSizeInfo
+
+    def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
+        """Create an instance from a KLayout Instance."""
+        self._instance = instance
+        self.kcl = kcl
+        self.ports = InstancePorts(self)
+        self.size_info = SizeInfo(self.bbox)
+        self.dsize_info = DSizeInfo(self.dbbox)
+
+    def __getitem__(
+        self, key: int | str | None | tuple[int | str | None, int, int]
+    ) -> Port:
+        """Returns port from instance.
+
+        The key can either be an integer, in which case the nth port is
+        returned, or a string in which case the first port with a matching
+        name is returned.
+
+        If the instance is an array, the key can also be a tuple in the
+        form of `c.ports[key_name, i_a, i_b]`, where `i_a` is the index in
+        the `instance.a` direction and `i_b` the `instance.b` direction.
+
+        E.g. `c.ports["a", 3, 5]`, accesses the ports of the instance which is
+        3 times in `a` direction (4th index in the array), and 5 times in `b` direction
+        (5th index in the array).
+        """
+        return self.ports[key]
+
+    def __getattr__(self, name: str) -> Any:
+        """If we don't have an attribute, get it from the instance."""
+        return getattr(self._instance, name)
+
+    @property
+    def name(self) -> str:
+        """Name of instance in GDS."""
+        prop = self.property(PROPID.NAME)
+        return (
+            str(prop)
+            if prop is not None
+            else f"{self.cell.name}_{self.trans.disp.x}_{self.trans.disp.y}"
+        )
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self.set_property(PROPID.NAME, value)
+
+    @property
+    def purpose(self) -> str | None:
+        """Purpose value of instance in GDS."""
+        return self.property(PROPID.PURPOSE)  # type: ignore[no-any-return]
+
+    @purpose.setter
+    def purpose(self, value: str | None) -> None:
+        self.set_property(PROPID.PURPOSE, value)
+
+    @property
+    def cell_index(self) -> int:
+        """Get the index of the cell this instance refers to."""
+        return self._instance.cell_index
+
+    @cell_index.setter
+    def cell_index(self, value: int) -> None:
+        self._instance_.cell_index = value
+
+    @property
+    def cell(self) -> KCell:
+        """Parent KCell  of the Instance."""
+        return self.kcl[self.cell_index]
+
+    @cell.setter
+    def cell(self, value: KCell) -> None:
+        self.cell_index = value.cell_index()
+
+    @property
+    def a(self) -> kdb.Vector:
+        """Returns the displacement vector for the 'a' axis."""
+        return self._instance.a
+
+    @a.setter
+    def a(self, vec: kdb.Vector | kdb.DVector) -> None:
+        self._instance.a = vec  # type: ignore[assignment]
+
+    @property
+    def b(self) -> kdb.Vector:
+        """Returns the displacement vector for the 'b' axis."""
+        return self._instance.b
+
+    @b.setter
+    def b(self, vec: kdb.Vector | kdb.DVector) -> None:
+        self._instance.b = vec  # type: ignore[assignment]
+
+    @property
+    def cell_inst(self) -> kdb.CellInstArray:
+        """Gets the basic CellInstArray object associated with this instance."""
+        return self._instance.cell_inst
+
+    @cell_inst.setter
+    def cell_inst(self, cell_inst: kdb.CellInstArray | kdb.DCellInstArray) -> None:
+        self._instance.cell_inst = cell_inst  # type: ignore[assignment]
+
+    @property
+    def cplx_trans(self) -> kdb.ICplxTrans:
+        """Gets the complex transformation of the instance.
+
+        Or the first instance in the array.
+        """
+        return self._instance.cplx_trans
+
+    @cplx_trans.setter
+    def cplx_trans(self, trans: kdb.ICplxTrans | kdb.DCplxTrans) -> None:
+        self._instance.cplx_trans = trans  # type: ignore[assignment]
+
+    @property
+    def dcplx_trans(self) -> kdb.DCplxTrans:
+        """Gets the complex transformation of the instance.
+
+        Or the first instance in the array.
+        """
+        return self._instance.dcplx_trans
+
+    @dcplx_trans.setter
+    def dcplx_trans(self, trans: kdb.DCplxTrans) -> None:
+        self._instance.dcplx_trans = trans
+
+    @property
+    def dtrans(self) -> kdb.DTrans:
+        """Gets the complex transformation of the instance.
+
+        Or the first instance in the array.
+        """
+        return self._instance.dtrans
+
+    @dtrans.setter
+    def dtrans(self, trans: kdb.DTrans) -> None:
+        self._instance.dtrans = trans
+
+    @property
+    def trans(self) -> kdb.Trans:
+        """Gets the complex transformation of the instance.
+
+        Or the first instance in the array.
+        """
+        return self._instance.trans
+
+    @trans.setter
+    def trans(self, trans: kdb.Trans | kdb.DTrans) -> None:
+        self._instance.trans = trans  # type: ignore[assignment]
+
+    @property
+    def na(self) -> int:
+        """Returns the displacement vector for the 'a' axis."""
+        return self._instance.na
+
+    @na.setter
+    def na(self, value: int) -> None:
+        self._instance.na = value
+
+    @property
+    def nb(self) -> int:
+        """Returns the number of instances in the 'b' axis."""
+        return self._instance.nb
+
+    @nb.setter
+    def nb(self, value: int) -> None:
+        self._instance.nb = value
+
+    @property
+    def parent_cell(self) -> KCell:
+        """Gets the cell this instance is contained in."""
+        return self.kcl[self._instance.parent_cell.cell_index()]
+
+    @parent_cell.setter
+    def parent_cell(self, cell: KCell | kdb.Cell) -> None:
+        if isinstance(cell, KCell):
+            self._instance.parent_cell = cell._kdb_cell
+        else:
+            self._instance.parent_cell = cell
+
+    @property
+    def prop_id(self) -> int:
+        """Gets the properties ID associated with the instance."""
+        return self._instance.prop_id
+
+    @prop_id.setter
+    def prop_id(self, value: int) -> None:
+        self._instance.prop_id = value
+
+    @property
+    def hash(self) -> bytes:
+        """Hash the instance."""
+        h = sha3_512()
+        h.update(self.cell.hash())
+        if not self.is_complex():
+            h.update(self.trans.hash().to_bytes(8, "big"))
+        else:
+            h.update(self.dcplx_trans.hash().to_bytes(8, "big"))
+        return h.digest()
+
+    @overload
+    def connect(
+        self,
+        port: str | Port | None,
+        other: Port,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
+    ) -> None: ...
+
+    @overload
+    def connect(
+        self,
+        port: str | Port | None,
+        other: Instance,
+        other_port_name: str | None,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
+    ) -> None: ...
+
+    def connect(
+        self,
+        port: str | Port | None,
+        other: Instance | Port,
+        other_port_name: str | None = None,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
+    ) -> None:
+        """Align port with name `portname` to a port.
+
+        Function to allow to transform this instance so that a port of this instance is
+        connected (same center with 180° turn) to another instance.
+
+        Args:
+            port: The name of the port of this instance to be connected, or directly an
+                instance port. Can be `None` because port names can be `None`.
+            other: The other instance or a port. Skip `other_port_name` if it's a port.
+            other_port_name: The name of the other port. Ignored if
+                `other` is a port.
+            mirror: Instead of applying klayout.db.Trans.R180 as a connection
+                transformation, use klayout.db.Trans.M90, which effectively means this
+                instance will be mirrored and connected.
+            allow_width_mismatch: Skip width check between the ports if set.
+            allow_layer_mismatch: Skip layer check between the ports if set.
+            allow_type_mismatch: Skip port_type check between the ports if set.
+            use_mirror: If False mirror flag does not get applied from the connection.
+            use_angle: If False the angle does not get applied from the connection.
+        """
+        if allow_width_mismatch is None:
+            allow_width_mismatch = config.allow_width_mismatch
+        if allow_layer_mismatch is None:
+            allow_layer_mismatch = config.allow_layer_mismatch
+        if allow_type_mismatch is None:
+            allow_type_mismatch = config.allow_type_mismatch
+        if use_mirror is None:
+            use_mirror = config.connect_use_mirror
+        if use_angle is None:
+            use_angle = config.connect_use_angle
+        if isinstance(other, Instance):
+            if other_port_name is None:
+                raise ValueError(
+                    "portname cannot be None if an Instance Object is given. For"
+                    "complex connections (non-90 degree and floating point ports) use"
+                    "route_cplx instead"
+                )
+            op = other.ports[other_port_name]
+        elif isinstance(other, Port):
+            op = other
+        else:
+            raise ValueError("other_instance must be of type Instance or Port")
+        if isinstance(port, Port):
+            p = port.copy(self.dcplx_trans.inverted())
+        else:
+            p = self.cell.ports[port]
+        if p.width != op.width and not allow_width_mismatch:
+            # The ports are not the same width
+            raise PortWidthMismatch(
+                self,
+                other,
+                p,
+                op,
+            )
+        if p.layer != op.layer and not allow_layer_mismatch:
+            # The ports are not on the same layer
+            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
+        if p.port_type != op.port_type and not allow_type_mismatch:
+            raise PortTypeMismatch(self, other, p, op)
+        if p._dcplx_trans or op._dcplx_trans:
+            dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
+            match (use_mirror, use_angle):
+                case True, True:
+                    _dcplx_trans = (
+                        op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                    )
+                    self._instance.dcplx_trans = _dcplx_trans
+                case False, True:
+                    dconn_trans = (
+                        kdb.DCplxTrans.M90
+                        if mirror ^ self.dcplx_trans.mirror
+                        else kdb.DCplxTrans.R180
+                    )
+                    opt = op.dcplx_trans
+                    opt.mirror = False
+                    _dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
+                    self._instance.dcplx_trans = _dcplx_trans
+                case False, False:
+                    self._instance.dcplx_trans = kdb.DCplxTrans(
+                        op.dcplx_trans.disp - p.dcplx_trans.disp
+                    )
+                case True, False:
+                    self._instance.dcplx_trans = kdb.DCplxTrans(
+                        op.dcplx_trans.disp - p.dcplx_trans.disp
+                    )
+                    self.d.mirror_y(op.dcplx_trans.disp.y)
+
+        else:
+            conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
+            match (use_mirror, use_angle):
+                case True, True:
+                    _trans = op.trans * conn_trans * p.trans.inverted()
+                    self._instance.trans = _trans
+                case False, True:
+                    conn_trans = (
+                        kdb.Trans.M90 if mirror ^ self.trans.mirror else kdb.Trans.R180
+                    )
+                    op = op.copy()
+                    op.trans.mirror = False
+                    _trans = op.trans * conn_trans * p.trans.inverted()
+                    self._instance.trans = _trans
+                case False, False:
+                    self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
+                case True, False:
+                    self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
+                    self.mirror_y(op.trans.disp.y)
+
+    @classmethod
+    def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
+        """Convert the instance to a yaml representation."""
+        d = {
+            "cellname": node.cell.name,
+            "trans": node._trans,
+            "dcplx_trans": node._dcplx_trans,
+        }
+        return representer.represent_mapping(cls.yaml_tag, d)
+
+    @overload
+    def movex(self, destination: int, /) -> Instance: ...
+
+    @overload
+    def movex(self, origin: int, destination: int) -> Instance: ...
+
+    def movex(self, origin: int, destination: int | None = None) -> Instance:
+        """Move the instance in x-direction in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.Trans(origin, 0))
+        else:
+            self.transform(kdb.Trans(destination - origin, 0))
+        return self
+
+    @overload
+    def movey(self, destination: int, /) -> Instance: ...
+
+    @overload
+    def movey(self, origin: int, destination: int) -> Instance: ...
+
+    def movey(self, origin: int, destination: int | None = None) -> Instance:
+        """Move the instance in y-direction in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.Trans(0, origin))
+        else:
+            self.transform(kdb.Trans(0, destination - origin))
+        return self
+
+    @overload
+    def move(self, destination: tuple[int, int], /) -> Instance: ...
+
+    @overload
+    def move(
+        self, origin: tuple[int, int], destination: tuple[int, int]
+    ) -> Instance: ...
+
+    def move(
+        self, origin: tuple[int, int], destination: tuple[int, int] | None = None
+    ) -> Instance:
+        """Move the instance in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.Trans(*origin))
+        else:
+            self.transform(
+                kdb.Trans(destination[0] - origin[0], destination[1] - origin[1])
+            )
+        return self
+
+    def rotate(
+        self, angle: Literal[0, 1, 2, 3], center: kdb.Point | None = None
+    ) -> Instance:
+        """Rotate instance in increments of 90°."""
+        if center:
+            t = kdb.Trans(center.to_v())
+            self.transform(t.inverted())
+        self.transform(kdb.Trans(angle, False, 0, 0))
+        if center:
+            self.transform(t)
+        return self
+
+    def __repr__(self) -> str:
+        """Return a string representation of the instance."""
+        port_names = [p.name for p in self.ports]
+        return (
+            f"{self.parent_cell.name}: ports {port_names}, {self.kcl[self.cell_index]}"
+        )
+
+    def mirror(
+        self, p1: kdb.Point = kdb.Point(1, 0), p2: kdb.Point = kdb.Point(0, 0)
+    ) -> Instance:
+        """Mirror the instance at a line."""
+        mirror_v = p2 - p1
+        disp = self.dcplx_trans.disp
+        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
+        dedge = kdb.DEdge(self.kcl.to_um(p1), self.kcl.to_um(p2))
+
+        v = self.kcl.to_um(mirror_v)
+        v = kdb.DVector(-v.y, v.x)
+
+        dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
+
+        cross_point = dedge.cut_point(dedge_disp)
+
+        self.transform(
+            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
+        )
+
+        return self
+
+    def mirror_x(self, x: int = 0) -> Instance:
+        """Mirror the instance at an y-axis at position x."""
+        self.transform(kdb.Trans(2, True, 2 * x, 0))
+        return self
+
+    def mirror_y(self, y: int = 0) -> Instance:
+        """Mirror the instance at an x-axis at position y."""
+        self.transform(kdb.Trans(0, True, 0, 2 * y))
+        return self
+
+    @property
+    def xmin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().left
+
+    @xmin.setter
+    def xmin(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().left, 0))
+
+    @property
+    def ymin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().bottom
+
+    @ymin.setter
+    def ymin(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(0, __val - self._instance.bbox().bottom))
+
+    @property
+    def xmax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().right
+
+    @xmax.setter
+    def xmax(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().right, 0))
+
+    @property
+    def ymax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.bbox().top
+
+    @ymax.setter
+    def ymax(self, __val: int) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.Trans(0, __val - self._instance.bbox().top))
+
+    @property
+    def ysize(self) -> int:
+        """Returns the height of the bounding box."""
+        return self._instance.bbox().height()
+
+    @property
+    def xsize(self) -> int:
+        """Returns the width of the bounding box."""
+        return self._instance.bbox().width()
+
+    @property
+    def x(self) -> int:
+        """Returns the x-coordinate center of the bounding box."""
+        return self._instance.bbox().center().x
+
+    @x.setter
+    def x(self, __val: int) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().center().x, 0))
+
+    @property
+    def y(self) -> int:
+        """Returns the x-coordinate center of the bounding box."""
+        return self._instance.bbox().center().y
+
+    @y.setter
+    def y(self, __val: int) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.Trans(__val - self.bbox().center().y, 0))
+
+    @property
+    def center(self) -> kdb.Point:
+        """Returns the coordinate center of the bounding box."""
+        return self._instance.bbox().center()
+
+    @center.setter
+    def center(self, val: tuple[int, int] | kdb.Vector) -> None:
+        """Moves the instance so that the bbox's center coordinate."""
+        if isinstance(val, kdb.Point | kdb.Vector):
+            self.transform(kdb.Trans(val - self.bbox().center()))
+        elif isinstance(val, tuple | list):
+            self.transform(kdb.Trans(kdb.Vector(val[0], val[1]) - self.bbox().center()))
+        else:
+            raise ValueError(
+                f"Type {type(val)} not supported for center setter {val}. "
+                "Not a tuple, list, kdb.Point or kdb.Vector."
+            )
+
+    @overload
+    def dmovex(self, destination: float, /) -> Instance: ...
+
+    @overload
+    def dmovex(self, origin: float, destination: float) -> Instance: ...
+
+    def dmovex(self, origin: float, destination: float | None = None) -> Instance:
+        """Move the instance in x-direction in um.
+
+        Args:
+            origin: reference point to move
+            destination: move origin so that it will land on this coordinate
+        """
+        if destination is None:
+            self.transform(kdb.DTrans(float(origin), 0.0))
+        else:
+            self.transform(kdb.DTrans(float(destination - origin), 0.0))
+        return self
+
+    @overload
+    def dmovey(self, destination: float, /) -> Instance: ...
+
+    @overload
+    def dmovey(self, origin: float, destination: float) -> Instance: ...
+
+    def dmovey(self, origin: float, destination: float | None = None) -> Instance:
+        """Move the instance in y-direction in um.
+
+        Args:
+            origin: reference point to move
+            destination: move origin so that it will land on this coordinate
+        """
+        if destination is None:
+            self.transform(kdb.DTrans(0.0, float(origin)))
+        else:
+            self.transform(kdb.DTrans(0.0, float(destination - origin)))
+        return self
+
+    def drotate(
+        self,
+        angle: float,
+        center: kdb.DPoint
+        | kdb.DVector
+        | tuple[float, float]
+        | Port
+        | str
+        | None = None,
+    ) -> Instance:
+        """Rotate instance in degrees.
+
+        Args:
+            angle: angle in degrees.
+            center: center of rotation. If a port is given, the center is the port's.
+                if a string is given, the center is the port with the name.
+                if a tuple is given, the center is the tuple.
+        """
+        if center:
+            _center: kdb.DVector | kdb.DPoint
+            if isinstance(center, str):
+                _center = self.ports[center].dcplx_trans.disp
+            elif isinstance(center, Port):
+                _center = center.dcplx_trans.disp
+            elif isinstance(center, tuple | list):
+                _center = kdb.DVector(*center)
+            else:
+                _center = center
+            t = kdb.DTrans(_center)  # type: ignore[arg-type]
+            self.transform(t.inverted())
+        self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
+        if center:
+            self.transform(t)
+        return self
+
+    @overload
+    def dmove(self, destination: tuple[float, float], /) -> Instance: ...
+
+    @overload
+    def dmove(
+        self, origin: tuple[float, float], destination: tuple[float, float]
+    ) -> Instance: ...
+
+    def dmove(
+        self,
+        origin: tuple[float, float],
+        destination: tuple[float, float] | None = None,
+    ) -> Instance:
+        """Move the instance in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.DTrans(float(origin[0]), float(origin[1])))
+        else:
+            self.transform(
+                kdb.DTrans(
+                    float(destination[0] - origin[0]), float(destination[1] - origin[1])
+                )
+            )
+        return self
+
+    def dmirror(
+        self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
+    ) -> Instance:
+        """Mirror the instance at a line."""
+        mirror_v = p2 - p1
+        disp = self.dcplx_trans.disp
+        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
+        dedge = kdb.DEdge(p1, p2)
+
+        v = mirror_v
+        v = kdb.DVector(-v.y, v.x)
+        dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
+        cross_point = dedge.cut_point(dedge_disp)
+        self.transform(
+            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
+        )
+
+        return self
+
+    def dmirror_x(self, x: float = 0) -> Instance:
+        """Mirror the instance at an x-axis."""
+        self.transform(kdb.DTrans(2, True, 2 * x, 0))
+        return self
+
+    def dmirror_y(self, y: float = 0) -> Instance:
+        """Mirror the instance at an y-axis."""
+        self.transform(kdb.DTrans(0, True, 0, 2 * y))
+        return self
+
+    @property
+    def dxmin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.dbbox().left
+
+    @dxmin.setter
+    def dxmin(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DTrans(__val - self.dbbox().left, 0.0))
+
+    @property
+    def dymin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.dbbox().bottom
+
+    @dymin.setter
+    def dymin(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DTrans(0.0, __val - self._instance.dbbox().bottom))
+
+    @property
+    def dxmax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.dbbox().right
+
+    @dxmax.setter
+    def dxmax(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DTrans(__val - self._instance.dbbox().right, 0.0))
+
+    @property
+    def dxsize(self) -> float:
+        """Returns the width of the bounding box."""
+        return self._instance.dbbox().width()
+
+    @property
+    def dysize(self) -> float:
+        """Returns the height of the bounding box."""
+        return self._instance.dbbox().height()
+
+    @property
+    def dymax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self._instance.dbbox().top
+
+    @dymax.setter
+    def dymax(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DTrans(0.0, __val - self._instance.dbbox().top))
+
+    @property
+    def dx(self) -> float:
+        """Returns the x-coordinate center of the bounding box."""
+        return self._instance.dbbox().center().x
+
+    @dx.setter
+    def dx(self, __val: float) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.DTrans(__val - self._instance.dbbox().center().x, 0.0))
+
+    @property
+    def dy(self) -> float:
+        """Returns the x-coordinate center of the bounding box."""
+        return self._instance.dbbox().center().y
+
+    @dy.setter
+    def dy(self, __val: float) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.DTrans(0.0, __val - self._instance.dbbox().center().y))
+
+    @property
+    def dcenter(self) -> kdb.DPoint:
+        """Returns the coordinate center of the bounding box."""
+        return self._instance.dbbox().center()
+
+    @dcenter.setter
+    def dcenter(self, val: tuple[float, float] | kdb.DPoint) -> None:
+        """Moves the instance so that the bbox's center coordinate."""
+        if isinstance(val, kdb.DPoint | kdb.DVector):
+            self.transform(kdb.DTrans(val - self._instance.dbbox().center()))
+        elif isinstance(val, tuple | list):
+            self.transform(
+                kdb.DTrans(kdb.DPoint(val[0], val[1]) - self._instance.dbbox().center())
+            )
+        else:
+            raise ValueError(
+                f"Type {type(val)} not supported for center setter {val}. "
+                "Not a tuple, list, kdb.Point or kdb.Vector."
+            )
+
+    def flatten(self, levels: int | None = None) -> None:
+        """Flatten all or just certain instances.
+
+        Args:
+            levels: If level < #hierarchy-levels -> pull the sub instances to self,
+                else pull the polygons. None will always flatten all levels.
+        """
+        if levels:
+            pc = self.parent_cell
+            self._instance.flatten(levels)
+            del pc.insts[self]
+            pc.evaluate_insts()
+        else:
+            pc = self.parent_cell
+            self._instance.flatten()
+            del pc.insts[self]
+
+
+class Instances:
+    """Holder for instances.
+
+    Allows retrieval by name or index
+    """
+
+    def __init__(self) -> None:
+        """Constructor."""
+        self._insts: list[Instance] = []
+
+    def append(self, inst: Instance) -> None:
+        """Append a new instance."""
+        self._insts.append(inst)
+
+    def __getitem__(self, key: str | int) -> Instance:
+        """Retrieve instance by index or by name."""
+        if isinstance(key, int):
+            return self._insts[key]
+
+        else:
+            return next(filter(lambda inst: inst.name == key, self._insts))
+
+    def __len__(self) -> int:
+        """Length of the instances."""
+        return self._insts.__len__()
+
+    def __iter__(self) -> Iterator[Instance]:
+        """Get instance iterator."""
+        return self._insts.__iter__()
+
+    def get_inst_names(self) -> dict[str | None, int]:
+        """Get count of names of named instances.
+
+        Not named instances will be added to the `None` key.
+        """
+        names: dict[str | None, int] = {}
+        for inst in self._insts:
+            if inst.name in names:
+                names[inst.name] += 1
+            else:
+                names[inst.name] = 1
+        return names
+
+    def __delitem__(self, item: Instance | int) -> None:
+        if isinstance(item, int):
+            del self._insts[item]
+        else:
+            self._insts.remove(item)
+
+    def clean(self) -> None:
+        deletion_list: list[int] = []
+        for i, inst in enumerate(self._insts):
+            if inst._instance._destroyed():
+                deletion_list.insert(0, i)
+        for i in deletion_list:
+            del self._insts[i]
+
+    def clear(self) -> None:
+        self._insts.clear()
+
+
+class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
+    name: str | None
+    cell: VKCell | KCell
+    trans: kdb.DCplxTrans
+    _ports: VInstancePorts
+
+    def __init__(
+        self,
+        cell: VKCell | KCell,
+        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        name: str | None = None,
+    ) -> None:
+        BaseModel.__init__(self, cell=cell, trans=trans, name=name)
+        self._ports = VInstancePorts(self)
+
+    def bbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
+        return self.cell.bbox().transformed(self.trans)
+
+    def __getitem__(self, key: int | str | None) -> Port:
+        """Returns port from instance.
+
+        The key can either be an integer, in which case the nth port is
+        returned, or a string in which case the first port with a matching
+        name is returned.
+
+        If the instance is an array, the key can also be a tuple in the
+        form of `c.ports[key_name, i_a, i_b]`, where `i_a` is the index in
+        the `instance.a` direction and `i_b` the `instance.b` direction.
+
+        E.g. `c.ports["a", 3, 5]`, accesses the ports of the instance which is
+        3 times in `a` direction (4th index in the array), and 5 times in `b` direction
+        (5th index in the array).
+        """
+        return self.ports[key]
+
+    @property
+    def ports(self) -> VInstancePorts:
+        return self._ports
+
+    def __repr__(self) -> str:
+        """Return a string representation of the instance."""
+        port_names = [p.name for p in self.ports]
+        return f"{self.cell.name}: ports {port_names}, transformation {self.trans}"
+
+    def insert_into(
+        self,
+        cell: KCell,
+        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+    ) -> Instance:
+        if isinstance(self.cell, VKCell):
+            _trans = trans * self.trans
+            base_trans = kdb.DCplxTrans(
+                kdb.DCplxTrans(
+                    kdb.ICplxTrans(_trans, cell.kcl.dbu)
+                    .s_trans()
+                    .to_dtype(cell.kcl.dbu)
+                )
+            )
+            _trans = base_trans.inverted() * _trans
+            _cell_name = self.cell.name
+            if _cell_name is None:
+                raise ValueError(
+                    "Cannot insert a non-flattened VInstance into a VKCell when the"
+                    f" name is 'None'. VKCell at {self.trans}"
+                )
+            if _trans != kdb.DCplxTrans():
+                _trans_str = (
+                    f"_M{_trans.mirror}_S{_trans.angle}"
+                    f"_X{_trans.disp.x}_Y{_trans.disp.y}"
+                ).replace(".", "p")
+                _cell_name = _cell_name + clean_name(_trans_str)
+            if cell.kcl.layout.cell(_cell_name) is None:
+                _cell = KCell(kcl=self.cell.kcl, name=_cell_name)  # self.cell.dup()
+                for layer, shapes in self.cell._shapes.items():
+                    for shape in shapes.transform(_trans):
+                        _cell.shapes(layer).insert(shape)
+                for inst in self.cell.insts:
+                    inst.insert_into(cell=_cell, trans=_trans)
+                _cell.name = _cell_name
+                for port in self.cell.ports:
+                    _cell.add_port(port.copy(_trans))
+                _settings = self.cell.settings.model_dump()
+                _settings.update({"virtual_trans": _trans})
+                _settings_units = self.cell.settings_units.model_copy()
+                _cell._settings = KCellSettings(**_settings)
+                _cell.info = Info(**self.cell.info.model_dump())
+                _cell._settings_units = _settings_units
+            else:
+                _cell = cell.kcl[_cell_name]
+            _inst = cell << _cell
+            _inst.transform(base_trans)
+            return _inst
+
+        else:
+            _trans = trans * self.trans
+            base_trans = kdb.DCplxTrans(
+                kdb.ICplxTrans(_trans, cell.kcl.dbu).s_trans().to_dtype(cell.kcl.dbu)
+            )
+            _trans = base_trans.inverted() * _trans
+            _cell_name = self.cell.name
+            if _trans != kdb.DCplxTrans():
+                _trans_str = (
+                    f"_M{_trans.mirror}_S{_trans.angle}"
+                    f"_X{_trans.disp.x}_Y{_trans.disp.y}"
+                ).replace(".", "p")
+                _cell_name = _cell_name + _trans_str
+            if cell.kcl.layout.cell(_cell_name) is None:
+                _cell = self.cell.dup()
+                _cell.name = _cell_name
+                _cell.flatten(False)
+                for layer in _cell.kcl.layer_indexes():
+                    _cell.shapes(layer).transform(_trans)
+                for port in _cell.ports:
+                    port.dcplx_trans = _trans * port.dcplx_trans
+            else:
+                _cell = cell.kcl[_cell_name]
+            _inst = cell << _cell
+            _inst.transform(base_trans)
+            return _inst
+
+    @overload
+    def insert_into_flat(
+        self,
+        cell: KCell | VKCell,
+        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        *,
+        levels: None = None,
+    ) -> None: ...
+
+    @overload
+    def insert_into_flat(
+        self,
+        cell: KCell | VKCell,
+        *,
+        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        levels: int,
+    ) -> None: ...
+
+    def insert_into_flat(
+        self,
+        cell: KCell | VKCell,
+        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        *,
+        levels: int | None = None,
+    ) -> None:
+        if isinstance(self.cell, VKCell):
+            for layer, shapes in self.cell._shapes.items():
+                for shape in shapes.transform(trans * self.trans):
+                    cell.shapes(layer).insert(shape)
+            for inst in self.cell.insts:
+                if levels is not None:
+                    if levels > 0:
+                        inst.insert_into_flat(
+                            cell, trans=trans * self.trans, levels=levels - 1
+                        )
+                    else:
+                        assert isinstance(cell, KCell)
+                        inst.insert_into(cell, trans=trans * self.trans)
+                else:
+                    inst.insert_into_flat(cell, trans=trans * self.trans)
+
+        else:
+            if levels:
+                logger.warning(
+                    "Levels are not supported if the inserted Instance is a KCell."
+                )
+            if isinstance(cell, KCell):
+                for layer in cell.kcl.layer_indexes():
+                    reg = kdb.Region(self.cell.begin_shapes_rec(layer))
+                    reg.transform(kdb.ICplxTrans((trans * self.trans), cell.kcl.dbu))
+                    cell.shapes(layer).insert(reg)
+            else:
+                for layer, shapes in self.cell._shapes.items():
+                    for shape in shapes.transform(trans * self.trans):
+                        cell.shapes(layer).insert(shape)
+                for vinst in self.cell.insts:
+                    vinst.insert_into_flat(cell, trans=trans * self.trans)
+
+    @overload
+    def connect(
+        self,
+        port: str | Port | None,
+        other: Port,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
+    ) -> None: ...
+
+    @overload
+    def connect(
+        self,
+        port: str | Port | None,
+        other: VInstance,
+        other_port_name: str | None,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
+    ) -> None: ...
+
+    def connect(
+        self,
+        port: str | Port | None,
+        other: VInstance | Port,
+        other_port_name: str | None = None,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
+    ) -> None:
+        """Align port with name `portname` to a port.
+
+        Function to allow to transform this instance so that a port of this instance is
+        connected (same center with 180° turn) to another instance.
+
+        Args:
+            port: The name of the port of this instance to be connected, or directly an
+                instance port. Can be `None` because port names can be `None`.
+            other: The other instance or a port. Skip `other_port_name` if it's a port.
+            other_port_name: The name of the other port. Ignored if
+                `other` is a port.
+            mirror: Instead of applying klayout.db.Trans.R180 as a connection
+                transformation, use klayout.db.Trans.M90, which effectively means this
+                instance will be mirrored and connected.
+            allow_width_mismatch: Skip width check between the ports if set.
+            allow_layer_mismatch: Skip layer check between the ports if set.
+            allow_type_mismatch: Skip port_type check between the ports if set.
+            use_mirror: If False mirror flag does not get applied from the connection.
+            use_angle: If False the angle does not get applied from the connection.
+        """
+        if allow_layer_mismatch is None:
+            allow_layer_mismatch = config.allow_layer_mismatch
+        if allow_width_mismatch is None:
+            allow_width_mismatch = config.allow_width_mismatch
+        if allow_type_mismatch is None:
+            allow_type_mismatch = config.allow_type_mismatch
+        if use_mirror is None:
+            use_mirror = config.connect_use_mirror
+        if use_angle is None:
+            use_angle = config.connect_use_angle
+        if isinstance(other, VInstance):
+            if other_port_name is None:
+                raise ValueError(
+                    "portname cannot be None if an Instance Object is given. For"
+                    "complex connections (non-90 degree and floating point ports) use"
+                    "route_cplx instead"
+                )
+            op = other.ports[other_port_name]
+        elif isinstance(other, Port):
+            op = other
+        else:
+            raise ValueError("other_instance must be of type Instance or Port")
+        if isinstance(port, Port):
+            p = port.copy(self.trans.inverted())
+        else:
+            p = self.cell.ports[port]
+        if p.width != op.width and not allow_width_mismatch:
+            # The ports are not the same width
+            raise PortWidthMismatch(
+                self,  # type: ignore[arg-type]
+                other,  # type: ignore[arg-type]
+                p,
+                op,
+            )
+        if p.layer != op.layer and not allow_layer_mismatch:
+            # The ports are not on the same layer
+            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)  # type: ignore[arg-type]
+        if p.port_type != op.port_type and not allow_type_mismatch:
+            raise PortTypeMismatch(self, other, p, op)  # type: ignore[arg-type]
+        dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
+        match (use_mirror, use_angle):
+            case True, True:
+                _trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                self.trans = _trans
+            case False, True:
+                dconn_trans = (
+                    kdb.DCplxTrans.M90
+                    if mirror ^ self.trans.mirror
+                    else kdb.DCplxTrans.R180
+                )
+                opt = op.dcplx_trans
+                opt.mirror = False
+                _dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
+                self.trans = _dcplx_trans
+            case False, False:
+                self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+            case True, False:
+                self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
+                self.mirror_y(op.dcplx_trans.disp.y)
+
+    def transform(self, trans: kdb.DTrans | kdb.DCplxTrans) -> Self:
+        self.trans = kdb.DCplxTrans(trans) * self.trans
+        return self
+
+    @overload
+    def movex(self, destination: float, /) -> Self: ...
+
+    @overload
+    def movex(self, origin: float, destination: float | None) -> Self: ...
+
+    def movex(self, origin: float, destination: float | None = None) -> Self:
+        """Move the instance in x-direction in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.DCplxTrans(origin, 0))
+        else:
+            self.transform(kdb.DCplxTrans(destination - origin, 0))
+        return self
+
+    @overload
+    def movey(self, destination: float, /) -> Self: ...
+
+    @overload
+    def movey(self, origin: float, destination: float | None) -> Self: ...
+
+    def movey(self, origin: float, destination: float | None = None) -> Self:
+        """Move the instance in y-direction in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.DCplxTrans(0, origin))
+        else:
+            self.transform(kdb.DCplxTrans(0, destination - origin))
+        return self
+
+    @overload
+    def move(self, destination: tuple[float, float], /) -> Self: ...
+
+    @overload
+    def move(
+        self, origin: tuple[float, float], destination: tuple[float, float] | None
+    ) -> Self: ...
+
+    def move(
+        self,
+        origin: tuple[float, float],
+        destination: tuple[float, float] | None = None,
+    ) -> Self:
+        """Move the instance in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        if destination is None:
+            self.transform(kdb.DCplxTrans(*origin))
+        else:
+            self.transform(
+                kdb.DCplxTrans(destination[0] - origin[0], destination[1] - origin[1])
+            )
+        return self
+
+    def rotate(self, angle: float, center: kdb.DPoint | None = None) -> Self:
+        """Rotate instance in increments of 90°."""
+        if not center:
+            self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
+        else:
+            t = kdb.DCplxTrans(center.to_v())
+            self.transform(t.inverted())
+            self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
+            self.transform(t)
+        return self
+
+    def mirror(
+        self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
+    ) -> Self:
+        """Mirror the instance at a line."""
+        mirror_v = p2 - p1
+        disp = self.trans.disp
+        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
+        dedge = kdb.DEdge(p1, p2)
+
+        v = mirror_v
+        v = kdb.DVector(-v.y, v.x)
+
+        dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
+
+        cross_point = dedge.cut_point(dedge_disp)
+
+        self.transform(
+            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
+        )
+
+        return self
+
+    def mirror_x(self, x: float = 0) -> Self:
+        """Mirror the instance at an x-axis."""
+        self.transform(kdb.DCplxTrans(1, 180, True, 2 * x, 0))
+        return self
+
+    def mirror_y(self, y: float = 0) -> Self:
+        """Mirror the instance at an y-axis."""
+        self.transform(kdb.DCplxTrans(1, 0, True, 0, 2 * y))
+        return self
+
+    @property
+    def xmin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().left
+
+    @xmin.setter
+    def xmin(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DCplxTrans(__val - self.bbox().left, 0))
+
+    @property
+    def ymin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().bottom
+
+    @ymin.setter
+    def ymin(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DCplxTrans(0, __val - self.bbox().bottom))
+
+    @property
+    def xmax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().right
+
+    @xmax.setter
+    def xmax(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DCplxTrans(__val - self.bbox().right, 0))
+
+    @property
+    def ymax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().top
+
+    @ymax.setter
+    def ymax(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DCplxTrans(0, __val - self.bbox().top))
+
+    @property
+    def ysize(self) -> float:
+        """Returns the height of the bounding box."""
+        return self.bbox().height()
+
+    @property
+    def xsize(self) -> float:
+        """Returns the width of the bounding box."""
+        return self.bbox().width()
+
+    @property
+    def x(self) -> float:
+        """Returns the x-coordinate center of the bounding box."""
+        return self.bbox().center().x
+
+    @x.setter
+    def x(self, __val: float) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.DCplxTrans(__val - self.bbox().center().x, 0))
+
+    @property
+    def y(self) -> float:
+        """Returns the x-coordinate center of the bounding box."""
+        return self.bbox().center().y
+
+    @y.setter
+    def y(self, __val: float) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.DCplxTrans(0, __val - self.bbox().center().y))
+
+    @property
+    def center(self) -> kdb.DPoint:
+        """Returns the coordinate center of the bounding box."""
+        return self.bbox().center()
+
+    @center.setter
+    def center(self, val: tuple[float, float] | kdb.DVector) -> None:
+        """Moves the instance so that the bbox's center coordinate."""
+        if isinstance(val, kdb.DVector):
+            self.transform(kdb.DCplxTrans(val - self.bbox().center().to_v()))
+        elif isinstance(val, tuple | list):
+            self.transform(
+                kdb.DCplxTrans(
+                    kdb.DVector(val[0], val[1]) - self.bbox().center().to_v()
+                )
+            )
+        else:
+            raise ValueError(
+                f"Type {type(val)} not supported for center setter {val}. "
+                "Not a tuple, list, kdb.Point or kdb.Vector."
+            )
+
+    @overload
+    def dmovex(self, destination: float, /) -> Self: ...
+
+    @overload
+    def dmovex(self, origin: float, destination: float | None) -> Self: ...
+
+    def dmovex(self, origin: float, destination: float | None = None) -> Self:
+        """Move the instance in x-direction in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        return self.movex(origin=origin, destination=destination)
+
+    @overload
+    def dmovey(self, destination: float, /) -> Self: ...
+
+    @overload
+    def dmovey(self, origin: float, destination: float) -> Self: ...
+
+    def dmovey(self, origin: float, destination: float | None = None) -> Self:
+        """Move the instance in y-direction in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        return self.movey(origin=origin, destination=destination)
+
+    @overload
+    def dmove(self, destination: tuple[float, float], /) -> Self: ...
+
+    @overload
+    def dmove(
+        self, origin: tuple[float, float], destination: tuple[float, float]
+    ) -> Self: ...
+
+    def dmove(
+        self,
+        origin: tuple[float, float],
+        destination: tuple[float, float] | None = None,
+    ) -> Self:
+        """Move the instance in dbu.
+
+        Args:
+            origin: reference point to move [dbu]
+            destination: move origin so that it will land on this coordinate [dbu]
+        """
+        return self.move(origin=origin, destination=destination)
+
+    def drotate(self, angle: float, center: kdb.DPoint | None = None) -> Self:
+        """Rotate instance in increments of 90°."""
+        if not center:
+            self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
+        else:
+            t = kdb.DCplxTrans(center.to_v())
+            self.transform(t.inverted())
+            self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
+            self.transform(t)
+        return self
+
+    def dmirror(
+        self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
+    ) -> Self:
+        """Mirror the instance at a line."""
+        mirror_v = p2 - p1
+        disp = self.trans.disp
+        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
+        dedge = kdb.DEdge(p1, p2)
+
+        v = mirror_v
+        v = kdb.DVector(-v.y, v.x)
+
+        dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
+
+        cross_point = dedge.cut_point(dedge_disp)
+
+        self.transform(
+            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
+        )
+
+        return self
+
+    def dmirror_x(self, x: float = 0) -> Self:
+        """Mirror the instance at an x-axis."""
+        self.transform(kdb.DCplxTrans(1, 180, True, 2 * x, 0))
+        return self
+
+    def dmirror_y(self, y: float = 0) -> Self:
+        """Mirror the instance at an y-axis."""
+        self.transform(kdb.DCplxTrans(1, 0, True, 0, 2 * y))
+        return self
+
+    @property
+    def dxmin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().left
+
+    @dxmin.setter
+    def dxmin(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DCplxTrans(__val - self.bbox().left, 0))
+
+    @property
+    def dymin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().bottom
+
+    @dymin.setter
+    def dymin(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DCplxTrans(0, __val - self.bbox().bottom))
+
+    @property
+    def dxmax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().right
+
+    @dxmax.setter
+    def dxmax(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DCplxTrans(__val - self.bbox().right, 0))
+
+    @property
+    def dymax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().top
+
+    @dymax.setter
+    def dymax(self, __val: float) -> None:
+        """Moves the instance so that the bbox's left x-coordinate."""
+        self.transform(kdb.DCplxTrans(0, __val - self.bbox().top))
+
+    @property
+    def dysize(self) -> float:
+        """Returns the height of the bounding box."""
+        return self.bbox().height()
+
+    @property
+    def dxsize(self) -> float:
+        """Returns the width of the bounding box."""
+        return self.bbox().width()
+
+    @property
+    def dx(self) -> float:
+        """Returns the x-coordinate center of the bounding box."""
+        return self.bbox().center().x
+
+    @dx.setter
+    def dx(self, __val: float) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.DCplxTrans(__val - self.bbox().center().x, 0))
+
+    @property
+    def dy(self) -> float:
+        """Returns the x-coordinate center of the bounding box."""
+        return self.bbox().center().y
+
+    @dy.setter
+    def dy(self, __val: float) -> None:
+        """Moves the instance so that the bbox's center x-coordinate."""
+        self.transform(kdb.DCplxTrans(0, __val - self.bbox().center().y))
+
+    @property
+    def dcenter(self) -> kdb.DPoint:
+        """Returns the coordinate center of the bounding box."""
+        return self.bbox().center()
+
+    @dcenter.setter
+    def dcenter(self, val: tuple[float, float] | kdb.DVector) -> None:
+        """Moves the instance so that the bbox's center coordinate."""
+        self.center = val  # type: ignore[assignment]
 
 
 KCell.model_rebuild()
