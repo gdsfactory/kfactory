@@ -600,9 +600,10 @@ class LockedError(AttributeError):
     def __init__(self, kcell: BaseKCell):
         """Throw _locked error."""
         super().__init__(
-            f"KCell {kcell.name} has been locked already."
-            " Modification has been disabled. "
-            "Modify the KCell in its autocell function or make a copy."
+            f"{kcell.name!r} is locked and likely stored in cache. Modifications are "
+            "disabled as its associated function is decorated with `cell`. To modify, "
+            "update the code in the function or create a copy of "
+            f"the {kcell.__class__.__name__}."
         )
 
 
