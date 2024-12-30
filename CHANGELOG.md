@@ -1,7 +1,26 @@
-<a id="v0.21.12"></a>
-# [v0.21.12](https://github.com/gdsfactory/kfactory/releases/tag/v0.21.12) - 2024-11-21
+<a id="v0.22.1"></a>
+# [v0.22.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.22.1) - 2024-12-29
 
 # What's Changed
+
+## New
+
+- better LockedError message [#536](https://github.com/gdsfactory/kfactory/pull/536)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.22.0...v0.22.1
+
+
+[Changes][v0.22.1]
+
+
+<a id="v0.22.0"></a>
+# [v0.22.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.22.0) - 2024-12-19
+
+# What's Changed
+
+## New
+
+- add better handling of placing errors [#532](https://github.com/gdsfactory/kfactory/pull/532)
 
 ## Bug Fixes
 
@@ -10,10 +29,10 @@
 - fix writer using gdsii always [#526](https://github.com/gdsfactory/kfactory/pull/526)
 - Fix fill_tiled segfault [#521](https://github.com/gdsfactory/kfactory/pull/521)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.11...v0.21.12
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.21.11...v0.22.0
 
 
-[Changes][v0.21.12]
+[Changes][v0.22.0]
 
 
 <a id="v0.21.11"></a>
@@ -1355,7 +1374,8 @@
 [Changes][v0.4.0]
 
 
-[v0.21.12]: https://github.com/gdsfactory/kfactory/compare/v0.21.11...v0.21.12
+[v0.22.1]: https://github.com/gdsfactory/kfactory/compare/v0.22.0...v0.22.1
+[v0.22.0]: https://github.com/gdsfactory/kfactory/compare/v0.21.11...v0.22.0
 [v0.21.11]: https://github.com/gdsfactory/kfactory/compare/v0.21.10...v0.21.11
 [v0.21.10]: https://github.com/gdsfactory/kfactory/compare/v0.21.8...v0.21.10
 [v0.21.8]: https://github.com/gdsfactory/kfactory/compare/v0.21.7...v0.21.8
