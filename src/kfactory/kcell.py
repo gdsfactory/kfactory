@@ -3668,13 +3668,17 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
 
     def insert_vinsts(self, recursive: bool = True) -> None:
         """Insert all virtual instances and create Instances of real KCells."""
-        if not self._destroyed():
+        if not self._kdb_cell._destroyed():
             for vi in self.vinsts:
                 vi.insert_into(self)
             self.vinsts.clear()
-            called_cell_indexes = self.called_cells()
+            called_cell_indexes = self._kdb_cell.called_cells()
             for c in sorted(
-                set(self.kcl[ci] for ci in called_cell_indexes)
+                set(
+                    self.kcl[ci]
+                    for ci in called_cell_indexes
+                    if not self.kcl[ci]._kdb_cell._destroyed()
+                )
                 & self.kcl.kcells.keys(),
                 key=lambda c: c.hierarchy_levels(),
             ):
