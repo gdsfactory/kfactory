@@ -1568,7 +1568,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
         suffix: str = "",
         keep_mirror: bool = False,
     ) -> None:
-        """Add a sequence of ports to the cells.
+        """Add a sequence of ports to the cell.
 
         Can be useful to add all ports of a instance for example.
 
@@ -1738,6 +1738,10 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
             return super().__getattr__(name)  # type: ignore
         except Exception:
             return getattr(self._kdb_cell, name)
+
+    def cell_index(self) -> int:
+        """Gets the cell index."""
+        return self._kdb_cell.cell_index()
 
     def dup(self) -> KCell:
         """Copy the full cell.
@@ -5412,7 +5416,7 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
 class VKCell(BaseKCell, arbitrary_types_allowed=True):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
-    _shapes: dict[int, VShapes] = field(default_factory=dict)
+    _shapes: dict[int, VShapes] = PrivateAttr(default_factory=dict)
     _name: str | None = None
     size_info: DSizeInfo
 
@@ -6584,25 +6588,6 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     def dcenter(self, val: tuple[float, float] | kdb.DVector) -> None:
         """Moves the instance so that the bbox's center coordinate."""
         self.center = val  # type: ignore[assignment]
-
-
-VInstance.model_rebuild()
-VShapes.model_rebuild()
-VKCell.model_rebuild()
-KCLayout.model_rebuild()
-LayerSection.model_rebuild()
-LayerEnclosure.model_rebuild()
-KCellEnclosure.model_rebuild()
-LayerEnclosureModel.model_rebuild()
-SymmetricalCrossSection.model_rebuild()
-kcl = KCLayout("DEFAULT")
-"""Default library object.
-
-Any [KCell][kfactory.kcell.KCell] uses this object unless another one is
-specified in the constructor."""
-cell = kcl.cell
-"""Default kcl @cell decorator."""
-vcell = kcl.vcell
 
 
 def _get_default_kcl() -> KCLayout:
@@ -8181,6 +8166,23 @@ class Instances:
         self._insts.clear()
 
 
+VInstance.model_rebuild()
+VShapes.model_rebuild()
+VKCell.model_rebuild()
+KCLayout.model_rebuild()
+LayerSection.model_rebuild()
+LayerEnclosure.model_rebuild()
+KCellEnclosure.model_rebuild()
+LayerEnclosureModel.model_rebuild()
+SymmetricalCrossSection.model_rebuild()
+kcl = KCLayout("DEFAULT")
+"""Default library object.
+
+Any [KCell][kfactory.kcell.KCell] uses this object unless another one is
+specified in the constructor."""
+cell = kcl.cell
+"""Default kcl @cell decorator."""
+vcell = kcl.vcell
 KCell.model_rebuild()
 
 
