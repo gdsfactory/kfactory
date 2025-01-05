@@ -2995,9 +2995,10 @@ class KCell:
         return self._kdb_cell.bbox().left
 
     @property
-    def center(self) -> kdb.Point:
+    def center(self) -> tuple[int, int]:
         """Returns the coordinate center of the bounding box."""
-        return self._kdb_cell.bbox().center()
+        center = self._kdb_cell.bbox().center()
+        return center.x, center.y
 
     @property
     def ymin(self) -> int:
@@ -5814,9 +5815,10 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         return self.bbox().left
 
     @property
-    def center(self) -> kdb.DPoint:
+    def center(self) -> tuple[float, float]:
         """Returns the coordinate center of the bounding box."""
-        return self.bbox().center()
+        center = self.bbox().center()
+        return center.x, center.y
 
     @property
     def ymin(self) -> float:
@@ -6458,9 +6460,10 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         self.transform(kdb.DCplxTrans(0, __val - self.bbox().center().y))
 
     @property
-    def center(self) -> kdb.DPoint:
+    def center(self) -> tuple[float, float]:
         """Returns the coordinate center of the bounding box."""
-        return self.bbox().center()
+        center = self.bbox().center()
+        return center.x, center.y
 
     @center.setter
     def center(self, val: tuple[float, float] | kdb.DVector) -> None:
@@ -7933,9 +7936,10 @@ class Instance:
         self.transform(kdb.Trans(__val - self.bbox().center().y, 0))
 
     @property
-    def center(self) -> kdb.Point:
+    def center(self) -> tuple[int, int]:
         """Returns the coordinate center of the bounding box."""
-        return self._instance.bbox().center()
+        center = self._instance.bbox().center()
+        return center.x, center.y
 
     @center.setter
     def center(self, val: tuple[int, int] | kdb.Vector) -> None:
@@ -9312,9 +9316,10 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         self.transform(kdb.Trans(__val - self.bbox().center().y, 0))
 
     @property
-    def center(self) -> kdb.Point:
+    def center(self) -> tuple[float, float]:
         """Returns the coordinate center of the bounding box."""
-        return self.bbox().center()
+        center = self.bbox().center()
+        return center.x, center.y
 
     @center.setter
     def center(self, val: tuple[int, int] | kdb.Vector) -> None:
