@@ -6022,6 +6022,11 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         cell: KCell,
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
     ) -> Instance:
+        if cell._destroyed():
+            raise ValueError(
+                f"Trying to insert VInstance {self.name}, {self.cell.name=}"
+                f" into destroyed {cell=}"
+            )
         if isinstance(self.cell, VKCell):
             _trans = trans * self.trans
             base_trans = kdb.DCplxTrans(
@@ -6044,7 +6049,8 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
                     f"_X{_trans.disp.x}_Y{_trans.disp.y}"
                 ).replace(".", "p")
                 _cell_name = _cell_name + clean_name(_trans_str)
-            if cell.kcl.layout.cell(_cell_name) is None:
+            kdb_cell = cell.kcl.layout.cell(_cell_name)
+            if kdb_cell is None or kdb_cell._destroyed():
                 _cell = KCell(kcl=self.cell.kcl, name=_cell_name)  # self.cell.dup()
                 for layer, shapes in self.cell._shapes.items():
                     for shape in shapes.transform(_trans):
