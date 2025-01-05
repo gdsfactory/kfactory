@@ -15,8 +15,9 @@ def test_instance_center(LAYER: Layers) -> None:
     ref2 = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
 
     ref1.center = ref2.center
-    ref2.center = ref1.center + kdb.Point(0, 1000).to_v()
+    ref2.center = (ref1.center[0], ref2.center[1] + 1000)
     ref2.dmove((0, 10))
+    assert ref2.center == (ref1.center[0], ref1.center[1] + 11_000)
 
 
 def test_instance_d_move(LAYER: Layers) -> None:
