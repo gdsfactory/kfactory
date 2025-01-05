@@ -111,7 +111,7 @@ directory = "_build/coverage_html_report"
 
 [tool.codespell]
 ignore-words-list = "euclidian,TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem"
-skip = "pyproject.toml"
+skip = "pyproject.toml, uv.lock"
 
 [tool.ruff]
 fix = true
