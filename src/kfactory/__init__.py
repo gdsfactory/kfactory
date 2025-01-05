@@ -13,6 +13,7 @@ import klayout.db as kdb
 import klayout.lay as lay
 import klayout.rdb as rdb
 from .kcell import (
+    BaseKCell,
     Info,
     Instance,
     InstanceGroup,
@@ -57,6 +58,7 @@ from aenum import constant  # type: ignore[import-untyped,unused-ignore]
 __all__ = [
     "Constants",
     "factories",
+    "BaseKCell",
     "Info",
     "Instance",
     "InstanceGroup",
