@@ -58,6 +58,7 @@ from aenum import constant  # type: ignore[import-untyped,unused-ignore]
 __all__ = [
     "Constants",
     "factories",
+    "BaseKCell",
     "Info",
     "Instance",
     "InstanceGroup",
