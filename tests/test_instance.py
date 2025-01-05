@@ -53,7 +53,10 @@ def test_mirror(LAYER: Layers) -> None:
     mp1 = kf.kdb.Point(50000, 25000)
     mp2 = -mp1
 
-    b2.mirror(disp * mp1, disp * mp2)
+    p1 = disp * mp1
+    p2 = disp * mp2
+
+    b2.mirror((p1.x, p1.y), (p2.x, p2.y))
 
     c.shapes(c.kcl.find_layer(LAYER.WG)).insert(kf.kdb.Edge(mp1, mp2).transformed(disp))
 
@@ -70,7 +73,10 @@ def test_dmirror(LAYER: Layers) -> None:
     mp1 = c.kcl.to_um(kf.kdb.Point(50000, 25000))
     mp2 = -mp1
 
-    b2.dmirror(disp * mp1, disp * mp2)
+    p1 = disp * mp1
+    p2 = disp * mp2
+
+    b2.dmirror((p1.x, p1.y), (p2.x, p2.y))
 
     c.shapes(c.kcl.find_layer(LAYER.WG)).insert(
         kf.kdb.DEdge(mp1, mp2).transformed(disp)
