@@ -45,6 +45,7 @@ from . import (
     routing,
     technology,
     utils,
+    factories,
 )
 from .conf import config, logger
 from .enclosure import LayerEnclosure, KCellEnclosure
@@ -55,6 +56,7 @@ from aenum import constant  # type: ignore[import-untyped,unused-ignore]
 
 __all__ = [
     "Constants",
+    "factories",
     "Info",
     "Instance",
     "InstanceGroup",

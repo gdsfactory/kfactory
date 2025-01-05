@@ -16,6 +16,7 @@ import importlib.util
 import inspect
 import json
 import socket
+from abc import ABC, abstractmethod
 from collections import UserDict, UserList, defaultdict
 from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
 from dataclasses import dataclass, field
@@ -28,6 +29,7 @@ from typing import (
     TYPE_CHECKING,
     Annotated,
     Any,
+    ClassVar,
     Literal,
     Protocol,
     TypeAlias,
@@ -51,6 +53,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    PrivateAttr,
     RootModel,
     ValidationError,
     model_validator,
@@ -594,7 +597,7 @@ class PROPID(IntEnum):
 class LockedError(AttributeError):
     """Raised when a locked cell is being modified."""
 
-    def __init__(self, kcell: KCell | VKCell):
+    def __init__(self, kcell: BaseKCell):
         """Throw _locked error."""
         super().__init__(
             f"{kcell.name!r} is locked and likely stored in cache. Modifications are "
@@ -1484,7 +1487,127 @@ class InstancePorts:
                 )
 
 
-class KCell:
+class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
+    """Base class for shared attributes between VKCell and KCell."""
+
+    _ports: Ports = PrivateAttr()
+    _locked: bool = PrivateAttr(False)
+    _settings: KCellSettings = PrivateAttr(default_factory=KCellSettings)
+    _settings_units: KCellSettingsUnits = PrivateAttr(
+        default_factory=KCellSettingsUnits
+    )
+    vinsts: list[VInstance] = Field(default_factory=list)
+    info: Info
+    kcl: KCLayout
+    function_name: str | None = None
+    basename: str | None = None
+
+    def __init__(
+        self,
+        *,
+        kcl: KCLayout,
+        info: dict[str, int | float | str] | None = None,
+        **kwargs: Any,
+    ):
+        super().__init__(kcl=kcl, info=Info(**(info or {})), **kwargs)
+
+    @property
+    @abstractmethod
+    def name(self) -> str | None: ...
+
+    @name.setter
+    @abstractmethod
+    def name(self, value: str) -> None: ...
+
+    @abstractmethod
+    def dup(self) -> Self: ...
+
+    @property
+    def settings(self) -> KCellSettings:
+        """Settings dictionary set by the [@vcell][kfactory.kcell.vcell] decorator."""
+        return self._settings
+
+    @property
+    def settings_units(self) -> KCellSettingsUnits:
+        """Dictionary containing the units of the settings.
+
+        Set by the [@cell][kfactory.kcell.KCLayout.cell] decorator.
+        """
+        return self._settings_units
+
+    @property
+    def ports(self) -> Ports:
+        """Ports associated with the cell."""
+        return self._ports
+
+    @ports.setter
+    def ports(self, new_ports: InstancePorts | Ports) -> None:
+        if self._locked:
+            raise LockedError(self)
+        self._ports = new_ports.copy()
+
+    def add_port(
+        self, port: Port, name: str | None = None, keep_mirror: bool = False
+    ) -> Port:
+        """Add an existing port. E.g. from an instance to propagate the port.
+
+        Args:
+            port: The port to add.
+            name: Overwrite the name of the port
+            keep_mirror: Keep the mirror part of the transformation of a port if
+                `True`, else set the mirror flag to `False`.
+        """
+        if self._locked:
+            raise LockedError(self)
+        return self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
+
+    def add_ports(
+        self,
+        ports: Iterable[Port],
+        prefix: str = "",
+        suffix: str = "",
+        keep_mirror: bool = False,
+    ) -> None:
+        """Add a sequence of ports to the cell.
+
+        Can be useful to add all ports of a instance for example.
+
+        Args:
+            ports: list/tuple (anything iterable) of ports.
+            prefix: string to add in front of all the port names
+            suffix: string to add at the end of all the port names
+            keep_mirror: Keep the mirror part of the transformation of a port if
+                `True`, else set the mirror flag to `False`.
+        """
+        if self._locked:
+            raise LockedError(self)
+        self.ports.add_ports(
+            ports=ports, prefix=prefix, suffix=suffix, keep_mirror=keep_mirror
+        )
+
+    def layer(self, *args: Any, **kwargs: Any) -> int:
+        """Get the layer info, convenience for `klayout.db.Layout.layer`."""
+        return self.kcl.layout.layer(*args, **kwargs)
+
+    @property
+    def factory_name(self) -> str:
+        """Return the name under which the factory was registered."""
+        factory_name = self.basename or self.function_name
+        if factory_name is not None:
+            return factory_name
+        raise ValueError(
+            f"{self.__class__.__name__} {self.name} has most likely not been registered"
+            " automatically as a factory. Therefore it doesn't have an associated name."
+        )
+
+    def create_vinst(self, cell: VKCell | KCell) -> VInstance:
+        """Insert the KCell as a VInstance into a VKCell or KCell."""
+        vi = VInstance(cell)
+        self.vinsts.append(vi)
+        return vi
+
+
+class KCell(BaseKCell, arbitrary_types_allowed=True):
     """KLayout cell and change its class to KCell.
 
     A KCell is a dynamic proxy for kdb.Cell. It has all the
@@ -1514,20 +1637,12 @@ class KCell:
         function_name: Name of the function that created the cell.
     """
 
-    yaml_tag: str = "!KCell"
-    _ports: Ports
-    _settings: KCellSettings
-    _settings_units: KCellSettingsUnits
-    _kdb_cell: kdb.Cell
-    info: Info
-    kcl: KCLayout
-    boundary: kdb.DPolygon | None
+    _kdb_cell: kdb.Cell = PrivateAttr()
+    yaml_tag: ClassVar[str] = "!KCell"
+    boundary: kdb.DPolygon | None = None
     insts: Instances
-    vinsts: list[VInstance]
     size_info: SizeInfo
     dsize_info: DSizeInfo
-    function_name: str | None = None
-    basename: str | None = None
 
     def __init__(
         self,
@@ -1547,35 +1662,28 @@ class KCell:
             ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
                 if `None` create an empty one.
         """
-        _kcl: KCLayout = kcl or _get_default_kcl()
-        self.kcl = _kcl
-        self.insts = Instances()
-        self.vinsts: list[VInstance] = []
-        self._settings = KCellSettings()
-        self._settings_units = KCellSettingsUnits()
-        self.info: Info = Info()
-        self._locked = False
+        _kcl = kcl or _get_default_kcl()
         if name is None:
             _name = "Unnamed_!" if kdb_cell is None else kdb_cell.name
         else:
             _name = name
             if kdb_cell is not None:
                 kdb_cell.name = name
-        self._kdb_cell = kdb_cell or _kcl.create_cell(_name)
+        _kdb_cell = kdb_cell or _kcl.create_cell(_name)
         if _name == "Unnamed_!":
-            self._kdb_cell.name = f"Unnamed_{self.cell_index()}"
+            _kdb_cell.name = f"Unnamed_{_kdb_cell.cell_index()}"
+        insts = Instances()
+        for inst in _kdb_cell.each_inst():
+            insts.append(Instance(_kcl, inst))
+        super().__init__(
+            kcl=_kcl,
+            size_info=SizeInfo(_kdb_cell.bbox),
+            dsize_info=DSizeInfo(_kdb_cell.dbbox),
+            insts=insts,
+        )
+        self._kdb_cell = _kdb_cell
+        self._ports = ports or Ports(_kcl)
         self.kcl.register_cell(self)
-        self.ports: Ports = ports or Ports(self.kcl)
-
-        if kdb_cell is not None:
-            for inst in kdb_cell.each_inst():
-                self.insts.append(Instance(self.kcl, inst))
-
-        self.boundary = None
-        self.size_info = SizeInfo(self._kdb_cell.bbox)
-        self.dsize_info = DSizeInfo(self._kdb_cell.dbbox)
-        self.function_name = None
-        self.basename = None
 
     def evaluate_insts(self) -> None:
         """Check all KLayout instances and create kfactory Instances."""
@@ -1587,21 +1695,9 @@ class KCell:
         """Returns port from instance."""
         return self.ports[key]
 
-    @property
-    def settings(self) -> KCellSettings:
-        """Settings dictionary.
-
-        Set by the [@cell][kfactory.kcell.KCLayout.cell] decorator.
-        """
-        return self._settings
-
-    @property
-    def settings_units(self) -> KCellSettingsUnits:
-        """Dictionary containing the units of the settings.
-
-        Set by the [@cell][kfactory.kcell.KCLayout.cell] decorator.
-        """
-        return self._settings_units
+    def __hash__(self) -> int:
+        """Hash the KCell."""
+        return hash((self.kcl.library.name(), self._kdb_cell.cell_index()))
 
     @property
     def name(self) -> str:
@@ -1636,9 +1732,16 @@ class KCell:
             raise LockedError(self)
         self._kdb_cell.ghost_cell = value
 
-    def __getattr__(self, name):  # type: ignore[no-untyped-def]
+    def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
-        return getattr(self._kdb_cell, name)
+        try:
+            return super().__getattr__(name)  # type: ignore
+        except Exception:
+            return getattr(self._kdb_cell, name)
+
+    def cell_index(self) -> int:
+        """Gets the cell index."""
+        return self._kdb_cell.cell_index()
 
     def dup(self) -> KCell:
         """Copy the full cell.
@@ -1665,52 +1768,13 @@ class KCell:
         """Enables use of `copy.copy` and `copy.deep_copy`."""
         return self.dup()
 
-    def add_port(
-        self, port: Port, name: str | None = None, keep_mirror: bool = False
-    ) -> Port:
-        """Add an existing port. E.g. from an instance to propagate the port.
-
-        Args:
-            port: The port to add.
-            name: Overwrite the name of the port
-            keep_mirror: Keep the mirror part of the transformation of a port if
-                `True`, else set the mirror flag to `False`.
-        """
-        if self._locked:
-            raise LockedError(self)
-        return self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
-
-    def add_ports(
-        self,
-        ports: Iterable[Port],
-        prefix: str = "",
-        suffix: str = "",
-        keep_mirror: bool = False,
-    ) -> None:
-        """Add a sequence of ports to the cells.
-
-        Can be useful to add all ports of a instance for example.
-
-        Args:
-            ports: list/tuple (anything iterable) of ports.
-            prefix: string to add in front of all the port names
-            suffix: string to add the end of all the port names.
-            keep_mirror: Keep the mirror part of the transformation of a port if
-                `True`, else set the mirror flag to `False`.
-        """
-        if self._locked:
-            raise LockedError(self)
-        self.ports.add_ports(
-            ports=ports, prefix=prefix, suffix=suffix, keep_mirror=keep_mirror
-        )
-
     @classmethod
     def from_yaml(
-        cls: Callable[..., KCell],
+        cls,
         constructor: Any,
         node: Any,
         verbose: bool = False,
-    ) -> KCell:
+    ) -> Self:
         """Internal function used by the placer to convert yaml to a KCell."""
         d = ruamel.yaml.constructor.SafeConstructor.construct_mapping(
             constructor,
@@ -1975,17 +2039,6 @@ class KCell:
         """Delete the cell."""
         self.kcl.delete_cell(self)
 
-    @property
-    def ports(self) -> Ports:
-        """Ports associated with the cell."""
-        return self._ports
-
-    @ports.setter
-    def ports(self, new_ports: InstancePorts | Ports) -> None:
-        if self._locked:
-            raise LockedError(self)
-        self._ports = new_ports.copy()
-
     @overload
     def create_port(
         self,
@@ -2188,10 +2241,6 @@ class KCell:
 
     def _kdb_copy(self) -> kdb.Cell:
         return self._kdb_cell.dup()
-
-    def layer(self, *args: Any, **kwargs: Any) -> int:
-        """Get the layer info, convenience for `klayout.db.Layout.layer`."""
-        return self.kcl.layout.layer(*args, **kwargs)
 
     def __lshift__(self, cell: KCell) -> Instance:
         """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
@@ -2969,17 +3018,6 @@ class KCell:
                 )
 
     @property
-    def factory_name(self) -> str:
-        """Return the name under which the factory was registered."""
-        factory_name = self.basename or self.function_name
-        if factory_name is not None:
-            return factory_name
-        raise ValueError(
-            f"KCell {self.name} has most likely not been registered automatically as a"
-            " factory. Therefore it doesn't have an associated name."
-        )
-
-    @property
     def x(self) -> int:
         """Returns the x-coordinate of the center of the bounding box."""
         return self._kdb_cell.bbox().center().x
@@ -3080,9 +3118,6 @@ class KCell:
         l2n = kdb.LayoutToNetlist(self.name, self.kcl.dbu)
         l2n.extract_netlist()
         il = l2n.internal_layout()
-
-        def filter_port(port: Port) -> bool:
-            return port.port_type in port_types
 
         called_kcells = [self.kcl[ci] for ci in self.called_cells()]
         called_kcells.sort(key=lambda c: c.hierarchy_levels())
@@ -3635,25 +3670,23 @@ class KCell:
 
     def insert_vinsts(self, recursive: bool = True) -> None:
         """Insert all virtual instances and create Instances of real KCells."""
-        if not self._destroyed():
+        if not self._kdb_cell._destroyed():
             for vi in self.vinsts:
                 vi.insert_into(self)
             self.vinsts.clear()
-            called_cell_indexes = self.called_cells()
+            called_cell_indexes = self._kdb_cell.called_cells()
             for c in sorted(
-                set(self.kcl[ci] for ci in called_cell_indexes)
+                set(
+                    self.kcl[ci]
+                    for ci in called_cell_indexes
+                    if not self.kcl[ci]._kdb_cell._destroyed()
+                )
                 & self.kcl.kcells.keys(),
                 key=lambda c: c.hierarchy_levels(),
             ):
                 for vi in c.vinsts:
                     vi.insert_into(c)
                 c.vinsts.clear()
-
-    def create_vinst(self, cell: VKCell | KCell) -> VInstance:
-        """Insert the KCell as a VInstance into a VKCell or KCell."""
-        vi = VInstance(cell)
-        self.vinsts.append(vi)
-        return vi
 
 
 def create_port_error(
@@ -5386,37 +5419,22 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
         return VShapes(cell=self.cell, _shapes=new_shapes)  # type: ignore[arg-type]
 
 
-class VKCell(BaseModel, arbitrary_types_allowed=True):
+class VKCell(BaseKCell, arbitrary_types_allowed=True):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
-    _ports: Ports
-    _shapes: dict[int, VShapes]
-    _locked: bool
-    _settings: KCellSettings
-    _settings_units: KCellSettingsUnits
-    info: Info
-    kcl: KCLayout
-    insts: list[VInstance]
-    _name: str | None
-    basename: str | None = None
-    function_name: str | None = None
+    _shapes: dict[int, VShapes] = PrivateAttr(default_factory=dict)
+    _name: str | None = None
     size_info: DSizeInfo
 
     def __init__(
         self,
         name: str | None = None,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] | None = None,
     ) -> None:
-        _kcl: KCLayout = kcl or _get_default_kcl()  # type: ignore[assignment, unused-ignore]
-        BaseModel.__init__(
-            self, kcl=_kcl, insts=[], info=Info(**info), size_info=DSizeInfo(self.bbox)
-        )
-        self._shapes = {}
+        _kcl = kcl or _get_default_kcl()
+        super().__init__(kcl=_kcl, info=info, size_info=DSizeInfo(self.bbox))
         self._ports = Ports(_kcl)
-        self._locked = False
-        self._settings = KCellSettings()
-        self._settings_units = KCellSettingsUnits()
         self._name = name
 
     def bbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
@@ -5445,21 +5463,8 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         return self.size_info
 
     @property
-    def vinsts(self) -> list[VInstance]:
-        return self.insts
-
-    @property
-    def settings(self) -> KCellSettings:
-        """Settings dictionary set by the [@vcell][kfactory.kcell.vcell] decorator."""
-        return self._settings
-
-    @property
-    def settings_units(self) -> KCellSettingsUnits:
-        """Dictionary containing the units of the settings.
-
-        Set by the [@cell][kfactory.kcell.KCLayout.cell] decorator.
-        """
-        return self._settings_units
+    def insts(self) -> list[VInstance]:
+        return self.vinsts
 
     @property
     def name(self) -> str | None:
@@ -5489,38 +5494,6 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         c.info = self.info.model_copy()
 
         return c
-
-    def add_port(
-        self, port: Port, name: str | None = None, keep_mirror: bool = False
-    ) -> Port:
-        """Add an existing port. E.g. from an instance to propagate the port.
-
-        Args:
-            port: The port to add.
-            name: Overwrite the name of the port
-            keep_mirror: Keep the mirror part of the transformation of a port if
-                `True`, else set the mirror flag to `False`.
-        """
-        if self._locked:
-            raise LockedError(self)
-        return self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
-
-    def add_ports(
-        self, ports: Iterable[Port], prefix: str = "", keep_mirror: bool = False
-    ) -> None:
-        """Add a sequence of ports to the cells.
-
-        Can be useful to add all ports of a instance for example.
-
-        Args:
-            ports: list/tuple (anything iterable) of ports.
-            prefix: string to add in front of all the port names
-            keep_mirror: Keep the mirror part of the transformation of a port if
-                `True`, else set the mirror flag to `False`.
-        """
-        if self._locked:
-            raise LockedError(self)
-        self.ports.add_ports(ports=ports, prefix=prefix, keep_mirror=keep_mirror)
 
     def show(
         self,
@@ -5578,17 +5551,6 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         port_names = [p.name for p in self.ports]
         return f"{self.name}: ports {port_names}, {len(self.insts)} instances"
 
-    @property
-    def ports(self) -> Ports:
-        """Ports associated with the cell."""
-        return self._ports
-
-    @ports.setter
-    def ports(self, new_ports: InstancePorts | Ports) -> None:
-        if self._locked:
-            raise LockedError(self)
-        self._ports = new_ports.copy()
-
     @overload
     def create_port(
         self,
@@ -5635,10 +5597,6 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
     def create_port(self, **kwargs: Any) -> Port:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
         return self.ports.create_port(**kwargs)
-
-    def layer(self, *args: Any, **kwargs: Any) -> int:
-        """Get the layer info, convenience for `klayout.db.Layout.layer`."""
-        return self.kcl.layout.layer(*args, **kwargs)
 
     def create_inst(
         self, cell: KCell | VKCell, trans: kdb.DCplxTrans = kdb.DCplxTrans()
@@ -5781,22 +5739,6 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
             recursive=recursive,
             add_cell_ports=add_cell_ports,
             check_layer_connectivity=check_layer_connectivity,
-        )
-
-    def insert(self, cell: KCell | VKCell) -> VInstance:
-        vi = VInstance(cell)
-        self.insts.append(vi)
-        return vi
-
-    @property
-    def factory_name(self) -> str:
-        """Return the name under which the factory was registered."""
-        factory_name = self.basename or self.function_name
-        if factory_name is not None:
-            return factory_name
-        raise ValueError(
-            f"VKCell {self.name} has most likely not been registered automatically as a"
-            " factory. Therefore it doesn't have an associated name."
         )
 
     @property
@@ -6656,25 +6598,6 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     def dcenter(self, val: tuple[float, float] | kdb.DVector) -> None:
         """Moves the instance so that the bbox's center coordinate."""
         self.center = val  # type: ignore[assignment]
-
-
-VInstance.model_rebuild()
-VShapes.model_rebuild()
-VKCell.model_rebuild()
-KCLayout.model_rebuild()
-LayerSection.model_rebuild()
-LayerEnclosure.model_rebuild()
-KCellEnclosure.model_rebuild()
-LayerEnclosureModel.model_rebuild()
-SymmetricalCrossSection.model_rebuild()
-kcl = KCLayout("DEFAULT")
-"""Default library object.
-
-Any [KCell][kfactory.kcell.KCell] uses this object unless another one is
-specified in the constructor."""
-cell = kcl.cell
-"""Default kcl @cell decorator."""
-vcell = kcl.vcell
 
 
 def _get_default_kcl() -> KCLayout:
@@ -8258,6 +8181,26 @@ class Instances:
 
     def clear(self) -> None:
         self._insts.clear()
+
+
+VInstance.model_rebuild()
+VShapes.model_rebuild()
+VKCell.model_rebuild()
+KCLayout.model_rebuild()
+LayerSection.model_rebuild()
+LayerEnclosure.model_rebuild()
+KCellEnclosure.model_rebuild()
+LayerEnclosureModel.model_rebuild()
+SymmetricalCrossSection.model_rebuild()
+kcl = KCLayout("DEFAULT")
+"""Default library object.
+
+Any [KCell][kfactory.kcell.KCell] uses this object unless another one is
+specified in the constructor."""
+cell = kcl.cell
+"""Default kcl @cell decorator."""
+vcell = kcl.vcell
+KCell.model_rebuild()
 
 
 class DecoratorList(UserList[Any]):
