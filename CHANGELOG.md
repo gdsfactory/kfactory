@@ -5,7 +5,17 @@
 
 ## New
 
+- fix port [#541](https://github.com/gdsfactory/kfactory/pull/541)
+- Add BaseKCell class and update VKCell and KCell to inherit from it [#528](https://github.com/gdsfactory/kfactory/pull/528)
 - better LockedError message [#536](https://github.com/gdsfactory/kfactory/pull/536)
+
+## Bug Fixes
+
+- fix port [#541](https://github.com/gdsfactory/kfactory/pull/541)
+
+## Dependency Updates
+
+- Add lockfile and more commands to makefile [#538](https://github.com/gdsfactory/kfactory/pull/538)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.22.0...v0.22.1
 
