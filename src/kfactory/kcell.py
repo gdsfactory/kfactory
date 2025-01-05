@@ -7757,13 +7757,15 @@ class Instance:
         )
 
     def mirror(
-        self, p1: kdb.Point = kdb.Point(1, 0), p2: kdb.Point = kdb.Point(0, 0)
+        self, p1: tuple[int, int] = (0, 1), p2: tuple[int, int] = (0, 0)
     ) -> Instance:
         """Mirror the instance at a line."""
-        mirror_v = p2 - p1
+        _p1 = kdb.Point(p1[0], p1[1])
+        _p2 = kdb.Point(p2[0], p2[1])
+        mirror_v = _p2 - _p1
         disp = self.dcplx_trans.disp
         angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
-        dedge = kdb.DEdge(self.kcl.to_um(p1), self.kcl.to_um(p2))
+        dedge = kdb.DEdge(self.kcl.to_um(_p1), self.kcl.to_um(_p2))
 
         v = self.kcl.to_um(mirror_v)
         v = kdb.DVector(-v.y, v.x)
@@ -7980,13 +7982,16 @@ class Instance:
         return self
 
     def dmirror(
-        self, p1: kdb.DPoint = kdb.DPoint(0, 1), p2: kdb.DPoint = kdb.DPoint(0, 0)
+        self, p1: tuple[float, float] = (0, 1), p2: tuple[float, float] = (0, 0)
     ) -> Instance:
         """Mirror the instance at a line."""
-        mirror_v = p2 - p1
+        _p1 = kdb.DPoint(p1[0], p1[1])
+        _p2 = kdb.DPoint(p2[0], p2[1])
+
+        mirror_v = _p2 - _p1
         disp = self.dcplx_trans.disp
         angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
-        dedge = kdb.DEdge(p1, p2)
+        dedge = kdb.DEdge(_p1, _p2)
 
         v = mirror_v
         v = kdb.DVector(-v.y, v.x)
