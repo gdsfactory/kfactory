@@ -8149,9 +8149,10 @@ class Instance:
         self.transform(kdb.DTrans(0.0, __val - self._instance.dbbox().center().y))
 
     @property
-    def dcenter(self) -> kdb.DPoint:
+    def dcenter(self) -> tuple[float, float]:
         """Returns the coordinate center of the bounding box."""
-        return self._instance.dbbox().center()
+        center = self._instance.dbbox().center()
+        return (center.x, center.y)
 
     @dcenter.setter
     def dcenter(self, val: tuple[float, float] | kdb.DPoint) -> None:
