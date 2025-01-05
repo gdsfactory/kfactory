@@ -5,6 +5,7 @@
 
 ## New
 
+- Easier mirror [#544](https://github.com/gdsfactory/kfactory/pull/544)
 - fix port [#541](https://github.com/gdsfactory/kfactory/pull/541)
 - Add BaseKCell class and update VKCell and KCell to inherit from it [#528](https://github.com/gdsfactory/kfactory/pull/528)
 - better LockedError message [#536](https://github.com/gdsfactory/kfactory/pull/536)
