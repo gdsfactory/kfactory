@@ -3065,9 +3065,10 @@ class KCell:
         return self._kdb_cell.dbbox().center().y
 
     @property
-    def dcenter(self) -> kdb.DPoint:
+    def dcenter(self) -> tuple[float, float]:
         """Coordinate of the port in um."""
-        return self._kdb_cell.dbbox().center()
+        center = self._kdb_cell.dbbox().center()
+        return center.x, center.y
 
     def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
         """Generate a LayoutToNetlist object from the port types.
@@ -5883,9 +5884,10 @@ class VKCell(BaseModel, arbitrary_types_allowed=True):
         return self.bbox().center().y
 
     @property
-    def dcenter(self) -> kdb.DPoint:
+    def dcenter(self) -> tuple[float, float]:
         """Coordinate of the port in um."""
-        return self.bbox().center()
+        center = self.bbox().center()
+        return center.x, center.y
 
 
 class VInstancePorts:
@@ -6642,9 +6644,10 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         self.transform(kdb.DCplxTrans(0, __val - self.bbox().center().y))
 
     @property
-    def dcenter(self) -> kdb.DPoint:
+    def dcenter(self) -> tuple[float, float]:
         """Returns the coordinate center of the bounding box."""
-        return self.bbox().center()
+        c = self.bbox().center()
+        return (c.x, c.y)
 
     @dcenter.setter
     def dcenter(self, val: tuple[float, float] | kdb.DVector) -> None:
@@ -9523,9 +9526,10 @@ class InstanceGroup(BaseModel, arbitrary_types_allowed=True):
         self.transform(kdb.DTrans(0.0, __val - self.dbbox().center().y))
 
     @property
-    def dcenter(self) -> kdb.DPoint:
+    def dcenter(self) -> tuple[float, float]:
         """Returns the coordinate center of the bounding box."""
-        return self.dbbox().center()
+        center = self.dbbox().center()
+        return (center.x, center.y)
 
     @dcenter.setter
     def dcenter(self, val: tuple[float, float] | kdb.DPoint) -> None:
