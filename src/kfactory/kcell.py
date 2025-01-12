@@ -5492,6 +5492,9 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
         c._settings = self.settings.model_copy()
         c._settings_units = self.settings_units.model_copy()
         c.info = self.info.model_copy()
+        for layer, shapes in self._shapes.items():
+            for shape in shapes:
+                c.shapes(layer).insert(shape)
 
         return c
 
@@ -5935,7 +5938,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         self._ports = VInstancePorts(self)
 
     def bbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
-        return self.cell.bbox().transformed(self.trans)
+        return self.cell.dbbox().transformed(self.trans)
 
     def __getitem__(self, key: int | str | None) -> Port:
         """Returns port from instance.
