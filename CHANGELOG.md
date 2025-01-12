@@ -7,6 +7,10 @@
 
 - Add BaseKCell to __init__.py [#545](https://github.com/gdsfactory/kfactory/pull/545)
 
+## Bug Fixes
+
+- fix VInstance.bbox and duplication of VKCell [#547](https://github.com/gdsfactory/kfactory/pull/547)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.23.0...v0.23.1
 
 
