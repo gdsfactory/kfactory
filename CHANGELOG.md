@@ -1,27 +1,48 @@
-<a id="v0.22.1"></a>
-# [v0.22.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.22.1) - 2024-12-29
+<a id="v0.23.1"></a>
+# [v0.23.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.23.1) - 2025-01-05
 
 # What's Changed
 
 ## New
 
-- Easier mirror [#544](https://github.com/gdsfactory/kfactory/pull/544)
-- fix port [#541](https://github.com/gdsfactory/kfactory/pull/541)
+- Add BaseKCell to __init__.py [#545](https://github.com/gdsfactory/kfactory/pull/545)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.23.0...v0.23.1
+
+
+[Changes][v0.23.1]
+
+
+<a id="v0.23.0"></a>
+# [v0.23.0](https://github.com/gdsfactory/kfactory/releases/tag/v0.23.0) - 2025-01-05
+
+# What's Changed
+
+## Breaking
+
+- (d)mirror as tuples instead of points [#544](https://github.com/gdsfactory/kfactory/pull/544)
+- Port (d)center as tuple [#541](https://github.com/gdsfactory/kfactory/pull/541)
+- Add BaseKCell class and update VKCell and KCell to inherit from it [#528](https://github.com/gdsfactory/kfactory/pull/528)
+
+## New
+
+- (d)mirror as tuples instead of points [#544](https://github.com/gdsfactory/kfactory/pull/544)
+- Port (d)center as tuple [#541](https://github.com/gdsfactory/kfactory/pull/541)
 - Add BaseKCell class and update VKCell and KCell to inherit from it [#528](https://github.com/gdsfactory/kfactory/pull/528)
 - better LockedError message [#536](https://github.com/gdsfactory/kfactory/pull/536)
 
 ## Bug Fixes
 
-- fix port [#541](https://github.com/gdsfactory/kfactory/pull/541)
+- Port (d)center as tuple [#541](https://github.com/gdsfactory/kfactory/pull/541)
 
 ## Dependency Updates
 
 - Add lockfile and more commands to makefile [#538](https://github.com/gdsfactory/kfactory/pull/538)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.22.0...v0.22.1
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.22.0...v0.23.0
 
 
-[Changes][v0.22.1]
+[Changes][v0.23.0]
 
 
 <a id="v0.22.0"></a>
@@ -1385,7 +1406,8 @@
 [Changes][v0.4.0]
 
 
-[v0.22.1]: https://github.com/gdsfactory/kfactory/compare/v0.22.0...v0.22.1
+[v0.23.1]: https://github.com/gdsfactory/kfactory/compare/v0.23.0...v0.23.1
+[v0.23.0]: https://github.com/gdsfactory/kfactory/compare/v0.22.0...v0.23.0
 [v0.22.0]: https://github.com/gdsfactory/kfactory/compare/v0.21.11...v0.22.0
 [v0.21.11]: https://github.com/gdsfactory/kfactory/compare/v0.21.10...v0.21.11
 [v0.21.10]: https://github.com/gdsfactory/kfactory/compare/v0.21.8...v0.21.10
