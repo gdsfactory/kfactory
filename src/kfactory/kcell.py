@@ -880,47 +880,56 @@ class Ports:
     yaml_tag = "!Ports"
     kcl: KCLayout
     _locked: bool
-    _ports: list[Port]
+    _bases: list[BasePort]
 
-    def __init__(self, kcl: KCLayout, ports: Iterable[Port] = []) -> None:
+    def __init__(
+        self,
+        kcl: KCLayout,
+        ports: Iterable[Port] = [],
+        bases: list[BasePort] | None = None,
+    ) -> None:
         """Constructor."""
-        self._ports: list[Port] = list(ports)
+        if bases is None:
+            self._bases = [p._base for p in ports]
+        else:
+            self._bases = bases
         self.kcl = kcl
 
     def __len__(self) -> int:
         """Return Port count."""
-        return len(self._ports)
+        return len(self._bases)
 
     def copy(
-        self, rename_funciton: Callable[[list[Port]], None] | None = None
+        self, rename_funciton: Callable[[Iterable[Port]], None] | None = None
     ) -> Ports:
         """Get a copy of each port."""
-        _ports = [p.copy() for p in self._ports]
+        _bases = [b.copy() for b in self._bases]
+        _ports = Ports(kcl=self.kcl, bases=_bases)
         if rename_funciton is not None:
-            rename_funciton(_ports)
+            rename_funciton(iter(_ports))
         return Ports(ports=_ports, kcl=self.kcl)
 
     def contains(self, port: Port) -> bool:
         """Check whether a port is already in the list."""
-        return port.hash() in [v.hash() for v in self._ports]
+        return port.hash() in [v.hash() for v in self._bases]
 
     def __iter__(self) -> Iterator[Port]:
         """Iterator, that allows for loops etc to directly access the object."""
-        yield from self._ports
+        yield from (Port(base=base) for base in self._bases)
 
-    def __contains__(self, port: str | Port) -> bool:
+    def __contains__(self, port: str | Port | DPort) -> bool:
         """Check whether a port is in this port collection."""
-        if isinstance(port, Port):
-            return port in self._ports
+        if isinstance(port, Port | DPort):
+            return port._base in self._bases
         else:
-            for _port in self._ports:
-                if _port.name == port:
+            for _base in self._bases:
+                if _base.name == port:
                     return True
             return False
 
     def clear(self) -> None:
         """Deletes all ports."""
-        self._ports.clear()
+        self._bases.clear()
 
     def add_port(
         self, port: Port, name: str | None = None, keep_mirror: bool = False
@@ -943,7 +952,7 @@ class Ports:
                     _port._dcplx_trans.mirror = False
             if name is not None:
                 _port.name = name
-            self._ports.append(_port)
+            self._bases.append(_port._base)
         else:
             dcplx_trans = port.dcplx_trans.dup()
             if not keep_mirror:
@@ -970,7 +979,7 @@ class Ports:
                     ),
                 )
 
-            self._ports.append(_port)
+            self._bases.append(_port._base)
         return _port
 
     def add_ports(
@@ -1142,8 +1151,8 @@ class Ports:
                 name=name,
                 port_type=port_type,
                 cross_section=cross_section,
-                angle=angle,
-                center=center,
+                iangle=angle,
+                icenter=center,
                 mirror_x=mirror_x,
                 kcl=self.kcl,
             )
@@ -1154,23 +1163,23 @@ class Ports:
                 f" and dwidth {dwidth}"
             )
 
-        self._ports.append(port)
+        self._bases.append(port._base)
         return port
 
     def get_all_named(self) -> dict[str, Port]:
         """Get all ports in a dictionary with names as keys."""
-        return {v.name: v for v in self._ports if v.name is not None}
+        return {v.name: Port(base=v) for v in self._bases if v.name is not None}
 
     def __getitem__(self, key: int | str | None) -> Port:
         """Get a specific port by name."""
         if isinstance(key, int):
-            return self._ports[key]
+            return Port(base=self._bases[key])
         try:
-            return next(filter(lambda port: port.name == key, self._ports))
+            return Port(base=next(filter(lambda port: port.name == key, self._bases)))
         except StopIteration:
             raise KeyError(
                 f"{key=} is not a valid port name or index. "
-                f"Available ports: {[v.name for v in self._ports]}"
+                f"Available ports: {[v.name for v in self._bases]}"
             )
 
     def filter(
@@ -1190,7 +1199,7 @@ class Ports:
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-        ports: Iterable[Port] = self._ports
+        ports: Iterable[Port] = (Port(base=b) for b in self._bases)
         if regex:
             ports = filter_regex(ports, regex)
         if layer is not None:
@@ -1206,20 +1215,22 @@ class Ports:
     def hash(self) -> bytes:
         """Get a hash of the port to compare."""
         h = sha3_512()
-        for port in sorted(self._ports, key=lambda port: hash(port)):
+        for port in sorted(
+            [Port(base=b) for b in self._bases], key=lambda port: hash(port)
+        ):
             h.update(port.name.encode("UTF-8") if port.name else b"")
             if port._trans:
-                h.update(port.trans.hash().to_bytes(8, "big"))
+                h.update(port._trans.hash().to_bytes(8, "big"))
             else:
                 h.update(port.dcplx_trans.hash().to_bytes(8, "big"))
-            h.update(port.width.to_bytes(8, "big"))
+            h.update(port.iwidth.to_bytes(8, "big"))
             h.update(port.port_type.encode("UTF-8"))
 
         return h.digest()
 
     def __repr__(self) -> str:
         """Representation of the Ports as strings."""
-        return repr([repr(p) for p in self._ports])
+        return repr([repr(Port(base=b)) for b in self._bases])
 
     def print(self, unit: Literal["dbu", "um", None] = None) -> None:
         """Pretty print ports."""
@@ -1855,9 +1866,6 @@ class KCell(BaseModel, BaseKCell[int], arbitrary_types_allowed=True):
             dsize_info=DSizeInfo(_kdb_cell.dbbox),
             insts=insts,
             info=Info(**(info or {})),
-            bbox=_kdb_cell.bbox,
-            dbbox=_kdb_cell.dbbox,
-            ibbox=_kdb_cell.bbox,
             vinsts=[],
             function_name=None,
             basename=None,
@@ -6826,7 +6834,17 @@ def _get_default_kcl() -> KCLayout:
     return kcl
 
 
-class BasePort:
+class BasePort(BaseModel):
+    name: str | None
+    kcl: KCLayout
+    cross_section: SymmetricalCrossSection
+    _trans: kdb.Trans | None
+    _dcplx_trans: kdb.DCplxTrans | None
+    info: Info = Info()
+    port_type: str
+
+
+class IntermediatePort:
     """A port is the photonics equivalent to a pin in electronics.
 
     In addition to the location and layer
@@ -6851,13 +6869,7 @@ class BasePort:
     """
 
     yaml_tag = "!Port"
-    name: str | None
-    kcl: KCLayout
-    cross_section: SymmetricalCrossSection
-    _trans: kdb.Trans | None
-    _dcplx_trans: kdb.DCplxTrans | None
-    info: Info = Info()
-    port_type: str
+    _base: BasePort
 
     @overload
     def __init__(
@@ -7021,6 +7033,13 @@ class BasePort:
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
         port_type: str = "optical",
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        base: BasePort,
     ): ...
 
     def __init__(
@@ -7039,68 +7058,151 @@ class BasePort:
         icenter: tuple[int, int] | None = None,
         dcenter: tuple[float, float] | None = None,
         mirror_x: bool = False,
-        port: BasePort | None = None,
+        port: IntermediatePort | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
         cross_section: SymmetricalCrossSection | None = None,
+        base: BasePort | None = None,
     ):
         """Create a port from dbu or um based units."""
-        if port is not None:
-            self.name = port.name if name is None else name
-
-            if port.dcplx_trans.is_complex():
-                self.dcplx_trans = port.dcplx_trans
-            else:
-                self.trans = port.trans
-
-            self.port_type = port.port_type
-            self.cross_section = port.cross_section
-            self.info = Info(**(info or port.info.model_dump()))
+        if base is not None:
+            self._base = base
             return
-        else:
-            self.info = Info(**info)
-        self.kcl = kcl or _get_default_kcl()
+        if port is not None:
+            self._base = BasePort(**port._base.model_dump())
+            return
+        _info = Info(**info)
+        _kcl = kcl or _get_default_kcl()
         if cross_section is None:
             if layer_info is None:
                 if layer is None:
                     raise ValueError("layer or layer_info for a port must be defined")
-                layer_info = self.kcl.get_info(layer)
+                layer_info = _kcl.get_info(layer)
             if iwidth is None and dwidth is None:
                 raise ValueError(
                     "any width and layer, or a cross_section must be given if the"
                     " 'port is None'"
                 )
             elif iwidth is None:
-                cross_section = self.kcl.get_cross_section(
+                cross_section = _kcl.get_cross_section(
                     CrossSectionSpec(
                         main_layer=layer_info,
-                        width=self.kcl.to_dbu(dwidth),  # type: ignore[arg-type]
+                        width=_kcl.to_dbu(dwidth),  # type: ignore[arg-type]
                     )
                 )
             else:
-                cross_section = self.kcl.get_cross_section(
+                cross_section = _kcl.get_cross_section(
                     CrossSectionSpec(main_layer=layer_info, width=iwidth)
                 )
-        self.cross_section = cross_section
+        _cross_section = cross_section
         if trans is not None:
             if isinstance(trans, str):
-                self.trans = kdb.Trans.from_s(trans)
+                _trans = kdb.Trans.from_s(trans)
             else:
-                self.trans = trans.dup()
+                _trans = trans.dup()
+            self._base = BasePort(
+                name=name,
+                kcl=_kcl,
+                cross_section=_cross_section,
+                _trans=_trans,
+                _dcplx_trans=None,
+                info=_info,
+                port_type=port_type,
+            )
         elif dcplx_trans is not None:
             if isinstance(dcplx_trans, str):
-                self.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
+                _dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
             else:
-                self.dcplx_trans = dcplx_trans.dup()
+                _dcplx_trans = dcplx_trans.dup()
+            self._base = BasePort(
+                name=name,
+                kcl=_kcl,
+                cross_section=_cross_section,
+                _trans=None,
+                _dcplx_trans=_dcplx_trans,
+                info=_info,
+                port_type=port_type,
+            )
         elif iangle is not None:
             assert icenter is not None
-            self.trans = kdb.Trans(iangle, mirror_x, *icenter)
-            self.port_type = port_type
+            _trans = kdb.Trans(iangle, mirror_x, *icenter)
+            self._base = BasePort(
+                name=name,
+                kcl=_kcl,
+                cross_section=_cross_section,
+                _trans=_trans,
+                _dcplx_trans=None,
+                info=_info,
+                port_type=port_type,
+            )
         elif dangle is not None:
             assert dcenter is not None
-            self.dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
-        self.name = name
-        self.port_type = port_type
+            _dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
+            self._base = BasePort(
+                name=name,
+                kcl=_kcl,
+                cross_section=_cross_section,
+                _trans=None,
+                _dcplx_trans=_dcplx_trans,
+                info=_info,
+                port_type=port_type,
+            )
+
+    @property
+    def name(self) -> str | None:
+        return self._base.name
+
+    @name.setter
+    def name(self, value: str | None) -> None:
+        self._base.name = value
+
+    @property
+    def port_type(self) -> str:
+        return self._base.port_type
+
+    @port_type.setter
+    def port_type(self, value: str) -> None:
+        self._base.port_type = value
+
+    @property
+    def _trans(self) -> kdb.Trans | None:
+        return self._base._trans
+
+    @_trans.setter
+    def _trans(self, value: kdb.Trans | None) -> None:
+        self._base._trans = value
+
+    @property
+    def _dcplx_trans(self) -> kdb.DCplxTrans | None:
+        return self._base._dcplx_trans
+
+    @_dcplx_trans.setter
+    def _dcplx_trans(self, value: kdb.Trans | None) -> None:
+        self._base._trans = value
+
+    @property
+    def cross_section(self) -> SymmetricalCrossSection:
+        return self._base.cross_section
+
+    @cross_section.setter
+    def cross_section(self, value: SymmetricalCrossSection) -> None:
+        self._base.cross_section = value
+
+    @property
+    def info(self) -> Info:
+        return self._base.info
+
+    @info.setter
+    def info(self, value: Info) -> None:
+        self._base.info = value
+
+    @property
+    def kcl(self) -> KCLayout:
+        return self._base.kcl
+
+    @kcl.setter
+    def kcl(self, value: KCLayout) -> None:
+        self._base.kcl = value
 
     @property
     def layer(self) -> LayerEnum | int:
@@ -7110,7 +7212,7 @@ class BasePort:
         index.
         """
         return self.kcl.find_layer(
-            self.cross_section.main_layer, allow_undefined_layers=True
+            self._base.cross_section.main_layer, allow_undefined_layers=True
         )
 
     @property
@@ -7127,14 +7229,14 @@ class BasePort:
         return self.cross_section.width
 
     @classmethod
-    def from_yaml(cls: type[BasePort], constructor, node) -> BasePort:  # type: ignore
+    def from_yaml(cls: type[IntermediatePort], constructor, node) -> IntermediatePort:  # type: ignore
         """Internal function used by the placer to convert yaml to a Port."""
         d = dict(constructor.construct_pairs(node))
         return cls(**d)
 
     def __eq__(self, other: object) -> bool:
         """Support for `port1 == port2` comparisons."""
-        if isinstance(other, BasePort):
+        if isinstance(other, IntermediatePort):
             if (
                 self.iwidth == other.iwidth
                 and self._trans == other._trans
@@ -7151,7 +7253,7 @@ class BasePort:
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans | None = None,
-    ) -> BasePort:
+    ) -> IntermediatePort:
         """Get a copy of a port.
 
         Transformation order which results in `copy.trans`:
@@ -7170,7 +7272,7 @@ class BasePort:
             if self._trans:
                 if isinstance(trans, kdb.Trans):
                     _trans = trans * self.trans
-                    return BasePort(
+                    return IntermediatePort(
                         name=self.name,
                         trans=_trans,
                         layer=self.layer,
@@ -7181,7 +7283,7 @@ class BasePort:
                     )
                 elif not trans.is_complex():
                     _trans = kdb.ICplxTrans(trans, self.kcl.dbu).s_trans() * self.trans
-                    return BasePort(
+                    return IntermediatePort(
                         name=self.name,
                         trans=_trans,
                         layer=self.layer,
@@ -7195,7 +7297,7 @@ class BasePort:
                 _dtrans = dtrans * self.dcplx_trans
             else:
                 _dtrans = trans * self.dcplx_trans
-            return BasePort(
+            return IntermediatePort(
                 name=self.name,
                 dcplx_trans=_dtrans,
                 dwidth=self.dwidth,
@@ -7208,7 +7310,7 @@ class BasePort:
             if self._trans:
                 match isinstance(trans, kdb.Trans), isinstance(post_trans, kdb.Trans):
                     case True, True:
-                        return BasePort(
+                        return IntermediatePort(
                             name=self.name,
                             trans=trans * self.trans * post_trans,  # type: ignore[operator]
                             layer=self.layer,
@@ -7224,7 +7326,7 @@ class BasePort:
                                 * self.trans
                                 * post_trans
                             )
-                            return BasePort(
+                            return IntermediatePort(
                                 name=self.name,
                                 trans=_trans,
                                 layer=self.layer,
@@ -7241,7 +7343,7 @@ class BasePort:
                                     post_trans.to_dtype(self.kcl.layout.dbu)  # type: ignore[union-attr,operator]
                                 )
                             )
-                            return BasePort(
+                            return IntermediatePort(
                                 name=self.name,
                                 dcplx_trans=_dcplxtrans,
                                 layer=self.layer,
@@ -7260,7 +7362,7 @@ class BasePort:
                             * self.dcplx_trans
                             * post_trans
                         )
-                        return BasePort(
+                        return IntermediatePort(
                             name=self.name,
                             dcplx_trans=_dcplxtrans,
                             layer=self.layer,
@@ -7279,7 +7381,7 @@ class BasePort:
             else:
                 _dposttrans = post_trans or kdb.DCplxTrans()
 
-            return BasePort(
+            return IntermediatePort(
                 name=self.name,
                 dcplx_trans=_dtrans * _dposttrans,
                 dwidth=self.dwidth,
@@ -7291,7 +7393,7 @@ class BasePort:
 
     def icopy_polar(
         self, d: int = 0, d_orth: int = 0, angle: int = 2, mirror: bool = False
-    ) -> BasePort:
+    ) -> IntermediatePort:
         """Get a polar copy of the port.
 
         This will return a port which is transformed relatively to the original port's
@@ -7308,7 +7410,7 @@ class BasePort:
 
     def dcopy_polar(
         self, d: float = 0, d_orth: float = 0, angle: float = 180, mirror: bool = False
-    ) -> BasePort:
+    ) -> IntermediatePort:
         """Get a polar copy of the port.
 
         This will return a port which is transformed relatively to the original port's
@@ -7544,7 +7646,7 @@ class BasePort:
         config.console.print(pprint_ports([self], unit=type))
 
 
-class Port(BasePort):
+class Port(IntermediatePort):
     @property
     def angle(self) -> int:
         """Angle of the transformation.
@@ -7599,7 +7701,7 @@ class Port(BasePort):
 
     def copy_polar(
         self, d: int = 0, d_orth: int = 0, angle: int = 2, mirror: bool = False
-    ) -> BasePort:
+    ) -> IntermediatePort:
         """Get a polar copy of the port.
 
         This will return a port which is transformed relatively to the original port's
@@ -7615,7 +7717,7 @@ class Port(BasePort):
         return self.copy(post_trans=kdb.Trans(angle, mirror, d, d_orth))
 
 
-class DPort(BasePort):
+class DPort(IntermediatePort):
     @property
     def angle(self) -> float:
         """Angle of the transformation.
@@ -7663,7 +7765,7 @@ class DPort(BasePort):
 
     def copy_polar(
         self, d: float = 0, d_orth: float = 0, angle: float = 180, mirror: bool = False
-    ) -> BasePort:
+    ) -> IntermediatePort:
         """Get a polar copy of the port.
 
         This will return a port which is transformed relatively to the original port's
@@ -8834,7 +8936,7 @@ def update_default_trans(
 
 
 def pprint_ports(
-    ports: Iterable[BasePort | Port | DPort], unit: Literal["dbu", "um", None] = None
+    ports: Iterable[IntermediatePort], unit: Literal["dbu", "um", None] = None
 ) -> rich.table.Table:
     """Print ports as a table.
 
@@ -8864,9 +8966,9 @@ def pprint_ports(
                         str(port.name) + " [dbu]",
                         f"{port.iwidth:_}",
                         port.kcl.get_info(port.layer).to_s(),
-                        f"{port.x:_}",
-                        f"{port.y:_}",
-                        str(port.angle),
+                        f"{port.ix:_}",
+                        f"{port.iy:_}",
+                        str(port.iangle),
                         str(port.mirror),
                         rich.json.JSON.from_data(port.info.model_dump()),
                     )
@@ -8899,9 +9001,9 @@ def pprint_ports(
                     str(port.name) + " [dbu]",
                     f"{port.iwidth:_}",
                     port.kcl.get_info(port.layer).to_s(),
-                    f"{port.x:_}",
-                    f"{port.y:_}",
-                    str(port.angle),
+                    f"{port.ix:_}",
+                    f"{port.iy:_}",
+                    str(port.iangle),
                     str(port.mirror),
                     rich.json.JSON.from_data(port.info.model_dump()),
                 )
