@@ -766,11 +766,11 @@ def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -
         assert (
             p1.trans == p2.trans * kdb.Trans.R180
             or p1.trans == p2.trans * kdb.Trans.M90
-        ), "Transformations of ports not matching for opposite check" f"{p1=} {p2=}"
+        ), f"Transformations of ports not matching for opposite check{p1=} {p2=}"
     if (checks & PortCheck.opposite) == 0:
-        assert (
-            p1.trans == p2.trans or p1.trans == p2.trans * kdb.Trans.M0
-        ), f"Transformations of ports not matching for overlapping check {p1=} {p2=}"
+        assert p1.trans == p2.trans or p1.trans == p2.trans * kdb.Trans.M0, (
+            f"Transformations of ports not matching for overlapping check {p1=} {p2=}"
+        )
     if checks & PortCheck.width:
         assert p1.width == p2.width, f"Width mismatch for {p1=} {p2=}"
     if checks & PortCheck.layer:
@@ -4377,7 +4377,7 @@ class KCLayout(
             if allow_undefined_layers:
                 return self.layout.layer(info)
             raise KeyError(
-                f"Layer '{args=}, {kwargs=}' has not been defined in the " "KCLayout."
+                f"Layer '{args=}, {kwargs=}' has not been defined in the KCLayout."
             )
 
     @overload
@@ -5675,6 +5675,9 @@ class VKCell(BaseKCell[float], BaseModel, arbitrary_types_allowed=True):
         c._settings = self.settings.model_copy()
         c._settings_units = self.settings_units.model_copy()
         c.info = self.info.model_copy()
+        for layer, shapes in self._shapes.items():
+            for shape in shapes:
+                c.shapes(layer).insert(shape)
 
         return c
 
@@ -8482,7 +8485,7 @@ def get_cell_name(
 
     if len(name) > max_cellname_length:
         name_hash = sha3_512(name.encode()).hexdigest()[:8]
-        name = f"{name[:(max_cellname_length - 9)]}_{name_hash}"
+        name = f"{name[: (max_cellname_length - 9)]}_{name_hash}"
 
     return name
 

@@ -858,7 +858,7 @@ def route_smart(
     length = len(start_ports)
     if len(kwargs) > 0:
         raise ValueError(
-            "Additional args and kwargs are not allowed for route_smart." f"{kwargs=}"
+            f"Additional args and kwargs are not allowed for route_smart.{kwargs=}"
         )
 
     if bend90_radius is None or separation is None:
