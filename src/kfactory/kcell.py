@@ -1516,7 +1516,7 @@ class BoxLike(Protocol[KUnit]):
     def center(self) -> PointLike[KUnit]: ...
 
 
-class KObject(Generic[KUnit], ABC):
+class KObject(Generic[KUnit]):
     bbox: BBoxConstructor[KUnit]
     ibbox: BBoxConstructor[int]
     dbbox: BBoxConstructor[float]
@@ -1663,24 +1663,21 @@ class KObject(Generic[KUnit], ABC):
 class BaseKCell(KObject[KUnit], ABC):
     """Base class for shared attributes between VKCell and KCell."""
 
-    _ports: Ports
     _locked: bool
+    _ports: Ports
     _settings: KCellSettings
     _settings_units: KCellSettingsUnits
-    vinsts: list[VInstance]
-    info: Info
-    kcl: KCLayout
-    function_name: str | None
     basename: str | None
+    function_name: str | None
+    kcl: KCLayout
+    info: Info
+    vinsts: list[VInstance]
 
     @property
     def name(self) -> str | None: ...
 
     @name.setter
     def name(self, value: str) -> None: ...
-
-    @abstractmethod
-    def dup(self) -> Self: ...
 
     @property
     def settings(self) -> KCellSettings:
@@ -1766,6 +1763,9 @@ class BaseKCell(KObject[KUnit], ABC):
         self.vinsts.append(vi)
         return vi
 
+    @abstractmethod
+    def dup(self) -> BaseKCell[KUnit]: ...
+
 
 class KCell(BaseModel, BaseKCell[int], arbitrary_types_allowed=True):
     """KLayout cell and change its class to KCell.
@@ -1806,17 +1806,6 @@ class KCell(BaseModel, BaseKCell[int], arbitrary_types_allowed=True):
     bbox: Callable[..., kdb.Box]
     ibbox: Callable[..., kdb.Box]
     dbbox: Callable[..., kdb.DBox]
-    _ports: Ports = PrivateAttr()
-    _locked: bool = PrivateAttr(False)
-    _settings: KCellSettings = PrivateAttr(default_factory=KCellSettings)
-    _settings_units: KCellSettingsUnits = PrivateAttr(
-        default_factory=KCellSettingsUnits
-    )
-    vinsts: list[VInstance] = Field(default_factory=list)
-    info: Info
-    kcl: KCLayout
-    function_name: str | None = None
-    basename: str | None = None
 
     def __init__(
         self,
@@ -1858,7 +1847,13 @@ class KCell(BaseModel, BaseKCell[int], arbitrary_types_allowed=True):
             bbox=_kdb_cell.bbox,
             dbbox=_kdb_cell.dbbox,
             ibbox=_kdb_cell.bbox,
+            vinsts=[],
+            function_name=None,
+            basename=None,
         )
+        self._locked = False
+        self._settings = KCellSettings()
+        self._settings_units = KCellSettingsUnits()
         self._kdb_cell = _kdb_cell
         self._ports = ports or Ports(_kcl)
         self.kcl.register_cell(self)
@@ -5597,12 +5592,13 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
         return VShapes(cell=self.cell, _shapes=new_shapes)  # type: ignore[arg-type]
 
 
-class VKCell(BaseModel, BaseKCell[float], arbitrary_types_allowed=True):
+class VKCell(BaseKCell[float], BaseModel, arbitrary_types_allowed=True):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
     _shapes: dict[int, VShapes] = PrivateAttr(default_factory=dict)
     _name: str | None = None
     size_info: DSizeInfo
+    isize_info: SizeInfo
 
     def __init__(
         self,
@@ -5611,9 +5607,19 @@ class VKCell(BaseModel, BaseKCell[float], arbitrary_types_allowed=True):
         info: dict[str, int | float | str] | None = None,
     ) -> None:
         _kcl = kcl or _get_default_kcl()
-        super().__init__(kcl=_kcl, info=info, size_info=DSizeInfo(self.bbox))
+        BaseModel.__init__(
+            self,
+            kcl=_kcl,
+            info=info,
+            size_info=DSizeInfo(self.bbox),
+            isize_info=SizeInfo(self.ibbox),
+        )
         self._ports = Ports(_kcl)
         self._name = name
+
+    @property
+    def dsize_info(self) -> DSizeInfo:
+        return self.size_info
 
     def bbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
         _layers = set(self._shapes.keys())
@@ -5638,10 +5644,6 @@ class VKCell(BaseModel, BaseKCell[float], arbitrary_types_allowed=True):
     def __getitem__(self, key: int | str | None) -> Port:
         """Returns port from instance."""
         return self.ports[key]
-
-    @property
-    def dsize_info(self) -> DSizeInfo:
-        return self.size_info
 
     @property
     def insts(self) -> list[VInstance]:
@@ -6116,7 +6118,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
         self._ports = VInstancePorts(self)
 
     def bbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
-        return self.cell.bbox().transformed(self.trans)
+        return self.cell.dbbox().transformed(self.trans)
 
     def __getitem__(self, key: int | str | None) -> Port:
         """Returns port from instance.
