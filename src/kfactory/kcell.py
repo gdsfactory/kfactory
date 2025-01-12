@@ -1492,11 +1492,6 @@ class InstancePorts:
 
 
 @runtime_checkable
-class BBoxConstructor(Protocol[KUnit]):
-    def __call__(self, layer: int | LayerEnum | None = None) -> BoxLike[KUnit]: ...
-
-
-@runtime_checkable
 class PointLike(Protocol[KUnit]):
     x: KUnit
     y: KUnit
@@ -1516,10 +1511,13 @@ class BoxLike(Protocol[KUnit]):
     def center(self) -> PointLike[KUnit]: ...
 
 
-class KObject(Generic[KUnit]):
-    bbox: BBoxConstructor[KUnit]
-    ibbox: BBoxConstructor[int]
-    dbbox: BBoxConstructor[float]
+class KObject(Generic[KUnit], ABC):
+    @abstractmethod
+    def bbox(self, layer: int | LayerEnum | None = None) -> BoxLike[KUnit]: ...
+    @abstractmethod
+    def ibbox(self, layer: int | LayerEnum | None = None) -> BoxLike[int]: ...
+    @abstractmethod
+    def dbbox(self, layer: int | LayerEnum | None = None) -> BoxLike[float]: ...
 
     @property
     def x(self) -> KUnit:
@@ -1660,7 +1658,7 @@ class KObject(Generic[KUnit]):
         return center.x, center.y
 
 
-class BaseKCell(KObject[KUnit], ABC):
+class BaseKCell(KObject[KUnit]):
     """Base class for shared attributes between VKCell and KCell."""
 
     _locked: bool
@@ -1803,9 +1801,6 @@ class KCell(BaseModel, BaseKCell[int], arbitrary_types_allowed=True):
     insts: Instances
     size_info: SizeInfo
     dsize_info: DSizeInfo
-    bbox: Callable[..., kdb.Box]
-    ibbox: Callable[..., kdb.Box]
-    dbbox: Callable[..., kdb.DBox]
 
     def __init__(
         self,
@@ -1813,6 +1808,7 @@ class KCell(BaseModel, BaseKCell[int], arbitrary_types_allowed=True):
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Ports | None = None,
+        info: dict[str, int | float | str] | None = None,
     ):
         """Constructor of KCell.
 
@@ -1824,6 +1820,7 @@ class KCell(BaseModel, BaseKCell[int], arbitrary_types_allowed=True):
                 KLayout Cell
             ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
                 if `None` create an empty one.
+            info: Information to add to the KCell.
         """
         _kcl = kcl or _get_default_kcl()
         if name is None:
@@ -1843,7 +1840,7 @@ class KCell(BaseModel, BaseKCell[int], arbitrary_types_allowed=True):
             size_info=SizeInfo(_kdb_cell.bbox),
             dsize_info=DSizeInfo(_kdb_cell.dbbox),
             insts=insts,
-            info=Info(),
+            info=Info(**(info or {})),
             bbox=_kdb_cell.bbox,
             dbbox=_kdb_cell.dbbox,
             ibbox=_kdb_cell.bbox,
@@ -1857,6 +1854,36 @@ class KCell(BaseModel, BaseKCell[int], arbitrary_types_allowed=True):
         self._kdb_cell = _kdb_cell
         self._ports = ports or Ports(_kcl)
         self.kcl.register_cell(self)
+
+    def bbox(self, layer: int | LayerEnum | None = None) -> kdb.Box:
+        """Gets the bounding box in dbu of the KCell.
+
+        If layer is not None the bounding box of that layer is returned.
+        """
+        if layer is None:
+            return self._kdb_cell.bbox()
+        else:
+            return self._kdb_cell.bbox(layer)
+
+    def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
+        """Gets the bounding box in um of the KCell.
+
+        If layer is not None the bounding box of that layer is returned.
+        """
+        if layer is None:
+            return self._kdb_cell.dbbox()
+        else:
+            return self._kdb_cell.dbbox(layer)
+
+    def ibbox(self, layer: int | LayerEnum | None = None) -> kdb.Box:
+        """Gets the bounding box in dbu of the KCell.
+
+        If layer is not None the bounding box of that layer is returned.
+        """
+        if layer is None:
+            return self._kdb_cell.bbox()
+        else:
+            return self._kdb_cell.bbox(layer)
 
     def evaluate_insts(self) -> None:
         """Check all KLayout instances and create kfactory Instances."""
@@ -5592,7 +5619,7 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
         return VShapes(cell=self.cell, _shapes=new_shapes)  # type: ignore[arg-type]
 
 
-class VKCell(BaseKCell[float], BaseModel, arbitrary_types_allowed=True):
+class VKCell(BaseModel, BaseKCell[float], arbitrary_types_allowed=True):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
     _shapes: dict[int, VShapes] = PrivateAttr(default_factory=dict)
@@ -5610,12 +5637,18 @@ class VKCell(BaseKCell[float], BaseModel, arbitrary_types_allowed=True):
         BaseModel.__init__(
             self,
             kcl=_kcl,
-            info=info,
+            info=Info(**(info or {})),
             size_info=DSizeInfo(self.bbox),
             isize_info=SizeInfo(self.ibbox),
+            basename=None,
+            function_name=None,
+            vinsts=[],
         )
+        self._locked = False
         self._ports = Ports(_kcl)
         self._name = name
+        self._settings = KCellSettings()
+        self._settings_units = KCellSettingsUnits()
 
     @property
     def dsize_info(self) -> DSizeInfo:
