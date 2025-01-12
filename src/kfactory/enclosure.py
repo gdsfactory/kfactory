@@ -906,9 +906,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                             "main_layer.minkowski_sum(max_shape).merged();"
                         )
                     case d if d < 0:
-                        max_region = (
-                            "var max_reg = tile_reg - " "(tile_reg - main_layer);"
-                        )
+                        max_region = "var max_reg = tile_reg - (tile_reg - main_layer);"
                     case 0:
                         max_region = "var max_reg = main_layer & tile_reg;"
                 queue_str += max_region
@@ -1169,9 +1167,9 @@ class KCellLayerEnclosures(BaseModel):
         The PDK Enclosure uses this to automatically apply enclosures.
         """
         for le in v:
-            assert (
-                le.main_layer is not None
-            ), "Enclosure for PDKEnclosure must have a main layer defined"
+            assert le.main_layer is not None, (
+                "Enclosure for PDKEnclosure must have a main layer defined"
+            )
         return v
 
     def __getitem__(self, key: str | int) -> LayerEnclosure:
@@ -1619,7 +1617,7 @@ class KCellEnclosure(BaseModel):
                                 )
                             case d if d < 0:
                                 max_region = (
-                                    "var max_reg = tile_reg - " f"(tile_reg - {_inp});"
+                                    f"var max_reg = tile_reg - (tile_reg - {_inp});"
                                 )
                             case 0:
                                 max_region = f"var max_reg = {_inp} & tile_reg;"
@@ -1645,7 +1643,7 @@ class KCellEnclosure(BaseModel):
                                     min_region = f"var min_reg = {_inp} & tile_reg;"
                             queue_str += min_region
                             queue_str += (
-                                f"_output({_out}," "(max_reg - min_reg) & _tile, true);"
+                                f"_output({_out},(max_reg - min_reg) & _tile, true);"
                             )
                         else:
                             queue_str += f"_output({_out}, max_reg & _tile, true);"

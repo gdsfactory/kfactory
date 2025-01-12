@@ -269,7 +269,7 @@ def place90(
     """
     if len(kwargs) > 0:
         raise ValueError(
-            "Additional args and kwargs are not allowed for route_smart." f"{kwargs=}"
+            f"Additional args and kwargs are not allowed for route_smart.{kwargs=}"
         )
     if allow_width_mismatch is None:
         allow_width_mismatch = config.allow_width_mismatch
