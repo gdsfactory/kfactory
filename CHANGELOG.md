@@ -1,5 +1,20 @@
+<a id="v0.23.2"></a>
+# [v0.23.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.23.2) - 2025-01-14
+
+# What's Changed
+
+## New
+
+- Add more locked checks to VKCell and remade lock file [#549](https://github.com/gdsfactory/kfactory/pull/549)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.23.1...v0.23.2
+
+
+[Changes][v0.23.2]
+
+
 <a id="v0.23.1"></a>
-# [v0.23.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.23.1) - 2025-01-05
+# [v0.23.1](https://github.com/gdsfactory/kfactory/releases/tag/v0.23.1) - 2025-01-12
 
 # What's Changed
 
@@ -1410,6 +1425,7 @@
 [Changes][v0.4.0]
 
 
+[v0.23.2]: https://github.com/gdsfactory/kfactory/compare/v0.23.1...v0.23.2
 [v0.23.1]: https://github.com/gdsfactory/kfactory/compare/v0.23.0...v0.23.1
 [v0.23.0]: https://github.com/gdsfactory/kfactory/compare/v0.22.0...v0.23.0
 [v0.22.0]: https://github.com/gdsfactory/kfactory/compare/v0.21.11...v0.22.0
