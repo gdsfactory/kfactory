@@ -30,6 +30,7 @@ from typing import (
     Annotated,
     Any,
     ClassVar,
+    Generic,
     Literal,
     Protocol,
     TypeAlias,
@@ -37,6 +38,7 @@ from typing import (
     cast,
     get_origin,
     overload,
+    runtime_checkable,
 )
 
 import cachetools.func
@@ -103,6 +105,8 @@ T = TypeVar("T")
 KC = TypeVar("KC", bound="KCell", covariant=True)
 LI = TypeVar("LI", bound="LayerInfos", covariant=True)
 C = TypeVar("C", bound="Constants", covariant=True)
+KUnit = TypeVar("KUnit", bound=int | float)
+BaseShape = TypeVar("BaseShape", bound=kdb.Box | kdb.DBox, covariant=True)
 
 KCellParams = ParamSpec("KCellParams")
 AnyTrans = TypeVar(
@@ -597,7 +601,7 @@ class PROPID(IntEnum):
 class LockedError(AttributeError):
     """Raised when a locked cell is being modified."""
 
-    def __init__(self, kcell: BaseKCell):
+    def __init__(self, kcell: BaseKCell[Any]):
         """Throw _locked error."""
         super().__init__(
             f"{kcell.name!r} is locked and likely stored in cache. Modifications are "
@@ -626,13 +630,13 @@ class PortWidthMismatch(ValueError):
         if isinstance(other_inst, Instance):
             super().__init__(
                 f'Width mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f'and {other_inst.cell.name}["{p2.name}"] ("{p1.width}"/"{p2.width}")',
+                f'and {other_inst.cell.name}["{p2.name}"] ("{p1.iwidth}"/"{p2.iwidth}")',
                 *args,
             )
         else:
             super().__init__(
                 f'Width mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f' and Port "{p2.name}" ("{p1.width}"/"{p2.width}")',
+                f' and Port "{p2.name}" ("{p1.iwidth}"/"{p2.iwidth}")',
                 *args,
             )
 
@@ -768,7 +772,7 @@ def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -
             f"Transformations of ports not matching for overlapping check {p1=} {p2=}"
         )
     if checks & PortCheck.width:
-        assert p1.width == p2.width, f"Width mismatch for {p1=} {p2=}"
+        assert p1.iwidth == p2.iwidth, f"Width mismatch for {p1=} {p2=}"
     if checks & PortCheck.layer:
         assert p1.layer == p2.layer, f"Layer mismatch for {p1=} {p2=}"
     if checks & PortCheck.port_type:
@@ -848,6 +852,19 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
         return self.root[enclosure.name]
 
 
+class DPorts:
+    """A collection of um-ports.
+
+    It is not a traditional dictionary. Elements can be retrieved as in a traditional
+    dictionary. But to keep tabs on names etc, the ports are stored as a list
+
+    Attributes:
+        _ports: Internal storage of the ports. Normally ports should be retrieved with
+            [__getitem__][kfactory.kcell.Ports.__getitem__] or with
+            [get_all_named][kfactory.kcell.Ports.get_all_named]
+    """
+
+
 class Ports:
     """A collection of ports.
 
@@ -863,46 +880,56 @@ class Ports:
     yaml_tag = "!Ports"
     kcl: KCLayout
     _locked: bool
+    _bases: list[BasePort]
 
-    def __init__(self, kcl: KCLayout, ports: Iterable[Port] = []) -> None:
+    def __init__(
+        self,
+        kcl: KCLayout,
+        ports: Iterable[Port] = [],
+        bases: list[BasePort] | None = None,
+    ) -> None:
         """Constructor."""
-        self._ports: list[Port] = list(ports)
+        if bases is None:
+            self._bases = [p._base for p in ports]
+        else:
+            self._bases = bases
         self.kcl = kcl
 
     def __len__(self) -> int:
         """Return Port count."""
-        return len(self._ports)
+        return len(self._bases)
 
     def copy(
-        self, rename_funciton: Callable[[list[Port]], None] | None = None
+        self, rename_funciton: Callable[[Iterable[Port]], None] | None = None
     ) -> Ports:
         """Get a copy of each port."""
-        _ports = [p.copy() for p in self._ports]
+        _bases = [b.copy() for b in self._bases]
+        _ports = Ports(kcl=self.kcl, bases=_bases)
         if rename_funciton is not None:
-            rename_funciton(_ports)
+            rename_funciton(iter(_ports))
         return Ports(ports=_ports, kcl=self.kcl)
 
     def contains(self, port: Port) -> bool:
         """Check whether a port is already in the list."""
-        return port.hash() in [v.hash() for v in self._ports]
+        return port.hash() in [v.hash() for v in self._bases]
 
     def __iter__(self) -> Iterator[Port]:
         """Iterator, that allows for loops etc to directly access the object."""
-        yield from self._ports
+        yield from (Port(base=base) for base in self._bases)
 
-    def __contains__(self, port: str | Port) -> bool:
+    def __contains__(self, port: str | Port | DPort) -> bool:
         """Check whether a port is in this port collection."""
-        if isinstance(port, Port):
-            return port in self._ports
+        if isinstance(port, Port | DPort):
+            return port._base in self._bases
         else:
-            for _port in self._ports:
-                if _port.name == port:
+            for _base in self._bases:
+                if _base.name == port:
                     return True
             return False
 
     def clear(self) -> None:
         """Deletes all ports."""
-        self._ports.clear()
+        self._bases.clear()
 
     def add_port(
         self, port: Port, name: str | None = None, keep_mirror: bool = False
@@ -925,7 +952,7 @@ class Ports:
                     _port._dcplx_trans.mirror = False
             if name is not None:
                 _port.name = name
-            self._ports.append(_port)
+            self._bases.append(_port._base)
         else:
             dcplx_trans = port.dcplx_trans.dup()
             if not keep_mirror:
@@ -952,7 +979,7 @@ class Ports:
                     ),
                 )
 
-            self._ports.append(_port)
+            self._bases.append(_port._base)
         return _port
 
     def add_ports(
@@ -1124,8 +1151,8 @@ class Ports:
                 name=name,
                 port_type=port_type,
                 cross_section=cross_section,
-                angle=angle,
-                center=center,
+                iangle=angle,
+                icenter=center,
                 mirror_x=mirror_x,
                 kcl=self.kcl,
             )
@@ -1136,23 +1163,23 @@ class Ports:
                 f" and dwidth {dwidth}"
             )
 
-        self._ports.append(port)
+        self._bases.append(port._base)
         return port
 
     def get_all_named(self) -> dict[str, Port]:
         """Get all ports in a dictionary with names as keys."""
-        return {v.name: v for v in self._ports if v.name is not None}
+        return {v.name: Port(base=v) for v in self._bases if v.name is not None}
 
     def __getitem__(self, key: int | str | None) -> Port:
         """Get a specific port by name."""
         if isinstance(key, int):
-            return self._ports[key]
+            return Port(base=self._bases[key])
         try:
-            return next(filter(lambda port: port.name == key, self._ports))
+            return Port(base=next(filter(lambda port: port.name == key, self._bases)))
         except StopIteration:
             raise KeyError(
                 f"{key=} is not a valid port name or index. "
-                f"Available ports: {[v.name for v in self._ports]}"
+                f"Available ports: {[v.name for v in self._bases]}"
             )
 
     def filter(
@@ -1172,7 +1199,7 @@ class Ports:
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-        ports: Iterable[Port] = self._ports
+        ports: Iterable[Port] = (Port(base=b) for b in self._bases)
         if regex:
             ports = filter_regex(ports, regex)
         if layer is not None:
@@ -1188,20 +1215,22 @@ class Ports:
     def hash(self) -> bytes:
         """Get a hash of the port to compare."""
         h = sha3_512()
-        for port in sorted(self._ports, key=lambda port: hash(port)):
+        for port in sorted(
+            [Port(base=b) for b in self._bases], key=lambda port: hash(port)
+        ):
             h.update(port.name.encode("UTF-8") if port.name else b"")
             if port._trans:
-                h.update(port.trans.hash().to_bytes(8, "big"))
+                h.update(port._trans.hash().to_bytes(8, "big"))
             else:
                 h.update(port.dcplx_trans.hash().to_bytes(8, "big"))
-            h.update(port.width.to_bytes(8, "big"))
+            h.update(port.iwidth.to_bytes(8, "big"))
             h.update(port.port_type.encode("UTF-8"))
 
         return h.digest()
 
     def __repr__(self) -> str:
         """Representation of the Ports as strings."""
-        return repr([repr(p) for p in self._ports])
+        return repr([repr(Port(base=b)) for b in self._bases])
 
     def print(self, unit: Literal["dbu", "um", None] = None) -> None:
         """Pretty print ports."""
@@ -1487,40 +1516,191 @@ class InstancePorts:
                 )
 
 
-class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
-    """Base class for shared attributes between VKCell and KCell."""
+@runtime_checkable
+class PointLike(Protocol[KUnit]):
+    x: KUnit
+    y: KUnit
 
-    _ports: Ports = PrivateAttr()
-    _locked: bool = PrivateAttr(False)
-    _settings: KCellSettings = PrivateAttr(default_factory=KCellSettings)
-    _settings_units: KCellSettingsUnits = PrivateAttr(
-        default_factory=KCellSettingsUnits
-    )
-    vinsts: list[VInstance] = Field(default_factory=list)
-    info: Info
-    kcl: KCLayout
-    function_name: str | None = None
-    basename: str | None = None
 
-    def __init__(
-        self,
-        *,
-        kcl: KCLayout,
-        info: dict[str, int | float | str] | None = None,
-        **kwargs: Any,
-    ):
-        super().__init__(kcl=kcl, info=Info(**(info or {})), **kwargs)
+@runtime_checkable
+class BoxLike(Protocol[KUnit]):
+    left: KUnit
+    right: KUnit
+    bottom: KUnit
+    top: KUnit
+
+    def width(self) -> KUnit: ...
+
+    def height(self) -> KUnit: ...
+
+    def center(self) -> PointLike[KUnit]: ...
+
+
+class KObject(Generic[KUnit], ABC):
+    @abstractmethod
+    def bbox(self, layer: int | LayerEnum | None = None) -> BoxLike[KUnit]: ...
+    @abstractmethod
+    def ibbox(self, layer: int | LayerEnum | None = None) -> BoxLike[int]: ...
+    @abstractmethod
+    def dbbox(self, layer: int | LayerEnum | None = None) -> BoxLike[float]: ...
 
     @property
-    @abstractmethod
+    def x(self) -> KUnit:
+        """Returns the x-coordinate of the center of the bounding box."""
+        return self.bbox().center().x
+
+    @property
+    def y(self) -> KUnit:
+        """Returns the y-coordinate of the center of the bounding box."""
+        return self.bbox().center().y
+
+    @property
+    def xmin(self) -> KUnit:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().left
+
+    @property
+    def center(self) -> tuple[KUnit, KUnit]:
+        """Returns the coordinate center of the bounding box."""
+        center = self.bbox().center()
+        return center.x, center.y
+
+    @property
+    def ymin(self) -> KUnit:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().bottom
+
+    @property
+    def xmax(self) -> KUnit:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().right
+
+    @property
+    def ymax(self) -> KUnit:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().top
+
+    @property
+    def xsize(self) -> KUnit:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().width()
+
+    @property
+    def ysize(self) -> KUnit:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.bbox().height()
+
+    @property
+    def dxmin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dbbox().left
+
+    @property
+    def dymin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dbbox().bottom
+
+    @property
+    def dxmax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dbbox().right
+
+    @property
+    def dymax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dbbox().top
+
+    @property
+    def dxsize(self) -> float:
+        """Returns the width of the bounding box."""
+        return self.dbbox().width()
+
+    @property
+    def dysize(self) -> float:
+        """Returns the height of the bounding box."""
+        return self.dbbox().height()
+
+    @property
+    def dx(self) -> float:
+        """X coordinate of the port in um."""
+        return self.dbbox().center().x
+
+    @property
+    def dy(self) -> float:
+        """Y coordinate of the port in um."""
+        return self.dbbox().center().y
+
+    @property
+    def dcenter(self) -> tuple[float, float]:
+        """Coordinate of the port in um."""
+        center = self.dbbox().center()
+        return center.x, center.y
+
+    @property
+    def ixmin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.ibbox().left
+
+    @property
+    def iymin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.ibbox().bottom
+
+    @property
+    def ixmax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.ibbox().right
+
+    @property
+    def iymax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.ibbox().top
+
+    @property
+    def ixsize(self) -> int:
+        """Returns the width of the bounding box."""
+        return self.ibbox().width()
+
+    @property
+    def iysize(self) -> int:
+        """Returns the height of the bounding box."""
+        return self.ibbox().height()
+
+    @property
+    def ix(self) -> int:
+        """X coordinate of the port in um."""
+        return self.ibbox().center().x
+
+    @property
+    def iy(self) -> int:
+        """Y coordinate of the port in um."""
+        return self.ibbox().center().y
+
+    @property
+    def icenter(self) -> tuple[int, int]:
+        """Coordinate of the port in um."""
+        center = self.ibbox().center()
+        return center.x, center.y
+
+
+class BaseKCell(KObject[KUnit]):
+    """Base class for shared attributes between VKCell and KCell."""
+
+    _locked: bool
+    _ports: Ports
+    _settings: KCellSettings
+    _settings_units: KCellSettingsUnits
+    basename: str | None
+    function_name: str | None
+    kcl: KCLayout
+    info: Info
+    vinsts: list[VInstance]
+
+    @property
     def name(self) -> str | None: ...
 
     @name.setter
-    @abstractmethod
     def name(self, value: str) -> None: ...
-
-    @abstractmethod
-    def dup(self) -> Self: ...
 
     @property
     def settings(self) -> KCellSettings:
@@ -1606,8 +1786,11 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
         self.vinsts.append(vi)
         return vi
 
+    @abstractmethod
+    def dup(self) -> BaseKCell[KUnit]: ...
 
-class KCell(BaseKCell, arbitrary_types_allowed=True):
+
+class KCell(BaseModel, BaseKCell[int], arbitrary_types_allowed=True):
     """KLayout cell and change its class to KCell.
 
     A KCell is a dynamic proxy for kdb.Cell. It has all the
@@ -1650,6 +1833,7 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Ports | None = None,
+        info: dict[str, int | float | str] | None = None,
     ):
         """Constructor of KCell.
 
@@ -1661,6 +1845,7 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
                 KLayout Cell
             ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
                 if `None` create an empty one.
+            info: Information to add to the KCell.
         """
         _kcl = kcl or _get_default_kcl()
         if name is None:
@@ -1680,16 +1865,41 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
             size_info=SizeInfo(_kdb_cell.bbox),
             dsize_info=DSizeInfo(_kdb_cell.dbbox),
             insts=insts,
+            info=Info(**(info or {})),
+            vinsts=[],
+            function_name=None,
+            basename=None,
         )
+        self._locked = False
+        self._settings = KCellSettings()
+        self._settings_units = KCellSettingsUnits()
         self._kdb_cell = _kdb_cell
         self._ports = ports or Ports(_kcl)
         self.kcl.register_cell(self)
 
-    def evaluate_insts(self) -> None:
-        """Check all KLayout instances and create kfactory Instances."""
-        self.insts = Instances()
-        for inst in self._kdb_cell.each_inst():
-            self.insts.append(Instance(self.kcl, inst))
+    def bbox(self, layer: int | LayerEnum | None = None) -> kdb.Box:
+        """Gets the bounding box in dbu of the KCell.
+
+        If layer is not None the bounding box of that layer is returned.
+        """
+        # The following works, but it's technically not allowed in the .pyi
+        return self._kdb_cell.bbox(layer)  # type: ignore[arg-type]
+
+    def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
+        """Gets the bounding box in um of the KCell.
+
+        If layer is not None the bounding box of that layer is returned.
+        """
+        # The following works, but it's technically not allowed in the .pyi
+        return self._kdb_cell.dbbox(layer)  # type: ignore[arg-type]
+
+    def ibbox(self, layer: int | LayerEnum | None = None) -> kdb.Box:
+        """Gets the bounding box in dbu of the KCell.
+
+        If layer is not None the bounding box of that layer is returned.
+        """
+        # The following works, but it's technically not allowed in the .pyi
+        return self._kdb_cell.bbox(layer)  # type: ignore[arg-type]
 
     def __getitem__(self, key: int | str | None) -> Port:
         """Returns port from instance."""
@@ -3017,97 +3227,97 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
                     f" Available formats are 'default' or 'legacy'."
                 )
 
-    @property
-    def x(self) -> int:
-        """Returns the x-coordinate of the center of the bounding box."""
-        return self._kdb_cell.bbox().center().x
+    # @property
+    # def x(self) -> int:
+    #     """Returns the x-coordinate of the center of the bounding box."""
+    #     return self._kdb_cell.bbox().center().x
 
-    @property
-    def y(self) -> int:
-        """Returns the y-coordinate of the center of the bounding box."""
-        return self._kdb_cell.bbox().center().y
+    # @property
+    # def y(self) -> int:
+    #     """Returns the y-coordinate of the center of the bounding box."""
+    #     return self._kdb_cell.bbox().center().y
 
-    @property
-    def xmin(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._kdb_cell.bbox().left
+    # @property
+    # def xmin(self) -> int:
+    #     """Returns the x-coordinate of the left edge of the bounding box."""
+    #     return self._kdb_cell.bbox().left
 
-    @property
-    def center(self) -> tuple[int, int]:
-        """Returns the coordinate center of the bounding box."""
-        center = self._kdb_cell.bbox().center()
-        return center.x, center.y
+    # @property
+    # def center(self) -> tuple[int, int]:
+    #     """Returns the coordinate center of the bounding box."""
+    #     center = self._kdb_cell.bbox().center()
+    #     return center.x, center.y
 
-    @property
-    def ymin(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._kdb_cell.bbox().bottom
+    # @property
+    # def ymin(self) -> int:
+    #     """Returns the x-coordinate of the left edge of the bounding box."""
+    #     return self._kdb_cell.bbox().bottom
 
-    @property
-    def xmax(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._kdb_cell.bbox().right
+    # @property
+    # def xmax(self) -> int:
+    #     """Returns the x-coordinate of the left edge of the bounding box."""
+    #     return self._kdb_cell.bbox().right
 
-    @property
-    def ymax(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._kdb_cell.bbox().top
+    # @property
+    # def ymax(self) -> int:
+    #     """Returns the x-coordinate of the left edge of the bounding box."""
+    #     return self._kdb_cell.bbox().top
 
-    @property
-    def xsize(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._kdb_cell.bbox().width()
+    # @property
+    # def xsize(self) -> int:
+    #     """Returns the x-coordinate of the left edge of the bounding box."""
+    #     return self._kdb_cell.bbox().width()
 
-    @property
-    def ysize(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._kdb_cell.bbox().height()
+    # @property
+    # def ysize(self) -> int:
+    #     """Returns the x-coordinate of the left edge of the bounding box."""
+    #     return self._kdb_cell.bbox().height()
 
-    @property
-    def dxmin(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._kdb_cell.dbbox().left
+    # @property
+    # def dxmin(self) -> float:
+    #     """Returns the x-coordinate of the left edge of the bounding box."""
+    #     return self._kdb_cell.dbbox().left
 
-    @property
-    def dymin(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._kdb_cell.dbbox().bottom
+    # @property
+    # def dymin(self) -> float:
+    #     """Returns the x-coordinate of the left edge of the bounding box."""
+    #     return self._kdb_cell.dbbox().bottom
 
-    @property
-    def dxmax(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._kdb_cell.dbbox().right
+    # @property
+    # def dxmax(self) -> float:
+    #     """Returns the x-coordinate of the left edge of the bounding box."""
+    #     return self._kdb_cell.dbbox().right
 
-    @property
-    def dymax(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._kdb_cell.dbbox().top
+    # @property
+    # def dymax(self) -> float:
+    #     """Returns the x-coordinate of the left edge of the bounding box."""
+    #     return self._kdb_cell.dbbox().top
 
-    @property
-    def dxsize(self) -> float:
-        """Returns the width of the bounding box."""
-        return self._kdb_cell.dbbox().width()
+    # @property
+    # def dxsize(self) -> float:
+    #     """Returns the width of the bounding box."""
+    #     return self._kdb_cell.dbbox().width()
 
-    @property
-    def dysize(self) -> float:
-        """Returns the height of the bounding box."""
-        return self._kdb_cell.dbbox().height()
+    # @property
+    # def dysize(self) -> float:
+    #     """Returns the height of the bounding box."""
+    #     return self._kdb_cell.dbbox().height()
 
-    @property
-    def dx(self) -> float:
-        """X coordinate of the port in um."""
-        return self._kdb_cell.dbbox().center().x
+    # @property
+    # def dx(self) -> float:
+    #     """X coordinate of the port in um."""
+    #     return self._kdb_cell.dbbox().center().x
 
-    @property
-    def dy(self) -> float:
-        """Y coordinate of the port in um."""
-        return self._kdb_cell.dbbox().center().y
+    # @property
+    # def dy(self) -> float:
+    #     """Y coordinate of the port in um."""
+    #     return self._kdb_cell.dbbox().center().y
 
-    @property
-    def dcenter(self) -> tuple[float, float]:
-        """Coordinate of the port in um."""
-        center = self._kdb_cell.dbbox().center()
-        return center.x, center.y
+    # @property
+    # def dcenter(self) -> tuple[float, float]:
+    #     """Coordinate of the port in um."""
+    #     center = self._kdb_cell.dbbox().center()
+    #     return center.x, center.y
 
     def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
         """Generate a LayoutToNetlist object from the port types.
@@ -3140,7 +3350,7 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
         circ = kdb.Circuit()
         circ.name = self.name
         circ.cell_index = self.cell_index()
-        circ.boundary = self.boundary or self.dbbox()
+        circ.boundary = self.boundary or kdb.DPolygon(self.dbbox())
 
         inst_ports: dict[
             str,
@@ -5419,12 +5629,13 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
         return VShapes(cell=self.cell, _shapes=new_shapes)  # type: ignore[arg-type]
 
 
-class VKCell(BaseKCell, arbitrary_types_allowed=True):
+class VKCell(BaseModel, BaseKCell[float], arbitrary_types_allowed=True):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
     _shapes: dict[int, VShapes] = PrivateAttr(default_factory=dict)
     _name: str | None = None
     size_info: DSizeInfo
+    isize_info: SizeInfo
 
     def __init__(
         self,
@@ -5433,9 +5644,25 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
         info: dict[str, int | float | str] | None = None,
     ) -> None:
         _kcl = kcl or _get_default_kcl()
-        super().__init__(kcl=_kcl, info=info, size_info=DSizeInfo(self.bbox))
+        BaseModel.__init__(
+            self,
+            kcl=_kcl,
+            info=Info(**(info or {})),
+            size_info=DSizeInfo(self.bbox),
+            isize_info=SizeInfo(self.ibbox),
+            basename=None,
+            function_name=None,
+            vinsts=[],
+        )
+        self._locked = False
         self._ports = Ports(_kcl)
         self._name = name
+        self._settings = KCellSettings()
+        self._settings_units = KCellSettingsUnits()
+
+    @property
+    def dsize_info(self) -> DSizeInfo:
+        return self.size_info
 
     def bbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
         _layers = set(self._shapes.keys())
@@ -5454,13 +5681,12 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
     def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
         return self.bbox(layer=layer)
 
+    def ibbox(self, layer: int | LayerEnum | None = None) -> kdb.Box:
+        return self.bbox(layer=layer).to_itype(self.kcl.dbu)
+
     def __getitem__(self, key: int | str | None) -> Port:
         """Returns port from instance."""
         return self.ports[key]
-
-    @property
-    def dsize_info(self) -> DSizeInfo:
-        return self.size_info
 
     @property
     def insts(self) -> list[VInstance]:
@@ -6616,7 +6842,17 @@ def _get_default_kcl() -> KCLayout:
     return kcl
 
 
-class Port:
+class BasePort(BaseModel):
+    name: str | None
+    kcl: KCLayout
+    cross_section: SymmetricalCrossSection
+    _trans: kdb.Trans | None
+    _dcplx_trans: kdb.DCplxTrans | None
+    info: Info = Info()
+    port_type: str
+
+
+class IntermediatePort:
     """A port is the photonics equivalent to a pin in electronics.
 
     In addition to the location and layer
@@ -6641,20 +6877,14 @@ class Port:
     """
 
     yaml_tag = "!Port"
-    name: str | None
-    kcl: KCLayout
-    cross_section: SymmetricalCrossSection
-    _trans: kdb.Trans | None
-    _dcplx_trans: kdb.DCplxTrans | None
-    info: Info = Info()
-    port_type: str
+    _base: BasePort
 
     @overload
     def __init__(
         self,
         *,
         name: str | None = None,
-        width: int,
+        iwidth: int,
         layer: LayerEnum | int,
         trans: kdb.Trans,
         kcl: KCLayout | None = None,
@@ -6680,11 +6910,11 @@ class Port:
         self,
         *,
         name: str | None = None,
-        width: int,
+        iwidth: int,
         layer: LayerEnum | int,
         port_type: str = "optical",
-        angle: int,
-        center: tuple[int, int],
+        iangle: int,
+        icenter: tuple[int, int],
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
@@ -6710,7 +6940,7 @@ class Port:
         self,
         *,
         name: str | None = None,
-        width: int,
+        iwidth: int,
         layer_info: kdb.LayerInfo,
         trans: kdb.Trans,
         kcl: KCLayout | None = None,
@@ -6736,11 +6966,11 @@ class Port:
         self,
         *,
         name: str | None = None,
-        width: int,
+        iwidth: int,
         layer_info: kdb.LayerInfo,
         port_type: str = "optical",
-        angle: int,
-        center: tuple[int, int],
+        iangle: int,
+        icenter: tuple[int, int],
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
@@ -6768,8 +6998,8 @@ class Port:
         name: str | None = None,
         cross_section: SymmetricalCrossSection,
         port_type: str = "optical",
-        angle: int,
-        center: tuple[int, int],
+        iangle: int,
+        icenter: tuple[int, int],
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
@@ -6813,79 +7043,174 @@ class Port:
         port_type: str = "optical",
     ): ...
 
+    @overload
+    def __init__(
+        self,
+        *,
+        base: BasePort,
+    ): ...
+
     def __init__(
         self,
         *,
         name: str | None = None,
-        width: int | None = None,
+        iwidth: int | None = None,
         dwidth: float | None = None,
         layer: int | None = None,
         layer_info: kdb.LayerInfo | None = None,
         port_type: str = "optical",
         trans: kdb.Trans | str | None = None,
         dcplx_trans: kdb.DCplxTrans | str | None = None,
-        angle: int | None = None,
+        iangle: int | None = None,
         dangle: float | None = None,
-        center: tuple[int, int] | None = None,
+        icenter: tuple[int, int] | None = None,
         dcenter: tuple[float, float] | None = None,
         mirror_x: bool = False,
-        port: Port | None = None,
+        port: IntermediatePort | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
         cross_section: SymmetricalCrossSection | None = None,
+        base: BasePort | None = None,
     ):
         """Create a port from dbu or um based units."""
-        if port is not None:
-            self.name = port.name if name is None else name
-
-            if port.dcplx_trans.is_complex():
-                self.dcplx_trans = port.dcplx_trans
-            else:
-                self.trans = port.trans
-
-            self.port_type = port.port_type
-            self.cross_section = port.cross_section
+        if base is not None:
+            self._base = base
             return
-        self.kcl = kcl or _get_default_kcl()
+        if port is not None:
+            self._base = BasePort(**port._base.model_dump())
+            return
+        _info = Info(**info)
+        _kcl = kcl or _get_default_kcl()
         if cross_section is None:
             if layer_info is None:
                 if layer is None:
                     raise ValueError("layer or layer_info for a port must be defined")
-                layer_info = self.kcl.get_info(layer)
-            if width is None and dwidth is None:
-                raise ValueError("width, layer must be given if the 'port is None'")
-            elif width is None:
-                cross_section = self.kcl.get_cross_section(
+                layer_info = _kcl.get_info(layer)
+            if iwidth is None and dwidth is None:
+                raise ValueError(
+                    "any width and layer, or a cross_section must be given if the"
+                    " 'port is None'"
+                )
+            elif iwidth is None:
+                cross_section = _kcl.get_cross_section(
                     CrossSectionSpec(
                         main_layer=layer_info,
-                        width=self.kcl.to_dbu(dwidth),  # type: ignore[arg-type]
+                        width=_kcl.to_dbu(dwidth),  # type: ignore[arg-type]
                     )
                 )
             else:
-                cross_section = self.kcl.get_cross_section(
-                    CrossSectionSpec(main_layer=layer_info, width=width)
+                cross_section = _kcl.get_cross_section(
+                    CrossSectionSpec(main_layer=layer_info, width=iwidth)
                 )
-        self.cross_section = cross_section
-        self.info = Info(**info)
+        _cross_section = cross_section
         if trans is not None:
             if isinstance(trans, str):
-                self.trans = kdb.Trans.from_s(trans)
+                _trans = kdb.Trans.from_s(trans)
             else:
-                self.trans = trans.dup()
+                _trans = trans.dup()
+            self._base = BasePort(
+                name=name,
+                kcl=_kcl,
+                cross_section=_cross_section,
+                _trans=_trans,
+                _dcplx_trans=None,
+                info=_info,
+                port_type=port_type,
+            )
         elif dcplx_trans is not None:
             if isinstance(dcplx_trans, str):
-                self.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
+                _dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
             else:
-                self.dcplx_trans = dcplx_trans.dup()
-        elif angle is not None:
-            assert center is not None
-            self.trans = kdb.Trans(angle, mirror_x, *center)
-            self.port_type = port_type
+                _dcplx_trans = dcplx_trans.dup()
+            self._base = BasePort(
+                name=name,
+                kcl=_kcl,
+                cross_section=_cross_section,
+                _trans=None,
+                _dcplx_trans=_dcplx_trans,
+                info=_info,
+                port_type=port_type,
+            )
+        elif iangle is not None:
+            assert icenter is not None
+            _trans = kdb.Trans(iangle, mirror_x, *icenter)
+            self._base = BasePort(
+                name=name,
+                kcl=_kcl,
+                cross_section=_cross_section,
+                _trans=_trans,
+                _dcplx_trans=None,
+                info=_info,
+                port_type=port_type,
+            )
         elif dangle is not None:
             assert dcenter is not None
-            self.dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
-        self.name = name
-        self.port_type = port_type
+            _dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
+            self._base = BasePort(
+                name=name,
+                kcl=_kcl,
+                cross_section=_cross_section,
+                _trans=None,
+                _dcplx_trans=_dcplx_trans,
+                info=_info,
+                port_type=port_type,
+            )
+
+    @property
+    def name(self) -> str | None:
+        return self._base.name
+
+    @name.setter
+    def name(self, value: str | None) -> None:
+        self._base.name = value
+
+    @property
+    def port_type(self) -> str:
+        return self._base.port_type
+
+    @port_type.setter
+    def port_type(self, value: str) -> None:
+        self._base.port_type = value
+
+    @property
+    def _trans(self) -> kdb.Trans | None:
+        return self._base._trans
+
+    @_trans.setter
+    def _trans(self, value: kdb.Trans | None) -> None:
+        self._base._trans = value
+
+    @property
+    def _dcplx_trans(self) -> kdb.DCplxTrans | None:
+        return self._base._dcplx_trans
+
+    @_dcplx_trans.setter
+    def _dcplx_trans(self, value: kdb.Trans | None) -> None:
+        self._base._trans = value
+
+    @property
+    def cross_section(self) -> SymmetricalCrossSection:
+        return self._base.cross_section
+
+    @cross_section.setter
+    def cross_section(self, value: SymmetricalCrossSection) -> None:
+        self._base.cross_section = value
+
+    @property
+    def info(self) -> Info:
+        return self._base.info
+
+    @info.setter
+    def info(self, value: Info) -> None:
+        self._base.info = value
+
+    @property
+    def kcl(self) -> KCLayout:
+        return self._base.kcl
+
+    @kcl.setter
+    def kcl(self, value: KCLayout) -> None:
+        self._base.kcl = value
 
     @property
     def layer(self) -> LayerEnum | int:
@@ -6895,7 +7220,7 @@ class Port:
         index.
         """
         return self.kcl.find_layer(
-            self.cross_section.main_layer, allow_undefined_layers=True
+            self._base.cross_section.main_layer, allow_undefined_layers=True
         )
 
     @property
@@ -6907,21 +7232,21 @@ class Port:
         return self.cross_section.main_layer
 
     @property
-    def width(self) -> int:
+    def iwidth(self) -> int:
         """Width of the port. This corresponds to the width of the cross section."""
         return self.cross_section.width
 
     @classmethod
-    def from_yaml(cls: type[Port], constructor, node) -> Port:  # type: ignore
+    def from_yaml(cls: type[IntermediatePort], constructor, node) -> IntermediatePort:  # type: ignore
         """Internal function used by the placer to convert yaml to a Port."""
         d = dict(constructor.construct_pairs(node))
         return cls(**d)
 
     def __eq__(self, other: object) -> bool:
         """Support for `port1 == port2` comparisons."""
-        if isinstance(other, Port):
+        if isinstance(other, IntermediatePort):
             if (
-                self.width == other.width
+                self.iwidth == other.iwidth
                 and self._trans == other._trans
                 and self._dcplx_trans == other._dcplx_trans
                 and self.name == other.name
@@ -6936,7 +7261,7 @@ class Port:
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans | None = None,
-    ) -> Port:
+    ) -> IntermediatePort:
         """Get a copy of a port.
 
         Transformation order which results in `copy.trans`:
@@ -6955,23 +7280,23 @@ class Port:
             if self._trans:
                 if isinstance(trans, kdb.Trans):
                     _trans = trans * self.trans
-                    return Port(
+                    return IntermediatePort(
                         name=self.name,
                         trans=_trans,
                         layer=self.layer,
                         port_type=self.port_type,
-                        width=self.width,
+                        iwidth=self.iwidth,
                         kcl=self.kcl,
                         info=info,
                     )
                 elif not trans.is_complex():
                     _trans = kdb.ICplxTrans(trans, self.kcl.dbu).s_trans() * self.trans
-                    return Port(
+                    return IntermediatePort(
                         name=self.name,
                         trans=_trans,
                         layer=self.layer,
                         port_type=self.port_type,
-                        width=self.width,
+                        iwidth=self.iwidth,
                         kcl=self.kcl,
                         info=info,
                     )
@@ -6980,7 +7305,7 @@ class Port:
                 _dtrans = dtrans * self.dcplx_trans
             else:
                 _dtrans = trans * self.dcplx_trans
-            return Port(
+            return IntermediatePort(
                 name=self.name,
                 dcplx_trans=_dtrans,
                 dwidth=self.dwidth,
@@ -6993,12 +7318,12 @@ class Port:
             if self._trans:
                 match isinstance(trans, kdb.Trans), isinstance(post_trans, kdb.Trans):
                     case True, True:
-                        return Port(
+                        return IntermediatePort(
                             name=self.name,
                             trans=trans * self.trans * post_trans,  # type: ignore[operator]
                             layer=self.layer,
                             port_type=self.port_type,
-                            width=self.width,
+                            iwidth=self.iwidth,
                             kcl=self.kcl,
                             info=info,
                         )
@@ -7009,12 +7334,12 @@ class Port:
                                 * self.trans
                                 * post_trans
                             )
-                            return Port(
+                            return IntermediatePort(
                                 name=self.name,
                                 trans=_trans,
                                 layer=self.layer,
                                 port_type=self.port_type,
-                                width=self.width,
+                                iwidth=self.iwidth,
                                 kcl=self.kcl,
                                 info=info,
                             )
@@ -7026,7 +7351,7 @@ class Port:
                                     post_trans.to_dtype(self.kcl.layout.dbu)  # type: ignore[union-attr,operator]
                                 )
                             )
-                            return Port(
+                            return IntermediatePort(
                                 name=self.name,
                                 dcplx_trans=_dcplxtrans,
                                 layer=self.layer,
@@ -7045,7 +7370,7 @@ class Port:
                             * self.dcplx_trans
                             * post_trans
                         )
-                        return Port(
+                        return IntermediatePort(
                             name=self.name,
                             dcplx_trans=_dcplxtrans,
                             layer=self.layer,
@@ -7064,7 +7389,7 @@ class Port:
             else:
                 _dposttrans = post_trans or kdb.DCplxTrans()
 
-            return Port(
+            return IntermediatePort(
                 name=self.name,
                 dcplx_trans=_dtrans * _dposttrans,
                 dwidth=self.dwidth,
@@ -7074,9 +7399,9 @@ class Port:
                 info=info,
             )
 
-    def copy_polar(
+    def icopy_polar(
         self, d: int = 0, d_orth: int = 0, angle: int = 2, mirror: bool = False
-    ) -> Port:
+    ) -> IntermediatePort:
         """Get a polar copy of the port.
 
         This will return a port which is transformed relatively to the original port's
@@ -7091,13 +7416,32 @@ class Port:
         """
         return self.copy(post_trans=kdb.Trans(angle, mirror, d, d_orth))
 
+    def dcopy_polar(
+        self, d: float = 0, d_orth: float = 0, angle: float = 180, mirror: bool = False
+    ) -> IntermediatePort:
+        """Get a polar copy of the port.
+
+        This will return a port which is transformed relatively to the original port's
+        transformation (orientation, angle and position).
+
+        Args:
+            d: The distance to the old port
+            d_orth: Orthogonal distance (positive is positive y for a port which is
+                facing angle=0°)
+            angle: Relative angle to the original port (0=0°,1=90°,2=180°,3=270°).
+            mirror: Whether to mirror the port relative to the original port.
+        """
+        return self.copy(
+            post_trans=kdb.DCplxTrans(mag=1, rot=angle, mirrx=mirror, x=d, y=d_orth)
+        )
+
     @property
-    def x(self) -> int:
+    def ix(self) -> int:
         """X coordinate of the port in dbu."""
         return self.trans.disp.x
 
-    @x.setter
-    def x(self, value: int) -> None:
+    @ix.setter
+    def ix(self, value: int) -> None:
         if self._trans:
             vec = self._trans.disp
             vec.x = value
@@ -7108,12 +7452,12 @@ class Port:
             self._dcplx_trans.disp = self.kcl.to_um(vec)
 
     @property
-    def y(self) -> int:
+    def iy(self) -> int:
         """Y coordinate of the port in dbu."""
         return self.trans.disp.y
 
-    @y.setter
-    def y(self, value: int) -> None:
+    @iy.setter
+    def iy(self, value: int) -> None:
         if self._trans:
             vec = self._trans.disp
             vec.y = value
@@ -7124,14 +7468,14 @@ class Port:
             self._dcplx_trans.disp = self.kcl.to_um(vec)
 
     @property
-    def center(self) -> tuple[int, int]:
+    def icenter(self) -> tuple[int, int]:
         """Returns port center."""
-        return (self.x, self.y)
+        return (self.ix, self.iy)
 
-    @center.setter
-    def center(self, value: tuple[int, int]) -> None:
-        self.x = value[0]
-        self.y = value[1]
+    @icenter.setter
+    def icenter(self, value: tuple[int, int]) -> None:
+        self.ix = value[0]
+        self.iy = value[1]
 
     @property
     def trans(self) -> kdb.Trans:
@@ -7175,7 +7519,7 @@ class Port:
             self._dcplx_trans = None
 
     @property
-    def angle(self) -> int:
+    def iangle(self) -> int:
         """Angle of the transformation.
 
         In the range of `[0,1,2,3]` which are increments in 90°. Not to be confused
@@ -7184,8 +7528,8 @@ class Port:
         """
         return self.trans.angle
 
-    @angle.setter
-    def angle(self, value: int) -> None:
+    @iangle.setter
+    def iangle(self, value: int) -> None:
         self._trans = self.trans.dup()
         self._dcplx_trans = None
         self._trans.angle = value
@@ -7275,7 +7619,7 @@ class Port:
     @property
     def dwidth(self) -> float:
         """Width of the port in um."""
-        return self.kcl.to_um(self.width)
+        return self.kcl.to_um(self.iwidth)
 
     @property
     def dmirror(self) -> bool:
@@ -7292,7 +7636,7 @@ class Port:
         name = self.name or ""
         h.update(name.encode("UTF-8"))
         h.update(self.trans.hash().to_bytes(8, "big"))
-        h.update(self.width.to_bytes(8, "big"))
+        h.update(self.iwidth.to_bytes(8, "big"))
         h.update(self.port_type.encode("UTF-8"))
         h.update(self.layer.to_bytes(8, "big"))
         return h.digest()
@@ -7310,7 +7654,144 @@ class Port:
         config.console.print(pprint_ports([self], unit=type))
 
 
-class Instance:
+class Port(IntermediatePort):
+    @property
+    def angle(self) -> int:
+        """Angle of the transformation.
+
+        In the range of `[0,1,2,3]` which are increments in 90°. Not to be confused
+        with `rot` of the transformation which keeps additional info about the
+        mirror flag.
+        """
+        return self.trans.angle
+
+    @angle.setter
+    def angle(self, value: int) -> None:
+        self.iangle = value
+
+    @property
+    def x(self) -> int:
+        """X coordinate of the port in dbu."""
+        return self.trans.disp.x
+
+    @x.setter
+    def x(self, value: int) -> None:
+        if self._trans:
+            vec = self._trans.disp
+            vec.x = value
+            self._trans.disp = vec
+        elif self._dcplx_trans:
+            vec = self.trans.disp
+            vec.x = value
+            self._dcplx_trans.disp = self.kcl.to_um(vec)
+
+    @property
+    def y(self) -> int:
+        """Y coordinate of the port in dbu."""
+        return self.trans.disp.y
+
+    @y.setter
+    def y(self, value: int) -> None:
+        self.iy = value
+
+    @property
+    def center(self) -> tuple[int, int]:
+        """Returns port center."""
+        return self.icenter
+
+    @center.setter
+    def center(self, value: tuple[int, int]) -> None:
+        self.icenter = value
+
+    def print(self, type: Literal["dbu", "um", None] = "dbu") -> None:
+        """Print the port pretty."""
+        super().print(type)
+
+    def copy_polar(
+        self, d: int = 0, d_orth: int = 0, angle: int = 2, mirror: bool = False
+    ) -> IntermediatePort:
+        """Get a polar copy of the port.
+
+        This will return a port which is transformed relatively to the original port's
+        transformation (orientation, angle and position).
+
+        Args:
+            d: The distance to the old port
+            d_orth: Orthogonal distance (positive is positive y for a port which is
+                facing angle=0°)
+            angle: Relative angle to the original port (0=0°,1=90°,2=180°,3=270°).
+            mirror: Whether to mirror the port relative to the original port.
+        """
+        return self.copy(post_trans=kdb.Trans(angle, mirror, d, d_orth))
+
+
+class DPort(IntermediatePort):
+    @property
+    def angle(self) -> float:
+        """Angle of the transformation.
+
+        In the range of `[0,1,2,3]` which are increments in 90°. Not to be confused
+        with `rot` of the transformation which keeps additional info about the
+        mirror flag.
+        """
+        return self.dangle
+
+    @angle.setter
+    def angle(self, value: float) -> None:
+        self.dangle = value
+
+    @property
+    def x(self) -> float:
+        """X coordinate of the port in dbu."""
+        return self.dx
+
+    @x.setter
+    def x(self, value: float) -> None:
+        self.dx = value
+
+    @property
+    def y(self) -> float:
+        """Y coordinate of the port in dbu."""
+        return self.dy
+
+    @y.setter
+    def y(self, value: float) -> None:
+        self.dy = value
+
+    @property
+    def center(self) -> tuple[float, float]:
+        """Returns port center."""
+        return self.dcenter
+
+    @center.setter
+    def center(self, value: tuple[int, int]) -> None:
+        self.dcenter = value
+
+    def print(self, type: Literal["dbu", "um", None] = "um") -> None:
+        """Print the port pretty."""
+        super().print(type)
+
+    def copy_polar(
+        self, d: float = 0, d_orth: float = 0, angle: float = 180, mirror: bool = False
+    ) -> IntermediatePort:
+        """Get a polar copy of the port.
+
+        This will return a port which is transformed relatively to the original port's
+        transformation (orientation, angle and position).
+
+        Args:
+            d: The distance to the old port
+            d_orth: Orthogonal distance (positive is positive y for a port which is
+                facing angle=0°)
+            angle: Relative angle to the original port (0=0°,1=90°,2=180°,3=270°).
+            mirror: Whether to mirror the port relative to the original port.
+        """
+        return self.copy(
+            post_trans=kdb.DCplxTrans(mag=1, rot=angle, mirrx=mirror, x=d, y=d_orth)
+        )
+
+
+class BaseInstance(KObject[KUnit]):
     """An Instance of a KCell.
 
     An Instance is a reference to a KCell with a transformation.
@@ -7325,7 +7806,7 @@ class Instance:
     yaml_tag = "!Instance"
     _instance: kdb.Instance
     kcl: KCLayout
-    ports: InstancePorts
+    # ports: InstancePorts
     size_info: SizeInfo
     dsize_info: DSizeInfo
 
@@ -7355,6 +7836,27 @@ class Instance:
         (5th index in the array).
         """
         return self.ports[key]
+
+    def bbox(self, layer: int | LayerEnum | None = None) -> kdb.Box:
+        """Gets the bounding box in dbu of the Instance.
+
+        If layer is not None the bounding box of that layer is returned.
+        """
+        return self._instance.bbox(layer)  # type: ignore[arg-type]
+
+    def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
+        """Gets the bounding box in um of the Instance.
+
+        If layer is not None the bounding box of that layer is returned.
+        """
+        return self._instance.dbbox(layer)  # type: ignore[arg-type]
+
+    def ibbox(self, layer: int | LayerEnum | None = None) -> kdb.Box:
+        """Gets the bounding box in dbu of the Instance.
+
+        If layer is not None the bounding box of that layer is returned.
+        """
+        return self._instance.bbox(layer)  # type: ignore[arg-type]
 
     def __getattr__(self, name: str) -> Any:
         """If we don't have an attribute, get it from the instance."""
@@ -7881,9 +8383,9 @@ class Instance:
     def center(self, val: tuple[int, int] | kdb.Vector) -> None:
         """Moves the instance so that the bbox's center coordinate."""
         if isinstance(val, kdb.Point | kdb.Vector):
-            self.transform(kdb.Trans(val - self.bbox().center()))
+            self.transform(kdb.Trans(kdb.Point(val) - self.bbox().center()))
         elif isinstance(val, tuple | list):
-            self.transform(kdb.Trans(kdb.Vector(val[0], val[1]) - self.bbox().center()))
+            self.transform(kdb.Trans(kdb.Point(val[0], val[1]) - self.bbox().center()))
         else:
             raise ValueError(
                 f"Type {type(val)} not supported for center setter {val}. "
@@ -8131,6 +8633,21 @@ class Instance:
             pc = self.parent_cell
             self._instance.flatten()
             del pc.insts[self]
+
+
+class Instance(BaseInstance[int]):
+    """An Instance of a KCell.
+
+    An Instance is a reference to a KCell with a transformation.
+
+    Attributes:
+        _instance: The internal `kdb.Instance` reference
+        ports: Transformed ports of the KCell
+        kcl: Pointer to the layout object holding the instance
+        d: Helper that allows retrieval of instance information in um
+    """
+
+    pass
 
 
 class Instances:
@@ -8427,7 +8944,7 @@ def update_default_trans(
 
 
 def pprint_ports(
-    ports: Iterable[Port], unit: Literal["dbu", "um", None] = None
+    ports: Iterable[IntermediatePort], unit: Literal["dbu", "um", None] = None
 ) -> rich.table.Table:
     """Print ports as a table.
 
@@ -8455,11 +8972,11 @@ def pprint_ports(
                 if port._trans is not None:
                     table.add_row(
                         str(port.name) + " [dbu]",
-                        f"{port.width:_}",
+                        f"{port.iwidth:_}",
                         port.kcl.get_info(port.layer).to_s(),
-                        f"{port.x:_}",
-                        f"{port.y:_}",
-                        str(port.angle),
+                        f"{port.ix:_}",
+                        f"{port.iy:_}",
+                        str(port.iangle),
                         str(port.mirror),
                         rich.json.JSON.from_data(port.info.model_dump()),
                     )
@@ -8490,11 +9007,11 @@ def pprint_ports(
             for port in ports:
                 table.add_row(
                     str(port.name) + " [dbu]",
-                    f"{port.width:_}",
+                    f"{port.iwidth:_}",
                     port.kcl.get_info(port.layer).to_s(),
-                    f"{port.x:_}",
-                    f"{port.y:_}",
-                    str(port.angle),
+                    f"{port.ix:_}",
+                    f"{port.iy:_}",
+                    str(port.iangle),
                     str(port.mirror),
                     rich.json.JSON.from_data(port.info.model_dump()),
                 )
