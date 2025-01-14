@@ -5599,11 +5599,15 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
 
     def create_port(self, **kwargs: Any) -> Port:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
+        if self._locked:
+            raise LockedError(self)
         return self.ports.create_port(**kwargs)
 
     def create_inst(
         self, cell: KCell | VKCell, trans: kdb.DCplxTrans = kdb.DCplxTrans()
     ) -> VInstance:
+        if self._locked:
+            raise LockedError(self)
         inst = VInstance(cell=cell, trans=kdb.DCplxTrans())
         self.insts.append(inst)
         return inst
@@ -5626,6 +5630,8 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
         return self.create_inst(cell=cell)
 
     def create_vinst(self, cell: KCell | VKCell) -> VInstance:
+        if self._locked:
+            raise LockedError(self)
         vi = VInstance(cell)
         self.vinsts.append(vi)
         return vi
@@ -5636,6 +5642,8 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
         return self._shapes[layer]
 
     def flatten(self) -> None:
+        if self._locked:
+            raise LockedError(self)
         for inst in self.insts:
             inst.insert_into_flat(self, inst.trans)
 
