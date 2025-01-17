@@ -47,6 +47,7 @@ import rich
 import rich.json
 import ruamel.yaml
 import toolz  # type: ignore[import-untyped,unused-ignore]
+import yaml
 from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
 from cachetools import Cache
 from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
@@ -630,7 +631,7 @@ class PortWidthMismatch(ValueError):
         if isinstance(other_inst, Instance):
             super().__init__(
                 f'Width mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f'and {other_inst.cell.name}["{p2.name}"] ("{p1.iwidth}"/"{p2.iwidth}")',
+                f'and {other_inst.cell.name}["{p2.name}"]("{p1.iwidth}"/"{p2.iwidth}")',
                 *args,
             )
         else:
@@ -1683,7 +1684,7 @@ class KObject(Generic[KUnit], ABC):
         return center.x, center.y
 
 
-class BaseKCell(KObject[KUnit]):
+class BaseKCell(KObject[KUnit], ABC):
     """Base class for shared attributes between VKCell and KCell."""
 
     _locked: bool
@@ -1697,10 +1698,16 @@ class BaseKCell(KObject[KUnit]):
     vinsts: list[VInstance]
 
     @property
-    def name(self) -> str | None: ...
+    @abstractmethod
+    def name(self) -> str | None:
+        """The name of the cell."""
+        ...
 
     @name.setter
-    def name(self, value: str) -> None: ...
+    @abstractmethod
+    def name(self, value: str) -> None:
+        """Set the name of the cell."""
+        ...
 
     @property
     def settings(self) -> KCellSettings:
@@ -1739,6 +1746,7 @@ class BaseKCell(KObject[KUnit]):
         """
         if self._locked:
             raise LockedError(self)
+
         return self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
 
     def add_ports(
@@ -1761,6 +1769,7 @@ class BaseKCell(KObject[KUnit]):
         """
         if self._locked:
             raise LockedError(self)
+
         self.ports.add_ports(
             ports=ports, prefix=prefix, suffix=suffix, keep_mirror=keep_mirror
         )
@@ -6844,7 +6853,7 @@ class BasePort(BaseModel):
     port_type: str
 
 
-class IntermediatePort:
+class IntermediatePort(BaseModel, Generic[KUnit], ABC):
     """A port is the photonics equivalent to a pin in electronics.
 
     In addition to the location and layer
@@ -6882,7 +6891,7 @@ class IntermediatePort:
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = {},
-    ): ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -6895,7 +6904,7 @@ class IntermediatePort:
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = {},
-    ): ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -6910,7 +6919,7 @@ class IntermediatePort:
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
-    ): ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -6925,7 +6934,7 @@ class IntermediatePort:
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
-    ): ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -6938,7 +6947,7 @@ class IntermediatePort:
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = {},
-    ): ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -6951,7 +6960,7 @@ class IntermediatePort:
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = {},
-    ): ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -6966,7 +6975,7 @@ class IntermediatePort:
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
-    ): ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -6981,7 +6990,7 @@ class IntermediatePort:
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
-    ): ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -6995,7 +7004,7 @@ class IntermediatePort:
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
-    ): ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -7009,7 +7018,7 @@ class IntermediatePort:
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
-    ): ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -7021,7 +7030,7 @@ class IntermediatePort:
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
         port_type: str = "optical",
-    ): ...
+    ) -> None: ...
 
     @overload
     def __init__(
@@ -7033,14 +7042,13 @@ class IntermediatePort:
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
         port_type: str = "optical",
-    ): ...
+    ) -> None: ...
 
     @overload
-    def __init__(
-        self,
-        *,
-        base: BasePort,
-    ): ...
+    def __init__(self, *, base: BasePort) -> None: ...
+
+    @overload
+    def __init__(self, *, port: IntermediatePort[KUnit]) -> None: ...
 
     def __init__(
         self,
@@ -7058,12 +7066,12 @@ class IntermediatePort:
         icenter: tuple[int, int] | None = None,
         dcenter: tuple[float, float] | None = None,
         mirror_x: bool = False,
-        port: IntermediatePort | None = None,
+        port: IntermediatePort[KUnit] | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
         cross_section: SymmetricalCrossSection | None = None,
         base: BasePort | None = None,
-    ):
+    ) -> None:
         """Create a port from dbu or um based units."""
         if base is not None:
             self._base = base
@@ -7177,8 +7185,8 @@ class IntermediatePort:
         return self._base._dcplx_trans
 
     @_dcplx_trans.setter
-    def _dcplx_trans(self, value: kdb.Trans | None) -> None:
-        self._base._trans = value
+    def _dcplx_trans(self, value: kdb.DCplxTrans | None) -> None:
+        self._base._dcplx_trans = value
 
     @property
     def cross_section(self) -> SymmetricalCrossSection:
@@ -7223,13 +7231,12 @@ class IntermediatePort:
         """
         return self.cross_section.main_layer
 
-    @property
-    def iwidth(self) -> int:
-        """Width of the port. This corresponds to the width of the cross section."""
-        return self.cross_section.width
-
     @classmethod
-    def from_yaml(cls: type[IntermediatePort], constructor, node) -> IntermediatePort:  # type: ignore
+    def from_yaml(
+        cls: type[IntermediatePort[KUnit]],
+        constructor: yaml.constructor.BaseConstructor,
+        node: yaml.nodes.MappingNode,
+    ) -> IntermediatePort[KUnit]:
         """Internal function used by the placer to convert yaml to a Port."""
         d = dict(constructor.construct_pairs(node))
         return cls(**d)
@@ -7253,7 +7260,7 @@ class IntermediatePort:
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans | None = None,
-    ) -> IntermediatePort:
+    ) -> IntermediatePort[KUnit]:
         """Get a copy of a port.
 
         Transformation order which results in `copy.trans`:
@@ -7393,7 +7400,7 @@ class IntermediatePort:
 
     def icopy_polar(
         self, d: int = 0, d_orth: int = 0, angle: int = 2, mirror: bool = False
-    ) -> IntermediatePort:
+    ) -> IntermediatePort[KUnit]:
         """Get a polar copy of the port.
 
         This will return a port which is transformed relatively to the original port's
@@ -7410,7 +7417,7 @@ class IntermediatePort:
 
     def dcopy_polar(
         self, d: float = 0, d_orth: float = 0, angle: float = 180, mirror: bool = False
-    ) -> IntermediatePort:
+    ) -> IntermediatePort[KUnit]:
         """Get a polar copy of the port.
 
         This will return a port which is transformed relatively to the original port's
@@ -7426,48 +7433,6 @@ class IntermediatePort:
         return self.copy(
             post_trans=kdb.DCplxTrans(mag=1, rot=angle, mirrx=mirror, x=d, y=d_orth)
         )
-
-    @property
-    def ix(self) -> int:
-        """X coordinate of the port in dbu."""
-        return self.trans.disp.x
-
-    @ix.setter
-    def ix(self, value: int) -> None:
-        if self._trans:
-            vec = self._trans.disp
-            vec.x = value
-            self._trans.disp = vec
-        elif self._dcplx_trans:
-            vec = self.trans.disp
-            vec.x = value
-            self._dcplx_trans.disp = self.kcl.to_um(vec)
-
-    @property
-    def iy(self) -> int:
-        """Y coordinate of the port in dbu."""
-        return self.trans.disp.y
-
-    @iy.setter
-    def iy(self, value: int) -> None:
-        if self._trans:
-            vec = self._trans.disp
-            vec.y = value
-            self._trans.disp = vec
-        elif self._dcplx_trans:
-            vec = self.trans.disp
-            vec.y = value
-            self._dcplx_trans.disp = self.kcl.to_um(vec)
-
-    @property
-    def icenter(self) -> tuple[int, int]:
-        """Returns port center."""
-        return (self.ix, self.iy)
-
-    @icenter.setter
-    def icenter(self, value: tuple[int, int]) -> None:
-        self.ix = value[0]
-        self.iy = value[1]
 
     @property
     def trans(self) -> kdb.Trans:
@@ -7510,6 +7475,150 @@ class IntermediatePort:
             self._trans = kdb.ICplxTrans(value.dup(), self.kcl.dbu).s_trans()
             self._dcplx_trans = None
 
+    @abstractmethod
+    @property
+    def width(self) -> KUnit:
+        """Width of the port. This corresponds to the width of the cross section."""
+        ...
+
+    @property
+    def iwidth(self) -> int:
+        """Width of the port. This corresponds to the width of the cross section."""
+        return self.cross_section.width
+
+    @property
+    def dwidth(self) -> float:
+        """Width of the port in um."""
+        return self.kcl.to_um(self.iwidth)
+
+    @property
+    def mirror(self) -> bool:
+        """Returns `True`/`False` depending on the mirror flag on the transformation."""
+        return self.trans.is_mirror()
+
+    @mirror.setter
+    def mirror(self, value: bool) -> None:
+        """Setter for mirror flag on trans."""
+        if self._trans:
+            self._trans.mirror = value
+        else:
+            self._dcplx_trans.mirror = value
+
+    @property
+    @abstractmethod
+    def x(self) -> KUnit: ...
+
+    @x.setter
+    @abstractmethod
+    def x(self, value: KUnit) -> None: ...
+
+    @property
+    def ix(self) -> int:
+        """X coordinate of the port in dbu."""
+        return self.trans.disp.x
+
+    @ix.setter
+    def ix(self, value: int) -> None:
+        if self._trans:
+            vec = self._trans.disp
+            vec.x = value
+            self._trans.disp = vec
+        elif self._dcplx_trans:
+            vec = self.trans.disp
+            vec.x = value
+            self._dcplx_trans.disp = self.kcl.to_um(vec)
+
+    @property
+    def dx(self) -> float:
+        """X coordinate of the port in um."""
+        return self.dcplx_trans.disp.x
+
+    @dx.setter
+    def dx(self, value: float) -> None:
+        vec = self.dcplx_trans.disp
+        vec.x = value
+        if self._trans:
+            self._trans.disp = self.kcl.to_dbu(vec)
+        elif self._dcplx_trans:
+            self._dcplx_trans.disp = vec
+
+    @property
+    @abstractmethod
+    def y(self) -> KUnit: ...
+
+    @y.setter
+    @abstractmethod
+    def y(self, value: KUnit) -> None: ...
+
+    @property
+    def iy(self) -> int:
+        """Y coordinate of the port in dbu."""
+        return self.trans.disp.y
+
+    @iy.setter
+    def iy(self, value: int) -> None:
+        if self._trans:
+            vec = self._trans.disp
+            vec.y = value
+            self._trans.disp = vec
+        elif self._dcplx_trans:
+            vec = self.trans.disp
+            vec.y = value
+            self._dcplx_trans.disp = self.kcl.to_um(vec)
+
+    @property
+    def dy(self) -> float:
+        """Y coordinate of the port in um."""
+        return self.dcplx_trans.disp.y
+
+    @dy.setter
+    def dy(self, value: float) -> None:
+        vec = self.dcplx_trans.disp
+        vec.y = value
+        if self._trans:
+            self._trans.disp = self.kcl.to_dbu(vec)
+        elif self._dcplx_trans:
+            self._dcplx_trans.disp = vec
+
+    @property
+    @abstractmethod
+    def center(self) -> tuple[KUnit, KUnit]: ...
+
+    @center.setter
+    @abstractmethod
+    def center(self, value: tuple[KUnit, KUnit]) -> None: ...
+
+    @property
+    def icenter(self) -> tuple[int, int]:
+        """Returns port center."""
+        return (self.ix, self.iy)
+
+    @icenter.setter
+    def icenter(self, value: tuple[int, int]) -> None:
+        self.ix = value[0]
+        self.iy = value[1]
+
+    @property
+    def dcenter(self) -> tuple[float, float]:
+        """Coordinate of the port in um."""
+        vec = self.dcplx_trans.disp
+        return (vec.x, vec.y)
+
+    @dcenter.setter
+    def dcenter(self, pos: tuple[float, float]) -> None:
+        if self._trans:
+            self._trans.disp = self.kcl.to_dbu(kdb.DVector(*pos))
+        elif self._dcplx_trans:
+            self._dcplx_trans.disp = kdb.DVector(*pos)
+
+    @property
+    @abstractmethod
+    def angle(self) -> KUnit: ...
+
+    @angle.setter
+    @abstractmethod
+    def angle(self, value: KUnit) -> None: ...
+
     @property
     def iangle(self) -> int:
         """Angle of the transformation.
@@ -7527,73 +7636,6 @@ class IntermediatePort:
         self._trans.angle = value
 
     @property
-    def orientation(self) -> float:
-        """Returns orientation in degrees for gdsfactory compatibility."""
-        return self.dcplx_trans.angle
-
-    @orientation.setter
-    def orientation(self, value: float) -> None:
-        if not self.dcplx_trans.is_complex() and value in [0, 90, 180, 270]:
-            self.trans.angle = int(value / 90)
-        else:
-            self._dcplx_trans = self.dcplx_trans
-            self.dcplx_trans.angle = value
-
-    @property
-    def mirror(self) -> bool:
-        """Returns `True`/`False` depending on the mirror flag on the transformation."""
-        return self.trans.is_mirror()
-
-    @mirror.setter
-    def mirror(self, value: bool) -> None:
-        """Setter for mirror flag on trans."""
-        if self._trans:
-            self._trans.mirror = value
-        else:
-            self._dcplx_trans.mirror = value  # type: ignore[union-attr]
-
-    @property
-    def dx(self) -> float:
-        """X coordinate of the port in um."""
-        return self.dcplx_trans.disp.x
-
-    @dx.setter
-    def dx(self, value: float) -> None:
-        vec = self.dcplx_trans.disp
-        vec.x = value
-        if self._trans:
-            self._trans.disp = self.kcl.to_dbu(vec)
-        elif self._dcplx_trans:
-            self._dcplx_trans.disp = vec
-
-    @property
-    def dy(self) -> float:
-        """Y coordinate of the port in um."""
-        return self.dcplx_trans.disp.y
-
-    @dy.setter
-    def dy(self, value: float) -> None:
-        vec = self.dcplx_trans.disp
-        vec.y = value
-        if self._trans:
-            self._trans.disp = self.kcl.to_dbu(vec)
-        elif self._dcplx_trans:
-            self._dcplx_trans.disp = vec
-
-    @property
-    def dcenter(self) -> tuple[float, float]:
-        """Coordinate of the port in um."""
-        vec = self.dcplx_trans.disp
-        return (vec.x, vec.y)
-
-    @dcenter.setter
-    def dcenter(self, pos: tuple[float, float]) -> None:
-        if self._trans:
-            self._trans.disp = self.kcl.to_dbu(kdb.DVector(*pos))
-        elif self._dcplx_trans:
-            self._dcplx_trans.disp = kdb.DVector(*pos)
-
-    @property
     def dangle(self) -> float:
         """Angle of the port in degrees."""
         return self.dcplx_trans.angle
@@ -7607,20 +7649,6 @@ class IntermediatePort:
         trans = self.dcplx_trans
         trans.angle = value
         self.dcplx_trans = trans
-
-    @property
-    def dwidth(self) -> float:
-        """Width of the port in um."""
-        return self.kcl.to_um(self.iwidth)
-
-    @property
-    def dmirror(self) -> bool:
-        """Mirror flag of the port."""
-        return self.mirror
-
-    @dmirror.setter
-    def dmirror(self, value: bool) -> None:
-        self.mirror = value
 
     def hash(self) -> bytes:
         """Hash of Port."""
@@ -7646,7 +7674,9 @@ class IntermediatePort:
         config.console.print(pprint_ports([self], unit=type))
 
 
-class Port(IntermediatePort):
+class Port(IntermediatePort[int]):
+    """Port class."""
+
     @property
     def angle(self) -> int:
         """Angle of the transformation.
@@ -7695,13 +7725,23 @@ class Port(IntermediatePort):
     def center(self, value: tuple[int, int]) -> None:
         self.icenter = value
 
+    @property
+    def width(self) -> int:
+        """Width of the port in dbu."""
+        return self.iwidth
+
+    @width.setter
+    def width(self, value: int) -> None:
+        """Set the width of the port in dbu."""
+        self.iwidth = value
+
     def print(self, type: Literal["dbu", "um", None] = "dbu") -> None:
         """Print the port pretty."""
         super().print(type)
 
     def copy_polar(
         self, d: int = 0, d_orth: int = 0, angle: int = 2, mirror: bool = False
-    ) -> IntermediatePort:
+    ) -> IntermediatePort[int]:
         """Get a polar copy of the port.
 
         This will return a port which is transformed relatively to the original port's
@@ -7717,7 +7757,7 @@ class Port(IntermediatePort):
         return self.copy(post_trans=kdb.Trans(angle, mirror, d, d_orth))
 
 
-class DPort(IntermediatePort):
+class DPort(IntermediatePort[float]):
     @property
     def angle(self) -> float:
         """Angle of the transformation.
@@ -7756,7 +7796,7 @@ class DPort(IntermediatePort):
         return self.dcenter
 
     @center.setter
-    def center(self, value: tuple[int, int]) -> None:
+    def center(self, value: tuple[float, float]) -> None:
         self.dcenter = value
 
     def print(self, type: Literal["dbu", "um", None] = "um") -> None:
@@ -7765,7 +7805,7 @@ class DPort(IntermediatePort):
 
     def copy_polar(
         self, d: float = 0, d_orth: float = 0, angle: float = 180, mirror: bool = False
-    ) -> IntermediatePort:
+    ) -> IntermediatePort[float]:
         """Get a polar copy of the port.
 
         This will return a port which is transformed relatively to the original port's
