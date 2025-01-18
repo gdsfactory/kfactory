@@ -944,7 +944,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             if carve_out_ports:
                 r = port_holes[layer_index]
                 for port in carve_out_ports:
-                    if port._trans:
+                    if port._base.trans is not None:
                         r.insert(
                             port_hole(port.width, max_size).transformed(port.trans)
                         )
@@ -1538,7 +1538,7 @@ class KCellEnclosure(BaseModel):
                 maxsize = max(maxsize, size)
 
                 for port in ports_by_layer[main_layer]:
-                    if port._trans:
+                    if port._base.trans:
                         port_hole_map[li].insert(
                             port_hole(port.width, size).transformed(port.trans)
                         )
