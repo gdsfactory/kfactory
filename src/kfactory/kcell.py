@@ -903,7 +903,7 @@ class Ports:
         self._ports.clear()
 
     def add_port(
-        self, port: Port, name: str | None = None, keep_mirror: bool = False
+        self, port: Port | DPort, name: str | None = None, keep_mirror: bool = False
     ) -> Port:
         """Add a port object.
 
@@ -915,41 +915,29 @@ class Ports:
                 equivalent) to `False`.
         """
         if port.kcl == self.kcl:
-            _port = port.copy()
+            _base = port._base.model_copy()
             if not keep_mirror:
-                if _port._base.trans:
-                    _port._base.trans.mirror = False
-                elif _port._base.dcplx_trans:
-                    _port._base.dcplx_trans.mirror = False
+                if _base.trans is not None:
+                    _base.trans.mirror = False
+                elif _base.dcplx_trans is not None:
+                    _base.dcplx_trans.mirror = False
             if name is not None:
-                _port.name = name
+                _base.name = name
+            _port = Port(base=_base)
             self._ports.append(_port)
         else:
             dcplx_trans = port.dcplx_trans.dup()
             if not keep_mirror:
                 dcplx_trans.mirror = False
-            _li = self.kcl.get_info(port.layer)
-            if _li is not None and _li.name is not None:
-                _port = Port(
-                    kcl=self.kcl,
-                    name=name or port.name,
-                    dcplx_trans=port.dcplx_trans,
-                    info=port.info.model_dump(),
-                    cross_section=self.kcl.get_cross_section(
-                        port.cross_section.to_dtype(port.kcl)
-                    ),
-                )
-            else:
-                _port = Port(
-                    kcl=self.kcl,
-                    name=name or port.name,
-                    dcplx_trans=port.dcplx_trans,
-                    info=port.info.model_dump(),
-                    cross_section=self.kcl.get_cross_section(
-                        port.cross_section.to_dtype(port.kcl)
-                    ),
-                )
-
+            _base = port._base.model_copy()
+            _base.trans = kdb.Trans.R0
+            _base.dcplx_trans = None
+            _base.kcl = self.kcl
+            _base.cross_section = self.kcl.get_cross_section(
+                port.cross_section.to_dtype(port.kcl)
+            )
+            _port = Port(base=_base)
+            _port.dcplx_trans = dcplx_trans
             self._ports.append(_port)
         return _port
 
@@ -6616,8 +6604,19 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     info: Info = Info()
     port_type: str
 
+    def __copy__(self) -> BasePort:
+        return BasePort(
+            name=self.name,
+            kcl=self.kcl,
+            cross_section=self.cross_section,
+            trans=self.trans.dup() if self.trans else None,
+            dcplx_trans=self.dcplx_trans.dup() if self.dcplx_trans else None,
+            info=self.info.model_copy(),
+            port_type=self.port_type,
+        )
+
     @model_serializer()
-    def serialize_model(self) -> BasePortDict:
+    def ser_model(self) -> BasePortDict:
         if self.trans is not None:
             trans = self.trans.dup()
         else:
