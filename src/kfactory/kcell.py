@@ -7029,9 +7029,9 @@ class ProtoPort(Protocol[TUnit]):
 
     def copy_polar(
         self,
-        d: TUnit,
-        d_orth: TUnit,
-        angle: TUnit,
+        d: int | float,
+        d_orth: int | float,
+        angle: int | float,
         mirror: bool = False,
     ) -> Port | DPort: ...
 
