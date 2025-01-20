@@ -63,7 +63,7 @@ def test_route_bend90(
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
-    b90r = abs(bend90.ports._ports[0].x - bend90.ports._ports[1].x)
+    b90r = abs(bend90.ports[0].x - bend90.ports[1].x)
     if abs(x) < b90r or abs(y) < b90r:
         kf.config.logfilter.regex = "route is too small, potential collisions:"
     kf.routing.optical.route(
@@ -106,7 +106,7 @@ def test_route_bend90_invert(
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
-    b90r = abs(bend90.ports._ports[0].x - bend90.ports._ports[1].x)
+    b90r = abs(bend90.ports[0].x - bend90.ports[1].x)
     if abs(x) < b90r or abs(y) < b90r:
         kf.config.logfilter.regex = "route is too small, potential collisions:"
     kf.routing.optical.route(
@@ -141,7 +141,7 @@ def test_route_bend90_euler(
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
-    b90r = abs(bend90_euler.ports._ports[0].x - bend90_euler.ports._ports[1].x)
+    b90r = abs(bend90_euler.ports[0].x - bend90_euler.ports[1].x)
     if abs(x) < b90r or abs(y) < b90r:
         kf.config.logfilter.regex = "route is too small, potential collisions:"
     kf.routing.optical.route(
@@ -217,7 +217,7 @@ def test_route_length(
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
-    b90r = abs(bend90_euler.ports._ports[0].x - bend90_euler.ports._ports[1].x)
+    b90r = abs(bend90_euler.ports[0].x - bend90_euler.ports[1].x)
     if abs(x) < b90r or abs(y) < b90r:
         kf.config.logfilter.regex = "route is too small, potential collisions:"
     route = kf.routing.optical.route(

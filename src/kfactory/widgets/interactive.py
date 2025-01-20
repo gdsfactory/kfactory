@@ -39,7 +39,7 @@ __all__ = ["display_kcell"]
 
 
 def display_kcell(
-    kc: KCell,
+    kc: TKCell[Any],
     lyrdb: Path | str | None = None,
     display_type: Literal["image", "widget"] | None = None,
 ) -> None:

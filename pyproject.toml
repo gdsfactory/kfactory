@@ -12,7 +12,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Operating System :: OS Independent",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 
 
 version = "0.23.1"
@@ -86,7 +86,7 @@ kf = "kfactory.cli:app"
 where = ["src"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 strict = true
 exclude = [
   "src/kfactory/widgets/interactive.py",
@@ -118,7 +118,7 @@ fix = true
 line-length = 88
 exclude = ["tests", "docs", "src/kfactory/widgets/interactive.py"]
 indent-width = 4
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [

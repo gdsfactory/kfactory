@@ -41,7 +41,7 @@ def port_tests(rename_f: Callable[..., None] | None = None) -> kf.KCell:
 @pytest.mark.parametrize("func", [None, port.rename_clockwise_multi])
 def test_rename_default(func: Callable[..., None]) -> None:
     cell = port_tests(func)
-    port_list = cell.ports._ports
+    port_list = list(cell.ports)
     xl = len(port_x_coords)
 
     indexes = list(range(4 * xl))
@@ -76,7 +76,7 @@ def test_rename_default(func: Callable[..., None]) -> None:
 def test_rename_orientation() -> None:
     cell = port_tests(port.rename_by_direction)
 
-    port_list = cell.ports._ports
+    port_list = list(cell.ports)
 
     names = (
         [f"E{i}" for i in [3, 0, 2, 4, 1]]
