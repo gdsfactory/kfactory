@@ -4,10 +4,9 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Self
 
 from pydantic import ConfigDict, RootModel, model_validator
-from typing_extensions import Self
 
 if TYPE_CHECKING:
     from .manhattan import ManhattanRouterSide
