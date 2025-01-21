@@ -18,7 +18,15 @@ import json
 import socket
 from abc import ABC, abstractmethod
 from collections import UserDict, UserList, defaultdict
-from collections.abc import Callable, Hashable, Iterable, Iterator, Sequence
+from collections.abc import (
+    Callable,
+    Hashable,
+    ItemsView,
+    Iterable,
+    Iterator,
+    Mapping,
+    Sequence,
+)
 from dataclasses import dataclass, field
 from enum import IntEnum, IntFlag, auto
 from hashlib import sha3_512
@@ -541,7 +549,7 @@ class PROPID(IntEnum):
 class LockedError(AttributeError):
     """Raised when a locked cell is being modified."""
 
-    def __init__(self, kcell: BaseKCell):
+    def __init__(self, kcell: BaseKCell[Any]):
         """Throw _locked error."""
         super().__init__(
             f"{kcell.name!r} is locked and likely stored in cache. Modifications are "
@@ -1503,7 +1511,16 @@ class DPorts(ProtoPorts[float]):
         return capture.get()
 
 
-class ProtoInstancePorts(Protocol[TUnit]):  # type: ignore[misc]
+class HasCellPorts(Protocol[TUnit]):  # type:ignore[misc]
+    @overload
+    def cell_ports(self: HasCellPorts[int]) -> Ports: ...
+    @overload
+    def cell_ports(self: HasCellPorts[float]) -> DPorts: ...
+    @property
+    def cell_ports(self) -> Ports | DPorts: ...
+
+
+class ProtoInstancePorts(HasCellPorts[TUnit]):
     """Ports of an Instance.
 
     These act as virtual ports as the centers needs to change if the
@@ -1566,9 +1583,19 @@ class ProtoInstancePorts(Protocol[TUnit]):  # type: ignore[misc]
             ports = filter_orientation(ports, orientation)
         return list(ports)
 
+    @overload
+    def __getitem__(
+        self: ProtoInstancePorts[int],
+        key: int | str | None | tuple[int | str | None, int, int],
+    ) -> Port: ...
+    @overload
+    def __getitem__(
+        self: ProtoInstancePorts[float],
+        key: int | str | None | tuple[int | str | None, int, int],
+    ) -> DPort: ...
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]
-    ) -> Port:
+    ) -> Port | DPort:
         """Returns port from instance.
 
         The key can either be an integer, in which case the nth port is
@@ -1621,8 +1648,8 @@ class ProtoInstancePorts(Protocol[TUnit]):  # type: ignore[misc]
                 )
 
     @property
-    def cell_ports(self) -> Ports:
-        return self.instance.cell.ports
+    @abstractmethod
+    def cell_ports(self) -> ProtoPorts[TUnit]: ...
 
     def __iter__(self) -> Iterator[Port]:
         """Create a copy of the ports to iterate through."""
@@ -1759,6 +1786,8 @@ class ProtoInstancePorts(Protocol[TUnit]):  # type: ignore[misc]
 
 
 class InstancePorts(ProtoInstancePorts[int]):
+    instance: Instance
+
     def __init__(self: ProtoInstancePorts[int], instance: Instance) -> None:
         """Creates the virtual ports object.
 
@@ -1767,11 +1796,31 @@ class InstancePorts(ProtoInstancePorts[int]):
         """
         self.instance = instance
 
+    @property
+    def cell_ports(self) -> Ports:
+        return self.instance.cell.ports
 
-class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
+
+class DInstancePorts(ProtoInstancePorts[float]):
+    instance: DInstance
+
+    def __init__(self: ProtoInstancePorts[float], instance: DInstance) -> None:
+        """Creates the virtual ports object.
+
+        Args:
+            instance: The related instance
+        """
+        self.instance = instance
+
+    @property
+    def cell_ports(self) -> DPorts:
+        return self.instance.cell.ports
+
+
+class BaseKCell(BaseModel, ABC, Generic[TUnit], arbitrary_types_allowed=True):
     """Base class for shared attributes between VKCell and KCell."""
 
-    _ports: Ports = PrivateAttr()
+    _ports: Ports | DPorts = PrivateAttr()
     _locked: bool = PrivateAttr(False)
     _settings: KCellSettings = PrivateAttr(default_factory=KCellSettings)
     _settings_units: KCellSettingsUnits = PrivateAttr(
@@ -1817,9 +1866,8 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
         return self._settings_units
 
     @property
-    def ports(self) -> Ports:
-        """Ports associated with the cell."""
-        return self._ports
+    @abstractmethod
+    def ports(self) -> Ports | DPorts: ...
 
     @ports.setter
     def ports(self, new_ports: InstancePorts | Ports) -> None:
@@ -2136,7 +2184,11 @@ class TKCell(BaseKCell, Generic[TUnit], arbitrary_types_allowed=True):
         port_type: str = "optical",
     ) -> Port: ...
 
-    def create_port(self, **kwargs: Any) -> Port:
+    @overload
+    def create_port(self: TKCell[int], **kwargs: Any) -> Port: ...
+    @overload
+    def create_port(self: TKCell[float], **kwargs: Any) -> DPort: ...
+    def create_port(self, **kwargs: Any) -> Port | DPort:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
         if self._locked:
             raise LockedError(self)
@@ -3623,6 +3675,8 @@ class TKCell(BaseKCell, Generic[TUnit], arbitrary_types_allowed=True):
 
 
 class DKCell(TKCell[float]):
+    _ports: DPorts = PrivateAttr()
+
     def __init__(
         self,
         name: str | None = None,
@@ -3660,13 +3714,32 @@ class DKCell(TKCell[float]):
             insts=insts,
         )
         self._kdb_cell = _kdb_cell
-        self._ports = ports or Ports(_kcl)
-        self.kcl.register_dcell(self)
+        self._ports = DPorts(
+            self.kcl, bases=self.kcl[_kdb_cell.cell_index()].ports._bases
+        )
+
+    @property
+    def ports(self) -> DPorts:
+        """Ports associated with the cell."""
+        return self._ports
+
+    def dup(self) -> DKCell:
+        kc = self.kcl[self.cell_index()].dup()
+        return DKCell(kcl=kc.kcl, kdb_cell=kc._kdb_cell)
+
+    @property
+    def info(self) -> Info:
+        return self.kcl.kcells[self.cell_index()].info
+
+    @info.setter
+    def info(self, value: Info) -> None:
+        self.kcl.kcells[self.cell_index()].info = value
 
 
 class KCell(TKCell[int]):
     yaml_tag: ClassVar[str] = "!KCell"
     insts: Instances
+    _ports: Ports = PrivateAttr()
 
     def __init__(
         self,
@@ -3734,6 +3807,11 @@ class KCell(TKCell[int]):
         """Delete the cell."""
         ci = self.cell_index()
         self.kcl.delete_cell(ci)
+
+    @property
+    def ports(self) -> Ports | DPorts:
+        """Ports associated with the cell."""
+        return self._ports
 
     @classmethod
     def from_yaml(
@@ -4238,6 +4316,28 @@ class LayerStack(BaseModel):
         return self.layers[attr]
 
 
+class DKCells(Mapping[int, DKCell]):
+    _kcl: KCLayout
+
+    def __init__(self, kcl: KCLayout):
+        self._kcl = kcl
+
+    def __getitem__(self, key: int | str) -> DKCell:
+        return DKCell(kcl=self._kcl, kdb_cell=self._kcl[key]._kdb_cell)
+
+    def __iter__(self) -> Iterator[int]:
+        return iter(self._kcl.kcells)
+
+    def __len__(self) -> int:
+        return len(self._kcl.kcells)
+
+    def items(self) -> ItemsView[int, DKCell]:
+        return {
+            i: DKCell(kcl=self._kcl, kdb_cell=self._kcl[i]._kdb_cell)
+            for i in self._kcl.kcells
+        }.items()
+
+
 class KCLayout(
     BaseModel, arbitrary_types_allowed=True, extra="allow", validate_assignment=True
 ):
@@ -4432,6 +4532,10 @@ class KCLayout(
     # @classmethod
     # def _set_name_and_library(cls, name: str) -> None:
     #     cls.library.register(name)
+
+    @functools.cached_property
+    def dkcells(self) -> DKCells:
+        return DKCells(self)
 
     def create_layer_enclosure(
         self,
@@ -5742,6 +5846,7 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
     _shapes: dict[int, VShapes] = PrivateAttr(default_factory=dict)
     _name: str | None = None
     size_info: SizeInfo[float]
+    _ports: DPorts = PrivateAttr()
 
     def __init__(
         self,
@@ -5751,8 +5856,13 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
     ) -> None:
         _kcl = kcl or _get_default_kcl()
         super().__init__(kcl=_kcl, info=info, size_info=SizeInfo[float](self.bbox))
-        self._ports = Ports(_kcl)
+        self._ports = DPorts(_kcl)
         self._name = name
+
+    @property
+    def ports(self) -> DPorts:
+        """Ports associated with the cell."""
+        return self._ports
 
     def bbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
         _layers = set(self._shapes.keys())
@@ -6018,7 +6128,7 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
         c._settings = self._settings
         c._settings_units = self._settings_units
         c.info = self.info
-        VInstance(self).insert_into(c)
+        VInstance(self).insert_into_flat(c, levels=1)
 
         c.write(
             filename=filename,
@@ -8079,18 +8189,6 @@ class ProtoInstance(Protocol[TUnit]):
         self._instance.nb = value
 
     @property
-    def parent_cell(self) -> KCell:
-        """Gets the cell this instance is contained in."""
-        return self.kcl[self._instance.parent_cell.cell_index()]
-
-    @parent_cell.setter
-    def parent_cell(self, cell: KCell | DKCell | kdb.Cell) -> None:
-        if isinstance(cell, KCell | DKCell):
-            self._instance.parent_cell = cell._kdb_cell
-        else:
-            self._instance.parent_cell = cell
-
-    @property
     def prop_id(self) -> int:
         """Gets the properties ID associated with the instance."""
         return self._instance.prop_id
@@ -8289,7 +8387,7 @@ class ProtoInstance(Protocol[TUnit]):
     def dmovey(self, destination: float, /) -> Self: ...
 
     @overload
-    def dmovey(self, origin: float, destination: float) -> Self: ...
+    def dmovey(self, origin: float, destination: float | None = None) -> Self: ...
 
     def dmovey(self, origin: float, destination: float | None = None) -> Self:
         """Move the instance in y-direction in um.
@@ -8344,7 +8442,9 @@ class ProtoInstance(Protocol[TUnit]):
 
     @overload
     def dmove(
-        self, origin: tuple[float, float], destination: tuple[float, float]
+        self,
+        origin: tuple[float, float],
+        destination: tuple[float, float] | None = None,
     ) -> Self: ...
 
     def dmove(
@@ -8709,7 +8809,16 @@ class Instance(ProtoInstance[int]):
 
     @property
     def parent_cell(self) -> KCell:
+        """Gets the cell this instance is contained in."""
         return self.kcl[self._instance.parent_cell.cell_index()]
+
+    @parent_cell.setter
+    def parent_cell(self, cell: KCell | DKCell | kdb.Cell) -> None:
+        if isinstance(cell, KCell | DKCell):
+            self.parent_cell.insts._insts.remove(self)
+            self._instance.parent_cell = cell._kdb_cell
+        else:
+            self._instance.parent_cell = cell
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
@@ -8937,12 +9046,30 @@ class DInstance(ProtoInstance[float]):
         """Create an instance from a KLayout Instance."""
         self._instance = instance
         self.kcl = kcl
-        self.ports = InstancePorts(self)
+        self.ports = DInstancePorts(self)
 
     @property
     def size_info(self) -> SizeInfo[float]:
         """Size info of the instance."""
         return self.dsize_info
+
+    @property
+    def parent_cell(self) -> DKCell:
+        """Gets the cell this instance is contained in."""
+        return self.kcl.dkcells[self._instance.parent_cell.cell_index()]
+
+    @parent_cell.setter
+    def parent_cell(self, cell: KCell | DKCell | kdb.Cell) -> None:
+        if isinstance(cell, KCell | DKCell):
+            self.parent_cell.insts._insts.remove(
+                Instance(kcl=self.kcl, instance=self._instancd)
+            )
+            self._instance.parent_cell = cell._kdb_cell
+        else:
+            self.parent_cell.insts._insts.remove(
+                Instance(kcl=self.kcl, instance=self._instancd)
+            )
+            self._instance.parent_cell = cell
 
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]
@@ -9009,14 +9136,14 @@ class DInstance(ProtoInstance[float]):
         self,
         origin: tuple[float, float],
         destination: tuple[float, float] | None = None,
-    ) -> Instance:
+    ) -> Self:
         """Move the instance in dbu.
 
         Args:
             origin: reference point to move [dbu]
             destination: move origin so that it will land on this coordinate [dbu]
         """
-        return self.move(origin, destination)
+        return self.dmove(origin, destination)
 
     def rotate(self, angle: float, center: kdb.DPoint | None = None) -> Self:  # type: ignore[override]
         """Rotate instance in increments of 90°."""
@@ -9133,6 +9260,9 @@ class Instances:
         """Append a new instance."""
         self._insts.append(inst)
 
+    def remove(self, inst: Instance | DInstance) -> None:
+        self._insts.remove(Instance(inst.kcl, inst._instance))
+
     def __getitem__(self, key: str | int) -> Instance:
         """Retrieve instance by index or by name."""
         if isinstance(key, int):
@@ -9162,11 +9292,11 @@ class Instances:
                 names[inst.name] = 1
         return names
 
-    def __delitem__(self, item: Instance | int) -> None:
+    def __delitem__(self, item: ProtoInstance[Any] | int) -> None:
         if isinstance(item, int):
             del self._insts[item]
         else:
-            self._insts.remove(item)
+            self._insts.remove(Instance(kcl=item.kcl, instance=item._instance))
 
     def clean(self) -> None:
         deletion_list: list[int] = []
@@ -9186,23 +9316,40 @@ class DInstances:
     Allows retrieval by name or index
     """
 
-    _insts: Instances
+    _insts: list[kdb.Instance]
+    _kcl: KCLayout
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        kcl: KCLayout,
+        insts: list[DInstance] | None = None,
+        bases: list[kdb.Instance] | None = None,
+    ) -> None:
         """Constructor."""
-        self._insts = []
+        self._kcl = kcl
+        if bases is not None:
+            self._bases = bases
+        else:
+            if insts is None:
+                insts = []
+            self._insts = [inst._instance for inst in insts]
 
-    def append(self, inst: DInstance) -> None:
+    def append(self, inst: DInstance | Instance) -> None:
         """Append a new instance."""
-        self._insts.append(Instance(self.kcl, inst._instance))
+        self._insts.append(inst._instance)
 
     def __getitem__(self, key: str | int) -> DInstance:
         """Retrieve instance by index or by name."""
         if isinstance(key, int):
-            return self._insts[key]
+            return DInstance(kcl=self._kcl, instance=self._insts[key])
 
         else:
-            return next(filter(lambda inst: inst.name == key, self._insts))
+            return DInstance(
+                kcl=self._kcl,
+                instance=next(
+                    filter(lambda inst: inst.property(PROPID.NAME) == key, self._insts)
+                ),
+            )
 
     def __len__(self) -> int:
         """Length of the instances."""
@@ -9210,7 +9357,7 @@ class DInstances:
 
     def __iter__(self) -> Iterator[DInstance]:
         """Get instance iterator."""
-        return self._insts.__iter__()
+        yield from (DInstance(kcl=self._kcl, instance=inst) for inst in self._insts)
 
     def get_inst_names(self) -> dict[str | None, int]:
         """Get count of names of named instances.
@@ -9218,7 +9365,8 @@ class DInstances:
         Not named instances will be added to the `None` key.
         """
         names: dict[str | None, int] = {}
-        for inst in self._insts:
+        for _inst in self._insts:
+            inst = DInstance(kcl=self._kcl, instance=_inst)
             if inst.name in names:
                 names[inst.name] += 1
             else:
@@ -9229,12 +9377,12 @@ class DInstances:
         if isinstance(item, int):
             del self._insts[item]
         else:
-            self._insts.remove(item)
+            self._insts.remove(item._instance)
 
     def clean(self) -> None:
         deletion_list: list[int] = []
         for i, inst in enumerate(self._insts):
-            if inst._instance._destroyed():
+            if inst._destroyed():
                 deletion_list.insert(0, i)
         for i in deletion_list:
             del self._insts[i]
