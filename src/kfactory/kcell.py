@@ -5701,7 +5701,7 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
         c._settings = self._settings
         c._settings_units = self._settings_units
         c.info = self.info
-        VInstance(self).insert_into(c)
+        VInstance(self).insert_into_flat(c, levels=1)
 
         c.write(
             filename=filename,
