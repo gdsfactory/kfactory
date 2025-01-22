@@ -1850,7 +1850,32 @@ class DInstancePorts(ProtoInstancePorts[float]):
 
 
 class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
-    """Base class for shared attributes between all Cells."""
+    """KLayout cell and change its class to KCell.
+
+    A KCell is a dynamic proxy for kdb.Cell. It has all the
+    attributes of the official KLayout class. Some attributes have been adjusted
+    to return KCell specific sub classes. If the function is listed here in the
+    docs, they have been adjusted for KFactory specifically. This object will
+    transparently proxy to kdb.Cell. Meaning any attribute not directly
+    defined in this class that are available from the KLayout counter part can
+    still be accessed. The pure KLayout object can be accessed with
+    `kdb_cell`.
+
+    Attributes:
+        yaml_tag: Tag for yaml serialization.
+        ports: Manages the ports of the cell.
+        settings: A dictionary containing settings populated by the
+            [cell][kfactory.kcell.cell] decorator.
+        info: Dictionary for storing additional info if necessary. This is not
+            passed to the GDS and therefore not reversible.
+        d: UMKCell object for easy access to the KCell in um units.
+        kcl: Library object that is the manager of the KLayout
+        boundary: Boundary of the cell.
+        insts: List of instances in the cell.
+        vinsts: List of virtual instances in the cell.
+        size_info: Size information of the cell.
+        function_name: Name of the function that created the cell.
+    """
 
     ports: list[BasePort] = Field(default_factory=list)
     locked: bool = False
@@ -1993,23 +2018,11 @@ class TKCell(BaseKCell, arbitrary_types_allowed=True):
     transparently proxy to kdb.Cell. Meaning any attribute not directly
     defined in this class that are available from the KLayout counter part can
     still be accessed. The pure KLayout object can be accessed with
-    `_kdb_cell`.
+    `kdb_cell`.
 
     Attributes:
-        yaml_tag: Tag for yaml serialization.
-        ports: Manages the ports of the cell.
-        settings: A dictionary containing settings populated by the
-            [cell][kfactory.kcell.cell] decorator.
-        info: Dictionary for storing additional info if necessary. This is not
-            passed to the GDS and therefore not reversible.
-        d: UMKCell object for easy access to the KCell in um units.
-        kcl: Library object that is the manager of the KLayout
-        boundary: Boundary of the cell.
-        insts: List of instances in the cell.
-        vinsts: List of virtual instances in the cell.
-        size_info: Size information of the cell.
-        _kdb_cell: Pure KLayout cell object.
-        _locked: If set the cell shouldn't be modified anymore.
+        kdb_cell: Pure KLayout cell object.
+        locked: If set the cell shouldn't be modified anymore.
         function_name: Name of the function that created the cell.
     """
 
@@ -3849,7 +3862,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 set(
                     self.kcl[ci]
                     for ci in called_cell_indexes
-                    if not self.kcl[ci]._kdb_cell._destroyed()
+                    if not self.kcl[ci].kdb_cell._destroyed()
                 )
                 & self.kcl.kcells.keys(),
                 key=lambda c: c.hierarchy_levels(),
@@ -4421,18 +4434,38 @@ class DKCells(Mapping[int, DKCell]):
         self._kcl = kcl
 
     def __getitem__(self, key: int | str) -> DKCell:
-        return DKCell(kcl=self._kcl, kdb_cell=self._kcl[key].kdb_cell)
+        return DKCell(base_kcell=self._kcl[key].base_kcell)
 
     def __iter__(self) -> Iterator[int]:
-        return iter(self._kcl.kcells)
+        return iter(self._kcl.tkcells)
 
     def __len__(self) -> int:
-        return len(self._kcl.kcells)
+        return len(self._kcl.tkcells)
 
     def items(self) -> ItemsView[int, DKCell]:
         return {
-            i: DKCell(kcl=self._kcl, kdb_cell=self._kcl[i].kdb_cell)
-            for i in self._kcl.kcells
+            i: DKCell(base_kcell=self._kcl[i].base_kcell) for i in self._kcl.tkcells
+        }.items()
+
+
+class KCells(Mapping[int, KCell]):
+    _kcl: KCLayout
+
+    def __init__(self, kcl: KCLayout):
+        self._kcl = kcl
+
+    def __getitem__(self, key: int | str) -> KCell:
+        return KCell(base_kcell=self._kcl[key].base_kcell)
+
+    def __iter__(self) -> Iterator[int]:
+        return iter(self._kcl.tkcells)
+
+    def __len__(self) -> int:
+        return len(self._kcl.tkcells)
+
+    def items(self) -> ItemsView[int, KCell]:
+        return {
+            i: KCell(base_kcell=self._kcl[i].base_kcell) for i in self._kcl.tkcells
         }.items()
 
 
@@ -4484,7 +4517,7 @@ class KCLayout(
 
     factories: Factories[TKCell]
     virtual_factories: Factories[VKCell]
-    kcells: dict[int, TKCell]
+    tkcells: dict[int, TKCell] = Field(default_factory=dict)
     layers: type[LayerEnum]
     infos: LayerInfos
     layer_stack: LayerStack
@@ -4545,7 +4578,6 @@ class KCLayout(
         _infos = infos() if infos else LayerInfos()
         super().__init__(
             name=name,
-            kcells={},
             layer_enclosures=LayerEnclosureModel(dict()),
             cross_sections=CrossSectionModel(kcl=self),
             enclosure=KCellEnclosure([]),
@@ -4625,6 +4657,11 @@ class KCLayout(
     def dkcells(self) -> DKCells:
         """DKCells is a mapping of int to DKCell."""
         return DKCells(self)
+
+    @functools.cached_property
+    def kcells(self) -> KCells:
+        """KCells is a mapping of int to KCell."""
+        return KCells(self)
 
     def create_layer_enclosure(
         self,
@@ -5119,7 +5156,7 @@ class KCLayout(
                     # post process the cell
                     for pp in post_process:
                         pp(cell)
-                    cell.locked = True
+                    cell._base_kcell.locked = True
                     if cell.kcl != self:
                         raise ValueError(
                             "The KCell created must be using the same"
@@ -5346,7 +5383,7 @@ class KCLayout(
                                                 port.name, port.dcplx_trans.s_trans()
                                             )
                                         )
-                    cell.locked = True
+                    cell._base_kcell.locked = True
                     if cell.kcl != self:
                         raise ValueError(
                             "The KCell created must be using the same"
@@ -5409,7 +5446,7 @@ class KCLayout(
         If the layout is cleared, all the LayerEnums and
         """
         self.layout.clear()
-        self.kcells = {}
+        self.tkcells = {}
 
         if keep_layers:
             self.layers = self.layerenum_from_dict(layers=self.infos)
@@ -5444,6 +5481,13 @@ class KCLayout(
 
     def _cell(self, name: str | int) -> kdb.Cell | None:
         return self.layout.cell(name)
+
+    @overload
+    def _cells(self, name: str | None = None) -> list[kdb.Cell]: ...
+    @overload
+    def _cells(self) -> int: ...
+    def _cells(self, name: str | None = None) -> int | list[kdb.Cell]:
+        return self.layout.cells(name)
 
     def create_cell(
         self,
@@ -5481,11 +5525,11 @@ class KCLayout(
         """Delete a cell in the kcl object."""
         if isinstance(cell, int):
             self.layout.delete_cell(cell)
-            self.kcells.pop(cell, None)
+            self.tkcells.pop(cell, None)
         else:
             ci = cell.cell_index()
             self.layout.delete_cell(ci)
-            self.kcells.pop(ci, None)
+            self.tkcells.pop(ci, None)
 
     def delete_cell_rec(self, cell_index: int) -> None:
         """Deletes a KCell plus all subcells."""
@@ -5517,8 +5561,8 @@ class KCLayout(
             allow_reregister: Overwrite the existing KCell registration with this one.
                 Doesn't allow name duplication.
         """
-        if (kcell.cell_index() not in self.kcells) or allow_reregister:
-            self.kcells[kcell.cell_index()] = kcell.base_kcell
+        if (kcell.cell_index() not in self.tkcells) or allow_reregister:
+            self.tkcells[kcell.cell_index()] = kcell.base_kcell
         else:
             raise ValueError(
                 "Cannot register a new cell with a name that already"
@@ -5542,7 +5586,7 @@ class KCLayout(
         """
         if isinstance(obj, int):
             try:
-                return cell_type(base_kcell=self.kcells[obj])
+                return cell_type(base_kcell=self.tkcells[obj])
             except KeyError:
                 kdb_c = self._cell(obj)
                 if kdb_c is None:
@@ -5554,7 +5598,7 @@ class KCLayout(
             kdb_c = self._cell(obj)
             if kdb_c is not None:
                 try:
-                    return cell_type(base_kcell=self.kcells[kdb_c.cell_index()])
+                    return cell_type(base_kcell=self.tkcells[kdb_c.cell_index()])
                 except KeyError:
                     c = cell_type(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
                     c.get_meta_data()
@@ -5825,7 +5869,7 @@ class KCLayout(
         """Clears all cells in the Layout object."""
         for tc in self.top_kcells():
             tc.prune_cell()
-        self.kcells = {}
+        self.tkcells = {}
 
     def get_enclosure(
         self, enclosure: str | LayerEnclosure | LayerEnclosureSpec
@@ -5955,7 +5999,8 @@ class VKCell(ProtoKCell[float]):
         *,
         name: str | None = None,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] | None = None,
+        info: dict[str, Any] | None = None,
+        settings: dict[str, Any] | None = None,
     ) -> None: ...
 
     def __init__(
@@ -5964,7 +6009,8 @@ class VKCell(ProtoKCell[float]):
         base_kcell: BaseKCell | None = None,
         name: str | None = None,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] | None = None,
+        info: dict[str, Any] | None = None,
+        settings: dict[str, Any] | None = None,
     ) -> None:
         if base_kcell is not None:
             self._base_kcell = base_kcell
@@ -5972,7 +6018,12 @@ class VKCell(ProtoKCell[float]):
             self.size_info = SizeInfo[float](self.bbox)
         else:
             _kcl = kcl or _get_default_kcl()
-            super().__init__(kcl=_kcl, info=info, size_info=SizeInfo[float](self.bbox))
+            self._base_kcell = BaseKCell(
+                kcl=_kcl,
+                info=Info(**(info or {})),
+                settings=KCellSettings(**(settings or {})),
+            )
+            self.size_info = SizeInfo[float](self.bbox)
             self._name = name
 
     @property

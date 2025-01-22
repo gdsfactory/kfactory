@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 from .. import kdb, rdb
 from ..conf import config, logger
-from ..kcell import Instance, KCell, Port, ProtoKCell, ProtoPort, TUnit
+from ..kcell import Instance, KCell, Port
 from ..kf_types import dbu
 from .manhattan import (
     ManhattanBundleRoutingFunction,
@@ -277,9 +277,9 @@ def get_radius(
 
 def route_bundle(
     *,
-    c: ProtoKCell[TUnit],
-    start_ports: Sequence[ProtoPort[TUnit]],
-    end_ports: Sequence[ProtoPort[TUnit]],
+    c: KCell,
+    start_ports: list[Port],
+    end_ports: list[Port],
     route_width: dbu | list[dbu] | None = None,
     sort_ports: bool = False,
     on_collision: Literal["error", "show_error"] | None = "show_error",

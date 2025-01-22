@@ -11,7 +11,7 @@ from typing import Any, Literal, ParamSpec, Protocol, TypedDict
 from .. import kdb
 from ..conf import logger
 from ..enclosure import clean_points
-from ..kcell import KCell, KCLayout, Port
+from ..kcell import KCell, KCLayout, Port, ProtoPort, TUnit
 from .steps import Step, Steps, Straight
 
 __all__ = [
@@ -61,11 +61,11 @@ class ManhattanBundleRoutingFunction(Protocol):
     def __call__(
         self,
         *,
-        start_ports: Sequence[Port | kdb.Trans],
-        end_ports: Sequence[Port | kdb.Trans],
+        start_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
+        end_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
         starts: list[list[Step]],
         ends: list[list[Step]],
-        widths: list[int] | None = None,
+        widths: list[TUnit] | None = None,
         **kwargs: Any,
     ) -> list[ManhattanRouter]: ...
 
@@ -818,9 +818,9 @@ def _place_dl_path_length(
 
 def route_smart(
     *,
-    start_ports: Sequence[Port | kdb.Trans],
-    end_ports: Sequence[Port | kdb.Trans],
-    widths: list[int] | None = None,
+    start_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
+    end_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
+    widths: list[TUnit] | None = None,
     bend90_radius: int | None = None,
     separation: int | None = None,
     starts: list[list[Step]] = [],
