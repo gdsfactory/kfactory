@@ -215,5 +215,5 @@ def test_ports_eq() -> None:
 
     port = Port(name="test", layer=1, width=2, center=(0, 0), angle=90)
 
-    dkcell.ports = [port]
+    dkcell.ports = [port] # type: ignore[assignment]
     assert kcell.ports == [port]

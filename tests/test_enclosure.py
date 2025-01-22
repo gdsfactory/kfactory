@@ -69,7 +69,7 @@ def test_bbox_enc(LAYER: Layers) -> None:
         ],
         main_layer=LAYER.WG,
     )
-    c = kf.KCell("BBOX_ENC")
+    c = kf.KCell(name="BBOX_ENC")
     enc.apply_bbox(c, ref=LAYER.WG)
 
 
@@ -119,7 +119,7 @@ def test_um_enclosure_nodbu(LAYER: Layers) -> None:
 
 
 def test_pdkenclosure(LAYER: Layers, straight_blank: kf.KCell) -> None:
-    c = kf.KCell("wg_slab")
+    c = kf.KCell(name="wg_slab")
 
     wg_box = kf.kdb.Box(10000, 500)
     c.shapes(c.kcl.find_layer(LAYER.WG)).insert(wg_box)

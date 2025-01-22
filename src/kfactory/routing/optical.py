@@ -8,7 +8,7 @@ from typing import Any, Literal
 from .. import kdb
 from ..conf import config, logger
 from ..factories import StraightFactory
-from ..kcell import KCell, Port
+from ..kcell import KCell, Port, ProtoKCell, ProtoPort, TUnit
 from ..kf_types import dbu
 from .generic import (
     ManhattanRoute,
@@ -36,9 +36,9 @@ __all__ = [
 
 
 def route_bundle(
-    c: KCell,
-    start_ports: list[Port],
-    end_ports: list[Port],
+    c: ProtoKCell[TUnit],
+    start_ports: Sequence[ProtoPort[TUnit]],
+    end_ports: Sequence[ProtoPort[TUnit]],
     separation: dbu,
     straight_factory: StraightFactory,
     bend90_cell: KCell,

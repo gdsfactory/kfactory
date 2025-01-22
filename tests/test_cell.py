@@ -269,8 +269,7 @@ def test_ports_in_cells() -> None:
     dkcell = kf.DKCell.from_kcell(kcell)
 
     port = kf.Port(name="test", layer=1, width=2, center=(0, 0), angle=90)
-    port = kcell.add_port(port, "o1")
+    new_port = kcell.add_port(port, "o1")
 
-    assert port in kcell.ports
-    assert port in dkcell.ports
-
+    assert new_port in kcell.ports
+    assert new_port in dkcell.ports

@@ -266,7 +266,7 @@ def test_smart_routing(
 ) -> None:
     """Tests all possible smart routing configs."""
     c = kf.KCell(
-        f"test_smart_routing_{sort_ports=}_{start_bbox=}_{start_angle=}"
+        name=f"test_smart_routing_{sort_ports=}_{start_bbox=}_{start_angle=}"
         f"{m2=}_{m1=}_{z=}_{p1=}_{p2=}"
     )
     c.name = c.name.replace("=", "")
@@ -495,7 +495,7 @@ def test_route_smart_waypoints_trans_sort(
     straight_factory_dbu: Callable[..., kf.KCell],
     LAYER: Layers,
 ) -> None:
-    c = kf.KCell("TEST_SMART_ROUTE_WAYPOINTS_TRANS_SORT")
+    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_TRANS_SORT")
     _l = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
@@ -530,7 +530,7 @@ def test_route_smart_waypoints_pts_sort(
     straight_factory_dbu: Callable[..., kf.KCell],
     LAYER: Layers,
 ) -> None:
-    c = kf.KCell("TEST_SMART_ROUTE_WAYPOINTS_PTS_SORT")
+    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_PTS_SORT")
     _l = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
@@ -565,7 +565,7 @@ def test_route_smart_waypoints_trans(
     straight_factory_dbu: Callable[..., kf.KCell],
     LAYER: Layers,
 ) -> None:
-    c = kf.KCell("TEST_SMART_ROUTE_WAYPOINTS_TRANS")
+    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_TRANS")
     _l = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
@@ -600,7 +600,7 @@ def test_route_smart_waypoints_pts(
     straight_factory_dbu: Callable[..., kf.KCell],
     LAYER: Layers,
 ) -> None:
-    c = kf.KCell("TEST_SMART_ROUTE_WAYPOINTS_PTS")
+    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_PTS")
     _l = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
@@ -633,7 +633,7 @@ def test_route_smart_waypoints_pts(
 def test_route_generic_reorient(
     bend90_small: kf.KCell, straight_factory_dbu: Callable[..., kf.KCell], LAYER: Layers
 ) -> None:
-    c = kf.KCell("test_route_generic_reorient")
+    c = kf.KCell(name="test_route_generic_reorient")
 
     start_ports = [
         c.create_port(
@@ -675,7 +675,7 @@ def test_route_generic_reorient(
 def test_placer_error(
     bend90_small: kf.KCell, straight_factory_dbu: Callable[..., kf.KCell], LAYER: Layers
 ) -> None:
-    c = kf.KCell("test_placer_error")
+    c = kf.KCell(name="test_placer_error")
 
     ps = kf.Port(name="start", width=500, layer_info=LAYER.WG, trans=kf.kdb.Trans.R0)
     pe = kf.Port(

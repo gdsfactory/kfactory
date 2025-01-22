@@ -119,6 +119,7 @@ LI = TypeVar("LI", bound="LayerInfos", covariant=True)
 C = TypeVar("C", bound="Constants", covariant=True)
 TUnit = TypeVar("TUnit", bound=int | float)
 TUnit_co = TypeVar("TUnit_co", bound=int | float, covariant=True)
+TPort = TypeVar("TPort", bound="ProtoPort[Any]")
 
 KCellParams = ParamSpec("KCellParams")
 AnyTrans = TypeVar(
@@ -519,15 +520,15 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
         cls,
         data: dict[str, MetaData],
     ) -> dict[str, MetaData]:
-        try:
-            for name, value in data.items():
+        for name, value in data.items():
+            try:
                 data[name] = check_metatadata_type(value)
-        except KeyError as e:
-            raise ValueError(
-                "Values of the info dict only support int, float, string ,tuple"
-                ", list, dict or None."
-                f"{name}: {value}, {type(value)}"
-            ) from e
+            except KeyError as e:
+                raise ValueError(
+                    "Values of the info dict only support int, float, string ,tuple"
+                    ", list, dict or None."
+                    f"{name}: {value}, {type(value)}"
+                ) from e
 
         return data
 
@@ -597,7 +598,8 @@ class PortWidthMismatch(ValueError):
         if isinstance(other_inst, Instance):
             super().__init__(
                 f'Width mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f'and {other_inst.cell.name}["{p2.name}"] ("{p1.dwidth}"/"{p2.dwidth}")',
+                f'and {other_inst.cell.name}["{p2.name}"]'
+                f'("{p1.dwidth}"/"{p2.dwidth}")',
                 *args,
             )
         else:
@@ -1880,9 +1882,21 @@ class ProtoKCell(ABC, Generic[TUnit]):
     def dup(self) -> Self: ...
 
     @property
+    def info(self) -> Info:
+        return self._base_kcell.info
+
+    @info.setter
+    def info(self, value: Info) -> None:
+        self._base_kcell.info = value
+
+    @property
     def settings(self) -> KCellSettings:
         """Settings dictionary set by the [@vcell][kfactory.kcell.vcell] decorator."""
         return self._base_kcell.settings
+
+    @settings.setter
+    def settings(self, value: KCellSettings) -> None:
+        self._base_kcell.settings = value
 
     @property
     def settings_units(self) -> KCellSettingsUnits:
@@ -1892,9 +1906,9 @@ class ProtoKCell(ABC, Generic[TUnit]):
         """
         return self._base_kcell.settings_units
 
-    @property
-    def info(self) -> Info:
-        return self._base_kcell.info
+    @settings_units.setter
+    def settings_units(self, value: KCellSettingsUnits) -> None:
+        self._base_kcell.settings_units = value
 
     @property
     @abstractmethod
@@ -2003,6 +2017,13 @@ class TKCell(BaseKCell, arbitrary_types_allowed=True):
     boundary: kdb.DPolygon | None = None
     insts: Instances
 
+    def __getattr__(self, name: str) -> Any:
+        """If KCell doesn't have an attribute, look in the KLayout Cell."""
+        try:
+            return super().__getattr__(name)  # type: ignore
+        except Exception:
+            return getattr(self.kdb_cell, name)
+
 
 class ProtoTKCell(ProtoKCell[TUnit], ABC):
     _base_kcell: TKCell
@@ -2017,8 +2038,9 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Ports | None = None,
+        info: dict[str, Any] | None = None,
+        settings: dict[str, Any] | None = None,
     ) -> None: ...
-
     def __init__(
         self,
         *,
@@ -2026,8 +2048,50 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         name: str | None = None,
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
-        ports: Ports | None = None,
-    ) -> None: ...
+        ports: Iterable[ProtoPort[Any]] | None = None,
+        info: dict[str, Any] | None = None,
+        settings: dict[str, Any] | None = None,
+    ) -> None:
+        """Constructor of KCell.
+
+        Args:
+            base_kcell: If not `None`, a KCell will be created from and existing
+                KLayout Cell
+            name: Name of the cell, if None will autogenerate name to
+                "Unnamed_<cell_index>".
+            kcl: KCLayout the cell should be attached to.
+            kdb_cell: If not `None`, a KCell will be created from and existing
+                KLayout Cell
+            ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
+                if `None` create an empty one.
+            info: Info object to attach to the KCell.
+            settings: KCellSettings object to attach to the KCell.
+        """
+        if base_kcell is not None:
+            self._base_kcell = base_kcell
+            return
+        _kcl = kcl or _get_default_kcl()
+        if name is None:
+            _name = "Unnamed_!" if kdb_cell is None else kdb_cell.name
+        else:
+            _name = name
+            if kdb_cell is not None:
+                kdb_cell.name = name
+        _kdb_cell = kdb_cell or _kcl.create_cell(_name)
+        if _name == "Unnamed_!":
+            _kdb_cell.name = f"Unnamed_{_kdb_cell.cell_index()}"
+        insts = Instances()
+        for inst in _kdb_cell.each_inst():
+            insts.append(Instance(_kcl, inst))
+        self._base_kcell = TKCell(
+            kcl=_kcl,
+            insts=insts,
+            info=Info(**(info or {})),
+            settings=KCellSettings(**(settings or {})),
+            kdb_cell=_kdb_cell,
+            ports=[port.base for port in ports] if ports else [],
+        )
+        self.kcl.register_cell(self)
 
     @property
     def base_kcell(self) -> TKCell:
@@ -2095,7 +2159,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         try:
             return super().__getattr__(name)  # type: ignore
         except Exception:
-            return getattr(self._base_kcell.kdb_cell, name)
+            return getattr(self._base_kcell, name)
 
     def cell_index(self) -> int:
         """Gets the cell index."""
@@ -2104,6 +2168,26 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def __copy__(self) -> Self:
         """Enables use of `copy.copy` and `copy.deep_copy`."""
         return self.dup()
+
+    def dup(self) -> Self:
+        """Copy the full cell.
+
+        Sets `_locked` to `False`
+
+        Returns:
+            cell: Exact copy of the current cell.
+                The name will have `$1` as duplicate names are not allowed
+        """
+        kdb_copy = self._kdb_copy()
+
+        c = self.__class__(kcl=self.kcl, kdb_cell=kdb_copy)
+        c.ports = self.ports.copy()
+
+        c._base_kcell.settings = self.settings.model_copy()
+        c._base_kcell.info = self.info.model_copy()
+        c._base_kcell.vinsts = self._base_kcell.vinsts.copy()
+
+        return c
 
     @property
     def kdb_cell(self) -> kdb.Cell:
@@ -2280,14 +2364,14 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     @overload
     def create_inst(
         self,
-        cell: KCell | int,
+        cell: ProtoTKCell[Any] | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
     ) -> Instance: ...
 
     @overload
     def create_inst(
         self,
-        cell: KCell | int,
+        cell: ProtoTKCell[Any] | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
         *,
         a: kdb.Vector,
@@ -2298,7 +2382,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
     def create_inst(
         self,
-        cell: KCell | int,
+        cell: ProtoTKCell[Any] | int,
         trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans = kdb.Trans(),
         a: kdb.Vector | None = None,
         b: kdb.Vector | None = None,
@@ -2384,7 +2468,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def library(self) -> kdb.Library:
         return self._base_kcell.kdb_cell.library()
 
-    def __lshift__(self, cell: KCell) -> Instance:
+    def __lshift__(self, cell: ProtoTKCell[Any]) -> Instance:
         """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
 
         Args:
@@ -3776,65 +3860,9 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
 
 class DKCell(ProtoTKCell[float]):
+    """Cell with floating point units."""
+
     yaml_tag: ClassVar[str] = "!DKCell"
-
-    @overload
-    def __init__(self, *, base_kcell: TKCell) -> None: ...
-    @overload
-    def __init__(
-        self,
-        *,
-        name: str | None = None,
-        kcl: KCLayout | None = None,
-        kdb_cell: kdb.Cell | None = None,
-        ports: Ports | None = None,
-    ) -> None: ...
-    def __init__(
-        self,
-        *,
-        base_kcell: TKCell | None = None,
-        name: str | None = None,
-        kcl: KCLayout | None = None,
-        kdb_cell: kdb.Cell | None = None,
-        ports: Iterable[ProtoPort[Any]] | None = None,
-    ):
-        """Constructor of KCell.
-
-        Args:
-            base_kcell: If not `None`, a KCell will be created from and existing
-                KLayout Cell
-            name: Name of the cell, if None will autogenerate name to
-                "Unnamed_<cell_index>".
-            kcl: KCLayout the cell should be attached to.
-            kdb_cell: If not `None`, a KCell will be created from and existing
-                KLayout Cell
-            ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
-                if `None` create an empty one.
-        """
-        if base_kcell is not None:
-            self._base_kcell = base_kcell
-            return
-        _kcl = kcl or _get_default_kcl()
-        if name is None:
-            _name = "Unnamed_!" if kdb_cell is None else kdb_cell.name
-        else:
-            _name = name
-            if kdb_cell is not None:
-                kdb_cell.name = name
-        _kdb_cell = kdb_cell or _kcl.create_cell(_name)
-        if _name == "Unnamed_!":
-            _kdb_cell.name = f"Unnamed_{_kdb_cell.cell_index()}"
-        insts = Instances()
-        for inst in _kdb_cell.each_inst():
-            insts.append(Instance(_kcl, inst))
-        base_kcell = TKCell(
-            kcl=_kcl,
-            insts=insts,
-            info=Info(),
-            kdb_cell=_kdb_cell,
-            ports=[port.base for port in ports] if ports else [],
-        )
-        self.kcl.register_cell(self)
 
     @property
     def ports(self) -> DPorts:
@@ -3847,102 +3875,17 @@ class DKCell(ProtoTKCell[float]):
             raise LockedError(self)
         self._base_kcell.ports = [port.base for port in new_ports]
 
-    def dup(self) -> DKCell:
-        kc = self.kcl[self.cell_index()].dup()
-        return DKCell(kcl=kc.kcl, kdb_cell=kc.kdb_cell)
-
-    @property
-    def info(self) -> Info:
-        return self.kcl.kcells[self.cell_index()].info
-
-    @info.setter
-    def info(self, value: Info) -> None:
-        self.kcl.kcells[self.cell_index()].info = value
+    def create_port(self, **kwargs: Any) -> DPort:
+        """Create a port in the cell."""
+        if self.locked:
+            raise LockedError(self)
+        return self.ports.create_port(**kwargs)
 
 
 class KCell(ProtoTKCell[int]):
-    """KCell is a base class for all KCells."""
+    """Cell with integer units."""
 
     yaml_tag: ClassVar[str] = "!KCell"
-
-    @overload
-    def __init__(self, *, base_kcell: TKCell) -> None: ...
-    @overload
-    def __init__(
-        self,
-        *,
-        name: str | None = None,
-        kcl: KCLayout | None = None,
-        kdb_cell: kdb.Cell | None = None,
-        ports: Ports | None = None,
-    ) -> None: ...
-    def __init__(
-        self,
-        *,
-        base_kcell: TKCell | None = None,
-        name: str | None = None,
-        kcl: KCLayout | None = None,
-        kdb_cell: kdb.Cell | None = None,
-        ports: Iterable[ProtoPort[Any]] | None = None,
-    ) -> None:
-        """Constructor of KCell.
-
-        Args:
-            base_kcell: If not `None`, a KCell will be created from and existing
-                KLayout Cell
-            name: Name of the cell, if None will autogenerate name to
-                "Unnamed_<cell_index>".
-            kcl: KCLayout the cell should be attached to.
-            kdb_cell: If not `None`, a KCell will be created from and existing
-                KLayout Cell
-            ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
-                if `None` create an empty one.
-        """
-        if base_kcell is not None:
-            self._base_kcell = base_kcell
-            return
-        _kcl = kcl or _get_default_kcl()
-        if name is None:
-            _name = "Unnamed_!" if kdb_cell is None else kdb_cell.name
-        else:
-            _name = name
-            if kdb_cell is not None:
-                kdb_cell.name = name
-        _kdb_cell = kdb_cell or _kcl.create_cell(_name)
-        if _name == "Unnamed_!":
-            _kdb_cell.name = f"Unnamed_{_kdb_cell.cell_index()}"
-        insts = Instances()
-        for inst in _kdb_cell.each_inst():
-            insts.append(Instance(_kcl, inst))
-        self._base_kcell = TKCell(
-            kcl=_kcl,
-            insts=insts,
-            info=Info(),
-            kdb_cell=_kdb_cell,
-            ports=[port.base for port in ports] if ports else [],
-        )
-        self.kcl.register_cell(self)
-
-    def dup(self) -> KCell:
-        """Copy the full cell.
-
-        Sets `_locked` to `False`
-
-        Returns:
-            cell: Exact copy of the current cell.
-                The name will have `$1` as duplicate names are not allowed
-        """
-        kdb_copy = self._kdb_copy()
-
-        c = KCell(kcl=self.kcl, kdb_cell=kdb_copy)
-        c.ports = self.ports.copy()
-
-        c._base_kcell.settings = self.settings.model_copy()
-        c._base_kcell.info = self.info.model_copy()
-
-        c._base_kcell.vinsts = self._base_kcell.vinsts.copy()
-
-        return c
 
     def delete(self) -> None:
         """Delete the cell."""
@@ -3959,6 +3902,12 @@ class KCell(ProtoTKCell[int]):
         if self.locked:
             raise LockedError(self)
         self._base_kcell.ports = [port.base for port in new_ports]
+
+    def create_port(self, **kwargs: Any) -> Port:
+        """Create a port in the cell."""
+        if self.locked:
+            raise LockedError(self)
+        return self.ports.create_port(**kwargs)
 
     @classmethod
     def from_yaml(
@@ -4674,6 +4623,7 @@ class KCLayout(
 
     @functools.cached_property
     def dkcells(self) -> DKCells:
+        """DKCells is a mapping of int to DKCell."""
         return DKCells(self)
 
     def create_layer_enclosure(
@@ -6569,7 +6519,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
 
     def insert_into(
         self,
-        cell: TKCell[Any],
+        cell: ProtoTKCell[Any],
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
     ) -> Instance:
         if isinstance(self.cell, VKCell):
@@ -7664,6 +7614,13 @@ class ProtoPort(ABC, Generic[TUnit]):
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
     ) -> DPort: ...
+
+    @overload
+    def copy(
+        self: ProtoPort[TUnit],
+        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+    ) -> ProtoPort[TUnit]: ...
 
     def copy(
         self,

@@ -83,7 +83,7 @@ def test_connection_flags(
     expected_transformation: kf.kdb.Trans,
 ) -> None:
     """Tests all the (relevant) connection flags."""
-    c = kf.KCell(f"{from_name=}_{use_mirror=}_{apply_mirror=}")
+    c = kf.KCell(name=f"{from_name=}_{use_mirror=}_{apply_mirror=}")
     i1 = c << straight
     i2 = c << bend90
 

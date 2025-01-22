@@ -89,7 +89,7 @@ def mzi() -> kf.KCell:
 
 
 def test_l2n() -> None:
-    c = kf.KCell("L2N_TEST")
+    c = kf.KCell(name="L2N_TEST")
     mzi1 = c << mzi()
     mzi2 = c << mzi()
     mzi2.connect("o1", mzi1, "o2")

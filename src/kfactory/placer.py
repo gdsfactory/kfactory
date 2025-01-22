@@ -2,6 +2,7 @@
 
 import os
 import sys
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, TypeVar
@@ -10,7 +11,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
 
 from .enclosure import LayerEnclosure
-from .kcell import KCell, KCLayout, Port, Ports
+from .kcell import KCell, KCLayout, Port, Ports, ProtoTKCell, TKCell
 from .kcell import kcl as stdkcl
 
 __all__ = ["cells_to_yaml", "cells_from_yaml"]
@@ -18,7 +19,10 @@ __all__ = ["cells_to_yaml", "cells_from_yaml"]
 PathLike = TypeVar("PathLike", str, Path, None)
 
 
-def cells_to_yaml(output: PathLike, cells: list[KCell] | KCell) -> None:
+def cells_to_yaml(
+    output: PathLike,
+    cells: Sequence[ProtoTKCell[Any]] | ProtoTKCell[Any] | Sequence[TKCell] | TKCell,
+) -> None:
     """Convert cell(s) to a yaml representations.
 
     Args:
@@ -30,14 +34,14 @@ def cells_to_yaml(output: PathLike, cells: list[KCell] | KCell) -> None:
     Returns:
         yaml dump
     """
-    cells = [cells] if isinstance(cells, KCell) else cells
-    cells.sort(key=lambda c: c.hierarchy_levels())
+    _cells = [cells] if isinstance(cells, ProtoTKCell | TKCell) else cells
+    _cells.sort(key=lambda c: c.hierarchy_levels())
     yaml = YAML()
     yaml.register_class(KCell)
     yaml.register_class(Port)
     yaml.register_class(Ports)
     yaml.indent(sequence=4, offset=2)
-    yaml.dump(cells, output)
+    yaml.dump(_cells, output)
 
 
 def get_yaml_obj() -> YAML:
