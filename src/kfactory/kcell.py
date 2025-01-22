@@ -1858,7 +1858,7 @@ class ProtoKCell(Protocol[TUnit]):
     def ports(self, new_ports: InstancePorts | Ports) -> None:
         if self.locked:
             raise LockedError(self)
-        self._base_kcell.ports = [base for base in new_ports.copy()._bases]
+        self._base_kcell.ports = list(new_ports.copy()._bases)
 
     def add_port(
         self, port: ProtoPort[Any], name: str | None = None, keep_mirror: bool = False
@@ -1961,7 +1961,7 @@ class TKCell(BaseKCell[TUnit], Generic[TUnit], arbitrary_types_allowed=True):
 
 
 class ProtoTKCell(ProtoKCell[TUnit]):
-    _base_kcell: TKCell[TUnit]  # type: ignore
+    _base_kcell: TKCell[TUnit]
 
     def evaluate_insts(self) -> None:
         """Check all KLayout instances and create kfactory Instances."""
@@ -2093,7 +2093,7 @@ class ProtoTKCell(ProtoKCell[TUnit]):
         width: int,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> ProtoPort[TUnit]: ...
 
     @overload
     def create_port(
@@ -2104,7 +2104,7 @@ class ProtoTKCell(ProtoKCell[TUnit]):
         dwidth: float,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> ProtoPort[TUnit]: ...
 
     @overload
     def create_port(
@@ -2112,7 +2112,7 @@ class ProtoTKCell(ProtoKCell[TUnit]):
         *,
         name: str | None = None,
         port: Port,
-    ) -> Port: ...
+    ) -> ProtoPort[TUnit]: ...
 
     @overload
     def create_port(
@@ -2125,7 +2125,7 @@ class ProtoTKCell(ProtoKCell[TUnit]):
         layer: LayerEnum | int,
         port_type: str = "optical",
         mirror_x: bool = False,
-    ) -> Port: ...
+    ) -> ProtoPort[TUnit]: ...
 
     @overload
     def create_port(
@@ -2136,7 +2136,7 @@ class ProtoTKCell(ProtoKCell[TUnit]):
         width: int,
         layer_info: kdb.LayerInfo,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> ProtoPort[TUnit]: ...
 
     @overload
     def create_port(
@@ -2147,7 +2147,7 @@ class ProtoTKCell(ProtoKCell[TUnit]):
         dwidth: float,
         layer_info: kdb.LayerInfo,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> ProtoPort[TUnit]: ...
 
     @overload
     def create_port(
@@ -2160,7 +2160,7 @@ class ProtoTKCell(ProtoKCell[TUnit]):
         layer_info: kdb.LayerInfo,
         port_type: str = "optical",
         mirror_x: bool = False,
-    ) -> Port: ...
+    ) -> ProtoPort[TUnit]: ...
 
     @overload
     def create_port(
@@ -2170,7 +2170,7 @@ class ProtoTKCell(ProtoKCell[TUnit]):
         cross_section: SymmetricalCrossSection,
         trans: kdb.Trans,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> ProtoPort[TUnit]: ...
 
     @overload
     def create_port(
@@ -2180,7 +2180,7 @@ class ProtoTKCell(ProtoKCell[TUnit]):
         cross_section: SymmetricalCrossSection,
         dcplx_trans: kdb.DCplxTrans,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> ProtoPort[TUnit]: ...
 
     def create_port(self, **kwargs: Any) -> ProtoPort[TUnit]:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
@@ -2289,6 +2289,12 @@ class ProtoTKCell(ProtoKCell[TUnit]):
     def _kdb_copy(self) -> kdb.Cell:
         return self._base_kcell.kdb_cell.dup()
 
+    def layout(self) -> kdb.Layout:
+        return self._base_kcell.kdb_cell.layout()
+
+    def library(self) -> kdb.Library:
+        return self._base_kcell.kdb_cell.library()
+
     def __lshift__(self, cell: KCell) -> Instance:
         """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
 
@@ -2342,7 +2348,7 @@ class ProtoTKCell(ProtoKCell[TUnit]):
 
     def convert_to_static(self, recursive: bool = True) -> None:
         """Convert the KCell to a static cell if it is pdk KCell."""
-        if self.library().name == self.kcl.name:
+        if self.library().name() == self.kcl.name:
             raise ValueError(f"KCell {self.qname()} is already a static KCell.")
         _lib_cell = kcls[self.library().name()][self.library_cell_index()]
         _lib_cell.set_meta_data()
@@ -6481,7 +6487,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     @overload
     def insert_into_flat(
         self,
-        cell: TKCell[Any] | VKCell,
+        cell: ProtoKCell[Any],
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
         *,
         levels: None = None,
@@ -6490,7 +6496,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
     @overload
     def insert_into_flat(
         self,
-        cell: TKCell[Any] | VKCell,
+        cell: ProtoKCell[Any],
         *,
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
         levels: int,
@@ -6498,7 +6504,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
 
     def insert_into_flat(
         self,
-        cell: TKCell[Any] | VKCell,
+        cell: ProtoKCell[Any],
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
         *,
         levels: int | None = None,
