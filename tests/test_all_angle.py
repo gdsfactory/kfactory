@@ -12,10 +12,10 @@ def test_all_angle_bundle(LAYER: Layers) -> None:
     )
 
     # vc = kf.VKCell("test_all_angle")
-    c = kf.KCell("test_all_angle")
+    c = kf.KCell(name="test_all_angle")
 
-    start_ports: list[kf.Port] = []
-    end_ports: list[kf.Port] = []
+    start_ports: list[kf.kcell.ProtoPort[int]] = []
+    end_ports: list[kf.kcell.ProtoPort[int]] = []
     r = 50
     n = 3
     _l = 9
@@ -33,7 +33,7 @@ def test_all_angle_bundle(LAYER: Layers) -> None:
                     1, a, False, -500 + r * np.cos(a_rad), -100 + r * np.sin(a_rad)
                 ),
                 layer=c.kcl.find_layer(LAYER.WG),
-                dwidth=1,
+                width=c.kcl.to_dbu(1),
             )
         )
         end_ports.append(
@@ -43,7 +43,7 @@ def test_all_angle_bundle(LAYER: Layers) -> None:
                     1, ae, False, 2510 + r * np.cos(ae_rad), 2410 + r * np.sin(ae_rad)
                 ),
                 layer=c.kcl.find_layer(LAYER.WG),
-                dwidth=1,
+                width=c.kcl.to_dbu(1),
             )
         )
     backbone = [

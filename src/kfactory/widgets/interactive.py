@@ -45,6 +45,7 @@ def display_kcell(
     display_type: Literal["image", "widget"] | None = None,
 ) -> None:
     """Display a KCell in a jupyter widget or an image."""
+    assert kc.name is not None
     cell_dup = kc.kcl[kc.name].dup()
     cell_dup.insert_vinsts()
     display_type = display_type or config.display_type

@@ -3,7 +3,7 @@ from conftest import Layers
 
 
 def test_l2n(LAYER: Layers) -> None:
-    c = kf.KCell("netlist_test")
+    c = kf.KCell(name="netlist_test")
 
     b = kf.cells.circular.bend_circular(width=1, radius=10, layer=LAYER.WG)
     s = kf.cells.straight.straight(width=1, length=20, layer=LAYER.WG)

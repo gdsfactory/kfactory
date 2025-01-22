@@ -154,7 +154,7 @@ def test_dspiral(LAYER: Layers) -> None:
     p = kf.Port(
         name="start",
         dcplx_trans=kf.kdb.DCplxTrans.R0,
-        dwidth=1,
+        width=c.kcl.to_dbu(1),
         layer=c.kcl.find_layer(LAYER.WG),
     )
 

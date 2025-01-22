@@ -68,6 +68,8 @@ docs = [
 ci = [
   "pytest",
   "pytest_regressions",
+  "pytest-xdist",
+  "pytest-randomly",
   "types-cachetools",
   "types-requests",
   "kfactory[full]",
