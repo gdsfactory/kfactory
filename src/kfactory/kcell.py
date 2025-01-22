@@ -1888,8 +1888,8 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     basename: str | None = None
 
 
-class ProtoKCell(ABC, Generic[TUnit]):
-    _base_kcell: BaseKCell
+class ProtoKCell(BaseModel, ABC, Generic[TUnit], arbitrary_types_allowed=True):
+    _base_kcell: BaseKCell = PrivateAttr()
 
     @property
     def locked(self) -> bool:
@@ -1934,6 +1934,22 @@ class ProtoKCell(ABC, Generic[TUnit]):
     @settings_units.setter
     def settings_units(self, value: KCellSettingsUnits) -> None:
         self._base_kcell.settings_units = value
+
+    @property
+    def function_name(self) -> str | None:
+        return self._base_kcell.function_name
+
+    @function_name.setter
+    def function_name(self, value: str | None) -> None:
+        self._base_kcell.function_name = value
+
+    @property
+    def basename(self) -> str | None:
+        return self._base_kcell.basename
+
+    @basename.setter
+    def basename(self, value: str | None) -> None:
+        self._base_kcell.basename = value
 
     @property
     @abstractmethod
@@ -2008,7 +2024,7 @@ class ProtoKCell(ABC, Generic[TUnit]):
         return self._base_kcell.kcl
 
 
-class TKCell(BaseKCell, arbitrary_types_allowed=True):
+class TKCell(BaseKCell):
     """KLayout cell and change its class to KCell.
 
     A KCell is a dynamic proxy for kdb.Cell. It has all the
@@ -2039,7 +2055,7 @@ class TKCell(BaseKCell, arbitrary_types_allowed=True):
 
 
 class ProtoTKCell(ProtoKCell[TUnit], ABC):
-    _base_kcell: TKCell
+    _base_kcell: TKCell = PrivateAttr()
 
     @overload
     def __init__(self, *, base_kcell: TKCell) -> None: ...
@@ -2081,6 +2097,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             settings: KCellSettings object to attach to the KCell.
         """
         if base_kcell is not None:
+            BaseModel.__init__(self)
             self._base_kcell = base_kcell
             return
         _kcl = kcl or _get_default_kcl()
@@ -2096,6 +2113,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         insts = Instances()
         for inst in _kdb_cell.each_inst():
             insts.append(Instance(_kcl, inst))
+        BaseModel.__init__(self)
         self._base_kcell = TKCell(
             kcl=_kcl,
             insts=insts,
@@ -2172,7 +2190,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         try:
             return super().__getattr__(name)  # type: ignore
         except Exception:
-            return getattr(self._base_kcell, name)
+            return getattr(self._base_kcell.kdb_cell, name)
 
     def cell_index(self) -> int:
         """Gets the cell index."""
@@ -2209,10 +2227,26 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def destroyed(self) -> bool:
         return self._base_kcell.kdb_cell._destroyed()
 
+    @property
+    def boundary(self) -> kdb.DPolygon | None:
+        return self._base_kcell.boundary
+
+    @boundary.setter
+    def boundary(self, boundary: kdb.DPolygon | None) -> None:
+        self._base_kcell.boundary = boundary
+
     @classmethod
     def from_kcell(cls, kcell: ProtoTKCell[Any]) -> Self:
         """Create a KCell from a KLayout Cell."""
         return cls(base_kcell=kcell._base_kcell)
+
+    @property
+    def insts(self) -> Instances:
+        return self._base_kcell.insts
+
+    @insts.setter
+    def insts(self, value: Iterable[Instance]) -> None:
+        self._base_kcell.insts = Instances(value)
 
     def show(
         self,
@@ -5480,6 +5514,7 @@ class KCLayout(
         return kcl
 
     def _cell(self, name: str | int) -> kdb.Cell | None:
+        print(name)
         return self.layout.cell(name)
 
     @overload
@@ -5987,7 +6022,7 @@ class VKCell(ProtoKCell[float]):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
     _shapes: dict[int, VShapes] = PrivateAttr(default_factory=dict)
-    _name: str | None = None
+    _name: str | None = PrivateAttr(default=None)
     size_info: SizeInfo[float]
 
     @overload
@@ -6012,6 +6047,7 @@ class VKCell(ProtoKCell[float]):
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None:
+        BaseModel.__init__(self)
         if base_kcell is not None:
             self._base_kcell = base_kcell
             self._name = base_kcell.function_name
