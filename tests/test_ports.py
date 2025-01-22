@@ -206,3 +206,14 @@ def test_dplx_port_dbu_port_conversion(LAYER: Layers) -> None:
     t2 = kf.kdb.Trans(1, False, 10_000, 10_000)
     p = kf.Port(dwidth=1, dcplx_trans=t1, layer=kf.kcl.find_layer(LAYER.WG), kcl=kf.kcl)
     assert p.trans == t2
+
+def test_ports_eq() -> None:
+    from kfactory.kcell import DKCell, KCell, Port
+
+    kcell = KCell(name="test")
+    dkcell = DKCell.from_kcell(kcell)
+
+    port = Port(name="test", layer=1, width=2, center=(0, 0), angle=90)
+
+    dkcell.ports = [port]
+    assert kcell.ports == [port]
