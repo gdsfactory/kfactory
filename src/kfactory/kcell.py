@@ -2057,19 +2057,6 @@ class TKCell(BaseKCell):
 class ProtoTKCell(ProtoKCell[TUnit], ABC):
     _base_kcell: TKCell = PrivateAttr()
 
-    @overload
-    def __init__(self, *, base_kcell: TKCell) -> None: ...
-    @overload
-    def __init__(
-        self,
-        *,
-        name: str | None = None,
-        kcl: KCLayout | None = None,
-        kdb_cell: kdb.Cell | None = None,
-        ports: Ports | None = None,
-        info: dict[str, Any] | None = None,
-        settings: dict[str, Any] | None = None,
-    ) -> None: ...
     def __init__(
         self,
         *,
@@ -2081,21 +2068,6 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None:
-        """Constructor of KCell.
-
-        Args:
-            base_kcell: If not `None`, a KCell will be created from and existing
-                KLayout Cell
-            name: Name of the cell, if None will autogenerate name to
-                "Unnamed_<cell_index>".
-            kcl: KCLayout the cell should be attached to.
-            kdb_cell: If not `None`, a KCell will be created from and existing
-                KLayout Cell
-            ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
-                if `None` create an empty one.
-            info: Info object to attach to the KCell.
-            settings: KCellSettings object to attach to the KCell.
-        """
         if base_kcell is not None:
             BaseModel.__init__(self)
             self._base_kcell = base_kcell
@@ -3911,6 +3883,55 @@ class DKCell(ProtoTKCell[float]):
 
     yaml_tag: ClassVar[str] = "!DKCell"
 
+    @overload
+    def __init__(self, *, base_kcell: TKCell) -> None: ...
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        kcl: KCLayout | None = None,
+        kdb_cell: kdb.Cell | None = None,
+        ports: Ports | None = None,
+        info: dict[str, Any] | None = None,
+        settings: dict[str, Any] | None = None,
+    ) -> None: ...
+    def __init__(
+        self,
+        *,
+        base_kcell: TKCell | None = None,
+        name: str | None = None,
+        kcl: KCLayout | None = None,
+        kdb_cell: kdb.Cell | None = None,
+        ports: Iterable[ProtoPort[Any]] | None = None,
+        info: dict[str, Any] | None = None,
+        settings: dict[str, Any] | None = None,
+    ) -> None:
+        """Constructor of KCell.
+
+        Args:
+            base_kcell: If not `None`, a KCell will be created from and existing
+                KLayout Cell
+            name: Name of the cell, if None will autogenerate name to
+                "Unnamed_<cell_index>".
+            kcl: KCLayout the cell should be attached to.
+            kdb_cell: If not `None`, a KCell will be created from and existing
+                KLayout Cell
+            ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
+                if `None` create an empty one.
+            info: Info object to attach to the KCell.
+            settings: KCellSettings object to attach to the KCell.
+        """
+        super().__init__(
+            base_kcell=base_kcell,
+            name=name,
+            kcl=kcl,
+            kdb_cell=kdb_cell,
+            ports=ports,
+            info=info,
+            settings=settings,
+        )
+
     @property
     def ports(self) -> DPorts:
         """Ports associated with the cell."""
@@ -3933,6 +3954,55 @@ class KCell(ProtoTKCell[int]):
     """Cell with integer units."""
 
     yaml_tag: ClassVar[str] = "!KCell"
+
+    @overload
+    def __init__(self, *, base_kcell: TKCell) -> None: ...
+    @overload
+    def __init__(
+        self,
+        *,
+        name: str | None = None,
+        kcl: KCLayout | None = None,
+        kdb_cell: kdb.Cell | None = None,
+        ports: Ports | None = None,
+        info: dict[str, Any] | None = None,
+        settings: dict[str, Any] | None = None,
+    ) -> None: ...
+    def __init__(
+        self,
+        *,
+        base_kcell: TKCell | None = None,
+        name: str | None = None,
+        kcl: KCLayout | None = None,
+        kdb_cell: kdb.Cell | None = None,
+        ports: Iterable[ProtoPort[Any]] | None = None,
+        info: dict[str, Any] | None = None,
+        settings: dict[str, Any] | None = None,
+    ) -> None:
+        """Constructor of KCell.
+
+        Args:
+            base_kcell: If not `None`, a KCell will be created from and existing
+                KLayout Cell
+            name: Name of the cell, if None will autogenerate name to
+                "Unnamed_<cell_index>".
+            kcl: KCLayout the cell should be attached to.
+            kdb_cell: If not `None`, a KCell will be created from and existing
+                KLayout Cell
+            ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
+                if `None` create an empty one.
+            info: Info object to attach to the KCell.
+            settings: KCellSettings object to attach to the KCell.
+        """
+        super().__init__(
+            base_kcell=base_kcell,
+            name=name,
+            kcl=kcl,
+            kdb_cell=kdb_cell,
+            ports=ports,
+            info=info,
+            settings=settings,
+        )
 
     def delete(self) -> None:
         """Delete the cell."""
@@ -5514,7 +5584,6 @@ class KCLayout(
         return kcl
 
     def _cell(self, name: str | int) -> kdb.Cell | None:
-        print(name)
         return self.layout.cell(name)
 
     @overload
