@@ -2431,6 +2431,7 @@ class KCell(BaseKCell, arbitrary_types_allowed=True):
             kc = self.kcl[kci]
             kc.insert_vinsts()
 
+        save_options.set_format_from_filename(str(filename))
         self._kdb_cell.write(str(filename), save_options)
 
     def read(
@@ -5291,6 +5292,7 @@ class KCLayout(
         if autoformat_from_file_extension:
             options.set_format_from_filename(filename)
 
+        options.set_format_from_filename(str(filename))
         return self.layout.write(filename, options)
 
     def top_kcells(self) -> list[KCell]:
@@ -5703,6 +5705,7 @@ class VKCell(BaseKCell, arbitrary_types_allowed=True):
         c.info = self.info
         VInstance(self).insert_into_flat(c, levels=1)
 
+        save_options.set_format_from_filename(str(filename))
         c.write(
             filename=filename,
             save_options=save_options,
