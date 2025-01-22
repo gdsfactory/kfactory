@@ -59,7 +59,7 @@ def register_classes(
 
     class ModKCell(KCell):
         def __init__(self, name: str | None = None, library: KCLayout = kcl):
-            KCell.__init__(self, name, library)
+            KCell.__init__(self, name=name, kcl=library)
 
         @classmethod
         def from_yaml(cls, constructor, node):  # type: ignore[no-untyped-def]

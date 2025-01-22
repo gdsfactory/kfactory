@@ -24,8 +24,10 @@ from collections.abc import (
     ItemsView,
     Iterable,
     Iterator,
+    KeysView,
     Mapping,
     Sequence,
+    ValuesView,
 )
 from dataclasses import dataclass, field
 from enum import IntEnum, IntFlag, auto
@@ -1119,7 +1121,7 @@ class Ports(ProtoPorts[int]):
                 layer_info = self.kcl.get_info(layer)
             assert layer_info is not None
             if width is None:
-                dwidth = cast(float, dwidth)
+                assert dwidth is not None, "dwidth needs to be set if width is not set"
                 if dwidth <= 0:
                     raise ValueError("dwidth needs to be set and be >0")
                 _width = self.kcl.to_dbu(dwidth)
@@ -1950,6 +1952,10 @@ class ProtoKCell(BaseModel, ABC, Generic[TUnit], arbitrary_types_allowed=True):
     @basename.setter
     def basename(self, value: str | None) -> None:
         self._base_kcell.basename = value
+
+    @property
+    def vinsts(self) -> list[VInstance]:
+        return self._base_kcell.vinsts
 
     @property
     @abstractmethod
@@ -4531,46 +4537,50 @@ class LayerStack(BaseModel):
         return self.layers[attr]
 
 
-class DKCells(Mapping[int, DKCell]):
+class ProtoCells(Mapping[int, KC], ABC):
     _kcl: KCLayout
 
     def __init__(self, kcl: KCLayout):
         self._kcl = kcl
 
+    @abstractmethod
+    def __getitem__(self, key: int | str) -> KC: ...
+
+    @abstractmethod
+    def _generate_dict(self) -> dict[int, KC]: ...
+
+    def __iter__(self) -> Iterator[int]:
+        return iter(self._kcl.tkcells)
+
+    def __len__(self) -> int:
+        return len(self._kcl.tkcells)
+
+    def items(self) -> ItemsView[int, KC]:
+        return self._generate_dict().items()
+
+    def values(self) -> ValuesView[KC]:
+        return self._generate_dict().values()
+
+    def keys(self) -> KeysView[int]:
+        return self._generate_dict().keys()
+
+
+class DKCells(ProtoCells[DKCell]):
     def __getitem__(self, key: int | str) -> DKCell:
         return DKCell(base_kcell=self._kcl[key].base_kcell)
 
-    def __iter__(self) -> Iterator[int]:
-        return iter(self._kcl.tkcells)
-
-    def __len__(self) -> int:
-        return len(self._kcl.tkcells)
-
-    def items(self) -> ItemsView[int, DKCell]:
+    def _generate_dict(self) -> dict[int, DKCell]:
         return {
             i: DKCell(base_kcell=self._kcl[i].base_kcell) for i in self._kcl.tkcells
-        }.items()
+        }
 
 
-class KCells(Mapping[int, KCell]):
-    _kcl: KCLayout
-
-    def __init__(self, kcl: KCLayout):
-        self._kcl = kcl
-
+class KCells(ProtoCells[KCell]):
     def __getitem__(self, key: int | str) -> KCell:
         return KCell(base_kcell=self._kcl[key].base_kcell)
 
-    def __iter__(self) -> Iterator[int]:
-        return iter(self._kcl.tkcells)
-
-    def __len__(self) -> int:
-        return len(self._kcl.tkcells)
-
-    def items(self) -> ItemsView[int, KCell]:
-        return {
-            i: KCell(base_kcell=self._kcl[i].base_kcell) for i in self._kcl.tkcells
-        }.items()
+    def _generate_dict(self) -> dict[int, KCell]:
+        return {i: KCell(base_kcell=self._kcl[i].base_kcell) for i in self._kcl.tkcells}
 
 
 class KCLayout(
@@ -6116,11 +6126,10 @@ class VKCell(ProtoKCell[float]):
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None:
-        BaseModel.__init__(self)
+        BaseModel.__init__(self, size_info=SizeInfo[float](self.bbox))
         if base_kcell is not None:
             self._base_kcell = base_kcell
             self._name = base_kcell.function_name
-            self.size_info = SizeInfo[float](self.bbox)
         else:
             _kcl = kcl or _get_default_kcl()
             self._base_kcell = BaseKCell(
@@ -6128,13 +6137,18 @@ class VKCell(ProtoKCell[float]):
                 info=Info(**(info or {})),
                 settings=KCellSettings(**(settings or {})),
             )
-            self.size_info = SizeInfo[float](self.bbox)
             self._name = name
 
     @property
     def ports(self) -> DPorts:
         """Ports associated with the cell."""
-        return DPorts(self.kcl, bases=self._base_kcell.ports)
+        return DPorts(kcl=self.kcl, bases=self._base_kcell.ports)
+
+    @ports.setter
+    def ports(self, new_ports: Iterable[ProtoPort[Any]]) -> None:
+        if self.locked:
+            raise LockedError(self)
+        self._base_kcell.ports = [port.base for port in new_ports]
 
     def bbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
         _layers = set(self._shapes.keys())
@@ -6262,7 +6276,7 @@ class VKCell(ProtoKCell[float]):
         width: int,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> DPort: ...
 
     @overload
     def create_port(
@@ -6270,10 +6284,10 @@ class VKCell(ProtoKCell[float]):
         *,
         name: str | None = None,
         dcplx_trans: kdb.DCplxTrans,
-        dwidth: float,
+        width: float,
         layer: LayerEnum | int,
         port_type: str = "optical",
-    ) -> Port: ...
+    ) -> DPort: ...
 
     @overload
     def create_port(
@@ -6281,7 +6295,7 @@ class VKCell(ProtoKCell[float]):
         *,
         name: str | None = None,
         port: Port,
-    ) -> Port: ...
+    ) -> DPort: ...
 
     @overload
     def create_port(
@@ -6294,9 +6308,9 @@ class VKCell(ProtoKCell[float]):
         layer: LayerEnum | int,
         port_type: str = "optical",
         mirror_x: bool = False,
-    ) -> Port: ...
+    ) -> DPort: ...
 
-    def create_port(self, **kwargs: Any) -> Port:
+    def create_port(self, **kwargs: Any) -> DPort:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
         if self.locked:
             raise LockedError(self)
@@ -7329,8 +7343,8 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     name: str | None
     kcl: KCLayout
     cross_section: SymmetricalCrossSection
-    trans: kdb.Trans | None
-    dcplx_trans: kdb.DCplxTrans | None
+    trans: kdb.Trans | None = None
+    dcplx_trans: kdb.DCplxTrans | None = None
     info: Info = Info()
     port_type: str
 
@@ -7707,19 +7721,19 @@ class ProtoPort(ABC, Generic[TUnit]):
             self._base.trans = kdb.ICplxTrans(value.dup(), self.kcl.dbu).s_trans()
 
     @property
-    def x(self) -> TUnit:
-        """X coordinate of the port in dbu."""
-        ...
+    @abstractmethod
+    def x(self) -> TUnit: ...
 
     @x.setter
+    @abstractmethod
     def x(self, value: TUnit) -> None: ...
 
     @property
-    def y(self) -> TUnit:
-        """Y coordinate of the port in dbu."""
-        ...
+    @abstractmethod
+    def y(self) -> TUnit: ...
 
     @y.setter
+    @abstractmethod
     def y(self, value: TUnit) -> None: ...
 
     @property
@@ -7916,23 +7930,20 @@ class Port(ProtoPort[int]):
         *,
         name: str | None = None,
         width: int | None = None,
-        dwidth: float | None = None,
         layer: int | None = None,
         layer_info: kdb.LayerInfo | None = None,
         port_type: str = "optical",
         trans: kdb.Trans | str | None = None,
         dcplx_trans: kdb.DCplxTrans | str | None = None,
         angle: int | None = None,
-        dangle: float | None = None,
         center: tuple[int, int] | None = None,
-        dcenter: tuple[float, float] | None = None,
         mirror_x: bool = False,
         port: Port | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = {},
         cross_section: SymmetricalCrossSection | None = None,
         base: BasePort | None = None,
-    ):
+    ) -> None:
         """Create a port from dbu or um based units."""
         if base is not None:
             self._base = base
@@ -7946,18 +7957,11 @@ class Port(ProtoPort[int]):
             if layer_info is None:
                 if layer is None:
                     raise ValueError("layer or layer_info for a port must be defined")
-                layer_info = _kcl.get_info(layer)
-            if width is None and dwidth is None:
+                layer_info = _kcl.layout.get_info(layer)
+            if width is None:
                 raise ValueError(
                     "any width and layer, or a cross_section must be given if the"
                     " 'port is None'"
-                )
-            elif width is None:
-                cross_section = _kcl.get_cross_section(
-                    CrossSectionSpec(
-                        main_layer=layer_info,
-                        width=_kcl.to_dbu(dwidth),  # type: ignore[arg-type]
-                    )
                 )
             else:
                 cross_section = _kcl.get_cross_section(
@@ -7974,7 +7978,6 @@ class Port(ProtoPort[int]):
                 kcl=_kcl,
                 cross_section=_cross_section,
                 trans=_trans,
-                dcplx_trans=None,
                 info=_info,
                 port_type=port_type,
             )
@@ -7987,7 +7990,6 @@ class Port(ProtoPort[int]):
                 name=name,
                 kcl=_kcl,
                 cross_section=_cross_section,
-                trans=None,
                 dcplx_trans=_dcplx_trans,
                 info=_info,
                 port_type=port_type,
@@ -8000,19 +8002,6 @@ class Port(ProtoPort[int]):
                 kcl=_kcl,
                 cross_section=_cross_section,
                 trans=_trans,
-                dcplx_trans=None,
-                info=_info,
-                port_type=port_type,
-            )
-        elif dangle is not None:
-            assert dcenter is not None
-            _dcplx_trans = kdb.DCplxTrans(1, dangle, mirror_x, *dcenter)
-            self._base = BasePort(
-                name=name,
-                kcl=_kcl,
-                cross_section=_cross_section,
-                trans=None,
-                dcplx_trans=_dcplx_trans,
                 info=_info,
                 port_type=port_type,
             )
@@ -8181,7 +8170,7 @@ class DPort(ProtoPort[float]):
             if layer_info is None:
                 if layer is None:
                     raise ValueError("layer or layer_info for a port must be defined")
-                layer_info = _kcl.get_info(layer)
+                layer_info = _kcl.layout.get_info(layer)
             if width is None:
                 raise ValueError(
                     "If a cross_section is not given a width must be defined."
@@ -8200,7 +8189,6 @@ class DPort(ProtoPort[float]):
                 kcl=_kcl,
                 cross_section=_cross_section,
                 trans=_trans,
-                dcplx_trans=None,
                 info=_info,
                 port_type=port_type,
             )
@@ -8213,7 +8201,6 @@ class DPort(ProtoPort[float]):
                 name=name,
                 kcl=_kcl,
                 cross_section=_cross_section,
-                trans=None,
                 dcplx_trans=_dcplx_trans,
                 info=_info,
                 port_type=port_type,
@@ -8225,13 +8212,14 @@ class DPort(ProtoPort[float]):
                 name=name,
                 kcl=_kcl,
                 cross_section=_cross_section,
-                trans=None,
                 dcplx_trans=_dcplx_trans,
                 info=_info,
                 port_type=port_type,
             )
             self.center = center
             self.angle = angle
+        else:
+            raise ValueError("Missing port parameters given")
 
     def __repr__(self) -> str:
         """String representation of port."""
@@ -8313,11 +8301,11 @@ class DPort(ProtoPort[float]):
         return (vec.x, vec.y)
 
     @center.setter
-    def center(self, pos: tuple[float, float]) -> None:
+    def center(self, value: tuple[float, float]) -> None:
         if self._base.trans:
-            self._base.trans.disp = self.kcl.to_dbu(kdb.DVector(*pos))
+            self._base.trans.disp = self.kcl.to_dbu(kdb.DVector(*value))
         elif self._base.dcplx_trans:
-            self._base.dcplx_trans.disp = kdb.DVector(*pos)
+            self._base.dcplx_trans.disp = kdb.DVector(*value)
 
     @property
     def angle(self) -> float:
