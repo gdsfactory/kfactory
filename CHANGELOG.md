@@ -7,6 +7,10 @@
 
 - Add more locked checks to VKCell and remade lock file [#549](https://github.com/gdsfactory/kfactory/pull/549)
 
+## Bug Fixes
+
+- fix virtual write [#550](https://github.com/gdsfactory/kfactory/issues/550) [#555](https://github.com/gdsfactory/kfactory/pull/555)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.23.1...v0.23.2
 
 
