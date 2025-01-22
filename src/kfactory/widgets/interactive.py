@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+
 try:
     from pathlib import Path
     from typing import Any
@@ -28,7 +29,7 @@ try:
 
     from .. import kdb, lay
     from ..conf import config, logger
-    from ..kcell import KCell
+    from ..kcell import KCell, ProtoKCell
     from typing import Literal
 
 except ImportError as e:
@@ -39,7 +40,7 @@ __all__ = ["display_kcell"]
 
 
 def display_kcell(
-    kc: TKCell[Any],
+    kc: ProtoKCell[Any],
     lyrdb: Path | str | None = None,
     display_type: Literal["image", "widget"] | None = None,
 ) -> None:
@@ -74,7 +75,7 @@ class LayoutImage:
             if self.layer_properties.exists() and self.layer_properties.is_file():
                 self.layer_properties = self.layer_properties
                 self.layout_view.load_layer_props(str(self.layer_properties))
-        self.show_cell(cell._kdb_cell)
+        self.show_cell(cell.kdb_cell)
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
 
         self.image = Image(value=png_data, format="png")
@@ -102,7 +103,7 @@ class LayoutIPImage:
             if self.layer_properties.exists() and self.layer_properties.is_file():
                 self.layer_properties = self.layer_properties
                 self.layout_view.load_layer_props(str(self.layer_properties))
-        self.show_cell(cell._kdb_cell)
+        self.show_cell(cell.kdb_cell)
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
         self.image = IPImage(  # type: ignore[no-untyped-call,unused-ignore]
             data=png_data, format="png", embed=True, width=800, height=600
@@ -137,7 +138,7 @@ class LayoutWidget:
             if self.layer_properties.exists() and self.layer_properties.is_file():
                 self.layer_properties = self.layer_properties
                 self.layout_view.load_layer_props(str(self.layer_properties))
-        self.show_cell(cell._kdb_cell)
+        self.show_cell(cell.kdb_cell)
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
 
         self.image = Image(value=png_data, format="png")

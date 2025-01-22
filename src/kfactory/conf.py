@@ -22,14 +22,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from . import kdb, rdb
 
 if TYPE_CHECKING:
-    from .kcell import KCLayout, TKCell
+    from .kcell import KCLayout, ProtoKCell
 
 
 @runtime_checkable
 class ShowFunction(Protocol):
     def __call__(
         self,
-        layout: KCLayout | TKCell[Any] | Path | str,
+        layout: KCLayout | ProtoKCell[Any] | Path | str,
         *,
         lyrdb: rdb.ReportDatabase | Path | str | None,
         l2n: kdb.LayoutToNetlist | Path | str | None,

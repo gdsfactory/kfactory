@@ -263,3 +263,14 @@ def test_check_ports(LAYER: Layers) -> None:
         test_multi_ports()
 
     kf.config.logfilter.regex = regex
+
+def test_ports_in_cells() -> None:
+    kcell = kf.KCell(name="test")
+    dkcell = kf.DKCell.from_kcell(kcell)
+
+    port = kf.Port(name="test", layer=1, width=2, center=(0, 0), angle=90)
+    port = kcell.add_port(port, "o1")
+
+    assert port in kcell.ports
+    assert port in dkcell.ports
+

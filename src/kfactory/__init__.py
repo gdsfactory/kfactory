@@ -35,6 +35,7 @@ from .kcell import (
     pprint_ports,
     save_layout_options,
     show,
+    DKCell,
 )
 from . import (
     cells,
@@ -59,6 +60,7 @@ __all__ = [
     "Constants",
     "factories",
     "BaseKCell",
+    "DKCell",
     "Info",
     "Instance",
     "InstanceGroup",

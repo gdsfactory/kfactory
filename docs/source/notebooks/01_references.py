@@ -158,7 +158,7 @@ c2
 # %%
 c = kf.KCell(name="instance_sample")
 w = kf.cells.straight.straight(length=10, width=0.6, layer=LAYER.WG)
-wr = kf.kdb.CellInstArray(w._kdb_cell, kf.kdb.Trans.R0)
+wr = kf.kdb.CellInstArray(w.kdb_cell, kf.kdb.Trans.R0)
 c.insert(wr)
 c
 
