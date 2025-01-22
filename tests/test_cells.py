@@ -143,7 +143,7 @@ def test_additional_info(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
 
     bend = test_bend_euler(width=1)
 
-    assert bend._locked is True
+    assert bend.locked is True
     assert bend.info.creation_time == "2023-02-12Z23:00:00"  # type: ignore[attr-defined, unused-ignore]
 
     bend.delete()
