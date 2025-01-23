@@ -67,7 +67,6 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    PrivateAttr,
     RootModel,
     ValidationError,
     model_serializer,
@@ -836,7 +835,7 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
         return self.root[enclosure.name]
 
 
-class ProtoPorts(BaseModel, ABC, Generic[TUnit]):
+class ProtoPorts(ABC, Generic[TUnit]):
     kcl: KCLayout
     _locked: bool
     _bases: list[BasePort]
@@ -848,7 +847,7 @@ class ProtoPorts(BaseModel, ABC, Generic[TUnit]):
         ports: Iterable[ProtoPort[Any]] | None = None,
         bases: list[BasePort] | None = None,
     ) -> None:
-        BaseModel.__init__(self, kcl=kcl)
+        self.kcl = kcl
         if bases is not None:
             self._bases = bases
         elif ports is not None:
@@ -1569,7 +1568,7 @@ class HasCellPorts(ABC, Generic[TUnit]):
     def cell_ports(self) -> ProtoPorts[TUnit]: ...
 
 
-class ProtoInstancePorts(BaseModel, HasCellPorts[TUnit], ABC):
+class ProtoInstancePorts(HasCellPorts[TUnit], ABC):
     """Ports of an Instance.
 
     These act as virtual ports as the centers needs to change if the
@@ -1843,7 +1842,7 @@ class InstancePorts(ProtoInstancePorts[int]):
         Args:
             instance: The related instance
         """
-        BaseModel.__init__(self, instance=instance)
+        self.instance = instance
 
     @property
     def cell_ports(self) -> Ports:
@@ -1859,7 +1858,7 @@ class DInstancePorts(ProtoInstancePorts[float]):
         Args:
             instance: The related instance
         """
-        BaseModel.__init__(self, instance=instance)
+        self.instance = instance
 
     @property
     def cell_ports(self) -> DPorts:
@@ -1905,8 +1904,8 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     basename: str | None = None
 
 
-class ProtoKCell(BaseModel, ABC, Generic[TUnit], arbitrary_types_allowed=True):
-    _base_kcell: BaseKCell = PrivateAttr()
+class ProtoKCell(ABC, Generic[TUnit]):
+    _base_kcell: BaseKCell
 
     @property
     def locked(self) -> bool:
@@ -2076,7 +2075,7 @@ class TKCell(BaseKCell):
 
 
 class ProtoTKCell(ProtoKCell[TUnit], ABC):
-    _base_kcell: TKCell = PrivateAttr()
+    _base_kcell: TKCell
 
     def __init__(
         self,
@@ -2089,7 +2088,6 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None:
-        BaseModel.__init__(self)
         if base_kcell is not None:
             self._base_kcell = base_kcell
             return
@@ -6140,8 +6138,8 @@ class VShapes(BaseModel, arbitrary_types_allowed=True):
 class VKCell(ProtoKCell[float]):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
-    _shapes: dict[int, VShapes] = PrivateAttr(default_factory=dict)
-    _name: str | None = PrivateAttr(default=None)
+    _shapes: dict[int, VShapes]
+    _name: str | None
     size_info: SizeInfo[float]
 
     @overload
@@ -6166,7 +6164,8 @@ class VKCell(ProtoKCell[float]):
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None:
-        BaseModel.__init__(self, size_info=SizeInfo[float](self.bbox))
+        self.size_info = SizeInfo[float](self.bbox)
+        self._shapes = {}
         if base_kcell is not None:
             self._base_kcell = base_kcell
             self._name = base_kcell.function_name
@@ -8341,8 +8340,8 @@ class DPort(ProtoPort[float]):
         self.mirror = value
 
 
-class ProtoInstance(BaseModel, ABC, Generic[TUnit]):
-    _instance: kdb.Instance = PrivateAttr()
+class ProtoInstance(ABC, Generic[TUnit]):
+    _instance: kdb.Instance
     kcl: KCLayout
 
     @property
@@ -9145,7 +9144,7 @@ class Instance(ProtoInstance[int]):
 
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
-        BaseModel.__init__(self, kcl=kcl)
+        self.kcl = kcl
         self._instance = instance
         self._ports = InstancePorts(self)
 
@@ -9429,7 +9428,7 @@ class DInstance(ProtoInstance[float]):
 
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
-        BaseModel.__init__(self, kcl=kcl)
+        self.kcl = kcl
         self._instance = instance
         self._ports = DInstancePorts(self)
 
