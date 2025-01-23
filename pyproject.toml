@@ -68,8 +68,6 @@ docs = [
 ci = [
   "pytest",
   "pytest_regressions",
-  "pytest-xdist",
-  "pytest-randomly",
   "pytest-cov",
   "types-cachetools",
   "types-requests",
