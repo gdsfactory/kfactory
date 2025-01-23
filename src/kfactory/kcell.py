@@ -8388,7 +8388,7 @@ class DPort(ProtoPort[float]):
 
 
 class ProtoInstance(BaseModel, ABC, Generic[TUnit]):
-    _instance: kdb.Instance
+    _instance: kdb.Instance = PrivateAttr()
     kcl: KCLayout
 
     @property
@@ -9175,12 +9175,23 @@ class Instance(ProtoInstance[int]):
     """
 
     yaml_tag: ClassVar[str] = "!Instance"
-    ports: InstancePorts
+    _ports: InstancePorts
 
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
-        BaseModel.__init__(self, kcl=kcl, ports=InstancePorts(self))
+        BaseModel.__init__(self, kcl=kcl)
         self._instance = instance
+        self._ports = InstancePorts(self)
+
+    @property
+    def ports(self) -> InstancePorts:
+        """Gets the transformed ports of the KCell."""
+        return self._ports
+
+    @ports.setter
+    def ports(self, value: InstancePorts) -> None:
+        """Sets the transformed ports of the KCell."""
+        self._ports = value
 
     @property
     def size_info(self) -> SizeInfo[int]:
@@ -9448,12 +9459,23 @@ class DInstance(ProtoInstance[float]):
     """
 
     yaml_tag: ClassVar[str] = "!Instance"
-    ports: DInstancePorts
+    _ports: DInstancePorts
 
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
-        BaseModel.__init__(self, kcl=kcl, ports=DInstancePorts(self))
+        BaseModel.__init__(self, kcl=kcl)
         self._instance = instance
+        self._ports = DInstancePorts(self)
+
+    @property
+    def ports(self) -> DInstancePorts:
+        """Gets the transformed ports of the KCell."""
+        return self._ports
+
+    @ports.setter
+    def ports(self, value: DInstancePorts) -> None:
+        """Sets the transformed ports of the KCell."""
+        self._ports = value
 
     @property
     def size_info(self) -> SizeInfo[float]:
