@@ -404,7 +404,7 @@ c
 
 
 # %%
-c = kf.KCell("mirror_example3")
+c = kf.KCell(name="mirror_example3")
 bend = kf.cells.euler.bend_euler(width=0.5, radius=1, layer=LAYER.WG)
 b1 = c << bend
 b2 = c << bend
@@ -412,7 +412,7 @@ b2.drotate(90)
 c
 
 # %%
-c = kf.KCell("mirror_example4")
+c = kf.KCell(name="mirror_example4")
 bend = kf.cells.euler.bend_euler(width=0.5, radius=1, layer=LAYER.WG)
 b1 = c << bend
 b2 = c << bend

@@ -603,7 +603,7 @@ class PortWidthMismatch(ValueError):
 
     def __init__(
         self,
-        inst: ProtoInstance[Any],
+        inst: ProtoInstance[Any] | ProtoPort[Any],
         other_inst: ProtoInstance[Any] | ProtoPort[Any],
         p1: ProtoPort[Any],
         p2: ProtoPort[Any],
@@ -6943,23 +6943,21 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
                     "complex connections (non-90 degree and floating point ports) use"
                     "route_cplx instead"
                 )
-            op = other.ports[other_port_name]
+            op = Port(base=other.ports[other_port_name].base)
         elif isinstance(other, ProtoPort):
-            op = other
+            op = Port(base=other.base)
         else:
             raise ValueError("other_instance must be of type Instance or Port")
         if isinstance(port, ProtoPort):
             p = port.copy(self.trans.inverted())
         else:
             p = Port(base=self.cell.ports[port].base)
+
+        assert isinstance(p, Port) and isinstance(op, Port)
+
         if p.width != op.width and not allow_width_mismatch:
             # The ports are not the same width
-            raise PortWidthMismatch(
-                self,  # type: ignore[arg-type]
-                other,  # type: ignore[arg-type]
-                p,
-                op,
-            )
+            raise PortWidthMismatch(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
             # The ports are not on the same layer
             raise PortLayerMismatch(self.cell.kcl, self, other, p, op)  # type: ignore[arg-type]
