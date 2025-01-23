@@ -209,12 +209,15 @@ def test_dplx_port_dbu_port_conversion(LAYER: Layers) -> None:
     assert p.trans == t2
 
 def test_ports_eq() -> None:
-    from kfactory.kcell import DKCell, KCell, Port
 
-    kcell = KCell(name="test")
-    dkcell = DKCell.from_kcell(kcell)
+    kcell = kf.KCell(name="test_ports_eq")
+    dkcell = kf.DKCell.from_kcell(kcell)
 
-    port = Port(name="test", layer=1, width=2, center=(0, 0), angle=90)
+    port = kf.Port(name="test", layer=1, width=2, center=(0, 0), angle=90)
 
     dkcell.ports = [port] # type: ignore[assignment]
     assert kcell.ports == [port]
+
+
+if __name__ == "__main__":
+    test_ports_eq()
