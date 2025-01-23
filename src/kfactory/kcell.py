@@ -2065,7 +2065,7 @@ class TKCell(BaseKCell):
 
     kdb_cell: kdb.Cell
     boundary: kdb.DPolygon | None = None
-    insts: list[kdb.Instance]
+    insts: list[kdb.Instance] = Field(default_factory=list)
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -2468,7 +2468,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 lib_ci = self.kcl.layout.add_lib_cell(
                     cell.kcl.library, cell.cell_index()
                 )
-                if lib_ci not in self.kcl.kcells:
+                if lib_ci not in self.kcl.tkcells:
                     cell.set_meta_data()
                     kcell = self.kcl[lib_ci]
                     kcell.rebuild()
@@ -2678,7 +2678,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     self.convert_to_static(recursive=True)
 
         for kci in (
-            set(self._base_kcell.kdb_cell.called_cells()) & self.kcl.kcells.keys()
+            set(self._base_kcell.kdb_cell.called_cells()) & self.kcl.tkcells.keys()
         ):
             kc = self.kcl[kci]
             kc.insert_vinsts()
@@ -2805,7 +2805,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 kc.rebuild()
                 kc.get_meta_data(meta_format=meta_format)
         else:
-            cis = self.kcl.kcells.keys()
+            cis = self.kcl.tkcells.keys()
             new_cis = set(cell_ids)
 
             for c in new_cis & cis:
@@ -3894,7 +3894,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     for ci in called_cell_indexes
                     if not self.kcl[ci].kdb_cell._destroyed()
                 )
-                & self.kcl.kcells.keys(),
+                & self.kcl.tkcells.keys(),
                 key=lambda c: c.hierarchy_levels(),
             ):
                 for vi in c._base_kcell.vinsts:
@@ -5623,17 +5623,8 @@ class KCLayout(
         kcl = KCLayout(self.name + "_DUPLICATE")
         kcl.layout.assign(self.layout.dup())
         if init_cells:
-            for i, kc in self.kcells.items():
-                kcl.kcells[i] = KCell(
-                    name=kc.name,
-                    kcl=kcl,
-                    kdb_cell=kcl.layout_cell(kc.name),
-                    ports=kc.ports,
-                )
-                kcl.kcells[i].settings = kc.settings.model_copy()
-                kcl.kcells[i].info = kc.info.model_copy(
-                    update={n: v for n, v in kc.info}
-                )
+            for i, kc in self.tkcells.items():
+                kcl.tkcells[i] = kc.model_copy(update={"kdb_cell": kc.kdb_cell})
         kcl.rename_function = self.rename_function
         return kcl
 
@@ -5703,12 +5694,12 @@ class KCLayout(
     def rebuild(self) -> None:
         """Rebuild the KCLayout based on the Layoutt object."""
         kcells2delete: list[int] = []
-        for ci in self.kcells:
-            if self[ci].destroyed():
+        for ci, c in self.tkcells.items():
+            if c.kdb_cell._destroyed():
                 kcells2delete.append(ci)
 
         for ci in kcells2delete:
-            del self.kcells[ci]
+            del self.tkcells[ci]
 
     def register_cell(
         self, kcell: ProtoTKCell[Any], allow_reregister: bool = False
@@ -5884,7 +5875,11 @@ class KCLayout(
                     ", available strategies are 'overwrite', 'skip', or 'drop'"
                 )
         meta_format = settings.get("meta_format") or config.meta_format
-        load_cells = set(self.layout_cell(c.name) for c in layout_b.cells("*"))
+        load_cells = {
+            cell
+            for c in layout_b.cells("*")
+            if (cell := self.layout_cell(c.name)) is not None
+        }
         new_cells = load_cells - cells
 
         if register_cells:
@@ -5997,18 +5992,18 @@ class KCLayout(
             case (True, True):
                 self.set_meta_data()
                 for kcell in self.kcells.values():
-                    if not kcell._destroyed():
+                    if not kcell.destroyed():
                         kcell.set_meta_data()
                         if kcell.is_library_cell():
                             kcell.convert_to_static(recursive=True)
             case (True, False):
                 self.set_meta_data()
                 for kcell in self.kcells.values():
-                    if not kcell._destroyed():
+                    if not kcell.destroyed():
                         kcell.set_meta_data()
             case (False, True):
                 for kcell in self.kcells.values():
-                    if kcell.is_library_cell() and not kcell._destroyed():
+                    if kcell.is_library_cell() and not kcell.destroyed():
                         kcell.convert_to_static(recursive=True)
 
         if autoformat_from_file_extension:
@@ -9203,7 +9198,7 @@ class Instance(ProtoInstance[int]):
 
     @property
     def cell(self) -> KCell:
-        """Parent KCell  of the Instance."""
+        """Parent KCell of the Instance."""
         return self.kcl.kcells[self.cell_index]
 
     @cell.setter
