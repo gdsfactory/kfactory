@@ -57,15 +57,15 @@ class ManhattanRoutePathFunction180(Protocol):
         ...
 
 
-class ManhattanBundleRoutingFunction(Protocol):
+class ManhattanBundleRoutingFunction(Protocol[TUnit]):
     def __call__(
         self,
         *,
         start_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
         end_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
-        starts: list[list[Step]],
-        ends: list[list[Step]],
-        widths: list[TUnit] | None = None,
+        starts: Sequence[Sequence[Step]],
+        ends: Sequence[Sequence[Step]],
+        widths: Sequence[TUnit] | None = None,
         **kwargs: Any,
     ) -> list[ManhattanRouter]: ...
 
@@ -820,14 +820,14 @@ def route_smart(
     *,
     start_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
     end_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
-    widths: list[TUnit] | None = None,
+    widths: Sequence[TUnit] | None = None,
     bend90_radius: int | None = None,
     separation: int | None = None,
-    starts: list[list[Step]] = [],
-    ends: list[list[Step]] = [],
-    bboxes: list[kdb.Box] | None = None,
+    starts: Sequence[Sequence[Step]] = [],
+    ends: Sequence[Sequence[Step]] = [],
+    bboxes: Sequence[kdb.Box] | None = None,
     sort_ports: bool = False,
-    waypoints: list[kdb.Point] | kdb.Trans | None = None,
+    waypoints: Sequence[kdb.Point] | kdb.Trans | None = None,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     **kwargs: Any,
 ) -> list[ManhattanRouter]:

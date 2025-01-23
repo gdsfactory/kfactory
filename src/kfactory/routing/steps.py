@@ -22,10 +22,9 @@ class Step(ABC):
         ...
 
     @property
-    @abstractmethod
     def include_bend(self) -> bool | None:
         """Whether the execute should leave space at the end of the step for a bend."""
-        ...
+        return None
 
 
 @dataclass
@@ -39,7 +38,6 @@ class Left(Step):
     """
 
     dist: int | None = None
-    include_bend: bool | None = None
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Make the router turn left and go straight if necessary."""
@@ -75,7 +73,6 @@ class Right(Step):
     """
 
     dist: int | None = None
-    include_bend: bool | None = None
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Adds the bend and potential straight after."""
@@ -102,7 +99,6 @@ class Straight(Step):
     """Adds a straight section to the router."""
 
     dist: int | None = None
-    include_bend: bool | None = None
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Adds a straight section to the router."""
@@ -119,7 +115,6 @@ class X(Step):
     """Go to an absolute X coordinate."""
 
     x: int
-    include_bend: bool | None = None
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Adds a straight section to the router."""
@@ -142,7 +137,6 @@ class Y(Step):
     """Go to an absolute X coordinate."""
 
     y: int
-    include_bend: bool | None = None
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Adds a straight section to the router."""
@@ -166,7 +160,6 @@ class XY(Step):
 
     x: int
     y: int
-    include_bend: bool | None = None
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Executes the step on a router."""
@@ -287,16 +280,13 @@ class Steps(RootModel[list[Any]]):
 
     def execute(self, router: ManhattanRouterSide) -> None:
         """Run all the steps on the given router."""
+        i = 0
         try:
-            # print(router.t)
-            i = 0
             if self.root:
                 for i, step in enumerate(self.root[:-1]):
                     step.execute(router, True)
                 i += i
                 step = self.root[-1]
                 step.execute(router, False)
-            # print(router.t)
-
         except Exception as e:
             raise ValueError(f"Error in step {i}, {step=}. Error: {str(e)}") from e
