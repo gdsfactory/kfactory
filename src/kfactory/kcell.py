@@ -2118,8 +2118,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None:
+        BaseModel.__init__(self)
         if base_kcell is not None:
-            BaseModel.__init__(self)
             self._base_kcell = base_kcell
             return
         _kcl = kcl or _get_default_kcl()
@@ -2135,7 +2135,6 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         insts = Instances()
         for inst in _kdb_cell.each_inst():
             insts.append(Instance(_kcl, inst))
-        BaseModel.__init__(self)
         self._base_kcell = TKCell(
             kcl=_kcl,
             insts=insts,
@@ -4614,6 +4613,11 @@ class ProtoCells(Mapping[int, KC], ABC):
     def keys(self) -> KeysView[int]:
         return self._generate_dict().keys()
 
+    def __contains__(self, key: object) -> bool:
+        if isinstance(key, int | str):
+            return key in self._kcl.tkcells
+        return False
+
 
 class DKCells(ProtoCells[DKCell]):
     def __getitem__(self, key: int | str) -> DKCell:
@@ -5185,7 +5189,7 @@ class KCLayout(
                     else:
                         _name = None
                     cell = f(**params)  # type: ignore[call-arg]
-                    if not isinstance(cell, KCell):
+                    if not isinstance(cell, ProtoTKCell):
                         raise ValueError(
                             f"Function did not return a KCell, but {type(cell)}"
                         )
