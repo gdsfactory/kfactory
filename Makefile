@@ -39,6 +39,9 @@ cov:
 uv-test:
 	uv run pytest -s -n logical
 
+uv-cov:
+	uv run pytest -s -n logical --cov=kfactory --cov-report=term-missing
+
 venv:
 	uv venv -p 3.13
 

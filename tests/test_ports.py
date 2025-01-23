@@ -41,13 +41,13 @@ def wg_floating_off_grid(LAYER: Layers) -> kf.KCell:
         dbu = c.kcl.dbu
 
         p1 = kf.kcell.Port(
-            dwidth=10 + dbu / 2,
+            width=c.kcl.to_dbu(10 + dbu / 2),
             name="o1",
             dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, dbu / 2, 0),
             layer=c.kcl.find_layer(LAYER.WG),
         )
         p2 = kf.kcell.Port(
-            dwidth=10 + dbu / 2,
+            width=c.kcl.to_dbu(10 + dbu / 2),
             name="o2",
             dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, 20 + dbu, 0),
             layer=c.kcl.find_layer(LAYER.WG),
@@ -163,7 +163,7 @@ def test_ports_set_center(LAYER: Layers) -> None:
     c = kf.KCell()
     p = c.create_port(
         name="o1",
-        dwidth=1,
+        width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
         layer=c.kcl.find_layer(LAYER.WG),
     )
@@ -189,7 +189,7 @@ def test_polar_copy_complex(LAYER: Layers) -> None:
     c = kf.KCell()
     p = c.create_port(
         name="o1",
-        dwidth=1,
+        width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 30, False, 0.755, 0),
         layer=c.kcl.find_layer(LAYER.WG),
     )

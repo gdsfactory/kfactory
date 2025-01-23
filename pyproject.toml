@@ -70,6 +70,7 @@ ci = [
   "pytest_regressions",
   "pytest-xdist",
   "pytest-randomly",
+  "pytest-cov",
   "types-cachetools",
   "types-requests",
   "kfactory[full]",
@@ -105,8 +106,7 @@ testpaths = ["src", "tests"]
 addopts = '--tb=short'
 norecursedirs = ["extra/*.py"]
 
-[tool.coverage.run]
-omit = "**/test_*.py"
+
 
 [tool.coverage.html]
 directory = "_build/coverage_html_report"

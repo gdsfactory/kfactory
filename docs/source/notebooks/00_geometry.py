@@ -162,7 +162,7 @@ def straight(length=10, width=1, layer=(1, 0)):
     wg.add_port(
         kf.Port(
             name="o1",
-            dwidth=width,
+            width=wg.kcl.to_dbu(width),
             dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, box.left, box.center().y),
             layer=_layer,
         )

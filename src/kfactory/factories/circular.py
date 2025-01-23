@@ -151,7 +151,7 @@ def bend_circular_factory(
         )
         c.create_port(
             dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
-            dwidth=width,
+            width=c.kcl.to_dbu(width),
             layer=c.kcl.find_layer(layer),
         )
         c.auto_rename_ports()
