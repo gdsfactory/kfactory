@@ -27,8 +27,8 @@ def unnamed_cell(name: str = "a") -> kf.KCell:
 
 
 def test_unnamed_cell() -> None:
-    c1 = unnamed_cell("test")
-    c2 = unnamed_cell("test")
+    c1 = unnamed_cell("test_unnamed_cell")
+    c2 = unnamed_cell("test_unnamed_cell")
     assert c1 is c2
 
 
