@@ -203,6 +203,19 @@ class KCellConstructor(Protocol[KC]):
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Ports | None = None,
+        info: dict[str, Any] | None = None,
+        settings: dict[str, Any] | None = None,
+    ) -> KC: ...
+    def __call__(
+        self,
+        *,
+        base_kcell: TKCell | None = None,
+        name: str | None = None,
+        kcl: KCLayout | None = None,
+        kdb_cell: kdb.Cell | None = None,
+        ports: Iterable[ProtoPort[Any]] | None = None,
+        info: dict[str, Any] | None = None,
+        settings: dict[str, Any] | None = None,
     ) -> KC: ...
 
 
@@ -823,27 +836,11 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
         return self.root[enclosure.name]
 
 
-class ProtoPorts(ABC, Generic[TUnit]):
+class ProtoPorts(BaseModel, ABC, Generic[TUnit]):
     kcl: KCLayout
     _locked: bool
     _bases: list[BasePort]
 
-    @overload
-    def __init__(self, *, kcl: KCLayout) -> None: ...
-    @overload
-    def __init__(
-        self,
-        *,
-        kcl: KCLayout,
-        ports: Iterable[ProtoPort[Any]] | None = None,
-    ) -> None: ...
-    @overload
-    def __init__(
-        self,
-        *,
-        kcl: KCLayout,
-        bases: list[BasePort] | None = None,
-    ) -> None: ...
     def __init__(
         self,
         *,
@@ -851,13 +848,13 @@ class ProtoPorts(ABC, Generic[TUnit]):
         ports: Iterable[ProtoPort[Any]] | None = None,
         bases: list[BasePort] | None = None,
     ) -> None:
+        BaseModel.__init__(self, kcl=kcl)
         if bases is not None:
             self._bases = bases
         elif ports is not None:
             self._bases = [p.base for p in ports]
         else:
             self._bases = []
-        self.kcl = kcl
         self._locked = False
 
     def __len__(self) -> int:
@@ -946,7 +943,32 @@ class Ports(ProtoPorts[int]):
             [get_all_named][kfactory.kcell.Ports.get_all_named]
     """
 
-    yaml_tag = "!Ports"
+    yaml_tag: ClassVar[str] = "!Ports"
+
+    @overload
+    def __init__(self, *, kcl: KCLayout) -> None: ...
+    @overload
+    def __init__(
+        self,
+        *,
+        kcl: KCLayout,
+        ports: Iterable[ProtoPort[Any]] | None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        *,
+        kcl: KCLayout,
+        bases: list[BasePort] | None = None,
+    ) -> None: ...
+    def __init__(
+        self,
+        *,
+        kcl: KCLayout,
+        ports: Iterable[ProtoPort[Any]] | None = None,
+        bases: list[BasePort] | None = None,
+    ) -> None:
+        return super().__init__(kcl=kcl, ports=ports, bases=bases)
 
     def __iter__(self) -> Iterator[Port]:
         """Iterator, that allows for loops etc to directly access the object."""
@@ -1264,6 +1286,31 @@ class DPorts(ProtoPorts[float]):
             This provides a way to dynamically calculate the ports.
     """
 
+    @overload
+    def __init__(self, *, kcl: KCLayout) -> None: ...
+    @overload
+    def __init__(
+        self,
+        *,
+        kcl: KCLayout,
+        ports: Iterable[ProtoPort[Any]] | None = None,
+    ) -> None: ...
+    @overload
+    def __init__(
+        self,
+        *,
+        kcl: KCLayout,
+        bases: list[BasePort] | None = None,
+    ) -> None: ...
+    def __init__(
+        self,
+        *,
+        kcl: KCLayout,
+        ports: Iterable[ProtoPort[Any]] | None = None,
+        bases: list[BasePort] | None = None,
+    ) -> None:
+        return super().__init__(kcl=kcl, ports=ports, bases=bases)
+
     def __iter__(self) -> Iterator[DPort]:
         """Iterator, that allows for loops etc to directly access the object."""
         yield from (DPort(base=b) for b in self._bases)
@@ -1545,16 +1592,13 @@ class DPorts(ProtoPorts[float]):
         return capture.get()
 
 
-class HasCellPorts(Protocol[TUnit]):  # type:ignore[misc]
-    @overload
-    def cell_ports(self: HasCellPorts[int]) -> Ports: ...
-    @overload
-    def cell_ports(self: HasCellPorts[float]) -> DPorts: ...
+class HasCellPorts(ABC, Generic[TUnit]):
     @property
-    def cell_ports(self) -> Ports | DPorts: ...
+    @abstractmethod
+    def cell_ports(self) -> ProtoPorts[TUnit]: ...
 
 
-class ProtoInstancePorts(HasCellPorts[TUnit]):
+class ProtoInstancePorts(BaseModel, HasCellPorts[TUnit], ABC):
     """Ports of an Instance.
 
     These act as virtual ports as the centers needs to change if the
@@ -1579,7 +1623,7 @@ class ProtoInstancePorts(HasCellPorts[TUnit]):
 
     def __contains__(self, port: str | DPort | Port) -> bool:
         """Check whether a port is in this port collection."""
-        if isinstance(port, Port):
+        if isinstance(port, ProtoPort):
             return port in (p for p in self.instance.ports)
         else:
             for _port in self.instance.ports:
@@ -1828,7 +1872,7 @@ class InstancePorts(ProtoInstancePorts[int]):
         Args:
             instance: The related instance
         """
-        self.instance = instance
+        BaseModel.__init__(self, instance=instance)
 
     @property
     def cell_ports(self) -> Ports:
@@ -1844,7 +1888,7 @@ class DInstancePorts(ProtoInstancePorts[float]):
         Args:
             instance: The related instance
         """
-        self.instance = instance
+        BaseModel.__init__(self, instance=instance)
 
     @property
     def cell_ports(self) -> DPorts:
@@ -2280,7 +2324,10 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             f"{self.name}: ports {port_names}, {len(self._base_kcell.insts)} instances"
         )
 
-    def delete(self) -> None: ...
+    def delete(self) -> None:
+        """Delete the cell."""
+        ci = self.cell_index()
+        self.kcl.delete_cell(ci)
 
     @overload
     def create_port(
@@ -4010,11 +4057,6 @@ class KCell(ProtoTKCell[int]):
             settings=settings,
         )
 
-    def delete(self) -> None:
-        """Delete the cell."""
-        ci = self.cell_index()
-        self.kcl.delete_cell(ci)
-
     @property
     def ports(self) -> Ports:
         """Ports associated with the cell."""
@@ -4308,8 +4350,8 @@ class KCell(ProtoTKCell[int]):
 def create_port_error(
     p1: Port | DPort,
     p2: Port | DPort,
-    c1: TKCell[Any],
-    c2: TKCell[Any],
+    c1: ProtoTKCell[Any],
+    c2: ProtoTKCell[Any],
     db: rdb.ReportDatabase,
     db_cell: rdb.RdbCell,
     cat: rdb.RdbCategory,
@@ -4545,6 +4587,14 @@ class ProtoCells(Mapping[int, KC], ABC):
 
     @abstractmethod
     def __getitem__(self, key: int | str) -> KC: ...
+
+    def __delitem__(self, key: int | str) -> None:
+        """Delete a cell by key (name or index)."""
+        if isinstance(key, int):
+            del self._kcl.tkcells[key]
+        else:
+            cell_index = self._kcl[key].cell_index()
+            del self._kcl.tkcells[cell_index]
 
     @abstractmethod
     def _generate_dict(self) -> dict[int, KC]: ...
@@ -6901,11 +6951,11 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):  # noqa: E999,D101
                     "route_cplx instead"
                 )
             op = other.ports[other_port_name]
-        elif isinstance(other, Port):
+        elif isinstance(other, ProtoPort):
             op = other
         else:
             raise ValueError("other_instance must be of type Instance or Port")
-        if isinstance(port, Port):
+        if isinstance(port, ProtoPort):
             p = port.copy(self.trans.inverted())
         else:
             p = self.cell.ports[port]
@@ -8337,11 +8387,9 @@ class DPort(ProtoPort[float]):
         self.mirror = value
 
 
-class ProtoInstance(ABC, Generic[TUnit]):
+class ProtoInstance(BaseModel, ABC, Generic[TUnit]):
     _instance: kdb.Instance
     kcl: KCLayout
-
-    def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None: ...
 
     @property
     def size_info(self) -> SizeInfo[TUnit]: ...
@@ -8369,7 +8417,10 @@ class ProtoInstance(ABC, Generic[TUnit]):
 
     def __getattr__(self, name: str) -> Any:
         """If we don't have an attribute, get it from the instance."""
-        return getattr(self._instance, name)
+        try:
+            return super().__getattr__(name)  # type: ignore
+        except Exception:
+            return getattr(self._instance, name)
 
     @property
     def name(self) -> str:
@@ -8386,7 +8437,7 @@ class ProtoInstance(ABC, Generic[TUnit]):
         self.set_property(PROPID.NAME, value)
 
     @property
-    def parent_cell(self) -> TKCell[TUnit]: ...
+    def parent_cell(self) -> ProtoTKCell[TUnit]: ...
 
     @property
     def purpose(self) -> str | None:
@@ -8404,16 +8455,17 @@ class ProtoInstance(ABC, Generic[TUnit]):
 
     @cell_index.setter
     def cell_index(self, value: int) -> None:
-        self._instance_.cell_index = value
+        self._instance.cell_index = value
 
     @property
-    def cell(self) -> KCell:
+    @abstractmethod
+    def cell(self) -> ProtoTKCell[TUnit]:
         """Parent KCell  of the Instance."""
-        return self.kcl[self.cell_index]
+        ...
 
     @cell.setter
-    def cell(self, value: KCell) -> None:
-        self.cell_index = value.cell_index()
+    @abstractmethod
+    def cell(self, value: ProtoTKCell[TUnit]) -> None: ...
 
     @property
     def a(self) -> kdb.Vector:
@@ -8757,6 +8809,9 @@ class ProtoInstance(ABC, Generic[TUnit]):
             self.transform(t)
         return self
 
+    def transform(self, trans: kdb.DCplxTrans | kdb.DTrans | kdb.Trans) -> None:
+        self._instance.transform(trans)
+
     @overload
     def dmove(self, destination: tuple[float, float], /) -> Self: ...
 
@@ -8929,11 +8984,14 @@ class ProtoInstance(ABC, Generic[TUnit]):
             del pc.insts[self]
 
     @overload
+    @abstractmethod
     def movex(self, destination: TUnit, /) -> Self: ...
 
     @overload
+    @abstractmethod
     def movex(self, origin: TUnit, destination: TUnit) -> Self: ...
 
+    @abstractmethod
     def movex(self, origin: TUnit, destination: TUnit | None = None) -> Self:
         """Move the instance in x-direction in dbu.
 
@@ -8944,11 +9002,14 @@ class ProtoInstance(ABC, Generic[TUnit]):
         ...
 
     @overload
+    @abstractmethod
     def movey(self, destination: TUnit, /) -> Self: ...
 
     @overload
+    @abstractmethod
     def movey(self, origin: TUnit, destination: TUnit) -> Self: ...
 
+    @abstractmethod
     def movey(self, origin: TUnit, destination: TUnit | None = None) -> Self:
         """Move the instance in y-direction in dbu.
 
@@ -8959,13 +9020,16 @@ class ProtoInstance(ABC, Generic[TUnit]):
         ...
 
     @overload
+    @abstractmethod
     def move(self, destination: tuple[TUnit, TUnit], /) -> Self: ...
 
     @overload
+    @abstractmethod
     def move(
         self, origin: tuple[TUnit, TUnit], destination: tuple[TUnit, TUnit]
     ) -> Self: ...
 
+    @abstractmethod
     def move(
         self,
         origin: tuple[TUnit, TUnit],
@@ -8979,100 +9043,120 @@ class ProtoInstance(ABC, Generic[TUnit]):
         """
         ...
 
+    @abstractmethod
     def rotate(
         self, angle: TUnit, center: kdb.Point | kdb.DPoint | None = None
     ) -> Self:
         """Rotate instance in increments of 90°."""
         ...
 
+    @abstractmethod
     def mirror(self, p1: tuple[TUnit, TUnit], p2: tuple[TUnit, TUnit]) -> Self:
         """Mirror the instance at a line."""
         ...
 
+    @abstractmethod
     def mirror_x(self, x: TUnit) -> Self:
         """Mirror the instance at an y-axis at position x."""
         ...
 
+    @abstractmethod
     def mirror_y(self, y: TUnit) -> Self:
         """Mirror the instance at an x-axis at position y."""
         ...
 
     @property
+    @abstractmethod
     def xmin(self) -> TUnit:
         """Returns the x-coordinate of the left edge of the bounding box."""
         ...
 
     @xmin.setter
+    @abstractmethod
     def xmin(self, __val: TUnit) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
         ...
 
     @property
+    @abstractmethod
     def ymin(self) -> TUnit:
         """Returns the x-coordinate of the left edge of the bounding box."""
         ...
 
     @ymin.setter
+    @abstractmethod
     def ymin(self, __val: TUnit) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
         ...
 
     @property
+    @abstractmethod
     def xmax(self) -> TUnit:
         """Returns the x-coordinate of the left edge of the bounding box."""
         ...
 
     @xmax.setter
+    @abstractmethod
     def xmax(self, __val: TUnit) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
         ...
 
     @property
+    @abstractmethod
     def ymax(self) -> TUnit:
         """Returns the x-coordinate of the left edge of the bounding box."""
         ...
 
     @ymax.setter
+    @abstractmethod
     def ymax(self, __val: TUnit) -> None:
         """Moves the instance so that the bbox's left x-coordinate."""
         ...
 
     @property
+    @abstractmethod
     def ysize(self) -> TUnit:
         """Returns the height of the bounding box."""
         ...
 
     @property
+    @abstractmethod
     def xsize(self) -> TUnit:
         """Returns the width of the bounding box."""
         ...
 
     @property
+    @abstractmethod
     def x(self) -> TUnit:
         """Returns the x-coordinate center of the bounding box."""
         ...
 
     @x.setter
+    @abstractmethod
     def x(self, __val: TUnit) -> None:
         """Moves the instance so that the bbox's center x-coordinate."""
         ...
 
     @property
+    @abstractmethod
     def y(self) -> TUnit:
         """Returns the x-coordinate center of the bounding box."""
         ...
 
     @y.setter
+    @abstractmethod
     def y(self, __val: TUnit) -> None:
         """Moves the instance so that the bbox's center x-coordinate."""
         ...
 
     @property
+    @abstractmethod
     def center(self) -> tuple[TUnit, TUnit]:
         """Returns the coordinate center of the bounding box."""
         ...
 
     @center.setter
+    @abstractmethod
     def center(self, val: tuple[TUnit, TUnit] | kdb.Vector | kdb.DVector) -> None:
         """Moves the instance so that the bbox's center coordinate."""
         ...
@@ -9090,14 +9174,13 @@ class Instance(ProtoInstance[int]):
         d: Helper that allows retrieval of instance information in um
     """
 
-    yaml_tag = "!Instance"
+    yaml_tag: ClassVar[str] = "!Instance"
     ports: InstancePorts
 
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
+        BaseModel.__init__(self, kcl=kcl, ports=InstancePorts(self))
         self._instance = instance
-        self.kcl = kcl
-        self.ports = InstancePorts(self)
 
     @property
     def size_info(self) -> SizeInfo[int]:
@@ -9123,10 +9206,6 @@ class Instance(ProtoInstance[int]):
         """
         return self.ports[key]
 
-    def __getattr__(self, name: str) -> Any:
-        """If we don't have an attribute, get it from the instance."""
-        return getattr(self._instance, name)
-
     @property
     def parent_cell(self) -> KCell:
         """Gets the cell this instance is contained in."""
@@ -9139,6 +9218,15 @@ class Instance(ProtoInstance[int]):
             self._instance.parent_cell = cell.kdb_cell
         else:
             self._instance.parent_cell = cell
+
+    @property
+    def cell(self) -> KCell:
+        """Parent KCell  of the Instance."""
+        return self.kcl.kcells[self.cell_index]
+
+    @cell.setter
+    def cell(self, value: ProtoTKCell[TUnit]) -> None:
+        self.cell_index = value.cell_index()
 
     @classmethod
     def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
@@ -9359,14 +9447,13 @@ class DInstance(ProtoInstance[float]):
         d: Helper that allows retrieval of instance information in um
     """
 
-    yaml_tag = "!Instance"
+    yaml_tag: ClassVar[str] = "!Instance"
     ports: DInstancePorts
 
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
+        BaseModel.__init__(self, kcl=kcl, ports=DInstancePorts(self))
         self._instance = instance
-        self.kcl = kcl
-        self.ports = DInstancePorts(self)
 
     @property
     def size_info(self) -> SizeInfo[float]:
@@ -9378,16 +9465,25 @@ class DInstance(ProtoInstance[float]):
         """Gets the cell this instance is contained in."""
         return self.kcl.dkcells[self._instance.parent_cell.cell_index()]
 
+    @property
+    def cell(self) -> DKCell:
+        """Parent KCell  of the Instance."""
+        return self.kcl.dkcells[self.cell_index]
+
+    @cell.setter
+    def cell(self, value: ProtoTKCell[TUnit]) -> None:
+        self.cell_index = value.cell_index()
+
     @parent_cell.setter
     def parent_cell(self, cell: KCell | DKCell | kdb.Cell) -> None:
         if isinstance(cell, KCell | DKCell):
             self.parent_cell.insts._insts.remove(
-                Instance(kcl=self.kcl, instance=self._instancd)
+                Instance(kcl=self.kcl, instance=self._instance)
             )
             self._instance.parent_cell = cell.kdb_cell
         else:
             self.parent_cell.insts._insts.remove(
-                Instance(kcl=self.kcl, instance=self._instancd)
+                Instance(kcl=self.kcl, instance=self._instance)
             )
             self._instance.parent_cell = cell
 
@@ -9409,10 +9505,6 @@ class DInstance(ProtoInstance[float]):
         (5th index in the array).
         """
         return self.ports[key]
-
-    def __getattr__(self, name: str) -> Any:
-        """If we don't have an attribute, get it from the instance."""
-        return getattr(self._instance, name)
 
     @overload
     def movex(self, destination: float, /) -> Self: ...
