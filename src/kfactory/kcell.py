@@ -2661,7 +2661,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         save_options: kdb.SaveLayoutOptions = save_layout_options(),
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
-        autoformat_from_file: bool = True,
+        autoformat_from_file_extension: bool = True,
     ) -> None:
         """Write a KCell to a GDS.
 
@@ -2698,7 +2698,10 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             kc = self.kcl[kci]
             kc.insert_vinsts()
 
-        self._base_kcell.kdb_cell.write(str(filename), save_options)
+        filename = str(filename)
+        if autoformat_from_file_extension:
+            save_options.set_format_from_filename(filename)
+        self._base_kcell.kdb_cell.write(filename, save_options)
 
     def read(
         self,
