@@ -2543,7 +2543,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             vinst.insert_into_flat(self)
         self._base_kcell.vinsts = []
         self._base_kcell.kdb_cell.flatten(False)
-        self._base_kcell.insts = Instances()
+        self._base_kcell.insts = []
 
         if merge:
             for layer in self.kcl.layer_indexes():
@@ -5510,8 +5510,8 @@ class KCLayout(
                             if port.layer in cell.kcl.netlist_layer_mapping:
                                 if port.base.trans:
                                     edge = kdb.Edge(
-                                        kdb.Point(0, int(-port.width // 2)),
-                                        kdb.Point(0, int(port.width // 2)),
+                                        kdb.Point(0, (-port.width // 2)),
+                                        kdb.Point(0, (port.width // 2)),
                                     )
                                     cell.shapes(
                                         cell.kcl.netlist_layer_mapping[port.layer]
@@ -5521,9 +5521,10 @@ class KCLayout(
                                             cell.kcl.netlist_layer_mapping[port.layer]
                                         ).insert(kdb.Text(port.name, port.trans))
                                 else:
+                                    dwidth = self.to_um(port.width)
                                     dedge = kdb.DEdge(
-                                        kdb.DPoint(0, -port.width / 2),
-                                        kdb.DPoint(0, port.width / 2),
+                                        kdb.DPoint(0, -dwidth / 2),
+                                        kdb.DPoint(0, dwidth / 2),
                                     )
                                     cell.shapes(
                                         cell.kcl.netlist_layer_mapping[port.layer]
@@ -8351,8 +8352,8 @@ class ProtoInstance(BaseModel, ABC, Generic[TUnit]):
     def instance(self) -> kdb.Instance:
         return self._instance
 
-    @abstractmethod
     @property
+    @abstractmethod
     def size_info(self) -> SizeInfo[TUnit]: ...
 
     @property
@@ -9654,14 +9655,14 @@ class ProtoInstances(Generic[TUnit], ABC):
         self,
         kcl: KCLayout,
         insts: Iterable[ProtoInstance[Any]] | None = None,
-        bases: Iterable[kdb.Instance] | None = None,
+        bases: list[kdb.Instance] | None = None,
     ) -> None:
         """Constructor."""
         self._kcl = kcl
         if insts is not None:
             self._insts = [inst.instance for inst in insts]
         if bases is not None:
-            self._insts = list(bases)
+            self._insts = bases
 
     def __len__(self) -> int:
         """Length of the instances."""
