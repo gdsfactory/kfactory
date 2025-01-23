@@ -46,19 +46,19 @@ triangle.shapes(triangle.layer(1, 0)).insert(triangle_poly)
 triangle
 
 # %%
-box = kf.KCell("Box")
+box = kf.KCell(name="Box")
 box_rect = kf.kdb.DBox(0, 0, 20, 5)
 box.shapes(box.kcl.find_layer(1, 0)).insert(box_rect)
 box
 
 # %%
-c = kf.KCell("fix_accute_angle")
+c = kf.KCell(name="fix_accute_angle")
 c << triangle
 c << box
 c
 
 # %%
-c = kf.KCell("tiled_test")
+c = kf.KCell(name="tiled_test")
 
 
 d1 = datetime.now()

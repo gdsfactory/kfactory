@@ -85,14 +85,14 @@ def route(
 
     start_port = Port(
         name="o1",
-        dwidth=width,
+        width=c.kcl.to_dbu(width),
         layer=layer,
         dcplx_trans=kdb.DCplxTrans(1, start_angle, False, backbone[0].to_v()),
         kcl=c.kcl,
     )
     end_port = Port(
         name="o1",
-        dwidth=width,
+        width=c.kcl.to_dbu(width),
         layer=layer,
         dcplx_trans=kdb.DCplxTrans(1, end_angle, False, backbone[-1].to_v()),
         kcl=c.kcl,

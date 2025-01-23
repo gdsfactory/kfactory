@@ -162,7 +162,7 @@ def straight(length=10, width=1, layer=(1, 0)):
     wg.add_port(
         kf.Port(
             name="o1",
-            dwidth=width,
+            width=wg.kcl.to_dbu(width),
             dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, box.left, box.center().y),
             layer=_layer,
         )
@@ -404,7 +404,7 @@ c
 
 
 # %%
-c = kf.KCell("mirror_example3")
+c = kf.KCell(name="mirror_example3")
 bend = kf.cells.euler.bend_euler(width=0.5, radius=1, layer=LAYER.WG)
 b1 = c << bend
 b2 = c << bend
@@ -412,7 +412,7 @@ b2.drotate(90)
 c
 
 # %%
-c = kf.KCell("mirror_example4")
+c = kf.KCell(name="mirror_example4")
 bend = kf.cells.euler.bend_euler(width=0.5, radius=1, layer=LAYER.WG)
 b1 = c << bend
 b2 = c << bend

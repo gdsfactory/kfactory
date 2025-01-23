@@ -27,8 +27,8 @@ def unnamed_cell(name: str = "a") -> kf.KCell:
 
 
 def test_unnamed_cell() -> None:
-    c1 = unnamed_cell("test")
-    c2 = unnamed_cell("test")
+    c1 = unnamed_cell("test_unnamed_cell")
+    c2 = unnamed_cell("test_unnamed_cell")
     assert c1 is c2
 
 
@@ -54,7 +54,7 @@ def test_no_snap(LAYER: Layers) -> None:
     c = kf.KCell()
 
     c.create_port(
-        dwidth=1,
+        width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
         layer=c.kcl.find_layer(LAYER.WG),
     )
@@ -84,7 +84,7 @@ def test_ports_cell(LAYER: Layers) -> None:
     c = kf.KCell()
     c.create_port(
         name="o1",
-        dwidth=1,
+        width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
         layer=c.kcl.find_layer(LAYER.WG),
     )
@@ -96,7 +96,7 @@ def test_ports_instance(LAYER: Layers) -> None:
     c = kf.KCell()
     c.create_port(
         name="o1",
-        dwidth=1,
+        width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
         layer=c.kcl.find_layer(LAYER.WG),
     )

@@ -321,7 +321,7 @@ def bend_euler_factory(
         else:
             c.create_port(
                 dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
-                dwidth=width,
+                width=c.kcl.to_dbu(width),
                 layer=li,
             )
         _info: dict[str, MetaData] = {}

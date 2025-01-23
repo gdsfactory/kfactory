@@ -34,7 +34,7 @@ def cells_to_yaml(
     Returns:
         yaml dump
     """
-    _cells = [cells] if isinstance(cells, ProtoTKCell | TKCell) else cells
+    _cells = [cells] if isinstance(cells, ProtoTKCell | TKCell) else list(cells)
     _cells.sort(key=lambda c: c.hierarchy_levels())
     yaml = YAML()
     yaml.register_class(KCell)
@@ -118,7 +118,7 @@ def exploded_yaml(
 
     class ModKCell(KCell):
         def __init__(self, name: str | None = None, library: KCLayout = library):
-            KCell.__init__(self, name, library)
+            KCell.__init__(self, name=name, kcl=library)
 
         @classmethod
         def from_yaml(cls, constructor, node):  # type: ignore[no-untyped-def]

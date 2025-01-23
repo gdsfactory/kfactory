@@ -47,7 +47,7 @@ kfactory is available on [pypi](https://pypi.org/project/kfactory/)
 pip install kfactory
 ```
 
-At the moment kfactory works only on python 3.10 and above
+At the moment kfactory works only on python 3.11 and above
 
 ### Development Installation
 

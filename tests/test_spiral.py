@@ -93,7 +93,7 @@ def dbend_circular(
     ]
     kf.enclosure.extrude_path(c, layer, backbone, width, enclosure, 0, angle)
     dp1 = kf.kcell.Port(
-        dwidth=width,
+        width=c.kcl.to_dbu(width),
         layer=c.kcl.find_layer(layer),
         name="W0",
         dcplx_trans=kf.kdb.DCplxTrans.R180,
@@ -106,14 +106,14 @@ def dbend_circular(
             dp2 = kf.Port(
                 name="N0",
                 layer=c.kcl.find_layer(layer),
-                dwidth=width,
+                width=c.kcl.to_dbu(width),
                 dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, radius, radius),
             )
         case 180:
             dp2 = kf.Port(
                 name="N0",
                 layer=c.kcl.find_layer(layer),
-                dwidth=width,
+                width=c.kcl.to_dbu(width),
                 dcplx_trans=kf.kdb.DTrans(1, 0, False, 0, 2 * radius),
             )
         case _:
