@@ -61,5 +61,3 @@ def test_all_angle_bundle(LAYER: Layers) -> None:
         straight_factory=sf,
         bend_factory=bf,
     )
-
-test_all_angle_bundle(Layers())
