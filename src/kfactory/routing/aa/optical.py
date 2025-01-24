@@ -1,7 +1,7 @@
 """Optical routing allows the creation of photonic (or any route using bends)."""
 
 from collections.abc import Sequence
-from typing import Protocol
+from typing import Any, Protocol
 
 import numpy as np
 
@@ -150,17 +150,17 @@ def route(
             s = c.create_vinst(straight_factory(width=width, length=_l))
             length_straights += _l
             s.connect(straight_ports[0], _port)
-            _port = s.ports[straight_ports[1]]
+            _port = Port(base=s.ports[straight_ports[1]].base)
             insts.append(s)
         if _a != 0:
             # after the straight place the bend
             b = c.create_vinst(bend)
             if _a < 0:
                 b.connect(bend_ports[1], _port)
-                _port = b.ports[bend_ports[0]]
+                _port = Port(base=b.ports[bend_ports[0]].base)
             else:
                 b.connect(bend_ports[0], _port)
-                _port = b.ports[bend_ports[1]]
+                _port = Port(base=b.ports[bend_ports[1]].base)
             insts.append(b)
         start_offset = effective_radius
         old_pt = pt
@@ -179,7 +179,7 @@ def route(
         s = c.create_vinst(straight_factory(width=width, length=_l))
         length_straights += _l
         s.connect(straight_ports[0], _port)
-        _port = s.ports[straight_ports[1]]
+        _port = Port(base=s.ports[straight_ports[1]].base)
         insts.append(s)
 
     return OpticalAllAngleRoute(
@@ -321,8 +321,8 @@ def route_bundle(
 
 
 def _get_connection_between_ports(
-    port_start: Port,
-    port_end: Port,
+    port_start: ProtoPort[Any],
+    port_end: ProtoPort[Any],
     bend_factory: BendFactory,
     backbone: list[kdb.DPoint],
     bend_ports: tuple[str, str] = ("o1", "o2"),
@@ -342,10 +342,13 @@ def _get_connection_between_ports(
         backbone: The backbone to be modified.
         bend_ports: Names of the ports created by the bend_factory.
     """
+    port_start_ = Port(base=port_start.base)
+    port_end_ = Port(base=port_end.base)
+
     _p0 = kdb.DPoint(0, 0)
     _p1 = kdb.DPoint(1, 0)
-    trans_start = port_start.dcplx_trans
-    trans_end = port_end.dcplx_trans
+    trans_start = port_start_.dcplx_trans
+    trans_end = port_end_.dcplx_trans
     edge_start = kdb.DEdge(trans_start * _p0, trans_start * _p1)
     edge_end = kdb.DEdge(trans_end * _p0, trans_end * _p1)
     xing = edge_start.cut_point(edge_end)
@@ -360,16 +363,16 @@ def _get_connection_between_ports(
             result = optimize_route(
                 bend_factory=bend_factory,
                 bend_ports=bend_ports,
-                start_port=port_start,
-                end_port=port_end,
+                start_port=port_start_,
+                end_port=port_end_,
                 angle=np.arctan2(v.y, v.x),
                 _p0=_p0,
                 _p1=_p1,
             )
             if result is None:
                 raise RuntimeError(
-                    f"Cannot find an automatic route from {port_start}"
-                    f" to bundle port {port_end}"
+                    f"Cannot find an automatic route from {port_start_}"
+                    f" to bundle port {port_end_}"
                 )
             p_start_port, p_start_bundle = result
             backbone[:1] = [
@@ -382,16 +385,16 @@ def _get_connection_between_ports(
         result = optimize_route(
             bend_factory=bend_factory,
             bend_ports=bend_ports,
-            start_port=port_start,
-            end_port=port_end,
+            start_port=port_start_,
+            end_port=port_end_,
             angle=np.arctan2(v.y, v.x),
             _p0=_p0,
             _p1=_p1,
         )
         if result is None:
             raise RuntimeError(
-                f"Cannot find an automatic route from {port_start}"
-                f" to bundle port {port_end}"
+                f"Cannot find an automatic route from {port_start_}"
+                f" to bundle port {port_end_}"
             )
         p_start_port, p_start_bundle = result
         backbone[:1] = [
@@ -531,7 +534,7 @@ def _get_partial_route2(
 
 
 def _get_effective_radius(
-    port1: Port, port2: Port, _p1: kdb.DPoint, _p2: kdb.DPoint
+    port1: ProtoPort[Any], port2: ProtoPort[Any], _p1: kdb.DPoint, _p2: kdb.DPoint
 ) -> float:
     e1 = kdb.DEdge(port1.dcplx_trans * _p1, port1.dcplx_trans * _p2)
     e2 = kdb.DEdge(port2.dcplx_trans * _p1, port2.dcplx_trans * _p2)

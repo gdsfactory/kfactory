@@ -916,7 +916,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> list[ProtoPort[TUnit]]: ...
+    ) -> Sequence[ProtoPort[TUnit]]: ...
 
     def __contains__(self, port: str | ProtoPort[Any] | BasePort) -> bool:
         """Check whether a port is in this port collection."""
@@ -1211,7 +1211,7 @@ class Ports(ProtoPorts[int]):
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> list[Port]:
+    ) -> Sequence[Port]:
         """Filter ports by name.
 
         Args:
@@ -1540,7 +1540,7 @@ class DPorts(ProtoPorts[float]):
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> list[DPort]:
+    ) -> Sequence[DPort]:
         """Filter ports by name.
 
         Args:
@@ -1631,7 +1631,7 @@ class ProtoInstancePorts(HasCellPorts[TUnit], ABC):
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> list[ProtoPort[TUnit]]:
+    ) -> Sequence[ProtoPort[TUnit]]:
         """Filter ports by name.
 
         Args:
@@ -1654,20 +1654,9 @@ class ProtoInstancePorts(HasCellPorts[TUnit], ABC):
             ports = filter_orientation(ports, orientation)
         return list(ports)
 
-    @overload
-    def __getitem__(
-        self: ProtoInstancePorts[int],
-        key: int | str | None | tuple[int | str | None, int, int],
-    ) -> Port: ...
-    @overload
-    def __getitem__(
-        self: ProtoInstancePorts[float],
-        key: int | str | None | tuple[int | str | None, int, int],
-    ) -> DPort: ...
-
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]
-    ) -> Port | DPort:
+    ) -> ProtoPort[TUnit]:
         """Returns port from instance.
 
         The key can either be an integer, in which case the nth port is
@@ -1815,7 +1804,7 @@ class ProtoInstancePorts(HasCellPorts[TUnit], ABC):
                     kcl=self.instance.kcl,
                     bases=[
                         b.transformed(trans=self.instance.trans)
-                        for b in self.cell_ports._bases
+                        for b in self.cell_ports.bases
                     ],
                 )
             else:
@@ -1823,7 +1812,7 @@ class ProtoInstancePorts(HasCellPorts[TUnit], ABC):
                     kcl=self.instance.kcl,
                     bases=[
                         b.transformed(trans=self.instance.dcplx_trans)
-                        for b in self.cell_ports._bases
+                        for b in self.cell_ports.bases
                     ],
                 )
         else:
@@ -1837,7 +1826,7 @@ class ProtoInstancePorts(HasCellPorts[TUnit], ABC):
                         )
                         for i_a in range(self.instance.na)
                         for i_b in range(self.instance.nb)
-                        for b in self.cell_ports._bases
+                        for b in self.cell_ports.bases
                     ],
                 )
             else:
@@ -1852,7 +1841,7 @@ class ProtoInstancePorts(HasCellPorts[TUnit], ABC):
                         )
                         for i_a in range(self.instance.na)
                         for i_b in range(self.instance.nb)
-                        for b in self.cell_ports._bases
+                        for b in self.cell_ports.bases
                     ],
                 )
 
@@ -1872,6 +1861,24 @@ class InstancePorts(ProtoInstancePorts[int]):
     def cell_ports(self) -> Ports:
         return self.instance.cell.ports
 
+    def filter(
+        self,
+        angle: int | None = None,
+        orientation: float | None = None,
+        layer: LayerEnum | int | None = None,
+        port_type: str | None = None,
+        regex: str | None = None,
+    ) -> Sequence[Port]:
+        return [
+            Port(base=p.base)
+            for p in super().filter(angle, orientation, layer, port_type, regex)
+        ]
+
+    def __getitem__(
+        self, key: int | str | None | tuple[int | str | None, int, int]
+    ) -> Port:
+        return Port(base=super().__getitem__(key).base)
+
 
 class DInstancePorts(ProtoInstancePorts[float]):
     instance: DInstance
@@ -1887,6 +1894,24 @@ class DInstancePorts(ProtoInstancePorts[float]):
     @property
     def cell_ports(self) -> DPorts:
         return self.instance.cell.ports
+
+    def filter(
+        self,
+        angle: float | None = None,
+        orientation: float | None = None,
+        layer: LayerEnum | int | None = None,
+        port_type: str | None = None,
+        regex: str | None = None,
+    ) -> Sequence[DPort]:
+        return [
+            DPort(base=p.base)
+            for p in super().filter(angle, orientation, layer, port_type, regex)
+        ]
+
+    def __getitem__(
+        self, key: int | str | None | tuple[int | str | None, int, int]
+    ) -> DPort:
+        return DPort(base=super().__getitem__(key).base)
 
 
 class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
