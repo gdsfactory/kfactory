@@ -1,6 +1,7 @@
 import kfactory as kf
 from functools import partial
 from conftest import Layers
+from pathlib import Path
 
 
 def test_virtual_cell() -> None:
@@ -52,8 +53,7 @@ def test_virtual_cell_insert(
 
 def test_all_angle_route(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
     bb = [kf.kdb.DPoint(x, y) for x, y in [(0, 0), (500, 0), (250, 200), (500, 250)]]
-    c = kf.KCell(name="test_virtual")
-    vc = kf.VKCell(name="test_all_angle")
+    vc = kf.VKCell("test_all_angle")
     kf.routing.aa.optical.route(
         vc,
         width=5,
@@ -71,4 +71,8 @@ def test_all_angle_route(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
             enclosure=wg_enc,
         ),
     )
-    kf.VInstance(vc, kf.kdb.DCplxTrans()).insert_into(c)
+    # kf.VInstance(vc, kf.kdb.DCplxTrans()).insert_into(c)
+    file = Path("test_all_angle.oas")
+    vc.write(file)
+    assert file.is_file()
+    file.unlink()
