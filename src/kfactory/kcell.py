@@ -160,6 +160,15 @@ SerializableShape: TypeAlias = (
     | kdb.DVector
     | kdb.LayerInfo
 )
+DBase: TypeAlias = (
+    float | kdb.DPoint | kdb.DVector | kdb.DBox | kdb.DPolygon | kdb.DPath | kdb.DText
+)
+
+
+IBase: TypeAlias = (
+    int | kdb.Point | kdb.Vector | kdb.Box | kdb.Polygon | kdb.Path | kdb.Text
+)
+
 IShapeLike: TypeAlias = (
     kdb.Polygon
     | kdb.Edge
@@ -4937,26 +4946,29 @@ class KCLayout(
     @overload
     def to_um(self, other: kdb.Text) -> kdb.DText: ...
 
+    @overload
+    def to_um(self, other: Sequence[int]) -> list[float]: ...
+
+    @overload
+    def to_um(self, other: None) -> None: ...
+
+    @overload
+    def to_um(self, other: T) -> T: ...
+
     def to_um(
-        self,
-        other: int
-        | kdb.Point
-        | kdb.Vector
-        | kdb.Box
-        | kdb.Polygon
-        | kdb.Path
-        | kdb.Text,
-    ) -> (
-        float
-        | kdb.DPoint
-        | kdb.DVector
-        | kdb.DBox
-        | kdb.DPolygon
-        | kdb.DPath
-        | kdb.DText
-    ):
+        self, other: IBase | Sequence[float] | None | T
+    ) -> DBase | list[float] | None | T:
         """Convert Shapes or values in dbu to DShapes or floats in um."""
-        return kdb.CplxTrans(self.layout.dbu) * other
+        if other is None:
+            return None
+        if isinstance(other, IBase):
+            return kdb.CplxTrans(self.layout.dbu) * other
+        if isinstance(other, str):
+            return cast(T, other)
+        if isinstance(other, Sequence):
+            other_ = cast(Sequence[Any], other)
+            return [self.to_um(o) for o in other_]
+        return other
 
     @overload
     def to_dbu(self, other: float) -> int: ...
@@ -4979,18 +4991,29 @@ class KCLayout(
     @overload
     def to_dbu(self, other: kdb.DText) -> kdb.Text: ...
 
+    @overload
+    def to_dbu(self, other: Sequence[float]) -> list[int]: ...
+
+    @overload
+    def to_dbu(self, other: None) -> None: ...
+
+    @overload
+    def to_dbu(self, other: T) -> T: ...
+
     def to_dbu(
-        self,
-        other: float
-        | kdb.DPoint
-        | kdb.DVector
-        | kdb.DBox
-        | kdb.DPolygon
-        | kdb.DPath
-        | kdb.DText,
-    ) -> int | kdb.Point | kdb.Vector | kdb.Box | kdb.Polygon | kdb.Path | kdb.Text:
+        self, other: DBase | Sequence[float] | None | T
+    ) -> IBase | list[int] | None | T:
         """Convert Shapes or values in dbu to DShapes or floats in um."""
-        return kdb.CplxTrans(self.layout.dbu).inverted() * other
+        if other is None:
+            return None
+        if isinstance(other, DBase):
+            return kdb.CplxTrans(self.layout.dbu).inverted() * other
+        if isinstance(other, str):
+            return cast(T, other)
+        if isinstance(other, Sequence):
+            other_ = cast(Sequence[Any], other)
+            return [self.to_dbu(o) for o in other_]
+        return other
 
     @overload
     def cell(

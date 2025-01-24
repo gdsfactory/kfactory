@@ -1,6 +1,7 @@
-import kfactory as kf
 import pytest
 from conftest import Layers
+
+import kfactory as kf
 
 
 @kf.cell

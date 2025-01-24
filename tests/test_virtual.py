@@ -1,7 +1,9 @@
-import kfactory as kf
 from functools import partial
-from conftest import Layers
 from pathlib import Path
+
+from conftest import Layers
+
+import kfactory as kf
 
 
 def test_virtual_cell() -> None:

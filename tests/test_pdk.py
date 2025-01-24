@@ -1,11 +1,11 @@
-import kfactory as kf
+from functools import partial
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 import pytest
-
-from functools import partial
-from tempfile import NamedTemporaryFile
-from pathlib import Path
 from conftest import Layers
+
+import kfactory as kf
 
 
 def test_pdk(LAYER: Layers) -> None:

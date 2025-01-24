@@ -116,7 +116,7 @@ skip = "pyproject.toml, uv.lock"
 [tool.ruff]
 fix = true
 line-length = 88
-exclude = ["tests", "docs", "src/kfactory/widgets/interactive.py"]
+exclude = [ "docs", "src/kfactory/widgets/interactive.py"]
 indent-width = 4
 target-version = "py311"
 
@@ -128,6 +128,7 @@ select = [
   "D",   # pydocstyle
   "I",
 ]
+per-file-ignores = {"tests/*.py" = ["D"]}
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.

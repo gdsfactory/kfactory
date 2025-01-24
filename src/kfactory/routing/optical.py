@@ -55,12 +55,7 @@ def route_bundle_um(
     end_angles: um | Sequence[um] | None = None,
     purpose: str | None = "routing",
 ) -> list[ManhattanRoute]:
-    if start_straights is None:
-        start_straights_dbu: dbu | Sequence[dbu] | None = None
-    elif isinstance(start_straights, Sequence):
-        start_straights_dbu = [c.kcl.to_dbu(s) for s in start_straights]
-    else:
-        start_straights_dbu = c.kcl.to_dbu(start_straights)
+    start_straights_dbu = c.kcl.to_dbu(start_straights)
 
     if end_straights is None:
         end_straights_dbu: dbu | Sequence[dbu] | None = None

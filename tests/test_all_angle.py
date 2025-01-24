@@ -1,8 +1,10 @@
 from functools import partial
-import kfactory as kf
-import numpy as np
 from random import randint
+
+import numpy as np
 from conftest import Layers
+
+import kfactory as kf
 
 
 def test_all_angle_bundle(LAYER: Layers) -> None:
