@@ -38,6 +38,7 @@ from .kcell import (
     save_layout_options,
     show,
     DKCell,
+    ProtoPort,
 )
 from . import (
     cells,
@@ -64,6 +65,7 @@ __all__ = [
     "DKCell",
     "DPorts",
     "Info",
+    "ProtoPort",
     "Instance",
     "InstanceGroup",
     "KCLayout",

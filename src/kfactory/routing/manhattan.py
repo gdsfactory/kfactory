@@ -11,7 +11,7 @@ from typing import Any, Literal, ParamSpec, Protocol, TypedDict
 from .. import kdb
 from ..conf import logger
 from ..enclosure import clean_points
-from ..kcell import KCell, KCLayout, Port, ProtoPort, TUnit
+from ..kcell import KCLayout, Port, ProtoPort, ProtoTKCell, TUnit
 from .steps import Step, Steps, Straight
 
 __all__ = [
@@ -615,10 +615,10 @@ class PathMatchDict(TypedDict):
 
 def path_length_match_manhattan_route(
     *,
-    c: KCell,
+    c: ProtoTKCell[int],
     routers: Sequence[ManhattanRouter],
-    start_ports: Sequence[Port],
-    end_ports: Sequence[Port],
+    start_ports: Sequence[ProtoPort[int]],
+    end_ports: Sequence[ProtoPort[int]],
     bend90_radius: int | None = None,
     separation: int | None = None,
     path_length: int | None = None,

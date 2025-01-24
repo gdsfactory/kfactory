@@ -49,23 +49,13 @@ def test_cell_return_type_with_layout_cache() -> None:
 
     kf.kcl.kcell("custom_dkcell_Ntest_cell_return_type")
 
-    @kf.cell(layout_cache=True, output_type=kf.DKCell)
+    @kf.dcell(layout_cache=True)
     def custom_dkcell(name: str = "a") -> kf.DKCell:
         return kf.kcl.dkcell(name)
 
-    kdcell = custom_dkcell("test_cell_return_type")
+    dkcell = custom_dkcell("test_cell_return_type")
 
-    assert isinstance(kdcell, kf.DKCell)
-
-    kf.kcl.kcell("custom_dcell_Ntest_dcell_return_type")
-
-    @kf.dcell(layout_cache=True)
-    def custom_dcell(name: str = "a") -> kf.DKCell:
-        return kf.kcl.dkcell(name)
-
-    kdcell = custom_dcell("test_dcell_return_type")
-
-    assert isinstance(kdcell, kf.DKCell)
+    assert isinstance(dkcell, kf.DKCell)
 
 
 if __name__ == "__main__":

@@ -91,7 +91,7 @@ def test_connection_flags(
     if apply_mirror:
         i2.mirror()
 
-    port: str | kf.Port = "o2" if from_name else i2.ports["o2"]
+    port = "o2" if from_name else i2.ports["o2"]
 
     i2.connect(port, i1, "o2", use_mirror=use_mirror)
 

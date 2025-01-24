@@ -7,18 +7,12 @@ from typing import TYPE_CHECKING, Any, Protocol, TypedDict, overload
 
 from typing_extensions import Unpack
 
+from kfactory.kcell import TKCell
+
 if TYPE_CHECKING:
     from cachetools import Cache
 
-    from .kcell import (
-        CHECK_INSTANCES,
-        KC,
-        KCell,
-        KCellFunc,
-        KCellParams,
-        KCLayout,
-        MetaData,
-    )
+    from .kcell import CHECK_INSTANCES, KC, KCellFunc, KCellParams, KCLayout, MetaData
 
 
 class ModuleCellKWargs(TypedDict, total=False):
@@ -36,7 +30,7 @@ class ModuleCellKWargs(TypedDict, total=False):
     overwrite_existing: bool | None
     layout_cache: bool | None
     info: dict[str, MetaData] | None
-    post_process: Iterable[Callable[[KCell], None]]
+    post_process: Iterable[Callable[[TKCell], None]]
     debug_names: bool | None
 
 
@@ -56,7 +50,7 @@ class KCellDecoratorKWargs(TypedDict, total=False):
     overwrite_existing: bool | None
     layout_cache: bool | None
     info: dict[str, MetaData] | None
-    post_process: Iterable[Callable[[KC], None]]
+    post_process: Iterable[Callable[[TKCell], None]]
     debug_names: bool | None
 
 
@@ -67,6 +61,7 @@ class KCellDecorator(Protocol):
         self, **kwargs: Unpack[KCellDecoratorKWargs]
     ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]:
         """__call__ implementation."""
+        ...
 
 
 class ModuleDecorator(Protocol):
@@ -76,6 +71,7 @@ class ModuleDecorator(Protocol):
         self, /, **kwargs: Unpack[ModuleCellKWargs]
     ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]:
         """__call__ implementation."""
+        ...
 
 
 def _module_cell(
