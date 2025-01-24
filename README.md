@@ -1,11 +1,7 @@
 # KFactory 1.0.0
 
-Kfactory is a [gdsfactory](https://github.com/gdsfactory/gdsfactory)-like tool. It is built with [KLayout](https://klayout.de) as a backend instead of gdstk, but aims to offer the similar features.
-
-> [!CAUTION]
-> KFactory is still experimental
-> Expect API changes without notice (even though we try to keep it to a minimum!). The core should be fairly stable with the exception of the all-angle router.
-> It is likely to change in future releases
+Kfactory is the backend for [gdsfactory](https://github.com/gdsfactory/gdsfactory). It is built upon [KLayout](https://klayout.de).
+It offers basic operations like gdsfactory, so it can be used on its own as as layout tool as well.
 
 It is suggest to pin the version of KFactory in `requirements.txt` or `pyproject.toml` with `kfactory==1.0.0` for example.
 
