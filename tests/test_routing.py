@@ -445,7 +445,7 @@ def test_custom_router(
 ) -> None:
     c = kf.kcl.kcell("CustomRouter")
     bend90 = kf.cells.circular.bend_circular(width=1, radius=10, layer=LAYER.WG)
-    b90r = kf.routing.generic.get_radius(bend90.ports)
+    b90r = kf.routing.generic.get_radius(list(bend90.ports))
     sf = partial(kf.cells.straight.straight_dbu, layer=LAYER.WG)
 
     start_ports = [

@@ -289,4 +289,4 @@ class Steps(RootModel[list[Any]]):
                 step = self.root[-1]
                 step.execute(router, False)
         except Exception as e:
-            raise ValueError(f"Error in step {i}, {step=}. Error: {str(e)}") from e
+            raise ValueError(f"Error in step {i}, {step=}. Error: {e!s}") from e

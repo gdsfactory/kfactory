@@ -15,11 +15,11 @@ from ..kcell import KCell, KCLayout, Port, ProtoPort, TUnit
 from .steps import Step, Steps, Straight
 
 __all__ = [
-    "route_manhattan",
-    "route_manhattan_180",
-    "clean_points",
     "ManhattanRoutePathFunction",
     "ManhattanRoutePathFunction180",
+    "clean_points",
+    "route_manhattan",
+    "route_manhattan_180",
     "route_smart",
 ]
 
@@ -616,9 +616,9 @@ class PathMatchDict(TypedDict):
 def path_length_match_manhattan_route(
     *,
     c: KCell,
-    routers: list[ManhattanRouter],
-    start_ports: list[Port],
-    end_ports: list[Port],
+    routers: Sequence[ManhattanRouter],
+    start_ports: Sequence[Port],
+    end_ports: Sequence[Port],
     bend90_radius: int | None = None,
     separation: int | None = None,
     path_length: int | None = None,

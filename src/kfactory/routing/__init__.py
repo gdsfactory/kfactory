@@ -15,4 +15,4 @@ class Route(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     length_um: float
 
 
-__all__ = ["electrical", "manhattan", "optical", "aa", "generic"]
+__all__ = ["aa", "electrical", "generic", "manhattan", "optical"]

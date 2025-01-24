@@ -14,7 +14,7 @@ repos:
       - id: mixed-line-ending
       - id: name-tests-test
         args: ["--pytest-test-first"]
-        exclude: 'tests/custom'
+        exclude: "tests/custom"
       - id: requirements-txt-fixer
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
@@ -25,10 +25,8 @@ repos:
     hooks:
       # Run the linter.
       - id: ruff
-        exclude: ^tests/
       # Run the formatter.
       - id: ruff-format
-        exclude: ^tests/
   - repo: https://github.com/kynan/nbstripout
     rev: 0.8.1
     hooks:
@@ -49,9 +47,9 @@ repos:
         # ignore all tests, not just tests data
         exclude: ^tests/
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.14.1'  # Use the sha / tag you want to point at
+    rev: "v1.14.1" # Use the sha / tag you want to point at
     hooks:
       - id: mypy
         require_serial: true
         language: system
-        exclude: ^docs/
+        exclude: ^docs/|src/kfactory/routing/

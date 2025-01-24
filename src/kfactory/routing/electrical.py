@@ -13,13 +13,13 @@ from .manhattan import ManhattanRoutePathFunction, route_manhattan, route_smart
 from .steps import Step, Straight
 
 __all__ = [
-    "route_elec",
+    "place_dual_rails",
+    "place_single_wire",
     "route_L",
     "route_bundle",
     "route_bundle_dual_rails",
     "route_dual_rails",
-    "place_single_wire",
-    "place_dual_rails",
+    "route_elec",
 ]
 
 

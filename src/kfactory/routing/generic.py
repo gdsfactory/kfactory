@@ -20,8 +20,8 @@ from .manhattan import (
 from .steps import Step, Straight
 
 __all__ = [
-    "PlacerFunction",
     "ManhattanRoute",
+    "PlacerFunction",
     "check_collisions",
     "get_radius",
     "route_bundle",

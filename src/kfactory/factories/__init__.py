@@ -22,11 +22,11 @@ class StraightFactory(Protocol):
 
 
 __all__ = [
+    "StraightFactory",
     "bezier",
     "circular",
     "euler",
     "straight",
     "taper",
     "virtual",
-    "StraightFactory",
 ]

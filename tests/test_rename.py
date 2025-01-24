@@ -167,15 +167,15 @@ def test_rename_setter(LAYER: Layers) -> None:
         match i % 4:
             case 1:
                 assert _port.name is not None and _port.name[1:] == str(i % 4 + 1), (
-                    f"Expected {str(i % 4 + 1)=}, original name {dir_list[i]}"
+                    f"Expected {i % 4 + 1=!s}, original name {dir_list[i]}"
                 )
             case 2:
                 assert _port.name is not None and _port.name[1:] == str(i % 4 - 1), (
-                    f"Expected {str(i % 4 - 1)=}, original name {dir_list[i]}"
+                    f"Expected {i % 4 - 1=!s}, original name {dir_list[i]}"
                 )
             case _:
                 assert _port.name is not None and _port.name[1:] == str(i % 4), (
-                    f"Expected {str(i % 4)=}, original name {dir_list[i]}"
+                    f"Expected {i % 4=!s}, original name {dir_list[i]}"
                 )
 
     kcl.rename_function = kf.port.rename_clockwise_multi

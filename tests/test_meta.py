@@ -3,6 +3,7 @@
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
+import pytest
 from conftest import Layers
 
 import kfactory as kf
@@ -186,3 +187,7 @@ def test_info_dump() -> None:
         wg_read.get_meta_data()
         assert wg_read.info == c.info
         assert wg_read.info["d"] == {"a": 1, "b": 2}
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "-s"])

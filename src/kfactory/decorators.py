@@ -101,7 +101,7 @@ def _module_cell(
 class Decorators:
     """Various decorators intended to be attached to a KCLayout."""
 
-    def __init__(self, kcl: KCLayout):
+    def __init__(self, kcl: KCLayout) -> None:
         """Just set the standard `@cell` decorator."""
         self._cell = kcl.cell
 

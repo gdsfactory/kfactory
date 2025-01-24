@@ -21,6 +21,6 @@ from .violations import fix_spacing_minkowski_tiled, fix_spacing_tiled
 
 __all__ = [
     "fill_tiled",
-    "fix_spacing_tiled",
     "fix_spacing_minkowski_tiled",
+    "fix_spacing_tiled",
 ]

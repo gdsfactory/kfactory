@@ -28,9 +28,9 @@ from .steps import Step, Straight
 __all__ = [
     "get_radius",
     "place90",
-    "route_loopback",
     "route",
     "route_bundle",
+    "route_loopback",
     "vec_angle",
 ]
 
@@ -468,7 +468,7 @@ def place90(
 
         if (pt.distance(old_pt) < b90r) and not allow_small_routes:
             raise ValueError(
-                f"distance between points {str(old_pt)} and {str(pt)} is too small to"
+                f"distance between points {old_pt!s} and {pt!s} is too small to"
                 f" safely place bends {pt.to_s()=}, {old_pt.to_s()=},"
                 f" {pt.distance(old_pt)=} < {b90r=}"
             )
@@ -478,8 +478,8 @@ def place90(
             and not allow_small_routes
         ):
             raise ValueError(
-                f"distance between points {str(old_pt)} and {str(pt)} is too small to"
-                f" safely place bends {str(pt)=}, {str(old_pt)=},"
+                f"distance between points {old_pt!s} and {pt!s} is too small to"
+                f" safely place bends {pt=!s}, {old_pt=!s},"
                 f" {pt.distance(old_pt)=} < {2 * b90r=}"
             )
 
@@ -728,11 +728,8 @@ def route_loopback(
 
     pz = kdb.Point(0, 0)
 
-    if (
-        start_straight > 0
-        and bend180_radius is None
-        or start_straight <= 0
-        and bend180_radius is None
+    if (start_straight > 0 and bend180_radius is None) or (
+        start_straight <= 0 and bend180_radius is None
     ):
         pts_start = [
             t1 * pz,
@@ -742,11 +739,8 @@ def route_loopback(
         pts_start = [t1 * pz, t1 * kdb.Trans(0, False, start_straight, 0) * pz]
     else:
         pts_start = [t1 * pz]
-    if (
-        end_straight > 0
-        and bend180_radius is None
-        or end_straight <= 0
-        and bend180_radius is None
+    if (end_straight > 0 and bend180_radius is None) or (
+        end_straight <= 0 and bend180_radius is None
     ):
         pts_end = [
             t2 * kdb.Trans(0, False, end_straight + bend90_radius, 0) * pz,

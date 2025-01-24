@@ -277,3 +277,7 @@ def test_pdk_cell_infosettings(straight: kf.KCell, LAYER: Layers) -> None:
     _wg.cell
     assert _wg.cell.settings == straight.settings
     assert _wg.cell.info == straight.info
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "-s"])
