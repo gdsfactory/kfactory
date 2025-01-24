@@ -10,9 +10,9 @@ from .. import KCell, kdb
 from ..conf import config, logger
 
 __all__ = [
-    "fix_spacing_tiled",
-    "fix_spacing_sizing_tiled",
     "fix_spacing_minkowski_tiled",
+    "fix_spacing_sizing_tiled",
+    "fix_spacing_tiled",
 ]
 
 

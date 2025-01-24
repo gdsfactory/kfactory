@@ -1,6 +1,7 @@
-import kfactory as kf
 import klayout.db as kdb
 from conftest import Layers
+
+import kfactory as kf
 
 
 def test_instance_xsize(LAYER: Layers) -> None:

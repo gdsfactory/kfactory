@@ -1,6 +1,7 @@
-import kfactory as kf
 from collections.abc import Callable
 from random import randint, uniform
+
+import kfactory as kf
 
 
 def test_grid_dbu_1d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:

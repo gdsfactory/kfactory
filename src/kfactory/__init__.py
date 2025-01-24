@@ -28,7 +28,9 @@ from .kcell import (
     Ports,
     VKCell,
     VInstance,
+    DPorts,
     cell,
+    dcell,
     dpolygon_from_array,
     kcl,
     polygon_from_array,
@@ -36,6 +38,7 @@ from .kcell import (
     save_layout_options,
     show,
     DKCell,
+    ProtoPort,
 )
 from . import (
     cells,
@@ -57,11 +60,12 @@ from aenum import constant  # type: ignore[import-untyped,unused-ignore]
 
 
 __all__ = [
-    "Constants",
-    "factories",
     "BaseKCell",
+    "Constants",
     "DKCell",
+    "DPorts",
     "Info",
+    "ProtoPort",
     "Instance",
     "InstanceGroup",
     "KCLayout",
@@ -80,14 +84,17 @@ __all__ = [
     "cells",
     "config",
     "constant",
+    "dcell",
     "dpolygon_from_array",
     "enclosure",
+    "factories",
     "flexgrid",
     "flexgrid_dbu",
     "grid",
     "grid_dbu",
     "kcl",
     "kdb",
+    "kf_types",
     "lay",
     "logger",
     "packing",
@@ -100,6 +107,5 @@ __all__ = [
     "save_layout_options",
     "show",
     "technology",
-    "kf_types",
     "utils",
 ]

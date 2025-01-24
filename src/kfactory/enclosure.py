@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Any, NotRequired, TypeGuard, overload
 
 import numpy as np
 from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_serializer
+from ruamel.yaml.representer import BaseRepresenter, MappingNode
 from typing_extensions import TypedDict
 
 from . import kdb
@@ -26,12 +27,12 @@ if TYPE_CHECKING:
     from .kcell import KCell, KCLayout, Port
 
 __all__ = [
-    "LayerEnclosure",
     "KCellEnclosure",
+    "LayerEnclosure",
     "extrude_path",
-    "extrude_path_points",
     "extrude_path_dynamic",
     "extrude_path_dynamic_points",
+    "extrude_path_points",
 ]
 
 
@@ -537,7 +538,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         ]
         | None = None,
         kcl: KCLayout | None = None,
-    ):
+    ) -> None:
         """Constructor of new enclosure.
 
         Args:
@@ -1025,7 +1026,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         self.apply_custom(c, bbox_reg)
 
     @classmethod
-    def to_yaml(cls, representer, node):  # type: ignore[no-untyped-def]
+    def to_yaml(cls, representer: BaseRepresenter, node: Any) -> MappingNode:
         """Get YAML representation of the enclosure."""
         d = dict(node.enclosures)
         return representer.represent_mapping(cls.yaml_tag, d)
@@ -1344,7 +1345,7 @@ class KCellEnclosure(BaseModel):
 
     enclosures: LayerEnclosureCollection
 
-    def __init__(self, enclosures: Iterable[LayerEnclosure]):
+    def __init__(self, enclosures: Iterable[LayerEnclosure]) -> None:
         """Init. Allow usage of an iterable object instead of a collection."""
         super().__init__(
             enclosures=LayerEnclosureCollection(enclosures=list(enclosures))

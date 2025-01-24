@@ -1,8 +1,10 @@
-import pytest
-import kfactory as kf
 from collections.abc import Callable
 from tempfile import NamedTemporaryFile
+
+import pytest
 from conftest import Layers
+
+import kfactory as kf
 
 
 def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
@@ -257,12 +259,16 @@ def test_check_ports(LAYER: Layers) -> None:
         return c
 
     regex = kf.config.logfilter.regex
-    kf.config.logfilter.regex = "^An error has been caught in function 'wrapper_autocell', process 'MainProcess'"
+    kf.config.logfilter.regex = (
+        "^An error has been caught in function "
+        "'wrapper_autocell', process 'MainProcess'"
+    )
 
     with pytest.raises(ValueError):
         test_multi_ports()
 
     kf.config.logfilter.regex = regex
+
 
 def test_ports_in_cells() -> None:
     kcell = kf.KCell(name="test")

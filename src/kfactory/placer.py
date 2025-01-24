@@ -5,7 +5,7 @@ import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, Self, TypeVar
 
 from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
@@ -14,7 +14,7 @@ from .enclosure import LayerEnclosure
 from .kcell import KCell, KCLayout, Port, Ports, ProtoTKCell, TKCell
 from .kcell import kcl as stdkcl
 
-__all__ = ["cells_to_yaml", "cells_from_yaml"]
+__all__ = ["cells_from_yaml", "cells_to_yaml"]
 
 PathLike = TypeVar("PathLike", str, Path, None)
 
@@ -58,11 +58,16 @@ def register_classes(
     """Register a new KCell class compatible with ruamel yaml."""
 
     class ModKCell(KCell):
-        def __init__(self, name: str | None = None, library: KCLayout = kcl):
+        def __init__(self, name: str | None = None, library: KCLayout = kcl) -> None:
             KCell.__init__(self, name=name, kcl=library)
 
         @classmethod
-        def from_yaml(cls, constructor, node):  # type: ignore[no-untyped-def]
+        def from_yaml(
+            cls,
+            constructor: SafeConstructor,
+            node: Any,
+            verbose: bool = False,
+        ) -> Self:
             return super().from_yaml(constructor, node, verbose=verbose)
 
     yaml.register_class(ModKCell)
@@ -117,12 +122,16 @@ def exploded_yaml(
     yaml = YAML(pure=True)
 
     class ModKCell(KCell):
-        def __init__(self, name: str | None = None, library: KCLayout = library):
+        def __init__(
+            self, name: str | None = None, library: KCLayout = library
+        ) -> None:
             KCell.__init__(self, name=name, kcl=library)
 
         @classmethod
-        def from_yaml(cls, constructor, node):  # type: ignore[no-untyped-def]
-            super().from_yaml(constructor, node, verbose=verbose)
+        def from_yaml(
+            cls, constructor: SafeConstructor, node: Any, verbose: bool = False
+        ) -> Self:
+            return super().from_yaml(constructor, node, verbose=verbose)
 
     return yaml.dump(yaml.load(inp), sys.stdout)
 
@@ -141,7 +150,7 @@ def include_from_loader(
         yaml_tag: str = "!include"
 
         @classmethod
-        def from_yaml(cls, constructor, node):  # type: ignore[no-untyped-def]
+        def from_yaml(cls, constructor: SafeConstructor, node: Any) -> None:
             d = SafeConstructor.construct_mapping(constructor, node)
 
             f = Path(d["filename"])

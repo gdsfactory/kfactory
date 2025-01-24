@@ -1,10 +1,12 @@
 """Tests for read and write of metadata."""
 
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 
-import kfactory as kf
-from pathlib import Path
+import pytest
 from conftest import Layers
+
+import kfactory as kf
 
 
 @kf.cell  # type: ignore[misc, unused-ignore]
@@ -119,7 +121,11 @@ def test_metainfo_read_cell(straight: kf.KCell) -> None:
 
         kcl = kf.KCLayout("TEST_META", infos=Layers)
         kcell = kcl.kcell(straight.name)
-        kf.config.logfilter.regex = r"KLayout <=0.28.15 \(last update 2024-02-02\) cannot read LayoutMetaInfo on 'Cell.read'. kfactory uses these extensively for ports, info, and settings. Therefore proceed at your own risk."
+        kf.config.logfilter.regex = (
+            r"KLayout <=0.28.15 \(last update 2024-02-02\) "
+            "cannot read LayoutMetaInfo on 'Cell.read'. kfactory uses these extensively"
+            " for ports, info, and settings. Therefore proceed at your own risk."
+        )
         for cs in straight.kcl.cross_sections.cross_sections.values():
             kcl.get_cross_section(cs)
         kcell.read(t.name)
@@ -181,3 +187,7 @@ def test_info_dump() -> None:
         wg_read.get_meta_data()
         assert wg_read.info == c.info
         assert wg_read.info["d"] == {"a": 1, "b": 2}
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "-s"])

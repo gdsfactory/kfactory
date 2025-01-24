@@ -19,7 +19,7 @@ from ..conf import logger
 from ..kcell import KCell, kcls, save_layout_options
 from ..kcell import show as kfshow
 
-__all__ = ["show", "build"]
+__all__ = ["build", "show"]
 
 
 def show(
@@ -59,7 +59,7 @@ def build(
         ),
     ],
     func_kwargs: Annotated[
-        Optional[list[str]],  # noqa: UP007
+        Optional[list[str]],
         typer.Argument(
             help="Arguments used for --type function."
             " Doesn't have any influence for other types"
@@ -108,7 +108,7 @@ def build(
 ) -> None:
     """Run a python modules __main__ or a function if specified."""
     path = sys.path.copy()
-    sys.path.append(os.getcwd())
+    sys.path.append(str(Path.cwd()))
     saveopts = save_layout_options()
     saveopts.gds2_max_cellname_length = max_cellname_length
     saveopts.gds2_max_vertex_count = max_vertex_count

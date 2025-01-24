@@ -1,5 +1,6 @@
-import kfactory as kf
 from conftest import Layers
+
+import kfactory as kf
 
 
 def test_tiled_fill_space(fill_cell: kf.KCell, LAYER: Layers) -> None:

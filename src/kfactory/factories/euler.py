@@ -22,10 +22,10 @@ from ..enclosure import LayerEnclosure, extrude_path
 from ..kcell import Info, KCell, KCLayout, MetaData
 
 __all__ = [
-    "euler_bend_points",
-    "euler_sbend_points",
     "bend_euler_factory",
     "bend_s_euler_factory",
+    "euler_bend_points",
+    "euler_sbend_points",
 ]
 
 
@@ -137,9 +137,7 @@ def euler_bend_points(
     step = Ltot / max(int(th * resolution), 1)
 
     # Generate points
-    points = []
-    for i in range(int(round(Ltot / step)) + 1):
-        points.append(_xy(i * step))
+    points = [_xy(i * step) for i in range(int(round(Ltot / step)) + 1)]
 
     return points
 

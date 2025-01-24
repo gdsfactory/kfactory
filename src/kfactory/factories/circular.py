@@ -64,7 +64,7 @@ def bend_circular_factory(
         snap_ports: Whether to snap ports to grid.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
-    if callable(additional_info) and additional_info is not None:
+    if callable(additional_info):
         _additional_info_func: Callable[
             ...,
             dict[str, MetaData],

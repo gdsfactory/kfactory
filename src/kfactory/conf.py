@@ -269,7 +269,7 @@ class Settings(BaseSettings):
         )
         return v
 
-    def __init__(self, **data: Any):
+    def __init__(self, **data: Any) -> None:
         """Set log filter and run pydantic."""
         super().__init__(**data)
 
@@ -277,4 +277,4 @@ class Settings(BaseSettings):
 config = Settings()
 
 
-__all__ = ["config", "LogLevel"]
+__all__ = ["LogLevel", "config"]

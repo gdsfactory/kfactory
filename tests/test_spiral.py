@@ -1,7 +1,9 @@
-import kfactory as kf
-import numpy as np
 import warnings
+
+import numpy as np
 from conftest import Layers
+
+import kfactory as kf
 
 
 def bend_circular(
@@ -129,7 +131,7 @@ def test_spiral(LAYER: Layers) -> None:
     r1 = 1000
     r2 = 0
 
-    p = kf.Port(
+    p: kf.ProtoPort[int] = kf.Port(
         name="start",
         trans=kf.kdb.Trans.R0,
         width=1000,
@@ -151,7 +153,7 @@ def test_dspiral(LAYER: Layers) -> None:
     r1 = 1
     r2 = 0
 
-    p = kf.Port(
+    p: kf.ProtoPort[int] = kf.Port(
         name="start",
         dcplx_trans=kf.kdb.DCplxTrans.R0,
         width=c.kcl.to_dbu(1),
