@@ -28,12 +28,14 @@ categories:
 
 # Change major/breaking to major and enhancement/minor to minor after v1.0
 version-resolver:
-  minor:
+  major:
     labels:
       - 'breaking'
-  patch:
+  minor:
     labels:
       - 'enhancement'
+  patch:
+    labels:
       - 'bug'
       - 'maintenance'
       - 'documentation'
