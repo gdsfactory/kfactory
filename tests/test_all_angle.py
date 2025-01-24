@@ -16,8 +16,8 @@ def test_all_angle_bundle(LAYER: Layers) -> None:
     # vc = kf.VKCell("test_all_angle")
     c = kf.KCell(name="test_all_angle_bundle")
 
-    start_ports: list[kf.kcell.ProtoPort[int]] = []
-    end_ports: list[kf.kcell.ProtoPort[int]] = []
+    start_ports: list[kf.kcell.Port] = []
+    end_ports: list[kf.kcell.Port] = []
     r = 50
     n = 3
     _l = 9

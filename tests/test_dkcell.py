@@ -1,3 +1,5 @@
+import pytest
+
 import kfactory as kf
 
 
@@ -38,3 +40,19 @@ def test_dkcell_ports() -> None:
     p = c.create_port(width=1, layer=1, center=(0, 0), angle=90)
     assert p in c.ports
     assert c.ports == [p]
+
+
+def test_dkcell_locked() -> None:
+    c = kf.kcl.dkcell("test_dkcell_locked")
+    assert c.locked is False
+    c._base_kcell.locked = True
+    assert c.locked is True
+    with pytest.raises(kf.kcell.LockedError):
+        c.ports = []
+
+    with pytest.raises(kf.kcell.LockedError):
+        c.create_port(width=1, layer=1, center=(0, 0), angle=90)
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])
