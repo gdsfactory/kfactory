@@ -1,7 +1,10 @@
-import kfactory as kf
-import pytest
 import re
+
+import pytest
 from conftest import Layers
+
+import kfactory as kf
+from kfactory.kcell import kcl
 
 
 @kf.cell
@@ -40,13 +43,13 @@ def wg_floating_off_grid(LAYER: Layers) -> kf.KCell:
         dbu = c.kcl.dbu
 
         p1 = kf.kcell.Port(
-            dwidth=10 + dbu / 2,
+            width=c.kcl.to_dbu(10 + dbu / 2),
             name="o1",
             dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, dbu / 2, 0),
             layer=c.kcl.find_layer(LAYER.WG),
         )
         p2 = kf.kcell.Port(
-            dwidth=10 + dbu / 2,
+            width=c.kcl.to_dbu(10 + dbu / 2),
             name="o2",
             dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, 20 + dbu, 0),
             layer=c.kcl.find_layer(LAYER.WG),
@@ -76,8 +79,8 @@ def test_settings(LAYER: Layers) -> None:
 def test_connect_cplx_port(LAYER: Layers) -> None:
     c = kf.KCell()
     wg1 = c << straight(1000, 20000, LAYER.WG)
-    port = kf.kcell.Port(
-        dwidth=1,
+    port = kf.Port(
+        width=c.kcl.to_dbu(1),
         layer=c.kcl.find_layer(LAYER.WG),
         name="cplxp1",
         dcplx_trans=kf.kdb.DCplxTrans(1, 30, False, 5, 10),
@@ -92,7 +95,11 @@ def test_connect_cplx_inst(LAYER: Layers) -> None:
     wg2 = c << straight(1000, 20000, LAYER.WG)
     wg1.transform(kf.kdb.DCplxTrans(1, 30, False, 5, 10))
     wg2.connect("o1", wg1, "o2")
-    kf.config.logfilter.regex = f"Port ({re.escape(str(wg1.ports['o1']))}|{re.escape(str(wg2.ports['o2']))}) is not an integer based port, converting to integer based"
+    kf.config.logfilter.regex = (
+        f"Port ({re.escape(str(wg1.ports['o1']))}|"
+        f"{re.escape(str(wg2.ports['o2']))}) is not an integer based port, "
+        "converting to integer based"
+    )
 
     c.add_port(wg1.ports["o1"])
     c.add_port(wg2.ports["o2"])
@@ -162,7 +169,7 @@ def test_ports_set_center(LAYER: Layers) -> None:
     c = kf.KCell()
     p = c.create_port(
         name="o1",
-        dwidth=1,
+        width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
         layer=c.kcl.find_layer(LAYER.WG),
     )
@@ -188,7 +195,7 @@ def test_polar_copy_complex(LAYER: Layers) -> None:
     c = kf.KCell()
     p = c.create_port(
         name="o1",
-        dwidth=1,
+        width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 30, False, 0.755, 0),
         layer=c.kcl.find_layer(LAYER.WG),
     )
@@ -204,5 +211,24 @@ def test_polar_copy_complex(LAYER: Layers) -> None:
 def test_dplx_port_dbu_port_conversion(LAYER: Layers) -> None:
     t1 = kf.kdb.DCplxTrans(1, 90, False, 10, 10)
     t2 = kf.kdb.Trans(1, False, 10_000, 10_000)
-    p = kf.Port(dwidth=1, dcplx_trans=t1, layer=kf.kcl.find_layer(LAYER.WG), kcl=kf.kcl)
+    p = kf.Port(
+        width=kcl.to_dbu(1),
+        dcplx_trans=t1,
+        layer=kf.kcl.find_layer(LAYER.WG),
+        kcl=kf.kcl,
+    )
     assert p.trans == t2
+
+
+def test_ports_eq() -> None:
+    kcell = kf.KCell(name="test_ports_eq")
+    dkcell = kf.DKCell.from_kcell(kcell)
+
+    port = kf.Port(name="test", layer=1, width=2, center=(0, 0), angle=90)
+
+    dkcell.ports = [port]  # type: ignore[assignment]
+    assert kcell.ports == [port]
+
+
+if __name__ == "__main__":
+    test_ports_eq()

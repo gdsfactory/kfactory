@@ -1,5 +1,6 @@
-import kfactory as kf
 from conftest import Layers
+
+import kfactory as kf
 
 
 @kf.cell
@@ -14,13 +15,13 @@ def simple_cplx_cell(layer: kf.kdb.LayerInfo) -> kf.KCell:
     li = c.kcl.find_layer(layer)
 
     p1 = kf.Port(
-        dwidth=hh * 2,
+        width=c.kcl.to_dbu(hh * 2),
         layer=li,
         name="o1",
         dcplx_trans=dct * kf.kdb.DCplxTrans.R180,
     )
     p2 = kf.Port(
-        dwidth=hh * 2,
+        width=c.kcl.to_dbu(hh * 2),
         layer=li,
         name="o2",
         dcplx_trans=dct * kf.kdb.DCplxTrans(kf.kdb.DVector(10, 0)),

@@ -1,10 +1,9 @@
+from collections.abc import Callable
 from functools import partial
 
 import pytest
 
 import kfactory as kf
-from collections.abc import Callable
-from dataclasses import dataclass
 
 # kf.config.logfilter.level = kf.conf.LogLevel.ERROR
 

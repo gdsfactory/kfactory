@@ -1,8 +1,10 @@
-import kfactory as kf
-from kfactory import port
+from collections.abc import Callable
+
 import pytest
 from conftest import Layers
-from collections.abc import Callable
+
+import kfactory as kf
+from kfactory import port
 
 port_x_coords = [-10000, 0, 0, 0, 10000]
 port_y_coords = [0, -10000, 0, 10000, 0]
@@ -41,7 +43,7 @@ def port_tests(rename_f: Callable[..., None] | None = None) -> kf.KCell:
 @pytest.mark.parametrize("func", [None, port.rename_clockwise_multi])
 def test_rename_default(func: Callable[..., None]) -> None:
     cell = port_tests(func)
-    port_list = cell.ports._ports
+    port_list = list(cell.ports)
     xl = len(port_x_coords)
 
     indexes = list(range(4 * xl))
@@ -76,7 +78,7 @@ def test_rename_default(func: Callable[..., None]) -> None:
 def test_rename_orientation() -> None:
     cell = port_tests(port.rename_by_direction)
 
-    port_list = cell.ports._ports
+    port_list = list(cell.ports)
 
     names = (
         [f"E{i}" for i in [3, 0, 2, 4, 1]]
@@ -164,17 +166,17 @@ def test_rename_setter(LAYER: Layers) -> None:
     for i, _port in enumerate(c2.ports):
         match i % 4:
             case 1:
-                assert _port.name is not None and _port.name[1:] == str(
-                    i % 4 + 1
-                ), f"Expected {str(i % 4 + 1)=}, original name {dir_list[i]}"
+                assert _port.name is not None and _port.name[1:] == str(i % 4 + 1), (
+                    f"Expected {i % 4 + 1=!s}, original name {dir_list[i]}"
+                )
             case 2:
-                assert _port.name is not None and _port.name[1:] == str(
-                    i % 4 - 1
-                ), f"Expected {str(i % 4 - 1)=}, original name {dir_list[i]}"
+                assert _port.name is not None and _port.name[1:] == str(i % 4 - 1), (
+                    f"Expected {i % 4 - 1=!s}, original name {dir_list[i]}"
+                )
             case _:
-                assert _port.name is not None and _port.name[1:] == str(
-                    i % 4
-                ), f"Expected {str(i % 4)=}, original name {dir_list[i]}"
+                assert _port.name is not None and _port.name[1:] == str(i % 4), (
+                    f"Expected {i % 4=!s}, original name {dir_list[i]}"
+                )
 
     kcl.rename_function = kf.port.rename_clockwise_multi
 

@@ -1,5 +1,6 @@
-import kfactory as kf
 from conftest import Layers
+
+import kfactory as kf
 
 
 def test_min_width_minkowski(straight: kf.KCell, LAYER: Layers) -> None:

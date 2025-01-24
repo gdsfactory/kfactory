@@ -87,17 +87,12 @@ def straight_dbu_factory(
             the KCell will be named 'straight_dbu[...]'.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
-    if callable(additional_info) and additional_info is not None:
-        _additional_info_func: Callable[
-            ...,
-            dict[str, MetaData],
-        ] = additional_info
+    if callable(additional_info):
+        _additional_info_func: Callable[..., dict[str, MetaData]] = additional_info
         _additional_info: dict[str, MetaData] = {}
     else:
 
-        def additional_info_func(
-            **kwargs: Any,
-        ) -> dict[str, MetaData]:
+        def additional_info_func(**kwargs: Any) -> dict[str, MetaData]:
             return {}
 
         _additional_info_func = additional_info_func

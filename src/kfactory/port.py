@@ -3,6 +3,8 @@
 Mainly renaming functions
 """
 
+from __future__ import annotations
+
 import re
 from collections.abc import Callable, Iterable
 from enum import IntEnum
@@ -11,7 +13,7 @@ from typing import TYPE_CHECKING, Any
 from . import kdb
 
 if TYPE_CHECKING:
-    from .kcell import KCell, LayerEnum, Port
+    from .kcell import KCell, LayerEnum, ProtoPort, TPort
 
 
 class DIRECTION(IntEnum):
@@ -24,7 +26,7 @@ class DIRECTION(IntEnum):
 
 
 def autorename(
-    c: "KCell",
+    c: KCell,
     f: Callable[..., None],
     *args: Any,
     **kwargs: Any,
@@ -37,12 +39,12 @@ def autorename(
         args: Arguments for the renaming function.
         kwargs: Keyword arguments for the renaming function.
     """
-    f(c.ports._ports, *args, **kwargs)
+    f(c.ports, *args, **kwargs)
 
 
 def rename_clockwise(
-    ports: "Iterable[Port]",
-    layer: "LayerEnum | int | None" = None,
+    ports: Iterable[ProtoPort[Any]],
+    layer: LayerEnum | int | None = None,
     port_type: str | None = None,
     regex: str | None = None,
     prefix: str = "o",
@@ -70,7 +72,7 @@ def rename_clockwise(
     """
     _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
 
-    def sort_key(port: "Port") -> tuple[int, int, int]:
+    def sort_key(port: ProtoPort[Any]) -> tuple[int, int, int]:
         match port.angle:
             case 2:
                 angle = 0
@@ -80,6 +82,8 @@ def rename_clockwise(
                 angle = 2
             case 3:
                 angle = 3
+            case _:
+                raise ValueError(f"Invalid angle: {port.angle}")
         dir_1 = 1 if angle < 2 else -1
         dir_2 = -1 if port.angle < 2 else 1
         key_1 = dir_1 * (
@@ -96,8 +100,8 @@ def rename_clockwise(
 
 
 def rename_clockwise_multi(
-    ports: "Iterable[Port]",
-    layers: "Iterable[LayerEnum | int] | None" = None,
+    ports: Iterable[ProtoPort[Any]],
+    layers: Iterable[LayerEnum | int] | None = None,
     regex: str | None = None,
     type_prefix_mapping: dict[str, str] = {"optical": "o", "electrical": "e"},
     start: int = 1,
@@ -145,8 +149,8 @@ def rename_clockwise_multi(
 
 
 def rename_by_direction(
-    ports: "Iterable[Port]",
-    layer: "LayerEnum | int | None" = None,
+    ports: Iterable[ProtoPort[Any]],
+    layer: LayerEnum | int | None = None,
     port_type: str | None = None,
     regex: str | None = None,
     dir_names: tuple[str, str, str, str] = ("E", "N", "W", "S"),
@@ -177,12 +181,12 @@ def rename_by_direction(
         dir_2 = -1 if dir < 2 else 1
         if dir % 2:
 
-            def key_sort(port: "Port") -> tuple[int, int]:
+            def key_sort(port: ProtoPort[Any]) -> tuple[int, int]:
                 return (port.trans.disp.x, dir_2 * port.trans.disp.y)
 
         else:
 
-            def key_sort(port: "Port") -> tuple[int, int]:
+            def key_sort(port: ProtoPort[Any]) -> tuple[int, int]:
                 return (port.trans.disp.y, dir_2 * port.trans.disp.x)
 
         for i, p in enumerate(sorted(filter_direction(_ports, dir), key=key_sort)):
@@ -190,11 +194,11 @@ def rename_by_direction(
 
 
 def filter_layer_pt_reg(
-    ports: "Iterable[Port]",
-    layer: "LayerEnum | int | None" = None,
+    ports: Iterable[TPort],
+    layer: LayerEnum | int | None = None,
     port_type: str | None = None,
     regex: str | None = None,
-) -> "Iterable[Port]":
+) -> Iterable[TPort]:
     """Filter ports by layer index, port type and name regex."""
     _ports = ports
     if layer is not None:
@@ -207,47 +211,47 @@ def filter_layer_pt_reg(
     return _ports
 
 
-def filter_direction(ports: "Iterable[Port]", direction: int) -> "filter[Port]":
+def filter_direction(ports: Iterable[TPort], direction: int) -> filter[TPort]:
     """Filter iterable/sequence of ports by direction :py:class:~`DIRECTION`."""
 
-    def f_func(p: "Port") -> bool:
+    def f_func(p: TPort) -> bool:
         return p.trans.angle == direction
 
     return filter(f_func, ports)
 
 
-def filter_orientation(ports: "Iterable[Port]", orientation: float) -> "filter[Port]":
+def filter_orientation(ports: Iterable[TPort], orientation: float) -> filter[TPort]:
     """Filter iterable/sequence of ports by direction :py:class:~`DIRECTION`."""
 
-    def f_func(p: "Port") -> bool:
+    def f_func(p: TPort) -> bool:
         return p.dcplx_trans.angle == orientation
 
     return filter(f_func, ports)
 
 
-def filter_port_type(ports: "Iterable[Port]", port_type: str) -> "filter[Port]":
+def filter_port_type(ports: Iterable[TPort], port_type: str) -> filter[TPort]:
     """Filter iterable/sequence of ports by port_type."""
 
-    def pt_filter(p: "Port") -> bool:
+    def pt_filter(p: TPort) -> bool:
         return p.port_type == port_type
 
     return filter(pt_filter, ports)
 
 
-def filter_layer(ports: "Iterable[Port]", layer: "int | LayerEnum") -> "filter[Port]":
+def filter_layer(ports: Iterable[TPort], layer: int | LayerEnum) -> filter[TPort]:
     """Filter iterable/sequence of ports by layer index / LayerEnum."""
 
-    def layer_filter(p: "Port") -> bool:
+    def layer_filter(p: TPort) -> bool:
         return p.layer == layer
 
     return filter(layer_filter, ports)
 
 
-def filter_regex(ports: "Iterable[Port]", regex: str) -> "filter[Port]":
+def filter_regex(ports: Iterable[TPort], regex: str) -> filter[TPort]:
     """Filter iterable/sequence of ports by port name."""
     pattern = re.compile(regex)
 
-    def regex_filter(p: "Port") -> bool:
+    def regex_filter(p: TPort) -> bool:
         if p.name is not None:
             return bool(pattern.match(p.name))
         else:

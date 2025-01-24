@@ -64,7 +64,7 @@ def bend_circular_factory(
         snap_ports: Whether to snap ports to grid.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
-    if callable(additional_info) and additional_info is not None:
+    if callable(additional_info):
         _additional_info_func: Callable[
             ...,
             dict[str, MetaData],
@@ -151,7 +151,7 @@ def bend_circular_factory(
         )
         c.create_port(
             dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
-            dwidth=width,
+            width=c.kcl.to_dbu(width),
             layer=c.kcl.find_layer(layer),
         )
         c.auto_rename_ports()

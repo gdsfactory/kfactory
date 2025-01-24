@@ -22,14 +22,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from . import kdb, rdb
 
 if TYPE_CHECKING:
-    from .kcell import KCell, KCLayout
+    from .kcell import KCLayout, ProtoKCell
 
 
 @runtime_checkable
 class ShowFunction(Protocol):
     def __call__(
         self,
-        layout: KCLayout | KCell | Path | str,
+        layout: KCLayout | ProtoKCell[Any] | Path | str,
         *,
         lyrdb: rdb.ReportDatabase | Path | str | None,
         l2n: kdb.LayoutToNetlist | Path | str | None,
@@ -269,7 +269,7 @@ class Settings(BaseSettings):
         )
         return v
 
-    def __init__(self, **data: Any):
+    def __init__(self, **data: Any) -> None:
         """Set log filter and run pydantic."""
         super().__init__(**data)
 
@@ -277,4 +277,4 @@ class Settings(BaseSettings):
 config = Settings()
 
 
-__all__ = ["config", "LogLevel"]
+__all__ = ["LogLevel", "config"]

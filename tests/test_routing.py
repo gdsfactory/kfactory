@@ -1,11 +1,11 @@
-import kfactory as kf
-import pytest
-from random import randint
+from collections.abc import Callable
 from functools import partial
+from random import randint
+
+import pytest
 from conftest import Layers
 
-from collections.abc import Callable
-from typing import Literal
+import kfactory as kf
 
 
 @pytest.mark.parametrize(
@@ -63,7 +63,7 @@ def test_route_bend90(
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
-    b90r = abs(bend90.ports._ports[0].x - bend90.ports._ports[1].x)
+    b90r = abs(bend90.ports[0].x - bend90.ports[1].x)
     if abs(x) < b90r or abs(y) < b90r:
         kf.config.logfilter.regex = "route is too small, potential collisions:"
     kf.routing.optical.route(
@@ -106,7 +106,7 @@ def test_route_bend90_invert(
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
-    b90r = abs(bend90.ports._ports[0].x - bend90.ports._ports[1].x)
+    b90r = abs(bend90.ports[0].x - bend90.ports[1].x)
     if abs(x) < b90r or abs(y) < b90r:
         kf.config.logfilter.regex = "route is too small, potential collisions:"
     kf.routing.optical.route(
@@ -141,7 +141,7 @@ def test_route_bend90_euler(
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
-    b90r = abs(bend90_euler.ports._ports[0].x - bend90_euler.ports._ports[1].x)
+    b90r = abs(bend90_euler.ports[0].x - bend90_euler.ports[1].x)
     if abs(x) < b90r or abs(y) < b90r:
         kf.config.logfilter.regex = "route is too small, potential collisions:"
     kf.routing.optical.route(
@@ -217,7 +217,7 @@ def test_route_length(
     p1 = optical_port.copy()
     p2 = optical_port.copy()
     p2.trans = kf.kdb.Trans(angle2, False, x, y)
-    b90r = abs(bend90_euler.ports._ports[0].x - bend90_euler.ports._ports[1].x)
+    b90r = abs(bend90_euler.ports[0].x - bend90_euler.ports[1].x)
     if abs(x) < b90r or abs(y) < b90r:
         kf.config.logfilter.regex = "route is too small, potential collisions:"
     route = kf.routing.optical.route(
@@ -266,7 +266,7 @@ def test_smart_routing(
 ) -> None:
     """Tests all possible smart routing configs."""
     c = kf.KCell(
-        f"test_smart_routing_{sort_ports=}_{start_bbox=}_{start_angle=}"
+        name=f"test_smart_routing_{sort_ports=}_{start_bbox=}_{start_angle=}"
         f"{m2=}_{m1=}_{z=}_{p1=}_{p2=}"
     )
     c.name = c.name.replace("=", "")
@@ -445,7 +445,7 @@ def test_custom_router(
 ) -> None:
     c = kf.kcl.kcell("CustomRouter")
     bend90 = kf.cells.circular.bend_circular(width=1, radius=10, layer=LAYER.WG)
-    b90r = kf.routing.generic.get_radius(bend90.ports)
+    b90r = kf.routing.generic.get_radius(list(bend90.ports))
     sf = partial(kf.cells.straight.straight_dbu, layer=LAYER.WG)
 
     start_ports = [
@@ -471,8 +471,8 @@ def test_custom_router(
 
     kf.routing.generic.route_bundle(
         c=c,
-        start_ports=start_ports,
-        end_ports=end_ports,
+        start_ports=[p._base for p in start_ports],
+        end_ports=[p._base for p in end_ports],
         ends=50_000,
         starts=50_000,
         routing_function=kf.routing.manhattan.route_smart,
@@ -495,7 +495,7 @@ def test_route_smart_waypoints_trans_sort(
     straight_factory_dbu: Callable[..., kf.KCell],
     LAYER: Layers,
 ) -> None:
-    c = kf.KCell("TEST_SMART_ROUTE_WAYPOINTS_TRANS_SORT")
+    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_TRANS_SORT")
     _l = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
@@ -530,7 +530,7 @@ def test_route_smart_waypoints_pts_sort(
     straight_factory_dbu: Callable[..., kf.KCell],
     LAYER: Layers,
 ) -> None:
-    c = kf.KCell("TEST_SMART_ROUTE_WAYPOINTS_PTS_SORT")
+    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_PTS_SORT")
     _l = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
@@ -565,7 +565,7 @@ def test_route_smart_waypoints_trans(
     straight_factory_dbu: Callable[..., kf.KCell],
     LAYER: Layers,
 ) -> None:
-    c = kf.KCell("TEST_SMART_ROUTE_WAYPOINTS_TRANS")
+    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_TRANS")
     _l = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
@@ -600,7 +600,7 @@ def test_route_smart_waypoints_pts(
     straight_factory_dbu: Callable[..., kf.KCell],
     LAYER: Layers,
 ) -> None:
-    c = kf.KCell("TEST_SMART_ROUTE_WAYPOINTS_PTS")
+    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_PTS")
     _l = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
@@ -633,7 +633,7 @@ def test_route_smart_waypoints_pts(
 def test_route_generic_reorient(
     bend90_small: kf.KCell, straight_factory_dbu: Callable[..., kf.KCell], LAYER: Layers
 ) -> None:
-    c = kf.KCell("test_route_generic_reorient")
+    c = kf.KCell(name="test_route_generic_reorient")
 
     start_ports = [
         c.create_port(
@@ -675,7 +675,7 @@ def test_route_generic_reorient(
 def test_placer_error(
     bend90_small: kf.KCell, straight_factory_dbu: Callable[..., kf.KCell], LAYER: Layers
 ) -> None:
-    c = kf.KCell("test_placer_error")
+    c = kf.KCell(name="test_placer_error")
 
     ps = kf.Port(name="start", width=500, layer_info=LAYER.WG, trans=kf.kdb.Trans.R0)
     pe = kf.Port(

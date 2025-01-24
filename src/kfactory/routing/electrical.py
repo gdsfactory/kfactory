@@ -13,13 +13,13 @@ from .manhattan import ManhattanRoutePathFunction, route_manhattan, route_smart
 from .steps import Step, Straight
 
 __all__ = [
-    "route_elec",
+    "place_dual_rails",
+    "place_single_wire",
     "route_L",
     "route_bundle",
     "route_bundle_dual_rails",
     "route_dual_rails",
-    "place_single_wire",
-    "place_dual_rails",
+    "route_elec",
 ]
 
 
@@ -30,7 +30,7 @@ def route_elec(
     start_straight: int | None = None,
     end_straight: int | None = None,
     route_path_function: ManhattanRoutePathFunction = route_manhattan,
-    width: dbu | None = None,
+    width: int | None = None,
     layer: int | None = None,
     minimum_straight: int | None = None,
 ) -> None:
@@ -53,8 +53,11 @@ def route_elec(
         layer: Layer to place the wire on. Calculated from the start port if `None`.
         minimum_straight: require a minimum straight
     """
+    c_ = c.to_kcell()
+    p1_ = p1.to_port()
+    p2_ = p2.to_port()
     if width is None:
-        width = p1.width
+        width = p1_.width
     if layer is None:
         layer = p1.layer
     if start_straight is None:
@@ -67,30 +70,30 @@ def route_elec(
         end_straight = min(minimum_straight // 2, end_straight)
 
         pts = route_path_function(
-            p1.copy(),
-            p2.copy(),
+            p1_.copy(),
+            p2_.copy(),
             bend90_radius=minimum_straight,
             start_steps=[Straight(dist=start_straight)],
             end_steps=[Straight(dist=end_straight)],
         )
     else:
         pts = route_path_function(
-            p1.copy(),
-            p2.copy(),
+            p1_.copy(),
+            p2_.copy(),
             bend90_radius=0,
             start_steps=[Straight(dist=start_straight)],
             end_steps=[Straight(dist=end_straight)],
         )
 
     path = kdb.Path(pts, width)
-    c.shapes(layer).insert(path.polygon())
+    c_.shapes(layer).insert(path.polygon())
 
 
 def route_L(
     c: KCell,
-    input_ports: list[Port],
+    input_ports: Sequence[Port],
     output_orientation: int = 1,
-    wire_spacing: dbu = 10000,
+    wire_spacing: int = 10000,
 ) -> list[Port]:
     """Route ports towards a bundle in an L shape.
 
@@ -99,30 +102,32 @@ def route_L(
     The function will produce a L-shape routing to connect input ports to output ports
     without any crossings.
     """
-    input_ports.sort(key=lambda p: p.y)
+    input_ports_ = [p.to_port() for p in input_ports]
+    c_ = c.to_kcell()
+    input_ports_.sort(key=lambda p: p.y)
 
-    y_max = input_ports[-1].y
-    y_min = input_ports[0].y
-    x_max = max(p.x for p in input_ports)
+    y_max = input_ports_[-1].y
+    y_min = input_ports_[0].y
+    x_max = max(p.x for p in input_ports_)
 
-    output_ports = []
+    output_ports: list[Port] = []
     if output_orientation == 1:
-        for i, p in enumerate(input_ports[::-1]):
+        for i, p in enumerate(input_ports_[::-1]):
             temp_port = p.copy()
             temp_port.trans = kdb.Trans(
                 3, False, x_max - wire_spacing * (i + 1), y_max + wire_spacing
             )
 
-            route_elec(c, p, temp_port)
+            route_elec(c_, p, temp_port)
             temp_port.trans.angle = 1
             output_ports.append(temp_port)
     elif output_orientation == 3:
-        for i, p in enumerate(input_ports):
+        for i, p in enumerate(input_ports_):
             temp_port = p.copy()
             temp_port.trans = kdb.Trans(
                 1, False, x_max - wire_spacing * (i + 1), y_min - wire_spacing
             )
-            route_elec(c, p, temp_port)
+            route_elec(c_, p, temp_port)
             temp_port.trans.angle = 3
             output_ports.append(temp_port)
     else:
@@ -242,8 +247,8 @@ def route_bundle(
     """
     return route_bundle_generic(
         c=c,
-        start_ports=start_ports,
-        end_ports=end_ports,
+        start_ports=[p._base for p in start_ports],
+        end_ports=[p._base for p in end_ports],
         starts=starts,
         ends=ends,
         routing_function=route_smart,
@@ -386,8 +391,8 @@ def route_bundle_dual_rails(
         ends = end_straights
     return route_bundle_generic(
         c=c,
-        start_ports=start_ports,
-        end_ports=end_ports,
+        start_ports=[p._base for p in start_ports],
+        end_ports=[p._base for p in end_ports],
         routing_function=route_smart,
         starts=starts,
         ends=ends,
@@ -462,7 +467,7 @@ def place_single_wire(
     p1: Port,
     p2: Port,
     pts: Sequence[kdb.Point],
-    route_width: dbu | None = None,
+    route_width: int | None = None,
     layer_info: kdb.LayerInfo | None = None,
     **kwargs: Any,
 ) -> ManhattanRoute:
@@ -509,7 +514,7 @@ def place_single_wire(
         polygons={layer_info: [shape]},
         instances=[],
         length=round(_length),
-        length_straight=round(_length),
+        length_straights=round(_length),
     )
 
 
@@ -518,9 +523,9 @@ def place_dual_rails(
     p1: Port,
     p2: Port,
     pts: Sequence[kdb.Point],
-    route_width: dbu | None = None,
+    route_width: int | None = None,
     layer_info: kdb.LayerInfo | None = None,
-    separation_rails: dbu | None = None,
+    separation_rails: int | None = None,
     **kwargs: Any,
 ) -> ManhattanRoute:
     """Placer function for a single wire.

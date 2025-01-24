@@ -1,7 +1,9 @@
-import kfactory as kf
 from functools import partial
-from conftest import Layers
 from pathlib import Path
+
+from conftest import Layers
+
+import kfactory as kf
 
 
 def test_virtual_cell() -> None:
@@ -21,7 +23,7 @@ def test_virtual_cell_insert(
 ) -> None:
     c = kf.KCell()
 
-    vc = kf.VKCell("test_virtual_insert")
+    vc = kf.VKCell(name="test_virtual_insert")
 
     e_bend = kf.cells.virtual.euler.virtual_bend_euler(
         width=0.5,
@@ -53,7 +55,7 @@ def test_virtual_cell_insert(
 
 def test_all_angle_route(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
     bb = [kf.kdb.DPoint(x, y) for x, y in [(0, 0), (500, 0), (250, 200), (500, 250)]]
-    vc = kf.VKCell("test_all_angle")
+    vc = kf.VKCell(name="test_all_angle")
     kf.routing.aa.optical.route(
         vc,
         width=5,

@@ -2,23 +2,27 @@
 
 import os
 import sys
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, TypeVar
+from typing import Any, Self, TypeVar
 
 from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
 
 from .enclosure import LayerEnclosure
-from .kcell import KCell, KCLayout, Port, Ports
+from .kcell import KCell, KCLayout, Port, Ports, ProtoTKCell, TKCell
 from .kcell import kcl as stdkcl
 
-__all__ = ["cells_to_yaml", "cells_from_yaml"]
+__all__ = ["cells_from_yaml", "cells_to_yaml"]
 
 PathLike = TypeVar("PathLike", str, Path, None)
 
 
-def cells_to_yaml(output: PathLike, cells: list[KCell] | KCell) -> None:
+def cells_to_yaml(
+    output: PathLike,
+    cells: Sequence[ProtoTKCell[Any]] | ProtoTKCell[Any] | Sequence[TKCell] | TKCell,
+) -> None:
     """Convert cell(s) to a yaml representations.
 
     Args:
@@ -30,14 +34,14 @@ def cells_to_yaml(output: PathLike, cells: list[KCell] | KCell) -> None:
     Returns:
         yaml dump
     """
-    cells = [cells] if isinstance(cells, KCell) else cells
-    cells.sort(key=lambda c: c.hierarchy_levels())
+    _cells = [cells] if isinstance(cells, ProtoTKCell | TKCell) else list(cells)
+    _cells.sort(key=lambda c: c.hierarchy_levels())
     yaml = YAML()
     yaml.register_class(KCell)
     yaml.register_class(Port)
     yaml.register_class(Ports)
     yaml.indent(sequence=4, offset=2)
-    yaml.dump(cells, output)
+    yaml.dump(_cells, output)
 
 
 def get_yaml_obj() -> YAML:
@@ -54,11 +58,16 @@ def register_classes(
     """Register a new KCell class compatible with ruamel yaml."""
 
     class ModKCell(KCell):
-        def __init__(self, name: str | None = None, library: KCLayout = kcl):
-            KCell.__init__(self, name, library)
+        def __init__(self, name: str | None = None, library: KCLayout = kcl) -> None:
+            KCell.__init__(self, name=name, kcl=library)
 
         @classmethod
-        def from_yaml(cls, constructor, node):  # type: ignore[no-untyped-def]
+        def from_yaml(
+            cls,
+            constructor: SafeConstructor,
+            node: Any,
+            verbose: bool = False,
+        ) -> Self:
             return super().from_yaml(constructor, node, verbose=verbose)
 
     yaml.register_class(ModKCell)
@@ -113,12 +122,16 @@ def exploded_yaml(
     yaml = YAML(pure=True)
 
     class ModKCell(KCell):
-        def __init__(self, name: str | None = None, library: KCLayout = library):
-            KCell.__init__(self, name, library)
+        def __init__(
+            self, name: str | None = None, library: KCLayout = library
+        ) -> None:
+            KCell.__init__(self, name=name, kcl=library)
 
         @classmethod
-        def from_yaml(cls, constructor, node):  # type: ignore[no-untyped-def]
-            super().from_yaml(constructor, node, verbose=verbose)
+        def from_yaml(
+            cls, constructor: SafeConstructor, node: Any, verbose: bool = False
+        ) -> Self:
+            return super().from_yaml(constructor, node, verbose=verbose)
 
     return yaml.dump(yaml.load(inp), sys.stdout)
 
@@ -137,7 +150,7 @@ def include_from_loader(
         yaml_tag: str = "!include"
 
         @classmethod
-        def from_yaml(cls, constructor, node):  # type: ignore[no-untyped-def]
+        def from_yaml(cls, constructor: SafeConstructor, node: Any) -> None:
             d = SafeConstructor.construct_mapping(constructor, node)
 
             f = Path(d["filename"])

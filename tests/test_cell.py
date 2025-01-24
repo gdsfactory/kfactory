@@ -1,8 +1,10 @@
-import pytest
-import kfactory as kf
 from collections.abc import Callable
 from tempfile import NamedTemporaryFile
+
+import pytest
 from conftest import Layers
+
+import kfactory as kf
 
 
 def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
@@ -27,8 +29,8 @@ def unnamed_cell(name: str = "a") -> kf.KCell:
 
 
 def test_unnamed_cell() -> None:
-    c1 = unnamed_cell("test")
-    c2 = unnamed_cell("test")
+    c1 = unnamed_cell("test_unnamed_cell")
+    c2 = unnamed_cell("test_unnamed_cell")
     assert c1 is c2
 
 
@@ -54,7 +56,7 @@ def test_no_snap(LAYER: Layers) -> None:
     c = kf.KCell()
 
     c.create_port(
-        dwidth=1,
+        width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
         layer=c.kcl.find_layer(LAYER.WG),
     )
@@ -84,7 +86,7 @@ def test_ports_cell(LAYER: Layers) -> None:
     c = kf.KCell()
     c.create_port(
         name="o1",
-        dwidth=1,
+        width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
         layer=c.kcl.find_layer(LAYER.WG),
     )
@@ -96,7 +98,7 @@ def test_ports_instance(LAYER: Layers) -> None:
     c = kf.KCell()
     c.create_port(
         name="o1",
-        dwidth=1,
+        width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
         layer=c.kcl.find_layer(LAYER.WG),
     )
@@ -257,9 +259,23 @@ def test_check_ports(LAYER: Layers) -> None:
         return c
 
     regex = kf.config.logfilter.regex
-    kf.config.logfilter.regex = "^An error has been caught in function 'wrapper_autocell', process 'MainProcess'"
+    kf.config.logfilter.regex = (
+        "^An error has been caught in function "
+        "'wrapper_autocell', process 'MainProcess'"
+    )
 
     with pytest.raises(ValueError):
         test_multi_ports()
 
     kf.config.logfilter.regex = regex
+
+
+def test_ports_in_cells() -> None:
+    kcell = kf.KCell(name="test")
+    dkcell = kf.DKCell.from_kcell(kcell)
+
+    port = kf.Port(name="test", layer=1, width=2, center=(0, 0), angle=90)
+    new_port = kcell.add_port(port, "o1")
+
+    assert new_port in kcell.ports
+    assert new_port in dkcell.ports

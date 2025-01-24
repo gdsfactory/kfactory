@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Self
 
 from pydantic import BaseModel, model_validator
-from typing_extensions import Self
 
 from . import kdb
 from .enclosure import DLayerEnclosure, LayerEnclosure

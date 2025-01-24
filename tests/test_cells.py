@@ -1,11 +1,11 @@
 import pathlib
+from functools import partial
+
 import pytest
+from conftest import Layers
 
 import kfactory as kf
-
-from functools import partial
 from kfactory.conf import logger
-from conftest import Layers
 
 
 class GeometryDifference(ValueError):
@@ -108,10 +108,10 @@ def test_cells(cell_name: str, LAYER: Layers) -> None:
         if not region_diff.is_empty():
             layer_tuple = kcl_ref.layout.layer_infos()[layer]
             region_xor = region_ref ^ region_run
-            c = kf.KCell(f"{cell.name}_diffs")
-            c_run = kf.KCell(f"{cell.name}_new")
-            c_ref = kf.KCell(f"{cell.name}_old")
-            c_xor = kf.KCell(f"{cell.name}_xor")
+            c = kf.KCell(name=f"{cell.name}_diffs")
+            c_run = kf.KCell(name=f"{cell.name}_new")
+            c_ref = kf.KCell(name=f"{cell.name}_old")
+            c_xor = kf.KCell(name=f"{cell.name}_xor")
             c_run.shapes(layer).insert(region_run)
             c_ref.shapes(layer).insert(region_ref)
             c_xor.shapes(layer).insert(region_xor)
@@ -143,7 +143,7 @@ def test_additional_info(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
 
     bend = test_bend_euler(width=1)
 
-    assert bend._locked is True
+    assert bend.locked is True
     assert bend.info.creation_time == "2023-02-12Z23:00:00"  # type: ignore[attr-defined, unused-ignore]
 
     bend.delete()

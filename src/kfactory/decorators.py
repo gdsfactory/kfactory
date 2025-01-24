@@ -13,11 +13,11 @@ if TYPE_CHECKING:
     from .kcell import (
         CHECK_INSTANCES,
         KC,
-        KCell,
         KCellFunc,
         KCellParams,
         KCLayout,
         MetaData,
+        TKCell,
     )
 
 
@@ -36,7 +36,7 @@ class ModuleCellKWargs(TypedDict, total=False):
     overwrite_existing: bool | None
     layout_cache: bool | None
     info: dict[str, MetaData] | None
-    post_process: Iterable[Callable[[KCell], None]]
+    post_process: Iterable[Callable[[TKCell], None]]
     debug_names: bool | None
 
 
@@ -56,7 +56,7 @@ class KCellDecoratorKWargs(TypedDict, total=False):
     overwrite_existing: bool | None
     layout_cache: bool | None
     info: dict[str, MetaData] | None
-    post_process: Iterable[Callable[[KC], None]]
+    post_process: Iterable[Callable[[TKCell], None]]
     debug_names: bool | None
 
 
@@ -67,6 +67,7 @@ class KCellDecorator(Protocol):
         self, **kwargs: Unpack[KCellDecoratorKWargs]
     ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]:
         """__call__ implementation."""
+        ...
 
 
 class ModuleDecorator(Protocol):
@@ -76,6 +77,7 @@ class ModuleDecorator(Protocol):
         self, /, **kwargs: Unpack[ModuleCellKWargs]
     ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]:
         """__call__ implementation."""
+        ...
 
 
 def _module_cell(
@@ -101,7 +103,7 @@ def _module_cell(
 class Decorators:
     """Various decorators intended to be attached to a KCLayout."""
 
-    def __init__(self, kcl: KCLayout):
+    def __init__(self, kcl: KCLayout) -> None:
         """Just set the standard `@cell` decorator."""
         self._cell = kcl.cell
 
