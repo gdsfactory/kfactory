@@ -7,12 +7,18 @@ from typing import TYPE_CHECKING, Any, Protocol, TypedDict, overload
 
 from typing_extensions import Unpack
 
-from kfactory.kcell import TKCell
-
 if TYPE_CHECKING:
     from cachetools import Cache
 
-    from .kcell import CHECK_INSTANCES, KC, KCellFunc, KCellParams, KCLayout, MetaData
+    from .kcell import (
+        CHECK_INSTANCES,
+        KC,
+        KCellFunc,
+        KCellParams,
+        KCLayout,
+        MetaData,
+        TKCell,
+    )
 
 
 class ModuleCellKWargs(TypedDict, total=False):
