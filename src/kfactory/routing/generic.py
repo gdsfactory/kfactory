@@ -10,13 +10,9 @@ from pydantic import BaseModel, Field
 
 from .. import kdb, rdb
 from ..conf import config, logger
-from ..kcell import Instance, KCell, Port
-from ..kf_types import dbu
-from .manhattan import (
-    ManhattanBundleRoutingFunction,
-    ManhattanRouter,
-    route_smart,
-)
+from ..kcell import Instance, Port, ProtoPort, ProtoTKCell
+from ..kf_types import dbu, um
+from .manhattan import ManhattanBundleRoutingFunction, ManhattanRouter, route_smart
 from .steps import Step, Straight
 
 __all__ = [
@@ -24,7 +20,7 @@ __all__ = [
     "ManhattanRoute",
     "check_collisions",
     "get_radius",
-    "route_bundle",
+    "route_bundle_dbu",
 ]
 
 
@@ -37,14 +33,15 @@ class PlacerFunction(Protocol):
 
     def __call__(
         self,
-        c: KCell,
-        p1: Port,
-        p2: Port,
+        c: ProtoTKCell[Any],
+        p1: ProtoPort[Any],
+        p2: ProtoPort[Any],
         pts: Sequence[kdb.Point],
         route_width: dbu | None = None,
         **kwargs: Any,
     ) -> ManhattanRoute:
         """Implementation of the function."""
+        ...
 
 
 class RouterPostProcessFunction(Protocol):
@@ -53,13 +50,14 @@ class RouterPostProcessFunction(Protocol):
     def __call__(
         self,
         *,
-        c: KCell,
+        c: ProtoTKCell[Any],
         routers: list[ManhattanRouter],
-        start_ports: list[Port],
-        end_ports: list[Port],
+        start_ports: Sequence[ProtoPort[Any]],
+        end_ports: Sequence[ProtoPort[Any]],
         **kwargs: Any,
     ) -> None:
         """Implementation of post process function."""
+        ...
 
 
 class ManhattanRoute(BaseModel, arbitrary_types_allowed=True):
@@ -100,9 +98,9 @@ class ManhattanRoute(BaseModel, arbitrary_types_allowed=True):
 
 
 def check_collisions(
-    c: KCell,
-    start_ports: list[Port],
-    end_ports: list[Port],
+    c: ProtoTKCell[Any],
+    start_ports: Sequence[ProtoPort[Any]],
+    end_ports: Sequence[ProtoPort[Any]],
     routers: list[ManhattanRouter],
     routes: list[ManhattanRoute],
     on_collision: Literal["error", "show_error"] | None = "show_error",
@@ -123,12 +121,15 @@ def check_collisions(
             overlaps to determine error. If not defined, all layers occurring in
             ports will be used.
     """
+    c_ = c.to_kcell()
+    start_ports_ = [p.to_port() for p in start_ports]
+    end_ports_ = [p.to_port() for p in end_ports]
     if on_collision is None:
         return
     collision_edges: dict[str, kdb.Edges] = {}
     inter_route_collisions = kdb.Edges()
     all_router_edges = kdb.Edges()
-    for i, (ps, pe, router) in enumerate(zip(start_ports, end_ports, routers)):
+    for i, (ps, pe, router) in enumerate(zip(start_ports_, end_ports_, routers)):
         _edges, router_edges = router.collisions(log_errors=None)
         if not _edges.is_empty():
             collision_edges[f"{ps.name} - {pe.name} (index: {i})"] = _edges
@@ -139,12 +140,12 @@ def check_collisions(
 
     if collision_edges or not inter_route_collisions.is_empty():
         if collision_check_layers is None:
-            collision_check_layers = list({p.layer_info for p in start_ports})
-        dbu = c.kcl.dbu
+            collision_check_layers = list({p.layer_info for p in start_ports_})
+        dbu = c_.kcl.dbu
         db = rdb.ReportDatabase("Routing Errors")
         cat = db.create_category("Manhattan Routing Collisions")
-        c.name = c.name[: config.max_cellname_length]
-        cell = db.create_cell(c.name)
+        c_.name = c_.name[: config.max_cellname_length]
+        cell = db.create_cell(c_.name)
         for name, edges in collision_edges.items():
             item = db.create_item(cell, cat)
             item.add_value(name)
@@ -168,7 +169,7 @@ def check_collisions(
 
         for layer_info in collision_check_layers:
             shapes_regions = shapes[layer_info]
-            layer = c.kcl.layer(layer_info)
+            layer = c_.kcl.layer(layer_info)
             error_region_instances = kdb.Region()
             error_region_shapes = kdb.Region()
             inst_regions: dict[int, kdb.Region] = {}
@@ -184,24 +185,24 @@ def check_collisions(
                 if not (inst_region & _inst_region).is_empty():
                     # if inst_shapes is None:
                     inst_shapes = kdb.Region()
-                    shape_it = c.begin_shapes_rec_overlapping(layer, inst.bbox(layer))
+                    shape_it = c_.begin_shapes_rec_overlapping(layer, inst.bbox(layer))
                     shape_it.select_cells([inst.cell.cell_index()])
                     shape_it.min_depth = 1
                     for _it in shape_it.each():
-                        if _it.path()[0].inst() == inst._instance:
+                        if _it.path()[0].inst() == inst.instance:
                             inst_shapes.insert(
                                 _it.shape().polygon.transformed(_it.trans())
                             )
                     for j, _reg in inst_regions.items():
                         if _reg & _inst_region:
                             __reg = kdb.Region()
-                            shape_it = c.begin_shapes_rec_touching(
+                            shape_it = c_.begin_shapes_rec_touching(
                                 layer, (_reg & _inst_region).bbox()
                             )
                             shape_it.select_cells([insts[j].cell.cell_index()])
                             shape_it.min_depth = 1
                             for _it in shape_it.each():
-                                if _it.path()[0].inst() == insts[j]._instance:
+                                if _it.path()[0].inst() == insts[j].instance:
                                     __reg.insert(
                                         _it.shape().polygon.transformed(_it.trans())
                                     )
@@ -221,7 +222,7 @@ def check_collisions(
                 for poly in error_region_shapes.merge().each():
                     it = db.create_item(cell, sc)
                     it.add_value("Route shapes overlapping with other shapes")
-                    it.add_value(c.kcl.to_um(poly))
+                    it.add_value(c_.kcl.to_um(poly))
             if not error_region_instances.is_empty():
                 any_layer_collision = True
                 if on_collision == "error":
@@ -233,18 +234,18 @@ def check_collisions(
                 for poly in error_region_instances.merge().each():
                     it = db.create_item(cell, sc)
                     it.add_value("Route instances overlapping with other instances")
-                    it.add_value(c.kcl.to_um(poly))
+                    it.add_value(c_.kcl.to_um(poly))
 
         if any_layer_collision:
             match on_collision:
                 case "show_error":
-                    c.show(lyrdb=db)
+                    c_.show(lyrdb=db)
                     raise RuntimeError(
-                        f"Routing collision in {c.kcl.future_cell_name or c.name}"
+                        f"Routing collision in {c_.kcl.future_cell_name or c_.name}"
                     )
                 case "error":
                     raise RuntimeError(
-                        f"Routing collision in {c.kcl.future_cell_name or c.name}"
+                        f"Routing collision in {c_.kcl.future_cell_name or c_.name}"
                     )
 
 
@@ -275,12 +276,12 @@ def get_radius(
     )
 
 
-def route_bundle(
+def route_bundle_um(
     *,
-    c: KCell,
-    start_ports: list[Port],
-    end_ports: list[Port],
-    route_width: dbu | list[dbu] | None = None,
+    c: ProtoTKCell[Any],
+    start_ports: Sequence[ProtoPort[Any]],
+    end_ports: Sequence[ProtoPort[Any]],
+    route_width: um | Sequence[um] | None = None,
     sort_ports: bool = False,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
@@ -291,10 +292,34 @@ def route_bundle(
     placer_kwargs: dict[str, Any] = {},
     router_post_process_function: RouterPostProcessFunction | None = None,
     router_post_process_kwargs: dict[str, Any] = {},
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
-    start_angles: int | list[int] | None = None,
-    end_angles: int | list[int] | None = None,
+    starts: um | Sequence[um] | Sequence[Step] | Sequence[Sequence[Step]] = [],
+    ends: um | Sequence[um] | Sequence[Step] | Sequence[Sequence[Step]] = [],
+    start_angles: um | Sequence[um] | None = None,
+    end_angles: um | Sequence[um] | None = None,
+) -> list[ManhattanRoute]:
+    """Route a bundle from starting ports to end_ports."""
+
+
+def route_bundle_dbu(
+    *,
+    c: ProtoTKCell[Any],
+    start_ports: Sequence[ProtoPort[Any]],
+    end_ports: Sequence[ProtoPort[Any]],
+    route_width: dbu | Sequence[dbu] | None = None,
+    sort_ports: bool = False,
+    on_collision: Literal["error", "show_error"] | None = "show_error",
+    on_placer_error: Literal["error", "show_error"] | None = "show_error",
+    collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
+    routing_function: ManhattanBundleRoutingFunction = route_smart,
+    routing_kwargs: dict[str, Any] = {"bbox_routing": "minimal"},
+    placer_function: PlacerFunction,
+    placer_kwargs: dict[str, Any] = {},
+    router_post_process_function: RouterPostProcessFunction | None = None,
+    router_post_process_kwargs: dict[str, Any] = {},
+    starts: dbu | Sequence[dbu] | Sequence[Step] | Sequence[Sequence[Step]] = [],
+    ends: dbu | Sequence[dbu] | Sequence[Step] | Sequence[Sequence[Step]] = [],
+    start_angles: dbu | Sequence[dbu] | None = None,
+    end_angles: dbu | Sequence[dbu] | None = None,
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
 
@@ -392,6 +417,7 @@ def route_bundle(
         end_angles: Overwrite the port orientation of all start_ports together
             (single value) or each one (list of values which is as long as end_ports).
     """
+    c_ = c.to_kcell()
     if not start_ports:
         return []
     if not (len(start_ports) == len(end_ports)):
@@ -400,13 +426,13 @@ def route_bundle(
             " the same size as the end ports and be the same length."
         )
     length = len(start_ports)
-    if starts == []:
+    if starts == [] or starts is None:
         starts = [starts] * length  # type: ignore[assignment]
     elif isinstance(starts, int):
         starts = [[Straight(dist=starts)] for _ in range(length)]  # type: ignore[assignment]
     elif isinstance(starts[0], Step):
         starts = [starts for _ in range(len(start_ports))]  # type: ignore[assignment]
-    if ends == []:
+    if ends == [] or ends is None:
         ends = [ends] * length  # type: ignore[assignment]
     elif isinstance(ends, int):
         ends = [[Straight(dist=ends)] for _ in range(length)]  # type: ignore[assignment]
@@ -481,7 +507,7 @@ def route_bundle(
 
     if router_post_process_function is not None:
         router_post_process_function(
-            c=c,
+            c=c_,
             start_ports=start_ports,
             end_ports=end_ports,
             routers=routers,
@@ -492,7 +518,7 @@ def route_bundle(
     for router, ps, pe in zip(routers, start_ports, end_ports):
         try:
             route = placer_function(
-                c,
+                c_,
                 ps,
                 pe,
                 router.start.pts,
@@ -501,14 +527,16 @@ def route_bundle(
             routes.append(route)
         except Exception as e:
             placer_errors.append(e)
-            error_routes.append((ps, pe, router.start.pts, router.width))
+            error_routes.append(
+                (ps.to_port(), pe.to_port(), router.start.pts, router.width)
+            )
     if placer_errors and on_placer_error == "show_error":
         print(len(placer_errors))
         db = rdb.ReportDatabase("Route Placing Errors")
         cell = db.create_cell(
-            c.name
-            if not c.name.startswith("Unnamed_")
-            else c.kcl.future_cell_name or c.name
+            c_.name
+            if not c_.name.startswith("Unnamed_")
+            else c_.kcl.future_cell_name or c_.name
         )
         for error, (ps, pe, pts, width) in zip(placer_errors, error_routes):
             cat = db.create_category(f"{ps.name} - {pe.name}")
@@ -520,8 +548,8 @@ def route_bundle(
             it.add_value(f"Exception: {error}")
             path = kdb.Path(pts, width or ps.width)
             print(f"{width=}")
-            it.add_value(c.kcl.to_um(path.polygon()))
-        c.show(lyrdb=db)
+            it.add_value(c_.kcl.to_um(path.polygon()))
+        c_.show(lyrdb=db)
     if placer_errors and on_placer_error is not None:
         for error in placer_errors:
             logger.error(error)
@@ -531,7 +559,7 @@ def route_bundle(
         )
 
     check_collisions(
-        c=c,
+        c=c_,
         start_ports=start_ports,
         end_ports=end_ports,
         on_collision=on_collision,

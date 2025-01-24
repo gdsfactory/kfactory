@@ -2233,6 +2233,10 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         """Create a KCell from a KLayout Cell."""
         return cls(base_kcell=kcell._base_kcell)
 
+    def to_kcell(self) -> KCell:
+        """Convert the ProtoTKCell to a KCell."""
+        return KCell(base_kcell=self._base_kcell)
+
     @property
     @abstractmethod
     def insts(self) -> ProtoInstances[TUnit]: ...
@@ -7477,6 +7481,10 @@ class ProtoPort(ABC, Generic[TUnit]):
     def kcl(self) -> KCLayout:
         """KCLayout associated to the prot."""
         return self._base.kcl
+
+    def to_port(self) -> Port:
+        """Convert the ProtoPort to a Port."""
+        return Port(base=self._base)
 
     @kcl.setter
     def kcl(self, value: KCLayout) -> None:

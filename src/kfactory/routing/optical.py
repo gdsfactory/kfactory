@@ -3,26 +3,16 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from .. import kdb
 from ..conf import config, logger
 from ..factories import StraightFactory
-from ..kcell import KCell, Port, ProtoKCell, ProtoPort, TUnit
-from ..kf_types import dbu
-from .generic import (
-    ManhattanRoute,
-    get_radius,
-)
-from .generic import (
-    route_bundle as route_bundle_generic,
-)
-from .manhattan import (
-    # ManhattanBundleRoutingFunction,
-    ManhattanRoutePathFunction,
-    route_manhattan,
-    route_smart,
-)
+from ..kcell import KCell, Port, ProtoPort, ProtoTKCell
+from ..kf_types import dbu, um
+from .generic import ManhattanRoute, get_radius
+from .generic import route_bundle_dbu as route_bundle_generic
+from .manhattan import ManhattanRoutePathFunction, route_manhattan, route_smart
 from .steps import Step, Straight
 
 __all__ = [
@@ -30,39 +20,163 @@ __all__ = [
     "place90",
     "route_loopback",
     "route",
-    "route_bundle",
+    "route_bundle_dbu",
     "vec_angle",
 ]
 
 
-def route_bundle(
-    c: ProtoKCell[TUnit],
-    start_ports: Sequence[ProtoPort[TUnit]],
-    end_ports: Sequence[ProtoPort[TUnit]],
+def route_bundle_um(
+    c: ProtoTKCell[Any],
+    start_ports: Sequence[ProtoPort[Any]],
+    end_ports: Sequence[ProtoPort[Any]],
+    separation: um,
+    straight_factory: StraightFactory,
+    bend90_cell: KCell,
+    taper_cell: KCell | None = None,
+    start_straights: um | Sequence[um] | None = None,
+    end_straights: um | Sequence[um] | None = None,
+    min_straight_taper: um = 0,
+    place_port_type: str = "optical",
+    place_allow_small_routes: bool = False,
+    collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
+    on_collision: Literal["error", "show_error"] | None = "show_error",
+    on_placer_error: Literal["error", "show_error"] | None = "show_error",
+    bboxes: Sequence[kdb.Box] = [],
+    allow_width_mismatch: bool | None = None,
+    allow_layer_mismatch: bool | None = None,
+    allow_type_mismatch: bool | None = None,
+    route_width: um | Sequence[um] | None = None,
+    sort_ports: bool = False,
+    bbox_routing: Literal["minimal", "full"] = "minimal",
+    waypoints: kdb.Trans | Sequence[kdb.Point] | None = None,
+    starts: um | Sequence[um] | Sequence[Step] | Sequence[Sequence[Step]] | None = None,
+    ends: um | Sequence[um] | Sequence[Step] | Sequence[Sequence[Step]] | None = None,
+    start_angles: um | Sequence[um] | None = None,
+    end_angles: um | Sequence[um] | None = None,
+    purpose: str | None = "routing",
+) -> list[ManhattanRoute]:
+    if start_straights is None:
+        start_straights_dbu: dbu | Sequence[dbu] | None = None
+    elif isinstance(start_straights, Sequence):
+        start_straights_dbu = [c.kcl.to_dbu(s) for s in start_straights]
+    else:
+        start_straights_dbu = c.kcl.to_dbu(start_straights)
+
+    if end_straights is None:
+        end_straights_dbu: dbu | Sequence[dbu] | None = None
+    elif isinstance(end_straights, Sequence):
+        end_straights_dbu = [c.kcl.to_dbu(s) for s in end_straights]
+    else:
+        end_straights_dbu = c.kcl.to_dbu(end_straights)
+
+    separation_dbu = c.kcl.to_dbu(separation)
+    min_straight_taper_dbu = c.kcl.to_dbu(min_straight_taper)
+
+    if starts is None:
+        starts_dbu = None
+    elif isinstance(starts, Sequence):
+        if isinstance(starts[0], float):
+            starts_dbu = [c.kcl.to_dbu(s) for s in cast(Sequence[float], starts)]
+        else:
+            starts_dbu = cast(Sequence[Step] | Sequence[Sequence[Step]], starts)
+    else:
+        starts_dbu = c.kcl.to_dbu(starts)
+
+    if ends is None:
+        ends_dbu = None
+    elif isinstance(ends, Sequence):
+        if isinstance(ends[0], float):
+            ends_dbu = [c.kcl.to_dbu(s) for s in cast(Sequence[float], ends)]
+        else:
+            ends_dbu = cast(Sequence[Step] | Sequence[Sequence[Step]], ends)
+    else:
+        ends_dbu = c.kcl.to_dbu(ends)
+
+    if start_angles is None:
+        start_angles_dbu: dbu | Sequence[dbu] | None = None
+    elif isinstance(start_angles, Sequence):
+        start_angles_dbu = [c.kcl.to_dbu(s) for s in start_angles]
+    else:
+        start_angles_dbu = c.kcl.to_dbu(start_angles)
+
+    if end_angles is None:
+        end_angles_dbu: dbu | Sequence[dbu] | None = None
+    elif isinstance(end_angles, Sequence):
+        end_angles_dbu = [c.kcl.to_dbu(s) for s in end_angles]
+    else:
+        end_angles_dbu = c.kcl.to_dbu(end_angles)
+
+    if route_width is None:
+        route_width_dbu: dbu | Sequence[dbu] | None = None
+    elif isinstance(route_width, Sequence):
+        route_width_dbu = [c.kcl.to_dbu(s) for s in route_width]
+    else:
+        route_width_dbu = c.kcl.to_dbu(route_width)
+
+    return route_bundle_dbu(
+        c=c.to_kcell(),
+        start_ports=[p.to_port() for p in start_ports],
+        end_ports=[p.to_port() for p in end_ports],
+        separation=separation_dbu,
+        straight_factory=straight_factory,
+        bend90_cell=bend90_cell,
+        taper_cell=taper_cell,
+        start_straights=start_straights_dbu,
+        end_straights=end_straights_dbu,
+        min_straight_taper=min_straight_taper_dbu,
+        place_port_type=place_port_type,
+        place_allow_small_routes=place_allow_small_routes,
+        collision_check_layers=collision_check_layers,
+        on_collision=on_collision,
+        on_placer_error=on_placer_error,
+        bboxes=bboxes,
+        allow_width_mismatch=allow_width_mismatch,
+        allow_layer_mismatch=allow_layer_mismatch,
+        allow_type_mismatch=allow_type_mismatch,
+        route_width=route_width_dbu,
+        sort_ports=sort_ports,
+        bbox_routing=bbox_routing,
+        waypoints=waypoints,
+        starts=starts_dbu,
+        ends=ends_dbu,
+        start_angles=start_angles_dbu,
+        end_angles=end_angles_dbu,
+        purpose=purpose,
+    )
+
+
+def route_bundle_dbu(
+    c: ProtoTKCell[Any],
+    start_ports: Sequence[ProtoPort[Any]],
+    end_ports: Sequence[ProtoPort[Any]],
     separation: dbu,
     straight_factory: StraightFactory,
     bend90_cell: KCell,
     taper_cell: KCell | None = None,
-    start_straights: dbu | list[dbu] | None = None,
-    end_straights: dbu | list[dbu] | None = None,
+    start_straights: dbu | Sequence[dbu] | None = None,
+    end_straights: dbu | Sequence[dbu] | None = None,
     min_straight_taper: dbu = 0,
     place_port_type: str = "optical",
     place_allow_small_routes: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
-    bboxes: list[kdb.Box] = [],
+    bboxes: Sequence[kdb.Box] = [],
     allow_width_mismatch: bool | None = None,
     allow_layer_mismatch: bool | None = None,
     allow_type_mismatch: bool | None = None,
-    route_width: dbu | list[dbu] | None = None,
+    route_width: dbu | Sequence[dbu] | None = None,
     sort_ports: bool = False,
     bbox_routing: Literal["minimal", "full"] = "minimal",
-    waypoints: kdb.Trans | list[kdb.Point] | None = None,
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
-    start_angles: int | list[int] | None = None,
-    end_angles: int | list[int] | None = None,
+    waypoints: kdb.Trans | Sequence[kdb.Point] | None = None,
+    starts: dbu
+    | Sequence[dbu]
+    | Sequence[Step]
+    | Sequence[Sequence[Step]]
+    | None = None,
+    ends: dbu | Sequence[dbu] | Sequence[Step] | Sequence[Sequence[Step]] | None = None,
+    start_angles: int | Sequence[int] | None = None,
+    end_angles: int | Sequence[int] | None = None,
     purpose: str | None = "routing",
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
@@ -161,6 +275,9 @@ def route_bundle(
         purpose: Set the property "purpose" (at id kf.kcell.PROPID.PURPOSE) to the
             value. Not set if None.
     """
+    c_ = c.to_kcell()
+    start_ports_ = [p.to_port() for p in start_ports]
+    end_ports_ = [p.to_port() for p in end_ports]
     if start_straights is not None:
         logger.warning("start_straights is deprecated. Use `starts` instead.")
         starts = start_straights
@@ -169,9 +286,9 @@ def route_bundle(
         ends = end_straights
     bend90_radius = get_radius(bend90_cell.ports.filter(port_type=place_port_type))
     return route_bundle_generic(
-        c=c,
-        start_ports=start_ports,
-        end_ports=end_ports,
+        c=c_,
+        start_ports=start_ports_,
+        end_ports=end_ports_,
         starts=starts,
         ends=ends,
         route_width=route_width,

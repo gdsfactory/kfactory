@@ -187,7 +187,7 @@ def test_route_bundle(
         kf.kdb.Box(1_000_000, 500_000, p_end[-1].x, 600_000)
     )
 
-    routes = kf.routing.optical.route_bundle(
+    routes = kf.routing.optical.route_bundle_dbu(
         c,
         p_start,
         p_end,
@@ -407,7 +407,7 @@ def test_smart_routing(
             )
         case _:
             rf = partial(
-                kf.routing.optical.route_bundle,
+                kf.routing.optical.route_bundle_dbu,
                 c,
                 start_ports=start_ports,
                 end_ports=end_ports,
@@ -469,7 +469,7 @@ def test_custom_router(
         for i in range(10)
     ]
 
-    kf.routing.generic.route_bundle(
+    kf.routing.generic.route_bundle_dbu(
         c=c,
         start_ports=start_ports,
         end_ports=end_ports,
@@ -513,7 +513,7 @@ def test_route_smart_waypoints_trans_sort(
         )
         for trans in transformations
     ]
-    kf.routing.optical.route_bundle(
+    kf.routing.optical.route_bundle_dbu(
         c,
         start_ports,
         end_ports,
@@ -548,7 +548,7 @@ def test_route_smart_waypoints_pts_sort(
         )
         for trans in transformations
     ]
-    kf.routing.optical.route_bundle(
+    kf.routing.optical.route_bundle_dbu(
         c,
         start_ports,
         end_ports,
@@ -584,7 +584,7 @@ def test_route_smart_waypoints_trans(
         )
         for trans in transformations
     ]
-    kf.routing.optical.route_bundle(
+    kf.routing.optical.route_bundle_dbu(
         c,
         start_ports,
         end_ports,
@@ -619,7 +619,7 @@ def test_route_smart_waypoints_pts(
         )
         for trans in transformations
     ]
-    kf.routing.optical.route_bundle(
+    kf.routing.optical.route_bundle_dbu(
         c,
         start_ports,
         end_ports,
@@ -660,7 +660,7 @@ def test_route_generic_reorient(
     start_angles = [2, 1, 1, 1, 1, 1, 1, 1, 1, 0]
     end_angles = 3
 
-    kf.routing.optical.route_bundle(
+    kf.routing.optical.route_bundle_dbu(
         c,
         start_ports=start_ports,
         end_ports=end_ports,
@@ -704,7 +704,7 @@ def test_placer_error(
     )
 
     with pytest.raises(kf.routing.generic.PlacerError):
-        kf.routing.optical.route_bundle(
+        kf.routing.optical.route_bundle_dbu(
             c,
             start_ports=[ps3, ps2, ps],
             end_ports=[pe3, pe2, pe],
