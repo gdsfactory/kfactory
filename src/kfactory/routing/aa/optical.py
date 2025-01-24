@@ -10,7 +10,7 @@ from pydantic import BaseModel
 from scipy.optimize import minimize_scalar  # type: ignore[import-untyped,unused-ignore]
 
 from ... import kdb
-from ...kcell import KCell, Port, ProtoKCell, ProtoPort, TUnit, VInstance, VKCell
+from ...kcell import DKCell, DPort, KCell, Port, ProtoPort, VInstance, VKCell
 
 __all__ = ["OpticalAllAngleRoute", "route"]
 
@@ -30,20 +30,20 @@ def _angle(v: kdb.DVector) -> float:
     return float(np.rad2deg(np.arctan2(v.y, v.x)))
 
 
-class StraightFactory(Protocol):
+class VirtualStraightFactory(Protocol):
     def __call__(self, width: float, length: float) -> VKCell: ...
 
 
-class BendFactory(Protocol):
+class VirtualBendFactory(Protocol):
     def __call__(self, width: float, angle: float) -> VKCell: ...
 
 
 def route(
-    c: VKCell | KCell,
+    c: VKCell | KCell | DKCell,
     width: float,
     backbone: Sequence[kdb.DPoint],
-    straight_factory: StraightFactory,
-    bend_factory: BendFactory,
+    straight_factory: VirtualStraightFactory,
+    bend_factory: VirtualBendFactory,
     bend_ports: tuple[str, str] = ("o1", "o2"),
     straight_ports: tuple[str, str] = ("o1", "o2"),
     tolerance: float = 0.1,
@@ -193,13 +193,13 @@ def route(
 
 
 def route_bundle(
-    c: ProtoKCell[TUnit],
-    start_ports: Sequence[ProtoPort[TUnit]],
-    end_ports: Sequence[ProtoPort[TUnit]],
+    c: KCell | DKCell | VKCell,
+    start_ports: Sequence[DPort | Port],
+    end_ports: Sequence[DPort | Port],
     backbone: Sequence[kdb.DPoint],
     separation: float | list[float],
-    straight_factory: StraightFactory,
-    bend_factory: BendFactory,
+    straight_factory: VirtualStraightFactory,
+    bend_factory: VirtualBendFactory,
     bend_ports: tuple[str, str] = ("o1", "o2"),
     straight_ports: tuple[str, str] = ("o1", "o2"),
 ) -> list[OpticalAllAngleRoute]:
@@ -323,7 +323,7 @@ def route_bundle(
 def _get_connection_between_ports(
     port_start: ProtoPort[Any],
     port_end: ProtoPort[Any],
-    bend_factory: BendFactory,
+    bend_factory: VirtualBendFactory,
     backbone: list[kdb.DPoint],
     bend_ports: tuple[str, str] = ("o1", "o2"),
 ) -> list[kdb.DPoint]:
@@ -408,7 +408,7 @@ def _get_connection_between_ports(
 
 def _get_partial_route(
     angle: float,
-    bend_factory: BendFactory,
+    bend_factory: VirtualBendFactory,
     bend_ports: tuple[str, str],
     start_port: Port,
     end_port: Port,
@@ -445,7 +445,7 @@ def _get_partial_route(
 
 
 def optimize_route(
-    bend_factory: BendFactory,
+    bend_factory: VirtualBendFactory,
     bend_ports: tuple[str, str],
     start_port: Port,
     end_port: Port,
@@ -459,7 +459,7 @@ def optimize_route(
 ) -> tuple[kdb.DPoint, kdb.DPoint]:
     def _optimize_func(
         angle: float,
-        bend_factory: BendFactory,
+        bend_factory: VirtualBendFactory,
         bend_ports: tuple[str, str],
         start_port: Port,
         end_port: Port,
@@ -496,7 +496,7 @@ def optimize_route(
 
 def _get_partial_route2(
     angle: float,
-    bend_factory: BendFactory,
+    bend_factory: VirtualBendFactory,
     bend_ports: tuple[str, str],
     start_port: Port,
     end_port: Port,
