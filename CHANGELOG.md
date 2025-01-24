@@ -1,3 +1,26 @@
+<a id="v0.23.3"></a>
+# [v0.23.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.23.3) - 2025-01-24
+
+# What's Changed
+
+## New
+
+- Remove insts from TKCell [#564](https://github.com/gdsfactory/kfactory/pull/564)
+
+## Bug Fixes
+
+- Fix typing issues [#560](https://github.com/gdsfactory/kfactory/pull/560)
+
+## Other changes
+
+- update tests [#557](https://github.com/gdsfactory/kfactory/pull/557)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.23.2...v0.23.3
+
+
+[Changes][v0.23.3]
+
+
 <a id="v0.23.2"></a>
 # [v0.23.2](https://github.com/gdsfactory/kfactory/releases/tag/v0.23.2) - 2025-01-22
 
@@ -1430,6 +1453,7 @@
 [Changes][v0.4.0]
 
 
+[v0.23.3]: https://github.com/gdsfactory/kfactory/compare/v0.23.2...v0.23.3
 [v0.23.2]: https://github.com/gdsfactory/kfactory/compare/v0.23.1...v0.23.2
 [v0.23.1]: https://github.com/gdsfactory/kfactory/compare/v0.23.0...v0.23.1
 [v0.23.0]: https://github.com/gdsfactory/kfactory/compare/v0.22.0...v0.23.0
