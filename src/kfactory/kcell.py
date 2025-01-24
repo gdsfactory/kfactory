@@ -2886,7 +2886,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         if self.locked:
             raise LockedError(self)
         if isinstance(inst, Instance):
-            return Instance(self.kcl, self._base_kcell.kdb_cell.insert(inst._instance))
+            return Instance(self.kcl, self._base_kcell.kdb_cell.insert(inst.instance))
         else:
             if not property_id:
                 return Instance(self.kcl, self._base_kcell.kdb_cell.insert(inst))
@@ -9774,14 +9774,6 @@ class ProtoInstances(Generic[TUnit], ABC):
 
     @abstractmethod
     def __getitem__(self, key: str | int) -> ProtoInstance[TUnit]: ...
-
-    def clean(self) -> None:
-        deletion_list: list[int] = []
-        for i, inst in enumerate(self._insts):
-            if inst._destroyed():
-                deletion_list.insert(0, i)
-        for i in deletion_list:
-            list(self._insts)[i].delete()
 
     def clear(self) -> None:
         for inst in self._insts:
