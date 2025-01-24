@@ -9036,13 +9036,9 @@ class ProtoInstance(ABC, Generic[TUnit]):
                 else pull the polygons. None will always flatten all levels.
         """
         if levels:
-            pc = self.parent_cell
             self._instance.flatten(levels)
-            del pc.insts[self]
         else:
-            pc = self.parent_cell
             self._instance.flatten()
-            del pc.insts[self]
 
     @overload
     @abstractmethod
