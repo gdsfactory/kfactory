@@ -1,11 +1,11 @@
-import kfactory as kf
-import pytest
-from random import randint
+from collections.abc import Callable
 from functools import partial
+from random import randint
+
+import pytest
 from conftest import Layers
 
-from collections.abc import Callable
-from typing import Literal
+import kfactory as kf
 
 
 @pytest.mark.parametrize(

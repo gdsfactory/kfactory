@@ -1,13 +1,14 @@
-from typing import Any
-import kfactory as kf
 from pathlib import Path
+from typing import Any
+
+import kfactory as kf
 
 
 def test_custom_show() -> None:
     showed = False
 
     def show(
-        layout: kf.KCLayout | kf.kcell.ProtoKCell[Any]  | Path | str,
+        layout: kf.KCLayout | kf.kcell.ProtoKCell[Any] | Path | str,
         lyrdb: kf.rdb.ReportDatabase | Path | str | None = None,
         l2n: kf.kdb.LayoutToNetlist | Path | str | None = None,
         keep_position: bool = True,

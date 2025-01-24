@@ -1,8 +1,9 @@
-import pytest
-import kfactory as kf
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+
 from conftest import Layers
+
+import kfactory as kf
 
 pdk = kf.KCLayout("YAML", infos=Layers)
 

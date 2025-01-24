@@ -1,7 +1,9 @@
-import kfactory as kf
-import numpy as np
 import warnings
+
+import numpy as np
 from conftest import Layers
+
+import kfactory as kf
 
 
 def bend_circular(

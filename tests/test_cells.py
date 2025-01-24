@@ -1,11 +1,11 @@
 import pathlib
+from functools import partial
+
 import pytest
+from conftest import Layers
 
 import kfactory as kf
-
-from functools import partial
 from kfactory.conf import logger
-from conftest import Layers
 
 
 class GeometryDifference(ValueError):

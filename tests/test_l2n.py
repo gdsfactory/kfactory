@@ -1,5 +1,6 @@
-import kfactory as kf
 from conftest import Layers
+
+import kfactory as kf
 
 pdk = kf.KCLayout("L2N", infos=Layers)
 

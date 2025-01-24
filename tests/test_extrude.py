@@ -1,7 +1,8 @@
-import kfactory as kf
-from kfactory.enclosure import extrude_path, extrude_path_dynamic
 import numpy as np
 from conftest import Layers
+
+import kfactory as kf
+from kfactory.enclosure import extrude_path_dynamic
 
 
 @kf.cell
@@ -11,7 +12,9 @@ def taper_dyn(
     c = kf.KCell()
 
     path = [kf.kdb.DPoint(x, 0) for x in range(21)]
-    _width = lambda x: width + width * np.sin(x * np.pi / 2)
+
+    def _width(x: float) -> float:
+        return float(width + width * np.sin(x * np.pi / 2))
 
     extrude_path_dynamic(c, layer, path, _width, enclosure)
 
@@ -47,7 +50,9 @@ def test_enc_extrude_dyn(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
     c = kf.KCell()
 
     path = [kf.kdb.DPoint(x, 0) for x in range(21)]
-    _width = lambda x: width + width * np.sin(x * np.pi / 2)
+
+    def _width(x: float) -> float:
+        return float(width + width * np.sin(x * np.pi / 2))
 
     enclosure.extrude_path_dynamic(c, path, layer, _width)
 
