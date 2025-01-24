@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 from .. import kdb, rdb
 from ..conf import config, logger
-from ..kcell import Instance, KCell, Port
+from ..kcell import BasePort, Instance, KCell, Port
 from ..kf_types import dbu
 from .manhattan import (
     ManhattanBundleRoutingFunction,
@@ -55,8 +55,8 @@ class RouterPostProcessFunction(Protocol):
         *,
         c: KCell,
         routers: list[ManhattanRouter],
-        start_ports: list[Port],
-        end_ports: list[Port],
+        start_ports: list[BasePort],
+        end_ports: list[BasePort],
         **kwargs: Any,
     ) -> None:
         """Implementation of post process function."""
@@ -101,8 +101,8 @@ class ManhattanRoute(BaseModel, arbitrary_types_allowed=True):
 
 def check_collisions(
     c: KCell,
-    start_ports: list[Port],
-    end_ports: list[Port],
+    start_ports: list[BasePort],
+    end_ports: list[BasePort],
     routers: list[ManhattanRouter],
     routes: list[ManhattanRoute],
     on_collision: Literal["error", "show_error"] | None = "show_error",
@@ -139,7 +139,9 @@ def check_collisions(
 
     if collision_edges or not inter_route_collisions.is_empty():
         if collision_check_layers is None:
-            collision_check_layers = list({p.layer_info for p in start_ports})
+            collision_check_layers = list(
+                {p.cross_section.main_layer for p in start_ports}
+            )
         dbu = c.kcl.dbu
         db = rdb.ReportDatabase("Routing Errors")
         cat = db.create_category("Manhattan Routing Collisions")
@@ -278,8 +280,8 @@ def get_radius(
 def route_bundle(
     *,
     c: KCell,
-    start_ports: list[Port],
-    end_ports: list[Port],
+    start_ports: list[BasePort],
+    end_ports: list[BasePort],
     route_width: dbu | list[dbu] | None = None,
     sort_ports: bool = False,
     on_collision: Literal["error", "show_error"] | None = "show_error",
@@ -416,7 +418,7 @@ def route_bundle(
     if start_angles is not None:
         if isinstance(start_angles, int):
             start_ports = [
-                p.copy(post_trans=kdb.Trans(start_angles - p.trans.angle))
+                p.transformed(post_trans=kdb.Trans(start_angles - p.get_trans().angle))
                 for p in start_ports
             ]
         else:
@@ -426,14 +428,14 @@ def route_bundle(
                     " a rotation for all ports must be provided."
                 )
             start_ports = [
-                p.copy(post_trans=kdb.Trans(a - p.trans.angle))
+                p.transformed(post_trans=kdb.Trans(a - p.get_trans().angle))
                 for a, p in zip(start_angles, start_ports)
             ]
 
     if end_angles is not None:
         if isinstance(end_angles, int):
             end_ports = [
-                p.copy(post_trans=kdb.Trans(end_angles - p.trans.angle))
+                p.transformed(post_trans=kdb.Trans(end_angles - p.get_trans().angle))
                 for p in end_ports
             ]
         else:
@@ -443,7 +445,7 @@ def route_bundle(
                     " a rotation for all ports must be provided."
                 )
             end_ports = [
-                p.copy(post_trans=kdb.Trans(a - p.trans.angle))
+                p.transformed(post_trans=kdb.Trans(a - p.get_trans().angle))
                 for a, p in zip(end_angles, start_ports)
             ]
 
@@ -453,7 +455,7 @@ def route_bundle(
         else:
             widths = route_width
     else:
-        widths = [p.width for p in start_ports]
+        widths = [p.cross_section.width for p in start_ports]
 
     routers = routing_function(
         start_ports=start_ports,
@@ -488,13 +490,13 @@ def route_bundle(
             **router_post_process_kwargs,
         )
     placer_errors: list[Exception] = []
-    error_routes: list[tuple[Port, Port, list[kdb.Point], int]] = []
+    error_routes: list[tuple[BasePort, BasePort, list[kdb.Point], int]] = []
     for router, ps, pe in zip(routers, start_ports, end_ports):
         try:
             route = placer_function(
                 c,
-                ps,
-                pe,
+                Port(base=ps),
+                Port(base=pe),
                 router.start.pts,
                 **placer_kwargs,
             )
@@ -518,7 +520,7 @@ def route_bundle(
                 f" points (dbu): {pts}"
             )
             it.add_value(f"Exception: {error}")
-            path = kdb.Path(pts, width or ps.width)
+            path = kdb.Path(pts, width or ps.cross_section.width)
             print(f"{width=}")
             it.add_value(c.kcl.to_um(path.polygon()))
         c.show(lyrdb=db)

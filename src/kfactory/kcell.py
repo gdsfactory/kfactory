@@ -7445,6 +7445,17 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             port_type=self.port_type,
         )
 
+    def get_trans(self) -> kdb.Trans:
+        return (
+            self.trans
+            or kdb.ICplxTrans(trans=self.dcplx_trans, dbu=self.kcl.dbu).s_trans()  # type: ignore[arg-type]
+        )
+
+    def get_dcplx_trans(self) -> kdb.DCplxTrans:
+        return self.dcplx_trans or kdb.DCplxTrans(
+            self.trans.to_dtype(self.kcl.dbu)  # type: ignore[union-attr]
+        )
+
 
 class ProtoPort(ABC, Generic[TUnit]):
     yaml_tag: str = "!Port"

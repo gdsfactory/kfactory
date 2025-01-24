@@ -471,8 +471,8 @@ def test_custom_router(
 
     kf.routing.generic.route_bundle(
         c=c,
-        start_ports=start_ports,
-        end_ports=end_ports,
+        start_ports=[p._base for p in start_ports],
+        end_ports=[p._base for p in end_ports],
         ends=50_000,
         starts=50_000,
         routing_function=kf.routing.manhattan.route_smart,

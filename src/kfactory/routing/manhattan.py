@@ -11,7 +11,7 @@ from typing import Any, Literal, ParamSpec, Protocol, TypedDict
 from .. import kdb
 from ..conf import logger
 from ..enclosure import clean_points
-from ..kcell import KCell, KCLayout, Port, ProtoPort, TUnit
+from ..kcell import BasePort, KCell, KCLayout, Port
 from .steps import Step, Steps, Straight
 
 __all__ = [
@@ -61,11 +61,11 @@ class ManhattanBundleRoutingFunction(Protocol):
     def __call__(
         self,
         *,
-        start_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
-        end_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
+        start_ports: Sequence[BasePort | kdb.Trans],
+        end_ports: Sequence[BasePort | kdb.Trans],
         starts: list[list[Step]],
         ends: list[list[Step]],
-        widths: list[TUnit] | None = None,
+        widths: list[int] | None = None,
         **kwargs: Any,
     ) -> list[ManhattanRouter]: ...
 
@@ -617,8 +617,8 @@ def path_length_match_manhattan_route(
     *,
     c: KCell,
     routers: list[ManhattanRouter],
-    start_ports: list[Port],
-    end_ports: list[Port],
+    start_ports: list[BasePort],
+    end_ports: list[BasePort],
     bend90_radius: int | None = None,
     separation: int | None = None,
     path_length: int | None = None,
@@ -818,9 +818,9 @@ def _place_dl_path_length(
 
 def route_smart(
     *,
-    start_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
-    end_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
-    widths: list[TUnit] | None = None,
+    start_ports: Sequence[BasePort | kdb.Trans],
+    end_ports: Sequence[BasePort | kdb.Trans],
+    widths: list[int] | None = None,
     bend90_radius: int | None = None,
     separation: int | None = None,
     starts: list[list[Step]] = [],
@@ -885,10 +885,12 @@ def route_smart(
     if length == 0:
         return []
 
-    start_ts = [p.trans if isinstance(p, Port) else p for p in start_ports]
-    end_ts = [p.trans if isinstance(p, Port) else p for p in end_ports]
+    start_ts = [p.get_trans() if isinstance(p, BasePort) else p for p in start_ports]
+    end_ts = [p.get_trans() if isinstance(p, BasePort) else p for p in end_ports]
     if widths is None:
-        widths = [p.width if isinstance(p, Port) else 0 for p in start_ports]
+        widths = [
+            p.cross_section.width if isinstance(p, BasePort) else 0 for p in start_ports
+        ]
     box_region = kdb.Region()
     if bboxes:
         for box in bboxes:

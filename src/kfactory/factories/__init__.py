@@ -6,7 +6,22 @@ from .. import KCell
 from . import bezier, circular, euler, straight, taper, virtual
 
 
-class StraightFactory(Protocol):
+class StraightFactoryDBU(Protocol):
+    """Factory Protocol for routing.
+
+    A straight factory must return a KCell with only a width and length given.
+    """
+
+    def __call__(self, width: int, length: int) -> KCell:
+        """Produces the KCell.
+
+        E.g. in a function this would amount to
+        `straight_factory(length=10_000, width=1000)`
+        """
+        ...
+
+
+class StraightFactoryUM(Protocol):
     """Factory Protocol for routing.
 
     A straight factory must return a KCell with only a width and length given.
@@ -28,5 +43,6 @@ __all__ = [
     "straight",
     "taper",
     "virtual",
-    "StraightFactory",
+    "StraightFactoryDBU",
+    "StraightFactoryUM",
 ]

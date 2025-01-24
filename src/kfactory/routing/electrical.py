@@ -242,8 +242,8 @@ def route_bundle(
     """
     return route_bundle_generic(
         c=c,
-        start_ports=start_ports,
-        end_ports=end_ports,
+        start_ports=[p._base for p in start_ports],
+        end_ports=[p._base for p in end_ports],
         starts=starts,
         ends=ends,
         routing_function=route_smart,
@@ -386,8 +386,8 @@ def route_bundle_dual_rails(
         ends = end_straights
     return route_bundle_generic(
         c=c,
-        start_ports=start_ports,
-        end_ports=end_ports,
+        start_ports=[p._base for p in start_ports],
+        end_ports=[p._base for p in end_ports],
         routing_function=route_smart,
         starts=starts,
         ends=ends,

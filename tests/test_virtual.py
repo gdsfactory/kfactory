@@ -53,7 +53,7 @@ def test_virtual_cell_insert(
 
 def test_all_angle_route(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
     bb = [kf.kdb.DPoint(x, y) for x, y in [(0, 0), (500, 0), (250, 200), (500, 250)]]
-    vc = kf.VKCell("test_all_angle")
+    vc = kf.VKCell(name="test_all_angle")
     kf.routing.aa.optical.route(
         vc,
         width=5,
