@@ -82,7 +82,7 @@ where = ["src"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-exclude = ["src/kfactory/widgets/interactive.py", "src/kfactory/routing/*.py"]
+exclude = ["src/kfactory/widgets/interactive.py", "src/kfactory/routing/"]
 plugins = "pydantic.mypy, numpy.typing.mypy_plugin"
 
 [tool.pylsp-mypy]
