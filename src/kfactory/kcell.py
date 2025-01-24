@@ -118,8 +118,9 @@ K = TypeVar("K", bound="KCell | DKCell", covariant=True)
 KC = TypeVar("KC", bound="ProtoTKCell[Any]", covariant=True)
 LI = TypeVar("LI", bound="LayerInfos", covariant=True)
 C = TypeVar("C", bound="Constants", covariant=True)
-TUnit = TypeVar("TUnit", bound=int | float)
+TUnit = TypeVar("TUnit", int, float)
 TUnit_co = TypeVar("TUnit_co", bound=int | float, covariant=True)
+TUnit_contra = TypeVar("TUnit_contra", bound=int | float, contravariant=True)
 TPort = TypeVar("TPort", bound="ProtoPort[Any]")
 
 KCellParams = ParamSpec("KCellParams")
@@ -2233,6 +2234,22 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         """Create a KCell from a KLayout Cell."""
         return cls(base_kcell=kcell._base_kcell)
 
+    def to_kcell(self) -> KCell:
+        return KCell(base_kcell=self._base_kcell)
+
+    @overload
+    @abstractmethod
+    def to_dbu(self, value: TUnit) -> int: ...
+
+    @overload
+    @abstractmethod
+    def to_dbu(self, value: PointLike[TUnit]) -> kdb.Point: ...
+
+    @abstractmethod
+    def to_dbu(self, value: TUnit | PointLike[TUnit]) -> int | kdb.Point:
+        """Convert a value to dbu."""
+        ...
+
     @property
     @abstractmethod
     def insts(self) -> ProtoInstances[TUnit]: ...
@@ -2681,9 +2698,10 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             kc = self.kcl[kci]
             kc.insert_vinsts()
 
+        filename = str(filename)
         if autoformat_from_file_extension:
             save_options.set_format_from_filename(filename)
-        self._base_kcell.kdb_cell.write(str(filename), save_options)
+        self._base_kcell.kdb_cell.write(filename, save_options)
 
     def read(
         self,
@@ -3977,6 +3995,18 @@ class DKCell(ProtoTKCell[float]):
             raise LockedError(self)
         return self.ports.create_port(**kwargs)
 
+    @overload
+    def to_dbu(self, value: float) -> int: ...
+
+    @overload
+    def to_dbu(self, value: PointLike[float]) -> kdb.Point: ...
+
+    def to_dbu(self, value: float | PointLike[float]) -> int | kdb.Point:
+        """Convert a value to dbu."""
+        if isinstance(value, PointLike):
+            return kdb.Point(self.to_dbu(value.x), self.to_dbu(value.y))
+        return self.kcl.to_dbu(value)
+
 
 class KCell(ProtoTKCell[int]):
     """Cell with integer units."""
@@ -4053,6 +4083,18 @@ class KCell(ProtoTKCell[int]):
         if self.locked:
             raise LockedError(self)
         return self.ports.create_port(**kwargs)
+
+    @overload
+    def to_dbu(self, value: int) -> int: ...
+
+    @overload
+    def to_dbu(self, value: PointLike[int]) -> kdb.Point: ...
+
+    def to_dbu(self, value: int | PointLike[int]) -> int | kdb.Point:
+        """Convert a value to dbu."""
+        if isinstance(value, PointLike):
+            return kdb.Point(value.x, value.y)
+        return value
 
     @classmethod
     def from_yaml(
@@ -7594,6 +7636,10 @@ class ProtoPort(ABC, Generic[TUnit]):
         else:
             self._base.trans = kdb.ICplxTrans(value.dup(), self.kcl.dbu).s_trans()
 
+    def to_port(self) -> Port:
+        """Convert the port to a regular port."""
+        return Port(base=self._base)
+
     @property
     @abstractmethod
     def x(self) -> TUnit: ...
@@ -7648,57 +7694,21 @@ class ProtoPort(ABC, Generic[TUnit]):
         else:
             self._base.dcplx_trans.mirror = value  # type: ignore[union-attr]
 
-    @overload
-    @abstractmethod
-    def copy(
-        self: ProtoPort[int],
-        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
-        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
-    ) -> Port: ...
-
-    @overload
-    @abstractmethod
-    def copy(
-        self: ProtoPort[float],
-        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
-        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
-    ) -> DPort: ...
-
     @abstractmethod
     def copy(
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
-    ) -> Port | DPort: ...
-
-    @overload
-    @abstractmethod
-    def copy_polar(
-        self: ProtoPort[int],
-        d: int,
-        d_orth: int,
-        angle: int,
-        mirror: bool = False,
-    ) -> Port: ...
-
-    @overload
-    @abstractmethod
-    def copy_polar(
-        self: ProtoPort[float],
-        d: float,
-        d_orth: float,
-        angle: float,
-        mirror: bool = False,
-    ) -> DPort: ...
+    ) -> ProtoPort[TUnit]: ...
 
     @abstractmethod
     def copy_polar(
         self,
-        d: int | float,
-        d_orth: int | float,
-        angle: int | float,
+        d: TUnit,
+        d_orth: TUnit,
+        angle: TUnit,
         mirror: bool = False,
-    ) -> Port | DPort: ...
+    ) -> ProtoPort[TUnit]: ...
 
     @property
     def dx(self) -> float:

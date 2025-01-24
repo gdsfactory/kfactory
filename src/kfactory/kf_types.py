@@ -3,7 +3,7 @@
 Mainly units for annotating types.
 """
 
-from typing import Annotated
+from typing import Annotated, TypeAlias
 
 from . import kdb
 from .kcell import (
@@ -21,3 +21,5 @@ rad = Annotated[float, "rad"]
 layer = Annotated[int | LayerEnum, "layer"]
 """Integer or enum index of a Layer."""
 layer_info = Annotated[kdb.LayerInfo, "layer info"]
+unit: TypeAlias = int | float
+"""Database unit or micrometer."""

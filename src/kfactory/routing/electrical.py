@@ -5,7 +5,7 @@ from typing import Any, Literal
 
 from .. import kdb
 from ..conf import logger
-from ..kcell import KCell, Port
+from ..kcell import KCell, PointLike, Port, ProtoPort, ProtoTKCell, TUnit
 from ..kf_types import dbu
 from .generic import ManhattanRoute
 from .generic import route_bundle as route_bundle_generic
@@ -24,15 +24,15 @@ __all__ = [
 
 
 def route_elec(
-    c: KCell,
-    p1: Port,
-    p2: Port,
-    start_straight: int | None = None,
-    end_straight: int | None = None,
+    c: ProtoTKCell[TUnit],
+    p1: ProtoPort[TUnit],
+    p2: ProtoPort[TUnit],
+    start_straight: TUnit | None = None,
+    end_straight: TUnit | None = None,
     route_path_function: ManhattanRoutePathFunction = route_manhattan,
-    width: dbu | None = None,
+    width: TUnit | None = None,
     layer: int | None = None,
-    minimum_straight: int | None = None,
+    minimum_straight: TUnit | None = None,
 ) -> None:
     """Connect two ports with a wire.
 
@@ -53,44 +53,53 @@ def route_elec(
         layer: Layer to place the wire on. Calculated from the start port if `None`.
         minimum_straight: require a minimum straight
     """
-    if width is None:
-        width = p1.width
+    c_ = c.to_kcell()
+    p1_ = p1.to_port()
+    p2_ = p2.to_port()
+    width_ = c.to_dbu(width) if width is not None else None
+    start_straight_ = c.to_dbu(start_straight) if start_straight is not None else None
+    end_straight_ = c.to_dbu(end_straight) if end_straight is not None else None
+    minimum_straight_ = (
+        c.to_dbu(minimum_straight) if minimum_straight is not None else None
+    )
+    if width_ is None:
+        width_ = p1_.width
     if layer is None:
         layer = p1.layer
-    if start_straight is None:
-        start_straight = round(width / 2)
-    if end_straight is None:
-        end_straight = round(width / 2)
+    if start_straight_ is None:
+        start_straight_ = round(width_ / 2)
+    if end_straight_ is None:
+        end_straight_ = round(width_ / 2)
 
-    if minimum_straight is not None:
-        start_straight = min(minimum_straight // 2, start_straight)
-        end_straight = min(minimum_straight // 2, end_straight)
+    if minimum_straight_ is not None:
+        start_straight_ = min(minimum_straight_ // 2, start_straight_)
+        end_straight_ = min(minimum_straight_ // 2, end_straight_)
 
         pts = route_path_function(
-            p1.copy(),
-            p2.copy(),
-            bend90_radius=minimum_straight,
-            start_steps=[Straight(dist=start_straight)],
-            end_steps=[Straight(dist=end_straight)],
+            p1_.copy(),
+            p2_.copy(),
+            bend90_radius=minimum_straight_,
+            start_steps=[Straight(dist=start_straight_)],
+            end_steps=[Straight(dist=end_straight_)],
         )
     else:
         pts = route_path_function(
-            p1.copy(),
-            p2.copy(),
+            p1_.copy(),
+            p2_.copy(),
             bend90_radius=0,
-            start_steps=[Straight(dist=start_straight)],
-            end_steps=[Straight(dist=end_straight)],
+            start_steps=[Straight(dist=start_straight_)],
+            end_steps=[Straight(dist=end_straight_)],
         )
 
-    path = kdb.Path(pts, width)
-    c.shapes(layer).insert(path.polygon())
+    path = kdb.Path(pts, width_)
+    c_.shapes(layer).insert(path.polygon())
 
 
 def route_L(
-    c: KCell,
-    input_ports: list[Port],
+    c: ProtoTKCell[TUnit],
+    input_ports: Sequence[ProtoPort[TUnit]],
     output_orientation: int = 1,
-    wire_spacing: dbu = 10000,
+    wire_spacing: TUnit = 10000,
 ) -> list[Port]:
     """Route ports towards a bundle in an L shape.
 
@@ -99,30 +108,33 @@ def route_L(
     The function will produce a L-shape routing to connect input ports to output ports
     without any crossings.
     """
-    input_ports.sort(key=lambda p: p.y)
+    input_ports_ = [p.to_port() for p in input_ports]
+    c_ = c.to_kcell()
+    input_ports_.sort(key=lambda p: p.y)
+    wire_spacing_ = c.to_dbu(wire_spacing)
 
-    y_max = input_ports[-1].y
-    y_min = input_ports[0].y
-    x_max = max(p.x for p in input_ports)
+    y_max = input_ports_[-1].y
+    y_min = input_ports_[0].y
+    x_max = max(p.x for p in input_ports_)
 
-    output_ports = []
+    output_ports: list[Port] = []
     if output_orientation == 1:
-        for i, p in enumerate(input_ports[::-1]):
+        for i, p in enumerate(input_ports_[::-1]):
             temp_port = p.copy()
             temp_port.trans = kdb.Trans(
-                3, False, x_max - wire_spacing * (i + 1), y_max + wire_spacing
+                3, False, x_max - wire_spacing_ * (i + 1), y_max + wire_spacing_
             )
 
-            route_elec(c, p, temp_port)
+            route_elec(c_, p, temp_port)
             temp_port.trans.angle = 1
             output_ports.append(temp_port)
     elif output_orientation == 3:
-        for i, p in enumerate(input_ports):
+        for i, p in enumerate(input_ports_):
             temp_port = p.copy()
             temp_port.trans = kdb.Trans(
-                1, False, x_max - wire_spacing * (i + 1), y_min - wire_spacing
+                1, False, x_max - wire_spacing_ * (i + 1), y_min - wire_spacing_
             )
-            route_elec(c, p, temp_port)
+            route_elec(c_, p, temp_port)
             temp_port.trans.angle = 3
             output_ports.append(temp_port)
     else:
@@ -458,11 +470,11 @@ def route_dual_rails(
 
 
 def place_single_wire(
-    c: KCell,
-    p1: Port,
-    p2: Port,
-    pts: Sequence[kdb.Point],
-    route_width: dbu | None = None,
+    c: ProtoTKCell[TUnit],
+    p1: ProtoPort[TUnit],
+    p2: ProtoPort[TUnit],
+    pts: Sequence[PointLike[TUnit]],
+    route_width: TUnit | None = None,
     layer_info: kdb.LayerInfo | None = None,
     **kwargs: Any,
 ) -> ManhattanRoute:
@@ -480,47 +492,52 @@ def place_single_wire(
             `p2.width`.
         kwargs: Compatibility for type checkers. Throws an error if not empty.
     """
+    c_ = c.to_kcell()
+    p1_ = p1.to_port()
+    p2_ = p2.to_port()
+    pts_ = [c.to_dbu(pt) for pt in pts]
+    route_width_ = c.to_dbu(route_width) if route_width is not None else None
     if layer_info is None:
         layer_info = p1.layer_info
-    if route_width is None:
-        route_width = p1.width
+    if route_width_ is None:
+        route_width_ = p1_.width
     if kwargs:
         raise ValueError(
             f"Additional kwargs aren't supported in route_single_wire {kwargs=}"
         )
 
     shape = (
-        c.shapes(c.layer(layer_info))
-        .insert(kdb.Path(pts, width=route_width).polygon())
+        c_.shapes(c_.layer(layer_info))
+        .insert(kdb.Path(pts_, width=route_width_).polygon())
         .polygon
     )
 
     _length = 0.0
-    pt1 = pts[0]
-    for pt2 in pts[1:]:
+    pt1 = pts_[0]
+    for pt2 in pts_[1:]:
         _length += (pt2 - pt1).length()
 
     return ManhattanRoute(
-        backbone=pts,
-        start_port=p1,
-        end_port=p2,
+        backbone=pts_,
+        start_port=p1_,
+        end_port=p2_,
         taper_length=0,
         bend90_radius=0,
         polygons={layer_info: [shape]},
         instances=[],
         length=round(_length),
-        length_straight=round(_length),
+        length_straights=round(_length),
     )
 
 
 def place_dual_rails(
-    c: KCell,
-    p1: Port,
-    p2: Port,
-    pts: Sequence[kdb.Point],
-    route_width: dbu | None = None,
+    c: ProtoTKCell[TUnit],
+    p1: ProtoPort[TUnit],
+    p2: ProtoPort[TUnit],
+    pts: Sequence[PointLike[TUnit]],
+    route_width: TUnit | None = None,
     layer_info: kdb.LayerInfo | None = None,
-    separation_rails: dbu | None = None,
+    separation_rails: TUnit | None = None,
     **kwargs: Any,
 ) -> ManhattanRoute:
     """Placer function for a single wire.
@@ -538,32 +555,42 @@ def place_dual_rails(
         separation_rails: Separation between the two rails.
         kwargs: Compatibility for type checkers. Throws an error if not empty.
     """
+    c_ = c.to_kcell()
+    p1_ = p1.to_port()
+    p2_ = p2.to_port()
+    pts_ = [c.to_dbu(pt) for pt in pts]
+    route_width_ = c.to_dbu(route_width) if route_width is not None else None
+    separation_rails_ = (
+        c.to_dbu(separation_rails) if separation_rails is not None else None
+    )
     if kwargs:
         raise ValueError(
             f"Additional kwargs aren't supported in route_dual_rails {kwargs=}"
         )
     if layer_info is None:
         layer_info = p1.layer_info
-    if route_width is None:
-        route_width = p1.width
-    if separation_rails is None:
+    if route_width_ is None:
+        route_width_ = p1_.width
+    if separation_rails_ is None:
         raise ValueError("Must specify a separation between the two rails.")
-    if separation_rails >= route_width:
-        raise ValueError(f"{separation_rails=} must be smaller than the {route_width}")
+    if separation_rails_ >= route_width_:
+        raise ValueError(
+            f"{separation_rails_=} must be smaller than the {route_width_}"
+        )
 
-    region = kdb.Region(kdb.Path(pts, route_width)) - kdb.Region(
-        kdb.Path(pts, separation_rails)
+    region = kdb.Region(kdb.Path(pts_, route_width_)) - kdb.Region(
+        kdb.Path(pts_, separation_rails_)
     )
 
     shapes = [
-        c.shapes(c.layer(layer_info)).insert(region[0]).polygon,
-        c.shapes(c.layer(layer_info)).insert(region[1]).polygon,
+        c_.shapes(c_.layer(layer_info)).insert(region[0]).polygon,
+        c_.shapes(c_.layer(layer_info)).insert(region[1]).polygon,
     ]
 
     return ManhattanRoute(
-        backbone=pts,
-        start_port=p1,
-        end_port=p2,
+        backbone=pts_,
+        start_port=p1_,
+        end_port=p2_,
         taper_length=0,
         bend90_radius=0,
         polygons={layer_info: shapes},
