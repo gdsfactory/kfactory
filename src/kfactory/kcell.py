@@ -106,6 +106,7 @@ __all__ = [
     "KCLayout",
     "KCell",
     "KCellParams",
+    "DKCell",
     "LayerEnum",
     "MetaData",
     "Port",
@@ -1956,6 +1957,15 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
 class ProtoKCell(ABC, Generic[TUnit]):
     _base_kcell: BaseKCell
 
+    @abstractmethod
+    def bbox(self, layer: LayerEnum | int | None = None) -> BoxLike[TUnit]: ...
+
+    @abstractmethod
+    def ibbox(self, layer: LayerEnum | int | None = None) -> BoxLike[int]: ...
+
+    @abstractmethod
+    def dbbox(self, layer: LayerEnum | int | None = None) -> BoxLike[float]: ...
+
     @property
     def locked(self) -> bool:
         return self._base_kcell.locked
@@ -3250,96 +3260,142 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     f" Available formats are 'default' or 'legacy'."
                 )
 
+    def ibbox(self, layer: LayerEnum | int | None = None) -> kdb.Box:
+        if layer is None:
+            return self._base_kcell.kdb_cell.bbox()
+        return self._base_kcell.kdb_cell.bbox(layer)
+
+    def dbbox(self, layer: LayerEnum | int | None = None) -> kdb.DBox:
+        if layer is None:
+            return self._base_kcell.kdb_cell.dbbox()
+        return self._base_kcell.kdb_cell.dbbox(layer)
+
     @property
-    def x(self) -> int:
+    @abstractmethod
+    def x(self) -> TUnit: ...
+
+    @property
+    @abstractmethod
+    def y(self) -> TUnit: ...
+
+    @property
+    @abstractmethod
+    def xmin(self) -> TUnit: ...
+
+    @property
+    @abstractmethod
+    def center(self) -> tuple[TUnit, TUnit]: ...
+
+    @property
+    @abstractmethod
+    def ymin(self) -> TUnit: ...
+
+    @property
+    @abstractmethod
+    def xmax(self) -> TUnit: ...
+
+    @property
+    @abstractmethod
+    def ymax(self) -> TUnit: ...
+
+    @property
+    @abstractmethod
+    def xsize(self) -> TUnit: ...
+
+    @property
+    @abstractmethod
+    def ysize(self) -> TUnit: ...
+
+    @property
+    def ix(self) -> int:
         """Returns the x-coordinate of the center of the bounding box."""
-        return self._base_kcell.kdb_cell.bbox().center().x
+        return self.ibbox().center().x
 
     @property
-    def y(self) -> int:
+    def iy(self) -> int:
         """Returns the y-coordinate of the center of the bounding box."""
-        return self._base_kcell.kdb_cell.bbox().center().y
+        return self.ibbox().center().y
 
     @property
-    def xmin(self) -> int:
+    def ixmin(self) -> int:
         """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._base_kcell.kdb_cell.bbox().left
+        return self.ibbox().left
 
     @property
-    def center(self) -> tuple[int, int]:
+    def icenter(self) -> tuple[int, int]:
         """Returns the coordinate center of the bounding box."""
-        center = self._base_kcell.kdb_cell.bbox().center()
+        center = self.ibbox().center()
         return center.x, center.y
 
     @property
-    def ymin(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._base_kcell.kdb_cell.bbox().bottom
+    def iymin(self) -> int:
+        """Returns the y-coordinate of the bottom edge of the bounding box."""
+        return self.ibbox().bottom
 
     @property
-    def xmax(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._base_kcell.kdb_cell.bbox().right
+    def ixmax(self) -> int:
+        """Returns the x-coordinate of the right edge of the bounding box."""
+        return self.ibbox().right
 
     @property
-    def ymax(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._base_kcell.kdb_cell.bbox().top
+    def iymax(self) -> int:
+        """Returns the y-coordinate of the top edge of the bounding box."""
+        return self.ibbox().top
 
     @property
-    def xsize(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._base_kcell.kdb_cell.bbox().width()
+    def ixsize(self) -> int:
+        """Returns the width of the bounding box."""
+        return self.ibbox().width()
 
     @property
-    def ysize(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._base_kcell.kdb_cell.bbox().height()
+    def iysize(self) -> int:
+        """Returns the height of the bounding box."""
+        return self.ibbox().height()
 
     @property
     def dxmin(self) -> float:
         """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._base_kcell.kdb_cell.dbbox().left
+        return self.dbbox().left
 
     @property
     def dymin(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._base_kcell.kdb_cell.dbbox().bottom
+        """Returns the y-coordinate of the bottom edge of the bounding box."""
+        return self.dbbox().bottom
 
     @property
     def dxmax(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._base_kcell.kdb_cell.dbbox().right
+        """Returns the x-coordinate of the right edge of the bounding box."""
+        return self.dbbox().right
 
     @property
     def dymax(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self._base_kcell.kdb_cell.dbbox().top
+        """Returns the y-coordinate of the top edge of the bounding box."""
+        return self.dbbox().top
 
     @property
     def dxsize(self) -> float:
         """Returns the width of the bounding box."""
-        return self._base_kcell.kdb_cell.dbbox().width()
+        return self.dbbox().width()
 
     @property
     def dysize(self) -> float:
         """Returns the height of the bounding box."""
-        return self._base_kcell.kdb_cell.dbbox().height()
+        return self.dbbox().height()
 
     @property
     def dx(self) -> float:
-        """X coordinate of the port in um."""
-        return self._base_kcell.kdb_cell.dbbox().center().x
+        """X coordinate of the center of the bounding box in um."""
+        return self.dbbox().center().x
 
     @property
     def dy(self) -> float:
-        """Y coordinate of the port in um."""
-        return self._base_kcell.kdb_cell.dbbox().center().y
+        """Y coordinate of the center of the bounding box in um."""
+        return self.dbbox().center().y
 
     @property
     def dcenter(self) -> tuple[float, float]:
-        """Coordinate of the port in um."""
-        center = self._base_kcell.kdb_cell.dbbox().center()
+        """Coordinate of the center of the bounding box in um."""
+        center = self.dbbox().center()
         return center.x, center.y
 
     @property
@@ -3381,7 +3437,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         circ = kdb.Circuit()
         circ.name = self.name
         circ.cell_index = self.cell_index()
-        circ.boundary = self.boundary or self.dbbox()
+        circ.boundary = self.boundary or kdb.DPolygon(self.dbbox())
 
         inst_ports: dict[
             str,
@@ -4010,6 +4066,7 @@ class DKCell(ProtoTKCell[float]):
 
     @property
     def insts(self) -> DInstances:
+        """Instances associated with the cell."""
         return DInstances(cell=self._base_kcell)
 
     def create_port(self, **kwargs: Any) -> DPort:
@@ -4017,6 +4074,57 @@ class DKCell(ProtoTKCell[float]):
         if self.locked:
             raise LockedError(self)
         return self.ports.create_port(**kwargs)
+
+    def bbox(self, layer: LayerEnum | int | None = None) -> BoxLike[float]:
+        """Returns the bounding box of the cell."""
+        if layer is None:
+            return self.dbbox()
+        return self.dbbox(layer)
+
+    @property
+    def x(self) -> float:
+        """Returns the x-coordinate of the center of the bounding box."""
+        return self.dx
+
+    @property
+    def y(self) -> float:
+        """Returns the y-coordinate of the center of the bounding box."""
+        return self.dy
+
+    @property
+    def xmin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dxmin
+
+    @property
+    def center(self) -> tuple[float, float]:
+        """Returns the coordinate center of the bounding box."""
+        return self.dcenter
+
+    @property
+    def ymin(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dymin
+
+    @property
+    def xmax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dxmax
+
+    @property
+    def ymax(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dymax
+
+    @property
+    def xsize(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dxsize
+
+    @property
+    def ysize(self) -> float:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.dysize
 
 
 class KCell(ProtoTKCell[int]):
@@ -4094,6 +4202,57 @@ class KCell(ProtoTKCell[int]):
         if self.locked:
             raise LockedError(self)
         return self.ports.create_port(**kwargs)
+
+    def bbox(self, layer: LayerEnum | int | None = None) -> kdb.Box:
+        """Returns the bounding box of the cell."""
+        if layer is None:
+            return self.ibbox()
+        return self.ibbox(layer)
+
+    @property
+    def x(self) -> int:
+        """Returns the x-coordinate of the center of the bounding box."""
+        return self.ix
+
+    @property
+    def y(self) -> int:
+        """Returns the y-coordinate of the center of the bounding box."""
+        return self.iy
+
+    @property
+    def xmin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.ixmin
+
+    @property
+    def center(self) -> tuple[int, int]:
+        """Returns the coordinate center of the bounding box."""
+        return self.icenter
+
+    @property
+    def ymin(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.iymin
+
+    @property
+    def xmax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.ixmax
+
+    @property
+    def ymax(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.iymax
+
+    @property
+    def xsize(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.ixsize
+
+    @property
+    def ysize(self) -> int:
+        """Returns the x-coordinate of the left edge of the bounding box."""
+        return self.iysize
 
     @classmethod
     def from_yaml(
@@ -6317,8 +6476,11 @@ class VKCell(ProtoKCell[float]):
 
         return box
 
-    def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
-        return self.bbox(layer=layer)
+    def ibbox(self, layer: LayerEnum | int | None = None) -> kdb.Box:
+        return self.bbox(layer).to_itype(self.kcl.dbu)
+
+    def dbbox(self, layer: LayerEnum | int | None = None) -> kdb.DBox:
+        return self.bbox(layer)
 
     def __getitem__(self, key: int | str | None) -> DPort:
         """Returns port from instance."""
