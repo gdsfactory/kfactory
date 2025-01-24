@@ -2113,7 +2113,6 @@ class TKCell(BaseKCell):
 
     kdb_cell: kdb.Cell
     boundary: kdb.DPolygon | None = None
-    insts: list[kdb.Instance] = Field(default_factory=list)
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -2150,10 +2149,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         _kdb_cell = kdb_cell or _kcl.create_cell(_name)
         if _name == "Unnamed_!":
             _kdb_cell.name = f"Unnamed_{_kdb_cell.cell_index()}"
-        insts: list[kdb.Instance] = list(_kdb_cell.each_inst())
         self._base_kcell = TKCell(
             kcl=_kcl,
-            insts=insts,
             info=Info(**(info or {})),
             settings=KCellSettings(**(settings or {})),
             kdb_cell=_kdb_cell,
@@ -2164,12 +2161,6 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     @property
     def base_kcell(self) -> TKCell:
         return self._base_kcell
-
-    def evaluate_insts(self) -> None:
-        """Check all KLayout instances and create kfactory Instances."""
-        self._base_kcell.insts.clear()
-        for inst in self._base_kcell.kdb_cell.each_inst():
-            self._base_kcell.insts.append(inst)
 
     def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]:
         """Returns port from instance."""
@@ -2519,14 +2510,12 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 if lib_ci not in self.kcl.tkcells:
                     cell.set_meta_data()
                     kcell = self.kcl[lib_ci]
-                    kcell.rebuild()
                     kcell.get_meta_data()
                 if libcell_as_static:
                     cell.set_meta_data()
                     ci = self.kcl.convert_cell_to_static(lib_ci)
                     kcell = self.kcl[ci]
                     kcell.copy_meta_info(cell.kdb_cell)
-                    kcell.rebuild()
                     kcell.name = cell.kcl.name + static_name_separator + cell.name
                     if cell.kcl.dbu != self.kcl.dbu:
                         for port, lib_port in zip(kcell.ports, cell.ports):
@@ -2537,16 +2526,14 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     ci = lib_ci
 
         if a is None:
-            ca = self._base_kcell.kdb_cell.insert(kdb.CellInstArray(ci, trans))
+            inst = self._base_kcell.kdb_cell.insert(kdb.CellInstArray(ci, trans))
         else:
             if b is None:
                 b = kdb.Vector()
-            ca = self._base_kcell.kdb_cell.insert(
+            inst = self._base_kcell.kdb_cell.insert(
                 kdb.CellInstArray(ci, trans, a, b, na, nb)
             )
-        inst: Instance = Instance(self.kcl, ca)
-        self.insts.append(inst)
-        return inst
+        return Instance(kcl=self.kcl, instance=inst)
 
     def _kdb_copy(self) -> kdb.Cell:
         return self._base_kcell.kdb_cell.dup()
@@ -2591,22 +2578,15 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             vinst.insert_into_flat(self)
         self._base_kcell.vinsts = []
         self._base_kcell.kdb_cell.flatten(False)
-        self._base_kcell.insts = []
 
         if merge:
-            for layer in self.kcl.layer_indexes():
+            for layer in self.kcl.layout.layer_indexes():
                 reg = kdb.Region(self.shapes(layer))
                 reg = reg.merge()
                 texts = kdb.Texts(self.shapes(layer))
-                self.clear(layer)
+                self.kdb_cell.clear(layer)
                 self.shapes(layer).insert(reg)
                 self.shapes(layer).insert(texts)
-
-    def rebuild(self) -> None:
-        """Rebuild the instances of the KCell."""
-        self.insts.clear()
-        for _inst in self._base_kcell.kdb_cell.each_inst():
-            self.insts.append(Instance(self.kcl, _inst))
 
     def convert_to_static(self, recursive: bool = True) -> None:
         """Convert the KCell to a static cell if it is pdk KCell."""
@@ -2644,7 +2624,6 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 c.replace(inst, ca)
 
         self.kcl.layout.delete_cell(_old_kdb_cell.cell_index())
-        self.rebuild()
 
     def draw_ports(self) -> None:
         """Draw all the ports on their respective layer."""
@@ -2855,7 +2834,6 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
             for c in new_cis:
                 kc = self.kcl[c]
-                kc.rebuild()
                 kc.get_meta_data(meta_format=meta_format)
         else:
             cis = self.kcl.tkcells.keys()
@@ -2863,10 +2841,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
             for c in new_cis & cis:
                 kc = self.kcl[c]
-                kc.rebuild()
                 kc.get_meta_data(meta_format=meta_format)
 
-        self.rebuild()
         self.get_meta_data(meta_format=meta_format)
 
         return cell_ids
@@ -4034,7 +4010,7 @@ class DKCell(ProtoTKCell[float]):
 
     @property
     def insts(self) -> DInstances:
-        return DInstances(kcl=self.kcl, bases=self._base_kcell.insts)
+        return DInstances(cell=self._base_kcell)
 
     def create_port(self, **kwargs: Any) -> DPort:
         """Create a port in the cell."""
@@ -4111,7 +4087,7 @@ class KCell(ProtoTKCell[int]):
     @property
     def insts(self) -> Instances:
         """Instances associated with the cell."""
-        return Instances(kcl=self.kcl, bases=self._base_kcell.insts)
+        return Instances(cell=self._base_kcell)
 
     def create_port(self, **kwargs: Any) -> Port:
         """Create a port in the cell."""
@@ -6026,7 +6002,6 @@ class KCLayout(
 
         for c in load_cells & cells:
             kc = self.kcells[c.cell_index()]
-            kc.rebuild()
             kc.get_meta_data(meta_format=meta_format)
 
         return lm
@@ -9064,7 +9039,6 @@ class ProtoInstance(ABC, Generic[TUnit]):
             pc = self.parent_cell
             self._instance.flatten(levels)
             del pc.insts[self]
-            pc.evaluate_insts()
         else:
             pc = self.parent_cell
             self._instance.flatten()
@@ -9766,25 +9740,19 @@ class DInstance(ProtoInstance[float]):
 
 
 class ProtoInstances(Generic[TUnit], ABC):
-    _insts: list[kdb.Instance]
-    _kcl: KCLayout
+    _tkcell: TKCell
 
-    def __init__(
-        self,
-        kcl: KCLayout,
-        insts: Iterable[ProtoInstance[Any]] | None = None,
-        bases: list[kdb.Instance] | None = None,
-    ) -> None:
+    def __init__(self, cell: TKCell) -> None:
         """Constructor."""
-        self._kcl = kcl
-        if insts is not None:
-            self._insts = [inst.instance for inst in insts]
-        if bases is not None:
-            self._insts = bases
+        self._tkcell = cell
 
     def __len__(self) -> int:
         """Length of the instances."""
-        return len(self._insts)
+        return len(list(self._tkcell.kdb_cell.each_inst()))
+
+    @property
+    def _insts(self) -> list[kdb.Instance]:
+        return list(self._tkcell.kdb_cell.each_inst())
 
     @abstractmethod
     def __iter__(self) -> Iterator[ProtoInstance[TUnit]]:
@@ -9793,9 +9761,9 @@ class ProtoInstances(Generic[TUnit], ABC):
 
     def __delitem__(self, item: ProtoInstance[Any] | int) -> None:
         if isinstance(item, int):
-            del self._insts[item]
+            self._insts[item].delete()
         else:
-            self._insts.remove(item.instance)
+            next(filter(lambda inst: inst == item, self._insts)).delete()
 
     @abstractmethod
     def __getitem__(self, key: str | int) -> ProtoInstance[TUnit]: ...
@@ -9806,17 +9774,18 @@ class ProtoInstances(Generic[TUnit], ABC):
             if inst._destroyed():
                 deletion_list.insert(0, i)
         for i in deletion_list:
-            del self._insts[i]
+            self._insts[i].delete()
 
     def clear(self) -> None:
-        self._insts.clear()
+        for inst in self._insts:
+            inst.delete()
 
     def append(self, inst: ProtoInstance[Any]) -> None:
         """Append a new instance."""
-        self._insts.append(inst.instance)
+        self._tkcell.kdb_cell.insert(inst.instance)
 
     def remove(self, inst: ProtoInstance[Any]) -> None:
-        self._insts.remove(inst.instance)
+        inst.instance.delete()
 
 
 class Instances(ProtoInstances[int]):
@@ -9827,15 +9796,17 @@ class Instances(ProtoInstances[int]):
 
     def __iter__(self) -> Iterator[Instance]:
         """Get instance iterator."""
-        yield from (Instance(kcl=self._kcl, instance=inst) for inst in self._insts)
+        yield from (
+            Instance(kcl=self._tkcell.kcl, instance=inst) for inst in self._insts
+        )
 
     def __getitem__(self, key: str | int) -> Instance:
         """Retrieve instance by index or by name."""
         if isinstance(key, int):
-            return Instance(kcl=self._kcl, instance=self._insts[key])
+            return Instance(kcl=self._tkcell.kcl, instance=self._insts[key])
         else:
             return Instance(
-                kcl=self._kcl,
+                kcl=self._tkcell.kcl,
                 instance=next(
                     filter(lambda inst: inst.property(PROPID.NAME) == key, self._insts)
                 ),
@@ -9850,15 +9821,17 @@ class DInstances(ProtoInstances[float]):
 
     def __iter__(self) -> Iterator[DInstance]:
         """Get instance iterator."""
-        yield from (DInstance(kcl=self._kcl, instance=inst) for inst in self._insts)
+        yield from (
+            DInstance(kcl=self._tkcell.kcl, instance=inst) for inst in self._insts
+        )
 
     def __getitem__(self, key: str | int) -> DInstance:
         """Retrieve instance by index or by name."""
         if isinstance(key, int):
-            return DInstance(kcl=self._kcl, instance=self._insts[key])
+            return DInstance(kcl=self._tkcell.kcl, instance=self._insts[key])
         else:
             return DInstance(
-                kcl=self._kcl,
+                kcl=self._tkcell.kcl,
                 instance=next(
                     filter(lambda inst: inst.property(PROPID.NAME) == key, self._insts)
                 ),
