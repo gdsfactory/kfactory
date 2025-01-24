@@ -11,7 +11,7 @@ from typing import Any, Literal, ParamSpec, Protocol, TypedDict
 from .. import kdb
 from ..conf import logger
 from ..enclosure import clean_points
-from ..kcell import KCLayout, Port, ProtoPort, ProtoTKCell, TUnit
+from ..kcell import BasePort, DKCell, KCell, KCLayout, Port
 from .steps import Step, Steps, Straight
 
 __all__ = [
@@ -57,15 +57,15 @@ class ManhattanRoutePathFunction180(Protocol):
         ...
 
 
-class ManhattanBundleRoutingFunction(Protocol[TUnit]):
+class ManhattanBundleRoutingFunction(Protocol):
     def __call__(
         self,
         *,
-        start_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
-        end_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
+        start_ports: Sequence[BasePort | kdb.Trans],
+        end_ports: Sequence[BasePort | kdb.Trans],
         starts: Sequence[Sequence[Step]],
         ends: Sequence[Sequence[Step]],
-        widths: Sequence[TUnit] | None = None,
+        widths: Sequence[int] | None = None,
         **kwargs: Any,
     ) -> list[ManhattanRouter]: ...
 
@@ -615,10 +615,10 @@ class PathMatchDict(TypedDict):
 
 def path_length_match_manhattan_route(
     *,
-    c: ProtoTKCell[int],
+    c: KCell | DKCell,
     routers: Sequence[ManhattanRouter],
-    start_ports: Sequence[ProtoPort[int]],
-    end_ports: Sequence[ProtoPort[int]],
+    start_ports: Sequence[BasePort],
+    end_ports: Sequence[BasePort],
     bend90_radius: int | None = None,
     separation: int | None = None,
     path_length: int | None = None,
@@ -818,9 +818,9 @@ def _place_dl_path_length(
 
 def route_smart(
     *,
-    start_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
-    end_ports: Sequence[ProtoPort[TUnit] | kdb.Trans],
-    widths: Sequence[TUnit] | None = None,
+    start_ports: Sequence[BasePort | kdb.Trans],
+    end_ports: Sequence[BasePort | kdb.Trans],
+    widths: Sequence[int] | None = None,
     bend90_radius: int | None = None,
     separation: int | None = None,
     starts: Sequence[Sequence[Step]] = [],
@@ -885,10 +885,12 @@ def route_smart(
     if length == 0:
         return []
 
-    start_ts = [p.trans if isinstance(p, Port) else p for p in start_ports]
-    end_ts = [p.trans if isinstance(p, Port) else p for p in end_ports]
+    start_ts = [p.get_trans() if isinstance(p, BasePort) else p for p in start_ports]
+    end_ts = [p.get_trans() if isinstance(p, BasePort) else p for p in end_ports]
     if widths is None:
-        widths = [p.width if isinstance(p, Port) else 0 for p in start_ports]
+        widths = [
+            p.cross_section.width if isinstance(p, BasePort) else 0 for p in start_ports
+        ]
     box_region = kdb.Region()
     if bboxes:
         for box in bboxes:
@@ -1965,8 +1967,8 @@ def _route_to_side(
 
 
 def _backbone2bundle(
-    backbone: list[kdb.Point],
-    port_widths: list[int],
+    backbone: Sequence[kdb.Point],
+    port_widths: Sequence[int],
     spacing: int,
 ) -> list[list[kdb.Point]]:
     """Used to extract a bundle from a backbone."""
@@ -2127,15 +2129,15 @@ def route_ports_to_bundle(
 
 
 def _route_waypoints(
-    waypoints: kdb.Trans | list[kdb.Point],
-    widths: list[int],
+    waypoints: kdb.Trans | Sequence[kdb.Point],
+    widths: Sequence[int],
     separation: int,
     bend90_radius: int,
-    start_ts: list[kdb.Trans],
-    end_ts: list[kdb.Trans],
-    starts: list[list[Step]],
-    ends: list[list[Step]],
-    bboxes: list[kdb.Box] | None,
+    start_ts: Sequence[kdb.Trans],
+    end_ts: Sequence[kdb.Trans],
+    starts: Sequence[Sequence[Step]],
+    ends: Sequence[Sequence[Step]],
+    bboxes: Sequence[kdb.Box] | None,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     sort_ports: bool = False,
 ) -> list[ManhattanRouter]:

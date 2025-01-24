@@ -908,6 +908,16 @@ class ProtoPorts(ABC, Generic[TUnit]):
     @abstractmethod
     def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]: ...
 
+    @abstractmethod
+    def filter(
+        self,
+        angle: int | None = None,
+        orientation: float | None = None,
+        layer: LayerEnum | int | None = None,
+        port_type: str | None = None,
+        regex: str | None = None,
+    ) -> list[ProtoPort[TUnit]]: ...
+
     def __contains__(self, port: str | ProtoPort[Any] | BasePort) -> bool:
         """Check whether a port is in this port collection."""
         if isinstance(port, ProtoPort):
@@ -955,6 +965,7 @@ class Ports(ProtoPorts[int]):
 
     @overload
     def __init__(self, *, kcl: KCLayout) -> None: ...
+
     @overload
     def __init__(
         self,
@@ -962,6 +973,7 @@ class Ports(ProtoPorts[int]):
         kcl: KCLayout,
         ports: Iterable[ProtoPort[Any]] | None = None,
     ) -> None: ...
+
     @overload
     def __init__(
         self,
@@ -969,6 +981,7 @@ class Ports(ProtoPorts[int]):
         kcl: KCLayout,
         bases: list[BasePort] | None = None,
     ) -> None: ...
+
     def __init__(
         self,
         *,
@@ -1527,7 +1540,7 @@ class DPorts(ProtoPorts[float]):
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> list[Port]:
+    ) -> list[DPort]:
         """Filter ports by name.
 
         Args:
@@ -1537,7 +1550,7 @@ class DPorts(ProtoPorts[float]):
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-        ports: Iterable[Port] = (Port(base=b) for b in self._bases)
+        ports: Iterable[DPort] = (DPort(base=b) for b in self._bases)
         if regex:
             ports = filter_regex(ports, regex)
         if layer is not None:
@@ -1613,7 +1626,7 @@ class ProtoInstancePorts(HasCellPorts[TUnit], ABC):
 
     def filter(
         self,
-        angle: int | None = None,
+        angle: TUnit | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
@@ -1636,14 +1649,25 @@ class ProtoInstancePorts(HasCellPorts[TUnit], ABC):
         if port_type:
             ports = filter_port_type(ports, port_type)
         if angle is not None:
-            ports = filter_direction(ports, angle)
+            ports = filter_direction(ports, round(angle / 90))
         if orientation is not None:
             ports = filter_orientation(ports, orientation)
         return list(ports)
 
+    @overload
+    def __getitem__(
+        self: ProtoInstancePorts[int],
+        key: int | str | None | tuple[int | str | None, int, int],
+    ) -> Port: ...
+    @overload
+    def __getitem__(
+        self: ProtoInstancePorts[float],
+        key: int | str | None | tuple[int | str | None, int, int],
+    ) -> DPort: ...
+
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]
-    ) -> ProtoPort[TUnit]:
+    ) -> Port | DPort:
         """Returns port from instance.
 
         The key can either be an integer, in which case the nth port is
@@ -2233,19 +2257,6 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
     def to_kcell(self) -> KCell:
         return KCell(base_kcell=self._base_kcell)
-
-    @overload
-    @abstractmethod
-    def to_dbu(self, value: TUnit) -> int: ...
-
-    @overload
-    @abstractmethod
-    def to_dbu(self, value: PointLike[TUnit]) -> kdb.Point: ...
-
-    @abstractmethod
-    def to_dbu(self, value: TUnit | PointLike[TUnit]) -> int | kdb.Point:
-        """Convert a value to dbu."""
-        ...
 
     @property
     @abstractmethod
@@ -4006,18 +4017,6 @@ class DKCell(ProtoTKCell[float]):
             raise LockedError(self)
         return self.ports.create_port(**kwargs)
 
-    @overload
-    def to_dbu(self, value: float) -> int: ...
-
-    @overload
-    def to_dbu(self, value: PointLike[float]) -> kdb.Point: ...
-
-    def to_dbu(self, value: float | PointLike[float]) -> int | kdb.Point:
-        """Convert a value to dbu."""
-        if isinstance(value, PointLike):
-            return kdb.Point(self.to_dbu(value.x), self.to_dbu(value.y))
-        return self.kcl.to_dbu(value)
-
 
 class KCell(ProtoTKCell[int]):
     """Cell with integer units."""
@@ -4094,18 +4093,6 @@ class KCell(ProtoTKCell[int]):
         if self.locked:
             raise LockedError(self)
         return self.ports.create_port(**kwargs)
-
-    @overload
-    def to_dbu(self, value: int) -> int: ...
-
-    @overload
-    def to_dbu(self, value: PointLike[int]) -> kdb.Point: ...
-
-    def to_dbu(self, value: int | PointLike[int]) -> int | kdb.Point:
-        """Convert a value to dbu."""
-        if isinstance(value, PointLike):
-            return kdb.Point(value.x, value.y)
-        return value
 
     @classmethod
     def from_yaml(
@@ -7566,6 +7553,17 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             dcplx_trans=dcplx_trans,
             info=self.info.copy(),
             port_type=self.port_type,
+        )
+
+    def get_trans(self) -> kdb.Trans:
+        return (
+            self.trans
+            or kdb.ICplxTrans(trans=self.dcplx_trans, dbu=self.kcl.dbu).s_trans()  # type: ignore[arg-type]
+        )
+
+    def get_dcplx_trans(self) -> kdb.DCplxTrans:
+        return self.dcplx_trans or kdb.DCplxTrans(
+            self.trans.to_dtype(self.kcl.dbu)  # type: ignore[union-attr]
         )
 
 

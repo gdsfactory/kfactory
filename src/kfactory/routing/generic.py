@@ -10,8 +10,8 @@ from pydantic import BaseModel, Field
 
 from .. import kdb, rdb
 from ..conf import config, logger
-from ..kcell import Instance, Port, ProtoPort, ProtoTKCell, TUnit
-from ..kf_types import dbu, unit
+from ..kcell import BasePort, Instance, KCell, Port, ProtoPort
+from ..kf_types import dbu
 from .manhattan import (
     ManhattanBundleRoutingFunction,
     ManhattanRouter,
@@ -32,32 +32,32 @@ class PlacerError(ValueError):
     pass
 
 
-class PlacerFunction(Protocol[TUnit]):
+class PlacerFunction(Protocol):
     """A placer function. Used to place Instances given a path."""
 
     def __call__(
         self,
-        c: ProtoTKCell[TUnit],
-        p1: ProtoPort[TUnit],
-        p2: ProtoPort[TUnit],
+        c: KCell,
+        p1: Port,
+        p2: Port,
         pts: Sequence[kdb.Point],
-        route_width: TUnit | None = None,
+        route_width: int | None = None,
         **kwargs: Any,
     ) -> ManhattanRoute:
         """Implementation of the function."""
         ...
 
 
-class RouterPostProcessFunction(Protocol[TUnit]):
+class RouterPostProcessFunction(Protocol):
     """A function that can be used to post process functions."""
 
     def __call__(
         self,
         *,
-        c: ProtoTKCell[TUnit],
+        c: KCell,
         routers: Sequence[ManhattanRouter],
-        start_ports: Sequence[ProtoPort[TUnit]],
-        end_ports: Sequence[ProtoPort[TUnit]],
+        start_ports: Sequence[BasePort],
+        end_ports: Sequence[BasePort],
         **kwargs: Any,
     ) -> None:
         """Implementation of post process function."""
@@ -102,9 +102,9 @@ class ManhattanRoute(BaseModel, arbitrary_types_allowed=True):
 
 
 def check_collisions(
-    c: ProtoTKCell[TUnit],
-    start_ports: Sequence[ProtoPort[TUnit]],
-    end_ports: Sequence[ProtoPort[TUnit]],
+    c: KCell,
+    start_ports: Sequence[BasePort],
+    end_ports: Sequence[BasePort],
     routers: Sequence[ManhattanRouter],
     routes: Sequence[ManhattanRoute],
     on_collision: Literal["error", "show_error"] | None = "show_error",
@@ -141,7 +141,9 @@ def check_collisions(
 
     if collision_edges or not inter_route_collisions.is_empty():
         if collision_check_layers is None:
-            collision_check_layers = list({p.layer_info for p in start_ports})
+            collision_check_layers = list(
+                {p.cross_section.main_layer for p in start_ports}
+            )
         dbu = c.kcl.dbu
         db = rdb.ReportDatabase("Routing Errors")
         cat = db.create_category("Manhattan Routing Collisions")
@@ -251,7 +253,7 @@ def check_collisions(
 
 
 def get_radius(
-    ports: Sequence[ProtoPort[TUnit]],
+    ports: Sequence[ProtoPort[Any]],
 ) -> dbu:
     """Calculates a radius between two ports.
 
@@ -279,32 +281,24 @@ def get_radius(
 
 def route_bundle(
     *,
-    c: ProtoTKCell[TUnit],
-    start_ports: Sequence[ProtoPort[TUnit]],
-    end_ports: Sequence[ProtoPort[TUnit]],
-    route_width: TUnit | list[TUnit] | None = None,
+    c: KCell,
+    start_ports: list[BasePort],
+    end_ports: list[BasePort],
+    route_width: dbu | list[dbu] | None = None,
     sort_ports: bool = False,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
-    routing_function: ManhattanBundleRoutingFunction[int] = route_smart,
+    routing_function: ManhattanBundleRoutingFunction = route_smart,
     routing_kwargs: dict[str, Any] = {"bbox_routing": "minimal"},
-    placer_function: PlacerFunction[int],
+    placer_function: PlacerFunction,
     placer_kwargs: dict[str, Any] = {},
-    router_post_process_function: RouterPostProcessFunction[int] | None = None,
+    router_post_process_function: RouterPostProcessFunction | None = None,
     router_post_process_kwargs: dict[str, Any] = {},
-    starts: TUnit
-    | Sequence[TUnit]
-    | Sequence[Step]
-    | Sequence[Sequence[Step]]
-    | None = None,
-    ends: TUnit
-    | Sequence[TUnit]
-    | Sequence[Step]
-    | Sequence[Sequence[Step]]
-    | None = None,
-    start_angles: TUnit | Sequence[TUnit] | None = None,
-    end_angles: TUnit | Sequence[TUnit] | None = None,
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    start_angles: int | list[int] | None = None,
+    end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
 
@@ -409,130 +403,103 @@ def route_bundle(
             "For bundle routing the input port list must have"
             " the same size as the end ports and be the same length."
         )
-    c_ = c.to_kcell()
-    start_ports_ = [p.to_port() for p in start_ports]
-    end_ports_ = [p.to_port() for p in end_ports]
-
-    if start_angles is None:
-        start_angles_: int | list[int] | None = None
-    elif isinstance(start_angles, unit):
-        start_angles_ = c.to_dbu(start_angles)
-    else:
-        start_angles_ = [c.to_dbu(a) for a in start_angles]
-
-    if end_angles is None:
-        end_angles_: int | list[int] | None = None
-    elif isinstance(end_angles, unit):
-        end_angles_ = c.to_dbu(end_angles)
-    else:
-        end_angles_ = [c.to_dbu(a) for a in end_angles]
-
-    length = len(start_ports_)
-    if starts is None or starts == []:
-        starts_: Sequence[Sequence[Step]] = [[]] * length
-    elif isinstance(starts, unit):
-        starts_ = [[Straight(dist=c.to_dbu(starts))] for _ in range(length)]
-    elif isinstance(starts[0], unit):
-        starts_ = [[Straight(dist=c.to_dbu(s))] for s in cast(list[TUnit], starts)]
+    length = len(start_ports)
+    if starts == []:
+        starts = [starts] * length  # type: ignore[assignment]
+    elif isinstance(starts, int):
+        starts = [[Straight(dist=starts)] for _ in range(length)]  # type: ignore[assignment]
     elif isinstance(starts[0], Step):
-        starts_ = [cast(list[Step], starts) for _ in range(len(start_ports_))]
-    else:
-        starts_ = cast(Sequence[Sequence[Step]], starts)
-
-    if ends is None or ends == []:
-        ends_: Sequence[Sequence[Step]] = [[]] * length
-    elif isinstance(ends, unit):
-        ends_ = [[Straight(dist=c.to_dbu(ends))] for _ in range(length)]
-    elif isinstance(ends[0], unit):
-        ends_ = [[Straight(dist=c.to_dbu(s))] for s in cast(list[TUnit], ends)]
+        starts = [starts for _ in range(len(start_ports))]  # type: ignore[assignment]
+    if ends == []:
+        ends = [ends] * length  # type: ignore[assignment]
+    elif isinstance(ends, int):
+        ends = [[Straight(dist=ends)] for _ in range(length)]  # type: ignore[assignment]
     elif isinstance(ends[0], Step):
-        ends_ = [cast(list[Step], ends) for _ in range(len(end_ports_))]
-    else:
-        ends_ = cast(Sequence[Sequence[Step]], ends)
+        ends = [ends for _ in range(len(start_ports))]  # type: ignore[assignment]
 
-    if start_angles_ is not None:
-        if isinstance(start_angles_, unit):
-            start_ports_ = [
-                p.copy(post_trans=kdb.Trans(start_angles_ - p.trans.angle))
-                for p in start_ports_
+    if start_angles is not None:
+        if isinstance(start_angles, int):
+            start_ports = [
+                p.transformed(post_trans=kdb.Trans(start_angles - p.get_trans().angle))
+                for p in start_ports
             ]
         else:
-            if not len(start_angles_) == len(start_ports_):
+            if not len(start_angles) == len(start_ports):
                 raise ValueError(
                     "If more than one end port should be rotated,"
                     " a rotation for all ports must be provided."
                 )
-            start_ports_ = [
-                p.copy(post_trans=kdb.Trans(a - p.trans.angle))
-                for a, p in zip(start_angles_, start_ports_)
+            start_ports = [
+                p.transformed(post_trans=kdb.Trans(a - p.get_trans().angle))
+                for a, p in zip(start_angles, start_ports)
             ]
 
-    if end_angles_ is not None:
-        if isinstance(end_angles_, unit):
-            end_ports_ = [
-                p.copy(post_trans=kdb.Trans(end_angles_ - p.trans.angle))
-                for p in end_ports_
+    if end_angles is not None:
+        if isinstance(end_angles, int):
+            end_ports = [
+                p.transformed(post_trans=kdb.Trans(end_angles - p.get_trans().angle))
+                for p in end_ports
             ]
         else:
-            if not len(end_angles_) == len(end_ports_):
+            if not len(end_angles) == len(end_ports):
                 raise ValueError(
                     "If more than one end port should be rotated,"
                     " a rotation for all ports must be provided."
                 )
-            end_ports_ = [
-                p.copy(post_trans=kdb.Trans(a - p.trans.angle))
-                for a, p in zip(end_angles_, start_ports_)
+            end_ports = [
+                p.transformed(post_trans=kdb.Trans(a - p.get_trans().angle))
+                for a, p in zip(end_angles, start_ports)
             ]
 
     if route_width:
-        if isinstance(route_width, unit):
-            widths = [c.to_dbu(route_width)] * len(start_ports_)
+        if isinstance(route_width, int):
+            widths = [route_width] * len(start_ports)
         else:
-            widths = [c.to_dbu(w) for w in route_width]
+            widths = route_width
     else:
-        widths = [p.width for p in start_ports_]
+        widths = [p.cross_section.width for p in start_ports]
 
     routers = routing_function(
-        start_ports=start_ports_,
-        end_ports=end_ports_,
+        start_ports=start_ports,
+        end_ports=end_ports,
         widths=widths,
-        starts=starts_,
-        ends=ends_,
+        starts=cast(list[list[Step]], starts),
+        ends=cast(list[list[Step]], ends),
         **routing_kwargs,
     )
 
     if not routers:
         return []
 
-    start_mapping = {sp.trans: sp for sp in start_ports_}
-    end_mapping = {ep.trans: ep for ep in end_ports_}
+    start_mapping = {sp.trans: sp for sp in start_ports}
+    end_mapping = {ep.trans: ep for ep in end_ports}
     routes: list[ManhattanRoute] = []
-    pp_start_ports: list[Port] = []
-    pp_end_ports: list[Port] = []
+    start_ports = []
+    end_ports = []
 
     for router in routers:
         sp = start_mapping[router.start_transformation]
         ep = end_mapping[router.end_transformation]
-        pp_start_ports.append(sp)
-        pp_end_ports.append(ep)
+        start_ports.append(sp)
+        end_ports.append(ep)
 
     if router_post_process_function is not None:
         router_post_process_function(
-            c=c_,
-            start_ports=pp_start_ports,
-            end_ports=pp_end_ports,
+            c=c,
+            start_ports=start_ports,
+            end_ports=end_ports,
             routers=routers,
             **router_post_process_kwargs,
         )
     placer_errors: list[Exception] = []
-    error_routes: list[tuple[Port, Port, list[kdb.Point], int]] = []
-    for router, ps, pe in zip(routers, pp_start_ports, pp_end_ports):
+    error_routes: list[tuple[BasePort, BasePort, list[kdb.Point], int]] = []
+    for router, ps, pe in zip(routers, start_ports, end_ports):
         try:
             route = placer_function(
-                c=c_,
-                p1=ps,
-                p2=pe,
-                pts=router.start.pts,
+                c,
+                Port(base=ps),
+                Port(base=pe),
+                router.start.pts,
                 **placer_kwargs,
             )
             routes.append(route)
@@ -540,6 +507,7 @@ def route_bundle(
             placer_errors.append(e)
             error_routes.append((ps, pe, router.start.pts, router.width))
     if placer_errors and on_placer_error == "show_error":
+        print(len(placer_errors))
         db = rdb.ReportDatabase("Route Placing Errors")
         cell = db.create_cell(
             c.name
@@ -554,7 +522,8 @@ def route_bundle(
                 f" points (dbu): {pts}"
             )
             it.add_value(f"Exception: {error}")
-            path = kdb.Path(pts, width or ps.width)
+            path = kdb.Path(pts, width or ps.cross_section.width)
+            print(f"{width=}")
             it.add_value(c.kcl.to_um(path.polygon()))
         c.show(lyrdb=db)
     if placer_errors and on_placer_error is not None:
