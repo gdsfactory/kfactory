@@ -9763,7 +9763,7 @@ class ProtoInstances(Generic[TUnit], ABC):
         if isinstance(item, int):
             self._insts[item].delete()
         else:
-            next(filter(lambda inst: inst == item, self._insts)).delete()
+            next(filter(lambda inst: inst == item.instance, self._insts)).delete()
 
     @abstractmethod
     def __getitem__(self, key: str | int) -> ProtoInstance[TUnit]: ...
