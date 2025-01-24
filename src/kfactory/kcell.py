@@ -9744,11 +9744,22 @@ class ProtoInstances(Generic[TUnit], ABC):
 
     def __len__(self) -> int:
         """Length of the instances."""
-        return len(list(self._tkcell.kdb_cell.each_inst()))
+        return self._tkcell.kdb_cell.child_instances()
 
     @property
-    def _insts(self) -> list[kdb.Instance]:
-        return list(self._tkcell.kdb_cell.each_inst())
+    def _insts(self) -> Iterator[kdb.Instance]:
+        yield from self._tkcell.kdb_cell.each_inst()
+
+    def _get_inst(self, item: kdb.Instance | str) -> kdb.Instance:
+        try:
+            if isinstance(item, kdb.Instance):
+                return next(filter(lambda inst: inst == item, self._insts))
+            else:
+                return next(
+                    filter(lambda inst: inst.property(PROPID.NAME) == item, self._insts)
+                )
+        except StopIteration:
+            raise ValueError(f"Instance {item} not found in {self._tkcell}")
 
     @abstractmethod
     def __iter__(self) -> Iterator[ProtoInstance[TUnit]]:
@@ -9757,9 +9768,9 @@ class ProtoInstances(Generic[TUnit], ABC):
 
     def __delitem__(self, item: ProtoInstance[Any] | int) -> None:
         if isinstance(item, int):
-            self._insts[item].delete()
+            list(self._insts)[item].delete()
         else:
-            next(filter(lambda inst: inst == item.instance, self._insts)).delete()
+            self._get_inst(item.instance).delete()
 
     @abstractmethod
     def __getitem__(self, key: str | int) -> ProtoInstance[TUnit]: ...
@@ -9770,7 +9781,7 @@ class ProtoInstances(Generic[TUnit], ABC):
             if inst._destroyed():
                 deletion_list.insert(0, i)
         for i in deletion_list:
-            self._insts[i].delete()
+            list(self._insts)[i].delete()
 
     def clear(self) -> None:
         for inst in self._insts:
@@ -9799,14 +9810,9 @@ class Instances(ProtoInstances[int]):
     def __getitem__(self, key: str | int) -> Instance:
         """Retrieve instance by index or by name."""
         if isinstance(key, int):
-            return Instance(kcl=self._tkcell.kcl, instance=self._insts[key])
+            return Instance(kcl=self._tkcell.kcl, instance=list(self._insts)[key])
         else:
-            return Instance(
-                kcl=self._tkcell.kcl,
-                instance=next(
-                    filter(lambda inst: inst.property(PROPID.NAME) == key, self._insts)
-                ),
-            )
+            return Instance(kcl=self._tkcell.kcl, instance=self._get_inst(key))
 
 
 class DInstances(ProtoInstances[float]):
@@ -9824,14 +9830,9 @@ class DInstances(ProtoInstances[float]):
     def __getitem__(self, key: str | int) -> DInstance:
         """Retrieve instance by index or by name."""
         if isinstance(key, int):
-            return DInstance(kcl=self._tkcell.kcl, instance=self._insts[key])
+            return DInstance(kcl=self._tkcell.kcl, instance=list(self._insts)[key])
         else:
-            return DInstance(
-                kcl=self._tkcell.kcl,
-                instance=next(
-                    filter(lambda inst: inst.property(PROPID.NAME) == key, self._insts)
-                ),
-            )
+            return DInstance(kcl=self._tkcell.kcl, instance=self._get_inst(key))
 
 
 VInstance.model_rebuild()
