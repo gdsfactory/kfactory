@@ -1981,6 +1981,16 @@ class ProtoKCell(ABC, Generic[TUnit]):
     @abstractmethod
     def dup(self) -> Self: ...
 
+    @abstractmethod
+    def write(
+        self,
+        filename: str | Path,
+        save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        convert_external_cells: bool = False,
+        set_meta_data: bool = True,
+        autoformat_from_file_extension: bool = True,
+    ) -> None: ...
+
     @property
     def info(self) -> Info:
         return self._base_kcell.info
@@ -6718,6 +6728,7 @@ class VKCell(ProtoKCell[float]):
         save_options: kdb.SaveLayoutOptions = save_layout_options(),
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
+        autoformat_from_file_extension: bool = True,
     ) -> None:
         """Write a KCell to a GDS.
 
@@ -6736,6 +6747,7 @@ class VKCell(ProtoKCell[float]):
             save_options=save_options,
             convert_external_cells=convert_external_cells,
             set_meta_data=set_meta_data,
+            autoformat_from_file_extension=autoformat_from_file_extension,
         )
 
     def l2n(
