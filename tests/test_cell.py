@@ -279,3 +279,112 @@ def test_ports_in_cells() -> None:
 
     assert new_port in kcell.ports
     assert new_port in dkcell.ports
+
+
+def test_kcell_attributes() -> None:
+    c = kf.kcl.kcell("test_kcell_attributes")
+    c.shapes(1).insert(kf.kdb.Box(0, 0, 10, 10))
+    assert c.shapes(1).size() == 1
+    assert c.bbox(1) == kf.kdb.Box(0, 0, 10, 10)
+    assert c.ibbox(1) == kf.kdb.Box(0, 0, 10, 10)
+    assert c.dbbox(1) == kf.kdb.DBox(0, 0, 0.01, 0.01)
+
+    assert c.x == 5
+    assert c.y == 5
+    assert c.xmin == 0
+    assert c.ymin == 0
+    assert c.xmax == 10
+    assert c.ymax == 10
+    assert c.xsize == 10
+    assert c.ysize == 10
+    assert c.center == (5, 5)
+
+    assert c.ix == 5
+    assert c.iy == 5
+    assert c.ixmin == 0
+    assert c.iymin == 0
+    assert c.ixmax == 10
+    assert c.iymax == 10
+    assert c.ixsize == 10
+    assert c.iysize == 10
+    assert c.icenter == (5, 5)
+
+    assert c.dxmin == 0.0
+    assert c.dymin == 0.0
+    assert c.dxmax == 0.01
+    assert c.dymax == 0.01
+    assert c.dxsize == 0.01
+    assert c.dysize == 0.01
+    assert c.dx == 0.005
+    assert c.dy == 0.005
+    assert c.dcenter == (0.005, 0.005)
+
+    assert (
+        str(c.isize_info)
+        == "SizeInfo: self.width=10, self.height=10, self.west=0, self.east=10"
+        ", self.south=0, self.north=10"
+    )
+    assert c.isize_info.west == 0
+    assert c.isize_info.east == 10
+    assert c.isize_info.south == 0
+    assert c.isize_info.north == 10
+    assert c.isize_info.width == 10
+    assert c.isize_info.height == 10
+    assert c.isize_info.sw == (0, 0)
+    assert c.isize_info.nw == (0, 10)
+    assert c.isize_info.se == (10, 0)
+    assert c.isize_info.ne == (10, 10)
+    assert c.isize_info.cw == (0, 5)
+    assert c.isize_info.ce == (10, 5)
+    assert c.isize_info.sc == (5, 0)
+    assert c.isize_info.nc == (5, 10)
+    assert c.isize_info.cc == (5, 5)
+    assert c.isize_info.center == (5, 5)
+
+    assert (
+        str(c.dsize_info)
+        == "SizeInfo: self.width=0.01, self.height=0.01, self.west=0.0, self.east=0.01"
+        ", self.south=0.0, self.north=0.01"
+    )
+    assert c.dsize_info.west == 0.0
+    assert c.dsize_info.east == 0.01
+    assert c.dsize_info.south == 0.0
+    assert c.dsize_info.north == 0.01
+    assert c.dsize_info.width == 0.01
+    assert c.dsize_info.height == 0.01
+    assert c.dsize_info.sw == (0.0, 0.0)
+    assert c.dsize_info.nw == (0.0, 0.01)
+    assert c.dsize_info.se == (0.01, 0.0)
+    assert c.dsize_info.ne == (0.01, 0.01)
+    assert c.dsize_info.cw == (0.0, 0.005)
+    assert c.dsize_info.ce == (0.01, 0.005)
+    assert c.dsize_info.sc == (0.005, 0.0)
+    assert c.dsize_info.nc == (0.005, 0.01)
+    assert c.dsize_info.cc == (0.005, 0.005)
+    assert c.dsize_info.center == (0.005, 0.005)
+
+    assert (
+        str(c.size_info)
+        == "SizeInfo: self.width=10, self.height=10, self.west=0, self.east=10"
+        ", self.south=0, self.north=10"
+    )
+    assert c.size_info.west == 0.0
+    assert c.size_info.east == 10.0
+    assert c.size_info.south == 0.0
+    assert c.size_info.north == 10.0
+    assert c.size_info.width == 10
+    assert c.size_info.height == 10
+    assert c.size_info.sw == (0, 0)
+    assert c.size_info.nw == (0, 10)
+    assert c.size_info.se == (10, 0)
+    assert c.size_info.ne == (10, 10)
+    assert c.size_info.cw == (0, 5)
+    assert c.size_info.ce == (10, 5)
+    assert c.size_info.sc == (5, 0)
+    assert c.size_info.nc == (5, 10)
+    assert c.size_info.cc == (5, 5)
+    assert c.size_info.center == (5, 5)
+
+
+if __name__ == "__main__":
+    test_kcell_attributes()
