@@ -10,7 +10,12 @@
 
 ## Bug Fixes
 
+- Fix instance collision error [#570](https://github.com/gdsfactory/kfactory/pull/570)
 - add Tunit, i and d properties for cells [#565](https://github.com/gdsfactory/kfactory/pull/565)
+
+## Documentation
+
+- Fix instance collision error [#570](https://github.com/gdsfactory/kfactory/pull/570)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.0.0...v1.1.0
 
