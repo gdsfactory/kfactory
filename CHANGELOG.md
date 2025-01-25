@@ -1,24 +1,52 @@
-<a id="v0.23.3"></a>
-# [v0.23.3](https://github.com/gdsfactory/kfactory/releases/tag/v0.23.3) - 2025-01-24
+<a id="v1.1.0"></a>
+# [v1.1.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.0) - 2025-01-25
 
 # What's Changed
 
 ## New
 
+- add Tunit, i and d properties for cells [#565](https://github.com/gdsfactory/kfactory/pull/565)
+
+## Bug Fixes
+
+- add Tunit, i and d properties for cells [#565](https://github.com/gdsfactory/kfactory/pull/565)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.0.0...v1.1.0
+
+
+[Changes][v1.1.0]
+
+
+<a id="v1.0.0"></a>
+# [v1.0.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.0.0) - 2025-01-24
+
+# What's Changed
+
+## Breaking
+
+- Introduce DKCell/DInstance/DInstancePorts/DPort and refactor classes for KCell/Port/Instance/Ports/InstancePorts [#552](https://github.com/gdsfactory/kfactory/pull/552) - A huge thanks to [@MatthewMckee4](https://github.com/MatthewMckee4) for the tremendous help
+
+## New
+
+- Introduce DKCell/DInstance/DInstancePorts/DPort and refactor classes for KCell/Port/Instance/Ports/InstancePorts [#552](https://github.com/gdsfactory/kfactory/pull/552)
 - Remove insts from TKCell [#564](https://github.com/gdsfactory/kfactory/pull/564)
 
 ## Bug Fixes
 
 - Fix typing issues [#560](https://github.com/gdsfactory/kfactory/pull/560)
 
+## Documentation
+
+- Introduce DKCell/DInstance/DInstancePorts/DPort and refactor classes for KCell/Port/Instance/Ports/InstancePorts [#552](https://github.com/gdsfactory/kfactory/pull/552)
+
 ## Other changes
 
 - update tests [#557](https://github.com/gdsfactory/kfactory/pull/557)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.23.2...v0.23.3
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v0.23.2...v1.0.0
 
 
-[Changes][v0.23.3]
+[Changes][v1.0.0]
 
 
 <a id="v0.23.2"></a>
@@ -1453,7 +1481,8 @@
 [Changes][v0.4.0]
 
 
-[v0.23.3]: https://github.com/gdsfactory/kfactory/compare/v0.23.2...v0.23.3
+[v1.1.0]: https://github.com/gdsfactory/kfactory/compare/v1.0.0...v1.1.0
+[v1.0.0]: https://github.com/gdsfactory/kfactory/compare/v0.23.2...v1.0.0
 [v0.23.2]: https://github.com/gdsfactory/kfactory/compare/v0.23.1...v0.23.2
 [v0.23.1]: https://github.com/gdsfactory/kfactory/compare/v0.23.0...v0.23.1
 [v0.23.0]: https://github.com/gdsfactory/kfactory/compare/v0.22.0...v0.23.0
