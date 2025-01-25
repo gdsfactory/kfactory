@@ -160,7 +160,7 @@ def straight(length=10, width=1, layer=(1, 0)):
     _layer = kf.kcl.find_layer(*layer)
     wg.shapes(_layer).insert(box)
     wg.add_port(
-        kf.Port(
+        port=kf.Port(
             name="o1",
             width=wg.kcl.to_dbu(width),
             dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, box.left, box.center().y),
