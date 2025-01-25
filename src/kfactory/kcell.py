@@ -2846,6 +2846,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
     def draw_ports(self) -> None:
         """Draw all the ports on their respective layer."""
+        locked = self._base_kcell.kdb_cell.locked
+        self._base_kcell.kdb_cell.locked = False
         polys: dict[int, kdb.Region] = {}
 
         for port in Ports(kcl=self.kcl, bases=self.ports.bases):
@@ -2887,6 +2889,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 self.shapes(port.layer).insert(
                     kdb.Text(port.name if port.name else "", port.trans)
                 )
+        self._base_kcell.kdb_cell.locked = locked
 
     def write(
         self,
