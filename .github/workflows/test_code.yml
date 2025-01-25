@@ -52,6 +52,18 @@ jobs:
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
         run: pytest
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Test coverage
+        run: |
+          make cov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
   test_docs:
     runs-on: ${{ matrix.os }}
     strategy:

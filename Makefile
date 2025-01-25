@@ -33,7 +33,7 @@ docs-serve:
 test:
 	uv run pytest -s
 
-cov:
+cov: dev
 	uv run pytest --cov=kfactory
 
 venv:
