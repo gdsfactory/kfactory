@@ -900,7 +900,6 @@ class ProtoPorts(ABC, Generic[TUnit]):
     @abstractmethod
     def add_ports(
         self,
-        *,
         ports: Iterable[ProtoPort[Any]],
         prefix: str = "",
         keep_mirror: bool = False,
@@ -1043,7 +1042,6 @@ class Ports(ProtoPorts[int]):
 
     def add_ports(
         self,
-        *,
         ports: Iterable[ProtoPort[Any]],
         prefix: str = "",
         keep_mirror: bool = False,
@@ -1354,7 +1352,6 @@ class DPorts(ProtoPorts[float]):
 
     def add_ports(
         self,
-        *,
         ports: Iterable[ProtoPort[Any]],
         prefix: str = "",
         keep_mirror: bool = False,
