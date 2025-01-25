@@ -27,8 +27,8 @@ def simple_cplx_cell(layer: kf.kdb.LayerInfo) -> kf.KCell:
         dcplx_trans=dct * kf.kdb.DCplxTrans(kf.kdb.DVector(10, 0)),
     )
 
-    c.add_port(p1)
-    c.add_port(p2)
+    c.add_port(port=p1)
+    c.add_port(port=p2)
 
     c.shapes(li).insert(dbox)
 

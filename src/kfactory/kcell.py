@@ -884,15 +884,15 @@ class ProtoPorts(ABC, Generic[TUnit]):
 
     @abstractmethod
     def add_port(
-        self, port: ProtoPort[Any], name: str | None = None, keep_mirror: bool = False
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
     ) -> ProtoPort[TUnit]: ...
 
     @abstractmethod
-    def create_port(
-        self,
-        *args: Any,
-        **kwargs: Any,
-    ) -> ProtoPort[TUnit]: ...
+    def create_port(self, *args: Any, **kwargs: Any) -> ProtoPort[TUnit]: ...
 
     @abstractmethod
     def get_all_named(self) -> Mapping[str, ProtoPort[TUnit]]: ...
@@ -998,7 +998,11 @@ class Ports(ProtoPorts[int]):
         yield from (Port(base=b) for b in self._bases)
 
     def add_port(
-        self, port: ProtoPort[Any], name: str | None = None, keep_mirror: bool = False
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
     ) -> Port:
         """Add a port object.
 
@@ -1304,7 +1308,11 @@ class DPorts(ProtoPorts[float]):
         yield from (DPort(base=b) for b in self._bases)
 
     def add_port(
-        self, port: ProtoPort[Any], name: str | None = None, keep_mirror: bool = False
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
     ) -> DPort:
         """Add a port object.
 
@@ -2040,6 +2048,9 @@ class ProtoKCell(ABC, Generic[TUnit]):
     def vinsts(self) -> list[VInstance]:
         return self._base_kcell.vinsts
 
+    @abstractmethod
+    def shapes(self, layer: int | kdb.LayerInfo) -> kdb.Shapes | VShapes: ...
+
     @property
     @abstractmethod
     def ports(self) -> ProtoPorts[TUnit]: ...
@@ -2049,7 +2060,11 @@ class ProtoKCell(ABC, Generic[TUnit]):
     def ports(self, new_ports: Iterable[ProtoPort[Any]]) -> None: ...
 
     def add_port(
-        self, port: ProtoPort[Any], name: str | None = None, keep_mirror: bool = False
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
     ) -> ProtoPort[TUnit]:
         """Add an existing port. E.g. from an instance to propagate the port.
 
@@ -2061,6 +2076,7 @@ class ProtoKCell(ABC, Generic[TUnit]):
         """
         if self.locked:
             raise LockedError(self)
+
         return self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
 
     def add_ports(
@@ -2083,9 +2099,16 @@ class ProtoKCell(ABC, Generic[TUnit]):
         """
         if self.locked:
             raise LockedError(self)
+
         self.ports.add_ports(
             ports=ports, prefix=prefix, suffix=suffix, keep_mirror=keep_mirror
         )
+
+    def create_port(self, *args: Any, **kwargs: Any) -> ProtoPort[TUnit]:
+        if self.locked:
+            raise LockedError(self)
+
+        return self.ports.create_port(*args, **kwargs)
 
     def layer(self, *args: Any, **kwargs: Any) -> int:
         """Get the layer info, convenience for `klayout.db.Layout.layer`."""
@@ -6598,7 +6621,9 @@ class VKCell(ProtoKCell[float]):
         self.vinsts.append(vi)
         return vi
 
-    def shapes(self, layer: int) -> VShapes:
+    def shapes(self, layer: int | kdb.LayerInfo) -> VShapes:
+        if isinstance(layer, kdb.LayerInfo):
+            layer = self.kcl.layout.layer(layer)
         if layer not in self._shapes:
             self._shapes[layer] = VShapes(cell=self)
         return self._shapes[layer]
@@ -6884,7 +6909,7 @@ class VInstance(BaseModel, arbitrary_types_allowed=True):
                     inst.insert_into(cell=_cell, trans=_trans)
                 _cell.name = _cell_name
                 for port in self.cell.ports:
-                    _cell.add_port(port.copy(_trans))
+                    _cell.add_port(port=port.copy(_trans))
                 _settings = self.cell.settings.model_dump()
                 _settings.update({"virtual_trans": _trans})
                 _settings_units = self.cell.settings_units.model_copy()
