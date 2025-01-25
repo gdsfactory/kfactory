@@ -3549,7 +3549,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                         " are currently not supported"
                     )
                     assert len(ports) == 1, (
-                        f"Multiple instance {[port[4] for port in ports]}"
+                        "Multiple instance "
+                        f"{[_instance_port_name(p[2], p[3]) for p in ports]}"
                         f"ports connected to the cell port {cellports[0]}"
                         " this is currently not supported and most likely a bug"
                     )
@@ -11214,3 +11215,7 @@ def _deserialize_setting(setting: MetaData) -> MetaData:
             case _:
                 return getattr(kdb, cls_name).from_s(value)  # type: ignore[no-any-return]
     return setting
+
+
+def _instance_port_name(inst: Instance, port: Port) -> str:
+    return f'{inst.name}["{port.name or str(None)}"]'
