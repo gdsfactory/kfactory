@@ -19,7 +19,7 @@ install:
 dev:
 	uv sync --all-extras
 	uv pip install -e .
-	pre-commit install
+	uv run pre-commit install
 
 docs-clean:
 	rm -rf site
