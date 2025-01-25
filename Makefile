@@ -19,7 +19,7 @@ install:
 dev:
 	uv sync --all-extras
 	uv pip install -e .
-	pre-commit install
+	uv run pre-commit install
 
 docs-clean:
 	rm -rf site
@@ -34,7 +34,7 @@ test:
 	uv run pytest -s
 
 cov:
-	uv run pytest --cov=kfactory
+	uv run pytest --cov=kfactory --cov-branch --cov-report=xml
 
 venv:
 	uv venv -p 3.13
