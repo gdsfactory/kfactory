@@ -5,6 +5,7 @@
 
 ## New
 
+- Add converage config [#569](https://github.com/gdsfactory/kfactory/pull/569)
 - add Tunit, i and d properties for cells [#565](https://github.com/gdsfactory/kfactory/pull/565)
 
 ## Bug Fixes
