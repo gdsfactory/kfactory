@@ -884,7 +884,11 @@ class ProtoPorts(ABC, Generic[TUnit]):
 
     @abstractmethod
     def add_port(
-        self, *, port: ProtoPort[Any], name: str | None = None, keep_mirror: bool = True
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
     ) -> ProtoPort[TUnit]: ...
 
     @abstractmethod
@@ -995,7 +999,11 @@ class Ports(ProtoPorts[int]):
         yield from (Port(base=b) for b in self._bases)
 
     def add_port(
-        self, *, port: ProtoPort[Any], name: str | None = None, keep_mirror: bool = True
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
     ) -> Port:
         """Add a port object.
 
@@ -1302,7 +1310,11 @@ class DPorts(ProtoPorts[float]):
         yield from (DPort(base=b) for b in self._bases)
 
     def add_port(
-        self, *, port: ProtoPort[Any], name: str | None = None, keep_mirror: bool = True
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
     ) -> DPort:
         """Add a port object.
 
