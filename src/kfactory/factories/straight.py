@@ -163,7 +163,7 @@ def straight_dbu_factory(
         _info.update(_additional_info)
         c.info = Info(**_info)
 
-        c.boundary = c.dbbox()
+        c.boundary = c.dbbox()  # type: ignore[assignment]
         c.auto_rename_ports()
         return c
 

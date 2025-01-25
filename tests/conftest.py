@@ -1,5 +1,6 @@
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from functools import partial
+from pathlib import Path
 
 import pytest
 
@@ -173,3 +174,9 @@ def fill_cell() -> kf.KCell:
     fc.shapes(fc.kcl.find_layer(Layers().WGCLAD)).insert(kf.kdb.DBox(20, 40))
     fc.shapes(fc.kcl.find_layer(Layers().WGCLAD)).insert(kf.kdb.DBox(30, 15))
     return fc
+
+
+@pytest.fixture(scope="module", autouse=True)
+def unlink_merge_read_oas() -> Iterator[None]:
+    yield
+    Path("MERGE_READ.oas").unlink(missing_ok=True)
