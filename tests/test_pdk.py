@@ -73,8 +73,8 @@ def test_multi_pdk(LAYER: Layers) -> None:
     doe_b1 = doe1 << bend90_pdk1(width=1, radius=10, layer=LAYER.WG)
     doe_b1.connect("o1", doe1_wg, "o2")
 
-    doe1.add_port(doe1_wg.ports["o1"], name="o1")
-    doe1.add_port(doe_b1.ports["o2"], name="o2")
+    doe1.add_port(port=doe1_wg.ports["o1"], name="o1")
+    doe1.add_port(port=doe_b1.ports["o2"], name="o2")
 
     doe2 = doe_pdk2.kcell("DOE2")
     enc2 = kf.LayerEnclosure(
@@ -90,8 +90,8 @@ def test_multi_pdk(LAYER: Layers) -> None:
     doe_b2.connect("o1", doe2_wg, "o2")
     doe_b3.connect("o1", doe_b2, "o2")
 
-    doe2.add_port(doe2_wg.ports["o1"], name="o1")
-    doe2.add_port(doe_b3.ports["o2"], name="o2")
+    doe2.add_port(port=doe2_wg.ports["o1"], name="o1")
+    doe2.add_port(port=doe_b3.ports["o2"], name="o2")
 
     assembly = assembly_pdk.kcell("TOP")
     d1 = assembly << doe1
@@ -115,8 +115,8 @@ def test_multi_pdk_convert(LAYER: Layers) -> None:
     doe_b1 = doe1 << bend90_pdk1(width=1, radius=10, layer=LAYER.WG)
     doe_b1.connect("o1", doe1_wg, "o2")
 
-    doe1.add_port(doe1_wg.ports["o1"], name="o1")
-    doe1.add_port(doe_b1.ports["o2"], name="o2")
+    doe1.add_port(port=doe1_wg.ports["o1"], name="o1")
+    doe1.add_port(port=doe_b1.ports["o2"], name="o2")
 
     doe2 = doe_pdk2.kcell("DOE2")
     enc2 = kf.LayerEnclosure(
@@ -132,8 +132,8 @@ def test_multi_pdk_convert(LAYER: Layers) -> None:
     doe_b2.connect("o1", doe2_wg, "o2")
     doe_b3.connect("o1", doe_b2, "o2")
 
-    doe2.add_port(doe2_wg.ports["o1"], name="o1")
-    doe2.add_port(doe_b3.ports["o2"], name="o2")
+    doe2.add_port(port=doe2_wg.ports["o1"], name="o1")
+    doe2.add_port(port=doe_b3.ports["o2"], name="o2")
 
     assembly = assembly_pdk.kcell("TOP")
     d1 = assembly << doe1
@@ -161,8 +161,8 @@ def test_multi_pdk_read_write(LAYER: Layers) -> None:
     doe_b1 = doe1 << bend90_pdk1(width=1, radius=10, layer=LAYER.WG)
     doe_b1.connect("o1", doe1_wg, "o2")
 
-    doe1.add_port(doe1_wg.ports["o1"], name="o1")
-    doe1.add_port(doe_b1.ports["o2"], name="o2")
+    doe1.add_port(port=doe1_wg.ports["o1"], name="o1")
+    doe1.add_port(port=doe_b1.ports["o2"], name="o2")
 
     doe2 = doe_pdk2_write.kcell("DOE2")
     enc2 = kf.LayerEnclosure(
@@ -178,8 +178,8 @@ def test_multi_pdk_read_write(LAYER: Layers) -> None:
     doe_b2.connect("o1", doe2_wg, "o2")
     doe_b3.connect("o1", doe_b2, "o2")
 
-    doe2.add_port(doe2_wg.ports["o1"], name="o1")
-    doe2.add_port(doe_b3.ports["o2"], name="o2")
+    doe2.add_port(port=doe2_wg.ports["o1"], name="o1")
+    doe2.add_port(port=doe_b3.ports["o2"], name="o2")
 
     doe_pdk1_read = kf.KCLayout("DOE1_READ", infos=Layers)
     doe_pdk2_read = kf.KCLayout("DOE2_READ", infos=Layers)
