@@ -852,7 +852,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                     " Therefore the layer must be defined in calls"
                 )
         tp = kdb.TilingProcessor()
-        tp.frame = c.dbbox()  # type: ignore[misc]
+        tp.frame = c.dbbox()  # type: ignore[misc, assignment]
         tp.dbu = c.kcl.dbu
         tp.threads = n_threads or config.n_threads
         maxsize = 0
@@ -1520,7 +1520,7 @@ class KCellEnclosure(BaseModel):
             carve_out_ports: Carves out a box of port_width +
         """
         tp = kdb.TilingProcessor()
-        tp.frame = c.dbbox()  # type: ignore[misc]
+        tp.frame = c.dbbox()  # type: ignore[misc, assignment]
         tp.dbu = c.kcl.dbu
         tp.threads = n_threads or config.n_threads
         inputs: set[str] = set()
