@@ -386,5 +386,10 @@ def test_kcell_attributes() -> None:
     assert c.size_info.center == (5, 5)
 
 
-if __name__ == "__main__":
-    test_kcell_attributes()
+def test_lock(straight: kf.KCell, bend90: kf.KCell) -> None:
+    with pytest.raises(RuntimeError):
+        straight.shapes(kf.kdb.LayerInfo(1, 0)).insert(kf.kdb.Box(500))
+    with pytest.raises(RuntimeError):
+        straight << bend90
+    with pytest.raises(RuntimeError):
+        straight.transform(kf.kdb.Trans.R90)
