@@ -33,8 +33,8 @@ docs-serve:
 test:
 	uv run pytest -s
 
-cov: dev
-	uv run pytest --cov=kfactory
+cov:
+	uv run pytest --cov=kfactory --cov-branch --cov-report=xml
 
 venv:
 	uv venv -p 3.13
