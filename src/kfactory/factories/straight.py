@@ -98,7 +98,7 @@ def straight_dbu_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @kcl.cell(basename=basename, **cell_kwargs)
+    @kcl.cell(basename=basename, output_type=KCell, **cell_kwargs)
     def straight(
         width: kf_types.dbu,
         length: kf_types.dbu,

@@ -393,3 +393,49 @@ def test_lock(straight: kf.KCell, bend90: kf.KCell) -> None:
         straight << bend90
     with pytest.raises(RuntimeError):
         straight.transform(kf.kdb.Trans.R90)
+
+
+def test_cell_decorator() -> None:
+    class KCellSubclass(kf.KCell):
+        pass
+
+    @kf.cell(output_type=KCellSubclass)
+    def test_cell(name: str) -> KCellSubclass:
+        cell = KCellSubclass(name=name)
+        return cell
+
+    @kf.cell(layout_cache=True, output_type=kf.KCell)
+    def test_kcell(name: str) -> kf.KCell:
+        cell = kf.KCell(name=name)
+        return cell
+
+    @kf.cell(output_type=kf.DKCell)
+    def test_k_to_dkcell(name: str) -> kf.KCell:
+        cell = kf.KCell(name=name)
+        return cell
+
+    @kf.cell(output_type=kf.DKCell)
+    def test_dkcell(name: str) -> kf.DKCell:
+        cell = kf.DKCell(name=name)
+        return cell
+
+    @kf.cell
+    def test_dk_to_kcell(name: str) -> kf.DKCell:
+        cell = kf.DKCell(name=name)
+        return cell
+
+    k_to_dkcell = test_k_to_dkcell("test_d_to_kcell")
+    kcell = test_kcell("test_lcell")
+    cell = test_cell("test_cell")
+    dkcell = test_dkcell("test_dkcell")
+    dk_to_kcell = test_dk_to_kcell("test_bcell")
+
+    assert isinstance(k_to_dkcell, kf.DKCell)
+    assert isinstance(kcell, kf.KCell)
+    assert isinstance(cell, KCellSubclass)
+    assert isinstance(dkcell, kf.DKCell)
+    assert isinstance(dk_to_kcell, kf.KCell)
+
+
+if __name__ == "__main__":
+    test_cell_decorator()
