@@ -5173,9 +5173,9 @@ class KCLayout(
     @overload
     def cell(
         self,
-        _func: KCellFunc[KCellParams, ProtoTKCell[Any]],
+        _func: KCellFunc[KCellParams, K],
         /,
-    ) -> KCellFunc[KCellParams, KCell]: ...
+    ) -> KCellFunc[KCellParams, K]: ...
 
     @overload
     def cell(
@@ -5198,9 +5198,7 @@ class KCLayout(
         post_process: Iterable[Callable[[TKCell], None]] = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[
-        [KCellFunc[KCellParams, ProtoTKCell[Any]]], KCellFunc[KCellParams, KCell]
-    ]: ...
+    ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
 
     # TODO: Fix to support KC once mypy supports it https://github.com/python/mypy/issues/17621
     @overload
@@ -5208,7 +5206,7 @@ class KCLayout(
         self,
         /,
         *,
-        output_type: type[K] = KCell,  # type: ignore[assignment]
+        output_type: type[K],
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
@@ -5229,9 +5227,9 @@ class KCLayout(
         [KCellFunc[KCellParams, ProtoTKCell[Any]]], KCellFunc[KCellParams, K]
     ]: ...
 
-    def cell(
+    def cell(  # type: ignore[misc]
         self,
-        _func: KCellFunc[KCellParams, ProtoTKCell[Any]] | None = None,
+        _func: KCellFunc[KCellParams, K] | None = None,
         /,
         *,
         output_type: type[K] | None = None,
@@ -5252,7 +5250,8 @@ class KCLayout(
         debug_names: bool | None = None,
         tags: list[str] | None = None,
     ) -> (
-        KCellFunc[KCellParams, KCell]
+        KCellFunc[KCellParams, K]
+        | Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]
         | Callable[
             [KCellFunc[KCellParams, ProtoTKCell[Any]]], KCellFunc[KCellParams, K]
         ]
@@ -5304,7 +5303,6 @@ class KCLayout(
                 can then be retrieved with `kcl.factories.tags[my_tag]` or if filtered
                 for multiple `kcl.factories.for_tags([my_tag1, my_tag2, ...])`.
         """
-        output_cell_type: type[K] = output_type or KCell  # type: ignore[assignment]
         if check_instances is None:
             check_instances = config.check_instances
         if overwrite_existing is None:
@@ -5315,9 +5313,10 @@ class KCLayout(
             debug_names = config.debug_names
 
         def decorator_autocell(
-            f: KCellFunc[KCellParams, ProtoTKCell[Any]],
+            f: KCellFunc[KCellParams, ProtoTKCell[Any]] | KCellFunc[KCellParams, K],
         ) -> KCellFunc[KCellParams, K]:
             sig = inspect.signature(f)
+            output_cell_type: type[K] = output_type or sig.return_annotation
 
             _cache: Cache[_HashedTuple, K] | dict[_HashedTuple, K] = cache or Cache(
                 maxsize=float("inf")
@@ -5570,14 +5569,15 @@ class KCLayout(
 
         return (
             cast(
-                Callable[
+                Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]
+                | Callable[
                     [KCellFunc[KCellParams, ProtoTKCell[Any]]],
                     KCellFunc[KCellParams, K],
                 ],
                 decorator_autocell,
             )
             if _func is None
-            else cast(KCellFunc[KCellParams, KCell], decorator_autocell(_func))
+            else decorator_autocell(_func)
         )
 
     @overload

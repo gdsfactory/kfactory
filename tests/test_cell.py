@@ -434,7 +434,7 @@ def test_cell_decorator() -> None:
     assert isinstance(kcell, kf.KCell)
     assert isinstance(cell, KCellSubclass)
     assert isinstance(dkcell, kf.DKCell)
-    assert isinstance(dk_to_kcell, kf.KCell)
+    assert isinstance(dk_to_kcell, kf.DKCell)
 
 
 if __name__ == "__main__":
