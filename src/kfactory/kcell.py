@@ -231,26 +231,6 @@ class PointLike(Protocol[TUnit]):
     y: TUnit
 
 
-class VectorLike(Protocol[TUnit]):
-    x: TUnit
-    y: TUnit
-
-
-class TransLike(Protocol[TUnit_co]):
-    @overload
-    def __init__(self, x: TUnit_co, y: TUnit_co) -> None: ...
-    @overload
-    def __init__(
-        self,
-        *,
-        rot: TUnit_co | None = None,
-        mirrx: bool | None = None,
-        x: TUnit_co | None = None,
-        y: TUnit_co | None = None,
-    ) -> None: ...
-    def inverted(self) -> Self: ...
-
-
 @runtime_checkable
 class BoxLike(Protocol[TUnit]):
     left: TUnit
