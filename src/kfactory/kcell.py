@@ -10257,9 +10257,9 @@ class InstanceGroup(DbuGeometry):
 
     insts: list[Instance]
 
-    def __init__(self, insts: list[Instance]) -> None:
+    def __init__(self, insts: Sequence[Instance]) -> None:
         """Initialize the InstanceGroup."""
-        self.insts = insts
+        self.insts = list(insts)
 
     def transform(
         self, trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans
