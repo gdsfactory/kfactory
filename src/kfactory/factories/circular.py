@@ -83,6 +83,7 @@ def bend_circular_factory(
     @kcl.cell(
         basename=basename,
         snap_ports=snap_ports,
+        output_type=KCell,
         **cell_kwargs,
     )
     def bend_circular(

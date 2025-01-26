@@ -96,7 +96,7 @@ def bend_s_bezier_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @kcl.cell(basename=basename, **cell_kwargs)
+    @kcl.cell(basename=basename, output_type=KCell, **cell_kwargs)
     def bend_s_bezier(
         width: kf_types.um,
         height: kf_types.um,
