@@ -6,6 +6,8 @@ from conftest import Layers
 
 import kfactory as kf
 
+kf.config.max_cellname_length = 200
+
 
 def test_pdk(LAYER: Layers) -> None:
     pdk = kf.KCLayout("PDK")
