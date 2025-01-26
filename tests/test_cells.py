@@ -54,16 +54,13 @@ def bend180_euler(LAYER: Layers) -> kf.KCell:
 
 
 def taper(LAYER: Layers) -> kf.KCell:
-    c = kf.cells.taper.taper(
+    return kf.cells.taper.taper(
         width1=0.5,
         width2=1,
         length=10,
         layer=LAYER.WG,
         enclosure=wg_enc,
-    )
-    c = c.dup()
-    c.name = "taper"
-    return c
+    ).dup()
 
 
 cells = dict(
