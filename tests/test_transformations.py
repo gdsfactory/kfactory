@@ -21,8 +21,10 @@ def test_rotation(
 
     wg1 = c << straight
     wg2 = c << straight
-
-    wg2.rotate(2, center=center)
+    if center:
+        wg2.rotate(2, center=(center.x, center.y))
+    else:
+        wg2.rotate(2)
 
     if center:
         c.shapes(c.kcl.find_layer(LAYER.WGCLAD)).insert(
@@ -51,7 +53,10 @@ def test_drotation(
     wg1 = c << straight
     wg2 = c << straight
 
-    wg2.drotate(30, center=center)
+    if center:
+        wg2.drotate(30, center=(center.x, center.y))
+    else:
+        wg2.drotate(30)
 
     if center:
         c.shapes(c.kcl.find_layer(LAYER.WGCLAD)).insert(
@@ -89,7 +94,7 @@ def test_connection_flags(
     i2 = c << bend90
 
     if apply_mirror:
-        i2.mirror()
+        i2.mirror((0, 1), (0, 0))
 
     port = "o2" if from_name else i2.ports["o2"]
 
