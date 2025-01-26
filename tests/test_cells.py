@@ -75,7 +75,7 @@ cells = dict(
     straight=straight,
 )
 
-cell_names = set(cells.keys())
+cell_names = list(sorted(set(cells.keys())))
 
 
 @pytest.fixture(params=cell_names, scope="function")
