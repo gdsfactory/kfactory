@@ -34,7 +34,7 @@ from enum import IntEnum, IntFlag, auto
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
-from threading import Lock
+from threading import RLock
 from types import FunctionType, ModuleType
 from typing import (
     TYPE_CHECKING,
@@ -5491,7 +5491,7 @@ class KCLayout(
     constants: Constants
     rename_function: Callable[..., None]
     _registered_functions: dict[int, Callable[..., TKCell]]
-    thread_lock: Lock = Field(default_factory=Lock)
+    thread_lock: RLock = Field(default_factory=RLock)
 
     info: Info = Field(default_factory=Info)
     settings: KCellSettings = Field(frozen=True)
@@ -5922,7 +5922,7 @@ class KCLayout(
             _cache: Cache[_HashedTuple, KCell] | dict[_HashedTuple, KCell] = (
                 cache or Cache(maxsize=float("inf"))
             )
-            _lock = Lock()
+            _lock = RLock()
 
             @functools.wraps(f)
             def wrapper_autocell(
@@ -5955,7 +5955,7 @@ class KCLayout(
                     params.pop(param, None)
                     param_units.pop(param, None)
 
-                @cachetools.cached(cache=_cache, lock=Lock())
+                @cachetools.cached(cache=_cache, lock=RLock())
                 @functools.wraps(f)
                 def wrapped_cell(
                     **params: KCellParams.args | KCellParams.kwargs,
