@@ -56,8 +56,8 @@ def wg_floating_off_grid(LAYER: Layers) -> kf.KCell:
         )
         c.shapes(LAYER.WG).insert(kf.kdb.DBox(p1.x, -p1.width / 2, p2.x, p1.width / 2))
 
-        c.add_port(p1)
-        c.add_port(p2)
+        c.add_port(port=p1)
+        c.add_port(port=p2)
 
         kf.config.logfilter.regex = None
 
@@ -101,8 +101,8 @@ def test_connect_cplx_inst(LAYER: Layers) -> None:
         "converting to integer based"
     )
 
-    c.add_port(wg1.ports["o1"])
-    c.add_port(wg2.ports["o2"])
+    c.add_port(port=wg1.ports["o1"])
+    c.add_port(port=wg2.ports["o2"])
 
     kf.config.logfilter.regex = None
     c.flatten()
@@ -125,8 +125,8 @@ def test_keep_mirror(LAYER: Layers) -> None:
         trans=kf.kdb.Trans.M90, width=1000, layer=c.kcl.find_layer(LAYER.WG), kcl=c.kcl
     )
 
-    c.add_port(p1, name="o1")
-    c.add_port(p1, name="o2", keep_mirror=True)
+    c.add_port(port=p1, name="o1")
+    c.add_port(port=p1, name="o2", keep_mirror=True)
 
     assert c["o1"].trans.is_mirror() is False
     assert c["o2"].trans.is_mirror() is True

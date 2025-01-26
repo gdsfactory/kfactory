@@ -46,7 +46,7 @@ def test_dkcell_ports() -> None:
 def test_dkcell_locked() -> None:
     c = kf.kcl.dkcell("test_dkcell_locked")
     assert c.locked is False
-    c._base_kcell.locked = True
+    c._base_kcell.lock()
     assert c.locked is True
     with pytest.raises(kf.kcell.LockedError):
         c.ports = []

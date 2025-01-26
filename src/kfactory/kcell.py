@@ -67,6 +67,7 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    PrivateAttr,
     RootModel,
     ValidationError,
     model_serializer,
@@ -1496,15 +1497,15 @@ class ProtoPorts(ABC, Generic[TUnit]):
 
     @abstractmethod
     def add_port(
-        self, port: ProtoPort[Any], name: str | None = None, keep_mirror: bool = False
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
     ) -> ProtoPort[TUnit]: ...
 
     @abstractmethod
-    def create_port(
-        self,
-        *args: Any,
-        **kwargs: Any,
-    ) -> ProtoPort[TUnit]: ...
+    def create_port(self, *args: Any, **kwargs: Any) -> ProtoPort[TUnit]: ...
 
     @abstractmethod
     def get_all_named(self) -> Mapping[str, ProtoPort[TUnit]]: ...
@@ -1610,7 +1611,11 @@ class Ports(ProtoPorts[int]):
         yield from (Port(base=b) for b in self._bases)
 
     def add_port(
-        self, port: ProtoPort[Any], name: str | None = None, keep_mirror: bool = False
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
     ) -> Port:
         """Add a port object.
 
@@ -1916,7 +1921,11 @@ class DPorts(ProtoPorts[float]):
         yield from (DPort(base=b) for b in self._bases)
 
     def add_port(
-        self, port: ProtoPort[Any], name: str | None = None, keep_mirror: bool = False
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
     ) -> DPort:
         """Add a port object.
 
@@ -2648,7 +2657,6 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     """
 
     ports: list[BasePort] = Field(default_factory=list)
-    locked: bool = False
     settings: KCellSettings = Field(default_factory=KCellSettings)
     settings_units: KCellSettingsUnits = Field(default_factory=KCellSettingsUnits)
     vinsts: VInstances
@@ -2657,6 +2665,12 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     function_name: str | None = None
     basename: str | None = None
 
+    @property
+    @abstractmethod
+    def locked(self) -> bool: ...
+    @abstractmethod
+    def lock(self) -> None: ...
+
 
 class ProtoKCell(BBoxBase[TUnit], Generic[TUnit]):
     _base_kcell: BaseKCell
@@ -2664,6 +2678,9 @@ class ProtoKCell(BBoxBase[TUnit], Generic[TUnit]):
     @property
     def locked(self) -> bool:
         return self._base_kcell.locked
+
+    def lock(self) -> None:
+        self._base_kcell.lock()
 
     @property
     @abstractmethod
@@ -2739,6 +2756,9 @@ class ProtoKCell(BBoxBase[TUnit], Generic[TUnit]):
     @abstractmethod
     def insts(self) -> ProtoInstances[TUnit, ProtoInstance[TUnit]]: ...
 
+    @abstractmethod
+    def shapes(self, layer: int | kdb.LayerInfo) -> kdb.Shapes | VShapes: ...
+
     @property
     @abstractmethod
     def ports(self) -> ProtoPorts[TUnit]: ...
@@ -2748,7 +2768,11 @@ class ProtoKCell(BBoxBase[TUnit], Generic[TUnit]):
     def ports(self, new_ports: Iterable[ProtoPort[Any]]) -> None: ...
 
     def add_port(
-        self, port: ProtoPort[Any], name: str | None = None, keep_mirror: bool = False
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
     ) -> ProtoPort[TUnit]:
         """Add an existing port. E.g. from an instance to propagate the port.
 
@@ -2760,6 +2784,7 @@ class ProtoKCell(BBoxBase[TUnit], Generic[TUnit]):
         """
         if self.locked:
             raise LockedError(self)
+
         return self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
 
     def add_ports(
@@ -2782,9 +2807,16 @@ class ProtoKCell(BBoxBase[TUnit], Generic[TUnit]):
         """
         if self.locked:
             raise LockedError(self)
+
         self.ports.add_ports(
             ports=ports, prefix=prefix, suffix=suffix, keep_mirror=keep_mirror
         )
+
+    def create_port(self, *args: Any, **kwargs: Any) -> ProtoPort[TUnit]:
+        if self.locked:
+            raise LockedError(self)
+
+        return self.ports.create_port(*args, **kwargs)
 
     def layer(self, *args: Any, **kwargs: Any) -> int:
         """Get the layer info, convenience for `klayout.db.Layout.layer`."""
@@ -2843,6 +2875,24 @@ class TKCell(BaseKCell):
             return super().__getattr__(name)  # type: ignore
         except Exception:
             return getattr(self.kdb_cell, name)
+
+    @property
+    def locked(self) -> bool:
+        return self.kdb_cell.is_locked()
+
+    def lock(self) -> None:
+        self.kdb_cell.locked = True
+
+
+class TVCell(BaseKCell):
+    _locked: bool = PrivateAttr(default=False)
+
+    @property
+    def locked(self) -> bool:
+        return self._locked
+
+    def lock(self) -> None:
+        self._locked = True
 
 
 class ProtoTKCell(ProtoKCell[TUnit], ABC):
@@ -3057,6 +3107,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def delete(self) -> None:
         """Delete the cell."""
         ci = self.cell_index()
+        self._base_kcell.kdb_cell.locked = False
         self.kcl.delete_cell(ci)
 
     @overload
@@ -3217,8 +3268,6 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         Returns:
             The created instance
         """
-        if self.locked:
-            raise LockedError(self)
         if isinstance(cell, int):
             ci = cell
         else:
@@ -3344,6 +3393,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
     def draw_ports(self) -> None:
         """Draw all the ports on their respective layer."""
+        locked = self._base_kcell.kdb_cell.locked
+        self._base_kcell.kdb_cell.locked = False
         polys: dict[int, kdb.Region] = {}
 
         for port in Ports(kcl=self.kcl, bases=self.ports.bases):
@@ -3385,6 +3436,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 self.shapes(port.layer).insert(
                     kdb.Text(port.name if port.name else "", port.trans)
                 )
+        self._base_kcell.kdb_cell.locked = locked
 
     def write(
         self,
@@ -3654,8 +3706,6 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 " this. You probably want to transform an instance instead.",
                 self.name,
             )
-        if self.locked:
-            raise LockedError(self)
         if trans:
             return Instance(
                 self.kcl,
@@ -3664,20 +3714,20 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     trans,  # type: ignore[arg-type]
                 ),
             )
-        else:
-            if transform_ports:
-                if isinstance(inst_or_trans, kdb.DTrans):
-                    inst_or_trans = kdb.DCplxTrans(inst_or_trans)
-                elif isinstance(inst_or_trans, kdb.ICplxTrans):
-                    inst_or_trans = kdb.DCplxTrans(inst_or_trans, self.kcl.dbu)
+        self._base_kcell.kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
+        if transform_ports:
+            if isinstance(inst_or_trans, kdb.DTrans):
+                inst_or_trans = kdb.DCplxTrans(inst_or_trans)
+            elif isinstance(inst_or_trans, kdb.ICplxTrans):
+                inst_or_trans = kdb.DCplxTrans(inst_or_trans, self.kcl.dbu)
 
-                if isinstance(inst_or_trans, kdb.Trans):
-                    for port in self.ports:
-                        port.trans = inst_or_trans * port.trans
-                else:
-                    for port in self.ports:
-                        port.dcplx_trans = inst_or_trans * port.dcplx_trans  # type: ignore[operator]
-            return self._base_kcell.kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
+            if isinstance(inst_or_trans, kdb.Trans):
+                for port in self.ports:
+                    port.trans = inst_or_trans * port.trans
+            else:
+                for port in self.ports:
+                    port.dcplx_trans = inst_or_trans * port.dcplx_trans  # type: ignore[operator]
+        return None
 
     def set_meta_data(self) -> None:
         """Set metadata of the Cell.
@@ -6018,7 +6068,7 @@ class KCLayout(
                     # post process the cell
                     for pp in post_process:
                         pp(cell.base_kcell)
-                    cell.base_kcell.locked = True
+                    cell.base_kcell.lock()
                     if cell.kcl != self:
                         raise ValueError(
                             "The KCell created must be using the same"
@@ -6316,7 +6366,7 @@ class KCLayout(
                                                 port.name, port.dcplx_trans.s_trans()
                                             )
                                         )
-                    cell._base_kcell.locked = True
+                    cell._base_kcell.lock()
                     if cell.kcl != self:
                         raise ValueError(
                             "The KCell created must be using the same"
@@ -6455,10 +6505,12 @@ class KCLayout(
     def delete_cell(self, cell: ProtoTKCell[Any] | int) -> None:
         """Delete a cell in the kcl object."""
         if isinstance(cell, int):
+            self.layout.cell(cell).locked = False
             self.layout.delete_cell(cell)
             self.tkcells.pop(cell, None)
         else:
             ci = cell.cell_index()
+            self.layout.cell(ci).locked = False
             self.layout.delete_cell(ci)
             self.tkcells.pop(ci, None)
 
@@ -6930,11 +6982,12 @@ class VShapes:
 class VKCell(ProtoKCell[float]):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
+    _base_kcell: TVCell
     _shapes: dict[int, VShapes]
     _name: str | None
 
     @overload
-    def __init__(self, *, base_kcell: BaseKCell) -> None: ...
+    def __init__(self, *, base_kcell: TVCell) -> None: ...
 
     @overload
     def __init__(
@@ -6949,7 +7002,7 @@ class VKCell(ProtoKCell[float]):
     def __init__(
         self,
         *,
-        base_kcell: BaseKCell | None = None,
+        base_kcell: TVCell | None = None,
         name: str | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, Any] | None = None,
@@ -6961,7 +7014,7 @@ class VKCell(ProtoKCell[float]):
             self._name = base_kcell.function_name
         else:
             _kcl = kcl or _get_default_kcl()
-            self._base_kcell = BaseKCell(
+            self._base_kcell = TVCell(
                 kcl=_kcl,
                 info=Info(**(info or {})),
                 settings=KCellSettings(**(settings or {})),
@@ -7185,7 +7238,9 @@ class VKCell(ProtoKCell[float]):
         self.vinsts.append(vi)
         return vi
 
-    def shapes(self, layer: int) -> VShapes:
+    def shapes(self, layer: int | kdb.LayerInfo) -> VShapes:
+        if isinstance(layer, kdb.LayerInfo):
+            layer = self.kcl.layout.layer(layer)
         if layer not in self._shapes:
             self._shapes[layer] = VShapes(cell=self)
         return self._shapes[layer]
@@ -8906,7 +8961,7 @@ class VInstance(ProtoInstance[float]):
                     inst.insert_into(cell=_cell, trans=_trans)
                 _cell.name = _cell_name
                 for port in self.cell.ports:
-                    _cell.add_port(port.copy(_trans))
+                    _cell.add_port(port=port.copy(_trans))
                 _settings = self.cell.settings.model_dump()
                 _settings.update({"virtual_trans": _trans})
                 _settings_units = self.cell.settings_units.model_copy()

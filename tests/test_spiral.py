@@ -101,7 +101,7 @@ def dbend_circular(
         dcplx_trans=kf.kdb.DCplxTrans.R180,
     )
     warnings.filterwarnings("ignore")
-    c.add_port(dp1)
+    c.add_port(port=dp1)
 
     match angle:
         case 90:
@@ -120,7 +120,7 @@ def dbend_circular(
             )
         case _:
             raise ValueError("only support 90/180° bends")
-    c.add_port(dp2)
+    c.add_port(port=dp2)
     warnings.filterwarnings("default")
     return c
 
