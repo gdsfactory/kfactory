@@ -44,7 +44,7 @@ cov:
 	uv run pytest --cov=kfactory --cov-branch --cov-report=xml
 
 uv-cov:
-	uv run pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered
+	uv run pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered --cov-branch --cov-report=xml
 
 venv:
 	uv venv -p 3.13

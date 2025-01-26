@@ -65,7 +65,7 @@ jobs:
           make test-venv
       - name: Test coverage
         run: |
-          make cov
+          make uv-cov
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:

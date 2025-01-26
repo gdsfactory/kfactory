@@ -269,7 +269,7 @@ def test_smart_routing(
     """Tests all possible smart routing configs."""
     kcl = _test_smart_routing_kcl
     c = kcl.kcell(
-        name=f"test_smart_routing_{start_bbox=}_{sort_ports=}_{indirect=}_{start_angle=}"
+        f"test_smart_routing_{sort_ports=}_{start_bbox=}_{start_angle=}"
         f"{m2=}_{m1=}_{z=}_{p1=}_{p2=}"
     )
     c.name = c.name.replace("=", "")
