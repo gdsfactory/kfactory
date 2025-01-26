@@ -70,7 +70,6 @@ from pydantic import (
     Field,
     PrivateAttr,
     RootModel,
-    ValidationError,
     model_serializer,
     model_validator,
 )
@@ -1029,6 +1028,10 @@ class KCellFunc(Protocol[KCellParams, KC]):
     def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC: ...
 
 
+class InvalidLayerError(ValueError):
+    """Raised when a layer is not valid."""
+
+
 class LayerInfos(BaseModel):
     """Class to store and serialize LayerInfos used in KCLayout.
 
@@ -1039,37 +1042,34 @@ class LayerInfos(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True, extra="allow")
 
+    def __init__(self, **kwargs: Any) -> None:
+        """Initialize the LayerInfos class.
+
+        Args:
+            kwargs: kdb.LayerInfo . if any extra field is not a kdb.LayerInfo,
+                the validator will raise a ValidationError.
+        """
+        super().__init__(**kwargs)
+
     @model_validator(mode="after")
     def _validate_layers(self) -> Self:
-        for field_name in self.model_fields.keys():
+        field_names = set(self.model_fields.keys())
+        if self.model_extra is not None:
+            field_names |= self.model_extra.keys()
+        for field_name in field_names:
             f = getattr(self, field_name)
             if not isinstance(f, kdb.LayerInfo):
-                raise ValidationError(
+                raise InvalidLayerError(
                     "All fields in LayerInfos must be of type kdb.LayerInfo. "
                     f"Field {field_name} is of type {type(f)}"
                 )
             if not f.is_named():
                 f.name = field_name
             if f.layer == -1 or f.datatype == -1:
-                raise ValidationError(
+                raise InvalidLayerError(
                     "Layers must specify layer number and datatype."
                     f" {field_name} didn't specify them"
                 )
-        if self.model_extra is not None:
-            for field_name in self.model_extra.keys():
-                f = getattr(self, field_name)
-                if not isinstance(f, kdb.LayerInfo):
-                    raise ValidationError(
-                        "All fields in LayerInfos must be of type kdb.LayerInfo. "
-                        f"Field {field_name} is of type {type(f)}"
-                    )
-                if not f.is_named():
-                    f.name = field_name
-                if f.layer == -1 or f.datatype == -1:
-                    raise ValidationError(
-                        "Layers must specify layer number and datatype."
-                        f" {field_name} didn't specify them"
-                    )
         return self
 
 
@@ -1155,7 +1155,7 @@ def convert_metadata_type(value: Any) -> MetaData:
     return clean_value(value)
 
 
-def check_metatadata_type(value: MetaData) -> MetaData:
+def check_metadata_type(value: MetaData) -> MetaData:
     """Recursively check an info value whether it can be stored."""
     if value is None:
         return None
@@ -1196,6 +1196,9 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
 class KCellSettingsUnits(
     BaseModel, extra="allow", validate_assignment=True, frozen=True
 ):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+
     @model_validator(mode="before")
     def restrict_types(cls, data: dict[str, str]) -> dict[str, str]:
         for name, value in data.items():
@@ -1213,6 +1216,9 @@ class KCellSettingsUnits(
 
 
 class Info(BaseModel, extra="allow", validate_assignment=True):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+
     @model_validator(mode="before")
     def restrict_types(
         cls,
@@ -1220,8 +1226,8 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
     ) -> dict[str, MetaData]:
         for name, value in data.items():
             try:
-                data[name] = check_metatadata_type(value)
-            except KeyError as e:
+                data[name] = check_metadata_type(value)
+            except ValueError as e:
                 raise ValueError(
                     "Values of the info dict only support int, float, string ,tuple"
                     ", list, dict or None."
@@ -1286,26 +1292,24 @@ class PortWidthMismatch(ValueError):
 
     def __init__(
         self,
-        inst: ProtoTInstance[Any] | ProtoPort[Any] | VInstance,
-        other_inst: ProtoTInstance[Any] | ProtoPort[Any] | VInstance,
+        inst: ProtoInstance[Any],
+        other_inst: ProtoInstance[Any] | ProtoPort[Any],
         p1: ProtoPort[Any],
         p2: ProtoPort[Any],
         *args: Any,
     ) -> None:
         """Throw error for the two ports `p1`/`p1`."""
-        if isinstance(other_inst, Instance | VInstance) and isinstance(
-            inst, Instance | VInstance
-        ):
+        if isinstance(other_inst, ProtoInstance):
             super().__init__(
-                f'Width mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f'and {other_inst.cell.name}["{p2.name}"]'
-                f'("{p1.dwidth}"/"{p2.dwidth}")',
+                f'Width mismatch between the ports {inst.cell_name}["{p1.name}"] '
+                f'and {other_inst.cell_name}["{p2.name}"]'
+                f'("{p1.width}"/"{p2.width}")',
                 *args,
             )
         else:
             super().__init__(
-                f'Width mismatch between the ports {inst.name}["{p1.name}"]'
-                f' and Port "{p2.name}" ("{p1.dwidth}"/"{p2.dwidth}")',
+                f'Width mismatch between the ports {inst.cell_name}["{p1.name}"] '
+                f'and Port "{p2.name}" ("{p1.width}"/"{p2.width}")',
                 *args,
             )
 
@@ -1316,8 +1320,8 @@ class PortLayerMismatch(ValueError):
     def __init__(
         self,
         kcl: KCLayout,
-        inst: ProtoTInstance[Any],
-        other_inst: ProtoTInstance[Any] | ProtoPort[Any],
+        inst: ProtoInstance[Any],
+        other_inst: ProtoInstance[Any] | ProtoPort[Any],
         p1: ProtoPort[Any],
         p2: ProtoPort[Any],
         *args: Any,
@@ -1333,15 +1337,15 @@ class PortLayerMismatch(ValueError):
             if isinstance(p2.layer, LayerEnum)
             else str(kcl.layout.get_info(p2.layer))
         )
-        if isinstance(other_inst, Instance):
+        if isinstance(other_inst, ProtoInstance):
             super().__init__(
-                f'Layer mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f' and {other_inst.cell.name}["{p2.name}"] ("{l1}"/"{l2}")',
+                f'Layer mismatch between the ports {inst.cell_name}["{p1.name}"]'
+                f' and {other_inst.cell_name}["{p2.name}"] ("{l1}"/"{l2}")',
                 *args,
             )
         else:
             super().__init__(
-                f'Layer mismatch between the ports {inst.cell.name}["{p1.name}"]'
+                f'Layer mismatch between the ports {inst.cell_name}["{p1.name}"]'
                 f' and Port "{p2.name}" ("{l1}"/"{l2}")',
                 *args,
             )
@@ -1352,30 +1356,26 @@ class PortTypeMismatch(ValueError):
 
     def __init__(
         self,
-        inst: ProtoTInstance[Any],
-        other_inst: ProtoTInstance[Any] | ProtoPort[Any],
+        inst: ProtoInstance[Any],
+        other_inst: ProtoInstance[Any] | ProtoPort[Any],
         p1: ProtoPort[Any],
         p2: ProtoPort[Any],
         *args: Any,
     ) -> None:
         """Throw error for the two ports `p1`/`p1`."""
-        if isinstance(other_inst, Instance):
+        if isinstance(other_inst, ProtoInstance):
             super().__init__(
-                f'Type mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f' and {other_inst.cell.name}["{p2.name}"]'
+                f'Type mismatch between the ports {inst.cell_name}["{p1.name}"]'
+                f' and {other_inst.cell_name}["{p2.name}"]'
                 f" ({p1.port_type}/{p2.port_type})",
                 *args,
             )
         else:
             super().__init__(
-                f'Type mismatch between the ports {inst.cell.name}["{p1.name}"]'
+                f'Type mismatch between the ports {inst.cell_name}["{p1.name}"]'
                 f' and Port "{p2.name}" ({p1.port_type}/{p2.port_type})',
                 *args,
             )
-
-
-class FrozenError(AttributeError):
-    """Raised if a KCell has been frozen and shouldn't be modified anymore."""
 
 
 class CellNameError(ValueError):
@@ -8388,6 +8388,18 @@ class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
     def kcl(self, value: KCLayout) -> None:
         self._kcl = value
 
+    @property
+    @abstractmethod
+    def name(self) -> str | None: ...
+
+    @name.setter
+    @abstractmethod
+    def name(self, value: str | None) -> None: ...
+
+    @property
+    @abstractmethod
+    def cell_name(self) -> str | None: ...
+
     @abstractmethod
     def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]: ...
 
@@ -8412,6 +8424,10 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         if layer is None:
             return self._instance.dbbox()
         return self._instance.dbbox(layer)
+
+    @property
+    def cell_name(self) -> str:
+        return self._instance.cell.name
 
     @abstractmethod
     def __getitem__(
@@ -8679,19 +8695,12 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         else:
             p = Port(base=self.cell.ports[port].base)
         if p.width != op.width and not allow_width_mismatch:
-            # The ports are not the same width
-            raise PortWidthMismatch(
-                self,
-                other,
-                p,
-                op,
-            )
+            raise PortWidthMismatch(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
-            # The ports are not on the same layer
             raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)
-        if p._base.dcplx_trans or op._base.dcplx_trans:
+        if p.base.dcplx_trans or op.base.dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
             match (use_mirror, use_angle):
                 case True, True:
@@ -8928,7 +8937,7 @@ class DInstance(ProtoTInstance[float], UMGeometricObject):
 
 
 class VInstance(ProtoInstance[float], UMGeometricObject):
-    name: str | None
+    _name: str | None
     cell: VKCell | KCell
     trans: kdb.DCplxTrans
     _ports: VInstancePorts
@@ -8940,10 +8949,22 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         name: str | None = None,
     ) -> None:
         self.kcl = cell.kcl
-        self.name = name
+        self._name = name
         self.cell = cell
         self.trans = trans
         self._ports = VInstancePorts(self)
+
+    @property
+    def name(self) -> str | None:
+        return self._name
+
+    @name.setter
+    def name(self, value: str | None) -> None:
+        self._name = value
+
+    @property
+    def cell_name(self) -> str | None:
+        return self.cell.name
 
     def ibbox(self, layer: int | LayerEnum | None = None) -> kdb.Box:
         return self.dbbox(layer).to_itype(self.kcl.dbu)
@@ -9201,13 +9222,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         assert isinstance(p, Port) and isinstance(op, Port)
 
         if p.width != op.width and not allow_width_mismatch:
-            # The ports are not the same width
             raise PortWidthMismatch(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
-            # The ports are not on the same layer
-            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)  # type: ignore[arg-type]
+            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
-            raise PortTypeMismatch(self, other, p, op)  # type: ignore[arg-type]
+            raise PortTypeMismatch(self, other, p, op)
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
         match (use_mirror, use_angle):
             case True, True:

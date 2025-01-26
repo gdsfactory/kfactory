@@ -174,8 +174,10 @@ def test_nometainfo_read(straight: kf.KCell) -> None:
         assert straight.basename is None
 
 
-def test_info_dump() -> None:
-    c = kf.KCell(info={"a": "A"}, settings={"a": "A", "c": "C"})
+def test_info_dump(kcl: kf.KCLayout) -> None:
+    c = kcl.kcell()
+    c.info = kf.Info(a="A")
+    c.settings = kf.KCellSettings(a="A", c="C")
     c.info.b = "B"  # type: ignore[attr-defined, unused-ignore]
     c.info["d"] = {"a": 1, "b": 2}
 

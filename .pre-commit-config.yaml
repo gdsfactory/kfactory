@@ -52,4 +52,4 @@ repos:
       - id: mypy
         require_serial: true
         language: system
-        exclude: ^docs/
+        exclude: ^docs/|^tests/
