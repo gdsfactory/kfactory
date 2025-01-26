@@ -5491,7 +5491,7 @@ class KCLayout(
     constants: Constants
     rename_function: Callable[..., None]
     _registered_functions: dict[int, Callable[..., TKCell]]
-    _lock: Lock = PrivateAttr(default_factory=Lock)
+    thread_lock: Lock = Field(default_factory=Lock)
 
     info: Info = Field(default_factory=Info)
     settings: KCellSettings = Field(frozen=True)
@@ -6165,7 +6165,7 @@ class KCLayout(
                 return _cell
 
             if register_factory:
-                with self._lock:
+                with self.thread_lock:
                     if hasattr(f, "__name__"):
                         function_name = f.__name__
                     elif hasattr(f, "func"):
@@ -6564,7 +6564,7 @@ class KCLayout(
             klayout.db.Cell: klayout.db.Cell object created in the Layout
 
         """
-        with self._lock:
+        with self.thread_lock:
             if allow_duplicate or (self.layout_cell(name) is None):
                 return self.layout.create_cell(name, *args)
             else:
@@ -6575,7 +6575,7 @@ class KCLayout(
 
     def delete_cell(self, cell: ProtoTKCell[Any] | int) -> None:
         """Delete a cell in the kcl object."""
-        with self._lock:
+        with self.thread_lock:
             if isinstance(cell, int):
                 self.layout.cell(cell).locked = False
                 self.layout.delete_cell(cell)
@@ -6588,20 +6588,20 @@ class KCLayout(
 
     def delete_cell_rec(self, cell_index: int) -> None:
         """Deletes a KCell plus all subcells."""
-        with self._lock:
+        with self.thread_lock:
             self.layout.delete_cell_rec(cell_index)
             self.rebuild()
 
     def delete_cells(self, cell_index_list: Sequence[int]) -> None:
         """Delete a sequence of cell by indexes."""
-        with self._lock:
+        with self.thread_lock:
             self.layout.delete_cells(cell_index_list)
             self.rebuild()
 
     def rebuild(self) -> None:
         """Rebuild the KCLayout based on the Layoutt object."""
         kcells2delete: list[int] = []
-        with self._lock:
+        with self.thread_lock:
             for ci, c in self.tkcells.items():
                 if c.kdb_cell._destroyed():
                     kcells2delete.append(ci)
@@ -6619,7 +6619,7 @@ class KCLayout(
             allow_reregister: Overwrite the existing KCell registration with this one.
                 Doesn't allow name duplication.
         """
-        with self._lock:
+        with self.thread_lock:
             if (kcell.cell_index() not in self.tkcells) or allow_reregister:
                 self.tkcells[kcell.cell_index()] = kcell.base_kcell
             else:
@@ -6705,7 +6705,7 @@ class KCLayout(
                 transformations as strings, never versions have them stored and loaded
                 in their native KLayout formats.
         """
-        with self._lock:
+        with self.thread_lock:
             if meta_format is None:
                 meta_format = config.meta_format
             if register_cells is None:
