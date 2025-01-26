@@ -436,6 +436,14 @@ def test_cell_decorator() -> None:
     assert isinstance(dkcell, kf.DKCell)
     assert isinstance(dk_to_kcell, kf.DKCell)
 
+    with pytest.raises(ValueError):
+
+        @kf.cell
+        def test_no_output_type():  # type: ignore[no-untyped-def]  # noqa: ANN202
+            return kf.KCell()
+
+        test_no_output_type()
+
 
 if __name__ == "__main__":
     test_cell_decorator()

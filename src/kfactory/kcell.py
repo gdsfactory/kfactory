@@ -5316,7 +5316,18 @@ class KCLayout(
             f: KCellFunc[KCellParams, ProtoTKCell[Any]] | KCellFunc[KCellParams, K],
         ) -> KCellFunc[KCellParams, K]:
             sig = inspect.signature(f)
-            output_cell_type: type[K] = output_type or sig.return_annotation
+            output_cell_type_: type[K] | type[inspect.Signature.empty] = (  # type: ignore[valid-type]
+                output_type or sig.return_annotation
+            )
+
+            if output_cell_type_ is inspect.Signature.empty:
+                raise ValueError(
+                    "You did not provide an output_type and the return annotation "
+                    "cannot be inferred from the function signature. Please provide "
+                    "an output_type or return annotation."
+                )
+
+            output_cell_type = cast(type[K], output_cell_type_)
 
             _cache: Cache[_HashedTuple, K] | dict[_HashedTuple, K] = cache or Cache(
                 maxsize=float("inf")

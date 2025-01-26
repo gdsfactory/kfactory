@@ -133,6 +133,6 @@ class Decorators:
         def mc(
             **kwargs: Unpack[ModuleCellKWargs],
         ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]:
-            return _module_cell(self._cell, **kwargs)  # type: ignore[arg-type]
+            return _module_cell(self._cell, **kwargs)
 
         return mc(**kwargs) if _func is None else mc(**kwargs)(_func)
