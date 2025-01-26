@@ -31,6 +31,7 @@ class Layers(kf.kcell.LayerInfos):
 # kf.kcl.layer_infos = Layers()
 
 kf.kcl.infos = Layers()
+kf.config.max_cellname_length = 200
 
 
 @pytest.fixture(scope="module")
