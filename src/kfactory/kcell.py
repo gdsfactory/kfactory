@@ -231,6 +231,26 @@ class PointLike(Protocol[TUnit]):
     y: TUnit
 
 
+class VectorLike(Protocol[TUnit]):
+    x: TUnit
+    y: TUnit
+
+
+class TransLike(Protocol[TUnit_co]):
+    @overload
+    def __init__(self, x: TUnit_co, y: TUnit_co) -> None: ...
+    @overload
+    def __init__(
+        self,
+        *,
+        rot: TUnit_co | None = None,
+        mirrx: bool | None = None,
+        x: TUnit_co | None = None,
+        y: TUnit_co | None = None,
+    ) -> None: ...
+    def inverted(self) -> Self: ...
+
+
 @runtime_checkable
 class BoxLike(Protocol[TUnit]):
     left: TUnit
@@ -347,7 +367,7 @@ class SizeInfo(Generic[TUnit]):
         return (c.x, c.y)
 
 
-class BBoxBase(Generic[TUnit], ABC):
+class Geometry(Generic[TUnit], ABC):
     @property
     @abstractmethod
     def kcl(self) -> KCLayout: ...
@@ -365,128 +385,121 @@ class BBoxBase(Generic[TUnit], ABC):
     @abstractmethod
     def dbbox(self, layer: int | None = None) -> BoxLike[float]: ...
 
+    @overload
+    @abstractmethod
+    def _standard_trans(self: Geometry[int]) -> type[kdb.Trans]: ...
+    @overload
+    @abstractmethod
+    def _standard_trans(self: Geometry[float]) -> type[kdb.DCplxTrans]: ...
+    @abstractmethod
+    def _standard_trans(self) -> type[kdb.Trans] | type[kdb.DCplxTrans]: ...
+
     @abstractmethod
     def transform(self, trans: kdb.Trans | kdb.DTrans | kdb.DCplxTrans, /) -> None: ...
 
     @property
-    @abstractmethod
     def x(self) -> TUnit:
         """Returns the x-coordinate of the center of the bounding box."""
-        ...
+        return self.bbox().center().x
 
     @x.setter
-    @abstractmethod
     def x(self, __val: TUnit) -> None:
         """Moves self so that the bbox's center x-coordinate."""
-        ...
+        self.transform(self._standard_trans()(x=__val - self.bbox().center().x))
 
     @property
-    @abstractmethod
     def y(self) -> TUnit:
         """Returns the y-coordinate of the center of the bounding box."""
-        ...
+        return self.bbox().center().y
 
     @y.setter
-    @abstractmethod
     def y(self, __val: TUnit) -> None:
         """Moves self so that the bbox's center y-coordinate."""
-        ...
+        self.transform(self._standard_trans()(y=__val - self.bbox().center().y))
 
     @property
-    @abstractmethod
     def xmin(self) -> TUnit:
         """Returns the x-coordinate of the left edge of the bounding box."""
-        ...
+        return self.bbox().left
 
     @xmin.setter
-    @abstractmethod
     def xmin(self, __val: TUnit) -> None:
         """Moves self so that the bbox's left edge x-coordinate."""
-        ...
+        self.transform(self._standard_trans()(x=__val - self.bbox().left))
 
     @property
-    @abstractmethod
     def ymin(self) -> TUnit:
         """Returns the y-coordinate of the bottom edge of the bounding box."""
-        ...
+        return self.bbox().bottom
 
     @ymin.setter
-    @abstractmethod
     def ymin(self, __val: TUnit) -> None:
         """Moves self so that the bbox's bottom edge y-coordinate."""
-        ...
+        self.transform(self._standard_trans()(y=__val - self.bbox().bottom))
 
     @property
-    @abstractmethod
     def xmax(self) -> TUnit:
         """Returns the x-coordinate of the right edge of the bounding box."""
-        ...
+        return self.bbox().right
 
     @xmax.setter
-    @abstractmethod
     def xmax(self, __val: TUnit) -> None:
         """Moves self so that the bbox's right edge x-coordinate."""
-        ...
+        self.transform(self._standard_trans()(x=__val - self.bbox().right))
 
     @property
-    @abstractmethod
     def ymax(self) -> TUnit:
         """Returns the y-coordinate of the top edge of the bounding box."""
-        ...
+        return self.bbox().top
 
     @ymax.setter
-    @abstractmethod
     def ymax(self, __val: TUnit) -> None:
         """Moves self so that the bbox's top edge y-coordinate."""
-        ...
+        self.transform(self._standard_trans()(y=__val - self.bbox().top))
 
     @property
-    @abstractmethod
     def xsize(self) -> TUnit:
         """Returns the width of the bounding box."""
-        ...
+        return self.bbox().width()
 
     @xsize.setter
-    @abstractmethod
     def xsize(self, __val: TUnit) -> None:
         """Sets the width of the bounding box."""
-        ...
+        self.transform(self._standard_trans()(x=__val - self.bbox().width()))
 
     @property
-    @abstractmethod
     def ysize(self) -> TUnit:
         """Returns the height of the bounding box."""
-        ...
+        return self.bbox().height()
 
     @ysize.setter
-    @abstractmethod
     def ysize(self, __val: TUnit) -> None:
         """Sets the height of the bounding box."""
-        ...
+        self.transform(self._standard_trans()(y=__val - self.bbox().height()))
 
     @property
-    @abstractmethod
     def center(self) -> tuple[TUnit, TUnit]:
         """Returns the coordinate center of the bounding box."""
-        ...
+        center = self.bbox().center()
+        return center.x, center.y
 
     @center.setter
-    @abstractmethod
     def center(self, __val: tuple[TUnit, TUnit]) -> None:
         """Moves self so that the bbox's center coordinate."""
-        ...
+        self.transform(
+            self._standard_trans()(
+                __val[0] - self.bbox().center().x, __val[1] - self.bbox().center().y
+            )
+        )
 
     @overload
-    @abstractmethod
     def move(self, destination: tuple[TUnit, TUnit], /) -> Self: ...
 
     @overload
-    @abstractmethod
     def move(
         self, origin: tuple[TUnit, TUnit], destination: tuple[TUnit, TUnit]
     ) -> Self: ...
 
-    @abstractmethod
     def move(
         self,
         origin: tuple[TUnit, TUnit],
@@ -498,17 +511,22 @@ class BBoxBase(Generic[TUnit], ABC):
             origin: reference point to move [dbu]
             destination: move origin so that it will land on this coordinate [dbu]
         """
-        ...
+        if destination is None:
+            self.transform(self._standard_trans()(*origin))
+        else:
+            self.transform(
+                self._standard_trans()(
+                    destination[0] - origin[0], destination[1] - origin[1]
+                )
+            )
+        return self
 
     @overload
-    @abstractmethod
     def movex(self, destination: TUnit, /) -> Self: ...
 
     @overload
-    @abstractmethod
     def movex(self, origin: TUnit, destination: TUnit) -> Self: ...
 
-    @abstractmethod
     def movex(self, origin: TUnit, destination: TUnit | None = None) -> Self:
         """Move self in x-direction in dbu.
 
@@ -516,17 +534,18 @@ class BBoxBase(Generic[TUnit], ABC):
             origin: reference point to move [dbu]
             destination: move origin so that it will land on this coordinate [dbu]
         """
-        ...
+        if destination is None:
+            self.transform(self._standard_trans()(x=origin))
+        else:
+            self.transform(self._standard_trans()(x=destination - origin))
+        return self
 
     @overload
-    @abstractmethod
     def movey(self, destination: TUnit, /) -> Self: ...
 
     @overload
-    @abstractmethod
     def movey(self, origin: TUnit, destination: TUnit) -> Self: ...
 
-    @abstractmethod
     def movey(self, origin: TUnit, destination: TUnit | None = None) -> Self:
         """Move self in y-direction in dbu.
 
@@ -534,7 +553,11 @@ class BBoxBase(Generic[TUnit], ABC):
             origin: reference point to move [dbu]
             destination: move origin so that it will land on this coordinate [dbu]
         """
-        ...
+        if destination is None:
+            self.transform(self._standard_trans()(y=origin))
+        else:
+            self.transform(self._standard_trans()(y=destination - origin))
+        return self
 
     @abstractmethod
     def rotate(self, angle: TUnit, center: tuple[TUnit, TUnit] | None = None) -> Self:
@@ -720,7 +743,7 @@ class BBoxBase(Generic[TUnit], ABC):
         if center:
             t = kdb.Trans(*center)
             self.transform(t.inverted())
-        self.transform(kdb.Trans(angle, False, 0, 0))
+        self.transform(kdb.Trans(rot=angle, mirrx=False, x=0, y=0))
         if center and t:
             self.transform(t)
         return self
@@ -926,30 +949,46 @@ class BBoxBase(Generic[TUnit], ABC):
             angle: angle to rotate self
             center: reference point to rotate around
         """
-        if not center:
-            self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
-        else:
-            t = kdb.DCplxTrans(kdb.DVector(*center))
+        t: kdb.DCplxTrans | None = None
+        if center:
+            t = kdb.DCplxTrans(*center)
             self.transform(t.inverted())
-            self.transform(kdb.DCplxTrans(1, angle, False, 0, 0))
+        self.transform(kdb.DCplxTrans(rot=angle, mirrx=False, x=0, y=0))
+        if center and t:
             self.transform(t)
         return self
 
     def dmirror(self, p1: tuple[float, float], p2: tuple[float, float]) -> Self:
         """Mirror self at a line."""
-        p1_dbu = (self.kcl.to_dbu(p1[0]), self.kcl.to_dbu(p1[1]))
-        p2_dbu = (self.kcl.to_dbu(p2[0]), self.kcl.to_dbu(p2[1]))
-        return self.imirror(p1_dbu, p2_dbu)
+        _p1 = kdb.DPoint(p1[0], p1[1])
+        _p2 = kdb.DPoint(p2[0], p2[1])
+        mirror_v = _p2 - _p1
+        disp = kdb.DVector(self.dxmin, self.dymin)
+        angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
+        dedge = kdb.DEdge(_p1, _p2)
+
+        v = mirror_v
+        v = kdb.DVector(-v.y, v.x)
+
+        dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
+
+        cross_point = dedge.cut_point(dedge_disp)
+
+        self.transform(
+            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
+        )
+
+        return self
 
     def dmirror_x(self, x: float = 0) -> Self:
         """Mirror self at an x-axis."""
-        x_dbu = self.kcl.to_dbu(x)
-        return self.imirror_x(x_dbu)
+        self.transform(kdb.DCplxTrans(1, 180, True, 2 * x, 0))
+        return self
 
     def dmirror_y(self, y: float = 0) -> Self:
         """Mirror self at an y-axis."""
-        y_dbu = self.kcl.to_dbu(y)
-        return self.imirror_y(y_dbu)
+        self.transform(kdb.DCplxTrans(1, 0, True, 0, 2 * y))
+        return self
 
     @property
     def size_info(self) -> SizeInfo[TUnit]:
@@ -964,320 +1003,38 @@ class BBoxBase(Generic[TUnit], ABC):
         return SizeInfo[float](self.dbbox)
 
 
-class IBBoxBase(BBoxBase[int], ABC):
-    @property
-    def x(self) -> int:
-        """Returns the x-coordinate of the center of the bounding box."""
-        return self.ix
-
-    @x.setter
-    def x(self, __val: int) -> None:
-        """Moves self so that the bbox's center x-coordinate."""
-        self.ix = __val
-
-    @property
-    def y(self) -> int:
-        """Returns the y-coordinate of the center of the bounding box."""
-        return self.iy
-
-    @y.setter
-    def y(self, __val: int) -> None:
-        """Moves self so that the bbox's center y-coordinate."""
-        self.iy = __val
-
-    @property
-    def xmin(self) -> int:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self.ixmin
-
-    @xmin.setter
-    def xmin(self, __val: int) -> None:
-        """Moves self so that the bbox's left edge x-coordinate."""
-        self.ixmin = __val
-
-    @property
-    def ymin(self) -> int:
-        """Returns the y-coordinate of the bottom edge of the bounding box."""
-        return self.iymin
-
-    @ymin.setter
-    def ymin(self, __val: int) -> None:
-        """Moves self so that the bbox's bottom edge y-coordinate."""
-        self.iymin = __val
-
-    @property
-    def xmax(self) -> int:
-        """Returns the x-coordinate of the right edge of the bounding box."""
-        return self.ixmax
-
-    @xmax.setter
-    def xmax(self, __val: int) -> None:
-        """Moves self so that the bbox's right edge x-coordinate."""
-        self.ixmax = __val
-
-    @property
-    def ymax(self) -> int:
-        """Returns the y-coordinate of the top edge of the bounding box."""
-        return self.iymax
-
-    @ymax.setter
-    def ymax(self, __val: int) -> None:
-        """Moves self so that the bbox's top edge y-coordinate."""
-        self.iymax = __val
-
-    @property
-    def xsize(self) -> int:
-        """Returns the width of the bounding box."""
-        return self.ixmax - self.ixmin
-
-    @xsize.setter
-    def xsize(self, __val: int) -> None:
-        """Sets the width of the bounding box."""
-        self.ixsize = __val
-
-    @property
-    def ysize(self) -> int:
-        """Returns the height of the bounding box."""
-        return self.iysize
-
-    @ysize.setter
-    def ysize(self, __val: int) -> None:
-        """Sets the height of the bounding box."""
-        self.iysize = __val
-
-    @property
-    def center(self) -> tuple[int, int]:
-        """Returns the coordinate center of the bounding box."""
-        return self.icenter
-
-    @center.setter
-    def center(self, __val: tuple[int, int]) -> None:
-        """Moves self so that the bbox's center coordinate."""
-        self.icenter = __val
-
-    @overload
-    def move(self, destination: tuple[int, int], /) -> Self: ...
-
-    @overload
-    def move(self, origin: tuple[int, int], destination: tuple[int, int]) -> Self: ...
-
-    def move(
-        self,
-        origin: tuple[int, int],
-        destination: tuple[int, int] | None = None,
-    ) -> Self:
-        """Move self in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        return self.imove(origin, destination)
-
-    @overload
-    def movex(self, destination: int, /) -> Self: ...
-
-    @overload
-    def movex(self, origin: int, destination: int) -> Self: ...
-
-    def movex(self, origin: int, destination: int | None = None) -> Self:
-        """Move self in x-direction in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        return self.imovex(origin, destination)
-
-    @overload
-    def movey(self, destination: int, /) -> Self: ...
-
-    @overload
-    def movey(self, origin: int, destination: int) -> Self: ...
-
-    def movey(self, origin: int, destination: int | None = None) -> Self:
-        """Move self in y-direction in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        return self.imovey(origin, destination)
+class DbuGeometry(Geometry[int], ABC):
+    def _standard_trans(self) -> type[kdb.Trans]:
+        return kdb.Trans
 
     def rotate(self, angle: int, center: tuple[int, int] | None = None) -> Self:
-        """Rotate self."""
         return self.irotate(angle, center)
 
-    def mirror(self, p1: tuple[int, int], p2: tuple[int, int]) -> Self:
-        """Mirror self at a line."""
-        return self.imirror(p1, p2)
-
     def mirror_x(self, x: int) -> Self:
-        """Mirror self at an y-axis at position x."""
         return self.imirror_x(x)
 
     def mirror_y(self, y: int) -> Self:
-        """Mirror self at an x-axis at position y."""
         return self.imirror_y(y)
 
+    def mirror(self, p1: tuple[int, int], p2: tuple[int, int]) -> Self:
+        return self.imirror(p1, p2)
 
-class DBBoxBase(BBoxBase[float], ABC):
-    @property
-    def x(self) -> float:
-        """Returns the x-coordinate of the center of the bounding box."""
-        return self.dx
 
-    @x.setter
-    def x(self, __val: float) -> None:
-        """Moves self so that the bbox's center x-coordinate."""
-        self.dx = __val
-
-    @property
-    def y(self) -> float:
-        """Returns the y-coordinate of the center of the bounding box."""
-        return self.dy
-
-    @y.setter
-    def y(self, __val: float) -> None:
-        """Moves self so that the bbox's center y-coordinate."""
-        self.dy = __val
-
-    @property
-    def xmin(self) -> float:
-        """Returns the x-coordinate of the left edge of the bounding box."""
-        return self.dxmin
-
-    @xmin.setter
-    def xmin(self, __val: float) -> None:
-        """Moves self so that the bbox's left edge x-coordinate."""
-        self.dxmin = __val
-
-    @property
-    def ymin(self) -> float:
-        """Returns the y-coordinate of the bottom edge of the bounding box."""
-        return self.dymin
-
-    @ymin.setter
-    def ymin(self, __val: float) -> None:
-        """Moves self so that the bbox's bottom edge y-coordinate."""
-        self.dymin = __val
-
-    @property
-    def xmax(self) -> float:
-        """Returns the x-coordinate of the right edge of the bounding box."""
-        return self.dxmax
-
-    @xmax.setter
-    def xmax(self, __val: float) -> None:
-        """Moves self so that the bbox's right edge x-coordinate."""
-        self.dxmax = __val
-
-    @property
-    def ymax(self) -> float:
-        """Returns the y-coordinate of the top edge of the bounding box."""
-        return self.dymax
-
-    @ymax.setter
-    def ymax(self, __val: float) -> None:
-        """Moves self so that the bbox's top edge y-coordinate."""
-        self.dymax = __val
-
-    @property
-    def xsize(self) -> float:
-        """Returns the width of the bounding box."""
-        return self.dxmax - self.dxmin
-
-    @xsize.setter
-    def xsize(self, __val: float) -> None:
-        """Sets the width of the bounding box."""
-        self.dxsize = __val
-
-    @property
-    def ysize(self) -> float:
-        """Returns the height of the bounding box."""
-        return self.dysize
-
-    @ysize.setter
-    def ysize(self, __val: float) -> None:
-        """Sets the height of the bounding box."""
-        self.dysize = __val
-
-    @property
-    def center(self) -> tuple[float, float]:
-        """Returns the coordinate center of the bounding box."""
-        return self.dcenter
-
-    @center.setter
-    def center(self, __val: tuple[float, float]) -> None:
-        """Moves self so that the bbox's center coordinate."""
-        self.dcenter = __val
-
-    @overload
-    def move(self, destination: tuple[float, float], /) -> Self: ...
-
-    @overload
-    def move(
-        self, origin: tuple[float, float], destination: tuple[float, float]
-    ) -> Self: ...
-
-    def move(
-        self,
-        origin: tuple[float, float],
-        destination: tuple[float, float] | None = None,
-    ) -> Self:
-        """Move self in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        return self.dmove(origin, destination)
-
-    @overload
-    def movex(self, destination: float, /) -> Self: ...
-
-    @overload
-    def movex(self, origin: float, destination: float) -> Self: ...
-
-    def movex(self, origin: float, destination: float | None = None) -> Self:
-        """Move self in x-direction in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        return self.dmovex(origin, destination)
-
-    @overload
-    def movey(self, destination: float, /) -> Self: ...
-
-    @overload
-    def movey(self, origin: float, destination: float) -> Self: ...
-
-    def movey(self, origin: float, destination: float | None = None) -> Self:
-        """Move self in y-direction in dbu.
-
-        Args:
-            origin: reference point to move [dbu]
-            destination: move origin so that it will land on this coordinate [dbu]
-        """
-        return self.dmovey(origin, destination)
+class UmGeometry(Geometry[float], ABC):
+    def _standard_trans(self) -> type[kdb.DCplxTrans]:
+        return kdb.DCplxTrans
 
     def rotate(self, angle: float, center: tuple[float, float] | None = None) -> Self:
-        """Rotate self."""
         return self.drotate(angle, center)
 
-    def mirror(self, p1: tuple[float, float], p2: tuple[float, float]) -> Self:
-        """Mirror self at a line."""
-        return self.dmirror(p1, p2)
-
     def mirror_x(self, x: float) -> Self:
-        """Mirror self at an y-axis at position x."""
         return self.dmirror_x(x)
 
     def mirror_y(self, y: float) -> Self:
-        """Mirror self at an x-axis at position y."""
         return self.dmirror_y(y)
+
+    def mirror(self, p1: tuple[float, float], p2: tuple[float, float]) -> Self:
+        return self.dmirror(p1, p2)
 
 
 class KCellFunc(Protocol[KCellParams, KC]):
@@ -2994,7 +2751,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     def lock(self) -> None: ...
 
 
-class ProtoKCell(BBoxBase[TUnit], Generic[TUnit]):
+class ProtoKCell(Geometry[TUnit], Generic[TUnit]):
     _base_kcell: BaseKCell
 
     @property
@@ -4948,7 +4705,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 c._base_kcell.vinsts.clear()
 
 
-class DKCell(ProtoTKCell[float], DBBoxBase):
+class DKCell(ProtoTKCell[float], UmGeometry):
     """Cell with floating point units."""
 
     yaml_tag: ClassVar[str] = "!DKCell"
@@ -5039,7 +4796,7 @@ class DKCell(ProtoTKCell[float], DBBoxBase):
         return self.dbbox(layer)
 
 
-class KCell(ProtoTKCell[int], IBBoxBase):
+class KCell(ProtoTKCell[int], DbuGeometry):
     """Cell with integer units."""
 
     yaml_tag: ClassVar[str] = "!KCell"
@@ -7293,7 +7050,7 @@ class VShapes:
         return len(self._shapes)
 
 
-class VKCell(ProtoKCell[float], DBBoxBase):
+class VKCell(ProtoKCell[float], UmGeometry):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
     _base_kcell: TVCell
@@ -8626,7 +8383,7 @@ class DPort(ProtoPort[float]):
         self.mirror = value
 
 
-class ProtoInstance(BBoxBase[TUnit], Generic[TUnit]):
+class ProtoInstance(Geometry[TUnit], Generic[TUnit]):
     _kcl: KCLayout
 
     @property
@@ -9011,7 +8768,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
             self._instance.flatten()
 
 
-class Instance(ProtoTInstance[int], IBBoxBase):
+class Instance(ProtoTInstance[int], DbuGeometry):
     """An Instance of a KCell.
 
     An Instance is a reference to a KCell with a transformation.
@@ -9098,7 +8855,7 @@ class Instance(ProtoTInstance[int], IBBoxBase):
         return representer.represent_mapping(cls.yaml_tag, d)
 
 
-class DInstance(ProtoTInstance[float], DBBoxBase):
+class DInstance(ProtoTInstance[float], UmGeometry):
     """An Instance of a KCell.
 
     An Instance is a reference to a KCell with a transformation.
@@ -9180,7 +8937,7 @@ class DInstance(ProtoTInstance[float], DBBoxBase):
         return DPort(base=self.ports[key].base)
 
 
-class VInstance(ProtoInstance[float], DBBoxBase):
+class VInstance(ProtoInstance[float], UmGeometry):
     name: str | None
     cell: VKCell | KCell
     trans: kdb.DCplxTrans
