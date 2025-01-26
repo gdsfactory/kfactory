@@ -153,7 +153,7 @@ c.plot()
 
 # %%
 @kf.cell
-def straight(length=10, width=1, layer=(1, 0)):
+def straight(length=10, width=1, layer=(1, 0)) -> kf.KCell:
     wg = kf.KCell()
     box = kf.kdb.DBox(length, width)
     int_box = wg.kcl.to_dbu(box)
