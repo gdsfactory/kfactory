@@ -9,6 +9,14 @@
 - Use kdb.Cell.locked/is_locked for KCell locking [#573](https://github.com/gdsfactory/kfactory/pull/573)
 - Make all arguments for add_port and add_ports kw [#572](https://github.com/gdsfactory/kfactory/pull/572)
 
+## Bug Fixes
+
+- Fix cell decorator [#576](https://github.com/gdsfactory/kfactory/pull/576)
+
+## Documentation
+
+- Fix cell decorator [#576](https://github.com/gdsfactory/kfactory/pull/576)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.0.1...v1.1.0
 
 
