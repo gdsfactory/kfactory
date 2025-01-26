@@ -2494,6 +2494,9 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def to_kcell(self) -> KCell:
         return KCell(base_kcell=self._base_kcell)
 
+    def to_dkcell(self) -> DKCell:
+        return DKCell(base_kcell=self._base_kcell)
+
     @property
     @abstractmethod
     def insts(self) -> ProtoInstances[TUnit]: ...
@@ -9875,6 +9878,7 @@ specified in the constructor."""
 cell = kcl.cell
 """Default kcl @cell decorator."""
 vcell = kcl.vcell
+"""Default kcl @vcell decorator."""
 
 
 class DecoratorList(UserList[Any]):
@@ -10278,7 +10282,7 @@ def show(
                 _kcl.write(p, library_save_options)
                 _kcl_paths.append({"name": _kcl.name, "file": str(p)})
 
-    elif isinstance(layout, KCell):
+    elif isinstance(layout, ProtoKCell):
         file = None
         spec = importlib.util.find_spec("git")
         if spec is not None:

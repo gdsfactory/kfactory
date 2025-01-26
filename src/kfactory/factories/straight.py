@@ -28,6 +28,8 @@ __all__ = ["straight_dbu_factory"]
 
 
 class StraightKCellFactory(Protocol):
+    __name__: str
+
     def __call__(
         self,
         width: kf_types.dbu,

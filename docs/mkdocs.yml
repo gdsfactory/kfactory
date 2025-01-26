@@ -5,18 +5,19 @@ docs_dir: source
 
 nav:
   - Home:
-    - Intro: index.md
-    - gdsfactory.md
-    - dosdonts.md
+      - Intro: index.md
+      - gdsfactory.md
+      - dosdonts.md
   - First Steps:
-    - Prerequisites: pre.md
-    - 5min Intro to KFactory: intro.md
+      - Prerequisites: pre.md
+      - 5min Intro to KFactory: intro.md
+      - Creating PCells: pcells.md
   - Tutorials:
-    - Basice Geometry in KLayout: notebooks/00_geometry.py
-    - KCell & Instance: notebooks/01_references.py
-    - DRC utils: notebooks/02_DRC.py
-    - Enclosures: notebooks/03_Enclosures.py
-    - Multiple KCLs: notebooks/04_KCL.py
+      - Basice Geometry in KLayout: notebooks/00_geometry.py
+      - KCell & Instance: notebooks/01_references.py
+      - DRC utils: notebooks/02_DRC.py
+      - Enclosures: notebooks/03_Enclosures.py
+      - Multiple KCLs: notebooks/04_KCL.py
   - Migration: migration.md
   - Config Class: config.md
   - API: reference/
@@ -34,7 +35,7 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
-   # Palette toggle for light mode
+    # Palette toggle for light mode
     - scheme: default
       toggle:
         icon: material/brightness-7
