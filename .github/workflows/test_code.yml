@@ -58,10 +58,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          uv venv -p ${{ matrix.python-version }}
-          make install
+          make test-venv
       - name: Test coverage
         run: |
           make cov
