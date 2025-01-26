@@ -172,7 +172,7 @@ def check_collisions(
 
         for layer_info in collision_check_layers:
             shapes_regions = shapes[layer_info]
-            layer = c.kcl.layer(layer_info)
+            layer_ = c.kcl.layout.layer(layer_info)
             error_region_instances = kdb.Region()
             error_region_shapes = kdb.Region()
             inst_regions: dict[int, kdb.Region] = {}
@@ -183,12 +183,12 @@ def check_collisions(
                     error_region_shapes.insert(shape_region & r)
                 shape_region.insert(r)
             for i, inst in enumerate(insts):
-                _inst_region = kdb.Region(inst.bbox(layer))
+                _inst_region = kdb.Region(inst.bbox(layer_))
                 # inst_shapes: kdb.Region | None = None
                 if not (inst_region & _inst_region).is_empty():
                     # if inst_shapes is None:
                     inst_shapes = kdb.Region()
-                    shape_it = c.begin_shapes_rec_overlapping(layer, inst.bbox(layer))
+                    shape_it = c.begin_shapes_rec_overlapping(layer_, inst.bbox(layer_))
                     shape_it.select_cells([inst.cell.cell_index()])
                     shape_it.min_depth = 1
                     for _it in shape_it.each():
@@ -200,7 +200,7 @@ def check_collisions(
                         if _reg & _inst_region:
                             __reg = kdb.Region()
                             shape_it = c.begin_shapes_rec_touching(
-                                layer, (_reg & _inst_region).bbox()
+                                layer_, (_reg & _inst_region).bbox()
                             )
                             shape_it.select_cells([insts[j].cell.cell_index()])
                             shape_it.min_depth = 1
