@@ -5,6 +5,7 @@
 
 ## New
 
+- Add inheritance for bounding box operations [#575](https://github.com/gdsfactory/kfactory/pull/575)
 - Use kdb.Cell.locked/is_locked for KCell locking [#573](https://github.com/gdsfactory/kfactory/pull/573)
 - Make all arguments for add_port and add_ports kw [#572](https://github.com/gdsfactory/kfactory/pull/572)
 
