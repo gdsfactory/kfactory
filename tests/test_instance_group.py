@@ -152,10 +152,25 @@ def test_rotate(
     assert _instance_group_equal(instance1, instance3)
 
 
+def test_instance_group_bounding_box(
+    instance_groups: _InstanceGroupTuple,
+) -> None:
+    instance1, _, instance3 = instance_groups
+
+    assert instance1.ibbox() == instance3.ibbox()
+
+    instance3.insts = []
+
+    assert instance1.dbbox() == kf.kdb.DBox(0, 0, 1, 1)
+    assert instance1.ibbox() == kf.kdb.DBox(0, 0, 1000, 1000)
+    assert instance3.dbbox() == kf.kdb.DBox()
+    assert instance3.ibbox() == kf.kdb.Box()
+
+
 def test_instance_group_attributes(
     instance_groups: _InstanceGroupTuple,
 ) -> None:
-    instance1, instance2, instance3 = instance_groups
+    instance1, instance2, _ = instance_groups
 
     instance1.movex(1000).rotate(1).mirror_x(1000)
     instance2.dmovex(1).drotate(90).dmirror_x(1)

@@ -976,7 +976,7 @@ class Geometry(Generic[TUnit], ABC):
         return SizeInfo[float](self.dbbox)
 
 
-class DbuGeometry(Geometry[int], ABC):
+class DBUGeometry(Geometry[int], ABC):
     def bbox(self, layer: int | None = None) -> kdb.Box:
         return self.ibbox(layer)
 
@@ -996,7 +996,7 @@ class DbuGeometry(Geometry[int], ABC):
         return self.imirror(p1, p2)
 
 
-class UmGeometry(Geometry[float], ABC):
+class UMGeometry(Geometry[float], ABC):
     def bbox(self, layer: int | None = None) -> kdb.DBox:
         return self.dbbox(layer)
 
@@ -4684,7 +4684,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 c._base_kcell.vinsts.clear()
 
 
-class DKCell(ProtoTKCell[float], UmGeometry):
+class DKCell(ProtoTKCell[float], UMGeometry):
     """Cell with floating point units."""
 
     yaml_tag: ClassVar[str] = "!DKCell"
@@ -4769,7 +4769,7 @@ class DKCell(ProtoTKCell[float], UmGeometry):
         return self.ports.create_port(**kwargs)
 
 
-class KCell(ProtoTKCell[int], DbuGeometry):
+class KCell(ProtoTKCell[int], DBUGeometry):
     """Cell with integer units."""
 
     yaml_tag: ClassVar[str] = "!KCell"
@@ -7021,7 +7021,7 @@ class VShapes:
         return len(self._shapes)
 
 
-class VKCell(ProtoKCell[float], UmGeometry):
+class VKCell(ProtoKCell[float], UMGeometry):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
     _base_kcell: TVCell
@@ -8740,7 +8740,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
             self._instance.flatten()
 
 
-class Instance(ProtoTInstance[int], DbuGeometry):
+class Instance(ProtoTInstance[int], DBUGeometry):
     """An Instance of a KCell.
 
     An Instance is a reference to a KCell with a transformation.
@@ -8823,7 +8823,7 @@ class Instance(ProtoTInstance[int], DbuGeometry):
         return representer.represent_mapping(cls.yaml_tag, d)
 
 
-class DInstance(ProtoTInstance[float], UmGeometry):
+class DInstance(ProtoTInstance[float], UMGeometry):
     """An Instance of a KCell.
 
     An Instance is a reference to a KCell with a transformation.
@@ -8901,7 +8901,7 @@ class DInstance(ProtoTInstance[float], UmGeometry):
         return DPort(base=self.ports[key].base)
 
 
-class VInstance(ProtoInstance[float], UmGeometry):
+class VInstance(ProtoInstance[float], UMGeometry):
     name: str | None
     cell: VKCell | KCell
     trans: kdb.DCplxTrans
@@ -10245,19 +10245,10 @@ class MergeDiff:
         )
 
 
-class InstanceGroup(DbuGeometry):
-    """Group of Instances.
+class ProtoInstanceGroup(Generic[TUnit, TInstance], Geometry[TUnit]):
+    insts: list[TInstance]
 
-    The instance group can be treated similar to a single instance
-    with regards to transformation functions and bounding boxes.
-
-    Args:
-        insts: List of the instances of the group.
-    """
-
-    insts: list[Instance]
-
-    def __init__(self, insts: Sequence[Instance]) -> None:
+    def __init__(self, insts: Sequence[TInstance]) -> None:
         """Initialize the InstanceGroup."""
         self.insts = list(insts)
 
@@ -10271,25 +10262,51 @@ class InstanceGroup(DbuGeometry):
     def ibbox(self, layer: int | None = None) -> kdb.Box:
         """Get the total bounding box or the bounding box of a layer in dbu."""
         bb = kdb.Box()
-        if layer is not None:
-            for _bb in (inst.ibbox(layer) for inst in self.insts):
-                bb += _bb
-        else:
-            for _bb in (inst.ibbox() for inst in self.insts):
-                bb += _bb
-
+        for _bb in (inst.ibbox(layer) for inst in self.insts):
+            bb += _bb
         return bb
 
     def dbbox(self, layer: int | None = None) -> kdb.DBox:
         """Get the total bounding box or the bounding box of a layer in um."""
         bb = kdb.DBox()
-        if layer is not None:
-            for _bb in (inst.dbbox(layer) for inst in self.insts):
-                bb += _bb
-        else:
-            for _bb in (inst.dbbox() for inst in self.insts):
-                bb += _bb
+        for _bb in (inst.dbbox(layer) for inst in self.insts):
+            bb += _bb
         return bb
+
+
+class InstanceGroup(ProtoInstanceGroup[int, Instance], DBUGeometry):
+    """Group of Instances.
+
+    The instance group can be treated similar to a single instance
+    with regards to transformation functions and bounding boxes.
+
+    Args:
+        insts: List of the instances of the group.
+    """
+
+    ...
+
+
+class DInstanceGroup(ProtoInstanceGroup[float, DInstance], UMGeometry):
+    """Group of DInstances.
+
+    The instance group can be treated similar to a single instance
+    with regards to transformation functions and bounding boxes.
+
+    Args:
+        insts: List of the dinstances of the group.
+    """
+
+
+class VInstanceGroup(ProtoInstanceGroup[float, VInstance], UMGeometry):
+    """Group of DInstances.
+
+    The instance group can be treated similar to a single instance
+    with regards to transformation functions and bounding boxes.
+
+    Args:
+        insts: List of the vinstances of the group.
+    """
 
 
 def _filter_ports(
