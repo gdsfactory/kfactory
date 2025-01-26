@@ -198,8 +198,8 @@ def test_route_bundle(
     )
 
     for route in routes:
-        c.add_port(route.start_port)
-        c.add_port(route.end_port)
+        c.add_port(port=route.start_port)
+        c.add_port(port=route.end_port)
 
     c.auto_rename_ports()
 
@@ -471,8 +471,8 @@ def test_custom_router(
 
     kf.routing.generic.route_bundle(
         c=c,
-        start_ports=[p._base for p in start_ports],
-        end_ports=[p._base for p in end_ports],
+        start_ports=[p.base for p in start_ports],
+        end_ports=[p.base for p in end_ports],
         ends=50_000,
         starts=50_000,
         routing_function=kf.routing.manhattan.route_smart,

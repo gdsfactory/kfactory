@@ -5,6 +5,23 @@
 
 ## New
 
+- Add inheritance for bounding box operations [#575](https://github.com/gdsfactory/kfactory/pull/575)
+- Use kdb.Cell.locked/is_locked for KCell locking [#573](https://github.com/gdsfactory/kfactory/pull/573)
+- Make all arguments for add_port and add_ports kw [#572](https://github.com/gdsfactory/kfactory/pull/572)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.0.1...v1.1.0
+
+
+[Changes][v1.1.0]
+
+
+<a id="v1.0.1"></a>
+# [v1.0.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.0.1) - 2025-01-25
+
+# What's Changed
+
+## New
+
 - Add coverage config [#569](https://github.com/gdsfactory/kfactory/pull/569)
 - add Tunit, i and d properties for cells [#565](https://github.com/gdsfactory/kfactory/pull/565)
 
@@ -17,10 +34,10 @@
 
 - Fix instance collision error [#570](https://github.com/gdsfactory/kfactory/pull/570)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.0.0...v1.1.0
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.0.0...v1.0.1
 
 
-[Changes][v1.1.0]
+[Changes][v1.0.1]
 
 
 <a id="v1.0.0"></a>
@@ -1487,7 +1504,8 @@
 [Changes][v0.4.0]
 
 
-[v1.1.0]: https://github.com/gdsfactory/kfactory/compare/v1.0.0...v1.1.0
+[v1.1.0]: https://github.com/gdsfactory/kfactory/compare/v1.0.1...v1.1.0
+[v1.0.1]: https://github.com/gdsfactory/kfactory/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/gdsfactory/kfactory/compare/v0.23.2...v1.0.0
 [v0.23.2]: https://github.com/gdsfactory/kfactory/compare/v0.23.1...v0.23.2
 [v0.23.1]: https://github.com/gdsfactory/kfactory/compare/v0.23.0...v0.23.1
