@@ -42,6 +42,7 @@ from typing import (
     ClassVar,
     Generic,
     Literal,
+    NoReturn,
     NotRequired,
     Protocol,
     Self,
@@ -201,6 +202,7 @@ kcls: dict[str, KCLayout] = {}
 class KCellConstructor(Protocol[KC]):
     @overload
     def __call__(self, *, base_kcell: TKCell) -> KC: ...
+
     @overload
     def __call__(
         self,
@@ -212,6 +214,7 @@ class KCellConstructor(Protocol[KC]):
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> KC: ...
+
     def __call__(
         self,
         *,
@@ -347,7 +350,9 @@ class SizeInfo(Generic[TUnit]):
         return (c.x, c.y)
 
 
-class Geometry(Generic[TUnit], ABC):
+class GeometricObject(Generic[TUnit], ABC):
+    kcl: KCLayout
+
     @abstractmethod
     def bbox(self, layer: int | None = None) -> BoxLike[TUnit]: ...
 
@@ -359,16 +364,18 @@ class Geometry(Generic[TUnit], ABC):
 
     @overload
     @abstractmethod
-    def _standard_trans(self: Geometry[int]) -> type[kdb.Trans]: ...
+    def _standard_trans(self: GeometricObject[int]) -> type[kdb.Trans]: ...
     @overload
     @abstractmethod
-    def _standard_trans(self: Geometry[float]) -> type[kdb.DCplxTrans]: ...
+    def _standard_trans(self: GeometricObject[float]) -> type[kdb.DCplxTrans]: ...
     @abstractmethod
     def _standard_trans(self) -> type[kdb.Trans] | type[kdb.DCplxTrans]: ...
 
     @abstractmethod
     def transform(
-        self, trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans, /
+        self,
+        trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
+        /,
     ) -> None: ...
 
     @property
@@ -724,21 +731,21 @@ class Geometry(Generic[TUnit], ABC):
 
     def imirror(self, p1: tuple[int, int], p2: tuple[int, int]) -> Self:
         """Mirror self at a line."""
-        _p1 = kdb.Point(p1[0], p1[1])
-        _p2 = kdb.Point(p2[0], p2[1])
+        _p1 = kdb.Point(p1[0], p1[1]).to_dtype(self.kcl.dbu)
+        _p2 = kdb.Point(p2[0], p2[1]).to_dtype(self.kcl.dbu)
         mirror_v = _p2 - _p1
-        disp = kdb.Vector(self.ixmin, self.iymin)
+        disp = kdb.DVector(self.dxmin, self.dymin)
         angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
-        dedge = kdb.Edge(_p1, _p2)
+        dedge = kdb.DEdge(_p1, _p2)
 
-        v = kdb.Vector(-mirror_v.y, mirror_v.x)
+        v = kdb.DVector(-mirror_v.y, mirror_v.x)
 
-        dedge_disp = kdb.Edge(disp.to_p(), (v + disp).to_p())
+        dedge_disp = kdb.DEdge(disp.to_p(), (v + disp).to_p())
 
         cross_point = dedge.cut_point(dedge_disp)
 
         self.transform(
-            kdb.ICplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
+            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
         )
 
         return self
@@ -976,7 +983,7 @@ class Geometry(Generic[TUnit], ABC):
         return SizeInfo[float](self.dbbox)
 
 
-class DBUGeometry(Geometry[int], ABC):
+class DBUGeometricObject(GeometricObject[int], ABC):
     def bbox(self, layer: int | None = None) -> kdb.Box:
         return self.ibbox(layer)
 
@@ -996,7 +1003,7 @@ class DBUGeometry(Geometry[int], ABC):
         return self.imirror(p1, p2)
 
 
-class UMGeometry(Geometry[float], ABC):
+class UMGeometricObject(GeometricObject[float], ABC):
     def bbox(self, layer: int | None = None) -> kdb.DBox:
         return self.dbbox(layer)
 
@@ -1951,6 +1958,7 @@ class DPorts(ProtoPorts[float]):
 
     @overload
     def __init__(self, *, kcl: KCLayout) -> None: ...
+
     @overload
     def __init__(
         self,
@@ -1958,6 +1966,7 @@ class DPorts(ProtoPorts[float]):
         kcl: KCLayout,
         ports: Iterable[ProtoPort[Any]] | None = None,
     ) -> None: ...
+
     @overload
     def __init__(
         self,
@@ -1965,6 +1974,7 @@ class DPorts(ProtoPorts[float]):
         kcl: KCLayout,
         bases: list[BasePort] | None = None,
     ) -> None: ...
+
     def __init__(
         self,
         *,
@@ -2730,7 +2740,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     def lock(self) -> None: ...
 
 
-class ProtoKCell(Geometry[TUnit], Generic[TUnit]):
+class ProtoKCell(GeometricObject[TUnit], Generic[TUnit]):
     _base_kcell: BaseKCell
 
     @property
@@ -4684,13 +4694,14 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 c._base_kcell.vinsts.clear()
 
 
-class DKCell(ProtoTKCell[float], UMGeometry):
+class DKCell(ProtoTKCell[float], UMGeometricObject):
     """Cell with floating point units."""
 
     yaml_tag: ClassVar[str] = "!DKCell"
 
     @overload
     def __init__(self, *, base_kcell: TKCell) -> None: ...
+
     @overload
     def __init__(
         self,
@@ -4702,6 +4713,7 @@ class DKCell(ProtoTKCell[float], UMGeometry):
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None: ...
+
     def __init__(
         self,
         *,
@@ -4769,13 +4781,14 @@ class DKCell(ProtoTKCell[float], UMGeometry):
         return self.ports.create_port(**kwargs)
 
 
-class KCell(ProtoTKCell[int], DBUGeometry):
+class KCell(ProtoTKCell[int], DBUGeometricObject):
     """Cell with integer units."""
 
     yaml_tag: ClassVar[str] = "!KCell"
 
     @overload
     def __init__(self, *, base_kcell: TKCell) -> None: ...
+
     @overload
     def __init__(
         self,
@@ -4787,6 +4800,7 @@ class KCell(ProtoTKCell[int], DBUGeometry):
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None: ...
+
     def __init__(
         self,
         *,
@@ -6501,8 +6515,10 @@ class KCLayout(
 
     @overload
     def _cells(self, name: str) -> list[kdb.Cell]: ...
+
     @overload
     def _cells(self) -> int: ...
+
     def _cells(self, name: str | None = None) -> int | list[kdb.Cell]:
         if name is None:
             return self.layout.cells()
@@ -6992,7 +7008,9 @@ class VShapes:
         yield from self._shapes
 
     def transform(
-        self, trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans, /
+        self,
+        trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
+        /,
     ) -> VShapes:
         new_shapes: list[DShapeLike] = []
         if isinstance(trans, kdb.Trans):
@@ -7021,7 +7039,7 @@ class VShapes:
         return len(self._shapes)
 
 
-class VKCell(ProtoKCell[float], UMGeometry):
+class VKCell(ProtoKCell[float], UMGeometricObject):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
     _base_kcell: TVCell
@@ -7068,7 +7086,9 @@ class VKCell(ProtoKCell[float], UMGeometry):
         return self.dbbox(layer).to_itype(self.kcl.dbu)
 
     def transform(
-        self, trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans, /
+        self,
+        trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
+        /,
     ) -> None:
         for key, vshape in self._shapes.items():
             self._shapes[key] = vshape.transform(trans)
@@ -8353,7 +8373,7 @@ class DPort(ProtoPort[float]):
         self.mirror = value
 
 
-class ProtoInstance(Geometry[TUnit], Generic[TUnit]):
+class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
     _kcl: KCLayout
 
     @property
@@ -8723,7 +8743,9 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         )
 
     def transform(
-        self, trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans, /
+        self,
+        trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
+        /,
     ) -> None:
         self._instance.transform(trans)
 
@@ -8740,7 +8762,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
             self._instance.flatten()
 
 
-class Instance(ProtoTInstance[int], DBUGeometry):
+class Instance(ProtoTInstance[int], DBUGeometricObject):
     """An Instance of a KCell.
 
     An Instance is a reference to a KCell with a transformation.
@@ -8823,7 +8845,7 @@ class Instance(ProtoTInstance[int], DBUGeometry):
         return representer.represent_mapping(cls.yaml_tag, d)
 
 
-class DInstance(ProtoTInstance[float], UMGeometry):
+class DInstance(ProtoTInstance[float], UMGeometricObject):
     """An Instance of a KCell.
 
     An Instance is a reference to a KCell with a transformation.
@@ -8901,7 +8923,7 @@ class DInstance(ProtoTInstance[float], UMGeometry):
         return DPort(base=self.ports[key].base)
 
 
-class VInstance(ProtoInstance[float], UMGeometry):
+class VInstance(ProtoInstance[float], UMGeometricObject):
     name: str | None
     cell: VKCell | KCell
     trans: kdb.DCplxTrans
@@ -9204,7 +9226,9 @@ class VInstance(ProtoInstance[float], UMGeometry):
                 self.mirror_y(op.dcplx_trans.disp.y)
 
     def transform(
-        self, trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans, /
+        self,
+        trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
+        /,
     ) -> None:
         if isinstance(trans, kdb.Trans):
             trans = trans.to_dtype(self.kcl.dbu)
@@ -10245,12 +10269,26 @@ class MergeDiff:
         )
 
 
-class ProtoInstanceGroup(Generic[TUnit, TInstance], Geometry[TUnit]):
+class ProtoInstanceGroup(Generic[TUnit, TInstance], GeometricObject[TUnit]):
     insts: list[TInstance]
 
     def __init__(self, insts: Sequence[TInstance]) -> None:
         """Initialize the InstanceGroup."""
         self.insts = list(insts)
+
+    @property
+    def kcl(self) -> KCLayout:
+        try:
+            return self.insts[0].kcl
+        except IndexError as e:
+            raise ValueError(
+                "Cannot transform or retrieve the KCLayout "
+                "of an instance group if it's empty"
+            ) from e
+
+    @kcl.setter
+    def kcl(self, val: KCLayout) -> NoReturn:
+        raise ValueError("KCLayout cannot be set on an instance group.")
 
     def transform(
         self, trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans
@@ -10274,7 +10312,7 @@ class ProtoInstanceGroup(Generic[TUnit, TInstance], Geometry[TUnit]):
         return bb
 
 
-class InstanceGroup(ProtoInstanceGroup[int, Instance], DBUGeometry):
+class InstanceGroup(ProtoInstanceGroup[int, Instance], DBUGeometricObject):
     """Group of Instances.
 
     The instance group can be treated similar to a single instance
@@ -10287,7 +10325,7 @@ class InstanceGroup(ProtoInstanceGroup[int, Instance], DBUGeometry):
     ...
 
 
-class DInstanceGroup(ProtoInstanceGroup[float, DInstance], UMGeometry):
+class DInstanceGroup(ProtoInstanceGroup[float, DInstance], UMGeometricObject):
     """Group of DInstances.
 
     The instance group can be treated similar to a single instance
@@ -10298,7 +10336,7 @@ class DInstanceGroup(ProtoInstanceGroup[float, DInstance], UMGeometry):
     """
 
 
-class VInstanceGroup(ProtoInstanceGroup[float, VInstance], UMGeometry):
+class VInstanceGroup(ProtoInstanceGroup[float, VInstance], UMGeometricObject):
     """Group of DInstances.
 
     The instance group can be treated similar to a single instance
