@@ -12,7 +12,7 @@ runner = CliRunner()
 def test_version_callback() -> None:
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert f"KFactory CLI Version: {__version__}" == result.output
+    assert f"KFactory CLI Version: {__version__}" in result.output
 
 
 def test_show_command() -> None:

@@ -39,6 +39,13 @@ def LAYER() -> Layers:
 
 
 @pytest.fixture
+def kcl() -> kf.KCLayout:
+    kcl = kf.KCLayout("TEST_LAYERS")
+    kcl.infos = Layers()
+    return kcl
+
+
+@pytest.fixture
 def wg_enc(LAYER: Layers) -> kf.LayerEnclosure:
     return kf.LayerEnclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
 

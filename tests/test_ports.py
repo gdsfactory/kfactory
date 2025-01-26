@@ -4,7 +4,6 @@ import pytest
 from conftest import Layers
 
 import kfactory as kf
-from kfactory.kcell import kcl
 
 
 @kf.cell
@@ -208,14 +207,14 @@ def test_polar_copy_complex(LAYER: Layers) -> None:
     )
 
 
-def test_dplx_port_dbu_port_conversion(LAYER: Layers) -> None:
+def test_dplx_port_dbu_port_conversion(LAYER: Layers, kcl: kf.KCLayout) -> None:
     t1 = kf.kdb.DCplxTrans(1, 90, False, 10, 10)
     t2 = kf.kdb.Trans(1, False, 10_000, 10_000)
     p = kf.Port(
         width=kcl.to_dbu(1),
         dcplx_trans=t1,
-        layer=kf.kcl.find_layer(LAYER.WG),
-        kcl=kf.kcl,
+        layer=kcl.find_layer(LAYER.WG),
+        kcl=kcl,
     )
     assert p.trans == t2
 

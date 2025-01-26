@@ -19,7 +19,8 @@ def test_custom_show() -> None:
         nonlocal showed
         showed = True
 
-    c = kf.kcl.kcell("CustomShow")
+    kcl = kf.KCLayout("TEST_CUSTOM_SHOW")
+    c = kcl.kcell("CustomShow")
     _show = kf.config.show_function
     kf.config.show_function = show
     c.show()
@@ -28,7 +29,8 @@ def test_custom_show() -> None:
 
 
 def test_custom_show_string() -> None:
-    c = kf.kcl.kcell("CustomShowString")
+    kcl = kf.KCLayout("TEST_CUSTOM_SHOW_STRING")
+    c = kcl.kcell("CustomShowString")
     _show = kf.config.show_function
     kf.config.show_function = "custom.show.show"  # type: ignore[assignment]
     c.show()

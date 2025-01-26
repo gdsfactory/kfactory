@@ -6453,6 +6453,10 @@ class KCLayout(
         """Create a new cell based ont he pdk's layout object."""
         return DKCell(name=name, kcl=self, ports=ports)
 
+    def vkcell(self, name: str | None = None) -> VKCell:
+        """Create a new cell based ont he pdk's layout object."""
+        return VKCell(name=name, kcl=self)
+
     def set_layers_from_infos(self, name: str, layers: LayerInfos) -> type[LayerEnum]:
         """Create a new LAYER enum based on the pdk's kcl."""
         return layerenum_from_dict(name=name, layers=layers, layout=self.layout)

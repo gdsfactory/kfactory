@@ -159,8 +159,9 @@ def test_route_bundle(
     optical_port: kf.Port,
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
+    kcl: kf.KCLayout,
 ) -> None:
-    c = kf.KCell()
+    c = kcl.kcell("TEST_ROUTE_BUNDLE")
 
     p_start = [
         optical_port.copy(
@@ -180,10 +181,8 @@ def test_route_bundle(
         for i in range(10)
     ]
 
-    c.shapes(kf.kcl.find_layer(10, 0)).insert(
-        kf.kdb.Box(-50_000, 0, 1_750_000, -100_000)
-    )
-    c.shapes(kf.kcl.find_layer(10, 0)).insert(
+    c.shapes(kcl.find_layer(10, 0)).insert(kf.kdb.Box(-50_000, 0, 1_750_000, -100_000))
+    c.shapes(kcl.find_layer(10, 0)).insert(
         kf.kdb.Box(1_000_000, 500_000, p_end[-1].x, 600_000)
     )
 
@@ -236,6 +235,9 @@ def test_route_length(
     assert route.n_bend90 == 2
 
 
+_test_smart_routing_kcl = kf.KCLayout("TEST_SMART_ROUTING", infos=Layers)
+
+
 @pytest.mark.parametrize(
     "indirect,sort_ports,start_bbox,start_angle,m2,m1,z,p1,p2",
     [
@@ -265,8 +267,9 @@ def test_smart_routing(
     p2: bool,
 ) -> None:
     """Tests all possible smart routing configs."""
-    c = kf.KCell(
-        name=f"test_smart_routing_{sort_ports=}_{start_bbox=}_{start_angle=}"
+    kcl = _test_smart_routing_kcl
+    c = kcl.kcell(
+        f"test_smart_routing_{sort_ports=}_{start_bbox=}_{start_angle=}"
         f"{m2=}_{m1=}_{z=}_{p1=}_{p2=}"
     )
     c.name = c.name.replace("=", "")
@@ -275,7 +278,7 @@ def test_smart_routing(
 
     base_t = kf.kdb.Trans.R0
 
-    _port = partial(c.create_port, width=500, layer=kf.kcl.find_layer(1, 0))
+    _port = partial(c.create_port, width=500, layer=kcl.find_layer(1, 0))
 
     start_ports: list[kf.Port] = []
     end_ports: list[kf.Port] = []
@@ -372,12 +375,12 @@ def test_smart_routing(
         start_boxes.append(start_box)
         end_boxes.append(end_box)
     for box in start_boxes + end_boxes:
-        c.shapes(kf.kcl.find_layer(10, 0)).insert(box)
+        c.shapes(kcl.find_layer(10, 0)).insert(box)
 
     for box in start_bboxes:
-        c.shapes(kf.kcl.find_layer(11, 0)).insert(box)
+        c.shapes(kcl.find_layer(11, 0)).insert(box)
     for box in end_bboxes:
-        c.shapes(kf.kcl.find_layer(12, 0)).insert(box)
+        c.shapes(kcl.find_layer(12, 0)).insert(box)
 
     match (m1, p1):
         case (True, False):
@@ -443,7 +446,8 @@ def test_smart_routing(
 def test_custom_router(
     LAYER: Layers,
 ) -> None:
-    c = kf.kcl.kcell("CustomRouter")
+    kcl = kf.KCLayout("TEST_CUSTOM_ROUTER")
+    c = kcl.kcell("CustomRouter")
     bend90 = kf.cells.circular.bend_circular(width=1, radius=10, layer=LAYER.WG)
     b90r = kf.routing.generic.get_radius(list(bend90.ports))
     sf = partial(kf.cells.straight.straight_dbu, layer=LAYER.WG)
