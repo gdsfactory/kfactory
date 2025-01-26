@@ -21,6 +21,10 @@ dev:
 	uv pip install -e .
 	uv run pre-commit install
 
+test-venv:
+	uv sync --all-extras
+	uv pip install -e .
+
 docs-clean:
 	rm -rf site
 
@@ -32,6 +36,9 @@ docs-serve:
 
 test:
 	uv run pytest -s
+
+uv-test:
+	uv run pytest -s -n logical
 
 cov:
 	uv run pytest --cov=kfactory --cov-branch --cov-report=xml
