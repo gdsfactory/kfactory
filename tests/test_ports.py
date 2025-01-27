@@ -4,7 +4,6 @@ import pytest
 from conftest import Layers
 
 import kfactory as kf
-from kfactory.kcell import kcl
 
 
 @kf.cell
@@ -118,6 +117,44 @@ def test_connect_integer(wg: kf.KCell) -> None:
     assert wg2.ports["o1"].trans == kf.kdb.Trans(0, False, 0, 0)
 
 
+def test_connect_port_width_mismatch(LAYER: Layers, wg: kf.KCell) -> None:
+    c = kf.KCell()
+    wg1 = c << straight(1000, 20000, LAYER.WG)
+    port = kf.Port(
+        width=c.kcl.to_dbu(2),
+        layer=c.kcl.find_layer(LAYER.WG),
+        name="cplxp1",
+        dcplx_trans=kf.kdb.DCplxTrans(1, 30, False, 5, 10),
+    )
+    with pytest.raises(kf.kcell.PortWidthMismatch) as excinfo:
+        wg1.connect("o1", port)
+    assert str(excinfo.value) == (
+        f'Width mismatch between the ports {wg1.cell_name}["o1"] and Port "cplxp1" '
+        f'("{wg1.ports["o1"].width}"/"2000")'
+    )
+
+
+def test_connect_instance_width_mismatch(LAYER: Layers, wg: kf.KCell) -> None:
+    c = kf.KCell()
+    wg1 = c << straight(1000, 20000, LAYER.WG)
+    port = kf.Port(
+        width=c.kcl.to_dbu(2),
+        layer=c.kcl.find_layer(LAYER.WG),
+        name="cplxp1",
+        dcplx_trans=kf.kdb.DCplxTrans(1, 30, False, 5, 10),
+    )
+    c2 = kf.KCell()
+    c2.add_port(port=port, name="o2")
+    wg1_instance = c << c2
+
+    with pytest.raises(kf.kcell.PortWidthMismatch) as excinfo:
+        wg1.connect("o1", wg1_instance, "o2")
+    assert str(excinfo.value) == (
+        f'Width mismatch between the ports {wg1.cell_name}["o1"] and '
+        f'{wg1_instance.cell_name}["o2"]("{wg1.ports["o1"].width}"/"2000")'
+    )
+
+
 def test_keep_mirror(LAYER: Layers) -> None:
     c = kf.KCell()
 
@@ -208,14 +245,14 @@ def test_polar_copy_complex(LAYER: Layers) -> None:
     )
 
 
-def test_dplx_port_dbu_port_conversion(LAYER: Layers) -> None:
+def test_dplx_port_dbu_port_conversion(LAYER: Layers, kcl: kf.KCLayout) -> None:
     t1 = kf.kdb.DCplxTrans(1, 90, False, 10, 10)
     t2 = kf.kdb.Trans(1, False, 10_000, 10_000)
     p = kf.Port(
         width=kcl.to_dbu(1),
         dcplx_trans=t1,
-        layer=kf.kcl.find_layer(LAYER.WG),
-        kcl=kf.kcl,
+        layer=kcl.find_layer(LAYER.WG),
+        kcl=kcl,
     )
     assert p.trans == t2
 
@@ -231,4 +268,4 @@ def test_ports_eq() -> None:
 
 
 if __name__ == "__main__":
-    test_ports_eq()
+    pytest.main([__file__])

@@ -86,13 +86,14 @@ def test_layer_merge_enc(LAYER: Layers) -> None:
 
 
 def test_um_enclosure(LAYER: Layers) -> None:
+    kcl = kf.KCLayout("TEST_UM_ENCLOSURE")
     enc = kf.LayerEnclosure(
         [
             (LAYER.WGCLAD, -5000, -3000),
             (LAYER.WGCLAD, -4000, -2000),
             (LAYER.WGCLAD, -2000, 1000),
         ],
-        kcl=kf.kcl,
+        kcl=kcl,
     )
 
     enc_um = kf.LayerEnclosure(
@@ -101,7 +102,7 @@ def test_um_enclosure(LAYER: Layers) -> None:
             (LAYER.WGCLAD, -4, -2),
             (LAYER.WGCLAD, -2, 1),
         ],
-        kcl=kf.kcl,
+        kcl=kcl,
     )
 
     assert enc == enc_um

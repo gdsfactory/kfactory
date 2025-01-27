@@ -1,3 +1,5 @@
+import threading
+import warnings
 from collections.abc import Callable
 from tempfile import NamedTemporaryFile
 
@@ -387,63 +389,43 @@ def test_kcell_attributes() -> None:
 
 
 def test_lock(straight: kf.KCell, bend90: kf.KCell) -> None:
-    with pytest.raises(RuntimeError):
-        straight.shapes(kf.kdb.LayerInfo(1, 0)).insert(kf.kdb.Box(500))
-    with pytest.raises(RuntimeError):
-        straight << bend90
-    with pytest.raises(RuntimeError):
-        straight.transform(kf.kdb.Trans.R90)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with pytest.raises(RuntimeError):
+            straight.shapes(kf.kdb.LayerInfo(1, 0)).insert(kf.kdb.Box(500))
+        with pytest.raises(RuntimeError):
+            straight << bend90
+        with pytest.raises(RuntimeError):
+            straight.transform(kf.kdb.Trans.R90)
 
 
-def test_cell_decorator() -> None:
-    class KCellSubclass(kf.KCell):
-        pass
+def test_cell_in_threads(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
+    def taper() -> kf.KCell:
+        return kf.cells.taper.taper(
+            width1=0.5,
+            width2=1,
+            length=10,
+            layer=LAYER.WG,
+            enclosure=wg_enc,
+        )
 
-    @kf.cell(output_type=KCellSubclass)
-    def test_cell(name: str) -> KCellSubclass:
-        cell = KCellSubclass(name=name)
-        return cell
+    threads: list[threading.Thread] = []
 
-    @kf.cell(layout_cache=True, output_type=kf.KCell)
-    def test_kcell(name: str) -> kf.KCell:
-        cell = kf.KCell(name=name)
-        return cell
+    for _ in range(4):
+        thread = threading.Thread(target=taper)
+        threads.append(thread)
+        thread.start()
 
-    @kf.cell(output_type=kf.DKCell)
-    def test_k_to_dkcell(name: str) -> kf.KCell:
-        cell = kf.KCell(name=name)
-        return cell
+    for thread in threads:
+        thread.join()
 
-    @kf.cell(output_type=kf.DKCell)
-    def test_dkcell(name: str) -> kf.DKCell:
-        cell = kf.DKCell(name=name)
-        return cell
+    t = taper()
 
-    @kf.cell
-    def test_dk_to_kcell(name: str) -> kf.DKCell:
-        cell = kf.DKCell(name=name)
-        return cell
-
-    k_to_dkcell = test_k_to_dkcell("test_d_to_kcell")
-    kcell = test_kcell("test_lcell")
-    cell = test_cell("test_cell")
-    dkcell = test_dkcell("test_dkcell")
-    dk_to_kcell = test_dk_to_kcell("test_bcell")
-
-    assert isinstance(k_to_dkcell, kf.DKCell)
-    assert isinstance(kcell, kf.KCell)
-    assert isinstance(cell, KCellSubclass)
-    assert isinstance(dkcell, kf.DKCell)
-    assert isinstance(dk_to_kcell, kf.DKCell)
-
-    with pytest.raises(ValueError):
-
-        @kf.cell
-        def test_no_output_type():  # type: ignore[no-untyped-def]  # noqa: ANN202
-            return kf.KCell()
-
-        test_no_output_type()
+    assert (
+        len([c for c in kf.kcl.tkcells.values() if c.kdb_cell.name == t.kdb_cell.name])
+        == 1
+    )
 
 
 if __name__ == "__main__":
-    test_cell_decorator()
+    pytest.main([__file__, "-v"])

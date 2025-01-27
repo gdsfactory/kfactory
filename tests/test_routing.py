@@ -1,11 +1,23 @@
 from collections.abc import Callable
 from functools import partial
-from random import randint
 
 import pytest
 from conftest import Layers
 
 import kfactory as kf
+
+smart_bundle_routing_params = [
+    (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
+    for indirect in (True, False)
+    for sort_ports in (False, True)
+    for start_bbox in (False, True)
+    for start_angle in (-2, -1, 0, 1, 2)
+    for m2 in (True, False)
+    for m1 in (True, False)
+    for z in (True, False)
+    for p1 in (True, False)
+    for p2 in (True, False)
+]
 
 
 @pytest.mark.parametrize(
@@ -40,7 +52,7 @@ def test_route_straight(
     [
         (20000, 20000, 2),
         (10000, 10000, 3),
-        (randint(10001, 20000), randint(10001, 20000), 3),
+        (150532, 12112, 3),
         (5000, 10000, 3),  # the mean one where points will collide for radius 10000
         (30000, 5000, 3),
         (500, 500, 3),
@@ -82,7 +94,7 @@ def test_route_bend90(
     [
         (20000, 20000, 2),
         (10000, 10000, 3),
-        (randint(10001, 20000), randint(10001, 20000), 3),
+        (15212, 19921, 3),
         (5000, 10000, 3),  # the mean one where points will collide for radius 10000
         (30000, 5000, 3),
         (500, 500, 3),
@@ -159,8 +171,9 @@ def test_route_bundle(
     optical_port: kf.Port,
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
+    kcl: kf.KCLayout,
 ) -> None:
-    c = kf.KCell()
+    c = kcl.kcell("TEST_ROUTE_BUNDLE")
 
     p_start = [
         optical_port.copy(
@@ -180,10 +193,8 @@ def test_route_bundle(
         for i in range(10)
     ]
 
-    c.shapes(kf.kcl.find_layer(10, 0)).insert(
-        kf.kdb.Box(-50_000, 0, 1_750_000, -100_000)
-    )
-    c.shapes(kf.kcl.find_layer(10, 0)).insert(
+    c.shapes(kcl.find_layer(10, 0)).insert(kf.kdb.Box(-50_000, 0, 1_750_000, -100_000))
+    c.shapes(kcl.find_layer(10, 0)).insert(
         kf.kdb.Box(1_000_000, 500_000, p_end[-1].x, 600_000)
     )
 
@@ -236,20 +247,12 @@ def test_route_length(
     assert route.n_bend90 == 2
 
 
+_test_smart_routing_kcl = kf.KCLayout("TEST_SMART_ROUTING", infos=Layers)
+
+
 @pytest.mark.parametrize(
     "indirect,sort_ports,start_bbox,start_angle,m2,m1,z,p1,p2",
-    [
-        (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
-        for indirect in (True, False)
-        for sort_ports in (False, True)
-        for start_bbox in (False, True)
-        for start_angle in (-2, -1, 0, 1, 2)
-        for m2 in (True, False)
-        for m1 in (True, False)
-        for z in (True, False)
-        for p1 in (True, False)
-        for p2 in (True, False)
-    ],
+    smart_bundle_routing_params,
 )
 def test_smart_routing(
     bend90_small: kf.KCell,
@@ -265,7 +268,8 @@ def test_smart_routing(
     p2: bool,
 ) -> None:
     """Tests all possible smart routing configs."""
-    c = kf.KCell(
+    kcl = _test_smart_routing_kcl
+    c = kcl.kcell(
         name=f"test_smart_routing_{start_bbox=}_{sort_ports=}_{indirect=}_{start_angle=}"
         f"{m2=}_{m1=}_{z=}_{p1=}_{p2=}"
     )
@@ -275,7 +279,7 @@ def test_smart_routing(
 
     base_t = kf.kdb.Trans.R0
 
-    _port = partial(c.create_port, width=500, layer=kf.kcl.find_layer(1, 0))
+    _port = partial(c.create_port, width=500, layer=kcl.find_layer(1, 0))
 
     start_ports: list[kf.Port] = []
     end_ports: list[kf.Port] = []
@@ -372,12 +376,12 @@ def test_smart_routing(
         start_boxes.append(start_box)
         end_boxes.append(end_box)
     for box in start_boxes + end_boxes:
-        c.shapes(kf.kcl.find_layer(10, 0)).insert(box)
+        c.shapes(kcl.find_layer(10, 0)).insert(box)
 
     for box in start_bboxes:
-        c.shapes(kf.kcl.find_layer(11, 0)).insert(box)
+        c.shapes(kcl.find_layer(11, 0)).insert(box)
     for box in end_bboxes:
-        c.shapes(kf.kcl.find_layer(12, 0)).insert(box)
+        c.shapes(kcl.find_layer(12, 0)).insert(box)
 
     match (m1, p1):
         case (True, False):
@@ -443,7 +447,8 @@ def test_smart_routing(
 def test_custom_router(
     LAYER: Layers,
 ) -> None:
-    c = kf.kcl.kcell("CustomRouter")
+    kcl = kf.KCLayout("TEST_CUSTOM_ROUTER")
+    c = kcl.kcell("CustomRouter")
     bend90 = kf.cells.circular.bend_circular(width=1, radius=10, layer=LAYER.WG)
     b90r = kf.routing.generic.get_radius(list(bend90.ports))
     sf = partial(kf.cells.straight.straight_dbu, layer=LAYER.WG)
