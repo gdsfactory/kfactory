@@ -5922,7 +5922,6 @@ class KCLayout(
             _cache: Cache[_HashedTuple, KCell] | dict[_HashedTuple, KCell] = (
                 cache or Cache(maxsize=float("inf"))
             )
-            _lock = RLock()
 
             @functools.wraps(f)
             def wrapper_autocell(
@@ -5960,7 +5959,7 @@ class KCLayout(
                 def wrapped_cell(
                     **params: KCellParams.args | KCellParams.kwargs,
                 ) -> KCell:
-                    with _lock:
+                    with self.thread_lock:
                         for key, value in params.items():
                             if isinstance(value, DecoratorDict | DecoratorList):
                                 params[key] = _hashable_to_original(value)
@@ -6144,12 +6143,12 @@ class KCLayout(
                             )
                         return cell
 
-                _cell = wrapped_cell(**params)
-                if _cell.destroyed():
-                    # If the any cell has been destroyed, we should clean up the cache.
-                    # Delete all the KCell entrances in the cache which have
-                    # `_destroyed() == True`i
-                    with _lock:
+                with self.thread_lock:
+                    _cell = wrapped_cell(**params)
+                    if _cell.destroyed():
+                        # If any cell has been destroyed, we should clean up the cache.
+                        # Delete all the KCell entrances in the cache which have
+                        # `_destroyed() == True`i
                         _deleted_cell_hashes: list[_HashedTuple] = [
                             _hash_item
                             for _hash_item, _cell_item in _cache.items()
@@ -6157,12 +6156,12 @@ class KCLayout(
                         ]
                         for _dch in _deleted_cell_hashes:
                             del _cache[_dch]
-                    _cell = wrapped_cell(**params)
+                        _cell = wrapped_cell(**params)
 
-                if info is not None:
-                    _cell.info.update(info)
+                    if info is not None:
+                        _cell.info.update(info)
 
-                return _cell
+                    return _cell
 
             if register_factory:
                 with self.thread_lock:
