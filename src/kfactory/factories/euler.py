@@ -256,6 +256,7 @@ def bend_euler_factory(
     @kcl.cell(
         snap_ports=snap_ports,
         basename=basename,
+        output_type=KCell,
         **cell_kwargs,
     )
     def bend_euler(
@@ -383,7 +384,7 @@ def bend_s_euler_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @kcl.cell(basename=basename, **cell_kwargs)
+    @kcl.cell(basename=basename, output_type=KCell, **cell_kwargs)
     def bend_s_euler(
         offset: kf_types.um,
         width: kf_types.um,

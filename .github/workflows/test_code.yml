@@ -46,7 +46,7 @@ jobs:
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
-        run: make uv-test
+        run: make test
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -65,7 +65,7 @@ jobs:
           make test-venv
       - name: Test coverage
         run: |
-          make uv-cov
+          make cov
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:

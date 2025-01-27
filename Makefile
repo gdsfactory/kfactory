@@ -35,16 +35,13 @@ docs-serve:
 	mkdocs serve -f docs/mkdocs.yml
 
 test:
-	uv run pytest -s
-
-uv-test:
 	uv run pytest -s -n logical
 
 cov:
-	uv run pytest --cov=kfactory --cov-branch --cov-report=xml
+	uv run pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
 
-uv-cov:
-	uv run pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered --cov-branch --cov-report=xml
+dev-cov:
+	uv run pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered --durations=10
 
 venv:
 	uv venv -p 3.13
