@@ -1,3 +1,5 @@
+import threading
+import warnings
 from collections.abc import Callable
 from tempfile import NamedTemporaryFile
 
@@ -387,9 +389,43 @@ def test_kcell_attributes() -> None:
 
 
 def test_lock(straight: kf.KCell, bend90: kf.KCell) -> None:
-    with pytest.raises(RuntimeError):
-        straight.shapes(kf.kdb.LayerInfo(1, 0)).insert(kf.kdb.Box(500))
-    with pytest.raises(RuntimeError):
-        straight << bend90
-    with pytest.raises(RuntimeError):
-        straight.transform(kf.kdb.Trans.R90)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        with pytest.raises(RuntimeError):
+            straight.shapes(kf.kdb.LayerInfo(1, 0)).insert(kf.kdb.Box(500))
+        with pytest.raises(RuntimeError):
+            straight << bend90
+        with pytest.raises(RuntimeError):
+            straight.transform(kf.kdb.Trans.R90)
+
+
+def test_cell_in_threads(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
+    def taper() -> kf.KCell:
+        return kf.cells.taper.taper(
+            width1=0.5,
+            width2=1,
+            length=10,
+            layer=LAYER.WG,
+            enclosure=wg_enc,
+        )
+
+    threads: list[threading.Thread] = []
+
+    for _ in range(4):
+        thread = threading.Thread(target=taper)
+        threads.append(thread)
+        thread.start()
+
+    for thread in threads:
+        thread.join()
+
+    t = taper()
+
+    assert (
+        len([c for c in kf.kcl.tkcells.values() if c.kdb_cell.name == t.kdb_cell.name])
+        == 1
+    )
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])
