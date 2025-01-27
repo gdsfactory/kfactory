@@ -6,9 +6,9 @@ from conftest import Layers
 import kfactory as kf
 
 
-def test_virtual_cell() -> None:
-    c = kf.VKCell()
-    c.shapes(kf.kcl.find_layer(1, 0)).insert(
+def test_virtual_cell(kcl: kf.KCLayout) -> None:
+    c = kcl.vkcell("TEST_VIRTUAL_CELL")
+    c.shapes(kcl.find_layer(1, 0)).insert(
         kf.kdb.DPolygon([kf.kdb.DPoint(0, 0), kf.kdb.DPoint(1, 0), kf.kdb.DPoint(0, 1)])
     )
 

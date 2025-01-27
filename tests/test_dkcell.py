@@ -4,38 +4,38 @@ import pytest
 import kfactory as kf
 
 
-@kf.cell
-def unnamed_dkcell(name: str = "a") -> kf.DKCell:
-    c = kf.kcl.dkcell(name)
-    return c
+def test_unnamed_dkcell(kcl: kf.KCLayout) -> None:
+    @kcl.cell
+    def unnamed_dkcell(name: str = "a") -> kf.DKCell:
+        c = kcl.dkcell(name)
+        return c
 
-
-def test_unnamed_dkcell() -> None:
     c1 = unnamed_dkcell("test_unnamed_dkcell")
     c2 = unnamed_dkcell("test_unnamed_dkcell")
     assert c1 is c2
 
 
-@kf.cell
-def nested_list_dict_dkcell(
-    arg1: dict[str, list[dict[str, str | int] | int] | int],
-) -> kf.DKCell:
-    c = kf.kcl.dkcell("test_nested_list_dict_dkcell")
-    return c
-
-
-def test_nested_dict_list_dkcell() -> None:
+def test_nested_dict_list_dkcell(kcl: kf.KCLayout) -> None:
     dl: dict[str, list[dict[str, str | int] | int] | int] = {
         "a": 5,
         "b": [5, {"c": "d", "e": 6}],
     }
+
+    @kcl.cell
+    def nested_list_dict_dkcell(
+        arg1: dict[str, list[dict[str, str | int] | int] | int],
+    ) -> kf.DKCell:
+        c = kcl.dkcell("test_nested_list_dict_dkcell")
+        return c
+
     c = nested_list_dict_dkcell(dl)
     assert dl == c.settings["arg1"]
     assert dl is not c.settings["arg1"]
 
 
 def test_dkcell_ports() -> None:
-    c = kf.kcl.dkcell("test_dkcell_ports")
+    kcl = kf.KCLayout("TEST_DKCELL_PORTS")
+    c = kcl.dkcell("test_dkcell_ports")
     assert isinstance(c.ports, kf.DPorts)
     assert list(c.ports) == []
     p = c.create_port(width=1, layer=1, center=(0, 0), angle=90)
@@ -44,9 +44,10 @@ def test_dkcell_ports() -> None:
 
 
 def test_dkcell_locked() -> None:
-    c = kf.kcl.dkcell("test_dkcell_locked")
+    kcl = kf.KCLayout("TEST_DKCELL_LOCKED")
+    c = kcl.dkcell("test_dkcell_locked")
     assert c.locked is False
-    c._base_kcell.lock()
+    c.base_kcell.lock()
     assert c.locked is True
     with pytest.raises(kf.kcell.LockedError):
         c.ports = []
@@ -56,7 +57,8 @@ def test_dkcell_locked() -> None:
 
 
 def test_dkcell_attributes() -> None:
-    c = kf.kcl.dkcell("test_dkcell_attributes")
+    kcl = kf.KCLayout("TEST_DKCELL_ATTRIBUTES")
+    c = kcl.dkcell("test_dkcell_attributes")
     c.shapes(1).insert(kdb.DBox(0, 0, 10, 10))
     assert c.shapes(1).size() == 1
     assert c.bbox(1) == kdb.DBox(0, 0, 10, 10)
@@ -160,5 +162,15 @@ def test_dkcell_attributes() -> None:
     assert c.size_info.center == (5, 5)
 
 
+def test_size_info_call(kcl: kf.KCLayout) -> None:
+    c = kcl.kcell()
+
+    c.shapes(1).insert(kdb.DBox(0, 0, 10, 10))
+
+    new_size_info = c.size_info(1)
+
+    assert new_size_info._bf() == c.size_info._bf()
+
+
 if __name__ == "__main__":
-    test_dkcell_attributes()
+    pytest.main([__file__])

@@ -21,6 +21,10 @@ dev:
 	uv pip install -e .
 	uv run pre-commit install
 
+test-venv:
+	uv sync --all-extras
+	uv pip install -e .
+
 docs-clean:
 	rm -rf site
 
@@ -31,10 +35,13 @@ docs-serve:
 	mkdocs serve -f docs/mkdocs.yml
 
 test:
-	uv run pytest -s
+	uv run pytest -s -n logical
 
 cov:
-	uv run pytest --cov=kfactory --cov-branch --cov-report=xml
+	uv run pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
+
+dev-cov:
+	uv run pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered --durations=10
 
 venv:
 	uv venv -p 3.13

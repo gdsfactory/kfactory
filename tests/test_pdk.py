@@ -1,11 +1,12 @@
 from functools import partial
-from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import pytest
 from conftest import Layers
 
 import kfactory as kf
+
+kf.config.max_cellname_length = 200
 
 
 def test_pdk(LAYER: Layers) -> None:
@@ -100,49 +101,48 @@ def test_multi_pdk(LAYER: Layers) -> None:
 
 
 def test_multi_pdk_convert(LAYER: Layers) -> None:
-    base_pdk = kf.KCLayout("BASE", infos=Layers)
+    with NamedTemporaryFile("a", suffix=".oas") as temp_file:
+        base_pdk = kf.KCLayout("BASE", infos=Layers)
 
-    doe_pdk1 = kf.KCLayout(name="DOE1", infos=Layers)
-    doe_pdk2 = kf.KCLayout(name="DOE2", infos=Layers)
-    assembly_pdk = kf.KCLayout(name="ASSEMBLY", infos=Layers)
+        doe_pdk1 = kf.KCLayout(name="DOE1", infos=Layers)
+        doe_pdk2 = kf.KCLayout(name="DOE2", infos=Layers)
+        assembly_pdk = kf.KCLayout(name="ASSEMBLY", infos=Layers)
 
-    wg = kf.factories.straight.straight_dbu_factory(base_pdk)
-    bend90_pdk1 = kf.factories.euler.bend_euler_factory(doe_pdk1)
-    bend90_pdk2 = kf.factories.euler.bend_euler_factory(doe_pdk2)
+        wg = kf.factories.straight.straight_dbu_factory(base_pdk)
+        bend90_pdk1 = kf.factories.euler.bend_euler_factory(doe_pdk1)
+        bend90_pdk2 = kf.factories.euler.bend_euler_factory(doe_pdk2)
 
-    doe1 = doe_pdk1.kcell("DOE1")
-    doe1_wg = doe1 << wg(width=1000, length=10_000, layer=LAYER.WG)
-    doe_b1 = doe1 << bend90_pdk1(width=1, radius=10, layer=LAYER.WG)
-    doe_b1.connect("o1", doe1_wg, "o2")
+        doe1 = doe_pdk1.kcell("DOE1")
+        doe1_wg = doe1 << wg(width=1000, length=10_000, layer=LAYER.WG)
+        doe_b1 = doe1 << bend90_pdk1(width=1, radius=10, layer=LAYER.WG)
+        doe_b1.connect("o1", doe1_wg, "o2")
 
-    doe1.add_port(port=doe1_wg.ports["o1"], name="o1")
-    doe1.add_port(port=doe_b1.ports["o2"], name="o2")
+        doe1.add_port(port=doe1_wg.ports["o1"], name="o1")
+        doe1.add_port(port=doe_b1.ports["o2"], name="o2")
 
-    doe2 = doe_pdk2.kcell("DOE2")
-    enc2 = kf.LayerEnclosure(
-        name="enc2",
-        sections=[(LAYER.WGCLAD, 0, 2000)],
-        main_layer=LAYER.WG,
-    )
-    doe2_wg = doe2 << wg(width=1000, length=10_000, layer=LAYER.WG)
-    doe_b2 = doe2 << bend90_pdk2(width=1, radius=10, layer=LAYER.WG)
-    doe_b2.connect("o1", doe2_wg, "o2")
-    doe_b3 = doe2 << bend90_pdk2(width=1, radius=10, layer=LAYER.WG, enclosure=enc2)
+        doe2 = doe_pdk2.kcell("DOE2")
+        enc2 = kf.LayerEnclosure(
+            name="enc2",
+            sections=[(LAYER.WGCLAD, 0, 2000)],
+            main_layer=LAYER.WG,
+        )
+        doe2_wg = doe2 << wg(width=1000, length=10_000, layer=LAYER.WG)
+        doe_b2 = doe2 << bend90_pdk2(width=1, radius=10, layer=LAYER.WG)
+        doe_b2.connect("o1", doe2_wg, "o2")
+        doe_b3 = doe2 << bend90_pdk2(width=1, radius=10, layer=LAYER.WG, enclosure=enc2)
 
-    doe_b2.connect("o1", doe2_wg, "o2")
-    doe_b3.connect("o1", doe_b2, "o2")
+        doe_b2.connect("o1", doe2_wg, "o2")
+        doe_b3.connect("o1", doe_b2, "o2")
 
-    doe2.add_port(port=doe2_wg.ports["o1"], name="o1")
-    doe2.add_port(port=doe_b3.ports["o2"], name="o2")
+        doe2.add_port(port=doe2_wg.ports["o1"], name="o1")
+        doe2.add_port(port=doe_b3.ports["o2"], name="o2")
 
-    assembly = assembly_pdk.kcell("TOP")
-    d1 = assembly << doe1
-    d2 = assembly << doe2
-    d2.connect("o1", d1, "o2")
+        assembly = assembly_pdk.kcell("TOP")
+        d1 = assembly << doe1
+        d2 = assembly << doe2
+        d2.connect("o1", d1, "o2")
 
-    p = Path("ASSEMBLY.oas")
-    assembly.write(p, convert_external_cells=True)
-    p.unlink()
+        assembly.write(temp_file.name, convert_external_cells=True)
 
 
 def test_multi_pdk_read_write(LAYER: Layers) -> None:
@@ -198,76 +198,79 @@ def test_multi_pdk_read_write(LAYER: Layers) -> None:
 
 
 def test_merge_read_shapes(LAYER: Layers) -> None:
-    with pytest.raises(kf.kcell.MergeError):
-        kcl_1 = kf.KCLayout("MERGE_BASE", infos=Layers)
-        s_base = kf.factories.straight.straight_dbu_factory(kcl_1)(
-            width=1000, length=10_000, layer=LAYER.WG
-        )
-        s_copy = s_base.dup()
-        s_copy.name = "Straight"
+    with NamedTemporaryFile("w+b", suffix=".oas") as temp_file:
+        with pytest.raises(kf.kcell.MergeError):
+            kcl_1 = kf.KCLayout("MERGE_BASE_SHAPES", infos=Layers)
+            s_base = kf.factories.straight.straight_dbu_factory(kcl_1)(
+                width=1000, length=10_000, layer=LAYER.WG
+            )
+            s_copy = s_base.dup()
+            s_copy.name = "Straight"
 
-        kcl_2 = kf.KCLayout("MERGE_READ", infos=Layers)
-        kcl_2.layers = kcl_2.layerenum_from_dict(layers=LAYER)
-        s_base = kf.factories.straight.straight_dbu_factory(kcl_2)(
-            width=1100, length=10_000, layer=LAYER.WG
-        )
-        s_copy = s_base.dup()
-        s_copy.name = "Straight"
+            kcl_2 = kf.KCLayout("MERGE_READ_SHAPES", infos=Layers)
+            kcl_2.layers = kcl_2.layerenum_from_dict(layers=LAYER)
+            s_base = kf.factories.straight.straight_dbu_factory(kcl_2)(
+                width=1100, length=10_000, layer=LAYER.WG
+            )
+            s_copy = s_base.dup()
+            s_copy.name = "Straight"
 
-        kcl_2.write("MERGE_READ.oas")
-        kf.config.logfilter.regex = "(?:Found poly)|(?:MetaInfo 'kfactory:)"
-        kcl_1.read("MERGE_READ.oas")
-        kf.config.logfilter.regex = None
-    Path("MERGE_READ.oas").unlink(missing_ok=True)
+            kcl_2.write(temp_file.name)
+
+            kf.config.logfilter.regex = "(?:Found poly)|(?:MetaInfo 'kfactory:)"
+            kcl_1.read(temp_file.name)
+            kf.config.logfilter.regex = None
 
 
 def test_merge_read_instances(LAYER: Layers) -> None:
-    with pytest.raises(kf.kcell.MergeError):
-        kcl_1 = kf.KCLayout("MERGE_BASE", infos=Layers)
-        kcl_1.layers = kcl_1.layerenum_from_dict(layers=LAYER)
+    with NamedTemporaryFile("w+b", suffix=".oas") as temp_file:
+        with pytest.raises(kf.kcell.MergeError):
+            kcl_1 = kf.KCLayout("MERGE_BASE_INSTANCES", infos=Layers)
+            kcl_1.layers = kcl_1.layerenum_from_dict(layers=LAYER)
 
-        enc1 = kf.LayerEnclosure(sections=[(LAYER.WG, 0, 200)], name="CLAD")
-        s_base = kf.factories.straight.straight_dbu_factory(kcl_1)(
-            width=1000, length=10_000, layer=LAYER.WGEXCLUDE, enclosure=enc1
-        )
-        s_copy = kcl_1.kcell("Straight")
-        s_copy << s_base
+            enc1 = kf.LayerEnclosure(sections=[(LAYER.WG, 0, 200)], name="CLAD")
+            s_base = kf.factories.straight.straight_dbu_factory(kcl_1)(
+                width=1000, length=10_000, layer=LAYER.WGEXCLUDE, enclosure=enc1
+            )
+            s_copy = kcl_1.kcell("Straight")
+            s_copy << s_base
 
-        kcl_2 = kf.KCLayout("MERGE_READ", infos=Layers)
-        kcl_2.layers = kcl_2.layerenum_from_dict(layers=LAYER)
-        enc2 = kf.LayerEnclosure(sections=[(LAYER.WG, 0, 200)], name="CLAD")
-        s_base = kf.factories.straight.straight_dbu_factory(kcl_2)(
-            width=1000, length=10_000, layer=LAYER.WGEXCLUDE, enclosure=enc2
-        )
-        s_copy = kcl_2.kcell("Straight")
-        copy = s_copy << s_base
-        copy.movey(-500)
+            kcl_2 = kf.KCLayout("MERGE_READ_INSTANCES", infos=Layers)
+            kcl_2.layers = kcl_2.layerenum_from_dict(layers=LAYER)
+            enc2 = kf.LayerEnclosure(sections=[(LAYER.WG, 0, 200)], name="CLAD")
+            s_base = kf.factories.straight.straight_dbu_factory(kcl_2)(
+                width=1000, length=10_000, layer=LAYER.WGEXCLUDE, enclosure=enc2
+            )
+            s_copy = kcl_2.kcell("Straight")
+            copy = s_copy << s_base
+            copy.movey(-500)
 
-        kcl_2.write("MERGE_READ.oas")
-        kf.config.logfilter.regex = "Found instance"
-        kcl_1.read("MERGE_READ.oas")
-        kf.config.logfilter.regex = None
-    Path("MERGE_READ.oas").unlink(missing_ok=True)
+            kcl_2.write(temp_file.name)
+
+            kf.config.logfilter.regex = "Found instance"
+            kcl_1.read(temp_file.name)
+            kf.config.logfilter.regex = None
 
 
 def test_merge_properties() -> None:
-    with pytest.raises(kf.kcell.MergeError):
-        kcl_1 = kf.KCLayout("MERGE_BASE", infos=Layers)
-        c = kcl_1.kcell("properties_cell")
-        c.info["test_prop"] = "kcl_1"
+    with NamedTemporaryFile("w+b", suffix=".oas") as temp_file:
+        with pytest.raises(kf.kcell.MergeError):
+            kcl_1 = kf.KCLayout("MERGE_BASE_PROPERTIES", infos=Layers)
+            c = kcl_1.kcell("properties_cell")
+            c.info["test_prop"] = "kcl_1"
 
-        kcl_2 = kf.KCLayout("MERGE_READ", infos=Layers)
-        c = kcl_2.kcell("properties_cell")
-        c.info["test_prop"] = "kcl_2"
+            kcl_2 = kf.KCLayout("MERGE_READ_PROPERTIES", infos=Layers)
+            c = kcl_2.kcell("properties_cell")
+            c.info["test_prop"] = "kcl_2"
 
-        kcl_2.write("MERGE_READ.oas")
-        regex = kf.config.logfilter.regex
-        kf.config.logfilter.regex = (
-            "MetaInfo differs between existing 'kcl_1' and loaded 'kcl_2'"
-        )
-        kcl_1.read("MERGE_READ.oas")
-        kf.config.logfilter.regex = regex
-        Path("MERGE_READ.oas").unlink(missing_ok=True)
+            kcl_2.write(temp_file.name)
+
+            regex = kf.config.logfilter.regex
+            kf.config.logfilter.regex = (
+                "MetaInfo differs between existing 'kcl_1' and loaded 'kcl_2'"
+            )
+            kcl_1.read(temp_file.name)
+            kf.config.logfilter.regex = regex
 
 
 def test_pdk_cell_infosettings(straight: kf.KCell, LAYER: Layers) -> None:

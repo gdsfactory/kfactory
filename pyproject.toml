@@ -70,6 +70,8 @@ ci = [
     "types-cachetools",
     "types-requests",
     "kfactory[full]",
+    "pytest-xdist",
+    "pytest-randomly",
 ]
 ipy = ["ipython", "ipywidgets", "ipytree", "ipyevents"]
 

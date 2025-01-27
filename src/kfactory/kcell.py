@@ -34,6 +34,7 @@ from enum import IntEnum, IntFlag, auto
 from hashlib import sha3_512
 from pathlib import Path
 from tempfile import gettempdir
+from threading import RLock
 from types import FunctionType, ModuleType
 from typing import (
     TYPE_CHECKING,
@@ -70,7 +71,6 @@ from pydantic import (
     Field,
     PrivateAttr,
     RootModel,
-    ValidationError,
     model_serializer,
     model_validator,
 )
@@ -1029,6 +1029,10 @@ class KCellFunc(Protocol[KCellParams, KC]):
     def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC: ...
 
 
+class InvalidLayerError(ValueError):
+    """Raised when a layer is not valid."""
+
+
 class LayerInfos(BaseModel):
     """Class to store and serialize LayerInfos used in KCLayout.
 
@@ -1039,37 +1043,34 @@ class LayerInfos(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True, extra="allow")
 
+    def __init__(self, **kwargs: Any) -> None:
+        """Initialize the LayerInfos class.
+
+        Args:
+            kwargs: kdb.LayerInfo . if any extra field is not a kdb.LayerInfo,
+                the validator will raise a ValidationError.
+        """
+        super().__init__(**kwargs)
+
     @model_validator(mode="after")
     def _validate_layers(self) -> Self:
-        for field_name in self.model_fields.keys():
+        field_names = set(self.model_fields.keys())
+        if self.model_extra is not None:
+            field_names |= self.model_extra.keys()
+        for field_name in field_names:
             f = getattr(self, field_name)
             if not isinstance(f, kdb.LayerInfo):
-                raise ValidationError(
+                raise InvalidLayerError(
                     "All fields in LayerInfos must be of type kdb.LayerInfo. "
                     f"Field {field_name} is of type {type(f)}"
                 )
             if not f.is_named():
                 f.name = field_name
             if f.layer == -1 or f.datatype == -1:
-                raise ValidationError(
+                raise InvalidLayerError(
                     "Layers must specify layer number and datatype."
                     f" {field_name} didn't specify them"
                 )
-        if self.model_extra is not None:
-            for field_name in self.model_extra.keys():
-                f = getattr(self, field_name)
-                if not isinstance(f, kdb.LayerInfo):
-                    raise ValidationError(
-                        "All fields in LayerInfos must be of type kdb.LayerInfo. "
-                        f"Field {field_name} is of type {type(f)}"
-                    )
-                if not f.is_named():
-                    f.name = field_name
-                if f.layer == -1 or f.datatype == -1:
-                    raise ValidationError(
-                        "Layers must specify layer number and datatype."
-                        f" {field_name} didn't specify them"
-                    )
         return self
 
 
@@ -1155,7 +1156,7 @@ def convert_metadata_type(value: Any) -> MetaData:
     return clean_value(value)
 
 
-def check_metatadata_type(value: MetaData) -> MetaData:
+def check_metadata_type(value: MetaData) -> MetaData:
     """Recursively check an info value whether it can be stored."""
     if value is None:
         return None
@@ -1196,6 +1197,9 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
 class KCellSettingsUnits(
     BaseModel, extra="allow", validate_assignment=True, frozen=True
 ):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+
     @model_validator(mode="before")
     def restrict_types(cls, data: dict[str, str]) -> dict[str, str]:
         for name, value in data.items():
@@ -1213,6 +1217,9 @@ class KCellSettingsUnits(
 
 
 class Info(BaseModel, extra="allow", validate_assignment=True):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+
     @model_validator(mode="before")
     def restrict_types(
         cls,
@@ -1220,8 +1227,8 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
     ) -> dict[str, MetaData]:
         for name, value in data.items():
             try:
-                data[name] = check_metatadata_type(value)
-            except KeyError as e:
+                data[name] = check_metadata_type(value)
+            except ValueError as e:
                 raise ValueError(
                     "Values of the info dict only support int, float, string ,tuple"
                     ", list, dict or None."
@@ -1286,26 +1293,24 @@ class PortWidthMismatch(ValueError):
 
     def __init__(
         self,
-        inst: ProtoTInstance[Any] | ProtoPort[Any] | VInstance,
-        other_inst: ProtoTInstance[Any] | ProtoPort[Any] | VInstance,
+        inst: ProtoInstance[Any],
+        other_inst: ProtoInstance[Any] | ProtoPort[Any],
         p1: ProtoPort[Any],
         p2: ProtoPort[Any],
         *args: Any,
     ) -> None:
         """Throw error for the two ports `p1`/`p1`."""
-        if isinstance(other_inst, Instance | VInstance) and isinstance(
-            inst, Instance | VInstance
-        ):
+        if isinstance(other_inst, ProtoInstance):
             super().__init__(
-                f'Width mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f'and {other_inst.cell.name}["{p2.name}"]'
-                f'("{p1.dwidth}"/"{p2.dwidth}")',
+                f'Width mismatch between the ports {inst.cell_name}["{p1.name}"] '
+                f'and {other_inst.cell_name}["{p2.name}"]'
+                f'("{p1.width}"/"{p2.width}")',
                 *args,
             )
         else:
             super().__init__(
-                f'Width mismatch between the ports {inst.name}["{p1.name}"]'
-                f' and Port "{p2.name}" ("{p1.dwidth}"/"{p2.dwidth}")',
+                f'Width mismatch between the ports {inst.cell_name}["{p1.name}"] '
+                f'and Port "{p2.name}" ("{p1.width}"/"{p2.width}")',
                 *args,
             )
 
@@ -1316,8 +1321,8 @@ class PortLayerMismatch(ValueError):
     def __init__(
         self,
         kcl: KCLayout,
-        inst: ProtoTInstance[Any],
-        other_inst: ProtoTInstance[Any] | ProtoPort[Any],
+        inst: ProtoInstance[Any],
+        other_inst: ProtoInstance[Any] | ProtoPort[Any],
         p1: ProtoPort[Any],
         p2: ProtoPort[Any],
         *args: Any,
@@ -1333,15 +1338,15 @@ class PortLayerMismatch(ValueError):
             if isinstance(p2.layer, LayerEnum)
             else str(kcl.layout.get_info(p2.layer))
         )
-        if isinstance(other_inst, Instance):
+        if isinstance(other_inst, ProtoInstance):
             super().__init__(
-                f'Layer mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f' and {other_inst.cell.name}["{p2.name}"] ("{l1}"/"{l2}")',
+                f'Layer mismatch between the ports {inst.cell_name}["{p1.name}"]'
+                f' and {other_inst.cell_name}["{p2.name}"] ("{l1}"/"{l2}")',
                 *args,
             )
         else:
             super().__init__(
-                f'Layer mismatch between the ports {inst.cell.name}["{p1.name}"]'
+                f'Layer mismatch between the ports {inst.cell_name}["{p1.name}"]'
                 f' and Port "{p2.name}" ("{l1}"/"{l2}")',
                 *args,
             )
@@ -1352,30 +1357,26 @@ class PortTypeMismatch(ValueError):
 
     def __init__(
         self,
-        inst: ProtoTInstance[Any],
-        other_inst: ProtoTInstance[Any] | ProtoPort[Any],
+        inst: ProtoInstance[Any],
+        other_inst: ProtoInstance[Any] | ProtoPort[Any],
         p1: ProtoPort[Any],
         p2: ProtoPort[Any],
         *args: Any,
     ) -> None:
         """Throw error for the two ports `p1`/`p1`."""
-        if isinstance(other_inst, Instance):
+        if isinstance(other_inst, ProtoInstance):
             super().__init__(
-                f'Type mismatch between the ports {inst.cell.name}["{p1.name}"]'
-                f' and {other_inst.cell.name}["{p2.name}"]'
+                f'Type mismatch between the ports {inst.cell_name}["{p1.name}"]'
+                f' and {other_inst.cell_name}["{p2.name}"]'
                 f" ({p1.port_type}/{p2.port_type})",
                 *args,
             )
         else:
             super().__init__(
-                f'Type mismatch between the ports {inst.cell.name}["{p1.name}"]'
+                f'Type mismatch between the ports {inst.cell_name}["{p1.name}"]'
                 f' and Port "{p2.name}" ({p1.port_type}/{p2.port_type})',
                 *args,
             )
-
-
-class FrozenError(AttributeError):
-    """Raised if a KCell has been frozen and shouldn't be modified anymore."""
 
 
 class CellNameError(ValueError):
@@ -5493,6 +5494,7 @@ class KCLayout(
     constants: Constants
     rename_function: Callable[..., None]
     _registered_functions: dict[int, Callable[..., TKCell]]
+    thread_lock: RLock = Field(default_factory=RLock)
 
     info: Info = Field(default_factory=Info)
     settings: KCellSettings = Field(frozen=True)
@@ -5997,7 +5999,7 @@ class KCLayout(
                     params.pop(param, None)
                     param_units.pop(param, None)
 
-                @cachetools.cached(cache=_cache)
+                @cachetools.cached(cache=_cache, lock=RLock())
                 @functools.wraps(f)
                 def wrapped_cell(
                     **params: KCellParams.args | KCellParams.kwargs,
@@ -6094,9 +6096,9 @@ class KCLayout(
                         case CHECK_INSTANCES.RAISE:
                             if any(inst.is_complex() for inst in cell.each_inst()):
                                 raise ValueError(
-                                    "Most foundries will not allow off-grid instances. "
-                                    "Please flatten them or add check_instances=False"
-                                    " to the decorator.\n"
+                                    "Most foundries will not allow off-grid "
+                                    "instances. Please flatten them or add "
+                                    "check_instances=False to the decorator.\n"
                                     "Cellnames of instances affected by this:"
                                     + "\n".join(
                                         inst.cell.name
@@ -6160,7 +6162,8 @@ class KCLayout(
                                             cell.kcl.netlist_layer_mapping[port.layer]
                                         ).insert(
                                             kdb.DText(
-                                                port.name, port.dcplx_trans.s_trans()
+                                                port.name,
+                                                port.dcplx_trans.s_trans(),
                                             )
                                         )
                     # post process the cell
@@ -6171,44 +6174,46 @@ class KCLayout(
                         raise ValueError(
                             "The KCell created must be using the same"
                             " KCLayout object as the @cell decorator. "
-                            f"{self.name!r} != {cell.kcl.name!r}. Please make sure to "
-                            "use @kcl.cell and only use @cell for cells which are"
-                            " created through kfactory.kcl. To create KCells not in "
-                            "the standard KCLayout, use either custom_kcl.kcell() or "
-                            "KCell(kcl=custom_kcl)."
+                            f"{self.name!r} != {cell.kcl.name!r}. Please make sure "
+                            "to use @kcl.cell and only use @cell for cells which "
+                            "are created through kfactory.kcl. To create KCells not"
+                            " in the standard KCLayout, use either "
+                            "custom_kcl.kcell() or KCell(kcl=custom_kcl)."
                         )
                     return output_cell_type(base_kcell=cell.base_kcell)
 
-                _cell = wrapped_cell(**params)
-                if _cell.destroyed():
-                    # If the any cell has been destroyed, we should clean up the cache.
-                    # Delete all the KCell entrances in the cache which have
-                    # `destroyed() == True`
-                    _deleted_cell_hashes: list[_HashedTuple] = [
-                        _hash_item
-                        for _hash_item, _cell_item in _cache.items()
-                        if _cell_item.destroyed()
-                    ]
-                    for _dch in _deleted_cell_hashes:
-                        del _cache[_dch]
+                with self.thread_lock:
                     _cell = wrapped_cell(**params)
+                    if _cell.destroyed():
+                        # If any cell has been destroyed, we should clean up the cache.
+                        # Delete all the KCell entrances in the cache which have
+                        # `destroyed() == True`
+                        _deleted_cell_hashes: list[_HashedTuple] = [
+                            _hash_item
+                            for _hash_item, _cell_item in _cache.items()
+                            if _cell_item.destroyed()
+                        ]
+                        for _dch in _deleted_cell_hashes:
+                            del _cache[_dch]
+                        _cell = wrapped_cell(**params)
 
-                if info is not None:
-                    _cell.info.update(info)
+                    if info is not None:
+                        _cell.info.update(info)
 
-                return _cell
+                    return _cell
 
             if register_factory:
-                if hasattr(f, "__name__"):
-                    function_name = f.__name__
-                elif hasattr(f, "func"):
-                    function_name = f.func.__name__
-                else:
-                    raise ValueError(f"Function {f} has no name.")
-                if tags:
-                    for tag in tags:
-                        self.factories.tags[tag].append(wrapper_autocell)
-                self.factories[basename or function_name] = wrapper_autocell
+                with self.thread_lock:
+                    if hasattr(f, "__name__"):
+                        function_name = f.__name__
+                    elif hasattr(f, "func"):
+                        function_name = f.func.__name__
+                    else:
+                        raise ValueError(f"Function {f} has no name.")
+                    if tags:
+                        for tag in tags:
+                            self.factories.tags[tag].append(wrapper_autocell)
+                    self.factories[basename or function_name] = wrapper_autocell
             return wrapper_autocell
 
         return (
@@ -6429,6 +6434,10 @@ class KCLayout(
         """Create a new cell based ont he pdk's layout object."""
         return DKCell(name=name, kcl=self, ports=ports)
 
+    def vkcell(self, name: str | None = None) -> VKCell:
+        """Create a new cell based ont he pdk's layout object."""
+        return VKCell(name=name, kcl=self)
+
     def set_layers_from_infos(self, name: str, layers: LayerInfos) -> type[LayerEnum]:
         """Create a new LAYER enum based on the pdk's kcl."""
         return layerenum_from_dict(name=name, layers=layers, layout=self.layout)
@@ -6524,45 +6533,50 @@ class KCLayout(
             klayout.db.Cell: klayout.db.Cell object created in the Layout
 
         """
-        if allow_duplicate or (self.layout_cell(name) is None):
-            return self.layout.create_cell(name, *args)
-        else:
-            raise ValueError(
-                f"Cellname {name} already exists. Please make sure the cellname is"
-                " unique or pass `allow_duplicate` when creating the library"
-            )
+        with self.thread_lock:
+            if allow_duplicate or (self.layout_cell(name) is None):
+                return self.layout.create_cell(name, *args)
+            else:
+                raise ValueError(
+                    f"Cellname {name} already exists. Please make sure the cellname is"
+                    " unique or pass `allow_duplicate` when creating the library"
+                )
 
     def delete_cell(self, cell: ProtoTKCell[Any] | int) -> None:
         """Delete a cell in the kcl object."""
-        if isinstance(cell, int):
-            self.layout.cell(cell).locked = False
-            self.layout.delete_cell(cell)
-            self.tkcells.pop(cell, None)
-        else:
-            ci = cell.cell_index()
-            self.layout.cell(ci).locked = False
-            self.layout.delete_cell(ci)
-            self.tkcells.pop(ci, None)
+        with self.thread_lock:
+            if isinstance(cell, int):
+                self.layout.cell(cell).locked = False
+                self.layout.delete_cell(cell)
+                self.tkcells.pop(cell, None)
+            else:
+                ci = cell.cell_index()
+                self.layout.cell(ci).locked = False
+                self.layout.delete_cell(ci)
+                self.tkcells.pop(ci, None)
 
     def delete_cell_rec(self, cell_index: int) -> None:
         """Deletes a KCell plus all subcells."""
-        self.layout.delete_cell_rec(cell_index)
-        self.rebuild()
+        with self.thread_lock:
+            self.layout.delete_cell_rec(cell_index)
+            self.rebuild()
 
     def delete_cells(self, cell_index_list: Sequence[int]) -> None:
         """Delete a sequence of cell by indexes."""
-        self.layout.delete_cells(cell_index_list)
-        self.rebuild()
+        with self.thread_lock:
+            self.layout.delete_cells(cell_index_list)
+            self.rebuild()
 
     def rebuild(self) -> None:
         """Rebuild the KCLayout based on the Layoutt object."""
         kcells2delete: list[int] = []
-        for ci, c in self.tkcells.items():
-            if c.kdb_cell._destroyed():
-                kcells2delete.append(ci)
+        with self.thread_lock:
+            for ci, c in self.tkcells.items():
+                if c.kdb_cell._destroyed():
+                    kcells2delete.append(ci)
 
-        for ci in kcells2delete:
-            del self.tkcells[ci]
+            for ci in kcells2delete:
+                del self.tkcells[ci]
 
     def register_cell(
         self, kcell: ProtoTKCell[Any], allow_reregister: bool = False
@@ -6574,13 +6588,14 @@ class KCLayout(
             allow_reregister: Overwrite the existing KCell registration with this one.
                 Doesn't allow name duplication.
         """
-        if (kcell.cell_index() not in self.tkcells) or allow_reregister:
-            self.tkcells[kcell.cell_index()] = kcell.base_kcell
-        else:
-            raise ValueError(
-                "Cannot register a new cell with a name that already"
-                " exists in the library"
-            )
+        with self.thread_lock:
+            if (kcell.cell_index() not in self.tkcells) or allow_reregister:
+                self.tkcells[kcell.cell_index()] = kcell.base_kcell
+            else:
+                raise ValueError(
+                    "Cannot register a new cell with a name that already"
+                    " exists in the library"
+                )
 
     def __getitem__(self, obj: str | int) -> KCell:
         """Retrieve a cell by name(str) or index(int).
@@ -6659,104 +6674,107 @@ class KCLayout(
                 transformations as strings, never versions have them stored and loaded
                 in their native KLayout formats.
         """
-        if meta_format is None:
-            meta_format = config.meta_format
-        if register_cells is None:
-            register_cells = meta_format == config.meta_format
-        layout_b = kdb.Layout()
-        layout_b.read(str(filename), options)
-        if (
-            self.cells() > 0
-            and test_merge
-            and (
-                options.cell_conflict_resolution
-                != kdb.LoadLayoutOptions.CellConflictResolution.RenameCell
-            )
-        ):
-            self.set_meta_data()
-            for kcell in self.kcells.values():
-                kcell.set_meta_data()
-            diff = MergeDiff(
-                layout_a=self.layout,
-                layout_b=layout_b,
-                name_a=self.name,
-                name_b=Path(filename).stem,
-            )
-            diff.compare()
-            if diff.dbu_differs:
-                raise MergeError("Layouts' DBU differ. Check the log for more info.")
-            elif diff.diff_xor.cells() > 0:
-                diff_kcl = KCLayout(self.name + "_XOR")
-                diff_kcl.layout.assign(diff.diff_xor)
-                show(diff_kcl)
-
-                err_msg = (
-                    f"Layout {self.name} cannot merge with layout "
-                    f"{Path(filename).stem} safely. See the error messages "
-                    f"or check with KLayout."
+        with self.thread_lock:
+            if meta_format is None:
+                meta_format = config.meta_format
+            if register_cells is None:
+                register_cells = meta_format == config.meta_format
+            layout_b = kdb.Layout()
+            layout_b.read(str(filename), options)
+            if (
+                self.cells() > 0
+                and test_merge
+                and (
+                    options.cell_conflict_resolution
+                    != kdb.LoadLayoutOptions.CellConflictResolution.RenameCell
                 )
-
-                if diff.layout_meta_diff:
-                    _yaml = ruamel.yaml.YAML(typ=["rt", "string"])
-                    err_msg += (
-                        "\nLayout Meta Diff:\n```\n"
-                        + _yaml.dumps(dict(diff.layout_meta_diff))  # type: ignore[attr-defined]
-                        + "\n```"
+            ):
+                self.set_meta_data()
+                for kcell in self.kcells.values():
+                    kcell.set_meta_data()
+                diff = MergeDiff(
+                    layout_a=self.layout,
+                    layout_b=layout_b,
+                    name_a=self.name,
+                    name_b=Path(filename).stem,
+                )
+                diff.compare()
+                if diff.dbu_differs:
+                    raise MergeError(
+                        "Layouts' DBU differ. Check the log for more info."
                     )
-                if diff.cells_meta_diff:
-                    _yaml = ruamel.yaml.YAML(typ=["rt", "string"])
-                    err_msg += (
-                        "\nLayout Meta Diff:\n```\n"
-                        + _yaml.dumps(dict(diff.cells_meta_diff))  # type: ignore[attr-defined]
-                        + "\n```"
+                elif diff.diff_xor.cells() > 0:
+                    diff_kcl = KCLayout(self.name + "_XOR")
+                    diff_kcl.layout.assign(diff.diff_xor)
+                    show(diff_kcl)
+
+                    err_msg = (
+                        f"Layout {self.name} cannot merge with layout "
+                        f"{Path(filename).stem} safely. See the error messages "
+                        f"or check with KLayout."
                     )
 
-                raise MergeError(err_msg)
+                    if diff.layout_meta_diff:
+                        _yaml = ruamel.yaml.YAML(typ=["rt", "string"])
+                        err_msg += (
+                            "\nLayout Meta Diff:\n```\n"
+                            + _yaml.dumps(dict(diff.layout_meta_diff))  # type: ignore[attr-defined]
+                            + "\n```"
+                        )
+                    if diff.cells_meta_diff:
+                        _yaml = ruamel.yaml.YAML(typ=["rt", "string"])
+                        err_msg += (
+                            "\nLayout Meta Diff:\n```\n"
+                            + _yaml.dumps(dict(diff.cells_meta_diff))  # type: ignore[attr-defined]
+                            + "\n```"
+                        )
 
-        cells = set(self._cells("*"))
-        fn = str(Path(filename).expanduser().resolve())
-        lm = self.layout.read(fn, options)
-        info, settings = self.get_meta_data()
+                    raise MergeError(err_msg)
 
-        match update_kcl_meta_data:
-            case "overwrite":
-                for k, v in info.items():
-                    self.info[k] = v
-            case "skip":
-                _info = self.info.model_dump()
+            cells = set(self._cells("*"))
+            fn = str(Path(filename).expanduser().resolve())
+            lm = self.layout.read(fn, options)
+            info, settings = self.get_meta_data()
 
-                # for k, v in self.info:
-                #     _info[k] = v
-                info.update(_info)
-                self.info = Info(**info)
+            match update_kcl_meta_data:
+                case "overwrite":
+                    for k, v in info.items():
+                        self.info[k] = v
+                case "skip":
+                    _info = self.info.model_dump()
 
-            case "drop":
-                pass
-            case _:
-                raise ValueError(
-                    f"Unknown meta update strategy {update_kcl_meta_data=}"
-                    ", available strategies are 'overwrite', 'skip', or 'drop'"
-                )
-        meta_format = settings.get("meta_format") or config.meta_format
-        load_cells = {
-            cell
-            for c in layout_b.cells("*")
-            if (cell := self.layout_cell(c.name)) is not None
-        }
-        new_cells = load_cells - cells
+                    # for k, v in self.info:
+                    #     _info[k] = v
+                    info.update(_info)
+                    self.info = Info(**info)
 
-        if register_cells:
-            for c in sorted(new_cells, key=lambda _c: _c.hierarchy_levels()):
-                kc = KCell(kdb_cell=c, kcl=self)
-                kc.get_meta_data(
-                    meta_format=meta_format,
-                )
+                case "drop":
+                    pass
+                case _:
+                    raise ValueError(
+                        f"Unknown meta update strategy {update_kcl_meta_data=}"
+                        ", available strategies are 'overwrite', 'skip', or 'drop'"
+                    )
+            meta_format = settings.get("meta_format") or config.meta_format
+            load_cells = {
+                cell
+                for c in layout_b.cells("*")
+                if (cell := self.layout_cell(c.name)) is not None
+            }
+            new_cells = load_cells - cells
 
-        for c in load_cells & cells:
-            kc = self.kcells[c.cell_index()]
-            kc.get_meta_data(meta_format=meta_format)
+            if register_cells:
+                for c in sorted(new_cells, key=lambda _c: _c.hierarchy_levels()):
+                    kc = KCell(kdb_cell=c, kcl=self)
+                    kc.get_meta_data(
+                        meta_format=meta_format,
+                    )
 
-        return lm
+            for c in load_cells & cells:
+                kc = self.kcells[c.cell_index()]
+                kc.get_meta_data(meta_format=meta_format)
+
+            return lm
 
     def get_meta_data(self) -> tuple[dict[str, Any], dict[str, Any]]:
         """Read KCLayout meta info from the KLayout object."""
@@ -8360,6 +8378,18 @@ class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
     def kcl(self, value: KCLayout) -> None:
         self._kcl = value
 
+    @property
+    @abstractmethod
+    def name(self) -> str | None: ...
+
+    @name.setter
+    @abstractmethod
+    def name(self, value: str | None) -> None: ...
+
+    @property
+    @abstractmethod
+    def cell_name(self) -> str | None: ...
+
     @abstractmethod
     def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]: ...
 
@@ -8384,6 +8414,10 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         if layer is None:
             return self._instance.dbbox()
         return self._instance.dbbox(layer)
+
+    @property
+    def cell_name(self) -> str:
+        return self._instance.cell.name
 
     @abstractmethod
     def __getitem__(
@@ -8651,19 +8685,12 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         else:
             p = Port(base=self.cell.ports[port].base)
         if p.width != op.width and not allow_width_mismatch:
-            # The ports are not the same width
-            raise PortWidthMismatch(
-                self,
-                other,
-                p,
-                op,
-            )
+            raise PortWidthMismatch(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
-            # The ports are not on the same layer
             raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatch(self, other, p, op)
-        if p._base.dcplx_trans or op._base.dcplx_trans:
+        if p.base.dcplx_trans or op.base.dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
             match (use_mirror, use_angle):
                 case True, True:
@@ -8900,7 +8927,7 @@ class DInstance(ProtoTInstance[float], UMGeometricObject):
 
 
 class VInstance(ProtoInstance[float], UMGeometricObject):
-    name: str | None
+    _name: str | None
     cell: VKCell | KCell
     trans: kdb.DCplxTrans
     _ports: VInstancePorts
@@ -8912,10 +8939,22 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         name: str | None = None,
     ) -> None:
         self.kcl = cell.kcl
-        self.name = name
+        self._name = name
         self.cell = cell
         self.trans = trans
         self._ports = VInstancePorts(self)
+
+    @property
+    def name(self) -> str | None:
+        return self._name
+
+    @name.setter
+    def name(self, value: str | None) -> None:
+        self._name = value
+
+    @property
+    def cell_name(self) -> str | None:
+        return self.cell.name
 
     def ibbox(self, layer: int | LayerEnum | None = None) -> kdb.Box:
         return self.dbbox(layer).to_itype(self.kcl.dbu)
@@ -8975,7 +9014,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     f"_M{_trans.mirror}_S{_trans.angle}"
                     f"_X{_trans.disp.x}_Y{_trans.disp.y}"
                 ).replace(".", "p")
-                _cell_name = _cell_name + clean_name(_trans_str)
+                _cell_name = get_cell_name(_cell_name + clean_name(_trans_str))
             if cell.kcl.layout_cell(_cell_name) is None:
                 _cell = KCell(kcl=self.cell.kcl, name=_cell_name)  # self.cell.dup()
                 for layer, shapes in self.cell._shapes.items():
@@ -9173,13 +9212,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         assert isinstance(p, Port) and isinstance(op, Port)
 
         if p.width != op.width and not allow_width_mismatch:
-            # The ports are not the same width
             raise PortWidthMismatch(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
-            # The ports are not on the same layer
-            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)  # type: ignore[arg-type]
+            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
-            raise PortTypeMismatch(self, other, p, op)  # type: ignore[arg-type]
+            raise PortTypeMismatch(self, other, p, op)
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
         match (use_mirror, use_angle):
             case True, True:
