@@ -279,6 +279,6 @@ def port_polygon(width: int) -> kdb.Polygon:
         hole = kdb.Region(poly).sized(-int(width * 0.05) or -1)
         hole -= kdb.Region(kdb.Box(0, 0, width // 2, -width // 2))
 
-        poly.insert_hole(list(list(hole.each())[0].each_point_hull()))
+        poly.insert_hole(list(next(iter(hole.each())).each_point_hull()))
         polygon_dict[width] = poly
         return poly

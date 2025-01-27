@@ -7,6 +7,7 @@ region.
 
 from __future__ import annotations
 
+import itertools
 import sys
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
@@ -244,7 +245,7 @@ def extrude_path_dynamic_points(
     end_trans = kdb.DCplxTrans(1, end_angle, False, p_end.x, p_end.y)
 
     if callable(widths):
-        length = sum(((p2 - p1).abs() for p2, p1 in zip(path[:-1], path[1:])))
+        length = sum(((p2 - p1).abs() for p2, p1 in itertools.pairwise(path)))
         z: float = 0
         ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))
         vector_top = [start_trans * ref_vector]
