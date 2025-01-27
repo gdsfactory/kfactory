@@ -5959,189 +5959,182 @@ class KCLayout(
                 def wrapped_cell(
                     **params: KCellParams.args | KCellParams.kwargs,
                 ) -> KCell:
-                    with self.thread_lock:
-                        for key, value in params.items():
-                            if isinstance(value, DecoratorDict | DecoratorList):
-                                params[key] = _hashable_to_original(value)
-                        old_future_name: str | None = None
-                        if set_name:
-                            if basename is not None:
-                                name = get_cell_name(basename, **params)
-                            else:
-                                name = get_cell_name(f.__name__, **params)
-                            old_future_name = self.future_cell_name
-                            self.future_cell_name = name
-                            if layout_cache:
-                                if overwrite_existing:
-                                    for c in list(self._cells(self.future_cell_name)):
-                                        self[c.cell_index()].delete()
-                                else:
-                                    layout_cell = self.layout_cell(
-                                        self.future_cell_name
-                                    )
-                                    if layout_cell is not None:
-                                        logger.debug(
-                                            "Loading {} from layout cache",
-                                            self.future_cell_name,
-                                        )
-                                        return self.get_cell(layout_cell.cell_index())
-                            logger.debug(f"Constructing {self.future_cell_name}")
-                            _name: str | None = name
+                    for key, value in params.items():
+                        if isinstance(value, DecoratorDict | DecoratorList):
+                            params[key] = _hashable_to_original(value)
+                    old_future_name: str | None = None
+                    if set_name:
+                        if basename is not None:
+                            name = get_cell_name(basename, **params)
                         else:
-                            _name = None
-                        cell = f(**params)  # type: ignore[call-arg]
-                        cell = KCell(base_kcell=cell.base_kcell)
-
-                        logger.debug("Constructed {}", _name or cell.name)
-
-                        if cell.locked:
-                            # If the cell is locked, it comes from a cache (most likely)
-                            # and should be copied first
-                            cell = cell.dup()
-                        if overwrite_existing:
-                            for c in list(self._cells(_name or cell.name)):
-                                if c is not cell.kdb_cell:
+                            name = get_cell_name(f.__name__, **params)
+                        old_future_name = self.future_cell_name
+                        self.future_cell_name = name
+                        if layout_cache:
+                            if overwrite_existing:
+                                for c in list(self._cells(self.future_cell_name)):
                                     self[c.cell_index()].delete()
-                        if set_name and _name:
-                            if debug_names and cell.kcl.layout_cell(_name) is not None:
-                                logger.opt(depth=4).error(
-                                    "KCell with name {name} exists already. Duplicate "
-                                    "occurrence in module '{module}' at "
-                                    "line {lno}",
-                                    name=_name,
-                                    module=f.__module__,
-                                    function_name=f.__name__,
-                                    lno=inspect.getsourcelines(f)[1],
-                                )
-                                raise CellNameError(
-                                    f"KCell with name {_name} exists already."
-                                )
-
-                            cell.name = _name
-                            self.future_cell_name = old_future_name
-                        if set_settings:
-                            if hasattr(f, "__name__"):
-                                cell.function_name = f.__name__
-                            elif hasattr(f, "func"):
-                                cell.function_name = f.func.__name__
                             else:
-                                raise ValueError(f"Function {f} has no name.")
-                            cell.basename = basename
+                                layout_cell = self.layout_cell(self.future_cell_name)
+                                if layout_cell is not None:
+                                    logger.debug(
+                                        "Loading {} from layout cache",
+                                        self.future_cell_name,
+                                    )
+                                    return self.get_cell(layout_cell.cell_index())
+                        logger.debug(f"Constructing {self.future_cell_name}")
+                        _name: str | None = name
+                    else:
+                        _name = None
+                    cell = f(**params)  # type: ignore[call-arg]
+                    cell = KCell(base_kcell=cell.base_kcell)
 
-                            for param in drop_params:
-                                params.pop(param, None)
-                                param_units.pop(param, None)
-                            cell.settings = KCellSettings(**params)
-                            cell.settings_units = KCellSettingsUnits(**param_units)
-                        if check_ports:
-                            port_names: dict[str | None, int] = defaultdict(int)
-                            for port in cell.ports:
-                                port_names[port.name] += 1
-                            duplicate_names = [
-                                (name, n) for name, n in port_names.items() if n > 1
-                            ]
-                            if duplicate_names:
-                                raise ValueError(
-                                    "Found duplicate port names: "
-                                    + ", ".join(
-                                        [f"{name}: {n}" for name, n in duplicate_names]
-                                    )
-                                    + " If this intentional, please pass "
-                                    "`check_ports=False` to the @cell decorator"
+                    logger.debug("Constructed {}", _name or cell.name)
+
+                    if cell.locked:
+                        # If the cell is locked, it comes from a cache (most likely)
+                        # and should be copied first
+                        cell = cell.dup()
+                    if overwrite_existing:
+                        for c in list(self._cells(_name or cell.name)):
+                            if c is not cell.kdb_cell:
+                                self[c.cell_index()].delete()
+                    if set_name and _name:
+                        if debug_names and cell.kcl.layout_cell(_name) is not None:
+                            logger.opt(depth=4).error(
+                                "KCell with name {name} exists already. Duplicate "
+                                "occurrence in module '{module}' at "
+                                "line {lno}",
+                                name=_name,
+                                module=f.__module__,
+                                function_name=f.__name__,
+                                lno=inspect.getsourcelines(f)[1],
+                            )
+                            raise CellNameError(
+                                f"KCell with name {_name} exists already."
+                            )
+
+                        cell.name = _name
+                        self.future_cell_name = old_future_name
+                    if set_settings:
+                        if hasattr(f, "__name__"):
+                            cell.function_name = f.__name__
+                        elif hasattr(f, "func"):
+                            cell.function_name = f.func.__name__
+                        else:
+                            raise ValueError(f"Function {f} has no name.")
+                        cell.basename = basename
+
+                        for param in drop_params:
+                            params.pop(param, None)
+                            param_units.pop(param, None)
+                        cell.settings = KCellSettings(**params)
+                        cell.settings_units = KCellSettingsUnits(**param_units)
+                    if check_ports:
+                        port_names: dict[str | None, int] = defaultdict(int)
+                        for port in cell.ports:
+                            port_names[port.name] += 1
+                        duplicate_names = [
+                            (name, n) for name, n in port_names.items() if n > 1
+                        ]
+                        if duplicate_names:
+                            raise ValueError(
+                                "Found duplicate port names: "
+                                + ", ".join(
+                                    [f"{name}: {n}" for name, n in duplicate_names]
                                 )
-                        match check_instances:
-                            case CHECK_INSTANCES.RAISE:
-                                if any(inst.is_complex() for inst in cell.each_inst()):
-                                    raise ValueError(
-                                        "Most foundries will not allow off-grid "
-                                        "instances. Please flatten them or add "
-                                        "check_instances=False to the decorator.\n"
-                                        "Cellnames of instances affected by this:"
-                                        + "\n".join(
-                                            inst.cell.name
-                                            for inst in cell.each_inst()
-                                            if inst.is_complex()
-                                        )
-                                    )
-                            case CHECK_INSTANCES.FLATTEN:
-                                if any(inst.is_complex() for inst in cell.each_inst()):
-                                    cell.flatten()
-                            case CHECK_INSTANCES.VINSTANCES:
-                                if any(inst.is_complex() for inst in cell.each_inst()):
-                                    complex_insts = [
-                                        inst
+                                + " If this intentional, please pass "
+                                "`check_ports=False` to the @cell decorator"
+                            )
+                    match check_instances:
+                        case CHECK_INSTANCES.RAISE:
+                            if any(inst.is_complex() for inst in cell.each_inst()):
+                                raise ValueError(
+                                    "Most foundries will not allow off-grid "
+                                    "instances. Please flatten them or add "
+                                    "check_instances=False to the decorator.\n"
+                                    "Cellnames of instances affected by this:"
+                                    + "\n".join(
+                                        inst.cell.name
                                         for inst in cell.each_inst()
                                         if inst.is_complex()
-                                    ]
-                                    for inst in complex_insts:
-                                        vinst = cell.create_vinst(
-                                            self[inst.cell.cell_index()]
-                                        )
-                                        vinst.trans = inst.dcplx_trans
-                                        inst.delete()
-                            case CHECK_INSTANCES.IGNORE:
-                                pass
-                        cell.insert_vinsts(recursive=False)
-                        if snap_ports:
-                            for port in cell.ports:
-                                if port.base.dcplx_trans:
-                                    dup = port.base.dcplx_trans.dup()
-                                    dup.disp = self.to_um(
-                                        self.to_dbu(port.base.dcplx_trans.disp)
                                     )
-                                    port.dcplx_trans = dup
-                        if add_port_layers:
-                            for port in cell.ports:
-                                if port.layer in cell.kcl.netlist_layer_mapping:
-                                    if port.base.trans:
-                                        edge = kdb.Edge(
-                                            kdb.Point(0, -port.width // 2),
-                                            kdb.Point(0, port.width // 2),
-                                        )
+                                )
+                        case CHECK_INSTANCES.FLATTEN:
+                            if any(inst.is_complex() for inst in cell.each_inst()):
+                                cell.flatten()
+                        case CHECK_INSTANCES.VINSTANCES:
+                            if any(inst.is_complex() for inst in cell.each_inst()):
+                                complex_insts = [
+                                    inst
+                                    for inst in cell.each_inst()
+                                    if inst.is_complex()
+                                ]
+                                for inst in complex_insts:
+                                    vinst = cell.create_vinst(
+                                        self[inst.cell.cell_index()]
+                                    )
+                                    vinst.trans = inst.dcplx_trans
+                                    inst.delete()
+                        case CHECK_INSTANCES.IGNORE:
+                            pass
+                    cell.insert_vinsts(recursive=False)
+                    if snap_ports:
+                        for port in cell.ports:
+                            if port.base.dcplx_trans:
+                                dup = port.base.dcplx_trans.dup()
+                                dup.disp = self.to_um(
+                                    self.to_dbu(port.base.dcplx_trans.disp)
+                                )
+                                port.dcplx_trans = dup
+                    if add_port_layers:
+                        for port in cell.ports:
+                            if port.layer in cell.kcl.netlist_layer_mapping:
+                                if port.base.trans:
+                                    edge = kdb.Edge(
+                                        kdb.Point(0, -port.width // 2),
+                                        kdb.Point(0, port.width // 2),
+                                    )
+                                    cell.shapes(
+                                        cell.kcl.netlist_layer_mapping[port.layer]
+                                    ).insert(port.trans * edge)
+                                    if port.name:
                                         cell.shapes(
                                             cell.kcl.netlist_layer_mapping[port.layer]
-                                        ).insert(port.trans * edge)
-                                        if port.name:
-                                            cell.shapes(
-                                                cell.kcl.netlist_layer_mapping[
-                                                    port.layer
-                                                ]
-                                            ).insert(kdb.Text(port.name, port.trans))
-                                    else:
-                                        dwidth = self.to_um(port.width)
-                                        dedge = kdb.DEdge(
-                                            kdb.DPoint(0, -dwidth / 2),
-                                            kdb.DPoint(0, dwidth / 2),
-                                        )
+                                        ).insert(kdb.Text(port.name, port.trans))
+                                else:
+                                    dwidth = self.to_um(port.width)
+                                    dedge = kdb.DEdge(
+                                        kdb.DPoint(0, -dwidth / 2),
+                                        kdb.DPoint(0, dwidth / 2),
+                                    )
+                                    cell.shapes(
+                                        cell.kcl.netlist_layer_mapping[port.layer]
+                                    ).insert(port.dcplx_trans * dedge)
+                                    if port.name:
                                         cell.shapes(
                                             cell.kcl.netlist_layer_mapping[port.layer]
-                                        ).insert(port.dcplx_trans * dedge)
-                                        if port.name:
-                                            cell.shapes(
-                                                cell.kcl.netlist_layer_mapping[
-                                                    port.layer
-                                                ]
-                                            ).insert(
-                                                kdb.DText(
-                                                    port.name,
-                                                    port.dcplx_trans.s_trans(),
-                                                )
+                                        ).insert(
+                                            kdb.DText(
+                                                port.name,
+                                                port.dcplx_trans.s_trans(),
                                             )
-                        # post process the cell
-                        for pp in post_process:
-                            pp(cell.base_kcell)
-                        cell.base_kcell.lock()
-                        if cell.kcl != self:
-                            raise ValueError(
-                                "The KCell created must be using the same"
-                                " KCLayout object as the @cell decorator. "
-                                f"{self.name!r} != {cell.kcl.name!r}. Please make sure "
-                                "to use @kcl.cell and only use @cell for cells which "
-                                "are created through kfactory.kcl. To create KCells not"
-                                " in the standard KCLayout, use either "
-                                "custom_kcl.kcell() or KCell(kcl=custom_kcl)."
-                            )
-                        return cell
+                                        )
+                    # post process the cell
+                    for pp in post_process:
+                        pp(cell.base_kcell)
+                    cell.base_kcell.lock()
+                    if cell.kcl != self:
+                        raise ValueError(
+                            "The KCell created must be using the same"
+                            " KCLayout object as the @cell decorator. "
+                            f"{self.name!r} != {cell.kcl.name!r}. Please make sure "
+                            "to use @kcl.cell and only use @cell for cells which "
+                            "are created through kfactory.kcl. To create KCells not"
+                            " in the standard KCLayout, use either "
+                            "custom_kcl.kcell() or KCell(kcl=custom_kcl)."
+                        )
+                    return cell
 
                 with self.thread_lock:
                     _cell = wrapped_cell(**params)

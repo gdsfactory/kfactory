@@ -120,7 +120,7 @@ def taper(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
         length=10,
         layer=LAYER.WG,
         enclosure=wg_enc,
-    ).dup()
+    )
 
 
 @pytest.fixture
