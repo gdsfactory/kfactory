@@ -5,6 +5,8 @@
 
 ## New
 
+- Add RUF rule to ruff and rearanged added [#582](https://github.com/gdsfactory/kfactory/pull/582)
+- Harmonize KCell.transform [#581](https://github.com/gdsfactory/kfactory/pull/581)
 - add some basic thread safety locks [#578](https://github.com/gdsfactory/kfactory/pull/578)
 - Add inheritance for bounding box operations [#575](https://github.com/gdsfactory/kfactory/pull/575)
 - Use kdb.Cell.locked/is_locked for KCell locking [#573](https://github.com/gdsfactory/kfactory/pull/573)
