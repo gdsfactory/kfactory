@@ -103,12 +103,12 @@ if TYPE_CHECKING:
 
 __all__ = [
     "CHECK_INSTANCES",
+    "DKCell",
     "Instance",
     "InstanceGroup",
     "KCLayout",
     "KCell",
     "KCellParams",
-    "DKCell",
     "LayerEnum",
     "MetaData",
     "Port",

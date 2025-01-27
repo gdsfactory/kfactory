@@ -121,6 +121,7 @@ select = [
     "I",   # isort
     "W",   # pycodestyle
     "ANN", # annotations
+    "RUF", # ruff
 ]
 ignore = ["ANN401"]
 per-file-ignores = { "tests/*.py" = ["D"] }
