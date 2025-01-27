@@ -1,11 +1,23 @@
 from collections.abc import Callable
 from functools import partial
-from random import randint
 
 import pytest
 from conftest import Layers
 
 import kfactory as kf
+
+smart_bundle_routing_params = [
+    (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
+    for indirect in (True, False)
+    for sort_ports in (False, True)
+    for start_bbox in (False, True)
+    for start_angle in (-2, -1, 0, 1, 2)
+    for m2 in (True, False)
+    for m1 in (True, False)
+    for z in (True, False)
+    for p1 in (True, False)
+    for p2 in (True, False)
+]
 
 
 @pytest.mark.parametrize(
@@ -40,7 +52,7 @@ def test_route_straight(
     [
         (20000, 20000, 2),
         (10000, 10000, 3),
-        (randint(10001, 20000), randint(10001, 20000), 3),
+        (150532, 12112, 3),
         (5000, 10000, 3),  # the mean one where points will collide for radius 10000
         (30000, 5000, 3),
         (500, 500, 3),
@@ -82,7 +94,7 @@ def test_route_bend90(
     [
         (20000, 20000, 2),
         (10000, 10000, 3),
-        (randint(10001, 20000), randint(10001, 20000), 3),
+        (15212, 19921, 3),
         (5000, 10000, 3),  # the mean one where points will collide for radius 10000
         (30000, 5000, 3),
         (500, 500, 3),
@@ -240,18 +252,7 @@ _test_smart_routing_kcl = kf.KCLayout("TEST_SMART_ROUTING", infos=Layers)
 
 @pytest.mark.parametrize(
     "indirect,sort_ports,start_bbox,start_angle,m2,m1,z,p1,p2",
-    [
-        (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
-        for indirect in (True, False)
-        for sort_ports in (False, True)
-        for start_bbox in (False, True)
-        for start_angle in (-2, -1, 0, 1, 2)
-        for m2 in (True, False)
-        for m1 in (True, False)
-        for z in (True, False)
-        for p1 in (True, False)
-        for p2 in (True, False)
-    ],
+    smart_bundle_routing_params,
 )
 def test_smart_routing(
     bend90_small: kf.KCell,

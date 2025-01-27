@@ -1,6 +1,7 @@
 from collections.abc import Callable, Iterator
 from functools import partial
 from pathlib import Path
+from threading import RLock
 
 import pytest
 
@@ -31,6 +32,9 @@ class Layers(kf.kcell.LayerInfos):
 # kf.kcl.layer_infos = Layers()
 
 kf.kcl.infos = Layers()
+
+
+cell_copy_lock = RLock()
 
 
 @pytest.fixture(scope="module")
@@ -113,12 +117,17 @@ def bend180_euler(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
 
 @pytest.fixture
 def taper(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
+    return taper_cell(LAYER=LAYER.WG, wg_enc=wg_enc)
+
+
+@kf.kcl.cell(set_name=False)
+def taper_cell(LAYER: kf.kdb.LayerInfo, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     if kf.kcl.layout.cell("taper") is None:
         c = kf.cells.taper.taper(
             width1=0.5,
             width2=1,
             length=10,
-            layer=LAYER.WG,
+            layer=LAYER,
             enclosure=wg_enc,
         )
         c = c.dup()
