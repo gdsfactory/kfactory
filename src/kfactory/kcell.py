@@ -3744,8 +3744,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
         /,
         *,
-        no_warn: bool = False,
-        transform_ports: bool = False,
+        transform_ports: bool = True,
     ) -> Instance: ...
 
     @overload
@@ -3754,8 +3753,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
         /,
         *,
-        no_warn: bool = False,
-        transform_ports: bool = False,
+        transform_ports: bool = True,
     ) -> None: ...
 
     def transform(
@@ -3768,16 +3766,9 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans | None = None,
         /,
         *,
-        no_warn: bool = False,
-        transform_ports: bool = False,
+        transform_ports: bool = True,
     ) -> Instance | None:
         """Transforms the instance or cell with the transformation given."""
-        if not no_warn:
-            logger.warning(
-                "You are transforming the KCell {}. It is highly discouraged to do"
-                " this. You probably want to transform an instance instead.",
-                self.name,
-            )
         if trans:
             return Instance(
                 self.kcl,
