@@ -5,12 +5,14 @@
 
 ## New
 
+- add some basic thread safety locks [#578](https://github.com/gdsfactory/kfactory/pull/578)
 - Add inheritance for bounding box operations [#575](https://github.com/gdsfactory/kfactory/pull/575)
 - Use kdb.Cell.locked/is_locked for KCell locking [#573](https://github.com/gdsfactory/kfactory/pull/573)
 - Make all arguments for add_port and add_ports kw [#572](https://github.com/gdsfactory/kfactory/pull/572)
 
 ## Bug Fixes
 
+- Fix locking logic [#579](https://github.com/gdsfactory/kfactory/pull/579)
 - Fix cell decorator [#576](https://github.com/gdsfactory/kfactory/pull/576)
 
 ## Documentation
