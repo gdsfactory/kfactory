@@ -9016,7 +9016,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     f"_M{_trans.mirror}_S{_trans.angle}"
                     f"_X{_trans.disp.x}_Y{_trans.disp.y}"
                 ).replace(".", "p")
-                _cell_name = _cell_name + clean_name(_trans_str)
+                _cell_name = get_cell_name(_cell_name + clean_name(_trans_str))
             if cell.kcl.layout_cell(_cell_name) is None:
                 _cell = KCell(kcl=self.cell.kcl, name=_cell_name)  # self.cell.dup()
                 for layer, shapes in self.cell._shapes.items():
