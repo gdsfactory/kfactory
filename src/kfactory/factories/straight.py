@@ -19,10 +19,13 @@ The slabs and excludes can be given in the form of an
 from collections.abc import Callable
 from typing import Any, Protocol
 
-from .. import kdb, kf_types
+from .. import kdb
 from ..conf import logger
 from ..enclosure import LayerEnclosure
-from ..kcell import Info, KCell, KCLayout, MetaData
+from ..kcell import KCell
+from ..layout import KCLayout
+from ..settings import Info
+from ..typings import MetaData, dbu
 
 __all__ = ["straight_dbu_factory"]
 
@@ -32,8 +35,8 @@ class StraightKCellFactory(Protocol):
 
     def __call__(
         self,
-        width: kf_types.dbu,
-        length: kf_types.dbu,
+        width: dbu,
+        length: dbu,
         layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
     ) -> KCell:
@@ -102,8 +105,8 @@ def straight_dbu_factory(
 
     @kcl.cell(basename=basename, output_type=KCell, **cell_kwargs)
     def straight(
-        width: kf_types.dbu,
-        length: kf_types.dbu,
+        width: dbu,
+        length: dbu,
         layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
     ) -> KCell:

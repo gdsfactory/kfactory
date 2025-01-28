@@ -18,7 +18,7 @@ import kfactory as kf
 #     WGCLADEXCLUDE = (111, 1)
 
 
-class Layers(kf.kcell.LayerInfos):
+class Layers(kf.LayerInfos):
     WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
     WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
     WGEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
@@ -168,14 +168,14 @@ def cells(
 @pytest.fixture
 def pdk() -> kf.KCLayout:
     layerstack = kf.LayerStack(
-        wg=kf.kcell.LayerLevel(
+        wg=kf.layer.LayerLevel(
             layer=Layers().WG,
             thickness=0.22,
             zmin=0,
             material="si",
             info=kf.kcell.Info(mesh_order=1),
         ),
-        clad=kf.kcell.LayerLevel(
+        clad=kf.layer.LayerLevel(
             layer=Layers().WGCLAD, thickness=3, zmin=0.22, material="sio2"
         ),
     )

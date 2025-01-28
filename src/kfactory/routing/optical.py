@@ -8,8 +8,9 @@ from typing import Any, Literal, cast, overload
 from .. import kdb
 from ..conf import config, logger
 from ..factories import StraightFactoryDBU, StraightFactoryUM
-from ..kcell import DKCell, DPort, KCell, Port
-from ..kf_types import dbu, um
+from ..kcell import DKCell, KCell
+from ..port import DPort, Port
+from ..typings import dbu, um
 from .generic import (
     ManhattanRoute,
     get_radius,

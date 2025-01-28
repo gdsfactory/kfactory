@@ -1,6 +1,6 @@
 import pytest
 
-from kfactory.kcell import check_metadata_type, convert_metadata_type
+from kfactory.serialization import check_metadata_type, convert_metadata_type
 
 
 def test_convert_metadata_type() -> None:

@@ -6,13 +6,16 @@ from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from dataclasses import InitVar, dataclass, field
 from functools import cached_property
-from typing import Any, Literal, ParamSpec, Protocol, TypedDict
+from typing import Any, Literal, ParamSpec, Protocol, TypedDict, cast
 
-from .. import kdb
+import klayout.db as kdb
+
 from ..conf import logger
 from ..enclosure import clean_points
-from ..kcell import BasePort, DKCell, KCell, KCLayout, Port
-from .steps import Step, Steps, Straight
+from ..kcell import DKCell, KCell
+from ..layout import KCLayout
+from ..port import BasePort, Port
+from ..routing.steps import Step, Steps, Straight
 
 __all__ = [
     "ManhattanRoutePathFunction",
@@ -668,13 +671,7 @@ def path_length_match_manhattan_route(
     modify_pts: tuple[kdb.Point, kdb.Point]
 
     for router in routers:
-        match position:
-            case -1:
-                modify_pts = tuple(router.start.pts[-2:])  # type: ignore[assignment]
-            case x if x >= 0:
-                modify_pts = tuple(router.start.pts[position : position + 2])  # type: ignore[assignment]
-            case _:
-                modify_pts = tuple(router.start.pts[position - 1 : position + 1])  # type: ignore[assignment]
+        modify_pts = tuple(router.start.pts[-2:])  # type: ignore[assignment]
         v = modify_pts[1] - modify_pts[0]
         match (v.x, v.y):
             case (x, 0) if x > 0:
@@ -685,7 +682,6 @@ def path_length_match_manhattan_route(
                 angle = 1
             case _:
                 angle = 3
-        # vl = v.length()
 
         match_dict[angle].append(
             (
@@ -1176,8 +1172,10 @@ def route_smart(
                                     clockwise=True,
                                 )
                             )
+                    case _:
+                        ...
 
-        all_routers = []
+        all_routers: list[ManhattanRouter] = []
         for ts, te, w, ss, es in zip(start_ts, end_ts, widths, starts, ends):
             start_t = start_mapping[ts]
             end_t = end_mapping[te]
@@ -1534,6 +1532,8 @@ def route_smart(
                         bbox=total_bbox,
                         separation=separation,
                     )
+                case _:
+                    ...
             route_to_bbox(
                 [router.start for router in router_bundle],
                 total_bbox,
@@ -1574,6 +1574,8 @@ def route_to_bbox(
                         router.straight_nobend(-bb.left + hw1 + router.t.disp.x)
                     case 3:
                         router.straight_nobend(-bb.bottom + hw1 + router.t.disp.y)
+                    case _:
+                        ...
         elif bbox_routing == "full":
             for router in routers:
                 hw1 = max(
@@ -1589,6 +1591,8 @@ def route_to_bbox(
                         router.straight(-bbox.left + hw1 + router.t.disp.x)
                     case 3:
                         router.straight(-bbox.bottom + hw1 + router.t.disp.y)
+                    case _:
+                        ...
         else:
             raise ValueError(
                 f"routing mode {bbox_routing=} is not supported, available modes"
@@ -1854,6 +1858,8 @@ def _sort_transformations(
                         end_transformations = _sort_trans_bank(
                             [t for t in back if t.disp.x >= box.center().x]
                         )
+                    case _:
+                        ...
                 end_transformations.reverse()
             case 1:
                 start_transformations = []
@@ -1947,6 +1953,8 @@ def _route_to_side(
                         rs.straight(rs.router.bend90_radius + x)
                 case 0 if x > 0:
                     rs.straight(x)
+                case _:
+                    ...
             if not (y == 0 and rs.ta == 2 and x > 0):
                 rs.left()
             bbox += rs.t * kdb.Point(0, -hw2)
@@ -1959,6 +1967,8 @@ def _route_to_side(
                         rs.straight(rs.router.bend90_radius + x)
                 case 0 if x > 0:
                     rs.straight(x)
+                case _:
+                    ...
             if not (y == 0 and rs.ta == 2 and x > 0):
                 rs.right()
             bbox += rs.t * kdb.Point(0, hw2)
@@ -2144,8 +2154,8 @@ def _route_waypoints(
     if isinstance(waypoints, kdb.Trans):
         length_widths = len(widths)
         half_width = (sum(widths) + (len(widths) - 1) * separation) // 2
-        backbone_start_trans = []
-        backbone_end_trans = []
+        backbone_start_trans: list[kdb.Trans] = []
+        backbone_end_trans: list[kdb.Trans] = []
         rot_t = waypoints * kdb.Trans.R180
         rot_t.mirror = False
         _w = -half_width
@@ -2161,7 +2171,7 @@ def _route_waypoints(
             bend90_radius=bend90_radius,
             separation=separation,
             starts=starts,
-            ends=[[]] * len(starts),
+            ends=cast(list[list[Step]], [[]] * len(starts)),
             bboxes=bboxes,
             waypoints=None,
             bbox_routing=bbox_routing,
@@ -2174,12 +2184,12 @@ def _route_waypoints(
             bend90_radius=bend90_radius,
             separation=separation,
             starts=ends,
-            ends=[[]] * len(ends),
+            ends=cast(list[list[Step]], [[]] * len(ends)),
             bboxes=bboxes,
             waypoints=None,
             bbox_routing=bbox_routing,
         )
-        all_routers = []
+        all_routers: list[ManhattanRouter] = []
         start_manhattan_routers.sort(key=lambda sr: sr.end_transformation)
         end_manhattan_routers.sort(
             key=lambda er: er.end_transformation * kdb.Trans.R180
@@ -2220,7 +2230,7 @@ def _route_waypoints(
             bend90_radius=bend90_radius,
             separation=separation,
             starts=starts,
-            ends=[[]] * len(starts),
+            ends=cast(list[list[Step]], [[]] * len(starts)),
             bboxes=bboxes,
             sort_ports=sort_ports,
             waypoints=None,
@@ -2235,7 +2245,7 @@ def _route_waypoints(
             bend90_radius=bend90_radius,
             separation=separation,
             starts=ends,
-            ends=[[]] * len(ends),
+            ends=cast(list[list[Step]], [[]] * len(ends)),
             bboxes=bboxes,
             sort_ports=sort_ports,
             waypoints=None,

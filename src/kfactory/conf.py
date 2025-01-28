@@ -7,10 +7,10 @@ import os
 import re
 import sys
 import traceback
-from enum import Enum
+from enum import Enum, IntEnum
 from itertools import takewhile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Literal, Protocol, cast, runtime_checkable
+from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 import loguru
 import rich.console
@@ -22,7 +22,32 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from . import kdb, rdb
 
 if TYPE_CHECKING:
-    from .kcell import KCLayout, ProtoKCell
+    from .kcell import ProtoKCell
+    from .layout import KCLayout
+
+
+DEFAULT_TRANS: dict[str, str | int | float | dict[str, str | int | float]] = {
+    "x": "E",
+    "y": "S",
+    "x0": "W",
+    "y0": "S",
+    "margin": {
+        "x": 10000,
+        "y": 10000,
+        "x0": 0,
+        "y0": 0,
+    },
+    "ref": -2,
+}
+
+
+class PROPID(IntEnum):
+    """Mapping for GDS properties."""
+
+    NAME = 0
+    """Instance name."""
+    PURPOSE = 1
+    """Instance purpose (e.g. 'routing')."""
 
 
 @runtime_checkable
@@ -127,6 +152,7 @@ def get_affinity() -> int:
     On (most) linux we can get it through the scheduling affinity. Otherwise,
     fall back to the multiprocessing cpu count.
     """
+    threads = 0
     try:
         threads = len(os.sched_getaffinity(0))  # type: ignore[attr-defined,unused-ignore]
     except AttributeError:
@@ -214,7 +240,7 @@ class Settings(BaseSettings):
         if isinstance(show, str):
             mod, f = show.rsplit(".", 1)
             loaded_mod = importlib.import_module(mod)
-            _show = cast(ShowFunction, loaded_mod.__getattribute__(f))
+            _show = loaded_mod.__getattribute__(f)
             if not isinstance(_show, ShowFunction):
                 raise ValidationError(f"{show=} is not a ShowFunction.")
             show = _show

@@ -10,7 +10,7 @@ BendEulerCustom(KCell.kcl) and use that one.
 """
 
 from ..factories.euler import bend_euler_factory, bend_s_euler_factory
-from ..kcell import kcl
+from ..layout import kcl
 
 __all__ = [
     "bend_euler",

@@ -41,46 +41,46 @@ def test_layer_infos_missing_datatype() -> None:
 
 def test_layer_infos_named_layer() -> None:
     layer_info = kf.LayerInfos(layer1=kf.kdb.LayerInfo(1, 0, name="Layer1"))
-    assert layer_info.layer1.name == "layer1"
+    assert layer_info.layer1.name == "layer1"  # type: ignore[attr-defined]
 
 
 def test_layer_infos_unnamed_layer() -> None:
     layer_info = kf.LayerInfos(layer1=kf.kdb.LayerInfo(1, 0))
-    assert layer_info.layer1.name == "layer1"
+    assert layer_info.layer1.name == "layer1"  # type: ignore[attr-defined]
 
 
 def test_layer_enum_creation(LAYER: Layers) -> None:
-    layer_enum = kf.kcell.layerenum_from_dict(name="LAYER", layers=LAYER)
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=LAYER)
     assert layer_enum.WG.layer == 1
     assert layer_enum.WG.datatype == 0
 
 
 def test_layer_enum_str(LAYER: Layers) -> None:
-    layer_enum = kf.kcell.layerenum_from_dict(name="LAYER", layers=LAYER)
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=LAYER)
     assert str(layer_enum.WG) == "WG"
 
 
 def test_layer_enum_getitem(LAYER: Layers) -> None:
-    layer_enum = kf.kcell.layerenum_from_dict(name="LAYER", layers=LAYER)
-    assert layer_enum["WG"][0] == 1
-    assert layer_enum["WG"][1] == 0
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=LAYER)
+    assert layer_enum["WG"][0] == 1  # type: ignore[index]
+    assert layer_enum["WG"][1] == 0  # type: ignore[index]
 
 
 def test_layer_enum_len(LAYER: Layers) -> None:
-    layer_enum = kf.kcell.layerenum_from_dict(name="LAYER", layers=LAYER)
-    assert len(layer_enum) == 7
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=LAYER)
+    assert len(layer_enum) == 7  # type: ignore[arg-type]
 
 
 def test_layer_enum_iter(LAYER: Layers) -> None:
-    layer_enum = kf.kcell.layerenum_from_dict(name="LAYER", layers=LAYER)
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=LAYER)
     values = list(layer_enum.WG)
     assert values == [1, 0]
 
 
 def test_layer_enum_invalid_index(LAYER: Layers) -> None:
-    layer_enum = kf.kcell.layerenum_from_dict(name="LAYER", layers=LAYER)
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=LAYER)
     with pytest.raises(ValueError):
-        layer_enum["WG"][2]
+        layer_enum["WG"][2]  # type: ignore[index]
 
 
 if __name__ == "__main__":

@@ -41,13 +41,13 @@ def wg_floating_off_grid(LAYER: Layers) -> kf.KCell:
         c = kf.KCell()
         dbu = c.kcl.dbu
 
-        p1 = kf.kcell.Port(
+        p1 = kf.Port(
             width=c.kcl.to_dbu(10 + dbu / 2),
             name="o1",
             dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, dbu / 2, 0),
             layer=c.kcl.find_layer(LAYER.WG),
         )
-        p2 = kf.kcell.Port(
+        p2 = kf.Port(
             width=c.kcl.to_dbu(10 + dbu / 2),
             name="o2",
             dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, 20 + dbu, 0),
@@ -126,7 +126,7 @@ def test_connect_port_width_mismatch(LAYER: Layers, wg: kf.KCell) -> None:
         name="cplxp1",
         dcplx_trans=kf.kdb.DCplxTrans(1, 30, False, 5, 10),
     )
-    with pytest.raises(kf.kcell.PortWidthMismatch) as excinfo:
+    with pytest.raises(kf.exceptions.PortWidthMismatch) as excinfo:
         wg1.connect("o1", port)
     assert str(excinfo.value) == (
         f'Width mismatch between the ports {wg1.cell_name}["o1"] and Port "cplxp1" '
@@ -147,7 +147,7 @@ def test_connect_instance_width_mismatch(LAYER: Layers, wg: kf.KCell) -> None:
     c2.add_port(port=port, name="o2")
     wg1_instance = c << c2
 
-    with pytest.raises(kf.kcell.PortWidthMismatch) as excinfo:
+    with pytest.raises(kf.exceptions.PortWidthMismatch) as excinfo:
         wg1.connect("o1", wg1_instance, "o2")
     assert str(excinfo.value) == (
         f'Width mismatch between the ports {wg1.cell_name}["o1"] and '

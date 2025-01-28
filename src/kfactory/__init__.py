@@ -11,60 +11,40 @@ __version__ = "1.0.2"
 import klayout.db as kdb
 import klayout.lay as lay
 import klayout.rdb as rdb
-from aenum import constant  # type: ignore[import-untyped,unused-ignore]
 
 
 from .conf import config, logger
 from .enclosure import KCellEnclosure, LayerEnclosure
 from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
-from .kcell import (
-    BaseKCell,
-    Constants,
-    DInstance,
-    DInstanceGroup,
-    DInstancePorts,
-    DInstances,
-    DKCell,
-    DPort,
-    DPorts,
-    Info,
-    Instance,
-    InstanceGroup,
-    InstancePorts,
-    Instances,
-    KCell,
-    KCellSettings,
-    KCLayout,
-    LayerEnum,
-    LayerInfos,
-    LayerStack,
-    Port,
-    Ports,
-    VInstance,
-    VInstanceGroup,
-    VInstancePorts,
-    VInstances,
-    VKCell,
-    VShapes,
-    cell,
+from .kcell import BaseKCell, DKCell, KCell, VKCell, show
+from .ports import Ports, DPorts
+from .port import Port, DPort
+from .instance import Instance, DInstance, VInstance
+from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
+from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
+from .instances import Instances, DInstances, VInstances
+from .settings import KCellSettings, Info
+from .layout import KCLayout, cell, vcell, kcl, Constants
+from .layer import LayerEnum, LayerInfos, LayerStack
+from .shapes import VShapes
+from .utilities import (
     dpolygon_from_array,
-    kcl,
     polygon_from_array,
-    pprint_ports,
     save_layout_options,
-    show,
+    pprint_ports,
 )
+
 from . import (
     cells,
     enclosure,
     factories,
-    kf_types,
     packing,
     placer,
     port,
     routing,
     technology,
     utils,
+    typings,
 )
 
 __all__ = [
@@ -102,7 +82,6 @@ __all__ = [
     "cell",
     "cells",
     "config",
-    "constant",
     "dpolygon_from_array",
     "enclosure",
     "factories",
@@ -112,7 +91,6 @@ __all__ = [
     "grid_dbu",
     "kcl",
     "kdb",
-    "kf_types",
     "lay",
     "logger",
     "packing",
@@ -125,5 +103,7 @@ __all__ = [
     "save_layout_options",
     "show",
     "technology",
+    "typings",
     "utils",
+    "vcell",
 ]

@@ -6,7 +6,8 @@ from collections.abc import Sequence
 from typing import Literal, cast
 
 from . import kdb
-from .kcell import Instance, KCell
+from .instance import Instance
+from .kcell import KCell
 
 
 def grid_dbu(

@@ -6,10 +6,13 @@ TODO: Non-linear tapers
 from collections.abc import Callable
 from typing import Any, Protocol
 
-from .. import kdb, kf_types
+from .. import kdb
 from ..conf import logger
 from ..enclosure import LayerEnclosure
-from ..kcell import Info, KCell, KCLayout, MetaData, kcl
+from ..kcell import KCell
+from ..layout import KCLayout, kcl
+from ..settings import Info
+from ..typings import MetaData, dbu
 
 __all__ = ["taper"]
 
@@ -17,9 +20,9 @@ __all__ = ["taper"]
 class TaperFactory(Protocol):
     def __call__(
         self,
-        width1: kf_types.dbu,
-        width2: kf_types.dbu,
-        length: kf_types.dbu,
+        width1: dbu,
+        width2: dbu,
+        length: dbu,
         layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
     ) -> KCell:
@@ -102,9 +105,9 @@ def taper_factory(
 
     @kcl.cell(basename=basename, output_type=KCell, **cell_kwargs)
     def taper(
-        width1: kf_types.dbu,
-        width2: kf_types.dbu,
-        length: kf_types.dbu,
+        width1: dbu,
+        width2: dbu,
+        length: dbu,
         layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
     ) -> KCell:
