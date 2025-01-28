@@ -513,8 +513,8 @@ def grid(
     ```
 
     Args:
-        target: Target KCell.
-        kcells: Sequence or sequence of sequence of KCells to add to the grid
+        target: Target DKCell.
+        kcells: Sequence or sequence of sequence of DKCells to add to the grid
         spacing: Value or tuple of value (different x/y) for spacing of the grid. [um]
         target_trans: Apply a transformation to the whole grid before placing it.
         shape: Respace the input of kcells into an array and fill as many positions
