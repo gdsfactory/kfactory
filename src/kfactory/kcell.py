@@ -699,13 +699,15 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         return self.ports.create_port(**kwargs)
 
     @overload
+    @abstractmethod
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
-    ) -> Instance: ...
+    ) -> ProtoTInstance[TUnit]: ...
 
     @overload
+    @abstractmethod
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
@@ -715,8 +717,9 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         b: kdb.Vector,
         na: int = 1,
         nb: int = 1,
-    ) -> Instance: ...
+    ) -> ProtoTInstance[TUnit]: ...
 
+    @abstractmethod
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
@@ -727,7 +730,19 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         nb: int = 1,
         libcell_as_static: bool = False,
         static_name_separator: str = "__",
-    ) -> Instance:
+    ) -> ProtoTInstance[TUnit]: ...
+
+    def _create_inst(
+        self,
+        cell: ProtoTKCell[Any] | int,
+        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans = kdb.Trans(),
+        a: kdb.Vector | None = None,
+        b: kdb.Vector | None = None,
+        na: int = 1,
+        nb: int = 1,
+        libcell_as_static: bool = False,
+        static_name_separator: str = "__",
+    ) -> kdb.Instance:
         """Add an instance of another KCell.
 
         Args:
@@ -788,7 +803,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             inst = self._base_kcell.kdb_cell.insert(
                 kdb.CellInstArray(ci, trans, a, b, na, nb)
             )
-        return Instance(kcl=self.kcl, instance=inst)
+        return inst
 
     def _kdb_copy(self) -> kdb.Cell:
         return self._base_kcell.kdb_cell.dup()
@@ -2190,6 +2205,43 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
             raise LockedError(self)
         return self.ports.create_port(**kwargs)
 
+    @overload
+    def create_inst(
+        self,
+        cell: ProtoTKCell[Any] | int,
+        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
+    ) -> DInstance: ...
+
+    @overload
+    def create_inst(
+        self,
+        cell: ProtoTKCell[Any] | int,
+        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
+        *,
+        a: kdb.Vector,
+        b: kdb.Vector,
+        na: int = 1,
+        nb: int = 1,
+    ) -> DInstance: ...
+
+    def create_inst(
+        self,
+        cell: ProtoTKCell[Any] | int,
+        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans = kdb.Trans(),
+        a: kdb.Vector | None = None,
+        b: kdb.Vector | None = None,
+        na: int = 1,
+        nb: int = 1,
+        libcell_as_static: bool = False,
+        static_name_separator: str = "__",
+    ) -> DInstance:
+        return DInstance(
+            kcl=self.kcl,
+            instance=self._create_inst(
+                cell, trans, a, b, na, nb, libcell_as_static, static_name_separator
+            ),
+        )
+
 
 class KCell(ProtoTKCell[int], DBUGeometricObject):
     """Cell with integer units."""
@@ -2276,6 +2328,43 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         if self.locked:
             raise LockedError(self)
         return self.ports.create_port(**kwargs)
+
+    @overload
+    def create_inst(
+        self,
+        cell: ProtoTKCell[Any] | int,
+        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
+    ) -> Instance: ...
+
+    @overload
+    def create_inst(
+        self,
+        cell: ProtoTKCell[Any] | int,
+        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
+        *,
+        a: kdb.Vector,
+        b: kdb.Vector,
+        na: int = 1,
+        nb: int = 1,
+    ) -> Instance: ...
+
+    def create_inst(
+        self,
+        cell: ProtoTKCell[Any] | int,
+        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans = kdb.Trans(),
+        a: kdb.Vector | None = None,
+        b: kdb.Vector | None = None,
+        na: int = 1,
+        nb: int = 1,
+        libcell_as_static: bool = False,
+        static_name_separator: str = "__",
+    ) -> Instance:
+        return Instance(
+            kcl=self.kcl,
+            instance=self._create_inst(
+                cell, trans, a, b, na, nb, libcell_as_static, static_name_separator
+            ),
+        )
 
     @classmethod
     def from_yaml(

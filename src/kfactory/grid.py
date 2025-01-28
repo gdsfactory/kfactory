@@ -6,7 +6,8 @@ from collections.abc import Sequence
 from typing import Literal, cast
 
 from . import kdb
-from .instance import Instance
+from .instance import DInstance, Instance
+from .instance_group import DInstanceGroup, InstanceGroup
 from .kcell import DKCell, KCell
 
 
@@ -20,7 +21,7 @@ def grid_dbu(
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
     mirror: bool = False,
-) -> list[list[Instance | None]]:
+) -> InstanceGroup:
     """Create a grid of instances.
 
     A grid uses the bounding box of the biggest width and biggest height of any bounding
@@ -144,7 +145,9 @@ def grid_dbu(
                 x0 += w // 2
             y0 += h // 2
             x0 = 0
-        return insts
+        return InstanceGroup(
+            [inst for array in insts for inst in array if inst is not None]
+        )
     else:
         _kcells: Sequence[KCell | None]
         if isinstance(kcells[0], KCell):
@@ -222,7 +225,9 @@ def grid_dbu(
                 x0 = 0
             else:
                 x0 += w // 2
-        return insts
+        return InstanceGroup(
+            [inst for array in insts for inst in array if inst is not None]
+        )
 
 
 def flexgrid_dbu(
@@ -235,7 +240,7 @@ def flexgrid_dbu(
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
     mirror: bool = False,
-) -> list[list[Instance | None]]:
+) -> InstanceGroup:
     """Create a grid of instances.
 
     A grid uses the bounding box of the biggest width per column and biggest height per
@@ -367,7 +372,9 @@ def flexgrid_dbu(
                 x0 += xmax.get(i_x, 0)
             y0 += ymax.get(i_y, 0)
             x0 = 0
-        return insts
+        return InstanceGroup(
+            [inst for array in insts for inst in array if inst is not None]
+        )
     else:
         _kcells: Sequence[KCell | None]
         if isinstance(kcells[0], KCell):
@@ -453,7 +460,9 @@ def flexgrid_dbu(
                 x0 = 0
             else:
                 x0 += xmax.get(i_x, 0)
-        return insts
+        return InstanceGroup(
+            [inst for array in insts for inst in array if inst is not None]
+        )
 
 
 def grid(
@@ -466,7 +475,7 @@ def grid(
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
     mirror: bool = False,
-) -> list[list[Instance | None]]:
+) -> DInstanceGroup:
     """Create a grid of instances.
 
     A grid uses the bounding box of the biggest width and biggest height of any bounding
@@ -531,7 +540,7 @@ def grid(
         spacing_x = spacing
         spacing_y = spacing
 
-    insts: list[list[Instance | None]]
+    insts: list[list[DInstance | None]]
     kcell_array: Sequence[Sequence[DKCell]]
 
     if shape is None:
@@ -591,7 +600,9 @@ def grid(
                 x0 += w / 2
             y0 += h / 2
             x0 = 0
-        return insts
+        return DInstanceGroup(
+            [inst for array in insts for inst in array if inst is not None]
+        )
     else:
         _kcells: Sequence[DKCell | None]
         if isinstance(kcells[0], DKCell):
@@ -669,7 +680,9 @@ def grid(
                 x0 = 0
             else:
                 x0 += w / 2
-        return insts
+        return DInstanceGroup(
+            [inst for array in insts for inst in array if inst is not None]
+        )
 
 
 def flexgrid(
@@ -682,7 +695,7 @@ def flexgrid(
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
     mirror: bool = False,
-) -> list[list[Instance | None]]:
+) -> DInstanceGroup:
     """Create a grid of instances.
 
     A grid uses the bounding box of the biggest width per column and biggest height per
@@ -742,7 +755,7 @@ def flexgrid(
         spacing_x = spacing
         spacing_y = spacing
 
-    insts: list[list[Instance | None]]
+    insts: list[list[DInstance | None]]
     kcell_array: Sequence[Sequence[DKCell]]
 
     if shape is None:
@@ -814,7 +827,9 @@ def flexgrid(
                 x0 += xmax.get(i_x, 0)
             y0 += ymax.get(i_y, 0)
             x0 = 0
-        return insts
+        return DInstanceGroup(
+            [inst for array in insts for inst in array if inst is not None]
+        )
     else:
         _kcells: Sequence[DKCell | None]
         if isinstance(kcells[0], DKCell):
@@ -900,4 +915,6 @@ def flexgrid(
                 x0 = 0
             else:
                 x0 += xmax.get(i_x, 0)
-        return insts
+        return DInstanceGroup(
+            [inst for array in insts for inst in array if inst is not None]
+        )
