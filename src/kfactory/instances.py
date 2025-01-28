@@ -184,10 +184,7 @@ class VInstances(ProtoInstances[float, VInstance]):
             return key in self._vinsts
         if isinstance(key, int):
             return key < len(self)
-        for inst in self._vinsts:
-            if inst.name == key:
-                return True
-        return False
+        return any(inst.name == key for inst in self._vinsts)
 
     def clear(self) -> None:
         """Clear all instances."""
