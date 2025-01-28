@@ -914,9 +914,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             polys[w] = poly
             if port.base.trans:
                 self.shapes(port.layer).insert(poly.transformed(port.trans))
-                self.shapes(port.layer).insert(
-                    kdb.Text(port.name or "", port.trans)
-                )
+                self.shapes(port.layer).insert(kdb.Text(port.name or "", port.trans))
             else:
                 self.shapes(port.layer).insert(poly, port.dcplx_trans)
                 self.shapes(port.layer).insert(
