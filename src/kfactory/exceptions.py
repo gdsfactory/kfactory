@@ -5,7 +5,6 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from .instance import ProtoInstance
     from .kcell import ProtoKCell
-    from .layer import LayerEnum
     from .layout import KCLayout
     from .port import ProtoPort
 
@@ -69,6 +68,9 @@ class PortLayerMismatch(ValueError):
         *args: Any,
     ) -> None:
         """Throw error for the two ports `p1`/`p1`."""
+        from .instance import ProtoInstance
+        from .layer import LayerEnum
+
         l1 = (
             f"{p1.layer.name}({p1.layer.__int__()})"
             if isinstance(p1.layer, LayerEnum)
@@ -105,6 +107,8 @@ class PortTypeMismatch(ValueError):
         *args: Any,
     ) -> None:
         """Throw error for the two ports `p1`/`p1`."""
+        from .instance import ProtoInstance
+
         if isinstance(other_inst, ProtoInstance):
             super().__init__(
                 f'Type mismatch between the ports {inst.cell_name}["{p1.name}"]'
