@@ -915,7 +915,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             if port.base.trans:
                 self.shapes(port.layer).insert(poly.transformed(port.trans))
                 self.shapes(port.layer).insert(
-                    kdb.Text(port.name if port.name else "", port.trans)
+                    kdb.Text(port.name or "", port.trans)
                 )
             else:
                 self.shapes(port.layer).insert(poly, port.dcplx_trans)
@@ -1716,7 +1716,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             ):
                 if add_cell_ports:
                     c_cat = db_.category_by_path(
-                        layer_cat(port.layer).path() + ".CellPorts"
+                        f"{layer_cat(port.layer).path()}.CellPorts"
                     ) or db_.create_category(layer_cat(port.layer), "CellPorts")
                     it = db_.create_item(db_cell, c_cat)
                     if port.name:

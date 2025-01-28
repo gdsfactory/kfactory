@@ -63,8 +63,8 @@ class ProtoTInstances(ProtoInstances[TUnit, ProtoTInstance[TUnit]], ABC):
                 return next(
                     filter(lambda inst: inst.property(PROPID.NAME) == item, self._insts)
                 )
-        except StopIteration:
-            raise ValueError(f"Instance {item} not found in {self._tkcell}")
+        except StopIteration as e:
+            raise ValueError(f"Instance {item} not found in {self._tkcell}") from e
 
     def __delitem__(self, item: ProtoTInstance[Any] | int) -> None:
         if isinstance(item, int):
@@ -157,11 +157,10 @@ class VInstances(ProtoInstances[float, VInstance]):
         """Retrieve instance by index or by name."""
         if isinstance(key, int):
             return self._vinsts[key]
-        else:
-            for inst in self._vinsts:
-                if inst.name == key:
-                    return inst
-            raise KeyError(f"No instance found with name: {key}")
+        for inst in self._vinsts:
+            if inst.name == key:
+                return inst
+        raise KeyError(f"No instance found with name: {key}")
 
     def clear(self) -> None:
         """Clear all instances."""

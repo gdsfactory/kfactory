@@ -94,18 +94,18 @@ class CrossSectionModel(BaseModel):
         | CrossSectionSpec
         | DSymmetricalCrossSection,
     ) -> SymmetricalCrossSection:
-        if isinstance(cross_section, SymmetricalCrossSection):
-            if cross_section.enclosure != self.kcl.get_enclosure(
-                cross_section.enclosure
-            ):
-                return self.get_cross_section(
-                    CrossSectionSpec(
-                        sections=cross_section.enclosure.model_dump()["sections"],
-                        main_layer=cross_section.main_layer,
-                        name=cross_section.name,
-                        width=cross_section.width,
-                    )
+        if isinstance(cross_section, SymmetricalCrossSection) and cross_section.enclosure != self.kcl.get_enclosure(
+                        cross_section.enclosure
+                    ):
+            return self.get_cross_section(
+                CrossSectionSpec(
+                    sections=cross_section.enclosure.model_dump()["sections"],
+                    main_layer=cross_section.main_layer,
+                    name=cross_section.name,
+                    width=cross_section.width,
                 )
+            )
+
         if isinstance(cross_section, str):
             return self.cross_sections[cross_section]
         elif isinstance(cross_section, DSymmetricalCrossSection):
