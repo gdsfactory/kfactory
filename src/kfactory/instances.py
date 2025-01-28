@@ -34,6 +34,9 @@ class ProtoInstances(Generic[TUnit, TInstance], ABC):
     def __getitem__(self, key: str | int) -> ProtoInstance[TUnit]: ...
 
     @abstractmethod
+    def __contains__(self, key: str | int | TInstance) -> bool: ...
+
+    @abstractmethod
     def clear(self) -> None: ...
 
 
@@ -71,6 +74,20 @@ class ProtoTInstances(ProtoInstances[TUnit, ProtoTInstance[TUnit]], ABC):
             list(self._insts)[item].delete()
         else:
             self._get_inst(item.instance).delete()
+
+    def __contains__(self, key: str | int | ProtoTInstance[Any]) -> bool:
+        try:
+            if isinstance(key, ProtoTInstance):
+                self._get_inst(key.instance)
+                return True
+            elif isinstance(key, str):
+                self._get_inst(key)
+                return True
+            else:
+                return key < len(self)
+            return False
+        except ValueError:
+            return False
 
     @abstractmethod
     def __getitem__(self, key: str | int) -> ProtoTInstance[TUnit]: ...
@@ -161,6 +178,13 @@ class VInstances(ProtoInstances[float, VInstance]):
             if inst.name == key:
                 return inst
         raise KeyError(f"No instance found with name: {key}")
+
+    def __contains__(self, key: str | int | VInstance) -> bool:
+        if isinstance(key, VInstance):
+            return key in self._vinsts
+        if isinstance(key, int):
+            return key < len(self)
+        return any(inst.name == key for inst in self._vinsts)
 
     def clear(self) -> None:
         """Clear all instances."""
