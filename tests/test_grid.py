@@ -49,7 +49,7 @@ def test_grid_dbu_2d_uneven(straight_factory_dbu: Callable[..., kf.KCell]) -> No
                 straight_factory_dbu(
                     width=randint(500, 2500) * 2, length=randint(2000, 20_000)
                 )
-                for i in range(10 + j**2)
+                for _ in range(10 + j**2)
             ]
             for j in range(-3, 3)
         ],
@@ -399,7 +399,7 @@ def test_flexgrid_dbu_2d_shape_rotation(
 def test_flexgrid_2d_shape_rotation(
     straight_factory: Callable[..., kf.KCell],
 ) -> None:
-    c = kf.KCell()
+    c = kf.DKCell()
 
     kf.flexgrid(
         c,
@@ -407,7 +407,7 @@ def test_flexgrid_2d_shape_rotation(
             [
                 straight_factory(
                     width=round(uniform(0.5, 2.5)) * 2, length=round(uniform(2, 20))
-                )
+                ).to_dkcell()
                 for _ in range(10)
             ]
             for _ in range(2)
