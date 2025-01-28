@@ -1,16 +1,20 @@
-<a id="v1.0.4"></a>
-# [v1.0.4](https://github.com/gdsfactory/kfactory/releases/tag/v1.0.4) - 2025-01-28
+<a id="v1.1.0"></a>
+# [v1.1.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.0) - 2025-01-28
 
 # What's Changed
+
+## New
+
+- Add instances contains [#585](https://github.com/gdsfactory/kfactory/pull/585)
 
 ## Bug Fixes
 
 - Cast protoport to port before int angle match [#584](https://github.com/gdsfactory/kfactory/pull/584)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.0.3...v1.0.4
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.0.3...v1.1.0
 
 
-[Changes][v1.0.4]
+[Changes][v1.1.0]
 
 
 <a id="v1.0.3"></a>
@@ -1546,7 +1550,7 @@
 [Changes][v0.4.0]
 
 
-[v1.0.4]: https://github.com/gdsfactory/kfactory/compare/v1.0.3...v1.0.4
+[v1.1.0]: https://github.com/gdsfactory/kfactory/compare/v1.0.3...v1.1.0
 [v1.0.3]: https://github.com/gdsfactory/kfactory/compare/v1.0.2...v1.0.3
 [v1.0.2]: https://github.com/gdsfactory/kfactory/compare/v1.0.1...v1.0.2
 [v1.0.1]: https://github.com/gdsfactory/kfactory/compare/v1.0.0...v1.0.1
