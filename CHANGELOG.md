@@ -5,6 +5,7 @@
 
 ## New
 
+- Add defaults for mirror, mirror_x, mirror_y [#588](https://github.com/gdsfactory/kfactory/pull/588)
 - Add instances contains [#585](https://github.com/gdsfactory/kfactory/pull/585)
 
 ## Bug Fixes
