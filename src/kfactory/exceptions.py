@@ -3,11 +3,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from kfactory.instance import ProtoInstance
-    from kfactory.kcell import ProtoKCell
-    from kfactory.layer import LayerEnum
-    from kfactory.layout import KCLayout
-    from kfactory.port import ProtoPort
+    from .instance import ProtoInstance
+    from .kcell import ProtoKCell
+    from .layer import LayerEnum
+    from .layout import KCLayout
+    from .port import ProtoPort
 
 
 class LockedError(AttributeError):

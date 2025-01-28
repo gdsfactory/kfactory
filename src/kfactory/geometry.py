@@ -1,7 +1,17 @@
-from typing import Generic
+from __future__ import annotations
 
-from kfactory.protocols import BoxFunction
-from kfactory.typings import TUnit
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Generic, Self, overload
+
+import numpy as np
+
+from . import kdb
+from .protocols import BoxFunction, BoxLike
+from .typings import TUnit
+
+if TYPE_CHECKING:
+    from .layer import LayerEnum
+    from .layout import KCLayout
 
 
 class SizeInfo(Generic[TUnit]):
@@ -480,12 +490,12 @@ class GeometricObject(Generic[TUnit], ABC):
 
     def imirror(self, p1: tuple[int, int], p2: tuple[int, int]) -> Self:
         """Mirror self at a line."""
-        _p1 = kdb.Point(p1[0], p1[1]).to_dtype(self.kcl.dbu)
-        _p2 = kdb.Point(p2[0], p2[1]).to_dtype(self.kcl.dbu)
-        mirror_v = _p2 - _p1
+        p1_ = kdb.Point(p1[0], p1[1]).to_dtype(self.kcl.dbu)
+        p2_ = kdb.Point(p2[0], p2[1]).to_dtype(self.kcl.dbu)
+        mirror_v = p2_ - p1_
         disp = kdb.DVector(self.dxmin, self.dymin)
         angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
-        dedge = kdb.DEdge(_p1, _p2)
+        dedge = kdb.DEdge(p1_, p2_)
 
         v = kdb.DVector(-mirror_v.y, mirror_v.x)
 
@@ -689,12 +699,12 @@ class GeometricObject(Generic[TUnit], ABC):
 
     def dmirror(self, p1: tuple[float, float], p2: tuple[float, float]) -> Self:
         """Mirror self at a line."""
-        _p1 = kdb.DPoint(p1[0], p1[1])
-        _p2 = kdb.DPoint(p2[0], p2[1])
-        mirror_v = _p2 - _p1
+        p1_ = kdb.DPoint(p1[0], p1[1])
+        p2_ = kdb.DPoint(p2[0], p2[1])
+        mirror_v = p2_ - p1_
         disp = kdb.DVector(self.dxmin, self.dymin)
         angle = np.mod(np.rad2deg(np.arctan2(mirror_v.y, mirror_v.x)), 180) * 2
-        dedge = kdb.DEdge(_p1, _p2)
+        dedge = kdb.DEdge(p1_, p2_)
 
         v = mirror_v
         v = kdb.DVector(-v.y, v.x)

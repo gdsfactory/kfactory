@@ -1,6 +1,11 @@
-from typing import Protocol, runtime_checkable
+from __future__ import annotations
 
-from kfactory.typings import KC, KCellParams, TUnit
+from typing import TYPE_CHECKING, Protocol, overload, runtime_checkable
+
+from .typings import KC, KCellParams, TUnit
+
+if TYPE_CHECKING:
+    from .layer import LayerEnum
 
 
 class KCellFunc(Protocol[KCellParams, KC]):

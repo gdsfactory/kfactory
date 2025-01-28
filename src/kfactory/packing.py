@@ -5,7 +5,9 @@ from collections.abc import Sequence
 import rpack  # type: ignore[import-untyped,unused-ignore]
 
 from . import kdb
-from .kcell import Instance, InstanceGroup, KCell
+from .instance import Instance
+from .instance_group import InstanceGroup
+from .kcell import KCell
 
 
 def pack_kcells(

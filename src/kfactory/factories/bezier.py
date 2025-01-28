@@ -7,9 +7,12 @@ import numpy as np
 import numpy.typing as nty
 from scipy.special import binom  # type:ignore[import-untyped,unused-ignore]
 
-from .. import kdb, kf_types
+from .. import kdb
 from ..enclosure import LayerEnclosure
-from ..kcell import Info, KCell, KCLayout, MetaData
+from ..kcell import KCell
+from ..layout import KCLayout
+from ..settings import Info
+from ..typings import MetaData, um
 
 __all__ = ["bend_s_bezier_factory"]
 
@@ -17,9 +20,9 @@ __all__ = ["bend_s_bezier_factory"]
 class BezierKCell(Protocol):
     def __call__(
         self,
-        width: kf_types.um,
-        height: kf_types.um,
-        length: kf_types.um,
+        width: um,
+        height: um,
+        length: um,
         layer: kdb.LayerInfo,
         nb_points: int = 99,
         t_start: float = 0,
@@ -98,9 +101,9 @@ def bend_s_bezier_factory(
 
     @kcl.cell(basename=basename, output_type=KCell, **cell_kwargs)
     def bend_s_bezier(
-        width: kf_types.um,
-        height: kf_types.um,
-        length: kf_types.um,
+        width: um,
+        height: um,
+        length: um,
         layer: kdb.LayerInfo,
         nb_points: int = 99,
         t_start: float = 0,

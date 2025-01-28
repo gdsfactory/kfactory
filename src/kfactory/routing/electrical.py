@@ -5,18 +5,18 @@ from typing import Any, Literal
 
 import klayout.db as kdb
 
-from kfactory.config import logger
-from kfactory.kcell import KCell
-from kfactory.kf_types import dbu
-from kfactory.port import Port
-from kfactory.routing.generic import ManhattanRoute
-from kfactory.routing.generic import route_bundle as route_bundle_generic
-from kfactory.routing.manhattan import (
+from ..config import logger
+from ..kcell import KCell
+from ..port import Port
+from ..routing.generic import ManhattanRoute
+from ..routing.generic import route_bundle as route_bundle_generic
+from ..routing.manhattan import (
     ManhattanRoutePathFunction,
     route_manhattan,
     route_smart,
 )
-from kfactory.routing.steps import Step, Straight
+from ..routing.steps import Step, Straight
+from ..typings import dbu
 
 __all__ = [
     "place_dual_rails",

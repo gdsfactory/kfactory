@@ -6,7 +6,10 @@ from typing import Any, Protocol
 from ... import kdb
 from ...config import logger
 from ...enclosure import LayerEnclosure
-from ...kcell import Info, KCLayout, MetaData, VKCell, vcell
+from ...kcell import VKCell
+from ...layout import KCLayout, vcell
+from ...settings import Info
+from ...typings import MetaData
 from .utils import extrude_backbone
 
 __all__ = ["virtual_straight_factory"]

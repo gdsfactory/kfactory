@@ -1,14 +1,16 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Annotated, Any, ParamSpec, TypeAlias, TypeVar
 
 import klayout.db as kdb
 import klayout.lay as lay
 
 if TYPE_CHECKING:
-    from kfactory.instance import ProtoInstance
-    from kfactory.kcell import ProtoTKCell
-    from kfactory.layer import LayerEnum, LayerInfos
-    from kfactory.layout import Constants
-    from kfactory.port import ProtoPort
+    from .instance import ProtoInstance
+    from .kcell import ProtoTKCell
+    from .layer import LayerEnum, LayerInfos
+    from .layout import Constants
+    from .port import ProtoPort
 
 
 T = TypeVar("T")
@@ -80,10 +82,10 @@ MetaData: TypeAlias = (
     | bool
     | str
     | SerializableShape
-    | None
     | list["MetaData"]
     | tuple["MetaData", ...]
     | dict[str, "MetaData"]
+    | None
 )
 
 

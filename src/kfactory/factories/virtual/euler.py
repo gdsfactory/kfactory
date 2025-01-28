@@ -7,7 +7,10 @@ from ... import kdb
 from ...config import logger
 from ...enclosure import LayerEnclosure
 from ...factories.euler import euler_bend_points
-from ...kcell import Info, KCLayout, MetaData, VKCell
+from ...kcell import VKCell
+from ...layout import KCLayout
+from ...settings import Info
+from ...typings import MetaData
 from .utils import extrude_backbone
 
 

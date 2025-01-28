@@ -30,18 +30,16 @@ from pydantic import (
 from ruamel.yaml.constructor import BaseConstructor
 from typing_extensions import TypedDict
 
-from kfactory.config import config
-from kfactory.cross_section import SymmetricalCrossSection
-from kfactory.layer import LayerEnum
-from kfactory.layout import KCLayout
-from kfactory.ports import pprint_ports
-from kfactory.settings import Info
-from kfactory.typings import TPort, TUnit
+from .config import config
+from .cross_section import CrossSectionSpec, SymmetricalCrossSection
+from .layer import LayerEnum
+from .settings import Info
+from .typings import TPort, TUnit
+from .utilities import pprint_ports
 
 if TYPE_CHECKING:
-    from kfactory.kcell import KCell, ProtoTKCell
-    from kfactory.layout import KCLayout
-    from kfactory.port import ProtoPort
+    from .kcell import KCell, ProtoTKCell
+    from .layout import KCLayout
 
 
 def create_port_error(
@@ -307,7 +305,7 @@ class ProtoPort(Generic[TUnit], ABC):
 
     @property
     def dcplx_trans(self) -> kdb.DCplxTrans:
-        """Complex transformation (µm based).
+        """Complex transformation (um based).
 
         If the internal transformation is simple, return a complex copy.
 
@@ -655,61 +653,60 @@ class Port(ProtoPort[int]):
         if port is not None:
             self._base = BasePort(**port.base.model_dump())
             return
-        _info = Info(**info)
-        from kfactory.cross_section import CrossSectionSpec
-        from kfactory.layout import get_default_kcl
+        info_ = Info(**info)
+        from .layout import get_default_kcl
 
-        _kcl = kcl or get_default_kcl()
+        kcl_ = kcl or get_default_kcl()
         if cross_section is None:
             if layer_info is None:
                 if layer is None:
                     raise ValueError("layer or layer_info for a port must be defined")
-                layer_info = _kcl.layout.get_info(layer)
+                layer_info = kcl_.layout.get_info(layer)
             if width is None:
                 raise ValueError(
                     "any width and layer, or a cross_section must be given if the"
                     " 'port is None'"
                 )
             else:
-                cross_section = _kcl.get_cross_section(
+                cross_section = kcl_.get_cross_section(
                     CrossSectionSpec(main_layer=layer_info, width=width)
                 )
-        _cross_section = cross_section
+        cross_section_ = cross_section
         if trans is not None:
             if isinstance(trans, str):
-                _trans = kdb.Trans.from_s(trans)
+                trans_ = kdb.Trans.from_s(trans)
             else:
-                _trans = trans.dup()
+                trans_ = trans.dup()
             self._base = BasePort(
                 name=name,
-                kcl=_kcl,
-                cross_section=_cross_section,
-                trans=_trans,
-                info=_info,
+                kcl=kcl_,
+                cross_section=cross_section_,
+                trans=trans_,
+                info=info_,
                 port_type=port_type,
             )
         elif dcplx_trans is not None:
             if isinstance(dcplx_trans, str):
-                _dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
+                dcplx_trans_ = kdb.DCplxTrans.from_s(dcplx_trans)
             else:
-                _dcplx_trans = dcplx_trans.dup()
+                dcplx_trans_ = dcplx_trans.dup()
             self._base = BasePort(
                 name=name,
-                kcl=_kcl,
-                cross_section=_cross_section,
-                dcplx_trans=_dcplx_trans,
-                info=_info,
+                kcl=kcl_,
+                cross_section=cross_section_,
+                dcplx_trans=dcplx_trans_,
+                info=info_,
                 port_type=port_type,
             )
         elif angle is not None:
             assert center is not None
-            _trans = kdb.Trans(angle, mirror_x, *center)
+            trans_ = kdb.Trans(angle, mirror_x, *center)
             self._base = BasePort(
                 name=name,
-                kcl=_kcl,
-                cross_section=_cross_section,
-                trans=_trans,
-                info=_info,
+                kcl=kcl_,
+                cross_section=cross_section_,
+                trans=trans_,
+                info=info_,
                 port_type=port_type,
             )
         else:
@@ -839,7 +836,7 @@ class Port(ProtoPort[int]):
             f"{self.layer_info}, port_type: {self.port_type})"
         )
 
-    def print(self, type: Literal[dbu, um, None] = None) -> None:
+    def print(self, type: Literal["dbu", "um", None] = None) -> None:
         """Print the port pretty."""
         config.console.print(pprint_ports([self], unit=type))
 
@@ -871,59 +868,59 @@ class DPort(ProtoPort[float]):
         if port is not None:
             self._base = BasePort(**port.base.model_dump())
             return
-        _info = Info(**info)
-        from kfactory.cross_section import CrossSectionSpec
-        from kfactory.layout import get_default_kcl
+        info_ = Info(**info)
 
-        _kcl = kcl or get_default_kcl()
+        from .layout import get_default_kcl
+
+        kcl_ = kcl or get_default_kcl()
         if cross_section is None:
             if layer_info is None:
                 if layer is None:
                     raise ValueError("layer or layer_info for a port must be defined")
-                layer_info = _kcl.layout.get_info(layer)
+                layer_info = kcl_.layout.get_info(layer)
             if width is None:
                 raise ValueError(
                     "If a cross_section is not given a width must be defined."
                 )
-            cross_section = _kcl.get_cross_section(
+            cross_section = kcl_.get_cross_section(
                 CrossSectionSpec(main_layer=layer_info, width=width)
             )
-        _cross_section = cross_section
+        cross_section_ = cross_section
         if trans is not None:
             if isinstance(trans, str):
-                _trans = kdb.Trans.from_s(trans)
+                trans_ = kdb.Trans.from_s(trans)
             else:
-                _trans = trans.dup()
+                trans_ = trans.dup()
             self._base = BasePort(
                 name=name,
-                kcl=_kcl,
-                cross_section=_cross_section,
-                trans=_trans,
-                info=_info,
+                kcl=kcl_,
+                cross_section=cross_section_,
+                trans=trans_,
+                info=info_,
                 port_type=port_type,
             )
         elif dcplx_trans is not None:
             if isinstance(dcplx_trans, str):
-                _dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
+                dcplx_trans_ = kdb.DCplxTrans.from_s(dcplx_trans)
             else:
-                _dcplx_trans = dcplx_trans.dup()
+                dcplx_trans_ = dcplx_trans.dup()
             self._base = BasePort(
                 name=name,
-                kcl=_kcl,
-                cross_section=_cross_section,
-                dcplx_trans=_dcplx_trans,
-                info=_info,
+                kcl=kcl_,
+                cross_section=cross_section_,
+                dcplx_trans=dcplx_trans_,
+                info=info_,
                 port_type=port_type,
             )
         elif angle is not None:
             assert center is not None
-            _dcplx_trans = kdb.DCplxTrans.R0
+            dcplx_trans_ = kdb.DCplxTrans.R0
             self._base = BasePort(
                 name=name,
-                kcl=_kcl,
-                cross_section=_cross_section,
-                dcplx_trans=_dcplx_trans,
-                info=_info,
+                kcl=kcl_,
+                cross_section=cross_section_,
+                dcplx_trans=dcplx_trans_,
+                info=info_,
                 port_type=port_type,
             )
             self.center = center
@@ -1103,7 +1100,7 @@ def rename_clockwise(
             o8  o7
     ```
     """
-    _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
+    ports_ = filter_layer_pt_reg(ports, layer, port_type, regex)
 
     def sort_key(port: ProtoPort[Any]) -> tuple[int, int, int]:
         match port.angle:
@@ -1128,7 +1125,7 @@ def rename_clockwise(
 
         return angle, key_1, key_2
 
-    for i, p in enumerate(sorted(_ports, key=sort_key), start=start):
+    for i, p in enumerate(sorted(ports_, key=sort_key), start=start):
         p.name = f"{prefix}{i}"
 
 
@@ -1210,7 +1207,7 @@ def rename_by_direction(
     ```
     """
     for dir in DIRECTION:
-        _ports = filter_layer_pt_reg(ports, layer, port_type, regex)
+        ports_ = filter_layer_pt_reg(ports, layer, port_type, regex)
         dir_2 = -1 if dir < 2 else 1
         if dir % 2:
 
@@ -1222,7 +1219,7 @@ def rename_by_direction(
             def key_sort(port: ProtoPort[Any]) -> tuple[int, int]:
                 return (port.trans.disp.y, dir_2 * port.trans.disp.x)
 
-        for i, p in enumerate(sorted(filter_direction(_ports, dir), key=key_sort)):
+        for i, p in enumerate(sorted(filter_direction(ports_, dir), key=key_sort)):
             p.name = f"{prefix}{dir_names[dir]}{i}"
 
 
@@ -1233,21 +1230,15 @@ def filter_layer_pt_reg(
     regex: str | None = None,
 ) -> Iterable[TPort]:
     """Filter ports by layer index, port type and name regex."""
-    from kfactory.port import (
-        filter_layer,
-        filter_port_type,
-        filter_regex,
-    )
-
-    _ports = ports
+    ports_ = ports
     if layer is not None:
-        _ports = filter_layer(_ports, layer)
+        ports_ = filter_layer(ports_, layer)
     if port_type is not None:
-        _ports = filter_port_type(_ports, port_type)
+        ports_ = filter_port_type(ports_, port_type)
     if regex is not None:
-        _ports = filter_regex(_ports, regex)
+        ports_ = filter_regex(ports_, regex)
 
-    return _ports
+    return ports_
 
 
 def filter_direction(ports: Iterable[TPort], direction: int) -> filter[TPort]:

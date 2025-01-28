@@ -2,20 +2,22 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
-from typing import Any, Generic
+from typing import TYPE_CHECKING, Any, Generic
 
 import klayout.db as kdb
 
-from kfactory.config import PROPID
-from kfactory.instance import (
+from .config import PROPID
+from .instance import (
     DInstance,
     Instance,
     ProtoInstance,
     ProtoTInstance,
     VInstance,
 )
-from kfactory.kcell import TKCell
-from kfactory.typings import TInstance, TUnit
+from .typings import TInstance, TUnit
+
+if TYPE_CHECKING:
+    from .kcell import TKCell
 
 
 class ProtoInstances(Generic[TUnit, TInstance], ABC):

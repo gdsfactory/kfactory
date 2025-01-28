@@ -8,10 +8,13 @@ from typing import Any, Protocol
 
 import numpy as np
 
-from .. import kdb, kf_types
+from .. import kdb
 from ..config import logger
 from ..enclosure import LayerEnclosure, extrude_path
-from ..kcell import Info, KCell, KCLayout, MetaData
+from ..kcell import KCell
+from ..layout import KCLayout
+from ..settings import Info
+from ..typings import MetaData, deg, um
 
 __all__ = ["bend_circular_factory"]
 
@@ -19,12 +22,12 @@ __all__ = ["bend_circular_factory"]
 class BendCircularKCell(Protocol):
     def __call__(
         self,
-        width: kf_types.um,
-        radius: kf_types.um,
+        width: um,
+        radius: um,
         layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
-        angle: kf_types.deg = 90,
-        angle_step: kf_types.deg = 1,
+        angle: deg = 90,
+        angle_step: deg = 1,
     ) -> KCell:
         """Circular radius bend [um].
 
@@ -87,12 +90,12 @@ def bend_circular_factory(
         **cell_kwargs,
     )
     def bend_circular(
-        width: kf_types.um,
-        radius: kf_types.um,
+        width: um,
+        radius: um,
         layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
-        angle: kf_types.deg = 90,
-        angle_step: kf_types.deg = 1,
+        angle: deg = 90,
+        angle_step: deg = 1,
     ) -> KCell:
         """Circular radius bend [um].
 

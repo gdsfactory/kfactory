@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
 
 import klayout.db as kdb
 from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from kfactory.settings import Info
+from .settings import Info
+
+if TYPE_CHECKING:
+    from .layout import KCLayout
 
 
 class InvalidLayerError(ValueError):
@@ -253,7 +256,7 @@ def layerenum_from_dict(
     name: str = "LAYER",
     layout: kdb.Layout | None = None,
 ) -> type[LayerEnum]:
-    from kfactory.layout import KCLayout, get_default_kcl
+    from .layout import get_default_kcl
 
     members: dict[str, constant[KCLayout] | tuple[int, int]] = {
         "layout": constant(layout or get_default_kcl().layout)

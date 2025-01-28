@@ -1,17 +1,22 @@
+from __future__ import annotations
+
 import functools
 import inspect
 from collections import UserDict, UserList
 from collections.abc import Callable, Hashable
-from typing import TYPE_CHECKING, Any
+from hashlib import sha3_512
+from types import FunctionType
+from typing import TYPE_CHECKING, Any, overload
 
 import klayout.db as kdb
 import numpy as np
 import toolz  # type: ignore[import-untyped,unused-ignore]
 
-from kfactory.typings import MetaData, SerializableShape
+from .config import config
+from .typings import MetaData, SerializableShape
 
 if TYPE_CHECKING:
-    from kfactory.kcell import ProtoKCell
+    from .kcell import ProtoKCell
 
 
 class DecoratorList(UserList[Any]):
@@ -58,7 +63,7 @@ def clean_name(name: str) -> str:
 
 
 def clean_value(
-    value: float | np.float64 | dict[Any, Any] | ProtoKCell | Callable[..., Any],
+    value: float | np.float64 | dict[Any, Any] | ProtoKCell[Any] | Callable[..., Any],
 ) -> str:
     """Makes sure a value is representable in a limited character_space."""
     if isinstance(value, int):  # integer
@@ -72,7 +77,7 @@ def clean_value(
     elif isinstance(value, dict):
         return dict2name(**value)
     elif hasattr(value, "name"):
-        return clean_name(value.name)
+        return clean_name(value.name)  # type: ignore[arg-type]
     elif callable(value):
         if isinstance(value, FunctionType) and value.__name__ == "<lambda>":
             raise ValueError(
@@ -119,19 +124,19 @@ def _to_hashable(
         ud = DecoratorDict()
         for item, value in sorted(d.items()):
             if isinstance(value, dict | list):
-                _value: Any = _to_hashable(value)
+                value_: Any = _to_hashable(value)
             else:
-                _value = value
-            ud[item] = _value
+                value_ = value
+            ud[item] = value_
         return ud
     else:
         ul = DecoratorList([])
         for index, value in enumerate(d):
             if isinstance(value, dict | list):
-                _value = _to_hashable(value)
+                value_ = _to_hashable(value)
             else:
-                _value = value
-            ul.append(_value)
+                value_ = value
+            ul.append(value_)
         return ul
 
 
@@ -156,13 +161,13 @@ def _hashable_to_original(
             udl[item] = _hashable_to_original(value)
         return udl.data
     elif isinstance(udl, DecoratorList):
-        _list = []
+        list_ = []
         for v in udl:
             if isinstance(v, DecoratorDict | DecoratorList):
-                _list.append(_hashable_to_original(v))
+                list_.append(_hashable_to_original(v))
             else:
-                _list.append(v)
-        return _list
+                list_.append(v)
+        return list_
     return udl
 
 
@@ -183,8 +188,8 @@ def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
     for key, value in kwargs.items():
         key = join_first_letters(key)
         label += [f"{key.upper()}{clean_value(value)}"]
-    _label = "_".join(label)
-    return clean_name(_label)
+    label_ = "_".join(label)
+    return clean_name(label_)
 
 
 def convert_metadata_type(value: Any) -> MetaData:

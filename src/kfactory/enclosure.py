@@ -26,7 +26,6 @@ from typing import (
     overload,
 )
 
-import klayout.db as kdb
 import numpy as np
 from pydantic import (
     BaseModel,
@@ -39,13 +38,13 @@ from pydantic import (
 from ruamel.yaml.representer import BaseRepresenter, MappingNode
 from typing_extensions import TypedDict
 
-from kfactory.config import config, logger
-from kfactory.kcell import KCell
-from kfactory.layout import KCLayout
+from . import kdb
+from .config import config, logger
 
 if TYPE_CHECKING:
-    from kfactory.kcell import KCell
-    from kfactory.layout import KCLayout
+    from .kcell import KCell
+    from .layout import KCLayout
+    from .port import Port
 
 __all__ = [
     "KCellEnclosure",

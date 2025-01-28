@@ -1,19 +1,29 @@
-from abc import ABC, abstractmethod
-from collections.abc import Iterable, Sequence
-from typing import Any, Generic
+from __future__ import annotations
 
-from kfactory.config import config
-from kfactory.instance import ProtoTInstance
-from kfactory.instance_ports import ProtoTInstancePorts
-from kfactory.layer import LayerEnum
-from kfactory.port import (
+from abc import ABC, abstractmethod
+from collections.abc import Callable, Iterable, Iterator, Sequence
+from typing import TYPE_CHECKING, Any, Generic, cast
+
+from . import kdb
+from .config import config
+from .layer import LayerEnum
+from .port import (
     BasePort,
     DPort,
     Port,
     ProtoPort,
+    filter_direction,
+    filter_layer,
+    filter_orientation,
+    filter_port_type,
+    filter_regex,
 )
-from kfactory.ports import DPorts, Ports, ProtoPorts
-from kfactory.typings import TUnit
+from .ports import DPorts, Ports, ProtoPorts
+from .typings import TUnit
+from .utilities import pprint_ports
+
+if TYPE_CHECKING:
+    from .instance import DInstance, Instance, ProtoTInstance, VInstance
 
 
 class HasCellPorts(Generic[TUnit], ABC):
@@ -83,14 +93,6 @@ class ProtoTInstancePorts(ProtoInstancePorts[TUnit], ABC):
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-        from kfactory.port import (
-            ProtoPort,
-            filter_direction,
-            filter_layer,
-            filter_orientation,
-            filter_port_type,
-            filter_regex,
-        )
 
         ports: Iterable[ProtoPort[TUnit]] = list(self.ports)
         if regex:
@@ -106,7 +108,7 @@ class ProtoTInstancePorts(ProtoInstancePorts[TUnit], ABC):
         return list(ports)
 
     def __getitem__(
-        self, key: int | str | None | tuple[int | str | None, int, int]
+        self, key: int | str | tuple[int | str | None, int, int] | None
     ) -> ProtoPort[TUnit]:
         """Returns port from instance.
 
@@ -326,7 +328,7 @@ class InstancePorts(ProtoTInstancePorts[int]):
         ]
 
     def __getitem__(
-        self, key: int | str | None | tuple[int | str | None, int, int]
+        self, key: int | str | tuple[int | str | None, int, int] | None
     ) -> Port:
         return Port(base=super().__getitem__(key).base)
 
@@ -360,7 +362,7 @@ class DInstancePorts(ProtoTInstancePorts[float]):
         ]
 
     def __getitem__(
-        self, key: int | str | None | tuple[int | str | None, int, int]
+        self, key: int | str | tuple[int | str | None, int, int] | None
     ) -> DPort:
         return DPort(base=super().__getitem__(key).base)
 

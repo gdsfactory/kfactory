@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import functools
 import inspect
-from collections import defaultdict
+from collections import UserDict, defaultdict
 from collections.abc import (
     Callable,
     Iterable,
@@ -10,14 +10,7 @@ from collections.abc import (
 )
 from pathlib import Path
 from threading import RLock
-from typing import (
-    Annotated,
-    Any,
-    Literal,
-    cast,
-    get_origin,
-    overload,
-)
+from typing import TYPE_CHECKING, Annotated, Any, Literal, cast, get_origin, overload
 
 import cachetools.func
 import klayout.db as kdb
@@ -31,28 +24,41 @@ from pydantic import (
     model_validator,
 )
 
-from kfactory import __version__
-from kfactory._cells import DKCells, Factories, KCells
-from kfactory.config import config
-from kfactory.cross_section import (
+from . import __version__
+from .config import CHECK_INSTANCES, config, logger
+from .cross_section import (
     CrossSectionModel,
     CrossSectionSpec,
     DSymmetricalCrossSection,
     SymmetricalCrossSection,
 )
-from kfactory.decorators import Decorators
-from kfactory.enclosure import (
+from .decorators import Decorators
+from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
     LayerEnclosureModel,
     LayerEnclosureSpec,
 )
-from kfactory.kcell import KCell, ProtoTKCell, TKCell, VKCell
-from kfactory.layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
-from kfactory.port import rename_clockwise_multi
-from kfactory.settings import Info, KCellSettings
-from kfactory.typings import MetaData
-from kfactory.utilities import save_layout_options
+from .exceptions import CellNameError, MergeError
+from .kcell import DKCell, KCell, ProtoTKCell, TKCell, VKCell, show
+from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
+from .merge import MergeDiff
+from .port import rename_clockwise_multi
+from .ports import DPorts, Ports
+from .protocols import KCellFunc
+from .serialization import (
+    DecoratorDict,
+    DecoratorList,
+    _hashable_to_original,
+    _to_hashable,
+    get_cell_name,
+)
+from .settings import Info, KCellSettings, KCellSettingsUnits
+from .typings import K, KCellParams, MetaData, T
+from .utilities import load_layout_options, save_layout_options
+
+if TYPE_CHECKING:
+    from .kcell import DKCells, KCells
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -69,6 +75,28 @@ class Constants(BaseModel):
 def get_default_kcl() -> KCLayout:
     """Utility function to get the default kcl object."""
     return kcl
+
+
+class Factories(UserDict[str, Callable[..., T]]):
+    tags: dict[str, list[Callable[..., T]]]
+
+    def __init__(self, data: dict[str, Callable[..., T]]) -> None:
+        super().__init__(data)
+        self.tags = defaultdict(list)
+
+    def __getattr__(self, name: str) -> Any:
+        if name != "data":
+            return self.data[name]
+        else:
+            self.__getattribute__(name)
+
+    def for_tags(self, tags: list[str]) -> list[Callable[..., T]]:
+        if len(tags) > 0:
+            tag_set = set(self.tags[tags[0]])
+            for tag in tags[1:]:
+                tag_set &= set(self.tags[tag])
+            return list(tag_set)
+        raise NotImplementedError()
 
 
 class KCLayout(
@@ -1277,8 +1305,8 @@ class KCLayout(
         options: kdb.LoadLayoutOptions = load_layout_options(),
         register_cells: bool | None = None,
         test_merge: bool = True,
-        update_kcl_meta_data: Literal[overwrite, skip, drop] = "skip",
-        meta_format: Literal[v1, v2, v3] | None = None,
+        update_kcl_meta_data: Literal["overwrite", "skip", "drop"] = "skip",
+        meta_format: Literal["v1", "v2", "v3"] | None = None,
     ) -> kdb.LayerMap:
         """Read a GDS file into the existing Layout.
 

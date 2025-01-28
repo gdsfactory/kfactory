@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import abstractmethod
 from hashlib import sha3_512
 from typing import (
@@ -12,21 +14,29 @@ from typing import (
 import klayout.db as kdb
 from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
-from kfactory.config import PROPID, config
-from kfactory.geometry import DBUGeometricObject, GeometricObject
-from kfactory.instance import ProtoTInstance
-from kfactory.instance_ports import (
+from .config import PROPID, config, logger
+from .exceptions import (
+    PortLayerMismatch,
+    PortTypeMismatch,
+    PortWidthMismatch,
+)
+from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
+from .instance_ports import (
+    DInstancePorts,
     InstancePorts,
     ProtoInstancePorts,
     ProtoTInstancePorts,
+    VInstancePorts,
 )
-from kfactory.kcell import DKCell, KCell, ProtoTKCell
-from kfactory.layout import KCLayout
-from kfactory.port import Port, ProtoPort
-from kfactory.typings import TUnit
+from .layer import LayerEnum
+from .port import DPort, Port, ProtoPort
+from .serialization import clean_name, get_cell_name
+from .settings import Info, KCellSettings
+from .typings import TUnit
 
 if TYPE_CHECKING:
-    from kfactory.kcell import KCLayout
+    from .kcell import DKCell, KCell, ProtoTKCell, VKCell
+    from .layout import KCLayout
 
 
 class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
@@ -335,12 +345,6 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
             use_mirror = config.connect_use_mirror
         if use_angle is None:
             use_angle = config.connect_use_angle
-        from kfactory.exceptions import (
-            PortLayerMismatch,
-            PortTypeMismatch,
-            PortWidthMismatch,
-        )
-        from kfactory.port import Port
 
         if isinstance(other, Instance):
             if other_port_name is None:
@@ -487,7 +491,6 @@ class Instance(ProtoTInstance[int], DBUGeometricObject):
         3 times in `a` direction (4th index in the array), and 5 times in `b` direction
         (5th index in the array).
         """
-        from kfactory.port import Port
 
         return Port(base=self.ports[key].base)
 

@@ -10,12 +10,11 @@ import klayout.db as kdb
 import klayout.rdb as rdb
 from pydantic import BaseModel, Field
 
-from kfactory.config import config, logger
-from kfactory.instance import Instance
-from kfactory.kcell import KCell
-from kfactory.kf_types import dbu
-from kfactory.port import BasePort, Port, ProtoPort
-
+from ..config import config, logger
+from ..instance import Instance
+from ..kcell import KCell
+from ..port import BasePort, Port, ProtoPort
+from ..typings import dbu
 from .manhattan import (
     ManhattanBundleRoutingFunction,
     ManhattanRouter,

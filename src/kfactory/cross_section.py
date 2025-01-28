@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, NotRequired, Self, TypedDict, cast
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from . import kdb
-from .enclosure import DLayerEnclosure, LayerEnclosure
+from .enclosure import DLayerEnclosure, LayerEnclosure, LayerEnclosureSpec
 
 if TYPE_CHECKING:
-    from kfactory.layout import KCLayout
+    from .layout import KCLayout
 
 
 class SymmetricalCrossSection(BaseModel, frozen=True):

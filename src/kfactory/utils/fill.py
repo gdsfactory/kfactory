@@ -7,7 +7,8 @@ from collections.abc import Iterable
 
 from .. import kdb
 from ..config import config, logger
-from ..kcell import KCell, KCLayout
+from ..kcell import KCell
+from ..layout import KCLayout
 
 stop = False
 

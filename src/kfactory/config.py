@@ -22,8 +22,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from . import kdb, rdb
 
 if TYPE_CHECKING:
-    from kfactory.kcell import ProtoKCell
-    from kfactory.layout import KCLayout
+    from .kcell import ProtoKCell
+    from .layout import KCLayout
 
 
 DEFAULT_TRANS: dict[str, str | int | float | dict[str, str | int | float]] = {

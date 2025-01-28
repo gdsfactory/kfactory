@@ -13,37 +13,38 @@ import klayout.lay as lay
 import klayout.rdb as rdb
 
 
-from kfactory.config import config, logger
-from kfactory.enclosure import KCellEnclosure, LayerEnclosure
-from kfactory.grid import flexgrid, flexgrid_dbu, grid, grid_dbu
-from kfactory.kcell import BaseKCell, DKCell, KCell, VKCell, show
-from kfactory.ports import Ports, DPorts, pprint_ports
-from kfactory.port import Port, DPort
-from kfactory.instance import Instance, DInstance, VInstance
-from kfactory.instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
-from kfactory.instance_ports import InstancePorts, DInstancePorts, VInstancePorts
-from kfactory.instances import Instances, DInstances, VInstances
-from kfactory.settings import KCellSettings, Info
-from kfactory.layout import KCLayout, cell, vcell, kcl, Constants
-from kfactory.layer import LayerEnum, LayerInfos, LayerStack
-from kfactory.shapes import VShapes
-from kfactory.utilities import (
+from .config import config, logger
+from .enclosure import KCellEnclosure, LayerEnclosure
+from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
+from .kcell import BaseKCell, DKCell, KCell, VKCell, show
+from .ports import Ports, DPorts
+from .port import Port, DPort
+from .instance import Instance, DInstance, VInstance
+from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
+from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
+from .instances import Instances, DInstances, VInstances
+from .settings import KCellSettings, Info
+from .layout import KCLayout, cell, vcell, kcl, Constants
+from .layer import LayerEnum, LayerInfos, LayerStack
+from .shapes import VShapes
+from .utilities import (
     dpolygon_from_array,
     polygon_from_array,
     save_layout_options,
+    pprint_ports,
 )
 
 from . import (
     cells,
     enclosure,
     factories,
-    kf_types,
     packing,
     placer,
     port,
     routing,
     technology,
     utils,
+    typings,
 )
 
 __all__ = [
@@ -90,7 +91,6 @@ __all__ = [
     "grid_dbu",
     "kcl",
     "kdb",
-    "kf_types",
     "lay",
     "logger",
     "packing",
@@ -103,6 +103,7 @@ __all__ = [
     "save_layout_options",
     "show",
     "technology",
+    "typings",
     "utils",
     "vcell",
 ]

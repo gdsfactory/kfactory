@@ -1,3 +1,19 @@
+from __future__ import annotations
+
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, Literal
+
+import rich
+from rich.table import Table
+
+from . import kdb
+from .config import DEFAULT_TRANS, config
+
+if TYPE_CHECKING:
+    from .instance import Instance
+    from .port import Port, ProtoPort
+
+
 def load_layout_options(**attributes: Any) -> kdb.LoadLayoutOptions:
     """Default options for loading GDS/OAS.
 
@@ -86,3 +102,91 @@ def _check_cell_ports(p1: ProtoPort[Any], p2: ProtoPort[Any]) -> int:
 
 def _instance_port_name(inst: Instance, port: Port) -> str:
     return f'{inst.name}["{port.name or str(None)}"]'
+
+
+def pprint_ports(
+    ports: Iterable[ProtoPort[Any]], unit: Literal["dbu", "um", None] = None
+) -> Table:
+    """Print ports as a table.
+
+    Args:
+        ports: The ports which should be printed.
+        unit: Define the print type of the ports. If None, any port
+            which can be represented accurately by a dbu representation
+            will be printed in dbu otherwise in um. 'dbu'/'um' will force
+            the printing to enforce one or the other representation
+    """
+    table = Table(show_lines=True)
+
+    table.add_column("Name")
+    table.add_column("Width")
+    table.add_column("Layer")
+    table.add_column("X")
+    table.add_column("Y")
+    table.add_column("Angle")
+    table.add_column("Mirror")
+    table.add_column("Info")
+
+    match unit:
+        case None:
+            for port in ports:
+                if port.base.trans is not None:
+                    table.add_row(
+                        str(port.name) + " [dbu]",
+                        f"{port.width:_}",
+                        port.kcl.get_info(port.layer).to_s(),
+                        f"{port.x:_}",
+                        f"{port.y:_}",
+                        str(port.angle),
+                        str(port.mirror),
+                        rich.json.JSON.from_data(port.info.model_dump()),
+                    )
+                else:
+                    t = port.dcplx_trans
+                    dx = t.disp.x
+                    dy = t.disp.y
+                    dwidth = port.kcl.to_um(port.cross_section.width)
+                    angle = t.angle
+                    mirror = t.mirror
+                    table.add_row(
+                        str(port.name) + " [um]",
+                        f"{dwidth:_}",
+                        port.kcl.get_info(port.layer).to_s(),
+                        f"{dx:_}",
+                        f"{dy:_}",
+                        str(angle),
+                        str(mirror),
+                        rich.json.JSON.from_data(port.info.model_dump()),
+                    )
+        case "um":
+            for port in ports:
+                t = port.dcplx_trans
+                dx = t.disp.x
+                dy = t.disp.y
+                dwidth = port.kcl.to_um(port.cross_section.width)
+                angle = t.angle
+                mirror = t.mirror
+                table.add_row(
+                    str(port.name) + " [um]",
+                    f"{dwidth:_}",
+                    port.kcl.get_info(port.layer).to_s(),
+                    f"{dx:_}",
+                    f"{dy:_}",
+                    str(angle),
+                    str(mirror),
+                    rich.json.JSON.from_data(port.info.model_dump()),
+                )
+        case "dbu":
+            for port in ports:
+                table.add_row(
+                    str(port.name) + " [dbu]",
+                    f"{port.width:_}",
+                    port.kcl.get_info(port.layer).to_s(),
+                    f"{port.x:_}",
+                    f"{port.y:_}",
+                    str(port.angle),
+                    str(port.mirror),
+                    rich.json.JSON.from_data(port.info.model_dump()),
+                )
+
+    return table

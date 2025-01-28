@@ -1,3 +1,15 @@
+from __future__ import annotations
+
+from collections.abc import Iterator, Sequence
+from typing import TYPE_CHECKING
+
+from . import kdb
+from .typings import DShapeLike, IShapeLike, ShapeLike
+
+if TYPE_CHECKING:
+    from .kcell import VKCell
+
+
 class VShapes:
     """Emulate `[klayout.db.Shapes][klayout.db.Shapes]`."""
 

@@ -1,7 +1,7 @@
 """Bezier curve based bends and functions."""
 
 from ..factories.bezier import bend_s_bezier_factory
-from ..kcell import kcl
+from ..layout import kcl
 
 __all__ = ["bend_s"]
 

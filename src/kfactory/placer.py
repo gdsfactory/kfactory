@@ -1,18 +1,22 @@
 """Placer of bends/straights from a route."""
 
-import os
+import os  # noqa: I001
 import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Self, TypeVar
 
+from .port import Port
+from .ports import Ports
+from .kcell import TKCell, ProtoTKCell
 from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
 
 from .enclosure import LayerEnclosure
-from .kcell import KCell, KCLayout, Port, Ports, ProtoTKCell, TKCell
-from .kcell import kcl as stdkcl
+from .kcell import KCell
+from .layout import KCLayout
+from .layout import kcl as stdkcl
 
 __all__ = ["cells_from_yaml", "cells_to_yaml"]
 

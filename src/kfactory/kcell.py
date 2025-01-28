@@ -18,11 +18,16 @@ import socket
 from abc import ABC, abstractmethod
 from collections.abc import (
     Callable,
+    ItemsView,
     Iterable,
     Iterator,
+    KeysView,
+    Mapping,
+    ValuesView,
 )
 from pathlib import Path
 from tempfile import gettempdir
+from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -30,6 +35,7 @@ from typing import (
     Generic,
     Literal,
     Self,
+    TypeVar,
     overload,
 )
 
@@ -43,28 +49,50 @@ from pydantic import (
 from ruamel.yaml.constructor import SafeConstructor
 from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
-from kfactory.exceptions import LockedError
-from kfactory.geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
-from kfactory.instance import ProtoInstance, VInstance
-from kfactory.instances import ProtoInstances, ProtoTInstances, VInstances
-from kfactory.layout import KCLayout, get_default_kcl
-from kfactory.port import ProtoPort
-from kfactory.ports import ProtoPorts
-from kfactory.settings import Info, KCellSettings, KCellSettingsUnits
-from kfactory.shapes import VShapes
-from kfactory.typings import TUnit
-from kfactory.utilities import save_layout_options
-
 from . import kdb, rdb
-from .config import CHECK_INSTANCES, config, logger
+from .config import CHECK_INSTANCES, DEFAULT_TRANS, ShowFunction, config, logger
 from .cross_section import SymmetricalCrossSection
+from .exceptions import LockedError, MergeError
+from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
+from .instance import DInstance, Instance, ProtoInstance, ProtoTInstance, VInstance
+from .instances import (
+    DInstances,
+    Instances,
+    ProtoInstances,
+    ProtoTInstances,
+    VInstances,
+)
+from .layer import LayerEnum
+from .merge import MergeDiff
 from .port import (
     BasePort,
+    DPort,
+    Port,
+    PortCheck,
+    ProtoPort,
+    create_port_error,
+    port_check,
     port_polygon,
+)
+from .ports import DPorts, Ports, ProtoPorts
+from .serialization import (
+    _deserialize_setting,
+    _serialize_setting,
+    clean_name,
+)
+from .settings import Info, KCellSettings, KCellSettingsUnits
+from .shapes import VShapes
+from .typings import KC, MetaData, TUnit
+from .utilities import (
+    _check_cell_ports,
+    _check_inst_ports,
+    _instance_port_name,
+    load_layout_options,
+    save_layout_options,
 )
 
 if TYPE_CHECKING:
-    from .config import ShowFunction
+    from .layout import KCLayout
 
 __all__ = [
     "CHECK_INSTANCES",
@@ -363,6 +391,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         if base_kcell is not None:
             self._base_kcell = base_kcell
             return
+        from .layout import get_default_kcl
+
         _kcl = kcl or get_default_kcl()
         if name is None:
             _name = "Unnamed_!" if kdb_cell is None else kdb_cell.name
@@ -812,6 +842,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         """Convert the KCell to a static cell if it is pdk KCell."""
         if self.library().name() == self.kcl.name:
             raise ValueError(f"KCell {self.qname()} is already a static KCell.")
+        from .layout import kcls
+
         _lib_cell = kcls[self.library().name()][self.library_cell_index()]
         _lib_cell.set_meta_data()
         _kdb_cell = self.kcl.layout_cell(
@@ -1249,6 +1281,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         port_dict: dict[str, Any] = {}
         settings: dict[str, MetaData] = {}
         settings_units: dict[str, str] = {}
+        from .layout import kcls
 
         match meta_format:
             case "v3":
@@ -1652,7 +1685,9 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 selected ports.
             check_layer_connectivity: Check whether the layer overlaps with instances.
         """
-        db_ = db or rdb.ReportDatabase(f"Connectivity Check {self.name}")
+        db_: rdb.ReportDatabase = db or rdb.ReportDatabase(
+            f"Connectivity Check {self.name}"
+        )
         assert isinstance(db_, rdb.ReportDatabase)
         if recursive:
             cc = self.called_cells()
@@ -1672,7 +1707,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 else:
                     li = self.kcl.get_info(layer)
                     ln = str(li).replace("/", "_")
-                layer_cats[layer] = db_.category_by_path(ln) or db_.create_category(ln)  # type: ignore[has-type]
+                layer_cats[layer] = db_.category_by_path(ln) or db_.create_category(ln)
             return layer_cats[layer]
 
         for port in Ports(kcl=self.kcl, bases=self.ports.bases):
@@ -2545,6 +2580,8 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None:
+        from .layout import get_default_kcl
+
         self._shapes = {}
         if base_kcell is not None:
             self._base_kcell = base_kcell
@@ -2916,6 +2953,8 @@ def show(
         library_save_options: Specific saving options for Cells which are in a library
             and not the main KCLayout.
     """
+    from .layout import kcls
+
     delete = False
     delete_lyrdb = False
     delete_l2n = False
@@ -3233,3 +3272,88 @@ def show(
         Path(lyrdbfile).unlink()  # type: ignore[arg-type]
     if delete_l2n and l2n is not None:
         Path(l2nfile).unlink()  # type: ignore[arg-type]
+
+
+T = TypeVar("T")
+
+
+class ProtoCells(Mapping[int, KC], ABC):
+    _kcl: KCLayout
+
+    def __init__(self, kcl: KCLayout) -> None:
+        self._kcl = kcl
+
+    @abstractmethod
+    def __getitem__(self, key: int | str) -> KC: ...
+
+    def __delitem__(self, key: int | str) -> None:
+        """Delete a cell by key (name or index)."""
+        if isinstance(key, int):
+            del self._kcl.tkcells[key]
+        else:
+            cell_index = self._kcl[key].cell_index()
+            del self._kcl.tkcells[cell_index]
+
+    @abstractmethod
+    def _generate_dict(self) -> dict[int, KC]: ...
+
+    def __iter__(self) -> Iterator[int]:
+        return iter(self._kcl.tkcells)
+
+    def __len__(self) -> int:
+        return len(self._kcl.tkcells)
+
+    def items(self) -> ItemsView[int, KC]:
+        return self._generate_dict().items()
+
+    def values(self) -> ValuesView[KC]:
+        return self._generate_dict().values()
+
+    def keys(self) -> KeysView[int]:
+        return self._generate_dict().keys()
+
+    def __contains__(self, key: object) -> bool:
+        if isinstance(key, int | str):
+            return key in self._kcl.tkcells
+        return False
+
+
+class DKCells(ProtoCells[DKCell]):
+    def __getitem__(self, key: int | str) -> DKCell:
+        return DKCell(base_kcell=self._kcl[key].base_kcell)
+
+    def _generate_dict(self) -> dict[int, DKCell]:
+        return {
+            i: DKCell(base_kcell=self._kcl[i].base_kcell) for i in self._kcl.tkcells
+        }
+
+
+class KCells(ProtoCells[KCell]):
+    def __getitem__(self, key: int | str) -> KCell:
+        return KCell(base_kcell=self._kcl[key].base_kcell)
+
+    def _generate_dict(self) -> dict[int, KCell]:
+        return {i: KCell(base_kcell=self._kcl[i].base_kcell) for i in self._kcl.tkcells}
+
+
+def get_cells(
+    modules: Iterable[ModuleType], verbose: bool = False
+) -> dict[str, Callable[..., KCell]]:
+    """Returns KCells (KCell functions) from a module or list of modules.
+
+    Args:
+        modules: module or iterable of modules.
+        verbose: prints in case any errors occur.
+    """
+    cells: dict[str, Callable[..., KCell]] = {}
+    for module in modules:
+        for t in inspect.getmembers(module):
+            if callable(t[1]) and t[0] != "partial":
+                try:
+                    r = inspect.signature(t[1]).return_annotation
+                    if r == KCell or (isinstance(r, str) and r.endswith("KCell")):
+                        cells[t[0]] = t[1]
+                except ValueError:
+                    if verbose:
+                        print(f"error in {t[0]}")
+    return cells

@@ -16,9 +16,10 @@ The slabs and excludes can be given in the form of an
 [Enclosure][kfactory.enclosure.LayerEncolosure].
 """
 
-from .. import KCell, kcl, kdb, kf_types
+from .. import KCell, kcl, kdb
 from ..enclosure import LayerEnclosure
 from ..factories.straight import straight_dbu_factory
+from ..typings import um
 
 __all__ = ["straight", "straight_dbu"]
 
@@ -26,8 +27,8 @@ straight_dbu = straight_dbu_factory(kcl)
 
 
 def straight(
-    width: kf_types.um,
-    length: kf_types.um,
+    width: um,
+    length: um,
     layer: kdb.LayerInfo,
     enclosure: LayerEnclosure | None = None,
 ) -> KCell:

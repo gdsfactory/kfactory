@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 from typing import Any
 
 from pydantic import BaseModel, model_validator
 
-from kfactory.typings import MetaData
+from .serialization import check_metadata_type, convert_metadata_type
+from .typings import MetaData
 
 
 class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=True):

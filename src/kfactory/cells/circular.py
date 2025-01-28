@@ -4,7 +4,7 @@ A circular bend has a constant radius.
 """
 
 from ..factories.circular import bend_circular_factory
-from ..kcell import kcl
+from ..layout import kcl
 
 __all__ = ["bend_circular"]
 

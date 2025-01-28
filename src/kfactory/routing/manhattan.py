@@ -10,12 +10,12 @@ from typing import Any, Literal, ParamSpec, Protocol, TypedDict, cast
 
 import klayout.db as kdb
 
-from kfactory.config import logger
-from kfactory.enclosure import clean_points
-from kfactory.kcell import DKCell, KCell
-from kfactory.layout import KCLayout
-from kfactory.port import BasePort, Port
-from kfactory.routing.steps import Step, Steps, Straight
+from ..config import logger
+from ..enclosure import clean_points
+from ..kcell import DKCell, KCell
+from ..layout import KCLayout
+from ..port import BasePort, Port
+from ..routing.steps import Step, Steps, Straight
 
 __all__ = [
     "ManhattanRoutePathFunction",
@@ -322,11 +322,11 @@ class ManhattanRouter:
     end_transformation: kdb.Trans
     start: ManhattanRouterSide = field(init=False)
     end: ManhattanRouterSide = field(init=False)
-    start_steps: InitVar[Sequence[Step]] = field(default_factory=list)
-    end_steps: InitVar[Sequence[Step]] = field(default_factory=list)
+    start_steps: InitVar[Sequence[Step]] = field(default=[])
+    end_steps: InitVar[Sequence[Step]] = field(default=[])
     width: int = 0
-    start_points: InitVar[list[kdb.Point]] = field(default_factory=list)
-    end_points: InitVar[list[kdb.Point]] = field(default_factory=list)
+    start_points: InitVar[list[kdb.Point]] = field(default=[])
+    end_points: InitVar[list[kdb.Point]] = field(default=[])
     finished: bool = False
 
     def __post_init__(
@@ -1008,8 +1008,8 @@ def route_smart(
                     " starting port positions "
                     f"{box.left=},{box.bottom=},{box.right=},{box.top=}[dbu]"
                 )
-            start_ts: list[kdb.Trans] = []
-            end_ts: list[kdb.Trans] = []
+            start_ts = []
+            end_ts = []
             for start_box, end_box, _bl in matches:
                 end_bundle = end_bundles[end_box]
                 start_bundle = start_bundles[start_box]
@@ -1206,7 +1206,7 @@ def route_smart(
                 sort_ports=False,
             )
 
-        all_routers: list[ManhattanRouter] = []
+        all_routers = []
         for ts, te, w, ss, es in zip(start_ts, end_ts, widths, starts, ends):
             all_routers.append(
                 ManhattanRouter(
@@ -2215,7 +2215,7 @@ def _route_waypoints(
             )
         start_angle = vec_dir(waypoints[0] - waypoints[1])
         end_angle = vec_dir(waypoints[-1] - waypoints[-2])
-        all_routers: list[ManhattanRouter] = []
+        all_routers = []
         bundle_points = _backbone2bundle(
             backbone=waypoints,
             port_widths=widths,
