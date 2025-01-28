@@ -11,8 +11,8 @@ from scipy.optimize import minimize_scalar  # type: ignore[import-untyped,unused
 
 from ... import kdb
 from ...instance import VInstance
-from ...kcell import DKCell, DPort, KCell, VKCell
-from ...port import Port, ProtoPort
+from ...kcell import DKCell, KCell, VKCell
+from ...port import DPort, Port, ProtoPort
 
 __all__ = ["OpticalAllAngleRoute", "route"]
 
