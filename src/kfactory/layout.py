@@ -10,7 +10,7 @@ from collections.abc import (
 )
 from pathlib import Path
 from threading import RLock
-from typing import TYPE_CHECKING, Annotated, Any, Literal, cast, get_origin, overload
+from typing import Annotated, Any, Literal, cast, get_origin, overload
 
 import cachetools.func
 import klayout.db as kdb
@@ -40,7 +40,17 @@ from .enclosure import (
     LayerEnclosureSpec,
 )
 from .exceptions import CellNameError, MergeError
-from .kcell import DKCell, KCell, ProtoTKCell, TKCell, VKCell, show
+from .kcell import (
+    DKCell,
+    DKCells,
+    KCell,
+    KCells,
+    ProtoTKCell,
+    TKCell,
+    TVCell,
+    VKCell,
+    show,
+)
 from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
 from .port import rename_clockwise_multi
@@ -56,9 +66,6 @@ from .serialization import (
 from .settings import Info, KCellSettings, KCellSettingsUnits
 from .typings import K, KCellParams, MetaData, T
 from .utilities import load_layout_options, save_layout_options
-
-if TYPE_CHECKING:
-    from .kcell import DKCells, KCells
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -1583,6 +1590,7 @@ class KCLayout(
 
 
 KCLayout.model_rebuild()
+TVCell.model_rebuild()
 
 
 kcl = KCLayout("DEFAULT")

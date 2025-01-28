@@ -20,7 +20,7 @@ def test_layerstack_layer_material(pdk: kf.KCLayout) -> None:
 
 
 def test_layerstack_layer_info(pdk: kf.KCLayout) -> None:
-    assert isinstance(pdk.layer_stack.get_layer_to_info()[(1, 0)], kf.kcell.Info)
+    assert isinstance(pdk.layer_stack.get_layer_to_info()[(1, 0)], kf.Info)
 
 
 def test_layerstack_layer_sidewall_angle(pdk: kf.KCLayout) -> None:
@@ -28,20 +28,20 @@ def test_layerstack_layer_sidewall_angle(pdk: kf.KCLayout) -> None:
 
 
 def test_layerstack_layer_getattr(pdk: kf.KCLayout, LAYER: Layers) -> None:
-    assert pdk.layer_stack.wg == kf.kcell.LayerLevel(
+    assert pdk.layer_stack.wg == kf.layer.LayerLevel(
         layer=LAYER.WG,
         thickness=0.22,
         zmin=0,
         material="si",
-        info=kf.kcell.Info(mesh_order=1),
+        info=kf.Info(mesh_order=1),
     )
 
 
 def test_layerstack_layer_getitem(pdk: kf.KCLayout, LAYER: Layers) -> None:
-    assert pdk.layer_stack["wg"] == kf.kcell.LayerLevel(
+    assert pdk.layer_stack["wg"] == kf.layer.LayerLevel(
         layer=LAYER.WG,
         thickness=0.22,
         zmin=0,
         material="si",
-        info=kf.kcell.Info(mesh_order=1),
+        info=kf.Info(mesh_order=1),
     )

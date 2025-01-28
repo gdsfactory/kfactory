@@ -5,9 +5,7 @@ import pytest
 import kfactory as kf
 
 
-def _instances_equal(
-    instance1: kf.kcell.Instance, instance2: kf.kcell.Instance
-) -> bool:
+def _instances_equal(instance1: kf.Instance, instance2: kf.Instance) -> bool:
     return (
         instance1.instance.cell_index == instance2.instance.cell_index
         and instance1.instance.dcplx_trans == instance2.instance.dcplx_trans
@@ -15,12 +13,12 @@ def _instances_equal(
 
 
 _InstanceGroupTuple: TypeAlias = tuple[
-    kf.kcell.InstanceGroup, kf.kcell.InstanceGroup, kf.kcell.InstanceGroup
+    kf.InstanceGroup, kf.InstanceGroup, kf.InstanceGroup
 ]
 
 
 def _instance_group_equal(
-    instance1: kf.kcell.InstanceGroup, instance2: kf.kcell.InstanceGroup
+    instance1: kf.InstanceGroup, instance2: kf.InstanceGroup
 ) -> bool:
     for i1, i2 in zip(instance1.insts, instance2.insts):
         if not _instances_equal(i1, i2):
@@ -31,20 +29,14 @@ def _instance_group_equal(
 @pytest.fixture
 def instance_groups() -> _InstanceGroupTuple:
     layer = kf.kdb.LayerInfo(1, 0)
-    cell = kf.kcell.KCell()
+    cell = kf.KCell()
     cell.shapes(layer).insert(kf.kdb.Box(0, 0, 1000, 1000))
 
-    parent_cell = kf.kcell.KCell()
+    parent_cell = kf.KCell()
 
-    instance_group1 = kf.kcell.InstanceGroup(
-        insts=[parent_cell << cell, parent_cell << cell]
-    )
-    instance_group2 = kf.kcell.InstanceGroup(
-        insts=[parent_cell << cell, parent_cell << cell]
-    )
-    instance_group3 = kf.kcell.InstanceGroup(
-        insts=[parent_cell << cell, parent_cell << cell]
-    )
+    instance_group1 = kf.InstanceGroup(insts=[parent_cell << cell, parent_cell << cell])
+    instance_group2 = kf.InstanceGroup(insts=[parent_cell << cell, parent_cell << cell])
+    instance_group3 = kf.InstanceGroup(insts=[parent_cell << cell, parent_cell << cell])
 
     return instance_group1, instance_group2, instance_group3
 

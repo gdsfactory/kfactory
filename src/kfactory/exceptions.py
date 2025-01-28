@@ -39,6 +39,8 @@ class PortWidthMismatch(ValueError):
         *args: Any,
     ) -> None:
         """Throw error for the two ports `p1`/`p1`."""
+        from .instance import ProtoInstance
+
         if isinstance(other_inst, ProtoInstance):
             super().__init__(
                 f'Width mismatch between the ports {inst.cell_name}["{p1.name}"] '

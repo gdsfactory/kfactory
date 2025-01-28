@@ -2953,7 +2953,7 @@ def show(
         library_save_options: Specific saving options for Cells which are in a library
             and not the main KCLayout.
     """
-    from .layout import kcls
+    from .layout import KCLayout, kcls
 
     delete = False
     delete_lyrdb = False
@@ -2979,7 +2979,7 @@ def show(
         except ImportError:
             name = "shell"
 
-    _kcl_paths: list[dict[str, str]] = []
+    kcl_paths: list[dict[str, str]] = []
 
     if isinstance(layout, KCLayout):
         file: Path | None = None
@@ -3017,20 +3017,20 @@ def show(
             file = tf
             delete = True
         if use_libraries:
-            _dir = tf.parent
-            _kcls = list(kcls.values())
-            _kcls.remove(layout)
-            for _kcl in _kcls:
+            dir_ = tf.parent
+            kcls_ = list(kcls.values())
+            kcls_.remove(layout)
+            for _kcl in kcls_:
                 if save_options.gds2_max_cellname_length:
                     p = (
-                        (_dir / _kcl.name[: save_options.gds2_max_cellname_length])
+                        (dir_ / _kcl.name[: save_options.gds2_max_cellname_length])
                         .with_suffix(".oas")
                         .resolve()
                     )
                 else:
-                    p = (_dir / _kcl.name).with_suffix(".oas").resolve()
+                    p = (dir_ / _kcl.name).with_suffix(".oas").resolve()
                 _kcl.write(p, library_save_options)
-                _kcl_paths.append({"name": _kcl.name, "file": str(p)})
+                kcl_paths.append({"name": _kcl.name, "file": str(p)})
 
     elif isinstance(layout, ProtoKCell):
         file = None
@@ -3068,13 +3068,13 @@ def show(
             file = tf
             delete = True
         if use_libraries:
-            _dir = tf.parent
-            _kcls = list(kcls.values())
-            _kcls.remove(layout.kcl)
-            for _kcl in _kcls:
-                p = (_dir / _kcl.name).with_suffix(".oas").resolve()
+            dir_ = tf.parent
+            kcls_ = list(kcls.values())
+            kcls_.remove(layout.kcl)
+            for _kcl in kcls_:
+                p = (dir_ / _kcl.name).with_suffix(".oas").resolve()
                 _kcl.write(p, library_save_options)
-                _kcl_paths.append({"name": _kcl.name, "file": str(p)})
+                kcl_paths.append({"name": _kcl.name, "file": str(p)})
 
     elif isinstance(layout, str | Path):
         file = Path(layout).expanduser().resolve()
@@ -3088,7 +3088,7 @@ def show(
     data_dict = {
         "gds": str(file),
         "keep_position": keep_position,
-        "libraries": _kcl_paths,
+        "libraries": kcl_paths,
     }
 
     if lyrdb is not None:

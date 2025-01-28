@@ -113,7 +113,7 @@ def test_cell_name_already_exists(kcl: kf.KCLayout) -> None:
         kcl.kcell(name=name)
         return cell1
 
-    with pytest.raises(kf.kcell.CellNameError):
+    with pytest.raises(kf.exceptions.CellNameError):
         test_cell_name_already_exists("cell1")
 
 

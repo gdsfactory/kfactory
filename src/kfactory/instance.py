@@ -672,6 +672,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         cell: ProtoTKCell[Any],
         trans: kdb.DCplxTrans = kdb.DCplxTrans(),
     ) -> Instance:
+        from .kcell import KCell, VKCell
+
         if isinstance(self.cell, VKCell):
             _trans = trans * self.trans
             base_trans = kdb.DCplxTrans(
