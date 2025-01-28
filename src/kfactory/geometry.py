@@ -305,17 +305,19 @@ class GeometricObject(Generic[TUnit], ABC):
         ...
 
     @abstractmethod
-    def mirror(self, p1: tuple[TUnit, TUnit], p2: tuple[TUnit, TUnit]) -> Self:
+    def mirror(
+        self, p1: tuple[TUnit, TUnit] = ..., p2: tuple[TUnit, TUnit] = ...
+    ) -> Self:
         """Mirror self at a line."""
         ...
 
     @abstractmethod
-    def mirror_x(self, x: TUnit) -> Self:
+    def mirror_x(self, x: TUnit = ...) -> Self:
         """Mirror self at an y-axis at position x."""
         ...
 
     @abstractmethod
-    def mirror_y(self, y: TUnit) -> Self:
+    def mirror_y(self, y: TUnit = ...) -> Self:
         """Mirror self at an x-axis at position y."""
         ...
 
@@ -488,7 +490,9 @@ class GeometricObject(Generic[TUnit], ABC):
             self.transform(t)
         return self
 
-    def imirror(self, p1: tuple[int, int], p2: tuple[int, int]) -> Self:
+    def imirror(
+        self, p1: tuple[int, int] = (1000, 0), p2: tuple[int, int] = (0, 0)
+    ) -> Self:
         """Mirror self at a line."""
         p1_ = kdb.Point(p1[0], p1[1]).to_dtype(self.kcl.dbu)
         p2_ = kdb.Point(p2[0], p2[1]).to_dtype(self.kcl.dbu)
@@ -509,12 +513,12 @@ class GeometricObject(Generic[TUnit], ABC):
 
         return self
 
-    def imirror_x(self, x: int) -> Self:
+    def imirror_x(self, x: int = 0) -> Self:
         """Mirror self at an y-axis at position x."""
         self.transform(kdb.Trans(2, True, 2 * x, 0))
         return self
 
-    def imirror_y(self, y: int) -> Self:
+    def imirror_y(self, y: int = 0) -> Self:
         """Mirror self at an x-axis at position y."""
         self.transform(kdb.Trans(0, True, 0, 2 * y))
         return self
@@ -697,7 +701,9 @@ class GeometricObject(Generic[TUnit], ABC):
             self.transform(t)
         return self
 
-    def dmirror(self, p1: tuple[float, float], p2: tuple[float, float]) -> Self:
+    def dmirror(
+        self, p1: tuple[float, float] = (1, 0), p2: tuple[float, float] = (0, 0)
+    ) -> Self:
         """Mirror self at a line."""
         p1_ = kdb.DPoint(p1[0], p1[1])
         p2_ = kdb.DPoint(p2[0], p2[1])
@@ -720,12 +726,12 @@ class GeometricObject(Generic[TUnit], ABC):
         return self
 
     def dmirror_x(self, x: float = 0) -> Self:
-        """Mirror self at an x-axis."""
+        """Mirror self at an y-axis at position x."""
         self.transform(kdb.DCplxTrans(1, 180, True, 2 * x, 0))
         return self
 
     def dmirror_y(self, y: float = 0) -> Self:
-        """Mirror self at an y-axis."""
+        """Mirror self at an x-axis at position y."""
         self.transform(kdb.DCplxTrans(1, 0, True, 0, 2 * y))
         return self
 
@@ -752,13 +758,15 @@ class DBUGeometricObject(GeometricObject[int], ABC):
     def rotate(self, angle: int, center: tuple[int, int] | None = None) -> Self:
         return self.irotate(angle, center)
 
-    def mirror_x(self, x: int) -> Self:
+    def mirror_x(self, x: int = 0) -> Self:
         return self.imirror_x(x)
 
-    def mirror_y(self, y: int) -> Self:
+    def mirror_y(self, y: int = 0) -> Self:
         return self.imirror_y(y)
 
-    def mirror(self, p1: tuple[int, int], p2: tuple[int, int]) -> Self:
+    def mirror(
+        self, p1: tuple[int, int] = (1000, 0), p2: tuple[int, int] = (0, 0)
+    ) -> Self:
         return self.imirror(p1, p2)
 
 
@@ -772,11 +780,13 @@ class UMGeometricObject(GeometricObject[float], ABC):
     def rotate(self, angle: float, center: tuple[float, float] | None = None) -> Self:
         return self.drotate(angle, center)
 
-    def mirror_x(self, x: float) -> Self:
+    def mirror_x(self, x: float = 0) -> Self:
         return self.dmirror_x(x)
 
-    def mirror_y(self, y: float) -> Self:
+    def mirror_y(self, y: float = 0) -> Self:
         return self.dmirror_y(y)
 
-    def mirror(self, p1: tuple[float, float], p2: tuple[float, float]) -> Self:
+    def mirror(
+        self, p1: tuple[float, float] = (1, 0), p2: tuple[float, float] = (0, 0)
+    ) -> Self:
         return self.dmirror(p1, p2)

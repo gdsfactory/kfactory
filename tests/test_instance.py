@@ -512,5 +512,68 @@ def test_vinstance_errors(kcl: kf.KCLayout, LAYER: Layers) -> None:
         ref.connect("o1", ref5)  # type: ignore
 
 
+def test_mirror_y_default_arg(dbu_instance_tuple: _DBUInstanceTuple) -> None:
+    instance1, instance2, instance3 = dbu_instance_tuple
+
+    instance1.mirror_y()
+    instance2.dmirror_y()
+    instance3.imirror_y()
+
+    assert _instances_equal(instance1, instance2)
+    assert _instances_equal(instance1, instance3)
+
+
+def test_mirror_x_default_arg(dbu_instance_tuple: _DBUInstanceTuple) -> None:
+    instance1, instance2, instance3 = dbu_instance_tuple
+
+    instance1.mirror_x()
+    instance2.dmirror_x()
+    instance3.imirror_x()
+
+    assert _instances_equal(instance1, instance2)
+    assert _instances_equal(instance1, instance3)
+
+
+def test_mirror_default_arg(dbu_instance_tuple: _DBUInstanceTuple) -> None:
+    instance1, instance2, instance3 = dbu_instance_tuple
+
+    instance1.mirror()
+    instance2.dmirror()
+    instance3.imirror()
+
+    assert _instances_equal(instance1, instance2)
+    assert _instances_equal(instance1, instance3)
+
+
+def test_mirror_x_equal() -> None:
+    cell = kf.kcell.DKCell()
+    layer = kf.kdb.LayerInfo(1, 0)
+    cell.shapes(layer).insert(kf.kdb.DBox(-5, -5, 5, 5))
+    parent_cell = kf.kcell.DKCell()
+    _ = parent_cell << cell
+    ref2 = parent_cell << cell
+    ref3 = parent_cell << cell
+
+    ref2.dmirror_x()
+    ref3.imirror_x()
+
+    assert parent_cell.bbox() == kf.kdb.DBox(-5, -5, 5, 5)
+
+
+def test_mirror_y_equal() -> None:
+    cell = kf.kcell.DKCell()
+    layer = kf.kdb.LayerInfo(1, 0)
+    cell.shapes(layer).insert(kf.kdb.DBox(-5, -5, 5, 5))
+    parent_cell = kf.kcell.DKCell()
+    _ = parent_cell << cell
+    ref2 = parent_cell << cell
+    ref3 = parent_cell << cell
+
+    ref2.dmirror_y()
+    ref3.imirror_y()
+
+    assert parent_cell.bbox() == kf.kdb.DBox(-5, -5, 5, 5)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-s"])
