@@ -10,22 +10,42 @@ from __future__ import annotations
 import itertools
 import sys
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import (
+    Callable,
+    Iterable,
+    Sequence,
+)
 from enum import IntEnum
 from functools import lru_cache
 from hashlib import sha1
-from typing import TYPE_CHECKING, Any, NotRequired, TypeGuard, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    NotRequired,
+    TypeGuard,
+    overload,
+)
 
+import klayout.db as kdb
 import numpy as np
-from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_serializer
+from pydantic import (
+    BaseModel,
+    Field,
+    PrivateAttr,
+    RootModel,
+    field_validator,
+    model_serializer,
+)
 from ruamel.yaml.representer import BaseRepresenter, MappingNode
 from typing_extensions import TypedDict
 
-from . import kdb
-from .conf import config, logger
+from kfactory.config import config, logger
+from kfactory.kcell import KCell
+from kfactory.layout import KCLayout
 
 if TYPE_CHECKING:
-    from .kcell import KCell, KCLayout, Port
+    from kfactory.kcell import KCell
+    from kfactory.layout import KCLayout
 
 __all__ = [
     "KCellEnclosure",
@@ -82,7 +102,7 @@ def clean_points(points: list[kdb.Point]) -> list[kdb.Point]:
     p_p = points[0]
     p = points[1]
 
-    del_points = []
+    del_points: list[int] = []
 
     for i, p_n in enumerate(points[2:], 2):
         v2 = p_n - p
@@ -1682,3 +1702,59 @@ class KCellEnclosure(BaseModel):
     def copy_to(self, kcl: KCLayout) -> KCellEnclosure:
         """Copy the KCellEnclosure to another KCLayout."""
         return KCellEnclosure([enc.copy_to(kcl) for enc in self.enclosures.enclosures])
+
+
+class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
+    """PDK access model for LayerEnclsoures."""
+
+    root: dict[str, LayerEnclosure] = Field(default={})
+
+    def __getitem__(self, __key: str) -> LayerEnclosure:
+        """Retrieve element by string key."""
+        return self.root[__key]
+
+    def __getattr__(self, __key: str) -> LayerEnclosure:
+        """Retrieve attribute by key."""
+        return self.root[__key]
+
+    def __setattr__(self, __key: str, __val: LayerEnclosure) -> None:
+        """Add a new LayerEnclosure."""
+        self.root[__key] = __val
+
+    def __setitem__(self, __key: str, __val: LayerEnclosure) -> None:
+        """Add a new LayerEnclosure."""
+        self.root[__key] = __val
+
+    def get_enclosure(
+        self,
+        enclosure: str | LayerEnclosure | LayerEnclosureSpec,
+        kcl: KCLayout,
+    ) -> LayerEnclosure:
+        if isinstance(enclosure, str):
+            return self[enclosure]
+        if isinstance(enclosure, dict):
+            if "dsections" not in enclosure:
+                enclosure = LayerEnclosure(
+                    dsections=enclosure.get("sections", []),
+                    name=enclosure.get("name"),
+                    main_layer=enclosure["main_layer"],
+                    kcl=kcl,
+                )
+            else:
+                enclosure = LayerEnclosure(
+                    sections=enclosure.get("sections", []),
+                    name=enclosure.get("name"),
+                    main_layer=enclosure["main_layer"],
+                    kcl=kcl,
+                )
+
+        if enclosure.name not in self.root:
+            self.root[enclosure.name] = enclosure
+            return enclosure
+        return self.root[enclosure.name]
+
+
+LayerEnclosureModel.model_rebuild()
+LayerSection.model_rebuild()
+LayerEnclosure.model_rebuild()
+KCellEnclosure.model_rebuild()

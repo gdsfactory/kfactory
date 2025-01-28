@@ -15,7 +15,7 @@ from typing import Annotated, Optional
 import git
 import typer
 
-from ..conf import logger
+from ..config import logger
 from ..kcell import KCell, kcls, save_layout_options
 from ..kcell import show as kfshow
 

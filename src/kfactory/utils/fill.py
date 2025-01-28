@@ -6,7 +6,7 @@ Filling empty regions in [KCells][kfactory.kcell.KCell] with filling cells.
 from collections.abc import Iterable
 
 from .. import kdb
-from ..conf import config, logger
+from ..config import config, logger
 from ..kcell import KCell, KCLayout
 
 stop = False

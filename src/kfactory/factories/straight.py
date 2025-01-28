@@ -20,7 +20,7 @@ from collections.abc import Callable
 from typing import Any, Protocol
 
 from .. import kdb, kf_types
-from ..conf import logger
+from ..config import logger
 from ..enclosure import LayerEnclosure
 from ..kcell import Info, KCell, KCLayout, MetaData
 

@@ -17,7 +17,7 @@ from scipy.optimize import brentq  # type:ignore[import-untyped,unused-ignore]
 from scipy.special import fresnel  # type:ignore[import-untyped,unused-ignore]
 
 from .. import kdb, kf_types
-from ..conf import logger
+from ..config import logger
 from ..enclosure import LayerEnclosure, extrude_path
 from ..kcell import Info, KCell, KCLayout, MetaData
 

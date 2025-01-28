@@ -6,7 +6,7 @@ from typing import Any, Protocol
 import numpy as np
 
 from ... import kdb
-from ...conf import logger
+from ...config import logger
 from ...enclosure import LayerEnclosure
 from ...kcell import Info, KCLayout, MetaData, VKCell
 from .utils import extrude_backbone

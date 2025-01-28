@@ -6,12 +6,16 @@ from collections import defaultdict
 from collections.abc import Sequence
 from typing import Any, Literal, Protocol, cast
 
+import klayout.db as kdb
+import klayout.rdb as rdb
 from pydantic import BaseModel, Field
 
-from .. import kdb, rdb
-from ..conf import config, logger
-from ..kcell import BasePort, Instance, KCell, Port, ProtoPort
-from ..kf_types import dbu
+from kfactory.config import config, logger
+from kfactory.instance import Instance
+from kfactory.kcell import KCell
+from kfactory.kf_types import dbu
+from kfactory.port import BasePort, Port, ProtoPort
+
 from .manhattan import (
     ManhattanBundleRoutingFunction,
     ManhattanRouter,

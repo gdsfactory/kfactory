@@ -11,49 +11,28 @@ __version__ = "1.0.2"
 import klayout.db as kdb
 import klayout.lay as lay
 import klayout.rdb as rdb
-from aenum import constant  # type: ignore[import-untyped,unused-ignore]
 
 
-from .conf import config, logger
-from .enclosure import KCellEnclosure, LayerEnclosure
-from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
-from .kcell import (
-    BaseKCell,
-    Constants,
-    DInstance,
-    DInstanceGroup,
-    DInstancePorts,
-    DInstances,
-    DKCell,
-    DPort,
-    DPorts,
-    Info,
-    Instance,
-    InstanceGroup,
-    InstancePorts,
-    Instances,
-    KCell,
-    KCellSettings,
-    KCLayout,
-    LayerEnum,
-    LayerInfos,
-    LayerStack,
-    Port,
-    Ports,
-    VInstance,
-    VInstanceGroup,
-    VInstancePorts,
-    VInstances,
-    VKCell,
-    VShapes,
-    cell,
+from kfactory.config import config, logger
+from kfactory.enclosure import KCellEnclosure, LayerEnclosure
+from kfactory.grid import flexgrid, flexgrid_dbu, grid, grid_dbu
+from kfactory.kcell import BaseKCell, DKCell, KCell, VKCell, show
+from kfactory.ports import Ports, DPorts, pprint_ports
+from kfactory.port import Port, DPort
+from kfactory.instance import Instance, DInstance, VInstance
+from kfactory.instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
+from kfactory.instance_ports import InstancePorts, DInstancePorts, VInstancePorts
+from kfactory.instances import Instances, DInstances, VInstances
+from kfactory.settings import KCellSettings, Info
+from kfactory.layout import KCLayout, cell, vcell, kcl, Constants
+from kfactory.layer import LayerEnum, LayerInfos, LayerStack
+from kfactory.shapes import VShapes
+from kfactory.utilities import (
     dpolygon_from_array,
-    kcl,
     polygon_from_array,
-    pprint_ports,
     save_layout_options,
-    show,
 )
+
 from . import (
     cells,
     enclosure,
@@ -102,7 +81,6 @@ __all__ = [
     "cell",
     "cells",
     "config",
-    "constant",
     "dpolygon_from_array",
     "enclosure",
     "factories",
@@ -126,4 +104,5 @@ __all__ = [
     "show",
     "technology",
     "utils",
+    "vcell",
 ]

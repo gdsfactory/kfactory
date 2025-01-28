@@ -9,7 +9,7 @@ from typing import Any, Protocol
 import numpy as np
 
 from .. import kdb, kf_types
-from ..conf import logger
+from ..config import logger
 from ..enclosure import LayerEnclosure, extrude_path
 from ..kcell import Info, KCell, KCLayout, MetaData
 

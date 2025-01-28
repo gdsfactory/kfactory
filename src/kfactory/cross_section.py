@@ -11,7 +11,7 @@ from . import kdb
 from .enclosure import DLayerEnclosure, LayerEnclosure
 
 if TYPE_CHECKING:
-    from .kcell import KCLayout
+    from kfactory.layout import KCLayout
 
 
 class SymmetricalCrossSection(BaseModel, frozen=True):
@@ -69,3 +69,85 @@ class DSymmetricalCrossSection(BaseModel):
             enclosure=kcl.get_enclosure(self.enclosure.to_itype(kcl)),
             name=self.name,
         )
+
+
+class CrossSectionSpec(TypedDict):
+    name: NotRequired[str]
+    sections: NotRequired[
+        list[tuple[kdb.LayerInfo, int] | tuple[kdb.LayerInfo, int, int]]
+    ]
+    main_layer: kdb.LayerInfo
+    width: int | float
+    dsections: NotRequired[
+        list[tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]]
+    ]
+
+
+class CrossSectionModel(BaseModel):
+    cross_sections: dict[str, SymmetricalCrossSection] = Field(default_factory=dict)
+    kcl: KCLayout
+
+    def get_cross_section(
+        self,
+        cross_section: str
+        | SymmetricalCrossSection
+        | CrossSectionSpec
+        | DSymmetricalCrossSection,
+    ) -> SymmetricalCrossSection:
+        if isinstance(cross_section, SymmetricalCrossSection):
+            if cross_section.enclosure != self.kcl.get_enclosure(
+                cross_section.enclosure
+            ):
+                return self.get_cross_section(
+                    CrossSectionSpec(
+                        sections=cross_section.enclosure.model_dump()["sections"],
+                        main_layer=cross_section.main_layer,
+                        name=cross_section.name,
+                        width=cross_section.width,
+                    )
+                )
+        if isinstance(cross_section, str):
+            return self.cross_sections[cross_section]
+        elif isinstance(cross_section, DSymmetricalCrossSection):
+            cross_section = cross_section.to_itype(self.kcl)
+        elif isinstance(cross_section, dict):
+            cast(CrossSectionSpec, cross_section)
+            if "dsections" in cross_section:
+                cross_section = SymmetricalCrossSection(
+                    width=self.kcl.to_dbu(cross_section["width"]),
+                    enclosure=self.kcl.layer_enclosures.get_enclosure(
+                        enclosure=LayerEnclosureSpec(
+                            dsections=cross_section["dsections"],
+                            main_layer=cross_section["main_layer"],
+                        ),
+                        kcl=self.kcl,
+                    ),
+                    name=cross_section.get("name", None),
+                )
+            else:
+                w = cross_section["width"]
+                if not isinstance(w, int) and not w.is_integer():
+                    raise ValueError(
+                        "A CrossSectionSpec with 'sections' must have a width in dbu."
+                    )
+                cross_section = SymmetricalCrossSection(
+                    width=int(w),
+                    enclosure=self.kcl.layer_enclosures.get_enclosure(
+                        LayerEnclosureSpec(
+                            sections=cross_section.get("sections", []),
+                            main_layer=cross_section["main_layer"],
+                        ),
+                        kcl=self.kcl,
+                    ),
+                    name=cross_section.get("name", None),
+                )
+        if cross_section.name not in self.cross_sections:
+            self.cross_sections[cross_section.name] = cross_section
+            return cross_section
+        return self.cross_sections[cross_section.name]
+
+    def __repr__(self) -> str:
+        return repr(self.cross_sections)
+
+
+SymmetricalCrossSection.model_rebuild()

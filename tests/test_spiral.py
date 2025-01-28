@@ -160,7 +160,7 @@ def test_dspiral(LAYER: Layers) -> None:
         layer=c.kcl.find_layer(LAYER.WG),
     )
 
-    kf.config.logfilter.level = kf.conf.LogLevel.ERROR
+    kf.config.logfilter.level = kf.config.LogLevel.ERROR
 
     for _ in range(10):
         r = r1 + r2

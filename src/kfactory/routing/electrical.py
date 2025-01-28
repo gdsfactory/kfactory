@@ -3,14 +3,20 @@
 from collections.abc import Callable, Sequence
 from typing import Any, Literal
 
-from .. import kdb
-from ..conf import logger
-from ..kcell import KCell, Port
-from ..kf_types import dbu
-from .generic import ManhattanRoute
-from .generic import route_bundle as route_bundle_generic
-from .manhattan import ManhattanRoutePathFunction, route_manhattan, route_smart
-from .steps import Step, Straight
+import klayout.db as kdb
+
+from kfactory.config import logger
+from kfactory.kcell import KCell
+from kfactory.kf_types import dbu
+from kfactory.port import Port
+from kfactory.routing.generic import ManhattanRoute
+from kfactory.routing.generic import route_bundle as route_bundle_generic
+from kfactory.routing.manhattan import (
+    ManhattanRoutePathFunction,
+    route_manhattan,
+    route_smart,
+)
+from kfactory.routing.steps import Step, Straight
 
 __all__ = [
     "place_dual_rails",
