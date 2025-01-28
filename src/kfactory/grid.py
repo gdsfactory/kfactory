@@ -7,7 +7,7 @@ from typing import Literal, cast
 
 from . import kdb
 from .instance import Instance
-from .kcell import KCell
+from .kcell import DKCell, KCell
 
 
 def grid_dbu(
@@ -457,8 +457,8 @@ def flexgrid_dbu(
 
 
 def grid(
-    target: KCell,
-    kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
+    target: DKCell,
+    kcells: Sequence[DKCell | None] | Sequence[Sequence[DKCell | None]],
     spacing: float | tuple[float, float],
     target_trans: kdb.DCplxTrans = kdb.DCplxTrans(),
     shape: tuple[int, int] | None = None,
@@ -532,10 +532,10 @@ def grid(
         spacing_y = spacing
 
     insts: list[list[Instance | None]]
-    kcell_array: Sequence[Sequence[KCell]]
+    kcell_array: Sequence[Sequence[DKCell]]
 
     if shape is None:
-        if isinstance(kcells[0], KCell):
+        if isinstance(kcells[0], DKCell):
             kcell_array = [list(kcells)]  # type:ignore[arg-type]
         else:
             kcell_array = kcells  # type: ignore[assignment]
@@ -593,13 +593,13 @@ def grid(
             x0 = 0
         return insts
     else:
-        _kcells: Sequence[KCell | None]
-        if isinstance(kcells[0], KCell):
-            _kcells = cast(Sequence[KCell | None], kcells)
+        _kcells: Sequence[DKCell | None]
+        if isinstance(kcells[0], DKCell):
+            _kcells = cast(Sequence[DKCell | None], kcells)
         else:
             _kcells = [
                 kcell
-                for array in cast(Sequence[Sequence[KCell | None]], kcells)
+                for array in cast(Sequence[Sequence[DKCell | None]], kcells)
                 for kcell in array
             ]
 
@@ -673,8 +673,8 @@ def grid(
 
 
 def flexgrid(
-    target: KCell,
-    kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
+    target: DKCell,
+    kcells: Sequence[DKCell | None] | Sequence[Sequence[DKCell | None]],
     spacing: float | tuple[float, float],
     target_trans: kdb.DCplxTrans = kdb.DCplxTrans(),
     shape: tuple[int, int] | None = None,
@@ -724,8 +724,8 @@ def flexgrid(
     ```
 
     Args:
-        target: Target KCell.
-        kcells: Sequence or sequence of sequence of KCells to add to the grid
+        target: Target DKCell.
+        kcells: Sequence or sequence of sequence of DKCells to add to the grid
         spacing: Value or tuple of value (different x/y) for spacing of the grid.
         target_trans: Apply a transformation to the whole grid before placing it.
         shape: Respace the input of kcells into an array and fill as many positions
@@ -743,13 +743,13 @@ def flexgrid(
         spacing_y = spacing
 
     insts: list[list[Instance | None]]
-    kcell_array: Sequence[Sequence[KCell]]
+    kcell_array: Sequence[Sequence[DKCell]]
 
     if shape is None:
-        if isinstance(kcells[0], KCell):
-            kcell_array = cast(Sequence[list[KCell]], [list(kcells)])
+        if isinstance(kcells[0], DKCell):
+            kcell_array = cast(Sequence[list[DKCell]], [list(kcells)])
         else:
-            kcell_array = cast(Sequence[Sequence[KCell]], kcells)
+            kcell_array = cast(Sequence[Sequence[DKCell]], kcells)
 
         x0: float = 0
         y0: float = 0
@@ -816,13 +816,13 @@ def flexgrid(
             x0 = 0
         return insts
     else:
-        _kcells: Sequence[KCell | None]
-        if isinstance(kcells[0], KCell):
-            _kcells = cast(Sequence[KCell | None], kcells)
+        _kcells: Sequence[DKCell | None]
+        if isinstance(kcells[0], DKCell):
+            _kcells = cast(Sequence[DKCell | None], kcells)
         else:
             _kcells = [
                 kcell
-                for array in cast(Sequence[Sequence[KCell | None]], kcells)
+                for array in cast(Sequence[Sequence[DKCell | None]], kcells)
                 for kcell in array
             ]
 
