@@ -1,5 +1,20 @@
 <a id="v1.1.0"></a>
-# [v1.1.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.0) - 2025-01-25
+# [v1.1.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.0) - 2025-01-27
+
+# What's Changed
+
+## New
+
+- Split up classes into different files [#583](https://github.com/gdsfactory/kfactory/pull/583)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.0.2...v1.1.0
+
+
+[Changes][v1.1.0]
+
+
+<a id="v1.0.2"></a>
+# [v1.0.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.0.2) - 2025-01-27
 
 # What's Changed
 
@@ -21,10 +36,10 @@
 
 - Fix cell decorator [#576](https://github.com/gdsfactory/kfactory/pull/576)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.0.1...v1.1.0
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.0.1...v1.0.2
 
 
-[Changes][v1.1.0]
+[Changes][v1.0.2]
 
 
 <a id="v1.0.1"></a>
@@ -1516,7 +1531,8 @@
 [Changes][v0.4.0]
 
 
-[v1.1.0]: https://github.com/gdsfactory/kfactory/compare/v1.0.1...v1.1.0
+[v1.1.0]: https://github.com/gdsfactory/kfactory/compare/v1.0.2...v1.1.0
+[v1.0.2]: https://github.com/gdsfactory/kfactory/compare/v1.0.1...v1.0.2
 [v1.0.1]: https://github.com/gdsfactory/kfactory/compare/v1.0.0...v1.0.1
 [v1.0.0]: https://github.com/gdsfactory/kfactory/compare/v0.23.2...v1.0.0
 [v0.23.2]: https://github.com/gdsfactory/kfactory/compare/v0.23.1...v0.23.2
