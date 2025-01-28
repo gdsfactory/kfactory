@@ -50,7 +50,7 @@ from ruamel.yaml.constructor import SafeConstructor
 from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from . import kdb, rdb
-from .config import CHECK_INSTANCES, DEFAULT_TRANS, ShowFunction, config, logger
+from .conf import CHECK_INSTANCES, DEFAULT_TRANS, ShowFunction, config, logger
 from .cross_section import SymmetricalCrossSection
 from .exceptions import LockedError, MergeError
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject

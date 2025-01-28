@@ -25,7 +25,7 @@ from pydantic import (
 )
 
 from . import __version__
-from .config import CHECK_INSTANCES, config, logger
+from .conf import CHECK_INSTANCES, config, logger
 from .cross_section import (
     CrossSectionModel,
     CrossSectionSpec,

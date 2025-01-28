@@ -28,7 +28,7 @@ try:
     )
 
     from .. import kdb, lay
-    from ..config import config, logger
+    from ..conf import config, logger
     from ..kcell import KCell, ProtoKCell
     from typing import Literal
 

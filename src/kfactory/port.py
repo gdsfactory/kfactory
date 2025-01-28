@@ -30,7 +30,7 @@ from pydantic import (
 from ruamel.yaml.constructor import BaseConstructor
 from typing_extensions import TypedDict
 
-from .config import config
+from .conf import config
 from .cross_section import CrossSectionSpec, SymmetricalCrossSection
 from .layer import LayerEnum
 from .settings import Info

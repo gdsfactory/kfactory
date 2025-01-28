@@ -13,7 +13,7 @@ import klayout.lay as lay
 import klayout.rdb as rdb
 
 
-from .config import config, logger
+from .conf import config, logger
 from .enclosure import KCellEnclosure, LayerEnclosure
 from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
 from .kcell import BaseKCell, DKCell, KCell, VKCell, show

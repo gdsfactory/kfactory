@@ -14,7 +14,7 @@ from typing import (
 import klayout.db as kdb
 from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
-from .config import PROPID, config, logger
+from .conf import PROPID, config, logger
 from .exceptions import (
     PortLayerMismatch,
     PortTypeMismatch,
@@ -770,6 +770,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         *,
         levels: int | None = None,
     ) -> None:
+        from .kcell import VKCell
+
         if isinstance(self.cell, VKCell):
             for layer, shapes in self.cell._shapes.items():
                 for shape in shapes.transform(trans * self.trans):

@@ -10,7 +10,7 @@ import klayout.db as kdb
 import klayout.rdb as rdb
 from pydantic import BaseModel, Field
 
-from ..config import config, logger
+from ..conf import config, logger
 from ..instance import Instance
 from ..kcell import KCell
 from ..port import BasePort, Port, ProtoPort

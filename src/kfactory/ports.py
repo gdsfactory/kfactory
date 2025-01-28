@@ -23,7 +23,7 @@ from ruamel.yaml.constructor import BaseConstructor
 from ruamel.yaml.representer import BaseRepresenter, SequenceNode
 
 from . import kdb
-from .config import config
+from .conf import config
 from .cross_section import CrossSectionSpec, SymmetricalCrossSection
 from .layer import LayerEnum
 from .port import (

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Generic
 
 import klayout.db as kdb
 
-from .config import PROPID
+from .conf import PROPID
 from .instance import (
     DInstance,
     Instance,

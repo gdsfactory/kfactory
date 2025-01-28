@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from pydantic import ConfigDict
 
 from . import kdb
-from .config import LogLevel, logger
+from .conf import LogLevel, logger
 from .typings import MetaData
 
 

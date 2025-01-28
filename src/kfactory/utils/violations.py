@@ -7,7 +7,7 @@ minimum space violations and then applies a fix.
 from typing import overload
 
 from .. import KCell, kdb
-from ..config import config, logger
+from ..conf import config, logger
 
 __all__ = [
     "fix_spacing_minkowski_tiled",

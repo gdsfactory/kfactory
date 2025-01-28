@@ -7,7 +7,7 @@ import rich
 from rich.table import Table
 
 from . import kdb
-from .config import DEFAULT_TRANS, config
+from .conf import DEFAULT_TRANS, config
 
 if TYPE_CHECKING:
     from .instance import Instance

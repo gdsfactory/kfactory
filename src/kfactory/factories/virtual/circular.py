@@ -6,7 +6,7 @@ from typing import Any, Protocol
 import numpy as np
 
 from ... import kdb
-from ...config import logger
+from ...conf import logger
 from ...enclosure import LayerEnclosure
 from ...kcell import VKCell
 from ...layout import KCLayout

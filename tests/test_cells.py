@@ -5,7 +5,7 @@ import pytest
 from conftest import Layers
 
 import kfactory as kf
-from kfactory.config import logger
+from kfactory.conf import logger
 
 
 class GeometryDifference(ValueError):

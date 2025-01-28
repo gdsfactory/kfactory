@@ -6,7 +6,7 @@ from collections.abc import Sequence
 from typing import Any, Literal, cast, overload
 
 from .. import kdb
-from ..config import config, logger
+from ..conf import config, logger
 from ..factories import StraightFactoryDBU, StraightFactoryUM
 from ..kcell import DKCell, KCell
 from ..port import DPort, Port

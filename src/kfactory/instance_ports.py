@@ -5,7 +5,7 @@ from collections.abc import Callable, Iterable, Iterator, Sequence
 from typing import TYPE_CHECKING, Any, Generic, cast
 
 from . import kdb
-from .config import config
+from .conf import config
 from .layer import LayerEnum
 from .port import (
     BasePort,

@@ -12,7 +12,7 @@ import klayout.db as kdb
 import numpy as np
 import toolz  # type: ignore[import-untyped,unused-ignore]
 
-from .config import config
+from .conf import config
 from .typings import MetaData, SerializableShape
 
 if TYPE_CHECKING:

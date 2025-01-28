@@ -4,7 +4,7 @@ from collections.abc import Callable
 from typing import Any, Protocol
 
 from ... import kdb
-from ...config import logger
+from ...conf import logger
 from ...enclosure import LayerEnclosure
 from ...kcell import VKCell
 from ...layout import KCLayout, vcell

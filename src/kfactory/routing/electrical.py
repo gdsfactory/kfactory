@@ -5,7 +5,7 @@ from typing import Any, Literal
 
 import klayout.db as kdb
 
-from ..config import logger
+from ..conf import logger
 from ..kcell import KCell
 from ..port import Port
 from ..routing.generic import ManhattanRoute

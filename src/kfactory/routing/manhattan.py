@@ -10,7 +10,7 @@ from typing import Any, Literal, ParamSpec, Protocol, TypedDict, cast
 
 import klayout.db as kdb
 
-from ..config import logger
+from ..conf import logger
 from ..enclosure import clean_points
 from ..kcell import DKCell, KCell
 from ..layout import KCLayout
@@ -1173,7 +1173,7 @@ def route_smart(
                                 )
                             )
                     case _:
-                        raise ValueError(f"Invalid angle: {end_angle=}")
+                        ...
 
         all_routers: list[ManhattanRouter] = []
         for ts, te, w, ss, es in zip(start_ts, end_ts, widths, starts, ends):
@@ -1533,7 +1533,7 @@ def route_smart(
                         separation=separation,
                     )
                 case _:
-                    raise ValueError(f"Invalid angle: {target_angle=}")
+                    ...
             route_to_bbox(
                 [router.start for router in router_bundle],
                 total_bbox,
@@ -1575,7 +1575,7 @@ def route_to_bbox(
                     case 3:
                         router.straight_nobend(-bb.bottom + hw1 + router.t.disp.y)
                     case _:
-                        raise ValueError(f"Invalid angle: {router.t.angle=}")
+                        ...
         elif bbox_routing == "full":
             for router in routers:
                 hw1 = max(
@@ -1592,7 +1592,7 @@ def route_to_bbox(
                     case 3:
                         router.straight(-bbox.bottom + hw1 + router.t.disp.y)
                     case _:
-                        raise ValueError(f"Invalid angle: {router.t.angle=}")
+                        ...
         else:
             raise ValueError(
                 f"routing mode {bbox_routing=} is not supported, available modes"
@@ -1859,7 +1859,7 @@ def _sort_transformations(
                             [t for t in back if t.disp.x >= box.center().x]
                         )
                     case _:
-                        raise ValueError(f"Invalid angle: {back_angle=}")
+                        ...
                 end_transformations.reverse()
             case 1:
                 start_transformations = []
@@ -1954,8 +1954,8 @@ def _route_to_side(
                 case 0 if x > 0:
                     rs.straight(x)
                 case _:
-                    raise ValueError(f"Invalid angle: {rs.ta=}")
-            if not (y == 0 and x > 0):
+                    ...
+            if not (y == 0 and rs.ta == 2 and x > 0):
                 rs.left()
             bbox += rs.t * kdb.Point(0, -hw2)
         else:
@@ -1968,8 +1968,8 @@ def _route_to_side(
                 case 0 if x > 0:
                     rs.straight(x)
                 case _:
-                    raise ValueError(f"Invalid angle: {rs.ta=}")
-            if not (y == 0 and x > 0):
+                    ...
+            if not (y == 0 and rs.ta == 2 and x > 0):
                 rs.right()
             bbox += rs.t * kdb.Point(0, hw2)
 

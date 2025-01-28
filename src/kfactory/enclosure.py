@@ -39,7 +39,7 @@ from ruamel.yaml.representer import BaseRepresenter, MappingNode
 from typing_extensions import TypedDict
 
 from . import kdb
-from .config import config, logger
+from .conf import config, logger
 
 if TYPE_CHECKING:
     from .kcell import KCell
