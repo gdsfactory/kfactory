@@ -232,7 +232,7 @@ def test_grid_1d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         ],
         spacing=5000,
         align_x="origin",
-        shape=(1, 10),
+        shape=(2, 10),
     )
 
 
