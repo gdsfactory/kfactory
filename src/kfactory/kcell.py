@@ -76,17 +76,17 @@ from .port import (
 )
 from .ports import DPorts, Ports, ProtoPorts
 from .serialization import (
-    _deserialize_setting,
-    _serialize_setting,
     clean_name,
+    deserialize_setting,
+    serialize_setting,
 )
 from .settings import Info, KCellSettings, KCellSettingsUnits
 from .shapes import VShapes
 from .typings import KC, MetaData, TUnit
 from .utilities import (
-    _check_cell_ports,
-    _check_inst_ports,
-    _instance_port_name,
+    check_cell_ports,
+    check_inst_ports,
+    instance_port_name,
     load_layout_options,
     save_layout_options,
 )
@@ -1625,7 +1625,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     )
                     assert len(ports) == 1, (
                         "Multiple instance "
-                        f"{[_instance_port_name(p[2], p[3]) for p in ports]}"
+                        f"{[instance_port_name(p[2], p[3]) for p in ports]}"
                         f"ports connected to the cell port {cellports[0]}"
                         " this is currently not supported and most likely a bug"
                     )
@@ -1819,7 +1819,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 match len(ports):
                     case 1:
                         if layer in cell_ports and coord in cell_ports[layer]:
-                            ccp = _check_cell_ports(
+                            ccp = check_cell_ports(
                                 cell_ports[layer][coord][0], ports[0][0]
                             )
                             if ccp & 1:
@@ -1890,7 +1890,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                                 )
 
                     case 2:
-                        cip = _check_inst_ports(ports[0][0], ports[1][0])
+                        cip = check_inst_ports(ports[0][0], ports[1][0])
                         if cip & 1:
                             subc = db_.category_by_path(
                                 lc.path() + ".WidthMismatch"
@@ -2314,19 +2314,19 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                 )
             p.info = Info(
                 **{
-                    name: _deserialize_setting(setting)
+                    name: deserialize_setting(setting)
                     for name, setting in _d["info"].items()
                 }
             )
         cell.settings = KCellSettings(
             **{
-                name: _deserialize_setting(setting)
+                name: deserialize_setting(setting)
                 for name, setting in d.get("settings", {}).items()
             }
         )
         cell.info = Info(
             **{
-                name: _deserialize_setting(setting)
+                name: deserialize_setting(setting)
                 for name, setting in d.get("info", {}).items()
             }
         )
@@ -2529,7 +2529,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                 p["dcplx_trans"] = port.base.dcplx_trans.to_s()
                 p["dwidth"] = port.dwidth
             p["info"] = {
-                name: _serialize_setting(setting)
+                name: serialize_setting(setting)
                 for name, setting in node.info.model_dump().items()
             }
             ports.append(p)
@@ -2541,11 +2541,11 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         if shapes:
             d["shapes"] = shapes
         d["settings"] = {
-            name: _serialize_setting(setting)
+            name: serialize_setting(setting)
             for name, setting in node.settings.model_dump().items()
         }
         d["info"] = {
-            name: _serialize_setting(info)
+            name: serialize_setting(info)
             for name, info in node.info.model_dump().items()
         }
         return representer.represent_mapping(cls.yaml_tag, d)

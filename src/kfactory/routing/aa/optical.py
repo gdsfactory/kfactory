@@ -10,7 +10,9 @@ from pydantic import BaseModel
 from scipy.optimize import minimize_scalar  # type: ignore[import-untyped,unused-ignore]
 
 from ... import kdb
-from ...kcell import DKCell, DPort, KCell, Port, ProtoPort, VInstance, VKCell
+from ...instance import VInstance
+from ...kcell import DKCell, DPort, KCell, VKCell
+from ...port import Port, ProtoPort
 
 __all__ = ["OpticalAllAngleRoute", "route"]
 

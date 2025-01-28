@@ -225,29 +225,27 @@ def check_metadata_type(value: MetaData) -> MetaData:
     )
 
 
-def _serialize_setting(setting: MetaData) -> MetaData:
+def serialize_setting(setting: MetaData) -> MetaData:
     if isinstance(setting, dict):
-        return {
-            name: _serialize_setting(_setting) for name, _setting in setting.items()
-        }
+        return {name: serialize_setting(_setting) for name, _setting in setting.items()}
     elif isinstance(setting, list):
-        return [_serialize_setting(s) for s in setting]
+        return [serialize_setting(s) for s in setting]
     elif isinstance(setting, tuple):
-        return tuple(_serialize_setting(s) for s in setting)
+        return tuple(serialize_setting(s) for s in setting)
     elif isinstance(setting, SerializableShape):
         return f"!#{setting.__class__.__name__} {setting!s}"
     return setting
 
 
-def _deserialize_setting(setting: MetaData) -> MetaData:
+def deserialize_setting(setting: MetaData) -> MetaData:
     if isinstance(setting, dict):
         return {
-            name: _deserialize_setting(_setting) for name, _setting in setting.items()
+            name: deserialize_setting(_setting) for name, _setting in setting.items()
         }
     elif isinstance(setting, list):
-        return [_deserialize_setting(s) for s in setting]
+        return [deserialize_setting(s) for s in setting]
     elif isinstance(setting, tuple):
-        return tuple(_deserialize_setting(s) for s in setting)
+        return tuple(deserialize_setting(s) for s in setting)
     elif isinstance(setting, str) and setting.startswith("!#"):
         cls_name, value = setting.removeprefix("!#").split(" ", 1)
         match cls_name:

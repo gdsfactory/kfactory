@@ -10,15 +10,11 @@ from typing_extensions import Unpack
 if TYPE_CHECKING:
     from cachetools import Cache
 
-    from .kcell import (
-        CHECK_INSTANCES,
-        KC,
-        KCellFunc,
-        KCellParams,
-        KCLayout,
-        MetaData,
-        TKCell,
-    )
+    from .conf import CHECK_INSTANCES
+    from .kcell import TKCell
+    from .layout import KCLayout
+    from .protocols import KCellFunc
+    from .typings import KC, KCellParams, MetaData
 
 
 class ModuleCellKWargs(TypedDict, total=False):

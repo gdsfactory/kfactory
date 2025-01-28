@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Literal
 
-import rich
+from rich.json import JSON
 from rich.table import Table
 
 from . import kdb
@@ -76,7 +76,7 @@ def dpolygon_from_array(array: Iterable[tuple[float, float]]) -> kdb.DPolygon:
     return kdb.DPolygon([kdb.DPoint(x, y) for (x, y) in array])
 
 
-def _check_inst_ports(p1: Port, p2: Port) -> int:
+def check_inst_ports(p1: Port, p2: Port) -> int:
     check_int = 0
     if p1.width != p2.width:
         check_int += 1
@@ -87,7 +87,7 @@ def _check_inst_ports(p1: Port, p2: Port) -> int:
     return check_int
 
 
-def _check_cell_ports(p1: ProtoPort[Any], p2: ProtoPort[Any]) -> int:
+def check_cell_ports(p1: ProtoPort[Any], p2: ProtoPort[Any]) -> int:
     p1_ = Port(base=p1.base)
     p2_ = Port(base=p2.base)
     check_int = 0
@@ -100,7 +100,7 @@ def _check_cell_ports(p1: ProtoPort[Any], p2: ProtoPort[Any]) -> int:
     return check_int
 
 
-def _instance_port_name(inst: Instance, port: Port) -> str:
+def instance_port_name(inst: Instance, port: Port) -> str:
     return f'{inst.name}["{port.name or str(None)}"]'
 
 
@@ -139,7 +139,7 @@ def pprint_ports(
                         f"{port.y:_}",
                         str(port.angle),
                         str(port.mirror),
-                        rich.json.JSON.from_data(port.info.model_dump()),
+                        JSON.from_data(port.info.model_dump()),
                     )
                 else:
                     t = port.dcplx_trans
@@ -156,7 +156,7 @@ def pprint_ports(
                         f"{dy:_}",
                         str(angle),
                         str(mirror),
-                        rich.json.JSON.from_data(port.info.model_dump()),
+                        JSON.from_data(port.info.model_dump()),
                     )
         case "um":
             for port in ports:
@@ -174,7 +174,7 @@ def pprint_ports(
                     f"{dy:_}",
                     str(angle),
                     str(mirror),
-                    rich.json.JSON.from_data(port.info.model_dump()),
+                    JSON.from_data(port.info.model_dump()),
                 )
         case "dbu":
             for port in ports:
@@ -186,7 +186,7 @@ def pprint_ports(
                     f"{port.y:_}",
                     str(port.angle),
                     str(port.mirror),
-                    rich.json.JSON.from_data(port.info.model_dump()),
+                    JSON.from_data(port.info.model_dump()),
                 )
 
     return table

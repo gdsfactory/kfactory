@@ -3,7 +3,8 @@
 from pydantic import BaseModel
 
 from .. import kdb
-from ..kcell import Instance, Port
+from ..instance import Instance
+from ..port import Port
 from . import aa, electrical, generic, manhattan, optical
 
 
