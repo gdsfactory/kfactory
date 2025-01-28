@@ -305,17 +305,19 @@ class GeometricObject(Generic[TUnit], ABC):
         ...
 
     @abstractmethod
-    def mirror(self, p1: tuple[TUnit, TUnit], p2: tuple[TUnit, TUnit]) -> Self:
+    def mirror(
+        self, p1: tuple[TUnit, TUnit] = ..., p2: tuple[TUnit, TUnit] = ...
+    ) -> Self:
         """Mirror self at a line."""
         ...
 
     @abstractmethod
-    def mirror_x(self, x: TUnit) -> Self:
+    def mirror_x(self, x: TUnit = ...) -> Self:
         """Mirror self at an y-axis at position x."""
         ...
 
     @abstractmethod
-    def mirror_y(self, y: TUnit) -> Self:
+    def mirror_y(self, y: TUnit = ...) -> Self:
         """Mirror self at an x-axis at position y."""
         ...
 
@@ -752,13 +754,15 @@ class DBUGeometricObject(GeometricObject[int], ABC):
     def rotate(self, angle: int, center: tuple[int, int] | None = None) -> Self:
         return self.irotate(angle, center)
 
-    def mirror_x(self, x: int) -> Self:
+    def mirror_x(self, x: int = 0) -> Self:
         return self.imirror_x(x)
 
-    def mirror_y(self, y: int) -> Self:
+    def mirror_y(self, y: int = 0) -> Self:
         return self.imirror_y(y)
 
-    def mirror(self, p1: tuple[int, int], p2: tuple[int, int]) -> Self:
+    def mirror(
+        self, p1: tuple[int, int] = (1000, 0), p2: tuple[int, int] = (0, 0)
+    ) -> Self:
         return self.imirror(p1, p2)
 
 
@@ -772,11 +776,13 @@ class UMGeometricObject(GeometricObject[float], ABC):
     def rotate(self, angle: float, center: tuple[float, float] | None = None) -> Self:
         return self.drotate(angle, center)
 
-    def mirror_x(self, x: float) -> Self:
+    def mirror_x(self, x: float = 0) -> Self:
         return self.dmirror_x(x)
 
-    def mirror_y(self, y: float) -> Self:
+    def mirror_y(self, y: float = 0) -> Self:
         return self.dmirror_y(y)
 
-    def mirror(self, p1: tuple[float, float], p2: tuple[float, float]) -> Self:
+    def mirror(
+        self, p1: tuple[float, float] = (1, 0), p2: tuple[float, float] = (0, 0)
+    ) -> Self:
         return self.dmirror(p1, p2)
