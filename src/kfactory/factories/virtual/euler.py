@@ -105,14 +105,14 @@ def virtual_bend_euler_factory(
             logger.critical(
                 f"Negative lengths are not allowed {angle} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             angle = -angle
         if width < 0:
             logger.critical(
                 f"Negative widths are not allowed {width} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             width = -width
         dbu = c.kcl.dbu
@@ -136,7 +136,7 @@ def virtual_bend_euler_factory(
                 layer=layer,
                 enclosure=enclosure,
                 angle=angle,
-            )
+            ),
         )
         _info.update(_additional_info)
         c.info = Info(**_info)

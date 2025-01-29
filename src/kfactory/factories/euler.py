@@ -79,7 +79,9 @@ class BendSEulerFactory(Protocol):
 
 
 def euler_bend_points(
-    angle_amount: deg = 90, radius: um = 100, resolution: float = 150
+    angle_amount: deg = 90,
+    radius: um = 100,
+    resolution: float = 150,
 ) -> list[kdb.DPoint]:
     """Base euler bend, no transformation, emerging from the origin."""
     if angle_amount < 0:
@@ -110,7 +112,7 @@ def euler_bend_points(
     def _xy(s: float) -> kdb.DPoint:
         if th == 0:
             return kdb.DPoint(0, 0)
-        elif s <= Ltot / 2:
+        if s <= Ltot / 2:
             (fsin, fcos) = fresnel(s / (sq2pi * a))
             X = sq2pi * a * fcos
             Y = sq2pi * a * fsin
@@ -170,7 +172,9 @@ def euler_endpoint(
 
 
 def euler_sbend_points(
-    offset: um = 5.0, radius: um = 10.0e-6, resolution: float = 150
+    offset: um = 5.0,
+    radius: um = 10.0e-6,
+    resolution: float = 150,
 ) -> list[kdb.DPoint]:
     """An Euler s-bend with parallel input and output, separated by an offset."""
 
@@ -285,14 +289,14 @@ def bend_euler_factory(
             logger.critical(
                 f"Negative lengths are not allowed {angle} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             angle = -angle
         if width < 0:
             logger.critical(
                 f"Negative widths are not allowed {width} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             width = -width
         backbone = euler_bend_points(angle, radius=radius, resolution=resolution)
@@ -335,7 +339,7 @@ def bend_euler_factory(
                 enclosure=enclosure,
                 angle=angle,
                 resolution=resolution,
-            )
+            ),
         )
         _info.update(_additional_info)
         c.info = Info(**_info)
@@ -411,7 +415,7 @@ def bend_s_euler_factory(
             logger.critical(
                 f"Negative widths are not allowed {width} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             width = -width
         backbone = euler_sbend_points(
@@ -459,7 +463,7 @@ def bend_s_euler_factory(
                 layer=layer,
                 enclosure=enclosure,
                 resolution=resolution,
-            )
+            ),
         )
         _info.update(_additional_info)
         c.info = Info(**_info)

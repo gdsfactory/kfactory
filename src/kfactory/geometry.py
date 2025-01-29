@@ -128,7 +128,7 @@ class GeometricObject(Generic[TUnit], ABC):
     @abstractmethod
     def _standard_trans(self: GeometricObject[float]) -> type[kdb.DCplxTrans]: ...
     @abstractmethod
-    def _standard_trans(self) -> type[kdb.Trans] | type[kdb.DCplxTrans]: ...
+    def _standard_trans(self) -> type[kdb.Trans | kdb.DCplxTrans]: ...
 
     @abstractmethod
     def transform(
@@ -228,8 +228,9 @@ class GeometricObject(Generic[TUnit], ABC):
         """Moves self so that the bbox's center coordinate."""
         self.transform(
             self._standard_trans()(
-                __val[0] - self.bbox().center().x, __val[1] - self.bbox().center().y
-            )
+                __val[0] - self.bbox().center().x,
+                __val[1] - self.bbox().center().y,
+            ),
         )
 
     @overload
@@ -237,7 +238,9 @@ class GeometricObject(Generic[TUnit], ABC):
 
     @overload
     def move(
-        self, origin: tuple[TUnit, TUnit], destination: tuple[TUnit, TUnit]
+        self,
+        origin: tuple[TUnit, TUnit],
+        destination: tuple[TUnit, TUnit],
     ) -> Self: ...
 
     def move(
@@ -256,8 +259,9 @@ class GeometricObject(Generic[TUnit], ABC):
         else:
             self.transform(
                 self._standard_trans()(
-                    destination[0] - origin[0], destination[1] - origin[1]
-                )
+                    destination[0] - origin[0],
+                    destination[1] - origin[1],
+                ),
             )
         return self
 
@@ -306,7 +310,9 @@ class GeometricObject(Generic[TUnit], ABC):
 
     @abstractmethod
     def mirror(
-        self, p1: tuple[TUnit, TUnit] = ..., p2: tuple[TUnit, TUnit] = ...
+        self,
+        p1: tuple[TUnit, TUnit] = ...,
+        p2: tuple[TUnit, TUnit] = ...,
     ) -> Self:
         """Mirror self at a line."""
         ...
@@ -412,8 +418,9 @@ class GeometricObject(Generic[TUnit], ABC):
         """Moves self so that the bbox's center coordinate."""
         self.transform(
             kdb.Trans(
-                val[0] - self.ibbox().center().x, val[1] - self.ibbox().center().y
-            )
+                val[0] - self.ibbox().center().x,
+                val[1] - self.ibbox().center().y,
+            ),
         )
 
     @overload
@@ -421,11 +428,15 @@ class GeometricObject(Generic[TUnit], ABC):
 
     @overload
     def imove(
-        self, origin: tuple[int, int], destination: tuple[int, int] | None = None
+        self,
+        origin: tuple[int, int],
+        destination: tuple[int, int] | None = None,
     ) -> Self: ...
 
     def imove(
-        self, origin: tuple[int, int], destination: tuple[int, int] | None = None
+        self,
+        origin: tuple[int, int],
+        destination: tuple[int, int] | None = None,
     ) -> Self:
         """Move self in dbu.
 
@@ -437,7 +448,7 @@ class GeometricObject(Generic[TUnit], ABC):
             self.transform(kdb.Trans(*origin))
         else:
             self.transform(
-                kdb.Trans(destination[0] - origin[0], destination[1] - origin[1])
+                kdb.Trans(destination[0] - origin[0], destination[1] - origin[1]),
             )
         return self
 
@@ -491,7 +502,9 @@ class GeometricObject(Generic[TUnit], ABC):
         return self
 
     def imirror(
-        self, p1: tuple[int, int] = (1000, 0), p2: tuple[int, int] = (0, 0)
+        self,
+        p1: tuple[int, int] = (1000, 0),
+        p2: tuple[int, int] = (0, 0),
     ) -> Self:
         """Mirror self at a line."""
         p1_ = kdb.Point(p1[0], p1[1]).to_dtype(self.kcl.dbu)
@@ -508,7 +521,7 @@ class GeometricObject(Generic[TUnit], ABC):
         cross_point = dedge.cut_point(dedge_disp)
 
         self.transform(
-            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
+            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2),
         )
 
         return self
@@ -614,8 +627,9 @@ class GeometricObject(Generic[TUnit], ABC):
         """Moves self so that the bbox's center coordinate in um."""
         self.transform(
             kdb.DTrans(
-                val[0] - self.dbbox().center().x, val[1] - self.dbbox().center().y
-            )
+                val[0] - self.dbbox().center().x,
+                val[1] - self.dbbox().center().y,
+            ),
         )
 
     @overload
@@ -643,7 +657,7 @@ class GeometricObject(Generic[TUnit], ABC):
             self.transform(kdb.DCplxTrans(*origin))
         else:
             self.transform(
-                kdb.DCplxTrans(destination[0] - origin[0], destination[1] - origin[1])
+                kdb.DCplxTrans(destination[0] - origin[0], destination[1] - origin[1]),
             )
         return self
 
@@ -702,7 +716,9 @@ class GeometricObject(Generic[TUnit], ABC):
         return self
 
     def dmirror(
-        self, p1: tuple[float, float] = (1, 0), p2: tuple[float, float] = (0, 0)
+        self,
+        p1: tuple[float, float] = (1, 0),
+        p2: tuple[float, float] = (0, 0),
     ) -> Self:
         """Mirror self at a line."""
         p1_ = kdb.DPoint(p1[0], p1[1])
@@ -720,7 +736,7 @@ class GeometricObject(Generic[TUnit], ABC):
         cross_point = dedge.cut_point(dedge_disp)
 
         self.transform(
-            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2)
+            kdb.DCplxTrans(1.0, angle, True, (cross_point.to_v() - disp) * 2),
         )
 
         return self
@@ -765,7 +781,9 @@ class DBUGeometricObject(GeometricObject[int], ABC):
         return self.imirror_y(y)
 
     def mirror(
-        self, p1: tuple[int, int] = (1000, 0), p2: tuple[int, int] = (0, 0)
+        self,
+        p1: tuple[int, int] = (1000, 0),
+        p2: tuple[int, int] = (0, 0),
     ) -> Self:
         return self.imirror(p1, p2)
 
@@ -787,6 +805,8 @@ class UMGeometricObject(GeometricObject[float], ABC):
         return self.dmirror_y(y)
 
     def mirror(
-        self, p1: tuple[float, float] = (1, 0), p2: tuple[float, float] = (0, 0)
+        self,
+        p1: tuple[float, float] = (1, 0),
+        p2: tuple[float, float] = (0, 0),
     ) -> Self:
         return self.dmirror(p1, p2)

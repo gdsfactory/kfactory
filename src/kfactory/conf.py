@@ -9,19 +9,19 @@ import sys
 import traceback
 from enum import Enum, IntEnum
 from itertools import takewhile
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 import loguru
 import rich.console
 from dotenv import find_dotenv
-from loguru import logger as logger
-from pydantic import BaseModel, Field, ValidationError, ValidationInfo, field_validator
+from loguru import logger
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from . import kdb, rdb
-
 if TYPE_CHECKING:
+    from pathlib import Path
+
+    from . import kdb, rdb
     from .kcell import ProtoKCell
     from .layout import KCLayout
 
@@ -80,7 +80,8 @@ def tracing_formatter(record: loguru.Record) -> str:
     Filter out frames coming from Loguru internals.
     """
     frames = takewhile(
-        lambda f: "/loguru/" not in f.filename, traceback.extract_stack()
+        lambda f: "/loguru/" not in f.filename,
+        traceback.extract_stack(),
     )
     stack = " > ".join(f"{f.filename}:{f.name}:{f.lineno}" for f in frames)
     record["extra"]["stack"] = stack
@@ -91,12 +92,11 @@ def tracing_formatter(record: loguru.Record) -> str:
             " | <cyan>{extra[stack]}</cyan> - <level>{message}</level>\n{exception}"
         )
 
-    else:
-        return (
-            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}"
-            "</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan>"
-            " - <level>{message}</level>\n{exception}"
-        )
+    return (
+        "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}"
+        "</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan>"
+        " - <level>{message}</level>\n{exception}"
+    )
 
 
 class LogLevel(str, Enum):
@@ -132,10 +132,9 @@ class LogFilter(BaseModel):
         levelno = logger.level(self.level).no
         if self.regex is None:
             return record["level"].no >= levelno
-        else:
-            return record["level"].no >= levelno and not bool(
-                re.search(self.regex, record["message"])
-            )
+        return record["level"].no >= levelno and not bool(
+            re.search(self.regex, record["message"]),
+        )
 
 
 def get_show_function(value: str | ShowFunction) -> ShowFunction:
@@ -235,14 +234,15 @@ class Settings(BaseSettings):
     @field_validator("show_function", mode="before")
     @classmethod
     def _validate_show_function(
-        cls, show: ShowFunction | str | None
+        cls,
+        show: ShowFunction | str | None,
     ) -> ShowFunction | None:
         if isinstance(show, str):
             mod, f = show.rsplit(".", 1)
             loaded_mod = importlib.import_module(mod)
             _show = loaded_mod.__getattribute__(f)
             if not isinstance(_show, ShowFunction):
-                raise ValidationError(f"{show=} is not a ShowFunction.")
+                raise TypeError(f"{show=} is not a ShowFunction.")
             show = _show
         return show
 
@@ -269,7 +269,7 @@ class Settings(BaseSettings):
             logger.warning(
                 "'overwrite_existing' has been set to True. This might cause "
                 "unintended behavior when overwriting existing cells and delete any "
-                "existing instances of them."
+                "existing instances of them.",
             )
         return v
 
@@ -281,17 +281,21 @@ class Settings(BaseSettings):
                 "'cell_layout_cache' has been set to True. This might cause when "
                 "as any cell names generated automatically are loaded from the layout"
                 " instead of created. This could happen e.g. after reading a gds file"
-                " into the layout."
+                " into the layout.",
             )
         return v
 
     @field_validator(
-        "allow_width_mismatch", "allow_layer_mismatch", "allow_type_mismatch"
+        "allow_width_mismatch",
+        "allow_layer_mismatch",
+        "allow_type_mismatch",
     )
     @classmethod
     def _debug_info_on_global_setting(cls, v: Any, info: ValidationInfo) -> Any:
         logger.bind(with_traceback=True).debug(
-            "'{}' set globally to '{}'", info.field_name, v
+            "'{}' set globally to '{}'",
+            info.field_name,
+            v,
         )
         return v
 

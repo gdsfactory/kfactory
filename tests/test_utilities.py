@@ -1,5 +1,6 @@
 import pytest
 
+from kfactory.exceptions import InvalidMetaDataError
 from kfactory.serialization import check_metadata_type, convert_metadata_type
 
 
@@ -23,6 +24,12 @@ def test_check_metadata_type() -> None:
     assert check_metadata_type((1, 2, 3)) == (1, 2, 3)
     assert check_metadata_type([1, 2, 3]) == [1, 2, 3]
     assert check_metadata_type({"key": "value"}) == {"key": "value"}
+    with pytest.raises(
+        InvalidMetaDataError,
+        match=" value={1, 2, 3}, type(value)=<class 'set",
+    ):
+        check_metadata_type({1, 2, 3})  # type: ignore[arg-type]
 
-    with pytest.raises(ValueError):
-        check_metadata_type(set([1, 2, 3]))  # type: ignore
+
+if __name__ == "__main__":
+    test_check_metadata_type()

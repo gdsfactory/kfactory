@@ -57,7 +57,7 @@ def bezier_curve(
         xs += ank * control_points[k][0]
         ys += ank * control_points[k][1]
 
-    return [kdb.DPoint(float(x), float(y)) for x, y in zip(xs, ys)]
+    return [kdb.DPoint(float(x), float(y)) for x, y in zip(xs, ys, strict=False)]
 
 
 def bend_s_bezier_factory(
@@ -138,7 +138,12 @@ def bend_s_bezier_factory(
             enclosure = LayerEnclosure()
 
         enclosure.extrude_path(
-            c, path=pts, main_layer=layer, width=width, start_angle=0, end_angle=0
+            c,
+            path=pts,
+            main_layer=layer,
+            width=width,
+            start_angle=0,
+            end_angle=0,
         )
 
         c.create_port(
@@ -150,7 +155,10 @@ def bend_s_bezier_factory(
         c.create_port(
             width=int(width / c.kcl.dbu),
             trans=kdb.Trans(
-                0, False, c.bbox().right, c.bbox().top - int(width / c.kcl.dbu) // 2
+                0,
+                False,
+                c.bbox().right,
+                c.bbox().top - int(width / c.kcl.dbu) // 2,
             ),
             layer=c.kcl.find_layer(layer),
             port_type="optical",
@@ -166,7 +174,7 @@ def bend_s_bezier_factory(
                 t_start=t_start,
                 t_stop=t_stop,
                 enclosure=enclosure,
-            )
+            ),
         )
         _info.update(_additional_info)
         c.info = Info(**_info)

@@ -10,7 +10,10 @@ import kfactory as kf
 
 @kf.cell  # type: ignore[misc, unused-ignore]
 def sample(
-    s: str = "a", i: int = 3, f: float = 2.0, t: tuple[int, ...] = (1,)
+    s: str = "a",
+    i: int = 3,
+    f: float = 2.0,
+    t: tuple[int, ...] = (1,),
 ) -> kf.KCell:
     with NamedTemporaryFile("a", suffix=".oas") as temp_file:
         c = kf.KCell()
@@ -28,7 +31,7 @@ def sample(
                         kf.kdb.Point(0, 0),
                         kf.kdb.Point(500, 0),
                         kf.kdb.Point(250, 250),
-                    ]
+                    ],
                 ),
             },
         }

@@ -16,7 +16,7 @@ def mmi_enc(layer: kf.kdb.LayerInfo, enclosure: kf.LayerEnclosure) -> kf.KCell:
             kf.kdb.Point(0, 500),
             kf.kdb.Point(2000, 250),
             kf.kdb.Point(2000, -250),
-        ]
+        ],
     )
 
     for t in [
@@ -55,7 +55,7 @@ def test_layer_multi_enc(LAYER: Layers) -> None:
             (LAYER.WGCLAD, -4000, -3900),
             (LAYER.WGCLAD, -100, 100),
             (LAYER.WGCLAD, -500, -400),
-        ]
+        ],
     )
     mmi_enc(LAYER.WG, enc)
 
@@ -80,7 +80,7 @@ def test_layer_merge_enc(LAYER: Layers) -> None:
             (LAYER.WGCLAD, -5000, -3000),
             (LAYER.WGCLAD, -4000, -2000),
             (LAYER.WGCLAD, -2000, 1000),
-        ]
+        ],
     )
     mmi_enc(LAYER.WG, enc)
 
@@ -116,7 +116,7 @@ def test_um_enclosure_nodbu(LAYER: Layers) -> None:
                 (LAYER.WGCLAD, -5, -3),
                 (LAYER.WGCLAD, -4, -2),
                 (LAYER.WGCLAD, -2, 1),
-            ]
+            ],
         )
 
 
@@ -162,7 +162,7 @@ def test_pdkenclosure(LAYER: Layers, straight_blank: kf.KCell) -> None:
             -wg_box.height() // 2 - 1000,
             wg_box.height() // 2 + 1000,
             wg_box.height() // 2 + 1000,
-        )
+        ),
     )
     for port in c.ports:
         port_wg_ex.insert(box.transformed(port.trans))

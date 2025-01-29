@@ -13,6 +13,7 @@ import numpy as np
 import toolz  # type: ignore[import-untyped,unused-ignore]
 
 from .conf import config
+from .exceptions import InvalidMetaDataError, NonSerializableError
 from .typings import MetaData, SerializableShape
 
 if TYPE_CHECKING:
@@ -66,29 +67,29 @@ def clean_value(
     value: float | np.float64 | dict[Any, Any] | ProtoKCell[Any] | Callable[..., Any],
 ) -> str:
     """Makes sure a value is representable in a limited character_space."""
-    if isinstance(value, int):  # integer
+    if isinstance(value, int):
         return str(value)
-    elif isinstance(value, float | np.float64):  # float
+    if isinstance(value, float | np.float64):
         return f"{value}".replace(".", "p").rstrip("0").rstrip("p")
-    elif isinstance(value, kdb.LayerInfo):
+    if isinstance(value, kdb.LayerInfo):
         return f"{value.name or str(value.layer) + '_' + str(value.datatype)}"
-    elif isinstance(value, list | tuple):
+    if isinstance(value, list | tuple):
         return "_".join(clean_value(v) for v in value)
-    elif isinstance(value, dict):
+    if isinstance(value, dict):
         return dict2name(**value)
-    elif hasattr(value, "name"):
+    if hasattr(value, "name"):
         return clean_name(value.name)  # type: ignore[arg-type]
-    elif callable(value):
+    if callable(value):
         if isinstance(value, FunctionType) and value.__name__ == "<lambda>":
-            raise ValueError(
-                "Unable to serialize lambda function. Use a named function instead."
+            raise NonSerializableError(
+                value=value,
+                extra_message="Use a named function instead.",
             )
         if isinstance(value, functools.partial):
             sig = inspect.signature(value.func)
-            args_as_kwargs = dict(zip(sig.parameters.keys(), value.args))
+            args_as_kwargs = dict(zip(sig.parameters.keys(), value.args, strict=False))
             args_as_kwargs.update(**value.keywords)
             args_as_kwargs = clean_dict(args_as_kwargs)
-            # args_as_kwargs.pop("function", None)
             func = value.func
             while hasattr(func, "func"):
                 func = func.func
@@ -98,14 +99,13 @@ def clean_value(
                 "settings": args_as_kwargs,
             }
             return clean_value(v)
-        elif isinstance(value, toolz.functoolz.Compose):
+        if isinstance(value, toolz.functoolz.Compose):
             return "_".join(
-                [clean_value(value.first)] + [clean_value(func) for func in value.funcs]
+                [clean_value(value.first)]
+                + [clean_value(func) for func in value.funcs],
             )
-        else:
-            return getattr(value, "__name__", value.__class__.__name__)
-    else:
-        return clean_name(str(value))
+        return getattr(value, "__name__", value.__class__.__name__)
+    return clean_name(str(value))
 
 
 @overload
@@ -129,15 +129,11 @@ def _to_hashable(
                 value_ = value
             ud[item] = value_
         return ud
-    else:
-        ul = DecoratorList([])
-        for index, value in enumerate(d):
-            if isinstance(value, dict | list):
-                value_ = _to_hashable(value)
-            else:
-                value_ = value
-            ul.append(value_)
-        return ul
+    ul = DecoratorList([])
+    for _, value in enumerate(d):
+        value_ = _to_hashable(value) if isinstance(value, dict | list) else value
+        ul.append(value_)
+    return ul
 
 
 @overload
@@ -160,8 +156,8 @@ def _hashable_to_original(
         for item, value in udl.items():
             udl[item] = _hashable_to_original(value)
         return udl.data
-    elif isinstance(udl, DecoratorList):
-        list_ = []
+    if isinstance(udl, DecoratorList):
+        list_: list[Any] = []
         for v in udl:
             if isinstance(v, DecoratorDict | DecoratorList):
                 list_.append(_hashable_to_original(v))
@@ -186,8 +182,8 @@ def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
     kwargs.pop("self", None)
     label = [prefix] if prefix else []
     for key, value in kwargs.items():
-        key = join_first_letters(key)
-        label += [f"{key.upper()}{clean_value(value)}"]
+        _key = join_first_letters(key)
+        label += [f"{_key.upper()}{clean_value(value)}"]
     label_ = "_".join(label)
     return clean_name(label_)
 
@@ -196,43 +192,44 @@ def convert_metadata_type(value: Any) -> MetaData:
     """Recursively clean up a MetaData for KCellSettings."""
     if isinstance(value, int | float | bool | str | SerializableShape):
         return value
-    elif value is None:
+    if value is None:
         return None
-    elif isinstance(value, tuple):
+    if isinstance(value, tuple):
         return tuple(convert_metadata_type(tv) for tv in value)
-    elif isinstance(value, list):
-        return list(convert_metadata_type(tv) for tv in value)
-    elif isinstance(value, dict):
+    if isinstance(value, list):
+        return [convert_metadata_type(tv) for tv in value]
+    if isinstance(value, dict):
         return {k: convert_metadata_type(v) for k, v in value.items()}
     return clean_value(value)
 
 
 def check_metadata_type(value: MetaData) -> MetaData:
     """Recursively check an info value whether it can be stored."""
-    if value is None:
-        return None
-    elif isinstance(value, str | int | float | bool | SerializableShape):
-        return value
-    elif isinstance(value, tuple):
-        return tuple(convert_metadata_type(tv) for tv in value)
-    elif isinstance(value, list):
-        return list(convert_metadata_type(tv) for tv in value)
-    elif isinstance(value, dict):
+    try:
+        if value is None:
+            return None
+        if isinstance(value, str | int | float | bool | SerializableShape):
+            return value
+        if isinstance(value, tuple):
+            return tuple(convert_metadata_type(tv) for tv in value)
+        if isinstance(value, list):
+            return [convert_metadata_type(tv) for tv in value]
         return {k: convert_metadata_type(v) for k, v in value.items()}
-    raise ValueError(
-        "Values of the info dict only support int, float, string, tuple or list."
-        f"{value=}, {type(value)=}"
-    )
+    except Exception as e:
+        raise InvalidMetaDataError(
+            value=value,
+            value_type=type(value),
+        ) from e
 
 
 def serialize_setting(setting: MetaData) -> MetaData:
     if isinstance(setting, dict):
         return {name: serialize_setting(_setting) for name, _setting in setting.items()}
-    elif isinstance(setting, list):
+    if isinstance(setting, list):
         return [serialize_setting(s) for s in setting]
-    elif isinstance(setting, tuple):
+    if isinstance(setting, tuple):
         return tuple(serialize_setting(s) for s in setting)
-    elif isinstance(setting, SerializableShape):
+    if isinstance(setting, SerializableShape):
         return f"!#{setting.__class__.__name__} {setting!s}"
     return setting
 
@@ -242,11 +239,11 @@ def deserialize_setting(setting: MetaData) -> MetaData:
         return {
             name: deserialize_setting(_setting) for name, _setting in setting.items()
         }
-    elif isinstance(setting, list):
+    if isinstance(setting, list):
         return [deserialize_setting(s) for s in setting]
-    elif isinstance(setting, tuple):
+    if isinstance(setting, tuple):
         return tuple(deserialize_setting(s) for s in setting)
-    elif isinstance(setting, str) and setting.startswith("!#"):
+    if isinstance(setting, str) and setting.startswith("!#"):
         cls_name, value = setting.removeprefix("!#").split(" ", 1)
         match cls_name:
             case "LayerInfo":
@@ -257,7 +254,9 @@ def deserialize_setting(setting: MetaData) -> MetaData:
 
 
 def get_cell_name(
-    cell_type: str, max_cellname_length: int | None = None, **kwargs: dict[str, Any]
+    cell_type: str,
+    max_cellname_length: int | None = None,
+    **kwargs: dict[str, Any],
 ) -> str:
     """Convert a cell to a string."""
     name = cell_type

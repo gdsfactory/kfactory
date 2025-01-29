@@ -7,7 +7,10 @@ from kfactory.enclosure import extrude_path_dynamic
 
 @kf.cell
 def taper_dyn(
-    length: float, width: float, layer: kf.kdb.LayerInfo, enclosure: kf.LayerEnclosure
+    length: float,
+    width: float,
+    layer: kf.kdb.LayerInfo,
+    enclosure: kf.LayerEnclosure,
 ) -> kf.KCell:
     c = kf.KCell()
 
@@ -23,7 +26,10 @@ def taper_dyn(
 
 @kf.cell
 def taper_static(
-    length: float, width: float, layer: kf.kdb.LayerInfo, enclosure: kf.LayerEnclosure
+    length: float,
+    width: float,
+    layer: kf.kdb.LayerInfo,
+    enclosure: kf.LayerEnclosure,
 ) -> kf.KCell:
     c = kf.KCell()
 

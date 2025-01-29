@@ -108,14 +108,14 @@ def virtual_bend_circular_factory(
             logger.critical(
                 f"Negative lengths are not allowed {angle} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             angle = -angle
         if width < 0:
             logger.critical(
                 f"Negative widths are not allowed {width} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             width = -width
         dbu = c.kcl.dbu
@@ -127,7 +127,10 @@ def virtual_bend_circular_factory(
                     (-np.cos(_angle / 180 * np.pi) + 1) * radius,
                 ]
                 for _angle in np.linspace(
-                    0, angle, int(angle // angle_step + 0.5), endpoint=True
+                    0,
+                    angle,
+                    int(angle // angle_step + 0.5),
+                    endpoint=True,
                 )
             ]
         ]
@@ -151,7 +154,7 @@ def virtual_bend_circular_factory(
                 enclosure=enclosure,
                 angle=angle,
                 angle_step=angle_step,
-            )
+            ),
         )
         _info.update(_additional_info)
         c.info = Info(**_info)

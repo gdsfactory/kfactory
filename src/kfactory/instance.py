@@ -16,9 +16,9 @@ from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from .conf import PROPID, config, logger
 from .exceptions import (
-    PortLayerMismatch,
-    PortTypeMismatch,
-    PortWidthMismatch,
+    PortLayerMismatchError,
+    PortTypeMismatchError,
+    PortWidthMismatchError,
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .instance_ports import (
@@ -104,7 +104,8 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @abstractmethod
     def __getitem__(
-        self, key: int | str | None | tuple[int | str | None, int, int]
+        self,
+        key: int | str | None | tuple[int | str | None, int, int],
     ) -> ProtoPort[TUnit]: ...
 
     def __getattr__(self, name: str) -> Any:
@@ -357,7 +358,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
                 raise ValueError(
                     "portname cannot be None if an Instance Object is given. For"
                     "complex connections (non-90 degree and floating point ports) use"
-                    "route_cplx instead"
+                    "route_cplx instead",
                 )
             op = Port(base=other.ports[other_port_name].base)
         elif isinstance(other, ProtoPort):
@@ -369,11 +370,11 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         else:
             p = Port(base=self.cell.ports[port].base)
         if p.width != op.width and not allow_width_mismatch:
-            raise PortWidthMismatch(self, other, p, op)
+            raise PortWidthMismatchError(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
-            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
+            raise PortLayerMismatchError(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
-            raise PortTypeMismatch(self, other, p, op)
+            raise PortTypeMismatchError(self, other, p, op)
         if p.base.dcplx_trans or op.base.dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
             match (use_mirror, use_angle):
@@ -394,11 +395,11 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
                     self._instance.dcplx_trans = _dcplx_trans
                 case False, False:
                     self._instance.dcplx_trans = kdb.DCplxTrans(
-                        op.dcplx_trans.disp - p.dcplx_trans.disp
+                        op.dcplx_trans.disp - p.dcplx_trans.disp,
                     )
                 case True, False:
                     self._instance.dcplx_trans = kdb.DCplxTrans(
-                        op.dcplx_trans.disp - p.dcplx_trans.disp
+                        op.dcplx_trans.disp - p.dcplx_trans.disp,
                     )
                     self.dmirror_y(op.dcplx_trans.disp.y)
 
@@ -481,7 +482,8 @@ class Instance(ProtoTInstance[int], DBUGeometricObject):
         self._ports = value
 
     def __getitem__(
-        self, key: int | str | None | tuple[int | str | None, int, int]
+        self,
+        key: int | str | None | tuple[int | str | None, int, int],
     ) -> Port:
         """Returns port from instance.
 
@@ -497,7 +499,6 @@ class Instance(ProtoTInstance[int], DBUGeometricObject):
         3 times in `a` direction (4th index in the array), and 5 times in `b` direction
         (5th index in the array).
         """
-
         return Port(base=self.ports[key].base)
 
     @property
@@ -582,17 +583,18 @@ class DInstance(ProtoTInstance[float], UMGeometricObject):
     def parent_cell(self, cell: KCell | DKCell | kdb.Cell) -> None:
         if isinstance(cell, KCell | DKCell):
             self.parent_cell.insts.remove(
-                Instance(kcl=self.kcl, instance=self._instance)
+                Instance(kcl=self.kcl, instance=self._instance),
             )
             self._instance.parent_cell = cell.kdb_cell
         else:
             self.parent_cell.insts.remove(
-                Instance(kcl=self.kcl, instance=self._instance)
+                Instance(kcl=self.kcl, instance=self._instance),
             )
             self._instance.parent_cell = cell
 
     def __getitem__(
-        self, key: int | str | None | tuple[int | str | None, int, int]
+        self,
+        key: int | str | None | tuple[int | str | None, int, int],
     ) -> DPort:
         """Returns port from instance.
 
@@ -686,15 +688,15 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 kdb.DCplxTrans(
                     kdb.ICplxTrans(_trans, cell.kcl.dbu)
                     .s_trans()
-                    .to_dtype(cell.kcl.dbu)
-                )
+                    .to_dtype(cell.kcl.dbu),
+                ),
             )
             _trans = base_trans.inverted() * _trans
             _cell_name = self.cell.name
             if _cell_name is None:
                 raise ValueError(
                     "Cannot insert a non-flattened VInstance into a VKCell when the"
-                    f" name is 'None'. VKCell at {self.trans}"
+                    f" name is 'None'. VKCell at {self.trans}",
                 )
             if _trans != kdb.DCplxTrans():
                 _trans_str = (
@@ -724,32 +726,30 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             _inst.transform(base_trans)
             return Instance(kcl=self.cell.kcl, instance=_inst.instance)
 
+        _trans = trans * self.trans
+        base_trans = kdb.DCplxTrans(
+            kdb.ICplxTrans(_trans, cell.kcl.dbu).s_trans().to_dtype(cell.kcl.dbu),
+        )
+        _trans = base_trans.inverted() * _trans
+        _cell_name = self.cell.name
+        if _trans != kdb.DCplxTrans():
+            _trans_str = (
+                f"_M{_trans.mirror}_S{_trans.angle}_X{_trans.disp.x}_Y{_trans.disp.y}"
+            ).replace(".", "p")
+            _cell_name = _cell_name + _trans_str
+        if cell.kcl.layout_cell(_cell_name) is None:
+            _cell = self.cell.dup()
+            _cell.name = _cell_name
+            _cell.flatten(False)
+            for layer in _cell.kcl.layer_indexes():
+                _cell.shapes(layer).transform(_trans)
+            for _port in _cell.ports:
+                _port.dcplx_trans = _trans * _port.dcplx_trans
         else:
-            _trans = trans * self.trans
-            base_trans = kdb.DCplxTrans(
-                kdb.ICplxTrans(_trans, cell.kcl.dbu).s_trans().to_dtype(cell.kcl.dbu)
-            )
-            _trans = base_trans.inverted() * _trans
-            _cell_name = self.cell.name
-            if _trans != kdb.DCplxTrans():
-                _trans_str = (
-                    f"_M{_trans.mirror}_S{_trans.angle}"
-                    f"_X{_trans.disp.x}_Y{_trans.disp.y}"
-                ).replace(".", "p")
-                _cell_name = _cell_name + _trans_str
-            if cell.kcl.layout_cell(_cell_name) is None:
-                _cell = self.cell.dup()
-                _cell.name = _cell_name
-                _cell.flatten(False)
-                for layer in _cell.kcl.layer_indexes():
-                    _cell.shapes(layer).transform(_trans)
-                for _port in _cell.ports:
-                    _port.dcplx_trans = _trans * _port.dcplx_trans
-            else:
-                _cell = cell.kcl[_cell_name]
-            _inst = cell << _cell
-            _inst.transform(base_trans)
-            return Instance(kcl=self.cell.kcl, instance=_inst.instance)
+            _cell = cell.kcl[_cell_name]
+        _inst = cell << _cell
+        _inst.transform(base_trans)
+        return Instance(kcl=self.cell.kcl, instance=_inst.instance)
 
     @overload
     def insert_into_flat(
@@ -786,7 +786,9 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 if levels is not None:
                     if levels > 0:
                         inst.insert_into_flat(
-                            cell, trans=trans * self.trans, levels=levels - 1
+                            cell,
+                            trans=trans * self.trans,
+                            levels=levels - 1,
                         )
                     else:
                         assert isinstance(cell, KCell)
@@ -797,7 +799,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         else:
             if levels:
                 logger.warning(
-                    "Levels are not supported if the inserted Instance is a KCell."
+                    "Levels are not supported if the inserted Instance is a KCell.",
                 )
             if isinstance(cell, KCell):
                 for layer in cell.kcl.layer_indexes():
@@ -888,7 +890,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 raise ValueError(
                     "portname cannot be None if an Instance Object is given. For"
                     "complex connections (non-90 degree and floating point ports) use"
-                    "route_cplx instead"
+                    "route_cplx instead",
                 )
             op = Port(base=other.ports[other_port_name].base)
         else:
@@ -901,11 +903,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         assert isinstance(p, Port) and isinstance(op, Port)
 
         if p.width != op.width and not allow_width_mismatch:
-            raise PortWidthMismatch(self, other, p, op)
+            raise PortWidthMismatchError(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
-            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
+            raise PortLayerMismatchError(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
-            raise PortTypeMismatch(self, other, p, op)
+            raise PortTypeMismatchError(self, other, p, op)
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
         match (use_mirror, use_angle):
             case True, True:

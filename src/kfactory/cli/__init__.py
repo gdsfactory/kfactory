@@ -20,7 +20,8 @@ app.command()(show)
 @app.callback(invoke_without_command=True)
 def version_callback(
     version: Annotated[
-        bool, typer.Option("--version", "-V", help="Show version of the CLI")
+        bool,
+        typer.Option("--version", "-V", help="Show version of the CLI"),
     ] = False,
 ) -> None:
     """Show the version of the cli."""

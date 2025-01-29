@@ -94,8 +94,7 @@ class Factories(UserDict[str, Callable[..., T]]):
     def __getattr__(self, name: str) -> Any:
         if name != "data":
             return self.data[name]
-        else:
-            self.__getattribute__(name)
+        self.__getattribute__(name)
 
     def for_tags(self, tags: list[str]) -> list[Callable[..., T]]:
         if len(tags) > 0:
@@ -103,11 +102,14 @@ class Factories(UserDict[str, Callable[..., T]]):
             for tag in tags[1:]:
                 tag_set &= set(self.tags[tag])
             return list(tag_set)
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 class KCLayout(
-    BaseModel, arbitrary_types_allowed=True, extra="allow", validate_assignment=True
+    BaseModel,
+    arbitrary_types_allowed=True,
+    extra="allow",
+    validate_assignment=True,
 ):
     """Small extension to the klayout.db.Layout.
 
@@ -159,7 +161,7 @@ class KCLayout(
     infos: LayerInfos
     layer_stack: LayerStack
     netlist_layer_mapping: dict[LayerEnum | int, LayerEnum | int] = Field(
-        default_factory=dict
+        default_factory=dict,
     )
     sparameters_path: Path | str | None
     interconnect_cml_path: Path | str | None
@@ -248,14 +250,14 @@ class KCLayout(
                     {
                         name: lenc.copy_to(self)
                         for name, lenc in layer_enclosures.root.items()
-                    }
+                    },
                 )
             else:
                 _layer_enclosures = LayerEnclosureModel(
                     {
                         name: lenc.copy_to(self)
                         for name, lenc in layer_enclosures.items()
-                    }
+                    },
                 )
         else:
             _layer_enclosures = LayerEnclosureModel({})
@@ -281,7 +283,8 @@ class KCLayout(
     @model_validator(mode="before")
     def _validate_layers(cls, data: dict[str, Any]) -> dict[str, Any]:
         data["layers"] = layerenum_from_dict(
-            layers=data["infos"], layout=data["library"].layout()
+            layers=data["infos"],
+            layout=data["library"].layout(),
         )
         data["library"].register(data["name"])
         return data
@@ -351,17 +354,27 @@ class KCLayout(
 
     @overload
     def find_layer(
-        self, name: str, *, allow_undefined_layers: Literal[True] = True
+        self,
+        name: str,
+        *,
+        allow_undefined_layers: Literal[True] = True,
     ) -> LayerEnum | int: ...
 
     @overload
     def find_layer(
-        self, info: kdb.LayerInfo, *, allow_undefined_layers: Literal[True] = True
+        self,
+        info: kdb.LayerInfo,
+        *,
+        allow_undefined_layers: Literal[True] = True,
     ) -> LayerEnum | int: ...
 
     @overload
     def find_layer(
-        self, layer: int, datatype: int, *, allow_undefined_layers: Literal[True] = True
+        self,
+        layer: int,
+        datatype: int,
+        *,
+        allow_undefined_layers: Literal[True] = True,
     ) -> LayerEnum | int: ...
 
     @overload
@@ -384,7 +397,8 @@ class KCLayout(
         all three of layer, datatype, and name.
         """
         allow_undefined_layers = kwargs.pop(
-            "allow_undefined_layers", config.allow_undefined_layers
+            "allow_undefined_layers",
+            config.allow_undefined_layers,
         )
         info = self.layout.get_info(self.layout.layer(*args, **kwargs))
         try:
@@ -393,7 +407,7 @@ class KCLayout(
             if allow_undefined_layers:
                 return self.layout.layer(info)
             raise KeyError(
-                f"Layer '{args=}, {kwargs=}' has not been defined in the KCLayout."
+                f"Layer '{args=}, {kwargs=}' has not been defined in the KCLayout.",
             )
 
     @overload
@@ -526,7 +540,8 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[
-        [KCellFunc[KCellParams, ProtoTKCell[Any]]], KCellFunc[KCellParams, K]
+        [KCellFunc[KCellParams, ProtoTKCell[Any]]],
+        KCellFunc[KCellParams, K],
     ]: ...
 
     def cell(  # type: ignore[misc]
@@ -555,7 +570,8 @@ class KCLayout(
         KCellFunc[KCellParams, K]
         | Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]
         | Callable[
-            [KCellFunc[KCellParams, ProtoTKCell[Any]]], KCellFunc[KCellParams, K]
+            [KCellFunc[KCellParams, ProtoTKCell[Any]]],
+            KCellFunc[KCellParams, K],
         ]
     ):
         """Decorator to cache and auto name the cell.
@@ -618,7 +634,7 @@ class KCLayout(
             f: KCellFunc[KCellParams, ProtoTKCell[Any]] | KCellFunc[KCellParams, K],
         ) -> KCellFunc[KCellParams, K]:
             sig = inspect.signature(f)
-            output_cell_type_: type[K] | type[inspect.Signature.empty] = (  # type: ignore[valid-type]
+            output_cell_type_: type[K | inspect.Signature.empty] = (  # type: ignore[valid-type]
                 output_type or sig.return_annotation
             )
 
@@ -626,18 +642,19 @@ class KCLayout(
                 raise ValueError(
                     "You did not provide an output_type and the return annotation "
                     "cannot be inferred from the function signature. Please provide "
-                    "an output_type or return annotation."
+                    "an output_type or return annotation.",
                 )
 
             output_cell_type = cast(type[K], output_cell_type_)
 
             _cache: Cache[_HashedTuple, K] | dict[_HashedTuple, K] = cache or Cache(
-                maxsize=float("inf")
+                maxsize=float("inf"),
             )
 
             @functools.wraps(f)
             def wrapper_autocell(
-                *args: KCellParams.args, **kwargs: KCellParams.kwargs
+                *args: KCellParams.args,
+                **kwargs: KCellParams.kwargs,
             ) -> K:
                 params: dict[str, Any] = {
                     p.name: p.default for _, p in sig.parameters.items()
@@ -694,7 +711,8 @@ class KCLayout(
                                         self.future_cell_name,
                                     )
                                     return self.get_cell(
-                                        layout_cell.cell_index(), output_cell_type
+                                        layout_cell.cell_index(),
+                                        output_cell_type,
                                     )
                         logger.debug(f"Constructing {self.future_cell_name}")
                         _name: str | None = name
@@ -724,7 +742,7 @@ class KCLayout(
                                 lno=inspect.getsourcelines(f)[1],
                             )
                             raise CellNameError(
-                                f"KCell with name {_name} exists already."
+                                f"KCell with name {_name} exists already.",
                             )
 
                         cell.name = _name
@@ -754,10 +772,10 @@ class KCLayout(
                             raise ValueError(
                                 "Found duplicate port names: "
                                 + ", ".join(
-                                    [f"{name}: {n}" for name, n in duplicate_names]
+                                    [f"{name}: {n}" for name, n in duplicate_names],
                                 )
                                 + " If this intentional, please pass "
-                                "`check_ports=False` to the @cell decorator"
+                                "`check_ports=False` to the @cell decorator",
                             )
                     match check_instances:
                         case CHECK_INSTANCES.RAISE:
@@ -771,7 +789,7 @@ class KCLayout(
                                         inst.cell.name
                                         for inst in cell.each_inst()
                                         if inst.is_complex()
-                                    )
+                                    ),
                                 )
                         case CHECK_INSTANCES.FLATTEN:
                             if any(inst.is_complex() for inst in cell.each_inst()):
@@ -785,7 +803,7 @@ class KCLayout(
                                 ]
                                 for inst in complex_insts:
                                     vinst = cell.create_vinst(
-                                        self[inst.cell.cell_index()]
+                                        self[inst.cell.cell_index()],
                                     )
                                     vinst.trans = inst.dcplx_trans
                                     inst.delete()
@@ -797,7 +815,7 @@ class KCLayout(
                             if port.base.dcplx_trans:
                                 dup = port.base.dcplx_trans.dup()
                                 dup.disp = self.to_um(
-                                    self.to_dbu(port.base.dcplx_trans.disp)
+                                    self.to_dbu(port.base.dcplx_trans.disp),
                                 )
                                 port.dcplx_trans = dup
                     if add_port_layers:
@@ -809,11 +827,11 @@ class KCLayout(
                                         kdb.Point(0, port.width // 2),
                                     )
                                     cell.shapes(
-                                        cell.kcl.netlist_layer_mapping[port.layer]
+                                        cell.kcl.netlist_layer_mapping[port.layer],
                                     ).insert(port.trans * edge)
                                     if port.name:
                                         cell.shapes(
-                                            cell.kcl.netlist_layer_mapping[port.layer]
+                                            cell.kcl.netlist_layer_mapping[port.layer],
                                         ).insert(kdb.Text(port.name, port.trans))
                                 else:
                                     dwidth = self.to_um(port.width)
@@ -822,16 +840,16 @@ class KCLayout(
                                         kdb.DPoint(0, dwidth / 2),
                                     )
                                     cell.shapes(
-                                        cell.kcl.netlist_layer_mapping[port.layer]
+                                        cell.kcl.netlist_layer_mapping[port.layer],
                                     ).insert(port.dcplx_trans * dedge)
                                     if port.name:
                                         cell.shapes(
-                                            cell.kcl.netlist_layer_mapping[port.layer]
+                                            cell.kcl.netlist_layer_mapping[port.layer],
                                         ).insert(
                                             kdb.DText(
                                                 port.name,
                                                 port.dcplx_trans.s_trans(),
-                                            )
+                                            ),
                                         )
                     # post process the cell
                     for pp in post_process:
@@ -845,7 +863,7 @@ class KCLayout(
                             "to use @kcl.cell and only use @cell for cells which "
                             "are created through kfactory.kcl. To create KCells not"
                             " in the standard KCLayout, use either "
-                            "custom_kcl.kcell() or KCell(kcl=custom_kcl)."
+                            "custom_kcl.kcell() or KCell(kcl=custom_kcl).",
                         )
                     return output_cell_type(base_kcell=cell.base_kcell)
 
@@ -973,7 +991,8 @@ class KCLayout(
 
             @functools.wraps(f)
             def wrapper_autocell(
-                *args: KCellParams.args, **kwargs: KCellParams.kwargs
+                *args: KCellParams.args,
+                **kwargs: KCellParams.kwargs,
             ) -> VKCell:
                 params: dict[str, KCellParams.args] = {
                     p.name: p.default for p in sig.parameters.values()
@@ -1014,7 +1033,7 @@ class KCLayout(
                     if cell.locked:
                         raise ValueError(
                             "Trying to change a locked VKCell is no allowed. "
-                            f"{cell.name=}"
+                            f"{cell.name=}",
                         )
                     if set_name:
                         if basename is not None:
@@ -1044,11 +1063,11 @@ class KCLayout(
                                         kdb.Point(0, int(port.width // 2)),
                                     )
                                     cell.shapes(
-                                        cell.kcl.netlist_layer_mapping[port.layer]
+                                        cell.kcl.netlist_layer_mapping[port.layer],
                                     ).insert(port.trans * edge)
                                     if port.name:
                                         cell.shapes(
-                                            cell.kcl.netlist_layer_mapping[port.layer]
+                                            cell.kcl.netlist_layer_mapping[port.layer],
                                         ).insert(kdb.Text(port.name, port.trans))
                                 else:
                                     dedge = kdb.DEdge(
@@ -1056,15 +1075,16 @@ class KCLayout(
                                         kdb.DPoint(0, port.width / 2),
                                     )
                                     cell.shapes(
-                                        cell.kcl.netlist_layer_mapping[port.layer]
+                                        cell.kcl.netlist_layer_mapping[port.layer],
                                     ).insert(port.dcplx_trans * dedge)
                                     if port.name:
                                         cell.shapes(
-                                            cell.kcl.netlist_layer_mapping[port.layer]
+                                            cell.kcl.netlist_layer_mapping[port.layer],
                                         ).insert(
                                             kdb.DText(
-                                                port.name, port.dcplx_trans.s_trans()
-                                            )
+                                                port.name,
+                                                port.dcplx_trans.s_trans(),
+                                            ),
                                         )
                     cell._base_kcell.lock()
                     if cell.kcl != self:
@@ -1075,7 +1095,7 @@ class KCLayout(
                             "use @kcl.cell and only use @cell for cells which are"
                             " created through kfactory.kcl. To create KCells not in "
                             "the standard KCLayout, use either custom_kcl.kcell() or "
-                            "KCell(kcl=custom_kcl)."
+                            "KCell(kcl=custom_kcl).",
                         )
                     return cell
 
@@ -1126,7 +1146,10 @@ class KCLayout(
             self.layout.__setattr__(name, value)
 
     def layerenum_from_dict(
-        self, name: str = "LAYER", *, layers: LayerInfos
+        self,
+        name: str = "LAYER",
+        *,
+        layers: LayerInfos,
     ) -> type[LayerEnum]:
         """Create a new [LayerEnum][kfactory.kcell.LayerEnum] from this KCLayout."""
         return layerenum_from_dict(layers=layers, name=name, layout=self.layout)
@@ -1203,11 +1226,10 @@ class KCLayout(
         with self.thread_lock:
             if allow_duplicate or (self.layout_cell(name) is None):
                 return self.layout.create_cell(name, *args)
-            else:
-                raise ValueError(
-                    f"Cellname {name} already exists. Please make sure the cellname is"
-                    " unique or pass `allow_duplicate` when creating the library"
-                )
+            raise ValueError(
+                f"Cellname {name} already exists. Please make sure the cellname is"
+                " unique or pass `allow_duplicate` when creating the library",
+            )
 
     def delete_cell(self, cell: ProtoTKCell[Any] | int) -> None:
         """Delete a cell in the kcl object."""
@@ -1246,7 +1268,9 @@ class KCLayout(
                 del self.tkcells[ci]
 
     def register_cell(
-        self, kcell: ProtoTKCell[Any], allow_reregister: bool = False
+        self,
+        kcell: ProtoTKCell[Any],
+        allow_reregister: bool = False,
     ) -> None:
         """Register an existing cell in the KCLayout object.
 
@@ -1261,7 +1285,7 @@ class KCLayout(
             else:
                 raise ValueError(
                     "Cannot register a new cell with a name that already"
-                    " exists in the library"
+                    " exists in the library",
                 )
 
     def __getitem__(self, obj: str | int) -> KCell:
@@ -1303,7 +1327,7 @@ class KCLayout(
         raise ValueError(
             f"Library doesn't have a KCell named {obj},"
             " available KCells are"
-            f"{pformat(sorted([cell.name for cell in self.kcells.values()]))}"
+            f"{pformat(sorted([cell.name for cell in self.kcells.values()]))}",
         )
 
     def read(
@@ -1368,9 +1392,9 @@ class KCLayout(
                 diff.compare()
                 if diff.dbu_differs:
                     raise MergeError(
-                        "Layouts' DBU differ. Check the log for more info."
+                        "Layouts' DBU differ. Check the log for more info.",
                     )
-                elif diff.diff_xor.cells() > 0:
+                if diff.diff_xor.cells() > 0:
                     diff_kcl = KCLayout(self.name + "_XOR")
                     diff_kcl.layout.assign(diff.diff_xor)
                     show(diff_kcl)
@@ -1420,7 +1444,7 @@ class KCLayout(
                 case _:
                     raise ValueError(
                         f"Unknown meta update strategy {update_kcl_meta_data=}"
-                        ", available strategies are 'overwrite', 'skip', or 'drop'"
+                        ", available strategies are 'overwrite', 'skip', or 'drop'",
                     )
             meta_format = settings.get("meta_format") or config.meta_format
             load_cells = {
@@ -1457,14 +1481,14 @@ class KCLayout(
                 self.get_enclosure(
                     LayerEnclosure(
                         **meta.value,
-                    )
+                    ),
                 )
             elif meta.name.startswith("kfactory:cross_section:"):
                 cross_sections.append(
                     {
                         "name": meta.name.removeprefix("kfactory:cross_section:"),
                         **meta.value,
-                    }
+                    },
                 )
 
         for cs in cross_sections:
@@ -1473,7 +1497,7 @@ class KCLayout(
                     width=cs["width"],
                     enclosure=self.get_enclosure(cs["layer_enclosure"]),
                     name=cs["name"],
-                )
+                ),
             )
 
         return info, settings
@@ -1482,11 +1506,11 @@ class KCLayout(
         """Set the info/settings of the KCLayout."""
         for name, setting in self.settings.model_dump().items():
             self.add_meta_info(
-                kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
+                kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True),
             )
         for name, info in self.info.model_dump().items():
             self.add_meta_info(
-                kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
+                kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True),
             )
         for enclosure in self.layer_enclosures.root.values():
             self.add_meta_info(
@@ -1495,7 +1519,7 @@ class KCLayout(
                     enclosure.model_dump(),
                     None,
                     True,
-                )
+                ),
             )
         for cross_section in self.cross_sections.cross_sections.values():
             self.add_meta_info(
@@ -1507,7 +1531,7 @@ class KCLayout(
                     },
                     None,
                     True,
-                )
+                ),
             )
 
     def write(
@@ -1573,7 +1597,8 @@ class KCLayout(
         self.tkcells = {}
 
     def get_enclosure(
-        self, enclosure: str | LayerEnclosure | LayerEnclosureSpec
+        self,
+        enclosure: str | LayerEnclosure | LayerEnclosureSpec,
     ) -> LayerEnclosure:
         """Gets a layer enclosure by name specification or the layerenclosure itself."""
         return self.layer_enclosures.get_enclosure(enclosure, self)

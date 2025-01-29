@@ -210,26 +210,38 @@ def fill_tiled(
         exlayers = " + ".join(
             [
                 layer_name + f".sized({c.kcl.to_dbu(size)})" if size else layer_name
-                for layer_name, (_, size) in zip(exlayer_names, exclude_layers)
-            ]
+                for layer_name, (_, size) in zip(
+                    exlayer_names,
+                    exclude_layers,
+                    strict=False,
+                )
+            ],
         )
         exregions = " + ".join(
             [
                 region_name + f".sized({c.kcl.to_dbu(size)})" if size else region_name
-                for region_name, (_, size) in zip(exregion_names, exclude_regions)
-            ]
+                for region_name, (_, size) in zip(
+                    exregion_names,
+                    exclude_regions,
+                    strict=False,
+                )
+            ],
         )
         layers = " + ".join(
             [
                 layer_name + f".sized({c.kcl.to_dbu(size)})" if size else layer_name
-                for layer_name, (_, size) in zip(layer_names, fill_layers)
-            ]
+                for layer_name, (_, size) in zip(layer_names, fill_layers, strict=False)
+            ],
         )
         regions = " + ".join(
             [
                 region_name + f".sized({c.kcl.to_dbu(size)})" if size else region_name
-                for region_name, (_, size) in zip(region_names, fill_regions)
-            ]
+                for region_name, (_, size) in zip(
+                    region_names,
+                    fill_regions,
+                    strict=False,
+                )
+            ],
         )
 
         if exlayer_names or exregion_names:
@@ -267,7 +279,9 @@ def fill_tiled(
         c.kcl.start_changes()
         try:
             logger.debug(
-                "Filling {} with {}", c.kcl.future_cell_name or c.name, fill_cell.name
+                "Filling {} with {}",
+                c.kcl.future_cell_name or c.name,
+                fill_cell.name,
             )
             logger.debug("fill string: '{}'", queue_str)
             tp.execute(f"Fill {c.name}")

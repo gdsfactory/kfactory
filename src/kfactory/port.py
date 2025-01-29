@@ -22,7 +22,7 @@ from typing import (
 )
 
 import klayout.db as kdb
-import klayout.rdb as rdb
+from klayout import rdb
 from pydantic import (
     BaseModel,
     model_serializer,
@@ -56,10 +56,10 @@ def create_port_error(
     if p1.name and p2.name:
         it.add_value(f"Port Names: {c1.name}.{p1.name}/{c2.name}.{p2.name}")
     it.add_value(
-        port_polygon(p1.cross_section.width).transformed(p1.trans).to_dtype(dbu)
+        port_polygon(p1.cross_section.width).transformed(p1.trans).to_dtype(dbu),
     )
     it.add_value(
-        port_polygon(p2.cross_section.width).transformed(p2.trans).to_dtype(dbu)
+        port_polygon(p2.cross_section.width).transformed(p2.trans).to_dtype(dbu),
     )
 
 
@@ -138,7 +138,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         if isinstance(post_trans, kdb.Trans):
             post_trans = kdb.DCplxTrans(post_trans.to_dtype(self.kcl.dbu))
         dcplx_trans = self.dcplx_trans or kdb.DCplxTrans(
-            t=self.trans.to_dtype(self.kcl.dbu)  # type: ignore[union-attr]
+            t=self.trans.to_dtype(self.kcl.dbu),  # type: ignore[union-attr]
         )
 
         base.trans = None
@@ -173,7 +173,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
 
     def get_dcplx_trans(self) -> kdb.DCplxTrans:
         return self.dcplx_trans or kdb.DCplxTrans(
-            self.trans.to_dtype(self.kcl.dbu)  # type: ignore[union-attr]
+            self.trans.to_dtype(self.kcl.dbu),  # type: ignore[union-attr]
         )
 
 
@@ -260,7 +260,8 @@ class ProtoPort(Generic[TUnit], ABC):
         index.
         """
         return self.kcl.find_layer(
-            self.cross_section.main_layer, allow_undefined_layers=True
+            self.cross_section.main_layer,
+            allow_undefined_layers=True,
         )
 
     @property
@@ -313,13 +314,13 @@ class ProtoPort(Generic[TUnit], ABC):
         transformation (set simple to `None` and the complex to the provided value.
         """
         return self._base.dcplx_trans or kdb.DCplxTrans(
-            self.trans.to_dtype(self.kcl.layout.dbu)
+            self.trans.to_dtype(self.kcl.layout.dbu),
         )
 
     @dcplx_trans.setter
     def dcplx_trans(self, value: kdb.DCplxTrans) -> None:
         if value.is_complex() or value.disp != self.kcl.to_um(
-            self.kcl.to_dbu(value.disp)
+            self.kcl.to_dbu(value.disp),
         ):
             self._base.dcplx_trans = value.dup()
         else:
@@ -669,12 +670,11 @@ class Port(ProtoPort[int]):
             if width is None:
                 raise ValueError(
                     "any width and layer, or a cross_section must be given if the"
-                    " 'port is None'"
+                    " 'port is None'",
                 )
-            else:
-                cross_section = kcl_.get_cross_section(
-                    CrossSectionSpec(main_layer=layer_info, width=width)
-                )
+            cross_section = kcl_.get_cross_section(
+                CrossSectionSpec(main_layer=layer_info, width=width),
+            )
         cross_section_ = cross_section
         if trans is not None:
             if isinstance(trans, str):
@@ -742,7 +742,11 @@ class Port(ProtoPort[int]):
         return Port(base=self._base.transformed(trans=trans, post_trans=post_trans))
 
     def copy_polar(
-        self, d: int = 0, d_orth: int = 0, angle: int = 2, mirror: bool = False
+        self,
+        d: int = 0,
+        d_orth: int = 0,
+        angle: int = 2,
+        mirror: bool = False,
     ) -> Port:
         """Get a polar copy of the port.
 
@@ -884,10 +888,10 @@ class DPort(ProtoPort[float]):
                 layer_info = kcl_.layout.get_info(layer)
             if width is None:
                 raise ValueError(
-                    "If a cross_section is not given a width must be defined."
+                    "If a cross_section is not given a width must be defined.",
                 )
             cross_section = kcl_.get_cross_section(
-                CrossSectionSpec(main_layer=layer_info, width=kcl_.to_dbu(width))
+                CrossSectionSpec(main_layer=layer_info, width=kcl_.to_dbu(width)),
             )
         cross_section_ = cross_section
         if trans is not None:
@@ -961,7 +965,11 @@ class DPort(ProtoPort[float]):
         return DPort(base=self._base.transformed(trans=trans, post_trans=post_trans))
 
     def copy_polar(
-        self, d: float = 0, d_orth: float = 0, angle: float = 2, mirror: bool = False
+        self,
+        d: float = 0,
+        d_orth: float = 0,
+        angle: float = 2,
+        mirror: bool = False,
     ) -> DPort:
         """Get a polar copy of the port.
 
@@ -976,7 +984,7 @@ class DPort(ProtoPort[float]):
             mirror: Whether to mirror the port relative to the original port.
         """
         return self.copy(
-            post_trans=kdb.DCplxTrans(rot=angle, mirrx=mirror, x=d, y=d_orth)
+            post_trans=kdb.DCplxTrans(rot=angle, mirrx=mirror, x=d, y=d_orth),
         )
 
     @property
@@ -1288,8 +1296,7 @@ def filter_regex(ports: Iterable[TPort], regex: str) -> filter[TPort]:
     def regex_filter(p: TPort) -> bool:
         if p.name is not None:
             return bool(pattern.match(p.name))
-        else:
-            return False
+        return False
 
     return filter(regex_filter, ports)
 
@@ -1301,18 +1308,17 @@ def port_polygon(width: int) -> kdb.Polygon:
     """Gets a polygon representation for a given port width."""
     if width in polygon_dict:
         return polygon_dict[width]
-    else:
-        poly = kdb.Polygon(
-            [
-                kdb.Point(0, width // 2),
-                kdb.Point(0, -width // 2),
-                kdb.Point(width // 2, 0),
-            ]
-        )
+    poly = kdb.Polygon(
+        [
+            kdb.Point(0, width // 2),
+            kdb.Point(0, -width // 2),
+            kdb.Point(width // 2, 0),
+        ],
+    )
 
-        hole = kdb.Region(poly).sized(-int(width * 0.05) or -1)
-        hole -= kdb.Region(kdb.Box(0, 0, width // 2, -width // 2))
+    hole = kdb.Region(poly).sized(-int(width * 0.05) or -1)
+    hole -= kdb.Region(kdb.Box(0, 0, width // 2, -width // 2))
 
-        poly.insert_hole(list(next(iter(hole.each())).each_point_hull()))
-        polygon_dict[width] = poly
-        return poly
+    poly.insert_hole(list(next(iter(hole.each())).each_point_hull()))
+    polygon_dict[width] = poly
+    return poly

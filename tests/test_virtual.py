@@ -9,7 +9,9 @@ import kfactory as kf
 def test_virtual_cell(kcl: kf.KCLayout) -> None:
     c = kcl.vkcell("TEST_VIRTUAL_CELL")
     c.shapes(kcl.find_layer(1, 0)).insert(
-        kf.kdb.DPolygon([kf.kdb.DPoint(0, 0), kf.kdb.DPoint(1, 0), kf.kdb.DPoint(0, 1)])
+        kf.kdb.DPolygon(
+            [kf.kdb.DPoint(0, 0), kf.kdb.DPoint(1, 0), kf.kdb.DPoint(0, 1)],
+        ),
     )
 
 
@@ -19,7 +21,9 @@ def test_virtual_inst(straight: kf.KCell) -> None:
 
 
 def test_virtual_cell_insert(
-    LAYER: Layers, straight: kf.KCell, wg_enc: kf.LayerEnclosure
+    LAYER: Layers,
+    straight: kf.KCell,
+    wg_enc: kf.LayerEnclosure,
 ) -> None:
     c = kf.KCell()
 
@@ -37,7 +41,10 @@ def test_virtual_cell_insert(
     e3 = vc << e_bend
     e4 = vc << e_bend
     _s = kf.cells.virtual.straight.virtual_straight(
-        width=0.5, length=10, layer=LAYER.WG, enclosure=wg_enc
+        width=0.5,
+        length=10,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
     )
     s = vc << _s
 
@@ -73,7 +80,6 @@ def test_all_angle_route(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
             enclosure=wg_enc,
         ),
     )
-    # kf.VInstance(vc, kf.kdb.DCplxTrans()).insert_into(c)
     file = Path("test_all_angle.oas")
     vc.write(file)
     assert file.is_file()

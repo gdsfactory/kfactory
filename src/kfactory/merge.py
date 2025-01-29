@@ -93,7 +93,7 @@ class MergeDiff:
             regions.append(r)
 
         for trans in instance.each_cplx_trans():
-            for li, r in zip(layer_infos, regions):
+            for li, r in zip(layer_infos, regions, strict=False):
                 self.cell_a.shapes(self.diff_a.layer(li)).insert(r.transformed(trans))
 
     def on_instance_in_b_only(self, instance: kdb.CellInstArray, propid: int) -> None:
@@ -111,7 +111,7 @@ class MergeDiff:
             regions.append(r)
 
         for trans in instance.each_cplx_trans():
-            for li, r in zip(layer_infos, regions):
+            for li, r in zip(layer_infos, regions, strict=False):
                 self.cell_b.shapes(self.diff_b.layer(li)).insert(r.transformed(trans))
 
     def on_polygon_in_b_only(self, poly: kdb.Polygon, propid: int) -> None:
@@ -129,7 +129,7 @@ class MergeDiff:
 
             c.shapes(self.diff_xor.layer(self.layer)).insert(
                 kdb.Region(self.cell_a.shapes(self.layer_a))
-                ^ kdb.Region(self.cell_b.shapes(self.layer_b))
+                ^ kdb.Region(self.cell_b.shapes(self.layer_b)),
             )
 
     def on_cell_meta_info_differs(
@@ -154,17 +154,17 @@ class MergeDiff:
         else:
             logger.error(
                 f"'{name}' MetaInfo differs between existing '{meta_a!s}' and"
-                f" loaded '{meta_b!s}'"
+                f" loaded '{meta_b!s}'",
             )
             self.cells_meta_diff[self.cell_a.name][name] = {
                 "existing": str(meta_a),
                 "loaded": str(meta_b),
             }
         dc = self.diff_xor.cell(self.cell_a.name) or self.diff_xor.create_cell(
-            self.cell_a.name
+            self.cell_a.name,
         )
         dc.add_meta_info(
-            kdb.LayoutMetaInfo(name, {"a": meta_a, "b": meta_b}, persisted=True)
+            kdb.LayoutMetaInfo(name, {"a": meta_a, "b": meta_b}, persisted=True),
         )
 
     def compare(self) -> bool:

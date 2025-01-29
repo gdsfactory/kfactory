@@ -7,7 +7,7 @@ from collections.abc import Sequence
 from typing import Any, Literal, Protocol, cast
 
 import klayout.db as kdb
-import klayout.rdb as rdb
+from klayout import rdb
 from pydantic import BaseModel, Field
 
 from ..conf import config, logger
@@ -133,7 +133,9 @@ def check_collisions(
     collision_edges: dict[str, kdb.Edges] = {}
     inter_route_collisions = kdb.Edges()
     all_router_edges = kdb.Edges()
-    for i, (ps, pe, router) in enumerate(zip(start_ports, end_ports, routers)):
+    for i, (ps, pe, router) in enumerate(
+        zip(start_ports, end_ports, routers, strict=False),
+    ):
         _edges, router_edges = router.collisions(log_errors=None)
         if not _edges.is_empty():
             collision_edges[f"{ps.name} - {pe.name} (index: {i})"] = _edges
@@ -145,7 +147,7 @@ def check_collisions(
     if collision_edges or not inter_route_collisions.is_empty():
         if collision_check_layers is None:
             collision_check_layers = list(
-                {p.cross_section.main_layer for p in start_ports}
+                {p.cross_section.main_layer for p in start_ports},
             )
         dbu = c.kcl.dbu
         db = rdb.ReportDatabase("Routing Errors")
@@ -167,7 +169,7 @@ def check_collisions(
         def layer_cat(layer_info: kdb.LayerInfo) -> rdb.RdbCategory:
             if layer_info not in layer_cats:
                 layer_cats[layer_info] = db.category_by_path(
-                    layer_info.to_s()
+                    layer_info.to_s(),
                 ) or db.create_category(layer_info.to_s())
             return layer_cats[layer_info]
 
@@ -197,20 +199,21 @@ def check_collisions(
                     for _it in shape_it.each():
                         if _it.path()[0].inst() == inst.instance:
                             inst_shapes.insert(
-                                _it.shape().polygon.transformed(_it.trans())
+                                _it.shape().polygon.transformed(_it.trans()),
                             )
                     for j, _reg in inst_regions.items():
                         if _reg & _inst_region:
                             __reg = kdb.Region()
                             shape_it = c.begin_shapes_rec_touching(
-                                layer_, (_reg & _inst_region).bbox()
+                                layer_,
+                                (_reg & _inst_region).bbox(),
                             )
                             shape_it.select_cells([insts[j].cell.cell_index()])
                             shape_it.min_depth = 1
                             for _it in shape_it.each():
                                 if _it.path()[0].inst() == insts[j].instance:
                                     __reg.insert(
-                                        _it.shape().polygon.transformed(_it.trans())
+                                        _it.shape().polygon.transformed(_it.trans()),
                                     )
 
                             error_region_instances.insert(__reg & inst_shapes)
@@ -223,7 +226,7 @@ def check_collisions(
                     continue
                 cat = layer_cat(layer_info)
                 sc = db.category_by_path(
-                    f"{cat.path()}.RoutingErrors"
+                    f"{cat.path()}.RoutingErrors",
                 ) or db.create_category(layer_cat(layer_info), "RoutingErrors")
                 for poly in error_region_shapes.merge().each():
                     it = db.create_item(cell, sc)
@@ -235,7 +238,7 @@ def check_collisions(
                     continue
                 cat = layer_cat(layer_info)
                 sc = db.category_by_path(
-                    f"{cat.path()}.RoutingErrors"
+                    f"{cat.path()}.RoutingErrors",
                 ) or db.create_category(layer_cat(layer_info), "RoutingErrors")
                 for poly in error_region_instances.merge().each():
                     it = db.create_item(cell, sc)
@@ -247,11 +250,11 @@ def check_collisions(
                 case "show_error":
                     c.show(lyrdb=db)
                     raise RuntimeError(
-                        f"Routing collision in {c.kcl.future_cell_name or c.name}"
+                        f"Routing collision in {c.kcl.future_cell_name or c.name}",
                     )
                 case "error":
                     raise RuntimeError(
-                        f"Routing collision in {c.kcl.future_cell_name or c.name}"
+                        f"Routing collision in {c.kcl.future_cell_name or c.name}",
                     )
 
 
@@ -265,7 +268,7 @@ def get_radius(
     ports_ = tuple(p.to_itype() for p in ports)
     if len(ports_) != 2:
         raise ValueError(
-            "Cannot determine the maximal radius of a bend with more than two ports."
+            "Cannot determine the maximal radius of a bend with more than two ports.",
         )
     p1, p2 = ports_
     if p1.angle == p2.angle:
@@ -278,7 +281,7 @@ def get_radius(
     if center is None:
         raise ValueError("Could not determine the radius. Something went very wrong.")
     return int(
-        max((p1.trans.disp - center).length(), (p2.trans.disp - center).length())
+        max((p1.trans.disp - center).length(), (p2.trans.disp - center).length()),
     )
 
 
@@ -404,7 +407,7 @@ def route_bundle(
     if not (len(start_ports) == len(end_ports)):
         raise ValueError(
             "For bundle routing the input port list must have"
-            " the same size as the end ports and be the same length."
+            " the same size as the end ports and be the same length.",
         )
     length = len(start_ports)
     if starts == []:
@@ -430,11 +433,11 @@ def route_bundle(
             if not len(start_angles) == len(start_ports):
                 raise ValueError(
                     "If more than one end port should be rotated,"
-                    " a rotation for all ports must be provided."
+                    " a rotation for all ports must be provided.",
                 )
             start_ports = [
                 p.transformed(post_trans=kdb.Trans(a - p.get_trans().angle))
-                for a, p in zip(start_angles, start_ports)
+                for a, p in zip(start_angles, start_ports, strict=False)
             ]
 
     if end_angles is not None:
@@ -447,11 +450,11 @@ def route_bundle(
             if not len(end_angles) == len(end_ports):
                 raise ValueError(
                     "If more than one end port should be rotated,"
-                    " a rotation for all ports must be provided."
+                    " a rotation for all ports must be provided.",
                 )
             end_ports = [
                 p.transformed(post_trans=kdb.Trans(a - p.get_trans().angle))
-                for a, p in zip(end_angles, start_ports)
+                for a, p in zip(end_angles, start_ports, strict=False)
             ]
 
     if route_width:
@@ -496,7 +499,7 @@ def route_bundle(
         )
     placer_errors: list[Exception] = []
     error_routes: list[tuple[BasePort, BasePort, list[kdb.Point], int]] = []
-    for router, ps, pe in zip(routers, start_ports, end_ports):
+    for router, ps, pe in zip(routers, start_ports, end_ports, strict=False):
         try:
             route = placer_function(
                 c,
@@ -515,14 +518,18 @@ def route_bundle(
         cell = db.create_cell(
             c.name
             if not c.name.startswith("Unnamed_")
-            else c.kcl.future_cell_name or c.name
+            else c.kcl.future_cell_name or c.name,
         )
-        for error, (ps, pe, pts, width) in zip(placer_errors, error_routes):
+        for error, (ps, pe, pts, width) in zip(
+            placer_errors,
+            error_routes,
+            strict=False,
+        ):
             cat = db.create_category(f"{ps.name} - {pe.name}")
             it = db.create_item(cell=cell, category=cat)
             it.add_value(
                 f"Error while trying to place route from {ps.name} to {pe.name} at"
-                f" points (dbu): {pts}"
+                f" points (dbu): {pts}",
             )
             it.add_value(f"Exception: {error}")
             path = kdb.Path(pts, width or ps.cross_section.width)
@@ -534,7 +541,7 @@ def route_bundle(
             logger.error(error)
         raise PlacerError(
             "Failed to place routes for bundle routing from "
-            f"{[p.name for p in start_ports]} to {[p.name for p in end_ports]}"
+            f"{[p.name for p in start_ports]} to {[p.name for p in end_ports]}",
         )
 
     check_collisions(

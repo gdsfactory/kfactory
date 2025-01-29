@@ -31,7 +31,10 @@ def bend_circular(
         for x, y in [
             [np.sin(_angle / 180 * np.pi) * r, (-np.cos(_angle / 180 * np.pi) + 1) * r]
             for _angle in np.linspace(
-                0, angle, int(angle // angle_step + 0.5), endpoint=True
+                0,
+                angle,
+                int(angle // angle_step + 0.5),
+                endpoint=True,
             )
         ]
     ]
@@ -89,7 +92,10 @@ def dbend_circular(
         for x, y in [
             [np.sin(_angle / 180 * np.pi) * r, (-np.cos(_angle / 180 * np.pi) + 1) * r]
             for _angle in np.linspace(
-                0, angle, int(angle // angle_step + 0.5), endpoint=True
+                0,
+                angle,
+                int(angle // angle_step + 0.5),
+                endpoint=True,
             )
         ]
     ]

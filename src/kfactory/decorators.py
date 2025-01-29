@@ -60,7 +60,8 @@ class KCellDecorator(Protocol):
     """Signature of the `@cell` decorator."""
 
     def __call__(
-        self, **kwargs: Unpack[KCellDecoratorKWargs]
+        self,
+        **kwargs: Unpack[KCellDecoratorKWargs],
     ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]:
         """__call__ implementation."""
         ...
@@ -70,7 +71,9 @@ class ModuleDecorator(Protocol):
     """Signature of the `@module_cell` decorator."""
 
     def __call__(
-        self, /, **kwargs: Unpack[ModuleCellKWargs]
+        self,
+        /,
+        **kwargs: Unpack[ModuleCellKWargs],
     ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]:
         """__call__ implementation."""
         ...
@@ -112,7 +115,9 @@ class Decorators:
 
     @overload
     def module_cell(
-        self, /, **kwargs: Unpack[ModuleCellKWargs]
+        self,
+        /,
+        **kwargs: Unpack[ModuleCellKWargs],
     ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]: ...
 
     def module_cell(  # type: ignore[misc]

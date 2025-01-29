@@ -18,7 +18,7 @@ class LockedError(AttributeError):
             f"{kcell.name!r} is locked and likely stored in cache. Modifications are "
             "disabled as its associated function is decorated with `cell`. To modify, "
             "update the code in the function or create a copy of "
-            f"the {kcell.__class__.__name__}."
+            f"the {kcell.__class__.__name__}.",
         )
 
 
@@ -26,7 +26,7 @@ class MergeError(ValueError):
     """Raised if two layout's have conflicting cell definitions."""
 
 
-class PortWidthMismatch(ValueError):
+class PortWidthMismatchError(ValueError):
     """Error thrown when two ports don't have a matching `width`."""
 
     def __init__(
@@ -55,7 +55,7 @@ class PortWidthMismatch(ValueError):
             )
 
 
-class PortLayerMismatch(ValueError):
+class PortLayerMismatchError(ValueError):
     """Error thrown when two ports don't have a matching `layer`."""
 
     def __init__(
@@ -95,7 +95,7 @@ class PortLayerMismatch(ValueError):
             )
 
 
-class PortTypeMismatch(ValueError):
+class PortTypeMismatchError(ValueError):
     """Error thrown when two ports don't have a matching `port_type`."""
 
     def __init__(
@@ -126,3 +126,21 @@ class PortTypeMismatch(ValueError):
 
 class CellNameError(ValueError):
     """Raised if a KCell is created and the automatic assigned name is taken."""
+
+
+class InvalidMetaDataError(ValueError):
+    """Raised if a metadata value is not valid."""
+
+    def __init__(self, value: Any, value_type: type[Any]) -> None:
+        """Throw error for the invalid metadata value `value` of type `type`."""
+        super().__init__(
+            f"{value=} is not a valid metadata type. {value_type=}",
+        )
+
+
+class NonSerializableError(ValueError):
+    """Raised if a value is not serializable."""
+
+    def __init__(self, value: Any, extra_message: str = "") -> None:
+        """Throw error for the non-serializable value `value`."""
+        super().__init__(f"{value=} is not serializable. {extra_message}")

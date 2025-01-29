@@ -47,16 +47,14 @@ class LayerPropertiesModel(BaseModel):
         """Convert string to the index with the dict dither2index."""
         if isinstance(v, str):
             return dither2index[v]
-        else:
-            return v
+        return v
 
     @field_validator("line_style", mode="before")
     def line_to_index(cls, v: str | int) -> int:
         """Convert string to the index with the dict dither2index."""
         if isinstance(v, str):
             return line2index[v]
-        else:
-            return v
+        return v
 
     # @staticmethod
     @field_serializer("dither_pattern")
@@ -122,7 +120,7 @@ def lyp_to_yaml(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
         lpnr = iter.current()
         if lpnr.has_children():
             layers.append(
-                LayerGroupModel(name=lpnr.name, members=kl2group(iter.first_child()))
+                LayerGroupModel(name=lpnr.name, members=kl2group(iter.first_child())),
             )
         else:
             layers.append(kl2lp(lpnr))
@@ -162,7 +160,7 @@ def kl2group(
         lpnr = iter.current()
         if lpnr.has_children():
             members.append(
-                LayerGroupModel(name=lpnr.name, members=kl2group(iter.first_child()))
+                LayerGroupModel(name=lpnr.name, members=kl2group(iter.first_child())),
             )
         else:
             members.append(kl2lp(lpnr))

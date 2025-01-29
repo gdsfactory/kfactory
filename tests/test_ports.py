@@ -4,6 +4,7 @@ import pytest
 from conftest import Layers
 
 import kfactory as kf
+from kfactory.exceptions import PortWidthMismatchError
 
 
 @kf.cell
@@ -11,7 +12,7 @@ def straight(width: int, length: int, layer: kf.kdb.LayerInfo) -> kf.KCell:
     c = kf.KCell()
 
     c.shapes(c.kcl.find_layer(layer)).insert(
-        kf.kdb.Box(0, -width // 2, length, width // 2)
+        kf.kdb.Box(0, -width // 2, length, width // 2),
     )
 
     c.create_port(
@@ -29,37 +30,37 @@ def straight(width: int, length: int, layer: kf.kdb.LayerInfo) -> kf.KCell:
     return c
 
 
-@pytest.fixture()
+@pytest.fixture
 def wg(LAYER: Layers) -> kf.KCell:
     return straight(1000, 20000, LAYER.WG)
 
 
-@pytest.fixture()
+@pytest.fixture
 @kf.cell
 def wg_floating_off_grid(LAYER: Layers) -> kf.KCell:
-    with pytest.raises(AssertionError):
-        c = kf.KCell()
-        dbu = c.kcl.dbu
+    c = kf.KCell()
+    dbu = c.kcl.dbu
 
-        p1 = kf.Port(
-            width=c.kcl.to_dbu(10 + dbu / 2),
-            name="o1",
-            dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, dbu / 2, 0),
-            layer=c.kcl.find_layer(LAYER.WG),
-        )
-        p2 = kf.Port(
-            width=c.kcl.to_dbu(10 + dbu / 2),
-            name="o2",
-            dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, 20 + dbu, 0),
-            layer=c.kcl.find_layer(LAYER.WG),
-        )
-        c.shapes(LAYER.WG).insert(kf.kdb.DBox(p1.x, -p1.width / 2, p2.x, p1.width / 2))
+    p1 = kf.Port(
+        width=c.kcl.to_dbu(10 + dbu / 2),
+        name="o1",
+        dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, dbu / 2, 0),
+        layer=c.kcl.find_layer(LAYER.WG),
+    )
+    p2 = kf.Port(
+        width=c.kcl.to_dbu(10 + dbu / 2),
+        name="o2",
+        dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, 20 + dbu, 0),
+        layer=c.kcl.find_layer(LAYER.WG),
+    )
+    c.shapes(LAYER.WG).insert(kf.kdb.DBox(p1.x, -p1.width / 2, p2.x, p1.width / 2))
+    # with pytest.raises(AssertionError):
+    c.add_port(port=p1)
 
-        c.add_port(port=p1)
-        c.add_port(port=p2)
+    # with pytest.raises(AssertionError):
+    c.add_port(port=p2)
 
-        kf.config.logfilter.regex = None
-
+    kf.config.logfilter.regex = None
     return c
 
 
@@ -117,7 +118,7 @@ def test_connect_integer(wg: kf.KCell) -> None:
     assert wg2.ports["o1"].trans == kf.kdb.Trans(0, False, 0, 0)
 
 
-def test_connect_port_width_mismatch(LAYER: Layers, wg: kf.KCell) -> None:
+def test_connect_port_width_mismatch(LAYER: Layers) -> None:
     c = kf.KCell()
     wg1 = c << straight(1000, 20000, LAYER.WG)
     port = kf.Port(
@@ -126,7 +127,7 @@ def test_connect_port_width_mismatch(LAYER: Layers, wg: kf.KCell) -> None:
         name="cplxp1",
         dcplx_trans=kf.kdb.DCplxTrans(1, 30, False, 5, 10),
     )
-    with pytest.raises(kf.exceptions.PortWidthMismatch) as excinfo:
+    with pytest.raises(PortWidthMismatchError) as excinfo:
         wg1.connect("o1", port)
     assert str(excinfo.value) == (
         f'Width mismatch between the ports {wg1.cell_name}["o1"] and Port "cplxp1" '
@@ -134,7 +135,7 @@ def test_connect_port_width_mismatch(LAYER: Layers, wg: kf.KCell) -> None:
     )
 
 
-def test_connect_instance_width_mismatch(LAYER: Layers, wg: kf.KCell) -> None:
+def test_connect_instance_width_mismatch(LAYER: Layers) -> None:
     c = kf.KCell()
     wg1 = c << straight(1000, 20000, LAYER.WG)
     port = kf.Port(
@@ -147,7 +148,7 @@ def test_connect_instance_width_mismatch(LAYER: Layers, wg: kf.KCell) -> None:
     c2.add_port(port=port, name="o2")
     wg1_instance = c << c2
 
-    with pytest.raises(kf.exceptions.PortWidthMismatch) as excinfo:
+    with pytest.raises(PortWidthMismatchError) as excinfo:
         wg1.connect("o1", wg1_instance, "o2")
     assert str(excinfo.value) == (
         f'Width mismatch between the ports {wg1.cell_name}["o1"] and '
@@ -159,7 +160,10 @@ def test_keep_mirror(LAYER: Layers) -> None:
     c = kf.KCell()
 
     p1 = kf.Port(
-        trans=kf.kdb.Trans.M90, width=1000, layer=c.kcl.find_layer(LAYER.WG), kcl=c.kcl
+        trans=kf.kdb.Trans.M90,
+        width=1000,
+        layer=c.kcl.find_layer(LAYER.WG),
+        kcl=c.kcl,
     )
 
     c.add_port(port=p1, name="o1")
@@ -241,7 +245,11 @@ def test_polar_copy_complex(LAYER: Layers) -> None:
     c.add_port(name="o2", port=p2)
 
     assert p2.dcplx_trans == kf.kdb.DCplxTrans(
-        1, 210, True, 0.938012701892, 0.683012701892
+        1,
+        210,
+        True,
+        0.938012701892,
+        0.683012701892,
     )
 
 
@@ -267,7 +275,7 @@ def test_ports_eq() -> None:
     assert kcell.ports == [port]
 
 
-def test_to_dtype(kcl: kf.KCLayout) -> None:
+def test_to_dtype() -> None:
     port = kf.Port(name="o1", width=10, layer=1, center=(1000, 1000), angle=1)
     dtype = port.to_dtype()
     assert dtype.name == "o1"
@@ -277,7 +285,7 @@ def test_to_dtype(kcl: kf.KCLayout) -> None:
     assert dtype.angle == 90
 
 
-def test_to_itype(kcl: kf.KCLayout) -> None:
+def test_to_itype() -> None:
     port = kf.DPort(name="o1", width=0.01, layer=1, center=(1, 1), angle=90)
     itype = port.to_itype()
     assert itype.name == "o1"

@@ -12,9 +12,9 @@ def test_custom_show() -> None:
         lyrdb: kf.rdb.ReportDatabase | Path | str | None = None,
         l2n: kf.kdb.LayoutToNetlist | Path | str | None = None,
         keep_position: bool = True,
-        save_options: kf.kdb.SaveLayoutOptions = kf.save_layout_options(),
+        save_options: kf.kdb.SaveLayoutOptions | None = None,
         use_libraries: bool = True,
-        library_save_options: kf.kdb.SaveLayoutOptions = kf.save_layout_options(),
+        library_save_options: kf.kdb.SaveLayoutOptions | None = None,
     ) -> None:
         nonlocal showed
         showed = True

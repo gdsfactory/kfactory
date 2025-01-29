@@ -11,8 +11,6 @@ from kfactory.conf import logger
 class GeometryDifference(ValueError):
     """Exception for Geometric differences."""
 
-    pass
-
 
 # class LAYER(kf.LayerEnum):  # type: ignore[unused-ignore, misc]
 #     kcl = kf.constant(kf.kcl)
@@ -25,31 +23,50 @@ wg_enc = kf.LayerEnclosure(name="WGSTD", sections=[(Layers().WGCLAD, 0, 2000)])
 
 def straight(LAYER: Layers) -> kf.KCell:
     return kf.cells.straight.straight(
-        width=0.5, length=1, layer=LAYER.WG, enclosure=wg_enc
+        width=0.5,
+        length=1,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
     )
 
 
 def bend90(LAYER: Layers) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
+        width=1,
+        radius=10,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
+        angle=90,
     )
 
 
 def bend180(LAYER: Layers) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
+        width=1,
+        radius=10,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
+        angle=180,
     )
 
 
 def bend90_euler(LAYER: Layers) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
+        width=1,
+        radius=10,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
+        angle=90,
     )
 
 
 def bend180_euler(LAYER: Layers) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
+        width=1,
+        radius=10,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
+        angle=180,
     )
 
 
@@ -72,7 +89,7 @@ cells = dict(
     straight=straight,
 )
 
-cell_names = list(sorted(set(cells.keys())))
+cell_names = sorted(set(cells.keys()))
 
 
 @pytest.fixture(params=cell_names, scope="function")
@@ -123,7 +140,7 @@ def test_cells(cell_name: str, LAYER: Layers) -> None:
                 run_cell.write(ref_file.name)
 
             raise GeometryDifference(
-                f"Differences found in {cell!r} on layer {layer_tuple}"
+                f"Differences found in {cell!r} on layer {layer_tuple}",
             )
 
 

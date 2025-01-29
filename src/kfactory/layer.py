@@ -46,14 +46,14 @@ class LayerInfos(BaseModel):
             if not isinstance(f, kdb.LayerInfo):
                 raise InvalidLayerError(
                     "All fields in LayerInfos must be of type kdb.LayerInfo. "
-                    f"Field {field_name} is of type {type(f)}"
+                    f"Field {field_name} is of type {type(f)}",
                 )
             if not f.is_named():
                 f.name = field_name
             if f.layer == -1 or f.datatype == -1:
                 raise InvalidLayerError(
                     "Layers must specify layer number and datatype."
-                    f" {field_name} didn't specify them"
+                    f" {field_name} didn't specify them",
                 )
         return self
 
@@ -103,14 +103,13 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
         """Retrieve layer number[0] / datatype[1] of a layer."""
         if key == 0:
             return self.layer
-        elif key == 1:
+        if key == 1:
             return self.datatype
 
-        else:
-            raise ValueError(
-                "LayerMap only has two values accessible like"
-                " a list, layer == [0] and datatype == [1]"
-            )
+        raise ValueError(
+            "LayerMap only has two values accessible like"
+            " a list, layer == [0] and datatype == [1]",
+        )
 
     def __len__(self) -> int:
         """A layer has length 2, layer number and datatype."""
@@ -259,7 +258,7 @@ def layerenum_from_dict(
     from .layout import get_default_kcl
 
     members: dict[str, constant[KCLayout] | tuple[int, int]] = {
-        "layout": constant(layout or get_default_kcl().layout)
+        "layout": constant(layout or get_default_kcl().layout),
     }
     for li in layers.model_dump().values():
         members[li.name] = li.layer, li.datatype

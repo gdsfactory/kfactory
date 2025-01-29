@@ -138,14 +138,14 @@ def taper_factory(
             logger.critical(
                 f"Negative lengths are not allowed {length} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             length = -length
         if width1 < 0:
             logger.critical(
                 f"Negative widths are not allowed {width1} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             width1 = -width1
 
@@ -153,7 +153,7 @@ def taper_factory(
             logger.critical(
                 f"Negative widths are not allowed {width2} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             width2 = -width2
 
@@ -165,8 +165,8 @@ def taper_factory(
                     kdb.Point(0, width1 // 2),
                     kdb.Point(length, width2 // 2),
                     kdb.Point(length, int(-width2 / 2)),
-                ]
-            )
+                ],
+            ),
         )
 
         c.create_port(trans=kdb.Trans(2, False, 0, 0), width=width1, layer=li)
@@ -189,7 +189,7 @@ def taper_factory(
                 length=length,
                 layer=layer,
                 enclosure=enclosure,
-            )
+            ),
         )
         _info.update(_additional_info)
         c.info = Info(**_info)

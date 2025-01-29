@@ -26,7 +26,7 @@ class ProtoInstanceGroup(Generic[TUnit, TInstance], GeometricObject[TUnit]):
         except IndexError as e:
             raise ValueError(
                 "Cannot transform or retrieve the KCLayout "
-                "of an instance group if it's empty"
+                "of an instance group if it's empty",
             ) from e
 
     @kcl.setter
@@ -34,7 +34,8 @@ class ProtoInstanceGroup(Generic[TUnit, TInstance], GeometricObject[TUnit]):
         raise ValueError("KCLayout cannot be set on an instance group.")
 
     def transform(
-        self, trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans
+        self,
+        trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
     ) -> None:
         """Transform the instance group."""
         for inst in self.insts:
@@ -76,8 +77,6 @@ class InstanceGroup(ProtoTInstanceGroup[int], DBUGeometricObject):
     Args:
         insts: List of the instances of the group.
     """
-
-    ...
 
 
 class DInstanceGroup(ProtoTInstanceGroup[float], UMGeometricObject):

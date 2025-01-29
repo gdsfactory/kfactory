@@ -122,7 +122,11 @@ def test_getter(LAYER: Layers) -> None:
 def test_array(straight: kf.KCell) -> None:
     c = kf.KCell()
     wg_array = c.create_inst(
-        straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
+        straight,
+        a=kf.kdb.Vector(15_000, 0),
+        b=kf.kdb.Vector(0, 3_000),
+        na=3,
+        nb=5,
     )
     for b in range(5):
         for a in range(3):
@@ -133,7 +137,11 @@ def test_array(straight: kf.KCell) -> None:
 def test_array_indexerror(straight: kf.KCell) -> None:
     c = kf.KCell()
     wg_array = c.create_inst(
-        straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
+        straight,
+        a=kf.kdb.Vector(15_000, 0),
+        b=kf.kdb.Vector(0, 3_000),
+        na=3,
+        nb=5,
     )
     regex = kf.config.logfilter.regex
     kf.config.logfilter.regex = r"^An error has been caught in function '__getitem__'"
@@ -253,10 +261,16 @@ def test_check_ports(LAYER: Layers) -> None:
     def test_multi_ports() -> kf.KCell:
         c = kcl.kcell()
         c.create_port(
-            name="a", trans=kf.kdb.Trans.R0, width=1000, layer=kcl.find_layer(1, 0)
+            name="a",
+            trans=kf.kdb.Trans.R0,
+            width=1000,
+            layer=kcl.find_layer(1, 0),
         )
         c.create_port(
-            name="a", trans=kf.kdb.Trans.R180, width=1000, layer=kcl.find_layer(1, 0)
+            name="a",
+            trans=kf.kdb.Trans.R180,
+            width=1000,
+            layer=kcl.find_layer(1, 0),
         )
         return c
 

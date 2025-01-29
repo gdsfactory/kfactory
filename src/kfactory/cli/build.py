@@ -64,48 +64,52 @@ def build(
         Optional[list[str]],
         typer.Argument(
             help="Arguments used for --type function."
-            " Doesn't have any influence for other types"
+            " Doesn't have any influence for other types",
         ),
     ] = None,
     show: Annotated[
-        bool, typer.Option(help="Show the file through klive in KLayout")
+        bool,
+        typer.Option(help="Show the file through klive in KLayout"),
     ] = True,
     library: Annotated[
         Optional[list[str]],
         typer.Option(
             help="Library(s) used by the main layout file. Only works for functions,"
-            " not for '__main__' modules"
+            " not for '__main__' modules",
         ),
     ] = None,
     suffix: Annotated[
-        LayoutSuffix, typer.Option(help="Format of the layout files")
+        LayoutSuffix,
+        typer.Option(help="Format of the layout files"),
     ] = LayoutSuffix.oas,
     write_full: Annotated[
         bool,
         typer.Option(
             help="Write the gds with full library support. Uses libraries passed with"
-            " --library. Only works in function mode not on modules"
+            " --library. Only works in function mode not on modules",
         ),
     ] = True,
     write_static: Annotated[
         bool,
         typer.Option(
             help="Write a layout where all cells are converted to static (non-library)"
-            " cells."
+            " cells.",
         ),
     ] = False,
     write_nocontext: Annotated[
         bool,
         typer.Option(
             help="Write the layout without any meta infos. This is useful for "
-            "submitting the GDS to fabs."
+            "submitting the GDS to fabs.",
         ),
     ] = False,
     max_vertex_count: Annotated[
-        int, typer.Option(help="Maximum number of vertices per polygon.")
+        int,
+        typer.Option(help="Maximum number of vertices per polygon."),
     ] = 4000,
     max_cellname_length: Annotated[
-        int, typer.Option(help="Maximum number of characters in a cell name.")
+        int,
+        typer.Option(help="Maximum number of characters in a cell name."),
     ] = 99,
 ) -> None:
     """Run a python modules __main__ or a function if specified."""
@@ -195,7 +199,7 @@ def build(
                 logger.critical(
                     f"Couldn't import function '{func}' from module '"
                     f"{file.with_suffix('')}"
-                    "'"
+                    "'",
                 )
         else:
             runpy.run_path(mod_file, run_name="__main__")
@@ -262,7 +266,7 @@ def build(
                         )
             except ImportError:
                 logger.critical(
-                    f"Couldn't import function '{func}' from module '{mod_file}'"
+                    f"Couldn't import function '{func}' from module '{mod_file}'",
                 )
         else:
             runpy.run_module(mod_file, run_name="__main__")

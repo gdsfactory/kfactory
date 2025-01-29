@@ -56,14 +56,16 @@ def wg_enc(LAYER: Layers) -> kf.LayerEnclosure:
 
 @pytest.fixture
 def straight_factory_dbu(
-    LAYER: Layers, wg_enc: kf.LayerEnclosure
+    LAYER: Layers,
+    wg_enc: kf.LayerEnclosure,
 ) -> Callable[..., kf.KCell]:
     return partial(kf.cells.straight.straight_dbu, layer=LAYER.WG, enclosure=wg_enc)
 
 
 @pytest.fixture
 def straight_factory(
-    LAYER: Layers, wg_enc: kf.LayerEnclosure
+    LAYER: Layers,
+    wg_enc: kf.LayerEnclosure,
 ) -> Callable[..., kf.KCell]:
     return partial(kf.cells.straight.straight, layer=LAYER.WG, enclosure=wg_enc)
 
@@ -71,7 +73,10 @@ def straight_factory(
 @pytest.fixture
 def straight(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.straight.straight(
-        width=0.5, length=1, layer=LAYER.WG, enclosure=wg_enc
+        width=0.5,
+        length=1,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
     )
 
 
@@ -83,35 +88,55 @@ def straight_blank(LAYER: Layers) -> kf.KCell:
 @pytest.fixture
 def bend90(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
+        width=0.5,
+        radius=10,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
+        angle=90,
     )
 
 
 @pytest.fixture
 def bend90_small(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=0.5, radius=5, layer=LAYER.WG, enclosure=wg_enc, angle=90
+        width=0.5,
+        radius=5,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
+        angle=90,
     )
 
 
 @pytest.fixture
 def bend180(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
+        width=0.5,
+        radius=10,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
+        angle=180,
     )
 
 
 @pytest.fixture
 def bend90_euler(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
+        width=0.5,
+        radius=10,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
+        angle=90,
     )
 
 
 @pytest.fixture
 def bend180_euler(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
+        width=0.5,
+        radius=10,
+        layer=LAYER.WG,
+        enclosure=wg_enc,
+        angle=180,
     )
 
 
@@ -176,7 +201,10 @@ def pdk() -> kf.KCLayout:
             info=kf.kcell.Info(mesh_order=1),
         ),
         clad=kf.layer.LayerLevel(
-            layer=Layers().WGCLAD, thickness=3, zmin=0.22, material="sio2"
+            layer=Layers().WGCLAD,
+            thickness=3,
+            zmin=0.22,
+            material="sio2",
         ),
     )
     kcl = kf.KCLayout("Test_PDK", infos=Layers, layer_stack=layerstack)

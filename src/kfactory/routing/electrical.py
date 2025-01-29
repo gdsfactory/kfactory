@@ -121,7 +121,10 @@ def route_L(
         for i, p in enumerate(input_ports_[::-1]):
             temp_port = p.copy()
             temp_port.trans = kdb.Trans(
-                3, False, x_max - wire_spacing * (i + 1), y_max + wire_spacing
+                3,
+                False,
+                x_max - wire_spacing * (i + 1),
+                y_max + wire_spacing,
             )
 
             route_elec(c_, p, temp_port)
@@ -131,14 +134,17 @@ def route_L(
         for i, p in enumerate(input_ports_):
             temp_port = p.copy()
             temp_port.trans = kdb.Trans(
-                1, False, x_max - wire_spacing * (i + 1), y_min - wire_spacing
+                1,
+                False,
+                x_max - wire_spacing * (i + 1),
+                y_min - wire_spacing,
             )
             route_elec(c_, p, temp_port)
             temp_port.trans.angle = 3
             output_ports.append(temp_port)
     else:
         raise ValueError(
-            "Invalid L-shape routing. Please change output_orientaion to 1 or 3."
+            "Invalid L-shape routing. Please change output_orientaion to 1 or 3.",
         )
     return output_ports
 
@@ -497,7 +503,7 @@ def place_single_wire(
         route_width = p1.width
     if kwargs:
         raise ValueError(
-            f"Additional kwargs aren't supported in route_single_wire {kwargs=}"
+            f"Additional kwargs aren't supported in route_single_wire {kwargs=}",
         )
 
     shape = (
@@ -551,7 +557,7 @@ def place_dual_rails(
     """
     if kwargs:
         raise ValueError(
-            f"Additional kwargs aren't supported in route_dual_rails {kwargs=}"
+            f"Additional kwargs aren't supported in route_dual_rails {kwargs=}",
         )
     if layer_info is None:
         layer_info = p1.layer_info
@@ -563,7 +569,7 @@ def place_dual_rails(
         raise ValueError(f"{separation_rails=} must be smaller than the {route_width}")
 
     region = kdb.Region(kdb.Path(pts, route_width)) - kdb.Region(
-        kdb.Path(pts, separation_rails)
+        kdb.Path(pts, separation_rails),
     )
 
     shapes = [

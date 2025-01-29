@@ -132,8 +132,8 @@ def route_bundle(
     | None = None,
     starts: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] = [],
     ends: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] = [],
-    start_angles: int | list[int] | float | list[float] | None = None,
-    end_angles: int | list[int] | float | list[float] | None = None,
+    start_angles: list[int] | float | list[float] | None = None,
+    end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
@@ -416,7 +416,7 @@ def place90(
     """
     if len(kwargs) > 0:
         raise ValueError(
-            f"Additional args and kwargs are not allowed for route_smart.{kwargs=}"
+            f"Additional args and kwargs are not allowed for route_smart.{kwargs=}",
         )
     if allow_width_mismatch is None:
         allow_width_mismatch = config.allow_width_mismatch
@@ -427,12 +427,12 @@ def place90(
     if straight_factory is None:
         raise ValueError(
             "place90 needs to have a straight_factory set. Please pass a "
-            "straight_factory which takes kwargs 'width: int' and 'length: int'."
+            "straight_factory which takes kwargs 'width: int' and 'length: int'.",
         )
     if bend90_cell is None:
         raise ValueError(
             "place90 needs to be passed a fixed bend90 cell with two optical"
-            " ports which are 90° apart from each other with port_type 'port_type'."
+            " ports which are 90° apart from each other with port_type 'port_type'.",
         )
     route_start_port = p1.copy()
     route_start_port.name = None
@@ -449,11 +449,11 @@ def place90(
     if len(bend90_ports) != 2:
         raise AttributeError(
             f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
-            f"with {port_type=}"
+            f"with {port_type=}",
         )
     if abs((bend90_ports[0].trans.angle - bend90_ports[1].trans.angle) % 4) != 1:
         raise AttributeError(
-            f"{bend90_cell.name} bend ports should be 90° apart from each other"
+            f"{bend90_cell.name} bend ports should be 90° apart from each other",
         )
 
     if (bend90_ports[1].trans.angle - bend90_ports[0].trans.angle) % 4 == 3:
@@ -463,10 +463,12 @@ def place90(
         b90p1 = bend90_ports[0]
         b90p2 = bend90_ports[1]
     assert b90p1.name is not None, logger.error(
-        "bend90_cell needs named ports, {}", b90p1
+        "bend90_cell needs named ports, {}",
+        b90p1,
     )
     assert b90p2.name is not None, logger.error(
-        "bend90_cell needs named ports, {}", b90p2
+        "bend90_cell needs named ports, {}",
+        b90p2,
     )
     b90c = kdb.Trans(
         b90p1.trans.rot,
@@ -475,7 +477,8 @@ def place90(
         b90p2.trans.disp.y if b90p1.trans.angle % 2 else b90p1.trans.disp.y,
     )
     b90r = max(
-        (b90p1.trans.disp - b90c.disp).length(), (b90p2.trans.disp - b90c.disp).length()
+        (b90p1.trans.disp - b90c.disp).length(),
+        (b90p2.trans.disp - b90c.disp).length(),
     )
     if taper_cell is not None:
         taper_ports = [p for p in taper_cell.ports if p.port_type == "optical"]
@@ -485,7 +488,7 @@ def place90(
         ):
             raise AttributeError(
                 "Taper must have only two optical ports that are 180° oriented to each"
-                " other"
+                " other",
             )
         if taper_ports[1].width == b90p1.width:
             taperp2, taperp1 = taper_ports
@@ -494,7 +497,7 @@ def place90(
         else:
             raise AttributeError(
                 "At least one of the taper's optical ports must be the same width as"
-                " the bend's ports"
+                " the bend's ports",
             )
         route = ManhattanRoute(
             backbone=list(pts).copy(),
@@ -605,9 +608,9 @@ def place90(
             raise ValueError(
                 f"distance between points {old_pt!s} and {pt!s} is too small to"
                 f" safely place bends {pt.to_s()=}, {old_pt.to_s()=},"
-                f" {pt.distance(old_pt)=} < {b90r=}"
+                f" {pt.distance(old_pt)=} < {b90r=}",
             )
-        elif (
+        if (
             pt.distance(old_pt) < 2 * b90r
             and i not in [1, len(pts) - 1]
             and not allow_small_routes
@@ -615,7 +618,7 @@ def place90(
             raise ValueError(
                 f"distance between points {old_pt!s} and {pt!s} is too small to"
                 f" safely place bends {pt=!s}, {old_pt=!s},"
-                f" {pt.distance(old_pt)=} < {2 * b90r=}"
+                f" {pt.distance(old_pt)=} < {2 * b90r=}",
             )
 
         vec = pt - old_pt
@@ -627,16 +630,16 @@ def place90(
         mirror = (vec_angle(vec_n) - vec_angle(vec)) % 4 != 3
         if (vec.y != 0) and (vec.x != 0):
             raise ValueError(
-                f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
+                f"The vector between manhattan points is not manhattan {old_pt}, {pt}",
             )
         ang = (vec_angle(vec) + 2) % 4
         if ang is None:
             raise ValueError(
-                f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
+                f"The vector between manhattan points is not manhattan {old_pt}, {pt}",
             )
         bend90.transform(kdb.Trans(ang, mirror, pt.x, pt.y) * b90c.inverted())
         length = int(
-            (bend90.ports[b90p1.name].trans.disp - old_bend_port.trans.disp).length()
+            (bend90.ports[b90p1.name].trans.disp - old_bend_port.trans.disp).length(),
         )
         route.length += int(length)
         if length > 0:
@@ -672,7 +675,7 @@ def place90(
                 )
                 route.instances.append(t1)
                 _l = int(
-                    length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2
+                    length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2,
                 )
                 if length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2 != 0:
                     wg = c << straight_factory(
@@ -758,7 +761,7 @@ def place90(
             route.instances.append(t1)
             if length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2 != 0:
                 _l = int(
-                    length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2
+                    length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2,
                 )
                 wg = c << straight_factory(
                     width=taperp2.width,
@@ -855,7 +858,7 @@ def route_loopback(
     ):
         raise ValueError(
             "for a standard loopback the ports must point in the same direction and"
-            "have to be parallel"
+            "have to be parallel",
         )
 
     pz = kdb.Point(0, 0)
@@ -889,16 +892,18 @@ def route_loopback(
             t2 *= kdb.Trans(2, False, end_straight, bend180_radius)
         else:
             t1 *= kdb.Trans(
-                2, False, start_straight + bend90_radius, -2 * bend90_radius
+                2,
+                False,
+                start_straight + bend90_radius,
+                -2 * bend90_radius,
             )
             t2 *= kdb.Trans(2, False, end_straight + bend90_radius, 2 * bend90_radius)
+    elif bend180_radius is not None:
+        t1 *= kdb.Trans(2, False, start_straight, bend180_radius)
+        t2 *= kdb.Trans(2, False, end_straight, -bend180_radius)
     else:
-        if bend180_radius is not None:
-            t1 *= kdb.Trans(2, False, start_straight, bend180_radius)
-            t2 *= kdb.Trans(2, False, end_straight, -bend180_radius)
-        else:
-            t1 *= kdb.Trans(2, False, start_straight + bend90_radius, 2 * bend90_radius)
-            t2 *= kdb.Trans(2, False, end_straight + bend90_radius, -2 * bend90_radius)
+        t1 *= kdb.Trans(2, False, start_straight + bend90_radius, 2 * bend90_radius)
+        t2 *= kdb.Trans(2, False, end_straight + bend90_radius, -2 * bend90_radius)
 
     return (
         pts_start
@@ -973,7 +978,7 @@ def route(
     if p1.width != p2.width and not allow_width_mismatch:
         raise ValueError(
             f"The ports have different widths {p1.width=} {p2.width=}. If this is"
-            "intentional, add `allow_width_mismatch=True` to override this."
+            "intentional, add `allow_width_mismatch=True` to override this.",
         )
 
     p1 = p1.copy()
@@ -986,13 +991,13 @@ def route(
 
     if len(bend90_ports) != 2:
         raise ValueError(
-            f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
+            f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports",
         )
 
     if abs((bend90_ports[0].trans.angle - bend90_ports[1].trans.angle) % 4) != 1:
         raise ValueError(
             f"{bend90_cell.name} bend ports should be 90° apart from each other. "
-            f"{bend90_ports[0]=} {bend90_ports[1]=}"
+            f"{bend90_ports[0]=} {bend90_ports[1]=}",
         )
     if (bend90_ports[1].trans.angle - bend90_ports[0].trans.angle) % 4 == 3:
         b90p1 = bend90_ports[1]
@@ -1014,7 +1019,7 @@ def route(
         max(
             (b90p1.trans.disp - b90c.disp).length(),
             (b90p2.trans.disp - b90c.disp).length(),
-        )
+        ),
     )
 
     if bend180_cell is not None:
@@ -1023,19 +1028,17 @@ def route(
         if len(bend180_ports) != 2:
             raise AttributeError(
                 f"{bend180_cell.name} should have 2 ports but has {len(bend180_ports)}"
-                " ports"
+                " ports",
             )
         if abs((bend180_ports[0].trans.angle - bend180_ports[1].trans.angle) % 4) != 0:
             raise AttributeError(
                 f"{bend180_cell.name} bend ports for bend180 should be 0° apart from"
-                f" each other, {bend180_ports[0]=} {bend180_ports[1]=}"
+                f" each other, {bend180_ports[0]=} {bend180_ports[1]=}",
             )
         d = 1 if bend180_ports[0].trans.angle in [0, 3] else -1
-        b180p1, b180p2 = list(
-            sorted(
-                bend180_ports,
-                key=lambda port: (d * port.trans.disp.x, d * port.trans.disp.y),
-            )
+        b180p1, b180p2 = sorted(
+            bend180_ports,
+            key=lambda port: (d * port.trans.disp.x, d * port.trans.disp.y),
         )
 
         b180r = int((b180p2.trans.disp - b180p1.trans.disp).length())
@@ -1113,7 +1116,7 @@ def route(
                         bend180.purpose = purpose
                         bend180.transform(
                             kdb.Trans((ang1 + 2) % 4, False, pt2.x, pt2.y)
-                            * b180p1.trans.inverted()
+                            * b180p1.trans.inverted(),
                         )
                         place90(
                             c=c,
@@ -1141,7 +1144,7 @@ def route(
                         bend180.purpose = purpose
                         bend180.transform(
                             kdb.Trans((ang1 + 2) % 4, False, pt2.x, pt2.y)
-                            * b180p2.trans.inverted()
+                            * b180p2.trans.inverted(),
                         )
                         place90(
                             c=c,

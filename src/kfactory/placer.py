@@ -101,7 +101,7 @@ def cells_from_yaml(
     """
     yaml = get_yaml_obj()
     yaml.register_class(
-        include_from_loader(inp.parent, kcl, additional_classes, verbose)
+        include_from_loader(inp.parent, kcl, additional_classes, verbose),
     )
 
     register_classes(
@@ -127,13 +127,18 @@ def exploded_yaml(
 
     class ModKCell(KCell):
         def __init__(
-            self, name: str | None = None, library: KCLayout = library
+            self,
+            name: str | None = None,
+            library: KCLayout = library,
         ) -> None:
             KCell.__init__(self, name=name, kcl=library)
 
         @classmethod
         def from_yaml(
-            cls, constructor: SafeConstructor, node: Any, verbose: bool = False
+            cls,
+            constructor: SafeConstructor,
+            node: Any,
+            verbose: bool = False,
         ) -> Self:
             return super().from_yaml(constructor, node, verbose=verbose)
 
@@ -162,7 +167,10 @@ def include_from_loader(
                 cells_from_yaml(f, library, additional_classes, verbose)
             else:
                 cells_from_yaml(
-                    (folder / f).resolve(), library, additional_classes, verbose
+                    (folder / f).resolve(),
+                    library,
+                    additional_classes,
+                    verbose,
                 )
 
     return Include

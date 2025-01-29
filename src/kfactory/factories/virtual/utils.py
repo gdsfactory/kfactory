@@ -30,11 +30,14 @@ def extrude_backbone(
         dbu: database unit to use as a reference
     """
     center_path_l, center_path_r = extrude_path_points(
-        backbone, width=width, start_angle=start_angle, end_angle=end_angle
+        backbone,
+        width=width,
+        start_angle=start_angle,
+        end_angle=end_angle,
     )
     center_path_r.reverse()
     c.shapes(c.kcl.find_layer(layer)).insert(
-        kdb.DPolygon(center_path_l + center_path_r)
+        kdb.DPolygon(center_path_l + center_path_r),
     )
 
     if enclosure:

@@ -288,7 +288,10 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit]):
             raise LockedError(self)
 
         self.ports.add_ports(
-            ports=ports, prefix=prefix, suffix=suffix, keep_mirror=keep_mirror
+            ports=ports,
+            prefix=prefix,
+            suffix=suffix,
+            keep_mirror=keep_mirror,
         )
 
     def create_port(self, *args: Any, **kwargs: Any) -> ProtoPort[TUnit]:
@@ -309,7 +312,7 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit]):
             return factory_name
         raise ValueError(
             f"{self.__class__.__name__} {self.name} has most likely not been registered"
-            " automatically as a factory. Therefore it doesn't have an associated name."
+            " automatically as a factory. Therefore it doesn't have an associated name.",
         )
 
     def create_vinst(self, cell: VKCell | KCell) -> VInstance:
@@ -427,7 +430,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             (
                 self._base_kcell.kcl.library.name(),
                 self._base_kcell.kdb_cell.cell_index(),
-            )
+            ),
         )
 
     def __eq__(self, other: object) -> bool:
@@ -766,31 +769,31 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         """
         if isinstance(cell, int):
             ci = cell
+        elif cell.layout() == self.layout():
+            ci = cell.cell_index()
         else:
-            if cell.layout() == self.layout():
-                ci = cell.cell_index()
+            assert cell.layout().library() is not None
+            lib_ci = self.kcl.layout.add_lib_cell(
+                cell.kcl.library,
+                cell.cell_index(),
+            )
+            if lib_ci not in self.kcl.tkcells:
+                cell.set_meta_data()
+                kcell = self.kcl[lib_ci]
+                kcell.get_meta_data()
+            if libcell_as_static:
+                cell.set_meta_data()
+                ci = self.kcl.convert_cell_to_static(lib_ci)
+                kcell = self.kcl[ci]
+                kcell.copy_meta_info(cell.kdb_cell)
+                kcell.name = cell.kcl.name + static_name_separator + cell.name
+                if cell.kcl.dbu != self.kcl.dbu:
+                    for port, lib_port in zip(kcell.ports, cell.ports, strict=False):
+                        port.cross_section = cell.kcl.get_cross_section(
+                            lib_port.cross_section.to_dtype(cell.kcl),
+                        )
             else:
-                assert cell.layout().library() is not None
-                lib_ci = self.kcl.layout.add_lib_cell(
-                    cell.kcl.library, cell.cell_index()
-                )
-                if lib_ci not in self.kcl.tkcells:
-                    cell.set_meta_data()
-                    kcell = self.kcl[lib_ci]
-                    kcell.get_meta_data()
-                if libcell_as_static:
-                    cell.set_meta_data()
-                    ci = self.kcl.convert_cell_to_static(lib_ci)
-                    kcell = self.kcl[ci]
-                    kcell.copy_meta_info(cell.kdb_cell)
-                    kcell.name = cell.kcl.name + static_name_separator + cell.name
-                    if cell.kcl.dbu != self.kcl.dbu:
-                        for port, lib_port in zip(kcell.ports, cell.ports):
-                            port.cross_section = cell.kcl.get_cross_section(
-                                lib_port.cross_section.to_dtype(cell.kcl)
-                            )
-                else:
-                    ci = lib_ci
+                ci = lib_ci
 
         if a is None:
             inst = self._base_kcell.kdb_cell.insert(kdb.CellInstArray(ci, trans))
@@ -798,7 +801,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             if b is None:
                 b = kdb.Vector()
             inst = self._base_kcell.kdb_cell.insert(
-                kdb.CellInstArray(ci, trans, a, b, na, nb)
+                kdb.CellInstArray(ci, trans, a, b, na, nb),
             )
         return inst
 
@@ -859,7 +862,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         _lib_cell = kcls[self.library().name()][self.library_cell_index()]
         _lib_cell.set_meta_data()
         _kdb_cell = self.kcl.layout_cell(
-            self.kcl.convert_cell_to_static(self.cell_index())
+            self.kcl.convert_cell_to_static(self.cell_index()),
         )
         assert _kdb_cell is not None
         _kdb_cell.name = self.qname()
@@ -908,8 +911,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                             kdb.Point(0, int(-w // 2)),
                             kdb.Point(0, int(w // 2)),
                             kdb.Point(int(w // 2), 0),
-                        ]
-                    )
+                        ],
+                    ),
                 )
                 if w > 20:
                     poly -= kdb.Region(
@@ -917,11 +920,12 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                             [
                                 kdb.Point(int(w // 20), 0),
                                 kdb.Point(
-                                    int(w // 20), int(-w // 2 + int(w * 2.5 // 20))
+                                    int(w // 20),
+                                    int(-w // 2 + int(w * 2.5 // 20)),
                                 ),
                                 kdb.Point(int(w // 2 - int(w * 1.41 / 20)), 0),
-                            ]
-                        )
+                            ],
+                        ),
                     )
             polys[w] = poly
             if port.base.trans:
@@ -930,7 +934,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             else:
                 self.shapes(port.layer).insert(poly, port.dcplx_trans)
                 self.shapes(port.layer).insert(
-                    kdb.Text(port.name if port.name else "", port.trans)
+                    kdb.Text(port.name if port.name else "", port.trans),
                 )
         self._base_kcell.kdb_cell.locked = locked
 
@@ -1019,7 +1023,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         logger.critical(
             "KLayout <=0.28.15 (last update 2024-02-02) cannot read LayoutMetaInfo on"
             " 'Cell.read'. kfactory uses these extensively for ports, info, and "
-            "settings. Therefore proceed at your own risk."
+            "settings. Therefore proceed at your own risk.",
         )
         if meta_format is None:
             meta_format = config.meta_format
@@ -1044,7 +1048,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             diff.compare()
             if diff.dbu_differs:
                 raise MergeError("Layouts' DBU differ. Check the log for more info.")
-            elif diff.diff_xor.cells() > 0 or diff.layout_meta_diff:
+            if diff.diff_xor.cells() > 0 or diff.layout_meta_diff:
                 diff_kcl = KCLayout(self.name + "_XOR")
                 diff_kcl.layout.assign(diff.diff_xor)
                 show(diff_kcl)
@@ -1090,7 +1094,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             case _:
                 raise ValueError(
                     f"Unknown meta update strategy {update_kcl_meta_data=}"
-                    ", available strategies are 'overwrite', 'skip', or 'drop'"
+                    ", available strategies are 'overwrite', 'skip', or 'drop'",
                 )
         meta_format = settings.get("meta_format") or meta_format
 
@@ -1134,12 +1138,15 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
     @overload
     def insert(
-        self, inst: Instance | kdb.CellInstArray | kdb.DCellInstArray
+        self,
+        inst: Instance | kdb.CellInstArray | kdb.DCellInstArray,
     ) -> Instance: ...
 
     @overload
     def insert(
-        self, inst: kdb.CellInstArray | kdb.DCellInstArray, property_id: int
+        self,
+        inst: kdb.CellInstArray | kdb.DCellInstArray,
+        property_id: int,
     ) -> Instance: ...
 
     def insert(
@@ -1152,14 +1159,13 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             raise LockedError(self)
         if isinstance(inst, Instance):
             return Instance(self.kcl, self._base_kcell.kdb_cell.insert(inst.instance))
-        else:
-            if not property_id:
-                return Instance(self.kcl, self._base_kcell.kdb_cell.insert(inst))
-            else:
-                assert isinstance(inst, kdb.CellInstArray | kdb.DCellInstArray)
-                return Instance(
-                    self.kcl, self._base_kcell.kdb_cell.insert(inst, property_id)
-                )
+        if not property_id:
+            return Instance(self.kcl, self._base_kcell.kdb_cell.insert(inst))
+        assert isinstance(inst, kdb.CellInstArray | kdb.DCellInstArray)
+        return Instance(
+            self.kcl,
+            self._base_kcell.kdb_cell.insert(inst, property_id),
+        )
 
     @overload
     def transform(
@@ -1234,7 +1240,12 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     }
 
                     self.add_meta_info(
-                        kdb.LayoutMetaInfo(f"kfactory:ports:{i}", meta_info, None, True)
+                        kdb.LayoutMetaInfo(
+                            f"kfactory:ports:{i}",
+                            meta_info,
+                            None,
+                            True,
+                        ),
                     )
                 else:
                     meta_info = {
@@ -1246,17 +1257,22 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     }
 
                     self.add_meta_info(
-                        kdb.LayoutMetaInfo(f"kfactory:ports:{i}", meta_info, None, True)
+                        kdb.LayoutMetaInfo(
+                            f"kfactory:ports:{i}",
+                            meta_info,
+                            None,
+                            True,
+                        ),
                     )
             settings = self.settings.model_dump()
             if settings:
                 self.add_meta_info(
-                    kdb.LayoutMetaInfo("kfactory:settings", settings, None, True)
+                    kdb.LayoutMetaInfo("kfactory:settings", settings, None, True),
                 )
             info = self.info.model_dump()
             if info:
                 self.add_meta_info(
-                    kdb.LayoutMetaInfo("kfactory:info", info, None, True)
+                    kdb.LayoutMetaInfo("kfactory:info", info, None, True),
                 )
             settings_units = self.settings_units.model_dump()
             if settings_units:
@@ -1266,19 +1282,22 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                         settings_units,
                         None,
                         True,
-                    )
+                    ),
                 )
 
             if self.function_name is not None:
                 self.add_meta_info(
                     kdb.LayoutMetaInfo(
-                        "kfactory:function_name", self.function_name, None, True
-                    )
+                        "kfactory:function_name",
+                        self.function_name,
+                        None,
+                        True,
+                    ),
                 )
 
             if self.basename is not None:
                 self.add_meta_info(
-                    kdb.LayoutMetaInfo("kfactory:basename", self.basename, None, True)
+                    kdb.LayoutMetaInfo("kfactory:basename", self.basename, None, True),
                 )
 
     def get_meta_data(
@@ -1311,7 +1330,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                         self._base_kcell.info = Info(**meta.value)
                     elif meta.name.startswith("kfactory:settings_units"):
                         self._base_kcell.settings_units = KCellSettingsUnits(
-                            **meta.value
+                            **meta.value,
                         )
                     elif meta.name.startswith("kfactory:settings"):
                         self._base_kcell.settings = KCellSettings(**meta.value)
@@ -1329,7 +1348,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                                 name=_v.get("name"),
                                 trans=_trans,
                                 cross_section=self.kcl.get_cross_section(
-                                    _v["cross_section"]
+                                    _v["cross_section"],
                                 ),
                                 port_type=_v["port_type"],
                             )
@@ -1338,7 +1357,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                                 name=_v.get("name"),
                                 dcplx_trans=_v["dcplx_trans"],
                                 cross_section=self.kcl.get_cross_section(
-                                    _v["cross_section"]
+                                    _v["cross_section"],
                                 ),
                                 port_type=_v["port_type"],
                             )
@@ -1350,15 +1369,15 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                         lib_kcl = kcls[lib_name]
                         cs = self.kcl.get_cross_section(
                             lib_kcl.get_cross_section(_v["cross_section"]).to_dtype(
-                                lib_kcl
-                            )
+                                lib_kcl,
+                            ),
                         )
 
                         if _trans is not None:
                             self.create_port(
                                 name=_v.get("name"),
                                 trans=_trans.to_dtype(lib_kcl.dbu).to_itype(
-                                    self.kcl.dbu
+                                    self.kcl.dbu,
                                 ),
                                 cross_section=cs,
                                 port_type=_v["port_type"],
@@ -1375,7 +1394,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 for meta in self.each_meta_info():
                     if meta.name.startswith("kfactory:ports"):
                         i, _type = meta.name.removeprefix("kfactory:ports:").split(
-                            ":", 1
+                            ":",
+                            1,
                         )
                         if i not in port_dict:
                             port_dict[i] = {}
@@ -1439,7 +1459,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 for meta in self.each_meta_info():
                     if meta.name.startswith("kfactory:ports"):
                         i, _type = meta.name.removeprefix("kfactory:ports:").split(
-                            ":", 1
+                            ":",
+                            1,
                         )
                         if i not in port_dict:
                             port_dict[i] = {}
@@ -1502,7 +1523,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             case _:
                 raise ValueError(
                     f"Unknown metadata format {config.meta_format}."
-                    f" Available formats are 'default' or 'legacy'."
+                    f" Available formats are 'default' or 'legacy'.",
                 )
 
     def ibbox(self, layer: int | None = None) -> kdb.Box:
@@ -1535,7 +1556,9 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         return l2n
 
     def circuit(
-        self, l2n: kdb.LayoutToNetlist, port_types: Iterable[str] = ("optical",)
+        self,
+        l2n: kdb.LayoutToNetlist,
+        port_types: Iterable[str] = ("optical",),
     ) -> None:
         """Create the circuit of the KCell in the given netlist."""
         netlist = l2n.netlist()
@@ -1559,7 +1582,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         portnames: set[str] = set()
 
         for i, port in filter(
-            port_filter, enumerate(Ports(kcl=self.kcl, bases=self.ports.bases))
+            port_filter,
+            enumerate(Ports(kcl=self.kcl, bases=self.ports.bases)),
         ):
             _trans = port.trans.dup()
             _trans.angle = _trans.angle % 2
@@ -1570,7 +1594,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             if port.name in portnames:
                 raise ValueError(
                     "Netlist extraction is not possible with"
-                    f" colliding port names. Duplicate name: {port.name}"
+                    f" colliding port names. Duplicate name: {port.name}",
                 )
 
             v = _trans.disp
@@ -1588,7 +1612,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         for h, layer_dict in cell_ports.items():
             for layer, _ports in layer_dict.items():
                 net = circ.create_net(
-                    "-".join(_port[1].name or f"{_port[0]}" for _port in _ports)
+                    "-".join(_port[1].name or f"{_port[0]}" for _port in _ports),
                 )
                 for i, port in _ports:
                     pin = circ.create_pin(port.name or f"{i}")
@@ -1598,7 +1622,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         for i, inst in enumerate(self.insts):
             name = inst.name or f"{i}_{inst.cell.name}"
             subc = circ.create_subcircuit(
-                netlist.circuit_by_cell_index(inst.cell_index), name
+                netlist.circuit_by_cell_index(inst.cell_index),
+                name,
             )
             subc.trans = inst.dcplx_trans
 
@@ -1618,7 +1643,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 if layer not in inst_ports[h]:
                     inst_ports[h][layer] = []
                 inst_ports[h][layer].append(
-                    (i, j, Instance(kcl=self.kcl, instance=inst.instance), port, subc)
+                    (i, j, Instance(kcl=self.kcl, instance=inst.instance), port, subc),
                 )
 
         # go through each position and layer and connect ports to their matching cell
@@ -1655,7 +1680,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                         [
                             (inst.name or str(i)) + "_" + (port.name or str(j))
                             for i, j, inst, port, _ in ports
-                        ]
+                        ],
                     )
 
                     net = circ.create_net(name)
@@ -1667,7 +1692,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                         port_check(ports[0][3], ports[1][3], PortCheck.all_opposite)
                         for i, j, _, port, subc in ports:
                             subc.connect_pin(
-                                subc.circuit_ref().pin_by_name(port.name or str(j)), net
+                                subc.circuit_ref().pin_by_name(port.name or str(j)),
+                                net,
                             )
         netlist.add(circ)
 
@@ -1696,7 +1722,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             check_layer_connectivity: Check whether the layer overlaps with instances.
         """
         db_: rdb.ReportDatabase = db or rdb.ReportDatabase(
-            f"Connectivity Check {self.name}"
+            f"Connectivity Check {self.name}",
         )
         assert isinstance(db_, rdb.ReportDatabase)
         if recursive:
@@ -1704,7 +1730,9 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             for c in self.kcl.each_cell_bottom_up():
                 if c in cc:
                     self.kcl[c].connectivity_check(
-                        port_types=port_types, db=db_, recursive=False
+                        port_types=port_types,
+                        db=db_,
+                        recursive=False,
                     )
         db_cell = db_.create_cell(self.name)
         cell_ports: dict[int, dict[tuple[float, float], list[ProtoPort[Any]]]] = {}
@@ -1726,7 +1754,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             ):
                 if add_cell_ports:
                     c_cat = db_.category_by_path(
-                        f"{layer_cat(port.layer).path()}.CellPorts"
+                        f"{layer_cat(port.layer).path()}.CellPorts",
                     ) or db_.create_category(layer_cat(port.layer), "CellPorts")
                     it = db_.create_item(db_cell, c_cat)
                     if port.name:
@@ -1734,23 +1762,22 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     if port.base.trans:
                         it.add_value(
                             self.kcl.to_um(
-                                port_polygon(port.width).transformed(port.trans)
-                            )
+                                port_polygon(port.width).transformed(port.trans),
+                            ),
                         )
                     else:
                         it.add_value(
                             self.kcl.to_um(port_polygon(port.width)).transformed(
-                                port.dcplx_trans
-                            )
+                                port.dcplx_trans,
+                            ),
                         )
                 xy = (port.x, port.y)
                 if port.layer not in cell_ports:
                     cell_ports[port.layer] = {xy: [port]}
+                elif xy not in cell_ports[port.layer]:
+                    cell_ports[port.layer][xy] = [port]
                 else:
-                    if xy not in cell_ports[port.layer]:
-                        cell_ports[port.layer][xy] = [port]
-                    else:
-                        cell_ports[port.layer][xy].append(port)
+                    cell_ports[port.layer][xy].append(port)
                 rec_it = kdb.RecursiveShapeIterator(
                     self.kcl.layout,
                     self._base_kcell.kdb_cell,
@@ -1763,49 +1790,52 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     port_edge = port_edge.transformed(port.trans)
                 else:
                     port_edge = port_edge.transformed(
-                        kdb.ICplxTrans(port.dcplx_trans, self.kcl.dbu)
+                        kdb.ICplxTrans(port.dcplx_trans, self.kcl.dbu),
                     )
                 p_edges = kdb.Edges([port_edge])
                 phys_overlap = p_edges & edges
                 if not phys_overlap.is_empty() and phys_overlap[0] != port_edge:
                     p_cat = db_.category_by_path(
-                        layer_cat(port.layer).path() + ".PartialPhysicalShape"
+                        layer_cat(port.layer).path() + ".PartialPhysicalShape",
                     ) or db_.create_category(
-                        layer_cat(port.layer), "PartialPhysicalShape"
+                        layer_cat(port.layer),
+                        "PartialPhysicalShape",
                     )
                     it = db_.create_item(db_cell, p_cat)
                     it.add_value(
                         "Insufficient overlap, partial overlap with polygon of"
                         f" {(phys_overlap[0].p1 - phys_overlap[0].p2).abs()}/"
-                        f"{port.width}"
+                        f"{port.width}",
                     )
                     it.add_value(
                         self.kcl.to_um(port_polygon(port.width).transformed(port.trans))
                         if port.base.trans
                         else self.kcl.to_um(port_polygon(port.width)).transformed(
-                            port.dcplx_trans
-                        )
+                            port.dcplx_trans,
+                        ),
                     )
                 elif phys_overlap.is_empty():
                     p_cat = db_.category_by_path(
-                        layer_cat(port.layer).path() + ".MissingPhysicalShape"
+                        layer_cat(port.layer).path() + ".MissingPhysicalShape",
                     ) or db_.create_category(
-                        layer_cat(port.layer), "MissingPhysicalShape"
+                        layer_cat(port.layer),
+                        "MissingPhysicalShape",
                     )
                     it = db_.create_item(db_cell, p_cat)
                     it.add_value(
-                        f"Found no overlapping Edge with Port {port.name or str(port)}"
+                        f"Found no overlapping Edge with Port {port.name or str(port)}",
                     )
                     it.add_value(
                         self.kcl.to_um(port_polygon(port.width).transformed(port.trans))
                         if port.base.trans
                         else self.kcl.to_um(port_polygon(port.width)).transformed(
-                            port.dcplx_trans
-                        )
+                            port.dcplx_trans,
+                        ),
                     )
 
         inst_ports: dict[
-            LayerEnum | int, dict[tuple[int, int], list[tuple[Port, KCell]]]
+            LayerEnum | int,
+            dict[tuple[int, int], list[tuple[Port, KCell]]],
         ] = {}
         for inst in self.insts:
             for port in Ports(kcl=self.kcl, bases=[p.base for p in inst.ports]):
@@ -1815,13 +1845,12 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     xy = (port.x, port.y)
                     if port.layer not in inst_ports:
                         inst_ports[port.layer] = {xy: [(port, inst.cell.to_itype())]}
+                    elif xy not in inst_ports[port.layer]:
+                        inst_ports[port.layer][xy] = [(port, inst.cell.to_itype())]
                     else:
-                        if xy not in inst_ports[port.layer]:
-                            inst_ports[port.layer][xy] = [(port, inst.cell.to_itype())]
-                        else:
-                            inst_ports[port.layer][xy].append(
-                                (port, inst.cell.to_itype())
-                            )
+                        inst_ports[port.layer][xy].append(
+                            (port, inst.cell.to_itype()),
+                        )
 
         for layer, port_coord_mapping in inst_ports.items():
             lc = layer_cat(layer)
@@ -1830,11 +1859,12 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     case 1:
                         if layer in cell_ports and coord in cell_ports[layer]:
                             ccp = check_cell_ports(
-                                cell_ports[layer][coord][0], ports[0][0]
+                                cell_ports[layer][coord][0],
+                                ports[0][0],
                             )
                             if ccp & 1:
                                 subc = db_.category_by_path(
-                                    lc.path() + ".WidthMismatch"
+                                    lc.path() + ".WidthMismatch",
                                 ) or db_.create_category(lc, "WidthMismatch")
                                 create_port_error(
                                     ports[0][0],
@@ -1849,7 +1879,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
                             if ccp & 2:
                                 subc = db_.category_by_path(
-                                    lc.path() + ".AngleMismatch"
+                                    lc.path() + ".AngleMismatch",
                                 ) or db_.create_category(lc, "AngleMismatch")
                                 create_port_error(
                                     ports[0][0],
@@ -1863,7 +1893,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                                 )
                             if ccp & 4:
                                 subc = db_.category_by_path(
-                                    lc.path() + ".TypeMismatch"
+                                    lc.path() + ".TypeMismatch",
                                 ) or db_.create_category(lc, "TypeMismatch")
                                 create_port_error(
                                     ports[0][0],
@@ -1877,33 +1907,33 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                                 )
                         else:
                             subc = db_.category_by_path(
-                                lc.path() + ".OrphanPort"
+                                lc.path() + ".OrphanPort",
                             ) or db_.create_category(lc, "OrphanPort")
                             it = db_.create_item(db_cell, subc)
                             it.add_value(
                                 f"Port Name: {ports[0][1].name}"
-                                f"{ports[0][0].name or str(ports[0][0])})"
+                                f"{ports[0][0].name or str(ports[0][0])})",
                             )
                             if ports[0][0]._base.trans:
                                 it.add_value(
                                     self.kcl.to_um(
                                         port_polygon(ports[0][0].width).transformed(
-                                            ports[0][0]._base.trans
-                                        )
-                                    )
+                                            ports[0][0]._base.trans,
+                                        ),
+                                    ),
                                 )
                             else:
                                 it.add_value(
                                     self.kcl.to_um(
-                                        port_polygon(port.width)
-                                    ).transformed(port.dcplx_trans)
+                                        port_polygon(port.width),
+                                    ).transformed(port.dcplx_trans),
                                 )
 
                     case 2:
                         cip = check_inst_ports(ports[0][0], ports[1][0])
                         if cip & 1:
                             subc = db_.category_by_path(
-                                lc.path() + ".WidthMismatch"
+                                lc.path() + ".WidthMismatch",
                             ) or db_.create_category(lc, "WidthMismatch")
                             create_port_error(
                                 ports[0][0],
@@ -1918,7 +1948,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
                         if cip & 2:
                             subc = db_.category_by_path(
-                                lc.path() + ".AngleMismatch"
+                                lc.path() + ".AngleMismatch",
                             ) or db_.create_category(lc, "AngleMismatch")
                             create_port_error(
                                 ports[0][0],
@@ -1932,7 +1962,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                             )
                         if cip & 4:
                             subc = db_.category_by_path(
-                                lc.path() + ".TypeMismatch"
+                                lc.path() + ".TypeMismatch",
                             ) or db_.create_category(lc, "TypeMismatch")
                             create_port_error(
                                 ports[0][0],
@@ -1946,7 +1976,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                             )
                         if layer in cell_ports and coord in cell_ports[layer]:
                             subc = db_.category_by_path(
-                                lc.path() + ".portoverlap"
+                                lc.path() + ".portoverlap",
                             ) or db_.create_category(lc, "portoverlap")
                             it = db_.create_item(db_cell, subc)
                             text = "Port Names: "
@@ -1961,18 +1991,18 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                                     rdb.RdbItemValue(
                                         self.kcl.to_um(
                                             port_polygon(cell_port.width).transformed(
-                                                cell_port.base.trans
-                                            )
-                                        )
-                                    )
+                                                cell_port.base.trans,
+                                            ),
+                                        ),
+                                    ),
                                 )
                             else:
                                 values.append(
                                     rdb.RdbItemValue(
                                         self.kcl.to_um(
-                                            port_polygon(cell_port.width)
-                                        ).transformed(cell_port.dcplx_trans)
-                                    )
+                                            port_polygon(cell_port.width),
+                                        ).transformed(cell_port.dcplx_trans),
+                                    ),
                                 )
                             for _port in ports:
                                 text += (
@@ -1984,10 +2014,10 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                                     rdb.RdbItemValue(
                                         self.kcl.to_um(
                                             port_polygon(_port[0].width).transformed(
-                                                _port[0].trans
-                                            )
-                                        )
-                                    )
+                                                _port[0].trans,
+                                            ),
+                                        ),
+                                    ),
                                 )
                             it.add_value(text[:-1])
                             for value in values:
@@ -1995,7 +2025,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
                     case x if x > 2:
                         subc = db_.category_by_path(
-                            lc.path() + ".portoverlap"
+                            lc.path() + ".portoverlap",
                         ) or db_.create_category(lc, "portoverlap")
                         it = db_.create_item(db_cell, subc)
                         text = "Port Names: "
@@ -2010,10 +2040,10 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                                 rdb.RdbItemValue(
                                     self.kcl.to_um(
                                         port_polygon(_port[0].width).transformed(
-                                            _port[0].trans
-                                        )
-                                    )
-                                )
+                                            _port[0].trans,
+                                        ),
+                                    ),
+                                ),
                             )
                         it.add_value(text[:-1])
                         for value in values:
@@ -2030,43 +2060,51 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     _bbox = inst.bbox(layer)
                     _inst_region = kdb.Region(
                         kdb.DBox(
-                            _bbox.left, _bbox.bottom, _bbox.right, _bbox.top
-                        ).to_itype(self.kcl.dbu)
+                            _bbox.left,
+                            _bbox.bottom,
+                            _bbox.right,
+                            _bbox.top,
+                        ).to_itype(self.kcl.dbu),
                     )
                     inst_shapes: kdb.Region | None = None
                     if not (inst_region & _inst_region).is_empty():
                         if inst_shapes is None:
                             inst_shapes = kdb.Region()
                             shape_it = self.begin_shapes_rec_overlapping(
-                                layer, inst.bbox(layer)
+                                layer,
+                                inst.bbox(layer),
                             )
                             shape_it.select_cells([inst.cell.cell_index()])
                             shape_it.min_depth = 1
                             for _it in shape_it.each():
                                 if _it.path()[0].inst() == inst.instance:
                                     inst_shapes.insert(
-                                        _it.shape().polygon.transformed(_it.trans())
+                                        _it.shape().polygon.transformed(_it.trans()),
                                     )
 
                         for j, _reg in inst_regions.items():
                             if _reg & _inst_region:
                                 __reg = kdb.Region()
                                 shape_it = self.begin_shapes_rec_touching(
-                                    layer, (_reg & _inst_region).bbox()
+                                    layer,
+                                    (_reg & _inst_region).bbox(),
                                 )
                                 shape_it.select_cells([self.insts[j].cell.cell_index()])
                                 shape_it.min_depth = 1
                                 for _it in shape_it.each():
                                     if _it.path()[0].inst() == self.insts[j].instance:
                                         __reg.insert(
-                                            _it.shape().polygon.transformed(_it.trans())
+                                            _it.shape().polygon.transformed(
+                                                _it.trans(),
+                                            ),
                                         )
 
                                 error_region_instances.insert(__reg & inst_shapes)
 
                     if not (_inst_region & reg).is_empty():
                         rec_it = self.begin_shapes_rec_touching(
-                            layer, (_inst_region & reg).bbox()
+                            layer,
+                            (_inst_region & reg).bbox(),
                         )
                         rec_it.min_depth = 1
                         error_region_shapes += kdb.Region(rec_it) & reg
@@ -2074,9 +2112,10 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     inst_regions[i] = _inst_region
                 if not error_region_shapes.is_empty():
                     sc = db_.category_by_path(
-                        layer_cat(layer).path() + ".ShapeInstanceshapeOverlap"
+                        layer_cat(layer).path() + ".ShapeInstanceshapeOverlap",
                     ) or db_.create_category(
-                        layer_cat(layer), "ShapeInstanceshapeOverlap"
+                        layer_cat(layer),
+                        "ShapeInstanceshapeOverlap",
                     )
                     it = db_.create_item(db_cell, sc)
                     it.add_value("Shapes overlapping with shapes of instances")
@@ -2084,11 +2123,11 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                         it.add_value(self.kcl.to_um(poly))
                 if not error_region_instances.is_empty():
                     sc = db_.category_by_path(
-                        layer_cat(layer).path() + ".InstanceshapeOverlap"
+                        layer_cat(layer).path() + ".InstanceshapeOverlap",
                     ) or db_.create_category(layer_cat(layer), "InstanceshapeOverlap")
                     it = db_.create_item(db_cell, sc)
                     it.add_value(
-                        "Instance shapes overlapping with shapes of other instances"
+                        "Instance shapes overlapping with shapes of other instances",
                     )
                     for poly in error_region_instances.merge().each():
                         it.add_value(self.kcl.to_um(poly))
@@ -2235,7 +2274,14 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
         return DInstance(
             kcl=self.kcl,
             instance=self._create_inst(
-                cell, trans, a, b, na, nb, libcell_as_static, static_name_separator
+                cell,
+                trans,
+                a,
+                b,
+                na,
+                nb,
+                libcell_as_static,
+                static_name_separator,
             ),
         )
 
@@ -2359,7 +2405,14 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         return Instance(
             kcl=self.kcl,
             instance=self._create_inst(
-                cell, trans, a, b, na, nb, libcell_as_static, static_name_separator
+                cell,
+                trans,
+                a,
+                b,
+                na,
+                nb,
+                libcell_as_static,
+                static_name_separator,
             ),
         )
 
@@ -2400,19 +2453,19 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                 **{
                     name: deserialize_setting(setting)
                     for name, setting in _d["info"].items()
-                }
+                },
             )
         cell.settings = KCellSettings(
             **{
                 name: deserialize_setting(setting)
                 for name, setting in d.get("settings", {}).items()
-            }
+            },
         )
         cell.info = Info(
             **{
                 name: deserialize_setting(setting)
                 for name, setting in d.get("info", {}).items()
-            }
+            },
         )
         for inst in d.get("insts", []):
             if "cellname" in inst:
@@ -2426,7 +2479,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
             else:
                 raise NotImplementedError(
                     'To define an instance, either a "cellfunction" or'
-                    ' a "cellname" needs to be defined'
+                    ' a "cellname" needs to be defined',
                 )
             t = inst.get("trans", {})
             if isinstance(t, str):
@@ -2573,7 +2626,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
             for shape in shapes:
                 shapetype, shapestring = shape.split(" ", 1)
                 cell.shapes(cell.layout().layer(linfo)).insert(
-                    type_to_class[shapetype](shapestring)
+                    type_to_class[shapetype](shapestring),
                 )
 
         return cell
@@ -2862,7 +2915,9 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
         return self.ports.create_port(**kwargs)
 
     def create_inst(
-        self, cell: KCell | VKCell, trans: kdb.DCplxTrans = kdb.DCplxTrans()
+        self,
+        cell: KCell | VKCell,
+        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
     ) -> VInstance:
         if self.locked:
             raise LockedError(self)
@@ -2923,7 +2978,7 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
                             kdb.DPoint(0, -w / 2),
                             kdb.DPoint(0, w / 2),
                             kdb.DPoint(w / 2, 0),
-                        ]
+                        ],
                     )
                 else:
                     poly = kdb.DPolygon(
@@ -2936,12 +2991,12 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
                             kdb.DPoint(w / 20, -w * 9 / 20),
                             kdb.DPoint(w * 19 / 20, 0),
                             kdb.DPoint(w / 2, 0),
-                        ]
+                        ],
                     )
                 polys[w] = poly
             self.shapes(port.layer).insert(poly.transformed(port.dcplx_trans))
             self.shapes(port.layer).insert(
-                kdb.Text(port.name if port.name else "", port.trans)
+                kdb.Text(port.name if port.name else "", port.trans),
             )
 
     def write(
@@ -2973,7 +3028,8 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
         )
 
     def l2n(
-        self, port_types: Iterable[str] = ("optical",)
+        self,
+        port_types: Iterable[str] = ("optical",),
     ) -> tuple[KCell, kdb.LayoutToNetlist]:
         """Generate a LayoutToNetlist object from the port types.
 
@@ -3050,11 +3106,10 @@ def show(
         frame_filename_stem = Path(frame.filename).stem
         if frame_filename_stem.startswith("<ipython-input"):  # IPython Case
             name = "ipython"
-        else:  # Normal Python kernel case
-            if frame.function != "<module>":
-                name = clean_name(frame_filename_stem + "_" + frame.function)
-            else:
-                name = clean_name(frame_filename_stem)
+        elif frame.function != "<module>":
+            name = clean_name(frame_filename_stem + "_" + frame.function)
+        else:
+            name = clean_name(frame_filename_stem)
     except Exception:
         try:
             from __main__ import __file__ as mf
@@ -3088,7 +3143,7 @@ def show(
         else:
             logger.info(
                 "git isn't installed. For better file storage, "
-                "please install kfactory[git] or gitpython."
+                "please install kfactory[git] or gitpython.",
             )
         if not file:
             try:
@@ -3139,7 +3194,7 @@ def show(
         else:
             logger.info(
                 "git isn't installed. For better file storage, "
-                "please install kfactory[git] or gitpython."
+                "please install kfactory[git] or gitpython.",
             )
         if not file:
             try:
@@ -3164,7 +3219,7 @@ def show(
         file = Path(layout).expanduser().resolve()
     else:
         raise NotImplementedError(
-            f"Unknown type {type(layout)} for streaming to KLayout"
+            f"Unknown type {type(layout)} for streaming to KLayout",
         )
     if not file.is_file():
         raise ValueError(f"{file} is not a File")
@@ -3199,7 +3254,7 @@ def show(
             else:
                 logger.info(
                     "git isn't installed. For better file storage, "
-                    "please install kfactory[git] or gitpython."
+                    "please install kfactory[git] or gitpython.",
                 )
             if not lyrdbfile:
                 try:
@@ -3215,7 +3270,7 @@ def show(
             lyrdbfile = Path(lyrdb).expanduser().resolve()
         else:
             raise NotImplementedError(
-                f"Unknown type {type(lyrdb)} for streaming to KLayout"
+                f"Unknown type {type(lyrdb)} for streaming to KLayout",
             )
         if not lyrdbfile.is_file():
             raise ValueError(f"{lyrdbfile} is not a File")
@@ -3245,7 +3300,7 @@ def show(
             else:
                 logger.info(
                     "git isn't installed. For better file storage, "
-                    "please install kfactory[git] or gitpython."
+                    "please install kfactory[git] or gitpython.",
                 )
             if not l2nfile:
                 try:
@@ -3261,7 +3316,7 @@ def show(
             l2nfile = Path(l2n).expanduser().resolve()
         else:
             raise NotImplementedError(
-                f"Unknown type {type(l2n)} for streaming to KLayout"
+                f"Unknown type {type(l2n)} for streaming to KLayout",
             )
         if not l2nfile.is_file():
             raise ValueError(f"{lyrdbfile} is not a File")
@@ -3310,7 +3365,7 @@ def show(
                             f"klive is out of date. Installed:{jmsg['version']}/"
                             "Recommended:"
                             f"{'.'.join(str(s) for s in rec_klive_version)}. Please "
-                            "update it in KLayout"
+                            "update it in KLayout",
                         )
                         klive_ok = False
                         break
@@ -3324,7 +3379,9 @@ def show(
                     for dv in (
                         kv - kfkv
                         for kv, kfkv in zip(
-                            klayout_version, kfactory_version, strict=True
+                            klayout_version,
+                            kfactory_version,
+                            strict=True,
                         )
                     ):
                         if dv > 0:
@@ -3339,7 +3396,7 @@ def show(
                                 f"KLayout GUI version ({jmsg['klayout_version']}) "
                                 "is older than the Python version "
                                 f"({_klayout_version}). This may cause issues. Please "
-                                "update the GUI to match or exceed the Python version."
+                                "update the GUI to match or exceed the Python version.",
                             )
                             break
 
@@ -3421,7 +3478,8 @@ class KCells(ProtoCells[KCell]):
 
 
 def get_cells(
-    modules: Iterable[ModuleType], verbose: bool = False
+    modules: Iterable[ModuleType],
+    verbose: bool = False,
 ) -> dict[str, Callable[..., KCell]]:
     """Returns KCells (KCell functions) from a module or list of modules.
 

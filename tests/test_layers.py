@@ -7,7 +7,8 @@ import kfactory as kf
 
 def test_layer_infos_valid() -> None:
     layer_info = kf.LayerInfos(
-        layer1=kf.kdb.LayerInfo(1, 0), layer2=kf.kdb.LayerInfo(2, 0)
+        layer1=kf.kdb.LayerInfo(1, 0),
+        layer2=kf.kdb.LayerInfo(2, 0),
     )
     assert layer_info.layer1.layer == 1
     assert layer_info.layer1.datatype == 0

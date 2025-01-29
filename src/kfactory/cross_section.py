@@ -22,11 +22,16 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
     name: str
 
     def __init__(
-        self, width: int, enclosure: LayerEnclosure, name: str | None = None
+        self,
+        width: int,
+        enclosure: LayerEnclosure,
+        name: str | None = None,
     ) -> None:
         """Initialized the CrossSection."""
         super().__init__(
-            width=width, enclosure=enclosure, name=name or f"{enclosure.name}_{width}"
+            width=width,
+            enclosure=enclosure,
+            name=name or f"{enclosure.name}_{width}",
         )
 
     @model_validator(mode="after")
@@ -37,7 +42,7 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
             raise ValueError(
                 "Width of symmetrical cross sections must have be a multiple of 2. "
                 "This could cause cross sections and extrusions to become unsymmetrical"
-                " otherwise."
+                " otherwise.",
             )
         return self
 
@@ -95,9 +100,10 @@ class CrossSectionModel(BaseModel):
         | DSymmetricalCrossSection,
     ) -> SymmetricalCrossSection:
         if isinstance(
-            cross_section, SymmetricalCrossSection
+            cross_section,
+            SymmetricalCrossSection,
         ) and cross_section.enclosure != self.kcl.get_enclosure(
-            cross_section.enclosure
+            cross_section.enclosure,
         ):
             return self.get_cross_section(
                 CrossSectionSpec(
@@ -105,12 +111,12 @@ class CrossSectionModel(BaseModel):
                     main_layer=cross_section.main_layer,
                     name=cross_section.name,
                     width=cross_section.width,
-                )
+                ),
             )
 
         if isinstance(cross_section, str):
             return self.cross_sections[cross_section]
-        elif isinstance(cross_section, DSymmetricalCrossSection):
+        if isinstance(cross_section, DSymmetricalCrossSection):
             cross_section = cross_section.to_itype(self.kcl)
         elif isinstance(cross_section, dict):
             cast(CrossSectionSpec, cross_section)
@@ -130,7 +136,7 @@ class CrossSectionModel(BaseModel):
                 w = cross_section["width"]
                 if not isinstance(w, int) and not w.is_integer():
                     raise ValueError(
-                        "A CrossSectionSpec with 'sections' must have a width in dbu."
+                        "A CrossSectionSpec with 'sections' must have a width in dbu.",
                     )
                 cross_section = SymmetricalCrossSection(
                     width=int(w),

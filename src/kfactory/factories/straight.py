@@ -133,14 +133,14 @@ def straight_dbu_factory(
             logger.critical(
                 f"Negative lengths are not allowed {length} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             length = -length
         if width < 0:
             logger.critical(
                 f"Negative widths are not allowed {width} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             width = -width
 
@@ -162,8 +162,11 @@ def straight_dbu_factory(
         }
         _info.update(
             _additional_info_func(
-                width=width, length=length, layer=layer, enclosure=enclosure
-            )
+                width=width,
+                length=length,
+                layer=layer,
+                enclosure=enclosure,
+            ),
         )
         _info.update(_additional_info)
         c.info = Info(**_info)

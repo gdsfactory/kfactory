@@ -111,14 +111,14 @@ def virtual_straight_factory(
             logger.critical(
                 f"Negative lengths are not allowed {length} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             length = -length
         if width < 0:
             logger.critical(
                 f"Negative widths are not allowed {width} as ports"
                 " will be inverted. Please use a positive number. Forcing positive"
-                " lengths."
+                " lengths.",
             )
             width = -width
 
@@ -140,7 +140,7 @@ def virtual_straight_factory(
                 length=length,
                 layer=layer,
                 enclosure=enclosure,
-            )
+            ),
         )
         _info.update(_additional_info)
         c.info = Info(**_info)

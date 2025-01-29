@@ -15,7 +15,9 @@ import kfactory as kf
     ],
 )
 def test_rotation(
-    center: kf.kdb.Point | None, straight: kf.KCell, LAYER: Layers
+    center: kf.kdb.Point | None,
+    straight: kf.KCell,
+    LAYER: Layers,
 ) -> None:
     c = kf.KCell()
 
@@ -28,7 +30,7 @@ def test_rotation(
 
     if center:
         c.shapes(c.kcl.find_layer(LAYER.WGCLAD)).insert(
-            kf.kdb.Box(10).transformed(kf.kdb.Trans(center.to_v()))
+            kf.kdb.Box(10).transformed(kf.kdb.Trans(center.to_v())),
         )
 
     c.add_ports(wg1.ports)
@@ -46,7 +48,9 @@ def test_rotation(
     ],
 )
 def test_drotation(
-    center: kf.kdb.DPoint | None, straight: kf.KCell, LAYER: Layers
+    center: kf.kdb.DPoint | None,
+    straight: kf.KCell,
+    LAYER: Layers,
 ) -> None:
     c = kf.KCell()
 
@@ -60,7 +64,7 @@ def test_drotation(
 
     if center:
         c.shapes(c.kcl.find_layer(LAYER.WGCLAD)).insert(
-            kf.kdb.DBox(0.01).transformed(kf.kdb.DCplxTrans(center.to_v()))
+            kf.kdb.DBox(0.01).transformed(kf.kdb.DCplxTrans(center.to_v())),
         )
 
     c.add_ports(wg1.ports)
@@ -68,7 +72,7 @@ def test_drotation(
 
 
 @pytest.mark.parametrize(
-    "from_name,use_mirror,apply_mirror,expected_transformation",
+    ("from_name", "use_mirror", "apply_mirror", "expected_transformation"),
     [
         (True, True, True, kf.kdb.Trans(1, False, 11_000, -10_000)),
         (True, True, False, kf.kdb.Trans(1, False, 11_000, -10_000)),

@@ -31,7 +31,9 @@ def test_cell_decorator(kcl: kf.KCLayout, LAYER: Layers) -> None:
 def test_set_settings_functionality(kcl: kf.KCLayout) -> None:
     @kcl.cell(set_settings=True)
     def test_set_settings(
-        name: str = "test_set_settings", width: float = 10.0, height: float = 5.0
+        name: str = "test_set_settings",
+        width: float = 10.0,
+        height: float = 5.0,
     ) -> kf.KCell:
         c = kcl.kcell(name=name)
         return c
@@ -42,7 +44,9 @@ def test_set_settings_functionality(kcl: kf.KCLayout) -> None:
 
     @kcl.cell(set_settings=False)
     def test_set_settings_no_settings(
-        name: str = "test_set_settings_no", width: float = 10.0, height: float = 5.0
+        name: str = "test_set_settings_no",
+        width: float = 10.0,
+        height: float = 5.0,
     ) -> kf.KCell:
         c = kcl.kcell(name=name)
         return c
@@ -51,7 +55,8 @@ def test_set_settings_functionality(kcl: kf.KCLayout) -> None:
     assert cell_without_settings.settings == kf.KCellSettings()
 
     test_set_settings_partial = functools.partial(
-        test_set_settings, name="test_set_settings_partial"
+        test_set_settings,
+        name="test_set_settings_partial",
     )
     cell_with_settings_partial = test_set_settings_partial()
     assert cell_with_settings_partial.function_name == "test_set_settings"
@@ -131,7 +136,9 @@ def test_cell_with_different_kcl(kcl: kf.KCLayout) -> None:
 def test_cell_parameters(kcl: kf.KCLayout) -> None:
     @kcl.cell
     def test_cell_with_empty_parameters(
-        name: str, width: float, height: float
+        name: str,
+        width: float,
+        height: float,
     ) -> kf.KCell:
         cell = kcl.kcell(name=name)
         return cell
@@ -155,17 +162,17 @@ def test_check_instances(kcl: kf.KCLayout) -> None:
 
     with pytest.raises(ValueError):
         kcl.cell(check_instances=kf.kcell.CHECK_INSTANCES.RAISE)(
-            test_cell_with_rotation
+            test_cell_with_rotation,
         )("test_rase")
 
     cell = kcl.cell(check_instances=kf.kcell.CHECK_INSTANCES.FLATTEN)(
-        test_cell_with_rotation
+        test_cell_with_rotation,
     )("test_flatten")
 
     assert len(cell.insts) == 0
 
     cell2 = kcl.cell(check_instances=kf.kcell.CHECK_INSTANCES.VINSTANCES)(
-        test_cell_with_rotation
+        test_cell_with_rotation,
     )("test_vinstances")
 
     assert cell2 is not cell
@@ -173,7 +180,7 @@ def test_check_instances(kcl: kf.KCLayout) -> None:
     assert len(cell2.insts) == 1
 
     kcl.cell(check_instances=kf.kcell.CHECK_INSTANCES.IGNORE)(test_cell_with_rotation)(
-        "test_ignore"
+        "test_ignore",
     )
 
 

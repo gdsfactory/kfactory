@@ -35,12 +35,13 @@ def pack_kcells(
         max_height=max_height,
     )
 
-    for inst_bb, bb in zip(bbs, packed_bbs):
+    for inst_bb, bb in zip(bbs, packed_bbs, strict=False):
         inst, _bb = inst_bb
         inst.transform(
             kdb.Trans(
-                bb[0] + spacing // 2 - _bb.left, bb[1] + spacing // 2 - _bb.bottom
-            )
+                bb[0] + spacing // 2 - _bb.left,
+                bb[1] + spacing // 2 - _bb.bottom,
+            ),
         )
 
     return InstanceGroup(insts=insts)
@@ -70,12 +71,13 @@ def pack_instances(
         max_height=max_height,
     )
 
-    for inst_bb, bb in zip(bbs, packed_bbs):
+    for inst_bb, bb in zip(bbs, packed_bbs, strict=False):
         inst, _bb = inst_bb
         inst.transform(
             kdb.Trans(
-                bb[0] + spacing // 2 - _bb.left, bb[1] + spacing // 2 - _bb.bottom
-            )
+                bb[0] + spacing // 2 - _bb.left,
+                bb[1] + spacing // 2 - _bb.bottom,
+            ),
         )
 
     return InstanceGroup(insts=instances)

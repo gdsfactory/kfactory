@@ -18,7 +18,9 @@ class VShapes:
     _bbox: kdb.DBox
 
     def __init__(
-        self, cell: VKCell, _shapes: Sequence[ShapeLike] | None = None
+        self,
+        cell: VKCell,
+        _shapes: Sequence[ShapeLike] | None = None,
     ) -> None:
         self.cell = cell
         self._shapes = list(_shapes) if _shapes is not None else []
@@ -30,7 +32,7 @@ class VShapes:
             isinstance(shape, kdb.Shape)
             and shape.cell.layout().dbu != self.cell.kcl.dbu
         ):
-            raise ValueError()
+            raise ValueError
         if isinstance(shape, kdb.DBox):
             shape = kdb.DPolygon(shape)
         elif isinstance(shape, kdb.Box):
@@ -72,7 +74,7 @@ class VShapes:
                     )
                 else:
                     new_shapes.append(
-                        shape.to_dtype(self.cell.kcl.dbu).transformed(trans)
+                        shape.to_dtype(self.cell.kcl.dbu).transformed(trans),
                     )
             else:
                 new_shapes.append(shape.dpolygon.transform(trans))

@@ -151,13 +151,12 @@ class ProtoPorts(ABC, Generic[TUnit]):
         """Check whether a port is in this port collection."""
         if isinstance(port, ProtoPort):
             return port.base in self._bases
-        elif isinstance(port, BasePort):
+        if isinstance(port, BasePort):
             return port in self._bases
-        else:
-            for _port in self._bases:
-                if _port.name == port:
-                    return True
-            return False
+        for _port in self._bases:
+            if _port.name == port:
+                return True
+        return False
 
     def clear(self) -> None:
         """Deletes all ports."""
@@ -171,7 +170,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
             other_list = cast(list[ProtoPort[Any]], list(other))
             if len(self._bases) != len(other_list):
                 return False
-            for b1, b2 in zip(self._bases, other_list):
+            for b1, b2 in zip(self._bases, other_list, strict=False):
                 if b1 != b2.base:
                     return False
             return True
@@ -261,7 +260,7 @@ class Ports(ProtoPorts[int]):
             base.dcplx_trans = None
             base.kcl = self.kcl
             base.cross_section = self.kcl.get_cross_section(
-                port.cross_section.to_dtype(port.kcl)
+                port.cross_section.to_dtype(port.kcl),
             )
             port_ = Port(base=base)
             port_.dcplx_trans = dcplx_trans
@@ -374,17 +373,17 @@ class Ports(ProtoPorts[int]):
             if width is None:
                 raise ValueError(
                     "Either width or dwidth must be set. It can be set through"
-                    " a cross section as well."
+                    " a cross section as well.",
                 )
             if layer_info is None:
                 if layer is None:
                     raise ValueError(
-                        "layer or layer_info must be defined to create a port."
+                        "layer or layer_info must be defined to create a port.",
                     )
                 layer_info = self.kcl.get_info(layer)
             assert layer_info is not None
             cross_section = self.kcl.get_cross_section(
-                CrossSectionSpec(main_layer=layer_info, width=width)
+                CrossSectionSpec(main_layer=layer_info, width=width),
             )
         if trans is not None:
             port = Port(
@@ -415,7 +414,7 @@ class Ports(ProtoPorts[int]):
         else:
             raise ValueError(
                 f"You need to define width {width} and trans {trans} or angle {angle}"
-                f" and center {center} or dcplx_trans {dcplx_trans}"
+                f" and center {center} or dcplx_trans {dcplx_trans}",
             )
 
         self._bases.append(port.base)
@@ -434,7 +433,7 @@ class Ports(ProtoPorts[int]):
         except StopIteration:
             raise KeyError(
                 f"{key=} is not a valid port name or index. "
-                f"Available ports: {[v.name for v in self._bases]}"
+                f"Available ports: {[v.name for v in self._bases]}",
             )
 
     def filter(
@@ -574,7 +573,7 @@ class DPorts(ProtoPorts[float]):
             base.dcplx_trans = None
             base.kcl = self.kcl
             base.cross_section = self.kcl.get_cross_section(
-                port.cross_section.to_dtype(port.kcl)
+                port.cross_section.to_dtype(port.kcl),
             )
             port_ = DPort(base=base)
             port_.dcplx_trans = dcplx_trans
@@ -698,12 +697,12 @@ class DPorts(ProtoPorts[float]):
             if width is None:
                 raise ValueError(
                     "Either width must be set. It can be set through"
-                    " a cross section as well."
+                    " a cross section as well.",
                 )
             if layer_info is None:
                 if layer is None:
                     raise ValueError(
-                        "layer or layer_info must be defined to create a port."
+                        "layer or layer_info must be defined to create a port.",
                     )
                 layer_info = self.kcl.get_info(layer)
             assert layer_info is not None
@@ -714,13 +713,13 @@ class DPorts(ProtoPorts[float]):
             if width_ % 2:
                 raise ValueError(
                     f"dwidth needs to be even to snap to grid. Got {dwidth}."
-                    "Ports must have a grid width of multiples of 2."
+                    "Ports must have a grid width of multiples of 2.",
                 )
             cross_section = self.kcl.get_cross_section(
                 CrossSectionSpec(
                     main_layer=layer_info,
                     width=width_,
-                )
+                ),
             )
         if trans is not None:
             port = DPort(
@@ -751,7 +750,7 @@ class DPorts(ProtoPorts[float]):
         else:
             raise ValueError(
                 f"You need to define width {width} and trans {trans} or angle {angle}"
-                f" and center {center} or dcplx_trans {dcplx_trans}"
+                f" and center {center} or dcplx_trans {dcplx_trans}",
             )
 
         self._bases.append(port.base)
@@ -770,7 +769,7 @@ class DPorts(ProtoPorts[float]):
         except StopIteration:
             raise KeyError(
                 f"{key=} is not a valid port name or index. "
-                f"Available ports: {[v.name for v in self._bases]}"
+                f"Available ports: {[v.name for v in self._bases]}",
             )
 
     def filter(

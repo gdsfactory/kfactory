@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Annotated, Any, ParamSpec, TypeAlias, TypeVar
 
 import klayout.db as kdb
-import klayout.lay as lay
+from klayout import lay
 
 if TYPE_CHECKING:
     from .instance import ProtoInstance
@@ -26,7 +26,8 @@ TInstance = TypeVar("TInstance", bound="ProtoInstance[Any]", covariant=True)
 
 KCellParams = ParamSpec("KCellParams")
 AnyTrans = TypeVar(
-    "AnyTrans", bound=kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans
+    "AnyTrans",
+    bound=kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
 )
 SerializableShape: TypeAlias = (
     kdb.Box

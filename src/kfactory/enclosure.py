@@ -82,7 +82,8 @@ def is_callable_widths(
 
 
 def path_pts_to_polygon(
-    pts_top: list[kdb.DPoint], pts_bot: list[kdb.DPoint]
+    pts_top: list[kdb.DPoint],
+    pts_bot: list[kdb.DPoint],
 ) -> kdb.DPolygon:
     """Convert a list of points to a polygon."""
     pts_bot.reverse()
@@ -213,7 +214,7 @@ def extrude_path(
                     width + 2 * section.d_max * target.kcl.dbu,
                     start_angle,
                     end_angle,
-                )
+                ),
             )
             _r = kdb.Region(target.kcl.to_dbu(_path))
             if section.d_min is not None:
@@ -223,7 +224,7 @@ def extrude_path(
                         width + 2 * section.d_min * target.kcl.dbu,
                         start_angle,
                         end_angle,
-                    )
+                    ),
                 )
                 _r -= kdb.Region(target.kcl.to_dbu(_path))
             reg.insert(_r)
@@ -290,7 +291,7 @@ def extrude_path_dynamic_points(
         vector_bot = [start_trans * kdb.DCplxTrans.R180 * ref_vector]
         p_old = path[0]
         p = path[1]
-        for point, w in zip(path[2:], widths[1:-1]):
+        for point, w in zip(path[2:], widths[1:-1], strict=False):
             ref_vector = kdb.DCplxTrans(kdb.DVector(0, w / 2))
             p_new = point
             v = p_new - p_old
@@ -359,9 +360,9 @@ def extrude_path_dynamic(
                                 w_max,
                                 start_angle,
                                 end_angle,
-                            )
-                        )
-                    )
+                            ),
+                        ),
+                    ),
                 )
                 if section.d_min is not None:
 
@@ -381,9 +382,9 @@ def extrude_path_dynamic(
                                     w_min,
                                     start_angle,
                                     end_angle,
-                                )
-                            )
-                        )
+                                ),
+                            ),
+                        ),
                     )
                 reg.insert(_r)
             target.shapes(target.kcl.layer(layer)).insert(reg.merge())
@@ -404,9 +405,9 @@ def extrude_path_dynamic(
                                 max_widths,
                                 start_angle,
                                 end_angle,
-                            )
-                        )
-                    )
+                            ),
+                        ),
+                    ),
                 )
                 if section.d_min is not None:
                     min_widths = [
@@ -421,9 +422,9 @@ def extrude_path_dynamic(
                                     min_widths,
                                     start_angle,
                                     end_angle,
-                                )
-                            )
-                        )
+                                ),
+                            ),
+                        ),
                     )
                 reg.insert(_r)
             target.shapes(target.kcl.layer(layer)).insert(reg.merge())
@@ -488,24 +489,23 @@ class LayerSection(BaseModel):
         if not self.sections:
             self.sections.append(sec)
             return 0
-        else:
-            i = 0
-            if sec.d_min is not None:
-                while i < len(self.sections) and sec.d_min > self.sections[i].d_max:
-                    i += 1
-                while (
-                    i < len(self.sections) and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
-                ):
-                    sec.d_max = max(self.sections[i].d_max, sec.d_max)
-                    sec.d_min = min(
-                        self.sections[i].d_min,
-                        sec.d_min,  # type: ignore[type-var]
-                    )
-                    self.sections.pop(i)
-                    if i == len(self.sections):
-                        break
-            self.sections.insert(i, sec)
-            return i
+        i = 0
+        if sec.d_min is not None:
+            while i < len(self.sections) and sec.d_min > self.sections[i].d_max:
+                i += 1
+            while (
+                i < len(self.sections) and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
+            ):
+                sec.d_max = max(self.sections[i].d_max, sec.d_max)
+                sec.d_min = min(
+                    self.sections[i].d_min,
+                    sec.d_min,  # type: ignore[type-var]
+                )
+                self.sections.pop(i)
+                if i == len(self.sections):
+                    break
+        self.sections.insert(i, sec)
+        return i
 
     def max_size(self) -> int:
         """Maximum size of the sections in this layer section."""
@@ -529,7 +529,10 @@ class DLayerEnclosure(BaseModel, arbitrary_types_allowed=True):
 
     def to_itype(self, kcl: KCLayout) -> LayerEnclosure:
         return LayerEnclosure(
-            dsections=self.sections, name=self.name, main_layer=self.main_layer, kcl=kcl
+            dsections=self.sections,
+            name=self.name,
+            main_layer=self.main_layer,
+            kcl=kcl,
         )
 
 
@@ -595,7 +598,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                             section[0],
                             kcl.to_dbu(section[1]),
                             kcl.to_dbu(section[2]),
-                        )
+                        ),
                     )
 
         for sec in sorted(
@@ -608,7 +611,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                 ls = LayerSection()
                 self.layer_sections[sec[0]] = ls
             ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
-                Section(d_max=sec[2], d_min=sec[1])
+                Section(d_max=sec[2], d_min=sec[1]),
             )
 
     @model_serializer
@@ -626,7 +629,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
     def __hash__(self) -> int:  # make hashable BaseModel subclass
         """Calculate a unique hash of the enclosure."""
         return hash(
-            (str(self), self.main_layer, tuple(list(self.layer_sections.items())))
+            (str(self), self.main_layer, tuple(list(self.layer_sections.items()))),
         )
 
     def __add__(self, other: LayerEnclosure) -> LayerEnclosure:
@@ -705,25 +708,24 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         """
         if d is None:
             return kdb.Region()
-        elif d == 0:
+        if d == 0:
             return r.dup()
-        elif d > 0:
+        if d > 0:
             return r.minkowski_sum(shape(d))
+        _shape = shape(abs(d))
+        if isinstance(_shape, list):
+            box_shape = kdb.Polygon(_shape)
+            bbox_maxsize = max(
+                box_shape.bbox().width(),
+                box_shape.bbox().height(),
+            )
         else:
-            _shape = shape(abs(d))
-            if isinstance(_shape, list):
-                box_shape = kdb.Polygon(_shape)
-                bbox_maxsize = max(
-                    box_shape.bbox().width(),
-                    box_shape.bbox().height(),
-                )
-            else:
-                bbox_maxsize = max(
-                    _shape.bbox().width(),
-                    _shape.bbox().height(),
-                )
-            bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
-            return r - (bbox_r - r).minkowski_sum(_shape)
+            bbox_maxsize = max(
+                _shape.bbox().width(),
+                _shape.bbox().height(),
+            )
+        bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
+        return r - (bbox_r - r).minkowski_sum(_shape)
 
     def apply_minkowski_enc(
         self,
@@ -768,7 +770,9 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                 raise ValueError("Undefined direction")
 
     def apply_minkowski_y(
-        self, c: KCell, ref: kdb.LayerInfo | kdb.Region | None = None
+        self,
+        c: KCell,
+        ref: kdb.LayerInfo | kdb.Region | None = None,
     ) -> None:
         """Apply an enclosure with a vector in y-direction.
 
@@ -782,7 +786,9 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         return self.apply_minkowski_enc(c, ref=ref, direction=Direction.Y)
 
     def apply_minkowski_x(
-        self, c: KCell, ref: kdb.LayerInfo | kdb.Region | None
+        self,
+        c: KCell,
+        ref: kdb.LayerInfo | kdb.Region | None,
     ) -> None:
         """Apply an enclosure with a vector in x-direction.
 
@@ -818,7 +824,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             if ref is None:
                 raise ValueError(
                     "The enclosure doesn't have  a reference `main_layer` defined."
-                    " Therefore the layer must be defined in calls"
+                    " Therefore the layer must be defined in calls",
                 )
         r = (
             kdb.Region(c.begin_shapes_rec(c.kcl.layer(ref)))
@@ -831,7 +837,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             for section in layersec.sections:
                 c.shapes(c.kcl.layer(layer)).insert(
                     self.minkowski_region(r, section.d_max, shape)
-                    - self.minkowski_region(r, section.d_min, shape)
+                    - self.minkowski_region(r, section.d_min, shape),
                 )
 
     def apply_minkowski_tiled(
@@ -869,7 +875,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             if ref is None:
                 raise ValueError(
                     "The enclosure doesn't have  a reference `main_layer` defined."
-                    " Therefore the layer must be defined in calls"
+                    " Therefore the layer must be defined in calls",
                 )
         tp = kdb.TilingProcessor()
         tp.frame = c.dbbox()  # type: ignore[misc, assignment]
@@ -878,7 +884,8 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         maxsize = 0
         for layersection in self.layer_sections.values():
             maxsize = max(
-                maxsize, *[section.d_max for section in layersection.sections]
+                maxsize,
+                *[section.d_max for section in layersection.sections],
             )
 
         min_tile_size_rec = 10 * maxsize * tp.dbu
@@ -958,7 +965,10 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
 
                 tp.queue(queue_str)
                 logger.debug(
-                    "String queued for {} on layer {}: {}", c.name, layer, queue_str
+                    "String queued for {} on layer {}: {}",
+                    c.name,
+                    layer,
+                    queue_str,
                 )
 
             operators.append((layer_index, operator))
@@ -967,13 +977,13 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                 for port in carve_out_ports:
                     if port._base.trans is not None:
                         r.insert(
-                            port_hole(port.width, max_size).transformed(port.trans)
+                            port_hole(port.width, max_size).transformed(port.trans),
                         )
                     else:
                         r.insert(
                             port_hole(port.width, max_size).transformed(
-                                kdb.ICplxTrans(port.dcplx_trans, c.kcl.dbu)
-                            )
+                                kdb.ICplxTrans(port.dcplx_trans, c.kcl.dbu),
+                            ),
                         )
                 port_holes[layer_index] = r
 
@@ -993,7 +1003,8 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         self,
         c: KCell,
         shape: Callable[
-            [int, int | None], kdb.Edge | kdb.Polygon | kdb.Box | kdb.Region
+            [int, int | None],
+            kdb.Edge | kdb.Polygon | kdb.Box | kdb.Region,
         ],
     ) -> None:
         """Apply a custom shape based on the section size.
@@ -1009,7 +1020,9 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                 c.shapes(layer_index).insert(shape(sec.d_max, sec.d_min))
 
     def apply_bbox(
-        self, c: KCell, ref: kdb.LayerInfo | kdb.Region | None = None
+        self,
+        c: KCell,
+        ref: kdb.LayerInfo | kdb.Region | None = None,
     ) -> None:
         """Apply an enclosure based on a bounding box.
 
@@ -1026,7 +1039,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             if ref is None:
                 raise ValueError(
                     "The enclosure doesn't have  a reference `main_layer` defined."
-                    " Therefore the layer must be defined in calls"
+                    " Therefore the layer must be defined in calls",
                 )
 
         if isinstance(ref, kdb.LayerInfo):
@@ -1093,7 +1106,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         if main_layer is None:
             raise ValueError(
                 "The enclosure doesn't have  a reference `main_layer` defined."
-                " Therefore the layer must be defined in calls"
+                " Therefore the layer must be defined in calls",
             )
         extrude_path(
             target=c,
@@ -1127,16 +1140,23 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
         if main_layer is None:
             raise ValueError(
                 "The enclosure doesn't have  a reference `main_layer` defined."
-                " Therefore the layer must be defined in calls"
+                " Therefore the layer must be defined in calls",
             )
         extrude_path_dynamic(
-            target=c, layer=main_layer, path=path, widths=widths, enclosure=self
+            target=c,
+            layer=main_layer,
+            path=path,
+            widths=widths,
+            enclosure=self,
         )
 
     def copy_to(self, kcl: KCLayout) -> LayerEnclosure:
         """Creat a copy of the LayerEnclosure in another KCLayout."""
         layer_enc = LayerEnclosure(
-            [], name=self.name, main_layer=self.main_layer, kcl=kcl
+            [],
+            name=self.name,
+            main_layer=self.main_layer,
+            kcl=kcl,
         )
         for layer, sections in self.layer_sections.items():
             for section in sections.sections:
@@ -1181,7 +1201,8 @@ class KCellLayerEnclosures(BaseModel):
 
     @field_validator("enclosures")
     def enclosures_must_have_main_layer(
-        cls, v: list[LayerEnclosure]
+        cls,
+        v: list[LayerEnclosure],
     ) -> list[LayerEnclosure]:
         """The PDK Enclosure must have main layers defined for each Enclosure.
 
@@ -1296,7 +1317,7 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
         self.merged_region: kdb.Region = kdb.Region()
         self.merged = False
         self.regions: dict[int, dict[int, kdb.Region]] = defaultdict(
-            lambda: defaultdict(kdb.Region)
+            lambda: defaultdict(kdb.Region),
         )
 
     def put(
@@ -1368,7 +1389,7 @@ class KCellEnclosure(BaseModel):
     def __init__(self, enclosures: Iterable[LayerEnclosure]) -> None:
         """Init. Allow usage of an iterable object instead of a collection."""
         super().__init__(
-            enclosures=LayerEnclosureCollection(enclosures=list(enclosures))
+            enclosures=LayerEnclosureCollection(enclosures=list(enclosures)),
         )
 
     def __hash__(self) -> int:
@@ -1393,25 +1414,24 @@ class KCellEnclosure(BaseModel):
         """
         if d is None:
             return kdb.Region()
-        elif d == 0:
+        if d == 0:
             return r.dup()
-        elif d > 0:
+        if d > 0:
             return r.minkowski_sum(shape(d))
+        _shape = shape(abs(d))
+        if isinstance(_shape, list):
+            box_shape = kdb.Polygon(_shape)
+            bbox_maxsize = max(
+                box_shape.bbox().width(),
+                box_shape.bbox().height(),
+            )
         else:
-            _shape = shape(abs(d))
-            if isinstance(_shape, list):
-                box_shape = kdb.Polygon(_shape)
-                bbox_maxsize = max(
-                    box_shape.bbox().width(),
-                    box_shape.bbox().height(),
-                )
-            else:
-                bbox_maxsize = max(
-                    _shape.bbox().width(),
-                    _shape.bbox().height(),
-                )
-            bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
-            return r - (bbox_r - r).minkowski_sum(_shape)
+            bbox_maxsize = max(
+                _shape.bbox().width(),
+                _shape.bbox().height(),
+            )
+        bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
+        return r - (bbox_r - r).minkowski_sum(_shape)
 
     def apply_minkowski_enc(
         self,
@@ -1505,7 +1525,9 @@ class KCellEnclosure(BaseModel):
                         reg = regions[layer]
                     for section in layersec.sections:
                         reg += self.minkowski_region(
-                            r, section.d_max, shape
+                            r,
+                            section.d_max,
+                            shape,
                         ) - self.minkowski_region(r, section.d_min, shape)
 
                         reg.merge()
@@ -1561,13 +1583,13 @@ class KCellEnclosure(BaseModel):
                 for port in ports_by_layer[main_layer]:
                     if port._base.trans:
                         port_hole_map[li].insert(
-                            port_hole(port.width, size).transformed(port.trans)
+                            port_hole(port.width, size).transformed(port.trans),
                         )
                     else:
                         port_hole_map[li].insert(
                             port_hole(port.width, size).transformed(
-                                kdb.ICplxTrans(port.dcplx_trans, port.kcl.dbu)
-                            )
+                                kdb.ICplxTrans(port.dcplx_trans, port.kcl.dbu),
+                            ),
                         )
 
         min_tile_size_rec = 10 * maxsize * tp.dbu
@@ -1585,7 +1607,8 @@ class KCellEnclosure(BaseModel):
         tp.tile_border(maxsize * tp.dbu, maxsize * tp.dbu)
         tp.tile_size(tile_size, tile_size)
         layer_regiontilesoperators: dict[
-            tuple[int, LayerSection], RegionTilesOperator
+            tuple[int, LayerSection],
+            RegionTilesOperator,
         ] = {}
 
         logger.debug("Starting KCellEnclosure on {}", c.kcl.future_cell_name or c.name)
