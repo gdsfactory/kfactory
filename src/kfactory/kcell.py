@@ -937,7 +937,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             else:
                 self.shapes(port.layer).insert(poly, port.dcplx_trans)
                 self.shapes(port.layer).insert(
-                    kdb.Text(port.name if port.name else "", port.trans),
+                    kdb.Text(port.name or "", port.trans),
                 )
         self._base_kcell.kdb_cell.locked = locked
 
