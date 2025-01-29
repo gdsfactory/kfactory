@@ -770,7 +770,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         *,
         levels: int | None = None,
     ) -> None:
-        from .kcell import VKCell
+        from .kcell import KCell, VKCell
 
         if isinstance(self.cell, VKCell):
             for layer, shapes in self.cell._shapes.items():
@@ -808,8 +808,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     @overload
     def connect(
         self,
-        port: str | Port | None,
-        other: Port,
+        port: str | ProtoPort[Any] | None,
+        other: ProtoPort[Any],
         *,
         mirror: bool = False,
         allow_width_mismatch: bool | None = None,
@@ -822,7 +822,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     @overload
     def connect(
         self,
-        port: str | Port | None,
+        port: str | ProtoPort[Any] | None,
         other: VInstance,
         other_port_name: str | None,
         *,
@@ -836,8 +836,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
 
     def connect(
         self,
-        port: str | Port | None,
-        other: VInstance | Port,
+        port: str | ProtoPort[Any] | None,
+        other: VInstance | ProtoPort[Any],
         other_port_name: str | None = None,
         *,
         mirror: bool = False,
@@ -888,7 +888,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         else:
             op = Port(base=other.base)
         if isinstance(port, ProtoPort):
-            p = port.copy(self.trans.inverted())
+            p = Port(base=port.copy(self.trans.inverted()).base)
         else:
             p = Port(base=self.cell.ports[port].base)
 
@@ -920,6 +920,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             case True, False:
                 self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
                 self.mirror_y(op.dcplx_trans.disp.y)
+            case _:
+                ...
 
     def transform(
         self,

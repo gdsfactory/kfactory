@@ -5,6 +5,7 @@ import pytest
 from conftest import Layers
 
 import kfactory as kf
+from kfactory import exceptions
 
 
 def test_instance_xsize(LAYER: Layers) -> None:
@@ -448,6 +449,124 @@ def test_center(dbu_instance_tuple: _DBUInstanceTuple) -> None:
     assert _instances_equal(instance1, instance3)
 
 
+def test_vinstance_connect_by_port(kcl: kf.KCLayout, LAYER: Layers) -> None:
+    c = kcl.vkcell()
+    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    straight2 = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    ref = c << straight
+    ref2 = c << straight2
+    ref2.move((50, 10))
+    ref.connect("o1", ref2.ports["o2"])
+    assert c.bbox() == kdb.DBox(50, 7.5, 70, 12.5)
+
+
+def test_vinstance_connect_by_port_use_angle_false(
+    kcl: kf.KCLayout, LAYER: Layers
+) -> None:
+    c = kcl.vkcell()
+    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    straight2 = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    ref = c << straight
+    ref2 = c << straight2
+    ref2.move((10, 10)).rotate(90)
+    ref.connect("o1", ref2.ports["o2"], use_angle=False)
+    assert c.bbox() == kdb.DBox(-12.5, 10, 0, 22.5)
+
+
+def test_vinstance_connect_by_port_use_mirror_false(
+    kcl: kf.KCLayout, LAYER: Layers
+) -> None:
+    c = kcl.vkcell()
+    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    straight2 = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    ref = c << straight
+    ref2 = c << straight2
+    ref2.move((10, 10)).rotate(270)
+    ref.connect("o1", ref2.ports["o2"], use_mirror=False)
+    assert c.bbox() == kdb.DBox(7.5, -30, 12.5, -10)
+
+
+def test_vinstance_connect_by_port_use_mirror_Use_angle_false(
+    kcl: kf.KCLayout, LAYER: Layers
+) -> None:
+    c = kcl.vkcell()
+    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    straight2 = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    ref = c << straight
+    ref2 = c << straight2
+    ref2.move((10, 10)).rotate(270)
+    ref.connect("o1", ref2.ports["o2"], use_mirror=False, use_angle=False)
+    c.show()
+    assert c.bbox() == kdb.DBox(7.5, -22.5, 20, -10)
+
+
+def test_vinstance_connect_by_str(kcl: kf.KCLayout, LAYER: Layers) -> None:
+    c = kcl.vkcell()
+    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    straight2 = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(20), layer=LAYER.WG
+    )
+    ref = c << straight
+    ref2 = c << straight2
+    ref2.move((50, 10))
+    ref.connect(ref.ports["o1"], ref2.ports["o2"])
+    assert c.bbox() == kdb.DBox(50, 7.5, 80, 12.5)
+
+
+def test_vinstance_errors(kcl: kf.KCLayout, LAYER: Layers) -> None:
+    c = kcl.vkcell()
+    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    straight2 = straight_factory(
+        width=kcl.to_dbu(10), length=kcl.to_dbu(20), layer=LAYER.WG
+    )
+    straight3 = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(20), layer=LAYER.FILL1
+    )
+    straight4 = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(20), layer=LAYER.WG
+    ).dup()
+    straight4.ports["o1"].port_type = "non-optical"
+    ref = c << straight
+    ref2 = c << straight2
+    ref3 = c << straight3
+    ref4 = c << straight4
+    ref5 = c << straight.dup()
+    with pytest.raises(exceptions.PortWidthMismatch):
+        ref.connect("o1", ref2.ports["o2"])
+    with pytest.raises(exceptions.PortLayerMismatch):
+        ref.connect("o1", ref3.ports["o2"])
+    with pytest.raises(exceptions.PortTypeMismatch):
+        ref.connect("o1", ref4.ports["o1"])
+    with pytest.raises(ValueError):
+        ref.connect("o1", ref5)  # type: ignore
+
+
 def test_mirror_y_default_arg(dbu_instance_tuple: _DBUInstanceTuple) -> None:
     instance1, instance2, instance3 = dbu_instance_tuple
 
@@ -512,4 +631,4 @@ def test_mirror_y_equal() -> None:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    pytest.main([__file__, "-s"])
