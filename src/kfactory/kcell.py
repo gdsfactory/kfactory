@@ -3017,7 +3017,7 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
                 polys[w] = poly
             self.shapes(port.layer).insert(poly.transformed(port.dcplx_trans))
             self.shapes(port.layer).insert(
-                kdb.Text(port.name if port.name else "", port.trans),
+                kdb.Text(port.name or "", port.trans),
             )
 
     def write(
