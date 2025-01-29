@@ -96,6 +96,12 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
     def cell_name(self) -> str:
         return self._instance.cell.name
 
+    def to_itype(self) -> Instance:
+        return Instance(kcl=self.kcl, instance=self._instance)
+
+    def to_dtype(self) -> DInstance:
+        return DInstance(kcl=self.kcl, instance=self._instance)
+
     @abstractmethod
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]

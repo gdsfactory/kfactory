@@ -525,15 +525,12 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def boundary(self, boundary: kdb.DPolygon | None) -> None:
         self._base_kcell.boundary = boundary
 
-    @classmethod
-    def from_kcell(cls, kcell: ProtoTKCell[Any]) -> Self:
-        """Create a KCell from a KLayout Cell."""
-        return cls(base_kcell=kcell._base_kcell)
-
-    def to_kcell(self) -> KCell:
+    def to_itype(self) -> KCell:
+        """Convert the kcell to a dbu kcell."""
         return KCell(base_kcell=self._base_kcell)
 
-    def to_dkcell(self) -> DKCell:
+    def to_dtype(self) -> DKCell:
+        """Convert the kcell to a um kcell."""
         return DKCell(base_kcell=self._base_kcell)
 
     def show(
@@ -1817,13 +1814,13 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 ):
                     xy = (port.x, port.y)
                     if port.layer not in inst_ports:
-                        inst_ports[port.layer] = {xy: [(port, inst.cell.to_kcell())]}
+                        inst_ports[port.layer] = {xy: [(port, inst.cell.to_itype())]}
                     else:
                         if xy not in inst_ports[port.layer]:
-                            inst_ports[port.layer][xy] = [(port, inst.cell.to_kcell())]
+                            inst_ports[port.layer][xy] = [(port, inst.cell.to_itype())]
                         else:
                             inst_ports[port.layer][xy].append(
-                                (port, inst.cell.to_kcell())
+                                (port, inst.cell.to_itype())
                             )
 
         for layer, port_coord_mapping in inst_ports.items():

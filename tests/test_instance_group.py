@@ -178,5 +178,33 @@ def test_instance_group_attributes(
     assert instance1.center == instance2.center
 
 
+def test_to_itype(kcl: kf.KCLayout) -> None:
+    cell = kcl.kcell()
+    dkcell = kcl.dkcell()
+    dkcell.shapes(0).insert(kf.kdb.DBox(-5, -5, 5, 5))
+    ref = cell << dkcell
+    ref2 = cell << dkcell
+    ref2.move((0, 0), (1000, 1000))
+    instance_group = kf.InstanceGroup(insts=[ref, ref2])
+    assert instance_group.bbox() == kf.kdb.Box(-5000, -5000, 6000, 6000)
+    dinstance_group = instance_group.to_dtype()
+    assert dinstance_group.bbox() == kf.kdb.DBox(-5, -5, 6, 6)
+    assert isinstance(dinstance_group, kf.DInstanceGroup)
+
+
+def test_to_dtype(kcl: kf.KCLayout) -> None:
+    cell = kcl.kcell()
+    dkcell = kcl.dkcell()
+    cell.shapes(0).insert(kf.kdb.DBox(-5, -5, 5, 5))
+    ref = dkcell << cell
+    ref2 = dkcell << cell
+    ref2.move((0, 0), (1, 1))
+    instance_group = kf.DInstanceGroup(insts=[ref, ref2])
+    assert instance_group.bbox() == kf.kdb.DBox(-5, -5, 6, 6)
+    dinstance_group = instance_group.to_itype()
+    assert dinstance_group.bbox() == kf.kdb.Box(-5000, -5000, 6000, 6000)
+    assert isinstance(dinstance_group, kf.InstanceGroup)
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

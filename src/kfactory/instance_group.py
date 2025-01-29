@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Generic, NoReturn
 
 from . import kdb
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
-from .instance import DInstance, Instance, VInstance
+from .instance import ProtoTInstance, VInstance
 from .typings import TInstance, TUnit
 
 if TYPE_CHECKING:
@@ -55,7 +55,19 @@ class ProtoInstanceGroup(Generic[TUnit, TInstance], GeometricObject[TUnit]):
         return bb
 
 
-class InstanceGroup(ProtoInstanceGroup[int, Instance], DBUGeometricObject):
+class ProtoTInstanceGroup(
+    ProtoInstanceGroup[TUnit, ProtoTInstance[TUnit]],
+    Generic[TUnit],
+    GeometricObject[TUnit],
+):
+    def to_itype(self) -> InstanceGroup:
+        return InstanceGroup(insts=[inst.to_itype() for inst in self.insts])
+
+    def to_dtype(self) -> DInstanceGroup:
+        return DInstanceGroup(insts=[inst.to_dtype() for inst in self.insts])
+
+
+class InstanceGroup(ProtoTInstanceGroup[int], DBUGeometricObject):
     """Group of Instances.
 
     The instance group can be treated similar to a single instance
@@ -68,7 +80,7 @@ class InstanceGroup(ProtoInstanceGroup[int, Instance], DBUGeometricObject):
     ...
 
 
-class DInstanceGroup(ProtoInstanceGroup[float, DInstance], UMGeometricObject):
+class DInstanceGroup(ProtoTInstanceGroup[float], UMGeometricObject):
     """Group of DInstances.
 
     The instance group can be treated similar to a single instance

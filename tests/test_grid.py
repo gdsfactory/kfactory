@@ -148,7 +148,7 @@ def test_grid_1d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         kcells=[
             straight_factory_dbu(
                 width=randint(500, 2500) * 2, length=randint(2000, 20_000)
-            ).to_dkcell()
+            ).to_dtype()
             for _ in range(10)
         ],
         spacing=5000,
@@ -165,7 +165,7 @@ def test_grid_2d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
             [
                 straight_factory_dbu(
                     width=randint(500, 2500) * 2, length=randint(2000, 20_000)
-                ).to_dkcell()
+                ).to_dtype()
                 for _ in range(10)
             ]
             for _ in range(2)
@@ -184,7 +184,7 @@ def test_grid_2d_uneven(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
             [
                 straight_factory_dbu(
                     width=randint(500, 2500) * 2, length=randint(2000, 20_000)
-                ).to_dkcell()
+                ).to_dtype()
                 for _ in range(10 + j**2)
             ]
             for j in range(-3, 3)
@@ -204,7 +204,7 @@ def test_grid_2d_rotation(straight_factory_dbu: Callable[..., kf.KCell]) -> None
             [
                 straight_factory_dbu(
                     width=randint(500, 2500) * 2, length=randint(2000, 20_000)
-                ).to_dkcell()
+                ).to_dtype()
                 for _ in range(10)
             ]
             for _ in range(2)
@@ -225,7 +225,7 @@ def test_grid_1d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
             [
                 straight_factory_dbu(
                     width=randint(500, 2500) * 2, length=randint(2000, 20_000)
-                ).to_dkcell()
+                ).to_dtype()
                 for _ in range(10)
             ]
             for _ in range(2)
@@ -245,7 +245,7 @@ def test_grid_2d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
             [
                 straight_factory_dbu(
                     width=randint(500, 2500) * 2, length=randint(2000, 20_000)
-                ).to_dkcell()
+                ).to_dtype()
                 for _ in range(10)
             ]
             for _ in range(2)
@@ -267,7 +267,7 @@ def test_grid_2d_shape_rotation(
             [
                 straight_factory_dbu(
                     width=randint(500, 2500) * 2, length=randint(2000, 20_000)
-                ).to_dkcell()
+                ).to_dtype()
                 for _ in range(10)
             ]
             for _ in range(2)
@@ -407,7 +407,7 @@ def test_flexgrid_2d_shape_rotation(
             [
                 straight_factory(
                     width=round(uniform(0.5, 2.5)) * 2, length=round(uniform(2, 20))
-                ).to_dkcell()
+                ).to_dtype()
                 for _ in range(10)
             ]
             for _ in range(2)

@@ -59,9 +59,9 @@ def route_elec(
         layer: Layer to place the wire on. Calculated from the start port if `None`.
         minimum_straight: require a minimum straight
     """
-    c_ = c.to_kcell()
-    p1_ = p1.to_port()
-    p2_ = p2.to_port()
+    c_ = c.to_itype()
+    p1_ = p1.to_itype()
+    p2_ = p2.to_itype()
     if width is None:
         width = p1_.width
     if layer is None:
@@ -108,8 +108,8 @@ def route_L(
     The function will produce a L-shape routing to connect input ports to output ports
     without any crossings.
     """
-    input_ports_ = [p.to_port() for p in input_ports]
-    c_ = c.to_kcell()
+    input_ports_ = [p.to_itype() for p in input_ports]
+    c_ = c.to_itype()
     input_ports_.sort(key=lambda p: p.y)
 
     y_max = input_ports_[-1].y
