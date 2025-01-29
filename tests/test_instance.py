@@ -465,6 +465,61 @@ def test_vinstance_connect_by_port(kcl: kf.KCLayout, LAYER: Layers) -> None:
     assert c.bbox() == kdb.DBox(50, 7.5, 70, 12.5)
 
 
+def test_vinstance_connect_by_port_use_angle_false(
+    kcl: kf.KCLayout, LAYER: Layers
+) -> None:
+    c = kcl.vkcell()
+    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    straight2 = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    ref = c << straight
+    ref2 = c << straight2
+    ref2.move((10, 10)).rotate(90)
+    ref.connect("o1", ref2.ports["o2"], use_angle=False)
+    assert c.bbox() == kdb.DBox(-12.5, 10, 0, 22.5)
+
+
+def test_vinstance_connect_by_port_use_mirror_false(
+    kcl: kf.KCLayout, LAYER: Layers
+) -> None:
+    c = kcl.vkcell()
+    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    straight2 = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    ref = c << straight
+    ref2 = c << straight2
+    ref2.move((10, 10)).rotate(270)
+    ref.connect("o1", ref2.ports["o2"], use_mirror=False)
+    assert c.bbox() == kdb.DBox(7.5, -30, 12.5, -10)
+
+
+def test_vinstance_connect_by_port_use_mirror_Use_angle_false(
+    kcl: kf.KCLayout, LAYER: Layers
+) -> None:
+    c = kcl.vkcell()
+    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    straight2 = straight_factory(
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+    )
+    ref = c << straight
+    ref2 = c << straight2
+    ref2.move((10, 10)).rotate(270)
+    ref.connect("o1", ref2.ports["o2"], use_mirror=False, use_angle=False)
+    c.show()
+    assert c.bbox() == kdb.DBox(7.5, -22.5, 20, -10)
+
+
 def test_vinstance_connect_by_str(kcl: kf.KCLayout, LAYER: Layers) -> None:
     c = kcl.vkcell()
     straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
