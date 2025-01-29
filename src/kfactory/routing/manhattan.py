@@ -3,19 +3,22 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Iterable, Sequence
 from dataclasses import InitVar, dataclass, field
 from functools import cached_property
-from typing import Any, Literal, ParamSpec, Protocol, TypedDict, cast
+from typing import TYPE_CHECKING, Any, Literal, ParamSpec, Protocol, TypedDict, cast
 
 import klayout.db as kdb
 
-from ..conf import logger
-from ..enclosure import clean_points
-from ..kcell import DKCell, KCell
-from ..layout import KCLayout
-from ..port import BasePort, Port
-from ..routing.steps import Step, Steps, Straight
+from kfactory.conf import logger
+from kfactory.enclosure import clean_points
+from kfactory.port import BasePort, Port
+from kfactory.routing.steps import Step, Steps, Straight
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Sequence
+
+    from kfactory.kcell import DKCell, KCell
+    from kfactory.layout import KCLayout
 
 __all__ = [
     "ManhattanRoutePathFunction",
@@ -37,8 +40,8 @@ class ManhattanRoutePathFunction(Protocol):
         port1: Port | kdb.Trans,
         port2: Port | kdb.Trans,
         bend90_radius: int,
-        start_steps: list[Step] = [],
-        end_steps: list[Step] = [],
+        start_steps: list[Step] | None = None,
+        end_steps: list[Step] | None = None,
     ) -> list[kdb.Point]:
         """Minimal kwargs of a manhattan route function."""
         ...
@@ -53,8 +56,8 @@ class ManhattanRoutePathFunction180(Protocol):
         port2: Port | kdb.Trans,
         bend90_radius: int,
         bend180_radius: int,
-        start_steps: list[Step] = [],
-        end_steps: list[Step] = [],
+        start_steps: list[Step] | None = None,
+        end_steps: list[Step] | None = None,
     ) -> list[kdb.Point]:
         """Minimal kwargs of a manhattan route function with 180° bend."""
         ...
@@ -136,7 +139,8 @@ def route_manhattan_180(
     p2 = t2 * _p
 
     if t2.disp == t1.disp and t2.angle == t1.angle:
-        raise ValueError("Identically oriented ports cannot be connected")
+        msg = "Identically oriented ports cannot be connected"
+        raise ValueError(msg)
 
     tv = t1.inverted() * (t2.disp - t1.disp)
 
@@ -162,9 +166,12 @@ def route_manhattan_180(
                 t2 *= kdb.Trans(0, False, end_straight, 0)
             pts = [t1.disp.to_p(), t2.disp.to_p()]
             pts[1:1] = [pts[1] + (t2 * kdb.Vector(0, tv.y))]
-            raise NotImplementedError(
+            msg = (
                 "`case (x, y, 0) if x > 0 and abs(y) == bend180_radius`"
-                " not supported yet",
+                " not supported yet"
+            )
+            raise NotImplementedError(
+                msg,
             )
         case (x, 0, 2):
             if start_straight > 0:
@@ -193,9 +200,12 @@ def route_manhattan_180(
                 start_steps=[],
                 end_steps=[Straight(dist=end_straight)],
             )
-    raise NotImplementedError(
+    msg = (
         "Case not supportedt yet. Please open an issue if you believe this is an error"
-        " and needs to be implemented ;)",
+        " and needs to be implemented ;)"
+    )
+    raise NotImplementedError(
+        msg,
     )
 
 
@@ -359,13 +369,15 @@ class ManhattanRouter:
         )
         if isinstance(start_steps, int):
             if start_steps < 0:
-                raise ValueError("Start straight must be >= 0")
+                msg = "Start straight must be >= 0"
+                raise ValueError(msg)
             self.start.straight(start_steps)
         else:
             Steps(list(start_steps)).execute(self.start)
         if isinstance(end_steps, int):
             if end_steps < 0:
-                raise ValueError("End straight must be >= 0")
+                msg = "End straight must be >= 0"
+                raise ValueError(msg)
             self.end.straight(end_steps)
         else:
             Steps(list(end_steps)).execute(self.end)
@@ -373,8 +385,9 @@ class ManhattanRouter:
     @property
     def path_length(self) -> int:
         if not self.finished:
+            msg = "Router is not finished yet, path_length will be inaccurate."
             raise ValueError(
-                "Router is not finished yet, path_length will be inaccurate.",
+                msg,
             )
         return self.start.path_length
 
@@ -394,7 +407,8 @@ class ManhattanRouter:
         if self.finished:
             return self.start.pts
         if max_try <= 0:
-            raise ValueError("Router was not able to find a possible route")
+            msg = "Router was not able to find a possible route"
+            raise ValueError(msg)
         tv = self.start.tv
         x = tv.x
         y = tv.y
@@ -546,8 +560,9 @@ class ManhattanRouter:
         """
         tv = self.start.tv
         if self.start.ta != 2:
+            msg = "Route is not finished. The transformations must be facing each other"
             raise ValueError(
-                "Route is not finished. The transformations must be facing each other",
+                msg,
             )
         if tv.y != 0:
             raise ValueError(
@@ -568,7 +583,7 @@ def route_manhattan(
     port2: Port | kdb.Trans,
     bend90_radius: int,
     start_steps: Sequence[Step] = [],
-    end_steps: list[Step] = [],
+    end_steps: list[Step] | None = None,
     max_tries: int = 20,
     invert: bool = False,
 ) -> list[kdb.Point]:
@@ -591,6 +606,8 @@ def route_manhattan(
     Returns:
         route: Calculated route in dbu points.
     """
+    if end_steps is None:
+        end_steps = []
     if not invert:
         t1 = port1 if isinstance(port1, kdb.Trans) else port1.trans
         t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans
@@ -652,16 +669,22 @@ def path_length_match_manhattan_route(
             f"Additional kwargs aren't supported in route_dual_rails {kwargs=}",
         )
     if bend90_radius is None:
-        raise ValueError(
+        msg = (
             "bend90_radius must be passed to the function, please pass it"
             " through the router_post_process_kwargs if using the "
-            "generic route_bunle",
+            "generic route_bunle"
+        )
+        raise ValueError(
+            msg,
         )
     if separation is None:
-        raise ValueError(
+        msg = (
             "separation must be passed to the function, please pass it"
             " through the router_post_process_kwargs if using the "
-            "generic route_bunle",
+            "generic route_bunle"
+        )
+        raise ValueError(
+            msg,
         )
     position = -1
     path_loops = 1
@@ -870,11 +893,14 @@ def route_smart(
         )
 
     if bend90_radius is None or separation is None:
-        raise ValueError(
+        msg = (
             "route_smart needs to have 'bend90_radius' and 'separation' "
             "defined as kwargs. Please pass them or if using a "
             "'route_bundle' function using this, make sure the bundle router"
-            " has the kwargs.",
+            " has the kwargs."
+        )
+        raise ValueError(
+            msg,
         )
 
     assert len(end_ports) == length, (
@@ -1779,7 +1805,7 @@ def route_loosely(
                     router.start.t.disp.to_p(),
                     router.end.t.disp.to_p(),
                 ).enlarged(router.width)
-                if s == 1 or s == 0:
+                if s in (1, 0):
                     if group:
                         forward_groups.append(group)
                     group = [router]
@@ -2250,10 +2276,13 @@ def _route_waypoints(
             all_routers.append(router)
         return all_routers
     if len(waypoints) < 2:
-        raise ValueError(
+        msg = (
             "If the waypoints should only contain one point, a direction "
             "for the waypoint must be indicated, please pass a 'kdb.Trans'"
-            " object instead.",
+            " object instead."
+        )
+        raise ValueError(
+            msg,
         )
     start_angle = vec_dir(waypoints[0] - waypoints[1])
     end_angle = vec_dir(waypoints[-1] - waypoints[-2])
@@ -2296,7 +2325,7 @@ def _route_waypoints(
     start_manhattan_routers.sort(key=lambda sr: sr.start.pts[-1])
     end_manhattan_routers.sort(key=lambda er: er.start.pts[-1])
     bundle_points.sort(key=lambda _bb: _bb[0])
-    end_manhattan_routers = list(
+    end_manhattan_routers = [
         er
         for _, er in sorted(
             zip(
@@ -2306,7 +2335,7 @@ def _route_waypoints(
             ),
             key=lambda pair: pair[0][0],
         )
-    )
+    ]
     for sr, _bb, er in zip(
         start_manhattan_routers,
         bundle_points,

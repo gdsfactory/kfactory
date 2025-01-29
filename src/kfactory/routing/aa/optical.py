@@ -9,10 +9,10 @@ import numpy as np
 from pydantic import BaseModel
 from scipy.optimize import minimize_scalar  # type: ignore[import-untyped,unused-ignore]
 
-from ... import kdb
-from ...instance import VInstance
-from ...kcell import DKCell, KCell, VKCell
-from ...port import DPort, Port, ProtoPort
+from kfactory import kdb
+from kfactory.instance import VInstance
+from kfactory.kcell import DKCell, KCell, VKCell
+from kfactory.port import DPort, Port, ProtoPort
 
 __all__ = ["OpticalAllAngleRoute", "route"]
 
@@ -72,7 +72,8 @@ def route(
             the point before and the following will be created.
     """
     if len(backbone) < 3:
-        raise ValueError("All angle routes with less than 3 points are not supported.")
+        msg = "All angle routes with less than 3 points are not supported."
+        raise ValueError(msg)
 
     bends: dict[float, VKCell] = {90: bend_factory(width=width, angle=90)}
     layer = bends[90].ports[bend_ports[0]].layer
@@ -233,9 +234,12 @@ def route_bundle(
 
     if backbone:
         if len(backbone) < 2:
-            raise NotImplementedError(
+            msg = (
                 "A bundle with less than two points has no orientation. "
-                "Cannot automatically determine orientation.",
+                "Cannot automatically determine orientation."
+            )
+            raise NotImplementedError(
+                msg,
             )
 
         if isinstance(separation, int | float):

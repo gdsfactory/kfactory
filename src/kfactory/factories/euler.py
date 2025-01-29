@@ -16,13 +16,13 @@ import numpy as np
 from scipy.optimize import brentq  # type:ignore[import-untyped,unused-ignore]
 from scipy.special import fresnel  # type:ignore[import-untyped,unused-ignore]
 
-from .. import kdb
-from ..conf import logger
-from ..enclosure import LayerEnclosure, extrude_path
-from ..kcell import KCell
-from ..layout import KCLayout
-from ..settings import Info
-from ..typings import MetaData, deg, um
+from kfactory import kdb
+from kfactory.conf import logger
+from kfactory.enclosure import LayerEnclosure, extrude_path
+from kfactory.kcell import KCell
+from kfactory.layout import KCLayout
+from kfactory.settings import Info
+from kfactory.typings import MetaData, deg, um
 
 __all__ = [
     "bend_euler_factory",
@@ -142,9 +142,8 @@ def euler_bend_points(
     step = Ltot / max(int(th * resolution), 1)
 
     # Generate points
-    points = [_xy(i * step) for i in range(int(round(Ltot / step)) + 1)]
+    return [_xy(i * step) for i in range(int(round(Ltot / step)) + 1)]
 
-    return points
 
 
 def euler_endpoint(

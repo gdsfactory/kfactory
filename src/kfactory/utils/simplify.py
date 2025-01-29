@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from .. import kdb
+from kfactory import kdb
 
 
 def simplify(points: list[kdb.Point], tolerance: float) -> list[kdb.Point]:

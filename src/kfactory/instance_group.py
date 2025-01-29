@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
 from typing import TYPE_CHECKING, Generic, NoReturn
 
 from . import kdb
@@ -9,6 +8,8 @@ from .instance import ProtoTInstance, VInstance
 from .typings import TInstance, TUnit
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from .layout import KCLayout
 
 
@@ -24,14 +25,18 @@ class ProtoInstanceGroup(Generic[TUnit, TInstance], GeometricObject[TUnit]):
         try:
             return self.insts[0].kcl
         except IndexError as e:
-            raise ValueError(
+            msg = (
                 "Cannot transform or retrieve the KCLayout "
-                "of an instance group if it's empty",
+                "of an instance group if it's empty"
+            )
+            raise ValueError(
+                msg,
             ) from e
 
     @kcl.setter
-    def kcl(self, val: KCLayout) -> NoReturn:
-        raise ValueError("KCLayout cannot be set on an instance group.")
+    def kcl(self, _val: KCLayout) -> NoReturn:
+        msg = "KCLayout cannot be set on an instance group."
+        raise ValueError(msg)
 
     def transform(
         self,

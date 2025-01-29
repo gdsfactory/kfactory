@@ -10,11 +10,6 @@ from __future__ import annotations
 import itertools
 import sys
 from collections import defaultdict
-from collections.abc import (
-    Callable,
-    Iterable,
-    Sequence,
-)
 from enum import IntEnum
 from functools import lru_cache
 from hashlib import sha1
@@ -22,6 +17,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     NotRequired,
+    Self,
     TypeGuard,
     overload,
 )
@@ -35,13 +31,20 @@ from pydantic import (
     field_validator,
     model_serializer,
 )
-from ruamel.yaml.representer import BaseRepresenter, MappingNode
 from typing_extensions import TypedDict
 
 from . import kdb
 from .conf import config, logger
 
 if TYPE_CHECKING:
+    from collections.abc import (
+        Callable,
+        Iterable,
+        Sequence,
+    )
+
+    from ruamel.yaml.representer import BaseRepresenter, MappingNode
+
     from .kcell import KCell
     from .layout import KCLayout
     from .port import Port
@@ -629,7 +632,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
     def __hash__(self) -> int:  # make hashable BaseModel subclass
         """Calculate a unique hash of the enclosure."""
         return hash(
-            (str(self), self.main_layer, tuple(list(self.layer_sections.items()))),
+            (str(self), self.main_layer, tuple(self.layer_sections.items())),
         )
 
     def __add__(self, other: LayerEnclosure) -> LayerEnclosure:
@@ -649,7 +652,8 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
     def to_dtype(self, kcl: KCLayout) -> DLayerEnclosure:
         """Convert the enclosure to a um based enclosure."""
         if self.main_layer is None:
-            raise ValueError("um based enclosures must have a main_layer")
+            msg = "um based enclosures must have a main_layer"
+            raise ValueError(msg)
         return DLayerEnclosure(
             name=self._name,
             sections=[
@@ -662,7 +666,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             main_layer=self.main_layer,
         )
 
-    def __iadd__(self, other: LayerEnclosure) -> LayerEnclosure:
+    def __iadd__(self, other: LayerEnclosure) -> Self:
         """Allows merging another enclosure into this one."""
         for layer, secs in other.layer_sections.items():
             for sec in secs.sections:
@@ -767,7 +771,8 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                 self.apply_minkowski_custom(c, ref=ref, shape=edge)
 
             case _:
-                raise ValueError("Undefined direction")
+                msg = "Undefined direction"
+                raise ValueError(msg)
 
     def apply_minkowski_y(
         self,
@@ -822,9 +827,12 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             ref = self.main_layer
 
             if ref is None:
-                raise ValueError(
+                msg = (
                     "The enclosure doesn't have  a reference `main_layer` defined."
-                    " Therefore the layer must be defined in calls",
+                    " Therefore the layer must be defined in calls"
+                )
+                raise ValueError(
+                    msg,
                 )
         r = (
             kdb.Region(c.begin_shapes_rec(c.kcl.layer(ref)))
@@ -873,9 +881,12 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             ref = self.main_layer
 
             if ref is None:
-                raise ValueError(
+                msg = (
                     "The enclosure doesn't have  a reference `main_layer` defined."
-                    " Therefore the layer must be defined in calls",
+                    " Therefore the layer must be defined in calls"
+                )
+                raise ValueError(
+                    msg,
                 )
         tp = kdb.TilingProcessor()
         tp.frame = c.dbbox()  # type: ignore[misc, assignment]
@@ -920,7 +931,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             operator = RegionOperator(cell=c, layer=layer_index)
             tp.output(f"target_{layer_index}", operator)
             max_size: int = _min_size
-            for i, section in enumerate(reversed(sections.sections)):
+            for _i, section in enumerate(reversed(sections.sections)):
                 max_size = max(max_size, section.d_max)
                 queue_str = f"var tile_reg = (_tile & _frame).sized({maxsize});"
                 queue_str += (
@@ -1037,9 +1048,12 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             ref = self.main_layer
 
             if ref is None:
-                raise ValueError(
+                msg = (
                     "The enclosure doesn't have  a reference `main_layer` defined."
-                    " Therefore the layer must be defined in calls",
+                    " Therefore the layer must be defined in calls"
+                )
+                raise ValueError(
+                    msg,
                 )
 
         if isinstance(ref, kdb.LayerInfo):
@@ -1104,9 +1118,12 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             end_angle: angle of the end piece
         """
         if main_layer is None:
-            raise ValueError(
+            msg = (
                 "The enclosure doesn't have  a reference `main_layer` defined."
-                " Therefore the layer must be defined in calls",
+                " Therefore the layer must be defined in calls"
+            )
+            raise ValueError(
+                msg,
             )
         extrude_path(
             target=c,
@@ -1138,9 +1155,12 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             widths: Width of the core of the path
         """
         if main_layer is None:
-            raise ValueError(
+            msg = (
                 "The enclosure doesn't have  a reference `main_layer` defined."
-                " Therefore the layer must be defined in calls",
+                " Therefore the layer must be defined in calls"
+            )
+            raise ValueError(
+                msg,
             )
         extrude_path_dynamic(
             target=c,
@@ -1200,6 +1220,7 @@ class KCellLayerEnclosures(BaseModel):
         return hash(tuple(self.enclosures))
 
     @field_validator("enclosures")
+    @classmethod
     def enclosures_must_have_main_layer(
         cls,
         v: list[LayerEnclosure],
@@ -1218,8 +1239,8 @@ class KCellLayerEnclosures(BaseModel):
         """Retrieve enclosure by main layer."""
         try:
             return next(filter(lambda enc: enc.main_layer == key, self.enclosures))
-        except StopIteration:
-            raise KeyError(f"Unknown key {key}")
+        except StopIteration as e:
+            raise KeyError(f"Unknown key {key}") from e
 
     def get_enclosure(
         self,
@@ -1471,7 +1492,8 @@ class KCellEnclosure(BaseModel):
                 self.apply_minkowski_custom(c, shape=edge)
 
             case _:
-                raise ValueError("Undefined direction")
+                msg = "Undefined direction"
+                raise ValueError(msg)
 
     def apply_minkowski_y(self, c: KCell) -> None:
         """Apply an enclosure with a vector in y-direction.

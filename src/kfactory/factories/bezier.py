@@ -7,12 +7,12 @@ import numpy as np
 import numpy.typing as nty
 from scipy.special import binom  # type:ignore[import-untyped,unused-ignore]
 
-from .. import kdb
-from ..enclosure import LayerEnclosure
-from ..kcell import KCell
-from ..layout import KCLayout
-from ..settings import Info
-from ..typings import MetaData, um
+from kfactory import kdb
+from kfactory.enclosure import LayerEnclosure
+from kfactory.kcell import KCell
+from kfactory.layout import KCLayout
+from kfactory.settings import Info
+from kfactory.typings import MetaData, um
 
 __all__ = ["bend_s_bezier_factory"]
 

@@ -59,9 +59,9 @@ class ShowFunction(Protocol):
         lyrdb: rdb.ReportDatabase | Path | str | None,
         l2n: kdb.LayoutToNetlist | Path | str | None,
         keep_position: bool,
-        save_options: kdb.SaveLayoutOptions,
+        save_options: kdb.SaveLayoutOptions | None,
         use_libraries: bool,
-        library_save_options: kdb.SaveLayoutOptions,
+        library_save_options: kdb.SaveLayoutOptions | None,
     ) -> None: ...
 
 

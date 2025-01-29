@@ -12,7 +12,6 @@ from typing import (
 )
 
 import klayout.db as kdb
-from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from .conf import PROPID, config, logger
 from .exceptions import (
@@ -28,14 +27,16 @@ from .instance_ports import (
     ProtoTInstancePorts,
     VInstancePorts,
 )
-from .layer import LayerEnum
 from .port import DPort, Port, ProtoPort
 from .serialization import clean_name, get_cell_name
 from .settings import Info, KCellSettings
 from .typings import TUnit
 
 if TYPE_CHECKING:
+    from ruamel.yaml.representer import BaseRepresenter, MappingNode
+
     from .kcell import DKCell, KCell, ProtoTKCell, VKCell
+    from .layer import LayerEnum
     from .layout import KCLayout
 
 
@@ -355,16 +356,20 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
         if isinstance(other, Instance):
             if other_port_name is None:
-                raise ValueError(
+                msg = (
                     "portname cannot be None if an Instance Object is given. For"
                     "complex connections (non-90 degree and floating point ports) use"
-                    "route_cplx instead",
+                    "route_cplx instead"
+                )
+                raise ValueError(
+                    msg,
                 )
             op = Port(base=other.ports[other_port_name].base)
         elif isinstance(other, ProtoPort):
             op = Port(base=other.base)
         else:
-            raise ValueError("other_instance must be of type Instance or Port")
+            msg = "other_instance must be of type Instance or Port"
+            raise ValueError(msg)
         if isinstance(port, ProtoPort):
             p = Port(base=port.base.transformed(self.dcplx_trans.inverted()))
         else:
@@ -508,6 +513,8 @@ class Instance(ProtoTInstance[int], DBUGeometricObject):
 
     @parent_cell.setter
     def parent_cell(self, cell: KCell | DKCell | kdb.Cell) -> None:
+        from .kcell import DKCell, KCell
+
         if isinstance(cell, KCell | DKCell):
             self.parent_cell.insts.remove(self)
             self._instance.parent_cell = cell.kdb_cell
@@ -581,6 +588,8 @@ class DInstance(ProtoTInstance[float], UMGeometricObject):
 
     @parent_cell.setter
     def parent_cell(self, cell: KCell | DKCell | kdb.Cell) -> None:
+        from .kcell import DKCell, KCell
+
         if isinstance(cell, KCell | DKCell):
             self.parent_cell.insts.remove(
                 Instance(kcl=self.kcl, instance=self._instance),
@@ -622,13 +631,13 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     def __init__(
         self,
         cell: VKCell | KCell,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        trans: kdb.DCplxTrans | None = None,
         name: str | None = None,
     ) -> None:
         self.kcl = cell.kcl
         self._name = name
         self.cell = cell
-        self.trans = trans
+        self.trans = trans or kdb.DCplxTrans()
         self._ports = VInstancePorts(self)
 
     @property
@@ -678,9 +687,12 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     def insert_into(
         self,
         cell: ProtoTKCell[Any],
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        trans: kdb.DCplxTrans | None = None,
     ) -> Instance:
         from .kcell import KCell, VKCell
+
+        if trans is None:
+            trans = kdb.DCplxTrans()
 
         if isinstance(self.cell, VKCell):
             _trans = trans * self.trans
@@ -755,7 +767,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     def insert_into_flat(
         self,
         cell: ProtoTKCell[Any] | VKCell,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        trans: kdb.DCplxTrans | None = None,
         *,
         levels: None = None,
     ) -> None: ...
@@ -765,18 +777,21 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         self,
         cell: ProtoTKCell[Any] | VKCell,
         *,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        trans: kdb.DCplxTrans | None = None,
         levels: int,
     ) -> None: ...
 
     def insert_into_flat(
         self,
         cell: ProtoTKCell[Any] | VKCell,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        trans: kdb.DCplxTrans | None = None,
         *,
         levels: int | None = None,
     ) -> None:
         from .kcell import KCell, VKCell
+
+        if trans is None:
+            trans = kdb.DCplxTrans()
 
         if isinstance(self.cell, VKCell):
             for layer, shapes in self.cell._shapes.items():
@@ -887,10 +902,13 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             use_angle = config.connect_use_angle
         if isinstance(other, VInstance):
             if other_port_name is None:
-                raise ValueError(
+                msg = (
                     "portname cannot be None if an Instance Object is given. For"
                     "complex connections (non-90 degree and floating point ports) use"
-                    "route_cplx instead",
+                    "route_cplx instead"
+                )
+                raise ValueError(
+                    msg,
                 )
             op = Port(base=other.ports[other_port_name].base)
         else:
@@ -900,7 +918,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         else:
             p = Port(base=self.cell.ports[port].base)
 
-        assert isinstance(p, Port) and isinstance(op, Port)
+        assert isinstance(p, Port)
+        assert isinstance(op, Port)
 
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatchError(self, other, p, op)

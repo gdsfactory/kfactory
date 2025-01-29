@@ -182,7 +182,8 @@ class XY(Step):
                     else:
                         router.straight(abs(dx))
                 if sign * dx < router.t.disp.x + router.router.bend90_radius:
-                    raise ValueError("XY step cannot go back")
+                    msg = "XY step cannot go back"
+                    raise ValueError(msg)
                 router.straight_nobend(abs(dx))
                 if self.y > router.t.disp.y:
                     if a == 0:
@@ -227,7 +228,8 @@ class XY(Step):
                     else:
                         router.straight(abs(dy))
                 if sign * dy < router.t.disp.y + router.router.bend90_radius:
-                    raise ValueError("XY step cannot go back")
+                    msg = "XY step cannot go back"
+                    raise ValueError(msg)
                 router.straight_nobend(abs(dx))
                 if self.x > router.t.disp.x:
                     if a == 3:
@@ -270,9 +272,12 @@ class Steps(RootModel[list[Any]]):
     def _check_steps(self) -> Self:
         for step in self.root:
             if not isinstance(step, Step):
-                raise ValueError(
+                msg = (
                     "All Steps must implement an "
-                    "'execute(self, router: ManhattanRouterSide, include_bend: bool)",
+                    "'execute(self, router: ManhattanRouterSide, include_bend: bool)"
+                )
+                raise ValueError(
+                    msg,
                 )
         return self
 

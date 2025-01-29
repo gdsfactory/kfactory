@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, Generic
 
 import klayout.db as kdb
@@ -17,6 +16,8 @@ from .instance import (
 from .typings import TInstance, TUnit
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from .kcell import TKCell
 
 

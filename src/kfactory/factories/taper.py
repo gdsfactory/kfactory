@@ -6,13 +6,13 @@ TODO: Non-linear tapers
 from collections.abc import Callable
 from typing import Any, Protocol
 
-from .. import kdb
-from ..conf import logger
-from ..enclosure import LayerEnclosure
-from ..kcell import KCell
-from ..layout import KCLayout, kcl
-from ..settings import Info
-from ..typings import MetaData, dbu
+from kfactory import kdb
+from kfactory.conf import logger
+from kfactory.enclosure import LayerEnclosure
+from kfactory.kcell import KCell
+from kfactory.layout import KCLayout, kcl
+from kfactory.settings import Info
+from kfactory.typings import MetaData, dbu
 
 __all__ = ["taper"]
 

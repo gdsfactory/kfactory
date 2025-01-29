@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterable, Iterator, Sequence
 from typing import TYPE_CHECKING, Any, Generic, cast
 
 from . import kdb
 from .conf import config
-from .layer import LayerEnum
 from .port import (
     BasePort,
     DPort,
@@ -23,7 +21,10 @@ from .typings import TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Iterator, Sequence
+
     from .instance import DInstance, Instance, ProtoTInstance, VInstance
+    from .layer import LayerEnum
 
 
 class HasCellPorts(Generic[TUnit], ABC):
@@ -61,10 +62,7 @@ class ProtoTInstancePorts(ProtoInstancePorts[TUnit], ABC):
         """Check whether a port is in this port collection."""
         if isinstance(port, ProtoPort):
             return port.base in [p.base for p in self.instance.ports]
-        for _port in self.instance.ports:
-            if _port.name == port:
-                return True
-        return False
+        return any(_port.name == port for _port in self.instance.ports)
 
     @property
     def ports(self) -> ProtoTInstancePorts[TUnit]:

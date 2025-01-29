@@ -11,7 +11,7 @@ from pydantic.color import Color
 from pydantic.functional_serializers import field_serializer
 from ruamel.yaml import YAML
 
-from .. import lay
+from kfactory import lay
 
 
 class LayerPropertiesModel(BaseModel):
@@ -32,6 +32,7 @@ class LayerPropertiesModel(BaseModel):
     valid: bool = True
 
     @model_validator(mode="before")
+    @classmethod
     def color_to_frame_fill(cls, data: dict[str, Any]) -> dict[str, Any]:
         """Convert a color string to a frame fill."""
         if "color" in data:
@@ -43,6 +44,7 @@ class LayerPropertiesModel(BaseModel):
         return data
 
     @field_validator("dither_pattern", mode="before")
+    @classmethod
     def dither_to_index(cls, v: str | int) -> int:
         """Convert string to the index with the dict dither2index."""
         if isinstance(v, str):
@@ -50,20 +52,22 @@ class LayerPropertiesModel(BaseModel):
         return v
 
     @field_validator("line_style", mode="before")
+    @classmethod
     def line_to_index(cls, v: str | int) -> int:
         """Convert string to the index with the dict dither2index."""
         if isinstance(v, str):
             return line2index[v]
         return v
 
-    # @staticmethod
     @field_serializer("dither_pattern")
-    def dither_to_json(value: int) -> str:  # type: ignore[misc]
+    @staticmethod
+    def dither_to_json(value: int) -> str:
         """Convert dither int to string key on json dump."""
         return index2dither[value]
 
     @field_serializer("line_style")
-    def line_to_json(value: int) -> str:  # type: ignore[misc]
+    @staticmethod
+    def line_to_json(value: int) -> str:
         """Convert dither int to string key on json dump."""
         return index2line[value]
 
@@ -133,7 +137,7 @@ def lyp_to_yaml(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
 
 def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
     """Convert a KLayout LayerPropertiesNodeRef to a pydantic representation."""
-    lp = LayerPropertiesModel(
+    return LayerPropertiesModel(
         name=kl.name.rstrip(f" - {kl.source_layer}/{kl.source_datatype}"),
         layer=(kl.source_layer, kl.source_datatype),
         frame_color=Color(hex(kl.frame_color)) if kl.frame_color else None,
@@ -147,8 +151,6 @@ def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
         transparent=kl.transparent,
         valid=kl.valid,
     )
-
-    return lp
 
 
 def kl2group(
@@ -457,8 +459,6 @@ line_styles = {
 dither2index: dict[str, int] = {
     name: index for index, name in enumerate(dither_patterns)
 }
-index2dither: dict[int, str] = {
-    index: name for index, name in enumerate(dither_patterns)
-}
+index2dither: dict[int, str] = dict(enumerate(dither_patterns))
 line2index: dict[str, int] = {name: index for index, name in enumerate(line_styles)}
-index2line: dict[int, str] = {index: name for index, name in enumerate(line_styles)}
+index2line: dict[int, str] = dict(enumerate(line_styles))

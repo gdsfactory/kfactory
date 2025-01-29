@@ -7,8 +7,7 @@ import kfactory as kf
 def test_unnamed_dkcell(kcl: kf.KCLayout) -> None:
     @kcl.cell
     def unnamed_dkcell(name: str = "a") -> kf.DKCell:
-        c = kcl.dkcell(name)
-        return c
+        return kcl.dkcell(name)
 
     c1 = unnamed_dkcell("test_unnamed_dkcell")
     c2 = unnamed_dkcell("test_unnamed_dkcell")
@@ -25,8 +24,7 @@ def test_nested_dict_list_dkcell(kcl: kf.KCLayout) -> None:
     def nested_list_dict_dkcell(
         arg1: dict[str, list[dict[str, str | int] | int] | int],
     ) -> kf.DKCell:
-        c = kcl.dkcell("test_nested_list_dict_dkcell")
-        return c
+        return kcl.dkcell("test_nested_list_dict_dkcell")
 
     c = nested_list_dict_dkcell(dl)
     assert dl == c.settings["arg1"]

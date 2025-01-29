@@ -1,7 +1,7 @@
 """Virtual euler cells."""
 
-from ...factories.virtual.euler import virtual_bend_euler_factory
-from ...layout import kcl
+from kfactory.factories.virtual.euler import virtual_bend_euler_factory
+from kfactory.layout import kcl
 
 __all__ = ["virtual_bend_euler"]
 

@@ -5,13 +5,14 @@ from typing import Any, Protocol
 
 import numpy as np
 
-from ... import kdb
-from ...conf import logger
-from ...enclosure import LayerEnclosure
-from ...kcell import VKCell
-from ...layout import KCLayout
-from ...settings import Info
-from ...typings import MetaData
+from kfactory import kdb
+from kfactory.conf import logger
+from kfactory.enclosure import LayerEnclosure
+from kfactory.kcell import VKCell
+from kfactory.layout import KCLayout
+from kfactory.settings import Info
+from kfactory.typings import MetaData
+
 from .utils import extrude_backbone
 
 __all__ = ["virtual_bend_circular_factory"]

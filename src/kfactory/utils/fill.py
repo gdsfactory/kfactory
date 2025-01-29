@@ -5,10 +5,10 @@ Filling empty regions in [KCells][kfactory.kcell.KCell] with filling cells.
 
 from collections.abc import Iterable
 
-from .. import kdb
-from ..conf import config, logger
-from ..kcell import KCell
-from ..layout import KCLayout
+from kfactory import kdb
+from kfactory.conf import config, logger
+from kfactory.kcell import KCell
+from kfactory.layout import KCLayout
 
 stop = False
 
@@ -248,13 +248,13 @@ def fill_tiled(
             queue_str = (
                 "var fill= "
                 + (
-                    " + ".join([layers, regions])
+                    f"{layers} + {regions}"
                     if regions and layers
                     else regions + layers
                 )
                 + "; var exclude = "
                 + (
-                    " + ".join([exlayers, exregions])
+                    f"{exlayers} + {exregions}"
                     if exregions and exlayers
                     else exregions + exlayers
                 )
@@ -266,7 +266,7 @@ def fill_tiled(
             queue_str = (
                 "var fill= "
                 + (
-                    " + ".join([layers, regions])
+                    f"{layers} + {regions}"
                     if regions and layers
                     else regions + layers
                 )

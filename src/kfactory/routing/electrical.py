@@ -5,18 +5,18 @@ from typing import Any, Literal
 
 import klayout.db as kdb
 
-from ..conf import logger
-from ..kcell import KCell
-from ..port import Port
-from ..routing.generic import ManhattanRoute
-from ..routing.generic import route_bundle as route_bundle_generic
-from ..routing.manhattan import (
+from kfactory.conf import logger
+from kfactory.kcell import KCell
+from kfactory.port import Port
+from kfactory.routing.generic import ManhattanRoute
+from kfactory.routing.generic import route_bundle as route_bundle_generic
+from kfactory.routing.manhattan import (
     ManhattanRoutePathFunction,
     route_manhattan,
     route_smart,
 )
-from ..routing.steps import Step, Straight
-from ..typings import dbu
+from kfactory.routing.steps import Step, Straight
+from kfactory.typings import dbu
 
 __all__ = [
     "place_dual_rails",
@@ -143,8 +143,9 @@ def route_L(
             temp_port.trans.angle = 3
             output_ports.append(temp_port)
     else:
+        msg = "Invalid L-shape routing. Please change output_orientaion to 1 or 3."
         raise ValueError(
-            "Invalid L-shape routing. Please change output_orientaion to 1 or 3.",
+            msg,
         )
     return output_ports
 
@@ -158,15 +159,15 @@ def route_bundle(
     end_straights: dbu | list[dbu] = 0,
     place_layer: kdb.LayerInfo | None = None,
     route_width: dbu | None = None,
-    bboxes: list[kdb.Box] = [],
+    bboxes: list[kdb.Box] | None = None,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     sort_ports: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:
@@ -257,6 +258,12 @@ def route_bundle(
             If no waypoints are set, the target angles of all ends muts be the same
             (after the steps).
     """
+    if ends is None:
+        ends = []
+    if starts is None:
+        starts = []
+    if bboxes is None:
+        bboxes = []
     return route_bundle_generic(
         c=c,
         start_ports=[p._base for p in start_ports],
@@ -295,15 +302,15 @@ def route_bundle_dual_rails(
     place_layer: kdb.LayerInfo | None = None,
     width_rails: dbu | None = None,
     separation_rails: dbu | None = None,
-    bboxes: list[kdb.Box] = [],
+    bboxes: list[kdb.Box] | None = None,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     sort_ports: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:
@@ -395,6 +402,12 @@ def route_bundle_dual_rails(
             If no waypoints are set, the target angles of all ends muts be the same
             (after the steps).
     """
+    if ends is None:
+        ends = []
+    if starts is None:
+        starts = []
+    if bboxes is None:
+        bboxes = []
     if start_straights is not None:
         logger.warning("start_straights is deprecated. Use `starts` instead.")
         starts = start_straights
@@ -564,7 +577,8 @@ def place_dual_rails(
     if route_width is None:
         route_width = p1.width
     if separation_rails is None:
-        raise ValueError("Must specify a separation between the two rails.")
+        msg = "Must specify a separation between the two rails."
+        raise ValueError(msg)
     if separation_rails >= route_width:
         raise ValueError(f"{separation_rails=} must be smaller than the {route_width}")
 

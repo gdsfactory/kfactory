@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING, Generic, Self, overload
 import numpy as np
 
 from . import kdb
-from .protocols import BoxFunction, BoxLike
 from .typings import TUnit
 
 if TYPE_CHECKING:
     from .layer import LayerEnum
     from .layout import KCLayout
+    from .protocols import BoxFunction, BoxLike
 
 
 class SizeInfo(Generic[TUnit]):

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -144,3 +145,11 @@ class NonSerializableError(ValueError):
     def __init__(self, value: Any, extra_message: str = "") -> None:
         """Throw error for the non-serializable value `value`."""
         super().__init__(f"{value=} is not serializable. {extra_message}")
+
+
+class NonInferableReturnAnnotationError(ValueError):
+    """Raised if a function's return annotation cannot be inferred."""
+
+    def __init__(self, func: Callable[..., Any]) -> None:
+        """Throw error for the function `func`."""
+        super().__init__(f"Return annotation cannot be inferred for {func.__name__}")

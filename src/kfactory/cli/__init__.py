@@ -7,7 +7,8 @@ from typing import Annotated
 
 import typer
 
-from .. import __version__
+from kfactory import __version__
+
 from .build import build, show
 
 app = typer.Typer(name="kf")
@@ -27,4 +28,3 @@ def version_callback(
     """Show the version of the cli."""
     if version:
         print(f"KFactory CLI Version: {__version__}")
-        raise typer.Exit()

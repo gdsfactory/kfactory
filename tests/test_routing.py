@@ -737,3 +737,7 @@ def test_placer_error(
             bend90_cell=bend90_small,
             on_placer_error="error",
         )
+
+
+if __name__ == "__main__":
+    pytest.main([__file__])

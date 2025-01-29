@@ -2,9 +2,9 @@
 
 from collections.abc import Sequence
 
-from ... import kdb
-from ...enclosure import LayerEnclosure, extrude_path_points
-from ...kcell import VKCell
+from kfactory import kdb
+from kfactory.enclosure import LayerEnclosure, extrude_path_points
+from kfactory.kcell import VKCell
 
 
 def extrude_backbone(

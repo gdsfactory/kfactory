@@ -3,23 +3,26 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from . import kdb
-from .instance import DInstance, Instance
 from .instance_group import DInstanceGroup, InstanceGroup
 from .kcell import DKCell, KCell
+
+if TYPE_CHECKING:
+    from .instance import DInstance, Instance
 
 
 def grid_dbu(
     target: KCell,
     kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
     spacing: int | tuple[int, int],
-    target_trans: kdb.Trans = kdb.Trans(),
+    target_trans: kdb.Trans | None = None,
     shape: tuple[int, int] | None = None,
     align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
+    *,
     mirror: bool = False,
 ) -> InstanceGroup:
     """Create a grid of instances.
@@ -86,14 +89,14 @@ def grid_dbu(
         spacing_x = spacing
         spacing_y = spacing
 
+    if target_trans is None:
+        target_trans = kdb.Trans()
+
     insts: list[list[Instance | None]]
     kcell_array: Sequence[Sequence[KCell]]
 
     if shape is None:
-        if isinstance(kcells[0], KCell):
-            kcell_array = [list(kcells)]  # type:ignore[arg-type]
-        else:
-            kcell_array = kcells  # type: ignore[assignment]
+        kcell_array = [list(kcells)] if isinstance(kcells[0], KCell) else kcells
 
         x0 = 0
         y0 = 0
@@ -229,11 +232,12 @@ def flexgrid_dbu(
     target: KCell,
     kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
     spacing: int | tuple[int, int],
-    target_trans: kdb.Trans = kdb.Trans(),
+    target_trans: kdb.Trans | None = None,
     shape: tuple[int, int] | None = None,
     align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
+    *,
     mirror: bool = False,
 ) -> InstanceGroup:
     """Create a grid of instances.
@@ -295,6 +299,9 @@ def flexgrid_dbu(
         spacing_x = spacing
         spacing_y = spacing
 
+    if target_trans is None:
+        target_trans = kdb.Trans()
+
     insts: list[list[Instance | None]]
     kcell_array: Sequence[Sequence[KCell]]
 
@@ -326,38 +333,37 @@ def flexgrid_dbu(
         for i_y, (array, box_array) in enumerate(zip(insts, bboxes, strict=False)):
             for i_x, (inst, bbox) in enumerate(zip(array, box_array, strict=False)):
                 if inst is not None and bbox is not None:
-                    if inst is not None and bbox is not None:
-                        match align_x:
-                            case "xmin":
-                                x = -bbox.left
-                            case "xmax":
-                                x = -bbox.right
-                            case "center":
-                                x = -bbox.center().x
-                            case _:
-                                x = 0
-                        match align_y:
-                            case "ymin":
-                                y = -bbox.bottom
-                            case "ymax":
-                                y = -bbox.top
-                            case "center":
-                                y = -bbox.center().y
-                            case _:
-                                y = 0
-                        at = kdb.Trans(x, y)
-                        inst.trans = at * inst.trans
-                        bbox = inst.bbox()
-                        xmin[i_x] = min(
-                            xmin.get(i_x) or bbox.left,
-                            bbox.left - spacing_x,
-                        )
-                        xmax[i_x] = max(xmax.get(i_x) or bbox.right, bbox.right)
-                        ymin[i_y] = min(
-                            ymin.get(i_y) or bbox.bottom,
-                            bbox.bottom - spacing_y,
-                        )
-                        ymax[i_y] = max(ymax.get(i_y) or bbox.top, bbox.top)
+                    match align_x:
+                        case "xmin":
+                            x = -bbox.left
+                        case "xmax":
+                            x = -bbox.right
+                        case "center":
+                            x = -bbox.center().x
+                        case _:
+                            x = 0
+                    match align_y:
+                        case "ymin":
+                            y = -bbox.bottom
+                        case "ymax":
+                            y = -bbox.top
+                        case "center":
+                            y = -bbox.center().y
+                        case _:
+                            y = 0
+                    at = kdb.Trans(x, y)
+                    inst.trans = at * inst.trans
+                    inst_bbox = inst.bbox()
+                    xmin[i_x] = min(
+                        xmin.get(i_x) or inst_bbox.left,
+                        inst_bbox.left - spacing_x,
+                    )
+                    xmax[i_x] = max(xmax.get(i_x) or inst_bbox.right, inst_bbox.right)
+                    ymin[i_y] = min(
+                        ymin.get(i_y) or inst_bbox.bottom,
+                        inst_bbox.bottom - spacing_y,
+                    )
+                    ymax[i_y] = max(ymax.get(i_y) or inst_bbox.top, inst_bbox.top)
 
         for i_y, (array, bbox_array) in enumerate(zip(insts, bboxes, strict=False)):
             y0 -= ymin.get(i_y, 0)
@@ -465,11 +471,12 @@ def grid(
     target: DKCell,
     kcells: Sequence[DKCell | None] | Sequence[Sequence[DKCell | None]],
     spacing: float | tuple[float, float],
-    target_trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+    target_trans: kdb.DCplxTrans | None = None,
     shape: tuple[int, int] | None = None,
     align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
+    *,
     mirror: bool = False,
 ) -> DInstanceGroup:
     """Create a grid of instances.
@@ -536,14 +543,14 @@ def grid(
         spacing_x = spacing
         spacing_y = spacing
 
+    if target_trans is None:
+        target_trans = kdb.DCplxTrans()
+
     insts: list[list[DInstance | None]]
     kcell_array: Sequence[Sequence[DKCell]]
 
     if shape is None:
-        if isinstance(kcells[0], DKCell):
-            kcell_array = [list(kcells)]  # type:ignore[arg-type]
-        else:
-            kcell_array = kcells  # type: ignore[assignment]
+        kcell_array = [list(kcells)] if isinstance(kcells[0], DKCell) else kcells
 
         x0: float = 0
         y0: float = 0
@@ -680,11 +687,12 @@ def flexgrid(
     target: DKCell,
     kcells: Sequence[DKCell | None] | Sequence[Sequence[DKCell | None]],
     spacing: float | tuple[float, float],
-    target_trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+    target_trans: kdb.DCplxTrans | None = None,
     shape: tuple[int, int] | None = None,
     align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
     rotation: Literal[0, 1, 2, 3] = 0,
+    *,
     mirror: bool = False,
 ) -> DInstanceGroup:
     """Create a grid of instances.
@@ -746,6 +754,9 @@ def flexgrid(
         spacing_x = spacing
         spacing_y = spacing
 
+    if target_trans is None:
+        target_trans = kdb.DCplxTrans()
+
     insts: list[list[DInstance | None]]
     kcell_array: Sequence[Sequence[DKCell]]
 
@@ -801,14 +812,17 @@ def flexgrid(
                             y = 0
                     at = kdb.DCplxTrans(x, y)
                     inst.dcplx_trans = at * inst.dcplx_trans
-                    bbox = inst.dbbox()
-                    xmin[i_x] = min(xmin.get(i_x) or bbox.left, bbox.left - spacing_x)
-                    xmax[i_x] = max(xmax.get(i_x) or bbox.right, bbox.right)
-                    ymin[i_y] = min(
-                        ymin.get(i_y) or bbox.bottom,
-                        bbox.bottom - spacing_y,
+                    inst_bbox = inst.dbbox()
+                    xmin[i_x] = min(
+                        xmin.get(i_x) or inst_bbox.left,
+                        inst_bbox.left - spacing_x,
                     )
-                    ymax[i_y] = max(ymax.get(i_y) or bbox.top, bbox.top)
+                    xmax[i_x] = max(xmax.get(i_x) or inst_bbox.right, inst_bbox.right)
+                    ymin[i_y] = min(
+                        ymin.get(i_y) or inst_bbox.bottom,
+                        inst_bbox.bottom - spacing_y,
+                    )
+                    ymax[i_y] = max(ymax.get(i_y) or inst_bbox.top, inst_bbox.top)
 
         for i_y, (array, bbox_array) in enumerate(zip(insts, bboxes, strict=False)):
             y0 -= ymin.get(i_y, 0)

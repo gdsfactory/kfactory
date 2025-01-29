@@ -26,8 +26,7 @@ def test_euler_snapping(LAYER: Layers) -> None:
 
 @kf.cell
 def unnamed_cell(name: str = "a") -> kf.KCell:
-    c = kf.kcl.kcell(name)
-    return c
+    return kf.kcl.kcell(name)
 
 
 def test_unnamed_cell() -> None:
@@ -40,8 +39,7 @@ def test_unnamed_cell() -> None:
 def nested_list_dict(
     arg1: dict[str, list[dict[str, str | int] | int] | int],
 ) -> kf.KCell:
-    c = kf.kcl.kcell()
-    return c
+    return kf.kcl.kcell()
 
 
 def test_nested_dict_list() -> None:
@@ -78,8 +76,7 @@ def test_namecollision(LAYER: Layers) -> None:
 def test_nested_dic() -> None:
     @kf.kcl.cell
     def recursive_dict_cell(d: dict[str, dict[str, str] | str]) -> kf.KCell:
-        c = kf.KCell()
-        return c
+        return kf.KCell()
 
     recursive_dict_cell({"test": {"test2": "test3"}, "test4": "test5"})
 
@@ -169,8 +166,7 @@ def test_cell_decorator_error(LAYER: Layers) -> None:
 
     @kf.kcl.cell
     def wrong_cell() -> kf.KCell:
-        c = kcl2.kcell("wrong_test")
-        return c
+        return kcl2.kcell("wrong_test")
 
     regex = kf.config.logfilter.regex
     kf.config.logfilter.regex = (
@@ -210,17 +206,13 @@ def test_overwrite(LAYER: Layers) -> None:
 
     @kcl.cell
     def test_overwrite_cell() -> kf.KCell:
-        print("overwrite1")
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     c1 = test_overwrite_cell()
 
     @kcl.cell(overwrite_existing=True)  # type: ignore[no-redef]
     def test_overwrite_cell() -> kf.KCell:
-        print("overwrite2")
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     c2 = test_overwrite_cell()
 

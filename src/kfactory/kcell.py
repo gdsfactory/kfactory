@@ -27,7 +27,6 @@ from collections.abc import (
 )
 from pathlib import Path
 from tempfile import gettempdir
-from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -47,11 +46,9 @@ from pydantic import (
     PrivateAttr,
 )
 from ruamel.yaml.constructor import SafeConstructor
-from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from . import kdb, rdb
 from .conf import CHECK_INSTANCES, DEFAULT_TRANS, ShowFunction, config, logger
-from .cross_section import SymmetricalCrossSection
 from .exceptions import LockedError, MergeError
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .instance import DInstance, Instance, ProtoInstance, ProtoTInstance, VInstance
@@ -92,6 +89,11 @@ from .utilities import (
 )
 
 if TYPE_CHECKING:
+    from types import ModuleType
+
+    from ruamel.yaml.representer import BaseRepresenter, MappingNode
+
+    from .cross_section import SymmetricalCrossSection
     from .layout import KCLayout
 
 __all__ = [
@@ -176,7 +178,8 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit]):
     def write(
         self,
         filename: str | Path,
-        save_options: kdb.SaveLayoutOptions = ...,
+        save_options: kdb.SaveLayoutOptions | None = None,
+        *,
         convert_external_cells: bool = ...,
         set_meta_data: bool = ...,
         autoformat_from_file_extension: bool = ...,
@@ -941,7 +944,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def write(
         self,
         filename: str | Path,
-        save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        save_options: kdb.SaveLayoutOptions | None = None,
+        *,
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
         autoformat_from_file_extension: bool = True,
@@ -950,6 +954,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
         See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
         """
+        if save_options is None:
+            save_options = save_layout_options()
         self.insert_vinsts()
         match set_meta_data, convert_external_cells:
             case True, True:
@@ -1047,7 +1053,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             )
             diff.compare()
             if diff.dbu_differs:
-                raise MergeError("Layouts' DBU differ. Check the log for more info.")
+                msg = "Layouts' DBU differ. Check the log for more info."
+                raise MergeError(msg)
             if diff.diff_xor.cells() > 0 or diff.layout_meta_diff:
                 diff_kcl = KCLayout(self.name + "_XOR")
                 diff_kcl.layout.assign(diff.diff_xor)
@@ -1699,8 +1706,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
     def connectivity_check(
         self,
-        port_types: list[str] = [],
-        layers: list[int] = [],
+        port_types: list[str] | None = None,
+        layers: list[int] | None = None,
         db: rdb.ReportDatabase | None = None,
         recursive: bool = True,
         add_cell_ports: bool = False,
@@ -1721,6 +1728,10 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 selected ports.
             check_layer_connectivity: Check whether the layer overlaps with instances.
         """
+        if layers is None:
+            layers = []
+        if port_types is None:
+            port_types = []
         db_: rdb.ReportDatabase = db or rdb.ReportDatabase(
             f"Connectivity Check {self.name}",
         )
@@ -2142,11 +2153,11 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             self._base_kcell.vinsts.clear()
             called_cell_indexes = self._base_kcell.kdb_cell.called_cells()
             for c in sorted(
-                set(
+                {
                     self.kcl[ci]
                     for ci in called_cell_indexes
                     if not self.kcl[ci].kdb_cell._destroyed()
-                )
+                }
                 & self.kcl.tkcells.keys(),
                 key=lambda c: c.hierarchy_levels(),
             ):
@@ -2431,7 +2442,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         )
         cell = cls(name=d["name"])
         if verbose:
-            print(f"Building {d['name']}")
+            pass
         for _d in d.get("ports", Ports(ports=[], kcl=cell.kcl)):
             if "dcplx_trans" in _d:
                 p = cell.create_port(
@@ -2477,9 +2488,12 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                 _cell = cellf(**inst["settings"])
                 del module
             else:
-                raise NotImplementedError(
+                msg = (
                     'To define an instance, either a "cellfunction" or'
-                    ' a "cellname" needs to be defined',
+                    ' a "cellname" needs to be defined'
+                )
+                raise NotImplementedError(
+                    msg,
                 )
             t = inst.get("trans", {})
             if isinstance(t, str):
@@ -2525,7 +2539,9 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                             ref = i
                             break
                     else:
-                        IndexError(f"No instance with cell name: <{ref_yml}> found")
+                        raise IndexError(
+                            f"No instance with cell name: <{ref_yml}> found",
+                        )
                 elif isinstance(ref_yml, int) and len(cell.insts) > 1:
                     ref = cell.insts[ref_yml]
 
@@ -2542,7 +2558,8 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                         if isinstance(x0_yml, int):
                             x0 = x0_yml
                         else:
-                            NotImplementedError("unknown format for x0")
+                            msg = "unknown format for x0"
+                            raise NotImplementedError(msg)
                 # y0
                 match y0_yml:
                     case "S":
@@ -2553,7 +2570,8 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                         if isinstance(y0_yml, int):
                             y0 = y0_yml
                         else:
-                            NotImplementedError("unknown format for y0")
+                            msg = "unknown format for y0"
+                            raise NotImplementedError(msg)
                 # x
                 match x_yml:
                     case "W":
@@ -2574,7 +2592,8 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                         if isinstance(x_yml, int):
                             x = x_yml
                         else:
-                            NotImplementedError("unknown format for x")
+                            msg = "unknown format for x"
+                            raise NotImplementedError(msg)
                 # y
                 match y_yml:
                     case "S":
@@ -2595,7 +2614,8 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                         if isinstance(y_yml, int):
                             y = y_yml
                         else:
-                            NotImplementedError("unknown format for y")
+                            msg = "unknown format for y"
+                            raise NotImplementedError(msg)
                 kinst.transform(kdb.Trans(0, False, x - x0, y - y0))
         type_to_class: dict[
             str,
@@ -2813,10 +2833,11 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
         self,
         lyrdb: rdb.ReportDatabase | Path | str | None = None,
         l2n: kdb.LayoutToNetlist | Path | str | None = None,
+        *,
         keep_position: bool = True,
-        save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        save_options: kdb.SaveLayoutOptions | None = None,
         use_libraries: bool = True,
-        library_save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        library_save_options: kdb.SaveLayoutOptions | None = None,
     ) -> None:
         """Stream the gds to klive.
 
@@ -3002,7 +3023,8 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
     def write(
         self,
         filename: str | Path,
-        save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        save_options: kdb.SaveLayoutOptions | None = None,
+        *,
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
         autoformat_from_file_extension: bool = True,
@@ -3011,6 +3033,8 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
 
         See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
         """
+        if save_options is None:
+            save_options = save_layout_options()
         c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
@@ -3029,7 +3053,6 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
 
     def l2n(
         self,
-        port_types: Iterable[str] = ("optical",),
     ) -> tuple[KCell, kdb.LayoutToNetlist]:
         """Generate a LayoutToNetlist object from the port types.
 
@@ -3047,13 +3070,18 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
 
     def connectivity_check(
         self,
-        port_types: list[str] = [],
-        layers: list[int] = [],
+        port_types: list[str] | None = None,
+        layers: list[int] | None = None,
         db: rdb.ReportDatabase | None = None,
+        *,
         recursive: bool = True,
         add_cell_ports: bool = False,
         check_layer_connectivity: bool = True,
     ) -> tuple[KCell, rdb.ReportDatabase]:
+        if layers is None:
+            layers = []
+        if port_types is None:
+            port_types = []
         c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
@@ -3075,10 +3103,11 @@ def show(
     layout: KCLayout | ProtoKCell[Any] | Path | str,
     lyrdb: rdb.ReportDatabase | Path | str | None = None,
     l2n: kdb.LayoutToNetlist | Path | str | None = None,
+    *,
     keep_position: bool = True,
-    save_options: kdb.SaveLayoutOptions = save_layout_options(),
+    save_options: kdb.SaveLayoutOptions | None = None,
     use_libraries: bool = True,
-    library_save_options: kdb.SaveLayoutOptions = save_layout_options(),
+    library_save_options: kdb.SaveLayoutOptions | None = None,
 ) -> None:
     """Show GDS in klayout.
 
@@ -3098,6 +3127,11 @@ def show(
     delete = False
     delete_lyrdb = False
     delete_l2n = False
+
+    if save_options is None:
+        save_options = save_layout_options()
+    if library_save_options is None:
+        library_save_options = save_layout_options()
 
     # Find the file that calls stack
     try:
@@ -3497,5 +3531,5 @@ def get_cells(
                         cells[t[0]] = t[1]
                 except ValueError:
                     if verbose:
-                        print(f"error in {t[0]}")
+                        pass
     return cells

@@ -9,8 +9,8 @@ All the default bends use snapping. To use no snapping make an instance of
 BendEulerCustom(KCell.kcl) and use that one.
 """
 
-from ..factories.euler import bend_euler_factory, bend_s_euler_factory
-from ..layout import kcl
+from kfactory.factories.euler import bend_euler_factory, bend_s_euler_factory
+from kfactory.layout import kcl
 
 __all__ = [
     "bend_euler",

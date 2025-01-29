@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Literal
 
 from rich.json import JSON
@@ -10,6 +9,8 @@ from . import kdb
 from .conf import DEFAULT_TRANS, config
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from .instance import Instance
     from .port import Port, ProtoPort
 
@@ -88,8 +89,8 @@ def check_inst_ports(p1: Port, p2: Port) -> int:
 
 
 def check_cell_ports(p1: ProtoPort[Any], p2: ProtoPort[Any]) -> int:
-    p1_ = Port(base=p1.base)
-    p2_ = Port(base=p2.base)
+    p1_ = p1.to_itype()
+    p2_ = p2.to_itype()
     check_int = 0
     if p1_.width != p2_.width:
         check_int += 1

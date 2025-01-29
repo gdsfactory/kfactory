@@ -7,10 +7,6 @@ from __future__ import annotations
 
 import re
 from abc import ABC, abstractmethod
-from collections.abc import (
-    Callable,
-    Iterable,
-)
 from enum import IntEnum, IntFlag, auto
 from typing import (
     TYPE_CHECKING,
@@ -27,18 +23,24 @@ from pydantic import (
     BaseModel,
     model_serializer,
 )
-from ruamel.yaml.constructor import BaseConstructor
 from typing_extensions import TypedDict
 
 from .conf import config
 from .cross_section import CrossSectionSpec, SymmetricalCrossSection
-from .layer import LayerEnum
 from .settings import Info
 from .typings import TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
+    from collections.abc import (
+        Callable,
+        Iterable,
+    )
+
+    from ruamel.yaml.constructor import BaseConstructor
+
     from .kcell import KCell, ProtoTKCell
+    from .layer import LayerEnum
     from .layout import KCLayout
 
 
@@ -147,23 +149,17 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
 
     @model_serializer()
     def ser_model(self) -> BasePortDict:
-        if self.trans is not None:
-            trans = self.trans.dup()
-        else:
-            trans = None
-        if self.dcplx_trans is not None:
-            dcplx_trans = self.dcplx_trans.dup()
-        else:
-            dcplx_trans = None
-        return dict(
-            name=self.name,
-            kcl=self.kcl,
-            cross_section=self.cross_section,
-            trans=trans,
-            dcplx_trans=dcplx_trans,
-            info=self.info.copy(),
-            port_type=self.port_type,
-        )
+        trans = self.trans.dup() if self.trans is not None else None
+        dcplx_trans = self.dcplx_trans.dup() if self.dcplx_trans is not None else None
+        return {
+            "name": self.name,
+            "kcl": self.kcl,
+            "cross_section": self.cross_section,
+            "trans": trans,
+            "dcplx_trans": dcplx_trans,
+            "info": self.info.copy(),
+            "port_type": self.port_type,
+        }
 
     def get_trans(self) -> kdb.Trans:
         return (
@@ -647,11 +643,13 @@ class Port(ProtoPort[int]):
         mirror_x: bool = False,
         port: Port | None = None,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] | None = None,
         cross_section: SymmetricalCrossSection | None = None,
         base: BasePort | None = None,
     ) -> None:
         """Create a port from dbu or um based units."""
+        if info is None:
+            info = {}
         if base is not None:
             self._base = base
             return
@@ -665,22 +663,23 @@ class Port(ProtoPort[int]):
         if cross_section is None:
             if layer_info is None:
                 if layer is None:
-                    raise ValueError("layer or layer_info for a port must be defined")
+                    msg = "layer or layer_info for a port must be defined"
+                    raise ValueError(msg)
                 layer_info = kcl_.layout.get_info(layer)
             if width is None:
-                raise ValueError(
+                msg = (
                     "any width and layer, or a cross_section must be given if the"
-                    " 'port is None'",
+                    " 'port is None'"
+                )
+                raise ValueError(
+                    msg,
                 )
             cross_section = kcl_.get_cross_section(
                 CrossSectionSpec(main_layer=layer_info, width=width),
             )
         cross_section_ = cross_section
         if trans is not None:
-            if isinstance(trans, str):
-                trans_ = kdb.Trans.from_s(trans)
-            else:
-                trans_ = trans.dup()
+            trans_ = kdb.Trans.from_s(trans) if isinstance(trans, str) else trans.dup()
             self._base = BasePort(
                 name=name,
                 kcl=kcl_,
@@ -714,7 +713,8 @@ class Port(ProtoPort[int]):
                 port_type=port_type,
             )
         else:
-            raise ValueError("Missing port parameters given")
+            msg = "Missing port parameters given"
+            raise ValueError(msg)
 
     @property
     def width(self) -> int:
@@ -865,11 +865,13 @@ class DPort(ProtoPort[float]):
         mirror_x: bool = False,
         port: Port | DPort | None = None,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] | None = None,
         cross_section: SymmetricalCrossSection | None = None,
         base: BasePort | None = None,
     ) -> None:
         """Create a port from dbu or um based units."""
+        if info is None:
+            info = {}
         if base is not None:
             self._base = base
             return
@@ -884,21 +886,20 @@ class DPort(ProtoPort[float]):
         if cross_section is None:
             if layer_info is None:
                 if layer is None:
-                    raise ValueError("layer or layer_info for a port must be defined")
+                    msg = "layer or layer_info for a port must be defined"
+                    raise ValueError(msg)
                 layer_info = kcl_.layout.get_info(layer)
             if width is None:
+                msg = "If a cross_section is not given a width must be defined."
                 raise ValueError(
-                    "If a cross_section is not given a width must be defined.",
+                    msg,
                 )
             cross_section = kcl_.get_cross_section(
                 CrossSectionSpec(main_layer=layer_info, width=kcl_.to_dbu(width)),
             )
         cross_section_ = cross_section
         if trans is not None:
-            if isinstance(trans, str):
-                trans_ = kdb.Trans.from_s(trans)
-            else:
-                trans_ = trans.dup()
+            trans_ = kdb.Trans.from_s(trans) if isinstance(trans, str) else trans.dup()
             self._base = BasePort(
                 name=name,
                 kcl=kcl_,
@@ -934,7 +935,8 @@ class DPort(ProtoPort[float]):
             self.center = center
             self.angle = angle
         else:
-            raise ValueError("Missing port parameters given")
+            msg = "Missing port parameters given"
+            raise ValueError(msg)
 
     def __repr__(self) -> str:
         """String representation of port."""
@@ -1145,7 +1147,7 @@ def rename_clockwise_multi(
     ports: Iterable[ProtoPort[Any]],
     layers: Iterable[LayerEnum | int] | None = None,
     regex: str | None = None,
-    type_prefix_mapping: dict[str, str] = {"optical": "o", "electrical": "e"},
+    type_prefix_mapping: dict[str, str] | None = None,
     start: int = 1,
 ) -> None:
     """Sort and return ports in the clockwise direction.
@@ -1167,6 +1169,8 @@ def rename_clockwise_multi(
             o8  o7
     ```
     """
+    if type_prefix_mapping is None:
+        type_prefix_mapping = {"optical": "o", "electrical": "e"}
     if layers:
         for p_type, prefix in type_prefix_mapping.items():
             for layer in layers:

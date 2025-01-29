@@ -5,6 +5,7 @@ import pytest
 from conftest import Layers
 
 import kfactory as kf
+from kfactory.exceptions import CellNameError, NonInferableReturnAnnotationError
 
 
 def test_cell_decorator(kcl: kf.KCLayout, LAYER: Layers) -> None:
@@ -35,8 +36,7 @@ def test_set_settings_functionality(kcl: kf.KCLayout) -> None:
         width: float = 10.0,
         height: float = 5.0,
     ) -> kf.KCell:
-        c = kcl.kcell(name=name)
-        return c
+        return kcl.kcell(name=name)
 
     cell_with_settings = test_set_settings()
     assert cell_with_settings.settings["width"] == 10.0
@@ -48,8 +48,7 @@ def test_set_settings_functionality(kcl: kf.KCLayout) -> None:
         width: float = 10.0,
         height: float = 5.0,
     ) -> kf.KCell:
-        c = kcl.kcell(name=name)
-        return c
+        return kcl.kcell(name=name)
 
     cell_without_settings = test_set_settings_no_settings()
     assert cell_without_settings.settings == kf.KCellSettings()
@@ -118,7 +117,7 @@ def test_cell_name_already_exists(kcl: kf.KCLayout) -> None:
         kcl.kcell(name=name)
         return cell1
 
-    with pytest.raises(kf.exceptions.CellNameError):
+    with pytest.raises(CellNameError):
         test_cell_name_already_exists("cell1")
 
 
@@ -140,11 +139,10 @@ def test_cell_parameters(kcl: kf.KCLayout) -> None:
         width: float,
         height: float,
     ) -> kf.KCell:
-        cell = kcl.kcell(name=name)
-        return cell
+        return kcl.kcell(name=name)
 
     with pytest.raises(TypeError):
-        test_cell_with_empty_parameters(name="test_cell_with_empty_parameters")  # type: ignore
+        test_cell_with_empty_parameters(name="test_cell_with_empty_parameters")
 
 
 def test_check_instances(kcl: kf.KCLayout) -> None:
@@ -190,28 +188,23 @@ def test_cell_decorator_types(kcl: kf.KCLayout) -> None:
 
     @kcl.cell(output_type=KCellSubclass)
     def test_cell(name: str) -> kf.KCell:
-        cell = kcl.kcell(name=name)
-        return cell
+        return kcl.kcell(name=name)
 
     @kcl.cell(layout_cache=True, output_type=kf.KCell)
     def test_kcell(name: str) -> kf.KCell:
-        cell = kcl.kcell(name=name)
-        return cell
+        return kcl.kcell(name=name)
 
     @kcl.cell(output_type=kf.DKCell)
     def test_k_to_dkcell(name: str) -> kf.KCell:
-        cell = kcl.kcell(name=name)
-        return cell
+        return kcl.kcell(name=name)
 
     @kcl.cell(output_type=kf.DKCell)
     def test_dkcell(name: str) -> kf.DKCell:
-        cell = kcl.dkcell(name=name)
-        return cell
+        return kcl.dkcell(name=name)
 
     @kcl.cell
     def test_dk_to_kcell(name: str) -> kf.DKCell:
-        cell = kcl.dkcell(name=name)
-        return cell
+        return kcl.dkcell(name=name)
 
     k_to_dkcell = test_k_to_dkcell("test_d_to_kcell")
     kcell = test_kcell("test_lcell")
@@ -225,7 +218,7 @@ def test_cell_decorator_types(kcl: kf.KCLayout) -> None:
     assert isinstance(dkcell, kf.DKCell)
     assert isinstance(dk_to_kcell, kf.DKCell)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(NonInferableReturnAnnotationError):
 
         @kcl.cell
         def test_no_output_type():  # type: ignore[no-untyped-def]  # noqa: ANN202

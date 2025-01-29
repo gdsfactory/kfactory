@@ -2,7 +2,8 @@
 
 from typing import Protocol
 
-from .. import DKCell, KCell
+from kfactory import DKCell, KCell
+
 from . import bezier, circular, euler, straight, taper, virtual
 
 

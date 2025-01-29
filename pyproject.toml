@@ -133,6 +133,11 @@ ignore = [
     "TRY003",
     "PLR0913",
     "PLR0912",
+    "PLR0915",
+    "N802",
+    "BLE001",
+    "TC001",
+    "T201",
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -149,6 +154,7 @@ ignore = [
     "FBT002",
     "ARG001",
 ]
+"src/kfactory/cli/**/*.py" = ["FBT002"]
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.

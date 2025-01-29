@@ -4,10 +4,10 @@ TODO: Non-linear tapers.
 
 """
 
-from .. import KCell, kcl, kdb
-from ..enclosure import LayerEnclosure
-from ..factories.taper import taper_factory
-from ..typings import um
+from kfactory import KCell, kcl, kdb
+from kfactory.enclosure import LayerEnclosure
+from kfactory.factories.taper import taper_factory
+from kfactory.typings import um
 
 __all__ = ["taper", "taper_dbu"]
 

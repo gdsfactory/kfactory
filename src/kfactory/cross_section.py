@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING, NotRequired, Self, TypedDict, cast
 
 from pydantic import BaseModel, Field, model_validator
 
-from . import kdb
 from .enclosure import DLayerEnclosure, LayerEnclosure, LayerEnclosureSpec
 
 if TYPE_CHECKING:
+    from . import kdb
     from .layout import KCLayout
 
 
@@ -37,12 +37,16 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
     @model_validator(mode="after")
     def _validate_enclosure_main_layer(self) -> Self:
         if self.enclosure.main_layer is None:
-            raise ValueError("Enclosures of cross sections must have a main layer.")
+            msg = "Enclosures of cross sections must have a main layer."
+            raise ValueError(msg)
         if (self.width // 2) * 2 != self.width:
-            raise ValueError(
+            msg = (
                 "Width of symmetrical cross sections must have be a multiple of 2. "
                 "This could cause cross sections and extrusions to become unsymmetrical"
-                " otherwise.",
+                " otherwise."
+            )
+            raise ValueError(
+                msg,
             )
         return self
 
@@ -135,8 +139,9 @@ class CrossSectionModel(BaseModel):
             else:
                 w = cross_section["width"]
                 if not isinstance(w, int) and not w.is_integer():
+                    msg = "A CrossSectionSpec with 'sections' must have a width in dbu."
                     raise ValueError(
-                        "A CrossSectionSpec with 'sections' must have a width in dbu.",
+                        msg,
                     )
                 cross_section = SymmetricalCrossSection(
                     width=int(w),

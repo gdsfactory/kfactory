@@ -3,24 +3,28 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Sequence
-from typing import Any, Literal, Protocol, cast
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
 
 import klayout.db as kdb
 from klayout import rdb
 from pydantic import BaseModel, Field
 
-from ..conf import config, logger
-from ..instance import Instance
-from ..kcell import KCell
-from ..port import BasePort, Port, ProtoPort
-from ..typings import dbu
+from kfactory.conf import config, logger
+from kfactory.instance import Instance
+from kfactory.port import BasePort, Port, ProtoPort
+from kfactory.typings import dbu
+
 from .manhattan import (
     ManhattanBundleRoutingFunction,
     ManhattanRouter,
     route_smart,
 )
 from .steps import Step, Straight
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from kfactory.kcell import KCell
 
 __all__ = [
     "ManhattanRoute",
@@ -102,6 +106,9 @@ class ManhattanRoute(BaseModel, arbitrary_types_allowed=True):
             length += int((p - p_old).length())
             p_old = p
         return length
+
+
+ManhattanRoute.model_rebuild()
 
 
 def check_collisions(
@@ -189,9 +196,7 @@ def check_collisions(
                 shape_region.insert(r)
             for i, inst in enumerate(insts):
                 _inst_region = kdb.Region(inst.bbox(layer_))
-                # inst_shapes: kdb.Region | None = None
                 if not (inst_region & _inst_region).is_empty():
-                    # if inst_shapes is None:
                     inst_shapes = kdb.Region()
                     shape_it = c.begin_shapes_rec_overlapping(layer_, inst.bbox(layer_))
                     shape_it.select_cells([inst.cell.cell_index()])
@@ -267,8 +272,9 @@ def get_radius(
     """
     ports_ = tuple(p.to_itype() for p in ports)
     if len(ports_) != 2:
+        msg = "Cannot determine the maximal radius of a bend with more than two ports."
         raise ValueError(
-            "Cannot determine the maximal radius of a bend with more than two ports.",
+            msg,
         )
     p1, p2 = ports_
     if p1.angle == p2.angle:
@@ -279,7 +285,8 @@ def get_radius(
 
     center = e1.cut_point(e2)
     if center is None:
-        raise ValueError("Could not determine the radius. Something went very wrong.")
+        msg = "Could not determine the radius. Something went very wrong."
+        raise ValueError(msg)
     return int(
         max((p1.trans.disp - center).length(), (p2.trans.disp - center).length()),
     )
@@ -296,13 +303,13 @@ def route_bundle(
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     routing_function: ManhattanBundleRoutingFunction = route_smart,
-    routing_kwargs: dict[str, Any] = {"bbox_routing": "minimal"},
+    routing_kwargs: dict[str, Any] | None = None,
     placer_function: PlacerFunction,
-    placer_kwargs: dict[str, Any] = {},
+    placer_kwargs: dict[str, Any] | None = None,
     router_post_process_function: RouterPostProcessFunction | None = None,
-    router_post_process_kwargs: dict[str, Any] = {},
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    router_post_process_kwargs: dict[str, Any] | None = None,
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:
@@ -402,12 +409,25 @@ def route_bundle(
         end_angles: Overwrite the port orientation of all start_ports together
             (single value) or each one (list of values which is as long as end_ports).
     """
+    if ends is None:
+        ends = []
+    if starts is None:
+        starts = []
+    if router_post_process_kwargs is None:
+        router_post_process_kwargs = {}
+    if placer_kwargs is None:
+        placer_kwargs = {}
+    if routing_kwargs is None:
+        routing_kwargs = {"bbox_routing": "minimal"}
     if not start_ports:
         return []
-    if not (len(start_ports) == len(end_ports)):
-        raise ValueError(
+    if len(start_ports) != len(end_ports):
+        msg = (
             "For bundle routing the input port list must have"
-            " the same size as the end ports and be the same length.",
+            " the same size as the end ports and be the same length."
+        )
+        raise ValueError(
+            msg,
         )
     length = len(start_ports)
     if starts == []:
@@ -430,10 +450,13 @@ def route_bundle(
                 for p in start_ports
             ]
         else:
-            if not len(start_angles) == len(start_ports):
-                raise ValueError(
+            if len(start_angles) != len(start_ports):
+                msg = (
                     "If more than one end port should be rotated,"
-                    " a rotation for all ports must be provided.",
+                    " a rotation for all ports must be provided."
+                )
+                raise ValueError(
+                    msg,
                 )
             start_ports = [
                 p.transformed(post_trans=kdb.Trans(a - p.get_trans().angle))
@@ -447,10 +470,13 @@ def route_bundle(
                 for p in end_ports
             ]
         else:
-            if not len(end_angles) == len(end_ports):
-                raise ValueError(
+            if len(end_angles) != len(end_ports):
+                msg = (
                     "If more than one end port should be rotated,"
-                    " a rotation for all ports must be provided.",
+                    " a rotation for all ports must be provided."
+                )
+                raise ValueError(
+                    msg,
                 )
             end_ports = [
                 p.transformed(post_trans=kdb.Trans(a - p.get_trans().angle))
@@ -513,7 +539,6 @@ def route_bundle(
             placer_errors.append(e)
             error_routes.append((ps, pe, router.start.pts, router.width))
     if placer_errors and on_placer_error == "show_error":
-        print(len(placer_errors))
         db = rdb.ReportDatabase("Route Placing Errors")
         cell = db.create_cell(
             c.name
@@ -533,7 +558,6 @@ def route_bundle(
             )
             it.add_value(f"Exception: {error}")
             path = kdb.Path(pts, width or ps.cross_section.width)
-            print(f"{width=}")
             it.add_value(c.kcl.to_um(path.polygon()))
         c.show(lyrdb=db)
     if placer_errors and on_placer_error is not None:

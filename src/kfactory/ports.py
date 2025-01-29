@@ -19,13 +19,9 @@ from typing import (
     overload,
 )
 
-from ruamel.yaml.constructor import BaseConstructor
-from ruamel.yaml.representer import BaseRepresenter, SequenceNode
-
 from . import kdb
 from .conf import config
 from .cross_section import CrossSectionSpec, SymmetricalCrossSection
-from .layer import LayerEnum
 from .port import (
     BasePort,
     DPort,
@@ -41,6 +37,10 @@ from .typings import TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
+    from ruamel.yaml.constructor import BaseConstructor
+    from ruamel.yaml.representer import BaseRepresenter, SequenceNode
+
+    from .layer import LayerEnum
     from .layout import KCLayout
 
 
@@ -153,10 +153,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
             return port.base in self._bases
         if isinstance(port, BasePort):
             return port in self._bases
-        for _port in self._bases:
-            if _port.name == port:
-                return True
-        return False
+        return any(_port.name == port for _port in self._bases)
 
     def clear(self) -> None:
         """Deletes all ports."""
@@ -371,14 +368,18 @@ class Ports(ProtoPorts[int]):
         """
         if cross_section is None:
             if width is None:
-                raise ValueError(
+                msg = (
                     "Either width or dwidth must be set. It can be set through"
-                    " a cross section as well.",
+                    " a cross section as well."
+                )
+                raise ValueError(
+                    msg,
                 )
             if layer_info is None:
                 if layer is None:
+                    msg = "layer or layer_info must be defined to create a port."
                     raise ValueError(
-                        "layer or layer_info must be defined to create a port.",
+                        msg,
                     )
                 layer_info = self.kcl.get_info(layer)
             assert layer_info is not None
@@ -695,20 +696,25 @@ class DPorts(ProtoPorts[float]):
         """
         if cross_section is None:
             if width is None:
-                raise ValueError(
+                msg = (
                     "Either width must be set. It can be set through"
-                    " a cross section as well.",
+                    " a cross section as well."
+                )
+                raise ValueError(
+                    msg,
                 )
             if layer_info is None:
                 if layer is None:
+                    msg = "layer or layer_info must be defined to create a port."
                     raise ValueError(
-                        "layer or layer_info must be defined to create a port.",
+                        msg,
                     )
                 layer_info = self.kcl.get_info(layer)
             assert layer_info is not None
             dwidth = width
             if dwidth <= 0:
-                raise ValueError("dwidth needs to be set and be >0")
+                msg = "dwidth needs to be set and be >0"
+                raise ValueError(msg)
             width_ = self.kcl.to_dbu(dwidth)
             if width_ % 2:
                 raise ValueError(

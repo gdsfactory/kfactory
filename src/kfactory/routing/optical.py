@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import Any, Literal, cast, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
-from .. import kdb
-from ..conf import config, logger
-from ..factories import StraightFactoryDBU, StraightFactoryUM
-from ..kcell import DKCell, KCell
-from ..port import DPort, Port
-from ..typings import dbu, um
+from kfactory import kdb
+from kfactory.conf import config, logger
+from kfactory.kcell import DKCell, KCell
+from kfactory.port import DPort, Port
+from kfactory.typings import dbu, um
+
 from .generic import (
     ManhattanRoute,
     get_radius,
@@ -25,6 +24,11 @@ from .manhattan import (
     route_smart,
 )
 from .steps import Step, Straight
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from kfactory.factories import StraightFactoryDBU, StraightFactoryUM
 
 __all__ = [
     "get_radius",
@@ -118,7 +122,7 @@ def route_bundle(
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
-    bboxes: list[kdb.Box] | list[kdb.DBox] = [],
+    bboxes: list[kdb.Box] | list[kdb.DBox] | None = None,
     allow_width_mismatch: bool | None = None,
     allow_layer_mismatch: bool | None = None,
     allow_type_mismatch: bool | None = None,
@@ -130,8 +134,8 @@ def route_bundle(
     | kdb.DTrans
     | list[kdb.DPoint]
     | None = None,
-    starts: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] = [],
-    ends: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] = [],
+    starts: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] = None,
+    ends: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] = None,
     start_angles: list[int] | float | list[float] | None = None,
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
@@ -232,6 +236,12 @@ def route_bundle(
         purpose: Set the property "purpose" (at id kf.kcell.PROPID.PURPOSE) to the
             value. Not set if None.
     """
+    if ends is None:
+        ends = []
+    if starts is None:
+        starts = []
+    if bboxes is None:
+        bboxes = []
     if start_straights is not None:
         logger.warning("start_straights is deprecated. Use `starts` instead.")
         starts = start_straights
@@ -425,14 +435,20 @@ def place90(
     if allow_type_mismatch is None:
         allow_type_mismatch = config.allow_type_mismatch
     if straight_factory is None:
-        raise ValueError(
+        msg = (
             "place90 needs to have a straight_factory set. Please pass a "
-            "straight_factory which takes kwargs 'width: int' and 'length: int'.",
+            "straight_factory which takes kwargs 'width: int' and 'length: int'."
+        )
+        raise ValueError(
+            msg,
         )
     if bend90_cell is None:
-        raise ValueError(
+        msg = (
             "place90 needs to be passed a fixed bend90 cell with two optical"
-            " ports which are 90° apart from each other with port_type 'port_type'.",
+            " ports which are 90° apart from each other with port_type 'port_type'."
+        )
+        raise ValueError(
+            msg,
         )
     route_start_port = p1.copy()
     route_start_port.name = None
@@ -486,18 +502,24 @@ def place90(
             len(taper_ports) != 2
             or (taper_ports[1].trans.angle + 2) % 4 != taper_ports[0].trans.angle
         ):
-            raise AttributeError(
+            msg = (
                 "Taper must have only two optical ports that are 180° oriented to each"
-                " other",
+                " other"
+            )
+            raise AttributeError(
+                msg,
             )
         if taper_ports[1].width == b90p1.width:
             taperp2, taperp1 = taper_ports
         elif taper_ports[0].width == b90p1.width:
             taperp1, taperp2 = taper_ports
         else:
-            raise AttributeError(
+            msg = (
                 "At least one of the taper's optical ports must be the same width as"
-                " the bend's ports",
+                " the bend's ports"
+            )
+            raise AttributeError(
+                msg,
             )
         route = ManhattanRoute(
             backbone=list(pts).copy(),
@@ -856,9 +878,12 @@ def route_loopback(
     if (t1.angle != t2.angle) and (
         (t1.disp.x == t2.disp.x) or (t1.disp.y == t2.disp.y)
     ):
-        raise ValueError(
+        msg = (
             "for a standard loopback the ports must point in the same direction and"
-            "have to be parallel",
+            "have to be parallel"
+        )
+        raise ValueError(
+            msg,
         )
 
     pz = kdb.Point(0, 0)
@@ -930,7 +955,7 @@ def route(
     route_path_function: ManhattanRoutePathFunction = route_manhattan,
     port_type: str = "optical",
     allow_small_routes: bool = False,
-    route_kwargs: dict[str, Any] | None = {},
+    route_kwargs: dict[str, Any] | None = None,
     route_width: dbu | None = None,
     min_straight_taper: dbu = 0,
     allow_width_mismatch: bool | None = None,
@@ -969,6 +994,8 @@ def route(
         purpose: Set the property "purpose" (at id kf.kcell.PROPID.PURPOSE) to the
             value. Not set if None.
     """
+    if route_kwargs is None:
+        route_kwargs = {}
     if allow_width_mismatch is None:
         allow_width_mismatch = config.allow_width_mismatch
     if allow_layer_mismatch is None:
@@ -1024,7 +1051,7 @@ def route(
 
     if bend180_cell is not None:
         # Bend 180 is available
-        bend180_ports = [p for p in bend180_cell.ports.filter(port_type=port_type)]
+        bend180_ports = list(bend180_cell.ports.filter(port_type=port_type))
         if len(bend180_ports) != 2:
             raise AttributeError(
                 f"{bend180_cell.name} should have 2 ports but has {len(bend180_ports)}"
@@ -1222,7 +1249,8 @@ def route(
 def vec_angle(v: kdb.Vector) -> int:
     """Determine vector angle in increments of 90°."""
     if v.x != 0 and v.y != 0:
-        raise ValueError("Non-manhattan vectors are not supported")
+        msg = "Non-manhattan vectors are not supported"
+        raise ValueError(msg)
 
     match (v.x, v.y):
         case (x, 0) if x > 0:

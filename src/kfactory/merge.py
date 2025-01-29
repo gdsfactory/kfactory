@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from pydantic import ConfigDict
 
 from . import kdb
 from .conf import LogLevel, logger
-from .typings import MetaData
+
+if TYPE_CHECKING:
+    from .typings import MetaData
 
 
 @dataclass
@@ -84,8 +87,8 @@ class MergeDiff:
         cell = self.layout_a.cell(instance.cell_index)
 
         regions: list[kdb.Region] = []
-        layers = [layer for layer in cell.layout().layer_indexes()]
-        layer_infos = [li for li in cell.layout().layer_infos()]
+        layers = list(cell.layout().layer_indexes())
+        layer_infos = list(cell.layout().layer_infos())
 
         for layer in layers:
             r = kdb.Region()
@@ -102,8 +105,8 @@ class MergeDiff:
         cell = self.layout_b.cell(instance.cell_index)
 
         regions: list[kdb.Region] = []
-        layers = [layer for layer in cell.layout().layer_indexes()]
-        layer_infos = [li for li in cell.layout().layer_infos()]
+        layers = list(cell.layout().layer_indexes())
+        layer_infos = list(cell.layout().layer_infos())
 
         for layer in layers:
             r = kdb.Region()

@@ -19,13 +19,13 @@ The slabs and excludes can be given in the form of an
 from collections.abc import Callable
 from typing import Any, Protocol
 
-from .. import kdb
-from ..conf import logger
-from ..enclosure import LayerEnclosure
-from ..kcell import KCell
-from ..layout import KCLayout
-from ..settings import Info
-from ..typings import MetaData, dbu
+from kfactory import kdb
+from kfactory.conf import logger
+from kfactory.enclosure import LayerEnclosure
+from kfactory.kcell import KCell
+from kfactory.layout import KCLayout
+from kfactory.settings import Info
+from kfactory.typings import MetaData, dbu
 
 __all__ = ["straight_dbu_factory"]
 
@@ -145,7 +145,8 @@ def straight_dbu_factory(
             width = -width
 
         if width // 2 * 2 != width:
-            raise ValueError("The width (w) must be a multiple of 2 database units")
+            msg = "The width (w) must be a multiple of 2 database units"
+            raise ValueError(msg)
 
         li = c.kcl.find_layer(layer)
         c.shapes(li).insert(kdb.Box(0, -width // 2, length, width // 2))

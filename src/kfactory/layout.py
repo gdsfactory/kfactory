@@ -10,13 +10,12 @@ from collections.abc import (
 )
 from pathlib import Path
 from threading import RLock
-from typing import Annotated, Any, Literal, cast, get_origin, overload
+from typing import TYPE_CHECKING, Annotated, Any, Literal, cast, get_origin, overload
 
 import cachetools.func
 import klayout.db as kdb
 import ruamel.yaml
 from cachetools import Cache
-from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -39,7 +38,7 @@ from .enclosure import (
     LayerEnclosureModel,
     LayerEnclosureSpec,
 )
-from .exceptions import CellNameError, MergeError
+from .exceptions import CellNameError, MergeError, NonInferableReturnAnnotationError
 from .kcell import (
     DKCell,
     DKCells,
@@ -54,7 +53,6 @@ from .kcell import (
 from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
 from .port import rename_clockwise_multi
-from .ports import DPorts, Ports
 from .protocols import KCellFunc
 from .serialization import (
     DecoratorDict,
@@ -66,6 +64,11 @@ from .serialization import (
 from .settings import Info, KCellSettings, KCellSettingsUnits
 from .typings import K, KCellParams, MetaData, T
 from .utilities import load_layout_options, save_layout_options
+
+if TYPE_CHECKING:
+    from cachetools.keys import _HashedTuple
+
+    from .ports import DPorts, Ports
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -95,6 +98,7 @@ class Factories(UserDict[str, Callable[..., T]]):
         if name != "data":
             return self.data[name]
         self.__getattribute__(name)
+        return None
 
     def for_tags(self, tags: list[str]) -> list[Callable[..., T]]:
         if len(tags) > 0:
@@ -186,9 +190,7 @@ class KCLayout(
         interconnect_cml_path: Path | str | None = None,
         layer_stack: LayerStack | None = None,
         constants: type[Constants] | None = None,
-        base_kcl: KCLayout | None = None,
         port_rename_function: Callable[..., None] = rename_clockwise_multi,
-        copy_base_kcl_layers: bool = True,
         info: dict[str, MetaData] | None = None,
     ) -> None:
         """Create a new KCLayout (PDK). Can be based on an old KCLayout.
@@ -218,7 +220,7 @@ class KCLayout(
         _infos = infos() if infos else LayerInfos()
         super().__init__(
             name=name,
-            layer_enclosures=LayerEnclosureModel(dict()),
+            layer_enclosures=LayerEnclosureModel({}),
             cross_sections=CrossSectionModel(kcl=self),
             enclosure=KCellEnclosure([]),
             infos=_infos,
@@ -265,14 +267,8 @@ class KCLayout(
         enclosure = (
             enclosure.copy_to(self) if enclosure else KCellEnclosure(enclosures=[])
         )
-        # layers = self.layerenum_from_dict(name="LAYER", layers=infos)
-        sparameters_path = sparameters_path
-        interconnect_cml_path = interconnect_cml_path
-        if enclosure is None:
-            enclosure = KCellEnclosure([])
         if layer_enclosures is None:
             _layer_enclosures = LayerEnclosureModel()
-        # self.layers = layers
         self.sparameters_path = sparameters_path
         self.enclosure = enclosure
         self.layer_enclosures = _layer_enclosures
@@ -281,6 +277,7 @@ class KCLayout(
         kcls[self.name] = self
 
     @model_validator(mode="before")
+    @classmethod
     def _validate_layers(cls, data: dict[str, Any]) -> dict[str, Any]:
         data["layers"] = layerenum_from_dict(
             layers=data["infos"],
@@ -317,9 +314,8 @@ class KCLayout(
         | None = None,
     ) -> LayerEnclosure:
         """Create a new LayerEnclosure in the KCLayout."""
-        if name is None:
-            if main_layer is not None and main_layer.name != "":
-                name = main_layer.name
+        if name is None and main_layer is not None and main_layer.name != "":
+            name = main_layer.name
         enc = LayerEnclosure(
             sections=sections,
             dsections=dsections,
@@ -558,12 +554,12 @@ class KCLayout(
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
         basename: str | None = None,
-        drop_params: list[str] = ["self", "cls"],
+        drop_params: list[str] | None = None,
         register_factory: bool = True,
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[TKCell], None]] = tuple(),
+        post_process: Iterable[Callable[[TKCell], None]] = (),
         debug_names: bool | None = None,
         tags: list[str] | None = None,
     ) -> (
@@ -621,6 +617,8 @@ class KCLayout(
                 can then be retrieved with `kcl.factories.tags[my_tag]` or if filtered
                 for multiple `kcl.factories.for_tags([my_tag1, my_tag2, ...])`.
         """
+        if drop_params is None:
+            drop_params = ["self", "cls"]
         if check_instances is None:
             check_instances = config.check_instances
         if overwrite_existing is None:
@@ -639,11 +637,7 @@ class KCLayout(
             )
 
             if output_cell_type_ is inspect.Signature.empty:
-                raise ValueError(
-                    "You did not provide an output_type and the return annotation "
-                    "cannot be inferred from the function signature. Please provide "
-                    "an output_type or return annotation.",
-                )
+                raise NonInferableReturnAnnotationError(f)
 
             output_cell_type = cast(type[K], output_cell_type_)
 
@@ -945,7 +939,7 @@ class KCLayout(
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
         basename: str | None = None,
-        drop_params: list[str] = ["self", "cls"],
+        drop_params: list[str] | None = None,
         register_factory: bool = True,
     ) -> (
         Callable[KCellParams, VKCell]
@@ -981,6 +975,9 @@ class KCLayout(
                 [factories][kfactory.kcell.KCLayout.factories]
         """
 
+        if drop_params is None:
+            drop_params = ["self", "cls"]
+
         def decorator_autocell(
             f: Callable[KCellParams, VKCell],
         ) -> Callable[KCellParams, VKCell]:
@@ -1003,7 +1000,7 @@ class KCLayout(
                     if get_origin(p.annotation) is Annotated
                 }
                 arg_par = list(sig.parameters.items())[: len(args)]
-                for i, (k, v) in enumerate(arg_par):
+                for i, (k, _v) in enumerate(arg_par):
                     params[k] = args[i]
                 params.update(kwargs)
 
@@ -1133,6 +1130,7 @@ class KCLayout(
         """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
         if name != "_name" and name not in self.model_fields:
             return self.layout.__getattribute__(name)
+        return None
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Use a custom setter to automatically set attributes.
@@ -1283,9 +1281,12 @@ class KCLayout(
             if (kcell.cell_index() not in self.tkcells) or allow_reregister:
                 self.tkcells[kcell.cell_index()] = kcell.base_kcell
             else:
-                raise ValueError(
+                msg = (
                     "Cannot register a new cell with a name that already"
-                    " exists in the library",
+                    " exists in the library"
+                )
+                raise ValueError(
+                    msg,
                 )
 
     def __getitem__(self, obj: str | int) -> KCell:
@@ -1391,8 +1392,9 @@ class KCLayout(
                 )
                 diff.compare()
                 if diff.dbu_differs:
+                    msg = "Layouts' DBU differ. Check the log for more info."
                     raise MergeError(
-                        "Layouts' DBU differ. Check the log for more info.",
+                        msg,
                     )
                 if diff.diff_xor.cells() > 0:
                     diff_kcl = KCLayout(self.name + "_XOR")

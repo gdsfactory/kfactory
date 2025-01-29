@@ -16,10 +16,10 @@ The slabs and excludes can be given in the form of an
 [Enclosure][kfactory.enclosure.LayerEncolosure].
 """
 
-from .. import KCell, kcl, kdb
-from ..enclosure import LayerEnclosure
-from ..factories.straight import straight_dbu_factory
-from ..typings import um
+from kfactory import KCell, kcl, kdb
+from kfactory.enclosure import LayerEnclosure
+from kfactory.factories.straight import straight_dbu_factory
+from kfactory.typings import um
 
 __all__ = ["straight", "straight_dbu"]
 

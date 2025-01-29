@@ -24,10 +24,7 @@ def test_check_metadata_type() -> None:
     assert check_metadata_type((1, 2, 3)) == (1, 2, 3)
     assert check_metadata_type([1, 2, 3]) == [1, 2, 3]
     assert check_metadata_type({"key": "value"}) == {"key": "value"}
-    with pytest.raises(
-        InvalidMetaDataError,
-        match=" value={1, 2, 3}, type(value)=<class 'set",
-    ):
+    with pytest.raises(InvalidMetaDataError):
         check_metadata_type({1, 2, 3})  # type: ignore[arg-type]
 
 

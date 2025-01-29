@@ -15,11 +15,11 @@ from typing import Annotated, Optional
 import git
 import typer
 
-from ..conf import logger
-from ..kcell import KCell
-from ..kcell import show as kfshow
-from ..layout import kcls
-from ..utilities import save_layout_options
+from kfactory.conf import logger
+from kfactory.kcell import KCell
+from kfactory.kcell import show as kfshow
+from kfactory.layout import kcls
+from kfactory.utilities import save_layout_options
 
 __all__ = ["build", "show"]
 

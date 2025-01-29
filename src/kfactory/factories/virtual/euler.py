@@ -3,14 +3,15 @@
 from collections.abc import Callable
 from typing import Any, Protocol
 
-from ... import kdb
-from ...conf import logger
-from ...enclosure import LayerEnclosure
-from ...factories.euler import euler_bend_points
-from ...kcell import VKCell
-from ...layout import KCLayout
-from ...settings import Info
-from ...typings import MetaData
+from kfactory import kdb
+from kfactory.conf import logger
+from kfactory.enclosure import LayerEnclosure
+from kfactory.factories.euler import euler_bend_points
+from kfactory.kcell import VKCell
+from kfactory.layout import KCLayout
+from kfactory.settings import Info
+from kfactory.typings import MetaData
+
 from .utils import extrude_backbone
 
 
