@@ -274,7 +274,7 @@ def test_check_ports(LAYER: Layers) -> None:
 
 def test_ports_in_cells() -> None:
     kcell = kf.KCell(name="test")
-    dkcell = kf.DKCell.from_kcell(kcell)
+    dkcell = kcell.to_dtype()
 
     port = kf.Port(name="test", layer=1, width=2, center=(0, 0), angle=90)
     new_port = kcell.add_port(port=port, name="o1")
