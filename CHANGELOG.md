@@ -5,11 +5,13 @@
 
 ## New
 
+- Make vinstance connect take ProtoPort [#587](https://github.com/gdsfactory/kfactory/pull/587)
 - Add defaults for mirror, mirror_x, mirror_y [#588](https://github.com/gdsfactory/kfactory/pull/588)
 - Add instances contains [#585](https://github.com/gdsfactory/kfactory/pull/585)
 
 ## Bug Fixes
 
+- Make vinstance connect take ProtoPort [#587](https://github.com/gdsfactory/kfactory/pull/587)
 - Fix um grid [#586](https://github.com/gdsfactory/kfactory/pull/586)
 - Cast protoport to port before int angle match [#584](https://github.com/gdsfactory/kfactory/pull/584)
 
