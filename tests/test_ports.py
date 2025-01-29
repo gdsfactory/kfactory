@@ -259,12 +259,52 @@ def test_dplx_port_dbu_port_conversion(LAYER: Layers, kcl: kf.KCLayout) -> None:
 
 def test_ports_eq() -> None:
     kcell = kf.KCell(name="test_ports_eq")
-    dkcell = kf.DKCell.from_kcell(kcell)
+    dkcell = kcell.to_dtype()
 
     port = kf.Port(name="test", layer=1, width=2, center=(0, 0), angle=90)
 
     dkcell.ports = [port]  # type: ignore[assignment]
     assert kcell.ports == [port]
+
+
+def test_to_dtype(kcl: kf.KCLayout) -> None:
+    port = kf.Port(name="o1", width=10, layer=1, center=(1000, 1000), angle=1)
+    dtype = port.to_dtype()
+    assert dtype.name == "o1"
+    assert dtype.width == 0.01
+    assert dtype.layer == 1
+    assert dtype.center == (1, 1)
+    assert dtype.angle == 90
+
+
+def test_to_itype(kcl: kf.KCLayout) -> None:
+    port = kf.DPort(name="o1", width=0.01, layer=1, center=(1, 1), angle=90)
+    itype = port.to_itype()
+    assert itype.name == "o1"
+    assert itype.width == 10
+    assert itype.layer == 1
+    assert itype.center == (1000, 1000)
+    assert itype.angle == 1
+
+
+def test_ports_to_dtype() -> None:
+    port = kf.Port(name="o1", width=10, layer=1, center=(1000, 1000), angle=1)
+    ports = kf.Ports(
+        kcl=kf.kcl,
+        ports=[port],
+    )
+    dtype = ports.to_dtype()
+    assert dtype[0] == port
+
+
+def test_ports_to_itype() -> None:
+    port = kf.DPort(name="o1", width=0.01, layer=1, center=(1, 1), angle=90)
+    ports = kf.DPorts(
+        kcl=kf.kcl,
+        ports=[port],
+    )
+    itype = ports.to_itype()
+    assert itype[0] == port
 
 
 if __name__ == "__main__":

@@ -273,7 +273,7 @@ class ProtoPort(Generic[TUnit], ABC):
 
     def __eq__(self, other: object) -> bool:
         """Support for `port1 == port2` comparisons."""
-        if isinstance(other, Port):
+        if isinstance(other, ProtoPort):
             return self._base == other._base
         return False
 
@@ -325,9 +325,13 @@ class ProtoPort(Generic[TUnit], ABC):
         else:
             self._base.trans = kdb.ICplxTrans(value.dup(), self.kcl.dbu).s_trans()
 
-    def to_port(self) -> Port:
-        """Convert the port to a regular port."""
+    def to_itype(self) -> Port:
+        """Convert the port to a dbu port."""
         return Port(base=self._base)
+
+    def to_dtype(self) -> DPort:
+        """Convert the port to a um port."""
+        return DPort(base=self._base)
 
     @property
     @abstractmethod
@@ -883,7 +887,7 @@ class DPort(ProtoPort[float]):
                     "If a cross_section is not given a width must be defined."
                 )
             cross_section = kcl_.get_cross_section(
-                CrossSectionSpec(main_layer=layer_info, width=width)
+                CrossSectionSpec(main_layer=layer_info, width=kcl_.to_dbu(width))
             )
         cross_section_ = cross_section
         if trans is not None:

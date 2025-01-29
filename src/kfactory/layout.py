@@ -793,7 +793,7 @@ class KCLayout(
                             pass
                     cell.insert_vinsts(recursive=False)
                     if snap_ports:
-                        for port in cell.to_kcell().ports:
+                        for port in cell.to_itype().ports:
                             if port.base.dcplx_trans:
                                 dup = port.base.dcplx_trans.dup()
                                 dup.disp = self.to_um(
@@ -801,7 +801,7 @@ class KCLayout(
                                 )
                                 port.dcplx_trans = dup
                     if add_port_layers:
-                        for port in cell.to_kcell().ports:
+                        for port in cell.to_itype().ports:
                             if port.layer in cell.kcl.netlist_layer_mapping:
                                 if port.base.trans:
                                     edge = kdb.Edge(

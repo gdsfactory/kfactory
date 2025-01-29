@@ -101,6 +101,12 @@ class ProtoPorts(ABC, Generic[TUnit]):
             rename_funciton([Port(base=b) for b in bases])
         return self.__class__(bases=bases, kcl=self.kcl)
 
+    def to_itype(self) -> Ports:
+        return Ports(kcl=self.kcl, bases=self._bases)
+
+    def to_dtype(self) -> DPorts:
+        return DPorts(kcl=self.kcl, bases=self._bases)
+
     @abstractmethod
     def __iter__(self) -> Iterator[ProtoPort[TUnit]]: ...
 

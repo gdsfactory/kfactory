@@ -274,7 +274,7 @@ def test_check_ports(LAYER: Layers) -> None:
 
 def test_ports_in_cells() -> None:
     kcell = kf.KCell(name="test")
-    dkcell = kf.DKCell.from_kcell(kcell)
+    dkcell = kcell.to_dtype()
 
     port = kf.Port(name="test", layer=1, width=2, center=(0, 0), angle=90)
     new_port = kcell.add_port(port=port, name="o1")
@@ -425,6 +425,20 @@ def test_cell_in_threads(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
         len([c for c in kf.kcl.tkcells.values() if c.kdb_cell.name == t.kdb_cell.name])
         == 1
     )
+
+
+def test_to_dtype(kcl: kf.KCLayout) -> None:
+    kcell = kcl.kcell()
+    kcell.shapes(0).insert(kf.kdb.Box(0, 0, 1000, 1000))
+    dkcell = kcell.to_dtype()
+    assert dkcell.bbox() == kf.kdb.DBox(0, 0, 1, 1)
+
+
+def test_to_itype(kcl: kf.KCLayout) -> None:
+    dkcell = kcl.dkcell()
+    dkcell.shapes(0).insert(kf.kdb.DBox(0, 0, 1, 1))
+    itype = dkcell.to_itype()
+    assert itype.bbox() == kf.kdb.Box(0, 0, 1000, 1000)
 
 
 if __name__ == "__main__":

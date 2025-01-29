@@ -451,7 +451,7 @@ def test_center(dbu_instance_tuple: _DBUInstanceTuple) -> None:
 
 def test_vinstance_connect_by_port(kcl: kf.KCLayout, LAYER: Layers) -> None:
     c = kcl.vkcell()
-    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     straight = straight_factory(
         width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
     )
@@ -469,7 +469,7 @@ def test_vinstance_connect_by_port_use_angle_false(
     kcl: kf.KCLayout, LAYER: Layers
 ) -> None:
     c = kcl.vkcell()
-    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     straight = straight_factory(
         width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
     )
@@ -487,7 +487,7 @@ def test_vinstance_connect_by_port_use_mirror_false(
     kcl: kf.KCLayout, LAYER: Layers
 ) -> None:
     c = kcl.vkcell()
-    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     straight = straight_factory(
         width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
     )
@@ -505,7 +505,7 @@ def test_vinstance_connect_by_port_use_mirror_Use_angle_false(
     kcl: kf.KCLayout, LAYER: Layers
 ) -> None:
     c = kcl.vkcell()
-    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     straight = straight_factory(
         width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
     )
@@ -516,13 +516,12 @@ def test_vinstance_connect_by_port_use_mirror_Use_angle_false(
     ref2 = c << straight2
     ref2.move((10, 10)).rotate(270)
     ref.connect("o1", ref2.ports["o2"], use_mirror=False, use_angle=False)
-    c.show()
     assert c.bbox() == kdb.DBox(7.5, -22.5, 20, -10)
 
 
 def test_vinstance_connect_by_str(kcl: kf.KCLayout, LAYER: Layers) -> None:
     c = kcl.vkcell()
-    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     straight = straight_factory(
         width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
     )
@@ -538,7 +537,7 @@ def test_vinstance_connect_by_str(kcl: kf.KCLayout, LAYER: Layers) -> None:
 
 def test_vinstance_errors(kcl: kf.KCLayout, LAYER: Layers) -> None:
     c = kcl.vkcell()
-    straight_factory = kf.cells.straight.straight_dbu_factory(kcl)
+    straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     straight = straight_factory(
         width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
     )
@@ -628,6 +627,30 @@ def test_mirror_y_equal() -> None:
     ref3.imirror_y()
 
     assert parent_cell.bbox() == kf.kdb.DBox(-5, -5, 5, 5)
+
+
+def test_to_itype(kcl: kf.KCLayout) -> None:
+    cell = kcl.kcell()
+    dkcell = kcl.dkcell()
+    dkcell.shapes(0).insert(kf.kdb.DBox(-5, -5, 5, 5))
+    ref = cell << dkcell
+    assert isinstance(ref, kf.Instance)
+    assert ref.bbox() == kf.kdb.Box(-5000, -5000, 5000, 5000)
+    dref = ref.to_dtype()
+    assert isinstance(dref, kf.DInstance)
+    assert dref.bbox() == kf.kdb.DBox(-5, -5, 5, 5)
+
+
+def test_to_dtype(kcl: kf.KCLayout) -> None:
+    cell = kcl.dkcell()
+    dkcell = kcl.kcell()
+    dkcell.shapes(0).insert(kf.kdb.DBox(-5, -5, 5, 5))
+    dref = cell << dkcell
+    assert isinstance(dref, kf.DInstance)
+    assert dref.bbox() == kf.kdb.DBox(-5, -5, 5, 5)
+    ref = dref.to_itype()
+    assert ref.bbox() == kf.kdb.Box(-5000, -5000, 5000, 5000)
+    assert isinstance(ref, kf.Instance)
 
 
 if __name__ == "__main__":

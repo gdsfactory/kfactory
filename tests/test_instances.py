@@ -70,5 +70,31 @@ def test_dinstances_contains_str(kcl: kf.KCLayout, LAYER: Layers) -> None:
     assert ref.name in c.insts
 
 
+def test_to_itype(kcl: kf.KCLayout) -> None:
+    cell = kcl.kcell()
+    dkcell = kcl.dkcell()
+    dkcell.shapes(0).insert(kf.kdb.DBox(-5, -5, 5, 5))
+    _ = cell << dkcell
+    ref = cell.insts[0]
+    assert isinstance(ref, kf.Instance)
+    assert ref.bbox() == kf.kdb.Box(-5000, -5000, 5000, 5000)
+    dref = ref.to_dtype()
+    assert isinstance(dref, kf.DInstance)
+    assert dref.bbox() == kf.kdb.DBox(-5, -5, 5, 5)
+
+
+def test_to_dtype(kcl: kf.KCLayout) -> None:
+    cell = kcl.dkcell()
+    dkcell = kcl.kcell()
+    dkcell.shapes(0).insert(kf.kdb.DBox(-5, -5, 5, 5))
+    _ = cell << dkcell
+    dref = cell.insts[0]
+    assert isinstance(dref, kf.DInstance)
+    assert dref.bbox() == kf.kdb.DBox(-5, -5, 5, 5)
+    ref = dref.to_itype()
+    assert ref.bbox() == kf.kdb.Box(-5000, -5000, 5000, 5000)
+    assert isinstance(ref, kf.Instance)
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

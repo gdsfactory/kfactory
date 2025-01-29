@@ -262,7 +262,7 @@ def get_radius(
 
     This can be used to determine the radius of two bend ports.
     """
-    ports_ = tuple(p.to_port() for p in ports)
+    ports_ = tuple(p.to_itype() for p in ports)
     if len(ports_) != 2:
         raise ValueError(
             "Cannot determine the maximal radius of a bend with more than two ports."

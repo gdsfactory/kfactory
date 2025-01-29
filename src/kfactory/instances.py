@@ -103,6 +103,12 @@ class ProtoTInstances(ProtoInstances[TUnit, ProtoTInstance[TUnit]], ABC):
     def remove(self, inst: ProtoTInstance[Any]) -> None:
         inst.instance.delete()
 
+    def to_itype(self) -> Instances:
+        return Instances(cell=self._tkcell)
+
+    def to_dtype(self) -> DInstances:
+        return DInstances(cell=self._tkcell)
+
 
 class Instances(ProtoTInstances[int]):
     """Holder for instances.
