@@ -222,8 +222,8 @@ class ProtoPorts(ABC, Generic[TUnit]):
 
     def __eq__(self, other: object) -> bool:
         """Support for `ports1 == ports2` comparisons."""
-        if isinstance(other, Sequence):
-            if len(self._bases) != len(other):
+        if isinstance(other, Iterable):
+            if len(self._bases) != len(list(other)):
                 return False
             return all(b1 == b2 for b1, b2 in zip(iter(self), other, strict=False))
         return False
