@@ -5,6 +5,7 @@
 
 ## New
 
+- Add __all__ to more files [#594](https://github.com/gdsfactory/kfactory/pull/594)
 - Add ruff Naming rule and fix most errors [#591](https://github.com/gdsfactory/kfactory/pull/591)
 - Add tests for Instance Ports [#593](https://github.com/gdsfactory/kfactory/pull/593)
 - Add ruff bugbear rule [#592](https://github.com/gdsfactory/kfactory/pull/592)
