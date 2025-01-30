@@ -765,7 +765,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             kcell.get_meta_data()
         if libcell_as_static:
             cell.set_meta_data()
-            ci = self.kcl.convert_cell_to_static(lib_ci)
+            ci = self.kcl.layout.convert_cell_to_static(lib_ci)
             kcell = self.kcl[ci]
             kcell.copy_meta_info(cell.kdb_cell)
             kcell.name = cell.kcl.name + static_name_separator + cell.name
