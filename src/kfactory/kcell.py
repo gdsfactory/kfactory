@@ -538,14 +538,18 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         lyrdb: rdb.ReportDatabase | Path | str | None = None,
         l2n: kdb.LayoutToNetlist | Path | str | None = None,
         keep_position: bool = True,
-        save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        save_options: kdb.SaveLayoutOptions | None = None,
         use_libraries: bool = True,
-        library_save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        library_save_options: kdb.SaveLayoutOptions | None = None,
     ) -> None:
         """Stream the gds to klive.
 
         Will create a temporary file of the gds and load it in KLayout via klive
         """
+        if save_options is None:
+            save_options = save_layout_options()
+        if library_save_options is None:
+            library_save_options = save_layout_options()
         show_f: ShowFunction = config.show_function or show
         show_f(
             self,
@@ -700,7 +704,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
+        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
     ) -> ProtoTInstance[TUnit]: ...
 
     @overload
@@ -708,7 +712,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
+        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
         *,
         a: kdb.Vector,
         b: kdb.Vector,
@@ -720,7 +724,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans = kdb.Trans(),
+        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
         a: kdb.Vector | None = None,
         b: kdb.Vector | None = None,
         na: int = 1,
@@ -732,7 +736,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def _create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans = kdb.Trans(),
+        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
         a: kdb.Vector | None = None,
         b: kdb.Vector | None = None,
         na: int = 1,
@@ -764,6 +768,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         Returns:
             The created instance
         """
+        if trans is None:
+            trans = kdb.Trans()
         if isinstance(cell, int):
             ci = cell
         else:
@@ -785,7 +791,9 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     kcell.copy_meta_info(cell.kdb_cell)
                     kcell.name = cell.kcl.name + static_name_separator + cell.name
                     if cell.kcl.dbu != self.kcl.dbu:
-                        for port, lib_port in zip(kcell.ports, cell.ports):
+                        for port, lib_port in zip(
+                            kcell.ports, cell.ports, strict=False
+                        ):
                             port.cross_section = cell.kcl.get_cross_section(
                                 lib_port.cross_section.to_dtype(cell.kcl)
                             )
@@ -937,7 +945,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def write(
         self,
         filename: str | Path,
-        save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        save_options: kdb.SaveLayoutOptions | None = None,
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
         autoformat_from_file_extension: bool = True,
@@ -946,6 +954,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
         See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
         """
+        if save_options is None:
+            save_options = save_layout_options()
         self.insert_vinsts()
         match set_meta_data, convert_external_cells:
             case True, True:
@@ -985,7 +995,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     def read(
         self,
         filename: str | Path,
-        options: kdb.LoadLayoutOptions = load_layout_options(),
+        options: kdb.LoadLayoutOptions | None = None,
         register_cells: bool = False,
         test_merge: bool = True,
         update_kcl_meta_data: Literal["overwrite", "skip", "drop"] = "drop",
@@ -1023,6 +1033,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         )
         if meta_format is None:
             meta_format = config.meta_format
+        if options is None:
+            options = load_layout_options()
         fn = str(Path(filename).expanduser().resolve())
         if test_merge and (
             options.cell_conflict_resolution
@@ -1585,8 +1597,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 portnames.add(port.name)
 
         # create nets and connect pins for each cell_port
-        for h, layer_dict in cell_ports.items():
-            for layer, _ports in layer_dict.items():
+        for _, layer_dict in cell_ports.items():
+            for _, _ports in layer_dict.items():
                 net = circ.create_net(
                     "-".join(_port[1].name or f"{_port[0]}" for _port in _ports)
                 )
@@ -1665,7 +1677,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                     )
                     if len(ports) == 2:
                         port_check(ports[0][3], ports[1][3], PortCheck.all_opposite)
-                        for i, j, _, port, subc in ports:
+                        for _, j, _, port, subc in ports:
                             subc.connect_pin(
                                 subc.circuit_ref().pin_by_name(port.name or str(j)), net
                             )
@@ -1673,8 +1685,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
     def connectivity_check(
         self,
-        port_types: list[str] = [],
-        layers: list[int] = [],
+        port_types: list[str] | None = None,
+        layers: list[int] | None = None,
         db: rdb.ReportDatabase | None = None,
         recursive: bool = True,
         add_cell_ports: bool = False,
@@ -1695,6 +1707,10 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                 selected ports.
             check_layer_connectivity: Check whether the layer overlaps with instances.
         """
+        if layers is None:
+            layers = []
+        if port_types is None:
+            port_types = []
         db_: rdb.ReportDatabase = db or rdb.ReportDatabase(
             f"Connectivity Check {self.name}"
         )
@@ -2206,14 +2222,14 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
+        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
     ) -> DInstance: ...
 
     @overload
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
+        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
         *,
         a: kdb.Vector,
         b: kdb.Vector,
@@ -2224,7 +2240,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans = kdb.Trans(),
+        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
         a: kdb.Vector | None = None,
         b: kdb.Vector | None = None,
         na: int = 1,
@@ -2235,7 +2251,14 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
         return DInstance(
             kcl=self.kcl,
             instance=self._create_inst(
-                cell, trans, a, b, na, nb, libcell_as_static, static_name_separator
+                cell,
+                trans or kdb.Trans(),
+                a,
+                b,
+                na,
+                nb,
+                libcell_as_static,
+                static_name_separator,
             ),
         )
 
@@ -2330,14 +2353,14 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
+        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
     ) -> Instance: ...
 
     @overload
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector = kdb.Trans(),
+        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
         *,
         a: kdb.Vector,
         b: kdb.Vector,
@@ -2348,7 +2371,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans = kdb.Trans(),
+        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
         a: kdb.Vector | None = None,
         b: kdb.Vector | None = None,
         na: int = 1,
@@ -2359,7 +2382,14 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         return Instance(
             kcl=self.kcl,
             instance=self._create_inst(
-                cell, trans, a, b, na, nb, libcell_as_static, static_name_separator
+                cell,
+                trans or kdb.Trans(),
+                a,
+                b,
+                na,
+                nb,
+                libcell_as_static,
+                static_name_separator,
             ),
         )
 
@@ -2761,14 +2791,18 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
         lyrdb: rdb.ReportDatabase | Path | str | None = None,
         l2n: kdb.LayoutToNetlist | Path | str | None = None,
         keep_position: bool = True,
-        save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        save_options: kdb.SaveLayoutOptions | None = None,
         use_libraries: bool = True,
-        library_save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        library_save_options: kdb.SaveLayoutOptions | None = None,
     ) -> None:
         """Stream the gds to klive.
 
         Will create a temporary file of the gds and load it in KLayout via klive
         """
+        if save_options is None:
+            save_options = save_layout_options()
+        if library_save_options is None:
+            library_save_options = save_layout_options()
         c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
@@ -2862,11 +2896,11 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
         return self.ports.create_port(**kwargs)
 
     def create_inst(
-        self, cell: KCell | VKCell, trans: kdb.DCplxTrans = kdb.DCplxTrans()
+        self, cell: KCell | VKCell, trans: kdb.DCplxTrans | None = None
     ) -> VInstance:
         if self.locked:
             raise LockedError(self)
-        inst = VInstance(cell=cell, trans=kdb.DCplxTrans())
+        inst = VInstance(cell=cell, trans=trans or kdb.DCplxTrans())
         self.insts.append(inst)
         return inst
 
@@ -2947,7 +2981,7 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
     def write(
         self,
         filename: str | Path,
-        save_options: kdb.SaveLayoutOptions = save_layout_options(),
+        save_options: kdb.SaveLayoutOptions | None = None,
         convert_external_cells: bool = False,
         set_meta_data: bool = True,
         autoformat_from_file_extension: bool = True,
@@ -2956,6 +2990,8 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
 
         See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
         """
+        if save_options is None:
+            save_options = save_layout_options()
         c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
@@ -2991,13 +3027,17 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
 
     def connectivity_check(
         self,
-        port_types: list[str] = [],
-        layers: list[int] = [],
+        port_types: list[str] | None = None,
+        layers: list[int] | None = None,
         db: rdb.ReportDatabase | None = None,
         recursive: bool = True,
         add_cell_ports: bool = False,
         check_layer_connectivity: bool = True,
     ) -> tuple[KCell, rdb.ReportDatabase]:
+        if layers is None:
+            layers = []
+        if port_types is None:
+            port_types = []
         c = self.kcl.kcell()
         if self.name is not None:
             c.name = self.name
@@ -3020,9 +3060,9 @@ def show(
     lyrdb: rdb.ReportDatabase | Path | str | None = None,
     l2n: kdb.LayoutToNetlist | Path | str | None = None,
     keep_position: bool = True,
-    save_options: kdb.SaveLayoutOptions = save_layout_options(),
+    save_options: kdb.SaveLayoutOptions | None = None,
     use_libraries: bool = True,
-    library_save_options: kdb.SaveLayoutOptions = save_layout_options(),
+    library_save_options: kdb.SaveLayoutOptions | None = None,
 ) -> None:
     """Show GDS in klayout.
 
@@ -3042,6 +3082,11 @@ def show(
     delete = False
     delete_lyrdb = False
     delete_l2n = False
+
+    if save_options is None:
+        save_options = save_layout_options()
+    if library_save_options is None:
+        library_save_options = save_layout_options()
 
     # Find the file that calls stack
     try:

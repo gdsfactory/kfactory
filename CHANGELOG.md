@@ -5,6 +5,7 @@
 
 ## New
 
+- Add ruff bugbear rule [#592](https://github.com/gdsfactory/kfactory/pull/592)
 - Add to_itype, to_dtype to dbu, um classes [#589](https://github.com/gdsfactory/kfactory/pull/589)
 - Make vinstance connect take ProtoPort [#587](https://github.com/gdsfactory/kfactory/pull/587)
 - Add defaults for mirror, mirror_x, mirror_y [#588](https://github.com/gdsfactory/kfactory/pull/588)

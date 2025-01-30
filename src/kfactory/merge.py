@@ -93,7 +93,7 @@ class MergeDiff:
             regions.append(r)
 
         for trans in instance.each_cplx_trans():
-            for li, r in zip(layer_infos, regions):
+            for li, r in zip(layer_infos, regions, strict=False):
                 self.cell_a.shapes(self.diff_a.layer(li)).insert(r.transformed(trans))
 
     def on_instance_in_b_only(self, instance: kdb.CellInstArray, propid: int) -> None:
@@ -111,7 +111,7 @@ class MergeDiff:
             regions.append(r)
 
         for trans in instance.each_cplx_trans():
-            for li, r in zip(layer_infos, regions):
+            for li, r in zip(layer_infos, regions, strict=False):
                 self.cell_b.shapes(self.diff_b.layer(li)).insert(r.transformed(trans))
 
     def on_polygon_in_b_only(self, poly: kdb.Polygon, propid: int) -> None:

@@ -620,13 +620,13 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     def __init__(
         self,
         cell: VKCell | KCell,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        trans: kdb.DCplxTrans | None = None,
         name: str | None = None,
     ) -> None:
         self.kcl = cell.kcl
         self._name = name
         self.cell = cell
-        self.trans = trans
+        self.trans = trans or kdb.DCplxTrans()
         self._ports = VInstancePorts(self)
 
     @property
@@ -676,9 +676,12 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     def insert_into(
         self,
         cell: ProtoTKCell[Any],
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        trans: kdb.DCplxTrans | None = None,
     ) -> Instance:
         from .kcell import KCell, VKCell
+
+        if trans is None:
+            trans = kdb.DCplxTrans()
 
         if isinstance(self.cell, VKCell):
             _trans = trans * self.trans
@@ -755,7 +758,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     def insert_into_flat(
         self,
         cell: ProtoTKCell[Any] | VKCell,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        trans: kdb.DCplxTrans | None = None,
         *,
         levels: None = None,
     ) -> None: ...
@@ -765,18 +768,21 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         self,
         cell: ProtoTKCell[Any] | VKCell,
         *,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        trans: kdb.DCplxTrans | None = None,
         levels: int,
     ) -> None: ...
 
     def insert_into_flat(
         self,
         cell: ProtoTKCell[Any] | VKCell,
-        trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+        trans: kdb.DCplxTrans | None = None,
         *,
         levels: int | None = None,
     ) -> None:
         from .kcell import KCell, VKCell
+
+        if trans is None:
+            trans = kdb.DCplxTrans()
 
         if isinstance(self.cell, VKCell):
             for layer, shapes in self.cell._shapes.items():

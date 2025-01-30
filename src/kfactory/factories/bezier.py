@@ -57,7 +57,7 @@ def bezier_curve(
         xs += ank * control_points[k][0]
         ys += ank * control_points[k][1]
 
-    return [kdb.DPoint(float(x), float(y)) for x, y in zip(xs, ys)]
+    return [kdb.DPoint(float(x), float(y)) for x, y in zip(xs, ys, strict=False)]
 
 
 def bend_s_bezier_factory(

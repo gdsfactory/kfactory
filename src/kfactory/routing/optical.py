@@ -53,7 +53,7 @@ def route_bundle(
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
-    bboxes: list[kdb.Box] = [],
+    bboxes: list[kdb.Box] | None = None,
     allow_width_mismatch: bool | None = None,
     allow_layer_mismatch: bool | None = None,
     allow_type_mismatch: bool | None = None,
@@ -61,8 +61,8 @@ def route_bundle(
     sort_ports: bool = False,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
     purpose: str | None = "routing",
@@ -86,7 +86,7 @@ def route_bundle(
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
-    bboxes: list[kdb.DBox] = [],
+    bboxes: list[kdb.DBox] | None = None,
     allow_width_mismatch: bool | None = None,
     allow_layer_mismatch: bool | None = None,
     allow_type_mismatch: bool | None = None,
@@ -94,8 +94,8 @@ def route_bundle(
     sort_ports: bool = False,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     waypoints: kdb.Trans | list[kdb.DPoint] | None = None,
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
     purpose: str | None = "routing",
@@ -118,7 +118,7 @@ def route_bundle(
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
-    bboxes: list[kdb.Box] | list[kdb.DBox] = [],
+    bboxes: list[kdb.Box] | list[kdb.DBox] | None = None,
     allow_width_mismatch: bool | None = None,
     allow_layer_mismatch: bool | None = None,
     allow_type_mismatch: bool | None = None,
@@ -130,8 +130,14 @@ def route_bundle(
     | kdb.DTrans
     | list[kdb.DPoint]
     | None = None,
-    starts: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] = [],
-    ends: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] = [],
+    starts: dbu
+    | list[dbu]
+    | um
+    | list[um]
+    | list[Step]
+    | list[list[Step]]
+    | None = None,
+    ends: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | float | list[float] | None = None,
     end_angles: int | list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
@@ -232,6 +238,12 @@ def route_bundle(
         purpose: Set the property "purpose" (at id kf.kcell.PROPID.PURPOSE) to the
             value. Not set if None.
     """
+    if ends is None:
+        ends = []
+    if starts is None:
+        starts = []
+    if bboxes is None:
+        bboxes = []
     if start_straights is not None:
         logger.warning("start_straights is deprecated. Use `starts` instead.")
         starts = start_straights
@@ -239,8 +251,8 @@ def route_bundle(
         logger.warning("end_straights is deprecated. Use `ends` instead.")
         ends = end_straights
     bend90_radius = get_radius(bend90_cell.ports.filter(port_type=place_port_type))
-    _start_ports = [p._base for p in start_ports]
-    _end_ports = [p._base for p in end_ports]
+    _start_ports = [p.base for p in start_ports]
+    _end_ports = [p.base for p in end_ports]
     if isinstance(c, KCell):
         return route_bundle_generic(
             c=c,
@@ -925,7 +937,7 @@ def route(
     route_path_function: ManhattanRoutePathFunction = route_manhattan,
     port_type: str = "optical",
     allow_small_routes: bool = False,
-    route_kwargs: dict[str, Any] | None = {},
+    route_kwargs: dict[str, Any] | None = None,
     route_width: dbu | None = None,
     min_straight_taper: dbu = 0,
     allow_width_mismatch: bool | None = None,
@@ -964,6 +976,8 @@ def route(
         purpose: Set the property "purpose" (at id kf.kcell.PROPID.PURPOSE) to the
             value. Not set if None.
     """
+    if route_kwargs is None:
+        route_kwargs = {}
     if allow_width_mismatch is None:
         allow_width_mismatch = config.allow_width_mismatch
     if allow_layer_mismatch is None:

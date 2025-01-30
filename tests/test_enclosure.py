@@ -36,10 +36,8 @@ def test_enclosure(layers: Layers) -> None:
     kf.LayerEnclosure([(layers.WG, 500, -250)])
 
 
-def test_enc(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
-    wg_enc
-
-    mmi_enc(layers.WG, wg_enc)
+def test_enc(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
+    mmi_enc(LAYER.WG, wg_enc)
 
 
 def test_neg_enc(layers: Layers) -> None:
