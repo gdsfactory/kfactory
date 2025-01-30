@@ -439,23 +439,22 @@ def test_to_itype(kcl: kf.KCLayout) -> None:
 
 
 def test_cell_yaml(kcl: kf.KCLayout, layers: Layers) -> None:
-    with tempfile.NamedTemporaryFile(suffix=".yaml") as tmpfile:
-        from ruamel.yaml import YAML
+    from ruamel.yaml import YAML
 
-        yaml = YAML()
-        yaml.register_class(kf.KCell)
-        c = kf.factories.straight.straight_dbu_factory(kf.kcl)(
-            width=5000, length=10000, layer=layers.WG
-        ).dup()
+    yaml = YAML()
+    yaml.register_class(kf.KCell)
+    c = kf.factories.straight.straight_dbu_factory(kf.kcl)(
+        width=5000, length=10000, layer=layers.WG
+    ).dup()
 
-        with open(tmpfile.name, "w") as file:
-            yaml.dump(c, file)
+    with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as tmpfile:
+        yaml.dump(c, tmpfile)
 
-        c.name += "test"
+    c.name += "test"
 
-        with open(tmpfile.name) as file:
-            cell = yaml.load(file)
-            assert isinstance(cell, kf.KCell)
+    with open(tmpfile.name) as file:
+        cell = yaml.load(file)
+        assert isinstance(cell, kf.KCell)
 
         c.name = c.name.replace("test", "")
 
