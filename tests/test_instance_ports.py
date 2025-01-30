@@ -4,9 +4,9 @@ from conftest import Layers
 import kfactory as kf
 
 
-def test_instance_ports(LAYER: Layers, kcl: kf.KCLayout) -> None:
+def test_instance_ports(layers: Layers, kcl: kf.KCLayout) -> None:
     c = kcl.kcell()
-    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
 
     instance_ports = ref.ports
 
@@ -35,13 +35,18 @@ def test_instance_ports(LAYER: Layers, kcl: kf.KCLayout) -> None:
 
 
 @pytest.fixture
-def dinstance_ports(LAYER: Layers, kcl: kf.KCLayout) -> kf.DInstance:
+def dinstance_ports(layers: Layers, kcl: kf.KCLayout) -> kf.DInstance:
     c = kcl.dkcell()
     straight = kf.factories.straight.straight_dbu_factory(kcl)(
-        width=5000, length=10000, layer=LAYER.WG
+        width=5000, length=10000, layer=layers.WG
     )
     ref = c.create_inst(
-        straight, trans=kf.kdb.ICplxTrans(mag=2), a=(10, 0), b=(0, 10), na=2, nb=2
+        straight,
+        trans=kf.kdb.DCplxTrans(mag=2),
+        a=kf.kdb.DVector(10, 0),
+        b=kf.kdb.DVector(0, 10),
+        na=2,
+        nb=2,
     )
     return ref
 
@@ -107,88 +112,88 @@ def test_dinstance_ports_iter(dinstance_ports: kf.DInstance) -> None:
     assert len(list(instance_ports)) == 8
 
 
-def test_single_instance_iter(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_single_instance_iter(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.kcell()
     ref = c.create_inst(
-        kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG),
+        kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG),
         trans=kf.kdb.ICplxTrans(mag=2),
     )
     instance_ports = ref.ports
     assert len(list(instance_ports)) == 2
 
 
-def test_complex_array_iter(kcl: kf.KCLayout, LAYER: Layers) -> None:
-    c = kcl.kcell()
-    ref = c.create_inst(
-        kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG),
-        trans=kf.kdb.ICplxTrans(mag=2),
-        a=(10, 0),
-        b=(0, 10),
-        na=2,
-        nb=2,
-    )
-    instance_ports = ref.ports
-    assert len(list(instance_ports)) == 8
-
-
-def test_regular_array_iter(kcl: kf.KCLayout, LAYER: Layers) -> None:
-    c = kcl.kcell()
-    ref = c.create_inst(
-        kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG),
-        a=(10, 0),
-        b=(0, 10),
-        na=2,
-        nb=2,
-    )
-    instance_ports = ref.ports
-    assert len(list(instance_ports)) == 8
-
-
-def test_single_instance_each_by_array_coord(kcl: kf.KCLayout, LAYER: Layers) -> None:
-    c = kcl.kcell()
-    ref = c.create_inst(
-        kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG),
-        trans=kf.kdb.ICplxTrans(mag=2),
-    )
-    instance_ports = ref.ports
-    assert [(i_a, i_b) for i_a, i_b, _ in instance_ports.each_by_array_coord()] == [
-        (0, 0),
-        (0, 0),
-    ]
-    instance_ports.copy()
-
-
-def test_complex_array_each_by_array_coord(kcl: kf.KCLayout, LAYER: Layers) -> None:
-    c = kcl.kcell()
-    ref = c.create_inst(
-        kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG),
-        trans=kf.kdb.ICplxTrans(mag=2),
-        a=(10, 0),
-        b=(0, 10),
-        na=2,
-        nb=2,
-    )
-    instance_ports = ref.ports
-    assert [(i_a, i_b) for i_a, i_b, _ in instance_ports.each_by_array_coord()] == [
-        (0, 0),
-        (0, 0),
-        (0, 1),
-        (0, 1),
-        (1, 0),
-        (1, 0),
-        (1, 1),
-        (1, 1),
-    ]
-
-    instance_ports.copy()
-
-
-def test_regular_array_each_by_array_coord(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_complex_array_iter(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.dkcell()
     ref = c.create_inst(
-        kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG),
-        a=(10, 0),
-        b=(0, 10),
+        kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG),
+        trans=kf.kdb.DCplxTrans(mag=2),
+        a=kf.kdb.DVector(10, 0),
+        b=kf.kdb.DVector(0, 10),
+        na=2,
+        nb=2,
+    )
+    instance_ports = ref.ports
+    assert len(list(instance_ports)) == 8
+
+
+def test_regular_array_iter(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kcl.dkcell()
+    ref = c.create_inst(
+        kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG),
+        a=kf.kdb.DVector(10, 0),
+        b=kf.kdb.DVector(0, 10),
+        na=2,
+        nb=2,
+    )
+    instance_ports = ref.ports
+    assert len(list(instance_ports)) == 8
+
+
+def test_single_instance_each_by_array_coord(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kcl.kcell()
+    ref = c.create_inst(
+        kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG),
+        trans=kf.kdb.ICplxTrans(mag=2),
+    )
+    instance_ports = ref.ports
+    assert [(i_a, i_b) for i_a, i_b, _ in instance_ports.each_by_array_coord()] == [
+        (0, 0),
+        (0, 0),
+    ]
+    instance_ports.copy()
+
+
+def test_complex_array_each_by_array_coord(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kcl.dkcell()
+    ref = c.create_inst(
+        kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG),
+        trans=kf.kdb.DCplxTrans(mag=2),
+        a=kf.kdb.DVector(10, 0),
+        b=kf.kdb.DVector(0, 10),
+        na=2,
+        nb=2,
+    )
+    instance_ports = ref.ports
+    assert [(i_a, i_b) for i_a, i_b, _ in instance_ports.each_by_array_coord()] == [
+        (0, 0),
+        (0, 0),
+        (0, 1),
+        (0, 1),
+        (1, 0),
+        (1, 0),
+        (1, 1),
+        (1, 1),
+    ]
+
+    instance_ports.copy()
+
+
+def test_regular_array_each_by_array_coord(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kcl.dkcell()
+    ref = c.create_inst(
+        kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG),
+        a=kf.kdb.DVector(10, 0),
+        b=kf.kdb.DVector(0, 10),
         na=2,
         nb=1,
     )
@@ -202,11 +207,11 @@ def test_regular_array_each_by_array_coord(kcl: kf.KCLayout, LAYER: Layers) -> N
     instance_ports.copy()
 
 
-def test_vinstance_ports_filter(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_vinstance_ports_filter(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.vkcell()
     ref = c.create_inst(
         kf.factories.straight.straight_dbu_factory(kcl)(
-            width=5000, length=10000, layer=LAYER.WG
+            width=5000, length=10000, layer=layers.WG
         ),
         trans=kf.kdb.DCplxTrans(mag=2),
     )
