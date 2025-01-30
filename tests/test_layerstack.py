@@ -27,9 +27,9 @@ def test_layerstack_layer_sidewall_angle(pdk: kf.KCLayout) -> None:
     assert isinstance(pdk.layer_stack.get_layer_to_sidewall_angle()[(1, 0)], float)
 
 
-def test_layerstack_layer_getattr(pdk: kf.KCLayout, LAYER: Layers) -> None:
+def test_layerstack_layer_getattr(pdk: kf.KCLayout, layers: Layers) -> None:
     assert pdk.layer_stack.wg == kf.layer.LayerLevel(
-        layer=LAYER.WG,
+        layer=layers.WG,
         thickness=0.22,
         zmin=0,
         material="si",
@@ -37,9 +37,9 @@ def test_layerstack_layer_getattr(pdk: kf.KCLayout, LAYER: Layers) -> None:
     )
 
 
-def test_layerstack_layer_getitem(pdk: kf.KCLayout, LAYER: Layers) -> None:
+def test_layerstack_layer_getitem(pdk: kf.KCLayout, layers: Layers) -> None:
     assert pdk.layer_stack["wg"] == kf.layer.LayerLevel(
-        layer=LAYER.WG,
+        layer=layers.WG,
         thickness=0.22,
         zmin=0,
         material="si",

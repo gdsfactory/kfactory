@@ -626,11 +626,7 @@ class Port(ProtoPort[int]):
     ) -> None: ...
 
     @overload
-    def __init__(
-        self,
-        *,
-        base: BasePort,
-    ) -> None: ...
+    def __init__(self, *, base: BasePort) -> None: ...
 
     def __init__(
         self,

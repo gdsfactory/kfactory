@@ -25,7 +25,7 @@ from pydantic import (
 )
 
 from . import __version__
-from .conf import CHECK_INSTANCES, config, logger
+from .conf import CheckInstances, config, logger
 from .cross_section import (
     CrossSectionModel,
     CrossSectionSpec,
@@ -279,6 +279,7 @@ class KCLayout(
         kcls[self.name] = self
 
     @model_validator(mode="before")
+    @classmethod
     def _validate_layers(cls, data: dict[str, Any]) -> dict[str, Any]:
         data["layers"] = layerenum_from_dict(
             layers=data["infos"], layout=data["library"].layout()
@@ -487,7 +488,7 @@ class KCLayout(
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
-        check_instances: CHECK_INSTANCES | None = ...,
+        check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
         cache: Cache[int, Any] | dict[int, Any] | None = ...,
@@ -512,7 +513,7 @@ class KCLayout(
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
-        check_instances: CHECK_INSTANCES | None = ...,
+        check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
         cache: Cache[int, Any] | dict[int, Any] | None = ...,
@@ -536,7 +537,7 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         check_ports: bool = True,
-        check_instances: CHECK_INSTANCES | None = None,
+        check_instances: CheckInstances | None = None,
         snap_ports: bool = True,
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
@@ -756,7 +757,7 @@ class KCLayout(
                                 "`check_ports=False` to the @cell decorator"
                             )
                     match check_instances:
-                        case CHECK_INSTANCES.RAISE:
+                        case CheckInstances.RAISE:
                             if any(inst.is_complex() for inst in cell.each_inst()):
                                 raise ValueError(
                                     "Most foundries will not allow off-grid "
@@ -769,10 +770,10 @@ class KCLayout(
                                         if inst.is_complex()
                                     )
                                 )
-                        case CHECK_INSTANCES.FLATTEN:
+                        case CheckInstances.FLATTEN:
                             if any(inst.is_complex() for inst in cell.each_inst()):
                                 cell.flatten()
-                        case CHECK_INSTANCES.VINSTANCES:
+                        case CheckInstances.VINSTANCES:
                             if any(inst.is_complex() for inst in cell.each_inst()):
                                 complex_insts = [
                                     inst
@@ -785,7 +786,7 @@ class KCLayout(
                                     )
                                     vinst.trans = inst.dcplx_trans
                                     inst.delete()
-                        case CHECK_INSTANCES.IGNORE:
+                        case CheckInstances.IGNORE:
                             pass
                     cell.insert_vinsts(recursive=False)
                     if snap_ports:

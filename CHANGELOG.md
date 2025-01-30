@@ -5,6 +5,7 @@
 
 ## New
 
+- Add ruff Naming rule and fix most errors [#591](https://github.com/gdsfactory/kfactory/pull/591)
 - Add tests for Instance Ports [#593](https://github.com/gdsfactory/kfactory/pull/593)
 - Add ruff bugbear rule [#592](https://github.com/gdsfactory/kfactory/pull/592)
 - Add to_itype, to_dtype to dbu, um classes [#589](https://github.com/gdsfactory/kfactory/pull/589)

@@ -15,6 +15,7 @@ class KCellSettings(BaseModel, extra="allow", validate_assignment=True, frozen=T
         super().__init__(**kwargs)
 
     @model_validator(mode="before")
+    @classmethod
     def restrict_types(cls, data: dict[str, Any]) -> dict[str, MetaData]:
         for name, value in data.items():
             data[name] = convert_metadata_type(value)
@@ -37,6 +38,7 @@ class KCellSettingsUnits(
         super().__init__(**kwargs)
 
     @model_validator(mode="before")
+    @classmethod
     def restrict_types(cls, data: dict[str, str]) -> dict[str, str]:
         for name, value in data.items():
             data[name] = str(value)
@@ -57,6 +59,7 @@ class Info(BaseModel, extra="allow", validate_assignment=True):
         super().__init__(**kwargs)
 
     @model_validator(mode="before")
+    @classmethod
     def restrict_types(
         cls,
         data: dict[str, MetaData],

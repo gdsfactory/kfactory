@@ -16,9 +16,9 @@ from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from .conf import PROPID, config, logger
 from .exceptions import (
-    PortLayerMismatch,
-    PortTypeMismatch,
-    PortWidthMismatch,
+    PortLayerMismatchError,
+    PortTypeMismatchError,
+    PortWidthMismatchError,
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .layer import LayerEnum
@@ -354,28 +354,29 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         if use_angle is None:
             use_angle = config.connect_use_angle
 
-        if isinstance(other, Instance):
+        if isinstance(other, ProtoTInstance):
             if other_port_name is None:
                 raise ValueError(
                     "portname cannot be None if an Instance Object is given. For"
                     "complex connections (non-90 degree and floating point ports) use"
                     "route_cplx instead"
                 )
-            op = Port(base=other.ports[other_port_name].base)
-        elif isinstance(other, ProtoPort):
-            op = Port(base=other.base)
+            op = other.ports[other_port_name].to_itype()
         else:
-            raise ValueError("other_instance must be of type Instance or Port")
+            op = other.to_itype()
         if isinstance(port, ProtoPort):
             p = Port(base=port.base.transformed(self.dcplx_trans.inverted()))
         else:
-            p = Port(base=self.cell.ports[port].base)
+            p = self.cell.ports[port].to_itype()
+
+        assert isinstance(p, Port) and isinstance(op, Port)
+
         if p.width != op.width and not allow_width_mismatch:
-            raise PortWidthMismatch(self, other, p, op)
+            raise PortWidthMismatchError(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
-            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
+            raise PortLayerMismatchError(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
-            raise PortTypeMismatch(self, other, p, op)
+            raise PortTypeMismatchError(self, other, p, op)
         if p.base.dcplx_trans or op.base.dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
             match (use_mirror, use_angle):
@@ -892,22 +893,22 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     "complex connections (non-90 degree and floating point ports) use"
                     "route_cplx instead"
                 )
-            op = Port(base=other.ports[other_port_name].base)
+            op = other.ports[other_port_name].to_itype()
         else:
-            op = Port(base=other.base)
+            op = other.to_itype()
         if isinstance(port, ProtoPort):
-            p = Port(base=port.copy(self.trans.inverted()).base)
+            p = port.copy(self.trans.inverted()).to_itype()
         else:
-            p = Port(base=self.cell.ports[port].base)
+            p = self.cell.ports[port].to_itype()
 
         assert isinstance(p, Port) and isinstance(op, Port)
 
         if p.width != op.width and not allow_width_mismatch:
-            raise PortWidthMismatch(self, other, p, op)
+            raise PortWidthMismatchError(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
-            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
+            raise PortLayerMismatchError(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
-            raise PortTypeMismatch(self, other, p, op)
+            raise PortTypeMismatchError(self, other, p, op)
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
         match (use_mirror, use_angle):
             case True, True:

@@ -114,12 +114,13 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = [
-    "E",  # pycodestyle
     "F",  # pyflakes
+    "E",  # pycodestyle
+    "W",  # pycodestyle
     "UP", # pyupgrade
+    "N",  # pep8-naming
     # "D",   # pydocstyle
     "I",   # isort
-    "W",   # pycodestyle
     "ANN", # annotations
     "RUF", # ruff
     "B",

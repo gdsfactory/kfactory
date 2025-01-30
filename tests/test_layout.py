@@ -7,7 +7,7 @@ from conftest import Layers
 import kfactory as kf
 
 
-def test_cell_decorator(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_cell_decorator(kcl: kf.KCLayout, layers: Layers) -> None:
     rectangle_post_process = MagicMock()
 
     @kcl.cell(post_process=[rectangle_post_process])
@@ -16,9 +16,9 @@ def test_cell_decorator(kcl: kf.KCLayout, LAYER: Layers) -> None:
         c.shapes(layer).insert(kf.kdb.DBox(0, 0, width, height))
         return c
 
-    rectangle_cell = rectangle(10, 10, LAYER.WG)
-    rectangle_cell2 = rectangle(10, 10, LAYER.WG)
-    rectangle_cell3 = rectangle(10.1, 10.1, LAYER.WG)
+    rectangle_cell = rectangle(10, 10, layers.WG)
+    rectangle_cell2 = rectangle(10, 10, layers.WG)
+    rectangle_cell3 = rectangle(10.1, 10.1, layers.WG)
 
     assert rectangle_cell is rectangle_cell2
     assert rectangle_cell is not rectangle_cell3
@@ -154,17 +154,17 @@ def test_check_instances(kcl: kf.KCLayout) -> None:
         return parent_cell
 
     with pytest.raises(ValueError):
-        kcl.cell(check_instances=kf.CHECK_INSTANCES.RAISE)(test_cell_with_rotation)(
-            "test_rase"
-        )
+        kcl.cell(check_instances=kf.kcell.CheckInstances.RAISE)(
+            test_cell_with_rotation
+        )("test_rase")
 
-    cell = kcl.cell(check_instances=kf.CHECK_INSTANCES.FLATTEN)(
+    cell = kcl.cell(check_instances=kf.kcell.CheckInstances.FLATTEN)(
         test_cell_with_rotation
     )("test_flatten")
 
     assert len(cell.insts) == 0
 
-    cell2 = kcl.cell(check_instances=kf.CHECK_INSTANCES.VINSTANCES)(
+    cell2 = kcl.cell(check_instances=kf.kcell.CheckInstances.VINSTANCES)(
         test_cell_with_rotation
     )("test_vinstances")
 
@@ -172,7 +172,7 @@ def test_check_instances(kcl: kf.KCLayout) -> None:
     assert len(cell2.vinsts) == 0
     assert len(cell2.insts) == 1
 
-    kcl.cell(check_instances=kf.CHECK_INSTANCES.IGNORE)(test_cell_with_rotation)(
+    kcl.cell(check_instances=kf.kcell.CheckInstances.IGNORE)(test_cell_with_rotation)(
         "test_ignore"
     )
 

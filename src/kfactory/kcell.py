@@ -50,7 +50,7 @@ from ruamel.yaml.constructor import SafeConstructor
 from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from . import kdb, rdb
-from .conf import DEFAULT_TRANS, ShowFunction, config, logger
+from .conf import DEFAULT_TRANS, CheckInstances, ShowFunction, config, logger
 from .cross_section import SymmetricalCrossSection
 from .exceptions import LockedError, MergeError
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
@@ -93,11 +93,12 @@ from .utilities import (
 
 if TYPE_CHECKING:
     from .layout import KCLayout
+    
 
-__all__ = [
-    "AnyKCell",
+__all__ = ["AnyKCell",
     "AnyTKCell",
     "BaseKCell",
+    "CheckInstances",
     "DKCell",
     "DKCells",
     "KCell",

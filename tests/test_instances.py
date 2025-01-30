@@ -4,67 +4,67 @@ from conftest import Layers
 import kfactory as kf
 
 
-def test_vinstances_contains(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_vinstances_contains(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.vkcell(name="test_vinstances_contains")
-    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
     assert ref in c.insts
 
 
-def test_instances_contains(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_instances_contains(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.kcell(name="test_instances_contains")
-    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
     assert ref in c.insts
 
 
-def test_dinstances_contains(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_dinstances_contains(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.dkcell(name="test_dinstances_contains")
-    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
     assert ref in c.insts
 
 
-def test_vinstances_contains_int(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_vinstances_contains_int(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.vkcell(name="test_vinstances_contains_int")
-    _ = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
-    _ = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    _ = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
+    _ = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
     assert 0 in c.insts
     assert 1 in c.insts
 
 
-def test_instances_contains_int(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_instances_contains_int(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.kcell(name="test_instances_contains_int")
-    _ = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
-    _ = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    _ = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
+    _ = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
     assert 0 in c.insts
     assert 1 in c.insts
 
 
-def test_dinstances_contains_int(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_dinstances_contains_int(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.dkcell(name="test_dinstances_contains_int")
-    _ = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
-    _ = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    _ = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
+    _ = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
     assert 0 in c.insts
     assert 1 in c.insts
 
 
-def test_vinstances_contains_str(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_vinstances_contains_str(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.vkcell(name="test_vinstances_contains_str")
-    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
     ref.name = "test_vinstances_contains_str_instance"
     assert ref.name is not None
     assert ref.name in c.insts
 
 
-def test_instances_contains_str(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_instances_contains_str(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.kcell(name="test_instances_contains_str")
-    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
     ref.name = "test_instances_contains_str_instance"
     assert ref.name is not None
     assert ref.name in c.insts
 
 
-def test_dinstances_contains_str(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_dinstances_contains_str(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.dkcell(name="test_dinstances_contains_str")
-    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
     ref.name = "test_dinstances_contains_str_instance"
     assert ref.name is not None
     assert ref.name in c.insts

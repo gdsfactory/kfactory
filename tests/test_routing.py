@@ -31,7 +31,7 @@ def test_route_straight(
     x: int,
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: Layers,
+    layers: Layers,
     optical_port: kf.Port,
 ) -> None:
     c = kf.KCell()
@@ -65,7 +65,7 @@ def test_route_straight(
 def test_route_bend90(
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: Layers,
+    layers: Layers,
     optical_port: kf.Port,
     x: int,
     y: int,
@@ -108,7 +108,7 @@ def test_route_bend90(
 def test_route_bend90_invert(
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: Layers,
+    layers: Layers,
     optical_port: kf.Port,
     x: int,
     y: int,
@@ -143,7 +143,7 @@ def test_route_bend90_invert(
 def test_route_bend90_euler(
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: Layers,
+    layers: Layers,
     optical_port: kf.Port,
     x: int,
     y: int,
@@ -167,7 +167,7 @@ def test_route_bend90_euler(
 
 
 def test_route_bundle(
-    LAYER: Layers,
+    layers: Layers,
     optical_port: kf.Port,
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
@@ -218,7 +218,7 @@ def test_route_bundle(
 def test_route_length(
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: Layers,
+    layers: Layers,
     optical_port: kf.Port,
     taper: kf.KCell,
 ) -> None:
@@ -445,19 +445,19 @@ def test_smart_routing(
 
 
 def test_custom_router(
-    LAYER: Layers,
+    layers: Layers,
 ) -> None:
     kcl = kf.KCLayout("TEST_CUSTOM_ROUTER")
     c = kcl.kcell("CustomRouter")
-    bend90 = kf.cells.circular.bend_circular(width=1, radius=10, layer=LAYER.WG)
+    bend90 = kf.cells.circular.bend_circular(width=1, radius=10, layer=layers.WG)
     b90r = kf.routing.generic.get_radius(list(bend90.ports))
-    sf = partial(kf.cells.straight.straight_dbu, layer=LAYER.WG)
+    sf = partial(kf.cells.straight.straight_dbu, layer=layers.WG)
 
     start_ports = [
         kf.Port(
             name="in{i}",
             width=1000,
-            layer_info=LAYER.WG,
+            layer_info=layers.WG,
             trans=kf.kdb.Trans(1, False, -850_000 + i * 200_000, 0),
             kcl=c.kcl,
         )
@@ -467,7 +467,7 @@ def test_custom_router(
         kf.Port(
             name="in{i}",
             width=1000,
-            layer_info=LAYER.WG,
+            layer_info=layers.WG,
             trans=kf.kdb.Trans(3, False, -400_000 + i * 100_000, 200_000),
             kcl=c.kcl,
         )
@@ -498,7 +498,7 @@ def test_custom_router(
 def test_route_smart_waypoints_trans_sort(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: Layers,
+    layers: Layers,
 ) -> None:
     c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_TRANS_SORT")
     _l = 15
@@ -506,13 +506,13 @@ def test_route_smart_waypoints_trans_sort(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=LAYER.WG, kcl=c.kcl, trans=trans)
+        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
         for trans in transformations
     ]
     end_ports = [
         kf.Port(
             width=500,
-            layer_info=LAYER.WG,
+            layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
@@ -533,7 +533,7 @@ def test_route_smart_waypoints_trans_sort(
 def test_route_smart_waypoints_pts_sort(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: Layers,
+    layers: Layers,
 ) -> None:
     c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_PTS_SORT")
     _l = 15
@@ -541,13 +541,13 @@ def test_route_smart_waypoints_pts_sort(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=LAYER.WG, kcl=c.kcl, trans=trans)
+        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
         for trans in transformations
     ]
     end_ports = [
         kf.Port(
             width=500,
-            layer_info=LAYER.WG,
+            layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
@@ -568,7 +568,7 @@ def test_route_smart_waypoints_pts_sort(
 def test_route_smart_waypoints_trans(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: Layers,
+    layers: Layers,
 ) -> None:
     c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_TRANS")
     _l = 15
@@ -576,14 +576,14 @@ def test_route_smart_waypoints_trans(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=LAYER.WG, kcl=c.kcl, trans=trans)
+        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
         for trans in transformations
     ]
     start_ports.reverse()
     end_ports = [
         kf.Port(
             width=500,
-            layer_info=LAYER.WG,
+            layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
@@ -603,7 +603,7 @@ def test_route_smart_waypoints_trans(
 def test_route_smart_waypoints_pts(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    LAYER: Layers,
+    layers: Layers,
 ) -> None:
     c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_PTS")
     _l = 15
@@ -611,14 +611,14 @@ def test_route_smart_waypoints_pts(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=LAYER.WG, kcl=c.kcl, trans=trans)
+        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
         for trans in transformations
     ]
     start_ports.reverse()
     end_ports = [
         kf.Port(
             width=500,
-            layer_info=LAYER.WG,
+            layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
@@ -636,7 +636,9 @@ def test_route_smart_waypoints_pts(
 
 
 def test_route_generic_reorient(
-    bend90_small: kf.KCell, straight_factory_dbu: Callable[..., kf.KCell], LAYER: Layers
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
 ) -> None:
     c = kf.KCell(name="test_route_generic_reorient")
 
@@ -678,33 +680,35 @@ def test_route_generic_reorient(
 
 
 def test_placer_error(
-    bend90_small: kf.KCell, straight_factory_dbu: Callable[..., kf.KCell], LAYER: Layers
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
 ) -> None:
     c = kf.KCell(name="test_placer_error")
 
-    ps = kf.Port(name="start", width=500, layer_info=LAYER.WG, trans=kf.kdb.Trans.R0)
+    ps = kf.Port(name="start", width=500, layer_info=layers.WG, trans=kf.kdb.Trans.R0)
     pe = kf.Port(
         name="end",
         width=500,
-        layer_info=LAYER.WG,
+        layer_info=layers.WG,
         trans=kf.kdb.Trans(2, False, 200_000, 0),
     )
     ps2 = kf.Port(
-        name="start2", width=500, layer_info=LAYER.WG, trans=kf.kdb.Trans(0, 5_000)
+        name="start2", width=500, layer_info=layers.WG, trans=kf.kdb.Trans(0, 5_000)
     )
     pe2 = kf.Port(
         name="end2",
         width=500,
-        layer_info=LAYER.WG,
+        layer_info=layers.WG,
         trans=kf.kdb.Trans(2, False, 200_000, 5_000),
     )
     ps3 = kf.Port(
-        name="start3", width=500, layer_info=LAYER.WG, trans=kf.kdb.Trans(0, 10_000)
+        name="start3", width=500, layer_info=layers.WG, trans=kf.kdb.Trans(0, 10_000)
     )
     pe3 = kf.Port(
         name="end3",
         width=500,
-        layer_info=LAYER.WG,
+        layer_info=layers.WG,
         trans=kf.kdb.Trans(2, False, 200_000, 10_000),
     )
 

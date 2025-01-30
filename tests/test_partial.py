@@ -30,6 +30,6 @@ def partial_cell(partial: partial[kf.KCell]) -> kf.KCell:
     return c
 
 
-def test_partial(LAYER: Layers) -> None:
-    c = partial_cell(partial(to_be_partialled, width=1, length=10, layer=LAYER.WG))
+def test_partial(layers: Layers) -> None:
+    c = partial_cell(partial(to_be_partialled, width=1, length=10, layer=layers.WG))
     assert "<" not in c.name

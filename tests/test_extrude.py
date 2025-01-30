@@ -35,17 +35,17 @@ def taper_static(
     return c
 
 
-def test_dynamic_sine_taper(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
-    taper_dyn(10, 1, LAYER.WG, wg_enc)
+def test_dynamic_sine_taper(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
+    taper_dyn(10, 1, layers.WG, wg_enc)
 
 
-def test_static_sine_taper(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
-    taper_static(10, 1, LAYER.WG, wg_enc)
+def test_static_sine_taper(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
+    taper_static(10, 1, layers.WG, wg_enc)
 
 
-def test_enc_extrude_dyn(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
+def test_enc_extrude_dyn(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
     width = 10
-    layer = LAYER.WG
+    layer = layers.WG
     enclosure = wg_enc
     c = kf.KCell()
 
@@ -57,9 +57,9 @@ def test_enc_extrude_dyn(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
     enclosure.extrude_path_dynamic(c, path, layer, _width)
 
 
-def test_enc_extrude_static(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
+def test_enc_extrude_static(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
     width = 10
-    layer = LAYER.WG
+    layer = layers.WG
     enclosure = wg_enc
     c = kf.KCell()
 
