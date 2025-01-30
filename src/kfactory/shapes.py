@@ -10,6 +10,9 @@ if TYPE_CHECKING:
     from .kcell import VKCell
 
 
+__all__ = ["VShapes"]
+
+
 class VShapes:
     """Emulate `[klayout.db.Shapes][klayout.db.Shapes]`."""
 
@@ -20,6 +23,7 @@ class VShapes:
     def __init__(
         self, cell: VKCell, _shapes: Sequence[ShapeLike] | None = None
     ) -> None:
+        """Initialize the shapes."""
         self.cell = cell
         self._shapes = list(_shapes) if _shapes is not None else []
         self._bbox = kdb.DBox()
@@ -43,12 +47,15 @@ class VShapes:
             self._bbox += b
 
     def bbox(self) -> kdb.DBox:
+        """Emulate `[klayout.db.Shapes][klayout.db.Shapes]'s bbox'`."""
         return self._bbox.dup()
 
     def __iter__(self) -> Iterator[ShapeLike]:
+        """Emulate `[klayout.db.Shapes][klayout.db.Shapes]'s __iter__'`."""
         yield from self._shapes
 
     def each(self) -> Iterator[ShapeLike]:
+        """Emulate `[klayout.db.Shapes][klayout.db.Shapes]'s each'`."""
         yield from self._shapes
 
     def transform(
@@ -56,6 +63,7 @@ class VShapes:
         trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
         /,
     ) -> VShapes:
+        """Emulate `[klayout.db.Shapes][klayout.db.Shapes]'s transform'`."""
         new_shapes: list[DShapeLike] = []
         if isinstance(trans, kdb.Trans):
             trans = trans.to_dtype(self.cell.kcl.dbu)
@@ -80,4 +88,5 @@ class VShapes:
         return VShapes(cell=self.cell, _shapes=new_shapes)
 
     def size(self) -> int:
+        """Emulate `[klayout.db.Shapes][klayout.db.Shapes]'s size'`."""
         return len(self._shapes)

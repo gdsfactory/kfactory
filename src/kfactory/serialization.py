@@ -16,16 +16,22 @@ from .conf import config
 from .typings import MetaData, SerializableShape
 
 if TYPE_CHECKING:
-    from .kcell import ProtoKCell
+    from .kcell import AnyKCell
 
 
 class DecoratorList(UserList[Any]):
+    """Hashable decorator for a list."""
+
     def __hash__(self) -> int:
+        """Hash the list."""
         return hash(tuple(self.data))
 
 
 class DecoratorDict(UserDict[Hashable, Any]):
+    """Hashable decorator for a dictionary."""
+
     def __hash__(self) -> int:
+        """Hash the dictionary."""
         return hash(tuple(sorted(self.data.items())))
 
 
@@ -63,7 +69,7 @@ def clean_name(name: str) -> str:
 
 
 def clean_value(
-    value: float | np.float64 | dict[Any, Any] | ProtoKCell[Any] | Callable[..., Any],
+    value: float | np.float64 | dict[Any, Any] | AnyKCell | Callable[..., Any],
 ) -> str:
     """Makes sure a value is representable in a limited character_space."""
     if isinstance(value, int):  # integer
@@ -226,6 +232,7 @@ def check_metadata_type(value: MetaData) -> MetaData:
 
 
 def serialize_setting(setting: MetaData) -> MetaData:
+    """Serialize a setting."""
     if isinstance(setting, dict):
         return {name: serialize_setting(_setting) for name, _setting in setting.items()}
     elif isinstance(setting, list):
@@ -238,6 +245,7 @@ def serialize_setting(setting: MetaData) -> MetaData:
 
 
 def deserialize_setting(setting: MetaData) -> MetaData:
+    """Deserialize a setting."""
     if isinstance(setting, dict):
         return {
             name: deserialize_setting(_setting) for name, _setting in setting.items()

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Generic, Self, overload
+from typing import TYPE_CHECKING, Any, Generic, Self, overload
 
 import numpy as np
 
@@ -12,6 +12,8 @@ from .typings import TUnit
 if TYPE_CHECKING:
     from .layer import LayerEnum
     from .layout import KCLayout
+
+__all__ = ["DBUGeometricObject", "GeometricObject", "SizeInfo", "UMGeometricObject"]
 
 
 class SizeInfo(Generic[TUnit]):
@@ -110,7 +112,13 @@ class SizeInfo(Generic[TUnit]):
 
 
 class GeometricObject(Generic[TUnit], ABC):
-    kcl: KCLayout
+    @property
+    @abstractmethod
+    def kcl(self) -> KCLayout: ...
+
+    @kcl.setter
+    @abstractmethod
+    def kcl(self, val: KCLayout, /) -> None: ...
 
     @abstractmethod
     def bbox(self, layer: int | None = None) -> BoxLike[TUnit]: ...
@@ -135,7 +143,7 @@ class GeometricObject(Generic[TUnit], ABC):
         self,
         trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
         /,
-    ) -> None: ...
+    ) -> Any: ...
 
     @property
     def x(self) -> TUnit:

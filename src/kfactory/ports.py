@@ -37,21 +37,24 @@ from .port import (
     filter_port_type,
     filter_regex,
 )
-from .typings import TUnit
+from .typings import TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
     from .layout import KCLayout
 
 
+__all__ = ["DPorts", "Ports", "ProtoPorts"]
+
+
 def _filter_ports(
-    ports: Iterable[Port],
+    ports: Iterable[TPort],
     angle: int | None = None,
     orientation: float | None = None,
     layer: LayerEnum | int | None = None,
     port_type: str | None = None,
     regex: str | None = None,
-) -> list[Port]:
+) -> list[TPort]:
     if regex:
         ports = filter_regex(ports, regex)
     if layer is not None:
@@ -66,9 +69,30 @@ def _filter_ports(
 
 
 class ProtoPorts(ABC, Generic[TUnit]):
+    """Base class for kf.Ports, kf.DPorts."""
+
     kcl: KCLayout
     _locked: bool
     _bases: list[BasePort]
+
+    @overload
+    def __init__(self, *, kcl: KCLayout) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        kcl: KCLayout,
+        ports: Iterable[ProtoPort[Any]] | None = None,
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        *,
+        kcl: KCLayout,
+        bases: list[BasePort] | None = None,
+    ) -> None: ...
 
     def __init__(
         self,
@@ -77,6 +101,13 @@ class ProtoPorts(ABC, Generic[TUnit]):
         ports: Iterable[ProtoPort[Any]] | None = None,
         bases: list[BasePort] | None = None,
     ) -> None:
+        """Initialize the Ports.
+
+        Args:
+            kcl: The KCLayout instance.
+            ports: The ports to add.
+            bases: The bases to add.
+        """
         self.kcl = kcl
         if bases is not None:
             self._bases = bases
@@ -92,23 +123,29 @@ class ProtoPorts(ABC, Generic[TUnit]):
 
     @property
     def bases(self) -> list[BasePort]:
+        """Get the bases."""
         return self._bases
 
-    def copy(self, rename_funciton: Callable[[list[Port]], None] | None = None) -> Self:
+    @abstractmethod
+    def copy(
+        self,
+        rename_function: Callable[[Sequence[ProtoPort[TUnit]]], None] | None = None,
+    ) -> Self:
         """Get a copy of each port."""
-        bases = [b.__copy__() for b in self._bases]
-        if rename_funciton is not None:
-            rename_funciton([Port(base=b) for b in bases])
-        return self.__class__(bases=bases, kcl=self.kcl)
+        ...
 
     def to_itype(self) -> Ports:
+        """Convert to a Ports."""
         return Ports(kcl=self.kcl, bases=self._bases)
 
     def to_dtype(self) -> DPorts:
+        """Convert to a DPorts."""
         return DPorts(kcl=self.kcl, bases=self._bases)
 
     @abstractmethod
-    def __iter__(self) -> Iterator[ProtoPort[TUnit]]: ...
+    def __iter__(self) -> Iterator[ProtoPort[TUnit]]:
+        """Iterator over the Ports."""
+        ...
 
     @abstractmethod
     def add_port(
@@ -117,25 +154,39 @@ class ProtoPorts(ABC, Generic[TUnit]):
         port: ProtoPort[Any],
         name: str | None = None,
         keep_mirror: bool = False,
-    ) -> ProtoPort[TUnit]: ...
+    ) -> ProtoPort[TUnit]:
+        """Add a port."""
+        ...
 
     @abstractmethod
-    def create_port(self, *args: Any, **kwargs: Any) -> ProtoPort[TUnit]: ...
+    def create_port(self, *args: Any, **kwargs: Any) -> ProtoPort[TUnit]:
+        """Create a port."""
+        ...
 
     @abstractmethod
-    def get_all_named(self) -> Mapping[str, ProtoPort[TUnit]]: ...
+    def get_all_named(self) -> Mapping[str, ProtoPort[TUnit]]:
+        """Get all ports in a dictionary with names as keys.
 
-    @abstractmethod
+        This filters out Ports with `None` as name.
+        """
+        ...
+
     def add_ports(
         self,
         ports: Iterable[ProtoPort[Any]],
         prefix: str = "",
         keep_mirror: bool = False,
         suffix: str = "",
-    ) -> None: ...
+    ) -> None:
+        """Append a list of ports."""
+        for p in ports:
+            name = p.name or ""
+            self.add_port(port=p, name=prefix + name + suffix, keep_mirror=keep_mirror)
 
     @abstractmethod
-    def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]: ...
+    def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]:
+        """Get a port by index or name."""
+        ...
 
     @abstractmethod
     def filter(
@@ -145,7 +196,17 @@ class ProtoPorts(ABC, Generic[TUnit]):
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> Sequence[ProtoPort[TUnit]]: ...
+    ) -> Sequence[ProtoPort[TUnit]]:
+        """Filter ports.
+
+        Args:
+            angle: Filter by angle. 0, 1, 2, 3.
+            orientation: Filter by orientation in degrees.
+            layer: Filter by layer.
+            port_type: Filter by port type.
+            regex: Filter by regex of the name.
+        """
+        ...
 
     def __contains__(self, port: str | ProtoPort[Any] | BasePort) -> bool:
         """Check whether a port is in this port collection."""
@@ -179,47 +240,13 @@ class ProtoPorts(ABC, Generic[TUnit]):
 
 
 class Ports(ProtoPorts[int]):
-    """A collection of ports.
+    """A collection of dbu ports.
 
     It is not a traditional dictionary. Elements can be retrieved as in a traditional
     dictionary. But to keep tabs on names etc, the ports are stored as a list
-
-    Attributes:
-        _ports: Internal storage of the ports. Normally ports should be retrieved with
-            [__getitem__][kfactory.kcell.Ports.__getitem__] or with
-            [get_all_named][kfactory.kcell.Ports.get_all_named]
     """
 
     yaml_tag: ClassVar[str] = "!Ports"
-
-    @overload
-    def __init__(self, *, kcl: KCLayout) -> None: ...
-
-    @overload
-    def __init__(
-        self,
-        *,
-        kcl: KCLayout,
-        ports: Iterable[ProtoPort[Any]] | None = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self,
-        *,
-        kcl: KCLayout,
-        bases: list[BasePort] | None = None,
-    ) -> None: ...
-
-    def __init__(
-        self,
-        *,
-        kcl: KCLayout,
-        ports: Iterable[ProtoPort[Any]] | None = None,
-        bases: list[BasePort] | None = None,
-    ) -> None:
-        """Initialize the Ports object."""
-        return super().__init__(kcl=kcl, ports=ports, bases=bases)
 
     def __iter__(self) -> Iterator[Port]:
         """Iterator, that allows for loops etc to directly access the object."""
@@ -267,18 +294,6 @@ class Ports(ProtoPorts[int]):
             port_.dcplx_trans = dcplx_trans
             self._bases.append(port_.base)
         return port_
-
-    def add_ports(
-        self,
-        ports: Iterable[ProtoPort[Any]],
-        prefix: str = "",
-        keep_mirror: bool = False,
-        suffix: str = "",
-    ) -> None:
-        """Append a list of ports."""
-        for p in ports:
-            name = p.name or ""
-            self.add_port(port=p, name=prefix + name + suffix, keep_mirror=keep_mirror)
 
     @overload
     def create_port(
@@ -437,6 +452,15 @@ class Ports(ProtoPorts[int]):
                 f"Available ports: {[v.name for v in self._bases]}"
             ) from e
 
+    def copy(
+        self, rename_function: Callable[[Sequence[Port]], None] | None = None
+    ) -> Self:
+        """Get a copy of each port."""
+        bases = [b.model_copy() for b in self._bases]
+        if rename_function is not None:
+            rename_function([Port(base=b) for b in bases])
+        return self.__class__(bases=bases, kcl=self.kcl)
+
     def filter(
         self,
         angle: int | None = None,
@@ -445,7 +469,7 @@ class Ports(ProtoPorts[int]):
         port_type: str | None = None,
         regex: str | None = None,
     ) -> Sequence[Port]:
-        """Filter ports by name.
+        """Filter ports.
 
         Args:
             angle: Filter by angle. 0, 1, 2, 3.
@@ -454,18 +478,14 @@ class Ports(ProtoPorts[int]):
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-        ports: Iterable[Port] = (Port(base=b) for b in self._bases)
-        if regex:
-            ports = filter_regex(ports, regex)
-        if layer is not None:
-            ports = filter_layer(ports, layer)
-        if port_type:
-            ports = filter_port_type(ports, port_type)
-        if angle is not None:
-            ports = filter_direction(ports, angle)
-        if orientation is not None:
-            ports = filter_orientation(ports, orientation)
-        return list(ports)
+        return _filter_ports(
+            (Port(base=b) for b in self._bases),
+            angle,
+            orientation,
+            layer,
+            port_type,
+            regex,
+        )
 
     def __repr__(self) -> str:
         """Representation of the Ports as strings."""
@@ -493,46 +513,13 @@ class Ports(ProtoPorts[int]):
 
 
 class DPorts(ProtoPorts[float]):
-    """DPorts of an DInstance.
+    """A collection of um ports.
 
-    These act as virtual ports as the centers needs to change if the
-    instance changes etc.
-
-
-    Attributes:
-        cell_ports: A pointer to the [`KCell.ports`][kfactory.kcell.KCell.ports]
-            of the cell
-        instance: A pointer to the Instance related to this.
-            This provides a way to dynamically calculate the ports.
+    It is not a traditional dictionary. Elements can be retrieved as in a traditional
+    dictionary. But to keep tabs on names etc, the ports are stored as a list
     """
 
-    @overload
-    def __init__(self, *, kcl: KCLayout) -> None: ...
-
-    @overload
-    def __init__(
-        self,
-        *,
-        kcl: KCLayout,
-        ports: Iterable[ProtoPort[Any]] | None = None,
-    ) -> None: ...
-
-    @overload
-    def __init__(
-        self,
-        *,
-        kcl: KCLayout,
-        bases: list[BasePort] | None = None,
-    ) -> None: ...
-
-    def __init__(
-        self,
-        *,
-        kcl: KCLayout,
-        ports: Iterable[ProtoPort[Any]] | None = None,
-        bases: list[BasePort] | None = None,
-    ) -> None:
-        return super().__init__(kcl=kcl, ports=ports, bases=bases)
+    yaml_tag: ClassVar[str] = "!DPorts"
 
     def __iter__(self) -> Iterator[DPort]:
         """Iterator, that allows for loops etc to directly access the object."""
@@ -580,18 +567,6 @@ class DPorts(ProtoPorts[float]):
             port_.dcplx_trans = dcplx_trans
             self._bases.append(port_.base)
         return port_
-
-    def add_ports(
-        self,
-        ports: Iterable[ProtoPort[Any]],
-        prefix: str = "",
-        keep_mirror: bool = False,
-        suffix: str = "",
-    ) -> None:
-        """Append a list of ports."""
-        for p in ports:
-            name = p.name or ""
-            self.add_port(port=p, name=prefix + name + suffix, keep_mirror=keep_mirror)
 
     @overload
     def create_port(
@@ -773,9 +748,18 @@ class DPorts(ProtoPorts[float]):
                 f"Available ports: {[v.name for v in self._bases]}"
             ) from e
 
+    def copy(
+        self, rename_function: Callable[[Sequence[DPort]], None] | None = None
+    ) -> Self:
+        """Get a copy of each port."""
+        bases = [b.model_copy() for b in self._bases]
+        if rename_function is not None:
+            rename_function([DPort(base=b) for b in bases])
+        return self.__class__(bases=bases, kcl=self.kcl)
+
     def filter(
         self,
-        angle: float | None = None,
+        angle: int | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
@@ -784,23 +768,20 @@ class DPorts(ProtoPorts[float]):
         """Filter ports by name.
 
         Args:
-            angle: Filter by angle.
+            angle: Filter by angle. 0, 1, 2, 3.
             orientation: Alias for angle.
             layer: Filter by layer.
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-        ports: Iterable[DPort] = (DPort(base=b) for b in self._bases)
-        if regex:
-            ports = filter_regex(ports, regex)
-        if layer is not None:
-            ports = filter_layer(ports, layer)
-        if port_type:
-            ports = filter_port_type(ports, port_type)
-        orientation = orientation or angle
-        if orientation is not None:
-            ports = filter_orientation(ports, orientation)
-        return list(ports)
+        return _filter_ports(
+            (DPort(base=b) for b in self._bases),
+            angle,
+            orientation,
+            layer,
+            port_type,
+            regex,
+        )
 
     def __repr__(self) -> str:
         """Representation of the Ports as strings."""

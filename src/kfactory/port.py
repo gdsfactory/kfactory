@@ -12,14 +12,7 @@ from collections.abc import (
     Iterable,
 )
 from enum import IntEnum, IntFlag, auto
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Generic,
-    Literal,
-    Self,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Generic, Literal, Self, cast, overload
 
 import klayout.db as kdb
 import klayout.rdb as rdb
@@ -38,20 +31,21 @@ from .typings import TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
-    from .kcell import KCell, ProtoTKCell
+    from .kcell import AnyTKCell, KCell
     from .layout import KCLayout
 
 
 def create_port_error(
     p1: ProtoPort[Any],
     p2: ProtoPort[Any],
-    c1: ProtoTKCell[Any],
-    c2: ProtoTKCell[Any],
+    c1: AnyTKCell,
+    c2: AnyTKCell,
     db: rdb.ReportDatabase,
     db_cell: rdb.RdbCell,
     cat: rdb.RdbCategory,
     dbu: float,
 ) -> None:
+    """Create an error report for two ports."""
     it = db.create_item(db_cell, cat)
     if p1.name and p2.name:
         it.add_value(f"Port Names: {c1.name}.{p1.name}/{c2.name}.{p2.name}")
@@ -64,6 +58,11 @@ def create_port_error(
 
 
 class PortCheck(IntFlag):
+    """Check for port equality.
+
+    This is used to check if two ports are equal.
+    """
+
     opposite = auto()
     width = auto()
     layer = auto()
@@ -73,6 +72,7 @@ class PortCheck(IntFlag):
 
 
 def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -> None:
+    """Check if two ports are equal."""
     if checks & PortCheck.opposite:
         assert (
             p1.trans == p2.trans * kdb.Trans.R180
@@ -91,6 +91,8 @@ def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -
 
 
 class BasePortDict(TypedDict):
+    """TypedDict for the BasePort."""
+
     name: str | None
     kcl: KCLayout
     cross_section: SymmetricalCrossSection
@@ -101,6 +103,11 @@ class BasePortDict(TypedDict):
 
 
 class BasePort(BaseModel, arbitrary_types_allowed=True):
+    """Class representing the base port.
+
+    This does not have any knowledge of units.
+    """
+
     name: str | None
     kcl: KCLayout
     cross_section: SymmetricalCrossSection
@@ -110,6 +117,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     port_type: str
 
     def __copy__(self) -> BasePort:
+        """Copy the BasePort."""
         return BasePort(
             name=self.name,
             kcl=self.kcl,
@@ -125,6 +133,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
     ) -> BasePort:
+        """Transform the BasePort."""
         base = self.__copy__()
         if (
             base.trans is not None
@@ -147,6 +156,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
 
     @model_serializer()
     def ser_model(self) -> BasePortDict:
+        """Serialize the BasePort."""
         if self.trans is not None:
             trans = self.trans.dup()
         else:
@@ -155,29 +165,37 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             dcplx_trans = self.dcplx_trans.dup()
         else:
             dcplx_trans = None
-        return dict(
-            name=self.name,
-            kcl=self.kcl,
-            cross_section=self.cross_section,
-            trans=trans,
-            dcplx_trans=dcplx_trans,
-            info=self.info.copy(),
-            port_type=self.port_type,
+        return cast(
+            BasePortDict,
+            dict(
+                name=self.name,
+                kcl=self.kcl,
+                cross_section=self.cross_section,
+                trans=trans,
+                dcplx_trans=dcplx_trans,
+                info=self.info.model_copy(),
+                port_type=self.port_type,
+            ),
         )
 
     def get_trans(self) -> kdb.Trans:
-        return (
-            self.trans
-            or kdb.ICplxTrans(trans=self.dcplx_trans, dbu=self.kcl.dbu).s_trans()  # type: ignore[arg-type]
-        )
+        """Get the transformation."""
+        if self.trans is not None:
+            return self.trans
+        assert self.dcplx_trans is not None, "Both trans and dcplx_trans are None"
+        return kdb.ICplxTrans(trans=self.dcplx_trans, dbu=self.kcl.dbu).s_trans()
 
     def get_dcplx_trans(self) -> kdb.DCplxTrans:
-        return self.dcplx_trans or kdb.DCplxTrans(
-            self.trans.to_dtype(self.kcl.dbu)  # type: ignore[union-attr]
-        )
+        """Get the complex transformation."""
+        if self.dcplx_trans is not None:
+            return self.dcplx_trans
+        assert self.trans is not None, "Both trans and dcplx_trans are None"
+        return kdb.DCplxTrans(self.trans.to_dtype(self.kcl.dbu))
 
 
 class ProtoPort(Generic[TUnit], ABC):
+    """Base class for kf.Port, kf.DPort."""
+
     yaml_tag: str = "!Port"
     _base: BasePort
 
@@ -199,10 +217,13 @@ class ProtoPort(Generic[TUnit], ABC):
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = ...,
         cross_section: SymmetricalCrossSection | None = None,
-    ) -> None: ...
+    ) -> None:
+        """Initialise a ProtoPort."""
+        ...
 
     @property
     def base(self) -> BasePort:
+        """Get the BasePort associated with this Port."""
         return self._base
 
     @property
@@ -336,7 +357,9 @@ class ProtoPort(Generic[TUnit], ABC):
 
     @property
     @abstractmethod
-    def x(self) -> TUnit: ...
+    def x(self) -> TUnit:
+        """X coordinate of the port."""
+        ...
 
     @x.setter
     @abstractmethod
@@ -344,7 +367,9 @@ class ProtoPort(Generic[TUnit], ABC):
 
     @property
     @abstractmethod
-    def y(self) -> TUnit: ...
+    def y(self) -> TUnit:
+        """Y coordinate of the port."""
+        ...
 
     @y.setter
     @abstractmethod
@@ -352,7 +377,9 @@ class ProtoPort(Generic[TUnit], ABC):
 
     @property
     @abstractmethod
-    def angle(self) -> TUnit: ...
+    def angle(self) -> TUnit:
+        """Angle of the port."""
+        ...
 
     @angle.setter
     @abstractmethod
@@ -373,7 +400,9 @@ class ProtoPort(Generic[TUnit], ABC):
 
     @property
     @abstractmethod
-    def width(self) -> TUnit: ...
+    def width(self) -> TUnit:
+        """Width of the port."""
+        ...
 
     @property
     def mirror(self) -> bool:
@@ -393,7 +422,9 @@ class ProtoPort(Generic[TUnit], ABC):
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
-    ) -> ProtoPort[TUnit]: ...
+    ) -> ProtoPort[TUnit]:
+        """Copy the port with a transformation."""
+        ...
 
     @abstractmethod
     def copy_polar(
@@ -402,7 +433,9 @@ class ProtoPort(Generic[TUnit], ABC):
         d_orth: TUnit,
         angle: TUnit,
         mirror: bool = False,
-    ) -> ProtoPort[TUnit]: ...
+    ) -> ProtoPort[TUnit]:
+        """Copy the port with a polar transformation."""
+        ...
 
     @property
     def dx(self) -> float:
@@ -845,6 +878,29 @@ class Port(ProtoPort[int]):
 
 
 class DPort(ProtoPort[float]):
+    """A port is the photonics equivalent to a pin in electronics.
+
+    In addition to the location and layer
+    that defines a pin, a port also contains an orientation and a width.
+    This can be fully represented with a transformation, integer and layer_index.
+
+
+    Attributes:
+        name: String to name the port.
+        width: The width of the port in dbu.
+        trans: Transformation in dbu. If the port can be represented in 90° intervals
+            this is the safe way to do so.
+        dcplx_trans: Transformation in micrometer. The port will autoconvert between
+            trans and dcplx_trans on demand.
+        port_type: A string defining the type of the port
+        layer: Index of the layer or a LayerEnum that acts like an integer, but can
+            contain layer number and datatype
+        info: A dictionary with additional info. Not reflected in GDS. Copy will make a
+            (shallow) copy of it.
+        d: Access port info in micrometer basis such as width and center / angle.
+        kcl: Link to the layout this port resides in.
+    """
+
     def __init__(
         self,
         *,

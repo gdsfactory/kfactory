@@ -7,7 +7,7 @@ import klayout.lay as lay
 
 if TYPE_CHECKING:
     from .instance import ProtoInstance
-    from .kcell import ProtoTKCell
+    from .kcell import BaseKCell, ProtoTKCell
     from .layer import LayerEnum, LayerInfos
     from .layout import Constants
     from .port import ProtoPort
@@ -23,11 +23,13 @@ TUnit_co = TypeVar("TUnit_co", bound=int | float, covariant=True)
 TUnit_contra = TypeVar("TUnit_contra", bound=int | float, contravariant=True)
 TPort = TypeVar("TPort", bound="ProtoPort[Any]")
 TInstance = TypeVar("TInstance", bound="ProtoInstance[Any]", covariant=True)
-
+TBaseCell = TypeVar("TBaseCell", bound="BaseKCell", covariant=True)
 KCellParams = ParamSpec("KCellParams")
+
 AnyTrans = TypeVar(
     "AnyTrans", bound=kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans
 )
+
 SerializableShape: TypeAlias = (
     kdb.Box
     | kdb.DBox

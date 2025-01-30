@@ -4,15 +4,25 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .instance import ProtoInstance
-    from .kcell import ProtoKCell
+    from .kcell import AnyKCell
     from .layout import KCLayout
     from .port import ProtoPort
+
+__all__ = [
+    "CellNameError",
+    "InvalidLayerError",
+    "LockedError",
+    "MergeError",
+    "PortLayerMismatchError",
+    "PortTypeMismatchError",
+    "PortWidthMismatchError",
+]
 
 
 class LockedError(AttributeError):
     """Raised when a locked cell is being modified."""
 
-    def __init__(self, kcell: ProtoKCell[Any]) -> None:
+    def __init__(self, kcell: AnyKCell) -> None:
         """Throw _locked error."""
         super().__init__(
             f"{kcell.name!r} is locked and likely stored in cache. Modifications are "
@@ -126,3 +136,7 @@ class PortTypeMismatchError(ValueError):
 
 class CellNameError(ValueError):
     """Raised if a KCell is created and the automatic assigned name is taken."""
+
+
+class InvalidLayerError(ValueError):
+    """Raised when a layer is not valid."""

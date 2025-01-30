@@ -11,6 +11,14 @@ from .typings import TInstance, TUnit
 if TYPE_CHECKING:
     from .layout import KCLayout
 
+__all__ = [
+    "DInstanceGroup",
+    "InstanceGroup",
+    "ProtoInstanceGroup",
+    "ProtoTInstanceGroup",
+    "VInstanceGroup",
+]
+
 
 class ProtoInstanceGroup(Generic[TUnit, TInstance], GeometricObject[TUnit]):
     insts: list[TInstance]

@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable, Iterator, Sequence
-from typing import TYPE_CHECKING, Any, Generic, cast
+from typing import Any, Generic, cast
 
 from . import kdb
 from .conf import config
+from .instance import DInstance, Instance, ProtoTInstance, VInstance
 from .layer import LayerEnum
 from .port import (
     BasePort,
@@ -19,11 +20,16 @@ from .port import (
     filter_regex,
 )
 from .ports import DPorts, Ports, ProtoPorts
-from .typings import TUnit
+from .typings import TInstance, TUnit
 from .utilities import pprint_ports
 
-if TYPE_CHECKING:
-    from .instance import DInstance, Instance, ProtoTInstance, VInstance
+__all__ = [
+    "DInstancePorts",
+    "InstancePorts",
+    "ProtoInstancePorts",
+    "ProtoTInstancePorts",
+    "VInstancePorts",
+]
 
 
 class HasCellPorts(Generic[TUnit], ABC):
@@ -32,10 +38,13 @@ class HasCellPorts(Generic[TUnit], ABC):
     def cell_ports(self) -> ProtoPorts[TUnit]: ...
 
 
-class ProtoInstancePorts(HasCellPorts[TUnit], ABC): ...
+class ProtoInstancePorts(HasCellPorts[TUnit], Generic[TUnit, TInstance], ABC):
+    instance: TInstance
 
 
-class ProtoTInstancePorts(ProtoInstancePorts[TUnit], ABC):
+class ProtoTInstancePorts(
+    ProtoInstancePorts[TUnit, ProtoTInstance[TUnit]], Generic[TUnit], ABC
+):
     """Ports of an Instance.
 
     These act as virtual ports as the centers needs to change if the
@@ -53,7 +62,7 @@ class ProtoTInstancePorts(ProtoInstancePorts[TUnit], ABC):
 
     def __len__(self) -> int:
         """Return Port count."""
-        if not self.instance.is_regular_array():
+        if not self.instance.instance.is_regular_array():
             return len(self.cell_ports)
         else:
             return len(self.cell_ports) * self.instance.na * self.instance.nb
@@ -93,7 +102,6 @@ class ProtoTInstancePorts(ProtoInstancePorts[TUnit], ABC):
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-
         ports: Iterable[ProtoPort[TUnit]] = list(self.ports)
         if regex:
             ports = filter_regex(ports, regex)
@@ -300,8 +308,6 @@ class ProtoTInstancePorts(ProtoInstancePorts[TUnit], ABC):
 
 
 class InstancePorts(ProtoTInstancePorts[int]):
-    instance: Instance
-
     def __init__(self, instance: Instance) -> None:
         """Creates the virtual ports object.
 
@@ -312,7 +318,7 @@ class InstancePorts(ProtoTInstancePorts[int]):
 
     @property
     def cell_ports(self) -> Ports:
-        return self.instance.cell.ports
+        return Ports(kcl=self.instance.cell.kcl, bases=self.instance.cell.ports.bases)
 
     def filter(
         self,
@@ -334,8 +340,6 @@ class InstancePorts(ProtoTInstancePorts[int]):
 
 
 class DInstancePorts(ProtoTInstancePorts[float]):
-    instance: DInstance
-
     def __init__(self, instance: DInstance) -> None:
         """Creates the virtual ports object.
 
@@ -346,7 +350,7 @@ class DInstancePorts(ProtoTInstancePorts[float]):
 
     @property
     def cell_ports(self) -> DPorts:
-        return self.instance.cell.ports
+        return DPorts(kcl=self.instance.cell.kcl, bases=self.instance.cell.ports.bases)
 
     def filter(
         self,
@@ -367,7 +371,7 @@ class DInstancePorts(ProtoTInstancePorts[float]):
         return DPort(base=super().__getitem__(key).base)
 
 
-class VInstancePorts(ProtoInstancePorts[float]):
+class VInstancePorts(ProtoInstancePorts[float, VInstance]):
     """Ports of an instance.
 
     These act as virtual ports as the centers needs to change if the
