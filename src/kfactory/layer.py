@@ -249,7 +249,7 @@ class LayerStack(BaseModel):
         """Access layer stack elements."""
         if key not in self.layers:
             layers = list(self.layers.keys())
-            raise ValueError(f"{key!r} not in {layers}")
+            raise KeyError(f"{key!r} not in {layers}")
 
         return self.layers[key]
 

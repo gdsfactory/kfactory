@@ -339,6 +339,15 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
     def kcl(self, val: KCLayout, /) -> None:
         self._base_kcell.kcl = val
 
+    def __repr__(self) -> str:
+        """Return a string representation of the Cell."""
+        port_names = [p.name for p in self.ports]
+        instances = [inst.name for inst in self.insts]
+        return (
+            f"{self.__class__.__name__}(name={self.name}, ports={port_names}, "
+            f"instances={instances}, locked={self.locked}, kcl={self.kcl.name})"
+        )
+
 
 class TKCell(BaseKCell):
     """KLayout cell and change its class to KCell.
@@ -374,6 +383,9 @@ class TKCell(BaseKCell):
 
     def lock(self) -> None:
         self.kdb_cell.locked = True
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(name={self.kdb_cell.name})"
 
 
 class TVCell(BaseKCell):
@@ -594,11 +606,6 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         Usage: Pass the kcell variable as an argument in the cell at the end
         """
         self.plot()
-
-    def __repr__(self) -> str:
-        """Return a string representation of the Cell."""
-        port_names = [p.name for p in self.ports]
-        return f"{self.name}: ports {port_names}, {len(self.insts)} instances"
 
     def delete(self) -> None:
         """Delete the cell."""
@@ -2450,28 +2457,26 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         if verbose:
             print(f"Building {d['name']}")
         for _d in d.get("ports", Ports(ports=[], kcl=cell.kcl)):
+            layer_as_string = (
+                str(_d["layer"]).replace("[", "").replace("]", "").replace(", ", "/")
+            )
             if "dcplx_trans" in _d:
-                p = cell.create_port(
+                cell.create_port(
                     name=str(_d["name"]),
                     dcplx_trans=kdb.DCplxTrans.from_s(_d["dcplx_trans"]),
-                    width=cell.kcl.to_dbu(_d["dwidth"]),
-                    layer=cell.kcl.layer(kdb.LayerInfo.from_string(_d["layer"])),
+                    width=_d["dwidth"],
+                    layer=cell.kcl.layer(kdb.LayerInfo.from_string(layer_as_string)),
                     port_type=_d["port_type"],
                 )
             else:
-                p = cell.create_port(
+                print(kdb.LayerInfo.from_string(layer_as_string))
+                cell.create_port(
                     name=str(_d["name"]),
                     trans=kdb.Trans.from_s(_d["trans"]),
-                    width=cell.kcl.to_dbu(int(_d["width"])),
-                    layer=cell.kcl.layer(kdb.LayerInfo.from_string(_d["layer"])),
+                    width=int(_d["width"]),
+                    layer=cell.kcl.layer(kdb.LayerInfo.from_string(layer_as_string)),
                     port_type=_d["port_type"],
                 )
-            p.info = Info(
-                **{
-                    name: deserialize_setting(setting)
-                    for name, setting in _d["info"].items()
-                }
-            )
         cell.settings = KCellSettings(
             **{
                 name: deserialize_setting(setting)
@@ -3481,6 +3486,16 @@ class ProtoCells(Mapping[int, KC], ABC):
         if isinstance(key, int | str):
             return key in self._kcl.tkcells
         return False
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self._kcl.name}, n={len(self)})"
+
+    def __str__(self) -> str:
+        return (
+            f"{self.__class__.__name__}({self._kcl.name}, {self._kcl.tkcells})".replace(
+                "TKCell", (self.__class__.__name__).replace("Cells", "Cell")
+            )
+        )
 
 
 class DKCells(ProtoCells[DKCell]):

@@ -851,19 +851,6 @@ class Port(ProtoPort[int]):
             self._base.dcplx_trans = self.dcplx_trans
             self._base.dcplx_trans.angle = value
 
-    @property
-    def mirror(self) -> bool:
-        """Returns `True`/`False` depending on the mirror flag on the transformation."""
-        return self.trans.is_mirror()
-
-    @mirror.setter
-    def mirror(self, value: bool) -> None:
-        """Setter for mirror flag on trans."""
-        if self._base.trans:
-            self._base.trans.mirror = value
-        else:
-            self._base.dcplx_trans.mirror = value  # type: ignore[union-attr]
-
     def __repr__(self) -> str:
         """String representation of port."""
         return (
@@ -1096,15 +1083,6 @@ class DPort(ProtoPort[float]):
     def width(self) -> float:
         """Width of the port in um."""
         return self.kcl.to_um(self._base.cross_section.width)
-
-    @property
-    def mirror(self) -> bool:
-        """Mirror flag of the port."""
-        return self.mirror
-
-    @mirror.setter
-    def mirror(self, value: bool) -> None:
-        self.mirror = value
 
 
 class DIRECTION(IntEnum):

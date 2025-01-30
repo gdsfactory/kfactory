@@ -47,6 +47,17 @@ class ProtoInstances(Generic[TUnit, TInstance], ABC):
     @abstractmethod
     def clear(self) -> None: ...
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(n={len(self)})"
+
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}(insts={list(self)})"
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ProtoInstances):
+            return False
+        return list(self) == list(other)
+
 
 class ProtoTInstances(ProtoInstances[TUnit, ProtoTInstance[TUnit]], ABC):
     _tkcell: TKCell

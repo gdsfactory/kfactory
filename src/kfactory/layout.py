@@ -1589,6 +1589,9 @@ class KCLayout(
         """Get a cross section by name or specification."""
         return self.cross_sections.get_cross_section(cross_section)
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.name}, n={len(self.kcells)})"
+
 
 KCLayout.model_rebuild()
 TVCell.model_rebuild()

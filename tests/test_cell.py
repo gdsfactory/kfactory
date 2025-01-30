@@ -1,3 +1,4 @@
+import tempfile
 import threading
 import warnings
 from collections.abc import Callable
@@ -435,6 +436,45 @@ def test_to_itype(kcl: kf.KCLayout) -> None:
     dkcell.shapes(0).insert(kf.kdb.DBox(0, 0, 1, 1))
     itype = dkcell.to_itype()
     assert itype.bbox() == kf.kdb.Box(0, 0, 1000, 1000)
+
+
+def test_cell_yaml(kcl: kf.KCLayout, layers: Layers) -> None:
+    with tempfile.NamedTemporaryFile(suffix=".yaml") as tmpfile:
+        from ruamel.yaml import YAML
+
+        yaml = YAML()
+        yaml.register_class(kf.KCell)
+        c = kf.factories.straight.straight_dbu_factory(kf.kcl)(
+            width=5000, length=10000, layer=layers.WG
+        ).dup()
+
+        with open(tmpfile.name, "w") as file:
+            yaml.dump(c, file)
+
+        c.name += "test"
+
+        with open(tmpfile.name) as file:
+            cell = yaml.load(file)
+            assert isinstance(cell, kf.KCell)
+
+        c.name = c.name.replace("test", "")
+
+        c_base_kcell = c.base_kcell
+        cell_base_kcell = cell.base_kcell
+
+        def compare_kcell_fields(
+            c_base_kcell: kf.KCell, cell_base_kcell: kf.KCell
+        ) -> bool:
+            for field in vars(c_base_kcell):
+                if field == "kdb_cell":
+                    continue
+                c_value = getattr(c_base_kcell, field)
+                cell_value = getattr(cell_base_kcell, field)
+                if c_value != cell_value:
+                    return False
+            return True
+
+        assert compare_kcell_fields(c_base_kcell, cell_base_kcell)
 
 
 if __name__ == "__main__":

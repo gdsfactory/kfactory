@@ -35,7 +35,6 @@ from pydantic import (
     field_validator,
     model_serializer,
 )
-from ruamel.yaml.representer import BaseRepresenter, MappingNode
 from typing_extensions import TypedDict
 
 from . import kdb
@@ -475,7 +474,7 @@ class LayerSection(BaseModel):
     touching or overlapping sections.
     """
 
-    sections: list[Section] = Field(default=[])
+    sections: list[Section] = Field(default_factory=list)
 
     def add_section(self, sec: Section) -> int:
         """Add a new section.
@@ -541,7 +540,6 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
     layer_sections: dict[kdb.LayerInfo, LayerSection]
     _name: str | None = PrivateAttr()
     main_layer: kdb.LayerInfo | None
-    yaml_tag: str = "!Enclosure"
 
     def __init__(
         self,
@@ -1041,12 +1039,6 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             return reg_max - reg_min
 
         self.apply_custom(c, bbox_reg)
-
-    @classmethod
-    def to_yaml(cls, representer: BaseRepresenter, node: Any) -> MappingNode:
-        """Get YAML representation of the enclosure."""
-        d = dict(node.enclosures)
-        return representer.represent_mapping(cls.yaml_tag, d)
 
     def __str__(self) -> str:
         """String representation of an enclosure.

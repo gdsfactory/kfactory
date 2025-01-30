@@ -15,12 +15,8 @@ from typing import (
     Generic,
     Literal,
     Self,
-    cast,
     overload,
 )
-
-from ruamel.yaml.constructor import BaseConstructor
-from ruamel.yaml.representer import BaseRepresenter, SequenceNode
 
 from . import kdb
 from .conf import config
@@ -226,14 +222,11 @@ class ProtoPorts(ABC, Generic[TUnit]):
 
     def __eq__(self, other: object) -> bool:
         """Support for `ports1 == ports2` comparisons."""
-        if isinstance(other, Iterable) and all(
-            isinstance(item, ProtoPort) for item in other
-        ):
-            other_list = cast(list[ProtoPort[Any]], list(other))
-            if len(self._bases) != len(other_list):
+        if isinstance(other, Iterable):
+            if len(self._bases) != len(other):
                 return False
-            for b1, b2 in zip(self._bases, other_list, strict=False):
-                if b1 != b2.base:
+            for b1, b2 in zip(iter(self), other, strict=False):
+                if b1 != b2:
                     return False
             return True
         return False
@@ -396,8 +389,10 @@ class Ports(ProtoPorts[int]):
                     raise ValueError(
                         "layer or layer_info must be defined to create a port."
                     )
-                layer_info = self.kcl.get_info(layer)
+                layer_info = self.kcl.layout.get_info(layer)
             assert layer_info is not None
+            if width <= 0:
+                raise ValueError("width needs to be set and be >0")
             cross_section = self.kcl.get_cross_section(
                 CrossSectionSpec(main_layer=layer_info, width=width)
             )
@@ -501,16 +496,6 @@ class Ports(ProtoPorts[int]):
             config.console.print(pprint_ports(self, unit=unit))
         return capture.get()
 
-    @classmethod
-    def to_yaml(cls, representer: BaseRepresenter, node: Self) -> SequenceNode:
-        """Convert the ports to a yaml representations."""
-        return representer.represent_sequence(cls.yaml_tag, node._bases)
-
-    @classmethod
-    def from_yaml(cls, constructor: BaseConstructor, node: Any) -> Self:
-        """Load Ports from a yaml representation."""
-        return cls(**constructor.construct_sequence(node))
-
 
 class DPorts(ProtoPorts[float]):
     """A collection of um ports.
@@ -594,7 +579,7 @@ class DPorts(ProtoPorts[float]):
     def create_port(
         self,
         *,
-        width: int,
+        width: float,
         layer: LayerEnum | int,
         center: tuple[float, float],
         angle: float,
@@ -628,7 +613,7 @@ class DPorts(ProtoPorts[float]):
     def create_port(
         self,
         *,
-        width: int,
+        width: float,
         layer_info: kdb.LayerInfo,
         center: tuple[float, float],
         angle: float,
@@ -680,15 +665,14 @@ class DPorts(ProtoPorts[float]):
                     raise ValueError(
                         "layer or layer_info must be defined to create a port."
                     )
-                layer_info = self.kcl.get_info(layer)
+                layer_info = self.kcl.layout.get_info(layer)
             assert layer_info is not None
-            dwidth = width
-            if dwidth <= 0:
-                raise ValueError("dwidth needs to be set and be >0")
-            width_ = self.kcl.to_dbu(dwidth)
+            if width <= 0:
+                raise ValueError("width needs to be set and be >0")
+            width_ = self.kcl.to_dbu(width)
             if width_ % 2:
                 raise ValueError(
-                    f"dwidth needs to be even to snap to grid. Got {dwidth}."
+                    f"width needs to be even to snap to grid. Got {width}."
                     "Ports must have a grid width of multiples of 2."
                 )
             cross_section = self.kcl.get_cross_section(
