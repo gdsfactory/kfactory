@@ -702,48 +702,94 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     @overload
     @abstractmethod
     def create_inst(
-        self,
+        self: ProtoTKCell[int],
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
-    ) -> ProtoTInstance[TUnit]: ...
+        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
+        *,
+        a: kdb.Vector | None = None,
+        b: kdb.Vector | None = None,
+        na: int = 1,
+        nb: int = 1,
+        libcell_as_static: bool = False,
+        static_name_separator: str = "__",
+    ) -> Instance: ...
 
     @overload
     @abstractmethod
     def create_inst(
-        self,
+        self: ProtoTKCell[float],
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
+        trans: kdb.DTrans | kdb.DVector | kdb.DCplxTrans | None = None,
         *,
-        a: kdb.Vector,
-        b: kdb.Vector,
+        a: kdb.DVector | None = None,
+        b: kdb.DVector | None = None,
         na: int = 1,
         nb: int = 1,
-    ) -> ProtoTInstance[TUnit]: ...
+        libcell_as_static: bool = False,
+        static_name_separator: str = "__",
+    ) -> DInstance: ...
 
     @abstractmethod
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
-        a: kdb.Vector | None = None,
-        b: kdb.Vector | None = None,
+        trans: kdb.Trans
+        | kdb.Vector
+        | kdb.ICplxTrans
+        | kdb.DTrans
+        | kdb.DVector
+        | kdb.DCplxTrans
+        | None = None,
+        *,
+        a: kdb.Vector | kdb.DVector | None = None,
+        b: kdb.Vector | kdb.DVector | None = None,
         na: int = 1,
         nb: int = 1,
         libcell_as_static: bool = False,
         static_name_separator: str = "__",
-    ) -> ProtoTInstance[TUnit]: ...
+    ) -> Instance | DInstance: ...
 
-    def _create_inst(
+    def _get_ci(
+        self,
+        cell: ProtoTKCell[Any],
+        libcell_as_static: bool = False,
+        static_name_separator: str = "__",
+    ) -> int:
+        if cell.layout() == self.layout():
+            return cell.cell_index()
+        assert cell.layout().library() is not None
+        lib_ci = self.kcl.layout.add_lib_cell(cell.kcl.library, cell.cell_index())
+        if lib_ci not in self.kcl.tkcells:
+            cell.set_meta_data()
+            kcell = self.kcl[lib_ci]
+            kcell.get_meta_data()
+        if libcell_as_static:
+            cell.set_meta_data()
+            ci = self.kcl.layout.convert_cell_to_static(lib_ci)
+            kcell = self.kcl[ci]
+            kcell.copy_meta_info(cell.kdb_cell)
+            kcell.name = cell.kcl.name + static_name_separator + cell.name
+            if cell.kcl.dbu != self.kcl.dbu:
+                for port, lib_port in zip(kcell.ports, cell.ports, strict=False):
+                    port.cross_section = cell.kcl.get_cross_section(
+                        lib_port.cross_section.to_dtype(cell.kcl)
+                    )
+            return ci
+        else:
+            return lib_ci
+
+    def icreate_inst(
         self,
         cell: ProtoTKCell[Any] | int,
         trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
+        *,
         a: kdb.Vector | None = None,
         b: kdb.Vector | None = None,
         na: int = 1,
         nb: int = 1,
         libcell_as_static: bool = False,
         static_name_separator: str = "__",
-    ) -> kdb.Instance:
+    ) -> Instance:
         """Add an instance of another KCell.
 
         Args:
@@ -773,32 +819,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         if isinstance(cell, int):
             ci = cell
         else:
-            if cell.layout() == self.layout():
-                ci = cell.cell_index()
-            else:
-                assert cell.layout().library() is not None
-                lib_ci = self.kcl.layout.add_lib_cell(
-                    cell.kcl.library, cell.cell_index()
-                )
-                if lib_ci not in self.kcl.tkcells:
-                    cell.set_meta_data()
-                    kcell = self.kcl[lib_ci]
-                    kcell.get_meta_data()
-                if libcell_as_static:
-                    cell.set_meta_data()
-                    ci = self.kcl.convert_cell_to_static(lib_ci)
-                    kcell = self.kcl[ci]
-                    kcell.copy_meta_info(cell.kdb_cell)
-                    kcell.name = cell.kcl.name + static_name_separator + cell.name
-                    if cell.kcl.dbu != self.kcl.dbu:
-                        for port, lib_port in zip(
-                            kcell.ports, cell.ports, strict=False
-                        ):
-                            port.cross_section = cell.kcl.get_cross_section(
-                                lib_port.cross_section.to_dtype(cell.kcl)
-                            )
-                else:
-                    ci = lib_ci
+            ci = self._get_ci(cell, libcell_as_static, static_name_separator)
 
         if a is None:
             inst = self._base_kcell.kdb_cell.insert(kdb.CellInstArray(ci, trans))
@@ -808,7 +829,60 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
             inst = self._base_kcell.kdb_cell.insert(
                 kdb.CellInstArray(ci, trans, a, b, na, nb)
             )
-        return inst
+        return Instance(kcl=self.kcl, instance=inst)
+
+    def dcreate_inst(
+        self,
+        cell: ProtoTKCell[Any] | int,
+        trans: kdb.DTrans | kdb.DVector | kdb.DCplxTrans | None = None,
+        *,
+        a: kdb.DVector | None = None,
+        b: kdb.DVector | None = None,
+        na: int = 1,
+        nb: int = 1,
+        libcell_as_static: bool = False,
+        static_name_separator: str = "__",
+    ) -> DInstance:
+        """Add an instance of another KCell.
+
+        Args:
+            cell: The cell to be added
+            trans: The integer transformation applied to the reference
+            a: Vector for the array.
+                Needs to be in positive X-direction. Usually this is only a
+                Vector in x-direction. Some foundries won't allow other Vectors.
+            b: Vector for the array.
+                Needs to be in positive Y-direction. Usually this is only a
+                Vector in x-direction. Some foundries won't allow other Vectors.
+            na: Number of elements in direction of `a`
+            nb: Number of elements in direction of `b`
+            libcell_as_static: If the cell is a Library cell
+                (different KCLayout object), convert it to a static cell. This can cause
+                name collisions that are automatically resolved by appending $1[..n] on
+                the newly created cell.
+            static_name_separator: Stringt to separate the KCLayout name from the cell
+                name when converting library cells (other KCLayout object than the one
+                of this KCell) to static cells (copy them into this KCell's KCLayout).
+
+        Returns:
+            The created instance
+        """
+        if trans is None:
+            trans = kdb.DTrans()
+        if isinstance(cell, int):
+            ci = cell
+        else:
+            ci = self._get_ci(cell, libcell_as_static, static_name_separator)
+
+        if a is None:
+            inst = self._base_kcell.kdb_cell.insert(kdb.DCellInstArray(ci, trans))
+        else:
+            if b is None:
+                b = kdb.DVector()
+            inst = self._base_kcell.kdb_cell.insert(
+                kdb.DCellInstArray(ci, trans, a, b, na, nb)
+            )
+        return DInstance(kcl=self.kcl, instance=inst)
 
     def _kdb_copy(self) -> kdb.Cell:
         return self._base_kcell.kdb_cell.dup()
@@ -2218,31 +2292,13 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
             raise LockedError(self)
         return self.ports.create_port(**kwargs)
 
-    @overload
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
-    ) -> DInstance: ...
-
-    @overload
-    def create_inst(
-        self,
-        cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
+        trans: kdb.DTrans | kdb.DVector | kdb.DCplxTrans | None = None,
         *,
-        a: kdb.Vector,
-        b: kdb.Vector,
-        na: int = 1,
-        nb: int = 1,
-    ) -> DInstance: ...
-
-    def create_inst(
-        self,
-        cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
-        a: kdb.Vector | None = None,
-        b: kdb.Vector | None = None,
+        a: kdb.DVector | None = None,
+        b: kdb.DVector | None = None,
         na: int = 1,
         nb: int = 1,
         libcell_as_static: bool = False,
@@ -2250,16 +2306,16 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
     ) -> DInstance:
         return DInstance(
             kcl=self.kcl,
-            instance=self._create_inst(
+            instance=self.dcreate_inst(
                 cell,
-                trans or kdb.Trans(),
-                a,
-                b,
-                na,
-                nb,
-                libcell_as_static,
-                static_name_separator,
-            ),
+                trans or kdb.DTrans(),
+                a=a,
+                b=b,
+                na=na,
+                nb=nb,
+                libcell_as_static=libcell_as_static,
+                static_name_separator=static_name_separator,
+            ).instance,
         )
 
 
@@ -2349,29 +2405,11 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
             raise LockedError(self)
         return self.ports.create_port(**kwargs)
 
-    @overload
-    def create_inst(
-        self,
-        cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
-    ) -> Instance: ...
-
-    @overload
-    def create_inst(
-        self,
-        cell: ProtoTKCell[Any] | int,
-        trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
-        *,
-        a: kdb.Vector,
-        b: kdb.Vector,
-        na: int = 1,
-        nb: int = 1,
-    ) -> Instance: ...
-
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
         trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
+        *,
         a: kdb.Vector | None = None,
         b: kdb.Vector | None = None,
         na: int = 1,
@@ -2381,16 +2419,16 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
     ) -> Instance:
         return Instance(
             kcl=self.kcl,
-            instance=self._create_inst(
+            instance=self.icreate_inst(
                 cell,
                 trans or kdb.Trans(),
-                a,
-                b,
-                na,
-                nb,
-                libcell_as_static,
-                static_name_separator,
-            ),
+                a=a,
+                b=b,
+                na=na,
+                nb=nb,
+                libcell_as_static=libcell_as_static,
+                static_name_separator=static_name_separator,
+            ).instance,
         )
 
     @classmethod

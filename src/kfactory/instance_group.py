@@ -15,9 +15,9 @@ if TYPE_CHECKING:
 class ProtoInstanceGroup(Generic[TUnit, TInstance], GeometricObject[TUnit]):
     insts: list[TInstance]
 
-    def __init__(self, insts: Sequence[TInstance]) -> None:
+    def __init__(self, insts: Sequence[TInstance] | None = None) -> None:
         """Initialize the InstanceGroup."""
-        self.insts = list(insts)
+        self.insts = list(insts) if insts is not None else []
 
     @property
     def kcl(self) -> KCLayout:

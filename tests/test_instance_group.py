@@ -206,5 +206,14 @@ def test_to_dtype(kcl: kf.KCLayout) -> None:
     assert isinstance(dinstance_group, kf.InstanceGroup)
 
 
+def test_instance_group_kcl(kcl: kf.KCLayout) -> None:
+    instance_group = kf.InstanceGroup()
+    with pytest.raises(ValueError):
+        _ = instance_group.kcl
+
+    with pytest.raises(ValueError):
+        instance_group.kcl = kcl
+
+
 if __name__ == "__main__":
     pytest.main([__file__])
