@@ -389,12 +389,12 @@ class KCLayout(
         info = self.layout.get_info(self.layout.layer(*args, **kwargs))
         try:
             return self.layers[info.name]  # type:ignore[no-any-return, index]
-        except KeyError:
+        except KeyError as e:
             if allow_undefined_layers:
                 return self.layout.layer(info)
             raise KeyError(
                 f"Layer '{args=}, {kwargs=}' has not been defined in the KCLayout."
-            )
+            ) from e
 
     @overload
     def to_um(self, other: int) -> float: ...
@@ -543,7 +543,7 @@ class KCLayout(
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
         basename: str | None = None,
-        drop_params: list[str] = ["self", "cls"],
+        drop_params: list[str] | None = None,
         register_factory: bool = True,
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
@@ -605,6 +605,8 @@ class KCLayout(
                 can then be retrieved with `kcl.factories.tags[my_tag]` or if filtered
                 for multiple `kcl.factories.for_tags([my_tag1, my_tag2, ...])`.
         """
+        if drop_params is None:
+            drop_params = ["self", "cls"]
         if check_instances is None:
             check_instances = config.check_instances
         if overwrite_existing is None:
@@ -912,7 +914,7 @@ class KCLayout(
         set_name: bool = True,
         check_ports: bool = True,
         basename: str | None = None,
-        drop_params: list[str] = ["self", "cls"],
+        drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
     ) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]: ...
 
@@ -927,7 +929,7 @@ class KCLayout(
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
         basename: str | None = None,
-        drop_params: list[str] = ["self", "cls"],
+        drop_params: Sequence[str] | None = None,
         register_factory: bool = True,
     ) -> (
         Callable[KCellParams, VKCell]
@@ -963,6 +965,9 @@ class KCLayout(
                 [factories][kfactory.kcell.KCLayout.factories]
         """
 
+        if drop_params is None:
+            drop_params = ["self", "cls"]
+
         def decorator_autocell(
             f: Callable[KCellParams, VKCell],
         ) -> Callable[KCellParams, VKCell]:
@@ -984,7 +989,7 @@ class KCLayout(
                     if get_origin(p.annotation) is Annotated
                 }
                 arg_par = list(sig.parameters.items())[: len(args)]
-                for i, (k, v) in enumerate(arg_par):
+                for i, (k, _v) in enumerate(arg_par):
                     params[k] = args[i]
                 params.update(kwargs)
 
@@ -1309,7 +1314,7 @@ class KCLayout(
     def read(
         self,
         filename: str | Path,
-        options: kdb.LoadLayoutOptions = load_layout_options(),
+        options: kdb.LoadLayoutOptions | None = None,
         register_cells: bool | None = None,
         test_merge: bool = True,
         update_kcl_meta_data: Literal["overwrite", "skip", "drop"] = "skip",
@@ -1341,6 +1346,8 @@ class KCLayout(
                 transformations as strings, never versions have them stored and loaded
                 in their native KLayout formats.
         """
+        if options is None:
+            options = load_layout_options()
         with self.thread_lock:
             if meta_format is None:
                 meta_format = config.meta_format
@@ -1513,7 +1520,7 @@ class KCLayout(
     def write(
         self,
         filename: str | Path,
-        options: kdb.SaveLayoutOptions = save_layout_options(),
+        options: kdb.SaveLayoutOptions | None = None,
         set_meta_data: bool = True,
         convert_external_cells: bool = False,
         autoformat_from_file_extension: bool = True,
@@ -1531,6 +1538,8 @@ class KCLayout(
                 automatically from the file extension of `filename`. This is necessary
                 for the options. If not set, this will default to `GDSII`.
         """
+        if options is None:
+            options = save_layout_options()
         if isinstance(filename, Path):
             filename = str(filename.resolve())
         for kc in list(self.kcells.values()):

@@ -171,7 +171,7 @@ class LayerLevel(BaseModel):
         material: str | None = None,
         sidewall_angle: float = 0.0,
         z_to_bias: tuple[int, ...] | None = None,
-        info: Info = Info(),
+        info: Info | None = None,
     ) -> None:
         if isinstance(layer, kdb.LayerInfo):
             layer = (layer.layer, layer.datatype)
@@ -183,7 +183,7 @@ class LayerLevel(BaseModel):
             material=material,
             sidewall_angle=sidewall_angle,
             z_to_bias=z_to_bias,
-            info=info,
+            info=info or Info(),
         )
 
 

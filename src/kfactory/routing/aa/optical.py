@@ -246,7 +246,7 @@ def route_bundle(
             spacings=separation,
         )
 
-        for ps, pe, pts in zip(start_ports, end_ports, pts_list):
+        for ps, pe, pts in zip(start_ports, end_ports, pts_list, strict=False):
             # use edges and transformation to get distances to calculate crossings
             # and types of crossings
             vector_bundle_start = pts[0] - pts[1]
@@ -297,7 +297,7 @@ def route_bundle(
                 )
             )
     else:
-        for ps, pe in zip(start_ports, end_ports):
+        for ps, pe in zip(start_ports, end_ports, strict=False):
             pts = _get_connection_between_ports(
                 port_start=ps,
                 port_end=pe,
@@ -454,11 +454,16 @@ def optimize_route(
     angle: float,
     angle_step: float = 5,
     stop_angle: tuple[float, float] | None = None,
-    _p0: kdb.DPoint = kdb.DPoint(0, 0),
-    _p1: kdb.DPoint = kdb.DPoint(1, 0),
+    _p0: kdb.DPoint | None = None,
+    _p1: kdb.DPoint | None = None,
     stop_min_dist: float = 0.005,
     min_angle_step: float = 0.001,
 ) -> tuple[kdb.DPoint, kdb.DPoint]:
+    if _p0 is None:
+        _p0 = kdb.DPoint(0, 0)
+    if _p1 is None:
+        _p1 = kdb.DPoint(1, 0)
+
     def _optimize_func(
         angle: float,
         bend_factory: VirtualBendFactory,
@@ -578,7 +583,7 @@ def backbone2bundle(
 
     x = -width // 2
 
-    for pw, spacing in zip(port_widths, spacings):
+    for pw, spacing in zip(port_widths, spacings, strict=False):
         x += pw // 2 + spacing // 2
 
         _e1 = edges[0].shifted(-x)

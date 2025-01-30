@@ -152,15 +152,15 @@ def route_bundle(
     end_straights: dbu | list[dbu] = 0,
     place_layer: kdb.LayerInfo | None = None,
     route_width: dbu | None = None,
-    bboxes: list[kdb.Box] = [],
+    bboxes: list[kdb.Box] | None = None,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     sort_ports: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:
@@ -251,6 +251,12 @@ def route_bundle(
             If no waypoints are set, the target angles of all ends muts be the same
             (after the steps).
     """
+    if ends is None:
+        ends = []
+    if starts is None:
+        starts = []
+    if bboxes is None:
+        bboxes = []
     return route_bundle_generic(
         c=c,
         start_ports=[p._base for p in start_ports],
@@ -289,15 +295,15 @@ def route_bundle_dual_rails(
     place_layer: kdb.LayerInfo | None = None,
     width_rails: dbu | None = None,
     separation_rails: dbu | None = None,
-    bboxes: list[kdb.Box] = [],
+    bboxes: list[kdb.Box] | None = None,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     sort_ports: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:
@@ -389,6 +395,12 @@ def route_bundle_dual_rails(
             If no waypoints are set, the target angles of all ends muts be the same
             (after the steps).
     """
+    if ends is None:
+        ends = []
+    if starts is None:
+        starts = []
+    if bboxes is None:
+        bboxes = []
     if start_straights is not None:
         logger.warning("start_straights is deprecated. Use `starts` instead.")
         starts = start_straights

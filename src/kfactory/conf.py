@@ -154,13 +154,12 @@ def get_affinity() -> int:
     """
     threads = 0
     try:
-        threads = len(os.sched_getaffinity(0))  # type: ignore[attr-defined,unused-ignore]
+        return len(os.sched_getaffinity(0))  # type: ignore[attr-defined,unused-ignore]
     except AttributeError:
         import multiprocessing
 
         threads = multiprocessing.cpu_count()
-    finally:
-        return threads
+    return threads
 
 
 dotenv_path = find_dotenv(usecwd=True)

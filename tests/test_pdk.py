@@ -277,7 +277,6 @@ def test_pdk_cell_infosettings(straight: kf.KCell, LAYER: Layers) -> None:
     kcl = kf.KCLayout("INFOSETTINGS", infos=Layers)
     c = kcl.kcell()
     _wg = c << straight
-    _wg.cell
     assert _wg.cell.settings == straight.settings
     assert _wg.cell.info == straight.info
 

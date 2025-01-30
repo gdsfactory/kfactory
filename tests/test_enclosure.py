@@ -37,8 +37,6 @@ def test_enclosure(LAYER: Layers) -> None:
 
 
 def test_enc(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
-    wg_enc
-
     mmi_enc(LAYER.WG, wg_enc)
 
 

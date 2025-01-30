@@ -181,6 +181,7 @@ class ProtoPort(Generic[TUnit], ABC):
     yaml_tag: str = "!Port"
     _base: BasePort
 
+    @abstractmethod
     def __init__(
         self,
         *,
@@ -196,7 +197,7 @@ class ProtoPort(Generic[TUnit], ABC):
         mirror_x: bool = False,
         port: Port | None = None,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] = ...,
         cross_section: SymmetricalCrossSection | None = None,
     ) -> None: ...
 
@@ -514,7 +515,7 @@ class Port(ProtoPort[int]):
         trans: kdb.Trans,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] = ...,
     ) -> None: ...
 
     @overload
@@ -527,7 +528,7 @@ class Port(ProtoPort[int]):
         dcplx_trans: kdb.DCplxTrans,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] = ...,
     ) -> None: ...
 
     @overload
@@ -542,7 +543,7 @@ class Port(ProtoPort[int]):
         center: tuple[int, int],
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] = ...,
     ) -> None: ...
 
     @overload
@@ -555,7 +556,7 @@ class Port(ProtoPort[int]):
         trans: kdb.Trans,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] = ...,
     ) -> None: ...
 
     @overload
@@ -568,7 +569,7 @@ class Port(ProtoPort[int]):
         dcplx_trans: kdb.DCplxTrans,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] = ...,
     ) -> None: ...
 
     @overload
@@ -583,7 +584,7 @@ class Port(ProtoPort[int]):
         center: tuple[int, int],
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] = ...,
     ) -> None: ...
 
     @overload
@@ -597,7 +598,7 @@ class Port(ProtoPort[int]):
         center: tuple[int, int],
         mirror_x: bool = False,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] = ...,
     ) -> None: ...
 
     @overload
@@ -608,7 +609,7 @@ class Port(ProtoPort[int]):
         cross_section: SymmetricalCrossSection,
         trans: kdb.Trans,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] = ...,
         port_type: str = "optical",
     ) -> None: ...
 
@@ -620,7 +621,7 @@ class Port(ProtoPort[int]):
         cross_section: SymmetricalCrossSection,
         dcplx_trans: kdb.DCplxTrans,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] = ...,
         port_type: str = "optical",
     ) -> None: ...
 
@@ -646,11 +647,13 @@ class Port(ProtoPort[int]):
         mirror_x: bool = False,
         port: Port | None = None,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] | None = None,
         cross_section: SymmetricalCrossSection | None = None,
         base: BasePort | None = None,
     ) -> None:
         """Create a port from dbu or um based units."""
+        if info is None:
+            info = {}
         if base is not None:
             self._base = base
             return
@@ -861,11 +864,13 @@ class DPort(ProtoPort[float]):
         mirror_x: bool = False,
         port: Port | DPort | None = None,
         kcl: KCLayout | None = None,
-        info: dict[str, int | float | str] = {},
+        info: dict[str, int | float | str] | None = None,
         cross_section: SymmetricalCrossSection | None = None,
         base: BasePort | None = None,
     ) -> None:
         """Create a port from dbu or um based units."""
+        if info is None:
+            info = {}
         if base is not None:
             self._base = base
             return
@@ -1137,7 +1142,7 @@ def rename_clockwise_multi(
     ports: Iterable[ProtoPort[Any]],
     layers: Iterable[LayerEnum | int] | None = None,
     regex: str | None = None,
-    type_prefix_mapping: dict[str, str] = {"optical": "o", "electrical": "e"},
+    type_prefix_mapping: dict[str, str] | None = None,
     start: int = 1,
 ) -> None:
     """Sort and return ports in the clockwise direction.
@@ -1159,6 +1164,8 @@ def rename_clockwise_multi(
             o8  o7
     ```
     """
+    if type_prefix_mapping is None:
+        type_prefix_mapping = {"optical": "o", "electrical": "e"}
     if layers:
         for p_type, prefix in type_prefix_mapping.items():
             for layer in layers:
@@ -1215,12 +1222,11 @@ def rename_by_direction(
         dir_2 = -1 if dir < 2 else 1
         if dir % 2:
 
-            def key_sort(port: ProtoPort[Any]) -> tuple[int, int]:
+            def key_sort(port: ProtoPort[Any], dir_2: int = dir_2) -> tuple[int, int]:
                 return (port.trans.disp.x, dir_2 * port.trans.disp.y)
-
         else:
 
-            def key_sort(port: ProtoPort[Any]) -> tuple[int, int]:
+            def key_sort(port: ProtoPort[Any], dir_2: int = dir_2) -> tuple[int, int]:
                 return (port.trans.disp.y, dir_2 * port.trans.disp.x)
 
         for i, p in enumerate(sorted(filter_direction(ports_, dir), key=key_sort)):

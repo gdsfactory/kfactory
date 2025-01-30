@@ -133,7 +133,9 @@ def check_collisions(
     collision_edges: dict[str, kdb.Edges] = {}
     inter_route_collisions = kdb.Edges()
     all_router_edges = kdb.Edges()
-    for i, (ps, pe, router) in enumerate(zip(start_ports, end_ports, routers)):
+    for i, (ps, pe, router) in enumerate(
+        zip(start_ports, end_ports, routers, strict=False)
+    ):
         _edges, router_edges = router.collisions(log_errors=None)
         if not _edges.is_empty():
             collision_edges[f"{ps.name} - {pe.name} (index: {i})"] = _edges
@@ -293,13 +295,13 @@ def route_bundle(
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     routing_function: ManhattanBundleRoutingFunction = route_smart,
-    routing_kwargs: dict[str, Any] = {"bbox_routing": "minimal"},
+    routing_kwargs: dict[str, Any] | None = None,
     placer_function: PlacerFunction,
-    placer_kwargs: dict[str, Any] = {},
+    placer_kwargs: dict[str, Any] | None = None,
     router_post_process_function: RouterPostProcessFunction | None = None,
-    router_post_process_kwargs: dict[str, Any] = {},
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = [],
+    router_post_process_kwargs: dict[str, Any] | None = None,
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:
@@ -399,6 +401,16 @@ def route_bundle(
         end_angles: Overwrite the port orientation of all start_ports together
             (single value) or each one (list of values which is as long as end_ports).
     """
+    if ends is None:
+        ends = []
+    if starts is None:
+        starts = []
+    if router_post_process_kwargs is None:
+        router_post_process_kwargs = {}
+    if placer_kwargs is None:
+        placer_kwargs = {}
+    if routing_kwargs is None:
+        routing_kwargs = {"bbox_routing": "minimal"}
     if not start_ports:
         return []
     if not (len(start_ports) == len(end_ports)):
@@ -434,7 +446,7 @@ def route_bundle(
                 )
             start_ports = [
                 p.transformed(post_trans=kdb.Trans(a - p.get_trans().angle))
-                for a, p in zip(start_angles, start_ports)
+                for a, p in zip(start_angles, start_ports, strict=False)
             ]
 
     if end_angles is not None:
@@ -451,7 +463,7 @@ def route_bundle(
                 )
             end_ports = [
                 p.transformed(post_trans=kdb.Trans(a - p.get_trans().angle))
-                for a, p in zip(end_angles, start_ports)
+                for a, p in zip(end_angles, start_ports, strict=False)
             ]
 
     if route_width:
@@ -496,7 +508,7 @@ def route_bundle(
         )
     placer_errors: list[Exception] = []
     error_routes: list[tuple[BasePort, BasePort, list[kdb.Point], int]] = []
-    for router, ps, pe in zip(routers, start_ports, end_ports):
+    for router, ps, pe in zip(routers, start_ports, end_ports, strict=False):
         try:
             route = placer_function(
                 c,
@@ -517,7 +529,9 @@ def route_bundle(
             if not c.name.startswith("Unnamed_")
             else c.kcl.future_cell_name or c.name
         )
-        for error, (ps, pe, pts, width) in zip(placer_errors, error_routes):
+        for error, (ps, pe, pts, width) in zip(
+            placer_errors, error_routes, strict=False
+        ):
             cat = db.create_category(f"{ps.name} - {pe.name}")
             it = db.create_item(cell=cell, category=cat)
             it.add_value(

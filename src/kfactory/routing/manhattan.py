@@ -37,8 +37,8 @@ class ManhattanRoutePathFunction(Protocol):
         port1: Port | kdb.Trans,
         port2: Port | kdb.Trans,
         bend90_radius: int,
-        start_steps: list[Step] = [],
-        end_steps: list[Step] = [],
+        start_steps: list[Step] | None = None,
+        end_steps: list[Step] | None = None,
     ) -> list[kdb.Point]:
         """Minimal kwargs of a manhattan route function."""
         ...
@@ -53,8 +53,8 @@ class ManhattanRoutePathFunction180(Protocol):
         port2: Port | kdb.Trans,
         bend90_radius: int,
         bend180_radius: int,
-        start_steps: list[Step] = [],
-        end_steps: list[Step] = [],
+        start_steps: list[Step] | None = None,
+        end_steps: list[Step] | None = None,
     ) -> list[kdb.Point]:
         """Minimal kwargs of a manhattan route function with 180° bend."""
         ...
@@ -561,7 +561,7 @@ def route_manhattan(
     port2: Port | kdb.Trans,
     bend90_radius: int,
     start_steps: Sequence[Step] = [],
-    end_steps: list[Step] = [],
+    end_steps: list[Step] | None = None,
     max_tries: int = 20,
     invert: bool = False,
 ) -> list[kdb.Point]:
@@ -584,6 +584,8 @@ def route_manhattan(
     Returns:
         route: Calculated route in dbu points.
     """
+    if end_steps is None:
+        end_steps = []
     if not invert:
         t1 = port1 if isinstance(port1, kdb.Trans) else port1.trans
         t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans
@@ -925,7 +927,7 @@ def route_smart(
         default_start_bundle: list[kdb.Trans] = []
         start_bundles: dict[kdb.Box, list[kdb.Trans]] = defaultdict(list)
         mh_routers: list[ManhattanRouter] = []
-        for s, s_t, e, e_t in zip(starts, start_ts, ends, end_ts):
+        for s, s_t, e, e_t in zip(starts, start_ts, ends, end_ts, strict=False):
             mh_routers.append(
                 ManhattanRouter(
                     bend90_radius=bend90_radius,
@@ -946,7 +948,7 @@ def route_smart(
             if b.contains(p):
                 start_bundles[b].append(ts)
             else:
-                for i, _b in enumerate(bboxes):
+                for _b in bboxes:
                     if _b.contains(p):
                         start_bundles[_b].append(ts)
                         b = _b
@@ -967,7 +969,7 @@ def route_smart(
             if b.contains(p):
                 end_bundles[b].append(ts)
             else:
-                for i, _b in enumerate(bboxes):
+                for _b in bboxes:
                     if _b.contains(p):
                         end_bundles[_b].append(ts)
                         b = _b
@@ -1176,7 +1178,9 @@ def route_smart(
                         ...
 
         all_routers: list[ManhattanRouter] = []
-        for ts, te, w, ss, es in zip(start_ts, end_ts, widths, starts, ends):
+        for ts, te, w, ss, es in zip(
+            start_ts, end_ts, widths, starts, ends, strict=False
+        ):
             start_t = start_mapping[ts]
             end_t = end_mapping[te]
             all_routers.append(
@@ -1207,7 +1211,9 @@ def route_smart(
             )
 
         all_routers = []
-        for ts, te, w, ss, es in zip(start_ts, end_ts, widths, starts, ends):
+        for ts, te, w, ss, es in zip(
+            start_ts, end_ts, widths, starts, ends, strict=False
+        ):
             all_routers.append(
                 ManhattanRouter(
                     bend90_radius=bend90_radius,
@@ -1231,7 +1237,7 @@ def route_smart(
     bundle = bundled_routers[0]
     bundle_bbox = complete_bbox.dup()
 
-    for router, bbox in zip(all_routers[1:], router_bboxes[1:]):
+    for router, bbox in zip(all_routers[1:], router_bboxes[1:], strict=False):
         dbrbox = bbox.enlarged(separation + router.width // 2)
         overlap_box = dbrbox & bundle_bbox
 
@@ -1457,7 +1463,8 @@ def route_smart(
                 angle = rg_angles[-1]
                 routers_anticlockwise: list[ManhattanRouter]
                 routers_anticlockwise = router_groups[-1][1].copy()
-                for i in reversed(range(i, len(router_groups) - 1)):
+                n = i
+                for i in reversed(range(n, len(router_groups) - 1)):
                     new_angle, new_routers = router_groups[i]
                     a = angle
                     if routers_anticlockwise:
@@ -1604,14 +1611,18 @@ def route_loosely(
     routers: Sequence[ManhattanRouter],
     separation: int,
     bbox_routing: Literal["minimal", "full"],
-    start_bbox: kdb.Box = kdb.Box(),
-    end_bbox: kdb.Box = kdb.Box(),
+    start_bbox: kdb.Box | None = None,
+    end_bbox: kdb.Box | None = None,
 ) -> None:
     """Route two port banks (all ports same direction) to the end.
 
     This will not result in a tight bundle but use all the space available and
     choose the shortest path.
     """
+    if start_bbox is None:
+        start_bbox = kdb.Box()
+    if end_bbox is None:
+        end_bbox = kdb.Box()
     router_start_box = start_bbox.dup()
 
     if routers:
@@ -2003,7 +2014,7 @@ def _backbone2bundle(
         _pts = [p.dup() for p in backbone]
         p1 = _pts[0]
 
-        for p2, e, dir in zip(_pts[1:], edges, dirs):
+        for p2, e, dir in zip(_pts[1:], edges, dirs, strict=False):
             _e = e.shifted(-x)
             if dir % 2:
                 p1.x = _e.p1.x
@@ -2037,7 +2048,8 @@ def route_ports_to_bundle(
     bundle_width = sum(tw[1] for tw in trans_ports) + (len(trans_ports) - 1) * spacing
 
     trans_mapping = {
-        norm_t: t for (t, _), (norm_t, _) in zip(ports_to_route, trans_ports)
+        norm_t: t
+        for (t, _), (norm_t, _) in zip(ports_to_route, trans_ports, strict=False)
     }
 
     def sort_port(port_width: tuple[kdb.Trans, int]) -> int:
@@ -2110,7 +2122,9 @@ def route_ports_to_bundle(
 
     bundle_position_x = max(
         tw[0].disp.x + ss + es + start_straight + end_straight
-        for tw, ss, es in zip(sorted_ports, bend_straight_lengths, straights)
+        for tw, ss, es in zip(
+            sorted_ports, bend_straight_lengths, straights, strict=False
+        )
     )
     bundle_position.x = max(bundle_position.x, bundle_position_x)
 
@@ -2118,7 +2132,7 @@ def route_ports_to_bundle(
     bundle_route_x = bundle_position.x
     port_dict: dict[kdb.Trans, list[kdb.Point]] = {}
 
-    for (_trans, _width), _end_straight in zip(sorted_ports, straights):
+    for (_trans, _width), _end_straight in zip(sorted_ports, straights, strict=False):
         bundle_route_y -= _width // 2
         t_e = kdb.Trans(2, False, bundle_route_x, bundle_route_y)
         pts = [
@@ -2195,7 +2209,7 @@ def _route_waypoints(
             key=lambda er: er.end_transformation * kdb.Trans.R180
         )
 
-        for sr, er in zip(start_manhattan_routers, end_manhattan_routers):
+        for sr, er in zip(start_manhattan_routers, end_manhattan_routers, strict=False):
             router = ManhattanRouter(
                 bend90_radius=bend90_radius,
                 start_transformation=sr.start_transformation,
@@ -2260,12 +2274,13 @@ def _route_waypoints(
                 zip(
                     sorted(bundle_points, key=lambda _bb: _bb[-1]),
                     end_manhattan_routers,
+                    strict=False,
                 ),
                 key=lambda pair: pair[0][0],
             )
         )
         for sr, _bb, er in zip(
-            start_manhattan_routers, bundle_points, end_manhattan_routers
+            start_manhattan_routers, bundle_points, end_manhattan_routers, strict=False
         ):
             router = ManhattanRouter(
                 bend90_radius=bend90_radius,
