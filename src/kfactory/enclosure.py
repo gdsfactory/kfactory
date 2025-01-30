@@ -290,7 +290,7 @@ def extrude_path_dynamic_points(
         vector_bot = [start_trans * kdb.DCplxTrans.R180 * ref_vector]
         p_old = path[0]
         p = path[1]
-        for point, w in zip(path[2:], widths[1:-1]):
+        for point, w in zip(path[2:], widths[1:-1], strict=False):
             ref_vector = kdb.DCplxTrans(kdb.DVector(0, w / 2))
             p_new = point
             v = p_new - p_old
@@ -348,7 +348,8 @@ def extrude_path_dynamic(
             reg = kdb.Region()
             for section in layer_sec.sections:
 
-                def w_max(x: float) -> float:
+                def w_max(x: float, section: Section = section) -> float:
+                    assert section.d_max is not None
                     return widths(x) + 2 * section.d_max * target.kcl.layout.dbu
 
                 _r = kdb.Region(
@@ -365,13 +366,9 @@ def extrude_path_dynamic(
                 )
                 if section.d_min is not None:
 
-                    def w_min(x: float) -> float:
-                        return (
-                            widths(x)
-                            + 2  # type: ignore[operator]
-                            * section.d_min
-                            * target.kcl.layout.dbu
-                        )
+                    def w_min(x: float, section: Section = section) -> float:
+                        assert section.d_min is not None
+                        return widths(x) + 2 * section.d_min * target.kcl.layout.dbu
 
                     _r -= kdb.Region(
                         target.kcl.to_dbu(
@@ -913,7 +910,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             operator = RegionOperator(cell=c, layer=layer_index)
             tp.output(f"target_{layer_index}", operator)
             max_size: int = _min_size
-            for i, section in enumerate(reversed(sections.sections)):
+            for _i, section in enumerate(reversed(sections.sections)):
                 max_size = max(max_size, section.d_max)
                 queue_str = f"var tile_reg = (_tile & _frame).sized({maxsize});"
                 queue_str += (
@@ -1197,8 +1194,8 @@ class KCellLayerEnclosures(BaseModel):
         """Retrieve enclosure by main layer."""
         try:
             return next(filter(lambda enc: enc.main_layer == key, self.enclosures))
-        except StopIteration:
-            raise KeyError(f"Unknown key {key}")
+        except StopIteration as e:
+            raise KeyError(f"Unknown key {key}") from e
 
     def get_enclosure(
         self,

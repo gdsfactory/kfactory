@@ -171,7 +171,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
             other_list = cast(list[ProtoPort[Any]], list(other))
             if len(self._bases) != len(other_list):
                 return False
-            for b1, b2 in zip(self._bases, other_list):
+            for b1, b2 in zip(self._bases, other_list, strict=False):
                 if b1 != b2.base:
                     return False
             return True
@@ -431,11 +431,11 @@ class Ports(ProtoPorts[int]):
             return Port(base=self._bases[key])
         try:
             return Port(base=next(filter(lambda base: base.name == key, self._bases)))
-        except StopIteration:
+        except StopIteration as e:
             raise KeyError(
                 f"{key=} is not a valid port name or index. "
                 f"Available ports: {[v.name for v in self._bases]}"
-            )
+            ) from e
 
     def filter(
         self,
@@ -767,11 +767,11 @@ class DPorts(ProtoPorts[float]):
             return DPort(base=self._bases[key])
         try:
             return DPort(base=next(filter(lambda base: base.name == key, self._bases)))
-        except StopIteration:
+        except StopIteration as e:
             raise KeyError(
                 f"{key=} is not a valid port name or index. "
                 f"Available ports: {[v.name for v in self._bases]}"
-            )
+            ) from e
 
     def filter(
         self,

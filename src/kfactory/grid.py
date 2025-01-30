@@ -15,7 +15,7 @@ def grid_dbu(
     target: KCell,
     kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
     spacing: int | tuple[int, int],
-    target_trans: kdb.Trans = kdb.Trans(),
+    target_trans: kdb.Trans | None = None,
     shape: tuple[int, int] | None = None,
     align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
@@ -86,6 +86,9 @@ def grid_dbu(
         spacing_x = spacing
         spacing_y = spacing
 
+    if target_trans is None:
+        target_trans = kdb.Trans()
+
     insts: list[list[Instance | None]]
     kcell_array: Sequence[Sequence[KCell]]
 
@@ -116,9 +119,9 @@ def grid_dbu(
             max(0 if bbox is None else bbox.height() + spacing_y for bbox in box_array)
             for box_array in bboxes
         )
-        for array, bbox_array in zip(insts, bboxes):
+        for array, bbox_array in zip(insts, bboxes, strict=False):
             y0 += h - h // 2
-            for bbox, inst in zip(bbox_array, array):
+            for bbox, inst in zip(bbox_array, array, strict=False):
                 x0 += w - w // 2
                 if bbox is not None and inst is not None:
                     match align_x:
@@ -188,7 +191,7 @@ def grid_dbu(
         ]
         w = max(shape_bboxes_widths) + spacing_x
         h = max(shape_bboxes_heights) + spacing_y
-        for i, (inst, bbox) in enumerate(zip(_insts, shape_bboxes)):
+        for i, (inst, bbox) in enumerate(zip(_insts, shape_bboxes, strict=False)):
             i_x = i % shape[1]
             i_y = i // shape[1]
             insts[i_y][i_x] = inst
@@ -234,7 +237,7 @@ def flexgrid_dbu(
     target: KCell,
     kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
     spacing: int | tuple[int, int],
-    target_trans: kdb.Trans = kdb.Trans(),
+    target_trans: kdb.Trans | None = None,
     shape: tuple[int, int] | None = None,
     align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
@@ -300,6 +303,9 @@ def flexgrid_dbu(
         spacing_x = spacing
         spacing_y = spacing
 
+    if target_trans is None:
+        target_trans = kdb.Trans()
+
     insts: list[list[Instance | None]]
     kcell_array: Sequence[Sequence[KCell]]
 
@@ -328,8 +334,8 @@ def flexgrid_dbu(
         ymin: dict[int, int] = {}
         ymax: dict[int, int] = {}
         xmax: dict[int, int] = {}
-        for i_y, (array, box_array) in enumerate(zip(insts, bboxes)):
-            for i_x, (inst, bbox) in enumerate(zip(array, box_array)):
+        for i_y, (array, box_array) in enumerate(zip(insts, bboxes, strict=False)):
+            for i_x, (inst, bbox) in enumerate(zip(array, box_array, strict=False)):
                 if inst is not None and bbox is not None:
                     if inst is not None and bbox is not None:
                         match align_x:
@@ -362,9 +368,9 @@ def flexgrid_dbu(
                         )
                         ymax[i_y] = max(ymax.get(i_y) or bbox.top, bbox.top)
 
-        for i_y, (array, bbox_array) in enumerate(zip(insts, bboxes)):
+        for i_y, (array, bbox_array) in enumerate(zip(insts, bboxes, strict=False)):
             y0 -= ymin.get(i_y, 0)
-            for i_x, (bbox, inst) in enumerate(zip(bbox_array, array)):
+            for i_x, (bbox, inst) in enumerate(zip(bbox_array, array, strict=False)):
                 x0 -= xmin.get(i_x, 0)
                 if inst is not None and bbox is not None:
                     at = kdb.Trans(x0, y0)
@@ -469,7 +475,7 @@ def grid(
     target: DKCell,
     kcells: Sequence[DKCell | None] | Sequence[Sequence[DKCell | None]],
     spacing: float | tuple[float, float],
-    target_trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+    target_trans: kdb.DCplxTrans | None = None,
     shape: tuple[int, int] | None = None,
     align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
@@ -540,6 +546,9 @@ def grid(
         spacing_x = spacing
         spacing_y = spacing
 
+    if target_trans is None:
+        target_trans = kdb.DCplxTrans()
+
     insts: list[list[DInstance | None]]
     kcell_array: Sequence[Sequence[DKCell]]
 
@@ -571,9 +580,9 @@ def grid(
             max(0 if bbox is None else bbox.height() + spacing_y for bbox in box_array)
             for box_array in bboxes
         )
-        for array, bbox_array in zip(insts, bboxes):
+        for array, bbox_array in zip(insts, bboxes, strict=False):
             y0 += h - h / 2
-            for bbox, inst in zip(bbox_array, array):
+            for bbox, inst in zip(bbox_array, array, strict=False):
                 x0 += w - w / 2
                 if bbox is not None and inst is not None:
                     match align_x:
@@ -643,7 +652,7 @@ def grid(
         ]
         w = max(shape_bboxes_widths) + spacing_x
         h = max(shape_bboxes_heights) + spacing_y
-        for i, (inst, bbox) in enumerate(zip(_insts, shape_bboxes)):
+        for i, (inst, bbox) in enumerate(zip(_insts, shape_bboxes, strict=False)):
             i_x = i % shape[1]
             i_y = i // shape[1]
             insts[i_y][i_x] = inst
@@ -689,7 +698,7 @@ def flexgrid(
     target: DKCell,
     kcells: Sequence[DKCell | None] | Sequence[Sequence[DKCell | None]],
     spacing: float | tuple[float, float],
-    target_trans: kdb.DCplxTrans = kdb.DCplxTrans(),
+    target_trans: kdb.DCplxTrans | None = None,
     shape: tuple[int, int] | None = None,
     align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
@@ -755,6 +764,9 @@ def flexgrid(
         spacing_x = spacing
         spacing_y = spacing
 
+    if target_trans is None:
+        target_trans = kdb.DCplxTrans()
+
     insts: list[list[DInstance | None]]
     kcell_array: Sequence[Sequence[DKCell]]
 
@@ -786,8 +798,8 @@ def flexgrid(
         ymin: dict[int, float] = {}
         ymax: dict[int, float] = {}
         xmax: dict[int, float] = {}
-        for i_y, (array, box_array) in enumerate(zip(insts, bboxes)):
-            for i_x, (inst, bbox) in enumerate(zip(array, box_array)):
+        for i_y, (array, box_array) in enumerate(zip(insts, bboxes, strict=False)):
+            for i_x, (inst, bbox) in enumerate(zip(array, box_array, strict=False)):
                 if inst is not None and bbox is not None:
                     match align_x:
                         case "xmin":
@@ -817,9 +829,9 @@ def flexgrid(
                     )
                     ymax[i_y] = max(ymax.get(i_y) or bbox.top, bbox.top)
 
-        for i_y, (array, bbox_array) in enumerate(zip(insts, bboxes)):
+        for i_y, (array, bbox_array) in enumerate(zip(insts, bboxes, strict=False)):
             y0 -= ymin.get(i_y, 0)
-            for i_x, (bbox, inst) in enumerate(zip(bbox_array, array)):
+            for i_x, (bbox, inst) in enumerate(zip(bbox_array, array, strict=False)):
                 x0 -= xmin.get(i_x, 0)
                 if inst is not None and bbox is not None:
                     at = kdb.DCplxTrans(x0, y0)

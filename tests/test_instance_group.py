@@ -20,7 +20,7 @@ _InstanceGroupTuple: TypeAlias = tuple[
 def _instance_group_equal(
     instance1: kf.InstanceGroup, instance2: kf.InstanceGroup
 ) -> bool:
-    for i1, i2 in zip(instance1.insts, instance2.insts):
+    for i1, i2 in zip(instance1.insts, instance2.insts, strict=False):
         if not _instances_equal(i1, i2):
             return False
     return True

@@ -85,7 +85,7 @@ def clean_value(
             )
         if isinstance(value, functools.partial):
             sig = inspect.signature(value.func)
-            args_as_kwargs = dict(zip(sig.parameters.keys(), value.args))
+            args_as_kwargs = dict(zip(sig.parameters.keys(), value.args, strict=False))
             args_as_kwargs.update(**value.keywords)
             args_as_kwargs = clean_dict(args_as_kwargs)
             # args_as_kwargs.pop("function", None)
@@ -131,7 +131,7 @@ def _to_hashable(
         return ud
     else:
         ul = DecoratorList([])
-        for index, value in enumerate(d):
+        for _index, value in enumerate(d):
             if isinstance(value, dict | list):
                 value_ = _to_hashable(value)
             else:

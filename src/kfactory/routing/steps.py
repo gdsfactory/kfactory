@@ -283,9 +283,9 @@ class Steps(RootModel[list[Any]]):
         i = 0
         try:
             if self.root:
-                for i, step in enumerate(self.root[:-1]):
+                for step in self.root[:-1]:
                     step.execute(router, True)
-                i += i
+                i += 1
                 step = self.root[-1]
                 step.execute(router, False)
         except Exception as e:

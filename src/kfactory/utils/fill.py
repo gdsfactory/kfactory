@@ -25,10 +25,12 @@ class FillOperator(kdb.TileOutputReceiver):
         origin: kdb.Point,
         row_step: kdb.Vector,
         column_step: kdb.Vector,
-        fill_margin: kdb.Vector = kdb.Vector(0, 0),
+        fill_margin: kdb.Vector | None = None,
         remaining_polygons: kdb.Region | None = None,
         multi: bool = False,
     ) -> None:
+        if fill_margin is None:
+            fill_margin = kdb.Vector(0, 0)
         """Initialize the receiver."""
         self.kcl = kcl
         self.top_cell = top_cell
@@ -210,25 +212,31 @@ def fill_tiled(
         exlayers = " + ".join(
             [
                 layer_name + f".sized({c.kcl.to_dbu(size)})" if size else layer_name
-                for layer_name, (_, size) in zip(exlayer_names, exclude_layers)
+                for layer_name, (_, size) in zip(
+                    exlayer_names, exclude_layers, strict=False
+                )
             ]
         )
         exregions = " + ".join(
             [
                 region_name + f".sized({c.kcl.to_dbu(size)})" if size else region_name
-                for region_name, (_, size) in zip(exregion_names, exclude_regions)
+                for region_name, (_, size) in zip(
+                    exregion_names, exclude_regions, strict=False
+                )
             ]
         )
         layers = " + ".join(
             [
                 layer_name + f".sized({c.kcl.to_dbu(size)})" if size else layer_name
-                for layer_name, (_, size) in zip(layer_names, fill_layers)
+                for layer_name, (_, size) in zip(layer_names, fill_layers, strict=False)
             ]
         )
         regions = " + ".join(
             [
                 region_name + f".sized({c.kcl.to_dbu(size)})" if size else region_name
-                for region_name, (_, size) in zip(region_names, fill_regions)
+                for region_name, (_, size) in zip(
+                    region_names, fill_regions, strict=False
+                )
             ]
         )
 

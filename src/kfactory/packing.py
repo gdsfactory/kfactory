@@ -35,7 +35,7 @@ def pack_kcells(
         max_height=max_height,
     )
 
-    for inst_bb, bb in zip(bbs, packed_bbs):
+    for inst_bb, bb in zip(bbs, packed_bbs, strict=False):
         inst, _bb = inst_bb
         inst.transform(
             kdb.Trans(
@@ -70,7 +70,7 @@ def pack_instances(
         max_height=max_height,
     )
 
-    for inst_bb, bb in zip(bbs, packed_bbs):
+    for inst_bb, bb in zip(bbs, packed_bbs, strict=False):
         inst, _bb = inst_bb
         inst.transform(
             kdb.Trans(

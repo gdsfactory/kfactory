@@ -17,7 +17,7 @@ def port_tests(rename_f: Callable[..., None] | None = None) -> kf.KCell:
 
     i = 0
     for angle in range(4):
-        for x, y in zip(port_x_coords, port_y_coords):
+        for x, y in zip(port_x_coords, port_y_coords, strict=False):
             point = (
                 kf.kdb.Trans(angle, False, 0, 0) * kf.kdb.Trans(0, False, offset, 0)
             ) * kf.kdb.Point(x, y)
