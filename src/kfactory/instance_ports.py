@@ -350,7 +350,7 @@ class DInstancePorts(ProtoTInstancePorts[float]):
 
     def filter(
         self,
-        angle: float | None = None,
+        angle: int | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
