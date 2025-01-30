@@ -21,13 +21,6 @@ from .exceptions import (
     PortWidthMismatch,
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
-from .instance_ports import (
-    DInstancePorts,
-    InstancePorts,
-    ProtoInstancePorts,
-    ProtoTInstancePorts,
-    VInstancePorts,
-)
 from .layer import LayerEnum
 from .port import DPort, Port, ProtoPort
 from .serialization import clean_name, get_cell_name
@@ -35,6 +28,13 @@ from .settings import Info, KCellSettings
 from .typings import TUnit
 
 if TYPE_CHECKING:
+    from .instance_ports import (
+        DInstancePorts,
+        InstancePorts,
+        ProtoInstancePorts,
+        ProtoTInstancePorts,
+        VInstancePorts,
+    )
     from .kcell import AnyKCell, AnyTKCell, DKCell, KCell, ProtoTKCell, VKCell
     from .layout import KCLayout
 
@@ -468,23 +468,18 @@ class Instance(ProtoTInstance[int], DBUGeometricObject):
     """
 
     yaml_tag: ClassVar[str] = "!Instance"
-    _ports: InstancePorts
 
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
         self.kcl = kcl
         self._instance = instance
-        self._ports = InstancePorts(self)
 
     @property
     def ports(self) -> InstancePorts:
         """Gets the transformed ports of the KCell."""
-        return self._ports
+        from .instance_ports import InstancePorts
 
-    @ports.setter
-    def ports(self, value: InstancePorts) -> None:
-        """Sets the transformed ports of the KCell."""
-        self._ports = value
+        return InstancePorts(self)
 
     def __getitem__(
         self, key: int | str | None | tuple[int | str | None, int, int]
@@ -552,23 +547,18 @@ class DInstance(ProtoTInstance[float], UMGeometricObject):
     """
 
     yaml_tag: ClassVar[str] = "!Instance"
-    _ports: DInstancePorts
 
     def __init__(self, kcl: KCLayout, instance: kdb.Instance) -> None:
         """Create an instance from a KLayout Instance."""
         self.kcl = kcl
         self._instance = instance
-        self._ports = DInstancePorts(self)
 
     @property
     def ports(self) -> DInstancePorts:
         """Gets the transformed ports of the KCell."""
-        return self._ports
+        from .instance_ports import DInstancePorts
 
-    @ports.setter
-    def ports(self, value: DInstancePorts) -> None:
-        """Sets the transformed ports of the KCell."""
-        self._ports = value
+        return DInstancePorts(self)
 
     @property
     def cell(self) -> DKCell:
@@ -621,7 +611,6 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     _name: str | None
     cell: VKCell | KCell
     trans: kdb.DCplxTrans
-    _ports: VInstancePorts
 
     def __init__(
         self,
@@ -633,7 +622,6 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         self._name = name
         self.cell = cell
         self.trans = trans or kdb.DCplxTrans()
-        self._ports = VInstancePorts(self)
 
     @property
     def name(self) -> str | None:
@@ -672,7 +660,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
 
     @property
     def ports(self) -> VInstancePorts:
-        return self._ports
+        from .instance_ports import (
+            VInstancePorts,
+        )
+
+        return VInstancePorts(self)
 
     def __repr__(self) -> str:
         """Return a string representation of the instance."""

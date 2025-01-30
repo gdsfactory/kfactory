@@ -12,7 +12,7 @@ import klayout.db as kdb
 import klayout.lay as lay
 import klayout.rdb as rdb
 
-from .conf import config, logger
+from .conf import config, logger, CHECK_INSTANCES
 from .enclosure import KCellEnclosure, LayerEnclosure
 from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
 from .kcell import BaseKCell, DKCell, KCell, VKCell, show
@@ -48,6 +48,7 @@ from . import (
 
 
 __all__ = [
+    "CHECK_INSTANCES",
     "BaseKCell",
     "Constants",
     "DInstance",

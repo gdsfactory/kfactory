@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable, Iterator, Sequence
-from typing import TYPE_CHECKING, Any, Generic, cast
+from typing import Any, Generic, cast
 
 from . import kdb
 from .conf import config
+from .instance import DInstance, Instance, ProtoTInstance, VInstance
 from .layer import LayerEnum
 from .port import (
     BasePort,
@@ -21,9 +22,6 @@ from .port import (
 from .ports import DPorts, Ports, ProtoPorts
 from .typings import TInstance, TUnit
 from .utilities import pprint_ports
-
-if TYPE_CHECKING:
-    from .instance import DInstance, Instance, ProtoTInstance, VInstance
 
 __all__ = [
     "DInstancePorts",

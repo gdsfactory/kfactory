@@ -1,13 +1,11 @@
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 import kfactory as kf
 
-if TYPE_CHECKING:
-    from kfactory.kcell import AnyKCell
-
 
 def test_custom_show() -> None:
+    from kfactory.kcell import AnyKCell
+
     showed = False
     _layout_options = kf.save_layout_options()
 

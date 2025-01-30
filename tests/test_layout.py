@@ -154,17 +154,17 @@ def test_check_instances(kcl: kf.KCLayout) -> None:
         return parent_cell
 
     with pytest.raises(ValueError):
-        kcl.cell(check_instances=kf.kcell.CHECK_INSTANCES.RAISE)(
-            test_cell_with_rotation
-        )("test_rase")
+        kcl.cell(check_instances=kf.CHECK_INSTANCES.RAISE)(test_cell_with_rotation)(
+            "test_rase"
+        )
 
-    cell = kcl.cell(check_instances=kf.kcell.CHECK_INSTANCES.FLATTEN)(
+    cell = kcl.cell(check_instances=kf.CHECK_INSTANCES.FLATTEN)(
         test_cell_with_rotation
     )("test_flatten")
 
     assert len(cell.insts) == 0
 
-    cell2 = kcl.cell(check_instances=kf.kcell.CHECK_INSTANCES.VINSTANCES)(
+    cell2 = kcl.cell(check_instances=kf.CHECK_INSTANCES.VINSTANCES)(
         test_cell_with_rotation
     )("test_vinstances")
 
