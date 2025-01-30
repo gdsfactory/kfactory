@@ -1180,6 +1180,7 @@ class KCellLayerEnclosures(BaseModel):
         return hash(tuple(self.enclosures))
 
     @field_validator("enclosures")
+    @classmethod
     def enclosures_must_have_main_layer(
         cls, v: list[LayerEnclosure]
     ) -> list[LayerEnclosure]:

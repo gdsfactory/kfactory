@@ -36,13 +36,13 @@ def simple_cplx_cell(layer: kf.kdb.LayerInfo) -> kf.KCell:
     return c
 
 
-def test_cell(LAYER: Layers) -> None:
-    simple_cplx_cell(LAYER.WG)
+def test_cell(layers: Layers) -> None:
+    simple_cplx_cell(layers.WG)
 
 
-def test_connected_cell(LAYER: Layers) -> None:
+def test_connected_cell(layers: Layers) -> None:
     c = kf.KCell()
-    layer = LAYER.WG
+    layer = layers.WG
     sckc1 = c << simple_cplx_cell(layer)
     sckc2 = c << simple_cplx_cell(layer)
     sckc2.connect("o1", sckc1, "o1")

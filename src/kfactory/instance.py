@@ -16,9 +16,9 @@ from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from .conf import PROPID, config, logger
 from .exceptions import (
-    PortLayerMismatch,
-    PortTypeMismatch,
-    PortWidthMismatch,
+    PortLayerMismatchError,
+    PortTypeMismatchError,
+    PortWidthMismatchError,
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .instance_ports import (
@@ -369,11 +369,11 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         else:
             p = Port(base=self.cell.ports[port].base)
         if p.width != op.width and not allow_width_mismatch:
-            raise PortWidthMismatch(self, other, p, op)
+            raise PortWidthMismatchError(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
-            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
+            raise PortLayerMismatchError(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
-            raise PortTypeMismatch(self, other, p, op)
+            raise PortTypeMismatchError(self, other, p, op)
         if p.base.dcplx_trans or op.base.dcplx_trans:
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
             match (use_mirror, use_angle):
@@ -901,11 +901,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         assert isinstance(p, Port) and isinstance(op, Port)
 
         if p.width != op.width and not allow_width_mismatch:
-            raise PortWidthMismatch(self, other, p, op)
+            raise PortWidthMismatchError(self, other, p, op)
         if p.layer != op.layer and not allow_layer_mismatch:
-            raise PortLayerMismatch(self.cell.kcl, self, other, p, op)
+            raise PortLayerMismatchError(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
-            raise PortTypeMismatch(self, other, p, op)
+            raise PortTypeMismatchError(self, other, p, op)
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
         match (use_mirror, use_angle):
             case True, True:

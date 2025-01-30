@@ -279,6 +279,7 @@ class KCLayout(
         kcls[self.name] = self
 
     @model_validator(mode="before")
+    @classmethod
     def _validate_layers(cls, data: dict[str, Any]) -> dict[str, Any]:
         data["layers"] = layerenum_from_dict(
             layers=data["infos"], layout=data["library"].layout()

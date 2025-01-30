@@ -125,7 +125,7 @@ def dbend_circular(
     return c
 
 
-def test_spiral(LAYER: Layers) -> None:
+def test_spiral(layers: Layers) -> None:
     c = kf.KCell()
 
     r1 = 1000
@@ -135,19 +135,19 @@ def test_spiral(LAYER: Layers) -> None:
         name="start",
         trans=kf.kdb.Trans.R0,
         width=1000,
-        layer=c.kcl.find_layer(LAYER.WG),
+        layer=c.kcl.find_layer(layers.WG),
     )
 
     for _ in range(10):
         r = r1 + r2
         r2 = r1
         r1 = r
-        b = c << bend_circular(width=1000, radius=r2, layer=LAYER.WG)
+        b = c << bend_circular(width=1000, radius=r2, layer=layers.WG)
         b.connect("W0", p)
         p = b.ports["N0"]
 
 
-def test_dspiral(LAYER: Layers) -> None:
+def test_dspiral(layers: Layers) -> None:
     c = kf.KCell()
 
     r1 = 1
@@ -157,7 +157,7 @@ def test_dspiral(LAYER: Layers) -> None:
         name="start",
         dcplx_trans=kf.kdb.DCplxTrans.R0,
         width=c.kcl.to_dbu(1),
-        layer=c.kcl.find_layer(LAYER.WG),
+        layer=c.kcl.find_layer(layers.WG),
     )
 
     kf.config.logfilter.level = kf.conf.LogLevel.ERROR
@@ -166,6 +166,6 @@ def test_dspiral(LAYER: Layers) -> None:
         r = r1 + r2
         r2 = r1
         r1 = r
-        b = c << dbend_circular(width=1, radius=r2, layer=LAYER.WG)
+        b = c << dbend_circular(width=1, radius=r2, layer=layers.WG)
         b.connect("W0", p)
         p = b.ports["N0"]

@@ -26,7 +26,7 @@ class MergeError(ValueError):
     """Raised if two layout's have conflicting cell definitions."""
 
 
-class PortWidthMismatch(ValueError):
+class PortWidthMismatchError(ValueError):
     """Error thrown when two ports don't have a matching `width`."""
 
     def __init__(
@@ -55,7 +55,7 @@ class PortWidthMismatch(ValueError):
             )
 
 
-class PortLayerMismatch(ValueError):
+class PortLayerMismatchError(ValueError):
     """Error thrown when two ports don't have a matching `layer`."""
 
     def __init__(
@@ -95,7 +95,7 @@ class PortLayerMismatch(ValueError):
             )
 
 
-class PortTypeMismatch(ValueError):
+class PortTypeMismatchError(ValueError):
     """Error thrown when two ports don't have a matching `port_type`."""
 
     def __init__(

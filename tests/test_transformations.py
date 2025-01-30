@@ -15,7 +15,7 @@ import kfactory as kf
     ],
 )
 def test_rotation(
-    center: kf.kdb.Point | None, straight: kf.KCell, LAYER: Layers
+    center: kf.kdb.Point | None, straight: kf.KCell, layers: Layers
 ) -> None:
     c = kf.KCell()
 
@@ -27,7 +27,7 @@ def test_rotation(
         wg2.rotate(2)
 
     if center:
-        c.shapes(c.kcl.find_layer(LAYER.WGCLAD)).insert(
+        c.shapes(c.kcl.find_layer(layers.WGCLAD)).insert(
             kf.kdb.Box(10).transformed(kf.kdb.Trans(center.to_v()))
         )
 
@@ -46,7 +46,7 @@ def test_rotation(
     ],
 )
 def test_drotation(
-    center: kf.kdb.DPoint | None, straight: kf.KCell, LAYER: Layers
+    center: kf.kdb.DPoint | None, straight: kf.KCell, layers: Layers
 ) -> None:
     c = kf.KCell()
 
@@ -59,7 +59,7 @@ def test_drotation(
         wg2.drotate(30)
 
     if center:
-        c.shapes(c.kcl.find_layer(LAYER.WGCLAD)).insert(
+        c.shapes(c.kcl.find_layer(layers.WGCLAD)).insert(
             kf.kdb.DBox(0.01).transformed(kf.kdb.DCplxTrans(center.to_v()))
         )
 

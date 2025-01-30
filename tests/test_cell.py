@@ -14,13 +14,13 @@ def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
     assert wg.name == "straight_W1000_L10000_LWG_EWGSTD"
 
 
-def test_circular_snapping(LAYER: Layers) -> None:
-    b = kf.cells.circular.bend_circular(width=1, radius=10, layer=LAYER.WG, angle=90)
+def test_circular_snapping(layers: Layers) -> None:
+    b = kf.cells.circular.bend_circular(width=1, radius=10, layer=layers.WG, angle=90)
     assert b.ports["o2"].dcplx_trans.disp == kf.kcl.to_um(b.ports["o2"].trans.disp)
 
 
-def test_euler_snapping(LAYER: Layers) -> None:
-    b = kf.cells.euler.bend_euler(width=1, radius=10, layer=LAYER.WG, angle=90)
+def test_euler_snapping(layers: Layers) -> None:
+    b = kf.cells.euler.bend_euler(width=1, radius=10, layer=layers.WG, angle=90)
     assert b.ports["o2"].dcplx_trans.disp == kf.kcl.to_um(b.ports["o2"].trans.disp)
 
 
@@ -54,13 +54,13 @@ def test_nested_dict_list() -> None:
     assert dl is not c.settings["arg1"]
 
 
-def test_no_snap(LAYER: Layers) -> None:
+def test_no_snap(layers: Layers) -> None:
     c = kf.KCell()
 
     c.create_port(
         width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
-        layer=c.kcl.find_layer(LAYER.WG),
+        layer=c.kcl.find_layer(layers.WG),
     )
 
     p = c.ports[0]
@@ -68,9 +68,9 @@ def test_no_snap(LAYER: Layers) -> None:
     assert p.dcplx_trans.disp != c.kcl.to_um(p.trans.disp)
 
 
-def test_namecollision(LAYER: Layers) -> None:
-    b1 = kf.cells.circular.bend_circular(width=1, radius=10.5, layer=LAYER.WG)
-    b2 = kf.cells.circular.bend_circular(width=1, radius=10.5000005, layer=LAYER.WG)
+def test_namecollision(layers: Layers) -> None:
+    b1 = kf.cells.circular.bend_circular(width=1, radius=10.5, layer=layers.WG)
+    b2 = kf.cells.circular.bend_circular(width=1, radius=10.5000005, layer=layers.WG)
 
     assert b1.name != b2.name
 
@@ -84,25 +84,25 @@ def test_nested_dic() -> None:
     recursive_dict_cell({"test": {"test2": "test3"}, "test4": "test5"})
 
 
-def test_ports_cell(LAYER: Layers) -> None:
+def test_ports_cell(layers: Layers) -> None:
     c = kf.KCell()
     c.create_port(
         name="o1",
         width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
-        layer=c.kcl.find_layer(LAYER.WG),
+        layer=c.kcl.find_layer(layers.WG),
     )
     assert c["o1"]
     assert "o1" in c.ports
 
 
-def test_ports_instance(LAYER: Layers) -> None:
+def test_ports_instance(layers: Layers) -> None:
     c = kf.KCell()
     c.create_port(
         name="o1",
         width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
-        layer=c.kcl.find_layer(LAYER.WG),
+        layer=c.kcl.find_layer(layers.WG),
     )
     c2 = kf.KCell()
     ref = c2 << c
@@ -112,9 +112,9 @@ def test_ports_instance(LAYER: Layers) -> None:
     assert "o1" in ref.ports
 
 
-def test_getter(LAYER: Layers) -> None:
+def test_getter(layers: Layers) -> None:
     c = kf.KCell()
-    c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
+    c << kf.cells.straight.straight(width=1, length=10, layer=layers.WG)
     assert c.y == 0
     assert c.dy == 0
 
@@ -156,7 +156,7 @@ def test_invalid_array(monkeypatch: pytest.MonkeyPatch, straight: kf.KCell) -> N
     kf.config.logfilter.regex = regex
 
 
-def test_cell_decorator_error(LAYER: Layers) -> None:
+def test_cell_decorator_error(layers: Layers) -> None:
     kcl2 = kf.KCLayout("decorator_test")
 
     @kf.kcl.cell
@@ -173,7 +173,7 @@ def test_cell_decorator_error(LAYER: Layers) -> None:
     kf.config.logfilter.regex = regex
 
 
-def test_info(LAYER: Layers) -> None:
+def test_info(layers: Layers) -> None:
     @kf.kcl.cell(info={"test": 42})
     def test_info_cell(test: int) -> kf.KCell:
         return kf.kcl.kcell()
@@ -182,22 +182,22 @@ def test_info(LAYER: Layers) -> None:
     assert c.info["test"] == 42
 
 
-def test_flatten(LAYER: Layers) -> None:
+def test_flatten(layers: Layers) -> None:
     c = kf.KCell()
-    _ = c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
+    _ = c << kf.cells.straight.straight(width=1, length=10, layer=layers.WG)
     assert len(c.insts) == 1, "c.insts should have 1 inst after adding a cell"
     c.flatten()
     assert len(c.insts) == 0, "c.insts should have 0 insts after flatten()"
 
 
-def test_size_info(LAYER: Layers) -> None:
+def test_size_info(layers: Layers) -> None:
     c = kf.KCell()
-    ref = c << kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
+    ref = c << kf.cells.straight.straight(width=1, length=10, layer=layers.WG)
     assert ref.size_info.ne[0] == 10000
     assert ref.dsize_info.ne[0] == 10
 
 
-def test_overwrite(LAYER: Layers) -> None:
+def test_overwrite(layers: Layers) -> None:
     kcl = kf.KCLayout("CELL_OVERWRITE")
 
     @kcl.cell
@@ -220,7 +220,7 @@ def test_overwrite(LAYER: Layers) -> None:
     assert c1._destroyed()
 
 
-def test_layout_cache(LAYER: Layers) -> None:
+def test_layout_cache(layers: Layers) -> None:
     kcl_write = kf.KCLayout("TEST_LAYOUT_CACHE_WRITE")
     kcl_read = kf.KCLayout("TEST_LAYOUT_CACHE_READ")
 
@@ -245,9 +245,9 @@ def test_layout_cache(LAYER: Layers) -> None:
     assert s_write.bbox() == s_read.bbox()
 
 
-def test_check_ports(LAYER: Layers) -> None:
+def test_check_ports(layers: Layers) -> None:
     kcl = kf.KCLayout("CHECK_PORTS", infos=Layers)
-    kcl.layers = kcl.layerenum_from_dict(layers=LAYER)
+    kcl.layers = kcl.layerenum_from_dict(layers=layers)
 
     @kcl.cell
     def test_multi_ports() -> kf.KCell:
@@ -399,13 +399,13 @@ def test_lock(straight: kf.KCell, bend90: kf.KCell) -> None:
             straight.transform(kf.kdb.Trans.R90)
 
 
-def test_cell_in_threads(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
+def test_cell_in_threads(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
     def taper() -> kf.KCell:
         return kf.cells.taper.taper(
             width1=0.5,
             width2=1,
             length=10,
-            layer=LAYER.WG,
+            layer=layers.WG,
             enclosure=wg_enc,
         )
 

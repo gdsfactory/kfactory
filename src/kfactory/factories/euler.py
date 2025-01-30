@@ -91,32 +91,29 @@ def euler_bend_points(
     if eth == 0:
         return [kdb.DPoint(0, 0)]
 
-    # Curve min radius
-    R = radius
-
     # Total displaced angle
     th = eth / 2
 
     # Total length of curve
-    Ltot = 4 * R * th
+    total_length = 4 * radius * th
 
     # Compute curve ##
-    a = np.sqrt(R**2 * np.abs(th))
+    a = np.sqrt(radius**2 * np.abs(th))
     sq2pi = np.sqrt(2 * np.pi)
 
     # Function for computing curve coords
-    (fasin, facos) = fresnel(np.sqrt(2 / np.pi) * R * th / a)
+    (fasin, facos) = fresnel(np.sqrt(2 / np.pi) * radius * th / a)
 
     def _xy(s: float) -> kdb.DPoint:
         if th == 0:
             return kdb.DPoint(0, 0)
-        elif s <= Ltot / 2:
+        elif s <= total_length / 2:
             (fsin, fcos) = fresnel(s / (sq2pi * a))
-            X = sq2pi * a * fcos
-            Y = sq2pi * a * fsin
+            x = sq2pi * a * fcos
+            y = sq2pi * a * fsin
         else:
-            (fsin, fcos) = fresnel((Ltot - s) / (sq2pi * a))
-            X = (
+            (fsin, fcos) = fresnel((total_length - s) / (sq2pi * a))
+            x = (
                 sq2pi
                 * a
                 * (
@@ -125,7 +122,7 @@ def euler_bend_points(
                     + np.sin(2 * th) * (fasin - fsin)
                 )
             )
-            Y = (
+            y = (
                 sq2pi
                 * a
                 * (
@@ -134,13 +131,13 @@ def euler_bend_points(
                     + np.sin(2 * th) * (facos - fcos)
                 )
             )
-        return kdb.DPoint(X, Y)
+        return kdb.DPoint(x, y)
 
     # Parametric step size
-    step = Ltot / max(int(th * resolution), 1)
+    step = total_length / max(int(th * resolution), 1)
 
     # Generate points
-    points = [_xy(i * step) for i in range(int(round(Ltot / step)) + 1)]
+    points = [_xy(i * step) for i in range(int(round(total_length / step)) + 1)]
 
     return points
 
@@ -153,20 +150,19 @@ def euler_endpoint(
 ) -> tuple[float, float]:
     """Gives the end point of a simple Euler bend as a i3.Coord2."""
     th = abs(angle_amount) * np.pi / 180 / 2
-    R = radius
     clockwise = angle_amount < 0
 
     (fsin, fcos) = fresnel(np.sqrt(2 * th / np.pi))
 
     a = 2 * np.sqrt(2 * np.pi * th) * (np.cos(th) * fcos + np.sin(th) * fsin)
-    r = a * R
-    X = r * np.cos(th)
-    Y = r * np.sin(th)
+    r = a * radius
+    x = r * np.cos(th)
+    y = r * np.sin(th)
 
     if clockwise:
-        Y *= -1
+        y *= -1
 
-    return X + start_point[0], Y + start_point[1]
+    return x + start_point[0], y + start_point[1]
 
 
 def euler_sbend_points(

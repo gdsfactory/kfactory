@@ -8,16 +8,16 @@ import kfactory as kf
 from kfactory import exceptions
 
 
-def test_instance_xsize(LAYER: Layers) -> None:
+def test_instance_xsize(layers: Layers) -> None:
     c = kf.KCell()
-    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
     assert ref.xsize
 
 
-def test_instance_center(LAYER: Layers) -> None:
+def test_instance_center(layers: Layers) -> None:
     c = kf.KCell()
-    ref1 = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
-    ref2 = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    ref1 = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
+    ref2 = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
 
     ref1.center = ref2.center
     ref2.center = (ref1.center[0], ref2.center[1] + 1000)
@@ -25,9 +25,9 @@ def test_instance_center(LAYER: Layers) -> None:
     assert ref2.center == (ref1.center[0], ref1.center[1] + 11_000)
 
 
-def test_instance_d_move(LAYER: Layers) -> None:
+def test_instance_d_move(layers: Layers) -> None:
     c = kf.KCell()
-    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
 
     ref.dmovex(10)
     ref.dmovex(10.0)
@@ -46,10 +46,10 @@ def test_instance_d_move(LAYER: Layers) -> None:
     ref.dmirror_x(0)
 
 
-def test_instance_mirror(LAYER: Layers) -> None:
+def test_instance_mirror(layers: Layers) -> None:
     """Test arbitrary mirror."""
     c = kf.KCell()
-    b = kf.cells.euler.bend_euler(width=1, radius=10, layer=LAYER.WG)
+    b = kf.cells.euler.bend_euler(width=1, radius=10, layer=layers.WG)
 
     c << b
     b2 = c << b
@@ -63,13 +63,15 @@ def test_instance_mirror(LAYER: Layers) -> None:
 
     b2.mirror((p1.x, p1.y), (p2.x, p2.y))
 
-    c.shapes(c.kcl.find_layer(LAYER.WG)).insert(kf.kdb.Edge(mp1, mp2).transformed(disp))
+    c.shapes(c.kcl.find_layer(layers.WG)).insert(
+        kf.kdb.Edge(mp1, mp2).transformed(disp)
+    )
 
 
-def test_dmirror(LAYER: Layers) -> None:
+def test_dmirror(layers: Layers) -> None:
     """Test arbitrary mirror."""
     c = kf.KCell()
-    b = kf.cells.euler.bend_euler(width=1, radius=10, layer=LAYER.WG)
+    b = kf.cells.euler.bend_euler(width=1, radius=10, layer=layers.WG)
 
     c << b
     b2 = c << b
@@ -83,7 +85,7 @@ def test_dmirror(LAYER: Layers) -> None:
 
     b2.dmirror((p1.x, p1.y), (p2.x, p2.y))
 
-    c.shapes(c.kcl.find_layer(LAYER.WG)).insert(
+    c.shapes(c.kcl.find_layer(layers.WG)).insert(
         kf.kdb.DEdge(mp1, mp2).transformed(disp)
     )
 
@@ -449,14 +451,14 @@ def test_center(dbu_instance_tuple: _DBUInstanceTuple) -> None:
     assert _instances_equal(instance1, instance3)
 
 
-def test_vinstance_connect_by_port(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_vinstance_connect_by_port(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.vkcell()
     straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     straight = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=layers.WG
     )
     straight2 = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=layers.WG
     )
     ref = c << straight
     ref2 = c << straight2
@@ -466,15 +468,15 @@ def test_vinstance_connect_by_port(kcl: kf.KCLayout, LAYER: Layers) -> None:
 
 
 def test_vinstance_connect_by_port_use_angle_false(
-    kcl: kf.KCLayout, LAYER: Layers
+    kcl: kf.KCLayout, layers: Layers
 ) -> None:
     c = kcl.vkcell()
     straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     straight = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=layers.WG
     )
     straight2 = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=layers.WG
     )
     ref = c << straight
     ref2 = c << straight2
@@ -484,15 +486,15 @@ def test_vinstance_connect_by_port_use_angle_false(
 
 
 def test_vinstance_connect_by_port_use_mirror_false(
-    kcl: kf.KCLayout, LAYER: Layers
+    kcl: kf.KCLayout, layers: Layers
 ) -> None:
     c = kcl.vkcell()
     straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     straight = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=layers.WG
     )
     straight2 = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=layers.WG
     )
     ref = c << straight
     ref2 = c << straight2
@@ -501,16 +503,16 @@ def test_vinstance_connect_by_port_use_mirror_false(
     assert c.bbox() == kdb.DBox(7.5, -30, 12.5, -10)
 
 
-def test_vinstance_connect_by_port_use_mirror_Use_angle_false(
-    kcl: kf.KCLayout, LAYER: Layers
+def test_vinstance_connect_by_port_use_mirror_use_angle_false(
+    kcl: kf.KCLayout, layers: Layers
 ) -> None:
     c = kcl.vkcell()
     straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     straight = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=layers.WG
     )
     straight2 = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=layers.WG
     )
     ref = c << straight
     ref2 = c << straight2
@@ -519,14 +521,14 @@ def test_vinstance_connect_by_port_use_mirror_Use_angle_false(
     assert c.bbox() == kdb.DBox(7.5, -22.5, 20, -10)
 
 
-def test_vinstance_connect_by_str(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_vinstance_connect_by_str(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.vkcell()
     straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     straight = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=layers.WG
     )
     straight2 = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(20), layer=LAYER.WG
+        width=kcl.to_dbu(5), length=kcl.to_dbu(20), layer=layers.WG
     )
     ref = c << straight
     ref2 = c << straight2
@@ -535,20 +537,20 @@ def test_vinstance_connect_by_str(kcl: kf.KCLayout, LAYER: Layers) -> None:
     assert c.bbox() == kdb.DBox(50, 7.5, 80, 12.5)
 
 
-def test_vinstance_errors(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_vinstance_errors(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kcl.vkcell()
     straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     straight = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=LAYER.WG
+        width=kcl.to_dbu(5), length=kcl.to_dbu(10), layer=layers.WG
     )
     straight2 = straight_factory(
-        width=kcl.to_dbu(10), length=kcl.to_dbu(20), layer=LAYER.WG
+        width=kcl.to_dbu(10), length=kcl.to_dbu(20), layer=layers.WG
     )
     straight3 = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(20), layer=LAYER.FILL1
+        width=kcl.to_dbu(5), length=kcl.to_dbu(20), layer=layers.FILL1
     )
     straight4 = straight_factory(
-        width=kcl.to_dbu(5), length=kcl.to_dbu(20), layer=LAYER.WG
+        width=kcl.to_dbu(5), length=kcl.to_dbu(20), layer=layers.WG
     ).dup()
     straight4.ports["o1"].port_type = "non-optical"
     ref = c << straight
@@ -556,11 +558,11 @@ def test_vinstance_errors(kcl: kf.KCLayout, LAYER: Layers) -> None:
     ref3 = c << straight3
     ref4 = c << straight4
     ref5 = c << straight.dup()
-    with pytest.raises(exceptions.PortWidthMismatch):
+    with pytest.raises(exceptions.PortWidthMismatchError):
         ref.connect("o1", ref2.ports["o2"])
-    with pytest.raises(exceptions.PortLayerMismatch):
+    with pytest.raises(exceptions.PortLayerMismatchError):
         ref.connect("o1", ref3.ports["o2"])
-    with pytest.raises(exceptions.PortTypeMismatch):
+    with pytest.raises(exceptions.PortTypeMismatchError):
         ref.connect("o1", ref4.ports["o1"])
     with pytest.raises(ValueError):
         ref.connect("o1", ref5)  # type: ignore

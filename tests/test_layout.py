@@ -7,7 +7,7 @@ from conftest import Layers
 import kfactory as kf
 
 
-def test_cell_decorator(kcl: kf.KCLayout, LAYER: Layers) -> None:
+def test_cell_decorator(kcl: kf.KCLayout, layers: Layers) -> None:
     rectangle_post_process = MagicMock()
 
     @kcl.cell(post_process=[rectangle_post_process])
@@ -16,9 +16,9 @@ def test_cell_decorator(kcl: kf.KCLayout, LAYER: Layers) -> None:
         c.shapes(layer).insert(kf.kdb.DBox(0, 0, width, height))
         return c
 
-    rectangle_cell = rectangle(10, 10, LAYER.WG)
-    rectangle_cell2 = rectangle(10, 10, LAYER.WG)
-    rectangle_cell3 = rectangle(10.1, 10.1, LAYER.WG)
+    rectangle_cell = rectangle(10, 10, layers.WG)
+    rectangle_cell2 = rectangle(10, 10, layers.WG)
+    rectangle_cell3 = rectangle(10.1, 10.1, layers.WG)
 
     assert rectangle_cell is rectangle_cell2
     assert rectangle_cell is not rectangle_cell3

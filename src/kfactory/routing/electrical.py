@@ -95,7 +95,7 @@ def route_elec(
     c_.shapes(layer).insert(path.polygon())
 
 
-def route_L(
+def route_L(  # noqa: N802
     c: KCell,
     input_ports: Sequence[Port],
     output_orientation: int = 1,
