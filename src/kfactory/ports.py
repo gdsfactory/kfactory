@@ -37,21 +37,24 @@ from .port import (
     filter_port_type,
     filter_regex,
 )
-from .typings import TUnit
+from .typings import TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
     from .layout import KCLayout
 
 
+__all__ = ["DPorts", "Ports", "ProtoPorts"]
+
+
 def _filter_ports(
-    ports: Iterable[Port],
+    ports: Iterable[TPort],
     angle: int | None = None,
     orientation: float | None = None,
     layer: LayerEnum | int | None = None,
     port_type: str | None = None,
     regex: str | None = None,
-) -> list[Port]:
+) -> list[TPort]:
     if regex:
         ports = filter_regex(ports, regex)
     if layer is not None:
@@ -454,18 +457,14 @@ class Ports(ProtoPorts[int]):
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-        ports: Iterable[Port] = (Port(base=b) for b in self._bases)
-        if regex:
-            ports = filter_regex(ports, regex)
-        if layer is not None:
-            ports = filter_layer(ports, layer)
-        if port_type:
-            ports = filter_port_type(ports, port_type)
-        if angle is not None:
-            ports = filter_direction(ports, angle)
-        if orientation is not None:
-            ports = filter_orientation(ports, orientation)
-        return list(ports)
+        return _filter_ports(
+            (Port(base=b) for b in self._bases),
+            angle,
+            orientation,
+            layer,
+            port_type,
+            regex,
+        )
 
     def __repr__(self) -> str:
         """Representation of the Ports as strings."""
@@ -775,7 +774,7 @@ class DPorts(ProtoPorts[float]):
 
     def filter(
         self,
-        angle: float | None = None,
+        angle: int | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
@@ -784,23 +783,20 @@ class DPorts(ProtoPorts[float]):
         """Filter ports by name.
 
         Args:
-            angle: Filter by angle.
+            angle: Filter by angle. 0, 1, 2, 3.
             orientation: Alias for angle.
             layer: Filter by layer.
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-        ports: Iterable[DPort] = (DPort(base=b) for b in self._bases)
-        if regex:
-            ports = filter_regex(ports, regex)
-        if layer is not None:
-            ports = filter_layer(ports, layer)
-        if port_type:
-            ports = filter_port_type(ports, port_type)
-        orientation = orientation or angle
-        if orientation is not None:
-            ports = filter_orientation(ports, orientation)
-        return list(ports)
+        return _filter_ports(
+            (DPort(base=b) for b in self._bases),
+            angle,
+            orientation,
+            layer,
+            port_type,
+            regex,
+        )
 
     def __repr__(self) -> str:
         """Representation of the Ports as strings."""

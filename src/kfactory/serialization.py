@@ -16,7 +16,7 @@ from .conf import config
 from .typings import MetaData, SerializableShape
 
 if TYPE_CHECKING:
-    from .kcell import ProtoKCell
+    from .kcell import AnyKCell
 
 
 class DecoratorList(UserList[Any]):
@@ -63,7 +63,7 @@ def clean_name(name: str) -> str:
 
 
 def clean_value(
-    value: float | np.float64 | dict[Any, Any] | ProtoKCell[Any] | Callable[..., Any],
+    value: float | np.float64 | dict[Any, Any] | AnyKCell | Callable[..., Any],
 ) -> str:
     """Makes sure a value is representable in a limited character_space."""
     if isinstance(value, int):  # integer

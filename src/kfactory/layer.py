@@ -7,14 +7,20 @@ import klayout.db as kdb
 from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from .exceptions import InvalidLayerError
 from .settings import Info
 
 if TYPE_CHECKING:
     from .layout import KCLayout
 
 
-class InvalidLayerError(ValueError):
-    """Raised when a layer is not valid."""
+__all__ = [
+    "LayerEnum",
+    "LayerInfos",
+    "LayerLevel",
+    "LayerStack",
+    "layerenum_from_dict",
+]
 
 
 class LayerInfos(BaseModel):

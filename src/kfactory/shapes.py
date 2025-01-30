@@ -10,6 +10,9 @@ if TYPE_CHECKING:
     from .kcell import VKCell
 
 
+__all__ = ["VShapes"]
+
+
 class VShapes:
     """Emulate `[klayout.db.Shapes][klayout.db.Shapes]`."""
 

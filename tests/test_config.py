@@ -1,7 +1,10 @@
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 
 import kfactory as kf
+
+if TYPE_CHECKING:
+    from kfactory.kcell import AnyKCell
 
 
 def test_custom_show() -> None:
@@ -9,7 +12,7 @@ def test_custom_show() -> None:
     _layout_options = kf.save_layout_options()
 
     def show(
-        layout: kf.KCLayout | kf.kcell.ProtoKCell[Any] | Path | str,
+        layout: kf.KCLayout | AnyKCell | Path | str,
         lyrdb: kf.rdb.ReportDatabase | Path | str | None = None,
         l2n: kf.kdb.LayoutToNetlist | Path | str | None = None,
         keep_position: bool = True,

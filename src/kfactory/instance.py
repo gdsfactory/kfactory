@@ -35,8 +35,10 @@ from .settings import Info, KCellSettings
 from .typings import TUnit
 
 if TYPE_CHECKING:
-    from .kcell import DKCell, KCell, ProtoTKCell, VKCell
+    from .kcell import AnyKCell, AnyTKCell, DKCell, KCell, ProtoTKCell, VKCell
     from .layout import KCLayout
+
+__all__ = ["DInstance", "Instance", "ProtoInstance", "ProtoTInstance", "VInstance"]
 
 
 class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
@@ -50,8 +52,8 @@ class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
         return self._kcl
 
     @kcl.setter
-    def kcl(self, value: KCLayout) -> None:
-        self._kcl = value
+    def kcl(self, val: KCLayout) -> None:
+        self._kcl = val
 
     @property
     @abstractmethod
@@ -72,7 +74,7 @@ class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
 
     @property
     @abstractmethod
-    def ports(self) -> ProtoInstancePorts[TUnit]: ...
+    def ports(self) -> ProtoInstancePorts[TUnit, ProtoInstance[TUnit]]: ...
 
 
 class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
@@ -401,6 +403,8 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
                         op.dcplx_trans.disp - p.dcplx_trans.disp
                     )
                     self.dmirror_y(op.dcplx_trans.disp.y)
+                case _:
+                    ...
 
         else:
             conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
@@ -421,6 +425,8 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
                 case True, False:
                     self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
                     self.dmirror_y(op.dcplx_trans.disp.y)
+                case _:
+                    ...
 
     def __repr__(self) -> str:
         """Return a string representation of the instance."""
@@ -675,7 +681,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
 
     def insert_into(
         self,
-        cell: ProtoTKCell[Any],
+        cell: AnyTKCell,
         trans: kdb.DCplxTrans | None = None,
     ) -> Instance:
         from .kcell import KCell, VKCell
@@ -757,7 +763,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     @overload
     def insert_into_flat(
         self,
-        cell: ProtoTKCell[Any] | VKCell,
+        cell: AnyKCell,
         trans: kdb.DCplxTrans | None = None,
         *,
         levels: None = None,
@@ -766,7 +772,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     @overload
     def insert_into_flat(
         self,
-        cell: ProtoTKCell[Any] | VKCell,
+        cell: AnyKCell,
         *,
         trans: kdb.DCplxTrans | None = None,
         levels: int,
@@ -774,7 +780,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
 
     def insert_into_flat(
         self,
-        cell: ProtoTKCell[Any] | VKCell,
+        cell: AnyKCell,
         trans: kdb.DCplxTrans | None = None,
         *,
         levels: int | None = None,

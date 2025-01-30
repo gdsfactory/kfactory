@@ -22,8 +22,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from . import kdb, rdb
 
 if TYPE_CHECKING:
-    from .kcell import ProtoKCell
+    from .kcell import AnyKCell
     from .layout import KCLayout
+
+__all__ = ["LogLevel", "config"]
 
 
 DEFAULT_TRANS: dict[str, str | int | float | dict[str, str | int | float]] = {
@@ -54,7 +56,7 @@ class PROPID(IntEnum):
 class ShowFunction(Protocol):
     def __call__(
         self,
-        layout: KCLayout | ProtoKCell[Any] | Path | str,
+        layout: KCLayout | AnyKCell | Path | str,
         *,
         lyrdb: rdb.ReportDatabase | Path | str | None,
         l2n: kdb.LayoutToNetlist | Path | str | None,
@@ -300,6 +302,3 @@ class Settings(BaseSettings):
 
 
 config = Settings()
-
-
-__all__ = ["LogLevel", "config"]

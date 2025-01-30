@@ -7,6 +7,8 @@ from .typings import KC, KCellParams, TUnit
 if TYPE_CHECKING:
     from .layer import LayerEnum
 
+__all__ = ["BoxFunction", "BoxLike", "KCellFunc", "PointLike"]
+
 
 class KCellFunc(Protocol[KCellParams, KC]):
     __name__: str

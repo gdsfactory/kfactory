@@ -38,15 +38,15 @@ from .typings import TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
-    from .kcell import KCell, ProtoTKCell
+    from .kcell import AnyTKCell, KCell
     from .layout import KCLayout
 
 
 def create_port_error(
     p1: ProtoPort[Any],
     p2: ProtoPort[Any],
-    c1: ProtoTKCell[Any],
-    c2: ProtoTKCell[Any],
+    c1: AnyTKCell,
+    c2: AnyTKCell,
     db: rdb.ReportDatabase,
     db_cell: rdb.RdbCell,
     cat: rdb.RdbCategory,

@@ -12,7 +12,6 @@ import klayout.db as kdb
 import klayout.lay as lay
 import klayout.rdb as rdb
 
-
 from .conf import config, logger
 from .enclosure import KCellEnclosure, LayerEnclosure
 from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
@@ -46,6 +45,7 @@ from . import (
     utils,
     typings,
 )
+
 
 __all__ = [
     "BaseKCell",

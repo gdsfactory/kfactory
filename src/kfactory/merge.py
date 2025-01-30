@@ -9,6 +9,8 @@ from . import kdb
 from .conf import LogLevel, logger
 from .typings import MetaData
 
+__all__ = ["MergeDiff"]
+
 
 @dataclass
 class MergeDiff:

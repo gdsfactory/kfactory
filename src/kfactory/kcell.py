@@ -35,7 +35,7 @@ from typing import (
     Generic,
     Literal,
     Self,
-    TypeVar,
+    TypeAlias,
     overload,
 )
 
@@ -50,7 +50,7 @@ from ruamel.yaml.constructor import SafeConstructor
 from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from . import kdb, rdb
-from .conf import CHECK_INSTANCES, DEFAULT_TRANS, ShowFunction, config, logger
+from .conf import DEFAULT_TRANS, ShowFunction, config, logger
 from .cross_section import SymmetricalCrossSection
 from .exceptions import LockedError, MergeError
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
@@ -82,7 +82,7 @@ from .serialization import (
 )
 from .settings import Info, KCellSettings, KCellSettingsUnits
 from .shapes import VShapes
-from .typings import KC, MetaData, TUnit
+from .typings import KC, MetaData, TBaseCell, TUnit
 from .utilities import (
     check_cell_ports,
     check_inst_ports,
@@ -95,10 +95,21 @@ if TYPE_CHECKING:
     from .layout import KCLayout
 
 __all__ = [
-    "CHECK_INSTANCES",
+    "AnyKCell",
+    "AnyTKCell",
     "BaseKCell",
     "DKCell",
+    "DKCells",
     "KCell",
+    "KCells",
+    "ProtoCells",
+    "ProtoKCell",
+    "ProtoTKCell",
+    "TKCell",
+    "TVCell",
+    "VKCell",
+    "get_cells",
+    "show",
 ]
 
 
@@ -151,8 +162,8 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
         ...
 
 
-class ProtoKCell(GeometricObject[TUnit], Generic[TUnit]):
-    _base_kcell: BaseKCell
+class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
+    _base_kcell: TBaseCell
 
     @property
     def locked(self) -> bool:
@@ -323,8 +334,8 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit]):
         return self._base_kcell.kcl
 
     @kcl.setter
-    def kcl(self, value: KCLayout) -> None:
-        self._base_kcell.kcl = value
+    def kcl(self, val: KCLayout, /) -> None:
+        self._base_kcell.kcl = val
 
 
 class TKCell(BaseKCell):
@@ -374,9 +385,7 @@ class TVCell(BaseKCell):
         self._locked = True
 
 
-class ProtoTKCell(ProtoKCell[TUnit], ABC):
-    _base_kcell: TKCell
-
+class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
     def __init__(
         self,
         *,
@@ -703,7 +712,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     @abstractmethod
     def create_inst(
         self,
-        cell: ProtoTKCell[Any] | int,
+        cell: AnyTKCell | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
     ) -> ProtoTInstance[TUnit]: ...
 
@@ -711,7 +720,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     @abstractmethod
     def create_inst(
         self,
-        cell: ProtoTKCell[Any] | int,
+        cell: AnyTKCell | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
         *,
         a: kdb.Vector,
@@ -723,7 +732,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
     @abstractmethod
     def create_inst(
         self,
-        cell: ProtoTKCell[Any] | int,
+        cell: AnyTKCell | int,
         trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
         a: kdb.Vector | None = None,
         b: kdb.Vector | None = None,
@@ -735,7 +744,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
     def _create_inst(
         self,
-        cell: ProtoTKCell[Any] | int,
+        cell: AnyTKCell | int,
         trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
         a: kdb.Vector | None = None,
         b: kdb.Vector | None = None,
@@ -820,7 +829,7 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
         return self._base_kcell.kdb_cell.library()
 
     @abstractmethod
-    def __lshift__(self, cell: ProtoTKCell[Any]) -> ProtoTInstance[TUnit]: ...
+    def __lshift__(self, cell: AnyTKCell) -> ProtoTInstance[TUnit]: ...
 
     def auto_rename_ports(self, rename_func: Callable[..., None] | None = None) -> None:
         """Rename the ports with the schema angle -> "NSWE" and sort by x and y.
@@ -980,6 +989,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                         kcell.convert_to_static(recursive=True)
                 if self.is_library_cell():
                     self.convert_to_static(recursive=True)
+            case _:
+                ...
 
         for kci in (
             set(self._base_kcell.kdb_cell.called_cells()) & self.kcl.tkcells.keys()
@@ -1096,14 +1107,8 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
 
                 info.update(_info)
                 self.kcl.info = Info(**info)
-
             case "drop":
-                pass
-            case _:
-                raise ValueError(
-                    f"Unknown meta update strategy {update_kcl_meta_data=}"
-                    ", available strategies are 'overwrite', 'skip', or 'drop'"
-                )
+                ...
         meta_format = settings.get("meta_format") or meta_format
 
         if register_cells:
@@ -1511,11 +1516,6 @@ class ProtoTKCell(ProtoKCell[TUnit], ABC):
                         _port.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
 
                     self.add_port(port=_port, keep_mirror=True)
-            case _:
-                raise ValueError(
-                    f"Unknown metadata format {config.meta_format}."
-                    f" Available formats are 'default' or 'legacy'."
-                )
 
     def ibbox(self, layer: int | None = None) -> kdb.Box:
         if layer is None:
@@ -2204,7 +2204,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
         """Instances associated with the cell."""
         return DInstances(cell=self._base_kcell)
 
-    def __lshift__(self, cell: ProtoTKCell[Any]) -> DInstance:
+    def __lshift__(self, cell: AnyTKCell) -> DInstance:
         """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
 
         Args:
@@ -2221,14 +2221,14 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
     @overload
     def create_inst(
         self,
-        cell: ProtoTKCell[Any] | int,
+        cell: AnyTKCell | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
     ) -> DInstance: ...
 
     @overload
     def create_inst(
         self,
-        cell: ProtoTKCell[Any] | int,
+        cell: AnyTKCell | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
         *,
         a: kdb.Vector,
@@ -2239,7 +2239,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
 
     def create_inst(
         self,
-        cell: ProtoTKCell[Any] | int,
+        cell: AnyTKCell | int,
         trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
         a: kdb.Vector | None = None,
         b: kdb.Vector | None = None,
@@ -2335,7 +2335,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         """Instances associated with the cell."""
         return Instances(cell=self._base_kcell)
 
-    def __lshift__(self, cell: ProtoTKCell[Any]) -> Instance:
+    def __lshift__(self, cell: AnyTKCell) -> Instance:
         """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
 
         Args:
@@ -2352,14 +2352,14 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
     @overload
     def create_inst(
         self,
-        cell: ProtoTKCell[Any] | int,
+        cell: AnyTKCell | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
     ) -> Instance: ...
 
     @overload
     def create_inst(
         self,
-        cell: ProtoTKCell[Any] | int,
+        cell: AnyTKCell | int,
         trans: kdb.Trans | kdb.ICplxTrans | kdb.Vector | None = None,
         *,
         a: kdb.Vector,
@@ -2370,7 +2370,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
 
     def create_inst(
         self,
-        cell: ProtoTKCell[Any] | int,
+        cell: AnyTKCell | int,
         trans: kdb.Trans | kdb.Vector | kdb.ICplxTrans | None = None,
         a: kdb.Vector | None = None,
         b: kdb.Vector | None = None,
@@ -2665,10 +2665,9 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         return representer.represent_mapping(cls.yaml_tag, d)
 
 
-class VKCell(ProtoKCell[float], UMGeometricObject):
+class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
-    _base_kcell: TVCell
     _shapes: dict[int, VShapes]
     _name: str | None
 
@@ -3056,7 +3055,7 @@ class VKCell(ProtoKCell[float], UMGeometricObject):
 
 
 def show(
-    layout: KCLayout | ProtoKCell[Any] | Path | str,
+    layout: KCLayout | AnyKCell | Path | str,
     lyrdb: rdb.ReportDatabase | Path | str | None = None,
     l2n: kdb.LayoutToNetlist | Path | str | None = None,
     keep_position: bool = True,
@@ -3403,9 +3402,6 @@ def show(
         Path(l2nfile).unlink()  # type: ignore[arg-type]
 
 
-T = TypeVar("T")
-
-
 class ProtoCells(Mapping[int, KC], ABC):
     _kcl: KCLayout
 
@@ -3486,3 +3482,7 @@ def get_cells(
                     if verbose:
                         print(f"error in {t[0]}")
     return cells
+
+
+AnyKCell: TypeAlias = ProtoKCell[Any, Any]
+AnyTKCell: TypeAlias = ProtoTKCell[Any]

@@ -14,7 +14,7 @@ from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
 
 from .enclosure import LayerEnclosure
-from .kcell import KCell
+from .kcell import KCell, AnyTKCell
 from .layout import KCLayout
 from .layout import kcl as stdkcl
 
@@ -25,7 +25,7 @@ PathLike = TypeVar("PathLike", str, Path, None)
 
 def cells_to_yaml(
     output: PathLike,
-    cells: Sequence[ProtoTKCell[Any]] | ProtoTKCell[Any] | Sequence[TKCell] | TKCell,
+    cells: Sequence[AnyTKCell] | AnyTKCell | Sequence[TKCell] | TKCell,
 ) -> None:
     """Convert cell(s) to a yaml representations.
 

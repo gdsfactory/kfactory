@@ -41,11 +41,11 @@ from .enclosure import (
 )
 from .exceptions import CellNameError, MergeError
 from .kcell import (
+    AnyTKCell,
     DKCell,
     DKCells,
     KCell,
     KCells,
-    ProtoTKCell,
     TKCell,
     TVCell,
     VKCell,
@@ -70,7 +70,7 @@ from .utilities import load_layout_options, save_layout_options
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
 
-__all__ = ["KCLayout"]
+__all__ = ["KCLayout", "cell", "get_default_kcl", "kcl", "kcls", "vcell"]
 
 
 class Constants(BaseModel):
@@ -152,7 +152,7 @@ class KCLayout(
     enclosure: KCellEnclosure
     library: kdb.Library
 
-    factories: Factories[ProtoTKCell[Any]]
+    factories: Factories[AnyTKCell]
     virtual_factories: Factories[VKCell]
     tkcells: dict[int, TKCell] = Field(default_factory=dict)
     layers: type[LayerEnum]
@@ -525,9 +525,7 @@ class KCLayout(
         post_process: Iterable[Callable[[TKCell], None]] = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[
-        [KCellFunc[KCellParams, ProtoTKCell[Any]]], KCellFunc[KCellParams, K]
-    ]: ...
+    ) -> Callable[[KCellFunc[KCellParams, AnyTKCell]], KCellFunc[KCellParams, K]]: ...
 
     def cell(  # type: ignore[misc]
         self,
@@ -554,9 +552,7 @@ class KCLayout(
     ) -> (
         KCellFunc[KCellParams, K]
         | Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]
-        | Callable[
-            [KCellFunc[KCellParams, ProtoTKCell[Any]]], KCellFunc[KCellParams, K]
-        ]
+        | Callable[[KCellFunc[KCellParams, AnyTKCell]], KCellFunc[KCellParams, K]]
     ):
         """Decorator to cache and auto name the cell.
 
@@ -615,7 +611,7 @@ class KCLayout(
             debug_names = config.debug_names
 
         def decorator_autocell(
-            f: KCellFunc[KCellParams, ProtoTKCell[Any]] | KCellFunc[KCellParams, K],
+            f: KCellFunc[KCellParams, AnyTKCell] | KCellFunc[KCellParams, K],
         ) -> KCellFunc[KCellParams, K]:
             sig = inspect.signature(f)
             output_cell_type_: type[K] | type[inspect.Signature.empty] = (  # type: ignore[valid-type]
@@ -887,7 +883,7 @@ class KCLayout(
             cast(
                 Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]
                 | Callable[
-                    [KCellFunc[KCellParams, ProtoTKCell[Any]]],
+                    [KCellFunc[KCellParams, AnyTKCell]],
                     KCellFunc[KCellParams, K],
                 ],
                 decorator_autocell,
@@ -1212,7 +1208,7 @@ class KCLayout(
                     " unique or pass `allow_duplicate` when creating the library"
                 )
 
-    def delete_cell(self, cell: ProtoTKCell[Any] | int) -> None:
+    def delete_cell(self, cell: AnyTKCell | int) -> None:
         """Delete a cell in the kcl object."""
         with self.thread_lock:
             if isinstance(cell, int):
@@ -1248,9 +1244,7 @@ class KCLayout(
             for ci in kcells2delete:
                 del self.tkcells[ci]
 
-    def register_cell(
-        self, kcell: ProtoTKCell[Any], allow_reregister: bool = False
-    ) -> None:
+    def register_cell(self, kcell: AnyTKCell, allow_reregister: bool = False) -> None:
         """Register an existing cell in the KCLayout object.
 
         Args:

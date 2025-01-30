@@ -19,6 +19,14 @@ from .typings import TInstance, TUnit
 if TYPE_CHECKING:
     from .kcell import TKCell
 
+__all__ = [
+    "DInstances",
+    "Instances",
+    "ProtoInstances",
+    "ProtoTInstances",
+    "VInstances",
+]
+
 
 class ProtoInstances(Generic[TUnit, TInstance], ABC):
     @abstractmethod
