@@ -345,7 +345,7 @@ def test_ports_eq(kcl: kf.KCLayout, layers: Layers) -> None:
     assert ports == ports2
     assert ports != list(ports)[:-1]
     assert ports != list(ports)[::-1]
-    assert not ports == 1
+    assert ports != 1
 
 
 def test_ports_create_port(kcl: kf.KCLayout, layers: Layers) -> None:
