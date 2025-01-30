@@ -37,8 +37,8 @@ class ManhattanRoutePathFunction(Protocol):
         port1: Port | kdb.Trans,
         port2: Port | kdb.Trans,
         bend90_radius: int,
-        start_steps: list[Step] | None = None,
-        end_steps: list[Step] | None = None,
+        start_steps: Sequence[Step] | None = None,
+        end_steps: Sequence[Step] | None = None,
     ) -> list[kdb.Point]:
         """Minimal kwargs of a manhattan route function."""
         ...
@@ -560,8 +560,8 @@ def route_manhattan(
     port1: Port | kdb.Trans,
     port2: Port | kdb.Trans,
     bend90_radius: int,
-    start_steps: Sequence[Step] = [],
-    end_steps: list[Step] | None = None,
+    start_steps: Sequence[Step] | None = None,
+    end_steps: Sequence[Step] | None = None,
     max_tries: int = 20,
     invert: bool = False,
 ) -> list[kdb.Point]:
@@ -586,6 +586,8 @@ def route_manhattan(
     """
     if end_steps is None:
         end_steps = []
+    if start_steps is None:
+        start_steps = []
     if not invert:
         t1 = port1 if isinstance(port1, kdb.Trans) else port1.trans
         t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans

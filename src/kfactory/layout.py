@@ -543,7 +543,7 @@ class KCLayout(
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
         basename: str | None = None,
-        drop_params: list[str] | None = None,
+        drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
@@ -605,8 +605,6 @@ class KCLayout(
                 can then be retrieved with `kcl.factories.tags[my_tag]` or if filtered
                 for multiple `kcl.factories.for_tags([my_tag1, my_tag2, ...])`.
         """
-        if drop_params is None:
-            drop_params = ["self", "cls"]
         if check_instances is None:
             check_instances = config.check_instances
         if overwrite_existing is None:
@@ -929,7 +927,7 @@ class KCLayout(
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
         basename: str | None = None,
-        drop_params: Sequence[str] | None = None,
+        drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
     ) -> (
         Callable[KCellParams, VKCell]

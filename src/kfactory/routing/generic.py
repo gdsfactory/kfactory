@@ -300,8 +300,8 @@ def route_bundle(
     placer_kwargs: dict[str, Any] | None = None,
     router_post_process_function: RouterPostProcessFunction | None = None,
     router_post_process_kwargs: dict[str, Any] | None = None,
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:

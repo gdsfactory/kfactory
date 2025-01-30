@@ -159,8 +159,8 @@ def route_bundle(
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:
@@ -259,8 +259,8 @@ def route_bundle(
         bboxes = []
     return route_bundle_generic(
         c=c,
-        start_ports=[p._base for p in start_ports],
-        end_ports=[p._base for p in end_ports],
+        start_ports=[p.base for p in start_ports],
+        end_ports=[p.base for p in end_ports],
         starts=starts,
         ends=ends,
         routing_function=route_smart,
@@ -302,8 +302,8 @@ def route_bundle_dual_rails(
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] = None,
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
 ) -> list[ManhattanRoute]:
