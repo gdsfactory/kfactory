@@ -93,9 +93,10 @@ from .utilities import (
 
 if TYPE_CHECKING:
     from .layout import KCLayout
-    
 
-__all__ = ["AnyKCell",
+
+__all__ = [
+    "AnyKCell",
     "AnyTKCell",
     "BaseKCell",
     "CheckInstances",
