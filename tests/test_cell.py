@@ -121,9 +121,7 @@ def test_getter(LAYER: Layers) -> None:
 
 def test_array(straight: kf.KCell) -> None:
     c = kf.KCell()
-    wg_array = c.create_inst(
-        straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
-    )
+    wg_array = c.create_inst(straight, a=(15_000, 0), b=(0, 3_000), na=3, nb=5)
     for b in range(5):
         for a in range(3):
             wg_array["o1", a, b]
@@ -132,9 +130,7 @@ def test_array(straight: kf.KCell) -> None:
 
 def test_array_indexerror(straight: kf.KCell) -> None:
     c = kf.KCell()
-    wg_array = c.create_inst(
-        straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
-    )
+    wg_array = c.create_inst(straight, a=(15_000, 0), b=(0, 3_000), na=3, nb=5)
     regex = kf.config.logfilter.regex
     kf.config.logfilter.regex = r"^An error has been caught in function '__getitem__'"
     with pytest.raises(IndexError):
