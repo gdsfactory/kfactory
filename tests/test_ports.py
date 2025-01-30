@@ -4,6 +4,7 @@ import pytest
 from conftest import Layers
 
 import kfactory as kf
+from kfactory.exceptions import PortWidthMismatchError
 
 
 @kf.cell
@@ -126,7 +127,7 @@ def test_connect_port_width_mismatch(layers: Layers, wg: kf.KCell) -> None:
         name="cplxp1",
         dcplx_trans=kf.kdb.DCplxTrans(1, 30, False, 5, 10),
     )
-    with pytest.raises(kf.exceptions.PortWidthMismatch) as excinfo:
+    with pytest.raises(PortWidthMismatchError) as excinfo:
         wg1.connect("o1", port)
     assert str(excinfo.value) == (
         f'Width mismatch between the ports {wg1.cell_name}["o1"] and Port "cplxp1" '
@@ -147,7 +148,7 @@ def test_connect_instance_width_mismatch(layers: Layers, wg: kf.KCell) -> None:
     c2.add_port(port=port, name="o2")
     wg1_instance = c << c2
 
-    with pytest.raises(kf.exceptions.PortWidthMismatch) as excinfo:
+    with pytest.raises(PortWidthMismatchError) as excinfo:
         wg1.connect("o1", wg1_instance, "o2")
     assert str(excinfo.value) == (
         f'Width mismatch between the ports {wg1.cell_name}["o1"] and '
