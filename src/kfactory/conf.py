@@ -111,7 +111,7 @@ class LogLevel(str, Enum):
     CRITICAL = "CRITICAL"
 
 
-class CheckInstance(str, Enum):
+class CheckInstances(str, Enum):
     RAISE = "error"
     FLATTEN = "flatten"
     VINSTANCES = "vinstances"
@@ -220,7 +220,7 @@ class Settings(BaseSettings):
     cell_overwrite_existing: bool = False
     connect_use_angle: bool = True
     connect_use_mirror: bool = True
-    check_instances: CheckInstance = CheckInstance.RAISE
+    check_instances: CheckInstances = CheckInstances.RAISE
     max_cellname_length: int = 99
     debug_names: bool = False
 

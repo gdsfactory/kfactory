@@ -25,7 +25,7 @@ from pydantic import (
 )
 
 from . import __version__
-from .conf import CheckInstance, config, logger
+from .conf import CheckInstances, config, logger
 from .cross_section import (
     CrossSectionModel,
     CrossSectionSpec,
@@ -488,7 +488,7 @@ class KCLayout(
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
-        check_instances: CheckInstance | None = ...,
+        check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
         cache: Cache[int, Any] | dict[int, Any] | None = ...,
@@ -513,7 +513,7 @@ class KCLayout(
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
-        check_instances: CheckInstance | None = ...,
+        check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
         cache: Cache[int, Any] | dict[int, Any] | None = ...,
@@ -539,7 +539,7 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         check_ports: bool = True,
-        check_instances: CheckInstance | None = None,
+        check_instances: CheckInstances | None = None,
         snap_ports: bool = True,
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
@@ -761,7 +761,7 @@ class KCLayout(
                                 "`check_ports=False` to the @cell decorator"
                             )
                     match check_instances:
-                        case CheckInstance.RAISE:
+                        case CheckInstances.RAISE:
                             if any(inst.is_complex() for inst in cell.each_inst()):
                                 raise ValueError(
                                     "Most foundries will not allow off-grid "
@@ -774,10 +774,10 @@ class KCLayout(
                                         if inst.is_complex()
                                     )
                                 )
-                        case CheckInstance.FLATTEN:
+                        case CheckInstances.FLATTEN:
                             if any(inst.is_complex() for inst in cell.each_inst()):
                                 cell.flatten()
-                        case CheckInstance.VINSTANCES:
+                        case CheckInstances.VINSTANCES:
                             if any(inst.is_complex() for inst in cell.each_inst()):
                                 complex_insts = [
                                     inst
@@ -790,7 +790,7 @@ class KCLayout(
                                     )
                                     vinst.trans = inst.dcplx_trans
                                     inst.delete()
-                        case CheckInstance.IGNORE:
+                        case CheckInstances.IGNORE:
                             pass
                     cell.insert_vinsts(recursive=False)
                     if snap_ports:

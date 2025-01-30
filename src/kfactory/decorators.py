@@ -10,7 +10,7 @@ from typing_extensions import Unpack
 if TYPE_CHECKING:
     from cachetools import Cache
 
-    from .conf import CheckInstance
+    from .conf import CheckInstances
     from .kcell import TKCell
     from .layout import KCLayout
     from .protocols import KCellFunc
@@ -23,7 +23,7 @@ class ModuleCellKWargs(TypedDict, total=False):
     set_settings: bool
     set_name: bool
     check_ports: bool
-    check_instances: CheckInstance | None
+    check_instances: CheckInstances | None
     snap_ports: bool
     add_port_layers: bool
     cache: Cache[int, Any] | dict[int, Any] | None
@@ -42,7 +42,7 @@ class KCellDecoratorKWargs(TypedDict, total=False):
     set_settings: bool
     set_name: bool
     check_ports: bool
-    check_instances: CheckInstance | None
+    check_instances: CheckInstances | None
     snap_ports: bool
     add_port_layers: bool
     cache: Cache[int, Any] | dict[int, Any] | None
