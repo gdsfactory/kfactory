@@ -225,10 +225,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
         if isinstance(other, Iterable):
             if len(self._bases) != len(other):
                 return False
-            for b1, b2 in zip(iter(self), other, strict=False):
-                if b1 != b2:
-                    return False
-            return True
+            return all(b1 == b2 for b1, b2 in zip(iter(self), other, strict=False))
         return False
 
 
