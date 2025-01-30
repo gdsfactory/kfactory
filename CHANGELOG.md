@@ -5,6 +5,7 @@
 
 ## New
 
+- Add tests for Instance Ports [#593](https://github.com/gdsfactory/kfactory/pull/593)
 - Add ruff bugbear rule [#592](https://github.com/gdsfactory/kfactory/pull/592)
 - Add to_itype, to_dtype to dbu, um classes [#589](https://github.com/gdsfactory/kfactory/pull/589)
 - Make vinstance connect take ProtoPort [#587](https://github.com/gdsfactory/kfactory/pull/587)
