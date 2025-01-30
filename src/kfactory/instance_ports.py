@@ -437,10 +437,7 @@ class VInstancePorts(ProtoInstancePorts[float, VInstance]):
         if isinstance(port, ProtoPort):
             return port.base in [p.base for p in self.instance.ports]
         else:
-            for _port in self.instance.ports:
-                if _port.name == port:
-                    return True
-            return False
+            return any(_port.name == port for _port in self.instance.ports)
 
     def __repr__(self) -> str:
         """String representation.
