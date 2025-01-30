@@ -476,6 +476,9 @@ def test_cell_yaml(kcl: kf.KCLayout, layers: Layers) -> None:
 
         assert compare_kcell_fields(c_base_kcell, cell_base_kcell)
 
+        c.delete()
+        cell.delete()
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
