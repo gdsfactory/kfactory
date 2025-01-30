@@ -102,7 +102,6 @@ class ProtoTInstancePorts(
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-
         ports: Iterable[ProtoPort[TUnit]] = list(self.ports)
         if regex:
             ports = filter_regex(ports, regex)

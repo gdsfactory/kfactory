@@ -29,9 +29,9 @@ class FillOperator(kdb.TileOutputReceiver):
         remaining_polygons: kdb.Region | None = None,
         multi: bool = False,
     ) -> None:
+        """Initialize the receiver."""
         if fill_margin is None:
             fill_margin = kdb.Vector(0, 0)
-        """Initialize the receiver."""
         self.kcl = kcl
         self.top_cell = top_cell
         self.fill_cell_index = fill_cell_index

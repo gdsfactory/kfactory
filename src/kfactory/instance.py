@@ -499,7 +499,6 @@ class Instance(ProtoTInstance[int], DBUGeometricObject):
         3 times in `a` direction (4th index in the array), and 5 times in `b` direction
         (5th index in the array).
         """
-
         return Port(base=self.ports[key].base)
 
     @property

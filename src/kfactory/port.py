@@ -12,14 +12,7 @@ from collections.abc import (
     Iterable,
 )
 from enum import IntEnum, IntFlag, auto
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Generic,
-    Literal,
-    Self,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Generic, Literal, Self, cast, overload
 
 import klayout.db as kdb
 import klayout.rdb as rdb
@@ -101,6 +94,11 @@ class BasePortDict(TypedDict):
 
 
 class BasePort(BaseModel, arbitrary_types_allowed=True):
+    """Class representing the base port.
+
+    This does not have any knowledge of units.
+    """
+
     name: str | None
     kcl: KCLayout
     cross_section: SymmetricalCrossSection
@@ -110,6 +108,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     port_type: str
 
     def __copy__(self) -> BasePort:
+        """Copy the BasePort."""
         return BasePort(
             name=self.name,
             kcl=self.kcl,
@@ -125,6 +124,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
     ) -> BasePort:
+        """Transform the BasePort."""
         base = self.__copy__()
         if (
             base.trans is not None
@@ -147,6 +147,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
 
     @model_serializer()
     def ser_model(self) -> BasePortDict:
+        """Serialize the BasePort."""
         if self.trans is not None:
             trans = self.trans.dup()
         else:
@@ -155,29 +156,37 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             dcplx_trans = self.dcplx_trans.dup()
         else:
             dcplx_trans = None
-        return dict(
-            name=self.name,
-            kcl=self.kcl,
-            cross_section=self.cross_section,
-            trans=trans,
-            dcplx_trans=dcplx_trans,
-            info=self.info.copy(),
-            port_type=self.port_type,
+        return cast(
+            BasePortDict,
+            dict(
+                name=self.name,
+                kcl=self.kcl,
+                cross_section=self.cross_section,
+                trans=trans,
+                dcplx_trans=dcplx_trans,
+                info=self.info.model_copy(),
+                port_type=self.port_type,
+            ),
         )
 
     def get_trans(self) -> kdb.Trans:
-        return (
-            self.trans
-            or kdb.ICplxTrans(trans=self.dcplx_trans, dbu=self.kcl.dbu).s_trans()  # type: ignore[arg-type]
-        )
+        """Get the transformation."""
+        if self.trans is not None:
+            return self.trans
+        assert self.dcplx_trans is not None, "Both trans and dcplx_trans are None"
+        return kdb.ICplxTrans(trans=self.dcplx_trans, dbu=self.kcl.dbu).s_trans()
 
     def get_dcplx_trans(self) -> kdb.DCplxTrans:
-        return self.dcplx_trans or kdb.DCplxTrans(
-            self.trans.to_dtype(self.kcl.dbu)  # type: ignore[union-attr]
-        )
+        """Get the complex transformation."""
+        if self.dcplx_trans is not None:
+            return self.dcplx_trans
+        assert self.trans is not None, "Both trans and dcplx_trans are None"
+        return kdb.DCplxTrans(self.trans.to_dtype(self.kcl.dbu))
 
 
 class ProtoPort(Generic[TUnit], ABC):
+    """Base class for kf.Port, kf.DPort."""
+
     yaml_tag: str = "!Port"
     _base: BasePort
 
@@ -199,10 +208,13 @@ class ProtoPort(Generic[TUnit], ABC):
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = ...,
         cross_section: SymmetricalCrossSection | None = None,
-    ) -> None: ...
+    ) -> None:
+        """Initialise a ProtoPort."""
+        ...
 
     @property
     def base(self) -> BasePort:
+        """Get the BasePort associated with this Port."""
         return self._base
 
     @property

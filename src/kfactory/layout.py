@@ -959,7 +959,6 @@ class KCLayout(
             register_factory: Register the resulting KCell-function to the
                 [factories][kfactory.kcell.KCLayout.factories]
         """
-
         if drop_params is None:
             drop_params = ["self", "cls"]
 

@@ -13,9 +13,9 @@ __all__ = [
     "InvalidLayerError",
     "LockedError",
     "MergeError",
-    "PortLayerMismatch",
-    "PortTypeMismatch",
-    "PortWidthMismatch",
+    "PortLayerMismatchError",
+    "PortTypeMismatchError",
+    "PortWidthMismatchError",
 ]
 
 

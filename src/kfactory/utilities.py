@@ -77,6 +77,11 @@ def dpolygon_from_array(array: Iterable[tuple[float, float]]) -> kdb.DPolygon:
 
 
 def check_inst_ports(p1: Port, p2: Port) -> int:
+    """Check if two ports are the same.
+
+    Returns:
+        int: A bitwise representation of the differences between the two ports.
+    """
     check_int = 0
     if p1.width != p2.width:
         check_int += 1
@@ -88,6 +93,11 @@ def check_inst_ports(p1: Port, p2: Port) -> int:
 
 
 def check_cell_ports(p1: ProtoPort[Any], p2: ProtoPort[Any]) -> int:
+    """Check if two ports are the same.
+
+    Returns:
+        int: A bitwise representation of the differences between the two ports.
+    """
     p1_ = Port(base=p1.base)
     p2_ = Port(base=p2.base)
     check_int = 0
@@ -101,7 +111,13 @@ def check_cell_ports(p1: ProtoPort[Any], p2: ProtoPort[Any]) -> int:
 
 
 def instance_port_name(inst: Instance, port: Port) -> str:
-    return f'{inst.name}["{port.name or str(None)}"]'
+    """Create a name for an instance port.
+
+    Args:
+        inst: The instance.
+        port: The port.
+    """
+    return f'{inst.name}["{port.name}"]'
 
 
 def pprint_ports(

@@ -114,18 +114,18 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = [
-    "F",  # pyflakes
-    "E",  # pycodestyle
-    "W",  # pycodestyle
-    "UP", # pyupgrade
-    "N",  # pep8-naming
+    "F",   # pyflakes
+    "E",   # pycodestyle
+    "W",   # pycodestyle
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
     # "D",   # pydocstyle
     "I",   # isort
     "ANN", # annotations
     "RUF", # ruff
-    "B",
+    "B",   # bugbear
 ]
-ignore = ["ANN401"]
+ignore = ["ANN401", "D100"]
 per-file-ignores = { "tests/*.py" = ["D"] }
 
 [tool.ruff.format]
