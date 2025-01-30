@@ -111,7 +111,7 @@ class LogLevel(str, Enum):
     CRITICAL = "CRITICAL"
 
 
-class CHECK_INSTANCES(str, Enum):
+class CHECK_INSTANCES(str, Enum):  # noqa: N801
     RAISE = "error"
     FLATTEN = "flatten"
     VINSTANCES = "vinstances"
