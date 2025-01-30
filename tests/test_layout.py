@@ -172,7 +172,7 @@ def test_check_instances(kcl: kf.KCLayout) -> None:
     assert len(cell2.vinsts) == 0
     assert len(cell2.insts) == 1
 
-    kcl.cell(check_instances=kf.kcell.CHECK_INSTANCES.IGNORE)(test_cell_with_rotation)(
+    kcl.cell(check_instances=kf.CHECK_INSTANCES.IGNORE)(test_cell_with_rotation)(
         "test_ignore"
     )
 

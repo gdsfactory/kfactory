@@ -660,9 +660,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
 
     @property
     def ports(self) -> VInstancePorts:
-        from .instance_ports import (
-            VInstancePorts,
-        )
+        from .instance_ports import VInstancePorts
 
         return VInstancePorts(self)
 
