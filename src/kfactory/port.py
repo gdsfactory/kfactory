@@ -45,6 +45,7 @@ def create_port_error(
     cat: rdb.RdbCategory,
     dbu: float,
 ) -> None:
+    """Create an error report for two ports."""
     it = db.create_item(db_cell, cat)
     if p1.name and p2.name:
         it.add_value(f"Port Names: {c1.name}.{p1.name}/{c2.name}.{p2.name}")
@@ -57,6 +58,11 @@ def create_port_error(
 
 
 class PortCheck(IntFlag):
+    """Check for port equality.
+
+    This is used to check if two ports are equal.
+    """
+
     opposite = auto()
     width = auto()
     layer = auto()
@@ -66,6 +72,7 @@ class PortCheck(IntFlag):
 
 
 def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -> None:
+    """Check if two ports are equal."""
     if checks & PortCheck.opposite:
         assert (
             p1.trans == p2.trans * kdb.Trans.R180
@@ -84,6 +91,8 @@ def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -
 
 
 class BasePortDict(TypedDict):
+    """TypedDict for the BasePort."""
+
     name: str | None
     kcl: KCLayout
     cross_section: SymmetricalCrossSection
@@ -348,7 +357,9 @@ class ProtoPort(Generic[TUnit], ABC):
 
     @property
     @abstractmethod
-    def x(self) -> TUnit: ...
+    def x(self) -> TUnit:
+        """X coordinate of the port."""
+        ...
 
     @x.setter
     @abstractmethod
@@ -356,7 +367,9 @@ class ProtoPort(Generic[TUnit], ABC):
 
     @property
     @abstractmethod
-    def y(self) -> TUnit: ...
+    def y(self) -> TUnit:
+        """Y coordinate of the port."""
+        ...
 
     @y.setter
     @abstractmethod
@@ -364,7 +377,9 @@ class ProtoPort(Generic[TUnit], ABC):
 
     @property
     @abstractmethod
-    def angle(self) -> TUnit: ...
+    def angle(self) -> TUnit:
+        """Angle of the port."""
+        ...
 
     @angle.setter
     @abstractmethod
@@ -385,7 +400,9 @@ class ProtoPort(Generic[TUnit], ABC):
 
     @property
     @abstractmethod
-    def width(self) -> TUnit: ...
+    def width(self) -> TUnit:
+        """Width of the port."""
+        ...
 
     @property
     def mirror(self) -> bool:
@@ -405,7 +422,9 @@ class ProtoPort(Generic[TUnit], ABC):
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
-    ) -> ProtoPort[TUnit]: ...
+    ) -> ProtoPort[TUnit]:
+        """Copy the port with a transformation."""
+        ...
 
     @abstractmethod
     def copy_polar(
@@ -414,7 +433,9 @@ class ProtoPort(Generic[TUnit], ABC):
         d_orth: TUnit,
         angle: TUnit,
         mirror: bool = False,
-    ) -> ProtoPort[TUnit]: ...
+    ) -> ProtoPort[TUnit]:
+        """Copy the port with a polar transformation."""
+        ...
 
     @property
     def dx(self) -> float:
@@ -857,6 +878,29 @@ class Port(ProtoPort[int]):
 
 
 class DPort(ProtoPort[float]):
+    """A port is the photonics equivalent to a pin in electronics.
+
+    In addition to the location and layer
+    that defines a pin, a port also contains an orientation and a width.
+    This can be fully represented with a transformation, integer and layer_index.
+
+
+    Attributes:
+        name: String to name the port.
+        width: The width of the port in dbu.
+        trans: Transformation in dbu. If the port can be represented in 90° intervals
+            this is the safe way to do so.
+        dcplx_trans: Transformation in micrometer. The port will autoconvert between
+            trans and dcplx_trans on demand.
+        port_type: A string defining the type of the port
+        layer: Index of the layer or a LayerEnum that acts like an integer, but can
+            contain layer number and datatype
+        info: A dictionary with additional info. Not reflected in GDS. Copy will make a
+            (shallow) copy of it.
+        d: Access port info in micrometer basis such as width and center / angle.
+        kcl: Link to the layout this port resides in.
+    """
+
     def __init__(
         self,
         *,

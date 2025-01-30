@@ -126,12 +126,13 @@ class ProtoPorts(ABC, Generic[TUnit]):
         """Get the bases."""
         return self._bases
 
-    def copy(self, rename_funciton: Callable[[list[Port]], None] | None = None) -> Self:
+    @abstractmethod
+    def copy(
+        self,
+        rename_function: Callable[[Sequence[ProtoPort[TUnit]]], None] | None = None,
+    ) -> Self:
         """Get a copy of each port."""
-        bases = [b.__copy__() for b in self._bases]
-        if rename_funciton is not None:
-            rename_funciton([Port(base=b) for b in bases])
-        return self.__class__(bases=bases, kcl=self.kcl)
+        ...
 
     def to_itype(self) -> Ports:
         """Convert to a Ports."""
@@ -451,6 +452,15 @@ class Ports(ProtoPorts[int]):
                 f"Available ports: {[v.name for v in self._bases]}"
             ) from e
 
+    def copy(
+        self, rename_function: Callable[[Sequence[Port]], None] | None = None
+    ) -> Self:
+        """Get a copy of each port."""
+        bases = [b.model_copy() for b in self._bases]
+        if rename_function is not None:
+            rename_function([Port(base=b) for b in bases])
+        return self.__class__(bases=bases, kcl=self.kcl)
+
     def filter(
         self,
         angle: int | None = None,
@@ -737,6 +747,15 @@ class DPorts(ProtoPorts[float]):
                 f"{key=} is not a valid port name or index. "
                 f"Available ports: {[v.name for v in self._bases]}"
             ) from e
+
+    def copy(
+        self, rename_function: Callable[[Sequence[DPort]], None] | None = None
+    ) -> Self:
+        """Get a copy of each port."""
+        bases = [b.model_copy() for b in self._bases]
+        if rename_function is not None:
+            rename_function([DPort(base=b) for b in bases])
+        return self.__class__(bases=bases, kcl=self.kcl)
 
     def filter(
         self,
