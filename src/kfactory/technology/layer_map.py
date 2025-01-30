@@ -32,6 +32,7 @@ class LayerPropertiesModel(BaseModel):
     valid: bool = True
 
     @model_validator(mode="before")
+    @classmethod
     def color_to_frame_fill(cls, data: dict[str, Any]) -> dict[str, Any]:
         """Convert a color string to a frame fill."""
         if "color" in data:
@@ -43,6 +44,7 @@ class LayerPropertiesModel(BaseModel):
         return data
 
     @field_validator("dither_pattern", mode="before")
+    @classmethod
     def dither_to_index(cls, v: str | int) -> int:
         """Convert string to the index with the dict dither2index."""
         if isinstance(v, str):
@@ -51,6 +53,7 @@ class LayerPropertiesModel(BaseModel):
             return v
 
     @field_validator("line_style", mode="before")
+    @classmethod
     def line_to_index(cls, v: str | int) -> int:
         """Convert string to the index with the dict dither2index."""
         if isinstance(v, str):
@@ -58,14 +61,15 @@ class LayerPropertiesModel(BaseModel):
         else:
             return v
 
-    # @staticmethod
     @field_serializer("dither_pattern")
-    def dither_to_json(value: int) -> str:  # type: ignore[misc]
+    @staticmethod
+    def dither_to_json(value: int) -> str:
         """Convert dither int to string key on json dump."""
         return index2dither[value]
 
     @field_serializer("line_style")
-    def line_to_json(value: int) -> str:  # type: ignore[misc]
+    @staticmethod
+    def line_to_json(value: int) -> str:
         """Convert dither int to string key on json dump."""
         return index2line[value]
 

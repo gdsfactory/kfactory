@@ -38,7 +38,7 @@ cell_copy_lock = RLock()
 
 
 @pytest.fixture(scope="module")
-def LAYER() -> Layers:
+def layers() -> Layers:
     return Layers()
 
 
@@ -50,84 +50,84 @@ def kcl() -> kf.KCLayout:
 
 
 @pytest.fixture
-def wg_enc(LAYER: Layers) -> kf.LayerEnclosure:
-    return kf.LayerEnclosure(name="WGSTD", sections=[(LAYER.WGCLAD, 0, 2000)])
+def wg_enc(layers: Layers) -> kf.LayerEnclosure:
+    return kf.LayerEnclosure(name="WGSTD", sections=[(layers.WGCLAD, 0, 2000)])
 
 
 @pytest.fixture
 def straight_factory_dbu(
-    LAYER: Layers, wg_enc: kf.LayerEnclosure
+    layers: Layers, wg_enc: kf.LayerEnclosure
 ) -> Callable[..., kf.KCell]:
-    return partial(kf.cells.straight.straight_dbu, layer=LAYER.WG, enclosure=wg_enc)
+    return partial(kf.cells.straight.straight_dbu, layer=layers.WG, enclosure=wg_enc)
 
 
 @pytest.fixture
 def straight_factory(
-    LAYER: Layers, wg_enc: kf.LayerEnclosure
+    layers: Layers, wg_enc: kf.LayerEnclosure
 ) -> Callable[..., kf.KCell]:
-    return partial(kf.cells.straight.straight, layer=LAYER.WG, enclosure=wg_enc)
+    return partial(kf.cells.straight.straight, layer=layers.WG, enclosure=wg_enc)
 
 
 @pytest.fixture
-def straight(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
+def straight(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.straight.straight(
-        width=0.5, length=1, layer=LAYER.WG, enclosure=wg_enc
+        width=0.5, length=1, layer=layers.WG, enclosure=wg_enc
     )
 
 
 @pytest.fixture
-def straight_blank(LAYER: Layers) -> kf.KCell:
-    return kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
+def straight_blank(layers: Layers) -> kf.KCell:
+    return kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
 
 
 @pytest.fixture
-def bend90(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
+def bend90(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
+        width=0.5, radius=10, layer=layers.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
-def bend90_small(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
+def bend90_small(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=0.5, radius=5, layer=LAYER.WG, enclosure=wg_enc, angle=90
+        width=0.5, radius=5, layer=layers.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
-def bend180(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
+def bend180(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
+        width=0.5, radius=10, layer=layers.WG, enclosure=wg_enc, angle=180
     )
 
 
 @pytest.fixture
-def bend90_euler(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
+def bend90_euler(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
+        width=0.5, radius=10, layer=layers.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
-def bend180_euler(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
+def bend180_euler(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=0.5, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
+        width=0.5, radius=10, layer=layers.WG, enclosure=wg_enc, angle=180
     )
 
 
 @pytest.fixture
-def taper(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
-    return taper_cell(LAYER=LAYER.WG, wg_enc=wg_enc)
+def taper(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
+    return taper_cell(layers=layers.WG, wg_enc=wg_enc)
 
 
 @kf.kcl.cell(set_name=False)
-def taper_cell(LAYER: kf.kdb.LayerInfo, wg_enc: kf.LayerEnclosure) -> kf.KCell:
-    if kf.kcl.layout.cell("taper") is None:
+def taper_cell(layers: kf.kdb.LayerInfo, wg_enc: kf.LayerEnclosure) -> kf.KCell:
+    if kf.kcl.layout_cell("taper") is None:
         c = kf.cells.taper.taper(
             width1=0.5,
             width2=1,
             length=10,
-            layer=LAYER,
+            layer=layers,
             enclosure=wg_enc,
         )
         c = c.dup()
@@ -138,11 +138,11 @@ def taper_cell(LAYER: kf.kdb.LayerInfo, wg_enc: kf.LayerEnclosure) -> kf.KCell:
 
 
 @pytest.fixture
-def optical_port(LAYER: Layers) -> kf.Port:
+def optical_port(layers: Layers) -> kf.Port:
     return kf.Port(
         name="o1",
         trans=kf.kdb.Trans.R0,
-        layer=kf.kcl.find_layer(LAYER.WG),
+        layer=kf.kcl.find_layer(layers.WG),
         width=500,
         port_type="optical",
     )

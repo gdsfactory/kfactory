@@ -19,7 +19,7 @@ def test_virtual_inst(straight: kf.KCell) -> None:
 
 
 def test_virtual_cell_insert(
-    LAYER: Layers, straight: kf.KCell, wg_enc: kf.LayerEnclosure
+    layers: Layers, straight: kf.KCell, wg_enc: kf.LayerEnclosure
 ) -> None:
     c = kf.KCell()
 
@@ -28,7 +28,7 @@ def test_virtual_cell_insert(
     e_bend = kf.cells.virtual.euler.virtual_bend_euler(
         width=0.5,
         radius=10,
-        layer=LAYER.WG,
+        layer=layers.WG,
         angle=25,
         enclosure=wg_enc,
     )
@@ -37,7 +37,7 @@ def test_virtual_cell_insert(
     e3 = vc << e_bend
     e4 = vc << e_bend
     _s = kf.cells.virtual.straight.virtual_straight(
-        width=0.5, length=10, layer=LAYER.WG, enclosure=wg_enc
+        width=0.5, length=10, layer=layers.WG, enclosure=wg_enc
     )
     s = vc << _s
 
@@ -53,7 +53,7 @@ def test_virtual_cell_insert(
     vi.insert_into(c)
 
 
-def test_all_angle_route(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
+def test_all_angle_route(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
     bb = [kf.kdb.DPoint(x, y) for x, y in [(0, 0), (500, 0), (250, 200), (500, 250)]]
     vc = kf.VKCell(name="test_all_angle")
     kf.routing.aa.optical.route(
@@ -62,14 +62,14 @@ def test_all_angle_route(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
         backbone=bb,
         straight_factory=partial(
             kf.cells.virtual.straight.virtual_straight,
-            layer=LAYER.WG,
+            layer=layers.WG,
             enclosure=wg_enc,
         ),
         bend_factory=partial(
             kf.cells.virtual.euler.virtual_bend_euler,
             width=5,
             radius=20,
-            layer=LAYER.WG,
+            layer=layers.WG,
             enclosure=wg_enc,
         ),
     )

@@ -49,36 +49,36 @@ def test_layer_infos_unnamed_layer() -> None:
     assert layer_info.layer1.name == "layer1"  # type: ignore[attr-defined]
 
 
-def test_layer_enum_creation(LAYER: Layers) -> None:
-    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=LAYER)
+def test_layer_enum_creation(layers: Layers) -> None:
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
     assert layer_enum.WG.layer == 1
     assert layer_enum.WG.datatype == 0
 
 
-def test_layer_enum_str(LAYER: Layers) -> None:
-    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=LAYER)
+def test_layer_enum_str(layers: Layers) -> None:
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
     assert str(layer_enum.WG) == "WG"
 
 
-def test_layer_enum_getitem(LAYER: Layers) -> None:
-    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=LAYER)
+def test_layer_enum_getitem(layers: Layers) -> None:
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
     assert layer_enum["WG"][0] == 1  # type: ignore[index]
     assert layer_enum["WG"][1] == 0  # type: ignore[index]
 
 
-def test_layer_enum_len(LAYER: Layers) -> None:
-    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=LAYER)
+def test_layer_enum_len(layers: Layers) -> None:
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
     assert len(layer_enum) == 7  # type: ignore[arg-type]
 
 
-def test_layer_enum_iter(LAYER: Layers) -> None:
-    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=LAYER)
+def test_layer_enum_iter(layers: Layers) -> None:
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
     values = list(layer_enum.WG)
     assert values == [1, 0]
 
 
-def test_layer_enum_invalid_index(LAYER: Layers) -> None:
-    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=LAYER)
+def test_layer_enum_invalid_index(layers: Layers) -> None:
+    layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
     with pytest.raises(ValueError):
         layer_enum["WG"][2]  # type: ignore[index]
 

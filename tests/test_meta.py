@@ -93,7 +93,7 @@ def test_metainfo_set(straight: kf.KCell) -> None:
     straight.delete()
 
 
-def test_metainfo_read(LAYER: Layers, straight: kf.KCell) -> None:
+def test_metainfo_read(layers: Layers, straight: kf.KCell) -> None:
     """Test whether we can read written metadata to ports."""
     with NamedTemporaryFile("a", suffix=".oas") as t:
         save = kf.save_layout_options()

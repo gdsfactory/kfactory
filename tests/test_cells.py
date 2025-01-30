@@ -8,57 +8,51 @@ import kfactory as kf
 from kfactory.conf import logger
 
 
-class GeometryDifference(ValueError):
+class GeometryDifferenceError(ValueError):
     """Exception for Geometric differences."""
 
-    pass
-
-
-# class LAYER(kf.LayerEnum):  # type: ignore[unused-ignore, misc]
-#     kcl = kf.constant(kf.kcl)
-#     WG = (1, 0)
-#     WGCLAD = (111, 0)
+    ...
 
 
 wg_enc = kf.LayerEnclosure(name="WGSTD", sections=[(Layers().WGCLAD, 0, 2000)])
 
 
-def straight(LAYER: Layers) -> kf.KCell:
+def straight(layers: Layers) -> kf.KCell:
     return kf.cells.straight.straight(
-        width=0.5, length=1, layer=LAYER.WG, enclosure=wg_enc
+        width=0.5, length=1, layer=layers.WG, enclosure=wg_enc
     )
 
 
-def bend90(LAYER: Layers) -> kf.KCell:
+def bend90(layers: Layers) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
+        width=1, radius=10, layer=layers.WG, enclosure=wg_enc, angle=90
     )
 
 
-def bend180(LAYER: Layers) -> kf.KCell:
+def bend180(layers: Layers) -> kf.KCell:
     return kf.cells.circular.bend_circular(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
+        width=1, radius=10, layer=layers.WG, enclosure=wg_enc, angle=180
     )
 
 
-def bend90_euler(LAYER: Layers) -> kf.KCell:
+def bend90_euler(layers: Layers) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=90
+        width=1, radius=10, layer=layers.WG, enclosure=wg_enc, angle=90
     )
 
 
-def bend180_euler(LAYER: Layers) -> kf.KCell:
+def bend180_euler(layers: Layers) -> kf.KCell:
     return kf.cells.euler.bend_euler(
-        width=1, radius=10, layer=LAYER.WG, enclosure=wg_enc, angle=180
+        width=1, radius=10, layer=layers.WG, enclosure=wg_enc, angle=180
     )
 
 
-def taper(LAYER: Layers) -> kf.KCell:
+def taper(layers: Layers) -> kf.KCell:
     return kf.cells.taper.taper(
         width1=0.5,
         width2=1,
         length=10,
-        layer=LAYER.WG,
+        layer=layers.WG,
         enclosure=wg_enc,
     )
 
@@ -81,10 +75,10 @@ def cell_name(request: pytest.FixtureRequest) -> str:
     return request.param  # type: ignore[no-any-return]
 
 
-def test_cells(cell_name: str, LAYER: Layers) -> None:
+def test_cells(cell_name: str, layers: Layers) -> None:
     """Ensure cells have the same geometry as their golden references."""
     gds_ref = pathlib.Path(__file__).parent / "test_data" / "ref"
-    cell = cells[cell_name](LAYER)
+    cell = cells[cell_name](layers)
     ref_file = gds_ref / f"{cell.name}.gds"
     run_cell = cell
     if not ref_file.exists():
@@ -122,19 +116,19 @@ def test_cells(cell_name: str, LAYER: Layers) -> None:
                 logger.info(f"replacing file {str(ref_file)!r}")
                 run_cell.write(ref_file.name)
 
-            raise GeometryDifference(
+            raise GeometryDifferenceError(
                 f"Differences found in {cell!r} on layer {layer_tuple}"
             )
 
 
-def test_additional_info(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
+def test_additional_info(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
     test_bend_euler = partial(
         kf.factories.euler.bend_euler_factory(
             kcl=kf.kcl,
             additional_info={"creation_time": "2023-02-12Z23:00:00"},
             overwrite_existing=True,
         ),
-        layer=LAYER.WG,
+        layer=layers.WG,
         radius=10,
     )
 

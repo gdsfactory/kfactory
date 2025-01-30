@@ -3,10 +3,10 @@ from conftest import Layers
 import kfactory as kf
 
 
-def test_tiled_fill_space(fill_cell: kf.KCell, LAYER: Layers) -> None:
+def test_tiled_fill_space(fill_cell: kf.KCell, layers: Layers) -> None:
     c = kf.KCell()
-    c.shapes(LAYER.WG).insert(kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512))
-    c.shapes(LAYER.WGCLAD).insert(
+    c.shapes(layers.WG).insert(kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512))
+    c.shapes(layers.WGCLAD).insert(
         kf.kdb.DPolygon(
             [kf.kdb.DPoint(0, 0), kf.kdb.DPoint(5000, 0), kf.kdb.DPoint(5000, 3000)]
         )
@@ -14,21 +14,21 @@ def test_tiled_fill_space(fill_cell: kf.KCell, LAYER: Layers) -> None:
     kf.utils.fill_tiled(
         c,
         fill_cell,
-        [(LAYER.WG, 0)],
+        [(layers.WG, 0)],
         exclude_layers=[
-            (LAYER.WGEXCLUDE, 100),
-            (LAYER.WGCLAD, 0),
-            (LAYER.WGCLADEXCLUDE, 0),
+            (layers.WGEXCLUDE, 100),
+            (layers.WGCLAD, 0),
+            (layers.WGCLADEXCLUDE, 0),
         ],
         x_space=5,
         y_space=5,
     )
 
 
-def test_tiled_fill_vector(fill_cell: kf.KCell, LAYER: Layers) -> None:
+def test_tiled_fill_vector(fill_cell: kf.KCell, layers: Layers) -> None:
     c = kf.KCell()
-    c.shapes(LAYER.WG).insert(kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512))
-    c.shapes(LAYER.WGCLAD).insert(
+    c.shapes(layers.WG).insert(kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512))
+    c.shapes(layers.WGCLAD).insert(
         kf.kdb.DPolygon(
             [kf.kdb.DPoint(0, 0), kf.kdb.DPoint(5000, 0), kf.kdb.DPoint(5000, 3000)]
         )
@@ -45,15 +45,15 @@ def test_tiled_fill_vector(fill_cell: kf.KCell, LAYER: Layers) -> None:
 
     poly.insert_hole(kf.kdb.DBox(-1800, -200, -1200, 200))
 
-    c.shapes(LAYER.WGEXCLUDE).insert(poly)
+    c.shapes(layers.WGEXCLUDE).insert(poly)
     kf.utils.fill_tiled(
         c,
         fill_cell,
-        [(LAYER.WG, 0)],
+        [(layers.WG, 0)],
         exclude_layers=[
-            (LAYER.WGEXCLUDE, 100),
-            (LAYER.WGCLAD, 0),
-            (LAYER.WGCLADEXCLUDE, 0),
+            (layers.WGEXCLUDE, 100),
+            (layers.WGCLAD, 0),
+            (layers.WGCLADEXCLUDE, 0),
         ],
         row_step=kf.kdb.DVector(35, 5),
         col_step=kf.kdb.DVector(-5, 50),

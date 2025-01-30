@@ -32,73 +32,73 @@ def mmi_enc(layer: kf.kdb.LayerInfo, enclosure: kf.LayerEnclosure) -> kf.KCell:
     return c
 
 
-def test_enclosure(LAYER: Layers) -> None:
-    kf.LayerEnclosure([(LAYER.WG, 500, -250)])
+def test_enclosure(layers: Layers) -> None:
+    kf.LayerEnclosure([(layers.WG, 500, -250)])
 
 
-def test_enc(LAYER: Layers, wg_enc: kf.LayerEnclosure) -> None:
-    mmi_enc(LAYER.WG, wg_enc)
+def test_enc(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
+    mmi_enc(layers.WG, wg_enc)
 
 
-def test_neg_enc(LAYER: Layers) -> None:
-    enc = kf.LayerEnclosure([(LAYER.WGCLAD, -1500, 1000)])
+def test_neg_enc(layers: Layers) -> None:
+    enc = kf.LayerEnclosure([(layers.WGCLAD, -1500, 1000)])
 
-    mmi_enc(LAYER.WG, enc)
+    mmi_enc(layers.WG, enc)
 
 
-def test_layer_multi_enc(LAYER: Layers) -> None:
+def test_layer_multi_enc(layers: Layers) -> None:
     enc = kf.LayerEnclosure(
         [
-            (LAYER.WGCLAD, -5000, -5400),
-            (LAYER.WGCLAD, -4000, -3900),
-            (LAYER.WGCLAD, -100, 100),
-            (LAYER.WGCLAD, -500, -400),
+            (layers.WGCLAD, -5000, -5400),
+            (layers.WGCLAD, -4000, -3900),
+            (layers.WGCLAD, -100, 100),
+            (layers.WGCLAD, -500, -400),
         ]
     )
-    mmi_enc(LAYER.WG, enc)
+    mmi_enc(layers.WG, enc)
 
 
-def test_bbox_enc(LAYER: Layers) -> None:
+def test_bbox_enc(layers: Layers) -> None:
     enc = kf.LayerEnclosure(
         [
-            (LAYER.WGCLAD, -5000, -5400),
-            (LAYER.WGCLAD, -4000, -3900),
-            (LAYER.WGCLAD, -100, 100),
-            (LAYER.WGCLAD, -500, -400),
+            (layers.WGCLAD, -5000, -5400),
+            (layers.WGCLAD, -4000, -3900),
+            (layers.WGCLAD, -100, 100),
+            (layers.WGCLAD, -500, -400),
         ],
-        main_layer=LAYER.WG,
+        main_layer=layers.WG,
     )
     c = kf.KCell(name="BBOX_ENC")
-    enc.apply_bbox(c, ref=LAYER.WG)
+    enc.apply_bbox(c, ref=layers.WG)
 
 
-def test_layer_merge_enc(LAYER: Layers) -> None:
+def test_layer_merge_enc(layers: Layers) -> None:
     enc = kf.LayerEnclosure(
         [
-            (LAYER.WGCLAD, -5000, -3000),
-            (LAYER.WGCLAD, -4000, -2000),
-            (LAYER.WGCLAD, -2000, 1000),
+            (layers.WGCLAD, -5000, -3000),
+            (layers.WGCLAD, -4000, -2000),
+            (layers.WGCLAD, -2000, 1000),
         ]
     )
-    mmi_enc(LAYER.WG, enc)
+    mmi_enc(layers.WG, enc)
 
 
-def test_um_enclosure(LAYER: Layers) -> None:
+def test_um_enclosure(layers: Layers) -> None:
     kcl = kf.KCLayout("TEST_UM_ENCLOSURE")
     enc = kf.LayerEnclosure(
         [
-            (LAYER.WGCLAD, -5000, -3000),
-            (LAYER.WGCLAD, -4000, -2000),
-            (LAYER.WGCLAD, -2000, 1000),
+            (layers.WGCLAD, -5000, -3000),
+            (layers.WGCLAD, -4000, -2000),
+            (layers.WGCLAD, -2000, 1000),
         ],
         kcl=kcl,
     )
 
     enc_um = kf.LayerEnclosure(
         dsections=[
-            (LAYER.WGCLAD, -5, -3),
-            (LAYER.WGCLAD, -4, -2),
-            (LAYER.WGCLAD, -2, 1),
+            (layers.WGCLAD, -5, -3),
+            (layers.WGCLAD, -4, -2),
+            (layers.WGCLAD, -2, 1),
         ],
         kcl=kcl,
     )
@@ -106,47 +106,47 @@ def test_um_enclosure(LAYER: Layers) -> None:
     assert enc == enc_um
 
 
-def test_um_enclosure_nodbu(LAYER: Layers) -> None:
+def test_um_enclosure_nodbu(layers: Layers) -> None:
     """When defining um sections, kcl must be defined."""
     with pytest.raises(AssertionError):
         kf.LayerEnclosure(
             dsections=[
-                (LAYER.WGCLAD, -5, -3),
-                (LAYER.WGCLAD, -4, -2),
-                (LAYER.WGCLAD, -2, 1),
+                (layers.WGCLAD, -5, -3),
+                (layers.WGCLAD, -4, -2),
+                (layers.WGCLAD, -2, 1),
             ]
         )
 
 
-def test_pdkenclosure(LAYER: Layers, straight_blank: kf.KCell) -> None:
+def test_pdkenclosure(layers: Layers, straight_blank: kf.KCell) -> None:
     c = kf.KCell(name="wg_slab")
 
     wg_box = kf.kdb.Box(10000, 500)
-    c.shapes(c.kcl.find_layer(LAYER.WG)).insert(wg_box)
-    c.shapes(c.kcl.find_layer(LAYER.WGCLAD)).insert(wg_box.enlarged(0, 2500))
+    c.shapes(c.kcl.find_layer(layers.WG)).insert(wg_box)
+    c.shapes(c.kcl.find_layer(layers.WGCLAD)).insert(wg_box.enlarged(0, 2500))
     c.create_port(
         trans=kf.kdb.Trans(0, False, wg_box.right, 0),
         width=wg_box.height(),
-        layer=c.kcl.find_layer(LAYER.WG),
+        layer=c.kcl.find_layer(layers.WG),
     )
     c.create_port(
         trans=kf.kdb.Trans(2, False, wg_box.left, 0),
         width=wg_box.height(),
-        layer=c.kcl.find_layer(LAYER.WG),
+        layer=c.kcl.find_layer(layers.WG),
     )
 
     enc1 = kf.LayerEnclosure(
         sections=[
-            (LAYER.WGEXCLUDE, 1000),
+            (layers.WGEXCLUDE, 1000),
         ],
         name="WGEX",
-        main_layer=LAYER.WG,
+        main_layer=layers.WG,
     )
 
     enc2 = kf.LayerEnclosure(
         name="CLADEX",
-        main_layer=LAYER.WGCLAD,
-        sections=[(LAYER.WGEXCLUDE, 1000), (LAYER.WGCLADEXCLUDE, 2000)],
+        main_layer=layers.WGCLAD,
+        sections=[(layers.WGEXCLUDE, 1000), (layers.WGCLADEXCLUDE, 2000)],
     )
 
     pdkenc = kf.KCellEnclosure(enclosures=[enc1, enc2])
@@ -168,9 +168,9 @@ def test_pdkenclosure(LAYER: Layers, straight_blank: kf.KCell) -> None:
     port_wg_ex.merge()
 
     assert (
-        kf.kdb.Region(c.shapes(c.kcl.find_layer(LAYER.WGEXCLUDE))) & port_wg_ex
+        kf.kdb.Region(c.shapes(c.kcl.find_layer(layers.WGEXCLUDE))) & port_wg_ex
     ).is_empty()
     assert (
-        (kf.kdb.Region(c.shapes(c.kcl.find_layer(LAYER.WGCLADEXCLUDE))) & port_wg_ex)
+        (kf.kdb.Region(c.shapes(c.kcl.find_layer(layers.WGCLADEXCLUDE))) & port_wg_ex)
         - port_wg_ex
     ).is_empty()
