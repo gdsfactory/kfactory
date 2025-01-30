@@ -87,7 +87,7 @@ class ProtoTInstancePorts(
 
     def filter(
         self,
-        angle: TUnit | None = None,
+        angle: int | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
@@ -111,7 +111,7 @@ class ProtoTInstancePorts(
         if port_type:
             ports = filter_port_type(ports, port_type)
         if angle is not None:
-            ports = filter_direction(ports, round(angle / 90))
+            ports = filter_direction(ports, angle)
         if orientation is not None:
             ports = filter_orientation(ports, orientation)
         return list(ports)
@@ -355,7 +355,7 @@ class DInstancePorts(ProtoTInstancePorts[float]):
 
     def filter(
         self,
-        angle: float | None = None,
+        angle: int | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,

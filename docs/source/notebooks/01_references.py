@@ -211,7 +211,7 @@ print(kf.__version__)
 c = kf.cells.straight.straight(length=10, width=0.6, layer=LAYER.WG)
 c3 = kf.KCell()  # Create a new blank Cell
 aref = c3.create_inst(
-    c, na=1, nb=3, a=kf.kdb.Vector(20000, 0), b=kf.kdb.Vector(0, 15000)
+    c, na=1, nb=3, a=(20000, 0), b=(0, 15000)
 )  # instance the Cell "c" 3 instances in it with a 3 rows, 1 columns array
 
 c3.add_ports(aref.ports)

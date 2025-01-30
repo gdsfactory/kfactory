@@ -481,7 +481,7 @@ def grid(
     shape: tuple[int, int] | None = None,
     align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
-    rotation: Literal[0, 1, 2, 3] = 0,
+    rotation: float = 0,
     mirror: bool = False,
 ) -> DInstanceGroup:
     """Create a grid of instances.
@@ -565,7 +565,7 @@ def grid(
 
         insts = [
             [
-                target.create_inst(kcell, kdb.ICplxTrans(1, rotation, mirror, 0, 0))
+                target.create_inst(kcell, kdb.DCplxTrans(1, rotation, mirror, 0, 0))
                 for kcell in array
             ]
             for array in kcell_array
@@ -637,7 +637,7 @@ def grid(
         _insts = [
             None
             if kcell is None
-            else target.create_inst(kcell, kdb.ICplxTrans(1, rotation, mirror, 0, 0))
+            else target.create_inst(kcell, kdb.DCplxTrans(1, rotation, mirror, 0, 0))
             for kcell in _kcells
         ]
 
@@ -704,7 +704,7 @@ def flexgrid(
     shape: tuple[int, int] | None = None,
     align_x: Literal["origin", "xmin", "xmax", "center"] = "center",
     align_y: Literal["origin", "ymin", "ymax", "center"] = "center",
-    rotation: Literal[0, 1, 2, 3] = 0,
+    rotation: float = 0,
     mirror: bool = False,
 ) -> DInstanceGroup:
     """Create a grid of instances.
@@ -786,7 +786,7 @@ def flexgrid(
                 None
                 if kcell is None
                 else target.create_inst(
-                    kcell, kdb.ICplxTrans(1, rotation, mirror, 0, 0)
+                    kcell, kdb.DCplxTrans(1, rotation, mirror, 0, 0)
                 )
                 for kcell in array
             ]
@@ -867,7 +867,7 @@ def flexgrid(
         _insts = [
             None
             if kcell is None
-            else target.create_inst(kcell, kdb.ICplxTrans(1, rotation, mirror, 0, 0))
+            else target.create_inst(kcell, kdb.DCplxTrans(1, rotation, mirror, 0, 0))
             for kcell in _kcells
         ]
 
