@@ -398,8 +398,6 @@ class Ports(ProtoPorts[int]):
                     )
                 layer_info = self.kcl.layout.get_info(layer)
             assert layer_info is not None
-            if width <= 0:
-                raise ValueError("width needs to be set and be >0")
             cross_section = self.kcl.get_cross_section(
                 CrossSectionSpec(main_layer=layer_info, width=width)
             )
@@ -663,8 +661,6 @@ class DPorts(ProtoPorts[float]):
                     )
                 layer_info = self.kcl.layout.get_info(layer)
             assert layer_info is not None
-            if width <= 0:
-                raise ValueError("width needs to be set and be >0")
             width_ = self.kcl.to_dbu(width)
             if width_ % 2:
                 raise ValueError(

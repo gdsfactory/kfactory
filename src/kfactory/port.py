@@ -21,7 +21,6 @@ from pydantic import (
     model_serializer,
     model_validator,
 )
-from ruamel.yaml.constructor import BaseConstructor
 from typing_extensions import TypedDict
 
 from .conf import config
@@ -179,7 +178,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             BasePortDict,
             dict(
                 name=self.name,
-                kcl=self.kcl.name,
+                kcl=self.kcl,
                 cross_section=self.cross_section,
                 trans=trans,
                 dcplx_trans=dcplx_trans,
@@ -582,12 +581,6 @@ class ProtoPort(Generic[TUnit], ABC):
             f"{self.layer_info}, port_type={self.port_type})"
         )
 
-    @classmethod
-    def from_yaml(cls, constructor: BaseConstructor, node: Any) -> Self:
-        """Internal function used by the placer to convert yaml to a Port."""
-        d = dict(constructor.construct_pairs(node))
-        return cls(**d)
-
 
 class Port(ProtoPort[int]):
     """A port is the photonics equivalent to a pin in electronics.
@@ -620,7 +613,7 @@ class Port(ProtoPort[int]):
         name: str | None = None,
         width: int,
         layer: LayerEnum | int,
-        trans: kdb.Trans,
+        trans: kdb.Trans | str,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = ...,
@@ -633,7 +626,7 @@ class Port(ProtoPort[int]):
         name: str | None = None,
         width: int,
         layer: LayerEnum | int,
-        dcplx_trans: kdb.DCplxTrans,
+        dcplx_trans: kdb.DCplxTrans | str,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = ...,
@@ -661,7 +654,7 @@ class Port(ProtoPort[int]):
         name: str | None = None,
         width: int,
         layer_info: kdb.LayerInfo,
-        trans: kdb.Trans,
+        trans: kdb.Trans | str,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = ...,
@@ -674,7 +667,7 @@ class Port(ProtoPort[int]):
         name: str | None = None,
         width: int,
         layer_info: kdb.LayerInfo,
-        dcplx_trans: kdb.DCplxTrans,
+        dcplx_trans: kdb.DCplxTrans | str,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = ...,
@@ -715,7 +708,7 @@ class Port(ProtoPort[int]):
         *,
         name: str | None = None,
         cross_section: SymmetricalCrossSection,
-        trans: kdb.Trans,
+        trans: kdb.Trans | str,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = ...,
         port_type: str = "optical",
@@ -727,7 +720,7 @@ class Port(ProtoPort[int]):
         *,
         name: str | None = None,
         cross_section: SymmetricalCrossSection,
-        dcplx_trans: kdb.DCplxTrans,
+        dcplx_trans: kdb.DCplxTrans | str,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = ...,
         port_type: str = "optical",
@@ -735,6 +728,9 @@ class Port(ProtoPort[int]):
 
     @overload
     def __init__(self, *, base: BasePort) -> None: ...
+
+    @overload
+    def __init__(self, *, port: ProtoPort[Any]) -> None: ...
 
     def __init__(
         self,
@@ -749,7 +745,7 @@ class Port(ProtoPort[int]):
         angle: int | None = None,
         center: tuple[int, int] | None = None,
         mirror_x: bool = False,
-        port: Port | None = None,
+        port: ProtoPort[Any] | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] | None = None,
         cross_section: SymmetricalCrossSection | None = None,
@@ -762,7 +758,7 @@ class Port(ProtoPort[int]):
             self._base = base
             return
         if port is not None:
-            self._base = BasePort(**port.base.model_dump())
+            self._base = port.base.__copy__()
             return
         info_ = Info(**info)
         from .layout import get_default_kcl
@@ -778,10 +774,9 @@ class Port(ProtoPort[int]):
                     "any width and layer, or a cross_section must be given if the"
                     " 'port is None'"
                 )
-            else:
-                cross_section = kcl_.get_cross_section(
-                    CrossSectionSpec(main_layer=layer_info, width=width)
-                )
+            cross_section = kcl_.get_cross_section(
+                CrossSectionSpec(main_layer=layer_info, width=width)
+            )
         cross_section_ = cross_section
         if trans is not None:
             if isinstance(trans, str):
@@ -922,7 +917,7 @@ class DPort(ProtoPort[float]):
         orientation: float | None = None,
         center: tuple[float, float] | None = None,
         mirror_x: bool = False,
-        port: Port | DPort | None = None,
+        port: ProtoPort[Any] | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] | None = None,
         cross_section: SymmetricalCrossSection | None = None,
@@ -935,7 +930,7 @@ class DPort(ProtoPort[float]):
             self._base = base
             return
         if port is not None:
-            self._base = BasePort(**port.base.model_dump())
+            self._base = port.base.__copy__()
             return
         info_ = Info(**info)
 
@@ -994,6 +989,7 @@ class DPort(ProtoPort[float]):
             )
             self.center = center
             self.orientation = orientation
+            self.mirror_x = mirror_x
         else:
             raise ValueError("Missing port parameters given")
 
@@ -1124,10 +1120,8 @@ def rename_clockwise(
                 angle = 1
             case 0:
                 angle = 2
-            case 3:
-                angle = 3
             case _:
-                raise ValueError(f"Invalid angle: {port.angle}")
+                angle = 3
         dir_1 = 1 if angle < 2 else -1
         dir_2 = -1 if port.angle < 2 else 1
         key_1 = dir_1 * (
