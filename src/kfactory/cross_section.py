@@ -11,7 +11,6 @@ from typing import (
     Self,
     TypedDict,
     cast,
-    overload,
 )
 
 from pydantic import BaseModel, Field, PrivateAttr, model_validator
@@ -99,14 +98,9 @@ class TCrossSection(ABC, Generic[TUnit]):
     def layer(self) -> kdb.LayerInfo:
         return self._base_cross_section.main_layer()
 
-    @overload
-    def enclosure(self: TCrossSection[int]) -> LayerEnclosure: ...
-    @overload
-    def enclosure(self: TCrossSection[float]) -> DLayerEnclosure: ...
-
     @property
-    @abstractmethod
-    def enclosure(self) -> LayerEnclosure | DLayerEnclosure: ...
+    def enclosure(self) -> LayerEnclosure:
+        return self._base_cross_section.enclosure
 
     @property
     def sections(self) -> dict[kdb.LayerInfo, list[tuple[TUnit | None, TUnit]]]:
@@ -143,6 +137,10 @@ class CrossSection(TCrossSection[int]):
                 enclosure=LayerEnclosure(sections=sections, main_layer=layer),
                 name=name,
             )
+
+    @property
+    def sections(self) -> tuple[tuple[float, float], ...]:
+        yield from ((section.d_min, section.d_max) for section in self._)
 
 
 class DCrossSection(TCrossSection[int]):
