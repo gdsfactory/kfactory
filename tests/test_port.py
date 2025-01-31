@@ -125,8 +125,25 @@ def test_base_port_eq(kcl: kf.KCLayout, layers: Layers) -> None:
     assert port1 != 2
 
 
+def test_port_eq(kcl: kf.KCLayout, layers: Layers) -> None:
+    port1 = kf.port.Port(
+        name=None,
+        kcl=kcl,
+        cross_section=kcl.get_cross_section(
+            CrossSectionSpec(main_layer=layers.WG, width=2000)
+        ),
+        port_type="optical",
+        trans=kf.kdb.Trans(1, 0),
+    )
+    port2 = port1.copy()
+    assert port1 == port2
+    port2.trans = kf.kdb.Trans(2, 0)
+    assert port1 != port2
+    assert port1 != 2
+
+
 def test_port_kcl(kcl: kf.KCLayout, pdk: kf.KCLayout, layers: Layers) -> None:
-    port = kf.port.BasePort(
+    port = kf.port.Port(
         name=None,
         kcl=kcl,
         cross_section=kcl.get_cross_section(
@@ -216,8 +233,11 @@ def test_port_orientation(kcl: kf.KCLayout, layers: Layers) -> None:
     assert math.isclose(port.orientation, 1)
     assert port.angle == 0
 
+    port.orientation = 45
+    assert port.orientation == 45
+    assert port.angle == 0
+
     port.angle = 7
-    assert port.angle == 3
     assert port.orientation == 270
 
     port.angle = 12
@@ -244,6 +264,79 @@ def test_to_itype() -> None:
     assert itype.layer == 1
     assert itype.center == (1000, 1000)
     assert itype.angle == 1
+
+
+def test_port_copy(kcl: kf.KCLayout, layers: Layers) -> None:
+    port = kf.DPort(
+        name=None,
+        kcl=kcl,
+        cross_section=kcl.get_cross_section(
+            CrossSectionSpec(main_layer=layers.WG, width=2000)
+        ),
+        port_type="optical",
+        trans=kf.kdb.Trans(1, 0),
+    )
+    port2 = port.copy()
+    port.trans = kf.kdb.Trans(2, 0)
+    assert port2.name is None
+    assert port2.kcl is kcl
+    assert port2.cross_section is kcl.get_cross_section(
+        CrossSectionSpec(main_layer=layers.WG, width=2000)
+    )
+    assert port2.port_type == "optical"
+    assert port2.trans == kf.kdb.Trans(1, 0)
+    assert port.trans == kf.kdb.Trans(2, 0)
+
+
+def test_port_mirror(kcl: kf.KCLayout, layers: Layers) -> None:
+    port = kf.port.DPort(
+        base=kf.port.BasePort(
+            name=None,
+            kcl=kcl,
+            cross_section=kcl.get_cross_section(
+                CrossSectionSpec(main_layer=layers.WG, width=2000)
+            ),
+            port_type="optical",
+            trans=kf.kdb.Trans(1, 0),
+        )
+    )
+    port.mirror = True
+    assert port.mirror
+    port.mirror = False
+    assert not port.mirror
+
+
+def test_port_xy(kcl: kf.KCLayout, layers: Layers) -> None:
+    port = kf.port.DPort(
+        base=kf.port.BasePort(
+            name=None,
+            kcl=kcl,
+            cross_section=kcl.get_cross_section(
+                CrossSectionSpec(main_layer=layers.WG, width=2000)
+            ),
+            port_type="optical",
+            trans=kf.kdb.Trans(0, 0),
+        )
+    )
+    port.dx = 1000
+    assert port.dx == 1000
+    assert port.dy == 0
+    assert port.dcenter == (1000, 0)
+
+    port.dcenter = (1000, 1000)
+    assert port.dx == 1000
+    assert port.dy == 1000
+    assert port.dcenter == (1000, 1000)
+
+    port.dy = 1000
+    assert port.dx == 1000
+    assert port.dy == 1000
+    assert port.dcenter == (1000, 1000)
+
+    port.center = (1, 1)
+    assert port.x == 1
+    assert port.y == 1
+    assert port.center == (1, 1)
 
 
 if __name__ == "__main__":

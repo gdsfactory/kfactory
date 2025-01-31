@@ -47,7 +47,10 @@ venv:
 	uv venv -p 3.13
 
 lint:
-	flake8 .
+	uv run ruff check .
+
+mypy:
+	uv run dmypy run src/kfactory
 
 pylint:
 	pylint kfactory

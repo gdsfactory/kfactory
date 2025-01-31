@@ -228,6 +228,16 @@ class ProtoPorts(ABC, Generic[TUnit]):
             return all(b1 == b2 for b1, b2 in zip(iter(self), other, strict=False))
         return False
 
+    def print(self, unit: Literal["dbu", "um", None] = None) -> None:
+        """Pretty print ports."""
+        config.console.print(pprint_ports(self, unit=unit))
+
+    def pformat(self, unit: Literal["dbu", "um", None] = None) -> str:
+        """Pretty print ports."""
+        with config.console.capture() as capture:
+            config.console.print(pprint_ports(self, unit=unit))
+        return capture.get()
+
 
 class Ports(ProtoPorts[int]):
     """A collection of dbu ports.
@@ -448,7 +458,7 @@ class Ports(ProtoPorts[int]):
         self, rename_function: Callable[[Sequence[Port]], None] | None = None
     ) -> Self:
         """Get a copy of each port."""
-        bases = [b.model_copy() for b in self._bases]
+        bases = [b.__copy__() for b in self._bases]
         if rename_function is not None:
             rename_function([Port(base=b) for b in bases])
         return self.__class__(bases=bases, kcl=self.kcl)
@@ -482,16 +492,6 @@ class Ports(ProtoPorts[int]):
     def __repr__(self) -> str:
         """Representation of the Ports as strings."""
         return repr([repr(DPort(base=b)) for b in self._bases])
-
-    def print(self, unit: Literal["dbu", "um", None] = None) -> None:
-        """Pretty print ports."""
-        config.console.print(pprint_ports(self, unit=unit))
-
-    def pformat(self, unit: Literal["dbu", "um", None] = None) -> str:
-        """Pretty print ports."""
-        with config.console.capture() as capture:
-            config.console.print(pprint_ports(self, unit=unit))
-        return capture.get()
 
 
 class DPorts(ProtoPorts[float]):
@@ -732,7 +732,7 @@ class DPorts(ProtoPorts[float]):
         self, rename_function: Callable[[Sequence[DPort]], None] | None = None
     ) -> Self:
         """Get a copy of each port."""
-        bases = [b.model_copy() for b in self._bases]
+        bases = [b.__copy__() for b in self._bases]
         if rename_function is not None:
             rename_function([DPort(base=b) for b in bases])
         return self.__class__(bases=bases, kcl=self.kcl)
@@ -766,13 +766,3 @@ class DPorts(ProtoPorts[float]):
     def __repr__(self) -> str:
         """Representation of the Ports as strings."""
         return repr([repr(Port(base=b)) for b in self._bases])
-
-    def print(self, unit: Literal["dbu", "um", None] = None) -> None:
-        """Pretty print ports."""
-        config.console.print(pprint_ports(self, unit=unit))
-
-    def pformat(self, unit: Literal["dbu", "um", None] = None) -> str:
-        """Pretty print ports."""
-        with config.console.capture() as capture:
-            config.console.print(pprint_ports(self, unit=unit))
-        return capture.get()

@@ -337,16 +337,6 @@ class ProtoPort(Generic[TUnit], ABC):
         return False
 
     @property
-    def center(self) -> tuple[TUnit, TUnit]:
-        """Returns port center."""
-        return (self.x, self.y)
-
-    @center.setter
-    def center(self, value: tuple[TUnit, TUnit]) -> None:
-        self.x = value[0]
-        self.y = value[1]
-
-    @property
     def trans(self) -> kdb.Trans:
         """Simple Transformation of the Port.
 
@@ -396,26 +386,6 @@ class ProtoPort(Generic[TUnit], ABC):
         return DPort(base=self._base)
 
     @property
-    @abstractmethod
-    def x(self) -> TUnit:
-        """X coordinate of the port."""
-        ...
-
-    @x.setter
-    @abstractmethod
-    def x(self, value: TUnit) -> None: ...
-
-    @property
-    @abstractmethod
-    def y(self) -> TUnit:
-        """Y coordinate of the port."""
-        ...
-
-    @y.setter
-    @abstractmethod
-    def y(self, value: TUnit) -> None: ...
-
-    @property
     def angle(self) -> Angle:
         """Angle of the transformation.
 
@@ -449,12 +419,6 @@ class ProtoPort(Generic[TUnit], ABC):
             self._base.dcplx_trans.angle = value
 
     @property
-    @abstractmethod
-    def width(self) -> TUnit:
-        """Width of the port."""
-        ...
-
-    @property
     def mirror(self) -> bool:
         """Returns `True`/`False` depending on the mirror flag on the transformation."""
         return self.trans.is_mirror()
@@ -464,8 +428,8 @@ class ProtoPort(Generic[TUnit], ABC):
         """Setter for mirror flag on trans."""
         if self._base.trans:
             self._base.trans.mirror = value
-        else:
-            self._base.dcplx_trans.mirror = value  # type: ignore[union-attr]
+        elif self._base.dcplx_trans:
+            self._base.dcplx_trans.mirror = value
 
     @abstractmethod
     def copy(
@@ -486,6 +450,79 @@ class ProtoPort(Generic[TUnit], ABC):
     ) -> ProtoPort[TUnit]:
         """Copy the port with a polar transformation."""
         ...
+
+    @property
+    def center(self) -> tuple[TUnit, TUnit]:
+        """Returns port center."""
+        return (self.x, self.y)
+
+    @center.setter
+    def center(self, value: tuple[TUnit, TUnit]) -> None:
+        self.x = value[0]
+        self.y = value[1]
+
+    @property
+    @abstractmethod
+    def x(self) -> TUnit:
+        """X coordinate of the port."""
+        ...
+
+    @x.setter
+    @abstractmethod
+    def x(self, value: TUnit) -> None: ...
+
+    @property
+    @abstractmethod
+    def y(self) -> TUnit:
+        """Y coordinate of the port."""
+        ...
+
+    @y.setter
+    @abstractmethod
+    def y(self, value: TUnit) -> None: ...
+
+    @property
+    @abstractmethod
+    def width(self) -> TUnit:
+        """Width of the port."""
+        ...
+
+    @property
+    def ix(self) -> int:
+        """X coordinate of the port in dbu."""
+        return self.trans.disp.x
+
+    @ix.setter
+    def ix(self, value: int) -> None:
+        if self._base.trans:
+            vec = self._base.trans.disp
+            vec.x = value
+            self._base.trans.disp = vec
+        elif self._base.dcplx_trans:
+            vec = self.trans.disp
+            vec.x = value
+            self._base.dcplx_trans.disp = self.kcl.to_um(vec)
+
+    @property
+    def iy(self) -> int:
+        """Y coordinate of the port in dbu."""
+        return self.trans.disp.y
+
+    @iy.setter
+    def iy(self, value: int) -> None:
+        if self._base.trans:
+            vec = self._base.trans.disp
+            vec.y = value
+            self._base.trans.disp = vec
+        elif self._base.dcplx_trans:
+            vec = self.trans.disp
+            vec.y = value
+            self._base.dcplx_trans.disp = self.kcl.to_um(vec)
+
+    @property
+    def iwidth(self) -> int:
+        """Width of the port in dbu."""
+        return self._base.cross_section.width
 
     @property
     def dx(self) -> float:
@@ -529,33 +566,21 @@ class ProtoPort(Generic[TUnit], ABC):
             self._base.dcplx_trans.disp = kdb.DVector(*pos)
 
     @property
-    def dangle(self) -> float:
-        """Angle of the port in degrees."""
-        return self.dcplx_trans.angle
-
-    @dangle.setter
-    def dangle(self, value: float) -> None:
-        if value in [0, 90, 180, 270] and self._base.trans:
-            self._base.trans.angle = round(value / 90)
-            return
-
-        trans = self.dcplx_trans
-        trans.angle = value
-        self.dcplx_trans = trans
-
-    @property
     def dwidth(self) -> float:
         """Width of the port in um."""
         return self.kcl.to_um(self._base.cross_section.width)
 
-    @property
-    def dmirror(self) -> bool:
-        """Mirror flag of the port."""
-        return self.mirror
+    def print(self, type: Literal["dbu", "um", None] = None) -> None:
+        """Print the port pretty."""
+        config.console.print(pprint_ports([self], unit=type))
 
-    @dmirror.setter
-    def dmirror(self, value: bool) -> None:
-        self.mirror = value
+    def __repr__(self) -> str:
+        """String representation of port."""
+        return (
+            f"{self.__class__.__name__}({self.name=}"
+            f", {self.width=}, trans={self.dcplx_trans.to_s()}, layer="
+            f"{self.layer_info}, port_type={self.port_type})"
+        )
 
     @classmethod
     def from_yaml(cls, constructor: BaseConstructor, node: Any) -> Self:
@@ -799,11 +824,6 @@ class Port(ProtoPort[int]):
         else:
             raise ValueError("Missing port parameters given")
 
-    @property
-    def width(self) -> int:
-        """Width of the port. This corresponds to the width of the cross section."""
-        return self.cross_section.width
-
     def copy(
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
@@ -844,46 +864,25 @@ class Port(ProtoPort[int]):
     @property
     def x(self) -> int:
         """X coordinate of the port in dbu."""
-        return self.trans.disp.x
+        return self.ix
 
     @x.setter
     def x(self, value: int) -> None:
-        if self._base.trans:
-            vec = self._base.trans.disp
-            vec.x = value
-            self._base.trans.disp = vec
-        elif self._base.dcplx_trans:
-            vec = self.trans.disp
-            vec.x = value
-            self._base.dcplx_trans.disp = self.kcl.to_um(vec)
+        self.ix = value
 
     @property
     def y(self) -> int:
         """Y coordinate of the port in dbu."""
-        return self.trans.disp.y
+        return self.iy
 
     @y.setter
     def y(self, value: int) -> None:
-        if self._base.trans:
-            vec = self._base.trans.disp
-            vec.y = value
-            self._base.trans.disp = vec
-        elif self._base.dcplx_trans:
-            vec = self.trans.disp
-            vec.y = value
-            self._base.dcplx_trans.disp = self.kcl.to_um(vec)
+        self.iy = value
 
-    def __repr__(self) -> str:
-        """String representation of port."""
-        return (
-            f"Port({'name: ' + self.name if self.name else ''}"
-            f", width: {self.width}, trans: {self.dcplx_trans.to_s()}, layer: "
-            f"{self.layer_info}, port_type: {self.port_type})"
-        )
-
-    def print(self, type: Literal["dbu", "um", None] = None) -> None:
-        """Print the port pretty."""
-        config.console.print(pprint_ports([self], unit=type))
+    @property
+    def width(self) -> int:
+        """Width of the port in um."""
+        return self.iwidth
 
 
 class DPort(ProtoPort[float]):
@@ -998,14 +997,6 @@ class DPort(ProtoPort[float]):
         else:
             raise ValueError("Missing port parameters given")
 
-    def __repr__(self) -> str:
-        """String representation of port."""
-        return (
-            f"DPort({'name: ' + self.name if self.name else ''}"
-            f", width: {self.width}, trans: {self.dcplx_trans.to_s()}, layer: "
-            f"{self.layer_info}, port_type: {self.port_type})"
-        )
-
     def copy(
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
@@ -1048,48 +1039,25 @@ class DPort(ProtoPort[float]):
     @property
     def x(self) -> float:
         """X coordinate of the port in um."""
-        return self.dcplx_trans.disp.x
+        return self.dx
 
     @x.setter
     def x(self, value: float) -> None:
-        vec = self.dcplx_trans.disp
-        vec.x = value
-        if self._base.trans:
-            self._base.trans.disp = self.kcl.to_dbu(vec)
-        elif self._base.dcplx_trans:
-            self._base.dcplx_trans.disp = vec
+        self.dx = value
 
     @property
     def y(self) -> float:
         """Y coordinate of the port in um."""
-        return self.dcplx_trans.disp.y
+        return self.dy
 
     @y.setter
     def y(self, value: float) -> None:
-        vec = self.dcplx_trans.disp
-        vec.y = value
-        if self._base.trans:
-            self._base.trans.disp = self.kcl.to_dbu(vec)
-        elif self._base.dcplx_trans:
-            self._base.dcplx_trans.disp = vec
-
-    @property
-    def center(self) -> tuple[float, float]:
-        """Coordinate of the port in um."""
-        vec = self.dcplx_trans.disp
-        return (vec.x, vec.y)
-
-    @center.setter
-    def center(self, value: tuple[float, float]) -> None:
-        if self._base.trans:
-            self._base.trans.disp = self.kcl.to_dbu(kdb.DVector(*value))
-        elif self._base.dcplx_trans:
-            self._base.dcplx_trans.disp = kdb.DVector(*value)
+        self.dy = value
 
     @property
     def width(self) -> float:
         """Width of the port in um."""
-        return self.kcl.to_um(self._base.cross_section.width)
+        return self.dwidth
 
 
 class DIRECTION(IntEnum):
