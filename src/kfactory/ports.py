@@ -705,8 +705,8 @@ class DPorts(ProtoPorts[float]):
             )
         else:
             raise ValueError(
-                f"You need to define width {width} and trans {trans} or orientation {orientation}"
-                f" and center {center} or dcplx_trans {dcplx_trans}"
+                f"You need to define width {width} and trans {trans} or orientation"
+                f" {orientation} and center {center} or dcplx_trans {dcplx_trans}"
             )
 
         self._bases.append(port.base)
