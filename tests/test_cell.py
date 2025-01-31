@@ -201,7 +201,6 @@ def test_overwrite(layers: Layers) -> None:
 
     @kcl.cell
     def test_overwrite_cell() -> kf.KCell:
-        print("overwrite1")
         c = kcl.kcell()
         return c
 
@@ -209,7 +208,6 @@ def test_overwrite(layers: Layers) -> None:
 
     @kcl.cell(overwrite_existing=True)  # type: ignore[no-redef]
     def test_overwrite_cell() -> kf.KCell:
-        print("overwrite2")
         c = kcl.kcell()
         return c
 
@@ -453,18 +451,20 @@ def test_cell_yaml(layers: Layers) -> None:
         width=5000, length=10000, layer=layers.WG
     ).dup()
 
-    c.name = "kf.factories.straight.straight_dbu_factory.random_cell"
+    _temp_cell_name = "kf.factories.straight.straight_dbu_factory.random_cell"
+
+    c.name = _temp_cell_name
 
     with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as tmpfile:
         yaml.dump(c, tmpfile)
 
-    c.name = "kf.factories.straight.straight_dbu_factory.random_cell_old"
+    c.name = _temp_cell_name + "_old"
 
     with open(tmpfile.name) as file:
         cell = yaml.load(file)
         assert isinstance(cell, kf.KCell)
 
-        c.name = "kf.factories.straight.straight_dbu_factory.random_cell"
+        c.name = _temp_cell_name
 
         c_base_kcell = c.base_kcell
         cell_base_kcell = cell.base_kcell
@@ -488,4 +488,4 @@ def test_cell_yaml(layers: Layers) -> None:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+    pytest.main([__file__, "-v", "-s"])

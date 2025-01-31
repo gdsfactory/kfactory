@@ -2469,7 +2469,6 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                     port_type=_d["port_type"],
                 )
             else:
-                print(kdb.LayerInfo.from_string(layer_as_string))
                 cell.create_port(
                     name=str(_d["name"]),
                     trans=kdb.Trans.from_s(_d["trans"]),
