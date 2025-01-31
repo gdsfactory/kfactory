@@ -2,13 +2,23 @@
 
 from __future__ import annotations
 
-from functools import cached_property
-from typing import TYPE_CHECKING, NotRequired, Self, TypedDict, cast
+from abc import ABC, abstractmethod
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Generic,
+    NotRequired,
+    Self,
+    TypedDict,
+    cast,
+    overload,
+)
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
 from . import kdb
 from .enclosure import DLayerEnclosure, LayerEnclosure, LayerEnclosureSpec
+from .typings import TUnit
 
 if TYPE_CHECKING:
     from .layout import KCLayout
@@ -19,7 +29,9 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
 
     width: int
     enclosure: LayerEnclosure
-    name: str
+    name: str = ""
+    radius: int | None = None
+    radius_min: int | None = None
 
     def __init__(
         self, width: int, enclosure: LayerEnclosure, name: str | None = None
@@ -28,6 +40,12 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
         super().__init__(
             width=width, enclosure=enclosure, name=name or f"{enclosure.name}_{width}"
         )
+
+    @model_validator(mode="before")
+    @classmethod
+    def _set_name(cls, data: Any) -> Any:
+        data["name"] = data.get("name") or f"{data['enclosure'].name}_{data['width']}"
+        return data
 
     @model_validator(mode="after")
     def _validate_enclosure_main_layer(self) -> Self:
@@ -47,7 +65,6 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
             raise ValueError("Width must be greater than 0.")
         return self
 
-    @cached_property
     def main_layer(self) -> kdb.LayerInfo:
         """Main Layer of the enclosure and cross section."""
         return self.enclosure.main_layer  # type: ignore[return-value]
@@ -59,6 +76,94 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
             enclosure=self.enclosure.to_dtype(kcl),
             name=self.name,
         )
+
+
+class TCrossSection(ABC, Generic[TUnit]):
+    _base_cross_section: SymmetricalCrossSection = PrivateAttr()
+
+    def __init__(
+        self,
+        width: TUnit,
+        layer: kdb.LayerInfo,
+        sections: list[tuple[TUnit, TUnit] | tuple[TUnit]],
+        radius: TUnit | None = None,
+        radius_min: TUnit | None = None,
+        base: SymmetricalCrossSection | None = None,
+    ): ...
+
+    @property
+    @abstractmethod
+    def width(self) -> TUnit: ...
+
+    @property
+    def layer(self) -> kdb.LayerInfo:
+        return self._base_cross_section.main_layer()
+
+    @overload
+    def enclosure(self: TCrossSection[int]) -> LayerEnclosure: ...
+    @overload
+    def enclosure(self: TCrossSection[float]) -> DLayerEnclosure: ...
+
+    @property
+    @abstractmethod
+    def enclosure(self) -> LayerEnclosure | DLayerEnclosure: ...
+
+    @property
+    def sections(self) -> dict[kdb.LayerInfo, list[tuple[TUnit | None, TUnit]]]:
+        return {
+            layer: [(s.d_min, s.d_max) for s in sections]
+            for layer, sections in self.enclosure.layer_sections.items()
+        }
+
+    @property
+    @abstractmethod
+    def radius(self) -> TUnit: ...
+
+    @property
+    @abstractmethod
+    def radius_min(self) -> TUnit: ...
+
+
+class CrossSection(TCrossSection[int]):
+    def __init__(
+        self,
+        width: int,
+        layer: kdb.LayerInfo,
+        sections: list[tuple[kdb.LayerInfo, int, int] | tuple[kdb.LayerInfo, int]],
+        radius: int | None = None,
+        radius_min: int | None = None,
+        name: str | None = None,
+        base: SymmetricalCrossSection | None = None,
+    ):
+        if base:
+            self._base_cross_section = base
+        else:
+            self._base_cross_section = SymmetricalCrossSection(
+                width=width,
+                enclosure=LayerEnclosure(sections=sections, main_layer=layer),
+                name=name,
+            )
+
+
+class DCrossSection(TCrossSection[int]):
+    def __init__(
+        self,
+        width: int,
+        layer: kdb.LayerInfo,
+        sections: list[tuple[kdb.LayerInfo, int, int] | tuple[kdb.LayerInfo, int]],
+        radius: int | None = None,
+        radius_min: int | None = None,
+        name: str | None = None,
+        base: SymmetricalCrossSection | None = None,
+    ):
+        if base:
+            self._base_cross_section = base
+        else:
+            self._base_cross_section = SymmetricalCrossSection(
+                width=width,
+                enclosure=LayerEnclosure(sections=sections, main_layer=layer),
+                name=name,
+            )
 
 
 class DSymmetricalCrossSection(BaseModel):
