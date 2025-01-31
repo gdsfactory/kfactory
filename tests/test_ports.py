@@ -259,26 +259,6 @@ def test_dplx_port_dbu_port_conversion(layers: Layers, kcl: kf.KCLayout) -> None
     assert p.trans == t2
 
 
-def test_to_dtype(kcl: kf.KCLayout) -> None:
-    port = kf.Port(name="o1", width=10, layer=1, center=(1000, 1000), angle=1)
-    dtype = port.to_dtype()
-    assert dtype.name == "o1"
-    assert dtype.width == 0.01
-    assert dtype.layer == 1
-    assert dtype.center == (1, 1)
-    assert dtype.angle == 90
-
-
-def test_to_itype(kcl: kf.KCLayout) -> None:
-    port = kf.DPort(name="o1", width=0.01, layer=1, center=(1, 1), angle=90)
-    itype = port.to_itype()
-    assert itype.name == "o1"
-    assert itype.width == 10
-    assert itype.layer == 1
-    assert itype.center == (1000, 1000)
-    assert itype.angle == 1
-
-
 def test_ports_to_dtype() -> None:
     port = kf.Port(name="o1", width=10, layer=1, center=(1000, 1000), angle=1)
     ports = kf.Ports(
@@ -290,7 +270,7 @@ def test_ports_to_dtype() -> None:
 
 
 def test_ports_to_itype() -> None:
-    port = kf.DPort(name="o1", width=0.01, layer=1, center=(1, 1), angle=90)
+    port = kf.DPort(name="o1", width=0.01, layer=1, center=(1, 1), orientation=90)
     ports = kf.DPorts(
         kcl=kf.kcl,
         ports=[port],
@@ -429,12 +409,12 @@ def test_dports_add_port(kcl: kf.KCLayout, layers: Layers) -> None:
     ports.add_port(port=port, name="o3")
     assert ports["o3"] == port
 
-    port2 = kf.DPort(name="o4", width=10, layer=1, center=(1000, 1000), angle=1)
+    port2 = kf.DPort(name="o4", width=10, layer=1, center=(1000, 1000), orientation=1)
     out_port = ports.add_port(port=port2, name="o4")
     assert out_port == ports["o4"]
 
     port3 = kf.DPort(
-        name="o5", width=10, layer=1, center=(1000, 1000), angle=1, kcl=kcl
+        name="o5", width=10, layer=1, center=(1000, 1000), orientation=1, kcl=kcl
     )
     port3.base.trans = None
     port3.base.dcplx_trans = kf.kdb.DCplxTrans(1, 90, False, 0, 0)
@@ -442,7 +422,7 @@ def test_dports_add_port(kcl: kf.KCLayout, layers: Layers) -> None:
     assert out_port == ports["o5"]
 
     port4 = kf.DPort(
-        name="o6", width=10, layer=1, center=(1000, 1000), angle=1, kcl=kcl
+        name="o6", width=10, layer=1, center=(1000, 1000), orientation=1, kcl=kcl
     )
     port4.base.trans = kf.kdb.Trans.R90
     port4.base.dcplx_trans = None
@@ -455,23 +435,29 @@ def test_dports_create_port(kcl: kf.KCLayout, layers: Layers) -> None:
         width=5000, length=10000, layer=layers.WG
     ).to_dtype()
     ports = c.ports
-    port = ports.create_port(name="o1", width=10, layer=1, center=(1000, 1000), angle=1)
+    port = ports.create_port(
+        name="o1", width=10, layer=1, center=(1000, 1000), orientation=1
+    )
     assert port in ports
 
     with pytest.raises(ValueError):
-        ports.create_port(name="o1", layer=1, center=(1000, 1000), angle=1)  # type: ignore[call-overload]
+        ports.create_port(name="o1", layer=1, center=(1000, 1000), orientation=1)  # type: ignore[call-overload]
 
     with pytest.raises(ValueError):
-        ports.create_port(name="o1", width=10, center=(1000, 1000), angle=1)  # type: ignore[call-overload]
+        ports.create_port(name="o1", width=10, center=(1000, 1000), orientation=1)  # type: ignore[call-overload]
 
     with pytest.raises(ValueError):
         ports.create_port(name="o1", layer=1, width=10)  # type: ignore[call-overload]
 
     with pytest.raises(ValueError, match="width needs to be set and be >0"):
-        ports.create_port(name="o1", width=-10, layer=1, center=(1000, 1000), angle=1)
+        ports.create_port(
+            name="o1", width=-10, layer=1, center=(1000, 1000), orientation=1
+        )
 
     with pytest.raises(ValueError, match="width needs to be even to snap to grid"):
-        ports.create_port(name="o1", width=0.001, layer=1, center=(1000, 1000), angle=1)
+        ports.create_port(
+            name="o1", width=0.001, layer=1, center=(1000, 1000), orientation=1
+        )
 
     port = ports.create_port(name="o1", width=10, layer=1, trans=kf.kdb.Trans.R90)
     assert port in ports

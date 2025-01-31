@@ -28,7 +28,7 @@ from .conf import config
 from .cross_section import CrossSectionSpec, SymmetricalCrossSection
 from .layer import LayerEnum
 from .settings import Info
-from .typings import TPort, TUnit
+from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
@@ -179,7 +179,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             BasePortDict,
             dict(
                 name=self.name,
-                kcl=self.kcl,
+                kcl=self.kcl.name,
                 cross_section=self.cross_section,
                 trans=trans,
                 dcplx_trans=dcplx_trans,
@@ -416,24 +416,34 @@ class ProtoPort(Generic[TUnit], ABC):
     def y(self, value: TUnit) -> None: ...
 
     @property
-    @abstractmethod
-    def angle(self) -> TUnit:
-        """Angle of the port."""
-        ...
+    def angle(self) -> Angle:
+        """Angle of the transformation.
+
+        In the range of `[0,1,2,3]` which are increments in 90°.
+        """
+        return self.trans.angle
 
     @angle.setter
-    @abstractmethod
-    def angle(self, value: int) -> None: ...
+    def angle(self, value: int) -> None:
+        self._base.trans = self.trans.dup()
+        self._base.dcplx_trans = None
+        self._base.trans.angle = value
 
     @property
     def orientation(self) -> float:
-        """Returns orientation in degrees for gdsfactory compatibility."""
+        """Returns orientation in degrees for gdsfactory compatibility.
+
+        In the range of `[0,360)`
+        """
         return self.dcplx_trans.angle
 
     @orientation.setter
     def orientation(self, value: float) -> None:
-        if not self.dcplx_trans.is_complex() and value in [0, 90, 180, 270]:
-            self.trans.angle = int(value / 90)
+        """Set the orientation of the port."""
+        if not self.dcplx_trans.is_complex():
+            dcplx_trans = self.dcplx_trans
+            dcplx_trans.angle = value
+            self.dcplx_trans = dcplx_trans
         else:
             self._base.dcplx_trans = self.dcplx_trans
             self._base.dcplx_trans.angle = value
@@ -863,35 +873,6 @@ class Port(ProtoPort[int]):
             vec.y = value
             self._base.dcplx_trans.disp = self.kcl.to_um(vec)
 
-    @property
-    def angle(self) -> int:
-        """Angle of the transformation.
-
-        In the range of `[0,1,2,3]` which are increments in 90°. Not to be confused
-        with `rot` of the transformation which keeps additional info about the
-        mirror flag.
-        """
-        return self.trans.angle
-
-    @angle.setter
-    def angle(self, value: int) -> None:
-        self._base.trans = self.trans.dup()
-        self._base.dcplx_trans = None
-        self._base.trans.angle = value
-
-    @property
-    def orientation(self) -> float:
-        """Returns orientation in degrees for gdsfactory compatibility."""
-        return self.dcplx_trans.angle
-
-    @orientation.setter
-    def orientation(self, value: float) -> None:
-        if not self.dcplx_trans.is_complex() and value in [0, 90, 180, 270]:
-            self.trans.angle = int(value / 90)
-        else:
-            self._base.dcplx_trans = self.dcplx_trans
-            self._base.dcplx_trans.angle = value
-
     def __repr__(self) -> str:
         """String representation of port."""
         return (
@@ -939,7 +920,7 @@ class DPort(ProtoPort[float]):
         port_type: str = "optical",
         trans: kdb.Trans | str | None = None,
         dcplx_trans: kdb.DCplxTrans | str | None = None,
-        angle: float | None = None,
+        orientation: float | None = None,
         center: tuple[float, float] | None = None,
         mirror_x: bool = False,
         port: Port | DPort | None = None,
@@ -1001,7 +982,7 @@ class DPort(ProtoPort[float]):
                 info=info_,
                 port_type=port_type,
             )
-        elif angle is not None:
+        elif orientation is not None:
             assert center is not None
             dcplx_trans_ = kdb.DCplxTrans.R0
             self._base = BasePort(
@@ -1013,7 +994,7 @@ class DPort(ProtoPort[float]):
                 port_type=port_type,
             )
             self.center = center
-            self.angle = angle
+            self.orientation = orientation
         else:
             raise ValueError("Missing port parameters given")
 
@@ -1104,21 +1085,6 @@ class DPort(ProtoPort[float]):
             self._base.trans.disp = self.kcl.to_dbu(kdb.DVector(*value))
         elif self._base.dcplx_trans:
             self._base.dcplx_trans.disp = kdb.DVector(*value)
-
-    @property
-    def angle(self) -> float:
-        """Angle of the port in degrees."""
-        return self.dcplx_trans.angle
-
-    @angle.setter
-    def angle(self, value: float) -> None:
-        if value in [0, 90, 180, 270] and self._base.trans:
-            self._base.trans.angle = round(value / 90)
-            return
-
-        trans = self.dcplx_trans
-        trans.angle = value
-        self.dcplx_trans = trans
 
     @property
     def width(self) -> float:

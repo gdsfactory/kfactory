@@ -33,7 +33,7 @@ from .port import (
     filter_port_type,
     filter_regex,
 )
-from .typings import TPort, TUnit
+from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
@@ -45,7 +45,7 @@ __all__ = ["DPorts", "Ports", "ProtoPorts"]
 
 def _filter_ports(
     ports: Iterable[TPort],
-    angle: int | None = None,
+    angle: Angle | None = None,
     orientation: float | None = None,
     layer: LayerEnum | int | None = None,
     port_type: str | None = None,
@@ -187,7 +187,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
     @abstractmethod
     def filter(
         self,
-        angle: int | None = None,
+        angle: Angle | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
@@ -314,7 +314,7 @@ class Ports(ProtoPorts[int]):
         width: int,
         layer: LayerEnum | int,
         center: tuple[int, int],
-        angle: Literal[0, 1, 2, 3],
+        angle: Angle,
         name: str | None = None,
         port_type: str = "optical",
     ) -> Port: ...
@@ -337,7 +337,7 @@ class Ports(ProtoPorts[int]):
         width: int,
         layer_info: kdb.LayerInfo,
         center: tuple[int, int],
-        angle: Literal[0, 1, 2, 3],
+        angle: Angle,
         name: str | None = None,
         port_type: str = "optical",
     ) -> Port: ...
@@ -353,7 +353,7 @@ class Ports(ProtoPorts[int]):
         trans: kdb.Trans | None = None,
         dcplx_trans: kdb.DCplxTrans | None = None,
         center: tuple[int, int] | None = None,
-        angle: Literal[0, 1, 2, 3] | None = None,
+        angle: Angle | None = None,
         mirror_x: bool = False,
         cross_section: SymmetricalCrossSection | None = None,
     ) -> Port:
@@ -455,7 +455,7 @@ class Ports(ProtoPorts[int]):
 
     def filter(
         self,
-        angle: int | None = None,
+        angle: Angle | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
@@ -579,7 +579,7 @@ class DPorts(ProtoPorts[float]):
         width: float,
         layer: LayerEnum | int,
         center: tuple[float, float],
-        angle: float,
+        orientation: float,
         name: str | None = None,
         port_type: str = "optical",
     ) -> DPort: ...
@@ -613,7 +613,7 @@ class DPorts(ProtoPorts[float]):
         width: float,
         layer_info: kdb.LayerInfo,
         center: tuple[float, float],
-        angle: float,
+        orientation: float,
         name: str | None = None,
         port_type: str = "optical",
     ) -> DPort: ...
@@ -629,7 +629,7 @@ class DPorts(ProtoPorts[float]):
         trans: kdb.Trans | None = None,
         dcplx_trans: kdb.DCplxTrans | None = None,
         center: tuple[float, float] | None = None,
-        angle: float | None = None,
+        orientation: float | None = None,
         mirror_x: bool = False,
         cross_section: SymmetricalCrossSection | None = None,
     ) -> DPort:
@@ -646,10 +646,9 @@ class DPorts(ProtoPorts[float]):
             dcplx_trans: Complex transformation for the port.
                 Use if a non-90° port is necessary.
             center: Tuple of the center. [dbu]
-            angle: Angle in 90° increments. Used for simple/dbu transformations.
+            orientation: Angle in degrees.
             mirror_x: Mirror the transformation of the port.
             cross_section: Cross section of the port. If set, overwrites width and layer
-                (info).
         """
         if cross_section is None:
             if width is None:
@@ -694,19 +693,19 @@ class DPorts(ProtoPorts[float]):
                 cross_section=cross_section,
                 kcl=self.kcl,
             )
-        elif angle is not None and center is not None:
+        elif orientation is not None and center is not None:
             port = DPort(
                 name=name,
                 port_type=port_type,
                 cross_section=cross_section,
-                angle=angle,
+                orientation=orientation,
                 center=center,
                 mirror_x=mirror_x,
                 kcl=self.kcl,
             )
         else:
             raise ValueError(
-                f"You need to define width {width} and trans {trans} or angle {angle}"
+                f"You need to define width {width} and trans {trans} or orientation {orientation}"
                 f" and center {center} or dcplx_trans {dcplx_trans}"
             )
 
@@ -740,7 +739,7 @@ class DPorts(ProtoPorts[float]):
 
     def filter(
         self,
-        angle: int | None = None,
+        angle: Angle | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
