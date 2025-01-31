@@ -150,6 +150,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             and isinstance(post_trans, kdb.Trans)
         ):
             base.trans = trans * base.trans * post_trans
+            base.dcplx_trans = None
             return base
         if isinstance(trans, kdb.Trans):
             trans = kdb.DCplxTrans(trans.to_dtype(self.kcl.dbu))
