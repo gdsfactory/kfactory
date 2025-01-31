@@ -11,8 +11,8 @@ _PortsType = tuple[kf.port.DPort, kf.port.Port, kf.port.DPort, kf.port.Port]
 
 
 kcl = kf.KCLayout("TEST_PORT")
-LAYERS = Layers()
-kcl.infos = LAYERS
+layers = Layers()
+kcl.infos = layers
 
 
 def get_ports() -> _PortsType:
@@ -20,7 +20,7 @@ def get_ports() -> _PortsType:
         name=None,
         kcl=kcl,
         cross_section=kcl.get_cross_section(
-            CrossSectionSpec(main_layer=LAYERS.WG, width=2000)
+            CrossSectionSpec(main_layer=layers.WG, width=2000)
         ),
         port_type="optical",
         trans=kf.kdb.Trans(0, 0),
@@ -415,9 +415,9 @@ def test_dport_copy_polar(kcl: kf.KCLayout) -> None:
     assert port2.dcplx_trans == kf.kdb.DCplxTrans(x=1, y=1, rot=45, mirrx=True)
 
 
-def test_autorename(kcl: kf.KCLayout) -> None:
+def test_autorename(kcl: kf.KCLayout, layers: Layers) -> None:
     cell = kf.factories.straight.straight_dbu_factory(kcl)(
-        length=10000, width=2000, layer=LAYERS.WG
+        length=10000, width=2000, layer=layers.WG
     )
 
     def _rename_ports(ports: kf.Ports) -> None:

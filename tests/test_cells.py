@@ -121,10 +121,12 @@ def test_cells(cell_name: str, layers: Layers) -> None:
             )
 
 
-def test_additional_info(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
+def test_additional_info(
+    kcl: kf.KCLayout, layers: Layers, wg_enc: kf.LayerEnclosure
+) -> None:
     test_bend_euler = partial(
         kf.factories.euler.bend_euler_factory(
-            kcl=kf.kcl,
+            kcl=kcl,
             additional_info={"creation_time": "2023-02-12Z23:00:00"},
             overwrite_existing=True,
         ),

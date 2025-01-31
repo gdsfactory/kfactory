@@ -259,20 +259,20 @@ def test_dplx_port_dbu_port_conversion(layers: Layers, kcl: kf.KCLayout) -> None
     assert p.trans == t2
 
 
-def test_ports_to_dtype() -> None:
+def test_ports_to_dtype(kcl: kf.KCLayout) -> None:
     port = kf.Port(name="o1", width=10, layer=1, center=(1000, 1000), angle=1)
     ports = kf.Ports(
-        kcl=kf.kcl,
+        kcl=kcl,
         ports=[port],
     )
     dtype = ports.to_dtype()
     assert dtype[0] == port
 
 
-def test_ports_to_itype() -> None:
+def test_ports_to_itype(kcl: kf.KCLayout) -> None:
     port = kf.DPort(name="o1", width=0.01, layer=1, center=(1, 1), orientation=90)
     ports = kf.DPorts(
-        kcl=kf.kcl,
+        kcl=kcl,
         ports=[port],
     )
     itype = ports.to_itype()

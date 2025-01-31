@@ -15,37 +15,35 @@ def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
     assert wg.name == "straight_W1000_L10000_LWG_EWGSTD"
 
 
-def test_circular_snapping(layers: Layers) -> None:
+def test_circular_snapping(kcl: kf.KCLayout, layers: Layers) -> None:
     b = kf.cells.circular.bend_circular(width=1, radius=10, layer=layers.WG, angle=90)
-    assert b.ports["o2"].dcplx_trans.disp == kf.kcl.to_um(b.ports["o2"].trans.disp)
+    assert b.ports["o2"].dcplx_trans.disp == kcl.to_um(b.ports["o2"].trans.disp)
 
 
-def test_euler_snapping(layers: Layers) -> None:
+def test_euler_snapping(kcl: kf.KCLayout, layers: Layers) -> None:
     b = kf.cells.euler.bend_euler(width=1, radius=10, layer=layers.WG, angle=90)
-    assert b.ports["o2"].dcplx_trans.disp == kf.kcl.to_um(b.ports["o2"].trans.disp)
+    assert b.ports["o2"].dcplx_trans.disp == kcl.to_um(b.ports["o2"].trans.disp)
 
 
-@kf.cell
-def unnamed_cell(name: str = "a") -> kf.KCell:
-    c = kf.kcl.kcell(name)
-    return c
+def test_unnamed_cell(kcl: kf.KCLayout) -> None:
+    @kcl.cell
+    def unnamed_cell(name: str = "a") -> kf.KCell:
+        c = kcl.kcell(name)
+        return c
 
-
-def test_unnamed_cell() -> None:
     c1 = unnamed_cell("test_unnamed_cell")
     c2 = unnamed_cell("test_unnamed_cell")
     assert c1 is c2
 
 
-@kf.cell
-def nested_list_dict(
-    arg1: dict[str, list[dict[str, str | int] | int] | int],
-) -> kf.KCell:
-    c = kf.kcl.kcell()
-    return c
+def test_nested_dict_list(kcl: kf.KCLayout) -> None:
+    @kcl.cell
+    def nested_list_dict(
+        arg1: dict[str, list[dict[str, str | int] | int] | int],
+    ) -> kf.KCell:
+        c = kcl.kcell()
+        return c
 
-
-def test_nested_dict_list() -> None:
     dl: dict[str, list[dict[str, str | int] | int] | int] = {
         "a": 5,
         "b": [5, {"c": "d", "e": 6}],
@@ -76,10 +74,10 @@ def test_namecollision(layers: Layers) -> None:
     assert b1.name != b2.name
 
 
-def test_nested_dic() -> None:
-    @kf.kcl.cell
+def test_nested_dic(kcl: kf.KCLayout) -> None:
+    @kcl.cell
     def recursive_dict_cell(d: dict[str, dict[str, str] | str]) -> kf.KCell:
-        c = kf.KCell()
+        c = kcl.kcell()
         return c
 
     recursive_dict_cell({"test": {"test2": "test3"}, "test4": "test5"})
@@ -153,10 +151,10 @@ def test_invalid_array(monkeypatch: pytest.MonkeyPatch, straight: kf.KCell) -> N
     kf.config.logfilter.regex = regex
 
 
-def test_cell_decorator_error(layers: Layers) -> None:
+def test_cell_decorator_error(kcl: kf.KCLayout) -> None:
     kcl2 = kf.KCLayout("decorator_test")
 
-    @kf.kcl.cell
+    @kcl.cell
     def wrong_cell() -> kf.KCell:
         c = kcl2.kcell("wrong_test")
         return c
@@ -170,26 +168,30 @@ def test_cell_decorator_error(layers: Layers) -> None:
     kf.config.logfilter.regex = regex
 
 
-def test_info(layers: Layers) -> None:
-    @kf.kcl.cell(info={"test": 42})
+def test_info(kcl: kf.KCLayout) -> None:
+    @kcl.cell(info={"test": 42})
     def test_info_cell(test: int) -> kf.KCell:
-        return kf.kcl.kcell()
+        return kcl.kcell()
 
     c = test_info_cell(42)
     assert c.info["test"] == 42
 
 
-def test_flatten(layers: Layers) -> None:
-    c = kf.KCell()
-    _ = c << kf.cells.straight.straight(width=1, length=10, layer=layers.WG)
+def test_flatten(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kcl.kcell()
+    _ = c << kf.factories.straight.straight_dbu_factory(kcl)(
+        width=2000, length=10000, layer=layers.WG
+    )
     assert len(c.insts) == 1, "c.insts should have 1 inst after adding a cell"
     c.flatten()
     assert len(c.insts) == 0, "c.insts should have 0 insts after flatten()"
 
 
-def test_size_info(layers: Layers) -> None:
-    c = kf.KCell()
-    ref = c << kf.cells.straight.straight(width=1, length=10, layer=layers.WG)
+def test_size_info(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kcl.kcell()
+    ref = c << kf.factories.straight.straight_dbu_factory(kcl)(
+        width=2000, length=10000, layer=layers.WG
+    )
     assert ref.size_info.ne[0] == 10000
     assert ref.dsize_info.ne[0] == 10
 
@@ -280,8 +282,8 @@ def test_ports_in_cells() -> None:
     assert new_port in dkcell.ports
 
 
-def test_kcell_attributes() -> None:
-    c = kf.kcl.kcell("test_kcell_attributes")
+def test_kcell_attributes(kcl: kf.KCLayout) -> None:
+    c = kcl.kcell("test_kcell_attributes")
     c.shapes(1).insert(kf.kdb.Box(0, 0, 10, 10))
     assert c.shapes(1).size() == 1
     assert c.bbox(1) == kf.kdb.Box(0, 0, 10, 10)
@@ -396,12 +398,16 @@ def test_lock(straight: kf.KCell, bend90: kf.KCell) -> None:
             straight.transform(kf.kdb.Trans.R90)
 
 
-def test_cell_in_threads(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
+def test_cell_in_threads(
+    kcl: kf.KCLayout, layers: Layers, wg_enc: kf.LayerEnclosure
+) -> None:
+    taper_factory = kf.cells.taper.taper_factory(kcl)
+
     def taper() -> kf.KCell:
-        return kf.cells.taper.taper(
-            width1=0.5,
-            width2=1,
-            length=10,
+        return taper_factory(
+            width1=5000,
+            width2=1000,
+            length=10000,
             layer=layers.WG,
             enclosure=wg_enc,
         )
@@ -419,7 +425,7 @@ def test_cell_in_threads(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
     t = taper()
 
     assert (
-        len([c for c in kf.kcl.tkcells.values() if c.kdb_cell.name == t.kdb_cell.name])
+        len([c for c in kcl.tkcells.values() if c.kdb_cell.name == t.kdb_cell.name])
         == 1
     )
 
@@ -438,7 +444,7 @@ def test_to_itype(kcl: kf.KCLayout) -> None:
     assert itype.bbox() == kf.kdb.Box(0, 0, 1000, 1000)
 
 
-def test_cell_yaml(kcl: kf.KCLayout, layers: Layers) -> None:
+def test_cell_yaml(layers: Layers) -> None:
     from ruamel.yaml import YAML
 
     yaml = YAML()
@@ -447,16 +453,18 @@ def test_cell_yaml(kcl: kf.KCLayout, layers: Layers) -> None:
         width=5000, length=10000, layer=layers.WG
     ).dup()
 
+    c.name = "kf.factories.straight.straight_dbu_factory.random_cell"
+
     with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as tmpfile:
         yaml.dump(c, tmpfile)
 
-    c.name += "test"
+    c.name = "kf.factories.straight.straight_dbu_factory.random_cell_old"
 
     with open(tmpfile.name) as file:
         cell = yaml.load(file)
         assert isinstance(cell, kf.KCell)
 
-        c.name = c.name.replace("test", "")
+        c.name = "kf.factories.straight.straight_dbu_factory.random_cell"
 
         c_base_kcell = c.base_kcell
         cell_base_kcell = cell.base_kcell
