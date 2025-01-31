@@ -83,5 +83,11 @@ def test_layer_enum_invalid_index(layers: Layers) -> None:
         layer_enum["WG"][2]  # type: ignore[index]
 
 
+def test_layer_stack(pdk: kf.KCLayout) -> None:
+    assert pdk.layer_stack.to_dict().keys() == {"wg", "clad"}
+    with pytest.raises(KeyError):
+        pdk.layer_stack["invalid"]
+
+
 if __name__ == "__main__":
-    pytest.main(["-v", __file__])
+    pytest.main(["-s", __file__])

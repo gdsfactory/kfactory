@@ -244,6 +244,19 @@ def test_vinstance_ports_filter(kcl: kf.KCLayout, layers: Layers) -> None:
 
     assert instance_ports["o2"] == ref.ports["o2"]
 
+    str(instance_ports)
+
+
+def test_vinstance_ports_contains(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kcl.vkcell()
+    ref = c.create_inst(
+        kf.factories.straight.straight_dbu_factory(kcl)(
+            width=5000, length=10000, layer=layers.WG
+        ),
+        trans=kf.kdb.DCplxTrans(mag=2),
+    )
+    assert ref.ports[0] in ref.ports
+
 
 if __name__ == "__main__":
     pytest.main([__file__])

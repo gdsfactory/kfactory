@@ -41,6 +41,24 @@ class HasCellPorts(Generic[TUnit], ABC):
 class ProtoInstancePorts(HasCellPorts[TUnit], Generic[TUnit, TInstance], ABC):
     instance: TInstance
 
+    @abstractmethod
+    def __len__(self) -> int: ...
+
+    @abstractmethod
+    def __contains__(self, port: str | ProtoPort[Any]) -> bool: ...
+
+    @abstractmethod
+    def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]: ...
+
+    @abstractmethod
+    def __iter__(self) -> Iterator[ProtoPort[TUnit]]: ...
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(n={len(self)})"
+
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}(ports={list(self)})"
+
 
 class ProtoTInstancePorts(
     ProtoInstancePorts[TUnit, ProtoTInstance[TUnit]], Generic[TUnit], ABC
@@ -413,6 +431,13 @@ class VInstancePorts(ProtoInstancePorts[float, VInstance]):
     def __iter__(self) -> Iterator[DPort]:
         """Create a copy of the ports to iterate through."""
         yield from (p.copy(self.instance.trans) for p in self.cell_ports)
+
+    def __contains__(self, port: str | ProtoPort[Any]) -> bool:
+        """Check if a port is in the instance."""
+        if isinstance(port, ProtoPort):
+            return port.base in [p.base for p in self.instance.ports]
+        else:
+            return any(_port.name == port for _port in self.instance.ports)
 
     def __repr__(self) -> str:
         """String representation.

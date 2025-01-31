@@ -41,6 +41,12 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
             )
         return self
 
+    @model_validator(mode="after")
+    def _validate_width(self) -> Self:
+        if self.width <= 0:
+            raise ValueError("Width must be greater than 0.")
+        return self
+
     @cached_property
     def main_layer(self) -> kdb.LayerInfo:
         """Main Layer of the enclosure and cross section."""
@@ -61,6 +67,12 @@ class DSymmetricalCrossSection(BaseModel):
     width: float
     enclosure: DLayerEnclosure
     name: str | None = None
+
+    @model_validator(mode="after")
+    def _validate_width(self) -> Self:
+        if self.width <= 0:
+            raise ValueError("Width must be greater than 0.")
+        return self
 
     def to_itype(self, kcl: KCLayout) -> SymmetricalCrossSection:
         """Convert to a dbu based CrossSection."""

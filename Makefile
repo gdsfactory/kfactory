@@ -41,13 +41,16 @@ cov:
 	uv run pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
 
 dev-cov:
-	uv run pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered --durations=10
+	uv run pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered
 
 venv:
 	uv venv -p 3.13
 
 lint:
-	flake8 .
+	uv run ruff check .
+
+mypy:
+	uv run dmypy run src/kfactory
 
 pylint:
 	pylint kfactory

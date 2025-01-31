@@ -19,15 +19,15 @@ import klayout.rdb as rdb
 from pydantic import (
     BaseModel,
     model_serializer,
+    model_validator,
 )
-from ruamel.yaml.constructor import BaseConstructor
 from typing_extensions import TypedDict
 
 from .conf import config
 from .cross_section import CrossSectionSpec, SymmetricalCrossSection
 from .layer import LayerEnum
 from .settings import Info
-from .typings import TPort, TUnit
+from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
@@ -116,6 +116,14 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     info: Info = Info()
     port_type: str
 
+    @model_validator(mode="after")
+    def check_exclusivity(self) -> Self:
+        if self.trans is None and self.dcplx_trans is None:
+            raise ValueError("Both trans and dcplx_trans cannot be None.")
+        elif self.trans is not None and self.dcplx_trans is not None:
+            raise ValueError("Only one of trans or dcplx_trans can be set.")
+        return self
+
     def __copy__(self) -> BasePort:
         """Copy the BasePort."""
         return BasePort(
@@ -141,6 +149,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             and isinstance(post_trans, kdb.Trans)
         ):
             base.trans = trans * base.trans * post_trans
+            base.dcplx_trans = None
             return base
         if isinstance(trans, kdb.Trans):
             trans = kdb.DCplxTrans(trans.to_dtype(self.kcl.dbu))
@@ -191,6 +200,33 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             return self.dcplx_trans
         assert self.trans is not None, "Both trans and dcplx_trans are None"
         return kdb.DCplxTrans(self.trans.to_dtype(self.kcl.dbu))
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, BasePort):
+            return False
+        return (
+            (self.trans is None and other.trans is None)
+            or (
+                (
+                    self.trans is not None
+                    and other.trans is not None
+                    and self.trans == other.trans
+                )
+                and (self.dcplx_trans is None and other.dcplx_trans is None)
+            )
+            or (
+                (
+                    self.dcplx_trans is not None
+                    and other.dcplx_trans is not None
+                    and self.dcplx_trans == other.dcplx_trans
+                )
+                and self.name == other.name
+                and self.kcl == other.kcl
+                and self.cross_section == other.cross_section
+                and self.port_type == other.port_type
+                and self.info == other.info
+            )
+        )
 
 
 class ProtoPort(Generic[TUnit], ABC):
@@ -300,16 +336,6 @@ class ProtoPort(Generic[TUnit], ABC):
         return False
 
     @property
-    def center(self) -> tuple[TUnit, TUnit]:
-        """Returns port center."""
-        return (self.x, self.y)
-
-    @center.setter
-    def center(self, value: tuple[TUnit, TUnit]) -> None:
-        self.x = value[0]
-        self.y = value[1]
-
-    @property
     def trans(self) -> kdb.Trans:
         """Simple Transformation of the Port.
 
@@ -324,6 +350,7 @@ class ProtoPort(Generic[TUnit], ABC):
     @trans.setter
     def trans(self, value: kdb.Trans) -> None:
         self._base.trans = value.dup()
+        self._base.dcplx_trans = None
 
     @property
     def dcplx_trans(self) -> kdb.DCplxTrans:
@@ -344,8 +371,10 @@ class ProtoPort(Generic[TUnit], ABC):
             self.kcl.to_dbu(value.disp)
         ):
             self._base.dcplx_trans = value.dup()
+            self._base.trans = None
         else:
             self._base.trans = kdb.ICplxTrans(value.dup(), self.kcl.dbu).s_trans()
+            self._base.dcplx_trans = None
 
     def to_itype(self) -> Port:
         """Convert the port to a dbu port."""
@@ -354,6 +383,82 @@ class ProtoPort(Generic[TUnit], ABC):
     def to_dtype(self) -> DPort:
         """Convert the port to a um port."""
         return DPort(base=self._base)
+
+    @property
+    def angle(self) -> Angle:
+        """Angle of the transformation.
+
+        In the range of `[0,1,2,3]` which are increments in 90°.
+        """
+        return self.trans.angle
+
+    @angle.setter
+    def angle(self, value: int) -> None:
+        self._base.trans = self.trans.dup()
+        self._base.dcplx_trans = None
+        self._base.trans.angle = value
+
+    @property
+    def orientation(self) -> float:
+        """Returns orientation in degrees for gdsfactory compatibility.
+
+        In the range of `[0,360)`
+        """
+        return self.dcplx_trans.angle
+
+    @orientation.setter
+    def orientation(self, value: float) -> None:
+        """Set the orientation of the port."""
+        if not self.dcplx_trans.is_complex():
+            dcplx_trans = self.dcplx_trans
+            dcplx_trans.angle = value
+            self.dcplx_trans = dcplx_trans
+        else:
+            self._base.dcplx_trans = self.dcplx_trans
+            self._base.dcplx_trans.angle = value
+
+    @property
+    def mirror(self) -> bool:
+        """Returns `True`/`False` depending on the mirror flag on the transformation."""
+        return self.trans.is_mirror()
+
+    @mirror.setter
+    def mirror(self, value: bool) -> None:
+        """Setter for mirror flag on trans."""
+        if self._base.trans:
+            self._base.trans.mirror = value
+        elif self._base.dcplx_trans:
+            self._base.dcplx_trans.mirror = value
+
+    @abstractmethod
+    def copy(
+        self,
+        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+    ) -> ProtoPort[TUnit]:
+        """Copy the port with a transformation."""
+        ...
+
+    @abstractmethod
+    def copy_polar(
+        self,
+        d: TUnit,
+        d_orth: TUnit,
+        angle: TUnit,
+        mirror: bool = False,
+    ) -> ProtoPort[TUnit]:
+        """Copy the port with a polar transformation."""
+        ...
+
+    @property
+    def center(self) -> tuple[TUnit, TUnit]:
+        """Returns port center."""
+        return (self.x, self.y)
+
+    @center.setter
+    def center(self, value: tuple[TUnit, TUnit]) -> None:
+        self.x = value[0]
+        self.y = value[1]
 
     @property
     @abstractmethod
@@ -377,65 +482,46 @@ class ProtoPort(Generic[TUnit], ABC):
 
     @property
     @abstractmethod
-    def angle(self) -> TUnit:
-        """Angle of the port."""
-        ...
-
-    @angle.setter
-    @abstractmethod
-    def angle(self, value: int) -> None: ...
-
-    @property
-    def orientation(self) -> float:
-        """Returns orientation in degrees for gdsfactory compatibility."""
-        return self.dcplx_trans.angle
-
-    @orientation.setter
-    def orientation(self, value: float) -> None:
-        if not self.dcplx_trans.is_complex() and value in [0, 90, 180, 270]:
-            self.trans.angle = int(value / 90)
-        else:
-            self._base.dcplx_trans = self.dcplx_trans
-            self._base.dcplx_trans.angle = value
-
-    @property
-    @abstractmethod
     def width(self) -> TUnit:
         """Width of the port."""
         ...
 
     @property
-    def mirror(self) -> bool:
-        """Returns `True`/`False` depending on the mirror flag on the transformation."""
-        return self.trans.is_mirror()
+    def ix(self) -> int:
+        """X coordinate of the port in dbu."""
+        return self.trans.disp.x
 
-    @mirror.setter
-    def mirror(self, value: bool) -> None:
-        """Setter for mirror flag on trans."""
+    @ix.setter
+    def ix(self, value: int) -> None:
         if self._base.trans:
-            self._base.trans.mirror = value
-        else:
-            self._base.dcplx_trans.mirror = value  # type: ignore[union-attr]
+            vec = self._base.trans.disp
+            vec.x = value
+            self._base.trans.disp = vec
+        elif self._base.dcplx_trans:
+            vec = self.trans.disp
+            vec.x = value
+            self._base.dcplx_trans.disp = self.kcl.to_um(vec)
 
-    @abstractmethod
-    def copy(
-        self,
-        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
-        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
-    ) -> ProtoPort[TUnit]:
-        """Copy the port with a transformation."""
-        ...
+    @property
+    def iy(self) -> int:
+        """Y coordinate of the port in dbu."""
+        return self.trans.disp.y
 
-    @abstractmethod
-    def copy_polar(
-        self,
-        d: TUnit,
-        d_orth: TUnit,
-        angle: TUnit,
-        mirror: bool = False,
-    ) -> ProtoPort[TUnit]:
-        """Copy the port with a polar transformation."""
-        ...
+    @iy.setter
+    def iy(self, value: int) -> None:
+        if self._base.trans:
+            vec = self._base.trans.disp
+            vec.y = value
+            self._base.trans.disp = vec
+        elif self._base.dcplx_trans:
+            vec = self.trans.disp
+            vec.y = value
+            self._base.dcplx_trans.disp = self.kcl.to_um(vec)
+
+    @property
+    def iwidth(self) -> int:
+        """Width of the port in dbu."""
+        return self._base.cross_section.width
 
     @property
     def dx(self) -> float:
@@ -479,39 +565,21 @@ class ProtoPort(Generic[TUnit], ABC):
             self._base.dcplx_trans.disp = kdb.DVector(*pos)
 
     @property
-    def dangle(self) -> float:
-        """Angle of the port in degrees."""
-        return self.dcplx_trans.angle
-
-    @dangle.setter
-    def dangle(self, value: float) -> None:
-        if value in [0, 90, 180, 270] and self._base.trans:
-            self._base.trans.angle = round(value / 90)
-            return
-
-        trans = self.dcplx_trans
-        trans.angle = value
-        self.dcplx_trans = trans
-
-    @property
     def dwidth(self) -> float:
         """Width of the port in um."""
         return self.kcl.to_um(self._base.cross_section.width)
 
-    @property
-    def dmirror(self) -> bool:
-        """Mirror flag of the port."""
-        return self.mirror
+    def print(self, type: Literal["dbu", "um", None] = None) -> None:
+        """Print the port pretty."""
+        config.console.print(pprint_ports([self], unit=type))
 
-    @dmirror.setter
-    def dmirror(self, value: bool) -> None:
-        self.mirror = value
-
-    @classmethod
-    def from_yaml(cls, constructor: BaseConstructor, node: Any) -> Self:
-        """Internal function used by the placer to convert yaml to a Port."""
-        d = dict(constructor.construct_pairs(node))
-        return cls(**d)
+    def __repr__(self) -> str:
+        """String representation of port."""
+        return (
+            f"{self.__class__.__name__}({self.name=}"
+            f", {self.width=}, trans={self.dcplx_trans.to_s()}, layer="
+            f"{self.layer_info}, port_type={self.port_type})"
+        )
 
 
 class Port(ProtoPort[int]):
@@ -545,7 +613,7 @@ class Port(ProtoPort[int]):
         name: str | None = None,
         width: int,
         layer: LayerEnum | int,
-        trans: kdb.Trans,
+        trans: kdb.Trans | str,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = ...,
@@ -558,7 +626,7 @@ class Port(ProtoPort[int]):
         name: str | None = None,
         width: int,
         layer: LayerEnum | int,
-        dcplx_trans: kdb.DCplxTrans,
+        dcplx_trans: kdb.DCplxTrans | str,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = ...,
@@ -586,7 +654,7 @@ class Port(ProtoPort[int]):
         name: str | None = None,
         width: int,
         layer_info: kdb.LayerInfo,
-        trans: kdb.Trans,
+        trans: kdb.Trans | str,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = ...,
@@ -599,7 +667,7 @@ class Port(ProtoPort[int]):
         name: str | None = None,
         width: int,
         layer_info: kdb.LayerInfo,
-        dcplx_trans: kdb.DCplxTrans,
+        dcplx_trans: kdb.DCplxTrans | str,
         kcl: KCLayout | None = None,
         port_type: str = "optical",
         info: dict[str, int | float | str] = ...,
@@ -640,7 +708,7 @@ class Port(ProtoPort[int]):
         *,
         name: str | None = None,
         cross_section: SymmetricalCrossSection,
-        trans: kdb.Trans,
+        trans: kdb.Trans | str,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = ...,
         port_type: str = "optical",
@@ -652,7 +720,7 @@ class Port(ProtoPort[int]):
         *,
         name: str | None = None,
         cross_section: SymmetricalCrossSection,
-        dcplx_trans: kdb.DCplxTrans,
+        dcplx_trans: kdb.DCplxTrans | str,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = ...,
         port_type: str = "optical",
@@ -660,6 +728,9 @@ class Port(ProtoPort[int]):
 
     @overload
     def __init__(self, *, base: BasePort) -> None: ...
+
+    @overload
+    def __init__(self, *, port: ProtoPort[Any]) -> None: ...
 
     def __init__(
         self,
@@ -674,7 +745,7 @@ class Port(ProtoPort[int]):
         angle: int | None = None,
         center: tuple[int, int] | None = None,
         mirror_x: bool = False,
-        port: Port | None = None,
+        port: ProtoPort[Any] | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] | None = None,
         cross_section: SymmetricalCrossSection | None = None,
@@ -687,7 +758,7 @@ class Port(ProtoPort[int]):
             self._base = base
             return
         if port is not None:
-            self._base = BasePort(**port.base.model_dump())
+            self._base = port.base.__copy__()
             return
         info_ = Info(**info)
         from .layout import get_default_kcl
@@ -703,10 +774,9 @@ class Port(ProtoPort[int]):
                     "any width and layer, or a cross_section must be given if the"
                     " 'port is None'"
                 )
-            else:
-                cross_section = kcl_.get_cross_section(
-                    CrossSectionSpec(main_layer=layer_info, width=width)
-                )
+            cross_section = kcl_.get_cross_section(
+                CrossSectionSpec(main_layer=layer_info, width=width)
+            )
         cross_section_ = cross_section
         if trans is not None:
             if isinstance(trans, str):
@@ -730,10 +800,11 @@ class Port(ProtoPort[int]):
                 name=name,
                 kcl=kcl_,
                 cross_section=cross_section_,
-                dcplx_trans=dcplx_trans_,
+                trans=kdb.Trans.R0,
                 info=info_,
                 port_type=port_type,
             )
+            self.dcplx_trans = dcplx_trans_
         elif angle is not None:
             assert center is not None
             trans_ = kdb.Trans(angle, mirror_x, *center)
@@ -747,11 +818,6 @@ class Port(ProtoPort[int]):
             )
         else:
             raise ValueError("Missing port parameters given")
-
-    @property
-    def width(self) -> int:
-        """Width of the port. This corresponds to the width of the cross section."""
-        return self.cross_section.width
 
     def copy(
         self,
@@ -793,88 +859,25 @@ class Port(ProtoPort[int]):
     @property
     def x(self) -> int:
         """X coordinate of the port in dbu."""
-        return self.trans.disp.x
+        return self.ix
 
     @x.setter
     def x(self, value: int) -> None:
-        if self._base.trans:
-            vec = self._base.trans.disp
-            vec.x = value
-            self._base.trans.disp = vec
-        elif self._base.dcplx_trans:
-            vec = self.trans.disp
-            vec.x = value
-            self._base.dcplx_trans.disp = self.kcl.to_um(vec)
+        self.ix = value
 
     @property
     def y(self) -> int:
         """Y coordinate of the port in dbu."""
-        return self.trans.disp.y
+        return self.iy
 
     @y.setter
     def y(self, value: int) -> None:
-        if self._base.trans:
-            vec = self._base.trans.disp
-            vec.y = value
-            self._base.trans.disp = vec
-        elif self._base.dcplx_trans:
-            vec = self.trans.disp
-            vec.y = value
-            self._base.dcplx_trans.disp = self.kcl.to_um(vec)
+        self.iy = value
 
     @property
-    def angle(self) -> int:
-        """Angle of the transformation.
-
-        In the range of `[0,1,2,3]` which are increments in 90°. Not to be confused
-        with `rot` of the transformation which keeps additional info about the
-        mirror flag.
-        """
-        return self.trans.angle
-
-    @angle.setter
-    def angle(self, value: int) -> None:
-        self._base.trans = self.trans.dup()
-        self._base.dcplx_trans = None
-        self._base.trans.angle = value
-
-    @property
-    def orientation(self) -> float:
-        """Returns orientation in degrees for gdsfactory compatibility."""
-        return self.dcplx_trans.angle
-
-    @orientation.setter
-    def orientation(self, value: float) -> None:
-        if not self.dcplx_trans.is_complex() and value in [0, 90, 180, 270]:
-            self.trans.angle = int(value / 90)
-        else:
-            self._base.dcplx_trans = self.dcplx_trans
-            self._base.dcplx_trans.angle = value
-
-    @property
-    def mirror(self) -> bool:
-        """Returns `True`/`False` depending on the mirror flag on the transformation."""
-        return self.trans.is_mirror()
-
-    @mirror.setter
-    def mirror(self, value: bool) -> None:
-        """Setter for mirror flag on trans."""
-        if self._base.trans:
-            self._base.trans.mirror = value
-        else:
-            self._base.dcplx_trans.mirror = value  # type: ignore[union-attr]
-
-    def __repr__(self) -> str:
-        """String representation of port."""
-        return (
-            f"Port({'name: ' + self.name if self.name else ''}"
-            f", width: {self.width}, trans: {self.dcplx_trans.to_s()}, layer: "
-            f"{self.layer_info}, port_type: {self.port_type})"
-        )
-
-    def print(self, type: Literal["dbu", "um", None] = None) -> None:
-        """Print the port pretty."""
-        config.console.print(pprint_ports([self], unit=type))
+    def width(self) -> int:
+        """Width of the port in um."""
+        return self.iwidth
 
 
 class DPort(ProtoPort[float]):
@@ -911,10 +914,10 @@ class DPort(ProtoPort[float]):
         port_type: str = "optical",
         trans: kdb.Trans | str | None = None,
         dcplx_trans: kdb.DCplxTrans | str | None = None,
-        angle: float | None = None,
+        orientation: float | None = None,
         center: tuple[float, float] | None = None,
         mirror_x: bool = False,
-        port: Port | DPort | None = None,
+        port: ProtoPort[Any] | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] | None = None,
         cross_section: SymmetricalCrossSection | None = None,
@@ -927,7 +930,7 @@ class DPort(ProtoPort[float]):
             self._base = base
             return
         if port is not None:
-            self._base = BasePort(**port.base.model_dump())
+            self._base = port.base.__copy__()
             return
         info_ = Info(**info)
 
@@ -973,7 +976,7 @@ class DPort(ProtoPort[float]):
                 info=info_,
                 port_type=port_type,
             )
-        elif angle is not None:
+        elif orientation is not None:
             assert center is not None
             dcplx_trans_ = kdb.DCplxTrans.R0
             self._base = BasePort(
@@ -985,17 +988,10 @@ class DPort(ProtoPort[float]):
                 port_type=port_type,
             )
             self.center = center
-            self.angle = angle
+            self.orientation = orientation
+            self.mirror_x = mirror_x
         else:
             raise ValueError("Missing port parameters given")
-
-    def __repr__(self) -> str:
-        """String representation of port."""
-        return (
-            f"DPort({'name: ' + self.name if self.name else ''}"
-            f", width: {self.width}, trans: {self.dcplx_trans.to_s()}, layer: "
-            f"{self.layer_info}, port_type: {self.port_type})"
-        )
 
     def copy(
         self,
@@ -1039,72 +1035,25 @@ class DPort(ProtoPort[float]):
     @property
     def x(self) -> float:
         """X coordinate of the port in um."""
-        return self.dcplx_trans.disp.x
+        return self.dx
 
     @x.setter
     def x(self, value: float) -> None:
-        vec = self.dcplx_trans.disp
-        vec.x = value
-        if self._base.trans:
-            self._base.trans.disp = self.kcl.to_dbu(vec)
-        elif self._base.dcplx_trans:
-            self._base.dcplx_trans.disp = vec
+        self.dx = value
 
     @property
     def y(self) -> float:
         """Y coordinate of the port in um."""
-        return self.dcplx_trans.disp.y
+        return self.dy
 
     @y.setter
     def y(self, value: float) -> None:
-        vec = self.dcplx_trans.disp
-        vec.y = value
-        if self._base.trans:
-            self._base.trans.disp = self.kcl.to_dbu(vec)
-        elif self._base.dcplx_trans:
-            self._base.dcplx_trans.disp = vec
-
-    @property
-    def center(self) -> tuple[float, float]:
-        """Coordinate of the port in um."""
-        vec = self.dcplx_trans.disp
-        return (vec.x, vec.y)
-
-    @center.setter
-    def center(self, value: tuple[float, float]) -> None:
-        if self._base.trans:
-            self._base.trans.disp = self.kcl.to_dbu(kdb.DVector(*value))
-        elif self._base.dcplx_trans:
-            self._base.dcplx_trans.disp = kdb.DVector(*value)
-
-    @property
-    def angle(self) -> float:
-        """Angle of the port in degrees."""
-        return self.dcplx_trans.angle
-
-    @angle.setter
-    def angle(self, value: float) -> None:
-        if value in [0, 90, 180, 270] and self._base.trans:
-            self._base.trans.angle = round(value / 90)
-            return
-
-        trans = self.dcplx_trans
-        trans.angle = value
-        self.dcplx_trans = trans
+        self.dy = value
 
     @property
     def width(self) -> float:
         """Width of the port in um."""
-        return self.kcl.to_um(self._base.cross_section.width)
-
-    @property
-    def mirror(self) -> bool:
-        """Mirror flag of the port."""
-        return self.mirror
-
-    @mirror.setter
-    def mirror(self, value: bool) -> None:
-        self.mirror = value
+        return self.dwidth
 
 
 class DIRECTION(IntEnum):
@@ -1171,10 +1120,8 @@ def rename_clockwise(
                 angle = 1
             case 0:
                 angle = 2
-            case 3:
-                angle = 3
             case _:
-                raise ValueError(f"Invalid angle: {port.angle}")
+                angle = 3
         dir_1 = 1 if angle < 2 else -1
         dir_2 = -1 if port.angle < 2 else 1
         key_1 = dir_1 * (

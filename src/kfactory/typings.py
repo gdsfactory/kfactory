@@ -104,3 +104,5 @@ layer = Annotated["int | LayerEnum", "layer"]
 layer_info = Annotated[kdb.LayerInfo, "layer info"]
 unit: TypeAlias = int | float
 """Database unit or micrometer."""
+Angle: TypeAlias = int
+"""Integer in the range of `[0,1,2,3]` which are increments in 90°."""

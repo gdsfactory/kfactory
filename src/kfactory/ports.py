@@ -15,12 +15,8 @@ from typing import (
     Generic,
     Literal,
     Self,
-    cast,
     overload,
 )
-
-from ruamel.yaml.constructor import BaseConstructor
-from ruamel.yaml.representer import BaseRepresenter, SequenceNode
 
 from . import kdb
 from .conf import config
@@ -37,7 +33,7 @@ from .port import (
     filter_port_type,
     filter_regex,
 )
-from .typings import TPort, TUnit
+from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
@@ -49,7 +45,7 @@ __all__ = ["DPorts", "Ports", "ProtoPorts"]
 
 def _filter_ports(
     ports: Iterable[TPort],
-    angle: int | None = None,
+    angle: Angle | None = None,
     orientation: float | None = None,
     layer: LayerEnum | int | None = None,
     port_type: str | None = None,
@@ -191,7 +187,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
     @abstractmethod
     def filter(
         self,
-        angle: int | None = None,
+        angle: Angle | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
@@ -226,17 +222,21 @@ class ProtoPorts(ABC, Generic[TUnit]):
 
     def __eq__(self, other: object) -> bool:
         """Support for `ports1 == ports2` comparisons."""
-        if isinstance(other, Iterable) and all(
-            isinstance(item, ProtoPort) for item in other
-        ):
-            other_list = cast(list[ProtoPort[Any]], list(other))
-            if len(self._bases) != len(other_list):
+        if isinstance(other, Iterable):
+            if len(self._bases) != len(list(other)):
                 return False
-            for b1, b2 in zip(self._bases, other_list, strict=False):
-                if b1 != b2.base:
-                    return False
-            return True
+            return all(b1 == b2 for b1, b2 in zip(iter(self), other, strict=False))
         return False
+
+    def print(self, unit: Literal["dbu", "um", None] = None) -> None:
+        """Pretty print ports."""
+        config.console.print(pprint_ports(self, unit=unit))
+
+    def pformat(self, unit: Literal["dbu", "um", None] = None) -> str:
+        """Pretty print ports."""
+        with config.console.capture() as capture:
+            config.console.print(pprint_ports(self, unit=unit))
+        return capture.get()
 
 
 class Ports(ProtoPorts[int]):
@@ -324,7 +324,7 @@ class Ports(ProtoPorts[int]):
         width: int,
         layer: LayerEnum | int,
         center: tuple[int, int],
-        angle: Literal[0, 1, 2, 3],
+        angle: Angle,
         name: str | None = None,
         port_type: str = "optical",
     ) -> Port: ...
@@ -347,7 +347,7 @@ class Ports(ProtoPorts[int]):
         width: int,
         layer_info: kdb.LayerInfo,
         center: tuple[int, int],
-        angle: Literal[0, 1, 2, 3],
+        angle: Angle,
         name: str | None = None,
         port_type: str = "optical",
     ) -> Port: ...
@@ -363,7 +363,7 @@ class Ports(ProtoPorts[int]):
         trans: kdb.Trans | None = None,
         dcplx_trans: kdb.DCplxTrans | None = None,
         center: tuple[int, int] | None = None,
-        angle: Literal[0, 1, 2, 3] | None = None,
+        angle: Angle | None = None,
         mirror_x: bool = False,
         cross_section: SymmetricalCrossSection | None = None,
     ) -> Port:
@@ -396,7 +396,7 @@ class Ports(ProtoPorts[int]):
                     raise ValueError(
                         "layer or layer_info must be defined to create a port."
                     )
-                layer_info = self.kcl.get_info(layer)
+                layer_info = self.kcl.layout.get_info(layer)
             assert layer_info is not None
             cross_section = self.kcl.get_cross_section(
                 CrossSectionSpec(main_layer=layer_info, width=width)
@@ -456,14 +456,14 @@ class Ports(ProtoPorts[int]):
         self, rename_function: Callable[[Sequence[Port]], None] | None = None
     ) -> Self:
         """Get a copy of each port."""
-        bases = [b.model_copy() for b in self._bases]
+        bases = [b.__copy__() for b in self._bases]
         if rename_function is not None:
             rename_function([Port(base=b) for b in bases])
         return self.__class__(bases=bases, kcl=self.kcl)
 
     def filter(
         self,
-        angle: int | None = None,
+        angle: Angle | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
@@ -490,26 +490,6 @@ class Ports(ProtoPorts[int]):
     def __repr__(self) -> str:
         """Representation of the Ports as strings."""
         return repr([repr(DPort(base=b)) for b in self._bases])
-
-    def print(self, unit: Literal["dbu", "um", None] = None) -> None:
-        """Pretty print ports."""
-        config.console.print(pprint_ports(self, unit=unit))
-
-    def pformat(self, unit: Literal["dbu", "um", None] = None) -> str:
-        """Pretty print ports."""
-        with config.console.capture() as capture:
-            config.console.print(pprint_ports(self, unit=unit))
-        return capture.get()
-
-    @classmethod
-    def to_yaml(cls, representer: BaseRepresenter, node: Self) -> SequenceNode:
-        """Convert the ports to a yaml representations."""
-        return representer.represent_sequence(cls.yaml_tag, node._bases)
-
-    @classmethod
-    def from_yaml(cls, constructor: BaseConstructor, node: Any) -> Self:
-        """Load Ports from a yaml representation."""
-        return cls(**constructor.construct_sequence(node))
 
 
 class DPorts(ProtoPorts[float]):
@@ -594,10 +574,10 @@ class DPorts(ProtoPorts[float]):
     def create_port(
         self,
         *,
-        width: int,
+        width: float,
         layer: LayerEnum | int,
         center: tuple[float, float],
-        angle: float,
+        orientation: float,
         name: str | None = None,
         port_type: str = "optical",
     ) -> DPort: ...
@@ -628,10 +608,10 @@ class DPorts(ProtoPorts[float]):
     def create_port(
         self,
         *,
-        width: int,
+        width: float,
         layer_info: kdb.LayerInfo,
         center: tuple[float, float],
-        angle: float,
+        orientation: float,
         name: str | None = None,
         port_type: str = "optical",
     ) -> DPort: ...
@@ -647,7 +627,7 @@ class DPorts(ProtoPorts[float]):
         trans: kdb.Trans | None = None,
         dcplx_trans: kdb.DCplxTrans | None = None,
         center: tuple[float, float] | None = None,
-        angle: float | None = None,
+        orientation: float | None = None,
         mirror_x: bool = False,
         cross_section: SymmetricalCrossSection | None = None,
     ) -> DPort:
@@ -664,10 +644,9 @@ class DPorts(ProtoPorts[float]):
             dcplx_trans: Complex transformation for the port.
                 Use if a non-90° port is necessary.
             center: Tuple of the center. [dbu]
-            angle: Angle in 90° increments. Used for simple/dbu transformations.
+            orientation: Angle in degrees.
             mirror_x: Mirror the transformation of the port.
             cross_section: Cross section of the port. If set, overwrites width and layer
-                (info).
         """
         if cross_section is None:
             if width is None:
@@ -680,15 +659,12 @@ class DPorts(ProtoPorts[float]):
                     raise ValueError(
                         "layer or layer_info must be defined to create a port."
                     )
-                layer_info = self.kcl.get_info(layer)
+                layer_info = self.kcl.layout.get_info(layer)
             assert layer_info is not None
-            dwidth = width
-            if dwidth <= 0:
-                raise ValueError("dwidth needs to be set and be >0")
-            width_ = self.kcl.to_dbu(dwidth)
+            width_ = self.kcl.to_dbu(width)
             if width_ % 2:
                 raise ValueError(
-                    f"dwidth needs to be even to snap to grid. Got {dwidth}."
+                    f"width needs to be even to snap to grid. Got {width}."
                     "Ports must have a grid width of multiples of 2."
                 )
             cross_section = self.kcl.get_cross_section(
@@ -713,20 +689,20 @@ class DPorts(ProtoPorts[float]):
                 cross_section=cross_section,
                 kcl=self.kcl,
             )
-        elif angle is not None and center is not None:
+        elif orientation is not None and center is not None:
             port = DPort(
                 name=name,
                 port_type=port_type,
                 cross_section=cross_section,
-                angle=angle,
+                orientation=orientation,
                 center=center,
                 mirror_x=mirror_x,
                 kcl=self.kcl,
             )
         else:
             raise ValueError(
-                f"You need to define width {width} and trans {trans} or angle {angle}"
-                f" and center {center} or dcplx_trans {dcplx_trans}"
+                f"You need to define width {width} and trans {trans} or orientation"
+                f" {orientation} and center {center} or dcplx_trans {dcplx_trans}"
             )
 
         self._bases.append(port.base)
@@ -752,14 +728,14 @@ class DPorts(ProtoPorts[float]):
         self, rename_function: Callable[[Sequence[DPort]], None] | None = None
     ) -> Self:
         """Get a copy of each port."""
-        bases = [b.model_copy() for b in self._bases]
+        bases = [b.__copy__() for b in self._bases]
         if rename_function is not None:
             rename_function([DPort(base=b) for b in bases])
         return self.__class__(bases=bases, kcl=self.kcl)
 
     def filter(
         self,
-        angle: int | None = None,
+        angle: Angle | None = None,
         orientation: float | None = None,
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
@@ -786,13 +762,3 @@ class DPorts(ProtoPorts[float]):
     def __repr__(self) -> str:
         """Representation of the Ports as strings."""
         return repr([repr(Port(base=b)) for b in self._bases])
-
-    def print(self, unit: Literal["dbu", "um", None] = None) -> None:
-        """Pretty print ports."""
-        config.console.print(pprint_ports(self, unit=unit))
-
-    def pformat(self, unit: Literal["dbu", "um", None] = None) -> str:
-        """Pretty print ports."""
-        with config.console.capture() as capture:
-            config.console.print(pprint_ports(self, unit=unit))
-        return capture.get()
