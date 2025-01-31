@@ -121,7 +121,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     def check_exclusivity(self) -> Self:
         if self.trans is None and self.dcplx_trans is None:
             raise ValueError("Both trans and dcplx_trans cannot be None.")
-        if self.trans is not None and self.dcplx_trans is not None:
+        elif self.trans is not None and self.dcplx_trans is not None:
             raise ValueError("Only one of trans or dcplx_trans can be set.")
         return self
 
@@ -361,6 +361,7 @@ class ProtoPort(Generic[TUnit], ABC):
     @trans.setter
     def trans(self, value: kdb.Trans) -> None:
         self._base.trans = value.dup()
+        self._base.dcplx_trans = None
 
     @property
     def dcplx_trans(self) -> kdb.DCplxTrans:
@@ -381,8 +382,10 @@ class ProtoPort(Generic[TUnit], ABC):
             self.kcl.to_dbu(value.disp)
         ):
             self._base.dcplx_trans = value.dup()
+            self._base.trans = None
         else:
             self._base.trans = kdb.ICplxTrans(value.dup(), self.kcl.dbu).s_trans()
+            self._base.dcplx_trans = None
 
     def to_itype(self) -> Port:
         """Convert the port to a dbu port."""
@@ -767,10 +770,11 @@ class Port(ProtoPort[int]):
                 name=name,
                 kcl=kcl_,
                 cross_section=cross_section_,
-                dcplx_trans=dcplx_trans_,
+                trans=kdb.Trans.R0,
                 info=info_,
                 port_type=port_type,
             )
+            self.dcplx_trans = dcplx_trans_
         elif angle is not None:
             assert center is not None
             trans_ = kdb.Trans(angle, mirror_x, *center)
