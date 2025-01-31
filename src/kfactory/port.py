@@ -19,6 +19,7 @@ import klayout.rdb as rdb
 from pydantic import (
     BaseModel,
     model_serializer,
+    model_validator,
 )
 from ruamel.yaml.constructor import BaseConstructor
 from typing_extensions import TypedDict
@@ -116,6 +117,14 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     info: Info = Info()
     port_type: str
 
+    @model_validator(mode="after")
+    def check_exclusivity(self) -> Self:
+        if self.trans is None and self.dcplx_trans is None:
+            raise ValueError("Both trans and dcplx_trans cannot be None.")
+        if self.trans is not None and self.dcplx_trans is not None:
+            raise ValueError("Only one of trans or dcplx_trans can be set.")
+        return self
+
     def __copy__(self) -> BasePort:
         """Copy the BasePort."""
         return BasePort(
@@ -191,6 +200,33 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             return self.dcplx_trans
         assert self.trans is not None, "Both trans and dcplx_trans are None"
         return kdb.DCplxTrans(self.trans.to_dtype(self.kcl.dbu))
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, BasePort):
+            return False
+        return (
+            (self.trans is None and other.trans is None)
+            or (
+                (
+                    self.trans is not None
+                    and other.trans is not None
+                    and self.trans == other.trans
+                )
+                and (self.dcplx_trans is None and other.dcplx_trans is None)
+            )
+            or (
+                (
+                    self.dcplx_trans is not None
+                    and other.dcplx_trans is not None
+                    and self.dcplx_trans == other.dcplx_trans
+                )
+                and self.name == other.name
+                and self.kcl == other.kcl
+                and self.cross_section == other.cross_section
+                and self.port_type == other.port_type
+                and self.info == other.info
+            )
+        )
 
 
 class ProtoPort(Generic[TUnit], ABC):

@@ -447,7 +447,7 @@ def test_dports_add_port(kcl: kf.KCLayout, layers: Layers) -> None:
     port4.base.trans = kf.kdb.Trans.R90
     port4.base.dcplx_trans = None
     out_port = ports.add_port(port=port4, name="o6")
-    assert "o6" in ports.get_all_named().keys()
+    assert out_port in ports
 
 
 def test_dports_create_port(kcl: kf.KCLayout, layers: Layers) -> None:
@@ -474,7 +474,7 @@ def test_dports_create_port(kcl: kf.KCLayout, layers: Layers) -> None:
         ports.create_port(name="o1", width=0.001, layer=1, center=(1000, 1000), angle=1)
 
     port = ports.create_port(name="o1", width=10, layer=1, trans=kf.kdb.Trans.R90)
-    assert port in ports.get_all_named().values()
+    assert port in ports
 
 
 def test_dports_get_all_named(kcl: kf.KCLayout, layers: Layers) -> None:
