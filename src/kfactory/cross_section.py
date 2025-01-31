@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import TYPE_CHECKING, ClassVar, NotRequired, Self, TypedDict, cast
+from typing import TYPE_CHECKING, NotRequired, Self, TypedDict, cast
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -16,8 +16,6 @@ if TYPE_CHECKING:
 
 class SymmetricalCrossSection(BaseModel, frozen=True):
     """CrossSection which is symmetrical to its main_layer/width."""
-
-    yaml_tag: ClassVar[str] = "!SymmetricalCrossSection"
 
     width: int
     enclosure: LayerEnclosure
