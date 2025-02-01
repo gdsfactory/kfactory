@@ -256,6 +256,30 @@ def test_vinstance_ports_contains(kcl: kf.KCLayout, layers: Layers) -> None:
         trans=kf.kdb.DCplxTrans(mag=2),
     )
     assert ref.ports[0] in ref.ports
+    assert ref.ports[0].name is not None
+    assert ref.ports[0].name in ref.ports
+
+
+def test_iter(kcl: kf.KCLayout, layers: Layers) -> None:
+    kcell = kcl.kcell()
+    iref = kcell.create_inst(
+        kf.factories.straight.straight_dbu_factory(kcl)(
+            width=5000, length=10000, layer=layers.WG
+        ),
+        trans=kf.kdb.ICplxTrans(mag=2),
+    )
+    assert len(list(iref.ports)) == 2
+    assert all(isinstance(p, kf.Port) for p in iref.ports)
+
+    dkcell = kcl.dkcell()
+    dref = dkcell.create_inst(
+        kf.factories.straight.straight_dbu_factory(kcl)(
+            width=5000, length=10000, layer=layers.WG
+        ),
+        trans=kf.kdb.DCplxTrans(mag=2),
+    )
+    assert len(list(dref.ports)) == 2
+    assert all(isinstance(p, kf.DPort) for p in dref.ports)
 
 
 if __name__ == "__main__":

@@ -191,7 +191,7 @@ class ProtoTInstancePorts(
     @abstractmethod
     def cell_ports(self) -> ProtoPorts[TUnit]: ...
 
-    def __iter__(self) -> Iterator[ProtoPort[TUnit]]:
+    def each_port(self) -> Iterator[ProtoPort[TUnit]]:
         """Create a copy of the ports to iterate through."""
         if not self.instance.is_regular_array():
             if not self.instance.is_complex():
@@ -219,6 +219,9 @@ class ProtoTInstancePorts(
                     for i_b in range(self.instance.nb)
                     for p in self.cell_ports
                 )
+
+    @abstractmethod
+    def __iter__(self) -> Iterator[ProtoPort[TUnit]]: ...
 
     def each_by_array_coord(self) -> Iterator[tuple[int, int, ProtoPort[TUnit]]]:
         if not self.instance.is_regular_array():
@@ -356,6 +359,9 @@ class InstancePorts(ProtoTInstancePorts[int]):
     ) -> Port:
         return Port(base=super().__getitem__(key).base)
 
+    def __iter__(self) -> Iterator[Port]:
+        yield from map(lambda p: p.to_itype(), self.each_port())
+
 
 class DInstancePorts(ProtoTInstancePorts[float]):
     def __init__(self, instance: DInstance) -> None:
@@ -387,6 +393,9 @@ class DInstancePorts(ProtoTInstancePorts[float]):
         self, key: int | str | tuple[int | str | None, int, int] | None
     ) -> DPort:
         return DPort(base=super().__getitem__(key).base)
+
+    def __iter__(self) -> Iterator[DPort]:
+        yield from map(lambda p: p.to_dtype(), self.each_port())
 
 
 class VInstancePorts(ProtoInstancePorts[float, VInstance]):
