@@ -35,7 +35,7 @@ if TYPE_CHECKING:
         ProtoTInstancePorts,
         VInstancePorts,
     )
-    from .kcell import AnyKCell, AnyTKCell, DKCell, KCell, ProtoTKCell, VKCell
+    from .kcell import AnyKCell, AnyTKCell, DKCell, KCell, ProtoTKCell
     from .layout import KCLayout
 
 __all__ = ["DInstance", "Instance", "ProtoInstance", "ProtoTInstance", "VInstance"]
@@ -609,12 +609,12 @@ class DInstance(ProtoTInstance[float], UMGeometricObject):
 
 class VInstance(ProtoInstance[float], UMGeometricObject):
     _name: str | None
-    cell: VKCell | KCell
+    cell: AnyKCell
     trans: kdb.DCplxTrans
 
     def __init__(
         self,
-        cell: VKCell | KCell,
+        cell: AnyKCell,
         trans: kdb.DCplxTrans | None = None,
         name: str | None = None,
     ) -> None:
