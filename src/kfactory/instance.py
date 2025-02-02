@@ -724,6 +724,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             return Instance(kcl=self.cell.kcl, instance=_inst.instance)
 
         else:
+            assert isinstance(self.cell, ProtoTKCell)
             _trans = trans * self.trans
             base_trans = kdb.DCplxTrans(
                 kdb.ICplxTrans(_trans, cell.kcl.dbu).s_trans().to_dtype(cell.kcl.dbu)
@@ -737,16 +738,16 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 ).replace(".", "p")
                 _cell_name = _cell_name + _trans_str
             if cell.kcl.layout_cell(_cell_name) is None:
-                _cell = self.cell.dup()
-                _cell.name = _cell_name
-                _cell.flatten(False)
-                for layer in _cell.kcl.layer_indexes():
-                    _cell.shapes(layer).transform(_trans)
-                for _port in _cell.ports:
+                tkcell = self.cell.dup()
+                tkcell.name = _cell_name
+                tkcell.flatten(False)
+                for layer in tkcell.kcl.layer_indexes():
+                    tkcell.shapes(layer).transform(_trans)
+                for _port in tkcell.ports:
                     _port.dcplx_trans = _trans * _port.dcplx_trans
             else:
-                _cell = cell.kcl[_cell_name]
-            _inst = cell << _cell
+                tkcell = cell.kcl[_cell_name]
+            _inst = cell << tkcell
             _inst.transform(base_trans)
             return Instance(kcl=self.cell.kcl, instance=_inst.instance)
 
@@ -775,7 +776,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         *,
         levels: int | None = None,
     ) -> None:
-        from .kcell import KCell, VKCell
+        from .kcell import ProtoTKCell, VKCell
 
         if trans is None:
             trans = kdb.DCplxTrans()
@@ -791,19 +792,20 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                             cell, trans=trans * self.trans, levels=levels - 1
                         )
                     else:
-                        assert isinstance(cell, KCell)
+                        assert isinstance(cell, ProtoTKCell)
                         inst.insert_into(cell, trans=trans * self.trans)
                 else:
                     inst.insert_into_flat(cell, trans=trans * self.trans)
 
         else:
+            assert isinstance(self.cell, ProtoTKCell)
             if levels:
                 logger.warning(
                     "Levels are not supported if the inserted Instance is a KCell."
                 )
-            if isinstance(cell, KCell):
+            if isinstance(cell, ProtoTKCell):
                 for layer in cell.kcl.layer_indexes():
-                    reg = kdb.Region(self.cell.begin_shapes_rec(layer))
+                    reg = kdb.Region(self.cell.kdb_cell.begin_shapes_rec(layer))
                     reg.transform(kdb.ICplxTrans((trans * self.trans), cell.kcl.dbu))
                     cell.shapes(layer).insert(reg)
             else:
