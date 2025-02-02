@@ -5,6 +5,8 @@
 
 ## New
 
+- Add more concrete methods for Instances [#598](https://github.com/gdsfactory/kfactory/pull/598)
+- Add concrete iter for InstancePorts and DInstancePorts [#597](https://github.com/gdsfactory/kfactory/pull/597)
 - Add ports tests [#595](https://github.com/gdsfactory/kfactory/pull/595)
 - Add __all__ to more files [#594](https://github.com/gdsfactory/kfactory/pull/594)
 - Add ruff Naming rule and fix most errors [#591](https://github.com/gdsfactory/kfactory/pull/591)
