@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from typing import TYPE_CHECKING, Generic, NoReturn
 
 from . import kdb
@@ -61,6 +61,9 @@ class ProtoInstanceGroup(Generic[TUnit, TInstance], GeometricObject[TUnit]):
         for _bb in (inst.dbbox(layer) for inst in self.insts):
             bb += _bb
         return bb
+
+    def __iter__(self) -> Iterator[TInstance]:
+        return iter(self.insts)
 
 
 class ProtoTInstanceGroup(

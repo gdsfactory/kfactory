@@ -57,6 +57,8 @@ class BoxLike(Protocol[TUnit]):
         """Get the height of the box."""
         ...
 
+    def empty(self) -> bool: ...
+
 
 @runtime_checkable
 class BoxFunction(Protocol[TUnit]):

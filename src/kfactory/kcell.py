@@ -325,8 +325,10 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
             " automatically as a factory. Therefore it doesn't have an associated name."
         )
 
-    def create_vinst(self, cell: VKCell | KCell) -> VInstance:
+    def create_vinst(self, cell: AnyKCell) -> VInstance:
         """Insert the KCell as a VInstance into a VKCell or KCell."""
+        if self.locked:
+            raise LockedError(self)
         vi = VInstance(cell)
         self._base_kcell.vinsts.append(vi)
         return vi
@@ -440,9 +442,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
     def base_kcell(self) -> TKCell:
         return self._base_kcell
 
+    @abstractmethod
     def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]:
         """Returns port from instance."""
-        return self.ports[key]
+        ...
 
     def __hash__(self) -> int:
         """Hash the KCell."""
@@ -2301,6 +2304,10 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
             raise LockedError(self)
         return self.ports.create_port(**kwargs)
 
+    def __getitem__(self, key: int | str | None) -> DPort:
+        """Returns port from instance."""
+        return self.ports[key]
+
     def create_inst(
         self,
         cell: ProtoTKCell[Any] | int,
@@ -2413,6 +2420,10 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         if self.locked:
             raise LockedError(self)
         return self.ports.create_port(**kwargs)
+
+    def __getitem__(self, key: int | str | None) -> Port:
+        """Returns port from instance."""
+        return self.ports[key]
 
     def create_inst(
         self,
@@ -2939,7 +2950,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
         return self.ports.create_port(**kwargs)
 
     def create_inst(
-        self, cell: KCell | VKCell, trans: kdb.DCplxTrans | None = None
+        self, cell: AnyKCell, trans: kdb.DCplxTrans | None = None
     ) -> VInstance:
         if self.locked:
             raise LockedError(self)
@@ -2961,10 +2972,10 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
         else:
             rename_func(self.ports)
 
-    def __lshift__(self, cell: KCell | VKCell) -> VInstance:
+    def __lshift__(self, cell: AnyKCell) -> VInstance:
         return self.create_inst(cell=cell)
 
-    def create_vinst(self, cell: KCell | VKCell) -> VInstance:
+    def create_vinst(self, cell: AnyKCell) -> VInstance:
         if self.locked:
             raise LockedError(self)
         vi = VInstance(cell)
