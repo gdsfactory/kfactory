@@ -82,12 +82,14 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
 
 class TCrossSection(ABC, Generic[TUnit]):
     _base_cross_section: SymmetricalCrossSection = PrivateAttr()
+    kcl: KCLayout
 
     def __init__(
         self,
         width: TUnit,
         layer: kdb.LayerInfo,
         sections: list[tuple[TUnit, TUnit] | tuple[TUnit]],
+        kcl: KCLayout,
         radius: TUnit | None = None,
         radius_min: TUnit | None = None,
         base: SymmetricalCrossSection | None = None,
@@ -106,11 +108,8 @@ class TCrossSection(ABC, Generic[TUnit]):
         return self._base_cross_section.enclosure
 
     @property
-    def sections(self) -> dict[kdb.LayerInfo, list[tuple[TUnit | None, TUnit]]]:
-        return {
-            layer: [(s.d_min, s.d_max) for s in sections.sections]
-            for layer, sections in self.enclosure.layer_sections.items()
-        }
+    @abstractmethod
+    def sections(self) -> dict[kdb.LayerInfo, list[tuple[TUnit | None, TUnit]]]: ...
 
     @property
     @abstractmethod
@@ -150,7 +149,7 @@ class CrossSection(TCrossSection[int]):
         }
 
 
-class DCrossSection(TCrossSection[int]):
+class DCrossSection(TCrossSection[float]):
     def __init__(
         self,
         width: int,
@@ -169,6 +168,22 @@ class DCrossSection(TCrossSection[int]):
                 enclosure=LayerEnclosure(sections=sections, main_layer=layer),
                 name=name,
             )
+
+    @property
+    def sections(self) -> dict[kdb.LayerInfo, list[tuple[float | None, float]]]:
+        items = self._base_cross_section.enclosure.layer_sections.items()
+        return {
+            layer: [
+                (
+                    self.kcl.to_um(section.d_min)
+                    if section.d_min is not None
+                    else None,
+                    self.kcl.to_um(section.d_max),
+                )
+                for section in sections.sections
+            ]
+            for layer, sections in items
+        }
 
 
 class DSymmetricalCrossSection(BaseModel):
