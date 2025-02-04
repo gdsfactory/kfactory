@@ -34,13 +34,21 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
     name: str = ""
     radius: int | None = None
     radius_min: int | None = None
+    bbox_sections: dict[kdb.LayerInfo, tuple[int, int, int, int]]
 
     def __init__(
-        self, width: int, enclosure: LayerEnclosure, name: str | None = None
+        self,
+        width: int,
+        enclosure: LayerEnclosure,
+        name: str | None = None,
+        bbox_sections: dict[kdb.LayerInfo, tuple[int, int, int, int]] | None = None,
     ) -> None:
         """Initialized the CrossSection."""
         super().__init__(
-            width=width, enclosure=enclosure, name=name or f"{enclosure.name}_{width}"
+            width=width,
+            enclosure=enclosure,
+            name=name or f"{enclosure.name}_{width}",
+            bbox_sections=bbox_sections or {},
         )
 
     @model_validator(mode="before")
@@ -80,13 +88,17 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
             name=self.name,
         )
 
+    def get_xmax(self) -> int:
+        return self.width // 2 + max(
+            s.d_max
+            for sections in self.enclosure.layer_sections.values()
+            for s in sections.sections
+        )
+
 
 class TCrossSection(BaseModel, ABC, Generic[TUnit], frozen=True):
     _base: SymmetricalCrossSection = PrivateAttr()
     kcl: KCLayout
-    _bbox_sections: dict[kdb.LayerInfo, tuple[int, int, int, int]] = PrivateAttr(
-        default_factory=dict
-    )
     name: str
 
     def __init__(
@@ -119,17 +131,20 @@ class TCrossSection(BaseModel, ABC, Generic[TUnit], frozen=True):
 
     @property
     @abstractmethod
-    def radius(self) -> TUnit: ...
+    def radius(self) -> TUnit | None: ...
 
     @property
     @abstractmethod
-    def radius_min(self) -> TUnit: ...
+    def radius_min(self) -> TUnit | None: ...
 
     @property
     @abstractmethod
     def bbox_sections(
         self,
     ) -> dict[kdb.LayerInfo, tuple[TUnit, TUnit, TUnit, TUnit]]: ...
+
+    @abstractmethod
+    def get_xmin_xmax(self) -> tuple[TUnit, TUnit]: ...
 
 
 class CrossSection(TCrossSection[int]):
@@ -174,7 +189,23 @@ class CrossSection(TCrossSection[int]):
 
     @property
     def bbox_sections(self) -> dict[kdb.LayerInfo, tuple[int, int, int, int]]:
-        return self._bbox_sections.copy()
+        return self._base.bbox_sections.copy()
+
+    @property
+    def width(self) -> int:
+        return self._base.width
+
+    @property
+    def radius(self) -> int | None:
+        return self._base.radius
+
+    @property
+    def radius_min(self) -> int | None:
+        return self._base.radius_min
+
+    def get_xmin_xmax(self) -> tuple[int, int]:
+        xmax = self._base.get_xmax()
+        return (xmax, xmax)
 
 
 class DCrossSection(TCrossSection[float]):
@@ -229,8 +260,12 @@ class DCrossSection(TCrossSection[float]):
     def bbox_sections(self) -> dict[kdb.LayerInfo, tuple[float, float, float, float]]:
         return {
             k: tuple(self.kcl.to_um(e) for e in v)  # type: ignore[misc]
-            for k, v in self._bbox_sections.items()
+            for k, v in self._base.bbox_sections.items()
         }
+
+    def get_xmin_xmax(self) -> tuple[float, float]:
+        xmax = self.kcl.to_um(self._base.get_xmax())
+        return (xmax, xmax)
 
 
 class DSymmetricalCrossSection(BaseModel):
@@ -334,6 +369,3 @@ class CrossSectionModel(BaseModel):
 
     def __repr__(self) -> str:
         return repr(self.cross_sections)
-
-
-SymmetricalCrossSection.model_rebuild()

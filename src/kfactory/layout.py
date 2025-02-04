@@ -27,8 +27,10 @@ from pydantic import (
 from . import __version__
 from .conf import CheckInstances, config, logger
 from .cross_section import (
+    CrossSection,
     CrossSectionModel,
     CrossSectionSpec,
+    DCrossSection,
     DSymmetricalCrossSection,
     SymmetricalCrossSection,
 )
@@ -380,6 +382,8 @@ class KCLayout(
             ) from e
 
     @overload
+    def to_um(self, other: None) -> None: ...
+    @overload
     def to_um(self, other: int) -> float: ...
 
     @overload
@@ -408,7 +412,8 @@ class KCLayout(
         | kdb.Box
         | kdb.Polygon
         | kdb.Path
-        | kdb.Text,
+        | kdb.Text
+        | None,
     ) -> (
         float
         | kdb.DPoint
@@ -417,10 +422,15 @@ class KCLayout(
         | kdb.DPolygon
         | kdb.DPath
         | kdb.DText
+        | None
     ):
         """Convert Shapes or values in dbu to DShapes or floats in um."""
+        if other is None:
+            return None
         return kdb.CplxTrans(self.layout.dbu) * other
 
+    @overload
+    def to_dbu(self, other: None) -> None: ...
     @overload
     def to_dbu(self, other: float) -> int: ...
 
@@ -450,9 +460,21 @@ class KCLayout(
         | kdb.DBox
         | kdb.DPolygon
         | kdb.DPath
-        | kdb.DText,
-    ) -> int | kdb.Point | kdb.Vector | kdb.Box | kdb.Polygon | kdb.Path | kdb.Text:
+        | kdb.DText
+        | None,
+    ) -> (
+        int
+        | kdb.Point
+        | kdb.Vector
+        | kdb.Box
+        | kdb.Polygon
+        | kdb.Path
+        | kdb.Text
+        | None
+    ):
         """Convert Shapes or values in dbu to DShapes or floats in um."""
+        if other is None:
+            return None
         return kdb.CplxTrans(self.layout.dbu).inverted() * other
 
     @overload
@@ -1588,3 +1610,6 @@ cell = kcl.cell
 """Default kcl @cell decorator."""
 vcell = kcl.vcell
 """Default kcl @vcell decorator."""
+SymmetricalCrossSection.model_rebuild()
+CrossSection.model_rebuild()
+DCrossSection.model_rebuild()
