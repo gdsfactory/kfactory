@@ -514,9 +514,6 @@ class LayerSection(BaseModel):
     def __len__(self) -> int:
         return len(self.sections)
 
-    def __iter__(self) -> Iterable[Section]:  # type:ignore[override]
-        yield from iter(self.sections)
-
 
 class DLayerEnclosure(BaseModel, arbitrary_types_allowed=True):
     sections: list[tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]]
@@ -529,7 +526,7 @@ class DLayerEnclosure(BaseModel, arbitrary_types_allowed=True):
         )
 
 
-class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowed=True):
+class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
     """Definitions for calculation of enclosing (or smaller) shapes of a reference.
 
     Attributes:
@@ -540,6 +537,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
     layer_sections: dict[kdb.LayerInfo, LayerSection]
     _name: str | None = PrivateAttr()
     main_layer: kdb.LayerInfo | None
+    bbox_sections: dict[kdb.LayerInfo, tuple[int, int, int, int]]
 
     def __init__(
         self,
@@ -552,6 +550,7 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]
         ]
         | None = None,
+        bbox_sections: Sequence[tuple[kdb.LayerInfo, int, int, int, int]] = [],
         kcl: KCLayout | None = None,
     ) -> None:
         """Constructor of new enclosure.
@@ -567,15 +566,8 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
                 Must be specified if `desections` is not `None`. Also necessary
                 if copying to another layout and not all layers used are LayerInfos.
         """
-        super().__init__(
-            layer_sections={},
-            _name=name,
-            main_layer=main_layer,
-            kcl=kcl,
-        )
-        self._name = name
 
-        self.layer_sections = {}
+        layer_sections: dict[kdb.LayerInfo, LayerSection] = {}
 
         if dsections is not None:
             assert kcl is not None, "If sections in um are defined, kcl must be set"
@@ -597,14 +589,22 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             sections,
             key=lambda sec: (sec[0].name, sec[0].layer, sec[0].datatype, sec[1]),
         ):
-            if sec[0] in self.layer_sections:
-                ls = self.layer_sections[sec[0]]
+            if sec[0] in layer_sections:
+                ls = layer_sections[sec[0]]
             else:
                 ls = LayerSection()
-                self.layer_sections[sec[0]] = ls
+                layer_sections[sec[0]] = ls
             ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
                 Section(d_max=sec[2], d_min=sec[1])
             )
+        super().__init__(
+            _name=name,
+            main_layer=main_layer,
+            kcl=kcl,
+            layer_sections=layer_sections,
+            bbox_sections={t[0]: (t[1], t[2], t[3], t[4]) for t in bbox_sections},
+        )
+        self._name = name
 
     @model_serializer
     def _serialize(self) -> dict[str, Any]:
@@ -624,20 +624,6 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             (str(self), self.main_layer, tuple(list(self.layer_sections.items())))
         )
 
-    def __add__(self, other: LayerEnclosure) -> LayerEnclosure:
-        """Returns the merged enclosure of two enclosures."""
-        enc = LayerEnclosure()
-
-        for layer, secs in self.layer_sections.items():
-            for sec in secs.sections:
-                enc.add_section(layer, sec)
-
-        for layer, secs in other.layer_sections.items():
-            for sec in secs.sections:
-                enc.add_section(layer, sec)
-
-        return enc
-
     def to_dtype(self, kcl: KCLayout) -> DLayerEnclosure:
         """Convert the enclosure to a um based enclosure."""
         if self.main_layer is None:
@@ -653,29 +639,6 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             ],
             main_layer=self.main_layer,
         )
-
-    def __iadd__(self, other: LayerEnclosure) -> LayerEnclosure:
-        """Allows merging another enclosure into this one."""
-        for layer, secs in other.layer_sections.items():
-            for sec in secs.sections:
-                self.add_section(layer, sec)
-        return self
-
-    def add_section(self, layer: kdb.LayerInfo, sec: Section) -> None:
-        """Add a new section to the the enclosure.
-
-        Args:
-            layer: Target layer.
-            sec: New section to add.
-        """
-        d = self.layer_sections
-
-        if layer in self.layer_sections:
-            d[layer].add_section(sec)
-        else:
-            d[layer] = LayerSection(sections=[sec])
-
-        self.layer_sections = d  # trick pydantic to validate
 
     @property
     def name(self) -> str:
@@ -1122,15 +1085,15 @@ class LayerEnclosure(BaseModel, validate_assignment=True, arbitrary_types_allowe
             target=c, layer=main_layer, path=path, widths=widths, enclosure=self
         )
 
-    def copy_to(self, kcl: KCLayout) -> LayerEnclosure:
-        """Creat a copy of the LayerEnclosure in another KCLayout."""
-        layer_enc = LayerEnclosure(
-            [], name=self.name, main_layer=self.main_layer, kcl=kcl
-        )
-        for layer, sections in self.layer_sections.items():
-            for section in sections.sections:
-                layer_enc.add_section(layer, section)
-        return layer_enc
+    # def copy_to(self, kcl: KCLayout) -> LayerEnclosure:
+    #     """Creat a copy of the LayerEnclosure in another KCLayout."""
+    #     layer_enc = LayerEnclosure(
+    #         [], name=self.name, main_layer=self.main_layer, kcl=kcl
+    #     )
+    #     for layer, sections in self.layer_sections.items():
+    #         for section in sections.sections:
+    #             layer_enc.add_section(layer, section)
+    #     return layer_enc
 
 
 class LayerEnclosureSpec(TypedDict):
@@ -1685,10 +1648,6 @@ class KCellEnclosure(BaseModel):
                 operator.insert()
         logger.debug("Finished KCellEnclosure on {}", c.kcl.future_cell_name or c.name)
 
-    def copy_to(self, kcl: KCLayout) -> KCellEnclosure:
-        """Copy the KCellEnclosure to another KCLayout."""
-        return KCellEnclosure([enc.copy_to(kcl) for enc in self.enclosures.enclosures])
-
 
 class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
     """PDK access model for LayerEnclsoures."""
@@ -1738,6 +1697,24 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
             self.root[enclosure.name] = enclosure
             return enclosure
         return self.root[enclosure.name]
+
+
+def _add_section(
+    layer_sections: dict[kdb.LayerInfo, LayerSection],
+    layer: kdb.LayerInfo,
+    section: Section,
+) -> None:
+    """Add a new section to the the enclosure.
+
+    Args:
+        layer: Target layer.
+        sec: New section to add.
+    """
+
+    if layer in layer_sections:
+        layer_sections[layer].add_section(section)
+    else:
+        layer_sections[layer] = LayerSection(sections=[section])
 
 
 LayerEnclosureModel.model_rebuild()

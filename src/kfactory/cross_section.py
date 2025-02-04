@@ -22,6 +22,8 @@ from .typings import TUnit
 if TYPE_CHECKING:
     from .layout import KCLayout
 
+__all__ = ["CrossSection", "DCrossSection", "SymmetricalCrossSection"]
+
 
 class SymmetricalCrossSection(BaseModel, frozen=True):
     """CrossSection which is symmetrical to its main_layer/width."""
@@ -64,6 +66,7 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
             raise ValueError("Width must be greater than 0.")
         return self
 
+    @property
     def main_layer(self) -> kdb.LayerInfo:
         """Main Layer of the enclosure and cross section."""
         return self.enclosure.main_layer  # type: ignore[return-value]
@@ -88,7 +91,7 @@ class TCrossSection(ABC, Generic[TUnit]):
         radius: TUnit | None = None,
         radius_min: TUnit | None = None,
         base: SymmetricalCrossSection | None = None,
-    ): ...
+    ) -> None: ...
 
     @property
     @abstractmethod
@@ -96,7 +99,7 @@ class TCrossSection(ABC, Generic[TUnit]):
 
     @property
     def layer(self) -> kdb.LayerInfo:
-        return self._base_cross_section.main_layer()
+        return self._base_cross_section.main_layer
 
     @property
     def enclosure(self) -> LayerEnclosure:
@@ -105,7 +108,7 @@ class TCrossSection(ABC, Generic[TUnit]):
     @property
     def sections(self) -> dict[kdb.LayerInfo, list[tuple[TUnit | None, TUnit]]]:
         return {
-            layer: [(s.d_min, s.d_max) for s in sections]
+            layer: [(s.d_min, s.d_max) for s in sections.sections]
             for layer, sections in self.enclosure.layer_sections.items()
         }
 
@@ -128,7 +131,7 @@ class CrossSection(TCrossSection[int]):
         radius_min: int | None = None,
         name: str | None = None,
         base: SymmetricalCrossSection | None = None,
-    ):
+    ) -> None:
         if base:
             self._base_cross_section = base
         else:
@@ -139,8 +142,12 @@ class CrossSection(TCrossSection[int]):
             )
 
     @property
-    def sections(self) -> tuple[tuple[float, float], ...]:
-        yield from ((section.d_min, section.d_max) for section in self._)
+    def sections(self) -> dict[kdb.LayerInfo, list[tuple[int | None, int]]]:
+        items = self._base_cross_section.enclosure.layer_sections.items()
+        return {
+            layer: [(section.d_min, section.d_max) for section in sections.sections]
+            for layer, sections in items
+        }
 
 
 class DCrossSection(TCrossSection[int]):
@@ -153,7 +160,7 @@ class DCrossSection(TCrossSection[int]):
         radius_min: int | None = None,
         name: str | None = None,
         base: SymmetricalCrossSection | None = None,
-    ):
+    ) -> None:
         if base:
             self._base_cross_section = base
         else:
