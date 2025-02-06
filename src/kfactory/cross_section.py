@@ -12,6 +12,7 @@ from typing import (
     Self,
     TypedDict,
     cast,
+    overload,
 )
 
 from pydantic import BaseModel, Field, PrivateAttr, model_validator
@@ -26,7 +27,7 @@ if TYPE_CHECKING:
 __all__ = ["CrossSection", "DCrossSection", "SymmetricalCrossSection"]
 
 
-class SymmetricalCrossSection(BaseModel, frozen=True):
+class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=True):
     """CrossSection which is symmetrical to its main_layer/width."""
 
     width: int
@@ -34,14 +35,14 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
     name: str = ""
     radius: int | None = None
     radius_min: int | None = None
-    bbox_sections: dict[kdb.LayerInfo, tuple[int, int, int, int]]
+    bbox_sections: dict[kdb.LayerInfo, int]
 
     def __init__(
         self,
         width: int,
         enclosure: LayerEnclosure,
         name: str | None = None,
-        bbox_sections: dict[kdb.LayerInfo, tuple[int, int, int, int]] | None = None,
+        bbox_sections: dict[kdb.LayerInfo, int] | None = None,
     ) -> None:
         """Initialized the CrossSection."""
         super().__init__(
@@ -96,20 +97,36 @@ class SymmetricalCrossSection(BaseModel, frozen=True):
         )
 
 
-class TCrossSection(BaseModel, ABC, Generic[TUnit], frozen=True):
+class TCrossSection(ABC, Generic[TUnit]):
     _base: SymmetricalCrossSection = PrivateAttr()
     kcl: KCLayout
-    name: str
+
+    @overload
+    def __init__(self, kcl: KCLayout, *, base: SymmetricalCrossSection) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        kcl: KCLayout,
+        width: TUnit,
+        layer: kdb.LayerInfo,
+        sections: Sequence[tuple[TUnit, TUnit] | tuple[TUnit]],
+        radius: TUnit | None = None,
+        radius_min: TUnit | None = None,
+        bbox_layers: Sequence[kdb.LayerInfo] | None = None,
+        bbox_offsets: Sequence[TUnit] | None = None,
+    ) -> None: ...
 
     def __init__(
         self,
-        width: TUnit,
-        layer: kdb.LayerInfo,
-        sections: list[tuple[TUnit, TUnit] | tuple[TUnit]],
         kcl: KCLayout,
+        width: TUnit | None = None,
+        layer: kdb.LayerInfo | None = None,
+        sections: Sequence[tuple[TUnit, TUnit] | tuple[TUnit]] | None = None,
         radius: TUnit | None = None,
         radius_min: TUnit | None = None,
-        bbox_sections: Sequence[tuple[kdb.LayerInfo, TUnit, TUnit, TUnit, TUnit]] = [],
+        bbox_layers: Sequence[kdb.LayerInfo] | None = None,
+        bbox_offsets: Sequence[TUnit] | None = None,
         base: SymmetricalCrossSection | None = None,
     ) -> None: ...
 
@@ -141,42 +158,74 @@ class TCrossSection(BaseModel, ABC, Generic[TUnit], frozen=True):
     @abstractmethod
     def bbox_sections(
         self,
-    ) -> dict[kdb.LayerInfo, tuple[TUnit, TUnit, TUnit, TUnit]]: ...
+    ) -> dict[kdb.LayerInfo, TUnit]: ...
 
     @abstractmethod
     def get_xmin_xmax(self) -> tuple[TUnit, TUnit]: ...
 
 
 class CrossSection(TCrossSection[int]):
+    @overload
+    def __init__(self, kcl: KCLayout, *, base: SymmetricalCrossSection) -> None: ...
+
+    @overload
     def __init__(
         self,
+        kcl: KCLayout,
         width: int,
         layer: kdb.LayerInfo,
-        sections: list[tuple[kdb.LayerInfo, int, int] | tuple[kdb.LayerInfo, int]],
-        kcl: KCLayout,
+        sections: Sequence[tuple[kdb.LayerInfo, int, int] | tuple[kdb.LayerInfo, int]],
         radius: int | None = None,
         radius_min: int | None = None,
         name: str | None = None,
+        bbox_layers: Sequence[kdb.LayerInfo] | None = None,
+        bbox_offsets: Sequence[int] | None = None,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        kcl: KCLayout,
+        width: int | None = None,
+        layer: kdb.LayerInfo | None = None,
+        sections: Sequence[tuple[kdb.LayerInfo, int, int] | tuple[kdb.LayerInfo, int]]
+        | None = None,
+        radius: int | None = None,
+        radius_min: int | None = None,
+        name: str | None = None,
+        bbox_layers: Sequence[kdb.LayerInfo] | None = None,
+        bbox_offsets: Sequence[int] | None = None,
         base: SymmetricalCrossSection | None = None,
-        bbox_sections: list[tuple[kdb.LayerInfo, int, int, int, int]] | None = None,
     ) -> None:
-        if base:
-            base = kcl.get_cross_section(base)
-        else:
-            base = kcl.get_cross_section(
+        if not base:
+            if bbox_layers:
+                if not bbox_offsets:
+                    bbox_offsets = [0 for _ in range(len(bbox_layers))]
+                else:
+                    if not len(bbox_offsets) == len(bbox_layers):
+                        raise ValueError(
+                            "Length of the bbox_layers list and the bbox_offsets list"
+                            " must be the same "
+                            f"{len(bbox_layers)=}, {len(bbox_offsets)=}"
+                        )
+            else:
+                bbox_layers = []
+                bbox_offsets = []
+            if width is None or layer is None or sections is None:
+                raise ValueError(
+                    "If no base is given, width, layer, and sections must be defined"
+                )
+            base = kcl.get_symmetrical_cross_section(
                 SymmetricalCrossSection(
                     width=width,
                     enclosure=LayerEnclosure(sections=sections, main_layer=layer),
                     name=name,
+                    bbox_sections={
+                        s[0]: s[1]
+                        for s in zip(bbox_layers, bbox_offsets)  # noqa: B905
+                    },
                 )
             )
-        bbox_sections = bbox_sections or []
-        BaseModel.__init__(
-            self,
-            name=name or base.name,
-            kcl=kcl,
-            bbox_sections={s[0]: (s[1], s[2], s[3], s[4]) for s in bbox_sections},
-        )
+        self.kcl = kcl
         self._base = base
 
     @property
@@ -188,7 +237,7 @@ class CrossSection(TCrossSection[int]):
         }
 
     @property
-    def bbox_sections(self) -> dict[kdb.LayerInfo, tuple[int, int, int, int]]:
+    def bbox_sections(self) -> dict[kdb.LayerInfo, int]:
         return self._base.bbox_sections.copy()
 
     @property
@@ -209,35 +258,75 @@ class CrossSection(TCrossSection[int]):
 
 
 class DCrossSection(TCrossSection[float]):
+    @overload
+    def __init__(self, kcl: KCLayout, *, base: SymmetricalCrossSection) -> None: ...
+
+    @overload
     def __init__(
         self,
-        width: int,
-        layer: kdb.LayerInfo,
-        sections: list[tuple[kdb.LayerInfo, int, int] | tuple[kdb.LayerInfo, int]],
         kcl: KCLayout,
-        radius: int | None = None,
-        radius_min: int | None = None,
+        width: float,
+        layer: kdb.LayerInfo,
+        sections: list[
+            tuple[kdb.LayerInfo, float, float] | tuple[kdb.LayerInfo, float]
+        ],
+        radius: float | None = None,
+        radius_min: float | None = None,
         name: str | None = None,
+        bbox_layers: Sequence[kdb.LayerInfo] | None = None,
+        bbox_offsets: Sequence[float] | None = None,
+    ) -> None: ...
+
+    def __init__(
+        self,
+        kcl: KCLayout,
+        width: float | None = None,
+        layer: kdb.LayerInfo | None = None,
+        sections: list[tuple[kdb.LayerInfo, float, float] | tuple[kdb.LayerInfo, float]]
+        | None = None,
+        radius: float | None = None,
+        radius_min: float | None = None,
+        name: str | None = None,
+        bbox_layers: Sequence[kdb.LayerInfo] | None = None,
+        bbox_offsets: Sequence[float] | None = None,
         base: SymmetricalCrossSection | None = None,
-        bbox_sections: list[tuple[kdb.LayerInfo, int, int, int, int]] | None = None,
     ) -> None:
-        bbox_sections = bbox_sections or []
-        if base:
-            base = kcl.get_cross_section(base)
-        else:
-            base = kcl.get_cross_section(
+        if not base:
+            if bbox_layers:
+                if not bbox_offsets:
+                    bbox_offsets = [0 for _ in range(len(bbox_layers))]
+                else:
+                    if not len(bbox_offsets) == len(bbox_layers):
+                        raise ValueError(
+                            "Length of the bbox_layers list and the bbox_offsets list"
+                            " must be the same "
+                            f"{len(bbox_layers)=}, {len(bbox_offsets)=}"
+                        )
+            else:
+                bbox_layers = []
+                bbox_offsets = []
+            if width is None or layer is None or sections is None:
+                raise ValueError(
+                    "If no base is given, width, layer, and sections must be defined"
+                )
+            base = kcl.get_symmetrical_cross_section(
                 SymmetricalCrossSection(
-                    width=width,
-                    enclosure=LayerEnclosure(sections=sections, main_layer=layer),
+                    width=kcl.to_dbu(width),
+                    enclosure=LayerEnclosure(
+                        sections=[
+                            (s[0], *[kcl.to_dbu(s[i]) for i in range(1, len(s))])  # type: ignore[misc, arg-type]
+                            for s in sections
+                        ],
+                        main_layer=layer,
+                    ),
                     name=name,
+                    bbox_sections={
+                        s[0]: kcl.to_dbu(s[1])
+                        for s in zip(bbox_layers, bbox_offsets)  # noqa: B905
+                    },
                 )
             )
-        BaseModel.__init__(
-            self,
-            name=name or base.name,
-            kcl=kcl,
-            bbox_sections={s[0]: (s[1], s[2], s[3], s[4]) for s in bbox_sections},
-        )
+        self.kcl = kcl
         self._base = base
 
     @property
@@ -257,11 +346,20 @@ class DCrossSection(TCrossSection[float]):
         }
 
     @property
-    def bbox_sections(self) -> dict[kdb.LayerInfo, tuple[float, float, float, float]]:
-        return {
-            k: tuple(self.kcl.to_um(e) for e in v)  # type: ignore[misc]
-            for k, v in self._base.bbox_sections.items()
-        }
+    def bbox_sections(self) -> dict[kdb.LayerInfo, float]:
+        return {k: self.kcl.to_um(v) for k, v in self._base.bbox_sections.items()}
+
+    @property
+    def width(self) -> float:
+        return self.kcl.to_um(self._base.width)
+
+    @property
+    def radius(self) -> float | None:
+        return self.kcl.to_um(self._base.radius)
+
+    @property
+    def radius_min(self) -> float | None:
+        return self.kcl.to_um(self._base.radius_min)
 
     def get_xmin_xmax(self) -> tuple[float, float]:
         xmax = self.kcl.to_um(self._base.get_xmax())

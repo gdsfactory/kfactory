@@ -670,7 +670,7 @@ class KCLayout(
                 @cachetools.cached(cache=cache_, lock=RLock())
                 @functools.wraps(f)
                 def wrapped_cell(
-                    **params: KCellParams.args | KCellParams.kwargs,
+                    **params: Any,
                 ) -> K:
                     for key, value in params.items():
                         if isinstance(value, DecoratorDict | DecoratorList):
@@ -978,7 +978,7 @@ class KCLayout(
             def wrapper_autocell(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
             ) -> VKCell:
-                params: dict[str, KCellParams.args] = {
+                params: dict[str, Any] = {
                     p.name: p.default for p in sig.parameters.values()
                 }
                 param_units: dict[str, str] = {
@@ -1008,7 +1008,7 @@ class KCLayout(
                 @cachetools.cached(cache=cache_)
                 @functools.wraps(f)
                 def wrapped_cell(
-                    **params: KCellParams.args,
+                    **params: Any,
                 ) -> VKCell:
                     for key, value in params.items():
                         if isinstance(value, DecoratorDict | DecoratorList):
@@ -1471,7 +1471,7 @@ class KCLayout(
                 )
 
         for cs in cross_sections:
-            self.get_cross_section(
+            self.get_symmetrical_cross_section(
                 SymmetricalCrossSection(
                     width=cs["width"],
                     enclosure=self.get_enclosure(cs["layer_enclosure"]),
@@ -1583,7 +1583,7 @@ class KCLayout(
         """Gets a layer enclosure by name specification or the layerenclosure itself."""
         return self.layer_enclosures.get_enclosure(enclosure, self)
 
-    def get_cross_section(
+    def get_symmetrical_cross_section(
         self,
         cross_section: str
         | SymmetricalCrossSection
@@ -1593,12 +1593,37 @@ class KCLayout(
         """Get a cross section by name or specification."""
         return self.cross_sections.get_cross_section(cross_section)
 
+    def get_icross_section(
+        self,
+        cross_section: str
+        | SymmetricalCrossSection
+        | CrossSectionSpec
+        | DSymmetricalCrossSection,
+    ) -> CrossSection:
+        """Get a cross section by name or specification."""
+        return CrossSection(
+            kcl=self, base=self.cross_sections.get_cross_section(cross_section)
+        )
+
+    def get_dcross_section(
+        self,
+        cross_section: str
+        | SymmetricalCrossSection
+        | CrossSectionSpec
+        | DSymmetricalCrossSection,
+    ) -> DCrossSection:
+        """Get a cross section by name or specification."""
+        return DCrossSection(
+            kcl=self, base=self.cross_sections.get_cross_section(cross_section)
+        )
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.name}, n={len(self.kcells)})"
 
 
 KCLayout.model_rebuild()
 TVCell.model_rebuild()
+SymmetricalCrossSection.model_rebuild()
 
 
 kcl = KCLayout("DEFAULT")
@@ -1610,6 +1635,3 @@ cell = kcl.cell
 """Default kcl @cell decorator."""
 vcell = kcl.vcell
 """Default kcl @vcell decorator."""
-SymmetricalCrossSection.model_rebuild()
-CrossSection.model_rebuild()
-DCrossSection.model_rebuild()

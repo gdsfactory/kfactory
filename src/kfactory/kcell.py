@@ -792,7 +792,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             kcell.name = cell.kcl.name + static_name_separator + cell.name
             if cell.kcl.dbu != self.kcl.dbu:
                 for port, lib_port in zip(kcell.ports, cell.ports, strict=False):
-                    port.cross_section = cell.kcl.get_cross_section(
+                    port.cross_section = cell.kcl.get_symmetrical_cross_section(
                         lib_port.cross_section.to_dtype(cell.kcl)
                     )
             return ci
@@ -1431,7 +1431,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                             self.create_port(
                                 name=v.get("name"),
                                 trans=trans_,
-                                cross_section=self.kcl.get_cross_section(
+                                cross_section=self.kcl.get_symmetrical_cross_section(
                                     v["cross_section"]
                                 ),
                                 port_type=v["port_type"],
@@ -1440,7 +1440,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                             self.create_port(
                                 name=v.get("name"),
                                 dcplx_trans=v["dcplx_trans"],
-                                cross_section=self.kcl.get_cross_section(
+                                cross_section=self.kcl.get_symmetrical_cross_section(
                                     v["cross_section"]
                                 ),
                                 port_type=v["port_type"],
@@ -1451,10 +1451,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         v = port_dict[index]
                         trans_ = v.get("trans")
                         lib_kcl = kcls[lib_name]
-                        cs = self.kcl.get_cross_section(
-                            lib_kcl.get_cross_section(v["cross_section"]).to_dtype(
-                                lib_kcl
-                            )
+                        cs = self.kcl.get_symmetrical_cross_section(
+                            lib_kcl.get_symmetrical_cross_section(
+                                v["cross_section"]
+                            ).to_dtype(lib_kcl)
                         )
 
                         if trans_ is not None:
