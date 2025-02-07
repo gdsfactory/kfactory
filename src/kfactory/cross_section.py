@@ -42,6 +42,8 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
         enclosure: LayerEnclosure,
         name: str | None = None,
         bbox_sections: dict[kdb.LayerInfo, int] | None = None,
+        radius: int | None = None,
+        radius_min: int | None = None,
     ) -> None:
         """Initialized the CrossSection."""
         super().__init__(
@@ -49,6 +51,8 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
             enclosure=enclosure,
             name=name or f"{enclosure.name}_{width}",
             bbox_sections=bbox_sections or {},
+            radius=radius,
+            radius_min=radius_min,
         )
 
     @model_validator(mode="before")
@@ -78,7 +82,8 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
     @property
     def main_layer(self) -> kdb.LayerInfo:
         """Main Layer of the enclosure and cross section."""
-        return self.enclosure.main_layer  # type: ignore[return-value]
+        assert self.enclosure.main_layer is not None
+        return self.enclosure.main_layer
 
     def to_dtype(self, kcl: KCLayout) -> DSymmetricalCrossSection:
         """Convert to a um based CrossSection."""
@@ -96,14 +101,38 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
         )
 
 
+class DSymmetricalCrossSection(BaseModel):
+    """um based CrossSection."""
+
+    width: float
+    enclosure: DLayerEnclosure
+    name: str | None = None
+
+    @model_validator(mode="after")
+    def _validate_width(self) -> Self:
+        if self.width <= 0:
+            raise ValueError("Width must be greater than 0.")
+        return self
+
+    def to_itype(self, kcl: KCLayout) -> SymmetricalCrossSection:
+        """Convert to a dbu based CrossSection."""
+        return SymmetricalCrossSection(
+            width=kcl.to_dbu(self.width),
+            enclosure=kcl.get_enclosure(self.enclosure.to_itype(kcl)),
+            name=self.name,
+        )
+
+
 class TCrossSection(ABC, Generic[TUnit]):
     _base: SymmetricalCrossSection = PrivateAttr()
     kcl: KCLayout
 
     @overload
+    @abstractmethod
     def __init__(self, kcl: KCLayout, *, base: SymmetricalCrossSection) -> None: ...
 
     @overload
+    @abstractmethod
     def __init__(
         self,
         kcl: KCLayout,
@@ -116,6 +145,7 @@ class TCrossSection(ABC, Generic[TUnit]):
         bbox_offsets: Sequence[TUnit] | None = None,
     ) -> None: ...
 
+    @abstractmethod
     def __init__(
         self,
         kcl: KCLayout,
@@ -130,6 +160,10 @@ class TCrossSection(ABC, Generic[TUnit]):
     ) -> None: ...
 
     @property
+    def base(self) -> SymmetricalCrossSection:
+        return self._base
+
+    @property
     @abstractmethod
     def width(self) -> TUnit: ...
 
@@ -140,6 +174,12 @@ class TCrossSection(ABC, Generic[TUnit]):
     @property
     def enclosure(self) -> LayerEnclosure:
         return self._base.enclosure
+
+    def to_itype(self) -> CrossSection:
+        return CrossSection(kcl=self.kcl, base=self._base)
+
+    def to_dtype(self) -> DCrossSection:
+        return DCrossSection(kcl=self.kcl, base=self._base)
 
     @property
     @abstractmethod
@@ -222,6 +262,8 @@ class CrossSection(TCrossSection[int]):
                         s[0]: s[1]
                         for s in zip(bbox_layers, bbox_offsets)  # noqa: B905
                     },
+                    radius=radius,
+                    radius_min=radius_min,
                 )
             )
         self.kcl = kcl
@@ -254,6 +296,10 @@ class CrossSection(TCrossSection[int]):
     def get_xmin_xmax(self) -> tuple[int, int]:
         xmax = self._base.get_xmax()
         return (xmax, xmax)
+
+    @property
+    def name(self) -> str:
+        return self._base.name
 
 
 class DCrossSection(TCrossSection[float]):
@@ -323,6 +369,8 @@ class DCrossSection(TCrossSection[float]):
                         s[0]: kcl.to_dbu(s[1])
                         for s in zip(bbox_layers, bbox_offsets)  # noqa: B905
                     },
+                    radius=kcl.to_dbu(radius) if radius else None,
+                    radius_min=kcl.to_dbu(radius_min) if radius_min else None,
                 )
             )
         self.kcl = kcl
@@ -363,28 +411,6 @@ class DCrossSection(TCrossSection[float]):
     def get_xmin_xmax(self) -> tuple[float, float]:
         xmax = self.kcl.to_um(self._base.get_xmax())
         return (xmax, xmax)
-
-
-class DSymmetricalCrossSection(BaseModel):
-    """um based CrossSection."""
-
-    width: float
-    enclosure: DLayerEnclosure
-    name: str | None = None
-
-    @model_validator(mode="after")
-    def _validate_width(self) -> Self:
-        if self.width <= 0:
-            raise ValueError("Width must be greater than 0.")
-        return self
-
-    def to_itype(self, kcl: KCLayout) -> SymmetricalCrossSection:
-        """Convert to a dbu based CrossSection."""
-        return SymmetricalCrossSection(
-            width=kcl.to_dbu(self.width),
-            enclosure=kcl.get_enclosure(self.enclosure.to_itype(kcl)),
-            name=self.name,
-        )
 
 
 class CrossSectionSpec(TypedDict, Generic[TUnit]):

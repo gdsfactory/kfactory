@@ -24,7 +24,13 @@ from pydantic import (
 from typing_extensions import TypedDict
 
 from .conf import config
-from .cross_section import CrossSectionSpec, SymmetricalCrossSection
+from .cross_section import (
+    CrossSection,
+    CrossSectionSpec,
+    DCrossSection,
+    SymmetricalCrossSection,
+    TCrossSection,
+)
 from .layer import LayerEnum
 from .settings import Info
 from .typings import Angle, TPort, TUnit
@@ -252,7 +258,7 @@ class ProtoPort(Generic[TUnit], ABC):
         port: Port | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = ...,
-        cross_section: SymmetricalCrossSection | None = None,
+        cross_section: TCrossSection[TUnit] | None = None,
     ) -> None:
         """Initialise a ProtoPort."""
         ...
@@ -272,13 +278,14 @@ class ProtoPort(Generic[TUnit], ABC):
         self._base.kcl = value
 
     @property
-    def cross_section(self) -> SymmetricalCrossSection:
-        """CrossSection associated to the prot."""
-        return self._base.cross_section
+    @abstractmethod
+    def cross_section(self) -> TCrossSection[TUnit]: ...
 
     @cross_section.setter
-    def cross_section(self, value: SymmetricalCrossSection) -> None:
-        self._base.cross_section = value
+    @abstractmethod
+    def cross_section(
+        self, value: SymmetricalCrossSection | TCrossSection[Any]
+    ) -> None: ...
 
     @property
     def name(self) -> str | None:
@@ -318,7 +325,7 @@ class ProtoPort(Generic[TUnit], ABC):
         index.
         """
         return self.kcl.find_layer(
-            self.cross_section.main_layer, allow_undefined_layers=True
+            self.cross_section.layer, allow_undefined_layers=True
         )
 
     @property
@@ -327,7 +334,7 @@ class ProtoPort(Generic[TUnit], ABC):
 
         This corresponds to the port's cross section's main layer.
         """
-        return self.cross_section.main_layer
+        return self.cross_section.layer
 
     def __eq__(self, other: object) -> bool:
         """Support for `port1 == port2` comparisons."""
@@ -693,7 +700,7 @@ class Port(ProtoPort[int]):
         self,
         *,
         name: str | None = None,
-        cross_section: SymmetricalCrossSection,
+        cross_section: CrossSection | SymmetricalCrossSection,
         port_type: str = "optical",
         angle: int,
         center: tuple[int, int],
@@ -707,7 +714,7 @@ class Port(ProtoPort[int]):
         self,
         *,
         name: str | None = None,
-        cross_section: SymmetricalCrossSection,
+        cross_section: CrossSection | SymmetricalCrossSection,
         trans: kdb.Trans | str,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = ...,
@@ -719,7 +726,7 @@ class Port(ProtoPort[int]):
         self,
         *,
         name: str | None = None,
-        cross_section: SymmetricalCrossSection,
+        cross_section: CrossSection | SymmetricalCrossSection,
         dcplx_trans: kdb.DCplxTrans | str,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = ...,
@@ -748,7 +755,7 @@ class Port(ProtoPort[int]):
         port: ProtoPort[Any] | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] | None = None,
-        cross_section: SymmetricalCrossSection | None = None,
+        cross_section: CrossSection | SymmetricalCrossSection | None = None,
         base: BasePort | None = None,
     ) -> None:
         """Create a port from dbu or um based units."""
@@ -774,10 +781,13 @@ class Port(ProtoPort[int]):
                     "any width and layer, or a cross_section must be given if the"
                     " 'port is None'"
                 )
-            cross_section = kcl_.get_symmetrical_cross_section(
+            cross_section_ = kcl_.get_symmetrical_cross_section(
                 CrossSectionSpec(layer=layer_info, width=width)
             )
-        cross_section_ = cross_section
+        elif isinstance(cross_section, SymmetricalCrossSection):
+            cross_section_ = cross_section
+        else:
+            cross_section_ = cross_section.base
         if trans is not None:
             if isinstance(trans, str):
                 trans_ = kdb.Trans.from_s(trans)
@@ -879,6 +889,19 @@ class Port(ProtoPort[int]):
         """Width of the port in um."""
         return self.iwidth
 
+    @property
+    def cross_section(self) -> CrossSection:
+        return CrossSection(kcl=self._base.kcl, base=self._base.cross_section)
+
+    @cross_section.setter
+    def cross_section(
+        self, value: SymmetricalCrossSection | TCrossSection[Any]
+    ) -> None:
+        if isinstance(value, SymmetricalCrossSection):
+            self._base.cross_section = value
+            return
+        self._base.cross_section = value.base
+
 
 class DPort(ProtoPort[float]):
     """A port is the photonics equivalent to a pin in electronics.
@@ -920,7 +943,7 @@ class DPort(ProtoPort[float]):
         port: ProtoPort[Any] | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] | None = None,
-        cross_section: SymmetricalCrossSection | None = None,
+        cross_section: DCrossSection | SymmetricalCrossSection | None = None,
         base: BasePort | None = None,
     ) -> None:
         """Create a port from dbu or um based units."""
@@ -946,10 +969,13 @@ class DPort(ProtoPort[float]):
                 raise ValueError(
                     "If a cross_section is not given a width must be defined."
                 )
-            cross_section = kcl_.get_symmetrical_cross_section(
+            cross_section_ = kcl_.get_symmetrical_cross_section(
                 CrossSectionSpec(layer=layer_info, width=kcl_.to_dbu(width))
             )
-        cross_section_ = cross_section
+        elif isinstance(cross_section, SymmetricalCrossSection):
+            cross_section_ = cross_section
+        else:
+            cross_section_ = cross_section.base
         if trans is not None:
             if isinstance(trans, str):
                 trans_ = kdb.Trans.from_s(trans)
@@ -1054,6 +1080,19 @@ class DPort(ProtoPort[float]):
     def width(self) -> float:
         """Width of the port in um."""
         return self.dwidth
+
+    @property
+    def cross_section(self) -> DCrossSection:
+        return DCrossSection(kcl=self._base.kcl, base=self._base.cross_section)
+
+    @cross_section.setter
+    def cross_section(
+        self, value: SymmetricalCrossSection | TCrossSection[Any]
+    ) -> None:
+        if isinstance(value, SymmetricalCrossSection):
+            self._base.cross_section = value
+            return
+        self._base.cross_section = value.base
 
 
 class DIRECTION(IntEnum):

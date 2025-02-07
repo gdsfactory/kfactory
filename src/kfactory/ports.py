@@ -288,7 +288,7 @@ class Ports(ProtoPorts[int]):
             base.dcplx_trans = None
             base.kcl = self.kcl
             base.cross_section = self.kcl.get_symmetrical_cross_section(
-                port.cross_section.to_dtype(port.kcl)
+                port.cross_section.base.to_dtype(port.kcl)
             )
             port_ = Port(base=base)
             port_.dcplx_trans = dcplx_trans
@@ -541,7 +541,7 @@ class DPorts(ProtoPorts[float]):
             base.dcplx_trans = None
             base.kcl = self.kcl
             base.cross_section = self.kcl.get_symmetrical_cross_section(
-                port.cross_section.to_dtype(port.kcl)
+                port.cross_section.base.to_dtype(port.kcl)
             )
             port_ = DPort(base=base)
             port_.dcplx_trans = dcplx_trans

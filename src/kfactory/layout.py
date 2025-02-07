@@ -1451,7 +1451,7 @@ class KCLayout(
         settings: dict[str, Any] = {}
         info: dict[str, Any] = {}
         cross_sections: list[dict[str, Any]] = []
-        for meta in self.each_meta_info():
+        for meta in self.layout.each_meta_info():
             if meta.name.startswith("kfactory:info"):
                 info[meta.name.removeprefix("kfactory:info:")] = meta.value
             elif meta.name.startswith("kfactory:settings"):
