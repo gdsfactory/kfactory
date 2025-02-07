@@ -175,6 +175,10 @@ class TCrossSection(ABC, Generic[TUnit]):
     def enclosure(self) -> LayerEnclosure:
         return self._base.enclosure
 
+    @property
+    def name(self) -> str:
+        return self._base.name
+
     def to_itype(self) -> CrossSection:
         return CrossSection(kcl=self.kcl, base=self._base)
 
@@ -296,10 +300,6 @@ class CrossSection(TCrossSection[int]):
     def get_xmin_xmax(self) -> tuple[int, int]:
         xmax = self._base.get_xmax()
         return (xmax, xmax)
-
-    @property
-    def name(self) -> str:
-        return self._base.name
 
 
 class DCrossSection(TCrossSection[float]):

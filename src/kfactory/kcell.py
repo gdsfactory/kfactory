@@ -699,8 +699,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             kcell.name = cell.kcl.name + static_name_separator + cell.name
             if cell.kcl.dbu != self.kcl.dbu:
                 for port, lib_port in zip(kcell.ports, cell.ports, strict=False):
-                    port.cross_section = cell.kcl.get_symmetrical_cross_section(
-                        lib_port.cross_section.to_dtype(cell.kcl)
+                    port.cross_section = CrossSection(
+                        kcl=kcell.kcl,
+                        base=cell.kcl.get_symmetrical_cross_section(
+                            lib_port.cross_section.base.to_dtype(cell.kcl)
+                        ),
                     )
             return ci
         else:
