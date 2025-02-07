@@ -51,7 +51,12 @@ from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from . import kdb, rdb
 from .conf import DEFAULT_TRANS, CheckInstances, ShowFunction, config, logger
-from .cross_section import SymmetricalCrossSection
+from .cross_section import (
+    CrossSection,
+    DCrossSection,
+    SymmetricalCrossSection,
+    TCrossSection,
+)
 from .exceptions import LockedError, MergeError
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .instance import DInstance, Instance, ProtoInstance, ProtoTInstance, VInstance
@@ -2217,6 +2222,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     vi.insert_into(c)
                 c._base_kcell.vinsts.clear()
 
+    @abstractmethod
+    def get_cross_section(
+        self,
+        cross_section: str
+        | dict[str, Any]
+        | Callable[..., CrossSection | DCrossSection]
+        | SymmetricalCrossSection,
+        **cross_section_kwargs: Any,
+    ) -> TCrossSection[TUnit]: ...
+
 
 class DKCell(ProtoTKCell[float], UMGeometricObject):
     """Cell with floating point units."""
@@ -2332,6 +2347,34 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
                 libcell_as_static=libcell_as_static,
                 static_name_separator=static_name_separator,
             ).instance,
+        )
+
+    def get_cross_section(
+        self,
+        cross_section: str
+        | dict[str, Any]
+        | Callable[..., CrossSection | DCrossSection]
+        | SymmetricalCrossSection,
+        **cross_section_kwargs: Any,
+    ) -> DCrossSection:
+        if isinstance(cross_section, str):
+            return DCrossSection(
+                kcl=self.kcl, base=self.kcl.cross_sections[cross_section]
+            )
+        if isinstance(cross_section, SymmetricalCrossSection):
+            return DCrossSection(kcl=self.kcl, base=cross_section)
+        if callable(cross_section):
+            any_cross_section = cross_section(**cross_section_kwargs)
+            return DCrossSection(kcl=self.kcl, base=any_cross_section._base)
+        if isinstance(cross_section, dict):
+            return DCrossSection(
+                kcl=self.kcl,
+                name=cross_section.get("name"),
+                **cross_section["settings"],
+            )
+        raise ValueError(
+            "Cannot create a cross section from "
+            f"{type(cross_section)=} and {cross_section_kwargs=}"
         )
 
 
@@ -2718,6 +2761,34 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
             for name, info in node.info.model_dump().items()
         }
         return representer.represent_mapping(cls.yaml_tag, d)
+
+    def get_cross_section(
+        self,
+        cross_section: str
+        | dict[str, Any]
+        | Callable[..., CrossSection | DCrossSection]
+        | SymmetricalCrossSection,
+        **cross_section_kwargs: Any,
+    ) -> CrossSection:
+        if isinstance(cross_section, str):
+            return CrossSection(
+                kcl=self.kcl, base=self.kcl.cross_sections[cross_section]
+            )
+        if isinstance(cross_section, SymmetricalCrossSection):
+            return CrossSection(kcl=self.kcl, base=cross_section)
+        if callable(cross_section):
+            any_cross_section = cross_section(**cross_section_kwargs)
+            return CrossSection(kcl=self.kcl, base=any_cross_section._base)
+        if isinstance(cross_section, dict):
+            return CrossSection(
+                kcl=self.kcl,
+                name=cross_section.get("name"),
+                **cross_section["settings"],
+            )
+        raise ValueError(
+            "Cannot create a cross section from "
+            f"{type(cross_section)=} and {cross_section_kwargs=}"
+        )
 
 
 class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):

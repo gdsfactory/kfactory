@@ -399,7 +399,7 @@ class Ports(ProtoPorts[int]):
                 layer_info = self.kcl.layout.get_info(layer)
             assert layer_info is not None
             cross_section = self.kcl.get_symmetrical_cross_section(
-                CrossSectionSpec(main_layer=layer_info, width=width)
+                CrossSectionSpec(layer=layer_info, width=width)
             )
         if trans is not None:
             port = Port(
@@ -669,7 +669,7 @@ class DPorts(ProtoPorts[float]):
                 )
             cross_section = self.kcl.get_symmetrical_cross_section(
                 CrossSectionSpec(
-                    main_layer=layer_info,
+                    layer=layer_info,
                     width=width_,
                 )
             )

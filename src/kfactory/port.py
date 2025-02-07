@@ -775,7 +775,7 @@ class Port(ProtoPort[int]):
                     " 'port is None'"
                 )
             cross_section = kcl_.get_symmetrical_cross_section(
-                CrossSectionSpec(main_layer=layer_info, width=width)
+                CrossSectionSpec(layer=layer_info, width=width)
             )
         cross_section_ = cross_section
         if trans is not None:
@@ -947,7 +947,7 @@ class DPort(ProtoPort[float]):
                     "If a cross_section is not given a width must be defined."
                 )
             cross_section = kcl_.get_symmetrical_cross_section(
-                CrossSectionSpec(main_layer=layer_info, width=kcl_.to_dbu(width))
+                CrossSectionSpec(layer=layer_info, width=kcl_.to_dbu(width))
             )
         cross_section_ = cross_section
         if trans is not None:
