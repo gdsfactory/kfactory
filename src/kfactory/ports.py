@@ -238,6 +238,10 @@ class ProtoPorts(ABC, Generic[TUnit]):
             config.console.print(pprint_ports(self, unit=unit))
         return capture.get()
 
+    def __hash__(self) -> int:
+        """Hash the ports."""
+        return hash(self._bases)
+
 
 class Ports(ProtoPorts[int]):
     """A collection of dbu ports.

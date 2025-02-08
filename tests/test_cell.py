@@ -448,7 +448,7 @@ def test_cell_yaml(layers: Layers) -> None:
     yaml = YAML()
     yaml.register_class(kf.KCell)
     c = kf.factories.straight.straight_dbu_factory(kf.kcl)(
-        width=5000, length=10000, layer=layers.WG
+        width=5320, length=17210, layer=layers.WG
     ).dup()
 
     _temp_cell_name = "kf.factories.straight.straight_dbu_factory.random_cell"
@@ -466,8 +466,8 @@ def test_cell_yaml(layers: Layers) -> None:
 
         c.name = _temp_cell_name
 
-        c_base_kcell = c.base_kcell
-        cell_base_kcell = cell.base_kcell
+        c_base_kcell = c.base
+        cell_base_kcell = cell.base
 
         def compare_kcell_fields(
             c_base_kcell: kf.KCell, cell_base_kcell: kf.KCell
