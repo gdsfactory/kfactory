@@ -448,7 +448,7 @@ def test_cell_yaml(layers: Layers) -> None:
     yaml = YAML()
     yaml.register_class(kf.KCell)
     c = kf.factories.straight.straight_dbu_factory(kf.kcl)(
-        width=5000, length=10000, layer=layers.WG
+        width=5320, length=17210, layer=layers.WG
     ).dup()
 
     _temp_cell_name = "kf.factories.straight.straight_dbu_factory.random_cell"
