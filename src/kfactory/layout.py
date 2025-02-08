@@ -665,9 +665,7 @@ class KCLayout(
 
                 @cachetools.cached(cache=_cache, lock=RLock())
                 @functools.wraps(f)
-                def wrapped_cell(
-                    **params: KCellParams.args | KCellParams.kwargs,
-                ) -> K:
+                def wrapped_cell(**params: Any) -> K:
                     for key, value in params.items():
                         if isinstance(value, DecoratorDict | DecoratorList):
                             params[key] = _hashable_to_original(value)
@@ -974,7 +972,7 @@ class KCLayout(
             def wrapper_autocell(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
             ) -> VKCell:
-                params: dict[str, KCellParams.args] = {
+                params: dict[str, Any] = {
                     p.name: p.default for p in sig.parameters.values()
                 }
                 param_units: dict[str, str] = {
@@ -1003,9 +1001,7 @@ class KCLayout(
 
                 @cachetools.cached(cache=_cache)
                 @functools.wraps(f)
-                def wrapped_cell(
-                    **params: KCellParams.args,
-                ) -> VKCell:
+                def wrapped_cell(**params: Any) -> VKCell:
                     for key, value in params.items():
                         if isinstance(value, DecoratorDict | DecoratorList):
                             params[key] = _hashable_to_original(value)
