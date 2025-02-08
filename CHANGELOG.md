@@ -5,6 +5,7 @@
 
 ## New
 
+- Update base_kcell to base and add locked setters [#599](https://github.com/gdsfactory/kfactory/pull/599)
 - Rework cross section [#596](https://github.com/gdsfactory/kfactory/pull/596)
 - Add more concrete methods for Instances [#598](https://github.com/gdsfactory/kfactory/pull/598)
 - Add concrete iter for InstancePorts and DInstancePorts [#597](https://github.com/gdsfactory/kfactory/pull/597)
