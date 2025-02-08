@@ -22,6 +22,7 @@
 
 ## Bug Fixes
 
+- Fix KCLayout.clear_kcells [#602](https://github.com/gdsfactory/kfactory/pull/602)
 - Fix mirror default parameters [#600](https://github.com/gdsfactory/kfactory/pull/600)
 - Make vinstance connect take ProtoPort [#587](https://github.com/gdsfactory/kfactory/pull/587)
 - Fix um grid [#586](https://github.com/gdsfactory/kfactory/pull/586)
