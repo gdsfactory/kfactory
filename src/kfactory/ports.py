@@ -287,8 +287,8 @@ class Ports(ProtoPorts[int]):
             base.trans = kdb.Trans.R0
             base.dcplx_trans = None
             base.kcl = self.kcl
-            base.cross_section = self.kcl.get_cross_section(
-                port.cross_section.to_dtype(port.kcl)
+            base.cross_section = self.kcl.get_symmetrical_cross_section(
+                port.cross_section.base.to_dtype(port.kcl)
             )
             port_ = Port(base=base)
             port_.dcplx_trans = dcplx_trans
@@ -398,8 +398,8 @@ class Ports(ProtoPorts[int]):
                     )
                 layer_info = self.kcl.layout.get_info(layer)
             assert layer_info is not None
-            cross_section = self.kcl.get_cross_section(
-                CrossSectionSpec(main_layer=layer_info, width=width)
+            cross_section = self.kcl.get_symmetrical_cross_section(
+                CrossSectionSpec(layer=layer_info, width=width)
             )
         if trans is not None:
             port = Port(
@@ -540,8 +540,8 @@ class DPorts(ProtoPorts[float]):
             base.trans = kdb.Trans.R0
             base.dcplx_trans = None
             base.kcl = self.kcl
-            base.cross_section = self.kcl.get_cross_section(
-                port.cross_section.to_dtype(port.kcl)
+            base.cross_section = self.kcl.get_symmetrical_cross_section(
+                port.cross_section.base.to_dtype(port.kcl)
             )
             port_ = DPort(base=base)
             port_.dcplx_trans = dcplx_trans
@@ -667,9 +667,9 @@ class DPorts(ProtoPorts[float]):
                     f"width needs to be even to snap to grid. Got {width}."
                     "Ports must have a grid width of multiples of 2."
                 )
-            cross_section = self.kcl.get_cross_section(
+            cross_section = self.kcl.get_symmetrical_cross_section(
                 CrossSectionSpec(
-                    main_layer=layer_info,
+                    layer=layer_info,
                     width=width_,
                 )
             )

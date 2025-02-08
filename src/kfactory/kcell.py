@@ -51,7 +51,12 @@ from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from . import kdb, rdb
 from .conf import DEFAULT_TRANS, CheckInstances, ShowFunction, config, logger
-from .cross_section import SymmetricalCrossSection
+from .cross_section import (
+    CrossSection,
+    DCrossSection,
+    SymmetricalCrossSection,
+    TCrossSection,
+)
 from .exceptions import LockedError, MergeError
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .instance import DInstance, Instance, ProtoInstance, ProtoTInstance, VInstance
@@ -418,21 +423,21 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             return
         from .layout import get_default_kcl
 
-        _kcl = kcl or get_default_kcl()
+        kcl_ = kcl or get_default_kcl()
         if name is None:
-            _name = "Unnamed_!" if kdb_cell is None else kdb_cell.name
+            name_ = "Unnamed_!" if kdb_cell is None else kdb_cell.name
         else:
-            _name = name
+            name_ = name
             if kdb_cell is not None:
                 kdb_cell.name = name
-        _kdb_cell = kdb_cell or _kcl.create_cell(_name)
-        if _name == "Unnamed_!":
-            _kdb_cell.name = f"Unnamed_{_kdb_cell.cell_index()}"
+        kdb_cell_ = kdb_cell or kcl_.create_cell(name_)
+        if name_ == "Unnamed_!":
+            kdb_cell_.name = f"Unnamed_{kdb_cell_.cell_index()}"
         self._base_kcell = TKCell(
-            kcl=_kcl,
+            kcl=kcl_,
             info=Info(**(info or {})),
             settings=KCellSettings(**(settings or {})),
-            kdb_cell=_kdb_cell,
+            kdb_cell=kdb_cell_,
             ports=[port.base for port in ports] if ports else [],
             vinsts=VInstances(),
         )
@@ -616,104 +621,6 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         self._base_kcell.kdb_cell.locked = False
         self.kcl.delete_cell(ci)
 
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
-        trans: kdb.Trans,
-        width: int,
-        layer: LayerEnum | int,
-        port_type: str = "optical",
-    ) -> ProtoPort[TUnit]: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
-        dcplx_trans: kdb.DCplxTrans,
-        width: int,
-        layer: LayerEnum | int,
-        port_type: str = "optical",
-    ) -> ProtoPort[TUnit]: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
-        port: Port,
-    ) -> ProtoPort[TUnit]: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
-        width: int,
-        center: tuple[int, int],
-        angle: int,
-        layer: LayerEnum | int,
-        port_type: str = "optical",
-        mirror_x: bool = False,
-    ) -> ProtoPort[TUnit]: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
-        trans: kdb.Trans,
-        width: int,
-        layer_info: kdb.LayerInfo,
-        port_type: str = "optical",
-    ) -> ProtoPort[TUnit]: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
-        dcplx_trans: kdb.DCplxTrans,
-        width: int,
-        layer_info: kdb.LayerInfo,
-        port_type: str = "optical",
-    ) -> ProtoPort[TUnit]: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
-        width: int,
-        center: tuple[int, int],
-        angle: int,
-        layer_info: kdb.LayerInfo,
-        port_type: str = "optical",
-        mirror_x: bool = False,
-    ) -> ProtoPort[TUnit]: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
-        cross_section: SymmetricalCrossSection,
-        trans: kdb.Trans,
-        port_type: str = "optical",
-    ) -> ProtoPort[TUnit]: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
-        cross_section: SymmetricalCrossSection,
-        dcplx_trans: kdb.DCplxTrans,
-        port_type: str = "optical",
-    ) -> ProtoPort[TUnit]: ...
-
     def create_port(self, **kwargs: Any) -> ProtoPort[TUnit]:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
         if self.locked:
@@ -792,8 +699,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             kcell.name = cell.kcl.name + static_name_separator + cell.name
             if cell.kcl.dbu != self.kcl.dbu:
                 for port, lib_port in zip(kcell.ports, cell.ports, strict=False):
-                    port.cross_section = cell.kcl.get_cross_section(
-                        lib_port.cross_section.to_dtype(cell.kcl)
+                    port.cross_section = CrossSection(
+                        kcl=kcell.kcl,
+                        base=cell.kcl.get_symmetrical_cross_section(
+                            lib_port.cross_section.base.to_dtype(cell.kcl)
+                        ),
                     )
             return ci
         else:
@@ -959,16 +869,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             raise ValueError(f"KCell {self.qname()} is already a static KCell.")
         from .layout import kcls
 
-        _lib_cell = kcls[self.library().name()][self.library_cell_index()]
-        _lib_cell.set_meta_data()
-        _kdb_cell = self.kcl.layout_cell(
+        lib_cell = kcls[self.library().name()][self.library_cell_index()]
+        lib_cell.set_meta_data()
+        kdb_cell = self.kcl.layout_cell(
             self.kcl.convert_cell_to_static(self.cell_index())
         )
-        assert _kdb_cell is not None
-        _kdb_cell.name = self.qname()
-        _ci = _kdb_cell.cell_index()
-        _old_kdb_cell = self._base_kcell.kdb_cell
-        _kdb_cell.copy_meta_info(_lib_cell.kdb_cell)
+        assert kdb_cell is not None
+        kdb_cell.name = self.qname()
+        ci_ = kdb_cell.cell_index()
+        old_kdb_cell = self._base_kcell.kdb_cell
+        kdb_cell.copy_meta_info(lib_cell.kdb_cell)
         self.get_meta_data()
 
         if recursive:
@@ -977,20 +887,20 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 if kc.is_library_cell():
                     kc.convert_to_static(recursive=recursive)
 
-        self._base_kcell.kdb_cell = _kdb_cell
-        for ci in _old_kdb_cell.caller_cells():
+        self._base_kcell.kdb_cell = kdb_cell
+        for ci in old_kdb_cell.caller_cells():
             c = self.kcl.layout_cell(ci)
             assert c is not None
             it = kdb.RecursiveInstanceIterator(self.kcl.layout, c)
-            it.targets = [_old_kdb_cell.cell_index()]
+            it.targets = [old_kdb_cell.cell_index()]
             it.max_depth = 0
             insts = [instit.current_inst_element().inst() for instit in it.each()]
             for inst in insts:
                 ca = inst.cell_inst
-                ca.cell_index = _ci
+                ca.cell_index = ci_
                 c.replace(inst, ca)
 
-        self.kcl.layout.delete_cell(_old_kdb_cell.cell_index())
+        self.kcl.layout.delete_cell(old_kdb_cell.cell_index())
 
     def draw_ports(self) -> None:
         """Draw all the ports on their respective layer."""
@@ -1165,17 +1075,17 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 )
 
                 if diff.layout_meta_diff:
-                    _yaml = ruamel.yaml.YAML(typ=["rt", "string"])
+                    yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + _yaml.dumps(dict(diff.layout_meta_diff))  # type: ignore[attr-defined]
+                        + yaml.dumps(dict(diff.layout_meta_diff))  # type: ignore[attr-defined]
                         + "\n```"
                     )
                 if diff.cells_meta_diff:
-                    _yaml = ruamel.yaml.YAML(typ=["rt", "string"])
+                    yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + _yaml.dumps(dict(diff.cells_meta_diff))  # type: ignore[attr-defined]
+                        + yaml.dumps(dict(diff.cells_meta_diff))  # type: ignore[attr-defined]
                         + "\n```"
                     )
 
@@ -1189,9 +1099,9 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 for k, v in info.items():
                     self.kcl.info[k] = v
             case "skip":
-                _info = self.info.model_dump()
+                info_ = self.info.model_dump()
 
-                info.update(_info)
+                info.update(info_)
                 self.kcl.info = Info(**info)
             case "drop":
                 ...
@@ -1425,69 +1335,69 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
                 if not self.is_library_cell():
                     for index in sorted(port_dict.keys()):
-                        _v = port_dict[index]
-                        _trans: kdb.Trans | None = _v.get("trans")
-                        if _trans is not None:
+                        v = port_dict[index]
+                        trans_: kdb.Trans | None = v.get("trans")
+                        if trans_ is not None:
                             self.create_port(
-                                name=_v.get("name"),
-                                trans=_trans,
-                                cross_section=self.kcl.get_cross_section(
-                                    _v["cross_section"]
+                                name=v.get("name"),
+                                trans=trans_,
+                                cross_section=self.kcl.get_symmetrical_cross_section(
+                                    v["cross_section"]
                                 ),
-                                port_type=_v["port_type"],
+                                port_type=v["port_type"],
                             )
                         else:
                             self.create_port(
-                                name=_v.get("name"),
-                                dcplx_trans=_v["dcplx_trans"],
-                                cross_section=self.kcl.get_cross_section(
-                                    _v["cross_section"]
+                                name=v.get("name"),
+                                dcplx_trans=v["dcplx_trans"],
+                                cross_section=self.kcl.get_symmetrical_cross_section(
+                                    v["cross_section"]
                                 ),
-                                port_type=_v["port_type"],
+                                port_type=v["port_type"],
                             )
                 else:
                     lib_name = self.library().name()
                     for index in sorted(port_dict.keys()):
-                        _v = port_dict[index]
-                        _trans = _v.get("trans")
+                        v = port_dict[index]
+                        trans_ = v.get("trans")
                         lib_kcl = kcls[lib_name]
-                        cs = self.kcl.get_cross_section(
-                            lib_kcl.get_cross_section(_v["cross_section"]).to_dtype(
-                                lib_kcl
-                            )
+                        cs = self.kcl.get_symmetrical_cross_section(
+                            lib_kcl.get_symmetrical_cross_section(
+                                v["cross_section"]
+                            ).to_dtype(lib_kcl)
                         )
 
-                        if _trans is not None:
+                        if trans_ is not None:
                             self.create_port(
-                                name=_v.get("name"),
-                                trans=_trans.to_dtype(lib_kcl.dbu).to_itype(
+                                name=v.get("name"),
+                                trans=trans_.to_dtype(lib_kcl.dbu).to_itype(
                                     self.kcl.dbu
                                 ),
                                 cross_section=cs,
-                                port_type=_v["port_type"],
+                                port_type=v["port_type"],
                             )
                         else:
                             self.create_port(
-                                name=_v.get("name"),
-                                dcplx_trans=_v["dcplx_trans"],
+                                name=v.get("name"),
+                                dcplx_trans=v["dcplx_trans"],
                                 cross_section=cs,
-                                port_type=_v["port_type"],
+                                port_type=v["port_type"],
                             )
 
             case "v2":
                 for meta in self.each_meta_info():
                     if meta.name.startswith("kfactory:ports"):
-                        i, _type = meta.name.removeprefix("kfactory:ports:").split(
+                        i, type_ = meta.name.removeprefix("kfactory:ports:").split(
                             ":", 1
                         )
                         if i not in port_dict:
                             port_dict[i] = {}
-                        if not _type.startswith("info"):
-                            port_dict[i][_type] = meta.value
+                        if not type_.startswith("info"):
+                            port_dict[i][type_] = meta.value
                         else:
                             if "info" not in port_dict[i]:
                                 port_dict[i]["info"] = {}
-                            port_dict[i]["info"][_type.removeprefix("info:")] = (
+                            port_dict[i]["info"][type_.removeprefix("info:")] = (
                                 meta.value
                             )
                     elif meta.name.startswith("kfactory:info"):
@@ -1516,42 +1426,42 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
                 self.ports.clear()
                 for index in sorted(port_dict.keys()):
-                    _d = port_dict[index]
-                    name = _d.get("name", None)
-                    port_type = _d["port_type"]
-                    layer_info = _d["layer"]
-                    width = _d["width"]
-                    trans = _d.get("trans", None)
-                    dcplx_trans = _d.get("dcplx_trans", None)
-                    _port = Port(
+                    d = port_dict[index]
+                    name = d.get("name", None)
+                    port_type = d["port_type"]
+                    layer_info = d["layer"]
+                    width = d["width"]
+                    trans = d.get("trans", None)
+                    dcplx_trans = d.get("dcplx_trans", None)
+                    port = Port(
                         name=name,
                         width=width,
                         layer_info=layer_info,
                         trans=kdb.Trans.R0,
                         kcl=self.kcl,
                         port_type=port_type,
-                        info=_d.get("info", {}),
+                        info=d.get("info", {}),
                     )
                     if trans:
-                        _port.trans = trans
+                        port.trans = trans
                     elif dcplx_trans:
-                        _port.dcplx_trans = dcplx_trans
+                        port.dcplx_trans = dcplx_trans
 
-                    self.add_port(port=_port, keep_mirror=True)
+                    self.add_port(port=port, keep_mirror=True)
             case "v1":
                 for meta in self.each_meta_info():
                     if meta.name.startswith("kfactory:ports"):
-                        i, _type = meta.name.removeprefix("kfactory:ports:").split(
+                        i, type_ = meta.name.removeprefix("kfactory:ports:").split(
                             ":", 1
                         )
                         if i not in port_dict:
                             port_dict[i] = {}
-                        if not _type.startswith("info"):
-                            port_dict[i][_type] = meta.value
+                        if not type_.startswith("info"):
+                            port_dict[i][type_] = meta.value
                         else:
                             if "info" not in port_dict[i]:
                                 port_dict[i]["info"] = {}
-                            port_dict[i]["info"][_type.removeprefix("info:")] = (
+                            port_dict[i]["info"][type_.removeprefix("info:")] = (
                                 meta.value
                             )
                     elif meta.name.startswith("kfactory:info"):
@@ -1580,28 +1490,28 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
                 self.ports.clear()
                 for index in sorted(port_dict.keys()):
-                    _d = port_dict[index]
-                    name = _d.get("name", None)
-                    port_type = _d["port_type"]
-                    layer = _d["layer"]
-                    width = _d["width"]
-                    trans = _d.get("trans", None)
-                    dcplx_trans = _d.get("dcplx_trans", None)
-                    _port = Port(
+                    d = port_dict[index]
+                    name = d.get("name", None)
+                    port_type = d["port_type"]
+                    layer = d["layer"]
+                    width = d["width"]
+                    trans = d.get("trans", None)
+                    dcplx_trans = d.get("dcplx_trans", None)
+                    port = Port(
                         name=name,
                         width=width,
                         layer_info=layer,
                         trans=kdb.Trans.R0,
                         kcl=self.kcl,
                         port_type=port_type,
-                        info=_d.get("info", {}),
+                        info=d.get("info", {}),
                     )
                     if trans:
-                        _port.trans = kdb.Trans.from_s(trans)
+                        port.trans = kdb.Trans.from_s(trans)
                     elif dcplx_trans:
-                        _port.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
+                        port.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
 
-                    self.add_port(port=_port, keep_mirror=True)
+                    self.add_port(port=port, keep_mirror=True)
 
     def ibbox(self, layer: int | None = None) -> kdb.Box:
         if layer is None:
@@ -1659,9 +1569,9 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         for i, port in filter(
             port_filter, enumerate(Ports(kcl=self.kcl, bases=self.ports.bases))
         ):
-            _trans = port.trans.dup()
-            _trans.angle = _trans.angle % 2
-            _trans.mirror = False
+            trans = port.trans.dup()
+            trans.angle = trans.angle % 2
+            trans.mirror = False
             layer_info = self.kcl.layout.get_info(port.layer)
             layer = f"{layer_info.layer}_{layer_info.datatype}"
 
@@ -1671,7 +1581,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     f" colliding port names. Duplicate name: {port.name}"
                 )
 
-            v = _trans.disp
+            v = trans.disp
             h = f"{v.x}_{v.y}"
             if h not in cell_ports:
                 cell_ports[h] = {}
@@ -1704,10 +1614,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 port_filter,
                 enumerate(Ports(kcl=self.kcl, bases=[p.base for p in inst.ports])),
             ):
-                _trans = port.trans.dup()
-                _trans.angle = _trans.angle % 2
-                _trans.mirror = False
-                v = _trans.disp
+                trans = port.trans.dup()
+                trans.angle = trans.angle % 2
+                trans.mirror = False
+                v = trans.disp
                 h = f"{v.x}_{v.y}"
                 layer_info = self.kcl.layout.get_info(port.layer)
                 layer = f"{layer_info.layer}_{layer_info.datatype}"
@@ -2129,14 +2039,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 inst_regions: dict[int, kdb.Region] = {}
                 inst_region = kdb.Region()
                 for i, inst in enumerate(self.insts):
-                    _bbox = inst.bbox(layer)
-                    _inst_region = kdb.Region(
-                        kdb.DBox(
-                            _bbox.left, _bbox.bottom, _bbox.right, _bbox.top
-                        ).to_itype(self.kcl.dbu)
+                    bbox = inst.bbox(layer)
+                    inst_region_ = kdb.Region(
+                        kdb.DBox(bbox.left, bbox.bottom, bbox.right, bbox.top).to_itype(
+                            self.kcl.dbu
+                        )
                     )
                     inst_shapes: kdb.Region | None = None
-                    if not (inst_region & _inst_region).is_empty():
+                    if not (inst_region & inst_region_).is_empty():
                         if inst_shapes is None:
                             inst_shapes = kdb.Region()
                             shape_it = self.begin_shapes_rec_overlapping(
@@ -2151,29 +2061,29 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                                     )
 
                         for j, _reg in inst_regions.items():
-                            if _reg & _inst_region:
-                                __reg = kdb.Region()
+                            if _reg & inst_region_:
+                                reg_ = kdb.Region()
                                 shape_it = self.begin_shapes_rec_touching(
-                                    layer, (_reg & _inst_region).bbox()
+                                    layer, (_reg & inst_region_).bbox()
                                 )
                                 shape_it.select_cells([self.insts[j].cell.cell_index()])
                                 shape_it.min_depth = 1
                                 for _it in shape_it.each():
                                     if _it.path()[0].inst() == self.insts[j].instance:
-                                        __reg.insert(
+                                        reg_.insert(
                                             _it.shape().polygon.transformed(_it.trans())
                                         )
 
-                                error_region_instances.insert(__reg & inst_shapes)
+                                error_region_instances.insert(reg_ & inst_shapes)
 
-                    if not (_inst_region & reg).is_empty():
+                    if not (inst_region_ & reg).is_empty():
                         rec_it = self.begin_shapes_rec_touching(
-                            layer, (_inst_region & reg).bbox()
+                            layer, (inst_region_ & reg).bbox()
                         )
                         rec_it.min_depth = 1
                         error_region_shapes += kdb.Region(rec_it) & reg
-                    inst_region += _inst_region
-                    inst_regions[i] = _inst_region
+                    inst_region += inst_region_
+                    inst_regions[i] = inst_region_
                 if not error_region_shapes.is_empty():
                     sc = db_.category_by_path(
                         layer_cat(layer).path() + ".ShapeInstanceshapeOverlap"
@@ -2216,6 +2126,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 for vi in c._base_kcell.vinsts:
                     vi.insert_into(c)
                 c._base_kcell.vinsts.clear()
+
+    @abstractmethod
+    def get_cross_section(
+        self,
+        cross_section: str
+        | dict[str, Any]
+        | Callable[..., CrossSection | DCrossSection]
+        | SymmetricalCrossSection,
+        **cross_section_kwargs: Any,
+    ) -> TCrossSection[TUnit]: ...
 
 
 class DKCell(ProtoTKCell[float], UMGeometricObject):
@@ -2332,6 +2252,34 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
                 libcell_as_static=libcell_as_static,
                 static_name_separator=static_name_separator,
             ).instance,
+        )
+
+    def get_cross_section(
+        self,
+        cross_section: str
+        | dict[str, Any]
+        | Callable[..., CrossSection | DCrossSection]
+        | SymmetricalCrossSection,
+        **cross_section_kwargs: Any,
+    ) -> DCrossSection:
+        if isinstance(cross_section, str):
+            return DCrossSection(
+                kcl=self.kcl, base=self.kcl.cross_sections[cross_section]
+            )
+        if isinstance(cross_section, SymmetricalCrossSection):
+            return DCrossSection(kcl=self.kcl, base=cross_section)
+        if callable(cross_section):
+            any_cross_section = cross_section(**cross_section_kwargs)
+            return DCrossSection(kcl=self.kcl, base=any_cross_section._base)
+        if isinstance(cross_section, dict):
+            return DCrossSection(
+                kcl=self.kcl,
+                name=cross_section.get("name"),
+                **cross_section["settings"],
+            )
+        raise ValueError(
+            "Cannot create a cross section from "
+            f"{type(cross_section)=} and {cross_section_kwargs=}"
         )
 
 
@@ -2501,12 +2449,12 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         )
         for inst in d.get("insts", []):
             if "cellname" in inst:
-                _cell = cell.kcl[inst["cellname"]]
+                cell_ = cell.kcl[inst["cellname"]]
             elif "cellfunction" in inst:
                 module_name, fname = inst["cellfunction"].rsplit(".", 1)
                 module = importlib.import_module(module_name)
                 cellf = getattr(module, fname)
-                _cell = cellf(**inst["settings"])
+                cell_ = cellf(**inst["settings"])
                 del module
             else:
                 raise NotImplementedError(
@@ -2516,7 +2464,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
             t = inst.get("trans", {})
             if isinstance(t, str):
                 cell.create_inst(
-                    _cell,
+                    cell_,
                     kdb.Trans.from_s(inst["trans"]),
                 )
             else:
@@ -2524,7 +2472,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                 mirror = t.get("mirror", False)
 
                 kinst = cell.create_inst(
-                    _cell,
+                    cell_,
                     kdb.Trans(angle, mirror, 0, 0),
                 )
 
@@ -2684,10 +2632,10 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         }
         ports: list[dict[str, Any]] = []
         for port in node.ports:
-            _l = node.kcl.get_info(port.layer)
+            l_ = node.kcl.get_info(port.layer)
             p: dict[str, Any] = {
                 "name": port.name,
-                "layer": [_l.layer, _l.datatype],
+                "layer": [l_.layer, l_.datatype],
                 "port_type": port.port_type,
             }
             if port.base.trans:
@@ -2718,6 +2666,34 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
             for name, info in node.info.model_dump().items()
         }
         return representer.represent_mapping(cls.yaml_tag, d)
+
+    def get_cross_section(
+        self,
+        cross_section: str
+        | dict[str, Any]
+        | Callable[..., CrossSection | DCrossSection]
+        | SymmetricalCrossSection,
+        **cross_section_kwargs: Any,
+    ) -> CrossSection:
+        if isinstance(cross_section, str):
+            return CrossSection(
+                kcl=self.kcl, base=self.kcl.cross_sections[cross_section]
+            )
+        if isinstance(cross_section, SymmetricalCrossSection):
+            return CrossSection(kcl=self.kcl, base=cross_section)
+        if callable(cross_section):
+            any_cross_section = cross_section(**cross_section_kwargs)
+            return CrossSection(kcl=self.kcl, base=any_cross_section._base)
+        if isinstance(cross_section, dict):
+            return CrossSection(
+                kcl=self.kcl,
+                name=cross_section.get("name"),
+                **cross_section["settings"],
+            )
+        raise ValueError(
+            "Cannot create a cross section from "
+            f"{type(cross_section)=} and {cross_section_kwargs=}"
+        )
 
 
 class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
@@ -2755,9 +2731,9 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
             self._base_kcell = base_kcell
             self._name = base_kcell.function_name
         else:
-            _kcl = kcl or get_default_kcl()
+            kcl_ = kcl or get_default_kcl()
             self._base_kcell = TVCell(
-                kcl=_kcl,
+                kcl=kcl_,
                 info=Info(**(info or {})),
                 settings=KCellSettings(**(settings or {})),
                 vinsts=VInstances(),
@@ -2787,9 +2763,9 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
         self._base_kcell.ports = [port.base for port in new_ports]
 
     def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
-        _layers = set(self._shapes.keys())
+        layers_ = set(self._shapes.keys())
 
-        layers = _layers if layer is None else {layer} & _layers
+        layers = layers_ if layer is None else {layer} & layers_
 
         box = kdb.DBox()
         for _layer in layers:
