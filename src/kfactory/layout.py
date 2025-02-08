@@ -1570,7 +1570,8 @@ class KCLayout(
     def clear_kcells(self) -> None:
         """Clears all cells in the Layout object."""
         for tc in self.top_kcells():
-            tc.prune_cell()
+            tc.locked = False
+            tc.kdb_cell.prune_cell()
         self.tkcells = {}
 
     def get_enclosure(

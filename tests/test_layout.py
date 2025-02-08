@@ -227,5 +227,14 @@ def test_cell_decorator_types(kcl: kf.KCLayout) -> None:
         test_no_output_type()
 
 
+def test_clear_kcells(kcl: kf.KCLayout, layers: Layers) -> None:
+    straight = kf.factories.straight.straight_dbu_factory(kcl)(
+        length=1000, width=1000, layer=layers.WG
+    )
+    kcl.clear_kcells()
+    assert len(kcl.kcells) == 0
+    assert straight.destroyed()
+
+
 if __name__ == "__main__":
     pytest.main(["-s", __file__])
