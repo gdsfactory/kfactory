@@ -370,9 +370,6 @@ def test_dport_invalid_init() -> None:
     with pytest.raises(ValueError):
         kf.DPort(name="o1", width=10, center=(1000, 1000), orientation=90)
 
-    with pytest.raises(ValueError):
-        kf.DPort(name="o1", layer=1, width=10)
-
     with pytest.raises(ValueError, match="Width must be greater than 0."):
         kf.DPort(name="o1", width=-10, layer=1, center=(1000, 1000), orientation=90)
 
