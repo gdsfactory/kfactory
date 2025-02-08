@@ -937,8 +937,8 @@ class DPort(ProtoPort[float]):
         port_type: str = "optical",
         trans: kdb.Trans | str | None = None,
         dcplx_trans: kdb.DCplxTrans | str | None = None,
-        orientation: float | None = None,
-        center: tuple[float, float] | None = None,
+        orientation: float = 0,
+        center: tuple[float, float] = (0, 0),
         mirror_x: bool = False,
         port: ProtoPort[Any] | None = None,
         kcl: KCLayout | None = None,
@@ -1002,7 +1002,7 @@ class DPort(ProtoPort[float]):
                 info=info_,
                 port_type=port_type,
             )
-        elif orientation is not None:
+        else:
             assert center is not None
             dcplx_trans_ = kdb.DCplxTrans.R0
             self._base = BasePort(
@@ -1016,8 +1016,6 @@ class DPort(ProtoPort[float]):
             self.center = center
             self.orientation = orientation
             self.mirror_x = mirror_x
-        else:
-            raise ValueError("Missing port parameters given")
 
     def copy(
         self,
