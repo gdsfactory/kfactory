@@ -13,6 +13,12 @@ import klayout.lay as lay
 import klayout.rdb as rdb
 
 from .conf import config, logger, CheckInstances
+from .cross_section import (
+    SymmetricalCrossSection,
+    CrossSection,
+    CrossSectionSpec,
+    DCrossSection,
+)
 from .enclosure import KCellEnclosure, LayerEnclosure
 from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
 from .kcell import BaseKCell, DKCell, KCell, VKCell, show
@@ -51,6 +57,9 @@ __all__ = [
     "BaseKCell",
     "CheckInstances",
     "Constants",
+    "CrossSection",
+    "CrossSectionSpec",
+    "DCrossSection",
     "DInstance",
     "DInstanceGroup",
     "DInstancePorts",
@@ -73,6 +82,7 @@ __all__ = [
     "LayerStack",
     "Port",
     "Ports",
+    "SymmetricalCrossSection",
     "VInstance",
     "VInstanceGroup",
     "VInstancePorts",

@@ -27,8 +27,10 @@ from pydantic import (
 from . import __version__
 from .conf import CheckInstances, config, logger
 from .cross_section import (
+    CrossSection,
     CrossSectionModel,
     CrossSectionSpec,
+    DCrossSection,
     DSymmetricalCrossSection,
     SymmetricalCrossSection,
 )
@@ -212,20 +214,20 @@ class KCLayout(
         library = kdb.Library()
         layout = library.layout()
         layer_stack = layer_stack or LayerStack()
-        _constants = constants() if constants else Constants()
-        _infos = infos() if infos else LayerInfos()
+        constants_ = constants() if constants else Constants()
+        infos_ = infos() if infos else LayerInfos()
         super().__init__(
             name=name,
             layer_enclosures=LayerEnclosureModel(dict()),
             cross_sections=CrossSectionModel(kcl=self),
             enclosure=KCellEnclosure([]),
-            infos=_infos,
+            infos=infos_,
             layers=LayerEnum,
             factories=Factories({}),
             virtual_factories=Factories({}),
             sparameters_path=sparameters_path,
             interconnect_cml_path=interconnect_cml_path,
-            constants=_constants,
+            constants=constants_,
             library=library,
             layer_stack=layer_stack,
             layout=layout,
@@ -242,38 +244,20 @@ class KCLayout(
 
         self.library.register(self.name)
 
-        if layer_enclosures:
-            if isinstance(layer_enclosures, LayerEnclosureModel):
-                _layer_enclosures = LayerEnclosureModel(
-                    {
-                        name: lenc.copy_to(self)
-                        for name, lenc in layer_enclosures.root.items()
-                    }
-                )
-            else:
-                _layer_enclosures = LayerEnclosureModel(
-                    {
-                        name: lenc.copy_to(self)
-                        for name, lenc in layer_enclosures.items()
-                    }
-                )
-        else:
-            _layer_enclosures = LayerEnclosureModel({})
-
-        enclosure = (
-            enclosure.copy_to(self) if enclosure else KCellEnclosure(enclosures=[])
+        enclosure = KCellEnclosure(
+            enclosures=[enc.model_copy() for enc in enclosure.enclosures.enclosures]
+            if enclosure
+            else []
         )
-        # layers = self.layerenum_from_dict(name="LAYER", layers=infos)
         sparameters_path = sparameters_path
         interconnect_cml_path = interconnect_cml_path
         if enclosure is None:
             enclosure = KCellEnclosure([])
         if layer_enclosures is None:
-            _layer_enclosures = LayerEnclosureModel()
-        # self.layers = layers
+            layer_enclosures_ = LayerEnclosureModel()
         self.sparameters_path = sparameters_path
         self.enclosure = enclosure
-        self.layer_enclosures = _layer_enclosures
+        self.layer_enclosures = layer_enclosures_
         self.interconnect_cml_path = interconnect_cml_path
 
         kcls[self.name] = self
@@ -398,6 +382,8 @@ class KCLayout(
             ) from e
 
     @overload
+    def to_um(self, other: None) -> None: ...
+    @overload
     def to_um(self, other: int) -> float: ...
 
     @overload
@@ -426,7 +412,8 @@ class KCLayout(
         | kdb.Box
         | kdb.Polygon
         | kdb.Path
-        | kdb.Text,
+        | kdb.Text
+        | None,
     ) -> (
         float
         | kdb.DPoint
@@ -435,10 +422,15 @@ class KCLayout(
         | kdb.DPolygon
         | kdb.DPath
         | kdb.DText
+        | None
     ):
         """Convert Shapes or values in dbu to DShapes or floats in um."""
+        if other is None:
+            return None
         return kdb.CplxTrans(self.layout.dbu) * other
 
+    @overload
+    def to_dbu(self, other: None) -> None: ...
     @overload
     def to_dbu(self, other: float) -> int: ...
 
@@ -468,9 +460,21 @@ class KCLayout(
         | kdb.DBox
         | kdb.DPolygon
         | kdb.DPath
-        | kdb.DText,
-    ) -> int | kdb.Point | kdb.Vector | kdb.Box | kdb.Polygon | kdb.Path | kdb.Text:
+        | kdb.DText
+        | None,
+    ) -> (
+        int
+        | kdb.Point
+        | kdb.Vector
+        | kdb.Box
+        | kdb.Polygon
+        | kdb.Path
+        | kdb.Text
+        | None
+    ):
         """Convert Shapes or values in dbu to DShapes or floats in um."""
+        if other is None:
+            return None
         return kdb.CplxTrans(self.layout.dbu).inverted() * other
 
     @overload
@@ -628,7 +632,7 @@ class KCLayout(
 
             output_cell_type = cast(type[K], output_cell_type_)
 
-            _cache: Cache[_HashedTuple, K] | dict[_HashedTuple, K] = cache or Cache(
+            cache_: Cache[_HashedTuple, K] | dict[_HashedTuple, K] = cache or Cache(
                 maxsize=float("inf")
             )
 
@@ -663,7 +667,7 @@ class KCLayout(
                     params.pop(param, None)
                     param_units.pop(param, None)
 
-                @cachetools.cached(cache=_cache, lock=RLock())
+                @cachetools.cached(cache=cache_, lock=RLock())
                 @functools.wraps(f)
                 def wrapped_cell(**params: Any) -> K:
                     for key, value in params.items():
@@ -692,37 +696,37 @@ class KCLayout(
                                         layout_cell.cell_index(), output_cell_type
                                     )
                         logger.debug(f"Constructing {self.future_cell_name}")
-                        _name: str | None = name
+                        name_: str | None = name
                     else:
-                        _name = None
+                        name_ = None
                     cell = f(**params)  # type: ignore[call-arg]
 
-                    logger.debug("Constructed {}", _name or cell.name)
+                    logger.debug("Constructed {}", name_ or cell.name)
 
                     if cell.locked:
                         # If the cell is locked, it comes from a cache (most likely)
                         # and should be copied first
                         cell = cell.dup()
                     if overwrite_existing:
-                        for c in list(self._cells(_name or cell.name)):
+                        for c in list(self._cells(name_ or cell.name)):
                             if c is not cell.kdb_cell:
                                 self[c.cell_index()].delete()
-                    if set_name and _name:
-                        if debug_names and cell.kcl.layout_cell(_name) is not None:
+                    if set_name and name_:
+                        if debug_names and cell.kcl.layout_cell(name_) is not None:
                             logger.opt(depth=4).error(
                                 "KCell with name {name} exists already. Duplicate "
                                 "occurrence in module '{module}' at "
                                 "line {lno}",
-                                name=_name,
+                                name=name_,
                                 module=f.__module__,
                                 function_name=f.__name__,
                                 lno=inspect.getsourcelines(f)[1],
                             )
                             raise CellNameError(
-                                f"KCell with name {_name} exists already."
+                                f"KCell with name {name_} exists already."
                             )
 
-                        cell.name = _name
+                        cell.name = name_
                         self.future_cell_name = old_future_name
                     if set_settings:
                         if hasattr(f, "__name__"):
@@ -845,24 +849,24 @@ class KCLayout(
                     return output_cell_type(base=cell.base)
 
                 with self.thread_lock:
-                    _cell = wrapped_cell(**params)
-                    if _cell.destroyed():
+                    cell_ = wrapped_cell(**params)
+                    if cell_.destroyed():
                         # If any cell has been destroyed, we should clean up the cache.
                         # Delete all the KCell entrances in the cache which have
                         # `destroyed() == True`
-                        _deleted_cell_hashes: list[_HashedTuple] = [
+                        deleted_cell_hashes: list[_HashedTuple] = [
                             _hash_item
-                            for _hash_item, _cell_item in _cache.items()
+                            for _hash_item, _cell_item in cache_.items()
                             if _cell_item.destroyed()
                         ]
-                        for _dch in _deleted_cell_hashes:
-                            del _cache[_dch]
-                        _cell = wrapped_cell(**params)
+                        for _dch in deleted_cell_hashes:
+                            del cache_[_dch]
+                        cell_ = wrapped_cell(**params)
 
                     if info is not None:
-                        _cell.info.update(info)
+                        cell_.info.update(info)
 
-                    return _cell
+                    return cell_
 
             if register_factory:
                 with self.thread_lock:
@@ -966,7 +970,7 @@ class KCLayout(
             sig = inspect.signature(f)
 
             # previously was a KCellCache, but dict should do for most case
-            _cache = cache or {}
+            cache_ = cache or {}
 
             @functools.wraps(f)
             def wrapper_autocell(
@@ -999,7 +1003,7 @@ class KCLayout(
                     params.pop(param, None)
                     param_units.pop(param, None)
 
-                @cachetools.cached(cache=_cache)
+                @cachetools.cached(cache=cache_)
                 @functools.wraps(f)
                 def wrapped_cell(**params: Any) -> VKCell:
                     for key, value in params.items():
@@ -1377,17 +1381,17 @@ class KCLayout(
                     )
 
                     if diff.layout_meta_diff:
-                        _yaml = ruamel.yaml.YAML(typ=["rt", "string"])
+                        yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                         err_msg += (
                             "\nLayout Meta Diff:\n```\n"
-                            + _yaml.dumps(dict(diff.layout_meta_diff))  # type: ignore[attr-defined]
+                            + yaml.dumps(dict(diff.layout_meta_diff))  # type: ignore[attr-defined]
                             + "\n```"
                         )
                     if diff.cells_meta_diff:
-                        _yaml = ruamel.yaml.YAML(typ=["rt", "string"])
+                        yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                         err_msg += (
                             "\nLayout Meta Diff:\n```\n"
-                            + _yaml.dumps(dict(diff.cells_meta_diff))  # type: ignore[attr-defined]
+                            + yaml.dumps(dict(diff.cells_meta_diff))  # type: ignore[attr-defined]
                             + "\n```"
                         )
 
@@ -1403,11 +1407,11 @@ class KCLayout(
                     for k, v in info.items():
                         self.info[k] = v
                 case "skip":
-                    _info = self.info.model_dump()
+                    info_ = self.info.model_dump()
 
                     # for k, v in self.info:
                     #     _info[k] = v
-                    info.update(_info)
+                    info.update(info_)
                     self.info = Info(**info)
 
                 case "drop":
@@ -1443,7 +1447,7 @@ class KCLayout(
         settings: dict[str, Any] = {}
         info: dict[str, Any] = {}
         cross_sections: list[dict[str, Any]] = []
-        for meta in self.each_meta_info():
+        for meta in self.layout.each_meta_info():
             if meta.name.startswith("kfactory:info"):
                 info[meta.name.removeprefix("kfactory:info:")] = meta.value
             elif meta.name.startswith("kfactory:settings"):
@@ -1463,7 +1467,7 @@ class KCLayout(
                 )
 
         for cs in cross_sections:
-            self.get_cross_section(
+            self.get_symmetrical_cross_section(
                 SymmetricalCrossSection(
                     width=cs["width"],
                     enclosure=self.get_enclosure(cs["layer_enclosure"]),
@@ -1575,15 +1579,45 @@ class KCLayout(
         """Gets a layer enclosure by name specification or the layerenclosure itself."""
         return self.layer_enclosures.get_enclosure(enclosure, self)
 
-    def get_cross_section(
+    def get_symmetrical_cross_section(
         self,
         cross_section: str
         | SymmetricalCrossSection
-        | CrossSectionSpec
+        | CrossSectionSpec[int]
         | DSymmetricalCrossSection,
     ) -> SymmetricalCrossSection:
         """Get a cross section by name or specification."""
         return self.cross_sections.get_cross_section(cross_section)
+
+    def get_icross_section(
+        self,
+        cross_section: str
+        | SymmetricalCrossSection
+        | CrossSectionSpec[int]
+        | DSymmetricalCrossSection,
+    ) -> CrossSection:
+        """Get a cross section by name or specification."""
+        return CrossSection(
+            kcl=self, base=self.cross_sections.get_cross_section(cross_section)
+        )
+
+    def get_dcross_section(
+        self,
+        cross_section: str
+        | SymmetricalCrossSection
+        | CrossSectionSpec[float]
+        | DSymmetricalCrossSection,
+    ) -> DCrossSection:
+        """Get a cross section by name or specification."""
+
+        if isinstance(cross_section, dict):
+            return DCrossSection(
+                kcl=self,
+                **cross_section,
+            )
+        return DCrossSection(
+            kcl=self, base=self.cross_sections.get_cross_section(cross_section)
+        )
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.name}, n={len(self.kcells)})"
@@ -1591,6 +1625,7 @@ class KCLayout(
 
 KCLayout.model_rebuild()
 TVCell.model_rebuild()
+SymmetricalCrossSection.model_rebuild()
 
 
 kcl = KCLayout("DEFAULT")

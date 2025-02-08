@@ -132,7 +132,7 @@ def test_metainfo_read_cell(straight: kf.KCell) -> None:
             " for ports, info, and settings. Therefore proceed at your own risk."
         )
         for cs in straight.kcl.cross_sections.cross_sections.values():
-            kcl.get_cross_section(cs)
+            kcl.get_symmetrical_cross_section(cs)
         kcell.read(t.name)
         kf.config.logfilter.regex = ""
 
