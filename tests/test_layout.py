@@ -23,8 +23,8 @@ def test_cell_decorator(kcl: kf.KCLayout, layers: Layers) -> None:
     assert rectangle_cell is rectangle_cell2
     assert rectangle_cell is not rectangle_cell3
 
-    rectangle_post_process.assert_any_call(rectangle_cell.base_kcell)
-    rectangle_post_process.assert_any_call(rectangle_cell3.base_kcell)
+    rectangle_post_process.assert_any_call(rectangle_cell.base)
+    rectangle_post_process.assert_any_call(rectangle_cell3.base)
     assert rectangle_post_process.call_count == 2
 
 

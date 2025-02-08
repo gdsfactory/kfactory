@@ -158,6 +158,10 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
         """If set the cell shouldn't be modified anymore."""
         ...
 
+    @locked.setter
+    @abstractmethod
+    def locked(self, value: bool) -> None: ...
+
     @abstractmethod
     def lock(self) -> None:
         """Lock the cell."""
@@ -165,14 +169,18 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
 
 
 class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
-    _base_kcell: TBaseCell
+    _base: TBaseCell
 
     @property
     def locked(self) -> bool:
-        return self._base_kcell.locked
+        return self._base.locked
+
+    @locked.setter
+    def locked(self, value: bool) -> None:
+        self._base.locked = value
 
     def lock(self) -> None:
-        self._base_kcell.lock()
+        self._base.lock()
 
     @property
     @abstractmethod
@@ -197,20 +205,20 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
 
     @property
     def info(self) -> Info:
-        return self._base_kcell.info
+        return self._base.info
 
     @info.setter
     def info(self, value: Info) -> None:
-        self._base_kcell.info = value
+        self._base.info = value
 
     @property
     def settings(self) -> KCellSettings:
         """Settings dictionary set by the [@vcell][kfactory.kcell.vcell] decorator."""
-        return self._base_kcell.settings
+        return self._base.settings
 
     @settings.setter
     def settings(self, value: KCellSettings) -> None:
-        self._base_kcell.settings = value
+        self._base.settings = value
 
     @property
     def settings_units(self) -> KCellSettingsUnits:
@@ -218,31 +226,35 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
 
         Set by the [@cell][kfactory.kcell.KCLayout.cell] decorator.
         """
-        return self._base_kcell.settings_units
+        return self._base.settings_units
 
     @settings_units.setter
     def settings_units(self, value: KCellSettingsUnits) -> None:
-        self._base_kcell.settings_units = value
+        self._base.settings_units = value
 
     @property
     def function_name(self) -> str | None:
-        return self._base_kcell.function_name
+        return self._base.function_name
 
     @function_name.setter
     def function_name(self, value: str | None) -> None:
-        self._base_kcell.function_name = value
+        self._base.function_name = value
 
     @property
     def basename(self) -> str | None:
-        return self._base_kcell.basename
+        return self._base.basename
 
     @basename.setter
     def basename(self, value: str | None) -> None:
-        self._base_kcell.basename = value
+        self._base.basename = value
 
     @property
     def vinsts(self) -> VInstances:
-        return self._base_kcell.vinsts
+        return self._base.vinsts
+
+    @property
+    def base(self) -> TBaseCell:
+        return self._base
 
     @property
     @abstractmethod
@@ -312,12 +324,12 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
 
     def layer(self, *args: Any, **kwargs: Any) -> int:
         """Get the layer info, convenience for `klayout.db.Layout.layer`."""
-        return self._base_kcell.kcl.layout.layer(*args, **kwargs)
+        return self._base.kcl.layout.layer(*args, **kwargs)
 
     @property
     def factory_name(self) -> str:
         """Return the name under which the factory was registered."""
-        factory_name = self._base_kcell.basename or self._base_kcell.function_name
+        factory_name = self._base.basename or self._base.function_name
         if factory_name is not None:
             return factory_name
         raise ValueError(
@@ -330,16 +342,16 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
         if self.locked:
             raise LockedError(self)
         vi = VInstance(cell)
-        self._base_kcell.vinsts.append(vi)
+        self._base.vinsts.append(vi)
         return vi
 
     @property
     def kcl(self) -> KCLayout:
-        return self._base_kcell.kcl
+        return self._base.kcl
 
     @kcl.setter
     def kcl(self, val: KCLayout, /) -> None:
-        self._base_kcell.kcl = val
+        self._base.kcl = val
 
     def __repr__(self) -> str:
         """Return a string representation of the Cell."""
@@ -383,6 +395,10 @@ class TKCell(BaseKCell):
     def locked(self) -> bool:
         return self.kdb_cell.is_locked()
 
+    @locked.setter
+    def locked(self, value: bool) -> None:
+        self.kdb_cell.locked = value
+
     def lock(self) -> None:
         self.kdb_cell.locked = True
 
@@ -397,6 +413,10 @@ class TVCell(BaseKCell):
     def locked(self) -> bool:
         return self._locked
 
+    @locked.setter
+    def locked(self, value: bool) -> None:
+        self._locked = value
+
     def lock(self) -> None:
         self._locked = True
 
@@ -405,7 +425,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
     def __init__(
         self,
         *,
-        base_kcell: TKCell | None = None,
+        base: TKCell | None = None,
         name: str | None = None,
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
@@ -413,8 +433,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None:
-        if base_kcell is not None:
-            self._base_kcell = base_kcell
+        if base is not None:
+            self._base = base
             return
         from .layout import get_default_kcl
 
@@ -428,7 +448,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         _kdb_cell = kdb_cell or _kcl.create_cell(_name)
         if _name == "Unnamed_!":
             _kdb_cell.name = f"Unnamed_{_kdb_cell.cell_index()}"
-        self._base_kcell = TKCell(
+        self._base = TKCell(
             kcl=_kcl,
             info=Info(**(info or {})),
             settings=KCellSettings(**(settings or {})),
@@ -437,10 +457,6 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             vinsts=VInstances(),
         )
         self.kcl.register_cell(self)
-
-    @property
-    def base_kcell(self) -> TKCell:
-        return self._base_kcell
 
     @abstractmethod
     def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]:
@@ -451,62 +467,59 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         """Hash the KCell."""
         return hash(
             (
-                self._base_kcell.kcl.library.name(),
-                self._base_kcell.kdb_cell.cell_index(),
+                self._base.kcl.library.name(),
+                self._base.kdb_cell.cell_index(),
             )
         )
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ProtoTKCell):
             return False
-        return self._base_kcell == other._base_kcell
+        return self._base == other._base
 
     @property
     def name(self) -> str:
         """Name of the KCell."""
-        return self._base_kcell.kdb_cell.name
+        return self._base.kdb_cell.name
 
     @name.setter
     def name(self, value: str) -> None:
         if self.locked:
             raise LockedError(self)
-        self._base_kcell.kdb_cell.name = value
+        self._base.kdb_cell.name = value
 
     @property
     def prop_id(self) -> int:
         """Gets the properties ID associated with the cell."""
-        return self._base_kcell.kdb_cell.prop_id
+        return self._base.kdb_cell.prop_id
 
     @prop_id.setter
     def prop_id(self, value: int) -> None:
         if self.locked:
             raise LockedError(self)
-        self._base_kcell.kdb_cell.prop_id = value
+        self._base.kdb_cell.prop_id = value
 
     @property
     def ghost_cell(self) -> bool:
         """Returns a value indicating whether the cell is a "ghost cell"."""
-        return self._base_kcell.kdb_cell.ghost_cell
+        return self._base.kdb_cell.ghost_cell
 
     @ghost_cell.setter
     def ghost_cell(self, value: bool) -> None:
         if self.locked:
             raise LockedError(self)
-        self._base_kcell.kdb_cell.ghost_cell = value
+        self._base.kdb_cell.ghost_cell = value
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
-        try:
-            return super().__getattr__(name)  # type: ignore
-        except Exception:
-            return getattr(self._base_kcell.kdb_cell, name)
+        return getattr(self._base.kdb_cell, name)
 
     def cell_index(self) -> int:
         """Gets the cell index."""
-        return self._base_kcell.kdb_cell.cell_index()
+        return self._base.kdb_cell.cell_index()
 
     def shapes(self, layer: int | kdb.LayerInfo) -> kdb.Shapes:
-        return self._base_kcell.kdb_cell.shapes(layer)
+        return self._base.kdb_cell.shapes(layer)
 
     @property
     @abstractmethod
@@ -530,34 +543,34 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         c = self.__class__(kcl=self.kcl, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
 
-        c._base_kcell.settings = self.settings.model_copy()
-        c._base_kcell.info = self.info.model_copy()
-        c._base_kcell.vinsts = self._base_kcell.vinsts.copy()
+        c._base.settings = self.settings.model_copy()
+        c._base.info = self.info.model_copy()
+        c._base.vinsts = self._base.vinsts.copy()
 
         return c
 
     @property
     def kdb_cell(self) -> kdb.Cell:
-        return self._base_kcell.kdb_cell
+        return self._base.kdb_cell
 
     def destroyed(self) -> bool:
-        return self._base_kcell.kdb_cell._destroyed()
+        return self._base.kdb_cell._destroyed()
 
     @property
     def boundary(self) -> kdb.DPolygon | None:
-        return self._base_kcell.boundary
+        return self._base.boundary
 
     @boundary.setter
     def boundary(self, boundary: kdb.DPolygon | None) -> None:
-        self._base_kcell.boundary = boundary
+        self._base.boundary = boundary
 
     def to_itype(self) -> KCell:
         """Convert the kcell to a dbu kcell."""
-        return KCell(base_kcell=self._base_kcell)
+        return KCell(base=self._base)
 
     def to_dtype(self) -> DKCell:
         """Convert the kcell to a um kcell."""
-        return DKCell(base_kcell=self._base_kcell)
+        return DKCell(base=self._base)
 
     def show(
         self,
@@ -613,7 +626,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
     def delete(self) -> None:
         """Delete the cell."""
         ci = self.cell_index()
-        self._base_kcell.kdb_cell.locked = False
+        self._base.kdb_cell.locked = False
         self.kcl.delete_cell(ci)
 
     @overload
@@ -843,11 +856,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             ci = self._get_ci(cell, libcell_as_static, static_name_separator)
 
         if a is None:
-            inst = self._base_kcell.kdb_cell.insert(kdb.CellInstArray(ci, trans))
+            inst = self._base.kdb_cell.insert(kdb.CellInstArray(ci, trans))
         else:
             if b is None:
                 b = kdb.Vector()
-            inst = self._base_kcell.kdb_cell.insert(
+            inst = self._base.kdb_cell.insert(
                 kdb.CellInstArray(ci, trans, a, b, na, nb)
             )
         return Instance(kcl=self.kcl, instance=inst)
@@ -896,23 +909,23 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             ci = self._get_ci(cell, libcell_as_static, static_name_separator)
 
         if a is None:
-            inst = self._base_kcell.kdb_cell.insert(kdb.DCellInstArray(ci, trans))
+            inst = self._base.kdb_cell.insert(kdb.DCellInstArray(ci, trans))
         else:
             if b is None:
                 b = kdb.DVector()
-            inst = self._base_kcell.kdb_cell.insert(
+            inst = self._base.kdb_cell.insert(
                 kdb.DCellInstArray(ci, trans, a, b, na, nb)
             )
         return DInstance(kcl=self.kcl, instance=inst)
 
     def _kdb_copy(self) -> kdb.Cell:
-        return self._base_kcell.kdb_cell.dup()
+        return self._base.kdb_cell.dup()
 
     def layout(self) -> kdb.Layout:
-        return self._base_kcell.kdb_cell.layout()
+        return self._base.kdb_cell.layout()
 
     def library(self) -> kdb.Library:
-        return self._base_kcell.kdb_cell.library()
+        return self._base.kdb_cell.library()
 
     @abstractmethod
     def __lshift__(self, cell: AnyTKCell) -> ProtoTInstance[TUnit]: ...
@@ -939,10 +952,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         """
         if self.locked:
             raise LockedError(self)
-        for vinst in self._base_kcell.vinsts:
+        for vinst in self._base.vinsts:
             vinst.insert_into_flat(self)
-        self._base_kcell.vinsts = VInstances()
-        self._base_kcell.kdb_cell.flatten(False)
+        self._base.vinsts = VInstances()
+        self._base.kdb_cell.flatten(False)
 
         if merge:
             for layer in self.kcl.layout.layer_indexes():
@@ -967,7 +980,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         assert _kdb_cell is not None
         _kdb_cell.name = self.qname()
         _ci = _kdb_cell.cell_index()
-        _old_kdb_cell = self._base_kcell.kdb_cell
+        _old_kdb_cell = self._base.kdb_cell
         _kdb_cell.copy_meta_info(_lib_cell.kdb_cell)
         self.get_meta_data()
 
@@ -977,7 +990,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 if kc.is_library_cell():
                     kc.convert_to_static(recursive=recursive)
 
-        self._base_kcell.kdb_cell = _kdb_cell
+        self._base.kdb_cell = _kdb_cell
         for ci in _old_kdb_cell.caller_cells():
             c = self.kcl.layout_cell(ci)
             assert c is not None
@@ -994,8 +1007,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
     def draw_ports(self) -> None:
         """Draw all the ports on their respective layer."""
-        locked = self._base_kcell.kdb_cell.locked
-        self._base_kcell.kdb_cell.locked = False
+        locked = self._base.kdb_cell.locked
+        self._base.kdb_cell.locked = False
         polys: dict[int, kdb.Region] = {}
 
         for port in Ports(kcl=self.kcl, bases=self.ports.bases):
@@ -1035,7 +1048,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 self.shapes(port.layer).insert(
                     kdb.Text(port.name if port.name else "", port.trans)
                 )
-        self._base_kcell.kdb_cell.locked = locked
+        self._base.kdb_cell.locked = locked
 
     def write(
         self,
@@ -1078,16 +1091,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             case _:
                 ...
 
-        for kci in (
-            set(self._base_kcell.kdb_cell.called_cells()) & self.kcl.tkcells.keys()
-        ):
+        for kci in set(self._base.kdb_cell.called_cells()) & self.kcl.tkcells.keys():
             kc = self.kcl[kci]
             kc.insert_vinsts()
 
         filename = str(filename)
         if autoformat_from_file_extension:
             save_options.set_format_from_filename(filename)
-        self._base_kcell.kdb_cell.write(filename, save_options)
+        self._base.kdb_cell.write(filename, save_options)
 
     def read(
         self,
@@ -1181,7 +1192,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
                 raise MergeError(err_msg)
 
-        cell_ids = self._base_kcell.kdb_cell.read(fn, options)
+        cell_ids = self._base.kdb_cell.read(fn, options)
         info, settings = self.kcl.get_meta_data()
 
         match update_kcl_meta_data:
@@ -1218,21 +1229,21 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
     def each_inst(self) -> Iterator[Instance]:
         """Iterates over all child instances (which may actually be instance arrays)."""
         yield from (
-            Instance(self.kcl, inst) for inst in self._base_kcell.kdb_cell.each_inst()
+            Instance(self.kcl, inst) for inst in self._base.kdb_cell.each_inst()
         )
 
     def each_overlapping_inst(self, b: kdb.Box | kdb.DBox) -> Iterator[Instance]:
         """Gets the instances overlapping the given rectangle."""
         yield from (
             Instance(self.kcl, inst)
-            for inst in self._base_kcell.kdb_cell.each_overlapping_inst(b)
+            for inst in self._base.kdb_cell.each_overlapping_inst(b)
         )
 
     def each_touching_inst(self, b: kdb.Box | kdb.DBox) -> Iterator[Instance]:
         """Gets the instances overlapping the given rectangle."""
         yield from (
             Instance(self.kcl, inst)
-            for inst in self._base_kcell.kdb_cell.each_touching_inst(b)
+            for inst in self._base.kdb_cell.each_touching_inst(b)
         )
 
     @overload
@@ -1254,15 +1265,13 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         if self.locked:
             raise LockedError(self)
         if isinstance(inst, Instance):
-            return Instance(self.kcl, self._base_kcell.kdb_cell.insert(inst.instance))
+            return Instance(self.kcl, self._base.kdb_cell.insert(inst.instance))
         else:
             if not property_id:
-                return Instance(self.kcl, self._base_kcell.kdb_cell.insert(inst))
+                return Instance(self.kcl, self._base.kdb_cell.insert(inst))
             else:
                 assert isinstance(inst, kdb.CellInstArray | kdb.DCellInstArray)
-                return Instance(
-                    self.kcl, self._base_kcell.kdb_cell.insert(inst, property_id)
-                )
+                return Instance(self.kcl, self._base.kdb_cell.insert(inst, property_id))
 
     @overload
     def transform(
@@ -1299,12 +1308,12 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         if trans:
             return Instance(
                 self.kcl,
-                self._base_kcell.kdb_cell.transform(
+                self._base.kdb_cell.transform(
                     inst_or_trans,  # type: ignore[arg-type]
                     trans,  # type: ignore[arg-type]
                 ),
             )
-        self._base_kcell.kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
+        self._base.kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
         if transform_ports:
             if isinstance(inst_or_trans, kdb.DTrans):
                 inst_or_trans = kdb.DCplxTrans(inst_or_trans)
@@ -1411,17 +1420,15 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         i = meta.name.removeprefix("kfactory:ports:")
                         port_dict[i] = meta.value
                     elif meta.name.startswith("kfactory:info"):
-                        self._base_kcell.info = Info(**meta.value)
+                        self._base.info = Info(**meta.value)
                     elif meta.name.startswith("kfactory:settings_units"):
-                        self._base_kcell.settings_units = KCellSettingsUnits(
-                            **meta.value
-                        )
+                        self._base.settings_units = KCellSettingsUnits(**meta.value)
                     elif meta.name.startswith("kfactory:settings"):
-                        self._base_kcell.settings = KCellSettings(**meta.value)
+                        self._base.settings = KCellSettings(**meta.value)
                     elif meta.name == "kfactory:function_name":
-                        self._base_kcell.function_name = meta.value
+                        self._base.function_name = meta.value
                     elif meta.name == "kfactory:basename":
-                        self._base_kcell.basename = meta.value
+                        self._base.basename = meta.value
 
                 if not self.is_library_cell():
                     for index in sorted(port_dict.keys()):
@@ -1605,13 +1612,13 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
     def ibbox(self, layer: int | None = None) -> kdb.Box:
         if layer is None:
-            return self._base_kcell.kdb_cell.bbox()
-        return self._base_kcell.kdb_cell.bbox(layer)
+            return self._base.kdb_cell.bbox()
+        return self._base.kdb_cell.bbox(layer)
 
     def dbbox(self, layer: int | None = None) -> kdb.DBox:
         if layer is None:
-            return self._base_kcell.kdb_cell.dbbox()
-        return self._base_kcell.kdb_cell.dbbox(layer)
+            return self._base.kdb_cell.dbbox()
+        return self._base.kdb_cell.dbbox(layer)
 
     def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
         """Generate a LayoutToNetlist object from the port types.
@@ -1855,7 +1862,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         cell_ports[port.layer][xy].append(port)
                 rec_it = kdb.RecursiveShapeIterator(
                     self.kcl.layout,
-                    self._base_kcell.kdb_cell,
+                    self._base.kdb_cell,
                     port.layer,
                     kdb.Box(2, port.width).transformed(port.trans),
                 )
@@ -2199,11 +2206,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
     def insert_vinsts(self, recursive: bool = True) -> None:
         """Insert all virtual instances and create Instances of real KCells."""
-        if not self._base_kcell.kdb_cell._destroyed():
-            for vi in self._base_kcell.vinsts:
+        if not self._base.kdb_cell._destroyed():
+            for vi in self._base.vinsts:
                 vi.insert_into(self)
-            self._base_kcell.vinsts.clear()
-            called_cell_indexes = self._base_kcell.kdb_cell.called_cells()
+            self._base.vinsts.clear()
+            called_cell_indexes = self._base.kdb_cell.called_cells()
             for c in sorted(
                 set(
                     self.kcl[ci]
@@ -2213,9 +2220,9 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 & self.kcl.tkcells.keys(),
                 key=lambda c: c.hierarchy_levels(),
             ):
-                for vi in c._base_kcell.vinsts:
+                for vi in c._base.vinsts:
                     vi.insert_into(c)
-                c._base_kcell.vinsts.clear()
+                c._base.vinsts.clear()
 
 
 class DKCell(ProtoTKCell[float], UMGeometricObject):
@@ -2224,7 +2231,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
     yaml_tag: ClassVar[str] = "!DKCell"
 
     @overload
-    def __init__(self, *, base_kcell: TKCell) -> None: ...
+    def __init__(self, *, base: TKCell) -> None: ...
 
     @overload
     def __init__(
@@ -2241,7 +2248,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
     def __init__(
         self,
         *,
-        base_kcell: TKCell | None = None,
+        base: TKCell | None = None,
         name: str | None = None,
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
@@ -2252,7 +2259,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
         """Constructor of KCell.
 
         Args:
-            base_kcell: If not `None`, a KCell will be created from and existing
+            base: If not `None`, a KCell will be created from and existing
                 KLayout Cell
             name: Name of the cell, if None will autogenerate name to
                 "Unnamed_<cell_index>".
@@ -2265,7 +2272,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
             settings: KCellSettings object to attach to the KCell.
         """
         super().__init__(
-            base_kcell=base_kcell,
+            base=base,
             name=name,
             kcl=kcl,
             kdb_cell=kdb_cell,
@@ -2277,18 +2284,18 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
     @property
     def ports(self) -> DPorts:
         """Ports associated with the cell."""
-        return DPorts(kcl=self.kcl, bases=self._base_kcell.ports)
+        return DPorts(kcl=self.kcl, bases=self._base.ports)
 
     @ports.setter
     def ports(self, new_ports: Iterable[ProtoPort[Any]]) -> None:
         if self.locked:
             raise LockedError(self)
-        self._base_kcell.ports = [port.base for port in new_ports]
+        self._base.ports = [port.base for port in new_ports]
 
     @property
     def insts(self) -> DInstances:
         """Instances associated with the cell."""
-        return DInstances(cell=self._base_kcell)
+        return DInstances(cell=self._base)
 
     def __lshift__(self, cell: AnyTKCell) -> DInstance:
         """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
@@ -2341,7 +2348,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
     yaml_tag: ClassVar[str] = "!KCell"
 
     @overload
-    def __init__(self, *, base_kcell: TKCell) -> None: ...
+    def __init__(self, *, base: TKCell) -> None: ...
 
     @overload
     def __init__(
@@ -2358,7 +2365,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
     def __init__(
         self,
         *,
-        base_kcell: TKCell | None = None,
+        base: TKCell | None = None,
         name: str | None = None,
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
@@ -2369,7 +2376,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         """Constructor of KCell.
 
         Args:
-            base_kcell: If not `None`, a KCell will be created from and existing
+            base: If not `None`, a KCell will be created from and existing
                 KLayout Cell
             name: Name of the cell, if None will autogenerate name to
                 "Unnamed_<cell_index>".
@@ -2382,7 +2389,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
             settings: KCellSettings object to attach to the KCell.
         """
         super().__init__(
-            base_kcell=base_kcell,
+            base=base,
             name=name,
             kcl=kcl,
             kdb_cell=kdb_cell,
@@ -2394,18 +2401,18 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
     @property
     def ports(self) -> Ports:
         """Ports associated with the cell."""
-        return Ports(kcl=self.kcl, bases=self._base_kcell.ports)
+        return Ports(kcl=self.kcl, bases=self._base.ports)
 
     @ports.setter
     def ports(self, new_ports: Iterable[ProtoPort[Any]]) -> None:
         if self.locked:
             raise LockedError(self)
-        self._base_kcell.ports = [port.base for port in new_ports]
+        self._base.ports = [port.base for port in new_ports]
 
     @property
     def insts(self) -> Instances:
         """Instances associated with the cell."""
-        return Instances(cell=self._base_kcell)
+        return Instances(cell=self._base)
 
     def __lshift__(self, cell: AnyTKCell) -> Instance:
         """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
@@ -2727,7 +2734,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
     _name: str | None
 
     @overload
-    def __init__(self, *, base_kcell: TVCell) -> None: ...
+    def __init__(self, *, base: TVCell) -> None: ...
 
     @overload
     def __init__(
@@ -2742,7 +2749,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
     def __init__(
         self,
         *,
-        base_kcell: TVCell | None = None,
+        base: TVCell | None = None,
         name: str | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, Any] | None = None,
@@ -2751,13 +2758,13 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
         from .layout import get_default_kcl
 
         self._shapes = {}
-        if base_kcell is not None:
-            self._base_kcell = base_kcell
-            self._name = base_kcell.function_name
+        if base is not None:
+            self._base = base
+            self._name = base.function_name
         else:
-            _kcl = kcl or get_default_kcl()
-            self._base_kcell = TVCell(
-                kcl=_kcl,
+            kcl_ = kcl or get_default_kcl()
+            self._base = TVCell(
+                kcl=kcl_,
                 info=Info(**(info or {})),
                 settings=KCellSettings(**(settings or {})),
                 vinsts=VInstances(),
@@ -2778,13 +2785,13 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
     @property
     def ports(self) -> DPorts:
         """Ports associated with the cell."""
-        return DPorts(kcl=self.kcl, bases=self._base_kcell.ports)
+        return DPorts(kcl=self.kcl, bases=self._base.ports)
 
     @ports.setter
     def ports(self, new_ports: Iterable[ProtoPort[Any]]) -> None:
         if self.locked:
             raise LockedError(self)
-        self._base_kcell.ports = [port.base for port in new_ports]
+        self._base.ports = [port.base for port in new_ports]
 
     def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
         _layers = set(self._shapes.keys())
@@ -2806,7 +2813,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
 
     @property
     def insts(self) -> VInstances:
-        return self._base_kcell.vinsts
+        return self._base.vinsts
 
     @property
     def name(self) -> str | None:
@@ -2833,7 +2840,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
 
         c.settings = self.settings.model_copy()
         c.settings_units = self.settings_units.model_copy()
-        c.info = self._base_kcell.info.model_copy()
+        c.info = self._base.info.model_copy()
         for layer, shapes in self._shapes.items():
             for shape in shapes:
                 c.shapes(layer).insert(shape)
@@ -3510,20 +3517,18 @@ class ProtoCells(Mapping[int, KC], ABC):
 
 class DKCells(ProtoCells[DKCell]):
     def __getitem__(self, key: int | str) -> DKCell:
-        return DKCell(base_kcell=self._kcl[key].base_kcell)
+        return DKCell(base=self._kcl[key].base)
 
     def _generate_dict(self) -> dict[int, DKCell]:
-        return {
-            i: DKCell(base_kcell=self._kcl[i].base_kcell) for i in self._kcl.tkcells
-        }
+        return {i: DKCell(base=self._kcl[i].base) for i in self._kcl.tkcells}
 
 
 class KCells(ProtoCells[KCell]):
     def __getitem__(self, key: int | str) -> KCell:
-        return KCell(base_kcell=self._kcl[key].base_kcell)
+        return KCell(base=self._kcl[key].base)
 
     def _generate_dict(self) -> dict[int, KCell]:
-        return {i: KCell(base_kcell=self._kcl[i].base_kcell) for i in self._kcl.tkcells}
+        return {i: KCell(base=self._kcl[i].base) for i in self._kcl.tkcells}
 
 
 def get_cells(

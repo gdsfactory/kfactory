@@ -832,8 +832,8 @@ class KCLayout(
                                         )
                     # post process the cell
                     for pp in post_process:
-                        pp(cell.base_kcell)
-                    cell.base_kcell.lock()
+                        pp(cell.base)
+                    cell.base.lock()
                     if cell.kcl != self:
                         raise ValueError(
                             "The KCell created must be using the same"
@@ -844,7 +844,7 @@ class KCLayout(
                             " in the standard KCLayout, use either "
                             "custom_kcl.kcell() or KCell(kcl=custom_kcl)."
                         )
-                    return output_cell_type(base_kcell=cell.base_kcell)
+                    return output_cell_type(base=cell.base)
 
                 with self.thread_lock:
                     _cell = wrapped_cell(**params)
@@ -1065,7 +1065,7 @@ class KCLayout(
                                                 port.name, port.dcplx_trans.s_trans()
                                             )
                                         )
-                    cell._base_kcell.lock()
+                    cell._base.lock()
                     if cell.kcl != self:
                         raise ValueError(
                             "The KCell created must be using the same"
@@ -1254,7 +1254,7 @@ class KCLayout(
         """
         with self.thread_lock:
             if (kcell.cell_index() not in self.tkcells) or allow_reregister:
-                self.tkcells[kcell.cell_index()] = kcell.base_kcell
+                self.tkcells[kcell.cell_index()] = kcell.base
             else:
                 raise ValueError(
                     "Cannot register a new cell with a name that already"
@@ -1278,7 +1278,7 @@ class KCLayout(
         """
         if isinstance(obj, int):
             try:
-                return cell_type(base_kcell=self.tkcells[obj])
+                return cell_type(base=self.tkcells[obj])
             except KeyError:
                 kdb_c = self.layout_cell(obj)
                 if kdb_c is None:
@@ -1290,7 +1290,7 @@ class KCLayout(
             kdb_c = self.layout_cell(obj)
             if kdb_c is not None:
                 try:
-                    return cell_type(base_kcell=self.tkcells[kdb_c.cell_index()])
+                    return cell_type(base=self.tkcells[kdb_c.cell_index()])
                 except KeyError:
                     c = cell_type(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
                     c.get_meta_data()

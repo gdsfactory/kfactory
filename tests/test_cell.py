@@ -466,8 +466,8 @@ def test_cell_yaml(layers: Layers) -> None:
 
         c.name = _temp_cell_name
 
-        c_base_kcell = c.base_kcell
-        cell_base_kcell = cell.base_kcell
+        c_base_kcell = c.base
+        cell_base_kcell = cell.base
 
         def compare_kcell_fields(
             c_base_kcell: kf.KCell, cell_base_kcell: kf.KCell
