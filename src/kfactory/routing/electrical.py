@@ -1,13 +1,13 @@
 """Utilities for automatically routing electrical connections."""
 
 from collections.abc import Callable, Sequence
-from typing import Any, Literal
+from typing import Any, Literal, overload
 
 import klayout.db as kdb
 
 from ..conf import logger
-from ..kcell import KCell
-from ..port import Port
+from ..kcell import DKCell, KCell
+from ..port import DPort, Port
 from ..routing.generic import ManhattanRoute
 from ..routing.generic import route_bundle as route_bundle_generic
 from ..routing.manhattan import (
@@ -16,7 +16,7 @@ from ..routing.manhattan import (
     route_smart,
 )
 from ..routing.steps import Step, Straight
-from ..typings import dbu
+from ..typings import dbu, um
 
 __all__ = [
     "place_dual_rails",
@@ -143,26 +143,100 @@ def route_L(  # noqa: N802
     return output_ports
 
 
+@overload
 def route_bundle(
     c: KCell,
-    start_ports: list[Port],
-    end_ports: list[Port],
+    start_ports: Sequence[Port],
+    end_ports: Sequence[Port],
     separation: dbu,
-    start_straights: dbu | list[dbu] = 0,
-    end_straights: dbu | list[dbu] = 0,
-    place_layer: kdb.LayerInfo | None = None,
-    route_width: dbu | None = None,
-    bboxes: list[kdb.Box] | None = None,
-    bbox_routing: Literal["minimal", "full"] = "minimal",
-    sort_ports: bool = False,
+    bend90_cell: KCell,
+    taper_cell: KCell | None = None,
+    start_straights: dbu | list[dbu] | None = None,
+    end_straights: dbu | list[dbu] | None = None,
+    min_straight_taper: dbu = 0,
+    place_port_type: str = "optical",
+    place_allow_small_routes: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
+    bboxes: list[kdb.Box] | None = None,
+    allow_width_mismatch: bool | None = None,
+    allow_layer_mismatch: bool | None = None,
+    allow_type_mismatch: bool | None = None,
+    route_width: dbu | list[dbu] | None = None,
+    sort_ports: bool = False,
+    bbox_routing: Literal["minimal", "full"] = "minimal",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
+    purpose: str | None = "routing",
+) -> list[ManhattanRoute]: ...
+
+
+@overload
+def route_bundle(
+    c: DKCell,
+    start_ports: Sequence[DPort],
+    end_ports: Sequence[DPort],
+    separation: um,
+    bend90_cell: DKCell,
+    taper_cell: DKCell | None = None,
+    start_straights: um | list[um] | None = None,
+    end_straights: um | list[um] | None = None,
+    min_straight_taper: dbu = 0,
+    place_port_type: str = "optical",
+    place_allow_small_routes: bool = False,
+    collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
+    on_collision: Literal["error", "show_error"] | None = "show_error",
+    on_placer_error: Literal["error", "show_error"] | None = "show_error",
+    bboxes: list[kdb.DBox] | None = None,
+    allow_width_mismatch: bool | None = None,
+    allow_layer_mismatch: bool | None = None,
+    allow_type_mismatch: bool | None = None,
+    route_width: um | list[um] | None = None,
+    sort_ports: bool = False,
+    bbox_routing: Literal["minimal", "full"] = "minimal",
+    waypoints: kdb.DTrans | list[kdb.DPoint] | None = None,
+    starts: um | list[um] | list[Step] | list[list[Step]] | None = None,
+    ends: um | list[um] | list[Step] | list[list[Step]] | None = None,
+    start_angles: float | list[float] | None = None,
+    end_angles: float | list[float] | None = None,
+    purpose: str | None = "routing",
+) -> list[ManhattanRoute]: ...
+
+
+def route_bundle(
+    c: KCell,
+    start_ports: list[Port] | list[DPort],
+    end_ports: list[Port] | list[DPort],
+    separation: dbu | um,
+    start_straights: dbu | list[dbu] | um | list[um] = 0,
+    end_straights: dbu | list[dbu] | um | list[um] = 0,
+    place_layer: kdb.LayerInfo | None = None,
+    route_width: dbu | None = None,
+    bboxes: list[kdb.Box] | list[kdb.DBox] | None = None,
+    bbox_routing: Literal["minimal", "full"] = "minimal",
+    sort_ports: bool = False,
+    collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
+    on_collision: Literal["error", "show_error"] | None = "show_error",
+    on_placer_error: Literal["error", "show_error"] | None = "show_error",
+    waypoints: kdb.Trans
+    | list[kdb.Point]
+    | kdb.DTrans
+    | list[kdb.DPoint]
+    | None = None,
+    starts: dbu
+    | list[dbu]
+    | um
+    | list[um]
+    | list[Step]
+    | list[list[Step]]
+    | None = None,
+    ends: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] | None = None,
+    start_angles: int | list[int] | float | list[float] | None = None,
+    end_angles: int | list[int] | float | list[float] | None = None,
 ) -> list[ManhattanRoute]:
     r"""Connect multiple input ports to output ports.
 
@@ -257,6 +331,34 @@ def route_bundle(
         starts = []
     if bboxes is None:
         bboxes = []
+
+    if isinstance(c, KCell):
+        return route_bundle_generic(
+            c=c,
+            start_ports=[p.base for p in start_ports],
+            end_ports=[p.base for p in end_ports],
+            starts=starts,
+            ends=ends,
+            routing_function=route_smart,
+            routing_kwargs={
+                "separation": separation,
+                "sort_ports": sort_ports,
+                "bbox_routing": bbox_routing,
+                "bboxes": list(bboxes),
+                "bend90_radius": 0,
+                "waypoints": waypoints,
+            },
+            placer_function=place_single_wire,
+            placer_kwargs={
+                "route_width": route_width,
+            },
+            sort_ports=sort_ports,
+            on_collision=on_collision,
+            on_placer_error=on_placer_error,
+            collision_check_layers=collision_check_layers,
+            start_angles=start_angles,
+            end_angles=end_angles,
+        )
     return route_bundle_generic(
         c=c,
         start_ports=[p.base for p in start_ports],
@@ -265,10 +367,10 @@ def route_bundle(
         ends=ends,
         routing_function=route_smart,
         routing_kwargs={
-            "separation": separation,
+            "separation": c.kcl.to_dbu(separation),
             "sort_ports": sort_ports,
             "bbox_routing": bbox_routing,
-            "bboxes": list(bboxes),
+            "bboxes": [bb.to_itype(c.kcl.dbu) for bb in bboxes],
             "bend90_radius": 0,
             "waypoints": waypoints,
         },
