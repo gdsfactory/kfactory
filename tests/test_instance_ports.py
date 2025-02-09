@@ -277,7 +277,6 @@ def test_iter(kcl: kf.KCLayout, layers: Layers) -> None:
     )
     assert len(list(dref.ports)) == 2
     assert all(isinstance(p, kf.DPort) for p in dref.ports)
-    print([c.name for c in kcl.kcells.values()])
 
 
 if __name__ == "__main__":
