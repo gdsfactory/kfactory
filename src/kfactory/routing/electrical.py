@@ -1,7 +1,7 @@
 """Utilities for automatically routing electrical connections."""
 
 from collections.abc import Callable, Sequence
-from typing import Any, Literal, overload
+from typing import Any, Literal, cast, overload
 
 import klayout.db as kdb
 
@@ -149,23 +149,16 @@ def route_bundle(
     start_ports: Sequence[Port],
     end_ports: Sequence[Port],
     separation: dbu,
-    bend90_cell: KCell,
-    taper_cell: KCell | None = None,
-    start_straights: dbu | list[dbu] | None = None,
-    end_straights: dbu | list[dbu] | None = None,
-    min_straight_taper: dbu = 0,
-    place_port_type: str = "optical",
-    place_allow_small_routes: bool = False,
+    start_straights: dbu | list[dbu] = 0,
+    end_straights: dbu | list[dbu] = 0,
+    place_layer: kdb.LayerInfo | None = None,
+    route_width: dbu | list[dbu] | None = None,
+    bboxes: Sequence[kdb.Box] | None = None,
+    bbox_routing: Literal["minimal", "full"] = "minimal",
+    sort_ports: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
-    bboxes: list[kdb.Box] | None = None,
-    allow_width_mismatch: bool | None = None,
-    allow_layer_mismatch: bool | None = None,
-    allow_type_mismatch: bool | None = None,
-    route_width: dbu | list[dbu] | None = None,
-    sort_ports: bool = False,
-    bbox_routing: Literal["minimal", "full"] = "minimal",
     waypoints: kdb.Trans | list[kdb.Point] | None = None,
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
@@ -181,23 +174,16 @@ def route_bundle(
     start_ports: Sequence[DPort],
     end_ports: Sequence[DPort],
     separation: um,
-    bend90_cell: DKCell,
-    taper_cell: DKCell | None = None,
-    start_straights: um | list[um] | None = None,
-    end_straights: um | list[um] | None = None,
-    min_straight_taper: dbu = 0,
-    place_port_type: str = "optical",
-    place_allow_small_routes: bool = False,
+    start_straights: um | list[um] = 0,
+    end_straights: um | list[um] = 0,
+    place_layer: kdb.LayerInfo | None = None,
+    route_width: um | list[um] | None = None,
+    bboxes: Sequence[kdb.DBox] | None = None,
+    bbox_routing: Literal["minimal", "full"] = "minimal",
+    sort_ports: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     on_collision: Literal["error", "show_error"] | None = "show_error",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
-    bboxes: list[kdb.DBox] | None = None,
-    allow_width_mismatch: bool | None = None,
-    allow_layer_mismatch: bool | None = None,
-    allow_type_mismatch: bool | None = None,
-    route_width: um | list[um] | None = None,
-    sort_ports: bool = False,
-    bbox_routing: Literal["minimal", "full"] = "minimal",
     waypoints: kdb.DTrans | list[kdb.DPoint] | None = None,
     starts: um | list[um] | list[Step] | list[list[Step]] | None = None,
     ends: um | list[um] | list[Step] | list[list[Step]] | None = None,
@@ -208,15 +194,15 @@ def route_bundle(
 
 
 def route_bundle(
-    c: KCell,
-    start_ports: list[Port] | list[DPort],
-    end_ports: list[Port] | list[DPort],
+    c: KCell | DKCell,
+    start_ports: Sequence[Port] | Sequence[DPort],
+    end_ports: Sequence[Port] | Sequence[DPort],
     separation: dbu | um,
     start_straights: dbu | list[dbu] | um | list[um] = 0,
     end_straights: dbu | list[dbu] | um | list[um] = 0,
     place_layer: kdb.LayerInfo | None = None,
-    route_width: dbu | None = None,
-    bboxes: list[kdb.Box] | list[kdb.DBox] | None = None,
+    route_width: dbu | um | list[dbu] | list[um] | None = None,
+    bboxes: Sequence[kdb.Box] | Sequence[kdb.DBox] | None = None,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     sort_ports: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
@@ -237,6 +223,7 @@ def route_bundle(
     ends: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | float | list[float] | None = None,
     end_angles: int | list[int] | float | list[float] | None = None,
+    purpose: str | None = "routing",
 ) -> list[ManhattanRoute]:
     r"""Connect multiple input ports to output ports.
 
@@ -337,8 +324,8 @@ def route_bundle(
             c=c,
             start_ports=[p.base for p in start_ports],
             end_ports=[p.base for p in end_ports],
-            starts=starts,
-            ends=ends,
+            starts=cast(dbu | list[dbu] | list[Step] | list[list[Step]], starts),
+            ends=cast(dbu | list[dbu] | list[Step] | list[list[Step]], ends),
             routing_function=route_smart,
             routing_kwargs={
                 "separation": separation,
@@ -356,11 +343,41 @@ def route_bundle(
             on_collision=on_collision,
             on_placer_error=on_placer_error,
             collision_check_layers=collision_check_layers,
-            start_angles=start_angles,
-            end_angles=end_angles,
+            start_angles=cast(int | list[int] | None, start_angles),
+            end_angles=cast(int | list[int], end_angles),
         )
+
+    if route_width is not None:
+        if isinstance(route_width, list):
+            route_width = [c.kcl.to_dbu(width) for width in route_width]
+        else:
+            route_width = c.kcl.to_dbu(route_width)
+    angles: dict[int | float, int] = {0: 0, 90: 1, 180: 2, 270: 30}
+    if start_angles is not None:
+        if isinstance(start_angles, list):
+            start_angles = [angles[angle] for angle in start_angles]
+        else:
+            start_angles = angles[start_angles]
+    if end_angles is not None:
+        if isinstance(end_angles, list):
+            end_angles = [angles[angle] for angle in end_angles]
+        else:
+            end_angles = angles[end_angles]
+
+    if isinstance(starts, int | float):
+        starts = c.kcl.to_dbu(starts)
+    elif isinstance(starts, list):
+        if isinstance(starts[0], int | float):
+            starts = [c.kcl.to_dbu(start) for start in starts]  # type: ignore[arg-type]
+        starts = cast(int | list[int] | list[Step] | list[list[Step]], starts)
+    if isinstance(ends, int | float):
+        ends = c.kcl.to_dbu(ends)
+    elif isinstance(ends, list):
+        if isinstance(ends[0], int | float):
+            ends = [c.kcl.to_dbu(end) for end in ends]  # type: ignore[arg-type]
+        ends = cast(int | list[int] | list[Step] | list[list[Step]], ends)
     return route_bundle_generic(
-        c=c,
+        c=c.kcl[c.cell_index()],
         start_ports=[p.base for p in start_ports],
         end_ports=[p.base for p in end_ports],
         starts=starts,
@@ -370,7 +387,7 @@ def route_bundle(
             "separation": c.kcl.to_dbu(separation),
             "sort_ports": sort_ports,
             "bbox_routing": bbox_routing,
-            "bboxes": [bb.to_itype(c.kcl.dbu) for bb in bboxes],
+            "bboxes": [bb.to_itype(c.kcl.dbu) for bb in cast(list[kdb.DBox], bboxes)],
             "bend90_radius": 0,
             "waypoints": waypoints,
         },
@@ -564,9 +581,9 @@ def route_dual_rails(
         hole_width: Width of the space between the rails. [dbu]
         layer: layer to place the rail in.
     """
-    _width = width or p1.width
-    _hole_width = hole_width or p1.width // 2
-    _layer = layer or p1.layer
+    width_ = width or p1.width
+    hole_width_ = hole_width or p1.width // 2
+    layer_ = layer or p1.layer
 
     pts = route_path_function(
         p1.copy(),
@@ -576,10 +593,10 @@ def route_dual_rails(
         end_straight=end_straight,
     )
 
-    path = kdb.Path(pts, _width)
-    hole_path = kdb.Path(pts, _hole_width)
+    path = kdb.Path(pts, width_)
+    hole_path = kdb.Path(pts, hole_width_)
     final_poly = kdb.Region(path.polygon()) - kdb.Region(hole_path.polygon())
-    c.shapes(_layer).insert(final_poly)
+    c.shapes(layer_).insert(final_poly)
 
 
 def place_single_wire(
@@ -620,21 +637,21 @@ def place_single_wire(
         .polygon
     )
 
-    _length = 0.0
+    length = 0.0
     pt1 = pts[0]
     for pt2 in pts[1:]:
-        _length += (pt2 - pt1).length()
+        length += (pt2 - pt1).length()
 
     return ManhattanRoute(
-        backbone=pts,
+        backbone=list(pts),
         start_port=p1,
         end_port=p2,
         taper_length=0,
         bend90_radius=0,
         polygons={layer_info: [shape]},
         instances=[],
-        length=round(_length),
-        length_straights=round(_length),
+        length=round(length),
+        length_straights=round(length),
     )
 
 
@@ -686,7 +703,7 @@ def place_dual_rails(
     ]
 
     return ManhattanRoute(
-        backbone=pts,
+        backbone=list(pts),
         start_port=p1,
         end_port=p2,
         taper_length=0,

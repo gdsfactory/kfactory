@@ -80,7 +80,7 @@ def route_bundle(
     taper_cell: DKCell | None = None,
     start_straights: um | list[um] | None = None,
     end_straights: um | list[um] | None = None,
-    min_straight_taper: dbu = 0,
+    min_straight_taper: um = 0,
     place_port_type: str = "optical",
     place_allow_small_routes: bool = False,
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
@@ -94,10 +94,10 @@ def route_bundle(
     sort_ports: bool = False,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     waypoints: kdb.Trans | list[kdb.DPoint] | None = None,
-    starts: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
-    ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
-    start_angles: int | list[int] | None = None,
-    end_angles: int | list[int] | None = None,
+    starts: um | list[um] | list[Step] | list[list[Step]] | None = None,
+    ends: um | list[um] | list[Step] | list[list[Step]] | None = None,
+    start_angles: float | list[float] | None = None,
+    end_angles: float | list[float] | None = None,
     purpose: str | None = "routing",
 ) -> list[ManhattanRoute]: ...
 
@@ -328,6 +328,8 @@ def route_bundle(
     bend90_cell = c.kcl[bend90_cell.cell_index()]
     if taper_cell is not None:
         taper_cell = c.kcl[taper_cell.cell_index()]
+    if min_straight_taper:
+        min_straight_taper = c.kcl.to_dbu(min_straight_taper)
 
     return route_bundle_generic(
         c=c.kcl[c.cell_index()],
@@ -343,7 +345,7 @@ def route_bundle(
         routing_function=route_smart,
         routing_kwargs={
             "bend90_radius": bend90_radius,
-            "separation": separation,
+            "separation": c.kcl.to_dbu(separation),
             "sort_ports": sort_ports,
             "bbox_routing": bbox_routing,
             "bboxes": list(bboxes),
@@ -488,8 +490,11 @@ def place90(
         b90p1.trans.disp.x if b90p1.trans.angle % 2 else b90p2.trans.disp.x,
         b90p2.trans.disp.y if b90p1.trans.angle % 2 else b90p1.trans.disp.y,
     )
-    b90r = max(
-        (b90p1.trans.disp - b90c.disp).length(), (b90p2.trans.disp - b90c.disp).length()
+    b90r = round(
+        max(
+            (b90p1.trans.disp - b90c.disp).length(),
+            (b90p2.trans.disp - b90c.disp).length(),
+        )
     )
     if taper_cell is not None:
         taper_ports = [p for p in taper_cell.ports if p.port_type == "optical"]
