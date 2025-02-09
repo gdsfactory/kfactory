@@ -320,7 +320,9 @@ def route_bundle(
         ends = cast(int | list[int] | list[Step] | list[list[Step]], ends)
 
     def _straight_factory(width: int, length: int) -> KCell:
-        dkc = straight_factory(width=c.kcl.to_dbu(width), length=c.kcl.to_dbu(length))
+        dkc = cast(StraightFactoryUM, straight_factory)(
+            width=c.kcl.to_um(width), length=c.kcl.to_um(length)
+        )
         return c.kcl[dkc.cell_index()]
 
     bend90_cell = c.kcl[bend90_cell.cell_index()]
