@@ -670,6 +670,7 @@ class KCLayout(
                 @cachetools.cached(cache=cache_, lock=RLock())
                 @functools.wraps(f)
                 def wrapped_cell(**params: Any) -> K:
+                    print("Wrapped cell...")
                     for key, value in params.items():
                         if isinstance(value, DecoratorDict | DecoratorList):
                             params[key] = _hashable_to_original(value)
@@ -849,6 +850,7 @@ class KCLayout(
                     return output_cell_type(base=cell.base)
 
                 with self.thread_lock:
+                    print("Locking...")
                     cell_ = wrapped_cell(**params)
                     if cell_.destroyed():
                         # If any cell has been destroyed, we should clean up the cache.
@@ -1556,8 +1558,12 @@ class KCLayout(
 
         if autoformat_from_file_extension:
             options.set_format_from_filename(filename)
-
-        return self.layout.write(filename, options)
+        try:
+            return self.layout.write(filename, options)
+        except Exception as e:
+            print([c.name for c in self.kcells.values()])
+            print(e)
+            raise e
 
     def top_kcells(self) -> list[KCell]:
         """Return the top KCells."""

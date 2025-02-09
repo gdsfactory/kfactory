@@ -1,8 +1,8 @@
 import kfactory as kf
 
 
-def test_icross_section_creation() -> None:
-    xs = kf.kcl.get_icross_section(
+def test_icross_section_creation(kcl: kf.KCLayout) -> None:
+    xs = kcl.get_icross_section(
         kf.cross_section.CrossSectionSpec[int](
             name="WG_350",
             sections=[(kf.kdb.LayerInfo(2, 0), 500)],
@@ -10,4 +10,4 @@ def test_icross_section_creation() -> None:
             width=1000,
         )
     )
-    assert xs._base in kf.kcl.cross_sections.cross_sections.values()
+    assert xs._base in kcl.cross_sections.cross_sections.values()
