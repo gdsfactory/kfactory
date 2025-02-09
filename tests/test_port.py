@@ -41,12 +41,10 @@ def test_create_port_error(kcl: kf.KCLayout, layers: Layers) -> None:
     db_cell = db.create_cell("test")
     subc = db.create_category("WidthMismatch")
 
-    cell = kf.factories.straight.straight_dbu_factory(kcl)(
-        length=10000, width=2000, layer=layers.WG
-    )
-    cell2 = kf.factories.straight.straight_dbu_factory(kcl)(
-        length=10000, width=2000, layer=layers.WG
-    )
+    straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
+
+    cell = straight_factory(length=10000, width=2000, layer=layers.WG)
+    cell2 = straight_factory(length=10000, width=2000, layer=layers.WG)
 
     kf.port.create_port_error(
         cell.ports["o1"],

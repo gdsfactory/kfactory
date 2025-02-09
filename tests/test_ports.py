@@ -36,39 +36,6 @@ def wg(layers: Layers) -> kf.KCell:
     return straight(1000, 20000, layers.WG)
 
 
-@pytest.fixture()
-@kf.cell
-def wg_floating_off_grid(layers: Layers) -> kf.KCell:
-    with pytest.raises(AssertionError):
-        c = kf.KCell()
-        dbu = c.kcl.dbu
-
-        p1 = kf.Port(
-            width=c.kcl.to_dbu(10 + dbu / 2),
-            name="o1",
-            dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, dbu / 2, 0),
-            layer=c.kcl.find_layer(layers.WG),
-        )
-        p2 = kf.Port(
-            width=c.kcl.to_dbu(10 + dbu / 2),
-            name="o2",
-            dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, 20 + dbu, 0),
-            layer=c.kcl.find_layer(layers.WG),
-        )
-        c.shapes(layers.WG).insert(kf.kdb.DBox(p1.x, -p1.width / 2, p2.x, p1.width / 2))
-
-        c.add_port(port=p1)
-        c.add_port(port=p2)
-
-        kf.config.logfilter.regex = None
-
-    return c
-
-
-def test_straight(layers: Layers) -> None:
-    straight(1000, 20000, layers.WG)
-
-
 def test_settings(layers: Layers) -> None:
     c = straight(1000, 20000, layers.WG)
 

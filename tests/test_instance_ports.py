@@ -262,10 +262,9 @@ def test_vinstance_ports_contains(kcl: kf.KCLayout, layers: Layers) -> None:
 
 def test_iter(kcl: kf.KCLayout, layers: Layers) -> None:
     kcell = kcl.kcell()
+    _straight_factory = kf.factories.straight.straight_dbu_factory(kcl)
     iref = kcell.create_inst(
-        kf.factories.straight.straight_dbu_factory(kcl)(
-            width=5000, length=10000, layer=layers.WG
-        ),
+        _straight_factory(width=5000, length=10000, layer=layers.WG),
         trans=kf.kdb.ICplxTrans(mag=2),
     )
     assert len(list(iref.ports)) == 2
@@ -273,9 +272,7 @@ def test_iter(kcl: kf.KCLayout, layers: Layers) -> None:
 
     dkcell = kcl.dkcell()
     dref = dkcell.create_inst(
-        kf.factories.straight.straight_dbu_factory(kcl)(
-            width=5000, length=10000, layer=layers.WG
-        ),
+        _straight_factory(width=5000, length=10000, layer=layers.WG),
         trans=kf.kdb.DCplxTrans(mag=2),
     )
     assert len(list(dref.ports)) == 2
@@ -283,4 +280,4 @@ def test_iter(kcl: kf.KCLayout, layers: Layers) -> None:
 
 
 if __name__ == "__main__":
-    pytest.main([__file__])
+    pytest.main([__file__, "-s"])

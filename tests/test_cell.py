@@ -399,7 +399,7 @@ def test_lock(straight: kf.KCell, bend90: kf.KCell) -> None:
 def test_cell_in_threads(
     kcl: kf.KCLayout, layers: Layers, wg_enc: kf.LayerEnclosure
 ) -> None:
-    taper_factory = kf.cells.taper.taper_factory(kcl)
+    taper_factory = kf.factories.taper.taper_factory(kcl)
 
     def taper() -> kf.KCell:
         return taper_factory(
