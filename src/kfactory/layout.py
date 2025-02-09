@@ -1561,9 +1561,9 @@ class KCLayout(
         try:
             return self.layout.write(filename, options)
         except Exception as e:
-            print([c.name for c in self.kcells.values()])
-            print(e)
-            raise e
+            raise RuntimeError(
+                f"kcl: {self.name}, Cells: {[c.name for c in self.kcells.values()]}"
+            ) from e
 
     def top_kcells(self) -> list[KCell]:
         """Return the top KCells."""
