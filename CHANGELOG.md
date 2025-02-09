@@ -29,6 +29,10 @@
 - Fix um grid [#586](https://github.com/gdsfactory/kfactory/pull/586)
 - Cast protoport to port before int angle match [#584](https://github.com/gdsfactory/kfactory/pull/584)
 
+## Other changes
+
+- Try to fix dependency [#606](https://github.com/gdsfactory/kfactory/pull/606)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.0.3...v1.1.0
 
 
