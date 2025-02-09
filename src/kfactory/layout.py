@@ -1556,12 +1556,8 @@ class KCLayout(
 
         if autoformat_from_file_extension:
             options.set_format_from_filename(filename)
-        try:
-            return self.layout.write(filename, options)
-        except Exception as e:
-            raise RuntimeError(
-                f"kcl: {self.name}, Cells: {[c.name for c in self.kcells.values()]}"
-            ) from e
+
+        return self.layout.write(filename, options)
 
     def top_kcells(self) -> list[KCell]:
         """Return the top KCells."""
