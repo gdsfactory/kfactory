@@ -167,10 +167,17 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     @abstractmethod
     def locked(self, value: bool) -> None: ...
 
-    @abstractmethod
     def lock(self) -> None:
         """Lock the cell."""
-        ...
+        self.locked = True
+
+    @property
+    @abstractmethod
+    def name(self) -> str | None: ...
+
+    @name.setter
+    @abstractmethod
+    def name(self, value: str) -> None: ...
 
 
 class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
@@ -188,12 +195,12 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
         self._base.lock()
 
     @property
-    @abstractmethod
-    def name(self) -> str | None: ...
+    def name(self) -> str | None:
+        return self._base.name
 
     @name.setter
-    @abstractmethod
-    def name(self, value: str) -> None: ...
+    def name(self, value: str) -> None:
+        self._base.name = value
 
     @abstractmethod
     def dup(self) -> Self: ...
@@ -404,15 +411,24 @@ class TKCell(BaseKCell):
     def locked(self, value: bool) -> None:
         self.kdb_cell.locked = value
 
-    def lock(self) -> None:
-        self.kdb_cell.locked = True
-
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(name={self.kdb_cell.name})"
+
+    @property
+    def name(self) -> str:
+        return self.kdb_cell.name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        if self.locked:
+            raise LockedError(self)
+        self.kdb_cell.name = value
 
 
 class TVCell(BaseKCell):
     _locked: bool = PrivateAttr(default=False)
+    shapes: dict[int, VShapes] = Field(default_factory=dict)
+    _name: str | None = PrivateAttr(default=None)
 
     @property
     def locked(self) -> bool:
@@ -422,8 +438,13 @@ class TVCell(BaseKCell):
     def locked(self, value: bool) -> None:
         self._locked = value
 
-    def lock(self) -> None:
-        self._locked = True
+    @property
+    def name(self) -> str | None:
+        return self._name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self._name = value
 
 
 class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
@@ -468,30 +489,22 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         """Returns port from instance."""
         ...
 
+    @property
+    def name(self) -> str:
+        return self._base.name
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self._base.name = value
+
     def __hash__(self) -> int:
         """Hash the KCell."""
-        return hash(
-            (
-                self._base.kcl.library.name(),
-                self._base.kdb_cell.cell_index(),
-            )
-        )
+        return hash((self._base.kcl.library.name(), self._base.kdb_cell.cell_index()))
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ProtoTKCell):
             return False
         return self._base == other._base
-
-    @property
-    def name(self) -> str:
-        """Name of the KCell."""
-        return self._base.kdb_cell.name
-
-    @name.setter
-    def name(self, value: str) -> None:
-        if self.locked:
-            raise LockedError(self)
-        self._base.kdb_cell.name = value
 
     @property
     def prop_id(self) -> int:
@@ -2706,9 +2719,6 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
 class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
     """Emulate `[klayout.db.Cell][klayout.db.Cell]`."""
 
-    _shapes: dict[int, VShapes]
-    _name: str | None
-
     @overload
     def __init__(self, *, base: TVCell) -> None: ...
 
@@ -2733,10 +2743,9 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
     ) -> None:
         from .layout import get_default_kcl
 
-        self._shapes = {}
         if base is not None:
             self._base = base
-            self._name = base.function_name
+            self.base.name = base.function_name
         else:
             kcl_ = kcl or get_default_kcl()
             self._base = TVCell(
@@ -2745,18 +2754,17 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
                 settings=KCellSettings(**(settings or {})),
                 vinsts=VInstances(),
             )
-            self._name = name
+            self._base.name = name
 
     def ibbox(self, layer: int | None = None) -> kdb.Box:
         return self.dbbox(layer).to_itype(self.kcl.dbu)
 
     def transform(
-        self,
-        trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
-        /,
+        self, trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans, /
     ) -> None:
-        for key, vshape in self._shapes.items():
-            self._shapes[key] = vshape.transform(trans)
+        _shapes = self.base.shapes
+        for key, vshape in _shapes.items():
+            _shapes[key] = vshape.transform(trans)
 
     @property
     def ports(self) -> DPorts:
@@ -2770,12 +2778,13 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
         self._base.ports = [port.base for port in new_ports]
 
     def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
-        layers_ = set(self._shapes.keys())
+        layers_ = set(self.shapes().keys())
 
         layers = layers_ if layer is None else {layer} & layers_
-
         box = kdb.DBox()
         for _layer in layers:
+            if isinstance(_layer, LayerEnum):
+                _layer = _layer.layout.layer(_layer.layer, _layer.datatype)
             box += self.shapes(_layer).bbox()
 
         for vinst in self.insts:
@@ -2790,17 +2799,6 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
     @property
     def insts(self) -> VInstances:
         return self._base.vinsts
-
-    @property
-    def name(self) -> str | None:
-        """Name of the KCell."""
-        return self._name
-
-    @name.setter
-    def name(self, value: str) -> None:
-        if self.locked:
-            raise LockedError(self)
-        self._name = value
 
     def dup(self) -> VKCell:
         """Copy the full cell.
@@ -2817,7 +2815,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
         c.settings = self.settings.model_copy()
         c.settings_units = self.settings_units.model_copy()
         c.info = self._base.info.model_copy()
-        for layer, shapes in self._shapes.items():
+        for layer, shapes in self.shapes().items():
             for shape in shapes:
                 c.shapes(layer).insert(shape)
 
@@ -2965,12 +2963,20 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
         self.vinsts.append(vi)
         return vi
 
-    def shapes(self, layer: int | kdb.LayerInfo) -> VShapes:
+    @overload
+    def shapes(self, layer: None = ...) -> dict[int, VShapes]: ...
+    @overload
+    def shapes(self, layer: int | kdb.LayerInfo) -> VShapes: ...
+    def shapes(
+        self, layer: int | kdb.LayerInfo | None = None
+    ) -> VShapes | dict[int, VShapes]:
+        if layer is None:
+            return self._base.shapes
         if isinstance(layer, kdb.LayerInfo):
             layer = self.kcl.layout.layer(layer)
-        if layer not in self._shapes:
-            self._shapes[layer] = VShapes(cell=self)
-        return self._shapes[layer]
+        if layer not in self._base.shapes:
+            self._base.shapes[layer] = VShapes(cell=self)
+        return self._base.shapes[layer]
 
     def flatten(self) -> None:
         if self.locked:

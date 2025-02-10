@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .instance import ProtoInstance
-    from .kcell import AnyKCell
+    from .kcell import AnyKCell, BaseKCell
     from .layout import KCLayout
     from .port import ProtoPort
 
@@ -22,7 +22,7 @@ __all__ = [
 class LockedError(AttributeError):
     """Raised when a locked cell is being modified."""
 
-    def __init__(self, kcell: AnyKCell) -> None:
+    def __init__(self, kcell: AnyKCell | BaseKCell) -> None:
         """Throw _locked error."""
         super().__init__(
             f"{kcell.name!r} is locked and likely stored in cache. Modifications are "
