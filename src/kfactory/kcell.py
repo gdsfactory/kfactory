@@ -167,10 +167,9 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     @abstractmethod
     def locked(self, value: bool) -> None: ...
 
-    @abstractmethod
     def lock(self) -> None:
         """Lock the cell."""
-        ...
+        self.locked = True
 
     @property
     @abstractmethod
@@ -412,9 +411,6 @@ class TKCell(BaseKCell):
     def locked(self, value: bool) -> None:
         self.kdb_cell.locked = value
 
-    def lock(self) -> None:
-        self.kdb_cell.locked = True
-
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(name={self.kdb_cell.name})"
 
@@ -431,7 +427,7 @@ class TKCell(BaseKCell):
 
 class TVCell(BaseKCell):
     _locked: bool = PrivateAttr(default=False)
-    _shapes: dict[int, VShapes] = PrivateAttr(default_factory=dict)
+    shapes: dict[int, VShapes] = Field(default_factory=dict)
     _name: str | None = PrivateAttr(default=None)
 
     @property
@@ -442,27 +438,12 @@ class TVCell(BaseKCell):
     def locked(self, value: bool) -> None:
         self._locked = value
 
-    def lock(self) -> None:
-        self._locked = True
-
-    @property
-    def shapes(self) -> dict[int, VShapes]:
-        return self._shapes
-
-    @shapes.setter
-    def shapes(self, value: dict[int, VShapes]) -> None:
-        if self.locked:
-            raise LockedError(self)
-        self._shapes = value
-
     @property
     def name(self) -> str | None:
         return self._name
 
     @name.setter
-    def name(self, value: str | None) -> None:
-        if self.locked:
-            raise LockedError(self)
+    def name(self, value: str) -> None:
         self._name = value
 
 
