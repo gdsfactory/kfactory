@@ -251,13 +251,13 @@ def route_bundle(
         logger.warning("end_straights is deprecated. Use `ends` instead.")
         ends = end_straights
     bend90_radius = get_radius(bend90_cell.ports.filter(port_type=place_port_type))
-    _start_ports = [p.base for p in start_ports]
-    _end_ports = [p.base for p in end_ports]
+    start_ports_ = [p.base for p in start_ports]
+    end_ports_ = [p.base for p in end_ports]
     if isinstance(c, KCell):
         return route_bundle_generic(
             c=c,
-            start_ports=_start_ports,
-            end_ports=_end_ports,
+            start_ports=start_ports_,
+            end_ports=end_ports_,
             starts=cast(dbu | list[dbu] | list[Step] | list[list[Step]], starts),
             ends=cast(dbu | list[dbu] | list[Step] | list[list[Step]], ends),
             route_width=cast(int, route_width),
@@ -333,8 +333,8 @@ def route_bundle(
 
     return route_bundle_generic(
         c=c.kcl[c.cell_index()],
-        start_ports=_start_ports,
-        end_ports=_end_ports,
+        start_ports=start_ports_,
+        end_ports=end_ports_,
         starts=starts,
         ends=ends,
         route_width=route_width,
@@ -573,8 +573,8 @@ def place90(
             route.instances.append(t1)
             route.start_port = Port(base=t1.ports[taperp1.name]._base.transformed())
             route.start_port.name = None
-            _l = int(length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2)
-            if _l != 0:
+            l_ = int(length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2)
+            if l_ != 0:
                 wg = c << straight_factory(
                     width=taperp2.width,
                     length=length
@@ -600,7 +600,7 @@ def place90(
                     allow_layer_mismatch=allow_layer_mismatch,
                     allow_type_mismatch=allow_type_mismatch,
                 )
-                route.length_straights += _l
+                route.length_straights += l_
                 route.n_taper += 2
             else:
                 t2 = c << taper_cell
@@ -690,7 +690,7 @@ def place90(
                     allow_type_mismatch=allow_type_mismatch,
                 )
                 route.instances.append(t1)
-                _l = int(
+                l_ = int(
                     length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2
                 )
                 if length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2 != 0:
@@ -722,7 +722,7 @@ def place90(
                         allow_layer_mismatch=allow_layer_mismatch,
                         allow_type_mismatch=allow_type_mismatch,
                     )
-                    route.length_straights += _l
+                    route.length_straights += l_
                 else:
                     t2 = c << taper_cell
                     t2.purpose = purpose
@@ -776,12 +776,12 @@ def place90(
             )
             route.instances.append(t1)
             if length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2 != 0:
-                _l = int(
+                l_ = int(
                     length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2
                 )
                 wg = c << straight_factory(
                     width=taperp2.width,
-                    length=_l,
+                    length=l_,
                 )
                 wg.purpose = purpose
                 route.instances.append(wg)
@@ -804,7 +804,7 @@ def place90(
                     allow_layer_mismatch=allow_layer_mismatch,
                     allow_type_mismatch=allow_type_mismatch,
                 )
-                route.length_straights += int(_l)
+                route.length_straights += int(l_)
             else:
                 t2 = c << taper_cell
                 t2.purpose = purpose
