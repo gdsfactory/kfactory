@@ -703,7 +703,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 _cell_name = get_cell_name(_cell_name + clean_name(_trans_str))
             if cell.kcl.layout_cell(_cell_name) is None:
                 _cell = KCell(kcl=self.cell.kcl, name=_cell_name)  # self.cell.dup()
-                for layer, shapes in self.cell._shapes.items():
+                for layer, shapes in self.cell.shapes().items():
                     for shape in shapes.transform(_trans):
                         _cell.shapes(layer).insert(shape)
                 for inst in self.cell.insts:
@@ -782,7 +782,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             trans = kdb.DCplxTrans()
 
         if isinstance(self.cell, VKCell):
-            for layer, shapes in self.cell._shapes.items():
+            for layer, shapes in self.cell.shapes().items():
                 for shape in shapes.transform(trans * self.trans):
                     cell.shapes(layer).insert(shape)
             for inst in self.cell.insts:
