@@ -2745,7 +2745,6 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
 
         if base is not None:
             self._base = base
-            self.base.name = base.function_name
         else:
             kcl_ = kcl or get_default_kcl()
             self._base = TVCell(
@@ -2754,7 +2753,8 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
                 settings=KCellSettings(**(settings or {})),
                 vinsts=VInstances(),
             )
-            self._base.name = name
+            if name:
+                self._base.name = name
 
     def ibbox(self, layer: int | None = None) -> kdb.Box:
         return self.dbbox(layer).to_itype(self.kcl.dbu)
