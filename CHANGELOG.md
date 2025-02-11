@@ -5,6 +5,7 @@
 
 ## New
 
+- Move VKCell state to TVCell [#607](https://github.com/gdsfactory/kfactory/pull/607)
 - Add default args for DPort center and orientation [#601](https://github.com/gdsfactory/kfactory/pull/601)
 - Update base_kcell to base and add locked setters [#599](https://github.com/gdsfactory/kfactory/pull/599)
 - Rework cross section [#596](https://github.com/gdsfactory/kfactory/pull/596)
