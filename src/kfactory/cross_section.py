@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -99,6 +99,11 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
             for sections in self.enclosure.layer_sections.values()
             for s in sections.sections
         )
+
+    def model_copy(
+        self, *, update: Mapping[str, Any] | None = {"name": None}, deep: bool = False
+    ) -> SymmetricalCrossSection:
+        return super().model_copy(update=update, deep=deep)
 
 
 class DSymmetricalCrossSection(BaseModel):
@@ -206,6 +211,11 @@ class TCrossSection(ABC, Generic[TUnit]):
     @abstractmethod
     def get_xmin_xmax(self) -> tuple[TUnit, TUnit]: ...
 
+    @abstractmethod
+    def model_copy(
+        self, *, update: Mapping[str, Any] = {"name": None}, deep: bool
+    ) -> Self: ...
+
 
 class CrossSection(TCrossSection[int]):
     @overload
@@ -300,6 +310,13 @@ class CrossSection(TCrossSection[int]):
     def get_xmin_xmax(self) -> tuple[int, int]:
         xmax = self._base.get_xmax()
         return (xmax, xmax)
+
+    def model_copy(
+        self, *, update: Mapping[str, Any] = {"name": None}, deep: bool
+    ) -> CrossSection:
+        return CrossSection(
+            kcl=self.kcl, base=self.base.model_copy(update=update, deep=deep)
+        )
 
 
 class DCrossSection(TCrossSection[float]):
@@ -411,6 +428,13 @@ class DCrossSection(TCrossSection[float]):
     def get_xmin_xmax(self) -> tuple[float, float]:
         xmax = self.kcl.to_um(self._base.get_xmax())
         return (xmax, xmax)
+
+    def model_copy(
+        self, *, update: Mapping[str, Any] = {"name": None}, deep: bool
+    ) -> DCrossSection:
+        return DCrossSection(
+            kcl=self.kcl, base=self.base.model_copy(update=update, deep=deep)
+        )
 
 
 class CrossSectionSpec(TypedDict, Generic[TUnit]):

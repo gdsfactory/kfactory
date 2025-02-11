@@ -13,6 +13,7 @@ from collections import defaultdict
 from collections.abc import (
     Callable,
     Iterable,
+    Mapping,
     Sequence,
 )
 from enum import IntEnum
@@ -537,7 +538,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
     layer_sections: dict[kdb.LayerInfo, LayerSection]
     _name: str | None = PrivateAttr()
     main_layer: kdb.LayerInfo | None
-    bbox_sections: dict[kdb.LayerInfo, tuple[int, int, int, int]]
+    bbox_sections: dict[kdb.LayerInfo, int]
 
     def __init__(
         self,
@@ -550,7 +551,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             tuple[kdb.LayerInfo, float] | tuple[kdb.LayerInfo, float, float]
         ]
         | None = None,
-        bbox_sections: Sequence[tuple[kdb.LayerInfo, int, int, int, int]] = [],
+        bbox_sections: Sequence[tuple[kdb.LayerInfo, int]] = [],
         kcl: KCLayout | None = None,
     ) -> None:
         """Constructor of new enclosure.
@@ -602,7 +603,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             main_layer=main_layer,
             kcl=kcl,
             layer_sections=layer_sections,
-            bbox_sections={t[0]: (t[1], t[2], t[3], t[4]) for t in bbox_sections},
+            bbox_sections={t[0]: t[1] for t in bbox_sections},
         )
         self._name = name
 
@@ -1085,15 +1086,10 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             target=c, layer=main_layer, path=path, widths=widths, enclosure=self
         )
 
-    # def copy_to(self, kcl: KCLayout) -> LayerEnclosure:
-    #     """Creat a copy of the LayerEnclosure in another KCLayout."""
-    #     layer_enc = LayerEnclosure(
-    #         [], name=self.name, main_layer=self.main_layer, kcl=kcl
-    #     )
-    #     for layer, sections in self.layer_sections.items():
-    #         for section in sections.sections:
-    #             layer_enc.add_section(layer, section)
-    #     return layer_enc
+    def model_copy(
+        self, *, update: Mapping[str, Any] | None = {"name": None}, deep: bool = False
+    ) -> LayerEnclosure:
+        return super().model_copy(update=update, deep=deep)
 
 
 class LayerEnclosureSpec(TypedDict):
