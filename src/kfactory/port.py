@@ -446,17 +446,6 @@ class ProtoPort(Generic[TUnit], ABC):
         """Copy the port with a transformation."""
         ...
 
-    @abstractmethod
-    def copy_polar(
-        self,
-        d: TUnit,
-        d_orth: TUnit,
-        angle: TUnit,
-        mirror: bool = False,
-    ) -> ProtoPort[TUnit]:
-        """Copy the port with a polar transformation."""
-        ...
-
     @property
     def center(self) -> tuple[TUnit, TUnit]:
         """Returns port center."""
@@ -1038,7 +1027,11 @@ class DPort(ProtoPort[float]):
         return DPort(base=self._base.transformed(trans=trans, post_trans=post_trans))
 
     def copy_polar(
-        self, d: float = 0, d_orth: float = 0, angle: float = 2, mirror: bool = False
+        self,
+        d: float = 0,
+        d_orth: float = 0,
+        orientation: float = 180,
+        mirror: bool = False,
     ) -> DPort:
         """Get a polar copy of the port.
 
@@ -1049,11 +1042,11 @@ class DPort(ProtoPort[float]):
             d: The distance to the old port
             d_orth: Orthogonal distance (positive is positive y for a port which is
                 facing angle=0°)
-            angle: Relative angle to the original port (0=0°,1=90°,2=180°,3=270°).
+            orientation: Relative angle to the original port, in degrees.
             mirror: Whether to mirror the port relative to the original port.
         """
         return self.copy(
-            post_trans=kdb.DCplxTrans(rot=angle, mirrx=mirror, x=d, y=d_orth)
+            post_trans=kdb.DCplxTrans(rot=orientation, mirrx=mirror, x=d, y=d_orth)
         )
 
     @property
