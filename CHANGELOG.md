@@ -23,6 +23,7 @@
 
 ## Bug Fixes
 
+- Fix electrical route bundle [#605](https://github.com/gdsfactory/kfactory/pull/605)
 - Fix clear kcells [#603](https://github.com/gdsfactory/kfactory/pull/603)
 - Fix KCLayout.clear_kcells [#602](https://github.com/gdsfactory/kfactory/pull/602)
 - Fix mirror default parameters [#600](https://github.com/gdsfactory/kfactory/pull/600)
