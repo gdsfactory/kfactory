@@ -331,6 +331,8 @@ def route_bundle(
     if min_straight_taper:
         min_straight_taper = c.kcl.to_dbu(min_straight_taper)
 
+    bboxes_ = [c.kcl.to_dbu(b) for b in cast(list[kdb.DBox], bboxes)]
+
     return route_bundle_generic(
         c=c.kcl[c.cell_index()],
         start_ports=start_ports_,
@@ -348,7 +350,7 @@ def route_bundle(
             "separation": c.kcl.to_dbu(separation),
             "sort_ports": sort_ports,
             "bbox_routing": bbox_routing,
-            "bboxes": list(bboxes),
+            "bboxes": list(bboxes_),
             "waypoints": waypoints,
         },
         placer_function=place90,

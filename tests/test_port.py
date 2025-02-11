@@ -406,7 +406,7 @@ def test_dport_init() -> None:
 
 def test_dport_copy_polar(kcl: kf.KCLayout) -> None:
     port = kf.DPort(name="o1", width=10, layer=1, center=(0, 0), orientation=0)
-    port2 = port.copy_polar(d=1, d_orth=1, angle=45, mirror=True)
+    port2 = port.copy_polar(d=1, d_orth=1, orientation=45, mirror=True)
     assert port2.dcplx_trans == kf.kdb.DCplxTrans(x=1, y=1, rot=45, mirrx=True)
 
 
