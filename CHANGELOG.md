@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- fix setter for kcl, there should be no setter [#611](https://github.com/gdsfactory/kfactory/pull/611)
 - better DPort constructor and name optional arg [#610](https://github.com/gdsfactory/kfactory/pull/610)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.1.1...v1.1.2
