@@ -2169,7 +2169,6 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
     @overload
     def __init__(
         self,
-        *,
         name: str | None = None,
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
@@ -2180,14 +2179,14 @@ class DKCell(ProtoTKCell[float], UMGeometricObject):
 
     def __init__(
         self,
-        *,
-        base: TKCell | None = None,
         name: str | None = None,
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Iterable[ProtoPort[Any]] | None = None,
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
+        *,
+        base: TKCell | None = None,
     ) -> None:
         """Constructor of KCell.
 
@@ -2314,7 +2313,6 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
     @overload
     def __init__(
         self,
-        *,
         name: str | None = None,
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
@@ -2325,14 +2323,14 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
 
     def __init__(
         self,
-        *,
-        base: TKCell | None = None,
         name: str | None = None,
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Iterable[ProtoPort[Any]] | None = None,
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
+        *,
+        base: TKCell | None = None,
     ) -> None:
         """Constructor of KCell.
 
