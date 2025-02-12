@@ -241,23 +241,6 @@ class ProtoPort(Generic[TUnit], ABC):
     yaml_tag: str = "!Port"
     _base: BasePort
 
-    @overload
-    @abstractmethod
-    def __init__(self, *, base: BasePort) -> None: ...
-
-    @overload
-    @abstractmethod
-    def __init__(
-        self,
-        name: str | None = None,
-        *,
-        width: TUnit | None = None,
-        layer: int | None = None,
-        layer_info: kdb.LayerInfo | None = None,
-        port_type: str = "optical",
-        trans: kdb.Trans | str | None = None,
-    ) -> None: ...
-
     @abstractmethod
     def __init__(
         self,
