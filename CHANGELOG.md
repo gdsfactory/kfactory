@@ -1,5 +1,20 @@
+<a id="v1.1.1"></a>
+# [v1.1.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.1) - 2025-02-12
+
+# What's Changed
+
+## Bug Fixes
+
+- fix constructors for kcell/dkcell [#609](https://github.com/gdsfactory/kfactory/pull/609)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.1.0...v1.1.1
+
+
+[Changes][v1.1.1]
+
+
 <a id="v1.1.0"></a>
-# [v1.1.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.0) - 2025-01-28
+# [v1.1.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.0) - 2025-02-11
 
 # What's Changed
 
@@ -23,6 +38,7 @@
 
 ## Bug Fixes
 
+- Fix route_bundle and DPort.copy_polar [#608](https://github.com/gdsfactory/kfactory/pull/608)
 - Fix electrical route bundle [#605](https://github.com/gdsfactory/kfactory/pull/605)
 - Fix clear kcells [#603](https://github.com/gdsfactory/kfactory/pull/603)
 - Fix KCLayout.clear_kcells [#602](https://github.com/gdsfactory/kfactory/pull/602)
@@ -1574,6 +1590,7 @@
 [Changes][v0.4.0]
 
 
+[v1.1.1]: https://github.com/gdsfactory/kfactory/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/gdsfactory/kfactory/compare/v1.0.3...v1.1.0
 [v1.0.3]: https://github.com/gdsfactory/kfactory/compare/v1.0.2...v1.0.3
 [v1.0.2]: https://github.com/gdsfactory/kfactory/compare/v1.0.1...v1.0.2
