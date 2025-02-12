@@ -1,3 +1,18 @@
+<a id="v1.1.2"></a>
+# [v1.1.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.2) - 2025-02-12
+
+# What's Changed
+
+## Bug Fixes
+
+- better DPort constructor and name optional arg [#610](https://github.com/gdsfactory/kfactory/pull/610)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.1.1...v1.1.2
+
+
+[Changes][v1.1.2]
+
+
 <a id="v1.1.1"></a>
 # [v1.1.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.1) - 2025-02-12
 
@@ -1590,6 +1605,7 @@
 [Changes][v0.4.0]
 
 
+[v1.1.2]: https://github.com/gdsfactory/kfactory/compare/v1.1.1...v1.1.2
 [v1.1.1]: https://github.com/gdsfactory/kfactory/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/gdsfactory/kfactory/compare/v1.0.3...v1.1.0
 [v1.0.3]: https://github.com/gdsfactory/kfactory/compare/v1.0.2...v1.0.3
