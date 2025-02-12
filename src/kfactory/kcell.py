@@ -361,10 +361,6 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
     def kcl(self) -> KCLayout:
         return self._base.kcl
 
-    @kcl.setter
-    def kcl(self, val: KCLayout, /) -> None:
-        self._base.kcl = val
-
     def __repr__(self) -> str:
         """Return a string representation of the Cell."""
         port_names = [p.name for p in self.ports]
@@ -464,21 +460,21 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             return
         from .layout import get_default_kcl
 
-        _kcl = kcl or get_default_kcl()
+        kcl_ = kcl or get_default_kcl()
         if name is None:
-            _name = "Unnamed_!" if kdb_cell is None else kdb_cell.name
+            name_ = "Unnamed_!" if kdb_cell is None else kdb_cell.name
         else:
-            _name = name
+            name_ = name
             if kdb_cell is not None:
                 kdb_cell.name = name
-        _kdb_cell = kdb_cell or _kcl.create_cell(_name)
-        if _name == "Unnamed_!":
-            _kdb_cell.name = f"Unnamed_{_kdb_cell.cell_index()}"
+        kdb_cell_ = kdb_cell or kcl_.create_cell(name_)
+        if name_ == "Unnamed_!":
+            kdb_cell_.name = f"Unnamed_{kdb_cell_.cell_index()}"
         self._base = TKCell(
-            kcl=_kcl,
+            kcl=kcl_,
             info=Info(**(info or {})),
             settings=KCellSettings(**(settings or {})),
-            kdb_cell=_kdb_cell,
+            kdb_cell=kdb_cell_,
             ports=[port.base for port in ports] if ports else [],
             vinsts=VInstances(),
         )
@@ -895,16 +891,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             raise ValueError(f"KCell {self.qname()} is already a static KCell.")
         from .layout import kcls
 
-        _lib_cell = kcls[self.library().name()][self.library_cell_index()]
-        _lib_cell.set_meta_data()
-        _kdb_cell = self.kcl.layout_cell(
+        lib_cell = kcls[self.library().name()][self.library_cell_index()]
+        lib_cell.set_meta_data()
+        kdb_cell = self.kcl.layout_cell(
             self.kcl.convert_cell_to_static(self.cell_index())
         )
-        assert _kdb_cell is not None
-        _kdb_cell.name = self.qname()
-        _ci = _kdb_cell.cell_index()
-        _old_kdb_cell = self._base.kdb_cell
-        _kdb_cell.copy_meta_info(_lib_cell.kdb_cell)
+        assert kdb_cell is not None
+        kdb_cell.name = self.qname()
+        ci_ = kdb_cell.cell_index()
+        old_kdb_cell = self._base.kdb_cell
+        kdb_cell.copy_meta_info(lib_cell.kdb_cell)
         self.get_meta_data()
 
         if recursive:
@@ -913,20 +909,20 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 if kc.is_library_cell():
                     kc.convert_to_static(recursive=recursive)
 
-        self._base.kdb_cell = _kdb_cell
-        for ci in _old_kdb_cell.caller_cells():
+        self._base.kdb_cell = kdb_cell
+        for ci in old_kdb_cell.caller_cells():
             c = self.kcl.layout_cell(ci)
             assert c is not None
             it = kdb.RecursiveInstanceIterator(self.kcl.layout, c)
-            it.targets = [_old_kdb_cell.cell_index()]
+            it.targets = [old_kdb_cell.cell_index()]
             it.max_depth = 0
             insts = [instit.current_inst_element().inst() for instit in it.each()]
             for inst in insts:
                 ca = inst.cell_inst
-                ca.cell_index = _ci
+                ca.cell_index = ci_
                 c.replace(inst, ca)
 
-        self.kcl.layout.delete_cell(_old_kdb_cell.cell_index())
+        self.kcl.layout.delete_cell(old_kdb_cell.cell_index())
 
     def draw_ports(self) -> None:
         """Draw all the ports on their respective layer."""
@@ -2758,11 +2754,13 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
         return self.dbbox(layer).to_itype(self.kcl.dbu)
 
     def transform(
-        self, trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans, /
+        self,
+        trans: kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans,
+        /,
     ) -> None:
-        _shapes = self.base.shapes
-        for key, vshape in _shapes.items():
-            _shapes[key] = vshape.transform(trans)
+        shapes = self.base.shapes
+        for key, vshape in shapes.items():
+            shapes[key] = vshape.transform(trans)
 
     @property
     def ports(self) -> DPorts:
@@ -2780,10 +2778,10 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
 
         layers = layers_ if layer is None else {layer} & layers_
         box = kdb.DBox()
-        for _layer in layers:
-            if isinstance(_layer, LayerEnum):
-                _layer = _layer.layout.layer(_layer.layer, _layer.datatype)
-            box += self.shapes(_layer).bbox()
+        for layer_ in layers:
+            if isinstance(layer_, LayerEnum):
+                layer_ = layer_.layout.layer(layer_.layer, layer_.datatype)
+            box += self.shapes(layer_).bbox()
 
         for vinst in self.insts:
             box += vinst.dbbox()
@@ -2963,8 +2961,10 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
 
     @overload
     def shapes(self, layer: None = ...) -> dict[int, VShapes]: ...
+
     @overload
     def shapes(self, layer: int | kdb.LayerInfo) -> VShapes: ...
+
     def shapes(
         self, layer: int | kdb.LayerInfo | None = None
     ) -> VShapes | dict[int, VShapes]:

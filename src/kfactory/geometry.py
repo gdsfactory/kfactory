@@ -116,10 +116,6 @@ class GeometricObject(Generic[TUnit], ABC):
     @abstractmethod
     def kcl(self) -> KCLayout: ...
 
-    @kcl.setter
-    @abstractmethod
-    def kcl(self, val: KCLayout, /) -> None: ...
-
     @abstractmethod
     def bbox(self, layer: int | None = None) -> BoxLike[TUnit]: ...
 
