@@ -241,11 +241,28 @@ class ProtoPort(Generic[TUnit], ABC):
     yaml_tag: str = "!Port"
     _base: BasePort
 
+    @overload
+    @abstractmethod
+    def __init__(self, *, base: BasePort) -> None: ...
+
+    @overload
     @abstractmethod
     def __init__(
         self,
-        *,
         name: str | None = None,
+        *,
+        width: TUnit | None = None,
+        layer: int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
+        port_type: str = "optical",
+        trans: kdb.Trans | str | None = None,
+    ) -> None: ...
+
+    @abstractmethod
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
         width: TUnit | None = None,
         layer: int | None = None,
         layer_info: kdb.LayerInfo | None = None,
@@ -259,6 +276,7 @@ class ProtoPort(Generic[TUnit], ABC):
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = ...,
         cross_section: TCrossSection[TUnit] | None = None,
+        base: BasePort | None = None,
     ) -> None:
         """Initialise a ProtoPort."""
         ...
@@ -631,8 +649,8 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        *,
         name: str | None = None,
+        *,
         width: int,
         layer: LayerEnum | int,
         port_type: str = "optical",
@@ -646,8 +664,8 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        *,
         name: str | None = None,
+        *,
         width: int,
         layer_info: kdb.LayerInfo,
         trans: kdb.Trans | str,
@@ -659,8 +677,8 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        *,
         name: str | None = None,
+        *,
         width: int,
         layer_info: kdb.LayerInfo,
         dcplx_trans: kdb.DCplxTrans | str,
@@ -672,8 +690,8 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        *,
         name: str | None = None,
+        *,
         width: int,
         layer_info: kdb.LayerInfo,
         port_type: str = "optical",
@@ -687,8 +705,8 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        *,
         name: str | None = None,
+        *,
         cross_section: CrossSection | SymmetricalCrossSection,
         port_type: str = "optical",
         angle: int,
@@ -701,8 +719,8 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        *,
         name: str | None = None,
+        *,
         cross_section: CrossSection | SymmetricalCrossSection,
         trans: kdb.Trans | str,
         kcl: KCLayout | None = None,
@@ -713,8 +731,8 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        *,
         name: str | None = None,
+        *,
         cross_section: CrossSection | SymmetricalCrossSection,
         dcplx_trans: kdb.DCplxTrans | str,
         kcl: KCLayout | None = None,
@@ -730,8 +748,8 @@ class Port(ProtoPort[int]):
 
     def __init__(
         self,
-        *,
         name: str | None = None,
+        *,
         width: int | None = None,
         layer: int | None = None,
         layer_info: kdb.LayerInfo | None = None,
@@ -916,10 +934,136 @@ class DPort(ProtoPort[float]):
         kcl: Link to the layout this port resides in.
     """
 
+    @overload
     def __init__(
         self,
-        *,
         name: str | None = None,
+        *,
+        width: float,
+        layer: LayerEnum | int,
+        trans: kdb.Trans | str,
+        kcl: KCLayout | None = None,
+        port_type: str = "optical",
+        info: dict[str, int | float | str] = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        width: float,
+        layer: LayerEnum | int,
+        dcplx_trans: kdb.DCplxTrans | str,
+        kcl: KCLayout | None = None,
+        port_type: str = "optical",
+        info: dict[str, int | float | str] = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        width: float,
+        layer: LayerEnum | int,
+        port_type: str = "optical",
+        orientation: float,
+        center: tuple[float, float] = (0, 0),
+        mirror_x: bool = False,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        width: float,
+        layer_info: kdb.LayerInfo,
+        trans: kdb.Trans | str,
+        kcl: KCLayout | None = None,
+        port_type: str = "optical",
+        info: dict[str, int | float | str] = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        width: float,
+        layer_info: kdb.LayerInfo,
+        dcplx_trans: kdb.DCplxTrans | str,
+        kcl: KCLayout | None = None,
+        port_type: str = "optical",
+        info: dict[str, int | float | str] = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        width: float,
+        layer_info: kdb.LayerInfo,
+        port_type: str = "optical",
+        orientation: float,
+        center: tuple[float, float] = (0, 0),
+        mirror_x: bool = False,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        cross_section: DCrossSection | SymmetricalCrossSection,
+        port_type: str = "optical",
+        orientation: float,
+        center: tuple[float, float],
+        mirror_x: bool = False,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        cross_section: DCrossSection | SymmetricalCrossSection,
+        trans: kdb.Trans | str,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = ...,
+        port_type: str = "optical",
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        cross_section: DCrossSection | SymmetricalCrossSection,
+        dcplx_trans: kdb.DCplxTrans | str,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = ...,
+        port_type: str = "optical",
+    ) -> None: ...
+
+    @overload
+    def __init__(self, *, base: BasePort) -> None: ...
+
+    @overload
+    def __init__(self, *, port: ProtoPort[Any]) -> None: ...
+
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
         width: float | None = None,
         layer: int | None = None,
         layer_info: kdb.LayerInfo | None = None,
