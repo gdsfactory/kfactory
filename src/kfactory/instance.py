@@ -106,7 +106,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @abstractmethod
     def __getitem__(
-        self, key: int | str | None | tuple[int | str | None, int, int]
+        self, key: int | str | tuple[int | str | None, int, int] | None
     ) -> ProtoPort[TUnit]: ...
 
     def __getattr__(self, name: str) -> Any:
@@ -381,10 +381,10 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
             dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
             match (use_mirror, use_angle):
                 case True, True:
-                    _dcplx_trans = (
+                    dcplx_trans = (
                         op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
                     )
-                    self._instance.dcplx_trans = _dcplx_trans
+                    self._instance.dcplx_trans = dcplx_trans
                 case False, True:
                     dconn_trans = (
                         kdb.DCplxTrans.M90
@@ -393,8 +393,8 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
                     )
                     opt = op.dcplx_trans
                     opt.mirror = False
-                    _dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
-                    self._instance.dcplx_trans = _dcplx_trans
+                    dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
+                    self._instance.dcplx_trans = dcplx_trans
                 case False, False:
                     self._instance.dcplx_trans = kdb.DCplxTrans(
                         op.dcplx_trans.disp - p.dcplx_trans.disp
@@ -411,16 +411,16 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
             conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
             match (use_mirror, use_angle):
                 case True, True:
-                    _trans = op.trans * conn_trans * p.trans.inverted()
-                    self._instance.trans = _trans
+                    trans = op.trans * conn_trans * p.trans.inverted()
+                    self._instance.trans = trans
                 case False, True:
                     conn_trans = (
                         kdb.Trans.M90 if mirror ^ self.trans.mirror else kdb.Trans.R180
                     )
                     op = op.copy()
                     op.trans.mirror = False
-                    _trans = op.trans * conn_trans * p.trans.inverted()
-                    self._instance.trans = _trans
+                    trans = op.trans * conn_trans * p.trans.inverted()
+                    self._instance.trans = trans
                 case False, False:
                     self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
                 case True, False:
@@ -483,7 +483,7 @@ class Instance(ProtoTInstance[int], DBUGeometricObject):
         return InstancePorts(self)
 
     def __getitem__(
-        self, key: int | str | None | tuple[int | str | None, int, int]
+        self, key: int | str | tuple[int | str | None, int, int] | None
     ) -> Port:
         """Returns port from instance.
 
@@ -588,7 +588,7 @@ class DInstance(ProtoTInstance[float], UMGeometricObject):
             self._instance.parent_cell = cell
 
     def __getitem__(
-        self, key: int | str | None | tuple[int | str | None, int, int]
+        self, key: int | str | tuple[int | str | None, int, int] | None
     ) -> DPort:
         """Returns port from instance.
 
@@ -680,76 +680,76 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             trans = kdb.DCplxTrans()
 
         if isinstance(self.cell, VKCell):
-            _trans = trans * self.trans
+            trans_ = trans * self.trans
             base_trans = kdb.DCplxTrans(
                 kdb.DCplxTrans(
-                    kdb.ICplxTrans(_trans, cell.kcl.dbu)
+                    kdb.ICplxTrans(trans_, cell.kcl.dbu)
                     .s_trans()
                     .to_dtype(cell.kcl.dbu)
                 )
             )
-            _trans = base_trans.inverted() * _trans
-            _cell_name = self.cell.name
-            if _cell_name is None:
+            trans_ = base_trans.inverted() * trans_
+            cell_name = self.cell.name
+            if cell_name is None:
                 raise ValueError(
                     "Cannot insert a non-flattened VInstance into a VKCell when the"
                     f" name is 'None'. VKCell at {self.trans}"
                 )
-            if _trans != kdb.DCplxTrans():
-                _trans_str = (
-                    f"_M{_trans.mirror}_S{_trans.angle}"
-                    f"_X{_trans.disp.x}_Y{_trans.disp.y}"
+            if trans_ != kdb.DCplxTrans():
+                trans_str = (
+                    f"_M{trans_.mirror}_S{trans_.angle}"
+                    f"_X{trans_.disp.x}_Y{trans_.disp.y}"
                 ).replace(".", "p")
-                _cell_name = get_cell_name(_cell_name + clean_name(_trans_str))
-            if cell.kcl.layout_cell(_cell_name) is None:
-                _cell = KCell(kcl=self.cell.kcl, name=_cell_name)  # self.cell.dup()
+                cell_name = get_cell_name(cell_name + clean_name(trans_str))
+            if cell.kcl.layout_cell(cell_name) is None:
+                cell_ = KCell(kcl=self.cell.kcl, name=cell_name)  # self.cell.dup()
                 for layer, shapes in self.cell.shapes().items():
-                    for shape in shapes.transform(_trans):
-                        _cell.shapes(layer).insert(shape)
+                    for shape in shapes.transform(trans_):
+                        cell_.shapes(layer).insert(shape)
                 for inst in self.cell.insts:
-                    inst.insert_into(cell=_cell, trans=_trans)
-                _cell.name = _cell_name
+                    inst.insert_into(cell=cell_, trans=trans_)
+                cell_.name = cell_name
                 for port in self.cell.ports:
-                    _cell.add_port(port=port.copy(_trans))
-                _settings = self.cell.settings.model_dump()
-                _settings.update({"virtual_trans": _trans})
-                _settings_units = self.cell.settings_units.model_copy()
-                _cell.settings = KCellSettings(**_settings)
-                _cell.info = Info(**self.cell.info.model_dump())
-                _cell.settings_units = _settings_units
+                    cell_.add_port(port=port.copy(trans_))
+                settings = self.cell.settings.model_dump()
+                settings.update({"virtual_trans": trans_})
+                settings_units = self.cell.settings_units.model_copy()
+                cell_.settings = KCellSettings(**settings)
+                cell_.info = Info(**self.cell.info.model_dump())
+                cell_.settings_units = settings_units
             else:
-                _cell = cell.kcl[_cell_name]
-            _inst = cell << _cell
-            _inst.transform(base_trans)
-            return Instance(kcl=self.cell.kcl, instance=_inst.instance)
+                cell_ = cell.kcl[cell_name]
+            inst_ = cell << cell_
+            inst_.transform(base_trans)
+            return Instance(kcl=self.cell.kcl, instance=inst_.instance)
 
         else:
             assert isinstance(self.cell, ProtoTKCell)
-            _trans = trans * self.trans
+            trans_ = trans * self.trans
             base_trans = kdb.DCplxTrans(
-                kdb.ICplxTrans(_trans, cell.kcl.dbu).s_trans().to_dtype(cell.kcl.dbu)
+                kdb.ICplxTrans(trans_, cell.kcl.dbu).s_trans().to_dtype(cell.kcl.dbu)
             )
-            _trans = base_trans.inverted() * _trans
-            _cell_name = self.cell.name
-            if _trans != kdb.DCplxTrans():
-                _trans_str = (
-                    f"_M{_trans.mirror}_S{_trans.angle}"
-                    f"_X{_trans.disp.x}_Y{_trans.disp.y}"
+            trans_ = base_trans.inverted() * trans_
+            cell_name = self.cell.name
+            if trans_ != kdb.DCplxTrans():
+                trans_str = (
+                    f"_M{trans_.mirror}_S{trans_.angle}"
+                    f"_X{trans_.disp.x}_Y{trans_.disp.y}"
                 ).replace(".", "p")
-                _cell_name = _cell_name + _trans_str
-            if cell.kcl.layout_cell(_cell_name) is None:
+                cell_name = cell_name + trans_str
+            if cell.kcl.layout_cell(cell_name) is None:
                 tkcell = self.cell.dup()
-                tkcell.name = _cell_name
+                tkcell.name = cell_name
                 tkcell.flatten(False)
                 for layer in tkcell.kcl.layer_indexes():
-                    tkcell.shapes(layer).transform(_trans)
+                    tkcell.shapes(layer).transform(trans_)
                 for _port in tkcell.ports:
-                    _port.dcplx_trans = _trans * _port.dcplx_trans
+                    _port.dcplx_trans = trans_ * _port.dcplx_trans
             else:
-                tkcell = cell.kcl[_cell_name]
-            _inst = cell << tkcell
-            _inst.transform(base_trans)
-            return Instance(kcl=self.cell.kcl, instance=_inst.instance)
+                tkcell = cell.kcl[cell_name]
+            inst_ = cell << tkcell
+            inst_.transform(base_trans)
+            return Instance(kcl=self.cell.kcl, instance=inst_.instance)
 
     @overload
     def insert_into_flat(
@@ -913,8 +913,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         dconn_trans = kdb.DCplxTrans.M90 if mirror else kdb.DCplxTrans.R180
         match (use_mirror, use_angle):
             case True, True:
-                _trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
-                self.trans = _trans
+                trans = op.dcplx_trans * dconn_trans * p.dcplx_trans.inverted()
+                self.trans = trans
             case False, True:
                 dconn_trans = (
                     kdb.DCplxTrans.M90
@@ -923,8 +923,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 )
                 opt = op.dcplx_trans
                 opt.mirror = False
-                _dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
-                self.trans = _dcplx_trans
+                dcplx_trans = opt * dconn_trans * p.dcplx_trans.inverted()
+                self.trans = dcplx_trans
             case False, False:
                 self.trans = kdb.DCplxTrans(op.dcplx_trans.disp - p.dcplx_trans.disp)
             case True, False:

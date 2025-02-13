@@ -487,5 +487,25 @@ def test_cell_yaml(layers: Layers) -> None:
         cell.delete()
 
 
+def test_cell_default_fallback() -> None:
+    kcl = kf.KCLayout("cell_default_fallback", default_cell_output_type=kf.DKCell)
+
+    @kcl.cell
+    def my_cell():  # type: ignore[no-untyped-def]  # noqa: ANN202
+        c = kcl.kcell()
+        return c
+
+    assert isinstance(my_cell(), kf.DKCell)
+    kcl.default_cell_output_type = kf.KCell
+
+    def my_cell():  # type: ignore[no-untyped-def,no-redef]  # noqa: ANN202
+        c = kcl.kcell()
+        return c
+
+    kf.layout.kcls.pop("cell_default_fallback")
+
+    assert isinstance(my_cell(), kf.KCell)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s"])
