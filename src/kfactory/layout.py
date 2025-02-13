@@ -511,7 +511,6 @@ class KCLayout(
         tags: list[str] | None = ...,
     ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
 
-    # TODO: Fix to support KC once mypy supports it https://github.com/python/mypy/issues/17621
     @overload
     def cell(
         self,
