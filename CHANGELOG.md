@@ -1,3 +1,18 @@
+<a id="v1.1.3"></a>
+# [v1.1.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.3) - 2025-02-13
+
+# What's Changed
+
+## Bug Fixes
+
+- fix route bundle waypoints for um interface [#612](https://github.com/gdsfactory/kfactory/pull/612)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.1.2...v1.1.3
+
+
+[Changes][v1.1.3]
+
+
 <a id="v1.1.2"></a>
 # [v1.1.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.2) - 2025-02-12
 
@@ -1606,6 +1621,7 @@
 [Changes][v0.4.0]
 
 
+[v1.1.3]: https://github.com/gdsfactory/kfactory/compare/v1.1.2...v1.1.3
 [v1.1.2]: https://github.com/gdsfactory/kfactory/compare/v1.1.1...v1.1.2
 [v1.1.1]: https://github.com/gdsfactory/kfactory/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/gdsfactory/kfactory/compare/v1.0.3...v1.1.0
