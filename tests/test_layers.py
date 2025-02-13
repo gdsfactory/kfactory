@@ -18,7 +18,7 @@ def test_layer_infos_valid() -> None:
 def test_layer_infos_invalid_type() -> None:
     with pytest.raises(
         ValidationError,
-        match="All fields in LayerInfos must be of type kdb.LayerInfo.",
+        match=r"All fields in LayerInfos must be of type kdb.LayerInfo.",
     ):
         kf.LayerInfos(layer1="invalid_layer_info")
 
@@ -26,7 +26,7 @@ def test_layer_infos_invalid_type() -> None:
 def test_layer_infos_missing_layer() -> None:
     with pytest.raises(
         ValidationError,
-        match="Layers must specify layer number and datatype.",
+        match=r"Layers must specify layer number and datatype.",
     ):
         kf.LayerInfos(layer1=kf.kdb.LayerInfo(-1, 0))
 
@@ -34,14 +34,14 @@ def test_layer_infos_missing_layer() -> None:
 def test_layer_infos_missing_datatype() -> None:
     with pytest.raises(
         ValidationError,
-        match="Layers must specify layer number and datatype.",
+        match=r"Layers must specify layer number and datatype.",
     ):
         kf.LayerInfos(layer1=kf.kdb.LayerInfo(1, -1))
 
 
 def test_layer_infos_named_layer() -> None:
     layer_info = kf.LayerInfos(layer1=kf.kdb.LayerInfo(1, 0, name="Layer1"))
-    assert layer_info.layer1.name == "layer1"  # type: ignore[attr-defined]
+    assert layer_info.layer1.name == "Layer1"  # type: ignore[attr-defined]
 
 
 def test_layer_infos_unnamed_layer() -> None:
