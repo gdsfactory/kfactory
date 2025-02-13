@@ -544,6 +544,8 @@ def route_bundle(
     if placer_errors and on_placer_error is not None:
         for error in placer_errors:
             logger.error(error)
+        if c.name.startswith("Unnamed_"):
+            c.name = c.kcl.future_cell_name or c.name
         raise PlacerError(
             "Failed to place routes for bundle routing from "
             f"{[p.name for p in start_ports]} to {[p.name for p in end_ports]}"

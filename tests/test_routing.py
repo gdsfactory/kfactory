@@ -780,3 +780,21 @@ def test_placer_error(
             bend90_cell=bend90_small,
             on_placer_error="error",
         )
+
+
+def test_clean_points() -> None:
+    assert [
+        kf.kdb.Point(0, 0),
+        kf.kdb.Point(100, 0),
+        kf.kdb.Point(100, 100),
+    ] == kf.routing.manhattan.clean_points(
+        [
+            kf.kdb.Point(0, 0),
+            kf.kdb.Point(10, 0),
+            kf.kdb.Point(20, 0),
+            kf.kdb.Point(30, 0),
+            kf.kdb.Point(100, 0),
+            kf.kdb.Point(100, 0),
+            kf.kdb.Point(100, 100),
+        ]
+    )
