@@ -113,6 +113,13 @@ def bend90_euler(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
 
 
 @pytest.fixture
+def bend90_euler_small(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
+    return kf.cells.euler.bend_euler(
+        width=0.1, radius=10, layer=layers.WG, enclosure=wg_enc, angle=90
+    )
+
+
+@pytest.fixture
 def bend180_euler(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return kf.cells.euler.bend_euler(
         width=0.5, radius=10, layer=layers.WG, enclosure=wg_enc, angle=180
