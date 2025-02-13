@@ -127,7 +127,7 @@ def route_bundle(
     bbox_routing: Literal["minimal", "full"] = "minimal",
     waypoints: kdb.Trans
     | list[kdb.Point]
-    | kdb.DTrans
+    | kdb.DCplxTrans
     | list[kdb.DPoint]
     | None = None,
     starts: dbu
@@ -332,6 +332,13 @@ def route_bundle(
         min_straight_taper = c.kcl.to_dbu(min_straight_taper)
 
     bboxes_ = [c.kcl.to_dbu(b) for b in cast(list[kdb.DBox], bboxes)]
+    if waypoints is not None:
+        if isinstance(waypoints, list):
+            waypoints = [
+                p.to_itype(c.kcl.dbu) for p in cast(list[kdb.DPoint], waypoints)
+            ]
+        else:
+            waypoints = cast(kdb.DCplxTrans, waypoints).s_trans().to_itype(c.kcl.dbu)
 
     return route_bundle_generic(
         c=c.kcl[c.cell_index()],
