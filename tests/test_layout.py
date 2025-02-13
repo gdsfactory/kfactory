@@ -1,5 +1,4 @@
 import functools
-from unittest.mock import MagicMock
 
 import pytest
 from conftest import Layers
@@ -8,7 +7,14 @@ import kfactory as kf
 
 
 def test_cell_decorator(kcl: kf.KCLayout, layers: Layers) -> None:
-    rectangle_post_process = MagicMock()
+    count: int = 0
+
+    def rectangle_post_process(cell: kf.kcell.TKCell) -> None:
+        assert cell.name == kf.serialization.clean_name(
+            f"rectangle_W{cell.settings['width']}_H{cell.settings['height']}_LWG"
+        )
+        nonlocal count
+        count += 1
 
     @kcl.cell(post_process=[rectangle_post_process])
     def rectangle(width: float, height: float, layer: kf.kdb.LayerInfo) -> kf.DKCell:
@@ -22,10 +28,11 @@ def test_cell_decorator(kcl: kf.KCLayout, layers: Layers) -> None:
 
     assert rectangle_cell is rectangle_cell2
     assert rectangle_cell is not rectangle_cell3
+    assert count == 2
 
-    rectangle_post_process.assert_any_call(rectangle_cell.base)
-    rectangle_post_process.assert_any_call(rectangle_cell3.base)
-    assert rectangle_post_process.call_count == 2
+    # rectangle_post_process.assert_any_call(rectangle_cell.base)
+    # rectangle_post_process.assert_any_call(rectangle_cell3.base)
+    # assert rectangle_post_process.call_count == 2
 
 
 def test_set_settings_functionality(kcl: kf.KCLayout) -> None:

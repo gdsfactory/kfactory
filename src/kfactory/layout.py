@@ -551,7 +551,7 @@ class KCLayout(
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[TKCell], None]] = tuple(),
+        post_process: Iterable[Callable[[K], None]] = tuple(),
         debug_names: bool | None = None,
         tags: list[str] | None = None,
     ) -> (
@@ -834,7 +834,7 @@ class KCLayout(
                                         )
                     # post process the cell
                     for pp in post_process:
-                        pp(cell.base)
+                        pp(cell)  # type: ignore[arg-type]
                     cell.base.lock()
                     if cell.kcl != self:
                         raise ValueError(
