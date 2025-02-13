@@ -6,12 +6,12 @@ from collections import defaultdict
 from collections.abc import Iterable, Sequence
 from dataclasses import InitVar, dataclass, field
 from functools import cached_property
-from typing import Any, Literal, ParamSpec, Protocol, TypedDict, cast
+from typing import Any, Literal, ParamSpec, Protocol, TypedDict, cast, overload
 
 import klayout.db as kdb
+import numpy as np
 
 from ..conf import logger
-from ..enclosure import clean_points
 from ..kcell import DKCell, KCell
 from ..layout import KCLayout
 from ..port import BasePort, Port
@@ -20,6 +20,7 @@ from ..routing.steps import Step, Steps, Straight
 __all__ = [
     "ManhattanRoutePathFunction",
     "ManhattanRoutePathFunction180",
+    "clean_points",
     "clean_points",
     "route_manhattan",
     "route_manhattan_180",
@@ -130,10 +131,10 @@ def route_manhattan_180(
     t1 = port1.dup() if isinstance(port1, kdb.Trans) else port1.trans.dup()
     t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans.dup()
 
-    _p = kdb.Point(0, 0)
+    p = kdb.Point(0, 0)
 
-    p1 = t1 * _p
-    p2 = t2 * _p
+    p1 = t1 * p
+    p2 = t2 * p
 
     if t2.disp == t1.disp and t2.angle == t1.angle:
         raise ValueError("Identically oriented ports cannot be connected")
@@ -150,7 +151,7 @@ def route_manhattan_180(
     # t2 *= kdb.Trans(0, False, end_straight, 0)
 
     points = [p1] if start_straight != 0 else []
-    end_points = [t2 * _p, p2] if end_straight != 0 else [p2]
+    end_points = [t2 * p, p2] if end_straight != 0 else [p2]
     tv = t1.inverted() * (t2.disp - t1.disp)
     if tv.abs() == 0:
         return points + end_points
@@ -304,10 +305,10 @@ class ManhattanRouterSide:
     @property
     def path_length(self) -> int:
         pl: int = 0
-        _l = len(self.pts)
-        if _l > 0:
+        l_ = len(self.pts)
+        if l_ > 0:
             p1 = self.pts[0]
-            for i in range(1, _l):
+            for i in range(1, l_):
                 p2 = self.pts[i]
                 pl += int((p2 - p1).length())
         return pl
@@ -336,19 +337,19 @@ class ManhattanRouter:
         start_points: list[kdb.Point],
         end_points: list[kdb.Point],
     ) -> None:
-        _start = self.start_transformation.dup()
-        _start.mirror = False
-        _end = self.end_transformation.dup()
-        _end.mirror = False
+        start = self.start_transformation.dup()
+        start.mirror = False
+        end = self.end_transformation.dup()
+        end.mirror = False
 
         self.start = ManhattanRouterSide(
             router=self,
-            _t=_start,
+            _t=start,
             pts=start_points,
         )
         self.end = ManhattanRouterSide(
             router=self,
-            _t=_end,
+            _t=end,
             pts=end_points,
         )
         if isinstance(start_steps, int):
@@ -435,12 +436,12 @@ class ManhattanRouter:
                 if ta == 3:
                     right = self.start.right
                     left = self.start.left
-                    _y = y
+                    y_ = y
                 else:
                     right = self.start.left
                     left = self.start.right
-                    _y = -y
-                if x >= self.bend90_radius and _y >= self.bend90_radius:
+                    y_ = -y
+                if x >= self.bend90_radius and y_ >= self.bend90_radius:
                     # straight forward can connect with a single bend
                     self.start.straight(x - self.bend90_radius)
                     left()
@@ -450,12 +451,12 @@ class ManhattanRouter:
                     # vertical way (seen from t1)
                     right()
                     return self.auto_route(max_try - 1)
-                if _y >= 3 * self.bend90_radius:
+                if y_ >= 3 * self.bend90_radius:
                     # enough to route in the other side
                     self.start.straight(self.bend90_radius + x)
                     left()
                     return self.auto_route(max_try - 1)
-                if _y <= -self.bend90_radius or x <= 0:
+                if y_ <= -self.bend90_radius or x <= 0:
                     self.start.straight(x + self.bend90_radius)
                     right()
                     return self.auto_route(max_try - 1)
@@ -467,7 +468,7 @@ class ManhattanRouter:
                         f"{self.start=}; {self.end=}; {self.start.pts=}"
                     )
                     right()
-                    self.start.straight(self.bend90_radius - _y)
+                    self.start.straight(self.bend90_radius - y_)
                     left()
                 else:
                     right()
@@ -481,7 +482,7 @@ class ManhattanRouter:
         )
 
     def collisions(
-        self, log_errors: None | Literal["warn", "error"] = "error"
+        self, log_errors: Literal["warn", "error"] | None = "error"
     ) -> tuple[kdb.Edges, kdb.Edges]:
         """Finds collisions.
 
@@ -502,12 +503,12 @@ class ManhattanRouter:
 
         for p in self.start.pts[2:]:
             new_edge = kdb.Edge(p_start, p)
-            _edges = kdb.Edges([new_edge])
-            potential_collisions = edges.interacting(other=_edges)
+            edges_ = kdb.Edges([new_edge])
+            potential_collisions = edges.interacting(other=edges_)
 
             if not potential_collisions.is_empty():
                 has_collisions = True
-                collisions.join_with(potential_collisions).join_with(_edges)
+                collisions.join_with(potential_collisions).join_with(edges_)
             edges.insert(last_edge)
             last_edge = new_edge
             p_start = p
@@ -591,20 +592,20 @@ def route_manhattan(
     if not invert:
         t1 = port1 if isinstance(port1, kdb.Trans) else port1.trans
         t2 = port2.dup() if isinstance(port2, kdb.Trans) else port2.trans
-        _start_steps = start_steps
-        _end_steps = end_steps
+        start_steps_ = start_steps
+        end_steps_ = end_steps
     else:
         t2 = port1 if isinstance(port1, kdb.Trans) else port1.trans
         t1 = port2 if isinstance(port2, kdb.Trans) else port2.trans
-        _end_steps = end_steps
-        _start_steps = end_steps
+        end_steps_ = end_steps
+        start_steps_ = end_steps
 
     router = ManhattanRouter(
         bend90_radius=bend90_radius,
         start_transformation=t1,
         end_transformation=t2,
-        start_steps=_start_steps,
-        end_steps=_end_steps,
+        start_steps=start_steps_,
+        end_steps=end_steps_,
     )
 
     pts = router.auto_route()
@@ -708,8 +709,8 @@ def path_length_match_manhattan_route(
             old_router, old_settings = routers_settings[0]
             router_group.append((old_router, old_settings))
             for router, settings in routers_settings[1:]:
-                _increasing = settings["dl"] > old_settings["dl"]
-                if increasing is not None and _increasing != increasing:
+                increasing_ = settings["dl"] > old_settings["dl"]
+                if increasing is not None and increasing_ != increasing:
                     if increasing is True:
                         _place_dl_path_length(
                             routers=router_group,
@@ -738,7 +739,7 @@ def path_length_match_manhattan_route(
                     router_group.append((router, settings))
                 old_router = router
                 old_settings = settings
-                increasing = _increasing
+                increasing = increasing_
             if not increasing:
                 router_group.reverse()
             _place_dl_path_length(
@@ -764,11 +765,11 @@ def _place_dl_path_length(
     index: int,
     position: Literal["center", "corner_start", "corner_end"] = "center",
 ) -> None:
-    _l = len(routers) - 1
-    _t = kdb.Trans(angle, False, 0, 0)
-    _tinv = _t.inverted()
+    l_ = len(routers) - 1
+    t_ = kdb.Trans(angle, False, 0, 0)
+    tinv = t_.inverted()
 
-    pmin = max((_tinv * settings["pts"][0]).x for _, settings in routers)
+    pmin = max((tinv * settings["pts"][0]).x for _, settings in routers)
     # pmax = min((_tinv * settings["pts"][1]).x for _, settings in routers)
 
     for i, (router, settings) in enumerate(routers):
@@ -784,35 +785,35 @@ def _place_dl_path_length(
             )
 
         t = kdb.Trans(
-            angle, False, (_t * kdb.Point(pmin, (_tinv * pts[0]).y)).to_v()
+            angle, False, (t_ * kdb.Point(pmin, (tinv * pts[0]).y)).to_v()
         ) * kdb.Trans(kdb.Vector(bend90_radius, 0))
         if direction == 1:
-            _r = kdb.Trans(3, False, bend90_radius, -bend90_radius)
-            _rr = kdb.Trans(1, False, bend90_radius, bend90_radius)
+            r = kdb.Trans(3, False, bend90_radius, -bend90_radius)
+            rr = kdb.Trans(1, False, bend90_radius, bend90_radius)
         else:
-            _r = kdb.Trans(1, False, bend90_radius, bend90_radius)
-            _rr = kdb.Trans(3, False, bend90_radius, -bend90_radius)
+            r = kdb.Trans(1, False, bend90_radius, bend90_radius)
+            rr = kdb.Trans(3, False, bend90_radius, -bend90_radius)
 
-        _p = kdb.Point(bend90_radius, 0)
+        p = kdb.Point(bend90_radius, 0)
 
         dl = path_length - router.start.path_length
 
-        _pts: list[kdb.Point] = []
+        pts_: list[kdb.Point] = []
 
-        _dl = kdb.Trans(dl // (path_loops * 2), 0)
+        dl_ = kdb.Trans(dl // (path_loops * 2), 0)
         for _ in range(path_loops):
-            _pts.append(t * _p)
-            t *= _r
-            t *= _dl
-            _pts.append(t * _p)
-            t *= _rr
-            t *= kdb.Trans((_l - i) * separation * 2, 0)
-            _pts.append(t * _p)
-            t *= _rr
-            t *= _dl
-            _pts.append(t * _p)
-            t *= _r
-        router.start.pts[index:index] = _pts
+            pts_.append(t * p)
+            t *= r
+            t *= dl_
+            pts_.append(t * p)
+            t *= rr
+            t *= kdb.Trans((l_ - i) * separation * 2, 0)
+            pts_.append(t * p)
+            t *= rr
+            t *= dl_
+            pts_.append(t * p)
+            t *= r
+        router.start.pts[index:index] = pts_
         pmin += separation + router.width // 2
 
 
@@ -907,15 +908,15 @@ def route_smart(
                 "parameter to disable this warning."
             )
             bboxes = []
-        _w0 = widths[0]
-        if not all(w == _w0 for w in widths):
+        w0 = widths[0]
+        if not all(w == w0 for w in widths):
             raise NotImplementedError(
                 f"'sort_ports=True' with variable widths is not supported: {widths=}"
             )
         if waypoints is not None:
             return _route_waypoints(
                 waypoints=waypoints,
-                widths=[_w0 for _ in range(len(start_ts))],
+                widths=[w0 for _ in range(len(start_ts))],
                 separation=separation,
                 bend90_radius=bend90_radius,
                 start_ts=start_ts,
@@ -1378,13 +1379,13 @@ def route_smart(
         group_angle: int | None = None
         current_group: list[ManhattanRouter] = []
         for router in sorted_routers:
-            _ang = router.start.t.angle
-            if _ang != group_angle:
+            ang = router.start.t.angle
+            if ang != group_angle:
                 if group_angle is not None:
                     router_groups.append(
                         ((group_angle - target_angle) % 4, current_group)
                     )
-                group_angle = _ang
+                group_angle = ang
                 current_group = []
             current_group.append(router)
         else:
@@ -2013,21 +2014,21 @@ def _backbone2bundle(
     for pw in port_widths:
         x += pw // 2
 
-        _pts = [p.dup() for p in backbone]
-        p1 = _pts[0]
+        pts_ = [p.dup() for p in backbone]
+        p1 = pts_[0]
 
-        for p2, e, dir in zip(_pts[1:], edges, dirs, strict=False):
-            _e = e.shifted(-x)
+        for p2, e, dir in zip(pts_[1:], edges, dirs, strict=False):
+            e_ = e.shifted(-x)
             if dir % 2:
-                p1.x = _e.p1.x
-                p2.x = _e.p2.x
+                p1.x = e_.p1.x
+                p2.x = e_.p2.x
             else:
-                p1.y = _e.p1.y
-                p2.y = _e.p2.y
+                p1.y = e_.p1.y
+                p2.y = e_.p2.y
             p1 = p2
 
         x += spacing + pw - pw // 2
-        pts.append(_pts)
+        pts.append(pts_)
 
     return pts
 
@@ -2086,26 +2087,26 @@ def route_ports_to_bundle(
 
         match dy:
             case 0:
-                _dir = 0
+                dir_ = 0
             case y if y > 0:
-                _dir = 1
+                dir_ = 1
             case _:
-                _dir = -1
-        changed = _dir != old_dir
+                dir_ = -1
+        changed = dir_ != old_dir
         match dy:
             case 0:
                 bend_straight_lengths.append(0)
                 append_straights(straights, current_straights, old_dir == -1)
                 current_straights.append(0)
                 straight = _width + spacing
-                old_dir = _dir
+                old_dir = dir_
             case y if abs(y) < 2 * bend_radius:
                 bend_straight_lengths.append(4 * bend_radius)
                 if not changed:
                     append_straights(straights, current_straights, old_dir == -1)
                     current_straights.append(0)
                     straight = _width + spacing
-                    old_dir = -_dir
+                    old_dir = -dir_
                 else:
                     current_straights.append(straight)
                     straight = 0
@@ -2118,7 +2119,7 @@ def route_ports_to_bundle(
                 else:
                     current_straights.append(straight)
                     straight += _width + spacing
-                old_dir = _dir
+                old_dir = dir_
         bundle_route_y -= _width - _width // 2 + spacing
     append_straights(straights, current_straights, old_dir == -1)
 
@@ -2174,12 +2175,12 @@ def _route_waypoints(
         backbone_end_trans: list[kdb.Trans] = []
         rot_t = waypoints * kdb.Trans.R180
         rot_t.mirror = False
-        _w = -half_width
+        w = -half_width
         for i in range(length_widths):
-            _w += widths[i] // 2
-            backbone_start_trans.append(rot_t * kdb.Trans(0, _w))
-            backbone_end_trans.append(rot_t * kdb.Trans(2, False, 0, _w))
-            _w += widths[i] - widths[i] // 2 + separation
+            w += widths[i] // 2
+            backbone_start_trans.append(rot_t * kdb.Trans(0, w))
+            backbone_end_trans.append(rot_t * kdb.Trans(2, False, 0, w))
+            w += widths[i] - widths[i] // 2 + separation
         start_manhattan_routers = route_smart(
             start_ports=start_ts,
             end_ports=backbone_start_trans,
@@ -2296,3 +2297,44 @@ def _route_waypoints(
             router.finished = True
             all_routers.append(router)
         return all_routers
+
+
+@overload
+def clean_points(points: list[kdb.Point]) -> list[kdb.Point]: ...
+
+
+@overload
+def clean_points(points: list[kdb.DPoint]) -> list[kdb.DPoint]: ...
+
+
+def clean_points(
+    points: list[kdb.Point] | list[kdb.DPoint],
+) -> list[kdb.Point] | list[kdb.DPoint]:
+    """Remove useless points from a manhattan type of list.
+
+    This will remove the middle points that are on a straight line.
+    """
+    if len(points) < 2:
+        return points
+    if len(points) == 2:
+        return points if points[1] != points[0] else points[:1]
+    p_p = points[0]
+    p = points[1]
+
+    del_points: list[int] = []
+
+    for i, p_n in enumerate(points[2:], 2):
+        v2 = p_n - p  # type: ignore[operator]
+        v1 = p - p_p  # type: ignore[operator]
+
+        if (
+            (np.sign(v1.x) == np.sign(v2.x)) and (np.sign(v1.y) == np.sign(v2.y))
+        ) or v2.abs() == 0:
+            del_points.append(i - 1)
+        else:
+            p_p = p
+            p = p_n  # type: ignore[assignment]
+    for i in reversed(del_points):
+        del points[i]
+
+    return points

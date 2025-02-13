@@ -522,7 +522,6 @@ def route_bundle(
             placer_errors.append(e)
             error_routes.append((ps, pe, router.start.pts, router.width))
     if placer_errors and on_placer_error == "show_error":
-        print(len(placer_errors))
         db = rdb.ReportDatabase("Route Placing Errors")
         cell = db.create_cell(
             c.name
@@ -540,12 +539,13 @@ def route_bundle(
             )
             it.add_value(f"Exception: {error}")
             path = kdb.Path(pts, width or ps.cross_section.width)
-            print(f"{width=}")
             it.add_value(c.kcl.to_um(path.polygon()))
         c.show(lyrdb=db)
     if placer_errors and on_placer_error is not None:
         for error in placer_errors:
             logger.error(error)
+        if c.name.startswith("Unnamed_"):
+            c.name = c.kcl.future_cell_name or c.name
         raise PlacerError(
             "Failed to place routes for bundle routing from "
             f"{[p.name for p in start_ports]} to {[p.name for p in end_ports]}"
