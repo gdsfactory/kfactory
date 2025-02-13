@@ -136,9 +136,9 @@ def check_collisions(
     for i, (ps, pe, router) in enumerate(
         zip(start_ports, end_ports, routers, strict=False)
     ):
-        _edges, router_edges = router.collisions(log_errors=None)
-        if not _edges.is_empty():
-            collision_edges[f"{ps.name} - {pe.name} (index: {i})"] = _edges
+        edges_, router_edges = router.collisions(log_errors=None)
+        if not edges_.is_empty():
+            collision_edges[f"{ps.name} - {pe.name} (index: {i})"] = edges_
         inter_route_collision = all_router_edges.interacting(router_edges)
         if not inter_route_collision.is_empty():
             inter_route_collisions.join_with(inter_route_collision)
@@ -188,9 +188,9 @@ def check_collisions(
                     error_region_shapes.insert(shape_region & r)
                 shape_region.insert(r)
             for i, inst in enumerate(insts):
-                _inst_region = kdb.Region(inst.bbox(layer_))
+                inst_region_ = kdb.Region(inst.bbox(layer_))
                 # inst_shapes: kdb.Region | None = None
-                if not (inst_region & _inst_region).is_empty():
+                if not (inst_region & inst_region_).is_empty():
                     # if inst_shapes is None:
                     inst_shapes = kdb.Region()
                     shape_it = c.begin_shapes_rec_overlapping(layer_, inst.bbox(layer_))
@@ -202,22 +202,22 @@ def check_collisions(
                                 _it.shape().polygon.transformed(_it.trans())
                             )
                     for j, _reg in inst_regions.items():
-                        if _reg & _inst_region:
-                            __reg = kdb.Region()
+                        if _reg & inst_region_:
+                            reg = kdb.Region()
                             shape_it = c.begin_shapes_rec_touching(
-                                layer_, (_reg & _inst_region).bbox()
+                                layer_, (_reg & inst_region_).bbox()
                             )
                             shape_it.select_cells([insts[j].cell.cell_index()])
                             shape_it.min_depth = 1
                             for _it in shape_it.each():
                                 if _it.path()[0].inst() == insts[j].instance:
-                                    __reg.insert(
+                                    reg.insert(
                                         _it.shape().polygon.transformed(_it.trans())
                                     )
 
-                            error_region_instances.insert(__reg & inst_shapes)
-                inst_region += _inst_region
-                inst_regions[i] = _inst_region
+                            error_region_instances.insert(reg & inst_shapes)
+                inst_region += inst_region_
+                inst_regions[i] = inst_region_
 
             if not error_region_shapes.is_empty():
                 any_layer_collision = True
@@ -272,9 +272,9 @@ def get_radius(
     p1, p2 = ports_
     if p1.angle == p2.angle:
         return int((p1.trans.disp - p2.trans.disp).length())
-    _p = kdb.Point(1, 0)
-    e1 = kdb.Edge(p1.trans.disp.to_p(), p1.trans * _p)
-    e2 = kdb.Edge(p2.trans.disp.to_p(), p2.trans * _p)
+    p = kdb.Point(1, 0)
+    e1 = kdb.Edge(p1.trans.disp.to_p(), p1.trans * p)
+    e2 = kdb.Edge(p2.trans.disp.to_p(), p2.trans * p)
 
     center = e1.cut_point(e2)
     if center is None:

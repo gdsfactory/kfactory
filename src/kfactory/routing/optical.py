@@ -286,6 +286,7 @@ def route_bundle(
                 "allow_layer_mismatch": allow_width_mismatch,
                 "allow_type_mismatch": allow_type_mismatch,
                 "purpose": purpose,
+                "route_width": route_width,
             },
             start_angles=cast(list[int] | int, start_angles),
             end_angles=cast(list[int] | int, end_angles),
@@ -372,6 +373,7 @@ def route_bundle(
             "allow_layer_mismatch": allow_width_mismatch,
             "allow_type_mismatch": allow_type_mismatch,
             "purpose": purpose,
+            "route_width": route_width,
         },
         start_angles=start_angles,
         end_angles=end_angles,
@@ -561,7 +563,7 @@ def place90(
             wg.connect(
                 wg_p1,
                 p1,
-                allow_width_mismatch=allow_width_mismatch,
+                allow_width_mismatch=route_width is not None or allow_width_mismatch,
                 allow_layer_mismatch=allow_layer_mismatch,
                 allow_type_mismatch=allow_type_mismatch,
             )
@@ -575,7 +577,7 @@ def place90(
             t1.connect(
                 taperp1.name,
                 p1,
-                allow_width_mismatch=allow_width_mismatch,
+                allow_width_mismatch=route_width is not None or allow_width_mismatch,
                 allow_layer_mismatch=allow_layer_mismatch,
                 allow_type_mismatch=allow_type_mismatch,
             )
@@ -1086,13 +1088,25 @@ def route(
                     case 1:
                         bend180 = c << bend180_cell
                         bend180.purpose = purpose
-                        bend180.connect(b180p1.name, p1)
+                        bend180.connect(
+                            b180p1.name,
+                            p1,
+                            allow_width_mismatch=allow_width_mismatch,
+                            allow_layer_mismatch=allow_layer_mismatch,
+                            allow_type_mismatch=allow_type_mismatch,
+                        )
                         start_port = bend180.ports[b180p2.name]
                         pts = pts[1:]
                     case 3:
                         bend180 = c << bend180_cell
                         bend180.purpose = purpose
-                        bend180.connect(b180p2.name, p1)
+                        bend180.connect(
+                            b180p2.name,
+                            p1,
+                            allow_width_mismatch=allow_width_mismatch,
+                            allow_layer_mismatch=allow_layer_mismatch,
+                            allow_type_mismatch=allow_type_mismatch,
+                        )
                         start_port = bend180.ports[b180p1.name]
                         pts = pts[1:]
             if (vec := pts[-1] - pts[-2]).length() == b180r:
@@ -1100,14 +1114,26 @@ def route(
                     case 1:
                         bend180 = c << bend180_cell
                         bend180.purpose = purpose
-                        bend180.connect(b180p1.name, p2)
+                        bend180.connect(
+                            b180p1.name,
+                            p2,
+                            allow_width_mismatch=allow_width_mismatch,
+                            allow_layer_mismatch=allow_layer_mismatch,
+                            allow_type_mismatch=allow_type_mismatch,
+                        )
                         end_port = bend180.ports[b180p2.name]
                         pts = pts[:-1]
                     case 3:
                         bend180 = c << bend180_cell
                         bend180.purpose = purpose
                         # bend180.mirror = True
-                        bend180.connect(b180p2.name, p2)
+                        bend180.connect(
+                            b180p2.name,
+                            p2,
+                            allow_width_mismatch=allow_width_mismatch,
+                            allow_layer_mismatch=allow_layer_mismatch,
+                            allow_type_mismatch=allow_type_mismatch,
+                        )
                         end_port = bend180.ports[b180p1.name]
                         pts = pts[:-1]
 
@@ -1128,10 +1154,22 @@ def route(
                         bend180 = c << bend180_cell
                         bend180.purpose = purpose
                         if start_port.name == b180p2.name:
-                            bend180.connect(b180p1.name, start_port)
+                            bend180.connect(
+                                b180p1.name,
+                                start_port,
+                                allow_width_mismatch=allow_width_mismatch,
+                                allow_layer_mismatch=allow_layer_mismatch,
+                                allow_type_mismatch=allow_type_mismatch,
+                            )
                             start_port = bend180.ports[b180p2.name]
                         else:
-                            bend180.connect(b180p2.name, start_port)
+                            bend180.connect(
+                                b180p2.name,
+                                start_port,
+                                allow_width_mismatch=allow_width_mismatch,
+                                allow_layer_mismatch=allow_layer_mismatch,
+                                allow_type_mismatch=allow_type_mismatch,
+                            )
                             start_port = bend180.ports[b180p1.name]
                         j = i - 1
                     elif (
