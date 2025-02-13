@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- fix layer naming in LayerInfos [#613](https://github.com/gdsfactory/kfactory/pull/613)
 - fix route bundle waypoints for um interface [#612](https://github.com/gdsfactory/kfactory/pull/612)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.1.2...v1.1.3
