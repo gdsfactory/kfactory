@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- change postprocess to get the proper output of the wrapped function [#615](https://github.com/gdsfactory/kfactory/pull/615)
 - Fix route width [#614](https://github.com/gdsfactory/kfactory/pull/614)
 - fix layer naming in LayerInfos [#613](https://github.com/gdsfactory/kfactory/pull/613)
 - fix route bundle waypoints for um interface [#612](https://github.com/gdsfactory/kfactory/pull/612)
