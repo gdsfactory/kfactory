@@ -54,7 +54,7 @@ class LayerInfos(BaseModel):
                     "All fields in LayerInfos must be of type kdb.LayerInfo. "
                     f"Field {field_name} is of type {type(f)}"
                 )
-            if not f.is_named():
+            if not f.name:
                 f.name = field_name
             if f.layer == -1 or f.datatype == -1:
                 raise InvalidLayerError(

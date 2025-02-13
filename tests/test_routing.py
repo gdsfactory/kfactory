@@ -215,6 +215,56 @@ def test_route_bundle(
     c.auto_rename_ports()
 
 
+def test_route_bundle_route_width(
+    layers: Layers,
+    optical_port: kf.Port,
+    bend90_euler_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    kcl: kf.KCLayout,
+) -> None:
+    c = kcl.kcell("TEST_ROUTE_BUNDLE")
+
+    p_start = [
+        optical_port.copy(
+            kf.kdb.Trans(
+                1,
+                False,
+                i * 200_000 - 50_000,
+                (4 - i) * 6_000 if i < 5 else (i - 5) * 6_000,
+            )
+        )
+        for i in range(10)
+    ]
+    p_end = [
+        optical_port.copy(
+            kf.kdb.Trans(3, False, i * 200_000 + i**2 * 19_000 + 500_000, 300_000)
+        )
+        for i in range(10)
+    ]
+
+    c.shapes(kcl.find_layer(10, 0)).insert(kf.kdb.Box(-50_000, 0, 1_750_000, -100_000))
+    c.shapes(kcl.find_layer(10, 0)).insert(
+        kf.kdb.Box(1_000_000, 500_000, p_end[-1].x, 600_000)
+    )
+
+    routes = kf.routing.optical.route_bundle(
+        c,
+        p_start,
+        p_end,
+        5_000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_euler_small,
+        on_collision=None,
+        route_width=100,
+    )
+
+    for route in routes:
+        c.add_port(port=route.start_port)
+        c.add_port(port=route.end_port)
+
+    c.auto_rename_ports()
+
+
 def test_route_length(
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
@@ -730,3 +780,21 @@ def test_placer_error(
             bend90_cell=bend90_small,
             on_placer_error="error",
         )
+
+
+def test_clean_points() -> None:
+    assert [
+        kf.kdb.Point(0, 0),
+        kf.kdb.Point(100, 0),
+        kf.kdb.Point(100, 100),
+    ] == kf.routing.manhattan.clean_points(
+        [
+            kf.kdb.Point(0, 0),
+            kf.kdb.Point(10, 0),
+            kf.kdb.Point(20, 0),
+            kf.kdb.Point(30, 0),
+            kf.kdb.Point(100, 0),
+            kf.kdb.Point(100, 0),
+            kf.kdb.Point(100, 100),
+        ]
+    )
