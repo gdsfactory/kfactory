@@ -89,7 +89,15 @@ def path_pts_to_polygon(
     return kdb.DPolygon(pts_top + pts_bot)
 
 
-def clean_points(points: list[kdb.Point]) -> list[kdb.Point]:
+@overload
+def clean_points(points: list[kdb.Point]) -> list[kdb.Point]: ...
+@overload
+def clean_points(points: list[kdb.DPoint]) -> list[kdb.DPoint]: ...
+
+
+def clean_points(
+    points: list[kdb.Point] | list[kdb.DPoint],
+) -> list[kdb.Point] | list[kdb.DPoint]:
     """Remove useless points from a manhattan type of list.
 
     This will remove the middle points that are on a straight line.
@@ -104,8 +112,8 @@ def clean_points(points: list[kdb.Point]) -> list[kdb.Point]:
     del_points: list[int] = []
 
     for i, p_n in enumerate(points[2:], 2):
-        v2 = p_n - p
-        v1 = p - p_p
+        v2 = p_n - p  # type: ignore[operator]
+        v1 = p - p_p  # type: ignore[operator]
 
         if (
             (np.sign(v1.x) == np.sign(v2.x)) and (np.sign(v1.y) == np.sign(v2.y))
@@ -113,7 +121,7 @@ def clean_points(points: list[kdb.Point]) -> list[kdb.Point]:
             del_points.append(i - 1)
         else:
             p_p = p
-            p = p_n
+            p = p_n  # type: ignore[assignment]
     for i in reversed(del_points):
         del points[i]
 
