@@ -8,15 +8,15 @@ import klayout.db as kdb
 from ..conf import logger
 from ..kcell import DKCell, KCell
 from ..port import DPort, Port
-from ..routing.generic import ManhattanRoute
-from ..routing.generic import route_bundle as route_bundle_generic
-from ..routing.manhattan import (
+from ..typings import dbu, um
+from .generic import ManhattanRoute
+from .generic import route_bundle as route_bundle_generic
+from .manhattan import (
     ManhattanRoutePathFunction,
     route_manhattan,
     route_smart,
 )
-from ..routing.steps import Step, Straight
-from ..typings import dbu, um
+from .steps import Step, Straight
 
 __all__ = [
     "place_dual_rails",
@@ -596,8 +596,8 @@ def route_dual_rails(
         p1.copy(),
         p2.copy(),
         bend90_radius=0,
-        start_straight=start_straight,
-        end_straight=end_straight,
+        start_steps=[Straight(dist=start_straight)],
+        end_steps=[Straight(dist=end_straight)],
     )
 
     path = kdb.Path(pts, width_)
