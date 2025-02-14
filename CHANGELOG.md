@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- fix waypoints in electrical routing for DKCell [#617](https://github.com/gdsfactory/kfactory/pull/617)
 - Fallback for not annotated functions [#616](https://github.com/gdsfactory/kfactory/pull/616)
 - change postprocess to get the proper output of the wrapped function [#615](https://github.com/gdsfactory/kfactory/pull/615)
 - Fix route width [#614](https://github.com/gdsfactory/kfactory/pull/614)
