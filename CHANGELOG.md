@@ -1,5 +1,20 @@
+<a id="v1.1.4"></a>
+# [v1.1.4](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.4) - 2025-02-14
+
+# What's Changed
+
+## Bug Fixes
+
+- fix dual rail route [#618](https://github.com/gdsfactory/kfactory/pull/618)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.1.3...v1.1.4
+
+
+[Changes][v1.1.4]
+
+
 <a id="v1.1.3"></a>
-# [v1.1.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.3) - 2025-02-13
+# [v1.1.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.3) - 2025-02-14
 
 # What's Changed
 
@@ -1626,6 +1641,7 @@
 [Changes][v0.4.0]
 
 
+[v1.1.4]: https://github.com/gdsfactory/kfactory/compare/v1.1.3...v1.1.4
 [v1.1.3]: https://github.com/gdsfactory/kfactory/compare/v1.1.2...v1.1.3
 [v1.1.2]: https://github.com/gdsfactory/kfactory/compare/v1.1.1...v1.1.2
 [v1.1.1]: https://github.com/gdsfactory/kfactory/compare/v1.1.0...v1.1.1
