@@ -376,6 +376,13 @@ def route_bundle(
         if isinstance(ends[0], int | float):
             ends = [c.kcl.to_dbu(end) for end in ends]  # type: ignore[arg-type]
         ends = cast(int | list[int] | list[Step] | list[list[Step]], ends)
+    if waypoints is not None:
+        if isinstance(waypoints, list):
+            waypoints = [
+                p.to_itype(c.kcl.dbu) for p in cast(list[kdb.DPoint], waypoints)
+            ]
+        else:
+            waypoints = cast(kdb.DCplxTrans, waypoints).s_trans().to_itype(c.kcl.dbu)
     return route_bundle_generic(
         c=c.kcl[c.cell_index()],
         start_ports=[p.base for p in start_ports],
