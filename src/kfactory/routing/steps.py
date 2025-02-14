@@ -41,10 +41,10 @@ class Left(Step):
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Make the router turn left and go straight if necessary."""
-        _ib = include_bend if self.include_bend is None else self.include_bend
+        ib = include_bend if self.include_bend is None else self.include_bend
         router.left()
         if self.dist:
-            if _ib:
+            if ib:
                 if (
                     self.dist is not None
                     and self.dist < 2 * router.router.bend90_radius
@@ -76,10 +76,10 @@ class Right(Step):
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Adds the bend and potential straight after."""
-        _ib = include_bend if self.include_bend is None else self.include_bend
+        ib = include_bend if self.include_bend is None else self.include_bend
         router.right()
         if self.dist:
-            if _ib:
+            if ib:
                 if self.dist < 2 * router.router.bend90_radius:
                     bend_radius = router.router.bend90_radius
                     raise ValueError(
@@ -102,9 +102,9 @@ class Straight(Step):
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Adds a straight section to the router."""
-        _ib = include_bend if self.include_bend is None else self.include_bend
+        ib = include_bend if self.include_bend is None else self.include_bend
         if self.dist:
-            if _ib:
+            if ib:
                 router.straight_nobend(self.dist)
             else:
                 router.straight(self.dist)
@@ -118,7 +118,7 @@ class X(Step):
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Adds a straight section to the router."""
-        _ib = include_bend if self.include_bend is None else self.include_bend
+        ib = include_bend if self.include_bend is None else self.include_bend
         if router.t.angle % 2:
             raise ValueError(
                 "Cannot go to position {self.x=}, because the router is currently "
@@ -126,7 +126,7 @@ class X(Step):
                 f"{(router.t.disp.x, router.t.disp.y)}"
             )
         if self.x:
-            if _ib:
+            if ib:
                 router.straight_nobend(self.x - router.t.disp.x)
             else:
                 router.straight(self.x - router.t.disp.x)
@@ -140,7 +140,7 @@ class Y(Step):
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Adds a straight section to the router."""
-        _ib = include_bend if self.include_bend is None else self.include_bend
+        ib = include_bend if self.include_bend is None else self.include_bend
         if router.t.angle % 2 == 0:
             raise ValueError(
                 "Cannot go to position {self.x=}, because the router is currently "
@@ -148,7 +148,7 @@ class Y(Step):
                 f"{(router.t.disp.x, router.t.disp.y)}"
             )
         if self.y:
-            if _ib:
+            if ib:
                 router.straight_nobend(self.y - router.t.disp.y)
             else:
                 router.straight(self.y - router.t.disp.y)
@@ -163,7 +163,7 @@ class XY(Step):
 
     def execute(self, router: ManhattanRouterSide, include_bend: bool) -> None:
         """Executes the step on a router."""
-        _ib = include_bend if self.include_bend is None else self.include_bend
+        ib = include_bend if self.include_bend is None else self.include_bend
         dx = self.x - router.t.disp.x
         dy = self.y - router.t.disp.y
         a = router.t.angle
@@ -177,7 +177,7 @@ class XY(Step):
                         f"Current position: {router.t.disp!r}.\n"
                         f"Target Position ({self.x},{self.y})"
                     )
-                    if _ib:
+                    if ib:
                         router.straight_nobend(abs(dx))
                     else:
                         router.straight(abs(dx))
@@ -191,7 +191,7 @@ class XY(Step):
                         else:
                             router.right()
                     dy = self.y - router.t.disp.y
-                    if _ib:
+                    if ib:
                         if abs(dy) < 0:
                             raise ValueError(
                                 "XY's y-step is too small. It is current pointing"
@@ -223,7 +223,7 @@ class XY(Step):
                         f"Current position: {router.t.disp!r}.\n"
                         f"Target Position ({self.x},{self.y})"
                     )
-                    if _ib:
+                    if ib:
                         router.straight_nobend(abs(dy))
                     else:
                         router.straight(abs(dy))
@@ -237,7 +237,7 @@ class XY(Step):
                         else:
                             router.right()
                     dx = self.x - router.t.disp.x
-                    if _ib:
+                    if ib:
                         if abs(dy) < 0:
                             raise ValueError(
                                 "XY's y-step is too small. It is current pointing"

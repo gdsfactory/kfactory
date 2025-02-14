@@ -48,6 +48,7 @@ from .kcell import (
     DKCells,
     KCell,
     KCells,
+    ProtoTKCell,
     TKCell,
     TVCell,
     VKCell,
@@ -175,6 +176,7 @@ class KCLayout(
     future_cell_name: str | None
 
     decorators: Decorators
+    default_cell_output_type: type[KCell | DKCell] = KCell
 
     def __init__(
         self,
@@ -190,6 +192,7 @@ class KCLayout(
         port_rename_function: Callable[..., None] = rename_clockwise_multi,
         copy_base_kcl_layers: bool = True,
         info: dict[str, MetaData] | None = None,
+        default_cell_output_type: type[KCell | DKCell] = KCell,
     ) -> None:
         """Create a new KCLayout (PDK). Can be based on an old KCLayout.
 
@@ -240,6 +243,7 @@ class KCLayout(
                 meta_format="v3",
             ),
             decorators=Decorators(self),
+            default_cell_output_type=default_cell_output_type,
         )
 
         self.library.register(self.name)
@@ -502,12 +506,11 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[TKCell], None]] = ...,
+        post_process: Iterable[Callable[[K], None]] = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
 
-    # TODO: Fix to support KC once mypy supports it https://github.com/python/mypy/issues/17621
     @overload
     def cell(
         self,
@@ -527,12 +530,12 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[TKCell], None]] = ...,
+        post_process: Iterable[Callable[[K], None]] = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[[KCellFunc[KCellParams, AnyTKCell]], KCellFunc[KCellParams, K]]: ...
 
-    def cell(  # type: ignore[misc]
+    def cell(
         self,
         _func: KCellFunc[KCellParams, K] | None = None,
         /,
@@ -619,16 +622,13 @@ class KCLayout(
             f: KCellFunc[KCellParams, AnyTKCell] | KCellFunc[KCellParams, K],
         ) -> KCellFunc[KCellParams, K]:
             sig = inspect.signature(f)
-            output_cell_type_: type[K] | type[inspect.Signature.empty] = (  # type: ignore[valid-type]
-                output_type or sig.return_annotation
-            )
-
-            if output_cell_type_ is inspect.Signature.empty:
-                raise ValueError(
-                    "You did not provide an output_type and the return annotation "
-                    "cannot be inferred from the function signature. Please provide "
-                    "an output_type or return annotation."
-                )
+            output_cell_type_: type[K] | type[ProtoTKCell[Any]]
+            if output_type is not None:
+                output_cell_type_ = output_type
+            elif sig.return_annotation is not inspect.Signature.empty:
+                output_cell_type_ = sig.return_annotation
+            else:
+                output_cell_type_ = self.default_cell_output_type
 
             output_cell_type = cast(type[K], output_cell_type_)
 
