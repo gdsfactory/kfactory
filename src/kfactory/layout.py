@@ -1233,8 +1233,14 @@ class KCLayout(
             self.layout.delete_cells(cell_index_list)
             self.rebuild()
 
+    def assign(self, layout: kdb.Layout) -> None:
+        """Assign a new Layout object to the KCLayout object."""
+        with self.thread_lock:
+            self.layout.assign(layout)
+            self.rebuild()
+
     def rebuild(self) -> None:
-        """Rebuild the KCLayout based on the Layoutt object."""
+        """Rebuild the KCLayout based on the Layout object."""
         kcells2delete: list[int] = []
         with self.thread_lock:
             for ci, c in self.tkcells.items():
@@ -1243,6 +1249,12 @@ class KCLayout(
 
             for ci in kcells2delete:
                 del self.tkcells[ci]
+
+            for cell in self._cells("*"):
+                if cell.cell_index() not in self.tkcells:
+                    self.tkcells[cell.cell_index()] = self.get_cell(
+                        cell.cell_index(), KCell
+                    ).base
 
     def register_cell(self, kcell: AnyTKCell, allow_reregister: bool = False) -> None:
         """Register an existing cell in the KCLayout object.
