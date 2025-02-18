@@ -246,5 +246,29 @@ def test_clear_kcells(kcl: kf.KCLayout, layers: Layers) -> None:
     assert c.destroyed()
 
 
+def test_kclayout_rebuild(kcl: kf.KCLayout, layers: Layers) -> None:
+    straight = kf.factories.straight.straight_dbu_factory(kcl)(
+        length=1000, width=1000, layer=layers.WG
+    )
+    del kcl.tkcells[straight.cell_index()]
+    assert len(kcl.tkcells) == 0
+    assert len(list(kcl.layout.each_cell())) == 1
+
+    kcl.rebuild()
+    assert len(kcl.kcells) == 1
+    assert len(list(kcl.layout.each_cell())) == 1
+
+
+def test_kclayout_assign(kcl: kf.KCLayout, layers: Layers) -> None:
+    kcl2 = kf.KCLayout(name="kcl2")
+    kcl2.infos = layers
+    kf.factories.straight.straight_dbu_factory(kcl2)(
+        length=1000, width=1000, layer=layers.WG
+    )
+    kcl.assign(kcl2.layout)
+    assert len(kcl2.kcells) == 1
+    assert len(list(kcl2.layout.each_cell())) == 1
+
+
 if __name__ == "__main__":
     pytest.main(["-s", __file__])
