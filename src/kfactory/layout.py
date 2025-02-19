@@ -219,9 +219,14 @@ class KCLayout(
         layer_stack = layer_stack or LayerStack()
         constants_ = constants() if constants else Constants()
         infos_ = infos() if infos else LayerInfos()
+        if layer_enclosures is not None:
+            if isinstance(layer_enclosures, dict):
+                layer_enclosures = LayerEnclosureModel(root=layer_enclosures)
+        else:
+            layer_enclosures = LayerEnclosureModel(root={})
         super().__init__(
             name=name,
-            layer_enclosures=LayerEnclosureModel(dict()),
+            layer_enclosures=layer_enclosures,
             cross_sections=CrossSectionModel(kcl=self),
             enclosure=KCellEnclosure([]),
             infos=infos_,
@@ -257,11 +262,8 @@ class KCLayout(
         interconnect_cml_path = interconnect_cml_path
         if enclosure is None:
             enclosure = KCellEnclosure([])
-        if layer_enclosures is None:
-            layer_enclosures_ = LayerEnclosureModel()
         self.sparameters_path = sparameters_path
         self.enclosure = enclosure
-        self.layer_enclosures = layer_enclosures_
         self.interconnect_cml_path = interconnect_cml_path
 
         kcls[self.name] = self
