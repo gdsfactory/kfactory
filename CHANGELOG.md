@@ -1,20 +1,18 @@
-<a id="v1.2.0"></a>
-# [v1.2.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.2.0) - 2025-02-14
+<a id="v1.1.4"></a>
+# [v1.1.4](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.4) - 2025-02-19
 
 # What's Changed
 
-## New
-
-- Update KCLayout.rebuild to add kcells from the layout [#620](https://github.com/gdsfactory/kfactory/pull/620)
-
 ## Bug Fixes
 
+- fix enclosure model on init [#621](https://github.com/gdsfactory/kfactory/pull/621)
+- Update KCLayout.rebuild to add kcells from the layout [#620](https://github.com/gdsfactory/kfactory/pull/620)
 - fix dual rail route [#618](https://github.com/gdsfactory/kfactory/pull/618)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.1.3...v1.2.0
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.1.3...v1.1.4
 
 
-[Changes][v1.2.0]
+[Changes][v1.1.4]
 
 
 <a id="v1.1.3"></a>
@@ -1645,7 +1643,7 @@
 [Changes][v0.4.0]
 
 
-[v1.2.0]: https://github.com/gdsfactory/kfactory/compare/v1.1.3...v1.2.0
+[v1.1.4]: https://github.com/gdsfactory/kfactory/compare/v1.1.3...v1.1.4
 [v1.1.3]: https://github.com/gdsfactory/kfactory/compare/v1.1.2...v1.1.3
 [v1.1.2]: https://github.com/gdsfactory/kfactory/compare/v1.1.1...v1.1.2
 [v1.1.1]: https://github.com/gdsfactory/kfactory/compare/v1.1.0...v1.1.1
