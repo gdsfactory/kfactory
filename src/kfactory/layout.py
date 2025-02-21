@@ -1687,11 +1687,7 @@ class KCLayout(
                 "Cell kwargs are not allowed for retrieving static cells by integer "
                 "or the cell itself."
             )
-        if isinstance(spec, int):
-            c: ProtoTKCell[Any] = self.kcells[spec]
-        else:
-            c = spec
-        return c
+        return self.kcells[spec] if isinstance(spec, int) else spec
 
 
 KCLayout.model_rebuild()

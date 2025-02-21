@@ -109,12 +109,10 @@ def yaml_to_lyp(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
     lv.save_layer_props(str(out))
 
 
-def lyp_to_yaml(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
-    """Convert a lyp file to a YAML ffile."""
+def lyp_to_lyp_model(inp: pathlib.Path | str) -> LypModel:
+    """Convert a lyp file to a LypModel."""
     f = pathlib.Path(inp).resolve()
     assert f.exists()
-
-    yaml = YAML()
 
     lv = lay.LayoutView()
     lv.load_layer_props(str(f))
@@ -134,6 +132,16 @@ def lyp_to_yaml(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
 
     lyp_m = LypModel(layers=layers)
 
+    return lyp_m
+
+
+def lyp_to_yaml(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
+    """Convert a lyp file to a YAML ffile."""
+
+    yaml = YAML()
+
+    lyp_m = lyp_to_lyp_model(inp)
+
     yaml.dump(loads(lyp_m.model_dump_json()), pathlib.Path(out))
 
 
@@ -145,10 +153,10 @@ def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
         frame_color=Color(hex(kl.frame_color)) if kl.frame_color else None,
         fill_color=Color(hex(kl.fill_color)) if kl.fill_color else None,
         dither_pattern=index2dither[kl.dither_pattern],
-        line_style=index2line[kl.line_style],
+        line_style=index2line.get(kl.line_style, "solid"),
         visible=kl.visible,
         width=kl.width,
-        xfill=kl.width,
+        xfill=kl.xfill,
         layer_to_name=kl.name.endswith(f" - {kl.source_layer}/{kl.source_datatype}"),
         transparent=kl.transparent,
         valid=kl.valid,
