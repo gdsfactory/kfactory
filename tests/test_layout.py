@@ -318,6 +318,7 @@ def test_get_component(layers: Layers) -> None:
             length=10,
             layer=layers.WG,
         )
+    with pytest.raises(ValueError):
         kf.kcl.get_component(
             kf.cells.straight.straight(
                 width=1, length=10, layer=layers.WG
