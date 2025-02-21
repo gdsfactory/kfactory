@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- properly require newest klayout in python [#622](https://github.com/gdsfactory/kfactory/pull/622)
 - fix enclosure model on init [#621](https://github.com/gdsfactory/kfactory/pull/621)
 - Update KCLayout.rebuild to add kcells from the layout [#620](https://github.com/gdsfactory/kfactory/pull/620)
 - fix dual rail route [#618](https://github.com/gdsfactory/kfactory/pull/618)
