@@ -294,6 +294,13 @@ def test_get_component(layers: Layers) -> None:
         output_type=kf.DKCell,
     )
     kf.kcl.get_component(
+        {
+            "component": "straight",
+            "settings": dict(width=1000, length=10_000, layer=kf.kdb.LayerInfo(1, 0)),
+        },
+        output_type=kf.DKCell,
+    )
+    kf.kcl.get_component(
         kf.cells.straight.straight,
         width=1,
         length=10,
@@ -327,6 +334,11 @@ def test_get_component(layers: Layers) -> None:
             width=1,
             length=10,
             layer=layers.WG,
+        )
+    with pytest.raises(TypeError):
+        kf.kcl.get_component(
+            {"component": "straight"},
+            output_type=kf.DKCell,
         )
 
 
