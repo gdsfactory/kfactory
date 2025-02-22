@@ -274,16 +274,16 @@ def test_get_component(layers: Layers) -> None:
     # normal functions
     kf.kcl.get_component(
         "straight", width=1000, length=10_000, layer=kf.kdb.LayerInfo(1, 0)
-    )
+    ).delete()
     kf.kcl.get_component(
         kf.cells.straight.straight, width=1, length=10, layer=layers.WG
-    )
+    ).delete()
     kf.kcl.get_component(
         kf.cells.straight.straight(width=1, length=10, layer=layers.WG)
-    )
+    ).delete()
     kf.kcl.get_component(
         kf.cells.straight.straight(width=1, length=10, layer=layers.WG).cell_index()
-    )
+    ).delete()
 
     # output_type functions
     kf.kcl.get_component(
@@ -292,29 +292,29 @@ def test_get_component(layers: Layers) -> None:
         length=10_000,
         layer=kf.kdb.LayerInfo(1, 0),
         output_type=kf.DKCell,
-    )
+    ).delete()
     kf.kcl.get_component(
         {
             "component": "straight",
             "settings": dict(width=1000, length=10_000, layer=kf.kdb.LayerInfo(1, 0)),
         },
         output_type=kf.DKCell,
-    )
+    ).delete()
     kf.kcl.get_component(
         kf.cells.straight.straight,
         width=1,
         length=10,
         layer=layers.WG,
         output_type=kf.DKCell,
-    )
+    ).delete()
     kf.kcl.get_component(
         kf.cells.straight.straight(width=1, length=10, layer=layers.WG),
         output_type=kf.DKCell,
-    )
+    ).delete()
     kf.kcl.get_component(
         kf.cells.straight.straight(width=1, length=10, layer=layers.WG).cell_index(),
         output_type=kf.DKCell,
-    )
+    ).delete()
 
     # raises errors
     with pytest.raises(ValueError):
