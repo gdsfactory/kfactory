@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- fix duplicate cell because of test [#626](https://github.com/gdsfactory/kfactory/pull/626)
 - Fix layer properties conversion [#624](https://github.com/gdsfactory/kfactory/pull/624)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.1.5...v1.2.0
