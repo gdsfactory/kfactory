@@ -1,3 +1,22 @@
+<a id="v1.2.0"></a>
+# [v1.2.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.2.0) - 2025-02-21
+
+# What's Changed
+
+## New
+
+- add a  function for `get_component` [#625](https://github.com/gdsfactory/kfactory/pull/625)
+
+## Bug Fixes
+
+- Fix layer properties conversion [#624](https://github.com/gdsfactory/kfactory/pull/624)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.1.5...v1.2.0
+
+
+[Changes][v1.2.0]
+
+
 <a id="v1.1.5"></a>
 # [v1.1.5](https://github.com/gdsfactory/kfactory/releases/tag/v1.1.5) - 2025-02-21
 
@@ -1644,6 +1663,7 @@
 [Changes][v0.4.0]
 
 
+[v1.2.0]: https://github.com/gdsfactory/kfactory/compare/v1.1.5...v1.2.0
 [v1.1.5]: https://github.com/gdsfactory/kfactory/compare/v1.1.3...v1.1.5
 [v1.1.3]: https://github.com/gdsfactory/kfactory/compare/v1.1.2...v1.1.3
 [v1.1.2]: https://github.com/gdsfactory/kfactory/compare/v1.1.1...v1.1.2
