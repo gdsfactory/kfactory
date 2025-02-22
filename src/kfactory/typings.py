@@ -1,6 +1,16 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated, Any, ParamSpec, TypeAlias, TypeVar
+from collections.abc import Callable
+from typing import (
+    TYPE_CHECKING,
+    Annotated,
+    Any,
+    NotRequired,
+    ParamSpec,
+    TypeAlias,
+    TypedDict,
+    TypeVar,
+)
 
 import klayout.db as kdb
 import klayout.lay as lay
@@ -11,7 +21,6 @@ if TYPE_CHECKING:
     from .layer import LayerEnum, LayerInfos
     from .layout import Constants
     from .port import ProtoPort
-
 
 T = TypeVar("T")
 K = TypeVar("K", bound="ProtoTKCell[Any]")
@@ -25,6 +34,12 @@ TPort = TypeVar("TPort", bound="ProtoPort[Any]")
 TInstance = TypeVar("TInstance", bound="ProtoInstance[Any]", covariant=True)
 TBaseCell = TypeVar("TBaseCell", bound="BaseKCell", covariant=True)
 KCellParams = ParamSpec("KCellParams")
+
+
+class KCellSpecDict(TypedDict):
+    component: str
+    settings: NotRequired[dict[str, Any]]
+
 
 AnyTrans = TypeVar(
     "AnyTrans", bound=kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans
@@ -106,3 +121,6 @@ unit: TypeAlias = int | float
 """Database unit or micrometer."""
 Angle: TypeAlias = int
 """Integer in the range of `[0,1,2,3]` which are increments in 90°."""
+KCellSpec: TypeAlias = (
+    "int | str | KCellSpecDict | ProtoTKCell[Any] | Callable[..., ProtoTKCell[Any]]"
+)

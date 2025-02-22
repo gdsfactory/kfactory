@@ -67,7 +67,7 @@ from .serialization import (
     get_cell_name,
 )
 from .settings import Info, KCellSettings, KCellSettingsUnits
-from .typings import K, KCellParams, MetaData, T
+from .typings import K, KCellParams, KCellSpec, MetaData, T
 from .utilities import load_layout_options, save_layout_options
 
 kcl: KCLayout
@@ -1637,6 +1637,57 @@ class KCLayout(
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.name}, n={len(self.kcells)})"
+
+    @overload
+    def get_component(
+        self, spec: KCellSpec, *, output_type: type[K], **cell_kwargs: Any
+    ) -> K: ...
+
+    @overload
+    def get_component(
+        self,
+        spec: int,
+    ) -> KCell: ...
+
+    @overload
+    def get_component(
+        self,
+        spec: str,
+        **cell_kwargs: Any,
+    ) -> ProtoTKCell[Any]: ...
+
+    @overload
+    def get_component(
+        self,
+        spec: Callable[..., K],
+        **cell_kwargs: Any,
+    ) -> K: ...
+    @overload
+    def get_component(self, spec: K) -> K: ...
+
+    def get_component(
+        self,
+        spec: KCellSpec,
+        *,
+        output_type: type[K] | None = None,
+        **cell_kwargs: Any,
+    ) -> ProtoTKCell[Any]:
+        if output_type:
+            return output_type(base=self.get_component(spec, **cell_kwargs).base)
+        if callable(spec):
+            return spec(**cell_kwargs)
+        if isinstance(spec, dict):
+            settings = spec.get("settings", {}).copy()
+            settings.update(cell_kwargs)
+            return self.factories[spec["component"]](**settings)
+        elif isinstance(spec, str):
+            return self.factories[spec](**cell_kwargs)
+        if cell_kwargs:
+            raise ValueError(
+                "Cell kwargs are not allowed for retrieving static cells by integer "
+                "or the cell itself."
+            )
+        return self.kcells[spec] if isinstance(spec, int) else spec
 
 
 KCLayout.model_rebuild()

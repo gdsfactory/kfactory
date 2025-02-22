@@ -270,5 +270,77 @@ def test_kclayout_assign(kcl: kf.KCLayout, layers: Layers) -> None:
     assert len(list(kcl2.layout.each_cell())) == 1
 
 
+def test_get_component(layers: Layers) -> None:
+    # normal functions
+    kf.kcl.get_component(
+        "straight", width=1000, length=10_000, layer=kf.kdb.LayerInfo(1, 0)
+    )
+    kf.kcl.get_component(
+        kf.cells.straight.straight, width=1, length=10, layer=layers.WG
+    )
+    kf.kcl.get_component(
+        kf.cells.straight.straight(width=1, length=10, layer=layers.WG)
+    )
+    kf.kcl.get_component(
+        kf.cells.straight.straight(width=1, length=10, layer=layers.WG).cell_index()
+    )
+
+    # output_type functions
+    kf.kcl.get_component(
+        "straight",
+        width=1000,
+        length=10_000,
+        layer=kf.kdb.LayerInfo(1, 0),
+        output_type=kf.DKCell,
+    )
+    kf.kcl.get_component(
+        {
+            "component": "straight",
+            "settings": dict(width=1000, length=10_000, layer=kf.kdb.LayerInfo(1, 0)),
+        },
+        output_type=kf.DKCell,
+    )
+    kf.kcl.get_component(
+        kf.cells.straight.straight,
+        width=1,
+        length=10,
+        layer=layers.WG,
+        output_type=kf.DKCell,
+    )
+    kf.kcl.get_component(
+        kf.cells.straight.straight(width=1, length=10, layer=layers.WG),
+        output_type=kf.DKCell,
+    )
+    kf.kcl.get_component(
+        kf.cells.straight.straight(width=1, length=10, layer=layers.WG).cell_index(),
+        output_type=kf.DKCell,
+    )
+
+    # raises errors
+    with pytest.raises(ValueError):
+        kf.kcl.get_component(
+            kf.cells.straight.straight(width=1, length=10, layer=layers.WG),
+            output_type=kf.DKCell,
+            width=1,
+            length=10,
+            layer=layers.WG,
+        )
+    with pytest.raises(ValueError):
+        kf.kcl.get_component(
+            kf.cells.straight.straight(
+                width=1, length=10, layer=layers.WG
+            ).cell_index(),
+            output_type=kf.DKCell,
+            width=1,
+            length=10,
+            layer=layers.WG,
+        )
+    with pytest.raises(TypeError):
+        kf.kcl.get_component(
+            {"component": "straight"},
+            output_type=kf.DKCell,
+        )
+
+
 if __name__ == "__main__":
     pytest.main(["-s", __file__])
