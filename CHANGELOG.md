@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- fix the filling functions not accepting all kinds of ProtoTKCell [#627](https://github.com/gdsfactory/kfactory/pull/627)
 - fix duplicate cell because of test [#626](https://github.com/gdsfactory/kfactory/pull/626)
 - Fix layer properties conversion [#624](https://github.com/gdsfactory/kfactory/pull/624)
 
