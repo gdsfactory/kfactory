@@ -4,10 +4,11 @@
 minimum space violations and then applies a fix.
 """
 
-from typing import overload
+from typing import Any, overload
 
-from .. import KCell, kdb
+from .. import kdb
 from ..conf import config, logger
+from ..kcell import KCell, ProtoTKCell
 
 __all__ = [
     "fix_spacing_minkowski_tiled",
@@ -48,7 +49,7 @@ def fix_spacing_tiled(
 
 
 def fix_spacing_tiled(
-    c: KCell,
+    c: ProtoTKCell[Any],
     min_space: int,
     layer: kdb.LayerInfo,
     metrics: kdb.Metrics = kdb.Metrics.Euclidian,
@@ -89,6 +90,7 @@ def fix_spacing_tiled(
         fix: Region containing the fixes for the violations
 
     """
+    c = KCell(base=c.base)
     if tile_size is None:
         min(25 * min_space, 250)
         tile_size = (30 * min_space * c.kcl.dbu, 30 * min_space * c.kcl.dbu)
@@ -273,7 +275,7 @@ def fix_spacing_minkowski_tiled(
 
 
 def fix_width_minkowski_tiled(
-    c: KCell,
+    c: ProtoTKCell[Any],
     min_width: int,
     ref: kdb.LayerInfo | kdb.Region,
     n_threads: int | None = None,
@@ -297,6 +299,7 @@ def fix_width_minkowski_tiled(
     Returns:
         kdb.Region: Region containing the fixes for the violations
     """
+    c = KCell(base=c.base)
     tp = kdb.TilingProcessor()
     tp.frame = c.dbbox()  # type: ignore[misc, assignment]
     tp.dbu = c.kcl.dbu
@@ -347,7 +350,7 @@ def fix_width_minkowski_tiled(
 
 
 def fix_width_and_spacing_minkowski_tiled(
-    c: KCell,
+    c: ProtoTKCell[Any],
     min_space: int,
     min_width: int,
     ref: kdb.LayerInfo | kdb.Region,
@@ -376,6 +379,7 @@ def fix_width_and_spacing_minkowski_tiled(
     Returns:
         kdb.Region: Region containing the fixes for the violations
     """
+    c = KCell(base=c.base)
     tp = kdb.TilingProcessor()
     tp.frame = c.dbbox()  # type: ignore[misc, assignment]
     tp.dbu = c.kcl.dbu

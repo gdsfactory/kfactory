@@ -4,10 +4,11 @@ Filling empty regions in [KCells][kfactory.kcell.KCell] with filling cells.
 """
 
 from collections.abc import Iterable
+from typing import Any
 
 from .. import kdb
 from ..conf import config, logger
-from ..kcell import KCell
+from ..kcell import KCell, ProtoTKCell
 from ..layout import KCLayout
 
 stop = False
@@ -99,8 +100,8 @@ class FillOperator(kdb.TileOutputReceiver):
 
 
 def fill_tiled(
-    c: KCell,
-    fill_cell: KCell,
+    c: ProtoTKCell[Any],
+    fill_cell: ProtoTKCell[Any],
     fill_layers: Iterable[tuple[kdb.LayerInfo, int]] = [],
     fill_regions: Iterable[tuple[kdb.Region, int]] = [],
     exclude_layers: Iterable[tuple[kdb.LayerInfo, int]] = [],
@@ -135,6 +136,8 @@ def fill_tiled(
         tile_border: The tile border to consider for excludes
         multi: Use the region_fill_multi strategy instead of single fill.
     """
+    c = KCell(base=c.base)
+    fill_cell = KCell(base=fill_cell.base)
     if n_threads is None:
         n_threads = config.n_threads
     tp = kdb.TilingProcessor()
@@ -186,21 +189,21 @@ def fill_tiled(
         exregion_names.append(region_name)
 
     if row_step is None:
-        _row_step = kdb.Vector(fill_cell.bbox().width() + int(x_space / c.kcl.dbu), 0)
+        row_step_ = kdb.Vector(fill_cell.bbox().width() + int(x_space / c.kcl.dbu), 0)
     else:
-        _row_step = c.kcl.to_dbu(row_step)
+        row_step_ = c.kcl.to_dbu(row_step)
     if col_step is None:
-        _col_step = kdb.Vector(0, fill_cell.bbox().height() + int(y_space / c.kcl.dbu))
+        col_step_ = kdb.Vector(0, fill_cell.bbox().height() + int(y_space / c.kcl.dbu))
     else:
-        _col_step = c.kcl.to_dbu(col_step)
+        col_step_ = c.kcl.to_dbu(col_step)
     fc_bbox = fill_cell.bbox()
     operator = FillOperator(
         c.kcl,
         c,
         fill_cell.cell_index(),
         fc_bbox=fc_bbox,
-        row_step=_row_step,
-        column_step=_col_step,
+        row_step=row_step_,
+        column_step=col_step_,
         origin=c.bbox().p1,
     )
     tp.output(

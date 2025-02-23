@@ -21,7 +21,7 @@ from .cross_section import (
 )
 from .enclosure import KCellEnclosure, LayerEnclosure
 from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
-from .kcell import BaseKCell, DKCell, KCell, VKCell, show
+from .kcell import BaseKCell, DKCell, KCell, ProtoTKCell, VKCell, show
 from .ports import Ports, DPorts
 from .port import Port, DPort
 from .instance import Instance, DInstance, VInstance
@@ -82,6 +82,7 @@ __all__ = [
     "LayerStack",
     "Port",
     "Ports",
+    "ProtoTKCell",
     "SymmetricalCrossSection",
     "VInstance",
     "VInstanceGroup",
