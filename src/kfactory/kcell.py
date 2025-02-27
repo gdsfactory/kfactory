@@ -458,7 +458,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         if base is not None:
             self._base = base
             return
-        from .layout import get_default_kcl
+        from .layout import get_default_kcl, kcls
 
         kcl_ = kcl or get_default_kcl()
         if name is None:
@@ -487,6 +487,9 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     f"Cell {kdb_cell_.name} in {kcl_.name}: {ports=}, {info=},"
                     f" {settings=}"
                 )
+            kcls[kdb_cell_.library().name()][
+                kdb_cell_.library_cell_index()
+            ].set_meta_data()
             self.get_meta_data()
         self.kcl.register_cell(self)
 
