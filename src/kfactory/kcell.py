@@ -470,6 +470,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         kdb_cell_ = kdb_cell or kcl_.create_cell(name_)
         if name_ == "Unnamed_!":
             kdb_cell_.name = f"Unnamed_{kdb_cell_.cell_index()}"
+
         self._base = TKCell(
             kcl=kcl_,
             info=Info(**(info or {})),
@@ -478,6 +479,15 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             ports=[port.base for port in ports] if ports else [],
             vinsts=VInstances(),
         )
+        if kdb_cell_.is_library_cell():
+            if name or ports or info or settings:
+                raise ValueError(
+                    "If a TKCell is created from a library cell (separate PDK/layout), "
+                    "ports, info, and settings must not be set."
+                    f"Cell {kdb_cell_.name} in {kcl_.name}: {ports=}, {info=},"
+                    f" {settings=}"
+                )
+            self.get_meta_data()
         self.kcl.register_cell(self)
 
     @abstractmethod
@@ -710,23 +720,22 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         assert cell.layout().library() is not None
         lib_ci = self.kcl.layout.add_lib_cell(cell.kcl.library, cell.cell_index())
         if lib_ci not in self.kcl.tkcells:
-            cell.set_meta_data()
             kcell = self.kcl[lib_ci]
-            kcell.get_meta_data()
         if libcell_as_static:
             cell.set_meta_data()
             ci = self.kcl.layout.convert_cell_to_static(lib_ci)
-            kcell = self.kcl[ci]
-            kcell.copy_meta_info(cell.kdb_cell)
-            kcell.name = cell.kcl.name + static_name_separator + cell.name
-            if cell.kcl.dbu != self.kcl.dbu:
-                for port, lib_port in zip(kcell.ports, cell.ports, strict=False):
-                    port.cross_section = CrossSection(
-                        kcl=kcell.kcl,
-                        base=cell.kcl.get_symmetrical_cross_section(
-                            lib_port.cross_section.base.to_dtype(cell.kcl)
-                        ),
-                    )
+            if ci not in self.kcl.tkcells:
+                kcell = self.kcl[ci]
+                kcell.copy_meta_info(cell.kdb_cell)
+                kcell.name = cell.kcl.name + static_name_separator + cell.name
+                if cell.kcl.dbu != self.kcl.dbu:
+                    for port, lib_port in zip(kcell.ports, cell.ports, strict=False):
+                        port.cross_section = CrossSection(
+                            kcl=kcell.kcl,
+                            base=cell.kcl.get_symmetrical_cross_section(
+                                lib_port.cross_section.base.to_dtype(cell.kcl)
+                            ),
+                        )
             return ci
         else:
             return lib_ci
