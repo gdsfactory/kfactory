@@ -480,7 +480,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             vinsts=VInstances(),
         )
         if kdb_cell_.is_library_cell():
-            if name or ports or info or settings:
+            if ports or info or settings:
                 raise ValueError(
                     "If a TKCell is created from a library cell (separate PDK/layout), "
                     "ports, info, and settings must not be set."
