@@ -147,7 +147,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
     ) -> BasePort:
-        """Transform the BasePort."""
+        """Get a transformed copy of the BasePort."""
         base = self.__copy__()
         if (
             base.trans is not None
