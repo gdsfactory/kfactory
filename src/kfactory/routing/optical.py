@@ -604,6 +604,7 @@ def place90(
                 route.instances.append(wg)
                 t2 = c << taper_cell
                 t2.purpose = purpose
+                wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
                 t2.connect(
                     taperp2.name,
                     wg_p2,
