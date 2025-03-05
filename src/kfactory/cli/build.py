@@ -132,7 +132,7 @@ def build(
             try:
                 spec = importlib.util.find_spec(str(file.name.removesuffix(".py")))
                 if spec is None or spec.loader is None:
-                    raise ImportError
+                    raise ImportError  # noqa: TRY301
                 _mod = importlib.util.module_from_spec(spec)
                 sys.modules[file.stem] = _mod
                 spec.loader.exec_module(_mod)

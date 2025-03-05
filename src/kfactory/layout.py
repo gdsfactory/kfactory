@@ -260,10 +260,6 @@ class KCLayout(
             if enclosure
             else []
         )
-        sparameters_path = sparameters_path
-        interconnect_cml_path = interconnect_cml_path
-        if enclosure is None:
-            enclosure = KCellEnclosure([])
         self.sparameters_path = sparameters_path
         self.enclosure = enclosure
         self.interconnect_cml_path = interconnect_cml_path
@@ -1424,8 +1420,6 @@ class KCLayout(
                 case "skip":
                     info_ = self.info.model_dump()
 
-                    # for k, v in self.info:
-                    #     _info[k] = v
                     info.update(info_)
                     self.info = Info(**info)
 
@@ -1672,6 +1666,7 @@ class KCLayout(
         output_type: type[K] | None = None,
         **cell_kwargs: Any,
     ) -> ProtoTKCell[Any]:
+        """Get a component by specification."""
         if output_type:
             return output_type(base=self.get_component(spec, **cell_kwargs).base)
         if callable(spec):

@@ -132,14 +132,12 @@ ignore = [
     "PT011",
     "PT012",
     "S311",
-]
-per-file-ignores = { "tests/*.py" = [
+    "ARG",
     "D",
-    "PLR2004",
-    "INP001",
-    "EM101",
-    "ARG001",
-] }
+    "SLF001",
+    "BLE001",
+]
+per-file-ignores = { "tests/*.py" = ["D", "PLR2004", "INP001", "EM101"] }
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.

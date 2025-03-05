@@ -97,7 +97,7 @@ def grid_dbu(
     kcell_array: Sequence[Sequence[KCell]]
 
     if shape is None:
-        if isinstance(kcells[0], KCell):
+        if isinstance(kcells[0], KCell):  # noqa: SIM108
             kcell_array = [list(kcells)]  # type:ignore[arg-type]
         else:
             kcell_array = kcells  # type: ignore[assignment]
@@ -336,36 +336,33 @@ def flexgrid_dbu(
         for i_y, (array, box_array) in enumerate(zip(insts, bboxes, strict=False)):
             for i_x, (inst, bbox) in enumerate(zip(array, box_array, strict=False)):
                 if inst is not None and bbox is not None:
-                    if inst is not None and bbox is not None:
-                        match align_x:
-                            case "xmin":
-                                x = -bbox.left
-                            case "xmax":
-                                x = -bbox.right
-                            case "center":
-                                x = -bbox.center().x
-                            case _:
-                                x = 0
-                        match align_y:
-                            case "ymin":
-                                y = -bbox.bottom
-                            case "ymax":
-                                y = -bbox.top
-                            case "center":
-                                y = -bbox.center().y
-                            case _:
-                                y = 0
-                        at = kdb.Trans(x, y)
-                        inst.trans = at * inst.trans
-                        bbox = inst.bbox()
-                        xmin[i_x] = min(
-                            xmin.get(i_x) or bbox.left, bbox.left - spacing_x
-                        )
-                        xmax[i_x] = max(xmax.get(i_x) or bbox.right, bbox.right)
-                        ymin[i_y] = min(
-                            ymin.get(i_y) or bbox.bottom, bbox.bottom - spacing_y
-                        )
-                        ymax[i_y] = max(ymax.get(i_y) or bbox.top, bbox.top)
+                    match align_x:
+                        case "xmin":
+                            x = -bbox.left
+                        case "xmax":
+                            x = -bbox.right
+                        case "center":
+                            x = -bbox.center().x
+                        case _:
+                            x = 0
+                    match align_y:
+                        case "ymin":
+                            y = -bbox.bottom
+                        case "ymax":
+                            y = -bbox.top
+                        case "center":
+                            y = -bbox.center().y
+                        case _:
+                            y = 0
+                    at = kdb.Trans(x, y)
+                    inst.trans = at * inst.trans
+                    bbox_ = inst.bbox()
+                    xmin[i_x] = min(xmin.get(i_x) or bbox_.left, bbox_.left - spacing_x)
+                    xmax[i_x] = max(xmax.get(i_x) or bbox_.right, bbox_.right)
+                    ymin[i_y] = min(
+                        ymin.get(i_y) or bbox_.bottom, bbox_.bottom - spacing_y
+                    )
+                    ymax[i_y] = max(ymax.get(i_y) or bbox_.top, bbox_.top)
 
         for i_y, (array, bbox_array) in enumerate(zip(insts, bboxes, strict=False)):
             y0 -= ymin.get(i_y, 0)
@@ -551,7 +548,7 @@ def grid(
     kcell_array: Sequence[Sequence[DKCell]]
 
     if shape is None:
-        if isinstance(kcells[0], DKCell):
+        if isinstance(kcells[0], DKCell):  # noqa: SIM108
             kcell_array = [list(kcells)]  # type:ignore[arg-type]
         else:
             kcell_array = kcells  # type: ignore[assignment]
@@ -814,13 +811,13 @@ def flexgrid(
                             y = 0
                     at = kdb.DCplxTrans(x, y)
                     inst.dcplx_trans = at * inst.dcplx_trans
-                    bbox = inst.dbbox()
-                    xmin[i_x] = min(xmin.get(i_x) or bbox.left, bbox.left - spacing_x)
-                    xmax[i_x] = max(xmax.get(i_x) or bbox.right, bbox.right)
+                    bbox_ = inst.dbbox()
+                    xmin[i_x] = min(xmin.get(i_x) or bbox_.left, bbox_.left - spacing_x)
+                    xmax[i_x] = max(xmax.get(i_x) or bbox_.right, bbox_.right)
                     ymin[i_y] = min(
-                        ymin.get(i_y) or bbox.bottom, bbox.bottom - spacing_y
+                        ymin.get(i_y) or bbox_.bottom, bbox_.bottom - spacing_y
                     )
-                    ymax[i_y] = max(ymax.get(i_y) or bbox.top, bbox.top)
+                    ymax[i_y] = max(ymax.get(i_y) or bbox_.top, bbox_.top)
 
         for i_y, (array, bbox_array) in enumerate(zip(insts, bboxes, strict=False)):
             y0 -= ymin.get(i_y, 0)

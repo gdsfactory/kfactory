@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, Any, Self
 
 from pydantic import ConfigDict, RootModel, model_validator
 
+from ..conf import ANGLE_180, ANGLE_270
+
 if TYPE_CHECKING:
     from .manhattan import ManhattanRouterSide
 
@@ -169,7 +171,7 @@ class XY(Step):
         a = router.t.angle
         match a:
             case 0 | 2 if self.y == router.t.disp.x:
-                sign = -1 if a == 2 else 1
+                sign = -1 if a == ANGLE_180 else 1
                 if sign * dx < 0:
                     raise ValueError(
                         "XY step cannot go back. It is current pointing at 0"
@@ -214,7 +216,7 @@ class XY(Step):
                     router.straight_nobend(abs(dy))
 
             case 1 | 3 if self.x == router.t.disp.x:
-                sign = -1 if a == 3 else 1
+                sign = -1 if a == ANGLE_270 else 1
                 if sign * dy < 0:
                     raise ValueError(
                         "XY step cannot go back. It is current pointing at 0"
@@ -222,15 +224,11 @@ class XY(Step):
                         f"Current position: {router.t.disp!r}.\n"
                         f"Target Position ({self.x},{self.y})"
                     )
-                    if ib:
-                        router.straight_nobend(abs(dy))
-                    else:
-                        router.straight(abs(dy))
                 if sign * dy < router.t.disp.y + router.router.bend90_radius:
                     raise ValueError("XY step cannot go back")
                 router.straight_nobend(abs(dx))
                 if self.x > router.t.disp.x:
-                    if a == 3:
+                    if a == ANGLE_270:
                         router.left()
                     else:
                         router.right()

@@ -314,7 +314,7 @@ def extrude_path_dynamic(
             for section in layer_list[layer].sections:
                 layer_list[layer].add_section(section)
     if is_callable_widths(widths):
-        for layer, layer_sec in layer_list.items():
+        for layer_, layer_sec in layer_list.items():
             reg = kdb.Region()
             for section in layer_sec.sections:
 
@@ -353,10 +353,10 @@ def extrude_path_dynamic(
                         )
                     )
                 reg.insert(r)
-            target.shapes(target.kcl.layer(layer)).insert(reg.merge())
+            target.shapes(target.kcl.layer(layer_)).insert(reg.merge())
 
     else:
-        for layer, layer_sec in layer_list.items():
+        for layer_, layer_sec in layer_list.items():
             reg = kdb.Region()
             for section in layer_sec.sections:
                 max_widths = [
@@ -393,7 +393,7 @@ def extrude_path_dynamic(
                         )
                     )
                 reg.insert(r)
-            target.shapes(target.kcl.layer(layer)).insert(reg.merge())
+            target.shapes(target.kcl.layer(layer_)).insert(reg.merge())
 
 
 class Section(BaseModel):
@@ -542,10 +542,10 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             assert kcl is not None, "If sections in um are defined, kcl must be set"
             sections = list(sections)
             for section in dsections:
-                if len(section) == 2:
+                if len(section) == 2:  # noqa: PLR2004
                     sections.append((section[0], kcl.to_dbu(section[1])))
 
-                elif len(section) == 3:
+                elif len(section) == 3:  # noqa: PLR2004
                     sections.append(
                         (
                             section[0],
@@ -563,7 +563,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             else:
                 ls = LayerSection()
                 layer_sections[sec[0]] = ls
-            ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
+            ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(  # noqa: PLR2004
                 Section(d_max=sec[2], d_min=sec[1])
             )
         super().__init__(
@@ -982,7 +982,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
         ]
         for layer, layer_section in self.layer_sections.items():
             list_to_hash.append([str(layer), str(layer_section.sections)])
-        return sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]
+        return sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]  # noqa: S324
 
     def extrude_path(
         self,
@@ -1232,7 +1232,6 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
             dbu: dbu used by the processor.
             clip: Whether the target was clipped to the tile or not.
         """
-        # self.region.insert(region)
         self.regions[ix][iy].insert(region)
 
     def merge_region(self) -> None:
@@ -1538,7 +1537,6 @@ class KCellEnclosure(BaseModel):
                             "var max_shape = Polygon.ellipse("
                             f"Box.new({section.d_max * 2},{section.d_max * 2}),"
                             f" {n_pts});"
-                            # f"var tile_reg = (_tile & _frame).sized({maxsize});"
                             f"var tile_reg = _tile & _frame.sized({maxsize});"
                         )
                         match section.d_max:
@@ -1612,21 +1610,21 @@ class KCellEnclosure(BaseModel):
 class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
     """PDK access model for LayerEnclsoures."""
 
-    root: dict[str, LayerEnclosure] = Field(default={})
+    root: dict[str, LayerEnclosure] = Field(default=dict)
 
-    def __getitem__(self, __key: str) -> LayerEnclosure:
+    def __getitem__(self, __key: str, /) -> LayerEnclosure:
         """Retrieve element by string key."""
         return self.root[__key]
 
-    def __getattr__(self, __key: str) -> LayerEnclosure:
+    def __getattr__(self, __key: str, /) -> LayerEnclosure:
         """Retrieve attribute by key."""
         return self.root[__key]
 
-    def __setattr__(self, __key: str, __val: LayerEnclosure) -> None:
+    def __setattr__(self, __key: str, /, __val: LayerEnclosure) -> None:
         """Add a new LayerEnclosure."""
         self.root[__key] = __val
 
-    def __setitem__(self, __key: str, __val: LayerEnclosure) -> None:
+    def __setitem__(self, __key: str, /, __val: LayerEnclosure) -> None:
         """Add a new LayerEnclosure."""
         self.root[__key] = __val
 

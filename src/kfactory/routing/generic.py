@@ -192,7 +192,6 @@ def check_collisions(
                 shape_region.insert(r)
             for i, inst in enumerate(insts):
                 inst_region_ = kdb.Region(inst.bbox(layer_))
-                # inst_shapes: kdb.Region | None = None
                 if not (inst_region & inst_region_).is_empty():
                     # if inst_shapes is None:
                     inst_shapes = kdb.Region()
@@ -260,15 +259,16 @@ def check_collisions(
                     )
 
 
-def get_radius(
-    ports: Sequence[ProtoPort[Any]],
-) -> dbu:
+PORTS_FOR_RADIUS = 2
+
+
+def get_radius(ports: Sequence[ProtoPort[Any]]) -> dbu:
     """Calculates a radius between two ports.
 
     This can be used to determine the radius of two bend ports.
     """
     ports_ = tuple(p.to_itype() for p in ports)
-    if len(ports_) != 2:
+    if len(ports_) != PORTS_FOR_RADIUS:
         raise ValueError(
             "Cannot determine the maximal radius of a bend with more than two ports."
         )

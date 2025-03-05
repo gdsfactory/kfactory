@@ -54,12 +54,12 @@ class FillOperator(kdb.TileOutputReceiver):
 
     def put(
         self,
-        ix: int,  # noqa: ARG002
-        iy: int,  # noqa: ARG002
+        ix: int,
+        iy: int,
         tile: kdb.Box,
         region: kdb.Region,
-        dbu: float,  # noqa: ARG002
-        clip: bool,  # noqa: ARG002
+        dbu: float,
+        clip: bool,
     ) -> None:
         """Called by the TilingProcessor."""
         if self.multi:
@@ -113,7 +113,7 @@ def fill_tiled(
     x_space: float = 0,
     y_space: float = 0,
     tile_border: tuple[float, float] = (20, 20),
-    multi: bool = False,  # noqa: ARG001
+    multi: bool = False,
 ) -> None:
     """Fill a [KCell][kfactory.kcell.KCell].
 

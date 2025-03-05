@@ -5,7 +5,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 from .. import kdb
-from ..conf import config, logger
+from ..conf import (
+    ANGLE_270,
+    MIN_POINTS_FOR_PLACEMENT,
+    NUM_PORTS_FOR_ROUTING,
+    config,
+    logger,
+)
 from ..factories import StraightFactoryDBU, StraightFactoryUM
 from ..kcell import DKCell, KCell
 from ..port import DPort, Port
@@ -475,7 +481,7 @@ def place90(
     old_bend_port = p1
     bend90_ports = [p for p in bend90_cell.ports if p.port_type == port_type]
 
-    if len(bend90_ports) != 2:
+    if len(bend90_ports) != NUM_PORTS_FOR_ROUTING:
         raise AttributeError(
             f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
             f"with {port_type=}"
@@ -485,7 +491,7 @@ def place90(
             f"{bend90_cell.name} bend ports should be 90° apart from each other"
         )
 
-    if (bend90_ports[1].trans.angle - bend90_ports[0].trans.angle) % 4 == 3:
+    if (bend90_ports[1].trans.angle - bend90_ports[0].trans.angle) % 4 == ANGLE_270:
         b90p1 = bend90_ports[1]
         b90p2 = bend90_ports[0]
     else:
@@ -512,7 +518,7 @@ def place90(
     if taper_cell is not None:
         taper_ports = [p for p in taper_cell.ports if p.port_type == "optical"]
         if (
-            len(taper_ports) != 2
+            len(taper_ports) != NUM_PORTS_FOR_ROUTING
             or (taper_ports[1].trans.angle + 2) % 4 != taper_ports[0].trans.angle
         ):
             raise AttributeError(
@@ -546,11 +552,11 @@ def place90(
             taper_length=0,
         )
 
-    if not pts or len(pts) < 2:
+    if not pts or len(pts) < MIN_POINTS_FOR_PLACEMENT:
         # Nothing to be placed
         return route
 
-    if len(pts) == 2:
+    if len(pts) == MIN_POINTS_FOR_PLACEMENT:
         length = int((pts[1] - pts[0]).length())
         route.length += int(length)
         if (
@@ -570,7 +576,7 @@ def place90(
                 allow_type_mismatch=allow_type_mismatch,
             )
             route.instances.append(wg)
-            route.start_port = Port(base=wg_p1._base.transformed())
+            route.start_port = Port(base=wg_p1.base.transformed())
             route.start_port.name = None
             route.length_straights += int(length)
         else:
@@ -584,7 +590,7 @@ def place90(
                 allow_type_mismatch=allow_type_mismatch,
             )
             route.instances.append(t1)
-            route.start_port = Port(base=t1.ports[taperp1.name]._base.transformed())
+            route.start_port = Port(base=t1.ports[taperp1.name].base.transformed())
             route.start_port.name = None
             l_ = int(length - (taperp1.trans.disp - taperp2.trans.disp).length() * 2)
             if l_ != 0:
@@ -657,7 +663,7 @@ def place90(
         bend90 = c << bend90_cell
         bend90.purpose = purpose
         route.n_bend90 += 1
-        mirror = (vec_angle(vec_n) - vec_angle(vec)) % 4 != 3
+        mirror = (vec_angle(vec_n) - vec_angle(vec)) % 4 != ANGLE_270
         if (vec.y != 0) and (vec.x != 0):
             raise ValueError(
                 f"The vector between manhattan points is not manhattan {old_pt}, {pt}"
@@ -1018,7 +1024,7 @@ def route(
     # determine bend90_radius
     bend90_ports = [p for p in bend90_cell.ports if p.port_type == port_type]
 
-    if len(bend90_ports) != 2:
+    if len(bend90_ports) != NUM_PORTS_FOR_ROUTING:
         raise ValueError(
             f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
         )
@@ -1028,7 +1034,7 @@ def route(
             f"{bend90_cell.name} bend ports should be 90° apart from each other. "
             f"{bend90_ports[0]=} {bend90_ports[1]=}"
         )
-    if (bend90_ports[1].trans.angle - bend90_ports[0].trans.angle) % 4 == 3:
+    if (bend90_ports[1].trans.angle - bend90_ports[0].trans.angle) % 4 == ANGLE_270:
         b90p1 = bend90_ports[1]
         b90p2 = bend90_ports[0]
     else:
@@ -1054,7 +1060,7 @@ def route(
     if bend180_cell is not None:
         # Bend 180 is available
         bend180_ports = list(bend180_cell.ports.filter(port_type=port_type))
-        if len(bend180_ports) != 2:
+        if len(bend180_ports) != NUM_PORTS_FOR_ROUTING:
             raise AttributeError(
                 f"{bend180_cell.name} should have 2 ports but has {len(bend180_ports)}"
                 " ports"
@@ -1082,7 +1088,7 @@ def route(
             end_straight=end_straight,
         )
 
-        if len(pts) > 2:
+        if len(pts) > 2:  # noqa: PLR2004
             if (vec := pts[1] - pts[0]).length() == b180r:
                 match (p1.trans.angle - vec_angle(vec)) % 4:
                     case 1:
@@ -1126,7 +1132,6 @@ def route(
                     case 3:
                         bend180 = c << bend180_cell
                         bend180.purpose = purpose
-                        # bend180.mirror = True
                         bend180.connect(
                             b180p2.name,
                             p2,
@@ -1137,7 +1142,7 @@ def route(
                         end_port = bend180.ports[b180p1.name]
                         pts = pts[:-1]
 
-            if len(pts) > 3:
+            if len(pts) > 3:  # noqa: PLR2004
                 pt1, pt2, pt3 = pts[:3]
                 j = 0
                 for i in range(3, len(pts) - 2):
@@ -1202,8 +1207,8 @@ def route(
                         start_port = bend180.ports[b180p2.name]
                     elif (
                         vec.length() == b180r
-                        and (ang2 - ang1) % 4 == 3
-                        and (ang3 - ang2) % 4 == 3
+                        and (ang2 - ang1) % 4 == ANGLE_270
+                        and (ang3 - ang2) % 4 == ANGLE_270
                     ):
                         bend180 = c << bend180_cell
                         bend180.purpose = purpose

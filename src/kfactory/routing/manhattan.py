@@ -19,7 +19,13 @@ from typing import (
 import klayout.db as kdb
 import numpy as np
 
-from ..conf import logger
+from ..conf import (
+    ANGLE_180,
+    ANGLE_270,
+    MIN_POINTS_FOR_CLEAN,
+    MIN_WAYPOINTS_FOR_ROUTING,
+    logger,
+)
 from ..port import BasePort, Port
 from ..routing.steps import Step, Steps, Straight
 
@@ -153,21 +159,20 @@ def route_manhattan_180(
 
     tv = t1.inverted() * (t2.disp - t1.disp)
 
-    if (t2.angle - t1.angle) % 4 == 2 and tv.y == 0:
+    if (t2.angle - t1.angle) % 4 == ANGLE_180 and tv.y == 0:
         if tv.x > 0:
             return [p1, p2]
         if tv.x == 0:
             return []
 
     t1 *= kdb.Trans(0, False, start_straight, 0)
-    # t2 *= kdb.Trans(0, False, end_straight, 0)
 
     points = [p1] if start_straight != 0 else []
     end_points = [t2 * p, p2] if end_straight != 0 else [p2]
     tv = t1.inverted() * (t2.disp - t1.disp)
     if tv.abs() == 0:
         return points + end_points
-    if (t2.angle - t1.angle) % 4 == 2 and tv.x > 0 and tv.y == 0:
+    if (t2.angle - t1.angle) % 4 == ANGLE_180 and tv.x > 0 and tv.y == 0:
         return points + end_points
     match (tv.x, tv.y, (t2.angle - t1.angle) % 4):
         case (x, y, 0) if x > 0 and abs(y) == bend180_radius:
@@ -278,7 +283,7 @@ class ManhattanRouterSide:
         return self._t
 
     @t.setter
-    def t(self, __t: kdb.Trans) -> None:
+    def t(self, __t: kdb.Trans, /) -> None:
         self._t.assign(__t)
 
     @property
@@ -445,7 +450,7 @@ class ManhattanRouter:
             case _:
                 # 1/3 cases are just one to the other
                 # with flipped y value and right/left flipped
-                if ta == 3:
+                if ta == ANGLE_270:
                     right = self.start.right
                     left = self.start.left
                     y_ = y
@@ -551,7 +556,7 @@ class ManhattanRouter:
         order.
         """
         tv = self.start.tv
-        if self.start.ta != 2:
+        if self.start.ta != ANGLE_180:
             raise ValueError(
                 "Route is not finished. The transformations must be facing each other"
             )
@@ -782,7 +787,6 @@ def _place_dl_path_length(
     tinv = t_.inverted()
 
     pmin = max((tinv * settings["pts"][0]).x for _, settings in routers)
-    # pmax = min((_tinv * settings["pts"][1]).x for _, settings in routers)
 
     for i, (router, settings) in enumerate(routers):
         pmin += router.width // 2
@@ -1457,7 +1461,7 @@ def route_smart(
                                 )
                     if new_angle <= angle:
                         if new_angle != 0:
-                            i -= 1
+                            i -= 1  # noqa: PLW2901
                         break
                     routers_clockwise.extend(new_routers)
                     angle = new_angle
@@ -1686,7 +1690,7 @@ def route_loosely(
                 )
                 delta += router.width - router.width // 2 + separation
 
-        if 3 in routers_per_angle:
+        if ANGLE_270 in routers_per_angle:
             r_list = list(routers_per_angle[3])
             delta = -r_list[0].width // 2
             for router in r_list:
@@ -1884,7 +1888,6 @@ def _sort_transformations(
             case 1:
                 start_transformations = []
                 end_transformations = _sort_trans_bank(back)
-                # end_transformations.reverse()
     for angle in [-1, 0, 1]:
         start_transformations.extend(
             _sort_trans_bank(trans_by_dir[(target_side + angle) % 4])
@@ -1974,7 +1977,7 @@ def _route_to_side(
                     rs.straight(x)
                 case _:
                     ...
-            if not (y == 0 and rs.ta == 2 and x > 0):
+            if not (y == 0 and rs.ta == ANGLE_180 and x > 0):
                 rs.left()
             bbox += rs.t * kdb.Point(0, -hw2)
         else:
@@ -1988,7 +1991,7 @@ def _route_to_side(
                     rs.straight(x)
                 case _:
                     ...
-            if not (y == 0 and rs.ta == 2 and x > 0):
+            if not (y == 0 and rs.ta == ANGLE_180 and x > 0):
                 rs.right()
             bbox += rs.t * kdb.Point(0, hw2)
 
@@ -2004,12 +2007,12 @@ def _backbone2bundle(
     pts: list[list[kdb.Point]] = []
 
     edges: list[kdb.Edge] = []
-    dirs: list[int] = []
+    angles: list[int] = []
     p1 = backbone[0]
 
     for p2 in backbone[1:]:
         edges.append(kdb.Edge(p1, p2))
-        dirs.append(vec_dir(p2 - p1))
+        angles.append(vec_dir(p2 - p1))
         p1 = p2
 
     width = sum(port_widths) + spacing * (len(port_widths) - 1)
@@ -2022,9 +2025,9 @@ def _backbone2bundle(
         pts_ = [p.dup() for p in backbone]
         p1 = pts_[0]
 
-        for p2, e, dir in zip(pts_[1:], edges, dirs, strict=False):
+        for p2, e, angle in zip(pts_[1:], edges, angles, strict=False):
             e_ = e.shifted(-x)
-            if dir % 2:
+            if angle % 2:
                 p1.x = e_.p1.x
                 p2.x = e_.p2.x
             else:
@@ -2047,8 +2050,8 @@ def route_ports_to_bundle(
     start_straight: int = 0,
     end_straight: int = 0,
 ) -> tuple[dict[kdb.Trans, list[kdb.Point]], kdb.Point]:
-    dir = ports_to_route[0][0].angle
-    dir_trans = kdb.Trans(dir, False, 0, 0)
+    angle = ports_to_route[0][0].angle
+    dir_trans = kdb.Trans(angle, False, 0, 0)
     inv_dir_trans = dir_trans.inverted()
     trans_ports = [
         (inv_dir_trans * _trans, _width) for (_trans, _width) in ports_to_route
@@ -2228,7 +2231,7 @@ def _route_waypoints(
             router.finished = True
             all_routers.append(router)
         return all_routers
-    if len(waypoints) < 2:
+    if len(waypoints) < MIN_WAYPOINTS_FOR_ROUTING:
         raise ValueError(
             "If the waypoints should only contain one point, a direction "
             "for the waypoint must be indicated, please pass a 'kdb.Trans'"
@@ -2318,9 +2321,9 @@ def clean_points(
 
     This will remove the middle points that are on a straight line.
     """
-    if len(points) < 2:
+    if len(points) < MIN_POINTS_FOR_CLEAN:
         return points
-    if len(points) == 2:
+    if len(points) == MIN_POINTS_FOR_CLEAN:
         return points if points[1] != points[0] else points[:1]
     p_p = points[0]
     p = points[1]

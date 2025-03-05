@@ -19,7 +19,7 @@ from pydantic import (
 )
 from typing_extensions import TypedDict
 
-from .conf import config
+from .conf import ANGLE_180, config
 from .cross_section import (
     CrossSection,
     CrossSectionSpec,
@@ -122,6 +122,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
 
     @model_validator(mode="after")
     def check_exclusivity(self) -> Self:
+        """Check if the port has a valid transformation."""
         if self.trans is None and self.dcplx_trans is None:
             raise ValueError("Both trans and dcplx_trans cannot be None.")
         if self.trans is not None and self.dcplx_trans is not None:
@@ -200,6 +201,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         return kdb.DCplxTrans(self.trans.to_dtype(self.kcl.dbu))
 
     def __eq__(self, other: object) -> bool:
+        """Check if two ports are equal."""
         if not isinstance(other, BasePort):
             return False
         return (
@@ -272,7 +274,9 @@ class ProtoPort(Generic[TUnit], ABC):
 
     @property
     @abstractmethod
-    def cross_section(self) -> TCrossSection[TUnit]: ...
+    def cross_section(self) -> TCrossSection[TUnit]:
+        """Get the cross section of the port."""
+        ...
 
     @cross_section.setter
     @abstractmethod
@@ -558,9 +562,9 @@ class ProtoPort(Generic[TUnit], ABC):
         """Width of the port in um."""
         return self.kcl.to_um(self._base.cross_section.width)
 
-    def print(self, type: Literal["dbu", "um", None] = None) -> None:
+    def print(self, print_type: Literal["dbu", "um", None] = None) -> None:
         """Print the port pretty."""
-        config.console.print(pprint_ports([self], unit=type))
+        config.console.print(pprint_ports([self], unit=print_type))
 
     def __repr__(self) -> str:
         """String representation of port."""
@@ -870,6 +874,7 @@ class Port(ProtoPort[int]):
 
     @property
     def cross_section(self) -> CrossSection:
+        """Get the cross section of the port."""
         return CrossSection(kcl=self._base.kcl, base=self._base.cross_section)
 
     @cross_section.setter
@@ -1187,6 +1192,7 @@ class DPort(ProtoPort[float]):
 
     @property
     def cross_section(self) -> DCrossSection:
+        """Get the cross section of the port."""
         return DCrossSection(kcl=self._base.kcl, base=self._base.cross_section)
 
     @cross_section.setter
@@ -1265,8 +1271,8 @@ def rename_clockwise(
                 angle = 2
             case _:
                 angle = 3
-        dir_1 = 1 if angle < 2 else -1
-        dir_2 = -1 if port.angle < 2 else 1
+        dir_1 = 1 if angle < ANGLE_180 else -1
+        dir_2 = -1 if port.angle < ANGLE_180 else 1
         key_1 = dir_1 * (
             port.trans.disp.x if angle % 2 else port.trans.disp.y
         )  # order should be y, x, -y, -x
@@ -1359,10 +1365,10 @@ def rename_by_direction(
             S0   S1
     ```
     """
-    for dir in DIRECTION:
+    for angle in DIRECTION:
         ports_ = filter_layer_pt_reg(ports, layer, port_type, regex)
-        dir_2 = -1 if dir < 2 else 1
-        if dir % 2:
+        dir_2 = -1 if angle < ANGLE_180 else 1
+        if angle % 2:
 
             def key_sort(port: ProtoPort[Any], dir_2: int = dir_2) -> tuple[int, int]:
                 return (port.trans.disp.x, dir_2 * port.trans.disp.y)
@@ -1371,8 +1377,8 @@ def rename_by_direction(
             def key_sort(port: ProtoPort[Any], dir_2: int = dir_2) -> tuple[int, int]:
                 return (port.trans.disp.y, dir_2 * port.trans.disp.x)
 
-        for i, p in enumerate(sorted(filter_direction(ports_, dir), key=key_sort)):
-            p.name = f"{prefix}{dir_names[dir]}{i}"
+        for i, p in enumerate(sorted(filter_direction(ports_, angle), key=key_sort)):
+            p.name = f"{prefix}{dir_names[angle]}{i}"
 
 
 def filter_layer_pt_reg(

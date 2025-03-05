@@ -397,7 +397,7 @@ class TKCell(BaseKCell):
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
         try:
-            return super().__getattr__(name)  # type: ignore
+            return super().__getattr__(name)
         except Exception:
             return getattr(self.kdb_cell, name)
 
@@ -959,7 +959,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         ]
                     )
                 )
-                if w > 20:
+                if w > 20:  # noqa: PLR2004
                     poly -= kdb.Region(
                         kdb.Polygon(
                             [
@@ -1694,11 +1694,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     )
 
                     net = circ.create_net(name)
-                    assert len(ports) <= 2, (
+                    assert len(ports) <= 2, (  # noqa: PLR2004
                         "Optical connection with more than two ports are not supported "
                         f"{[_port[3] for _port in ports]}"
                     )
-                    if len(ports) == 2:
+                    if len(ports) == 2:  # noqa: PLR2004
                         port_check(ports[0][3], ports[1][3], PortCheck.all_opposite)
                         for _, j, _, port, subc in ports:
                             subc.connect_pin(
@@ -2028,7 +2028,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                             for value in values:
                                 it.add_value(value)
 
-                    case x if x > 2:
+                    case x if x > 2:  # noqa: PLR2004
                         subc = db_.category_by_path(
                             lc.path() + ".portoverlap"
                         ) or db_.create_category(lc, "portoverlap")
@@ -2637,10 +2637,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
     @classmethod
     def to_yaml(cls, representer: BaseRepresenter, node: Self) -> MappingNode:
         """Internal function to convert the cell to yaml."""
-        d: dict[str, Any] = {
-            "name": node.name,
-            # "ports": node.ports,  # Ports.to_yaml(representer, node.ports),
-        }
+        d: dict[str, Any] = {"name": node.name}
 
         insts = [
             {"cellname": inst.cell.name, "trans": inst.instance.trans.to_s()}
@@ -2788,9 +2785,10 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
         layers = layers_ if layer is None else {layer} & layers_
         box = kdb.DBox()
         for layer_ in layers:
-            if isinstance(layer_, LayerEnum):
-                layer_ = layer_.layout.layer(layer_.layer, layer_.datatype)
-            box += self.shapes(layer_).bbox()
+            layer__ = layer_
+            if isinstance(layer__, LayerEnum):
+                layer__ = layer__.layout.layer(layer__.layer, layer__.datatype)
+            box += self.shapes(layer__).bbox()
 
         for vinst in self.insts:
             box += vinst.dbbox()
@@ -3001,7 +2999,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
             if w in polys:
                 poly = polys[w]
             else:
-                if w < 2:
+                if w < 2:  # noqa: PLR2004
                     poly = kdb.DPolygon(
                         [
                             kdb.DPoint(0, -w / 2),

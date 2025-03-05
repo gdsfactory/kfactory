@@ -447,12 +447,12 @@ class RegionOperator(kdb.TileOutputReceiver):
 
     def put(
         self,
-        ix: int,  # noqa: ARG002
-        iy: int,  # noqa: ARG002
-        tile: kdb.Box,  # noqa: ARG002
+        ix: int,
+        iy: int,
+        tile: kdb.Box,
         region: kdb.Region,
-        dbu: float,  # noqa: ARG002
-        clip: bool,  # noqa: ARG002
+        dbu: float,
+        clip: bool,
     ) -> None:
         """Tiling Processor output call.
 
