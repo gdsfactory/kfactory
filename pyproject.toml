@@ -86,6 +86,10 @@ python_version = "3.11"
 strict = true
 exclude = ["src/kfactory/widgets/interactive.py"]
 
+[[tool.mypy.overrides]]
+module = ["src.*"]
+ignore_missing_imports = true
+
 [tool.pylsp-mypy]
 enabled = true
 live_mode = true

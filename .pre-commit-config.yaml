@@ -60,4 +60,6 @@ repos:
           - loguru
           - pydantic-settings
           - typer
+          - types-PyYAML
+          - scipy
         exclude: ^docs/|^tests/
