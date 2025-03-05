@@ -1,3 +1,16 @@
+<a id="v1.2.3"></a>
+# [v1.2.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.2.3) - 2025-03-05
+
+# What's Changed
+
+
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.2.2...v1.2.3
+
+
+[Changes][v1.2.3]
+
+
 <a id="v1.2.2"></a>
 # [v1.2.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.2.2) - 2025-03-05
 
@@ -1696,6 +1709,7 @@
 [Changes][v0.4.0]
 
 
+[v1.2.3]: https://github.com/gdsfactory/kfactory/compare/v1.2.2...v1.2.3
 [v1.2.2]: https://github.com/gdsfactory/kfactory/compare/v1.2.1...v1.2.2
 [v1.2.1]: https://github.com/gdsfactory/kfactory/compare/v1.2.0...v1.2.1
 [v1.2.0]: https://github.com/gdsfactory/kfactory/compare/v1.1.5...v1.2.0
