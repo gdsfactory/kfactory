@@ -28,8 +28,7 @@ def test_euler_snapping(kcl: kf.KCLayout, layers: Layers) -> None:
 def test_unnamed_cell(kcl: kf.KCLayout) -> None:
     @kcl.cell
     def unnamed_cell(name: str = "a") -> kf.KCell:
-        c = kcl.kcell(name)
-        return c
+        return kcl.kcell(name)
 
     c1 = unnamed_cell("test_unnamed_cell")
     c2 = unnamed_cell("test_unnamed_cell")
@@ -41,8 +40,7 @@ def test_nested_dict_list(kcl: kf.KCLayout) -> None:
     def nested_list_dict(
         arg1: dict[str, list[dict[str, str | int] | int] | int],
     ) -> kf.KCell:
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     dl: dict[str, list[dict[str, str | int] | int] | int] = {
         "a": 5,
@@ -77,8 +75,7 @@ def test_namecollision(layers: Layers) -> None:
 def test_nested_dic(kcl: kf.KCLayout) -> None:
     @kcl.cell
     def recursive_dict_cell(d: dict[str, dict[str, str] | str]) -> kf.KCell:
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     recursive_dict_cell({"test": {"test2": "test3"}, "test4": "test5"})
 
@@ -156,8 +153,7 @@ def test_cell_decorator_error(kcl: kf.KCLayout) -> None:
 
     @kcl.cell
     def wrong_cell() -> kf.KCell:
-        c = kcl2.kcell("wrong_test")
-        return c
+        return kcl2.kcell("wrong_test")
 
     regex = kf.config.logfilter.regex
     kf.config.logfilter.regex = (
@@ -201,15 +197,13 @@ def test_overwrite(layers: Layers) -> None:
 
     @kcl.cell
     def test_overwrite_cell() -> kf.KCell:
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     c1 = test_overwrite_cell()
 
     @kcl.cell(overwrite_existing=True)  # type: ignore[no-redef]
     def test_overwrite_cell() -> kf.KCell:
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     c2 = test_overwrite_cell()
 
@@ -492,15 +486,13 @@ def test_cell_default_fallback() -> None:
 
     @kcl.cell
     def my_cell():  # type: ignore[no-untyped-def]  # noqa: ANN202
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     assert isinstance(my_cell(), kf.DKCell)
     kcl.default_cell_output_type = kf.KCell
 
     def my_cell():  # type: ignore[no-untyped-def,no-redef]  # noqa: ANN202
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     kf.layout.kcls.pop("cell_default_fallback")
 

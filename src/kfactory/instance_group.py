@@ -90,7 +90,6 @@ class InstanceGroup(ProtoTInstanceGroup[int], DBUGeometricObject):
     """
 
 
-
 class DInstanceGroup(ProtoTInstanceGroup[float], UMGeometricObject):
     """Group of DInstances.
 

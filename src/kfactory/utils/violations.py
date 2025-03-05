@@ -109,7 +109,9 @@ def fix_spacing_tiled(
     if smooth_factor != 0 or smooth_absolute:
         keep = "true" if smooth_keep_hv else "false"
         smooth = (
-            smooth_absolute if smooth_absolute else min(int(smooth_factor * min_space), 1)
+            smooth_absolute
+            if smooth_absolute
+            else min(int(smooth_factor * min_space), 1)
         )
         queue_str = (
             f"var sc = reg.space_check({min_space},"

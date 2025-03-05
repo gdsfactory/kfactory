@@ -734,8 +734,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         cell_name = self.cell.name
         if trans_ != kdb.DCplxTrans():
             trans_str = (
-                f"_M{trans_.mirror}_S{trans_.angle}"
-                f"_X{trans_.disp.x}_Y{trans_.disp.y}"
+                f"_M{trans_.mirror}_S{trans_.angle}_X{trans_.disp.x}_Y{trans_.disp.y}"
             ).replace(".", "p")
             cell_name = cell_name + trans_str
         if cell.kcl.layout_cell(cell_name) is None:

@@ -186,12 +186,8 @@ def grid_dbu(
         insts.append([None] * shape[1])
 
     shape_bboxes = [None if inst is None else inst.bbox() for inst in _insts]
-    shape_bboxes_heights = [
-        0 if box is None else box.height() for box in shape_bboxes
-    ]
-    shape_bboxes_widths = [
-        0 if box is None else box.width() for box in shape_bboxes
-    ]
+    shape_bboxes_heights = [0 if box is None else box.height() for box in shape_bboxes]
+    shape_bboxes_widths = [0 if box is None else box.width() for box in shape_bboxes]
     w = max(shape_bboxes_widths) + spacing_x
     h = max(shape_bboxes_heights) + spacing_y
     for i, (inst, bbox) in enumerate(zip(_insts, shape_bboxes, strict=False)):
@@ -645,12 +641,8 @@ def grid(
         insts.append([None] * shape[1])
 
     shape_bboxes = [None if inst is None else inst.dbbox() for inst in _insts]
-    shape_bboxes_heights = [
-        0 if box is None else box.height() for box in shape_bboxes
-    ]
-    shape_bboxes_widths = [
-        0 if box is None else box.width() for box in shape_bboxes
-    ]
+    shape_bboxes_heights = [0 if box is None else box.height() for box in shape_bboxes]
+    shape_bboxes_widths = [0 if box is None else box.width() for box in shape_bboxes]
     w = max(shape_bboxes_widths) + spacing_x
     h = max(shape_bboxes_heights) + spacing_y
     for i, (inst, bbox) in enumerate(zip(_insts, shape_bboxes, strict=False)):

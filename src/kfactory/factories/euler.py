@@ -140,7 +140,6 @@ def euler_bend_points(
     return [_xy(i * step) for i in range(int(round(total_length / step)) + 1)]
 
 
-
 def euler_endpoint(
     start_point: tuple[float, float] = (0.0, 0.0),
     radius: um = 10.0,

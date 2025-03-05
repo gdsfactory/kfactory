@@ -190,8 +190,7 @@ def pdk() -> kf.KCLayout:
             layer=Layers().WGCLAD, thickness=3, zmin=0.22, material="sio2"
         ),
     )
-    kcl = kf.KCLayout("Test_PDK", infos=Layers, layer_stack=layerstack)
-    return kcl
+    return kf.KCLayout("Test_PDK", infos=Layers, layer_stack=layerstack)
 
 
 @pytest.fixture

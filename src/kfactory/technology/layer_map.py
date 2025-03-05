@@ -131,7 +131,6 @@ def lyp_to_lyp_model(inp: pathlib.Path | str) -> LypModel:
     return LypModel(layers=layers)
 
 
-
 def lyp_to_yaml(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
     """Convert a lyp file to a YAML ffile."""
     yaml = YAML()
@@ -157,7 +156,6 @@ def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
         transparent=kl.transparent,
         valid=kl.valid,
     )
-
 
 
 def kl2group(

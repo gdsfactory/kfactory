@@ -589,9 +589,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
 
     def __hash__(self) -> int:  # make hashable BaseModel subclass
         """Calculate a unique hash of the enclosure."""
-        return hash(
-            (str(self), self.main_layer, tuple(self.layer_sections.items()))
-        )
+        return hash((str(self), self.main_layer, tuple(self.layer_sections.items())))
 
     def to_dtype(self, kcl: KCLayout) -> DLayerEnclosure:
         """Convert the enclosure to a um based enclosure."""

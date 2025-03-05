@@ -48,7 +48,7 @@ def test_route_straight(
 
 
 @pytest.mark.parametrize(
-    "x,y,angle2",
+    ("x", "y", "angle2"),
     [
         (20000, 20000, 2),
         (10000, 10000, 3),
@@ -90,7 +90,7 @@ def test_route_bend90(
 
 
 @pytest.mark.parametrize(
-    "x,y,angle2",
+    ("x", "y", "angle2"),
     [
         (20000, 20000, 2),
         (10000, 10000, 3),
@@ -133,7 +133,7 @@ def test_route_bend90_invert(
 
 
 @pytest.mark.parametrize(
-    "x,y,angle2",
+    ("x", "y", "angle2"),
     [
         (40000, 40000, 2),
         (20000, 20000, 3),

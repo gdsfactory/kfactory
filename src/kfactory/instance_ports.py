@@ -248,9 +248,7 @@ class ProtoTInstancePorts(
                     i_a,
                     i_b,
                     p.copy(
-                        kdb.DCplxTrans(
-                            self.instance.da * i_a + self.instance.db * i_b
-                        )
+                        kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
                         * self.instance.dcplx_trans
                     ),
                 )
@@ -308,9 +306,7 @@ class ProtoTInstancePorts(
             bases=[
                 b.transformed(
                     self.instance.dcplx_trans
-                    * kdb.DCplxTrans(
-                        self.instance.db * i_a + self.instance.db * i_b
-                    )
+                    * kdb.DCplxTrans(self.instance.db * i_a + self.instance.db * i_b)
                 )
                 for i_a in range(self.instance.na)
                 for i_b in range(self.instance.nb)

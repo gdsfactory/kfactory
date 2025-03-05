@@ -247,13 +247,13 @@ def fill_tiled(
             queue_str = (
                 "var fill= "
                 + (
-                    " + ".join([layers, regions])
+                    f"{layers} + {regions}"
                     if regions and layers
                     else regions + layers
                 )
                 + "; var exclude = "
                 + (
-                    " + ".join([exlayers, exregions])
+                    f"{exlayers} + {exregions}"
                     if exregions and exlayers
                     else exregions + exlayers
                 )
@@ -265,7 +265,7 @@ def fill_tiled(
             queue_str = (
                 "var fill= "
                 + (
-                    " + ".join([layers, regions])
+                    f"{layers} + {regions}"
                     if regions and layers
                     else regions + layers
                 )

@@ -12,7 +12,6 @@ class GeometryDifferenceError(ValueError):
     """Exception for Geometric differences."""
 
 
-
 wg_enc = kf.LayerEnclosure(name="WGSTD", sections=[(Layers().WGCLAD, 0, 2000)])
 
 
@@ -56,19 +55,19 @@ def taper(layers: Layers) -> kf.KCell:
     )
 
 
-cells = dict(
-    bend90=bend90,
-    bend180=bend180,
-    bend180_euler=bend180_euler,
-    bend90_euler=bend90_euler,
-    taper=taper,
-    straight=straight,
-)
+cells = {
+    "bend90": bend90,
+    "bend180": bend180,
+    "bend180_euler": bend180_euler,
+    "bend90_euler": bend90_euler,
+    "taper": taper,
+    "straight": straight,
+}
 
 cell_names = sorted(set(cells.keys()))
 
 
-@pytest.fixture(params=cell_names, scope="function")
+@pytest.fixture(params=cell_names)
 def cell_name(request: pytest.FixtureRequest) -> str:
     """Returns cell name."""
     return request.param  # type: ignore[no-any-return]

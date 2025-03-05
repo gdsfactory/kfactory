@@ -40,8 +40,7 @@ def test_set_settings_functionality(kcl: kf.KCLayout) -> None:
     def test_set_settings(
         name: str = "test_set_settings", width: float = 10.0, height: float = 5.0
     ) -> kf.KCell:
-        c = kcl.kcell(name=name)
-        return c
+        return kcl.kcell(name=name)
 
     cell_with_settings = test_set_settings()
     assert cell_with_settings.settings["width"] == 10.0
@@ -51,8 +50,7 @@ def test_set_settings_functionality(kcl: kf.KCLayout) -> None:
     def test_set_settings_no_settings(
         name: str = "test_set_settings_no", width: float = 10.0, height: float = 5.0
     ) -> kf.KCell:
-        c = kcl.kcell(name=name)
-        return c
+        return kcl.kcell(name=name)
 
     cell_without_settings = test_set_settings_no_settings()
     assert cell_without_settings.settings == kf.KCellSettings()
@@ -140,8 +138,7 @@ def test_cell_parameters(kcl: kf.KCLayout) -> None:
     def test_cell_with_empty_parameters(
         name: str, width: float, height: float
     ) -> kf.KCell:
-        cell = kcl.kcell(name=name)
-        return cell
+        return kcl.kcell(name=name)
 
     with pytest.raises(TypeError):
         test_cell_with_empty_parameters(name="test_cell_with_empty_parameters")  # type: ignore
@@ -190,28 +187,23 @@ def test_cell_decorator_types(kcl: kf.KCLayout) -> None:
 
     @kcl.cell(output_type=KCellSubclass)
     def test_cell(name: str) -> kf.KCell:
-        cell = kcl.kcell(name=name)
-        return cell
+        return kcl.kcell(name=name)
 
     @kcl.cell(layout_cache=True, output_type=kf.KCell)
     def test_kcell(name: str) -> kf.KCell:
-        cell = kcl.kcell(name=name)
-        return cell
+        return kcl.kcell(name=name)
 
     @kcl.cell(output_type=kf.DKCell)
     def test_k_to_dkcell(name: str) -> kf.KCell:
-        cell = kcl.kcell(name=name)
-        return cell
+        return kcl.kcell(name=name)
 
     @kcl.cell(output_type=kf.DKCell)
     def test_dkcell(name: str) -> kf.DKCell:
-        cell = kcl.dkcell(name=name)
-        return cell
+        return kcl.dkcell(name=name)
 
     @kcl.cell
     def test_dk_to_kcell(name: str) -> kf.DKCell:
-        cell = kcl.dkcell(name=name)
-        return cell
+        return kcl.dkcell(name=name)
 
     k_to_dkcell = test_k_to_dkcell("test_d_to_kcell")
     kcell = test_kcell("test_lcell")
@@ -296,7 +288,7 @@ def test_get_component(layers: Layers) -> None:
     kf.kcl.get_component(
         {
             "component": "straight",
-            "settings": dict(width=1000, length=10_000, layer=kf.kdb.LayerInfo(1, 0)),
+            "settings": {"width": 1000, "length": 10_000, "layer": kf.kdb.LayerInfo(1, 0)},
         },
         output_type=kf.DKCell,
     ).delete()

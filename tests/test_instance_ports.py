@@ -40,7 +40,7 @@ def dinstance_ports(layers: Layers, kcl: kf.KCLayout) -> kf.DInstance:
     straight = kf.factories.straight.straight_dbu_factory(kcl)(
         width=5000, length=10000, layer=layers.WG
     )
-    ref = c.create_inst(
+    return c.create_inst(
         straight,
         trans=kf.kdb.DCplxTrans(mag=2),
         a=kf.kdb.DVector(10, 0),
@@ -48,7 +48,6 @@ def dinstance_ports(layers: Layers, kcl: kf.KCLayout) -> kf.DInstance:
         na=2,
         nb=2,
     )
-    return ref
 
 
 def test_dinstance_ports_length(dinstance_ports: kf.DInstance) -> None:
