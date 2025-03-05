@@ -894,10 +894,7 @@ def flexgrid(
             ymin[i_y] = min(ymin.get(i_y) or bbox.bottom, bbox.bottom - spacing_y)
             ymax[i_y] = max(ymax.get(i_y) or bbox.top, bbox.top)
 
-    insts = []
-    for _ in range(shape[0]):
-        insts.append([None] * shape[1])
-
+    insts = [[None] * shape[1] for _ in range(shape[0])]
     for i, inst in enumerate(_insts):
         i_x = i % shape[1]
         i_y = i // shape[1]
