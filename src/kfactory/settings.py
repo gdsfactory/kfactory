@@ -15,10 +15,6 @@ __all__ = ["Info", "KCellSettings", "KCellSettingsUnits", "SettingMixin"]
 class SettingMixin:
     """Mixin class for shared settings functionality."""
 
-    def __init__(self, **kwargs: Any) -> None:
-        """Initialize the settings."""
-        super().__init__(**kwargs)
-
     def __getitem__(self, key: str) -> Any:
         """Get the value of a setting."""
         return getattr(self, key)
@@ -41,6 +37,10 @@ class KCellSettings(
 ):
     """Settings for a BaseKCell."""
 
+    def __init__(self, **kwargs: Any) -> None:
+        """Initialize the settings."""
+        super().__init__(**kwargs)
+
     @model_validator(mode="before")
     @classmethod
     def restrict_types(cls, data: dict[str, Any]) -> dict[str, MetaData]:
@@ -55,6 +55,10 @@ class KCellSettingsUnits(
 ):
     """Settings for the units of a KCell."""
 
+    def __init__(self, **kwargs: Any) -> None:
+        """Initialize the settings."""
+        super().__init__(**kwargs)
+
     @model_validator(mode="before")
     @classmethod
     def restrict_types(cls, data: dict[str, str]) -> dict[str, str]:
@@ -66,6 +70,10 @@ class KCellSettingsUnits(
 
 class Info(SettingMixin, BaseModel, extra="allow", validate_assignment=True):
     """Info for a KCell."""
+
+    def __init__(self, **kwargs: Any) -> None:
+        """Initialize the settings."""
+        super().__init__(**kwargs)
 
     @model_validator(mode="before")
     @classmethod

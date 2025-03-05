@@ -386,6 +386,7 @@ class KCLayout(
 
     @overload
     def to_um(self, other: None) -> None: ...
+
     @overload
     def to_um(self, other: int) -> float: ...
 
@@ -1395,14 +1396,14 @@ class KCLayout(
                         yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                         err_msg += (
                             "\nLayout Meta Diff:\n```\n"
-                            + yaml.dumps(dict(diff.layout_meta_diff))  # type: ignore[attr-defined]
+                            + yaml.dumps(dict(diff.layout_meta_diff))
                             + "\n```"
                         )
                     if diff.cells_meta_diff:
                         yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                         err_msg += (
                             "\nLayout Meta Diff:\n```\n"
-                            + yaml.dumps(dict(diff.cells_meta_diff))  # type: ignore[attr-defined]
+                            + yaml.dumps(dict(diff.cells_meta_diff))
                             + "\n```"
                         )
 

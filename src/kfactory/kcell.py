@@ -1111,14 +1111,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + yaml.dumps(dict(diff.layout_meta_diff))  # type: ignore[attr-defined]
+                        + yaml.dumps(dict(diff.layout_meta_diff))
                         + "\n```"
                     )
                 if diff.cells_meta_diff:
                     yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + yaml.dumps(dict(diff.cells_meta_diff))  # type: ignore[attr-defined]
+                        + yaml.dumps(dict(diff.cells_meta_diff))
                         + "\n```"
                     )
 

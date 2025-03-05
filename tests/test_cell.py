@@ -465,7 +465,7 @@ def test_cell_yaml(layers: Layers) -> None:
         cell_base_kcell = cell.base
 
         def compare_kcell_fields(
-            c_base_kcell: kf.KCell, cell_base_kcell: kf.KCell
+            c_base_kcell: kf.kcell.TKCell, cell_base_kcell: kf.kcell.TKCell
         ) -> bool:
             for field in vars(c_base_kcell):
                 if field == "kdb_cell":

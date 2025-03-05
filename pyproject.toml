@@ -85,7 +85,6 @@ where = ["src"]
 python_version = "3.11"
 strict = true
 exclude = ["src/kfactory/widgets/interactive.py"]
-plugins = "pydantic.mypy, numpy.typing.mypy_plugin"
 
 [tool.pylsp-mypy]
 enabled = true

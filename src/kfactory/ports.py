@@ -232,7 +232,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
         """Pretty print ports."""
         with config.console.capture() as capture:
             config.console.print(pprint_ports(self, unit=unit))
-        return capture.get()
+        return str(capture.get())
 
     def __hash__(self) -> int:
         """Hash the ports."""

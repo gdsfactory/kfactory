@@ -50,6 +50,14 @@ repos:
     rev: "v1.15.0" # Use the sha / tag you want to point at
     hooks:
       - id: mypy
-        require_serial: true
-        language: system
+        args: [--ignore-missing-imports, --strict, --config-file=pyproject.toml]
+        additional_dependencies:
+          - pydantic
+          - numpy
+          - pytest
+          - klayout
+          - types-cachetools
+          - loguru
+          - pydantic-settings
+          - typer
         exclude: ^docs/|^tests/

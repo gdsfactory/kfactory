@@ -567,13 +567,12 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
                 Section(d_max=sec[2], d_min=sec[1])
             )
         super().__init__(
-            _name=name,
             main_layer=main_layer,
             kcl=kcl,
             layer_sections=layer_sections,
             bbox_sections={t[0]: t[1] for t in bbox_sections},
         )
-        self._name = name
+        self._name = name  # type: ignore[misc]
 
     @model_serializer
     def _serialize(self) -> dict[str, Any]:
