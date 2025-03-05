@@ -51,6 +51,10 @@ from . import (
     utils,
     typings,
 )
+from .routing.generic import ManhattanRoute
+from .typings import dbu  # noqa: F401
+
+ManhattanRoute.model_rebuild()
 
 
 __all__ = [

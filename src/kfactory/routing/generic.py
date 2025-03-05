@@ -3,24 +3,27 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Sequence
-from typing import Any, Literal, Protocol, cast
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
 
 import klayout.db as kdb
 from klayout import rdb
 from pydantic import BaseModel, Field
 
 from ..conf import config, logger
-from ..instance import Instance
-from ..kcell import KCell
 from ..port import BasePort, Port, ProtoPort
-from ..typings import dbu
 from .manhattan import (
     ManhattanBundleRoutingFunction,
     ManhattanRouter,
     route_smart,
 )
 from .steps import Step, Straight
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from ..instance import Instance
+    from ..kcell import KCell
+    from ..typings import dbu
 
 __all__ = [
     "ManhattanRoute",
@@ -542,6 +545,7 @@ def route_bundle(
             it.add_value(c.kcl.to_um(path.polygon()))
         c.show(lyrdb=db)
     if placer_errors and on_placer_error is not None:
+        print(placer_errors)
         for error in placer_errors:
             logger.error(error)
         if c.name.startswith("Unnamed_"):

@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
-from typing import Any, Literal, cast, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 from .. import kdb
 from ..conf import config, logger
@@ -25,6 +24,9 @@ from .manhattan import (
     route_smart,
 )
 from .steps import Step, Straight
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 __all__ = [
     "get_radius",
@@ -1064,9 +1066,9 @@ def route(
             )
         d = 1 if bend180_ports[0].trans.angle in [0, 3] else -1
         b180p1, b180p2 = sorted(
-                bend180_ports,
-                key=lambda port: (d * port.trans.disp.x, d * port.trans.disp.y),
-            )
+            bend180_ports,
+            key=lambda port: (d * port.trans.disp.x, d * port.trans.disp.y),
+        )
 
         b180r = int((b180p2.trans.disp - b180p1.trans.disp).length())
         start_port = p1.copy()
