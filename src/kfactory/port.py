@@ -7,15 +7,11 @@ from __future__ import annotations
 
 import re
 from abc import ABC, abstractmethod
-from collections.abc import (
-    Callable,
-    Iterable,
-)
 from enum import IntEnum, IntFlag, auto
 from typing import TYPE_CHECKING, Any, Generic, Literal, Self, cast, overload
 
 import klayout.db as kdb
-import klayout.rdb as rdb
+from klayout import rdb
 from pydantic import (
     BaseModel,
     model_serializer,
@@ -31,13 +27,15 @@ from .cross_section import (
     SymmetricalCrossSection,
     TCrossSection,
 )
-from .layer import LayerEnum
 from .settings import Info
 from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+
     from .kcell import AnyTKCell, KCell
+    from .layer import LayerEnum
     from .layout import KCLayout
 
 
@@ -126,7 +124,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     def check_exclusivity(self) -> Self:
         if self.trans is None and self.dcplx_trans is None:
             raise ValueError("Both trans and dcplx_trans cannot be None.")
-        elif self.trans is not None and self.dcplx_trans is not None:
+        if self.trans is not None and self.dcplx_trans is not None:
             raise ValueError("Only one of trans or dcplx_trans can be set.")
         return self
 
@@ -172,25 +170,19 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     @model_serializer()
     def ser_model(self) -> BasePortDict:
         """Serialize the BasePort."""
-        if self.trans is not None:
-            trans = self.trans.dup()
-        else:
-            trans = None
-        if self.dcplx_trans is not None:
-            dcplx_trans = self.dcplx_trans.dup()
-        else:
-            dcplx_trans = None
+        trans = self.trans.dup() if self.trans is not None else None
+        dcplx_trans = self.dcplx_trans.dup() if self.dcplx_trans is not None else None
         return cast(
             BasePortDict,
-            dict(
-                name=self.name,
-                kcl=self.kcl,
-                cross_section=self.cross_section,
-                trans=trans,
-                dcplx_trans=dcplx_trans,
-                info=self.info.model_copy(),
-                port_type=self.port_type,
-            ),
+            {
+                "name": self.name,
+                "kcl": self.kcl,
+                "cross_section": self.cross_section,
+                "trans": trans,
+                "dcplx_trans": dcplx_trans,
+                "info": self.info.model_copy(),
+                "port_type": self.port_type,
+            },
         )
 
     def get_trans(self) -> kdb.Trans:
@@ -779,10 +771,7 @@ class Port(ProtoPort[int]):
         else:
             cross_section_ = cross_section.base
         if trans is not None:
-            if isinstance(trans, str):
-                trans_ = kdb.Trans.from_s(trans)
-            else:
-                trans_ = trans.dup()
+            trans_ = kdb.Trans.from_s(trans) if isinstance(trans, str) else trans.dup()
             self._base = BasePort(
                 name=name,
                 kcl=kcl_,
@@ -1093,10 +1082,7 @@ class DPort(ProtoPort[float]):
         else:
             cross_section_ = cross_section.base
         if trans is not None:
-            if isinstance(trans, str):
-                trans_ = kdb.Trans.from_s(trans)
-            else:
-                trans_ = trans.dup()
+            trans_ = kdb.Trans.from_s(trans) if isinstance(trans, str) else trans.dup()
             self._base = BasePort(
                 name=name,
                 kcl=kcl_,
@@ -1450,8 +1436,7 @@ def filter_regex(ports: Iterable[TPort], regex: str) -> filter[TPort]:
     def regex_filter(p: TPort) -> bool:
         if p.name is not None:
             return bool(pattern.match(p.name))
-        else:
-            return False
+        return False
 
     return filter(regex_filter, ports)
 
@@ -1463,18 +1448,17 @@ def port_polygon(width: int) -> kdb.Polygon:
     """Gets a polygon representation for a given port width."""
     if width in polygon_dict:
         return polygon_dict[width]
-    else:
-        poly = kdb.Polygon(
-            [
-                kdb.Point(0, width // 2),
-                kdb.Point(0, -width // 2),
-                kdb.Point(width // 2, 0),
-            ]
-        )
+    poly = kdb.Polygon(
+        [
+            kdb.Point(0, width // 2),
+            kdb.Point(0, -width // 2),
+            kdb.Point(width // 2, 0),
+        ]
+    )
 
-        hole = kdb.Region(poly).sized(-int(width * 0.05) or -1)
-        hole -= kdb.Region(kdb.Box(0, 0, width // 2, -width // 2))
+    hole = kdb.Region(poly).sized(-int(width * 0.05) or -1)
+    hole -= kdb.Region(kdb.Box(0, 0, width // 2, -width // 2))
 
-        poly.insert_hole(list(next(iter(hole.each())).each_point_hull()))
-        polygon_dict[width] = poly
-        return poly
+    poly.insert_hole(list(next(iter(hole.each())).each_point_hull()))
+    polygon_dict[width] = poly
+    return poly

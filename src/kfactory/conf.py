@@ -9,19 +9,19 @@ import sys
 import traceback
 from enum import Enum, IntEnum
 from itertools import takewhile
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 import loguru
 import rich.console
 from dotenv import find_dotenv
-from loguru import logger as logger
+from loguru import logger
 from pydantic import BaseModel, Field, ValidationError, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from . import kdb, rdb
-
 if TYPE_CHECKING:
+    from pathlib import Path
+
+    from . import kdb, rdb
     from .kcell import AnyKCell
     from .layout import KCLayout
 
@@ -93,12 +93,11 @@ def tracing_formatter(record: loguru.Record) -> str:
             " | <cyan>{extra[stack]}</cyan> - <level>{message}</level>\n{exception}"
         )
 
-    else:
-        return (
-            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}"
-            "</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan>"
-            " - <level>{message}</level>\n{exception}"
-        )
+    return (
+        "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}"
+        "</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan>"
+        " - <level>{message}</level>\n{exception}"
+    )
 
 
 class LogLevel(str, Enum):
@@ -134,10 +133,9 @@ class LogFilter(BaseModel):
         levelno = logger.level(self.level).no
         if self.regex is None:
             return record["level"].no >= levelno
-        else:
-            return record["level"].no >= levelno and not bool(
-                re.search(self.regex, record["message"])
-            )
+        return record["level"].no >= levelno and not bool(
+            re.search(self.regex, record["message"])
+        )
 
 
 def get_show_function(value: str | ShowFunction) -> ShowFunction:

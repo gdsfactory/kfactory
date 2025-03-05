@@ -138,8 +138,8 @@ def route_bundle(
     | list[list[Step]]
     | None = None,
     ends: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] | None = None,
-    start_angles: int | list[int] | float | list[float] | None = None,
-    end_angles: int | list[int] | float | list[float] | None = None,
+    start_angles: list[int] | float | list[float] | None = None,
+    end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
@@ -638,7 +638,7 @@ def place90(
                 f" safely place bends {pt.to_s()=}, {old_pt.to_s()=},"
                 f" {pt.distance(old_pt)=} < {b90r=}"
             )
-        elif (
+        if (
             pt.distance(old_pt) < 2 * b90r
             and i not in [1, len(pts) - 1]
             and not allow_small_routes
@@ -923,13 +923,12 @@ def route_loopback(
                 2, False, start_straight + bend90_radius, -2 * bend90_radius
             )
             t2 *= kdb.Trans(2, False, end_straight + bend90_radius, 2 * bend90_radius)
+    elif bend180_radius is not None:
+        t1 *= kdb.Trans(2, False, start_straight, bend180_radius)
+        t2 *= kdb.Trans(2, False, end_straight, -bend180_radius)
     else:
-        if bend180_radius is not None:
-            t1 *= kdb.Trans(2, False, start_straight, bend180_radius)
-            t2 *= kdb.Trans(2, False, end_straight, -bend180_radius)
-        else:
-            t1 *= kdb.Trans(2, False, start_straight + bend90_radius, 2 * bend90_radius)
-            t2 *= kdb.Trans(2, False, end_straight + bend90_radius, -2 * bend90_radius)
+        t1 *= kdb.Trans(2, False, start_straight + bend90_radius, 2 * bend90_radius)
+        t2 *= kdb.Trans(2, False, end_straight + bend90_radius, -2 * bend90_radius)
 
     return (
         pts_start
@@ -1064,12 +1063,10 @@ def route(
                 f" each other, {bend180_ports[0]=} {bend180_ports[1]=}"
             )
         d = 1 if bend180_ports[0].trans.angle in [0, 3] else -1
-        b180p1, b180p2 = list(
-            sorted(
+        b180p1, b180p2 = sorted(
                 bend180_ports,
                 key=lambda port: (d * port.trans.disp.x, d * port.trans.disp.y),
             )
-        )
 
         b180r = int((b180p2.trans.disp - b180p1.trans.disp).length())
         start_port = p1.copy()

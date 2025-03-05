@@ -27,7 +27,6 @@ from collections.abc import (
 )
 from pathlib import Path
 from tempfile import gettempdir
-from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -47,7 +46,6 @@ from pydantic import (
     PrivateAttr,
 )
 from ruamel.yaml.constructor import SafeConstructor
-from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from . import kdb, rdb
 from .conf import DEFAULT_TRANS, CheckInstances, ShowFunction, config, logger
@@ -97,6 +95,10 @@ from .utilities import (
 )
 
 if TYPE_CHECKING:
+    from types import ModuleType
+
+    from ruamel.yaml.representer import BaseRepresenter, MappingNode
+
     from .layout import KCLayout
 
 
@@ -740,8 +742,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                             ),
                         )
             return ci
-        else:
-            return lib_ci
+        return lib_ci
 
     def icreate_inst(
         self,
@@ -1095,7 +1096,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             diff.compare()
             if diff.dbu_differs:
                 raise MergeError("Layouts' DBU differ. Check the log for more info.")
-            elif diff.diff_xor.cells() > 0 or diff.layout_meta_diff:
+            if diff.diff_xor.cells() > 0 or diff.layout_meta_diff:
                 diff_kcl = KCLayout(self.name + "_XOR")
                 diff_kcl.layout.assign(diff.diff_xor)
                 show(diff_kcl)
@@ -1197,12 +1198,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             raise LockedError(self)
         if isinstance(inst, Instance):
             return Instance(self.kcl, self._base.kdb_cell.insert(inst.instance))
-        else:
-            if not property_id:
-                return Instance(self.kcl, self._base.kdb_cell.insert(inst))
-            else:
-                assert isinstance(inst, kdb.CellInstArray | kdb.DCellInstArray)
-                return Instance(self.kcl, self._base.kdb_cell.insert(inst, property_id))
+        if not property_id:
+            return Instance(self.kcl, self._base.kdb_cell.insert(inst))
+        assert isinstance(inst, kdb.CellInstArray | kdb.DCellInstArray)
+        return Instance(self.kcl, self._base.kdb_cell.insert(inst, property_id))
 
     @overload
     def transform(
@@ -1621,8 +1620,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 portnames.add(port.name)
 
         # create nets and connect pins for each cell_port
-        for _, layer_dict in cell_ports.items():
-            for _, _ports in layer_dict.items():
+        for layer_dict in cell_ports.values():
+            for _ports in layer_dict.values():
                 net = circ.create_net(
                     "-".join(_port[1].name or f"{_port[0]}" for _port in _ports)
                 )
@@ -1786,11 +1785,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 xy = (port.x, port.y)
                 if port.layer not in cell_ports:
                     cell_ports[port.layer] = {xy: [port]}
+                elif xy not in cell_ports[port.layer]:
+                    cell_ports[port.layer][xy] = [port]
                 else:
-                    if xy not in cell_ports[port.layer]:
-                        cell_ports[port.layer][xy] = [port]
-                    else:
-                        cell_ports[port.layer][xy].append(port)
+                    cell_ports[port.layer][xy].append(port)
                 rec_it = kdb.RecursiveShapeIterator(
                     self.kcl.layout,
                     self._base.kdb_cell,
@@ -1855,13 +1853,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     xy = (port.x, port.y)
                     if port.layer not in inst_ports:
                         inst_ports[port.layer] = {xy: [(port, inst.cell.to_itype())]}
+                    elif xy not in inst_ports[port.layer]:
+                        inst_ports[port.layer][xy] = [(port, inst.cell.to_itype())]
                     else:
-                        if xy not in inst_ports[port.layer]:
-                            inst_ports[port.layer][xy] = [(port, inst.cell.to_itype())]
-                        else:
-                            inst_ports[port.layer][xy].append(
-                                (port, inst.cell.to_itype())
-                            )
+                        inst_ports[port.layer][xy].append((port, inst.cell.to_itype()))
 
         for layer, port_coord_mapping in inst_ports.items():
             lc = layer_cat(layer)
@@ -2143,11 +2138,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             self._base.vinsts.clear()
             called_cell_indexes = self._base.kdb_cell.called_cells()
             for c in sorted(
-                set(
+                {
                     self.kcl[ci]
                     for ci in called_cell_indexes
                     if not self.kcl[ci].kdb_cell._destroyed()
-                )
+                }
                 & self.kcl.tkcells.keys(),
                 key=lambda c: c.hierarchy_levels(),
             ):
@@ -2440,7 +2435,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         )
         cell = cls(name=d["name"])
         if verbose:
-            print(f"Building {d['name']}")
+            logger.info(f"Building {d['name']}")
         for _d in d.get("ports", Ports(ports=[], kcl=cell.kcl)):
             layer_as_string = (
                 str(_d["layer"]).replace("[", "").replace("]", "").replace(", ", "/")
@@ -2531,7 +2526,9 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                             ref = i
                             break
                     else:
-                        IndexError(f"No instance with cell name: <{ref_yml}> found")
+                        raise IndexError(
+                            f"No instance with cell name: <{ref_yml}> found"
+                        )
                 elif isinstance(ref_yml, int) and len(cell.insts) > 1:
                     ref = cell.insts[ref_yml]
 
@@ -2548,7 +2545,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                         if isinstance(x0_yml, int):
                             x0 = x0_yml
                         else:
-                            NotImplementedError("unknown format for x0")
+                            raise NotImplementedError("unknown format for x0")
                 # y0
                 match y0_yml:
                     case "S":
@@ -2559,7 +2556,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                         if isinstance(y0_yml, int):
                             y0 = y0_yml
                         else:
-                            NotImplementedError("unknown format for y0")
+                            raise NotImplementedError("unknown format for y0")
                 # x
                 match x_yml:
                     case "W":
@@ -2580,7 +2577,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                         if isinstance(x_yml, int):
                             x = x_yml
                         else:
-                            NotImplementedError("unknown format for x")
+                            raise NotImplementedError("unknown format for x")
                 # y
                 match y_yml:
                     case "S":
@@ -2601,7 +2598,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                         if isinstance(y_yml, int):
                             y = y_yml
                         else:
-                            NotImplementedError("unknown format for y")
+                            raise NotImplementedError("unknown format for y")
                 kinst.transform(kdb.Trans(0, False, x - x0, y - y0))
         type_to_class: dict[
             str,
@@ -3148,11 +3145,10 @@ def show(
         frame_filename_stem = Path(frame.filename).stem
         if frame_filename_stem.startswith("<ipython-input"):  # IPython Case
             name = "ipython"
-        else:  # Normal Python kernel case
-            if frame.function != "<module>":
-                name = clean_name(frame_filename_stem + "_" + frame.function)
-            else:
-                name = clean_name(frame_filename_stem)
+        elif frame.function != "<module>":
+            name = clean_name(frame_filename_stem + "_" + frame.function)
+        else:
+            name = clean_name(frame_filename_stem)
     except Exception:
         try:
             from __main__ import __file__ as mf
@@ -3542,7 +3538,7 @@ def get_cells(
                         cells[t[0]] = t[1]
                 except ValueError:
                     if verbose:
-                        print(f"error in {t[0]}")
+                        logger.error(f"error in {t[0]}")
     return cells
 
 

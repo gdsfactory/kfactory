@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
 from typing import TYPE_CHECKING, Any, Protocol, TypedDict, overload
 
 from typing_extensions import Unpack
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+
     from cachetools import Cache
 
     from .conf import CheckInstances

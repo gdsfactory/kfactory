@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
 
 from pydantic import BaseModel, model_validator
 
 from .serialization import check_metadata_type, convert_metadata_type
-from .typings import MetaData
+
+if TYPE_CHECKING:
+    from .typings import MetaData
 
 __all__ = ["Info", "KCellSettings", "KCellSettingsUnits", "SettingMixin"]
 

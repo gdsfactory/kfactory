@@ -10,13 +10,12 @@ from collections.abc import (
 )
 from pathlib import Path
 from threading import RLock
-from typing import Annotated, Any, Literal, cast, get_origin, overload
+from typing import TYPE_CHECKING, Annotated, Any, Literal, cast, get_origin, overload
 
 import cachetools.func
 import klayout.db as kdb
 import ruamel.yaml
 from cachetools import Cache
-from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -57,7 +56,6 @@ from .kcell import (
 from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
 from .port import rename_clockwise_multi
-from .ports import DPorts, Ports
 from .protocols import KCellFunc
 from .serialization import (
     DecoratorDict,
@@ -69,6 +67,11 @@ from .serialization import (
 from .settings import Info, KCellSettings, KCellSettingsUnits
 from .typings import K, KCellParams, KCellSpec, MetaData, T
 from .utilities import load_layout_options, save_layout_options
+
+if TYPE_CHECKING:
+    from cachetools.keys import _HashedTuple
+
+    from .ports import DPorts, Ports
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -97,8 +100,7 @@ class Factories(UserDict[str, Callable[..., T]]):
     def __getattr__(self, name: str) -> Any:
         if name != "data":
             return self.data[name]
-        else:
-            self.__getattribute__(name)
+        return self.__getattribute__(name)
 
     def for_tags(self, tags: list[str]) -> list[Callable[..., T]]:
         if len(tags) > 0:
@@ -106,7 +108,7 @@ class Factories(UserDict[str, Callable[..., T]]):
             for tag in tags[1:]:
                 tag_set &= set(self.tags[tag])
             return list(tag_set)
-        raise NotImplementedError()
+        raise NotImplementedError
 
 
 class KCLayout(
@@ -305,9 +307,8 @@ class KCLayout(
         | None = None,
     ) -> LayerEnclosure:
         """Create a new LayerEnclosure in the KCLayout."""
-        if name is None:
-            if main_layer is not None and main_layer.name != "":
-                name = main_layer.name
+        if name is None and main_layer is not None and main_layer.name != "":
+            name = main_layer.name
         enc = LayerEnclosure(
             sections=sections,
             dsections=dsections,
@@ -556,7 +557,7 @@ class KCLayout(
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[K], None]] = tuple(),
+        post_process: Iterable[Callable[[K], None]] = (),
         debug_names: bool | None = None,
         tags: list[str] | None = None,
     ) -> (
@@ -624,7 +625,7 @@ class KCLayout(
             f: KCellFunc[KCellParams, AnyTKCell] | KCellFunc[KCellParams, K],
         ) -> KCellFunc[KCellParams, K]:
             sig = inspect.signature(f)
-            output_cell_type_: type[K] | type[ProtoTKCell[Any]]
+            output_cell_type_: type[K | ProtoTKCell[Any]]
             if output_type is not None:
                 output_cell_type_ = output_type
             elif sig.return_annotation is not inspect.Signature.empty:
@@ -1114,6 +1115,7 @@ class KCLayout(
         """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
         if name != "_name" and name not in self.model_fields:
             return self.layout.__getattribute__(name)
+        return None
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Use a custom setter to automatically set attributes.
@@ -1204,11 +1206,10 @@ class KCLayout(
         with self.thread_lock:
             if allow_duplicate or (self.layout_cell(name) is None):
                 return self.layout.create_cell(name, *args)
-            else:
-                raise ValueError(
-                    f"Cellname {name} already exists. Please make sure the cellname is"
-                    " unique or pass `allow_duplicate` when creating the library"
-                )
+            raise ValueError(
+                f"Cellname {name} already exists. Please make sure the cellname is"
+                " unique or pass `allow_duplicate` when creating the library"
+            )
 
     def delete_cell(self, cell: AnyTKCell | int) -> None:
         """Delete a cell in the kcl object."""
@@ -1383,7 +1384,7 @@ class KCLayout(
                     raise MergeError(
                         "Layouts' DBU differ. Check the log for more info."
                     )
-                elif diff.diff_xor.cells() > 0:
+                if diff.diff_xor.cells() > 0:
                     diff_kcl = KCLayout(self.name + "_XOR")
                     diff_kcl.layout.assign(diff.diff_xor)
                     show(diff_kcl)
@@ -1625,7 +1626,6 @@ class KCLayout(
         | DSymmetricalCrossSection,
     ) -> DCrossSection:
         """Get a cross section by name or specification."""
-
         if isinstance(cross_section, dict):
             return DCrossSection(
                 kcl=self,
@@ -1680,7 +1680,7 @@ class KCLayout(
             settings = spec.get("settings", {}).copy()
             settings.update(cell_kwargs)
             return self.factories[spec["component"]](**settings)
-        elif isinstance(spec, str):
+        if isinstance(spec, str):
             return self.factories[spec](**cell_kwargs)
         if cell_kwargs:
             raise ValueError(

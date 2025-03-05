@@ -31,7 +31,7 @@ def straight(width: int, length: int, layer: kf.kdb.LayerInfo) -> kf.KCell:
     return c
 
 
-@pytest.fixture()
+@pytest.fixture
 def wg(layers: Layers) -> kf.KCell:
     return straight(1000, 20000, layers.WG)
 

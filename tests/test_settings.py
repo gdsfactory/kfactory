@@ -92,7 +92,7 @@ def test_info_restrict_types() -> None:
     assert valid_data.key3 == [1, 2, 3]
 
     with pytest.raises(ValidationError):
-        Info(key1=set([1, 2, 3]))
+        Info(key1={1, 2, 3})
 
     info_with_none = Info(key1=None)
     assert info_with_none.key1 is None

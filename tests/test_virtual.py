@@ -73,7 +73,6 @@ def test_all_angle_route(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
             enclosure=wg_enc,
         ),
     )
-    # kf.VInstance(vc, kf.kdb.DCplxTrans()).insert_into(c)
     file = Path("test_all_angle.oas")
     vc.write(file)
     assert file.is_file()

@@ -221,8 +221,8 @@ def route_bundle(
     | list[list[Step]]
     | None = None,
     ends: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] | None = None,
-    start_angles: int | list[int] | float | list[float] | None = None,
-    end_angles: int | list[int] | float | list[float] | None = None,
+    start_angles: list[int] | float | list[float] | None = None,
+    end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
 ) -> list[ManhattanRoute]:
     r"""Connect multiple input ports to output ports.

@@ -181,38 +181,37 @@ class XY(Step):
                         router.straight_nobend(abs(dx))
                     else:
                         router.straight(abs(dx))
-                else:
-                    if sign * dx < router.t.disp.x + router.router.bend90_radius:
-                        raise ValueError("XY step cannot go back")
-                    router.straight_nobend(abs(dx))
-                    if self.y > router.t.disp.y:
-                        if a == 0:
-                            router.left()
-                        else:
-                            router.right()
-                    dy = self.y - router.t.disp.y
-                    if ib:
-                        if abs(dy) < 0:
-                            raise ValueError(
-                                "XY's y-step is too small. It is current pointing"
-                                f" at {router.t.angle * 90}"
-                                " degrees.\n"
-                                f"Current position: {router.t.disp!r}.\n"
-                                f"Target Position ({self.x},{self.y})"
-                            )
-                        router.straight(abs(dy))
+                if sign * dx < router.t.disp.x + router.router.bend90_radius:
+                    raise ValueError("XY step cannot go back")
+                router.straight_nobend(abs(dx))
+                if self.y > router.t.disp.y:
+                    if a == 0:
+                        router.left()
                     else:
-                        if abs(dy) < router.router.bend90_radius:
-                            raise ValueError(
-                                "XY's y-step is too small. It is current pointing"
-                                f" at {router.t.angle * 90}"
-                                " degrees.\n"
-                                f"Current position: {router.t.disp!r}.\n"
-                                f"Target Position ({self.x},{self.y})\n"
-                                "Too small distance to place bend of "
-                                f"{router.router.bend90_radius} size"
-                            )
-                        router.straight_nobend(abs(dy))
+                        router.right()
+                dy = self.y - router.t.disp.y
+                if ib:
+                    if abs(dy) < 0:
+                        raise ValueError(
+                            "XY's y-step is too small. It is current pointing"
+                            f" at {router.t.angle * 90}"
+                            " degrees.\n"
+                            f"Current position: {router.t.disp!r}.\n"
+                            f"Target Position ({self.x},{self.y})"
+                        )
+                    router.straight(abs(dy))
+                else:
+                    if abs(dy) < router.router.bend90_radius:
+                        raise ValueError(
+                            "XY's y-step is too small. It is current pointing"
+                            f" at {router.t.angle * 90}"
+                            " degrees.\n"
+                            f"Current position: {router.t.disp!r}.\n"
+                            f"Target Position ({self.x},{self.y})\n"
+                            "Too small distance to place bend of "
+                            f"{router.router.bend90_radius} size"
+                        )
+                    router.straight_nobend(abs(dy))
 
             case 1 | 3 if self.x == router.t.disp.x:
                 sign = -1 if a == 3 else 1
@@ -227,38 +226,37 @@ class XY(Step):
                         router.straight_nobend(abs(dy))
                     else:
                         router.straight(abs(dy))
-                else:
-                    if sign * dy < router.t.disp.y + router.router.bend90_radius:
-                        raise ValueError("XY step cannot go back")
-                    router.straight_nobend(abs(dx))
-                    if self.x > router.t.disp.x:
-                        if a == 3:
-                            router.left()
-                        else:
-                            router.right()
-                    dx = self.x - router.t.disp.x
-                    if ib:
-                        if abs(dy) < 0:
-                            raise ValueError(
-                                "XY's y-step is too small. It is current pointing"
-                                f" at {router.t.angle * 90}"
-                                " degrees.\n"
-                                f"Current position: {router.t.disp!r}.\n"
-                                f"Target Position ({self.x},{self.y})"
-                            )
-                        router.straight(abs(dy))
+                if sign * dy < router.t.disp.y + router.router.bend90_radius:
+                    raise ValueError("XY step cannot go back")
+                router.straight_nobend(abs(dx))
+                if self.x > router.t.disp.x:
+                    if a == 3:
+                        router.left()
                     else:
-                        if abs(dy) < router.router.bend90_radius:
-                            raise ValueError(
-                                "XY's y-step is too small. It is current pointing"
-                                f" at {router.t.angle * 90}"
-                                " degrees.\n"
-                                f"Current position: {router.t.disp!r}.\n"
-                                f"Target Position ({self.x},{self.y})\n"
-                                "Too small distance to place bend of "
-                                f"{router.router.bend90_radius} size"
-                            )
-                        router.straight_nobend(abs(dy))
+                        router.right()
+                dx = self.x - router.t.disp.x
+                if ib:
+                    if abs(dy) < 0:
+                        raise ValueError(
+                            "XY's y-step is too small. It is current pointing"
+                            f" at {router.t.angle * 90}"
+                            " degrees.\n"
+                            f"Current position: {router.t.disp!r}.\n"
+                            f"Target Position ({self.x},{self.y})"
+                        )
+                    router.straight(abs(dy))
+                else:
+                    if abs(dy) < router.router.bend90_radius:
+                        raise ValueError(
+                            "XY's y-step is too small. It is current pointing"
+                            f" at {router.t.angle * 90}"
+                            " degrees.\n"
+                            f"Current position: {router.t.disp!r}.\n"
+                            f"Target Position ({self.x},{self.y})\n"
+                            "Too small distance to place bend of "
+                            f"{router.router.bend90_radius} size"
+                        )
+                    router.straight_nobend(abs(dy))
 
 
 class Steps(RootModel[list[Any]]):

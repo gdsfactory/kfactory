@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, Generic
 
 import klayout.db as kdb
@@ -17,6 +16,8 @@ from .instance import (
 from .typings import TInstance, TUnit
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from .kcell import TKCell
 
 __all__ = [
@@ -81,10 +82,9 @@ class ProtoTInstances(ProtoInstances[TUnit, ProtoTInstance[TUnit]], ABC):
         try:
             if isinstance(item, kdb.Instance):
                 return next(filter(lambda inst: inst == item, self._insts))
-            else:
-                return next(
-                    filter(lambda inst: inst.property(PROPID.NAME) == item, self._insts)
-                )
+            return next(
+                filter(lambda inst: inst.property(PROPID.NAME) == item, self._insts)
+            )
         except StopIteration as e:
             raise ValueError(f"Instance {item} not found in {self._tkcell}") from e
 
@@ -99,11 +99,10 @@ class ProtoTInstances(ProtoInstances[TUnit, ProtoTInstance[TUnit]], ABC):
             if isinstance(key, ProtoTInstance):
                 self._get_inst(key.instance)
                 return True
-            elif isinstance(key, str):
+            if isinstance(key, str):
                 self._get_inst(key)
                 return True
-            else:
-                return key < len(self)
+            return key < len(self)
             return False
         except ValueError:
             return False
@@ -145,8 +144,7 @@ class Instances(ProtoTInstances[int]):
         """Retrieve instance by index or by name."""
         if isinstance(key, int):
             return Instance(kcl=self._tkcell.kcl, instance=list(self._insts)[key])
-        else:
-            return Instance(kcl=self._tkcell.kcl, instance=self._get_inst(key))
+        return Instance(kcl=self._tkcell.kcl, instance=self._get_inst(key))
 
 
 class DInstances(ProtoTInstances[float]):
@@ -165,8 +163,7 @@ class DInstances(ProtoTInstances[float]):
         """Retrieve instance by index or by name."""
         if isinstance(key, int):
             return DInstance(kcl=self._tkcell.kcl, instance=list(self._insts)[key])
-        else:
-            return DInstance(kcl=self._tkcell.kcl, instance=self._get_inst(key))
+        return DInstance(kcl=self._tkcell.kcl, instance=self._get_inst(key))
 
 
 class VInstances(ProtoInstances[float, VInstance]):

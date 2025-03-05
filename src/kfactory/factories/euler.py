@@ -107,7 +107,7 @@ def euler_bend_points(
     def _xy(s: float) -> kdb.DPoint:
         if th == 0:
             return kdb.DPoint(0, 0)
-        elif s <= total_length / 2:
+        if s <= total_length / 2:
             (fsin, fcos) = fresnel(s / (sq2pi * a))
             x = sq2pi * a * fcos
             y = sq2pi * a * fsin
@@ -137,9 +137,8 @@ def euler_bend_points(
     step = total_length / max(int(th * resolution), 1)
 
     # Generate points
-    points = [_xy(i * step) for i in range(int(round(total_length / step)) + 1)]
+    return [_xy(i * step) for i in range(int(round(total_length / step)) + 1)]
 
-    return points
 
 
 def euler_endpoint(

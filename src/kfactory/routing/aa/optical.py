@@ -430,20 +430,18 @@ def _get_partial_route(
     xe = _e.cut_point(_e2)
     if xe is None:
         return rp, kdb.DPoint(), np.inf
-    else:
-        bend2 = bend_factory(
-            width=start_port.width,
-            angle=abs((-angle + end_port.dcplx_trans.angle + 180) % 360 - 180),
-        )
-        er2 = _get_effective_radius(
-            bend2.ports[bend_ports[0]], bend2.ports[bend_ports[1]], _p0, _p1
-        )
-        r2 = (xe - end_port.dcplx_trans.disp.to_p()).abs() - er2
-        if r2 < 0 or (end_port.dcplx_trans.inverted() * xe).x < 0:
-            r2 = r2 / bend.kcl.dbu * 10
-            return rp, xe, abs(r2 / bend.kcl.dbu * 10)
-        else:
-            return rp, xe, abs(r2)
+    bend2 = bend_factory(
+        width=start_port.width,
+        angle=abs((-angle + end_port.dcplx_trans.angle + 180) % 360 - 180),
+    )
+    er2 = _get_effective_radius(
+        bend2.ports[bend_ports[0]], bend2.ports[bend_ports[1]], _p0, _p1
+    )
+    r2 = (xe - end_port.dcplx_trans.disp.to_p()).abs() - er2
+    if r2 < 0 or (end_port.dcplx_trans.inverted() * xe).x < 0:
+        r2 = r2 / bend.kcl.dbu * 10
+        return rp, xe, abs(r2 / bend.kcl.dbu * 10)
+    return rp, xe, abs(r2)
 
 
 def optimize_route(
@@ -524,20 +522,18 @@ def _get_partial_route2(
     xe = _e.cut_point(_e2)
     if xe is None:
         return rp, kdb.DPoint(), np.inf
-    else:
-        bend2 = bend_factory(
-            width=start_port.width,
-            angle=abs((-angle + end_port.dcplx_trans.angle + 180) % 360 - 180),
-        )
-        er2 = _get_effective_radius(
-            bend2.ports[bend_ports[0]], bend2.ports[bend_ports[1]], _p0, _p1
-        )
-        r2 = (xe - end_port.dcplx_trans.disp.to_p()).abs() - er2
-        if r2 < 0 or (end_port.dcplx_trans.inverted() * xe).x < 0:
-            r2 = r2 / bend.kcl.dbu * 10
-            return rp, xe, abs(r2 / bend.kcl.dbu * 10)
-        else:
-            return rp, xe, abs(r2)
+    bend2 = bend_factory(
+        width=start_port.width,
+        angle=abs((-angle + end_port.dcplx_trans.angle + 180) % 360 - 180),
+    )
+    er2 = _get_effective_radius(
+        bend2.ports[bend_ports[0]], bend2.ports[bend_ports[1]], _p0, _p1
+    )
+    r2 = (xe - end_port.dcplx_trans.disp.to_p()).abs() - er2
+    if r2 < 0 or (end_port.dcplx_trans.inverted() * xe).x < 0:
+        r2 = r2 / bend.kcl.dbu * 10
+        return rp, xe, abs(r2 / bend.kcl.dbu * 10)
+    return rp, xe, abs(r2)
 
 
 def _get_effective_radius(

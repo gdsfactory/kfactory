@@ -48,27 +48,19 @@ def test_rename_default(func: Callable[..., None]) -> None:
 
     indexes = list(range(4 * xl))
     # east:
-    inds_east = list(
-        sorted(
+    inds_east = sorted(
             indexes[2 * xl : 3 * xl],
             key=lambda i: (-port_y_coords[i - 2 * xl], -port_x_coords[i - 2 * xl]),
         )
-    )
-    inds_north = list(
-        sorted(
+    inds_north = sorted(
             indexes[xl : 2 * xl],
             key=lambda i: (-port_y_coords[i - xl], -port_x_coords[i - xl]),
         )
-    )
-    inds_west = list(
-        sorted(indexes[:xl], key=lambda i: (-port_y_coords[i], -port_x_coords[i]))
-    )
-    inds_south = list(
-        sorted(
+    inds_west = sorted(indexes[:xl], key=lambda i: (-port_y_coords[i], -port_x_coords[i]))
+    inds_south = sorted(
             indexes[3 * xl : 4 * xl],
             key=lambda i: (-port_y_coords[i - 3 * xl], -port_x_coords[i - 3 * xl]),
         )
-    )
 
     assert [p.name for p in port_list] == [
         f"o{i + 1}" for i in inds_east + inds_north + inds_west + inds_south

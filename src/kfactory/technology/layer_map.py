@@ -49,8 +49,7 @@ class LayerPropertiesModel(BaseModel):
         """Convert string to the index with the dict dither2index."""
         if isinstance(v, str):
             return dither2index[v]
-        else:
-            return v
+        return v
 
     @field_validator("line_style", mode="before")
     @classmethod
@@ -58,8 +57,7 @@ class LayerPropertiesModel(BaseModel):
         """Convert string to the index with the dict dither2index."""
         if isinstance(v, str):
             return line2index[v]
-        else:
-            return v
+        return v
 
     @field_serializer("dither_pattern")
     @staticmethod
@@ -130,14 +128,12 @@ def lyp_to_lyp_model(inp: pathlib.Path | str) -> LypModel:
             layers.append(kl2lp(lpnr))
         iter.next_sibling(1)
 
-    lyp_m = LypModel(layers=layers)
+    return LypModel(layers=layers)
 
-    return lyp_m
 
 
 def lyp_to_yaml(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
     """Convert a lyp file to a YAML ffile."""
-
     yaml = YAML()
 
     lyp_m = lyp_to_lyp_model(inp)
@@ -147,7 +143,7 @@ def lyp_to_yaml(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
 
 def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
     """Convert a KLayout LayerPropertiesNodeRef to a pydantic representation."""
-    lp = LayerPropertiesModel(
+    return LayerPropertiesModel(
         name=kl.name.rstrip(f" - {kl.source_layer}/{kl.source_datatype}"),
         layer=(kl.source_layer, kl.source_datatype),
         frame_color=Color(hex(kl.frame_color)) if kl.frame_color else None,
@@ -162,7 +158,6 @@ def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
         valid=kl.valid,
     )
 
-    return lp
 
 
 def kl2group(
@@ -471,8 +466,6 @@ line_styles = {
 dither2index: dict[str, int] = {
     name: index for index, name in enumerate(dither_patterns)
 }
-index2dither: dict[int, str] = {
-    index: name for index, name in enumerate(dither_patterns)
-}
+index2dither: dict[int, str] = dict(enumerate(dither_patterns))
 line2index: dict[str, int] = {name: index for index, name in enumerate(line_styles)}
-index2line: dict[int, str] = {index: name for index, name in enumerate(line_styles)}
+index2line: dict[int, str] = dict(enumerate(line_styles))

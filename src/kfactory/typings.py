@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import (
     TYPE_CHECKING,
     Annotated,
@@ -13,9 +12,11 @@ from typing import (
 )
 
 import klayout.db as kdb
-import klayout.lay as lay
+from klayout import lay
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from .instance import ProtoInstance
     from .kcell import BaseKCell, ProtoTKCell
     from .layer import LayerEnum, LayerInfos

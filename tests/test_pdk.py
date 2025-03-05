@@ -28,7 +28,7 @@ def test_pdk(layers: Layers) -> None:
 def test_clear(layers: Layers) -> None:
     kcl = kf.KCLayout("CLEAR")
     kcl.layer(500, 0)
-    kcl.infos = kf.LayerInfos(**{"WG": kf.kdb.LayerInfo(1, 0)})
+    kcl.infos = kf.LayerInfos(WG=kf.kdb.LayerInfo(1, 0))
     # kcl.layers = kcl.layerenum_from_dict(layers=LAYER)
     # kcl.layers = kcl.layerenum_from_dict(
     #     layers=kf.LayerInfos(WG=kf.kdb.LayerInfo(1, 0))

@@ -301,7 +301,17 @@ _test_smart_routing_kcl = kf.KCLayout("TEST_SMART_ROUTING", infos=Layers)
 
 
 @pytest.mark.parametrize(
-    "indirect,sort_ports,start_bbox,start_angle,m2,m1,z,p1,p2",
+    (
+        "indirect",
+        "sort_ports",
+        "start_bbox",
+        "start_angle",
+        "m2",
+        "m1",
+        "z",
+        "p1",
+        "p2",
+    ),
     smart_bundle_routing_params,
 )
 def test_smart_routing(
@@ -474,7 +484,6 @@ def test_smart_routing(
                 straight_factory=straight_factory_dbu,
             )
 
-    # (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)
     match (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2):
         case (
             (True, False, False, -1, True, False, False, True, False)
@@ -688,7 +697,6 @@ def test_route_smart_waypoints_pts(
 def test_route_generic_reorient(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    layers: Layers,
 ) -> None:
     c = kf.KCell(name="test_route_generic_reorient")
 
@@ -710,7 +718,6 @@ def test_route_generic_reorient(
         )
         for i in range(10)
     ]
-    # end_ports.reverse()
 
     c.add_ports(start_ports + end_ports)
 

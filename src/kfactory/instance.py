@@ -12,7 +12,6 @@ from typing import (
 )
 
 import klayout.db as kdb
-from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from .conf import PROPID, config, logger
 from .exceptions import (
@@ -21,13 +20,14 @@ from .exceptions import (
     PortWidthMismatchError,
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
-from .layer import LayerEnum
 from .port import DPort, Port, ProtoPort
 from .serialization import clean_name, get_cell_name
 from .settings import Info, KCellSettings
 from .typings import TUnit
 
 if TYPE_CHECKING:
+    from ruamel.yaml.representer import BaseRepresenter, MappingNode
+
     from .instance_ports import (
         DInstancePorts,
         InstancePorts,
@@ -36,6 +36,7 @@ if TYPE_CHECKING:
         VInstancePorts,
     )
     from .kcell import AnyKCell, AnyTKCell, DKCell, KCell, ProtoTKCell
+    from .layer import LayerEnum
     from .layout import KCLayout
 
 __all__ = ["DInstance", "Instance", "ProtoInstance", "ProtoTInstance", "VInstance"]
@@ -369,7 +370,8 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         else:
             p = self.cell.ports[port].to_itype()
 
-        assert isinstance(p, Port) and isinstance(op, Port)
+        assert isinstance(p, Port)
+        assert isinstance(op, Port)
 
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatchError(self, other, p, op)
@@ -723,33 +725,32 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             inst_.transform(base_trans)
             return Instance(kcl=self.cell.kcl, instance=inst_.instance)
 
+        assert isinstance(self.cell, ProtoTKCell)
+        trans_ = trans * self.trans
+        base_trans = kdb.DCplxTrans(
+            kdb.ICplxTrans(trans_, cell.kcl.dbu).s_trans().to_dtype(cell.kcl.dbu)
+        )
+        trans_ = base_trans.inverted() * trans_
+        cell_name = self.cell.name
+        if trans_ != kdb.DCplxTrans():
+            trans_str = (
+                f"_M{trans_.mirror}_S{trans_.angle}"
+                f"_X{trans_.disp.x}_Y{trans_.disp.y}"
+            ).replace(".", "p")
+            cell_name = cell_name + trans_str
+        if cell.kcl.layout_cell(cell_name) is None:
+            tkcell = self.cell.dup()
+            tkcell.name = cell_name
+            tkcell.flatten(False)
+            for layer in tkcell.kcl.layer_indexes():
+                tkcell.shapes(layer).transform(trans_)
+            for _port in tkcell.ports:
+                _port.dcplx_trans = trans_ * _port.dcplx_trans
         else:
-            assert isinstance(self.cell, ProtoTKCell)
-            trans_ = trans * self.trans
-            base_trans = kdb.DCplxTrans(
-                kdb.ICplxTrans(trans_, cell.kcl.dbu).s_trans().to_dtype(cell.kcl.dbu)
-            )
-            trans_ = base_trans.inverted() * trans_
-            cell_name = self.cell.name
-            if trans_ != kdb.DCplxTrans():
-                trans_str = (
-                    f"_M{trans_.mirror}_S{trans_.angle}"
-                    f"_X{trans_.disp.x}_Y{trans_.disp.y}"
-                ).replace(".", "p")
-                cell_name = cell_name + trans_str
-            if cell.kcl.layout_cell(cell_name) is None:
-                tkcell = self.cell.dup()
-                tkcell.name = cell_name
-                tkcell.flatten(False)
-                for layer in tkcell.kcl.layer_indexes():
-                    tkcell.shapes(layer).transform(trans_)
-                for _port in tkcell.ports:
-                    _port.dcplx_trans = trans_ * _port.dcplx_trans
-            else:
-                tkcell = cell.kcl[cell_name]
-            inst_ = cell << tkcell
-            inst_.transform(base_trans)
-            return Instance(kcl=self.cell.kcl, instance=inst_.instance)
+            tkcell = cell.kcl[cell_name]
+        inst_ = cell << tkcell
+        inst_.transform(base_trans)
+        return Instance(kcl=self.cell.kcl, instance=inst_.instance)
 
     @overload
     def insert_into_flat(
@@ -902,7 +903,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         else:
             p = self.cell.ports[port].to_itype()
 
-        assert isinstance(p, Port) and isinstance(op, Port)
+        assert isinstance(p, Port)
+        assert isinstance(op, Port)
 
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatchError(self, other, p, op)

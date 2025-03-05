@@ -10,12 +10,6 @@ from __future__ import annotations
 import itertools
 import sys
 from collections import defaultdict
-from collections.abc import (
-    Callable,
-    Iterable,
-    Mapping,
-    Sequence,
-)
 from enum import IntEnum
 from functools import lru_cache
 from hashlib import sha1
@@ -42,6 +36,13 @@ from . import kdb
 from .conf import config, logger
 
 if TYPE_CHECKING:
+    from collections.abc import (
+        Callable,
+        Iterable,
+        Mapping,
+        Sequence,
+    )
+
     from .kcell import KCell
     from .layout import KCLayout
     from .port import Port
@@ -454,24 +455,23 @@ class LayerSection(BaseModel):
         if not self.sections:
             self.sections.append(sec)
             return 0
-        else:
-            i = 0
-            if sec.d_min is not None:
-                while i < len(self.sections) and sec.d_min > self.sections[i].d_max:
-                    i += 1
-                while (
-                    i < len(self.sections) and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
-                ):
-                    sec.d_max = max(self.sections[i].d_max, sec.d_max)
-                    sec.d_min = min(
-                        self.sections[i].d_min,
-                        sec.d_min,  # type: ignore[type-var]
-                    )
-                    self.sections.pop(i)
-                    if i == len(self.sections):
-                        break
-            self.sections.insert(i, sec)
-            return i
+        i = 0
+        if sec.d_min is not None:
+            while i < len(self.sections) and sec.d_min > self.sections[i].d_max:
+                i += 1
+            while (
+                i < len(self.sections) and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
+            ):
+                sec.d_max = max(self.sections[i].d_max, sec.d_max)
+                sec.d_min = min(
+                    self.sections[i].d_min,
+                    sec.d_min,  # type: ignore[type-var]
+                )
+                self.sections.pop(i)
+                if i == len(self.sections):
+                    break
+        self.sections.insert(i, sec)
+        return i
 
     def max_size(self) -> int:
         """Maximum size of the sections in this layer section."""
@@ -536,7 +536,6 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
                 Must be specified if `desections` is not `None`. Also necessary
                 if copying to another layout and not all layers used are LayerInfos.
         """
-
         layer_sections: dict[kdb.LayerInfo, LayerSection] = {}
 
         if dsections is not None:
@@ -591,7 +590,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
     def __hash__(self) -> int:  # make hashable BaseModel subclass
         """Calculate a unique hash of the enclosure."""
         return hash(
-            (str(self), self.main_layer, tuple(list(self.layer_sections.items())))
+            (str(self), self.main_layer, tuple(self.layer_sections.items()))
         )
 
     def to_dtype(self, kcl: KCLayout) -> DLayerEnclosure:
@@ -633,25 +632,24 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
         """
         if d is None:
             return kdb.Region()
-        elif d == 0:
+        if d == 0:
             return r.dup()
-        elif d > 0:
+        if d > 0:
             return r.minkowski_sum(shape(d))
+        shape_ = shape(abs(d))
+        if isinstance(shape_, list):
+            box_shape = kdb.Polygon(shape_)
+            bbox_maxsize = max(
+                box_shape.bbox().width(),
+                box_shape.bbox().height(),
+            )
         else:
-            shape_ = shape(abs(d))
-            if isinstance(shape_, list):
-                box_shape = kdb.Polygon(shape_)
-                bbox_maxsize = max(
-                    box_shape.bbox().width(),
-                    box_shape.bbox().height(),
-                )
-            else:
-                bbox_maxsize = max(
-                    shape_.bbox().width(),
-                    shape_.bbox().height(),
-                )
-            bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
-            return r - (bbox_r - r).minkowski_sum(shape_)
+            bbox_maxsize = max(
+                shape_.bbox().width(),
+                shape_.bbox().height(),
+            )
+        bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
+        return r - (bbox_r - r).minkowski_sum(shape_)
 
     def apply_minkowski_enc(
         self,
@@ -1311,25 +1309,24 @@ class KCellEnclosure(BaseModel):
         """
         if d is None:
             return kdb.Region()
-        elif d == 0:
+        if d == 0:
             return r.dup()
-        elif d > 0:
+        if d > 0:
             return r.minkowski_sum(shape(d))
+        shape_ = shape(abs(d))
+        if isinstance(shape_, list):
+            box_shape = kdb.Polygon(shape_)
+            bbox_maxsize = max(
+                box_shape.bbox().width(),
+                box_shape.bbox().height(),
+            )
         else:
-            shape_ = shape(abs(d))
-            if isinstance(shape_, list):
-                box_shape = kdb.Polygon(shape_)
-                bbox_maxsize = max(
-                    box_shape.bbox().width(),
-                    box_shape.bbox().height(),
-                )
-            else:
-                bbox_maxsize = max(
-                    shape_.bbox().width(),
-                    shape_.bbox().height(),
-                )
-            bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
-            return r - (bbox_r - r).minkowski_sum(shape_)
+            bbox_maxsize = max(
+                shape_.bbox().width(),
+                shape_.bbox().height(),
+            )
+        bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
+        return r - (bbox_r - r).minkowski_sum(shape_)
 
     def apply_minkowski_enc(
         self,
@@ -1675,7 +1672,6 @@ def _add_section(
         layer: Target layer.
         sec: New section to add.
     """
-
     if layer in layer_sections:
         layer_sections[layer].add_section(section)
     else:

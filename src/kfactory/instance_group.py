@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Iterator, Sequence
 from typing import TYPE_CHECKING, Generic, NoReturn
 
 from . import kdb
@@ -9,6 +8,8 @@ from .instance import ProtoTInstance, VInstance
 from .typings import TInstance, TUnit
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator, Sequence
+
     from .layout import KCLayout
 
 __all__ = [
@@ -88,7 +89,6 @@ class InstanceGroup(ProtoTInstanceGroup[int], DBUGeometricObject):
         insts: List of the instances of the group.
     """
 
-    ...
 
 
 class DInstanceGroup(ProtoTInstanceGroup[float], UMGeometricObject):

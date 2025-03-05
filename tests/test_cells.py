@@ -11,7 +11,6 @@ from kfactory.conf import logger
 class GeometryDifferenceError(ValueError):
     """Exception for Geometric differences."""
 
-    ...
 
 
 wg_enc = kf.LayerEnclosure(name="WGSTD", sections=[(Layers().WGCLAD, 0, 2000)])
@@ -66,7 +65,7 @@ cells = dict(
     straight=straight,
 )
 
-cell_names = list(sorted(set(cells.keys())))
+cell_names = sorted(set(cells.keys()))
 
 
 @pytest.fixture(params=cell_names, scope="function")

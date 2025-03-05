@@ -113,20 +113,24 @@ indent-width = 4
 target-version = "py311"
 
 [tool.ruff.lint]
-select = [
-    "F",   # pyflakes
-    "E",   # pycodestyle
-    "W",   # pycodestyle
-    "UP",  # pyupgrade
-    "N",   # pep8-naming
-    # "D",   # pydocstyle
-    "I",   # isort
-    "ANN", # annotations
-    "RUF", # ruff
-    "B",   # bugbear
+select = ["ALL"]
+ignore = [
+    "ANN401",
+    "D100",
+    "COM812",
+    "S101",
+    "FBT",
+    "PLR0915",
+    "PLR0911",
+    "C901",
+    "TRY003",
+    "PLR0913",
+    "PLR0912",
+    "TC004",
+    "EM",
+    "TID252",
 ]
-ignore = ["ANN401", "D100"]
-per-file-ignores = { "tests/*.py" = ["D"] }
+per-file-ignores = { "tests/*.py" = ["D", "PLR2004", "INP001", "EM101"] }
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.

@@ -7,7 +7,7 @@ from collections.abc import Sequence
 from typing import Any, Literal, Protocol, cast
 
 import klayout.db as kdb
-import klayout.rdb as rdb
+from klayout import rdb
 from pydantic import BaseModel, Field
 
 from ..conf import config, logger

@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING, Any, Generic, Self, overload
 import numpy as np
 
 from . import kdb
-from .protocols import BoxFunction, BoxLike
 from .typings import TUnit
 
 if TYPE_CHECKING:
     from .layer import LayerEnum
     from .layout import KCLayout
+    from .protocols import BoxFunction, BoxLike
 
 __all__ = ["DBUGeometricObject", "GeometricObject", "SizeInfo", "UMGeometricObject"]
 
@@ -132,7 +132,7 @@ class GeometricObject(Generic[TUnit], ABC):
     @abstractmethod
     def _standard_trans(self: GeometricObject[float]) -> type[kdb.DCplxTrans]: ...
     @abstractmethod
-    def _standard_trans(self) -> type[kdb.Trans] | type[kdb.DCplxTrans]: ...
+    def _standard_trans(self) -> type[kdb.Trans | kdb.DCplxTrans]: ...
 
     @abstractmethod
     def transform(

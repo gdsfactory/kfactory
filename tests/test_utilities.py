@@ -24,5 +24,5 @@ def test_check_metadata_type() -> None:
     assert check_metadata_type([1, 2, 3]) == [1, 2, 3]
     assert check_metadata_type({"key": "value"}) == {"key": "value"}
 
-    with pytest.raises(ValueError):
-        check_metadata_type(set([1, 2, 3]))  # type: ignore
+    with pytest.raises(ValueError, match="^Values of the info dict only support.*"):
+        check_metadata_type({1, 2, 3})  # type: ignore[arg-type]
