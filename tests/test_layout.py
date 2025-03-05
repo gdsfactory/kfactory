@@ -30,15 +30,13 @@ def test_cell_decorator(kcl: kf.KCLayout, layers: Layers) -> None:
     assert rectangle_cell is not rectangle_cell3
     assert count == 2
 
-    # rectangle_post_process.assert_any_call(rectangle_cell.base)
-    # rectangle_post_process.assert_any_call(rectangle_cell3.base)
-    # assert rectangle_post_process.call_count == 2
-
 
 def test_set_settings_functionality(kcl: kf.KCLayout) -> None:
     @kcl.cell(set_settings=True)
     def test_set_settings(
-        name: str = "test_set_settings", width: float = 10.0, height: float = 5.0
+        name: str = "test_set_settings",
+        width: float = 10.0,
+        height: float = 5.0,
     ) -> kf.KCell:
         return kcl.kcell(name=name)
 
@@ -48,7 +46,9 @@ def test_set_settings_functionality(kcl: kf.KCLayout) -> None:
 
     @kcl.cell(set_settings=False)
     def test_set_settings_no_settings(
-        name: str = "test_set_settings_no", width: float = 10.0, height: float = 5.0
+        name: str = "test_set_settings_no",
+        width: float = 10.0,
+        height: float = 5.0,
     ) -> kf.KCell:
         return kcl.kcell(name=name)
 
@@ -136,12 +136,14 @@ def test_cell_with_different_kcl(kcl: kf.KCLayout) -> None:
 def test_cell_parameters(kcl: kf.KCLayout) -> None:
     @kcl.cell
     def test_cell_with_empty_parameters(
-        name: str, width: float, height: float
+        name: str,
+        width: float,
+        height: float,
     ) -> kf.KCell:
         return kcl.kcell(name=name)
 
     with pytest.raises(TypeError):
-        test_cell_with_empty_parameters(name="test_cell_with_empty_parameters")  # type: ignore
+        test_cell_with_empty_parameters(name="test_cell_with_empty_parameters")
 
 
 def test_check_instances(kcl: kf.KCLayout) -> None:
@@ -288,7 +290,11 @@ def test_get_component(layers: Layers) -> None:
     kf.kcl.get_component(
         {
             "component": "straight",
-            "settings": {"width": 1000, "length": 10_000, "layer": kf.kdb.LayerInfo(1, 0)},
+            "settings": {
+                "width": 1000,
+                "length": 10_000,
+                "layer": kf.kdb.LayerInfo(1, 0),
+            },
         },
         output_type=kf.DKCell,
     ).delete()

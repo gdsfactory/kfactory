@@ -167,7 +167,7 @@ def test_size_info_call(kcl: kf.KCLayout) -> None:
 
     new_size_info = c.size_info(1)
 
-    assert new_size_info._bf() == c.size_info._bf()
+    assert new_size_info._bf() == c.size_info._bf()  # noqa: SLF001
 
 
 if __name__ == "__main__":

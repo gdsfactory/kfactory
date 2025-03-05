@@ -23,11 +23,11 @@ class SettingMixin:
         """Get the value of a setting."""
         return getattr(self, key)
 
-    def get(self, __key: str, default: Any = None) -> Any:
+    def get(self, __key: str, /, default: Any = None) -> Any:
         """Get the value of a setting."""
         return getattr(self, __key, default)
 
-    def __contains__(self, __key: str) -> bool:
+    def __contains__(self, __key: str, /) -> bool:
         """Check if a setting exists."""
         return hasattr(self, __key)
 

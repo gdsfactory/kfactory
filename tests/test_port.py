@@ -200,7 +200,7 @@ def test_port_cross_section(kcl: kf.KCLayout, layers: Layers) -> None:
     assert port.width == 3000
 
 
-def test_port_info(kcl: kf.KCLayout, layers: Layers) -> None:
+def test_port_info() -> None:
     port = get_ports()[0].copy()
     assert port.info == kf.Info()
     port.info = kf.Info(test="test")
@@ -404,7 +404,7 @@ def test_dport_init() -> None:
     assert dport.dcplx_trans == kf.kdb.DCplxTrans(1, 0)
 
 
-def test_dport_copy_polar(kcl: kf.KCLayout) -> None:
+def test_dport_copy_polar() -> None:
     port = kf.DPort(name="o1", width=10, layer=1, center=(0, 0), orientation=0)
     port2 = port.copy_polar(d=1, d_orth=1, orientation=45, mirror=True)
     assert port2.dcplx_trans == kf.kdb.DCplxTrans(x=1, y=1, rot=45, mirrx=True)

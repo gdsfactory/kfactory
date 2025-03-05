@@ -11,6 +11,8 @@ from pydantic.color import Color
 from pydantic.functional_serializers import field_serializer
 from ruamel.yaml import YAML
 
+from kfactory.conf import MIN_HEX_THRESHOLD
+
 from .. import lay
 
 
@@ -95,14 +97,14 @@ def yaml_to_lyp(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
     lyp_m = LypModel.parse_obj(lyp_dict)
 
     lv = lay.LayoutView()
-    iter = lv.end_layers()
+    layers_iter = lv.end_layers()
 
     for member in lyp_m.layers:
         if isinstance(member, LayerPropertiesModel):
-            lv.insert_layer(iter, lp2kl(member))
-            iter.next()
+            lv.insert_layer(layers_iter, lp2kl(member))
+            layers_iter.next()
         else:
-            lv.insert_layer(iter, group2lp(member))
+            lv.insert_layer(layers_iter, group2lp(member))
 
     lv.save_layer_props(str(out))
 
@@ -115,18 +117,20 @@ def lyp_to_lyp_model(inp: pathlib.Path | str) -> LypModel:
     lv = lay.LayoutView()
     lv.load_layer_props(str(f))
 
-    iter = lv.begin_layers()
+    layers_iter = lv.begin_layers()
     layers: list[LayerGroupModel | LayerPropertiesModel] = []
 
-    while not iter.at_end():
-        lpnr = iter.current()
+    while not layers_iter.at_end():
+        lpnr = layers_iter.current()
         if lpnr.has_children():
             layers.append(
-                LayerGroupModel(name=lpnr.name, members=kl2group(iter.first_child()))
+                LayerGroupModel(
+                    name=lpnr.name, members=kl2group(layers_iter.first_child())
+                )
             )
         else:
             layers.append(kl2lp(lpnr))
-        iter.next_sibling(1)
+        layers_iter.next_sibling(1)
 
     return LypModel(layers=layers)
 
@@ -159,19 +163,21 @@ def kl2lp(kl: lay.LayerPropertiesNodeRef) -> LayerPropertiesModel:
 
 
 def kl2group(
-    iter: lay.LayerPropertiesIterator,
+    iterable: lay.LayerPropertiesIterator,
 ) -> list[LayerGroupModel | LayerPropertiesModel]:
     """Convert a full LayerPropertiesIterator to a pydantic representation."""
     members: list[LayerGroupModel | LayerPropertiesModel] = []
-    while not iter.at_end():
-        lpnr = iter.current()
+    while not iterable.at_end():
+        lpnr = iterable.current()
         if lpnr.has_children():
             members.append(
-                LayerGroupModel(name=lpnr.name, members=kl2group(iter.first_child()))
+                LayerGroupModel(
+                    name=lpnr.name, members=kl2group(iterable.first_child())
+                )
             )
         else:
             members.append(kl2lp(lpnr))
-        iter.next_sibling(1)
+        iterable.next_sibling(1)
     return members
 
 
@@ -185,12 +191,12 @@ def lp2kl(lp: LayerPropertiesModel) -> lay.LayerPropertiesNode:
     kl_lp.source = f"{lp.layer[0]}/{lp.layer[1]}"
     if lp.frame_color:
         hex_n = lp.frame_color.as_hex()[1:]
-        if len(hex_n) < 6:
+        if len(hex_n) < MIN_HEX_THRESHOLD:
             hex_n = "".join(x * 2 for x in hex_n)
         kl_lp.frame_color = int(hex_n, 16)
     if lp.fill_color:
         hex_n = lp.fill_color.as_hex()[1:]
-        if len(hex_n) < 6:
+        if len(hex_n) < MIN_HEX_THRESHOLD:
             hex_n = "".join(x * 2 for x in hex_n)
         kl_lp.fill_color = int(hex_n, 16)
 

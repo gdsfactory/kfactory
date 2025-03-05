@@ -86,7 +86,7 @@ def test_connect_integer(wg: kf.KCell) -> None:
     assert wg2.ports["o1"].trans == kf.kdb.Trans(0, False, 0, 0)
 
 
-def test_connect_port_width_mismatch(layers: Layers, wg: kf.KCell) -> None:
+def test_connect_port_width_mismatch(layers: Layers) -> None:
     c = kf.KCell()
     wg1 = c << straight(1000, 20000, layers.WG)
     port = kf.Port(
@@ -103,7 +103,7 @@ def test_connect_port_width_mismatch(layers: Layers, wg: kf.KCell) -> None:
     )
 
 
-def test_connect_instance_width_mismatch(layers: Layers, wg: kf.KCell) -> None:
+def test_connect_instance_width_mismatch(layers: Layers) -> None:
     c = kf.KCell()
     wg1 = c << straight(1000, 20000, layers.WG)
     port = kf.Port(

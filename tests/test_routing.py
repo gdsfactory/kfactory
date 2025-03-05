@@ -31,7 +31,6 @@ def test_route_straight(
     x: int,
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    layers: Layers,
     optical_port: kf.Port,
 ) -> None:
     c = kf.KCell()
@@ -65,7 +64,6 @@ def test_route_straight(
 def test_route_bend90(
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    layers: Layers,
     optical_port: kf.Port,
     x: int,
     y: int,
@@ -108,7 +106,6 @@ def test_route_bend90(
 def test_route_bend90_invert(
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    layers: Layers,
     optical_port: kf.Port,
     x: int,
     y: int,
@@ -143,7 +140,6 @@ def test_route_bend90_invert(
 def test_route_bend90_euler(
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    layers: Layers,
     optical_port: kf.Port,
     x: int,
     y: int,
@@ -167,7 +163,6 @@ def test_route_bend90_euler(
 
 
 def test_route_bundle(
-    layers: Layers,
     optical_port: kf.Port,
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
@@ -216,7 +211,6 @@ def test_route_bundle(
 
 
 def test_route_bundle_route_width(
-    layers: Layers,
     optical_port: kf.Port,
     bend90_euler_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
@@ -268,7 +262,6 @@ def test_route_bundle_route_width(
 def test_route_length(
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    layers: Layers,
     optical_port: kf.Port,
     taper: kf.KCell,
 ) -> None:

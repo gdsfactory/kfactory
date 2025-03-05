@@ -120,7 +120,9 @@ def test_cells(cell_name: str, layers: Layers) -> None:
 
 
 def test_additional_info(
-    kcl: kf.KCLayout, layers: Layers, wg_enc: kf.LayerEnclosure
+    kcl: kf.KCLayout,
+    layers: Layers,
+    wg_enc: kf.LayerEnclosure,
 ) -> None:
     test_bend_euler = partial(
         kf.factories.euler.bend_euler_factory(

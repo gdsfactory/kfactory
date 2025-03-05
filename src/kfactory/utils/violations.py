@@ -187,8 +187,8 @@ def fix_spacing_sizing_tiled(
 
     queue_str = (
         "var tile_reg=reg & (_tile & _frame);"
-        + f"reg = tile_reg.sized({min_space}).sized({-min_space});"
-        + "_output(fix_reg, reg)"
+        f"reg = tile_reg.sized({min_space}).sized({-min_space});"
+        "_output(fix_reg, reg)"
     )
 
     tp.queue(queue_str)
@@ -447,12 +447,12 @@ class RegionOperator(kdb.TileOutputReceiver):
 
     def put(
         self,
-        ix: int,
-        iy: int,
-        tile: kdb.Box,
+        ix: int,  # noqa: ARG002
+        iy: int,  # noqa: ARG002
+        tile: kdb.Box,  # noqa: ARG002
         region: kdb.Region,
-        dbu: float,
-        clip: bool,
+        dbu: float,  # noqa: ARG002
+        clip: bool,  # noqa: ARG002
     ) -> None:
         """Tiling Processor output call.
 

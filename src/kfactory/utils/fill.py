@@ -54,12 +54,12 @@ class FillOperator(kdb.TileOutputReceiver):
 
     def put(
         self,
-        ix: int,
-        iy: int,
+        ix: int,  # noqa: ARG002
+        iy: int,  # noqa: ARG002
         tile: kdb.Box,
         region: kdb.Region,
-        dbu: float,
-        clip: bool,
+        dbu: float,  # noqa: ARG002
+        clip: bool,  # noqa: ARG002
     ) -> None:
         """Called by the TilingProcessor."""
         if self.multi:
@@ -113,7 +113,7 @@ def fill_tiled(
     x_space: float = 0,
     y_space: float = 0,
     tile_border: tuple[float, float] = (20, 20),
-    multi: bool = False,
+    multi: bool = False,  # noqa: ARG001
 ) -> None:
     """Fill a [KCell][kfactory.kcell.KCell].
 
@@ -144,7 +144,7 @@ def fill_tiled(
     dbb = c.dbbox()
     for r, ext in fill_regions:
         dbb += r.bbox().to_dtype(c.kcl.dbu).enlarged(ext)
-    tp.frame = dbb  # type: ignore
+    tp.frame = dbb
     tp.dbu = c.kcl.dbu
     tp.threads = n_threads
 
@@ -246,11 +246,7 @@ def fill_tiled(
         if exlayer_names or exregion_names:
             queue_str = (
                 "var fill= "
-                + (
-                    f"{layers} + {regions}"
-                    if regions and layers
-                    else regions + layers
-                )
+                + (f"{layers} + {regions}" if regions and layers else regions + layers)
                 + "; var exclude = "
                 + (
                     f"{exlayers} + {exregions}"
@@ -264,11 +260,7 @@ def fill_tiled(
         else:
             queue_str = (
                 "var fill= "
-                + (
-                    f"{layers} + {regions}"
-                    if regions and layers
-                    else regions + layers
-                )
+                + (f"{layers} + {regions}" if regions and layers else regions + layers)
                 + "; var fill_region = _tile.minkowski_sum(Box.new("
                 f"0,0,{fc_bbox.width() - 1},{fc_bbox.height() - 1}))"
                 " & _frame & fill;"

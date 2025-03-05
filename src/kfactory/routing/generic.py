@@ -545,7 +545,6 @@ def route_bundle(
             it.add_value(c.kcl.to_um(path.polygon()))
         c.show(lyrdb=db)
     if placer_errors and on_placer_error is not None:
-        print(placer_errors)
         for error in placer_errors:
             logger.error(error)
         if c.name.startswith("Unnamed_"):

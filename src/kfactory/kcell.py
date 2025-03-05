@@ -85,7 +85,7 @@ from .serialization import (
 )
 from .settings import Info, KCellSettings, KCellSettingsUnits
 from .shapes import VShapes
-from .typings import KC, MetaData, TBaseCell, TUnit
+from .typings import KC_co, MetaData, TBaseCell_co, TUnit
 from .utilities import (
     check_cell_ports,
     check_inst_ports,
@@ -182,8 +182,8 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     def name(self, value: str) -> None: ...
 
 
-class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
-    _base: TBaseCell
+class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
+    _base: TBaseCell_co
 
     @property
     def locked(self) -> bool:
@@ -267,7 +267,7 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
         return self._base.vinsts
 
     @property
-    def base(self) -> TBaseCell:
+    def base(self) -> TBaseCell_co:
         return self._base
 
     @property
@@ -3452,14 +3452,14 @@ def show(
         Path(l2nfile).unlink()  # type: ignore[arg-type]
 
 
-class ProtoCells(Mapping[int, KC], ABC):
+class ProtoCells(Mapping[int, KC_co], ABC):
     _kcl: KCLayout
 
     def __init__(self, kcl: KCLayout) -> None:
         self._kcl = kcl
 
     @abstractmethod
-    def __getitem__(self, key: int | str) -> KC: ...
+    def __getitem__(self, key: int | str) -> KC_co: ...
 
     def __delitem__(self, key: int | str) -> None:
         """Delete a cell by key (name or index)."""
@@ -3470,7 +3470,7 @@ class ProtoCells(Mapping[int, KC], ABC):
             del self._kcl.tkcells[cell_index]
 
     @abstractmethod
-    def _generate_dict(self) -> dict[int, KC]: ...
+    def _generate_dict(self) -> dict[int, KC_co]: ...
 
     def __iter__(self) -> Iterator[int]:
         return iter(self._kcl.tkcells)
@@ -3478,10 +3478,10 @@ class ProtoCells(Mapping[int, KC], ABC):
     def __len__(self) -> int:
         return len(self._kcl.tkcells)
 
-    def items(self) -> ItemsView[int, KC]:
+    def items(self) -> ItemsView[int, KC_co]:
         return self._generate_dict().items()
 
-    def values(self) -> ValuesView[KC]:
+    def values(self) -> ValuesView[KC_co]:
         return self._generate_dict().values()
 
     def keys(self) -> KeysView[int]:

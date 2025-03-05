@@ -41,6 +41,8 @@ DEFAULT_TRANS: dict[str, str | int | float | dict[str, str | int | float]] = {
     },
     "ref": -2,
 }
+MIN_POINTS_FOR_SIMPLIFY = 3
+MIN_HEX_THRESHOLD = 6
 
 
 class PROPID(IntEnum):
@@ -263,7 +265,7 @@ class Settings(BaseSettings):
 
     @field_validator("cell_overwrite_existing")
     @classmethod
-    def _validate_overwrite_and_cache(cls, v: bool, info: ValidationInfo) -> bool:
+    def _validate_overwrite_and_cache(cls, v: bool) -> bool:
         if v is True:
             logger.warning(
                 "'overwrite_existing' has been set to True. This might cause "
@@ -274,7 +276,7 @@ class Settings(BaseSettings):
 
     @field_validator("cell_layout_cache")
     @classmethod
-    def _validate_layout_cache(cls, v: bool, info: ValidationInfo) -> bool:
+    def _validate_layout_cache(cls, v: bool) -> bool:
         if v is True:
             logger.debug(
                 "'cell_layout_cache' has been set to True. This might cause when "

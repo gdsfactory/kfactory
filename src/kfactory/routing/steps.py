@@ -257,6 +257,8 @@ class XY(Step):
                             f"{router.router.bend90_radius} size"
                         )
                     router.straight_nobend(abs(dy))
+            case _:
+                ...
 
 
 class Steps(RootModel[list[Any]]):
@@ -270,7 +272,7 @@ class Steps(RootModel[list[Any]]):
     def _check_steps(self) -> Self:
         for step in self.root:
             if not isinstance(step, Step):
-                raise ValueError(
+                raise TypeError(
                     "All Steps must implement an "
                     "'execute(self, router: ManhattanRouterSide, include_bend: bool)"
                 )

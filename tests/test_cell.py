@@ -2,6 +2,7 @@ import tempfile
 import threading
 import warnings
 from collections.abc import Callable
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import pytest
@@ -135,7 +136,7 @@ def test_array_indexerror(straight: kf.KCell) -> None:
     kf.config.logfilter.regex = regex
 
 
-def test_invalid_array(monkeypatch: pytest.MonkeyPatch, straight: kf.KCell) -> None:
+def test_invalid_array(straight: kf.KCell) -> None:
     c = kf.KCell()
     wg = c.create_inst(straight)
     regex = kf.config.logfilter.regex
@@ -192,7 +193,7 @@ def test_size_info(kcl: kf.KCLayout, layers: Layers) -> None:
     assert ref.dsize_info.ne[0] == 10
 
 
-def test_overwrite(layers: Layers) -> None:
+def test_overwrite() -> None:
     kcl = kf.KCLayout("CELL_OVERWRITE")
 
     @kcl.cell
@@ -208,10 +209,10 @@ def test_overwrite(layers: Layers) -> None:
     c2 = test_overwrite_cell()
 
     assert c2 is not c1
-    assert c1._destroyed()
+    assert c1.destroyed()
 
 
-def test_layout_cache(layers: Layers) -> None:
+def test_layout_cache() -> None:
     kcl_write = kf.KCLayout("TEST_LAYOUT_CACHE_WRITE")
     kcl_read = kf.KCLayout("TEST_LAYOUT_CACHE_READ")
 
@@ -222,9 +223,9 @@ def test_layout_cache(layers: Layers) -> None:
         return c
 
     s_write = write_straight()
-    tf = NamedTemporaryFile(suffix=".gds.gz")
-    kcl_write.write(tf.name)
-    kcl_read.read(tf.name)
+    with NamedTemporaryFile(suffix=".gds.gz") as tf:
+        kcl_write.write(tf.name)
+        kcl_read.read(tf.name)
 
     @kcl_read.cell(basename="straight", layout_cache=True)
     def read_straight() -> kf.KCell:
@@ -454,7 +455,7 @@ def test_cell_yaml(layers: Layers) -> None:
 
     c.name = _temp_cell_name + "_old"
 
-    with open(tmpfile.name) as file:
+    with Path(tmpfile.name).open() as file:
         cell = yaml.load(file)
         assert isinstance(cell, kf.KCell)
 

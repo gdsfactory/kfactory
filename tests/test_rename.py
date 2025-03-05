@@ -163,15 +163,18 @@ def test_rename_setter(layers: Layers) -> None:
     for i, _port in enumerate(c2.ports):
         match i % 4:
             case 1:
-                assert _port.name is not None and _port.name[1:] == str(i % 4 + 1), (
+                assert _port.name is not None
+                assert _port.name[1:] == str(i % 4 + 1), (
                     f"Expected {i % 4 + 1=!s}, original name {dir_list[i]}"
                 )
             case 2:
-                assert _port.name is not None and _port.name[1:] == str(i % 4 - 1), (
+                assert _port.name is not None
+                assert _port.name[1:] == str(i % 4 - 1), (
                     f"Expected {i % 4 - 1=!s}, original name {dir_list[i]}"
                 )
             case _:
-                assert _port.name is not None and _port.name[1:] == str(i % 4), (
+                assert _port.name is not None
+                assert _port.name[1:] == str(i % 4), (
                     f"Expected {i % 4=!s}, original name {dir_list[i]}"
                 )
 

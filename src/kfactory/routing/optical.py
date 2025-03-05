@@ -1053,7 +1053,7 @@ def route(
 
     if bend180_cell is not None:
         # Bend 180 is available
-        bend180_ports = [p for p in bend180_cell.ports.filter(port_type=port_type)]
+        bend180_ports = list(bend180_cell.ports.filter(port_type=port_type))
         if len(bend180_ports) != 2:
             raise AttributeError(
                 f"{bend180_cell.name} should have 2 ports but has {len(bend180_ports)}"
