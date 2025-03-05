@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, Generic
 
 import klayout.db as kdb
@@ -14,9 +13,11 @@ from .instance import (
     ProtoTInstance,
     VInstance,
 )
-from .typings import TInstance, TUnit
+from .typings import TInstance_co, TUnit
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from .kcell import TKCell
 
 __all__ = [
@@ -28,7 +29,7 @@ __all__ = [
 ]
 
 
-class ProtoInstances(Generic[TUnit, TInstance], ABC):
+class ProtoInstances(Generic[TUnit, TInstance_co], ABC):
     @abstractmethod
     def __iter__(self) -> Iterator[ProtoInstance[TUnit]]: ...
 
@@ -36,13 +37,13 @@ class ProtoInstances(Generic[TUnit, TInstance], ABC):
     def __len__(self) -> int: ...
 
     @abstractmethod
-    def __delitem__(self, item: TInstance | int) -> None: ...
+    def __delitem__(self, item: TInstance_co | int) -> None: ...
 
     @abstractmethod
     def __getitem__(self, key: str | int) -> ProtoInstance[TUnit]: ...
 
     @abstractmethod
-    def __contains__(self, key: str | int | TInstance) -> bool: ...
+    def __contains__(self, key: str | int | TInstance_co) -> bool: ...
 
     @abstractmethod
     def clear(self) -> None: ...
@@ -81,10 +82,9 @@ class ProtoTInstances(ProtoInstances[TUnit, ProtoTInstance[TUnit]], ABC):
         try:
             if isinstance(item, kdb.Instance):
                 return next(filter(lambda inst: inst == item, self._insts))
-            else:
-                return next(
-                    filter(lambda inst: inst.property(PROPID.NAME) == item, self._insts)
-                )
+            return next(
+                filter(lambda inst: inst.property(PROPID.NAME) == item, self._insts)
+            )
         except StopIteration as e:
             raise ValueError(f"Instance {item} not found in {self._tkcell}") from e
 
@@ -99,12 +99,10 @@ class ProtoTInstances(ProtoInstances[TUnit, ProtoTInstance[TUnit]], ABC):
             if isinstance(key, ProtoTInstance):
                 self._get_inst(key.instance)
                 return True
-            elif isinstance(key, str):
+            if isinstance(key, str):
                 self._get_inst(key)
                 return True
-            else:
-                return key < len(self)
-            return False
+            return key < len(self)
         except ValueError:
             return False
 
@@ -145,8 +143,7 @@ class Instances(ProtoTInstances[int]):
         """Retrieve instance by index or by name."""
         if isinstance(key, int):
             return Instance(kcl=self._tkcell.kcl, instance=list(self._insts)[key])
-        else:
-            return Instance(kcl=self._tkcell.kcl, instance=self._get_inst(key))
+        return Instance(kcl=self._tkcell.kcl, instance=self._get_inst(key))
 
 
 class DInstances(ProtoTInstances[float]):
@@ -165,8 +162,7 @@ class DInstances(ProtoTInstances[float]):
         """Retrieve instance by index or by name."""
         if isinstance(key, int):
             return DInstance(kcl=self._tkcell.kcl, instance=list(self._insts)[key])
-        else:
-            return DInstance(kcl=self._tkcell.kcl, instance=self._get_inst(key))
+        return DInstance(kcl=self._tkcell.kcl, instance=self._get_inst(key))
 
 
 class VInstances(ProtoInstances[float, VInstance]):

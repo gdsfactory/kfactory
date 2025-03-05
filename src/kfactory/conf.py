@@ -9,19 +9,19 @@ import sys
 import traceback
 from enum import Enum, IntEnum
 from itertools import takewhile
-from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 import loguru
 import rich.console
 from dotenv import find_dotenv
-from loguru import logger as logger
+from loguru import logger as logger  # noqa: PLC0414
 from pydantic import BaseModel, Field, ValidationError, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from . import kdb, rdb
-
 if TYPE_CHECKING:
+    from pathlib import Path
+
+    from . import kdb, rdb
     from .kcell import AnyKCell
     from .layout import KCLayout
 
@@ -41,6 +41,18 @@ DEFAULT_TRANS: dict[str, str | int | float | dict[str, str | int | float]] = {
     },
     "ref": -2,
 }
+MIN_POINTS_FOR_SIMPLIFY = 3
+MIN_POINTS_FOR_CLEAN = 2
+MIN_POINTS_FOR_PLACEMENT = 2
+MIN_WAYPOINTS_FOR_ROUTING = 2
+NUM_PORTS_FOR_ROUTING = 2
+MIN_ALL_ANGLE_ROUTES_POINTS = 3
+MIN_HEX_THRESHOLD = 6
+
+ANGLE_0 = 0
+ANGLE_90 = 1
+ANGLE_180 = 2
+ANGLE_270 = 3
 
 
 class PROPID(IntEnum):
@@ -93,12 +105,11 @@ def tracing_formatter(record: loguru.Record) -> str:
             " | <cyan>{extra[stack]}</cyan> - <level>{message}</level>\n{exception}"
         )
 
-    else:
-        return (
-            "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}"
-            "</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan>"
-            " - <level>{message}</level>\n{exception}"
-        )
+    return (
+        "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <level>{level: <8}"
+        "</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan>"
+        " - <level>{message}</level>\n{exception}"
+    )
 
 
 class LogLevel(str, Enum):
@@ -134,10 +145,9 @@ class LogFilter(BaseModel):
         levelno = logger.level(self.level).no
         if self.regex is None:
             return record["level"].no >= levelno
-        else:
-            return record["level"].no >= levelno and not bool(
-                re.search(self.regex, record["message"])
-            )
+        return record["level"].no >= levelno and not bool(
+            re.search(self.regex, record["message"])
+        )
 
 
 def get_show_function(value: str | ShowFunction) -> ShowFunction:
@@ -265,7 +275,7 @@ class Settings(BaseSettings):
 
     @field_validator("cell_overwrite_existing")
     @classmethod
-    def _validate_overwrite_and_cache(cls, v: bool, info: ValidationInfo) -> bool:
+    def _validate_overwrite_and_cache(cls, v: bool) -> bool:
         if v is True:
             logger.warning(
                 "'overwrite_existing' has been set to True. This might cause "
@@ -276,7 +286,7 @@ class Settings(BaseSettings):
 
     @field_validator("cell_layout_cache")
     @classmethod
-    def _validate_layout_cache(cls, v: bool, info: ValidationInfo) -> bool:
+    def _validate_layout_cache(cls, v: bool) -> bool:
         if v is True:
             logger.debug(
                 "'cell_layout_cache' has been set to True. This might cause when "

@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING, Any, Generic, Self, overload
 import numpy as np
 
 from . import kdb
-from .protocols import BoxFunction, BoxLike
 from .typings import TUnit
 
 if TYPE_CHECKING:
     from .layer import LayerEnum
     from .layout import KCLayout
+    from .protocols import BoxFunction, BoxLike
 
 __all__ = ["DBUGeometricObject", "GeometricObject", "SizeInfo", "UMGeometricObject"]
 
@@ -132,7 +132,7 @@ class GeometricObject(Generic[TUnit], ABC):
     @abstractmethod
     def _standard_trans(self: GeometricObject[float]) -> type[kdb.DCplxTrans]: ...
     @abstractmethod
-    def _standard_trans(self) -> type[kdb.Trans] | type[kdb.DCplxTrans]: ...
+    def _standard_trans(self) -> type[kdb.Trans | kdb.DCplxTrans]: ...
 
     @abstractmethod
     def transform(
@@ -147,7 +147,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.bbox().center().x
 
     @x.setter
-    def x(self, __val: TUnit) -> None:
+    def x(self, __val: TUnit, /) -> None:
         """Moves self so that the bbox's center x-coordinate."""
         self.transform(self._standard_trans()(x=__val - self.bbox().center().x))
 
@@ -157,7 +157,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.bbox().center().y
 
     @y.setter
-    def y(self, __val: TUnit) -> None:
+    def y(self, __val: TUnit, /) -> None:
         """Moves self so that the bbox's center y-coordinate."""
         self.transform(self._standard_trans()(y=__val - self.bbox().center().y))
 
@@ -167,7 +167,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.bbox().left
 
     @xmin.setter
-    def xmin(self, __val: TUnit) -> None:
+    def xmin(self, __val: TUnit, /) -> None:
         """Moves self so that the bbox's left edge x-coordinate."""
         self.transform(self._standard_trans()(x=__val - self.bbox().left))
 
@@ -177,7 +177,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.bbox().bottom
 
     @ymin.setter
-    def ymin(self, __val: TUnit) -> None:
+    def ymin(self, __val: TUnit, /) -> None:
         """Moves self so that the bbox's bottom edge y-coordinate."""
         self.transform(self._standard_trans()(y=__val - self.bbox().bottom))
 
@@ -187,7 +187,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.bbox().right
 
     @xmax.setter
-    def xmax(self, __val: TUnit) -> None:
+    def xmax(self, __val: TUnit, /) -> None:
         """Moves self so that the bbox's right edge x-coordinate."""
         self.transform(self._standard_trans()(x=__val - self.bbox().right))
 
@@ -197,7 +197,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.bbox().top
 
     @ymax.setter
-    def ymax(self, __val: TUnit) -> None:
+    def ymax(self, __val: TUnit, /) -> None:
         """Moves self so that the bbox's top edge y-coordinate."""
         self.transform(self._standard_trans()(y=__val - self.bbox().top))
 
@@ -207,7 +207,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.bbox().width()
 
     @xsize.setter
-    def xsize(self, __val: TUnit) -> None:
+    def xsize(self, __val: TUnit, /) -> None:
         """Sets the width of the bounding box."""
         self.transform(self._standard_trans()(x=__val - self.bbox().width()))
 
@@ -217,7 +217,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.bbox().height()
 
     @ysize.setter
-    def ysize(self, __val: TUnit) -> None:
+    def ysize(self, __val: TUnit, /) -> None:
         """Sets the height of the bounding box."""
         self.transform(self._standard_trans()(y=__val - self.bbox().height()))
 
@@ -228,7 +228,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return center.x, center.y
 
     @center.setter
-    def center(self, __val: tuple[TUnit, TUnit]) -> None:
+    def center(self, __val: tuple[TUnit, TUnit], /) -> None:
         """Moves self so that the bbox's center coordinate."""
         self.transform(
             self._standard_trans()(
@@ -331,7 +331,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.ibbox().center().x
 
     @ix.setter
-    def ix(self, __val: int) -> None:
+    def ix(self, __val: int, /) -> None:
         """Moves self so that the bbox's center x-coordinate."""
         self.transform(kdb.Trans(__val - self.ibbox().center().x, 0))
 
@@ -341,7 +341,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.ibbox().center().y
 
     @iy.setter
-    def iy(self, __val: int) -> None:
+    def iy(self, __val: int, /) -> None:
         """Moves self so that the bbox's center y-coordinate."""
         self.transform(kdb.Trans(0, __val - self.ibbox().center().y))
 
@@ -351,7 +351,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.ibbox().left
 
     @ixmin.setter
-    def ixmin(self, __val: int) -> None:
+    def ixmin(self, __val: int, /) -> None:
         """Moves self so that the bbox's left x-coordinate."""
         self.transform(kdb.Trans(__val - self.ibbox().left, 0))
 
@@ -361,7 +361,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.ibbox().bottom
 
     @iymin.setter
-    def iymin(self, __val: int) -> None:
+    def iymin(self, __val: int, /) -> None:
         """Moves self so that the bbox's bottom y-coordinate."""
         self.transform(kdb.Trans(0, __val - self.ibbox().bottom))
 
@@ -371,7 +371,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.ibbox().right
 
     @ixmax.setter
-    def ixmax(self, __val: int) -> None:
+    def ixmax(self, __val: int, /) -> None:
         """Moves self so that the bbox's right x-coordinate."""
         self.transform(kdb.Trans(__val - self.ibbox().right, 0))
 
@@ -381,7 +381,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.ibbox().top
 
     @iymax.setter
-    def iymax(self, __val: int) -> None:
+    def iymax(self, __val: int, /) -> None:
         """Moves self so that the bbox's top y-coordinate."""
         self.transform(kdb.Trans(0, __val - self.ibbox().top))
 
@@ -391,7 +391,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.ibbox().width()
 
     @ixsize.setter
-    def ixsize(self, __val: int) -> None:
+    def ixsize(self, __val: int, /) -> None:
         """Sets the width of the bounding box."""
         self.transform(kdb.Trans(__val - self.ibbox().width(), 0))
 
@@ -401,7 +401,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.ibbox().height()
 
     @iysize.setter
-    def iysize(self, __val: int) -> None:
+    def iysize(self, __val: int, /) -> None:
         """Sets the height of the bounding box."""
         self.transform(kdb.Trans(0, __val - self.ibbox().height()))
 
@@ -533,7 +533,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.dbbox().center().x
 
     @dx.setter
-    def dx(self, __val: float) -> None:
+    def dx(self, __val: float, /) -> None:
         """Moves self so that the bbox's center x-coordinate in um."""
         self.transform(kdb.DTrans(__val - self.dbbox().center().x, 0))
 
@@ -543,7 +543,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.dbbox().center().y
 
     @dy.setter
-    def dy(self, __val: float) -> None:
+    def dy(self, __val: float, /) -> None:
         """Moves self so that the bbox's center y-coordinate in um."""
         self.transform(kdb.DTrans(0, __val - self.dbbox().center().y))
 
@@ -553,7 +553,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.dbbox().left
 
     @dxmin.setter
-    def dxmin(self, __val: float) -> None:
+    def dxmin(self, __val: float, /) -> None:
         """Moves self so that the bbox's left x-coordinate in um."""
         self.transform(kdb.DTrans(__val - self.dbbox().left, 0))
 
@@ -563,7 +563,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.dbbox().bottom
 
     @dymin.setter
-    def dymin(self, __val: float) -> None:
+    def dymin(self, __val: float, /) -> None:
         """Moves self so that the bbox's bottom y-coordinate in um."""
         self.transform(kdb.DTrans(0, __val - self.dbbox().bottom))
 
@@ -573,7 +573,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.dbbox().right
 
     @dxmax.setter
-    def dxmax(self, __val: float) -> None:
+    def dxmax(self, __val: float, /) -> None:
         """Moves self so that the bbox's right x-coordinate in um."""
         self.transform(kdb.DTrans(__val - self.dbbox().right, 0))
 
@@ -583,7 +583,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.dbbox().top
 
     @dymax.setter
-    def dymax(self, __val: float) -> None:
+    def dymax(self, __val: float, /) -> None:
         """Moves self so that the bbox's top y-coordinate in um."""
         self.transform(kdb.DTrans(0, __val - self.dbbox().top))
 
@@ -593,7 +593,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.dbbox().width()
 
     @dxsize.setter
-    def dxsize(self, __val: float) -> None:
+    def dxsize(self, __val: float, /) -> None:
         """Sets the width of the bounding box in um."""
         self.transform(kdb.DTrans(__val - self.dbbox().width(), 0))
 
@@ -603,7 +603,7 @@ class GeometricObject(Generic[TUnit], ABC):
         return self.dbbox().height()
 
     @dysize.setter
-    def dysize(self, __val: float) -> None:
+    def dysize(self, __val: float, /) -> None:
         """Sets the height of the bounding box in um."""
         self.transform(kdb.DTrans(0, __val - self.dbbox().height()))
 

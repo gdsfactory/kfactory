@@ -10,12 +10,6 @@ from __future__ import annotations
 import itertools
 import sys
 from collections import defaultdict
-from collections.abc import (
-    Callable,
-    Iterable,
-    Mapping,
-    Sequence,
-)
 from enum import IntEnum
 from functools import lru_cache
 from hashlib import sha1
@@ -42,6 +36,13 @@ from . import kdb
 from .conf import config, logger
 
 if TYPE_CHECKING:
+    from collections.abc import (
+        Callable,
+        Iterable,
+        Mapping,
+        Sequence,
+    )
+
     from .kcell import KCell
     from .layout import KCLayout
     from .port import Port
@@ -313,7 +314,7 @@ def extrude_path_dynamic(
             for section in layer_list[layer].sections:
                 layer_list[layer].add_section(section)
     if is_callable_widths(widths):
-        for layer, layer_sec in layer_list.items():
+        for layer_, layer_sec in layer_list.items():
             reg = kdb.Region()
             for section in layer_sec.sections:
 
@@ -352,10 +353,10 @@ def extrude_path_dynamic(
                         )
                     )
                 reg.insert(r)
-            target.shapes(target.kcl.layer(layer)).insert(reg.merge())
+            target.shapes(target.kcl.layer(layer_)).insert(reg.merge())
 
     else:
-        for layer, layer_sec in layer_list.items():
+        for layer_, layer_sec in layer_list.items():
             reg = kdb.Region()
             for section in layer_sec.sections:
                 max_widths = [
@@ -392,7 +393,7 @@ def extrude_path_dynamic(
                         )
                     )
                 reg.insert(r)
-            target.shapes(target.kcl.layer(layer)).insert(reg.merge())
+            target.shapes(target.kcl.layer(layer_)).insert(reg.merge())
 
 
 class Section(BaseModel):
@@ -454,24 +455,23 @@ class LayerSection(BaseModel):
         if not self.sections:
             self.sections.append(sec)
             return 0
-        else:
-            i = 0
-            if sec.d_min is not None:
-                while i < len(self.sections) and sec.d_min > self.sections[i].d_max:
-                    i += 1
-                while (
-                    i < len(self.sections) and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
-                ):
-                    sec.d_max = max(self.sections[i].d_max, sec.d_max)
-                    sec.d_min = min(
-                        self.sections[i].d_min,
-                        sec.d_min,  # type: ignore[type-var]
-                    )
-                    self.sections.pop(i)
-                    if i == len(self.sections):
-                        break
-            self.sections.insert(i, sec)
-            return i
+        i = 0
+        if sec.d_min is not None:
+            while i < len(self.sections) and sec.d_min > self.sections[i].d_max:
+                i += 1
+            while (
+                i < len(self.sections) and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
+            ):
+                sec.d_max = max(self.sections[i].d_max, sec.d_max)
+                sec.d_min = min(
+                    self.sections[i].d_min,
+                    sec.d_min,  # type: ignore[type-var]
+                )
+                self.sections.pop(i)
+                if i == len(self.sections):
+                    break
+        self.sections.insert(i, sec)
+        return i
 
     def max_size(self) -> int:
         """Maximum size of the sections in this layer section."""
@@ -536,17 +536,16 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
                 Must be specified if `desections` is not `None`. Also necessary
                 if copying to another layout and not all layers used are LayerInfos.
         """
-
         layer_sections: dict[kdb.LayerInfo, LayerSection] = {}
 
         if dsections is not None:
             assert kcl is not None, "If sections in um are defined, kcl must be set"
             sections = list(sections)
             for section in dsections:
-                if len(section) == 2:
+                if len(section) == 2:  # noqa: PLR2004
                     sections.append((section[0], kcl.to_dbu(section[1])))
 
-                elif len(section) == 3:
+                elif len(section) == 3:  # noqa: PLR2004
                     sections.append(
                         (
                             section[0],
@@ -564,17 +563,16 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             else:
                 ls = LayerSection()
                 layer_sections[sec[0]] = ls
-            ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
+            ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(  # noqa: PLR2004
                 Section(d_max=sec[2], d_min=sec[1])
             )
         super().__init__(
-            _name=name,
             main_layer=main_layer,
             kcl=kcl,
             layer_sections=layer_sections,
             bbox_sections={t[0]: t[1] for t in bbox_sections},
         )
-        self._name = name
+        self._name = name  # type: ignore[misc]
 
     @model_serializer
     def _serialize(self) -> dict[str, Any]:
@@ -590,9 +588,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
 
     def __hash__(self) -> int:  # make hashable BaseModel subclass
         """Calculate a unique hash of the enclosure."""
-        return hash(
-            (str(self), self.main_layer, tuple(list(self.layer_sections.items())))
-        )
+        return hash((str(self), self.main_layer, tuple(self.layer_sections.items())))
 
     def to_dtype(self, kcl: KCLayout) -> DLayerEnclosure:
         """Convert the enclosure to a um based enclosure."""
@@ -633,25 +629,24 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
         """
         if d is None:
             return kdb.Region()
-        elif d == 0:
+        if d == 0:
             return r.dup()
-        elif d > 0:
+        if d > 0:
             return r.minkowski_sum(shape(d))
+        shape_ = shape(abs(d))
+        if isinstance(shape_, list):
+            box_shape = kdb.Polygon(shape_)
+            bbox_maxsize = max(
+                box_shape.bbox().width(),
+                box_shape.bbox().height(),
+            )
         else:
-            shape_ = shape(abs(d))
-            if isinstance(shape_, list):
-                box_shape = kdb.Polygon(shape_)
-                bbox_maxsize = max(
-                    box_shape.bbox().width(),
-                    box_shape.bbox().height(),
-                )
-            else:
-                bbox_maxsize = max(
-                    shape_.bbox().width(),
-                    shape_.bbox().height(),
-                )
-            bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
-            return r - (bbox_r - r).minkowski_sum(shape_)
+            bbox_maxsize = max(
+                shape_.bbox().width(),
+                shape_.bbox().height(),
+            )
+        bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
+        return r - (bbox_r - r).minkowski_sum(shape_)
 
     def apply_minkowski_enc(
         self,
@@ -986,7 +981,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
         ]
         for layer, layer_section in self.layer_sections.items():
             list_to_hash.append([str(layer), str(layer_section.sections)])
-        return sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]
+        return sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]  # noqa: S324
 
     def extrude_path(
         self,
@@ -1236,7 +1231,6 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
             dbu: dbu used by the processor.
             clip: Whether the target was clipped to the tile or not.
         """
-        # self.region.insert(region)
         self.regions[ix][iy].insert(region)
 
     def merge_region(self) -> None:
@@ -1311,25 +1305,24 @@ class KCellEnclosure(BaseModel):
         """
         if d is None:
             return kdb.Region()
-        elif d == 0:
+        if d == 0:
             return r.dup()
-        elif d > 0:
+        if d > 0:
             return r.minkowski_sum(shape(d))
+        shape_ = shape(abs(d))
+        if isinstance(shape_, list):
+            box_shape = kdb.Polygon(shape_)
+            bbox_maxsize = max(
+                box_shape.bbox().width(),
+                box_shape.bbox().height(),
+            )
         else:
-            shape_ = shape(abs(d))
-            if isinstance(shape_, list):
-                box_shape = kdb.Polygon(shape_)
-                bbox_maxsize = max(
-                    box_shape.bbox().width(),
-                    box_shape.bbox().height(),
-                )
-            else:
-                bbox_maxsize = max(
-                    shape_.bbox().width(),
-                    shape_.bbox().height(),
-                )
-            bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
-            return r - (bbox_r - r).minkowski_sum(shape_)
+            bbox_maxsize = max(
+                shape_.bbox().width(),
+                shape_.bbox().height(),
+            )
+        bbox_r = kdb.Region(r.bbox().enlarged(bbox_maxsize))
+        return r - (bbox_r - r).minkowski_sum(shape_)
 
     def apply_minkowski_enc(
         self,
@@ -1543,7 +1536,6 @@ class KCellEnclosure(BaseModel):
                             "var max_shape = Polygon.ellipse("
                             f"Box.new({section.d_max * 2},{section.d_max * 2}),"
                             f" {n_pts});"
-                            # f"var tile_reg = (_tile & _frame).sized({maxsize});"
                             f"var tile_reg = _tile & _frame.sized({maxsize});"
                         )
                         match section.d_max:
@@ -1617,21 +1609,21 @@ class KCellEnclosure(BaseModel):
 class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
     """PDK access model for LayerEnclsoures."""
 
-    root: dict[str, LayerEnclosure] = Field(default={})
+    root: dict[str, LayerEnclosure] = Field(default_factory=dict)
 
-    def __getitem__(self, __key: str) -> LayerEnclosure:
+    def __getitem__(self, __key: str, /) -> LayerEnclosure:
         """Retrieve element by string key."""
         return self.root[__key]
 
-    def __getattr__(self, __key: str) -> LayerEnclosure:
+    def __getattr__(self, __key: str, /) -> LayerEnclosure:
         """Retrieve attribute by key."""
         return self.root[__key]
 
-    def __setattr__(self, __key: str, __val: LayerEnclosure) -> None:
+    def __setattr__(self, __key: str, /, __val: LayerEnclosure) -> None:
         """Add a new LayerEnclosure."""
         self.root[__key] = __val
 
-    def __setitem__(self, __key: str, __val: LayerEnclosure) -> None:
+    def __setitem__(self, __key: str, /, __val: LayerEnclosure) -> None:
         """Add a new LayerEnclosure."""
         self.root[__key] = __val
 
@@ -1675,7 +1667,6 @@ def _add_section(
         layer: Target layer.
         sec: New section to add.
     """
-
     if layer in layer_sections:
         layer_sections[layer].add_section(section)
     else:

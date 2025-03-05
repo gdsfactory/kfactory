@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, Self
 
 import klayout.db as kdb
@@ -11,6 +10,8 @@ from .exceptions import InvalidLayerError
 from .settings import Info
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from .layout import KCLayout
 
 
@@ -84,11 +85,11 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
         """Just here to make sure klayout knows the layer name."""
         self.layout.set_info(self, kdb.LayerInfo(self.layer, self.datatype, self.name))
 
-    def __new__(  # type: ignore[misc]
-        cls: LayerEnum,
+    def __new__(
+        cls,
         layer: int,
         datatype: int,
-    ) -> LayerEnum:
+    ) -> Self:
         """Create a new Enum.
 
         Because it needs to act like an integer an enum is created and expanded.
@@ -109,14 +110,13 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
         """Retrieve layer number[0] / datatype[1] of a layer."""
         if key == 0:
             return self.layer
-        elif key == 1:
+        if key == 1:
             return self.datatype
 
-        else:
-            raise ValueError(
-                "LayerMap only has two values accessible like"
-                " a list, layer == [0] and datatype == [1]"
-            )
+        raise ValueError(
+            "LayerMap only has two values accessible like"
+            " a list, layer == [0] and datatype == [1]"
+        )
 
     def __len__(self) -> int:
         """A layer has length 2, layer number and datatype."""

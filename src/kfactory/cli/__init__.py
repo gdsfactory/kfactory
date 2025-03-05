@@ -25,5 +25,5 @@ def version_callback(
 ) -> None:
     """Show the version of the cli."""
     if version:
-        print(f"KFactory CLI Version: {__version__}")
-        raise typer.Exit()
+        print(f"KFactory CLI Version: {__version__}")  # noqa: T201
+        raise typer.Exit

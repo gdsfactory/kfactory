@@ -21,7 +21,6 @@ from typing import (
 from . import kdb
 from .conf import config
 from .cross_section import CrossSectionSpec, SymmetricalCrossSection
-from .layer import LayerEnum
 from .port import (
     BasePort,
     DPort,
@@ -37,6 +36,7 @@ from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
+    from .layer import LayerEnum
     from .layout import KCLayout
 
 
@@ -208,13 +208,9 @@ class ProtoPorts(ABC, Generic[TUnit]):
         """Check whether a port is in this port collection."""
         if isinstance(port, ProtoPort):
             return port.base in self._bases
-        elif isinstance(port, BasePort):
+        if isinstance(port, BasePort):
             return port in self._bases
-        else:
-            for _port in self._bases:
-                if _port.name == port:
-                    return True
-            return False
+        return any(_port.name == port for _port in self._bases)
 
     def clear(self) -> None:
         """Deletes all ports."""
@@ -236,7 +232,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
         """Pretty print ports."""
         with config.console.capture() as capture:
             config.console.print(pprint_ports(self, unit=unit))
-        return capture.get()
+        return str(capture.get())
 
     def __hash__(self) -> int:
         """Hash the ports."""

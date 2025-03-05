@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -16,11 +15,13 @@ from typing import (
 
 from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
-from . import kdb
 from .enclosure import DLayerEnclosure, LayerEnclosure, LayerEnclosureSpec
 from .typings import TUnit
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
+
+    from . import kdb
     from .layout import KCLayout
 
 __all__ = ["CrossSection", "DCrossSection", "SymmetricalCrossSection"]
@@ -253,13 +254,12 @@ class CrossSection(TCrossSection[int]):
             if bbox_layers:
                 if not bbox_offsets:
                     bbox_offsets = [0 for _ in range(len(bbox_layers))]
-                else:
-                    if not len(bbox_offsets) == len(bbox_layers):
-                        raise ValueError(
-                            "Length of the bbox_layers list and the bbox_offsets list"
-                            " must be the same "
-                            f"{len(bbox_layers)=}, {len(bbox_offsets)=}"
-                        )
+                elif len(bbox_offsets) != len(bbox_layers):
+                    raise ValueError(
+                        "Length of the bbox_layers list and the bbox_offsets list"
+                        " must be the same "
+                        f"{len(bbox_layers)=}, {len(bbox_offsets)=}"
+                    )
             else:
                 bbox_layers = []
                 bbox_offsets = []
@@ -357,13 +357,12 @@ class DCrossSection(TCrossSection[float]):
             if bbox_layers:
                 if not bbox_offsets:
                     bbox_offsets = [0 for _ in range(len(bbox_layers))]
-                else:
-                    if not len(bbox_offsets) == len(bbox_layers):
-                        raise ValueError(
-                            "Length of the bbox_layers list and the bbox_offsets list"
-                            " must be the same "
-                            f"{len(bbox_layers)=}, {len(bbox_offsets)=}"
-                        )
+                elif len(bbox_offsets) != len(bbox_layers):
+                    raise ValueError(
+                        "Length of the bbox_layers list and the bbox_offsets list"
+                        " must be the same "
+                        f"{len(bbox_layers)=}, {len(bbox_offsets)=}"
+                    )
             else:
                 bbox_layers = []
                 bbox_offsets = []

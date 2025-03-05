@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from pydantic import ConfigDict
 
 from . import kdb
 from .conf import LogLevel, logger
-from .typings import MetaData
+
+if TYPE_CHECKING:
+    from .typings import MetaData
 
 __all__ = ["MergeDiff"]
 
@@ -55,6 +58,7 @@ class MergeDiff:
         self.kdiff.on_cell_meta_info_differs = self.on_cell_meta_info_differs  # type: ignore[assignment]
 
     def on_dbu_differs(self, dbu_a: float, dbu_b: float) -> None:
+        """Called when the DBU differs between the two layouts."""
         if self.loglevel is not None:
             logger.log(
                 self.loglevel,
@@ -81,13 +85,14 @@ class MergeDiff:
         self.cell_a.shapes(self.layer_a).insert(poly)
 
     def on_instance_in_a_only(self, instance: kdb.CellInstArray, propid: int) -> None:
+        """Called when there is only an instance in the cell_a."""
         if self.loglevel is not None:
             logger.log(self.loglevel, f"Found {instance=} in {self.name_a} only.")
         cell = self.layout_a.cell(instance.cell_index)
 
         regions: list[kdb.Region] = []
-        layers = [layer for layer in cell.layout().layer_indexes()]
-        layer_infos = [li for li in cell.layout().layer_infos()]
+        layers = list(cell.layout().layer_indexes())
+        layer_infos = list(cell.layout().layer_infos())
 
         for layer in layers:
             r = kdb.Region()
@@ -99,13 +104,14 @@ class MergeDiff:
                 self.cell_a.shapes(self.diff_a.layer(li)).insert(r.transformed(trans))
 
     def on_instance_in_b_only(self, instance: kdb.CellInstArray, propid: int) -> None:
+        """Called when there is only an instance in the cell_b."""
         if self.loglevel is not None:
             logger.log(self.loglevel, f"Found {instance=} in {self.name_b} only.")
         cell = self.layout_b.cell(instance.cell_index)
 
         regions: list[kdb.Region] = []
-        layers = [layer for layer in cell.layout().layer_indexes()]
-        layer_infos = [li for li in cell.layout().layer_infos()]
+        layers = list(cell.layout().layer_indexes())
+        layer_infos = list(cell.layout().layer_infos())
 
         for layer in layers:
             r = kdb.Region()

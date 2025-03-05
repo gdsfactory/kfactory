@@ -2,6 +2,7 @@ import tempfile
 import threading
 import warnings
 from collections.abc import Callable
+from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import pytest
@@ -28,8 +29,7 @@ def test_euler_snapping(kcl: kf.KCLayout, layers: Layers) -> None:
 def test_unnamed_cell(kcl: kf.KCLayout) -> None:
     @kcl.cell
     def unnamed_cell(name: str = "a") -> kf.KCell:
-        c = kcl.kcell(name)
-        return c
+        return kcl.kcell(name)
 
     c1 = unnamed_cell("test_unnamed_cell")
     c2 = unnamed_cell("test_unnamed_cell")
@@ -41,8 +41,7 @@ def test_nested_dict_list(kcl: kf.KCLayout) -> None:
     def nested_list_dict(
         arg1: dict[str, list[dict[str, str | int] | int] | int],
     ) -> kf.KCell:
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     dl: dict[str, list[dict[str, str | int] | int] | int] = {
         "a": 5,
@@ -77,8 +76,7 @@ def test_namecollision(layers: Layers) -> None:
 def test_nested_dic(kcl: kf.KCLayout) -> None:
     @kcl.cell
     def recursive_dict_cell(d: dict[str, dict[str, str] | str]) -> kf.KCell:
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     recursive_dict_cell({"test": {"test2": "test3"}, "test4": "test5"})
 
@@ -138,7 +136,7 @@ def test_array_indexerror(straight: kf.KCell) -> None:
     kf.config.logfilter.regex = regex
 
 
-def test_invalid_array(monkeypatch: pytest.MonkeyPatch, straight: kf.KCell) -> None:
+def test_invalid_array(straight: kf.KCell) -> None:
     c = kf.KCell()
     wg = c.create_inst(straight)
     regex = kf.config.logfilter.regex
@@ -156,8 +154,7 @@ def test_cell_decorator_error(kcl: kf.KCLayout) -> None:
 
     @kcl.cell
     def wrong_cell() -> kf.KCell:
-        c = kcl2.kcell("wrong_test")
-        return c
+        return kcl2.kcell("wrong_test")
 
     regex = kf.config.logfilter.regex
     kf.config.logfilter.regex = (
@@ -196,28 +193,26 @@ def test_size_info(kcl: kf.KCLayout, layers: Layers) -> None:
     assert ref.dsize_info.ne[0] == 10
 
 
-def test_overwrite(layers: Layers) -> None:
+def test_overwrite() -> None:
     kcl = kf.KCLayout("CELL_OVERWRITE")
 
     @kcl.cell
     def test_overwrite_cell() -> kf.KCell:
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     c1 = test_overwrite_cell()
 
     @kcl.cell(overwrite_existing=True)  # type: ignore[no-redef]
     def test_overwrite_cell() -> kf.KCell:
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     c2 = test_overwrite_cell()
 
     assert c2 is not c1
-    assert c1._destroyed()
+    assert c1.destroyed()
 
 
-def test_layout_cache(layers: Layers) -> None:
+def test_layout_cache() -> None:
     kcl_write = kf.KCLayout("TEST_LAYOUT_CACHE_WRITE")
     kcl_read = kf.KCLayout("TEST_LAYOUT_CACHE_READ")
 
@@ -228,9 +223,9 @@ def test_layout_cache(layers: Layers) -> None:
         return c
 
     s_write = write_straight()
-    tf = NamedTemporaryFile(suffix=".gds.gz")
-    kcl_write.write(tf.name)
-    kcl_read.read(tf.name)
+    with NamedTemporaryFile(suffix=".gds.gz") as tf:
+        kcl_write.write(tf.name)
+        kcl_read.read(tf.name)
 
     @kcl_read.cell(basename="straight", layout_cache=True)
     def read_straight() -> kf.KCell:
@@ -460,7 +455,7 @@ def test_cell_yaml(layers: Layers) -> None:
 
     c.name = _temp_cell_name + "_old"
 
-    with open(tmpfile.name) as file:
+    with Path(tmpfile.name).open() as file:
         cell = yaml.load(file)
         assert isinstance(cell, kf.KCell)
 
@@ -470,7 +465,7 @@ def test_cell_yaml(layers: Layers) -> None:
         cell_base_kcell = cell.base
 
         def compare_kcell_fields(
-            c_base_kcell: kf.KCell, cell_base_kcell: kf.KCell
+            c_base_kcell: kf.kcell.TKCell, cell_base_kcell: kf.kcell.TKCell
         ) -> bool:
             for field in vars(c_base_kcell):
                 if field == "kdb_cell":
@@ -492,15 +487,13 @@ def test_cell_default_fallback() -> None:
 
     @kcl.cell
     def my_cell():  # type: ignore[no-untyped-def]  # noqa: ANN202
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     assert isinstance(my_cell(), kf.DKCell)
     kcl.default_cell_output_type = kf.KCell
 
     def my_cell():  # type: ignore[no-untyped-def,no-redef]  # noqa: ANN202
-        c = kcl.kcell()
-        return c
+        return kcl.kcell()
 
     kf.layout.kcls.pop("cell_default_fallback")
 

@@ -107,7 +107,7 @@ def euler_bend_points(
     def _xy(s: float) -> kdb.DPoint:
         if th == 0:
             return kdb.DPoint(0, 0)
-        elif s <= total_length / 2:
+        if s <= total_length / 2:
             (fsin, fcos) = fresnel(s / (sq2pi * a))
             x = sq2pi * a * fcos
             y = sq2pi * a * fsin
@@ -137,9 +137,7 @@ def euler_bend_points(
     step = total_length / max(int(th * resolution), 1)
 
     # Generate points
-    points = [_xy(i * step) for i in range(int(round(total_length / step)) + 1)]
-
-    return points
+    return [_xy(i * step) for i in range(int(round(total_length / step)) + 1)]
 
 
 def euler_endpoint(
@@ -176,7 +174,7 @@ def euler_sbend_points(
         return 2 * end_point[1] - abs(offset)
 
     # Get direction
-    dir = +1 if offset >= 0 else -1
+    direction = 1 if offset >= 0 else -1
     # Check whether offset requires straight section
     a = 0.0
     b = 90.0
@@ -185,12 +183,12 @@ def euler_sbend_points(
 
     if fa * fb < 0:
         # Offset can be produced just by bends alone
-        angle = dir * brentq(froot, 0.0, 90.0)
+        angle = direction * brentq(froot, 0.0, 90.0)
         extra_y = 0.0
     else:
         # Offset is greater than max height of bends
-        angle = dir * 90.0
-        extra_y = -dir * fb
+        angle = direction * 90.0
+        extra_y = -direction * fb
 
     spoints = []
     right_point = []
@@ -199,9 +197,9 @@ def euler_sbend_points(
     # Second bend
     for pts in points_left_half:
         r_pt_x = 2 * points_left_half[-1].x - pts.x
-        r_pt_y = 2 * points_left_half[-1].y - pts.y + extra_y * dir
-        pts.y = pts.y * dir
-        r_pt_y = r_pt_y * dir
+        r_pt_y = 2 * points_left_half[-1].y - pts.y + extra_y * direction
+        pts.y = pts.y * direction
+        r_pt_y = r_pt_y * direction
         spoints.append(pts)
         right_point.append(kdb.DPoint(r_pt_x, r_pt_y))
     spoints += right_point[::-1]
@@ -309,7 +307,7 @@ def bend_euler_factory(
             trans=kdb.Trans(2, False, c.kcl.to_dbu(backbone[0]).to_v()),
         )
 
-        if abs(angle % 90) < 0.001:
+        if abs(angle % 90) < 0.001:  # noqa: PLR2004
             _ang = round(angle)
             c.create_port(
                 trans=kdb.Trans(_ang // 90, False, c.kcl.to_dbu(backbone[-1]).to_v()),
@@ -366,8 +364,7 @@ def bend_s_euler_factory(
             the KCell will be named 'straight_dbu[...]'.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
-    kcl = kcl
-    if callable(additional_info) and additional_info is not None:
+    if callable(additional_info):
         _additional_info_func: Callable[
             ...,
             dict[str, MetaData],

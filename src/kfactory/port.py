@@ -7,15 +7,11 @@ from __future__ import annotations
 
 import re
 from abc import ABC, abstractmethod
-from collections.abc import (
-    Callable,
-    Iterable,
-)
 from enum import IntEnum, IntFlag, auto
 from typing import TYPE_CHECKING, Any, Generic, Literal, Self, cast, overload
 
 import klayout.db as kdb
-import klayout.rdb as rdb
+from klayout import rdb
 from pydantic import (
     BaseModel,
     model_serializer,
@@ -23,7 +19,7 @@ from pydantic import (
 )
 from typing_extensions import TypedDict
 
-from .conf import config
+from .conf import ANGLE_180, config
 from .cross_section import (
     CrossSection,
     CrossSectionSpec,
@@ -31,13 +27,15 @@ from .cross_section import (
     SymmetricalCrossSection,
     TCrossSection,
 )
-from .layer import LayerEnum
 from .settings import Info
 from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+
     from .kcell import AnyTKCell, KCell
+    from .layer import LayerEnum
     from .layout import KCLayout
 
 
@@ -124,9 +122,10 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
 
     @model_validator(mode="after")
     def check_exclusivity(self) -> Self:
+        """Check if the port has a valid transformation."""
         if self.trans is None and self.dcplx_trans is None:
             raise ValueError("Both trans and dcplx_trans cannot be None.")
-        elif self.trans is not None and self.dcplx_trans is not None:
+        if self.trans is not None and self.dcplx_trans is not None:
             raise ValueError("Only one of trans or dcplx_trans can be set.")
         return self
 
@@ -172,25 +171,19 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     @model_serializer()
     def ser_model(self) -> BasePortDict:
         """Serialize the BasePort."""
-        if self.trans is not None:
-            trans = self.trans.dup()
-        else:
-            trans = None
-        if self.dcplx_trans is not None:
-            dcplx_trans = self.dcplx_trans.dup()
-        else:
-            dcplx_trans = None
+        trans = self.trans.dup() if self.trans is not None else None
+        dcplx_trans = self.dcplx_trans.dup() if self.dcplx_trans is not None else None
         return cast(
             BasePortDict,
-            dict(
-                name=self.name,
-                kcl=self.kcl,
-                cross_section=self.cross_section,
-                trans=trans,
-                dcplx_trans=dcplx_trans,
-                info=self.info.model_copy(),
-                port_type=self.port_type,
-            ),
+            {
+                "name": self.name,
+                "kcl": self.kcl,
+                "cross_section": self.cross_section,
+                "trans": trans,
+                "dcplx_trans": dcplx_trans,
+                "info": self.info.model_copy(),
+                "port_type": self.port_type,
+            },
         )
 
     def get_trans(self) -> kdb.Trans:
@@ -208,6 +201,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         return kdb.DCplxTrans(self.trans.to_dtype(self.kcl.dbu))
 
     def __eq__(self, other: object) -> bool:
+        """Check if two ports are equal."""
         if not isinstance(other, BasePort):
             return False
         return (
@@ -280,7 +274,9 @@ class ProtoPort(Generic[TUnit], ABC):
 
     @property
     @abstractmethod
-    def cross_section(self) -> TCrossSection[TUnit]: ...
+    def cross_section(self) -> TCrossSection[TUnit]:
+        """Get the cross section of the port."""
+        ...
 
     @cross_section.setter
     @abstractmethod
@@ -566,9 +562,9 @@ class ProtoPort(Generic[TUnit], ABC):
         """Width of the port in um."""
         return self.kcl.to_um(self._base.cross_section.width)
 
-    def print(self, type: Literal["dbu", "um", None] = None) -> None:
+    def print(self, print_type: Literal["dbu", "um", None] = None) -> None:
         """Print the port pretty."""
-        config.console.print(pprint_ports([self], unit=type))
+        config.console.print(pprint_ports([self], unit=print_type))
 
     def __repr__(self) -> str:
         """String representation of port."""
@@ -779,10 +775,7 @@ class Port(ProtoPort[int]):
         else:
             cross_section_ = cross_section.base
         if trans is not None:
-            if isinstance(trans, str):
-                trans_ = kdb.Trans.from_s(trans)
-            else:
-                trans_ = trans.dup()
+            trans_ = kdb.Trans.from_s(trans) if isinstance(trans, str) else trans.dup()
             self._base = BasePort(
                 name=name,
                 kcl=kcl_,
@@ -881,6 +874,7 @@ class Port(ProtoPort[int]):
 
     @property
     def cross_section(self) -> CrossSection:
+        """Get the cross section of the port."""
         return CrossSection(kcl=self._base.kcl, base=self._base.cross_section)
 
     @cross_section.setter
@@ -1093,10 +1087,7 @@ class DPort(ProtoPort[float]):
         else:
             cross_section_ = cross_section.base
         if trans is not None:
-            if isinstance(trans, str):
-                trans_ = kdb.Trans.from_s(trans)
-            else:
-                trans_ = trans.dup()
+            trans_ = kdb.Trans.from_s(trans) if isinstance(trans, str) else trans.dup()
             self._base = BasePort(
                 name=name,
                 kcl=kcl_,
@@ -1201,6 +1192,7 @@ class DPort(ProtoPort[float]):
 
     @property
     def cross_section(self) -> DCrossSection:
+        """Get the cross section of the port."""
         return DCrossSection(kcl=self._base.kcl, base=self._base.cross_section)
 
     @cross_section.setter
@@ -1279,8 +1271,8 @@ def rename_clockwise(
                 angle = 2
             case _:
                 angle = 3
-        dir_1 = 1 if angle < 2 else -1
-        dir_2 = -1 if port.angle < 2 else 1
+        dir_1 = 1 if angle < ANGLE_180 else -1
+        dir_2 = -1 if port.angle < ANGLE_180 else 1
         key_1 = dir_1 * (
             port.trans.disp.x if angle % 2 else port.trans.disp.y
         )  # order should be y, x, -y, -x
@@ -1373,10 +1365,10 @@ def rename_by_direction(
             S0   S1
     ```
     """
-    for dir in DIRECTION:
+    for angle in DIRECTION:
         ports_ = filter_layer_pt_reg(ports, layer, port_type, regex)
-        dir_2 = -1 if dir < 2 else 1
-        if dir % 2:
+        dir_2 = -1 if angle < ANGLE_180 else 1
+        if angle % 2:
 
             def key_sort(port: ProtoPort[Any], dir_2: int = dir_2) -> tuple[int, int]:
                 return (port.trans.disp.x, dir_2 * port.trans.disp.y)
@@ -1385,8 +1377,8 @@ def rename_by_direction(
             def key_sort(port: ProtoPort[Any], dir_2: int = dir_2) -> tuple[int, int]:
                 return (port.trans.disp.y, dir_2 * port.trans.disp.x)
 
-        for i, p in enumerate(sorted(filter_direction(ports_, dir), key=key_sort)):
-            p.name = f"{prefix}{dir_names[dir]}{i}"
+        for i, p in enumerate(sorted(filter_direction(ports_, angle), key=key_sort)):
+            p.name = f"{prefix}{dir_names[angle]}{i}"
 
 
 def filter_layer_pt_reg(
@@ -1450,8 +1442,7 @@ def filter_regex(ports: Iterable[TPort], regex: str) -> filter[TPort]:
     def regex_filter(p: TPort) -> bool:
         if p.name is not None:
             return bool(pattern.match(p.name))
-        else:
-            return False
+        return False
 
     return filter(regex_filter, ports)
 
@@ -1463,18 +1454,17 @@ def port_polygon(width: int) -> kdb.Polygon:
     """Gets a polygon representation for a given port width."""
     if width in polygon_dict:
         return polygon_dict[width]
-    else:
-        poly = kdb.Polygon(
-            [
-                kdb.Point(0, width // 2),
-                kdb.Point(0, -width // 2),
-                kdb.Point(width // 2, 0),
-            ]
-        )
+    poly = kdb.Polygon(
+        [
+            kdb.Point(0, width // 2),
+            kdb.Point(0, -width // 2),
+            kdb.Point(width // 2, 0),
+        ]
+    )
 
-        hole = kdb.Region(poly).sized(-int(width * 0.05) or -1)
-        hole -= kdb.Region(kdb.Box(0, 0, width // 2, -width // 2))
+    hole = kdb.Region(poly).sized(-int(width * 0.05) or -1)
+    hole -= kdb.Region(kdb.Box(0, 0, width // 2, -width // 2))
 
-        poly.insert_hole(list(next(iter(hole.each())).each_point_hull()))
-        polygon_dict[width] = poly
-        return poly
+    poly.insert_hole(list(next(iter(hole.each())).each_point_hull()))
+    polygon_dict[width] = poly
+    return poly

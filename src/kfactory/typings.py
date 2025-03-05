@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import (
     TYPE_CHECKING,
     Annotated,
@@ -13,30 +12,31 @@ from typing import (
 )
 
 import klayout.db as kdb
-import klayout.lay as lay
+from klayout import lay
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from .instance import ProtoInstance
     from .kcell import BaseKCell, ProtoTKCell
-    from .layer import LayerEnum, LayerInfos
-    from .layout import Constants
+    from .layer import LayerEnum
     from .port import ProtoPort
 
 T = TypeVar("T")
 K = TypeVar("K", bound="ProtoTKCell[Any]")
-KC = TypeVar("KC", bound="ProtoTKCell[Any]", covariant=True)
-LI = TypeVar("LI", bound="LayerInfos", covariant=True)
-C = TypeVar("C", bound="Constants", covariant=True)
+KC_co = TypeVar("KC_co", bound="ProtoTKCell[Any]", covariant=True)
 TUnit = TypeVar("TUnit", int, float)
 TUnit_co = TypeVar("TUnit_co", bound=int | float, covariant=True)
 TUnit_contra = TypeVar("TUnit_contra", bound=int | float, contravariant=True)
 TPort = TypeVar("TPort", bound="ProtoPort[Any]")
-TInstance = TypeVar("TInstance", bound="ProtoInstance[Any]", covariant=True)
-TBaseCell = TypeVar("TBaseCell", bound="BaseKCell", covariant=True)
+TInstance_co = TypeVar("TInstance_co", bound="ProtoInstance[Any]", covariant=True)
+TBaseCell_co = TypeVar("TBaseCell_co", bound="BaseKCell", covariant=True)
 KCellParams = ParamSpec("KCellParams")
 
 
 class KCellSpecDict(TypedDict):
+    """Specification for a KCell."""
+
     component: str
     settings: NotRequired[dict[str, Any]]
 
@@ -117,7 +117,7 @@ rad = Annotated[float, "rad"]
 layer = Annotated["int | LayerEnum", "layer"]
 """Integer or enum index of a Layer."""
 layer_info = Annotated[kdb.LayerInfo, "layer info"]
-unit: TypeAlias = int | float
+Unit: TypeAlias = int | float
 """Database unit or micrometer."""
 Angle: TypeAlias = int
 """Integer in the range of `[0,1,2,3]` which are increments in 90°."""

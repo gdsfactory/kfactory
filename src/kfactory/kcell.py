@@ -27,7 +27,6 @@ from collections.abc import (
 )
 from pathlib import Path
 from tempfile import gettempdir
-from types import ModuleType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -47,7 +46,6 @@ from pydantic import (
     PrivateAttr,
 )
 from ruamel.yaml.constructor import SafeConstructor
-from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
 from . import kdb, rdb
 from .conf import DEFAULT_TRANS, CheckInstances, ShowFunction, config, logger
@@ -87,7 +85,7 @@ from .serialization import (
 )
 from .settings import Info, KCellSettings, KCellSettingsUnits
 from .shapes import VShapes
-from .typings import KC, MetaData, TBaseCell, TUnit
+from .typings import KC_co, MetaData, TBaseCell_co, TUnit
 from .utilities import (
     check_cell_ports,
     check_inst_ports,
@@ -97,6 +95,10 @@ from .utilities import (
 )
 
 if TYPE_CHECKING:
+    from types import ModuleType
+
+    from ruamel.yaml.representer import BaseRepresenter, MappingNode
+
     from .layout import KCLayout
 
 
@@ -180,8 +182,8 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     def name(self, value: str) -> None: ...
 
 
-class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
-    _base: TBaseCell
+class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
+    _base: TBaseCell_co
 
     @property
     def locked(self) -> bool:
@@ -265,7 +267,7 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell], ABC):
         return self._base.vinsts
 
     @property
-    def base(self) -> TBaseCell:
+    def base(self) -> TBaseCell_co:
         return self._base
 
     @property
@@ -395,7 +397,7 @@ class TKCell(BaseKCell):
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
         try:
-            return super().__getattr__(name)  # type: ignore
+            return super().__getattr__(name)  # type: ignore[misc]
         except Exception:
             return getattr(self.kdb_cell, name)
 
@@ -740,8 +742,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                             ),
                         )
             return ci
-        else:
-            return lib_ci
+        return lib_ci
 
     def icreate_inst(
         self,
@@ -958,7 +959,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         ]
                     )
                 )
-                if w > 20:
+                if w > 20:  # noqa: PLR2004
                     poly -= kdb.Region(
                         kdb.Polygon(
                             [
@@ -1095,7 +1096,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             diff.compare()
             if diff.dbu_differs:
                 raise MergeError("Layouts' DBU differ. Check the log for more info.")
-            elif diff.diff_xor.cells() > 0 or diff.layout_meta_diff:
+            if diff.diff_xor.cells() > 0 or diff.layout_meta_diff:
                 diff_kcl = KCLayout(self.name + "_XOR")
                 diff_kcl.layout.assign(diff.diff_xor)
                 show(diff_kcl)
@@ -1110,14 +1111,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + yaml.dumps(dict(diff.layout_meta_diff))  # type: ignore[attr-defined]
+                        + yaml.dumps(dict(diff.layout_meta_diff))
                         + "\n```"
                     )
                 if diff.cells_meta_diff:
                     yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + yaml.dumps(dict(diff.cells_meta_diff))  # type: ignore[attr-defined]
+                        + yaml.dumps(dict(diff.cells_meta_diff))
                         + "\n```"
                     )
 
@@ -1197,12 +1198,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             raise LockedError(self)
         if isinstance(inst, Instance):
             return Instance(self.kcl, self._base.kdb_cell.insert(inst.instance))
-        else:
-            if not property_id:
-                return Instance(self.kcl, self._base.kdb_cell.insert(inst))
-            else:
-                assert isinstance(inst, kdb.CellInstArray | kdb.DCellInstArray)
-                return Instance(self.kcl, self._base.kdb_cell.insert(inst, property_id))
+        if not property_id:
+            return Instance(self.kcl, self._base.kdb_cell.insert(inst))
+        assert isinstance(inst, kdb.CellInstArray | kdb.DCellInstArray)
+        return Instance(self.kcl, self._base.kdb_cell.insert(inst, property_id))
 
     @overload
     def transform(
@@ -1621,8 +1620,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 portnames.add(port.name)
 
         # create nets and connect pins for each cell_port
-        for _, layer_dict in cell_ports.items():
-            for _, _ports in layer_dict.items():
+        for layer_dict in cell_ports.values():
+            for _ports in layer_dict.values():
                 net = circ.create_net(
                     "-".join(_port[1].name or f"{_port[0]}" for _port in _ports)
                 )
@@ -1695,11 +1694,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     )
 
                     net = circ.create_net(name)
-                    assert len(ports) <= 2, (
+                    assert len(ports) <= 2, (  # noqa: PLR2004
                         "Optical connection with more than two ports are not supported "
                         f"{[_port[3] for _port in ports]}"
                     )
-                    if len(ports) == 2:
+                    if len(ports) == 2:  # noqa: PLR2004
                         port_check(ports[0][3], ports[1][3], PortCheck.all_opposite)
                         for _, j, _, port, subc in ports:
                             subc.connect_pin(
@@ -1786,11 +1785,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 xy = (port.x, port.y)
                 if port.layer not in cell_ports:
                     cell_ports[port.layer] = {xy: [port]}
+                elif xy not in cell_ports[port.layer]:
+                    cell_ports[port.layer][xy] = [port]
                 else:
-                    if xy not in cell_ports[port.layer]:
-                        cell_ports[port.layer][xy] = [port]
-                    else:
-                        cell_ports[port.layer][xy].append(port)
+                    cell_ports[port.layer][xy].append(port)
                 rec_it = kdb.RecursiveShapeIterator(
                     self.kcl.layout,
                     self._base.kdb_cell,
@@ -1855,13 +1853,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     xy = (port.x, port.y)
                     if port.layer not in inst_ports:
                         inst_ports[port.layer] = {xy: [(port, inst.cell.to_itype())]}
+                    elif xy not in inst_ports[port.layer]:
+                        inst_ports[port.layer][xy] = [(port, inst.cell.to_itype())]
                     else:
-                        if xy not in inst_ports[port.layer]:
-                            inst_ports[port.layer][xy] = [(port, inst.cell.to_itype())]
-                        else:
-                            inst_ports[port.layer][xy].append(
-                                (port, inst.cell.to_itype())
-                            )
+                        inst_ports[port.layer][xy].append((port, inst.cell.to_itype()))
 
         for layer, port_coord_mapping in inst_ports.items():
             lc = layer_cat(layer)
@@ -2033,7 +2028,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                             for value in values:
                                 it.add_value(value)
 
-                    case x if x > 2:
+                    case x if x > 2:  # noqa: PLR2004
                         subc = db_.category_by_path(
                             lc.path() + ".portoverlap"
                         ) or db_.create_category(lc, "portoverlap")
@@ -2143,11 +2138,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             self._base.vinsts.clear()
             called_cell_indexes = self._base.kdb_cell.called_cells()
             for c in sorted(
-                set(
+                {
                     self.kcl[ci]
                     for ci in called_cell_indexes
                     if not self.kcl[ci].kdb_cell._destroyed()
-                )
+                }
                 & self.kcl.tkcells.keys(),
                 key=lambda c: c.hierarchy_levels(),
             ):
@@ -2440,7 +2435,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
         )
         cell = cls(name=d["name"])
         if verbose:
-            print(f"Building {d['name']}")
+            logger.info(f"Building {d['name']}")
         for _d in d.get("ports", Ports(ports=[], kcl=cell.kcl)):
             layer_as_string = (
                 str(_d["layer"]).replace("[", "").replace("]", "").replace(", ", "/")
@@ -2531,7 +2526,9 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                             ref = i
                             break
                     else:
-                        IndexError(f"No instance with cell name: <{ref_yml}> found")
+                        raise IndexError(
+                            f"No instance with cell name: <{ref_yml}> found"
+                        )
                 elif isinstance(ref_yml, int) and len(cell.insts) > 1:
                     ref = cell.insts[ref_yml]
 
@@ -2548,7 +2545,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                         if isinstance(x0_yml, int):
                             x0 = x0_yml
                         else:
-                            NotImplementedError("unknown format for x0")
+                            raise NotImplementedError("unknown format for x0")
                 # y0
                 match y0_yml:
                     case "S":
@@ -2559,7 +2556,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                         if isinstance(y0_yml, int):
                             y0 = y0_yml
                         else:
-                            NotImplementedError("unknown format for y0")
+                            raise NotImplementedError("unknown format for y0")
                 # x
                 match x_yml:
                     case "W":
@@ -2580,7 +2577,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                         if isinstance(x_yml, int):
                             x = x_yml
                         else:
-                            NotImplementedError("unknown format for x")
+                            raise NotImplementedError("unknown format for x")
                 # y
                 match y_yml:
                     case "S":
@@ -2601,7 +2598,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
                         if isinstance(y_yml, int):
                             y = y_yml
                         else:
-                            NotImplementedError("unknown format for y")
+                            raise NotImplementedError("unknown format for y")
                 kinst.transform(kdb.Trans(0, False, x - x0, y - y0))
         type_to_class: dict[
             str,
@@ -2640,10 +2637,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject):
     @classmethod
     def to_yaml(cls, representer: BaseRepresenter, node: Self) -> MappingNode:
         """Internal function to convert the cell to yaml."""
-        d: dict[str, Any] = {
-            "name": node.name,
-            # "ports": node.ports,  # Ports.to_yaml(representer, node.ports),
-        }
+        d: dict[str, Any] = {"name": node.name}
 
         insts = [
             {"cellname": inst.cell.name, "trans": inst.instance.trans.to_s()}
@@ -2791,9 +2785,10 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
         layers = layers_ if layer is None else {layer} & layers_
         box = kdb.DBox()
         for layer_ in layers:
-            if isinstance(layer_, LayerEnum):
-                layer_ = layer_.layout.layer(layer_.layer, layer_.datatype)
-            box += self.shapes(layer_).bbox()
+            layer__ = layer_
+            if isinstance(layer__, LayerEnum):
+                layer__ = layer__.layout.layer(layer__.layer, layer__.datatype)
+            box += self.shapes(layer__).bbox()
 
         for vinst in self.insts:
             box += vinst.dbbox()
@@ -3004,7 +2999,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
             if w in polys:
                 poly = polys[w]
             else:
-                if w < 2:
+                if w < 2:  # noqa: PLR2004
                     poly = kdb.DPolygon(
                         [
                             kdb.DPoint(0, -w / 2),
@@ -3148,11 +3143,10 @@ def show(
         frame_filename_stem = Path(frame.filename).stem
         if frame_filename_stem.startswith("<ipython-input"):  # IPython Case
             name = "ipython"
-        else:  # Normal Python kernel case
-            if frame.function != "<module>":
-                name = clean_name(frame_filename_stem + "_" + frame.function)
-            else:
-                name = clean_name(frame_filename_stem)
+        elif frame.function != "<module>":
+            name = clean_name(frame_filename_stem + "_" + frame.function)
+        else:
+            name = clean_name(frame_filename_stem)
     except Exception:
         try:
             from __main__ import __file__ as mf
@@ -3456,14 +3450,14 @@ def show(
         Path(l2nfile).unlink()  # type: ignore[arg-type]
 
 
-class ProtoCells(Mapping[int, KC], ABC):
+class ProtoCells(Mapping[int, KC_co], ABC):
     _kcl: KCLayout
 
     def __init__(self, kcl: KCLayout) -> None:
         self._kcl = kcl
 
     @abstractmethod
-    def __getitem__(self, key: int | str) -> KC: ...
+    def __getitem__(self, key: int | str) -> KC_co: ...
 
     def __delitem__(self, key: int | str) -> None:
         """Delete a cell by key (name or index)."""
@@ -3474,7 +3468,7 @@ class ProtoCells(Mapping[int, KC], ABC):
             del self._kcl.tkcells[cell_index]
 
     @abstractmethod
-    def _generate_dict(self) -> dict[int, KC]: ...
+    def _generate_dict(self) -> dict[int, KC_co]: ...
 
     def __iter__(self) -> Iterator[int]:
         return iter(self._kcl.tkcells)
@@ -3482,10 +3476,10 @@ class ProtoCells(Mapping[int, KC], ABC):
     def __len__(self) -> int:
         return len(self._kcl.tkcells)
 
-    def items(self) -> ItemsView[int, KC]:
+    def items(self) -> ItemsView[int, KC_co]:
         return self._generate_dict().items()
 
-    def values(self) -> ValuesView[KC]:
+    def values(self) -> ValuesView[KC_co]:
         return self._generate_dict().values()
 
     def keys(self) -> KeysView[int]:
@@ -3542,7 +3536,7 @@ def get_cells(
                         cells[t[0]] = t[1]
                 except ValueError:
                     if verbose:
-                        print(f"error in {t[0]}")
+                        logger.error(f"error in {t[0]}")
     return cells
 
 

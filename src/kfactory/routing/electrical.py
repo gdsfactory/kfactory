@@ -5,7 +5,7 @@ from typing import Any, Literal, cast, overload
 
 import klayout.db as kdb
 
-from ..conf import logger
+from ..conf import ANGLE_270, logger
 from ..kcell import DKCell, KCell
 from ..port import DPort, Port
 from ..typings import dbu, um
@@ -127,7 +127,7 @@ def route_L(  # noqa: N802
             route_elec(c_, p, temp_port)
             temp_port.trans.angle = 1
             output_ports.append(temp_port)
-    elif output_orientation == 3:
+    elif output_orientation == ANGLE_270:
         for i, p in enumerate(input_ports_):
             temp_port = p.copy()
             temp_port.trans = kdb.Trans(
@@ -221,8 +221,8 @@ def route_bundle(
     | list[list[Step]]
     | None = None,
     ends: dbu | list[dbu] | um | list[um] | list[Step] | list[list[Step]] | None = None,
-    start_angles: int | list[int] | float | list[float] | None = None,
-    end_angles: int | list[int] | float | list[float] | None = None,
+    start_angles: list[int] | float | list[float] | None = None,
+    end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
 ) -> list[ManhattanRoute]:
     r"""Connect multiple input ports to output ports.
@@ -311,6 +311,7 @@ def route_bundle(
             (single value) or each one (list of values which is as long as end_ports).
             If no waypoints are set, the target angles of all ends muts be the same
             (after the steps).
+        purpose: Purpose of the routes. (Unused)
     """
     if ends is None:
         ends = []
@@ -535,8 +536,8 @@ def route_bundle_dual_rails(
         ends = end_straights
     return route_bundle_generic(
         c=c,
-        start_ports=[p._base for p in start_ports],
-        end_ports=[p._base for p in end_ports],
+        start_ports=[p.base for p in start_ports],
+        end_ports=[p.base for p in end_ports],
         routing_function=route_smart,
         starts=starts,
         ends=ends,

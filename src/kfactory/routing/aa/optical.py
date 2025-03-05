@@ -4,12 +4,11 @@ from collections.abc import Sequence
 from typing import Any, Protocol
 
 import numpy as np
-
-# from typing import Any
 from pydantic import BaseModel
-from scipy.optimize import minimize_scalar  # type: ignore[import-untyped,unused-ignore]
+from scipy.optimize import minimize_scalar
 
 from ... import kdb
+from ...conf import MIN_ALL_ANGLE_ROUTES_POINTS, MIN_WAYPOINTS_FOR_ROUTING
 from ...instance import VInstance
 from ...kcell import DKCell, KCell, VKCell
 from ...port import DPort, Port, ProtoPort
@@ -71,7 +70,7 @@ def route(
             angle below this tolerance, the point will be skipped and a straight between
             the point before and the following will be created.
     """
-    if len(backbone) < 3:
+    if len(backbone) < MIN_ALL_ANGLE_ROUTES_POINTS:
         raise ValueError("All angle routes with less than 3 points are not supported.")
 
     bends: dict[float, VKCell] = {90: bend_factory(width=width, angle=90)}
@@ -232,7 +231,7 @@ def route_bundle(
     routes: list[OpticalAllAngleRoute] = []
 
     if backbone:
-        if len(backbone) < 2:
+        if len(backbone) < MIN_WAYPOINTS_FOR_ROUTING:
             raise NotImplementedError(
                 "A bundle with less than two points has no orientation. "
                 "Cannot automatically determine orientation."
@@ -249,47 +248,48 @@ def route_bundle(
         for ps, pe, pts in zip(start_ports, end_ports, pts_list, strict=False):
             # use edges and transformation to get distances to calculate crossings
             # and types of crossings
-            vector_bundle_start = pts[0] - pts[1]
-            vector_bundle_end = pts[-1] - pts[-2]
+            pts_ = pts
+            vector_bundle_start = pts_[0] - pts_[1]
+            vector_bundle_end = pts_[-1] - pts_[-2]
             trans_bundle_start = kdb.DCplxTrans(
                 1,
                 np.rad2deg(np.arctan2(vector_bundle_start.y, vector_bundle_start.x)),
                 False,
-                pts[0].to_v(),
+                pts_[0].to_v(),
             )
             trans_bundle_end = kdb.DCplxTrans(
                 1,
                 np.rad2deg(np.arctan2(vector_bundle_end.y, vector_bundle_end.x)),
                 False,
-                pts[-1].to_v(),
+                pts_[-1].to_v(),
             )
             psb = ps.copy()
             psb.dcplx_trans = trans_bundle_start
             peb = pe.copy()
             peb.dcplx_trans = trans_bundle_end
 
-            pts = _get_connection_between_ports(
+            pts_ = _get_connection_between_ports(
                 port_start=ps,
                 port_end=psb,
                 bend_factory=bend_factory,
                 bend_ports=bend_ports,
-                backbone=pts,
+                backbone=pts_,
             )
 
-            pts.reverse()
-            pts = _get_connection_between_ports(
+            pts_.reverse()
+            pts_ = _get_connection_between_ports(
                 port_start=pe,
                 port_end=peb,
                 bend_factory=bend_factory,
-                backbone=pts,
+                backbone=pts_,
                 bend_ports=bend_ports,
             )
-            pts.reverse()
+            pts_.reverse()
             routes.append(
                 route(
                     c,
                     ps.dwidth,
-                    pts,
+                    pts_,
                     straight_factory=straight_factory,
                     bend_factory=bend_factory,
                     bend_ports=bend_ports,
@@ -298,7 +298,7 @@ def route_bundle(
             )
     else:
         for ps, pe in zip(start_ports, end_ports, strict=False):
-            pts = _get_connection_between_ports(
+            pts_ = _get_connection_between_ports(
                 port_start=ps,
                 port_end=pe,
                 bend_factory=bend_factory,
@@ -306,12 +306,12 @@ def route_bundle(
                 backbone=[],
             )
             # the connection will not write the end point
-            pts.append(pe.dcplx_trans.disp.to_p())
+            pts_.append(pe.dcplx_trans.disp.to_p())
             routes.append(
                 route(
                     c,
                     ps.dwidth,
-                    pts,
+                    pts_,
                     straight_factory=straight_factory,
                     bend_factory=bend_factory,
                     bend_ports=bend_ports,
@@ -430,20 +430,18 @@ def _get_partial_route(
     xe = _e.cut_point(_e2)
     if xe is None:
         return rp, kdb.DPoint(), np.inf
-    else:
-        bend2 = bend_factory(
-            width=start_port.width,
-            angle=abs((-angle + end_port.dcplx_trans.angle + 180) % 360 - 180),
-        )
-        er2 = _get_effective_radius(
-            bend2.ports[bend_ports[0]], bend2.ports[bend_ports[1]], _p0, _p1
-        )
-        r2 = (xe - end_port.dcplx_trans.disp.to_p()).abs() - er2
-        if r2 < 0 or (end_port.dcplx_trans.inverted() * xe).x < 0:
-            r2 = r2 / bend.kcl.dbu * 10
-            return rp, xe, abs(r2 / bend.kcl.dbu * 10)
-        else:
-            return rp, xe, abs(r2)
+    bend2 = bend_factory(
+        width=start_port.width,
+        angle=abs((-angle + end_port.dcplx_trans.angle + 180) % 360 - 180),
+    )
+    er2 = _get_effective_radius(
+        bend2.ports[bend_ports[0]], bend2.ports[bend_ports[1]], _p0, _p1
+    )
+    r2 = (xe - end_port.dcplx_trans.disp.to_p()).abs() - er2
+    if r2 < 0 or (end_port.dcplx_trans.inverted() * xe).x < 0:
+        r2 = r2 / bend.kcl.dbu * 10
+        return rp, xe, abs(r2 / bend.kcl.dbu * 10)
+    return rp, xe, abs(r2)
 
 
 def optimize_route(
@@ -524,20 +522,18 @@ def _get_partial_route2(
     xe = _e.cut_point(_e2)
     if xe is None:
         return rp, kdb.DPoint(), np.inf
-    else:
-        bend2 = bend_factory(
-            width=start_port.width,
-            angle=abs((-angle + end_port.dcplx_trans.angle + 180) % 360 - 180),
-        )
-        er2 = _get_effective_radius(
-            bend2.ports[bend_ports[0]], bend2.ports[bend_ports[1]], _p0, _p1
-        )
-        r2 = (xe - end_port.dcplx_trans.disp.to_p()).abs() - er2
-        if r2 < 0 or (end_port.dcplx_trans.inverted() * xe).x < 0:
-            r2 = r2 / bend.kcl.dbu * 10
-            return rp, xe, abs(r2 / bend.kcl.dbu * 10)
-        else:
-            return rp, xe, abs(r2)
+    bend2 = bend_factory(
+        width=start_port.width,
+        angle=abs((-angle + end_port.dcplx_trans.angle + 180) % 360 - 180),
+    )
+    er2 = _get_effective_radius(
+        bend2.ports[bend_ports[0]], bend2.ports[bend_ports[1]], _p0, _p1
+    )
+    r2 = (xe - end_port.dcplx_trans.disp.to_p()).abs() - er2
+    if r2 < 0 or (end_port.dcplx_trans.inverted() * xe).x < 0:
+        r2 = r2 / bend.kcl.dbu * 10
+        return rp, xe, abs(r2 / bend.kcl.dbu * 10)
+    return rp, xe, abs(r2)
 
 
 def _get_effective_radius(

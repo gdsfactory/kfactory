@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from collections.abc import Iterator, Sequence
 from typing import TYPE_CHECKING, Generic, NoReturn
 
 from . import kdb
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .instance import ProtoTInstance, VInstance
-from .typings import TInstance, TUnit
+from .typings import TInstance_co, TUnit
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator, Sequence
+
     from .layout import KCLayout
 
 __all__ = [
@@ -20,10 +21,10 @@ __all__ = [
 ]
 
 
-class ProtoInstanceGroup(Generic[TUnit, TInstance], GeometricObject[TUnit]):
-    insts: list[TInstance]
+class ProtoInstanceGroup(Generic[TUnit, TInstance_co], GeometricObject[TUnit]):
+    insts: list[TInstance_co]
 
-    def __init__(self, insts: Sequence[TInstance] | None = None) -> None:
+    def __init__(self, insts: Sequence[TInstance_co] | None = None) -> None:
         """Initialize the InstanceGroup."""
         self.insts = list(insts) if insts is not None else []
 
@@ -62,7 +63,7 @@ class ProtoInstanceGroup(Generic[TUnit, TInstance], GeometricObject[TUnit]):
             bb += _bb
         return bb
 
-    def __iter__(self) -> Iterator[TInstance]:
+    def __iter__(self) -> Iterator[TInstance_co]:
         return iter(self.insts)
 
 
@@ -87,8 +88,6 @@ class InstanceGroup(ProtoTInstanceGroup[int], DBUGeometricObject):
     Args:
         insts: List of the instances of the group.
     """
-
-    ...
 
 
 class DInstanceGroup(ProtoTInstanceGroup[float], UMGeometricObject):

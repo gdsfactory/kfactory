@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Callable, Iterable, Iterator, Sequence
-from typing import Any, Generic, cast
+from typing import TYPE_CHECKING, Any, Generic, cast
 
 from . import kdb
 from .conf import config
 from .instance import DInstance, Instance, ProtoTInstance, VInstance
-from .layer import LayerEnum
 from .port import (
     BasePort,
     DPort,
@@ -20,8 +18,13 @@ from .port import (
     filter_regex,
 )
 from .ports import DPorts, Ports, ProtoPorts
-from .typings import TInstance, TUnit
+from .typings import TInstance_co, TUnit
 from .utilities import pprint_ports
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Iterator, Sequence
+
+    from .layer import LayerEnum
 
 __all__ = [
     "DInstancePorts",
@@ -38,8 +41,8 @@ class HasCellPorts(Generic[TUnit], ABC):
     def cell_ports(self) -> ProtoPorts[TUnit]: ...
 
 
-class ProtoInstancePorts(HasCellPorts[TUnit], Generic[TUnit, TInstance], ABC):
-    instance: TInstance
+class ProtoInstancePorts(HasCellPorts[TUnit], Generic[TUnit, TInstance_co], ABC):
+    instance: TInstance_co
 
     @abstractmethod
     def __len__(self) -> int: ...
@@ -82,18 +85,13 @@ class ProtoTInstancePorts(
         """Return Port count."""
         if not self.instance.instance.is_regular_array():
             return len(self.cell_ports)
-        else:
-            return len(self.cell_ports) * self.instance.na * self.instance.nb
+        return len(self.cell_ports) * self.instance.na * self.instance.nb
 
     def __contains__(self, port: str | ProtoPort[Any]) -> bool:
         """Check whether a port is in this port collection."""
         if isinstance(port, ProtoPort):
             return port.base in [p.base for p in self.instance.ports]
-        else:
-            for _port in self.instance.ports:
-                if _port.name == port:
-                    return True
-            return False
+        return any(_port.name == port for _port in self.instance.ports)
 
     @property
     def ports(self) -> ProtoTInstancePorts[TUnit]:
@@ -155,8 +153,7 @@ class ProtoTInstancePorts(
                 p = self.cell_ports[cast(int | str | None, key)]
                 if not self.instance.is_complex():
                     return p.copy(self.instance.trans)
-                else:
-                    return p.copy(self.instance.dcplx_trans)
+                return p.copy(self.instance.dcplx_trans)
             except KeyError as e:
                 raise KeyError(
                     f"{key=} is not a valid port name or index. "
@@ -181,11 +178,10 @@ class ProtoTInstancePorts(
                     kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
                     * self.instance.trans
                 )
-            else:
-                return p.copy(
-                    kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
-                    * self.instance.dcplx_trans
-                )
+            return p.copy(
+                kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
+                * self.instance.dcplx_trans
+            )
 
     @property
     @abstractmethod
@@ -198,27 +194,26 @@ class ProtoTInstancePorts(
                 yield from (p.copy(self.instance.trans) for p in self.cell_ports)
             else:
                 yield from (p.copy(self.instance.dcplx_trans) for p in self.cell_ports)
+        elif not self.instance.is_complex():
+            yield from (
+                p.copy(
+                    kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                    * self.instance.trans
+                )
+                for i_a in range(self.instance.na)
+                for i_b in range(self.instance.nb)
+                for p in self.cell_ports
+            )
         else:
-            if not self.instance.is_complex():
-                yield from (
-                    p.copy(
-                        kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
-                        * self.instance.trans
-                    )
-                    for i_a in range(self.instance.na)
-                    for i_b in range(self.instance.nb)
-                    for p in self.cell_ports
+            yield from (
+                p.copy(
+                    kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
+                    * self.instance.dcplx_trans
                 )
-            else:
-                yield from (
-                    p.copy(
-                        kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
-                        * self.instance.dcplx_trans
-                    )
-                    for i_a in range(self.instance.na)
-                    for i_b in range(self.instance.nb)
-                    for p in self.cell_ports
-                )
+                for i_a in range(self.instance.na)
+                for i_b in range(self.instance.nb)
+                for p in self.cell_ports
+            )
 
     @abstractmethod
     def __iter__(self) -> Iterator[ProtoPort[TUnit]]: ...
@@ -233,37 +228,34 @@ class ProtoTInstancePorts(
                 yield from (
                     (0, 0, p.copy(self.instance.dcplx_trans)) for p in self.cell_ports
                 )
+        elif not self.instance.is_complex():
+            yield from (
+                (
+                    i_a,
+                    i_b,
+                    p.copy(
+                        kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                        * self.instance.trans
+                    ),
+                )
+                for i_a in range(self.instance.na)
+                for i_b in range(self.instance.nb)
+                for p in self.cell_ports
+            )
         else:
-            if not self.instance.is_complex():
-                yield from (
-                    (
-                        i_a,
-                        i_b,
-                        p.copy(
-                            kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
-                            * self.instance.trans
-                        ),
-                    )
-                    for i_a in range(self.instance.na)
-                    for i_b in range(self.instance.nb)
-                    for p in self.cell_ports
+            yield from (
+                (
+                    i_a,
+                    i_b,
+                    p.copy(
+                        kdb.DCplxTrans(self.instance.da * i_a + self.instance.db * i_b)
+                        * self.instance.dcplx_trans
+                    ),
                 )
-            else:
-                yield from (
-                    (
-                        i_a,
-                        i_b,
-                        p.copy(
-                            kdb.DCplxTrans(
-                                self.instance.da * i_a + self.instance.db * i_b
-                            )
-                            * self.instance.dcplx_trans
-                        ),
-                    )
-                    for i_a in range(self.instance.na)
-                    for i_b in range(self.instance.nb)
-                    for p in self.cell_ports
-                )
+                for i_a in range(self.instance.na)
+                for i_b in range(self.instance.nb)
+                for p in self.cell_ports
+            )
 
     def __repr__(self) -> str:
         """String representation.
@@ -289,43 +281,38 @@ class ProtoTInstancePorts(
                         for b in self.cell_ports.bases
                     ],
                 )
-            else:
-                return Ports(
-                    kcl=self.instance.kcl,
-                    bases=[
-                        b.transformed(trans=self.instance.dcplx_trans)
-                        for b in self.cell_ports.bases
-                    ],
+            return Ports(
+                kcl=self.instance.kcl,
+                bases=[
+                    b.transformed(trans=self.instance.dcplx_trans)
+                    for b in self.cell_ports.bases
+                ],
+            )
+        if not self.instance.is_complex():
+            return Ports(
+                kcl=self.instance.kcl,
+                bases=[
+                    b.transformed(
+                        self.instance.trans
+                        * kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
+                    )
+                    for i_a in range(self.instance.na)
+                    for i_b in range(self.instance.nb)
+                    for b in self.cell_ports.bases
+                ],
+            )
+        return Ports(
+            kcl=self.instance.kcl,
+            bases=[
+                b.transformed(
+                    self.instance.dcplx_trans
+                    * kdb.DCplxTrans(self.instance.db * i_a + self.instance.db * i_b)
                 )
-        else:
-            if not self.instance.is_complex():
-                return Ports(
-                    kcl=self.instance.kcl,
-                    bases=[
-                        b.transformed(
-                            self.instance.trans
-                            * kdb.Trans(self.instance.a * i_a + self.instance.b * i_b)
-                        )
-                        for i_a in range(self.instance.na)
-                        for i_b in range(self.instance.nb)
-                        for b in self.cell_ports.bases
-                    ],
-                )
-            else:
-                return Ports(
-                    kcl=self.instance.kcl,
-                    bases=[
-                        b.transformed(
-                            self.instance.dcplx_trans
-                            * kdb.DCplxTrans(
-                                self.instance.db * i_a + self.instance.db * i_b
-                            )
-                        )
-                        for i_a in range(self.instance.na)
-                        for i_b in range(self.instance.nb)
-                        for b in self.cell_ports.bases
-                    ],
-                )
+                for i_a in range(self.instance.na)
+                for i_b in range(self.instance.nb)
+                for b in self.cell_ports.bases
+            ],
+        )
 
 
 class InstancePorts(ProtoTInstancePorts[int]):
@@ -360,7 +347,7 @@ class InstancePorts(ProtoTInstancePorts[int]):
         return Port(base=super().__getitem__(key).base)
 
     def __iter__(self) -> Iterator[Port]:
-        yield from map(lambda p: p.to_itype(), self.each_port())
+        yield from (p.to_itype() for p in self.each_port())
 
 
 class DInstancePorts(ProtoTInstancePorts[float]):
@@ -395,7 +382,7 @@ class DInstancePorts(ProtoTInstancePorts[float]):
         return DPort(base=super().__getitem__(key).base)
 
     def __iter__(self) -> Iterator[DPort]:
-        yield from map(lambda p: p.to_dtype(), self.each_port())
+        yield from (p.to_dtype() for p in self.each_port())
 
 
 class VInstancePorts(ProtoInstancePorts[float, VInstance]):
@@ -445,8 +432,7 @@ class VInstancePorts(ProtoInstancePorts[float, VInstance]):
         """Check if a port is in the instance."""
         if isinstance(port, ProtoPort):
             return port.base in [p.base for p in self.instance.ports]
-        else:
-            return any(_port.name == port for _port in self.instance.ports)
+        return any(_port.name == port for _port in self.instance.ports)
 
     def __repr__(self) -> str:
         """String representation.

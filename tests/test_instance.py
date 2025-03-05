@@ -54,7 +54,6 @@ def test_instance_mirror(layers: Layers) -> None:
     c << b
     b2 = c << b
     disp = kdb.Trans(5000, 5000)
-    # mp1 = kf.kdb.Point(-10000, 10000)
     mp1 = kf.kdb.Point(50000, 25000)
     mp2 = -mp1
 
@@ -76,7 +75,6 @@ def test_dmirror(layers: Layers) -> None:
     c << b
     b2 = c << b
     disp = kdb.Trans(5000, 5000).to_dtype(c.kcl.dbu)
-    # mp1 = kf.kdb.Point(-10000, 10000)
     mp1 = c.kcl.to_um(kf.kdb.Point(50000, 25000))
     mp2 = -mp1
 
@@ -565,7 +563,7 @@ def test_vinstance_errors(kcl: kf.KCLayout, layers: Layers) -> None:
     with pytest.raises(exceptions.PortTypeMismatchError):
         ref.connect("o1", ref4.ports["o1"])
     with pytest.raises(ValueError):
-        ref.connect("o1", ref5)  # type: ignore
+        ref.connect("o1", ref5)  # type: ignore[arg-type]
 
 
 def test_mirror_y_default_arg(dbu_instance_tuple: _DBUInstanceTuple) -> None:

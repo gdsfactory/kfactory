@@ -48,26 +48,20 @@ def test_rename_default(func: Callable[..., None]) -> None:
 
     indexes = list(range(4 * xl))
     # east:
-    inds_east = list(
-        sorted(
-            indexes[2 * xl : 3 * xl],
-            key=lambda i: (-port_y_coords[i - 2 * xl], -port_x_coords[i - 2 * xl]),
-        )
+    inds_east = sorted(
+        indexes[2 * xl : 3 * xl],
+        key=lambda i: (-port_y_coords[i - 2 * xl], -port_x_coords[i - 2 * xl]),
     )
-    inds_north = list(
-        sorted(
-            indexes[xl : 2 * xl],
-            key=lambda i: (-port_y_coords[i - xl], -port_x_coords[i - xl]),
-        )
+    inds_north = sorted(
+        indexes[xl : 2 * xl],
+        key=lambda i: (-port_y_coords[i - xl], -port_x_coords[i - xl]),
     )
-    inds_west = list(
-        sorted(indexes[:xl], key=lambda i: (-port_y_coords[i], -port_x_coords[i]))
+    inds_west = sorted(
+        indexes[:xl], key=lambda i: (-port_y_coords[i], -port_x_coords[i])
     )
-    inds_south = list(
-        sorted(
-            indexes[3 * xl : 4 * xl],
-            key=lambda i: (-port_y_coords[i - 3 * xl], -port_x_coords[i - 3 * xl]),
-        )
+    inds_south = sorted(
+        indexes[3 * xl : 4 * xl],
+        key=lambda i: (-port_y_coords[i - 3 * xl], -port_x_coords[i - 3 * xl]),
     )
 
     assert [p.name for p in port_list] == [
@@ -128,11 +122,14 @@ def test_rename_setter(layers: Layers) -> None:
     for i, _port in enumerate(c1.ports):
         match i % 4:
             case 1:
-                assert _port.name is not None and _port.name[1:] == str(i + 2)
+                assert _port.name is not None
+                assert _port.name[1:] == str(i + 2)
             case 2:
-                assert _port.name is not None and _port.name[1:] == str(i)
+                assert _port.name is not None
+                assert _port.name[1:] == str(i)
             case _:
-                assert _port.name is not None and _port.name[1:] == str(i + 1)
+                assert _port.name is not None
+                assert _port.name[1:] == str(i + 1)
 
     kcl.rename_function = kf.port.rename_by_direction
 
@@ -166,15 +163,18 @@ def test_rename_setter(layers: Layers) -> None:
     for i, _port in enumerate(c2.ports):
         match i % 4:
             case 1:
-                assert _port.name is not None and _port.name[1:] == str(i % 4 + 1), (
+                assert _port.name is not None
+                assert _port.name[1:] == str(i % 4 + 1), (
                     f"Expected {i % 4 + 1=!s}, original name {dir_list[i]}"
                 )
             case 2:
-                assert _port.name is not None and _port.name[1:] == str(i % 4 - 1), (
+                assert _port.name is not None
+                assert _port.name[1:] == str(i % 4 - 1), (
                     f"Expected {i % 4 - 1=!s}, original name {dir_list[i]}"
                 )
             case _:
-                assert _port.name is not None and _port.name[1:] == str(i % 4), (
+                assert _port.name is not None
+                assert _port.name[1:] == str(i % 4), (
                     f"Expected {i % 4=!s}, original name {dir_list[i]}"
                 )
 

@@ -144,7 +144,7 @@ def fill_tiled(
     dbb = c.dbbox()
     for r, ext in fill_regions:
         dbb += r.bbox().to_dtype(c.kcl.dbu).enlarged(ext)
-    tp.frame = dbb  # type: ignore
+    tp.frame = dbb  # type: ignore[assignment, misc]
     tp.dbu = c.kcl.dbu
     tp.threads = n_threads
 
@@ -246,14 +246,10 @@ def fill_tiled(
         if exlayer_names or exregion_names:
             queue_str = (
                 "var fill= "
-                + (
-                    " + ".join([layers, regions])
-                    if regions and layers
-                    else regions + layers
-                )
+                + (f"{layers} + {regions}" if regions and layers else regions + layers)
                 + "; var exclude = "
                 + (
-                    " + ".join([exlayers, exregions])
+                    f"{exlayers} + {exregions}"
                     if exregions and exlayers
                     else exregions + exlayers
                 )
@@ -264,11 +260,7 @@ def fill_tiled(
         else:
             queue_str = (
                 "var fill= "
-                + (
-                    " + ".join([layers, regions])
-                    if regions and layers
-                    else regions + layers
-                )
+                + (f"{layers} + {regions}" if regions and layers else regions + layers)
                 + "; var fill_region = _tile.minkowski_sum(Box.new("
                 f"0,0,{fc_bbox.width() - 1},{fc_bbox.height() - 1}))"
                 " & _frame & fill;"

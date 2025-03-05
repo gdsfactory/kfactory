@@ -10,4 +10,4 @@ def test_icross_section_creation(kcl: kf.KCLayout) -> None:
             width=1000,
         )
     )
-    assert xs._base in kcl.cross_sections.cross_sections.values()
+    assert xs.base in kcl.cross_sections.cross_sections.values()

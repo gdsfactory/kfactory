@@ -13,7 +13,6 @@ def test_all_angle_bundle(layers: Layers) -> None:
         kf.cells.virtual.euler.virtual_bend_euler, layer=layers.WG, radius=10, width=1
     )
 
-    # vc = kf.VKCell("test_all_angle")
     c = kf.KCell(name="test_all_angle_bundle")
 
     start_ports: list[kf.Port] = []

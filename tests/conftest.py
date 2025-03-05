@@ -7,16 +7,6 @@ import pytest
 
 import kfactory as kf
 
-# kf.config.logfilter.level = kf.conf.LogLevel.ERROR
-
-
-# class LAYER_CLASS(kf.LayerEnum):
-#     kcl = kf.constant(kf.kcl)
-#     WG = (1, 0)
-#     WGCLAD = (111, 0)
-#     WGEXCLUDE = (1, 1)
-#     WGCLADEXCLUDE = (111, 1)
-
 
 class Layers(kf.LayerInfos):
     WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
@@ -27,9 +17,6 @@ class Layers(kf.LayerInfos):
     FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
     FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
 
-
-# kf.kcl.layers = kf.kcl.set_layers_from_infos(name="LAYER", layers=Layers())
-# kf.kcl.layer_infos = Layers()
 
 kf.kcl.infos = Layers()
 
@@ -190,8 +177,7 @@ def pdk() -> kf.KCLayout:
             layer=Layers().WGCLAD, thickness=3, zmin=0.22, material="sio2"
         ),
     )
-    kcl = kf.KCLayout("Test_PDK", infos=Layers, layer_stack=layerstack)
-    return kcl
+    return kf.KCLayout("Test_PDK", infos=Layers, layer_stack=layerstack)
 
 
 @pytest.fixture

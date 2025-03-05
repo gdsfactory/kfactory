@@ -68,7 +68,7 @@ def test_drotation(
 
 
 @pytest.mark.parametrize(
-    "from_name,use_mirror,apply_mirror,expected_transformation",
+    ("from_name", "use_mirror", "apply_mirror", "expected_transformation"),
     [
         (True, True, True, kf.kdb.Trans(1, False, 11_000, -10_000)),
         (True, True, False, kf.kdb.Trans(1, False, 11_000, -10_000)),

@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from kfactory.conf import MIN_POINTS_FOR_SIMPLIFY
+
 from .. import kdb
 
 
@@ -15,11 +17,8 @@ def simplify(points: list[kdb.Point], tolerance: float) -> list[kdb.Point]:
         tolerance: if two points are > tolerance (in dbu) apart,
             delete most suitable points.
     """
-    [points[0]]
-    if len(points) < 3:
+    if len(points) < MIN_POINTS_FOR_SIMPLIFY:
         return points
-
-    len(points) - 1
 
     e = kdb.Edge(points[0], points[-1])
     dists = [e.distance_abs(p) for p in points]
@@ -46,11 +45,8 @@ def dsimplify(points: list[kdb.DPoint], tolerance: float) -> list[kdb.DPoint]:
         tolerance: if two points are > tolerance (in um) apart,
             delete most suitable points.
     """
-    if len(points) < 3:
+    if len(points) < MIN_POINTS_FOR_SIMPLIFY:
         return points
-    [points[0]]
-
-    len(points) - 1
 
     e = kdb.DEdge(points[0], points[-1])
     dists = [e.distance_abs(p) for p in points]
