@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Sequence
-from typing import Any, Literal, Protocol, cast
+from collections.abc import Callable, Sequence
+from typing import Any, Literal, Protocol, TypeAlias, cast
 
 import klayout.db as kdb
 import klayout.rdb as rdb
@@ -29,6 +29,8 @@ __all__ = [
     "get_radius",
     "route_bundle",
 ]
+
+LengthFunction: TypeAlias = Callable[["ManhattanRoute"], dbu]
 
 
 class PlacerError(ValueError):
@@ -67,6 +69,27 @@ class RouterPostProcessFunction(Protocol):
         ...
 
 
+def length_by_area(manhattan_route: ManhattanRoute) -> dbu:
+    layer = manhattan_route.start_port.layer
+    cell_dict: dict[KCell, int] = {}
+
+    a: int = 0
+
+    for inst in manhattan_route.instances:
+        c = inst.cell
+
+        a_ = cell_dict.get(c, None)
+        if a is None:
+            r = kdb.Region(c.begin_shapes_rec(layer))
+            r.merge()
+            a_ = r.area()
+            cell_dict[c] = a_
+
+        a += cast(int, a_)
+
+    return a
+
+
 class ManhattanRoute(BaseModel, arbitrary_types_allowed=True):
     """Optical route containing a connection between two ports.
 
@@ -88,10 +111,10 @@ class ManhattanRoute(BaseModel, arbitrary_types_allowed=True):
     n_taper: int = 0
     bend90_radius: dbu = 0
     taper_length: dbu = 0
-    length: dbu = 0
     """Length of backbone without the bends."""
     length_straights: dbu = 0
     polygons: dict[kdb.LayerInfo, list[kdb.Polygon]] = Field(default_factory=dict)
+    length_function: LengthFunction = length_by_area
 
     @property
     def length_backbone(self) -> dbu:
@@ -102,6 +125,10 @@ class ManhattanRoute(BaseModel, arbitrary_types_allowed=True):
             length += int((p - p_old).length())
             p_old = p
         return length
+
+    @property
+    def length(self) -> dbu:
+        return self.length_function(self)
 
 
 def check_collisions(
