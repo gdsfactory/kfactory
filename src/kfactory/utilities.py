@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, Literal
 
 from rich.json import JSON
@@ -10,6 +9,8 @@ from . import kdb
 from .conf import DEFAULT_TRANS, config
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from .instance import Instance
     from .port import Port, ProtoPort
 
@@ -98,6 +99,8 @@ def check_cell_ports(p1: ProtoPort[Any], p2: ProtoPort[Any]) -> int:
     Returns:
         int: A bitwise representation of the differences between the two ports.
     """
+    from .port import Port
+
     p1_ = Port(base=p1.base)
     p2_ = Port(base=p2.base)
     check_int = 0
