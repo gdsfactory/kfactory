@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 import loguru
 import rich.console
 from dotenv import find_dotenv
-from loguru import logger
+from loguru import logger as logger  # noqa: PLC0414
 from pydantic import BaseModel, Field, ValidationError, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 

@@ -113,7 +113,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
     def __getattr__(self, name: str) -> Any:
         """If we don't have an attribute, get it from the instance."""
         try:
-            return super().__getattr__(name)
+            return super().__getattr__(name)  # type: ignore[misc]
         except Exception:
             return getattr(self._instance, name)
 

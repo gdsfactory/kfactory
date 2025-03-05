@@ -144,7 +144,7 @@ def fill_tiled(
     dbb = c.dbbox()
     for r, ext in fill_regions:
         dbb += r.bbox().to_dtype(c.kcl.dbu).enlarged(ext)
-    tp.frame = dbb
+    tp.frame = dbb  # type: ignore[assignment, misc]
     tp.dbu = c.kcl.dbu
     tp.threads = n_threads
 

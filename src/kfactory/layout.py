@@ -69,7 +69,7 @@ from .typings import K, KCellParams, KCellSpec, MetaData, T
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
-    from cachetools.keys import _HashedTuple
+    from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
 
     from .ports import DPorts, Ports
 

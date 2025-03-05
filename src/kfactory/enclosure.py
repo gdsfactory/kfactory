@@ -1610,7 +1610,7 @@ class KCellEnclosure(BaseModel):
 class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
     """PDK access model for LayerEnclsoures."""
 
-    root: dict[str, LayerEnclosure] = Field(default=dict)
+    root: dict[str, LayerEnclosure] = Field(default_factory=dict)
 
     def __getitem__(self, __key: str, /) -> LayerEnclosure:
         """Retrieve element by string key."""

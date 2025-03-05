@@ -85,7 +85,7 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
         """Just here to make sure klayout knows the layer name."""
         self.layout.set_info(self, kdb.LayerInfo(self.layer, self.datatype, self.name))
 
-    def __new__(  # type: ignore[misc]
+    def __new__(
         cls,
         layer: int,
         datatype: int,

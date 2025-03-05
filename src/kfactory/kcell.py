@@ -397,7 +397,7 @@ class TKCell(BaseKCell):
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
         try:
-            return super().__getattr__(name)
+            return super().__getattr__(name)  # type: ignore[misc]
         except Exception:
             return getattr(self.kdb_cell, name)
 
