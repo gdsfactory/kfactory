@@ -248,6 +248,8 @@ def check_collisions(
 
         if any_layer_collision:
             match on_collision:
+                case "ignore":
+                    pass
                 case "show_error":
                     c.show(lyrdb=db)
                     raise RuntimeError(
@@ -294,7 +296,7 @@ def route_bundle(
     end_ports: list[BasePort],
     route_width: dbu | list[dbu] | None = None,
     sort_ports: bool = False,
-    on_collision: Literal["error", "show_error"] | None = "show_error",
+    on_collision: Literal["error", "show_error", "ignore"] | None = "ignore",
     on_placer_error: Literal["error", "show_error"] | None = "show_error",
     collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
     routing_function: ManhattanBundleRoutingFunction = route_smart,
@@ -554,13 +556,14 @@ def route_bundle(
             f"{[p.name for p in start_ports]} to {[p.name for p in end_ports]}"
         )
 
-    check_collisions(
-        c=c,
-        start_ports=start_ports,
-        end_ports=end_ports,
-        on_collision=on_collision,
-        collision_check_layers=collision_check_layers,
-        routers=routers,
-        routes=routes,
-    )
+    if on_collision != "ignore":
+        check_collisions(
+            c=c,
+            start_ports=start_ports,
+            end_ports=end_ports,
+            on_collision=on_collision,
+            collision_check_layers=collision_check_layers,
+            routers=routers,
+            routes=routes,
+        )
     return routes
