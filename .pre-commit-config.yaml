@@ -21,7 +21,7 @@ repos:
         exclude: 'changelog\.d/.*|CHANGELOG\.md'
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.9.7
+    rev: v0.9.10
     hooks:
       # Run the linter.
       - id: ruff
@@ -55,7 +55,7 @@ repos:
           - pydantic
           - numpy
           - pytest
-          - klayout
+          - klayout==0.29.11
           - types-cachetools
           - loguru
           - pydantic-settings
