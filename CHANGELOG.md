@@ -3,7 +3,13 @@
 
 # What's Changed
 
+## Bug Fixes
 
+- pin klayout version [#635](https://github.com/gdsfactory/kfactory/pull/635)
+
+## Dependency Updates
+
+- pin klayout version [#635](https://github.com/gdsfactory/kfactory/pull/635)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.2.2...v1.2.3
 
