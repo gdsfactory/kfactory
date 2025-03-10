@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Annotated,
@@ -99,9 +100,8 @@ MetaData: TypeAlias = (
     | bool
     | str
     | SerializableShape
-    | list["MetaData"]
-    | tuple["MetaData", ...]
-    | dict[str, "MetaData"]
+    | Sequence["MetaData"]
+    | Mapping[str, "MetaData"]
     | None
 )
 
