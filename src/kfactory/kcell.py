@@ -431,7 +431,7 @@ class TKCell(BaseKCell):
 
             if module is not None and module.__name__ == "kfactory.layout":
                 frame_info = stack[5]
-                logger.error(
+                logger.opt(depth=2).error(
                     "Name conflict in "
                     f"{frame_info.frame.f_locals['f'].__code__.co_filename}::"
                     f"{frame_info.frame.f_locals['f'].__name__} at line "
@@ -456,7 +456,7 @@ class TKCell(BaseKCell):
                         if frame_info.function != "<module>"
                         else ""
                     )
-                    logger.error(
+                    logger.opt(depth=3).error(
                         "Name conflict in "
                         f"{module_name}{function_name} at line "
                         f"{frame_info.lineno}\n"
@@ -476,7 +476,7 @@ class TKCell(BaseKCell):
                         if frame_info.function != "<module>"
                         else ""
                     )
-                    logger.error(
+                    logger.opt(depth=3).error(
                         "Name conflict in "
                         f"{frame_info.filename}"
                         f"{function_name} at line {frame_info.lineno}"
