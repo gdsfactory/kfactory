@@ -56,7 +56,6 @@ from .kcell import (
 from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
 from .port import rename_clockwise_multi
-from .protocols import KCellFunc
 from .serialization import (
     DecoratorDict,
     DecoratorList,
@@ -72,6 +71,7 @@ if TYPE_CHECKING:
     from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
 
     from .ports import DPorts, Ports
+    from .protocols import KCellFunc
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -630,7 +630,7 @@ class KCLayout(
             else:
                 output_cell_type_ = self.default_cell_output_type
 
-            output_cell_type = cast(type[K], output_cell_type_)
+            output_cell_type = cast("type[K]", output_cell_type_)
 
             cache_: Cache[_HashedTuple, K] | dict[_HashedTuple, K] = cache or Cache(
                 maxsize=float("inf")
@@ -884,11 +884,10 @@ class KCLayout(
 
         return (
             cast(
-                Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]
-                | Callable[
-                    [KCellFunc[KCellParams, AnyTKCell]],
-                    KCellFunc[KCellParams, K],
-                ],
+                "Callable[[KCellFunc[KCellParams, K]], "
+                "KCellFunc[KCellParams, K]] | "
+                "Callable[[KCellFunc[KCellParams, AnyTKCell]],"
+                " KCellFunc[KCellParams, K]]",
                 decorator_autocell,
             )
             if _func is None
