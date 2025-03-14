@@ -55,7 +55,7 @@ repos:
           - pydantic
           - numpy
           - pytest
-          - klayout==0.29.11
+          - klayout
           - types-cachetools
           - loguru
           - pydantic-settings
