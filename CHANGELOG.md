@@ -1,5 +1,20 @@
+<a id="v1.3.0"></a>
+# [v1.3.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.3.0) - 2025-03-16
+
+# What's Changed
+
+## New
+
+- add error messages for name conflicts on renaming [#637](https://github.com/gdsfactory/kfactory/pull/637)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.2.3...v1.3.0
+
+
+[Changes][v1.3.0]
+
+
 <a id="v1.2.3"></a>
-# [v1.2.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.2.3) - 2025-03-05
+# [v1.2.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.2.3) - 2025-03-13
 
 # What's Changed
 
@@ -1715,6 +1730,7 @@
 [Changes][v0.4.0]
 
 
+[v1.3.0]: https://github.com/gdsfactory/kfactory/compare/v1.2.3...v1.3.0
 [v1.2.3]: https://github.com/gdsfactory/kfactory/compare/v1.2.2...v1.2.3
 [v1.2.2]: https://github.com/gdsfactory/kfactory/compare/v1.2.1...v1.2.2
 [v1.2.1]: https://github.com/gdsfactory/kfactory/compare/v1.2.0...v1.2.1
