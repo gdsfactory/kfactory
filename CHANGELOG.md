@@ -7,6 +7,10 @@
 
 - add error messages for name conflicts on renaming [#637](https://github.com/gdsfactory/kfactory/pull/637)
 
+## Bug Fixes
+
+- fix connectivity-check [#638](https://github.com/gdsfactory/kfactory/pull/638)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.2.3...v1.3.0
 
 
