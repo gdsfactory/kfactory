@@ -2133,12 +2133,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 inst_regions: dict[int, kdb.Region] = {}
                 inst_region = kdb.Region()
                 for i, inst in enumerate(self.insts):
-                    bbox = inst.bbox(layer)
-                    inst_region_ = kdb.Region(
-                        kdb.DBox(bbox.left, bbox.bottom, bbox.right, bbox.top).to_itype(
-                            self.kcl.dbu
-                        )
-                    )
+                    inst_region_ = kdb.Region(inst.ibbox(layer))
                     inst_shapes: kdb.Region | None = None
                     if not (inst_region & inst_region_).is_empty():
                         if inst_shapes is None:
