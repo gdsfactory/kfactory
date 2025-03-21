@@ -1814,7 +1814,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             for c in self.kcl.each_cell_bottom_up():
                 if c in cc:
                     self.kcl[c].connectivity_check(
-                        port_types=port_types, db=db_, recursive=False
+                        port_types=port_types,
+                        db=db_,
+                        recursive=False,
+                        add_cell_ports=add_cell_ports,
+                        layers=layers,
                     )
         db_cell = db_.create_cell(self.name)
         cell_ports: dict[int, dict[tuple[float, float], list[ProtoPort[Any]]]] = {}
@@ -2179,19 +2183,19 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     ) or db_.create_category(
                         layer_cat(layer), "ShapeInstanceshapeOverlap"
                     )
-                    it = db_.create_item(db_cell, sc)
-                    it.add_value("Shapes overlapping with shapes of instances")
                     for poly in error_region_shapes.merge().each():
+                        it = db_.create_item(db_cell, sc)
+                        it.add_value("Shapes overlapping with shapes of instances")
                         it.add_value(self.kcl.to_um(poly))
                 if not error_region_instances.is_empty():
                     sc = db_.category_by_path(
                         layer_cat(layer).path() + ".InstanceshapeOverlap"
                     ) or db_.create_category(layer_cat(layer), "InstanceshapeOverlap")
-                    it = db_.create_item(db_cell, sc)
-                    it.add_value(
-                        "Instance shapes overlapping with shapes of other instances"
-                    )
                     for poly in error_region_instances.merge().each():
+                        it = db_.create_item(db_cell, sc)
+                        it.add_value(
+                            "Instance shapes overlapping with shapes of other instances"
+                        )
                         it.add_value(self.kcl.to_um(poly))
 
         return db_

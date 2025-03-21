@@ -137,7 +137,7 @@ def euler_bend_points(
     step = total_length / max(int(th * resolution), 1)
 
     # Generate points
-    return [_xy(i * step) for i in range(int(round(total_length / step)) + 1)]
+    return [_xy(i * step) for i in range(round(total_length / step) + 1)]
 
 
 def euler_endpoint(

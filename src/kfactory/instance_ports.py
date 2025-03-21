@@ -150,7 +150,7 @@ class ProtoTInstancePorts(
         """
         if not self.instance.is_regular_array():
             try:
-                p = self.cell_ports[cast(int | str | None, key)]
+                p = self.cell_ports[cast("int | str | None", key)]
                 if not self.instance.is_complex():
                     return p.copy(self.instance.trans)
                 return p.copy(self.instance.dcplx_trans)
