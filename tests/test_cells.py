@@ -1,5 +1,6 @@
 import pathlib
 from functools import partial
+from typing import Any
 
 import pytest
 from conftest import Layers
@@ -12,71 +13,59 @@ class GeometryDifferenceError(ValueError):
     """Exception for Geometric differences."""
 
 
-wg_enc = kf.LayerEnclosure(name="WGSTD", sections=[(Layers().WGCLAD, 0, 2000)])
-
-
-def straight(layers: Layers) -> kf.KCell:
-    return kf.cells.straight.straight(
-        width=0.5, length=1, layer=layers.WG, enclosure=wg_enc
-    )
-
-
-def bend90(layers: Layers) -> kf.KCell:
-    return kf.cells.circular.bend_circular(
-        width=1, radius=10, layer=layers.WG, enclosure=wg_enc, angle=90
-    )
-
-
-def bend180(layers: Layers) -> kf.KCell:
-    return kf.cells.circular.bend_circular(
-        width=1, radius=10, layer=layers.WG, enclosure=wg_enc, angle=180
-    )
-
-
-def bend90_euler(layers: Layers) -> kf.KCell:
-    return kf.cells.euler.bend_euler(
-        width=1, radius=10, layer=layers.WG, enclosure=wg_enc, angle=90
-    )
-
-
-def bend180_euler(layers: Layers) -> kf.KCell:
-    return kf.cells.euler.bend_euler(
-        width=1, radius=10, layer=layers.WG, enclosure=wg_enc, angle=180
-    )
-
-
-def taper(layers: Layers) -> kf.KCell:
-    return kf.cells.taper.taper(
-        width1=0.5,
-        width2=1,
-        length=10,
-        layer=layers.WG,
-        enclosure=wg_enc,
-    )
-
-
-cells = {
-    "bend90": bend90,
-    "bend180": bend180,
-    "bend180_euler": bend180_euler,
-    "bend90_euler": bend90_euler,
-    "taper": taper,
-    "straight": straight,
-}
-
-cell_names = sorted(set(cells.keys()))
-
-
-@pytest.fixture(params=cell_names)
-def cell_name(request: pytest.FixtureRequest) -> str:
+@pytest.fixture
+def cell_params(wg_enc: kf.LayerEnclosure, layers: Layers) -> dict[str, Any]:
     """Returns cell name."""
-    return request.param  # type: ignore[no-any-return]
+    return {
+        "bend_circular": {
+            "width": 1,
+            "radius": 10,
+            "layer": layers.WG,
+            "enclosure": wg_enc,
+        },
+        "bend_euler": {
+            "width": 1,
+            "radius": 10,
+            "layer": layers.WG,
+            "enclosure": wg_enc,
+        },
+        "bend_s_bezier": {
+            "width": 1,
+            "height": 10,
+            "length": 100,
+            "layer": layers.WG,
+            "enclosure": wg_enc,
+        },
+        "bend_s_euler": {
+            "width": 1,
+            "radius": 30,
+            "offset": 10,
+            "layer": layers.WG,
+            "enclosure": wg_enc,
+        },
+        "straight": {
+            "width": 1000,
+            "length": 100_000,
+            "layer": layers.WG,
+            "enclosure": wg_enc,
+        },
+        "taper": {
+            "width1": 1000,
+            "width2": 10_000,
+            "length": 50_000,
+            "layer": layers.WG,
+            "enclosure": wg_enc,
+        },
+    }
 
 
-def test_cells(cell_name: str, layers: Layers) -> None:
+@pytest.mark.parametrize(
+    "cell_name", sorted(set(kf.kcl.factories.keys()) - {"taper_cell"})
+)
+def test_cells(cell_name: str, cell_params: dict[str, Any]) -> None:
     """Ensure cells have the same geometry as their golden references."""
     gds_ref = pathlib.Path(__file__).parent / "test_data" / "ref"
-    cell = cells[cell_name](layers)
+    cell = kf.kcl.factories[cell_name](**cell_params.get(cell_name, {}))
     ref_file = gds_ref / f"{cell.name}.gds"
     run_cell = cell
     if not ref_file.exists():
