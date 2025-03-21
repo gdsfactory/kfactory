@@ -481,8 +481,8 @@ def route_bundle(
         start_ports=start_ports,
         end_ports=end_ports,
         widths=widths,
-        starts=cast(list[list[Step]], starts),
-        ends=cast(list[list[Step]], ends),
+        starts=cast("list[list[Step]]", starts),
+        ends=cast("list[list[Step]]", ends),
         **routing_kwargs,
     )
 

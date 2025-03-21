@@ -12,10 +12,8 @@ from ..conf import (
     config,
     logger,
 )
-from ..factories import StraightFactoryDBU, StraightFactoryUM
 from ..kcell import DKCell, KCell
 from ..port import DPort, Port
-from ..typings import dbu, um
 from .generic import (
     ManhattanRoute,
     get_radius,
@@ -33,6 +31,9 @@ from .steps import Step, Straight
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
+
+    from ..factories import StraightFactoryDBU, StraightFactoryUM
+    from ..typings import dbu, um
 
 __all__ = [
     "get_radius",
@@ -266,9 +267,9 @@ def route_bundle(
             c=c,
             start_ports=start_ports_,
             end_ports=end_ports_,
-            starts=cast(dbu | list[dbu] | list[Step] | list[list[Step]], starts),
-            ends=cast(dbu | list[dbu] | list[Step] | list[list[Step]], ends),
-            route_width=cast(int, route_width),
+            starts=cast("dbu | list[dbu] | list[Step] | list[list[Step]]", starts),
+            ends=cast("dbu | list[dbu] | list[Step] | list[list[Step]]", ends),
+            route_width=cast("int", route_width),
             sort_ports=sort_ports,
             on_collision=on_collision,
             on_placer_error=on_placer_error,
@@ -296,8 +297,8 @@ def route_bundle(
                 "purpose": purpose,
                 "route_width": route_width,
             },
-            start_angles=cast(list[int] | int, start_angles),
-            end_angles=cast(list[int] | int, end_angles),
+            start_angles=cast("list[int] | int", start_angles),
+            end_angles=cast("list[int] | int", end_angles),
         )
     if route_width is not None:
         if isinstance(route_width, list):
@@ -320,16 +321,16 @@ def route_bundle(
     elif isinstance(starts, list):
         if isinstance(starts[0], int | float):
             starts = [c.kcl.to_dbu(start) for start in starts]  # type: ignore[arg-type]
-        starts = cast(int | list[int] | list[Step] | list[list[Step]], starts)
+        starts = cast("int | list[int] | list[Step] | list[list[Step]]", starts)
     if isinstance(ends, int | float):
         ends = c.kcl.to_dbu(ends)
     elif isinstance(ends, list):
         if isinstance(ends[0], int | float):
             ends = [c.kcl.to_dbu(end) for end in ends]  # type: ignore[arg-type]
-        ends = cast(int | list[int] | list[Step] | list[list[Step]], ends)
+        ends = cast("int | list[int] | list[Step] | list[list[Step]]", ends)
 
     def _straight_factory(width: int, length: int) -> KCell:
-        dkc = cast(StraightFactoryUM, straight_factory)(
+        dkc = cast("StraightFactoryUM", straight_factory)(
             width=c.kcl.to_um(width), length=c.kcl.to_um(length)
         )
         return c.kcl[dkc.cell_index()]
@@ -340,14 +341,14 @@ def route_bundle(
     if min_straight_taper:
         min_straight_taper = c.kcl.to_dbu(min_straight_taper)
 
-    bboxes_ = [c.kcl.to_dbu(b) for b in cast(list[kdb.DBox], bboxes)]
+    bboxes_ = [c.kcl.to_dbu(b) for b in cast("list[kdb.DBox]", bboxes)]
     if waypoints is not None:
         if isinstance(waypoints, list):
             waypoints = [
-                p.to_itype(c.kcl.dbu) for p in cast(list[kdb.DPoint], waypoints)
+                p.to_itype(c.kcl.dbu) for p in cast("list[kdb.DPoint]", waypoints)
             ]
         else:
-            waypoints = cast(kdb.DCplxTrans, waypoints).s_trans().to_itype(c.kcl.dbu)
+            waypoints = cast("kdb.DCplxTrans", waypoints).s_trans().to_itype(c.kcl.dbu)
 
     return route_bundle_generic(
         c=c.kcl[c.cell_index()],
