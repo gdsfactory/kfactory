@@ -325,8 +325,8 @@ def route_bundle(
             c=c,
             start_ports=[p.base for p in start_ports],
             end_ports=[p.base for p in end_ports],
-            starts=cast(dbu | list[dbu] | list[Step] | list[list[Step]], starts),
-            ends=cast(dbu | list[dbu] | list[Step] | list[list[Step]], ends),
+            starts=cast("dbu | list[dbu] | list[Step] | list[list[Step]]", starts),
+            ends=cast("dbu | list[dbu] | list[Step] | list[list[Step]]", ends),
             routing_function=route_smart,
             routing_kwargs={
                 "separation": separation,
@@ -344,8 +344,8 @@ def route_bundle(
             on_collision=on_collision,
             on_placer_error=on_placer_error,
             collision_check_layers=collision_check_layers,
-            start_angles=cast(int | list[int] | None, start_angles),
-            end_angles=cast(int | list[int], end_angles),
+            start_angles=cast("int | list[int] | None", start_angles),
+            end_angles=cast("int | list[int]", end_angles),
         )
 
     if route_width is not None:
@@ -370,20 +370,20 @@ def route_bundle(
     elif isinstance(starts, list):
         if isinstance(starts[0], int | float):
             starts = [c.kcl.to_dbu(start) for start in starts]  # type: ignore[arg-type]
-        starts = cast(int | list[int] | list[Step] | list[list[Step]], starts)
+        starts = cast("int | list[int] | list[Step] | list[list[Step]]", starts)
     if isinstance(ends, int | float):
         ends = c.kcl.to_dbu(ends)
     elif isinstance(ends, list):
         if isinstance(ends[0], int | float):
             ends = [c.kcl.to_dbu(end) for end in ends]  # type: ignore[arg-type]
-        ends = cast(int | list[int] | list[Step] | list[list[Step]], ends)
+        ends = cast("int | list[int] | list[Step] | list[list[Step]]", ends)
     if waypoints is not None:
         if isinstance(waypoints, list):
             waypoints = [
-                p.to_itype(c.kcl.dbu) for p in cast(list[kdb.DPoint], waypoints)
+                p.to_itype(c.kcl.dbu) for p in cast("list[kdb.DPoint]", waypoints)
             ]
         else:
-            waypoints = cast(kdb.DCplxTrans, waypoints).s_trans().to_itype(c.kcl.dbu)
+            waypoints = cast("kdb.DCplxTrans", waypoints).s_trans().to_itype(c.kcl.dbu)
     return route_bundle_generic(
         c=c.kcl[c.cell_index()],
         start_ports=[p.base for p in start_ports],
@@ -395,7 +395,7 @@ def route_bundle(
             "separation": c.kcl.to_dbu(separation),
             "sort_ports": sort_ports,
             "bbox_routing": bbox_routing,
-            "bboxes": [bb.to_itype(c.kcl.dbu) for bb in cast(list[kdb.DBox], bboxes)],
+            "bboxes": [bb.to_itype(c.kcl.dbu) for bb in cast("list[kdb.DBox]", bboxes)],
             "bend90_radius": 0,
             "waypoints": waypoints,
         },

@@ -174,7 +174,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         trans = self.trans.dup() if self.trans is not None else None
         dcplx_trans = self.dcplx_trans.dup() if self.dcplx_trans is not None else None
         return cast(
-            BasePortDict,
+            "BasePortDict",
             {
                 "name": self.name,
                 "kcl": self.kcl,

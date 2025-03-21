@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
 from typing import TYPE_CHECKING, Literal, cast
 
 from . import kdb
@@ -10,6 +9,8 @@ from .instance_group import DInstanceGroup, InstanceGroup
 from .kcell import DKCell, KCell
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from .instance import DInstance, Instance
 
 __all__ = ["flexgrid", "flexgrid_dbu", "grid", "grid_dbu"]
@@ -157,11 +158,11 @@ def grid_dbu(
         )
     _kcells: Sequence[KCell | None]
     if isinstance(kcells[0], KCell):
-        _kcells = cast(Sequence[KCell | None], kcells)
+        _kcells = cast("Sequence[KCell | None]", kcells)
     else:
         _kcells = [
             kcell
-            for array in cast(Sequence[Sequence[KCell | None]], kcells)
+            for array in cast("Sequence[Sequence[KCell | None]]", kcells)
             for kcell in array
         ]
 
@@ -310,9 +311,9 @@ def flexgrid_dbu(
 
     if shape is None:
         if isinstance(kcells[0], KCell):
-            kcell_array = cast(Sequence[list[KCell]], [list(kcells)])
+            kcell_array = cast("Sequence[list[KCell]]", [list(kcells)])
         else:
-            kcell_array = cast(Sequence[Sequence[KCell]], kcells)
+            kcell_array = cast("Sequence[Sequence[KCell]]", kcells)
 
         x0 = 0
         y0 = 0
@@ -379,11 +380,11 @@ def flexgrid_dbu(
         )
     _kcells: Sequence[KCell | None]
     if isinstance(kcells[0], KCell):
-        _kcells = cast(Sequence[KCell | None], kcells)
+        _kcells = cast("Sequence[KCell | None]", kcells)
     else:
         _kcells = [
             kcell
-            for array in cast(Sequence[Sequence[KCell | None]], kcells)
+            for array in cast("Sequence[Sequence[KCell | None]]", kcells)
             for kcell in array
         ]
 
@@ -609,11 +610,11 @@ def grid(
         )
     _kcells: Sequence[DKCell | None]
     if isinstance(kcells[0], DKCell):
-        _kcells = cast(Sequence[DKCell | None], kcells)
+        _kcells = cast("Sequence[DKCell | None]", kcells)
     else:
         _kcells = [
             kcell
-            for array in cast(Sequence[Sequence[DKCell | None]], kcells)
+            for array in cast("Sequence[Sequence[DKCell | None]]", kcells)
             for kcell in array
         ]
 
@@ -762,9 +763,9 @@ def flexgrid(
 
     if shape is None:
         if isinstance(kcells[0], DKCell):
-            kcell_array = cast(Sequence[list[DKCell]], [list(kcells)])
+            kcell_array = cast("Sequence[list[DKCell]]", [list(kcells)])
         else:
-            kcell_array = cast(Sequence[Sequence[DKCell]], kcells)
+            kcell_array = cast("Sequence[Sequence[DKCell]]", kcells)
 
         x0: float = 0
         y0: float = 0
@@ -834,11 +835,11 @@ def flexgrid(
         )
     _kcells: Sequence[DKCell | None]
     if isinstance(kcells[0], DKCell):
-        _kcells = cast(Sequence[DKCell | None], kcells)
+        _kcells = cast("Sequence[DKCell | None]", kcells)
     else:
         _kcells = [
             kcell
-            for array in cast(Sequence[Sequence[DKCell | None]], kcells)
+            for array in cast("Sequence[Sequence[DKCell | None]]", kcells)
             for kcell in array
         ]
 
