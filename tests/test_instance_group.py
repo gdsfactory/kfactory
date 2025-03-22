@@ -215,5 +215,13 @@ def test_instance_group_kcl(kcl: kf.KCLayout) -> None:
         instance_group.kcl = kcl
 
 
+def test_instnace_group_iter(
+    instance_groups: _InstanceGroupTuple,
+) -> None:
+    instance1, *_ = instance_groups
+    for inst in instance1:
+        assert isinstance(inst, kf.Instance)
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

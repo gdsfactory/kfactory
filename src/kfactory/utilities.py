@@ -179,33 +179,35 @@ def pprint_ports(
                     )
         case "um":
             for port in ports:
-                t = port.dcplx_trans
+                dport = port.to_dtype()
+                t = dport.dcplx_trans
                 dx = t.disp.x
                 dy = t.disp.y
-                dwidth = port.kcl.to_um(port.cross_section.width)
+                dwidth = dport.cross_section.width
                 angle = t.angle
                 mirror = t.mirror
                 table.add_row(
-                    str(port.name) + " [um]",
+                    str(dport.name) + " [um]",
                     f"{dwidth:_}",
-                    port.kcl.get_info(port.layer).to_s(),
+                    dport.kcl.get_info(dport.layer).to_s(),
                     f"{dx:_}",
                     f"{dy:_}",
                     str(angle),
                     str(mirror),
-                    JSON.from_data(port.info.model_dump()),
+                    JSON.from_data(dport.info.model_dump()),
                 )
         case "dbu":
             for port in ports:
+                iport = port.to_itype()
                 table.add_row(
-                    str(port.name) + " [dbu]",
-                    f"{port.width:_}",
-                    port.kcl.get_info(port.layer).to_s(),
-                    f"{port.x:_}",
-                    f"{port.y:_}",
-                    str(port.angle),
-                    str(port.mirror),
-                    JSON.from_data(port.info.model_dump()),
+                    str(iport.name) + " [dbu]",
+                    f"{iport.width:_}",
+                    iport.kcl.get_info(iport.layer).to_s(),
+                    f"{iport.x:_}",
+                    f"{iport.y:_}",
+                    str(iport.angle),
+                    str(iport.mirror),
+                    JSON.from_data(iport.info.model_dump()),
                 )
 
     return table

@@ -9,6 +9,7 @@ import pytest
 from conftest import Layers
 
 import kfactory as kf
+from kfactory.cross_section import CrossSection, CrossSectionSpec
 
 
 def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
@@ -264,11 +265,21 @@ def test_check_ports(layers: Layers) -> None:
     kf.config.logfilter.regex = regex
 
 
-def test_ports_in_cells() -> None:
-    kcell = kf.KCell(name="test")
+def test_ports_in_cells(kcl: kf.KCLayout, layers: Layers) -> None:
+    kcell = kcl.kcell(name="test")
     dkcell = kcell.to_dtype()
 
-    port = kf.Port(name="test", layer=1, width=2, center=(0, 0), angle=90)
+    port = kf.Port(
+        name="test",
+        center=(0, 0),
+        angle=0,
+        cross_section=CrossSection(
+            kcl,
+            base=kcl.get_symmetrical_cross_section(
+                CrossSectionSpec(layer=layers.WG, width=2000)
+            ),
+        ),
+    )
     new_port = kcell.add_port(port=port, name="o1")
 
     assert new_port in kcell.ports
@@ -513,6 +524,12 @@ def test_transform(kcl: kf.KCLayout, layers: Layers) -> None:
     c.transform(inst.instance, t)
 
     assert inst.trans == t * t_
+    
+def test_factory_name(kcl: kf.KCLayout, layers: Layers) -> None:
+    cell = kf.factories.straight.straight_dbu_factory(kcl)(
+        width=10, length=10, layer=layers.WG
+    )
+    assert cell.factory_name == "straight"
 
 
 if __name__ == "__main__":
