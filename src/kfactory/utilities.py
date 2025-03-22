@@ -164,7 +164,7 @@ def pprint_ports(
                     t = port.dcplx_trans
                     dx = t.disp.x
                     dy = t.disp.y
-                    dwidth = port.cross_section.width
+                    dwidth = port.kcl.to_um(port.cross_section.width)
                     angle = t.angle
                     mirror = t.mirror
                     table.add_row(
