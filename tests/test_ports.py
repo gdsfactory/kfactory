@@ -505,5 +505,17 @@ def test_dports_pformat(kcl: kf.KCLayout, layers: Layers) -> None:
     assert ports.pformat()
 
 
+def test_kcell_transformation(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kcl.kcell("Test Port Transformation")
+    t_ = kf.kdb.Trans(rot=1, x=0, y=5000)
+    p = c.create_port(trans=t_, width=1000, layer_info=layers.WG, name="o1")
+    p_ = p.copy()
+
+    t = kf.kdb.Trans(rot=2, mirrx=False, x=10_0000, y=20_000)
+    c.transform(t)
+    assert p.trans == t * t_
+    assert p.trans == p_.copy(t).trans
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-s"])
