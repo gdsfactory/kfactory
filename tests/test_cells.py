@@ -47,7 +47,6 @@ def cell_params(wg_enc: kf.LayerEnclosure, layers: Layers) -> dict[str, Any]:
             "width": 1000,
             "length": 100_000,
             "layer": layers.WG,
-            "enclosure": wg_enc,
         },
         "taper": {
             "width1": 1000,
