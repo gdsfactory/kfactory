@@ -8,10 +8,13 @@ calculate areas that violate min space violations.
 """
 
 from .fill import fill_tiled
+from .simplify import dsimplify, simplify
 from .violations import fix_spacing_minkowski_tiled, fix_spacing_tiled
 
 __all__ = [
+    "dsimplify",
     "fill_tiled",
     "fix_spacing_minkowski_tiled",
     "fix_spacing_tiled",
+    "simplify",
 ]

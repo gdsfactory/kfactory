@@ -1,7 +1,10 @@
 import klayout.db as kdb
 import pytest
+from conftest import Layers
 
 import kfactory as kf
+from kfactory.cross_section import CrossSection, CrossSectionSpec, DCrossSection
+from kfactory.exceptions import LockedError
 
 
 def test_unnamed_dkcell(kcl: kf.KCLayout) -> None:
@@ -41,17 +44,61 @@ def test_dkcell_ports() -> None:
     assert c.ports == [p]
 
 
-def test_dkcell_locked() -> None:
+def test_dkcell_locked(layers: Layers) -> None:
     kcl = kf.KCLayout("TEST_DKCELL_LOCKED")
+    kcl.infos = layers
     c = kcl.dkcell("test_dkcell_locked")
     assert c.locked is False
     c.base.lock()
     assert c.locked is True
-    with pytest.raises(kf.kcell.LockedError):
+
+    p = kf.port.DPort(
+        name="o1",
+        kcl=kcl,
+        cross_section=DCrossSection(
+            kcl,
+            base=kcl.get_symmetrical_cross_section(
+                CrossSectionSpec(layer=layers.WG, width=2000)
+            ),
+        ),
+        port_type="optical",
+        trans=kf.kdb.Trans(1, 0),
+    )
+
+    with pytest.raises(LockedError):
         c.ports = []
 
-    with pytest.raises(kf.kcell.LockedError):
+    with pytest.raises(LockedError):
         c.create_port(width=1, layer=1, center=(0, 0), orientation=90)
+
+    with pytest.raises(LockedError):
+        c.add_port(port=p)
+
+    with pytest.raises(LockedError):
+        c.add_ports(ports=[p])
+
+    with pytest.raises(LockedError):
+        c.create_port(
+            name="o1",
+            kcl=kcl,
+            cross_section=CrossSection(
+                kcl,
+                base=kcl.get_symmetrical_cross_section(
+                    CrossSectionSpec(layer=layers.WG, width=2000)
+                ),
+            ),
+            port_type="optical",
+            trans=kf.kdb.Trans(1, 0),
+        )
+
+    with pytest.raises(ValueError):
+        _ = c.factory_name
+
+    with pytest.raises(LockedError):
+        c.create_vinst(c)
+
+    with pytest.raises(LockedError):
+        c.base.name = "test_dkcell_locked"
 
 
 def test_dkcell_attributes() -> None:
@@ -168,6 +215,11 @@ def test_size_info_call(kcl: kf.KCLayout) -> None:
     new_size_info = c.size_info(1)
 
     assert new_size_info._bf() == c.size_info._bf()
+
+
+def test_tkcell(kcl: kf.KCLayout) -> None:
+    c = kcl.dkcell("test_dkcell_getattr")
+    assert c.base.called_cells() == []
 
 
 if __name__ == "__main__":

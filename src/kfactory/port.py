@@ -1372,6 +1372,7 @@ def rename_by_direction(
 
             def key_sort(port: ProtoPort[Any], dir_2: int = dir_2) -> tuple[int, int]:
                 return (port.trans.disp.x, dir_2 * port.trans.disp.y)
+
         else:
 
             def key_sort(port: ProtoPort[Any], dir_2: int = dir_2) -> tuple[int, int]:

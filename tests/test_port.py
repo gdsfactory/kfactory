@@ -5,7 +5,7 @@ import pytest
 from conftest import Layers
 
 import kfactory as kf
-from kfactory.cross_section import CrossSectionSpec
+from kfactory.cross_section import CrossSection, CrossSectionSpec
 
 _PortsType = tuple[kf.port.DPort, kf.port.Port, kf.port.DPort, kf.port.Port]
 
@@ -197,7 +197,26 @@ def test_port_cross_section(kcl: kf.KCLayout, layers: Layers) -> None:
     assert port.cross_section.base is kcl.get_symmetrical_cross_section(
         CrossSectionSpec(layer=layers.WG, width=3000)
     )
+    port.cross_section = CrossSection(
+        kcl,
+        base=kcl.get_symmetrical_cross_section(
+            CrossSectionSpec(layer=layers.WG, width=3000)
+        ),
+    )
+    assert port.cross_section.base is kcl.get_symmetrical_cross_section(
+        CrossSectionSpec(layer=layers.WG, width=3000)
+    )
     assert port.width == 3000
+    dport = port.to_dtype()
+    dport.cross_section = CrossSection(
+        kcl,
+        base=kcl.get_symmetrical_cross_section(
+            CrossSectionSpec(layer=layers.WG, width=3000)
+        ),
+    )
+    assert dport.cross_section.base is kcl.get_symmetrical_cross_section(
+        CrossSectionSpec(layer=layers.WG, width=3000)
+    )
 
 
 def test_port_info() -> None:

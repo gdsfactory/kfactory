@@ -156,6 +156,25 @@ line-ending = "auto"
 [tool.ruff.lint.pydocstyle]
 convention = "google"
 
+[tool.coverage.report]
+exclude_also = [
+    "if self\\.debug",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "@(abc\\.)?abstractmethod",
+    "if TYPE_CHECKING:",
+    "@overload",
+    "class .*\\(Protocol(\\[.*\\])?(,.*)?.*\\):",
+    "def .*:[\\s]*\\.\\.\\.$",
+]
+ignore_errors = true
+
+[tool.coverage.run]
+omit = ["src/kfactory/widgets/interactive.py", "src/kfactory/cli/**/*.py"]
+
+
 [tool.tbump]
 # Uncomment this if your project is hosted on GitHub:
 # github_url = "https://github.com/<user or organization>/<project>/"

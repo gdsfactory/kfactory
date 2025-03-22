@@ -278,5 +278,9 @@ def test_iter(kcl: kf.KCLayout, layers: Layers) -> None:
     assert all(isinstance(p, kf.DPort) for p in dref.ports)
 
 
+def test_dinstance_ports_repr(dinstance_ports: kf.DInstance) -> None:
+    assert repr(dinstance_ports.ports)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-s"])

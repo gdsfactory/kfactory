@@ -1724,7 +1724,13 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 if layer not in inst_ports[h]:
                     inst_ports[h][layer] = []
                 inst_ports[h][layer].append(
-                    (i, j, Instance(kcl=self.kcl, instance=inst.instance), port, subc)
+                    (
+                        i,
+                        j,
+                        Instance(kcl=self.kcl, instance=inst.instance),
+                        port,
+                        subc,
+                    )
                 )
 
         # go through each position and layer and connect ports to their matching cell
