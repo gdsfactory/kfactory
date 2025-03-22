@@ -500,5 +500,20 @@ def test_cell_default_fallback() -> None:
     assert isinstance(my_cell(), kf.KCell)
 
 
+def test_transform(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kf.KCell()
+    c2 = kf.KCell()
+
+    inst = c << c2
+    t_ = kf.kdb.Trans.M90
+    inst.transform(t_)
+
+    t = kf.kdb.Trans(x=50_000, y=10_000)
+
+    c.transform(inst.instance, t)
+
+    assert inst.trans == t * t_
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "-s"])
