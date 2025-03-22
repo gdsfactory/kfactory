@@ -257,14 +257,6 @@ class ProtoTInstancePorts(
                 for p in self.cell_ports
             )
 
-    def __repr__(self) -> str:
-        """String representation.
-
-        Creates a copy and uses the `__repr__` of
-        [Ports][kfactory.kcell.Ports.__repr__].
-        """
-        return repr(self.copy())
-
     def print(self) -> None:
         config.console.print(pprint_ports(self.copy()))
 
@@ -433,14 +425,6 @@ class VInstancePorts(ProtoInstancePorts[float, VInstance]):
         if isinstance(port, ProtoPort):
             return port.base in [p.base for p in self.instance.ports]
         return any(_port.name == port for _port in self.instance.ports)
-
-    def __repr__(self) -> str:
-        """String representation.
-
-        Creates a copy and uses the `__repr__` of
-        [Ports][kfactory.kcell.Ports.__repr__].
-        """
-        return repr(self.copy())
 
     def filter(
         self,

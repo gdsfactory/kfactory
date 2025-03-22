@@ -505,5 +505,20 @@ def test_dports_pformat(kcl: kf.KCLayout, layers: Layers) -> None:
     assert ports.pformat()
 
 
+def test_ports_hash(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kf.factories.straight.straight_dbu_factory(kcl)(
+        width=5000, length=10000, layer=layers.WG
+    )
+    d = {c: 1}
+    assert d[c] == 1
+
+
+def test_ports_repr(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kf.factories.straight.straight_dbu_factory(kcl)(
+        width=5000, length=10000, layer=layers.WG
+    )
+    repr(c.ports)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-s"])
