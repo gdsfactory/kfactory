@@ -546,7 +546,8 @@ def test_transform(kcl: kf.KCLayout, layers: Layers) -> None:
     assert inst.trans == t * t_
     c.delete()
     c2.delete()
-    
+
+
 def test_factory_name(kcl: kf.KCLayout, layers: Layers) -> None:
     cell = kf.factories.straight.straight_dbu_factory(kcl)(
         width=10, length=10, layer=layers.WG
