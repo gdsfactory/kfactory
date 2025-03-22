@@ -10,6 +10,7 @@ from conftest import Layers
 
 import kfactory as kf
 from kfactory.cross_section import CrossSection, CrossSectionSpec
+from kfactory.exceptions import LockedError
 
 
 def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
@@ -391,15 +392,34 @@ def test_kcell_attributes(kcl: kf.KCLayout) -> None:
     assert c.size_info.center == (5, 5)
 
 
-def test_lock(straight: kf.KCell, bend90: kf.KCell) -> None:
+def test_lock(straight: kf.KCell, bend90: kf.KCell, layers: Layers) -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
+        # shape insert
         with pytest.raises(RuntimeError):
             straight.shapes(kf.kdb.LayerInfo(1, 0)).insert(kf.kdb.Box(500))
+        # instance insert
         with pytest.raises(RuntimeError):
             straight << bend90
+        # transform
         with pytest.raises(RuntimeError):
             straight.transform(kf.kdb.Trans.R90)
+        # create_vinst
+        with pytest.raises(LockedError):
+            straight.create_vinst(bend90)
+        # create_port
+        with pytest.raises(LockedError):
+            straight.create_port(trans=kf.kdb.Trans.R0, width=1000, layer=layers.WG)
+        # name setter
+        with pytest.raises(LockedError):
+            straight.name = "new name"
+
+
+def test_kdb_getattr(straight: kf.KCell) -> None:
+    straight.cell_index()
+
+    with warnings.catch_warnings(), pytest.raises(AttributeError):
+        straight.abcde  # noqa: B018
 
 
 def test_cell_in_threads(
@@ -524,6 +544,8 @@ def test_transform(kcl: kf.KCLayout, layers: Layers) -> None:
     c.transform(inst.instance, t)
 
     assert inst.trans == t * t_
+    c.delete()
+    c2.delete()
     
 def test_factory_name(kcl: kf.KCLayout, layers: Layers) -> None:
     cell = kf.factories.straight.straight_dbu_factory(kcl)(
