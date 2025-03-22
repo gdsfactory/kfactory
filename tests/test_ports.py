@@ -515,6 +515,7 @@ def test_kcell_transformation(kcl: kf.KCLayout, layers: Layers) -> None:
     c.transform(t)
     assert p.trans == t * t_
     assert p.trans == p_.copy(t).trans
+    c.delete()
 
 
 if __name__ == "__main__":
