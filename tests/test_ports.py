@@ -9,7 +9,7 @@ from kfactory.exceptions import PortWidthMismatchError
 
 
 @kf.cell
-def straight(width: int, length: int, layer: kf.kdb.LayerInfo) -> kf.KCell:
+def straight_test(width: int, length: int, layer: kf.kdb.LayerInfo) -> kf.KCell:
     c = kf.KCell()
 
     c.shapes(c.kcl.find_layer(layer)).insert(
@@ -33,20 +33,20 @@ def straight(width: int, length: int, layer: kf.kdb.LayerInfo) -> kf.KCell:
 
 @pytest.fixture
 def wg(layers: Layers) -> kf.KCell:
-    return straight(1000, 20000, layers.WG)
+    return straight_test(1000, 20000, layers.WG)
 
 
 def test_settings(layers: Layers) -> None:
-    c = straight(1000, 20000, layers.WG)
+    c = straight_test(1000, 20000, layers.WG)
 
     assert c.settings["length"] == 20000
     assert c.settings["width"] == 1000
-    assert c.name == "straight_W1000_L20000_LWG"
+    assert c.name == "straight_test_W1000_L20000_LWG"
 
 
 def test_connect_cplx_port(layers: Layers) -> None:
     c = kf.KCell()
-    wg1 = c << straight(1000, 20000, layers.WG)
+    wg1 = c << straight_test(1000, 20000, layers.WG)
     port = kf.Port(
         width=c.kcl.to_dbu(1),
         layer=c.kcl.find_layer(layers.WG),
@@ -59,8 +59,8 @@ def test_connect_cplx_port(layers: Layers) -> None:
 def test_connect_cplx_inst(layers: Layers) -> None:
     c = kf.KCell()
 
-    wg1 = c << straight(1000, 20000, layers.WG)
-    wg2 = c << straight(1000, 20000, layers.WG)
+    wg1 = c << straight_test(1000, 20000, layers.WG)
+    wg2 = c << straight_test(1000, 20000, layers.WG)
     wg1.transform(kf.kdb.DCplxTrans(1, 30, False, 5, 10))
     wg2.connect("o1", wg1, "o2")
     kf.config.logfilter.regex = (
@@ -88,7 +88,7 @@ def test_connect_integer(wg: kf.KCell) -> None:
 
 def test_connect_port_width_mismatch(layers: Layers) -> None:
     c = kf.KCell()
-    wg1 = c << straight(1000, 20000, layers.WG)
+    wg1 = c << straight_test(1000, 20000, layers.WG)
     port = kf.Port(
         width=c.kcl.to_dbu(2),
         layer=c.kcl.find_layer(layers.WG),
@@ -105,7 +105,7 @@ def test_connect_port_width_mismatch(layers: Layers) -> None:
 
 def test_connect_instance_width_mismatch(layers: Layers) -> None:
     c = kf.KCell()
-    wg1 = c << straight(1000, 20000, layers.WG)
+    wg1 = c << straight_test(1000, 20000, layers.WG)
     port = kf.Port(
         width=c.kcl.to_dbu(2),
         layer=c.kcl.find_layer(layers.WG),
@@ -503,6 +503,21 @@ def test_dports_pformat(kcl: kf.KCLayout, layers: Layers) -> None:
     ).to_dtype()
     ports = c.ports
     assert ports.pformat()
+
+
+def test_ports_hash(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kf.factories.straight.straight_dbu_factory(kcl)(
+        width=5000, length=10000, layer=layers.WG
+    )
+    d = {c: 1}
+    assert d[c] == 1
+
+
+def test_ports_repr(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kf.factories.straight.straight_dbu_factory(kcl)(
+        width=5000, length=10000, layer=layers.WG
+    )
+    repr(c.ports)
 
 
 if __name__ == "__main__":

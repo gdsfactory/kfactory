@@ -174,7 +174,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         trans = self.trans.dup() if self.trans is not None else None
         dcplx_trans = self.dcplx_trans.dup() if self.dcplx_trans is not None else None
         return cast(
-            BasePortDict,
+            "BasePortDict",
             {
                 "name": self.name,
                 "kcl": self.kcl,
@@ -1372,6 +1372,7 @@ def rename_by_direction(
 
             def key_sort(port: ProtoPort[Any], dir_2: int = dir_2) -> tuple[int, int]:
                 return (port.trans.disp.x, dir_2 * port.trans.disp.y)
+
         else:
 
             def key_sort(port: ProtoPort[Any], dir_2: int = dir_2) -> tuple[int, int]:

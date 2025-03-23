@@ -119,26 +119,27 @@ target-version = "py311"
 select = ["ALL"]
 ignore = [
     "ANN401",
-    "D100",
-    "COM812",
-    "S101",
-    "FBT",
-    "PLR0915",
-    "PLR0911",
+    "ARG",
+    "BLE001",
     "C901",
-    "TRY003",
-    "PLR0913",
-    "PLR0912",
-    "TC004",
+    "COM812",
+    "D100",
+    "D",
     "EM",
-    "TID252",
+    "FBT",
+    "PLR0904",
+    "PLR0911",
+    "PLR0912",
+    "PLR0913",
+    "PLR0915",
     "PT011",
     "PT012",
+    "S101",
     "S311",
-    "ARG",
-    "D",
     "SLF001",
-    "BLE001",
+    "TC004",
+    "TID252",
+    "TRY003",
 ]
 per-file-ignores = { "tests/*.py" = ["D", "PLR2004", "INP001", "EM101"] }
 
@@ -154,6 +155,25 @@ line-ending = "auto"
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.coverage.report]
+exclude_also = [
+    "if self\\.debug",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "@(abc\\.)?abstractmethod",
+    "if TYPE_CHECKING:",
+    "@overload",
+    "class .*\\(Protocol(\\[.*\\])?(,.*)?.*\\):",
+    "def .*:[\\s]*\\.\\.\\.$",
+]
+ignore_errors = true
+
+[tool.coverage.run]
+omit = ["src/kfactory/widgets/interactive.py", "src/kfactory/cli/**/*.py"]
+
 
 [tool.tbump]
 # Uncomment this if your project is hosted on GitHub:
