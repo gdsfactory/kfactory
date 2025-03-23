@@ -1,21 +1,17 @@
-<a id="v1.3.0"></a>
-# [v1.3.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.3.0) - 2025-03-21
+<a id="v1.2.5"></a>
+# [v1.2.5](https://github.com/gdsfactory/kfactory/releases/tag/v1.2.5) - 2025-03-21
 
 # What's Changed
-
-## New
-
-- Add more tests [#643](https://github.com/gdsfactory/kfactory/pull/643)
 
 ## Bug Fixes
 
 - fix naming conflicts that are none [#644](https://github.com/gdsfactory/kfactory/pull/644)
 - Test connectivity [#640](https://github.com/gdsfactory/kfactory/pull/640)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.2.4...v1.3.0
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.2.4...v1.2.5
 
 
-[Changes][v1.3.0]
+[Changes][v1.2.5]
 
 
 <a id="v1.2.4"></a>
@@ -1754,7 +1750,7 @@
 [Changes][v0.4.0]
 
 
-[v1.3.0]: https://github.com/gdsfactory/kfactory/compare/v1.2.4...v1.3.0
+[v1.2.5]: https://github.com/gdsfactory/kfactory/compare/v1.2.4...v1.2.5
 [v1.2.4]: https://github.com/gdsfactory/kfactory/compare/v1.2.3...v1.2.4
 [v1.2.3]: https://github.com/gdsfactory/kfactory/compare/v1.2.2...v1.2.3
 [v1.2.2]: https://github.com/gdsfactory/kfactory/compare/v1.2.1...v1.2.2
