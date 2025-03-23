@@ -420,7 +420,9 @@ class TKCell(BaseKCell):
     def name(self, value: str) -> None:
         if self.locked:
             raise LockedError(self)
-        if value != self.kcl.layout.unique_cell_name(value):
+        if value != self.kdb_cell.name and value != self.kcl.layout.unique_cell_name(
+            value
+        ):
             stack = inspect.stack()
             module = inspect.getmodule(stack[3].frame)
             tkcells = [
@@ -436,8 +438,8 @@ class TKCell(BaseKCell):
                     f"{frame_info.frame.f_locals['f'].__code__.co_filename}::"
                     f"{frame_info.frame.f_locals['f'].__name__} at line "
                     f"{frame_info.frame.f_locals['f'].__code__.co_firstlineno}\n"
-                    f"Renaming {self.name} to {value} would cause it to be"
-                    " named the same as:\n"
+                    f"Renaming {self.name} (cell_index={self.kdb_cell.cell_index()}) to"
+                    f" {value} would cause it to be named the same as:\n"
                     + "\n".join(
                         f" - {tkcell.name} (cell_index={tkcell.kdb_cell.cell_index()}),"
                         f" function_name={tkcell.function_name},"
@@ -445,6 +447,22 @@ class TKCell(BaseKCell):
                         for tkcell in tkcells
                     )
                 )
+                if config.debug_names:
+                    raise ValueError(
+                        "Name conflict in "
+                        f"{frame_info.frame.f_locals['f'].__code__.co_filename}::"
+                        f"{frame_info.frame.f_locals['f'].__name__} at line "
+                        f"{frame_info.frame.f_locals['f'].__code__.co_firstlineno}\n"
+                        f"Renaming {self.name} (cell_index={self.kdb_cell.cell_index()}"
+                        f") to {value} would cause it to be named the same as:\n"
+                        + "\n".join(
+                            f" - {tkcell.name} "
+                            f"(cell_index={tkcell.kdb_cell.cell_index()}),"
+                            f" function_name={tkcell.function_name},"
+                            f" basename={tkcell.basename}"
+                            for tkcell in tkcells
+                        )
+                    )
             else:
                 frame_info = stack[3]
                 if module is not None:
@@ -460,8 +478,9 @@ class TKCell(BaseKCell):
                         "Name conflict in "
                         f"{module_name}{function_name} at line "
                         f"{frame_info.lineno}\n"
-                        f"Renaming {self.name} to {value} would cause it to be"
-                        " named the same as:\n"
+                        f"Renaming {self.name} (cell_index="
+                        f"{self.kdb_cell.cell_index()}) to"
+                        f" {value} would cause it to be named the same as:\n"
                         + "\n".join(
                             f" - {tkcell.name} "
                             f"(cell_index={tkcell.kdb_cell.cell_index()}),"
@@ -470,6 +489,22 @@ class TKCell(BaseKCell):
                             for tkcell in tkcells
                         )
                     )
+                    if config.debug_names:
+                        raise ValueError(
+                            "Name conflict in "
+                            f"{module_name}{function_name} at line "
+                            f"{frame_info.lineno}\n"
+                            f"Renaming {self.name} (cell_index="
+                            f"{self.kdb_cell.cell_index()}) to"
+                            f" {value} would cause it to be named the same as:\n"
+                            + "\n".join(
+                                f" - {tkcell.name} "
+                                f"(cell_index={tkcell.kdb_cell.cell_index()}),"
+                                f" function_name={tkcell.function_name},"
+                                f" basename={tkcell.basename}"
+                                for tkcell in tkcells
+                            )
+                        )
                 else:
                     function_name = (
                         "::" + frame_info.function
@@ -479,9 +514,10 @@ class TKCell(BaseKCell):
                     logger.opt(depth=3).error(
                         "Name conflict in "
                         f"{frame_info.filename}"
-                        f"{function_name} at line {frame_info.lineno}"
-                        f"Renaming {self.name} to {value} would cause it to be"
-                        " named the same as:\n"
+                        f"{function_name} at line {frame_info.lineno}\n"
+                        f"Renaming {self.name} (cell_index="
+                        f"{self.kdb_cell.cell_index()}) to"
+                        f" {value} would cause it to be named the same as:\n"
                         + "\n".join(
                             f" - {tkcell.name} "
                             f"(cell_index={tkcell.kdb_cell.cell_index()}),"
@@ -490,6 +526,22 @@ class TKCell(BaseKCell):
                             for tkcell in tkcells
                         )
                     )
+                    if config.debug_names:
+                        raise ValueError(
+                            "Name conflict in "
+                            f"{frame_info.filename}"
+                            f"{function_name} at line {frame_info.lineno}\n"
+                            f"Renaming {self.name} (cell_index="
+                            f"{self.kdb_cell.cell_index()}) to"
+                            f" {value} would cause it to be named the same as:\n"
+                            + "\n".join(
+                                f" - {tkcell.name} "
+                                f"(cell_index={tkcell.kdb_cell.cell_index()}),"
+                                f" function_name={tkcell.function_name},"
+                                f" basename={tkcell.basename}"
+                                for tkcell in tkcells
+                            )
+                        )
 
         self.kdb_cell.name = value
 
@@ -629,7 +681,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         """Enables use of `copy.copy` and `copy.deep_copy`."""
         return self.dup()
 
-    def dup(self) -> Self:
+    def dup(self, new_name: str | None = None) -> Self:
         """Copy the full cell.
 
         Sets `_locked` to `False`
@@ -639,6 +691,24 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 The name will have `$1` as duplicate names are not allowed
         """
         kdb_copy = self._kdb_copy()
+        if new_name:
+            if new_name == self.name:
+                if config.debug_names:
+                    raise ValueError(
+                        "When duplicating a Cell, avoid giving the duplicate the same "
+                        "name, as this can cause naming conflicts and may render the "
+                        "GDS/OASIS file unwritable. If you're using a @cell function, "
+                        "ensure that the function has a different name than the one "
+                        "being called."
+                    )
+                logger.error(
+                    "When duplicating a Cell, avoid giving the duplicate the same "
+                    "name, as this can cause naming conflicts and may render the "
+                    "GDS/OASIS file unwritable. If you're using a @cell function, "
+                    "ensure that the function has a different name than the one being "
+                    "called."
+                )
+            kdb_copy.name = new_name
 
         c = self.__class__(kcl=self.kcl, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
