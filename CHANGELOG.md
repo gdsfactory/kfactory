@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- fix naming conflicts that are none [#644](https://github.com/gdsfactory/kfactory/pull/644)
 - Test connectivity [#640](https://github.com/gdsfactory/kfactory/pull/640)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.2.4...v1.3.0
