@@ -706,7 +706,7 @@ class KCLayout(
                     if cell.locked:
                         # If the cell is locked, it comes from a cache (most likely)
                         # and should be copied first
-                        cell = cell.dup()
+                        cell = cell.dup(new_name=self.future_cell_name)
                     if overwrite_existing:
                         for c in list(self._cells(name_ or cell.name)):
                             if c is not cell.kdb_cell:
