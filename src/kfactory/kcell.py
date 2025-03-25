@@ -2262,7 +2262,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     for poly in error_region_shapes.merge().each():
                         it = db_.create_item(db_cell, sc)
                         it.add_value("Shapes overlapping with shapes of instances")
-                        it.add_value(self.kcl.to_um(poly))
+                        it.add_value(self.kcl.to_um(poly.downcast()))
                 if not error_region_instances.is_empty():
                     sc = db_.category_by_path(
                         layer_cat(layer).path() + ".InstanceshapeOverlap"
@@ -2272,7 +2272,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         it.add_value(
                             "Instance shapes overlapping with shapes of other instances"
                         )
-                        it.add_value(self.kcl.to_um(poly))
+                        it.add_value(self.kcl.to_um(poly.downcast()))
 
         return db_
 
