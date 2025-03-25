@@ -67,10 +67,7 @@ def get_length_from_area(layer: kdb.LayerInfo | None = None) -> LengthFunction:
 def get_length_from_info(
     route: ManhattanRoute, attribute_name: str = "length"
 ) -> int | float:
-    length = 0
-    for inst in route.instances:
-        length += inst.cell.info[attribute_name]
-    return length
+    return sum(inst.cell.info[attribute_name] for inst in route.instances)
 
 
 def get_length_from_backbone(route: ManhattanRoute) -> int:
