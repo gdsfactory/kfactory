@@ -11,6 +11,7 @@ from ..port import DPort, Port
 from ..typings import dbu, um
 from .generic import ManhattanRoute
 from .generic import route_bundle as route_bundle_generic
+from .length_functions import get_length_from_backbone
 from .manhattan import (
     ManhattanRoutePathFunction,
     route_manhattan,
@@ -658,8 +659,8 @@ def place_single_wire(
         bend90_radius=0,
         polygons={layer_info: [shape]},
         instances=[],
-        length=round(length),
         length_straights=round(length),
+        length_function=get_length_from_backbone,
     )
 
 

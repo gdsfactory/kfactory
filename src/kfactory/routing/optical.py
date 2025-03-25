@@ -559,7 +559,6 @@ def place90(
 
     if len(pts) == MIN_POINTS_FOR_PLACEMENT:
         length = int((pts[1] - pts[0]).length())
-        route.length += int(length)
         if (
             taper_cell is None
             or length
@@ -678,7 +677,6 @@ def place90(
         length = int(
             (bend90.ports[b90p1.name].trans.disp - old_bend_port.trans.disp).length()
         )
-        route.length += int(length)
         if length > 0:
             if (
                 taper_cell is None
@@ -761,7 +759,6 @@ def place90(
         old_pt = pt
         old_bend_port = bend90.ports[b90p2.name]
     length = int((bend90.ports[b90p2.name].trans.disp - p2.trans.disp).length())
-    route.length += int(length)
     if length > 0:
         if (
             taper_cell is None

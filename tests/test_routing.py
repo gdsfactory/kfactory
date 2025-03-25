@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from functools import partial
 
+import numpy as np
 import pytest
 from conftest import Layers
 
@@ -202,12 +203,50 @@ def test_route_bundle(
         bend90_cell=bend90_euler,
         on_collision=None,
     )
+    route_lengths = [
+        814026.004,
+        839026.004,
+        902026.004,
+        1003026.004,
+        1142026.004,
+        1313026.004,
+        1516026.004,
+        1757026.004,
+        2036026.004,
+        2353026.004,
+    ]
 
-    for route in routes:
+    for route, length in zip(routes, route_lengths, strict=True):
         c.add_port(port=route.start_port)
         c.add_port(port=route.end_port)
+        assert np.isclose(route.length, length)
 
     c.auto_rename_ports()
+
+
+def test_route_length_straight(
+    optical_port: kf.Port,
+    bend90_euler: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    kcl: kf.KCLayout,
+    layers: Layers,
+) -> None:
+    c = kcl.kcell("TEST_ROUTE_BUNDLE_AREA_LENGTH")
+    p1 = kf.Port(name="o1", width=1000, trans=kf.kdb.Trans.R0, layer_info=layers.WG)
+    p2 = p1.copy_polar(d=10_000)
+    p2.name = "o2"
+
+    routes = kf.routing.optical.route_bundle(
+        c,
+        [p1],
+        [p2],
+        5_000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_euler,
+        on_collision=None,
+    )
+
+    assert [r.length for r in routes] == [10_000]
 
 
 def test_route_bundle_route_width(
@@ -283,8 +322,7 @@ def test_route_length(
         taper_cell=taper,
     )
     kf.config.logfilter.regex = None
-
-    assert route.length == 65196
+    assert np.isclose(route.length, 173222.004)
     assert route.length_straights == 25196
     assert route.length_backbone == 140000
     assert route.n_bend90 == 2
@@ -491,7 +529,8 @@ def test_smart_routing(
             | (True, True, False, 1, False, True, False, False, False)
         ):
             with pytest.raises(RuntimeError):  # , match="Routing Collision"):i
-                rf()
+                routes = rf()
+                [route.length for route in routes]
         case _:
             rf()
 
