@@ -1,16 +1,20 @@
-<a id="v1.2.6"></a>
-# [v1.2.6](https://github.com/gdsfactory/kfactory/releases/tag/v1.2.6) - 2025-03-25
+<a id="v1.3.0"></a>
+# [v1.3.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.3.0) - 2025-03-25
 
 # What's Changed
+
+## New
+
+- make length attribute in ManhattanRoute configurable with length_function [#629](https://github.com/gdsfactory/kfactory/pull/629)
 
 ## Dependency Updates
 
 - Update klayout requirement from !=0.29.12,<0.30.0,>=0.29.11 to >=0.30,<0.31.0 [#645](https://github.com/gdsfactory/kfactory/pull/645)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.2.5...v1.2.6
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.2.5...v1.3.0
 
 
-[Changes][v1.2.6]
+[Changes][v1.3.0]
 
 
 <a id="v1.2.5"></a>
@@ -1765,7 +1769,7 @@
 [Changes][v0.4.0]
 
 
-[v1.2.6]: https://github.com/gdsfactory/kfactory/compare/v1.2.5...v1.2.6
+[v1.3.0]: https://github.com/gdsfactory/kfactory/compare/v1.2.5...v1.3.0
 [v1.2.5]: https://github.com/gdsfactory/kfactory/compare/v1.2.4...v1.2.5
 [v1.2.4]: https://github.com/gdsfactory/kfactory/compare/v1.2.3...v1.2.4
 [v1.2.3]: https://github.com/gdsfactory/kfactory/compare/v1.2.2...v1.2.3
