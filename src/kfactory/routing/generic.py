@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from ..conf import config, logger
 from ..port import BasePort, Port, ProtoPort
+from .length_functions import LengthFunction, get_length_from_area
 from .manhattan import (
     ManhattanBundleRoutingFunction,
     ManhattanRouter,
@@ -91,10 +92,10 @@ class ManhattanRoute(BaseModel, arbitrary_types_allowed=True):
     n_taper: int = 0
     bend90_radius: dbu = 0
     taper_length: dbu = 0
-    length: dbu = 0
     """Length of backbone without the bends."""
     length_straights: dbu = 0
     polygons: dict[kdb.LayerInfo, list[kdb.Polygon]] = Field(default_factory=dict)
+    length_function: LengthFunction = Field(default_factory=get_length_from_area)
 
     @property
     def length_backbone(self) -> dbu:
@@ -105,6 +106,10 @@ class ManhattanRoute(BaseModel, arbitrary_types_allowed=True):
             length += int((p - p_old).length())
             p_old = p
         return length
+
+    @property
+    def length(self) -> int | float:
+        return self.length_function(self)
 
 
 def check_collisions(
@@ -266,6 +271,15 @@ def get_radius(ports: Sequence[ProtoPort[Any]]) -> dbu:
     """Calculates a radius between two ports.
 
     This can be used to determine the radius of two bend ports.
+
+    Args:
+        ports: A sequence of exactly two ports.
+
+    Returns:
+        Radius in dbu.
+
+    Raises:
+        ValueError: Radius cannot be determined
     """
     ports_ = tuple(p.to_itype() for p in ports)
     if len(ports_) != PORTS_FOR_RADIUS:
@@ -403,6 +417,14 @@ def route_bundle(
             (single value) or each one (list of values which is as long as start_ports).
         end_angles: Overwrite the port orientation of all start_ports together
             (single value) or each one (list of values which is as long as end_ports).
+
+    Returns:
+        List of ManattanRoutes containing the instances of the route.
+
+    Raises:
+        PlacerError: Something went wrong and the resulting route of the placer function
+            is not manhattan or the elements cannot be fitted.
+        ValueError: Ports or places or args are misconfigured.
     """
     if ends is None:
         ends = []

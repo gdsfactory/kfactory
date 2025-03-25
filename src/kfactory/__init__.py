@@ -29,7 +29,7 @@ from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
 from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
 from .instances import Instances, DInstances, VInstances
 from .settings import KCellSettings, Info
-from .layout import KCLayout, cell, vcell, kcl, Constants
+from .layout import Constants, KCLayout, cell, vcell, kcl, kcls
 from .layer import LayerEnum, LayerInfos, LayerStack
 from .shapes import VShapes
 from .utilities import (
@@ -107,6 +107,7 @@ __all__ = [
     "grid",
     "grid_dbu",
     "kcl",
+    "kcls",
     "kdb",
     "lay",
     "logger",
