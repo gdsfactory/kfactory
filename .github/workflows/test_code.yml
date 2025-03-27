@@ -38,6 +38,31 @@ jobs:
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
         run: make test
+  test_code_min_ver:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 12
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+          - "3.13"
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          uv venv -p ${{ matrix.python-version }}
+          make test-venv
+          make gds-download
+          uv sync --override minimal.txt
+      - name: Test with pytest
+        env:
+          KFACTORY_LOGFILTER_LEVEL: "ERROR"
+        run: make test
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:

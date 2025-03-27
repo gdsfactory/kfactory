@@ -28,8 +28,8 @@ dependencies = [
     "rectangle-packer",
     "requests",
     "ruamel.yaml.string",
-    "scipy",
-    "tomli",
+    "scipy >= 1.15",
+    "tomli >= 2.2.1",
     "toolz",
     "typer",
 ]
