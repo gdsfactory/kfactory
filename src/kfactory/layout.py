@@ -43,6 +43,7 @@ from .enclosure import (
 from .exceptions import CellNameError, MergeError
 from .kcell import (
     AnyTKCell,
+    BaseKCell,
     DKCell,
     DKCells,
     KCell,
@@ -55,7 +56,7 @@ from .kcell import (
 )
 from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
-from .port import rename_clockwise_multi
+from .port import BasePort, rename_clockwise_multi
 from .serialization import (
     DecoratorDict,
     DecoratorList,
@@ -1109,7 +1110,7 @@ class KCLayout(
 
     def __getattr__(self, name: str) -> Any:
         """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
-        if name != "_name" and name not in self.model_fields:
+        if name != "_name" and name not in self.__class__.model_fields:
             return self.layout.__getattribute__(name)
         return None
 
@@ -1119,7 +1120,7 @@ class KCLayout(
         If the attribute is not in this object, set it on the
         Layout object.
         """
-        if name in self.model_fields:
+        if name in self.__class__.model_fields:
             super().__setattr__(name, value)
         elif hasattr(self.layout, name):
             self.layout.__setattr__(name, value)
@@ -1686,9 +1687,13 @@ class KCLayout(
 
 
 KCLayout.model_rebuild()
-TVCell.model_rebuild()
 SymmetricalCrossSection.model_rebuild()
-
+CrossSectionModel.model_rebuild()
+TKCell.model_rebuild()
+TVCell.model_rebuild()
+BasePort.model_rebuild()
+BaseKCell.model_rebuild()
+LayerEnclosureModel.model_rebuild()
 
 kcl = KCLayout("DEFAULT")
 """Default library object.

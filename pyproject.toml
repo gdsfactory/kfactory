@@ -23,7 +23,7 @@ dependencies = [
     "gitpython",
     "loguru",
     "klayout >= 0.30, < 0.31.0",
-    "pydantic >= 2.0.2, < 3",
+    "pydantic >= 2.11, < 2.12",
     "pydantic-settings >= 2.0.1, < 3",
     "rectangle-packer",
     "requests",
