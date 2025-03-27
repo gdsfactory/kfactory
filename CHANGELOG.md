@@ -7,6 +7,10 @@
 
 - make length attribute in ManhattanRoute configurable with length_function [#629](https://github.com/gdsfactory/kfactory/pull/629)
 
+## Bug Fixes
+
+- Fix pydantic 2.11 [#646](https://github.com/gdsfactory/kfactory/pull/646)
+
 ## Dependency Updates
 
 - Update klayout requirement from !=0.29.12,<0.30.0,>=0.29.11 to >=0.30,<0.31.0 [#645](https://github.com/gdsfactory/kfactory/pull/645)
