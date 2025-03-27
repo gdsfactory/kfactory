@@ -6,9 +6,9 @@ klayout==0.30.0
 pydantic==2.11.0
 pydantic-settings==2.0.1
 rectangle-packer==2.0.2
-requests==0.2.0
+requests==2.32.2
 ruamel.yaml.string==0.1.0
 scipy==1.15.0
 tomli==2.2.1
-toolz==0.7.0
+toolz==1.0.0
 typer==0.0.1

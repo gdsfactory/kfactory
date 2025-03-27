@@ -35,13 +35,16 @@ docs-serve:
 	mkdocs serve -f docs/mkdocs.yml
 
 test:
-	uv run pytest -s -n logical
+	uv run --isolated pytest -s -n logical
+
+test-min: install
+	uv run -v --isolated --no-cache --no-sync --extra ci --with-requirements minimal-reqs.txt pytest -s -n logical
 
 cov:
-	uv run pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
+	uv run --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
 
 dev-cov:
-	uv run pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered
+	uv run --isolated pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered
 
 venv:
 	uv venv -p 3.13
@@ -84,4 +87,4 @@ gds-upload:
 gds-download:
 	gh release download v0.6.0 -D gds/gds_ref/ --clobber
 
-.PHONY: build docs
+.PHONY: build docs test test-min
