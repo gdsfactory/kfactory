@@ -37,7 +37,7 @@ docs-serve:
 test:
 	uv run --extra ci --isolated pytest -s -n logical
 
-test-min: install
+test-min:
 	uv run --isolated --no-cache --no-sync --extra ci --with-requirements minimal-reqs.txt pytest -s -n logical
 
 cov:
