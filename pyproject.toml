@@ -62,6 +62,7 @@ docs = [
     "mkdocs-section-index",
     "mkdocs-video",
     "pymdown-extensions",
+    "ruff",
 ]
 ci = [
     "pytest",
