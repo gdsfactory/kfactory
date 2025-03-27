@@ -17,7 +17,6 @@ jobs:
   test_code:
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 12
       matrix:
         python-version:
           - "3.11"
@@ -41,7 +40,6 @@ jobs:
   test_code_min_ver:
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 12
       matrix:
         python-version:
           - "3.11"
@@ -65,7 +63,6 @@ jobs:
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 12
       matrix:
         python-version:
           - "3.13"
@@ -88,7 +85,6 @@ jobs:
   test_docs:
     runs-on: ${{ matrix.os }}
     strategy:
-      max-parallel: 12
       matrix:
         python-version:
           - "3.13"
