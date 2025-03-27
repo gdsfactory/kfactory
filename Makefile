@@ -35,16 +35,16 @@ docs-serve:
 	mkdocs serve -f docs/mkdocs.yml
 
 test:
-	uv run --isolated pytest -s -n logical
+	uv run --extra ci --isolated pytest -s -n logical
 
 test-min: install
 	uv run -v --isolated --no-cache --no-sync --extra ci --with-requirements minimal-reqs.txt pytest -s -n logical
 
 cov:
-	uv run --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
+	uv run --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
 
 dev-cov:
-	uv run --isolated pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered
+	uv run --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered
 
 venv:
 	uv venv -p 3.13
