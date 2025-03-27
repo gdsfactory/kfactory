@@ -30,8 +30,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          uv venv -p ${{ matrix.python-version }}
-          make test-venv
           make gds-download
       - name: Test with pytest
         env:
@@ -52,14 +50,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          uv venv -p ${{ matrix.python-version }}
-          make test-venv
           make gds-download
-          uv pip install -e . -r minimal-reqs.txt
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
-        run: uv run --no-sync pytest -n logical
+        run: make test-min
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:
