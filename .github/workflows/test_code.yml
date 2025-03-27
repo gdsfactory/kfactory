@@ -55,7 +55,7 @@ jobs:
           uv venv -p ${{ matrix.python-version }}
           make test-venv
           make gds-download
-          uv pip install -e . -r minmal-reqs.txt
+          uv pip install -e . -r minimal-reqs.txt
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
