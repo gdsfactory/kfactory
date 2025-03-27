@@ -5,7 +5,7 @@ loguru==0.2.5
 klayout==0.30.0
 pydantic==2.11.0
 pydantic-settings==2.0.1
-rectangle-packer==2.0.1
+rectangle-packer==2.0.2
 requests==0.2.0
 ruamel.yaml.string==0.1.0
 scipy==1.15.0

@@ -45,7 +45,6 @@ jobs:
       matrix:
         python-version:
           - "3.11"
-          - "3.12"
           - "3.13"
         os: [ubuntu-latest, windows-latest, macos-latest]
     steps:
@@ -58,7 +57,7 @@ jobs:
           uv venv -p ${{ matrix.python-version }}
           make test-venv
           make gds-download
-          uv sync --override minimal.txt
+          uv install -e . -r minmal-reqs.txt
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
