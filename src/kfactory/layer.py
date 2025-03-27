@@ -45,7 +45,7 @@ class LayerInfos(BaseModel):
 
     @model_validator(mode="after")
     def _validate_layers(self) -> Self:
-        field_names = set(self.model_fields.keys())
+        field_names = set(self.__class__.model_fields.keys())
         if self.model_extra is not None:
             field_names |= self.model_extra.keys()
         for field_name in field_names:
