@@ -11,4 +11,4 @@ ruamel.yaml.string==0.1.0
 scipy==1.15.0
 tomli==2.2.1
 toolz==1.0.0
-typer==0.0.1
+typer==0.15.2
