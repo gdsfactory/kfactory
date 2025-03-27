@@ -10,7 +10,7 @@ help:
 	@echo 'make release VERSION=MAJOR.MINOR.PATCH:      Dry run for new release with version number v${MAJOR}.${MINOR}.${PATCH}'
 
 uv:
-	curl -LsSf https://astral.sh/uv/0.4.30/install.sh | sh
+	curl -LsSf https://astral.sh/uv/install.sh | sh
 
 install:
 	uv sync --extra docs --extra dev
@@ -38,7 +38,7 @@ test:
 	uv run --extra ci --isolated pytest -s -n logical
 
 test-min: install
-	uv run -v --isolated --no-cache --no-sync --extra ci --with-requirements minimal-reqs.txt pytest -s -n logical
+	uv run --isolated --no-cache --no-sync --extra ci --with-requirements minimal-reqs.txt pytest -s -n logical
 
 cov:
 	uv run --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
