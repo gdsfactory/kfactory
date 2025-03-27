@@ -43,6 +43,7 @@ from .enclosure import (
 from .exceptions import CellNameError, MergeError
 from .kcell import (
     AnyTKCell,
+    BaseKCell,
     DKCell,
     DKCells,
     KCell,
@@ -55,7 +56,7 @@ from .kcell import (
 )
 from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
-from .port import rename_clockwise_multi
+from .port import BasePort, rename_clockwise_multi
 from .serialization import (
     DecoratorDict,
     DecoratorList,
@@ -1686,9 +1687,13 @@ class KCLayout(
 
 
 KCLayout.model_rebuild()
-TVCell.model_rebuild()
 SymmetricalCrossSection.model_rebuild()
-
+CrossSectionModel.model_rebuild()
+TKCell.model_rebuild()
+TVCell.model_rebuild()
+BasePort.model_rebuild()
+BaseKCell.model_rebuild()
+LayerEnclosureModel.model_rebuild()
 
 kcl = KCLayout("DEFAULT")
 """Default library object.
