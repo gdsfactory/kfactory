@@ -8,7 +8,7 @@ pydantic-settings==2.0.1
 rectangle-packer==2.0.2
 requests==2.32.2
 ruamel.yaml.string==0.1.1
-scipy==1.15.0
+scipy==1.15.2
 tomli==2.2.1
 toolz==1.0.0
 typer==0.15.2
