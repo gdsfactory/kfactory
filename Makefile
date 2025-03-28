@@ -38,7 +38,7 @@ test:
 	uv run --extra ci --isolated pytest -s -n logical
 
 test-min:
-	uv run --extra ci --isolated --with-requirements minimal-reqs.txt pytest -s -n logical
+	uv run --extra ci --resolution lowest-direct --isolated pytest -s -n logical
 
 cov:
 	uv run --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
@@ -87,4 +87,7 @@ gds-upload:
 gds-download:
 	gh release download v0.6.0 -D gds/gds_ref/ --clobber
 
-.PHONY: build docs test test-min
+clean:
+	git clean -xdf
+
+.PHONY: build docs test test-min clean
