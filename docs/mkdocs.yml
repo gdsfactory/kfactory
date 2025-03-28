@@ -66,9 +66,6 @@ plugins:
             # ignore_init_summary: true
             separate_signature: true
             show_signature_annotations: true
-            preload_modules:
-              - klayout.db
-              - klayout.lay
             members_order: alphabetical
   - gen-files:
       scripts:
