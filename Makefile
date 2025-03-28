@@ -29,10 +29,10 @@ docs-clean:
 	rm -rf site
 
 docs:
-	mkdocs build -f docs/mkdocs.yml
+	uv run --extra docs --isolated mkdocs build -f docs/mkdocs.yml
 
 docs-serve:
-	mkdocs serve -f docs/mkdocs.yml
+	uv run --extra docs --isolated mkdocs serve -f docs/mkdocs.yml
 
 test:
 	uv run --extra ci --isolated pytest -s -n logical
@@ -90,4 +90,4 @@ gds-download:
 clean:
 	git clean -xdf
 
-.PHONY: build docs test test-min clean
+.PHONY: build docs docs-serve test test-min clean
