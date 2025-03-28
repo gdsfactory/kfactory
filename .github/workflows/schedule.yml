@@ -23,7 +23,4 @@ jobs:
     steps:
       - uses: austenstone/schedule@v1.3
         with:
-          github-token: ${{ secrets.TOKEN }}
-          date: ${{ github.event.inputs.date }}
           workflow: 'test_code.yml'
-          timezone: 'GMT'
