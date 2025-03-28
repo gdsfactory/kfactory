@@ -88,10 +88,6 @@ gds-download:
 	gh release download v0.6.0 -D gds/gds_ref/ --clobber
 
 clean:
-	rm -rf .pytest_cache
-	rm -rf .ruff_cache
-	rm -rf .mypy_cache
-	rm -rf .venv
-
+	git clean -xdf
 
 .PHONY: build docs test test-min clean
