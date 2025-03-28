@@ -8,9 +8,11 @@ import re
 import sys
 import traceback
 from enum import Enum, IntEnum
+from functools import cached_property
 from itertools import takewhile
 from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
+import git
 import loguru
 import rich.console
 from dotenv import find_dotenv
@@ -305,6 +307,17 @@ class Settings(BaseSettings):
             "'{}' set globally to '{}'", info.field_name, v
         )
         return v
+
+    @cached_property
+    def root_dir(self) -> Path:
+        try:
+            repo = git.repo.Repo(".", search_parent_directories=True)
+            wtd = repo.working_tree_dir
+            root = Path(wtd) if wtd is not None else Path.cwd()
+        except git.InvalidGitRepositoryError:
+            root = Path.cwd()
+        root.mkdir(parents=True, exist_ok=True)
+        return root
 
     def __init__(self, **data: Any) -> None:
         """Set log filter and run pydantic."""
