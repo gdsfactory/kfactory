@@ -67,6 +67,11 @@ plugins:
             separate_signature: true
             show_signature_annotations: true
             members_order: alphabetical
+            extensions:
+              - griffe_pydantic
+              - dataclasses
+              - griffe_inherited_docstrings
+              - griffe_warnings_deprecated
   - gen-files:
       scripts:
         - source/gen_ref_pages.py
