@@ -21,4 +21,5 @@ jobs:
     steps:
       - uses: austenstone/schedule@v1.3
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           workflow: 'test_code.yml'
