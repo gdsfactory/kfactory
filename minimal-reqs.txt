@@ -1,5 +1,5 @@
 aenum==3.1.15
-cachetools==5.2.0
+cachetools==5.5.2
 gitpython==3.1.44
 loguru==0.7.3
 klayout==0.30.0
