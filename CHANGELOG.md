@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- Remove klayout api from docs [#656](https://github.com/gdsfactory/kfactory/pull/656)
 - Update min req test [#655](https://github.com/gdsfactory/kfactory/pull/655)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.3.0...v1.3.1
