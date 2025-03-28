@@ -10,7 +10,7 @@ help:
 	@echo 'make release VERSION=MAJOR.MINOR.PATCH:      Dry run for new release with version number v${MAJOR}.${MINOR}.${PATCH}'
 
 uv:
-	curl -LsSf https://astral.sh/uv/0.4.30/install.sh | sh
+	curl -LsSf https://astral.sh/uv/install.sh | sh
 
 install:
 	uv sync --extra docs --extra dev
@@ -35,13 +35,16 @@ docs-serve:
 	mkdocs serve -f docs/mkdocs.yml
 
 test:
-	uv run pytest -s -n logical
+	uv run --extra ci --isolated pytest -s -n logical
+
+test-min:
+	uv run --extra ci --isolated --with-requirements minimal-reqs.txt pytest -s -n logical
 
 cov:
-	uv run pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
+	uv run --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
 
 dev-cov:
-	uv run pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered
+	uv run --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered
 
 venv:
 	uv venv -p 3.13
@@ -84,4 +87,4 @@ gds-upload:
 gds-download:
 	gh release download v0.6.0 -D gds/gds_ref/ --clobber
 
-.PHONY: build docs
+.PHONY: build docs test test-min
