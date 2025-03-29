@@ -508,7 +508,29 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[K], None]] = ...,
+        post_process: Iterable[Callable[[K], None]],
+        debug_names: bool | None = ...,
+        tags: list[str] | None = ...,
+    ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
+
+    @overload
+    def cell(
+        self,
+        /,
+        *,
+        set_settings: bool = ...,
+        set_name: bool = ...,
+        check_ports: bool = ...,
+        check_instances: CheckInstances | None = ...,
+        snap_ports: bool = ...,
+        add_port_layers: bool = ...,
+        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        basename: str | None = ...,
+        drop_params: list[str] = ...,
+        register_factory: bool = ...,
+        overwrite_existing: bool | None = ...,
+        layout_cache: bool | None = ...,
+        info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
@@ -532,7 +554,7 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[K], None]] = ...,
+        post_process: Iterable[Callable[[K], None]] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[[KCellFunc[KCellParams, AnyTKCell]], KCellFunc[KCellParams, K]]: ...
@@ -556,7 +578,7 @@ class KCLayout(
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[K], None]] = (),
+        post_process: Iterable[Callable[[K], None]] | None = None,
         debug_names: bool | None = None,
         tags: list[str] | None = None,
     ) -> (
@@ -619,6 +641,8 @@ class KCLayout(
             layout_cache = config.cell_layout_cache
         if debug_names is None:
             debug_names = config.debug_names
+        if post_process is None:
+            post_process = ()
 
         def decorator_autocell(
             f: KCellFunc[KCellParams, AnyTKCell] | KCellFunc[KCellParams, K],
