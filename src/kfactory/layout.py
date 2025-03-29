@@ -65,6 +65,7 @@ if TYPE_CHECKING:
 
     from .ports import DPorts, Ports
     from .protocols import KCellFunc
+    from .typings import K
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -501,7 +502,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[T], T]: ...
+    ) -> Callable[[Callable[KCellParams, K]], Callable[KCellParams, K]]: ...
 
     @overload
     def cell(
@@ -734,7 +735,7 @@ class KCLayout(
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
-    ) -> Callable[[KCellFunc[KCellParams, VK]], KCellFunc[KCellParams, VK]]: ...
+    ) -> Callable[[Callable[KCellParams, VK]], Callable[KCellParams, VK]]: ...
 
     def vcell(
         self,
@@ -1192,10 +1193,12 @@ class KCLayout(
                     )
                 )
             elif meta.name.startswith("kfactory:cross_section:"):
-                cross_sections.append({
-                    "name": meta.name.removeprefix("kfactory:cross_section:"),
-                    **meta.value,
-                })
+                cross_sections.append(
+                    {
+                        "name": meta.name.removeprefix("kfactory:cross_section:"),
+                        **meta.value,
+                    }
+                )
 
         for cs in cross_sections:
             self.get_symmetrical_cross_section(
