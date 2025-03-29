@@ -531,6 +531,7 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
+        post_process: Iterable[Callable[[K], None]] | None = None,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
@@ -557,7 +558,7 @@ class KCLayout(
         post_process: Iterable[Callable[[K], None]] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[KCellFunc[KCellParams, AnyTKCell]], KCellFunc[KCellParams, K]]: ...
+    ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
 
     def cell(
         self,
@@ -584,7 +585,6 @@ class KCLayout(
     ) -> (
         KCellFunc[KCellParams, K]
         | Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]
-        | Callable[[KCellFunc[KCellParams, AnyTKCell]], KCellFunc[KCellParams, K]]
     ):
         """Decorator to cache and auto name the cell.
 
@@ -694,10 +694,7 @@ class KCLayout(
 
         return (
             cast(
-                "Callable[[KCellFunc[KCellParams, K]], "
-                "KCellFunc[KCellParams, K]] | "
-                "Callable[[KCellFunc[KCellParams, AnyTKCell]],"
-                " KCellFunc[KCellParams, K]]",
+                "Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]",
                 decorator_autocell,
             )
             if _func is None
