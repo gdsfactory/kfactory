@@ -22,7 +22,6 @@ from typing_extensions import Unpack
 from . import kdb
 from .conf import CheckInstances, logger
 from .exceptions import CellNameError
-from .kcell import VKCell
 from .protocols import KCellFunc
 from .serialization import (
     DecoratorDict,
@@ -32,14 +31,14 @@ from .serialization import (
     to_hashable,
 )
 from .settings import KCellSettings, KCellSettingsUnits
-from .typings import KC, K, KCellParams, MetaData
+from .typings import KC, VK, K, KCellParams, MetaData
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
 
     from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
 
-    from .kcell import AnyKCell, ProtoTKCell, TKCell
+    from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
     from .layout import KCLayout
     from .typings import KC_co
 
@@ -390,8 +389,8 @@ class WrappedKCellFunc(KCellFunc[KCellParams, KC]):
         return self._f(*args, **kwargs)
 
 
-class WrappedVKCellFunc(KCellFunc[KCellParams, VKCell]):
-    _f: KCellFunc[KCellParams, VKCell]
+class WrappedVKCellFunc(KCellFunc[KCellParams, VK]):
+    _f: KCellFunc[KCellParams, VK]
     cache: Cache[int, Any] | dict[int, Any]
     name: str | None
 
@@ -409,7 +408,7 @@ class WrappedVKCellFunc(KCellFunc[KCellParams, VKCell]):
         self,
         *,
         kcl: KCLayout,
-        f: KCellFunc[KCellParams, VKCell],
+        f: KCellFunc[KCellParams, VK],
         sig: inspect.Signature,
         cache: Cache[int, Any] | dict[int, Any],
         set_settings: bool,
@@ -421,12 +420,12 @@ class WrappedVKCellFunc(KCellFunc[KCellParams, VKCell]):
         @functools.wraps(f)
         def wrapper_autocell(
             *args: KCellParams.args, **kwargs: KCellParams.kwargs
-        ) -> VKCell:
+        ) -> VK:
             params, param_units = _parse_params(sig, kcl, args, kwargs)
 
             @cached(cache=cache, lock=RLock())
             @functools.wraps(f)
-            def wrapped_cell(**params: Any) -> VKCell:
+            def wrapped_cell(**params: Any) -> VK:
                 _params_to_original(params)
                 cell = f(**params)  # type: ignore[call-arg]
                 if cell.locked:
@@ -455,7 +454,7 @@ class WrappedVKCellFunc(KCellFunc[KCellParams, VKCell]):
         elif hasattr(f, "func"):
             self.name = f.func.__name__
 
-    def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> VKCell:
+    def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> VK:
         return self._f(*args, **kwargs)
 
 

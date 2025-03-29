@@ -57,7 +57,7 @@ from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
 from .port import BasePort, rename_clockwise_multi
 from .settings import Info, KCellSettings
-from .typings import KC, KCellParams, KCellSpec, MetaData, T
+from .typings import KC, VK, KCellParams, KCellSpec, MetaData, T
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
@@ -717,9 +717,9 @@ class KCLayout(
     @overload
     def vcell(
         self,
-        _func: KCellFunc[KCellParams, VKCell],
+        _func: KCellFunc[KCellParams, VK],
         /,
-    ) -> KCellFunc[KCellParams, VKCell]: ...
+    ) -> KCellFunc[KCellParams, VK]: ...
 
     @overload
     def vcell(
@@ -734,11 +734,11 @@ class KCLayout(
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
-    ) -> Callable[[KCellFunc[KCellParams, VKCell]], KCellFunc[KCellParams, VKCell]]: ...
+    ) -> Callable[[KCellFunc[KCellParams, VK]], KCellFunc[KCellParams, VK]]: ...
 
     def vcell(
         self,
-        _func: KCellFunc[KCellParams, VKCell] | None = None,
+        _func: KCellFunc[KCellParams, VK] | None = None,
         /,
         *,
         set_settings: bool = True,
@@ -750,8 +750,8 @@ class KCLayout(
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
     ) -> (
-        KCellFunc[KCellParams, VKCell]
-        | Callable[[KCellFunc[KCellParams, VKCell]], KCellFunc[KCellParams, VKCell]]
+        KCellFunc[KCellParams, VK]
+        | Callable[[KCellFunc[KCellParams, VK]], KCellFunc[KCellParams, VK]]
     ):
         """Decorator to cache and auto name the cell.
 
@@ -784,8 +784,8 @@ class KCLayout(
         """
 
         def decorator_autocell(
-            f: Callable[KCellParams, VKCell],
-        ) -> Callable[KCellParams, VKCell]:
+            f: Callable[KCellParams, VK],
+        ) -> Callable[KCellParams, VK]:
             sig = inspect.signature(f)
 
             # previously was a KCellCache, but dict should do for most case
@@ -1192,12 +1192,10 @@ class KCLayout(
                     )
                 )
             elif meta.name.startswith("kfactory:cross_section:"):
-                cross_sections.append(
-                    {
-                        "name": meta.name.removeprefix("kfactory:cross_section:"),
-                        **meta.value,
-                    }
-                )
+                cross_sections.append({
+                    "name": meta.name.removeprefix("kfactory:cross_section:"),
+                    **meta.value,
+                })
 
         for cs in cross_sections:
             self.get_symmetrical_cross_section(
