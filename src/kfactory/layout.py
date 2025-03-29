@@ -735,7 +735,7 @@ class KCLayout(
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
-    ) -> Callable[[Callable[..., K]], Callable[..., K]]: ...
+    ) -> Callable[[Callable[KCellParams, VK]], Callable[KCellParams, VK]]: ...
 
     def vcell(
         self,
