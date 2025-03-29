@@ -22,6 +22,7 @@ from typing_extensions import Unpack
 from . import kdb
 from .conf import CheckInstances, logger
 from .exceptions import CellNameError
+from .kcell import VKCell
 from .protocols import KCellFunc
 from .serialization import (
     DecoratorDict,
@@ -38,7 +39,7 @@ if TYPE_CHECKING:
 
     from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
 
-    from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
+    from .kcell import AnyKCell, ProtoTKCell, TKCell
     from .layout import KCLayout
     from .typings import KC_co
 
