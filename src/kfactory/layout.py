@@ -65,6 +65,7 @@ if TYPE_CHECKING:
 
     from .ports import DPorts, Ports
     from .protocols import KCellFunc
+    from .typings import K
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -501,7 +502,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[T], T]: ...
+    ) -> Callable[[Callable[..., K]], Callable[..., K]]: ...
 
     @overload
     def cell(
@@ -734,7 +735,7 @@ class KCLayout(
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
-    ) -> Callable[[T], T]: ...
+    ) -> Callable[[Callable[..., K]], Callable[..., K]]: ...
 
     def vcell(
         self,
