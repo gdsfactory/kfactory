@@ -10,9 +10,8 @@ from collections.abc import (
 )
 from pathlib import Path
 from threading import RLock
-from typing import TYPE_CHECKING, Annotated, Any, Literal, cast, get_origin, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
-import cachetools.func
 import klayout.db as kdb
 import ruamel.yaml
 from cachetools import Cache
@@ -33,7 +32,7 @@ from .cross_section import (
     DSymmetricalCrossSection,
     SymmetricalCrossSection,
 )
-from .decorators import Decorators, WrappedKCellFunc
+from .decorators import Decorators, WrappedKCellFunc, WrappedVKCellFunc
 from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
@@ -57,15 +56,8 @@ from .kcell import (
 from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
 from .port import BasePort, rename_clockwise_multi
-from .serialization import (
-    DecoratorDict,
-    DecoratorList,
-    _hashable_to_original,
-    _to_hashable,
-    get_cell_name,
-)
-from .settings import Info, KCellSettings, KCellSettingsUnits
-from .typings import K, KCellParams, KCellSpec, MetaData, T
+from .settings import Info, KCellSettings
+from .typings import KC, KCellParams, KCellSpec, MetaData, T
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
@@ -485,9 +477,9 @@ class KCLayout(
     @overload
     def cell(
         self,
-        _func: KCellFunc[KCellParams, K],
+        _func: KCellFunc[KCellParams, KC],
         /,
-    ) -> KCellFunc[KCellParams, K]: ...
+    ) -> KCellFunc[KCellParams, KC]: ...
 
     @overload
     def cell(
@@ -529,17 +521,17 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[K], None]],
+        post_process: Iterable[Callable[[KC], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
+    ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]: ...
 
     @overload
     def cell(
         self,
         /,
         *,
-        output_type: type[K],
+        output_type: type[KC],
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
@@ -553,17 +545,17 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[K], None]],
+        post_process: Iterable[Callable[[KC], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
+    ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]: ...
 
     @overload
     def cell(
         self,
         /,
         *,
-        output_type: type[K],
+        output_type: type[KC],
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
@@ -579,14 +571,14 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
+    ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]: ...
 
     def cell(
         self,
-        _func: KCellFunc[KCellParams, K] | None = None,
+        _func: KCellFunc[KCellParams, KC] | None = None,
         /,
         *,
-        output_type: type[K] | None = None,
+        output_type: type[KC] | None = None,
         set_settings: bool = True,
         set_name: bool = True,
         check_ports: bool = True,
@@ -600,12 +592,12 @@ class KCLayout(
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[K], None]] | None = None,
+        post_process: Iterable[Callable[[KC], None]] | None = None,
         debug_names: bool | None = None,
         tags: list[str] | None = None,
     ) -> (
-        KCellFunc[KCellParams, K]
-        | Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]
+        KCellFunc[KCellParams, KC]
+        | Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]
     ):
         """Decorator to cache and auto name the cell.
 
@@ -666,10 +658,10 @@ class KCLayout(
             post_process = ()
 
         def decorator_autocell(
-            f: KCellFunc[KCellParams, AnyTKCell] | KCellFunc[KCellParams, K],
-        ) -> WrappedKCellFunc[KCellParams, K]:
+            f: KCellFunc[KCellParams, KC],
+        ) -> WrappedKCellFunc[KCellParams, KC]:
             sig = inspect.signature(f)
-            output_cell_type_: type[K | ProtoTKCell[Any]]
+            output_cell_type_: type[KC | ProtoTKCell[Any]]
             if output_type is not None:
                 output_cell_type_ = output_type
             elif sig.return_annotation is not inspect.Signature.empty:
@@ -677,9 +669,9 @@ class KCLayout(
             else:
                 output_cell_type_ = self.default_cell_output_type
 
-            output_cell_type_ = cast("type[K]", output_cell_type_)
+            output_cell_type_ = cast("type[KC]", output_cell_type_)
 
-            cache_: Cache[_HashedTuple, K] | dict[_HashedTuple, K] = cache or Cache(
+            cache_: Cache[_HashedTuple, KC] | dict[_HashedTuple, KC] = cache or Cache(
                 maxsize=float("inf")
             )
             wrapper_autocell = WrappedKCellFunc(
@@ -715,7 +707,7 @@ class KCLayout(
 
         return (
             cast(
-                "Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]",
+                "Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]",
                 decorator_autocell,
             )
             if _func is None
@@ -725,9 +717,9 @@ class KCLayout(
     @overload
     def vcell(
         self,
-        _func: Callable[KCellParams, VKCell],
+        _func: KCellFunc[KCellParams, VKCell],
         /,
-    ) -> Callable[KCellParams, VKCell]: ...
+    ) -> KCellFunc[KCellParams, VKCell]: ...
 
     @overload
     def vcell(
@@ -737,14 +729,16 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         check_ports: bool = True,
+        add_port_layers: bool = True,
+        cache: Cache[int, Any] | dict[int, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
-    ) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]: ...
+    ) -> Callable[[KCellFunc[KCellParams, VKCell]], KCellFunc[KCellParams, VKCell]]: ...
 
     def vcell(
         self,
-        _func: Callable[KCellParams, VKCell] | None = None,
+        _func: KCellFunc[KCellParams, VKCell] | None = None,
         /,
         *,
         set_settings: bool = True,
@@ -756,8 +750,8 @@ class KCLayout(
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
     ) -> (
-        Callable[KCellParams, VKCell]
-        | Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VKCell]]
+        KCellFunc[KCellParams, VKCell]
+        | Callable[[KCellFunc[KCellParams, VKCell]], KCellFunc[KCellParams, VKCell]]
     ):
         """Decorator to cache and auto name the cell.
 
@@ -788,8 +782,6 @@ class KCLayout(
             register_factory: Register the resulting KCell-function to the
                 [factories][kfactory.kcell.KCLayout.factories]
         """
-        if drop_params is None:
-            drop_params = ["self", "cls"]
 
         def decorator_autocell(
             f: Callable[KCellParams, VKCell],
@@ -799,113 +791,17 @@ class KCLayout(
             # previously was a KCellCache, but dict should do for most case
             cache_ = cache or {}
 
-            @functools.wraps(f)
-            def wrapper_autocell(
-                *args: KCellParams.args, **kwargs: KCellParams.kwargs
-            ) -> VKCell:
-                params: dict[str, Any] = {
-                    p.name: p.default for p in sig.parameters.values()
-                }
-                param_units: dict[str, str] = {
-                    p.name: p.annotation.__metadata__[0]
-                    for p in sig.parameters.values()
-                    if get_origin(p.annotation) is Annotated
-                }
-                arg_par = list(sig.parameters.items())[: len(args)]
-                for i, (k, _v) in enumerate(arg_par):
-                    params[k] = args[i]
-                params.update(kwargs)
-
-                del_parameters: list[str] = []
-
-                for key, value in params.items():
-                    if isinstance(value, dict | list):
-                        params[key] = _to_hashable(value)
-                    elif isinstance(value, kdb.LayerInfo):
-                        params[key] = self.get_info(self.layer(value))
-                    if value is inspect.Parameter.empty:
-                        del_parameters.append(key)
-
-                for param in del_parameters:
-                    params.pop(param, None)
-                    param_units.pop(param, None)
-
-                @cachetools.cached(cache=cache_)
-                @functools.wraps(f)
-                def wrapped_cell(**params: Any) -> VKCell:
-                    for key, value in params.items():
-                        if isinstance(value, DecoratorDict | DecoratorList):
-                            params[key] = _hashable_to_original(value)
-                    cell = f(**params)  # type: ignore[call-arg]
-                    if cell.locked:
-                        raise ValueError(
-                            "Trying to change a locked VKCell is no allowed. "
-                            f"{cell.name=}"
-                        )
-                    if set_name:
-                        if basename is not None:
-                            name = get_cell_name(basename, **params)
-                        else:
-                            name = get_cell_name(f.__name__, **params)
-                        cell.name = name
-                    if set_settings:
-                        if hasattr(f, "__name__"):
-                            cell.function_name = f.__name__
-                        elif hasattr(f, "func"):
-                            cell.function_name = f.func.__name__
-                        else:
-                            raise ValueError(f"Function {f} has no name.")
-                        cell.basename = basename
-                        for param in drop_params:
-                            params.pop(param, None)
-                            param_units.pop(param, None)
-                        cell.settings = KCellSettings(**params)
-                        cell.settings_units = KCellSettingsUnits(**param_units)
-                    if add_port_layers:
-                        for port in cell.ports:
-                            if port.layer in cell.kcl.netlist_layer_mapping:
-                                if port.base.trans:
-                                    edge = kdb.Edge(
-                                        kdb.Point(0, int(-port.width // 2)),
-                                        kdb.Point(0, int(port.width // 2)),
-                                    )
-                                    cell.shapes(
-                                        cell.kcl.netlist_layer_mapping[port.layer]
-                                    ).insert(port.trans * edge)
-                                    if port.name:
-                                        cell.shapes(
-                                            cell.kcl.netlist_layer_mapping[port.layer]
-                                        ).insert(kdb.Text(port.name, port.trans))
-                                else:
-                                    dedge = kdb.DEdge(
-                                        kdb.DPoint(0, -port.width / 2),
-                                        kdb.DPoint(0, port.width / 2),
-                                    )
-                                    cell.shapes(
-                                        cell.kcl.netlist_layer_mapping[port.layer]
-                                    ).insert(port.dcplx_trans * dedge)
-                                    if port.name:
-                                        cell.shapes(
-                                            cell.kcl.netlist_layer_mapping[port.layer]
-                                        ).insert(
-                                            kdb.DText(
-                                                port.name, port.dcplx_trans.s_trans()
-                                            )
-                                        )
-                    cell._base.lock()
-                    if cell.kcl != self:
-                        raise ValueError(
-                            "The KCell created must be using the same"
-                            " KCLayout object as the @cell decorator. "
-                            f"{self.name!r} != {cell.kcl.name!r}. Please make sure to "
-                            "use @kcl.cell and only use @cell for cells which are"
-                            " created through kfactory.kcl. To create KCells not in "
-                            "the standard KCLayout, use either custom_kcl.kcell() or "
-                            "KCell(kcl=custom_kcl)."
-                        )
-                    return cell
-
-                return wrapped_cell(**params)
+            wrapper_autocell = WrappedVKCellFunc(
+                kcl=self,
+                f=f,
+                sig=sig,
+                cache=cache_,
+                set_settings=set_settings,
+                set_name=set_name,
+                add_port_layers=add_port_layers,
+                basename=basename,
+                drop_params=drop_params,
+            )
 
             if register_factory:
                 if hasattr(f, "__name__"):
@@ -993,12 +889,12 @@ class KCLayout(
         return self.layout.cell(name)
 
     @overload
-    def _cells(self, name: str) -> list[kdb.Cell]: ...
+    def cells(self, name: str) -> list[kdb.Cell]: ...
 
     @overload
-    def _cells(self) -> int: ...
+    def cells(self) -> int: ...
 
-    def _cells(self, name: str | None = None) -> int | list[kdb.Cell]:
+    def cells(self, name: str | None = None) -> int | list[kdb.Cell]:
         if name is None:
             return self.layout.cells()
         return self.layout.cells(name)
@@ -1077,7 +973,7 @@ class KCLayout(
             for ci in kcells2delete:
                 del self.tkcells[ci]
 
-            for cell in self._cells("*"):
+            for cell in self.cells("*"):
                 if cell.cell_index() not in self.tkcells:
                     self.tkcells[cell.cell_index()] = self.get_cell(
                         cell.cell_index(), KCell
@@ -1108,7 +1004,7 @@ class KCLayout(
         """
         return self.get_cell(obj)
 
-    def get_cell(self, obj: str | int, cell_type: type[K] = KCell) -> K:  # type: ignore[assignment]
+    def get_cell(self, obj: str | int, cell_type: type[KC] = KCell) -> KC:  # type: ignore[assignment]
         """Retrieve a cell by name(str) or index(int).
 
         Attrs:
@@ -1236,7 +1132,7 @@ class KCLayout(
 
                     raise MergeError(err_msg)
 
-            cells = set(self._cells("*"))
+            cells = set(self.cells("*"))
             fn = str(Path(filename).expanduser().resolve())
             lm = self.layout.read(fn, options)
             info, settings = self.get_meta_data()
@@ -1462,8 +1358,8 @@ class KCLayout(
 
     @overload
     def get_component(
-        self, spec: KCellSpec, *, output_type: type[K], **cell_kwargs: Any
-    ) -> K: ...
+        self, spec: KCellSpec, *, output_type: type[KC], **cell_kwargs: Any
+    ) -> KC: ...
 
     @overload
     def get_component(
@@ -1481,17 +1377,17 @@ class KCLayout(
     @overload
     def get_component(
         self,
-        spec: Callable[..., K],
+        spec: Callable[..., KC],
         **cell_kwargs: Any,
-    ) -> K: ...
+    ) -> KC: ...
     @overload
-    def get_component(self, spec: K) -> K: ...
+    def get_component(self, spec: KC) -> KC: ...
 
     def get_component(
         self,
         spec: KCellSpec,
         *,
-        output_type: type[K] | None = None,
+        output_type: type[KC] | None = None,
         **cell_kwargs: Any,
     ) -> ProtoTKCell[Any]:
         """Get a component by specification."""

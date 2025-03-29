@@ -111,14 +111,14 @@ def clean_value(
 
 
 @overload
-def _to_hashable(d: dict[Hashable, Any]) -> DecoratorDict: ...
+def to_hashable(d: dict[Hashable, Any]) -> DecoratorDict: ...
 
 
 @overload
-def _to_hashable(d: list[Any]) -> DecoratorList: ...
+def to_hashable(d: list[Any]) -> DecoratorList: ...
 
 
-def _to_hashable(
+def to_hashable(
     d: dict[Hashable, Any] | list[Any],
 ) -> DecoratorDict | DecoratorList:
     """Convert a `dict` to a `DecoratorDict`."""
@@ -126,43 +126,43 @@ def _to_hashable(
         ud = DecoratorDict()
         for item, value in sorted(d.items()):
             if isinstance(value, dict | list):
-                value_: Any = _to_hashable(value)
+                value_: Any = to_hashable(value)
             else:
                 value_ = value
             ud[item] = value_
         return ud
     ul = DecoratorList([])
     for _index, value in enumerate(d):
-        value_ = _to_hashable(value) if isinstance(value, dict | list) else value
+        value_ = to_hashable(value) if isinstance(value, dict | list) else value
         ul.append(value_)
     return ul
 
 
 @overload
-def _hashable_to_original(udl: DecoratorDict) -> dict[Hashable, Any]: ...
+def hashable_to_original(udl: DecoratorDict) -> dict[Hashable, Any]: ...
 
 
 @overload
-def _hashable_to_original(udl: DecoratorList) -> list[Hashable]: ...
+def hashable_to_original(udl: DecoratorList) -> list[Hashable]: ...
 
 
 @overload
-def _hashable_to_original(udl: Any) -> Any: ...
+def hashable_to_original(udl: Any) -> Any: ...
 
 
-def _hashable_to_original(
+def hashable_to_original(
     udl: DecoratorDict | DecoratorList | Any,
 ) -> dict[str, Any] | list[Any] | Any:
     """Convert `DecoratorDict` to `dict`."""
     if isinstance(udl, DecoratorDict):
         for item, value in udl.items():
-            udl[item] = _hashable_to_original(value)
+            udl[item] = hashable_to_original(value)
         return udl.data
     if isinstance(udl, DecoratorList):
         list_: list[Any] = []
         for v in udl:
             if isinstance(v, DecoratorDict | DecoratorList):
-                list_.append(_hashable_to_original(v))
+                list_.append(hashable_to_original(v))
             else:
                 list_.append(v)
         return list_

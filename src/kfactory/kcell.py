@@ -2949,7 +2949,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
     def insts(self) -> VInstances:
         return self._base.vinsts
 
-    def dup(self) -> VKCell:
+    def dup(self, new_name: str | None = None) -> Self:
         """Copy the full cell.
 
         Removes lock if the original cell was locked.
@@ -2958,7 +2958,9 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
             cell: Exact copy of the current cell.
                 The name will have `$1` as duplicate names are not allowed
         """
-        c = VKCell(kcl=self.kcl, name=self.name + "$1" if self.name else None)
+        c = self.__class__(
+            kcl=self.kcl, name=new_name or self.name + "$1" if self.name else None
+        )
         c.ports = DPorts(kcl=self.kcl, ports=self.ports.copy())
 
         c.settings = self.settings.model_copy()
