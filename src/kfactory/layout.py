@@ -33,7 +33,7 @@ from .cross_section import (
     DSymmetricalCrossSection,
     SymmetricalCrossSection,
 )
-from .decorators import Decorators
+from .decorators import Decorators, WrappedKCellFunc
 from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
@@ -64,7 +64,6 @@ from .serialization import (
     _to_hashable,
     get_cell_name,
 )
-from .session_cache import WrappedKCellFunc
 from .settings import Info, KCellSettings, KCellSettingsUnits
 from .typings import K, KCellParams, KCellSpec, MetaData, T
 from .utilities import load_layout_options, save_layout_options
