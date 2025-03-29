@@ -734,7 +734,7 @@ class KCLayout(
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
-    ) -> Callable[[KCellFunc[KCellParams, VK]], KCellFunc[KCellParams, VK]]: ...
+    ) -> Callable[[T], T]: ...
 
     def vcell(
         self,
@@ -1192,10 +1192,12 @@ class KCLayout(
                     )
                 )
             elif meta.name.startswith("kfactory:cross_section:"):
-                cross_sections.append({
-                    "name": meta.name.removeprefix("kfactory:cross_section:"),
-                    **meta.value,
-                })
+                cross_sections.append(
+                    {
+                        "name": meta.name.removeprefix("kfactory:cross_section:"),
+                        **meta.value,
+                    }
+                )
 
         for cs in cross_sections:
             self.get_symmetrical_cross_section(
