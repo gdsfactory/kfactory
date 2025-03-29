@@ -508,10 +508,9 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[K], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
+    ) -> Callable[[T], T]: ...
 
     @overload
     def cell(
@@ -531,7 +530,7 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[K], None]] | None = None,
+        post_process: Iterable[Callable[[K], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
@@ -555,7 +554,30 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[K], None]] | None = ...,
+        post_process: Iterable[Callable[[K], None]],
+        debug_names: bool | None = ...,
+        tags: list[str] | None = ...,
+    ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
+
+    @overload
+    def cell(
+        self,
+        /,
+        *,
+        output_type: type[K],
+        set_settings: bool = ...,
+        set_name: bool = ...,
+        check_ports: bool = ...,
+        check_instances: CheckInstances | None = ...,
+        snap_ports: bool = ...,
+        add_port_layers: bool = ...,
+        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        basename: str | None = ...,
+        drop_params: list[str] = ...,
+        register_factory: bool = ...,
+        overwrite_existing: bool | None = ...,
+        layout_cache: bool | None = ...,
+        info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[[KCellFunc[KCellParams, K]], KCellFunc[KCellParams, K]]: ...
