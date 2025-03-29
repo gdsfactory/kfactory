@@ -502,7 +502,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[Callable[..., K]], Callable[..., K]]: ...
+    ) -> Callable[[Callable[KCellParams, K]], Callable[KCellParams, K]]: ...
 
     @overload
     def cell(
