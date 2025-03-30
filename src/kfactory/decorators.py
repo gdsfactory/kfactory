@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import inspect
+import pickle
 from collections import defaultdict
 from threading import RLock
 from typing import (
@@ -35,6 +36,7 @@ from .typings import KC, VK, K, KCellParams, MetaData
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
+    from pathlib import Path
 
     from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
 
@@ -246,8 +248,10 @@ def _post_process(
 
 class WrappedKCellFunc(KCellFunc[KCellParams, KC]):
     _f: KCellFunc[KCellParams, KC]
-    cache: Cache[int, Any] | dict[int, Any]
+    cache: Cache[int, KC] | dict[int, Any]
     name: str | None
+    kcl: KCLayout
+    output_type: type[KC]
 
     @property
     def __name__(self) -> str:
@@ -266,7 +270,7 @@ class WrappedKCellFunc(KCellFunc[KCellParams, KC]):
         f: KCellFunc[KCellParams, KC],
         sig: inspect.Signature,
         output_type: type[KC],
-        cache: Cache[int, Any] | dict[int, Any],
+        cache: Cache[int, KC] | dict[int, KC],
         set_settings: bool,
         set_name: bool,
         check_ports: bool,
@@ -281,6 +285,9 @@ class WrappedKCellFunc(KCellFunc[KCellParams, KC]):
         post_process: Iterable[Callable[[KC], None]],
         debug_names: bool,
     ) -> None:
+        self.kcl = kcl
+        self.output_type = output_type
+
         @functools.wraps(f)
         def wrapper_autocell(
             *args: KCellParams.args, **kwargs: KCellParams.kwargs
@@ -387,6 +394,33 @@ class WrappedKCellFunc(KCellFunc[KCellParams, KC]):
 
     def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
         return self._f(*args, **kwargs)
+
+    def dump(self, path: Path, save_options: kdb.SaveLayoutOptions) -> None:
+        logger.debug("Saving state of function {name}", name=self.name)
+        save_options.clear_cells()
+        save_options.keep_instances = True
+        hk_list: list[tuple[str, _HashedTuple]] = []
+
+        for hk, c in self.cache.items():
+            save_options.add_this_cell(c.cell_index())
+            hk_list.append((c.name, hk))
+        path.mkdir(parents=True, exist_ok=True)
+        self.kcl.write(path / "cells.gds", options=save_options)
+        with (path / "keytable.pkl").open(mode="wb") as f:
+            pickle.dump(tuple(hk_list), f)
+
+    def load(self, path: Path) -> None:
+        load_opts = kdb.LoadLayoutOptions()
+        load_opts.cell_conflict_resolution = (
+            kdb.LoadLayoutOptions.CellConflictResolution.SkipNewCell
+        )
+        self.kcl.read(path / "cells.gds.gz", options=load_opts, test_merge=False)
+        with (path / "keytable.pkl").open(mode="rb") as f:
+            hashmap = pickle.load(f)  # noqa: S301
+            for cell_name, hk in hashmap:
+                self.cache[hk] = self.output_type(
+                    base=self.kcl.tkcells[self.kcl.layout.cell(cell_name).cell_index()]
+                )
 
 
 class WrappedVKCellFunc(KCellFunc[KCellParams, VK]):

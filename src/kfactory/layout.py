@@ -57,7 +57,7 @@ from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
 from .port import BasePort, rename_clockwise_multi
 from .settings import Info, KCellSettings
-from .typings import KC, VK, KCellParams, KCellSpec, MetaData, T
+from .typings import KC, VK, K, KCellParams, KCellSpec, MetaData, T
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
@@ -65,7 +65,6 @@ if TYPE_CHECKING:
 
     from .ports import DPorts, Ports
     from .protocols import KCellFunc
-    from .typings import K
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -480,7 +479,7 @@ class KCLayout(
         self,
         _func: KCellFunc[KCellParams, KC],
         /,
-    ) -> KCellFunc[KCellParams, KC]: ...
+    ) -> WrappedKCellFunc[KCellParams, KC]: ...
 
     @overload
     def cell(
@@ -493,7 +492,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[_HashedTuple, Any] | dict[_HashedTuple, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -502,7 +501,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[Callable[KCellParams, K]], Callable[KCellParams, K]]: ...
+    ) -> Callable[[KCellFunc[..., KC]], WrappedKCellFunc[..., KC]]: ...
 
     @overload
     def cell(
@@ -515,7 +514,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[_HashedTuple, Any] | dict[_HashedTuple, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -525,7 +524,7 @@ class KCLayout(
         post_process: Iterable[Callable[[KC], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]: ...
+    ) -> Callable[[KCellFunc[..., K]], WrappedKCellFunc[..., KC]]: ...
 
     @overload
     def cell(
@@ -539,7 +538,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[_HashedTuple, Any] | dict[_HashedTuple, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -549,7 +548,7 @@ class KCLayout(
         post_process: Iterable[Callable[[KC], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]: ...
+    ) -> Callable[[KCellFunc[..., ProtoTKCell[Any]]], WrappedKCellFunc[..., KC]]: ...
 
     @overload
     def cell(
@@ -563,7 +562,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[_HashedTuple, Any] | dict[_HashedTuple, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -572,7 +571,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]: ...
+    ) -> Callable[[KCellFunc[..., ProtoTKCell[Any]]], WrappedKCellFunc[..., KC]]: ...
 
     def cell(
         self,
@@ -586,7 +585,7 @@ class KCLayout(
         check_instances: CheckInstances | None = None,
         snap_ports: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[_HashedTuple, Any] | dict[_HashedTuple, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -597,8 +596,11 @@ class KCLayout(
         debug_names: bool | None = None,
         tags: list[str] | None = None,
     ) -> (
-        KCellFunc[KCellParams, KC]
-        | Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]
+        WrappedKCellFunc[KCellParams, KC]
+        | Callable[
+            [KCellFunc[KCellParams, ProtoTKCell[Any]]],
+            WrappedKCellFunc[KCellParams, KC],
+        ]
     ):
         """Decorator to cache and auto name the cell.
 
@@ -708,7 +710,8 @@ class KCLayout(
 
         return (
             cast(
-                "Callable[[KCellFunc[KCellParams, KC]], KCellFunc[KCellParams, KC]]",
+                "Callable[[KCellFunc[KCellParams, ProtoTKCell[Any]]]"
+                ",WrappedKCellFunc[KCellParams, KC]]",
                 decorator_autocell,
             )
             if _func is None
@@ -731,7 +734,7 @@ class KCLayout(
         set_name: bool = True,
         check_ports: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[_HashedTuple, Any] | dict[_HashedTuple, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -746,7 +749,7 @@ class KCLayout(
         set_name: bool = True,
         check_ports: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[_HashedTuple, Any] | dict[_HashedTuple, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
