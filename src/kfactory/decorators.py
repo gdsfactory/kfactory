@@ -405,7 +405,7 @@ class WrappedKCellFunc(KCellFunc[KCellParams, KC]):
             save_options.add_this_cell(c.cell_index())
             hk_list.append((c.name, hk))
         path.mkdir(parents=True, exist_ok=True)
-        self.kcl.write(path / "cells.gds", options=save_options)
+        self.kcl.write(path / "cells.gds.gz", options=save_options)
         with (path / "keytable.pkl").open(mode="wb") as f:
             pickle.dump(tuple(hk_list), f)
 
