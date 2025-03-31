@@ -244,9 +244,9 @@ def _post_process(
         pp(cell)
 
 
-class WrappedKCellFunc(Generic[KCellParams, KC]):
-    _f: Callable[KCellParams, KC]
-    _f_orig: Callable[KCellParams, KC]
+class WrappedKCellFunc(Generic[KC]):
+    _f: Callable[..., KC]
+    _f_orig: Callable[..., KC]
     cache: Cache[int, KC] | dict[int, Any]
     name: str | None
     kcl: KCLayout
@@ -392,7 +392,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         elif hasattr(f, "func"):
             self.name = f.func.__name__
 
-    def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
+    def __call__(self, *args: Any, **kwargs: Any) -> KC:
         return self._f(*args, **kwargs)
 
     def dump(self, path: Path, save_options: kdb.SaveLayoutOptions) -> None:
@@ -422,13 +422,13 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                     base=self.kcl.tkcells[self.kcl.layout.cell(cell_name).cell_index()]
                 )
 
-    @property
+    @functools.cached_property
     def file(self) -> Path:
         return Path(self._f_orig.__code__.co_filename).resolve()
 
 
-class WrappedVKCellFunc(Generic[KCellParams, VK]):
-    _f: Callable[KCellParams, VK]
+class WrappedVKCellFunc(Protocol[VK]):
+    _f: Callable[..., VK]
     cache: Cache[int, Any] | dict[int, Any]
     name: str | None
 
@@ -492,7 +492,7 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
         elif hasattr(f, "func"):
             self.name = f.func.__name__
 
-    def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> VK:
+    def __call__(self, *args: Any, **kwargs: Any) -> VK:
         return self._f(*args, **kwargs)
 
 

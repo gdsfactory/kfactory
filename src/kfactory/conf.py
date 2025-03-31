@@ -309,7 +309,7 @@ class Settings(BaseSettings):
         return v
 
     @cached_property
-    def root_dir(self) -> Path:
+    def project_dir(self) -> Path:
         try:
             repo = git.repo.Repo(".", search_parent_directories=True)
             wtd = repo.working_tree_dir
