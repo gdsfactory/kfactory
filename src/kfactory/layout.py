@@ -3,6 +3,11 @@ from __future__ import annotations
 import functools
 import inspect
 from collections import UserDict, defaultdict
+from collections.abc import (
+    Callable,  # noqa: TC003
+    Iterable,  # noqa: TC003
+    Sequence,  # noqa: TC003
+)
 from pathlib import Path
 from threading import RLock
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
@@ -56,12 +61,6 @@ from .typings import KC, VK, K, KCellParams, KCellSpec, MetaData, T
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
-    from collections.abc import (
-        Callable,
-        Iterable,
-        Sequence,
-    )
-
     from .ports import DPorts, Ports
 
 kcl: KCLayout
