@@ -38,8 +38,6 @@ from .typings import KC, VK, K, KCellParams, MetaData
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
 
-    from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
-
     from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
     from .layout import KCLayout
     from .typings import KC_co
@@ -371,7 +369,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                     # If any cell has been destroyed, we should clean up the cache.
                     # Delete all the KCell entrances in the cache which have
                     # `destroyed() == True`
-                    deleted_cell_hashes: list[_HashedTuple] = [
+                    deleted_cell_hashes: list[int] = [
                         _hash_item
                         for _hash_item, _cell_item in cache.items()
                         if _cell_item.destroyed()
@@ -401,7 +399,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         logger.debug("Saving state of function {name}", name=self.name)
         save_options.clear_cells()
         save_options.keep_instances = True
-        hk_list: list[tuple[str, _HashedTuple]] = []
+        hk_list: list[tuple[str, int]] = []
 
         for hk, c in self.cache.items():
             save_options.add_this_cell(c.cell_index())
