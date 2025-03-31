@@ -6,11 +6,13 @@ import functools
 import inspect
 import pickle
 from collections import defaultdict
+from pathlib import Path
 from threading import RLock
 from typing import (
     TYPE_CHECKING,
     Annotated,
     Any,
+    Generic,
     Protocol,
     TypedDict,
     get_origin,
@@ -23,7 +25,6 @@ from typing_extensions import Unpack
 from . import kdb
 from .conf import CheckInstances, logger
 from .exceptions import CellNameError
-from .protocols import KCellFunc
 from .serialization import (
     DecoratorDict,
     DecoratorList,
@@ -36,7 +37,6 @@ from .typings import KC, VK, K, KCellParams, MetaData
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
-    from pathlib import Path
 
     from cachetools.keys import _HashedTuple  # type: ignore[attr-defined,unused-ignore]
 
@@ -197,7 +197,7 @@ def _check_ports(cell: ProtoTKCell[Any]) -> None:
 
 def _set_settings(
     cell: K,
-    f: KCellFunc[KCellParams, K],
+    f: Callable[KCellParams, K],
     drop_params: Sequence[str],
     params: dict[str, Any],
     param_units: dict[str, Any],
@@ -246,8 +246,9 @@ def _post_process(
         pp(cell)
 
 
-class WrappedKCellFunc(KCellFunc[KCellParams, KC]):
-    _f: KCellFunc[KCellParams, KC]
+class WrappedKCellFunc(Generic[KCellParams, KC]):
+    _f: Callable[KCellParams, KC]
+    _f_orig: Callable[KCellParams, KC]
     cache: Cache[int, KC] | dict[int, Any]
     name: str | None
     kcl: KCLayout
@@ -267,7 +268,7 @@ class WrappedKCellFunc(KCellFunc[KCellParams, KC]):
         self,
         *,
         kcl: KCLayout,
-        f: KCellFunc[KCellParams, KC],
+        f: Callable[KCellParams, KC],
         sig: inspect.Signature,
         output_type: type[KC],
         cache: Cache[int, KC] | dict[int, KC],
@@ -385,6 +386,7 @@ class WrappedKCellFunc(KCellFunc[KCellParams, KC]):
                 return cell_
 
         self._f = wrapper_autocell
+        self._f_orig = f
         self.cache = cache
         self.name = None
         if hasattr(f, "__name__"):
@@ -422,9 +424,13 @@ class WrappedKCellFunc(KCellFunc[KCellParams, KC]):
                     base=self.kcl.tkcells[self.kcl.layout.cell(cell_name).cell_index()]
                 )
 
+    @property
+    def file(self) -> Path:
+        return Path(self._f_orig.__code__.co_filename).resolve()
 
-class WrappedVKCellFunc(KCellFunc[KCellParams, VK]):
-    _f: KCellFunc[KCellParams, VK]
+
+class WrappedVKCellFunc(Generic[KCellParams, VK]):
+    _f: Callable[KCellParams, VK]
     cache: Cache[int, Any] | dict[int, Any]
     name: str | None
 
@@ -442,7 +448,7 @@ class WrappedVKCellFunc(KCellFunc[KCellParams, VK]):
         self,
         *,
         kcl: KCLayout,
-        f: KCellFunc[KCellParams, VK],
+        f: Callable[KCellParams, VK],
         sig: inspect.Signature,
         cache: Cache[int, Any] | dict[int, Any],
         set_settings: bool,
@@ -536,7 +542,7 @@ class KCellDecorator(Protocol):
 
     def __call__(
         self, **kwargs: Unpack[KCellDecoratorKWargs]
-    ) -> Callable[[KCellFunc[KCellParams, KC_co]], KCellFunc[KCellParams, KC_co]]:
+    ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
         """__call__ implementation."""
         ...
 
@@ -546,7 +552,7 @@ class ModuleDecorator(Protocol):
 
     def __call__(
         self, /, **kwargs: Unpack[ModuleCellKWargs]
-    ) -> Callable[[KCellFunc[KCellParams, KC_co]], KCellFunc[KCellParams, KC_co]]:
+    ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
         """__call__ implementation."""
         ...
 
@@ -555,15 +561,15 @@ def _module_cell(
     cell_decorator: KCellDecorator,
     /,
     **kwargs: Unpack[ModuleCellKWargs],
-) -> Callable[[KCellFunc[KCellParams, KC_co]], KCellFunc[KCellParams, KC_co]]:
+) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
     """Constructs the actual decorator.
 
     Modifies the basename to the module if the module is not the main one.
     """
 
     def decorator_cell(
-        f: KCellFunc[KCellParams, KC_co],
-    ) -> KCellFunc[KCellParams, KC_co]:
+        f: Callable[KCellParams, KC_co],
+    ) -> Callable[KCellParams, KC_co]:
         mod = f.__module__
         basename = f.__name__ if mod == "__main" else f"{mod}_{f.__name__}"
         return cell_decorator(basename=basename, **kwargs)(f)
@@ -581,29 +587,29 @@ class Decorators:
     @overload
     def module_cell(
         self,
-        _func: KCellFunc[KCellParams, KC_co],
+        _func: Callable[KCellParams, KC_co],
         /,
-    ) -> KCellFunc[KCellParams, KC_co]: ...
+    ) -> Callable[KCellParams, KC_co]: ...
 
     @overload
     def module_cell(
         self, /, **kwargs: Unpack[ModuleCellKWargs]
-    ) -> Callable[[KCellFunc[KCellParams, KC_co]], KCellFunc[KCellParams, KC_co]]: ...
+    ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]: ...
 
-    def module_cell(  # type: ignore[misc]
+    def module_cell(
         self,
-        _func: KCellFunc[KCellParams, KC_co] | None = None,
+        _func: Callable[KCellParams, KC_co] | None = None,
         /,
         **kwargs: Unpack[ModuleCellKWargs],
     ) -> (
-        KCellFunc[KCellParams, KC_co]
-        | Callable[[KCellFunc[KCellParams, KC_co]], KCellFunc[KCellParams, KC_co]]
+        Callable[KCellParams, KC_co]
+        | Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]
     ):
         """Constructs the `@module_cell` decorator on KCLayout.decorators."""
 
         def mc(
             **kwargs: Unpack[ModuleCellKWargs],
-        ) -> Callable[[KCellFunc[KCellParams, KC_co]], KCellFunc[KCellParams, KC_co]]:
+        ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
             return _module_cell(self._cell, **kwargs)  # type: ignore[arg-type]
 
         return mc(**kwargs) if _func is None else mc(**kwargs)(_func)
