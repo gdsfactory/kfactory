@@ -25,7 +25,6 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 K = TypeVar("K", bound="ProtoKCell[Any, Any]")
 KC = TypeVar("KC", bound="ProtoTKCell[Any]")
-KCOut = TypeVar("KCOut", bound="ProtoTKCell[Any]")
 VK = TypeVar("VK", bound="VKCell")
 K_co = TypeVar("K_co", bound="ProtoKCell[Any, Any]", covariant=True)
 KC_co = TypeVar("KC_co", bound="ProtoTKCell[Any]", covariant=True)
