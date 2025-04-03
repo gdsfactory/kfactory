@@ -9,32 +9,15 @@ from shutil import rmtree
 from typing import TYPE_CHECKING
 
 from .conf import config
-from .layout import kcls
+from .layout import KCLayout, kcls
 from .utilities import save_layout_options
 
 if TYPE_CHECKING:
     from pathlib import Path
     from typing import Any
 
+    from .decorators import WrappedKCellFunc
     from .kcell import ProtoTKCell
-
-
-# def load_session(session_dir: Path | None = None) -> None:
-#     build_dir = session_dir or (config.project_dir / "session")
-#     loaded_factories: set[WrappedKCellFunc[Any]] = set()
-#     for kcl in kcls.values():
-#         kcl_dir = build_dir / kcl.name
-#         for factory in kcl.factories.values():
-#             if factory.name is None:
-#                 continue
-#             factory_dir = kcl_dir / "_".join(
-#                 (
-#                     _file_path_hash(factory.file)[-16:],
-#                     _file_hash(factory.file)[-16:],
-#                 )
-#             )
-#             if factory_dir.is_dir():
-#                 factory.load(factory_dir / factory.name / "cells.gds.gz")
 
 
 def save_session(
@@ -99,9 +82,30 @@ def load_session(session_dir: Path | None = None) -> None:
         if kcl_name not in kcls:
             raise ValueError(f"Unknown KCL {kcl_name}")
         kcl = kcls[kcl_name]
-        for factory in kcl:
+        kcl_dir = build_dir / kcl.name
+        loaded_kcl = KCLayout("SESSION_LOAD")
+        loaded_kcl.read(kcl_dir / "cells.gds.gz")
+        if not kcl_dir.exists():
+            continue
+        invalid_factories: set[WrappedKCellFunc[Any]] = set()
+        with (kcl_dir / "facories.pkl").open("rb") as f:
+            factory_infos = pickle.load(f)
+        for factory in kcl.factories.values():
             ph = _file_path_hash(factory.file)
             fh = _file_hash(factory.file)
+            factory_info = factory_infos.get(factory.name)
+            if factory_info is not None:
+                factory_dependencies, _, ph_loaded, fh_loaded = factory_info
+
+                if ph_loaded != ph or fh_loaded != fh:
+                    invalid_factories |= factory_dependencies
+        for factory in set(kcl.factories.values()) - invalid_factories:
+            factory_info = factory_infos.get(factory.name)
+            if factory_info:
+                cache_ = factory_info[1]
+                for hk, cn in cache_:
+                    # TODO: fix
+                    factory.cache[hk] = loaded_kcl[cn]
 
 
 @functools.cache
