@@ -568,4 +568,4 @@ def test_prune(kcl: kf.KCLayout) -> None:
 
     test_cell = test1()
     test2.prune()
-    assert test_cell._destroyed() is True
+    assert test_cell._destroyed()
