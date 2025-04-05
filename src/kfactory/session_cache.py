@@ -168,6 +168,7 @@ def load_kcl(kcl_path: Path) -> None:
 
             tkc_ = kc_._base
             factory.cache[hk] = factory.output_type(base=tkc_)
+    loaded_kcl.delete()
 
 
 @functools.cache

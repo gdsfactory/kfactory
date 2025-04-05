@@ -398,6 +398,15 @@ class WrappedKCellFunc(Generic[KC]):
     def file(self) -> Path:
         return Path(self._f_orig.__code__.co_filename).resolve()
 
+    def prune(self) -> None:
+        cells = list(self.cache.values())
+        caller_cis = {
+            ci for cell in cells for ci in cell.caller_cells() if not cell._destroyed()
+        }
+        caller_cis |= {c.cell_index() for c in cells}
+        for ci in caller_cis:
+            self.kcl[ci].delete()
+
 
 class WrappedVKCellFunc(Generic[VK]):
     _f: Callable[..., VK]

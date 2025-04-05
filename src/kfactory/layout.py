@@ -1137,8 +1137,8 @@ class KCLayout(
                     raise MergeError(err_msg)
 
             cells = set(self.cells("*"))
-            fn = str(Path(filename).expanduser().resolve())
-            lm = self.layout.read(fn, options)
+            binary_layout = layout_b.write_bytes(save_layout_options())
+            lm = self.layout.read_bytes(binary_layout)
             info, settings = self.get_meta_data()
 
             match update_kcl_meta_data:
@@ -1411,6 +1411,10 @@ class KCLayout(
                 "or the cell itself."
             )
         return self.kcells[spec] if isinstance(spec, int) else spec
+
+    def delete(self) -> None:
+        del kcls[self.name]
+        self.library.delete()
 
 
 KCLayout.model_rebuild()
