@@ -5,6 +5,7 @@
 
 ## New
 
+- add prune to cache [#663](https://github.com/gdsfactory/kfactory/pull/663)
 - Session Storage [#658](https://github.com/gdsfactory/kfactory/pull/658)
 - proof of concept for session loading/storing [#662](https://github.com/gdsfactory/kfactory/pull/662)
 
