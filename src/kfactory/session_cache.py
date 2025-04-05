@@ -129,8 +129,7 @@ def load_kcl(kcl_path: Path) -> None:
                 invalid_factories.add(factory.name)
     cells_to_add: defaultdict[int, list[tuple[int, KCell, str]]] = defaultdict(list)
     for factory_name in set(kcl.factories.keys()) - invalid_factories:
-        factory_info = factory_infos.get(factory_name)
-        if factory_info:
+        if factory_info := factory_infos.get(factory_name):
             cache_ = factory_info[1]
             for hk, cn in cache_:
                 kc = loaded_kcl[cn]
