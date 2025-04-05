@@ -3,11 +3,6 @@ from __future__ import annotations
 import functools
 import inspect
 from collections import UserDict, defaultdict
-from collections.abc import (
-    Callable,  # noqa: TC003
-    Iterable,  # noqa: TC003
-    Sequence,  # noqa: TC003
-)
 from pathlib import Path
 from threading import RLock
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
@@ -61,6 +56,12 @@ from .typings import KC, KCIN, VK, KC_contra, KCellParams, KCellSpec, MetaData, 
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
+    from collections.abc import (
+        Callable,
+        Iterable,
+        Sequence,
+    )
+
     from .ports import DPorts, Ports
 
 kcl: KCLayout
@@ -147,7 +148,7 @@ class KCLayout(
     enclosure: KCellEnclosure
     library: kdb.Library
 
-    factories: Factories[WrappedKCellFunc[ProtoTKCell[Any]]]
+    factories: Factories[WrappedKCellFunc[Any, ProtoTKCell[Any]]]
     virtual_factories: Factories[WrappedVKCellFunc[VKCell]]
     tkcells: dict[int, TKCell] = Field(default_factory=dict)
     layers: type[LayerEnum]
@@ -476,7 +477,7 @@ class KCLayout(
         self,
         _func: Callable[KCellParams, KC],
         /,
-    ) -> WrappedKCellFunc[KC]: ...
+    ) -> WrappedKCellFunc[KCellParams, KC]: ...
 
     @overload
     def cell(
@@ -498,7 +499,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[Callable[..., KC]], WrappedKCellFunc[KC]]: ...
+    ) -> Callable[[Callable[KCellParams, KC]], WrappedKCellFunc[KCellParams, KC]]: ...
 
     @overload
     def cell(
@@ -521,7 +522,7 @@ class KCLayout(
         post_process: Iterable[Callable[[KC_contra], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[Callable[..., KC]], WrappedKCellFunc[KC]]: ...
+    ) -> Callable[[Callable[KCellParams, KC]], WrappedKCellFunc[KCellParams, KC]]: ...
 
     @overload
     def cell(
@@ -545,7 +546,9 @@ class KCLayout(
         post_process: Iterable[Callable[[KC_contra], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[Callable[..., ProtoTKCell[Any]]], WrappedKCellFunc[KC]]: ...
+    ) -> Callable[
+        [Callable[KCellParams, ProtoTKCell[Any]]], WrappedKCellFunc[KCellParams, KC]
+    ]: ...
 
     @overload
     def cell(
@@ -568,7 +571,9 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[Callable[..., ProtoTKCell[Any]]], WrappedKCellFunc[KC]]: ...
+    ) -> Callable[
+        [Callable[KCellParams, ProtoTKCell[Any]]], WrappedKCellFunc[KCellParams, KC]
+    ]: ...
 
     def cell(
         self,
@@ -593,10 +598,10 @@ class KCLayout(
         debug_names: bool | None = None,
         tags: list[str] | None = None,
     ) -> (
-        WrappedKCellFunc[KC]
+        WrappedKCellFunc[KCellParams, KC]
         | Callable[
             [Callable[KCellParams, ProtoTKCell[Any]]],
-            WrappedKCellFunc[KC],
+            WrappedKCellFunc[KCellParams, KC],
         ]
     ):
         """Decorator to cache and auto name the cell.
@@ -662,7 +667,7 @@ class KCLayout(
 
         def decorator_autocell(
             f: Callable[KCellParams, KCIN],
-        ) -> WrappedKCellFunc[KC]:
+        ) -> WrappedKCellFunc[KCellParams, KC]:
             sig = inspect.signature(f)
             output_cell_type_: type[KC | ProtoTKCell[Any]]
             if output_type is not None:
@@ -677,7 +682,7 @@ class KCLayout(
             cache_: Cache[int, KC] | dict[int, KC] = cache or Cache(
                 maxsize=float("inf")
             )
-            wrapper_autocell: WrappedKCellFunc[KC] = WrappedKCellFunc(
+            wrapper_autocell: WrappedKCellFunc[KCellParams, KC] = WrappedKCellFunc(
                 kcl=self,
                 f=f,
                 sig=sig,
@@ -710,8 +715,7 @@ class KCLayout(
 
         return (
             cast(
-                "Callable[[Callable[KCellParams, ProtoTKCell[Any]]]"
-                ",WrappedKCellFunc[KC]]",
+                "Callable[[Callable[KCellParams, ProtoTKCell[Any]]], WrappedKCellFunc[KCellParams, KC]]",  # noqa: E501
                 decorator_autocell,
             )
             if _func is None
