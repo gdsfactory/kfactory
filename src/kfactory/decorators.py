@@ -32,13 +32,13 @@ from .serialization import (
     to_hashable,
 )
 from .settings import KCellSettings, KCellSettingsUnits
+from .typings import KC, VK, K, KC_co, KC_contra, KCellParams, MetaData
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
 
     from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
     from .layout import KCLayout
-    from .typings import KC, VK, K, KC_co, KC_contra, KCellParams, MetaData
 
 
 def _parse_params(
