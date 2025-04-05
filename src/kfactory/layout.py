@@ -3,11 +3,7 @@ from __future__ import annotations
 import functools
 import inspect
 from collections import UserDict, defaultdict
-from collections.abc import (
-    Callable,  # noqa: TC003
-    Iterable,  # noqa: TC003
-    Sequence,  # noqa: TC003
-)
+from collections.abc import Callable, Iterable, Sequence  # noqa: TC003
 from pathlib import Path
 from threading import RLock
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
@@ -149,6 +145,8 @@ class KCLayout(
 
     factories: Factories[WrappedKCellFunc[..., ProtoTKCell[Any]]]
     virtual_factories: Factories[WrappedVKCellFunc[..., VKCell]]
+    factories: Factories[WrappedKCellFunc[Any, ProtoTKCell[Any]]]
+    virtual_factories: Factories[WrappedVKCellFunc[VKCell]]
     tkcells: dict[int, TKCell] = Field(default_factory=dict)
     layers: type[LayerEnum]
     infos: LayerInfos
@@ -714,8 +712,7 @@ class KCLayout(
 
         return (
             cast(
-                "Callable[[Callable[KCellParams, ProtoTKCell[Any]]]"
-                ",WrappedKCellFunc[KCellParams, KC]]",
+                "Callable[[Callable[KCellParams, ProtoTKCell[Any]]], WrappedKCellFunc[KCellParams, KC]]",  # noqa: E501
                 decorator_autocell,
             )
             if _func is None
