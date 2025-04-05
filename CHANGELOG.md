@@ -11,6 +11,7 @@
 
 ## Bug Fixes
 
+- fix session loading [#664](https://github.com/gdsfactory/kfactory/pull/664)
 - Fix decorator [#660](https://github.com/gdsfactory/kfactory/pull/660)
 - Remove klayout api from docs [#656](https://github.com/gdsfactory/kfactory/pull/656)
 - Update min req test [#655](https://github.com/gdsfactory/kfactory/pull/655)
