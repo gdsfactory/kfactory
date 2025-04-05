@@ -237,7 +237,8 @@ def _check_cell(cell: AnyKCell, kcl: KCLayout) -> None:
 
 
 def _post_process(
-    cell: ProtoTKCell[Any], post_process_functions: Iterable[Callable[[K], None]]
+    cell: ProtoTKCell[Any],
+    post_process_functions: Iterable[Callable[[ProtoTKCell[Any]], None]],
 ) -> None:
     for pp in post_process_functions:
         pp(cell)
@@ -393,41 +394,6 @@ class WrappedKCellFunc(Generic[KC]):
 
     def __call__(self, *args: Any, **kwargs: Any) -> KC:
         return self._f(*args, **kwargs)
-
-    # def dump(self, path: Path, save_options: kdb.SaveLayoutOptions) -> set[str]:
-    #     logger.debug("Saving state of function {name}", name=self.name)
-    #     save_options.clear_cells()
-    #     save_options.keep_instances = True
-    #     hk_list: list[tuple[str, int]] = []
-    #     library_dependencies: set[str] = set()
-
-    #     for hk, c in self.cache.items():
-    #         if c.is_library_cell():
-    #             save_options.add_cell(c.cell_index())
-    #             library_dependencies.add(c.library().name())
-    #         else:
-    #             for
-    #             save_options.add_this_cell(c.cell_index())
-    #         hk_list.append((c.name, hk))
-    #     path.mkdir(parents=True, exist_ok=True)
-    #     self.kcl.write(path / "cells.gds.gz", options=save_options)
-    #     with (path / "keytable.pkl").open(mode="wb") as f:
-    #         pickle.dump(tuple(hk_list), f)
-
-    #     return library_dependencies
-
-    # def load(self, path: Path) -> None:
-    #     load_opts = kdb.LoadLayoutOptions()
-    #     load_opts.cell_conflict_resolution = (
-    #         kdb.LoadLayoutOptions.CellConflictResolution.SkipNewCell
-    #     )
-    #     self.kcl.read(path / "cells.gds.gz", options=load_opts, test_merge=False)
-    #     with (path / "keytable.pkl").open(mode="rb") as f:
-    #         hashmap = pickle.load(f)
-    #         for cell_name, hk in hashmap:
-    #             self.cache[hk] = self.output_type(
-    #                 base=self.kcl.tkcells[self.kcl.layout.cell(cell_name).cell_index()]
-    #             )
 
     @functools.cached_property
     def file(self) -> Path:
