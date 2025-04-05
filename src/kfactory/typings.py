@@ -18,13 +18,18 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from .instance import ProtoInstance
-    from .kcell import BaseKCell, ProtoTKCell
+    from .kcell import BaseKCell, ProtoKCell, ProtoTKCell, VKCell
     from .layer import LayerEnum
     from .port import ProtoPort
 
 T = TypeVar("T")
-K = TypeVar("K", bound="ProtoTKCell[Any]")
+K = TypeVar("K", bound="ProtoKCell[Any, Any]")
+KC = TypeVar("KC", bound="ProtoTKCell[Any]")
+KCIN = TypeVar("KCIN", bound="ProtoTKCell[Any]")
+VK = TypeVar("VK", bound="VKCell")
+K_co = TypeVar("K_co", bound="ProtoKCell[Any, Any]", covariant=True)
 KC_co = TypeVar("KC_co", bound="ProtoTKCell[Any]", covariant=True)
+KC_contra = TypeVar("KC_contra", bound="ProtoTKCell[Any]", contravariant=True)
 TUnit = TypeVar("TUnit", int, float)
 TUnit_co = TypeVar("TUnit_co", bound=int | float, covariant=True)
 TUnit_contra = TypeVar("TUnit_contra", bound=int | float, contravariant=True)
