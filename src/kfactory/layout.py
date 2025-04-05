@@ -862,6 +862,8 @@ class KCLayout(
 
         If the layout is cleared, all the LayerEnums and
         """
+        for c in self.layout.cells("*"):
+            c.locked = False
         self.layout.clear()
         self.tkcells = {}
 
