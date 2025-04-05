@@ -867,6 +867,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         lib_ci = self.kcl.layout.add_lib_cell(cell.kcl.library, cell.cell_index())
         if lib_ci not in self.kcl.tkcells:
             kcell = self.kcl[lib_ci]
+            kcell.basename = cell.basename
+            kcell.function_name = cell.function_name
         if libcell_as_static:
             cell.set_meta_data()
             ci = self.kcl.layout.convert_cell_to_static(lib_ci)

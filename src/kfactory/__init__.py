@@ -32,6 +32,7 @@ from .settings import KCellSettings, Info
 from .layout import Constants, KCLayout, cell, vcell, kcl, kcls
 from .layer import LayerEnum, LayerInfos, LayerStack
 from .shapes import VShapes
+from .session_cache import save_session, load_session
 from .utilities import (
     dpolygon_from_array,
     polygon_from_array,
@@ -110,6 +111,7 @@ __all__ = [
     "kcls",
     "kdb",
     "lay",
+    "load_session",
     "logger",
     "packing",
     "placer",
@@ -120,6 +122,7 @@ __all__ = [
     "rdb",
     "routing",
     "save_layout_options",
+    "save_session",
     "show",
     "technology",
     "typings",

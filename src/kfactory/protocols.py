@@ -1,23 +1,18 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, overload, runtime_checkable
+from typing import (
+    TYPE_CHECKING,
+    Protocol,
+    overload,
+    runtime_checkable,
+)
 
-from .typings import K_co, KCellParams, TUnit
+from .typings import TUnit
 
 if TYPE_CHECKING:
     from .layer import LayerEnum
 
-__all__ = ["BoxFunction", "BoxLike", "KCellFunc", "PointLike"]
-
-
-class KCellFunc(Protocol[KCellParams, K_co]):
-    """Protocol for a KCell function."""
-
-    __name__: str
-
-    def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> K_co:
-        """Call the KCell function."""
-        ...
+__all__ = ["BoxFunction", "BoxLike", "PointLike"]
 
 
 @runtime_checkable
@@ -73,6 +68,7 @@ class BoxFunction(Protocol[TUnit]):
     def __call__(self) -> BoxLike[TUnit]: ...
     @overload
     def __call__(self, layer: LayerEnum | int) -> BoxLike[TUnit]: ...
+
     def __call__(self, layer: LayerEnum | int | None = None) -> BoxLike[TUnit]:
         """Call the box function."""
         ...

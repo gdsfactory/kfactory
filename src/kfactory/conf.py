@@ -10,6 +10,7 @@ import traceback
 from enum import Enum, IntEnum
 from functools import cached_property
 from itertools import takewhile
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
 import git
@@ -21,8 +22,6 @@ from pydantic import BaseModel, Field, ValidationError, ValidationInfo, field_va
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from . import kdb, rdb
     from .kcell import AnyKCell
     from .layout import KCLayout
@@ -309,7 +308,7 @@ class Settings(BaseSettings):
         return v
 
     @cached_property
-    def root_dir(self) -> Path:
+    def project_dir(self) -> Path:
         try:
             repo = git.repo.Repo(".", search_parent_directories=True)
             wtd = repo.working_tree_dir
