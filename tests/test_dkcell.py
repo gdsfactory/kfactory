@@ -222,5 +222,41 @@ def test_tkcell(kcl: kf.KCLayout) -> None:
     assert c.base.called_cells() == []
 
 
+def test_cell_decorator(kcl: kf.KCLayout) -> None:
+    @kcl.cell
+    def test_cell(name: str) -> kf.DKCell:
+        return kcl.dkcell(name)
+
+    @kcl.cell()
+    def test_cell2(name: str) -> kf.DKCell:
+        return kcl.dkcell(name)
+
+    def post_process(x: kf.DKCell) -> None: ...
+
+    @kcl.cell(post_process=[post_process])
+    def test_cell3(name: str) -> kf.DKCell:
+        return kcl.dkcell(name)
+
+    @kcl.cell(post_process=[lambda x: None], output_type=kf.DKCell)
+    def test_cell4(name: str) -> kf.DKCell:
+        return kcl.dkcell(name)
+
+    @kcl.cell(output_type=kf.DKCell)
+    def test_cell5(name: str) -> kf.DKCell:
+        return kcl.dkcell(name)
+
+    cell1 = test_cell("cell1")
+    cell2 = test_cell2("cell2")
+    cell3 = test_cell3("cell3")
+    cell4 = test_cell4("cell4")
+    cell5 = test_cell5("cell5")
+
+    assert isinstance(cell1, kf.DKCell)
+    assert isinstance(cell2, kf.DKCell)
+    assert isinstance(cell3, kf.DKCell)
+    assert isinstance(cell4, kf.DKCell)
+    assert isinstance(cell5, kf.DKCell)
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

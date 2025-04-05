@@ -672,7 +672,7 @@ class KCLayout(
             else:
                 output_cell_type_ = self.default_cell_output_type
 
-            output_cell_type_ = cast("type[KC]", output_cell_type_)
+            output_cell_type__ = cast("type[KC]", output_cell_type_)
 
             cache_: Cache[int, KC] | dict[int, KC] = cache or Cache(
                 maxsize=float("inf")
@@ -681,7 +681,7 @@ class KCLayout(
                 kcl=self,
                 f=f,
                 sig=sig,
-                output_type=output_cell_type_,
+                output_type=output_cell_type__,
                 cache=cache_,
                 set_settings=set_settings,
                 set_name=set_name,
