@@ -237,8 +237,8 @@ def _check_cell(cell: AnyKCell, kcl: KCLayout) -> None:
 
 
 def _post_process(
-    cell: ProtoTKCell[Any],
-    post_process_functions: Iterable[Callable[[ProtoTKCell[Any]], None]],
+    cell: KC,
+    post_process_functions: Iterable[Callable[[KC], None]],
 ) -> None:
     for pp in post_process_functions:
         pp(cell)
@@ -246,7 +246,7 @@ def _post_process(
 
 class WrappedKCellFunc(Generic[KC]):
     _f: Callable[..., KC]
-    _f_orig: Callable[..., KC]
+    _f_orig: Callable[..., ProtoTKCell[Any]]
     cache: Cache[int, KC] | dict[int, Any]
     name: str | None
     kcl: KCLayout
@@ -266,7 +266,7 @@ class WrappedKCellFunc(Generic[KC]):
         self,
         *,
         kcl: KCLayout,
-        f: Callable[KCellParams, KC],
+        f: Callable[KCellParams, ProtoTKCell[Any]],
         sig: inspect.Signature,
         output_type: type[KC],
         cache: Cache[int, KC] | dict[int, KC],
@@ -358,7 +358,7 @@ class WrappedKCellFunc(Generic[KC]):
                     _snap_ports(cell, kcl)
                 if add_port_layers:
                     _add_port_layers(cell, kcl)
-                _post_process(cell, post_process)
+                _post_process(cell, post_process)  # type: ignore[arg-type]
                 cell.base.lock()
                 _check_cell(cell, kcl)
                 return output_type(base=cell.base)

@@ -57,7 +57,7 @@ from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
 from .port import BasePort, rename_clockwise_multi
 from .settings import Info, KCellSettings
-from .typings import KC, VK, K, KCellParams, KCellSpec, MetaData, T
+from .typings import KC, KCIN, VK, KCellParams, KCellSpec, MetaData, T
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
@@ -147,7 +147,7 @@ class KCLayout(
     enclosure: KCellEnclosure
     library: kdb.Library
 
-    factories: Factories[WrappedKCellFunc[AnyTKCell]]
+    factories: Factories[WrappedKCellFunc[ProtoTKCell[Any]]]
     virtual_factories: Factories[WrappedVKCellFunc[VKCell]]
     tkcells: dict[int, TKCell] = Field(default_factory=dict)
     layers: type[LayerEnum]
@@ -498,7 +498,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[Callable[..., KC]], WrappedKCellFunc[KC]]: ...
+    ) -> Callable[[Callable[..., ProtoTKCell[Any]]], WrappedKCellFunc[KC]]: ...
 
     @overload
     def cell(
@@ -521,7 +521,7 @@ class KCLayout(
         post_process: Iterable[Callable[[KC], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[Callable[..., K]], WrappedKCellFunc[KC]]: ...
+    ) -> Callable[[Callable[..., ProtoTKCell[Any]]], WrappedKCellFunc[KC]]: ...
 
     @overload
     def cell(
@@ -572,7 +572,7 @@ class KCLayout(
 
     def cell(
         self,
-        _func: Callable[KCellParams, KC] | None = None,
+        _func: Callable[KCellParams, KCIN] | None = None,
         /,
         *,
         output_type: type[KC] | None = None,
@@ -645,6 +645,9 @@ class KCLayout(
             tags: Tag cell functions with user defined tags. With this, cell functions
                 can then be retrieved with `kcl.factories.tags[my_tag]` or if filtered
                 for multiple `kcl.factories.for_tags([my_tag1, my_tag2, ...])`.
+        Returns:
+            A wrapped cell function which caches responses and modifies the cell
+            according to settings.
         """
         if check_instances is None:
             check_instances = config.check_instances
@@ -658,7 +661,7 @@ class KCLayout(
             post_process = ()
 
         def decorator_autocell(
-            f: Callable[KCellParams, KC],
+            f: Callable[KCellParams, KCIN],
         ) -> WrappedKCellFunc[KC]:
             sig = inspect.signature(f)
             output_cell_type_: type[KC | ProtoTKCell[Any]]
@@ -674,7 +677,7 @@ class KCLayout(
             cache_: Cache[int, KC] | dict[int, KC] = cache or Cache(
                 maxsize=float("inf")
             )
-            wrapper_autocell = WrappedKCellFunc(
+            wrapper_autocell: WrappedKCellFunc[KC] = WrappedKCellFunc(
                 kcl=self,
                 f=f,
                 sig=sig,
@@ -701,8 +704,8 @@ class KCLayout(
                         raise ValueError(f"Function {f} has no name.")
                     if tags:
                         for tag in tags:
-                            self.factories.tags[tag].append(wrapper_autocell)
-                    self.factories[basename or wrapper_autocell.name] = wrapper_autocell
+                            self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
+                    self.factories[basename or wrapper_autocell.name] = wrapper_autocell  # type: ignore[assignment]
             return wrapper_autocell
 
         return (
@@ -811,7 +814,7 @@ class KCLayout(
                     function_name = f.func.__name__
                 else:
                     raise ValueError(f"Function {f} has no name.")
-                self.virtual_factories[basename or function_name] = wrapper_autocell
+                self.virtual_factories[basename or function_name] = wrapper_autocell  # type: ignore[assignment]
             return wrapper_autocell
 
         return decorator_autocell if _func is None else decorator_autocell(_func)
