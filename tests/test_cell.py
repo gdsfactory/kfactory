@@ -555,5 +555,17 @@ def test_factory_name(kcl: kf.KCLayout, layers: Layers) -> None:
     assert cell.factory_name == "straight"
 
 
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "-s"])
+def test_prune(kcl: kf.KCLayout) -> None:
+    @kcl.cell
+    def test2() -> kf.KCell:
+        return kcl.kcell()
+
+    @kcl.cell
+    def test1() -> kf.KCell:
+        c = kcl.kcell()
+        c << test2()
+        return c
+
+    test_cell = test1()
+    test2.prune()
+    assert test_cell._destroyed() is True
