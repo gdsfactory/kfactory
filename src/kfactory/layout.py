@@ -143,10 +143,8 @@ class KCLayout(
     enclosure: KCellEnclosure
     library: kdb.Library
 
-    factories: Factories[WrappedKCellFunc[..., ProtoTKCell[Any]]]
-    virtual_factories: Factories[WrappedVKCellFunc[..., VKCell]]
     factories: Factories[WrappedKCellFunc[Any, ProtoTKCell[Any]]]
-    virtual_factories: Factories[WrappedVKCellFunc[VKCell]]
+    virtual_factories: Factories[WrappedVKCellFunc[Any, VKCell]]
     tkcells: dict[int, TKCell] = Field(default_factory=dict)
     layers: type[LayerEnum]
     infos: LayerInfos
