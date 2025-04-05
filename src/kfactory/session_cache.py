@@ -82,10 +82,28 @@ def save_session(
         json.dump({k: list(v) for k, v in kcl_dependencies.items()}, f)
 
 
-def load_session(session_dir: Path | None = None) -> None:
+def load_session(
+    session_dir: Path | None = None, warn_missing_dir: bool = True
+) -> None:
     kcls_dir = session_dir or (config.project_dir / "build/session/kcls")
+    logger.debug("Loading session from {}", kcls_dir)
 
-    with (kcls_dir / "../kcl_dependencies.json").resolve().open("rt") as f:
+    if not kcls_dir.exists():
+        if warn_missing_dir:
+            logger.warning(
+                "Session folder {} does not exist, cannot load session.", kcls_dir
+            )
+        return
+
+    dependency_file = (kcls_dir / "../kcl_dependencies.json").resolve()
+
+    if not dependency_file.exists():
+        logger.error(
+            "Found session folder {}, but it's missing `kcl_dependencies.json`, "
+            "aborting session load."
+        )
+        return
+    with dependency_file.open("rt") as f:
         kcl_dependencies = json.load(f)
 
     kcl_paths = set(kcls_dir.glob("*"))
@@ -99,12 +117,16 @@ def load_session(session_dir: Path | None = None) -> None:
             break
         loadable_kcls = kcl_paths - loaded_kcls
         for p in loadable_kcls:
-            if not (set(kcl_dependencies.get(p.name, [])) - loaded_kcls):
+            if not (
+                {kcls_dir / p_ for p_ in kcl_dependencies.get(p.name, [])} - loaded_kcls
+            ):
                 load_kcl(kcl_path=p)
                 loaded_kcls.add(p)
                 changed = True
+                logger.debug("Loaded {}", p.name)
     else:
         logger.warning("Cannot load session due to circular dependencies. ")
+    logger.debug("Loaded session. Loaded kcls: {}", [p.name for p in kcl_paths])
 
 
 def load_kcl(kcl_path: Path) -> None:
