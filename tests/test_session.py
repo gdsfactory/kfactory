@@ -56,5 +56,5 @@ def test_session_cache() -> None:
     assert session2.cell_created
     assert session3.cell_created
 
-    session1.kcl1.delete()
     session2.kcl2.delete()
+    session1.kcl1.delete()

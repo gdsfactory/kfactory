@@ -1413,6 +1413,7 @@ class KCLayout(
 
     def delete(self) -> None:
         del kcls[self.name]
+        self.clear(keep_layers=False)
         self.library.delete()
 
 
