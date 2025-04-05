@@ -32,14 +32,13 @@ from .serialization import (
     to_hashable,
 )
 from .settings import KCellSettings, KCellSettingsUnits
-from .typings import KC, VK, K, KCellParams, MetaData
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
 
     from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
     from .layout import KCLayout
-    from .typings import KC_co
+    from .typings import KC, VK, K, KC_co, KC_contra, KCellParams, MetaData
 
 
 def _parse_params(
@@ -237,8 +236,8 @@ def _check_cell(cell: AnyKCell, kcl: KCLayout) -> None:
 
 
 def _post_process(
-    cell: KC,
-    post_process_functions: Iterable[Callable[[KC], None]],
+    cell: KC_contra,
+    post_process_functions: Iterable[Callable[[KC_contra], None]],
 ) -> None:
     for pp in post_process_functions:
         pp(cell)
@@ -281,7 +280,7 @@ class WrappedKCellFunc(Generic[KC]):
         overwrite_existing: bool | None,
         layout_cache: bool | None,
         info: dict[str, MetaData] | None,
-        post_process: Iterable[Callable[[KC], None]],
+        post_process: Iterable[Callable[[ProtoTKCell[Any]], None]],
         debug_names: bool,
     ) -> None:
         self.kcl = kcl
@@ -358,7 +357,7 @@ class WrappedKCellFunc(Generic[KC]):
                     _snap_ports(cell, kcl)
                 if add_port_layers:
                     _add_port_layers(cell, kcl)
-                _post_process(cell, post_process)  # type: ignore[arg-type]
+                _post_process(cell, post_process)
                 cell.base.lock()
                 _check_cell(cell, kcl)
                 return output_type(base=cell.base)

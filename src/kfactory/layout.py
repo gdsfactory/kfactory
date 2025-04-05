@@ -57,7 +57,7 @@ from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
 from .port import BasePort, rename_clockwise_multi
 from .settings import Info, KCellSettings
-from .typings import KC, KCIN, VK, KCellParams, KCellSpec, MetaData, T
+from .typings import KC, KCIN, VK, KC_contra, KCellParams, KCellSpec, MetaData, T
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
@@ -518,7 +518,31 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[KC], None]],
+        post_process: Iterable[Callable[[KC_contra], None]],
+        debug_names: bool | None = ...,
+        tags: list[str] | None = ...,
+    ) -> Callable[[Callable[..., KC]], WrappedKCellFunc[KC]]: ...
+
+    @overload
+    def cell(
+        self,
+        /,
+        *,
+        output_type: type[KC],
+        set_settings: bool = ...,
+        set_name: bool = ...,
+        check_ports: bool = ...,
+        check_instances: CheckInstances | None = ...,
+        snap_ports: bool = ...,
+        add_port_layers: bool = ...,
+        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        basename: str | None = ...,
+        drop_params: list[str] = ...,
+        register_factory: bool = ...,
+        overwrite_existing: bool | None = ...,
+        layout_cache: bool | None = ...,
+        info: dict[str, MetaData] | None = ...,
+        post_process: Iterable[Callable[[KC_contra], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[[Callable[..., ProtoTKCell[Any]]], WrappedKCellFunc[KC]]: ...
@@ -542,37 +566,13 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[KC], None]],
-        debug_names: bool | None = ...,
-        tags: list[str] | None = ...,
-    ) -> Callable[[Callable[..., ProtoTKCell[Any]]], WrappedKCellFunc[KC]]: ...
-
-    @overload
-    def cell(
-        self,
-        /,
-        *,
-        output_type: type[KC],
-        set_settings: bool = ...,
-        set_name: bool = ...,
-        check_ports: bool = ...,
-        check_instances: CheckInstances | None = ...,
-        snap_ports: bool = ...,
-        add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
-        basename: str | None = ...,
-        drop_params: list[str] = ...,
-        register_factory: bool = ...,
-        overwrite_existing: bool | None = ...,
-        layout_cache: bool | None = ...,
-        info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[[Callable[..., ProtoTKCell[Any]]], WrappedKCellFunc[KC]]: ...
 
     def cell(
         self,
-        _func: Callable[KCellParams, KCIN] | None = None,
+        _func: Callable[KCellParams, ProtoTKCell[Any]] | None = None,
         /,
         *,
         output_type: type[KC] | None = None,
@@ -589,7 +589,7 @@ class KCLayout(
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KC], None]] | None = None,
+        post_process: Iterable[Callable[[KC_contra], None]] | None = None,
         debug_names: bool | None = None,
         tags: list[str] | None = None,
     ) -> (
@@ -694,7 +694,7 @@ class KCLayout(
                 overwrite_existing=overwrite_existing,
                 layout_cache=layout_cache,
                 info=info,
-                post_process=post_process,
+                post_process=post_process,  # type: ignore[arg-type]
                 debug_names=debug_names,
             )
 
