@@ -498,7 +498,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-    ) -> Callable[[Callable[..., ProtoTKCell[Any]]], WrappedKCellFunc[KC]]: ...
+    ) -> Callable[[Callable[..., KC]], WrappedKCellFunc[KC]]: ...
 
     @overload
     def cell(
