@@ -243,9 +243,9 @@ def _post_process(
         pp(cell)
 
 
-class WrappedKCellFunc(Generic[KC]):
-    _f: Callable[..., KC]
-    _f_orig: Callable[..., ProtoTKCell[Any]]
+class WrappedKCellFunc(Generic[KCellParams, KC]):
+    _f: Callable[KCellParams, KC]
+    _f_orig: Callable[KCellParams, ProtoTKCell[Any]]
     cache: Cache[int, KC] | dict[int, Any]
     name: str | None
     kcl: KCLayout
@@ -390,8 +390,9 @@ class WrappedKCellFunc(Generic[KC]):
             self.name = f.__name__
         elif hasattr(f, "func"):
             self.name = f.func.__name__
+        functools.update_wrapper(self, f)
 
-    def __call__(self, *args: Any, **kwargs: Any) -> KC:
+    def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
         return self._f(*args, **kwargs)
 
     @functools.cached_property
@@ -407,9 +408,11 @@ class WrappedKCellFunc(Generic[KC]):
         for ci in caller_cis:
             self.kcl[ci].delete()
 
+        self.kcl.cleanup()
 
-class WrappedVKCellFunc(Generic[VK]):
-    _f: Callable[..., VK]
+
+class WrappedVKCellFunc(Generic[KCellParams, VK]):
+    _f: Callable[KCellParams, VK]
     cache: Cache[int, Any] | dict[int, Any]
     name: str | None
 
