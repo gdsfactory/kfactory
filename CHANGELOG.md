@@ -1,10 +1,16 @@
-<a id="v1.3.1"></a>
-# [v1.3.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.3.1) - 2025-03-28
+<a id="v1.4.0"></a>
+# [v1.4.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.4.0) - 2025-03-28
 
 # What's Changed
 
+## New
+
+- Session Storage [#658](https://github.com/gdsfactory/kfactory/pull/658)
+- proof of concept for session loading/storing [#662](https://github.com/gdsfactory/kfactory/pull/662)
+
 ## Bug Fixes
 
+- Fix decorator [#660](https://github.com/gdsfactory/kfactory/pull/660)
 - Remove klayout api from docs [#656](https://github.com/gdsfactory/kfactory/pull/656)
 - Update min req test [#655](https://github.com/gdsfactory/kfactory/pull/655)
 
@@ -16,10 +22,10 @@
 
 - add some extensions to griffe and mkdocs [#657](https://github.com/gdsfactory/kfactory/pull/657)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.3.0...v1.3.1
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.3.0...v1.4.0
 
 
-[Changes][v1.3.1]
+[Changes][v1.4.0]
 
 
 <a id="v1.3.0"></a>
@@ -1797,7 +1803,7 @@
 [Changes][v0.4.0]
 
 
-[v1.3.1]: https://github.com/gdsfactory/kfactory/compare/v1.3.0...v1.3.1
+[v1.4.0]: https://github.com/gdsfactory/kfactory/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/gdsfactory/kfactory/compare/v1.2.5...v1.3.0
 [v1.2.5]: https://github.com/gdsfactory/kfactory/compare/v1.2.4...v1.2.5
 [v1.2.4]: https://github.com/gdsfactory/kfactory/compare/v1.2.3...v1.2.4
