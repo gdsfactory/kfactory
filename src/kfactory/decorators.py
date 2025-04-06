@@ -390,6 +390,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
             self.name = f.__name__
         elif hasattr(f, "func"):
             self.name = f.func.__name__
+        functools.update_wrapper(self, f)
 
     def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
         return self._f(*args, **kwargs)
@@ -407,9 +408,11 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         for ci in caller_cis:
             self.kcl[ci].delete()
 
+        self.kcl.cleanup()
 
-class WrappedVKCellFunc(Generic[VK]):
-    _f: Callable[..., VK]
+
+class WrappedVKCellFunc(Generic[KCellParams, VK]):
+    _f: Callable[KCellParams, VK]
     cache: Cache[int, Any] | dict[int, Any]
     name: str | None
 

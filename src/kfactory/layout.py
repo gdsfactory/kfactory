@@ -144,7 +144,7 @@ class KCLayout(
     library: kdb.Library
 
     factories: Factories[WrappedKCellFunc[Any, ProtoTKCell[Any]]]
-    virtual_factories: Factories[WrappedVKCellFunc[VKCell]]
+    virtual_factories: Factories[WrappedVKCellFunc[Any, VKCell]]
     tkcells: dict[int, TKCell] = Field(default_factory=dict)
     layers: type[LayerEnum]
     infos: LayerInfos
@@ -862,6 +862,8 @@ class KCLayout(
 
         If the layout is cleared, all the LayerEnums and
         """
+        for c in self.layout.cells("*"):
+            c.locked = False
         self.layout.clear()
         self.tkcells = {}
 

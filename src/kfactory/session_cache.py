@@ -29,7 +29,11 @@ def save_session(
         rmtree(kcls_dir)
     skip_cells: set[int] = set()
     kcl_dependencies: defaultdict[str, set[str]] = defaultdict(set)
-    for kcl in kcls.values():
+    kcls_ = (
+        list(kcls.values()) if c is None else [kcls[kcl_] for kcl_ in get_cell_kcls(c)]
+    )
+
+    for kcl in kcls_:
         kcl.start_changes()
         save_options = save_layout_options()
         save_options.clear_cells()
@@ -187,10 +191,20 @@ def load_kcl(kcl_path: Path) -> None:
                 inst_.cplx_trans = inst.cplx_trans
             kc_.copy_shapes(kc.kdb_cell)
             kc_.copy_meta_info(kc.kdb_cell)
+            kc_.get_meta_data()
 
             tkc_ = kc_._base
             factory.cache[hk] = factory.output_type(base=tkc_)
     loaded_kcl.delete()
+
+
+def get_cell_kcls(c: ProtoTKCell[Any]) -> set[str]:
+    kcls_ = {c.kcl.name}
+    for ci in c.called_cells():
+        c_ = c.kcl.layout.cell(ci)
+        if c_.is_library_cell():
+            kcls_ |= get_cell_kcls(kcls[c_.library().name()][c_.library_cell_index()])
+    return kcls_
 
 
 @functools.cache
