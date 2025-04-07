@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from abc import ABC, abstractmethod
 from enum import IntEnum, IntFlag, auto
-from typing import TYPE_CHECKING, Any, Generic, Literal, Self, cast, overload
+from typing import TYPE_CHECKING, Any, Generic, Literal, Self, overload
 
 import klayout.db as kdb
 from klayout import rdb
@@ -173,17 +173,14 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         """Serialize the BasePort."""
         trans = self.trans.dup() if self.trans is not None else None
         dcplx_trans = self.dcplx_trans.dup() if self.dcplx_trans is not None else None
-        return cast(
-            "BasePortDict",
-            {
-                "name": self.name,
-                "kcl": self.kcl,
-                "cross_section": self.cross_section,
-                "trans": trans,
-                "dcplx_trans": dcplx_trans,
-                "info": self.info.model_copy(),
-                "port_type": self.port_type,
-            },
+        return BasePortDict(
+            name=self.name,
+            kcl=self.kcl,
+            cross_section=self.cross_section,
+            trans=trans,
+            dcplx_trans=dcplx_trans,
+            info=self.info.model_copy(),
+            port_type=self.port_type,
         )
 
     def get_trans(self) -> kdb.Trans:
