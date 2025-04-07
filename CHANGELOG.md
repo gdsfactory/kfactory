@@ -5,6 +5,7 @@
 
 ## New
 
+- add better error message on none return and support partials [#668](https://github.com/gdsfactory/kfactory/pull/668)
 - add prune to cache [#663](https://github.com/gdsfactory/kfactory/pull/663)
 - Session Storage [#658](https://github.com/gdsfactory/kfactory/pull/658)
 - proof of concept for session loading/storing [#662](https://github.com/gdsfactory/kfactory/pull/662)
