@@ -569,3 +569,12 @@ def test_prune(kcl: kf.KCLayout) -> None:
     test_cell = test1()
     test2.prune()
     assert test_cell._destroyed()
+
+
+def test_return_none(kcl: kf.KCLayout) -> None:
+    @kcl.cell
+    def test_no_return() -> kf.KCell:  # type: ignore[return]
+        kcl.kcell()
+
+    with pytest.raises(ValueError):
+        test_no_return()

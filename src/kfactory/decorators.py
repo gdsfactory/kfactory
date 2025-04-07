@@ -191,6 +191,16 @@ def _check_ports(cell: ProtoTKCell[Any]) -> None:
         )
 
 
+def _get_function_name(f: Callable[..., Any]) -> str:
+    if hasattr(f, "__name__"):
+        name = f.__name__
+    elif hasattr(f, "func"):
+        name = f.func.__name__
+    else:
+        raise ValueError(f"Function {f} has no name.")
+    return name
+
+
 def _set_settings(
     cell: K,
     f: Callable[KCellParams, K],
@@ -199,12 +209,7 @@ def _set_settings(
     param_units: dict[str, Any],
     basename: str | None,
 ) -> None:
-    if hasattr(f, "__name__"):
-        cell.function_name = f.__name__
-    elif hasattr(f, "func"):
-        cell.function_name = f.func.__name__
-    else:
-        raise ValueError(f"Function {f} has no name.")
+    cell.function_name = _get_function_name(f)
     cell.basename = basename
 
     for param in drop_params:
@@ -285,6 +290,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
+        self.name = _get_function_name(f)
 
         @functools.wraps(f)
         def wrapper_autocell(
@@ -323,6 +329,12 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                 else:
                     name_ = None
                 cell = f(**params)  # type: ignore[call-arg]
+                if cell is None:
+                    raise ValueError(
+                        f"The cell function {self.name!r} in {str(self.file)!r}"
+                        " returned None. Did you forget to return the cell or component"
+                        " at the end of the function?"
+                    )
 
                 logger.debug("Constructed {}", name_ or cell.name)
 
@@ -385,11 +397,6 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         self._f = wrapper_autocell
         self._f_orig = f
         self.cache = cache
-        self.name = None
-        if hasattr(f, "__name__"):
-            self.name = f.__name__
-        elif hasattr(f, "func"):
-            self.name = f.func.__name__
         functools.update_wrapper(self, f)
 
     def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
