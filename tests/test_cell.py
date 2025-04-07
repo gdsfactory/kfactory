@@ -1,3 +1,4 @@
+import functools
 import tempfile
 import threading
 import warnings
@@ -572,9 +573,10 @@ def test_prune(kcl: kf.KCLayout) -> None:
 
 
 def test_return_none(kcl: kf.KCLayout) -> None:
-    @kcl.cell
     def test_no_return() -> kf.KCell:  # type: ignore[return]
         kcl.kcell()
 
     with pytest.raises(ValueError):
-        test_no_return()
+        kcl.cell()(test_no_return)()
+    with pytest.raises(ValueError):
+        kcl.cell()(functools.partial(test_no_return))()

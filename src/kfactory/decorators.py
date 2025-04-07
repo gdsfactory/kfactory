@@ -7,6 +7,7 @@ import inspect
 from collections import defaultdict
 from pathlib import Path
 from threading import RLock
+from types import FunctionType
 from typing import (
     TYPE_CHECKING,
     Annotated,
@@ -252,7 +253,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     _f: Callable[KCellParams, KC]
     _f_orig: Callable[KCellParams, ProtoTKCell[Any]]
     cache: Cache[int, KC] | dict[int, Any]
-    name: str | None
+    name: str
     kcl: KCLayout
     output_type: type[KC]
 
@@ -307,7 +308,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                     if basename is not None:
                         name = get_cell_name(basename, **params)
                     else:
-                        name = get_cell_name(f.__name__, **params)
+                        name = get_cell_name(self.name, **params)
                     old_future_name = kcl.future_cell_name
                     kcl.future_cell_name = name
                     if layout_cache:
@@ -404,6 +405,10 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
 
     @functools.cached_property
     def file(self) -> Path:
+        if isinstance(self._f_orig, FunctionType):
+            return Path(self._f_orig.__code__.co_filename).resolve()
+        if isinstance(self._f_orig, functools.partial):
+            return Path(self._f_orig.func.__code__.co_filename).resolve()
         return Path(self._f_orig.__code__.co_filename).resolve()
 
     def prune(self) -> None:
