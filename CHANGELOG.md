@@ -5,6 +5,7 @@
 
 ## New
 
+- add len to wrapper and make it properly pruning [#669](https://github.com/gdsfactory/kfactory/pull/669)
 - add better error message on none return and support partials [#668](https://github.com/gdsfactory/kfactory/pull/668)
 - add prune to cache [#663](https://github.com/gdsfactory/kfactory/pull/663)
 - Session Storage [#658](https://github.com/gdsfactory/kfactory/pull/658)
@@ -12,6 +13,7 @@
 
 ## Bug Fixes
 
+- add len to wrapper and make it properly pruning [#669](https://github.com/gdsfactory/kfactory/pull/669)
 - Fix types and mypy plugins [#667](https://github.com/gdsfactory/kfactory/pull/667)
 - Fix cell decorator  [#666](https://github.com/gdsfactory/kfactory/pull/666)
 - fix session loading [#664](https://github.com/gdsfactory/kfactory/pull/664)
