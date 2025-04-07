@@ -419,7 +419,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         return Path(self._f_orig.__code__.co_filename).resolve()
 
     def prune(self) -> None:
-        cells = list(self.cache.values())
+        cells = [c for c in self.cache.values() if not c._destroyed()]
         caller_cis = {
             ci for cell in cells for ci in cell.caller_cells() if not cell._destroyed()
         }
