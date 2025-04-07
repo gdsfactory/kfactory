@@ -11,6 +11,7 @@
 
 ## Bug Fixes
 
+- Fix types and mypy plugins [#667](https://github.com/gdsfactory/kfactory/pull/667)
 - Fix cell decorator  [#666](https://github.com/gdsfactory/kfactory/pull/666)
 - fix session loading [#664](https://github.com/gdsfactory/kfactory/pull/664)
 - Fix decorator [#660](https://github.com/gdsfactory/kfactory/pull/660)
