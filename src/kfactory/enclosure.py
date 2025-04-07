@@ -572,7 +572,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             layer_sections=layer_sections,
             bbox_sections={t[0]: t[1] for t in bbox_sections},
         )
-        self._name = name  # type: ignore[misc]
+        self._name = name
 
     @model_serializer
     def _serialize(self) -> dict[str, Any]:
