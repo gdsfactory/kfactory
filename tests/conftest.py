@@ -171,7 +171,7 @@ def pdk() -> kf.KCLayout:
             thickness=0.22,
             zmin=0,
             material="si",
-            info=kf.kcell.Info(mesh_order=1),
+            info=kf.Info(mesh_order=1),
         ),
         clad=kf.layer.LayerLevel(
             layer=Layers().WGCLAD, thickness=3, zmin=0.22, material="sio2"
@@ -181,8 +181,12 @@ def pdk() -> kf.KCLayout:
 
 
 @pytest.fixture
-@kf.kcl.cell
 def fill_cell() -> kf.KCell:
+    return fill_cell_fixture()
+
+
+@kf.kcl.cell(basename="fill_cell")
+def fill_cell_fixture() -> kf.KCell:
     fc = kf.KCell()
     fc.shapes(fc.kcl.find_layer(Layers().WGCLAD)).insert(kf.kdb.DBox(20, 40))
     fc.shapes(fc.kcl.find_layer(Layers().WGCLAD)).insert(kf.kdb.DBox(30, 15))
