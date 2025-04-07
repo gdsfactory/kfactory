@@ -4,7 +4,7 @@ from collections.abc import Callable, Sequence
 from typing import Any, Protocol
 
 import numpy as np
-import numpy.typing as nty
+import numpy.typing as npt
 from scipy.special import binom  # type:ignore[import-untyped,unused-ignore]
 
 from .. import kdb
@@ -45,7 +45,7 @@ class BezierKCell(Protocol):
 
 
 def bezier_curve(
-    t: nty.NDArray[np.floating[Any]],
+    t: npt.NDArray[np.floating[Any]],
     control_points: Sequence[tuple[np.float64 | float, np.float64 | float]],
 ) -> list[kdb.DPoint]:
     """Calculates the backbone of a bezier bend."""
