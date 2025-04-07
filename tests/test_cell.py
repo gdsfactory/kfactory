@@ -570,6 +570,7 @@ def test_prune(kcl: kf.KCLayout) -> None:
     test_cell = test1()
     test2.prune()
     assert test_cell._destroyed()
+    assert len(test2) == 0
 
 
 def test_return_none(kcl: kf.KCLayout) -> None:

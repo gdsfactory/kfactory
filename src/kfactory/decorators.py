@@ -403,6 +403,13 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
         return self._f(*args, **kwargs)
 
+    def __len__(self) -> int:
+        del_cells = [hk for hk, kc in self.cache.items() if kc._destroyed()]
+        for hk in del_cells:
+            del self.cache[hk]
+
+        return len(self.cache)
+
     @functools.cached_property
     def file(self) -> Path:
         if isinstance(self._f_orig, FunctionType):
@@ -421,6 +428,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
             self.kcl[ci].delete()
 
         self.kcl.cleanup()
+        self.cache.clear()
 
 
 class WrappedVKCellFunc(Generic[KCellParams, VK]):
