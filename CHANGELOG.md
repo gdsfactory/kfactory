@@ -1,5 +1,20 @@
+<a id="v1.4.1"></a>
+# [v1.4.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.4.1) - 2025-04-07
+
+# What's Changed
+
+## Bug Fixes
+
+- Fix kcell func prune [#670](https://github.com/gdsfactory/kfactory/pull/670)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.0...v1.4.1
+
+
+[Changes][v1.4.1]
+
+
 <a id="v1.4.0"></a>
-# [v1.4.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.4.0) - 2025-03-28
+# [v1.4.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.4.0) - 2025-04-07
 
 # What's Changed
 
@@ -1810,6 +1825,7 @@
 [Changes][v0.4.0]
 
 
+[v1.4.1]: https://github.com/gdsfactory/kfactory/compare/v1.4.0...v1.4.1
 [v1.4.0]: https://github.com/gdsfactory/kfactory/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/gdsfactory/kfactory/compare/v1.2.5...v1.3.0
 [v1.2.5]: https://github.com/gdsfactory/kfactory/compare/v1.2.4...v1.2.5
