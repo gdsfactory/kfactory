@@ -85,7 +85,13 @@ class Factories(UserDict[str, T]):
 
     def __getattr__(self, name: str) -> Any:
         if name != "data":
-            return self.data[name]
+            try:
+                return self.data[name]
+            except KeyError as e:
+                try:
+                    return self.__getattribute__(name)
+                except AttributeError:
+                    raise KeyError from e
         return self.__getattribute__(name)
 
     def for_tags(self, tags: list[str]) -> list[T]:
