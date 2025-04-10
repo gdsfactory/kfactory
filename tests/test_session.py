@@ -6,6 +6,9 @@ import kfactory as kf
 def test_session_cache() -> None:
     c = session3.my_cell(a=5)
 
+    f2 = session2.kcl2.factories["my_other_cell"]
+    f1 = session1.kcl1.factories["test"]
+
     assert session1.cell_created
     assert session2.cell_created
     assert session3.cell_created
@@ -16,8 +19,8 @@ def test_session_cache() -> None:
     session2.cell_created = False
     session3.cell_created = False
 
-    session1.test.prune()
-    session2.my_other_cell.prune()
+    f1.prune()
+    f2.prune()
 
     kf.load_session()
 
@@ -27,7 +30,7 @@ def test_session_cache() -> None:
     assert not session2.cell_created
     assert not session3.cell_created
 
-    session2.my_other_cell.prune()
+    f2.prune()
 
     session1.cell_created = False
     session2.cell_created = False
@@ -41,8 +44,8 @@ def test_session_cache() -> None:
 
     kf.save_session(session1.test())
 
-    session1.test.prune()
-    session2.my_other_cell.prune()
+    f1.prune()
+    f2.prune()
 
     session1.cell_created = False
     session2.cell_created = False

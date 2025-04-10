@@ -121,7 +121,9 @@ def test_getter(layers: Layers) -> None:
 
 def test_array(straight: kf.KCell) -> None:
     c = kf.KCell()
-    wg_array = c.create_inst(straight, a=(15_000, 0), b=(0, 3_000), na=3, nb=5)
+    wg_array = c.create_inst(
+        straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
+    )
     for b in range(5):
         for a in range(3):
             wg_array["o1", a, b]
@@ -130,7 +132,9 @@ def test_array(straight: kf.KCell) -> None:
 
 def test_array_indexerror(straight: kf.KCell) -> None:
     c = kf.KCell()
-    wg_array = c.create_inst(straight, a=(15_000, 0), b=(0, 3_000), na=3, nb=5)
+    wg_array = c.create_inst(
+        straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
+    )
     regex = kf.config.logfilter.regex
     kf.config.logfilter.regex = r"^An error has been caught in function '__getitem__'"
     with pytest.raises(IndexError):
@@ -568,12 +572,12 @@ def test_prune(kcl: kf.KCLayout) -> None:
         return c
 
     test_cell = test1()
-    assert len(test1) == 1
-    assert len(test2) == 1
-    test2.prune()
+    assert len(kcl.factories["test1"]) == 1
+    assert len(kcl.factories["test2"]) == 1
+    kcl.factories["test2"].prune()
     assert test_cell._destroyed()
-    assert len(test1) == 0
-    assert len(test2) == 0
+    assert len(kcl.factories["test1"]) == 0
+    assert len(kcl.factories["test2"]) == 0
 
 
 def test_return_none(kcl: kf.KCLayout) -> None:
