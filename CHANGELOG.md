@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- Make `@cell` return the `__call__` from the class instead of the entire class [#672](https://github.com/gdsfactory/kfactory/pull/672)
 - Fix kcell func prune [#670](https://github.com/gdsfactory/kfactory/pull/670)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.0...v1.4.1
