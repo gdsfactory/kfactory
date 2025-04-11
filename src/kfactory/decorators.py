@@ -305,10 +305,14 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                 _params_to_original(params)
                 old_future_name: str | None = None
                 if set_name:
+                    module_name = None
+                    if hasattr(f, "__module__"):
+                        module_name = f.__module__
+
                     if basename is not None:
-                        name = get_cell_name(basename, **params)
+                        name = get_cell_name(basename, _qualname=module_name, **params)
                     else:
-                        name = get_cell_name(self.name, **params)
+                        name = get_cell_name(self.name, _qualname=module_name, **params)
                     old_future_name = kcl.future_cell_name
                     kcl.future_cell_name = name
                     if layout_cache:
