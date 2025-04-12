@@ -1,5 +1,20 @@
-<a id="v1.4.1"></a>
-# [v1.4.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.4.1) - 2025-04-07
+<a id="v1.4.3"></a>
+# [v1.4.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.4.3) - 2025-04-12
+
+# What's Changed
+
+## Bug Fixes
+
+- relax scipy requirement [#674](https://github.com/gdsfactory/kfactory/pull/674)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.4.3
+
+
+[Changes][v1.4.3]
+
+
+<a id="v1.4.2"></a>
+# [v1.4.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.4.2) - 2025-04-10
 
 # What's Changed
 
@@ -9,10 +24,10 @@
 - Make `@cell` return the `__call__` from the class instead of the entire class [#672](https://github.com/gdsfactory/kfactory/pull/672)
 - Fix kcell func prune [#670](https://github.com/gdsfactory/kfactory/pull/670)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.0...v1.4.1
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.0...v1.4.2
 
 
-[Changes][v1.4.1]
+[Changes][v1.4.2]
 
 
 <a id="v1.4.0"></a>
@@ -1827,7 +1842,8 @@
 [Changes][v0.4.0]
 
 
-[v1.4.1]: https://github.com/gdsfactory/kfactory/compare/v1.4.0...v1.4.1
+[v1.4.3]: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.4.3
+[v1.4.2]: https://github.com/gdsfactory/kfactory/compare/v1.4.0...v1.4.2
 [v1.4.0]: https://github.com/gdsfactory/kfactory/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/gdsfactory/kfactory/compare/v1.2.5...v1.3.0
 [v1.2.5]: https://github.com/gdsfactory/kfactory/compare/v1.2.4...v1.2.5
