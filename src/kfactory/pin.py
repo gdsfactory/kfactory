@@ -218,8 +218,8 @@ class ProtoPin(ABC, Generic[TUnit]):
         return self._allowed_angles
 
     @allowed_angles.setter
-    def allowed_angles(self, value: list[Literal[0, 1, 2, 3]]) -> None:
-        self._allowed_angles = value
+    def allowed_angles(self, value: Sequence[Literal[0, 1, 2, 3]]) -> None:
+        self._allowed_angles = list(value)
 
     @property
     def allowed_orientations(self) -> list[Literal[0, 90, 180, 270]]:
