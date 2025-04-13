@@ -271,6 +271,7 @@ def test_to_dtype() -> None:
     assert dtype.width == 0.01
     assert dtype.layer == 1
     assert dtype.center == (1, 1)
+    assert dtype.icenter == (1000, 1000)
     assert dtype.angle == 1
     assert dtype.orientation == 90
 
@@ -282,6 +283,7 @@ def test_to_itype() -> None:
     assert itype.width == 10
     assert itype.layer == 1
     assert itype.center == (1000, 1000)
+    assert itype.icenter == (1000, 1000)
     assert itype.angle == 1
 
 
@@ -334,6 +336,9 @@ def test_port_xy_center(port: kf.port.ProtoPort[Any]) -> None:
 
     port.center = (1, 1)
     assert port.center == (1, 1)
+
+    port.icenter = (152, 153)
+    assert port.icenter == (152, 153)
 
     port.ix = 121
     assert port.ix == 121
