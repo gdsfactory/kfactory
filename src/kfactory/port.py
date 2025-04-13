@@ -552,6 +552,19 @@ class ProtoPort(Generic[TUnit], ABC):
             self._base.dcplx_trans.disp = kdb.DVector(*pos)
 
     @property
+    def icenter(self) -> tuple[int, int]:
+        """Coordinate of the port in dbu."""
+        vec = self.trans.disp
+        return (vec.x, vec.y)
+
+    @icenter.setter
+    def icenter(self, pos: tuple[int, int]) -> None:
+        if self._base.trans:
+            self._base.trans.disp = kdb.Vector(*pos)
+        elif self._base.dcplx_trans:
+            self._base.dcplx_trans.disp = self.kcl.to_um(kdb.Vector(*pos))
+
+    @property
     def dwidth(self) -> float:
         """Width of the port in um."""
         return self.kcl.to_um(self._base.cross_section.width)

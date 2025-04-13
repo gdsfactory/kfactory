@@ -1,16 +1,20 @@
-<a id="v1.4.3"></a>
-# [v1.4.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.4.3) - 2025-04-12
+<a id="v1.5.0"></a>
+# [v1.5.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.0) - 2025-04-12
 
 # What's Changed
+
+## New
+
+- Add ProtoPort.icenter [#676](https://github.com/gdsfactory/kfactory/pull/676)
 
 ## Bug Fixes
 
 - relax scipy requirement [#674](https://github.com/gdsfactory/kfactory/pull/674)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.4.3
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.5.0
 
 
-[Changes][v1.4.3]
+[Changes][v1.5.0]
 
 
 <a id="v1.4.2"></a>
@@ -1842,7 +1846,7 @@
 [Changes][v0.4.0]
 
 
-[v1.4.3]: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.4.3
+[v1.5.0]: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.5.0
 [v1.4.2]: https://github.com/gdsfactory/kfactory/compare/v1.4.0...v1.4.2
 [v1.4.0]: https://github.com/gdsfactory/kfactory/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/gdsfactory/kfactory/compare/v1.2.5...v1.3.0
