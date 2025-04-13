@@ -189,9 +189,7 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     def __eq__(self, other: object) -> bool:
         """Support for `pin1 == pin2` comparisons."""
-        if isinstance(other, ProtoPin):
-            return self._base == other._base
-        return False
+        return self._base == other._base if isinstance(other, ProtoPin) else False
 
     @property
     @abstractmethod
