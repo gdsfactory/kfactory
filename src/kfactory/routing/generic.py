@@ -237,7 +237,7 @@ def check_collisions(
                 for poly in error_region_shapes.merge().each():
                     it = db.create_item(cell, sc)
                     it.add_value("Route shapes overlapping with other shapes")
-                    it.add_value(c.kcl.to_um(poly))
+                    it.add_value(c.kcl.to_um(poly.downcast()))
             if not error_region_instances.is_empty():
                 any_layer_collision = True
                 if on_collision == "error":
@@ -249,7 +249,7 @@ def check_collisions(
                 for poly in error_region_instances.merge().each():
                     it = db.create_item(cell, sc)
                     it.add_value("Route instances overlapping with other instances")
-                    it.add_value(c.kcl.to_um(poly))
+                    it.add_value(c.kcl.to_um(poly.downcast()))
 
         if any_layer_collision:
             match on_collision:
