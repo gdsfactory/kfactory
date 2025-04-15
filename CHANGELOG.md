@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- fix lyrdb generation in route errors [#677](https://github.com/gdsfactory/kfactory/pull/677)
 - relax scipy requirement [#674](https://github.com/gdsfactory/kfactory/pull/674)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.5.0
