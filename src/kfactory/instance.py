@@ -118,7 +118,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
             return getattr(self._instance, name)
 
     @property
-    def name(self) -> str | None:
+    def name(self) -> str:
         """Name of instance in GDS."""
         prop = self.instance.property(PROPID.NAME)
         return (
