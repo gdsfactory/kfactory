@@ -131,9 +131,7 @@ def get_netlist(
     c: KCell | DKCell,
     exclude_port_types: Sequence[str] | None = ("placement", "pad", "bump"),
 ) -> TNetlist[int] | TNetlist[float]:
-    if isinstance(c, KCell):
-        return Netlist(name=c.name)
-    return DNetlist(name=c.name)
+    return Netlist(name=c.name) if isinstance(c, KCell) else DNetlist(name=c.name)
 
 
 @overload
