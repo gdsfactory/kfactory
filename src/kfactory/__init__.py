@@ -39,7 +39,7 @@ from .utilities import (
     save_layout_options,
     pprint_ports,
 )
-from .netlist import Netlist, get_netlist, read_netlist
+from .netlist import DNetlist, Netlist, get_netlist, read_netlist
 
 from . import (
     cells,
@@ -72,6 +72,7 @@ __all__ = [
     "DInstancePorts",
     "DInstances",
     "DKCell",
+    "DNetlist",
     "DPort",
     "DPorts",
     "Info",

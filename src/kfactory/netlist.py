@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import json
 from collections.abc import Sequence
 from pathlib import Path
 from typing import (
-    TYPE_CHECKING,
     Annotated,
     Any,
     Generic,
@@ -13,16 +11,14 @@ from typing import (
     TypeAlias,
     overload,
 )
+import re
 
 from pydantic import BaseModel, Field, RootModel, model_validator
 from ruamel.yaml import YAML
 from typing_extensions import TypeAliasType
 
-from .kcell import DKCell, KCell, ProtoTKCell
+from .kcell import DKCell, KCell
 from .typings import TUnit, dbu, um
-
-if TYPE_CHECKING:
-    from .layout import KCLayout
 
 yaml = YAML(typ="safe")
 
@@ -52,14 +48,14 @@ class Placement(BaseModel, Generic[TUnit]):
         return self
 
 
-class RegularArrayPlacement(Placement[TUnit]):
+class RegularArray(Placement[TUnit]):
     columns: int = Field(gt=0, default=1)
     rows: int = Field(gt=0, default=1)
     column_pitch: TUnit
     row_pitch: TUnit
 
 
-class ArrayPlacement(Placement[TUnit]):
+class Array(Placement[TUnit]):
     na: int = Field(gt=1, default=1)
     nb: int = Field(gt=0, default=1)
     pitch_a: tuple[TUnit, TUnit]
@@ -71,10 +67,7 @@ CellSettings = RootModel[dict[str, JSON_Serializable]]
 
 class NetlistInstance(BaseModel, Generic[TUnit]):
     settings: CellSettings | None = None
-
-
-class Connection(BaseModel):
-    pass
+    array: RegularArray[TUnit] | Array[TUnit] | None = None
 
 
 class Route(BaseModel, Generic[TUnit]):
@@ -93,6 +86,46 @@ class Route(BaseModel, Generic[TUnit]):
         return data
 
 
+class PortRef(BaseModel):
+    instance: str
+    port_name: str
+
+
+class PortArrayRef(PortRef):
+    ia: int
+    ib: int
+
+
+class Connection(BaseModel):
+    p1: PortRef | PortArrayRef
+    p2: PortRef | PortArrayRef
+
+    @classmethod
+    def from_list(cls, data: Any) -> Connection:
+        if isinstance(data, list | tuple):
+            if isinstance(data[0][0], list | tuple):
+                p1 = {
+                    "instance": data[0][0][0],
+                    "port_name": data[0][1],
+                    "ia": data[0][0][1][0],
+                    "ib": data[0][0][1][1],
+                }
+            else:
+                p1 = {"instance": data[0][0], "port_name": data[0][1]}
+            if isinstance(data[1][0], list | tuple):
+                p2 = {
+                    "instance": data[1][0][0],
+                    "port_name": data[1][1],
+                    "ia": data[1][0][1][0],
+                    "ib": data[1][0][1][1],
+                }
+            else:
+                p2 = {"instance": data[1][0], "port_name": data[1][1]}
+
+            return Connection.model_validate({"p1": p1, "p2": p2})
+        return Connection(**data)
+
+
 class TNetlist(BaseModel, Generic[TUnit]):
     name: str | None = None
     dependencies: list[Path] = Field(default_factory=list)
@@ -100,13 +133,57 @@ class TNetlist(BaseModel, Generic[TUnit]):
     placements: (
         dict[
             str,
-            Placement[TUnit] | ArrayPlacement[TUnit] | RegularArrayPlacement[TUnit],
+            Array[TUnit] | RegularArray[TUnit] | Placement[TUnit],
         ]
         | None
     ) = None
     nets: list[tuple[NetlistInstance[TUnit], str]] | None = None
-    connections: list[tuple[str, str]] | None = None
+    connections: list[Connection] | None = None
     routes: dict[str, Route[TUnit]] | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _validate_model(cls, data: dict[str, Any]) -> dict[str, Any]:
+        connections = data.get("connections")
+        if connections and isinstance(connections, dict):
+            built_connections: list[Connection] = []
+            connections_: list[tuple[tuple[str, str], tuple[str, str]]] = [
+                (k.rsplit(",", 1), v.rsplit(",", 1)) for k, v in connections.items()
+            ]
+            for i, connection_ in enumerate(connections_):
+                connection_0: (
+                    tuple[str, str] | tuple[tuple[str, tuple[int, ...]], str]
+                ) = connection_[0]
+                match = re.match(r"(.*?)(<\d+\.\d+>)$", connection_[0][0])
+                if match:
+                    connection_0 = (
+                        (
+                            match.group(1),
+                            tuple(
+                                int(j) for j in match.group(2).strip("<>").split(".")
+                            ),
+                        ),
+                        connection_[0][1],
+                    )
+                connection_1: (
+                    tuple[str, str] | tuple[tuple[str, tuple[int, ...]], str]
+                ) = connection_[1]
+                match = re.match(r"(.*?)(<\d+\.\d+>)$", connection_[1][0])
+                if match:
+                    connection_1 = (
+                        (
+                            match.group(1),
+                            tuple(
+                                int(j) for j in match.group(2).strip("<>").split(".")
+                            ),
+                        ),
+                        connection_[1][1],
+                    )
+                built_connections.append(
+                    Connection.from_list((connection_0, connection_1))
+                )
+            data["connections"] = built_connections
+        return data
 
 
 Netlist: TypeAlias = TNetlist[dbu]
@@ -151,7 +228,7 @@ def read_netlist(
     with file.open(mode="rt") as f:
         yaml_dict = yaml.load(f)
         if unit == "dbu":
-            return TNetlist[int].model_validate(yaml_dict)
+            return TNetlist[int].model_validate(yaml_dict, strict=True)
         return TNetlist[float].model_validate(yaml_dict)
 
 
