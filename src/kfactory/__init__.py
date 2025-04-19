@@ -39,6 +39,7 @@ from .utilities import (
     save_layout_options,
     pprint_ports,
 )
+from .netlist import DNetlist, Netlist, get_netlist, read_netlist
 
 from . import (
     cells,
@@ -71,6 +72,7 @@ __all__ = [
     "DInstancePorts",
     "DInstances",
     "DKCell",
+    "DNetlist",
     "DPort",
     "DPorts",
     "Info",
@@ -86,6 +88,7 @@ __all__ = [
     "LayerEnum",
     "LayerInfos",
     "LayerStack",
+    "Netlist",
     "Port",
     "Ports",
     "ProtoTKCell",
@@ -105,6 +108,7 @@ __all__ = [
     "factories",
     "flexgrid",
     "flexgrid_dbu",
+    "get_netlist",
     "grid",
     "grid_dbu",
     "kcl",
@@ -120,6 +124,7 @@ __all__ = [
     "pprint_ports",
     "protocols",
     "rdb",
+    "read_netlist",
     "routing",
     "save_layout_options",
     "save_session",
