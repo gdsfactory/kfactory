@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Sequence
 from pathlib import Path
 from typing import (
@@ -11,7 +12,6 @@ from typing import (
     TypeAlias,
     overload,
 )
-import re
 
 from pydantic import BaseModel, Field, RootModel, model_validator
 from ruamel.yaml import YAML
