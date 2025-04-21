@@ -3039,28 +3039,6 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
         self,
         *,
         name: str | None = None,
-        trans: kdb.Trans,
-        width: int,
-        layer: LayerEnum | int,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
-        dcplx_trans: kdb.DCplxTrans,
-        width: float,
-        layer: LayerEnum | int,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
         port: Port,
     ) -> DPort: ...
 
