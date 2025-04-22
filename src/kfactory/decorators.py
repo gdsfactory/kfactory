@@ -148,10 +148,11 @@ def _check_instances(
         case CheckInstances.RAISE:
             if any(inst.is_complex() for inst in cell.each_inst()):
                 raise ValueError(
-                    "Most foundries will not allow off-grid "
-                    "instances. Please flatten them or add "
-                    "check_instances=False to the decorator.\n"
-                    "Cellnames of instances affected by this:"
+                    "Found off-grid instances, which is not allowed in most "
+                    "foundries.\n"
+                    "Please run c.flatten() before returning "
+                    "or add use @cell(check_instances=False).\n"
+                    "Cellnames of instances affected by this: "
                     + "\n".join(
                         inst.cell.name for inst in cell.each_inst() if inst.is_complex()
                     )
