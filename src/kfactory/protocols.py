@@ -18,9 +18,9 @@ from .typings import Angle, TUnit
 __all__ = [
     "BoxFunction",
     "BoxLike",
+    "TCreatePortFunction",
+    "DCreatePortFunction",
     "CreatePortFunction",
-    "CreatePortFunctionFloat",
-    "CreatePortFunctionInt",
     "PointLike",
 ]
 
@@ -85,7 +85,7 @@ class BoxFunction(Protocol[TUnit]):
 
 
 @runtime_checkable
-class CreatePortFunction(Protocol[TUnit]):
+class TCreatePortFunction(Protocol[TUnit]):
     """Protocol for the different argument variants a function can have to create a port."""
 
     @overload
@@ -133,7 +133,7 @@ class CreatePortFunction(Protocol[TUnit]):
     ) -> ProtoPort[TUnit]: ...
 
 
-class CreatePortFunctionInt(CreatePortFunction[int], Protocol):
+class CreatePortFunction(TCreatePortFunction[int], Protocol):
     @overload
     def __call__(
         self,
@@ -159,7 +159,7 @@ class CreatePortFunctionInt(CreatePortFunction[int], Protocol):
     ) -> Port: ...
 
 
-class CreatePortFunctionFloat(CreatePortFunction[float], Protocol):
+class DCreatePortFunction(TCreatePortFunction[float], Protocol):
     @overload
     def __call__(
         self,

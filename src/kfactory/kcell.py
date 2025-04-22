@@ -3034,27 +3034,6 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
         port_names = [p.name for p in self.ports]
         return f"{self.name}: ports {port_names}, {len(self.insts)} instances"
 
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
-        port: Port,
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        name: str | None = None,
-        width: int,
-        center: tuple[int, int],
-        angle: int,
-        layer: LayerEnum | int,
-        port_type: str = "optical",
-        mirror_x: bool = False,
-    ) -> DPort: ...
-
     def create_port(self, **kwargs: Any) -> DPort:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
         if self.locked:

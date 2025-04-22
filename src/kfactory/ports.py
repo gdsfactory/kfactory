@@ -33,9 +33,9 @@ from .port import (
     filter_regex,
 )
 from .protocols import (
+    TCreatePortFunction,
+    DCreatePortFunction,
     CreatePortFunction,
-    CreatePortFunctionFloat,
-    CreatePortFunctionInt,
 )
 from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
@@ -75,7 +75,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
     kcl: KCLayout
     _locked: bool
     _bases: list[BasePort]
-    create_port: CreatePortFunction[TUnit]
+    create_port: TCreatePortFunction[TUnit]
 
     @overload
     def __init__(self, *, kcl: KCLayout) -> None: ...
@@ -253,7 +253,7 @@ class Ports(ProtoPorts[int]):
     """
 
     yaml_tag: ClassVar[str] = "!Ports"
-    create_port: CreatePortFunctionInt
+    create_port: CreatePortFunction
 
     def __iter__(self) -> Iterator[Port]:
         """Iterator, that allows for loops etc to directly access the object."""
@@ -453,7 +453,7 @@ class DPorts(ProtoPorts[float]):
     """
 
     yaml_tag: ClassVar[str] = "!DPorts"
-    create_port: CreatePortFunctionFloat
+    create_port: DCreatePortFunction
 
     def __iter__(self) -> Iterator[DPort]:
         """Iterator, that allows for loops etc to directly access the object."""
