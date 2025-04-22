@@ -7,6 +7,14 @@
 
 - Add codeowners file [#681](https://github.com/gdsfactory/kfactory/pull/681)
 
+## Bug Fixes
+
+- better port exceptions [#682](https://github.com/gdsfactory/kfactory/pull/682)
+
+## Documentation
+
+- better port exceptions [#682](https://github.com/gdsfactory/kfactory/pull/682)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.3...v1.5.0
 
 
