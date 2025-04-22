@@ -1,21 +1,42 @@
 <a id="v1.5.0"></a>
-# [v1.5.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.0) - 2025-04-12
+# [v1.5.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.0) - 2025-04-19
 
 # What's Changed
 
 ## New
 
-- Add ProtoPort.icenter [#676](https://github.com/gdsfactory/kfactory/pull/676)
+- Add codeowners file [#681](https://github.com/gdsfactory/kfactory/pull/681)
 
 ## Bug Fixes
 
-- fix lyrdb generation in route errors [#677](https://github.com/gdsfactory/kfactory/pull/677)
-- relax scipy requirement [#674](https://github.com/gdsfactory/kfactory/pull/674)
+- better port exceptions [#682](https://github.com/gdsfactory/kfactory/pull/682)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.5.0
+## Documentation
+
+- better message for off-grid references [#680](https://github.com/gdsfactory/kfactory/pull/680)
+- better port exceptions [#682](https://github.com/gdsfactory/kfactory/pull/682)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.3...v1.5.0
 
 
 [Changes][v1.5.0]
+
+
+<a id="v1.4.3"></a>
+# [v1.4.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.4.3) - 2025-04-17
+
+# What's Changed
+
+## Bug Fixes
+
+- Add ProtoPort.icenter [#676](https://github.com/gdsfactory/kfactory/pull/676)
+- fix lyrdb generation in route errors [#677](https://github.com/gdsfactory/kfactory/pull/677)
+- relax scipy requirement [#674](https://github.com/gdsfactory/kfactory/pull/674)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.4.3
+
+
+[Changes][v1.4.3]
 
 
 <a id="v1.4.2"></a>
@@ -1847,7 +1868,8 @@
 [Changes][v0.4.0]
 
 
-[v1.5.0]: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.5.0
+[v1.5.0]: https://github.com/gdsfactory/kfactory/compare/v1.4.3...v1.5.0
+[v1.4.3]: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.4.3
 [v1.4.2]: https://github.com/gdsfactory/kfactory/compare/v1.4.0...v1.4.2
 [v1.4.0]: https://github.com/gdsfactory/kfactory/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/gdsfactory/kfactory/compare/v1.2.5...v1.3.0

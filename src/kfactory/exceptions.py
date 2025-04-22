@@ -52,14 +52,14 @@ class PortWidthMismatchError(ValueError):
 
         if isinstance(other_inst, ProtoInstance):
             super().__init__(
-                f'Width mismatch between the ports {inst.cell_name}["{p1.name}"] '
-                f'and {other_inst.cell_name}["{p2.name}"]'
+                f'Width mismatch between the ports {inst.name}["{p1.name}"] '
+                f'and {other_inst.name}["{p2.name}"]'
                 f'("{p1.width}"/"{p2.width}")',
                 *args,
             )
         else:
             super().__init__(
-                f'Width mismatch between the ports {inst.cell_name}["{p1.name}"] '
+                f'Width mismatch between the ports {inst.name}["{p1.name}"] '
                 f'and Port "{p2.name}" ("{p1.width}"/"{p2.width}")',
                 *args,
             )
@@ -93,13 +93,13 @@ class PortLayerMismatchError(ValueError):
         )
         if isinstance(other_inst, ProtoInstance):
             super().__init__(
-                f'Layer mismatch between the ports {inst.cell_name}["{p1.name}"]'
-                f' and {other_inst.cell_name}["{p2.name}"] ("{l1}"/"{l2}")',
+                f'Layer mismatch between the ports {inst.name}["{p1.name}"]'
+                f' and {other_inst.name}["{p2.name}"] ("{l1}"/"{l2}")',
                 *args,
             )
         else:
             super().__init__(
-                f'Layer mismatch between the ports {inst.cell_name}["{p1.name}"]'
+                f'Layer mismatch between the ports {inst.name}["{p1.name}"]'
                 f' and Port "{p2.name}" ("{l1}"/"{l2}")',
                 *args,
             )
@@ -121,14 +121,14 @@ class PortTypeMismatchError(ValueError):
 
         if isinstance(other_inst, ProtoInstance):
             super().__init__(
-                f'Type mismatch between the ports {inst.cell_name}["{p1.name}"]'
-                f' and {other_inst.cell_name}["{p2.name}"]'
+                f'Type mismatch between the ports {inst.name}["{p1.name}"]'
+                f' and {other_inst.name}["{p2.name}"]'
                 f" ({p1.port_type}/{p2.port_type})",
                 *args,
             )
         else:
             super().__init__(
-                f'Type mismatch between the ports {inst.cell_name}["{p1.name}"]'
+                f'Type mismatch between the ports {inst.name}["{p1.name}"]'
                 f' and Port "{p2.name}" ({p1.port_type}/{p2.port_type})',
                 *args,
             )
