@@ -98,7 +98,7 @@ def test_connect_port_width_mismatch(layers: Layers) -> None:
     with pytest.raises(PortWidthMismatchError) as excinfo:
         wg1.connect("o1", port)
     assert str(excinfo.value) == (
-        f'Width mismatch between the ports {wg1.cell_name}["o1"] and Port "cplxp1" '
+        f'Width mismatch between the ports {wg1.cell_name}_0_0["o1"] and Port "cplxp1" '
         f'("{wg1.ports["o1"].width}"/"2000")'
     )
 
@@ -119,8 +119,8 @@ def test_connect_instance_width_mismatch(layers: Layers) -> None:
     with pytest.raises(PortWidthMismatchError) as excinfo:
         wg1.connect("o1", wg1_instance, "o2")
     assert str(excinfo.value) == (
-        f'Width mismatch between the ports {wg1.cell_name}["o1"] and '
-        f'{wg1_instance.cell_name}["o2"]("{wg1.ports["o1"].width}"/"2000")'
+        f'Width mismatch between the ports {wg1.name}["o1"] and '
+        f'{wg1_instance.name}["o2"]("{wg1.ports["o1"].width}"/"2000")'
     )
 
 
