@@ -7,14 +7,22 @@ from typing import (
     runtime_checkable,
 )
 
-from .typings import TUnit, Angle
-from .port import ProtoPort, Port, DPort
-from .layout import kdb
+from . import kdb
 
 if TYPE_CHECKING:
     from .layer import LayerEnum
+    from .port import DPort, Port, ProtoPort
 
-__all__ = ["BoxFunction", "BoxLike", "PointLike"]
+from .typings import Angle, TUnit
+
+__all__ = [
+    "BoxFunction",
+    "BoxLike",
+    "CreatePortFunction",
+    "CreatePortFunctionFloat",
+    "CreatePortFunctionInt",
+    "PointLike",
+]
 
 
 @runtime_checkable
@@ -75,8 +83,9 @@ class BoxFunction(Protocol[TUnit]):
         """Call the box function."""
         ...
 
+
 @runtime_checkable
-class CreatePortFunction(Protocol[TUnit, TAngle]):
+class CreatePortFunction(Protocol[TUnit]):
     """Protocol for the different argument variants a function can have to create a port."""
 
     @overload
@@ -100,7 +109,7 @@ class CreatePortFunction(Protocol[TUnit, TAngle]):
         name: str | None = None,
         port_type: str = "optical",
     ) -> ProtoPort[TUnit]: ...
-        
+
     @overload
     def __call__(
         self,
@@ -123,13 +132,15 @@ class CreatePortFunction(Protocol[TUnit, TAngle]):
         port_type: str = "optical",
     ) -> ProtoPort[TUnit]: ...
 
+
+class CreatePortFunctionInt(CreatePortFunction[int], Protocol):
     @overload
     def __call__(
         self,
         *,
         width: int,
         layer: LayerEnum | int,
-        center: tuple[TUnit, TUnit],
+        center: tuple[int, int],
         angle: Angle,
         name: str | None = None,
         port_type: str = "optical",
@@ -141,19 +152,21 @@ class CreatePortFunction(Protocol[TUnit, TAngle]):
         *,
         width: int,
         layer_info: kdb.LayerInfo,
-        center: tuple[TUnit, TUnit],
+        center: tuple[int, int],
         angle: Angle,
         name: str | None = None,
         port_type: str = "optical",
     ) -> Port: ...
 
+
+class CreatePortFunctionFloat(CreatePortFunction[float], Protocol):
     @overload
     def __call__(
         self,
         *,
         width: float,
         layer: LayerEnum | int,
-        center: tuple[TUnit, TUnit],
+        center: tuple[float, float],
         orientation: float,
         name: str | None = None,
         port_type: str = "optical",
@@ -165,7 +178,7 @@ class CreatePortFunction(Protocol[TUnit, TAngle]):
         *,
         width: float,
         layer_info: kdb.LayerInfo,
-        center: tuple[TUnit, TUnit],
+        center: tuple[float, float],
         orientation: float,
         name: str | None = None,
         port_type: str = "optical",

@@ -32,9 +32,13 @@ from .port import (
     filter_port_type,
     filter_regex,
 )
+from .protocols import (
+    CreatePortFunction,
+    CreatePortFunctionFloat,
+    CreatePortFunctionInt,
+)
 from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
-from .protocols import CreatePortFunction
 
 if TYPE_CHECKING:
     from .layer import LayerEnum
@@ -249,7 +253,7 @@ class Ports(ProtoPorts[int]):
     """
 
     yaml_tag: ClassVar[str] = "!Ports"
-    create_port: CreatePortFunction[int]
+    create_port: CreatePortFunctionInt
 
     def __iter__(self) -> Iterator[Port]:
         """Iterator, that allows for loops etc to directly access the object."""
@@ -449,7 +453,7 @@ class DPorts(ProtoPorts[float]):
     """
 
     yaml_tag: ClassVar[str] = "!DPorts"
-    create_port: CreatePortFunction[float]
+    create_port: CreatePortFunctionFloat
 
     def __iter__(self) -> Iterator[DPort]:
         """Iterator, that allows for loops etc to directly access the object."""
