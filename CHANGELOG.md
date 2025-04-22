@@ -13,6 +13,7 @@
 
 ## Documentation
 
+- better message for off-grid references [#680](https://github.com/gdsfactory/kfactory/pull/680)
 - better port exceptions [#682](https://github.com/gdsfactory/kfactory/pull/682)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.3...v1.5.0
