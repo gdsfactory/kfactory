@@ -346,10 +346,7 @@ class Ports(ProtoPorts[int]):
                     raise ValueError(
                         "layer or layer_info must be defined to create a port."
                     )
-                if isinstance(layer, int):
-                    layer_info = self.kcl.layout.get_info(layer)
-                elif isinstance(layer, LayerEnum):
-                    layer_info = self.kcl.layout.get_info(layer[0])
+                layer_info = self.kcl.layout.get_info(layer)
             assert layer_info is not None
             cross_section = self.kcl.get_symmetrical_cross_section(
                 CrossSectionSpec(layer=layer_info, width=width)
@@ -545,10 +542,7 @@ class DPorts(ProtoPorts[float]):
                     raise ValueError(
                         "layer or layer_info must be defined to create a port."
                     )
-                if isinstance(layer, int):
-                    layer_info = self.kcl.layout.get_info(layer)
-                elif isinstance(layer, LayerEnum):
-                    layer_info = self.kcl.layout.get_info(layer[0])
+                layer_info = self.kcl.layout.get_info(layer)
             assert layer_info is not None
             width_ = self.kcl.to_dbu(width)
             if width_ % 2:
