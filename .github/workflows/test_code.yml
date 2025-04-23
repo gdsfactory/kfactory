@@ -27,8 +27,11 @@ jobs:
           repository: astral-sh/ruff
           path: ruff
           ref: main
+      - uses: astral-sh/setup-uv@v5
       - name: Run red-knot check
-        run: cd ruff && cargo run -p red_knot check ../src/kfactory
+        run: cd ruff && cargo build -p red_knot
+      - name: Run red-knot check
+        run: uv run ruff/target/debug/red_knot check src/kfactory
 
 
   test_code:
