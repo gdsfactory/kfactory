@@ -1,6 +1,6 @@
-name-template: 'v$RESOLVED_VERSION'
-tag-template: 'v$RESOLVED_VERSION'
-change-template: '- $TITLE [#$NUMBER](https://github.com/gdsfactory/kfactory/pull/$NUMBER)'
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+change-template: "- $TITLE [#$NUMBER](https://github.com/gdsfactory/kfactory/pull/$NUMBER)"
 template: |
   # What's Changed
 
@@ -9,67 +9,72 @@ template: |
   **Full Changelog**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
 
 categories:
-  - title: 'Breaking'
-    label: 'breaking'
-  - title: 'New'
+  - title: "Breaking"
+    label: "breaking"
+  - title: "New"
     labels:
-    - 'enhancement'
-    - 'feature'
-  - title: 'Bug Fixes'
-    label: 'bug'
-  - title: 'Maintenance'
-    label: 'maintenance'
-  - title: 'Documentation'
-    label: 'documentation'
-  - title: 'Other changes'
-  - title: 'Dependency Updates'
-    label: 'dependencies'
+      - "enhancement"
+      - "feature"
+  - title: "Bug Fixes"
+    label: "bug"
+  - title: "Maintenance"
+    label: "maintenance"
+  - title: "Documentation"
+    label: "documentation"
+  - title: "Other changes"
+  - title: "Dependency Updates"
+    label: "dependencies"
     collapse-after: 5
 
 # Change major/breaking to major and enhancement/minor to minor after v1.0
 version-resolver:
   major:
     labels:
-      - 'breaking'
+      - "breaking"
   minor:
     labels:
-      - 'enhancement'
+      - "enhancement"
   patch:
     labels:
-      - 'bug'
-      - 'maintenance'
-      - 'documentation'
-      - 'dependencies'
-      - 'security'
+      - "bug"
+      - "maintenance"
+      - "documentation"
+      - "dependencies"
+      - "security"
   default: patch
 
 exclude-labels:
-  - 'github_actions'
+  - "github_actions"
 
 autolabeler:
-  - label: 'documentation'
+  - label: "documentation"
     files:
-      - '*.md'
+      - "*.md"
     branch:
-      - '/docs-.+/'
-  - label: 'bug'
+      - "/docs-.+/"
+  - label: "bug"
     branch:
-      - '/^fix-.+/'
+      - "/^fix-.+/"
     title:
-      - '/^fix/i'
-  - label: 'enhancement'
+      - "/^fix/i"
+  - label: "enhancement"
     branch:
-      - '/^feature-.+/'
-      - '/^add-.+/'
-      - '/^improve-.+/'
+      - "/^feature-.+/"
+      - "/^add-.+/"
+      - "/^improve-.+/"
     title:
       - '/^add\s/i'
-  - label: 'routing'
+  - label: "routing"
     files:
-      - 'src/kfactory/routing/**/*.py'
-  - label: 'cells'
+      - "src/kfactory/routing/**/*.py"
+  - label: "cells"
     files:
-      - 'src/kfactory/cells/**/*.py'
-  - label: 'github_actions'
+      - "src/kfactory/cells/**/*.py"
+  - label: "github_actions"
     files:
-      - '.github/**/*.yml'
+      - ".github/**/*.yml"
+  - label: "refactor"
+    branch:
+      - "/^refactor-.+/"
+    title:
+      - "/^refactor/i"
