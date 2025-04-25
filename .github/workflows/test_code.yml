@@ -17,6 +17,22 @@ jobs:
     - uses: actions/setup-python@v5
     - uses: pre-commit/action@v3.0.1
 
+  red-knot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: astral-sh/ruff
+          path: ruff
+          ref: main
+      - uses: astral-sh/setup-uv@v5
+      - name: Build red-knot check
+        run: cd ruff && cargo build -p red_knot
+      - name: Run red-knot check
+        run: uv run ruff/target/debug/red_knot check src/kfactory || true
+
+
   test_code:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -38,6 +54,7 @@ jobs:
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
         run: make test
+
   test_code_min_ver:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -58,6 +75,7 @@ jobs:
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
         run: make test-min
+
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -80,6 +98,7 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+
   test_docs:
     runs-on: ${{ matrix.os }}
     strategy:
