@@ -7,6 +7,10 @@
 
 - add route_bundle_rf for electrical [#686](https://github.com/gdsfactory/kfactory/pull/686)
 
+## Bug Fixes
+
+- fix the rf router [#687](https://github.com/gdsfactory/kfactory/pull/687)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.4...v1.5.0
 
 
