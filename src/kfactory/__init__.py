@@ -6,7 +6,7 @@ Uses the klayout package as a backend.
 # The import order matters, we need to first import the important stuff.
 # isort:skip_file
 
-__version__ = "1.4.4"
+__version__ = "1.5.0"
 
 import klayout.db as kdb
 from klayout import lay
