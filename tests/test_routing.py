@@ -849,6 +849,8 @@ def test_rf_bundle() -> None:
 
     layer = Layers()
 
+    infos = kf.kcl.infos
+
     kf.kcl.infos = Layers()
 
     enc = kf.LayerEnclosure(
@@ -945,3 +947,4 @@ def test_rf_bundle() -> None:
     c.add_ports([p1_s, p2_s, p3_s, p1_e, p2_e, p3_e])
 
     c.show()
+    kf.kcl.infos = infos
