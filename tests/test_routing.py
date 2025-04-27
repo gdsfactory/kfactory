@@ -913,40 +913,50 @@ def test_rf_bundle() -> None:
             port_type="electrical",
         )
 
-        dy = 600_000
+        dy = 1_000_000
 
         p1_e = kf.Port(
             name="PG1",
             cross_section=xs_g,
-            trans=kf.kdb.Trans(rot=2, mirrx=False, x=100_000, y=dy + 50_000),
+            trans=kf.kdb.Trans(rot=0, mirrx=False, x=-500_000, y=dy - 50_000),
             port_type="electrical",
         )
         p2_e = kf.Port(
             name="PS",
             cross_section=xs_s,
-            trans=kf.kdb.Trans(rot=2, mirrx=False, x=100_000, y=dy),
+            trans=kf.kdb.Trans(rot=0, mirrx=False, x=-500_000, y=dy),
             port_type="electrical",
         )
         p3_e = kf.Port(
             name="PG1",
             cross_section=xs_g,
-            trans=kf.kdb.Trans(rot=2, mirrx=False, x=100_000, y=dy - 50_000),
+            trans=kf.kdb.Trans(rot=0, mirrx=False, x=-500_000, y=dy + 50_000),
             port_type="electrical",
         )
+
+        ports = [p1_s, p2_s, p3_s, p1_e, p2_e, p3_e]
+
+        b = kf.kdb.Box()
+        for p in ports[:3]:
+            b += p.trans.disp.to_p()
+
+        b += kf.kdb.Point(-90_000, y=dy)
+
+        end_ports = [p1_e, p2_e, p3_e]
 
         kf.routing.electrical.route_bundle_rf(
             c,
             start_ports=[p1_s, p2_s, p3_s],
-            end_ports=[p1_e, p2_e, p3_e],
+            end_ports=end_ports,
             wire_factory=wire,
             bend_factory=bend_circular,
             layer=layer.M1,
             enclosure=enc,
             minimum_radius=50_000,
+            bboxes=[b.enlarged(-1)],
         )
 
-        c.add_ports([p1_s, p2_s, p3_s, p1_e, p2_e, p3_e])
-
-        c.show()
+        c.add_ports(ports)
+        c.shapes(c.kcl.layer(1, 0)).insert(b)
     finally:
         kf.kcl.infos = infos

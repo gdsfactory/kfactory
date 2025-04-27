@@ -1086,6 +1086,7 @@ def route_bundle_rf(
     *,
     layer: kdb.LayerInfo,
     enclosure: LayerEnclosure | None = None,
+    bboxes: list[kdb.Box] | None = None,
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
 
@@ -1211,7 +1212,7 @@ def route_bundle_rf(
     max_ = max(points, key=lambda p: p.y)
 
     center_radius = abs(max_.y - min_.y) // 2 + minimum_radius
-    bboxes: list[kdb.Box] = []
+    bboxes = bboxes or []
     if ends is None:
         ends = []
     if starts is None:
