@@ -370,7 +370,7 @@ def test_smart_routing(
 
     base_t = kf.kdb.Trans.R0
 
-    _port = partial(c.create_port, width=500, layer=kcl.find_layer(1, 0))
+    port = partial(c.create_port, width=500, layer=kcl.find_layer(1, 0))
 
     start_ports: list[kf.Port] = []
     end_ports: list[kf.Port] = []
@@ -405,13 +405,13 @@ def test_smart_routing(
             angle = a + start_angle + i
             if i == 2:
                 for j in range(5):
-                    ps = _port(
+                    ps = port(
                         name=f"start_{a=}_{i=}_{j=}",
                         trans=t
                         * kf.kdb.Trans(angle, False, 0, 0)
                         * kf.kdb.Trans(100_000, (1 - j) * 15_000 - 50_000),
                     )
-                    pe = _port(
+                    pe = port(
                         name=f"end_{a=}_{i=}_{j=}",
                         trans=t
                         * kf.kdb.Trans(a, False, 0, 0)
@@ -425,13 +425,13 @@ def test_smart_routing(
                     n += 1
             elif i == -2:
                 for j in range(5):
-                    ps = _port(
+                    ps = port(
                         name=f"start_{a=}_{i=}_{j=}",
                         trans=t
                         * kf.kdb.Trans(angle, False, 0, 0)
                         * kf.kdb.Trans(100_000, j * 15_000 + 50_000),
                     )
-                    pe = _port(
+                    pe = port(
                         name=f"end_{a=}_{i=}_{j=}",
                         trans=t
                         * kf.kdb.Trans(a, False, 0, 0)
@@ -445,13 +445,13 @@ def test_smart_routing(
                     n += 1
             else:
                 for j in range(10):
-                    ps = _port(
+                    ps = port(
                         name=f"start_{a=}_{i=}_{j=}",
                         trans=t
                         * kf.kdb.Trans(angle, False, 0, 0)
                         * kf.kdb.Trans(100_000, j * 15_000 - 50_000),
                     )
-                    pe = _port(
+                    pe = port(
                         name=f"end_{a=}_{i=}_{j=}",
                         trans=t
                         * kf.kdb.Trans(a, False, 0, 0)
@@ -592,9 +592,9 @@ def test_route_smart_waypoints_trans_sort(
     layers: Layers,
 ) -> None:
     c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_TRANS_SORT")
-    _l = 15
-    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
-        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
+    l_ = 15
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)] + [
+        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
         kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
@@ -627,9 +627,9 @@ def test_route_smart_waypoints_pts_sort(
     layers: Layers,
 ) -> None:
     c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_PTS_SORT")
-    _l = 15
-    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
-        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
+    l_ = 15
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)] + [
+        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
         kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
@@ -662,9 +662,9 @@ def test_route_smart_waypoints_trans(
     layers: Layers,
 ) -> None:
     c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_TRANS")
-    _l = 15
-    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
-        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
+    l_ = 15
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)] + [
+        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
         kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
@@ -697,9 +697,9 @@ def test_route_smart_waypoints_pts(
     layers: Layers,
 ) -> None:
     c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_PTS")
-    _l = 15
-    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(_l)] + [
-        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(_l)
+    l_ = 15
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)] + [
+        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
         kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
@@ -837,3 +837,111 @@ def test_clean_points() -> None:
             kf.kdb.Point(100, 100),
         ]
     )
+
+
+def test_rf_bundle() -> None:
+    c = kf.KCell()
+
+    class Layers(kf.LayerInfos):
+        M1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
+        M1EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 1)
+        M2EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(11, 1)
+
+    layer = Layers()
+
+    kf.kcl.infos = Layers()
+
+    enc = kf.LayerEnclosure(
+        sections=[(layer.M1EX, 500), (layer.M2EX, -200, 2000)],
+        name="M1",
+        main_layer=layer.M1,
+    )
+
+    xs_g = kf.kcl.get_icross_section(
+        kf.SymmetricalCrossSection(width=40_000, enclosure=enc, name="G")
+    )
+
+    xs_s = kf.kcl.get_icross_section(
+        kf.SymmetricalCrossSection(width=10_000, enclosure=enc, name="S")
+    )
+
+    def bend_circular(radius: int, cross_section: kf.CrossSection) -> kf.KCell:
+        c = kf.cells.circular.bend_circular(
+            radius=kf.kcl.to_um(radius),
+            width=kf.kcl.to_um(cross_section.width),
+            layer=cross_section.layer,
+            enclosure=cross_section.enclosure,
+        )
+        c.kdb_cell.locked = False
+        for p in c.ports:
+            p.port_type = "electrical"
+        c.kdb_cell.locked = True
+        return c
+
+    def wire(length: int, cross_section: kf.CrossSection) -> kf.KCell:
+        c = kf.cells.straight.straight_dbu(
+            width=cross_section.width,
+            length=length,
+            layer=cross_section.layer,
+            enclosure=cross_section.enclosure,
+        )
+        c.kdb_cell.locked = False
+        for p in c.ports:
+            p.port_type = "electrical"
+        c.kdb_cell.locked = True
+        return c
+
+    p1_s = kf.Port(
+        name="G1",
+        cross_section=xs_g,
+        trans=kf.kdb.Trans(x=0, y=50_000),
+        port_type="electrical",
+    )
+    p2_s = kf.Port(
+        name="S",
+        cross_section=xs_s,
+        trans=kf.kdb.Trans(x=0, y=0),
+        port_type="electrical",
+    )
+    p3_s = kf.Port(
+        name="G2",
+        cross_section=xs_g,
+        trans=kf.kdb.Trans(x=0, y=-50_000),
+        port_type="electrical",
+    )
+
+    dy = 600_000
+
+    p1_e = kf.Port(
+        name="PG1",
+        cross_section=xs_g,
+        trans=kf.kdb.Trans(rot=2, mirrx=False, x=100_000, y=dy + 50_000),
+        port_type="electrical",
+    )
+    p2_e = kf.Port(
+        name="PS",
+        cross_section=xs_s,
+        trans=kf.kdb.Trans(rot=2, mirrx=False, x=100_000, y=dy),
+        port_type="electrical",
+    )
+    p3_e = kf.Port(
+        name="PG1",
+        cross_section=xs_g,
+        trans=kf.kdb.Trans(rot=2, mirrx=False, x=100_000, y=dy - 50_000),
+        port_type="electrical",
+    )
+
+    kf.routing.electrical.route_bundle_rf(
+        c,
+        start_ports=[p1_s, p2_s, p3_s],
+        end_ports=[p1_e, p2_e, p3_e],
+        wire_factory=wire,
+        bend_factory=bend_circular,
+        layer=layer.M1,
+        enclosure=enc,
+        minimal_radius=50_000,
+    )
+
+    c.add_ports([p1_s, p2_s, p3_s, p1_e, p2_e, p3_e])
+
+    c.show()
