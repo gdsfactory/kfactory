@@ -957,9 +957,6 @@ def test_rf_bundle() -> None:
         )
 
         c.add_ports(ports)
-
         c.shapes(c.kcl.layer(1, 0)).insert(b)
-
-        c.show()
     finally:
         kf.kcl.infos = infos
