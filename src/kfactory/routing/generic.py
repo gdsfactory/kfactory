@@ -370,7 +370,6 @@ def route_bundle(
         c: Cell to place the route in.
         start_ports: List of start ports.
         end_ports: List of end ports.
-        separation: Separation between the routes.
         starts: List of steps to use on each starting port or all of them.
         ends: List of steps to use on each end port or all of them.
         collision_check_layers: Layers to check for actual errors if manhattan routes
