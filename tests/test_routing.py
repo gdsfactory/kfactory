@@ -851,100 +851,102 @@ def test_rf_bundle() -> None:
 
     infos = kf.kcl.infos
 
-    kf.kcl.infos = Layers()
+    try:
+        kf.kcl.infos = Layers()
 
-    enc = kf.LayerEnclosure(
-        sections=[(layer.M1EX, 500), (layer.M2EX, -200, 2000)],
-        name="M1",
-        main_layer=layer.M1,
-    )
-
-    xs_g = kf.kcl.get_icross_section(
-        kf.SymmetricalCrossSection(width=40_000, enclosure=enc, name="G")
-    )
-
-    xs_s = kf.kcl.get_icross_section(
-        kf.SymmetricalCrossSection(width=10_000, enclosure=enc, name="S")
-    )
-
-    def bend_circular(radius: int, cross_section: kf.CrossSection) -> kf.KCell:
-        c = kf.cells.circular.bend_circular(
-            radius=kf.kcl.to_um(radius),
-            width=kf.kcl.to_um(cross_section.width),
-            layer=cross_section.layer,
-            enclosure=cross_section.enclosure,
+        enc = kf.LayerEnclosure(
+            sections=[(layer.M1EX, 500), (layer.M2EX, -200, 2000)],
+            name="M1",
+            main_layer=layer.M1,
         )
-        c.kdb_cell.locked = False
-        for p in c.ports:
-            p.port_type = "electrical"
-        c.kdb_cell.locked = True
-        return c
 
-    def wire(length: int, cross_section: kf.CrossSection) -> kf.KCell:
-        c = kf.cells.straight.straight_dbu(
-            width=cross_section.width,
-            length=length,
-            layer=cross_section.layer,
-            enclosure=cross_section.enclosure,
+        xs_g = kf.kcl.get_icross_section(
+            kf.SymmetricalCrossSection(width=40_000, enclosure=enc, name="G")
         )
-        c.kdb_cell.locked = False
-        for p in c.ports:
-            p.port_type = "electrical"
-        c.kdb_cell.locked = True
-        return c
 
-    p1_s = kf.Port(
-        name="G1",
-        cross_section=xs_g,
-        trans=kf.kdb.Trans(x=0, y=50_000),
-        port_type="electrical",
-    )
-    p2_s = kf.Port(
-        name="S",
-        cross_section=xs_s,
-        trans=kf.kdb.Trans(x=0, y=0),
-        port_type="electrical",
-    )
-    p3_s = kf.Port(
-        name="G2",
-        cross_section=xs_g,
-        trans=kf.kdb.Trans(x=0, y=-50_000),
-        port_type="electrical",
-    )
+        xs_s = kf.kcl.get_icross_section(
+            kf.SymmetricalCrossSection(width=10_000, enclosure=enc, name="S")
+        )
 
-    dy = 600_000
+        def bend_circular(radius: int, cross_section: kf.CrossSection) -> kf.KCell:
+            c = kf.cells.circular.bend_circular(
+                radius=kf.kcl.to_um(radius),
+                width=kf.kcl.to_um(cross_section.width),
+                layer=cross_section.layer,
+                enclosure=cross_section.enclosure,
+            )
+            c.kdb_cell.locked = False
+            for p in c.ports:
+                p.port_type = "electrical"
+            c.kdb_cell.locked = True
+            return c
 
-    p1_e = kf.Port(
-        name="PG1",
-        cross_section=xs_g,
-        trans=kf.kdb.Trans(rot=2, mirrx=False, x=100_000, y=dy + 50_000),
-        port_type="electrical",
-    )
-    p2_e = kf.Port(
-        name="PS",
-        cross_section=xs_s,
-        trans=kf.kdb.Trans(rot=2, mirrx=False, x=100_000, y=dy),
-        port_type="electrical",
-    )
-    p3_e = kf.Port(
-        name="PG1",
-        cross_section=xs_g,
-        trans=kf.kdb.Trans(rot=2, mirrx=False, x=100_000, y=dy - 50_000),
-        port_type="electrical",
-    )
+        def wire(length: int, cross_section: kf.CrossSection) -> kf.KCell:
+            c = kf.cells.straight.straight_dbu(
+                width=cross_section.width,
+                length=length,
+                layer=cross_section.layer,
+                enclosure=cross_section.enclosure,
+            )
+            c.kdb_cell.locked = False
+            for p in c.ports:
+                p.port_type = "electrical"
+            c.kdb_cell.locked = True
+            return c
 
-    kf.routing.electrical.route_bundle_rf(
-        c,
-        start_ports=[p1_s, p2_s, p3_s],
-        end_ports=[p1_e, p2_e, p3_e],
-        wire_factory=wire,
-        bend_factory=bend_circular,
-        layer=layer.M1,
-        enclosure=enc,
-        minimal_radius=50_000,
-    )
+        p1_s = kf.Port(
+            name="G1",
+            cross_section=xs_g,
+            trans=kf.kdb.Trans(x=0, y=50_000),
+            port_type="electrical",
+        )
+        p2_s = kf.Port(
+            name="S",
+            cross_section=xs_s,
+            trans=kf.kdb.Trans(x=0, y=0),
+            port_type="electrical",
+        )
+        p3_s = kf.Port(
+            name="G2",
+            cross_section=xs_g,
+            trans=kf.kdb.Trans(x=0, y=-50_000),
+            port_type="electrical",
+        )
 
-    c.add_ports([p1_s, p2_s, p3_s, p1_e, p2_e, p3_e])
+        dy = 600_000
 
-    c.show()
-    kf.kcl.infos = infos
+        p1_e = kf.Port(
+            name="PG1",
+            cross_section=xs_g,
+            trans=kf.kdb.Trans(rot=2, mirrx=False, x=100_000, y=dy + 50_000),
+            port_type="electrical",
+        )
+        p2_e = kf.Port(
+            name="PS",
+            cross_section=xs_s,
+            trans=kf.kdb.Trans(rot=2, mirrx=False, x=100_000, y=dy),
+            port_type="electrical",
+        )
+        p3_e = kf.Port(
+            name="PG1",
+            cross_section=xs_g,
+            trans=kf.kdb.Trans(rot=2, mirrx=False, x=100_000, y=dy - 50_000),
+            port_type="electrical",
+        )
+
+        kf.routing.electrical.route_bundle_rf(
+            c,
+            start_ports=[p1_s, p2_s, p3_s],
+            end_ports=[p1_e, p2_e, p3_e],
+            wire_factory=wire,
+            bend_factory=bend_circular,
+            layer=layer.M1,
+            enclosure=enc,
+            minimum_radius=50_000,
+        )
+
+        c.add_ports([p1_s, p2_s, p3_s, p1_e, p2_e, p3_e])
+
+        c.show()
+    finally:
+        kf.kcl.infos = infos
