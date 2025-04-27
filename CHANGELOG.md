@@ -3,7 +3,9 @@
 
 # What's Changed
 
+## Bug Fixes
 
+- fix rf bboxes being ignored [#689](https://github.com/gdsfactory/kfactory/pull/689)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.0...v1.5.1
 
