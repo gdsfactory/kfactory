@@ -1,6 +1,9 @@
 coverage:
   status:
     project:
-      default:   # default is the status check's name, not default settings
+      default: # default is the status check's name, not default settings
         target: auto
         threshold: 2
+    patch:
+      default:
+        enabled: false
