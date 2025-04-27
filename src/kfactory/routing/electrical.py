@@ -1082,7 +1082,7 @@ def route_bundle_rf(
     start_angles: list[int] | float | list[float] | None = None,
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
-    minimal_radius: int | None = None,
+    minimum_radius: int = 0,
     *,
     layer: kdb.LayerInfo,
     enclosure: LayerEnclosure | None = None,
@@ -1186,15 +1186,7 @@ def route_bundle_rf(
     Returns:
         list[ManhattanRoute]: The route object with the placed components.
     """
-    bboxes: list[kdb.Box] = []
-    if ends is None:
-        ends = []
-    if starts is None:
-        starts = []
-    start_ports_ = [p.base for p in start_ports]
-    end_ports_ = [p.base for p in end_ports]
-
-    p1 = Port(base=start_ports_[0])
+    p1 = Port(base=start_ports[0].base)
     port_angle = p1.angle
 
     for port in start_ports[1:]:
@@ -1203,24 +1195,30 @@ def route_bundle_rf(
                 "All ports must have the same orientation and separation between their "
                 f"core material Orientations: {[p.orientation for p in start_ports]}"
             )
+    separation = 0
     if len(start_ports) > 1:
+        p2 = Port(base=start_ports[1].base)
         separation = (
-            round(
-                start_ports[1]
-                .trans.disp.to_p()
-                .distance(start_ports[0].trans.disp.to_p())
-            )
-            - start_ports[0].width // 2
-            - start_ports[1].width // 2
+            round(p2.trans.disp.to_p().distance(p1.trans.disp.to_p()))
+            - (p1.width + p2.width) // 2
         )
 
     points = [
-        p1.trans.inverted() * Port(base=port).trans.disp.to_p() for port in start_ports_
+        p1.trans.inverted() * Port(base=port.base).trans.disp.to_p()
+        for port in start_ports
     ]
     min_ = min(points, key=lambda p: p.y)
     max_ = max(points, key=lambda p: p.y)
 
-    center_radius = abs(max_.y - min_.y) // 2 + minimal_radius  # type: ignore[operator]
+    center_radius = abs(max_.y - min_.y) // 2 + minimum_radius
+    bboxes: list[kdb.Box] = []
+    if ends is None:
+        ends = []
+    if starts is None:
+        starts = []
+
+    start_ports_ = [p.base for p in start_ports]
+    end_ports_ = [p.base for p in end_ports]
 
     p1t = p1.trans
     u = kdb.Vector()
