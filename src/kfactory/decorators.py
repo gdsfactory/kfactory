@@ -425,8 +425,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
             ci for cell in cells for ci in cell.caller_cells() if not cell._destroyed()
         }
         caller_cis |= {c.cell_index() for c in cells}
-        for ci in caller_cis:
-            self.kcl[ci].delete()
+        self.kcl.delete_cells(list(caller_cis))
 
         self.kcl.cleanup()
         self.cache.clear()
