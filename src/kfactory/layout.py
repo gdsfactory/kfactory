@@ -969,6 +969,9 @@ class KCLayout(
     def delete_cells(self, cell_index_list: Sequence[int]) -> None:
         """Delete a sequence of cell by indexes."""
         with self.thread_lock:
+            for ci in cell_index_list:
+                self.layout.cell(ci).locked = False
+                self.tkcells.pop(ci, None)
             self.layout.delete_cells(cell_index_list)
             self.rebuild()
 
