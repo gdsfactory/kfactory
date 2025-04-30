@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- fix cache pruning [#691](https://github.com/gdsfactory/kfactory/pull/691)
 - Lower mkdocs video lower bound [#690](https://github.com/gdsfactory/kfactory/pull/690)
 - fix rf bboxes being ignored [#689](https://github.com/gdsfactory/kfactory/pull/689)
 
