@@ -1,5 +1,18 @@
-<a id="v1.5.1"></a>
-# [v1.5.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.1) - 2025-04-27
+<a id="v1.5.3"></a>
+# [v1.5.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.3) - 2025-05-01
+
+# What's Changed
+
+
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.2...v1.5.3
+
+
+[Changes][v1.5.3]
+
+
+<a id="v1.5.2"></a>
+# [v1.5.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.2) - 2025-04-30
 
 # What's Changed
 
@@ -13,10 +26,10 @@
 
 - Lower mkdocs video lower bound [#690](https://github.com/gdsfactory/kfactory/pull/690)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.0...v1.5.1
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.0...v1.5.2
 
 
-[Changes][v1.5.1]
+[Changes][v1.5.2]
 
 
 <a id="v1.5.0"></a>
@@ -1904,7 +1917,8 @@
 [Changes][v0.4.0]
 
 
-[v1.5.1]: https://github.com/gdsfactory/kfactory/compare/v1.5.0...v1.5.1
+[v1.5.3]: https://github.com/gdsfactory/kfactory/compare/v1.5.2...v1.5.3
+[v1.5.2]: https://github.com/gdsfactory/kfactory/compare/v1.5.0...v1.5.2
 [v1.5.0]: https://github.com/gdsfactory/kfactory/compare/v1.4.4...v1.5.0
 [v1.4.4]: https://github.com/gdsfactory/kfactory/compare/v1.4.3...v1.4.4
 [v1.4.3]: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.4.3
