@@ -3,7 +3,9 @@
 
 # What's Changed
 
+## Bug Fixes
 
+- fix layer selection for electrical router [#693](https://github.com/gdsfactory/kfactory/pull/693)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.2...v1.5.3
 
