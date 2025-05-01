@@ -565,6 +565,7 @@ def route_bundle_dual_rails(
         placer_kwargs={
             "separation_rails": separation_rails,
             "route_width": width_rails,
+            "layer_info": place_layer,
         },
         sort_ports=sort_ports,
         on_collision=on_collision,
