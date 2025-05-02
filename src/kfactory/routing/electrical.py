@@ -414,6 +414,7 @@ def route_bundle(
         placer_function=place_single_wire,
         placer_kwargs={
             "route_width": route_width,
+            "layer_info": place_layer,
         },
         sort_ports=sort_ports,
         on_collision=on_collision,
