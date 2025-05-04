@@ -1419,7 +1419,9 @@ class KCLayout(
             settings.update(cell_kwargs)
             return self.factories[spec["component"]](**settings)
         if isinstance(spec, str):
-            return self.factories[spec](**cell_kwargs)
+            if spec in self.factories:
+                return self.factories[spec](**cell_kwargs)
+            return self[spec]
         if cell_kwargs:
             raise ValueError(
                 "Cell kwargs are not allowed for retrieving static cells by integer "

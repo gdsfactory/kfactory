@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections import defaultdict
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -26,20 +27,23 @@ from pydantic import (
 from ruamel.yaml import YAML
 from typing_extensions import TypeAliasType
 
+from . import kdb
 from .conf import PROPID
-from .kcell import DKCell, KCell
-from .layout import KCLayout, kcls
+from .kcell import DKCell, KCell, ProtoTKCell
+from .layout import KCLayout, get_default_kcl, kcls
 from .typings import TUnit, dbu, um
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from .instance import ProtoTInstance
+
 yaml = YAML(typ="safe")
 
-JSON_Serializable = TypeAliasType(
-    "JSON_Serializable",
-    "int | float| bool | str | list[JSON_Serializable] | tuple[JSON_Serializable, ...]"
-    " | dict[str, JSON_Serializable]| None",
+JSONSerializable = TypeAliasType(
+    "JSONSerializable",
+    "int | float| bool | str | list[JSONSerializable] | tuple[JSONSerializable, ...]"
+    " | dict[str, JSONSerializable]| None",
 )
 
 
@@ -103,18 +107,18 @@ class Ports(BaseModel, Generic[TUnit]):
         return PortRef(instance=self.instance.name, port=key)
 
 
-CellConfig = RootModel[dict[str, JSON_Serializable]]
+CellConfig = RootModel[dict[str, JSONSerializable]]
 
 
 class SchemaInstance(
     BaseModel, Generic[TUnit], extra="forbid", arbitrary_types_allowed=True
 ):
     name: str = Field(exclude=True)
-    kcl: KCLayout = Field(exclude=True, default="DEFAULT")  # type: ignore[assignment]
     component: str
     settings: CellConfig | None = None
     info: CellConfig | None = None
     array: RegularArray[TUnit] | Array[TUnit] | None = None
+    kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
     _schema: TSchema[TUnit] = PrivateAttr()
 
     @field_validator("kcl", mode="before")
@@ -130,12 +134,54 @@ class SchemaInstance(
             raise RuntimeError("Schema instance has no parent set.")
         return self._schema
 
+    @property
+    def placement(self) -> Placement[TUnit] | None:
+        return self.parent_schema.placements.get(self.name)
+
+    def place(
+        self,
+        x: TUnit | PortRef = 0,
+        y: TUnit | PortRef = 0,
+        dx: TUnit = 0,
+        dy: TUnit = 0,
+        orientation: Literal[0, 90, 180, 270] = 0,
+        mirror: bool = False,
+    ) -> Placement[TUnit]:
+        placement = Placement[TUnit](
+            x=x, y=y, dx=dx, dy=dy, orientation=orientation, mirror=mirror
+        )
+        self.parent_schema.placements[self.name] = placement
+        return placement
+
+    @overload
+    def __getitem__(self, value: str) -> PortRef: ...
+    @overload
+    def __getitem__(self, value: tuple[str, int, int]) -> PortArrayRef: ...
+
+    def __getitem__(self, value: str | tuple[str, int, int]) -> PortRef:
+        if isinstance(value, str):
+            return PortRef(instance=self.name, port=value)
+        return PortArrayRef(instance=self.name, port=value[0], ia=value[1], ib=value[2])
+
+    def connect(
+        self, port: str | tuple[str, int, int], other: Port[TUnit] | PortRef
+    ) -> Connection[TUnit]:
+        if isinstance(port, str):
+            pref = PortRef(instance=self.name, port=port)
+        else:
+            pref = PortArrayRef(
+                instance=self.name, port=port[0], ia=port[1], ib=port[2]
+            )
+        conn = Connection[TUnit]((other, pref))
+        self.parent_schema.connections.append(conn)
+        return conn
+
 
 class Route(BaseModel, Generic[TUnit], extra="forbid"):
     name: str = Field(exclude=True)
     links: list[Link[TUnit]]
     routing_strategy: str | None = None
-    settings: dict[str, JSON_Serializable]
+    settings: dict[str, JSONSerializable]
 
     @model_validator(mode="before")
     @classmethod
@@ -269,11 +315,16 @@ class Connection(
         ]
     ]
 ):
-    root: tuple[PortArrayRef | PortRef, PortArrayRef | PortRef]
+    root: tuple[PortArrayRef | PortRef | Port[TUnit], PortArrayRef | PortRef]
 
     @model_validator(mode="after")
     def _sort_data(self) -> Self:
         self.root = tuple(sorted(self.root))  # type: ignore[assignment]
+        if isinstance(self.root[1], Port):
+            raise TypeError(
+                "Two cell ports cannot be connected together. This would cause an "
+                "invalid netlist."
+            )
         return self
 
     @classmethod
@@ -325,14 +376,17 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
     connections: list[Connection[TUnit]] = Field(default_factory=list)
     routes: dict[str, Route[TUnit]] = Field(default_factory=dict)
     ports: dict[str, Port[TUnit]] = Field(default_factory=dict)
+    kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
 
     def create_inst(
         self,
         name: str,
         component: str,
         settings: CellConfig | None = None,
-        info: CellConfig | None = None,
+        info: JSONSerializable | None = None,
         array: RegularArray[TUnit] | Array[TUnit] | None = None,
+        placement: Placement[TUnit] | None = None,
+        kcl: KCLayout | None = None,
     ) -> SchemaInstance[TUnit]:
         inst = SchemaInstance[TUnit].model_validate(
             {
@@ -341,6 +395,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                 "settings": settings,
                 "info": info,
                 "array": array,
+                "kcl": kcl or self.kcl,
             }
         )
         inst._schema = self
@@ -405,6 +460,8 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
     def _validate_model(cls, data: dict[str, Any]) -> dict[str, Any]:
         if not isinstance(data, dict):
             return data
+        if "kcl" in data and isinstance(data["kcl"], str):
+            data["kcl"] = kcls[data["kcl"]]
         instances = data.get("instances")
         if instances:
             for name, instance in instances.items():
@@ -459,6 +516,160 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         for inst in self.instances.values():
             inst._schema = self
         return self
+
+    def create_cell(self, output_type: type[ProtoTKCell[TUnit]]) -> ProtoTKCell[TUnit]:
+        c = output_type()
+
+        instances: dict[str, ProtoTInstance[TUnit]] = {}
+
+        for inst in self.instances.values():
+            if inst.settings:
+                inst_ = c.create_inst(
+                    inst.kcl.get_component(inst.component, **inst.settings.root)
+                )
+            else:
+                inst_ = c.create_inst(inst.kcl.get_component(inst.component))
+
+            inst_.name = inst.name
+            instances[inst.name] = inst_
+
+        islands: dict[str, set[str]] = {}
+        instance_connections: defaultdict[str, list[Connection[TUnit]]] = defaultdict(
+            list
+        )
+        for connection in self.connections:
+            pr1, pr2 = connection.root
+            if isinstance(pr1, Port):
+                continue
+            instance_connections[pr1.instance].append(connection)
+            instance_connections[pr2.instance].append(connection)
+            islands1 = islands.get(pr1.instance)
+            islands2 = islands.get(pr2.instance)
+            match islands1 is None, islands2 is None:
+                case True, True:
+                    island = {pr1.instance, pr2.instance}
+                    islands[pr1.instance] = island
+                    islands[pr2.instance] = island
+                case False, True:
+                    island = islands[pr1.instance]
+                    island.add(pr2.instance)
+                    islands[pr2.instance] = island
+                case True, False:
+                    island = islands[pr2.instance]
+                    island.add(pr1.instance)
+                    islands[pr1.instance] = island
+                case False, False:
+                    island = islands[pr1.instance] | islands[pr2.instance]
+                    for instance_name in island:
+                        islands[instance_name] = island
+        placed_islands: list[set[str]] = []
+        for island in islands.values():
+            if island not in placed_islands:
+                _place_islands(
+                    c, island, instances, instance_connections, self.instances
+                )
+                placed_islands.append(island)
+
+        return c
+
+
+def _place_islands(
+    c: ProtoTKCell[TUnit],
+    schema_island: set[str],
+    instances: dict[str, ProtoTInstance[TUnit]],
+    connections: dict[str, list[Connection[TUnit]]],
+    schema_instances: dict[str, SchemaInstance[TUnit]],
+) -> None:
+    target_length = len(schema_island)
+    placed_insts: set[str] = set()
+
+    placable_insts: set[str] = set()
+
+    for inst in schema_island:
+        schema_inst = schema_instances[inst]
+        kinst = instances[inst]
+        if schema_inst.placement:
+            p = schema_inst.placement
+            if isinstance(p.x, PortRef) or isinstance(p.y, PortRef):
+                # TODO @sebastian: needs to properly check whether port placed and available
+                continue
+            st = kinst._standard_trans()
+            if isinstance(st, kdb.Trans | kdb.ICplxTrans):
+                kinst.transform(
+                    kdb.ICplxTrans(
+                        mag=1,
+                        rot=p.orientation,
+                        mirrx=p.mirror,
+                        x=p.x + p.dx,
+                        y=p.y + p.dy,
+                    )
+                )
+            else:
+                kinst.transform(
+                    kdb.DCplxTrans(
+                        mag=1,
+                        rot=p.orientation,
+                        mirrx=p.mirror,
+                        x=p.x + p.dx,
+                        y=p.y + p.dy,
+                    )
+                )
+            placed_insts.add(inst)
+
+    while len(placed_insts) < target_length:
+        placable_insts = _get_placable(placed_insts, connections)
+
+        _connect_instances(instances, placable_insts, connections, placed_insts)
+        placed_insts |= placable_insts
+
+        if not placable_insts:
+            raise ValueError("Could not place all instances.")
+
+
+def _connect_instances(
+    instances: dict[str, ProtoTInstance[TUnit]],
+    place_insts: set[str],
+    connections: dict[str, list[Connection[TUnit]]],
+    placed_instances: set[str],
+) -> None:
+    for inst_name in place_insts:
+        inst = instances[inst_name]
+        for conn in connections[inst_name]:
+            if isinstance(conn.root[0], Port):
+                continue
+            if (
+                conn.root[0].instance == inst_name
+                and conn.root[1].instance in placed_instances
+            ):
+                inst.connect(
+                    conn.root[0].port,
+                    instances[conn.root[1].instance],
+                    conn.root[1].port,
+                )
+                break
+            if conn.root[0].instance in placed_instances:
+                inst.connect(
+                    conn.root[1].port,
+                    instances[conn.root[0].instance],
+                    conn.root[0].port,
+                )
+                break
+        else:
+            raise ValueError("Could not connect all instances")
+
+
+def _get_placable(
+    placed_insts: set[str], connections: dict[str, list[Connection[TUnit]]]
+) -> set[str]:
+    placable_insts: set[str] = set()
+    for inst in placed_insts:
+        for connection in connections[inst]:
+            ref1, ref2 = connection.root
+            if isinstance(ref1, Port):
+                placable_insts.add(ref2.instance)
+            else:
+                placable_insts |= {ref1.instance, ref2.instance}
+    return placable_insts - placed_insts
 
 
 @overload
