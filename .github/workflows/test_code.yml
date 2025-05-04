@@ -27,9 +27,9 @@ jobs:
           path: ruff
           ref: main
       - uses: astral-sh/setup-uv@v6
-      - name: Build red-knot check
+      - name: Build ty
         run: cd ruff && cargo build -p ty
-      - name: Run red-knot check
+      - name: Run ty check
         run: uv run ruff/target/debug/ty check src/kfactory || true
 
 
