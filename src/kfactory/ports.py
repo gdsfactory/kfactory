@@ -32,6 +32,11 @@ from .port import (
     filter_port_type,
     filter_regex,
 )
+from .protocols import (
+    TCreatePortFunction,
+    DCreatePortFunction,
+    CreatePortFunction,
+)
 from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
 
@@ -70,6 +75,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
     kcl: KCLayout
     _locked: bool
     _bases: list[BasePort]
+    create_port: TCreatePortFunction[TUnit]
 
     @overload
     def __init__(self, *, kcl: KCLayout) -> None: ...
@@ -247,6 +253,7 @@ class Ports(ProtoPorts[int]):
     """
 
     yaml_tag: ClassVar[str] = "!Ports"
+    create_port: CreatePortFunction
 
     def __iter__(self) -> Iterator[Port]:
         """Iterator, that allows for loops etc to directly access the object."""
@@ -294,63 +301,6 @@ class Ports(ProtoPorts[int]):
             port_.dcplx_trans = dcplx_trans
             self._bases.append(port_.base)
         return port_
-
-    @overload
-    def create_port(
-        self,
-        *,
-        trans: kdb.Trans,
-        width: int,
-        layer: int,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> Port: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        dcplx_trans: kdb.DCplxTrans,
-        width: int,
-        layer: LayerEnum | int,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> Port: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        width: int,
-        layer: LayerEnum | int,
-        center: tuple[int, int],
-        angle: Angle,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> Port: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        trans: kdb.Trans,
-        width: int,
-        layer_info: kdb.LayerInfo,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> Port: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        width: int,
-        layer_info: kdb.LayerInfo,
-        center: tuple[int, int],
-        angle: Angle,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> Port: ...
 
     def create_port(
         self,
@@ -500,6 +450,7 @@ class DPorts(ProtoPorts[float]):
     """
 
     yaml_tag: ClassVar[str] = "!DPorts"
+    create_port: DCreatePortFunction
 
     def __iter__(self) -> Iterator[DPort]:
         """Iterator, that allows for loops etc to directly access the object."""
@@ -547,74 +498,6 @@ class DPorts(ProtoPorts[float]):
             port_.dcplx_trans = dcplx_trans
             self._bases.append(port_.base)
         return port_
-
-    @overload
-    def create_port(
-        self,
-        *,
-        trans: kdb.Trans,
-        width: float,
-        layer: int,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        dcplx_trans: kdb.DCplxTrans,
-        width: float,
-        layer: LayerEnum | int,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        width: float,
-        layer: LayerEnum | int,
-        center: tuple[float, float],
-        orientation: float,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        trans: kdb.Trans,
-        width: float,
-        layer_info: kdb.LayerInfo,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        dcplx_trans: kdb.DCplxTrans,
-        width: float,
-        layer_info: kdb.LayerInfo,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        width: float,
-        layer_info: kdb.LayerInfo,
-        center: tuple[float, float],
-        orientation: float,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> DPort: ...
 
     def create_port(
         self,
