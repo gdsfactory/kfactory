@@ -17,7 +17,7 @@ jobs:
     - uses: actions/setup-python@v5
     - uses: pre-commit/action@v3.0.1
 
-  red-knot:
+  run-ty:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,9 +28,9 @@ jobs:
           ref: main
       - uses: astral-sh/setup-uv@v6
       - name: Build red-knot check
-        run: cd ruff && cargo build -p red_knot
+        run: cd ruff && cargo build -p ty
       - name: Run red-knot check
-        run: uv run ruff/target/debug/red_knot check src/kfactory || true
+        run: uv run ruff/target/debug/ty check src/kfactory || true
 
 
   test_code:
