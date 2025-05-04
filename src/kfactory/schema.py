@@ -18,6 +18,7 @@ from pydantic import (
     AfterValidator,
     BaseModel,
     Field,
+    PrivateAttr,
     RootModel,
     field_validator,
     model_validator,
@@ -114,6 +115,7 @@ class SchemaInstance(
     settings: CellConfig | None = None
     info: CellConfig | None = None
     array: RegularArray[TUnit] | Array[TUnit] | None = None
+    _schema: TSchema[TUnit] = PrivateAttr()
 
     @field_validator("kcl", mode="before")
     @classmethod
@@ -122,10 +124,16 @@ class SchemaInstance(
             return kcls[value]
         return value
 
+    @property
+    def parent_schema(self) -> TSchema[TUnit]:
+        if self._schema is None:
+            raise RuntimeError("Schema instance has no parent set.")
+        return self._schema
 
-class Route(BaseModel, extra="forbid"):
+
+class Route(BaseModel, Generic[TUnit], extra="forbid"):
     name: str = Field(exclude=True)
-    links: list[Link]
+    links: list[Link[TUnit]]
     routing_strategy: str | None = None
     settings: dict[str, JSON_Serializable]
 
@@ -154,6 +162,13 @@ class PortRef(BaseModel, extra="forbid"):
             return {"instance": data[0], "port": data[1]}
         return data
 
+    def __lt__(self, other: PortRef | PortArrayRef | Port[Any]) -> bool:
+        if isinstance(other, Port):
+            return False
+        if isinstance(other, PortArrayRef):
+            return True
+        return (self.instance, self.port) < (other.instance, other.port)
+
 
 class PortArrayRef(PortRef, extra="forbid"):
     ia: int
@@ -175,6 +190,16 @@ class PortArrayRef(PortRef, extra="forbid"):
                 }
         return data
 
+    def __lt__(self, other: PortRef | Port[Any] | PortArrayRef) -> bool:
+        if isinstance(other, Port[Any] | PortRef):
+            return False
+        return (self.instance, self.port, self.ia, self.ib) < (
+            other.instance,
+            other.port,
+            other.ia,
+            other.ib,
+        )
+
 
 class Port(BaseModel, Generic[TUnit], extra="forbid"):
     name: str = Field(exclude=True)
@@ -183,21 +208,76 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
     dx: TUnit = cast("TUnit", 0)
     dy: TUnit = cast("TUnit", 0)
 
+    def __lt__(self, other: Port[Any] | PortRef) -> bool:
+        if isinstance(other, Port):
+            return (self.name, self.x, self.y, self.dx, self.dy) < (
+                other.name,
+                other.x,
+                other.y,
+                other.dx,
+                other.dy,
+            )
+        return True
 
-class Net(RootModel[list[PortArrayRef | PortRef]]):
-    root: list[PortArrayRef | PortRef]
+
+class Net(RootModel[list[PortArrayRef | PortRef | Port[TUnit]]]):
+    root: list[PortArrayRef | PortRef | Port[TUnit]]
+
+    def sort(self) -> Self:
+        def _port_sort(port: PortRef | Port[Any]) -> tuple[Any, ...]:
+            if isinstance(port, PortRef):
+                return (port.instance, port.port)
+            return (port.name,)
+
+        self.root.sort(key=_port_sort)
+        return self
+
+    def __lt__(self, other: Net[Any]) -> bool:
+        if len(self.root) == 0:
+            return False
+        if len(other.root) == 0:
+            return True
+        s0 = self.root[0]
+        o0 = other.root[0]
+        return s0 < o0
+
+    @model_validator(mode="after")
+    def _sort_data(self) -> Self:
+        self.root.sort()
+        return self
 
 
-class Link(RootModel[tuple[PortArrayRef | PortRef, PortArrayRef | PortRef]]):
+class Link(
+    RootModel[
+        tuple[
+            Port[TUnit] | PortArrayRef | PortRef, Port[TUnit] | PortArrayRef | PortRef
+        ]
+    ]
+):
     root: tuple[PortArrayRef | PortRef, PortArrayRef | PortRef]
 
+    @model_validator(mode="after")
+    def _sort_data(self) -> Self:
+        self.root = tuple(sorted(self.root))  # type: ignore[assignment]
+        return self
 
-class Connection(BaseModel, extra="forbid"):
-    p1: PortArrayRef | PortRef
-    p2: PortArrayRef | PortRef
+
+class Connection(
+    RootModel[
+        tuple[
+            Port[TUnit] | PortArrayRef | PortRef, Port[TUnit] | PortArrayRef | PortRef
+        ]
+    ]
+):
+    root: tuple[PortArrayRef | PortRef, PortArrayRef | PortRef]
+
+    @model_validator(mode="after")
+    def _sort_data(self) -> Self:
+        self.root = tuple(sorted(self.root))  # type: ignore[assignment]
+        return self
 
     @classmethod
-    def from_list(cls, data: Any) -> Connection:
+    def from_list(cls, data: Any) -> Connection[TUnit]:
         if isinstance(data, list | tuple):
             if isinstance(data[0][0], list | tuple):
                 p1 = {
@@ -225,8 +305,16 @@ class Connection(BaseModel, extra="forbid"):
 class TNetlist(BaseModel, Generic[TUnit], extra="forbid"):
     name: str | None = None
     instances: dict[str, SchemaInstance[TUnit]] | None = None
-    nets: list[Net]
+    nets: list[Net[TUnit]]
     ports: dict[str, Port[TUnit]] | None = None
+
+    def sort(self) -> Self:
+        if self.instances:
+            self.instances = dict(sorted(self.instances.items()))
+        self.nets.sort()
+        if self.ports:
+            self.ports = {p.name: p for p in self.ports.values()}
+        return self
 
 
 class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
@@ -234,8 +322,8 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
     dependencies: list[Path] = Field(default_factory=list)
     instances: dict[str, SchemaInstance[TUnit]] = Field(default_factory=dict)
     placements: dict[str, Placement[TUnit]] = Field(default_factory=dict)
-    connections: list[Connection] = Field(default_factory=list)
-    routes: dict[str, Route] = Field(default_factory=dict)
+    connections: list[Connection[TUnit]] = Field(default_factory=list)
+    routes: dict[str, Route[TUnit]] = Field(default_factory=dict)
     ports: dict[str, Port[TUnit]] = Field(default_factory=dict)
 
     def create_inst(
@@ -255,6 +343,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                 "array": array,
             }
         )
+        inst._schema = self
 
         self.instances[inst.name] = inst
         return inst
@@ -278,8 +367,8 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         self.ports[p.name] = p
         return p
 
-    def create_connection(self, port1: PortRef, port2: PortRef) -> Connection:
-        conn = Connection(p1=port1, p2=port2)
+    def create_connection(self, port1: PortRef, port2: PortRef) -> Connection[TUnit]:
+        conn = Connection[TUnit]((port1, port2))
         if port1.instance not in self.instances:
             raise ValueError(
                 f"Cannot create connection to unknown instance {port1.instance}"
@@ -292,7 +381,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         return conn
 
     def netlist(self) -> TNetlist[TUnit]:
-        nets: list[Net] = []
+        nets: list[Net[TUnit]] = []
         if self.routes is not None:
             nets.extend(
                 [
@@ -302,9 +391,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                 ]
             )
         if self.connections:
-            nets.extend(
-                [Net([connection.p1, connection.p2]) for connection in self.connections]
-            )
+            nets.extend([Net(list(connection.root)) for connection in self.connections])
 
         return TNetlist[TUnit](
             name=self.name,
@@ -328,7 +415,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                 route["name"] = name
         connections = data.get("connections")
         if connections and isinstance(connections, dict):
-            built_connections: list[Connection] = []
+            built_connections: list[Connection[TUnit]] = []
             connections_: list[tuple[tuple[str, str], tuple[str, str]]] = [
                 (k.rsplit(",", 1), v.rsplit(",", 1)) for k, v in connections.items()
             ]
@@ -366,6 +453,12 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                 )
             data["connections"] = built_connections
         return data
+
+    @model_validator(mode="after")
+    def assign_backrefs(self) -> Self:
+        for inst in self.instances.values():
+            inst._schema = self
+        return self
 
 
 @overload

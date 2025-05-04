@@ -39,4 +39,6 @@ routes:
       tl,e3: tr,e1
       bl,e3: br,e1
 """
-    kf.DSchema.model_validate(yaml.load(schema_yaml))
+    schema = kf.DSchema.model_validate(yaml.load(schema_yaml))
+    for inst in schema.instances.values():
+        _ = inst.parent_schema.name
