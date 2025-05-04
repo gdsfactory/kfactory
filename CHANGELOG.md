@@ -1,3 +1,16 @@
+<a id="v1.5.5"></a>
+# [v1.5.5](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.5) - 2025-05-04
+
+# What's Changed
+
+
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.5.5
+
+
+[Changes][v1.5.5]
+
+
 <a id="v1.5.4"></a>
 # [v1.5.4](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.4) - 2025-05-02
 
@@ -1934,6 +1947,7 @@
 [Changes][v0.4.0]
 
 
+[v1.5.5]: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.5.5
 [v1.5.4]: https://github.com/gdsfactory/kfactory/compare/v1.5.3...v1.5.4
 [v1.5.3]: https://github.com/gdsfactory/kfactory/compare/v1.5.2...v1.5.3
 [v1.5.2]: https://github.com/gdsfactory/kfactory/compare/v1.5.0...v1.5.2
