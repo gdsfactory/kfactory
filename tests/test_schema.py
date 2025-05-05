@@ -134,9 +134,7 @@ def test_schema_create_cell() -> None:
         s2 = schema.create_inst(
             name="s2", component="straight", settings={"length": 5000}
         )
-        s3 = schema.create_inst(
-            name="s3", component="straight", settings={"length": 10_000}
-        )
+        s3 = schema.create_inst(name="s3", component="straight", settings={"length": n})
 
         s3.connect("o1", s1["o2"])
         s2.connect("o1", s3["o2"])
