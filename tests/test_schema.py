@@ -89,4 +89,60 @@ def test_schema_create() -> None:
 
     s1.place(x=1000, y=10_000)
 
-    schema.create_cell(kf.KCell).show()
+    schema.create_cell(kf.KCell)
+
+
+def test_schema_create_cell() -> None:
+    class Layers(kf.LayerInfos):
+        WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+        WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
+        WGEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
+        WGCLADEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1)
+        FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
+        FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
+        FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
+
+    LAYER = Layers()
+    pdk = kf.KCLayout("SCHEMA_PDK_DECORATOR", infos=Layers)
+
+    @pdk.cell
+    def straight(length: int) -> kf.KCell:
+        c = pdk.kcell()
+        c.shapes(LAYER.WG).insert(kf.kdb.Box(0, -250, length, 250))
+        c.create_port(
+            name="o1",
+            width=500,
+            trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=0),
+            layer_info=LAYER.WG,
+        )
+        c.create_port(
+            name="o2",
+            width=500,
+            trans=kf.kdb.Trans(x=length, y=0),
+            layer_info=LAYER.WG,
+        )
+
+        return c
+
+    @pdk.schematic_cell
+    def long_straight(n: int) -> kf.schema.TSchema[int]:
+        schema = kf.schema.TSchema[int](kcl=pdk)
+
+        s1 = schema.create_inst(
+            name="s1", component="straight", settings={"length": 5000}
+        )
+        s2 = schema.create_inst(
+            name="s2", component="straight", settings={"length": 5000}
+        )
+        s3 = schema.create_inst(
+            name="s3", component="straight", settings={"length": 10_000}
+        )
+
+        s3.connect("o1", s1["o2"])
+        s2.connect("o1", s3["o2"])
+
+        s1.place(x=1000, y=10_000)
+
+        return schema
+
+    long_straight(50_000).show()

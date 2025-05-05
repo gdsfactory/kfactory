@@ -31,7 +31,7 @@ from . import kdb
 from .conf import PROPID
 from .kcell import DKCell, KCell, ProtoTKCell
 from .layout import KCLayout, get_default_kcl, kcls
-from .typings import TUnit, dbu, um
+from .typings import KC, TUnit, dbu, um
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -517,10 +517,10 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
             inst._schema = self
         return self
 
-    def create_cell(self, output_type: type[ProtoTKCell[TUnit]]) -> ProtoTKCell[TUnit]:
-        c = output_type()
+    def create_cell(self, output_type: type[KC]) -> KC:
+        c = output_type(kcl=self.kcl)
 
-        instances: dict[str, ProtoTInstance[TUnit]] = {}
+        instances: dict[str, ProtoTInstance[Any]] = {}
 
         for inst in self.instances.values():
             if inst.settings:
