@@ -436,8 +436,9 @@ class ProtoPort(Generic[TUnit], ABC):
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        **kwargs: Any,
     ) -> ProtoPort[TUnit]:
-        """Copy the port with a transformation."""
+        """Copy the port with a transformation and allow overriding any parameter."""
         ...
 
     @property
@@ -826,21 +827,27 @@ class Port(ProtoPort[int]):
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        **kwargs: Any,
     ) -> Port:
-        """Get a copy of a port.
-
-        Transformation order which results in `copy.trans`:
-            - Trans: `trans * port.trans * post_trans`
-            - DCplxTrans: `trans * port.dcplx_trans * post_trans`
-
-        Args:
-            trans: an optional transformation applied to the port to be copied.
-            post_trans: transformation to apply to the port after copying.
-
-        Returns:
-            port: a copy of the port
-        """
-        return Port(base=self._base.transformed(trans=trans, post_trans=post_trans))
+        """Get a copy of a port, allowing any parameter to be overridden."""
+        # Get a transformed base port
+        base = self._base.transformed(trans=trans, post_trans=post_trans)
+        # Prepare parameters for the constructor
+        params = dict(
+            name=base.name,
+            kcl=base.kcl,
+            cross_section=base.cross_section,
+            trans=base.trans,
+            dcplx_trans=base.dcplx_trans,
+            info=base.info.model_copy(),
+            port_type=base.port_type,
+        )
+        params.update(kwargs)
+        # Remove None values for trans/dcplx_trans if both are present
+        if params.get("trans") is None and params.get("dcplx_trans") is None:
+            params.pop("trans", None)
+            params.pop("dcplx_trans", None)
+        return Port(**params)
 
     def copy_polar(
         self, d: int = 0, d_orth: int = 0, angle: int = 2, mirror: bool = False
@@ -1138,21 +1145,24 @@ class DPort(ProtoPort[float]):
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        **kwargs: Any,
     ) -> DPort:
-        """Get a copy of a port.
-
-        Transformation order which results in `copy.trans`:
-            - Trans: `trans * port.trans * post_trans`
-            - DCplxTrans: `trans * port.dcplx_trans * post_trans`
-
-        Args:
-            trans: an optional transformation applied to the port to be copied.
-            post_trans: transformation to apply to the port after copying.
-
-        Returns:
-            port: a copy of the port
-        """
-        return DPort(base=self._base.transformed(trans=trans, post_trans=post_trans))
+        """Get a copy of a port, allowing any parameter to be overridden."""
+        base = self._base.transformed(trans=trans, post_trans=post_trans)
+        params = dict(
+            name=base.name,
+            kcl=base.kcl,
+            cross_section=base.cross_section,
+            trans=base.trans,
+            dcplx_trans=base.dcplx_trans,
+            info=base.info.model_copy(),
+            port_type=base.port_type,
+        )
+        params.update(kwargs)
+        if params.get("trans") is None and params.get("dcplx_trans") is None:
+            params.pop("trans", None)
+            params.pop("dcplx_trans", None)
+        return DPort(**params)
 
     def copy_polar(
         self,
