@@ -25,26 +25,20 @@ from pydantic import (
     model_validator,
 )
 from ruamel.yaml import YAML
-from typing_extensions import TypeAliasType
 
 from . import kdb
 from .conf import PROPID
 from .kcell import DKCell, KCell, ProtoTKCell
 from .layout import KCLayout, get_default_kcl, kcls
-from .typings import KC, TUnit, dbu, um
+from .typings import KC, JSONSerializable, TUnit, dbu, um
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from .instance import ProtoTInstance
+    from .instance import DInstance, Instance, ProtoTInstance
+    from .port import ProtoPort
 
 yaml = YAML(typ="safe")
-
-JSONSerializable = TypeAliasType(
-    "JSONSerializable",
-    "int | float| bool | str | list[JSONSerializable] | tuple[JSONSerializable, ...]"
-    " | dict[str, JSONSerializable]| None",
-)
 
 
 def _gez(value: TUnit) -> TUnit:
@@ -55,13 +49,16 @@ def _gez(value: TUnit) -> TUnit:
     return value
 
 
-class Placement(BaseModel, Generic[TUnit], extra="forbid"):
+class MirrorPlacement(BaseModel, extra="forbid"):
+    mirror: bool = False
+
+
+class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
     x: TUnit | PortRef | PortArrayRef = cast("TUnit", 0)
     dx: TUnit = cast("TUnit", 0)
     y: TUnit | PortRef | PortArrayRef = cast("TUnit", 0)
     dy: TUnit = cast("TUnit", 0)
     orientation: Literal[0, 90, 180, 270] = 0
-    mirror: bool = False
 
     @model_validator(mode="after")
     def _require_absolute_or_relative(self) -> Self:
@@ -75,6 +72,15 @@ class Placement(BaseModel, Generic[TUnit], extra="forbid"):
     @property
     def is_absolute(self) -> bool:
         return not (isinstance(self.x, str) or isinstance(self.y, str))
+
+    def is_placable(self, c: ProtoTKCell[Any], placed_instances: set[str]) -> bool:
+        placable = True
+        if isinstance(self.x, PortRef):
+            placable = self.x.instance in placed_instances
+        if isinstance(self.y, PortRef):
+            placable = placable and self.y.instance in placed_instances
+
+        return placable
 
 
 class RegularArray(BaseModel, Generic[TUnit], extra="forbid"):
@@ -115,7 +121,7 @@ class SchemaInstance(
 ):
     name: str = Field(exclude=True)
     component: str
-    settings: CellConfig | None = None
+    settings: dict[str, JSONSerializable] = Field(default={})
     info: CellConfig | None = None
     array: RegularArray[TUnit] | Array[TUnit] | None = None
     kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
@@ -180,7 +186,7 @@ class SchemaInstance(
 class Route(BaseModel, Generic[TUnit], extra="forbid"):
     name: str = Field(exclude=True)
     links: list[Link[TUnit]]
-    routing_strategy: str | None = None
+    routing_strategy: str = "route_bundle"
     settings: dict[str, JSONSerializable]
 
     @model_validator(mode="before")
@@ -198,6 +204,10 @@ class Route(BaseModel, Generic[TUnit], extra="forbid"):
 class PortRef(BaseModel, extra="forbid"):
     instance: str
     port: str
+
+    @property
+    def name(self) -> str:
+        return self.port
 
     @model_validator(mode="before")
     @classmethod
@@ -253,17 +263,37 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
     y: TUnit | PortRef | PortArrayRef
     dx: TUnit = cast("TUnit", 0)
     dy: TUnit = cast("TUnit", 0)
+    cross_section: str
+    orientation: Literal[0, 90, 180, 270]
 
     def __lt__(self, other: Port[Any] | PortRef) -> bool:
         if isinstance(other, Port):
-            return (self.name, self.x, self.y, self.dx, self.dy) < (
+            return (
+                self.name,
+                self.x,
+                self.y,
+                self.dx,
+                self.dy,
+                self.orientation,
+                self.cross_section,
+            ) < (
                 other.name,
                 other.x,
                 other.y,
                 other.dx,
                 other.dy,
+                other.orientation,
+                other.cross_section,
             )
         return True
+
+    def is_placable(self, c: ProtoTKCell[Any], placed_instances: set[str]) -> bool:
+        placable = True
+        if isinstance(self.x, PortRef):
+            placable = self.x.instance in placed_instances
+        if isinstance(self.y, PortRef):
+            placable = placable and self.y.instance in placed_instances
+        return placable
 
 
 class Net(RootModel[list[PortArrayRef | PortRef | Port[TUnit]]]):
@@ -357,7 +387,7 @@ class TNetlist(BaseModel, Generic[TUnit], extra="forbid"):
     name: str | None = None
     instances: dict[str, SchemaInstance[TUnit]] | None = None
     nets: list[Net[TUnit]]
-    ports: dict[str, Port[TUnit]] | None = None
+    ports: dict[str, Port[TUnit] | PortRef | PortArrayRef] | None = None
 
     def sort(self) -> Self:
         if self.instances:
@@ -375,14 +405,14 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
     placements: dict[str, Placement[TUnit]] = Field(default_factory=dict)
     connections: list[Connection[TUnit]] = Field(default_factory=list)
     routes: dict[str, Route[TUnit]] = Field(default_factory=dict)
-    ports: dict[str, Port[TUnit]] = Field(default_factory=dict)
+    ports: dict[str, Port[TUnit] | PortRef | PortArrayRef] = Field(default_factory=dict)
     kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
 
     def create_inst(
         self,
         name: str,
         component: str,
-        settings: CellConfig | None = None,
+        settings: dict[str, JSONSerializable] | None = None,
         info: JSONSerializable | None = None,
         array: RegularArray[TUnit] | Array[TUnit] | None = None,
         placement: Placement[TUnit] | None = None,
@@ -392,7 +422,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
             {
                 "name": name,
                 "component": component,
-                "settings": settings,
+                "settings": settings or {},
                 "info": info,
                 "array": array,
                 "kcl": kcl or self.kcl,
@@ -403,22 +433,33 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         self.instances[inst.name] = inst
         return inst
 
-    def add_port(self, name: str, port_ref: PortRef | PortArrayRef) -> Port[TUnit]:
+    def add_port(
+        self, name: str | None = None, *, port: PortRef | PortArrayRef
+    ) -> None:
+        name = name or port.port
         if name not in self.ports:
-            p = Port[TUnit](name=name, x=port_ref, y=port_ref)
-            self.ports[name] = p
-            return p
+            self.ports[name] = port
         raise ValueError(f"Port with name {name} already exists")
 
     def create_port(
         self,
         name: str,
+        cross_section: str,
         x: PortRef | PortArrayRef | TUnit,
         y: PortRef | PortArrayRef | TUnit,
         dx: TUnit = 0,
         dy: TUnit = 0,
+        orientation: Literal[0, 90, 180, 270] = 0,
     ) -> Port[TUnit]:
-        p = Port(name=name, x=x, y=y, dx=dx, dy=dy)
+        p = Port(
+            name=name,
+            x=x,
+            y=y,
+            dx=dx,
+            dy=dy,
+            cross_section=cross_section,
+            orientation=orientation,
+        )
         self.ports[p.name] = p
         return p
 
@@ -522,10 +563,41 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
 
         instances: dict[str, ProtoTInstance[Any]] = {}
 
+        inst_: Instance | DInstance
+
+        # create instances
         for inst in self.instances.values():
-            if inst.settings:
+            vec_class = kdb.Vector if isinstance(c, KCell) else kdb.DVector
+            if inst.array:
+                if isinstance(inst.array, RegularArray):
+                    a = vec_class(x=inst.array.column_pitch, y=0)  # type: ignore[call-overload]
+                    b = vec_class(x=0, y=inst.array.row_pitch)  # type: ignore[call-overload]
+                    na = inst.array.columns
+                    nb = inst.array.rows
+                else:
+                    a = vec_class(*inst.array.pitch_a)  # type: ignore[call-overload]
+                    b = vec_class(*inst.array.pitch_b)  # type: ignore[call-overload]
+                    na = inst.array.na
+                    nb = inst.array.nb
+                if inst.settings:
+                    inst_ = c.create_inst(
+                        inst.kcl.get_component(inst.component, **inst.settings),
+                        a=a,  # type: ignore[arg-type]
+                        b=b,  # type: ignore[arg-type]
+                        na=na,
+                        nb=nb,
+                    )
+                else:
+                    inst_ = c.create_inst(
+                        inst.kcl.get_component(inst.component),
+                        a=a,  # type: ignore[arg-type]
+                        b=b,  # type: ignore[arg-type]
+                        na=na,
+                        nb=nb,
+                    )
+            elif inst.settings:
                 inst_ = c.create_inst(
-                    inst.kcl.get_component(inst.component, **inst.settings.root)
+                    inst.kcl.get_component(inst.component, **inst.settings)
                 )
             else:
                 inst_ = c.create_inst(inst.kcl.get_component(inst.component))
@@ -533,10 +605,14 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
             inst_.name = inst.name
             instances[inst.name] = inst_
 
+        # calculate islands -- islands are a bunch of directly connected instances and
+        # must be isolated from other islands either through no connection at all or
+        # routes
         islands: dict[str, set[str]] = {}
         instance_connections: defaultdict[str, list[Connection[TUnit]]] = defaultdict(
             list
         )
+
         for connection in self.connections:
             pr1, pr2 = connection.root
             if isinstance(pr1, Port):
@@ -562,15 +638,113 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                     island = islands[pr1.instance] | islands[pr2.instance]
                     for instance_name in island:
                         islands[instance_name] = island
+
+        for inst_name in self.instances:
+            if inst.name not in islands:
+                islands[inst_name] = {inst_name}
         placed_islands: list[set[str]] = []
+        placed_insts: set[str] = set()
         for island in islands.values():
             if island not in placed_islands:
                 _place_islands(
-                    c, island, instances, instance_connections, self.instances
+                    c,
+                    island,
+                    instances,
+                    instance_connections,
+                    self.instances,
+                    placed_insts,
                 )
                 placed_islands.append(island)
+                placed_insts |= island
+
+        # ports
+        for name, port in self.ports.items():
+            if isinstance(port, Port):
+                if isinstance(port.x, PortArrayRef):
+                    ref = port.x
+                    port.x = c.insts[ref.instance].ports[ref.port, ref.ia, ref.ib].x
+                elif isinstance(port.x, PortRef):
+                    port.x = c.insts[ref.instance].ports[ref.port].x
+                if isinstance(port.y, PortArrayRef):
+                    ref = port.y
+                    port.y = c.insts[ref.instance].ports[ref.port, ref.ia, ref.ib].y
+                elif isinstance(port.y, PortRef):
+                    port.y = c.insts[ref.instance].ports[ref.port].y
+
+                p = c.create_port(
+                    name=port.name,
+                    center=(port.x, port.y),
+                    cross_section=c.get_cross_section(
+                        c.kcl.get_symmetrical_cross_section(port.cross_section)
+                    ),
+                )
+                p.orientation = port.orientation
+            else:
+                c.add_port(port=c.insts[port.instance].ports[c.port], name=name)
+        # routes
+        for route in self.routes.values():
+            start_ports: list[ProtoPort[Any]] = []
+            end_ports: list[ProtoPort[Any]] = []
+            for link in route.links:
+                l1, l2 = link.root[0], link.root[1]
+                if isinstance(l1, PortRef):
+                    p1 = c.insts[l1.instance].ports[l1.port]
+                else:
+                    p1 = c.insts[l1.instance].ports[l1.port, l1.ia, l1.ib]
+                start_ports.append(p1)
+                if isinstance(l2, PortRef):
+                    p2 = c.insts[l2.instance].ports[l2.port]
+                else:
+                    p2 = c.insts[l2.instance].ports[l2.port, l2.ia, l2.ib]
+                end_ports.append(p2)
+            self.kcl.routing_strategies[route.routing_strategy](
+                c, start_ports, end_ports, **route.settings
+            )
+
+        # verify connections
+        port_connection_errors: list[Connection[TUnit]] = []
+        connection_errors: list[Connection[TUnit]] = []
+        for conn in self.connections:
+            c1 = conn.root[0]
+            c2 = conn.root[1]
+            if isinstance(c1, Port):
+                p1 = c.ports[c1.name]
+                p2 = c.insts[c2.instance].ports[c2.port]
+                if p1.dcplx_trans != p2.dcplx_trans:
+                    port_connection_errors.append(conn)
+            else:
+                if isinstance(c1, PortArrayRef):
+                    p1 = c.insts[c1.instance].ports[c1.port, c1.ia, c1.ib]
+                else:
+                    p1 = c.insts[c1.instance].ports[c1.port]
+                if isinstance(c2, PortArrayRef):
+                    p2 = c.insts[c2.instance].ports[c2.port, c2.ia, c2.ib]
+                else:
+                    p2 = c.insts[c2.instance].ports[c2.port]
+
+                t1 = p1.dcplx_trans
+                t2 = p2.dcplx_trans
+                if t1 * kdb.DCplxTrans.R180 != t2 or t1 * kdb.DCplxTrans.M90:
+                    connection_errors.append(conn)
 
         return c
+
+    def add_route(
+        self,
+        name: str,
+        start_ports: list[PortRef],
+        end_ports: list[PortRef],
+        **settings: JSONSerializable,
+    ) -> Route[TUnit]:
+        route = Route[TUnit](
+            name=name,
+            links=[
+                Link((sp, ep)) for sp, ep in zip(start_ports, end_ports, strict=True)
+            ],
+            settings=settings,
+        )
+        self.routes[name] = route
+        return route
 
 
 def _place_islands(
@@ -579,9 +753,9 @@ def _place_islands(
     instances: dict[str, ProtoTInstance[TUnit]],
     connections: dict[str, list[Connection[TUnit]]],
     schema_instances: dict[str, SchemaInstance[TUnit]],
-) -> None:
+    placed_insts: set[str],
+) -> set[str]:
     target_length = len(schema_island)
-    placed_insts: set[str] = set()
 
     placable_insts: set[str] = set()
 
@@ -590,30 +764,39 @@ def _place_islands(
         kinst = instances[inst]
         if schema_inst.placement:
             p = schema_inst.placement
-            if isinstance(p.x, PortRef) or isinstance(p.y, PortRef):
-                # TODO @sebastian: needs to properly check whether port placed and available
-                continue
-            st = kinst._standard_trans()
-            if isinstance(st, kdb.Trans | kdb.ICplxTrans):
-                kinst.transform(
-                    kdb.ICplxTrans(
-                        mag=1,
-                        rot=p.orientation,
-                        mirrx=p.mirror,
-                        x=p.x + p.dx,
-                        y=p.y + p.dy,
-                    )
+            if p.is_placable(c, placed_insts):
+                x = (
+                    instances[p.x.instance].ports[p.x.port].x
+                    if isinstance(p.x, PortRef)
+                    else p.x
                 )
-            else:
-                kinst.transform(
-                    kdb.DCplxTrans(
-                        mag=1,
-                        rot=p.orientation,
-                        mirrx=p.mirror,
-                        x=p.x + p.dx,
-                        y=p.y + p.dy,
-                    )
+                y = (
+                    instances[p.y.instance].ports[p.y.port].y
+                    if isinstance(p.y, PortRef)
+                    else p.y
                 )
+
+                st = kinst._standard_trans()
+                if isinstance(st, kdb.Trans | kdb.ICplxTrans):
+                    kinst.transform(
+                        kdb.ICplxTrans(
+                            mag=1,
+                            rot=p.orientation,
+                            mirrx=p.mirror,
+                            x=x + p.dx,
+                            y=y + p.dy,
+                        )
+                    )
+                else:
+                    kinst.transform(
+                        kdb.DCplxTrans(
+                            mag=1,
+                            rot=p.orientation,
+                            mirrx=p.mirror,
+                            x=x + p.dx,
+                            y=y + p.dy,
+                        )
+                    )
             placed_insts.add(inst)
 
     while len(placed_insts) < target_length:
@@ -624,6 +807,8 @@ def _place_islands(
 
         if not placable_insts:
             raise ValueError("Could not place all instances.")
+
+    return placed_insts
 
 
 def _connect_instances(
@@ -645,6 +830,8 @@ def _connect_instances(
                     conn.root[0].port,
                     instances[conn.root[1].instance],
                     conn.root[1].port,
+                    use_angle=True,
+                    use_mirror=False,
                 )
                 break
             if conn.root[0].instance in placed_instances:
@@ -652,6 +839,8 @@ def _connect_instances(
                     conn.root[1].port,
                     instances[conn.root[0].instance],
                     conn.root[0].port,
+                    use_angle=True,
+                    use_mirror=False,
                 )
                 break
         else:

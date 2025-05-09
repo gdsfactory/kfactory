@@ -13,6 +13,7 @@ from typing import (
 
 import klayout.db as kdb
 from klayout import lay
+from typing_extensions import TypeAliasType
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -37,6 +38,13 @@ TPort = TypeVar("TPort", bound="ProtoPort[Any]")
 TInstance_co = TypeVar("TInstance_co", bound="ProtoInstance[Any]", covariant=True)
 TBaseCell_co = TypeVar("TBaseCell_co", bound="BaseKCell", covariant=True)
 KCellParams = ParamSpec("KCellParams")
+P = ParamSpec("P")
+
+JSONSerializable = TypeAliasType(
+    "JSONSerializable",
+    "int | float| bool | str | list[JSONSerializable] | tuple[JSONSerializable, ...]"
+    " | dict[str, JSONSerializable]| None",
+)
 
 
 class KCellSpecDict(TypedDict):

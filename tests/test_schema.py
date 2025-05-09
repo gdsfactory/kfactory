@@ -1,3 +1,6 @@
+from collections.abc import Sequence
+from typing import Any
+
 from ruamel.yaml import YAML
 
 import kfactory as kf
@@ -54,24 +57,24 @@ def test_schema_create() -> None:
         FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
         FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
 
-    LAYER = Layers()
+    layers = Layers()
     pdk = kf.KCLayout("SCHEMA_PDK", infos=Layers)
 
     @pdk.cell
     def straight(length: int) -> kf.KCell:
         c = pdk.kcell()
-        c.shapes(LAYER.WG).insert(kf.kdb.Box(0, -250, length, 250))
+        c.shapes(layers.WG).insert(kf.kdb.Box(0, -250, length, 250))
         c.create_port(
             name="o1",
             width=500,
             trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=0),
-            layer_info=LAYER.WG,
+            layer_info=layers.WG,
         )
         c.create_port(
             name="o2",
             width=500,
             trans=kf.kdb.Trans(x=length, y=0),
-            layer_info=LAYER.WG,
+            layer_info=layers.WG,
         )
 
         return c
@@ -102,29 +105,29 @@ def test_schema_create_cell() -> None:
         FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
         FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
 
-    LAYER = Layers()
+    layers = Layers()
     pdk = kf.KCLayout("SCHEMA_PDK_DECORATOR", infos=Layers)
 
     @pdk.cell
     def straight(length: int) -> kf.KCell:
         c = pdk.kcell()
-        c.shapes(LAYER.WG).insert(kf.kdb.Box(0, -250, length, 250))
+        c.shapes(layers.WG).insert(kf.kdb.Box(0, -250, length, 250))
         c.create_port(
             name="o1",
             width=500,
             trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=0),
-            layer_info=LAYER.WG,
+            layer_info=layers.WG,
         )
         c.create_port(
             name="o2",
             width=500,
             trans=kf.kdb.Trans(x=length, y=0),
-            layer_info=LAYER.WG,
+            layer_info=layers.WG,
         )
 
         return c
 
-    @pdk.schematic_cell
+    @pdk.schematic_cell(output_type=kf.DKCell)
     def long_straight(n: int) -> kf.schema.TSchema[int]:
         schema = kf.schema.TSchema[int](kcl=pdk)
 
@@ -144,3 +147,75 @@ def test_schema_create_cell() -> None:
         return schema
 
     long_straight(50_000).show()
+
+
+def test_schema_route() -> None:
+    class Layers(kf.LayerInfos):
+        WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+        WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
+        WGEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
+        WGCLADEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1)
+        FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
+        FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
+        FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
+
+    layers = Layers()
+    pdk = kf.KCLayout("SCHEMA_PDK_ROUTING", infos=Layers)
+
+    @pdk.cell
+    def straight(width: int, length: int) -> kf.KCell:
+        c = pdk.kcell()
+        c.shapes(layers.WG).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
+        c.create_port(
+            name="o1",
+            width=width,
+            trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=0),
+            layer_info=layers.WG,
+        )
+        c.create_port(
+            name="o2",
+            width=width,
+            trans=kf.kdb.Trans(x=length, y=0),
+            layer_info=layers.WG,
+        )
+
+        return c
+
+    bend90_function = kf.factories.euler.bend_euler_factory(kcl=pdk)
+    bend90 = bend90_function(width=0.500, radius=10, layer=layers.WG)
+
+    @pdk.routing_strategy
+    def route_bundle(
+        c: kf.ProtoTKCell[Any],
+        start_ports: Sequence[kf.ProtoPort[Any]],
+        end_ports: Sequence[kf.ProtoPort[Any]],
+        separation: int = 5000,
+    ) -> list[kf.routing.generic.ManhattanRoute]:
+        return kf.routing.optical.route_bundle(
+            c=kf.KCell(base=c._base),
+            start_ports=[kf.Port(base=sp.base) for sp in start_ports],
+            end_ports=[kf.Port(base=ep.base) for ep in end_ports],
+            separation=separation,
+            straight_factory=straight,
+            bend90_cell=bend90,
+        )
+
+    @pdk.schematic_cell(output_type=kf.KCell)
+    def route_example() -> kf.schema.TSchema[int]:
+        schema = kf.schema.TSchema[int](kcl=pdk)
+
+        s1 = schema.create_inst(
+            name="s1", component="straight", settings={"length": 5000, "width": 500}
+        )
+        s2 = schema.create_inst(
+            name="s2", component="straight", settings={"length": 5000, "width": 500}
+        )
+
+        s1.place(x=1000, y=10_000)
+        s2.place(x=1000, y=210_000)
+
+        schema.add_route("s1-s2", [s1["o2"]], [s2["o2"]], separation=20_000)
+
+        return schema
+
+    route_example().show()

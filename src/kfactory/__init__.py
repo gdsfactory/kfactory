@@ -23,7 +23,7 @@ from .enclosure import KCellEnclosure, LayerEnclosure
 from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
 from .kcell import BaseKCell, DKCell, KCell, ProtoTKCell, VKCell, show
 from .ports import Ports, DPorts
-from .port import Port, DPort
+from .port import Port, DPort, ProtoPort
 from .instance import Instance, DInstance, VInstance
 from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
 from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
@@ -90,6 +90,7 @@ __all__ = [
     "LayerStack",
     "Port",
     "Ports",
+    "ProtoPort",
     "ProtoTKCell",
     "Schema",
     "SymmetricalCrossSection",
