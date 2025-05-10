@@ -185,6 +185,11 @@ class KCLayout(
     decorators: Decorators
     default_cell_output_type: type[KCell | DKCell] = KCell
 
+    connectivity: list[
+        tuple[kdb.LayerInfo, kdb.LayerInfo]
+        | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo]
+    ]
+
     routing_strategies: dict[
         str,
         Callable[
@@ -213,6 +218,11 @@ class KCLayout(
         copy_base_kcl_layers: bool = True,
         info: dict[str, MetaData] | None = None,
         default_cell_output_type: type[KCell | DKCell] = KCell,
+        connectivity: Sequence[
+            tuple[kdb.LayerInfo, kdb.LayerInfo]
+            | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo]
+        ]
+        | None = None,
     ) -> None:
         """Create a new KCLayout (PDK). Can be based on an old KCLayout.
 
@@ -269,6 +279,7 @@ class KCLayout(
             ),
             decorators=Decorators(self),
             default_cell_output_type=default_cell_output_type,
+            connectivity=connectivity or [],
         )
 
         self.library.register(self.name)
