@@ -118,7 +118,7 @@ class SchemaInstance(
 ):
     name: str = Field(exclude=True)
     component: str
-    settings: dict[str, JSONSerializable] = Field(default={})
+    settings: dict[str, JSONSerializable] = Field(default_factory=dict)
     array: RegularArray[TUnit] | Array[TUnit] | None = None
     kcl: KCLayout = Field(default_factory=get_default_kcl)
     _schema: TSchema[TUnit] = PrivateAttr()
