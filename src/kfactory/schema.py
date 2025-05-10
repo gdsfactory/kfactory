@@ -75,12 +75,12 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
         return not (isinstance(self.x, str) or isinstance(self.y, str))
 
     def is_placeable(self, c: ProtoTKCell[Any], placed_instances: set[str]) -> bool:
-        is_placeable = True
+        placeable = True
         if isinstance(self.x, PortRef):
-            is_placeable = self.x.instance in placed_instances
+            placeable = self.x.instance in placed_instances
         if isinstance(self.y, PortRef):
-            is_placeable = is_placeable and self.y.instance in placed_instances
-        return is_placeable
+            placeable = placeable and self.y.instance in placed_instances
+        return placeable
 
 
 class RegularArray(BaseModel, Generic[TUnit], extra="forbid"):
