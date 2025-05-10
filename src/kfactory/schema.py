@@ -73,14 +73,13 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
     def is_absolute(self) -> bool:
         return not (isinstance(self.x, str) or isinstance(self.y, str))
 
-    def is_placable(self, c: ProtoTKCell[Any], placed_instances: set[str]) -> bool:
-        placable = True
+    def is_placeable(self, c: ProtoTKCell[Any], placed_instances: set[str]) -> bool:
+        is_placeable = True
         if isinstance(self.x, PortRef):
-            placable = self.x.instance in placed_instances
+            is_placeable = self.x.instance in placed_instances
         if isinstance(self.y, PortRef):
-            placable = placable and self.y.instance in placed_instances
-
-        return placable
+            is_placeable = is_placeable and self.y.instance in placed_instances
+        return is_placeable
 
 
 class RegularArray(BaseModel, Generic[TUnit], extra="forbid"):
@@ -247,7 +246,7 @@ class PortArrayRef(PortRef, extra="forbid"):
         return data
 
     def __lt__(self, other: PortRef | Port[Any] | PortArrayRef) -> bool:
-        if isinstance(other, Port[Any] | PortRef):
+        if isinstance(other, Port | PortRef):
             return False
         return (self.instance, self.port, self.ia, self.ib) < (
             other.instance,
@@ -287,20 +286,20 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
             )
         return True
 
-    def is_placable(self, c: ProtoTKCell[Any], placed_instances: set[str]) -> bool:
-        placable = True
+    def is_placeable(self, c: ProtoTKCell[Any], placed_instances: set[str]) -> bool:
+        placeable = True
         if isinstance(self.x, PortRef):
-            placable = self.x.instance in placed_instances
+            placeable = self.x.instance in placed_instances
         if isinstance(self.y, PortRef):
-            placable = placable and self.y.instance in placed_instances
-        return placable
+            placeable = placeable and self.y.instance in placed_instances
+        return placeable
 
 
 class Net(RootModel[list[PortArrayRef | PortRef | Port[TUnit]]]):
     root: list[PortArrayRef | PortRef | Port[TUnit]]
 
     def sort(self) -> Self:
-        def _port_sort(port: PortRef | Port[Any]) -> tuple[Any, ...]:
+        def _port_sort(port: PortRef | Port[Any]) -> tuple[str, ...]:
             if isinstance(port, PortRef):
                 return (port.instance, port.port)
             return (port.name,)
@@ -757,14 +756,14 @@ def _place_islands(
 ) -> set[str]:
     target_length = len(schema_island)
 
-    placable_insts: set[str] = set()
+    placeable_insts: set[str] = set()
 
     for inst in schema_island:
         schema_inst = schema_instances[inst]
         kinst = instances[inst]
         if schema_inst.placement:
             p = schema_inst.placement
-            if p.is_placable(c, placed_insts):
+            if p.is_placeable(c, placed_insts):
                 x = (
                     instances[p.x.instance].ports[p.x.port].x
                     if isinstance(p.x, PortRef)
@@ -800,12 +799,12 @@ def _place_islands(
             placed_insts.add(inst)
 
     while len(placed_insts) < target_length:
-        placable_insts = _get_placable(placed_insts, connections)
+        placeable_insts = _get_placeable(placed_insts, connections)
 
-        _connect_instances(instances, placable_insts, connections, placed_insts)
-        placed_insts |= placable_insts
+        _connect_instances(instances, placeable_insts, connections, placed_insts)
+        placed_insts |= placeable_insts
 
-        if not placable_insts:
+        if not placeable_insts:
             raise ValueError("Could not place all instances.")
 
     return placed_insts
@@ -847,18 +846,18 @@ def _connect_instances(
             raise ValueError("Could not connect all instances")
 
 
-def _get_placable(
+def _get_placeable(
     placed_insts: set[str], connections: dict[str, list[Connection[TUnit]]]
 ) -> set[str]:
-    placable_insts: set[str] = set()
+    placeable_insts: set[str] = set()
     for inst in placed_insts:
         for connection in connections[inst]:
             ref1, ref2 = connection.root
             if isinstance(ref1, Port):
-                placable_insts.add(ref2.instance)
+                placeable_insts.add(ref2.instance)
             else:
-                placable_insts |= {ref1.instance, ref2.instance}
-    return placable_insts - placed_insts
+                placeable_insts |= {ref1.instance, ref2.instance}
+    return placeable_insts - placed_insts
 
 
 @overload
