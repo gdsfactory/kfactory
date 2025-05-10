@@ -18,19 +18,22 @@ jobs:
     - uses: pre-commit/action@v3.0.1
 
   run-ty:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.13"
+        os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          repository: astral-sh/ruff
-          path: ruff
-          ref: main
       - uses: astral-sh/setup-uv@v6
-      - name: Build ty
-        run: cd ruff && cargo build -p ty
+      - name: Install dependencies
+        run: |
+          uv sync
+          uv pip install ty
       - name: Run ty check
-        run: uv run ruff/target/debug/ty check src/kfactory || true
+        run: uv run ty check src/kfactory
 
 
   test_code:
