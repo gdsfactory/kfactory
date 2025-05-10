@@ -27,6 +27,7 @@ from .port import Port, DPort, ProtoPort
 from .instance import Instance, DInstance, VInstance
 from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
 from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
+from .netlist import Netlist
 from .schema import Schema, DSchema, get_schema, read_schema
 from .instances import Instances, DInstances, VInstances
 from .settings import KCellSettings, Info
@@ -88,6 +89,7 @@ __all__ = [
     "LayerEnum",
     "LayerInfos",
     "LayerStack",
+    "Netlist",
     "Port",
     "Ports",
     "ProtoPort",

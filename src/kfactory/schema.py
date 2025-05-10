@@ -10,7 +10,6 @@ from typing import (
     Generic,
     Literal,
     Self,
-    TypeAlias,
     cast,
     overload,
 )
@@ -21,6 +20,7 @@ from pydantic import (
     Field,
     PrivateAttr,
     RootModel,
+    field_serializer,
     field_validator,
     model_validator,
 )
@@ -30,6 +30,7 @@ from . import kdb
 from .conf import PROPID
 from .kcell import DKCell, KCell, ProtoTKCell
 from .layout import KCLayout, get_default_kcl, kcls
+from .netlist import Net, Netlist, NetlistInstance, NetlistPort, PortArrayRef, PortRef
 from .typings import KC, JSONSerializable, TUnit, dbu, um
 
 if TYPE_CHECKING:
@@ -112,18 +113,14 @@ class Ports(BaseModel, Generic[TUnit]):
         return PortRef(instance=self.instance.name, port=key)
 
 
-CellConfig = RootModel[dict[str, JSONSerializable]]
-
-
 class SchemaInstance(
     BaseModel, Generic[TUnit], extra="forbid", arbitrary_types_allowed=True
 ):
     name: str = Field(exclude=True)
     component: str
     settings: dict[str, JSONSerializable] = Field(default={})
-    info: CellConfig | None = None
     array: RegularArray[TUnit] | Array[TUnit] | None = None
-    kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
+    kcl: KCLayout = Field(default_factory=get_default_kcl)
     _schema: TSchema[TUnit] = PrivateAttr()
 
     @field_validator("kcl", mode="before")
@@ -132,6 +129,10 @@ class SchemaInstance(
         if isinstance(value, str):
             return kcls[value]
         return value
+
+    @field_serializer("kcl")
+    def _serialize_kcl(self, kcl: KCLayout) -> str:
+        return kcl.name
 
     @property
     def parent_schema(self) -> TSchema[TUnit]:
@@ -200,62 +201,6 @@ class Route(BaseModel, Generic[TUnit], extra="forbid"):
         return data
 
 
-class PortRef(BaseModel, extra="forbid"):
-    instance: str
-    port: str
-
-    @property
-    def name(self) -> str:
-        return self.port
-
-    @model_validator(mode="before")
-    @classmethod
-    def _validate_portref(cls, data: dict[str, Any]) -> dict[str, Any]:
-        if isinstance(data, str):
-            data = tuple(data.rsplit(",", 1))
-        if isinstance(data, tuple):
-            return {"instance": data[0], "port": data[1]}
-        return data
-
-    def __lt__(self, other: PortRef | PortArrayRef | Port[Any]) -> bool:
-        if isinstance(other, Port):
-            return False
-        if isinstance(other, PortArrayRef):
-            return True
-        return (self.instance, self.port) < (other.instance, other.port)
-
-
-class PortArrayRef(PortRef, extra="forbid"):
-    ia: int
-    ib: int
-
-    @model_validator(mode="before")
-    @classmethod
-    def _validate_array_portref(cls, data: dict[str, Any]) -> dict[str, Any]:
-        if isinstance(data, str):
-            data = tuple(data.rsplit(",", 1))
-        if isinstance(data, tuple):
-            match = re.match(r"(.*?)<(\d+)\.(\d+)>$", data[0])
-            if match:
-                return {
-                    "instance": match.group(1),
-                    "ia": int(match.group(2)),
-                    "ib": int(match.group(3)),
-                    "port": data[1],
-                }
-        return data
-
-    def __lt__(self, other: PortRef | Port[Any] | PortArrayRef) -> bool:
-        if isinstance(other, Port | PortRef):
-            return False
-        return (self.instance, self.port, self.ia, self.ib) < (
-            other.instance,
-            other.port,
-            other.ia,
-            other.ib,
-        )
-
-
 class Port(BaseModel, Generic[TUnit], extra="forbid"):
     name: str = Field(exclude=True)
     x: TUnit | PortRef | PortArrayRef
@@ -293,33 +238,6 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
         if isinstance(self.y, PortRef):
             placeable = placeable and self.y.instance in placed_instances
         return placeable
-
-
-class Net(RootModel[list[PortArrayRef | PortRef | Port[TUnit]]]):
-    root: list[PortArrayRef | PortRef | Port[TUnit]]
-
-    def sort(self) -> Self:
-        def _port_sort(port: PortRef | Port[Any]) -> tuple[str, ...]:
-            if isinstance(port, PortRef):
-                return (port.instance, port.port)
-            return (port.name,)
-
-        self.root.sort(key=_port_sort)
-        return self
-
-    def __lt__(self, other: Net[Any]) -> bool:
-        if len(self.root) == 0:
-            return False
-        if len(other.root) == 0:
-            return True
-        s0 = self.root[0]
-        o0 = other.root[0]
-        return s0 < o0
-
-    @model_validator(mode="after")
-    def _sort_data(self) -> Self:
-        self.root.sort()
-        return self
 
 
 class Link(
@@ -382,21 +300,6 @@ class Connection(
         return Connection(**data)
 
 
-class TNetlist(BaseModel, Generic[TUnit], extra="forbid"):
-    name: str | None = None
-    instances: dict[str, SchemaInstance[TUnit]] | None = None
-    nets: list[Net[TUnit]]
-    ports: dict[str, Port[TUnit] | PortRef | PortArrayRef] | None = None
-
-    def sort(self) -> Self:
-        if self.instances:
-            self.instances = dict(sorted(self.instances.items()))
-        self.nets.sort()
-        if self.ports:
-            self.ports = {p.name: p for p in self.ports.values()}
-        return self
-
-
 class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
     name: str | None = None
     dependencies: list[Path] = Field(default_factory=list)
@@ -438,6 +341,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         name = name or port.port
         if name not in self.ports:
             self.ports[name] = port
+            return
         raise ValueError(f"Port with name {name} already exists")
 
     def create_port(
@@ -475,8 +379,8 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         self.connections.append(conn)
         return conn
 
-    def netlist(self) -> TNetlist[TUnit]:
-        nets: list[Net[TUnit]] = []
+    def netlist(self) -> Netlist:
+        nets: list[Net] = []
         if self.routes is not None:
             nets.extend(
                 [
@@ -486,13 +390,33 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                 ]
             )
         if self.connections:
-            nets.extend([Net(list(connection.root)) for connection in self.connections])
+            nets.extend(
+                [
+                    Net(
+                        [
+                            NetlistPort(name=p.name) if isinstance(p, Port) else p
+                            for p in connection.root
+                        ]
+                    )
+                    for connection in self.connections
+                ]
+            )
 
-        return TNetlist[TUnit](
+        return Netlist(
             name=self.name,
-            instances=self.instances.copy() if self.instances else None,
+            instances={
+                inst.name: NetlistInstance(
+                    name=inst.name,
+                    kcl=inst.kcl.name,
+                    component=inst.component,
+                    settings=inst.settings,
+                )
+                for inst in self.instances.values()
+            }
+            if self.instances
+            else None,
             nets=nets,
-            ports=self.ports.copy() if self.ports else None,
+            ports=[NetlistPort(name=name) for name in self.ports],
         )
 
     @model_validator(mode="before")
@@ -746,6 +670,12 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         return route
 
 
+class Schema(TSchema[dbu]): ...
+
+
+class DSchema(TSchema[um]): ...
+
+
 def _place_islands(
     c: ProtoTKCell[TUnit],
     schema_island: set[str],
@@ -908,12 +838,10 @@ def read_schema(
     with file.open(mode="rt") as f:
         yaml_dict = yaml.load(f)
         if unit == "dbu":
-            return TSchema[int].model_validate(yaml_dict, strict=True)
-        return TSchema[float].model_validate(yaml_dict)
+            return Schema.model_validate(yaml_dict, strict=True)
+        return DSchema.model_validate(yaml_dict)
 
 
 TSchema[Annotated[int, str]].model_rebuild()
 TSchema[Annotated[float, str]].model_rebuild()
 SchemaInstance.model_rebuild()
-Schema: TypeAlias = TSchema[dbu]
-DSchema: TypeAlias = TSchema[um]

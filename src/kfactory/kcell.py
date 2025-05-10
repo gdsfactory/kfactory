@@ -23,6 +23,7 @@ from collections.abc import (
     Iterator,
     KeysView,
     Mapping,
+    Sequence,
     ValuesView,
 )
 from pathlib import Path
@@ -67,6 +68,7 @@ from .instances import (
 )
 from .layer import LayerEnum
 from .merge import MergeDiff
+from .netlist import Netlist
 from .port import (
     BasePort,
     DPort,
@@ -1698,6 +1700,26 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
         Args:
             port_types: The port types to consider for the netlist extraction.
+        Returns:
+            LayoutToNetlist extracted from instance and cell port positions.
+        """
+        logger.warning(
+            "l2n is deprecated and will be removed in 2.0. Please use `l2n_ports`"
+            " instead."
+        )
+        return self.l2n_ports(port_types=port_types)
+
+    def l2n_ports(
+        self, port_types: Iterable[str] = ("optical",)
+    ) -> kdb.LayoutToNetlist:
+        """Generate a LayoutToNetlist object from the port types.
+
+        Uses kfactory ports as a basis for extraction.
+
+        Args:
+            port_types: The port types to consider for the netlist extraction.
+        Returns:
+            LayoutToNetlist extracted from instance and cell port positions.
         """
         l2n = kdb.LayoutToNetlist(self.name, self.kcl.dbu)
         l2n.extract_netlist()
@@ -1711,6 +1733,84 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         self.circuit(l2n, port_types=port_types)
         il.assign(self.kcl.layout)
         return l2n
+
+    def l2n_extraction(
+        self,
+        mark_port_types: Iterable[str] = ("electrical", "RF", "DC"),
+        connectivity: Sequence[
+            tuple[kdb.LayerInfo, kdb.LayerInfo]
+            | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo]
+        ]
+        | None = None,
+    ) -> kdb.LayoutToNetlist:
+        """Generate a LayoutToNetlist object from the port types.
+
+        Uses electrical connectivity for extraction.
+
+        Args:
+            port_types: The port types to consider for the netlist extraction.
+        Returns:
+            LayoutToNetlist extracted from electrical connectivity.
+        """
+        l2n = kdb.LayoutToNetlist(
+            kdb.RecursiveShapeIterator(
+                self.kcl.layout, self.kdb_cell, self.kcl.layout.layer_indexes()
+            )
+        )
+
+        ly = l2n.internal_layout()
+
+        for ci in [self.cell_index(), *self.called_cells()]:
+            c = self.kcl[ci]
+            for port in c.ports:
+                if port.port_type in mark_port_types and port.name is not None:
+                    internal_cell = ly.cell(c.name)
+                    internal_cell.shapes(port.layer_info).insert(
+                        kdb.Text(port.name, trans=port.trans)
+                    )
+
+        connectivity = connectivity or self.kcl.connectivity
+        made_layers: dict[kdb.LayerInfo, kdb.Region] = {}
+        for conn in connectivity:
+            layer = conn[0]
+            if layer not in made_layers:
+                old_layer = l2n.make_layer(self.kcl.get_info(self.kcl.layer(layer)))
+                made_layers[layer] = old_layer
+            else:
+                old_layer = made_layers[layer]
+
+            for layer in conn[1:]:
+                if layer not in made_layers:
+                    new_layer = l2n.make_layer(self.kcl.get_info(self.kcl.layer(layer)))
+                    made_layers[layer] = new_layer
+                else:
+                    new_layer = made_layers[layer]
+
+                l2n.connect(old_layer, new_layer)
+                old_layer = new_layer
+
+        l2n.extract_netlist()
+
+        return l2n
+
+    def netlist(
+        self,
+        port_types: Iterable[str] = ("optical",),
+        mark_port_types: Iterable[str] = ("electrical", "RF", "DC"),
+        connectivity: Sequence[
+            tuple[kdb.LayerInfo, kdb.LayerInfo]
+            | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo]
+        ]
+        | None = None,
+    ) -> Netlist:
+        l2n_opt = self.l2n_ports(port_types=port_types)
+        l2n_elec = self.l2n_extraction(
+            mark_port_types=mark_port_types, connectivity=connectivity
+        )
+
+        nl = Netlist(nets=[])
+
+        return nl
 
     def circuit(
         self, l2n: kdb.LayoutToNetlist, port_types: Iterable[str] = ("optical",)
@@ -1740,7 +1840,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             port_filter, enumerate(Ports(kcl=self.kcl, bases=self.ports.bases))
         ):
             trans = port.trans.dup()
-            trans.angle = trans.angle % 2
+            trans.angle %= 2
             trans.mirror = False
             layer_info = self.kcl.layout.get_info(port.layer)
             layer = f"{layer_info.layer}_{layer_info.datatype}"
