@@ -30,8 +30,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - name: Install dependencies
         run: |
-          uv sync
-          uv pip install ty
+          uv sync --extra dev
       - name: Run ty check
         run: uv run ty check src/kfactory || true
 
