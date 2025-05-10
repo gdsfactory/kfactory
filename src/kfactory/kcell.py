@@ -583,9 +583,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         if base is not None:
             self._base = base
             return
+
         from .layout import get_default_kcl, kcls
 
         kcl_ = kcl or get_default_kcl()
+
         if name is None:
             name_ = "Unnamed_!" if kdb_cell is None else kdb_cell.name
         else:
@@ -1120,9 +1122,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 self.shapes(port.layer).insert(kdb.Text(port.name or "", port.trans))
             else:
                 self.shapes(port.layer).insert(poly, port.dcplx_trans)
-                self.shapes(port.layer).insert(
-                    kdb.Text(port.name if port.name else "", port.trans)
-                )
+                self.shapes(port.layer).insert(kdb.Text(port.name or "", port.trans))
         self._base.kdb_cell.locked = locked
 
     def write(
@@ -3172,9 +3172,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject):
                     )
                 polys[w] = poly
             self.shapes(port.layer).insert(poly.transformed(port.dcplx_trans))
-            self.shapes(port.layer).insert(
-                kdb.Text(port.name if port.name else "", port.trans)
-            )
+            self.shapes(port.layer).insert(kdb.Text(port.name or "", port.trans))
 
     def write(
         self,

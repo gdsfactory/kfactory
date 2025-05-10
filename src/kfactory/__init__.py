@@ -23,10 +23,11 @@ from .enclosure import KCellEnclosure, LayerEnclosure
 from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
 from .kcell import BaseKCell, DKCell, KCell, ProtoTKCell, VKCell, show
 from .ports import Ports, DPorts
-from .port import Port, DPort
+from .port import Port, DPort, ProtoPort
 from .instance import Instance, DInstance, VInstance
 from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
 from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
+from .schema import Schema, DSchema, get_schema, read_schema
 from .instances import Instances, DInstances, VInstances
 from .settings import KCellSettings, Info
 from .layout import Constants, KCLayout, cell, vcell, kcl, kcls
@@ -73,6 +74,7 @@ __all__ = [
     "DKCell",
     "DPort",
     "DPorts",
+    "DSchema",
     "Info",
     "Instance",
     "InstanceGroup",
@@ -88,7 +90,9 @@ __all__ = [
     "LayerStack",
     "Port",
     "Ports",
+    "ProtoPort",
     "ProtoTKCell",
+    "Schema",
     "SymmetricalCrossSection",
     "VInstance",
     "VInstanceGroup",
@@ -105,6 +109,7 @@ __all__ = [
     "factories",
     "flexgrid",
     "flexgrid_dbu",
+    "get_schema",
     "grid",
     "grid_dbu",
     "kcl",
@@ -120,6 +125,7 @@ __all__ = [
     "pprint_ports",
     "protocols",
     "rdb",
+    "read_schema",
     "routing",
     "save_layout_options",
     "save_session",

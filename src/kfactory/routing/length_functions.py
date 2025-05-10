@@ -7,8 +7,6 @@ from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 import klayout.db as kdb
 
-from ..layout import kcls
-
 if TYPE_CHECKING:
     from .generic import ManhattanRoute
 
@@ -29,6 +27,8 @@ class LengthFunction(Protocol):
 
 @cache
 def _get_area_from_layer(kcl: str, ci: int, layer: kdb.LayerInfo, width: int) -> float:
+    from ..layout import kcls
+
     c = kcls[kcl][ci]
     return (
         kdb.Region(c.kdb_cell.begin_shapes_rec(c.kcl.layer(layer))).merge().area()
