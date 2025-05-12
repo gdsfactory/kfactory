@@ -1,7 +1,4 @@
-"""Utilities for Ports.
-
-Mainly renaming functions
-"""
+"""Ports and port functionalities."""
 
 from __future__ import annotations
 
