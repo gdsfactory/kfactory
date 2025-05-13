@@ -243,7 +243,7 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
 class Link(
     RootModel[
         tuple[
-            Port[TUnit] | PortArrayRef | PortRef, Port[TUnit] | PortArrayRef | PortRef
+            PortArrayRef | PortRef, PortArrayRef | PortRef
         ]
     ]
 ):
