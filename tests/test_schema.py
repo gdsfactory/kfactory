@@ -282,12 +282,13 @@ def test_netlist() -> None:
     )
 
     s1.place(x=1000, y=10_000)
-    s2.place(x=1000, y=210_000)
+    s2.place(x=1000, y=-210_000)
 
     schema.add_route("s1-s2", [s1["o2"]], [s2["o2"]], separation=20_000)
     schema.add_port("o1", port=s1["o1"])
-    schema.add_port("o2", port=s1["o1"])
+    schema.add_port("o2", port=s2["o1"])
 
     nl = schema.netlist()
-    nl2 = kf.Netlist.model_validate(nl.model_dump())
-    assert nl == nl2
+    c = schema.create_cell(kf.KCell)
+    nl2 = c.netlist(ignore_unnamed=True)
+    assert nl == nl2[c.name]

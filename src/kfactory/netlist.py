@@ -7,6 +7,8 @@ from pydantic import BaseModel, Field, RootModel, model_validator
 
 from .typings import JSONSerializable  # noqa: TC001
 
+__all__ = ["Netlist", "NetlistInstance", "NetlistPort", "PortArrayRef", "PortRef"]
+
 
 class PortRef(BaseModel, extra="forbid"):
     instance: str
@@ -100,18 +102,23 @@ class Net(RootModel[list[PortArrayRef | PortRef | NetlistPort]]):
         return self
 
 
+class NetlistArray(BaseModel):
+    na: int
+    nb: int
+
+
 class NetlistInstance(BaseModel):
-    name: str
     kcl: str
     component: str
     settings: dict[str, JSONSerializable] = Field(default={})
+    array: NetlistArray | None = Field(default=None)
 
 
 class Netlist(BaseModel, extra="forbid"):
     name: str | None = None
-    instances: dict[str, NetlistInstance] | None = None
-    nets: list[Net]
-    ports: list[NetlistPort] | None = None
+    instances: dict[str, NetlistInstance] = Field(default_factory=dict)
+    nets: list[Net] = Field(default_factory=list)
+    ports: list[NetlistPort] = Field(default_factory=list)
 
     def sort(self) -> Self:
         if self.instances:
@@ -132,3 +139,49 @@ class Netlist(BaseModel, extra="forbid"):
                 if isinstance(instance, dict):
                     instance["name"] = name
         return data
+
+    def create_port(self, name: str) -> NetlistPort:
+        p = NetlistPort(name=name)
+        self.ports.append(p)
+        return p
+
+    def create_inst(
+        self, name: str, kcl: str, component: str, settings: dict[str, JSONSerializable]
+    ) -> None:
+        self.instances[name] = NetlistInstance(
+            kcl=kcl, component=component, settings=settings
+        )
+
+    def create_net(self, *ports: PortRef | NetlistPort) -> None:
+        net_ports: list[PortRef | NetlistPort] = []
+        for port in ports:
+            if isinstance(port, PortRef):
+                if port.instance not in self.instances:
+                    raise ValueError("Unknown instance ", port.instance)
+                inst = self.instances[port.instance]
+                if isinstance(port, PortArrayRef):
+                    if port.ia == 1 and port.ib == 1:
+                        net_ports.append(
+                            PortRef(instance=port.instance, port=port.port)
+                        )
+                        continue
+                    if not inst.array:
+                        raise ValueError(
+                            f"Instance {port.instance} is not an array instance. "
+                            f"But an array portref was requested {port=}"
+                        )
+                    if port.ia > inst.array.na:
+                        raise ValueError(
+                            f"Instance {port.instance} has only {inst.array.na}"
+                            " elements in `na` direction"
+                        )
+                    if port.ib > inst.array.nb:
+                        raise ValueError(
+                            f"Instance {port.instance} has only {inst.array.nb}"
+                            " elements in `na` direction"
+                        )
+                net_ports.append(port)
+            else:
+                net_ports.append(NetlistPort(name=port.name))
+
+        self.nets.append(Net(net_ports))

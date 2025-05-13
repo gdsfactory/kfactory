@@ -315,7 +315,6 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         name: str,
         component: str,
         settings: dict[str, JSONSerializable] | None = None,
-        info: JSONSerializable | None = None,
         array: RegularArray[TUnit] | Array[TUnit] | None = None,
         placement: Placement[TUnit] | None = None,
         kcl: KCLayout | None = None,
@@ -325,7 +324,6 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                 "name": name,
                 "component": component,
                 "settings": settings or {},
-                "info": info,
                 "array": array,
                 "kcl": kcl or self.kcl,
             }
@@ -402,11 +400,19 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                 ]
             )
 
-        return Netlist(
+        if self.ports:
+            nets.extend(
+                [
+                    Net([NetlistPort(name=name), p])
+                    for name, p in self.ports.items()
+                    if isinstance(p, PortRef)
+                ]
+            )
+
+        nl = Netlist(
             name=self.name,
             instances={
                 inst.name: NetlistInstance(
-                    name=inst.name,
                     kcl=inst.kcl.name,
                     component=inst.component,
                     settings=inst.settings,
@@ -414,10 +420,12 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                 for inst in self.instances.values()
             }
             if self.instances
-            else None,
+            else {},
             nets=nets,
             ports=[NetlistPort(name=name) for name in self.ports],
         )
+        nl.sort()
+        return nl
 
     @model_validator(mode="before")
     @classmethod
@@ -603,7 +611,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                 )
                 p.orientation = port.orientation
             else:
-                c.add_port(port=c.insts[port.instance].ports[c.port], name=name)
+                c.add_port(port=c.insts[port.instance].ports[port.port], name=name)
         # routes
         for route in self.routes.values():
             start_ports: list[ProtoPort[Any]] = []
@@ -670,10 +678,12 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         return route
 
 
-class Schema(TSchema[dbu]): ...
+class Schema(TSchema[dbu]):
+    pass
 
 
-class DSchema(TSchema[um]): ...
+class DSchema(TSchema[um]):
+    pass
 
 
 def _place_islands(
