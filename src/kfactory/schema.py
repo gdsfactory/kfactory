@@ -185,7 +185,7 @@ class SchemaInstance(
 
 class Route(BaseModel, Generic[TUnit], extra="forbid"):
     name: str = Field(exclude=True)
-    links: list[Link[TUnit]]
+    links: list[Link]
     routing_strategy: str = "route_bundle"
     settings: dict[str, JSONSerializable]
 
@@ -240,13 +240,7 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
         return placeable
 
 
-class Link(
-    RootModel[
-        tuple[
-            PortArrayRef | PortRef, PortArrayRef | PortRef
-        ]
-    ]
-):
+class Link(RootModel[tuple[PortArrayRef | PortRef, PortArrayRef | PortRef]]):
     root: tuple[PortArrayRef | PortRef, PortArrayRef | PortRef]
 
     @model_validator(mode="after")
