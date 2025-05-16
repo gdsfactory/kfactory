@@ -54,6 +54,8 @@ from . import (
     typings,
     kcell,
     conf,
+    layer,
+    layout,
 )
 from .routing.generic import ManhattanRoute
 from .typings import dbu  # noqa: F401
@@ -115,6 +117,8 @@ __all__ = [
     "kcls",
     "kdb",
     "lay",
+    "layer",
+    "layout",
     "load_session",
     "logger",
     "packing",

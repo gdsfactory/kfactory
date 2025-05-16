@@ -1,10 +1,10 @@
 import klayout.db as kdb
 import pytest
-from conftest import Layers
 
 import kfactory as kf
 from kfactory.cross_section import CrossSection, CrossSectionSpec, DCrossSection
 from kfactory.exceptions import LockedError
+from tests.conftest import Layers
 
 
 def test_unnamed_dkcell(kcl: kf.KCLayout) -> None:

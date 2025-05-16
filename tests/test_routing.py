@@ -3,9 +3,9 @@ from functools import partial
 
 import numpy as np
 import pytest
-from conftest import Layers
 
 import kfactory as kf
+from tests.conftest import Layers
 
 smart_bundle_routing_params = [
     (indirect, sort_ports, start_bbox, start_angle, m2, m1, z, p1, p2)

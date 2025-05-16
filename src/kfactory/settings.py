@@ -15,6 +15,10 @@ __all__ = ["Info", "KCellSettings", "KCellSettingsUnits", "SettingMixin"]
 class SettingMixin:
     """Mixin class for shared settings functionality."""
 
+    def __getattr__(self, key: str) -> Any:
+        """Get the value of a setting."""
+        return super().__getattr__(key)  # type: ignore[misc]
+
     def __getitem__(self, key: str) -> Any:
         """Get the value of a setting."""
         return getattr(self, key)
@@ -29,7 +33,7 @@ class SettingMixin:
 
     def __str__(self) -> str:
         """Return the representation of the settings."""
-        return f"{self.__class__.__name__}({super().__str__()})"
+        return repr(self)
 
 
 class KCellSettings(

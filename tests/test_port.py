@@ -2,10 +2,10 @@ import math
 from typing import Any
 
 import pytest
-from conftest import Layers
 
 import kfactory as kf
 from kfactory.cross_section import CrossSection, CrossSectionSpec
+from tests.conftest import Layers
 
 _PortsType = tuple[kf.port.DPort, kf.port.Port, kf.port.DPort, kf.port.Port]
 

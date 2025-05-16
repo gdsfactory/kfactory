@@ -2,10 +2,10 @@ from typing import Any, TypeAlias
 
 import klayout.db as kdb
 import pytest
-from conftest import Layers
 
 import kfactory as kf
 from kfactory import exceptions
+from tests.conftest import Layers
 
 
 def test_instance_xsize(layers: Layers) -> None:
