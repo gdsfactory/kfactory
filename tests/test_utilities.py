@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING, Literal
 
 import klayout.db as kdb
 import pytest
-from conftest import Layers
 
 import kfactory as kf
 from kfactory.port import DPort, Port
@@ -15,6 +14,7 @@ from kfactory.utilities import (
     polygon_from_array,
     pprint_ports,
 )
+from tests.conftest import Layers
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

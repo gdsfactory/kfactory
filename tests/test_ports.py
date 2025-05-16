@@ -2,10 +2,10 @@ import re
 from collections.abc import Sequence
 
 import pytest
-from conftest import Layers
 
 import kfactory as kf
 from kfactory.exceptions import PortWidthMismatchError
+from tests.conftest import Layers
 
 
 @kf.cell
