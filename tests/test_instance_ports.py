@@ -1,7 +1,7 @@
 import pytest
-from conftest import Layers
 
 import kfactory as kf
+from tests.conftest import Layers
 
 
 def test_instance_ports(layers: Layers, kcl: kf.KCLayout) -> None:

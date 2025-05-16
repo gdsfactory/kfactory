@@ -3,9 +3,9 @@
 from tempfile import NamedTemporaryFile
 
 import pytest
-from conftest import Layers
 
 import kfactory as kf
+from tests.conftest import Layers
 
 
 @kf.cell  # type: ignore[misc, unused-ignore]

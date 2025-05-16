@@ -1,8 +1,8 @@
 import numpy as np
-from conftest import Layers
 
 import kfactory as kf
 from kfactory.enclosure import extrude_path_dynamic
+from tests.conftest import Layers
 
 
 @kf.cell

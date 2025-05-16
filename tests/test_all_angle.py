@@ -2,9 +2,9 @@ from functools import partial
 from random import randint
 
 import numpy as np
-from conftest import Layers
 
 import kfactory as kf
+from tests.conftest import Layers
 
 
 def test_all_angle_bundle(layers: Layers) -> None:

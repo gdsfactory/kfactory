@@ -1,9 +1,8 @@
 from functools import partial
 from pathlib import Path
 
-from conftest import Layers
-
 import kfactory as kf
+from tests.conftest import Layers
 
 
 def test_virtual_cell(kcl: kf.KCLayout) -> None:
