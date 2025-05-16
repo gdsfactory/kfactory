@@ -3,7 +3,9 @@
 
 # What's Changed
 
+## Bug Fixes
 
+- fix bezier factory out port [#697](https://github.com/gdsfactory/kfactory/pull/697)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.5.5
 
