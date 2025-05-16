@@ -21,6 +21,8 @@ categories:
     label: "maintenance"
   - title: "Documentation"
     label: "documentation"
+  - title: "Typing"
+    label: "typing"
   - title: "Other changes"
   - title: "Dependency Updates"
     label: "dependencies"
@@ -78,3 +80,8 @@ autolabeler:
       - "/^refactor-.+/"
     title:
       - "/^refactor/i"
+  - label: "typing"
+    branch:
+      - "/^typing-.+/"
+    title:
+      - "/^typing/i"
