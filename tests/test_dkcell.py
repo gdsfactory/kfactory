@@ -80,7 +80,6 @@ def test_dkcell_locked(layers: Layers) -> None:
     with pytest.raises(LockedError):
         c.create_port(
             name="o1",
-            kcl=kcl,
             cross_section=CrossSection(
                 kcl,
                 base=kcl.get_symmetrical_cross_section(
