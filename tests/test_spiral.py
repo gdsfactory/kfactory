@@ -94,7 +94,7 @@ def dbend_circular(
         ]
     ]
     kf.enclosure.extrude_path(c, layer, backbone, width, enclosure, 0, angle)
-    dp1 = kf.kcell.Port(
+    dp1 = kf.port.Port(
         width=c.kcl.to_dbu(width),
         layer=c.kcl.find_layer(layer),
         name="W0",
@@ -116,7 +116,7 @@ def dbend_circular(
                 name="N0",
                 layer=c.kcl.find_layer(layer),
                 width=c.kcl.to_dbu(width),
-                dcplx_trans=kf.kdb.DTrans(1, 0, False, 0, 2 * radius),
+                dcplx_trans=kf.kdb.DCplxTrans(1, 0, False, 0, 2 * radius),
             )
         case _:
             raise ValueError("only support 90/180° bends")
@@ -131,7 +131,7 @@ def test_spiral(layers: Layers) -> None:
     r1 = 1000
     r2 = 0
 
-    p: kf.ProtoPort[int] = kf.Port(
+    p: kf.port.ProtoPort[int] = kf.Port(
         name="start",
         trans=kf.kdb.Trans.R0,
         width=1000,
@@ -153,7 +153,7 @@ def test_dspiral(layers: Layers) -> None:
     r1 = 1
     r2 = 0
 
-    p: kf.ProtoPort[int] = kf.Port(
+    p: kf.port.ProtoPort[int] = kf.Port(
         name="start",
         dcplx_trans=kf.kdb.DCplxTrans.R0,
         width=c.kcl.to_dbu(1),
