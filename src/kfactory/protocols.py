@@ -277,6 +277,8 @@ class DCreatePort(ABC):
 
         port = DPort(
             kcl=self.kcl,
+            name=name,
+            width=width,
             cross_section=cross_section,
             trans=trans,
             dcplx_trans=dcplx_trans,

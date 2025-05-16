@@ -413,7 +413,7 @@ def test_dportsadd_port(kcl: kf.KCLayout, layers: Layers) -> None:
     with pytest.raises(ValueError):
         ports.create_port(name="o1", width=10, center=(1000, 1000), orientation=1)  # type: ignore[call-overload]
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AssertionError):
         ports.create_port(name="o1", layer=1, width=10)  # type: ignore[call-overload]
 
     with pytest.raises(ValueError, match="Width must be greater than 0."):
