@@ -1,6 +1,5 @@
-from session import session1, session2, session3
-
 import kfactory as kf
+from tests.session import session1, session2, session3
 
 
 def test_session_cache() -> None:
