@@ -1,26 +1,11 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from collections.abc import (
-    Callable,
-    Iterable,
-    Iterator,
-    Mapping,
-    Sequence,
-)
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Generic,
-    Literal,
-    Self,
-    overload,
-)
+from abc import abstractmethod
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Protocol, Self, overload
 
 from . import kdb
 from .conf import config
-from .cross_section import CrossSectionSpec, SymmetricalCrossSection
 from .port import (
     BasePort,
     DPort,
@@ -65,10 +50,10 @@ def _filter_ports(
     return list(ports)
 
 
-class ProtoPorts(ABC, Generic[TUnit]):
+class ProtoPorts(Protocol[TUnit]):
     """Base class for kf.Ports, kf.DPorts."""
 
-    kcl: KCLayout
+    _kcl: KCLayout
     _locked: bool
     _bases: list[BasePort]
 
@@ -123,6 +108,16 @@ class ProtoPorts(ABC, Generic[TUnit]):
         """Get the bases."""
         return self._bases
 
+    @property
+    def kcl(self) -> KCLayout:
+        """Get the KCLayout."""
+        return self._kcl
+
+    @kcl.setter
+    def kcl(self, value: KCLayout) -> None:
+        """Set the KCLayout."""
+        self._kcl = value
+
     @abstractmethod
     def copy(
         self,
@@ -153,11 +148,6 @@ class ProtoPorts(ABC, Generic[TUnit]):
         keep_mirror: bool = False,
     ) -> ProtoPort[TUnit]:
         """Add a port."""
-        ...
-
-    @abstractmethod
-    def _create_port(self, *args: Any, **kwargs: Any) -> ProtoPort[TUnit]:
-        """Create a port."""
         ...
 
     @abstractmethod
@@ -296,90 +286,6 @@ class Ports(ProtoPorts[int], ICreatePort):
             self._bases.append(port_.base)
         return port_
 
-    def _create_port(
-        self,
-        *,
-        name: str | None = None,
-        width: int | None = None,
-        layer: LayerEnum | int | None = None,
-        layer_info: kdb.LayerInfo | None = None,
-        port_type: str = "optical",
-        trans: kdb.Trans | None = None,
-        dcplx_trans: kdb.DCplxTrans | None = None,
-        center: tuple[int, int] | None = None,
-        angle: Angle | None = None,
-        mirror_x: bool = False,
-        cross_section: SymmetricalCrossSection | None = None,
-    ) -> Port:
-        """Create a new port in the list.
-
-        Args:
-            name: Optional name of port.
-            width: Width of the port in dbu. If `trans` is set (or the manual creation
-                with `center` and `angle`), this needs to be as well.
-            layer: Layer index of the port.
-            layer_info: Layer definition of the port.
-            port_type: Type of the port (electrical, optical, etc.)
-            trans: Transformation object of the port. [dbu]
-            dcplx_trans: Complex transformation for the port.
-                Use if a non-90° port is necessary.
-            center: Tuple of the center. [dbu]
-            angle: Angle in 90° increments. Used for simple/dbu transformations.
-            mirror_x: Mirror the transformation of the port.
-            cross_section: Cross section of the port. If set, overwrites width and layer
-                (info).
-        """
-        if cross_section is None:
-            if width is None:
-                raise ValueError(
-                    "Either width or dwidth must be set. It can be set through"
-                    " a cross section as well."
-                )
-            if layer_info is None:
-                if layer is None:
-                    raise ValueError(
-                        "layer or layer_info must be defined to create a port."
-                    )
-                layer_info = self.kcl.layout.get_info(layer)
-            assert layer_info is not None
-            cross_section = self.kcl.get_symmetrical_cross_section(
-                CrossSectionSpec(layer=layer_info, width=width)
-            )
-        if trans is not None:
-            port = Port(
-                name=name,
-                trans=trans,
-                cross_section=cross_section,
-                port_type=port_type,
-                kcl=self.kcl,
-            )
-        elif dcplx_trans is not None:
-            port = Port(
-                name=name,
-                dcplx_trans=dcplx_trans,
-                port_type=port_type,
-                cross_section=cross_section,
-                kcl=self.kcl,
-            )
-        elif angle is not None and center is not None:
-            port = Port(
-                name=name,
-                port_type=port_type,
-                cross_section=cross_section,
-                angle=angle,
-                center=center,
-                mirror_x=mirror_x,
-                kcl=self.kcl,
-            )
-        else:
-            raise ValueError(
-                f"You need to define width {width} and trans {trans} or angle {angle}"
-                f" and center {center} or dcplx_trans {dcplx_trans}"
-            )
-
-        self._bases.append(port.base)
-        return port
-
     def get_all_named(self) -> Mapping[str, Port]:
         """Get all ports in a dictionary with names as keys."""
         return {v.name: Port(base=v) for v in self._bases if v.name is not None}
@@ -491,98 +397,6 @@ class DPorts(ProtoPorts[float], DCreatePort):
             port_.dcplx_trans = dcplx_trans
             self._bases.append(port_.base)
         return port_
-
-    def _create_port(
-        self,
-        *,
-        name: str | None = None,
-        width: float | None = None,
-        layer: LayerEnum | int | None = None,
-        layer_info: kdb.LayerInfo | None = None,
-        port_type: str = "optical",
-        trans: kdb.Trans | None = None,
-        dcplx_trans: kdb.DCplxTrans | None = None,
-        center: tuple[float, float] | None = None,
-        orientation: float | None = None,
-        mirror_x: bool = False,
-        cross_section: SymmetricalCrossSection | None = None,
-    ) -> DPort:
-        """Create a new port in the list.
-
-        Args:
-            name: Optional name of port.
-            width: Width of the port in dbu. If `trans` is set (or the manual creation
-                with `center` and `angle`), this needs to be as well.
-            layer: Layer index of the port.
-            layer_info: Layer definition of the port.
-            port_type: Type of the port (electrical, optical, etc.)
-            trans: Transformation object of the port. [dbu]
-            dcplx_trans: Complex transformation for the port.
-                Use if a non-90° port is necessary.
-            center: Tuple of the center. [dbu]
-            orientation: Angle in degrees.
-            mirror_x: Mirror the transformation of the port.
-            cross_section: Cross section of the port. If set, overwrites width and layer
-        """
-        if cross_section is None:
-            if width is None:
-                raise ValueError(
-                    "Either width must be set. It can be set through"
-                    " a cross section as well."
-                )
-            if layer_info is None:
-                if layer is None:
-                    raise ValueError(
-                        "layer or layer_info must be defined to create a port."
-                    )
-                layer_info = self.kcl.layout.get_info(layer)
-            assert layer_info is not None
-            width_ = self.kcl.to_dbu(width)
-            if width_ % 2:
-                raise ValueError(
-                    f"width needs to be even to snap to grid. Got {width}."
-                    "Ports must have a grid width of multiples of 2."
-                )
-            cross_section = self.kcl.get_symmetrical_cross_section(
-                CrossSectionSpec(
-                    layer=layer_info,
-                    width=width_,
-                )
-            )
-        if trans is not None:
-            port = DPort(
-                name=name,
-                trans=trans,
-                cross_section=cross_section,
-                port_type=port_type,
-                kcl=self.kcl,
-            )
-        elif dcplx_trans is not None:
-            port = DPort(
-                name=name,
-                dcplx_trans=dcplx_trans,
-                port_type=port_type,
-                cross_section=cross_section,
-                kcl=self.kcl,
-            )
-        elif orientation is not None and center is not None:
-            port = DPort(
-                name=name,
-                port_type=port_type,
-                cross_section=cross_section,
-                orientation=orientation,
-                center=center,
-                mirror_x=mirror_x,
-                kcl=self.kcl,
-            )
-        else:
-            raise ValueError(
-                f"You need to define width {width} and trans {trans} or orientation"
-                f" {orientation} and center {center} or dcplx_trans {dcplx_trans}"
-            )
-
-        self._bases.append(port.base)
-        return port
 
     def get_all_named(self) -> Mapping[str, DPort]:
         """Get all ports in a dictionary with names as keys."""

@@ -331,9 +331,6 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
             ports=ports, prefix=prefix, suffix=suffix, keep_mirror=keep_mirror
         )
 
-    @abstractmethod
-    def _create_port(self, *args: Any, **kwargs: Any) -> ProtoPort[TUnit]: ...
-
     def layer(self, *args: Any, **kwargs: Any) -> int:
         """Get the layer info, convenience for `klayout.db.Layout.layer`."""
         return self._base.kcl.layout.layer(*args, **kwargs)
@@ -662,7 +659,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
-        return getattr(self._base.kdb_cell, name)
+        try:
+            return super().__getattr__(name)  # type: ignore[misc]
+        except Exception:
+            return getattr(self._base, name)
 
     def cell_index(self) -> int:
         """Gets the cell index."""
@@ -798,7 +798,13 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         self.kcl.delete_cell(ci)
 
     @abstractmethod
-    def _create_port(self, **kwargs: Any) -> ProtoPort[TUnit]: ...
+    def add_port(
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
+    ) -> ProtoPort[Any]: ...
 
     @overload
     @abstractmethod
@@ -2383,11 +2389,22 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         """
         return DInstance(kcl=self.kcl, instance=self.create_inst(cell).instance)
 
-    def _create_port(self, **kwargs: Any) -> DPort:
+    def add_port(
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
+    ) -> DPort:
         """Create a port in the cell."""
         if self.locked:
             raise LockedError(self)
-        return self.ports.create_port(**kwargs)
+
+        return self.ports.add_port(
+            port=port,
+            name=name,
+            keep_mirror=keep_mirror,
+        )
 
     def __getitem__(self, key: int | str | None) -> DPort:
         """Returns port from instance."""
@@ -2527,11 +2544,22 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         """
         return self.create_inst(cell)
 
-    def _create_port(self, **kwargs: Any) -> Port:
+    def add_port(
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
+    ) -> Port:
         """Create a port in the cell."""
         if self.locked:
             raise LockedError(self)
-        return self.ports.create_port(**kwargs)
+
+        return self.ports.add_port(
+            port=port,
+            name=name,
+            keep_mirror=keep_mirror,
+        )
 
     def __getitem__(self, key: int | str | None) -> Port:
         """Returns port from instance."""
@@ -3029,11 +3057,21 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         port_names = [p.name for p in self.ports]
         return f"{self.name}: ports {port_names}, {len(self.insts)} instances"
 
-    def _create_port(self, **kwargs: Any) -> DPort:
+    def add_port(
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
+    ) -> DPort:
         """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
         if self.locked:
             raise LockedError(self)
-        return self.ports.create_port(**kwargs)
+        return self.ports.add_port(
+            port=port,
+            name=name,
+            keep_mirror=keep_mirror,
+        )
 
     def create_inst(
         self, cell: AnyKCell, trans: kdb.DCplxTrans | None = None

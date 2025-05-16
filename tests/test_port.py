@@ -36,7 +36,7 @@ def get_ports() -> _PortsType:
     )
 
 
-def test_create_port_error(kcl: kf.KCLayout, layers: Layers) -> None:
+def testadd_port_error(kcl: kf.KCLayout, layers: Layers) -> None:
     db = kf.rdb.ReportDatabase("Connectivity Check")
     db_cell = db.create_cell("test")
     subc = db.create_category("WidthMismatch")
