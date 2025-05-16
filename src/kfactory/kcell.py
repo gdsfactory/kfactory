@@ -1836,7 +1836,6 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             exclude_purpose=exclude_purpose,
             ignore_unnamed=ignore_unnamed,
         )
-        l2n_elec.write("~/Downloads/test_schema_python.l2n", True)
 
         netlists: dict[str, Netlist] = {}
 
