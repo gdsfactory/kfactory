@@ -1713,7 +1713,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
     def l2n_ports(
         self,
         port_types: Iterable[str] = ("optical",),
-        exclude_purpose: list[str] | None = None,
+        exclude_purposes: list[str] | None = None,
         ignore_unnamed: bool = False,
     ) -> kdb.LayoutToNetlist:
         """Generate a LayoutToNetlist object from the port types.
@@ -1740,13 +1740,13 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             c.circuit(
                 l2n,
                 port_types=port_types,
-                exclude_purpose=exclude_purpose,
+                exclude_purposes=exclude_purposes,
                 ignore_unnamed=ignore_unnamed,
             )
         self.circuit(
             l2n,
             port_types=port_types,
-            exclude_purpose=exclude_purpose,
+            exclude_purposes=exclude_purposes,
             ignore_unnamed=ignore_unnamed,
         )
         return l2n
@@ -1801,8 +1801,6 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 l_ = l2n.make_layer(ly_elec.find_layer(layer.name), layer.name)
                 layers[layer] = l_
                 l2n.connect(l_)
-
-        connectivity = connectivity or self.kcl.connectivity
         for conn in connectivity:
             old_layer = layers[conn[0]]
 
@@ -1810,7 +1808,6 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 li = layers[layer]
                 l2n.connect(old_layer, li)
                 old_layer = li
-        l2n.reset_extracted()
         l2n.extract_netlist()
         l2n.check_extraction_errors()
 
@@ -1826,14 +1823,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         ]
         | None = None,
         ignore_unnamed: bool = False,
-        exclude_purpose: list[str] | None = None,
+        exclude_purposes: list[str] | None = None,
     ) -> dict[str, Netlist]:
         l2n_elec = self.l2n_elec(
             mark_port_types=mark_port_types, connectivity=connectivity
         )
         l2n_opt = self.l2n_ports(
             port_types=port_types,
-            exclude_purpose=exclude_purpose,
+            exclude_purposes=exclude_purposes,
             ignore_unnamed=ignore_unnamed,
         )
 
@@ -1847,7 +1844,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 l2n_opt=l2n_opt,
                 l2n_elec=l2n_elec,
                 ignore_unnamed=ignore_unnamed,
-                exclude_purpose=exclude_purpose,
+                exclude_purposes=exclude_purposes,
             )
         return netlists
 
@@ -1856,7 +1853,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         l2n: kdb.LayoutToNetlist,
         port_types: Iterable[str] = ("optical",),
         ignore_unnamed: bool = False,
-        exclude_purpose: list[str] | None = None,
+        exclude_purposes: list[str] | None = None,
     ) -> None:
         """Create the circuit of the KCell in the given netlist."""
         netlist = l2n.netlist()
@@ -1997,39 +1994,47 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                             subc.connect_pin(
                                 subc.circuit_ref().pin_by_name(port.name or str(j)), net
                             )
+
+        del_subcs: list[kdb.SubCircuit] = []
         if ignore_unnamed:
             del_subcs = [
                 circ.subcircuit_by_name(inst.name)
                 for inst in self.insts
                 if not inst.is_named()
             ]
+        if exclude_purposes:
+            del_subcs.extend(
+                circ.subcircuit_by_name(inst.name)
+                for inst in self.insts
+                if inst.purpose in exclude_purposes
+            )
 
-            for subc in del_subcs:
-                nets: list[kdb.Net] = []
-                for net in circ.each_net():
-                    for sc_pin in net.each_subcircuit_pin():
-                        if sc_pin.subcircuit().id() == subc.id():
-                            nets.append(net)
-                            break
+        for subc in del_subcs:
+            nets: list[kdb.Net] = []
+            for net in circ.each_net():
+                for sc_pin in net.each_subcircuit_pin():
+                    if sc_pin.subcircuit().id() == subc.id():
+                        nets.append(net)
+                        break
 
-                if nets:
-                    target_net = nets[0]
-                    for net in nets[1:]:
-                        spinrefs = [
-                            (spin.pin(), spin.subcircuit())
-                            for spin in net.each_subcircuit_pin()
-                        ]
-                        for pin, _subc in spinrefs:
-                            _subc.disconnect_pin(pin)
-                            if _subc not in del_subcs:
-                                _subc.connect_pin(pin, target_net)
-                        net_pins = [pinref.pin() for pinref in net.each_pin()]
-                        for pin in net_pins:
-                            circ.disconnect_pin(pin)
-                            circ.connect_pin(pin, target_net)
-                        circ.remove_net(net)
-            for subc in del_subcs:
-                circ.remove_subcircuit(subc)
+            if nets:
+                target_net = nets[0]
+                for net in nets[1:]:
+                    spinrefs = [
+                        (spin.pin(), spin.subcircuit())
+                        for spin in net.each_subcircuit_pin()
+                    ]
+                    for pin, _subc in spinrefs:
+                        _subc.disconnect_pin(pin)
+                        if _subc not in del_subcs:
+                            _subc.connect_pin(pin, target_net)
+                    net_pins = [pinref.pin() for pinref in net.each_pin()]
+                    for pin in net_pins:
+                        circ.disconnect_pin(pin)
+                        circ.connect_pin(pin, target_net)
+                    circ.remove_net(net)
+        for subc in del_subcs:
+            circ.remove_subcircuit(subc)
 
         netlist.add(circ)
 
@@ -3875,18 +3880,18 @@ def _get_netlist(
     l2n_opt: kdb.LayoutToNetlist,
     l2n_elec: kdb.LayoutToNetlist,
     ignore_unnamed: bool = False,
-    exclude_purpose: list[str] | None = None,
+    exclude_purposes: list[str] | None = None,
 ) -> Netlist:
     opt_circ = l2n_opt.netlist().circuit_by_name(c.name)
     elec_circ = l2n_elec.netlist().circuit_by_cell_index(
         l2n_elec.internal_layout().cell(c.name).cell_index()
     )
     nl = Netlist(nets=[])
-    exclude_purpose = exclude_purpose or []
+    exclude_purposes = exclude_purposes or []
     keep_name = not ignore_unnamed
 
     for inst in c.insts:
-        if (keep_name or inst.is_named()) and (inst.purpose not in exclude_purpose):
+        if (keep_name or inst.is_named()) and (inst.purpose not in exclude_purposes):
             if inst.cell.factory_name is not None:
                 nl.create_inst(
                     name=inst.name,
