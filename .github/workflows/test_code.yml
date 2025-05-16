@@ -55,7 +55,7 @@ jobs:
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
-        run: make test
+        run: make test PYTHON=${{ matrix.python-version }}
 
   test_code_min_ver:
     runs-on: ${{ matrix.os }}
