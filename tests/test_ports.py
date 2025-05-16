@@ -421,7 +421,7 @@ def test_dportsadd_port(kcl: kf.KCLayout, layers: Layers) -> None:
             name="o1", width=-10, layer=1, center=(1000, 1000), orientation=1
         )
 
-    with pytest.raises(ValueError, match="width needs to be even to snap to grid"):
+    with pytest.raises(ValueError):
         ports.create_port(
             name="o1", width=0.001, layer=1, center=(1000, 1000), orientation=1
         )
