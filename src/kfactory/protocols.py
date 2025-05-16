@@ -7,12 +7,22 @@ from typing import (
     runtime_checkable,
 )
 
-from .typings import TUnit
+from . import kdb
 
 if TYPE_CHECKING:
     from .layer import LayerEnum
+    from .port import DPort, Port, ProtoPort
 
-__all__ = ["BoxFunction", "BoxLike", "PointLike"]
+from .typings import Angle, TUnit
+
+__all__ = [
+    "BoxFunction",
+    "BoxLike",
+    "TCreatePortFunction",
+    "DCreatePortFunction",
+    "CreatePortFunction",
+    "PointLike",
+]
 
 
 @runtime_checkable
@@ -72,3 +82,104 @@ class BoxFunction(Protocol[TUnit]):
     def __call__(self, layer: LayerEnum | int | None = None) -> BoxLike[TUnit]:
         """Call the box function."""
         ...
+
+
+@runtime_checkable
+class TCreatePortFunction(Protocol[TUnit]):
+    """Protocol for the different argument variants a function can have to create a port."""
+
+    @overload
+    def __call__(
+        self,
+        *,
+        trans: kdb.Trans,
+        width: TUnit,
+        layer: int | LayerEnum,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> ProtoPort[TUnit]: ...
+
+    @overload
+    def __call__(
+        self,
+        *,
+        trans: kdb.Trans,
+        width: TUnit,
+        layer_info: kdb.LayerInfo,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> ProtoPort[TUnit]: ...
+
+    @overload
+    def __call__(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        width: TUnit,
+        layer: LayerEnum | int,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> ProtoPort[TUnit]: ...
+
+    @overload
+    def __call__(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        width: TUnit,
+        layer_info: kdb.LayerInfo,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> ProtoPort[TUnit]: ...
+
+
+class CreatePortFunction(TCreatePortFunction[int], Protocol):
+    @overload
+    def __call__(
+        self,
+        *,
+        width: int,
+        layer: LayerEnum | int,
+        center: tuple[int, int],
+        angle: Angle,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def __call__(
+        self,
+        *,
+        width: int,
+        layer_info: kdb.LayerInfo,
+        center: tuple[int, int],
+        angle: Angle,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+
+class DCreatePortFunction(TCreatePortFunction[float], Protocol):
+    @overload
+    def __call__(
+        self,
+        *,
+        width: float,
+        layer: LayerEnum | int,
+        center: tuple[float, float],
+        orientation: float,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    @overload
+    def __call__(
+        self,
+        *,
+        width: float,
+        layer_info: kdb.LayerInfo,
+        center: tuple[float, float],
+        orientation: float,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
