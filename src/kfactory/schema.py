@@ -659,10 +659,12 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         name: str,
         start_ports: list[PortRef],
         end_ports: list[PortRef],
+        routing_strategy: str,
         **settings: JSONSerializable,
     ) -> Route[TUnit]:
         route = Route[TUnit](
             name=name,
+            routing_strategy=routing_strategy,
             links=[
                 Link((sp, ep)) for sp, ep in zip(start_ports, end_ports, strict=True)
             ],

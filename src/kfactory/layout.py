@@ -1157,7 +1157,9 @@ class KCLayout(
         kcl.layout.assign(self.layout.dup())
         if init_cells:
             for i, kc in self.tkcells.items():
-                kcl.tkcells[i] = kc.model_copy(update={"kdb_cell": kc.kdb_cell})
+                kcl.tkcells[i] = kc.model_copy(
+                    update={"kdb_cell": kc.kdb_cell, "kcl": kcl}
+                )
         kcl.rename_function = self.rename_function
         return kcl
 

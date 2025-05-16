@@ -146,8 +146,6 @@ def test_schema_create_cell() -> None:
 
         return schema
 
-    long_straight(50_000).show()
-
 
 def test_schema_route() -> None:
     class Layers(kf.LayerInfos):
@@ -214,11 +212,11 @@ def test_schema_route() -> None:
         s1.place(x=1000, y=10_000)
         s2.place(x=1000, y=210_000)
 
-        schema.add_route("s1-s2", [s1["o2"]], [s2["o2"]], separation=20_000)
+        schema.add_route(
+            "s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000
+        )
 
         return schema
-
-    route_example().show()
 
 
 def test_netlist() -> None:
@@ -230,9 +228,18 @@ def test_netlist() -> None:
         FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
         FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
         FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
+        METAL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
+        METAL1EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 1)
+        VIA1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
+        METAL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4, 0)
+        METAL2EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4, 1)
 
     layers = Layers()
-    pdk = kf.KCLayout("SCHEMA_PDK_NETLIST", infos=Layers)
+    pdk = kf.KCLayout(
+        "SCHEMA_PDK_NETLIST",
+        infos=Layers,
+        connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)],
+    )
 
     @pdk.cell
     def straight(width: int, length: int) -> kf.KCell:
@@ -251,6 +258,32 @@ def test_netlist() -> None:
             layer_info=layers.WG,
         )
 
+        return c
+
+    @pdk.cell
+    def pad_m1() -> kf.KCell:
+        c = pdk.kcell()
+        c.shapes(layers.METAL1).insert(kf.kdb.Box(100_000))
+        c.create_port(
+            name="e1",
+            trans=kf.kdb.Trans(50_000, 0),
+            width=50_000,
+            layer_info=layers.METAL1,
+            port_type="electrical",
+        )
+        return c
+
+    @pdk.cell
+    def pad_m2() -> kf.KCell:
+        c = pdk.kcell()
+        c.shapes(layers.METAL2).insert(kf.kdb.Box(100_000))
+        c.create_port(
+            name="e1",
+            trans=kf.kdb.Trans(50_000, 0),
+            width=50_000,
+            layer_info=layers.METAL2,
+            port_type="electrical",
+        )
         return c
 
     bend90_function = kf.factories.euler.bend_euler_factory(kcl=pdk)
@@ -272,6 +305,24 @@ def test_netlist() -> None:
             bend90_cell=bend90,
         )
 
+    @pdk.routing_strategy
+    def route_bundle_elec(
+        c: kf.ProtoTKCell[Any],
+        start_ports: Sequence[kf.ProtoPort[Any]],
+        end_ports: Sequence[kf.ProtoPort[Any]],
+        separation: int = 5000,
+        start_straight: int = 0,
+        end_straight: int = 0,
+    ) -> list[kf.routing.generic.ManhattanRoute]:
+        return kf.routing.electrical.route_bundle(
+            c=kf.KCell(base=c._base),
+            start_ports=[kf.Port(base=sp.base) for sp in start_ports],
+            end_ports=[kf.Port(base=ep.base) for ep in end_ports],
+            separation=separation,
+            starts=start_straight,
+            ends=end_straight,
+        )
+
     schema = kf.Schema(kcl=pdk)
 
     s1 = schema.create_inst(
@@ -281,14 +332,40 @@ def test_netlist() -> None:
         name="s2", component="straight", settings={"length": 5000, "width": 500}
     )
 
+    padm1_1 = schema.create_inst(name="padm1_1", component="pad_m1")
+    padm1_2 = schema.create_inst(name="padm1_2", component="pad_m1")
+    padm2_1 = schema.create_inst(name="padm2_1", component="pad_m2")
+    padm2_2 = schema.create_inst(name="padm2_2", component="pad_m2")
+
     s1.place(x=1000, y=10_000)
     s2.place(x=1000, y=-210_000)
 
-    schema.add_route("s1-s2", [s1["o2"]], [s2["o2"]], separation=20_000)
+    padm1_1.place(x=-5_000, y=0)
+    padm1_2.place(x=5_000, y=0, orientation=180)
+    padm2_1.place(x=0, y=1000, orientation=270)
+    padm2_2.place(x=0, y=-1000, orientation=90)
+
+    schema.add_route("s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000)
+    schema.add_route(
+        "pm1_1-pm1_2",
+        [padm1_1["e1"]],
+        [padm1_2["e1"]],
+        "route_bundle_elec",
+        separation=20_000,
+    )
+    schema.add_route(
+        "pm2_1-pm2_2",
+        [padm2_1["e1"]],
+        [padm2_2["e1"]],
+        "route_bundle_elec",
+        separation=20_000,
+    )
     schema.add_port("o1", port=s1["o1"])
     schema.add_port("o2", port=s2["o1"])
 
     nl = schema.netlist()
     c = schema.create_cell(kf.KCell)
-    nl2 = c.netlist(ignore_unnamed=True)
+    nl2 = c.netlist(
+        ignore_unnamed=True, connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)]
+    )
     assert nl == nl2[c.name]

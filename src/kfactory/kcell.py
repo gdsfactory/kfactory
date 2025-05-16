@@ -16,6 +16,7 @@ import inspect
 import json
 import socket
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from collections.abc import (
     Callable,
     ItemsView,
@@ -1750,12 +1751,13 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         )
         return l2n
 
-    def l2n_extraction(
+    def l2n_elec(
         self,
         mark_port_types: Iterable[str] = ("electrical", "RF", "DC"),
         connectivity: Sequence[
-            tuple[kdb.LayerInfo, kdb.LayerInfo]
-            | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo]
+            tuple[kdb.LayerInfo]
+            | tuple[kdb.LayerInfo, kdb.LayerInfo]
+            | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo],
         ]
         | None = None,
     ) -> kdb.LayoutToNetlist:
@@ -1768,44 +1770,49 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         Returns:
             LayoutToNetlist extracted from electrical connectivity.
         """
-        l2n = kdb.LayoutToNetlist(
+        connectivity = connectivity or self.kcl.connectivity
+        ly_elec = self.kcl.layout.dup()
+
+        for ci in [self.cell_index(), *self.called_cells()]:
+            c_ = self.kcl[ci]
+            c = ly_elec.cell(ci)
+            assert c_.name == c.name
+            c.locked = False
+            for port in c_.ports:
+                if port.port_type in mark_port_types and port.name is not None:
+                    c.shapes(port.layer_info).insert(
+                        kdb.Text(string=port.name, trans=port.trans)
+                    )
+
+        l2n: kdb.LayoutToNetlist = kdb.LayoutToNetlist(
             kdb.RecursiveShapeIterator(
-                self.kcl.layout, self.kdb_cell, self.kcl.layout.layer_indexes()
+                ly_elec,
+                ly_elec.cell(self.name),
+                [],
             )
         )
 
-        ly = l2n.internal_layout()
+        connectivity = connectivity or self.kcl.connectivity
 
-        for ci in [self.cell_index(), *self.called_cells()]:
-            c = self.kcl[ci]
-            for port in c.ports:
-                if port.port_type in mark_port_types and port.name is not None:
-                    internal_cell = ly.cell(c.name)
-                    internal_cell.shapes(port.layer_info).insert(
-                        kdb.Text(port.name, trans=port.trans)
-                    )
+        layers: dict[kdb.LayerInfo, kdb.Region] = {}
+
+        for conn in connectivity:
+            for layer in conn:
+                l_ = l2n.make_layer(ly_elec.find_layer(layer.name), layer.name)
+                layers[layer] = l_
+                l2n.connect(l_)
 
         connectivity = connectivity or self.kcl.connectivity
-        made_layers: dict[kdb.LayerInfo, kdb.Region] = {}
         for conn in connectivity:
-            layer = conn[0]
-            if layer not in made_layers:
-                old_layer = l2n.make_layer(self.kcl.get_info(self.kcl.layer(layer)))
-                made_layers[layer] = old_layer
-            else:
-                old_layer = made_layers[layer]
+            old_layer = layers[conn[0]]
 
             for layer in conn[1:]:
-                if layer not in made_layers:
-                    new_layer = l2n.make_layer(self.kcl.get_info(self.kcl.layer(layer)))
-                    made_layers[layer] = new_layer
-                else:
-                    new_layer = made_layers[layer]
-
-                l2n.connect(old_layer, new_layer)
-                old_layer = new_layer
-
+                li = layers[layer]
+                l2n.connect(old_layer, li)
+                old_layer = li
+        l2n.reset_extracted()
         l2n.extract_netlist()
+        l2n.check_extraction_errors()
 
         return l2n
 
@@ -1821,24 +1828,28 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         ignore_unnamed: bool = False,
         exclude_purpose: list[str] | None = None,
     ) -> dict[str, Netlist]:
+        l2n_elec = self.l2n_elec(
+            mark_port_types=mark_port_types, connectivity=connectivity
+        )
         l2n_opt = self.l2n_ports(
             port_types=port_types,
             exclude_purpose=exclude_purpose,
             ignore_unnamed=ignore_unnamed,
         )
-        l2n_elec = self.l2n_extraction(
-            mark_port_types=mark_port_types, connectivity=connectivity
-        )
+        l2n_elec.write("~/Downloads/test_schema_python.l2n", True)
+
         netlists: dict[str, Netlist] = {}
 
-        netlists[self.name] = _get_netlist(
-            c=self,
-            ci=self.cell_index(),
-            l2n_opt=l2n_opt,
-            l2n_elec=l2n_elec,
-            ignore_unnamed=ignore_unnamed,
-            exclude_purpose=exclude_purpose,
-        )
+        for ci in [self.cell_index(), *self.called_cells()]:
+            c_ = self.kcl[ci]
+            name = c_.name
+            netlists[name] = _get_netlist(
+                c=c_,
+                l2n_opt=l2n_opt,
+                l2n_elec=l2n_elec,
+                ignore_unnamed=ignore_unnamed,
+                exclude_purpose=exclude_purpose,
+            )
         return netlists
 
     def circuit(
@@ -1918,7 +1929,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 enumerate(Ports(kcl=self.kcl, bases=[p.base for p in inst.ports])),
             ):
                 trans = port.trans.dup()
-                trans.angle = trans.angle % 2
+                trans.angle %= 2
                 trans.mirror = False
                 v = trans.disp
                 h = f"{v.x}_{v.y}"
@@ -3678,7 +3689,7 @@ def show(
     data = json.dumps(data_dict)
     try:
         conn = socket.create_connection(("127.0.0.1", 8082), timeout=0.5)
-        data = data + "\n"
+        data += "\n"
         enc_data = data.encode()
         conn.sendall(enc_data)
         conn.settimeout(5)
@@ -3862,13 +3873,15 @@ AnyTKCell: TypeAlias = ProtoTKCell[Any]
 
 def _get_netlist(
     c: ProtoTKCell[Any],
-    ci: int,
     l2n_opt: kdb.LayoutToNetlist,
     l2n_elec: kdb.LayoutToNetlist,
     ignore_unnamed: bool = False,
     exclude_purpose: list[str] | None = None,
 ) -> Netlist:
-    opt_circ = l2n_opt.netlist().circuit_by_cell_index(ci)
+    opt_circ = l2n_opt.netlist().circuit_by_name(c.name)
+    elec_circ = l2n_elec.netlist().circuit_by_cell_index(
+        l2n_elec.internal_layout().cell(c.name).cell_index()
+    )
     nl = Netlist(nets=[])
     exclude_purpose = exclude_purpose or []
     keep_name = not ignore_unnamed
@@ -3926,6 +3939,68 @@ def _get_netlist(
                             )
                         )
                     break
-        nl.nets.append(Net(net_refs))
+        if len(net_refs) > 1:
+            nl.nets.append(Net(net_refs))
+    if elec_circ:
+        instances_per_transformation: dict[
+            kdb.DCplxTrans, list[ProtoTInstance[Any]]
+        ] = defaultdict(list)
+        for inst in c.insts:
+            instances_per_transformation[inst.dcplx_trans].append(inst)
+        for net in elec_circ.each_net():
+            net_refs = []
+            for pinref in net.each_pin():
+                p = nl.create_port(pinref.pin().name())
+                net_refs.append(p)
+            for subc_pin in net.each_subcircuit_pin():
+                subc = subc_pin.subcircuit()
+                circ_ref = subc.circuit_ref()
+                circ = subc.circuit()
+                pin = subc_pin.pin()
+                recit = kdb.RecursiveInstanceIterator(
+                    c.kcl.layout,
+                    c.kcl.layout.cell(circ.name),
+                    box=kdb.Box(2).transformed(
+                        kdb.ICplxTrans(trans=subc.trans, dbu=c.kcl.dbu)
+                    ),
+                )
+                recit.max_depth = 0
+                recit.targets = [
+                    c.kcl[
+                        l2n_elec.internal_layout().cell(circ_ref.cell_index).name
+                    ].cell_index()
+                ]
+                recit.overlapping = True
+                for it in recit.each():
+                    inst_el = it.current_inst_element()
+                    if inst_el.specific_cplx_trans() == kdb.ICplxTrans(
+                        trans=subc.trans, dbu=c.kcl.dbu
+                    ):
+                        insts = list(
+                            filter(
+                                lambda inst: inst.cell.name
+                                == l2n_elec.internal_layout()
+                                .cell(circ_ref.cell_index)
+                                .name,
+                                instances_per_transformation[it.inst_dtrans()],
+                            )
+                        )
+                        inst = insts[0]
+                        if inst_el.ia() < 0:
+                            net_refs.append(
+                                PortRef(instance=inst.name, port=pin.name())
+                            )
+                        else:
+                            net_refs.append(
+                                PortArrayRef(
+                                    instance=subc.name,
+                                    port=pin.name(),
+                                    ia=inst_el.ia(),
+                                    ib=inst_el.ib(),
+                                )
+                            )
+                        break
+            if len(net_refs) > 1:
+                nl.nets.append(Net(net_refs))
     nl.sort()
     return nl
