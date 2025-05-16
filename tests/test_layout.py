@@ -1,9 +1,9 @@
 import functools
 
 import pytest
-from conftest import Layers
 
 import kfactory as kf
+from tests.conftest import Layers
 
 
 def test_cell_decorator(kcl: kf.KCLayout, layers: Layers) -> None:

@@ -1,10 +1,10 @@
 from collections.abc import Callable
 
 import pytest
-from conftest import Layers
 
 import kfactory as kf
 from kfactory import port
+from tests.conftest import Layers
 
 port_x_coords = [-10000, 0, 0, 0, 10000]
 port_y_coords = [0, -10000, 0, 10000, 0]

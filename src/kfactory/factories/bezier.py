@@ -149,9 +149,7 @@ def bend_s_bezier_factory(
         )
         c.create_port(
             width=int(width / c.kcl.dbu),
-            trans=kdb.Trans(
-                0, False, c.bbox().right, c.bbox().top - int(width / c.kcl.dbu) // 2
-            ),
+            trans=kdb.Trans(0, False, c.bbox().right, kcl.to_dbu(height)),
             layer=c.kcl.find_layer(layer),
             port_type="optical",
         )

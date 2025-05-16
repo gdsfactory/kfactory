@@ -1,14 +1,24 @@
-<a id="v1.5.5"></a>
-# [v1.5.5](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.5) - 2025-05-04
+<a id="v1.6.0"></a>
+# [v1.6.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.6.0) - 2025-05-04
 
 # What's Changed
 
+## New
+
+- Add correct conftest import in test files [#700](https://github.com/gdsfactory/kfactory/pull/700)
+
+## Bug Fixes
+
+- fix bezier factory out port [#697](https://github.com/gdsfactory/kfactory/pull/697)
+
+## Typing
+
+- Add correct conftest import in test files [#700](https://github.com/gdsfactory/kfactory/pull/700)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.6.0
 
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.5.5
-
-
-[Changes][v1.5.5]
+[Changes][v1.6.0]
 
 
 <a id="v1.5.4"></a>
@@ -1947,7 +1957,7 @@
 [Changes][v0.4.0]
 
 
-[v1.5.5]: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.5.5
+[v1.6.0]: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.6.0
 [v1.5.4]: https://github.com/gdsfactory/kfactory/compare/v1.5.3...v1.5.4
 [v1.5.3]: https://github.com/gdsfactory/kfactory/compare/v1.5.2...v1.5.3
 [v1.5.2]: https://github.com/gdsfactory/kfactory/compare/v1.5.0...v1.5.2

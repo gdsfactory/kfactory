@@ -7,11 +7,11 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import pytest
-from conftest import Layers
 
 import kfactory as kf
 from kfactory.cross_section import CrossSection, CrossSectionSpec
 from kfactory.exceptions import LockedError
+from tests.conftest import Layers
 
 
 def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
