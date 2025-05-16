@@ -295,7 +295,7 @@ def test_ports_eq(kcl: kf.KCLayout, layers: Layers) -> None:
     assert ports != 1
 
 
-def test_portsadd_port(kcl: kf.KCLayout, layers: Layers) -> None:
+def test_ports_create_port(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kf.factories.straight.straight_dbu_factory(kcl)(
         width=5000, length=10000, layer=layers.WG
     )
@@ -397,7 +397,7 @@ def test_dports_add_port(kcl: kf.KCLayout, layers: Layers) -> None:
     assert out_port in ports
 
 
-def test_dportsadd_port(kcl: kf.KCLayout, layers: Layers) -> None:
+def test_dports_create_port(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kf.factories.straight.straight_dbu_factory(kcl)(
         width=5000, length=10000, layer=layers.WG
     ).to_dtype()
@@ -421,7 +421,7 @@ def test_dportsadd_port(kcl: kf.KCLayout, layers: Layers) -> None:
             name="o1", width=-10, layer=1, center=(1000, 1000), orientation=1
         )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="width needs to be even to snap to grid"):
         ports.create_port(
             name="o1", width=0.001, layer=1, center=(1000, 1000), orientation=1
         )

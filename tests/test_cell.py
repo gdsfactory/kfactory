@@ -414,7 +414,7 @@ def test_lock(straight: kf.KCell, bend90: kf.KCell, layers: Layers) -> None:
             straight.create_vinst(bend90)
         # create_port
         with pytest.raises(LockedError):
-            straight.create_port(trans=kf.kdb.Trans.R0, width=1000, layer=0)
+            straight.create_port(trans=kf.kdb.Trans.R0, width=1000, layer=layers.WG)
         # name setter
         with pytest.raises(LockedError):
             straight.name = "new name"
