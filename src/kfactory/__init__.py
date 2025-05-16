@@ -52,6 +52,8 @@ from . import (
     technology,
     utils,
     typings,
+    kcell,
+    conf,
 )
 from .routing.generic import ManhattanRoute
 from .typings import dbu  # noqa: F401
@@ -99,6 +101,7 @@ __all__ = [
     "VShapes",
     "cell",
     "cells",
+    "conf",
     "config",
     "dpolygon_from_array",
     "enclosure",
@@ -107,6 +110,7 @@ __all__ = [
     "flexgrid_dbu",
     "grid",
     "grid_dbu",
+    "kcell",
     "kcl",
     "kcls",
     "kdb",
