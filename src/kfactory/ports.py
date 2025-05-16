@@ -32,6 +32,7 @@ from .port import (
     filter_port_type,
     filter_regex,
 )
+from .protocols import DCreatePort, ICreatePort
 from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
 
@@ -155,7 +156,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
         ...
 
     @abstractmethod
-    def create_port(self, *args: Any, **kwargs: Any) -> ProtoPort[TUnit]:
+    def _create_port(self, *args: Any, **kwargs: Any) -> ProtoPort[TUnit]:
         """Create a port."""
         ...
 
@@ -239,7 +240,7 @@ class ProtoPorts(ABC, Generic[TUnit]):
         return hash(self._bases)
 
 
-class Ports(ProtoPorts[int]):
+class Ports(ProtoPorts[int], ICreatePort):
     """A collection of dbu ports.
 
     It is not a traditional dictionary. Elements can be retrieved as in a traditional
@@ -295,64 +296,7 @@ class Ports(ProtoPorts[int]):
             self._bases.append(port_.base)
         return port_
 
-    @overload
-    def create_port(
-        self,
-        *,
-        trans: kdb.Trans,
-        width: int,
-        layer: int,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> Port: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        dcplx_trans: kdb.DCplxTrans,
-        width: int,
-        layer: LayerEnum | int,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> Port: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        width: int,
-        layer: LayerEnum | int,
-        center: tuple[int, int],
-        angle: Angle,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> Port: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        trans: kdb.Trans,
-        width: int,
-        layer_info: kdb.LayerInfo,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> Port: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        width: int,
-        layer_info: kdb.LayerInfo,
-        center: tuple[int, int],
-        angle: Angle,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> Port: ...
-
-    def create_port(
+    def _create_port(
         self,
         *,
         name: str | None = None,
@@ -492,7 +436,7 @@ class Ports(ProtoPorts[int]):
         return repr([repr(DPort(base=b)) for b in self._bases])
 
 
-class DPorts(ProtoPorts[float]):
+class DPorts(ProtoPorts[float], DCreatePort):
     """A collection of um ports.
 
     It is not a traditional dictionary. Elements can be retrieved as in a traditional
@@ -548,75 +492,7 @@ class DPorts(ProtoPorts[float]):
             self._bases.append(port_.base)
         return port_
 
-    @overload
-    def create_port(
-        self,
-        *,
-        trans: kdb.Trans,
-        width: float,
-        layer: int,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        dcplx_trans: kdb.DCplxTrans,
-        width: float,
-        layer: LayerEnum | int,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        width: float,
-        layer: LayerEnum | int,
-        center: tuple[float, float],
-        orientation: float,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        trans: kdb.Trans,
-        width: float,
-        layer_info: kdb.LayerInfo,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        dcplx_trans: kdb.DCplxTrans,
-        width: float,
-        layer_info: kdb.LayerInfo,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    @overload
-    def create_port(
-        self,
-        *,
-        width: float,
-        layer_info: kdb.LayerInfo,
-        center: tuple[float, float],
-        orientation: float,
-        name: str | None = None,
-        port_type: str = "optical",
-    ) -> DPort: ...
-
-    def create_port(
+    def _create_port(
         self,
         *,
         name: str | None = None,

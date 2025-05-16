@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-from typing import (
-    TYPE_CHECKING,
-    Protocol,
-    overload,
-    runtime_checkable,
-)
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Protocol, overload, runtime_checkable
 
-from .typings import TUnit
+from .typings import Angle, TUnit
 
 if TYPE_CHECKING:
+    import klayout.db as kdb
+
+    from .cross_section import SymmetricalCrossSection
     from .layer import LayerEnum
+    from .port import DPort, Port
 
 __all__ = ["BoxFunction", "BoxLike", "PointLike"]
 
@@ -72,3 +72,230 @@ class BoxFunction(Protocol[TUnit]):
     def __call__(self, layer: LayerEnum | int | None = None) -> BoxLike[TUnit]:
         """Call the box function."""
         ...
+
+
+class ICreatePort(ABC):
+    """Protocol for a create_port functionality"""
+
+    @overload
+    def create_port(
+        self,
+        *,
+        trans: kdb.Trans,
+        width: int,
+        layer: int,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        width: int,
+        layer: LayerEnum | int,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        width: int,
+        layer: LayerEnum | int,
+        center: tuple[int, int],
+        angle: Angle,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        trans: kdb.Trans,
+        width: int,
+        layer_info: kdb.LayerInfo,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        width: int,
+        layer_info: kdb.LayerInfo,
+        center: tuple[int, int],
+        angle: Angle,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        width: int | None = None,
+        layer: LayerEnum | int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
+        port_type: str = "optical",
+        trans: kdb.Trans | None = None,
+        dcplx_trans: kdb.DCplxTrans | None = None,
+        center: tuple[int, int] | None = None,
+        angle: Angle | None = None,
+        mirror_x: bool = False,
+        cross_section: SymmetricalCrossSection | None = None,
+    ) -> Port:
+        """Create a port."""
+        return self._create_port(
+            name=name,
+            width=width,
+            layer=layer,
+            layer_info=layer_info,
+            port_type=port_type,
+            trans=trans,
+            dcplx_trans=dcplx_trans,
+            center=center,
+            angle=angle,
+            mirror_x=mirror_x,
+            cross_section=cross_section,
+        )
+
+    @abstractmethod
+    def _create_port(
+        self,
+        *,
+        name: str | None = None,
+        width: int | None = None,
+        layer: LayerEnum | int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
+        port_type: str = "optical",
+        trans: kdb.Trans | None = None,
+        dcplx_trans: kdb.DCplxTrans | None = None,
+        center: tuple[int, int] | None = None,
+        angle: Angle | None = None,
+        mirror_x: bool = False,
+        cross_section: SymmetricalCrossSection | None = None,
+    ) -> Port: ...
+
+
+class DCreatePort(ABC):
+    """Protocol for a create_port functionality"""
+
+    @overload
+    def create_port(
+        self,
+        *,
+        trans: kdb.Trans,
+        width: float,
+        layer: int,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        width: float,
+        layer: LayerEnum | int,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        width: float,
+        layer: LayerEnum | int,
+        center: tuple[float, float],
+        orientation: float,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        trans: kdb.Trans,
+        width: float,
+        layer_info: kdb.LayerInfo,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        width: float,
+        layer_info: kdb.LayerInfo,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        width: float,
+        layer_info: kdb.LayerInfo,
+        center: tuple[float, float],
+        orientation: float,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        width: float | None = None,
+        layer: LayerEnum | int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
+        port_type: str = "optical",
+        trans: kdb.Trans | None = None,
+        dcplx_trans: kdb.DCplxTrans | None = None,
+        center: tuple[float, float] | None = None,
+        orientation: float | None = None,
+        mirror_x: bool = False,
+        cross_section: SymmetricalCrossSection | None = None,
+    ) -> DPort:
+        """Create a port."""
+        return self._create_port(
+            name=name,
+            width=width,
+            layer=layer,
+            layer_info=layer_info,
+            port_type=port_type,
+            trans=trans,
+            dcplx_trans=dcplx_trans,
+            center=center,
+            orientation=orientation,
+            mirror_x=mirror_x,
+            cross_section=cross_section,
+        )
+
+    @abstractmethod
+    def _create_port(
+        self,
+        *,
+        name: str | None = None,
+        width: float | None = None,
+        layer: LayerEnum | int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
+        port_type: str = "optical",
+        trans: kdb.Trans | None = None,
+        dcplx_trans: kdb.DCplxTrans | None = None,
+        center: tuple[float, float] | None = None,
+        orientation: float | None = None,
+        mirror_x: bool = False,
+        cross_section: SymmetricalCrossSection | None = None,
+    ) -> DPort: ...
