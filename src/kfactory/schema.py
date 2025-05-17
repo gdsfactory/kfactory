@@ -74,7 +74,7 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
     def is_absolute(self) -> bool:
         return not (isinstance(self.x, str) or isinstance(self.y, str))
 
-    def is_placeable(self, c: ProtoTKCell[Any], placed_instances: set[str]) -> bool:
+    def is_placeable(self, placed_instances: set[str]) -> bool:
         placeable = True
         if isinstance(self.x, PortRef):
             placeable = self.x.instance in placed_instances
@@ -236,7 +236,7 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
             self.cross_section,
         )
 
-    def is_placeable(self, c: ProtoTKCell[Any], placed_instances: set[str]) -> bool:
+    def is_placeable(self, placed_instances: set[str]) -> bool:
         placeable = True
         if isinstance(self.x, PortRef):
             placeable = self.x.instance in placed_instances
@@ -706,7 +706,7 @@ def _place_islands(
         kinst = instances[inst]
         if schema_inst.placement:
             p = schema_inst.placement
-            if p.is_placeable(c, placed_insts):
+            if p.is_placeable(placed_insts):
                 x = (
                     instances[p.x.instance].ports[p.x.port].x
                     if isinstance(p.x, PortRef)
