@@ -269,7 +269,9 @@ class Connection(
         return self
 
     @classmethod
-    def from_list(cls, data: Any) -> Connection[TUnit]:
+    def from_list(
+        cls, data: list[Any] | tuple[Any, ...] | dict[str, Any]
+    ) -> Connection[TUnit]:
         if isinstance(data, list | tuple):
             if isinstance(data[0][0], list | tuple):
                 p1 = {
