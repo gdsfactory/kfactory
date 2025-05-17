@@ -21,7 +21,7 @@ __all__ = [
 ]
 
 
-class ProtoInstanceGroup(Generic[TUnit, TInstance_co], GeometricObject[TUnit]):
+class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, TInstance_co]):
     insts: list[TInstance_co]
 
     def __init__(self, insts: Sequence[TInstance_co] | None = None) -> None:

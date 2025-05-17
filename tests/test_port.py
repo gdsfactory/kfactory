@@ -493,5 +493,18 @@ def test_rename_clockwise_multi(kcl: kf.KCLayout, layers: Layers) -> None:
     assert len(list(ports)) == 2
 
 
+def test_create(kcl: kf.KCLayout, layers: Layers) -> None:
+    cell = kcl.kcell()
+
+    cell.create_port(
+        name="o1",
+        cross_section=kcl.get_icross_section(
+            CrossSectionSpec(layer=layers.WG, width=2000)
+        ),
+        port_type="optical",
+        trans=kf.kdb.Trans(1, 0),
+    )
+
+
 if __name__ == "__main__":
     pytest.main(["-s", __file__])
