@@ -6,7 +6,7 @@ from collections import UserDict, defaultdict
 from collections.abc import Callable, Iterable, Sequence  # noqa: TC003
 from pathlib import Path
 from threading import RLock
-from typing import TYPE_CHECKING, Any, Literal, cast, overload
+from typing import TYPE_CHECKING, Any, Concatenate, Literal, cast, overload
 
 import klayout.db as kdb
 import ruamel.yaml
@@ -52,13 +52,26 @@ from .kcell import (
 )
 from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
-from .port import BasePort, rename_clockwise_multi
+from .port import BasePort, ProtoPort, rename_clockwise_multi
+from .routing.generic import ManhattanRoute
 from .settings import Info, KCellSettings
-from .typings import KC, KCIN, VK, KC_contra, KCellParams, KCellSpec, MetaData, T
+from .typings import (
+    KC,
+    KCIN,
+    VK,
+    KC_contra,
+    KCellParams,
+    KCellSpec,
+    MetaData,
+    P,
+    T,
+    TUnit,
+)
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
     from .ports import DPorts, Ports
+    from .schema import TSchema
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -173,6 +186,24 @@ class KCLayout(
     decorators: Decorators
     default_cell_output_type: type[KCell | DKCell] = KCell
 
+    connectivity: list[
+        tuple[kdb.LayerInfo, kdb.LayerInfo]
+        | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo]
+    ]
+
+    routing_strategies: dict[
+        str,
+        Callable[
+            Concatenate[
+                ProtoTKCell[Any],
+                Sequence[ProtoPort[Any]],
+                Sequence[ProtoPort[Any]],
+                ...,
+            ],
+            list[ManhattanRoute],
+        ],
+    ] = Field(default_factory=dict)
+
     def __init__(
         self,
         name: str,
@@ -188,6 +219,11 @@ class KCLayout(
         copy_base_kcl_layers: bool = True,
         info: dict[str, MetaData] | None = None,
         default_cell_output_type: type[KCell | DKCell] = KCell,
+        connectivity: Sequence[
+            tuple[kdb.LayerInfo, kdb.LayerInfo]
+            | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo]
+        ]
+        | None = None,
     ) -> None:
         """Create a new KCLayout (PDK). Can be based on an old KCLayout.
 
@@ -244,6 +280,7 @@ class KCLayout(
             ),
             decorators=Decorators(self),
             default_cell_output_type=default_cell_output_type,
+            connectivity=connectivity or [],
         )
 
         self.library.register(self.name)
@@ -473,6 +510,230 @@ class KCLayout(
         if other is None:
             return None
         return kdb.CplxTrans(self.layout.dbu).inverted() * other
+
+    @overload
+    def schematic_cell(
+        self,
+        _func: Callable[KCellParams, TSchema[TUnit]],
+        /,
+    ) -> Callable[KCellParams, KCell]: ...
+
+    @overload
+    def schematic_cell(
+        self,
+        /,
+        *,
+        set_settings: bool = ...,
+        set_name: bool = ...,
+        check_ports: bool = ...,
+        check_instances: CheckInstances | None = ...,
+        snap_ports: bool = ...,
+        add_port_layers: bool = ...,
+        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        basename: str | None = ...,
+        drop_params: list[str] = ...,
+        register_factory: bool = ...,
+        overwrite_existing: bool | None = ...,
+        layout_cache: bool | None = ...,
+        info: dict[str, MetaData] | None = ...,
+        debug_names: bool | None = ...,
+        tags: list[str] | None = ...,
+    ) -> Callable[
+        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KCell]
+    ]: ...
+
+    @overload
+    def schematic_cell(
+        self,
+        /,
+        *,
+        set_settings: bool = ...,
+        set_name: bool = ...,
+        check_ports: bool = ...,
+        check_instances: CheckInstances | None = ...,
+        snap_ports: bool = ...,
+        add_port_layers: bool = ...,
+        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        basename: str | None = ...,
+        drop_params: list[str] = ...,
+        register_factory: bool = ...,
+        overwrite_existing: bool | None = ...,
+        layout_cache: bool | None = ...,
+        info: dict[str, MetaData] | None = ...,
+        post_process: Iterable[Callable[[KCell], None]],
+        debug_names: bool | None = ...,
+        tags: list[str] | None = ...,
+    ) -> Callable[
+        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KCell]
+    ]: ...
+
+    @overload
+    def schematic_cell(
+        self,
+        /,
+        *,
+        output_type: type[KC],
+        set_settings: bool = ...,
+        set_name: bool = ...,
+        check_ports: bool = ...,
+        check_instances: CheckInstances | None = ...,
+        snap_ports: bool = ...,
+        add_port_layers: bool = ...,
+        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        basename: str | None = ...,
+        drop_params: list[str] = ...,
+        register_factory: bool = ...,
+        overwrite_existing: bool | None = ...,
+        layout_cache: bool | None = ...,
+        info: dict[str, MetaData] | None = ...,
+        post_process: Iterable[Callable[[KCell], None]],
+        debug_names: bool | None = ...,
+        tags: list[str] | None = ...,
+    ) -> Callable[
+        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KC]
+    ]: ...
+
+    @overload
+    def schematic_cell(
+        self,
+        /,
+        *,
+        output_type: type[KC],
+        set_settings: bool = ...,
+        set_name: bool = ...,
+        check_ports: bool = ...,
+        check_instances: CheckInstances | None = ...,
+        snap_ports: bool = ...,
+        add_port_layers: bool = ...,
+        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        basename: str | None = ...,
+        drop_params: list[str] = ...,
+        register_factory: bool = ...,
+        overwrite_existing: bool | None = ...,
+        layout_cache: bool | None = ...,
+        info: dict[str, MetaData] | None = ...,
+        debug_names: bool | None = ...,
+        tags: list[str] | None = ...,
+    ) -> Callable[
+        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KC]
+    ]: ...
+
+    def schematic_cell(
+        self,
+        _func: Callable[KCellParams, TSchema[TUnit]] | None = None,
+        /,
+        *,
+        output_type: type[KC] | None = None,
+        set_settings: bool = True,
+        set_name: bool = True,
+        check_ports: bool = True,
+        check_instances: CheckInstances | None = None,
+        snap_ports: bool = True,
+        add_port_layers: bool = True,
+        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        basename: str | None = None,
+        drop_params: Sequence[str] = ("self", "cls"),
+        register_factory: bool = True,
+        overwrite_existing: bool | None = None,
+        layout_cache: bool | None = None,
+        info: dict[str, MetaData] | None = None,
+        post_process: Iterable[Callable[[KCell], None]] | None = None,
+        debug_names: bool | None = None,
+        tags: list[str] | None = None,
+    ) -> (
+        Callable[KCellParams, KCell]
+        | Callable[
+            [Callable[KCellParams, TSchema[Any]]],
+            Callable[KCellParams, KC],
+        ]
+        | Callable[
+            [Callable[KCellParams, TSchema[Any]]],
+            Callable[KCellParams, KCell],
+        ]
+    ):
+        if _func is None:
+            if output_type is None:
+
+                def wrap_f(
+                    f: Callable[KCellParams, TSchema[TUnit]],
+                ) -> Callable[KCellParams, KCell]:
+                    @self.cell(
+                        output_type=KCell,
+                        set_settings=set_settings,
+                        set_name=set_name,
+                        check_ports=check_ports,
+                        check_instances=check_instances,
+                        snap_ports=snap_ports,
+                        add_port_layers=add_port_layers,
+                        cache=cache,
+                        basename=basename,
+                        drop_params=list(drop_params),
+                        register_factory=register_factory,
+                        overwrite_existing=overwrite_existing,
+                        layout_cache=layout_cache,
+                        info=info,
+                        post_process=post_process or [],
+                        debug_names=debug_names,
+                        tags=tags,
+                    )
+                    @functools.wraps(f)
+                    def kcell_func(
+                        *args: KCellParams.args, **kwargs: KCellParams.kwargs
+                    ) -> KCell:
+                        schema = f(*args, **kwargs)
+                        return schema.create_cell(KCell)
+
+                    return kcell_func
+
+                return wrap_f
+
+            def custom_wrap_f(
+                f: Callable[KCellParams, TSchema[TUnit]],
+            ) -> Callable[KCellParams, KC]:
+                @self.cell(
+                    output_type=output_type,
+                    set_settings=set_settings,
+                    set_name=set_name,
+                    check_ports=check_ports,
+                    check_instances=check_instances,
+                    snap_ports=snap_ports,
+                    add_port_layers=add_port_layers,
+                    cache=cache,
+                    basename=basename,
+                    drop_params=list(drop_params),
+                    register_factory=register_factory,
+                    overwrite_existing=overwrite_existing,
+                    layout_cache=layout_cache,
+                    info=info,
+                    post_process=post_process or [],
+                    debug_names=debug_names,
+                    tags=tags,
+                )
+                @functools.wraps(f)
+                def custom_kcell_func(
+                    *args: KCellParams.args, **kwargs: KCellParams.kwargs
+                ) -> KCell:
+                    schema = f(*args, **kwargs)
+                    return schema.create_cell(KCell)
+
+                return custom_kcell_func
+
+            return custom_wrap_f
+
+        def simple_wrap_f(
+            f: Callable[KCellParams, TSchema[TUnit]],
+        ) -> Callable[KCellParams, KCell]:
+            @functools.wraps(f)
+            @self.cell
+            def kcell_func(
+                *args: KCellParams.args, **kwargs: KCellParams.kwargs
+            ) -> KCell:
+                schema = f(*args, **kwargs)
+                return schema.create_cell(KCell)
+
+            return kcell_func
+
+        return simple_wrap_f(_func)
 
     @overload
     def cell(
@@ -897,7 +1158,9 @@ class KCLayout(
         kcl.layout.assign(self.layout.dup())
         if init_cells:
             for i, kc in self.tkcells.items():
-                kcl.tkcells[i] = kc.model_copy(update={"kdb_cell": kc.kdb_cell})
+                kcl.tkcells[i] = kc.model_copy(
+                    update={"kdb_cell": kc.kdb_cell, "kcl": kcl}
+                )
         kcl.rename_function = self.rename_function
         return kcl
 
@@ -1422,7 +1685,9 @@ class KCLayout(
             settings.update(cell_kwargs)
             return self.factories[spec["component"]](**settings)
         if isinstance(spec, str):
-            return self.factories[spec](**cell_kwargs)
+            if spec in self.factories:
+                return self.factories[spec](**cell_kwargs)
+            return self[spec]
         if cell_kwargs:
             raise ValueError(
                 "Cell kwargs are not allowed for retrieving static cells by integer "
@@ -1434,7 +1699,31 @@ class KCLayout(
         del kcls[self.name]
         self.library.delete()
 
+    def routing_strategy(
+        self,
+        f: Callable[
+            Concatenate[
+                ProtoTKCell[Any],
+                Sequence[ProtoPort[Any]],
+                Sequence[ProtoPort[Any]],
+                P,
+            ],
+            list[ManhattanRoute],
+        ],
+    ) -> Callable[
+        Concatenate[
+            ProtoTKCell[Any],
+            Sequence[ProtoPort[Any]],
+            Sequence[ProtoPort[Any]],
+            P,
+        ],
+        list[ManhattanRoute],
+    ]:
+        self.routing_strategies[f.__name__] = f
+        return f
 
+
+ManhattanRoute.model_rebuild()
 KCLayout.model_rebuild()
 SymmetricalCrossSection.model_rebuild()
 CrossSectionModel.model_rebuild()

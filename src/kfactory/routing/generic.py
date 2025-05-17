@@ -10,7 +10,9 @@ from klayout import rdb
 from pydantic import BaseModel, Field
 
 from ..conf import config, logger
+from ..instance import Instance  # noqa: TC001
 from ..port import BasePort, Port, ProtoPort
+from ..typings import dbu  # noqa: TC001
 from .length_functions import LengthFunction, get_length_from_area
 from .manhattan import (
     ManhattanBundleRoutingFunction,
@@ -22,9 +24,7 @@ from .steps import Step, Straight
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from ..instance import Instance
     from ..kcell import KCell
-    from ..typings import dbu
 
 __all__ = [
     "ManhattanRoute",
