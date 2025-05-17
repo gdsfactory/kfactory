@@ -1799,11 +1799,15 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
         layers: dict[kdb.LayerInfo, kdb.Region] = {}
 
-        for conn in connectivity:
-            for layer in conn:
-                l_ = l2n.make_layer(ly_elec.layer(layer), layer.name)
-                layers[layer] = l_
-                l2n.connect(l_)
+        layer_infos = {
+            ly_elec.get_info(ly_elec.layer(info))
+            for layer_set in connectivity
+            for info in layer_set
+        }
+        for info in layer_infos:
+            l_ = l2n.make_layer(ly_elec.layer(info), info.name)
+            layers[info] = l_
+            l2n.connect(l_)
         for conn in connectivity:
             old_layer = layers[conn[0]]
 
