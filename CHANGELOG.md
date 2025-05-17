@@ -5,6 +5,7 @@
 
 ## New
 
+- Add conf, kcell to kf exports [#701](https://github.com/gdsfactory/kfactory/pull/701)
 - Add correct conftest import in test files [#700](https://github.com/gdsfactory/kfactory/pull/700)
 
 ## Bug Fixes
@@ -13,6 +14,7 @@
 
 ## Typing
 
+- Add conf, kcell to kf exports [#701](https://github.com/gdsfactory/kfactory/pull/701)
 - Add correct conftest import in test files [#700](https://github.com/gdsfactory/kfactory/pull/700)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.6.0
