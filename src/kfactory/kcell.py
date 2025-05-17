@@ -1797,7 +1797,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
         connectivity = connectivity or self.kcl.connectivity
 
-        layers: dict[kdb.LayerInfo, kdb.Region] = {}
+        layers: dict[int, kdb.Region] = {}
 
         layer_infos = {
             ly_elec.get_info(ly_elec.layer(info))
@@ -1806,13 +1806,13 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         }
         for info in layer_infos:
             l_ = l2n.make_layer(ly_elec.layer(info), info.name)
-            layers[info] = l_
+            layers[ly_elec.layer(info)] = l_
             l2n.connect(l_)
         for conn in connectivity:
-            old_layer = layers[conn[0]]
+            old_layer = layers[ly_elec.layer(conn[0])]
 
             for layer in conn[1:]:
-                li = layers[layer]
+                li = layers[ly_elec.layer(layer)]
                 l2n.connect(old_layer, li)
                 old_layer = li
         l2n.extract_netlist()
