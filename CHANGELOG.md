@@ -10,10 +10,12 @@
 
 ## Bug Fixes
 
+- fix port width errors [#704](https://github.com/gdsfactory/kfactory/pull/704)
 - fix bezier factory out port [#697](https://github.com/gdsfactory/kfactory/pull/697)
 
 ## Typing
 
+- Enhance create_port to have a unified interface [#703](https://github.com/gdsfactory/kfactory/pull/703)
 - Add conf, kcell to kf exports [#701](https://github.com/gdsfactory/kfactory/pull/701)
 - Add correct conftest import in test files [#700](https://github.com/gdsfactory/kfactory/pull/700)
 

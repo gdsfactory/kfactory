@@ -25,6 +25,7 @@ from .cross_section import (
     CrossSectionModel,
     CrossSectionSpec,
     DCrossSection,
+    DCrossSectionSpec,
     DSymmetricalCrossSection,
     SymmetricalCrossSection,
 )
@@ -1600,7 +1601,8 @@ class KCLayout(
         self,
         cross_section: str
         | SymmetricalCrossSection
-        | CrossSectionSpec[int]
+        | CrossSectionSpec
+        | DCrossSectionSpec
         | DSymmetricalCrossSection,
     ) -> SymmetricalCrossSection:
         """Get a cross section by name or specification."""
@@ -1610,8 +1612,11 @@ class KCLayout(
         self,
         cross_section: str
         | SymmetricalCrossSection
-        | CrossSectionSpec[int]
-        | DSymmetricalCrossSection,
+        | CrossSectionSpec
+        | DCrossSectionSpec
+        | DCrossSection
+        | DSymmetricalCrossSection
+        | CrossSection,
     ) -> CrossSection:
         """Get a cross section by name or specification."""
         return CrossSection(
@@ -1622,15 +1627,13 @@ class KCLayout(
         self,
         cross_section: str
         | SymmetricalCrossSection
-        | CrossSectionSpec[float]
-        | DSymmetricalCrossSection,
+        | CrossSectionSpec
+        | DCrossSectionSpec
+        | DSymmetricalCrossSection
+        | CrossSection
+        | DCrossSection,
     ) -> DCrossSection:
         """Get a cross section by name or specification."""
-        if isinstance(cross_section, dict):
-            return DCrossSection(
-                kcl=self,
-                **cross_section,
-            )
         return DCrossSection(
             kcl=self, base=self.cross_sections.get_cross_section(cross_section)
         )
