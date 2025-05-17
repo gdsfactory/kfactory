@@ -77,8 +77,7 @@ from .port import (
     port_check,
     port_polygon,
 )
-from .ports import DPorts, Ports, ProtoPorts
-from .protocols import DCreatePort, ICreatePort
+from .ports import DCreatePort, DPorts, ICreatePort, Ports, ProtoPorts
 from .serialization import (
     clean_name,
     deserialize_setting,

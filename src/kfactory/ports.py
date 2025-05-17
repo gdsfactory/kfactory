@@ -1,11 +1,20 @@
 from __future__ import annotations
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, Protocol, Self, overload
 
+from pydantic import ValidationError
+
 from . import kdb
 from .conf import config
+from .cross_section import (
+    CrossSection,
+    CrossSectionSpec,
+    DCrossSection,
+    DCrossSectionSpec,
+    SymmetricalCrossSection,
+)
 from .port import (
     BasePort,
     DPort,
@@ -17,7 +26,6 @@ from .port import (
     filter_port_type,
     filter_regex,
 )
-from .protocols import DCreatePort, ICreatePort
 from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
 
@@ -230,6 +238,340 @@ class ProtoPorts(Protocol[TUnit]):
         return hash(self._bases)
 
 
+class ICreatePort(ABC):
+    """Protocol for a create_port functionality"""
+
+    @property
+    @abstractmethod
+    def kcl(self) -> KCLayout: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        trans: kdb.Trans,
+        cross_section: CrossSectionSpec
+        | DCrossSectionSpec
+        | CrossSection
+        | DCrossSection
+        | SymmetricalCrossSection,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        trans: kdb.Trans,
+        width: int,
+        layer: int,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        width: int,
+        layer: LayerEnum | int,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        width: int,
+        layer: LayerEnum | int,
+        center: tuple[int, int],
+        angle: Angle,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        trans: kdb.Trans,
+        width: int,
+        layer_info: kdb.LayerInfo,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        width: int,
+        layer_info: kdb.LayerInfo,
+        center: tuple[int, int],
+        angle: Angle,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        width: int | None = None,
+        layer: LayerEnum | int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
+        port_type: str = "optical",
+        trans: kdb.Trans | None = None,
+        dcplx_trans: kdb.DCplxTrans | None = None,
+        center: tuple[int, int] | None = None,
+        angle: Angle | None = None,
+        mirror_x: bool = False,
+        cross_section: CrossSectionSpec
+        | DCrossSectionSpec
+        | CrossSection
+        | DCrossSection
+        | SymmetricalCrossSection
+        | None = None,
+    ) -> Port:
+        """Create a port."""
+
+        if cross_section is None:
+            if width is None:
+                raise ValueError(
+                    "Either width or dwidth must be set. It can be set through"
+                    " a cross section as well."
+                )
+            if layer_info is None:
+                if layer is None:
+                    raise ValueError(
+                        "layer or layer_info must be defined to create a port."
+                    )
+                layer_info = self.kcl.layout.get_info(layer)
+            assert layer_info is not None
+            try:
+                xs = self.kcl.get_icross_section(
+                    CrossSectionSpec(layer=layer_info, width=width, unit="dbu")
+                )
+            except ValidationError as e:
+                raise ValueError(
+                    "Port width width needs to be even to snap to grid properly "
+                    "and greater than 0"
+                    f". 1 DBU is {self.kcl.dbu} um."
+                ) from e
+        else:
+            xs = self.kcl.get_icross_section(cross_section)
+        if trans is not None:
+            port = Port(
+                name=name,
+                trans=trans,
+                cross_section=xs,
+                port_type=port_type,
+                kcl=self.kcl,
+            )
+        elif dcplx_trans is not None:
+            port = Port(
+                name=name,
+                dcplx_trans=dcplx_trans,
+                port_type=port_type,
+                cross_section=xs,
+                kcl=self.kcl,
+            )
+        elif angle is not None and center is not None:
+            port = Port(
+                name=name,
+                port_type=port_type,
+                cross_section=xs,
+                angle=angle,
+                center=center,
+                mirror_x=mirror_x,
+                kcl=self.kcl,
+            )
+        else:
+            raise ValueError(
+                f"You need to define width {width} and trans {trans} or angle {angle}"
+                f" and center {center} or dcplx_trans {dcplx_trans}"
+            )
+
+        return self.add_port(port=port, keep_mirror=True)
+
+    @abstractmethod
+    def add_port(
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
+    ) -> Port: ...
+
+
+class DCreatePort(ABC):
+    """Protocol for a create_port functionality"""
+
+    @property
+    @abstractmethod
+    def kcl(self) -> KCLayout: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        trans: kdb.Trans,
+        width: float,
+        layer: int,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        width: float,
+        layer: LayerEnum | int,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        width: float,
+        layer: LayerEnum | int,
+        center: tuple[float, float],
+        orientation: float,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        trans: kdb.Trans,
+        width: float,
+        layer_info: kdb.LayerInfo,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        width: float,
+        layer_info: kdb.LayerInfo,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        width: float,
+        layer_info: kdb.LayerInfo,
+        center: tuple[float, float],
+        orientation: float,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    def create_port(
+        self,
+        *,
+        name: str | None = None,
+        width: float | None = None,
+        layer: LayerEnum | int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
+        port_type: str = "optical",
+        trans: kdb.Trans | None = None,
+        dcplx_trans: kdb.DCplxTrans | None = None,
+        center: tuple[float, float] | None = None,
+        orientation: float | None = None,
+        mirror_x: bool = False,
+        cross_section: DCrossSection
+        | CrossSection
+        | CrossSectionSpec
+        | DCrossSectionSpec
+        | None = None,
+    ) -> DPort:
+        """Create a port."""
+        if cross_section is None:
+            if width is None:
+                raise ValueError(
+                    "Either width must be set. It can be set through"
+                    " a cross section as well."
+                )
+            if layer_info is None:
+                if layer is None:
+                    raise ValueError(
+                        "layer or layer_info must be defined to create a port."
+                    )
+                layer_info = self.kcl.layout.get_info(layer)
+            assert layer_info is not None
+            try:
+                xs = self.kcl.get_dcross_section(
+                    DCrossSectionSpec(layer=layer_info, width=width, unit="um")
+                )
+            except ValidationError as e:
+                raise ValueError(
+                    "Port width width needs to be even to snap to grid properly "
+                    "and greater than 0"
+                    f". 1 DBU is {self.kcl.dbu} um. Port width must be a "
+                    f"multiple of {2 * self.kcl.dbu} um."
+                ) from e
+        else:
+            xs = self.kcl.get_dcross_section(cross_section)
+        if trans is not None:
+            port = DPort(
+                name=name,
+                trans=trans,
+                cross_section=xs,
+                port_type=port_type,
+                kcl=self.kcl,
+            )
+        elif dcplx_trans is not None:
+            port = DPort(
+                name=name,
+                dcplx_trans=dcplx_trans,
+                port_type=port_type,
+                cross_section=xs,
+                kcl=self.kcl,
+            )
+        elif orientation is not None and center is not None:
+            port = DPort(
+                name=name,
+                port_type=port_type,
+                cross_section=xs,
+                orientation=orientation,
+                center=center,
+                mirror_x=mirror_x,
+                kcl=self.kcl,
+            )
+        else:
+            raise ValueError(
+                f"You need to define width {width} and trans {trans} or orientation"
+                f" {orientation} and center {center} or dcplx_trans {dcplx_trans}"
+            )
+
+        return self.add_port(port=port, keep_mirror=True)
+
+    @abstractmethod
+    def add_port(
+        self,
+        *,
+        port: ProtoPort[Any],
+        name: str | None = None,
+        keep_mirror: bool = False,
+    ) -> DPort: ...
+
+
 class Ports(ProtoPorts[int], ICreatePort):
     """A collection of dbu ports.
 
@@ -260,7 +602,7 @@ class Ports(ProtoPorts[int], ICreatePort):
                 equivalent) to `False`.
         """
         if port.kcl == self.kcl:
-            base = port.base.__copy__()
+            base = port.base.model_copy()
             if not keep_mirror:
                 if base.trans is not None:
                     base.trans.mirror = False
@@ -274,7 +616,7 @@ class Ports(ProtoPorts[int], ICreatePort):
             dcplx_trans = port.dcplx_trans.dup()
             if not keep_mirror:
                 dcplx_trans.mirror = False
-            base = port.base.__copy__()
+            base = port.base.model_copy()
             base.trans = kdb.Trans.R0
             base.dcplx_trans = None
             base.kcl = self.kcl
@@ -372,7 +714,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
                 equivalent) to `False`.
         """
         if port.kcl == self.kcl:
-            base = port.base.__copy__()
+            base = port.base.model_copy()
             if not keep_mirror:
                 if base.trans is not None:
                     base.trans.mirror = False
@@ -386,7 +728,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
             dcplx_trans = port.dcplx_trans.dup()
             if not keep_mirror:
                 dcplx_trans.mirror = False
-            base = port.base.__copy__()
+            base = port.base.model_copy()
             base.trans = kdb.Trans.R0
             base.dcplx_trans = None
             base.kcl = self.kcl

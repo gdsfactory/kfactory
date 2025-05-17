@@ -7,6 +7,7 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Generic,
+    Literal,
     NotRequired,
     Self,
     TypedDict,
@@ -24,7 +25,13 @@ if TYPE_CHECKING:
     from . import kdb
     from .layout import KCLayout
 
-__all__ = ["CrossSection", "DCrossSection", "SymmetricalCrossSection"]
+__all__ = [
+    "CrossSection",
+    "CrossSectionSpec",
+    "DCrossSection",
+    "DCrossSectionSpec",
+    "SymmetricalCrossSection",
+]
 
 
 class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=True):
@@ -66,12 +73,14 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
     def _validate_enclosure_main_layer(self) -> Self:
         if self.enclosure.main_layer is None:
             raise ValueError("Enclosures of cross sections must have a main layer.")
-        if (self.width // 2) * 2 != self.width:
+        if self.width % 2:
             raise ValueError(
-                "Width of symmetrical cross sections must have be a multiple of 2. "
+                "Width of symmetrical cross sections must have be a multiple of 2 dbu. "
                 "This could cause cross sections and extrusions to become unsymmetrical"
                 " otherwise."
             )
+        if not self.width:
+            raise ValueError("Cross section with width 0 is not allowed.")
         return self
 
     @model_validator(mode="after")
@@ -436,7 +445,7 @@ class DCrossSection(TCrossSection[float]):
         )
 
 
-class CrossSectionSpec(TypedDict, Generic[TUnit]):
+class TCrossSectionSpec(Generic[TUnit], TypedDict):
     name: NotRequired[str]
     sections: NotRequired[
         list[tuple[kdb.LayerInfo, TUnit] | tuple[kdb.LayerInfo, TUnit, TUnit]]
@@ -445,6 +454,14 @@ class CrossSectionSpec(TypedDict, Generic[TUnit]):
     width: TUnit
     bbox_layers: NotRequired[Sequence[kdb.LayerInfo]]
     bbox_offsets: NotRequired[Sequence[TUnit]]
+
+
+class CrossSectionSpec(TCrossSectionSpec[int]):
+    unit: NotRequired[Literal["dbu"]]
+
+
+class DCrossSectionSpec(TCrossSectionSpec[float]):
+    unit: Literal["um"]
 
 
 class CrossSectionModel(BaseModel):
@@ -459,10 +476,15 @@ class CrossSectionModel(BaseModel):
         cross_section: str
         | SymmetricalCrossSection
         | DSymmetricalCrossSection
-        | CrossSectionSpec[int],
+        | CrossSectionSpec
+        | DCrossSectionSpec
+        | CrossSection
+        | DCrossSection,
     ) -> SymmetricalCrossSection:
         if isinstance(cross_section, str):
             return self.cross_sections[cross_section]
+        if isinstance(cross_section, TCrossSection):
+            cross_section = cross_section.base
         if isinstance(cross_section, SymmetricalCrossSection):
             if cross_section.enclosure != self.kcl.get_enclosure(
                 cross_section.enclosure
@@ -484,12 +506,34 @@ class CrossSectionModel(BaseModel):
                 )
         elif isinstance(cross_section, DSymmetricalCrossSection):
             cross_section = cross_section.to_itype(self.kcl)
-        else:
+
+        elif cross_section.get("unit", "dbu") == "dbu":
             cross_section = SymmetricalCrossSection(
-                width=cross_section["width"],
+                width=cross_section["width"],  # type: ignore[arg-type]
                 enclosure=self.kcl.layer_enclosures.get_enclosure(
                     LayerEnclosureSpec(
-                        sections=cross_section.get("sections", []),
+                        sections=cross_section.get("sections", []),  # type: ignore[typeddict-item]
+                        main_layer=cross_section["layer"],
+                    ),
+                    kcl=self.kcl,
+                ),
+                name=cross_section.get("name", None),
+            )
+        else:
+            cross_section = SymmetricalCrossSection(
+                width=self.kcl.to_dbu(cross_section["width"]),
+                enclosure=self.kcl.layer_enclosures.get_enclosure(
+                    LayerEnclosureSpec(
+                        dsections=[
+                            (section[0], self.kcl.to_dbu(section[1]))
+                            if len(section) == 2  # noqa: PLR2004
+                            else (
+                                section[0],
+                                self.kcl.to_dbu(section[1]),
+                                self.kcl.to_dbu(section[2]),
+                            )
+                            for section in cross_section.get("sections", [])
+                        ],
                         main_layer=cross_section["layer"],
                     ),
                     kcl=self.kcl,
