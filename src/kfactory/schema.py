@@ -333,6 +333,8 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         inst._schema = self
 
         self.instances[inst.name] = inst
+        if placement:
+            self.placements[inst.name] = placement
         return inst
 
     def add_port(
