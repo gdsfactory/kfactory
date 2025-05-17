@@ -75,7 +75,9 @@ class PortCheck(IntFlag):
     all_overlap = width + port_type + layer  # type: ignore[operator]
 
 
-def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -> None:
+def port_check(
+    p1: Port, p2: Port, checks: PortCheck | int = PortCheck.all_opposite
+) -> None:
     """Check if two ports are equal."""
     if checks & PortCheck.opposite:
         assert (

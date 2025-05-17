@@ -16,6 +16,7 @@ import inspect
 import json
 import socket
 from abc import ABC, abstractmethod
+from collections import defaultdict
 from collections.abc import (
     Callable,
     ItemsView,
@@ -23,6 +24,7 @@ from collections.abc import (
     Iterator,
     KeysView,
     Mapping,
+    Sequence,
     ValuesView,
 )
 from pathlib import Path
@@ -67,6 +69,7 @@ from .instances import (
 )
 from .layer import LayerEnum
 from .merge import MergeDiff
+from .netlist import Net, Netlist, NetlistPort, PortArrayRef, PortRef
 from .port import (
     BasePort,
     DPort,
@@ -577,9 +580,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         if base is not None:
             self._base = base
             return
+
         from .layout import get_default_kcl, kcls
 
         kcl_ = kcl or get_default_kcl()
+
         if name is None:
             name_ = "Unnamed_!" if kdb_cell is None else kdb_cell.name
         else:
@@ -632,7 +637,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, ProtoTKCell):
             return False
-        return self._base == other._base
+        return self._base is other._base
 
     @property
     def prop_id(self) -> int:
@@ -1120,9 +1125,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 self.shapes(port.layer).insert(kdb.Text(port.name or "", port.trans))
             else:
                 self.shapes(port.layer).insert(poly, port.dcplx_trans)
-                self.shapes(port.layer).insert(
-                    kdb.Text(port.name if port.name else "", port.trans)
-                )
+                self.shapes(port.layer).insert(kdb.Text(port.name or "", port.trans))
         self._base.kdb_cell.locked = locked
 
     def write(
@@ -1698,22 +1701,169 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
         Args:
             port_types: The port types to consider for the netlist extraction.
+        Returns:
+            LayoutToNetlist extracted from instance and cell port positions.
+        """
+        logger.warning(
+            "l2n is deprecated and will be removed in 2.0. Please use `l2n_ports`"
+            " instead."
+        )
+        return self.l2n_ports(port_types=port_types)
+
+    def l2n_ports(
+        self,
+        port_types: Iterable[str] = ("optical",),
+        exclude_purposes: list[str] | None = None,
+        ignore_unnamed: bool = False,
+        allow_width_mismatch: bool = False,
+    ) -> kdb.LayoutToNetlist:
+        """Generate a LayoutToNetlist object from the port types.
+
+        Uses kfactory ports as a basis for extraction.
+
+        Args:
+            port_types: The port types to consider for the netlist extraction.
+            exclude_purpose: List of purposes, if an instance has that purpose, it will
+                be ignored.
+            ignore_unnamed: Ignore any instance without `.name` set.
+        Returns:
+            LayoutToNetlist extracted from instance and cell port positions.
         """
         l2n = kdb.LayoutToNetlist(self.name, self.kcl.dbu)
         l2n.extract_netlist()
         il = l2n.internal_layout()
+        il.assign(self.kcl.layout)
 
         called_kcells = [self.kcl[ci] for ci in self.called_cells()]
         called_kcells.sort(key=lambda c: c.hierarchy_levels())
 
         for c in called_kcells:
-            c.circuit(l2n, port_types=port_types)
-        self.circuit(l2n, port_types=port_types)
-        il.assign(self.kcl.layout)
+            c.circuit(
+                l2n,
+                port_types=port_types,
+                exclude_purposes=exclude_purposes,
+                ignore_unnamed=ignore_unnamed,
+                allow_width_mismatch=allow_width_mismatch,
+            )
+        self.circuit(
+            l2n,
+            port_types=port_types,
+            exclude_purposes=exclude_purposes,
+            ignore_unnamed=ignore_unnamed,
+            allow_width_mismatch=allow_width_mismatch,
+        )
         return l2n
 
+    def l2n_elec(
+        self,
+        mark_port_types: Iterable[str] = ("electrical", "RF", "DC"),
+        connectivity: Sequence[
+            tuple[kdb.LayerInfo]
+            | tuple[kdb.LayerInfo, kdb.LayerInfo]
+            | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo],
+        ]
+        | None = None,
+    ) -> kdb.LayoutToNetlist:
+        """Generate a LayoutToNetlist object from the port types.
+
+        Uses electrical connectivity for extraction.
+
+        Args:
+            port_types: The port types to consider for the netlist extraction.
+        Returns:
+            LayoutToNetlist extracted from electrical connectivity.
+        """
+        connectivity = connectivity or self.kcl.connectivity
+        ly_elec = self.kcl.dup().layout
+
+        for ci in [self.cell_index(), *self.called_cells()]:
+            c_ = self.kcl[ci]
+            c = ly_elec.cell(ci)
+            assert c_.name == c.name
+            c.locked = False
+            for port in c_.ports:
+                if port.port_type in mark_port_types and port.name is not None:
+                    c.shapes(port.layer_info).insert(
+                        kdb.Text(string=port.name, trans=port.trans)
+                    )
+
+        l2n: kdb.LayoutToNetlist = kdb.LayoutToNetlist(
+            kdb.RecursiveShapeIterator(
+                ly_elec,
+                ly_elec.cell(self.name),
+                [],
+            )
+        )
+
+        connectivity = connectivity or self.kcl.connectivity
+
+        layers: dict[int, kdb.Region] = {}
+
+        layer_infos = {
+            ly_elec.get_info(ly_elec.layer(info))
+            for layer_set in connectivity
+            for info in layer_set
+        }
+        for info in layer_infos:
+            l_ = l2n.make_layer(ly_elec.layer(info), info.name)
+            layers[ly_elec.layer(info)] = l_
+            l2n.connect(l_)
+        for conn in connectivity:
+            old_layer = layers[ly_elec.layer(conn[0])]
+
+            for layer in conn[1:]:
+                li = layers[ly_elec.layer(layer)]
+                l2n.connect(old_layer, li)
+                old_layer = li
+        l2n.extract_netlist()
+        l2n.check_extraction_errors()
+
+        return l2n
+
+    def netlist(
+        self,
+        port_types: Iterable[str] = ("optical",),
+        mark_port_types: Iterable[str] = ("electrical", "RF", "DC"),
+        connectivity: Sequence[
+            tuple[kdb.LayerInfo, kdb.LayerInfo]
+            | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo]
+        ]
+        | None = None,
+        ignore_unnamed: bool = False,
+        exclude_purposes: list[str] | None = None,
+        allow_width_mismatch: bool = False,
+    ) -> dict[str, Netlist]:
+        l2n_elec = self.l2n_elec(
+            mark_port_types=mark_port_types, connectivity=connectivity
+        )
+        l2n_opt = self.l2n_ports(
+            port_types=port_types,
+            exclude_purposes=exclude_purposes,
+            ignore_unnamed=ignore_unnamed,
+            allow_width_mismatch=allow_width_mismatch,
+        )
+
+        netlists: dict[str, Netlist] = {}
+
+        for ci in [self.cell_index(), *self.called_cells()]:
+            c_ = self.kcl[ci]
+            name = c_.name
+            netlists[name] = _get_netlist(
+                c=c_,
+                l2n_opt=l2n_opt,
+                l2n_elec=l2n_elec,
+                ignore_unnamed=ignore_unnamed,
+                exclude_purposes=exclude_purposes,
+            )
+        return netlists
+
     def circuit(
-        self, l2n: kdb.LayoutToNetlist, port_types: Iterable[str] = ("optical",)
+        self,
+        l2n: kdb.LayoutToNetlist,
+        port_types: Iterable[str] = ("optical",),
+        ignore_unnamed: bool = False,
+        exclude_purposes: list[str] | None = None,
+        allow_width_mismatch: bool = False,
     ) -> None:
         """Create the circuit of the KCell in the given netlist."""
         netlist = l2n.netlist()
@@ -1740,7 +1890,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             port_filter, enumerate(Ports(kcl=self.kcl, bases=self.ports.bases))
         ):
             trans = port.trans.dup()
-            trans.angle = trans.angle % 2
+            trans.angle %= 2
             trans.mirror = False
             layer_info = self.kcl.layout.get_info(port.layer)
             layer = f"{layer_info.layer}_{layer_info.datatype}"
@@ -1774,7 +1924,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
         # sort the ports of all instances by position and layer
         for i, inst in enumerate(self.insts):
-            name = inst.name or f"{i}_{inst.cell.name}"
+            name = inst.name
             subc = circ.create_subcircuit(
                 netlist.circuit_by_cell_index(inst.cell_index), name
             )
@@ -1785,7 +1935,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 enumerate(Ports(kcl=self.kcl, bases=[p.base for p in inst.ports])),
             ):
                 trans = port.trans.dup()
-                trans.angle = trans.angle % 2
+                trans.angle %= 2
                 trans.mirror = False
                 v = trans.disp
                 h = f"{v.x}_{v.y}"
@@ -1826,13 +1976,18 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
                     inst_port = ports[0]
                     port = inst_port[3]
-
-                    port_check(cellports[0][1], port, PortCheck.all_overlap)
+                    if allow_width_mismatch:
+                        port_check(
+                            cellports[0][1], port, PortCheck.port_type + PortCheck.layer
+                        )
+                    else:
+                        port_check(cellports[0][1], port, PortCheck.all_overlap)
                     subc = inst_port[4]
-                    subc.connect_pin(
-                        subc.circuit_ref().pin_by_name(port.name or str(inst_port[1])),
-                        circ.net_by_name(cellports[0][1].name or f"{cellports[0][0]}"),
-                    )
+                    pin = subc.circuit_ref().pin_by_name(port.name or str(inst_port[1]))
+                    net = circ.net_by_name(cellports[0][1].name or f"{cellports[0][0]}")
+                    assert pin is not None
+                    assert net is not None
+                    subc.connect_pin(pin, net)
                 else:
                     # connect instance ports to each other
                     name = "-".join(
@@ -1848,11 +2003,62 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         f"{[_port[3] for _port in ports]}"
                     )
                     if len(ports) == 2:  # noqa: PLR2004
-                        port_check(ports[0][3], ports[1][3], PortCheck.all_opposite)
+                        if allow_width_mismatch:
+                            port_check(
+                                ports[0][3],
+                                ports[1][3],
+                                PortCheck.layer
+                                + PortCheck.port_type
+                                + PortCheck.opposite,
+                            )
+                        else:
+                            port_check(ports[0][3], ports[1][3], PortCheck.all_opposite)
                         for _, j, _, port, subc in ports:
                             subc.connect_pin(
                                 subc.circuit_ref().pin_by_name(port.name or str(j)), net
                             )
+
+        del_subcs: list[kdb.SubCircuit] = []
+        if ignore_unnamed:
+            del_subcs = [
+                circ.subcircuit_by_name(inst.name)
+                for inst in self.insts
+                if not inst.is_named()
+            ]
+        if exclude_purposes:
+            del_subcs.extend(
+                circ.subcircuit_by_name(inst.name)
+                for inst in self.insts
+                if inst.purpose in exclude_purposes
+            )
+
+        for subc in del_subcs:
+            nets: list[kdb.Net] = []
+            for net in circ.each_net():
+                for sc_pin in net.each_subcircuit_pin():
+                    if sc_pin.subcircuit().id() == subc.id():
+                        nets.append(net)
+                        break
+
+            if nets:
+                target_net = nets[0]
+                for net in nets[1:]:
+                    spinrefs = [
+                        (spin.pin(), spin.subcircuit())
+                        for spin in net.each_subcircuit_pin()
+                    ]
+                    for pin, _subc in spinrefs:
+                        _subc.disconnect_pin(pin)
+                        if _subc not in del_subcs:
+                            _subc.connect_pin(pin, target_net)
+                    net_pins = [pinref.pin() for pinref in net.each_pin()]
+                    for pin in net_pins:
+                        circ.disconnect_pin(pin)
+                        circ.connect_pin(pin, target_net)
+                    circ.remove_net(net)
+        for subc in del_subcs:
+            circ.remove_subcircuit(subc)
+
         netlist.add(circ)
 
     def connectivity_check(
@@ -3161,9 +3367,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
                     )
                 polys[w] = poly
             self.shapes(port.layer).insert(poly.transformed(port.dcplx_trans))
-            self.shapes(port.layer).insert(
-                kdb.Text(port.name if port.name else "", port.trans)
-            )
+            self.shapes(port.layer).insert(kdb.Text(port.name or "", port.trans))
 
     def write(
         self,
@@ -3501,7 +3705,7 @@ def show(
     data = json.dumps(data_dict)
     try:
         conn = socket.create_connection(("127.0.0.1", 8082), timeout=0.5)
-        data = data + "\n"
+        data += "\n"
         enc_data = data.encode()
         conn.sendall(enc_data)
         conn.settimeout(5)
@@ -3681,3 +3885,127 @@ def get_cells(
 
 AnyKCell: TypeAlias = ProtoKCell[Any, Any]
 AnyTKCell: TypeAlias = ProtoTKCell[Any]
+
+
+def _get_netlist(
+    c: ProtoTKCell[Any],
+    l2n_opt: kdb.LayoutToNetlist,
+    l2n_elec: kdb.LayoutToNetlist,
+    ignore_unnamed: bool = False,
+    exclude_purposes: list[str] | None = None,
+) -> Netlist:
+    opt_circ = l2n_opt.netlist().circuit_by_name(c.name)
+    elec_circ = l2n_elec.netlist().circuit_by_name(c.name)
+    nl = Netlist(nets=[])
+    exclude_purposes = exclude_purposes or []
+    keep_name = not ignore_unnamed
+
+    for inst in c.insts:
+        if (keep_name or inst.is_named()) and (inst.purpose not in exclude_purposes):
+            if inst.cell.factory_name is not None:
+                nl.create_inst(
+                    name=inst.name,
+                    kcl=inst.cell.library().name()
+                    if inst.cell.is_library_cell()
+                    else inst.cell.kcl.name,
+                    component=inst.cell.factory_name,
+                    settings=serialize_setting(inst.cell.settings.model_dump()),  # type: ignore[arg-type]
+                )
+            else:
+                nl.create_inst(
+                    name=inst.name,
+                    kcl=inst.cell.library().name()
+                    if inst.cell.is_library_cell()
+                    else inst.cell.kcl.name,
+                    component=inst.cell.name,
+                    settings=serialize_setting(inst.cell.settings.model_dump()),
+                )
+
+    for net in opt_circ.each_net():
+        net_refs: list[PortRef | NetlistPort] = []
+        for pinref in net.each_pin():
+            p = nl.create_port(pinref.pin().name())
+            net_refs.append(p)
+        for subc_pin in net.each_subcircuit_pin():
+            subc = subc_pin.subcircuit()
+            circ_ref = subc.circuit_ref()
+            circ = subc.circuit()
+            pin = subc_pin.pin()
+            recit = kdb.RecursiveInstanceIterator(
+                c.kcl.layout, c.kcl.layout.cell(circ.name)
+            )
+            recit.max_depth = 0
+            recit.targets = [circ_ref.cell_index]
+            for it in recit.each():
+                inst_el = it.current_inst_element()
+                if inst_el.specific_cplx_trans() == kdb.ICplxTrans(
+                    trans=subc.trans, dbu=c.kcl.dbu
+                ):
+                    if inst_el.ia() < 0:
+                        net_refs.append(PortRef(instance=subc.name, port=pin.name()))
+                    else:
+                        net_refs.append(
+                            PortArrayRef(
+                                instance=subc.name,
+                                port=pin.name(),
+                                ia=inst_el.ia(),
+                                ib=inst_el.ib(),
+                            )
+                        )
+                    break
+        if len(net_refs) > 1:
+            nl.nets.append(Net(net_refs))
+    if elec_circ:
+        instances_per_transformation: dict[
+            kdb.DCplxTrans, list[ProtoTInstance[Any]]
+        ] = defaultdict(list)
+        for inst in c.insts:
+            instances_per_transformation[inst.dcplx_trans].append(inst)
+        for net in elec_circ.each_net():
+            net_refs = []
+            for pinref in net.each_pin():
+                p = nl.create_port(pinref.pin().name())
+                net_refs.append(p)
+            for subc_pin in net.each_subcircuit_pin():
+                subc = subc_pin.subcircuit()
+                circ_ref = subc.circuit_ref()
+                circ = subc.circuit()
+                pin = subc_pin.pin()
+                recit = kdb.RecursiveInstanceIterator(
+                    c.kcl.layout,
+                    c.kcl.layout.cell(circ.name),
+                    box=kdb.Box(2).transformed(
+                        kdb.ICplxTrans(trans=subc.trans, dbu=c.kcl.dbu)
+                    ),
+                )
+                recit.max_depth = 0
+                recit.targets = [
+                    c.kcl[
+                        l2n_elec.internal_layout().cell(circ_ref.cell_index).name
+                    ].cell_index()
+                ]
+                recit.overlapping = True
+                for it in recit.each():
+                    inst_el = it.current_inst_element()
+                    if inst_el.specific_cplx_trans() == kdb.ICplxTrans(
+                        trans=subc.trans, dbu=c.kcl.dbu
+                    ):
+                        inst = Instance(kcl=c.kcl, instance=inst_el.inst())
+                        if inst_el.ia() < 0:
+                            net_refs.append(
+                                PortRef(instance=inst.name, port=pin.name())
+                            )
+                        else:
+                            net_refs.append(
+                                PortArrayRef(
+                                    instance=subc.name,
+                                    port=pin.name(),
+                                    ia=inst_el.ia(),
+                                    ib=inst_el.ib(),
+                                )
+                            )
+                        break
+            if len(net_refs) > 1:
+                nl.nets.append(Net(net_refs))
+    nl.sort()
+    return nl
