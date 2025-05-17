@@ -1089,6 +1089,12 @@ class DPort(ProtoPort[float]):
                 raise ValueError(
                     "If a cross_section is not given a width must be defined."
                 )
+            width_ = kcl_.to_dbu(width)
+            if width_ % 2:
+                raise ValueError(
+                    f"width needs to be even to snap to grid. Got {width}."
+                    "Ports must have a grid width of multiples of 2."
+                )
             cross_section_ = kcl_.get_symmetrical_cross_section(
                 CrossSectionSpec(layer=layer_info, width=kcl_.to_dbu(width))
             )
