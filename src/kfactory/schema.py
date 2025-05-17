@@ -712,7 +712,7 @@ def _place_islands(
                 )
 
                 st = kinst._standard_trans()
-                if isinstance(st, kdb.Trans | kdb.ICplxTrans):
+                if st is kdb.Trans or st is kdb.ICplxTrans:
                     kinst.transform(
                         kdb.ICplxTrans(
                             mag=1,
@@ -720,7 +720,7 @@ def _place_islands(
                             mirrx=p.mirror,
                             x=x + p.dx,
                             y=y + p.dy,
-                        )
+                        )  # type: ignore[call-overload]
                     )
                 else:
                     kinst.transform(

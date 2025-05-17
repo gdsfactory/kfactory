@@ -340,10 +340,10 @@ def test_netlist() -> None:
     s1.place(x=1000, y=10_000)
     s2.place(x=1000, y=-210_000)
 
-    padm1_1.place(x=-5_000, y=0)
-    padm1_2.place(x=5_000, y=0, orientation=180)
-    padm2_1.place(x=0, y=1000, orientation=270)
-    padm2_2.place(x=0, y=-1000, orientation=90)
+    padm1_1.place(x=-500_000, y=0)
+    padm1_2.place(x=500_000, y=0, orientation=180)
+    padm2_1.place(x=0, y=100_000, orientation=270)
+    padm2_2.place(x=0, y=-100_000, orientation=90)
 
     schema.add_route("s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000)
     schema.add_route(

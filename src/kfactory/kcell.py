@@ -1771,7 +1771,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             LayoutToNetlist extracted from electrical connectivity.
         """
         connectivity = connectivity or self.kcl.connectivity
-        ly_elec = self.kcl.layout.dup()
+        ly_elec = self.kcl.dup().layout
 
         for ci in [self.cell_index(), *self.called_cells()]:
             c_ = self.kcl[ci]
@@ -1798,7 +1798,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
         for conn in connectivity:
             for layer in conn:
-                l_ = l2n.make_layer(ly_elec.find_layer(layer.name), layer.name)
+                l_ = l2n.make_layer(ly_elec.layer(layer), layer.name)
                 layers[layer] = l_
                 l2n.connect(l_)
         for conn in connectivity:
