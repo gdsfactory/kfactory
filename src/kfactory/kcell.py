@@ -4001,16 +4001,7 @@ def _get_netlist(
                     if inst_el.specific_cplx_trans() == kdb.ICplxTrans(
                         trans=subc.trans, dbu=c.kcl.dbu
                     ):
-                        insts = list(
-                            filter(
-                                lambda inst: inst.cell.name
-                                == l2n_elec.internal_layout()
-                                .cell(circ_ref.cell_index)
-                                .name,
-                                instances_per_transformation[it.inst_dtrans()],
-                            )
-                        )
-                        inst = insts[0]
+                        inst = Instance(kcl=c.kcl, instance=inst_el.inst())
                         if inst_el.ia() < 0:
                             net_refs.append(
                                 PortRef(instance=inst.name, port=pin.name())
