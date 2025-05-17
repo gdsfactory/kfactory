@@ -3906,9 +3906,7 @@ def _get_netlist(
     exclude_purposes: list[str] | None = None,
 ) -> Netlist:
     opt_circ = l2n_opt.netlist().circuit_by_name(c.name)
-    elec_circ = l2n_elec.netlist().circuit_by_cell_index(
-        l2n_elec.internal_layout().cell(c.name).cell_index()
-    )
+    elec_circ = l2n_elec.netlist().circuit_by_name(c.name)
     nl = Netlist(nets=[])
     exclude_purposes = exclude_purposes or []
     keep_name = not ignore_unnamed
