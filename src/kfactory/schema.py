@@ -212,24 +212,29 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
 
     def __lt__(self, other: Port[Any] | PortRef) -> bool:
         if isinstance(other, Port):
-            return (
-                self.name,
-                self.x,
-                self.y,
-                self.dx,
-                self.dy,
-                self.orientation,
-                self.cross_section,
-            ) < (
-                other.name,
-                other.x,
-                other.y,
-                other.dx,
-                other.dy,
-                other.orientation,
-                other.cross_section,
-            )
+            return self._as_tuple() < other._as_tuple()
         return True
+
+    def _as_tuple(
+        self,
+    ) -> tuple[
+        str,
+        TUnit | PortRef | PortArrayRef,
+        TUnit | PortRef | PortArrayRef,
+        TUnit,
+        TUnit,
+        Literal[0, 90, 180, 270],
+        str,
+    ]:
+        return (
+            self.name,
+            self.x,
+            self.y,
+            self.dx,
+            self.dy,
+            self.orientation,
+            self.cross_section,
+        )
 
     def is_placeable(self, c: ProtoTKCell[Any], placed_instances: set[str]) -> bool:
         placeable = True
