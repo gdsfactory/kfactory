@@ -42,8 +42,7 @@ P = ParamSpec("P")
 
 JSONSerializable = TypeAliasType(
     "JSONSerializable",
-    "int | float| bool | str | list[JSONSerializable] | tuple[JSONSerializable, ...]"
-    " | dict[str, JSONSerializable]| None",
+    "int | float| bool | str | list[JSONSerializable] | tuple[JSONSerializable, ...] | dict[str, JSONSerializable]| None",  # noqa: E501
 )
 
 
