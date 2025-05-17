@@ -192,11 +192,12 @@ class Route(BaseModel, Generic[TUnit], extra="forbid"):
     @model_validator(mode="before")
     @classmethod
     def _parse_links(cls, data: dict[str, Any]) -> dict[str, Any]:
-        links = data.get("links", [])
+        links = cast("dict[str, str]| None", data.get("links"))
 
         if isinstance(links, dict):
             data["links"] = [
-                [tuple(k.split(",")), tuple(v.split(","))] for k, v in links.items()
+                [tuple(str(k).split(",")), tuple(str(v).split(","))]
+                for k, v in links.items()
             ]
         return data
 
