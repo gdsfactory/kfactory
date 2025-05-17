@@ -1715,6 +1715,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         port_types: Iterable[str] = ("optical",),
         exclude_purposes: list[str] | None = None,
         ignore_unnamed: bool = False,
+        allow_width_mismatch: bool = False,
     ) -> kdb.LayoutToNetlist:
         """Generate a LayoutToNetlist object from the port types.
 
@@ -1742,12 +1743,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 port_types=port_types,
                 exclude_purposes=exclude_purposes,
                 ignore_unnamed=ignore_unnamed,
+                allow_width_mismatch=allow_width_mismatch,
             )
         self.circuit(
             l2n,
             port_types=port_types,
             exclude_purposes=exclude_purposes,
             ignore_unnamed=ignore_unnamed,
+            allow_width_mismatch=allow_width_mismatch,
         )
         return l2n
 
@@ -1824,6 +1827,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         | None = None,
         ignore_unnamed: bool = False,
         exclude_purposes: list[str] | None = None,
+        allow_width_mismatch: bool = False,
     ) -> dict[str, Netlist]:
         l2n_elec = self.l2n_elec(
             mark_port_types=mark_port_types, connectivity=connectivity
@@ -1832,6 +1836,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             port_types=port_types,
             exclude_purposes=exclude_purposes,
             ignore_unnamed=ignore_unnamed,
+            allow_width_mismatch=allow_width_mismatch,
         )
 
         netlists: dict[str, Netlist] = {}
@@ -1854,6 +1859,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         port_types: Iterable[str] = ("optical",),
         ignore_unnamed: bool = False,
         exclude_purposes: list[str] | None = None,
+        allow_width_mismatch: bool = False,
     ) -> None:
         """Create the circuit of the KCell in the given netlist."""
         netlist = l2n.netlist()
@@ -1966,8 +1972,12 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
                     inst_port = ports[0]
                     port = inst_port[3]
-
-                    port_check(cellports[0][1], port, PortCheck.all_overlap)
+                    if allow_width_mismatch:
+                        port_check(
+                            cellports[0][1], port, PortCheck.port_type + PortCheck.layer
+                        )
+                    else:
+                        port_check(cellports[0][1], port, PortCheck.all_overlap)
                     subc = inst_port[4]
                     pin = subc.circuit_ref().pin_by_name(port.name or str(inst_port[1]))
                     net = circ.net_by_name(cellports[0][1].name or f"{cellports[0][0]}")
@@ -1989,7 +1999,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         f"{[_port[3] for _port in ports]}"
                     )
                     if len(ports) == 2:  # noqa: PLR2004
-                        port_check(ports[0][3], ports[1][3], PortCheck.all_opposite)
+                        if allow_width_mismatch:
+                            port_check(
+                                ports[0][3],
+                                ports[1][3],
+                                PortCheck.layer
+                                + PortCheck.port_type
+                                + PortCheck.opposite,
+                            )
+                        else:
+                            port_check(ports[0][3], ports[1][3], PortCheck.all_opposite)
                         for _, j, _, port, subc in ports:
                             subc.connect_pin(
                                 subc.circuit_ref().pin_by_name(port.name or str(j)), net
