@@ -1,8 +1,8 @@
 import pytest
-from conftest import Layers
 from pydantic import ValidationError
 
 import kfactory as kf
+from tests.conftest import Layers
 
 
 def test_layer_infos_valid() -> None:

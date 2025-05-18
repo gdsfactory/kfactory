@@ -1,9 +1,9 @@
 import functools
 
 import pytest
-from conftest import Layers
 
 import kfactory as kf
+from tests.conftest import Layers
 
 
 def test_cell_decorator(kcl: kf.KCLayout, layers: Layers) -> None:
@@ -16,7 +16,7 @@ def test_cell_decorator(kcl: kf.KCLayout, layers: Layers) -> None:
         nonlocal count
         count += 1
 
-    @kcl.cell(post_process=[rectangle_post_process])
+    @kcl.cell(post_process=[rectangle_post_process])  # type: ignore[type-var]
     def rectangle(width: float, height: float, layer: kf.kdb.LayerInfo) -> kf.DKCell:
         c = kcl.dkcell()
         c.shapes(layer).insert(kf.kdb.DBox(0, 0, width, height))
@@ -143,7 +143,7 @@ def test_cell_parameters(kcl: kf.KCLayout) -> None:
         return kcl.kcell(name=name)
 
     with pytest.raises(TypeError):
-        test_cell_with_empty_parameters(name="test_cell_with_empty_parameters")
+        test_cell_with_empty_parameters(name="test_cell_with_empty_parameters")  # type: ignore[call-arg]
 
 
 def test_check_instances(kcl: kf.KCLayout) -> None:

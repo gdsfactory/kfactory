@@ -10,7 +10,9 @@ from klayout import rdb
 from pydantic import BaseModel, Field
 
 from ..conf import config, logger
+from ..instance import Instance  # noqa: TC001
 from ..port import BasePort, Port, ProtoPort
+from ..typings import dbu  # noqa: TC001
 from .length_functions import LengthFunction, get_length_from_area
 from .manhattan import (
     ManhattanBundleRoutingFunction,
@@ -22,9 +24,7 @@ from .steps import Step, Straight
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from ..instance import Instance
     from ..kcell import KCell
-    from ..typings import dbu
 
 __all__ = [
     "ManhattanRoute",
@@ -237,7 +237,7 @@ def check_collisions(
                 for poly in error_region_shapes.merge().each():
                     it = db.create_item(cell, sc)
                     it.add_value("Route shapes overlapping with other shapes")
-                    it.add_value(c.kcl.to_um(poly))
+                    it.add_value(c.kcl.to_um(poly.downcast()))
             if not error_region_instances.is_empty():
                 any_layer_collision = True
                 if on_collision == "error":
@@ -249,7 +249,7 @@ def check_collisions(
                 for poly in error_region_instances.merge().each():
                     it = db.create_item(cell, sc)
                     it.add_value("Route instances overlapping with other instances")
-                    it.add_value(c.kcl.to_um(poly))
+                    it.add_value(c.kcl.to_um(poly.downcast()))
 
         if any_layer_collision:
             match on_collision:
@@ -370,7 +370,6 @@ def route_bundle(
         c: Cell to place the route in.
         start_ports: List of start ports.
         end_ports: List of end ports.
-        separation: Separation between the routes.
         starts: List of steps to use on each starting port or all of them.
         ends: List of steps to use on each end port or all of them.
         collision_check_layers: Layers to check for actual errors if manhattan routes

@@ -1,10 +1,10 @@
 import klayout.db as kdb
 import pytest
-from conftest import Layers
 
 import kfactory as kf
 from kfactory.cross_section import CrossSection, CrossSectionSpec, DCrossSection
 from kfactory.exceptions import LockedError
+from tests.conftest import Layers
 
 
 def test_unnamed_dkcell(kcl: kf.KCLayout) -> None:
@@ -80,7 +80,6 @@ def test_dkcell_locked(layers: Layers) -> None:
     with pytest.raises(LockedError):
         c.create_port(
             name="o1",
-            kcl=kcl,
             cross_section=CrossSection(
                 kcl,
                 base=kcl.get_symmetrical_cross_section(

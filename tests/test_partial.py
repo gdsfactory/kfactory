@@ -1,8 +1,7 @@
 from functools import partial
 
-from conftest import Layers
-
 import kfactory as kf
+from tests.conftest import Layers
 
 
 def to_be_partialled(width: float, length: float, layer: kf.kdb.LayerInfo) -> kf.KCell:

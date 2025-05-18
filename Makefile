@@ -1,4 +1,5 @@
-
+PYTHON ?= 3.12
+PYTHON_FLAG = -p $(PYTHON)
 
 help:
 	@echo 'make install:                                Install package, hook, notebooks and gdslib'
@@ -29,22 +30,22 @@ docs-clean:
 	rm -rf site
 
 docs:
-	uv run --extra docs --isolated mkdocs build -f docs/mkdocs.yml
+	uv run $(PYTHON_FLAG) --extra docs --isolated mkdocs build -f docs/mkdocs.yml
 
 docs-serve:
-	uv run --extra docs --isolated mkdocs serve -f docs/mkdocs.yml
+	uv run $(PYTHON_FLAG) --extra docs --isolated mkdocs serve -f docs/mkdocs.yml
 
 test:
-	uv run --extra ci --isolated pytest -s -n logical
+	uv run $(PYTHON_FLAG) --extra ci --isolated pytest -s -n logical
 
 test-min:
-	uv run --extra ci --resolution lowest-direct --isolated pytest -s -n logical
+	uv run $(PYTHON_FLAG) --extra ci --resolution lowest-direct --isolated pytest -s -n logical
 
 cov:
-	uv run --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
+	uv run $(PYTHON_FLAG) --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
 
 dev-cov:
-	uv run --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered
+	uv run $(PYTHON_FLAG) --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered
 
 venv:
 	uv venv -p 3.13

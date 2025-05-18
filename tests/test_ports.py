@@ -2,10 +2,10 @@ import re
 from collections.abc import Sequence
 
 import pytest
-from conftest import Layers
 
 import kfactory as kf
 from kfactory.exceptions import PortWidthMismatchError
+from tests.conftest import Layers
 
 
 @kf.cell
@@ -98,7 +98,7 @@ def test_connect_port_width_mismatch(layers: Layers) -> None:
     with pytest.raises(PortWidthMismatchError) as excinfo:
         wg1.connect("o1", port)
     assert str(excinfo.value) == (
-        f'Width mismatch between the ports {wg1.cell_name}["o1"] and Port "cplxp1" '
+        f'Width mismatch between the ports {wg1.cell_name}_0_0["o1"] and Port "cplxp1" '
         f'("{wg1.ports["o1"].width}"/"2000")'
     )
 
@@ -119,8 +119,8 @@ def test_connect_instance_width_mismatch(layers: Layers) -> None:
     with pytest.raises(PortWidthMismatchError) as excinfo:
         wg1.connect("o1", wg1_instance, "o2")
     assert str(excinfo.value) == (
-        f'Width mismatch between the ports {wg1.cell_name}["o1"] and '
-        f'{wg1_instance.cell_name}["o2"]("{wg1.ports["o1"].width}"/"2000")'
+        f'Width mismatch between the ports {wg1.name}["o1"] and '
+        f'{wg1_instance.name}["o2"]("{wg1.ports["o1"].width}"/"2000")'
     )
 
 
@@ -312,7 +312,7 @@ def test_ports_create_port(kcl: kf.KCLayout, layers: Layers) -> None:
     with pytest.raises(ValueError):
         ports.create_port(name="o1", layer=1, width=10)  # type: ignore[call-overload]
 
-    with pytest.raises(ValueError, match="Width must be greater than 0."):
+    with pytest.raises(ValueError, match=r"and greater than 0."):
         ports.create_port(name="o1", width=-10, layer=1, center=(1000, 1000), angle=1)
 
 
@@ -416,7 +416,7 @@ def test_dports_create_port(kcl: kf.KCLayout, layers: Layers) -> None:
     with pytest.raises(ValueError):
         ports.create_port(name="o1", layer=1, width=10)  # type: ignore[call-overload]
 
-    with pytest.raises(ValueError, match="Width must be greater than 0."):
+    with pytest.raises(ValueError, match=r"and greater than 0."):
         ports.create_port(
             name="o1", width=-10, layer=1, center=(1000, 1000), orientation=1
         )

@@ -2,10 +2,10 @@ import math
 from typing import Any
 
 import pytest
-from conftest import Layers
 
 import kfactory as kf
 from kfactory.cross_section import CrossSection, CrossSectionSpec
+from tests.conftest import Layers
 
 _PortsType = tuple[kf.port.DPort, kf.port.Port, kf.port.DPort, kf.port.Port]
 
@@ -491,6 +491,19 @@ def test_rename_clockwise_multi(kcl: kf.KCLayout, layers: Layers) -> None:
     ports["o2"].name = "o5"
     kf.port.rename_clockwise_multi(ports, layers=[0], regex="o4")
     assert len(list(ports)) == 2
+
+
+def test_create(kcl: kf.KCLayout, layers: Layers) -> None:
+    cell = kcl.kcell()
+
+    cell.create_port(
+        name="o1",
+        cross_section=kcl.get_icross_section(
+            CrossSectionSpec(layer=layers.WG, width=2000)
+        ),
+        port_type="optical",
+        trans=kf.kdb.Trans(1, 0),
+    )
 
 
 if __name__ == "__main__":

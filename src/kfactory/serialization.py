@@ -13,7 +13,7 @@ import numpy as np
 import toolz  # type: ignore[import-untyped,unused-ignore]
 
 from .conf import config
-from .typings import MetaData, SerializableShape
+from .typings import JSONSerializable, MetaData, SerializableShape
 
 if TYPE_CHECKING:
     from .kcell import AnyKCell
@@ -224,7 +224,7 @@ def check_metadata_type(value: MetaData) -> MetaData:
     raise ValueError(msg)
 
 
-def serialize_setting(setting: MetaData) -> MetaData:
+def serialize_setting(setting: MetaData) -> JSONSerializable:
     """Serialize a setting."""
     if isinstance(setting, dict):
         return {name: serialize_setting(_setting) for name, _setting in setting.items()}
@@ -237,7 +237,7 @@ def serialize_setting(setting: MetaData) -> MetaData:
     return setting
 
 
-def deserialize_setting(setting: MetaData) -> MetaData:
+def deserialize_setting(setting: JSONSerializable) -> MetaData:
     """Deserialize a setting."""
     if isinstance(setting, dict):
         return {

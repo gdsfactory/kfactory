@@ -6,7 +6,7 @@ Uses the klayout package as a backend.
 # The import order matters, we need to first import the important stuff.
 # isort:skip_file
 
-__version__ = "1.4.2"
+__version__ = "1.6.0"
 
 import klayout.db as kdb
 from klayout import lay
@@ -23,10 +23,12 @@ from .enclosure import KCellEnclosure, LayerEnclosure
 from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
 from .kcell import BaseKCell, DKCell, KCell, ProtoTKCell, VKCell, show
 from .ports import Ports, DPorts
-from .port import Port, DPort
+from .port import Port, DPort, ProtoPort
 from .instance import Instance, DInstance, VInstance
 from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
 from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
+from .netlist import Netlist
+from .schema import Schema, DSchema, get_schema, read_schema
 from .instances import Instances, DInstances, VInstances
 from .settings import KCellSettings, Info
 from .layout import Constants, KCLayout, cell, vcell, kcl, kcls
@@ -52,6 +54,10 @@ from . import (
     technology,
     utils,
     typings,
+    kcell,
+    conf,
+    layer,
+    layout,
 )
 from .routing.generic import ManhattanRoute
 from .typings import dbu  # noqa: F401
@@ -73,6 +79,7 @@ __all__ = [
     "DKCell",
     "DPort",
     "DPorts",
+    "DSchema",
     "Info",
     "Instance",
     "InstanceGroup",
@@ -86,9 +93,12 @@ __all__ = [
     "LayerEnum",
     "LayerInfos",
     "LayerStack",
+    "Netlist",
     "Port",
     "Ports",
+    "ProtoPort",
     "ProtoTKCell",
+    "Schema",
     "SymmetricalCrossSection",
     "VInstance",
     "VInstanceGroup",
@@ -99,18 +109,23 @@ __all__ = [
     "VShapes",
     "cell",
     "cells",
+    "conf",
     "config",
     "dpolygon_from_array",
     "enclosure",
     "factories",
     "flexgrid",
     "flexgrid_dbu",
+    "get_schema",
     "grid",
     "grid_dbu",
+    "kcell",
     "kcl",
     "kcls",
     "kdb",
     "lay",
+    "layer",
+    "layout",
     "load_session",
     "logger",
     "packing",
@@ -120,6 +135,7 @@ __all__ = [
     "pprint_ports",
     "protocols",
     "rdb",
+    "read_schema",
     "routing",
     "save_layout_options",
     "save_session",

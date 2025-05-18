@@ -34,6 +34,6 @@ def test_custom_show_string() -> None:
     kcl = kf.KCLayout("TEST_CUSTOM_SHOW_STRING")
     c = kcl.kcell("CustomShowString")
     _show = kf.config.show_function
-    kf.config.show_function = "custom.show.show"  # type: ignore[assignment]
+    kf.config.show_function = "tests.custom.show.show"  # type: ignore[assignment]
     c.show()
     kf.config.show_function = _show

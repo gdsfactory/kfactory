@@ -246,6 +246,9 @@ def route_bundle(
             (after the steps).
         purpose: Set the property "purpose" (at id kf.kcell.PROPID.PURPOSE) to the
             value. Not set if None.
+
+    Returns:
+        list[ManhattanRoute]: The route object with the placed components.
     """
     if ends is None:
         ends = []
@@ -449,6 +452,13 @@ def place90(
             an error is raised.
         kwargs: Additional kwargs. Compatibility for type checking. If any kwargs are
             passed an error is raised.
+
+    Returns:
+        ManhattanRoute: The route object with the placed components.
+
+    Raises:
+        ValueError: If the route cannot be placed due to small space.
+        AttributeError: If the bend90_cell or taper_cell do not have the correct.
     """
     if len(kwargs) > 0:
         raise ValueError(
@@ -883,6 +893,9 @@ def route_loopback(
 
     Returns:
         points: List of the calculated points (starting/ending at p1/p2).
+
+    Raises:
+        ValueError: If the ports are not parallel or point in the same direction.
     """
     t1 = port1 if isinstance(port1, kdb.Trans) else port1.trans
     t2 = port2 if isinstance(port2, kdb.Trans) else port2.trans
@@ -969,7 +982,7 @@ def route(
     allow_type_mismatch: bool | None = None,
     purpose: str | None = "routing",
 ) -> ManhattanRoute:
-    """Places a route.
+    """Places a route between two ports.
 
     Args:
         c: Cell to place the route in.
@@ -999,6 +1012,13 @@ def route(
             (config default: False).
         purpose: Set the property "purpose" (at id kf.kcell.PROPID.PURPOSE) to the
             value. Not set if None.
+
+    Raises:
+        ValueError: If the route cannot be placed due to small space.
+        AttributeError: If the bend90_cell or taper_cell do not have the correct.
+
+    Returns:
+        ManhattanRoute: The route object with the placed components.
     """
     if route_kwargs is None:
         route_kwargs = {}
@@ -1288,7 +1308,15 @@ def route(
 
 
 def vec_angle(v: kdb.Vector) -> int:
-    """Determine vector angle in increments of 90°."""
+    """Determine vector angle in increments of 90°.
+
+    Returns:
+        The angle of the vector in increments of 90° (0, 1, 2, 3).
+
+
+    Raises:
+        ValueError: If the vector is not a manhattan vector.
+    """
     if v.x != 0 and v.y != 0:
         raise ValueError("Non-manhattan vectors are not supported")
 

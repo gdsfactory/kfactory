@@ -1,20 +1,135 @@
-<a id="v1.5.0"></a>
-# [v1.5.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.0) - 2025-04-12
+<a id="v1.6.0"></a>
+# [v1.6.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.6.0) - 2025-05-04
 
 # What's Changed
 
 ## New
 
-- Add ProtoPort.icenter [#676](https://github.com/gdsfactory/kfactory/pull/676)
+- Add conf, kcell to kf exports [#701](https://github.com/gdsfactory/kfactory/pull/701)
+- Add correct conftest import in test files [#700](https://github.com/gdsfactory/kfactory/pull/700)
 
 ## Bug Fixes
 
-- relax scipy requirement [#674](https://github.com/gdsfactory/kfactory/pull/674)
+- fix port width errors [#704](https://github.com/gdsfactory/kfactory/pull/704)
+- fix bezier factory out port [#697](https://github.com/gdsfactory/kfactory/pull/697)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.5.0
+## Typing
+
+- Enhance create_port to have a unified interface [#703](https://github.com/gdsfactory/kfactory/pull/703)
+- Add conf, kcell to kf exports [#701](https://github.com/gdsfactory/kfactory/pull/701)
+- Add correct conftest import in test files [#700](https://github.com/gdsfactory/kfactory/pull/700)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.6.0
+
+
+[Changes][v1.6.0]
+
+
+<a id="v1.5.4"></a>
+# [v1.5.4](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.4) - 2025-05-02
+
+# What's Changed
+
+## Bug Fixes
+
+- fix route_bundle for single routes [#694](https://github.com/gdsfactory/kfactory/pull/694)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.3...v1.5.4
+
+
+[Changes][v1.5.4]
+
+
+<a id="v1.5.3"></a>
+# [v1.5.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.3) - 2025-05-01
+
+# What's Changed
+
+## Bug Fixes
+
+- fix layer selection for electrical router [#693](https://github.com/gdsfactory/kfactory/pull/693)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.2...v1.5.3
+
+
+[Changes][v1.5.3]
+
+
+<a id="v1.5.2"></a>
+# [v1.5.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.2) - 2025-04-30
+
+# What's Changed
+
+## Bug Fixes
+
+- fix cache pruning [#691](https://github.com/gdsfactory/kfactory/pull/691)
+- Lower mkdocs video lower bound [#690](https://github.com/gdsfactory/kfactory/pull/690)
+- fix rf bboxes being ignored [#689](https://github.com/gdsfactory/kfactory/pull/689)
+
+## Documentation
+
+- Lower mkdocs video lower bound [#690](https://github.com/gdsfactory/kfactory/pull/690)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.5.0...v1.5.2
+
+
+[Changes][v1.5.2]
+
+
+<a id="v1.5.0"></a>
+# [v1.5.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.5.0) - 2025-04-27
+
+# What's Changed
+
+## New
+
+- add route_bundle_rf for electrical [#686](https://github.com/gdsfactory/kfactory/pull/686)
+
+## Bug Fixes
+
+- fix the rf router [#687](https://github.com/gdsfactory/kfactory/pull/687)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.4...v1.5.0
 
 
 [Changes][v1.5.0]
+
+
+<a id="v1.4.4"></a>
+# [v1.4.4](https://github.com/gdsfactory/kfactory/releases/tag/v1.4.4) - 2025-04-22
+
+# What's Changed
+
+## Bug Fixes
+
+- better port exceptions [#682](https://github.com/gdsfactory/kfactory/pull/682)
+
+## Documentation
+
+- better message for off-grid references [#680](https://github.com/gdsfactory/kfactory/pull/680)
+- better port exceptions [#682](https://github.com/gdsfactory/kfactory/pull/682)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.3...v1.4.4
+
+
+[Changes][v1.4.4]
+
+
+<a id="v1.4.3"></a>
+# [v1.4.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.4.3) - 2025-04-17
+
+# What's Changed
+
+## Bug Fixes
+
+- Add ProtoPort.icenter [#676](https://github.com/gdsfactory/kfactory/pull/676)
+- fix lyrdb generation in route errors [#677](https://github.com/gdsfactory/kfactory/pull/677)
+- relax scipy requirement [#674](https://github.com/gdsfactory/kfactory/pull/674)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.4.3
+
+
+[Changes][v1.4.3]
 
 
 <a id="v1.4.2"></a>
@@ -1846,7 +1961,13 @@
 [Changes][v0.4.0]
 
 
-[v1.5.0]: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.5.0
+[v1.6.0]: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.6.0
+[v1.5.4]: https://github.com/gdsfactory/kfactory/compare/v1.5.3...v1.5.4
+[v1.5.3]: https://github.com/gdsfactory/kfactory/compare/v1.5.2...v1.5.3
+[v1.5.2]: https://github.com/gdsfactory/kfactory/compare/v1.5.0...v1.5.2
+[v1.5.0]: https://github.com/gdsfactory/kfactory/compare/v1.4.4...v1.5.0
+[v1.4.4]: https://github.com/gdsfactory/kfactory/compare/v1.4.3...v1.4.4
+[v1.4.3]: https://github.com/gdsfactory/kfactory/compare/v1.4.2...v1.4.3
 [v1.4.2]: https://github.com/gdsfactory/kfactory/compare/v1.4.0...v1.4.2
 [v1.4.0]: https://github.com/gdsfactory/kfactory/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/gdsfactory/kfactory/compare/v1.2.5...v1.3.0

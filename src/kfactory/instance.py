@@ -117,15 +117,24 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         except Exception:
             return getattr(self._instance, name)
 
+    def is_named(self) -> bool:
+        return self.instance.property(PROPID.NAME) is not None
+
     @property
     def name(self) -> str:
         """Name of instance in GDS."""
         prop = self.instance.property(PROPID.NAME)
-        return (
-            str(prop)
-            if prop is not None
-            else f"{self.cell.name}_{self.trans.disp.x}_{self.trans.disp.y}"
-        )
+        if prop is not None:
+            return str(prop)
+        name = f"{self.cell.name}_{self.trans.disp.x}_{self.trans.disp.y}"
+        if self.cplx_trans.angle != 0:
+            if self.cplx_trans.angle.is_integer():
+                name += f"_A{int(self.cplx_trans.angle)}"
+            else:
+                name += f"_A{str(self.cplx_trans.angle).replace('.', 'p')}"
+        if self.cplx_trans.is_mirror():
+            name += "_M"
+        return name
 
     @name.setter
     def name(self, value: str | None) -> None:
@@ -301,7 +310,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         self,
         port: str | ProtoPort[Any] | None,
         other: ProtoTInstance[Any],
-        other_port_name: str | None,
+        other_port_name: str | int | tuple[int | str, int, int] | None,
         *,
         mirror: bool = False,
         allow_width_mismatch: bool | None = None,
@@ -315,7 +324,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         self,
         port: str | ProtoPort[Any] | None,
         other: ProtoTInstance[Any] | ProtoPort[Any],
-        other_port_name: str | None = None,
+        other_port_name: str | int | tuple[int | str, int, int] | None = None,
         *,
         mirror: bool = False,
         allow_width_mismatch: bool | None = None,

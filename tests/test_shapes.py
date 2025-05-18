@@ -1,6 +1,5 @@
-from conftest import Layers
-
 import kfactory as kf
+from tests.conftest import Layers
 
 
 def test_shapes(layers: Layers) -> None:

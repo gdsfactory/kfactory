@@ -7,11 +7,11 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 import pytest
-from conftest import Layers
 
 import kfactory as kf
 from kfactory.cross_section import CrossSection, CrossSectionSpec
 from kfactory.exceptions import LockedError
+from tests.conftest import Layers
 
 
 def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
@@ -414,7 +414,9 @@ def test_lock(straight: kf.KCell, bend90: kf.KCell, layers: Layers) -> None:
             straight.create_vinst(bend90)
         # create_port
         with pytest.raises(LockedError):
-            straight.create_port(trans=kf.kdb.Trans.R0, width=1000, layer=layers.WG)
+            straight.create_port(
+                trans=kf.kdb.Trans.R0, width=1000, layer_info=layers.WG
+            )
         # name setter
         with pytest.raises(LockedError):
             straight.name = "new name"

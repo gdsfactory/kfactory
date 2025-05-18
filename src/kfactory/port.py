@@ -72,7 +72,9 @@ class PortCheck(IntFlag):
     all_overlap = width + port_type + layer  # type: ignore[operator]
 
 
-def port_check(p1: Port, p2: Port, checks: PortCheck = PortCheck.all_opposite) -> None:
+def port_check(
+    p1: Port, p2: Port, checks: PortCheck | int = PortCheck.all_opposite
+) -> None:
     """Check if two ports are equal."""
     if checks & PortCheck.opposite:
         assert (
@@ -1085,6 +1087,12 @@ class DPort(ProtoPort[float]):
             if width is None:
                 raise ValueError(
                     "If a cross_section is not given a width must be defined."
+                )
+            width_ = kcl_.to_dbu(width)
+            if width_ % 2:
+                raise ValueError(
+                    f"width needs to be even to snap to grid. Got {width}."
+                    "Ports must have a grid width of multiples of 2."
                 )
             cross_section_ = kcl_.get_symmetrical_cross_section(
                 CrossSectionSpec(layer=layer_info, width=kcl_.to_dbu(width))
