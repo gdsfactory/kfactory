@@ -1266,10 +1266,15 @@ class RegionTilesOperator(kdb.TileOutputReceiver):
                 self.kcell.shapes(layer).insert(self.merged_region)
 
 
-@lru_cache(None)
 def port_hole(port_width: int, section_width: int) -> kdb.Box:
-    w_h = port_width // 2 + section_width
-    return kdb.Box(0, -w_h, w_h, w_h)
+    key = (port_width, section_width)
+    try:
+        return _port_hole_cache[key]
+    except KeyError:
+        w_h = port_width // 2 + section_width
+        box = kdb.Box(0, -w_h, w_h, w_h)
+        _port_hole_cache[key] = box
+        return box
 
 
 class KCellEnclosure(BaseModel):
@@ -1677,3 +1682,5 @@ LayerEnclosureModel.model_rebuild()
 LayerSection.model_rebuild()
 LayerEnclosure.model_rebuild()
 KCellEnclosure.model_rebuild()
+
+_port_hole_cache = {}
