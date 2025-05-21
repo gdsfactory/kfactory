@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections import defaultdict
 from typing import Any, Self
 
 from pydantic import BaseModel, Field, RootModel, model_validator
@@ -74,6 +75,9 @@ class NetlistPort(BaseModel):
             return self.name < other.name
         return True
 
+    def __hash__(self) -> int:
+        return hash(self.name)
+
 
 class Net(RootModel[list[PortArrayRef | PortRef | NetlistPort]]):
     root: list[PortArrayRef | PortRef | NetlistPort]
@@ -112,6 +116,7 @@ class NetlistInstance(BaseModel):
     component: str
     settings: dict[str, JSONSerializable] = Field(default={})
     array: NetlistArray | None = Field(default=None)
+    name: str = Field(exclude=True)
 
 
 class Netlist(BaseModel, extra="forbid"):
@@ -149,7 +154,7 @@ class Netlist(BaseModel, extra="forbid"):
         self, name: str, kcl: str, component: str, settings: dict[str, JSONSerializable]
     ) -> None:
         self.instances[name] = NetlistInstance(
-            kcl=kcl, component=component, settings=settings
+            kcl=kcl, component=component, settings=settings, name=name
         )
 
     def create_net(self, *ports: PortRef | NetlistPort) -> None:
@@ -185,3 +190,85 @@ class Netlist(BaseModel, extra="forbid"):
                 net_ports.append(NetlistPort(name=port.name))
 
         self.nets.append(Net(net_ports))
+
+    def with_equivalent_ports(
+        self,
+        equivalent_ports: dict[str, list[list[str]]],
+        port_mapping: dict[str, dict[str | None, str]],
+    ) -> Netlist:
+        ports_per_inst: dict[str, list[PortRef]] = defaultdict(list)
+        net_for_port: dict[PortRef, Net] = {}
+
+        matched_insts: list[str] = [
+            inst.name
+            for inst in self.instances.values()
+            if inst.component in equivalent_ports
+        ]
+        changed_nets_dict: dict[PortRef, set[Net]] = defaultdict(set)
+        all_changed_nets: set[Net] = set()
+        for net in self.nets:
+            for port in net.root:
+                if isinstance(port, PortRef):
+                    ports_per_inst[port.instance].append(port)
+                    net_for_port[port] = net
+                    if port.instance in matched_insts:
+                        port_name = port_mapping[
+                            self.instances[port.instance].component
+                        ].get(port.port)
+                        if port_name is not None:
+                            port.port = port_name
+                            changed_nets_dict[port].add(net)
+                            all_changed_nets.add(net)
+
+        targets = {net: NetMergeTarget() for net in all_changed_nets}
+
+        for changed_nets in changed_nets_dict.values():
+            if len(changed_nets) > 1:
+                changed_nets_ = list(changed_nets)
+                t = targets[changed_nets_[0]].find_target()
+                for net in changed_nets_:
+                    target = targets[net].find_target()
+                    target.set_target(t)
+
+        nets_per_target: dict[NetMergeTarget, set[Net]] = defaultdict(set)
+        for net in all_changed_nets:
+            nets_per_target[targets[net].find_target()].add(net)
+
+        del_nets: set[Net] = set()
+        new_nets: list[Net] = []
+        ports = {port.name: port for port in self.ports}
+        for nets in nets_per_target.values():
+            new_net = Net(root=[])
+            for net in nets:
+                refs: set[PortRef | NetlistPort] = set()
+                for portorref in net.root:
+                    if isinstance(portorref, PortRef):
+                        refs.add(portorref)
+                    else:
+                        refs.add(ports[port_mapping[self.name][portorref.name]])  # type: ignore[index]
+                new_net.root.extend(list(refs))
+                del_nets.add(net)
+            new_nets.append(new_net)
+
+        nl = self.model_copy()
+        nl.ports = list(set(ports.values()))
+        nl.nets = list(set(nl.nets) - del_nets) + new_nets
+
+        return self
+
+
+class NetMergeTarget:
+    target: NetMergeTarget | None
+
+    def __init__(self) -> None:
+        self.target = None
+
+    def set_target(self, target: NetMergeTarget) -> None:
+        if target is not self:
+            self.target = target
+
+    def find_target(self) -> NetMergeTarget:
+        if self.target is None:
+            return self
+
+        return self.target.find_target()

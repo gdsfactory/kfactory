@@ -257,6 +257,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     name: str
     kcl: KCLayout
     output_type: type[KC]
+    equivalent_ports: list[list[str]] | None = None
 
     @property
     def __name__(self) -> str:
@@ -289,6 +290,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         info: dict[str, MetaData] | None,
         post_process: Iterable[Callable[[ProtoTKCell[Any]], None]],
         debug_names: bool,
+        equivalent_ports: list[list[str]] | None = None,
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
@@ -399,6 +401,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         self._f = wrapper_autocell
         self._f_orig = f
         self.cache = cache
+        self.equivalent_ports = equivalent_ports
         functools.update_wrapper(self, f)
 
     def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:

@@ -417,6 +417,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
             name=self.name,
             instances={
                 inst.name: NetlistInstance(
+                    name=inst.name,
                     kcl=inst.kcl.name,
                     component=inst.component,
                     settings=inst.settings,
