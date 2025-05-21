@@ -452,26 +452,34 @@ class LayerSection(BaseModel):
 
         Checks for overlaps after.
         """
-        if not self.sections:
-            self.sections.append(sec)
+        sections = self.sections
+        if not sections:
+            sections.append(sec)
             return 0
-        i = 0
-        if sec.d_min is not None:
-            while i < len(self.sections) and sec.d_min > self.sections[i].d_max:
-                i += 1
-            while (
-                i < len(self.sections) and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
-            ):
-                sec.d_max = max(self.sections[i].d_max, sec.d_max)
-                sec.d_min = min(
-                    self.sections[i].d_min,
-                    sec.d_min,  # type: ignore[type-var]
-                )
-                self.sections.pop(i)
-                if i == len(self.sections):
-                    break
-        self.sections.insert(i, sec)
-        return i
+        if sec.d_min is None:
+            sections.insert(0, sec)
+            return 0
+
+        # Find insertion/first overlapping index using binary search
+        i = _find_insert_idx(sections, sec.d_min)
+
+        # Merge any overlapping sections starting at i
+        merge_start = i
+        merge_end = i
+        n = len(sections)
+        # Overlap if the current section's d_min is <= sec.d_max
+        while merge_end < n and sections[merge_end].d_min <= sec.d_max:
+            # Expand bounds to cover all overlapping sections
+            sec.d_min = min(sec.d_min, sections[merge_end].d_min)
+            sec.d_max = max(sec.d_max, sections[merge_end].d_max)
+            merge_end += 1
+
+        # Remove all overlapping sections in a single operation (slice)
+        if merge_end > merge_start:
+            del sections[merge_start:merge_end]
+
+        sections.insert(merge_start, sec)
+        return merge_start
 
     def max_size(self) -> int:
         """Maximum size of the sections in this layer section."""
@@ -1671,6 +1679,18 @@ def _add_section(
         layer_sections[layer].add_section(section)
     else:
         layer_sections[layer] = LayerSection(sections=[section])
+
+
+def _find_insert_idx(sections, d_min):
+    """Binary search to find the first index in sections where d_max >= d_min."""
+    lo, hi = 0, len(sections)
+    while lo < hi:
+        mid = (lo + hi) // 2
+        if sections[mid].d_max < d_min:
+            lo = mid + 1
+        else:
+            hi = mid
+    return lo
 
 
 LayerEnclosureModel.model_rebuild()
