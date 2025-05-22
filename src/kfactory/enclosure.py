@@ -468,9 +468,9 @@ class LayerSection(BaseModel):
         merge_end = i
         n = len(sections)
         # Overlap if the current section's d_min is <= sec.d_max
-        while merge_end < n and sections[merge_end].d_min <= sec.d_max:
+        while merge_end < n and sections[merge_end].d_min <= sec.d_max:  # type: ignore[operator]
             # Expand bounds to cover all overlapping sections
-            sec.d_min = min(sec.d_min, sections[merge_end].d_min)
+            sec.d_min = min(sec.d_min, sections[merge_end].d_min)  # type: ignore[type-var]
             sec.d_max = max(sec.d_max, sections[merge_end].d_max)
             merge_end += 1
 
@@ -1686,7 +1686,7 @@ def _find_insert_idx(sections: list[Section], d_min: int | None) -> int:
     lo, hi = 0, len(sections)
     while lo < hi:
         mid = (lo + hi) // 2
-        if sections[mid].d_max < d_min:
+        if sections[mid].d_max < d_min:  # type: ignore[operator]
             lo = mid + 1
         else:
             hi = mid
