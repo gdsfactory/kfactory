@@ -1,10 +1,26 @@
-<a id="v1.6.0"></a>
-# [v1.6.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.6.0) - 2025-05-04
+<a id="v1.7.0"></a>
+# [v1.7.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.7.0) - 2025-05-22
 
 # What's Changed
 
 ## New
 
+- add basic lvs equivalency checks [#706](https://github.com/gdsfactory/kfactory/pull/706)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.6.0...v1.7.0
+
+
+[Changes][v1.7.0]
+
+
+<a id="v1.6.0"></a>
+# [v1.6.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.6.0) - 2025-05-17
+
+# What's Changed
+
+## New
+
+- Add Schema and Netlist for Schematic Cells and Extraction [#679](https://github.com/gdsfactory/kfactory/pull/679)
 - Add conf, kcell to kf exports [#701](https://github.com/gdsfactory/kfactory/pull/701)
 - Add correct conftest import in test files [#700](https://github.com/gdsfactory/kfactory/pull/700)
 
@@ -12,6 +28,10 @@
 
 - fix port width errors [#704](https://github.com/gdsfactory/kfactory/pull/704)
 - fix bezier factory out port [#697](https://github.com/gdsfactory/kfactory/pull/697)
+
+## Documentation
+
+- Add Schema and Netlist for Schematic Cells and Extraction [#679](https://github.com/gdsfactory/kfactory/pull/679)
 
 ## Typing
 
@@ -1961,6 +1981,7 @@
 [Changes][v0.4.0]
 
 
+[v1.7.0]: https://github.com/gdsfactory/kfactory/compare/v1.6.0...v1.7.0
 [v1.6.0]: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.6.0
 [v1.5.4]: https://github.com/gdsfactory/kfactory/compare/v1.5.3...v1.5.4
 [v1.5.3]: https://github.com/gdsfactory/kfactory/compare/v1.5.2...v1.5.3
