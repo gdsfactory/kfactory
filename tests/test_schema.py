@@ -363,10 +363,11 @@ def test_netlist() -> None:
     schema.add_port("o1", port=s1["o1"])
     schema.add_port("o2", port=s2["o1"])
 
-    nl = schema.netlist()
     c = schema.create_cell(kf.KCell)
+    nl = schema.netlist()
     nl2 = c.netlist(
-        ignore_unnamed=True, connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)]
+        ignore_unnamed=True,
+        connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)],
     )
     assert nl == nl2[c.name]
 
@@ -388,7 +389,7 @@ def test_netlist_equivalent() -> None:
 
     layers = Layers()
     pdk = kf.KCLayout(
-        "SCHEMA_PDK_NETLIST",
+        "SCHEMA_PDK_NETLIST_EQUIVALENT",
         infos=Layers,
         connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)],
     )
@@ -412,7 +413,7 @@ def test_netlist_equivalent() -> None:
 
         return c
 
-    @pdk.cell(equivalent_ports=[["e1", "e2", "e3", "e4"]])
+    @pdk.cell(lvs_equivalent_ports=[["e1", "e2", "e3", "e4"]])
     def pad_m1() -> kf.KCell:
         c = pdk.kcell()
         c.shapes(layers.METAL1).insert(kf.kdb.Box(100_000))
@@ -490,46 +491,52 @@ def test_netlist_equivalent() -> None:
     padm1_3 = schema.create_inst(name="padm1_3", component="pad_m1")
     padm1_4 = schema.create_inst(name="padm1_4", component="pad_m1")
 
-    padm1_1.place(x=-100_000, y=0)
-    padm1_2.place(x=100_000, y=0)
-    padm1_3.place(x=-100_000, y=-100_000)
+    padm1_1.place(x=-400_000, y=0)
+    padm1_2.place(x=400_000, y=0)
+    padm1_3.place(x=-400_000, y=-400_000)
     padm1_4.place(
-        x=100_000,
-        y=-100_000,
+        x=400_000,
+        y=-400_000,
     )
 
     schema.add_route(
         "pm1_1-pm1_2",
-        [padm1_1["e1"]],
+        [padm1_1["e3"]],
         [padm1_2["e1"]],
         "route_bundle_elec",
         separation=20_000,
     )
     schema.add_route(
-        "pm1_2-pm1_3",
-        [padm1_2["e1"]],
-        [padm1_3["e1"]],
+        "pm1_2-pm1_4",
+        [padm1_2["e4"]],
+        [padm1_4["e2"]],
         "route_bundle_elec",
         separation=20_000,
     )
     schema.add_route(
         "pm1_3-pm1_4",
-        [padm1_3["e1"]],
-        [padm1_4["e1"]],
+        [padm1_1["e4"]],
+        [padm1_3["e2"]],
         "route_bundle_elec",
         separation=20_000,
     )
     schema.add_route(
         "pm1_4-pm1_1",
         [padm1_4["e1"]],
-        [padm1_1["e1"]],
+        [padm1_3["e3"]],
         "route_bundle_elec",
         separation=20_000,
     )
 
     nl = schema.netlist()
     c = schema.create_cell(kf.KCell)
+    c.show()
     nl2 = c.netlist(
         ignore_unnamed=True, connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)]
     )
-    assert nl == nl2[c.name]
+    assert (
+        nl.lvs_equivalent(
+            cell_name=c.name, equivalent_ports={"pad_m1": [["e1", "e2", "e3", "e4"]]}
+        )
+        == nl2[c.name]
+    )

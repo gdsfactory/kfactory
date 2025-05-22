@@ -35,6 +35,17 @@ class PortRef(BaseModel, extra="forbid"):
             return True
         return (self.instance, self.port) < (other.instance, other.port)
 
+    def __hash__(self) -> int:
+        return hash((self.instance, self.port))
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, PortRef)
+            and len(self.model_fields) == len(other.model_fields)
+            and self.instance == other.instance
+            and self.port == other.port
+        )
+
 
 class PortArrayRef(PortRef, extra="forbid"):
     ia: int
@@ -64,6 +75,19 @@ class PortArrayRef(PortRef, extra="forbid"):
             other.port,
             other.ia,
             other.ib,
+        )
+
+    def __hash__(self) -> int:
+        return hash((self.instance, self.port, self.ia, self.ib))
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, PortArrayRef)
+            and len(self.model_fields) == len(other.model_fields)
+            and self.instance == other.instance
+            and self.port == other.port
+            and self.ia == other.ia
+            and self.ib == other.ib
         )
 
 
@@ -105,6 +129,9 @@ class Net(RootModel[list[PortArrayRef | PortRef | NetlistPort]]):
         self.root.sort()
         return self
 
+    def __hash__(self) -> int:
+        return hash(tuple(self.root))
+
 
 class NetlistArray(BaseModel):
     na: int
@@ -120,7 +147,6 @@ class NetlistInstance(BaseModel):
 
 
 class Netlist(BaseModel, extra="forbid"):
-    name: str | None = None
     instances: dict[str, NetlistInstance] = Field(default_factory=dict)
     nets: list[Net] = Field(default_factory=list)
     ports: list[NetlistPort] = Field(default_factory=list)
@@ -128,6 +154,8 @@ class Netlist(BaseModel, extra="forbid"):
     def sort(self) -> Self:
         if self.instances:
             self.instances = dict(sorted(self.instances.items()))
+        for net in self.nets:
+            net.sort()
         self.nets.sort()
         if self.ports:
             self.ports.sort()
@@ -191,11 +219,20 @@ class Netlist(BaseModel, extra="forbid"):
 
         self.nets.append(Net(net_ports))
 
-    def with_equivalent_ports(
+    def lvs_equivalent(
         self,
+        cell_name: str,
         equivalent_ports: dict[str, list[list[str]]],
-        port_mapping: dict[str, dict[str | None, str]],
+        port_mapping: dict[str, dict[str | None, str]] | None = None,
     ) -> Netlist:
+        if port_mapping is None:
+            port_mapping = defaultdict(dict)
+            for cell_name_, list_of_port_lists in equivalent_ports.items():
+                for port_list in list_of_port_lists:
+                    if port_list:
+                        p1 = port_list[0]
+                        for port in port_list:
+                            port_mapping[cell_name_][port] = p1
         ports_per_inst: dict[str, list[PortRef]] = defaultdict(list)
         net_for_port: dict[PortRef, Net] = {}
 
@@ -206,18 +243,19 @@ class Netlist(BaseModel, extra="forbid"):
         ]
         changed_nets_dict: dict[PortRef, set[Net]] = defaultdict(set)
         all_changed_nets: set[Net] = set()
-        for net in self.nets:
-            for port in net.root:
-                if isinstance(port, PortRef):
-                    ports_per_inst[port.instance].append(port)
-                    net_for_port[port] = net
-                    if port.instance in matched_insts:
+        nl = self.model_copy(deep=True)
+        for net in nl.nets:
+            for netport in net.root:
+                if isinstance(netport, PortRef):
+                    ports_per_inst[netport.instance].append(netport)
+                    net_for_port[netport] = net
+                    if netport.instance in matched_insts:
                         port_name = port_mapping[
-                            self.instances[port.instance].component
-                        ].get(port.port)
+                            nl.instances[netport.instance].component
+                        ].get(netport.port)
                         if port_name is not None:
-                            port.port = port_name
-                            changed_nets_dict[port].add(net)
+                            netport.port = port_name
+                            changed_nets_dict[netport].add(net)
                             all_changed_nets.add(net)
 
         targets = {net: NetMergeTarget() for net in all_changed_nets}
@@ -236,25 +274,26 @@ class Netlist(BaseModel, extra="forbid"):
 
         del_nets: set[Net] = set()
         new_nets: list[Net] = []
-        ports = {port.name: port for port in self.ports}
+        ports = {port.name: port for port in nl.ports}
         for nets in nets_per_target.values():
             new_net = Net(root=[])
+            refs: set[PortRef | NetlistPort] = set()
             for net in nets:
-                refs: set[PortRef | NetlistPort] = set()
                 for portorref in net.root:
                     if isinstance(portorref, PortRef):
                         refs.add(portorref)
                     else:
-                        refs.add(ports[port_mapping[self.name][portorref.name]])  # type: ignore[index]
-                new_net.root.extend(list(refs))
+                        refs.add(ports[port_mapping[cell_name][portorref.name]])
                 del_nets.add(net)
+            new_net.root.extend(list(refs))
             new_nets.append(new_net)
 
-        nl = self.model_copy()
         nl.ports = list(set(ports.values()))
         nl.nets = list(set(nl.nets) - del_nets) + new_nets
 
-        return self
+        nl.sort()
+
+        return nl
 
 
 class NetMergeTarget:

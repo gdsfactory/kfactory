@@ -393,7 +393,7 @@ class TKCell(BaseKCell):
 
     kdb_cell: kdb.Cell
     boundary: kdb.DPolygon | None = None
-    equivalent_ports: list[list[str]] | None = None
+    lvs_equivalent_ports: list[list[str]] | None = None
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -1790,7 +1790,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             c.locked = False
             mapping = port_mapping.get(c_.name, {})
             for port in c_.ports:
-                port_name = mapping.get(port.name)
+                port_name = mapping.get(port.name, port.name)
                 if (
                     port_name == port.name
                     and port.port_type in mark_port_types
@@ -1853,8 +1853,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             for ci in [self.cell_index(), *self.called_cells()]:
                 c_ = self.kcl[ci]
                 eqps = (
-                    c_.equivalent_ports
-                    or c_.kcl.factories[c_.factory_name].equivalent_ports
+                    c_.lvs_equivalent_ports
+                    or c_.kcl.factories[c_.factory_name].lvs_equivalent_ports
                     if c_.has_factory_name()
                     else None
                 )
@@ -1899,9 +1899,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 ignore_unnamed=ignore_unnamed,
                 exclude_purposes=exclude_purposes,
             )
-            if equivalent_ports.get(c_.name):
-                nl = nl.with_equivalent_ports(
-                    equivalent_ports=equivalent_ports, port_mapping=port_mapping
+            if equivalent_ports.get(c_.name) is not None:
+                nl = nl.lvs_equivalent(
+                    cell_name=c_.name,
+                    equivalent_ports=equivalent_ports,
+                    port_mapping=port_mapping,
                 )
             netlists[name] = nl
         return netlists
@@ -2565,7 +2567,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
     @property
     def equivalent_ports(self) -> list[list[str]] | None:
-        return self._base.equivalent_ports
+        return self._base.lvs_equivalent_ports
 
 
 class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
@@ -3949,7 +3951,7 @@ def _get_netlist(
 ) -> Netlist:
     opt_circ = l2n_opt.netlist().circuit_by_name(c.name)
     elec_circ = l2n_elec.netlist().circuit_by_name(c.name)
-    nl = Netlist(nets=[], name=c.name)
+    nl = Netlist(nets=[])
     exclude_purposes = exclude_purposes or []
     keep_name = not ignore_unnamed
 

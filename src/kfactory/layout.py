@@ -762,7 +762,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-        equivalent_ports: list[list[str]] | None = None,
+        lvs_equivalent_ports: list[list[str]] | None = None,
     ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
     @overload
@@ -786,7 +786,7 @@ class KCLayout(
         post_process: Iterable[Callable[[KC_contra], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-        equivalent_ports: list[list[str]] | None = None,
+        lvs_equivalent_ports: list[list[str]] | None = None,
     ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
     @overload
@@ -811,7 +811,7 @@ class KCLayout(
         post_process: Iterable[Callable[[KC_contra], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-        equivalent_ports: list[list[str]] | None = None,
+        lvs_equivalent_ports: list[list[str]] | None = None,
     ) -> Callable[
         [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
     ]: ...
@@ -837,7 +837,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
-        equivalent_ports: list[list[str]] | None = None,
+        lvs_equivalent_ports: list[list[str]] | None = None,
     ) -> Callable[
         [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
     ]: ...
@@ -864,7 +864,7 @@ class KCLayout(
         post_process: Iterable[Callable[[KC_contra], None]] | None = None,
         debug_names: bool | None = None,
         tags: list[str] | None = None,
-        equivalent_ports: list[list[str]] | None = None,
+        lvs_equivalent_ports: list[list[str]] | None = None,
     ) -> (
         Callable[KCellParams, KC]
         | Callable[
@@ -969,7 +969,7 @@ class KCLayout(
                 info=info,
                 post_process=post_process,  # type: ignore[arg-type]
                 debug_names=debug_names,
-                equivalent_ports=equivalent_ports,
+                lvs_equivalent_ports=lvs_equivalent_ports,
             )
 
             if register_factory:
