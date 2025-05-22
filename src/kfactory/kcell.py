@@ -348,6 +348,9 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
             " automatically as a factory. Therefore it doesn't have an associated name."
         )
 
+    def has_factory_name(self) -> bool:
+        return bool(self._base.basename or self._base.function_name)
+
     def create_vinst(self, cell: AnyKCell) -> VInstance:
         """Insert the KCell as a VInstance into a VKCell or KCell."""
         if self.locked:
@@ -390,6 +393,7 @@ class TKCell(BaseKCell):
 
     kdb_cell: kdb.Cell
     boundary: kdb.DPolygon | None = None
+    lvs_equivalent_ports: list[list[str]] | None = None
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -1763,6 +1767,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo],
         ]
         | None = None,
+        port_mapping: dict[str, dict[str | None, str]] | None = None,
     ) -> kdb.LayoutToNetlist:
         """Generate a LayoutToNetlist object from the port types.
 
@@ -1776,13 +1781,21 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         connectivity = connectivity or self.kcl.connectivity
         ly_elec = self.kcl.dup().layout
 
+        port_mapping = port_mapping or {}
+
         for ci in [self.cell_index(), *self.called_cells()]:
             c_ = self.kcl[ci]
             c = ly_elec.cell(ci)
             assert c_.name == c.name
             c.locked = False
+            mapping = port_mapping.get(c_.name, {})
             for port in c_.ports:
-                if port.port_type in mark_port_types and port.name is not None:
+                port_name = mapping.get(port.name, port.name)
+                if (
+                    port_name == port.name
+                    and port.port_type in mark_port_types
+                    and port.name is not None
+                ):
                     c.shapes(port.layer_info).insert(
                         kdb.Text(string=port.name, trans=port.trans)
                     )
@@ -1829,12 +1842,35 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo]
         ]
         | None = None,
+        *,
+        equivalent_ports: dict[str, list[list[str]]] | None = None,
         ignore_unnamed: bool = False,
         exclude_purposes: list[str] | None = None,
         allow_width_mismatch: bool = False,
     ) -> dict[str, Netlist]:
+        if equivalent_ports is None:
+            equivalent_ports = {}
+            for ci in [self.cell_index(), *self.called_cells()]:
+                c_ = self.kcl[ci]
+                eqps = (
+                    c_.lvs_equivalent_ports
+                    or c_.kcl.factories[c_.factory_name].lvs_equivalent_ports
+                    if c_.has_factory_name()
+                    else None
+                )
+                if eqps is not None:
+                    equivalent_ports[c_.name] = eqps
+        port_mapping: dict[str, dict[str | None, str]] = defaultdict(dict)
+        for cell_name, list_of_port_lists in equivalent_ports.items():
+            for port_list in list_of_port_lists:
+                if port_list:
+                    p1 = port_list[0]
+                    for port in port_list:
+                        port_mapping[cell_name][port] = p1
         l2n_elec = self.l2n_elec(
-            mark_port_types=mark_port_types, connectivity=connectivity
+            mark_port_types=mark_port_types,
+            connectivity=connectivity,
+            port_mapping=port_mapping,
         )
         l2n_opt = self.l2n_ports(
             port_types=port_types,
@@ -1845,16 +1881,31 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
         netlists: dict[str, Netlist] = {}
 
+        for cell_name, eqps in equivalent_ports.items():
+            for eqp_list in eqps:
+                if eqp_list:
+                    p1 = eqp_list[0]
+                    for p in eqp_list:
+                        port_mapping[cell_name][p] = p1
+
         for ci in [self.cell_index(), *self.called_cells()]:
             c_ = self.kcl[ci]
             name = c_.name
-            netlists[name] = _get_netlist(
+
+            nl = _get_netlist(
                 c=c_,
                 l2n_opt=l2n_opt,
                 l2n_elec=l2n_elec,
                 ignore_unnamed=ignore_unnamed,
                 exclude_purposes=exclude_purposes,
             )
+            if equivalent_ports.get(c_.name) is not None:
+                nl = nl.lvs_equivalent(
+                    cell_name=c_.name,
+                    equivalent_ports=equivalent_ports,
+                    port_mapping=port_mapping,
+                )
+            netlists[name] = nl
         return netlists
 
     def circuit(
@@ -2513,6 +2564,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         | SymmetricalCrossSection,
         **cross_section_kwargs: Any,
     ) -> TCrossSection[TUnit]: ...
+
+    @property
+    def equivalent_ports(self) -> list[list[str]] | None:
+        return self._base.lvs_equivalent_ports
 
 
 class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
@@ -4006,6 +4061,6 @@ def _get_netlist(
                             )
                         break
             if len(net_refs) > 1:
-                nl.nets.append(Net(net_refs))
+                nl.create_net(*net_refs)
     nl.sort()
     return nl
