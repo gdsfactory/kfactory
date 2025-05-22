@@ -11,7 +11,6 @@ import itertools
 import sys
 from collections import defaultdict
 from enum import IntEnum
-from functools import lru_cache
 from hashlib import sha1
 from typing import (
     TYPE_CHECKING,
@@ -1683,4 +1682,4 @@ LayerSection.model_rebuild()
 LayerEnclosure.model_rebuild()
 KCellEnclosure.model_rebuild()
 
-_port_hole_cache = {}
+_port_hole_cache: dict[tuple[int, int], kdb.Box] = {}
