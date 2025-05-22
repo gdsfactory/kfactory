@@ -1681,7 +1681,7 @@ def _add_section(
         layer_sections[layer] = LayerSection(sections=[section])
 
 
-def _find_insert_idx(sections, d_min):
+def _find_insert_idx(sections: list[Section], d_min: int | None) -> int:
     """Binary search to find the first index in sections where d_max >= d_min."""
     lo, hi = 0, len(sections)
     while lo < hi:
