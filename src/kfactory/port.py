@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import re
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from enum import IntEnum, IntFlag, auto
 from typing import TYPE_CHECKING, Any, Generic, Literal, Self, overload
 
@@ -30,7 +31,6 @@ from .cross_section import (
 from .settings import Info
 from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
-from collections.abc import Iterable
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
