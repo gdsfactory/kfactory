@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- Fix schema serialization check and fix pydantic warning [#711](https://github.com/gdsfactory/kfactory/pull/711)
 - fix property name for lvs_equivalent_ports [#710](https://github.com/gdsfactory/kfactory/pull/710)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.0...v1.7.1
