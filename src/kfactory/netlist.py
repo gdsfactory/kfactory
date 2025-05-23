@@ -41,7 +41,7 @@ class PortRef(BaseModel, extra="forbid"):
     def __eq__(self, other: object) -> bool:
         return (
             isinstance(other, PortRef)
-            and len(self.model_fields) == len(other.model_fields)
+            and len(self.__class__.model_fields) == len(other.__class__.model_fields)
             and self.instance == other.instance
             and self.port == other.port
         )
