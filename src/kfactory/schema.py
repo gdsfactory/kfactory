@@ -70,6 +70,14 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
 
         return self
 
+    @model_validator(mode="before")
+    @classmethod
+    def _replace_rotation_orientation(cls, data: dict[str, Any]) -> dict[str, Any]:
+        if "rotation" in data:
+            orientation = data.pop("rotation")
+            data["orientation"] = orientation
+        return data
+
     @property
     def is_absolute(self) -> bool:
         return not (isinstance(self.x, str) or isinstance(self.y, str))
@@ -447,7 +455,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
             for name, route in routes.items():
                 route["name"] = name
         connections = data.get("connections")
-        if connections and isinstance(connections, dict):
+        if connections is not None and isinstance(connections, dict):
             built_connections: list[Connection[TUnit]] = []
             connections_: list[tuple[tuple[str, str], tuple[str, str]]] = [
                 (k.rsplit(",", 1), v.rsplit(",", 1)) for k, v in connections.items()
