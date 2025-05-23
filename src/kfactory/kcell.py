@@ -2566,7 +2566,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
     ) -> TCrossSection[TUnit]: ...
 
     @property
-    def equivalent_ports(self) -> list[list[str]] | None:
+    def lvs_equivalent_ports(self) -> list[list[str]] | None:
         return self._base.lvs_equivalent_ports
 
 
