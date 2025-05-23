@@ -1,5 +1,20 @@
+<a id="v1.7.1"></a>
+# [v1.7.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.7.1) - 2025-05-23
+
+# What's Changed
+
+## Bug Fixes
+
+- fix property name for lvs_equivalent_ports [#710](https://github.com/gdsfactory/kfactory/pull/710)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.0...v1.7.1
+
+
+[Changes][v1.7.1]
+
+
 <a id="v1.7.0"></a>
-# [v1.7.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.7.0) - 2025-05-22
+# [v1.7.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.7.0) - 2025-05-23
 
 # What's Changed
 
@@ -1981,6 +1996,7 @@
 [Changes][v0.4.0]
 
 
+[v1.7.1]: https://github.com/gdsfactory/kfactory/compare/v1.7.0...v1.7.1
 [v1.7.0]: https://github.com/gdsfactory/kfactory/compare/v1.6.0...v1.7.0
 [v1.6.0]: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.6.0
 [v1.5.4]: https://github.com/gdsfactory/kfactory/compare/v1.5.3...v1.5.4
