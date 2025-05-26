@@ -46,6 +46,9 @@ class PortRef(BaseModel, extra="forbid"):
             and self.port == other.port
         )
 
+    def __str__(self) -> str:
+        return f"{self.instance}[{self.port!r}]"
+
 
 class PortArrayRef(PortRef, extra="forbid"):
     ia: int
@@ -89,6 +92,9 @@ class PortArrayRef(PortRef, extra="forbid"):
             and self.ia == other.ia
             and self.ib == other.ib
         )
+
+    def __str__(self) -> str:
+        return f"{self.instance}[{self.port!r}, {self.ia}, {self.ib}]"
 
 
 class NetlistPort(BaseModel):

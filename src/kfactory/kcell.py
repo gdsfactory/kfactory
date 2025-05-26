@@ -1779,16 +1779,20 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             LayoutToNetlist extracted from electrical connectivity.
         """
         connectivity = connectivity or self.kcl.connectivity
-        ly_elec = self.kcl.dup().layout
+        ly_elec = self.kcl.layout.dup()
 
         port_mapping = port_mapping or {}
+        c_elec: kdb.Cell = ly_elec.cell(self.name)
 
-        for ci in [self.cell_index(), *self.called_cells()]:
+        for ci in [c_elec.cell_index(), *c_elec.called_cells()]:
             c_ = self.kcl[ci]
-            c = ly_elec.cell(ci)
+            c = ly_elec.cell(c_.name)
             assert c_.name == c.name
             c.locked = False
-            mapping = port_mapping.get(c_.name, {})
+            mapping = port_mapping.get(
+                c_.name,
+                port_mapping.get(c_.factory_name, {}) if c_.has_factory_name() else {},
+            )
             for port in c_.ports:
                 port_name = mapping.get(port.name, port.name)
                 if (
@@ -4042,8 +4046,10 @@ def _get_netlist(
                 recit.overlapping = True
                 for it in recit.each():
                     inst_el = it.current_inst_element()
-                    if inst_el.specific_cplx_trans() == kdb.ICplxTrans(
-                        trans=subc.trans, dbu=c.kcl.dbu
+                    if (
+                        inst_el.specific_cplx_trans()
+                        == kdb.ICplxTrans(trans=subc.trans, dbu=c.kcl.dbu)
+                        and pin.name() != ""
                     ):
                         inst = Instance(kcl=c.kcl, instance=inst_el.inst())
                         if inst_el.ia() < 0:

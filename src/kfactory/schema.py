@@ -442,6 +442,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
     @model_validator(mode="before")
     @classmethod
     def _validate_model(cls, data: dict[str, Any]) -> dict[str, Any]:
+        data.pop("nets", None)
         if not isinstance(data, dict):
             return data
         if "kcl" in data and isinstance(data["kcl"], str):
