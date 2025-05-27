@@ -5,7 +5,13 @@
 
 ## Bug Fixes
 
+- fix netlist stuff [#712](https://github.com/gdsfactory/kfactory/pull/712)
+- Fix schema serialization check and fix pydantic warning [#711](https://github.com/gdsfactory/kfactory/pull/711)
 - fix property name for lvs_equivalent_ports [#710](https://github.com/gdsfactory/kfactory/pull/710)
+
+## Dependency Updates
+
+- Update typer requirement from <0.16,>=0.15.2 to >=0.15.2,<0.17 [#713](https://github.com/gdsfactory/kfactory/pull/713)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.0...v1.7.1
 
