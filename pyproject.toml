@@ -53,6 +53,7 @@ dev = [
 ]
 docs = [
     "kfactory[ipy]",
+    "markdown-exec>=1.10.3",
     "mkdocs>=1.6.1",
     "mkdocs-gen-files>=0.5.0",
     "mkdocs-jupyter>=0.25.1",

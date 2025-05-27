@@ -1,3 +1,9 @@
+"""This is still experimental.
+
+Caution is advised when using this, as the API might suddenly change.
+In order to fix bugs etc.
+"""
+
 from __future__ import annotations
 
 import re
@@ -12,6 +18,8 @@ __all__ = ["Netlist", "NetlistInstance", "NetlistPort", "PortArrayRef", "PortRef
 
 
 class PortRef(BaseModel, extra="forbid"):
+    """Reference to a port in a Netlist or Schema Instance."""
+
     instance: str
     port: str
 
@@ -51,6 +59,8 @@ class PortRef(BaseModel, extra="forbid"):
 
 
 class PortArrayRef(PortRef, extra="forbid"):
+    """Reference to a port which is in an array instance."""
+
     ia: int
     ib: int
 
@@ -98,6 +108,8 @@ class PortArrayRef(PortRef, extra="forbid"):
 
 
 class NetlistPort(BaseModel):
+    """Cell level port in a netlsit."""
+
     name: str
 
     def __lt__(self, other: NetlistPort | PortRef) -> bool:
@@ -110,6 +122,11 @@ class NetlistPort(BaseModel):
 
 
 class Net(RootModel[list[PortArrayRef | PortRef | NetlistPort]]):
+    """Net for a Netlist.
+
+    A net is a sequence of port references or netlist ports.
+    """
+
     root: list[PortArrayRef | PortRef | NetlistPort]
 
     def sort(self) -> Self:
@@ -145,6 +162,15 @@ class NetlistArray(BaseModel):
 
 
 class NetlistInstance(BaseModel):
+    """Instance reference.
+
+    Attributes:
+        kcl: The original KCLayout (PDK) the instance was instantiated from.
+        component: The `@cell` decorated function the component was instantiated from.
+        settings: Settings used to call the component.
+        array: Whether the instance was a AREF.
+    """
+
     kcl: str
     component: str
     settings: dict[str, JSONSerializable] = Field(default={})
@@ -153,6 +179,20 @@ class NetlistInstance(BaseModel):
 
 
 class Netlist(BaseModel, extra="forbid"):
+    """This is still experimental.
+
+    Caution is advised when using this, as the API might suddenly change.
+    In order to fix bugs etc.
+
+
+    Attributes:
+        instances: Dictionary with a mapping between instances and their settings.
+        nets: Nets of the netlist. This is an abstraction and can in the Schema either
+            be a route or a connection.
+        ports: Ports/Pins of the netlist. Upstream exposed ports/pins. These can either
+            be references to a subcircuit (instance) port or a new one.
+    """
+
     instances: dict[str, NetlistInstance] = Field(default_factory=dict)
     nets: list[Net] = Field(default_factory=list)
     ports: list[NetlistPort] = Field(default_factory=list)
@@ -231,6 +271,24 @@ class Netlist(BaseModel, extra="forbid"):
         equivalent_ports: dict[str, list[list[str]]],
         port_mapping: dict[str, dict[str | None, str]] | None = None,
     ) -> Netlist:
+        """Get an equivalent netlist.
+
+        This is is useful for when there are components such as pads which have
+        more than one port which electrically are equivalent (same metal plane).
+
+        Args:
+            cell_name: Name of the netlist. This is usually `c.name` or similar.
+                Used to retrieve equivalent ports for self.
+            equivalent_ports: Dict containing cellname mapping vs lists of equivalent
+                port names.
+            port_mapping: Passed as a dict of
+                `{c_name: {port_name: equivalent_name, ...}, ...}`.
+                If not given is constructed in function.
+
+        Returns:
+            New netlist with equivalent ports mapped to their equivalent (usually first
+            port name in the list of equivalents).
+        """
         if port_mapping is None:
             port_mapping = defaultdict(dict)
             for cell_name_, list_of_port_lists in equivalent_ports.items():
