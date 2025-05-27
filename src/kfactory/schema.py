@@ -1,3 +1,9 @@
+"""This is still experimental.
+
+Caution is advised when using this, as the API might suddenly change.
+In order to fix bugs etc.
+"""
+
 from __future__ import annotations
 
 import re
@@ -40,6 +46,8 @@ if TYPE_CHECKING:
     from .port import ProtoPort
 
 yaml = YAML(typ="safe")
+
+__all__ = ["DSchema", "Schema", "read_schema"]
 
 
 def _gez(value: TUnit) -> TUnit:
@@ -329,6 +337,23 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         placement: Placement[TUnit] | None = None,
         kcl: KCLayout | None = None,
     ) -> SchemaInstance[TUnit]:
+        """Create a schema instance.
+
+        This would be an SREF or AREF in the resulting GDS cell.
+
+        Args:
+            name: Instance name. In a schema, each instance must be named,
+                unless created through routing functions.
+            component: Factory name of the component to instantiate.
+            settings: Settings dictionary to configure the factory.
+            array: If the instance should create an array instance (AREF),
+                this can be passed here as an `Array` class instance.
+            placement: Optional placement for the instance. Can also be configured
+                with `inst.place(...)` afterwards.
+
+        Returns:
+            Schema instance representing the args.
+        """
         inst = SchemaInstance[TUnit].model_validate(
             {
                 "name": name,
@@ -681,6 +706,8 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         routing_strategy: str,
         **settings: JSONSerializable,
     ) -> Route[TUnit]:
+        if name in self.routes:
+            raise ValueError(f"Route with name {name!r} already exists")
         route = Route[TUnit](
             name=name,
             routing_strategy=routing_strategy,
@@ -694,11 +721,11 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
 
 
 class Schema(TSchema[dbu]):
-    pass
+    """Schema with a base unit of dbu for placements."""
 
 
 class DSchema(TSchema[um]):
-    pass
+    """Schema with a base unit of um for placements."""
 
 
 def _place_islands(
