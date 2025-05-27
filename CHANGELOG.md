@@ -5,7 +5,7 @@
 
 ## Bug Fixes
 
-- update docstrings to netlist/schema classses [#714](https://github.com/gdsfactory/kfactory/pull/714)
+- update docstrings to netlist/schema classes [#714](https://github.com/gdsfactory/kfactory/pull/714)
 - fix netlist stuff [#712](https://github.com/gdsfactory/kfactory/pull/712)
 - Fix schema serialization check and fix pydantic warning [#711](https://github.com/gdsfactory/kfactory/pull/711)
 - fix property name for lvs_equivalent_ports [#710](https://github.com/gdsfactory/kfactory/pull/710)
