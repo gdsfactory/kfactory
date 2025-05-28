@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from .instance import Instance
+    from .pin import Pin, ProtoPin
     from .port import Port, ProtoPort
 
 
@@ -208,6 +209,87 @@ def pprint_ports(
                     str(iport.angle),
                     str(iport.mirror),
                     JSON.from_data(iport.info.model_dump()),
+                )
+
+    return table
+
+
+def pprint_pins(
+    pins: Iterable[ProtoPin[Any]], unit: Literal["dbu", "um", None] = None
+) -> Table:
+    """Print pins as a table.
+
+    Args:
+        pins: The pins which should be printed.
+        unit: Define the print type of the pins. If None, any pin
+            which can be represented accurately by a dbu representation
+            will be printed in dbu otherwise in um. 'dbu'/'um' will force
+            the printing to enforce one or the other representation
+    """
+    table = Table(show_lines=True)
+
+    table.add_column("Name")
+    table.add_column("Width")
+    table.add_column("Layer")
+    table.add_column("X")
+    table.add_column("Y")
+    table.add_column("Allowed Angles")
+    table.add_column("Info")
+
+    match unit:
+        case None:
+            for pin in pins:
+                if isinstance(pin, Pin):
+                    table.add_row(
+                        str(pin.name) + " [dbu]",
+                        f"{pin.width:_}",
+                        pin.kcl.get_info(pin.layer).to_s(),
+                        f"{pin.x:_}",
+                        f"{pin.y:_}",
+                        str(pin.allowed_angles),
+                        JSON.from_data(pin.info.model_dump()),
+                    )
+                else:
+                    dx = pin.x
+                    dy = pin.y
+                    dwidth = pin.width
+                    allowed_orientations = pin.allowed_orientations
+                    table.add_row(
+                        str(pin.name) + " [um]",
+                        f"{dwidth:_}",
+                        pin.kcl.get_info(pin.layer).to_s(),
+                        f"{dx:_}",
+                        f"{dy:_}",
+                        str(allowed_orientations),
+                        JSON.from_data(pin.info.model_dump()),
+                    )
+        case "um":
+            for pin in pins:
+                dpin = pin.to_dtype()
+                dx = dpin.x
+                dy = dpin.y
+                dwidth = dpin.width
+                allowed_orientations = dpin.allowed_orientations
+                table.add_row(
+                    str(dpin.name) + " [um]",
+                    f"{dwidth:_}",
+                    dpin.kcl.get_info(dpin.layer).to_s(),
+                    f"{dx:_}",
+                    f"{dy:_}",
+                    str(allowed_orientations),
+                    JSON.from_data(dpin.info.model_dump()),
+                )
+        case "dbu":
+            for pin in pins:
+                ipin = pin.to_itype()
+                table.add_row(
+                    str(ipin.name) + " [dbu]",
+                    f"{ipin.width:_}",
+                    ipin.kcl.get_info(ipin.layer).to_s(),
+                    f"{ipin.x:_}",
+                    f"{ipin.y:_}",
+                    str(ipin.allowed_angles),
+                    JSON.from_data(ipin.info.model_dump()),
                 )
 
     return table

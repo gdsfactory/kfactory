@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from abc import ABC, abstractmethod
 from copy import copy
 from typing import TYPE_CHECKING, Any, Generic, Literal, overload
@@ -13,11 +14,11 @@ from typing_extensions import TypedDict
 
 from .conf import config
 from .settings import Info
-from .typings import TUnit, dbu, um
-from .utilities import pprint_ports
+from .typings import TPin, TUnit
+from .utilities import pprint_pins
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Iterable, Sequence
 
     from .layer import LayerEnum
     from .layout import KCLayout
@@ -352,9 +353,9 @@ class ProtoPin(ABC, Generic[TUnit]):
         """Width of the port in um."""
         return self.kcl.to_um(self._base.width)
 
-    def print(self, print_type: Literal[dbu, um] | None = None) -> None:
+    def print(self, print_type: Literal["dbu", "um", None] = None) -> None:
         """Print the port pretty."""
-        config.console.print(pprint_ports([self], unit=print_type))
+        config.console.print(pprint_pins([self], unit=print_type))
 
     def __repr__(self) -> str:
         """String representation of port."""
@@ -661,3 +662,61 @@ class DPin(ProtoPin[float]):
     @pos.setter
     def pos(self, value: kdb.DPoint) -> None:
         self.base.pos = value.to_itype(self.kcl.dbu)
+
+
+def filter_regex(pins: Iterable[TPin], regex: str) -> filter[TPin]:
+    """Filter iterable/sequence of pins by pin name."""
+    pattern = re.compile(regex)
+
+    def regex_filter(p: TPin) -> bool:
+        if p.name is not None:
+            return bool(pattern.match(p.name))
+        return False
+
+    return filter(regex_filter, pins)
+
+
+def filter_layer(pins: Iterable[TPin], layer: int | LayerEnum) -> filter[TPin]:
+    """Filter iterable/sequence of pins by layer index / LayerEnum."""
+
+    def layer_filter(p: TPin) -> bool:
+        return p.layer == layer
+
+    return filter(layer_filter, pins)
+
+
+def filter_pin_type(pins: Iterable[TPin], pin_type: str) -> filter[TPin]:
+    """Filter iterable/sequence of pins by pin_type."""
+
+    def pt_filter(p: TPin) -> bool:
+        return p.pin_type == pin_type
+
+    return filter(pt_filter, pins)
+
+
+def filter_directions(
+    pins: Iterable[TPin], allowed_directons: list[int]
+) -> filter[TPin]:
+    """Filter iterable/sequence of pins by directions :py:class:~`DIRECTION`."""
+
+    def f_func(p: TPin) -> bool:
+        for direction in allowed_directons:
+            if direction not in p.base.allowed_angles:
+                return False
+        return True
+
+    return filter(f_func, pins)
+
+
+def filter_orientations(
+    pins: Iterable[TPin], allowed_orientations: list[float]
+) -> filter[TPin]:
+    """Filter iterable/sequence of pins by orientations :py:class:~`DIRECTION`."""
+
+    def f_func(p: TPin) -> bool:
+        for orientation in allowed_orientations:
+            if (int(orientation) % 360 // 90) not in p.base.allowed_angles:
+                return False
+        return True
+
+    return filter(f_func, pins)
