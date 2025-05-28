@@ -50,7 +50,7 @@ from pydantic import (
 from ruamel.yaml.constructor import SafeConstructor
 
 from . import kdb, rdb
-from .conf import DEFAULT_TRANS, CheckInstances, ShowFunction, config, logger
+from .conf import DEFAULT_TRANS, PROPID, CheckInstances, ShowFunction, config, logger
 from .cross_section import (
     CrossSection,
     DCrossSection,
@@ -4052,6 +4052,12 @@ def _get_netlist(
                         and pin.name() != ""
                     ):
                         inst = Instance(kcl=c.kcl, instance=inst_el.inst())
+                        purpose = inst.property(PROPID.PURPOSE)
+                        name = inst.property(PROPID.NAME)
+                        if (name is None and ignore_unnamed) or (
+                            purpose in exclude_purposes
+                        ):
+                            continue
                         if inst_el.ia() < 0:
                             net_refs.append(
                                 PortRef(instance=inst.name, port=pin.name())
