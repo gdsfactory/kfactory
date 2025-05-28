@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
 from copy import copy
-from typing import TYPE_CHECKING, Any, Generic, Literal
+from typing import TYPE_CHECKING, Any, Generic, Literal, overload
 
 import klayout.db as kdb
 from pydantic import (
@@ -12,11 +11,15 @@ from pydantic import (
 )
 from typing_extensions import TypedDict
 
-from .layer import LayerEnum
+from .conf import config
 from .settings import Info
-from .typings import TUnit
+from .typings import TUnit, dbu, um
+from .utilities import pprint_ports
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from .layer import LayerEnum
     from .layout import KCLayout
     from .protocols import PointLike
 
@@ -27,6 +30,7 @@ class BasePinDict(TypedDict):
     name: str | None
     kcl: KCLayout
     layer_info: kdb.LayerInfo
+    width: int
     pos: kdb.Point
     allowed_angles: set[Literal[0, 1, 2, 3]]
     info: Info
@@ -42,6 +46,7 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
     name: str | None
     kcl: KCLayout
     layer_info: kdb.LayerInfo
+    width: int
     pos: kdb.Point
     allowed_angles: set[Literal[0, 1, 2, 3]]
     info: Info = Info()
@@ -53,6 +58,7 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
             name=self.name,
             kcl=self.kcl,
             layer_info=self.layer_info,
+            width=self.width,
             pos=self.pos,
             allowed_angles=self.allowed_angles.copy(),
             info=self.info.model_copy(),
@@ -70,7 +76,18 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
             trans_: kdb.Trans | kdb.ICplxTrans = trans.to_itrans(self.kcl.dbu)
         else:
             trans_ = trans
-        base.pos = trans_ * self.pos
+
+        if isinstance(post_trans, kdb.DCplxTrans):
+            post_trans_: kdb.Trans | kdb.ICplxTrans = post_trans.to_itrans(self.kcl.dbu)
+        else:
+            post_trans_ = post_trans
+
+        base.pos = trans_ * self.pos * post_trans_
+        base.allowed_angles = {
+            a + (int(trans.angle()) % 360 // 90) + (int(post_trans.angle()) % 360 // 90)
+            for a in self.allowed_angles
+        }
+
         return base
 
     @model_serializer()
@@ -79,6 +96,7 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
         return BasePinDict(
             name=self.name,
             kcl=self.kcl,
+            width=self.width,
             pos=self.pos,
             allowed_angles=self.allowed_angles.copy(),
             layer_info=self.layer_info,
@@ -102,7 +120,7 @@ class ProtoPin(ABC, Generic[TUnit]):
         layer: int | None = None,
         layer_info: kdb.LayerInfo | None = None,
         pin_type: str = "DC",
-        pos: kdb.Trans | str | None = None,
+        pos: kdb.Point | None = None,
         allowed_angles: list[int] | None = None,
         allowed_orientations: list[float] | None = None,
         pin: ProtoPin[Any] | None = None,
@@ -299,7 +317,7 @@ class ProtoPin(ABC, Generic[TUnit]):
     @property
     def iwidth(self) -> int:
         """Width of the port in dbu."""
-        return self._base.cross_section.width
+        return self._base.width
 
     @property
     def dx(self) -> float:
@@ -332,7 +350,7 @@ class ProtoPin(ABC, Generic[TUnit]):
     @property
     def dwidth(self) -> float:
         """Width of the port in um."""
-        return self.kcl.to_um(self._base.cross_section.width)
+        return self.kcl.to_um(self._base.width)
 
     def print(self, print_type: Literal[dbu, um] | None = None) -> None:
         """Print the port pretty."""
@@ -348,6 +366,127 @@ class ProtoPin(ABC, Generic[TUnit]):
 
 
 class Pin(ProtoPin[int]):
+    """
+    Electrical pin. Equivatelnt to optical port but for electrical connections.
+
+    Attributes:
+        name: String to name the pin.
+        width: The width of the pin in dbu.
+        layer: Index of the layer or a LayerEnum that acts like an integer, but can
+            contain layer number and datatype
+        layer_info: LayerInfo object containing layer information.
+        pin_type: A string defining the type of the pin
+        pos: Position of the pin as a kdb.Point
+        allowed_angles: Possible connection angles to the pin.
+        info: A dictionary with additional info. Not reflected in GDS. Copy will make a
+            (shallow) copy of it.
+        kcl: Link to the layout this port resides in.
+    """
+
+    @overload
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        width: int | None = None,
+        layer: int | None = None,
+        pin_type: str = "DC",
+        pos: kdb.Point | None = None,
+        allowed_angles: list[int] | None = None,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        width: int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
+        pin_type: str = "DC",
+        pos: kdb.Point | None = None,
+        allowed_angles: list[int] | None = None,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(self, *, base: BasePin) -> None: ...
+
+    @overload
+    def __init__(self, *, pin: ProtoPin[Any]) -> None: ...
+
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        width: int | None = None,
+        layer: int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
+        pin_type: str = "DC",
+        pos: kdb.Point | None = None,
+        allowed_angles: list[int] | None = None,
+        pin: ProtoPin[Any] | None = None,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = ...,
+        base: BasePin | None = None,
+    ) -> None:
+        if pin is not None:
+            self._base = pin.base.__copy__()
+            return
+        if base is not None:
+            self._base = base
+            return
+
+        if info is None:
+            info = {}
+        info_ = Info(**info)
+
+        from .layout import get_default_kcl
+
+        kcl_ = kcl or get_default_kcl()
+        if layer_info is None:
+            if layer is None:
+                raise ValueError(
+                    "layer or layer_info for a pin must be defined if"
+                    " 'pin and base are None'"
+                )
+            layer_info = kcl_.layout.get_info(layer)
+        if width is None:
+            raise ValueError(
+                "any width and layer must be given if'pin and base are None'"
+            )
+        if pos is None:
+            raise ValueError("pos for a pin must be defined if 'pin and base are None'")
+        if allowed_angles is None:
+            raise ValueError(
+                "allowed angles for a pin must be defined if 'pin and base are None'"
+            )
+
+        self._base = BasePin(
+            name=name,
+            kcl=kcl_,
+            layer_info=layer_info,
+            width=width,
+            pos=pos,
+            allowed_angles=set(allowed_angles),
+            info=info_,
+            pin_type=pin_type,
+        )
+
+    def copy(
+        self,
+        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+    ) -> Pin:
+        return Pin(base=self._base.transformed(trans=trans, post_trans=post_trans))
+
+    def copy_polar(
+        self, d: int = 0, d_orth: int = 0, angle: int = 2, mirror: bool = False
+    ) -> Pin:
+        return self.copy(post_trans=kdb.Trans(angle, mirror, d, d_orth))
+
     @property
     def x(self) -> int:
         return self.ix
@@ -363,3 +502,162 @@ class Pin(ProtoPin[int]):
     @y.setter
     def y(self, value: int) -> None:
         self.iy = value
+
+    @property
+    def width(self) -> int:
+        """Width of the pin in um."""
+        return self.iwidth
+
+    @property
+    def pos(self) -> kdb.Point:
+        return self.base.pos
+
+    @pos.setter
+    def pos(self, value: kdb.Point) -> None:
+        self.base.pos = value
+
+
+class DPin(ProtoPin[float]):
+    @overload
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        width: float | None = None,
+        layer: int | None = None,
+        pin_type: str = "DC",
+        pos: kdb.DPoint | None = None,
+        allowed_orientations: list[float] | None = None,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        width: float | None = None,
+        layer_info: kdb.LayerInfo | None = None,
+        pin_type: str = "DC",
+        pos: kdb.DPoint | None = None,
+        allowed_orientations: list[float] | None = None,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = ...,
+    ) -> None: ...
+
+    @overload
+    def __init__(self, *, base: BasePin) -> None: ...
+
+    @overload
+    def __init__(self, *, pin: ProtoPin[Any]) -> None: ...
+
+    def __init__(
+        self,
+        name: str | None = None,
+        *,
+        width: float | None = None,
+        layer: int | None = None,
+        layer_info: kdb.LayerInfo | None = None,
+        pin_type: str = "DC",
+        pos: kdb.DPoint | None = None,
+        allowed_orientations: list[float] | None = None,
+        pin: ProtoPin[Any] | None = None,
+        kcl: KCLayout | None = None,
+        info: dict[str, int | float | str] = ...,
+        base: BasePin | None = None,
+    ) -> None:
+        if pin is not None:
+            self._base = pin.base.__copy__()
+            return
+        if base is not None:
+            self._base = base
+            return
+
+        if info is None:
+            info = {}
+        info_ = Info(**info)
+
+        from .layout import get_default_kcl
+
+        kcl_ = kcl or get_default_kcl()
+        if layer_info is None:
+            if layer is None:
+                raise ValueError(
+                    "layer or layer_info for a dpin must be defined if"
+                    " 'pin and base are None'"
+                )
+            layer_info = kcl_.layout.get_info(layer)
+        if width is None:
+            raise ValueError(
+                "any width and layer must be given if 'pin and base are None'"
+            )
+        if pos is None:
+            raise ValueError(
+                "pos for a dpin must be defined if 'pin and base are None'"
+            )
+        if allowed_orientations is None:
+            raise ValueError(
+                "allowed orientations for a dpin must be defined if"
+                " 'pin and base are None'"
+            )
+
+        self._base = BasePin(
+            name=name,
+            kcl=kcl_,
+            layer_info=layer_info,
+            width=self.kcl.to_dbu(width),
+            pos=pos.to_itype(self.kcl.dbu),
+            allowed_angles={int(a) % 360 // 90 for a in allowed_orientations},
+            info=info_,
+            pin_type=pin_type,
+        )
+
+    def copy(
+        self,
+        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+    ) -> DPin:
+        return DPin(base=self._base.transformed(trans=trans, post_trans=post_trans))
+
+    def copy_polar(
+        self,
+        d: float = 0,
+        d_orth: float = 0,
+        orientation: float = 180,
+        mirror: bool = False,
+    ) -> DPin:
+        return self.copy(
+            post_trans=kdb.DCplxTrans(rot=orientation, mirrx=mirror, x=d, y=d_orth)
+        )
+
+    @property
+    def x(self) -> float:
+        """X coordinate of the pin in um."""
+        return self.dx
+
+    @x.setter
+    def x(self, value: float) -> None:
+        self.dx = value
+
+    @property
+    def y(self) -> float:
+        """Y coordinate of the pin in um."""
+        return self.dy
+
+    @y.setter
+    def y(self, value: float) -> None:
+        self.dy = value
+
+    @property
+    def width(self) -> float:
+        """Width of the pin in um."""
+        return self.dwidth
+
+    @property
+    def pos(self) -> kdb.DPoint:
+        return self.base.pos.to_dtype(self.kcl.dbu)
+
+    @pos.setter
+    def pos(self, value: kdb.DPoint) -> None:
+        self.base.pos = value.to_itype(self.kcl.dbu)
