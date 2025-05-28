@@ -1,18 +1,33 @@
-<a id="v1.7.1"></a>
-# [v1.7.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.7.1) - 2025-05-23
+<a id="v1.7.2"></a>
+# [v1.7.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.7.2) - 2025-05-27
 
 # What's Changed
 
 ## Bug Fixes
 
-- update docstrings to netlist/schema classes [#714](https://github.com/gdsfactory/kfactory/pull/714)
+- fix electrical extraction for unnamed cells [#715](https://github.com/gdsfactory/kfactory/pull/715)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.1...v1.7.2
+
+
+[Changes][v1.7.2]
+
+
+<a id="v1.7.1"></a>
+# [v1.7.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.7.1) - 2025-05-27
+
+# What's Changed
+
+## Bug Fixes
+
+- update docstrings to netlist/schema classses [#714](https://github.com/gdsfactory/kfactory/pull/714)
 - fix netlist stuff [#712](https://github.com/gdsfactory/kfactory/pull/712)
-- Fix schema serialization check and fix pydantic warning [#711](https://github.com/gdsfactory/kfactory/pull/711)
+- fix schema serialization check and fix pydantic warning [#711](https://github.com/gdsfactory/kfactory/pull/711)
 - fix property name for lvs_equivalent_ports [#710](https://github.com/gdsfactory/kfactory/pull/710)
 
 ## Dependency Updates
 
-- Update typer requirement from <0.16,>=0.15.2 to >=0.15.2,<0.17 [#713](https://github.com/gdsfactory/kfactory/pull/713)
+- update typer requirement from <0.16,>=0.15.2 to >=0.15.2,<0.17 [#713](https://github.com/gdsfactory/kfactory/pull/713)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.0...v1.7.1
 
@@ -2003,6 +2018,7 @@
 [Changes][v0.4.0]
 
 
+[v1.7.2]: https://github.com/gdsfactory/kfactory/compare/v1.7.1...v1.7.2
 [v1.7.1]: https://github.com/gdsfactory/kfactory/compare/v1.7.0...v1.7.1
 [v1.7.0]: https://github.com/gdsfactory/kfactory/compare/v1.6.0...v1.7.0
 [v1.6.0]: https://github.com/gdsfactory/kfactory/compare/v1.5.4...v1.6.0
