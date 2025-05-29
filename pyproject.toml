@@ -194,7 +194,7 @@ exclude_also = [
 ignore_errors = true
 
 [tool.coverage.run]
-omit = ["src/kfactory/widgets/interactive.py", "src/kfactory/cli/**/*.py"]
+omit = ["src/kfactory/cli/**/*.py"]
 
 
 [tool.tbump]

@@ -745,6 +745,7 @@ def _place_islands(
         kinst = instances[inst]
         if schema_inst.placement:
             p = schema_inst.placement
+            assert p is not None
             if p.is_placeable(placed_insts):
                 x = (
                     instances[p.x.instance].ports[p.x.port].x

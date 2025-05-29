@@ -58,6 +58,7 @@ from . import (
     conf,
     layer,
     layout,
+    schema,
 )
 from .routing.generic import ManhattanRoute
 from .typings import dbu  # noqa: F401
@@ -139,6 +140,7 @@ __all__ = [
     "routing",
     "save_layout_options",
     "save_session",
+    "schema",
     "show",
     "technology",
     "typings",
