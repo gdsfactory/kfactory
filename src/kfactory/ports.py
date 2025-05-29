@@ -320,9 +320,8 @@ class ICreatePort(ABC):
     def create_port(
         self,
         *,
-        width: int,
         layer_info: kdb.LayerInfo,
-        center: tuple[int, int],
+        trans: kdb.Trans,
         cross_section: CrossSectionSpec
         | DCrossSectionSpec
         | CrossSection
@@ -502,9 +501,8 @@ class DCreatePort(ABC):
     def create_port(
         self,
         *,
-        width: float,
         layer_info: kdb.LayerInfo,
-        center: tuple[float, float],
+        trans: kdb.Trans,
         cross_section: DCrossSection
         | CrossSection
         | CrossSectionSpec
