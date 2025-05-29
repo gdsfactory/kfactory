@@ -70,6 +70,11 @@ from .instances import (
 from .layer import LayerEnum
 from .merge import MergeDiff
 from .netlist import Net, Netlist, NetlistPort, PortArrayRef, PortRef
+from .pin import (
+    BasePin,
+    ProtoPin,
+)
+from .pins import ProtoPins
 from .port import (
     BasePort,
     DPort,
@@ -140,6 +145,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     Attributes:
         yaml_tag: Tag for yaml serialization.
         ports: Manages the ports of the cell.
+        pins: Manages the pins of the cell.
         settings: A dictionary containing settings populated by the
             [cell][kfactory.kcell.cell] decorator.
         info: Dictionary for storing additional info if necessary. This is not
@@ -154,6 +160,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     """
 
     ports: list[BasePort] = Field(default_factory=list)
+    pins: list[BasePin] = Field(default_factory=list)
     settings: KCellSettings = Field(default_factory=KCellSettings)
     settings_units: KCellSettingsUnits = Field(default_factory=KCellSettingsUnits)
     vinsts: VInstances
@@ -332,6 +339,51 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
         self.ports.add_ports(
             ports=ports, prefix=prefix, suffix=suffix, keep_mirror=keep_mirror
         )
+
+    @property
+    @abstractmethod
+    def pins(self) -> ProtoPins[TUnit]: ...
+
+    @pins.setter
+    @abstractmethod
+    def pins(self, new_pins: Iterable[ProtoPin[Any]]) -> None: ...
+
+    def add_pin(
+        self,
+        *,
+        pin: ProtoPin[Any],
+        name: str | None = None,
+    ) -> ProtoPin[TUnit]:
+        """Add an existing pin. E.g. from an instance to propagate the pin.
+
+        Args:
+            pin: The pin to add.
+            name: Overwrite the name of the pin
+        """
+        if self.locked:
+            raise LockedError(self)
+
+        return self.pins.add_pin(pin=pin, name=name)
+
+    def add_pins(
+        self,
+        pins: Iterable[ProtoPin[Any]],
+        prefix: str = "",
+        suffix: str = "",
+    ) -> None:
+        """Add a sequence of pins to the cell.
+
+        Can be useful to add all pins of a instance for example.
+
+        Args:
+            pins: list/tuple (anything iterable) of pins.
+            prefix: string to add in front of all the pin names
+            suffix: string to add at the end of all the pin names
+        """
+        if self.locked:
+            raise LockedError(self)
+
+        self.pins.add_pins(pins=pins, prefix=prefix, suffix=suffix)
 
     def layer(self, *args: Any, **kwargs: Any) -> int:
         """Get the layer info, convenience for `klayout.db.Layout.layer`."""
@@ -574,6 +626,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Iterable[ProtoPort[Any]] | None = None,
+        pins: Iterable[ProtoPin[Any]] | None = None,
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None:
@@ -601,14 +654,15 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             settings=KCellSettings(**(settings or {})),
             kdb_cell=kdb_cell_,
             ports=[port.base for port in ports] if ports else [],
+            pins=[pin.base for pin in pins] if pins else [],
             vinsts=VInstances(),
         )
         if kdb_cell_.is_library_cell():
-            if ports or info or settings:
+            if ports or pins or info or settings:
                 raise ValueError(
                     "If a TKCell is created from a library cell (separate PDK/layout), "
-                    "ports, info, and settings must not be set."
-                    f"Cell {kdb_cell_.name} in {kcl_.name}: {ports=}, {info=},"
+                    "ports, pins, info, and settings must not be set."
+                    f"Cell {kdb_cell_.name} in {kcl_.name}: {ports=}, {pins=}, {info=},"
                     f" {settings=}"
                 )
             kcls[kdb_cell_.library().name()][
