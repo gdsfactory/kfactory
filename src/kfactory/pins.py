@@ -150,7 +150,6 @@ class ProtoPins(Protocol[TUnit]):
         *,
         pin: ProtoPin[Any],
         name: str | None = None,
-        keep_mirror: bool = False,
     ) -> ProtoPin[TUnit]:
         """Add a pin."""
         ...
@@ -167,13 +166,12 @@ class ProtoPins(Protocol[TUnit]):
         self,
         pins: Iterable[ProtoPin[Any]],
         prefix: str = "",
-        keep_mirror: bool = False,
         suffix: str = "",
     ) -> None:
         """Append a list of pins."""
         for p in pins:
             name = p.name or ""
-            self.add_pin(pin=p, name=prefix + name + suffix, keep_mirror=keep_mirror)
+            self.add_pin(pin=p, name=prefix + name + suffix)
 
     @abstractmethod
     def __getitem__(self, key: int | str | None) -> ProtoPin[TUnit]:
@@ -325,7 +323,7 @@ class DCreatePin(ABC):
         width: float | None = None,
         layer: LayerEnum | int | None = None,
         pin_type: str = "DC",
-        pos: kdb.Point | None = None,
+        pos: kdb.DPoint | None = None,
         allowed_orientations: list[float] | None = None,
         name: str | None = None,
     ) -> DPin: ...
@@ -337,7 +335,7 @@ class DCreatePin(ABC):
         width: float | None = None,
         layer_info: kdb.LayerInfo | None = None,
         pin_type: str = "DC",
-        pos: kdb.Point | None = None,
+        pos: kdb.DPoint | None = None,
         allowed_orientations: list[float] | None = None,
         name: str | None = None,
     ) -> DPin: ...
@@ -350,7 +348,7 @@ class DCreatePin(ABC):
         layer: LayerEnum | int | None = None,
         layer_info: kdb.LayerInfo | None = None,
         pin_type: str = "optical",
-        pos: kdb.Point | None = None,
+        pos: kdb.DPoint | None = None,
         allowed_orientations: list[float] | None = None,
     ) -> DPin:
         """Create a pin."""
@@ -371,7 +369,7 @@ class DCreatePin(ABC):
             width=width,
             layer_info=layer_info,
             pin_type=pin_type,
-            allowed_angles=allowed_orientations,
+            allowed_orientations=allowed_orientations,
             pos=pos,
             kcl=self.kcl,
         )
