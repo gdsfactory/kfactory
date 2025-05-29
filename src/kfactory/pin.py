@@ -75,19 +75,28 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
         base = copy(self)
         if isinstance(trans, kdb.DCplxTrans):
             trans_: kdb.Trans | kdb.ICplxTrans = trans.to_itrans(self.kcl.dbu)
+            transformed_angles: list[Literal[0, 1, 2, 3]] = {
+                (a + int(trans.angle()) % 360 // 90) % 4 for a in self.allowed_angles
+            }
         else:
             trans_ = trans
+            transformed_angles: list[Literal[0, 1, 2, 3]] = {
+                (a + trans.angle()) % 4 for a in self.allowed_angles
+            }
 
         if isinstance(post_trans, kdb.DCplxTrans):
             post_trans_: kdb.Trans | kdb.ICplxTrans = post_trans.to_itrans(self.kcl.dbu)
+            post_transformed_angles: list[Literal[0, 1, 2, 3]] = {
+                (a + int(trans.angle()) % 360 // 90) % 4 for a in transformed_angles
+            }
         else:
             post_trans_ = post_trans
+            post_transformed_angles: list[Literal[0, 1, 2, 3]] = {
+                (a + post_trans.angle()) % 4 for a in transformed_angles
+            }
 
         base.pos = trans_ * self.pos * post_trans_
-        base.allowed_angles = {
-            a + (int(trans.angle()) % 360 // 90) + (int(post_trans.angle()) % 360 // 90)
-            for a in self.allowed_angles
-        }
+        base.allowed_angles = post_transformed_angles
 
         return base
 
