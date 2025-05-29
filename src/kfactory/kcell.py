@@ -768,6 +768,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
         c = self.__class__(kcl=self.kcl, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
+        c.pins = self.pins.copy()
 
         c._base.settings = self.settings.model_copy()
         c._base.info = self.info.model_copy()
@@ -863,6 +864,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         name: str | None = None,
         keep_mirror: bool = False,
     ) -> ProtoPort[Any]: ...
+
+    @abstractmethod
+    def add_pin(
+        self,
+        *,
+        pin: ProtoPin[Any],
+        name: str | None = None,
+    ) -> ProtoPin[Any]: ...
 
     @overload
     @abstractmethod
