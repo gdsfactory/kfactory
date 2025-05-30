@@ -7,6 +7,10 @@
 
 - Add create_port overload [#717](https://github.com/gdsfactory/kfactory/pull/717)
 
+## Typing
+
+- Typing Fixes [#718](https://github.com/gdsfactory/kfactory/pull/718)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.8.0
 
 
