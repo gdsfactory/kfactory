@@ -109,11 +109,8 @@ def my_schema() -> kf.schema.Schema:
     return schema
 
 kcell = my_schema()
-kcell.show()
-from pprint import pprint
 
-pprint(kcell.netlist())
-
+kcell
 # %%
 # There is now a a KCell in the KCLayout
 kcl_default.kcells
