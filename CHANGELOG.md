@@ -1,5 +1,20 @@
+<a id="v1.8.0"></a>
+# [v1.8.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.0) - 2025-05-30
+
+# What's Changed
+
+## New
+
+- Add create_port overload [#717](https://github.com/gdsfactory/kfactory/pull/717)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.8.0
+
+
+[Changes][v1.8.0]
+
+
 <a id="v1.7.2"></a>
-# [v1.7.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.7.2) - 2025-05-27
+# [v1.7.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.7.2) - 2025-05-28
 
 # What's Changed
 
@@ -2018,6 +2033,7 @@
 [Changes][v0.4.0]
 
 
+[v1.8.0]: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.8.0
 [v1.7.2]: https://github.com/gdsfactory/kfactory/compare/v1.7.1...v1.7.2
 [v1.7.1]: https://github.com/gdsfactory/kfactory/compare/v1.7.0...v1.7.1
 [v1.7.0]: https://github.com/gdsfactory/kfactory/compare/v1.6.0...v1.7.0
