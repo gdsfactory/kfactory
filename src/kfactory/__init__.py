@@ -6,7 +6,7 @@ Uses the klayout package as a backend.
 # The import order matters, we need to first import the important stuff.
 # isort:skip_file
 
-__version__ = "1.7.2"
+__version__ = "1.7.3"
 
 import klayout.db as kdb
 from klayout import lay
@@ -58,6 +58,7 @@ from . import (
     conf,
     layer,
     layout,
+    schema,
 )
 from .routing.generic import ManhattanRoute
 from .typings import dbu  # noqa: F401
@@ -139,6 +140,7 @@ __all__ = [
     "routing",
     "save_layout_options",
     "save_session",
+    "schema",
     "show",
     "technology",
     "typings",

@@ -316,6 +316,21 @@ class ICreatePort(ABC):
         port_type: str = "optical",
     ) -> Port: ...
 
+    @overload
+    def create_port(
+        self,
+        *,
+        layer_info: kdb.LayerInfo,
+        trans: kdb.Trans,
+        cross_section: CrossSectionSpec
+        | DCrossSectionSpec
+        | CrossSection
+        | DCrossSection
+        | SymmetricalCrossSection,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> Port: ...
+
     def create_port(
         self,
         *,
@@ -478,6 +493,20 @@ class DCreatePort(ABC):
         layer_info: kdb.LayerInfo,
         center: tuple[float, float],
         orientation: float,
+        name: str | None = None,
+        port_type: str = "optical",
+    ) -> DPort: ...
+
+    @overload
+    def create_port(
+        self,
+        *,
+        layer_info: kdb.LayerInfo,
+        trans: kdb.Trans,
+        cross_section: DCrossSection
+        | CrossSection
+        | CrossSectionSpec
+        | DCrossSectionSpec,
         name: str | None = None,
         port_type: str = "optical",
     ) -> DPort: ...
