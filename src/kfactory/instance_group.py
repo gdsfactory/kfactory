@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Generic, NoReturn
 from . import kdb
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .instance import DInstance, Instance, VInstance
-from .typings import Instance_co, TInstance_co, TUnit
+from .typings import TInstance_co, TTInstance_co, TUnit
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
@@ -21,10 +21,10 @@ __all__ = [
 ]
 
 
-class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, Instance_co]):
-    insts: list[Instance_co]
+class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, TInstance_co]):
+    insts: list[TInstance_co]
 
-    def __init__(self, insts: Sequence[Instance_co] | None = None) -> None:
+    def __init__(self, insts: Sequence[TInstance_co] | None = None) -> None:
         """Initialize the InstanceGroup."""
         self.insts = list(insts) if insts is not None else []
 
@@ -63,13 +63,13 @@ class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, Instance_co]):
             bb += _bb
         return bb
 
-    def __iter__(self) -> Iterator[Instance_co]:
+    def __iter__(self) -> Iterator[TInstance_co]:
         return iter(self.insts)
 
 
 class ProtoTInstanceGroup(
-    ProtoInstanceGroup[TUnit, TInstance_co],
-    Generic[TUnit, TInstance_co],
+    ProtoInstanceGroup[TUnit, TTInstance_co],
+    Generic[TUnit, TTInstance_co],
     GeometricObject[TUnit],
 ):
     def to_itype(self) -> InstanceGroup:
