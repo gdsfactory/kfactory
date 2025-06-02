@@ -1,8 +1,8 @@
 """Factories for generating functions which can produce KCells or VKCells."""
 
-from typing import Protocol
+from typing import Any, Protocol
 
-from .. import DKCell, KCell
+from .. import ProtoTKCell
 from . import bezier, circular, euler, straight, taper, virtual
 
 
@@ -12,7 +12,7 @@ class StraightFactoryDBU(Protocol):
     A straight factory must return a KCell with only a width and length given.
     """
 
-    def __call__(self, width: int, length: int) -> KCell:
+    def __call__(self, width: int, length: int) -> ProtoTKCell[Any]:
         """Produces the KCell.
 
         E.g. in a function this would amount to
@@ -27,13 +27,17 @@ class StraightFactoryUM(Protocol):
     A straight factory must return a KCell with only a width and length given.
     """
 
-    def __call__(self, width: float, length: float) -> DKCell:
+    def __call__(self, width: float, length: float) -> ProtoTKCell[Any]:
         """Produces the KCell.
 
         E.g. in a function this would amount to
         `straight_factory(length=10_000, width=1000)`
         """
         ...
+
+
+class SBendFactoryDBU(Protocol):
+    def __call__(self, *, offset: int) -> ProtoTKCell[Any]: ...
 
 
 __all__ = [
