@@ -1,20 +1,20 @@
-<a id="v1.8.0"></a>
-# [v1.8.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.0) - 2025-05-30
+<a id="v1.7.3"></a>
+# [v1.7.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.7.3) - 2025-05-30
 
 # What's Changed
 
-## New
+## Bug Fixes
 
-- Add create_port overload [#717](https://github.com/gdsfactory/kfactory/pull/717)
+- Fix create_port overloads [#717](https://github.com/gdsfactory/kfactory/pull/717)
 
 ## Typing
 
 - Typing Fixes [#718](https://github.com/gdsfactory/kfactory/pull/718)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.8.0
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.7.3
 
 
-[Changes][v1.8.0]
+[Changes][v1.7.3]
 
 
 <a id="v1.7.2"></a>
@@ -2037,7 +2037,7 @@
 [Changes][v0.4.0]
 
 
-[v1.8.0]: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.8.0
+[v1.7.3]: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.7.3
 [v1.7.2]: https://github.com/gdsfactory/kfactory/compare/v1.7.1...v1.7.2
 [v1.7.1]: https://github.com/gdsfactory/kfactory/compare/v1.7.0...v1.7.1
 [v1.7.0]: https://github.com/gdsfactory/kfactory/compare/v1.6.0...v1.7.0
