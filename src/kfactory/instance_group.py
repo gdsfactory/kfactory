@@ -4,8 +4,8 @@ from typing import TYPE_CHECKING, Generic, NoReturn
 
 from . import kdb
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
-from .instance import ProtoTInstance, VInstance
-from .typings import TInstance_co, TUnit
+from .instance import DInstance, Instance, VInstance
+from .typings import TInstance_co, TTInstance_co, TUnit
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
@@ -68,8 +68,8 @@ class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, TInstance_co]):
 
 
 class ProtoTInstanceGroup(
-    ProtoInstanceGroup[TUnit, ProtoTInstance[TUnit]],
-    Generic[TUnit],
+    ProtoInstanceGroup[TUnit, TTInstance_co],
+    Generic[TUnit, TTInstance_co],
     GeometricObject[TUnit],
 ):
     def to_itype(self) -> InstanceGroup:
@@ -79,7 +79,7 @@ class ProtoTInstanceGroup(
         return DInstanceGroup(insts=[inst.to_dtype() for inst in self.insts])
 
 
-class InstanceGroup(ProtoTInstanceGroup[int], DBUGeometricObject):
+class InstanceGroup(ProtoTInstanceGroup[int, Instance], DBUGeometricObject):
     """Group of Instances.
 
     The instance group can be treated similar to a single instance
@@ -90,7 +90,7 @@ class InstanceGroup(ProtoTInstanceGroup[int], DBUGeometricObject):
     """
 
 
-class DInstanceGroup(ProtoTInstanceGroup[float], UMGeometricObject):
+class DInstanceGroup(ProtoTInstanceGroup[float, DInstance], UMGeometricObject):
     """Group of DInstances.
 
     The instance group can be treated similar to a single instance
