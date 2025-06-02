@@ -18,7 +18,7 @@ from typing_extensions import TypeAliasType
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from .instance import ProtoInstance
+    from .instance import ProtoInstance, ProtoTInstance
     from .kcell import BaseKCell, ProtoKCell, ProtoTKCell, VKCell
     from .layer import LayerEnum
     from .port import ProtoPort
@@ -35,7 +35,8 @@ TUnit = TypeVar("TUnit", int, float)
 TUnit_co = TypeVar("TUnit_co", bound=int | float, covariant=True)
 TUnit_contra = TypeVar("TUnit_contra", bound=int | float, contravariant=True)
 TPort = TypeVar("TPort", bound="ProtoPort[Any]")
-TInstance_co = TypeVar("TInstance_co", bound="ProtoInstance[Any]", covariant=True)
+Instance_co = TypeVar("Instance_co", bound="ProtoInstance[Any]", covariant=True)
+TInstance_co = TypeVar("TInstance_co", bound="ProtoTInstance[Any]", covariant=True)
 TBaseCell_co = TypeVar("TBaseCell_co", bound="BaseKCell", covariant=True)
 KCellParams = ParamSpec("KCellParams")
 P = ParamSpec("P")

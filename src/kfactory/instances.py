@@ -13,7 +13,7 @@ from .instance import (
     ProtoTInstance,
     VInstance,
 )
-from .typings import TInstance_co, TUnit
+from .typings import Instance_co, TUnit
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -29,7 +29,7 @@ __all__ = [
 ]
 
 
-class ProtoInstances(Generic[TUnit, TInstance_co], ABC):
+class ProtoInstances(Generic[TUnit, Instance_co], ABC):
     @abstractmethod
     def __iter__(self) -> Iterator[ProtoInstance[TUnit]]: ...
 
@@ -37,13 +37,13 @@ class ProtoInstances(Generic[TUnit, TInstance_co], ABC):
     def __len__(self) -> int: ...
 
     @abstractmethod
-    def __delitem__(self, item: TInstance_co | int) -> None: ...
+    def __delitem__(self, item: Instance_co | int) -> None: ...
 
     @abstractmethod
     def __getitem__(self, key: str | int) -> ProtoInstance[TUnit]: ...
 
     @abstractmethod
-    def __contains__(self, key: str | int | TInstance_co) -> bool: ...
+    def __contains__(self, key: str | int | Instance_co) -> bool: ...
 
     @abstractmethod
     def clear(self) -> None: ...

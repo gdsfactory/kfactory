@@ -18,7 +18,7 @@ from .port import (
     filter_regex,
 )
 from .ports import DPorts, Ports, ProtoPorts
-from .typings import TInstance_co, TUnit
+from .typings import Instance_co, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
@@ -41,8 +41,8 @@ class HasCellPorts(Generic[TUnit], ABC):
     def cell_ports(self) -> ProtoPorts[TUnit]: ...
 
 
-class ProtoInstancePorts(HasCellPorts[TUnit], Generic[TUnit, TInstance_co], ABC):
-    instance: TInstance_co
+class ProtoInstancePorts(HasCellPorts[TUnit], Generic[TUnit, Instance_co], ABC):
+    instance: Instance_co
 
     @abstractmethod
     def __len__(self) -> int: ...
