@@ -21,6 +21,7 @@ from .exceptions import (
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .port import DPort, Port, ProtoPort
+from .pin import ProtoPin
 from .serialization import clean_name, get_cell_name
 from .settings import Info, KCellSettings
 from .typings import TUnit
@@ -34,6 +35,10 @@ if TYPE_CHECKING:
         ProtoInstancePorts,
         ProtoTInstancePorts,
         VInstancePorts,
+    )
+    from .instance_pins import (
+        ProtoInstancePins,
+        ProtoTInstancePins,
     )
     from .kcell import AnyKCell, AnyTKCell, DKCell, KCell, ProtoTKCell
     from .layer import LayerEnum
@@ -76,6 +81,10 @@ class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
     @property
     @abstractmethod
     def ports(self) -> ProtoInstancePorts[TUnit, ProtoInstance[TUnit]]: ...
+
+    @property
+    @abstractmethod
+    def pins(self) -> ProtoInstancePins[TUnit, ProtoInstance[TUnit]]: ...
 
 
 class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
@@ -165,7 +174,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
     @property
     @abstractmethod
     def cell(self) -> ProtoTKCell[TUnit]:
-        """Parent KCell  of the Instance."""
+        """Parent KCell of the Instance."""
         ...
 
     @cell.setter
@@ -176,6 +185,12 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
     @abstractmethod
     def ports(self) -> ProtoTInstancePorts[TUnit]:
         """Ports of the instance."""
+        ...
+
+    @property
+    @abstractmethod
+    def pins(self) -> ProtoTInstancePins[TUnit]:
+        """Pins of the instance."""
         ...
 
     @property
@@ -319,6 +334,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
     ) -> None: ...
+
 
     def connect(
         self,
