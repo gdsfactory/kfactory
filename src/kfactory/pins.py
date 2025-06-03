@@ -3,7 +3,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, Protocol, Self, overload
 
-from . import kdb
 from .conf import config
 from .pin import (
     BasePin,
@@ -27,6 +26,7 @@ if TYPE_CHECKING:
         Sequence,
     )
 
+    from . import kdb
     from .layer import LayerEnum
     from .layout import KCLayout
     from .typings import TPin, TUnit

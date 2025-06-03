@@ -39,7 +39,7 @@ class BasePinDict(TypedDict):
 
 
 class BasePin(BaseModel, arbitrary_types_allowed=True):
-    """Class representing the base port.
+    """Class representing the base pin.
 
     This does not have any knowledge of units.
     """
@@ -73,26 +73,26 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
     ) -> BasePin:
         """Get a transformed copy of the BasePin."""
         base = copy(self)
+        transformed_angles: set[Literal[0, 1, 2, 3]]
         if isinstance(trans, kdb.DCplxTrans):
             trans_: kdb.Trans | kdb.ICplxTrans = trans.to_itrans(self.kcl.dbu)
-            transformed_angles: set[Literal[0, 1, 2, 3]] = {
-                (a + int(trans.angle()) % 360 // 90) % 4 for a in self.allowed_angles
+            transformed_angles = {
+                (a + int(trans.angle) % 360 // 90) % 4 for a in self.allowed_angles
             }
         else:
             trans_ = trans
-            transformed_angles: set[Literal[0, 1, 2, 3]] = {
-                (a + trans.angle()) % 4 for a in self.allowed_angles
-            }
+            transformed_angles = {(a + trans.angle) % 4 for a in self.allowed_angles}
 
+        post_transformed_angles: set[Literal[0, 1, 2, 3]]
         if isinstance(post_trans, kdb.DCplxTrans):
             post_trans_: kdb.Trans | kdb.ICplxTrans = post_trans.to_itrans(self.kcl.dbu)
-            post_transformed_angles: set[Literal[0, 1, 2, 3]] = {
-                (a + int(trans.angle()) % 360 // 90) % 4 for a in transformed_angles
+            post_transformed_angles = {
+                (a + int(trans.angle) % 360 // 90) % 4 for a in transformed_angles
             }
         else:
             post_trans_ = post_trans
-            post_transformed_angles: set[Literal[0, 1, 2, 3]] = {
-                (a + post_trans.angle()) % 4 for a in transformed_angles
+            post_transformed_angles = {
+                (a + post_trans.angle) % 4 for a in transformed_angles
             }
 
         base.pos = trans_ * self.pos * post_trans_
@@ -116,9 +116,9 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
 
 
 class ProtoPin(ABC, Generic[TUnit]):
-    """Base class for kf.Port, kf.DPort."""
+    """Base class for kf.Pin, kf.DPin."""
 
-    yaml_tag: str = "!Port"
+    yaml_tag: str = "!Pin"
     _base: BasePin
 
     @abstractmethod
@@ -138,7 +138,7 @@ class ProtoPin(ABC, Generic[TUnit]):
         info: dict[str, int | float | str] = ...,
         base: BasePin | None = None,
     ) -> None:
-        """Initialise a ProtoPort."""
+        """Initialise a ProtoPin."""
         match (allowed_angles, allowed_orientations):
             case None, None:
                 raise ValueError(
@@ -156,7 +156,7 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @property
     def base(self) -> BasePin:
-        """Get the BasePin associated with this Port."""
+        """Get the BasePin associated with this Pin."""
         return self._base
 
     @property
@@ -170,7 +170,7 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @property
     def name(self) -> str | None:
-        """Name of the port."""
+        """Name of the pin."""
         return self._base.name
 
     @name.setter
@@ -179,10 +179,7 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @property
     def pin_type(self) -> str:
-        """Type of the port.
-
-        Usually "optical" or "electrical".
-        """
+        """Type of the pin."""
         return self._base.pin_type
 
     @pin_type.setter
@@ -191,7 +188,7 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @property
     def info(self) -> Info:
-        """Additional info about the port."""
+        """Additional info about the pin."""
         return self._base.info
 
     @info.setter
@@ -200,19 +197,12 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @property
     def layer(self) -> LayerEnum | int:
-        """Get the layer index of the port.
-
-        This corresponds to the port's cross section's main layer converted to the
-        index.
-        """
+        """Get the layer index of the pin."""
         return self.kcl.find_layer(self.layer_info, allow_undefined_layers=True)
 
     @property
     def layer_info(self) -> kdb.LayerInfo:
-        """Get the layer info of the port.
-
-        This corresponds to the port's cross section's main layer.
-        """
+        """Get the layer info of the pin."""
         return self.base.layer_info
 
     def __eq__(self, other: object) -> bool:
@@ -228,11 +218,11 @@ class ProtoPin(ABC, Generic[TUnit]):
     def pos(self, value: PointLike[TUnit]) -> None: ...
 
     def to_itype(self) -> Pin:
-        """Convert the port to a dbu port."""
+        """Convert the port to a dbu pin."""
         return Pin(base=self._base)
 
     def to_dtype(self) -> DPin:
-        """Convert the port to a um port."""
+        """Convert the port to a um pin."""
         return DPin(base=self._base)
 
     @property
@@ -257,7 +247,7 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @allowed_orientations.setter
     def allowed_orientations(self, value: Sequence[float]) -> None:
-        """Set the orientation of the port."""
+        """Set the orientation of the pin."""
         values = {(a % 360) / 90 for a in value}
         if values - {0, 1, 2, 3} is not None:
             raise ValueError("Only {0,90,180,270} are allowed as orientation.")
@@ -269,12 +259,12 @@ class ProtoPin(ABC, Generic[TUnit]):
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
     ) -> ProtoPin[TUnit]:
-        """Copy the port with a transformation."""
+        """Copy the pin with a transformation."""
         ...
 
     @property
     def center(self) -> tuple[TUnit, TUnit]:
-        """Returns port center."""
+        """Returns pin center."""
         return (self.pos.x, self.pos.y)
 
     @center.setter
@@ -284,7 +274,7 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @property
     def x(self) -> TUnit:
-        """X coordinate of the port."""
+        """X coordinate of the pin."""
         return self.pos.x
 
     @x.setter
@@ -293,7 +283,7 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @property
     def y(self) -> TUnit:
-        """Y coordinate of the port."""
+        """Y coordinate of the pin."""
         return self.pos.y
 
     @y.setter
@@ -303,12 +293,12 @@ class ProtoPin(ABC, Generic[TUnit]):
     @property
     @abstractmethod
     def width(self) -> TUnit:
-        """Width of the port."""
+        """Width of the pin."""
         ...
 
     @property
     def ix(self) -> int:
-        """X coordinate of the port in dbu."""
+        """X coordinate of the pin in dbu."""
         return self.base.pos.x
 
     @ix.setter
@@ -317,7 +307,7 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @property
     def iy(self) -> int:
-        """Y coordinate of the port in dbu."""
+        """Y coordinate of the pin in dbu."""
         return self.base.pos.y
 
     @iy.setter
@@ -326,12 +316,12 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @property
     def iwidth(self) -> int:
-        """Width of the port in dbu."""
+        """Width of the pin in dbu."""
         return self._base.width
 
     @property
     def dx(self) -> float:
-        """X coordinate of the port in um."""
+        """X coordinate of the pin in um."""
         return self.kcl.to_um(self.base.pos.x)
 
     @dx.setter
@@ -340,7 +330,7 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @property
     def dy(self) -> float:
-        """Y coordinate of the port in um."""
+        """Y coordinate of the pin in um."""
         return self.kcl.to_um(self.base.pos.y)
 
     @dy.setter
@@ -349,7 +339,7 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @property
     def dcenter(self) -> tuple[float, float]:
-        """Coordinate of the port in um."""
+        """Coordinate of the pin in um."""
         p = self.kcl.to_um(self.base.pos)
         return p.x, p.y
 
@@ -359,19 +349,20 @@ class ProtoPin(ABC, Generic[TUnit]):
 
     @property
     def dwidth(self) -> float:
-        """Width of the port in um."""
+        """Width of the pin in um."""
         return self.kcl.to_um(self._base.width)
 
     def print(self, print_type: Literal["dbu", "um", None] = None) -> None:
-        """Print the port pretty."""
+        """Print the pin pretty."""
         config.console.print(pprint_pins([self], unit=print_type))
 
     def __repr__(self) -> str:
-        """String representation of port."""
+        """String representation of pin."""
         return (
             f"{self.__class__.__name__}({self.name=}"
-            f", {self.width=}, trans={self.dcplx_trans.to_s()}, layer="
-            f"{self.layer_info}, pin_type={self.pin_type})"
+            f", {self.width=}, layer={self.layer_info}"
+            f", pos={self.pos}, allowed_angles={self.allowed_angles}, "
+            f"pin_type={self.pin_type})"
         )
 
 

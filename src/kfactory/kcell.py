@@ -10,6 +10,7 @@ ports and other inf from instances.
 
 from __future__ import annotations
 
+import ast
 import importlib
 import importlib.util
 import inspect
@@ -72,9 +73,11 @@ from .merge import MergeDiff
 from .netlist import Net, Netlist, NetlistPort, PortArrayRef, PortRef
 from .pin import (
     BasePin,
+    DPin,
+    Pin,
     ProtoPin,
 )
-from .pins import ProtoPins
+from .pins import DPins, Pins, ProtoPins
 from .port import (
     BasePort,
     DPort,
@@ -415,10 +418,12 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
     def __repr__(self) -> str:
         """Return a string representation of the Cell."""
         port_names = [p.name for p in self.ports]
+        pin_names = [p.name for p in self.pins]
         instances = [inst.name for inst in self.insts]
         return (
             f"{self.__class__.__name__}(name={self.name}, ports={port_names}, "
-            f"instances={instances}, locked={self.locked}, kcl={self.kcl.name})"
+            f"pins={pin_names}, instances={instances}, locked={self.locked}, "
+            f"kcl={self.kcl.name})"
         )
 
 
@@ -1087,6 +1092,20 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         else:
             rename_func(self.ports)
 
+    def auto_rename_pins(self, rename_func: Callable[..., None] | None = None) -> None:
+        """Rename the pins with the schema angle -> "NSWE" and sort by x and y.
+
+        Args:
+            rename_func: Function that takes Iterable[Pin] and renames them.
+                This can of course contain a filter and only rename some of the pins
+        """
+        if self.locked:
+            raise LockedError(self)
+        if rename_func is None:
+            self.kcl.rename_function(self.pins)
+        else:
+            rename_func(self.pins)
+
     def flatten(self, merge: bool = True) -> None:
         """Flatten the cell.
 
@@ -1189,6 +1208,52 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             else:
                 self.shapes(port.layer).insert(poly, port.dcplx_trans)
                 self.shapes(port.layer).insert(kdb.Text(port.name or "", port.trans))
+        self._base.kdb_cell.locked = locked
+
+    def draw_pins(self) -> None:
+        """Draw all the pins on their respective layer."""
+        locked = self._base.kdb_cell.locked
+        self._base.kdb_cell.locked = False
+        polys: dict[int, kdb.Region] = {}
+
+        for pin in Pins(kcl=self.kcl, bases=self.pins.bases):
+            w = pin.width
+
+            if w in polys:
+                poly = polys[w]
+            else:
+                poly = kdb.Region()
+                poly.insert(
+                    kdb.Polygon(
+                        [
+                            kdb.Point(0, int(-w // 2)),
+                            kdb.Point(0, int(w // 2)),
+                            kdb.Point(int(w // 2), 0),
+                        ]
+                    )
+                )
+                if w > 20:  # noqa: PLR2004
+                    poly -= kdb.Region(
+                        kdb.Polygon(
+                            [
+                                kdb.Point(int(w // 20), 0),
+                                kdb.Point(
+                                    int(w // 20), int(-w // 2 + int(w * 2.5 // 20))
+                                ),
+                                kdb.Point(int(w // 2 - int(w * 1.41 / 20)), 0),
+                            ]
+                        )
+                    )
+                polys[w] = poly
+
+            for agl in pin.allowed_angles:
+                self.shapes(pin.layer).insert(
+                    poly.transformed(kdb.Trans(agl, False, pin.ix, pin.iy))
+                )
+            self.shapes(pin.layer).insert(
+                kdb.Text(pin.name or "", kdb.Trans(pin.ix, pin.iy))
+            )
+
         self._base.kdb_cell.locked = locked
 
     def write(
@@ -1420,6 +1485,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         /,
         *,
         transform_ports: bool = True,
+        transform_pins: bool = True,
     ) -> Instance: ...
 
     @overload
@@ -1429,6 +1495,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         /,
         *,
         transform_ports: bool = True,
+        transform_pins: bool = True,
     ) -> None: ...
 
     def transform(
@@ -1442,6 +1509,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         /,
         *,
         transform_ports: bool = True,
+        transform_pins: bool = True,
     ) -> Instance | None:
         """Transforms the instance or cell with the transformation given."""
         if trans:
@@ -1455,28 +1523,48 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         self._base.kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
         if transform_ports:
             if isinstance(inst_or_trans, kdb.DTrans):
-                inst_or_trans = kdb.DCplxTrans(inst_or_trans)
+                inst_or_trans_ports = kdb.DCplxTrans(inst_or_trans)
             elif isinstance(inst_or_trans, kdb.ICplxTrans):
-                inst_or_trans = kdb.DCplxTrans(inst_or_trans, self.kcl.dbu)
+                inst_or_trans_ports = kdb.DCplxTrans(inst_or_trans, self.kcl.dbu)
 
-            if isinstance(inst_or_trans, kdb.Trans):
+            if isinstance(inst_or_trans_ports, kdb.Trans):
                 for port in self.ports:
-                    port.trans = inst_or_trans * port.trans
+                    port.trans = inst_or_trans_ports * port.trans
             else:
                 for port in self.ports:
-                    port.dcplx_trans = inst_or_trans * port.dcplx_trans  # type: ignore[operator]
+                    port.dcplx_trans = inst_or_trans_ports * port.dcplx_trans
+
+        if transform_pins:
+            if isinstance(inst_or_trans, kdb.DTrans):
+                inst_or_trans_pins = inst_or_trans.to_itype(self.kcl.dbu)
+            elif isinstance(inst_or_trans, kdb.DCplxTrans):
+                inst_or_trans_pins = inst_or_trans.to_itrans(self.kcl.dbu)
+
+            for pin in self.pins:
+                pin.base.pos = inst_or_trans_pins * pin.base.pos
+                if isinstance(inst_or_trans_pins, kdb.Trans):
+                    pin.base.allowed_angles = {
+                        (a + inst_or_trans_pins.angle) % 4
+                        for a in pin.base.allowed_angles
+                    }
+                else:
+                    pin.base.allowed_angles = {
+                        (a + int(inst_or_trans_pins.angle) % 360 // 90) % 4
+                        for a in pin.base.allowed_angles
+                    }
+
         return None
 
     def set_meta_data(self) -> None:
         """Set metadata of the Cell.
 
-        Currently, ports, settings and info will be set.
+        Currently, ports, pins, settings and info will be set.
         """
         self.clear_meta_info()
         if not self.is_library_cell():
             for i, port in enumerate(self.ports):
                 if port.base.trans is not None:
-                    meta_info: dict[str, MetaData] = {
+                    meta_info_ports: dict[str, MetaData] = {
                         "name": port.name,
                         "cross_section": port.cross_section.name,
                         "trans": port.base.trans,
@@ -1485,10 +1573,12 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     }
 
                     self.add_meta_info(
-                        kdb.LayoutMetaInfo(f"kfactory:ports:{i}", meta_info, None, True)
+                        kdb.LayoutMetaInfo(
+                            f"kfactory:ports:{i}", meta_info_ports, None, True
+                        )
                     )
                 else:
-                    meta_info = {
+                    meta_info_ports = {
                         "name": port.name,
                         "cross_section": port.cross_section.name,
                         "dcplx_trans": port.dcplx_trans,
@@ -1497,8 +1587,24 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     }
 
                     self.add_meta_info(
-                        kdb.LayoutMetaInfo(f"kfactory:ports:{i}", meta_info, None, True)
+                        kdb.LayoutMetaInfo(
+                            f"kfactory:ports:{i}", meta_info_ports, None, True
+                        )
                     )
+
+            for i, pin in enumerate(self.pins):
+                meta_info_pins: dict[str, MetaData] = {
+                    "name": pin.name,
+                    "layer": pin.layer,
+                    "pos": pin.pos,
+                    "allowed_angles": pin.allowed_angles,
+                    "pin_type": pin.pin_type,
+                    "info": pin.info.model_dump(),
+                }
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo(f"kfactory:pins:{i}", meta_info_pins, None, True)
+                )
+
             settings = self.settings.model_dump()
             if settings:
                 self.add_meta_info(
@@ -1540,6 +1646,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         if meta_format is None:
             meta_format = config.meta_format
         port_dict: dict[str, Any] = {}
+        pin_dict: dict[str, Any] = {}
         settings: dict[str, MetaData] = {}
         settings_units: dict[str, str] = {}
         from .layout import kcls
@@ -1547,6 +1654,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         match meta_format:
             case "v3":
                 self.ports.clear()
+                self.pins.clear()
                 meta_iter = (
                     kcls[self.library().name()][
                         self.library_cell_index()
@@ -1558,6 +1666,9 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     if meta.name.startswith("kfactory:ports"):
                         i = meta.name.removeprefix("kfactory:ports:")
                         port_dict[i] = meta.value
+                    elif meta.name.startswith("kfactory:pins"):
+                        i = meta.name.removeprefix("kfactory:pins:")
+                        pin_dict[i] = meta.value
                     elif meta.name.startswith("kfactory:info"):
                         self._base.info = Info(**meta.value)
                     elif meta.name.startswith("kfactory:settings_units"):
@@ -1591,6 +1702,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                                 ),
                                 port_type=v["port_type"],
                             )
+                    for index in sorted(pin_dict.keys()):
+                        v = pin_dict[index]
+                        self.create_pin(
+                            name=v.get("name"),
+                            width=v.get("width"),
+                            layer=v.get("layer"),
+                            pos=v.get("pos"),
+                            allowed_angles=v.get("allowed_angles"),
+                            pin_type=v.get("pin_type"),
+                        )
                 else:
                     lib_name = self.library().name()
                     for index in sorted(port_dict.keys()):
@@ -1619,7 +1740,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                                 cross_section=cs,
                                 port_type=v["port_type"],
                             )
-
+                    for index in sorted(pin_dict.keys()):
+                        v = pin_dict[index]
+                        self.create_pin(
+                            name=v.get("name"),
+                            width=v.get("width"),
+                            layer=v.get("layer"),
+                            pos=v.get("pos"),
+                            allowed_angles=v.get("allowed_angles"),
+                            pin_type=v.get("pin_type"),
+                        )
             case "v2":
                 for meta in self.each_meta_info():
                     if meta.name.startswith("kfactory:ports"):
@@ -1634,6 +1764,20 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                             if "info" not in port_dict[i]:
                                 port_dict[i]["info"] = {}
                             port_dict[i]["info"][type_.removeprefix("info:")] = (
+                                meta.value
+                            )
+                    elif meta.name.startswith("kfactory:pins"):
+                        i, type_ = meta.name.removeprefix("kfactory:pins:").split(
+                            ":", 1
+                        )
+                        if i not in pin_dict:
+                            pin_dict[i] = {}
+                        if not type_.startswith("info"):
+                            pin_dict[i][type_] = meta.value
+                        else:
+                            if "info" not in pin_dict[i]:
+                                pin_dict[i]["info"] = {}
+                            pin_dict[i]["info"][type_.removeprefix("info:")] = (
                                 meta.value
                             )
                     elif meta.name.startswith("kfactory:info"):
@@ -1684,6 +1828,28 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         port.dcplx_trans = dcplx_trans
 
                     self.add_port(port=port, keep_mirror=True)
+
+                self.pins.clear()
+                for index in sorted(pin_dict.keys()):
+                    d = pin_dict[index]
+                    name = d.get("name", None)
+                    pin_type = d["pin_type"]
+                    layer_info = d["layer"]
+                    width = d["width"]
+                    pos = d.get("pos")
+                    allowed_angles = d.get("allowed_angles")
+                    pin = Pin(
+                        name=name,
+                        width=width,
+                        layer_info=layer_info,
+                        pos=pos,
+                        allowed_angles=allowed_angles,
+                        kcl=self.kcl,
+                        pin_type=pin_type,
+                        info=d.get("info", {}),
+                    )
+
+                    self.add_pin(pin=pin)
             case "v1":
                 for meta in self.each_meta_info():
                     if meta.name.startswith("kfactory:ports"):
@@ -1698,6 +1864,20 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                             if "info" not in port_dict[i]:
                                 port_dict[i]["info"] = {}
                             port_dict[i]["info"][type_.removeprefix("info:")] = (
+                                meta.value
+                            )
+                    elif meta.name.startswith("kfactory:pins"):
+                        i, type_ = meta.name.removeprefix("kfactory:pins:").split(
+                            ":", 1
+                        )
+                        if i not in pin_dict:
+                            pin_dict[i] = {}
+                        if not type_.startswith("info"):
+                            pin_dict[i][type_] = meta.value
+                        else:
+                            if "info" not in pin_dict[i]:
+                                pin_dict[i]["info"] = {}
+                            pin_dict[i]["info"][type_.removeprefix("info:")] = (
                                 meta.value
                             )
                     elif meta.name.startswith("kfactory:info"):
@@ -1748,6 +1928,28 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         port.dcplx_trans = kdb.DCplxTrans.from_s(dcplx_trans)
 
                     self.add_port(port=port, keep_mirror=True)
+
+                self.pins.clear()
+                for index in sorted(pin_dict.keys()):
+                    d = pin_dict[index]
+                    name = d.get("name", None)
+                    pin_type = d["pin_type"]
+                    layer = d["layer"]
+                    width = d["width"]
+                    pos = d.get("pos")
+                    allowed_angles = d.get("allowed_angles")
+                    pin = Pin(
+                        name=name,
+                        width=width,
+                        layer_info=layer,
+                        pos=pos,
+                        allowed_angles=allowed_angles,
+                        kcl=self.kcl,
+                        pin_type=pin_type,
+                        info=d.get("info", {}),
+                    )
+
+                    self.add_pin(pin=pin)
 
     def ibbox(self, layer: int | None = None) -> kdb.Box:
         if layer is None:
@@ -2593,6 +2795,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Iterable[ProtoPort[Any]] | None = None,
+        pins: Iterable[ProtoPin[Any]] | None = None,
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None: ...
@@ -2603,6 +2806,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Iterable[ProtoPort[Any]] | None = None,
+        pins: Iterable[ProtoPin[Any]] | None = None,
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
         *,
@@ -2620,6 +2824,8 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
                 KLayout Cell
             ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
                 if `None` create an empty one.
+            pins: Attach an existing [Pins][kfactory.kcell.Pins] object to the KCell,
+                if `None` create an empty one.
             info: Info object to attach to the KCell.
             settings: KCellSettings object to attach to the KCell.
         """
@@ -2629,6 +2835,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
             kcl=kcl,
             kdb_cell=kdb_cell,
             ports=ports,
+            pins=pins,
             info=info,
             settings=settings,
         )
@@ -2643,6 +2850,17 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         if self.locked:
             raise LockedError(self)
         self._base.ports = [port.base for port in new_ports]
+
+    @property
+    def pins(self) -> DPins:
+        """Pins associated with the cell."""
+        return DPins(kcl=self.kcl, bases=self._base.pins)
+
+    @pins.setter
+    def pins(self, new_pins: Iterable[ProtoPin[Any]]) -> None:
+        if self.locked:
+            raise LockedError(self)
+        self._base.pins = [pin.base for pin in new_pins]
 
     @property
     def insts(self) -> DInstances:
@@ -2672,6 +2890,21 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
             port=port,
             name=name,
             keep_mirror=keep_mirror,
+        )
+
+    def add_pin(
+        self,
+        *,
+        pin: ProtoPin[Any],
+        name: str | None = None,
+    ) -> DPin:
+        """Create a pin in the cell."""
+        if self.locked:
+            raise LockedError(self)
+
+        return self.pins.add_pin(
+            pin=pin,
+            name=name,
         )
 
     def __getitem__(self, key: int | str | None) -> DPort:
@@ -2748,6 +2981,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Iterable[ProtoPort[Any]] | None = None,
+        pins: Iterable[ProtoPin[Any]] | None = None,
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None: ...
@@ -2758,6 +2992,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Iterable[ProtoPort[Any]] | None = None,
+        pins: Iterable[ProtoPin[Any]] | None = None,
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
         *,
@@ -2775,6 +3010,8 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
                 KLayout Cell
             ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
                 if `None` create an empty one.
+            pins: Attach an existing [Pins][kfactory.kcell.Pins] object to the KCell,
+                if `None` create an empty one.
             info: Info object to attach to the KCell.
             settings: KCellSettings object to attach to the KCell.
         """
@@ -2784,6 +3021,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
             kcl=kcl,
             kdb_cell=kdb_cell,
             ports=ports,
+            pins=pins,
             info=info,
             settings=settings,
         )
@@ -2798,6 +3036,17 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         if self.locked:
             raise LockedError(self)
         self._base.ports = [port.base for port in new_ports]
+
+    @property
+    def pins(self) -> Pins:
+        """Pins associated with the cell."""
+        return Pins(kcl=self.kcl, bases=self._base.pins)
+
+    @pins.setter
+    def pins(self, new_pins: Iterable[ProtoPin[Any]]) -> None:
+        if self.locked:
+            raise LockedError(self)
+        self._base.pins = [pin.base for pin in new_pins]
 
     @property
     def insts(self) -> Instances:
@@ -2827,6 +3076,21 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
             port=port,
             name=name,
             keep_mirror=keep_mirror,
+        )
+
+    def add_pin(
+        self,
+        *,
+        pin: ProtoPin[Any],
+        name: str | None = None,
+    ) -> Pin:
+        """Create a pin in the cell."""
+        if self.locked:
+            raise LockedError(self)
+
+        return self.pins.add_pin(
+            pin=pin,
+            name=name,
         )
 
     def __getitem__(self, key: int | str | None) -> Port:
@@ -2895,6 +3159,18 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
                     layer=cell.kcl.layer(kdb.LayerInfo.from_string(layer_as_string)),
                     port_type=_d["port_type"],
                 )
+        for _d in d.get("pins", Pins(pins=[], kcl=cell.kcl)):
+            layer_as_string = (
+                str(_d["layer"]).replace("[", "").replace("]", "").replace(", ", "/")
+            )
+            cell.create_pin(
+                name=str(_d["name"]),
+                pos=kdb.Point.from_s(_d["pos"]),
+                allowed_angles=ast.literal_eval(_d["allowed_angles"]),
+                width=int(_d["width"]),
+                layer=cell.kcl.layer(kdb.LayerInfo.from_string(layer_as_string)),
+                pin_type=_d["pin_type"],
+            )
         cell.settings = KCellSettings(
             **{
                 name: deserialize_setting(setting)
@@ -3112,6 +3388,28 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
 
         d["ports"] = ports
 
+        pins: list[dict[str, Any]] = []
+        for pin in node.pins:
+            l_ = node.kcl.get_info(pin.layer)
+            pn: dict[str, Any] = {
+                "name": pin.name,
+                "layer": [l_.layer, l_.datatype],
+                "pin_type": pin.pin_type,
+            }
+            if isinstance(pin, Pin):
+                pn["pos"] = pin.base.pos.to_s()
+                pn["width"] = pin.width
+            else:
+                pn["pos"] = pin.base.pos.to_s()
+                pn["dwidth"] = pin.dwidth
+            pn["info"] = {
+                name: serialize_setting(setting)
+                for name, setting in node.info.model_dump().items()
+            }
+            pins.append(pn)
+
+        d["pins"] = pins
+
         if insts:
             d["insts"] = insts
         if shapes:
@@ -3218,6 +3516,17 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             raise LockedError(self)
         self._base.ports = [port.base for port in new_ports]
 
+    @property
+    def pins(self) -> DPins:
+        """Pins associated with the cell."""
+        return DPins(kcl=self.kcl, bases=self._base.pins)
+
+    @pins.setter
+    def pins(self, new_pins: Iterable[ProtoPin[Any]]) -> None:
+        if self.locked:
+            raise LockedError(self)
+        self._base.pins = [pin.base for pin in new_pins]
+
     def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
         layers_ = set(self.shapes().keys())
 
@@ -3255,6 +3564,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             kcl=self.kcl, name=new_name or self.name + "$1" if self.name else None
         )
         c.ports = DPorts(kcl=self.kcl, ports=self.ports.copy())
+        c.pins = DPins(kcl=self.kcl, pins=self.pins.copy())
 
         c.settings = self.settings.model_copy()
         c.settings_units = self.settings_units.model_copy()
@@ -3287,6 +3597,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             c.name = self.name
         VInstance(self).insert_into_flat(c, levels=0)
         c.add_ports(self.ports)
+        c.add_pins(self.pins)
         show_f: ShowFunction = config.show_function or show
         show_f(
             c,
@@ -3323,7 +3634,11 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
     def __repr__(self) -> str:
         """Return a string representation of the Cell."""
         port_names = [p.name for p in self.ports]
-        return f"{self.name}: ports {port_names}, {len(self.insts)} instances"
+        pin_names = [p.name for p in self.pins]
+        return (
+            f"{self.name}: ports {port_names}, pins {pin_names}, "
+            f"{len(self.insts)} instances"
+        )
 
     def add_port(
         self,
@@ -3339,6 +3654,20 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             port=port,
             name=name,
             keep_mirror=keep_mirror,
+        )
+
+    def add_pin(
+        self,
+        *,
+        pin: ProtoPin[Any],
+        name: str | None = None,
+    ) -> DPin:
+        """Proxy for [Pins.create_pin][kfactory.kcell.Pins.create_pin]."""
+        if self.locked:
+            raise LockedError(self)
+        return self.pins.add_pin(
+            pin=pin,
+            name=name,
         )
 
     def create_inst(
@@ -3363,6 +3692,20 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             self.kcl.rename_function(self.ports)
         else:
             rename_func(self.ports)
+
+    def auto_rename_pins(self, rename_func: Callable[..., None] | None = None) -> None:
+        """Rename the pins with the schema angle -> "NSWE" and sort by x and y.
+
+        Args:
+            rename_func: Function that takes Iterable[Pin] and renames them.
+                This can of course contain a filter and only rename some of the pins
+        """
+        if self.locked:
+            raise LockedError(self)
+        if rename_func is None:
+            self.kcl.rename_function(self.pins)
+        else:
+            rename_func(self.pins)
 
     def __lshift__(self, cell: AnyKCell) -> VInstance:
         return self.create_inst(cell=cell)
@@ -3431,6 +3774,46 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
                 polys[w] = poly
             self.shapes(port.layer).insert(poly.transformed(port.dcplx_trans))
             self.shapes(port.layer).insert(kdb.Text(port.name or "", port.trans))
+
+    def draw_pins(self) -> None:
+        """Draw all the pins on their respective layer."""
+        polys: dict[float, kdb.DPolygon] = {}
+
+        for pin in self.pins:
+            w = pin.width
+
+            if w in polys:
+                poly = polys[w]
+            elif w < 2:  # noqa: PLR2004
+                poly = kdb.DPolygon(
+                    [
+                        kdb.DPoint(0, -w / 2),
+                        kdb.DPoint(0, w / 2),
+                        kdb.DPoint(w / 2, 0),
+                    ]
+                )
+            else:
+                poly = kdb.DPolygon(
+                    [
+                        kdb.DPoint(0, -w / 2),
+                        kdb.DPoint(0, w / 2),
+                        kdb.DPoint(w / 2, 0),
+                        kdb.DPoint(w * 19 / 20, 0),
+                        kdb.DPoint(w / 20, w * 9 / 20),
+                        kdb.DPoint(w / 20, -w * 9 / 20),
+                        kdb.DPoint(w * 19 / 20, 0),
+                        kdb.DPoint(w / 2, 0),
+                    ]
+                )
+                polys[w] = poly
+
+            for agl in pin.allowed_angles:
+                self.shapes(pin.layer).insert(
+                    poly.transformed(kdb.DTrans(agl, False, pin.dx, pin.dy))
+                )
+            self.shapes(pin.layer).insert(
+                kdb.Text(pin.name or "", kdb.Trans(pin.ix, pin.iy))
+            )
 
     def write(
         self,
