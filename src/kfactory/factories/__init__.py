@@ -2,7 +2,9 @@
 
 from typing import Any, Protocol
 
-from .. import ProtoTKCell
+from ..instance import ProtoTInstance
+from ..instance_group import ProtoTInstanceGroup
+from ..kcell import ProtoTKCell
 from . import bezier, circular, euler, straight, taper, virtual
 
 
@@ -37,7 +39,9 @@ class StraightFactoryUM(Protocol):
 
 
 class SBendFactoryDBU(Protocol):
-    def __call__(self, *, offset: int) -> ProtoTKCell[Any]: ...
+    def __call__(
+        self, *, c: ProtoTKCell[Any], offset: int, length: int, width: int
+    ) -> ProtoTInstance[Any] | ProtoTInstanceGroup[Any, Any]: ...
 
 
 __all__ = [

@@ -364,20 +364,20 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         if use_angle is None:
             use_angle = config.connect_use_angle
 
-        if isinstance(other, ProtoTInstance):
+        if isinstance(other, ProtoPort):
+            op = Port(base=other.base)
+        else:
             if other_port_name is None:
                 raise ValueError(
                     "portname cannot be None if an Instance Object is given. For"
                     "complex connections (non-90 degree and floating point ports) use"
                     "route_cplx instead"
                 )
-            op = other.ports[other_port_name].to_itype()
-        else:
-            op = other.to_itype()
+            op = Port(base=other.ports[other_port_name].base)
         if isinstance(port, ProtoPort):
             p = Port(base=port.base.transformed(self.dcplx_trans.inverted()))
         else:
-            p = self.cell.ports[port].to_itype()
+            p = Port(base=self.cell.ports[port].base)
 
         assert isinstance(p, Port)
         assert isinstance(op, Port)
@@ -416,7 +416,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
                     )
                     self.dmirror_y(op.dcplx_trans.disp.y)
                 case _:
-                    ...
+                    raise NotImplementedError("This shouldn't happen")
 
         else:
             conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
@@ -438,7 +438,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
                     self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
                     self.dmirror_y(op.dcplx_trans.disp.y)
                 case _:
-                    ...
+                    raise NotImplementedError("This shouldn't happen")
 
     def __repr__(self) -> str:
         """Return a string representation of the instance."""

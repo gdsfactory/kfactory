@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from functools import partial
+from typing import Any
 
 import numpy as np
 import pytest
@@ -304,7 +305,7 @@ def test_route_length(
     optical_port: kf.Port,
     taper: kf.KCell,
 ) -> None:
-    x, y, angle2 = (70000, 70000, 2)
+    x, y, angle2 = (55000, 70000, 2)
 
     c = kf.KCell()
     p1 = optical_port.copy()
@@ -313,18 +314,20 @@ def test_route_length(
     b90r = abs(bend90_euler.ports[0].x - bend90_euler.ports[1].x)
     if abs(x) < b90r or abs(y) < b90r:
         kf.config.logfilter.regex = "route is too small, potential collisions:"
-    route = kf.routing.optical.route(
-        c,
-        p1,
-        p2,
+    route = kf.routing.optical.route_bundle(
+        c=c,
+        start_ports=[p1],
+        end_ports=[p2],
+        separation=5000,
         straight_factory=straight_factory_dbu,
         bend90_cell=bend90_euler,
         taper_cell=taper,
-    )
+        allow_width_mismatch=True,
+    )[0]
     kf.config.logfilter.regex = None
-    assert np.isclose(route.length, 173222.004)
-    assert route.length_straights == 25196
-    assert route.length_backbone == 140000
+    assert np.isclose(route.length, 135624.004)
+    assert route.length_straights == 30196
+    assert route.length_backbone == 125000
     assert route.n_bend90 == 2
 
 
@@ -546,7 +549,7 @@ def test_custom_router(
 
     start_ports = [
         kf.Port(
-            name="in{i}",
+            name=f"in{i}",
             width=1000,
             layer_info=layers.WG,
             trans=kf.kdb.Trans(1, False, -850_000 + i * 200_000, 0),
@@ -556,7 +559,7 @@ def test_custom_router(
     ]
     end_ports = [
         kf.Port(
-            name="in{i}",
+            name=f"in{i}",
             width=1000,
             layer_info=layers.WG,
             trans=kf.kdb.Trans(3, False, -400_000 + i * 100_000, 200_000),
@@ -576,7 +579,7 @@ def test_custom_router(
             "bend90_radius": b90r,
             "separation": 4000,
         },
-        placer_function=kf.routing.optical.place90,
+        placer_function=kf.routing.optical.place_manhattan,
         placer_kwargs={"bend90_cell": bend90, "straight_factory": sf},
         router_post_process_function=kf.routing.manhattan.path_length_match_manhattan_route,
         router_post_process_kwargs={
@@ -960,3 +963,94 @@ def test_rf_bundle() -> None:
         c.shapes(c.kcl.layer(1, 0)).insert(b)
     finally:
         kf.kcl.infos = infos
+
+
+def test_sbend_routing() -> None:
+    class Layers(kf.LayerInfos):
+        WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+        WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
+
+    layer_infos = Layers()
+
+    c = kf.KCell()
+    c.kcl.infos = layer_infos
+
+    ps: list[kf.Port] = []
+    pe: list[kf.Port] = []
+
+    enc = c.kcl.get_enclosure(
+        kf.LayerEnclosure(
+            sections=[(layer_infos.WGEX, 5000)], name="WG", main_layer=layer_infos.WG
+        )
+    )
+    xs = c.kcl.get_icross_section(
+        cross_section=kf.SymmetricalCrossSection(width=1000, enclosure=enc)
+    )
+
+    for i, ((x1, y1), (x2, y2)) in enumerate(
+        [
+            ((0, 100_000), (250_000, 90_000)),
+            ((-120_000, 200_000), (250_000, 190_000)),
+            ((-200_000, 0), (250_000, 200_000)),
+            ((-100_000, 0), (250_000, 0)),
+        ]
+    ):
+        ps.append(
+            c.create_port(
+                trans=kf.kdb.Trans(rot=i, mirrx=False, x=x1, y=y1),
+                cross_section=xs,
+                name=f"in_{i}",
+            )
+        )
+        pe.append(
+            c.create_port(
+                trans=kf.kdb.Trans(rot=2, mirrx=False, x=x2, y=y2),
+                cross_section=xs,
+                name=f"out_{i}",
+            )
+        )
+
+    def straight_factory(width: int, length: int) -> kf.KCell:
+        return kf.cells.straight.straight_dbu(
+            width=width, length=length, layer=layer_infos.WG, enclosure=enc
+        )
+
+    def sbend_factory(
+        c: kf.ProtoTKCell[Any], offset: int, length: int, width: int
+    ) -> kf.InstanceGroup:
+        c = kf.KCell(base=c.base)
+        ig = kf.InstanceGroup()
+
+        sbend = c << kf.cells.euler.bend_s_euler(
+            offset=c.kcl.to_um(offset),
+            width=c.kcl.to_um(width),
+            radius=10,
+            layer=layer_infos.WG,
+            enclosure=enc,
+        )
+        ig.insts.append(sbend)
+
+        l_ = length - sbend.ibbox().width()
+        ig.add_port(name="o1", port=sbend.ports["o1"])
+
+        if l_ > 0:
+            wg = c << straight_factory(width=width, length=l_)
+            ig.insts.append(wg)
+            wg.connect("o1", sbend.ports["o2"])
+            ig.add_port(port=wg.ports["o2"], name="o2")
+        else:
+            ig.add_port(port=sbend.ports["o2"], name="o2")
+
+        return ig
+
+    kf.routing.optical.route_bundle(
+        c=c,
+        start_ports=ps,
+        end_ports=pe,
+        separation=5000,
+        straight_factory=straight_factory,
+        bend90_cell=kf.cells.euler.bend_euler(
+            width=c.kcl.to_um(xs.width), radius=10, layer=layer_infos.WG, enclosure=enc
+        ),
+        sbend_factory=sbend_factory,
+    )
