@@ -191,7 +191,7 @@ def test_multi_pdk_read_write(layers: Layers) -> None:
 def test_merge_read_shapes(layers: Layers) -> None:
     with (
         NamedTemporaryFile("w+b", suffix=".oas") as temp_file,
-        pytest.raises(kf.kcell.MergeError),
+        pytest.raises(kf.exceptions.MergeError),
     ):
         kcl_1 = kf.KCLayout("MERGE_BASE_SHAPES", infos=Layers)
         s_base = kf.factories.straight.straight_dbu_factory(kcl_1)(
@@ -218,7 +218,7 @@ def test_merge_read_shapes(layers: Layers) -> None:
 def test_merge_read_instances(layers: Layers) -> None:
     with (
         NamedTemporaryFile("w+b", suffix=".oas") as temp_file,
-        pytest.raises(kf.kcell.MergeError),
+        pytest.raises(kf.exceptions.MergeError),
     ):
         kcl_1 = kf.KCLayout("MERGE_BASE_INSTANCES", infos=Layers)
         kcl_1.layers = kcl_1.layerenum_from_dict(layers=layers)
@@ -250,7 +250,7 @@ def test_merge_read_instances(layers: Layers) -> None:
 def test_merge_properties() -> None:
     with (
         NamedTemporaryFile("w+b", suffix=".oas") as temp_file,
-        pytest.raises(kf.kcell.MergeError),
+        pytest.raises(kf.exceptions.MergeError),
     ):
         kcl_1 = kf.KCLayout("MERGE_BASE_PROPERTIES", infos=Layers)
         c = kcl_1.kcell("properties_cell")

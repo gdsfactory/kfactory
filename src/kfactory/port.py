@@ -170,6 +170,33 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         base.dcplx_trans = trans * dcplx_trans * post_trans
         return base
 
+    def transform(
+        self,
+        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+    ) -> Self:
+        """Get a transformed copy of the BasePort."""
+        base = self
+        if (
+            base.trans is not None
+            and isinstance(trans, kdb.Trans)
+            and isinstance(post_trans, kdb.Trans)
+        ):
+            base.trans = trans * base.trans * post_trans
+            base.dcplx_trans = None
+            return self
+        if isinstance(trans, kdb.Trans):
+            trans = kdb.DCplxTrans(trans.to_dtype(self.kcl.dbu))
+        if isinstance(post_trans, kdb.Trans):
+            post_trans = kdb.DCplxTrans(post_trans.to_dtype(self.kcl.dbu))
+        dcplx_trans = self.dcplx_trans or kdb.DCplxTrans(
+            t=self.trans.to_dtype(self.kcl.dbu)  # type: ignore[union-attr]
+        )
+
+        base.trans = None
+        base.dcplx_trans = trans * dcplx_trans * post_trans
+        return self
+
     @model_serializer()
     def ser_model(self) -> BasePortDict:
         """Serialize the BasePort."""
@@ -585,6 +612,15 @@ class ProtoPort(Generic[TUnit], ABC):
             f", {self.width=}, trans={self.dcplx_trans.to_s()}, layer="
             f"{self.layer_info}, port_type={self.port_type})"
         )
+
+    def transform(
+        self,
+        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+    ) -> Self:
+        """Get a transformed copy of the BasePort."""
+        self.base.transform(trans=trans, post_trans=post_trans)
+        return self
 
 
 class Port(ProtoPort[int]):

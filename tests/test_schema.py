@@ -530,7 +530,6 @@ def test_netlist_equivalent() -> None:
 
     nl = schema.netlist()
     c = schema.create_cell(kf.KCell)
-    c.show()
     nl2 = c.netlist(
         ignore_unnamed=True, connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)]
     )

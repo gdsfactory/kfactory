@@ -807,7 +807,7 @@ def place_rf_rails(
         allow_type_mismatch = config.allow_type_mismatch
     if wire_factory is None:
         raise ValueError(
-            "place90 needs to have a wire_factory set. Please pass a "
+            "place_rf_rails needs to have a wire_factory set. Please pass a "
             "wire_factory which takes kwargs 'width: int' and 'length: int'."
         )
     cross_section = p1.kcl.get_icross_section(
