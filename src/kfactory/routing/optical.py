@@ -285,7 +285,8 @@ def route_bundle(
             "route_width": route_width,
         }
     else:
-        placer = place_manhattan_with_sbends
+        # Not a type error
+        placer = place_manhattan_with_sbends  # type: ignore[assignment]
         placer_kwargs = {
             "straight_factory": straight_factory,
             "bend90_cell": bend90_cell,

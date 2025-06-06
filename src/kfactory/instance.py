@@ -577,7 +577,7 @@ class DInstance(ProtoTInstance[float], UMGeometricObject):
         return self.kcl.dkcells[self.cell_index]
 
     @cell.setter
-    def cell(self, value: ProtoTKCell[TUnit]) -> None:
+    def cell(self, value: ProtoTKCell[float]) -> None:
         self.cell_index = value.cell_index()
 
     @property
