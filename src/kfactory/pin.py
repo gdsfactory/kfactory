@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 class BasePinDict(TypedDict):
     name: str | None
-    _c: ProtoTKCell[Any]
+    c: ProtoTKCell[Any]
     ports: set[str]
     info: Info
     pin_type: str
