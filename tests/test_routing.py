@@ -973,6 +973,7 @@ def test_sbend_routing() -> None:
     layer_infos = Layers()
 
     c = kf.KCell()
+    old_infos = c.kcl.infos
     c.kcl.infos = layer_infos
 
     ps: list[kf.Port] = []
@@ -1054,3 +1055,5 @@ def test_sbend_routing() -> None:
         ),
         sbend_factory=sbend_factory,
     )
+
+    c.kcl.infos = old_infos
