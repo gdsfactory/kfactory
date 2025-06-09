@@ -70,6 +70,8 @@ from .instances import (
 from .layer import LayerEnum
 from .merge import MergeDiff
 from .netlist import Net, Netlist, NetlistPort, PortArrayRef, PortRef
+from .pin import BasePin, DPin, Pin, ProtoPin
+from .pins import DPins, Pins, ProtoPins
 from .port import (
     BasePort,
     DPort,
@@ -389,11 +391,13 @@ class TKCell(BaseKCell):
         kdb_cell: Pure KLayout cell object.
         locked: If set the cell shouldn't be modified anymore.
         function_name: Name of the function that created the cell.
+        pins: Manages the pins of the cell.
     """
 
     kdb_cell: kdb.Cell
     boundary: kdb.DPolygon | None = None
     lvs_equivalent_ports: list[list[str]] | None = None
+    pins: list[BasePin] = Field(default_factory=list)
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -634,6 +638,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
     def name(self, value: str) -> None:
         self._base.name = value
 
+    @property
+    @abstractmethod
+    def pins(self) -> ProtoPins[TUnit]: ...
+
+    @pins.setter
+    @abstractmethod
+    def pins(self, new_pins: Iterable[ProtoPin[Any]]) -> None: ...
+
     def __hash__(self) -> int:
         """Hash the KCell."""
         return hash((self._base.kcl.library.name(), self._base.kdb_cell.cell_index()))
@@ -718,6 +730,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
         c = self.__class__(kcl=self.kcl, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
+
+        c._base.pins = [
+            BasePin(
+                name=p.name,
+                ports={port.base for port in c.ports},
+                pin_type=p.pin_type,
+                info=p.info,
+            )
+            for p in self._base.pins
+        ]
 
         c._base.settings = self.settings.model_copy()
         c._base.info = self.info.model_copy()
@@ -813,6 +835,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         name: str | None = None,
         keep_mirror: bool = False,
     ) -> ProtoPort[Any]: ...
+
+    @abstractmethod
+    def create_pin(
+        self,
+        *,
+        ports: Iterable[ProtoPort[Any]],
+        name: str | None = None,
+        pin_type: str = "DC",
+        info: dict[str, int | float | str] | None = None,
+    ) -> ProtoPin[Any]: ...
 
     @overload
     @abstractmethod
@@ -2641,6 +2673,17 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         self._base.ports = [port.base for port in new_ports]
 
     @property
+    def pins(self) -> DPins:
+        """Pins associated with the cell."""
+        return DPins(bases=self._base.pins)
+
+    @pins.setter
+    def pins(self, new_pins: Iterable[ProtoPin[Any]]) -> None:
+        if self.locked:
+            raise LockedError(self)
+        self._base.pins = [pin.base for pin in new_pins]
+
+    @property
     def insts(self) -> DInstances:
         """Instances associated with the cell."""
         return DInstances(cell=self._base)
@@ -2668,6 +2711,19 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
             port=port,
             name=name,
             keep_mirror=keep_mirror,
+        )
+
+    def create_pin(
+        self,
+        *,
+        ports: Iterable[ProtoPort[Any]],
+        name: str | None = None,
+        pin_type: str = "DC",
+        info: dict[str, int | float | str] | None = None,
+    ) -> DPin:
+        """Create a pin in the cell."""
+        return self.pins.create_pin(
+            name=name, ports=ports, pin_type=pin_type, info=info
         )
 
     def __getitem__(self, key: int | str | None) -> DPort:
@@ -2796,6 +2852,17 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         self._base.ports = [port.base for port in new_ports]
 
     @property
+    def pins(self) -> Pins:
+        """Pins associated with the cell."""
+        return Pins(bases=self._base.pins)
+
+    @pins.setter
+    def pins(self, new_pins: Iterable[ProtoPin[Any]]) -> None:
+        if self.locked:
+            raise LockedError(self)
+        self._base.pins = [pin.base for pin in new_pins]
+
+    @property
     def insts(self) -> Instances:
         """Instances associated with the cell."""
         return Instances(cell=self._base)
@@ -2823,6 +2890,19 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
             port=port,
             name=name,
             keep_mirror=keep_mirror,
+        )
+
+    def create_pin(
+        self,
+        *,
+        ports: Iterable[ProtoPort[Any]],
+        name: str | None = None,
+        pin_type: str = "DC",
+        info: dict[str, int | float | str] | None = None,
+    ) -> Pin:
+        """Create a pin in the cell."""
+        return self.pins.create_pin(
+            name=name, ports=ports, pin_type=pin_type, info=info
         )
 
     def __getitem__(self, key: int | str | None) -> Port:
