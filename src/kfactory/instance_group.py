@@ -44,6 +44,16 @@ class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, TInstance_co], A
         self.insts = list(insts) if insts is not None else []
         self._base_ports = [p.base for p in ports] if ports is not None else []
 
+    @property
+    def name(self) -> str:
+        return str(self)
+
+    def __str__(self) -> str:
+        return (
+            f"InstanceGroup(insts={[inst.name for inst in self.insts]}, "
+            f"ports={[p.name for p in self.ports]})"
+        )
+
     @cached_property
     @abstractmethod
     def ports(self) -> ProtoPorts[TUnit]:
