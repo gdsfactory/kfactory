@@ -1,7 +1,11 @@
-<a id="v1.7.3"></a>
-# [v1.7.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.7.3) - 2025-05-30
+<a id="v1.8.0"></a>
+# [v1.8.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.0) - 2025-05-30
 
 # What's Changed
+
+## New
+
+- rework the optical placer and add sbend capabilities [#720](https://github.com/gdsfactory/kfactory/pull/720)
 
 ## Bug Fixes
 
@@ -12,10 +16,10 @@
 
 - Typing Fixes [#718](https://github.com/gdsfactory/kfactory/pull/718)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.7.3
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.8.0
 
 
-[Changes][v1.7.3]
+[Changes][v1.8.0]
 
 
 <a id="v1.7.2"></a>
@@ -2038,7 +2042,7 @@
 [Changes][v0.4.0]
 
 
-[v1.7.3]: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.7.3
+[v1.8.0]: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.8.0
 [v1.7.2]: https://github.com/gdsfactory/kfactory/compare/v1.7.1...v1.7.2
 [v1.7.1]: https://github.com/gdsfactory/kfactory/compare/v1.7.0...v1.7.1
 [v1.7.0]: https://github.com/gdsfactory/kfactory/compare/v1.6.0...v1.7.0
