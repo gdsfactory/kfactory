@@ -170,7 +170,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @cell.setter
     @abstractmethod
-    def cell(self, value: ProtoTKCell[TUnit]) -> None: ...
+    def cell(self, value: ProtoTKCell[Any]) -> None: ...
 
     @property
     @abstractmethod
@@ -531,7 +531,7 @@ class Instance(ProtoTInstance[int], DBUGeometricObject):
         return self.kcl.kcells[self.cell_index]
 
     @cell.setter
-    def cell(self, value: ProtoTKCell[int]) -> None:
+    def cell(self, value: ProtoTKCell[Any]) -> None:
         self.cell_index = value.cell_index()
 
     @classmethod
@@ -577,7 +577,7 @@ class DInstance(ProtoTInstance[float], UMGeometricObject):
         return self.kcl.dkcells[self.cell_index]
 
     @cell.setter
-    def cell(self, value: ProtoTKCell[float]) -> None:
+    def cell(self, value: ProtoTKCell[Any]) -> None:
         self.cell_index = value.cell_index()
 
     @property
