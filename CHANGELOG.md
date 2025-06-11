@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- fix connect for virtual instances and the other way around [#725](https://github.com/gdsfactory/kfactory/pull/725)
 - Override ProtoTInstanceGroup second generic param with TInstance [#721](https://github.com/gdsfactory/kfactory/pull/721)
 - Fix create_port overloads [#717](https://github.com/gdsfactory/kfactory/pull/717)
 
