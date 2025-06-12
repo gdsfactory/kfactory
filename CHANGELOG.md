@@ -1,5 +1,35 @@
+<a id="v1.8.2"></a>
+# [v1.8.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.2) - 2025-06-12
+
+# What's Changed
+
+## Bug Fixes
+
+- fix routing if no sbend is allowed [#728](https://github.com/gdsfactory/kfactory/pull/728)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.8.1...v1.8.2
+
+
+[Changes][v1.8.2]
+
+
+<a id="v1.8.1"></a>
+# [v1.8.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.1) - 2025-06-12
+
+# What's Changed
+
+## Bug Fixes
+
+- insert dcplx_trans property to VInstance and fix place90 call [#726](https://github.com/gdsfactory/kfactory/pull/726)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.8.0...v1.8.1
+
+
+[Changes][v1.8.1]
+
+
 <a id="v1.8.0"></a>
-# [v1.8.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.0) - 2025-06-11
+# [v1.8.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.0) - 2025-06-12
 
 # What's Changed
 
@@ -9,7 +39,6 @@
 
 ## Bug Fixes
 
-- insert dcplx_trans property to VInstance and fix place90 call [#726](https://github.com/gdsfactory/kfactory/pull/726)
 - fix connect for virtual instances and the other way around [#725](https://github.com/gdsfactory/kfactory/pull/725)
 - Override ProtoTInstanceGroup second generic param with TInstance [#721](https://github.com/gdsfactory/kfactory/pull/721)
 - Fix create_port overloads [#717](https://github.com/gdsfactory/kfactory/pull/717)
@@ -2044,6 +2073,8 @@
 [Changes][v0.4.0]
 
 
+[v1.8.2]: https://github.com/gdsfactory/kfactory/compare/v1.8.1...v1.8.2
+[v1.8.1]: https://github.com/gdsfactory/kfactory/compare/v1.8.0...v1.8.1
 [v1.8.0]: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.8.0
 [v1.7.2]: https://github.com/gdsfactory/kfactory/compare/v1.7.1...v1.7.2
 [v1.7.1]: https://github.com/gdsfactory/kfactory/compare/v1.7.0...v1.7.1
