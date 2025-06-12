@@ -193,6 +193,33 @@ def _check_ports(cell: ProtoTKCell[Any]) -> None:
         )
 
 
+def _check_pins(cell: ProtoTKCell[Any]) -> None:
+    pin_names: dict[str | None, int] = defaultdict(int)
+    port_names: dict[str | None, int] = defaultdict(int)
+    for pin in cell.pins:
+        pin_names[pin.name] += 1
+        for pin_port in pin.ports:
+            port_names[pin_port.name] += 1
+    for port in cell.ports:
+        port_names[port.name] += 1
+    duplicate_pin_names = [(name, n) for name, n in pin_names.items() if n > 1]
+    if duplicate_pin_names:
+        raise ValueError(
+            "Found duplicate pin names: "
+            + ", ".join([f"{name}: {n}" for name, n in duplicate_pin_names])
+            + " If this intentional, please pass "
+            "`check_pins=False` to the @cell decorator"
+        )
+    duplicate_port_names = [(name, n) for name, n in port_names.items() if n > 1]
+    if duplicate_port_names:
+        raise ValueError(
+            "Found duplicate port names when adding the pin: "
+            + ", ".join([f"{name}: {n}" for name, n in duplicate_port_names])
+            + " If this intentional, please pass "
+            "`check_pins=False` to the @cell decorator"
+        )
+
+
 def _get_function_name(f: Callable[..., Any]) -> str:
     if hasattr(f, "__name__"):
         name = f.__name__
@@ -280,6 +307,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         set_settings: bool,
         set_name: bool,
         check_ports: bool,
+        check_pins: bool,
         check_instances: CheckInstances,
         snap_ports: bool,
         add_port_layers: bool,
@@ -367,6 +395,8 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                     _set_settings(cell, f, drop_params, params, param_units, basename)
                 if check_ports:
                     _check_ports(cell)
+                if check_pins:
+                    _check_pins(cell)
                 _check_instances(cell, kcl, check_instances)
                 cell.insert_vinsts(recursive=False)
                 if snap_ports:
@@ -509,6 +539,7 @@ class ModuleCellKWargs(TypedDict, total=False):
     set_settings: bool
     set_name: bool
     check_ports: bool
+    check_pins: bool
     check_instances: CheckInstances | None
     snap_ports: bool
     add_port_layers: bool
@@ -528,6 +559,7 @@ class KCellDecoratorKWargs(TypedDict, total=False):
     set_settings: bool
     set_name: bool
     check_ports: bool
+    check_pins: bool
     check_instances: CheckInstances | None
     snap_ports: bool
     add_port_layers: bool

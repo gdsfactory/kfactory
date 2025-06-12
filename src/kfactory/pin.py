@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Generic
 
 from pydantic import BaseModel
@@ -12,11 +12,15 @@ from .typings import TUnit
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-    from .port import BasePort
+    from .layout import KCLayout
+    from .port import BasePort, DPort, Port, ProtoPort
+
+__all__ = ["DPin", "Pin", "ProtoPin"]
 
 
 class BasePinDict(TypedDict):
     name: str | None
+    kcl: KCLayout
     ports: set[BasePort]
     info: Info
     pin_type: str
@@ -24,6 +28,7 @@ class BasePinDict(TypedDict):
 
 class BasePin(BaseModel, arbitrary_types_allowed=True):
     name: str | None
+    kcl: KCLayout
     ports: set[BasePort]
     info: Info = Info()
     pin_type: str
@@ -53,6 +58,15 @@ class ProtoPin(Generic[TUnit], ABC):
         self._base.name = value
 
     @property
+    def kcl(self) -> KCLayout:
+        """KCLayout associated to the pin."""
+        return self._base.kcl
+
+    @kcl.setter
+    def kcl(self, value: KCLayout) -> None:
+        self._base.kcl = value
+
+    @property
     def pin_type(self) -> str:
         """Type of the pin."""
         return self._base.pin_type
@@ -71,8 +85,8 @@ class ProtoPin(Generic[TUnit], ABC):
         self._base.info = value
 
     @property
-    def ports(self) -> list[BasePort]:
-        return list(self._base.ports)
+    def ports(self) -> set[BasePort]:
+        return self._base.ports
 
     @ports.setter
     def ports(self, value: Iterable[BasePort]) -> None:
@@ -93,8 +107,37 @@ class ProtoPin(Generic[TUnit], ABC):
             f"ports={self.ports}, pin_type={self.pin_type})"
         )
 
+    @abstractmethod
+    def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]:
+        """Get a port in the pin by index or name."""
+        ...
 
-class Pin(ProtoPin[int]): ...
+
+class Pin(ProtoPin[int]):
+    def __getitem__(self, key: int | str | None) -> Port:
+        if isinstance(key, int):
+            return Port(base=list(self.ports)[key])
+        try:
+            return Port(
+                base=next(filter(lambda port_base: port_base.name == key, self.ports))
+            )
+        except StopIteration as e:
+            raise KeyError(
+                f"{key=} is not a valid port name or index within the pin. "
+                f"Available ports: {[v.name for v in self.ports]}"
+            ) from e
 
 
-class DPin(ProtoPin[float]): ...
+class DPin(ProtoPin[float]):
+    def __getitem__(self, key: int | str | None) -> DPort:
+        if isinstance(key, int):
+            return DPort(base=list(self.ports)[key])
+        try:
+            return DPort(
+                base=next(filter(lambda port_base: port_base.name == key, self.ports))
+            )
+        except StopIteration as e:
+            raise KeyError(
+                f"{key=} is not a valid port name or index within the pin. "
+                f"Available ports: {[v.name for v in self.ports]}"
+            ) from e
