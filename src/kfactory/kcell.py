@@ -734,6 +734,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         c._base.pins = [
             BasePin(
                 name=p.name,
+                kcl=self.kcl,
                 ports={port.base for port in c.ports},
                 pin_type=p.pin_type,
                 info=p.info,
@@ -2675,7 +2676,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
     @property
     def pins(self) -> DPins:
         """Pins associated with the cell."""
-        return DPins(bases=self._base.pins)
+        return DPins(kcl=self.kcl, bases=self._base.pins)
 
     @pins.setter
     def pins(self, new_pins: Iterable[ProtoPin[Any]]) -> None:
@@ -2854,7 +2855,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
     @property
     def pins(self) -> Pins:
         """Pins associated with the cell."""
-        return Pins(bases=self._base.pins)
+        return Pins(kcl=self.kcl, bases=self._base.pins)
 
     @pins.setter
     def pins(self, new_pins: Iterable[ProtoPin[Any]]) -> None:

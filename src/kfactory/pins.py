@@ -10,22 +10,37 @@ from .typings import TUnit
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
 
+    from .layout import KCLayout
     from .port import ProtoPort
+
+__all__ = ["DPins", "Pins", "ProtoPins"]
 
 
 class ProtoPins(Protocol[TUnit]):
+    _kcl: KCLayout
     _bases: list[BasePin]
 
     def __init__(
         self,
         *,
+        kcl: KCLayout,
         bases: list[BasePin],
     ) -> None:
+        self._kcl = kcl
         self._bases = bases
 
     def __len__(self) -> int:
         """Return Pin count."""
         return len(self._bases)
+
+    @property
+    def kcl(self) -> KCLayout:
+        """KCLayout associated to the pins."""
+        return self._kcl
+
+    @kcl.setter
+    def kcl(self, value: KCLayout) -> None:
+        self._kcl = value
 
     @property
     def bases(self) -> list[BasePin]:
@@ -34,11 +49,11 @@ class ProtoPins(Protocol[TUnit]):
 
     def to_itype(self) -> Pins:
         """Convert to a Ports."""
-        return Pins(bases=self._bases)
+        return Pins(kcl=self.kcl, bases=self._bases)
 
     def to_dtype(self) -> DPins:
         """Convert to a DPins."""
-        return DPins(bases=self._bases)
+        return DPins(kcl=self.kcl, bases=self._bases)
 
     @abstractmethod
     def __iter__(self) -> Iterator[ProtoPin[TUnit]]:
@@ -102,8 +117,15 @@ class Pins(ProtoPins[int]):
         if info is None:
             info = {}
         info_ = Info(**info)
+        port_bases = set()
+        for port in ports:
+            port_base = port.base.model_copy()
+            if port.kcl != self.kcl:
+                port_base.kcl = self.kcl
+            port_bases.add(port_base)
+
         base_ = BasePin(
-            name=name, ports={p.base for p in ports}, pin_type=pin_type, info=info_
+            name=name, kcl=self.kcl, ports=port_bases, pin_type=pin_type, info=info_
         )
         self._bases.append(base_)
 
@@ -141,12 +163,19 @@ class DPins(ProtoPins[float]):
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
     ) -> DPin:
-        """Add a pin to DPins."""
+        """Add a pin to Pins."""
         if info is None:
             info = {}
         info_ = Info(**info)
+        port_bases = set()
+        for port in ports:
+            port_base = port.base.model_copy()
+            if port.kcl != self.kcl:
+                port_base.kcl = self.kcl
+            port_bases.add(port_base)
+
         base_ = BasePin(
-            name=name, ports={p.base for p in ports}, pin_type=pin_type, info=info_
+            name=name, kcl=self.kcl, ports=port_bases, pin_type=pin_type, info=info_
         )
         self._bases.append(base_)
 

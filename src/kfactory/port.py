@@ -227,6 +227,9 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             )
         )
 
+    def __hash__(self) -> int:
+        return hash((self.name, self.port_type))
+
 
 class ProtoPort(Generic[TUnit], ABC):
     """Base class for kf.Port, kf.DPort."""
