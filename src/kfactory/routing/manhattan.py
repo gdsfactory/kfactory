@@ -1468,7 +1468,7 @@ def route_smart(
                                     clockwise=True,
                                     bbox=start_bbox,
                                     separation=separation,
-                                    allow_sbends=a == 0,
+                                    allow_sbends=a == 0 and allow_sbend,
                                 )
                         else:
                             while a != new_angle:
@@ -1480,7 +1480,7 @@ def route_smart(
                                     clockwise=True,
                                     bbox=start_bbox,
                                     separation=separation,
-                                    allow_sbends=a == 0,
+                                    allow_sbends=a == 0 and allow_sbend,
                                 )
                     if new_angle <= angle:
                         if new_angle != 0:
@@ -1518,7 +1518,7 @@ def route_smart(
                                 clockwise=False,
                                 bbox=start_bbox,
                                 separation=separation,
-                                allow_sbends=a == 0,
+                                allow_sbends=a == 0 and allow_sbend,
                             )
                     if new_angle == 0:
                         routers_anticlockwise.extend(new_routers)
@@ -1536,7 +1536,7 @@ def route_smart(
                             clockwise=False,
                             bbox=start_bbox,
                             separation=separation,
-                            allow_sbends=a == 0,
+                            allow_sbends=a == 0 and allow_sbend,
                         )
             route_to_bbox(
                 [router.start for router in sorted_routers],
