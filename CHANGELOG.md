@@ -1,5 +1,5 @@
 <a id="v1.8.0"></a>
-# [v1.8.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.0) - 2025-05-30
+# [v1.8.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.0) - 2025-06-11
 
 # What's Changed
 
@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- insert dcplx_trans property to VInstance and fix place90 call [#726](https://github.com/gdsfactory/kfactory/pull/726)
 - fix connect for virtual instances and the other way around [#725](https://github.com/gdsfactory/kfactory/pull/725)
 - Override ProtoTInstanceGroup second generic param with TInstance [#721](https://github.com/gdsfactory/kfactory/pull/721)
 - Fix create_port overloads [#717](https://github.com/gdsfactory/kfactory/pull/717)
