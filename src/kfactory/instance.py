@@ -658,6 +658,14 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         self._name = value
 
     @property
+    def dcplx_trans(self) -> kdb.DCplxTrans:
+        return self.trans
+
+    @dcplx_trans.setter
+    def dcplx_trans(self, val: kdb.DCplxTrans) -> None:
+        self.trans = val
+
+    @property
     def cell_name(self) -> str | None:
         return self.cell.name
 

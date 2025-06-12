@@ -1431,7 +1431,7 @@ def place90(
         allow_layer_mismatch=allow_layer_mismatch,
         allow_type_mismatch=allow_type_mismatch,
         purpose=purpose,
-        kwargs=kwargs,
+        **kwargs,
     )
 
 
