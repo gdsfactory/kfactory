@@ -195,26 +195,22 @@ def _check_ports(cell: ProtoTKCell[Any]) -> None:
 
 def _check_pins(cell: ProtoTKCell[Any]) -> None:
     pin_names: dict[str | None, int] = defaultdict(int)
-    port_names: dict[str | None, int] = defaultdict(int)
     for pin in cell.pins:
         pin_names[pin.name] += 1
-        for pin_port in pin.ports:
-            port_names[pin_port.name] += 1
-    for port in cell.ports:
-        port_names[port.name] += 1
+        pin_ports = {id(port) for port in pin.ports}
+        pin_ports_in_cell = {id(port.base) for port in cell.ports} & pin_ports
+        if len(pin_ports_in_cell) != len(pin_ports):
+            raise ValueError(
+                f"Attempted to create a pin {pin.name} with ports not belonging "
+                "to the cell. Please use ports that belong to the cell "
+                "to create the pin."
+            )
+
     duplicate_pin_names = [(name, n) for name, n in pin_names.items() if n > 1]
     if duplicate_pin_names:
         raise ValueError(
             "Found duplicate pin names: "
             + ", ".join([f"{name}: {n}" for name, n in duplicate_pin_names])
-            + " If this intentional, please pass "
-            "`check_pins=False` to the @cell decorator"
-        )
-    duplicate_port_names = [(name, n) for name, n in port_names.items() if n > 1]
-    if duplicate_port_names:
-        raise ValueError(
-            "Found duplicate port names when adding the pin: "
-            + ", ".join([f"{name}: {n}" for name, n in duplicate_port_names])
             + " If this intentional, please pass "
             "`check_pins=False` to the @cell decorator"
         )
