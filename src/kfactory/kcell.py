@@ -1082,10 +1082,13 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             it.targets = [old_kdb_cell.cell_index()]
             it.max_depth = 0
             insts = [instit.current_inst_element().inst() for instit in it.each()]
+            locked = c.locked
+            c.locked = False
             for inst in insts:
                 ca = inst.cell_inst
                 ca.cell_index = ci_
                 c.replace(inst, ca)
+            c.locked = locked
 
         self.kcl.layout.delete_cell(old_kdb_cell.cell_index())
 
