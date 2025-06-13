@@ -117,6 +117,10 @@ class Pins(ProtoPins[int]):
         if info is None:
             info = {}
         info_ = Info(**info)
+        if len(list(ports)) < 1:
+            raise ValueError(
+                f"At least one port must provided to create pin named {name}."
+            )
         port_bases = set()
         for port in ports:
             port_base = port.base.model_copy()
@@ -167,6 +171,10 @@ class DPins(ProtoPins[float]):
         if info is None:
             info = {}
         info_ = Info(**info)
+        if len(list(ports)) < 1:
+            raise ValueError(
+                f"At least one port must provided to create pin named {name}."
+            )
         port_bases = set()
         for port in ports:
             port_base = port.base.model_copy()
