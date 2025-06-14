@@ -1,3 +1,18 @@
+<a id="v1.8.3"></a>
+# [v1.8.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.3) - 2025-06-14
+
+# What's Changed
+
+## Bug Fixes
+
+- fix replace on being locked when converting cells [#730](https://github.com/gdsfactory/kfactory/pull/730)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.8.2...v1.8.3
+
+
+[Changes][v1.8.3]
+
+
 <a id="v1.8.2"></a>
 # [v1.8.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.2) - 2025-06-12
 
@@ -2073,6 +2088,7 @@
 [Changes][v0.4.0]
 
 
+[v1.8.3]: https://github.com/gdsfactory/kfactory/compare/v1.8.2...v1.8.3
 [v1.8.2]: https://github.com/gdsfactory/kfactory/compare/v1.8.1...v1.8.2
 [v1.8.1]: https://github.com/gdsfactory/kfactory/compare/v1.8.0...v1.8.1
 [v1.8.0]: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.8.0
