@@ -22,6 +22,8 @@ from .cross_section import (
 from .enclosure import KCellEnclosure, LayerEnclosure
 from .grid import flexgrid, flexgrid_dbu, grid, grid_dbu
 from .kcell import BaseKCell, DKCell, KCell, ProtoTKCell, VKCell, show
+from .pin import Pin, DPin, ProtoPin
+from .pins import Pins, DPins
 from .ports import Ports, DPorts
 from .port import Port, DPort, ProtoPort
 from .instance import Instance, DInstance, VInstance
@@ -78,6 +80,8 @@ __all__ = [
     "DInstancePorts",
     "DInstances",
     "DKCell",
+    "DPin",
+    "DPins",
     "DPort",
     "DPorts",
     "DSchema",
@@ -95,8 +99,11 @@ __all__ = [
     "LayerInfos",
     "LayerStack",
     "Netlist",
+    "Pin",
+    "Pins",
     "Port",
     "Ports",
+    "ProtoPin",
     "ProtoPort",
     "ProtoTKCell",
     "Schema",
