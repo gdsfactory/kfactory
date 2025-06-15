@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Generic
 from pydantic import BaseModel
 from typing_extensions import TypedDict
 
+from . import kdb
 from .settings import Info
 from .typings import TUnit
 
@@ -32,6 +33,21 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
     ports: set[BasePort]
     info: Info = Info()
     pin_type: str
+
+    def transformed(
+        self,
+        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+    ) -> BasePin:
+        return BasePin(
+            name=self.name,
+            kcl=self.kcl,
+            ports={
+                p.transformed(trans=trans, post_trans=post_trans) for p in self.ports
+            },
+            info=self.info.model_copy(),
+            pin_type=self.pin_type,
+        )
 
 
 class ProtoPin(Generic[TUnit], ABC):
@@ -112,6 +128,15 @@ class ProtoPin(Generic[TUnit], ABC):
         """Get a port in the pin by index or name."""
         ...
 
+    @abstractmethod
+    def copy(
+        self,
+        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+    ) -> ProtoPin[TUnit]:
+        """Copy the port with a transformation."""
+        ...
+
 
 class Pin(ProtoPin[int]):
     def __getitem__(self, key: int | str | None) -> Port:
@@ -127,6 +152,26 @@ class Pin(ProtoPin[int]):
                 f"Available ports: {[v.name for v in self.ports]}"
             ) from e
 
+    def copy(
+        self,
+        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+    ) -> Pin:
+        """Get a copy of a pin.
+
+        Transformation order which results in `copy.trans`:
+            - Trans: `trans * pin.trans * post_trans`
+            - DCplxTrans: `trans * pin.dcplx_trans * post_trans`
+
+        Args:
+            trans: an optional transformation applied to the pin to be copied.
+            post_trans: transformation to apply to the pin after copying.
+
+        Returns:
+            pin: a copy of the pin
+        """
+        return Pin(base=self._base.transformed(trans=trans, post_trans=post_trans))
+
 
 class DPin(ProtoPin[float]):
     def __getitem__(self, key: int | str | None) -> DPort:
@@ -141,3 +186,23 @@ class DPin(ProtoPin[float]):
                 f"{key=} is not a valid port name or index within the pin. "
                 f"Available ports: {[v.name for v in self.ports]}"
             ) from e
+
+    def copy(
+        self,
+        trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+        post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
+    ) -> DPin:
+        """Get a copy of a pin.
+
+        Transformation order which results in `copy.trans`:
+            - Trans: `trans * pin.trans * post_trans`
+            - DCplxTrans: `trans * pin.dcplx_trans * post_trans`
+
+        Args:
+            trans: an optional transformation applied to the pin to be copied.
+            post_trans: transformation to apply to the pin after copying.
+
+        Returns:
+            pin: a copy of the pin
+        """
+        return DPin(base=self._base.transformed(trans=trans, post_trans=post_trans))

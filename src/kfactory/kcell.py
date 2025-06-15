@@ -156,6 +156,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     """
 
     ports: list[BasePort] = Field(default_factory=list)
+    pins: list[BasePin] = Field(default_factory=list)
     settings: KCellSettings = Field(default_factory=KCellSettings)
     settings_units: KCellSettingsUnits = Field(default_factory=KCellSettingsUnits)
     vinsts: VInstances
@@ -290,6 +291,14 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
     @abstractmethod
     def ports(self, new_ports: Iterable[ProtoPort[Any]]) -> None: ...
 
+    @property
+    @abstractmethod
+    def pins(self) -> ProtoPins[TUnit]: ...
+
+    @pins.setter
+    @abstractmethod
+    def pins(self, new_ports: Iterable[ProtoPin[Any]]) -> None: ...
+
     def add_port(
         self,
         *,
@@ -397,7 +406,6 @@ class TKCell(BaseKCell):
     kdb_cell: kdb.Cell
     boundary: kdb.DPolygon | None = None
     lvs_equivalent_ports: list[list[str]] | None = None
-    pins: list[BasePin] = Field(default_factory=list)
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -731,16 +739,18 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         c = self.__class__(kcl=self.kcl, kdb_cell=kdb_copy)
         c.ports = self.ports.copy()
 
-        c._base.pins = [
-            BasePin(
-                name=p.name,
-                kcl=self.kcl,
-                ports={port.base for port in c.ports},
-                pin_type=p.pin_type,
-                info=p.info,
-            )
-            for p in self._base.pins
-        ]
+        if self.pins:
+            port_mapping = {id(p): i for i, p in enumerate(c.ports)}
+            c._base.pins = [
+                BasePin(
+                    name=p.name,
+                    kcl=self.kcl,
+                    ports={c.base.ports[port_mapping[id(port)]] for port in p.ports},
+                    pin_type=p.pin_type,
+                    info=p.info,
+                )
+                for p in self._base.pins
+            ]
 
         c._base.settings = self.settings.model_copy()
         c._base.info = self.info.model_copy()
@@ -3297,6 +3307,17 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         if self.locked:
             raise LockedError(self)
         self._base.ports = [port.base for port in new_ports]
+
+    @property
+    def pins(self) -> DPins:
+        """Ports associated with the cell."""
+        return DPins(kcl=self.kcl, bases=self._base.pins)
+
+    @pins.setter
+    def pins(self, new_pins: Iterable[ProtoPin[Any]]) -> None:
+        if self.locked:
+            raise LockedError(self)
+        self._base.pins = [pin.base for pin in new_pins]
 
     def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
         layers_ = set(self.shapes().keys())

@@ -123,7 +123,7 @@ class Pins(ProtoPins[int]):
             )
         port_bases = set()
         for port in ports:
-            port_base = port.base.model_copy()
+            port_base = port.base
             if port.kcl != self.kcl:
                 port_base.kcl = self.kcl
             port_bases.add(port_base)
