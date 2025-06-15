@@ -46,6 +46,64 @@ def test_instance_d_move(layers: Layers) -> None:
     ref.dmirror_x(0)
 
 
+def test_instance_array(layers: Layers) -> None:
+    c = kf.KCell()
+    ref = c.create_inst(
+        kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG),
+        na=4,
+        nb=6,
+        a=kf.kdb.Vector(3000, 0),
+        b=kf.kdb.Vector(0, 2000),
+    )
+
+    ref.dmovex(10)
+    ref.dmovex(10.0)
+
+    ref.dmovey(10)
+    ref.dmovey(10.0)
+    ref.dmovex(10).movey(10)
+    ref.drotate(45).movey(10)
+
+    ref.dxmin = 0
+    ref.dxmax = 0
+    ref.dymin = 0
+    ref.dymax = 0
+
+    ref.dmirror_y(0)
+    ref.dmirror_x(0)
+
+    for x in range(4):
+        for y in range(6):
+            disp_o1 = (
+                ref.ports["o1", x, y].dcplx_trans.disp
+                - (
+                    kf.kdb.DCplxTrans(
+                        trans=kf.kdb.InstElement(
+                            ref.instance, x, y
+                        ).specific_cplx_trans(),
+                        dbu=c.kcl.dbu,
+                    )
+                    * ref.cell.ports["o1"].dcplx_trans
+                ).disp
+            )
+            disp_o2 = (
+                ref.ports["o2", x, y].dcplx_trans.disp
+                - (
+                    kf.kdb.DCplxTrans(
+                        trans=kf.kdb.InstElement(
+                            ref.instance, x, y
+                        ).specific_cplx_trans(),
+                        dbu=c.kcl.dbu,
+                    )
+                    * ref.cell.ports["o2"].dcplx_trans
+                ).disp
+            )
+            assert abs(disp_o1.x) < 0.0005
+            assert abs(disp_o1.y) < 0.0005
+            assert abs(disp_o2.x) < 0.0005
+            assert abs(disp_o2.y) < 0.0005
+
+
 def test_instance_mirror(layers: Layers) -> None:
     """Test arbitrary mirror."""
     c = kf.KCell()
@@ -89,7 +147,8 @@ def test_dmirror(layers: Layers) -> None:
 
 
 def _instances_equal(
-    instance1: kf.kcell.ProtoTInstance[Any], instance2: kf.kcell.ProtoTInstance[Any]
+    instance1: kf.instance.ProtoTInstance[Any],
+    instance2: kf.instance.ProtoTInstance[Any],
 ) -> bool:
     return (
         instance1.instance.cell_index == instance2.instance.cell_index
@@ -98,12 +157,12 @@ def _instances_equal(
 
 
 _DBUInstanceTuple: TypeAlias = tuple[
-    kf.kcell.Instance, kf.kcell.Instance, kf.kcell.Instance
+    kf.instance.Instance, kf.instance.Instance, kf.instance.Instance
 ]
 
 
 _UMInstanceTuple: TypeAlias = tuple[
-    kf.kcell.DInstance, kf.kcell.DInstance, kf.kcell.DInstance
+    kf.instance.DInstance, kf.instance.DInstance, kf.instance.DInstance
 ]
 
 
@@ -563,7 +622,7 @@ def test_vinstance_errors(kcl: kf.KCLayout, layers: Layers) -> None:
     with pytest.raises(exceptions.PortTypeMismatchError):
         ref.connect("o1", ref4.ports["o1"])
     with pytest.raises(ValueError):
-        ref.connect("o1", ref5)  # type: ignore[arg-type]
+        ref.connect("o1", ref5)  # type: ignore[call-overload]
 
 
 def test_mirror_y_default_arg(dbu_instance_tuple: _DBUInstanceTuple) -> None:

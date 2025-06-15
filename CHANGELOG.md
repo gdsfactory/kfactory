@@ -1,20 +1,71 @@
-<a id="v1.7.3"></a>
-# [v1.7.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.7.3) - 2025-05-30
+<a id="v1.8.3"></a>
+# [v1.8.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.3) - 2025-06-14
 
 # What's Changed
 
 ## Bug Fixes
 
+- fix replace on being locked when converting cells [#730](https://github.com/gdsfactory/kfactory/pull/730)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.8.2...v1.8.3
+
+
+[Changes][v1.8.3]
+
+
+<a id="v1.8.2"></a>
+# [v1.8.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.2) - 2025-06-12
+
+# What's Changed
+
+## Bug Fixes
+
+- fix routing if no sbend is allowed [#728](https://github.com/gdsfactory/kfactory/pull/728)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.8.1...v1.8.2
+
+
+[Changes][v1.8.2]
+
+
+<a id="v1.8.1"></a>
+# [v1.8.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.1) - 2025-06-12
+
+# What's Changed
+
+## Bug Fixes
+
+- insert dcplx_trans property to VInstance and fix place90 call [#726](https://github.com/gdsfactory/kfactory/pull/726)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.8.0...v1.8.1
+
+
+[Changes][v1.8.1]
+
+
+<a id="v1.8.0"></a>
+# [v1.8.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.0) - 2025-06-12
+
+# What's Changed
+
+## New
+
+- rework the optical placer and add sbend capabilities [#720](https://github.com/gdsfactory/kfactory/pull/720)
+
+## Bug Fixes
+
+- fix connect for virtual instances and the other way around [#725](https://github.com/gdsfactory/kfactory/pull/725)
+- Override ProtoTInstanceGroup second generic param with TInstance [#721](https://github.com/gdsfactory/kfactory/pull/721)
 - Fix create_port overloads [#717](https://github.com/gdsfactory/kfactory/pull/717)
 
 ## Typing
 
 - Typing Fixes [#718](https://github.com/gdsfactory/kfactory/pull/718)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.7.3
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.8.0
 
 
-[Changes][v1.7.3]
+[Changes][v1.8.0]
 
 
 <a id="v1.7.2"></a>
@@ -2037,7 +2088,10 @@
 [Changes][v0.4.0]
 
 
-[v1.7.3]: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.7.3
+[v1.8.3]: https://github.com/gdsfactory/kfactory/compare/v1.8.2...v1.8.3
+[v1.8.2]: https://github.com/gdsfactory/kfactory/compare/v1.8.1...v1.8.2
+[v1.8.1]: https://github.com/gdsfactory/kfactory/compare/v1.8.0...v1.8.1
+[v1.8.0]: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.8.0
 [v1.7.2]: https://github.com/gdsfactory/kfactory/compare/v1.7.1...v1.7.2
 [v1.7.1]: https://github.com/gdsfactory/kfactory/compare/v1.7.0...v1.7.1
 [v1.7.0]: https://github.com/gdsfactory/kfactory/compare/v1.6.0...v1.7.0

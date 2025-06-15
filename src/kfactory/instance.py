@@ -170,7 +170,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @cell.setter
     @abstractmethod
-    def cell(self, value: ProtoTKCell[TUnit]) -> None: ...
+    def cell(self, value: ProtoTKCell[Any]) -> None: ...
 
     @property
     @abstractmethod
@@ -320,10 +320,25 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         use_angle: bool | None = None,
     ) -> None: ...
 
+    @overload
     def connect(
         self,
         port: str | ProtoPort[Any] | None,
-        other: ProtoTInstance[Any] | ProtoPort[Any],
+        other: VInstance,
+        other_port_name: str | int | None,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
+    ) -> None: ...
+
+    def connect(
+        self,
+        port: str | ProtoPort[Any] | None,
+        other: ProtoInstance[Any] | ProtoPort[Any],
         other_port_name: str | int | tuple[int | str, int, int] | None = None,
         *,
         mirror: bool = False,
@@ -364,20 +379,20 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         if use_angle is None:
             use_angle = config.connect_use_angle
 
-        if isinstance(other, ProtoTInstance):
+        if isinstance(other, ProtoPort):
+            op = Port(base=other.base)
+        else:
             if other_port_name is None:
                 raise ValueError(
                     "portname cannot be None if an Instance Object is given. For"
                     "complex connections (non-90 degree and floating point ports) use"
                     "route_cplx instead"
                 )
-            op = other.ports[other_port_name].to_itype()
-        else:
-            op = other.to_itype()
+            op = Port(base=other.ports[other_port_name].base)  # type: ignore[index]
         if isinstance(port, ProtoPort):
             p = Port(base=port.base.transformed(self.dcplx_trans.inverted()))
         else:
-            p = self.cell.ports[port].to_itype()
+            p = Port(base=self.cell.ports[port].base)
 
         assert isinstance(p, Port)
         assert isinstance(op, Port)
@@ -416,7 +431,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
                     )
                     self.dmirror_y(op.dcplx_trans.disp.y)
                 case _:
-                    ...
+                    raise NotImplementedError("This shouldn't happen")
 
         else:
             conn_trans = kdb.Trans.M90 if mirror else kdb.Trans.R180
@@ -438,7 +453,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
                     self._instance.trans = kdb.Trans(op.trans.disp - p.trans.disp)
                     self.dmirror_y(op.dcplx_trans.disp.y)
                 case _:
-                    ...
+                    raise NotImplementedError("This shouldn't happen")
 
     def __repr__(self) -> str:
         """Return a string representation of the instance."""
@@ -531,7 +546,7 @@ class Instance(ProtoTInstance[int], DBUGeometricObject):
         return self.kcl.kcells[self.cell_index]
 
     @cell.setter
-    def cell(self, value: ProtoTKCell[int]) -> None:
+    def cell(self, value: ProtoTKCell[Any]) -> None:
         self.cell_index = value.cell_index()
 
     @classmethod
@@ -577,7 +592,7 @@ class DInstance(ProtoTInstance[float], UMGeometricObject):
         return self.kcl.dkcells[self.cell_index]
 
     @cell.setter
-    def cell(self, value: ProtoTKCell[TUnit]) -> None:
+    def cell(self, value: ProtoTKCell[Any]) -> None:
         self.cell_index = value.cell_index()
 
     @property
@@ -641,6 +656,14 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     @name.setter
     def name(self, value: str | None) -> None:
         self._name = value
+
+    @property
+    def dcplx_trans(self) -> kdb.DCplxTrans:
+        return self.trans
+
+    @dcplx_trans.setter
+    def dcplx_trans(self, val: kdb.DCplxTrans) -> None:
+        self.trans = val
 
     @property
     def cell_name(self) -> str | None:
@@ -842,8 +865,23 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     def connect(
         self,
         port: str | ProtoPort[Any] | None,
+        other: ProtoTInstance[Any],
+        other_port_name: str | int | tuple[int | str, int, int] | None,
+        *,
+        mirror: bool = False,
+        allow_width_mismatch: bool | None = None,
+        allow_layer_mismatch: bool | None = None,
+        allow_type_mismatch: bool | None = None,
+        use_mirror: bool | None = None,
+        use_angle: bool | None = None,
+    ) -> None: ...
+
+    @overload
+    def connect(
+        self,
+        port: str | ProtoPort[Any] | None,
         other: VInstance,
-        other_port_name: str | None,
+        other_port_name: str | int | None,
         *,
         mirror: bool = False,
         allow_width_mismatch: bool | None = None,
@@ -856,8 +894,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     def connect(
         self,
         port: str | ProtoPort[Any] | None,
-        other: VInstance | ProtoPort[Any],
-        other_port_name: str | None = None,
+        other: ProtoInstance[Any] | ProtoPort[Any],
+        other_port_name: str | int | tuple[int | str, int, int] | None = None,
         *,
         mirror: bool = False,
         allow_width_mismatch: bool | None = None,
@@ -896,16 +934,16 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             use_mirror = config.connect_use_mirror
         if use_angle is None:
             use_angle = config.connect_use_angle
-        if isinstance(other, VInstance):
+        if isinstance(other, ProtoInstance):
             if other_port_name is None:
                 raise ValueError(
                     "portname cannot be None if an Instance Object is given. For"
                     "complex connections (non-90 degree and floating point ports) use"
                     "route_cplx instead"
                 )
-            op = other.ports[other_port_name].to_itype()
+            op = Port(base=other.ports[other_port_name].base)  # type: ignore[index]
         else:
-            op = other.to_itype()
+            op = Port(base=other.base)
         if isinstance(port, ProtoPort):
             p = port.copy(self.trans.inverted()).to_itype()
         else:

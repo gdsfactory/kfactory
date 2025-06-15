@@ -20,6 +20,7 @@ import klayout.db as kdb
 import numpy as np
 
 from ..conf import (
+    ANGLE_90,
     ANGLE_180,
     ANGLE_270,
     MIN_POINTS_FOR_CLEAN,
@@ -346,6 +347,7 @@ class ManhattanRouter:
     start_points: InitVar[list[kdb.Point]] = field(default=[])
     end_points: InitVar[list[kdb.Point]] = field(default=[])
     finished: bool = False
+    allow_sbends: bool = False
 
     def __post_init__(
         self,
@@ -394,6 +396,7 @@ class ManhattanRouter:
         self,
         max_try: int = 20,
         straight_s_bend_strategy: Literal["short", "long"] = "short",
+        bbox: kdb.Box | None = None,
     ) -> list[kdb.Point]:
         """Automatically determine a route from start to end.
 
@@ -439,6 +442,8 @@ class ManhattanRouter:
                     case 0:
                         return self.finish()
                     case y if y_abs < 2 * self.bend90_radius:
+                        if self.allow_sbends:
+                            return self.finish()
                         if straight_s_bend_strategy == "short":
                             self.start.right() if y > 0 else self.start.left()
                         else:
@@ -561,10 +566,13 @@ class ManhattanRouter:
                 "Route is not finished. The transformations must be facing each other"
             )
         if tv.y != 0:
-            raise ValueError(
-                "Route  is not finished. The transformations are not properly aligned: "
-                f"Vector (as seen from t1): {tv.x=}, {tv.y=}"
-            )
+            if not self.allow_sbends:
+                raise ValueError(
+                    "Route  is not finished. The transformations are not properly "
+                    f"aligned: Vector (as seen from t1): {tv.x=}, {tv.y=}"
+                )
+            if self.start.t.disp.to_p() != self.start.pts[-1]:
+                self.start.pts.append(self.start.t.disp.to_p())
         if self.end.pts[-1] != self.start.pts[-1]:
             self.start.pts.extend(reversed(self.end.pts))
         else:
@@ -846,6 +854,7 @@ def route_smart(
     sort_ports: bool = False,
     waypoints: Sequence[kdb.Point] | kdb.Trans | None = None,
     bbox_routing: Literal["minimal", "full"] = "minimal",
+    allow_sbend: bool = False,
     **kwargs: Any,
 ) -> list[ManhattanRouter]:
     """Route around start or end bboxes (obstacles on the way not implemented yet).
@@ -869,8 +878,15 @@ def route_smart(
         bbox_routing: "minimal": only route to the bbox so that it can be safely routed
             around, but start or end bends might encroach on the bounding boxes when
             leaving them.
+        allow_sbends: Allows the router to route the final pieces with sbends.
         kwargs: Additional kwargs. Compatibility for type checking. If any kwargs are
             passed an error is raised.
+    Raises:
+        ValueError: If the route cannot conform to bend radius and other routing
+            restrictions a value error is raised.
+    Returns:
+        List of ManhattanRoute objects which contain all the instances in the route
+        as well as the route info.
     """
     length = len(start_ports)
     if len(kwargs) > 0:
@@ -942,6 +958,7 @@ def route_smart(
                 bboxes=bboxes,
                 sort_ports=True,
                 bbox_routing=bbox_routing,
+                allow_sbends=allow_sbend,
             )
         default_start_bundle: list[kdb.Trans] = []
         start_bundles: dict[kdb.Box, list[kdb.Trans]] = defaultdict(list)
@@ -954,6 +971,7 @@ def route_smart(
                     end_transformation=e_t,
                     start_steps=s,
                     end_steps=e,
+                    allow_sbends=allow_sbend,
                 )
             )
         start_ts = [r.start.t for r in mh_routers]
@@ -1210,6 +1228,7 @@ def route_smart(
                     start_steps=ss,
                     end_steps=es,
                     width=w,
+                    allow_sbends=allow_sbend,
                 )
             )
 
@@ -1227,6 +1246,7 @@ def route_smart(
                 bbox_routing=bbox_routing,
                 bend90_radius=bend90_radius,
                 sort_ports=False,
+                allow_sbends=allow_sbend,
             )
 
         all_routers = []
@@ -1241,6 +1261,7 @@ def route_smart(
                     start_steps=ss,
                     end_steps=es,
                     width=w,
+                    allow_sbends=allow_sbend,
                 )
             )
 
@@ -1430,7 +1451,7 @@ def route_smart(
             # Routing clock-wise (the order of the routers, the actual routings are
             # anti-clockwise and vice-versa)
 
-            if traverses0 or rg_angles[-1] in (0, 3):
+            if traverses0 or rg_angles[-1] in {0, 3}:
                 routers_clockwise: list[ManhattanRouter]
                 routers_clockwise = router_groups[0][1].copy()
                 for i in range(1, len(router_groups)):
@@ -1438,7 +1459,7 @@ def route_smart(
                     a = angle
                     if routers_clockwise:
                         if traverses0:
-                            while a not in (new_angle, 0):
+                            while a not in {new_angle, 0}:
                                 a = (a + 1) % 4
                                 total_bbox += _route_to_side(
                                     routers=[
@@ -1447,6 +1468,7 @@ def route_smart(
                                     clockwise=True,
                                     bbox=start_bbox,
                                     separation=separation,
+                                    allow_sbends=a == 0 and allow_sbend,
                                 )
                         else:
                             while a != new_angle:
@@ -1458,6 +1480,7 @@ def route_smart(
                                     clockwise=True,
                                     bbox=start_bbox,
                                     separation=separation,
+                                    allow_sbends=a == 0 and allow_sbend,
                                 )
                     if new_angle <= angle:
                         if new_angle != 0:
@@ -1486,7 +1509,7 @@ def route_smart(
                     new_angle, new_routers = router_groups[i]
                     a = angle
                     if routers_anticlockwise:
-                        while a not in (new_angle, 0):
+                        while a not in {new_angle, 0}:
                             a = (a - 1) % 4
                             total_bbox += _route_to_side(
                                 routers=[
@@ -1495,6 +1518,7 @@ def route_smart(
                                 clockwise=False,
                                 bbox=start_bbox,
                                 separation=separation,
+                                allow_sbends=a == 0 and allow_sbend,
                             )
                     if new_angle == 0:
                         routers_anticlockwise.extend(new_routers)
@@ -1512,6 +1536,7 @@ def route_smart(
                             clockwise=False,
                             bbox=start_bbox,
                             separation=separation,
+                            allow_sbends=a == 0 and allow_sbend,
                         )
             route_to_bbox(
                 [router.start for router in sorted_routers],
@@ -1525,6 +1550,7 @@ def route_smart(
                 start_bbox=total_bbox,
                 end_bbox=end_bbox,
                 bbox_routing=bbox_routing,
+                allow_sbend=allow_sbend,
             )
         else:
             routers = router_groups[0][1]
@@ -1536,6 +1562,7 @@ def route_smart(
                         clockwise=True,
                         bbox=total_bbox,
                         separation=separation,
+                        allow_sbends=allow_sbend,
                     )
                 case 2:
                     total_bbox = _route_to_side(
@@ -1549,6 +1576,7 @@ def route_smart(
                         clockwise=routers[0].start.tv.y > 0,
                         bbox=total_bbox,
                         separation=separation,
+                        allow_sbends=allow_sbend,
                     )
                 case 3:
                     total_bbox = _route_to_side(
@@ -1556,6 +1584,7 @@ def route_smart(
                         clockwise=False,
                         bbox=total_bbox,
                         separation=separation,
+                        allow_sbends=allow_sbend,
                     )
                 case _:
                     ...
@@ -1571,6 +1600,7 @@ def route_smart(
                 start_bbox=total_bbox,
                 end_bbox=end_bbox,
                 bbox_routing=bbox_routing,
+                allow_sbend=allow_sbend,
             )
 
     return all_routers
@@ -1599,8 +1629,6 @@ def route_to_bbox(
                         router.straight_nobend(-bb.left + hw1 + router.t.disp.x)
                     case 3:
                         router.straight_nobend(-bb.bottom + hw1 + router.t.disp.y)
-                    case _:
-                        ...
         elif bbox_routing == "full":
             for router in routers:
                 hw1 = max(
@@ -1616,8 +1644,6 @@ def route_to_bbox(
                         router.straight(-bbox.left + hw1 + router.t.disp.x)
                     case 3:
                         router.straight(-bbox.bottom + hw1 + router.t.disp.y)
-                    case _:
-                        ...
         else:
             raise ValueError(
                 f"routing mode {bbox_routing=} is not supported, available modes"
@@ -1631,6 +1657,7 @@ def route_loosely(
     bbox_routing: Literal["minimal", "full"],
     start_bbox: kdb.Box | None = None,
     end_bbox: kdb.Box | None = None,
+    allow_sbend: bool = False,
 ) -> None:
     """Route two port banks (all ports same direction) to the end.
 
@@ -1658,7 +1685,7 @@ def route_loosely(
         for router in sorted_routers:
             routers_per_angle[(router.start.t.angle - angle + 2) % 4].append(router)
 
-        if 1 in routers_per_angle:
+        if ANGLE_90 in routers_per_angle:
             r_list = list(reversed(routers_per_angle[1]))
             delta = -r_list[0].width // 2
             for router in r_list:
@@ -1792,7 +1819,7 @@ def route_loosely(
                 if not router.finished:
                     router.start.straight(delta)
                     delta += router.width + separation
-                    router.auto_route()
+                    router.auto_route(bbox=start_bbox)
 
         for router_group in reverse_groups:
             delta = 0
@@ -1800,7 +1827,7 @@ def route_loosely(
                 if not router.finished:
                     router.start.straight(delta)
                     delta += router.width + separation
-                    router.auto_route()
+                    router.auto_route(bbox=start_bbox)
 
 
 def vec_dir(vec: kdb.Vector) -> int:
@@ -1921,6 +1948,7 @@ def _route_to_side(
     bbox: kdb.Box,
     separation: int,
     bbox_routing: Literal["minimal", "full"] = "minimal",
+    allow_sbends: bool = False,
 ) -> kdb.Box:
     """Route a list of routers either clockwise or anti-clockwise one 90° corner.
 
@@ -1971,12 +1999,10 @@ def _route_to_side(
                 case 3:
                     if x >= rs.router.bend90_radius:
                         rs.straight_nobend(x)
-                    elif x > -rs.router.bend90_radius:
+                    elif x > -rs.router.bend90_radius and not allow_sbends:
                         rs.straight(rs.router.bend90_radius + x)
                 case 0 if x > 0:
                     rs.straight(x)
-                case _:
-                    ...
             if not (y == 0 and rs.ta == ANGLE_180 and x > 0):
                 rs.left()
             bbox += rs.t * kdb.Point(0, -hw2)
@@ -1985,12 +2011,10 @@ def _route_to_side(
                 case 1:
                     if x >= rs.router.bend90_radius:
                         rs.straight_nobend(x)
-                    elif x > -rs.router.bend90_radius:
+                    elif x > -rs.router.bend90_radius and not allow_sbends:
                         rs.straight(rs.router.bend90_radius + x)
                 case 0 if x > 0:
                     rs.straight(x)
-                case _:
-                    ...
             if not (y == 0 and rs.ta == ANGLE_180 and x > 0):
                 rs.right()
             bbox += rs.t * kdb.Point(0, hw2)
@@ -2175,6 +2199,7 @@ def _route_waypoints(
     bboxes: Sequence[kdb.Box] | None,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     sort_ports: bool = False,
+    allow_sbends: bool = False,
 ) -> list[ManhattanRouter]:
     if isinstance(waypoints, kdb.Trans):
         length_widths = len(widths)
@@ -2226,6 +2251,7 @@ def _route_waypoints(
                 start_transformation=sr.start_transformation,
                 end_transformation=er.start_transformation,
                 start_points=sr.start.pts[:-1] + list(reversed(er.start.pts[:-1])),
+                allow_sbends=allow_sbends,
             )
             router.start.t = router.end_transformation * kdb.Trans.R180
             router.finished = True
@@ -2299,6 +2325,7 @@ def _route_waypoints(
             start_points=sr.start.pts[:-1]
             + _bb[1:-1]
             + list(reversed(er.start.pts[:-1])),
+            allow_sbends=allow_sbends,
         )
         router.start.t = router.end.t * kdb.Trans.R180
         router.finished = True

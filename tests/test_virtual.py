@@ -76,3 +76,27 @@ def test_all_angle_route(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
     vc.write(file)
     assert file.is_file()
     file.unlink()
+
+
+def test_virtual_connect(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
+    e_bend = kf.cells.virtual.euler.virtual_bend_euler(
+        width=0.5,
+        radius=10,
+        layer=layers.WG,
+        angle=25,
+        enclosure=wg_enc,
+    )
+
+    wg = kf.cells.straight.straight_dbu(
+        width=500, enclosure=wg_enc, layer=layers.WG, length=10_000
+    )
+
+    c = kf.KCell()
+
+    wg1 = c << wg
+    wg2 = c << wg
+
+    b1 = c.create_vinst(e_bend)
+
+    b1.connect("o1", wg1, "o2")
+    wg2.connect("o1", e_bend, "o2")

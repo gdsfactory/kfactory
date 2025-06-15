@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .instance import ProtoInstance
+    from .instance_group import ProtoInstanceGroup
     from .kcell import AnyKCell, BaseKCell
     from .layout import KCLayout
     from .port import ProtoPort
@@ -41,8 +42,8 @@ class PortWidthMismatchError(ValueError):
 
     def __init__(
         self,
-        inst: ProtoInstance[Any],
-        other_inst: ProtoInstance[Any] | ProtoPort[Any],
+        inst: ProtoInstance[Any] | ProtoInstanceGroup[Any, Any],
+        other_inst: ProtoInstance[Any] | ProtoInstanceGroup[Any, Any] | ProtoPort[Any],
         p1: ProtoPort[Any],
         p2: ProtoPort[Any],
         *args: Any,
@@ -71,8 +72,8 @@ class PortLayerMismatchError(ValueError):
     def __init__(
         self,
         kcl: KCLayout,
-        inst: ProtoInstance[Any],
-        other_inst: ProtoInstance[Any] | ProtoPort[Any],
+        inst: ProtoInstance[Any] | ProtoInstanceGroup[Any, Any],
+        other_inst: ProtoInstance[Any] | ProtoInstanceGroup[Any, Any] | ProtoPort[Any],
         p1: ProtoPort[Any],
         p2: ProtoPort[Any],
         *args: Any,
@@ -110,8 +111,8 @@ class PortTypeMismatchError(ValueError):
 
     def __init__(
         self,
-        inst: ProtoInstance[Any],
-        other_inst: ProtoInstance[Any] | ProtoPort[Any],
+        inst: ProtoInstance[Any] | ProtoInstanceGroup[Any, Any],
+        other_inst: ProtoInstance[Any] | ProtoInstanceGroup[Any, Any] | ProtoPort[Any],
         p1: ProtoPort[Any],
         p2: ProtoPort[Any],
         *args: Any,
