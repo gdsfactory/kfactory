@@ -65,6 +65,14 @@ class ProtoPins(Protocol[TUnit]):
         """Get a pin by index or name."""
         ...
 
+    def __contains__(self, pin: str | ProtoPin[Any] | BasePin) -> bool:
+        """Check whether a pin is in this pin collection."""
+        if isinstance(pin, ProtoPin):
+            return pin.base in self._bases
+        if isinstance(pin, BasePin):
+            return pin in self._bases
+        return any(_pin.name == pin for _pin in self._bases)
+
     @abstractmethod
     def create_pin(
         self,
