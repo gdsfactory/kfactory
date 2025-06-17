@@ -94,3 +94,7 @@ def test_pins(layers: Layers) -> None:
         assert port.base is pad().ports[port.name].base
     for port in pad_tapeout().pins["pin1"].ports:
         assert port.base is pad_tapeout().ports[port.name].base
+
+    assert len(pad().pins.filter(pin_type="DC", regex=r"^pin")) == 1
+    assert len(pad().pins.filter(pin_type="RF", regex="pin1")) == 0
+    assert len(pad1.pins.filter(pin_type="RF", regex="pin1")) == 0
