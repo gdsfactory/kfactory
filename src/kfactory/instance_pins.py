@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Generic, cast
+from typing import TYPE_CHECKING, Any, Generic, Literal, cast
 
 from . import kdb
+from .conf import config
 from .instance import DInstance, Instance, ProtoTInstance, VInstance
-from .pin import BasePin, DPin, Pin, ProtoPin
+from .pin import BasePin, DPin, Pin, ProtoPin, filter_type_reg
 from .pins import DPins, Pins, ProtoPins
 from .typings import TInstance_co, TUnit
+from .utilities import pprint_pins
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterable, Iterator, Sequence
 
 
 class HasCellPins(ABC, Generic[TUnit]):
@@ -79,35 +81,21 @@ class ProtoTInstancePins(
     def bases(self) -> list[BasePin]:
         return [p.base for p in self.instance.pins]
 
-    # def filter(
-    #     self,
-    #     angle: int | None = None,
-    #     orientation: float | None = None,
-    #     layer: LayerEnum | int | None = None,
-    #     pin_type: str | None = None,
-    #     regex: str | None = None,
-    # ) -> Sequence[ProtoPin[TUnit]]:
-    #     """Filter pins by name.
+    def filter(
+        self,
+        pin_type: str | None = None,
+        regex: str | None = None,
+    ) -> Sequence[ProtoPin[TUnit]]:
+        """Filter pins by name.
 
-    #     Args:
-    #         angle: Filter by angle. 0, 1, 2, 3.
-    #         orientation: Filter by orientation in degrees.
-    #         layer: Filter by layer.
-    #         pin_type: Filter by pin type.
-    #         regex: Filter by regex of the name.
-    #     """
-    #     pins: Iterable[ProtoPin[TUnit]] = list(self.pins)
-    #     if regex:
-    #         pins = filter_regex(pins, regex)
-    #     if layer is not None:
-    #         pins = filter_layer(pins, layer)
-    #     if pin_type:
-    #         pins = filter_pin_type(pins, pin_type)
-    #     if angle is not None:
-    #         pins = filter_direction(pins, angle)
-    #     if orientation is not None:
-    #         pins = filter_orientation(pins, orientation)
-    #     return list(pins)
+        Args:
+            pin_type: Filter by pin type.
+            regex: Filter by regex of the name.
+        Returns:
+            Filtered list of pins.
+        """
+        pins: Iterable[ProtoPin[TUnit]] = list(self)
+        return list(filter_type_reg(pins, pin_type=pin_type, regex=regex))
 
     def __getitem__(
         self, key: int | str | tuple[int | str | None, int, int] | None
@@ -125,6 +113,13 @@ class ProtoTInstancePins(
         E.g. `c.pins["a", 3, 5]`, accesses the pins of the instance which is
         3 times in `a` direction (4th index in the array), and 5 times in `b` direction
         (5th index in the array).
+
+        Raises:
+            IndexError: If the pin is an array pin and the index is out of range.
+            KeyError: If the pin name does not exist.
+
+        Returns:
+            Pin from instance by name or name and array index.
         """
         if not self.instance.is_regular_array():
             try:
@@ -233,8 +228,8 @@ class ProtoTInstancePins(
                 for p in self.cell_pins
             )
 
-    # def print(self) -> None:
-    #     config.console.print(pprint_pins(self.copy()))
+    def print(self, unit: Literal["dbu", "um", None] = None) -> None:
+        config.console.print(pprint_pins(self.copy(), unit=unit))
 
     def copy(self, rename_function: Callable[[list[Pin]], None] | None = None) -> Pins:
         """Creates a copy in the form of [Pins][kfactory.kcell.Pins]."""
@@ -294,18 +289,21 @@ class InstancePins(ProtoTInstancePins[int]):
     def cell_pins(self) -> Pins:
         return Pins(kcl=self.instance.cell.kcl, bases=self.instance.cell.pins.bases)
 
-    # def filter(
-    #     self,
-    #     angle: int | None = None,
-    #     orientation: float | None = None,
-    #     layer: LayerEnum | int | None = None,
-    #     pin_type: str | None = None,
-    #     regex: str | None = None,
-    # ) -> Sequence[Pin]:
-    #     return [
-    #         Pin(base=p.base)
-    #         for p in super().filter(angle, orientation, layer, pin_type, regex)
-    #     ]
+    def filter(
+        self,
+        pin_type: str | None = None,
+        regex: str | None = None,
+    ) -> list[Pin]:
+        """Filter pins by name.
+
+        Args:
+            pin_type: Filter by pin type.
+            regex: Filter by regex of the name.
+        Returns:
+            Filtered list of pins.
+        """
+        pins: Iterable[Pin] = list(self)
+        return list(filter_type_reg(pins, pin_type=pin_type, regex=regex))
 
     def __getitem__(
         self, key: int | str | tuple[int | str | None, int, int] | None
@@ -329,18 +327,21 @@ class DInstancePins(ProtoTInstancePins[float]):
     def cell_pins(self) -> DPins:
         return DPins(kcl=self.instance.cell.kcl, bases=self.instance.cell.pins.bases)
 
-    # def filter(
-    #     self,
-    #     angle: int | None = None,
-    #     orientation: float | None = None,
-    #     layer: LayerEnum | int | None = None,
-    #     pin_type: str | None = None,
-    #     regex: str | None = None,
-    # ) -> Sequence[DPin]:
-    #     return [
-    #         DPin(base=p.base)
-    #         for p in super().filter(angle, orientation, layer, pin_type, regex)
-    #     ]
+    def filter(
+        self,
+        pin_type: str | None = None,
+        regex: str | None = None,
+    ) -> list[DPin]:
+        """Filter pins by name.
+
+        Args:
+            pin_type: Filter by pin type.
+            regex: Filter by regex of the name.
+        Returns:
+            Filtered list of pins.
+        """
+        pins: Iterable[DPin] = list(self)
+        return list(filter_type_reg(pins, pin_type=pin_type, regex=regex))
 
     def __getitem__(
         self, key: int | str | tuple[int | str | None, int, int] | None
@@ -398,35 +399,21 @@ class VInstancePins(ProtoInstancePins[float, VInstance]):
             return pin.base in [p.base for p in self.instance.pins]
         return any(_pin.name == pin for _pin in self.instance.pins)
 
-    # def filter(
-    #     self,
-    #     angle: int | None = None,
-    #     orientation: float | None = None,
-    #     layer: LayerEnum | int | None = None,
-    #     pin_type: str | None = None,
-    #     regex: str | None = None,
-    # ) -> list[DPin]:
-    #     """Filter pins by name.
+    def filter(
+        self,
+        pin_type: str | None = None,
+        regex: str | None = None,
+    ) -> list[DPin]:
+        """Filter pins by name.
 
-    #     Args:
-    #         angle: Filter by angle. 0, 1, 2, 3.
-    #         orientation: Filter by orientation in degrees.
-    #         layer: Filter by layer.
-    #         pin_type: Filter by pin type.
-    #         regex: Filter by regex of the name.
-    #     """
-    #     pins = list(self.instance.pins)
-    #     if regex:
-    #         pins = list(filter_regex(pins, regex))
-    #     if layer is not None:
-    #         pins = list(filter_layer(pins, layer))
-    #     if pin_type:
-    #         pins = list(filter_pin_type(pins, pin_type))
-    #     if angle is not None:
-    #         pins = list(filter_direction(pins, angle))
-    #     if orientation is not None:
-    #         pins = list(filter_orientation(pins, orientation))
-    #     return list(pins)
+        Args:
+            pin_type: Filter by pin type.
+            regex: Filter by regex of the name.
+        Returns:
+            Filtered list of pins.
+        """
+        pins: Iterable[DPin] = list(self)
+        return list(filter_type_reg(pins, pin_type=pin_type, regex=regex))
 
     def copy(self) -> DPins:
         """Creates a copy in the form of [Pins][kfactory.kcell.Pins]."""

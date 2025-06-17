@@ -21,6 +21,7 @@ if TYPE_CHECKING:
     from .instance import ProtoInstance, ProtoTInstance
     from .kcell import BaseKCell, ProtoKCell, ProtoTKCell, VKCell
     from .layer import LayerEnum
+    from .pin import ProtoPin
     from .port import ProtoPort
 
 T = TypeVar("T")
@@ -35,6 +36,9 @@ TUnit = TypeVar("TUnit", int, float)
 TUnit_co = TypeVar("TUnit_co", bound=int | float, covariant=True)
 TUnit_contra = TypeVar("TUnit_contra", bound=int | float, contravariant=True)
 TPort = TypeVar("TPort", bound="ProtoPort[Any]")
+TPort_co = TypeVar("TPort_co", bound="ProtoPort[Any]", covariant=True)
+TPort_contra = TypeVar("TPort_contra", bound="ProtoPort[Any]", contravariant=True)
+TPin = TypeVar("TPin", bound="ProtoPin[Any]")
 TInstance_co = TypeVar("TInstance_co", bound="ProtoInstance[Any]", covariant=True)
 TTInstance_co = TypeVar("TTInstance_co", bound="ProtoTInstance[Any]", covariant=True)
 TBaseCell_co = TypeVar("TBaseCell_co", bound="BaseKCell", covariant=True)

@@ -197,7 +197,7 @@ def _check_pins(cell: ProtoTKCell[Any]) -> None:
     pin_names: dict[str | None, int] = defaultdict(int)
     for pin in cell.pins:
         pin_names[pin.name] += 1
-        pin_ports = {id(port) for port in pin.ports}
+        pin_ports = {id(port) for port in pin._base.ports}
         pin_ports_in_cell = {id(port.base) for port in cell.ports} & pin_ports
         if len(pin_ports_in_cell) != len(pin_ports):
             raise ValueError(

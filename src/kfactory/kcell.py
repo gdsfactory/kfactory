@@ -377,9 +377,11 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
     def __repr__(self) -> str:
         """Return a string representation of the Cell."""
         port_names = [p.name for p in self.ports]
+        pin_names = [pin.name for pin in self.pins]
         instances = [inst.name for inst in self.insts]
         return (
             f"{self.__class__.__name__}(name={self.name}, ports={port_names}, "
+            f"pins={pin_names}, "
             f"instances={instances}, locked={self.locked}, kcl={self.kcl.name})"
         )
 
@@ -590,6 +592,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         kcl: KCLayout | None = None,
         kdb_cell: kdb.Cell | None = None,
         ports: Iterable[ProtoPort[Any]] | None = None,
+        pins: Iterable[ProtoPin[Any]] | None = None,
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None:
@@ -617,14 +620,15 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             settings=KCellSettings(**(settings or {})),
             kdb_cell=kdb_cell_,
             ports=[port.base for port in ports] if ports else [],
+            pins=[pin.base for pin in pins] if pins else [],
             vinsts=VInstances(),
         )
         if kdb_cell_.is_library_cell():
-            if ports or info or settings:
+            if ports or info or settings or pins:
                 raise ValueError(
                     "If a TKCell is created from a library cell (separate PDK/layout), "
-                    "ports, info, and settings must not be set."
-                    f"Cell {kdb_cell_.name} in {kcl_.name}: {ports=}, {info=},"
+                    "ports, info, settings, and pins must not be set."
+                    f"Cell {kdb_cell_.name} in {kcl_.name}: {ports=}, {pins=}, {info=},"
                     f" {settings=}"
                 )
             kcls[kdb_cell_.library().name()][
@@ -855,7 +859,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         name: str | None = None,
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
-    ) -> ProtoPin[Any]: ...
+    ) -> ProtoPin[TUnit]: ...
 
     @overload
     @abstractmethod
@@ -1486,6 +1490,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     self.add_meta_info(
                         kdb.LayoutMetaInfo(f"kfactory:ports:{i}", meta_info, None, True)
                     )
+            for i, pin in enumerate(self.pins):
+                meta_info = {
+                    "name": pin.name,
+                    "pin_type": pin.pin_type,
+                    "info": pin.info.model_dump(),
+                    "ports": [self.base.ports.index(port.base) for port in pin.ports],
+                }
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo(f"kfactory:pins:{i}", meta_info, None, True)
+                )
             settings = self.settings.model_dump()
             if settings:
                 self.add_meta_info(
@@ -1527,6 +1541,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         if meta_format is None:
             meta_format = config.meta_format
         port_dict: dict[str, Any] = {}
+        pin_dict: dict[str, Any] = {}
+        ports: dict[str, BasePort] = {}
         settings: dict[str, MetaData] = {}
         settings_units: dict[str, str] = {}
         from .layout import kcls
@@ -1545,6 +1561,9 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                     if meta.name.startswith("kfactory:ports"):
                         i = meta.name.removeprefix("kfactory:ports:")
                         port_dict[i] = meta.value
+                    elif meta.name.startswith("kfactory:pins"):
+                        i = meta.name.removeprefix("kfactory:pins:")
+                        pin_dict[i] = meta.value
                     elif meta.name.startswith("kfactory:info"):
                         self._base.info = Info(**meta.value)
                     elif meta.name.startswith("kfactory:settings_units"):
@@ -1561,23 +1580,33 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         v = port_dict[index]
                         trans_: kdb.Trans | None = v.get("trans")
                         if trans_ is not None:
-                            self.create_port(
+                            ports[index] = self.create_port(
                                 name=v.get("name"),
                                 trans=trans_,
                                 cross_section=self.kcl.get_symmetrical_cross_section(
                                     v["cross_section"]
                                 ),
                                 port_type=v["port_type"],
+                                info=v["info"],
                             )
                         else:
-                            self.create_port(
+                            ports[index] = self.create_port(
                                 name=v.get("name"),
                                 dcplx_trans=v["dcplx_trans"],
                                 cross_section=self.kcl.get_symmetrical_cross_section(
                                     v["cross_section"]
                                 ),
                                 port_type=v["port_type"],
+                                info=v["info"],
                             )
+                    for index in sorted(pin_dict.keys()):
+                        v = pin_dict[index]
+                        self.create_pin(
+                            name=v.get("name"),
+                            ports=[ports[port_index] for port_index in v["ports"]],  # type: ignore[misc]
+                            pin_type=v["pin_type"],
+                            info=v["info"],
+                        )
                 else:
                     lib_name = self.library().name()
                     for index in sorted(port_dict.keys()):
@@ -1591,7 +1620,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         )
 
                         if trans_ is not None:
-                            self.create_port(
+                            ports[index] = self.create_port(
                                 name=v.get("name"),
                                 trans=trans_.to_dtype(lib_kcl.dbu).to_itype(
                                     self.kcl.dbu
@@ -1600,12 +1629,20 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                                 port_type=v["port_type"],
                             )
                         else:
-                            self.create_port(
+                            ports[index] = self.create_port(
                                 name=v.get("name"),
                                 dcplx_trans=v["dcplx_trans"],
                                 cross_section=cs,
                                 port_type=v["port_type"],
                             )
+                    for index in sorted(pin_dict):
+                        v = pin_dict[index]
+                        self.create_pin(
+                            name=v.get("name"),
+                            ports=[ports[str(port_index)] for port_index in v["ports"]],  # type: ignore[misc]
+                            pin_type=v["pin_type"],
+                            info=v["info"],
+                        )
 
             case "v2":
                 for meta in self.each_meta_info():
@@ -2637,6 +2674,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         ports: Iterable[ProtoPort[Any]] | None = None,
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
+        pins: Iterable[ProtoPin[Any]] | None = None,
     ) -> None: ...
 
     def __init__(
@@ -2647,6 +2685,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         ports: Iterable[ProtoPort[Any]] | None = None,
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
+        pins: Iterable[ProtoPin[Any]] | None = None,
         *,
         base: TKCell | None = None,
     ) -> None:
@@ -2673,6 +2712,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
             ports=ports,
             info=info,
             settings=settings,
+            pins=pins,
         )
 
     @property
@@ -2816,6 +2856,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         ports: Iterable[ProtoPort[Any]] | None = None,
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
+        pins: Iterable[ProtoPin[Any]] | None = None,
     ) -> None: ...
 
     def __init__(
@@ -2826,6 +2867,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         ports: Iterable[ProtoPort[Any]] | None = None,
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
+        pins: Iterable[ProtoPin[Any]] | None = None,
         *,
         base: TKCell | None = None,
     ) -> None:
@@ -2852,6 +2894,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
             ports=ports,
             info=info,
             settings=settings,
+            pins=pins,
         )
 
     @property
@@ -3424,7 +3467,11 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
     def __repr__(self) -> str:
         """Return a string representation of the Cell."""
         port_names = [p.name for p in self.ports]
-        return f"{self.name}: ports {port_names}, {len(self.insts)} instances"
+        pin_names = [pin.name for pin in self.pins]
+        return (
+            f"{self.name}: ports {port_names}, pins {pin_names}, {len(self.insts)} "
+            "instances"
+        )
 
     def add_port(
         self,

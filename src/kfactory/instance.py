@@ -31,7 +31,6 @@ if TYPE_CHECKING:
     from .instance_pins import (
         DInstancePins,
         InstancePins,
-        ProtoInstancePins,
         ProtoTInstancePins,
         VInstancePins,
     )
