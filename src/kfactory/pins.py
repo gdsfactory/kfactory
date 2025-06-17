@@ -4,13 +4,13 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING, Any, ClassVar, Literal, Protocol
 
 from .conf import config
-from .pin import BasePin, DPin, Pin, ProtoPin
+from .pin import BasePin, DPin, Pin, ProtoPin, filter_type_reg
 from .settings import Info
 from .typings import TUnit
 from .utilities import pprint_pins
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator, Mapping
+    from collections.abc import Iterable, Iterator, Mapping, Sequence
 
     from .layout import KCLayout
     from .port import ProtoPort
@@ -94,6 +94,22 @@ class ProtoPins(Protocol[TUnit]):
         This filters out Pins with `None` as name.
         """
         ...
+
+    def filter(
+        self,
+        pin_type: str | None = None,
+        regex: str | None = None,
+    ) -> Sequence[ProtoPin[TUnit]]:
+        """Filter pins by name.
+
+        Args:
+            pin_type: Filter by pin type.
+            regex: Filter by regex of the name.
+        Returns:
+            Filtered list of pins.
+        """
+        pins: Iterable[ProtoPin[TUnit]] = list(self)
+        return list(filter_type_reg(pins, pin_type=pin_type, regex=regex))
 
 
 class Pins(ProtoPins[int]):

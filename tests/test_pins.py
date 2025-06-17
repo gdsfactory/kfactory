@@ -98,3 +98,9 @@ def test_pins(layers: Layers) -> None:
     assert len(pad().pins.filter(pin_type="DC", regex=r"^pin")) == 1
     assert len(pad().pins.filter(pin_type="RF", regex="pin1")) == 0
     assert len(pad1.pins.filter(pin_type="RF", regex="pin1")) == 0
+
+    ci = pad().cell_index()
+    ci2 = pad2.cell.cell_index()
+    c.delete()
+    kf.kcl[ci].delete()
+    kf.kcl[ci2].delete()
