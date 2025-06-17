@@ -16,6 +16,9 @@ class Layers(kf.LayerInfos):
     FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
     FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
     FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
+    METAL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(20, 0)
+    METAL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(21, 0)
+    METAL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(21, 0)
 
 
 kf.kcl.infos = Layers()

@@ -435,8 +435,11 @@ class TKCell(BaseKCell):
     def name(self, value: str) -> None:
         if self.locked:
             raise LockedError(self)
-        if value != self.kdb_cell.name and value != self.kcl.layout.unique_cell_name(
-            value
+        if (
+            value != self.kdb_cell.name
+            and value != self.kcl.layout.unique_cell_name(value)
+            and not self.kcl.layout.cell(value).is_library_cell()
+            and not self.is_library_cell()
         ):
             stack = inspect.stack()
             module = inspect.getmodule(stack[3].frame)
