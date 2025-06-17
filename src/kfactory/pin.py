@@ -23,7 +23,7 @@ __all__ = ["DPin", "Pin", "ProtoPin"]
 class BasePinDict(TypedDict):
     name: str | None
     kcl: KCLayout
-    ports: set[BasePort]
+    ports: list[BasePort]
     info: Info
     pin_type: str
 
@@ -31,7 +31,7 @@ class BasePinDict(TypedDict):
 class BasePin(BaseModel, arbitrary_types_allowed=True):
     name: str | None
     kcl: KCLayout
-    ports: set[BasePort]
+    ports: list[BasePort]
     info: Info = Info()
     pin_type: str
 
@@ -43,9 +43,9 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
         return BasePin(
             name=self.name,
             kcl=self.kcl,
-            ports={
+            ports=[
                 p.transformed(trans=trans, post_trans=post_trans) for p in self.ports
-            },
+            ],
             info=self.info.model_copy(),
             pin_type=self.pin_type,
         )
@@ -160,7 +160,7 @@ class Pin(ProtoPin[int]):
 
     @ports.setter
     def ports(self, value: Iterable[ProtoPort[Any]]) -> None:
-        self._base.ports = {p.base for p in value}
+        self._base.ports = [p.base for p in value]
 
     def copy(
         self,
@@ -225,7 +225,7 @@ class DPin(ProtoPin[float]):
 
     @ports.setter
     def ports(self, value: Iterable[ProtoPort[Any]]) -> None:
-        self._base.ports = {p.base for p in value}
+        self._base.ports = [p.base for p in value]
 
 
 def filter_type_reg(

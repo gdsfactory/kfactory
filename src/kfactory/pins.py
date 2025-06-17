@@ -147,7 +147,7 @@ class Pins(ProtoPins[int]):
             raise ValueError(
                 f"At least one port must provided to create pin named {name}."
             )
-        port_bases = set()
+        port_bases = []
         for port in ports:
             port_base = port.base
             if port.kcl != self.kcl:
@@ -155,7 +155,7 @@ class Pins(ProtoPins[int]):
                     "Cannot add a pin which belongs to a different layout or cell to a"
                     f" cell. {port=}, {self.kcl!r}"
                 )
-            port_bases.add(port_base)
+            port_bases.append(port_base)
 
         base_ = BasePin(
             name=name, kcl=self.kcl, ports=port_bases, pin_type=pin_type, info=info_
@@ -208,12 +208,12 @@ class DPins(ProtoPins[float]):
             raise ValueError(
                 f"At least one port must provided to create pin named {name}."
             )
-        port_bases = set()
+        port_bases = []
         for port in ports:
             port_base = port.base
             if port.kcl != self.kcl:
                 port_base.kcl = self.kcl
-            port_bases.add(port_base)
+            port_bases.append(port_base)
 
         base_ = BasePin(
             name=name, kcl=self.kcl, ports=port_bases, pin_type=pin_type, info=info_

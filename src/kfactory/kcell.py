@@ -752,7 +752,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 BasePin(
                     name=p.name,
                     kcl=self.kcl,
-                    ports={c.base.ports[port_mapping[id(port)]] for port in p.ports},
+                    ports=[c.base.ports[port_mapping[id(port)]] for port in p.ports],
                     pin_type=p.pin_type,
                     info=p.info,
                 )
