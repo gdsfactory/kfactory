@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from .instance import Instance
+    from .pin import DPin, Pin
     from .port import Port, ProtoPort
 
 
@@ -209,5 +210,37 @@ def pprint_ports(
                     str(iport.mirror),
                     JSON.from_data(iport.info.model_dump()),
                 )
+
+    return table
+
+
+def pprint_pins(
+    pins: Iterable[Pin] | Iterable[DPin], unit: Literal["dbu", "um", None] = None
+) -> Table:
+    """Print ports as a table.
+
+    Args:
+        pins: The pins which should be printed.
+        unit: Define the print type of the ports. If None, any port
+            which can be represented accurately by a dbu representation
+            will be printed in dbu otherwise in um. 'dbu'/'um' will force
+            the printing to enforce one or the other representation
+    """
+    table = Table(show_lines=True)
+
+    table.add_column("Name")
+    table.add_column("Pin Type")
+    table.add_column("Ports")
+    table.add_column("Info")
+
+    for pin in pins:
+        ports = pprint_ports(pin.ports, unit=unit)
+        ports.box = None
+        table.add_row(
+            str(pin.name),
+            str(pin.pin_type),
+            ports,
+            JSON.from_data(pin.info.model_dump()),
+        )
 
     return table

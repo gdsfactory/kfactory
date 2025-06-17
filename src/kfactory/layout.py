@@ -1322,9 +1322,7 @@ class KCLayout(
                 kdb_c = self.layout_cell(obj)
                 if kdb_c is None:
                     raise
-                c = cell_type(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
-                c.get_meta_data()
-                return c
+                return cell_type(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
         else:
             kdb_c = self.layout_cell(obj)
             if kdb_c is not None:

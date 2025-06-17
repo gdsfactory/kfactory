@@ -26,7 +26,7 @@ from .port import (
     filter_port_type,
     filter_regex,
 )
-from .typings import Angle, TPort, TUnit
+from .typings import Angle, MetaData, TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
@@ -257,6 +257,7 @@ class ICreatePort(ABC):
         | SymmetricalCrossSection,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> Port: ...
 
     @overload
@@ -268,6 +269,7 @@ class ICreatePort(ABC):
         layer: int,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> Port: ...
 
     @overload
@@ -291,6 +293,7 @@ class ICreatePort(ABC):
         angle: Angle,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> Port: ...
 
     @overload
@@ -302,6 +305,7 @@ class ICreatePort(ABC):
         layer_info: kdb.LayerInfo,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> Port: ...
 
     @overload
@@ -314,6 +318,7 @@ class ICreatePort(ABC):
         angle: Angle,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> Port: ...
 
     @overload
@@ -329,6 +334,7 @@ class ICreatePort(ABC):
         | SymmetricalCrossSection,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> Port: ...
 
     def create_port(
@@ -350,6 +356,7 @@ class ICreatePort(ABC):
         | DCrossSection
         | SymmetricalCrossSection
         | None = None,
+        info: dict[str, MetaData] | None = None,
     ) -> Port:
         """Create a port."""
 
@@ -409,6 +416,8 @@ class ICreatePort(ABC):
                 f"You need to define width {width} and trans {trans} or angle {angle}"
                 f" and center {center} or dcplx_trans {dcplx_trans}"
             )
+        if info:
+            port.info.update(info)
 
         return self.add_port(port=port, keep_mirror=True)
 
@@ -438,6 +447,7 @@ class DCreatePort(ABC):
         layer: int,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
 
     @overload
@@ -449,6 +459,7 @@ class DCreatePort(ABC):
         layer: LayerEnum | int,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
 
     @overload
@@ -461,6 +472,7 @@ class DCreatePort(ABC):
         orientation: float,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
 
     @overload
@@ -472,6 +484,7 @@ class DCreatePort(ABC):
         layer_info: kdb.LayerInfo,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
 
     @overload
@@ -483,6 +496,7 @@ class DCreatePort(ABC):
         layer_info: kdb.LayerInfo,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
 
     @overload
@@ -495,6 +509,7 @@ class DCreatePort(ABC):
         orientation: float,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
 
     @overload
@@ -509,6 +524,7 @@ class DCreatePort(ABC):
         | DCrossSectionSpec,
         name: str | None = None,
         port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
 
     def create_port(
@@ -529,6 +545,7 @@ class DCreatePort(ABC):
         | CrossSectionSpec
         | DCrossSectionSpec
         | None = None,
+        info: dict[str, MetaData] | None = None,
     ) -> DPort:
         """Create a port."""
         if cross_section is None:
@@ -588,6 +605,8 @@ class DCreatePort(ABC):
                 f"You need to define width {width} and trans {trans} or orientation"
                 f" {orientation} and center {center} or dcplx_trans {dcplx_trans}"
             )
+        if info:
+            port.info.update(info)
 
         return self.add_port(port=port, keep_mirror=True)
 

@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import TYPE_CHECKING, Any, ClassVar, Protocol
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Protocol
 
+from .conf import config
 from .pin import BasePin, DPin, Pin, ProtoPin
 from .settings import Info
 from .typings import TUnit
+from .utilities import pprint_pins
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
@@ -131,9 +133,12 @@ class Pins(ProtoPins[int]):
             )
         port_bases = set()
         for port in ports:
-            port_base = port.base.model_copy()
+            port_base = port.base
             if port.kcl != self.kcl:
-                port_base.kcl = self.kcl
+                raise ValueError(
+                    "Cannot add a pin which belongs to a different layout or cell to a"
+                    f" cell. {port=}, {self.kcl!r}"
+                )
             port_bases.add(port_base)
 
         base_ = BasePin(
@@ -146,6 +151,10 @@ class Pins(ProtoPins[int]):
     def get_all_named(self) -> Mapping[str, Pin]:
         """Get all pins in a dictionary with names as keys."""
         return {v.name: Pin(base=v) for v in self._bases if v.name is not None}
+
+    def print(self, unit: Literal["dbu", "um", None] = None) -> None:
+        """Pretty print ports."""
+        config.console.print(pprint_pins(self, unit=unit))
 
 
 class DPins(ProtoPins[float]):
@@ -185,7 +194,7 @@ class DPins(ProtoPins[float]):
             )
         port_bases = set()
         for port in ports:
-            port_base = port.base.model_copy()
+            port_base = port.base
             if port.kcl != self.kcl:
                 port_base.kcl = self.kcl
             port_bases.add(port_base)
