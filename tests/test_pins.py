@@ -5,10 +5,8 @@ from tests.conftest import Layers
 def test_pins(layers: Layers) -> None:
     kcl_1 = kf.KCLayout("PIN_PDK", infos=Layers)
 
-    xs = kcl_1.get_icross_section(
-        kf.SymmetricalCrossSection(
-            width=5000, enclosure=kf.LayerEnclosure(main_layer=layers.METAL1, name="M1")
-        )
+    xs = kf.SymmetricalCrossSection(
+        width=5000, enclosure=kf.LayerEnclosure(main_layer=layers.METAL1, name="M1")
     )
 
     @kcl_1.cell
@@ -99,7 +97,7 @@ def test_pins(layers: Layers) -> None:
     assert len(pad().pins.filter(pin_type="RF", regex="pin1")) == 0
     assert len(pad1.pins.filter(pin_type="RF", regex="pin1")) == 0
 
-    ci = pad().cell_index()
+    ci = pad1.cell.cell_index()
     ci2 = pad2.cell.cell_index()
     c.delete()
     kf.kcl[ci].delete()
