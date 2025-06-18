@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- fix VInstance trans on insert [#736](https://github.com/gdsfactory/kfactory/pull/736)
 - fix type completions for jedi [#735](https://github.com/gdsfactory/kfactory/pull/735)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.9.0...v1.9.1
