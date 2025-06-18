@@ -27,7 +27,7 @@ class LengthFunction(Protocol):
 
 @cache
 def _get_area_from_layer(kcl: str, ci: int, layer: kdb.LayerInfo, width: int) -> float:
-    from ..layout import kcls  # noqa: PLC0415
+    from ..layout import kcls
 
     c = kcls[kcl][ci]
     return (

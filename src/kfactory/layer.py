@@ -262,7 +262,7 @@ def layerenum_from_dict(
     name: str = "LAYER",
     layout: kdb.Layout | None = None,
 ) -> type[LayerEnum]:
-    from .layout import get_default_kcl  # noqa: PLC0415
+    from .layout import get_default_kcl
 
     members: dict[str, constant[KCLayout] | tuple[int, int]] = {
         "layout": constant(layout or get_default_kcl().layout)

@@ -476,7 +476,7 @@ def test_to_itype(kcl: kf.KCLayout) -> None:
 
 
 def test_cell_yaml(layers: Layers) -> None:
-    from ruamel.yaml import YAML  # noqa: PLC0415
+    from ruamel.yaml import YAML
 
     yaml = YAML()
     yaml.register_class(kf.KCell)
