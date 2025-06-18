@@ -5,6 +5,7 @@
 
 ## New
 
+- Update VKCell/VInstance recognition and add markers for virtual cells [#733](https://github.com/gdsfactory/kfactory/pull/733)
 - Add pins [#722](https://github.com/gdsfactory/kfactory/pull/722)
 - Add instance pins [#732](https://github.com/gdsfactory/kfactory/pull/732)
 
