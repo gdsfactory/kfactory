@@ -1,5 +1,20 @@
+<a id="v1.9.1"></a>
+# [v1.9.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.9.1) - 2025-06-18
+
+# What's Changed
+
+## Bug Fixes
+
+- fix type completions for jedi [#735](https://github.com/gdsfactory/kfactory/pull/735)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.9.0...v1.9.1
+
+
+[Changes][v1.9.1]
+
+
 <a id="v1.9.0"></a>
-# [v1.9.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.9.0) - 2025-06-14
+# [v1.9.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.9.0) - 2025-06-18
 
 # What's Changed
 
@@ -2095,6 +2110,7 @@
 [Changes][v0.4.0]
 
 
+[v1.9.1]: https://github.com/gdsfactory/kfactory/compare/v1.9.0...v1.9.1
 [v1.9.0]: https://github.com/gdsfactory/kfactory/compare/v1.8.2...v1.9.0
 [v1.8.2]: https://github.com/gdsfactory/kfactory/compare/v1.8.1...v1.8.2
 [v1.8.1]: https://github.com/gdsfactory/kfactory/compare/v1.8.0...v1.8.1
