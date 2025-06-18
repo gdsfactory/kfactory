@@ -802,7 +802,7 @@ class Port(ProtoPort[int]):
             self._base = port.base.__copy__()
             return
         info_ = Info(**info)
-        from .layout import get_default_kcl
+        from .layout import get_default_kcl  # noqa: PLC0415
 
         kcl_ = kcl or get_default_kcl()
         if cross_section is None:
@@ -1118,7 +1118,7 @@ class DPort(ProtoPort[float]):
             return
         info_ = Info(**info)
 
-        from .layout import get_default_kcl
+        from .layout import get_default_kcl  # noqa: PLC0415
 
         kcl_ = kcl or get_default_kcl()
         if cross_section is None:

@@ -169,7 +169,7 @@ def get_affinity() -> int:
     try:
         return len(os.sched_getaffinity(0))  # type: ignore[attr-defined,unused-ignore]
     except AttributeError:
-        import multiprocessing
+        import multiprocessing  # noqa: PLC0415
 
         threads = multiprocessing.cpu_count()
     return threads
@@ -252,10 +252,10 @@ class Settings(BaseSettings):
         if isinstance(show, str):
             mod, f = show.rsplit(".", 1)
             loaded_mod = importlib.import_module(mod)
-            _show = loaded_mod.__getattribute__(f)
-            if not isinstance(_show, ShowFunction):
+            show_ = getattr(loaded_mod, f)
+            if not isinstance(show_, ShowFunction):
                 raise ValidationError(f"{show=} is not a ShowFunction.")
-            show = _show
+            show = show_
         return show
 
     @field_validator("logfilter")

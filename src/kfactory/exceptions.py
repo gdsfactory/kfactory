@@ -49,7 +49,7 @@ class PortWidthMismatchError(ValueError):
         *args: Any,
     ) -> None:
         """Throw error for the two ports `p1`/`p1`."""
-        from .instance import ProtoInstance
+        from .instance import ProtoInstance  # noqa: PLC0415
 
         if isinstance(other_inst, ProtoInstance):
             super().__init__(
@@ -79,8 +79,8 @@ class PortLayerMismatchError(ValueError):
         *args: Any,
     ) -> None:
         """Throw error for the two ports `p1`/`p1`."""
-        from .instance import ProtoInstance
-        from .layer import LayerEnum
+        from .instance import ProtoInstance  # noqa: PLC0415
+        from .layer import LayerEnum  # noqa: PLC0415
 
         l1 = (
             f"{p1.layer.name}({p1.layer.__int__()})"
@@ -118,7 +118,7 @@ class PortTypeMismatchError(ValueError):
         *args: Any,
     ) -> None:
         """Throw error for the two ports `p1`/`p1`."""
-        from .instance import ProtoInstance
+        from .instance import ProtoInstance  # noqa: PLC0415
 
         if isinstance(other_inst, ProtoInstance):
             super().__init__(

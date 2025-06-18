@@ -402,12 +402,17 @@ class TKCell(BaseKCell):
         kdb_cell: Pure KLayout cell object.
         locked: If set the cell shouldn't be modified anymore.
         function_name: Name of the function that created the cell.
-        pins: Manages the pins of the cell.
+        virtual: If true, the Cell came from a VKCell.
+        vtrans: If not None, the cell came from an instance which cannot be snapped
+            lossless to the grid. This happens if a was used and the VInstance cannot
+            be mapped to the grid without information loss.
     """
 
     kdb_cell: kdb.Cell
     boundary: kdb.DPolygon | None = None
     lvs_equivalent_ports: list[list[str]] | None = None
+    virtual: bool = False
+    vtrans: kdb.DCplxTrans | None = None
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -603,7 +608,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             self._base = base
             return
 
-        from .layout import get_default_kcl, kcls
+        from .layout import get_default_kcl, kcls  # noqa: PLC0415
 
         kcl_ = kcl or get_default_kcl()
 
@@ -653,6 +658,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
     def name(self, value: str) -> None:
         self._base.name = value
 
+    @property
+    def virtual(self) -> bool:
+        return self._base.virtual
+
+    @property
     @property
     @abstractmethod
     def pins(self) -> ProtoPins[TUnit]: ...
@@ -828,7 +838,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             display_type: Type of display. Options are "widget" or "image".
 
         """
-        from .widgets.interactive import display_kcell
+        from .widgets.interactive import display_kcell  # noqa: PLC0415
 
         display_kcell(self, lyrdb=lyrdb, display_type=display_type)
 
@@ -1104,7 +1114,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         """Convert the KCell to a static cell if it is pdk KCell."""
         if self.library().name() == self.kcl.name:
             raise ValueError(f"KCell {self.qname()} is already a static KCell.")
-        from .layout import kcls
+        from .layout import kcls  # noqa: PLC0415
 
         lib_cell = kcls[self.library().name()][self.library_cell_index()]
         lib_cell.set_meta_data()
@@ -1548,7 +1558,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         ports: dict[str, BasePort] = {}
         settings: dict[str, MetaData] = {}
         settings_units: dict[str, str] = {}
-        from .layout import kcls
+        from .layout import kcls  # noqa: PLC0415
 
         match meta_format:
             case "v3":
@@ -3316,7 +3326,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         info: dict[str, Any] | None = None,
         settings: dict[str, Any] | None = None,
     ) -> None:
-        from .layout import get_default_kcl
+        from .layout import get_default_kcl  # noqa: PLC0415
 
         if base is not None:
             self._base = base
@@ -3450,7 +3460,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
 
         Usage: Pass the vkcell variable as an argument in the cell at the end
         """
-        from .widgets.interactive import display_kcell
+        from .widgets.interactive import display_kcell  # noqa: PLC0415
 
         c = self.kcl.kcell()
         if self.name is not None:
@@ -3682,7 +3692,7 @@ def show(
         library_save_options: Specific saving options for Cells which are in a library
             and not the main KCLayout.
     """
-    from .layout import KCLayout, kcls
+    from .layout import KCLayout, kcls  # noqa: PLC0415
 
     delete = False
     delete_lyrdb = False
@@ -3706,7 +3716,7 @@ def show(
             name = clean_name(frame_filename_stem)
     except Exception:
         try:
-            from __main__ import __file__ as mf
+            from __main__ import __file__ as mf  # noqa: PLC0415
 
             name = clean_name(mf)
         except ImportError:
@@ -3718,7 +3728,7 @@ def show(
         file: Path | None = None
         spec = importlib.util.find_spec("git")
         if spec is not None:
-            import git
+            import git  # noqa: PLC0415
 
             try:
                 repo = git.repo.Repo(".", search_parent_directories=True)
@@ -3741,7 +3751,7 @@ def show(
             )
         if not file:
             try:
-                from __main__ import __file__ as mf
+                from __main__ import __file__ as mf  # noqa: PLC0415
             except ImportError:
                 mf = "shell"
             tf = Path(gettempdir()) / (name + ".oas")
@@ -3769,7 +3779,7 @@ def show(
         file = None
         spec = importlib.util.find_spec("git")
         if spec is not None:
-            import git
+            import git  # noqa: PLC0415
 
             try:
                 repo = git.repo.Repo(".", search_parent_directories=True)
@@ -3792,7 +3802,7 @@ def show(
             )
         if not file:
             try:
-                from __main__ import __file__ as mf
+                from __main__ import __file__ as mf  # noqa: PLC0415
             except ImportError:
                 mf = "shell"
             tf = Path(gettempdir()) / (name + ".gds")
@@ -3829,7 +3839,7 @@ def show(
             lyrdbfile: Path | None = None
             spec = importlib.util.find_spec("git")
             if spec is not None:
-                import git
+                import git  # noqa: PLC0415
 
                 try:
                     repo = git.repo.Repo(".", search_parent_directories=True)
@@ -3852,7 +3862,7 @@ def show(
                 )
             if not lyrdbfile:
                 try:
-                    from __main__ import __file__ as mf
+                    from __main__ import __file__ as mf  # noqa: PLC0415
                 except ImportError:
                     mf = "shell"
                 tf = Path(gettempdir()) / (name + ".lyrdb")
@@ -3875,7 +3885,7 @@ def show(
             l2nfile: Path | None = None
             spec = importlib.util.find_spec("git")
             if spec is not None:
-                import git
+                import git  # noqa: PLC0415
 
                 try:
                     repo = git.repo.Repo(".", search_parent_directories=True)
@@ -3898,7 +3908,7 @@ def show(
                 )
             if not l2nfile:
                 try:
-                    from __main__ import __file__ as mf
+                    from __main__ import __file__ as mf  # noqa: PLC0415
                 except ImportError:
                     mf = "shell"
                 tf = Path(gettempdir()) / (name + ".l2n")

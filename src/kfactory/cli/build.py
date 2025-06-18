@@ -2,7 +2,6 @@
 
 Use `kf --help` for more info.
 """
-# ruff: noqa: UP007
 
 import importlib
 import os
@@ -10,7 +9,7 @@ import runpy
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import git
 import typer
@@ -61,7 +60,7 @@ def build(
         ),
     ],
     func_kwargs: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Argument(
             help="Arguments used for --type function."
             " Doesn't have any influence for other types"
@@ -71,7 +70,7 @@ def build(
         bool, typer.Option(help="Show the file through klive in KLayout")
     ] = True,
     library: Annotated[
-        Optional[list[str]],
+        list[str] | None,
         typer.Option(
             help="Library(s) used by the main layout file. Only works for functions,"
             " not for '__main__' modules"

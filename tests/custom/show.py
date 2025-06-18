@@ -18,7 +18,7 @@ def show(
     use_libraries: bool = True,
     library_save_options: kfactory.kdb.SaveLayoutOptions | None = None,
 ) -> None:
-    import kfactory as kf
+    import kfactory as kf  # noqa: PLC0415
 
     if save_options is None:
         save_options = kf.save_layout_options()
