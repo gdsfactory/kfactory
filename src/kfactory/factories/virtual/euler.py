@@ -80,6 +80,7 @@ def virtual_bend_euler_factory(
 
     @kcl.vcell(
         basename=basename,
+        output_type=VKCell,
         **cell_kwargs,
     )
     def bend_euler(

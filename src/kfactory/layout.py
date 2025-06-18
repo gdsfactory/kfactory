@@ -5,6 +5,7 @@ import inspect
 from collections import UserDict, defaultdict
 from collections.abc import Callable, Iterable, Sequence  # noqa: TC003
 from pathlib import Path
+from pprint import pformat
 from threading import RLock
 from typing import TYPE_CHECKING, Any, Concatenate, Literal, cast, overload
 
@@ -1013,7 +1014,6 @@ class KCLayout(
         self,
         /,
         *,
-        output_type: type[VK] | None = None,
         set_settings: bool = True,
         set_name: bool = True,
         add_port_layers: bool = True,
@@ -1028,6 +1028,27 @@ class KCLayout(
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
     ) -> Callable[[Callable[KCellParams, VK]], Callable[KCellParams, VK]]: ...
+
+    @overload
+    def vcell(
+        self,
+        /,
+        *,
+        output_type: type[VK] | None = None,
+        set_settings: bool = True,
+        set_name: bool = True,
+        add_port_layers: bool = True,
+        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        basename: str | None = None,
+        drop_params: Sequence[str] = ("self", "cls"),
+        register_factory: bool = True,
+        post_process: Iterable[Callable[[VKCell], None]],
+        info: dict[str, MetaData] | None = None,
+        check_ports: bool = True,
+        check_pins: bool = True,
+        tags: list[str] | None = None,
+        lvs_equivalent_ports: list[list[str]] | None = None,
+    ) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VK]]: ...
 
     def vcell(
         self,
@@ -1359,7 +1380,6 @@ class KCLayout(
                     c = cell_type(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
                     c.get_meta_data()
                     return c
-        from pprint import pformat  # noqa: PLC0415
 
         raise ValueError(
             f"Library doesn't have a KCell named {obj},"
