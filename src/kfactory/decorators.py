@@ -33,7 +33,17 @@ from .serialization import (
     to_hashable,
 )
 from .settings import KCellSettings, KCellSettingsUnits
-from .typings import KC, VK, K, KC_co, KC_contra, KCellParams, MetaData, VK_contra
+from .typings import (
+    KC,
+    VK,
+    K,
+    K_contra,
+    KC_co,
+    KC_contra,
+    KCellParams,
+    MetaData,
+    VK_contra,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
@@ -280,12 +290,11 @@ def _post_process(
 
 
 def _post_process(
-    cell: KC_contra | VK_contra,
-    post_process_functions: Iterable[Callable[[KC_contra], None]]
-    | Iterable[Callable[[VK_contra], None]],
+    cell: K_contra,
+    post_process_functions: Iterable[Callable[[K_contra], None]],
 ) -> None:
     for pp in post_process_functions:
-        pp(cell)  # type: ignore[arg-type]
+        pp(cell)
 
 
 class WrappedKCellFunc(Generic[KCellParams, KC]):

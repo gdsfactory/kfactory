@@ -516,14 +516,14 @@ class Instance(ProtoTInstance[int], DBUGeometricObject):
     @functools.cached_property
     def ports(self) -> InstancePorts:
         """Gets the transformed ports of the KCell."""
-        from .instance_ports import InstancePorts  # noqa: PLC0415
+        from .instance_ports import InstancePorts
 
         return InstancePorts(self)
 
     @functools.cached_property
     def pins(self) -> InstancePins:
         """Gets the transformed pins of the KCell."""
-        from .instance_pins import InstancePins  # noqa: PLC0415
+        from .instance_pins import InstancePins
 
         return InstancePins(self)
 
@@ -601,14 +601,14 @@ class DInstance(ProtoTInstance[float], UMGeometricObject):
     @functools.cached_property
     def ports(self) -> DInstancePorts:
         """Gets the transformed ports of the KCell."""
-        from .instance_ports import DInstancePorts  # noqa: PLC0415
+        from .instance_ports import DInstancePorts
 
         return DInstancePorts(self)
 
     @functools.cached_property
     def pins(self) -> DInstancePins:
         """Gets the transformed ports of the KCell."""
-        from .instance_pins import DInstancePins  # noqa: PLC0415
+        from .instance_pins import DInstancePins
 
         return DInstancePins(self)
 
@@ -720,13 +720,13 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
 
     @functools.cached_property
     def ports(self) -> VInstancePorts:
-        from .instance_ports import VInstancePorts  # noqa: PLC0415
+        from .instance_ports import VInstancePorts
 
         return VInstancePorts(self)
 
     @functools.cached_property
     def pins(self) -> VInstancePins:
-        from .instance_pins import VInstancePins  # noqa: PLC0415
+        from .instance_pins import VInstancePins
 
         return VInstancePins(self)
 
@@ -740,7 +740,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         cell: AnyTKCell,
         trans: kdb.DCplxTrans | None = None,
     ) -> Instance:
-        from .kcell import KCell, ProtoTKCell, VKCell  # noqa: PLC0415
+        from .kcell import KCell, ProtoTKCell, VKCell
 
         if trans is None:
             trans = kdb.DCplxTrans()
@@ -871,7 +871,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         *,
         levels: int | None = None,
     ) -> None:
-        from .kcell import ProtoTKCell, VKCell  # noqa: PLC0415
+        from .kcell import ProtoTKCell, VKCell
 
         if trans is None:
             trans = kdb.DCplxTrans()

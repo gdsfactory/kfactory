@@ -169,7 +169,7 @@ def get_affinity() -> int:
     try:
         return len(os.sched_getaffinity(0))  # type: ignore[attr-defined,unused-ignore]
     except AttributeError:
-        import multiprocessing  # noqa: PLC0415
+        import multiprocessing
 
         threads = multiprocessing.cpu_count()
     return threads

@@ -163,6 +163,7 @@ ignore = [
     "TID252",
     "TRY003",
     "PLW1641",
+    "PLC0415",
 ]
 per-file-ignores = { "tests/*.py" = ["D", "PLR2004", "INP001", "EM101"] }
 
