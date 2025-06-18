@@ -22,7 +22,6 @@ from .exceptions import (
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .port import DPort, Port, ProtoPort
 from .serialization import clean_name, get_cell_name
-from .settings import Info, KCellSettings
 from .typings import TUnit
 
 if TYPE_CHECKING:
@@ -777,11 +776,10 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 cell_.name = cell_name
                 for port in self.cell.ports:
                     cell_.add_port(port=port.copy(trans_))
-                settings = self.cell.settings.model_dump()
-                settings.update({"virtual_trans": trans_})
+                settings = self.cell.settings.model_copy()
                 settings_units = self.cell.settings_units.model_copy()
-                cell_.settings = KCellSettings(**settings)
-                cell_.info = Info(**self.cell.info.model_dump())
+                cell_.settings = settings
+                cell_.info = self.cell.info.model_copy(deep=True)
                 cell_.settings_units = settings_units
             else:
                 cell_ = cell.kcl[cell_name]
