@@ -11,6 +11,7 @@
 
 ## Bug Fixes
 
+- Fix typing issues [#734](https://github.com/gdsfactory/kfactory/pull/734)
 - fix replace on being locked when converting cells [#730](https://github.com/gdsfactory/kfactory/pull/730)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.8.2...v1.9.0
