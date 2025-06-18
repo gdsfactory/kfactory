@@ -998,7 +998,11 @@ class KCLayout(
                             self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
                     self.factories[basename or wrapper_autocell.name] = wrapper_autocell  # type: ignore[assignment]
 
-            return wrapper_autocell.__call__
+            @functools.wraps(f)
+            def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
+                return wrapper_autocell(*args, **kwargs)
+
+            return func
 
         return decorator_autocell if _func is None else decorator_autocell(_func)
 
@@ -1156,7 +1160,11 @@ class KCLayout(
                     wrapper_autocell  # type: ignore[assignment]
                 )
 
-            return wrapper_autocell.__call__
+            @functools.wraps(f)
+            def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> VK:
+                return wrapper_autocell(*args, **kwargs)
+
+            return func
 
         return decorator_autocell if _func is None else decorator_autocell(_func)
 
