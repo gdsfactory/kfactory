@@ -763,11 +763,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 )
             if trans_ != kdb.DCplxTrans():
                 trans_str = ""
-                if trans.mirror:
+                if trans_.mirror:
                     trans_str += "_M"
-                if trans.angle != 0:
+                if trans_.angle != 0:
                     f"_A{trans_.angle}"
-                if trans.disp != kdb.DVector(0, 0):
+                if trans_.disp != kdb.DVector(0, 0):
                     trans_str += f"_X{trans_.disp.x}_Y{trans_.disp.y}"
                 trans_str = trans_str.replace(".", "p")
                 cell_name = get_cell_name(cell_name + clean_name(trans_str))
@@ -814,11 +814,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         cell_name = self.cell.name
         if trans_ != kdb.DCplxTrans():
             trans_str = ""
-            if trans.mirror:
+            if trans_.mirror:
                 trans_str += "_M"
-            if trans.angle != 0:
+            if trans_.angle != 0:
                 f"_A{trans_.angle}"
-            if trans.disp != kdb.DVector(0, 0):
+            if trans_.disp != kdb.DVector(0, 0):
                 trans_str += f"_X{trans_.disp.x}_Y{trans_.disp.y}"
             trans_str = trans_str.replace(".", "p")
             cell_name += trans_str
