@@ -1,16 +1,21 @@
-<a id="v1.8.3"></a>
-# [v1.8.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.8.3) - 2025-06-14
+<a id="v1.9.0"></a>
+# [v1.9.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.9.0) - 2025-06-14
 
 # What's Changed
+
+## New
+
+- Add pins [#722](https://github.com/gdsfactory/kfactory/pull/722)
+- Add instance pins [#732](https://github.com/gdsfactory/kfactory/pull/732)
 
 ## Bug Fixes
 
 - fix replace on being locked when converting cells [#730](https://github.com/gdsfactory/kfactory/pull/730)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.8.2...v1.8.3
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.8.2...v1.9.0
 
 
-[Changes][v1.8.3]
+[Changes][v1.9.0]
 
 
 <a id="v1.8.2"></a>
@@ -2088,7 +2093,7 @@
 [Changes][v0.4.0]
 
 
-[v1.8.3]: https://github.com/gdsfactory/kfactory/compare/v1.8.2...v1.8.3
+[v1.9.0]: https://github.com/gdsfactory/kfactory/compare/v1.8.2...v1.9.0
 [v1.8.2]: https://github.com/gdsfactory/kfactory/compare/v1.8.1...v1.8.2
 [v1.8.1]: https://github.com/gdsfactory/kfactory/compare/v1.8.0...v1.8.1
 [v1.8.0]: https://github.com/gdsfactory/kfactory/compare/v1.7.2...v1.8.0
