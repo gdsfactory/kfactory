@@ -894,6 +894,9 @@ class Port(ProtoPort[int]):
                 facing angle=0°)
             angle: Relative angle to the original port (0=0°,1=90°,2=180°,3=270°).
             mirror: Whether to mirror the port relative to the original port.
+
+        Returns:
+            Port copied relative to it's current position and angle/orientation.
         """
         return self.copy(post_trans=kdb.Trans(angle, mirror, d, d_orth))
 

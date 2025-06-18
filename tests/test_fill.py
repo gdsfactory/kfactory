@@ -19,9 +19,9 @@ def test_tiled_fill_space(fill_cell: kf.KCell, layers: Layers) -> None:
         fill_cell,
         [(layers.WG, 0)],
         exclude_layers=[
-            (layers.WGEXCLUDE, 100),
+            (layers.WGEX, 100),
             (layers.WGCLAD, 0),
-            (layers.WGCLADEXCLUDE, 0),
+            (layers.WGCLADEX, 0),
         ],
         x_space=5,
         y_space=5,
@@ -52,15 +52,15 @@ def test_tiled_fill_vector(fill_cell: kf.KCell, layers: Layers) -> None:
 
     poly.insert_hole(kf.kdb.DBox(-1800, -200, -1200, 200))
 
-    c.shapes(layers.WGEXCLUDE).insert(poly)
+    c.shapes(layers.WGEX).insert(poly)
     kf.utils.fill_tiled(
         c,
         fill_cell,
         [(layers.WG, 0)],
         exclude_layers=[
-            (layers.WGEXCLUDE, 100),
+            (layers.WGEX, 100),
             (layers.WGCLAD, 0),
-            (layers.WGCLADEXCLUDE, 0),
+            (layers.WGCLADEX, 0),
         ],
         row_step=kf.kdb.DVector(35, 5),
         col_step=kf.kdb.DVector(-5, 50),

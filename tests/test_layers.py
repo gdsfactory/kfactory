@@ -68,7 +68,7 @@ def test_layer_enum_getitem(layers: Layers) -> None:
 
 def test_layer_enum_len(layers: Layers) -> None:
     layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
-    assert len(layer_enum) == 7  # type: ignore[arg-type]
+    assert len(layer_enum) == 15  # type: ignore[arg-type]
 
 
 def test_layer_enum_iter(layers: Layers) -> None:

@@ -52,6 +52,7 @@ from .kcell import (
 )
 from .layer import LayerEnum, LayerInfos, LayerStack, layerenum_from_dict
 from .merge import MergeDiff
+from .pin import BasePin
 from .port import BasePort, ProtoPort, rename_clockwise_multi
 from .routing.generic import ManhattanRoute
 from .settings import Info, KCellSettings
@@ -526,6 +527,7 @@ class KCLayout(
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
+        check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
@@ -550,6 +552,7 @@ class KCLayout(
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
+        check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
@@ -576,6 +579,7 @@ class KCLayout(
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
+        check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
@@ -602,6 +606,7 @@ class KCLayout(
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
+        check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
@@ -627,6 +632,7 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         check_ports: bool = True,
+        check_pins: bool = True,
         check_instances: CheckInstances | None = None,
         snap_ports: bool = True,
         add_port_layers: bool = True,
@@ -662,6 +668,7 @@ class KCLayout(
                         set_settings=set_settings,
                         set_name=set_name,
                         check_ports=check_ports,
+                        check_pins=check_pins,
                         check_instances=check_instances,
                         snap_ports=snap_ports,
                         add_port_layers=add_port_layers,
@@ -695,6 +702,7 @@ class KCLayout(
                     set_settings=set_settings,
                     set_name=set_name,
                     check_ports=check_ports,
+                    check_pins=check_pins,
                     check_instances=check_instances,
                     snap_ports=snap_ports,
                     add_port_layers=add_port_layers,
@@ -750,6 +758,7 @@ class KCLayout(
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
+        check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
@@ -773,6 +782,7 @@ class KCLayout(
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
+        check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
@@ -798,6 +808,7 @@ class KCLayout(
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
+        check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
@@ -825,6 +836,7 @@ class KCLayout(
         set_settings: bool = ...,
         set_name: bool = ...,
         check_ports: bool = ...,
+        check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
@@ -851,6 +863,7 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         check_ports: bool = True,
+        check_pins: bool = True,
         check_instances: CheckInstances | None = None,
         snap_ports: bool = True,
         add_port_layers: bool = True,
@@ -885,6 +898,7 @@ class KCLayout(
             set_name: Auto create the name of the cell to the functionname plus a
                 string created from the args/kwargs
             check_ports: Check uniqueness of port names.
+            check_pins: Check uniqueness of pin names.
             check_instances: Check for any complex instances. A complex instance is a an
                 instance that has a magnification != 1 or non-90° rotation.
                 Depending on the setting, an error is raised, the cell is flattened,
@@ -959,6 +973,7 @@ class KCLayout(
                 set_settings=set_settings,
                 set_name=set_name,
                 check_ports=check_ports,
+                check_pins=check_pins,
                 check_instances=check_instances,
                 snap_ports=snap_ports,
                 add_port_layers=add_port_layers,
@@ -1307,9 +1322,7 @@ class KCLayout(
                 kdb_c = self.layout_cell(obj)
                 if kdb_c is None:
                     raise
-                c = cell_type(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
-                c.get_meta_data()
-                return c
+                return cell_type(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
         else:
             kdb_c = self.layout_cell(obj)
             if kdb_c is not None:
@@ -1735,6 +1748,7 @@ SymmetricalCrossSection.model_rebuild()
 CrossSectionModel.model_rebuild()
 TKCell.model_rebuild()
 TVCell.model_rebuild()
+BasePin.model_rebuild()
 BasePort.model_rebuild()
 BaseKCell.model_rebuild()
 LayerEnclosureModel.model_rebuild()

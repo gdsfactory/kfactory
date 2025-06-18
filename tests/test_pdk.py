@@ -20,6 +20,7 @@ def test_pdk(layers: Layers) -> None:
 def test_clear() -> None:
     kcl = kf.KCLayout("CLEAR")
     kcl.layer(500, 0)
+
     kcl.infos = kf.LayerInfos(WG=kf.kdb.LayerInfo(1, 0))
 
     assert kcl.layers.WG == 1
@@ -225,7 +226,7 @@ def test_merge_read_instances(layers: Layers) -> None:
 
         enc1 = kf.LayerEnclosure(sections=[(layers.WG, 0, 200)], name="CLAD")
         s_base = kf.factories.straight.straight_dbu_factory(kcl_1)(
-            width=1000, length=10_000, layer=layers.WGEXCLUDE, enclosure=enc1
+            width=1000, length=10_000, layer=layers.WGEX, enclosure=enc1
         )
         s_copy = kcl_1.kcell("Straight")
         s_copy << s_base
@@ -234,7 +235,7 @@ def test_merge_read_instances(layers: Layers) -> None:
         kcl_2.layers = kcl_2.layerenum_from_dict(layers=layers)
         enc2 = kf.LayerEnclosure(sections=[(layers.WG, 0, 200)], name="CLAD")
         s_base = kf.factories.straight.straight_dbu_factory(kcl_2)(
-            width=1000, length=10_000, layer=layers.WGEXCLUDE, enclosure=enc2
+            width=1000, length=10_000, layer=layers.WGEX, enclosure=enc2
         )
         s_copy = kcl_2.kcell("Straight")
         copy = s_copy << s_base

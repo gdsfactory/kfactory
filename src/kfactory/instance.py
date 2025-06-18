@@ -28,6 +28,12 @@ from .typings import TUnit
 if TYPE_CHECKING:
     from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
+    from .instance_pins import (
+        DInstancePins,
+        InstancePins,
+        ProtoTInstancePins,
+        VInstancePins,
+    )
     from .instance_ports import (
         DInstancePorts,
         InstancePorts,
@@ -175,6 +181,12 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
     @property
     @abstractmethod
     def ports(self) -> ProtoTInstancePorts[TUnit]:
+        """Ports of the instance."""
+        ...
+
+    @property
+    @abstractmethod
+    def pins(self) -> ProtoTInstancePins[TUnit]:
         """Ports of the instance."""
         ...
 
@@ -508,6 +520,13 @@ class Instance(ProtoTInstance[int], DBUGeometricObject):
 
         return InstancePorts(self)
 
+    @property
+    def pins(self) -> InstancePins:
+        """Gets the transformed pins of the KCell."""
+        from .instance_pins import InstancePins
+
+        return InstancePins(self)
+
     def __getitem__(
         self, key: int | str | tuple[int | str | None, int, int] | None
     ) -> Port:
@@ -585,6 +604,13 @@ class DInstance(ProtoTInstance[float], UMGeometricObject):
         from .instance_ports import DInstancePorts
 
         return DInstancePorts(self)
+
+    @property
+    def pins(self) -> DInstancePins:
+        """Gets the transformed ports of the KCell."""
+        from .instance_pins import DInstancePins
+
+        return DInstancePins(self)
 
     @property
     def cell(self) -> DKCell:
@@ -697,6 +723,12 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         from .instance_ports import VInstancePorts
 
         return VInstancePorts(self)
+
+    @property
+    def pins(self) -> VInstancePins:
+        from .instance_pins import VInstancePins
+
+        return VInstancePins(self)
 
     def __repr__(self) -> str:
         """Return a string representation of the instance."""

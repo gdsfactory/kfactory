@@ -4,6 +4,7 @@ from typing import Any
 from ruamel.yaml import YAML
 
 import kfactory as kf
+from tests.conftest import Layers
 
 
 def test_schema() -> None:
@@ -48,17 +49,8 @@ routes:
 
 
 def test_schema_create() -> None:
-    class Layers(kf.LayerInfos):
-        WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
-        WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
-        WGEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
-        WGCLADEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1)
-        FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
-        FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
-        FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
-
-    layers = Layers()
     pdk = kf.KCLayout("SCHEMA_PDK", infos=Layers)
+    layers = Layers()
 
     @pdk.cell
     def straight(length: int) -> kf.KCell:
@@ -96,15 +88,6 @@ def test_schema_create() -> None:
 
 
 def test_schema_create_cell() -> None:
-    class Layers(kf.LayerInfos):
-        WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
-        WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
-        WGEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
-        WGCLADEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1)
-        FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
-        FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
-        FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
-
     layers = Layers()
     pdk = kf.KCLayout("SCHEMA_PDK_DECORATOR", infos=Layers)
 
@@ -148,15 +131,6 @@ def test_schema_create_cell() -> None:
 
 
 def test_schema_route() -> None:
-    class Layers(kf.LayerInfos):
-        WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
-        WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
-        WGEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
-        WGCLADEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1)
-        FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
-        FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
-        FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
-
     layers = Layers()
     pdk = kf.KCLayout("SCHEMA_PDK_ROUTING", infos=Layers)
 
@@ -373,20 +347,6 @@ def test_netlist() -> None:
 
 
 def test_netlist_equivalent() -> None:
-    class Layers(kf.LayerInfos):
-        WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
-        WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
-        WGEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
-        WGCLADEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1)
-        FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
-        FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
-        FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
-        METAL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
-        METAL1EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 1)
-        VIA1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
-        METAL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4, 0)
-        METAL2EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4, 1)
-
     layers = Layers()
     pdk = kf.KCLayout(
         "SCHEMA_PDK_NETLIST_EQUIVALENT",

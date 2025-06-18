@@ -1058,7 +1058,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
 
 class LayerEnclosureSpec(TypedDict):
     main_layer: kdb.LayerInfo
-    name: NotRequired[str]
+    name: NotRequired[str | None]
     sections: NotRequired[
         list[tuple[kdb.LayerInfo, int] | tuple[kdb.LayerInfo, int, int]]
     ]

@@ -497,6 +497,7 @@ class CrossSectionModel(BaseModel):
                                     "sections"
                                 ],
                                 main_layer=cross_section.main_layer,
+                                name=cross_section.enclosure._name,
                             ),
                             kcl=self.kcl,
                         ),
@@ -514,6 +515,7 @@ class CrossSectionModel(BaseModel):
                     LayerEnclosureSpec(
                         sections=cross_section.get("sections", []),  # type: ignore[typeddict-item]
                         main_layer=cross_section["layer"],
+                        name=cross_section.get("enclosure", {}).get("name"),  # type: ignore[attr-defined]
                     ),
                     kcl=self.kcl,
                 ),
@@ -535,6 +537,7 @@ class CrossSectionModel(BaseModel):
                             for section in cross_section.get("sections", [])
                         ],
                         main_layer=cross_section["layer"],
+                        name=cross_section.get("enclosure", {}).get("name"),  # type: ignore[attr-defined]
                     ),
                     kcl=self.kcl,
                 ),
