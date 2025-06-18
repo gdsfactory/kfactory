@@ -4,7 +4,7 @@ import kfactory as kf
 
 
 def test_custom_show() -> None:
-    from kfactory.kcell import AnyKCell
+    from kfactory.kcell import AnyKCell  # noqa: PLC0415
 
     showed = False
     _layout_options = kf.save_layout_options()

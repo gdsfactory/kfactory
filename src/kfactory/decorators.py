@@ -33,7 +33,7 @@ from .serialization import (
     to_hashable,
 )
 from .settings import KCellSettings, KCellSettingsUnits
-from .typings import KC, VK, K, KC_co, KC_contra, KCellParams, MetaData
+from .typings import KC, VK, K, KC_co, KC_contra, KCellParams, MetaData, VK_contra
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
@@ -179,7 +179,7 @@ def _snap_ports(cell: ProtoTKCell[Any], kcl: KCLayout) -> None:
             port.dcplx_trans = dup
 
 
-def _check_ports(cell: ProtoTKCell[Any]) -> None:
+def _check_ports(cell: ProtoTKCell[Any] | VKCell) -> None:
     port_names: dict[str | None, int] = defaultdict(int)
     for port in cell.ports:
         port_names[port.name] += 1
@@ -193,7 +193,7 @@ def _check_ports(cell: ProtoTKCell[Any]) -> None:
         )
 
 
-def _check_pins(cell: ProtoTKCell[Any]) -> None:
+def _check_pins(cell: ProtoTKCell[Any] | VKCell) -> None:
     pin_names: dict[str | None, int] = defaultdict(int)
     for pin in cell.pins:
         pin_names[pin.name] += 1
@@ -265,12 +265,27 @@ def _check_cell(cell: AnyKCell, kcl: KCLayout) -> None:
         )
 
 
+@overload
 def _post_process(
     cell: KC_contra,
     post_process_functions: Iterable[Callable[[KC_contra], None]],
+) -> None: ...
+
+
+@overload
+def _post_process(
+    cell: VK_contra,
+    post_process_functions: Iterable[Callable[[VK_contra], None]],
+) -> None: ...
+
+
+def _post_process(
+    cell: KC_contra | VK_contra,
+    post_process_functions: Iterable[Callable[[KC_contra], None]]
+    | Iterable[Callable[[VK_contra], None]],
 ) -> None:
     for pp in post_process_functions:
-        pp(cell)
+        pp(cell)  # type: ignore[arg-type]
 
 
 class WrappedKCellFunc(Generic[KCellParams, KC]):
@@ -462,8 +477,12 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
 
 class WrappedVKCellFunc(Generic[KCellParams, VK]):
     _f: Callable[KCellParams, VK]
-    cache: Cache[int, Any] | dict[int, Any]
-    name: str | None
+    _f_orig: Callable[KCellParams, VKCell]
+    cache: Cache[int, VK] | dict[int, Any]
+    name: str
+    kcl: KCLayout
+    output_type: type[VK]
+    lvs_equivalent_ports: list[list[str]] | None = None
 
     @property
     def __name__(self) -> str:
@@ -479,15 +498,25 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
         self,
         *,
         kcl: KCLayout,
-        f: Callable[KCellParams, VK],
+        f: Callable[KCellParams, VKCell],
         sig: inspect.Signature,
-        cache: Cache[int, Any] | dict[int, Any],
+        output_type: type[VK],
+        cache: Cache[int, VK] | dict[int, VK],
         set_settings: bool,
         set_name: bool,
+        check_ports: bool,
+        check_pins: bool,
         add_port_layers: bool,
         basename: str | None,
         drop_params: Sequence[str],
+        info: dict[str, MetaData] | None,
+        post_process: Iterable[Callable[[VKCell], None]],
+        lvs_equivalent_ports: list[list[str]] | None = None,
     ) -> None:
+        self.kcl = kcl
+        self.output_type = output_type
+        self.name = _get_function_name(f)
+
         @functools.wraps(f)
         def wrapper_autocell(
             *args: KCellParams.args, **kwargs: KCellParams.kwargs
@@ -498,35 +527,75 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
             @functools.wraps(f)
             def wrapped_cell(**params: Any) -> VK:
                 _params_to_original(params)
-                cell = f(**params)  # type: ignore[call-arg]
-                if cell.locked:
-                    cell = cell.dup(new_name=kcl.future_cell_name)
+                old_future_name: str | None = None
                 if set_name:
                     if basename is not None:
                         name = get_cell_name(basename, **params)
                     else:
-                        name = get_cell_name(f.__name__, **params)
-                    cell.name = name
+                        name = get_cell_name(self.name, **params)
+                    old_future_name = kcl.future_cell_name
+                    kcl.future_cell_name = name
+                    logger.debug(f"Constructing {kcl.future_cell_name}")
+                    name_: str | None = name
+                else:
+                    name_ = None
+                cell = f(**params)  # type: ignore[call-arg]
+                if cell is None:
+                    raise ValueError(
+                        f"The cell function {self.name!r} in {str(self.file)!r}"
+                        " returned None. Did you forget to return the cell or component"
+                        " at the end of the function?"
+                    )
+
+                logger.debug("Constructed {}", name_ or cell.name)
+
+                if cell.locked:
+                    # If the cell is locked, it comes from a cache (most likely)
+                    # and should be copied first
+                    cell = cell.dup(new_name=kcl.future_cell_name)
+                if set_name and name_:
+                    cell.name = name_
+                    kcl.future_cell_name = old_future_name
                 if set_settings:
                     _set_settings(cell, f, drop_params, params, param_units, basename)
+                if check_ports:
+                    _check_ports(cell)
+                if check_pins:
+                    _check_pins(cell)
                 if add_port_layers:
                     _add_port_layers_vkcell(cell, kcl)
+                _post_process(cell, post_process)
                 cell.base.lock()
                 _check_cell(cell, kcl)
-                return cell
+                return output_type(base=cell.base)
 
-            return wrapped_cell(**params)
+            with kcl.thread_lock:
+                cell_ = wrapped_cell(**params)
+
+                if info is not None:
+                    cell_.info.update(info)
+
+                return cell_
 
         self._f = wrapper_autocell
+        self._f_orig = f
         self.cache = cache
-        self.name = None
-        if hasattr(f, "__name__"):
-            self.name = f.__name__
-        elif hasattr(f, "func"):
-            self.name = f.func.__name__
+        self.lvs_equivalent_ports = lvs_equivalent_ports
+        functools.update_wrapper(self, f)
 
     def __call__(self, *args: Any, **kwargs: Any) -> VK:
         return self._f(*args, **kwargs)
+
+    def __len__(self) -> int:
+        return len(self.cache)
+
+    @functools.cached_property
+    def file(self) -> Path:
+        if isinstance(self._f_orig, FunctionType):
+            return Path(self._f_orig.__code__.co_filename).resolve()
+        if isinstance(self._f_orig, functools.partial):
+            return Path(self._f_orig.func.__code__.co_filename).resolve()
+        return Path(self._f_orig.__code__.co_filename).resolve()
 
 
 class ModuleCellKWargs(TypedDict, total=False):

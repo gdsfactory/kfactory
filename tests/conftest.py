@@ -39,8 +39,8 @@ def layers() -> Layers:
 
 @pytest.fixture
 def kcl() -> kf.KCLayout:
-    import random
-    import string
+    import random  # noqa: PLC0415
+    import string  # noqa: PLC0415
 
     random_name = "".join(random.choices(string.ascii_letters, k=10))
     kcl = kf.KCLayout(name=random_name)

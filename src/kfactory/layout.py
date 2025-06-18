@@ -186,6 +186,7 @@ class KCLayout(
 
     decorators: Decorators
     default_cell_output_type: type[KCell | DKCell] = KCell
+    default_vcell_output_type: type[VKCell] = VKCell
 
     connectivity: list[
         tuple[kdb.LayerInfo, kdb.LayerInfo]
@@ -996,20 +997,9 @@ class KCLayout(
                             self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
                     self.factories[basename or wrapper_autocell.name] = wrapper_autocell  # type: ignore[assignment]
 
-            @functools.wraps(f)
-            def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
-                return wrapper_autocell(*args, **kwargs)
+            return wrapper_autocell.__call__
 
-            return func
-
-        return (
-            cast(
-                "Callable[[Callable[KCellParams, ProtoTKCell[Any]]], WrappedKCellFunc[KCellParams, KC]]",  # noqa: E501
-                decorator_autocell,
-            )
-            if _func is None
-            else decorator_autocell(_func)
-        )
+        return decorator_autocell if _func is None else decorator_autocell(_func)
 
     @overload
     def vcell(
@@ -1023,29 +1013,41 @@ class KCLayout(
         self,
         /,
         *,
+        output_type: type[VK] | None = None,
         set_settings: bool = True,
         set_name: bool = True,
-        check_ports: bool = True,
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
+        post_process: Iterable[Callable[[VKCell], None]],
+        info: dict[str, MetaData] | None = None,
+        check_ports: bool = True,
+        check_pins: bool = True,
+        tags: list[str] | None = None,
+        lvs_equivalent_ports: list[list[str]] | None = None,
     ) -> Callable[[Callable[KCellParams, VK]], Callable[KCellParams, VK]]: ...
 
     def vcell(
         self,
-        _func: Callable[KCellParams, VK] | None = None,
+        _func: Callable[KCellParams, VKCell] | None = None,
         /,
         *,
+        output_type: type[VK] | None = None,
         set_settings: bool = True,
         set_name: bool = True,
-        check_ports: bool = True,
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
+        post_process: Iterable[Callable[[VKCell], None]] | None = None,
+        info: dict[str, MetaData] | None = None,
+        check_ports: bool = True,
+        check_pins: bool = True,
+        tags: list[str] | None = None,
+        lvs_equivalent_ports: list[list[str]] | None = None,
     ) -> (
         Callable[KCellParams, VK]
         | Callable[[Callable[KCellParams, VK]], Callable[KCellParams, VK]]
@@ -1061,8 +1063,8 @@ class KCLayout(
             set_settings: Copy the args & kwargs into the settings dictionary
             set_name: Auto create the name of the cell to the functionname plus a
                 string created from the args/kwargs
-            check_ports: Check whether there are any non-90° ports in the cell and throw
-                a warning if there are
+            check_ports: Check uniqueness of port names.
+            check_pins: Check uniqueness of pin names.
             snap_ports: Snap the centers of the ports onto the grid
                 (only x/y, not angle).
             add_port_layers: Add special layers of
@@ -1078,15 +1080,32 @@ class KCLayout(
                 [settings][kfactory.kcell.KCell.settings]
             register_factory: Register the resulting KCell-function to the
                 [factories][kfactory.kcell.KCLayout.factories]
+            info: Additional metadata to put into info attribute.
+            post_process: List of functions to call after the cell has been created.
+        Returns:
+            A wrapped vcell function which caches responses and modifies the VKCell
+            according to settings.
         """
+        if post_process is None:
+            post_process = ()
 
         def decorator_autocell(
-            f: Callable[KCellParams, VK],
+            f: Callable[KCellParams, VKCell],
         ) -> Callable[KCellParams, VK]:
             sig = inspect.signature(f)
+            output_cell_type_: type[VK | VKCell]
+            if output_type is not None:
+                output_cell_type_ = output_type
+            elif sig.return_annotation is not inspect.Signature.empty:
+                output_cell_type_ = sig.return_annotation
+            else:
+                output_cell_type_ = self.default_vcell_output_type
 
+            output_cell_type__ = cast("type[VK]", output_cell_type_)
             # previously was a KCellCache, but dict should do for most case
-            cache_ = cache or {}
+            cache_: Cache[int, VK] | dict[int, VK] = cache or Cache(
+                maxsize=float("inf")
+            )
 
             wrapper_autocell = WrappedVKCellFunc(
                 kcl=self,
@@ -1098,17 +1117,25 @@ class KCLayout(
                 add_port_layers=add_port_layers,
                 basename=basename,
                 drop_params=drop_params,
+                post_process=post_process,
+                output_type=output_cell_type__,
+                info=info,
+                check_ports=check_ports,
+                check_pins=check_pins,
+                lvs_equivalent_ports=lvs_equivalent_ports,
             )
 
             if register_factory:
-                if hasattr(f, "__name__"):
-                    function_name = f.__name__
-                elif hasattr(f, "func"):
-                    function_name = f.func.__name__
-                else:
+                if wrapper_autocell.name is None:
                     raise ValueError(f"Function {f} has no name.")
-                self.virtual_factories[basename or function_name] = wrapper_autocell  # type: ignore[assignment]
-            return wrapper_autocell
+                if tags:
+                    for tag in tags:
+                        self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
+                self.virtual_factories[basename or wrapper_autocell.name] = (
+                    wrapper_autocell  # type: ignore[assignment]
+                )
+
+            return wrapper_autocell.__call__
 
         return decorator_autocell if _func is None else decorator_autocell(_func)
 
@@ -1332,7 +1359,7 @@ class KCLayout(
                     c = cell_type(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
                     c.get_meta_data()
                     return c
-        from pprint import pformat
+        from pprint import pformat  # noqa: PLC0415
 
         raise ValueError(
             f"Library doesn't have a KCell named {obj},"

@@ -100,7 +100,7 @@ def check_cell_ports(p1: ProtoPort[Any], p2: ProtoPort[Any]) -> int:
     Returns:
         int: A bitwise representation of the differences between the two ports.
     """
-    from .port import Port
+    from .port import Port  # noqa: PLC0415
 
     p1_ = Port(base=p1.base)
     p2_ = Port(base=p2.base)
