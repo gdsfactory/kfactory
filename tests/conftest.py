@@ -11,14 +11,19 @@ import kfactory as kf
 class Layers(kf.LayerInfos):
     WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
     WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
-    WGEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
-    WGCLADEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1)
+    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
+    WGCLADEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1)
     FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
     FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
     FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
     METAL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(20, 0)
-    METAL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(21, 0)
-    METAL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(21, 0)
+    METAL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(22, 0)
+    METAL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(24, 0)
+    METAL1EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(20, 1)
+    METAL2EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(22, 1)
+    METAL3EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(24, 1)
+    VIA1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(21, 0)
+    VIA2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(23, 0)
 
 
 kf.kcl.infos = Layers()

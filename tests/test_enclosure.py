@@ -137,7 +137,7 @@ def test_pdkenclosure(layers: Layers, straight_blank: kf.KCell) -> None:
 
     enc1 = kf.LayerEnclosure(
         sections=[
-            (layers.WGEXCLUDE, 1000),
+            (layers.WGEX, 1000),
         ],
         name="WGEX",
         main_layer=layers.WG,
@@ -146,7 +146,7 @@ def test_pdkenclosure(layers: Layers, straight_blank: kf.KCell) -> None:
     enc2 = kf.LayerEnclosure(
         name="CLADEX",
         main_layer=layers.WGCLAD,
-        sections=[(layers.WGEXCLUDE, 1000), (layers.WGCLADEXCLUDE, 2000)],
+        sections=[(layers.WGEX, 1000), (layers.WGCLADEX, 2000)],
     )
 
     pdkenc = kf.KCellEnclosure(enclosures=[enc1, enc2])
@@ -167,10 +167,12 @@ def test_pdkenclosure(layers: Layers, straight_blank: kf.KCell) -> None:
 
     port_wg_ex.merge()
 
+    c.show()
+
     assert (
-        kf.kdb.Region(c.shapes(c.kcl.find_layer(layers.WGEXCLUDE))) & port_wg_ex
+        kf.kdb.Region(c.shapes(c.kcl.find_layer(layers.WGEX))) & port_wg_ex
     ).is_empty()
     assert (
-        (kf.kdb.Region(c.shapes(c.kcl.find_layer(layers.WGCLADEXCLUDE))) & port_wg_ex)
+        (kf.kdb.Region(c.shapes(c.kcl.find_layer(layers.WGCLADEX))) & port_wg_ex)
         - port_wg_ex
     ).is_empty()
