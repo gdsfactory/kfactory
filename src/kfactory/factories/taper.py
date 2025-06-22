@@ -103,7 +103,12 @@ def taper_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @kcl.cell(basename=basename, output_type=KCell, **cell_kwargs)
+    @kcl.cell(
+        basename=basename,
+        output_type=KCell,
+        ports=[("o1", 2), ("o2", 0)],
+        **cell_kwargs,
+    )
     def taper(
         width1: dbu,
         width2: dbu,

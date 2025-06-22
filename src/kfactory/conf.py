@@ -65,6 +65,13 @@ class PROPID(IntEnum):
     """Instance purpose (e.g. 'routing')."""
 
 
+class PORTDIRECTION(IntEnum):
+    RIGHT = 0
+    TOP = 1
+    LEFT = 2
+    BOTTOM = 3
+
+
 @runtime_checkable
 class ShowFunction(Protocol):
     def __call__(

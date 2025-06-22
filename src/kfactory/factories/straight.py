@@ -16,8 +16,8 @@ The slabs and excludes can be given in the form of an
 [Enclosure][kfactory.enclosure.LayerEnclosure].
 """
 
-from collections.abc import Callable
-from typing import Any, Protocol
+from collections.abc import Callable, Sequence
+from typing import Any, Literal, Protocol
 
 from .. import kdb
 from ..conf import logger
@@ -69,6 +69,7 @@ def straight_dbu_factory(
     | dict[str, MetaData]
     | None = None,
     basename: str | None = None,
+    ports: Sequence[tuple[str, Literal[0, 1, 2, 3]]] = (("o1", 2), ("o2", 0)),
     **cell_kwargs: Any,
 ) -> StraightKCellFactory:
     """Returns a function generating straights [dbu].
@@ -103,7 +104,12 @@ def straight_dbu_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @kcl.cell(basename=basename, output_type=KCell, **cell_kwargs)
+    @kcl.cell(
+        basename=basename,
+        output_type=KCell,
+        ports=ports,
+        **cell_kwargs,
+    )
     def straight(
         width: dbu,
         length: dbu,
