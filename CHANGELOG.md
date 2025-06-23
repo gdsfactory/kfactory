@@ -1,11 +1,25 @@
-<a id="v1.9.2"></a>
-# [v1.9.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.9.2) - 2025-06-18
+<a id="v1.9.3"></a>
+# [v1.9.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.9.3) - 2025-06-19
 
 # What's Changed
 
 ## Bug Fixes
 
 - fix basename/function_name not set on vinst insert [#737](https://github.com/gdsfactory/kfactory/pull/737)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.9.2...v1.9.3
+
+
+[Changes][v1.9.3]
+
+
+<a id="v1.9.2"></a>
+# [v1.9.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.9.2) - 2025-06-19
+
+# What's Changed
+
+## Bug Fixes
+
 - fix VInstance trans on insert [#736](https://github.com/gdsfactory/kfactory/pull/736)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.9.1...v1.9.2
@@ -21,7 +35,6 @@
 
 ## Bug Fixes
 
-- fix VInstance trans on insert [#736](https://github.com/gdsfactory/kfactory/pull/736)
 - fix type completions for jedi [#735](https://github.com/gdsfactory/kfactory/pull/735)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.9.0...v1.9.1
@@ -2127,6 +2140,7 @@
 [Changes][v0.4.0]
 
 
+[v1.9.3]: https://github.com/gdsfactory/kfactory/compare/v1.9.2...v1.9.3
 [v1.9.2]: https://github.com/gdsfactory/kfactory/compare/v1.9.1...v1.9.2
 [v1.9.1]: https://github.com/gdsfactory/kfactory/compare/v1.9.0...v1.9.1
 [v1.9.0]: https://github.com/gdsfactory/kfactory/compare/v1.8.2...v1.9.0
