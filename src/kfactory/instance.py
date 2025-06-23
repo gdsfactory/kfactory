@@ -819,7 +819,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             if trans_.mirror:
                 trans_str += "_M"
             if trans_.angle != 0:
-                f"_A{trans_.angle}"
+                trans_str += f"_A{trans_.angle}"
             if trans_.disp != kdb.DVector(0, 0):
                 trans_str += f"_X{trans_.disp.x}_Y{trans_.disp.y}"
             trans_str = trans_str.replace(".", "p")
