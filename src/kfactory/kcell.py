@@ -1952,12 +1952,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             equivalent_ports = {}
             for ci in [self.cell_index(), *self.called_cells()]:
                 c_ = self.kcl[ci]
-                eqps = (
-                    c_.lvs_equivalent_ports
-                    or c_.kcl.factories[c_.factory_name].lvs_equivalent_ports
-                    if c_.has_factory_name()
-                    else None
-                )
+                eqps: list[list[str]] | None = c_.lvs_equivalent_ports or None
+                if c_.has_factory_name():
+                    if c_.virtual:
+                        eqps = c_.kcl.virtual_factories[
+                            c_.factory_name
+                        ].lvs_equivalent_ports
+                    else:
+                        eqps = c_.kcl.factories[c_.factory_name].lvs_equivalent_ports
                 if eqps is not None:
                     equivalent_ports[c_.name] = eqps
         port_mapping: dict[str, dict[str | None, str]] = defaultdict(dict)
@@ -4126,14 +4128,17 @@ def _get_netlist(
 
     for inst in c.insts:
         if (keep_name or inst.is_named()) and (inst.purpose not in exclude_purposes):
-            if inst.cell.factory_name is not None:
+            if inst.cell.has_factory_name():
                 nl.create_inst(
                     name=inst.name,
                     kcl=inst.cell.library().name()
                     if inst.cell.is_library_cell()
                     else inst.cell.kcl.name,
                     component=inst.cell.factory_name,
-                    settings=serialize_setting(inst.cell.settings.model_dump()),  # type: ignore[arg-type]
+                    settings={
+                        k: serialize_setting(v)
+                        for k, v in inst.cell.settings.model_dump().items()
+                    },
                 )
             else:
                 nl.create_inst(
@@ -4142,7 +4147,10 @@ def _get_netlist(
                     if inst.cell.is_library_cell()
                     else inst.cell.kcl.name,
                     component=inst.cell.name,
-                    settings=serialize_setting(inst.cell.settings.model_dump()),
+                    settings={
+                        k: serialize_setting(v)
+                        for k, v in inst.cell.settings.model_dump().items()
+                    },
                 )
 
     for net in opt_circ.each_net():
