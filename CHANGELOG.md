@@ -1,3 +1,34 @@
+<a id="v1.9.5"></a>
+# [v1.9.5](https://github.com/gdsfactory/kfactory/releases/tag/v1.9.5) - 2025-06-24
+
+# What's Changed
+
+## Bug Fixes
+
+- fix insert vinsts for KCells [#741](https://github.com/gdsfactory/kfactory/pull/741)
+- fix netlist extraction for vcells [#740](https://github.com/gdsfactory/kfactory/pull/740)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.9.4...v1.9.5
+
+
+[Changes][v1.9.5]
+
+
+<a id="v1.9.4"></a>
+# [v1.9.4](https://github.com/gdsfactory/kfactory/releases/tag/v1.9.4) - 2025-06-23
+
+# What's Changed
+
+## Bug Fixes
+
+- fix missing transformation string appending [#739](https://github.com/gdsfactory/kfactory/pull/739)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.9.3...v1.9.4
+
+
+[Changes][v1.9.4]
+
+
 <a id="v1.9.3"></a>
 # [v1.9.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.9.3) - 2025-06-19
 
@@ -2140,6 +2171,8 @@
 [Changes][v0.4.0]
 
 
+[v1.9.5]: https://github.com/gdsfactory/kfactory/compare/v1.9.4...v1.9.5
+[v1.9.4]: https://github.com/gdsfactory/kfactory/compare/v1.9.3...v1.9.4
 [v1.9.3]: https://github.com/gdsfactory/kfactory/compare/v1.9.2...v1.9.3
 [v1.9.2]: https://github.com/gdsfactory/kfactory/compare/v1.9.1...v1.9.2
 [v1.9.1]: https://github.com/gdsfactory/kfactory/compare/v1.9.0...v1.9.1
