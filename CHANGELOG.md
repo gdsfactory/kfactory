@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- fix insert vinsts for KCells [#741](https://github.com/gdsfactory/kfactory/pull/741)
 - fix netlist extraction for vcells [#740](https://github.com/gdsfactory/kfactory/pull/740)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.9.4...v1.9.5
