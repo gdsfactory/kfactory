@@ -5,7 +5,7 @@ from __future__ import annotations
 import functools
 import inspect
 from collections import defaultdict
-from operator import attrgetter, itemgetter
+from enum import StrEnum
 from pathlib import Path
 from threading import RLock
 from types import FunctionType
@@ -14,7 +14,6 @@ from typing import (
     Annotated,
     Any,
     Generic,
-    Literal,
     Protocol,
     TypedDict,
     get_origin,
@@ -25,7 +24,7 @@ from cachetools import Cache, cached
 from typing_extensions import Unpack
 
 from . import kdb
-from .conf import PORTDIRECTION, CheckInstances, logger
+from .conf import CheckInstances, logger
 from .exceptions import CellNameError
 from .serialization import (
     DecoratorDict,
@@ -151,6 +150,20 @@ def _add_port_layers_vkcell(cell: VKCell, kcl: KCLayout) -> None:
                     cell.shapes(cell.kcl.netlist_layer_mapping[port.layer]).insert(
                         kdb.DText(port.name, port.dcplx_trans.s_trans())
                     )
+
+
+class PortsDefinition(TypedDict, total=False):
+    right: list[str]
+    top: list[str]
+    left: list[str]
+    bottom: list[str]
+
+
+class Direction(StrEnum):
+    right = "right"
+    left = "left"
+    top = "top"
+    bottom = "bottom"
 
 
 def _check_instances(
@@ -307,7 +320,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     kcl: KCLayout
     output_type: type[KC]
     lvs_equivalent_ports: list[list[str]] | None = None
-    port_definitions: list[tuple[str, PORTDIRECTION]] | None = None
+    ports_definition: PortsDefinition | None = None
 
     @property
     def __name__(self) -> str:
@@ -342,11 +355,12 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         post_process: Iterable[Callable[[ProtoTKCell[Any]], None]],
         debug_names: bool,
         lvs_equivalent_ports: list[list[str]] | None = None,
-        ports: Sequence[tuple[str, Literal[0, 1, 2, 3]]] | None = None,
+        ports: PortsDefinition | None = None,
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
         self.name = _get_function_name(f)
+        self.ports_definition = ports.copy() if ports is not None else None
 
         @functools.wraps(f)
         def wrapper_autocell(
@@ -430,28 +444,64 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                 _post_process(cell, post_process)
                 cell.base.lock()
                 _check_cell(cell, kcl)
-                if ports is not None:
-                    if len(cell.ports) != len(cell.ports):
+                if self.ports_definition is not None:
+                    port_lengths = 0
+                    for direction in Direction:
+                        port_lengths += len(self.ports_definition.get(direction, []))  # type: ignore[arg-type]
+                    mapping = {0: "right", 1: "top", 2: "left", 3: "bottom"}
+                    if len(cell.ports) != port_lengths:
+                        received_ports = PortsDefinition()
+                        for port in cell.ports:
+                            mapped: Direction = Direction(mapping[port.trans.angle])
+                            if mapped not in received_ports:
+                                received_ports[mapped] = []  # type: ignore[literal-required]
+                            received_ports[mapped].append(port.name)  # type: ignore[literal-required]
                         raise ValueError(
                             "The `@cell` decorator defines ports, but they do not match"
                             " the extracted ports. Declared ports: "
-                            f"{','.join(sorted(port[0] for port in ports))!r}"
+                            f"{self.ports_definition}"
                             ", Received ports: "
-                            f"{','.join(sorted(str(p.name) for p in cell.ports))}"
+                            f"{received_ports}"
                         )
-                    for port_name, cell_port in zip(
-                        sorted(port[0] for port in ports),
-                        sorted(cell.ports, key=attrgetter("name")),
-                        strict=True,
-                    ):
-                        if port_name != cell_port.name:
+
+                    if check_ports:
+                        found_errors = False
+                        for port in cell.ports:
+                            if (
+                                port.name
+                                not in self.ports_definition[mapping[port.trans.angle]]  # type: ignore[literal-required]
+                            ):
+                                found_errors = True
+                        if found_errors:
+                            received_ports = PortsDefinition()
+                            for port in cell.ports:
+                                mapped = Direction(mapping[port.trans.angle])
+                                if mapped not in received_ports:
+                                    received_ports[mapped] = []  # type: ignore[literal-required]
+                                received_ports[mapped].append(port.name)  # type: ignore[literal-required]
                             raise ValueError(
-                                "Namemismatch between declared ports in cell decorator "
-                                "vs cell implementation port names. "
-                                "Declared names: "
-                                f"{','.join(sorted(port[0] for port in ports))}. "
-                                "Implementation names: "
-                                f"{','.join(sorted(str(p.name) for p in cell.ports))}"
+                                "The `@cell` decorator defines ports, but they do not"
+                                " match the extracted ports. Declared ports: "
+                                f"{self.ports_definition}"
+                                ", Received ports: "
+                                f"{received_ports}"
+                            )
+                    else:
+                        port_names: list[str | None] = []
+                        for direction in Direction:
+                            if direction in self.ports_definition:
+                                port_names.extend(self.ports_definition[direction])  # type: ignore[literal-required]
+
+                        for port in cell.ports:
+                            if port.name not in port_names:
+                                found_errors = True
+                        if found_errors:
+                            raise ValueError(
+                                "The `@cell` decorator defines ports, but they do not"
+                                " match the extracted ports. Declared ports: "
+                                f"{port_names}"
+                                ", Received ports: "
+                                f"{[p.name for p in cell.ports]}"
                             )
 
                 return output_type(base=cell.base)
@@ -480,11 +530,6 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         self._f_orig = f
         self.cache = cache
         self.lvs_equivalent_ports = lvs_equivalent_ports
-        if ports is not None:
-            self.port_definitions = sorted(
-                ((port[0], PORTDIRECTION(port[1])) for port in ports),
-                key=itemgetter(0),
-            )
         functools.update_wrapper(self, f)
 
     def __call__(self, *args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
@@ -525,6 +570,7 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
     kcl: KCLayout
     output_type: type[VK]
     lvs_equivalent_ports: list[list[str]] | None = None
+    ports_definition: PortsDefinition | None = None
 
     @property
     def __name__(self) -> str:
@@ -554,11 +600,12 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
         info: dict[str, MetaData] | None,
         post_process: Iterable[Callable[[VKCell], None]],
         lvs_equivalent_ports: list[list[str]] | None = None,
-        ports: Sequence[tuple[str, Literal[0, 1, 2, 3]]] | None = None,
+        ports: PortsDefinition | None = None,
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
         self.name = _get_function_name(f)
+        self.ports_definitions = ports.copy() if ports is not None else None
 
         @functools.wraps(f)
         def wrapper_autocell(
@@ -610,32 +657,43 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
                 _post_process(cell, post_process)
                 cell.base.lock()
                 _check_cell(cell, kcl)
-                if ports is not None:
-                    if len(cell.ports) != len(cell.ports):
+                if self.ports_definition is not None:
+                    port_lengths = 0
+                    for direction in Direction:
+                        port_lengths += len(self.ports_definition.get(direction, []))  # type: ignore[arg-type]
+                    mapping = {0: "right", 1: "top", 2: "left", 3: "bottom"}
+                    if len(cell.ports) != port_lengths:
+                        received_ports = PortsDefinition()
+                        for port in cell.ports:
+                            mapped: Direction = Direction(mapping[port.trans.angle])
+                            if mapped not in received_ports:
+                                received_ports[mapped] = []  # type: ignore[literal-required]
+                            received_ports[mapped].append(port.name)  # type: ignore[literal-required]
                         raise ValueError(
                             "The `@cell` decorator defines ports, but they do not match"
                             " the extracted ports. Declared ports: "
-                            f"{','.join(sorted(port[0] for port in ports))!r}"
+                            f"{self.ports_definition}"
                             ", Received ports: "
-                            f"{','.join(sorted(str(p.name) for p in cell.ports))}"
+                            f"{received_ports}"
                         )
-                    for port_name, cell_port in zip(
-                        sorted(port[0] for port in ports),
-                        sorted(cell.ports, key=attrgetter("name")),
-                        strict=True,
-                    ):
-                        if port_name != cell_port.name:
-                            raise ValueError(
-                                "Namemismatch between declared ports in cell decorator "
-                                "vs cell implementation port names. "
-                                "Declared names: "
-                                f"{','.join(sorted(port[0] for port in ports))}. "
-                                "Implementation names: "
-                                f"{','.join(sorted(str(p.name) for p in cell.ports))}"
-                            )
-                    self.port_definitions = [
-                        (port[0], PORTDIRECTION(port[1])) for port in ports
-                    ]
+
+                    port_names: list[str | None] = []
+                    for direction in Direction:
+                        if direction in self.ports_definition:
+                            port_names.extend(self.ports_definition[direction])  # type: ignore[literal-required]
+
+                    for port in cell.ports:
+                        if port.name not in port_names:
+                            found_errors = True
+                    if found_errors:
+                        raise ValueError(
+                            "The `@cell` decorator defines ports, but they do not"
+                            " match the extracted ports. Declared ports: "
+                            f"{port_names}"
+                            ", Received ports: "
+                            f"{[p.name for p in cell.ports]}"
+                        )
+
                 return output_type(base=cell.base)
 
             with kcl.thread_lock:

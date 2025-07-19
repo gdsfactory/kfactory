@@ -16,11 +16,12 @@ The slabs and excludes can be given in the form of an
 [Enclosure][kfactory.enclosure.LayerEnclosure].
 """
 
-from collections.abc import Callable, Sequence
-from typing import Any, Literal, Protocol
+from collections.abc import Callable
+from typing import Any, Protocol
 
 from .. import kdb
 from ..conf import logger
+from ..decorators import PortsDefinition
 from ..enclosure import LayerEnclosure
 from ..kcell import KCell
 from ..layout import KCLayout
@@ -60,6 +61,9 @@ class StraightKCellFactory(Protocol):
         ...
 
 
+_straight_default_ports = PortsDefinition(left=["o1"], right=["o2"])
+
+
 def straight_dbu_factory(
     kcl: KCLayout,
     additional_info: Callable[
@@ -69,7 +73,7 @@ def straight_dbu_factory(
     | dict[str, MetaData]
     | None = None,
     basename: str | None = None,
-    ports: Sequence[tuple[str, Literal[0, 1, 2, 3]]] = (("o1", 2), ("o2", 0)),
+    ports: PortsDefinition = _straight_default_ports,
     **cell_kwargs: Any,
 ) -> StraightKCellFactory:
     """Returns a function generating straights [dbu].

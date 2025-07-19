@@ -106,7 +106,7 @@ def taper_factory(
     @kcl.cell(
         basename=basename,
         output_type=KCell,
-        ports=[("o1", 2), ("o2", 0)],
+        ports={"left": ["o1"], "right": ["o2"]},
         **cell_kwargs,
     )
     def taper(
