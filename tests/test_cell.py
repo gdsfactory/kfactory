@@ -5,6 +5,7 @@ import warnings
 from collections.abc import Callable
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+from typing import Any
 
 import pytest
 
@@ -37,6 +38,16 @@ def test_unnamed_cell(kcl: kf.KCLayout) -> None:
     c1 = unnamed_cell("test_unnamed_cell")
     c2 = unnamed_cell("test_unnamed_cell")
     assert c1 is c2
+
+
+def test_wrong_dict(kcl: kf.KCLayout) -> None:
+    with pytest.raises(kf.exceptions.CellNameError):
+
+        @kf.cell
+        def wrong_dict_cell(a: dict[Any, Any]) -> kf.KCell:
+            return kcl.kcell()
+
+        wrong_dict_cell({(1, 0): 555, (2, 0): 10})
 
 
 def test_nested_dict_list(kcl: kf.KCLayout) -> None:
