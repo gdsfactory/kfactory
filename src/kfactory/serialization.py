@@ -13,6 +13,7 @@ import numpy as np
 import toolz  # type: ignore[import-untyped,unused-ignore]
 
 from .conf import config
+from .exceptions import CellNameError
 from .typings import JSONSerializable, MetaData, SerializableShape
 
 if TYPE_CHECKING:
@@ -81,7 +82,14 @@ def clean_value(
     if isinstance(value, list | tuple):
         return "_".join(clean_value(v) for v in value)
     if isinstance(value, dict):
-        return dict2name(**value)
+        try:
+            return dict2name(**value)
+        except TypeError as e:
+            raise CellNameError(
+                "Dictionaries passed to functions as args/kwargs"
+                " must be of type dict[str, ...] to be properly serialized"
+                " for Cell/Component names or similar."
+            ) from e
     if hasattr(value, "name"):
         return clean_name(value.name)  # type: ignore[arg-type]
     if callable(value):
