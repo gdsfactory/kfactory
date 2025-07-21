@@ -20,7 +20,6 @@ authors = [{ name = "gdsfactory community", email = "contact@gdsfactory.com" }]
 dependencies = [
     "aenum >= 3.1.15, < 4",
     "cachetools >= 5.2.0",
-    "gitpython >= 3.1.44, < 4",
     "loguru >= 0.7.3, < 0.8",
     "klayout >= 0.30, < 0.31.0",
     "pydantic >= 2.11, < 2.12",
