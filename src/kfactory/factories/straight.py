@@ -21,6 +21,7 @@ from typing import Any, Protocol
 
 from .. import kdb
 from ..conf import logger
+from ..decorators import PortsDefinition
 from ..enclosure import LayerEnclosure
 from ..kcell import KCell
 from ..layout import KCLayout
@@ -60,6 +61,9 @@ class StraightKCellFactory(Protocol):
         ...
 
 
+_straight_default_ports = PortsDefinition(left=["o1"], right=["o2"])
+
+
 def straight_dbu_factory(
     kcl: KCLayout,
     additional_info: Callable[
@@ -69,6 +73,7 @@ def straight_dbu_factory(
     | dict[str, MetaData]
     | None = None,
     basename: str | None = None,
+    ports: PortsDefinition = _straight_default_ports,
     **cell_kwargs: Any,
 ) -> StraightKCellFactory:
     """Returns a function generating straights [dbu].
@@ -103,7 +108,12 @@ def straight_dbu_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @kcl.cell(basename=basename, output_type=KCell, **cell_kwargs)
+    @kcl.cell(
+        basename=basename,
+        output_type=KCell,
+        ports=ports,
+        **cell_kwargs,
+    )
     def straight(
         width: dbu,
         length: dbu,

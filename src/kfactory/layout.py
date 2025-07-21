@@ -30,7 +30,7 @@ from .cross_section import (
     DSymmetricalCrossSection,
     SymmetricalCrossSection,
 )
-from .decorators import Decorators, WrappedKCellFunc, WrappedVKCellFunc
+from .decorators import Decorators, PortsDefinition, WrappedKCellFunc, WrappedVKCellFunc
 from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
@@ -774,6 +774,7 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
     ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
     @overload
@@ -799,6 +800,7 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
     ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
     @overload
@@ -825,6 +827,7 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
     ) -> Callable[
         [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
     ]: ...
@@ -852,6 +855,7 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
     ) -> Callable[
         [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
     ]: ...
@@ -880,6 +884,7 @@ class KCLayout(
         debug_names: bool | None = None,
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
     ) -> (
         Callable[KCellParams, KC]
         | Callable[
@@ -987,6 +992,7 @@ class KCLayout(
                 post_process=post_process,  # type: ignore[arg-type]
                 debug_names=debug_names,
                 lvs_equivalent_ports=lvs_equivalent_ports,
+                ports=ports,
             )
 
             if register_factory:
@@ -1031,6 +1037,7 @@ class KCLayout(
         check_pins: bool = True,
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
     ) -> Callable[[Callable[KCellParams, VK]], Callable[KCellParams, VK]]: ...
 
     @overload
@@ -1038,7 +1045,7 @@ class KCLayout(
         self,
         /,
         *,
-        output_type: type[VK] | None = None,
+        output_type: type[VK],
         set_settings: bool = True,
         set_name: bool = True,
         add_port_layers: bool = True,
@@ -1052,6 +1059,7 @@ class KCLayout(
         check_pins: bool = True,
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
     ) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VK]]: ...
 
     def vcell(
@@ -1073,6 +1081,7 @@ class KCLayout(
         check_pins: bool = True,
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
     ) -> (
         Callable[KCellParams, VK]
         | Callable[[Callable[KCellParams, VK]], Callable[KCellParams, VK]]
@@ -1148,6 +1157,7 @@ class KCLayout(
                 check_ports=check_ports,
                 check_pins=check_pins,
                 lvs_equivalent_ports=lvs_equivalent_ports,
+                ports=ports,
             )
 
             if register_factory:
