@@ -1,5 +1,20 @@
+<a id="v1.10.0"></a>
+# [v1.10.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.10.0) - 2025-07-21
+
+# What's Changed
+
+## New
+
+- add port defitions to cell decorator [#738](https://github.com/gdsfactory/kfactory/pull/738)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.9.5...v1.10.0
+
+
+[Changes][v1.10.0]
+
+
 <a id="v1.9.5"></a>
-# [v1.9.5](https://github.com/gdsfactory/kfactory/releases/tag/v1.9.5) - 2025-06-24
+# [v1.9.5](https://github.com/gdsfactory/kfactory/releases/tag/v1.9.5) - 2025-06-27
 
 # What's Changed
 
@@ -2171,6 +2186,7 @@
 [Changes][v0.4.0]
 
 
+[v1.10.0]: https://github.com/gdsfactory/kfactory/compare/v1.9.5...v1.10.0
 [v1.9.5]: https://github.com/gdsfactory/kfactory/compare/v1.9.4...v1.9.5
 [v1.9.4]: https://github.com/gdsfactory/kfactory/compare/v1.9.3...v1.9.4
 [v1.9.3]: https://github.com/gdsfactory/kfactory/compare/v1.9.2...v1.9.3
