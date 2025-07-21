@@ -7,6 +7,10 @@
 
 - add port defitions to cell decorator [#738](https://github.com/gdsfactory/kfactory/pull/738)
 
+## Bug Fixes
+
+- fix [#705](https://github.com/gdsfactory/kfactory/issues/705) - better error message on cell name serialization problem of dictionary [#743](https://github.com/gdsfactory/kfactory/pull/743)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.9.5...v1.10.0
 
 
