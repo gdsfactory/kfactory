@@ -11,7 +11,6 @@ from enum import Enum
 from pathlib import Path
 from typing import Annotated
 
-import git
 import typer
 
 from ..conf import logger
@@ -155,17 +154,8 @@ def build(
 
                 cell = getattr(_mod, func)(**kwargs)
                 if isinstance(cell, KCell):
-                    try:
-                        repo = git.repo.Repo(".", search_parent_directories=True)
-                    except git.InvalidGitRepositoryError:
-                        pass
-                    else:
-                        wtd = repo.working_tree_dir
-                        if wtd is not None:
-                            root = Path(wtd) / "build/gds"
-                            root.mkdir(parents=True, exist_ok=True)
-                        else:
-                            root = Path()
+                    root = Path.cwd() / "build/gds"
+                    root.mkdir(parents=True, exist_ok=True)
                     if show:
                         cell.show()
                     if write_full:
@@ -224,17 +214,8 @@ def build(
 
                 cell = getattr(_mod, func)(**kwargs)
                 if isinstance(cell, KCell):
-                    try:
-                        repo = git.repo.Repo(".", search_parent_directories=True)
-                    except git.InvalidGitRepositoryError:
-                        pass
-                    else:
-                        wtd = repo.working_tree_dir
-                        if wtd is not None:
-                            root = Path(wtd) / "build/gds"
-                            root.mkdir(parents=True, exist_ok=True)
-                        else:
-                            root = Path()
+                    root = Path.cwd() / "build/gds"
+                    root.mkdir(parents=True, exist_ok=True)
                     if show:
                         cell.show()
                     if write_full:

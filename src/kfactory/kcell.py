@@ -3727,40 +3727,13 @@ def show(
     kcl_paths: list[dict[str, str]] = []
 
     if isinstance(layout, KCLayout):
-        file: Path | None = None
-        spec = importlib.util.find_spec("git")
-        if spec is not None:
-            import git
-
-            try:
-                repo = git.repo.Repo(".", search_parent_directories=True)
-            except git.InvalidGitRepositoryError:
-                pass
-            else:
-                wtd = repo.working_tree_dir
-                if wtd is not None:
-                    root = Path(wtd) / "build/gds"
-                    root.mkdir(parents=True, exist_ok=True)
-                    tf = root / Path(name).with_suffix(".oas")
-                    tf.parent.mkdir(parents=True, exist_ok=True)
-                    layout.write(str(tf), save_options)
-                    file = tf
-                    delete = False
-        else:
-            logger.info(
-                "git isn't installed. For better file storage, "
-                "please install kfactory[git] or gitpython."
-            )
-        if not file:
-            try:
-                from __main__ import __file__ as mf
-            except ImportError:
-                mf = "shell"
-            tf = Path(gettempdir()) / (name + ".oas")
-            tf.parent.mkdir(parents=True, exist_ok=True)
-            layout.write(tf, save_options)
-            file = tf
-            delete = True
+        root = Path.cwd() / "build/gds"
+        root.mkdir(parents=True, exist_ok=True)
+        tf = root / Path(name).with_suffix(".oas")
+        tf.parent.mkdir(parents=True, exist_ok=True)
+        layout.write(str(tf), save_options)
+        file = tf
+        delete = False
         if use_libraries:
             dir_ = tf.parent
             kcls_ = list(kcls.values())
@@ -3778,40 +3751,13 @@ def show(
                 kcl_paths.append({"name": _kcl.name, "file": str(p)})
 
     elif isinstance(layout, ProtoKCell):
-        file = None
-        spec = importlib.util.find_spec("git")
-        if spec is not None:
-            import git
-
-            try:
-                repo = git.repo.Repo(".", search_parent_directories=True)
-            except git.InvalidGitRepositoryError:
-                pass
-            else:
-                wtd = repo.working_tree_dir
-                if wtd is not None:
-                    root = Path(wtd) / "build/gds"
-                    root.mkdir(parents=True, exist_ok=True)
-                    tf = root / Path(name).with_suffix(".oas")
-                    tf.parent.mkdir(parents=True, exist_ok=True)
-                    layout.write(str(tf), save_options)
-                    file = tf
-                    delete = False
-        else:
-            logger.info(
-                "git isn't installed. For better file storage, "
-                "please install kfactory[git] or gitpython."
-            )
-        if not file:
-            try:
-                from __main__ import __file__ as mf
-            except ImportError:
-                mf = "shell"
-            tf = Path(gettempdir()) / (name + ".gds")
-            tf.parent.mkdir(parents=True, exist_ok=True)
-            layout.write(tf, save_options)
-            file = tf
-            delete = True
+        root = Path.cwd() / "build/gds"
+        root.mkdir(parents=True, exist_ok=True)
+        tf = root / Path(name).with_suffix(".oas")
+        tf.parent.mkdir(parents=True, exist_ok=True)
+        layout.write(str(tf), save_options)
+        file = tf
+        delete = False
         if use_libraries:
             dir_ = tf.parent
             kcls_ = list(kcls.values())
@@ -3838,40 +3784,13 @@ def show(
 
     if lyrdb is not None:
         if isinstance(lyrdb, rdb.ReportDatabase):
-            lyrdbfile: Path | None = None
-            spec = importlib.util.find_spec("git")
-            if spec is not None:
-                import git
-
-                try:
-                    repo = git.repo.Repo(".", search_parent_directories=True)
-                except git.InvalidGitRepositoryError:
-                    pass
-                else:
-                    wtd = repo.working_tree_dir
-                    if wtd is not None:
-                        root = Path(wtd) / "build/gds"
-                        root.mkdir(parents=True, exist_ok=True)
-                        tf = root / Path(name).with_suffix(".lyrdb")
-                        tf.parent.mkdir(parents=True, exist_ok=True)
-                        lyrdb.save(str(tf))
-                        lyrdbfile = tf
-                        delete_lyrdb = False
-            else:
-                logger.info(
-                    "git isn't installed. For better file storage, "
-                    "please install kfactory[git] or gitpython."
-                )
-            if not lyrdbfile:
-                try:
-                    from __main__ import __file__ as mf
-                except ImportError:
-                    mf = "shell"
-                tf = Path(gettempdir()) / (name + ".lyrdb")
-                tf.parent.mkdir(parents=True, exist_ok=True)
-                lyrdb.save(str(tf))
-                lyrdbfile = tf
-                delete_lyrdb = True
+            root = Path.cwd() / "build/gds"
+            root.mkdir(parents=True, exist_ok=True)
+            tf = root / Path(name).with_suffix(".lyrdb")
+            tf.parent.mkdir(parents=True, exist_ok=True)
+            lyrdb.save(str(tf))
+            lyrdbfile = tf
+            delete_lyrdb = False
         elif isinstance(lyrdb, str | Path):
             lyrdbfile = Path(lyrdb).expanduser().resolve()
         else:
@@ -3884,40 +3803,13 @@ def show(
 
     if l2n is not None:
         if isinstance(l2n, kdb.LayoutToNetlist):
-            l2nfile: Path | None = None
-            spec = importlib.util.find_spec("git")
-            if spec is not None:
-                import git
-
-                try:
-                    repo = git.repo.Repo(".", search_parent_directories=True)
-                except git.InvalidGitRepositoryError:
-                    pass
-                else:
-                    wtd = repo.working_tree_dir
-                    if wtd is not None:
-                        root = Path(wtd) / "build/gds"
-                        root.mkdir(parents=True, exist_ok=True)
-                        tf = root / Path(name).with_suffix(".l2n")
-                        tf.parent.mkdir(parents=True, exist_ok=True)
-                        l2n.write(str(tf))
-                        l2nfile = tf
-                        delete_l2n = False
-            else:
-                logger.info(
-                    "git isn't installed. For better file storage, "
-                    "please install kfactory[git] or gitpython."
-                )
-            if not l2nfile:
-                try:
-                    from __main__ import __file__ as mf
-                except ImportError:
-                    mf = "shell"
-                tf = Path(gettempdir()) / (name + ".l2n")
-                tf.parent.mkdir(parents=True, exist_ok=True)
-                l2n.write(str(tf))
-                l2nfile = tf
-                delete_l2n = True
+            root = Path.cwd() / "build/gds"
+            root.mkdir(parents=True, exist_ok=True)
+            tf = root / Path(name).with_suffix(".l2n")
+            tf.parent.mkdir(parents=True, exist_ok=True)
+            l2n.write(str(tf))
+            l2nfile = tf
+            delete_l2n = False
         elif isinstance(l2n, str | Path):
             l2nfile = Path(l2n).expanduser().resolve()
         else:
@@ -3925,7 +3817,7 @@ def show(
                 f"Unknown type {type(l2n)} for streaming to KLayout"
             )
         if not l2nfile.is_file():
-            raise ValueError(f"{lyrdbfile} is not a File")
+            raise ValueError(f"{l2nfile} is not a File")
         data_dict["l2n"] = str(l2nfile)
 
     data = json.dumps(data_dict)
