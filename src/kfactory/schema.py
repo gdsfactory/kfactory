@@ -314,7 +314,7 @@ class Connection(
             else:
                 p2 = {"instance": data[1][0], "port": data[1][1]}
 
-            return Connection.model_validate({"p1": p1, "p2": p2})
+            return Connection.model_validate((p1, p2))
         return Connection(**data)
 
 

@@ -5,7 +5,7 @@
 
 ## New
 
-- add port defitions to cell decorator [#738](https://github.com/gdsfactory/kfactory/pull/738)
+- add port definitions to cell decorator [#738](https://github.com/gdsfactory/kfactory/pull/738)
 
 ## Bug Fixes
 
