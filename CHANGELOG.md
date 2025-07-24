@@ -1,5 +1,24 @@
+<a id="v1.10.1"></a>
+# [v1.10.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.10.1) - 2025-07-24
+
+# What's Changed
+
+## Bug Fixes
+
+- fix schema connection serialization [#745](https://github.com/gdsfactory/kfactory/pull/745)
+
+## Documentation
+
+- fix schema connection serialization [#745](https://github.com/gdsfactory/kfactory/pull/745)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.10.0...v1.10.1
+
+
+[Changes][v1.10.1]
+
+
 <a id="v1.10.0"></a>
-# [v1.10.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.10.0) - 2025-07-21
+# [v1.10.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.10.0) - 2025-07-22
 
 # What's Changed
 
@@ -2190,6 +2209,7 @@
 [Changes][v0.4.0]
 
 
+[v1.10.1]: https://github.com/gdsfactory/kfactory/compare/v1.10.0...v1.10.1
 [v1.10.0]: https://github.com/gdsfactory/kfactory/compare/v1.9.5...v1.10.0
 [v1.9.5]: https://github.com/gdsfactory/kfactory/compare/v1.9.4...v1.9.5
 [v1.9.4]: https://github.com/gdsfactory/kfactory/compare/v1.9.3...v1.9.4
