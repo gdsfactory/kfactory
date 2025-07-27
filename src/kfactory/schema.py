@@ -5,9 +5,10 @@ In order to fix bugs etc.
 """
 
 from __future__ import annotations
-
+import keyword
 import re
 from collections import defaultdict
+from operator import attrgetter
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -45,9 +46,18 @@ if TYPE_CHECKING:
     from .instance import DInstance, Instance, ProtoTInstance
     from .port import ProtoPort
 
+__all__ = ["DSchema", "Schema", "read_schema"]
+
+
 yaml = YAML(typ="safe")
 
-__all__ = ["DSchema", "Schema", "read_schema"]
+_schematic_default_imports = {
+    "kfactory": "kf",
+}
+
+
+def _valid_varname(name: str) -> str:
+    return name if not (name.isidentifier() or keyword.iskeyword(name)) else f"_{name}"
 
 
 def _gez(value: TUnit) -> TUnit:
@@ -104,6 +114,9 @@ class RegularArray(BaseModel, Generic[TUnit], extra="forbid"):
     column_pitch: TUnit
     rows: int = Field(gt=0, default=1)
     row_pitch: TUnit
+
+    def __repr__(self) -> str:
+        return f"RegularArray(columns={self.columns}, columns_pitch=)"
 
 
 class Array(BaseModel, Generic[TUnit], extra="forbid"):
@@ -718,6 +731,75 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         )
         self.routes[name] = route
         return route
+
+    def as_schematic_cell(
+        self,
+        imports: dict[str, str] = _schematic_default_imports,
+        kfactory_name: str | None = None,
+        *,
+        tunit: str,
+    ) -> str:
+        schema_cell = ""
+        indent = 0
+
+        def _ind() -> str:
+            nonlocal indent
+            return " " * indent
+
+        kf_name = kfactory_name or imports["kfactory"]
+
+        def _kcls(name: str) -> str:
+            return f'{kf_name}.["{name}"]'
+
+        for imp, imp_as in imports.items():
+            if imp_as is None:
+                schema_cell += f"import {imp}\n"
+            else:
+                schema_cell += f"import {imp} as {imp_as}\n"
+
+        if imports:
+            schema_cell += "\n\n"
+
+        schema_cell += f"kcl = {_kcls(self.kcl.name)}']\n\n"
+
+        schema_cell += "@kcl.schematic_cell\n"
+        schema_cell += f"def {self.name}() -> {kf_name}.{self.__class__}:\n"
+        indent = 2
+
+        schema_cell += f"{_ind()}# Create the schema instances\n"
+
+        for inst in sorted(self.instances.values(), key=attrgetter("name")):
+            inst_name = _valid_varname(inst.name)
+            schema_cell += f"{_ind()}{inst_name} = self.create_inst(\n"
+            indent += 2
+            schema_cell += f"{_ind()}name={inst.name!r},\n"
+            f"{_ind()}component={inst.component!r},\n"
+            f"{_ind()}settings={inst.settings!r},\n"
+            f"{_ind()}kcl={inst.kcl.name!r},\n"
+            if inst.array is not None:
+                arr = inst.array
+                if isinstance(arr, RegularArray):
+                    schema_cell += f"{_ind()}array=RegularArray(\n"
+                    indent += 2
+                    schema_cell += f"{_ind()}columns={arr.columns},\n"
+                    f"{_ind()}columns_pitch={arr.column_pitch},\n"
+                    f"{_ind()}rows={arr.rows},\n"
+                    f"{_ind()}row_pitch={arr.row_pitch}),\n"
+                    indent -= 2
+                    schema_cell += f"{_ind()})\n"
+                else:
+                    schema_cell += f"{_ind()}array=Array(\n"
+                    indent += 2
+                    schema_cell += f"{_ind()}na={arr.na},\n"
+                    f"{_ind()}nb={arr.nb},\n"
+                    f"{_ind()}pitch_a={arr.pitch_a},\n"
+                    f"{_ind()}pitch_b={arr.pitch_b}),\n"
+                    indent -= 2
+                    schema_cell += f"{_ind()})\n"
+            indent -= 2
+            schema_cell += f"{_ind()})\n"
+
+        return schema_cell
 
 
 class Schema(TSchema[dbu]):

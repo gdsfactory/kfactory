@@ -499,3 +499,5 @@ def test_netlist_equivalent() -> None:
         )
         == nl2[c.name]
     )
+
+    schema_str = schema.as_schematic_cell(tunit="int")
