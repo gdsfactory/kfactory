@@ -11,41 +11,50 @@ def test_schema() -> None:
     yaml = YAML(typ=["rt", "safe", "string"])
     schema_yaml = """
 instances:
-  bl:
-    component: pad
-  tl:
-    component: pad
-  br:
-    component: pad
-  tr:
-    component: pad
+  mmi_long:
+    component: mmi1x2
+    settings:
+      width_mmi: 4.5
+      length_mmi: 10
+  mmi_short:
+    component: mmi1x2
+    settings:
+      width_mmi: 4.5
+      length_mmi: 5
 
 placements:
-  tl:
-    x: -200
-    y: 500
-
-  br:
-    x: 400
-    y: 400
-
-  tr:
-    x: 400
-    y: 600
+  mmi_short:
+    rotation: 180
+  mmi_long:
+    rotation: 90
+    x: mmi_short,o1
+    y: mmi_short,o1
+    dx: 20
+    dy: 20
 
 routes:
-  electrical:
+  optical:
+    routing_strategy: route_bundle_all_angle
     settings:
-      separation: 20
-      cross_section: metal_routing
-      allow_width_mismatch: True
+      end_connector: wonky  # using our new, wonky connector for the final segment
+      end_cross_section:  # and for that final segment, also tip the connector to use this cross-section
+        cross_section: strip
+        settings:
+          width: 2.0
     links:
-      tl,e3: tr,e1
-      bl,e3: br,e1
+      mmi_short,o1: mmi_long,o1
+
+ports:
+  o1: mmi_short,o2
+  o2: mmi_short,o3
 """
     schema = kf.DSchema.model_validate(yaml.load(schema_yaml))
     for inst in schema.instances.values():
         _ = inst.parent_schema.name
+
+    schema_str = schema.as_schematic_cell(tunit="int")
+
+    print(schema_str)
 
 
 def test_schema_create() -> None:
@@ -445,6 +454,7 @@ def test_netlist_equivalent() -> None:
         )
 
     schema = kf.Schema(kcl=pdk)
+    schema.name = "test_schema"
 
     padm1_1 = schema.create_inst(name="padm1_1", component="pad_m1")
     padm1_2 = schema.create_inst(name="padm1_2", component="pad_m1")
@@ -501,3 +511,5 @@ def test_netlist_equivalent() -> None:
     )
 
     schema_str = schema.as_schematic_cell(tunit="int")
+
+    print(schema_str)

@@ -5,6 +5,7 @@ In order to fix bugs etc.
 """
 
 from __future__ import annotations
+
 import keyword
 import re
 from collections import defaultdict
@@ -57,7 +58,7 @@ _schematic_default_imports = {
 
 
 def _valid_varname(name: str) -> str:
-    return name if not (name.isidentifier() or keyword.iskeyword(name)) else f"_{name}"
+    return name if name.isidentifier() and not keyword.iskeyword(name) else f"_{name}"
 
 
 def _gez(value: TUnit) -> TUnit:
@@ -78,6 +79,7 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
     y: TUnit | PortRef | PortArrayRef = cast("TUnit", 0)
     dy: TUnit = cast("TUnit", 0)
     orientation: Literal[0, 90, 180, 270] = 0
+    origin: str | tuple[TUnit, TUnit] | None = None
 
     @model_validator(mode="after")
     def _require_absolute_or_relative(self) -> Self:
@@ -92,13 +94,8 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
     @classmethod
     def _replace_rotation_orientation(cls, data: dict[str, Any]) -> dict[str, Any]:
         if "rotation" in data:
-            orientation = data.pop("rotation")
-            data["orientation"] = orientation
+            data["orientation"] = data.pop("rotation")
         return data
-
-    @property
-    def is_absolute(self) -> bool:
-        return not (isinstance(self.x, str) or isinstance(self.y, str))
 
     def is_placeable(self, placed_instances: set[str]) -> bool:
         placeable = True
@@ -214,7 +211,7 @@ class SchemaInstance(
 
 class Route(BaseModel, Generic[TUnit], extra="forbid"):
     name: str = Field(exclude=True)
-    links: list[Link]
+    links: list[Link[TUnit]]
     routing_strategy: str = "route_bundle"
     settings: dict[str, JSONSerializable]
 
@@ -274,9 +271,30 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
             placeable = placeable and self.y.instance in placed_instances
         return placeable
 
+    def as_call(self) -> str:
+        port_str = f"x={self.x}, y={self.y}"
+        if self.dx:
+            port_str += f", {self.dx}"
+        if self.dy:
+            port_str += f", {self.dy}"
 
-class Link(RootModel[tuple[PortArrayRef | PortRef, PortArrayRef | PortRef]]):
-    root: tuple[PortArrayRef | PortRef, PortArrayRef | PortRef]
+        return port_str
+
+    def as_python_str(self) -> str:
+        return f"schema.ports[{self.name!r}]"
+
+
+class Link(
+    RootModel[
+        tuple[
+            PortArrayRef | PortRef | Port[TUnit], PortArrayRef | PortRef | Port[TUnit]
+        ]
+    ],
+    Generic[TUnit],
+):
+    root: tuple[
+        PortArrayRef | PortRef | Port[TUnit], PortArrayRef | PortRef | Port[TUnit]
+    ]
 
     @model_validator(mode="after")
     def _sort_data(self) -> Self:
@@ -432,7 +450,14 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         if self.routes is not None:
             nets.extend(
                 [
-                    Net(list(link.root))
+                    Net(
+                        [
+                            NetlistPort(name=port.name)
+                            if isinstance(port, Port)
+                            else port
+                            for port in link.root
+                        ]
+                    )
                     for route in self.routes.values()
                     for link in route.links
                 ]
@@ -669,15 +694,19 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
             end_ports: list[ProtoPort[Any]] = []
             for link in route.links:
                 l1, l2 = link.root[0], link.root[1]
-                if isinstance(l1, PortRef):
-                    p1 = c.insts[l1.instance].ports[l1.port]
-                else:
+                if isinstance(l1, Port):
+                    p1 = c.ports[l1.name]
+                elif isinstance(l1, PortArrayRef):
                     p1 = c.insts[l1.instance].ports[l1.port, l1.ia, l1.ib]
-                start_ports.append(p1)
-                if isinstance(l2, PortRef):
-                    p2 = c.insts[l2.instance].ports[l2.port]
                 else:
+                    p1 = c.insts[l1.instance].ports[l1.port]
+                start_ports.append(p1)
+                if isinstance(l2, Port):
+                    p2 = c.ports[l2.name]
+                elif isinstance(l2, PortArrayRef):
                     p2 = c.insts[l2.instance].ports[l2.port, l2.ia, l2.ib]
+                else:
+                    p2 = c.insts[l2.instance].ports[l2.port]
                 end_ports.append(p2)
             self.kcl.routing_strategies[route.routing_strategy](
                 c, start_ports, end_ports, **route.settings
@@ -714,8 +743,8 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
     def add_route(
         self,
         name: str,
-        start_ports: list[PortRef],
-        end_ports: list[PortRef],
+        start_ports: list[PortRef | Port[TUnit]],
+        end_ports: list[PortRef | Port[TUnit]],
         routing_strategy: str,
         **settings: JSONSerializable,
     ) -> Route[TUnit]:
@@ -731,6 +760,9 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         )
         self.routes[name] = route
         return route
+
+    def __getitem__(self, key: str) -> Port[TUnit] | PortRef:
+        return self.ports[key]
 
     def as_schematic_cell(
         self,
@@ -763,14 +795,19 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         schema_cell += f"kcl = {_kcls(self.kcl.name)}']\n\n"
 
         schema_cell += "@kcl.schematic_cell\n"
-        schema_cell += f"def {self.name}() -> {kf_name}.{self.__class__}:\n"
+        schema_cell += f"def {self.name}() -> {kf_name}.{self.__class__.__name__}:\n"
         indent = 2
+
+        schema_cell += f"{_ind()}schema = Schema(kcl=kcl)\n\n"
 
         schema_cell += f"{_ind()}# Create the schema instances\n"
 
+        names: dict[str, str] = {}
+
         for inst in sorted(self.instances.values(), key=attrgetter("name")):
             inst_name = _valid_varname(inst.name)
-            schema_cell += f"{_ind()}{inst_name} = self.create_inst(\n"
+            names[inst.name] = inst_name
+            schema_cell += f"{_ind()}{inst_name} = schema.create_inst(\n"
             indent += 2
             schema_cell += f"{_ind()}name={inst.name!r},\n"
             f"{_ind()}component={inst.component!r},\n"
@@ -798,6 +835,129 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                     schema_cell += f"{_ind()})\n"
             indent -= 2
             schema_cell += f"{_ind()})\n"
+
+        if self.ports:
+            schema_cell += f"{_ind()}# Schema ports\n"
+
+            for port in sorted(
+                self.ports.values(), key=attrgetter("__class__.__name__")
+            ):
+                if isinstance(port, Port):
+                    schema_cell += f"{_ind()}schema.create_port(\n"
+                    indent += 2
+                    schema_cell += f"{_ind()}name={port.name!r},\n"
+                    schema_cell += f"{_ind()}cross_section={port.cross_section!r},\n"
+                    schema_cell += f"{_ind()}orientation={port.orientation},\n"
+                    if isinstance(port.x, PortRef):
+                        schema_cell += (
+                            f"{_ind()}x={port.x.as_python_str(names[port.x.name])},\n"
+                        )
+                    else:
+                        schema_cell += f"{_ind()}x={port.x},\n"
+                    if isinstance(port.y, PortRef):
+                        schema_cell += (
+                            f"{_ind()}y={port.y.as_python_str(names[port.y.name])},\n"
+                        )
+                    else:
+                        schema_cell += f"{_ind()}y={port.y},\n"
+                    if port.dx:
+                        f"{_ind()}dx={port.dx},\n"
+                    if port.dy:
+                        f"{_ind()}dy={port.dy},\n"
+                    indent -= 2
+                else:
+                    schema_cell += (
+                        f"{_ind()}schema.add_port("
+                        f"{port.as_python_str(names[port.instance])})\n"
+                    )
+        if self.placements:
+            schema_cell += f"\n{_ind()}# Schema instance placements\n"
+
+            for name, placement in self.placements.items():
+                inst_name = names[name]
+                schema_cell += f"{_ind()}{inst_name}.place(\n"
+                indent += 2
+                if placement.x:
+                    schema_cell += f"{_ind()}x={placement.x},\n"
+                if placement.y:
+                    schema_cell += f"{_ind()}y={placement.y},\n"
+                if placement.dx:
+                    schema_cell += f"{_ind()}dx={placement.dx},\n"
+                if placement.dy:
+                    schema_cell += f"{_ind()}dy={placement.dy},\n"
+                if placement.orientation:
+                    schema_cell += f"{_ind()}orientation={placement.orientation},\n"
+                if placement.mirror:
+                    schema_cell += f"{_ind()}mirror={placement.mirror},\n"
+                indent -= 2
+                schema_cell += f"{_ind()})\n"
+
+        if self.connections:
+            schema_cell += f"\n{_ind()}# Schema connections\n"
+
+            for connection in self.connections:
+                ref1, ref2 = connection.root
+                if isinstance(ref1, PortRef):
+                    schema_cell += f"{_ind()}{names[ref1.instance]}.connect(\n"
+                    indent += 2
+                    if isinstance(ref1, PortArrayRef):
+                        schema_cell += (
+                            f"{_ind()}port=({ref1.port!r},{ref1.ia},{ref1.ib}),\n"
+                        )
+                    else:
+                        schema_cell += f"{_ind()}port={ref1.port!r},\n"
+                    assert isinstance(ref2, PortRef)
+                    if isinstance(ref2, PortRef):
+                        schema_cell += (
+                            f"{_ind()}other={ref2.as_python_str(names[ref2.name])},\n"
+                        )
+                    indent -= 2
+                    schema_cell += f"{_ind()})\n"
+                else:
+                    assert isinstance(ref2, PortRef)
+                    schema_cell += f"{_ind()}{names[ref2.instance]}.connect(\n"
+                    indent += 2
+                    if isinstance(ref2, PortArrayRef):
+                        schema_cell += (
+                            f"{_ind()}port=({ref2.port!r}, {ref2.ia}, {ref2.ib}),\n"
+                        )
+                    else:
+                        schema_cell += f"{_ind()}port={ref2.port!r},\n"
+                    schema_cell += f"{_ind()}other=schema.ports[{ref1.name!r}]\n"
+                    indent -= 2
+                    schema_cell += f"{_ind()})\n"
+        if self.routes:
+            schema_cell += f"\n{_ind()}# Schema routes\n"
+            for route in self.routes.values():
+                schema_cell += f"{_ind()}schema.add_route(\n"
+                indent += 2
+                # schema_cell += f"{_ind()}
+                schema_cell += f"{_ind()}name={route.name!r},\n"
+                start_ports: list[str] = []
+                end_ports: list[str] = []
+                for link in route.links:
+                    p1, p2 = link.root
+                    if isinstance(p1, Port):
+                        start_ports.append(p1.as_python_str())
+                    else:
+                        start_ports.append(p1.as_python_str(names[p1.instance]))
+                    if isinstance(p2, Port):
+                        start_ports.append(p2.as_python_str())
+                    else:
+                        start_ports.append(p2.as_python_str(names[p2.instance]))
+
+                schema_cell += f"{_ind()}start_ports=[{', '.join(start_ports)}],\n"
+                schema_cell += f"{_ind()}end_ports=[{', '.join(end_ports)}],\n"
+                schema_cell += f"{_ind()}routing_strategy={route.routing_strategy!r},\n"
+                for key, value in route.settings.items():
+                    if isinstance(value, str):
+                        schema_cell += f"{_ind()}{key}={value!r},\n"
+                    else:
+                        schema_cell += f"{_ind()}{key}={value},\n"
+                indent -= 2
+                schema_cell += f"{_ind()})\n"
+
+        schema_cell += f"{_ind()}return schema"
 
         return schema_cell
 
