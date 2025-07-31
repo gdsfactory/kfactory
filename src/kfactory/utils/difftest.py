@@ -1,14 +1,16 @@
 """GDS regression test. Inspired by lytest."""
 
+# ruff: noqa: T201
 import filecmp
 import pathlib
 import shutil
 
 import kfactory as kf
-from kfactory import DKCell, KCLayout, kdb, ProtoTKCell
+from kfactory import DKCell, KCLayout, kdb
+from kfactory.kcell import TKCell
 
 
-class GeometryDifference(Exception):
+class GeometryDifferenceError(Exception):
     pass
 
 
@@ -30,10 +32,13 @@ def xor(
         old: reference layout.
         new: run layout.
         test_name: prefix for the new cell.
-        ignore_sliver_differences: if True, ignores any sliver differences in the XOR result. If None (default), defers to the value set in CONF.difftest_ignore_sliver_differences
-        ignore_cell_name_differences: if True, ignores any cell name differences. If None (default), defers to the value set in CONF.difftest_ignore_cell_name_differences
-        ignore_label_differences: if True, ignores any label differences when run in XOR mode. If None (default) defers to the value set in CONF.difftest_ignore_label_differences
-        stagger: if True, staggers the old/new/xor views. If False, all three are overlaid.
+        ignore_sliver_differences: if True, ignores any sliver differences in the
+            XOR result.
+        ignore_cell_name_differences: if True, ignores any cell name differences.
+        ignore_label_differences: if True, ignores any label differences when run in
+            XOR mode.
+        stagger: if True, staggers the old/new/xor views.
+            If False, all three are overlaid.
     """
     if old.kcl.dbu != new.kcl.dbu:
         raise ValueError(
@@ -53,16 +58,14 @@ def xor(
             reg = kdb.Region()
             regions[key] = reg
             return reg
-        else:
-            return regions[key]
+        return regions[key]
 
     def get_texts(key: int, texts_dict: dict[int, kdb.Texts]) -> kdb.Texts:
         if key not in texts_dict:
             texts = kdb.Texts()
             texts_dict[key] = texts
             return texts
-        else:
-            return texts_dict[key]
+        return texts_dict[key]
 
     def polygon_diff_a(anotb: kdb.Polygon, prop_id: int) -> None:
         get_region(ld.layer_index_a(), a_regions).insert(anotb)
@@ -112,7 +115,7 @@ def xor(
     if not ignore_label_differences and (a_texts or b_texts):
         equivalent = False
     if equal:
-        return gf.Component(name="xor_empty")
+        return DKCell(name="xor_empty")
     c = DKCell(name=f"{test_name}_difftest")
     ref = old
     run = new
@@ -144,7 +147,8 @@ def xor(
     )
 
     print("Running XOR on differences...")
-    # assume equivalence until we find XOR differences, determined significant by the settings
+    # assume equivalence until we find XOR differences,
+    # determined significant by the settings
     diff = DKCell(name=f"{test_name}_xor")
 
     for layer in c.kcl.layer_infos():
@@ -205,25 +209,31 @@ def diff(
     show: bool = False,
     stagger: bool = True,
 ) -> bool:
-    """Returns True if files are different, prints differences and shows them in klayout.
+    """Returns True if files are different.
+
+    Prints differences and shows them in klayout.
 
     Args:
         ref_file: reference (old) file.
         run_file: run (new) file.
         xor: runs xor on every layer between old and run files.
         test_name: prefix for the new cell.
-        ignore_sliver_differences: if True, ignores any sliver differences in the XOR result. If None (default), defers to the value set in CONF.difftest_ignore_sliver_differences
-        ignore_cell_name_differences: if True, ignores any cell name differences. If None (default), defers to the value set in CONF.difftest_ignore_cell_name_differences
-        ignore_label_differences: if True, ignores any label differences when run in XOR mode. If None (default) defers to the value set in CONF.difftest_ignore_label_differences
+        ignore_sliver_differences: if True, ignores any sliver differences in the
+            XOR result.
+        ignore_cell_name_differences: if True, ignores any cell name differences.
+        ignore_label_differences: if True, ignores any label differences when run in
+            XOR mode.
         show: shows diff in klayout.
-        stagger: if True, staggers the old/new/xor views. If False, all three are overlaid.
+        stagger: if True, staggers the old/new/xor views. If False, all three are
+            overlaid.
     """
     old = read_top_cell(pathlib.Path(ref_file))
     new = read_top_cell(pathlib.Path(run_file))
 
     if old.kcl.dbu != new.kcl.dbu:
         raise ValueError(
-            f"dbu is different in old {old.kcl.dbu} {ref_file!r} and new {new.kcl.dbu} {run_file!r} files"
+            f"dbu is different in old {old.kcl.dbu} {ref_file!r} "
+            f"and new {new.kcl.dbu} {run_file!r} files"
         )
 
     equivalent = True
@@ -239,16 +249,14 @@ def diff(
             reg = kdb.Region()
             regions[key] = reg
             return reg
-        else:
-            return regions[key]
+        return regions[key]
 
     def get_texts(key: int, texts_dict: dict[int, kdb.Texts]) -> kdb.Texts:
         if key not in texts_dict:
             texts = kdb.Texts()
             texts_dict[key] = texts
             return texts
-        else:
-            return texts_dict[key]
+        return texts_dict[key]
 
     def polygon_diff_a(anotb: kdb.Polygon, prop_id: int) -> None:
         get_region(ld.layer_index_a(), a_regions).insert(anotb)
@@ -331,7 +339,8 @@ def diff(
 
         if xor:
             print("Running XOR on differences...")
-            # assume equivalence until we find XOR differences, determined significant by the settings
+            # assume equivalence until we find XOR differences,
+            # determined significant by the settings
             diff = DKCell(name=f"{test_name}_xor")
 
             for layer in c.kcl.layer_infos():
@@ -391,7 +400,7 @@ def diff(
 
 
 def difftest(
-    component: ProtoTKCell,
+    component: TKCell,
     dirpath: pathlib.Path,
     dirpath_run: pathlib.Path,
     test_name: str | None = None,
@@ -400,11 +409,12 @@ def difftest(
     ignore_cell_name_differences: bool = False,
     ignore_label_differences: bool = False,
 ) -> None:
-    """Avoids GDS regressions tests on the GeometryDifference.
+    """Avoids GDS regressions tests on the GeometryDifferenceError.
 
     If files are the same it returns None. If files are different runs XOR
     between new component and the GDS reference stored in dirpath and
-    raises GeometryDifference if there are differences and show differences in KLayout.
+    raises GeometryDifferenceError if there are differences and show differences
+    in KLayout.
 
     If it runs for the fist time it just stores the GDS reference.
 
@@ -414,9 +424,11 @@ def difftest(
         dirpath: directory where reference files are stored.
         xor: runs XOR.
         dirpath_run: directory to store gds file generated by the test.
-        ignore_sliver_differences: if True, ignores any sliver differences in the XOR result.
+        ignore_sliver_differences: if True, ignores any sliver differences
+            in the XOR result.
         ignore_cell_name_differences: if True, ignores any cell name differences.
-        ignore_label_differences: if True, ignores any label differences when run in XOR mode.
+        ignore_label_differences: if True, ignores any label differences when run
+            in XOR mode.
 
     """
     test_name = test_name or (
@@ -449,6 +461,8 @@ def difftest(
         xor=xor,
         test_name=test_name,
         ignore_sliver_differences=ignore_sliver_differences,
+        ignore_cell_name_differences=ignore_cell_name_differences,
+        ignore_label_differences=ignore_label_differences,
         show=True,
     ):
         print(
@@ -459,7 +473,7 @@ def difftest(
         try:
             overwrite(ref_file, run_file)
         except OSError as exc:
-            raise GeometryDifference(
+            raise GeometryDifferenceError(
                 "\n"
                 f"{test_name!r} changed from reference {str(ref_file)!r}. "
                 "Run `pytest -s` to step and check differences in klayout GUI."
@@ -469,11 +483,11 @@ def difftest(
 def overwrite(ref_file: pathlib.Path, run_file: pathlib.Path) -> None:
     val = input("Save current GDS as the new reference (Y)? [Y/n]")
     if val.upper().startswith("N"):
-        raise GeometryDifference
+        raise GeometryDifferenceError
 
     ref_file.unlink()
     shutil.copy(run_file, ref_file)
-    raise GeometryDifference
+    raise GeometryDifferenceError
 
 
 def read_top_cell(arg0: pathlib.Path) -> kf.DKCell:
@@ -485,4 +499,3 @@ def read_top_cell(arg0: pathlib.Path) -> kf.DKCell:
         for cross_section in kcl.cross_sections.cross_sections.values():
             kf.kcl.get_symmetrical_cross_section(cross_section)
     return kcell
-
