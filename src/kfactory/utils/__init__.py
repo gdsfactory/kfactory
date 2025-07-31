@@ -10,6 +10,7 @@ calculate areas that violate min space violations.
 from .fill import fill_tiled
 from .simplify import dsimplify, simplify
 from .violations import fix_spacing_minkowski_tiled, fix_spacing_tiled
+from .difftest import difftest, diff, xor
 
 __all__ = [
     "dsimplify",
@@ -17,4 +18,7 @@ __all__ = [
     "fix_spacing_minkowski_tiled",
     "fix_spacing_tiled",
     "simplify",
+    "difftest",
+    "diff",
+    "xor",
 ]
