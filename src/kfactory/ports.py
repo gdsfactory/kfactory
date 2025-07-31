@@ -178,9 +178,16 @@ class ProtoPorts(Protocol[TUnit]):
             name = p.name or ""
             self.add_port(port=p, name=prefix + name + suffix, keep_mirror=keep_mirror)
 
+    @overload
     @abstractmethod
     def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]:
         """Get a port by index or name."""
+        ...
+
+    @overload
+    @abstractmethod
+    def __getitem__(self, key: slice) -> Self:
+        """Get ports by slice."""
         ...
 
     @abstractmethod
@@ -680,8 +687,18 @@ class Ports(ProtoPorts[int], ICreatePort):
         """Get all ports in a dictionary with names as keys."""
         return {v.name: Port(base=v) for v in self._bases if v.name is not None}
 
+    @overload
     def __getitem__(self, key: int | str | None) -> Port:
-        """Get a specific port by name."""
+        """Get a port by index or name."""
+
+    @overload
+    def __getitem__(self, key: slice) -> Self:
+        """Get ports by slice."""
+
+    def __getitem__(self, key: slice | int | str | None) -> Self | Port:
+        if isinstance(key, slice):
+            return self.__class__(bases=self._bases[key], kcl=self.kcl)
+
         if isinstance(key, int):
             return Port(base=self._bases[key])
         try:
@@ -792,8 +809,18 @@ class DPorts(ProtoPorts[float], DCreatePort):
         """Get all ports in a dictionary with names as keys."""
         return {v.name: DPort(base=v) for v in self._bases if v.name is not None}
 
+    @overload
     def __getitem__(self, key: int | str | None) -> DPort:
-        """Get a specific port by name."""
+        """Get a port by index or name."""
+
+    @overload
+    def __getitem__(self, key: slice) -> Self:
+        """Get ports by slice."""
+
+    def __getitem__(self, key: slice | int | str | None) -> Self | DPort:
+        if isinstance(key, slice):
+            return self.__class__(bases=self._bases[key], kcl=self.kcl)
+
         if isinstance(key, int):
             return DPort(base=self._bases[key])
         try:
