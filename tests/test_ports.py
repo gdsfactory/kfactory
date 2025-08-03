@@ -367,6 +367,15 @@ def test_ports_getitem(kcl: kf.KCLayout, layers: Layers) -> None:
         ports["o3"]
 
 
+def test_ports_getitem_slice(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kf.factories.straight.straight_dbu_factory(kcl)(
+        width=5000, length=10000, layer=layers.WG
+    )
+    ports = c.ports
+    assert ports == ports[:]
+    assert ports == ports[0 : len(ports)]
+
+
 def test_dports_add_port(kcl: kf.KCLayout, layers: Layers) -> None:
     c = kf.factories.straight.straight_dbu_factory(kcl)(
         width=5000, length=10000, layer=layers.WG
@@ -446,6 +455,15 @@ def test_dports_getitem(kcl: kf.KCLayout, layers: Layers) -> None:
     assert ports[0] == ports["o1"]
     with pytest.raises(KeyError):
         ports["o3"]
+
+
+def test_dports_getitem_slice(kcl: kf.KCLayout, layers: Layers) -> None:
+    c = kf.factories.straight.straight_dbu_factory(kcl)(
+        width=5000, length=10000, layer=layers.WG
+    ).to_dtype()
+    ports = c.ports
+    assert ports == ports[:]
+    assert ports == ports[0 : len(ports)]
 
 
 def test_dports_copy(kcl: kf.KCLayout, layers: Layers) -> None:

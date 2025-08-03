@@ -50,6 +50,7 @@ dev = [
     "types-pygments>=2.19.0.20250305",
     "types-requests>=2.32.0.20250328",
     "types-setuptools>=76.0.0.20250328",
+    "scipy-stubs",
 ]
 docs = [
     "kfactory[ipy]",
