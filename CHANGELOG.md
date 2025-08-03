@@ -1,3 +1,18 @@
+<a id="v1.11.0"></a>
+# [v1.11.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.11.0) - 2025-08-03
+
+# What's Changed
+
+## New
+
+- Ability to get a slice of ports [#748](https://github.com/gdsfactory/kfactory/pull/748)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.10.1...v1.11.0
+
+
+[Changes][v1.11.0]
+
+
 <a id="v1.10.1"></a>
 # [v1.10.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.10.1) - 2025-07-24
 
@@ -2209,6 +2224,7 @@
 [Changes][v0.4.0]
 
 
+[v1.11.0]: https://github.com/gdsfactory/kfactory/compare/v1.10.1...v1.11.0
 [v1.10.1]: https://github.com/gdsfactory/kfactory/compare/v1.10.0...v1.10.1
 [v1.10.0]: https://github.com/gdsfactory/kfactory/compare/v1.9.5...v1.10.0
 [v1.9.5]: https://github.com/gdsfactory/kfactory/compare/v1.9.4...v1.9.5
