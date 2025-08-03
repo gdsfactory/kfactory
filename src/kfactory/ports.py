@@ -818,11 +818,10 @@ class DPorts(ProtoPorts[float], DCreatePort):
         """Get ports by slice."""
 
     def __getitem__(self, key: slice | int | str | None) -> Self | DPort:
-        if isinstance(key, slice):
-            return self.__class__(bases=self._bases[key], kcl=self.kcl)
-
         if isinstance(key, int):
             return DPort(base=self._bases[key])
+        if isinstance(key, slice):
+            return self.__class__(bases=self._bases[key], kcl=self.kcl)
         try:
             return DPort(base=next(filter(lambda base: base.name == key, self._bases)))
         except StopIteration as e:
