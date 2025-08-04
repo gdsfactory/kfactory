@@ -5,6 +5,7 @@
 
 ## New
 
+- add as_png_data to utilities [#752](https://github.com/gdsfactory/kfactory/pull/752)
 - add capabilities to automatically apply klayout technologies [#751](https://github.com/gdsfactory/kfactory/pull/751)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.11.0...v1.12.0
