@@ -444,7 +444,7 @@ def difftest(
     ref_file = dirpath_ref / f"{test_name}.gds"
     run_file = dirpath_run / f"{test_name}.gds"
 
-    run_file = component.write_gds(gdspath=run_file)
+    component.write(run_file)
 
     if not ref_file.exists():
         shutil.copy(run_file, ref_file)
