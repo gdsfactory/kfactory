@@ -5,7 +5,12 @@
 
 ## New
 
-- Ability to get a slice of ports [#748](https://github.com/gdsfactory/kfactory/pull/748)
+- port difftest from gdsfactory [#747](https://github.com/gdsfactory/kfactory/pull/747)
+- Add slices to ports [#748](https://github.com/gdsfactory/kfactory/pull/748)
+
+## Bug Fixes
+
+- fix types for fill [#749](https://github.com/gdsfactory/kfactory/pull/749)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.10.1...v1.11.0
 
