@@ -17,6 +17,7 @@ def test_custom_show() -> None:
         save_options: kf.kdb.SaveLayoutOptions = _layout_options,
         use_libraries: bool = True,
         library_save_options: kf.kdb.SaveLayoutOptions = _layout_options,
+        technology: str | None = None,
     ) -> None:
         nonlocal showed
         showed = True
