@@ -10,6 +10,7 @@ from .. import kdb
 from ..conf import config, logger
 from ..kcell import KCell, ProtoTKCell
 from ..layout import KCLayout
+from ..typings import um
 
 stop = False
 
@@ -102,17 +103,17 @@ class FillOperator(kdb.TileOutputReceiver):
 def fill_tiled(
     c: ProtoTKCell[Any],
     fill_cell: ProtoTKCell[Any],
-    fill_layers: Iterable[tuple[kdb.LayerInfo, int]] = [],
-    fill_regions: Iterable[tuple[kdb.Region, int]] = [],
-    exclude_layers: Iterable[tuple[kdb.LayerInfo, int]] = [],
-    exclude_regions: Iterable[tuple[kdb.Region, int]] = [],
+    fill_layers: Iterable[tuple[kdb.LayerInfo, um]] = [],
+    fill_regions: Iterable[tuple[kdb.Region, um]] = [],
+    exclude_layers: Iterable[tuple[kdb.LayerInfo, um]] = [],
+    exclude_regions: Iterable[tuple[kdb.Region, um]] = [],
     n_threads: int | None = None,
-    tile_size: tuple[float, float] | None = None,
+    tile_size: tuple[um, um] | None = None,
     row_step: kdb.DVector | None = None,
     col_step: kdb.DVector | None = None,
-    x_space: float = 0,
-    y_space: float = 0,
-    tile_border: tuple[float, float] = (20, 20),
+    x_space: um = 0,
+    y_space: um = 0,
+    tile_border: tuple[um, um] = (20, 20),
     multi: bool = False,
 ) -> None:
     """Fill a [KCell][kfactory.kcell.KCell].
@@ -189,11 +190,11 @@ def fill_tiled(
         exregion_names.append(region_name)
 
     if row_step is None:
-        row_step_ = kdb.Vector(fill_cell.bbox().width() + int(x_space / c.kcl.dbu), 0)
+        row_step_ = c.kcl.to_dbu(kdb.DVector(fill_cell.bbox().width() + x_space, 0))
     else:
         row_step_ = c.kcl.to_dbu(row_step)
     if col_step is None:
-        col_step_ = kdb.Vector(0, fill_cell.bbox().height() + int(y_space / c.kcl.dbu))
+        col_step_ = c.kcl.to_dbu(kdb.DVector(0, fill_cell.bbox().height() + y_space))
     else:
         col_step_ = c.kcl.to_dbu(col_step)
     fc_bbox = fill_cell.bbox()
