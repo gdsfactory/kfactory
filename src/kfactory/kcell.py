@@ -806,6 +806,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         save_options: kdb.SaveLayoutOptions | None = None,
         use_libraries: bool = True,
         library_save_options: kdb.SaveLayoutOptions | None = None,
+        technology: str | None = None,
     ) -> None:
         """Stream the gds to klive.
 
@@ -824,6 +825,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             save_options=save_options,
             use_libraries=use_libraries,
             library_save_options=library_save_options,
+            technology=technology,
         )
 
     def plot(
@@ -3432,6 +3434,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         save_options: kdb.SaveLayoutOptions | None = None,
         use_libraries: bool = True,
         library_save_options: kdb.SaveLayoutOptions | None = None,
+        technology: str | None = None,
     ) -> None:
         """Stream the gds to klive.
 
@@ -3455,6 +3458,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             save_options=save_options,
             use_libraries=use_libraries,
             library_save_options=library_save_options,
+            technology=technology,
         )
 
     def plot(self) -> None:
