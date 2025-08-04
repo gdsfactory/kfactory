@@ -1,3 +1,18 @@
+<a id="v1.12.1"></a>
+# [v1.12.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.12.1) - 2025-08-04
+
+# What's Changed
+
+## Bug Fixes
+
+- fix missing technology attribute in show function [#753](https://github.com/gdsfactory/kfactory/pull/753)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.12.0...v1.12.1
+
+
+[Changes][v1.12.1]
+
+
 <a id="v1.12.0"></a>
 # [v1.12.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.12.0) - 2025-08-04
 
@@ -2246,6 +2261,7 @@
 [Changes][v0.4.0]
 
 
+[v1.12.1]: https://github.com/gdsfactory/kfactory/compare/v1.12.0...v1.12.1
 [v1.12.0]: https://github.com/gdsfactory/kfactory/compare/v1.11.0...v1.12.0
 [v1.11.0]: https://github.com/gdsfactory/kfactory/compare/v1.10.1...v1.11.0
 [v1.10.1]: https://github.com/gdsfactory/kfactory/compare/v1.10.0...v1.10.1
