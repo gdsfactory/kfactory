@@ -1,17 +1,19 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal
 
 from rich.json import JSON
 from rich.table import Table
 
-from . import kdb
+from . import kdb, lay
 from .conf import DEFAULT_TRANS, config
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from .instance import Instance
+    from .kcell import ProtoTKCell
     from .pin import DPin, Pin
     from .port import Port, ProtoPort
 
@@ -244,3 +246,24 @@ def pprint_pins(
         )
 
     return table
+
+
+def as_png_data(
+    c: ProtoTKCell[Any],
+    layer_properties: str | Path | None = None,
+    resolution: tuple[int, int] = (800, 600),
+) -> bytes:
+    layout_view = lay.LayoutView()
+    layout_view.show_layout(c.kcl.layout.dup(), False)
+    if layer_properties is not None:
+        layer_properties = Path(layer_properties)
+        if layer_properties.exists() and layer_properties.is_file():
+            layout_view.load_layer_props(str(layer_properties))
+    elif c.kcl.technology_file is not None:
+        layout_view.active_cellview().technology = c.kcl.technology.name
+    layout_view.active_cellview().cell = c.kdb_cell
+    layout_view.max_hier()
+    layout_view.resize(*resolution)
+    layout_view.add_missing_layers()
+    layout_view.zoom_fit()
+    return layout_view.get_screenshot_pixels().to_png_data()

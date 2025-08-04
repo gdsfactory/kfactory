@@ -27,10 +27,11 @@ try:
         VBox,
     )
 
+    from ..utilities import as_png_data
     from .. import kdb, lay
     from ..conf import config, logger
-    from ..kcell import KCell, ProtoKCell
-    from typing import Literal
+    from ..kcell import KCell, ProtoKCell, ProtoTKCell
+    from typing import Literal, Any
 
 except ImportError as e:
     print("You need install jupyter notebook plugin with `pip install kfactory[ipy]`")
@@ -65,58 +66,26 @@ widgets: list[LayoutImage | LayoutIPImage] = []
 class LayoutImage:
     def __init__(
         self,
-        cell: KCell,
+        cell: ProtoTKCell[Any],
         layer_properties: str | None = None,
     ):
-        self.layout_view = lay.LayoutView()
-        self.layout_view.show_layout(cell.kcl.layout, False)
-        self.layer_properties: Path | None = None
-        if layer_properties is not None:
-            self.layer_properties = Path(layer_properties)
-            if self.layer_properties.exists() and self.layer_properties.is_file():
-                self.layer_properties = self.layer_properties
-                self.layout_view.load_layer_props(str(self.layer_properties))
-        self.show_cell(cell.kdb_cell)
-        png_data = self.layout_view.get_screenshot_pixels().to_png_data()
+        png_data = as_png_data(cell)
 
         self.image = Image(value=png_data, format="png")
         widgets.append(self)
-
-    def show_cell(self, cell: kdb.Cell) -> None:
-        self.layout_view.active_cellview().cell = cell
-        self.layout_view.max_hier()
-        self.layout_view.resize(800, 600)
-        self.layout_view.add_missing_layers()
-        self.layout_view.zoom_fit()
 
 
 class LayoutIPImage:
     def __init__(
         self,
-        cell: KCell,
+        cell: ProtoTKCell[Any],
         layer_properties: Path | str | None = None,
     ):
-        self.layout_view = lay.LayoutView()
-        self.layout_view.show_layout(cell.kcl.layout, False)
-        self.layer_properties: Path | None = None
-        if layer_properties is not None:
-            self.layer_properties = Path(layer_properties)
-            if self.layer_properties.exists() and self.layer_properties.is_file():
-                self.layer_properties = self.layer_properties
-                self.layout_view.load_layer_props(str(self.layer_properties))
-        self.show_cell(cell.kdb_cell)
-        png_data = self.layout_view.get_screenshot_pixels().to_png_data()
         self.image = IPImage(  # type: ignore[no-untyped-call,unused-ignore]
-            data=png_data, format="png", embed=True, width=800, height=600
+            data=as_png_data(cell), format="png", embed=True, width=800, height=600
         )
         widgets.append(self)
 
-    def show_cell(self, cell: kdb.Cell) -> None:
-        self.layout_view.active_cellview().cell = cell
-        self.layout_view.max_hier()
-        self.layout_view.resize(800, 600)
-        self.layout_view.add_missing_layers()
-        self.layout_view.zoom_fit()
 
 
 class LayoutWidget:
