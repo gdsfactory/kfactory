@@ -55,7 +55,10 @@ class PortRef(BaseModel, extra="forbid"):
         )
 
     def __str__(self) -> str:
-        return f"{self.instance}[{self.port!r}]"
+        return self.as_python_str()
+
+    def as_python_str(self, inst_name: str | None = None) -> str:
+        return f"{inst_name or self.instance}[{self.port!r}]"
 
 
 class PortArrayRef(PortRef, extra="forbid"):
@@ -104,7 +107,10 @@ class PortArrayRef(PortRef, extra="forbid"):
         )
 
     def __str__(self) -> str:
-        return f"{self.instance}[{self.port!r}, {self.ia}, {self.ib}]"
+        return self.as_python_str()
+
+    def as_python_str(self, inst_name: str | None = None) -> str:
+        return f"{inst_name or self.instance}[{self.port!r}, {self.ia}, {self.ib}]"
 
 
 class NetlistPort(BaseModel):
