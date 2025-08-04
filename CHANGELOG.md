@@ -1,5 +1,20 @@
+<a id="v1.12.0"></a>
+# [v1.12.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.12.0) - 2025-08-04
+
+# What's Changed
+
+## New
+
+- add capabilities to automatically apply klayout technologies [#751](https://github.com/gdsfactory/kfactory/pull/751)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.11.0...v1.12.0
+
+
+[Changes][v1.12.0]
+
+
 <a id="v1.11.0"></a>
-# [v1.11.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.11.0) - 2025-08-03
+# [v1.11.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.11.0) - 2025-08-04
 
 # What's Changed
 
@@ -10,6 +25,7 @@
 
 ## Bug Fixes
 
+- fixes difftest [#750](https://github.com/gdsfactory/kfactory/pull/750)
 - fix types for fill [#749](https://github.com/gdsfactory/kfactory/pull/749)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.10.1...v1.11.0
@@ -2229,6 +2245,7 @@
 [Changes][v0.4.0]
 
 
+[v1.12.0]: https://github.com/gdsfactory/kfactory/compare/v1.11.0...v1.12.0
 [v1.11.0]: https://github.com/gdsfactory/kfactory/compare/v1.10.1...v1.11.0
 [v1.10.1]: https://github.com/gdsfactory/kfactory/compare/v1.10.0...v1.10.1
 [v1.10.0]: https://github.com/gdsfactory/kfactory/compare/v1.9.5...v1.10.0
