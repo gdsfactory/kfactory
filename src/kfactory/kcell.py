@@ -817,15 +817,22 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         if library_save_options is None:
             library_save_options = save_layout_options()
         show_f: ShowFunction = config.show_function or show
+
+        kwargs: dict[str, Any] = {}
+        if technology is not None:
+            kwargs["technology"] = technology
+        if l2n is not None:
+            kwargs["l2n"] = l2n
+        if lyrdb is not None:
+            kwargs["lyrdb"] = lyrdb
+
         show_f(
             self,
-            lyrdb=lyrdb,
-            l2n=l2n,
             keep_position=keep_position,
             save_options=save_options,
             use_libraries=use_libraries,
             library_save_options=library_save_options,
-            technology=technology,
+            **kwargs,
         )
 
     def plot(
@@ -3449,17 +3456,18 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             c.name = self.name
         VInstance(self).insert_into_flat(c, levels=0)
         c.add_ports(self.ports)
-        show_f: ShowFunction = config.show_function or show
-        show_f(
-            c,
-            lyrdb=lyrdb,
-            l2n=l2n,
-            keep_position=keep_position,
-            save_options=save_options,
-            use_libraries=use_libraries,
-            library_save_options=library_save_options,
-            technology=technology,
-        )
+        c.info = self.info.model_copy()
+        c.base.settings = self.settings.model_copy()
+
+        kwargs: dict[str, Any] = {}
+        if technology is not None:
+            kwargs["technology"] = technology
+        if l2n is not None:
+            kwargs["l2n"] = l2n
+        if lyrdb is not None:
+            kwargs["lyrdb"] = lyrdb
+
+        c.show(keep_position=keep_position, **kwargs)
 
     def plot(self) -> None:
         """Display cell.
