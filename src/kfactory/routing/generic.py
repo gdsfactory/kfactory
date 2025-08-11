@@ -13,6 +13,7 @@ from ..conf import config, logger
 from ..instance import Instance  # noqa: TC001
 from ..port import BasePort, Port, ProtoPort
 from ..typings import dbu  # noqa: TC001
+from .astar import route_astar
 from .length_functions import LengthFunction, get_length_from_area
 from .manhattan import (
     ManhattanBundleRoutingFunction,
@@ -585,3 +586,25 @@ def route_bundle(
         routes=routes,
     )
     return routes
+
+
+def route_bundle_astar(
+    *,
+    c: KCell,
+    start_ports: list[BasePort],
+    end_ports: list[BasePort],
+    route_width: dbu | list[dbu] | None = None,
+    on_collision: Literal["error", "show_error"] | None = "show_error",
+    on_placer_error: Literal["error", "show_error"] | None = "show_error",
+    collision_check_layers: Sequence[kdb.LayerInfo] | None = None,
+    routing_function: ManhattanBundleRoutingFunction = route_astar,
+    routing_kwargs: dict[str, Any] | None = None,
+    placer_function: PlacerFunction,
+    placer_kwargs: dict[str, Any] | None = None,
+    router_post_process_function: RouterPostProcessFunction | None = None,
+    router_post_process_kwargs: dict[str, Any] | None = None,
+    starts: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
+    ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
+    start_angles: int | list[int] | None = None,
+    end_angles: int | list[int] | None = None,
+) -> list[ManhattanRoute]: ...
