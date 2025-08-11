@@ -949,6 +949,11 @@ ipy = [
     { name = "ipywidgets" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "ty" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "aenum", specifier = ">=3.1.15,<4" },
@@ -1007,6 +1012,9 @@ requires-dist = [
     { name = "types-setuptools", marker = "extra == 'dev'", specifier = ">=76.0.0.20250328" },
 ]
 provides-extras = ["dev", "docs", "ci", "ipy"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "ty", specifier = ">=0.0.1a17" }]
 
 [[package]]
 name = "klayout"

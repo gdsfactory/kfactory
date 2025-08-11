@@ -32,7 +32,7 @@ jobs:
         run: |
           uv sync --extra dev
       - name: Run ty check
-        run: uv run ty check src/kfactory || true
+        run: uv run ty check src/kfactory --exit-zero
 
 
   test_code:

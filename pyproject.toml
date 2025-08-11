@@ -240,3 +240,8 @@ src = "src/kfactory/__init__.py"
 [tool.basedpyright]
 reportUnusedCallResult = false
 reportUnusedExpression = false
+
+[dependency-groups]
+dev = [
+    "ty>=0.0.1a17",
+]
