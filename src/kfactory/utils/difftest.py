@@ -154,8 +154,8 @@ def xor(
     for layer in c.kcl.layer_infos():
         # exists in both
         if (
-            new_kcell.kcl.layout.find_layer(layer) is not None
-            and old_kcell.kcl.layout.find_layer(layer) is not None
+            new_kcell.kcl.layout.layer(layer) is not None
+            and old_kcell.kcl.layout.layer(layer) is not None
         ):
             layer_ref = old_kcell.layer(layer)
             layer_run = new_kcell.layer(layer)
@@ -179,7 +179,7 @@ def xor(
                     equivalent = False
                 print(message)
         # only in new
-        elif new_kcell.kcl.layout.find_layer(layer) is not None:
+        elif new_kcell.kcl.layout.layer(layer) is not None:
             layer_id = new_kcell.layer(layer)
             region = kdb.Region(new_kcell.begin_shapes_rec(layer_id))
             diff.shapes(c.kcl.layer(layer)).insert(region)
@@ -187,7 +187,7 @@ def xor(
             equivalent = False
 
         # only in old
-        elif old_kcell.kcl.layout.find_layer(layer) is not None:
+        elif old_kcell.kcl.layout.layer(layer) is not None:
             layer_id = old_kcell.layer(layer)
             region = kdb.Region(old_kcell.begin_shapes_rec(layer_id))
             diff.shapes(c.kcl.layer(layer)).insert(region)
@@ -346,8 +346,8 @@ def diff(
             for layer in c.kcl.layer_infos():
                 # exists in both
                 if (
-                    new.kcl.layout.find_layer(layer) is not None
-                    and old.kcl.layout.find_layer(layer) is not None
+                    new.kcl.layout.layer(layer) is not None
+                    and old.kcl.layout.layer(layer) is not None
                 ):
                     layer_ref = old.layer(layer)
                     layer_run = new.layer(layer)
@@ -371,7 +371,7 @@ def diff(
                             equivalent = False
                         print(message)
                 # only in new
-                elif new.kcl.layout.find_layer(layer) is not None:
+                elif new.kcl.layout.layer(layer) is not None:
                     layer_id = new.layer(layer)
                     region = kdb.Region(new.begin_shapes_rec(layer_id))
                     diff.shapes(c.kcl.layer(layer)).insert(region)
@@ -379,7 +379,7 @@ def diff(
                     equivalent = False
 
                 # only in old
-                elif old.kcl.layout.find_layer(layer) is not None:
+                elif old.kcl.layout.layer(layer) is not None:
                     layer_id = old.layer(layer)
                     region = kdb.Region(old.begin_shapes_rec(layer_id))
                     diff.shapes(c.kcl.layer(layer)).insert(region)
@@ -444,7 +444,7 @@ def difftest(
     ref_file = dirpath_ref / f"{test_name}.gds"
     run_file = dirpath_run / f"{test_name}.gds"
 
-    run_file = component.write_gds(gdspath=run_file)
+    component.write(run_file)
 
     if not ref_file.exists():
         shutil.copy(run_file, ref_file)

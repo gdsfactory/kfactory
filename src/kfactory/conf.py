@@ -84,6 +84,7 @@ class ShowFunction(Protocol):
         save_options: kdb.SaveLayoutOptions,
         use_libraries: bool,
         library_save_options: kdb.SaveLayoutOptions,
+        technology: str | None = None,
     ) -> None: ...
 
 

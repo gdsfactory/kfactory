@@ -157,7 +157,7 @@ def straight_dbu_factory(
         if width // 2 * 2 != width:
             raise ValueError("The width (w) must be a multiple of 2 database units")
 
-        li = c.kcl.find_layer(layer)
+        li = c.kcl.layer(layer)
         c.shapes(li).insert(kdb.Box(0, -width // 2, length, width // 2))
         c.create_port(trans=kdb.Trans(2, False, 0, 0), layer=li, width=width)
         c.create_port(trans=kdb.Trans(0, False, length, 0), layer=li, width=width)

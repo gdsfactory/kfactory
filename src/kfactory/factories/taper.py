@@ -162,7 +162,7 @@ def taper_factory(
             )
             width2 = -width2
 
-        li = c.kcl.find_layer(layer)
+        li = c.kcl.layer(layer)
         taper = c.shapes(li).insert(
             kdb.Polygon(
                 [

@@ -300,7 +300,7 @@ def bend_euler_factory(
             start_angle=0,
             end_angle=angle,
         )
-        li = c.kcl.find_layer(layer)
+        li = c.kcl.layer(layer)
         c.create_port(
             layer=li,
             width=c.kcl.to_dbu(width),
@@ -429,7 +429,7 @@ def bend_s_euler_factory(
         else:
             p1 = c.kcl.to_dbu(backbone[0])
             p2 = c.kcl.to_dbu(backbone[-1])
-        li = c.kcl.find_layer(layer)
+        li = c.kcl.layer(layer)
         c.create_port(
             trans=kdb.Trans(2, False, p1.to_v()),
             width=c.kcl.to_dbu(width),

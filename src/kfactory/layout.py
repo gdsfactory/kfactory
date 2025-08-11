@@ -4,12 +4,12 @@ import functools
 import inspect
 from collections import UserDict, defaultdict
 from collections.abc import Callable, Iterable, Sequence  # noqa: TC003
+from functools import cached_property
 from pathlib import Path
 from pprint import pformat
 from threading import RLock
 from typing import TYPE_CHECKING, Any, Concatenate, Literal, cast, overload
 
-import klayout.db as kdb
 import ruamel.yaml
 from cachetools import Cache
 from pydantic import (
@@ -19,7 +19,7 @@ from pydantic import (
     model_validator,
 )
 
-from . import __version__
+from . import __version__, kdb
 from .conf import CheckInstances, config
 from .cross_section import (
     CrossSection,
@@ -206,6 +206,7 @@ class KCLayout(
             list[ManhattanRoute],
         ],
     ] = Field(default_factory=dict)
+    technology_file: Path | None = None
 
     def __init__(
         self,
@@ -227,6 +228,7 @@ class KCLayout(
             | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo]
         ]
         | None = None,
+        technology_file: Path | str | None = None,
     ) -> None:
         """Create a new KCLayout (PDK). Can be based on an old KCLayout.
 
@@ -258,6 +260,13 @@ class KCLayout(
                 layer_enclosures = LayerEnclosureModel(root=layer_enclosures)
         else:
             layer_enclosures = LayerEnclosureModel(root={})
+        if technology_file:
+            technology_file = Path(technology_file).resolve()
+            if not technology_file.is_file():
+                raise ValueError(
+                    f"{technology_file=} is not an existing file."
+                    " Make sure to link it to the .lyt file."
+                )
         super().__init__(
             name=name,
             layer_enclosures=layer_enclosures,
@@ -284,6 +293,7 @@ class KCLayout(
             decorators=Decorators(self),
             default_cell_output_type=default_cell_output_type,
             connectivity=connectivity or [],
+            technology_file=technology_file,
         )
 
         self.library.register(self.name)
@@ -348,6 +358,15 @@ class KCLayout(
 
         self.layer_enclosures[enc.name] = enc
         return enc
+
+    @cached_property
+    def technology(self) -> kdb.Technology:
+        if self.technology_file is not None:
+            tech = kdb.Technology()
+            tech.load(str(self.technology_file))
+            kdb.Technology.register_technology(tech)
+            return tech
+        raise ValueError(f"{self.technology_file} is not a file or is None.")
 
     @overload
     def find_layer(self, name: str) -> LayerEnum: ...
