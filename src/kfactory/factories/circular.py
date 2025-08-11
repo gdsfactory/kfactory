@@ -151,12 +151,12 @@ def bend_circular_factory(
         c.create_port(
             trans=kdb.Trans(2, False, 0, 0),
             width=int(width / c.kcl.dbu),
-            layer=c.kcl.find_layer(layer),
+            layer=c.kcl.layer(layer),
         )
         c.create_port(
             dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
             width=c.kcl.to_dbu(width),
-            layer=c.kcl.find_layer(layer),
+            layer=c.kcl.layer(layer),
         )
         c.auto_rename_ports()
         c.boundary = center_path

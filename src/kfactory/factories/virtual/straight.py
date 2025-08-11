@@ -148,13 +148,13 @@ def virtual_straight_factory(
         c.create_port(
             name="o1",
             dcplx_trans=kdb.DCplxTrans(1, 180, False, 0, 0),
-            layer=c.kcl.find_layer(layer),
+            layer=c.kcl.layer(layer),
             width=width,
         )
         c.create_port(
             name="o2",
             dcplx_trans=kdb.DCplxTrans(1, 0, False, length, 0),
-            layer=c.kcl.find_layer(layer),
+            layer=c.kcl.layer(layer),
             width=width,
         )
         return c
