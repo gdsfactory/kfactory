@@ -33,13 +33,11 @@ def extrude_backbone(
         backbone, width=width, start_angle=start_angle, end_angle=end_angle
     )
     center_path_r.reverse()
-    c.shapes(c.kcl.find_layer(layer)).insert(
-        kdb.DPolygon(center_path_l + center_path_r)
-    )
+    c.shapes(c.kcl.layer(layer)).insert(kdb.DPolygon(center_path_l + center_path_r))
 
     if enclosure:
         for _layer, sections in enclosure.layer_sections.items():
-            _li = c.kcl.find_layer(_layer)
+            _li = c.kcl.layer(_layer)
             for section in sections.sections:
                 if section.d_min is not None:
                     inner_l, inner_r = extrude_path_points(
