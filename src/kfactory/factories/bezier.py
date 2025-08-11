@@ -144,13 +144,13 @@ def bend_s_bezier_factory(
         c.create_port(
             width=int(width / c.kcl.dbu),
             trans=kdb.Trans(2, False, 0, 0),
-            layer=c.kcl.find_layer(layer),
+            layer=c.kcl.layer(layer),
             port_type="optical",
         )
         c.create_port(
             width=int(width / c.kcl.dbu),
             trans=kdb.Trans(0, False, c.bbox().right, kcl.to_dbu(height)),
-            layer=c.kcl.find_layer(layer),
+            layer=c.kcl.layer(layer),
             port_type="optical",
         )
         _info: dict[str, MetaData] = {}

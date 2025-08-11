@@ -159,7 +159,7 @@ def virtual_bend_circular_factory(
 
         c.create_port(
             name="o1",
-            layer=c.kcl.find_layer(layer),
+            layer=c.kcl.layer(layer),
             width=round(width / c.kcl.dbu),
             dcplx_trans=kdb.DCplxTrans(1, 180, False, backbone[0].to_v()),
         )
@@ -167,7 +167,7 @@ def virtual_bend_circular_factory(
             name="o2",
             dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
             width=width,
-            layer=c.kcl.find_layer(layer),
+            layer=c.kcl.layer(layer),
         )
         return c
 

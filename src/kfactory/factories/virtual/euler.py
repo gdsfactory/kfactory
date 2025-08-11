@@ -144,7 +144,7 @@ def virtual_bend_euler_factory(
 
         c.create_port(
             name="o1",
-            layer=c.kcl.find_layer(layer),
+            layer=c.kcl.layer(layer),
             width=width,
             dcplx_trans=kdb.DCplxTrans(1, 180, False, backbone[0].to_v()),
         )
@@ -152,7 +152,7 @@ def virtual_bend_euler_factory(
             name="o2",
             dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
             width=width,
-            layer=c.kcl.find_layer(layer),
+            layer=c.kcl.layer(layer),
         )
         return c
 
