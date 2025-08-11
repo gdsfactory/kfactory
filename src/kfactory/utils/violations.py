@@ -94,7 +94,7 @@ def fix_spacing_tiled(
     if tile_size is None:
         min(25 * min_space, 250)
         tile_size = (30 * min_space * c.kcl.dbu, 30 * min_space * c.kcl.dbu)
-    li = c.kcl.find_layer(layer)
+    li = c.kcl.layer(layer)
     tp = kdb.TilingProcessor()
     tp.frame = c.kcl.to_um(c.bbox(li))  # type: ignore[misc, assignment]
     tp.dbu = c.kcl.dbu
@@ -173,7 +173,7 @@ def fix_spacing_sizing_tiled(
     if tile_size is None:
         size = min_space * 20 * c.kcl.dbu
         tile_size = (size, size)
-    li = c.kcl.find_layer(layer)
+    li = c.kcl.layer(layer)
     tp.frame = c.kcl.to_um(c.bbox(li))  # type: ignore[misc, assignment]
     tp.dbu = c.kcl.dbu
     tp.tile_size(*tile_size)  # tile size in um
@@ -239,7 +239,7 @@ def fix_spacing_minkowski_tiled(
 
     tp.tile_size(*tile_size)
     if isinstance(ref, kdb.LayerInfo):
-        tp.input("main_layer", c.kcl.layout, c.cell_index(), c.kcl.find_layer(ref))
+        tp.input("main_layer", c.kcl.layout, c.cell_index(), c.kcl.layer(ref))
     else:
         tp.input("main_layer", ref)
 
@@ -314,7 +314,7 @@ def fix_width_minkowski_tiled(
 
     tp.tile_size(*tile_size)
     if isinstance(ref, kdb.LayerInfo):
-        tp.input("main_layer", c.kcl.layout, c.cell_index(), c.kcl.find_layer(ref))
+        tp.input("main_layer", c.kcl.layout, c.cell_index(), c.kcl.layer(ref))
     else:
         tp.input("main_layer", ref)
 
@@ -395,7 +395,7 @@ def fix_width_and_spacing_minkowski_tiled(
 
     tp.tile_size(*tile_size)
     if isinstance(ref, kdb.LayerInfo):
-        tp.input("main_layer", c.kcl.layout, c.cell_index(), c.kcl.find_layer(ref))
+        tp.input("main_layer", c.kcl.layout, c.cell_index(), c.kcl.layer(ref))
     else:
         tp.input("main_layer", ref)
 

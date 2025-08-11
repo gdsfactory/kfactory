@@ -347,9 +347,7 @@ class ProtoPort(Generic[TUnit], ABC):
         This corresponds to the port's cross section's main layer converted to the
         index.
         """
-        return self.kcl.find_layer(
-            self.cross_section.layer, allow_undefined_layers=True
-        )
+        return self.kcl.layout.layer(self.cross_section.layer)
 
     @property
     def layer_info(self) -> kdb.LayerInfo:

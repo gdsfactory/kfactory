@@ -190,11 +190,11 @@ def fill_tiled(
         exregion_names.append(region_name)
 
     if row_step is None:
-        row_step_ = c.kcl.to_dbu(kdb.DVector(fill_cell.bbox().width() + x_space, 0))
+        row_step_ = c.kcl.to_dbu(kdb.DVector(fill_cell.dbbox().width() + x_space, 0))
     else:
         row_step_ = c.kcl.to_dbu(row_step)
     if col_step is None:
-        col_step_ = c.kcl.to_dbu(kdb.DVector(0, fill_cell.bbox().height() + y_space))
+        col_step_ = c.kcl.to_dbu(kdb.DVector(0, fill_cell.dbbox().height() + y_space))
     else:
         col_step_ = c.kcl.to_dbu(col_step)
     fc_bbox = fill_cell.bbox()
