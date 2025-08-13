@@ -597,10 +597,17 @@ def test_return_none(kcl: kf.KCLayout) -> None:
     def test_no_return() -> kf.KCell:  # type: ignore[return]
         kcl.kcell()
 
+    def test_no_return_vk() -> kf.VKCell:  # type: ignore[return]
+        kcl.vkcell()
+
     with pytest.raises(TypeError):
         kcl.cell()(test_no_return)()
     with pytest.raises(TypeError):
         kcl.cell()(functools.partial(test_no_return))()
+    with pytest.raises(TypeError):
+        kcl.vcell(test_no_return_vk)()
+    with pytest.raises(TypeError):
+        kcl.vcell(functools.partial(test_no_return_vk))()
 
 
 def test_return_wrong_type(kcl: kf.KCLayout) -> None:
