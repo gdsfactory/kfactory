@@ -26,6 +26,7 @@ from typing_extensions import Unpack
 from . import kdb
 from .conf import CheckInstances, logger
 from .exceptions import CellNameError
+from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
 from .serialization import (
     DecoratorDict,
     DecoratorList,
@@ -49,7 +50,6 @@ from .typings import (
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
 
-    from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
     from .layout import KCLayout
 
 
@@ -400,10 +400,16 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                     name_ = None
                 cell = f(**params)  # type: ignore[call-arg]
                 if cell is None:
-                    raise ValueError(
+                    raise TypeError(
                         f"The cell function {self.name!r} in {str(self.file)!r}"
                         " returned None. Did you forget to return the cell or component"
                         " at the end of the function?"
+                    )
+                if not isinstance(cell, ProtoTKCell):
+                    raise TypeError(
+                        f"The cell function {self.name!r} in {str(self.file)!r}"
+                        f" returned {type(cell)=}. The `@cell` decorator only supports"
+                        " KCell/DKCell or any SubClass such as Component."
                     )
 
                 logger.debug("Constructed {}", name_ or cell.name)
@@ -631,10 +637,16 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
                     name_ = None
                 cell = f(**params)  # type: ignore[call-arg]
                 if cell is None:
-                    raise ValueError(
+                    raise TypeError(
                         f"The cell function {self.name!r} in {str(self.file)!r}"
                         " returned None. Did you forget to return the cell or component"
                         " at the end of the function?"
+                    )
+                if not isinstance(cell, VKCell):
+                    raise TypeError(
+                        f"The cell function {self.name!r} in {str(self.file)!r}"
+                        f" returned {type(cell)=}. The `@vcell` decorator only supports"
+                        " VKCell or any SubClass such as ComponentAllAngle."
                     )
 
                 logger.debug("Constructed {}", name_ or cell.name)
