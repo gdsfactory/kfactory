@@ -400,10 +400,16 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                     name_ = None
                 cell = f(**params)  # type: ignore[call-arg]
                 if cell is None:
-                    raise ValueError(
+                    raise (
                         f"The cell function {self.name!r} in {str(self.file)!r}"
                         " returned None. Did you forget to return the cell or component"
                         " at the end of the function?"
+                    )
+                if not isinstance(cell, ProtoTKCell):
+                    raise TypeError(
+                        f"The cell function {self.name!r} in {str(self.file)!r}"
+                        f" returned {type(cell)=}. This decorator only supports"
+                        " KCell/DKCell or any SubClass such as Component."
                     )
 
                 logger.debug("Constructed {}", name_ or cell.name)
@@ -636,6 +642,12 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
                         " returned None. Did you forget to return the cell or component"
                         " at the end of the function?"
                     )
+                if not isinstance(cell, ProtoTKCell):
+                    raise TypeError(
+                        f"The cell function {self.name!r} in {str(self.file)!r}"
+                        f" returned {type(cell)=}. This decorator only supports"
+                        " CKCell/or any SubClass such as ComponentAllAngle."
+                    )
 
                 logger.debug("Constructed {}", name_ or cell.name)
 
@@ -660,15 +672,15 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
                 if self.ports_definition is not None:
                     port_lengths = 0
                     for direction in Direction:
-                        port_lengths += len(self.ports_definition.get(direction, []))  # type: ignore[arg-type]
+                        port_lengths += len(self.ports_definition.get(direction, []))
                     mapping = {0: "right", 1: "top", 2: "left", 3: "bottom"}
                     if len(cell.ports) != port_lengths:
                         received_ports = PortsDefinition()
                         for port in cell.ports:
                             mapped: Direction = Direction(mapping[port.trans.angle])
                             if mapped not in received_ports:
-                                received_ports[mapped] = []  # type: ignore[literal-required]
-                            received_ports[mapped].append(port.name)  # type: ignore[literal-required]
+                                received_ports[mapped] = []
+                            received_ports[mapped].append(port.name)
                         raise ValueError(
                             "The `@cell` decorator defines ports, but they do not match"
                             " the extracted ports. Declared ports: "
@@ -680,7 +692,7 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
                     port_names: list[str | None] = []
                     for direction in Direction:
                         if direction in self.ports_definition:
-                            port_names.extend(self.ports_definition[direction])  # type: ignore[literal-required]
+                            port_names.extend(self.ports_definition[direction])
 
                     for port in cell.ports:
                         if port.name not in port_names:
