@@ -1969,6 +1969,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                         ].lvs_equivalent_ports
                     elif c_.is_library_cell():
                         from .layout import kcls
+
                         eqps = (
                             kcls[c_.library().name()]
                             .factories[c_.factory_name]
