@@ -130,6 +130,60 @@ def test_schema_create_cell() -> None:
         return schema
 
 
+def test_schema_kcl_mix_netlist() -> None:
+    layers = Layers()
+    pdk = kf.KCLayout("SCHEMA_PDK_DECORATOR", infos=Layers)
+    pdk2 = kf.KCLayout("SCHEMA_PDK_DECORATOR_2", infos=Layers)
+
+    @pdk.cell
+    def straight(length: int) -> kf.KCell:
+        c = pdk.kcell()
+        c.shapes(layers.WG).insert(kf.kdb.Box(0, -250, length, 250))
+        c.create_port(
+            name="o1",
+            width=500,
+            trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=0),
+            layer_info=layers.WG,
+        )
+        c.create_port(
+            name="o2",
+            width=500,
+            trans=kf.kdb.Trans(x=length, y=0),
+            layer_info=layers.WG,
+        )
+
+        return c
+
+    @pdk2.schematic_cell()
+    def long_straight(n: int) -> kf.schema.TSchema[int]:
+        schema = kf.Schema(kcl=pdk2)
+
+        s1 = schema.create_inst(
+            name="s1",
+            component="straight",
+            settings={"length": 5000},
+            kcl=pdk,
+        )
+        s2 = schema.create_inst(
+            name="s2",
+            component="straight",
+            settings={"length": 5000},
+            kcl=pdk,
+        )
+        s3 = schema.create_inst(
+            name="s3", component="straight", settings={"length": n}, kcl=pdk
+        )
+
+        s3.connect("o1", s1["o2"])
+        s2.connect("o1", s3["o2"])
+
+        s1.place(x=1000, y=10_000)
+
+        return schema
+
+    long_straight(n=2000).netlist()
+
+
 def test_schema_route() -> None:
     layers = Layers()
     pdk = kf.KCLayout("SCHEMA_PDK_ROUTING", infos=Layers)
