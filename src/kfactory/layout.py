@@ -1520,7 +1520,14 @@ class KCLayout(
 
             cells = set(self.cells("*"))
             binary_layout = layout_b.write_bytes(save_layout_options())
-            lm = self.layout.read_bytes(binary_layout)
+            locked_cells = [
+                kdb_cell for kdb_cell in self.layout.each_cell() if kdb_cell.locked
+            ]
+            for kdb_cell in locked_cells:
+                kdb_cell.locked = False
+            lm = self.layout.read_bytes(binary_layout, options)
+            for kdb_cell in locked_cells:
+                kdb_cell.locked = True
             info, settings = self.get_meta_data()
 
             match update_kcl_meta_data:
