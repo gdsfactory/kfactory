@@ -17,12 +17,11 @@ Features similar to gdsfactory:
 - [x] PDK/package configuration
 - [x] Plugin system (simulations etc.) - Check [kplugins](https://github.com/gdsfactory/kplugins)
 - [x] Generic PDK example - Check [kgeneric](https://github.com/gdsfactory/kgeneric)
-
+- [x] CrossSection
+- [x] Netlist/Schematics and LVS
 
 Notable missing Features:
 
-- [ ] CrossSection
-- [ ] Netlist/Schematics and LVS
 - [ ] More advanced routing
 
 
