@@ -186,7 +186,10 @@ class SchemaInstance(
         return PortArrayRef(instance=self.name, port=value[0], ia=value[1], ib=value[2])
 
     def connect(
-        self, port: str | tuple[str, int, int], other: Port[TUnit] | PortRef
+        self,
+        port: str | tuple[str, int, int],
+        other: Port[TUnit] | PortRef,
+        mirror: bool = False,
     ) -> Connection[TUnit]:
         if isinstance(port, str):
             pref = PortRef(instance=self.name, port=port)
@@ -194,7 +197,7 @@ class SchemaInstance(
             pref = PortArrayRef(
                 instance=self.name, port=port[0], ia=port[1], ib=port[2]
             )
-        conn = Connection[TUnit]((other, pref))
+        conn = Connection[TUnit]((other, pref), mirror=mirror)
         self.parent_schema.connections.append(conn)
         return conn
 
@@ -271,19 +274,26 @@ class Link(RootModel[tuple[PortArrayRef | PortRef, PortArrayRef | PortRef]]):
         return self
 
 
-class Connection(
-    RootModel[
-        tuple[
-            Port[TUnit] | PortArrayRef | PortRef, Port[TUnit] | PortArrayRef | PortRef
-        ]
+class Connection(BaseModel, Generic[TUnit], extra="forbid"):
+    ports: tuple[
+        Port[TUnit] | PortArrayRef | PortRef,
+        Port[TUnit] | PortArrayRef | PortRef,
     ]
-):
-    root: tuple[PortArrayRef | PortRef | Port[TUnit], PortArrayRef | PortRef]
+    mirror: bool = False
+
+    @property
+    def root(
+        self,
+    ) -> tuple[
+        Port[TUnit] | PortArrayRef | PortRef,
+        Port[TUnit] | PortArrayRef | PortRef,
+    ]:
+        return self.ports
 
     @model_validator(mode="after")
     def _sort_data(self) -> Self:
-        self.root = tuple(sorted(self.root))  # type: ignore[assignment]
-        if isinstance(self.root[1], Port):
+        self.ports = tuple(sorted(self.ports))  # type: ignore[assignment]
+        if isinstance(self.ports[1], Port):
             raise TypeError(
                 "Two cell ports cannot be connected together. This would cause an "
                 "invalid netlist."
@@ -812,8 +822,9 @@ def _connect_instances(
                     conn.root[0].port,
                     instances[conn.root[1].instance],
                     conn.root[1].port,
+                    mirror=conn.mirror,
                     use_angle=True,
-                    use_mirror=False,
+                    use_mirror=True,
                 )
                 break
             if conn.root[0].instance in placed_instances:
@@ -821,8 +832,9 @@ def _connect_instances(
                     conn.root[1].port,
                     instances[conn.root[0].instance],
                     conn.root[0].port,
+                    mirror=conn.mirror,
                     use_angle=True,
-                    use_mirror=False,
+                    use_mirror=True,
                 )
                 break
         else:
