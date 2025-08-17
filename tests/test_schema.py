@@ -20,6 +20,10 @@ skip_files = [
 ]
 
 
+def _get_path_stem(p: Path) -> str:
+    return p.with_suffix("").stem
+
+
 def test_schema() -> None:
     yaml = YAML(typ=["rt", "safe", "string"])
     schema_yaml = """
@@ -578,7 +582,7 @@ def test_netlist_equivalent() -> None:
         else pytest.param(file)
         for file in yaml_files
     ],
-    ids=lambda p: str(p.with_suffix("").stem),
+    ids=lambda p: _get_path_stem,
 )
 def test_gdsfactory_yaml(path: Path) -> None:
     with path.open(encoding="utf-8") as f:
