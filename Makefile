@@ -1,5 +1,6 @@
 PYTHON ?= 3.12
 PYTHON_FLAG = -p $(PYTHON)
+SUBMOD := tests/gdsfactory-yaml-pics
 
 help:
 	@echo 'make install:                                Install package, hook, notebooks and gdslib'
@@ -35,7 +36,7 @@ docs:
 docs-serve:
 	uv run $(PYTHON_FLAG) --extra docs --isolated mkdocs serve -f docs/mkdocs.yml
 
-test:
+test: init-submodule
 	uv run $(PYTHON_FLAG) --extra ci --isolated pytest -s -n logical
 
 test-min:
@@ -91,4 +92,22 @@ gds-download:
 clean:
 	git clean -xdf
 
-.PHONY: build docs docs-serve test test-min clean
+init-submodule:
+	# init shallow
+	git submodule update --init --depth 1 $(SUBMOD)
+	# ensure it tracks main on updates
+	git submodule set-branch --branch main $(SUBMOD)
+	# restrict working tree to the yaml_pics folder
+	git -C $(SUBMOD) sparse-checkout init --cone
+	git -C $(SUBMOD) sparse-checkout set notebooks/yaml_pics
+
+update-submodule:
+	# pull latest main for the submodule, still shallow
+	git submodule update --remote --depth 1 $(SUBMOD)
+
+
+clean-submodule:
+	# remove only the checked-out files, keep the submodule entry
+	git -C $(SUBMOD) clean -xdf
+
+.PHONY: build docs docs-serve test test-min clean init-submodule update-submodule test clean-submodule

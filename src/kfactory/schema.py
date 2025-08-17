@@ -67,7 +67,8 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
     dx: TUnit = cast("TUnit", 0)
     y: TUnit | PortRef | PortArrayRef = cast("TUnit", 0)
     dy: TUnit = cast("TUnit", 0)
-    orientation: Literal[0, 90, 180, 270] = 0
+    orientation: float = 0
+    port: str | None = None
 
     @model_validator(mode="after")
     def _require_absolute_or_relative(self) -> Self:
@@ -215,6 +216,8 @@ class Route(BaseModel, Generic[TUnit], extra="forbid"):
                 [tuple(str(k).split(",")), tuple(str(v).split(","))]
                 for k, v in links.items()
             ]
+        if "settings" not in data:
+            data["settings"] = {}
         return data
 
 
