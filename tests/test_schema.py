@@ -1,10 +1,23 @@
 from collections.abc import Sequence
+from pathlib import Path
 from typing import Any
 
+import pytest
 from ruamel.yaml import YAML
 
 import kfactory as kf
 from tests.conftest import Layers
+
+# Find all YAML files
+yaml_dir = Path(__file__).parent / "gdsfactory-yaml-pics" / "notebooks" / "yaml_pics"
+yaml_files = sorted(yaml_dir.glob("**/*.pic.yml"))
+skip_files = [
+    "aar_bundles02",
+    "aar_bundles01",
+    "aar_bundles03",
+    "mzi_lattice_filter",
+    "mirror_demo",
+]
 
 
 def test_schema() -> None:
@@ -553,3 +566,24 @@ def test_netlist_equivalent() -> None:
         )
         == nl2[c.name]
     )
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param(file, marks=pytest.mark.skip)
+        if file.with_suffix("").stem in skip_files
+        else pytest.param(file)
+        for file in yaml_files
+    ],
+    ids=lambda p: str(p.with_suffix("").stem),
+)
+def test_yaml_is_valid(path: Path) -> None:
+    with path.open(encoding="utf-8") as f:
+        fstr = f.read()
+        pytest.mark.skipif("%" in fstr)
+        f.seek(0)
+        yaml = YAML(typ=["rt", "safe", "string"])
+        schema = kf.DSchema.model_validate(yaml.load(f))
+        for inst in schema.instances.values():
+            _ = inst.parent_schema.name
