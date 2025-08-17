@@ -571,14 +571,16 @@ def test_netlist_equivalent() -> None:
 @pytest.mark.parametrize(
     "path",
     [
-        pytest.param(file, marks=pytest.mark.skip)
+        pytest.param(
+            file, marks=pytest.mark.skip(reason="Incompatible gdsfactory schema")
+        )
         if file.with_suffix("").stem in skip_files
         else pytest.param(file)
         for file in yaml_files
     ],
     ids=lambda p: str(p.with_suffix("").stem),
 )
-def test_yaml_is_valid(path: Path) -> None:
+def test_gdsfactory_yaml(path: Path) -> None:
     with path.open(encoding="utf-8") as f:
         fstr = f.read()
         pytest.mark.skipif("%" in fstr)
