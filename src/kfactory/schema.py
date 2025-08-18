@@ -158,7 +158,7 @@ class SchemaInstance(
         return self._schema
 
     @property
-    def placement(self) -> Placement[TUnit] | None:
+    def placement(self) -> MirrorPlacement | Placement[TUnit] | None:
         return self.parent_schema.placements.get(self.name)
 
     def place(
@@ -198,8 +198,15 @@ class SchemaInstance(
             pref = PortArrayRef(
                 instance=self.name, port=port[0], ia=port[1], ib=port[2]
             )
-        conn = Connection[TUnit]((other, pref), mirror=mirror)
+        conn = Connection[TUnit]((other, pref))
         self.parent_schema.connections.append(conn)
+        if mirror:
+            if self.name in self.parent_schema.placements:
+                raise ValueError(
+                    f"Cannot apply mirror to instance {self.name}"
+                    " — placement already exists."
+                )
+            self.parent_schema.placements[self.name] = MirrorPlacement(mirror=True)
         return conn
 
 
@@ -277,26 +284,19 @@ class Link(RootModel[tuple[PortArrayRef | PortRef, PortArrayRef | PortRef]]):
         return self
 
 
-class Connection(BaseModel, Generic[TUnit], extra="forbid"):
-    ports: tuple[
-        Port[TUnit] | PortArrayRef | PortRef,
-        Port[TUnit] | PortArrayRef | PortRef,
+class Connection(
+    RootModel[
+        tuple[
+            Port[TUnit] | PortArrayRef | PortRef, Port[TUnit] | PortArrayRef | PortRef
+        ]
     ]
-    mirror: bool = False
-
-    @property
-    def root(
-        self,
-    ) -> tuple[
-        Port[TUnit] | PortArrayRef | PortRef,
-        Port[TUnit] | PortArrayRef | PortRef,
-    ]:
-        return self.ports
+):
+    root: tuple[PortArrayRef | PortRef | Port[TUnit], PortArrayRef | PortRef]
 
     @model_validator(mode="after")
     def _sort_data(self) -> Self:
-        self.ports = tuple(sorted(self.ports))  # type: ignore[assignment]
-        if isinstance(self.ports[1], Port):
+        self.root = tuple(sorted(self.root))  # type: ignore[assignment]
+        if isinstance(self.root[1], Port):
             raise TypeError(
                 "Two cell ports cannot be connected together. This would cause an "
                 "invalid netlist."
@@ -335,7 +335,9 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
     name: str | None = None
     dependencies: list[Path] = Field(default_factory=list)
     instances: dict[str, SchemaInstance[TUnit]] = Field(default_factory=dict)
-    placements: dict[str, Placement[TUnit]] = Field(default_factory=dict)
+    placements: dict[str, MirrorPlacement | Placement[TUnit]] = Field(
+        default_factory=dict
+    )
     connections: list[Connection[TUnit]] = Field(default_factory=list)
     routes: dict[str, Route[TUnit]] = Field(default_factory=dict)
     ports: dict[str, Port[TUnit] | PortRef | PortArrayRef] = Field(default_factory=dict)
@@ -756,7 +758,7 @@ def _place_islands(
     for inst in schema_island:
         schema_inst = schema_instances[inst]
         kinst = instances[inst]
-        if schema_inst.placement:
+        if schema_inst.placement and isinstance(schema_inst.placement, Placement):
             p = schema_inst.placement
             assert p is not None
             if p.is_placeable(placed_insts):
@@ -780,7 +782,7 @@ def _place_islands(
                             mirrx=p.mirror,
                             x=x + p.dx,
                             y=y + p.dy,
-                        )  # type: ignore[call-overload]
+                        )
                     )
                 else:
                     kinst.transform(
@@ -797,7 +799,9 @@ def _place_islands(
     while len(placed_insts) < target_length:
         placeable_insts = _get_placeable(placed_insts, connections)
 
-        _connect_instances(instances, placeable_insts, connections, placed_insts)
+        _connect_instances(
+            instances, placeable_insts, connections, placed_insts, schema_instances
+        )
         placed_insts |= placeable_insts
 
         if not placeable_insts:
@@ -811,6 +815,7 @@ def _connect_instances(
     place_insts: set[str],
     connections: dict[str, list[Connection[TUnit]]],
     placed_instances: set[str],
+    schema_instances: dict[str, SchemaInstance[TUnit]],
 ) -> None:
     for inst_name in place_insts:
         inst = instances[inst_name]
@@ -825,7 +830,9 @@ def _connect_instances(
                     conn.root[0].port,
                     instances[conn.root[1].instance],
                     conn.root[1].port,
-                    mirror=conn.mirror,
+                    mirror=getattr(
+                        schema_instances[inst_name].placement, "mirror", False
+                    ),
                     use_angle=True,
                     use_mirror=True,
                 )
@@ -835,7 +842,9 @@ def _connect_instances(
                     conn.root[1].port,
                     instances[conn.root[0].instance],
                     conn.root[0].port,
-                    mirror=conn.mirror,
+                    mirror=getattr(
+                        schema_instances[inst_name].placement, "mirror", False
+                    ),
                     use_angle=True,
                     use_mirror=True,
                 )
