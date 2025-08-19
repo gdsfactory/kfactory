@@ -545,50 +545,6 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
     def create_cell(self, output_type: type[KC]) -> KC:
         c = output_type(kcl=self.kcl)
 
-        instances: dict[str, ProtoTInstance[Any]] = {}
-
-        inst_: Instance | DInstance
-
-        # create instances
-        for inst in self.instances.values():
-            vec_class = kdb.Vector if isinstance(c, KCell) else kdb.DVector
-            if inst.array:
-                if isinstance(inst.array, RegularArray):
-                    a = vec_class(x=inst.array.column_pitch, y=0)  # type: ignore[call-overload]
-                    b = vec_class(x=0, y=inst.array.row_pitch)  # type: ignore[call-overload]
-                    na = inst.array.columns
-                    nb = inst.array.rows
-                else:
-                    a = vec_class(*inst.array.pitch_a)  # type: ignore[call-overload]
-                    b = vec_class(*inst.array.pitch_b)  # type: ignore[call-overload]
-                    na = inst.array.na
-                    nb = inst.array.nb
-                if inst.settings:
-                    inst_ = c.create_inst(
-                        inst.kcl.get_component(inst.component, **inst.settings),
-                        a=a,  # type: ignore[arg-type]
-                        b=b,  # type: ignore[arg-type]
-                        na=na,
-                        nb=nb,
-                    )
-                else:
-                    inst_ = c.create_inst(
-                        inst.kcl.get_component(inst.component),
-                        a=a,  # type: ignore[arg-type]
-                        b=b,  # type: ignore[arg-type]
-                        na=na,
-                        nb=nb,
-                    )
-            elif inst.settings:
-                inst_ = c.create_inst(
-                    inst.kcl.get_component(inst.component, **inst.settings)
-                )
-            else:
-                inst_ = c.create_inst(inst.kcl.get_component(inst.component))
-
-            inst_.name = inst.name
-            instances[inst.name] = inst_
-
         # calculate islands -- islands are a bunch of directly connected instances and
         # must be isolated from other islands either through no connection at all or
         # routes
@@ -624,8 +580,10 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                         islands[instance_name] = island
 
         for inst_name in self.instances:
-            if inst.name not in islands:
+            if inst_name not in islands:
                 islands[inst_name] = {inst_name}
+
+        instances: dict[str, ProtoTInstance[Any]] = {}
         placed_islands: list[set[str]] = []
         placed_insts: set[str] = set()
         for island in islands.values():
@@ -743,6 +701,54 @@ class DSchema(TSchema[um]):
     """Schema with a base unit of um for placements."""
 
 
+def _create_kinst(
+    c: ProtoTKCell[TUnit],
+    schema_inst: SchemaInstance[TUnit],
+) -> ProtoTInstance[TUnit]:
+    kinst: Instance | DInstance
+
+    vec_class = kdb.Vector if isinstance(c, KCell) else kdb.DVector
+    if schema_inst.array:
+        if isinstance(schema_inst.array, RegularArray):
+            a = vec_class(x=schema_inst.array.column_pitch, y=0)
+            b = vec_class(x=0, y=schema_inst.array.row_pitch)
+            na = schema_inst.array.columns
+            nb = schema_inst.array.rows
+        else:
+            a = vec_class(*schema_inst.array.pitch_a)
+            b = vec_class(*schema_inst.array.pitch_b)
+            na = schema_inst.array.na
+            nb = schema_inst.array.nb
+        if schema_inst.settings:
+            kinst = c.create_inst(
+                schema_inst.kcl.get_component(
+                    schema_inst.component, **schema_inst.settings
+                ),
+                a=a,  # type: ignore[arg-type]
+                b=b,  # type: ignore[arg-type]
+                na=na,
+                nb=nb,
+            )
+        else:
+            kinst = c.create_inst(
+                schema_inst.kcl.get_component(schema_inst.component),
+                a=a,  # type: ignore[arg-type]
+                b=b,  # type: ignore[arg-type]
+                na=na,
+                nb=nb,
+            )
+    elif schema_inst.settings:
+        kinst = c.create_inst(
+            schema_inst.kcl.get_component(schema_inst.component, **schema_inst.settings)
+        )
+    else:
+        kinst = c.create_inst(schema_inst.kcl.get_component(schema_inst.component))
+    kinst.name = schema_inst.name
+    kinst.is_mirrored = schema_inst.placement.mirror if schema_inst.placement else False  # type: ignore[attr-defined]
+
+    return kinst
+
+
 def _place_islands(
     c: ProtoTKCell[TUnit],
     schema_island: set[str],
@@ -757,7 +763,8 @@ def _place_islands(
 
     for inst in schema_island:
         schema_inst = schema_instances[inst]
-        kinst = instances[inst]
+        kinst = _create_kinst(c, schema_inst)
+        instances[inst] = kinst
         if schema_inst.placement and isinstance(schema_inst.placement, Placement):
             p = schema_inst.placement
             assert p is not None
@@ -794,14 +801,12 @@ def _place_islands(
                             y=y + p.dy,
                         )
                     )
-            placed_insts.add(inst)
+                placed_insts.add(inst)
 
     while len(placed_insts) < target_length:
         placeable_insts = _get_placeable(placed_insts, connections)
 
-        _connect_instances(
-            instances, placeable_insts, connections, placed_insts, schema_instances
-        )
+        _connect_instances(instances, placeable_insts, connections, placed_insts)
         placed_insts |= placeable_insts
 
         if not placeable_insts:
@@ -815,7 +820,6 @@ def _connect_instances(
     place_insts: set[str],
     connections: dict[str, list[Connection[TUnit]]],
     placed_instances: set[str],
-    schema_instances: dict[str, SchemaInstance[TUnit]],
 ) -> None:
     for inst_name in place_insts:
         inst = instances[inst_name]
@@ -830,11 +834,9 @@ def _connect_instances(
                     conn.root[0].port,
                     instances[conn.root[1].instance],
                     conn.root[1].port,
-                    mirror=getattr(
-                        schema_instances[inst_name].placement, "mirror", False
-                    ),
+                    mirror=inst.is_mirrored,
                     use_angle=True,
-                    use_mirror=True,
+                    use_mirror=False,
                 )
                 break
             if conn.root[0].instance in placed_instances:
@@ -842,11 +844,9 @@ def _connect_instances(
                     conn.root[1].port,
                     instances[conn.root[0].instance],
                     conn.root[0].port,
-                    mirror=getattr(
-                        schema_instances[inst_name].placement, "mirror", False
-                    ),
+                    mirror=inst.is_mirrored,
                     use_angle=True,
-                    use_mirror=True,
+                    use_mirror=False,
                 )
                 break
         else:
