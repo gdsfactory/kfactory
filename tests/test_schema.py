@@ -147,6 +147,106 @@ def test_schema_create_cell() -> None:
         return schema
 
 
+def test_schema_mirror_connection() -> None:
+    layers = Layers()
+    pdk = kf.KCLayout("SCHEMA_PDK_DECORATOR", infos=Layers)
+
+    @pdk.cell
+    def straight(length: int) -> kf.KCell:
+        c = pdk.kcell()
+        c.shapes(layers.WG).insert(kf.kdb.Box(0, -250, length, 250))
+        c.create_port(
+            name="o1",
+            width=500,
+            trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=0),
+            layer_info=layers.WG,
+        )
+        c.create_port(
+            name="o2",
+            width=500,
+            trans=kf.kdb.Trans(x=length, y=0),
+            layer_info=layers.WG,
+        )
+
+        return c
+
+    @pdk.cell
+    def bend_s_euler(
+        offset: int,
+        radius: int = 10_000,
+        resolution: float = 150,
+    ) -> kf.KCell:
+        c = pdk.kcell()
+
+        width = 500
+
+        backbone = kf.factories.euler.euler_sbend_points(
+            offset=pdk.to_um(offset),
+            radius=pdk.to_um(radius),
+            resolution=resolution,
+        )
+        center_path = kf.enclosure.extrude_path(
+            target=c,
+            layer=pdk.infos["WG"],
+            path=backbone,
+            width=pdk.to_um(width),
+            start_angle=0,
+            end_angle=0,
+        )
+
+        v = backbone[-1] - backbone[0]
+        if v.x < 0:
+            p1 = c.kcl.to_dbu(backbone[-1])
+            p2 = c.kcl.to_dbu(backbone[0])
+        else:
+            p1 = c.kcl.to_dbu(backbone[0])
+            p2 = c.kcl.to_dbu(backbone[-1])
+        li = c.kcl.layer(pdk.infos["WG"])
+        c.create_port(
+            trans=kf.kdb.Trans(2, False, p1.to_v()),
+            width=width,
+            port_type="optical",
+            layer=li,
+        )
+        c.create_port(
+            trans=kf.kdb.Trans(0, False, p2.to_v()),
+            width=width,
+            port_type="optical",
+            layer=li,
+        )
+        c.boundary = center_path
+
+        c.auto_rename_ports()
+        return c
+
+    @pdk.schematic_cell()
+    def straight_sbend(length: int, offset: int) -> kf.schema.TSchema[int]:
+        schema = kf.Schema(kcl=pdk, name="Mirror Test")
+
+        s1 = schema.create_inst(
+            name="s1", component="straight", settings={"length": length}
+        )
+        s2 = schema.create_inst(
+            name="s2", component="bend_s_euler", settings={"offset": offset}
+        )
+        s3 = schema.create_inst(
+            name="s3", component="straight", settings={"length": length}
+        )
+        s4 = schema.create_inst(
+            name="s4", component="bend_s_euler", settings={"offset": offset}
+        )
+
+        s2.connect("o1", s1["o2"], mirror=True)
+        s4.connect("o1", s3["o2"])
+
+        s1.place(x=0, y=0)
+        s3.place(x=0, y=10_000)
+
+        return schema
+
+    straight_sbend(length=10_000, offset=20_000)
+
+
 def test_schema_kcl_mix_netlist() -> None:
     layers = Layers()
     pdk = kf.KCLayout("SCHEMA_PDK_DECORATOR", infos=Layers)
