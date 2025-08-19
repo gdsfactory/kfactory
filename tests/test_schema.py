@@ -244,7 +244,7 @@ def test_schema_mirror_connection() -> None:
 
         return schema
 
-    straight_sbend(length=10_000, offset=20_000).show()
+    straight_sbend(length=10_000, offset=20_000)
 
 
 def test_schema_kcl_mix_netlist() -> None:
