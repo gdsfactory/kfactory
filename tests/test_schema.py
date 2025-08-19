@@ -187,7 +187,7 @@ def test_schema_mirror_connection() -> None:
         )
         center_path = kf.enclosure.extrude_path(
             target=c,
-            layer=pdk.infos.WG,
+            layer=pdk.infos["WG"],
             path=backbone,
             width=pdk.to_um(width),
             start_angle=0,
@@ -201,7 +201,7 @@ def test_schema_mirror_connection() -> None:
         else:
             p1 = c.kcl.to_dbu(backbone[0])
             p2 = c.kcl.to_dbu(backbone[-1])
-        li = c.kcl.layer(pdk.infos.WG)
+        li = c.kcl.layer(pdk.infos["WG"])
         c.create_port(
             trans=kf.kdb.Trans(2, False, p1.to_v()),
             width=width,
@@ -221,7 +221,7 @@ def test_schema_mirror_connection() -> None:
 
     @pdk.schematic_cell()
     def straight_sbend(length: int, offset: int) -> kf.schema.TSchema[int]:
-        schema = kf.Schema(kcl=pdk)
+        schema = kf.Schema(kcl=pdk, name="Mirror Test")
 
         s1 = schema.create_inst(
             name="s1", component="straight", settings={"length": length}
@@ -229,14 +229,22 @@ def test_schema_mirror_connection() -> None:
         s2 = schema.create_inst(
             name="s2", component="bend_s_euler", settings={"offset": offset}
         )
+        s3 = schema.create_inst(
+            name="s3", component="straight", settings={"length": length}
+        )
+        s4 = schema.create_inst(
+            name="s4", component="bend_s_euler", settings={"offset": offset}
+        )
 
         s2.connect("o1", s1["o2"], mirror=True)
+        s4.connect("o1", s3["o2"])
 
         s1.place(x=0, y=0)
+        s3.place(x=0, y=10_000)
 
         return schema
 
-    straight_sbend(length=10_000, offset=20_000)
+    straight_sbend(length=10_000, offset=20_000).show()
 
 
 def test_schema_kcl_mix_netlist() -> None:
