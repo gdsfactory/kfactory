@@ -35,7 +35,7 @@ from pydantic import (
 from ruamel.yaml import YAML
 
 from . import kdb
-from .conf import PROPID
+from .conf import PROPID, logger
 from .kcell import DKCell, KCell, ProtoTKCell
 from .layout import KCLayout, get_default_kcl, kcls
 from .netlist import Net, Netlist, NetlistInstance, NetlistPort, PortArrayRef, PortRef
@@ -78,8 +78,8 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
     dx: TUnit = cast("TUnit", 0)
     y: TUnit | PortRef | PortArrayRef = cast("TUnit", 0)
     dy: TUnit = cast("TUnit", 0)
-    orientation: Literal[0, 90, 180, 270] = 0
-    origin: str | tuple[TUnit, TUnit] | None = None
+    orientation: float = 0
+    port: str | None = None
 
     @model_validator(mode="after")
     def _require_absolute_or_relative(self) -> Self:
@@ -167,7 +167,7 @@ class SchemaInstance(
         return self._schema
 
     @property
-    def placement(self) -> Placement[TUnit] | None:
+    def placement(self) -> MirrorPlacement | Placement[TUnit] | None:
         return self.parent_schema.placements.get(self.name)
 
     def place(
@@ -196,7 +196,10 @@ class SchemaInstance(
         return PortArrayRef(instance=self.name, port=value[0], ia=value[1], ib=value[2])
 
     def connect(
-        self, port: str | tuple[str, int, int], other: Port[TUnit] | PortRef
+        self,
+        port: str | tuple[str, int, int],
+        other: Port[TUnit] | PortRef,
+        mirror: bool = False,
     ) -> Connection[TUnit]:
         if isinstance(port, str):
             pref = PortRef(instance=self.name, port=port)
@@ -206,6 +209,13 @@ class SchemaInstance(
             )
         conn = Connection[TUnit]((other, pref))
         self.parent_schema.connections.append(conn)
+        if mirror:
+            if self.name in self.parent_schema.placements:
+                raise ValueError(
+                    f"Cannot apply mirror to instance {self.name}"
+                    " — placement already exists."
+                )
+            self.parent_schema.placements[self.name] = MirrorPlacement(mirror=True)
         return conn
 
 
@@ -225,6 +235,8 @@ class Route(BaseModel, Generic[TUnit], extra="forbid"):
                 [tuple(str(k).split(",")), tuple(str(v).split(","))]
                 for k, v in links.items()
             ]
+        if "settings" not in data:
+            data["settings"] = {}
         return data
 
 
@@ -270,6 +282,9 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
         if isinstance(self.y, PortRef):
             placeable = placeable and self.y.instance in placed_instances
         return placeable
+
+    def __str__(self) -> str:
+        return f"CellPort[{self.name!r}]"
 
     def as_call(self) -> str:
         port_str = f"x={self.x}, y={self.y}"
@@ -353,7 +368,9 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
     name: str | None = None
     dependencies: list[Path] = Field(default_factory=list)
     instances: dict[str, SchemaInstance[TUnit]] = Field(default_factory=dict)
-    placements: dict[str, Placement[TUnit]] = Field(default_factory=dict)
+    placements: dict[str, MirrorPlacement | Placement[TUnit]] = Field(
+        default_factory=dict
+    )
     connections: list[Connection[TUnit]] = Field(default_factory=list)
     routes: dict[str, Route[TUnit]] = Field(default_factory=dict)
     ports: dict[str, Port[TUnit] | PortRef | PortArrayRef] = Field(default_factory=dict)
@@ -568,50 +585,6 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
     def create_cell(self, output_type: type[KC]) -> KC:
         c = output_type(kcl=self.kcl)
 
-        instances: dict[str, ProtoTInstance[Any]] = {}
-
-        inst_: Instance | DInstance
-
-        # create instances
-        for inst in self.instances.values():
-            vec_class = kdb.Vector if isinstance(c, KCell) else kdb.DVector
-            if inst.array:
-                if isinstance(inst.array, RegularArray):
-                    a = vec_class(x=inst.array.column_pitch, y=0)  # type: ignore[call-overload]
-                    b = vec_class(x=0, y=inst.array.row_pitch)  # type: ignore[call-overload]
-                    na = inst.array.columns
-                    nb = inst.array.rows
-                else:
-                    a = vec_class(*inst.array.pitch_a)  # type: ignore[call-overload]
-                    b = vec_class(*inst.array.pitch_b)  # type: ignore[call-overload]
-                    na = inst.array.na
-                    nb = inst.array.nb
-                if inst.settings:
-                    inst_ = c.create_inst(
-                        inst.kcl.get_component(inst.component, **inst.settings),
-                        a=a,  # type: ignore[arg-type]
-                        b=b,  # type: ignore[arg-type]
-                        na=na,
-                        nb=nb,
-                    )
-                else:
-                    inst_ = c.create_inst(
-                        inst.kcl.get_component(inst.component),
-                        a=a,  # type: ignore[arg-type]
-                        b=b,  # type: ignore[arg-type]
-                        na=na,
-                        nb=nb,
-                    )
-            elif inst.settings:
-                inst_ = c.create_inst(
-                    inst.kcl.get_component(inst.component, **inst.settings)
-                )
-            else:
-                inst_ = c.create_inst(inst.kcl.get_component(inst.component))
-
-            inst_.name = inst.name
-            instances[inst.name] = inst_
-
         # calculate islands -- islands are a bunch of directly connected instances and
         # must be isolated from other islands either through no connection at all or
         # routes
@@ -647,11 +620,21 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                         islands[instance_name] = island
 
         for inst_name in self.instances:
-            if inst.name not in islands:
+            if inst_name not in islands:
                 islands[inst_name] = {inst_name}
+
+        instances: dict[str, ProtoTInstance[Any]] = {}
         placed_islands: list[set[str]] = []
         placed_insts: set[str] = set()
+        seen_islands: set[int] = set()
+        unique_islands: list[set[str]] = []
         for island in islands.values():
+            island_id = id(island)
+            if island_id not in seen_islands:
+                seen_islands.add(island_id)
+                unique_islands.append(island)
+        for i, island in enumerate(unique_islands):
+            logger.debug("Placing island {} of schema {}, {}", i, self.name, island)
             if island not in placed_islands:
                 _place_islands(
                     c,
@@ -713,8 +696,8 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
             )
 
         # verify connections
-        port_connection_errors: list[Connection[TUnit]] = []
-        connection_errors: list[Connection[TUnit]] = []
+        port_connection_transformation_errors: list[Connection[TUnit]] = []
+        connection_transformation_errors: list[Connection[TUnit]] = []
         for conn in self.connections:
             c1 = conn.root[0]
             c2 = conn.root[1]
@@ -722,7 +705,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                 p1 = c.ports[c1.name]
                 p2 = c.insts[c2.instance].ports[c2.port]
                 if p1.dcplx_trans != p2.dcplx_trans:
-                    port_connection_errors.append(conn)
+                    port_connection_transformation_errors.append(conn)
             else:
                 if isinstance(c1, PortArrayRef):
                     p1 = c.insts[c1.instance].ports[c1.port, c1.ia, c1.ib]
@@ -735,8 +718,19 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
 
                 t1 = p1.dcplx_trans
                 t2 = p2.dcplx_trans
-                if t1 * kdb.DCplxTrans.R180 != t2 or t1 * kdb.DCplxTrans.M90:
-                    connection_errors.append(conn)
+                if (t1 != t2 * kdb.DCplxTrans.R180) and (t1 != t2 * kdb.DCplxTrans.M90):
+                    connection_transformation_errors.append(conn)
+
+        if connection_transformation_errors or port_connection_transformation_errors:
+            raise ValueError(
+                f"Not all connections in schema {self.name}"
+                " could be satisfied. Missing or wrong connections:\n"
+                + "\n".join(
+                    f"{conn.root[0]} - {conn.root[1]}"
+                    for conn in connection_transformation_errors
+                    + port_connection_transformation_errors
+                )
+            )
 
         return c
 
@@ -970,6 +964,54 @@ class DSchema(TSchema[um]):
     """Schema with a base unit of um for placements."""
 
 
+def _create_kinst(
+    c: ProtoTKCell[TUnit],
+    schema_inst: SchemaInstance[TUnit],
+) -> ProtoTInstance[TUnit]:
+    kinst: Instance | DInstance
+
+    vec_class = kdb.Vector if isinstance(c, KCell) else kdb.DVector
+    if schema_inst.array:
+        if isinstance(schema_inst.array, RegularArray):
+            a = vec_class(x=schema_inst.array.column_pitch, y=0)
+            b = vec_class(x=0, y=schema_inst.array.row_pitch)
+            na = schema_inst.array.columns
+            nb = schema_inst.array.rows
+        else:
+            a = vec_class(*schema_inst.array.pitch_a)
+            b = vec_class(*schema_inst.array.pitch_b)
+            na = schema_inst.array.na
+            nb = schema_inst.array.nb
+        if schema_inst.settings:
+            kinst = c.create_inst(
+                schema_inst.kcl.get_component(
+                    schema_inst.component, **schema_inst.settings
+                ),
+                a=a,  # type: ignore[arg-type]
+                b=b,  # type: ignore[arg-type]
+                na=na,
+                nb=nb,
+            )
+        else:
+            kinst = c.create_inst(
+                schema_inst.kcl.get_component(schema_inst.component),
+                a=a,  # type: ignore[arg-type]
+                b=b,  # type: ignore[arg-type]
+                na=na,
+                nb=nb,
+            )
+    elif schema_inst.settings:
+        kinst = c.create_inst(
+            schema_inst.kcl.get_component(schema_inst.component, **schema_inst.settings)
+        )
+    else:
+        kinst = c.create_inst(schema_inst.kcl.get_component(schema_inst.component))
+    kinst.name = schema_inst.name
+    kinst.is_mirrored = schema_inst.placement.mirror if schema_inst.placement else False  # type: ignore[attr-defined]
+
+    return kinst
+
+
 def _place_islands(
     c: ProtoTKCell[TUnit],
     schema_island: set[str],
@@ -984,50 +1026,58 @@ def _place_islands(
 
     for inst in schema_island:
         schema_inst = schema_instances[inst]
-        kinst = instances[inst]
+        kinst = _create_kinst(c, schema_inst)
+        instances[inst] = kinst
         if schema_inst.placement:
-            p = schema_inst.placement
-            assert p is not None
-            if p.is_placeable(placed_insts):
-                x = (
-                    instances[p.x.instance].ports[p.x.port].x
-                    if isinstance(p.x, PortRef)
-                    else p.x
-                )
-                y = (
-                    instances[p.y.instance].ports[p.y.port].y
-                    if isinstance(p.y, PortRef)
-                    else p.y
-                )
-
-                st = kinst._standard_trans()
-                if st is kdb.Trans or st is kdb.ICplxTrans:
-                    kinst.transform(
-                        kdb.ICplxTrans(
-                            mag=1,
-                            rot=p.orientation,
-                            mirrx=p.mirror,
-                            x=x + p.dx,
-                            y=y + p.dy,
-                        )  # type: ignore[call-overload]
+            if isinstance(schema_inst.placement, Placement):
+                logger.debug("Placing {}", schema_inst.name)
+                p = schema_inst.placement
+                assert p is not None
+                if p.is_placeable(placed_insts):
+                    x = (
+                        instances[p.x.instance].ports[p.x.port].x
+                        if isinstance(p.x, PortRef)
+                        else p.x
                     )
-                else:
-                    kinst.transform(
-                        kdb.DCplxTrans(
-                            mag=1,
-                            rot=p.orientation,
-                            mirrx=p.mirror,
-                            x=x + p.dx,
-                            y=y + p.dy,
+                    y = (
+                        instances[p.y.instance].ports[p.y.port].y
+                        if isinstance(p.y, PortRef)
+                        else p.y
+                    )
+
+                    st = kinst._standard_trans()
+                    if st is kdb.Trans or st is kdb.ICplxTrans:
+                        kinst.transform(
+                            kdb.ICplxTrans(
+                                mag=1,
+                                rot=p.orientation,
+                                mirrx=p.mirror,
+                                x=x + p.dx,
+                                y=y + p.dy,
+                            )
                         )
-                    )
-            placed_insts.add(inst)
+                    else:
+                        kinst.transform(
+                            kdb.DCplxTrans(
+                                mag=1,
+                                rot=p.orientation,
+                                mirrx=p.mirror,
+                                x=x + p.dx,
+                                y=y + p.dy,
+                            )
+                        )
+                    placed_insts.add(inst)
+            else:
+                kinst.transform(kdb.Trans.M0)
 
-    while len(placed_insts) < target_length:
+    placed_island_insts = placed_insts & schema_island
+
+    while len(placed_island_insts) < target_length:
         placeable_insts = _get_placeable(placed_insts, connections)
 
         _connect_instances(instances, placeable_insts, connections, placed_insts)
         placed_insts |= placeable_insts
+        placed_island_insts |= placeable_insts
 
         if not placeable_insts:
             raise ValueError("Could not place all instances.")

@@ -1,10 +1,27 @@
 from collections.abc import Sequence
+from pathlib import Path
 from typing import Any
 
+import pytest
 from ruamel.yaml import YAML
 
 import kfactory as kf
 from tests.conftest import Layers
+
+# Find all YAML files
+yaml_dir = Path(__file__).parent / "gdsfactory-yaml-pics" / "notebooks" / "yaml_pics"
+yaml_files = sorted(yaml_dir.glob("**/*.pic.yml"))
+skip_files = [
+    "aar_bundles02",
+    "aar_bundles01",
+    "aar_bundles03",
+    "mzi_lattice_filter",
+    "mirror_demo",
+]
+
+
+def _get_path_stem(p: Path) -> str:
+    return p.with_suffix("").stem
 
 
 def test_schema() -> None:
@@ -47,14 +64,13 @@ routes:
 ports:
   o1: mmi_short,o2
   o2: mmi_short,o3
-"""
+"""  # noqa: E501
     schema = kf.DSchema.model_validate(yaml.load(schema_yaml))
     for inst in schema.instances.values():
         _ = inst.parent_schema.name
 
     schema_str = schema.as_schematic_cell(tunit="int")
-
-    print(schema_str)
+    assert schema_str is not None
 
 
 def test_schema_create() -> None:
@@ -137,6 +153,160 @@ def test_schema_create_cell() -> None:
         s1.place(x=1000, y=10_000)
 
         return schema
+
+
+def test_schema_mirror_connection() -> None:
+    layers = Layers()
+    pdk = kf.KCLayout("SCHEMA_PDK_DECORATOR", infos=Layers)
+
+    @pdk.cell
+    def straight(length: int) -> kf.KCell:
+        c = pdk.kcell()
+        c.shapes(layers.WG).insert(kf.kdb.Box(0, -250, length, 250))
+        c.create_port(
+            name="o1",
+            width=500,
+            trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=0),
+            layer_info=layers.WG,
+        )
+        c.create_port(
+            name="o2",
+            width=500,
+            trans=kf.kdb.Trans(x=length, y=0),
+            layer_info=layers.WG,
+        )
+
+        return c
+
+    @pdk.cell
+    def bend_s_euler(
+        offset: int,
+        radius: int = 10_000,
+        resolution: float = 150,
+    ) -> kf.KCell:
+        c = pdk.kcell()
+
+        width = 500
+
+        backbone = kf.factories.euler.euler_sbend_points(
+            offset=pdk.to_um(offset),
+            radius=pdk.to_um(radius),
+            resolution=resolution,
+        )
+        center_path = kf.enclosure.extrude_path(
+            target=c,
+            layer=pdk.infos["WG"],
+            path=backbone,
+            width=pdk.to_um(width),
+            start_angle=0,
+            end_angle=0,
+        )
+
+        v = backbone[-1] - backbone[0]
+        if v.x < 0:
+            p1 = c.kcl.to_dbu(backbone[-1])
+            p2 = c.kcl.to_dbu(backbone[0])
+        else:
+            p1 = c.kcl.to_dbu(backbone[0])
+            p2 = c.kcl.to_dbu(backbone[-1])
+        li = c.kcl.layer(pdk.infos["WG"])
+        c.create_port(
+            trans=kf.kdb.Trans(2, False, p1.to_v()),
+            width=width,
+            port_type="optical",
+            layer=li,
+        )
+        c.create_port(
+            trans=kf.kdb.Trans(0, False, p2.to_v()),
+            width=width,
+            port_type="optical",
+            layer=li,
+        )
+        c.boundary = center_path
+
+        c.auto_rename_ports()
+        return c
+
+    @pdk.schematic_cell()
+    def straight_sbend(length: int, offset: int) -> kf.schema.TSchema[int]:
+        schema = kf.Schema(kcl=pdk, name="Mirror Test")
+
+        s1 = schema.create_inst(
+            name="s1", component="straight", settings={"length": length}
+        )
+        s2 = schema.create_inst(
+            name="s2", component="bend_s_euler", settings={"offset": offset}
+        )
+        s3 = schema.create_inst(
+            name="s3", component="straight", settings={"length": length}
+        )
+        s4 = schema.create_inst(
+            name="s4", component="bend_s_euler", settings={"offset": offset}
+        )
+
+        s2.connect("o1", s1["o2"], mirror=True)
+        s4.connect("o1", s3["o2"])
+
+        s1.place(x=0, y=0)
+        s3.place(x=0, y=10_000)
+
+        return schema
+
+    straight_sbend(length=10_000, offset=20_000)
+
+
+def test_schema_kcl_mix_netlist() -> None:
+    layers = Layers()
+    pdk = kf.KCLayout("SCHEMA_PDK_DECORATOR", infos=Layers)
+    pdk2 = kf.KCLayout("SCHEMA_PDK_DECORATOR_2", infos=Layers)
+
+    @pdk.cell
+    def straight(length: int) -> kf.KCell:
+        c = pdk.kcell()
+        c.shapes(layers.WG).insert(kf.kdb.Box(0, -250, length, 250))
+        c.create_port(
+            name="o1",
+            width=500,
+            trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=0),
+            layer_info=layers.WG,
+        )
+        c.create_port(
+            name="o2",
+            width=500,
+            trans=kf.kdb.Trans(x=length, y=0),
+            layer_info=layers.WG,
+        )
+
+        return c
+
+    @pdk2.schematic_cell()
+    def long_straight(n: int) -> kf.schema.TSchema[int]:
+        schema = kf.Schema(kcl=pdk2)
+
+        s1 = schema.create_inst(
+            name="s1",
+            component="straight",
+            settings={"length": 5000},
+            kcl=pdk,
+        )
+        s2 = schema.create_inst(
+            name="s2",
+            component="straight",
+            settings={"length": 5000},
+            kcl=pdk,
+        )
+        s3 = schema.create_inst(
+            name="s3", component="straight", settings={"length": n}, kcl=pdk
+        )
+
+        s3.connect("o1", s1["o2"])
+        s2.connect("o1", s3["o2"])
+
+        s1.place(x=1000, y=10_000)
+
+        return schema
+
+    long_straight(n=2000).netlist()
 
 
 def test_schema_route() -> None:
@@ -512,4 +682,27 @@ def test_netlist_equivalent() -> None:
 
     schema_str = schema.as_schematic_cell(tunit="int")
 
-    print(schema_str)
+    assert schema_str is not None
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param(
+            file, marks=pytest.mark.skip(reason="Incompatible gdsfactory schema")
+        )
+        if file.with_suffix("").stem in skip_files
+        else pytest.param(file)
+        for file in yaml_files
+    ],
+    ids=lambda p: _get_path_stem,
+)
+def test_gdsfactory_yaml(path: Path) -> None:
+    with path.open(encoding="utf-8") as f:
+        fstr = f.read()
+        pytest.mark.skipif("%" in fstr)
+        f.seek(0)
+        yaml = YAML(typ=["rt", "safe", "string"])
+        schema = kf.DSchema.model_validate(yaml.load(f))
+        for inst in schema.instances.values():
+            _ = inst.parent_schema.name

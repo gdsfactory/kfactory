@@ -1,11 +1,11 @@
-# KFactory 1.12.2
+# KFactory 1.12.4
 
 [![codecov](https://codecov.io/gh/gdsfactory/kfactory/graph/badge.svg?token=dArcfnQE4w)](https://codecov.io/gh/gdsfactory/kfactory)
 
 Kfactory is the backend for [gdsfactory](https://github.com/gdsfactory/gdsfactory). It is built upon [KLayout](https://klayout.de).
 It offers basic operations like gdsfactory, so it can be used on its own as as layout tool as well.
 
-It is recommended to pin the version of KFactory in `requirements.txt` or `pyproject.toml` with `kfactory==1.12.2` for example.
+It is recommended to pin the version of KFactory in `requirements.txt` or `pyproject.toml` with `kfactory==1.12.4` for example.
 
 Features similar to gdsfactory:
 
@@ -17,12 +17,11 @@ Features similar to gdsfactory:
 - [x] PDK/package configuration
 - [x] Plugin system (simulations etc.) - Check [kplugins](https://github.com/gdsfactory/kplugins)
 - [x] Generic PDK example - Check [kgeneric](https://github.com/gdsfactory/kgeneric)
-
+- [x] CrossSection
+- [x] Netlist/Schematics and LVS
 
 Notable missing Features:
 
-- [ ] CrossSection
-- [ ] Netlist/Schematics and LVS
 - [ ] More advanced routing
 
 
