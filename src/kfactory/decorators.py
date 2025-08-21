@@ -172,15 +172,22 @@ def _check_instances(
     match check_instances:
         case CheckInstances.RAISE:
             if any(inst.is_complex() for inst in cell.each_inst()):
+                instance_names = [
+                    inst.name for inst in cell.each_inst() if inst.is_complex()
+                ]
+                cell_names = [
+                    inst.cell.name for inst in cell.each_inst() if inst.is_complex()
+                ]
+                affected = "\n".join(
+                    f"Instance name: {iname}, Cell name: {cname}"
+                    for iname, cname in zip(instance_names, cell_names, strict=True)
+                )
                 raise ValueError(
                     "Found off-grid instances, which is not allowed in most "
                     "foundries.\n"
                     "Please run c.flatten() before returning "
                     "or add use @cell(check_instances=False).\n"
-                    "Cellnames of instances affected by this: "
-                    + "\n".join(
-                        inst.cell.name for inst in cell.each_inst() if inst.is_complex()
-                    )
+                    f"Cellnames of instances affected by this:\n{affected}"
                 )
         case CheckInstances.FLATTEN:
             if any(inst.is_complex() for inst in cell.each_inst()):
