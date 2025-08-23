@@ -1841,7 +1841,12 @@ def vec_dir(vec: kdb.Vector) -> int:
         case (0, y) if y < 0:
             return 3
         case _:
-            raise ValueError(f"Non-manhattan vectors aren't supported {vec}")
+            raise ValueError(
+                f"Non-manhattan vectors aren't supported: {vec}.\n"
+                f"Waypoint vectors must be axis-aligned (either x=0 or y=0).\n"
+                f"Consider adjusting waypoints to ensure each segment is either horizontal or vertical.\n"
+                f"Tip: Try changing one coordinate at a time between waypoints."
+            )
 
 
 def _sort_routers(routers: Sequence[ManhattanRouter]) -> Sequence[ManhattanRouter]:
