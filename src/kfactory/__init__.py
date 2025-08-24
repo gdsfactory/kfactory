@@ -30,7 +30,14 @@ from .instance import Instance, DInstance, VInstance
 from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
 from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
 from .netlist import Netlist
-from .schematic import Schematic, DSchematic, get_schematic, read_schematic
+from .schematic import (
+    Schematic,
+    DSchematic,
+    get_schematic,
+    read_schematic,
+    Schema,
+    DSchema,
+)
 from .instances import Instances, DInstances, VInstances
 from .settings import KCellSettings, Info
 from .layout import Constants, KCLayout, cell, vcell, kcl, kcls
@@ -60,7 +67,7 @@ from . import (
     conf,
     layer,
     layout,
-    schema,
+    schematic,
 )
 from .routing.generic import ManhattanRoute
 from .typings import dbu  # noqa: F401
@@ -84,6 +91,7 @@ __all__ = [
     "DPins",
     "DPort",
     "DPorts",
+    "DSchema",
     "DSchematic",
     "Info",
     "Instance",
@@ -106,6 +114,7 @@ __all__ = [
     "ProtoPin",
     "ProtoPort",
     "ProtoTKCell",
+    "Schema",
     "Schematic",
     "SymmetricalCrossSection",
     "VInstance",
@@ -147,7 +156,7 @@ __all__ = [
     "routing",
     "save_layout_options",
     "save_session",
-    "schema",
+    "schematic",
     "show",
     "technology",
     "typings",

@@ -161,14 +161,14 @@ class SchematicInstance(
         return kcl.name
 
     @property
-    def parent_schema(self) -> TSchematic[TUnit]:
+    def parent_schematic(self) -> TSchematic[TUnit]:
         if self._schema is None:
             raise RuntimeError("Schematic instance has no parent set.")
         return self._schema
 
     @property
     def placement(self) -> MirrorPlacement | Placement[TUnit] | None:
-        return self.parent_schema.placements.get(self.name)
+        return self.parent_schematic.placements.get(self.name)
 
     def place(
         self,
@@ -183,7 +183,7 @@ class SchematicInstance(
         placement = Placement[TUnit](
             x=x, y=y, dx=dx, dy=dy, orientation=orientation, mirror=mirror, port=port
         )
-        self.parent_schema.placements[self.name] = placement
+        self.parent_schematic.placements[self.name] = placement
         return placement
 
     @overload
@@ -209,14 +209,14 @@ class SchematicInstance(
                 instance=self.name, port=port[0], ia=port[1], ib=port[2]
             )
         conn = Connection[TUnit]((other, pref))
-        self.parent_schema.connections.append(conn)
+        self.parent_schematic.connections.append(conn)
         if mirror:
-            if self.name in self.parent_schema.placements:
+            if self.name in self.parent_schematic.placements:
                 raise ValueError(
                     f"Cannot apply mirror to instance {self.name}"
                     " — placement already exists."
                 )
-            self.parent_schema.placements[self.name] = MirrorPlacement(mirror=True)
+            self.parent_schematic.placements[self.name] = MirrorPlacement(mirror=True)
         return conn
 
 
@@ -970,6 +970,28 @@ class Schematic(TSchematic[dbu]):
 
 class DSchematic(TSchematic[um]):
     """Schematic with a base unit of um for placements."""
+
+
+class Schema(Schematic):
+    """Schematic with a base unit of dbu for placements."""
+
+    def __init__(self, **data: Any) -> None:
+        logger.warning(
+            "Schema is deprecated, please use Schematic. "
+            "It will be removed in kfactory 2.0"
+        )
+        super().__init__(**data)
+
+
+class DSchema(DSchematic):
+    """Schematic with a base unit of um for placements."""
+
+    def __init__(self, **data: Any) -> None:
+        logger.warning(
+            "DSchema is deprecated, please use DSchematic. "
+            "It will be removed in kfactory 2.0"
+        )
+        super().__init__(**data)
 
 
 def _create_kinst(
