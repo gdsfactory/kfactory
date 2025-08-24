@@ -47,7 +47,7 @@ if TYPE_CHECKING:
     from .instance import DInstance, Instance, ProtoTInstance
     from .port import ProtoPort
 
-__all__ = ["DSchema", "Schema", "read_schema"]
+__all__ = ["DSchematic", "Schematic", "get_schematic", "read_schematic"]
 
 
 yaml = YAML(typ="safe")
@@ -124,7 +124,7 @@ class Array(BaseModel, Generic[TUnit], extra="forbid"):
 
 
 class Ports(BaseModel, Generic[TUnit]):
-    instance: SchemaInstance[TUnit]
+    instance: SchematicInstance[TUnit]
 
     def __getitem__(self, key: str | tuple[str, int, int]) -> PortRef | PortArrayRef:
         if isinstance(key, tuple):
@@ -139,7 +139,7 @@ class Ports(BaseModel, Generic[TUnit]):
         return PortRef(instance=self.instance.name, port=key)
 
 
-class SchemaInstance(
+class SchematicInstance(
     BaseModel, Generic[TUnit], extra="forbid", arbitrary_types_allowed=True
 ):
     name: str = Field(exclude=True)
@@ -147,7 +147,7 @@ class SchemaInstance(
     settings: dict[str, JSONSerializable] = Field(default_factory=dict)
     array: RegularArray[TUnit] | Array[TUnit] | None = None
     kcl: KCLayout = Field(default_factory=get_default_kcl)
-    _schema: TSchema[TUnit] = PrivateAttr()
+    _schema: TSchematic[TUnit] = PrivateAttr()
 
     @field_validator("kcl", mode="before")
     @classmethod
@@ -161,9 +161,9 @@ class SchemaInstance(
         return kcl.name
 
     @property
-    def parent_schema(self) -> TSchema[TUnit]:
+    def parent_schema(self) -> TSchematic[TUnit]:
         if self._schema is None:
-            raise RuntimeError("Schema instance has no parent set.")
+            raise RuntimeError("Schematic instance has no parent set.")
         return self._schema
 
     @property
@@ -178,9 +178,10 @@ class SchemaInstance(
         dy: TUnit = 0,
         orientation: Literal[0, 90, 180, 270] = 0,
         mirror: bool = False,
+        port: str | None = None,
     ) -> Placement[TUnit]:
         placement = Placement[TUnit](
-            x=x, y=y, dx=dx, dy=dy, orientation=orientation, mirror=mirror
+            x=x, y=y, dx=dx, dy=dy, orientation=orientation, mirror=mirror, port=port
         )
         self.parent_schema.placements[self.name] = placement
         return placement
@@ -364,10 +365,10 @@ class Connection(
         return Connection(**data)
 
 
-class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
+class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     name: str | None = None
     dependencies: list[Path] = Field(default_factory=list)
-    instances: dict[str, SchemaInstance[TUnit]] = Field(default_factory=dict)
+    instances: dict[str, SchematicInstance[TUnit]] = Field(default_factory=dict)
     placements: dict[str, MirrorPlacement | Placement[TUnit]] = Field(
         default_factory=dict
     )
@@ -384,7 +385,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         array: RegularArray[TUnit] | Array[TUnit] | None = None,
         placement: Placement[TUnit] | None = None,
         kcl: KCLayout | None = None,
-    ) -> SchemaInstance[TUnit]:
+    ) -> SchematicInstance[TUnit]:
         """Create a schema instance.
 
         This would be an SREF or AREF in the resulting GDS cell.
@@ -400,9 +401,9 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                 with `inst.place(...)` afterwards.
 
         Returns:
-            Schema instance representing the args.
+            Schematic instance representing the args.
         """
-        inst = SchemaInstance[TUnit].model_validate(
+        inst = SchematicInstance[TUnit].model_validate(
             {
                 "name": name,
                 "component": component,
@@ -792,7 +793,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         schema_cell += f"def {self.name}() -> {kf_name}.{self.__class__.__name__}:\n"
         indent = 2
 
-        schema_cell += f"{_ind()}schema = Schema(kcl=kcl)\n\n"
+        schema_cell += f"{_ind()}schema = Schematic(kcl=kcl)\n\n"
 
         schema_cell += f"{_ind()}# Create the schema instances\n"
 
@@ -831,10 +832,10 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
             schema_cell += f"{_ind()})\n"
 
         if self.ports:
-            schema_cell += f"{_ind()}# Schema ports\n"
+            schema_cell += f"{_ind()}# Schematic ports\n"
 
             for port in sorted(
-                self.ports.values(), key=attrgetter("__class__.__name__")
+                self.ports.values(), key=attrgetter("__class__.__name__", "name")
             ):
                 if isinstance(port, Port):
                     schema_cell += f"{_ind()}schema.create_port(\n"
@@ -865,29 +866,36 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                         f"{port.as_python_str(names[port.instance])})\n"
                     )
         if self.placements:
-            schema_cell += f"\n{_ind()}# Schema instance placements\n"
+            schema_cell += f"\n{_ind()}# Schematic instance placements\n"
 
-            for name, placement in self.placements.items():
+            for name, placement in sorted(
+                self.placements.items(), key=lambda p: (isinstance(p, Placement), p[0])
+            ):
                 inst_name = names[name]
-                schema_cell += f"{_ind()}{inst_name}.place(\n"
-                indent += 2
-                if placement.x:
-                    schema_cell += f"{_ind()}x={placement.x},\n"
-                if placement.y:
-                    schema_cell += f"{_ind()}y={placement.y},\n"
-                if placement.dx:
-                    schema_cell += f"{_ind()}dx={placement.dx},\n"
-                if placement.dy:
-                    schema_cell += f"{_ind()}dy={placement.dy},\n"
-                if placement.orientation:
-                    schema_cell += f"{_ind()}orientation={placement.orientation},\n"
-                if placement.mirror:
-                    schema_cell += f"{_ind()}mirror={placement.mirror},\n"
-                indent -= 2
-                schema_cell += f"{_ind()})\n"
+                if isinstance(placement, Placement):
+                    schema_cell += f"{_ind()}{inst_name}.place(\n"
+                    indent += 2
+                    if placement.x:
+                        schema_cell += f"{_ind()}x={placement.x},\n"
+                    if placement.y:
+                        schema_cell += f"{_ind()}y={placement.y},\n"
+                    if placement.dx:
+                        schema_cell += f"{_ind()}dx={placement.dx},\n"
+                    if placement.dy:
+                        schema_cell += f"{_ind()}dy={placement.dy},\n"
+                    if placement.orientation:
+                        schema_cell += f"{_ind()}orientation={placement.orientation},\n"
+                    if placement.mirror:
+                        schema_cell += f"{_ind()}mirror={placement.mirror},\n"
+                    if placement.port is not None:
+                        schema_cell += f"{_ind()}port={placement.port},\n"
+                    indent -= 2
+                    schema_cell += f"{_ind()})\n"
+                else:
+                    schema_cell += f"{_ind()}{inst_name}.mirror = True\n"
 
         if self.connections:
-            schema_cell += f"\n{_ind()}# Schema connections\n"
+            schema_cell += f"\n{_ind()}# Schematic connections\n"
 
             for connection in self.connections:
                 ref1, ref2 = connection.root
@@ -921,7 +929,7 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
                     indent -= 2
                     schema_cell += f"{_ind()})\n"
         if self.routes:
-            schema_cell += f"\n{_ind()}# Schema routes\n"
+            schema_cell += f"\n{_ind()}# Schematic routes\n"
             for route in self.routes.values():
                 schema_cell += f"{_ind()}schema.add_route(\n"
                 indent += 2
@@ -956,17 +964,17 @@ class TSchema(BaseModel, Generic[TUnit], extra="forbid"):
         return schema_cell
 
 
-class Schema(TSchema[dbu]):
-    """Schema with a base unit of dbu for placements."""
+class Schematic(TSchematic[dbu]):
+    """Schematic with a base unit of dbu for placements."""
 
 
-class DSchema(TSchema[um]):
-    """Schema with a base unit of um for placements."""
+class DSchematic(TSchematic[um]):
+    """Schematic with a base unit of um for placements."""
 
 
 def _create_kinst(
     c: ProtoTKCell[TUnit],
-    schema_inst: SchemaInstance[TUnit],
+    schema_inst: SchematicInstance[TUnit],
 ) -> ProtoTInstance[TUnit]:
     kinst: Instance | DInstance
 
@@ -1017,7 +1025,7 @@ def _place_islands(
     schema_island: set[str],
     instances: dict[str, ProtoTInstance[TUnit]],
     connections: dict[str, list[Connection[TUnit]]],
-    schema_instances: dict[str, SchemaInstance[TUnit]],
+    schema_instances: dict[str, SchematicInstance[TUnit]],
     placed_insts: set[str],
 ) -> set[str]:
     target_length = len(schema_island)
@@ -1047,8 +1055,30 @@ def _place_islands(
 
                     st = kinst._standard_trans()
                     if st is kdb.Trans or st is kdb.ICplxTrans:
+                        if p.port is None:
+                            kinst.transform(
+                                kdb.ICplxTrans(
+                                    mag=1,
+                                    rot=p.orientation,
+                                    mirrx=p.mirror,
+                                    x=x + p.dx,
+                                    y=y + p.dy,
+                                )
+                            )
+                        else:
+                            kinst.transform(
+                                kdb.ICplxTrans(
+                                    mag=1,
+                                    rot=p.orientation,
+                                    mirrx=p.mirror,
+                                    x=x + p.dx,
+                                    y=y + p.dy,
+                                )
+                                * kdb.ICplxTrans(-kinst.ports[p.port].trans.disp)
+                            )
+                    elif p.port is None:
                         kinst.transform(
-                            kdb.ICplxTrans(
+                            kdb.DCplxTrans(
                                 mag=1,
                                 rot=p.orientation,
                                 mirrx=p.mirror,
@@ -1065,6 +1095,7 @@ def _place_islands(
                                 x=x + p.dx,
                                 y=y + p.dy,
                             )
+                            * kdb.DCplxTrans(-kinst.ports[p.port].dcplx_trans.disp)
                         )
                     placed_insts.add(inst)
             else:
@@ -1136,27 +1167,27 @@ def _get_placeable(
 
 
 @overload
-def get_schema(
+def get_schematic(
     c: KCell,
     exclude_port_types: Sequence[str] | None = ("placement", "pad", "bump"),
-) -> TSchema[int]: ...
+) -> TSchematic[int]: ...
 
 
 @overload
-def get_schema(
+def get_schematic(
     c: DKCell,
     exclude_port_types: Sequence[str] | None = ("placement", "pad", "bump"),
-) -> TSchema[float]: ...
+) -> TSchematic[float]: ...
 
 
-def get_schema(
+def get_schematic(
     c: KCell | DKCell,
     exclude_port_types: Sequence[str] | None = ("placement", "pad", "bump"),
-) -> TSchema[int] | TSchema[float]:
+) -> TSchematic[int] | TSchematic[float]:
     if isinstance(c, KCell):
-        schema: TSchema[int] | TSchema[float] = Schema(name=c.name)
+        schema: TSchematic[int] | TSchematic[float] = Schematic(name=c.name)
     else:
-        schema = DSchema(name=c.name)
+        schema = DSchematic(name=c.name)
 
     for inst in c.insts:
         name = inst.property(PROPID.NAME)
@@ -1167,26 +1198,26 @@ def get_schema(
 
 
 @overload
-def read_schema(file: Path | str, unit: Literal["dbu"] = "dbu") -> Schema: ...
+def read_schematic(file: Path | str, unit: Literal["dbu"] = "dbu") -> Schematic: ...
 
 
 @overload
-def read_schema(file: Path | str, unit: Literal["um"]) -> DSchema: ...
+def read_schematic(file: Path | str, unit: Literal["um"]) -> DSchematic: ...
 
 
-def read_schema(
+def read_schematic(
     file: Path | str, unit: Literal["dbu", "um"] = "dbu"
-) -> Schema | DSchema:
+) -> Schematic | DSchematic:
     file = Path(file).resolve()
     if not file.is_file():
         raise ValueError(f"{file=} is either not a file or does not exist.")
     with file.open(mode="rt") as f:
         yaml_dict = yaml.load(f)
         if unit == "dbu":
-            return Schema.model_validate(yaml_dict, strict=True)
-        return DSchema.model_validate(yaml_dict)
+            return Schematic.model_validate(yaml_dict, strict=True)
+        return DSchematic.model_validate(yaml_dict)
 
 
-TSchema[Annotated[int, str]].model_rebuild()
-TSchema[Annotated[float, str]].model_rebuild()
-SchemaInstance.model_rebuild()
+TSchematic[Annotated[int, str]].model_rebuild()
+TSchematic[Annotated[float, str]].model_rebuild()
+SchematicInstance.model_rebuild()

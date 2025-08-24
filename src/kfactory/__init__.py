@@ -30,7 +30,7 @@ from .instance import Instance, DInstance, VInstance
 from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
 from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
 from .netlist import Netlist
-from .schema import Schema, DSchema, get_schema, read_schema
+from .schematic import Schematic, DSchematic, get_schematic, read_schematic
 from .instances import Instances, DInstances, VInstances
 from .settings import KCellSettings, Info
 from .layout import Constants, KCLayout, cell, vcell, kcl, kcls
@@ -84,7 +84,7 @@ __all__ = [
     "DPins",
     "DPort",
     "DPorts",
-    "DSchema",
+    "DSchematic",
     "Info",
     "Instance",
     "InstanceGroup",
@@ -106,7 +106,7 @@ __all__ = [
     "ProtoPin",
     "ProtoPort",
     "ProtoTKCell",
-    "Schema",
+    "Schematic",
     "SymmetricalCrossSection",
     "VInstance",
     "VInstanceGroup",
@@ -124,7 +124,7 @@ __all__ = [
     "factories",
     "flexgrid",
     "flexgrid_dbu",
-    "get_schema",
+    "get_schematic",
     "grid",
     "grid_dbu",
     "kcell",
@@ -143,7 +143,7 @@ __all__ = [
     "pprint_ports",
     "protocols",
     "rdb",
-    "read_schema",
+    "read_schematic",
     "routing",
     "save_layout_options",
     "save_session",

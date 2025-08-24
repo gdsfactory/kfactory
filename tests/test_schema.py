@@ -65,7 +65,7 @@ ports:
   o1: mmi_short,o2
   o2: mmi_short,o3
 """  # noqa: E501
-    schema = kf.DSchema.model_validate(yaml.load(schema_yaml))
+    schema = kf.DSchematic.model_validate(yaml.load(schema_yaml))
     for inst in schema.instances.values():
         _ = inst.parent_schema.name
 
@@ -703,6 +703,6 @@ def test_gdsfactory_yaml(path: Path) -> None:
         pytest.mark.skipif("%" in fstr)
         f.seek(0)
         yaml = YAML(typ=["rt", "safe", "string"])
-        schema = kf.DSchema.model_validate(yaml.load(f))
+        schema = kf.DSchematic.model_validate(yaml.load(f))
         for inst in schema.instances.values():
             _ = inst.parent_schema.name
