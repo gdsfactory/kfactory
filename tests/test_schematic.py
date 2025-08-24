@@ -709,8 +709,29 @@ def test_gdsfactory_yaml(path: Path) -> None:
     with path.open(encoding="utf-8") as f:
         fstr = f.read()
         pytest.mark.skipif("%" in fstr)
+    schematic = kf.read_schematic(path)
+    for inst in schematic.instances.values():
+        _ = inst.parent_schematic.name
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param(
+            file, marks=pytest.mark.skip(reason="Incompatible gdsfactory schematic")
+        )
+        if file.with_suffix("").stem in skip_files
+        else pytest.param(file)
+        for file in yaml_files
+    ],
+    ids=lambda p: _get_path_stem,
+)
+def test_gdsfactory_yaml_build(path: Path) -> None:
+    pytest.importorskip("gdsfactory")
+    with path.open(encoding="utf-8") as f:
+        fstr = f.read()
+        pytest.mark.skipif("%" in fstr)
         f.seek(0)
-        yaml = YAML(typ=["rt", "safe", "string"])
-        schematic = kf.DSchematic.model_validate(yaml.load(f))
-        for inst in schematic.instances.values():
-            _ = inst.parent_schematic.name
+    schematic = kf.read_schematic(path)
+    for inst in schematic.instances.values():
+        _ = inst.parent_schematic.name
