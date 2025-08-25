@@ -233,7 +233,7 @@ class Route(BaseModel, Generic[TUnit], extra="forbid"):
 
         if isinstance(links, dict):
             data["links"] = [
-                [tuple(str(k).split(",")), tuple(str(v).split(","))]
+                (tuple(str(k).split(",")), tuple(str(v).split(",")))
                 for k, v in links.items()
             ]
         if "settings" not in data:
@@ -522,7 +522,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
 
     @model_validator(mode="before")
     @classmethod
-    def _validate_model(cls, data: dict[str, Any]) -> dict[str, Any]:
+    def _validate_schematic(cls, data: dict[str, Any]) -> dict[str, Any]:
         data.pop("nets", None)
         if not isinstance(data, dict):
             return data
