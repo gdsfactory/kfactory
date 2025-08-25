@@ -73,7 +73,7 @@ from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
     from .ports import DPorts, Ports
-    from .schema import TSchema
+    from .schematic import TSchematic
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -536,7 +536,7 @@ class KCLayout(
     @overload
     def schematic_cell(
         self,
-        _func: Callable[KCellParams, TSchema[TUnit]],
+        _func: Callable[KCellParams, TSchematic[TUnit]],
         /,
     ) -> Callable[KCellParams, KCell]: ...
 
@@ -562,7 +562,7 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[
-        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KCell]
+        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KCell]
     ]: ...
 
     @overload
@@ -588,7 +588,7 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[
-        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KCell]
+        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KCell]
     ]: ...
 
     @overload
@@ -615,7 +615,7 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[
-        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KC]
+        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KC]
     ]: ...
 
     @overload
@@ -641,12 +641,12 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[
-        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KC]
+        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KC]
     ]: ...
 
     def schematic_cell(
         self,
-        _func: Callable[KCellParams, TSchema[TUnit]] | None = None,
+        _func: Callable[KCellParams, TSchematic[TUnit]] | None = None,
         /,
         *,
         output_type: type[KC] | None = None,
@@ -670,11 +670,11 @@ class KCLayout(
     ) -> (
         Callable[KCellParams, KCell]
         | Callable[
-            [Callable[KCellParams, TSchema[Any]]],
+            [Callable[KCellParams, TSchematic[Any]]],
             Callable[KCellParams, KC],
         ]
         | Callable[
-            [Callable[KCellParams, TSchema[Any]]],
+            [Callable[KCellParams, TSchematic[Any]]],
             Callable[KCellParams, KCell],
         ]
     ):
@@ -682,7 +682,7 @@ class KCLayout(
             if output_type is None:
 
                 def wrap_f(
-                    f: Callable[KCellParams, TSchema[TUnit]],
+                    f: Callable[KCellParams, TSchematic[TUnit]],
                 ) -> Callable[KCellParams, KCell]:
                     @self.cell(
                         output_type=KCell,
@@ -708,15 +708,17 @@ class KCLayout(
                     def kcell_func(
                         *args: KCellParams.args, **kwargs: KCellParams.kwargs
                     ) -> KCell:
-                        schema = f(*args, **kwargs)
-                        return schema.create_cell(KCell)
+                        schematic = f(*args, **kwargs)
+                        c_ = schematic.create_cell(KCell)
+                        c_.schematic = schematic
+                        return c_
 
                     return kcell_func
 
                 return wrap_f
 
             def custom_wrap_f(
-                f: Callable[KCellParams, TSchema[TUnit]],
+                f: Callable[KCellParams, TSchematic[TUnit]],
             ) -> Callable[KCellParams, KC]:
                 @self.cell(
                     output_type=output_type,
@@ -742,23 +744,27 @@ class KCLayout(
                 def custom_kcell_func(
                     *args: KCellParams.args, **kwargs: KCellParams.kwargs
                 ) -> KCell:
-                    schema = f(*args, **kwargs)
-                    return schema.create_cell(KCell)
+                    schematic = f(*args, **kwargs)
+                    c_ = schematic.create_cell(KCell)
+                    c_.schematic = schematic
+                    return c_
 
                 return custom_kcell_func
 
             return custom_wrap_f
 
         def simple_wrap_f(
-            f: Callable[KCellParams, TSchema[TUnit]],
+            f: Callable[KCellParams, TSchematic[TUnit]],
         ) -> Callable[KCellParams, KCell]:
             @functools.wraps(f)
             @self.cell
             def kcell_func(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
             ) -> KCell:
-                schema = f(*args, **kwargs)
-                return schema.create_cell(KCell)
+                schematic = f(*args, **kwargs)
+                c_ = schematic.create_cell(KCell)
+                c_.schematic = schematic
+                return c_
 
             return kcell_func
 
