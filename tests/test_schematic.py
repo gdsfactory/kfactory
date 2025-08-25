@@ -250,7 +250,8 @@ def test_schema_mirror_connection() -> None:
             name="s4", component="bend_s_euler", settings={"offset": offset}
         )
 
-        s2.connect("o1", s1["o2"], mirror=True)
+        s2.connect("o1", s1["o2"])
+        s2.mirror = True
         s4.connect("o1", s3["o2"])
 
         s1.place(x=0, y=0)

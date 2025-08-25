@@ -147,7 +147,7 @@ class SchematicInstance(
     settings: dict[str, JSONSerializable] = Field(default_factory=dict)
     array: RegularArray[TUnit] | Array[TUnit] | None = None
     kcl: KCLayout = Field(default_factory=get_default_kcl)
-    _schema: TSchematic[TUnit] = PrivateAttr()
+    _schematic: TSchematic[TUnit] = PrivateAttr()
 
     @field_validator("kcl", mode="before")
     @classmethod
@@ -162,9 +162,9 @@ class SchematicInstance(
 
     @property
     def parent_schematic(self) -> TSchematic[TUnit]:
-        if self._schema is None:
+        if self._schematic is None:
             raise RuntimeError("Schematic instance has no parent set.")
-        return self._schema
+        return self._schematic
 
     @property
     def placement(self) -> MirrorPlacement | Placement[TUnit] | None:
@@ -200,7 +200,6 @@ class SchematicInstance(
         self,
         port: str | tuple[str, int, int],
         other: Port[TUnit] | PortRef,
-        mirror: bool = False,
     ) -> Connection[TUnit]:
         if isinstance(port, str):
             pref = PortRef(instance=self.name, port=port)
@@ -210,14 +209,20 @@ class SchematicInstance(
             )
         conn = Connection[TUnit]((other, pref))
         self.parent_schematic.connections.append(conn)
-        if mirror:
-            if self.name in self.parent_schematic.placements:
-                raise ValueError(
-                    f"Cannot apply mirror to instance {self.name}"
-                    " — placement already exists."
-                )
-            self.parent_schematic.placements[self.name] = MirrorPlacement(mirror=True)
         return conn
+
+    @property
+    def mirror(self) -> bool:
+        if self.placement is None:
+            return False
+        return self.placement.mirror
+
+    @mirror.setter
+    def mirror(self, value: bool) -> None:
+        if self.placement is None:
+            self.parent_schematic.placements[self.name] = MirrorPlacement(mirror=True)
+        else:
+            self.placement.mirror = value
 
 
 class Route(BaseModel, Generic[TUnit], extra="forbid"):
@@ -412,7 +417,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 "kcl": kcl or self.kcl,
             }
         )
-        inst._schema = self
+        inst._schematic = self
 
         self.instances[inst.name] = inst
         if placement:
@@ -580,7 +585,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     @model_validator(mode="after")
     def assign_backrefs(self) -> Self:
         for inst in self.instances.values():
-            inst._schema = self
+            inst._schematic = self
         return self
 
     def create_cell(self, output_type: type[KC]) -> KC:
