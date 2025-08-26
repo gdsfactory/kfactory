@@ -36,15 +36,15 @@ from ruamel.yaml import YAML
 
 from . import kdb
 from .conf import PROPID, logger
-from .kcell import DKCell, KCell, ProtoTKCell
+from .kcell import DKCell, KCell, ProtoTKCell, VKCell
 from .layout import KCLayout, get_default_kcl, kcls
 from .netlist import Net, Netlist, NetlistInstance, NetlistPort, PortArrayRef, PortRef
 from .typings import KC, JSONSerializable, TUnit, dbu, um
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Callable, Sequence
 
-    from .instance import DInstance, Instance, ProtoTInstance
+    from .instance import DInstance, Instance, ProtoTInstance, VInstance
     from .port import ProtoPort
 
 __all__ = ["DSchematic", "Schematic", "get_schematic", "read_schematic"]
@@ -147,6 +147,7 @@ class SchematicInstance(
     settings: dict[str, JSONSerializable] = Field(default_factory=dict)
     array: RegularArray[TUnit] | Array[TUnit] | None = None
     kcl: KCLayout = Field(default_factory=get_default_kcl)
+    virtual: bool = False
     _schematic: TSchematic[TUnit] = PrivateAttr()
 
     @field_validator("kcl", mode="before")
@@ -588,7 +589,12 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
             inst._schematic = self
         return self
 
-    def create_cell(self, output_type: type[KC]) -> KC:
+    def create_cell(
+        self,
+        output_type: type[KC],
+        factories: dict[str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]]
+        | None = None,
+    ) -> KC:
         c = output_type(kcl=self.kcl)
 
         # calculate islands -- islands are a bunch of directly connected instances and
@@ -629,7 +635,22 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
             if inst_name not in islands:
                 islands[inst_name] = {inst_name}
 
-        instances: dict[str, ProtoTInstance[Any]] = {}
+        for name, port in self.ports.items():
+            if isinstance(port, Port):
+                if isinstance(port.x, PortRef) or isinstance(port.y, PortRef):
+                    continue
+                p = c.create_port(
+                    name=port.name,
+                    center=(port.x, port.y),
+                    cross_section=c.get_cross_section(
+                        c.kcl.get_symmetrical_cross_section(port.cross_section)
+                    ),
+                )
+                p.orientation = port.orientation
+            else:
+                c.add_port(port=c.insts[port.instance].ports[port.port], name=name)
+
+        instances: dict[str, ProtoTInstance[Any] | VInstance] = {}
         placed_islands: list[set[str]] = []
         placed_insts: set[str] = set()
         seen_islands: set[int] = set()
@@ -1002,10 +1023,63 @@ class DSchema(DSchematic):
 def _create_kinst(
     c: ProtoTKCell[TUnit],
     schema_inst: SchematicInstance[TUnit],
-) -> ProtoTInstance[TUnit]:
+    factories: dict[str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]]
+    | None,
+) -> ProtoTInstance[TUnit] | VInstance:
     kinst: Instance | DInstance
 
     vec_class = kdb.Vector if isinstance(c, KCell) else kdb.DVector
+
+    cell = (
+        factories[schema_inst.component](**schema_inst.settings)
+        if factories
+        else schema_inst.kcl.get_component(
+            schema_inst.component, **schema_inst.settings
+        )
+    )
+    if isinstance(cell, ProtoTKCell) and not schema_inst.virtual:
+        if schema_inst.array:
+            if isinstance(schema_inst.array, RegularArray):
+                a = vec_class(x=schema_inst.array.column_pitch, y=0)
+                b = vec_class(x=0, y=schema_inst.array.row_pitch)
+                na = schema_inst.array.columns
+                nb = schema_inst.array.rows
+            else:
+                a = vec_class(*schema_inst.array.pitch_a)
+                b = vec_class(*schema_inst.array.pitch_b)
+                na = schema_inst.array.na
+                nb = schema_inst.array.nb
+            if schema_inst.settings:
+                kinst = c.create_inst(
+                    cell,
+                    a=a,  # type: ignore[arg-type]
+                    b=b,  # type: ignore[arg-type]
+                    na=na,
+                    nb=nb,
+                )
+            else:
+                kinst = c.create_inst(
+                    cell,
+                    a=a,  # type: ignore[arg-type]
+                    b=b,  # type: ignore[arg-type]
+                    na=na,
+                    nb=nb,
+                )
+        elif schema_inst.settings:
+            kinst = c.create_inst(
+                schema_inst.kcl.get_component(
+                    schema_inst.component, **schema_inst.settings
+                )
+            )
+        else:
+            kinst = c.create_inst(schema_inst.kcl.get_component(schema_inst.component))
+        kinst.name = schema_inst.name
+        if schema_inst.mirror:
+            kinst.transform(kdb.Trans.M0)
+        return kinst
+
+    # If the instance is a
+    vinst = c.create_vinst(cell)
     if schema_inst.array:
         if isinstance(schema_inst.array, RegularArray):
             a = vec_class(x=schema_inst.array.column_pitch, y=0)
@@ -1017,43 +1091,28 @@ def _create_kinst(
             b = vec_class(*schema_inst.array.pitch_b)
             na = schema_inst.array.na
             nb = schema_inst.array.nb
-        if schema_inst.settings:
-            kinst = c.create_inst(
-                schema_inst.kcl.get_component(
-                    schema_inst.component, **schema_inst.settings
-                ),
-                a=a,  # type: ignore[arg-type]
-                b=b,  # type: ignore[arg-type]
-                na=na,
-                nb=nb,
-            )
-        else:
-            kinst = c.create_inst(
-                schema_inst.kcl.get_component(schema_inst.component),
-                a=a,  # type: ignore[arg-type]
-                b=b,  # type: ignore[arg-type]
-                na=na,
-                nb=nb,
-            )
-    elif schema_inst.settings:
-        kinst = c.create_inst(
-            schema_inst.kcl.get_component(schema_inst.component, **schema_inst.settings)
-        )
-    else:
-        kinst = c.create_inst(schema_inst.kcl.get_component(schema_inst.component))
-    kinst.name = schema_inst.name
-    kinst.is_mirrored = schema_inst.placement.mirror if schema_inst.placement else False  # type: ignore[attr-defined]
-
-    return kinst
+        if not isinstance(a, kdb.DVector):
+            a = c.kcl.to_um(a)
+        if not isinstance(b, kdb.DVector):
+            b = c.kcl.to_um(b)
+        vinst.a = a
+        vinst.b = b
+        vinst.na = na
+        vinst.nb = nb
+    if schema_inst.mirror:
+        vinst.transform(kdb.DCplxTrans.M0)
+    return vinst
 
 
 def _place_islands(
     c: ProtoTKCell[TUnit],
     schema_island: set[str],
-    instances: dict[str, ProtoTInstance[TUnit]],
+    instances: dict[str, ProtoTInstance[TUnit] | VInstance],
     connections: dict[str, list[Connection[TUnit]]],
     schema_instances: dict[str, SchematicInstance[TUnit]],
     placed_insts: set[str],
+    factories: dict[str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]]
+    | None = None,
 ) -> set[str]:
     target_length = len(schema_island)
 
@@ -1061,7 +1120,7 @@ def _place_islands(
 
     for inst in schema_island:
         schema_inst = schema_instances[inst]
-        kinst = _create_kinst(c, schema_inst)
+        kinst = _create_kinst(c, schema_inst, factories=factories)
         instances[inst] = kinst
         if schema_inst.placement:
             if isinstance(schema_inst.placement, Placement):
@@ -1144,7 +1203,7 @@ def _place_islands(
 
 
 def _connect_instances(
-    instances: dict[str, ProtoTInstance[TUnit]],
+    instances: dict[str, ProtoTInstance[TUnit] | VInstance],
     place_insts: set[str],
     connections: dict[str, list[Connection[TUnit]]],
     placed_instances: set[str],

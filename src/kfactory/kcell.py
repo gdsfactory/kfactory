@@ -363,11 +363,19 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
     def has_factory_name(self) -> bool:
         return bool(self._base.basename or self._base.function_name)
 
-    def create_vinst(self, cell: AnyKCell) -> VInstance:
+    def create_vinst(
+        self,
+        cell: AnyKCell,
+        *,
+        a: kdb.DVector = kdb.DVector(0, 0),  # noqa: B008
+        b: kdb.DVector = kdb.DVector(0, 0),  # noqa: B008
+        na: int = 1,
+        nb: int = 1,
+    ) -> VInstance:
         """Insert the KCell as a VInstance into a VKCell or KCell."""
         if self.locked:
             raise LockedError(self)
-        vi = VInstance(cell)
+        vi = VInstance(cell, a=a.dup(), b=b.dup(), na=na, nb=nb)
         self._base.vinsts.append(vi)
         return vi
 
@@ -3567,13 +3575,6 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
 
     def __lshift__(self, cell: AnyKCell) -> VInstance:
         return self.create_inst(cell=cell)
-
-    def create_vinst(self, cell: AnyKCell) -> VInstance:
-        if self.locked:
-            raise LockedError(self)
-        vi = VInstance(cell)
-        self.vinsts.append(vi)
-        return vi
 
     @overload
     def shapes(self, layer: None = ...) -> dict[int, VShapes]: ...
