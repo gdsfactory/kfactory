@@ -4,6 +4,7 @@ Use `kf --help` for more info.
 """
 
 import importlib
+import importlib.util
 import os
 import runpy
 import sys
@@ -156,7 +157,7 @@ def build(
                 cell = getattr(_mod, func)(**kwargs)
                 if isinstance(cell, KCell):
                     try:
-                        repo = git.repo.Repo(".", search_parent_directories=True)
+                        repo = git.Repo(".", search_parent_directories=True)
                     except git.InvalidGitRepositoryError:
                         pass
                     else:
@@ -225,7 +226,7 @@ def build(
                 cell = getattr(_mod, func)(**kwargs)
                 if isinstance(cell, KCell):
                     try:
-                        repo = git.repo.Repo(".", search_parent_directories=True)
+                        repo = git.Repo(".", search_parent_directories=True)
                     except git.InvalidGitRepositoryError:
                         pass
                     else:
