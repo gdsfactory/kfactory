@@ -91,7 +91,7 @@ jobs:
         run: |
           uv sync --all-extras
       - name: Test coverage
-        run: uv run -p ${{ matrix.python-version }} --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report
+        run: uv run -p ${{ matrix.python-version }} --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
