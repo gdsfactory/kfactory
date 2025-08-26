@@ -25,7 +25,7 @@ jobs:
           python -m pip install uv
           uv pip install --system -e .[ci,docs]
           export KFACTORY_DISPLAY_TYPE="image"
-          just docs
+          uv run -p 3.13 --extra docs --isolated mkdocs build -f docs/mkdocs.yml
       - uses: actions/upload-pages-artifact@v3
         with:
           name: github-pages

@@ -49,12 +49,11 @@ jobs:
       - name: Install dependencies
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          just gds-download
+        run: gh release download v0.6.0 -D gds/gds_ref/ --clobber
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
-        run: just test ${{ matrix.python-version }}
+        run: uv run -p ${{ matrix.python-version }} --extra ci --isolated pytest -s -n logical
 
   test_code_min_ver:
     runs-on: ${{ matrix.os }}
@@ -70,12 +69,11 @@ jobs:
       - name: Install dependencies
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          just gds-download
+        run: gh release download v0.6.0 -D gds/gds_ref/ --clobber
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
-        run: just test-min
+        run: uv run -p ${{ matrix.python-version }} --extra ci --resolution lowest-direct --isolated pytest -s -n logical
 
   coverage:
     runs-on: ${{ matrix.os }}
@@ -91,10 +89,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          just test-venv
+          uv sync --all-extras
       - name: Test coverage
-        run: |
-          just cov
+        run: uv run -p ${{ matrix.python-version }} --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
@@ -122,7 +119,6 @@ jobs:
           python -m pip install --user -U uv wheel
           uv pip install --system -e .[docs,ci]
           python -m ipykernel install --user --name python3
-          just dev
+          uv sync --all-extras
       - name: Test documentation
-        run: |
-          just docs
+        run: uv run -p ${{ matrix.python-version }} --extra docs --isolated mkdocs build -f docs/mkdocs.yml
