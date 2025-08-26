@@ -45,7 +45,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
 
     from .instance import DInstance, Instance, ProtoTInstance, VInstance
-    from .port import ProtoPort
+    from .port import BasePort, ProtoPort
 
 __all__ = ["DSchematic", "Schematic", "get_schematic", "read_schematic"]
 
@@ -97,12 +97,16 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
             data["orientation"] = data.pop("rotation")
         return data
 
-    def is_placeable(self, placed_instances: set[str]) -> bool:
+    def is_placeable(self, placed_instances: set[str], placed_ports: set[str]) -> bool:
         placeable = True
         if isinstance(self.x, PortRef):
             placeable = self.x.instance in placed_instances
+        elif isinstance(self.x, Port):
+            placeable = placeable and self.x.name in placed_ports
         if isinstance(self.y, PortRef):
             placeable = placeable and self.y.instance in placed_instances
+        elif isinstance(self.y, Port):
+            placeable = placeable and self.y.name in placed_ports
         return placeable
 
 
@@ -249,12 +253,12 @@ class Route(BaseModel, Generic[TUnit], extra="forbid"):
 
 class Port(BaseModel, Generic[TUnit], extra="forbid"):
     name: str = Field(exclude=True)
-    x: TUnit | PortRef | PortArrayRef
-    y: TUnit | PortRef | PortArrayRef
+    x: TUnit | PortRef
+    y: TUnit | PortRef
     dx: TUnit = cast("TUnit", 0)
     dy: TUnit = cast("TUnit", 0)
     cross_section: str
-    orientation: Literal[0, 90, 180, 270]
+    orientation: Literal[0, 90, 180, 270] | PortRef
 
     def __lt__(self, other: Port[Any] | PortRef) -> bool:
         if isinstance(other, Port):
@@ -265,11 +269,11 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
         self,
     ) -> tuple[
         str,
-        TUnit | PortRef | PortArrayRef,
-        TUnit | PortRef | PortArrayRef,
+        TUnit | PortRef,
+        TUnit | PortRef,
         TUnit,
         TUnit,
-        Literal[0, 90, 180, 270],
+        Literal[0, 90, 180, 270] | PortRef,
         str,
     ]:
         return (
@@ -288,7 +292,48 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
             placeable = self.x.instance in placed_instances
         if isinstance(self.y, PortRef):
             placeable = placeable and self.y.instance in placed_instances
+        if isinstance(self.orientation, PortRef):
+            placeable = placeable and self.orientation.instance in placed_instances
         return placeable
+
+    def place(
+        self, cell: ProtoTKCell[TUnit], schematic: TSchematic[TUnit], name: str
+    ) -> BasePort:
+        if isinstance(self.x, PortRef):
+            if isinstance(self.x, PortArrayRef):
+                x = (
+                    cell.insts[self.x.instance]
+                    .ports[self.x.port, self.x.ia, self.x.ib]
+                    .x
+                )
+            else:
+                x = cell.insts[self.x.instance].ports[self.x.port].x
+        else:
+            x = self.x
+        x += self.dx
+        if isinstance(self.y, PortRef):
+            if isinstance(self.y, PortArrayRef):
+                y = (
+                    cell.insts[self.y.instance]
+                    .ports[self.y.port, self.y.ia, self.y.ib]
+                    .y
+                )
+            else:
+                y = cell.insts[self.y.instance].ports[self.y.port].y
+        else:
+            y = self.y
+        y += self.dy
+        if isinstance(self.orientation, PortRef):
+            orientation = (
+                cell.insts[self.orientation.instance]
+                .ports[self.orientation.port]
+                .orientation
+            )
+        else:
+            orientation = self.orientation
+        return cell.create_port(
+            x=x, y=y, orientation=orientation, cross_section=self.cross_section
+        ).base
 
     def __str__(self) -> str:
         return f"CellPort[{self.name!r}]"
@@ -382,6 +427,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     routes: dict[str, Route[TUnit]] = Field(default_factory=dict)
     ports: dict[str, Port[TUnit] | PortRef | PortArrayRef] = Field(default_factory=dict)
     kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
+    unit: Literal["dbu", "um"]
 
     def create_inst(
         self,
@@ -635,24 +681,16 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
             if inst_name not in islands:
                 islands[inst_name] = {inst_name}
 
+        placed_insts: set[str] = set()
+        placed_ports: set[str] = set()
+
         for name, port in self.ports.items():
-            if isinstance(port, Port):
-                if isinstance(port.x, PortRef) or isinstance(port.y, PortRef):
-                    continue
-                p = c.create_port(
-                    name=port.name,
-                    center=(port.x, port.y),
-                    cross_section=c.get_cross_section(
-                        c.kcl.get_symmetrical_cross_section(port.cross_section)
-                    ),
-                )
-                p.orientation = port.orientation
-            else:
-                c.add_port(port=c.insts[port.instance].ports[port.port], name=name)
+            if port.is_placeable(placed_instances=placed_insts):
+                p = port.place(cell=c, schematic=self, name=name)
+                placed_ports.add(p.name)
 
         instances: dict[str, ProtoTInstance[Any] | VInstance] = {}
         placed_islands: list[set[str]] = []
-        placed_insts: set[str] = set()
         seen_islands: set[int] = set()
         unique_islands: list[set[str]] = []
         for island in islands.values():
@@ -665,39 +703,50 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
             if island not in placed_islands:
                 _place_islands(
                     c,
-                    island,
-                    instances,
-                    instance_connections,
-                    self.instances,
-                    placed_insts,
+                    schematic_island=island,
+                    instances=instances,
+                    connections=instance_connections,
+                    schematic_instances=self.instances,
+                    placed_insts=placed_insts,
+                    placed_ports=placed_ports,
+                    schematic=self,
                 )
                 placed_islands.append(island)
                 placed_insts |= island
 
-        # ports
-        for name, port in self.ports.items():
-            if isinstance(port, Port):
-                if isinstance(port.x, PortArrayRef):
-                    ref = port.x
-                    port.x = c.insts[ref.instance].ports[ref.port, ref.ia, ref.ib].x
-                elif isinstance(port.x, PortRef):
-                    port.x = c.insts[ref.instance].ports[ref.port].x
-                if isinstance(port.y, PortArrayRef):
-                    ref = port.y
-                    port.y = c.insts[ref.instance].ports[ref.port, ref.ia, ref.ib].y
-                elif isinstance(port.y, PortRef):
-                    port.y = c.insts[ref.instance].ports[ref.port].y
+        # # ports
+        # for name, port in self.ports.items():
+        #     port_ = port.model_copy()
+        #     if port_.is_placeable(placed_instances=placed_insts):
+        #         if isinstance(port_, Port):
+        #             if isinstance(port_.x, PortArrayRef):
+        #                 ref = port_.x
+        #                 port_.x = (
+        #                     c.insts[ref.instance].ports[ref.port, ref.ia, ref.ib].x
+        #                 )
+        #             elif isinstance(port_.x, PortRef):
+        #                 port_.x = c.insts[ref.instance].ports[ref.port].x
+        #             if isinstance(port_.y, PortArrayRef):
+        #                 ref = port_.y
+        #                 port_.y = (
+        #                     c.insts[ref.instance].ports[ref.port, ref.ia, ref.ib].y
+        #                 )
+        #             elif isinstance(port_.y, PortRef):
+        #                 port_.y = c.insts[ref.instance].ports[ref.port].y
 
-                p = c.create_port(
-                    name=port.name,
-                    center=(port.x, port.y),
-                    cross_section=c.get_cross_section(
-                        c.kcl.get_symmetrical_cross_section(port.cross_section)
-                    ),
-                )
-                p.orientation = port.orientation
-            else:
-                c.add_port(port=c.insts[port.instance].ports[port.port], name=name)
+        #             p = c.create_port(
+        #                 name=port.name,
+        #                 center=(port_.x, port_.y),
+        #                 cross_section=c.get_cross_section(
+        #                     c.kcl.get_symmetrical_cross_section(port_.cross_section)
+        #                 ),
+        #             )
+        #             p.orientation = port_.orientation
+        #         else:
+        #             c.add_port(
+        #                 port=c.insts[port_.instance].ports[port_.port], name=name
+        #             )
+
         # routes
         for route in self.routes.values():
             start_ports: list[ProtoPort[Any]] = []
@@ -785,14 +834,12 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     def __getitem__(self, key: str) -> Port[TUnit] | PortRef:
         return self.ports[key]
 
-    def as_schematic_cell(
+    def code_str(
         self,
         imports: dict[str, str] = _schematic_default_imports,
         kfactory_name: str | None = None,
-        *,
-        tunit: str,
     ) -> str:
-        schema_cell = ""
+        schematic_cell = ""
         indent = 0
 
         def _ind() -> str:
@@ -806,161 +853,163 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
 
         for imp, imp_as in imports.items():
             if imp_as is None:
-                schema_cell += f"import {imp}\n"
+                schematic_cell += f"import {imp}\n"
             else:
-                schema_cell += f"import {imp} as {imp_as}\n"
+                schematic_cell += f"import {imp} as {imp_as}\n"
 
         if imports:
-            schema_cell += "\n\n"
+            schematic_cell += "\n\n"
 
-        schema_cell += f"kcl = {_kcls(self.kcl.name)}']\n\n"
+        schematic_cell += f"kcl = {_kcls(self.kcl.name)}']\n\n"
 
-        schema_cell += "@kcl.schematic_cell\n"
-        schema_cell += f"def {self.name}() -> {kf_name}.{self.__class__.__name__}:\n"
+        schematic_cell += "@kcl.schematic_cell\n"
+        schematic_cell += f"def {self.name}() -> {kf_name}.{self.__class__.__name__}:\n"
         indent = 2
 
-        schema_cell += f"{_ind()}schema = Schematic(kcl=kcl)\n\n"
+        schematic_cell += f"{_ind()}schematic = Schematic(kcl=kcl)\n\n"
 
-        schema_cell += f"{_ind()}# Create the schema instances\n"
+        schematic_cell += f"{_ind()}# Create the schematic instances\n"
 
         names: dict[str, str] = {}
 
         for inst in sorted(self.instances.values(), key=attrgetter("name")):
             inst_name = _valid_varname(inst.name)
             names[inst.name] = inst_name
-            schema_cell += f"{_ind()}{inst_name} = schema.create_inst(\n"
+            schematic_cell += f"{_ind()}{inst_name} = schematic.create_inst(\n"
             indent += 2
-            schema_cell += f"{_ind()}name={inst.name!r},\n"
+            schematic_cell += f"{_ind()}name={inst.name!r},\n"
             f"{_ind()}component={inst.component!r},\n"
             f"{_ind()}settings={inst.settings!r},\n"
             f"{_ind()}kcl={inst.kcl.name!r},\n"
             if inst.array is not None:
                 arr = inst.array
                 if isinstance(arr, RegularArray):
-                    schema_cell += f"{_ind()}array=RegularArray(\n"
+                    schematic_cell += f"{_ind()}array=RegularArray(\n"
                     indent += 2
-                    schema_cell += f"{_ind()}columns={arr.columns},\n"
+                    schematic_cell += f"{_ind()}columns={arr.columns},\n"
                     f"{_ind()}columns_pitch={arr.column_pitch},\n"
                     f"{_ind()}rows={arr.rows},\n"
                     f"{_ind()}row_pitch={arr.row_pitch}),\n"
                     indent -= 2
-                    schema_cell += f"{_ind()})\n"
+                    schematic_cell += f"{_ind()})\n"
                 else:
-                    schema_cell += f"{_ind()}array=Array(\n"
+                    schematic_cell += f"{_ind()}array=Array(\n"
                     indent += 2
-                    schema_cell += f"{_ind()}na={arr.na},\n"
+                    schematic_cell += f"{_ind()}na={arr.na},\n"
                     f"{_ind()}nb={arr.nb},\n"
                     f"{_ind()}pitch_a={arr.pitch_a},\n"
                     f"{_ind()}pitch_b={arr.pitch_b}),\n"
                     indent -= 2
-                    schema_cell += f"{_ind()})\n"
+                    schematic_cell += f"{_ind()})\n"
             indent -= 2
-            schema_cell += f"{_ind()})\n"
+            schematic_cell += f"{_ind()})\n"
 
         if self.ports:
-            schema_cell += f"{_ind()}# Schematic ports\n"
+            schematic_cell += f"{_ind()}# Schematic ports\n"
 
             for port in sorted(
                 self.ports.values(), key=attrgetter("__class__.__name__", "name")
             ):
                 if isinstance(port, Port):
-                    schema_cell += f"{_ind()}schema.create_port(\n"
+                    schematic_cell += f"{_ind()}schematic.create_port(\n"
                     indent += 2
-                    schema_cell += f"{_ind()}name={port.name!r},\n"
-                    schema_cell += f"{_ind()}cross_section={port.cross_section!r},\n"
-                    schema_cell += f"{_ind()}orientation={port.orientation},\n"
+                    schematic_cell += f"{_ind()}name={port.name!r},\n"
+                    schematic_cell += f"{_ind()}cross_section={port.cross_section!r},\n"
+                    schematic_cell += f"{_ind()}orientation={port.orientation},\n"
                     if isinstance(port.x, PortRef):
-                        schema_cell += (
+                        schematic_cell += (
                             f"{_ind()}x={port.x.as_python_str(names[port.x.name])},\n"
                         )
                     else:
-                        schema_cell += f"{_ind()}x={port.x},\n"
+                        schematic_cell += f"{_ind()}x={port.x},\n"
                     if isinstance(port.y, PortRef):
-                        schema_cell += (
+                        schematic_cell += (
                             f"{_ind()}y={port.y.as_python_str(names[port.y.name])},\n"
                         )
                     else:
-                        schema_cell += f"{_ind()}y={port.y},\n"
+                        schematic_cell += f"{_ind()}y={port.y},\n"
                     if port.dx:
                         f"{_ind()}dx={port.dx},\n"
                     if port.dy:
                         f"{_ind()}dy={port.dy},\n"
                     indent -= 2
                 else:
-                    schema_cell += (
-                        f"{_ind()}schema.add_port("
+                    schematic_cell += (
+                        f"{_ind()}schematic.add_port("
                         f"{port.as_python_str(names[port.instance])})\n"
                     )
         if self.placements:
-            schema_cell += f"\n{_ind()}# Schematic instance placements\n"
+            schematic_cell += f"\n{_ind()}# Schematic instance placements\n"
 
             for name, placement in sorted(
                 self.placements.items(), key=lambda p: (isinstance(p, Placement), p[0])
             ):
                 inst_name = names[name]
                 if isinstance(placement, Placement):
-                    schema_cell += f"{_ind()}{inst_name}.place(\n"
+                    schematic_cell += f"{_ind()}{inst_name}.place(\n"
                     indent += 2
                     if placement.x:
-                        schema_cell += f"{_ind()}x={placement.x},\n"
+                        schematic_cell += f"{_ind()}x={placement.x},\n"
                     if placement.y:
-                        schema_cell += f"{_ind()}y={placement.y},\n"
+                        schematic_cell += f"{_ind()}y={placement.y},\n"
                     if placement.dx:
-                        schema_cell += f"{_ind()}dx={placement.dx},\n"
+                        schematic_cell += f"{_ind()}dx={placement.dx},\n"
                     if placement.dy:
-                        schema_cell += f"{_ind()}dy={placement.dy},\n"
+                        schematic_cell += f"{_ind()}dy={placement.dy},\n"
                     if placement.orientation:
-                        schema_cell += f"{_ind()}orientation={placement.orientation},\n"
+                        schematic_cell += (
+                            f"{_ind()}orientation={placement.orientation},\n"
+                        )
                     if placement.mirror:
-                        schema_cell += f"{_ind()}mirror={placement.mirror},\n"
+                        schematic_cell += f"{_ind()}mirror={placement.mirror},\n"
                     if placement.port is not None:
-                        schema_cell += f"{_ind()}port={placement.port},\n"
+                        schematic_cell += f"{_ind()}port={placement.port},\n"
                     indent -= 2
-                    schema_cell += f"{_ind()})\n"
+                    schematic_cell += f"{_ind()})\n"
                 else:
-                    schema_cell += f"{_ind()}{inst_name}.mirror = True\n"
+                    schematic_cell += f"{_ind()}{inst_name}.mirror = True\n"
 
         if self.connections:
-            schema_cell += f"\n{_ind()}# Schematic connections\n"
+            schematic_cell += f"\n{_ind()}# Schematic connections\n"
 
             for connection in self.connections:
                 ref1, ref2 = connection.root
                 if isinstance(ref1, PortRef):
-                    schema_cell += f"{_ind()}{names[ref1.instance]}.connect(\n"
+                    schematic_cell += f"{_ind()}{names[ref1.instance]}.connect(\n"
                     indent += 2
                     if isinstance(ref1, PortArrayRef):
-                        schema_cell += (
+                        schematic_cell += (
                             f"{_ind()}port=({ref1.port!r},{ref1.ia},{ref1.ib}),\n"
                         )
                     else:
-                        schema_cell += f"{_ind()}port={ref1.port!r},\n"
+                        schematic_cell += f"{_ind()}port={ref1.port!r},\n"
                     assert isinstance(ref2, PortRef)
                     if isinstance(ref2, PortRef):
-                        schema_cell += (
+                        schematic_cell += (
                             f"{_ind()}other={ref2.as_python_str(names[ref2.name])},\n"
                         )
                     indent -= 2
-                    schema_cell += f"{_ind()})\n"
+                    schematic_cell += f"{_ind()})\n"
                 else:
                     assert isinstance(ref2, PortRef)
-                    schema_cell += f"{_ind()}{names[ref2.instance]}.connect(\n"
+                    schematic_cell += f"{_ind()}{names[ref2.instance]}.connect(\n"
                     indent += 2
                     if isinstance(ref2, PortArrayRef):
-                        schema_cell += (
+                        schematic_cell += (
                             f"{_ind()}port=({ref2.port!r}, {ref2.ia}, {ref2.ib}),\n"
                         )
                     else:
-                        schema_cell += f"{_ind()}port={ref2.port!r},\n"
-                    schema_cell += f"{_ind()}other=schema.ports[{ref1.name!r}]\n"
+                        schematic_cell += f"{_ind()}port={ref2.port!r},\n"
+                    schematic_cell += f"{_ind()}other=schematic.ports[{ref1.name!r}]\n"
                     indent -= 2
-                    schema_cell += f"{_ind()})\n"
+                    schematic_cell += f"{_ind()})\n"
         if self.routes:
-            schema_cell += f"\n{_ind()}# Schematic routes\n"
+            schematic_cell += f"\n{_ind()}# Schematic routes\n"
             for route in self.routes.values():
-                schema_cell += f"{_ind()}schema.add_route(\n"
+                schematic_cell += f"{_ind()}schematic.add_route(\n"
                 indent += 2
-                # schema_cell += f"{_ind()}
-                schema_cell += f"{_ind()}name={route.name!r},\n"
+                # schematic_cell += f"{_ind()}
+                schematic_cell += f"{_ind()}name={route.name!r},\n"
                 start_ports: list[str] = []
                 end_ports: list[str] = []
                 for link in route.links:
@@ -974,28 +1023,44 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                     else:
                         start_ports.append(p2.as_python_str(names[p2.instance]))
 
-                schema_cell += f"{_ind()}start_ports=[{', '.join(start_ports)}],\n"
-                schema_cell += f"{_ind()}end_ports=[{', '.join(end_ports)}],\n"
-                schema_cell += f"{_ind()}routing_strategy={route.routing_strategy!r},\n"
+                schematic_cell += f"{_ind()}start_ports=[{', '.join(start_ports)}],\n"
+                schematic_cell += f"{_ind()}end_ports=[{', '.join(end_ports)}],\n"
+                schematic_cell += (
+                    f"{_ind()}routing_strategy={route.routing_strategy!r},\n"
+                )
                 for key, value in route.settings.items():
                     if isinstance(value, str):
-                        schema_cell += f"{_ind()}{key}={value!r},\n"
+                        schematic_cell += f"{_ind()}{key}={value!r},\n"
                     else:
-                        schema_cell += f"{_ind()}{key}={value},\n"
+                        schematic_cell += f"{_ind()}{key}={value},\n"
                 indent -= 2
-                schema_cell += f"{_ind()})\n"
+                schematic_cell += f"{_ind()})\n"
 
-        schema_cell += f"{_ind()}return schema"
+        schematic_cell += f"{_ind()}return schema"
 
-        return schema_cell
+        return schematic_cell
 
 
 class Schematic(TSchematic[dbu]):
     """Schematic with a base unit of dbu for placements."""
 
+    def __init__(self, **data: Any) -> None:
+        if "unit" in data:
+            raise ValueError(
+                "Cannot set the unit direct. It needs to be set by the class init."
+            )
+        super().__init__(unit="dbu", **data)
+
 
 class DSchematic(TSchematic[um]):
     """Schematic with a base unit of um for placements."""
+
+    def __init__(self, **data: Any) -> None:
+        if "unit" in data:
+            raise ValueError(
+                "Cannot set the unit direct. It needs to be set by the class init."
+            )
+        super().__init__(unit="um", **data)
 
 
 class Schema(Schematic):
@@ -1006,7 +1071,11 @@ class Schema(Schematic):
             "Schema is deprecated, please use Schematic. "
             "It will be removed in kfactory 2.0"
         )
-        super().__init__(**data)
+        if "unit" in data:
+            raise ValueError(
+                "Cannot set the unit direct. It needs to be set by the class init."
+            )
+        super().__init__(unit="dbu", **data)
 
 
 class DSchema(DSchematic):
@@ -1017,7 +1086,11 @@ class DSchema(DSchematic):
             "DSchema is deprecated, please use DSchematic. "
             "It will be removed in kfactory 2.0"
         )
-        super().__init__(**data)
+        if "unit" in data:
+            raise ValueError(
+                "Cannot set the unit direct. It needs to be set by the class init."
+            )
+        super().__init__(unit="um", **data)
 
 
 def _create_kinst(
@@ -1074,8 +1147,6 @@ def _create_kinst(
         else:
             kinst = c.create_inst(schema_inst.kcl.get_component(schema_inst.component))
         kinst.name = schema_inst.name
-        if schema_inst.mirror:
-            kinst.transform(kdb.Trans.M0)
         return kinst
 
     # If the instance is a
@@ -1106,20 +1177,22 @@ def _create_kinst(
 
 def _place_islands(
     c: ProtoTKCell[TUnit],
-    schema_island: set[str],
+    schematic_island: set[str],
     instances: dict[str, ProtoTInstance[TUnit] | VInstance],
     connections: dict[str, list[Connection[TUnit]]],
-    schema_instances: dict[str, SchematicInstance[TUnit]],
+    schematic_instances: dict[str, SchematicInstance[TUnit]],
     placed_insts: set[str],
+    placed_ports: set[str],
+    schematic: TSchematic[TUnit],
     factories: dict[str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]]
     | None = None,
 ) -> set[str]:
-    target_length = len(schema_island)
+    target_length = len(schematic_island)
 
     placeable_insts: set[str] = set()
 
-    for inst in schema_island:
-        schema_inst = schema_instances[inst]
+    for inst in schematic_island:
+        schema_inst = schematic_instances[inst]
         kinst = _create_kinst(c, schema_inst, factories=factories)
         instances[inst] = kinst
         if schema_inst.placement:
@@ -1127,7 +1200,7 @@ def _place_islands(
                 logger.debug("Placing {}", schema_inst.name)
                 p = schema_inst.placement
                 assert p is not None
-                if p.is_placeable(placed_insts):
+                if p.is_placeable(placed_insts, placed_ports):
                     x = (
                         instances[p.x.instance].ports[p.x.port].x
                         if isinstance(p.x, PortRef)
@@ -1187,10 +1260,15 @@ def _place_islands(
             else:
                 kinst.transform(kdb.Trans.M0)
 
-    placed_island_insts = placed_insts & schema_island
+    placed_island_insts = placed_insts & schematic_island
 
     while len(placed_island_insts) < target_length:
-        placeable_insts = _get_placeable(placed_insts, connections)
+        placeable_insts, placeable_ports = _get_placeable(
+            placed_insts=placed_insts,
+            connections=connections,
+            placed_ports=placed_ports,
+            schematic=schematic,
+        )
 
         _connect_instances(instances, placeable_insts, connections, placed_insts)
         placed_insts |= placeable_insts
@@ -1239,17 +1317,36 @@ def _connect_instances(
 
 
 def _get_placeable(
-    placed_insts: set[str], connections: dict[str, list[Connection[TUnit]]]
-) -> set[str]:
+    placed_insts: set[str],
+    connections: dict[str, list[Connection[TUnit]]],
+    placed_ports: set[str],
+    schematic: TSchematic[TUnit],
+) -> tuple[set[str], set[str]]:
     placeable_insts: set[str] = set()
+    placeable_ports: set[str] = set()
     for inst in placed_insts:
         for connection in connections[inst]:
             ref1, ref2 = connection.root
             if isinstance(ref1, Port):
-                placeable_insts.add(ref2.instance)
+                if ref1 in placed_ports:
+                    placeable_insts.add(ref2.instance)
             else:
                 placeable_insts |= {ref1.instance, ref2.instance}
-    return placeable_insts - placed_insts
+    for name, port in schematic.ports.items():
+        if port.name in placed_ports:
+            continue
+        if isinstance(port, Port):
+            add_port = True
+            if isinstance(port.x, PortRef) and port.x.instance not in placed_insts:
+                add_port = False
+            if isinstance(port.y, PortRef) and port.y.instance not in placed_insts:
+                add_port = False
+            if add_port:
+                placeable_ports.add(port.name)
+        elif isinstance(port, PortRef) and name not in placed_ports:
+            if port.instance in placed_insts:
+                placeable_insts.add(name)
+    return placeable_insts - placed_insts, placeable_ports
 
 
 @overload
@@ -1271,16 +1368,16 @@ def get_schematic(
     exclude_port_types: Sequence[str] | None = ("placement", "pad", "bump"),
 ) -> TSchematic[int] | TSchematic[float]:
     if isinstance(c, KCell):
-        schema: TSchematic[int] | TSchematic[float] = Schematic(name=c.name)
+        schematic: TSchematic[int] | TSchematic[float] = Schematic(name=c.name)
     else:
-        schema = DSchematic(name=c.name)
+        schematic = DSchematic(name=c.name)
 
     for inst in c.insts:
         name = inst.property(PROPID.NAME)
         if name is not None:
-            schema.create_inst(name, inst.cell.factory_name or inst.cell.name)
+            schematic.create_inst(name, inst.cell.factory_name or inst.cell.name)
 
-    return schema
+    return schematic
 
 
 @overload

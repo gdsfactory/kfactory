@@ -8,11 +8,16 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from typing import Any, Self
+from typing import TYPE_CHECKING, Any, Self
 
 from pydantic import BaseModel, Field, RootModel, model_validator
 
 from .typings import JSONSerializable  # noqa: TC001
+
+if TYPE_CHECKING:
+    from .kcell import ProtoTKCell
+    from .port import BasePort
+    from .schematic import TSchematic
 
 __all__ = ["Netlist", "NetlistInstance", "NetlistPort", "PortArrayRef", "PortRef"]
 
@@ -59,6 +64,16 @@ class PortRef(BaseModel, extra="forbid"):
 
     def as_python_str(self, inst_name: str | None = None) -> str:
         return f"{inst_name or self.instance}[{self.port!r}]"
+
+    def is_placeable(self, placed_instances: set[str]) -> bool:
+        return self.instance in placed_instances
+
+    def place(
+        self, cell: ProtoTKCell[Any], schematic: TSchematic[Any], name: str
+    ) -> BasePort:
+        return cell.add_port(
+            port=cell.insts[self.instance].ports[self.port], name=name
+        ).base
 
 
 class PortArrayRef(PortRef, extra="forbid"):
@@ -111,6 +126,13 @@ class PortArrayRef(PortRef, extra="forbid"):
 
     def as_python_str(self, inst_name: str | None = None) -> str:
         return f"{inst_name or self.instance}[{self.port!r}, {self.ia}, {self.ib}]"
+
+    def place(
+        self, cell: ProtoTKCell[Any], schematic: TSchematic[Any], name: str
+    ) -> BasePort:
+        return cell.add_port(
+            port=cell.insts[self.instance].ports[self.port, self.ia, self.ib], name=name
+        ).base
 
 
 class NetlistPort(BaseModel):

@@ -69,7 +69,7 @@ ports:
     for inst in schematic.instances.values():
         _ = inst.parent_schematic.name
 
-    schema_str = schematic.as_schematic_cell(tunit="int")
+    schema_str = schematic.code_str()
     assert schema_str is not None
 
 
@@ -259,7 +259,7 @@ def test_schema_mirror_connection() -> None:
 
         return schematic
 
-    straight_sbend(length=10_000, offset=20_000)
+    straight_sbend(length=10_000, offset=20_000).show()
 
 
 def test_schema_kcl_mix_netlist() -> None:
@@ -689,7 +689,7 @@ def test_netlist_equivalent() -> None:
         == nl2[c.name]
     )
 
-    schema_str = schematic.as_schematic_cell(tunit="int")
+    schema_str = schematic.code_str()
 
     assert schema_str is not None
 
@@ -704,7 +704,7 @@ def test_netlist_equivalent() -> None:
         else pytest.param(file)
         for file in yaml_files
     ],
-    ids=lambda p: _get_path_stem,
+    ids=_get_path_stem,
 )
 def test_gdsfactory_yaml(path: Path) -> None:
     with path.open(encoding="utf-8") as f:
@@ -725,7 +725,7 @@ def test_gdsfactory_yaml(path: Path) -> None:
         else pytest.param(file)
         for file in yaml_files
     ],
-    ids=lambda p: _get_path_stem,
+    ids=_get_path_stem,
 )
 def test_gdsfactory_yaml_build(path: Path) -> None:
     pytest.importorskip("gdsfactory")
