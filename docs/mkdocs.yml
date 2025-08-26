@@ -18,6 +18,7 @@ nav:
       - DRC utils: notebooks/02_DRC.py
       - Enclosures: notebooks/03_Enclosures.py
       - Multiple KCLs: notebooks/04_KCL.py
+      - Schemas: notebooks/05_Schemas.py
   - Migration: migration.md
   - Config Class: config.md
   - API: reference/
