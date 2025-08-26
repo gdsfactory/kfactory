@@ -710,7 +710,3 @@ def test_to_dtype(kcl: kf.KCLayout) -> None:
     ref = dref.to_itype()
     assert ref.bbox() == kf.kdb.Box(-5000, -5000, 5000, 5000)
     assert isinstance(ref, kf.Instance)
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-s"])

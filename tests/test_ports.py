@@ -549,7 +549,3 @@ def test_ports_repr(kcl: kf.KCLayout, layers: Layers) -> None:
         width=5000, length=10000, layer=layers.WG
     )
     repr(c.ports)
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-s"])

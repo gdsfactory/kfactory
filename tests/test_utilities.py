@@ -108,7 +108,3 @@ def test_pprint_ports(layers: Layers, kcl: kf.KCLayout) -> None:
     )
     for case, ports_ in a:
         pprint_ports(ports_, case)
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-s"])
