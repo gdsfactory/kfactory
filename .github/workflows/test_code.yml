@@ -6,16 +6,16 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 */12 * * *'
+    - cron: "0 */12 * * *"
   workflow_dispatch:
 
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-    - uses: pre-commit/action@v3.0.1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - uses: pre-commit/action@v3.0.1
 
   run-ty:
     runs-on: ${{ matrix.os }}
@@ -34,7 +34,6 @@ jobs:
       # - name: Run ty check
       #   run: uv run ty check src/kfactory --exit-zero
 
-
   test_code:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -51,11 +50,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          make gds-download
+          just gds-download
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
-        run: make test PYTHON=${{ matrix.python-version }}
+        run: just test ${{ matrix.python-version }}
 
   test_code_min_ver:
     runs-on: ${{ matrix.os }}
@@ -72,11 +71,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          make gds-download
+          just gds-download
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
-        run: make test-min
+        run: just test-min
 
   coverage:
     runs-on: ${{ matrix.os }}
@@ -92,10 +91,10 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          make test-venv
+          just test-venv
       - name: Test coverage
         run: |
-          make cov
+          just cov
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
@@ -123,7 +122,7 @@ jobs:
           python -m pip install --user -U uv wheel
           uv pip install --system -e .[docs,ci]
           python -m ipykernel install --user --name python3
-          make install
+          just dev
       - name: Test documentation
         run: |
-          make docs
+          just docs
