@@ -221,7 +221,3 @@ def test_instnace_group_iter(
     instance1, *_ = instance_groups
     for inst in instance1:
         assert isinstance(inst, kf.Instance)
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])

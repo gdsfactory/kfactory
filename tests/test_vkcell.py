@@ -106,7 +106,3 @@ def test_vkcell_attributes() -> None:
     assert c.size_info.nc == (5, 10)
     assert c.size_info.cc == (5, 5)
     assert c.size_info.center == (5, 5)
-
-
-if __name__ == "__main__":
-    test_vkcell_attributes()

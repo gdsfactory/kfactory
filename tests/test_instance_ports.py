@@ -280,7 +280,3 @@ def test_iter(kcl: kf.KCLayout, layers: Layers) -> None:
 
 def test_dinstance_ports_repr(dinstance_ports: kf.DInstance) -> None:
     assert repr(dinstance_ports.ports)
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-s"])
