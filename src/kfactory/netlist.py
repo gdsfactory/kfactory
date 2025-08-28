@@ -15,7 +15,8 @@ from pydantic import BaseModel, Field, RootModel, model_validator
 from .typings import JSONSerializable  # noqa: TC001
 
 if TYPE_CHECKING:
-    from .kcell import ProtoTKCell
+    from .cross_section import CrossSection, DCrossSection
+    from .kcell import KCell, ProtoTKCell
     from .port import BasePort
     from .schematic import TSchematic
 
@@ -69,7 +70,11 @@ class PortRef(BaseModel, extra="forbid"):
         return self.instance in placed_instances
 
     def place(
-        self, cell: ProtoTKCell[Any], schematic: TSchematic[Any], name: str
+        self,
+        cell: KCell,
+        schematic: TSchematic[Any],
+        name: str,
+        cross_sections: dict[str, CrossSection | DCrossSection],
     ) -> BasePort:
         return cell.add_port(
             port=cell.insts[self.instance].ports[self.port], name=name
@@ -128,7 +133,11 @@ class PortArrayRef(PortRef, extra="forbid"):
         return f"{inst_name or self.instance}[{self.port!r}, {self.ia}, {self.ib}]"
 
     def place(
-        self, cell: ProtoTKCell[Any], schematic: TSchematic[Any], name: str
+        self,
+        cell: ProtoTKCell[Any],
+        schematic: TSchematic[Any],
+        name: str,
+        cross_sections: dict[str, CrossSection | DCrossSection],
     ) -> BasePort:
         return cell.add_port(
             port=cell.insts[self.instance].ports[self.port, self.ia, self.ib], name=name
