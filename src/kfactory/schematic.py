@@ -1167,7 +1167,7 @@ def _create_kinst(
                     schematic_inst.kcl.get_component(schematic_inst.component)
                 )
             kinst.name = schematic_inst.name
-            return Instance(kcl=cell_.kcl, instance=kinst._instance)
+            return Instance(kcl=c.kcl, instance=kinst._instance)
 
     # If the instance is a
     vinst = c.create_vinst(cell)
