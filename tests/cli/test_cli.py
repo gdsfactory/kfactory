@@ -36,7 +36,3 @@ def test_show_function() -> None:
         temp_file.chmod(0o000)
 
         show(temp_file)
-
-
-if __name__ == "__main__":
-    test_show_function()

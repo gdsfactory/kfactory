@@ -1,5 +1,4 @@
 import klayout.db as kdb
-import pytest
 
 from kfactory.utils.simplify import dsimplify, simplify
 
@@ -72,7 +71,3 @@ def test_simplify_single_point() -> None:
     points = [kdb.DPoint(0, 0)]
     simplified = dsimplify(points, 0.1)
     assert simplified == points
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])
