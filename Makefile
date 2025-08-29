@@ -42,6 +42,9 @@ test: init-submodule
 test-min:
 	uv run $(PYTHON_FLAG) --extra ci --resolution lowest-direct --isolated pytest -s -n logical
 
+test-gdsfactory: init-submodule
+	uv run $(PYTHON_FLAG) --extra ci --with gdsfactory --no-deps --isolated pytest -s -n logical tests/test_schematic.py::test_gdsfactory_yaml_build
+
 cov:
 	uv run $(PYTHON_FLAG) --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
 
