@@ -972,6 +972,7 @@ def route_smart(
                     start_steps=s,
                     end_steps=e,
                     allow_sbends=allow_sbend,
+                    width=w0,
                 )
             )
         start_ts = [r.start.t for r in mh_routers]
@@ -2252,6 +2253,7 @@ def _route_waypoints(
                 end_transformation=er.start_transformation,
                 start_points=sr.start.pts[:-1] + list(reversed(er.start.pts[:-1])),
                 allow_sbends=allow_sbends,
+                width=sr.width,
             )
             router.start.t = router.end_transformation * kdb.Trans.R180
             router.finished = True
@@ -2326,6 +2328,7 @@ def _route_waypoints(
             + _bb[1:-1]
             + list(reversed(er.start.pts[:-1])),
             allow_sbends=allow_sbends,
+            width=sr.width,
         )
         router.start.t = router.end.t * kdb.Trans.R180
         router.finished = True

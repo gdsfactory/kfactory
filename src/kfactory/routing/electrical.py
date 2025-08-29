@@ -358,6 +358,7 @@ def route_bundle(
             collision_check_layers=collision_check_layers,
             start_angles=cast("int | list[int] | None", start_angles),
             end_angles=cast("int | list[int]", end_angles),
+            route_width=cast("int", route_width),
         )
 
     if route_width is not None:
@@ -422,6 +423,7 @@ def route_bundle(
         collision_check_layers=collision_check_layers,
         start_angles=start_angles,
         end_angles=end_angles,
+        route_width=route_width,
     )
 
 
