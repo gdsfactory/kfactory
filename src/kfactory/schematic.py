@@ -15,6 +15,7 @@ from typing import (
     TYPE_CHECKING,
     Annotated,
     Any,
+    Concatenate,
     Generic,
     Literal,
     Self,
@@ -40,14 +41,15 @@ from .instance import DInstance, Instance, VInstance
 from .kcell import DKCell, KCell, ProtoTKCell, VKCell
 from .layout import KCLayout, get_default_kcl, kcls
 from .netlist import Net, Netlist, NetlistInstance, NetlistPort, PortArrayRef, PortRef
+from .port import DPort as DKCellPort
+from .port import Port as KCellPort
+from .port import ProtoPort
 from .typings import KC, JSONSerializable, TUnit, dbu, um
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
 
     from .cross_section import CrossSection, DCrossSection
-    from .port import Port as KCellPort
-    from .port import ProtoPort
 
 __all__ = ["DSchematic", "Schematic", "get_schematic", "read_schematic"]
 
@@ -658,9 +660,25 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     def create_cell(
         self,
         output_type: type[KC],
-        factories: dict[str, Callable[..., KCell | DKCell] | Callable[..., VKCell]]
+        factories: dict[
+            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
+        ]
         | None = None,
         cross_sections: dict[str, CrossSection | DCrossSection] | None = None,
+        routing_strategies: dict[
+            str,
+            Callable[
+                Concatenate[
+                    ProtoTKCell[Any],
+                    Sequence[ProtoPort[Any]],
+                    Sequence[ProtoPort[Any]],
+                    ...,
+                ],
+                Any,
+            ],
+        ]
+        | None = None,
+        place_unknown: bool = False,
     ) -> KC:
         c = KCell(kcl=self.kcl)
 
@@ -671,6 +689,9 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         instance_connections: defaultdict[str, list[Connection[TUnit]]] = defaultdict(
             list
         )
+
+        if routing_strategies is None:
+            routing_strategies = c.kcl.routing_strategies
 
         if cross_sections is None:
             cross_sections = {
@@ -733,7 +754,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         for i, island in enumerate(unique_islands):
             logger.debug("Placing island {} of schema {}, {}", i, self.name, island)
             if island not in placed_islands:
-                _place_islands(
+                _place_island(
                     c,
                     schematic_island=island,
                     instances=instances,
@@ -743,6 +764,8 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                     placed_ports=placed_ports,
                     schematic=self,
                     cross_sections=cross_sections,
+                    factories=factories,
+                    place_unknown=place_unknown,
                 )
                 placed_islands.append(island)
                 placed_insts |= island
@@ -767,9 +790,18 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 else:
                     p2 = c.insts[l2.instance].ports[l2.port]
                 end_ports.append(p2)
-            self.kcl.routing_strategies[route.routing_strategy](
-                c, start_ports, end_ports, **route.settings
-            )
+            route_c = output_type(base=c.base)
+            if isinstance(route_c, KCell):
+                routing_strategies[route.routing_strategy](
+                    output_type(base=c.base), start_ports, end_ports, **route.settings
+                )
+            else:
+                routing_strategies[route.routing_strategy](
+                    output_type(base=c.base),
+                    [DKCellPort(base=sp.base) for sp in start_ports],
+                    [DKCellPort(base=ep.base) for ep in end_ports],
+                    **route.settings,
+                )
 
         # verify connections
         port_connection_transformation_errors: list[Connection[TUnit]] = []
@@ -1110,7 +1142,7 @@ def _create_kinst(
     cell_ = (
         factories[schematic_inst.component](**schematic_inst.settings)
         if factories
-        else schematic_inst.kcl.get_component(
+        else schematic_inst.kcl.get_anycell(
             schematic_inst.component, **schematic_inst.settings
         )
     )
@@ -1156,16 +1188,8 @@ def _create_kinst(
                         na=na,
                         nb=nb,
                     )
-            elif schematic_inst.settings:
-                kinst = c.create_inst(
-                    schematic_inst.kcl.get_component(
-                        schematic_inst.component, **schematic_inst.settings
-                    )
-                )
             else:
-                kinst = c.create_inst(
-                    schematic_inst.kcl.get_component(schematic_inst.component)
-                )
+                kinst = c.create_inst(cell)
             kinst.name = schematic_inst.name
             return Instance(kcl=c.kcl, instance=kinst._instance)
 
@@ -1205,7 +1229,7 @@ def _dvec(x: float, y: float, c: KCell, unit: Literal["dbu", "um"]) -> kdb.DVect
     return kdb.DVector(x, y)
 
 
-def _place_islands(
+def _place_island(
     c: KCell,
     schematic_island: set[str],
     instances: dict[str, Instance | VInstance],
@@ -1219,6 +1243,7 @@ def _place_islands(
         str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
     ]
     | None = None,
+    place_unknown: bool = False,
 ) -> set[str]:
     target_length = len(schematic_island)
 
@@ -1317,11 +1342,33 @@ def _place_islands(
         )
 
     if len(placed_island_insts) < target_length:
-        raise ValueError(
-            "Could not place all instances. This is likely due to missing place "
-            "instructions (need at least 1 per individual group of connected"
-            " instances)"
-        )
+        if place_unknown:
+            place_inst = next(iter(schematic_island - placed_island_insts))
+            logger.warning(
+                "Cannot determine instance placement. Using implicit placement 0,0 "
+                f"with orientation 0 for instance {place_inst!r}"
+            )
+            schematic.instances[place_inst].place()
+            placed_insts.add(place_inst)
+            placed_island_insts.add(place_inst)
+            placed = True
+            while placed:
+                placed = _get_and_place_insts_and_ports(
+                    c=c,
+                    placed_insts=placed_insts,
+                    placed_ports=placed_ports,
+                    connections=connections,
+                    schematic=schematic,
+                    instances=instances,
+                    placed_island_insts=placed_island_insts,
+                    cross_sections=cross_sections,
+                )
+        if len(placed_island_insts) < target_length:
+            raise ValueError(
+                "Could not place all instances. This is likely due to missing place "
+                "instructions (need at least 1 per individual group of connected"
+                " instances)"
+            )
 
     return placed_insts
 

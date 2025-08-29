@@ -20,7 +20,7 @@ from pydantic import (
 )
 
 from . import __version__, kdb
-from .conf import CheckInstances, config
+from .conf import CheckInstances, config, logger
 from .cross_section import (
     CrossSection,
     CrossSectionModel,
@@ -61,6 +61,7 @@ from .typings import (
     KC,
     KCIN,
     VK,
+    AnyCellSpec,
     KC_contra,
     KCellParams,
     KCellSpec,
@@ -1810,6 +1811,69 @@ class KCLayout(
                 "or the cell itself."
             )
         return self.kcells[spec] if isinstance(spec, int) else spec
+
+    def get_anycell(
+        self,
+        spec: AnyCellSpec,
+        **cell_kwargs: Any,
+    ) -> KCell | VKCell:
+        if callable(spec):
+            c = spec(**cell_kwargs)
+            if isinstance(c, ProtoTKCell):
+                return KCell(base=c.base)
+            return c
+        if isinstance(spec, dict):
+            settings = spec.get("settings", {}).copy()
+            settings.update(cell_kwargs)
+            kcell_factory = self.factories.get(spec["component"])
+            vkcell_factory = self.virtual_factories.get(spec["component"])
+            if kcell_factory is not None and vkcell_factory is not None:
+                logger.warning(
+                    f"Found a factory for component {spec['component']!r} "
+                    "as a standard cell as well as a virtual one (all-angle). "
+                    "Proceeding with standard factory."
+                )
+            if kcell_factory is not None:
+                return KCell(base=kcell_factory(**settings).base)
+            if vkcell_factory is not None:
+                return vkcell_factory(**settings)
+            raise ValueError(
+                f"Could not find standard or virtual factory for component "
+                f"{spec['component']}.\n"
+                f"Available standard factories are {list(self.factories.data)!r}.\n"
+                "Available virtual factories are "
+                f"{list(self.virtual_factories.data)!r}.\n"
+            )
+        if isinstance(spec, str):
+            kcell_factory = self.factories.get(spec)
+            vkcell_factory = self.virtual_factories.get(spec)
+            if kcell_factory is not None and vkcell_factory is not None:
+                logger.warning(
+                    f"Found a factory for component {spec!r} "
+                    "as a standard cell as well as a virtual one (all-angle). "
+                    "Proceeding with standard factory."
+                )
+            if kcell_factory is not None:
+                return KCell(base=kcell_factory(**cell_kwargs).base)
+            if vkcell_factory is not None:
+                return vkcell_factory(**cell_kwargs)
+            raise ValueError(
+                f"Could not find standard or virtual factory for component "
+                f"{spec}.\n"
+                f"Available standard factories are {list(self.factories.data)!r}.\n"
+                f"Available virtual factories are "
+                f"{list(self.virtual_factories.data)!r}.\n"
+            )
+        if cell_kwargs:
+            raise ValueError(
+                "Cell kwargs are not allowed for retrieving static cells by integer "
+                "or the cell itself."
+            )
+        if isinstance(spec, int):
+            return self.kcells[spec]
+        if isinstance(spec, ProtoTKCell):
+            return KCell(base=spec.base)
+        return spec
 
     def delete(self) -> None:
         del kcls[self.name]
