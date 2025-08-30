@@ -6,16 +6,16 @@ on:
     branches:
       - main
   schedule:
-    - cron: '0 */12 * * *'
+    - cron: "0 */12 * * *"
   workflow_dispatch:
 
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-python@v5
-    - uses: pre-commit/action@v3.0.1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - uses: pre-commit/action@v3.0.1
 
   run-ty:
     runs-on: ${{ matrix.os }}
@@ -34,7 +34,6 @@ jobs:
       # - name: Run ty check
       #   run: uv run ty check src/kfactory --exit-zero
 
-
   test_code:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -50,12 +49,11 @@ jobs:
       - name: Install dependencies
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          make gds-download
+        run: gh release download v0.6.0 -D gds/gds_ref/ --clobber
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
-        run: make test PYTHON=${{ matrix.python-version }}
+        run: uv run -p ${{ matrix.python-version }} --extra ci --isolated pytest -s -n logical
 
   test_code_min_ver:
     runs-on: ${{ matrix.os }}
@@ -71,12 +69,11 @@ jobs:
       - name: Install dependencies
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          make gds-download
+        run: gh release download v0.6.0 -D gds/gds_ref/ --clobber
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
-        run: make test-min
+        run: uv run -p ${{ matrix.python-version }} --extra ci --resolution lowest-direct --isolated pytest -s -n logical
 
   coverage:
     runs-on: ${{ matrix.os }}
@@ -92,10 +89,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          make test-venv
+          uv sync --all-extras
       - name: Test coverage
-        run: |
-          make cov
+        run: uv run -p ${{ matrix.python-version }} --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
@@ -123,7 +119,6 @@ jobs:
           python -m pip install --user -U uv wheel
           uv pip install --system -e .[docs,ci]
           python -m ipykernel install --user --name python3
-          make install
+          uv sync --all-extras
       - name: Test documentation
-        run: |
-          make docs
+        run: uv run -p ${{ matrix.python-version }} --extra docs --isolated mkdocs build -f docs/mkdocs.yml
