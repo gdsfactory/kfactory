@@ -1101,13 +1101,13 @@ def test_routing_same_plane() -> None:
     p1_e = kf.Port(
         name="PG1",
         cross_section=xs_s,
-        trans=kf.kdb.Trans(rot=3, mirrx=False, x=500_000, y=0),
+        trans=kf.kdb.Trans(rot=1, mirrx=False, x=500_000, y=-50_000),
         port_type="electrical",
     )
     p2_e = kf.Port(
         name="PS",
         cross_section=xs_s,
-        trans=kf.kdb.Trans(rot=3, mirrx=False, x=550_000, y=0),
+        trans=kf.kdb.Trans(rot=1, mirrx=False, x=450_000, y=-50_000),
         port_type="electrical",
     )
 
@@ -1122,3 +1122,4 @@ def test_routing_same_plane() -> None:
     )
 
     c.add_ports(ports)
+    c.show()

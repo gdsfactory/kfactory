@@ -1557,14 +1557,6 @@ def route_smart(
             routers = router_groups[0][1]
             r = routers[0]
             match (target_angle - r.start.t.angle) % 4:
-                case 1:
-                    total_bbox = _route_to_side(
-                        [r.start for r in routers],
-                        clockwise=True,
-                        bbox=total_bbox,
-                        separation=separation,
-                        allow_sbends=allow_sbend,
-                    )
                 case 2:
                     total_bbox = _route_to_side(
                         [r.start for r in routers],
