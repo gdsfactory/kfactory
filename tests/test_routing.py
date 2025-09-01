@@ -1122,4 +1122,3 @@ def test_routing_same_plane() -> None:
     )
 
     c.add_ports(ports)
-    c.show()
