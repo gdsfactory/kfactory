@@ -2199,32 +2199,64 @@ def _route_waypoints(
             backbone_start_trans.append(rot_t * kdb.Trans(0, w))
             backbone_end_trans.append(rot_t * kdb.Trans(2, False, 0, w))
             w += widths[i] - widths[i] // 2 + separation
-        start_manhattan_routers = route_smart(
-            start_ports=start_ts,
-            end_ports=backbone_start_trans,
-            widths=widths,
-            bend90_radius=bend90_radius,
-            separation=separation,
-            starts=starts,
-            ends=cast("list[list[Step]]", [[]] * len(starts)),
-            bboxes=bboxes,
-            waypoints=None,
-            bbox_routing=bbox_routing,
-            sort_ports=sort_ports,
-        )
-        end_manhattan_routers = route_smart(
-            start_ports=end_ts,
-            end_ports=backbone_end_trans,
-            widths=widths,
-            bend90_radius=bend90_radius,
-            separation=separation,
-            starts=ends,
-            ends=cast("list[list[Step]]", [[]] * len(ends)),
-            bboxes=bboxes,
-            waypoints=None,
-            bbox_routing=bbox_routing,
-            sort_ports=sort_ports,
-        )
+        if sort_ports:
+            start_manhattan_routers = route_smart(
+                start_ports=start_ts,
+                end_ports=backbone_start_trans,
+                widths=widths,
+                bend90_radius=bend90_radius,
+                separation=separation,
+                starts=starts,
+                ends=cast("list[list[Step]]", [[]] * len(starts)),
+                bboxes=bboxes,
+                waypoints=None,
+                bbox_routing=bbox_routing,
+                sort_ports=True,
+            )
+            end_manhattan_routers = route_smart(
+                start_ports=end_ts,
+                end_ports=backbone_end_trans,
+                widths=widths,
+                bend90_radius=bend90_radius,
+                separation=separation,
+                starts=ends,
+                ends=cast("list[list[Step]]", [[]] * len(ends)),
+                bboxes=bboxes,
+                waypoints=None,
+                bbox_routing=bbox_routing,
+                sort_ports=True,
+            )
+        else:
+            order = {t: i for i, t in enumerate(start_ts)}
+            start_manhattan_routers = route_smart(
+                start_ports=start_ts,
+                end_ports=backbone_start_trans,
+                widths=widths,
+                bend90_radius=bend90_radius,
+                separation=separation,
+                starts=starts,
+                ends=cast("list[list[Step]]", [[]] * len(starts)),
+                bboxes=bboxes,
+                waypoints=None,
+                bbox_routing=bbox_routing,
+                sort_ports=True,
+            )
+
+            end_manhattan_routers = route_smart(
+                start_ports=[
+                    end_ts[order[router.start_transformation]]
+                    for router in reversed(start_manhattan_routers)
+                ],
+                end_ports=backbone_end_trans,
+                widths=widths,
+                bend90_radius=bend90_radius,
+                separation=separation,
+                starts=ends,
+                ends=cast("list[list[Step]]", [[]] * len(ends)),
+                bboxes=bboxes,
+                waypoints=None,
+                bbox_routing=bbox_routing,
+            )
         all_routers: list[ManhattanRouter] = []
         start_manhattan_routers.sort(key=lambda sr: sr.end_transformation)
         end_manhattan_routers.sort(
@@ -2280,36 +2312,73 @@ def _route_waypoints(
                 )
             raise ValueError(error_msg) from e
         raise
-    start_manhattan_routers = route_smart(
-        start_ports=start_ts,
-        end_ports=[
-            kdb.Trans(start_angle, False, _bb[0].to_v()) for _bb in bundle_points
-        ],
-        widths=widths,
-        bend90_radius=bend90_radius,
-        separation=separation,
-        starts=starts,
-        ends=cast("list[list[Step]]", [[]] * len(starts)),
-        bboxes=bboxes,
-        sort_ports=sort_ports,
-        waypoints=None,
-        bbox_routing=bbox_routing,
-    )
-    end_manhattan_routers = route_smart(
-        end_ports=[
-            kdb.Trans(end_angle, False, _bb[-1].to_v()) for _bb in bundle_points
-        ],
-        start_ports=end_ts,
-        widths=widths,
-        bend90_radius=bend90_radius,
-        separation=separation,
-        starts=ends,
-        ends=cast("list[list[Step]]", [[]] * len(ends)),
-        bboxes=bboxes,
-        sort_ports=sort_ports,
-        waypoints=None,
-        bbox_routing=bbox_routing,
-    )
+
+    if sort_ports:
+        start_manhattan_routers = route_smart(
+            start_ports=start_ts,
+            end_ports=[
+                kdb.Trans(start_angle, False, _bb[0].to_v()) for _bb in bundle_points
+            ],
+            widths=widths,
+            bend90_radius=bend90_radius,
+            separation=separation,
+            starts=starts,
+            ends=cast("list[list[Step]]", [[]] * len(starts)),
+            bboxes=bboxes,
+            sort_ports=sort_ports,
+            waypoints=None,
+            bbox_routing=bbox_routing,
+        )
+        end_manhattan_routers = route_smart(
+            end_ports=[
+                kdb.Trans(end_angle, False, _bb[-1].to_v()) for _bb in bundle_points
+            ],
+            start_ports=end_ts,
+            widths=widths,
+            bend90_radius=bend90_radius,
+            separation=separation,
+            starts=ends,
+            ends=cast("list[list[Step]]", [[]] * len(ends)),
+            bboxes=bboxes,
+            sort_ports=sort_ports,
+            waypoints=None,
+            bbox_routing=bbox_routing,
+        )
+    else:
+        order = {t: i for i, t in enumerate(start_ts)}
+        start_manhattan_routers = route_smart(
+            start_ports=start_ts,
+            end_ports=[
+                kdb.Trans(start_angle, False, _bb[0].to_v()) for _bb in bundle_points
+            ],
+            widths=widths,
+            bend90_radius=bend90_radius,
+            separation=separation,
+            starts=starts,
+            ends=cast("list[list[Step]]", [[]] * len(starts)),
+            bboxes=bboxes,
+            sort_ports=True,
+            waypoints=None,
+            bbox_routing=bbox_routing,
+        )
+        end_manhattan_routers = route_smart(
+            end_ports=[
+                kdb.Trans(end_angle, False, _bb[-1].to_v()) for _bb in bundle_points
+            ],
+            start_ports=[
+                end_ts[order[router.start_transformation]]
+                for router in reversed(start_manhattan_routers)
+            ],
+            widths=widths,
+            bend90_radius=bend90_radius,
+            separation=separation,
+            starts=ends,
+            ends=cast("list[list[Step]]", [[]] * len(ends)),
+            bboxes=bboxes,
+            sort_ports=False,
+            waypoints=None,
+            bbox_routing=bbox_routing,
+        )
     start_manhattan_routers.sort(key=lambda sr: sr.start.pts[-1])
     end_manhattan_routers.sort(key=lambda er: er.start.pts[-1])
     bundle_points.sort(key=lambda _bb: _bb[0])
