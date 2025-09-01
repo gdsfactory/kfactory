@@ -659,6 +659,51 @@ def test_route_smart_waypoints_pts_sort(
     )
 
 
+def test_route_waypoints_non_manhattan(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
+) -> None:
+    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_NON_MANHATTAN")
+    l_ = 15
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)] + [
+        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
+    ]
+    start_ports = [
+        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for trans in transformations
+    ]
+    end_ports = [
+        kf.Port(
+            width=500,
+            layer_info=layers.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
+        )
+        for trans in transformations
+    ]
+    with pytest.raises(
+        ValueError,
+        match=r"Found non-manhattan waypoints\. "
+        r"route_smart only supports manhattan \(orthogonal to the axes\) routing\..*",
+    ):
+        kf.routing.optical.route_bundle(
+            c,
+            start_ports,
+            end_ports,
+            separation=4000,
+            straight_factory=straight_factory_dbu,
+            bend90_cell=bend90_small,
+            waypoints=[
+                kf.kdb.Point(250_000, 0),
+                kf.kdb.Point(255_000, 100_000),
+                kf.kdb.Point(400_000, 100_000),
+            ],
+            sort_ports=True,
+            on_placer_error="error",
+        )
+
+
 def test_route_smart_waypoints_trans(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
@@ -1042,7 +1087,7 @@ def test_sbend_routing() -> None:
     )
 
 
-def test_routing_same_plane() -> None:
+def test_route_same_plane() -> None:
     c = kf.KCell()
 
     layer = Layers()
