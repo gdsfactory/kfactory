@@ -1040,3 +1040,85 @@ def test_sbend_routing() -> None:
         ),
         sbend_factory=sbend_factory,
     )
+
+
+def test_routing_same_plane() -> None:
+    c = kf.KCell()
+
+    layer = Layers()
+
+    kf.kcl.infos = Layers()
+
+    enc = kf.LayerEnclosure(
+        sections=[(layer.METAL1EX, 500), (layer.METAL2EX, -200, 2000)],
+        name="M1",
+        main_layer=layer.METAL1,
+    )
+
+    xs_s = kf.kcl.get_icross_section(
+        kf.SymmetricalCrossSection(width=10_000, enclosure=enc, name="S")
+    )
+
+    def bend_circular(radius: int, cross_section: kf.CrossSection) -> kf.KCell:
+        c = kf.cells.circular.bend_circular(
+            radius=kf.kcl.to_um(radius),
+            width=kf.kcl.to_um(cross_section.width),
+            layer=cross_section.layer,
+            enclosure=cross_section.enclosure,
+        )
+        c.kdb_cell.locked = False
+        for p in c.ports:
+            p.port_type = "electrical"
+        c.kdb_cell.locked = True
+        return c
+
+    def wire(length: int, cross_section: kf.CrossSection) -> kf.KCell:
+        c = kf.cells.straight.straight_dbu(
+            width=cross_section.width,
+            length=length,
+            layer=cross_section.layer,
+            enclosure=cross_section.enclosure,
+        )
+        c.kdb_cell.locked = False
+        for p in c.ports:
+            p.port_type = "electrical"
+        c.kdb_cell.locked = True
+        return c
+
+    p1_s = kf.Port(
+        name="G1",
+        cross_section=xs_s,
+        trans=kf.kdb.Trans(x=0, y=0),
+        port_type="electrical",
+    )
+    p2_s = kf.Port(
+        name="S",
+        cross_section=xs_s,
+        trans=kf.kdb.Trans(x=0, y=-50_000),
+        port_type="electrical",
+    )
+
+    p1_e = kf.Port(
+        name="PG1",
+        cross_section=xs_s,
+        trans=kf.kdb.Trans(rot=1, mirrx=False, x=500_000, y=-50_000),
+        port_type="electrical",
+    )
+    p2_e = kf.Port(
+        name="PS",
+        cross_section=xs_s,
+        trans=kf.kdb.Trans(rot=1, mirrx=False, x=450_000, y=-50_000),
+        port_type="electrical",
+    )
+
+    ports = [p1_s, p2_s, p1_e, p2_e]
+
+    kf.routing.electrical.route_bundle(
+        c,
+        start_ports=[p1_s, p2_s],
+        end_ports=[p1_e, p2_e],
+        separation=4000,
+        on_collision="error",
+    )
+
+    c.add_ports(ports)

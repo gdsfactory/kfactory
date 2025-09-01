@@ -1557,14 +1557,6 @@ def route_smart(
             routers = router_groups[0][1]
             r = routers[0]
             match (target_angle - r.start.t.angle) % 4:
-                case 1:
-                    total_bbox = _route_to_side(
-                        [r.start for r in routers],
-                        clockwise=True,
-                        bbox=total_bbox,
-                        separation=separation,
-                        allow_sbends=allow_sbend,
-                    )
                 case 2:
                     total_bbox = _route_to_side(
                         [r.start for r in routers],
@@ -1575,14 +1567,6 @@ def route_smart(
                     total_bbox = _route_to_side(
                         [r.start for r in routers],
                         clockwise=routers[0].start.tv.y > 0,
-                        bbox=total_bbox,
-                        separation=separation,
-                        allow_sbends=allow_sbend,
-                    )
-                case 3:
-                    total_bbox = _route_to_side(
-                        [r.start for r in routers],
-                        clockwise=False,
                         bbox=total_bbox,
                         separation=separation,
                         allow_sbends=allow_sbend,
@@ -2239,6 +2223,7 @@ def _route_waypoints(
             bboxes=bboxes,
             waypoints=None,
             bbox_routing=bbox_routing,
+            sort_ports=sort_ports,
         )
         all_routers: list[ManhattanRouter] = []
         start_manhattan_routers.sort(key=lambda sr: sr.end_transformation)
