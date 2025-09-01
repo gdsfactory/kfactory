@@ -1579,14 +1579,6 @@ def route_smart(
                         separation=separation,
                         allow_sbends=allow_sbend,
                     )
-                case 3:
-                    total_bbox = _route_to_side(
-                        [r.start for r in routers],
-                        clockwise=False,
-                        bbox=total_bbox,
-                        separation=separation,
-                        allow_sbends=allow_sbend,
-                    )
                 case _:
                     ...
             route_to_bbox(
@@ -2239,6 +2231,7 @@ def _route_waypoints(
             bboxes=bboxes,
             waypoints=None,
             bbox_routing=bbox_routing,
+            sort_ports=sort_ports,
         )
         all_routers: list[ManhattanRouter] = []
         start_manhattan_routers.sort(key=lambda sr: sr.end_transformation)
