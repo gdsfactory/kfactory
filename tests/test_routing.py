@@ -682,21 +682,26 @@ def test_route_waypoints_non_manhattan(
         )
         for trans in transformations
     ]
-    kf.routing.optical.route_bundle(
-        c,
-        start_ports,
-        end_ports,
-        separation=4000,
-        straight_factory=straight_factory_dbu,
-        bend90_cell=bend90_small,
-        waypoints=[
-            kf.kdb.Point(250_000, 0),
-            kf.kdb.Point(255_000, 100_000),
-            kf.kdb.Point(400_000, 100_000),
-        ],
-        sort_ports=True,
-        on_placer_error="show_error",
-    )
+    with pytest.raises(
+        ValueError,
+        match=r"Found non-manhattan waypoints\. "
+        r"route_smart only supports manhattan \(orthogonal to the axes\) routing\..*",
+    ):
+        kf.routing.optical.route_bundle(
+            c,
+            start_ports,
+            end_ports,
+            separation=4000,
+            straight_factory=straight_factory_dbu,
+            bend90_cell=bend90_small,
+            waypoints=[
+                kf.kdb.Point(250_000, 0),
+                kf.kdb.Point(255_000, 100_000),
+                kf.kdb.Point(400_000, 100_000),
+            ],
+            sort_ports=True,
+            on_placer_error="error",
+        )
 
 
 def test_route_smart_waypoints_trans(
