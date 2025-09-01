@@ -3755,7 +3755,7 @@ def show(
             import git
 
             try:
-                repo = git.repo.Repo(".", search_parent_directories=True)
+                repo = git.Repo(".", search_parent_directories=True)
             except git.InvalidGitRepositoryError:
                 pass
             else:
@@ -3808,7 +3808,7 @@ def show(
             import git
 
             try:
-                repo = git.repo.Repo(".", search_parent_directories=True)
+                repo = git.Repo(".", search_parent_directories=True)
             except git.InvalidGitRepositoryError:
                 pass
             else:
@@ -3870,7 +3870,7 @@ def show(
                 import git
 
                 try:
-                    repo = git.repo.Repo(".", search_parent_directories=True)
+                    repo = git.Repo(".", search_parent_directories=True)
                 except git.InvalidGitRepositoryError:
                     pass
                 else:
@@ -3916,7 +3916,7 @@ def show(
                 import git
 
                 try:
-                    repo = git.repo.Repo(".", search_parent_directories=True)
+                    repo = git.Repo(".", search_parent_directories=True)
                 except git.InvalidGitRepositoryError:
                     pass
                 else:

@@ -318,7 +318,7 @@ class Settings(BaseSettings):
     @cached_property
     def project_dir(self) -> Path:
         try:
-            repo = git.repo.Repo(".", search_parent_directories=True)
+            repo = git.Repo(".", search_parent_directories=True)
             wtd = repo.working_tree_dir
             root = Path(wtd) if wtd is not None else Path.cwd()
         except git.InvalidGitRepositoryError:

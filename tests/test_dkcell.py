@@ -255,7 +255,3 @@ def test_cell_decorator(kcl: kf.KCLayout) -> None:
     assert isinstance(cell3, kf.DKCell)
     assert isinstance(cell4, kf.DKCell)
     assert isinstance(cell5, kf.DKCell)
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])

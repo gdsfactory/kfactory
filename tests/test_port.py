@@ -504,7 +504,3 @@ def test_create(kcl: kf.KCLayout, layers: Layers) -> None:
         port_type="optical",
         trans=kf.kdb.Trans(1, 0),
     )
-
-
-if __name__ == "__main__":
-    pytest.main(["-s", __file__])
