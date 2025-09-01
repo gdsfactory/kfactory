@@ -2250,14 +2250,36 @@ def _route_waypoints(
             "for the waypoint must be indicated, please pass a 'kdb.Trans'"
             " object instead."
         )
-    start_angle = vec_dir(waypoints[0] - waypoints[1])
-    end_angle = vec_dir(waypoints[-1] - waypoints[-2])
-    all_routers = []
-    bundle_points = _backbone2bundle(
-        backbone=waypoints,
-        port_widths=widths,
-        spacing=separation,
-    )
+    try:
+        start_angle = vec_dir(waypoints[0] - waypoints[1])
+        end_angle = vec_dir(waypoints[-1] - waypoints[-2])
+        all_routers = []
+        bundle_points = _backbone2bundle(
+            backbone=waypoints,
+            port_widths=widths,
+            spacing=separation,
+        )
+    except (ValueError, TypeError) as e:
+        wp_old = waypoints[0]
+        non_manhattan_wps: list[tuple[kdb.Point, kdb.Point, kdb.Vector]] = []
+        for wp in waypoints[1:]:
+            v = wp - wp_old
+            if not _is_manhattan(v):
+                non_manhattan_wps.append((wp_old, wp, v))
+            wp_old = wp
+        if non_manhattan_wps:
+            error_msg = (
+                "Found non-manhattan waypoints. route_smart only supports manhattan"
+                " (orthogonal to the axes) routing.\n Non-manhattan waypoints "
+                "(x,y)[dbu]:\n"
+            )
+            for error_wp in non_manhattan_wps:
+                error_msg += (
+                    f"Start point: {error_wp[0]} End point: {error_wp[1]} "
+                    f"Resulting vector (end - start): {error_wp[2]}\n"
+                )
+            raise ValueError(error_msg) from e
+        raise
     start_manhattan_routers = route_smart(
         start_ports=start_ts,
         end_ports=[
@@ -2360,3 +2382,7 @@ def clean_points(
         del points[i]
 
     return points
+
+
+def _is_manhattan(v: kdb.Vector | kdb.DVector) -> bool:
+    return v.x == 0 or v.y == 0

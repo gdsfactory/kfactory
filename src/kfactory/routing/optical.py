@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
-from .. import kdb
+from .. import kdb, rdb
 from ..conf import (
     ANGLE_270,
     MIN_POINTS_FOR_PLACEMENT,
@@ -20,8 +20,8 @@ from .generic import (
     route_bundle as route_bundle_generic,
 )
 from .manhattan import (
-    # ManhattanBundleRoutingFunction,
     ManhattanRoutePathFunction,
+    _is_manhattan,
     route_manhattan,
     route_smart,
 )
@@ -302,32 +302,88 @@ def route_bundle(
             "sbend_factory": sbend_factory,
         }
     if isinstance(c, KCell):
-        return route_bundle_generic(
-            c=c,
-            start_ports=start_ports_,
-            end_ports=end_ports_,
-            starts=cast("dbu | list[dbu] | list[Step] | list[list[Step]]", starts),
-            ends=cast("dbu | list[dbu] | list[Step] | list[list[Step]]", ends),
-            route_width=cast("int", route_width),
-            sort_ports=sort_ports,
-            on_collision=on_collision,
-            on_placer_error=on_placer_error,
-            collision_check_layers=collision_check_layers,
-            routing_function=route_smart,
-            routing_kwargs={
-                "bend90_radius": bend90_radius,
-                "separation": separation,
-                "sort_ports": sort_ports,
-                "bbox_routing": bbox_routing,
-                "bboxes": list(bboxes),
-                "waypoints": waypoints,
-                "allow_sbend": sbend_factory is not None,
-            },
-            placer_function=placer,
-            placer_kwargs=placer_kwargs,
-            start_angles=cast("list[int] | int", start_angles),
-            end_angles=cast("list[int] | int", end_angles),
-        )
+        try:
+            return route_bundle_generic(
+                c=c,
+                start_ports=start_ports_,
+                end_ports=end_ports_,
+                starts=cast("dbu | list[dbu] | list[Step] | list[list[Step]]", starts),
+                ends=cast("dbu | list[dbu] | list[Step] | list[list[Step]]", ends),
+                route_width=cast("int", route_width),
+                sort_ports=sort_ports,
+                on_collision=on_collision,
+                on_placer_error=on_placer_error,
+                collision_check_layers=collision_check_layers,
+                routing_function=route_smart,
+                routing_kwargs={
+                    "bend90_radius": bend90_radius,
+                    "separation": separation,
+                    "sort_ports": sort_ports,
+                    "bbox_routing": bbox_routing,
+                    "bboxes": list(bboxes),
+                    "waypoints": waypoints,
+                    "allow_sbend": sbend_factory is not None,
+                },
+                placer_function=placer,
+                placer_kwargs=placer_kwargs,
+                start_angles=cast("list[int] | int", start_angles),
+                end_angles=cast("list[int] | int", end_angles),
+            )
+        except ValueError as e:
+            if str(e).startswith("Found non-manhattan waypoints."):
+                waypoints = cast("list[kdb.Point]", waypoints)
+                wp_old = waypoints[0]
+                non_manhattan_wps: list[tuple[kdb.Point, kdb.Point, kdb.Vector]] = []
+                for wp in waypoints[1:]:
+                    v = wp - wp_old
+                    if not _is_manhattan(v):
+                        non_manhattan_wps.append((wp_old, wp, v))
+                    wp_old = wp
+                error_msg = (
+                    "Found non-manhattan waypoints. route_smart only supports manhattan"
+                    " (orthogonal to the axes) routing.\n Non-manhattan waypoints "
+                    "(x,y)[dbu]:\n"
+                )
+                for error_wp in non_manhattan_wps:
+                    error_msg += (
+                        f"Start point: {error_wp[0]} End point: {error_wp[1]} "
+                        f"Resulting vector (end - start): {error_wp[2]}\n"
+                    )
+                if on_placer_error == "show_error":
+                    c_: KCell | DKCell = c.dup()
+                    c_.name = c.kcl.future_cell_name or c.name
+                    db = rdb.ReportDatabase("Routing Waypoint Errors")
+                    err_cat = db.create_category("Waypoint Error")
+                    wp_cat = db.create_category("Waypoints")
+                    cell = db.create_cell(c_.name)
+                    wp_len = len(waypoints)
+
+                    width = cast("int | None", route_width) or cast(
+                        "int", start_ports[0].width
+                    )
+
+                    for i, wp in enumerate(waypoints):
+                        it = db.create_item(cell=cell, category=wp_cat)
+                        it.add_value(f"Waypoint {i + 1}/{wp_len}")
+                        it.add_value(
+                            kdb.DText(
+                                f"Waypoint {i + 1}/{wp_len}",
+                                kdb.Trans(wp.to_v()).to_dtype(c.kcl.dbu),
+                            )
+                        )
+                        it.add_value(
+                            kdb.Box(width).moved(wp.to_v()).to_dtype(c.kcl.dbu)
+                        )
+                    for error_wp in non_manhattan_wps:
+                        it = db.create_item(cell=cell, category=err_cat)
+                        it.add_value(
+                            kdb.Path([error_wp[0], error_wp[1]], width)
+                            .to_dtype(c.kcl.dbu)
+                            .polygon()
+                        )
+                    c_.show(lyrdb=db)
+                raise ValueError(error_msg) from e
+            raise
     if route_width is not None:
         if isinstance(route_width, list):
             route_width = [c.kcl.to_dbu(width) for width in route_width]
@@ -377,44 +433,92 @@ def route_bundle(
             ]
         else:
             waypoints = cast("kdb.DCplxTrans", waypoints).s_trans().to_itype(c.kcl.dbu)
+    try:
+        return route_bundle_generic(
+            c=c.kcl[c.cell_index()],
+            start_ports=start_ports_,
+            end_ports=end_ports_,
+            starts=starts,
+            ends=ends,
+            route_width=route_width,
+            sort_ports=sort_ports,
+            on_collision=on_collision,
+            on_placer_error=on_placer_error,
+            collision_check_layers=collision_check_layers,
+            routing_function=route_smart,
+            routing_kwargs={
+                "bend90_radius": bend90_radius,
+                "separation": c.kcl.to_dbu(separation),
+                "sort_ports": sort_ports,
+                "bbox_routing": bbox_routing,
+                "bboxes": list(bboxes_),
+                "waypoints": waypoints,
+            },
+            placer_function=place_manhattan,
+            placer_kwargs={
+                "straight_factory": _straight_factory,
+                "bend90_cell": bend90_cell,
+                "taper_cell": taper_cell,
+                "port_type": place_port_type,
+                "min_straight_taper": min_straight_taper,
+                "allow_small_routes": False,
+                "allow_width_mismatch": allow_width_mismatch,
+                "allow_layer_mismatch": allow_width_mismatch,
+                "allow_type_mismatch": allow_type_mismatch,
+                "purpose": purpose,
+                "route_width": route_width,
+            },
+            start_angles=start_angles,
+            end_angles=end_angles,
+        )
+    except ValueError as e:
+        if str(e).startswith("Found non-manhattan waypoints."):
+            waypoints = cast("list[kdb.DPoint]", waypoints)
+            wp_old_d = waypoints[0]
+            non_manhattan_wps_d: list[tuple[kdb.DPoint, kdb.DPoint, kdb.DVector]] = []
+            for wp_d in waypoints[1:]:
+                v_d = wp_d - wp_old_d
+                if not _is_manhattan(v_d):
+                    non_manhattan_wps_d.append((wp_old_d, wp_d, v_d))
+                wp_old_d = wp_d
+            error_msg = (
+                "Found non-manhattan waypoints. route_smart only supports manhattan"
+                " (orthogonal to the axes) routing.\n Non-manhattan waypoints "
+                "(x,y)[dbu]:\n"
+            )
+            for error_wp_d in non_manhattan_wps_d:
+                error_msg += (
+                    f"Start point: {error_wp_d[0]} End point: {error_wp_d[1]} "
+                    f"Resulting vector (end - start): {error_wp_d[2]}\n"
+                )
+            if on_placer_error == "show_error":
+                c_ = c.dup()
+                c_.name = c.kcl.future_cell_name or c.name
+                db = rdb.ReportDatabase("Routing Waypoint Errors")
+                err_cat = db.create_category("Waypoint Error")
+                wp_cat = db.create_category("Waypoints")
+                cell = db.create_cell(c_.name)
+                wp_len = len(waypoints)
 
-    return route_bundle_generic(
-        c=c.kcl[c.cell_index()],
-        start_ports=start_ports_,
-        end_ports=end_ports_,
-        starts=starts,
-        ends=ends,
-        route_width=route_width,
-        sort_ports=sort_ports,
-        on_collision=on_collision,
-        on_placer_error=on_placer_error,
-        collision_check_layers=collision_check_layers,
-        routing_function=route_smart,
-        routing_kwargs={
-            "bend90_radius": bend90_radius,
-            "separation": c.kcl.to_dbu(separation),
-            "sort_ports": sort_ports,
-            "bbox_routing": bbox_routing,
-            "bboxes": list(bboxes_),
-            "waypoints": waypoints,
-        },
-        placer_function=place_manhattan,
-        placer_kwargs={
-            "straight_factory": _straight_factory,
-            "bend90_cell": bend90_cell,
-            "taper_cell": taper_cell,
-            "port_type": place_port_type,
-            "min_straight_taper": min_straight_taper,
-            "allow_small_routes": False,
-            "allow_width_mismatch": allow_width_mismatch,
-            "allow_layer_mismatch": allow_width_mismatch,
-            "allow_type_mismatch": allow_type_mismatch,
-            "purpose": purpose,
-            "route_width": route_width,
-        },
-        start_angles=start_angles,
-        end_angles=end_angles,
-    )
+                width_d = cast("float | None", route_width) or cast(
+                    "float", start_ports[0].width
+                )
+
+                for i, wp_d in enumerate(waypoints):
+                    it = db.create_item(cell=cell, category=wp_cat)
+                    it.add_value(f"Waypoint {i + 1}/{wp_len}")
+                    it.add_value(
+                        kdb.DText(f"Waypoint {i + 1}/{wp_len}", kdb.DTrans(wp_d.to_v()))
+                    )
+                    it.add_value(kdb.DBox(width_d).moved(wp_d.to_v()))
+                for error_wp_d in non_manhattan_wps_d:
+                    it = db.create_item(cell=cell, category=err_cat)
+                    it.add_value(
+                        kdb.DPath([error_wp_d[0], error_wp_d[1]], width_d).polygon()
+                    )
+                c_.show(lyrdb=db)
+            raise ValueError(error_msg) from e
+        raise
 
 
 def _place_straight(
