@@ -187,7 +187,7 @@ def _check_instances(
                     "foundries.\n"
                     "Please run c.flatten() before returning "
                     "or add use @cell(check_instances=False).\n"
-                    f"Cellnames of instances affected by this:\n{affected}"
+                    f"Instances affected by this:\n{affected}"
                 )
         case CheckInstances.FLATTEN:
             if any(inst.is_complex() for inst in cell.each_inst()):
