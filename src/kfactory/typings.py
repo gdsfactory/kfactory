@@ -143,3 +143,4 @@ Angle: TypeAlias = int
 KCellSpec: TypeAlias = (
     "int | str | KCellSpecDict | ProtoTKCell[Any] | Callable[..., ProtoTKCell[Any]]"
 )
+AnyCellSpec: TypeAlias = "int | str | KCellSpecDict | ProtoTKCell[Any] | VKCell | Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]"  # noqa: E501
