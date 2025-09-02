@@ -104,10 +104,11 @@ class LayoutWidget:
         self.layout_view.show_layout(cell.kcl.layout, False)
         self.layer_properties: Path | None = None
         if layer_properties is not None:
-            self.layer_properties = Path(layer_properties)
-            if self.layer_properties.exists() and self.layer_properties.is_file():
-                self.layer_properties = self.layer_properties
-                self.layout_view.load_layer_props(str(self.layer_properties))
+            layer_properties_path = Path(layer_properties)
+            if layer_properties_path.exists() and layer_properties_path.is_file():
+                self.layout_view.load_layer_props(str(layer_properties_path))
+            self.layer_properties = layer_properties_path
+
         self.show_cell(cell.kdb_cell)
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
 

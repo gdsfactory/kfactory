@@ -87,7 +87,3 @@ def test_layer_stack(pdk: kf.KCLayout) -> None:
     assert pdk.layer_stack.to_dict().keys() == {"wg", "clad"}
     with pytest.raises(KeyError):
         pdk.layer_stack["invalid"]
-
-
-if __name__ == "__main__":
-    pytest.main(["-s", __file__])

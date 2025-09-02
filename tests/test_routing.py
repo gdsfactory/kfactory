@@ -661,6 +661,51 @@ def test_route_smart_waypoints_pts_sort(
     )
 
 
+def test_route_waypoints_non_manhattan(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
+) -> None:
+    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_NON_MANHATTAN")
+    l_ = 15
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)] + [
+        kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
+    ]
+    start_ports = [
+        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for trans in transformations
+    ]
+    end_ports = [
+        kf.Port(
+            width=500,
+            layer_info=layers.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
+        )
+        for trans in transformations
+    ]
+    with pytest.raises(
+        ValueError,
+        match=r"Found non-manhattan waypoints\. "
+        r"route_smart only supports manhattan \(orthogonal to the axes\) routing\..*",
+    ):
+        kf.routing.optical.route_bundle(
+            c,
+            start_ports,
+            end_ports,
+            separation=4000,
+            straight_factory=straight_factory_dbu,
+            bend90_cell=bend90_small,
+            waypoints=[
+                kf.kdb.Point(250_000, 0),
+                kf.kdb.Point(255_000, 100_000),
+                kf.kdb.Point(400_000, 100_000),
+            ],
+            sort_ports=True,
+            on_placer_error="error",
+        )
+
+
 def test_route_smart_waypoints_trans(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
@@ -1042,3 +1087,85 @@ def test_sbend_routing() -> None:
         ),
         sbend_factory=sbend_factory,
     )
+
+
+def test_route_same_plane() -> None:
+    c = kf.KCell()
+
+    layer = Layers()
+
+    kf.kcl.infos = Layers()
+
+    enc = kf.LayerEnclosure(
+        sections=[(layer.METAL1EX, 500), (layer.METAL2EX, -200, 2000)],
+        name="M1",
+        main_layer=layer.METAL1,
+    )
+
+    xs_s = kf.kcl.get_icross_section(
+        kf.SymmetricalCrossSection(width=10_000, enclosure=enc, name="S")
+    )
+
+    def bend_circular(radius: int, cross_section: kf.CrossSection) -> kf.KCell:
+        c = kf.cells.circular.bend_circular(
+            radius=kf.kcl.to_um(radius),
+            width=kf.kcl.to_um(cross_section.width),
+            layer=cross_section.layer,
+            enclosure=cross_section.enclosure,
+        )
+        c.kdb_cell.locked = False
+        for p in c.ports:
+            p.port_type = "electrical"
+        c.kdb_cell.locked = True
+        return c
+
+    def wire(length: int, cross_section: kf.CrossSection) -> kf.KCell:
+        c = kf.cells.straight.straight_dbu(
+            width=cross_section.width,
+            length=length,
+            layer=cross_section.layer,
+            enclosure=cross_section.enclosure,
+        )
+        c.kdb_cell.locked = False
+        for p in c.ports:
+            p.port_type = "electrical"
+        c.kdb_cell.locked = True
+        return c
+
+    p1_s = kf.Port(
+        name="G1",
+        cross_section=xs_s,
+        trans=kf.kdb.Trans(x=0, y=0),
+        port_type="electrical",
+    )
+    p2_s = kf.Port(
+        name="S",
+        cross_section=xs_s,
+        trans=kf.kdb.Trans(x=0, y=-50_000),
+        port_type="electrical",
+    )
+
+    p1_e = kf.Port(
+        name="PG1",
+        cross_section=xs_s,
+        trans=kf.kdb.Trans(rot=1, mirrx=False, x=500_000, y=-50_000),
+        port_type="electrical",
+    )
+    p2_e = kf.Port(
+        name="PS",
+        cross_section=xs_s,
+        trans=kf.kdb.Trans(rot=1, mirrx=False, x=450_000, y=-50_000),
+        port_type="electrical",
+    )
+
+    ports = [p1_s, p2_s, p1_e, p2_e]
+
+    kf.routing.electrical.route_bundle(
+        c,
+        start_ports=[p1_s, p2_s],
+        end_ports=[p1_e, p2_e],
+        separation=4000,
+        on_collision="error",
+    )
+
+    c.add_ports(ports)

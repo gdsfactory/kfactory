@@ -7,8 +7,8 @@ from json import loads
 from typing import Any
 
 from pydantic import BaseModel, field_validator, model_validator
-from pydantic.color import Color
 from pydantic.functional_serializers import field_serializer
+from pydantic_extra_types.color import Color
 from ruamel.yaml import YAML
 
 from kfactory.conf import MIN_HEX_THRESHOLD
@@ -94,7 +94,7 @@ def yaml_to_lyp(inp: pathlib.Path | str, out: pathlib.Path | str) -> None:
 
     yaml = YAML()
     lyp_dict = yaml.load(f)
-    lyp_m = LypModel.parse_obj(lyp_dict)
+    lyp_m = LypModel.model_validate(lyp_dict)
 
     lv = lay.LayoutView()
     layers_iter = lv.end_layers()

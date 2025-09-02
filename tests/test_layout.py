@@ -338,7 +338,3 @@ def test_get_component(layers: Layers) -> None:
             {"component": "straight"},
             output_type=kf.DKCell,
         )
-
-
-if __name__ == "__main__":
-    pytest.main(["-s", __file__])
