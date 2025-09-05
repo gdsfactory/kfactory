@@ -1310,12 +1310,23 @@ class KCLayout(
 
         """
         with self.thread_lock:
-            if allow_duplicate or (self.layout_cell(name) is None):
+            if allow_duplicate:
                 return self.layout.create_cell(name, *args)
-            raise ValueError(
-                f"Cellname {name} already exists. Please make sure the cellname is"
-                " unique or pass `allow_duplicate` when creating the library"
+            existing = self.layout_cell(name)
+            if existing is None:
+                return self.layout.create_cell(name, *args)
+            # Cell already exists, auto-rename with suffix
+            import warnings
+            counter = 1
+            new_name = f"{name}${counter}"
+            while self.layout_cell(new_name) is not None:
+                counter += 1
+                new_name = f"{name}${counter}"
+            warnings.warn(
+                f"Cell '{name}' already exists. Creating '{new_name}' instead.",
+                stacklevel=2
             )
+            return self.layout.create_cell(new_name, *args)
 
     def delete_cell(self, cell: AnyTKCell | int) -> None:
         """Delete a cell in the kcl object."""
