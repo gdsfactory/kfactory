@@ -15,10 +15,12 @@ docs-clean:
 
 # Build documentation
 docs python_version="3.12":
+    uv run -p {{python_version}} --extra docs --isolated python docs/make_schematic_diagram.py
     uv run -p {{python_version}} --extra docs --isolated mkdocs build -f docs/mkdocs.yml
 
 # Serve documentation locally
 docs-serve python_version="3.12":
+    uv run -p {{python_version}} --extra docs --isolated python docs/make_schematic_diagram.py
     uv run -p {{python_version}} --extra docs --isolated mkdocs serve -f docs/mkdocs.yml
 
 # Run tests (depends on init-submodule)
