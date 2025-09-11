@@ -3721,6 +3721,7 @@ def show(
     use_libraries: bool = True,
     library_save_options: kdb.SaveLayoutOptions | None = None,
     set_technology: bool = True,
+    file_format: Literal["oas", "gds"] = "oas",
 ) -> None:
     """Show GDS in klayout.
 
@@ -3768,36 +3769,21 @@ def show(
     kcl_paths: list[dict[str, str]] = []
 
     if isinstance(layout, KCLayout):
-        file: Path | None = None
-        spec = importlib.util.find_spec("git")
-        if spec is not None:
-            import git
-
-            try:
-                repo = git.Repo(".", search_parent_directories=True)
-            except git.InvalidGitRepositoryError:
-                pass
-            else:
-                wtd = repo.working_tree_dir
-                if wtd is not None:
-                    root = Path(wtd) / "build/gds"
-                    root.mkdir(parents=True, exist_ok=True)
-                    tf = root / Path(name).with_suffix(".oas")
-                    tf.parent.mkdir(parents=True, exist_ok=True)
-                    layout.write(str(tf), save_options)
-                    file = tf
-                    delete = False
+        gitpath = config.project_dir
+        if gitpath:
+            root = Path(gitpath) / "build/mask"
+            root.mkdir(parents=True, exist_ok=True)
+            tf = root / Path(name).with_suffix(f".{file_format}")
+            tf.parent.mkdir(parents=True, exist_ok=True)
+            layout.write(str(tf), save_options)
+            file = tf
+            delete = False
         else:
-            logger.info(
-                "git isn't installed. For better file storage, "
-                "please install kfactory[git] or gitpython."
-            )
-        if not file:
             try:
                 from __main__ import __file__ as mf
             except ImportError:
                 mf = "shell"
-            tf = Path(gettempdir()) / (name + ".oas")
+            tf = Path(gettempdir()) / (name + f".{file_format}")
             tf.parent.mkdir(parents=True, exist_ok=True)
             layout.write(tf, save_options)
             file = tf
@@ -3810,42 +3796,27 @@ def show(
                 if save_options.gds2_max_cellname_length:
                     p = (
                         (dir_ / _kcl.name[: save_options.gds2_max_cellname_length])
-                        .with_suffix(".oas")
+                        .with_suffix(f".{file_format}")
                         .resolve()
                     )
                 else:
-                    p = (dir_ / _kcl.name).with_suffix(".oas").resolve()
+                    p = (dir_ / _kcl.name).with_suffix(f".{file_format}").resolve()
                 _kcl.write(p, library_save_options)
                 kcl_paths.append({"name": _kcl.name, "file": str(p)})
         if technology is None and layout.technology_file is not None:
             technology = layout.technology.name
 
     elif isinstance(layout, ProtoKCell):
-        file = None
-        spec = importlib.util.find_spec("git")
-        if spec is not None:
-            import git
-
-            try:
-                repo = git.Repo(".", search_parent_directories=True)
-            except git.InvalidGitRepositoryError:
-                pass
-            else:
-                wtd = repo.working_tree_dir
-                if wtd is not None:
-                    root = Path(wtd) / "build/gds"
-                    root.mkdir(parents=True, exist_ok=True)
-                    tf = root / Path(name).with_suffix(".oas")
-                    tf.parent.mkdir(parents=True, exist_ok=True)
-                    layout.write(str(tf), save_options)
-                    file = tf
-                    delete = False
+        gitpath = config.project_dir
+        if gitpath:
+            root = Path(gitpath) / "build/gds"
+            root.mkdir(parents=True, exist_ok=True)
+            tf = root / Path(name).with_suffix(".oas")
+            tf.parent.mkdir(parents=True, exist_ok=True)
+            layout.write(str(tf), save_options)
+            file = tf
+            delete = False
         else:
-            logger.info(
-                "git isn't installed. For better file storage, "
-                "please install kfactory[git] or gitpython."
-            )
-        if not file:
             try:
                 from __main__ import __file__ as mf
             except ImportError:
@@ -3883,31 +3854,16 @@ def show(
 
     if lyrdb is not None:
         if isinstance(lyrdb, rdb.ReportDatabase):
-            lyrdbfile: Path | None = None
-            spec = importlib.util.find_spec("git")
-            if spec is not None:
-                import git
-
-                try:
-                    repo = git.Repo(".", search_parent_directories=True)
-                except git.InvalidGitRepositoryError:
-                    pass
-                else:
-                    wtd = repo.working_tree_dir
-                    if wtd is not None:
-                        root = Path(wtd) / "build/gds"
-                        root.mkdir(parents=True, exist_ok=True)
-                        tf = root / Path(name).with_suffix(".lyrdb")
-                        tf.parent.mkdir(parents=True, exist_ok=True)
-                        lyrdb.save(str(tf))
-                        lyrdbfile = tf
-                        delete_lyrdb = False
+            gitpath = config.project_dir
+            if gitpath:
+                root = Path(gitpath) / "build/mask"
+                root.mkdir(parents=True, exist_ok=True)
+                tf = root / Path(name).with_suffix(".lyrdb")
+                tf.parent.mkdir(parents=True, exist_ok=True)
+                lyrdb.save(str(tf))
+                lyrdbfile = tf
+                delete_lyrdb = False
             else:
-                logger.info(
-                    "git isn't installed. For better file storage, "
-                    "please install kfactory[git] or gitpython."
-                )
-            if not lyrdbfile:
                 try:
                     from __main__ import __file__ as mf
                 except ImportError:
@@ -3929,31 +3885,16 @@ def show(
 
     if l2n is not None:
         if isinstance(l2n, kdb.LayoutToNetlist):
-            l2nfile: Path | None = None
-            spec = importlib.util.find_spec("git")
-            if spec is not None:
-                import git
-
-                try:
-                    repo = git.Repo(".", search_parent_directories=True)
-                except git.InvalidGitRepositoryError:
-                    pass
-                else:
-                    wtd = repo.working_tree_dir
-                    if wtd is not None:
-                        root = Path(wtd) / "build/gds"
-                        root.mkdir(parents=True, exist_ok=True)
-                        tf = root / Path(name).with_suffix(".l2n")
-                        tf.parent.mkdir(parents=True, exist_ok=True)
-                        l2n.write(str(tf))
-                        l2nfile = tf
-                        delete_l2n = False
+            gitpath = config.project_dir
+            if gitpath:
+                root = Path(gitpath) / "build/mask"
+                root.mkdir(parents=True, exist_ok=True)
+                tf = root / Path(name).with_suffix(".l2n")
+                tf.parent.mkdir(parents=True, exist_ok=True)
+                l2n.write(str(tf))
+                l2nfile = tf
+                delete_l2n = False
             else:
-                logger.info(
-                    "git isn't installed. For better file storage, "
-                    "please install kfactory[git] or gitpython."
-                )
-            if not l2nfile:
                 try:
                     from __main__ import __file__ as mf
                 except ImportError:
@@ -4084,9 +4025,9 @@ def show(
     if delete:
         Path(file).unlink()
     if delete_lyrdb and lyrdb is not None:
-        Path(lyrdbfile).unlink()  # type: ignore[arg-type]
+        Path(lyrdbfile).unlink()
     if delete_l2n and l2n is not None:
-        Path(l2nfile).unlink()  # type: ignore[arg-type]
+        Path(l2nfile).unlink()
 
 
 class ProtoCells(Mapping[int, KC_co], ABC):
