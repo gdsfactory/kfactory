@@ -694,6 +694,49 @@ def test_netlist_equivalent() -> None:
     assert schema_str is not None
 
 
+def test_schematic_anchor_port() -> None:
+    pdk = kf.KCLayout("SCHEMA_PDK_ANCHOR_PORT", infos=Layers)
+    layers = Layers()
+
+    @pdk.cell
+    def straight(length: int) -> kf.KCell:
+        c = pdk.kcell()
+        c.shapes(layers.WG).insert(kf.kdb.Box(0, -250, length, 250))
+        c.create_port(
+            name="o1",
+            width=500,
+            trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=0),
+            layer_info=layers.WG,
+        )
+        c.create_port(
+            name="o2",
+            width=500,
+            trans=kf.kdb.Trans(x=length, y=0),
+            layer_info=layers.WG,
+        )
+
+        return c
+
+    schematic = kf.Schematic(kcl=pdk)
+
+    s1 = schematic.create_inst(
+        name="s1", component="straight", settings={"length": 5000}
+    )
+    s2 = schematic.create_inst(
+        name="s2", component="straight", settings={"length": 5000}
+    )
+    s3 = schematic.create_inst(
+        name="s3", component="straight", settings={"length": 10_000}
+    )
+
+    s3.connect("o1", s1["o2"])
+    s2.connect("o1", s3["o2"])
+
+    s1.place(x=1000, y=10_000)
+
+    schematic.create_cell(kf.KCell)
+
+
 @pytest.mark.parametrize(
     "path",
     [

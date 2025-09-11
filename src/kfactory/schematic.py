@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import keyword
 import re
+import subprocess
 from collections import defaultdict
 from operator import attrgetter
 from pathlib import Path
@@ -19,6 +20,7 @@ from typing import (
     Generic,
     Literal,
     Self,
+    TypedDict,
     cast,
     overload,
 )
@@ -47,7 +49,7 @@ from .port import ProtoPort
 from .typings import KC, JSONSerializable, TUnit, dbu, um
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable, Mapping, Sequence
 
     from .cross_section import CrossSection, DCrossSection
 
@@ -77,13 +79,45 @@ class MirrorPlacement(BaseModel, extra="forbid"):
     mirror: bool = False
 
 
+class Anchor(BaseModel):
+    pass
+
+
+class PortAnchor(Anchor):
+    port: str
+
+
+class FixedAnchor(Anchor):
+    x: Literal["left", "center", "right"] | None = None
+    y: Literal["bottom", "center", "top"] | None = None
+
+
+class FixedAnchorDict(TypedDict):
+    x: Literal["left", "center", "right"] | None
+    y: Literal["bottom", "center", "top"] | None
+
+
+_anchor_mapping: dict[str, FixedAnchorDict] = {
+    "center": {"x": "center", "y": "center"},
+    "cc": {"x": "center", "y": "center"},
+    "ce": {"x": "right", "y": "center"},
+    "cw": {"x": "left", "y": "center"},
+    "nc": {"x": "center", "y": "top"},
+    "ne": {"x": "right", "y": "top"},
+    "nw": {"x": "left", "y": "top"},
+    "sc": {"x": "center", "y": "bottom"},
+    "se": {"x": "right", "y": "bottom"},
+    "sw": {"x": "left", "y": "bottom"},
+}
+
+
 class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
     x: TUnit | PortRef | PortArrayRef = cast("TUnit", 0)
     dx: TUnit = cast("TUnit", 0)
     y: TUnit | PortRef | PortArrayRef = cast("TUnit", 0)
     dy: TUnit = cast("TUnit", 0)
     orientation: float = 0
-    port: str | None = None
+    anchor: FixedAnchor | PortAnchor | None = None
 
     @model_validator(mode="after")
     def _require_absolute_or_relative(self) -> Self:
@@ -150,7 +184,7 @@ class Ports(BaseModel, Generic[TUnit]):
 class SchematicInstance(
     BaseModel, Generic[TUnit], extra="forbid", arbitrary_types_allowed=True
 ):
-    name: str = Field(exclude=True)
+    name: str = Field(exclude=True, frozen=True)
     component: str
     settings: dict[str, JSONSerializable] = Field(default_factory=dict)
     array: RegularArray[TUnit] | Array[TUnit] | None = None
@@ -190,8 +224,15 @@ class SchematicInstance(
         port: str | None = None,
     ) -> Placement[TUnit]:
         placement = Placement[TUnit](
-            x=x, y=y, dx=dx, dy=dy, orientation=orientation, mirror=mirror, port=port
+            x=x,
+            y=y,
+            dx=dx,
+            dy=dy,
+            orientation=orientation,
+            mirror=mirror,
         )
+        if port is not None:
+            placement.anchor = PortAnchor(port=port)
         self.parent_schematic.placements[self.name] = placement
         return placement
 
@@ -305,7 +346,7 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
         cell: KCell,
         schematic: TSchematic[TUnit],
         name: str,
-        cross_sections: dict[str, CrossSection | DCrossSection],
+        cross_sections: Mapping[str, CrossSection | DCrossSection],
     ) -> KCellPort:
         if isinstance(self.x, PortRef):
             if isinstance(self.x, PortArrayRef):
@@ -358,7 +399,7 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
         )
 
     def __str__(self) -> str:
-        return f"CellPort[{self.name!r}]"
+        return self.as_python_str()
 
     def as_call(self) -> str:
         port_str = f"x={self.x}, y={self.y}"
@@ -369,8 +410,8 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
 
         return port_str
 
-    def as_python_str(self) -> str:
-        return f"schema.ports[{self.name!r}]"
+    def as_python_str(self, schematic_name: str = "schematic") -> str:
+        return f"{schematic_name}.ports[{self.name!r}]"
 
 
 class Link(
@@ -649,6 +690,26 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                     Connection.from_list((connection_0, connection_1))
                 )
             data["connections"] = built_connections
+        placements = data.get("placements")
+        if placements:
+            for placement in placements.values():
+                if "port" in placement:
+                    port = placement.pop("port")
+                    if port in [
+                        "ce",
+                        "cw",
+                        "nc",
+                        "ne",
+                        "nw",
+                        "sc",
+                        "se",
+                        "sw",
+                        "center",
+                        "cc",
+                    ]:
+                        placement["anchor"] = _anchor_mapping[port]
+                    else:
+                        placement["anchor"] = {"port": port}
         return data
 
     @model_validator(mode="after")
@@ -660,11 +721,11 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     def create_cell(
         self,
         output_type: type[KC],
-        factories: dict[
+        factories: Mapping[
             str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
         ]
         | None = None,
-        cross_sections: dict[str, CrossSection | DCrossSection] | None = None,
+        cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
         routing_strategies: dict[
             str,
             Callable[
@@ -777,16 +838,26 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
             for link in route.links:
                 l1, l2 = link.root[0], link.root[1]
                 if isinstance(l1, Port):
-                    p1 = c.ports[l1.name]
+                    p1: KCellPort | DKCellPort = c.ports[l1.name]
                 elif isinstance(l1, PortArrayRef):
-                    p1 = c.insts[l1.instance].ports[l1.port, l1.ia, l1.ib]
+                    if self.instances[l1.instance].virtual:
+                        p1 = c.vinsts[l1.instance].ports[l1.port, l1.ia, l1.ib]
+                    else:
+                        p1 = c.insts[l1.instance].ports[l1.port, l1.ia, l1.ib]
+                elif self.instances[l1.instance].virtual:
+                    p1 = c.vinsts[l1.instance].ports[l1.port]
                 else:
                     p1 = c.insts[l1.instance].ports[l1.port]
                 start_ports.append(p1)
                 if isinstance(l2, Port):
-                    p2 = c.ports[l2.name]
+                    p2: KCellPort | DKCellPort = c.ports[l2.name]
                 elif isinstance(l2, PortArrayRef):
-                    p2 = c.insts[l2.instance].ports[l2.port, l2.ia, l2.ib]
+                    if self.instances[l2.instance].virtual:
+                        p2 = c.vinsts[l2.instance].ports[l2.port, l2.ia, l2.ib]
+                    else:
+                        p2 = c.insts[l2.instance].ports[l2.port, l2.ia, l2.ib]
+                elif self.instances[l2.instance].virtual:
+                    p2 = c.vinsts[l2.instance].ports[l2.port]
                 else:
                     p2 = c.insts[l2.instance].ports[l2.port]
                 end_ports.append(p2)
@@ -839,6 +910,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                     + port_connection_transformation_errors
                 )
             )
+        c.schematic = self
 
         return output_type(base=c.base)
 
@@ -870,6 +942,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         self,
         imports: dict[str, str] = _schematic_default_imports,
         kfactory_name: str | None = None,
+        ruff_format: bool = True,
     ) -> str:
         schematic_cell = ""
         indent = 0
@@ -881,7 +954,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         kf_name = kfactory_name or imports["kfactory"]
 
         def _kcls(name: str) -> str:
-            return f'{kf_name}.["{name}"]'
+            return f'{kf_name}.kcls["{name}"]'
 
         for imp, imp_as in imports.items():
             if imp_as is None:
@@ -892,13 +965,16 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         if imports:
             schematic_cell += "\n\n"
 
-        schematic_cell += f"kcl = {_kcls(self.kcl.name)}']\n\n"
+        schematic_cell += f"kcl = {_kcls(self.kcl.name)}\n\n"
 
         schematic_cell += "@kcl.schematic_cell\n"
         schematic_cell += f"def {self.name}() -> {kf_name}.{self.__class__.__name__}:\n"
         indent = 2
 
-        schematic_cell += f"{_ind()}schematic = Schematic(kcl=kcl)\n\n"
+        if isinstance(self, Schematic):
+            schematic_cell += f"{_ind()}schematic = {kf_name}.Schematic(kcl=kcl)\n\n"
+        else:
+            schematic_cell += f"{_ind()}schematic = {kf_name}.DSchematic(kcl=kcl)\n\n"
 
         schematic_cell += f"{_ind()}# Create the schematic instances\n"
 
@@ -939,8 +1015,12 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         if self.ports:
             schematic_cell += f"{_ind()}# Schematic ports\n"
 
-            for port in sorted(
-                self.ports.values(), key=attrgetter("__class__.__name__", "name")
+            for name, port in sorted(
+                self.ports.items(),
+                key=lambda named_port: (
+                    named_port[1].__class__.__name__,
+                    named_port[0],
+                ),
             ):
                 if isinstance(port, Port):
                     schematic_cell += f"{_ind()}schematic.create_port(\n"
@@ -968,7 +1048,8 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 else:
                     schematic_cell += (
                         f"{_ind()}schematic.add_port("
-                        f"{port.as_python_str(names[port.instance])})\n"
+                        f"name={name},"
+                        f"port={port.as_python_str(names[port.instance])})\n"
                     )
         if self.placements:
             schematic_cell += f"\n{_ind()}# Schematic instance placements\n"
@@ -994,8 +1075,11 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                         )
                     if placement.mirror:
                         schematic_cell += f"{_ind()}mirror={placement.mirror},\n"
-                    if placement.port is not None:
-                        schematic_cell += f"{_ind()}port={placement.port},\n"
+                    if placement.anchor:
+                        schematic_cell += (
+                            f"{_ind()}anchor="
+                            f"{placement.anchor.model_dump(exclude_defaults=True)},\n"
+                        )
                     indent -= 2
                     schematic_cell += f"{_ind()})\n"
                 else:
@@ -1017,9 +1101,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                         schematic_cell += f"{_ind()}port={ref1.port!r},\n"
                     assert isinstance(ref2, PortRef)
                     if isinstance(ref2, PortRef):
-                        schematic_cell += (
-                            f"{_ind()}other={ref2.as_python_str(names[ref2.name])},\n"
-                        )
+                        schematic_cell += f"{_ind()}other={ref2},\n"
                     indent -= 2
                     schematic_cell += f"{_ind()})\n"
                 else:
@@ -1032,7 +1114,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                         )
                     else:
                         schematic_cell += f"{_ind()}port={ref2.port!r},\n"
-                    schematic_cell += f"{_ind()}other=schematic.ports[{ref1.name!r}]\n"
+                    schematic_cell += f"{_ind()}other={ref1}\n"
                     indent -= 2
                     schematic_cell += f"{_ind()})\n"
         if self.routes:
@@ -1068,7 +1150,29 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 indent -= 2
                 schematic_cell += f"{_ind()})\n"
 
-        schematic_cell += f"{_ind()}return schema"
+        schematic_cell += f"{_ind()}return schematic"
+
+        if ruff_format:
+            try:
+                result = subprocess.run(
+                    ["ruff", "format", "-"],  # noqa: S607
+                    input=schematic_cell,
+                    text=True,
+                    capture_output=True,
+                    check=False,
+                )
+                if result.returncode != 0:
+                    logger.warning(
+                        "Ruff errored out, returning unmodified string. Ruff errors:\n"
+                        + result.stderr
+                    )
+                    return schematic_cell
+
+                schematic_cell = result.stdout
+            except FileNotFoundError:
+                logger.warning(
+                    "Ruff not found or installed. Returning unformatted string."
+                )
 
         return schematic_cell
 
@@ -1132,7 +1236,7 @@ class DSchema(DSchematic):
 def _create_kinst(
     c: KCell,
     schematic_inst: SchematicInstance[TUnit],
-    factories: dict[
+    factories: Mapping[
         str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
     ]
     | None,
@@ -1195,6 +1299,7 @@ def _create_kinst(
 
     # If the instance is a
     vinst = c.create_vinst(cell)
+    vinst.name = schematic_inst.name
     if schematic_inst.array:
         if isinstance(schematic_inst.array, RegularArray):
             da = _dvec(x=schematic_inst.array.column_pitch, y=0, c=c, unit=unit)
@@ -1238,8 +1343,8 @@ def _place_island(
     placed_insts: set[str],
     placed_ports: set[str],
     schematic: TSchematic[TUnit],
-    cross_sections: dict[str, CrossSection | DCrossSection],
-    factories: dict[
+    cross_sections: Mapping[str, CrossSection | DCrossSection],
+    factories: Mapping[
         str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
     ]
     | None = None,
@@ -1268,9 +1373,8 @@ def _place_island(
                         else p.y
                     )
 
-                    st = kinst._standard_trans()
-                    if st is kdb.Trans or st is kdb.ICplxTrans:
-                        if p.port is None:
+                    if schematic.unit == "dbu":
+                        if p.anchor is None:
                             kinst.transform(
                                 kdb.ICplxTrans(
                                     mag=1,
@@ -1279,8 +1383,34 @@ def _place_island(
                                     x=x + p.dx,
                                     y=y + p.dy,
                                 )
+                            )
+                        elif isinstance(p.anchor, PortAnchor):
+                            kinst.transform(
+                                kdb.ICplxTrans(
+                                    mag=1,
+                                    rot=p.orientation,
+                                    mirrx=p.mirror,
+                                    x=x + p.dx,
+                                    y=y + p.dy,
+                                )
+                                * kdb.ICplxTrans(-kinst.ports[p.anchor.port].trans.disp)
                             )
                         else:
+                            match p.anchor.x:
+                                case "left":
+                                    _x = kinst.ibbox().left
+                                case "right":
+                                    _x = kinst.ibbox().right
+                                case "center":
+                                    _x = kinst.ibbox().center().x
+                            match p.anchor.y:
+                                case "top":
+                                    _y = kinst.ibbox().top
+                                case "bottom":
+                                    _y = kinst.ibbox().bottom
+                                case "center":
+                                    _y = kinst.ibbox().center().x
+
                             kinst.transform(
                                 kdb.ICplxTrans(
                                     mag=1,
@@ -1289,9 +1419,10 @@ def _place_island(
                                     x=x + p.dx,
                                     y=y + p.dy,
                                 )
-                                * kdb.ICplxTrans(-kinst.ports[p.port].trans.disp)
+                                * kdb.ICplxTrans(-kdb.Vector(_x, _y))
                             )
-                    elif p.port is None:
+
+                    elif p.anchor is None:
                         kinst.transform(
                             kdb.DCplxTrans(
                                 mag=1,
@@ -1301,7 +1432,7 @@ def _place_island(
                                 y=y + p.dy,
                             )
                         )
-                    else:
+                    elif isinstance(p.anchor, PortAnchor):
                         kinst.transform(
                             kdb.DCplxTrans(
                                 mag=1,
@@ -1310,7 +1441,35 @@ def _place_island(
                                 x=x + p.dx,
                                 y=y + p.dy,
                             )
-                            * kdb.DCplxTrans(-kinst.ports[p.port].dcplx_trans.disp)
+                            * kdb.DCplxTrans(
+                                -kinst.ports[p.anchor.port].dcplx_trans.disp
+                            )
+                        )
+                    else:
+                        match p.anchor.x:
+                            case "left":
+                                _dx = kinst.dbbox().left
+                            case "right":
+                                _dx = kinst.dbbox().right
+                            case "center":
+                                _dx = kinst.dbbox().center().x
+                        match p.anchor.y:
+                            case "top":
+                                _dy = kinst.dbbox().top
+                            case "bottom":
+                                _dy = kinst.dbbox().bottom
+                            case "center":
+                                _dy = kinst.dbbox().center().x
+
+                        kinst.transform(
+                            kdb.DCplxTrans(
+                                mag=1,
+                                rot=p.orientation,
+                                mirrx=p.mirror,
+                                x=x + p.dx,
+                                y=y + p.dy,
+                            )
+                            * kdb.DCplxTrans(-kdb.DVector(_dx, _dy))
                         )
                     placed_insts.add(inst)
             else:
@@ -1381,7 +1540,7 @@ def _get_and_place_insts_and_ports(
     schematic: TSchematic[TUnit],
     instances: dict[str, Instance | VInstance],
     placed_island_insts: set[str],
-    cross_sections: dict[str, CrossSection | DCrossSection],
+    cross_sections: Mapping[str, CrossSection | DCrossSection],
 ) -> bool:
     placeable_insts, placeable_ports = _get_placeable(
         placed_insts=placed_insts,

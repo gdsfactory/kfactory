@@ -15,6 +15,8 @@ from pydantic import BaseModel, Field, RootModel, model_validator
 from .typings import JSONSerializable  # noqa: TC001
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from .cross_section import CrossSection, DCrossSection
     from .kcell import KCell, ProtoTKCell
     from .port import BasePort
@@ -74,7 +76,7 @@ class PortRef(BaseModel, extra="forbid"):
         cell: KCell,
         schematic: TSchematic[Any],
         name: str,
-        cross_sections: dict[str, CrossSection | DCrossSection],
+        cross_sections: Mapping[str, CrossSection | DCrossSection],
     ) -> BasePort:
         return cell.add_port(
             port=cell.insts[self.instance].ports[self.port], name=name
@@ -137,7 +139,7 @@ class PortArrayRef(PortRef, extra="forbid"):
         cell: ProtoTKCell[Any],
         schematic: TSchematic[Any],
         name: str,
-        cross_sections: dict[str, CrossSection | DCrossSection],
+        cross_sections: Mapping[str, CrossSection | DCrossSection],
     ) -> BasePort:
         return cell.add_port(
             port=cell.insts[self.instance].ports[self.port, self.ia, self.ib], name=name

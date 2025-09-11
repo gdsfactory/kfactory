@@ -850,7 +850,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             cell_name += trans_str
         else:
             inst_ = cell.create_inst(
-                cell=cell_, na=self.na, nb=self.nb, a=self.a, b=self.b
+                cell=self.cell, na=self.na, nb=self.nb, a=self.a, b=self.b
             )
             if self._name:
                 inst_.name = self._name

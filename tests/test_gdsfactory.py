@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+from ruamel.yaml import YAML
 
 import kfactory as kf
 
@@ -17,6 +18,7 @@ skip_files = [
     "mzi_lattice_filter",
     "mirror_demo",
 ]
+yaml = YAML(typ=["string", "safe"])
 
 
 def _get_path_stem(p: Path) -> str:
@@ -40,11 +42,11 @@ def test_gdsfactory_yaml_build(path: Path) -> None:
     factories = pdk.cells
     with path.open(encoding="utf-8") as f:
         fstr = jinja2.Template(f.read()).render()
-    schematic = kf.read_schematic(path)
+    schematic = kf.DSchematic.model_validate(yaml.load(fstr))
     schematic.create_cell(
         output_type=gf.Component,
         factories=factories,
         routing_strategies=pdk.routing_strategies or gf_factories.routing_strategies,
         place_unknown=True,
     ).show()
-    print(schematic.code_str())
+    print(schematic.code_str())  # noqa: T201
