@@ -66,10 +66,21 @@ _schematic_default_imports = {
 
 
 def _valid_varname(name: str) -> str:
+    """Return a valid Python identifier for `name`.
+
+    If `name` is not a valid identifier or is a Python keyword, prefix it with "_".
+    This is useful when turning instance/port names into Python variables.
+    """
     return name if name.isidentifier() and not keyword.iskeyword(name) else f"_{name}"
 
 
 def _gez(value: TUnit) -> TUnit:
+    """Validate that a unit-like value is >= 0.
+
+    Raises:
+        ValueError: If `value` is negative.
+    """
+
     if value < 0:
         raise ValueError(
             "x of pitch_a and y of pitch_b must be greater or equal to zero."
@@ -78,19 +89,47 @@ def _gez(value: TUnit) -> TUnit:
 
 
 class MirrorPlacement(BaseModel, extra="forbid"):
+    """Mirror-only placement toggle for an instance.
+
+    Mirror only placements are used for connections. This ensures that the schematic can
+    keep track of the relative mirror in case its placement is defined through
+    connections only (i.e. purely relative to neighboring instances).
+
+    Attributes:
+        mirror: Whether the instance should be mirrored horizontally.
+    """
+
     mirror: bool = False
 
 
 class Anchor(BaseModel):
-    pass
+    """Base class for placement anchors.
+
+    Subclasses (e.g. `FixedAnchor`, `PortAnchor`) define reference points used
+    to align an instance during placement. Anchors allow to place instances relative to
+    to their bounding box or port positions.
+    """
 
 
 class FixedAnchor(Anchor):
+    """Anchor an instance to a fixed point of its own bounding box.
+
+    Attributes:
+        x: Horizontal anchor relative to the instance bbox ("left", "center", "right").
+        y: Vertical anchor relative to the instance bbox ("bottom", "center", "top").
+    """
+
     x: Literal["left", "center", "right"] | None = None
     y: Literal["bottom", "center", "top"] | None = None
 
 
 class PortAnchor(Anchor):
+    """Anchor an instance using one of its ports.
+
+    Attributes:
+        port: Name of the port on the instance to use as the anchor point.
+    """
+
     port: str
 
 
@@ -122,21 +161,31 @@ _anchor_mapping: dict[str, FixedAnchorDict] = {
 
 
 class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
+    """Absolute placement and orientation for an instance.
+
+    Coordinates may be absolute (`x`, `y`) with
+    relative offsets (`dx`, `dy`), and can reference other instance ports via
+    `PortRef`/`PortArrayRef`. These are still considered absolute placements, but
+    allow relative
+
+    Attributes:
+        x: x position or a port reference providing the x coordinate.
+        dx: Relative X offset added to `x`.
+        y: y position or a port reference providing the y coordinate.
+        dy: Relative Y offset added to `y`.
+        orientation: Rotation in degrees (0, 90, 180, 270). Can be a reference
+            to another instance's port.
+        anchor: Optional `FixedAnchor`/`PortAnchor` to align the instance relative
+            to its bounding box or one of its ports.
+        mirror: Whether the instance is to be mirrored or not.
+    """
+
     x: TUnit | PortRef | PortArrayRef = cast("TUnit", 0)
     dx: TUnit = cast("TUnit", 0)
     y: TUnit | PortRef | PortArrayRef = cast("TUnit", 0)
     dy: TUnit = cast("TUnit", 0)
     orientation: float = 0
     anchor: FixedAnchor | PortAnchor | None = None
-
-    @model_validator(mode="after")
-    def _require_absolute_or_relative(self) -> Self:
-        if self.x is None and self.dx is None:
-            raise ValueError("Either x or dx must be defined.")
-        if self.y is None and self.dy is None:
-            raise ValueError("Either y or dy must be defined.")
-
-        return self
 
     @model_validator(mode="before")
     @classmethod
@@ -146,6 +195,10 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
         return data
 
     def is_placeable(self, placed_instances: set[str], placed_ports: set[str]) -> bool:
+        """Return True if all referenced instances/ports are already placed.
+
+        If true, this means this instance can be placed now.
+        """
         placeable = True
         if isinstance(self.x, PortRef):
             placeable = self.x.instance in placed_instances
@@ -159,6 +212,15 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
 
 
 class RegularArray(BaseModel, Generic[TUnit], extra="forbid"):
+    """Rectangular array with uniform row/column pitch.
+
+    Attributes:
+        columns: Number of columns (> 0).
+        column_pitch: Distance between columns.
+        rows: Number of rows (> 0).
+        row_pitch: Distance between rows.
+    """
+
     columns: int = Field(gt=0, default=1)
     column_pitch: TUnit
     rows: int = Field(gt=0, default=1)
@@ -169,6 +231,17 @@ class RegularArray(BaseModel, Generic[TUnit], extra="forbid"):
 
 
 class Array(BaseModel, Generic[TUnit], extra="forbid"):
+    """General 2D array parameterization using two pitch vectors.
+
+    Attributes:
+        na: Repetition count along vector A. This vector
+            needs to have a positive x component.
+        nb: Repetition count along vector B. This vector
+            needs to have a positive y component
+        pitch_a: (dx, dy) pitch for vector A. dx must be >= 0.
+        pitch_b: (dx, dy) pitch for vector B. dy must be >= 0.
+    """
+
     na: int = Field(gt=1, default=1)
     nb: int = Field(gt=0, default=1)
     pitch_a: tuple[Annotated[TUnit, AfterValidator(_gez)], TUnit]
@@ -176,9 +249,17 @@ class Array(BaseModel, Generic[TUnit], extra="forbid"):
 
 
 class Ports(BaseModel, Generic[TUnit]):
+    """Indexer for an instance's ports to produce `PortRef`/`PortArrayRef`.
+
+    Example:
+        `inst.ports["out"]` -> `PortRef`
+        `inst.ports["out", 1, 0]` -> `PortArrayRef` (requires instance array)
+    """
+
     instance: SchematicInstance[TUnit]
 
     def __getitem__(self, key: str | tuple[str, int, int]) -> PortRef | PortArrayRef:
+        """Return a port reference for a (standard or array) port."""
         if isinstance(key, tuple):
             if self.instance.array is None:
                 raise ValueError(
@@ -194,6 +275,27 @@ class Ports(BaseModel, Generic[TUnit]):
 class SchematicInstance(
     BaseModel, Generic[TUnit], extra="forbid", arbitrary_types_allowed=True
 ):
+    """Instance record within a schematic.
+
+    Attributes:
+        name: Instance name (unique within the schematic).
+        component: Factory (cell function) name used to create the underlying cell.
+        settings: Parameters passed to the factory.
+        array: Optional array specification (`RegularArray` or `Array`).
+        kcl: Layout context (`KCLayout`) to build the instance from. Defaults to
+            default object.
+        virtual: If True, create a virtual instance (VInstance/ComponentAllAngle).
+        placement: Reference to a placement if the instance has a corresponding one.
+
+    Properties:
+        parent_schematic: `(D)Schematic` owning this instance.
+        ports: Accessing `PortRef`/`PortArrayRef` resulting from this instance.
+
+    Methods:
+        place: Declare a placement, saved in the schematic owning this instance.
+        connect: Create and register a `Connection` from one of my ports.
+    """
+
     name: str = Field(exclude=True, frozen=True)
     component: str
     settings: dict[str, JSONSerializable] = Field(default_factory=dict)
@@ -233,6 +335,12 @@ class SchematicInstance(
         mirror: bool = False,
         anchor: FixedAnchorDict | PortAnchorDict | None = None,
     ) -> Placement[TUnit]:
+        """Declare placement/orientation/mirroring for this instance.
+
+        Returns:
+            The created `Placement` (also stored under `self.placement` which references
+            `self.parent_schematic.placements`).
+        """
         placement = Placement[TUnit](
             x=x,
             y=y,
@@ -265,6 +373,7 @@ class SchematicInstance(
         port: str | tuple[str, int, int],
         other: Port[TUnit] | PortRef,
     ) -> Connection[TUnit]:
+        """Connect one of my ports to `other` and register it on the schematic."""
         if isinstance(port, str):
             pref = PortRef(instance=self.name, port=port)
         else:
@@ -294,6 +403,16 @@ class SchematicInstance(
 
 
 class Route(BaseModel, Generic[TUnit], extra="forbid"):
+    """Bundle of `Link`s routed using a named strategy.
+
+    Attributes:
+        name: Route identifier (key in `(D)Schematic.routes`).
+        links: Pairs of start/end ports to be routed.
+        routing_strategy: Name of routing function registered on the
+            `Schematic.create_cell` or registered in `KCLayout` if none are given.
+        settings: Keyword arguments forwarded to the routing strategy.
+    """
+
     name: str = Field(exclude=True)
     links: list[Link[TUnit]]
     routing_strategy: str = "route_bundle"
@@ -315,6 +434,28 @@ class Route(BaseModel, Generic[TUnit], extra="forbid"):
 
 
 class Port(BaseModel, Generic[TUnit], extra="forbid"):
+    """A schematic-level, placeable port.
+
+    This port is on the Schematic's cell's level, i.e. equivalent of `(D)KCell.ports`
+    (or `Component.ports`).
+
+    The port position/orientation can be absolute or derived from other placed
+    instance ports via `PortRef`/`PortArrayRef`.
+
+    Attributes:
+        name: Port name (key in schematic).
+        x: x position or `PortRef`.
+        y: y position or `PortRef`.
+        dx: Relative x offset.
+        dy: Relative y offset.
+        cross_section: Name of the cross-section to apply.
+        orientation: Orientation in degrees or `PortRef`.
+
+    Methods:
+        is_placeable: True if all references resolve to already placed instances.
+        place: Materialize the port on a `KCell` using provided cross-sections.
+    """
+
     name: str = Field(exclude=True)
     x: TUnit | PortRef
     y: TUnit | PortRef
@@ -440,6 +581,11 @@ class Link(
     ],
     Generic[TUnit],
 ):
+    """Undirected association between two ports (refs or schematic ports).
+
+    The pair is stored in sorted order to ensure stable equality and hashing.
+    """
+
     root: tuple[
         PortArrayRef | PortRef | Port[TUnit], PortArrayRef | PortRef | Port[TUnit]
     ]
@@ -457,6 +603,15 @@ class Connection(
         ]
     ]
 ):
+    """Hard connection between two ports.
+
+    Enforced as {PortRef | PortArrayRef | Port} x {PortRef | PortArrayRef}.
+    Two `Port` objects (cell ports) cannot be connected directly.
+
+    Raises:
+        TypeError: If connection attempts to join two `Port` objects.
+    """
+
     root: tuple[PortArrayRef | PortRef | Port[TUnit], PortArrayRef | PortRef]
 
     @model_validator(mode="after")
@@ -473,6 +628,12 @@ class Connection(
     def from_list(
         cls, data: list[Any] | tuple[Any, ...] | dict[str, Any]
     ) -> Connection[TUnit]:
+        """Parse a Connection from a compact list/tuple/dict representation.
+
+        Used for parsing legacy gdsfactory like connections.
+
+        Supports array addressing like `( (inst, (ia, ib)), port )`.
+        """
         if isinstance(data, list | tuple):
             if isinstance(data[0][0], list | tuple):
                 p1 = {
@@ -498,6 +659,23 @@ class Connection(
 
 
 class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
+    """Schematic of a cell / component.
+
+    Parameters:
+        unit: Base coordinate unit ("dbu" or "um"). Fixed by subclass.
+        kcl: `KCLayout` context (excluded from model serialization). Needed for
+            referencing and creation of the cell.
+
+    Attributes:
+        name: Optional schematic name.
+        dependencies: File dependencies to watch (e.g., for regeneration).
+        instances: Mapping of instance name -> `SchematicInstance`.
+        placements: Mapping of instance name -> `Placement`/`MirrorPlacement`.
+        connections: List of `Connection`s.
+        routes: Mapping of route name -> `Route`.
+        ports: Mapping of port name -> `Port`/`PortRef`/`PortArrayRef`.
+    """
+
     name: str | None = None
     dependencies: list[Path] = Field(default_factory=list)
     instances: dict[str, SchematicInstance[TUnit]] = Field(default_factory=dict)
@@ -524,14 +702,16 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         This would be an SREF or AREF in the resulting GDS cell.
 
         Args:
-            name: Instance name. In a schema, each instance must be named,
+            name: Instance name. In a schematic, each instance must be named,
                 unless created through routing functions.
             component: Factory name of the component to instantiate.
-            settings: Settings dictionary to configure the factory.
+            settings: Parameters passed to the factory (optional).
             array: If the instance should create an array instance (AREF),
                 this can be passed here as an `Array` class instance.
             placement: Optional placement for the instance. Can also be configured
                 with `inst.place(...)` afterwards.
+            kcl: Optional `KCLayout` override for this instance.
+
 
         Returns:
             Schematic instance representing the args.
@@ -555,6 +735,15 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     def add_port(
         self, name: str | None = None, *, port: PortRef | PortArrayRef
     ) -> None:
+        """Expose an existing instance port as a schematic top-level port.
+
+        Args:
+            name: Name for the schematic port; defaults to the underlying port name.
+            port: Port reference to expose.
+
+        Raises:
+            ValueError: If a schematic port with `name` already exists.
+        """
         name = name or port.port
         if name not in self.ports:
             self.ports[name] = port
@@ -571,6 +760,11 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         dy: TUnit = 0,
         orientation: Literal[0, 90, 180, 270] = 0,
     ) -> Port[TUnit]:
+        """Create a schematic-level, placeable port.
+
+        Returns:
+            The created `Port`, also stored in `self.ports`.
+        """
         p = Port(
             name=name,
             x=x,
@@ -583,12 +777,30 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         self.ports[p.name] = p
         return p
 
-    def create_connection(self, port1: PortRef, port2: PortRef) -> Connection[TUnit]:
+    def create_connection(
+        self, port1: PortRef | Port[TUnit], port2: PortRef
+    ) -> Connection[TUnit]:
+        """Create and register a connection between two instance ports.
+
+        Args:
+            port1: First instance port.
+            port2: Second instance port.
+
+        Raises:
+            ValueError: If either referenced instance is unknown.
+
+        Returns:
+            The created `Connection`.
+        """
+
         conn = Connection[TUnit]((port1, port2))
-        if port1.instance not in self.instances:
-            raise ValueError(
-                f"Cannot create connection to unknown instance {port1.instance}"
-            )
+        if isinstance(port1, PortRef):
+            if port1.instance not in self.instances:
+                raise ValueError(
+                    f"Cannot create connection to unknown instance {port1.instance}"
+                )
+        elif port1 != self.ports.get(port1.name):
+            raise ValueError(f"Unknown port {port1=}")
         if port2.instance not in self.instances:
             raise ValueError(
                 f"Cannot create connection to unknown instance {port2.instance}"
@@ -597,6 +809,13 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         return conn
 
     def netlist(self) -> Netlist:
+        """Compile the schematic into a `Netlist`.
+
+        Includes nets from `connections`, `routes`, and exposed `ports`. Instances
+        are serialized with their `kcl`, component, and settings. The resulting
+        netlist is sorted for stable output.
+        """
+
         nets: list[Net] = []
         if self.routes is not None:
             nets.extend(
@@ -759,6 +978,25 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         | None = None,
         place_unknown: bool = False,
     ) -> KC:
+        """Materialize the schematic into a `KCell`/`DKCell`/`Component`.
+
+        Args:
+            output_type: Cell type to return (e.g., `KCell`, `DKCell`).
+            factories: Optional mapping from factory name to callable returning a cell.
+            cross_sections: Optional mapping of cross-section names to definitions.
+                If undefined uses `self.kcl`'s cross sections.
+            routing_strategies: Strategy functions keyed by name. If none uses
+                `self.kcl`'s routing strategies
+            place_unknown: If True, place otherwise unplaceable instances at (0, 0).
+                This might cause unintended side effects as the schematic is seemingly
+                not fully deterministic, therefore this is disabled by default.
+
+        Returns:
+            A cell of type `output_type` with instances, ports, and routes realized.
+
+        Raises:
+            ValueError: If placement or connection constraints cannot be satisfied.
+        """
         c = KCell(kcl=self.kcl)
 
         # calculate islands -- islands are a bunch of directly connected instances and
@@ -940,6 +1178,22 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         routing_strategy: str,
         **settings: JSONSerializable,
     ) -> Route[TUnit]:
+        """Create a multi-link route bundle.
+
+        Args:
+            name: Route identifier (must be unique).
+            start_ports: Start ports for each link.
+            end_ports: End ports for each link.
+            routing_strategy: Name of the routing strategy function.
+            **settings: Extra keyword args forwarded to the strategy.
+
+        Returns:
+            The created `Route`.
+
+        Raises:
+            ValueError: If `name` already exists.
+        """
+
         if name in self.routes:
             raise ValueError(f"Route with name {name!r} already exists")
         route = Route[TUnit](
@@ -962,6 +1216,18 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         kfactory_name: str | None = None,
         ruff_format: bool = True,
     ) -> str:
+        """Generate Python code that reconstructs this schematic.
+
+        Args:
+            imports: Mapping of module -> alias to emit at top of file.
+            kfactory_name: Optional override for the `kfactory` import name.
+            ruff_format: If True, format the generated code with `ruff`.
+
+        Returns:
+            The generated source code as a string. If `ruff` is unavailable or
+            fails, the unformatted string is returned.
+        """
+
         schematic_cell = ""
         indent = 0
 
@@ -1222,7 +1488,7 @@ class DSchematic(TSchematic[um]):
 
 
 class Schema(Schematic):
-    """Schematic with a base unit of dbu for placements."""
+    """Deprecated alias for `Schematic` (will be removed in kfactory 2.0)."""
 
     def __init__(self, **data: Any) -> None:
         logger.warning(
@@ -1237,7 +1503,7 @@ class Schema(Schematic):
 
 
 class DSchema(DSchematic):
-    """Schematic with a base unit of um for placements."""
+    """Deprecated alias for `DSchematic` (will be removed in kfactory 2.0)."""
 
     def __init__(self, **data: Any) -> None:
         logger.warning(
@@ -1671,6 +1937,20 @@ def get_schematic(
     c: KCell | DKCell,
     exclude_port_types: Sequence[str] | None = ("placement", "pad", "bump"),
 ) -> TSchematic[int] | TSchematic[float]:
+    """NOT FUNCTIONAL YET.
+
+    Create a minimal `TSchematic` from an existing cell.
+
+    Currently extracts named instances only. Port extraction is not yet implemented.
+
+    Args:
+        c: Source cell.
+        exclude_port_types: Port types to ignore (reserved for future use).
+
+    Returns:
+        A `Schematic` if `c` is `KCell`, otherwise a `DSchematic`.
+    """
+
     if isinstance(c, KCell):
         schematic: TSchematic[int] | TSchematic[float] = Schematic(name=c.name)
     else:
@@ -1695,6 +1975,19 @@ def read_schematic(file: Path | str, unit: Literal["um"]) -> DSchematic: ...
 def read_schematic(
     file: Path | str, unit: Literal["dbu", "um"] = "dbu"
 ) -> Schematic | DSchematic:
+    """Read a schematic from a YAML file.
+
+    Args:
+        file: Path to a YAML file.
+        unit: Target coordinate unit; controls which subclass is constructed.
+
+    Returns:
+        `Schematic` when `unit="dbu"`, else `DSchematic`.
+
+    Raises:
+        ValueError: If `file` does not exist or is not a file.
+    """
+
     file = Path(file).resolve()
     if not file.is_file():
         raise ValueError(f"{file=} is either not a file or does not exist.")
@@ -1703,8 +1996,3 @@ def read_schematic(
         if unit == "dbu":
             return Schematic.model_validate(yaml_dict, strict=True)
         return DSchematic.model_validate(yaml_dict)
-
-
-TSchematic[Annotated[int, str]].model_rebuild()
-TSchematic[Annotated[float, str]].model_rebuild()
-SchematicInstance.model_rebuild()
