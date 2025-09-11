@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 def save_session(
     c: ProtoTKCell[Any] | None = None, session_dir: Path | None = None
 ) -> None:
-    kcls_dir = session_dir or (config.project_dir / "build/session/kcls")
+    kcls_dir = session_dir or ((config.project_dir or Path()) / "build/session/kcls")
     if kcls_dir.exists():
         rmtree(kcls_dir)
     skip_cells: set[int] = set()
@@ -89,7 +89,7 @@ def save_session(
 def load_session(
     session_dir: Path | None = None, warn_missing_dir: bool = True
 ) -> None:
-    kcls_dir = session_dir or (config.project_dir / "build/session/kcls")
+    kcls_dir = session_dir or ((config.project_dir or Path()) / "build/session/kcls")
     logger.debug("Loading session from {}", kcls_dir)
 
     if not kcls_dir.exists():
