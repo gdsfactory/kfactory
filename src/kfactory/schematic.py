@@ -10,6 +10,7 @@ import keyword
 import re
 import subprocess
 from collections import defaultdict
+from functools import cached_property
 from operator import attrgetter
 from pathlib import Path
 from typing import (
@@ -21,6 +22,7 @@ from typing import (
     Literal,
     Self,
     TypedDict,
+    TypeGuard,
     cast,
     overload,
 )
@@ -83,18 +85,26 @@ class Anchor(BaseModel):
     pass
 
 
-class PortAnchor(Anchor):
-    port: str
-
-
 class FixedAnchor(Anchor):
     x: Literal["left", "center", "right"] | None = None
     y: Literal["bottom", "center", "top"] | None = None
 
 
+class PortAnchor(Anchor):
+    port: str
+
+
 class FixedAnchorDict(TypedDict):
     x: Literal["left", "center", "right"] | None
     y: Literal["bottom", "center", "top"] | None
+
+
+class PortAnchorDict(TypedDict):
+    port: str
+
+
+def _is_portdict(d: PortAnchorDict | FixedAnchorDict) -> TypeGuard[PortAnchorDict]:
+    return "port" in d
 
 
 _anchor_mapping: dict[str, FixedAnchorDict] = {
@@ -221,7 +231,7 @@ class SchematicInstance(
         dy: TUnit = 0,
         orientation: Literal[0, 90, 180, 270] = 0,
         mirror: bool = False,
-        port: str | None = None,
+        anchor: FixedAnchorDict | PortAnchorDict | None = None,
     ) -> Placement[TUnit]:
         placement = Placement[TUnit](
             x=x,
@@ -231,8 +241,12 @@ class SchematicInstance(
             orientation=orientation,
             mirror=mirror,
         )
-        if port is not None:
-            placement.anchor = PortAnchor(port=port)
+        if anchor is not None:
+            if _is_portdict(anchor):
+                placement.anchor = PortAnchor(port=anchor["port"])
+            else:
+                fixed = cast("FixedAnchorDict", anchor)
+                placement.anchor = FixedAnchor(x=fixed["x"], y=fixed["y"])
         self.parent_schematic.placements[self.name] = placement
         return placement
 
@@ -273,6 +287,10 @@ class SchematicInstance(
             self.parent_schematic.placements[self.name] = MirrorPlacement(mirror=True)
         else:
             self.placement.mirror = value
+
+    @cached_property
+    def ports(self) -> Ports[TUnit]:
+        return Ports(instance=self)
 
 
 class Route(BaseModel, Generic[TUnit], extra="forbid"):
