@@ -20,18 +20,19 @@ authors = [{ name = "gdsfactory community", email = "contact@gdsfactory.com" }]
 dependencies = [
     "aenum >= 3.1.15, < 4",
     "cachetools >= 5.2.0",
-    "pygit2 >= 1.18.2, < 2",
-    "loguru >= 0.7.3, < 0.8",
     "klayout >= 0.30, < 0.31.0",
+    "loguru >= 0.7.3, < 0.8",
     "pydantic >= 2.11, < 2.12",
+    "pydantic-extra-types>=2.10.5",
     "pydantic-settings >= 2.0.1, < 3",
+    "pygit2 >= 1.18.2, < 2",
+    "rapidfuzz >= 3.13.0 < 4",
     "rectangle-packer >= 2.0.2, < 3",
     "requests >= 2.23.3, < 3",
     "ruamel.yaml.string >= 0.1.1, < 0.2",
     "scipy >= 1.14.1, < 2",
     "toolz >= 1, < 2",
     "typer >= 0.15.2, < 0.18",
-    "pydantic-extra-types>=2.10.5",
 ]
 
 [project.optional-dependencies]
