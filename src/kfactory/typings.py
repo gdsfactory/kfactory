@@ -47,6 +47,7 @@ TBaseCell_co = TypeVar("TBaseCell_co", bound="BaseKCell", covariant=True)
 KCellParams = ParamSpec("KCellParams")
 P = ParamSpec("P")
 
+
 JSONSerializable = TypeAliasType(
     "JSONSerializable",
     "int | float| bool | str | list[JSONSerializable] | tuple[JSONSerializable, ...] | dict[str, JSONSerializable] | None",  # noqa: E501

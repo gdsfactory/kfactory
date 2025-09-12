@@ -434,7 +434,8 @@ class KCLayout(
             if allow_undefined_layers:
                 return self.layout.layer(info)
             raise KeyError(
-                f"Layer '{args=}, {kwargs=}' has not been defined in the KCLayout."
+                f"Layer '{args=}, {kwargs=}' has not been defined in the KCLayout. "
+                "Have you defined the layer and set it in KCLayout.info?"
             ) from e
 
     @overload
@@ -1320,7 +1321,8 @@ class KCLayout(
             if allow_duplicate or (self.layout_cell(name) is None):
                 return self.layout.create_cell(name, *args)
             raise ValueError(
-                f"Cellname {name} already exists. Please make sure the cellname is"
+                f"Cellname {name} already exists in the layout/KCLayout. "
+                "Please make sure the cellname is"
                 " unique or pass `allow_duplicate` when creating the library"
             )
 
@@ -1388,7 +1390,7 @@ class KCLayout(
                 self.tkcells[kcell.cell_index()] = kcell.base
             else:
                 raise ValueError(
-                    "Cannot register a new cell with a name that already"
+                    f"Cannot register {kcell} if it has been registered already"
                     " exists in the library"
                 )
 
@@ -1400,7 +1402,12 @@ class KCLayout(
         """
         return self.get_cell(obj)
 
-    def get_cell(self, obj: str | int, cell_type: type[KC] = KCell) -> KC:  # type: ignore[assignment]
+    def get_cell(
+        self,
+        obj: str | int,
+        cell_type: type[KC] = KCell,  # type: ignore[assignment]
+        error_search_limit: int | None = 10,
+    ) -> KC:
         """Retrieve a cell by name(str) or index(int).
 
         Attrs:
@@ -1408,6 +1415,7 @@ class KCLayout(
             cell_type: type of cell to return
         """
         if isinstance(obj, int):
+            # search by index
             try:
                 return cell_type(base=self.tkcells[obj])
             except KeyError:
@@ -1415,15 +1423,33 @@ class KCLayout(
                 if kdb_c is None:
                     raise
                 return cell_type(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
-        else:
-            kdb_c = self.layout_cell(obj)
-            if kdb_c is not None:
-                try:
-                    return cell_type(base=self.tkcells[kdb_c.cell_index()])
-                except KeyError:
-                    c = cell_type(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
-                    c.get_meta_data()
-                    return c
+        # search by name/key
+        kdb_c = self.layout_cell(obj)
+        if kdb_c is not None:
+            try:
+                return cell_type(base=self.tkcells[kdb_c.cell_index()])
+            except KeyError:
+                c = cell_type(name=kdb_c.name, kcl=self, kdb_cell=kdb_c)
+                c.get_meta_data()
+                return c
+        if error_search_limit:
+            # limit the print of available cells
+            # and throw closest names with fuzzy search
+            from rapidfuzz import process
+
+            closest_names = [
+                result[0]
+                for result in process.extract(
+                    obj,
+                    (cell.name for cell in self.kcells.values()),
+                    limit=error_search_limit,
+                )
+            ]
+            raise ValueError(
+                f"Library doesn't have a KCell named {obj},"
+                f" closest {error_search_limit} are: \n"
+                f"{pformat(closest_names)}"
+            )
 
         raise ValueError(
             f"Library doesn't have a KCell named {obj},"
@@ -1526,7 +1552,11 @@ class KCLayout(
                     raise MergeError(err_msg)
 
             cells = set(self.cells("*"))
-            binary_layout = layout_b.write_bytes(save_layout_options())
+            saveopts = save_layout_options()
+            saveopts.gds2_max_cellname_length = (
+                kdb.SaveLayoutOptions().gds2_max_cellname_length
+            )
+            binary_layout = layout_b.write_bytes(saveopts)
             locked_cells = [
                 kdb_cell for kdb_cell in self.layout.each_cell() if kdb_cell.locked
             ]
