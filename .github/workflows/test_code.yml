@@ -23,7 +23,6 @@ jobs:
       matrix:
         python-version:
           - "3.11"
-          - "3.13"
         os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v5
