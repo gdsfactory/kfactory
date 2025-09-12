@@ -38,7 +38,7 @@ jobs:
           echo "Found $DIAGNOSTIC_COUNT diagnostics"
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            COMMENT_BODY="**`ty` Results**
+            COMMENT_BODY="**ty Results**
 
           Found **$DIAGNOSTIC_COUNT** diagnostics when type checking the codebase.
 
