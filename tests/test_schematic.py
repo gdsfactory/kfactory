@@ -20,8 +20,17 @@ skip_files = [
 ]
 
 
-def _get_path_stem(p: Path) -> str:
-    return p.with_suffix("").stem
+def _get_path_stem(p: Path) -> str | None:
+    # If it's a tuple, grab the first item
+    if isinstance(p, tuple) and p:
+        p = p[0]
+
+    # Handle str/Path inputs
+    if isinstance(p, str | Path):
+        return Path(p).with_suffix("").stem
+
+    # Let pytest fall back to default ID
+    return None
 
 
 def test_schematic() -> None:
