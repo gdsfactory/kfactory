@@ -36,11 +36,19 @@ New/Improved Features:
   which are built into KLayout
 
 
-## Installation
+## Getting Started
 
-kfactory is available on [pypi](https://pypi.org/project/kfactory/)
+### Installation
+
+kfactory is available as [`kfactory`](https://pypi.org/project/kfactory/) on PyPI
+
+Install kfactory with `uv`, or `pip`:
 
 ```bash
+# Add kfactory to your project.
+uv add kfactory
+
+# With pip.
 pip install kfactory
 ```
 
@@ -48,11 +56,10 @@ At the moment kfactory works only on python 3.11 and above
 
 ### Development Installation
 
-
 A development environment can be installed with
 
 ```bash
-python -m pip install -e .[dev]
+just dev
 ```
 
-It is defined in `pyproject.toml`. For committing `pre-commit` should be installed with `pre-commit install`.
+For committing `pre-commit` should be installed with `pre-commit install` (this is done with `just dev`).
