@@ -34,13 +34,11 @@ jobs:
         run: |
           uv run ty check src/kfactory > ty_output.txt 2>&1 || true
 
-          cat "ty_output.txt"
-
           DIAGNOSTIC_COUNT=$(grep -o "Found [0-9]* diagnostics" ty_output.txt | grep -o "[0-9]*" || echo "0")
           echo "Found $DIAGNOSTIC_COUNT diagnostics"
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            COMMENT_BODY="🔍 **Type Check Results**
+            COMMENT_BODY="**`ty` Results**
 
           Found **$DIAGNOSTIC_COUNT** type diagnostics in the codebase.
 
