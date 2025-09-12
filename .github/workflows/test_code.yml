@@ -38,7 +38,7 @@ jobs:
           echo "Found $DIAGNOSTIC_COUNT diagnostics"
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            COMMENT_BODY="**ty Results**
+            COMMENT_BODY="**Ty Results**
 
           Found **$DIAGNOSTIC_COUNT** diagnostics when type checking the codebase.
 
@@ -54,7 +54,7 @@ jobs:
 
             # Check if comment already exists
             EXISTING_COMMENT=$(gh api repos/${{ github.repository }}/issues/${{ github.event.number }}/comments \
-              --jq '.[] | select(.body | contains("**ty Results**")) | .id' | head -1 || echo "")
+              --jq '.[] | select(.body | contains("**Ty Results**")) | .id' | head -1 || echo "")
 
             if [ -n "$EXISTING_COMMENT" ]; then
               # Update existing comment
