@@ -40,7 +40,7 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             COMMENT_BODY="**`ty` Results**
 
-          Found **$DIAGNOSTIC_COUNT** type diagnostics in the codebase.
+          Found **$DIAGNOSTIC_COUNT** diagnostics when type checking the codebase.
 
           <details>
           <summary>View full ty output</summary>
