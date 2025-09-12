@@ -54,7 +54,7 @@ jobs:
 
             # Check if comment already exists
             EXISTING_COMMENT=$(gh api repos/${{ github.repository }}/issues/${{ github.event.number }}/comments \
-              --jq '.[] | select(.body | contains("🔍 **Type Check Results**")) | .id' | head -1 || echo "")
+              --jq '.[] | select(.body | contains("**ty Results**")) | .id' | head -1 || echo "")
 
             if [ -n "$EXISTING_COMMENT" ]; then
               # Update existing comment
