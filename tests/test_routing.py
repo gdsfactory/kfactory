@@ -536,8 +536,6 @@ def test_smart_routing(
                 [route.length for route in routes]
         case _:
             rf()
-            if m1 and not p1:
-                c.show()
 
 
 def test_custom_router(
