@@ -386,7 +386,7 @@ class ICreatePort(ABC):
                 )
             except ValidationError as e:
                 raise ValueError(
-                    "Port width width needs to be even to snap to grid properly "
+                    "Port width needs to be even to snap to grid properly "
                     "and greater than 0"
                     f". 1 DBU is {self.kcl.dbu} um."
                 ) from e
@@ -574,7 +574,7 @@ class DCreatePort(ABC):
                 )
             except ValidationError as e:
                 raise ValueError(
-                    "Port width width needs to be even to snap to grid properly "
+                    "Port width needs to be even to snap to grid properly "
                     "and greater than 0"
                     f". 1 DBU is {self.kcl.dbu} um. Port width must be a "
                     f"multiple of {2 * self.kcl.dbu} um."
