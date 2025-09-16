@@ -127,7 +127,7 @@ def instance_port_name(inst: Instance, port: Port) -> str:
 
 
 def pprint_ports(
-    ports: Iterable[ProtoPort[Any]], unit: Literal["dbu", "um", None] = None
+    ports: Iterable[ProtoPort[Any]], unit: Literal["dbu", "um"] | None = None
 ) -> Table:
     """Print ports as a table.
 
@@ -217,7 +217,7 @@ def pprint_ports(
 
 
 def pprint_pins(
-    pins: Iterable[Pin] | Iterable[DPin], unit: Literal["dbu", "um", None] = None
+    pins: Iterable[Pin] | Iterable[DPin], unit: Literal["dbu", "um"] | None = None
 ) -> Table:
     """Print ports as a table.
 

@@ -188,7 +188,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     def name(self, value: str) -> None: ...
 
 
-class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
+class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # noqa: PYI059
     _base: TBaseCell_co
 
     @property
@@ -591,7 +591,7 @@ class TVCell(BaseKCell):
         self._name = value
 
 
-class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
+class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI059
     def __init__(
         self,
         *,

@@ -255,7 +255,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         )
 
 
-class ProtoPort(Generic[TUnit], ABC):
+class ProtoPort(Generic[TUnit], ABC):  # noqa: PYI059
     """Base class for kf.Port, kf.DPort."""
 
     yaml_tag: str = "!Port"
@@ -601,7 +601,7 @@ class ProtoPort(Generic[TUnit], ABC):
         """Width of the port in um."""
         return self.kcl.to_um(self._base.cross_section.width)
 
-    def print(self, print_type: Literal["dbu", "um", None] = None) -> None:
+    def print(self, print_type: Literal["dbu", "um"] | None = None) -> None:
         """Print the port pretty."""
         config.console.print(pprint_ports([self], unit=print_type))
 

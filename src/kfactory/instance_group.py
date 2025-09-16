@@ -31,7 +31,7 @@ __all__ = [
 ]
 
 
-class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, TInstance_co], ABC):
+class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, TInstance_co], ABC):  # noqa: PYI059
     insts: list[TInstance_co]
     _base_ports: list[BasePort]
 
