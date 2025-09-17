@@ -1,4 +1,4 @@
-name: Test pre-commit, code and docs
+name: pytest
 
 on:
   pull_request:
@@ -119,12 +119,8 @@ jobs:
       matrix:
         python-version:
           - "3.13"
-        os: [ubuntu-latest]
+        os: [macos-latest]
     steps:
-      - name: Install graphviz
-        shell: bash -l {0}
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt install graphviz graphviz-dev
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
         with:
@@ -148,10 +144,6 @@ jobs:
         os: [ubuntu-latest]
 
     steps:
-      - name: Install graphviz
-        shell: bash -l {0}
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt install graphviz graphviz-dev
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:
