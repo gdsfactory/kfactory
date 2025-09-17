@@ -35,13 +35,13 @@ __all__ = [
 ]
 
 
-class HasCellPorts(Generic[TUnit], ABC):
+class HasCellPorts(ABC, Generic[TUnit]):
     @property
     @abstractmethod
     def cell_ports(self) -> ProtoPorts[TUnit]: ...
 
 
-class ProtoInstancePorts(HasCellPorts[TUnit], Generic[TUnit, TInstance_co], ABC):
+class ProtoInstancePorts(HasCellPorts[TUnit], ABC, Generic[TUnit, TInstance_co]):
     instance: TInstance_co
 
     @abstractmethod
@@ -64,7 +64,7 @@ class ProtoInstancePorts(HasCellPorts[TUnit], Generic[TUnit, TInstance_co], ABC)
 
 
 class ProtoTInstancePorts(
-    ProtoInstancePorts[TUnit, ProtoTInstance[TUnit]], Generic[TUnit], ABC
+    ProtoInstancePorts[TUnit, ProtoTInstance[TUnit]], ABC, Generic[TUnit]
 ):
     """Ports of an Instance.
 

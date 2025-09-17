@@ -111,7 +111,7 @@ class SizeInfo(Generic[TUnit]):
         return (c.x, c.y)
 
 
-class GeometricObject(Generic[TUnit], ABC):
+class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
     @property
     @abstractmethod
     def kcl(self) -> KCLayout: ...
