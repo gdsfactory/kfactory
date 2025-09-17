@@ -16,7 +16,7 @@ jobs:
       matrix:
         python-version:
           - "3.13"
-        os: [macos-latest]
+        os: [ubuntu-latest]
     steps:
       - name: Install graphviz
         shell: bash -l {0}
