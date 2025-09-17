@@ -87,7 +87,6 @@ class LayoutIPImage:
         widgets.append(self)
 
 
-
 class LayoutWidget:
     def __init__(
         self,
@@ -348,18 +347,18 @@ class LayoutWidget:
 
         buttons = 0
         if shift:
-            buttons |= lay.ButtonState.ShiftKey
+            buttons |= lay.ButtonState.ShiftKey  # type: ignore[attr-defined]
         if alt:
-            buttons |= lay.ButtonState.AltKey
+            buttons |= lay.ButtonState.AltKey  # type: ignore[attr-defined]
         if ctrl:
-            buttons |= lay.ButtonState.ControlKey
+            buttons |= lay.ButtonState.ControlKey  # type: ignore[attr-defined]
 
         if mouse_buttons & 1:
-            buttons |= lay.ButtonState.LeftButton
+            buttons |= lay.ButtonState.LeftButton  # type: ignore[attr-defined]
         if mouse_buttons & 2:
-            buttons |= lay.ButtonState.RightButton
+            buttons |= lay.ButtonState.RightButton  # type: ignore[attr-defined]
         if mouse_buttons & 4:
-            buttons |= lay.ButtonState.MidButton
+            buttons |= lay.ButtonState.MidButton  # type: ignore[attr-defined]
 
         return buttons
 
