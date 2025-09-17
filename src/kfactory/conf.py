@@ -317,9 +317,12 @@ class Settings(BaseSettings):
 
     @cached_property
     def project_dir(self) -> Path | None:
+        """Find the current working directory's project dir.
+
+        This is the git repo if it exists, cwd otherwise."""
         try:
             repo = pygit2.Repository(Path.cwd())
-            return Path(repo.workdir).resolve()
+            return Path(repo.workdir or repo.path).resolve()
         except pygit2.GitError:
             return None
 
