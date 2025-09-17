@@ -28,7 +28,7 @@ def fix_spacing_tiled(
     size_space_check: int = 5,
     n_threads: int = 4,
     tile_size: tuple[um, um] | None = None,
-    overlap: float = 3,
+    overlap: float = 2.2,
     smooth_factor: float = 0.05,
 ) -> kdb.Region: ...
 
@@ -43,7 +43,7 @@ def fix_spacing_tiled(
     size_space_check: int = 5,
     n_threads: int = 4,
     tile_size: tuple[um, um] | None = None,
-    overlap: float = 3,
+    overlap: float = 2.2,
     *,
     smooth_absolute: dbu,
 ) -> kdb.Region: ...
@@ -58,7 +58,7 @@ def fix_spacing_tiled(
     size_space_check: int = 5,
     n_threads: int | None = None,
     tile_size: tuple[um, um] | None = None,
-    overlap: float = 3,
+    overlap: float = 2.2,
     smooth_factor: float = 0.05,
     smooth_absolute: dbu | None = None,
     smooth_keep_hv: bool = True,
@@ -153,7 +153,7 @@ def fix_spacing_sizing_tiled(
     layer: kdb.LayerInfo,
     n_threads: int | None = None,
     tile_size: tuple[um, um] | None = None,
-    overlap: int = 2,
+    overlap: float = 2.2,
 ) -> kdb.Region:
     """Fix min space issues by using a dilation & erosion.
 
@@ -210,7 +210,7 @@ def fix_spacing_minkowski_tiled(
     ref: kdb.LayerInfo | kdb.Region,
     n_threads: int | None = None,
     tile_size: tuple[um, um] | None = None,
-    overlap: int = 1,
+    overlap: float = 2.2,
     smooth: dbu | None = None,
 ) -> kdb.Region:
     """Fix min space issues by using a dilation & erosion with a box.
@@ -286,7 +286,7 @@ def fix_width_minkowski_tiled(
     ref: kdb.LayerInfo | kdb.Region,
     n_threads: int | None = None,
     tile_size: tuple[um, um] | None = None,
-    overlap: int = 1,
+    overlap: float = 2.2,
     smooth: dbu | None = None,
 ) -> kdb.Region:
     """Fix min space issues by using a dilation & erosion with a box.
@@ -362,7 +362,7 @@ def fix_width_and_spacing_minkowski_tiled(
     ref: kdb.LayerInfo | kdb.Region,
     n_threads: int | None = None,
     tile_size: tuple[um, um] | None = None,
-    overlap: int = 1,
+    overlap: float = 2.2,
     smooth: dbu | None = None,
 ) -> kdb.Region:
     """Fix min space and width issues by using a dilation & erosion with a box.
