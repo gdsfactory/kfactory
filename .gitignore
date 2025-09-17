@@ -34,6 +34,8 @@ pip-log.txt
 extra/
 docs/_autosummary
 docs/modules
+docs/source/_static/schematic.svg
+docs/source/_static/dschematic.svg
 
 # ipython
 .ipynb_checkpoints

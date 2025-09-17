@@ -28,11 +28,13 @@
 from collections.abc import Sequence
 import kfactory as kf
 
+
 class LayerInfos(kf.LayerInfos):
-    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1,0)
-    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2,0) # WG Exclude
-    CLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4,0) # cladding
-    FLOORPLAN: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10,0)
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)  # WG Exclude
+    CLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4, 0)  # cladding
+    FLOORPLAN: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
+
 
 # Make the layout object aware of the new layers:
 LAYER = LayerInfos()
@@ -51,6 +53,7 @@ from typing import Any
 
 bend90_function = kf.factories.euler.bend_euler_factory(kcl=kcl_default)
 bend90 = bend90_function(width=0.500, radius=10, layer=LAYER.WG)
+
 
 @kcl_default.cell
 def straight(width: int, length: int) -> kf.KCell:
@@ -71,6 +74,7 @@ def straight(width: int, length: int) -> kf.KCell:
 
     return c
 
+
 @kcl_default.routing_strategy
 def route_bundle(
     c: kf.ProtoTKCell[Any],
@@ -89,7 +93,7 @@ def route_bundle(
 
 
 @kcl_default.schematic_cell(output_type=kf.KCell)
-def my_schema() -> kf.schema.Schema:
+def my_schematic_cell() -> kf.schematic.Schematic:
     schema = kf.Schema(kcl=kcl_default)
 
     s1 = schema.create_inst(
@@ -102,13 +106,12 @@ def my_schema() -> kf.schema.Schema:
     s1.place(x=1000, y=10_000)
     s2.place(x=1000, y=100_000)
 
-    schema.add_route(
-        "s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000
-    )
+    schema.add_route("s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000)
 
     return schema
 
-kcell = my_schema()
+
+kcell = my_schematic_cell()
 
 kcell
 # %%

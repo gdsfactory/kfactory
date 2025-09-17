@@ -54,6 +54,10 @@ markdown_extensions:
       check_paths: true
 
 plugins:
+  - gen-files:
+      scripts:
+        - scripts/gen_diagrams.py
+        - scripts/gen_ref_pages.py
   - mkdocstrings:
       enabled: true
       # custom_templates: templates
@@ -73,9 +77,6 @@ plugins:
               - dataclasses
               - griffe_inherited_docstrings
               - griffe_warnings_deprecated
-  - gen-files:
-      scripts:
-        - source/gen_ref_pages.py
   - mkdocs-video:
       is_video: true
       video_type: webm

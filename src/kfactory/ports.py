@@ -346,6 +346,20 @@ class ICreatePort(ABC):
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> Port: ...
+    @overload
+    def create_port(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        cross_section: CrossSectionSpec
+        | DCrossSectionSpec
+        | CrossSection
+        | DCrossSection
+        | SymmetricalCrossSection,
+        name: str | None = None,
+        port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
+    ) -> Port: ...
 
     def create_port(
         self,
@@ -526,12 +540,26 @@ class DCreatePort(ABC):
     def create_port(
         self,
         *,
-        layer_info: kdb.LayerInfo,
         trans: kdb.Trans,
-        cross_section: DCrossSection
+        cross_section: CrossSectionSpec
+        | DCrossSectionSpec
         | CrossSection
-        | CrossSectionSpec
-        | DCrossSectionSpec,
+        | DCrossSection
+        | SymmetricalCrossSection,
+        name: str | None = None,
+        port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
+    ) -> DPort: ...
+    @overload
+    def create_port(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        cross_section: CrossSectionSpec
+        | DCrossSectionSpec
+        | CrossSection
+        | DCrossSection
+        | SymmetricalCrossSection,
         name: str | None = None,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
@@ -550,10 +578,11 @@ class DCreatePort(ABC):
         center: tuple[float, float] | None = None,
         orientation: float | None = None,
         mirror_x: bool = False,
-        cross_section: DCrossSection
-        | CrossSection
-        | CrossSectionSpec
+        cross_section: CrossSectionSpec
         | DCrossSectionSpec
+        | CrossSection
+        | DCrossSection
+        | SymmetricalCrossSection
         | None = None,
         info: dict[str, MetaData] | None = None,
     ) -> DPort:

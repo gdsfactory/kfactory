@@ -20,7 +20,7 @@ from pydantic import (
 )
 
 from . import __version__, kdb
-from .conf import CheckInstances, config
+from .conf import CheckInstances, config, logger
 from .cross_section import (
     CrossSection,
     CrossSectionModel,
@@ -61,6 +61,7 @@ from .typings import (
     KC,
     KCIN,
     VK,
+    AnyCellSpec,
     KC_contra,
     KCellParams,
     KCellSpec,
@@ -73,7 +74,7 @@ from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
     from .ports import DPorts, Ports
-    from .schema import TSchema
+    from .schematic import TSchematic
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -537,7 +538,7 @@ class KCLayout(
     @overload
     def schematic_cell(
         self,
-        _func: Callable[KCellParams, TSchema[TUnit]],
+        _func: Callable[KCellParams, TSchematic[TUnit]],
         /,
     ) -> Callable[KCellParams, KCell]: ...
 
@@ -563,7 +564,7 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[
-        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KCell]
+        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KCell]
     ]: ...
 
     @overload
@@ -589,7 +590,7 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[
-        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KCell]
+        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KCell]
     ]: ...
 
     @overload
@@ -616,7 +617,7 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[
-        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KC]
+        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KC]
     ]: ...
 
     @overload
@@ -642,12 +643,12 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
     ) -> Callable[
-        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KC]
+        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KC]
     ]: ...
 
     def schematic_cell(
         self,
-        _func: Callable[KCellParams, TSchema[TUnit]] | None = None,
+        _func: Callable[KCellParams, TSchematic[TUnit]] | None = None,
         /,
         *,
         output_type: type[KC] | None = None,
@@ -671,11 +672,11 @@ class KCLayout(
     ) -> (
         Callable[KCellParams, KCell]
         | Callable[
-            [Callable[KCellParams, TSchema[Any]]],
+            [Callable[KCellParams, TSchematic[Any]]],
             Callable[KCellParams, KC],
         ]
         | Callable[
-            [Callable[KCellParams, TSchema[Any]]],
+            [Callable[KCellParams, TSchematic[Any]]],
             Callable[KCellParams, KCell],
         ]
     ):
@@ -683,7 +684,7 @@ class KCLayout(
             if output_type is None:
 
                 def wrap_f(
-                    f: Callable[KCellParams, TSchema[TUnit]],
+                    f: Callable[KCellParams, TSchematic[TUnit]],
                 ) -> Callable[KCellParams, KCell]:
                     @self.cell(
                         output_type=KCell,
@@ -709,15 +710,17 @@ class KCLayout(
                     def kcell_func(
                         *args: KCellParams.args, **kwargs: KCellParams.kwargs
                     ) -> KCell:
-                        schema = f(*args, **kwargs)
-                        return schema.create_cell(KCell)
+                        schematic = f(*args, **kwargs)
+                        c_ = schematic.create_cell(KCell)
+                        c_.schematic = schematic
+                        return c_
 
                     return kcell_func
 
                 return wrap_f
 
             def custom_wrap_f(
-                f: Callable[KCellParams, TSchema[TUnit]],
+                f: Callable[KCellParams, TSchematic[TUnit]],
             ) -> Callable[KCellParams, KC]:
                 @self.cell(
                     output_type=output_type,
@@ -743,23 +746,27 @@ class KCLayout(
                 def custom_kcell_func(
                     *args: KCellParams.args, **kwargs: KCellParams.kwargs
                 ) -> KCell:
-                    schema = f(*args, **kwargs)
-                    return schema.create_cell(KCell)
+                    schematic = f(*args, **kwargs)
+                    c_ = schematic.create_cell(KCell)
+                    c_.schematic = schematic
+                    return c_
 
                 return custom_kcell_func
 
             return custom_wrap_f
 
         def simple_wrap_f(
-            f: Callable[KCellParams, TSchema[TUnit]],
+            f: Callable[KCellParams, TSchematic[TUnit]],
         ) -> Callable[KCellParams, KCell]:
             @functools.wraps(f)
             @self.cell
             def kcell_func(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
             ) -> KCell:
-                schema = f(*args, **kwargs)
-                return schema.create_cell(KCell)
+                schematic = f(*args, **kwargs)
+                c_ = schematic.create_cell(KCell)
+                c_.schematic = schematic
+                return c_
 
             return kcell_func
 
@@ -1834,6 +1841,69 @@ class KCLayout(
                 "or the cell itself."
             )
         return self.kcells[spec] if isinstance(spec, int) else spec
+
+    def get_anycell(
+        self,
+        spec: AnyCellSpec,
+        **cell_kwargs: Any,
+    ) -> KCell | VKCell:
+        if callable(spec):
+            c = spec(**cell_kwargs)
+            if isinstance(c, ProtoTKCell):
+                return KCell(base=c.base)
+            return c
+        if isinstance(spec, dict):
+            settings = spec.get("settings", {}).copy()
+            settings.update(cell_kwargs)
+            kcell_factory = self.factories.get(spec["component"])
+            vkcell_factory = self.virtual_factories.get(spec["component"])
+            if kcell_factory is not None and vkcell_factory is not None:
+                logger.warning(
+                    f"Found a factory for component {spec['component']!r} "
+                    "as a standard cell as well as a virtual one (all-angle). "
+                    "Proceeding with standard factory."
+                )
+            if kcell_factory is not None:
+                return KCell(base=kcell_factory(**settings).base)
+            if vkcell_factory is not None:
+                return vkcell_factory(**settings)
+            raise ValueError(
+                f"Could not find standard or virtual factory for component "
+                f"{spec['component']}.\n"
+                f"Available standard factories are {list(self.factories.data)!r}.\n"
+                "Available virtual factories are "
+                f"{list(self.virtual_factories.data)!r}.\n"
+            )
+        if isinstance(spec, str):
+            kcell_factory = self.factories.get(spec)
+            vkcell_factory = self.virtual_factories.get(spec)
+            if kcell_factory is not None and vkcell_factory is not None:
+                logger.warning(
+                    f"Found a factory for component {spec!r} "
+                    "as a standard cell as well as a virtual one (all-angle). "
+                    "Proceeding with standard factory."
+                )
+            if kcell_factory is not None:
+                return KCell(base=kcell_factory(**cell_kwargs).base)
+            if vkcell_factory is not None:
+                return vkcell_factory(**cell_kwargs)
+            raise ValueError(
+                f"Could not find standard or virtual factory for component "
+                f"{spec}.\n"
+                f"Available standard factories are {list(self.factories.data)!r}.\n"
+                f"Available virtual factories are "
+                f"{list(self.virtual_factories.data)!r}.\n"
+            )
+        if cell_kwargs:
+            raise ValueError(
+                "Cell kwargs are not allowed for retrieving static cells by integer "
+                "or the cell itself."
+            )
+        if isinstance(spec, int):
+            return self.kcells[spec]
+        if isinstance(spec, ProtoTKCell):
+            return KCell(base=spec.base)
+        return spec
 
     def delete(self) -> None:
         del kcls[self.name]
