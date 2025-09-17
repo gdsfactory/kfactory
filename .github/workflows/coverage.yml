@@ -1,3 +1,5 @@
+name: code coverage
+
 on:
   pull_request:
   push:
@@ -8,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  code-coverage:
+  coverage:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
