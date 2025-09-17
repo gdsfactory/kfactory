@@ -59,7 +59,7 @@ def test_create_port_error(kcl: kf.KCLayout, layers: Layers) -> None:
 
 
 def test_invalid_base_port_trans(kcl: kf.KCLayout, layers: Layers) -> None:
-    with pytest.raises(ValueError, match="Both trans and dcplx_trans cannot be None."):
+    with pytest.raises(ValueError, match=r"Both trans and dcplx_trans cannot be None."):
         kf.port.BasePort(
             name=None,
             kcl=kcl,
@@ -70,7 +70,7 @@ def test_invalid_base_port_trans(kcl: kf.KCLayout, layers: Layers) -> None:
         )
 
     with pytest.raises(
-        ValueError, match="Only one of trans or dcplx_trans can be set."
+        ValueError, match=r"Only one of trans or dcplx_trans can be set."
     ):
         kf.port.BasePort(
             name=None,
@@ -381,18 +381,18 @@ def test_port_invalid_init() -> None:
     with pytest.raises(ValueError):
         kf.Port(name="o1", layer=1, width=10)  # type: ignore[call-overload]
 
-    with pytest.raises(ValueError, match="Width must be greater than 0."):
+    with pytest.raises(ValueError, match=r"Width must be greater than 0."):
         kf.Port(name="o1", width=-10, layer=1, center=(1000, 1000), angle=1)
 
 
 def test_dport_invalid_init() -> None:
     with pytest.raises(ValueError):
-        kf.DPort(name="o1", layer=1, center=(1000, 1000), orientation=90)
+        kf.DPort(name="o1", layer=1, center=(1000, 1000), orientation=90)  # type: ignore[call-overload]
 
     with pytest.raises(ValueError):
-        kf.DPort(name="o1", width=10, center=(1000, 1000), orientation=90)
+        kf.DPort(name="o1", width=10, center=(1000, 1000), orientation=90)  # type: ignore[call-overload]
 
-    with pytest.raises(ValueError, match="Width must be greater than 0."):
+    with pytest.raises(ValueError, match=r"Width must be greater than 0."):
         kf.DPort(name="o1", width=-10, layer=1, center=(1000, 1000), orientation=90)
 
 
@@ -467,7 +467,7 @@ def test_filter_regex(kcl: kf.KCLayout, layers: Layers) -> None:
     assert len(filtered) == 1
 
     filtered[0].name = None
-    filtered = kf.port.filter_regex(filtered, "o2")
+    filtered = list(kf.port.filter_regex(filtered, "o2"))
     assert len(list(filtered)) == 0
 
 
