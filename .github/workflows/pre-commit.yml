@@ -1,5 +1,3 @@
-name: Pre-Commit
-
 on:
   pull_request:
   push:
