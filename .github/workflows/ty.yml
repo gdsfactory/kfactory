@@ -1,0 +1,66 @@
+name: "ty (typechecker)"
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+
+jobs:
+  run-ty:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version:
+          - "3.11"
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        run: |
+          uv sync --extra dev
+      - name: Run ty check and comment results
+        run: |
+          uv run ty check src/kfactory > ty_output.txt 2>&1 || true
+
+          DIAGNOSTIC_COUNT=$(grep -o "Found [0-9]* diagnostics" ty_output.txt | grep -o "[0-9]*" || echo "0")
+          echo "Found $DIAGNOSTIC_COUNT diagnostics"
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            COMMENT_BODY="**Ty Results**
+
+          Found **$DIAGNOSTIC_COUNT** diagnostics when type checking the codebase.
+
+          <details>
+          <summary>View full ty output</summary>
+
+          \`\`\`
+          $(cat ty_output.txt)
+          \`\`\`
+          </details>
+
+          _Updated: $(date)_"
+
+            # Check if comment already exists
+            EXISTING_COMMENT=$(gh api repos/${{ github.repository }}/issues/${{ github.event.number }}/comments \
+              --jq '.[] | select(.body | contains("**Ty Results**")) | .id' | head -1 || echo "")
+
+            if [ -n "$EXISTING_COMMENT" ]; then
+              # Update existing comment
+              gh api repos/${{ github.repository }}/issues/comments/$EXISTING_COMMENT \
+                -X PATCH \
+                -f body="$COMMENT_BODY"
+              echo "Updated existing comment $EXISTING_COMMENT"
+            else
+              # Create new comment
+              gh api repos/${{ github.repository }}/issues/${{ github.event.number }}/comments \
+                -f body="$COMMENT_BODY"
+              echo "Created new comment"
+            fi
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
