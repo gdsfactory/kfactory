@@ -150,6 +150,18 @@ class PortAnchorDict(TypedDict):
     port: str
 
 
+class AnchorRef(BaseModel):
+    instance: str
+
+
+class AnchorRefX(AnchorRef):
+    x: Literal["left", "center", "right"] | None = None
+
+
+class AnchorRefY(AnchorRef):
+    y: Literal["bottom", "center", "top"] | None = None
+
+
 def _is_portdict(d: PortAnchorDict | FixedAnchorDict) -> TypeGuard[PortAnchorDict]:
     return "port" in d
 
@@ -165,6 +177,14 @@ _anchor_mapping: dict[str, FixedAnchorDict] = {
     "sc": {"x": "center", "y": "bottom"},
     "se": {"x": "right", "y": "bottom"},
     "sw": {"x": "left", "y": "bottom"},
+}
+
+_anchorref_mapping: dict[str, str] = {
+    "east": "right",
+    "west": "left",
+    "north": "top",
+    "south": "bottom",
+    "center": "center",
 }
 
 
@@ -188,9 +208,9 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
         mirror: Whether the instance is to be mirrored or not.
     """
 
-    x: TUnit | PortRef | PortArrayRef = cast("TUnit", 0)
+    x: TUnit | PortRef | PortArrayRef | AnchorRefX = cast("TUnit", 0)
     dx: TUnit = cast("TUnit", 0)
-    y: TUnit | PortRef | PortArrayRef = cast("TUnit", 0)
+    y: TUnit | PortRef | PortArrayRef | AnchorRefY = cast("TUnit", 0)
     dy: TUnit = cast("TUnit", 0)
     orientation: float = 0
     anchor: FixedAnchor | PortAnchor | None = None
@@ -212,10 +232,14 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
             placeable = self.x.instance in placed_instances
         elif isinstance(self.x, Port):
             placeable = placeable and self.x.name in placed_ports
+        elif isinstance(self.x, AnchorRefX):
+            placeable = placeable and self.x.instance in placed_instances
         if isinstance(self.y, PortRef):
             placeable = placeable and self.y.instance in placed_instances
         elif isinstance(self.y, Port):
             placeable = placeable and self.y.name in placed_ports
+        elif isinstance(self.y, AnchorRefY):
+            placeable = placeable and self.y.instance in placed_instances
         return placeable
 
 
@@ -335,8 +359,8 @@ class SchematicInstance(
 
     def place(
         self,
-        x: TUnit | PortRef = 0,
-        y: TUnit | PortRef = 0,
+        x: TUnit | PortRef | AnchorRefX = 0,
+        y: TUnit | PortRef | AnchorRefY = 0,
         dx: TUnit = 0,
         dy: TUnit = 0,
         orientation: Literal[0, 90, 180, 270] = 0,
@@ -409,6 +433,29 @@ class SchematicInstance(
     def ports(self) -> Ports[TUnit]:
         return Ports(instance=self)
 
+    @property
+    def xmin(self) -> AnchorRefX:
+        return AnchorRefX(instance=self.name, x="left")
+
+    @property
+    def xmax(self) -> AnchorRefX:
+        return AnchorRefX(instance=self.name, x="left")
+
+    @property
+    def ymin(self) -> AnchorRefY:
+        return AnchorRefY(instance=self.name, y="bottom")
+
+    @property
+    def ymax(self) -> AnchorRefY:
+        return AnchorRefY(instance=self.name, y="top")
+
+    @property
+    def center(self) -> tuple[AnchorRefX, AnchorRefY]:
+        return (
+            AnchorRefX(instance=self.name, x="center"),
+            AnchorRefY(instance=self.name, y="center"),
+        )
+
 
 class Route(BaseModel, Generic[TUnit], extra="forbid"):
     """Bundle of `Link`s routed using a named strategy.
@@ -433,7 +480,7 @@ class Route(BaseModel, Generic[TUnit], extra="forbid"):
 
         if isinstance(links, dict):
             data["links"] = [
-                (tuple(str(k).split(",")), tuple(str(v).split(",")))
+                (tuple(str(k).rsplit(",", 1)), tuple(str(v).rsplit(",", 1)))
                 for k, v in links.items()
             ]
         if "settings" not in data:
@@ -465,8 +512,8 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
     """
 
     name: str = Field(exclude=True)
-    x: TUnit | PortRef
-    y: TUnit | PortRef
+    x: TUnit | PortRef | AnchorRefX
+    y: TUnit | PortRef | AnchorRefY
     dx: TUnit = cast("TUnit", 0)
     dy: TUnit = cast("TUnit", 0)
     cross_section: str
@@ -481,8 +528,8 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
         self,
     ) -> tuple[
         str,
-        TUnit | PortRef,
-        TUnit | PortRef,
+        TUnit | PortRef | AnchorRefX,
+        TUnit | PortRef | AnchorRefY,
         TUnit,
         TUnit,
         Literal[0, 90, 180, 270] | PortRef,
@@ -500,9 +547,9 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
 
     def is_placeable(self, placed_instances: set[str]) -> bool:
         placeable = True
-        if isinstance(self.x, PortRef):
+        if isinstance(self.x, PortRef | AnchorRefX):
             placeable = self.x.instance in placed_instances
-        if isinstance(self.y, PortRef):
+        if isinstance(self.y, PortRef | AnchorRefY):
             placeable = placeable and self.y.instance in placed_instances
         if isinstance(self.orientation, PortRef):
             placeable = placeable and self.orientation.instance in placed_instances
@@ -524,6 +571,14 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
                 )
             else:
                 x = cell.insts[self.x.instance].ports[self.x.port].x
+        elif isinstance(self.x, AnchorRefX):
+            match self.x.x:
+                case "left":
+                    x = cell.insts[self.x.instance].xmin
+                case "center":
+                    x = cell.insts[self.x.instance].bbox().center().x
+                case "right":
+                    x = cell.insts[self.x.instance].xmax
         else:
             x = self.x
         x += self.dx
@@ -536,6 +591,14 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
                 )
             else:
                 y = cell.insts[self.y.instance].ports[self.y.port].y
+        elif isinstance(self.y, AnchorRefY):
+            match self.y.y:
+                case "bottom":
+                    y = cell.insts[self.y.instance].ymin
+                case "center":
+                    y = cell.insts[self.y.instance].bbox().center().y
+                case "top":
+                    y = cell.insts[self.y.instance].ymax
         else:
             y = self.y
         y += self.dy
@@ -682,6 +745,8 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         connections: List of `Connection`s.
         routes: Mapping of route name -> `Route`.
         ports: Mapping of port name -> `Port`/`PortRef`/`PortArrayRef`.
+        info: dict which will be mapped to `KCell.info` (or any other derivate like
+            Component).
     """
 
     name: str | None = None
@@ -695,6 +760,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     ports: dict[str, Port[TUnit] | PortRef | PortArrayRef] = Field(default_factory=dict)
     kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
     unit: Literal["dbu", "um"]
+    info: dict[str, JSONSerializable] = Field(default_factory=dict)
 
     def create_inst(
         self,
@@ -938,6 +1004,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         placements = data.get("placements")
         if placements:
             for placement in placements.values():
+                anchor: FixedAnchorDict | None = None
                 if "port" in placement:
                     port = placement.pop("port")
                     if port in [
@@ -955,6 +1022,43 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                         placement["anchor"] = _anchor_mapping[port]
                     else:
                         placement["anchor"] = {"port": port}
+                anchor = placement.get("anchor", {})
+                if "xmin" in placement:
+                    anchor["x"] = "left"
+                    placement["x"] = placement.pop("xmin")
+                elif "xmax" in placement:
+                    anchor["x"] = "right"
+                    placement["y"] = placement.pop("xmax")
+                if "ymin" in placement:
+                    anchor["y"] = "bottom"
+                    placement["y"] = placement.pop("ymin")
+                elif "ymax" in placement:
+                    anchor["y"] = "top"
+                    placement["y"] = placement.pop("ymax")
+                placement["anchor"] = anchor
+                x_ = placement.get("x")
+                if isinstance(x_, str):
+                    inst, port = x_.rsplit(",", 1)
+                    if port in ["east", "center", "west"]:
+                        placement["x"] = {
+                            "instance": inst,
+                            "x": _anchorref_mapping[port],
+                        }
+                    else:
+                        placement["x"] = {"instance": inst, "port": port}
+                y_ = placement.get("y")
+                if isinstance(y_, str):
+                    inst, port = x_.rsplit(",", 1)
+                    if port in ["bottom", "center", "top"]:
+                        placement["x"] = {
+                            "instance": inst,
+                            "y": _anchorref_mapping[port],
+                        }
+                    else:
+                        placement["y"] = {"instance": inst, "port": port}
+
+                if isinstance(placement.get("y"), str):
+                    raise NotImplementedError
         return data
 
     @model_validator(mode="after")
@@ -1183,6 +1287,8 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 )
             )
         c.schematic = self
+        if self.name:
+            c.name = name
 
         return output_type(base=c.base)
 
@@ -1662,16 +1768,32 @@ def _place_island(
                 p = schema_inst.placement
                 assert p is not None
                 if p.is_placeable(placed_insts, placed_ports):
-                    x = (
-                        instances[p.x.instance].ports[p.x.port].x
-                        if isinstance(p.x, PortRef)
-                        else p.x
-                    )
-                    y = (
-                        instances[p.y.instance].ports[p.y.port].y
-                        if isinstance(p.y, PortRef)
-                        else p.y
-                    )
+                    if isinstance(p.x, PortRef):
+                        x = instances[p.x.instance].ports[p.x.port].x
+                    elif isinstance(p.x, AnchorRefX):
+                        bb = instances[p.x.instance].ibbox()
+                        match p.x.x:
+                            case "left":
+                                x = bb.left
+                            case "right":
+                                x = bb.right
+                            case _:
+                                x = bb.center().x
+                    else:
+                        x = p.x
+                    if isinstance(p.y, PortRef):
+                        y = instances[p.y.instance].ports[p.y.port].y
+                    elif isinstance(p.y, AnchorRefY):
+                        bb = instances[p.y.instance].ibbox()
+                        match p.y.y:
+                            case "bottom":
+                                y = bb.bottom
+                            case "top":
+                                y = bb.top
+                            case _:
+                                y = bb.center().y
+                    else:
+                        y = p.y
 
                     if schematic.unit == "dbu":
                         if p.anchor is None:
@@ -1753,6 +1875,8 @@ def _place_island(
                                 _dx = kinst.dbbox().right
                             case "center":
                                 _dx = kinst.dbbox().center().x
+                            case _:
+                                _dx = 0
                         match p.anchor.y:
                             case "top":
                                 _dy = kinst.dbbox().top
@@ -1760,6 +1884,8 @@ def _place_island(
                                 _dy = kinst.dbbox().bottom
                             case "center":
                                 _dy = kinst.dbbox().center().x
+                            case _:
+                                _dy = 0
 
                         kinst.transform(
                             kdb.DCplxTrans(
