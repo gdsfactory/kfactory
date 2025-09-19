@@ -503,8 +503,8 @@ def route_bundle(
     if not routers:
         return []
 
-    start_mapping = {sp.trans: sp for sp in start_ports}
-    end_mapping = {ep.trans: ep for ep in end_ports}
+    start_mapping = {sp.get_trans(): sp for sp in start_ports}
+    end_mapping = {ep.get_trans(): ep for ep in end_ports}
     routes: list[ManhattanRoute] = []
     start_ports = []
     end_ports = []
