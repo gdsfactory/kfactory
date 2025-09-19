@@ -2440,28 +2440,56 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                     self.kcl.dbu,
                                 )
                         else:
-                            subc = db_.category_by_path(
-                                lc.path() + ".OrphanPort"
-                            ) or db_.create_category(lc, "OrphanPort")
-                            it = db_.create_item(db_cell, subc)
-                            it.add_value(
-                                f"Port Name: {ports[0][1].name}"
-                                f"{ports[0][0].name or str(ports[0][0])})"
-                            )
-                            if ports[0][0]._base.trans:
+                            # Check if this is an electrical port touching a polygon
+                            port_obj = ports[0][0]
+                            skip_orphan = False
+
+                            if port_obj.port_type == 'electrical':
+                                # Check if the port is touching a polygon on the same layer
+                                rec_it = kdb.RecursiveShapeIterator(
+                                    self.kcl.layout,
+                                    self._base.kdb_cell,
+                                    port_obj.layer,
+                                    kdb.Box(2, port_obj.width).transformed(port_obj.trans),
+                                )
+                                edges = kdb.Region(rec_it).merge().edges().merge()
+                                port_edge = kdb.Edge(0, port_obj.width // 2, 0, -port_obj.width // 2)
+                                if port_obj.base.trans:
+                                    port_edge = port_edge.transformed(port_obj.trans)
+                                else:
+                                    port_edge = port_edge.transformed(
+                                        kdb.ICplxTrans(port_obj.dcplx_trans, self.kcl.dbu)
+                                    )
+                                p_edges = kdb.Edges([port_edge])
+                                phys_overlap = p_edges & edges
+
+                                # If there's any overlap with a polygon, skip orphan port reporting
+                                if not phys_overlap.is_empty():
+                                    skip_orphan = True
+
+                            if not skip_orphan:
+                                subc = db_.category_by_path(
+                                    lc.path() + ".OrphanPort"
+                                ) or db_.create_category(lc, "OrphanPort")
+                                it = db_.create_item(db_cell, subc)
                                 it.add_value(
-                                    self.kcl.to_um(
-                                        port_polygon(ports[0][0].width).transformed(
-                                            ports[0][0]._base.trans
+                                    f"Port Name: {ports[0][1].name}"
+                                    f"{ports[0][0].name or str(ports[0][0])})"
+                                )
+                                if ports[0][0]._base.trans:
+                                    it.add_value(
+                                        self.kcl.to_um(
+                                            port_polygon(ports[0][0].width).transformed(
+                                                ports[0][0]._base.trans
+                                            )
                                         )
                                     )
-                                )
-                            else:
-                                it.add_value(
-                                    self.kcl.to_um(
-                                        port_polygon(port.width)
-                                    ).transformed(port.dcplx_trans)
-                                )
+                                else:
+                                    it.add_value(
+                                        self.kcl.to_um(
+                                            port_polygon(port.width)
+                                        ).transformed(port.dcplx_trans)
+                                    )
 
                     case 2:
                         cip = check_inst_ports(ports[0][0], ports[1][0])
