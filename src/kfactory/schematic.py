@@ -56,6 +56,7 @@ from .netlist import Net, Netlist, NetlistInstance, NetlistPort, PortArrayRef, P
 from .port import DPort as DKCellPort
 from .port import Port as KCellPort
 from .port import ProtoPort
+from .settings import Info
 from .typings import KC, JSONSerializable, TUnit, dbu, um
 
 if TYPE_CHECKING:
@@ -1110,6 +1111,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
             ValueError: If placement or connection constraints cannot be satisfied.
         """
         c = KCell(kcl=self.kcl)
+        c.info = Info(**self.info)
 
         # calculate islands -- islands are a bunch of directly connected instances and
         # must be isolated from other islands either through no connection at all or
@@ -1288,7 +1290,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
             )
         c.schematic = self
         if self.name:
-            c.name = name
+            c.name = self.name
 
         return output_type(base=c.base)
 
