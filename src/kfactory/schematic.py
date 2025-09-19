@@ -1150,14 +1150,22 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 if p1.dcplx_trans != p2.dcplx_trans:
                     port_connection_transformation_errors.append(conn)
             else:
+                if self.instances[c1.instance].virtual:
+                    inst1: Instance | VInstance = c.vinsts[c1.instance]
+                else:
+                    inst1 = c.insts[c1.instance]
+                if self.instances[c2.instance].virtual:
+                    inst2: Instance | VInstance = c.vinsts[c2.instance]
+                else:
+                    inst2 = c.insts[c2.instance]
                 if isinstance(c1, PortArrayRef):
-                    p1 = c.insts[c1.instance].ports[c1.port, c1.ia, c1.ib]
+                    p1 = inst1.ports[c1.port, c1.ia, c1.ib]
                 else:
-                    p1 = c.insts[c1.instance].ports[c1.port]
+                    p1 = inst1.ports[c1.port]
                 if isinstance(c2, PortArrayRef):
-                    p2 = c.insts[c2.instance].ports[c2.port, c2.ia, c2.ib]
+                    p2 = inst2.ports[c2.port, c2.ia, c2.ib]
                 else:
-                    p2 = c.insts[c2.instance].ports[c2.port]
+                    p2 = inst2.ports[c2.port]
 
                 t1 = p1.dcplx_trans
                 t2 = p2.dcplx_trans
@@ -1590,7 +1598,7 @@ def _create_kinst(
             return Instance(kcl=c.kcl, instance=kinst._instance)
 
     # If the instance is a
-    vinst = c.create_vinst(cell)
+    vinst = c.create_vinst(cell_)
     vinst.name = schematic_inst.name
     if schematic_inst.array:
         if isinstance(schematic_inst.array, RegularArray):

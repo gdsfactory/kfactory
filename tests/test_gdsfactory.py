@@ -50,3 +50,42 @@ def test_gdsfactory_yaml_build(path: Path) -> None:
         place_unknown=True,
     ).show()
     print(schematic.code_str())  # noqa: T201
+
+
+def test_gdsfactory_yaml_samples() -> None:
+    sample_all_angle = """
+    name: sample_all_angle
+
+    placements:
+      s0:
+        x: 0
+        y: 0
+    instances:
+      s0:
+        component: straight
+        settings:
+            length: 10
+      b1:
+        component: bend_euler_all_angle
+        settings:
+          radius: 10
+          angle: 30
+        virtual: True
+      s1:
+        component: straight
+        settings:
+          length: 10
+        virtual: true
+    connections:
+      s1,o1: b1,o2
+      s0,o2: b1,o1
+    """
+    pdk = gf.get_active_pdk()
+    factories = pdk.cells
+    schematic = kf.DSchematic.model_validate(yaml.load(sample_all_angle))
+    schematic.create_cell(
+        output_type=gf.Component,
+        factories=factories,
+        routing_strategies=pdk.routing_strategies or gf_factories.routing_strategies,
+        place_unknown=True,
+    ).show()
