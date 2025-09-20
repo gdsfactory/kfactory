@@ -26,151 +26,124 @@ yaml = YAML(typ=["string", "safe"])
 
 yaml_samples = [
     """
-name: sample_all_angle
-placements:
-  s0:
-    x: 0
-    y: 0
-instances:
-  s0:
-    component: straight
-    settings:
-        length: 10
-  b1:
-    component: bend_euler_all_angle
-    settings:
-      radius: 10
-      angle: 30
-    virtual: True
-  s1:
-    component: straight
-    settings:
-      length: 10
-    virtual: true
-connections:
-  s1,o1: b1,o2
-  s0,o2: b1,o1
-""",
-    """
-name: sample_mmis
-info:
-    polarization: te
-    wavelength: 1.55
-    description: just a demo on adding metadata
-instances:
-    mmi_long:
-      component: mmi1x2
-      settings:
-        width_mmi: 4.5
-        length_mmi: 10
-    mmi_short:
-      component: mmi1x2
-      settings:
-        width_mmi: 4.5
-        length_mmi: 5
-placements:
-    mmi_long:
-        rotation: 180
-        x: 100
-        y: 100
-routes:
-    route_name1:
-        links:
-            mmi_short,o2: mmi_long,o1
+    name: sample_all_angle
+    placements:
+      s0:
+        x: 0
+        y: 0
+    instances:
+      s0:
+        component: straight
         settings:
-            cross_section: strip
-ports:
-    o1: mmi_short,o1
-    o2: mmi_long,o2
-    o3: mmi_long,o3
-""",
+            length: 10
+      b1:
+        component: bend_euler_all_angle
+        settings:
+          radius: 10
+          angle: 30
+        virtual: True
+      s1:
+        component: straight
+        settings:
+          length: 10
+        virtual: true
+    connections:
+      s1,o1: b1,o2
+      s0,o2: b1,o1
+    """,
     """
-name: mask_compact
-instances:
-    mmi1x2_sweep_pack:
-       component: pack_doe
-       settings:
-         doe: mmi1x2
-         settings:
-             length_mmi: [2, 100]
-             width_mmi: [4, 10]
-         do_permutations: True
-         spacing: 100
-         function: add_fiber_array
-    mzi_sweep:
-       component: pack_doe
-       settings:
-         doe: mzi
-         settings:
-            delta_length: [10, 100]
-         do_permutations: True
-         spacing: 100
-         function: add_fiber_array
-placements:
-    mmi1x2_sweep_pack:
-        xmin: -10
-    mzi_sweep:
-        xmin: mmi1x2_sweep_pack,east
-""",
+    name: sample_mmis
+    info:
+        polarization: te
+        wavelength: 1.55
+        description: just a demo on adding metadata
+    instances:
+        mmi_long:
+          component: mmi1x2
+          settings:
+            width_mmi: 4.5
+            length_mmi: 10
+        mmi_short:
+          component: mmi1x2
+          settings:
+            width_mmi: 4.5
+            length_mmi: 5
+    placements:
+        mmi_long:
+            rotation: 180
+            x: 100
+            y: 100
+    routes:
+        route_name1:
+            links:
+                mmi_short,o2: mmi_long,o1
+            settings:
+                cross_section: strip
+    ports:
+        o1: mmi_short,o1
+        o2: mmi_long,o2
+        o3: mmi_long,o3
+    """,
     """
-instances:
-  t:
-    component: pad_array
-    settings:
-      port_orientation: 270
-      columns: 3
-  b:
-    component: pad_array
-    settings:
-      port_orientation: 90
-      columns: 3
-placements:
-  t:
-    x: 200
-    y: 400
-routes:
-  route1:
-    settings:
-      bend: wire_corner
-      start_straight_length: 150
-      end_straight_length: 150
-      cross_section: metal_routing
-      allow_width_mismatch: True
-      sort_ports: True
-    links:
-      t,e11: b,e11
-      t,e13: b,e13
-""",
+    name: mask_compact
+    instances:
+        mmi1x2_sweep_pack:
+           component: pack_doe
+           settings:
+             doe: mmi1x2
+             settings:
+                 length_mmi: [2, 100]
+                 width_mmi: [4, 10]
+             do_permutations: True
+             spacing: 100
+             function: add_fiber_array
+        mzi_sweep:
+           component: pack_doe
+           settings:
+             doe: mzi
+             settings:
+                delta_length: [10, 100]
+             do_permutations: True
+             spacing: 100
+             function: add_fiber_array
+    placements:
+        mmi1x2_sweep_pack:
+            xmin: -10
+        mzi_sweep:
+            x: mmi1x2_sweep_pack,east
+            dx: 10
+            y: {instance: mmi1x2_sweep_pack, y: top}
+            anchor: {x: "left", y: "top"}
+    """,
     """
-instances:
-  t:
-    component: pad_array
-    settings:
-      port_orientation: 270
-      columns: 3
-  b:
-    component: pad_array
-    settings:
-      port_orientation: 90
-      columns: 3
-
-placements:
-  t:
-    x: 200
-    y: 400
-routes:
-  route1:
-    settings:
-      bend: wire_corner
-      # start_straight_length: 150
-      # end_straight_length: 150
-      cross_section: metal_routing
-      allow_width_mismatch: True
-      sort_ports: True
-    links:
-      t,e11: b,e11
-      t,e13: b,e13
-""",
+    instances:
+      t:
+        component: pad_array
+        settings:
+          port_orientation: 270
+          columns: 3
+      b:
+        component: pad_array
+        settings:
+          port_orientation: 90
+          columns: 3
+    placements:
+      t:
+        x: 200
+        y: 400
+    routes:
+      route1:
+        settings:
+          bend: wire_corner
+          # start_straight_length: 150
+          # end_straight_length: 150
+          cross_section: metal_routing
+          allow_width_mismatch: True
+          sort_ports: True
+        links:
+          t,e11: b,e11
+          t,e13: b,e13
+    """,
 ]
 
 
@@ -217,4 +190,4 @@ def test_gdsfactory_yaml_samples(sample: str) -> None:
         factories=factories,
         routing_strategies=pdk.routing_strategies or gf_factories.routing_strategies,
         place_unknown=True,
-    ).show()
+    )
