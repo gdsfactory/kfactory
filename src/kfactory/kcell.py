@@ -105,6 +105,7 @@ if TYPE_CHECKING:
     from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
     from .layout import KCLayout
+    from .schematic import TSchematic
 
 
 __all__ = [
@@ -362,11 +363,19 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # 
     def has_factory_name(self) -> bool:
         return bool(self._base.basename or self._base.function_name)
 
-    def create_vinst(self, cell: AnyKCell) -> VInstance:
+    def create_vinst(
+        self,
+        cell: AnyKCell,
+        *,
+        a: kdb.DVector = kdb.DVector(0, 0),  # noqa: B008
+        b: kdb.DVector = kdb.DVector(0, 0),  # noqa: B008
+        na: int = 1,
+        nb: int = 1,
+    ) -> VInstance:
         """Insert the KCell as a VInstance into a VKCell or KCell."""
         if self.locked:
             raise LockedError(self)
-        vi = VInstance(cell)
+        vi = VInstance(cell, a=a.dup(), b=b.dup(), na=na, nb=nb)
         self._base.vinsts.append(vi)
         return vi
 
@@ -413,6 +422,7 @@ class TKCell(BaseKCell):
     lvs_equivalent_ports: list[list[str]] | None = None
     virtual: bool = False
     vtrans: kdb.DCplxTrans | None = None
+    _schematic: TSchematic[Any] | None = PrivateAttr(default=None)
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -420,6 +430,14 @@ class TKCell(BaseKCell):
             return super().__getattr__(name)  # type: ignore[misc]
         except Exception:
             return getattr(self.kdb_cell, name)
+
+    @property
+    def schematic(self) -> TSchematic[Any] | None:
+        return self._schematic
+
+    @schematic.setter
+    def schematic(self, value: TSchematic[Any] | None) -> None:
+        self._schematic = value
 
     @property
     def locked(self) -> bool:
@@ -644,6 +662,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             ].set_meta_data()
             self.get_meta_data()
         self.kcl.register_cell(self)
+
+    @property
+    def schematic(self) -> TSchematic[Any] | None:
+        return self._base.schematic
+
+    @schematic.setter
+    def schematic(self, value: TSchematic[Any] | None) -> None:
+        self._base.schematic = value
 
     @abstractmethod
     def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]:
@@ -3549,13 +3575,6 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
 
     def __lshift__(self, cell: AnyKCell) -> VInstance:
         return self.create_inst(cell=cell)
-
-    def create_vinst(self, cell: AnyKCell) -> VInstance:
-        if self.locked:
-            raise LockedError(self)
-        vi = VInstance(cell)
-        self.vinsts.append(vi)
-        return vi
 
     @overload
     def shapes(self, layer: None = ...) -> dict[int, VShapes]: ...

@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     name: build docs
     steps:
+      - name: Install graphviz
+        shell: bash -l {0}
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt install graphviz graphviz-dev
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v5
         with:

@@ -1,0 +1,52 @@
+name: pytest
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+
+jobs:
+  test_code:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.12"
+          - "3.13"
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download v0.6.0 -D gds/gds_ref/ --clobber
+      - name: Test with pytest
+        env:
+          KFACTORY_LOGFILTER_LEVEL: "ERROR"
+        run: uv run -p ${{ matrix.python-version }} --extra ci --isolated pytest -s -n logical
+
+  test_code_min_ver:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version:
+          - "3.11"
+          - "3.13"
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - name: Install dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download v0.6.0 -D gds/gds_ref/ --clobber
+      - name: Test with pytest
+        env:
+          KFACTORY_LOGFILTER_LEVEL: "ERROR"
+        run: uv run -p ${{ matrix.python-version }} --extra ci --resolution lowest-direct --isolated pytest -s -n logical
