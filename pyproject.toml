@@ -222,6 +222,15 @@ regex = '''
   (?P<minor>\d+)
   \.
   (?P<patch>\d+)
+  (?:
+    (?P<pre>(a|b|rc)\d+)
+  )?
+  (?:
+    \.post(?P<post>\d+)
+  )?
+  (?:
+    \.dev(?P<dev>\d+)
+  )?
   '''
 
 [tool.tbump.git]
