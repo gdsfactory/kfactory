@@ -14,6 +14,7 @@ DSchematic (um based schematic) class diagram:
 
 from __future__ import annotations
 
+import inspect
 import keyword
 import re
 import subprocess
@@ -364,7 +365,7 @@ class SchematicInstance(
         y: TUnit | PortRef | AnchorRefY = 0,
         dx: TUnit = 0,
         dy: TUnit = 0,
-        orientation: Literal[0, 90, 180, 270] = 0,
+        orientation: float = 0,
         mirror: bool = False,
         anchor: FixedAnchorDict | PortAnchorDict | None = None,
     ) -> Placement[TUnit]:
@@ -771,6 +772,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         array: RegularArray[TUnit] | Array[TUnit] | None = None,
         placement: Placement[TUnit] | None = None,
         kcl: KCLayout | None = None,
+        virtual: bool = False,
     ) -> SchematicInstance[TUnit]:
         """Create a schema instance.
 
@@ -798,6 +800,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 "settings": settings or {},
                 "array": array,
                 "kcl": kcl or self.kcl,
+                "virtual": virtual,
             }
         )
         inst._schematic = self
@@ -883,7 +886,12 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         self.connections.append(conn)
         return conn
 
-    def netlist(self) -> Netlist:
+    def netlist(
+        self,
+        add_defaults: bool = True,
+        factories: Mapping[str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]]
+        | None = None,
+    ) -> Netlist:
         """Compile the schematic into a `Netlist`.
 
         Includes nets from `connections`, `routes`, and exposed `ports`. Instances
@@ -928,22 +936,51 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                     if isinstance(p, PortRef)
                 ]
             )
-
-        nl = Netlist(
-            instances={
-                inst.name: NetlistInstance(
-                    name=inst.name,
-                    kcl=inst.kcl.name,
-                    component=inst.component,
-                    settings=inst.settings,
+        if add_defaults:
+            if factories is None:
+                factories = {
+                    name: wrapped._f_orig
+                    for name, wrapped in self.kcl.factories.data.items()
+                }
+                factories.update(
+                    {
+                        name: wrapped._f_orig
+                        for name, wrapped in self.kcl.virtual_factories.data.items()
+                    }
                 )
-                for inst in self.instances.values()
-            }
-            if self.instances
-            else {},
-            nets=nets,
-            ports=[NetlistPort(name=name) for name in self.ports],
-        )
+            nl = Netlist(
+                instances={
+                    inst.name: NetlistInstance(
+                        name=inst.name,
+                        kcl=inst.kcl.name,
+                        component=inst.component,
+                        settings=_get_full_settings(
+                            inst.settings, inspect.signature(factories[inst.component])
+                        ),
+                    )
+                    for inst in self.instances.values()
+                }
+                if self.instances
+                else {},
+                nets=nets,
+                ports=[NetlistPort(name=name) for name in self.ports],
+            )
+        else:
+            nl = Netlist(
+                instances={
+                    inst.name: NetlistInstance(
+                        name=inst.name,
+                        kcl=inst.kcl.name,
+                        component=inst.component,
+                        settings=inst.settings,
+                    )
+                    for inst in self.instances.values()
+                }
+                if self.instances
+                else {},
+                nets=nets,
+                ports=[NetlistPort(name=name) for name in self.ports],
+            )
         nl.sort()
         return nl
 
@@ -1703,6 +1740,8 @@ def _create_kinst(
             else:
                 kinst = c.create_inst(cell)
             kinst.name = schematic_inst.name
+            if schematic_inst.mirror:
+                kinst.transform(kdb.DCplxTrans.M0)
             return Instance(kcl=c.kcl, instance=kinst._instance)
 
     # If the instance is a
@@ -1764,178 +1803,169 @@ def _place_island(
         schema_inst = schematic_instances[inst]
         kinst = _create_kinst(c, schema_inst, factories=factories)
         instances[inst] = kinst
-        if schema_inst.placement:
-            if isinstance(schema_inst.placement, Placement):
-                logger.debug("Placing {}", schema_inst.name)
-                p = schema_inst.placement
-                assert p is not None
+        if schema_inst.placement and isinstance(schema_inst.placement, Placement):
+            logger.debug("Placing {}", schema_inst.name)
+            p = schema_inst.placement
+            assert p is not None
 
-                if p.is_placeable(placed_insts, placed_ports):
-                    if schematic.unit == "dbu":
-                        if isinstance(p.x, PortRef):
-                            x: float = KCellPort(
-                                base=instances[p.x.instance].ports[p.x.port].base
-                            ).x
-                        elif isinstance(p.x, AnchorRefX):
-                            bb: kdb.Box | kdb.DBox = instances[p.x.instance].ibbox()
-                            match p.x.x:
-                                case "left":
-                                    x = bb.left
-                                case "right":
-                                    x = bb.right
-                                case _:
-                                    x = bb.center().x
-                        else:
-                            x = p.x
-                        if isinstance(p.y, PortRef):
-                            y: float = KCellPort(
-                                base=instances[p.y.instance].ports[p.y.port].base
-                            ).y
-                        elif isinstance(p.y, AnchorRefY):
-                            bb = instances[p.y.instance].ibbox()
-                            match p.y.y:
-                                case "bottom":
-                                    y = bb.bottom
-                                case "top":
-                                    y = bb.top
-                                case _:
-                                    y = bb.center().y
-                        else:
-                            y = p.y
-                        if p.anchor is None:
-                            kinst.transform(
-                                kdb.ICplxTrans(
-                                    mag=1,
-                                    rot=p.orientation,
-                                    mirrx=p.mirror,
-                                    x=x + p.dx,
-                                    y=y + p.dy,
-                                )
-                            )
-                        elif isinstance(p.anchor, PortAnchor):
-                            kinst.transform(
-                                kdb.ICplxTrans(
-                                    mag=1,
-                                    rot=p.orientation,
-                                    mirrx=p.mirror,
-                                    x=x + p.dx,
-                                    y=y + p.dy,
-                                )
-                                * kdb.ICplxTrans(-kinst.ports[p.anchor.port].trans.disp)
-                            )
-                        else:
-                            match p.anchor.x:
-                                case "left":
-                                    _x = kinst.ibbox().left
-                                case "right":
-                                    _x = kinst.ibbox().right
-                                case "center":
-                                    _x = kinst.ibbox().center().x
-                            match p.anchor.y:
-                                case "top":
-                                    _y = kinst.ibbox().top
-                                case "bottom":
-                                    _y = kinst.ibbox().bottom
-                                case "center":
-                                    _y = kinst.ibbox().center().x
-
-                            kinst.transform(
-                                kdb.ICplxTrans(
-                                    mag=1,
-                                    rot=p.orientation,
-                                    mirrx=p.mirror,
-                                    x=x + p.dx,
-                                    y=y + p.dy,
-                                )
-                                * kdb.ICplxTrans(-kdb.Vector(_x, _y))
-                            )
+            if p.is_placeable(placed_insts, placed_ports):
+                if schematic.unit == "dbu":
+                    if isinstance(p.x, PortRef):
+                        x: float = KCellPort(
+                            base=instances[p.x.instance].ports[p.x.port].base
+                        ).x
+                    elif isinstance(p.x, AnchorRefX):
+                        bb: kdb.Box | kdb.DBox = instances[p.x.instance].ibbox()
+                        match p.x.x:
+                            case "left":
+                                x = bb.left
+                            case "right":
+                                x = bb.right
+                            case _:
+                                x = bb.center().x
                     else:
-                        if isinstance(p.x, PortRef):
-                            x = DKCellPort(
-                                base=instances[p.x.instance].ports[p.x.port].base
-                            ).x
-                        elif isinstance(p.x, AnchorRefX):
-                            bb = instances[p.x.instance].dbbox()
-                            match p.x.x:
-                                case "left":
-                                    x = bb.left
-                                case "right":
-                                    x = bb.right
-                                case _:
-                                    x = bb.center().x
-                        else:
-                            x = p.x
-                        if isinstance(p.y, PortRef):
-                            y = DKCellPort(
-                                base=instances[p.y.instance].ports[p.y.port].base
-                            ).y
-                        elif isinstance(p.y, AnchorRefY):
-                            bb = instances[p.y.instance].dbbox()
-                            match p.y.y:
-                                case "bottom":
-                                    y = bb.bottom
-                                case "top":
-                                    y = bb.top
-                                case _:
-                                    y = bb.center().y
-                        else:
-                            y = p.y
-                        if p.anchor is None:
-                            kinst.transform(
-                                kdb.DCplxTrans(
-                                    mag=1,
-                                    rot=p.orientation,
-                                    mirrx=p.mirror,
-                                    x=x + p.dx,
-                                    y=y + p.dy,
-                                )
+                        x = p.x
+                    if isinstance(p.y, PortRef):
+                        y: float = KCellPort(
+                            base=instances[p.y.instance].ports[p.y.port].base
+                        ).y
+                    elif isinstance(p.y, AnchorRefY):
+                        bb = instances[p.y.instance].ibbox()
+                        match p.y.y:
+                            case "bottom":
+                                y = bb.bottom
+                            case "top":
+                                y = bb.top
+                            case _:
+                                y = bb.center().y
+                    else:
+                        y = p.y
+                    if p.anchor is None:
+                        kinst.transform(
+                            kdb.ICplxTrans(
+                                mag=1,
+                                rot=p.orientation,
+                                x=x + p.dx,
+                                y=y + p.dy,
                             )
-                        elif isinstance(p.anchor, PortAnchor):
-                            kinst.transform(
-                                kdb.DCplxTrans(
-                                    mag=1,
-                                    rot=p.orientation,
-                                    mirrx=p.mirror,
-                                    x=x + p.dx,
-                                    y=y + p.dy,
-                                )
-                                * kdb.DCplxTrans(
-                                    -kinst.ports[p.anchor.port].dcplx_trans.disp
-                                )
+                        )
+                    elif isinstance(p.anchor, PortAnchor):
+                        kinst.transform(
+                            kdb.ICplxTrans(
+                                mag=1,
+                                rot=p.orientation,
+                                x=x + p.dx,
+                                y=y + p.dy,
                             )
-                        else:
-                            match p.anchor.x:
-                                case "left":
-                                    _dx = kinst.dbbox().left
-                                case "right":
-                                    _dx = kinst.dbbox().right
-                                case "center":
-                                    _dx = kinst.dbbox().center().x
-                                case _:
-                                    _dx = 0
-                            match p.anchor.y:
-                                case "top":
-                                    _dy = kinst.dbbox().top
-                                case "bottom":
-                                    _dy = kinst.dbbox().bottom
-                                case "center":
-                                    _dy = kinst.dbbox().center().x
-                                case _:
-                                    _dy = 0
+                            * kdb.ICplxTrans(-kinst.ports[p.anchor.port].trans.disp)
+                        )
+                    else:
+                        match p.anchor.x:
+                            case "left":
+                                _x = kinst.ibbox().left
+                            case "right":
+                                _x = kinst.ibbox().right
+                            case "center":
+                                _x = kinst.ibbox().center().x
+                        match p.anchor.y:
+                            case "top":
+                                _y = kinst.ibbox().top
+                            case "bottom":
+                                _y = kinst.ibbox().bottom
+                            case "center":
+                                _y = kinst.ibbox().center().x
 
-                            kinst.transform(
-                                kdb.DCplxTrans(
-                                    mag=1,
-                                    rot=p.orientation,
-                                    mirrx=p.mirror,
-                                    x=x + p.dx,
-                                    y=y + p.dy,
-                                )
-                                * kdb.DCplxTrans(-kdb.DVector(_dx, _dy))
+                        kinst.transform(
+                            kdb.ICplxTrans(
+                                mag=1,
+                                rot=p.orientation,
+                                x=x + p.dx,
+                                y=y + p.dy,
                             )
-                    placed_insts.add(inst)
-            elif schema_inst.placement.mirror:
-                kinst.transform(kdb.Trans.M0)
+                            * kdb.ICplxTrans(-kdb.Vector(_x, _y))
+                        )
+                else:
+                    if isinstance(p.x, PortRef):
+                        x = DKCellPort(
+                            base=instances[p.x.instance].ports[p.x.port].base
+                        ).x
+                    elif isinstance(p.x, AnchorRefX):
+                        bb = instances[p.x.instance].dbbox()
+                        match p.x.x:
+                            case "left":
+                                x = bb.left
+                            case "right":
+                                x = bb.right
+                            case _:
+                                x = bb.center().x
+                    else:
+                        x = p.x
+                    if isinstance(p.y, PortRef):
+                        y = DKCellPort(
+                            base=instances[p.y.instance].ports[p.y.port].base
+                        ).y
+                    elif isinstance(p.y, AnchorRefY):
+                        bb = instances[p.y.instance].dbbox()
+                        match p.y.y:
+                            case "bottom":
+                                y = bb.bottom
+                            case "top":
+                                y = bb.top
+                            case _:
+                                y = bb.center().y
+                    else:
+                        y = p.y
+                    if p.anchor is None:
+                        kinst.transform(
+                            kdb.DCplxTrans(
+                                mag=1,
+                                rot=p.orientation,
+                                x=x + p.dx,
+                                y=y + p.dy,
+                            )
+                        )
+                    elif isinstance(p.anchor, PortAnchor):
+                        kinst.transform(
+                            kdb.DCplxTrans(
+                                mag=1,
+                                rot=p.orientation,
+                                x=x + p.dx,
+                                y=y + p.dy,
+                            )
+                            * kdb.DCplxTrans(
+                                -kinst.ports[p.anchor.port].dcplx_trans.disp
+                            )
+                        )
+                    else:
+                        match p.anchor.x:
+                            case "left":
+                                _dx = kinst.dbbox().left
+                            case "right":
+                                _dx = kinst.dbbox().right
+                            case "center":
+                                _dx = kinst.dbbox().center().x
+                            case _:
+                                _dx = 0
+                        match p.anchor.y:
+                            case "top":
+                                _dy = kinst.dbbox().top
+                            case "bottom":
+                                _dy = kinst.dbbox().bottom
+                            case "center":
+                                _dy = kinst.dbbox().center().x
+                            case _:
+                                _dy = 0
+
+                        kinst.transform(
+                            kdb.DCplxTrans(
+                                mag=1,
+                                rot=p.orientation,
+                                x=x + p.dx,
+                                y=y + p.dy,
+                            )
+                            * kdb.DCplxTrans(-kdb.DVector(_dx, _dy))
+                        )
+                placed_insts.add(inst)
 
     placed_island_insts = placed_insts & schematic_island
 
@@ -2174,3 +2204,17 @@ def read_schematic(
         if unit == "dbu":
             return Schematic.model_validate(yaml_dict, strict=True)
         return DSchematic.model_validate(yaml_dict)
+
+
+def _get_full_settings(
+    settings: dict[str, JSONSerializable], f_sig: inspect.Signature
+) -> dict[str, JSONSerializable]:
+    params: dict[str, JSONSerializable] = {
+        param_name: param.default
+        for param_name, param in f_sig.parameters.items()
+        if param.default is not inspect._empty
+    }
+
+    params.update(settings)
+
+    return params
