@@ -78,6 +78,10 @@ class PortRef(BaseModel, extra="forbid"):
         name: str,
         cross_sections: Mapping[str, CrossSection | DCrossSection],
     ) -> BasePort:
+        if schematic.instances[self.instance].virtual:
+            return cell.add_port(
+                port=cell.vinsts[self.instance].ports[self.port], name=name
+            ).base
         return cell.add_port(
             port=cell.insts[self.instance].ports[self.port], name=name
         ).base

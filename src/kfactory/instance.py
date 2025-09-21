@@ -22,7 +22,6 @@ from .exceptions import (
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .port import DPort, Port, ProtoPort
-from .serialization import clean_name, get_cell_name
 from .typings import TUnit
 
 if TYPE_CHECKING:
@@ -784,15 +783,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     f" name is 'None'. VKCell at {self.trans}"
                 )
             if trans_ != kdb.DCplxTrans():
-                trans_str = ""
-                if trans_.mirror:
-                    trans_str += "_M"
-                if trans_.angle != 0:
-                    f"_A{trans_.angle}"
-                if trans_.disp != kdb.DVector(0, 0):
-                    trans_str += f"_X{trans_.disp.x}_Y{trans_.disp.y}"
-                trans_str = trans_str.replace(".", "p")
-                cell_name = get_cell_name(cell_name + clean_name(trans_str))
+                cell_name += f"_{trans_.hash():x}"
             if cell.kcl.layout_cell(cell_name) is None:
                 cell_ = KCell(kcl=self.cell.kcl, name=cell_name)  # self.cell.dup()
                 for layer, shapes in self.cell.shapes().items():
@@ -839,15 +830,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         trans_ = base_trans.inverted() * trans_
         cell_name = self.cell.name
         if trans_ != kdb.DCplxTrans():
-            trans_str = ""
-            if trans_.mirror:
-                trans_str += "_M"
-            if trans_.angle != 0:
-                trans_str += f"_A{trans_.angle}"
-            if trans_.disp != kdb.DVector(0, 0):
-                trans_str += f"_X{trans_.disp.x}_Y{trans_.disp.y}"
-            trans_str = trans_str.replace(".", "p")
-            cell_name += trans_str
+            cell_name += f"_{trans_.hash():x}"
         else:
             inst_ = cell.create_inst(
                 cell=self.cell, na=self.na, nb=self.nb, a=self.a, b=self.b
@@ -1067,7 +1050,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             case False, True:
                 dconn_trans = (
                     kdb.DCplxTrans.M90
-                    if mirror ^ self.trans.mirror
+                    if mirror ^ self.dcplx_trans.mirror
                     else kdb.DCplxTrans.R180
                 )
                 opt = op.dcplx_trans
