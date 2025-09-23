@@ -3764,7 +3764,7 @@ def show(
                 from __main__ import __file__ as mf
             except ImportError:
                 mf = "shell"
-            tf = Path(gettempdir()) / (name + f".{file_format}")
+            tf = Path(gettempdir()) / f"{name}.{file_format}"
             tf.parent.mkdir(parents=True, exist_ok=True)
             layout.write(tf, save_options)
             file = tf
@@ -3790,9 +3790,9 @@ def show(
     elif isinstance(layout, ProtoKCell):
         gitpath = config.project_dir
         if gitpath:
-            root = Path(gitpath) / "build/gds"
+            root = Path(gitpath) / "build" / file_format
             root.mkdir(parents=True, exist_ok=True)
-            tf = root / Path(name).with_suffix(".oas")
+            tf = root / Path(name).with_suffix(f".{file_format}")
             tf.parent.mkdir(parents=True, exist_ok=True)
             layout.write(str(tf), save_options)
             file = tf
@@ -3802,7 +3802,7 @@ def show(
                 from __main__ import __file__ as mf
             except ImportError:
                 mf = "shell"
-            tf = Path(gettempdir()) / (name + ".gds")
+            tf = Path(gettempdir()) / f"{name}.{file_format}"
             tf.parent.mkdir(parents=True, exist_ok=True)
             layout.write(tf, save_options)
             file = tf
@@ -3812,7 +3812,7 @@ def show(
             kcls_ = list(kcls.values())
             kcls_.remove(layout.kcl)
             for _kcl in kcls_:
-                p = (dir_ / _kcl.name).with_suffix(".oas").resolve()
+                p = (dir_ / _kcl.name).with_suffix(f".{file_format}").resolve()
                 _kcl.write(p, library_save_options)
                 kcl_paths.append({"name": _kcl.name, "file": str(p)})
         if technology is None and layout.kcl.technology_file is not None:
