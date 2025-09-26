@@ -805,6 +805,12 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         )
         inst._schematic = self
 
+        if inst.name in self.instances:
+            raise ValueError(
+                f"Duplicate instance names are not allowed {inst.name=!r}"
+                "already exists."
+            )
+
         self.instances[inst.name] = inst
         if placement:
             self.placements[inst.name] = placement
@@ -2018,7 +2024,7 @@ def _place_island(
             raise ValueError(
                 "Could not place all instances. This is likely due to missing place "
                 "instructions (need at least 1 per individual group of connected"
-                " instances)"
+                f" instances). Unplaced instances: {instances.keys() - placed_insts!r}"
             )
 
     return placed_insts

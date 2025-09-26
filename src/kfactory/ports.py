@@ -710,6 +710,8 @@ class Ports(ProtoPorts[int], ICreatePort):
             base.cross_section = self.kcl.get_symmetrical_cross_section(
                 port.cross_section.base.to_dtype(port.kcl)
             )
+            if name is not None:
+                base.name = name
             port_ = Port(base=base)
             port_.dcplx_trans = dcplx_trans
             self._bases.append(port_.base)
