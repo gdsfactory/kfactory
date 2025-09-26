@@ -33,6 +33,7 @@ dependencies = [
     "scipy >= 1.14.1, < 2",
     "toolz >= 1, < 2",
     "typer >= 0.15.2, < 0.18",
+    "semver >= 3.0.4, < 4",
 ]
 
 [project.optional-dependencies]
