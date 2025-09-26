@@ -1,0 +1,37 @@
+name: code coverage
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+
+jobs:
+  coverage:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version:
+          - "3.13"
+        os: [ubuntu-latest]
+    steps:
+      - name: Install graphviz
+        shell: bash -l {0}
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt install graphviz graphviz-dev
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          uv sync --all-extras
+      - name: Test coverage
+        run: uv run -p ${{ matrix.python-version }} --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

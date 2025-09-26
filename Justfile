@@ -25,6 +25,9 @@ docs-serve python_version="3.12":
 test python_version="3.12": init-submodule
     uv run -p {{python_version}} --extra ci --isolated pytest -s -n logical
 
+test-gdsfactory python_version="3.12": init-submodule
+    uv run -p {{python_version}} --no-sync --extra ci --with gdsfactory --with . --isolated pytest -s -n logical tests/test_gdsfactory.py
+
 # Run tests with minimum dependencies
 test-min python_version="3.12":
     uv run -p {{python_version}} --extra ci --resolution lowest-direct --isolated pytest -s -n logical
