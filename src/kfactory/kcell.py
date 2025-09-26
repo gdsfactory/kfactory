@@ -48,6 +48,7 @@ from pydantic import (
     PrivateAttr,
 )
 from ruamel.yaml.constructor import SafeConstructor
+from semver import Version
 
 from . import kdb, rdb
 from .conf import DEFAULT_TRANS, PROPID, CheckInstances, ShowFunction, config, logger
@@ -3949,52 +3950,37 @@ def show(
                                 file=jmsg["file"],
                             )
                 # check klive version
-                klive_version = [int(s) for s in jmsg["version"].split(".")]
-                rec_klive_version = (0, 3, 3)
-                klive_ok = True
-                for dv in (
-                    kv - rkv
-                    for kv, rkv in zip(klive_version, rec_klive_version, strict=True)
-                ):
-                    if dv > 0:
-                        break
-                    if dv < 0:
-                        logger.warning(
-                            f"klive is out of date. Installed:{jmsg['version']}/"
-                            "Recommended:"
-                            f"{'.'.join(str(s) for s in rec_klive_version)}. Please "
-                            "update it in KLayout"
+                klive_version = Version.parse(jmsg["version"])
+                rec_klive_version = Version(major=0, minor=4, patch=1)
+                klive_ok = rec_klive_version.compare(klive_version) >= 0
+
+                if not klive_ok:
+                    logger.warning(
+                        f"klive is out of date. Installed:{jmsg['version']}/"
+                        "Recommended:"
+                        f"{rec_klive_version}. Please "
+                        "update it in KLayout"
+                    )
+                else:
+                    klayout_version = Version.parse(jmsg["klayout_version"])
+                    kfactory_version = Version.parse(_klayout_version)
+
+                    min_rec_klayout = Version(major=0, minor=28, patch=13)
+
+                    if kfactory_version.compare(min_rec_klayout) < 0:
+                        logger.error(
+                            f"KLayout GUI version ({jmsg['klayout_version']}) "
+                            "is older than the Python version "
+                            f"({_klayout_version}). This may cause issues. Please "
+                            "update the GUI to match or exceed the Python version."
                         )
-                        klive_ok = False
-                        break
-
-                if klive_ok:
-                    klayout_version = [
-                        int(s) for s in jmsg["klayout_version"].split(".")
-                    ]
-                    kfactory_version = [int(s) for s in _klayout_version.split(".")]
-
-                    for dv in (
-                        kv - kfkv
-                        for kv, kfkv in zip(
-                            klayout_version, kfactory_version, strict=True
+                    elif kfactory_version.compare(klayout_version) < 0:
+                        logger.debug(
+                            f"KLayout GUI version ({jmsg['klayout_version']}) "
+                            "is older than the Python version "
+                            f"({_klayout_version}). This may cause issues. Please "
+                            "update the GUI to match or exceed the Python version."
                         )
-                    ):
-                        if dv > 0:
-                            break
-                        if dv < 0:
-                            if klayout_version < [0, 28, 13]:
-                                log = logger.error
-                            else:
-                                log = logger.debug
-
-                            log(
-                                f"KLayout GUI version ({jmsg['klayout_version']}) "
-                                "is older than the Python version "
-                                f"({_klayout_version}). This may cause issues. Please "
-                                "update the GUI to match or exceed the Python version."
-                            )
-                            break
 
             except json.JSONDecodeError:
                 logger.info(f"Message from klive: {msg}")
