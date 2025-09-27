@@ -711,6 +711,8 @@ class KCLayout(
                         *args: KCellParams.args, **kwargs: KCellParams.kwargs
                     ) -> KCell:
                         schematic = f(*args, **kwargs)
+                        if set_name:
+                            schematic.name = self.future_cell_name
                         c_ = schematic.create_cell(KCell)
                         c_.schematic = schematic
                         return c_
@@ -747,6 +749,8 @@ class KCLayout(
                     *args: KCellParams.args, **kwargs: KCellParams.kwargs
                 ) -> KCell:
                     schematic = f(*args, **kwargs)
+                    if set_name:
+                        schematic.name = self.future_cell_name
                     c_ = schematic.create_cell(KCell)
                     c_.schematic = schematic
                     return c_
@@ -764,6 +768,8 @@ class KCLayout(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
             ) -> KCell:
                 schematic = f(*args, **kwargs)
+                if set_name:
+                    schematic.name = self.future_cell_name
                 c_ = schematic.create_cell(KCell)
                 c_.schematic = schematic
                 return c_

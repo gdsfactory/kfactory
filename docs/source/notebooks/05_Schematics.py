@@ -14,7 +14,7 @@
 # ---
 
 # %% [markdown]
-# # Schematics
+# # Schematic Cells
 
 # %% [markdown]
 # You can also use multiple KCLayout objects as PDKs or Libraries of KCells and parametric KCell-Functions
@@ -28,6 +28,8 @@
 # %%
 import kfactory as kf
 import numpy as np
+from IPython.display import JSON
+from IPython import get_ipython
 
 
 class Layers(kf.LayerInfos):
@@ -455,4 +457,70 @@ def crossing45(n: int, pitch: kf.typings.um, cross_section: str) -> kf.DSchemati
 
 
 kf.kcl.get_dcross_section(xs_wg1)
-crossing45(8, pitch=30, cross_section="WG1000")
+c = crossing45(8, pitch=30, cross_section="WG1000")
+c
+
+# %%
+JSON(c.schematic.model_dump(exclude_defaults=True))
+
+# %% [markdown]
+# ### Sample LVS of schematic vs extracted (Connection) Netlist
+#
+# With a schematic we can relatively easily do full check between the schematic and extracted netlist.
+#
+# <i>Note: For full (digital) connections extraction and checks more is necessary than simply comparing netlists. In optics it's not sufficient to check purely for connectivity like in digital electronics where we can simplify this with the assumption that any touching metal is connected. Therefore, additional tests like the connectivity check or even full DRC are necessary for better confidence about LVS.</i>
+
+# %%
+schematic_netlist = c.schematic.netlist()
+JSON(schematic_netlist.model_dump())
+
+# %%
+extracted_netlist = c.netlist()[
+    c.name
+]  # the extracted netlist is hierarchical by default
+JSON(extracted_netlist.model_dump())
+
+# %% [markdown]
+# Let's make an LVS check, i.e. compare the extracted netlist versus the netlist directly from the schematic
+
+# %%
+assert schematic_netlist == extracted_netlist
+
+# %% [markdown]
+# A schematic can also be converted to python code. This allows to first import/draw schematics with external tools such as gdsfactory+ for example and then convert it to a standard cell function (sometimes called PCell, i.e. Parametric Cell)
+
+# %% [markdown]
+# ## Converting a Schematic to a cell function (parametric cell (PCell))
+#
+# The schematic can output and format a code string to generate a valid python file which can regenerate this schematic. Through the `imports` additional imports can be added.
+
+# %%
+# c.schematic.code_str?
+
+# %%
+from IPython.display import Code
+
+Code(c.schematic.code_str())
+
+# %% [markdown]
+# In order to not create a name conflict with the cell created above, let's copy an rename the schematic
+
+# %%
+new_schematic = c.schematic.model_copy()
+new_schematic.name = new_schematic.name + "_copy"
+
+# %% [markdown]
+# Let's run this code. We are using a trick to run code in the ipython environment. The code is roughly equivalent to `exec(new_schematic.code_str())`, meaning we are just feeding the code to be directly executed.
+
+# %%
+get_ipython().run_cell(new_schematic.code_str())
+
+# %% [markdown]
+# As the code has been executed, we can now directly call it by the variable name, create the new cell and create it and visualize it.
+
+# %%
+c_new = crossing45_N8_P30_CSWG1000_copy()
+c_new
+
+# %%
+c_new.ports.print()

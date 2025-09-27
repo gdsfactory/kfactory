@@ -741,7 +741,6 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
 
     Attributes:
         name: Optional schematic name.
-        dependencies: File dependencies to watch (e.g., for regeneration).
         instances: Mapping of instance name -> `SchematicInstance`.
         placements: Mapping of instance name -> `Placement`/`MirrorPlacement`.
         connections: List of `Connection`s.
@@ -752,7 +751,6 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     """
 
     name: str | None = None
-    dependencies: list[Path] = Field(default_factory=list)
     instances: dict[str, SchematicInstance[TUnit]] = Field(default_factory=dict)
     placements: dict[str, MirrorPlacement | Placement[TUnit]] = Field(
         default_factory=dict
@@ -895,7 +893,11 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     def netlist(
         self,
         add_defaults: bool = True,
-        factories: Mapping[str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]]
+        factories: dict[str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]]
+        | None = None,
+        external_factories: dict[
+            str, dict[str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]]
+        ]
         | None = None,
     ) -> Netlist:
         """Compile the schematic into a `Netlist`.
@@ -943,17 +945,24 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 ]
             )
         if add_defaults:
-            if factories is None:
-                factories = {
-                    name: wrapped._f_orig
-                    for name, wrapped in self.kcl.factories.data.items()
-                }
-                factories.update(
-                    {
-                        name: wrapped._f_orig
-                        for name, wrapped in self.kcl.virtual_factories.data.items()
-                    }
-                )
+            kcl_factories: dict[
+                str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]
+            ]
+            if external_factories is None:
+                all_factories: dict[
+                    str,
+                    dict[str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]],
+                ] = defaultdict(dict)
+                for kcl_ in kcls.values():
+                    kcl_factories = {f.name: f._f for f in kcl_.factories.values()}
+                    kcl_factories.update(
+                        {vf.name: vf._f for vf in kcl_.virtual_factories.values()}
+                    )
+                    all_factories[kcl_.name] = kcl_factories
+            else:
+                all_factories = external_factories.copy()
+            if factories is not None:
+                all_factories[self.kcl.name] = factories
             nl = Netlist(
                 instances={
                     inst.name: NetlistInstance(
@@ -961,7 +970,10 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                         kcl=inst.kcl.name,
                         component=inst.component,
                         settings=_get_full_settings(
-                            inst.settings, inspect.signature(factories[inst.component])
+                            inst.settings,
+                            inspect.signature(
+                                all_factories[inst.kcl.name][inst.component]
+                            ),
                         ),
                     )
                     for inst in self.instances.values()
@@ -1418,7 +1430,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
 
         schematic_cell += f"kcl = {_kcls(self.kcl.name)}\n\n"
 
-        schematic_cell += "@kcl.schematic_cell\n"
+        schematic_cell += f"@kcl.schematic_cell(output_type={kf_name}.DKCell)\n"
         schematic_cell += f"def {self.name}() -> {kf_name}.{self.__class__.__name__}:\n"
         indent = 2
 
@@ -1436,28 +1448,37 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
             names[inst.name] = inst_name
             schematic_cell += f"{_ind()}{inst_name} = schematic.create_inst(\n"
             indent += 2
-            schematic_cell += f"{_ind()}name={inst.name!r},\n"
-            f"{_ind()}component={inst.component!r},\n"
-            f"{_ind()}settings={inst.settings!r},\n"
-            f"{_ind()}kcl={inst.kcl.name!r},\n"
+            schematic_cell += (
+                f"{_ind()}name={inst.name!r},\n"
+                f"{_ind()}component={inst.component!r},\n"
+                f"{_ind()}settings={inst.settings!r},\n"
+            )
+            if inst.kcl != self.kcl:
+                schematic_cell += f"{_ind()}kcl={_kcls(inst.kcl.name)},\n"
+            if inst.virtual:
+                schematic_cell += f"{_ind()}virtual=True,\n"
             if inst.array is not None:
                 arr = inst.array
                 if isinstance(arr, RegularArray):
                     schematic_cell += f"{_ind()}array=RegularArray(\n"
                     indent += 2
-                    schematic_cell += f"{_ind()}columns={arr.columns},\n"
-                    f"{_ind()}columns_pitch={arr.column_pitch},\n"
-                    f"{_ind()}rows={arr.rows},\n"
-                    f"{_ind()}row_pitch={arr.row_pitch}),\n"
+                    schematic_cell += (
+                        f"{_ind()}columns={arr.columns},\n"
+                        f"{_ind()}columns_pitch={arr.column_pitch},\n"
+                        f"{_ind()}rows={arr.rows},\n"
+                        f"{_ind()}row_pitch={arr.row_pitch}),\n"
+                    )
                     indent -= 2
                     schematic_cell += f"{_ind()})\n"
                 else:
                     schematic_cell += f"{_ind()}array=Array(\n"
                     indent += 2
-                    schematic_cell += f"{_ind()}na={arr.na},\n"
-                    f"{_ind()}nb={arr.nb},\n"
-                    f"{_ind()}pitch_a={arr.pitch_a},\n"
-                    f"{_ind()}pitch_b={arr.pitch_b}),\n"
+                    schematic_cell += (
+                        f"{_ind()}na={arr.na},\n"
+                        f"{_ind()}nb={arr.nb},\n"
+                        f"{_ind()}pitch_a={arr.pitch_a},\n"
+                        f"{_ind()}pitch_b={arr.pitch_b}),\n"
+                    )
                     indent -= 2
                     schematic_cell += f"{_ind()})\n"
             indent -= 2
@@ -1492,14 +1513,14 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                     else:
                         schematic_cell += f"{_ind()}y={port.y},\n"
                     if port.dx:
-                        f"{_ind()}dx={port.dx},\n"
+                        schematic_cell += f"{_ind()}dx={port.dx},\n"
                     if port.dy:
-                        f"{_ind()}dy={port.dy},\n"
+                        schematic_cell += f"{_ind()}dy={port.dy},\n"
                     indent -= 2
                 else:
                     schematic_cell += (
                         f"{_ind()}schematic.add_port("
-                        f"name={name},"
+                        f"name={name!r},"
                         f"port={port.as_python_str(names[port.instance])})\n"
                     )
         if self.placements:
