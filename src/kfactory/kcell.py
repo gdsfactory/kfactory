@@ -2602,6 +2602,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                             )
                             shape_it.select_cells([inst.cell.cell_index()])
                             shape_it.min_depth = 1
+                            shape_it.shape_flags = kdb.Shapes.SRegions
                             for _it in shape_it.each():
                                 if _it.path()[0].inst() == inst.instance:
                                     inst_shapes.insert(
@@ -2616,6 +2617,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                 )
                                 shape_it.select_cells([self.insts[j].cell.cell_index()])
                                 shape_it.min_depth = 1
+                                shape_it.shape_flags = kdb.Shapes.SRegions
                                 for _it in shape_it.each():
                                     if _it.path()[0].inst() == self.insts[j].instance:
                                         reg_.insert(
