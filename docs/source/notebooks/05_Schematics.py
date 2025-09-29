@@ -1,20 +1,13 @@
-# ---
-# jupyter:
-#   jupytext:
-#     custom_cell_magics: kql
-#     text_representation:
-#       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
-#       jupytext_version: 1.17.3
-#   kernelspec:
-#     display_name: Python 3 (ipykernel)
-#     language: python
-#     name: python3
-# ---
-
 # %% [markdown]
 # # Schematic Cells
+#
+# This notebook demonstrates how to use `kfactory` for schematic-driven
+# photonic design. We will:
+# - Build higher-level schematic cells
+#     - Create basic parametric cells (PCell) such as straights and bends
+#     - Define routing strategies
+# - Compare schematic vs. extracted layouts (LVS)
+# - Generate reusable code from schematics
 
 # %%
 # Imports
@@ -23,9 +16,6 @@ import numpy as np
 
 from IPython.core.getipython import get_ipython
 from pprint import pformat
-
-# %% [markdown]
-# You can also use multiple KCLayout objects as PDKs or Libraries of KCells and parametric KCell-Functions
 
 # %% editable=true slideshow={"slide_type": ""} tags=["hide"]
 # For jupyter to show the big dicts/jsons correctly, we need a helper function `scrollable_text`
@@ -116,41 +106,29 @@ def scrollable_text(
     """
     display(HTML(html_block))
 
-
 # %% [markdown]
 # ## Basic example with routing
 #
-# In order to avoid name conflicts, let's create a new clean KCLayout (pdk)
-
+# In order to avoid name conflicts, let's create a new clean `KCLayout` (our PDK container).
+# A **PDK** (Process Design Kit) defines the available layers, devices, and design rules
+# for a given process. Here we’ll create a lightweight one for demonstration.
 
 # %%
 class Layers(kf.LayerInfos):
     WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
-    WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
-    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
-    WGCLADEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1)
-    FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
-    FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
-    FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
-    METAL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(20, 0)
-    METAL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(22, 0)
-    METAL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(24, 0)
-    METAL1EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(20, 1)
-    METAL2EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(22, 1)
-    METAL3EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(24, 1)
-    VIA1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(21, 0)
-    VIA2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(23, 0)
-
+    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2,0)
 
 layers = Layers()
 pdk = kf.KCLayout("SCHEMA_PDK_ROUTING", infos=Layers)
 
-
 # %% [markdown]
 # ### Cell functions
 #
-# For routing a basic straight and a bend are sufficient.
-
+# To begin, we define the **basic building blocks** for routing:
+# - A **straight waveguide** of given length and width
+# - A **90° Euler bend** for turning corners
+#
+# These primitives are enough to assemble larger routed networks.
 
 # %%
 @pdk.cell
@@ -176,6 +154,14 @@ def straight(width: int, length: int) -> kf.KCell:
 bend90_function = kf.factories.euler.bend_euler_factory(kcl=pdk)
 bend90 = bend90_function(width=0.500, radius=10, layer=layers.WG)
 
+# %% [markdown]
+# ### Routing strategy
+#
+# Next we define a **routing strategy** (`route_bundle`).
+# This specifies how to connect groups of ports with straight sections and bends.
+# - It ensures separation between parallel routes
+# - Reuses our basic cells (`straight`, `bend90`)
+# - Can be applied consistently across designs
 
 # %%
 @pdk.routing_strategy
@@ -194,6 +180,15 @@ def route_bundle(
         bend90_cell=bend90,
     )
 
+# %% [markdown]
+# ### Example schematic with routing
+#
+# Now we can demonstrate usage in a schematic:
+# - Two straight sections (`s1` and `s2`)
+# - Positioned apart vertically
+# - Connected automatically by our routing strategy
+#
+# This shows how schematics carry both connectivity **and** layout placement information.
 
 # %%
 @pdk.schematic_cell
@@ -221,9 +216,18 @@ route_example()
 
 # %% [markdown]
 # ## Example: 45 Degrees Crossing with virtual cells
+#
+# We’ll now construct a more advanced schematic: a **grid of 45° crossings**.
+# This introduces:
+# - Direct polygon construction
+# - Use of virtual parametric cells (`vcell` and `VKCell`)
+# - Hierarchical design through schematic instantiation
 
 # %% [markdown]
 # ### Setup pdk
+#
+# Let’s define a new `KCLayout` for this example, including
+# a cross-section definition for a wide waveguide.
 
 # %%
 pdk = kf.KCLayout("CROSSING_PDK", infos=Layers)
@@ -240,9 +244,17 @@ xs_wg1 = pdk.get_icross_section(
     )
 )
 
+# Ensure the same cross_section is also available in the target layout as well
+kf.kcl.get_icross_section(xs_wg1)
+
 # %% [markdown]
 # #### PDK Cells
-
+#
+# The `cross` cell builds a single 45° crossing:
+# - Constructs polygons for waveguide arms
+# - Ensures spacing rules are met via `fix_spacing_tiled`
+# - Adds enclosures for cladding / fill excludes
+# - Creates ports in four directions for connectivity
 
 # %%
 @pdk.cell
@@ -299,7 +311,19 @@ def cross(cross_section: str) -> kf.KCell:
 
     return c
 
+# %% [markdown]
+# ### Virtual cells
+#
+# Unlike physical cells, **virtual cells** are defined parametrically:
+# - Only generate geometry when needed
+# - Lightweight and efficient
+#
+# Here we define:
+# - `bend_euler`: a parametric Euler bend
+# - `euler_term`: a bend tapering to a termination
+# - `straight`: a parametric straight section
 
+# %%
 @pdk.vcell
 def bend_euler(
     radius: float,
@@ -408,6 +432,16 @@ def straight(length: float, cross_section: str) -> kf.VKCell:
 
     return c
 
+
+# %% [markdown]
+# ### Crossing schematic
+#
+# The `crossing45` schematic builds an array of crossings:
+# - Tiles multiple `cross` instances
+# - Adds spacers and bends to enforce pitch
+# - Places input/output ports systematically
+#
+# This results in a scalable crossing matrix driven entirely by schematic logic.
 
 # %%
 @kf.kcl.schematic_cell(output_type=kf.DKCell)
@@ -643,8 +677,6 @@ def crossing45(n: int, pitch: kf.typings.um, cross_section: str) -> kf.DSchemati
 
     return s
 
-
-kf.kcl.get_dcross_section(xs_wg1)
 c = crossing45(8, pitch=30, cross_section="WG1000")
 c
 
@@ -654,9 +686,11 @@ scrollable_text(pformat(c.schematic.model_dump(exclude_defaults=True)))
 # %% [markdown]
 # ### Sample LVS of schematic vs extracted (Connection) Netlist
 #
-# With a schematic we can relatively easily do full check between the schematic and extracted netlist.
+# With both schematic and extracted netlists, we can perform a partial **Layout vs. Schematic (LVS)**:
+# - `schematic_netlist`: direct from schematic definition
+# - `extracted_netlist`: derived from the physical layout
 #
-# <i>Note: For full (digital) connections extraction and checks more is necessary than simply comparing netlists. In optics it's not sufficient to check purely for connectivity like in digital electronics where we can simplify this with the assumption that any touching metal is connected. Therefore, additional tests like the connectivity check or even full DRC are necessary for better confidence about LVS.</i>
+# Matching them ensures the layout faithfully implements the intended connectivity.
 
 # %%
 schematic_netlist = c.schematic.netlist()
@@ -669,39 +703,46 @@ extracted_netlist = c.netlist()[
 scrollable_text(pformat(extracted_netlist.model_dump()))
 
 # %% [markdown]
-# Let's make an LVS check, i.e. compare the extracted netlist versus the netlist directly from the schematic
+# Let’s make an LVS check, i.e. compare the extracted netlist versus the netlist directly from the schematic.
 
 # %%
 assert schematic_netlist == extracted_netlist
 
 # %% [markdown]
-# A schematic can also be converted to python code. This allows to first import/draw schematics with external tools such as gdsfactory+ for example and then convert it to a standard cell function (sometimes called PCell, i.e. Parametric Cell)
-
-# %% [markdown]
 # ## Converting a Schematic to a cell function (parametric cell (PCell))
 #
-# The schematic can output and format a code string to generate a valid python file which can regenerate this schematic. Through the `imports` additional imports can be added.
+# Another powerful feature: **exporting schematics as code**.
+# - `code_str()` generates a self-contained Python function
+# - The result is a reusable **parametric cell (PCell)**
+# - This makes schematics portable and automatable across environments
 
 # %%
 from IPython.display import Code
-
 Code(c.schematic.code_str())
 
 # %% [markdown]
-# In order to not create a name conflict with the cell created above, let's copy an rename the schematic
+# To avoid name conflicts with our existing schematic,
+# let’s make a copy and rename it before execution.
 
 # %%
 new_schematic = c.schematic.model_copy()
 new_schematic.name = new_schematic.name + "_copy"
 
 # %% [markdown]
-# Let's run this code. We are using a trick to run code in the ipython environment. The code is roughly equivalent to `exec(new_schematic.code_str())`, meaning we are just feeding the code to be directly executed.
+# ### Executing generated code
+#
+# We can directly execute the generated code string in this notebook,
+# which defines a new PCell function.
+# This closes the loop:
+# 1. Design a schematic
+# 2. Generate its layout and netlist
+# 3. Export as reusable code
 
 # %%
 get_ipython().run_cell(new_schematic.code_str())
 
 # %% [markdown]
-# As the code has been executed, we can now directly call it by the variable name, create the new cell and create it and visualize it.
+# Now we can instantiate the newly generated PCell and visualize it.
 
 # %%
 c_new = crossing45_N8_P30_CSWG1000_copy()
