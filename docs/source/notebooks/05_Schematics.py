@@ -16,27 +16,216 @@
 # %% [markdown]
 # # Schematic Cells
 
+# %%
+# Imports
+import kfactory as kf
+import numpy as np
+
+from IPython.core.getipython import get_ipython
+from pprint import pformat
+
 # %% [markdown]
 # You can also use multiple KCLayout objects as PDKs or Libraries of KCells and parametric KCell-Functions
 
+# %% editable=true slideshow={"slide_type": ""} tags=["hide"]
+# For jupyter to show the big dicts/jsons correctly, we need a helper function `scrollable_text`
+# this is hidden from the docs build
+
+from IPython.display import display, HTML
+import html
+
+
+
+def scrollable_text(
+    text: str, max_height: int = 300, width: str = "100%", font_size: str = "14px"
+) -> None:
+    """Render scrollable, searchable text output for Jupyter and mkdocs-jupyter.
+
+    This function wraps text inside a scrollable <pre> block with a search box.
+    It adapts to light/dark mode automatically. The search highlights all matches
+    and pressing Enter jumps to the next match.
+
+    Args:
+        text (str): The text to display.
+        max_height (int, optional): Maximum height in pixels before scrolling.
+            Defaults to 300.
+        width (str, optional): CSS width (e.g. "100%", "800px").
+            Defaults to "100%".
+        font_size (str, optional): CSS font size (e.g. "14px", "0.9em").
+            Defaults to "14px".
+    """
+    safe = html.escape(str(text))
+
+    style = (
+        f"max-height:{max_height}px; overflow:auto; "
+        f"border:1px solid var(--st-border); padding:6px; "
+        f"background:var(--st-bg); color:var(--st-fg); "
+        f"width:{width}; font-size:{font_size}; white-space:pre-wrap;"
+    )
+
+    html_block = f"""
+    <style>
+    :root {{
+        --st-bg: #f9f9f9;
+        --st-fg: #111;
+        --st-border: #ccc;
+    }}
+    @media (prefers-color-scheme: dark) {{
+        :root {{
+            --st-bg: #1e1e1e;
+            --st-fg: #ddd;
+            --st-border: #555;
+        }}
+        mark {{
+            background: #ffb347;
+            color: black;
+        }}
+    }}
+    </style>
+    <div style="margin-bottom:0.5em;">
+      <input type="search" placeholder="Search (Enter = next match)"
+             style="margin-bottom:6px; width:98%; padding:4px;"
+             oninput="
+                var q=this.value;
+                var pre=this.nextElementSibling;
+                var orig=pre.dataset.orig;
+                pre.dataset.index=0;
+                if(!q) {{
+                    pre.innerHTML=orig;
+                    return;
+                }}
+                var regex=new RegExp('('+q.replace(/[.*+?^${{}}()|[\\]\\\\]/g,'\\\\$&')+')','gi');
+                pre.innerHTML=orig.replace(regex,'<mark>$1</mark>');
+                var marks=pre.querySelectorAll('mark');
+                if(marks.length) marks[0].scrollIntoView({{behavior:'smooth', block:'center'}});
+             "
+             onkeydown="
+                if(event.key==='Enter'){{
+                    event.preventDefault();
+                    var pre=this.nextElementSibling;
+                    var marks=pre.querySelectorAll('mark');
+                    if(!marks.length) return;
+                    var idx=parseInt(pre.dataset.index)||0;
+                    idx=(idx+1)%marks.length;
+                    pre.dataset.index=idx;
+                    marks[idx].scrollIntoView({{behavior:'smooth', block:'center'}});
+                }}
+             ">
+      <pre style="{style}" data-orig="{safe}" data-index="0">{safe}</pre>
+    </div>
+    """
+    display(HTML(html_block))
+
+
 # %% [markdown]
-# ## Example Crossing
+# ## Basic example with routing
+#
+# In order to avoid name conflicts, let's create a new clean KCLayout (pdk)
+
+
+# %%
+class Layers(kf.LayerInfos):
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+    WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
+    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
+    WGCLADEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1)
+    FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
+    FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
+    FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
+    METAL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(20, 0)
+    METAL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(22, 0)
+    METAL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(24, 0)
+    METAL1EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(20, 1)
+    METAL2EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(22, 1)
+    METAL3EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(24, 1)
+    VIA1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(21, 0)
+    VIA2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(23, 0)
+
+
+layers = Layers()
+pdk = kf.KCLayout("SCHEMA_PDK_ROUTING", infos=Layers)
+
+
+# %% [markdown]
+# ### Cell functions
+#
+# For routing a basic straight and a bend are sufficient.
+
+
+# %%
+@pdk.cell
+def straight(width: int, length: int) -> kf.KCell:
+    c = pdk.kcell()
+    c.shapes(layers.WG).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
+    c.create_port(
+        name="o1",
+        width=width,
+        trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=0),
+        layer_info=layers.WG,
+    )
+    c.create_port(
+        name="o2",
+        width=width,
+        trans=kf.kdb.Trans(x=length, y=0),
+        layer_info=layers.WG,
+    )
+
+    return c
+
+
+bend90_function = kf.factories.euler.bend_euler_factory(kcl=pdk)
+bend90 = bend90_function(width=0.500, radius=10, layer=layers.WG)
+
+
+# %%
+@pdk.routing_strategy
+def route_bundle(
+    c: kf.KCell,
+    start_ports: list[kf.Port],
+    end_ports: list[kf.Port],
+    separation: int = 5000,
+) -> list[kf.routing.generic.ManhattanRoute]:
+    return kf.routing.optical.route_bundle(
+        c=kf.KCell(base=c._base),
+        start_ports=[kf.Port(base=sp.base) for sp in start_ports],
+        end_ports=[kf.Port(base=ep.base) for ep in end_ports],
+        separation=separation,
+        straight_factory=straight,
+        bend90_cell=bend90,
+    )
+
+
+# %%
+@pdk.schematic_cell
+def route_example() -> kf.schematic.TSchematic[int]:
+    schematic = kf.Schematic(kcl=pdk)
+
+    s1 = schematic.create_inst(
+        name="s1", component="straight", settings={"length": 5000, "width": 500}
+    )
+    s2 = schematic.create_inst(
+        name="s2", component="straight", settings={"length": 5000, "width": 500}
+    )
+
+    s1.place(x=1000, y=10_000)
+    s2.place(x=1000, y=210_000)
+
+    schematic.add_route(
+        "s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000
+    )
+
+    return schematic
+
+
+route_example()
+
+# %% [markdown]
+# ## Example: 45 Degrees Crossing with virtual cells
 
 # %% [markdown]
 # ### Setup pdk
 
 # %%
-import kfactory as kf
-import numpy as np
-from IPython.display import JSON
-from IPython import get_ipython
-
-
-class Layers(kf.LayerInfos):
-    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
-    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 1)
-
-
 pdk = kf.KCLayout("CROSSING_PDK", infos=Layers)
 
 LAYER = Layers()
@@ -50,7 +239,6 @@ xs_wg1 = pdk.get_icross_section(
         name="WG1000",
     )
 )
-
 
 # %% [markdown]
 # #### PDK Cells
@@ -461,7 +649,7 @@ c = crossing45(8, pitch=30, cross_section="WG1000")
 c
 
 # %%
-JSON(c.schematic.model_dump(exclude_defaults=True))
+scrollable_text(pformat(c.schematic.model_dump(exclude_defaults=True)))
 
 # %% [markdown]
 # ### Sample LVS of schematic vs extracted (Connection) Netlist
@@ -472,13 +660,13 @@ JSON(c.schematic.model_dump(exclude_defaults=True))
 
 # %%
 schematic_netlist = c.schematic.netlist()
-JSON(schematic_netlist.model_dump())
+scrollable_text(pformat(schematic_netlist.model_dump()))
 
 # %%
 extracted_netlist = c.netlist()[
     c.name
 ]  # the extracted netlist is hierarchical by default
-JSON(extracted_netlist.model_dump())
+scrollable_text(pformat(extracted_netlist.model_dump()))
 
 # %% [markdown]
 # Let's make an LVS check, i.e. compare the extracted netlist versus the netlist directly from the schematic
@@ -493,9 +681,6 @@ assert schematic_netlist == extracted_netlist
 # ## Converting a Schematic to a cell function (parametric cell (PCell))
 #
 # The schematic can output and format a code string to generate a valid python file which can regenerate this schematic. Through the `imports` additional imports can be added.
-
-# %%
-# c.schematic.code_str?
 
 # %%
 from IPython.display import Code

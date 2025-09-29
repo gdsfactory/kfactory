@@ -92,6 +92,11 @@ plugins:
       execute_ignore:
         - "source/*.py"
       ignore: ["source/*.py"]
+      remove_tag_config:
+        remove_input_tags:
+          - hide
+        remove_output_tags:
+          - hide
   - literate-nav:
       nav_file: SUMMARY.md
   - section-index

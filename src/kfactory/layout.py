@@ -763,7 +763,7 @@ class KCLayout(
             f: Callable[KCellParams, TSchematic[TUnit]],
         ) -> Callable[KCellParams, KCell]:
             @functools.wraps(f)
-            @self.cell
+            @self.cell(output_type=KCell)
             def kcell_func(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
             ) -> KCell:
