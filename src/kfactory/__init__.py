@@ -52,7 +52,6 @@ from .utilities import (
 )
 
 from . import (
-    cells,
     enclosure,
     factories,
     packing,

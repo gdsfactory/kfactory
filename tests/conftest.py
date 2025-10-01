@@ -6,6 +6,7 @@ from threading import RLock
 import pytest
 
 import kfactory as kf
+import kfactory.cells
 
 
 class Layers(kf.LayerInfos):

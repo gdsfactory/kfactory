@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from kfactory.kcell import Info, KCellSettings, KCellSettingsUnits
+from kfactory.settings import Info, KCellSettings, KCellSettingsUnits
 
 
 def test_kcell_settings_initialization() -> None:

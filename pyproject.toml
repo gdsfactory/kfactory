@@ -1,6 +1,6 @@
-[build-system]
-requires = ["setuptools>=74", "wheel", "build", "setuptools_scm[toml]>=8.1"]
-build-backend = "setuptools.build_meta"
+# [build-system]
+# requires = ["setuptools>=74", "wheel", "build", "setuptools_scm[toml]>=8.1"]
+# build-backend = "setuptools.build_meta"
 
 [project]
 name = "kfactory"
