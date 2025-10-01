@@ -125,7 +125,23 @@ class Factories(Generic[F]):
         return key in self._all
 
     def __getitem__(self, key: str) -> F:
-        return self._all[self._by_name[key]]
+        try:
+            return self._all[self._by_name[key]]
+        except KeyError as e:
+            from rapidfuzz import process
+
+            results = pformat(
+                [
+                    result[0]
+                    for result in process.extract(
+                        key, list(self._by_name.keys()), limit=10
+                    )
+                ]
+            )
+
+            raise KeyError(
+                f"Unknown Factory {key!r}, closest 10 name matches: {results}"
+            ) from e
 
     def get(self, key: str) -> F | None:
         if key in self._by_name:
