@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import functools
 import inspect
-from collections import UserDict, defaultdict
+from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence  # noqa: TC003
 from functools import cached_property
 from pathlib import Path
 from pprint import pformat
 from threading import RLock
-from typing import TYPE_CHECKING, Any, Concatenate, Literal, cast, overload
+from typing import TYPE_CHECKING, Any, Concatenate, Generic, Literal, cast, overload
 
 import ruamel.yaml
 from cachetools import Cache
@@ -62,12 +62,12 @@ from .typings import (
     KCIN,
     VK,
     AnyCellSpec,
+    F,
     KC_contra,
     KCellParams,
     KCellSpec,
     MetaData,
     P,
-    T,
     TUnit,
 )
 from .utilities import load_layout_options, save_layout_options
@@ -93,31 +93,44 @@ def get_default_kcl() -> KCLayout:
     return kcl
 
 
-class Factories(UserDict[str, T]):
-    tags: dict[str, list[T]]
+class Factories(Generic[F]):
+    _all: list[F]
+    _by_name: dict[str, int]
+    _by_tag: defaultdict[str, list[int]]
+    _by_function: dict[Callable[..., Any], int]
 
-    def __init__(self, data: dict[str, T]) -> None:
-        super().__init__(data)
-        self.tags = defaultdict(list)
+    def __init__(self) -> None:
+        self._all = []
+        self._by_name = {}
+        self._by_tag = defaultdict(list)
+        self._by_function = {}
 
-    def __getattr__(self, name: str) -> Any:
-        if name != "data":
-            try:
-                return self.data[name]
-            except KeyError as e:
-                try:
-                    return self.__getattribute__(name)
-                except AttributeError:
-                    raise KeyError from e
-        return self.__getattribute__(name)
+    def add(self, factory: F) -> None:
+        idx = len(self._all)
+        self._all.append(factory)
+        for tag in factory.tags:
+            self._by_tag[tag].append(idx)
+        self._by_name[factory.name] = idx
+        self._by_function[factory.__call__] = idx
 
-    def for_tags(self, tags: list[str]) -> list[T]:
-        if len(tags) > 0:
-            tag_set = set(self.tags[tags[0]])
-            for tag in tags[1:]:
-                tag_set &= set(self.tags[tag])
-            return list(tag_set)
-        raise NotImplementedError
+    def get_by_name(self, name: str) -> F:
+        return self._all[self._by_name[name]]
+
+    def get_by_tag(self, tag: str) -> list[F]:
+        return [self._all[idx] for idx in self._by_tag[tag]]
+
+    def __contains__(self, key: str | F) -> bool:
+        if isinstance(key, str):
+            return key in self._by_name
+        return key in self._all
+
+    def __getitem__(self, key: str) -> F:
+        return self._all[self._by_name[key]]
+
+    def get(self, key: str) -> F | None:
+        if key in self._by_name:
+            return self.get_by_name(key)
+        return None
 
 
 class KCLayout(
@@ -275,8 +288,8 @@ class KCLayout(
             enclosure=KCellEnclosure([]),
             infos=infos_,
             layers=LayerEnum,
-            factories=Factories({}),
-            virtual_factories=Factories({}),
+            factories=Factories[WrappedKCellFunc[Any, ProtoTKCell[Any]]](),
+            virtual_factories=Factories[WrappedVKCellFunc[Any, VKCell]](),
             sparameters_path=sparameters_path,
             interconnect_cml_path=interconnect_cml_path,
             constants=constants_,
@@ -1032,10 +1045,7 @@ class KCLayout(
                 with self.thread_lock:
                     if wrapper_autocell.name is None:
                         raise ValueError(f"Function {f} has no name.")
-                    if tags:
-                        for tag in tags:
-                            self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
-                    self.factories[basename or wrapper_autocell.name] = wrapper_autocell  # type: ignore[assignment]
+                    self.factories.add(wrapper_autocell)  # type: ignore[arg-type]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
@@ -1194,14 +1204,10 @@ class KCLayout(
             )
 
             if register_factory:
-                if wrapper_autocell.name is None:
-                    raise ValueError(f"Function {f} has no name.")
-                if tags:
-                    for tag in tags:
-                        self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
-                self.virtual_factories[basename or wrapper_autocell.name] = (
-                    wrapper_autocell  # type: ignore[assignment]
-                )
+                with self.thread_lock:
+                    if wrapper_autocell.name is None:
+                        raise ValueError(f"Function {f} has no name.")
+                    self.virtual_factories.add(wrapper_autocell)  # type: ignore[arg-type]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> VK:
@@ -1875,10 +1881,10 @@ class KCLayout(
                 return vkcell_factory(**settings)
             raise ValueError(
                 f"Could not find standard or virtual factory for component "
-                f"{spec['component']}.\n"
-                f"Available standard factories are {list(self.factories.data)!r}.\n"
+                f"{spec['component']}.\nAvailable standard factories are "
+                f"{[fact.name for fact in self.factories._all]!r}.\n"
                 "Available virtual factories are "
-                f"{list(self.virtual_factories.data)!r}.\n"
+                f"{[fact.name for fact in self.virtual_factories._all]!r}.\n"
             )
         if isinstance(spec, str):
             kcell_factory = self.factories.get(spec)
@@ -1895,10 +1901,10 @@ class KCLayout(
                 return vkcell_factory(**cell_kwargs)
             raise ValueError(
                 f"Could not find standard or virtual factory for component "
-                f"{spec}.\n"
-                f"Available standard factories are {list(self.factories.data)!r}.\n"
+                f"{spec}.\nAvailable standard factories are "
+                f"{[fact.name for fact in self.factories._all]!r}.\n"
                 f"Available virtual factories are "
-                f"{list(self.virtual_factories.data)!r}.\n"
+                f"{[fact.name for fact in self.virtual_factories._all]!r}.\n"
             )
         if cell_kwargs:
             raise ValueError(

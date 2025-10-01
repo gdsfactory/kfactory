@@ -18,6 +18,7 @@ from typing_extensions import TypeAliasType
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from .decorators import WrappedKCellFunc, WrappedVKCellFunc
     from .instance import ProtoInstance, ProtoTInstance
     from .kcell import BaseKCell, ProtoKCell, ProtoTKCell, VKCell
     from .layer import LayerEnum
@@ -45,6 +46,15 @@ TInstance_co = TypeVar("TInstance_co", bound="ProtoInstance[Any]", covariant=Tru
 TTInstance_co = TypeVar("TTInstance_co", bound="ProtoTInstance[Any]", covariant=True)
 TBaseCell_co = TypeVar("TBaseCell_co", bound="BaseKCell", covariant=True)
 KCellParams = ParamSpec("KCellParams")
+F = TypeVar(
+    "F",
+    bound="WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]",
+)
+F_co = TypeVar(
+    "F_co",
+    bound="WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]",
+    covariant=True,
+)
 P = ParamSpec("P")
 
 
