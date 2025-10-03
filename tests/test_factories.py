@@ -2,7 +2,8 @@ from collections.abc import Callable
 
 import pytest
 
-from kfactory import KCell, KCLayout, LayerEnclosure, kcl
+from kfactory import KCell, KCLayout, LayerEnclosure
+from kfactory.cells import demo
 
 from .conftest import Layers
 
@@ -19,7 +20,7 @@ def test_factory_name(kcl: KCLayout) -> None:
 def test_factory_retrieval(
     straight: Callable[..., KCell], layers: Layers, wg_enc: LayerEnclosure
 ) -> None:
-    straight_ = kcl.factories["straight"]
+    straight_ = demo.factories["straight"]
     c = straight_(width=1000, length=10_000, layer=layers.WG, enclosure=wg_enc)
     assert isinstance(c, KCell)
 
@@ -30,4 +31,4 @@ def test_factory_retrieval(
             r"\['straight',"
         ),
     ):
-        kcl.factories["straights"]
+        demo.factories["straights"]
