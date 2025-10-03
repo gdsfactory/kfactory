@@ -1741,7 +1741,7 @@ def _create_kinst(
                     res[0]
                     for res in extract(
                         schematic_inst.component,
-                        schematic_inst.kcl.factories.keys(),
+                        schematic_inst.kcl.factories._by_name.keys(),
                         limit=10,
                     )
                 ]
@@ -1749,7 +1749,7 @@ def _create_kinst(
                     res[0]
                     for res in extract(
                         schematic_inst.component,
-                        schematic_inst.kcl.virtual_factories.keys(),
+                        schematic_inst.kcl.virtual_factories._by_name.keys(),
                         limit=10,
                     )
                 ]

@@ -302,8 +302,8 @@ class KCLayout(
             enclosure=KCellEnclosure([]),
             infos=infos_,
             layers=LayerEnum,
-            factories=Factories({}),
-            virtual_factories=Factories({}),
+            factories=Factories[WrappedKCellFunc[Any, ProtoTKCell[Any]]](),
+            virtual_factories=Factories[WrappedVKCellFunc[Any, VKCell]](),
             sparameters_path=sparameters_path,
             interconnect_cml_path=interconnect_cml_path,
             constants=constants_,
@@ -1059,10 +1059,7 @@ class KCLayout(
                 with self.thread_lock:
                     if wrapper_autocell.name is None:
                         raise ValueError(f"Function {f} has no name.")
-                    if tags:
-                        for tag in tags:
-                            self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
-                    self.factories[basename or wrapper_autocell.name] = wrapper_autocell  # type: ignore[assignment]
+                    self.factories.add(wrapper_autocell)  # type: ignore[arg-type]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
@@ -1223,12 +1220,7 @@ class KCLayout(
             if register_factory:
                 if wrapper_autocell.name is None:
                     raise ValueError(f"Function {f} has no name.")
-                if tags:
-                    for tag in tags:
-                        self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
-                self.virtual_factories[basename or wrapper_autocell.name] = (
-                    wrapper_autocell  # type: ignore[assignment]
-                )
+                self.virtual_factories.add(wrapper_autocell)  # type: ignore[arg-type]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> VK:
