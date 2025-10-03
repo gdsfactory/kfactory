@@ -51,6 +51,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
 
     from .layout import KCLayout
+    from .schematic import DSchematic, Schematic
 
 
 def _parse_params(
@@ -322,12 +323,14 @@ def _post_process(
 class WrappedKCellFunc(Generic[KCellParams, KC]):
     _f: Callable[KCellParams, KC]
     _f_orig: Callable[KCellParams, ProtoTKCell[Any]]
+    _f_schematic: Callable[KCellParams, Schematic | DSchematic] | None = None
     cache: Cache[int, KC] | dict[int, Any]
     name: str
     kcl: KCLayout
     output_type: type[KC]
     lvs_equivalent_ports: list[list[str]] | None = None
     ports_definition: PortsDefinition | None = None
+    tags: set[str]
 
     @property
     def __name__(self) -> str:
@@ -363,11 +366,13 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         debug_names: bool,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
+        tags: Sequence[str] | None = None,
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
         self.name = _get_function_name(f)
         self.ports_definition = ports.copy() if ports is not None else None
+        self.tags = set(tags) if tags else set()
 
         @functools.wraps(f)
         def wrapper_autocell(
@@ -584,6 +589,7 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
     output_type: type[VK]
     lvs_equivalent_ports: list[list[str]] | None = None
     ports_definition: PortsDefinition | None = None
+    tags: set[str]
 
     @property
     def __name__(self) -> str:
@@ -614,11 +620,13 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
         post_process: Iterable[Callable[[VKCell], None]],
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
+        tags: Sequence[str] | None = None,
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
         self.name = _get_function_name(f)
         self.ports_definitions = ports.copy() if ports is not None else None
+        self.tags = set(tags) if tags else set()
 
         @functools.wraps(f)
         def wrapper_autocell(

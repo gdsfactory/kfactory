@@ -87,7 +87,8 @@ def virtual_cell_params(wg_enc: kf.LayerEnclosure, layers: Layers) -> dict[str, 
 
 
 @pytest.mark.parametrize(
-    "cell_name", sorted(set(kf.kcl.factories.keys()) - {"taper_cell"})
+    "cell_name",
+    sorted(set(kf.kcl.factories._by_name) - {"taper_cell"}),
 )
 def test_cells(cell_name: str, cell_params: dict[str, Any]) -> None:
     """Ensure cells have the same geometry as their golden references."""
@@ -136,7 +137,7 @@ def test_cells(cell_name: str, cell_params: dict[str, Any]) -> None:
 
 
 @pytest.mark.parametrize(
-    "cell_name", sorted(set(kf.kcl.virtual_factories.keys()) - {"taper_cell"})
+    "cell_name", sorted(set(kf.kcl.virtual_factories._by_name) - {"taper_cell"})
 )
 def test_virtual_cells(cell_name: str, virtual_cell_params: dict[str, Any]) -> None:
     """Ensure cells have the same geometry as their golden references."""

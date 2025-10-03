@@ -10,11 +10,11 @@ from .. import kdb
 from ..conf import logger
 from ..enclosure import LayerEnclosure
 from ..kcell import KCell
-from ..layout import KCLayout, kcl
+from ..layout import KCLayout
 from ..settings import Info
 from ..typings import MetaData, dbu
 
-__all__ = ["taper"]
+__all__ = ["taper_factory"]
 
 
 class TaperFactory(Protocol):
@@ -204,6 +204,3 @@ def taper_factory(
         return c
 
     return taper
-
-
-taper = taper_factory(kcl)
