@@ -18,6 +18,7 @@ from pydantic import (
     Field,
     model_validator,
 )
+from rapidfuzz.process import extract
 
 from . import __version__, kdb
 from .conf import CheckInstances, config, logger
@@ -61,7 +62,6 @@ from .typings import (
     KC,
     KCIN,
     VK,
-    AnyCellSpec,
     KC_contra,
     KCellParams,
     KCellSpec,
@@ -73,8 +73,10 @@ from .typings import (
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
+    from .instance import DInstance, Instance, VInstance
     from .ports import DPorts, Ports
     from .schematic import TSchematic
+    from .typings import KCellSpec
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -1794,123 +1796,6 @@ class KCLayout(
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.name}, n={len(self.kcells)})"
 
-    @overload
-    def get_component(
-        self, spec: KCellSpec, *, output_type: type[KC], **cell_kwargs: Any
-    ) -> KC: ...
-
-    @overload
-    def get_component(
-        self,
-        spec: int,
-    ) -> KCell: ...
-
-    @overload
-    def get_component(
-        self,
-        spec: str,
-        **cell_kwargs: Any,
-    ) -> ProtoTKCell[Any]: ...
-
-    @overload
-    def get_component(
-        self,
-        spec: Callable[..., KC],
-        **cell_kwargs: Any,
-    ) -> KC: ...
-    @overload
-    def get_component(self, spec: KC) -> KC: ...
-
-    def get_component(
-        self,
-        spec: KCellSpec,
-        *,
-        output_type: type[KC] | None = None,
-        **cell_kwargs: Any,
-    ) -> ProtoTKCell[Any]:
-        """Get a component by specification."""
-        if output_type:
-            return output_type(base=self.get_component(spec, **cell_kwargs).base)
-        if callable(spec):
-            return spec(**cell_kwargs)
-        if isinstance(spec, dict):
-            settings = spec.get("settings", {}).copy()
-            settings.update(cell_kwargs)
-            return self.factories[spec["component"]](**settings)
-        if isinstance(spec, str):
-            if spec in self.factories:
-                return self.factories[spec](**cell_kwargs)
-            return self[spec]
-        if cell_kwargs:
-            raise ValueError(
-                "Cell kwargs are not allowed for retrieving static cells by integer "
-                "or the cell itself."
-            )
-        return self.kcells[spec] if isinstance(spec, int) else spec
-
-    def get_anycell(
-        self,
-        spec: AnyCellSpec,
-        **cell_kwargs: Any,
-    ) -> KCell | VKCell:
-        if callable(spec):
-            c = spec(**cell_kwargs)
-            if isinstance(c, ProtoTKCell):
-                return KCell(base=c.base)
-            return c
-        if isinstance(spec, dict):
-            settings = spec.get("settings", {}).copy()
-            settings.update(cell_kwargs)
-            kcell_factory = self.factories.get(spec["component"])
-            vkcell_factory = self.virtual_factories.get(spec["component"])
-            if kcell_factory is not None and vkcell_factory is not None:
-                logger.warning(
-                    f"Found a factory for component {spec['component']!r} "
-                    "as a standard cell as well as a virtual one (all-angle). "
-                    "Proceeding with standard factory."
-                )
-            if kcell_factory is not None:
-                return KCell(base=kcell_factory(**settings).base)
-            if vkcell_factory is not None:
-                return vkcell_factory(**settings)
-            raise ValueError(
-                f"Could not find standard or virtual factory for component "
-                f"{spec['component']}.\n"
-                f"Available standard factories are {list(self.factories.data)!r}.\n"
-                "Available virtual factories are "
-                f"{list(self.virtual_factories.data)!r}.\n"
-            )
-        if isinstance(spec, str):
-            kcell_factory = self.factories.get(spec)
-            vkcell_factory = self.virtual_factories.get(spec)
-            if kcell_factory is not None and vkcell_factory is not None:
-                logger.warning(
-                    f"Found a factory for component {spec!r} "
-                    "as a standard cell as well as a virtual one (all-angle). "
-                    "Proceeding with standard factory."
-                )
-            if kcell_factory is not None:
-                return KCell(base=kcell_factory(**cell_kwargs).base)
-            if vkcell_factory is not None:
-                return vkcell_factory(**cell_kwargs)
-            raise ValueError(
-                f"Could not find standard or virtual factory for component "
-                f"{spec}.\n"
-                f"Available standard factories are {list(self.factories.data)!r}.\n"
-                f"Available virtual factories are "
-                f"{list(self.virtual_factories.data)!r}.\n"
-            )
-        if cell_kwargs:
-            raise ValueError(
-                "Cell kwargs are not allowed for retrieving static cells by integer "
-                "or the cell itself."
-            )
-        if isinstance(spec, int):
-            return self.kcells[spec]
-        if isinstance(spec, ProtoTKCell):
-            return KCell(base=spec.base)
-        return spec
-
     def delete(self) -> None:
         del kcls[self.name]
         self.library.delete()
@@ -1959,3 +1844,148 @@ cell = kcl.cell
 """Default kcl @cell decorator."""
 vcell = kcl.vcell
 """Default kcl @vcell decorator."""
+
+
+@overload
+def add_inst(
+    c: KCell,
+    spec: KCellSpec,
+    cell_kwargs: dict[str, Any] | None = None,
+    kcl: KCLayout | None = None,
+) -> Instance: ...
+
+
+@overload
+def add_inst(
+    c: DKCell,
+    spec: KCellSpec,
+    cell_kwargs: dict[str, Any] | None = None,
+    kcl: KCLayout | None = None,
+) -> DInstance: ...
+
+
+def add_inst(
+    c: KCell | DKCell,
+    spec: KCellSpec,
+    cell_kwargs: dict[str, Any] | None = None,
+    kcl: KCLayout | None = None,
+) -> Instance | DInstance:
+    kcl_ = kcl or c.kcl
+
+    if cell_kwargs is None:
+        cell_kwargs = {}
+
+    if callable(spec):
+        cell = spec(**cell_kwargs)
+
+    if isinstance(spec, dict):
+        settings = spec.get("settings", {}).copy()
+        kcl_ = kcls[spec.get("kcl", kcl_.name)]
+        cell = kcl_.factories[spec["component"]](**settings)
+
+    if isinstance(spec, str):
+        if spec in kcl_.factories:
+            cell = kcl_.factories[spec](**cell_kwargs)
+        else:
+            cell = kcl_[spec]
+
+    if cell_kwargs:
+        raise ValueError(
+            "Cell kwargs are not allowed for retrieving static cells by integer "
+            "or the cell itself."
+        )
+    cell = (
+        kcl_.kcells[spec] if isinstance(spec, int) else cast("ProtoTKCell[Any]", spec)
+    )
+
+    if isinstance(cell, ProtoTKCell):
+        return c << cell
+
+    logger.warning(
+        "Cell {} is not a cell but likely a VKCell. Type of cell: {}."
+        " Returning VInstance",
+        cell,
+        type(cell),
+    )
+
+    return c.create_vinst(cell)
+
+
+@overload
+def add_anyinst(
+    c: KCell,
+    spec: KCellSpec,
+    cell_kwargs: dict[str, Any] | None = None,
+    kcl: KCLayout | None = None,
+    virtual: Literal[False] = False,
+) -> Instance: ...
+
+
+@overload
+def add_anyinst(
+    c: DKCell,
+    spec: KCellSpec,
+    cell_kwargs: dict[str, Any] | None = None,
+    kcl: KCLayout | None = None,
+    virtual: Literal[False] = False,
+) -> DInstance: ...
+
+
+@overload
+def add_anyinst(
+    c: KCell,
+    spec: KCellSpec,
+    cell_kwargs: dict[str, Any] | None = None,
+    kcl: KCLayout | None = None,
+    virtual: Literal[True] = True,
+) -> VInstance: ...
+
+
+def add_anyinst(
+    c: KCell | DKCell,
+    spec: KCellSpec,
+    cell_kwargs: dict[str, Any] | None = None,
+    kcl: KCLayout | None = None,
+    virtual: bool = False,
+) -> Instance | DInstance | VInstance:
+    if not virtual:
+        return add_inst(c=c, spec=spec, cell_kwargs=cell_kwargs, kcl=kcl)
+    kcl_ = kcl or c.kcl
+
+    if cell_kwargs is None:
+        cell_kwargs = {}
+
+    if callable(spec):
+        return c << spec(**cell_kwargs)
+
+    if isinstance(spec, dict):
+        settings = spec.get("settings", {}).copy()
+        kcl_ = kcls[spec.get("kcl", kcl_.name)]
+        comp = spec["component"]
+        if comp in kcl_.factories:
+            return c.create_vinst(kcl_.factories[comp](**settings))
+        try:
+            return c.create_vinst(kcl_.factories[comp](**settings))
+        except KeyError as e:
+            results = [
+                res[0]
+                for res in extract(
+                    comp, list(kcl_.factories) + list(kcl_.virtual_factories), limit=10
+                )
+            ]
+            raise KeyError(
+                f"Could not find component {comp!r} in real or virtual factories. "
+                f"Closest 10 matches: {results}"
+            ) from e
+
+    if isinstance(spec, str):
+        if spec in kcl_.factories:
+            return c << kcl_.factories[spec](**cell_kwargs)
+        return c << kcl_[spec]
+
+    if cell_kwargs:
+        raise ValueError(
+            "Cell kwargs are not allowed for retrieving static cells by integer "
+            "or the cell itself."
+        )
+    return c << (kcl_.kcells[spec] if isinstance(spec, int) else spec)

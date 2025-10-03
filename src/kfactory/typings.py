@@ -54,11 +54,12 @@ JSONSerializable = TypeAliasType(
 )
 
 
-class KCellSpecDict(TypedDict):
+class KCellSpecDict(TypedDict, total=True):
     """Specification for a KCell."""
 
     component: str
     settings: NotRequired[dict[str, Any]]
+    kcl: NotRequired[str]
 
 
 AnyTrans = TypeVar(

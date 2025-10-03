@@ -106,7 +106,7 @@ def virtual_straight_factory(
             layer: Main layer of the waveguide.
             enclosure: Definition of slab/excludes. [dbu]
         """
-        c = VKCell(kcl=kcl)
+        c = kcl.vkcell()
         if length < 0:
             logger.critical(
                 f"Negative lengths are not allowed {length} as ports"

@@ -69,9 +69,17 @@ from . import (
     schematic,
 )
 from .routing.generic import ManhattanRoute
-from .typings import dbu  # noqa: F401
+from types import ModuleType
 
 ManhattanRoute.model_rebuild()
+
+
+def __getattr__(name: str) -> ModuleType:
+    if name == "cells":
+        import kfactory.cells
+
+        return kfactory.cells
+    raise AttributeError(f"module {__name__} has no attribute {name}")
 
 
 __all__ = [
