@@ -22,6 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: astral-sh/setup-uv@v6
+      - uses: extractions/setup-just@v3
       - name: Install dependencies
         env:
           GH_TOKEN: ${{ github.token }}
@@ -29,7 +30,7 @@ jobs:
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
-        run: uv run -p ${{ matrix.python-version }} --extra ci --isolated pytest -s -n logical
+        run: just test ${{ matrix.python-version }}
 
   test_code_min_ver:
     runs-on: ${{ matrix.os }}
@@ -49,4 +50,4 @@ jobs:
       - name: Test with pytest
         env:
           KFACTORY_LOGFILTER_LEVEL: "ERROR"
-        run: uv run -p ${{ matrix.python-version }} --extra ci --resolution lowest-direct --isolated pytest -s -n logical
+        run: just test-min ${{ matrix.python-version }}
