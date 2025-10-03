@@ -1,8 +1,8 @@
 """Virtual circular cells."""
 
 from ...factories.virtual.circular import virtual_bend_circular_factory
-from ...layout import kcl
+from .. import demo
 
 __all__ = ["virtual_bend_circular"]
 
-virtual_bend_circular = virtual_bend_circular_factory(kcl)
+virtual_bend_circular = virtual_bend_circular_factory(kcl=demo)

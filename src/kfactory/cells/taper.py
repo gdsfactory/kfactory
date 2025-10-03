@@ -4,14 +4,15 @@ TODO: Non-linear tapers.
 
 """
 
-from .. import KCell, kcl, kdb
+from .. import KCell, kdb
 from ..enclosure import LayerEnclosure
 from ..factories.taper import taper_factory
 from ..typings import um
+from . import demo
 
 __all__ = ["taper", "taper_dbu"]
 
-taper_dbu = taper_factory(kcl)
+taper_dbu = taper_factory(kcl=demo)
 
 
 def taper(
@@ -46,9 +47,9 @@ def taper(
         enclosure: Definition of the slab/exclude.
     """
     return taper_dbu(
-        width1=int(width1 / kcl.dbu),
-        width2=int(width2 / kcl.dbu),
-        length=int(length / kcl.dbu),
+        width1=demo.to_dbu(width1),
+        width2=demo.to_dbu(width2),
+        length=demo.to_dbu(length),
         layer=layer,
         enclosure=enclosure,
     )

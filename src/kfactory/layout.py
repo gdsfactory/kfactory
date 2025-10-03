@@ -20,7 +20,7 @@ from pydantic import (
 )
 
 from . import __version__, kdb
-from .conf import CheckInstances, config, logger
+from .conf import CheckInstances, config
 from .cross_section import (
     CrossSection,
     CrossSectionModel,
@@ -61,11 +61,9 @@ from .typings import (
     KC,
     KCIN,
     VK,
-    AnyCellSpec,
     F,
     KC_contra,
     KCellParams,
-    KCellSpec,
     MetaData,
     P,
     TUnit,
@@ -304,8 +302,8 @@ class KCLayout(
             enclosure=KCellEnclosure([]),
             infos=infos_,
             layers=LayerEnum,
-            factories=Factories[WrappedKCellFunc[Any, ProtoTKCell[Any]]](),
-            virtual_factories=Factories[WrappedVKCellFunc[Any, VKCell]](),
+            factories=Factories({}),
+            virtual_factories=Factories({}),
             sparameters_path=sparameters_path,
             interconnect_cml_path=interconnect_cml_path,
             constants=constants_,
@@ -1061,7 +1059,10 @@ class KCLayout(
                 with self.thread_lock:
                     if wrapper_autocell.name is None:
                         raise ValueError(f"Function {f} has no name.")
-                    self.factories.add(wrapper_autocell)  # type: ignore[arg-type]
+                    if tags:
+                        for tag in tags:
+                            self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
+                    self.factories[basename or wrapper_autocell.name] = wrapper_autocell  # type: ignore[assignment]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
@@ -1220,10 +1221,14 @@ class KCLayout(
             )
 
             if register_factory:
-                with self.thread_lock:
-                    if wrapper_autocell.name is None:
-                        raise ValueError(f"Function {f} has no name.")
-                    self.virtual_factories.add(wrapper_autocell)  # type: ignore[arg-type]
+                if wrapper_autocell.name is None:
+                    raise ValueError(f"Function {f} has no name.")
+                if tags:
+                    for tag in tags:
+                        self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
+                self.virtual_factories[basename or wrapper_autocell.name] = (
+                    wrapper_autocell  # type: ignore[assignment]
+                )
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> VK:
@@ -1815,123 +1820,6 @@ class KCLayout(
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.name}, n={len(self.kcells)})"
-
-    @overload
-    def get_component(
-        self, spec: KCellSpec, *, output_type: type[KC], **cell_kwargs: Any
-    ) -> KC: ...
-
-    @overload
-    def get_component(
-        self,
-        spec: int,
-    ) -> KCell: ...
-
-    @overload
-    def get_component(
-        self,
-        spec: str,
-        **cell_kwargs: Any,
-    ) -> ProtoTKCell[Any]: ...
-
-    @overload
-    def get_component(
-        self,
-        spec: Callable[..., KC],
-        **cell_kwargs: Any,
-    ) -> KC: ...
-    @overload
-    def get_component(self, spec: KC) -> KC: ...
-
-    def get_component(
-        self,
-        spec: KCellSpec,
-        *,
-        output_type: type[KC] | None = None,
-        **cell_kwargs: Any,
-    ) -> ProtoTKCell[Any]:
-        """Get a component by specification."""
-        if output_type:
-            return output_type(base=self.get_component(spec, **cell_kwargs).base)
-        if callable(spec):
-            return spec(**cell_kwargs)
-        if isinstance(spec, dict):
-            settings = spec.get("settings", {}).copy()
-            settings.update(cell_kwargs)
-            return self.factories[spec["component"]](**settings)
-        if isinstance(spec, str):
-            if spec in self.factories:
-                return self.factories[spec](**cell_kwargs)
-            return self[spec]
-        if cell_kwargs:
-            raise ValueError(
-                "Cell kwargs are not allowed for retrieving static cells by integer "
-                "or the cell itself."
-            )
-        return self.kcells[spec] if isinstance(spec, int) else spec
-
-    def get_anycell(
-        self,
-        spec: AnyCellSpec,
-        **cell_kwargs: Any,
-    ) -> KCell | VKCell:
-        if callable(spec):
-            c = spec(**cell_kwargs)
-            if isinstance(c, ProtoTKCell):
-                return KCell(base=c.base)
-            return c
-        if isinstance(spec, dict):
-            settings = spec.get("settings", {}).copy()
-            settings.update(cell_kwargs)
-            kcell_factory = self.factories.get(spec["component"])
-            vkcell_factory = self.virtual_factories.get(spec["component"])
-            if kcell_factory is not None and vkcell_factory is not None:
-                logger.warning(
-                    f"Found a factory for component {spec['component']!r} "
-                    "as a standard cell as well as a virtual one (all-angle). "
-                    "Proceeding with standard factory."
-                )
-            if kcell_factory is not None:
-                return KCell(base=kcell_factory(**settings).base)
-            if vkcell_factory is not None:
-                return vkcell_factory(**settings)
-            raise ValueError(
-                f"Could not find standard or virtual factory for component "
-                f"{spec['component']}.\nAvailable standard factories are "
-                f"{[fact.name for fact in self.factories._all]!r}.\n"
-                "Available virtual factories are "
-                f"{[fact.name for fact in self.virtual_factories._all]!r}.\n"
-            )
-        if isinstance(spec, str):
-            kcell_factory = self.factories.get(spec)
-            vkcell_factory = self.virtual_factories.get(spec)
-            if kcell_factory is not None and vkcell_factory is not None:
-                logger.warning(
-                    f"Found a factory for component {spec!r} "
-                    "as a standard cell as well as a virtual one (all-angle). "
-                    "Proceeding with standard factory."
-                )
-            if kcell_factory is not None:
-                return KCell(base=kcell_factory(**cell_kwargs).base)
-            if vkcell_factory is not None:
-                return vkcell_factory(**cell_kwargs)
-            raise ValueError(
-                f"Could not find standard or virtual factory for component "
-                f"{spec}.\nAvailable standard factories are "
-                f"{[fact.name for fact in self.factories._all]!r}.\n"
-                f"Available virtual factories are "
-                f"{[fact.name for fact in self.virtual_factories._all]!r}.\n"
-            )
-        if cell_kwargs:
-            raise ValueError(
-                "Cell kwargs are not allowed for retrieving static cells by integer "
-                "or the cell itself."
-            )
-        if isinstance(spec, int):
-            return self.kcells[spec]
-        if isinstance(spec, ProtoTKCell):
-            return KCell(base=spec.base)
-        return spec
 
     def delete(self) -> None:
         del kcls[self.name]

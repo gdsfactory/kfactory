@@ -101,7 +101,7 @@ def virtual_bend_euler_factory(
             angle: Angle of the bend.
             resolution: Angle resolution for the backbone.
         """
-        c = VKCell()
+        c = kcl.vkcell()
         if angle < 0:
             logger.critical(
                 f"Negative lengths are not allowed {angle} as ports"
