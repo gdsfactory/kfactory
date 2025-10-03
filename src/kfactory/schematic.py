@@ -1714,64 +1714,118 @@ def _create_kinst(
     | None,
 ) -> Instance | VInstance:
     kinst: Instance | DInstance
-
-    cell_ = (
-        factories[schematic_inst.component](**schematic_inst.settings)
-        if factories
-        else schematic_inst.kcl.get_anycell(
-            schematic_inst.component, **schematic_inst.settings
+    if factories:
+        is_factory = schematic_inst.component in factories
+        cell_: ProtoTKCell[Any] | VKCell = factories[schematic_inst.component](
+            **schematic_inst.settings
         )
-    )
+    else:
+        is_factory = schematic_inst.component in schematic_inst.kcl.factories
+        is_virtual_factory = (
+            schematic_inst.component in schematic_inst.kcl.virtual_factories
+        )
+
+        match is_factory, is_virtual_factory:
+            case True, False:
+                cell_ = schematic_inst.kcl.factories[schematic_inst.component](
+                    **schematic_inst.settings
+                )
+            case False, True:
+                cell_ = schematic_inst.kcl.virtual_factories[schematic_inst.component](
+                    **schematic_inst.settings
+                )
+            case False, False:
+                from rapidfuzz.process import extract
+
+                closest_factories = [
+                    res[0]
+                    for res in extract(
+                        schematic_inst.component,
+                        schematic_inst.kcl.factories.keys(),
+                        limit=10,
+                    )
+                ]
+                closest_vritual_factories = [
+                    res[0]
+                    for res in extract(
+                        schematic_inst.component,
+                        schematic_inst.kcl.virtual_factories.keys(),
+                        limit=10,
+                    )
+                ]
+                msg = (
+                    f"Unknown component factory {schematic_inst.component!r} "
+                    f"for KCLayout {schematic_inst.kcl.name}.\n"
+                    f"Closest factories: {closest_factories}\n"
+                    f"Closest virtual factories: {closest_vritual_factories}"
+                )
+                logger.error(msg)
+                raise KeyError(msg)
+            case True, True:
+                logger.warning(
+                    "Found {component} both in factories and virtual "
+                    "factories of KCLayout {kcl}. Returning cell from real factory.",
+                    component=schematic_inst.component,
+                    kcl=schematic_inst.kcl.name,
+                )
+                cell_ = schematic_inst.kcl.factories[schematic_inst.component](
+                    **schematic_inst.settings
+                )
     schematic = schematic_inst._schematic
     unit = schematic.unit
-    if isinstance(cell_, ProtoTKCell):
+    if isinstance(cell_, ProtoTKCell) and not schematic_inst.virtual:
         cell = KCell(base=cell_.base)
-        if not schematic_inst.virtual:
-            if schematic_inst.array:
-                if isinstance(schematic_inst.array, RegularArray):
-                    a = _vec(
-                        x=schematic_inst.array.column_pitch,
-                        y=0,
-                        c=c,
-                        unit=unit,
-                    )
-                    b = _vec(
-                        x=0,
-                        y=schematic_inst.array.row_pitch,
-                        c=c,
-                        unit=unit,
-                    )
-                    na = schematic_inst.array.columns
-                    nb = schematic_inst.array.rows
-                else:
-                    a = _vec(*schematic_inst.array.pitch_a, c=c, unit=unit)
-                    b = _vec(*schematic_inst.array.pitch_b, c=c, unit=unit)
-                    na = schematic_inst.array.na
-                    nb = schematic_inst.array.nb
-                if schematic_inst.settings:
-                    kinst = c.create_inst(
-                        cell,
-                        a=a,
-                        b=b,
-                        na=na,
-                        nb=nb,
-                    )
-                else:
-                    kinst = c.create_inst(
-                        cell,
-                        a=a,
-                        b=b,
-                        na=na,
-                        nb=nb,
-                    )
+        if schematic_inst.array:
+            if isinstance(schematic_inst.array, RegularArray):
+                a = _vec(
+                    x=schematic_inst.array.column_pitch,
+                    y=0,
+                    c=c,
+                    unit=unit,
+                )
+                b = _vec(
+                    x=0,
+                    y=schematic_inst.array.row_pitch,
+                    c=c,
+                    unit=unit,
+                )
+                na = schematic_inst.array.columns
+                nb = schematic_inst.array.rows
             else:
-                kinst = c.create_inst(cell)
-            kinst.name = schematic_inst.name
-            if schematic_inst.mirror:
-                kinst.transform(kdb.DCplxTrans.M0)
-            return Instance(kcl=c.kcl, instance=kinst._instance)
+                a = _vec(*schematic_inst.array.pitch_a, c=c, unit=unit)
+                b = _vec(*schematic_inst.array.pitch_b, c=c, unit=unit)
+                na = schematic_inst.array.na
+                nb = schematic_inst.array.nb
+            if schematic_inst.settings:
+                kinst = c.create_inst(
+                    cell,
+                    a=a,
+                    b=b,
+                    na=na,
+                    nb=nb,
+                )
+            else:
+                kinst = c.create_inst(
+                    cell,
+                    a=a,
+                    b=b,
+                    na=na,
+                    nb=nb,
+                )
+        else:
+            kinst = c.create_inst(cell)
+        kinst.name = schematic_inst.name
+        if schematic_inst.mirror:
+            kinst.transform(kdb.DCplxTrans.M0)
+        return Instance(kcl=c.kcl, instance=kinst._instance)
 
     # If the instance is a
+    if isinstance(cell_, ProtoTKCell) and not schematic_inst.virtual:
+        logger.warning(
+            "Schematic Instance {} is not declared as virtual but is only available"
+            " as a virtual cell. Please set the virtual flag in order"
+            " to make sure LVS and other checks will not flag false-positive errors."
+        )
     vinst = c.create_vinst(cell_)
     vinst.name = schematic_inst.name
     if schematic_inst.array:

@@ -9,10 +9,10 @@ def test_layer_infos_valid() -> None:
     layer_info = kf.LayerInfos(
         layer1=kf.kdb.LayerInfo(1, 0), layer2=kf.kdb.LayerInfo(2, 0)
     )
-    assert layer_info.layer1.layer == 1
-    assert layer_info.layer1.datatype == 0
-    assert layer_info.layer2.layer == 2
-    assert layer_info.layer2.datatype == 0
+    assert layer_info.layer1.layer == 1  # type: ignore[attr-defined]
+    assert layer_info.layer1.datatype == 0  # type: ignore[attr-defined]
+    assert layer_info.layer2.layer == 2  # type: ignore[attr-defined]
+    assert layer_info.layer2.datatype == 0  # type: ignore[attr-defined]
 
 
 def test_layer_infos_invalid_type() -> None:
