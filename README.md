@@ -1,11 +1,11 @@
-# KFactory 2.0.0rc3
+# KFactory 2.0.0rc4
 
 [![codecov](https://codecov.io/gh/gdsfactory/kfactory/graph/badge.svg?token=dArcfnQE4w)](https://codecov.io/gh/gdsfactory/kfactory)
 
 Kfactory is the backend for [gdsfactory](https://github.com/gdsfactory/gdsfactory). It is built upon [KLayout](https://klayout.de).
 It offers basic operations like gdsfactory, so it can be used on its own as as layout tool as well.
 
-It is recommended to pin the version of KFactory in `requirements.txt` or `pyproject.toml` with `kfactory==2.0.0rc3` for example.
+It is recommended to pin the version of KFactory in `requirements.txt` or `pyproject.toml` with `kfactory==2.0.0rc4` for example.
 
 Features similar to gdsfactory:
 
