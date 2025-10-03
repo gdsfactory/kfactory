@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import functools
 import inspect
-from collections import UserDict, defaultdict
+from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence  # noqa: TC003
 from functools import cached_property
 from pathlib import Path
 from pprint import pformat
 from threading import RLock
-from typing import TYPE_CHECKING, Any, Concatenate, Literal, cast, overload
+from typing import TYPE_CHECKING, Any, Concatenate, Generic, Literal, cast, overload
 
 import ruamel.yaml
 from cachetools import Cache
@@ -18,10 +18,9 @@ from pydantic import (
     Field,
     model_validator,
 )
-from rapidfuzz.process import extract
 
 from . import __version__, kdb
-from .conf import CheckInstances, config, logger
+from .conf import CheckInstances, config
 from .cross_section import (
     CrossSection,
     CrossSectionModel,
@@ -62,21 +61,18 @@ from .typings import (
     KC,
     KCIN,
     VK,
+    F,
     KC_contra,
     KCellParams,
-    KCellSpec,
     MetaData,
     P,
-    T,
     TUnit,
 )
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
-    from .instance import DInstance, Instance, VInstance
     from .ports import DPorts, Ports
     from .schematic import TSchematic
-    from .typings import KCellSpec
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -95,31 +91,60 @@ def get_default_kcl() -> KCLayout:
     return kcl
 
 
-class Factories(UserDict[str, T]):
-    tags: dict[str, list[T]]
+class Factories(Generic[F]):
+    _all: list[F]
+    _by_name: dict[str, int]
+    _by_tag: defaultdict[str, list[int]]
+    _by_function: dict[Callable[..., Any], int]
 
-    def __init__(self, data: dict[str, T]) -> None:
-        super().__init__(data)
-        self.tags = defaultdict(list)
+    def __init__(self) -> None:
+        self._all = []
+        self._by_name = {}
+        self._by_tag = defaultdict(list)
+        self._by_function = {}
 
-    def __getattr__(self, name: str) -> Any:
-        if name != "data":
-            try:
-                return self.data[name]
-            except KeyError as e:
-                try:
-                    return self.__getattribute__(name)
-                except AttributeError:
-                    raise KeyError from e
-        return self.__getattribute__(name)
+    def add(self, factory: F) -> None:
+        idx = len(self._all)
+        self._all.append(factory)
+        for tag in factory.tags:
+            self._by_tag[tag].append(idx)
+        self._by_name[factory.name] = idx
+        self._by_function[factory.__call__] = idx
 
-    def for_tags(self, tags: list[str]) -> list[T]:
-        if len(tags) > 0:
-            tag_set = set(self.tags[tags[0]])
-            for tag in tags[1:]:
-                tag_set &= set(self.tags[tag])
-            return list(tag_set)
-        raise NotImplementedError
+    def get_by_name(self, name: str) -> F:
+        return self._all[self._by_name[name]]
+
+    def get_by_tag(self, tag: str) -> list[F]:
+        return [self._all[idx] for idx in self._by_tag[tag]]
+
+    def __contains__(self, key: str | F) -> bool:
+        if isinstance(key, str):
+            return key in self._by_name
+        return key in self._all
+
+    def __getitem__(self, key: str) -> F:
+        try:
+            return self._all[self._by_name[key]]
+        except KeyError as e:
+            from rapidfuzz import process
+
+            results = pformat(
+                [
+                    result[0]
+                    for result in process.extract(
+                        key, list(self._by_name.keys()), limit=10
+                    )
+                ]
+            )
+
+            raise KeyError(
+                f"Unknown Factory {key!r}, closest 10 name matches: {results}"
+            ) from e
+
+    def get(self, key: str) -> F | None:
+        if key in self._by_name:
+            return self.get_by_name(key)
+        return None
 
 
 class KCLayout(
@@ -277,8 +302,8 @@ class KCLayout(
             enclosure=KCellEnclosure([]),
             infos=infos_,
             layers=LayerEnum,
-            factories=Factories({}),
-            virtual_factories=Factories({}),
+            factories=Factories[WrappedKCellFunc[Any, ProtoTKCell[Any]]](),
+            virtual_factories=Factories[WrappedVKCellFunc[Any, VKCell]](),
             sparameters_path=sparameters_path,
             interconnect_cml_path=interconnect_cml_path,
             constants=constants_,
@@ -1034,10 +1059,7 @@ class KCLayout(
                 with self.thread_lock:
                     if wrapper_autocell.name is None:
                         raise ValueError(f"Function {f} has no name.")
-                    if tags:
-                        for tag in tags:
-                            self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
-                    self.factories[basename or wrapper_autocell.name] = wrapper_autocell  # type: ignore[assignment]
+                    self.factories.add(wrapper_autocell)  # type: ignore[arg-type]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
@@ -1198,12 +1220,7 @@ class KCLayout(
             if register_factory:
                 if wrapper_autocell.name is None:
                     raise ValueError(f"Function {f} has no name.")
-                if tags:
-                    for tag in tags:
-                        self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
-                self.virtual_factories[basename or wrapper_autocell.name] = (
-                    wrapper_autocell  # type: ignore[assignment]
-                )
+                self.virtual_factories.add(wrapper_autocell)  # type: ignore[arg-type]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> VK:
@@ -1844,148 +1861,3 @@ cell = kcl.cell
 """Default kcl @cell decorator."""
 vcell = kcl.vcell
 """Default kcl @vcell decorator."""
-
-
-@overload
-def add_inst(
-    c: KCell,
-    spec: KCellSpec,
-    cell_kwargs: dict[str, Any] | None = None,
-    kcl: KCLayout | None = None,
-) -> Instance: ...
-
-
-@overload
-def add_inst(
-    c: DKCell,
-    spec: KCellSpec,
-    cell_kwargs: dict[str, Any] | None = None,
-    kcl: KCLayout | None = None,
-) -> DInstance: ...
-
-
-def add_inst(
-    c: KCell | DKCell,
-    spec: KCellSpec,
-    cell_kwargs: dict[str, Any] | None = None,
-    kcl: KCLayout | None = None,
-) -> Instance | DInstance:
-    kcl_ = kcl or c.kcl
-
-    if cell_kwargs is None:
-        cell_kwargs = {}
-
-    if callable(spec):
-        cell = spec(**cell_kwargs)
-
-    if isinstance(spec, dict):
-        settings = spec.get("settings", {}).copy()
-        kcl_ = kcls[spec.get("kcl", kcl_.name)]
-        cell = kcl_.factories[spec["component"]](**settings)
-
-    if isinstance(spec, str):
-        if spec in kcl_.factories:
-            cell = kcl_.factories[spec](**cell_kwargs)
-        else:
-            cell = kcl_[spec]
-
-    if cell_kwargs:
-        raise ValueError(
-            "Cell kwargs are not allowed for retrieving static cells by integer "
-            "or the cell itself."
-        )
-    cell = (
-        kcl_.kcells[spec] if isinstance(spec, int) else cast("ProtoTKCell[Any]", spec)
-    )
-
-    if isinstance(cell, ProtoTKCell):
-        return c << cell
-
-    logger.warning(
-        "Cell {} is not a cell but likely a VKCell. Type of cell: {}."
-        " Returning VInstance",
-        cell,
-        type(cell),
-    )
-
-    return c.create_vinst(cell)
-
-
-@overload
-def add_anyinst(
-    c: KCell,
-    spec: KCellSpec,
-    cell_kwargs: dict[str, Any] | None = None,
-    kcl: KCLayout | None = None,
-    virtual: Literal[False] = False,
-) -> Instance: ...
-
-
-@overload
-def add_anyinst(
-    c: DKCell,
-    spec: KCellSpec,
-    cell_kwargs: dict[str, Any] | None = None,
-    kcl: KCLayout | None = None,
-    virtual: Literal[False] = False,
-) -> DInstance: ...
-
-
-@overload
-def add_anyinst(
-    c: KCell,
-    spec: KCellSpec,
-    cell_kwargs: dict[str, Any] | None = None,
-    kcl: KCLayout | None = None,
-    virtual: Literal[True] = True,
-) -> VInstance: ...
-
-
-def add_anyinst(
-    c: KCell | DKCell,
-    spec: KCellSpec,
-    cell_kwargs: dict[str, Any] | None = None,
-    kcl: KCLayout | None = None,
-    virtual: bool = False,
-) -> Instance | DInstance | VInstance:
-    if not virtual:
-        return add_inst(c=c, spec=spec, cell_kwargs=cell_kwargs, kcl=kcl)
-    kcl_ = kcl or c.kcl
-
-    if cell_kwargs is None:
-        cell_kwargs = {}
-
-    if callable(spec):
-        return c << spec(**cell_kwargs)
-
-    if isinstance(spec, dict):
-        settings = spec.get("settings", {}).copy()
-        kcl_ = kcls[spec.get("kcl", kcl_.name)]
-        comp = spec["component"]
-        if comp in kcl_.factories:
-            return c.create_vinst(kcl_.factories[comp](**settings))
-        try:
-            return c.create_vinst(kcl_.factories[comp](**settings))
-        except KeyError as e:
-            results = [
-                res[0]
-                for res in extract(
-                    comp, list(kcl_.factories) + list(kcl_.virtual_factories), limit=10
-                )
-            ]
-            raise KeyError(
-                f"Could not find component {comp!r} in real or virtual factories. "
-                f"Closest 10 matches: {results}"
-            ) from e
-
-    if isinstance(spec, str):
-        if spec in kcl_.factories:
-            return c << kcl_.factories[spec](**cell_kwargs)
-        return c << kcl_[spec]
-
-    if cell_kwargs:
-        raise ValueError(
-            "Cell kwargs are not allowed for retrieving static cells by integer "
-            "or the cell itself."
-        )
-    return c << (kcl_.kcells[spec] if isinstance(spec, int) else spec)
