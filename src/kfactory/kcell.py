@@ -106,6 +106,7 @@ if TYPE_CHECKING:
     from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
     from .layout import KCLayout
+    from .schematic import TSchematic
 
 
 __all__ = [
@@ -363,11 +364,19 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # 
     def has_factory_name(self) -> bool:
         return bool(self._base.basename or self._base.function_name)
 
-    def create_vinst(self, cell: AnyKCell) -> VInstance:
+    def create_vinst(
+        self,
+        cell: AnyKCell,
+        *,
+        a: kdb.DVector = kdb.DVector(0, 0),  # noqa: B008
+        b: kdb.DVector = kdb.DVector(0, 0),  # noqa: B008
+        na: int = 1,
+        nb: int = 1,
+    ) -> VInstance:
         """Insert the KCell as a VInstance into a VKCell or KCell."""
         if self.locked:
             raise LockedError(self)
-        vi = VInstance(cell)
+        vi = VInstance(cell, a=a.dup(), b=b.dup(), na=na, nb=nb)
         self._base.vinsts.append(vi)
         return vi
 
@@ -414,6 +423,8 @@ class TKCell(BaseKCell):
     lvs_equivalent_ports: list[list[str]] | None = None
     virtual: bool = False
     vtrans: kdb.DCplxTrans | None = None
+    _schematic: TSchematic[Any] | None = PrivateAttr(default=None)
+    _library_cell: KCell | None = PrivateAttr(default=None)
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -421,6 +432,14 @@ class TKCell(BaseKCell):
             return super().__getattr__(name)  # type: ignore[misc]
         except Exception:
             return getattr(self.kdb_cell, name)
+
+    @property
+    def schematic(self) -> TSchematic[Any] | None:
+        return self._schematic
+
+    @schematic.setter
+    def schematic(self, value: TSchematic[Any] | None) -> None:
+        self._schematic = value
 
     @property
     def locked(self) -> bool:
@@ -646,6 +665,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             self.get_meta_data()
         self.kcl.register_cell(self)
 
+    @property
+    def schematic(self) -> TSchematic[Any] | None:
+        return self._base.schematic
+
+    @schematic.setter
+    def schematic(self, value: TSchematic[Any] | None) -> None:
+        self._base.schematic = value
+
     @abstractmethod
     def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]:
         """Returns port from instance."""
@@ -661,6 +688,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
 
     @property
     def virtual(self) -> bool:
+        if self.kdb_cell.is_library_cell():
+            return self.library_cell.virtual
         return self._base.virtual
 
     @property
@@ -948,6 +977,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             kcell = self.kcl[lib_ci]
             kcell.basename = cell.basename
             kcell.function_name = cell.function_name
+            kcell.base._library_cell = KCell(base=cell.base)
         if libcell_as_static:
             cell.set_meta_data()
             ci = self.kcl.layout.convert_cell_to_static(lib_ci)
@@ -955,6 +985,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                 kcell = self.kcl[ci]
                 kcell.copy_meta_info(cell.kdb_cell)
                 kcell.name = cell.kcl.name + static_name_separator + cell.name
+                kcell.base.virtual = cell.virtual
                 if cell.kcl.dbu != self.kcl.dbu:
                     for port, lib_port in zip(kcell.ports, cell.ports, strict=False):
                         port.cross_section = CrossSection(
@@ -1080,6 +1111,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
 
     def library(self) -> kdb.Library:
         return self._base.kdb_cell.library()
+
+    @property
+    @abstractmethod
+    def library_cell(self) -> ProtoTKCell[TUnit]: ...
 
     @abstractmethod
     def __lshift__(self, cell: AnyTKCell) -> ProtoTInstance[TUnit]: ...
@@ -1964,18 +1999,23 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                 c_ = self.kcl[ci]
                 eqps: list[list[str]] | None = c_.lvs_equivalent_ports or None
                 if c_.has_factory_name():
-                    if c_.virtual:
+                    if c_.is_library_cell():
+                        if c_.virtual:
+                            eqps = (
+                                _get_orig_cell(c_)
+                                .kcl.virtual_factories[c_.factory_name]
+                                .lvs_equivalent_ports
+                            )
+                        else:
+                            eqps = (
+                                _get_orig_cell(c_)
+                                .kcl.factories[c_.factory_name]
+                                .lvs_equivalent_ports
+                            )
+                    elif c_.virtual:
                         eqps = c_.kcl.virtual_factories[
                             c_.factory_name
                         ].lvs_equivalent_ports
-                    elif c_.is_library_cell():
-                        from .layout import kcls
-
-                        eqps = (
-                            kcls[c_.library().name()]
-                            .factories[c_.factory_name]
-                            .lvs_equivalent_ports
-                        )
                     else:
                         eqps = c_.kcl.factories[c_.factory_name].lvs_equivalent_ports
                 if eqps is not None:
@@ -2873,6 +2913,17 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
             f"{type(cross_section)=} and {cross_section_kwargs=}"
         )
 
+    @property
+    def library_cell(self) -> DKCell:
+        if self.kdb_cell.is_library_cell():
+            lib_cell = self.base._library_cell
+            assert lib_cell is not None
+            return DKCell(base=lib_cell.base)
+        raise ValueError(
+            "This is not a proxy cell referencing a library cell. Please check"
+            " with `.is_library_cell()` first if unsure."
+        )
+
 
 class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
     """Cell with integer units."""
@@ -2958,6 +3009,17 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
     def insts(self) -> Instances:
         """Instances associated with the cell."""
         return Instances(cell=self._base)
+
+    @property
+    def library_cell(self) -> KCell:
+        if self.kdb_cell.is_library_cell():
+            lib_cell = self.base._library_cell
+            assert lib_cell is not None
+            return lib_cell
+        raise ValueError(
+            "This is not a proxy cell referencing a library cell. Please check"
+            " with `.is_library_cell()` first if unsure."
+        )
 
     def __lshift__(self, cell: AnyTKCell) -> Instance:
         """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
@@ -3552,13 +3614,6 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
 
     def __lshift__(self, cell: AnyKCell) -> VInstance:
         return self.create_inst(cell=cell)
-
-    def create_vinst(self, cell: AnyKCell) -> VInstance:
-        if self.locked:
-            raise LockedError(self)
-        vi = VInstance(cell)
-        self.vinsts.append(vi)
-        return vi
 
     @overload
     def shapes(self, layer: None = ...) -> dict[int, VShapes]: ...
@@ -4229,3 +4284,17 @@ def _get_netlist(
                 nl.create_net(*net_refs)
     nl.sort()
     return nl
+
+
+@overload
+def _get_orig_cell(c: KCell) -> KCell: ...
+
+
+@overload
+def _get_orig_cell(c: DKCell) -> DKCell: ...
+
+
+def _get_orig_cell(c: KCell | DKCell) -> KCell | DKCell:
+    if c.is_library_cell():
+        return _get_orig_cell(c.library_cell)
+    return c

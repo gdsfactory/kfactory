@@ -20,49 +20,66 @@ skip_files = [
 ]
 
 
-def _get_path_stem(p: Path) -> str:
-    return p.with_suffix("").stem
+def _get_path_stem(p: Path) -> str | None:
+    # If it's a tuple, grab the first item
+    if isinstance(p, tuple) and p:
+        p = p[0]
+
+    # Handle str/Path inputs
+    if isinstance(p, str | Path):
+        return Path(p).with_suffix("").stem
+
+    # Let pytest fall back to default ID
+    return None
 
 
-def test_schema() -> None:
+def test_schematic() -> None:
     yaml = YAML(typ=["rt", "safe", "string"])
     schema_yaml = """
 instances:
-  bl:
-    component: pad
-  tl:
-    component: pad
-  br:
-    component: pad
-  tr:
-    component: pad
+  mmi_long:
+    component: mmi1x2
+    settings:
+      width_mmi: 4.5
+      length_mmi: 10
+  mmi_short:
+    component: mmi1x2
+    settings:
+      width_mmi: 4.5
+      length_mmi: 5
 
 placements:
-  tl:
-    x: -200
-    y: 500
-
-  br:
-    x: 400
-    y: 400
-
-  tr:
-    x: 400
-    y: 600
+  mmi_short:
+    rotation: 180
+  mmi_long:
+    rotation: 90
+    x: mmi_short,o1
+    y: mmi_short,o1
+    dx: 20
+    dy: 20
 
 routes:
-  electrical:
+  optical:
+    routing_strategy: route_bundle_all_angle
     settings:
-      separation: 20
-      cross_section: metal_routing
-      allow_width_mismatch: True
+      end_connector: wonky  # using our new, wonky connector for the final segment
+      end_cross_section:  # and for that final segment, also tip the connector to use this cross-section
+        cross_section: strip
+        settings:
+          width: 2.0
     links:
-      tl,e3: tr,e1
-      bl,e3: br,e1
-"""
-    schema = kf.DSchema.model_validate(yaml.load(schema_yaml))
-    for inst in schema.instances.values():
-        _ = inst.parent_schema.name
+      mmi_short,o1: mmi_long,o1
+
+ports:
+  o1: mmi_short,o2
+  o2: mmi_short,o3
+"""  # noqa: E501
+    schematic = kf.DSchematic.model_validate(yaml.load(schema_yaml))
+    for inst in schematic.instances.values():
+        _ = inst.parent_schematic.name
+
+    schema_str = schematic.code_str()
+    assert schema_str is not None
 
 
 def test_schema_create() -> None:
@@ -88,11 +105,15 @@ def test_schema_create() -> None:
 
         return c
 
-    schema = kf.Schema(kcl=pdk)
+    schematic = kf.Schematic(kcl=pdk)
 
-    s1 = schema.create_inst(name="s1", component="straight", settings={"length": 5000})
-    s2 = schema.create_inst(name="s2", component="straight", settings={"length": 5000})
-    s3 = schema.create_inst(
+    s1 = schematic.create_inst(
+        name="s1", component="straight", settings={"length": 5000}
+    )
+    s2 = schematic.create_inst(
+        name="s2", component="straight", settings={"length": 5000}
+    )
+    s3 = schematic.create_inst(
         name="s3", component="straight", settings={"length": 10_000}
     )
 
@@ -101,7 +122,7 @@ def test_schema_create() -> None:
 
     s1.place(x=1000, y=10_000)
 
-    schema.create_cell(kf.KCell)
+    schematic.create_cell(kf.KCell)
 
 
 def test_schema_create_cell() -> None:
@@ -128,23 +149,25 @@ def test_schema_create_cell() -> None:
         return c
 
     @pdk.schematic_cell(output_type=kf.DKCell)
-    def long_straight(n: int) -> kf.schema.TSchema[int]:
-        schema = kf.Schema(kcl=pdk)
+    def long_straight(n: int) -> kf.schematic.TSchematic[int]:
+        schematic = kf.Schematic(kcl=pdk)
 
-        s1 = schema.create_inst(
+        s1 = schematic.create_inst(
             name="s1", component="straight", settings={"length": 5000}
         )
-        s2 = schema.create_inst(
+        s2 = schematic.create_inst(
             name="s2", component="straight", settings={"length": 5000}
         )
-        s3 = schema.create_inst(name="s3", component="straight", settings={"length": n})
+        s3 = schematic.create_inst(
+            name="s3", component="straight", settings={"length": n}
+        )
 
         s3.connect("o1", s1["o2"])
         s2.connect("o1", s3["o2"])
 
         s1.place(x=1000, y=10_000)
 
-        return schema
+        return schematic
 
 
 def test_schema_mirror_connection() -> None:
@@ -220,31 +243,32 @@ def test_schema_mirror_connection() -> None:
         return c
 
     @pdk.schematic_cell()
-    def straight_sbend(length: int, offset: int) -> kf.schema.TSchema[int]:
-        schema = kf.Schema(kcl=pdk, name="Mirror Test")
+    def straight_sbend(length: int, offset: int) -> kf.schematic.TSchematic[int]:
+        schematic = kf.Schematic(kcl=pdk, name="Mirror Test")
 
-        s1 = schema.create_inst(
+        s1 = schematic.create_inst(
             name="s1", component="straight", settings={"length": length}
         )
-        s2 = schema.create_inst(
+        s2 = schematic.create_inst(
             name="s2", component="bend_s_euler", settings={"offset": offset}
         )
-        s3 = schema.create_inst(
+        s3 = schematic.create_inst(
             name="s3", component="straight", settings={"length": length}
         )
-        s4 = schema.create_inst(
+        s4 = schematic.create_inst(
             name="s4", component="bend_s_euler", settings={"offset": offset}
         )
 
-        s2.connect("o1", s1["o2"], mirror=True)
+        s2.connect("o1", s1["o2"])
+        s2.mirror = True
         s4.connect("o1", s3["o2"])
 
         s1.place(x=0, y=0)
         s3.place(x=0, y=10_000)
 
-        return schema
+        return schematic
 
-    straight_sbend(length=10_000, offset=20_000)
+    straight_sbend(length=10_000, offset=20_000).show()
 
 
 def test_schema_kcl_mix_netlist() -> None:
@@ -272,22 +296,22 @@ def test_schema_kcl_mix_netlist() -> None:
         return c
 
     @pdk2.schematic_cell()
-    def long_straight(n: int) -> kf.schema.TSchema[int]:
-        schema = kf.Schema(kcl=pdk2)
+    def long_straight(n: int) -> kf.schematic.TSchematic[int]:
+        schematic = kf.Schematic(kcl=pdk2)
 
-        s1 = schema.create_inst(
+        s1 = schematic.create_inst(
             name="s1",
             component="straight",
             settings={"length": 5000},
             kcl=pdk,
         )
-        s2 = schema.create_inst(
+        s2 = schematic.create_inst(
             name="s2",
             component="straight",
             settings={"length": 5000},
             kcl=pdk,
         )
-        s3 = schema.create_inst(
+        s3 = schematic.create_inst(
             name="s3", component="straight", settings={"length": n}, kcl=pdk
         )
 
@@ -296,7 +320,7 @@ def test_schema_kcl_mix_netlist() -> None:
 
         s1.place(x=1000, y=10_000)
 
-        return schema
+        return schematic
 
     long_straight(n=2000).netlist()
 
@@ -344,24 +368,24 @@ def test_schema_route() -> None:
         )
 
     @pdk.schematic_cell(output_type=kf.KCell)
-    def route_example() -> kf.schema.TSchema[int]:
-        schema = kf.Schema(kcl=pdk)
+    def route_example() -> kf.schematic.TSchematic[int]:
+        schematic = kf.Schematic(kcl=pdk)
 
-        s1 = schema.create_inst(
+        s1 = schematic.create_inst(
             name="s1", component="straight", settings={"length": 5000, "width": 500}
         )
-        s2 = schema.create_inst(
+        s2 = schematic.create_inst(
             name="s2", component="straight", settings={"length": 5000, "width": 500}
         )
 
         s1.place(x=1000, y=10_000)
         s2.place(x=1000, y=210_000)
 
-        schema.add_route(
+        schematic.add_route(
             "s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000
         )
 
-        return schema
+        return schematic
 
 
 def test_netlist() -> None:
@@ -468,19 +492,19 @@ def test_netlist() -> None:
             ends=end_straight,
         )
 
-    schema = kf.Schema(kcl=pdk)
+    schematic = kf.Schematic(kcl=pdk)
 
-    s1 = schema.create_inst(
+    s1 = schematic.create_inst(
         name="s1", component="straight", settings={"length": 5000, "width": 500}
     )
-    s2 = schema.create_inst(
+    s2 = schematic.create_inst(
         name="s2", component="straight", settings={"length": 5000, "width": 500}
     )
 
-    padm1_1 = schema.create_inst(name="padm1_1", component="pad_m1")
-    padm1_2 = schema.create_inst(name="padm1_2", component="pad_m1")
-    padm2_1 = schema.create_inst(name="padm2_1", component="pad_m2")
-    padm2_2 = schema.create_inst(name="padm2_2", component="pad_m2")
+    padm1_1 = schematic.create_inst(name="padm1_1", component="pad_m1")
+    padm1_2 = schematic.create_inst(name="padm1_2", component="pad_m1")
+    padm2_1 = schematic.create_inst(name="padm2_1", component="pad_m2")
+    padm2_2 = schematic.create_inst(name="padm2_2", component="pad_m2")
 
     s1.place(x=1000, y=10_000)
     s2.place(x=1000, y=-210_000)
@@ -490,26 +514,28 @@ def test_netlist() -> None:
     padm2_1.place(x=0, y=100_000, orientation=270)
     padm2_2.place(x=0, y=-100_000, orientation=90)
 
-    schema.add_route("s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000)
-    schema.add_route(
+    schematic.add_route(
+        "s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000
+    )
+    schematic.add_route(
         "pm1_1-pm1_2",
         [padm1_1["e1"]],
         [padm1_2["e1"]],
         "route_bundle_elec",
         separation=20_000,
     )
-    schema.add_route(
+    schematic.add_route(
         "pm2_1-pm2_2",
         [padm2_1["e1"]],
         [padm2_2["e1"]],
         "route_bundle_elec",
         separation=20_000,
     )
-    schema.add_port("o1", port=s1["o1"])
-    schema.add_port("o2", port=s2["o1"])
+    schematic.add_port("o1", port=s1["o1"])
+    schematic.add_port("o2", port=s2["o1"])
 
-    c = schema.create_cell(kf.KCell)
-    nl = schema.netlist()
+    c = schematic.create_cell(kf.KCell)
+    nl = schematic.netlist()
     nl2 = c.netlist(
         ignore_unnamed=True,
         connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)],
@@ -615,12 +641,13 @@ def test_netlist_equivalent() -> None:
             ends=end_straight,
         )
 
-    schema = kf.Schema(kcl=pdk)
+    schematic = kf.Schematic(kcl=pdk)
+    schematic.name = "test_schematic"
 
-    padm1_1 = schema.create_inst(name="padm1_1", component="pad_m1")
-    padm1_2 = schema.create_inst(name="padm1_2", component="pad_m1")
-    padm1_3 = schema.create_inst(name="padm1_3", component="pad_m1")
-    padm1_4 = schema.create_inst(name="padm1_4", component="pad_m1")
+    padm1_1 = schematic.create_inst(name="padm1_1", component="pad_m1")
+    padm1_2 = schematic.create_inst(name="padm1_2", component="pad_m1")
+    padm1_3 = schematic.create_inst(name="padm1_3", component="pad_m1")
+    padm1_4 = schematic.create_inst(name="padm1_4", component="pad_m1")
 
     padm1_1.place(x=-400_000, y=0)
     padm1_2.place(x=400_000, y=0)
@@ -630,28 +657,28 @@ def test_netlist_equivalent() -> None:
         y=-400_000,
     )
 
-    schema.add_route(
+    schematic.add_route(
         "pm1_1-pm1_2",
         [padm1_1["e3"]],
         [padm1_2["e1"]],
         "route_bundle_elec",
         separation=20_000,
     )
-    schema.add_route(
+    schematic.add_route(
         "pm1_2-pm1_4",
         [padm1_2["e4"]],
         [padm1_4["e2"]],
         "route_bundle_elec",
         separation=20_000,
     )
-    schema.add_route(
+    schematic.add_route(
         "pm1_3-pm1_4",
         [padm1_1["e4"]],
         [padm1_3["e2"]],
         "route_bundle_elec",
         separation=20_000,
     )
-    schema.add_route(
+    schematic.add_route(
         "pm1_4-pm1_1",
         [padm1_4["e1"]],
         [padm1_3["e3"]],
@@ -659,8 +686,8 @@ def test_netlist_equivalent() -> None:
         separation=20_000,
     )
 
-    nl = schema.netlist()
-    c = schema.create_cell(kf.KCell)
+    nl = schematic.netlist()
+    c = schematic.create_cell(kf.KCell)
     nl2 = c.netlist(
         ignore_unnamed=True, connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)]
     )
@@ -671,25 +698,75 @@ def test_netlist_equivalent() -> None:
         == nl2[c.name]
     )
 
+    schema_str = schematic.code_str()
+
+    assert schema_str is not None
+
+
+def test_schematic_anchor() -> None:
+    pdk = kf.KCLayout("SCHEMA_PDK_ANCHOR_PORT", infos=Layers)
+    layers = Layers()
+
+    @pdk.cell
+    def straight(length: int) -> kf.KCell:
+        c = pdk.kcell()
+        c.shapes(layers.WG).insert(kf.kdb.Box(0, -250, length, 250))
+        c.create_port(
+            name="o1",
+            width=500,
+            trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=0),
+            layer_info=layers.WG,
+        )
+        c.create_port(
+            name="o2",
+            width=500,
+            trans=kf.kdb.Trans(x=length, y=0),
+            layer_info=layers.WG,
+        )
+
+        return c
+
+    schematic = kf.Schematic(kcl=pdk)
+
+    s1 = schematic.create_inst(
+        name="s1", component="straight", settings={"length": 5000}
+    )
+    s2 = schematic.create_inst(
+        name="s2", component="straight", settings={"length": 5000}
+    )
+    s3 = schematic.create_inst(
+        name="s3", component="straight", settings={"length": 10_000}
+    )
+
+    s1.place()
+    s2.place(x=1000, y=10_000, anchor={"x": "left", "y": "top"})
+    s3.place(
+        x=s1.ports["o2"],
+        y=s1.ports["o2"],
+        orientation=90,
+        dx=10_000,
+        anchor={"port": "o1"},
+    )
+
+    schematic.create_cell(kf.KCell).show()
+
 
 @pytest.mark.parametrize(
     "path",
     [
         pytest.param(
-            file, marks=pytest.mark.skip(reason="Incompatible gdsfactory schema")
+            file, marks=pytest.mark.skip(reason="Incompatible gdsfactory schematic")
         )
         if file.with_suffix("").stem in skip_files
         else pytest.param(file)
         for file in yaml_files
     ],
-    ids=lambda p: _get_path_stem,
+    ids=_get_path_stem,
 )
 def test_gdsfactory_yaml(path: Path) -> None:
     with path.open(encoding="utf-8") as f:
         fstr = f.read()
         pytest.mark.skipif("%" in fstr)
-        f.seek(0)
-        yaml = YAML(typ=["rt", "safe", "string"])
-        schema = kf.DSchema.model_validate(yaml.load(f))
-        for inst in schema.instances.values():
-            _ = inst.parent_schema.name
+    schematic = kf.read_schematic(path)
+    for inst in schematic.instances.values():
+        _ = inst.parent_schematic.name

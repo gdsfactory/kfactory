@@ -1,0 +1,32 @@
+name: docs
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch:
+
+jobs:
+  test_docs:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version:
+          - "3.13"
+        os: [ubuntu-latest]
+
+    steps:
+      - name: Install graphviz
+        shell: bash -l {0}
+        run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt install graphviz graphviz-dev
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: extractions/setup-just@v3
+      - name: Test coverage
+        run: just docs

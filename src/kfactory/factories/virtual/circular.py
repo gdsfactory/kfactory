@@ -104,7 +104,7 @@ def virtual_bend_circular_factory(
             angle: Angle amount of the bend.
             angle_step: Angle amount per backbone point of the bend.
         """
-        c = VKCell()
+        c = kcl.vkcell()
         if angle < 0:
             logger.critical(
                 f"Negative lengths are not allowed {angle} as ports"
