@@ -1006,6 +1006,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     @classmethod
     def _validate_schematic(cls, data: dict[str, Any]) -> dict[str, Any]:
         data.pop("nets", None)
+        data.pop("warnings", None)
         if not isinstance(data, dict):
             return data
         if "kcl" in data and isinstance(data["kcl"], str):
