@@ -1014,6 +1014,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         if instances:
             for name, instance in instances.items():
                 instance["name"] = name
+                instance.pop("info", None)
         routes = data.get("routes")
         if routes:
             for name, route in routes.items():
