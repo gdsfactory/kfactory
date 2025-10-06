@@ -3,12 +3,26 @@ from __future__ import annotations
 import functools
 import inspect
 from collections import defaultdict
-from collections.abc import Callable, Iterable, Sequence  # noqa: TC003
+from collections.abc import (
+    Callable,
+    Iterable,
+    Iterator,
+    Mapping,
+    Sequence,
+)
 from functools import cached_property
 from pathlib import Path
 from pprint import pformat
 from threading import RLock
-from typing import TYPE_CHECKING, Any, Concatenate, Generic, Literal, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Concatenate,
+    Generic,
+    Literal,
+    cast,
+    overload,
+)
 
 import ruamel.yaml
 from cachetools import Cache
@@ -66,6 +80,7 @@ from .typings import (
     KCellParams,
     MetaData,
     P,
+    T,
     TUnit,
 )
 from .utilities import load_layout_options, save_layout_options
@@ -91,7 +106,7 @@ def get_default_kcl() -> KCLayout:
     return kcl
 
 
-class Factories(Generic[F]):
+class Factories(Mapping[str, F], Generic[F]):
     _all: list[F]
     _by_name: dict[str, int]
     _by_tag: defaultdict[str, list[int]]
@@ -114,10 +129,30 @@ class Factories(Generic[F]):
     def get_by_name(self, name: str) -> F:
         return self._all[self._by_name[name]]
 
+    def is_unique(self) -> bool:
+        return len(self._all) == len(self._by_name)
+
+    def rebuild(self) -> None:
+        self._by_name = {}
+        self._by_tag = defaultdict(list)
+        self._by_function = {}
+
+        for idx, factory in enumerate(self._all):
+            for tag in factory.tags:
+                self._by_tag[tag].append(idx)
+            self._by_name[factory.name] = idx
+            self._by_function[factory.__call__] = idx
+
     def get_by_tag(self, tag: str) -> list[F]:
         return [self._all[idx] for idx in self._by_tag[tag]]
 
-    def __contains__(self, key: str | F) -> bool:
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._by_name)
+
+    def __len__(self) -> int:
+        return len(self._by_name)
+
+    def __contains__(self, key: Any) -> bool:
         if isinstance(key, str):
             return key in self._by_name
         return key in self._all
@@ -141,10 +176,16 @@ class Factories(Generic[F]):
                 f"Unknown Factory {key!r}, closest 10 name matches: {results}"
             ) from e
 
-    def get(self, key: str) -> F | None:
+    @overload
+    def get(self, key: str, /) -> F | None: ...
+
+    @overload
+    def get(self, key: str, /, default: T) -> F | T: ...
+
+    def get(self, key: str, /, default: T | None = None) -> F | T | None:
         if key in self._by_name:
             return self.get_by_name(key)
-        return None
+        return default
 
 
 class KCLayout(
@@ -590,6 +631,24 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
+        factories: Mapping[
+            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
+        ]
+        | None = None,
+        cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
+        routing_strategies: dict[
+            str,
+            Callable[
+                Concatenate[
+                    ProtoTKCell[Any],
+                    Sequence[ProtoPort[Any]],
+                    Sequence[ProtoPort[Any]],
+                    ...,
+                ],
+                Any,
+            ],
+        ]
+        | None = None,
     ) -> Callable[
         [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KCell]
     ]: ...
@@ -616,6 +675,24 @@ class KCLayout(
         post_process: Iterable[Callable[[KCell], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
+        factories: Mapping[
+            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
+        ]
+        | None = None,
+        cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
+        routing_strategies: dict[
+            str,
+            Callable[
+                Concatenate[
+                    ProtoTKCell[Any],
+                    Sequence[ProtoPort[Any]],
+                    Sequence[ProtoPort[Any]],
+                    ...,
+                ],
+                Any,
+            ],
+        ]
+        | None = None,
     ) -> Callable[
         [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KCell]
     ]: ...
@@ -643,6 +720,24 @@ class KCLayout(
         post_process: Iterable[Callable[[KCell], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
+        factories: Mapping[
+            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
+        ]
+        | None = None,
+        cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
+        routing_strategies: dict[
+            str,
+            Callable[
+                Concatenate[
+                    ProtoTKCell[Any],
+                    Sequence[ProtoPort[Any]],
+                    Sequence[ProtoPort[Any]],
+                    ...,
+                ],
+                Any,
+            ],
+        ]
+        | None = None,
     ) -> Callable[
         [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KC]
     ]: ...
@@ -669,6 +764,24 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
+        factories: Mapping[
+            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
+        ]
+        | None = None,
+        cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
+        routing_strategies: dict[
+            str,
+            Callable[
+                Concatenate[
+                    ProtoTKCell[Any],
+                    Sequence[ProtoPort[Any]],
+                    Sequence[ProtoPort[Any]],
+                    ...,
+                ],
+                Any,
+            ],
+        ]
+        | None = None,
     ) -> Callable[
         [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KC]
     ]: ...
@@ -696,6 +809,24 @@ class KCLayout(
         post_process: Iterable[Callable[[KCell], None]] | None = None,
         debug_names: bool | None = None,
         tags: list[str] | None = None,
+        factories: Mapping[
+            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
+        ]
+        | None = None,
+        cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
+        routing_strategies: dict[
+            str,
+            Callable[
+                Concatenate[
+                    ProtoTKCell[Any],
+                    Sequence[ProtoPort[Any]],
+                    Sequence[ProtoPort[Any]],
+                    ...,
+                ],
+                Any,
+            ],
+        ]
+        | None = None,
     ) -> (
         Callable[KCellParams, KCell]
         | Callable[
@@ -740,7 +871,12 @@ class KCLayout(
                         schematic = f(*args, **kwargs)
                         if set_name:
                             schematic.name = self.future_cell_name
-                        c_ = schematic.create_cell(KCell)
+                        c_ = schematic.create_cell(
+                            KCell,
+                            factories=factories,
+                            cross_sections=cross_sections,
+                            routing_strategies=routing_strategies,
+                        )
                         c_.schematic = schematic
                         return c_
 
@@ -778,7 +914,12 @@ class KCLayout(
                     schematic = f(*args, **kwargs)
                     if set_name:
                         schematic.name = self.future_cell_name
-                    c_ = schematic.create_cell(KCell)
+                    c_ = schematic.create_cell(
+                        KCell,
+                        factories=factories,
+                        cross_sections=cross_sections,
+                        routing_strategies=routing_strategies,
+                    )
                     c_.schematic = schematic
                     return c_
 
@@ -797,7 +938,12 @@ class KCLayout(
                 schematic = f(*args, **kwargs)
                 if set_name:
                     schematic.name = self.future_cell_name
-                c_ = schematic.create_cell(KCell)
+                c_ = schematic.create_cell(
+                    KCell,
+                    factories=factories,
+                    cross_sections=cross_sections,
+                    routing_strategies=routing_strategies,
+                )
                 c_.schematic = schematic
                 return c_
 
