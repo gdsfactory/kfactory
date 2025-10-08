@@ -32,7 +32,7 @@ dependencies = [
     "ruamel.yaml.string >= 0.1.1, < 0.2",
     "scipy >= 1.14.1, < 2",
     "toolz >= 1, < 2",
-    "typer >= 0.15.2, < 0.18",
+    "typer >= 0.15.2, < 0.20",
     "semver >= 3.0.4, < 4",
 ]
 
