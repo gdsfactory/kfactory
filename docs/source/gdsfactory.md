@@ -76,6 +76,7 @@ In contrast to gdsfactory, every geometrical dimension is represented as an obje
 | Object (dbu) | Object (um)    | Description                                                                                              |
 |--------------|----------------|----------------------------------------------------------------------------------------------------------|
 | Point        | DPoint         | Holds x/y coordinate in dbu
+
 | Vector       | DVector        | Similar to a point, but can be used for geometry operations and can be multiplied 
 
 | Edge         | DEdge          | Connection of two points (p1/p2) and is aware of the two sides
@@ -87,6 +88,7 @@ In contrast to gdsfactory, every geometrical dimension is represented as an obje
 | Polygon      | DPolygon       | Like the simple polygon but this one can have holes and allows operations like sizing
 
 | Text         | DText          | Labels. They can have a full transformation, but KLayout does not show full transformations by default
+
 | Shape        | -              | A generalized container for other geometric objects that allows storage and retrieval
 
 | Shapes       | -              | A flat collection of shapes. Used by KCells to access shapes in a cell 
