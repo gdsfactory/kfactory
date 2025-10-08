@@ -17,16 +17,24 @@
 # %% [markdown]
 # # KCell
 #
-# A `KCell` is like an empty canvas, where you can add polygons, instances to other Cells and ports (to connect to other cells)
+# A `KCell` is like an empty canvas, where you can add polygons and instances to other Cells and ports (which is used to connect to other cells)
 #
-# In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries. The default is `0.001`, i.e. 1nm grid size (0.001 microns)
+# In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries. 
+# The default is `0.001`, i.e. 1nm grid size (0.001 microns)
 #
 # - `Point`, `Box`, `Polygon`, `Edge`, `Region` are in dbu
 # - `DPoint`, `DBox`, `DPolygon`, `DEdge` are in microns
 #
-# Most Shape types are available as microns and dbu parts. They can be converted with `<ShapeTypeDBU>.to_dtype(dbu)` to microns and with `<ShapeTypeMicrons>.to_itype(dbu)` where `dbu` is the the conversion of one database unit to microns.
-# Alternatively they can be converted with `c.kcl.to_um(<ShapeTypeDBU>)` or `c.kcl.to_dbu(<ShapeTypeMicrons>)` where `c.kcl` is the KCell and `kcl` is the `KCLayout` which owns the KCell.
+# Most Shape types are available as microns and dbu parts. They can be converted with `<ShapeTypeDBU>.to_dtype(dbu)` to microns
+#  and with `<ShapeTypeMicrons>.to_itype(dbu)` where `dbu` is the the conversion of one database unit to microns.
+# Alternatively they can be converted with `c.kcl.to_um(<ShapeTypeDBU>)` or `c.kcl.to_dbu(<ShapeTypeMicrons>)` 
+# where `c.kcl` is the KCell and `kcl` is the `KCLayout` which owns the KCell.
 
+# Imports: It imports the necessary libraries: kfactory for layout creation and numpy for numerical operations
+# LayerInfos Class: In chip fabrication, the design is built up layer by layer. 
+# Each layer corresponds to a specific material or process step (e.g., silicon, metal, oxide). 
+# This class creates human-readable names (WG for waveguide, CLAD for cladding) 
+# and maps them to the GDS layer numbers ((1, 0), (4, 0))
 
 # %%
 import kfactory as kf
@@ -67,7 +75,7 @@ poly1 = kf.kdb.DPolygon(
 c.shapes(c.kcl.find_layer(1, 0)).insert(poly1)
 
 # %%
-c.show()  # show in klayout
+c.show()  # show in KLayout
 c.plot()
 
 # %% [markdown]
@@ -85,12 +93,16 @@ c.shapes(c.kcl.find_layer(1, 0)).insert(poly1)
 c.shapes(c.kcl.find_layer(2, 0)).insert(poly1)
 c
 
+# kf.kdb.TextGenerator: This creates a text object. The text "Hello!" is converted into a set of polygons that can be fabricated.
+# kf.kdb.DBox(...): This creates a simple rectangle (a box).
+# This box is defined by the coordinates of its lower-left corner (-2.5, -5) and upper-right corner (2.5, 5).
+# Like before, these shapes are then inserted into specific layers in the cell c.
 # %%
 c = kf.KCell()
 textgenerator = kf.kdb.TextGenerator.default_generator()
 t = textgenerator.text("Hello!", c.kcl.dbu)
 c.shapes(kf.kcl.find_layer(1, 0)).insert(t)
-c.show()  # show in klayout
+c.show()  # show in KLayout
 c.plot()
 
 # %%
@@ -117,7 +129,7 @@ text1 = t.transformed(
 
 # %%
 ### complex transformation example:ce
-#     magnification(float): magnification, DO NOT USE on cells or instances, only shapes, most foundries will not allow magnifications on actual cell instances or cells
+#     magnification(float): magnification, DO NOT USE on cells or instances, only on shapes. Most foundries will not allow magnifications on actual cell instances or cells.
 #     rotation(float): rotation in degrees
 #     mirror(bool): boolean to mirror at x axis and then rotate if true
 #     x(float): x coordinate
@@ -131,7 +143,7 @@ text2 = t.transformed(
 # text2.rotate(45)
 r.move(
     -5, 0
-)  # boxes can be moved like this, other shapes and cellss/refs need to be moved with .transform
+)  # boxes can be moved like this, other shapes and cells/refs need to be moved with .transform
 r.move(-5, 0)
 
 # %%
@@ -140,7 +152,7 @@ c.shapes(c.kcl.find_layer(2, 0)).insert(text2)
 c.shapes(c.kcl.find_layer(2, 0)).insert(r)
 
 # %%
-c.show()  # show in klayout
+c.show()  # show in KLayout
 c.plot()
 
 # %% [markdown]
@@ -148,7 +160,7 @@ c.plot()
 #
 # Cells can have a "Port" that allows you to connect Instances together like legos.
 #
-# You can write a simple function to make a rectangular straight, assign ports to the ends, and then connect those rectangles together.
+# You can write a simple function to make a rectangular straight, assign ports to the ends and then connect those rectangles together.
 
 
 # %%
@@ -187,20 +199,20 @@ c
 # Now we can align everything together using the ports:
 
 # %% [markdown]
-# Each straight has two ports: 'o1' and 'o2'.  These are arbitrary names defined in our straight() function above
+# Each straight has two ports: 'o1' and 'o2'. These are arbitrary names defined in our straight() function above
 
 # %%
-# Let's keep wg1 in place on the bottom, and connect the other straights to it.
-# To do that, on wg2 we'll grab the "W0" port and connect it to the "E0" on wg1:
+# Let us keep wg1 in place on the bottom and then connect the other straights to it.
+# To do that, on wg2 we will grab the "W0" port and connect it to the "E0" on wg1:
 wg2.connect("o1", wg1.ports["o2"])
-# Next, on wg3 let's grab the "W0" port and connect it to the "E0" on wg2:
+# Next, on wg3, take the "W0" port and connect it to the "E0" on wg2:
 wg3.connect("o1", wg2.ports["o2"])
 c
 
 # %%
 c.add_port(name="o1", port=wg1.ports["o1"])
 c.add_port(name="o2", port=wg3.ports["o2"])
-c.show()  # show in klayout
+c.show()  # show in KLayout
 c.plot()
 
 # %% [markdown]
@@ -235,7 +247,7 @@ c.shapes(c.kcl.find_layer(4, 0)).insert(
 
 
 # %%
-c.show()  # show in klayout
+c.show()  # show in KLayout
 c.plot()
 
 # %% [markdown]
@@ -243,10 +255,10 @@ c.plot()
 #
 # Your straights wg1/wg2/wg3 are instances to other straight cells.
 #
-# If you want to add ports to the new Cell `c` you can use `add_port`, where you can create a new port or use an instance an existing port from the underlying instance.
+# If you want to add ports to the new cell `c` you can use `add_port`, where you can create a new port or use an instance an existing port from the underlying instance.
 
 # %% [markdown]
-# You can access the ports of a Cell or Instance
+# You can access the ports of a cll or instance
 
 
 # %%
@@ -255,7 +267,7 @@ wg2.ports
 # %% [markdown]
 # ## Instances
 #
-# Now that we have your cell `c` is a multi-straight cell, you can add instances to that cell in a new blank Cell `c2`, then add two instances and shift one to see the movement.
+# Now that we have your cell `c`, which is a multi-straight cell, you can add instances to that cell in a new blank Cell `c2`, then add two instances and shift one to see the movement.
 
 
 # %%
@@ -268,7 +280,7 @@ mwg2_ref.transform(kf.kdb.DTrans(10, 10))
 c2
 
 # %%
-# Like before, let's connect mwg1 and mwg2 together
+# Like before, now we connect mwg1 and mwg2 together
 mwg1_ref.connect("o2", mwg2_ref.ports["o1"])
 
 # %%
@@ -303,8 +315,8 @@ c
 #
 # ## Labels
 #
-# You can add abstract GDS labels (annotate) to your Cells, in order to record information
-# directly into the final GDS file without putting any extra geometry onto any layer
+# You can add abstract GDS labels (annotate) to your cells, in order to record information
+# directly into the final GDS file without putting any extra geometry onto any layer.
 # This label will display in a GDS viewer, but will not be rendered or printed
 # like the polygons created by gf.cells.text().
 
@@ -314,7 +326,7 @@ c2.shapes(c2.kcl.find_layer(1, 0)).insert(kf.kdb.Text("First label", mwg1_ref.tr
 c2.shapes(c2.kcl.find_layer(1, 0)).insert(kf.kdb.Text("Second label", mwg2_ref.trans))
 
 # %%
-# It's very useful for recording information about the devices or layout
+# It is very useful for recording information about the devices or layout
 c2.shapes(c2.kcl.find_layer(10, 0)).insert(
     kf.kdb.Text(
         f"The x size of this\nlayout is {c2.dbbox().width()}",
@@ -333,7 +345,7 @@ c2.plot()
 #
 # The ``operation`` argument should be {not, and, or, xor, 'A-B', 'B-A', 'A+B'}.
 # Note that 'A+B' is equivalent to 'or', 'A-B' is equivalent to 'not', and
-# 'B-A' is equivalent to 'not' with the operands switched
+# 'B-A' is equivalent to 'not' with the operands switched.
 
 
 # %%
@@ -386,7 +398,7 @@ c.shapes(c.kcl.find_layer(1, 0)).insert(e3)
 c
 
 # %% [markdown]
-# ## Move instance by port
+# ## Move the instance by port
 
 
 # %%
@@ -394,7 +406,7 @@ c = kf.KCell()
 wg = c << kf.cells.straight.straight(width=0.5, length=1, layer=LAYER.WG)
 bend = c << kf.cells.euler.bend_euler(width=0.5, radius=1, layer=LAYER.WG)
 
-bend.connect("o1", wg.ports["o2"])  # connects follow Source, destination syntax
+bend.connect("o1", wg.ports["o2"])  # connects follow source, the destination is the syntax
 c
 
 # %% [markdown]
@@ -425,9 +437,9 @@ c
 # %% [markdown]
 # ## Write GDS
 #
-# [GDSII](https://en.wikipedia.org/wiki/GDSII) is the Standard format for exchanging CMOS circuits with foundries
+# [GDSII](https://en.wikipedia.org/wiki/GDSII) is the standard format for exchanging CMOS circuits with foundries
 #
-# You can write your Cell to GDS file.
+# You can write your cell to a GDS file.
 
 
 # %%

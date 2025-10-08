@@ -4,7 +4,7 @@
 
 PCells are a way to create cells that are parameterized by several variables.
 
-In KFactory, with the @cell for `KCell` and `DKCell` or @vcell for `VKCell` you can easily create PCells.
+In kfactory, with the @cell for `KCell` and `DKCell` or @vcell for `VKCell` you can easily create PCells.
 
 Throughout this tutorial we use this example of a very simple PCell.
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
 ### Complex Example
 
-There might be a case where you want to create a pcell based on another one, but return a different type of cell.
+There might be a case where you want to create a PCell based on another one, but return a different type of cell.
 ```python
 import kfactory as kf
 

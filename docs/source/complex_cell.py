@@ -13,6 +13,10 @@
 #     name: python3
 # ---
 
+# this script builds a composite cell by taking a circular bend and a straight waveguide, 
+# snapping them together end-to-end, 
+# and then presenting the combined shape as a single new component with its own input and output ports.
+
 from layers import LAYER, si_enc
 from straight import straight
 
@@ -26,7 +30,7 @@ def composite_cell() -> kf.KCell:
     bend = c.create_inst(
         kf.cells.circular.bend_circular(
             1000 * c.kcl.dbu, 20000 * c.kcl.dbu, LAYER.SI, enclosure=si_enc
-        )  # the standard kf.cells are in um, so we need to convert to dbu
+        )  # the standard kf.cells are in um, so we need to convert it to dbu
     )
     wg = c << straight(1000, 5000, 5000)
 

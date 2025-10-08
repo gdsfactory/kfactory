@@ -1,4 +1,7 @@
 """Generate the code reference pages."""
+# This script automatically generates the API reference documentation for a Python project. 
+# It scans the source code, creates a corresponding Markdown file for each Python module, 
+# and builds a navigation menu to link them all together, preparing the structure for a documentation website using MkDocs.
 
 from pathlib import Path
 import klayout

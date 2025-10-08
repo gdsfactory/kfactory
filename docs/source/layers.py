@@ -13,6 +13,8 @@
 #     name: kernel_name
 # ---
 
+# This code sets up custom layer definitions and an enclosure rule for a kfactory chip layout
+
 import kfactory as kf
 
 

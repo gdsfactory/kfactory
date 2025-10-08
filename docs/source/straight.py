@@ -1,3 +1,10 @@
+# This script defines and displays a reusable component for a straight optical waveguide.
+# It also includes a secondary "exclusion" layer.
+# The function creates a KCell and draws two centered rectangles.
+# It then creates and defines two ports, which store the location, orientation and width.
+# Also automatically renames ports. E.g. "o1" and "o2".
+# It then allows the component to be opened in KLayout, through the kf.show function.
+
 from layers import LAYER
 
 import kfactory as kf

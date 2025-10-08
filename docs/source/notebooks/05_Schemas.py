@@ -22,7 +22,7 @@
 # %% [markdown]
 # ## Use multiple KCLayout objects as PDKs/Libraries
 #
-# KCLayouts can act as PDKs. They can be seamlessly instantiated into each other
+# KCLayouts can act as PDKs. They can be seamlessly incooperated into each other
 
 # %%
 from collections.abc import Sequence
@@ -47,6 +47,14 @@ kcl_default = kf.kcl
 kcl_default.kcells
 
 # %%
+
+# bend90 = bend90_function: This creates a standard, pre-configured 90-degree bend component. 
+# This will be used for making turns in the routes.
+# @kcl_default.cell def straight: This defines a simple, reusable straight waveguide component.
+# It is parametric, meaning you can specify its width and length. 
+# Crucially, it has two connection points, o1 (input) and o2 (output), called ports.
+# This section will serve as basic building blocks, so that the router knows what a bend and a straight looks like.
+
 from typing import Any
 
 bend90_function = kf.factories.euler.bend_euler_factory(kcl=kcl_default)
@@ -71,6 +79,15 @@ def straight(width: int, length: int) -> kf.KCell:
 
     return c
 
+# @kcl_default.routing_strategy: This decorator registers the route_bundle function as a named set of instructions.
+# The schematic will be able call upon these instructions when necessary 
+# def route_bundle: The function takes a list of starting ports and ending ports. 
+# It then calls kf.routing.optical.route_bundle, which is a smart, built-in algorithm designed to connect multiple waveguides simultaneously.
+# This ensures that they run parallel to each other with a specified separation.
+# This is where the first section comes into play. The algorithm is being told to use the straight and bend90 components defined there.
+# In essence, this section created a custom routing command named "route_bundle" and is defined as a rule for how to connect things.
+
+
 @kcl_default.routing_strategy
 def route_bundle(
     c: kf.ProtoTKCell[Any],
@@ -87,6 +104,13 @@ def route_bundle(
         bend90_cell=bend90,
     )
 
+# @kcl_default.schematic_cell: This decorator signifies that the function will return an abstract Schema, not a physical KCell with polygons.
+# schema = kf.Schema: This creates an abstract canvas.
+# schema.create_inst: This places two instances of the "straight" component into the schematic.
+# It is like putting two parts on a circuit diagram.
+# schema.add_route: This is the key command. It does not draw a route; it issues a connection request. 
+# It says: "I need to connect port o2 of component s1 to port o2 of component s2."
+# Crucially, it specifies how to make the connection by referencing the rule you just created: "route_bundle".
 
 @kcl_default.schematic_cell(output_type=kf.KCell)
 def my_schema() -> kf.schema.Schema:
@@ -107,6 +131,16 @@ def my_schema() -> kf.schema.Schema:
     )
 
     return schema
+
+# Although deceivingly simple looking, the my_schema function is powerful. It makes kfactory's layout engine read the abstract schema.
+# This has the following effects:
+# It creates a physical KCell
+# It places s1 and s2
+# It reads the add_route request
+# It looks up and incooperates the previously added "route_bundle" routing strategy
+# Lastly, it calls upon the "route_bundle" function,
+# which automatically calculates the optimal path between the bends and straights. It also physically connects them.
+
 
 kcell = my_schema()
 
