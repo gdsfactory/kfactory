@@ -71,7 +71,7 @@ Available log levels are "TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR"
 
 Log outputs can be filtered either by setting a minimum level or by regex. The minimum level is configured in `kfactory.config.logfilter.level`.
 Instead of configuring it through python, it can also be configured from an environment variable. By default the log level is set to "INFO",
-so anything below "INFO" is not an output. This can be configured either by setting the level in python, through dotenv
+so anything below "INFO" is not sent to an output. This can be configured either by setting the level in python, through dotenv
 ([untested](https://docs.pydantic.dev/latest/usage/settings/#dotenv-env-support)), or through environment variables.
 
 | Logging Function                  | Minimum `kfactory.config.logfilter.level` |
@@ -94,7 +94,7 @@ Setting the loglevel through environment:
 export KFACTORY_LOGFILTER_LEVEL="DEBUG"
 ```
 
-This can of course also done in a way which requires setting it only once. (under Linux/MacOS): `KFACTORY_LOGFILTER_LEVEL="DEBUG" python my_file.py`
+This can of course also be done in a way which requires setting it only once. (under Linux/MacOS): `KFACTORY_LOGFILTER_LEVEL="DEBUG" python my_file.py`
 
 ##### Windows
 
@@ -146,7 +146,8 @@ Traceback (most recent call last):
 
 ## Jupyter Widget
 
-By default kfactory will provide an interactive Jupyter widget for notebooks. The widget is not very performant and might impact performance for larger notebooks. Instead of the widget a simple `IPython.Image` may be used. It can be configured in `kfactory.config.display_type`. Available options are `widget` or `image`. For example, the docs that use `image` as the interactive widget will not work on a standard html page.
+By default kfactory will provide a `IPython.Image` for notebooks. Instead of the image a simple interactive Jupyter widget may be used. The widget is not very performant and might impact performance for larger notebooks. 
+It can be configured in `kfactory.config.display_type`. Available options are `widget` or `image`. For example, the docs that use `image` as the interactive widget will not work on a standard html page.
 
 Similar to the log level this may also be configured through dotenv or an env variable.
 `export KFACTORY_DISPLAY_TYPE="image"` will set it to display as image by default.
