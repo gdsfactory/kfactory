@@ -258,7 +258,7 @@ c.plot()
 # If you want to add ports to the new cell `c` you can use `add_port`, where you can create a new port or use an instance an existing port from the underlying instance.
 
 # %% [markdown]
-# You can access the ports of a cll or instance
+# You can access the ports of a cell or instance
 
 
 # %%
