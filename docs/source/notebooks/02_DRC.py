@@ -39,10 +39,10 @@ kf.kcl.infos = LAYER
 
 # %%
 
-#A cell named triangle containing a triangle shape is created.
-#A cell named Box containing a rectangular DBox is created.
-#A third cell c is created, and instances of the triangle and box are placed into it. 
-#This part of the code is not directly used in the main demonstration but sets up a basic layout context.
+# A cell named triangle containing a triangle shape is created.
+# A cell named Box containing a rectangular DBox is created.
+# A third cell c is created, and instances of the triangle and box are placed into it. 
+# This part of the code is not directly used in the main demonstration but sets up a basic layout context.
 
 triangle = kf.KCell()
 triangle_poly = kf.kdb.DPolygon(

@@ -156,12 +156,25 @@ c.show()  # show in KLayout
 c.plot()
 
 # %% [markdown]
-# ## connect **ports**
-#
-# Cells can have a "Port" that allows you to connect Instances together like legos.
-#
-# You can write a simple function to make a rectangular straight, assign ports to the ends and then connect those rectangles together.
+# This portion essentially demonstrates how to draw a shape and add connections to it.
 
+# It defines a function named straight, which accepts the following three arguments:
+# Length: The length of a waveguide in microns, the default is 10 µm.
+# Width: The width of the waveguide in microns, the default is 1 µm.
+# Layer: A tuple (data structure with multiple parts to it), which specifies the GDSII (Graphic Design System II) layer it will draw on.
+# layer=(1, 0): This tuple holds the blueprint information.
+# *layer: The asterisk * is Python's "unpacking" operator. It turns the tuple (1, 0) into two separate arguments, so kf.kcl.find_layer(*layer) is the same as calling kf.kcl.find_layer(1, 0).
+# kf.kcl.find_layer: This function takes the layer and purpose numbers, in this case 1 and 0 and finds the corresponding internal layer index.
+# This will then allow the KLayout software uses to manage the data efficiently.
+# wg.shapes(_layer).insert(box): This is the "drawing" step. 
+# It instructs the software to take the rectangular box shape and place it specifically on the blueprint for Layer 1, Purpose 0. 
+# Without this, the shape would exist only in memory but not be part of the final chip design.
+# wg = kf.KCell(): Creates a new, empty cell named wg (short for waveguide).
+# box = kf.kdb.DBox(length, width): Creates a rectangular shape object using floating-point coordinates in microns.
+# int_box = wg.kcl.to_dbu(box): Chip layout databases use integers for high precision, called database units (dbu). 
+# This line converts the box's micron coordinates into these integer units.
+# Then the function adds connecting ports named "o1" and "o2".
+# Finally, the function will return the completed wg cell, which now contains the rectangular shape.
 
 # %%
 @kf.cell
@@ -187,6 +200,7 @@ def straight(length=10, width=1, layer=(1, 0)) -> kf.KCell:
     )
     return wg
 
+# The following code creates and places three separate straight waveguides, each with a different length, into a designated cell called c.
 
 # %%
 c = kf.KCell()
@@ -195,8 +209,6 @@ wg2 = c << straight(length=2, width=2.5, layer=(1, 0))
 wg3 = c << straight(length=3, width=2.5, layer=(1, 0))
 c
 
-# %% [markdown]
-# Now we can align everything together using the ports:
 
 # %% [markdown]
 # Each straight has two ports: 'o1' and 'o2'. These are arbitrary names defined in our straight() function above
@@ -264,11 +276,10 @@ c.plot()
 # %%
 wg2.ports
 
-# %% [markdown]
-# ## Instances
-#
-# Now that we have your cell `c`, which is a multi-straight cell, you can add instances to that cell in a new blank Cell `c2`, then add two instances and shift one to see the movement.
-
+# Here we create a new design cell (MultiMultiWaveguide) and place to identical straight waveguides into it.
+# We then place the physical copies into the c2 canvas via mwg1_ref = c2.create_inst(wg1) and mwg2_ref = c2.create_inst(wg2)
+# After that, we move wg2 by 10 microns in the x and y directions with mwg2_ref.transform(kf.kdb.DTrans(10, 10))
+# In an interactive environment like a Jupyter Notebook, the last line c2 would then show you two waveguides. One at (0, 0) and one at (10, 10)
 
 # %%
 c2 = kf.KCell(name="MultiMultiWaveguide")
@@ -286,6 +297,11 @@ mwg1_ref.connect("o2", mwg2_ref.ports["o1"])
 # %%
 c2
 
+# This block creates and mirrors 2 Euler bend components horizontally, this creates a U turn. An Euler bend is a curve designed to minimize light loss.
+# Setup: A new cell c is created, and a 90-degree Euler bend component is defined. 
+# Placement: Two identical instances of the bend, b1 and b2, are placed in c at the origin (0, 0), one on top of the other.
+# Transformation: b2.mirror_x(x=0) takes the second instance (b2) and mirrors it horizontally across the y-axis (the vertical line where x=0).
+# Result: The final cell c contains the original bend (b1) and its horizontal mirror image (b2).
 # %%
 c = kf.KCell()
 bend = kf.cells.euler.bend_euler(radius=10, width=1, layer=LAYER.WG)
@@ -294,6 +310,10 @@ b2 = c << bend
 b2.mirror_x(x=0)
 c
 
+# Next, we will mirror them vertically, which will create 2 back to back curves.
+# Setup & Placement: This is identical to the first block; two bend instances are placed at the origin.
+# Transformation: b2.mirror_y(y=0) takes the second instance (b2) and mirrors it vertically across the x-axis (the horizontal line where y=0).
+# Result: The cell c now contains the original bend and its vertical mirror image. They are positioned back-to-back, but their connection points are still overlapping at the origin.
 # %%
 c = kf.KCell()
 bend = kf.cells.euler.bend_euler(radius=10, width=1, layer=LAYER.WG)
@@ -302,6 +322,12 @@ b2 = c << bend
 b2.mirror_y(y=0)
 c
 
+# After that, we expand on the previous structure and make it a S-bend waveguide.
+# Setup & Mirroring: The code starts exactly like Block 2, creating two bends (b1, b2) and mirroring b2 vertically. They are still overlapping.
+# Alignment: b1.ymin = b2.ymax is the key step. This is a powerful kfactory feature for alignment. 
+# It moves the entire b1 instance vertically until its bottom edge (ymin) is perfectly aligned with the top edge (ymax) of the mirrored b2 instance.
+# Result: The two mirrored bends are now perfectly stitched together to form a seamless S-bend.
+# This is a common component for shifting the path of a waveguide.
 # %%
 c = kf.KCell()
 bend = kf.cells.euler.bend_euler(radius=10, width=1, layer=LAYER.WG)
@@ -326,7 +352,19 @@ c2.shapes(c2.kcl.find_layer(1, 0)).insert(kf.kdb.Text("First label", mwg1_ref.tr
 c2.shapes(c2.kcl.find_layer(1, 0)).insert(kf.kdb.Text("Second label", mwg2_ref.trans))
 
 # %%
-# It is very useful for recording information about the devices or layout
+# First we insert a new shape into the c2 cell:
+# c2.kcl.find_layer(10, 0): This specifies that the new shape will be drawn on GDSII layer 10, purpose 0. 
+# This layer is often used for documentation or labels.
+# c2.shapes(...).insert(...): This is the command to add the shape (in this case, a text object) to the specified layer.
+# Then we define the text object:
+# The String: f"The x size of this\nlayout is {c2.dbbox().width()}"
+# The \n creates a line break.
+# c2.dbbox().width() is a function call that dynamically calculates the total width of the entire c2 cell in database units (dbu).
+# This number then gets embedded directly into the text.
+# kf.kdb.Trans(c2.bbox().right, c2.bbox().top) sets the location for the text label, in this case at the top right corner.
+# Lastly, there are 2 ways to visualize the final design:
+# c2.show(): If you are running the script inside the main KLayout application, this command will render the cell in the layout viewer.
+# c2.plot(): This command generates a 2D plot of the cell, which is useful for viewing the layout directly in environments like a Jupyter Notebook.
 c2.shapes(c2.kcl.find_layer(10, 0)).insert(
     kf.kdb.Text(
         f"The x size of this\nlayout is {c2.dbbox().width()}",

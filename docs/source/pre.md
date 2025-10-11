@@ -1,6 +1,17 @@
 # Installation
 
 In conjunction with kfactory it is highly recommended to first install KLayout, a GDS and OASIS file viewer, and klive, the plugin for loading gds files from KFactory.
+Furthermore, you will need a file editor and viewer in which you can work with Python. There are two easy to use options:
+Pycharm: https://www.jetbrains.com/help/pycharm/quick-start-guide.html
+VSCode: https://code.visualstudio.com/docs/getstarted/getting-started
+
+# Python 
+
+[Python] Being able to use and understand the basics of Python will be invaluable when trying to follow the tutorials showcased. We would highly recommend obtaining at least the basic knowledge of how Python works and why it works in the way it does.
+The following Python tutorial is comprehensive and easy to start out with: (https://www.learnpython.org/)
+To install numpy in VSCode, navigate to the TERMINAL tab and write: py -m pip install numpy
+To install mkdocs-gen-files, navigate to the TERMINAL tab and write: py -m pip install mkdocs-gen-files
+If after installing KLayout an error appears that says KLayout is undefined or cannot be found: py -m pip install klayout 
 
 # KLayout
 

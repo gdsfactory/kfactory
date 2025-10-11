@@ -34,14 +34,14 @@ kf.kcl.infos = LAYER
 
 # %%
 
-#This first block creates a simple enclosure with one extra layer.
+# This first block creates a simple enclosure with one extra layer.
 # kf.enclosure.LayerEnclosure(...): This defines a set of rules for creating new layers based on a main layer.
 # main_layer=LAYER.WG: This specifies that the enclosure rules will be applied to any shapes on the WG (waveguide) layer.
 # (LAYER.SLAB, 2000): This is the core rule. It means: 
 # "Create a new shape on the SLAB layer by taking the WG shape and expanding it outwards by 2000 database units (which is 2 µm, since the default dbu is 1 nm)."
 # kf.cells.euler.bend_euler(...): This function creates an Euler bend, a type of curved waveguide.
-#enclosure=enc: By passing our enc rule into the bend component, the component automatically creates the SLAB layer around the WG layer according to the rule.
-#The result is a waveguide bend on LAYER.WG surrounded by a larger slab shape on LAYER.SLAB.
+# enclosure=enc: By passing our enc rule into the bend component, the component automatically creates the SLAB layer around the WG layer according to the rule.
+# The result is a waveguide bend on LAYER.WG surrounded by a larger slab shape on LAYER.SLAB.
 
 enc = kf.enclosure.LayerEnclosure(
     [

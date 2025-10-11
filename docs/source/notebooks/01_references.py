@@ -170,7 +170,7 @@ wr = c << kf.cells.straight.straight(length=10, width=0.6, layer=LAYER.WG)
 c
 
 # %% [markdown]
-# in both cases you can move the instance `wr` after created
+# in both cases you can move the instance `wr` after creating it
 
 # %%
 c = kf.KCell(name="two_instances")
@@ -200,7 +200,7 @@ c
 # ## Arrays of instances
 #
 # In GDS, there is a type of structure called an "Instance", which takes a cell and repeats it NxM times on a fixed grid spacing.
-#  For convenience, `Cell` includes this functionality with the add_array() function.
+# For convenience, `Cell` includes this functionality with the add_array() function.
 # Note that CellArrays are not compatible with ports (since there is no way to access/modify individual elements in a GDS cellarray)
 #
 # Let us  make a new Cell and put a big array of our cell `c` in it:
@@ -274,12 +274,9 @@ c
 # ## Port naming
 #
 # You have the freedom to name the ports as you want, and you can use `c.auto_rename_ports` to rename them later on.
-#
 # Here is the default naming convention.
-#
-# Ports are numbered clock-wise starting from the bottom left corner
-#
-# Optical ports have `o` prefix and Electrical ports `e` prefix
+# Ports are numbered clock-wise starting from the bottom left corner.
+# Optical ports have `o` prefix and Electrical ports `e` prefix.
 
 # %% [markdown]
 # Here is the default one we use (clockwise starting from bottom left west facing port)

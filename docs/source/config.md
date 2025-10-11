@@ -34,6 +34,19 @@ will automatically execute `from my_package import my_show_function`. The string
 
     If the show function is set as an environment variable, the custom show function **MUST NOT** contain any default values depending on kfactory as that will cause a circular import error due to the config being set up early on in the   initialization of kfactory. An example to solve this can look like the following:
 
+    This code defines a flexible and powerful utility function called show that is designed to display a chip layout in the KLayout application.
+    It is essentially a more comprehensive and detailed version of the kf.show() function.
+    Here is an explanation of the most important arguments:
+
+    layout: This is the main object to be displayed. The function is very flexible and can accept:
+    A kfactory.KCell (a single component).
+    A kfactory.KCLayout (a full layout with multiple cells).
+    A Path or str (a file path to a GDSII file on your disk).
+    lyrdb: An optional layer properties file (.lyp). This file tells KLayout how to color, name, and style each layer, making the layout much easier to read.
+    l2n: An optional Layout-to-Netlist database. This is for advanced use cases where you want to see how the physical layout corresponds to an electrical or photonic circuit schematic.
+    keep_position: A boolean that, if True, tells KLayout to keep the current window's zoom and position when loading the new layout.
+
+
     ```python
     from __future__ import annotations
     from typing import TYPE_CHECKING
