@@ -22,7 +22,7 @@
 # %% [markdown]
 # ## Use multiple KCLayout objects as PDKs/Libraries
 #
-# KCLayouts can act as PDKs. They can be seamlessly instantiated into each other
+# KCLayouts can act as PDKs. They can be seamlessly incooperated into each other.
 
 # %%
 import kfactory as kf
@@ -60,18 +60,18 @@ kcl_default.kcells
 kcl_default.dbu
 
 # %%
-# Create a new KCLayout to simulate pdk (could be package with e.g. `from test_pdk import kcl as pdk` or similar)
+# Create a new KCLayout to simulate PDK (could be package with e.g. `from test_pdk import kcl as pdk` or similar)
 kcl2 = kf.KCLayout("TEST_PDK", infos=LayerInfos)
 # Set the dbu to 0.005 (5nm)
 kcl2.dbu = 0.005
 kcl2.layout.dbu
 
 # %%
-# Since it's a new KCLayout, it's empty
+# Since it is a new KCLayout, it is empty
 kcl2
 
 # %%
-# Create an parametric KCell-Function for straights on the new pdk
+# Create a parametric KCell-Function for straights on the new PDK
 sf2 = kf.factories.straight.straight_dbu_factory(kcl=kcl2)
 
 # %%
@@ -85,7 +85,7 @@ print(f"{s_default.bbox().height()=}")
 print(f"{s_default.dbbox().height()=}")
 print(f"{s_default.bbox().width()=}")
 print(f"{s_default.dbbox().width()=}")
-# The test pdk uses a 5nm grid, so it will be 200dbu (1um) high and 10000dbu (50um) wide
+# The test PDK uses a 5nm grid, so it will be 200dbu (1um) high and 10000dbu (50um) wide
 print(f"{s2.bbox().height()=}")
 print(f"{s2.dbbox().height()=}")
 print(f"{s2.bbox().width()=}")
@@ -100,7 +100,7 @@ s_default.ports.print(unit="um")
 s2.ports.print(unit="um")
 
 # %%
-# Both can be instantiated into the same KCell
+# Both can be incooperated into the same KCell
 c = kcl_default.kcell()
 si_d = c << s_default
 si_2 = c << s2

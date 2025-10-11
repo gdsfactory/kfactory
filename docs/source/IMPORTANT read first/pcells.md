@@ -4,7 +4,7 @@
 
 PCells are a way to create cells that are parameterized by several variables.
 
-In KFactory, with the @cell for `KCell` and `DKCell` or @vcell for `VKCell` you can easily create PCells.
+In kfactory, with the @cell for `KCell` and `DKCell` or @vcell for `VKCell` you can easily create PCells.
 
 Throughout this tutorial we use this example of a very simple PCell.
 
@@ -122,7 +122,18 @@ if __name__ == "__main__":
 
 ### Complex Example
 
-There might be a case where you want to create a pcell based on another one, but return a different type of cell.
+There might be a case where you want to create a PCell based on another one, but return a different type of cell.
+
+First, a new, empty class called DKCellSubclass is defined. It inherits from kf.DKCell (Design Kit Cell), which is a kfactory cell type that can hold extra metadata (essentially data about data).
+straight = kf.factories.straight.straight_dbu_factory(kcl=kf.kcl) is a standard factory function (a type of function that creates and returns new objects and functions). and serves as a basic generator that builds a straight waveguide KCell using arguments in database units (dbu).
+The kf.cell(output_type=DKCellSubclass) part acts as a "wrapper." It takes the original straight function and creates a new version.
+This new version does everything the original did, but it ensures the final component it returns is an instance of our custom DKCellSubclass (Design Kit) instead of the default kf.KCell.
+dkcell_straight = dkcell_straight_factory(1000, 5000, Layers().WG):
+The new, modified factory is called to create a straight waveguide 1 µm wide (1000 dbu) and 5 µm long (5000 dbu).
+assert isinstance(dkcell_straight, DKCellSubclass) is critical as it verifies that the object created by the instance is indeed our custom
+DKCellSubclass. If this wrapper fails, it will produce an error.
+dkcell_straight.show(): Finally, the custom-typed component is displayed in the KLayout viewer.
+
 ```python
 import kfactory as kf
 
