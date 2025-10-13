@@ -3,13 +3,13 @@
 kfactory is based on KLayout and therefore has quite a few fundamental differences to gdsfactory.
 
 A Component in gdsfactory corresponds to a [KCell][kfactory.kcell.KCell] in kfactory. ComponentReference is
-represented in kfactory as an [Instance][kfactory.kcell.Instance].
+represented in kfactory as an [Instance][kfactory.instance.Instance].
 
 ## KCLayout / KCell / Instance
 
-KLayout uses a [Layout](https://klayout.de/doc/code/class_Layout.html) object as a base. 
-Cells (and KCells) must have a Layout as a base, they cannot work without one. 
-Therefore a KCell will always be attached to a [KCLayout][kfactory.kcell.KCLayout] which is an extension of a layout object. Kfactory provides a default KCLayout objective [kfactory.kcl][kfactory.kcell.kcl] which all KCells not specifying another KCLayout in the constructor will use.
+KLayout uses a [Layout](https://klayout.de/doc/code/class_Layout.html) object as a base.
+Cells (and KCells) must have a Layout as a base, they cannot work without one.
+Therefore a KCell will always be attached to a [KCLayout][kfactory.layout.KCLayout] which is an extension of a layout object. Kfactory provides a default KCLayout objective [kfactory.kcl][kfactory.layout.kcl] which all KCells not specifying another KCLayout in the constructor will use.
 
 This KCLayout object contains all the KCells and also keeps track of the layers.
 
@@ -17,12 +17,12 @@ Similar to the KCell,which cannot exist without a KCLayout, an instance cannot e
 
 ## Layers
 
-Compared to gdsfactory, KLayout needs to initialize new layers. 
+Compared to gdsfactory, KLayout needs to initialize new layers.
 Layers are always associated or part of one KCLayout. They cannot be shared or used in another KCLayout without a function that specifically copies it from one KCLayout to another.
 It can be done directly in the KCLayout object with `kcl.layer(layernumber, datatype)` which will return an integer. This integer
 is the internal index of the layer, meaning KLayout will keep layers in a mapping (dictionary) like structure.
 
-kfactory also provides an enum class [LayerEnum][kfactory.kcell.LayerEnum] to do the mapping for the (default) KCLayout. This can be done in the standard enum way
+kfactory also provides an enum class [LayerEnum][kfactory.layer.LayerEnum] to do the mapping for the (default) KCLayout. This can be done in the standard enum way
 
 !!! example "LayerEnum"
 
@@ -40,8 +40,8 @@ Or it can be done dynamically with a slightly more complex syntax.
     LAYER = kfactory.LayerEnum("LAYER", {"WG": (1, 0), "WGEXCLUDE": (1, 1)})
     ```
 
-The first argument represents the name of the enum that will be used for the `__str__` or `__repr__` methods. 
-It is strongly recommended to name it the same as the variable it is assigned to. 
+The first argument represents the name of the enum that will be used for the `__str__` or `__repr__` methods.
+It is strongly recommended to name it the same as the variable it is assigned to.
 This will make sure that the behavior is the same as the one that was constructed first.
 
 The LayerEum also allows mapping from string to layer index and layer number and datatype:
@@ -64,9 +64,9 @@ The LayerEum also allows mapping from string to layer index and layer number and
 
 !!! danger "Layer Indexes"
 
-    In KLayout it is possible to push shapes or other layer associated objects into layer indexes that do not exist (yet or even ever). Therefore always use either the `LayerEnum` to access a shapes object or use the KLayout tools to do so. 
+    In KLayout it is possible to push shapes or other layer associated objects into layer indexes that do not exist (yet or even ever). Therefore always use either the `LayerEnum` to access a shapes object or use the KLayout tools to do so.
     E.g. shapes on layer `(1,0)` can either be accessed with `c.shapes(LAYER.WG)` or `c.shapes(c.kcl.layer(1,0))`.
-    It is never good practice to do `c.shapes(0)` even if layer index 0 exists. 
+    It is never good practice to do `c.shapes(0)` even if layer index 0 exists.
     If you import this module later on, index 0 might be something else, or even worse, be deleted.
 
 ## Shapes
@@ -77,7 +77,7 @@ In contrast to gdsfactory, every geometrical dimension is represented as an obje
 |--------------|----------------|----------------------------------------------------------------------------------------------------------|
 | Point        | DPoint         | Holds x/y coordinate in dbu
 
-| Vector       | DVector        | Similar to a point, but can be used for geometry operations and can be multiplied 
+| Vector       | DVector        | Similar to a point, but can be used for geometry operations and can be multiplied
 
 | Edge         | DEdge          | Connection of two points (p1/p2) and is aware of the two sides
 
@@ -91,9 +91,9 @@ In contrast to gdsfactory, every geometrical dimension is represented as an obje
 
 | Shape        | -              | A generalized container for other geometric objects that allows storage and retrieval
 
-| Shapes       | -              | A flat collection of shapes. Used by KCells to access shapes in a cell 
+| Shapes       | -              | A flat collection of shapes. Used by KCells to access shapes in a cell
 
-| Region       | -              | Flat or deep collection of polygons. Any other dbu shape can be inserted (except Texts) 
+| Region       | -              | Flat or deep collection of polygons. Any other dbu shape can be inserted (except Texts)
 
 In kfactory and KLayout these objects can live outside of a (K)Cell. Therefore it is not possible to create them through the KCell like in gdsfactory.
 
@@ -101,11 +101,11 @@ These objects can be inserted into a KCell with `c.shapes(layer_index).insert(sh
 
 ### gdsfactory's `add_polygon` in kfactory
 
-In gdsfactory polygons are usually created through `c.add_polygon(pts, layer_tuple)`. 
-In kfactory this is not directly possible, nor very useful, as not all geometrical objects are polygons. 
+In gdsfactory polygons are usually created through `c.add_polygon(pts, layer_tuple)`.
+In kfactory this is not directly possible, nor very useful, as not all geometrical objects are polygons.
 Additionally, kfactory and KLayout do not know layers without a datatype and integers alone are interpreted as layer indexes not as a `(layer_number, 0)` tuple (a data structure consisting of multiple parts).
 
-In kfactory a `Polygon` can be created like this and then inserted into KCell `c` with `c.shapes(layer_index).insert(polygon)`. Since the objects are not linked to any KCell, they can be used multiple times. 
+In kfactory a `Polygon` can be created like this and then inserted into KCell `c` with `c.shapes(layer_index).insert(polygon)`. Since the objects are not linked to any KCell, they can be used multiple times.
 Using the `LAYER` object from above, a code could look like this:
 
 !!! example "Polygon"
@@ -152,7 +152,7 @@ Similar to the `add_polygon` function, `add_label` acts as a text record to a ce
 
 ## Connecting Ports
 
-kfactory also offers `c.connect(port_name, other_port)` like gdsfactory does. It does not exactly do the same thing as in gdsfactory though. A [Port][kfactory.kcell.Port] in kfactory will always try to be on a grid. Additionally the port is using `kfactory.kdb.Trans` and `kfactory.kdb.DCplxTrans` by default, similar to an instance.
+kfactory also offers `c.connect(port_name, other_port)` like gdsfactory does. It does not exactly do the same thing as in gdsfactory though. A [Port][kfactory.port.Port] in kfactory will always try to be on a grid. Additionally the port is using `kfactory.kdb.Trans` and `kfactory.kdb.DCplxTrans` by default, similar to an instance.
 This also means that a port is aware of mirroring. Since a `connect` can be simplified to `instance.trans = other_port.trans * kfactory.kdb.Trans.R180 * port.trans.inversed()` (for the 90° on-grid cases), it can be seen that the center, angle and mirror flag of the `instance` is overwritten. Therefore, any move / rotation / mirror of the instance `connect` is called on, will have no influence on the state after the connect.
 
 Also, as with gdsfactory `connect` , it is not final. It does not imply any shared link between the instances after the `connect`, it is simply a transformation with some checks concerning the layer, width and port type matching.
@@ -171,9 +171,9 @@ Also, as with gdsfactory `connect` , it is not final. It does not imply any shar
 
 ## LayerEnclosure / KCellEnclosure vs CrossSection
 
-kfactory does not have the concept of cross sections. 
+kfactory does not have the concept of cross sections.
 Since cross sections are limited to have a path as a backbone, kfactory implemented a more generalized form as enclosures.
-[LayerEnclosures][kfactory.enclosure.LayerEnclosure] can use regions or even entire layers as a basis to apply excludes and claddings (or anything that depends on the base form). 
-Additionally, kfactory has the extended concept of [KCellEnclosure][kfactory.enclosure.KCellEnclosure]. 
-These can apply enclosures to a whole KCell on all layers the KCellEnclosure is aware of. 
+[LayerEnclosures][kfactory.enclosure.LayerEnclosure] can use regions or even entire layers as a basis to apply excludes and claddings (or anything that depends on the base form).
+Additionally, kfactory has the extended concept of [KCellEnclosure][kfactory.enclosure.KCellEnclosure].
+These can apply enclosures to a whole KCell on all layers the KCellEnclosure is aware of.
 For further info, please head over to the [Tutorial](/kfactory/notebooks/03_Enclosures)

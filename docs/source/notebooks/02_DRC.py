@@ -41,7 +41,7 @@ kf.kcl.infos = LAYER
 
 # A cell named triangle containing a triangle shape is created.
 # A cell named Box containing a rectangular DBox is created.
-# A third cell c is created, and instances of the triangle and box are placed into it. 
+# A third cell c is created, and instances of the triangle and box are placed into it.
 # This part of the code is not directly used in the main demonstration but sets up a basic layout context.
 
 triangle = kf.KCell()
@@ -66,7 +66,7 @@ c
 # %%
 
 # Two were placed inside one another for loops and are used to draw a huge number of ellipses.
-# The placement logic is designed to make many of these ellipses overlap or violate minimum spacing rules, 
+# The placement logic is designed to make many of these ellipses overlap or violate minimum spacing rules,
 # this creates a "dirty" layout that needs to be fixed.
 # d1 and d2 are used to time how long it takes to generate all these shapes.
 # This section intentionally creates a massive, complicated layout with thousands of shapes placed very close to each other.
@@ -93,8 +93,8 @@ for i in range(50):
 d2 = datetime.now()
 
 # kf.utils.fix_spacing_tiled: This powerful function is designed to enforce a minimum spacing rule across an entire layout.
-# How it works: It breaks the massive layout into smaller sections called "tiles" (tile_size=(250, 250)). 
-# It then processes each tile individually to find any shapes on the WG layer (c.kcl.infos.WG) that are closer than the specified distance of 1000 dbu (1 µm). 
+# How it works: It breaks the massive layout into smaller sections called "tiles" (tile_size=(250, 250)).
+# It then processes each tile individually to find any shapes on the WG layer (c.kcl.infos.WG) that are closer than the specified distance of 1000 dbu (1 µm).
 # It merges these violating shapes into larger, compliant polygons.
 # n_threads=32: This tells the function to use 32 parallel processing threads, dramatically speeding up the operation on modern CPUs.
 # The "cleaned" geometry is then inserted onto a new layer, (2, 0),
@@ -140,7 +140,7 @@ for i in range(50):
 
 d2 = datetime.now()
 
-# kf.utils.fix_spacing_minkowski_tiled: This function also fixes minimum spacing violations using a tiling approach. 
+# kf.utils.fix_spacing_minkowski_tiled: This function also fixes minimum spacing violations using a tiling approach.
 # However, it is based on the Minkowski sum, a mathematical operation that is very effective for "growing" and merging shapes.
 # smooth=5: This is an additional parameter that smooths out the corners of the merged shapes, which can be beneficial for device performance.
 # Like before, it generates the cleaned geometry on layer (2, 0) and times the process.

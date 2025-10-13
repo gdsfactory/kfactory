@@ -19,7 +19,7 @@
 #
 # A `KCell` is like an empty canvas, where you can add polygons and instances to other Cells and ports (which is used to connect to other cells)
 #
-# In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries. 
+# In KLayout geometries are in datatabase units (dbu) or microns. GDS uses an integer grid as a basis for geometries.
 # The default is `0.001`, i.e. 1nm grid size (0.001 microns)
 #
 # - `Point`, `Box`, `Polygon`, `Edge`, `Region` are in dbu
@@ -27,13 +27,13 @@
 #
 # Most Shape types are available as microns and dbu parts. They can be converted with `<ShapeTypeDBU>.to_dtype(dbu)` to microns
 #  and with `<ShapeTypeMicrons>.to_itype(dbu)` where `dbu` is the the conversion of one database unit to microns.
-# Alternatively they can be converted with `c.kcl.to_um(<ShapeTypeDBU>)` or `c.kcl.to_dbu(<ShapeTypeMicrons>)` 
+# Alternatively they can be converted with `c.kcl.to_um(<ShapeTypeDBU>)` or `c.kcl.to_dbu(<ShapeTypeMicrons>)`
 # where `c.kcl` is the KCell and `kcl` is the `KCLayout` which owns the KCell.
 
 # Imports: It imports the necessary libraries: kfactory for layout creation and numpy for numerical operations
-# LayerInfos Class: In chip fabrication, the design is built up layer by layer. 
-# Each layer corresponds to a specific material or process step (e.g., silicon, metal, oxide). 
-# This class creates human-readable names (WG for waveguide, CLAD for cladding) 
+# LayerInfos Class: In chip fabrication, the design is built up layer by layer.
+# Each layer corresponds to a specific material or process step (e.g., silicon, metal, oxide).
+# This class creates human-readable names (WG for waveguide, CLAD for cladding)
 # and maps them to the GDS layer numbers ((1, 0), (4, 0))
 
 # %%
@@ -166,12 +166,12 @@ c.plot()
 # *layer: The asterisk * is Python's "unpacking" operator. It turns the tuple (1, 0) into two separate arguments, so kf.kcl.find_layer(*layer) is the same as calling kf.kcl.find_layer(1, 0).
 # kf.kcl.find_layer: This function takes the layer and purpose numbers, in this case 1 and 0 and finds the corresponding internal layer index.
 # This will then allow the KLayout software uses to manage the data efficiently.
-# wg.shapes(_layer).insert(box): This is the "drawing" step. 
-# It instructs the software to take the rectangular box shape and place it specifically on the blueprint for Layer 1, Purpose 0. 
+# wg.shapes(_layer).insert(box): This is the "drawing" step.
+# It instructs the software to take the rectangular box shape and place it specifically on the blueprint for Layer 1, Purpose 0.
 # Without this, the shape would exist only in memory but not be part of the final chip design.
 # wg = kf.KCell(): Creates a new, empty cell named wg (short for waveguide).
 # box = kf.kdb.DBox(length, width): Creates a rectangular shape object using floating-point coordinates in microns.
-# int_box = wg.kcl.to_dbu(box): Chip layout databases use integers for high precision, called database units (dbu). 
+# int_box = wg.kcl.to_dbu(box): Chip layout databases use integers for high precision, called database units (dbu).
 # This line converts the box's micron coordinates into these integer units.
 # Then the function adds connecting ports named "o1" and "o2".
 # Finally, the function will return the completed wg cell, which now contains the rectangular shape.
@@ -298,7 +298,7 @@ mwg1_ref.connect("o2", mwg2_ref.ports["o1"])
 c2
 
 # This block creates and mirrors 2 Euler bend components horizontally, this creates a U turn. An Euler bend is a curve designed to minimize light loss.
-# Setup: A new cell c is created, and a 90-degree Euler bend component is defined. 
+# Setup: A new cell c is created, and a 90-degree Euler bend component is defined.
 # Placement: Two identical instances of the bend, b1 and b2, are placed in c at the origin (0, 0), one on top of the other.
 # Transformation: b2.mirror_x(x=0) takes the second instance (b2) and mirrors it horizontally across the y-axis (the vertical line where x=0).
 # Result: The final cell c contains the original bend (b1) and its horizontal mirror image (b2).
@@ -324,7 +324,7 @@ c
 
 # After that, we expand on the previous structure and make it a S-bend waveguide.
 # Setup & Mirroring: The code starts exactly like Block 2, creating two bends (b1, b2) and mirroring b2 vertically. They are still overlapping.
-# Alignment: b1.ymin = b2.ymax is the key step. This is a powerful kfactory feature for alignment. 
+# Alignment: b1.ymin = b2.ymax is the key step. This is a powerful kfactory feature for alignment.
 # It moves the entire b1 instance vertically until its bottom edge (ymin) is perfectly aligned with the top edge (ymax) of the mirrored b2 instance.
 # Result: The two mirrored bends are now perfectly stitched together to form a seamless S-bend.
 # This is a common component for shifting the path of a waveguide.
@@ -353,7 +353,7 @@ c2.shapes(c2.kcl.find_layer(1, 0)).insert(kf.kdb.Text("Second label", mwg2_ref.t
 
 # %%
 # First we insert a new shape into the c2 cell:
-# c2.kcl.find_layer(10, 0): This specifies that the new shape will be drawn on GDSII layer 10, purpose 0. 
+# c2.kcl.find_layer(10, 0): This specifies that the new shape will be drawn on GDSII layer 10, purpose 0.
 # This layer is often used for documentation or labels.
 # c2.shapes(...).insert(...): This is the command to add the shape (in this case, a text object) to the specified layer.
 # Then we define the text object:

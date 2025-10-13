@@ -8,7 +8,7 @@ from .. import kdb
 
 
 def simplify(points: list[kdb.Point], tolerance: float) -> list[kdb.Point]:
-    """Simplify a list of [Point][klayout.db.Point] to a certain tolerance (in dbu).
+    """Simplify a list of `klayout.db.Point` to a certain tolerance (in dbu).
 
     Uses [Ramer-Douglas-Peucker algorithm](https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm)
 
@@ -41,7 +41,7 @@ def dsimplify(points: list[kdb.DPoint], tolerance: float) -> list[kdb.DPoint]:
     Uses [Ramer-Douglas-Peucker algorithm](https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm)
 
     Args:
-        points: list of [DPoint][klayout.db.DPoint] to simplify
+        points: list of `klayout.db.DPoint` to simplify
         tolerance: if two points are > tolerance (in um) apart,
             delete most suitable points.
     """

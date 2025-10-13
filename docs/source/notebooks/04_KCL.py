@@ -22,16 +22,18 @@
 # %% [markdown]
 # ## Use multiple KCLayout objects as PDKs/Libraries
 #
-# KCLayouts can act as PDKs. They can be seamlessly incooperated into each other.
+# KCLayouts can act as PDKs. They can be seamlessly incorporated into each other.
 
 # %%
 import kfactory as kf
 
+
 class LayerInfos(kf.LayerInfos):
-    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1,0)
-    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2,0) # WG Exclude
-    CLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4,0) # cladding
-    FLOORPLAN: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10,0)
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)  # WG Exclude
+    CLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4, 0)  # cladding
+    FLOORPLAN: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
+
 
 # Make the layout object aware of the new layers:
 LAYER = LayerInfos()
@@ -47,9 +49,7 @@ kcl_default.kcells
 
 # %%
 # Create a default straight waveguide in the default KCLayout with dbu==0.001 (1nm grid)
-s_default = kf.cells.straight.straight(
-    width=1, length=10, layer=LAYER.WG
-)
+s_default = kf.cells.straight.straight(width=1, length=10, layer=LAYER.WG)
 
 # %%
 # There is now a a KCell in the KCLayout
@@ -100,7 +100,7 @@ s_default.ports.print(unit="um")
 s2.ports.print(unit="um")
 
 # %%
-# Both can be incooperated into the same KCell
+# Both can be incorporated into the same KCell
 c = kcl_default.kcell()
 si_d = c << s_default
 si_2 = c << s2

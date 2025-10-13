@@ -159,7 +159,7 @@ Traceback (most recent call last):
 
 ## Jupyter Widget
 
-By default kfactory will provide a `IPython.Image` for notebooks. Instead of the image a simple interactive Jupyter widget may be used. The widget is not very performant and might impact performance for larger notebooks. 
+By default kfactory will provide a `IPython.Image` for notebooks. Instead of the image a simple interactive Jupyter widget may be used. The widget is not very performant and might impact performance for larger notebooks.
 It can be configured in `kfactory.config.display_type`. Available options are `widget` or `image`. For example, the docs that use `image` as the interactive widget will not work on a standard html page.
 
 Similar to the log level this may also be configured through dotenv or an env variable.

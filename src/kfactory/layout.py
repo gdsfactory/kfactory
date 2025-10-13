@@ -933,8 +933,7 @@ class KCLayout(
                 ignored.
             snap_ports: Snap the centers of the ports onto the grid
                 (only x/y, not angle).
-            add_port_layers: Add special layers of
-                [netlist_layer_mapping][kfactory.kcell.KCLayout.netlist_layer_mapping]
+            add_port_layers: Add special layers of `KCLayout.netlist_layer_mapping`
                 to the ports if the port layer is in the mapping.
             cache: Provide a user defined cache instead of an internal one. This
                 can be used for example to clear the cache.
@@ -944,7 +943,7 @@ class KCLayout(
             drop_params: Drop these parameters before writing the
                 [settings][kfactory.kcell.KCell.settings]
             register_factory: Register the resulting KCell-function to the
-                [factories][kfactory.kcell.KCLayout.factories]
+                `KCLayout.factories`
             layout_cache: If true, treat the layout like a cache, if a cell with the
                 same name exists already, pick that one instead of using running the
                 function. This only works if `set_name` is true. Can be globally
@@ -956,9 +955,7 @@ class KCLayout(
             post_process: List of functions to call after the cell has been created.
             debug_names: Check on setting the name whether a cell with this name already
                 exists.
-            tags: Tag cell functions with user defined tags. With this, cell functions
-                can then be retrieved with `kcl.factories.tags[my_tag]` or if filtered
-                for multiple `kcl.factories.for_tags([my_tag1, my_tag2, ...])`.
+            tags: Tag cell functions with user defined tags.
         Returns:
             A wrapped cell function which caches responses and modifies the cell
             according to settings.
@@ -1119,21 +1116,16 @@ class KCLayout(
                 string created from the args/kwargs
             check_ports: Check uniqueness of port names.
             check_pins: Check uniqueness of pin names.
-            snap_ports: Snap the centers of the ports onto the grid
-                (only x/y, not angle).
-            add_port_layers: Add special layers of
-                [netlist_layer_mapping][kfactory.kcell.KCLayout.netlist_layer_mapping]
+            add_port_layers: Add special layers of `KCLayout.netlist_layer_mapping`
                 to the ports if the port layer is in the mapping.
             cache: Provide a user defined cache instead of an internal one. This
                 can be used for example to clear the cache.
-            rec_dicts: Allow and inspect recursive dictionaries as parameters (can be
-                expensive if the cell is called often).
             basename: Overwrite the name normally inferred from the function or class
                 name.
             drop_params: Drop these parameters before writing the
                 [settings][kfactory.kcell.KCell.settings]
             register_factory: Register the resulting KCell-function to the
-                [factories][kfactory.kcell.KCLayout.factories]
+                `KCLayout.factories`
             info: Additional metadata to put into info attribute.
             post_process: List of functions to call after the cell has been created.
         Returns:
