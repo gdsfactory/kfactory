@@ -16,8 +16,8 @@
 
 # %% [markdown]
 # # Enclosures
-# This code uses kfactory to demonstrate how to create enclosures, 
-# which are geometries that surround or are derived from a main shape. 
+# This code uses kfactory to demonstrate how to create enclosures,
+# which are geometries that surround or are derived from a main shape.
 # This is a crucial technique for defining things like cladding layers, doping regions, or keep-out zones around a central component like a waveguide.
 
 # %%
@@ -37,7 +37,7 @@ kf.kcl.infos = LAYER
 # This first block creates a simple enclosure with one extra layer.
 # kf.enclosure.LayerEnclosure(...): This defines a set of rules for creating new layers based on a main layer.
 # main_layer=LAYER.WG: This specifies that the enclosure rules will be applied to any shapes on the WG (waveguide) layer.
-# (LAYER.SLAB, 2000): This is the core rule. It means: 
+# (LAYER.SLAB, 2000): This is the core rule. It means:
 # "Create a new shape on the SLAB layer by taking the WG shape and expanding it outwards by 2000 database units (which is 2 µm, since the default dbu is 1 nm)."
 # kf.cells.euler.bend_euler(...): This function creates an Euler bend, a type of curved waveguide.
 # enclosure=enc: By passing our enc rule into the bend component, the component automatically creates the SLAB layer around the WG layer according to the rule.
@@ -60,7 +60,7 @@ c.plot()
 # (LAYER.NPP, 1000, 2000): This rule is more advanced. It has three parts: (layer, enclosure, offset).
 # It targets the NPP layer (likely for N-type doping).
 # The enclosure value of 1000 means the new shape will be 1 µm wider than the main WG shape.
-# The offset value of 2000 means the new shape will also be shifted outwards by 2 µm from the edge of the WG. 
+# The offset value of 2000 means the new shape will also be shifted outwards by 2 µm from the edge of the WG.
 # This creates a doped region that is separated from the waveguide core.
 # This more complex enc object is then applied to a new Euler bend,
 # which then results in a component with three layers: the core WG, the SLAB, and the offset NPP doping region.
@@ -78,15 +78,15 @@ c.plot()
 
 # %%
 
-# kcell_enc = kf.KCellEnclosure([enc]): This creates a wrapper, a KCellEnclosure, that can hold one or more LayerEnclosure rule sets. 
+# kcell_enc = kf.KCellEnclosure([enc]): This creates a wrapper, a KCellEnclosure, that can hold one or more LayerEnclosure rule sets.
 # Here, it holds the SLAB_DOPED rules from the previous step.
-# @kf.cell def two_bends(...): This defines a new, reusable component that contains two separate Euler bends. 
+# @kf.cell def two_bends(...): This defines a new, reusable component that contains two separate Euler bends.
 # It is important to note that the bends themselves are created without any enclosure.
 # if enclosure:: The function checks if an enclosure object was passed to it.
-# enclosure.apply_minkowski_tiled(c): This is the key command. 
-# It takes the final geometry of the two_bends cell (both bends combined) and applies the enclosure rules to the whole thing at once. 
+# enclosure.apply_minkowski_tiled(c): This is the key command.
+# It takes the final geometry of the two_bends cell (both bends combined) and applies the enclosure rules to the whole thing at once.
 # This correctly merges the enclosures of the two bends into a single, continuous shape, which is often the desired result.
-# The final output is the two_bends component, where a single, unified SLAB and NPP region correctly surrounds the combined geometry of both bends. 
+# The final output is the two_bends component, where a single, unified SLAB and NPP region correctly surrounds the combined geometry of both bends.
 # This method is more robust for complex cells than applying enclosures to each sub-component individually.
 
 kcell_enc = kf.KCellEnclosure([enc])

@@ -29,7 +29,7 @@
 # It is huge, and you need to use it in your design 250 times.
 # Well, a single copy of BigPolygon takes up 1MB of memory, so you do not want to make 250 copies of it
 # You can instead *instances* the polygon 250 times.
-# Each instance only uses a few bytes of memory -- 
+# Each instance only uses a few bytes of memory --
 # It only needs to know the memory address of the BigPolygon, alongside its position, rotation and mirror.
 # This way, you can keep one copy of BigPolygon and use it again and again.
 #
@@ -90,7 +90,7 @@ c
 # Now you have 3x polygons all on top of each other. Again, this would appear
 # useless, except that you can manipulate each instance independently. Notice that
 # when you called `c.add_ref(p)` above, we saved the result to a new variable each
-# time (`poly_ref`, `poly_ref2`, and `poly_ref3`)?  
+# time (`poly_ref`, `poly_ref2`, and `poly_ref3`)?
 # You can use those variables to reposition the instances.
 
 # %%
@@ -232,7 +232,7 @@ c.ports
 # ## Connect the instances
 #
 # We have seen that once you create a instance you can manipulate the instance to move it to a location.
-# Here we are going to connect that instance to a port. 
+# Here we are going to connect that instance to a port.
 # Remember that we follow the rule that a certain instance `source` connects to a `destination` port.
 
 # %%

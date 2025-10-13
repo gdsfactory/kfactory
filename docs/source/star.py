@@ -1,4 +1,4 @@
-# This script uses kfactory to programmatically create a complex chip layout that looks like a starry sky. 
+# This script uses kfactory to programmatically create a complex chip layout that looks like a starry sky.
 # It does this by defining components for stars, placing them randomly, and then subtracting their shapes from a background layer.
 
 import kfactory as kf

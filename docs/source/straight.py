@@ -9,11 +9,11 @@ from layers import LAYER
 
 import kfactory as kf
 
-# LAYER.SI: Refers to the Silicon layer (e.g., GDSII layer 1, datatype 0), 
+# LAYER.SI: Refers to the Silicon layer (e.g., GDSII layer 1, datatype 0),
 # which forms the physical core of the waveguide where light is confined.
-# LAYER.SIEXCLUDE: Refers to an Exclusion layer (e.g., GDSII layer 1, datatype 1). 
-# This is a metadata layer used for Design Rule Checking (DRC). 
-# It defines a "keep-out" zone around the waveguide, 
+# LAYER.SIEXCLUDE: Refers to an Exclusion layer (e.g., GDSII layer 1, datatype 1).
+# This is a metadata layer used for Design Rule Checking (DRC).
+# It defines a "keep-out" zone around the waveguide,
 # essentially instructing automated tools not to place other silicon structures within this boundary.
 # This is done to prevent performance degradation from optical crosstalk.(Two light sources interfering with one another)
 # Then, two rectangular shapes are drawn: the core and the wider exclusion zone. They are created with kf.kdb.Box(left, bottom, right, top):

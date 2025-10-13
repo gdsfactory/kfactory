@@ -100,7 +100,6 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
         Args:
             layer: Layer number of the layer.
             datatype: Datatype of the layer.
-            kcl: Base Layout object to register the layer to.
         """
         value = cls.layout.layer(layer, datatype)
         obj: int = int.__new__(cls, value)

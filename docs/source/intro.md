@@ -1,6 +1,6 @@
 # Getting Started
 
-As an example we will build a small waveguide and incooperate a circular bend waveguide and connect them.
+As an example we will build a small waveguide and incorporate a circular bend waveguide and connect them.
 
 First let us create some layers. We will use the standard library for this.
 Create a `layers.py`. The full one can be downloaded here: [`layers.py`](./layers.py).
@@ -80,9 +80,9 @@ if __name__ == "__main__":
 The ``kf.show`` will create a GDS in the temp folder and then send the GDS by klive to KLayout (if klive is installed).
 By running this with ``python straight.py``, it should show us a straight like this:
 
-![straight](./_static/straight.png)
+![straight](./_static/waveguide.png)
 
-Afterwards let us create the composite cell [`complex_cell.py`](./complex_cell.py). This one incooperates a waveguide and a circular bend and then connects them.
+Afterwards let us create the composite cell [`complex_cell.py`](./complex_cell.py). This one incorporates a waveguide and a circular bend and then connects them.
 
 First, a straight function is defined. Then similarly to the above code, ports are added and renamed.
 The second portion of this code only runs when executed directly:
