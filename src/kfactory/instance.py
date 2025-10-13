@@ -315,7 +315,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         allow_type_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
-    ) -> None: ...
+    ) -> Self: ...
 
     @overload
     def connect(
@@ -330,7 +330,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         allow_type_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
-    ) -> None: ...
+    ) -> Self: ...
 
     @overload
     def connect(
@@ -345,7 +345,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         allow_type_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
-    ) -> None: ...
+    ) -> Self: ...
 
     def connect(
         self,
@@ -359,7 +359,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         allow_type_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
-    ) -> None:
+    ) -> Self:
         """Align port with name `portname` to a port.
 
         Function to allow to transform this instance so that a port of this instance is
@@ -466,6 +466,8 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
                     self.dmirror_y(op.dcplx_trans.disp.y)
                 case _:
                     raise NotImplementedError("This shouldn't happen")
+
+        return self
 
     def __repr__(self) -> str:
         """Return a string representation of the instance."""
