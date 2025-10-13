@@ -71,6 +71,7 @@ docs = [
     "griffe-pydantic>=1.1.4",
     "griffe-inherited-docstrings>=1.1.1",
     "griffe-warnings-deprecated>=1.1.0",
+    "ruff>=0.9.2",
 ]
 ci = [
     "pytest >= 8.3.5",

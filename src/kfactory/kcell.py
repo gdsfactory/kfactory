@@ -145,7 +145,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
         yaml_tag: Tag for yaml serialization.
         ports: Manages the ports of the cell.
         settings: A dictionary containing settings populated by the
-            [cell][kfactory.kcell.cell] decorator.
+            [cell][kfactory.layout.KCLayout.cell] decorator.
         info: Dictionary for storing additional info if necessary. This is not
             passed to the GDS and therefore not reversible.
         d: UMKCell object for easy access to the KCell in um units.
@@ -235,7 +235,7 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # 
 
     @property
     def settings(self) -> KCellSettings:
-        """Settings dictionary set by the [@vcell][kfactory.kcell.vcell] decorator."""
+        """Settings dictionary set by the `kfactory.layout.KCLayout.vcell` decorator."""
         return self._base.settings
 
     @settings.setter
@@ -1868,7 +1868,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
 
         Args:
             port_types: The port types to consider for the netlist extraction.
-            exclude_purpose: List of purposes, if an instance has that purpose, it will
+            exclude_purposes: List of purposes, if an instance has that purpose, it will
                 be ignored.
             ignore_unnamed: Ignore any instance without `.name` set.
         Returns:
@@ -1915,7 +1915,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         Uses electrical connectivity for extraction.
 
         Args:
-            port_types: The port types to consider for the netlist extraction.
+            mark_port_types: The port types to consider for the netlist extraction.
+            connectivity: Define connectivity between layers. These can be single
+                layers (just consider this layer as metal), two layers (two metals
+                which touch each other), or three layers (two metals with a via)
+            port_mapping: Remap ports of cells to others. This allows to define
+                equivalent ports in the lvs. E.g. `{"cell_A": {"o3": "o1", "o2"}}`
+                will remap "o2" and "o3" to "o1". Making the three ports the same
+                one for LVS.
         Returns:
             LayoutToNetlist extracted from electrical connectivity.
         """
@@ -2818,7 +2825,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         return DInstances(cell=self._base)
 
     def __lshift__(self, cell: AnyTKCell) -> DInstance:
-        """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
+        """Convenience function for `DKCell.create_inst`.
 
         Args:
             cell: The cell to be added as an instance
@@ -3022,7 +3029,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         )
 
     def __lshift__(self, cell: AnyTKCell) -> Instance:
-        """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
+        """Convenience function for `KCell.create_inst`.
 
         Args:
             cell: The cell to be added as an instance

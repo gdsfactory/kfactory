@@ -165,7 +165,7 @@ def fix_spacing_sizing_tiled(
         tile_size: tuple determining the size of each sub tile (in um), should be big
             compared to the violation size. By default this will be at minimum 250 um or
             25 times the violation size, whichever is bigger.
-         overlap: how many times bigger to make the tile border in relation to the
+        overlap: how many times bigger to make the tile border in relation to the
             violation size. Smaller than 1 can lead to errors
 
     Returns:
@@ -223,7 +223,7 @@ def fix_spacing_minkowski_tiled(
         tile_size: tuple determining the size of each sub tile (in um), should be big
             compared to the violation size. By default this will be at minimum 250 um or
             25 times the violation size, whichever is bigger.
-         overlap: how many times bigger to make the tile border in relation to the
+        overlap: how many times bigger to make the tile border in relation to the
             violation size. Smaller than 1 can lead to errors
         smooth: Apply smoothening (simplifying) at the end if > 0
 
@@ -299,7 +299,7 @@ def fix_width_minkowski_tiled(
         tile_size: tuple determining the size of each sub tile (in um), should be big
             compared to the violation size. By default this will be at minimum 250 um or
             25 times the violation size, whichever is bigger.
-         overlap: how many times bigger to make the tile border in relation to the
+        overlap: how many times bigger to make the tile border in relation to the
             violation size. Smaller than 1 can lead to errors
         smooth: Apply smoothening (simplifying) at the end if > 0
 
@@ -379,7 +379,7 @@ def fix_width_and_spacing_minkowski_tiled(
         tile_size: tuple determining the size of each sub tile (in um), should be big
             compared to the violation size. By default this will be at minimum 250 um or
             25 times the violation size, whichever is bigger.
-         overlap: how many times bigger to make the tile border in relation to the
+        overlap: how many times bigger to make the tile border in relation to the
             violation size. Smaller than 1 can lead to errors (overlap*min_space)
         smooth: Apply smoothening (simplifying) at the end if > 0
 
