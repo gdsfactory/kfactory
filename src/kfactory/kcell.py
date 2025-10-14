@@ -29,6 +29,7 @@ from collections.abc import (
 )
 from pathlib import Path
 from tempfile import gettempdir
+from threading import get_ident
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -585,8 +586,8 @@ class TKCell(BaseKCell):
                                 for tkcell in tkcells
                             )
                         )
-
-        self.kdb_cell.name = value
+        with self.kcl.thread_lock:
+            self.kdb_cell.name = value
 
 
 class TVCell(BaseKCell):
@@ -633,7 +634,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         kcl_ = kcl or get_default_kcl()
 
         if name is None:
-            name_ = "Unnamed_!" if kdb_cell is None else kdb_cell.name
+            name_ = f"Unnamed_!{get_ident()}" if kdb_cell is None else kdb_cell.name
         else:
             name_ = name
             if kdb_cell is not None:
@@ -972,9 +973,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         if cell.layout() == self.layout():
             return cell.cell_index()
         assert cell.layout().library() is not None
-        lib_ci = self.kcl.layout.add_lib_cell(cell.kcl.library, cell.cell_index())
+        with self.kcl.thread_lock:
+            lib_ci = self.kcl.layout.add_lib_cell(cell.kcl.library, cell.cell_index())
         if lib_ci not in self.kcl.tkcells:
-            kcell = self.kcl[lib_ci]
+            with self.kcl.thread_lock:
+                kcell = self.kcl[lib_ci]
             kcell.basename = cell.basename
             kcell.function_name = cell.function_name
             kcell.base._library_cell = KCell(base=cell.base)

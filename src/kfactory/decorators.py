@@ -7,7 +7,7 @@ import inspect
 from collections import defaultdict
 from enum import StrEnum
 from pathlib import Path
-from threading import RLock
+from threading import Condition, RLock
 from types import FunctionType
 from typing import (
     TYPE_CHECKING,
@@ -324,7 +324,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     _f: Callable[KCellParams, KC]
     _f_orig: Callable[KCellParams, ProtoTKCell[Any]]
     _f_schematic: Callable[KCellParams, Schematic | DSchematic] | None = None
-    cache: Cache[int, KC] | dict[int, Any]
+    cache: Cache[int, KC]
     name: str
     kcl: KCLayout
     output_type: type[KC]
@@ -349,7 +349,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         f: Callable[KCellParams, ProtoTKCell[Any]],
         sig: inspect.Signature,
         output_type: type[KC],
-        cache: Cache[int, KC] | dict[int, KC],
+        cache: Cache[int, KC],
         set_settings: bool,
         set_name: bool,
         check_ports: bool,
@@ -374,13 +374,16 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         self.ports_definition = ports.copy() if ports is not None else None
         self.tags = set(tags) if tags else set()
 
+        lock = RLock()
+        condition = Condition(lock=lock)
+
         @functools.wraps(f)
         def wrapper_autocell(
             *args: KCellParams.args, **kwargs: KCellParams.kwargs
         ) -> KC:
             params, param_units = _parse_params(sig, kcl, args, kwargs)
 
-            @cached(cache=cache, lock=RLock())
+            @cached(cache=cache, lock=lock, condition=condition)
             @functools.wraps(f)
             def wrapped_cell(**params: Any) -> KC:
                 _params_to_original(params)
@@ -390,14 +393,17 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                         name = get_cell_name(basename, **params)
                     else:
                         name = get_cell_name(self.name, **params)
-                    old_future_name = kcl.future_cell_name
-                    kcl.future_cell_name = name
+                    old_future_name = kcl.future_cell_name.get()
+                    with kcl.thread_lock:
+                        kcl.future_cell_name.set(name)
                     if layout_cache:
                         if overwrite_existing:
-                            for c in list(kcl.cells(kcl.future_cell_name)):
-                                kcl[c.cell_index()].delete()
+                            with kcl.thread_lock:
+                                for c in list(kcl.cells(name)):
+                                    kcl[c.cell_index()].delete()
                         else:
-                            layout_cell = kcl.layout_cell(kcl.future_cell_name)
+                            with kcl.thread_lock:
+                                layout_cell = kcl.layout_cell(name)
                             if layout_cell is not None:
                                 logger.debug(
                                     "Loading {} from layout cache",
@@ -406,7 +412,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                                 return kcl.get_cell(
                                     layout_cell.cell_index(), output_type
                                 )
-                    logger.debug(f"Constructing {kcl.future_cell_name}")
+                    logger.debug(f"Constructing {kcl.future_cell_name.get()}")
                     name_: str | None = name
                 else:
                     name_ = None
@@ -424,12 +430,15 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                         " KCell/DKCell or any SubClass such as Component."
                     )
 
-                logger.debug("Constructed {}", name_ or cell.name)
+                logger.debug("Constructed {} {}", name_ or cell.name, cell.cell_index())
 
                 if cell.locked:
                     # If the cell is locked, it comes from a cache (most likely)
                     # and should be copied first
-                    cell = cell.dup(new_name=kcl.future_cell_name)
+                    cell = cell.dup(
+                        new_name=kcl.future_cell_name.get()
+                        or cell.kcl.layout.unique_cell_name(cell.name)
+                    )
                 if overwrite_existing:
                     _overwrite_existing(name_, cell, kcl)
                 if set_name and name_:
@@ -446,7 +455,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                         raise CellNameError(f"KCell with name {name_} exists already.")
 
                     cell.name = name_
-                    kcl.future_cell_name = old_future_name
+                    kcl.future_cell_name.set(old_future_name)
                 if set_settings:
                     _set_settings(cell, f, drop_params, params, param_units, basename)
                 if check_ports:
@@ -524,25 +533,25 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
 
                 return output_type(base=cell.base)
 
-            with kcl.thread_lock:
+            # with kcl.thread_lock:
+            cell_ = wrapped_cell(**params)
+            if cell_.destroyed():
+                # If any cell has been destroyed, we should clean up the cache.
+                # Delete all the KCell entrances in the cache which have
+                # `destroyed() == True`
+                deleted_cell_hashes: list[int] = [
+                    _hash_item
+                    for _hash_item, _cell_item in cache.items()
+                    if _cell_item.destroyed()
+                ]
+                for _dch in deleted_cell_hashes:
+                    del cache[_dch]
                 cell_ = wrapped_cell(**params)
-                if cell_.destroyed():
-                    # If any cell has been destroyed, we should clean up the cache.
-                    # Delete all the KCell entrances in the cache which have
-                    # `destroyed() == True`
-                    deleted_cell_hashes: list[int] = [
-                        _hash_item
-                        for _hash_item, _cell_item in cache.items()
-                        if _cell_item.destroyed()
-                    ]
-                    for _dch in deleted_cell_hashes:
-                        del cache[_dch]
-                    cell_ = wrapped_cell(**params)
 
-                if info is not None:
-                    cell_.info.update(info)
+            if info is not None:
+                cell_.info.update(info)
 
-                return cell_
+            return cell_
 
         self._f = wrapper_autocell
         self._f_orig = f
@@ -583,7 +592,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
 class WrappedVKCellFunc(Generic[KCellParams, VK]):
     _f: Callable[KCellParams, VK]
     _f_orig: Callable[KCellParams, VKCell]
-    cache: Cache[int, VK] | dict[int, Any]
+    cache: Cache[int, VK]
     name: str
     kcl: KCLayout
     output_type: type[VK]
@@ -608,7 +617,7 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
         f: Callable[KCellParams, VKCell],
         sig: inspect.Signature,
         output_type: type[VK],
-        cache: Cache[int, VK] | dict[int, VK],
+        cache: Cache[int, VK],
         set_settings: bool,
         set_name: bool,
         check_ports: bool,
@@ -628,13 +637,16 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
         self.ports_definitions = ports.copy() if ports is not None else None
         self.tags = set(tags) if tags else set()
 
+        lock = RLock()
+        condition = Condition(lock=lock)
+
         @functools.wraps(f)
         def wrapper_autocell(
             *args: KCellParams.args, **kwargs: KCellParams.kwargs
         ) -> VK:
             params, param_units = _parse_params(sig, kcl, args, kwargs)
 
-            @cached(cache=cache, lock=RLock())
+            @cached(cache=cache, lock=lock, condition=condition)
             @functools.wraps(f)
             def wrapped_cell(**params: Any) -> VK:
                 _params_to_original(params)
@@ -644,8 +656,8 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
                         name = get_cell_name(basename, **params)
                     else:
                         name = get_cell_name(self.name, **params)
-                    old_future_name = kcl.future_cell_name
-                    kcl.future_cell_name = name
+                    old_future_name = kcl.future_cell_name.get()
+                    kcl.future_cell_name.set(name)
                     logger.debug(f"Constructing {kcl.future_cell_name}")
                     name_: str | None = name
                 else:
@@ -669,10 +681,10 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
                 if cell.locked:
                     # If the cell is locked, it comes from a cache (most likely)
                     # and should be copied first
-                    cell = cell.dup(new_name=kcl.future_cell_name)
+                    cell = cell.dup(new_name=kcl.future_cell_name.get())
                 if set_name and name_:
                     cell.name = name_
-                    kcl.future_cell_name = old_future_name
+                    kcl.future_cell_name.set(old_future_name)
                 if set_settings:
                     _set_settings(cell, f, drop_params, params, param_units, basename)
                 if check_ports:
@@ -762,7 +774,7 @@ class ModuleCellKWargs(TypedDict, total=False):
     check_instances: CheckInstances | None
     snap_ports: bool
     add_port_layers: bool
-    cache: Cache[int, Any] | dict[int, Any] | None
+    cache: Cache[int, Any] | None
     drop_params: list[str]
     register_factory: bool
     overwrite_existing: bool | None
@@ -782,7 +794,7 @@ class KCellDecoratorKWargs(TypedDict, total=False):
     check_instances: CheckInstances | None
     snap_ports: bool
     add_port_layers: bool
-    cache: Cache[int, Any] | dict[int, Any] | None
+    cache: Cache[int, Any] | None
     basename: str | None
     drop_params: list[str]
     register_factory: bool

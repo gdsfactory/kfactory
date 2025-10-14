@@ -13,7 +13,7 @@ from collections.abc import (
 from functools import cached_property
 from pathlib import Path
 from pprint import pformat
-from threading import RLock
+from threading import RLock, get_ident
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -93,6 +93,8 @@ kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
 
 __all__ = ["KCLayout", "cell", "get_default_kcl", "kcl", "kcls", "vcell"]
+
+_global_lock = RLock()
 
 
 class Constants(BaseModel):
@@ -188,6 +190,25 @@ class Factories(Mapping[str, F], Generic[F]):
         return default
 
 
+class FutureCellName:
+    _future_cell_names: dict[int, str]
+    _lock: RLock
+
+    def __init__(self) -> None:
+        self._future_cell_names = {}
+        self._lock = RLock()
+
+    def set(self, value: str | None) -> None:
+        with self._lock:
+            if value is None:
+                self._future_cell_names.pop(get_ident(), None)
+            else:
+                self._future_cell_names[get_ident()] = value
+
+    def get(self) -> str | None:
+        return self._future_cell_names.get(get_ident())
+
+
 class KCLayout(
     BaseModel, arbitrary_types_allowed=True, extra="allow", validate_assignment=True
 ):
@@ -227,7 +248,7 @@ class KCLayout(
         constants: dict of constants for the PDK.
 
     """
-    name: str
+    name: str = Field(frozen=True)
     layout: kdb.Layout
     layer_enclosures: LayerEnclosureModel
     cross_sections: CrossSectionModel
@@ -252,7 +273,9 @@ class KCLayout(
 
     info: Info = Field(default_factory=Info)
     settings: KCellSettings = Field(frozen=True)
-    future_cell_name: str | None
+    future_cell_name: FutureCellName = Field(
+        default_factory=FutureCellName, frozen=True
+    )
 
     decorators: Decorators
     default_cell_output_type: type[KCell | DKCell] = KCell
@@ -353,7 +376,6 @@ class KCLayout(
             layout=layout,
             rename_function=port_rename_function,
             info=Info(**info) if info else Info(),
-            future_cell_name=None,
             settings=KCellSettings(
                 version=__version__,
                 klayout_version=kdb.__version__,  # type: ignore[attr-defined]
@@ -375,8 +397,8 @@ class KCLayout(
         self.sparameters_path = sparameters_path
         self.enclosure = enclosure
         self.interconnect_cml_path = interconnect_cml_path
-
-        kcls[self.name] = self
+        with _global_lock:
+            kcls[self.name] = self
 
     @model_validator(mode="before")
     @classmethod
@@ -396,11 +418,6 @@ class KCLayout(
     def kcells(self) -> KCells:
         """KCells is a mapping of int to KCell."""
         return KCells(self)
-
-    @property
-    def dbu(self) -> float:
-        """Get the database unit."""
-        return self.layout.dbu
 
     def create_layer_enclosure(
         self,
@@ -424,9 +441,22 @@ class KCLayout(
             main_layer=main_layer,
             kcl=self,
         )
-
-        self.layer_enclosures[enc.name] = enc
+        with self.thread_lock:
+            self.layer_enclosures[enc.name] = enc
         return enc
+
+    @overload
+    def layer(self, info: kdb.LayerInfo) -> int: ...
+    @overload
+    def layer(self, name: str) -> int: ...
+    @overload
+    def layer(self, layer: int, datatype: int) -> int: ...
+    @overload
+    def layer(self, layer: int, datatype: int, name: str) -> int: ...
+
+    def layer(self, *args: Any, **kwargs: Any) -> int:
+        with self.thread_lock:
+            return self.layout.layer(*args, **kwargs)
 
     @cached_property
     def technology(self) -> kdb.Technology:
@@ -439,17 +469,14 @@ class KCLayout(
 
     @overload
     def find_layer(self, name: str) -> LayerEnum: ...
-
     @overload
     def find_layer(self, info: kdb.LayerInfo) -> LayerEnum: ...
-
     @overload
     def find_layer(
         self,
         layer: int,
         datatype: int,
     ) -> LayerEnum: ...
-
     @overload
     def find_layer(
         self,
@@ -457,22 +484,18 @@ class KCLayout(
         dataytpe: int,
         name: str,
     ) -> LayerEnum: ...
-
     @overload
     def find_layer(
         self, name: str, *, allow_undefined_layers: Literal[True] = True
     ) -> LayerEnum | int: ...
-
     @overload
     def find_layer(
         self, info: kdb.LayerInfo, *, allow_undefined_layers: Literal[True] = True
     ) -> LayerEnum | int: ...
-
     @overload
     def find_layer(
         self, layer: int, datatype: int, *, allow_undefined_layers: Literal[True] = True
     ) -> LayerEnum | int: ...
-
     @overload
     def find_layer(
         self,
@@ -508,25 +531,18 @@ class KCLayout(
 
     @overload
     def to_um(self, other: None) -> None: ...
-
     @overload
     def to_um(self, other: int) -> float: ...
-
     @overload
     def to_um(self, other: kdb.Point) -> kdb.DPoint: ...
-
     @overload
     def to_um(self, other: kdb.Vector) -> kdb.DVector: ...
-
     @overload
     def to_um(self, other: kdb.Box) -> kdb.DBox: ...
-
     @overload
     def to_um(self, other: kdb.Polygon) -> kdb.DPolygon: ...
-
     @overload
     def to_um(self, other: kdb.Path) -> kdb.DPath: ...
-
     @overload
     def to_um(self, other: kdb.Text) -> kdb.DText: ...
 
@@ -622,7 +638,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[int, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -665,7 +681,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[int, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -710,7 +726,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[int, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -755,7 +771,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[int, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -799,7 +815,7 @@ class KCLayout(
         check_instances: CheckInstances | None = None,
         snap_ports: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[int, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -870,7 +886,7 @@ class KCLayout(
                     ) -> KCell:
                         schematic = f(*args, **kwargs)
                         if set_name:
-                            schematic.name = self.future_cell_name
+                            schematic.name = self.future_cell_name.get()
                         c_ = schematic.create_cell(
                             KCell,
                             factories=factories,
@@ -913,7 +929,7 @@ class KCLayout(
                 ) -> KCell:
                     schematic = f(*args, **kwargs)
                     if set_name:
-                        schematic.name = self.future_cell_name
+                        schematic.name = self.future_cell_name.get()
                     c_ = schematic.create_cell(
                         KCell,
                         factories=factories,
@@ -937,7 +953,7 @@ class KCLayout(
             ) -> KCell:
                 schematic = f(*args, **kwargs)
                 if set_name:
-                    schematic.name = self.future_cell_name
+                    schematic.name = self.future_cell_name.get()
                 c_ = schematic.create_cell(
                     KCell,
                     factories=factories,
@@ -970,7 +986,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[int, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -995,7 +1011,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[int, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -1022,7 +1038,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[int, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -1051,7 +1067,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[int, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -1079,7 +1095,7 @@ class KCLayout(
         check_instances: CheckInstances | None = None,
         snap_ports: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[int, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -1171,9 +1187,7 @@ class KCLayout(
 
             output_cell_type__ = cast("type[KC]", output_cell_type_)
 
-            cache_: Cache[int, KC] | dict[int, KC] = cache or Cache(
-                maxsize=float("inf")
-            )
+            cache_: Cache[int, KC] = cache or Cache(maxsize=float("inf"))
             wrapper_autocell: WrappedKCellFunc[KCellParams, KC] = WrappedKCellFunc(
                 kcl=self,
                 f=f,
@@ -1227,7 +1241,7 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[int, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -1249,7 +1263,7 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[int, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -1271,7 +1285,7 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[int, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -1332,9 +1346,7 @@ class KCLayout(
 
             output_cell_type__ = cast("type[VK]", output_cell_type_)
             # previously was a KCellCache, but dict should do for most case
-            cache_: Cache[int, VK] | dict[int, VK] = cache or Cache(
-                maxsize=float("inf")
-            )
+            cache_: Cache[int, VK] = cache or Cache(maxsize=float("inf"))
 
             wrapper_autocell = WrappedVKCellFunc(
                 kcl=self,
@@ -1356,9 +1368,10 @@ class KCLayout(
             )
 
             if register_factory:
-                if wrapper_autocell.name is None:
-                    raise ValueError(f"Function {f} has no name.")
-                self.virtual_factories.add(wrapper_autocell)  # type: ignore[arg-type]
+                with self.thread_lock:
+                    if wrapper_autocell.name is None:
+                        raise ValueError(f"Function {f} has no name.")
+                    self.virtual_factories.add(wrapper_autocell)  # type: ignore[arg-type]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> VK:
@@ -1386,7 +1399,10 @@ class KCLayout(
 
     def __getattr__(self, name: str) -> Any:
         """If KCLayout doesn't have an attribute, look in the KLayout Cell."""
-        if name != "_name" and name not in self.__class__.model_fields:
+        if name not in self.__class__.model_fields and name not in (
+            "name",
+            "future_cell_name",
+        ):
             return self.layout.__getattribute__(name)
         return None
 
@@ -1431,15 +1447,16 @@ class KCLayout(
         Returns:
             Copy of itself
         """
-        kcl = KCLayout(self.name + "_DUPLICATE")
-        kcl.layout.assign(self.layout.dup())
-        if init_cells:
-            for i, kc in self.tkcells.items():
-                kcl.tkcells[i] = kc.model_copy(
-                    update={"kdb_cell": kc.kdb_cell, "kcl": kcl}
-                )
-        kcl.rename_function = self.rename_function
-        return kcl
+        with self.thread_lock:
+            kcl = KCLayout(self.name + "_DUPLICATE")
+            kcl.layout.assign(self.layout.dup())
+            if init_cells:
+                for i, kc in self.tkcells.items():
+                    kcl.tkcells[i] = kc.model_copy(
+                        update={"kdb_cell": kc.kdb_cell, "kcl": kcl}
+                    )
+            kcl.rename_function = self.rename_function
+            return kcl
 
     def layout_cell(self, name: str | int) -> kdb.Cell | None:
         """Get a cell by name or index from the Layout object."""
@@ -1952,8 +1969,9 @@ class KCLayout(
         return f"{self.__class__.__name__}({self.name}, n={len(self.kcells)})"
 
     def delete(self) -> None:
-        del kcls[self.name]
-        self.library.delete()
+        with _global_lock, self.thread_lock:
+            del kcls[self.name]
+            self.library.delete()
 
     def routing_strategy(
         self,
