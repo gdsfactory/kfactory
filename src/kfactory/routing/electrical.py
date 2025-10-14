@@ -801,8 +801,6 @@ def place_single_wire(
         route_width: Overwrite automatic detection of wire width.
         layer_info: Place on a specific layer. Otherwise, use
             `p1.layer_info`.
-        width: Place a route with a specific width. Otherwise, use
-            `p2.width`.
         kwargs: Compatibility for type checkers. Throws an error if not empty.
     """
     if layer_info is None:
@@ -859,7 +857,6 @@ def place_dual_rails(
             Total width of all rails.
         layer_info: Place on a specific layer. Otherwise, use
             `p1.layer_info`.
-        width_rails: Total width of the rails.
         separation_rails: Separation between the two rails.
         kwargs: Compatibility for type checkers. Throws an error if not empty.
     """
@@ -940,8 +937,17 @@ def place_rf_rails(
             Total width of all rails.
         layer_info: Place on a specific layer. Otherwise, use
             `p1.layer_info`.
-        width_rails: Total width of the rails.
-        enclosure: Enclosure the placed_rails with an enclosure.
+        enclosure: Apply an enclosure to the rail.
+        center_radius: The radius at the center of the rails.
+        bend_factory: The function to call to create the rail bends.
+        wire_factory: The function to call to create the straights of the rails.
+        port_type: Which port_type to filter the bend for.
+        allow_small_routes: Proceed with placing even if there is not enough space.
+        allow_width_mismatch: Allow to place even if port widths do not match.
+        allow_layer_mismatch: Allow to place even if port layers do not match.
+        allow_type_mismatch: Allow to place even if port port_type do not match.
+        purpose: Which `Instance.purpose` to assign to the created instances of the
+            placer.
         kwargs: Compatibility for type checkers. Throws an error if not empty.
     """
     if kwargs:
@@ -1299,17 +1305,10 @@ def route_bundle_rf(
         c: Cell to place the route in.
         start_ports: List of start ports.
         end_ports: List of end ports.
-        separation: Separation between the routes.
-        straight_factory: Factory function for straight cells. in DBU.
-        bend90_cell: 90° bend cell.
-        taper_cell: Taper cell.
-        start_straights: DEPRECATED[Use starts instead]
-            `p1`.
-        end_straights: DEPRECATED[Use ends instead]
-            `p2`.
         starts: Minimal straight segment after `start_ports`.
         ends: Minimal straight segment before `end_ports`.
-        min_straight_taper: Minimum straight [dbu] before attempting to place tapers.
+        bend_factory: The function to call to create the rail bends.
+        wire_factory: The function to call to create the straights of the rails.
         place_port_type: Port type to use for the bend90_cell.
         place_allow_small_routes: Don't throw an error if two corners cannot be placed.
         collision_check_layers: Layers to check for actual errors if manhattan routes
@@ -1329,11 +1328,7 @@ def route_bundle_rf(
             (config default: False).
         allow_type_mismatch: If True, the type of the ports is ignored
             (config default: False).
-        route_width: Width of the route. If None, the width of the ports is used.
         sort_ports: Automatically sort ports.
-        bbox_routing: "minimal": only route to the bbox so that it can be safely routed
-            around, but start or end bends might encroach on the bounding boxes when
-            leaving them.
         waypoints: Bundle the ports and route them with minimal separation through
             the waypoints. The waypoints can either be a list of at least two points
             or a single transformation. If it's a transformation, the points will be

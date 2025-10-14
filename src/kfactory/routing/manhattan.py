@@ -878,7 +878,7 @@ def route_smart(
         bbox_routing: "minimal": only route to the bbox so that it can be safely routed
             around, but start or end bends might encroach on the bounding boxes when
             leaving them.
-        allow_sbends: Allows the router to route the final pieces with sbends.
+        allow_sbend: Allows the router to route the final pieces with sbends.
         kwargs: Additional kwargs. Compatibility for type checking. If any kwargs are
             passed an error is raised.
     Raises:

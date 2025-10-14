@@ -1,3 +1,6 @@
+# This script uses kfactory to programmatically create a complex chip layout that looks like a starry sky.
+# It does this by defining components for stars, placing them randomly, and then subtracting their shapes from a background layer.
+
 import kfactory as kf
 import numpy as np
 from layers import LAYER
@@ -21,7 +24,7 @@ def star(
 
     c = kf.KCell()
 
-    # the first star diamond, we use a box (int based)
+    # For the first star diamond, we use a box (int based)
 
     diamond = kf.kdb.DPolygon(
         [
@@ -71,7 +74,7 @@ def sky_with_stars() -> kf.KCell:
     box = kf.kdb.Box(0, 0, 400000, 400000)  # 400umx400um sky (default dbu)
     sky = kf.kdb.Region(box)
 
-    # set a custom seed for random
+    # Set a custom seed for random
     seed = 314159
     random.seed(seed)
 
@@ -90,7 +93,7 @@ def sky_with_stars() -> kf.KCell:
         )
         _star.transform(kf.kdb.DTrans(angle, False, x, y))
 
-    # remove the stars from the sky
+    # Remove the stars from the sky
 
     sky -= kf.kdb.Region(c.begin_shapes_rec(c.kcl.find_layer(star_layer)))
 
