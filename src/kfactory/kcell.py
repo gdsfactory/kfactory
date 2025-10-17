@@ -634,7 +634,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         kcl_ = kcl or get_default_kcl()
 
         if name is None:
-            name_ = f"Unnamed_!{get_ident()}" if kdb_cell is None else kdb_cell.name
+            name_ = (
+                kcl_.layout.unique_cell_name(f"Unnamed_!{get_ident()}")
+                if kdb_cell is None
+                else kdb_cell.name
+            )
         else:
             name_ = name
             if kdb_cell is not None:
