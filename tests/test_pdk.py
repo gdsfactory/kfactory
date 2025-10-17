@@ -1,5 +1,7 @@
+from collections.abc import Callable
 from functools import partial
 from tempfile import NamedTemporaryFile
+from typing import Any
 
 import pytest
 
@@ -48,7 +50,10 @@ def test_kcell_delete(layers: Layers) -> None:
     assert s1.destroyed() is False
 
 
-def test_multi_pdk(layers: Layers) -> None:
+def test_multi_pdk(
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     base_pdk = kf.KCLayout("BASE", infos=Layers)
 
     doe_pdk1 = kf.KCLayout(name="DOE1", infos=Layers)
@@ -88,9 +93,13 @@ def test_multi_pdk(layers: Layers) -> None:
     d1 = assembly << doe1
     d2 = assembly << doe2
     d2.connect("o1", d1, "o2")
+    oasis_regression(assembly)
 
 
-def test_multi_pdk_convert(layers: Layers) -> None:
+def test_multi_pdk_convert(
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     with NamedTemporaryFile("a", suffix=".oas") as temp_file:
         base_pdk = kf.KCLayout("BASE", infos=Layers)
 
@@ -135,9 +144,13 @@ def test_multi_pdk_convert(layers: Layers) -> None:
         d2.connect("o1", d1, "o2")
 
         assembly.write(temp_file.name, convert_external_cells=True)
+        oasis_regression(assembly)
 
 
-def test_multi_pdk_read_write(layers: Layers) -> None:
+def test_multi_pdk_read_write(
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     base_pdk = kf.KCLayout("BASE", infos=Layers)
 
     doe_pdk1_write = kf.KCLayout(name="DOE1_WRITE", infos=Layers)
@@ -187,9 +200,12 @@ def test_multi_pdk_read_write(layers: Layers) -> None:
     d1 = assembly << doe_pdk1_read[doe1.name]
     d2 = assembly << doe_pdk2_read[doe2.name]
     d2.connect("o1", d1, "o2")
+    oasis_regression(assembly)
 
 
-def test_merge_read_shapes(layers: Layers) -> None:
+def test_merge_read_shapes(
+    layers: Layers,
+) -> None:
     with (
         NamedTemporaryFile("w+b", suffix=".oas") as temp_file,
         pytest.raises(kf.exceptions.MergeError),
@@ -216,7 +232,9 @@ def test_merge_read_shapes(layers: Layers) -> None:
         kf.config.logfilter.regex = None
 
 
-def test_merge_read_instances(layers: Layers) -> None:
+def test_merge_read_instances(
+    layers: Layers,
+) -> None:
     with (
         NamedTemporaryFile("w+b", suffix=".oas") as temp_file,
         pytest.raises(kf.exceptions.MergeError),
@@ -271,9 +289,12 @@ def test_merge_properties() -> None:
         kf.config.logfilter.regex = regex
 
 
-def test_pdk_cell_infosettings(straight: kf.KCell) -> None:
+def test_pdk_cell_infosettings(
+    straight: kf.KCell, oasis_regression: Callable[[kf.ProtoTKCell[Any]], None]
+) -> None:
     kcl = kf.KCLayout("INFOSETTINGS", infos=Layers)
     c = kcl.kcell()
     _wg = c << straight
     assert _wg.cell.settings == straight.settings
     assert _wg.cell.info == straight.info
+    oasis_regression(c)

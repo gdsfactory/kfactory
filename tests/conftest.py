@@ -2,11 +2,15 @@ from collections.abc import Callable, Iterator
 from functools import partial
 from pathlib import Path
 from threading import RLock
+from typing import Any
 
 import pytest
+from pytest_regressions.file_regression import FileRegressionFixture
 
 import kfactory as kf
 import kfactory.cells
+
+pytest_plugins = ["pytest_regressions"]
 
 
 class Layers(kf.LayerInfos):
@@ -33,6 +37,18 @@ kf.kcl.infos = Layers()
 cell_copy_lock = RLock()
 
 
+@pytest.fixture(scope="session")
+def lazy_datadir() -> Path:
+    assert kf.config.project_dir is not None
+    return kf.config.project_dir / "tests/test_data/generated"
+
+
+@pytest.fixture(scope="session")
+def original_datadir() -> Path:
+    assert kf.config.project_dir is not None
+    return kf.config.project_dir / "tests/test_data/generated"
+
+
 @pytest.fixture(scope="module")
 def layers() -> Layers:
     return Layers()
@@ -42,6 +58,8 @@ def layers() -> Layers:
 def kcl() -> kf.KCLayout:
     import random
     import string
+
+    random.seed(9000)
 
     random_name = "".join(random.choices(string.ascii_letters, k=10))
     kcl = kf.KCLayout(name=random_name)
@@ -206,3 +224,17 @@ def fill_cell_fixture() -> kf.KCell:
 def unlink_merge_read_oas() -> Iterator[None]:
     yield
     Path("MERGE_READ.oas").unlink(missing_ok=True)
+
+
+@pytest.fixture
+def oasis_regression(
+    file_regression: FileRegressionFixture,
+) -> Callable[[kf.ProtoTKCell[Any]], None]:
+    saveopts = kf.save_layout_options()
+    saveopts.format = "OASIS"
+
+    def _check(c: kf.ProtoTKCell[Any]) -> None:
+        c.kcl.layout.clear_meta_info()
+        file_regression.check(c.write_bytes(saveopts), binary=True, extension=".oas")
+
+    return _check
