@@ -15,22 +15,39 @@ from kfactory.exceptions import LockedError
 from tests.conftest import Layers
 
 
-def test_enclosure_name(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_enclosure_name(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     wg = straight_factory_dbu(width=1000, length=10000)
     assert wg.name == "straight_W1000_L10000_LWG_EWGSTD"
+    oasis_regression(wg)
 
 
-def test_circular_snapping(kcl: kf.KCLayout, layers: Layers) -> None:
+def test_circular_snapping(
+    kcl: kf.KCLayout,
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     b = kf.cells.circular.bend_circular(width=1, radius=10, layer=layers.WG, angle=90)
     assert b.ports["o2"].dcplx_trans.disp == kcl.to_um(b.ports["o2"].trans.disp)
+    oasis_regression(b)
 
 
-def test_euler_snapping(kcl: kf.KCLayout, layers: Layers) -> None:
+def test_euler_snapping(
+    kcl: kf.KCLayout,
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     b = kf.cells.euler.bend_euler(width=1, radius=10, layer=layers.WG, angle=90)
     assert b.ports["o2"].dcplx_trans.disp == kcl.to_um(b.ports["o2"].trans.disp)
+    oasis_regression(b)
 
 
-def test_unnamed_cell(kcl: kf.KCLayout) -> None:
+def test_unnamed_cell(
+    kcl: kf.KCLayout,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     @kcl.cell
     def unnamed_cell(name: str = "a") -> kf.KCell:
         return kcl.kcell(name)
@@ -40,7 +57,9 @@ def test_unnamed_cell(kcl: kf.KCLayout) -> None:
     assert c1 is c2
 
 
-def test_wrong_dict(kcl: kf.KCLayout) -> None:
+def test_wrong_dict(
+    kcl: kf.KCLayout,
+) -> None:
     with pytest.raises(kf.exceptions.CellNameError):
 
         @kf.cell
@@ -50,7 +69,10 @@ def test_wrong_dict(kcl: kf.KCLayout) -> None:
         wrong_dict_cell({(1, 0): 555, (2, 0): 10})
 
 
-def test_nested_dict_list(kcl: kf.KCLayout) -> None:
+def test_nested_dict_list(
+    kcl: kf.KCLayout,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     @kcl.cell
     def nested_list_dict(
         arg1: dict[str, list[dict[str, str | int] | int] | int],
@@ -64,9 +86,13 @@ def test_nested_dict_list(kcl: kf.KCLayout) -> None:
     c = nested_list_dict(dl)
     assert dl == c.settings["arg1"]
     assert dl is not c.settings["arg1"]
+    oasis_regression(c)
 
 
-def test_no_snap(layers: Layers) -> None:
+def test_no_snap(
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
 
     c.create_port(
@@ -78,24 +104,36 @@ def test_no_snap(layers: Layers) -> None:
     p = c.ports[0]
 
     assert p.dcplx_trans.disp != c.kcl.to_um(p.trans.disp)
+    oasis_regression(c)
 
 
-def test_namecollision(layers: Layers) -> None:
+def test_namecollision(
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     b1 = kf.cells.circular.bend_circular(width=1, radius=10.5, layer=layers.WG)
     b2 = kf.cells.circular.bend_circular(width=1, radius=10.5000005, layer=layers.WG)
 
     assert b1.name != b2.name
+    oasis_regression(b1)
 
 
-def test_nested_dic(kcl: kf.KCLayout) -> None:
+def test_nested_dic(
+    kcl: kf.KCLayout,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     @kcl.cell
     def recursive_dict_cell(d: dict[str, dict[str, str] | str]) -> kf.KCell:
         return kcl.kcell()
 
-    recursive_dict_cell({"test": {"test2": "test3"}, "test4": "test5"})
+    c = recursive_dict_cell({"test": {"test2": "test3"}, "test4": "test5"})
+    oasis_regression(c)
 
 
-def test_ports_cell(layers: Layers) -> None:
+def test_ports_cell(
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
     c.create_port(
         name="o1",
@@ -105,9 +143,13 @@ def test_ports_cell(layers: Layers) -> None:
     )
     assert c["o1"]
     assert "o1" in c.ports
+    oasis_regression(c)
 
 
-def test_ports_instance(layers: Layers) -> None:
+def test_ports_instance(
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
     c.create_port(
         name="o1",
@@ -121,16 +163,23 @@ def test_ports_instance(layers: Layers) -> None:
     assert "o1" in c.ports
     assert ref["o1"]
     assert "o1" in ref.ports
+    oasis_regression(c2)
 
 
-def test_getter(layers: Layers) -> None:
+def test_getter(
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
     c << kf.cells.straight.straight(width=1, length=10, layer=layers.WG)
     assert c.y == 0
     assert c.dy == 0
 
 
-def test_array(straight: kf.KCell) -> None:
+def test_array(
+    straight: kf.KCell,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
     wg_array = c.create_inst(
         straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
@@ -139,9 +188,13 @@ def test_array(straight: kf.KCell) -> None:
         for a in range(3):
             wg_array["o1", a, b]
             wg_array["o1", a, b]
+    oasis_regression(c)
 
 
-def test_array_indexerror(straight: kf.KCell) -> None:
+def test_array_indexerror(
+    straight: kf.KCell,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
     wg_array = c.create_inst(
         straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
@@ -152,9 +205,13 @@ def test_array_indexerror(straight: kf.KCell) -> None:
         wg_array["o1", 3, 5]
         wg_array["o1", 3, 5]
     kf.config.logfilter.regex = regex
+    oasis_regression(c)
 
 
-def test_invalid_array(straight: kf.KCell) -> None:
+def test_invalid_array(
+    straight: kf.KCell,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
     wg = c.create_inst(straight)
     regex = kf.config.logfilter.regex
@@ -165,9 +222,12 @@ def test_invalid_array(straight: kf.KCell) -> None:
                 wg["o1", a, b]
                 wg["o1", a, b]
     kf.config.logfilter.regex = regex
+    oasis_regression(c)
 
 
-def test_cell_decorator_error(kcl: kf.KCLayout) -> None:
+def test_cell_decorator_error(
+    kcl: kf.KCLayout,
+) -> None:
     kcl2 = kf.KCLayout("decorator_test")
 
     @kcl.cell
@@ -178,21 +238,31 @@ def test_cell_decorator_error(kcl: kf.KCLayout) -> None:
     kf.config.logfilter.regex = (
         r"^An error has been caught in function 'wrapper_autocell'"
     )
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+    ):
         wrong_cell()
     kf.config.logfilter.regex = regex
 
 
-def test_info(kcl: kf.KCLayout) -> None:
+def test_info(
+    kcl: kf.KCLayout,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     @kcl.cell(info={"test": 42})
     def test_info_cell(test: int) -> kf.KCell:
         return kcl.kcell()
 
     c = test_info_cell(42)
     assert c.info["test"] == 42
+    oasis_regression(c)
 
 
-def test_flatten(kcl: kf.KCLayout, layers: Layers) -> None:
+def test_flatten(
+    kcl: kf.KCLayout,
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kcl.kcell()
     _ = c << kf.factories.straight.straight_dbu_factory(kcl)(
         width=2000, length=10000, layer=layers.WG
@@ -200,18 +270,26 @@ def test_flatten(kcl: kf.KCLayout, layers: Layers) -> None:
     assert len(c.insts) == 1, "c.insts should have 1 inst after adding a cell"
     c.flatten()
     assert len(c.insts) == 0, "c.insts should have 0 insts after flatten()"
+    oasis_regression(c)
 
 
-def test_size_info(kcl: kf.KCLayout, layers: Layers) -> None:
+def test_size_info(
+    kcl: kf.KCLayout,
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kcl.kcell()
     ref = c << kf.factories.straight.straight_dbu_factory(kcl)(
         width=2000, length=10000, layer=layers.WG
     )
     assert ref.size_info.ne[0] == 10000
     assert ref.dsize_info.ne[0] == 10
+    oasis_regression(c)
 
 
-def test_overwrite() -> None:
+def test_overwrite(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     kcl = kf.KCLayout("CELL_OVERWRITE")
 
     @kcl.cell
@@ -228,6 +306,7 @@ def test_overwrite() -> None:
 
     assert c2 is not c1
     assert c1.destroyed()
+    oasis_regression(c2)
 
 
 def test_layout_cache() -> None:
@@ -255,7 +334,9 @@ def test_layout_cache() -> None:
     assert s_write.bbox() == s_read.bbox()
 
 
-def test_check_ports(layers: Layers) -> None:
+def test_check_ports(
+    layers: Layers,
+) -> None:
     kcl = kf.KCLayout("CHECK_PORTS", infos=Layers)
     kcl.layers = kcl.layerenum_from_dict(layers=layers)
 
@@ -282,7 +363,11 @@ def test_check_ports(layers: Layers) -> None:
     kf.config.logfilter.regex = regex
 
 
-def test_ports_in_cells(kcl: kf.KCLayout, layers: Layers) -> None:
+def test_ports_in_cells(
+    kcl: kf.KCLayout,
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     kcell = kcl.kcell(name="test")
     dkcell = kcell.to_dtype()
 
@@ -301,9 +386,13 @@ def test_ports_in_cells(kcl: kf.KCLayout, layers: Layers) -> None:
 
     assert new_port in kcell.ports
     assert new_port in dkcell.ports
+    oasis_regression(dkcell)
 
 
-def test_kcell_attributes(kcl: kf.KCLayout) -> None:
+def test_kcell_attributes(
+    kcl: kf.KCLayout,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kcl.kcell("test_kcell_attributes")
     c.shapes(1).insert(kf.kdb.Box(0, 0, 10, 10))
     assert c.shapes(1).size() == 1
@@ -407,8 +496,14 @@ def test_kcell_attributes(kcl: kf.KCLayout) -> None:
     assert c.size_info.cc == (5, 5)
     assert c.size_info.center == (5, 5)
 
+    oasis_regression(c)
 
-def test_lock(straight: kf.KCell, bend90: kf.KCell, layers: Layers) -> None:
+
+def test_lock(
+    straight: kf.KCell,
+    bend90: kf.KCell,
+    layers: Layers,
+) -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         # shape insert
@@ -433,7 +528,9 @@ def test_lock(straight: kf.KCell, bend90: kf.KCell, layers: Layers) -> None:
             straight.name = "new name"
 
 
-def test_kdb_getattr(straight: kf.KCell) -> None:
+def test_kdb_getattr(
+    straight: kf.KCell,
+) -> None:
     straight.cell_index()
 
     with warnings.catch_warnings(), pytest.raises(AttributeError):
@@ -441,7 +538,10 @@ def test_kdb_getattr(straight: kf.KCell) -> None:
 
 
 def test_cell_in_threads(
-    kcl: kf.KCLayout, layers: Layers, wg_enc: kf.LayerEnclosure
+    kcl: kf.KCLayout,
+    layers: Layers,
+    wg_enc: kf.LayerEnclosure,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     taper_factory = kf.factories.taper.taper_factory(kcl)
 
@@ -471,12 +571,18 @@ def test_cell_in_threads(
         == 1
     )
 
+    oasis_regression(t)
 
-def test_to_dtype(kcl: kf.KCLayout) -> None:
+
+def test_to_dtype(
+    kcl: kf.KCLayout,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     kcell = kcl.kcell()
     kcell.shapes(0).insert(kf.kdb.Box(0, 0, 1000, 1000))
     dkcell = kcell.to_dtype()
     assert dkcell.bbox() == kf.kdb.DBox(0, 0, 1, 1)
+    oasis_regression(dkcell)
 
 
 def test_to_itype(kcl: kf.KCLayout) -> None:
@@ -486,7 +592,10 @@ def test_to_itype(kcl: kf.KCLayout) -> None:
     assert itype.bbox() == kf.kdb.Box(0, 0, 1000, 1000)
 
 
-def test_cell_yaml(layers: Layers) -> None:
+def test_cell_yaml(
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     from ruamel.yaml import YAML
 
     yaml = YAML()
@@ -527,11 +636,14 @@ def test_cell_yaml(layers: Layers) -> None:
 
         assert compare_kcell_fields(c_base_kcell, cell_base_kcell)
 
+        oasis_regression(c)
         c.delete()
         cell.delete()
 
 
-def test_cell_default_fallback() -> None:
+def test_cell_default_fallback(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     kcl = kf.KCLayout("cell_default_fallback", default_cell_output_type=kf.DKCell)
 
     @kcl.cell
@@ -547,9 +659,13 @@ def test_cell_default_fallback() -> None:
     kf.layout.kcls.pop("cell_default_fallback")
 
     assert isinstance(my_cell(), kf.KCell)
+    oasis_regression(my_cell())
 
 
-def test_transform(kcl: kf.KCLayout, layers: Layers) -> None:
+def test_transform(
+    kcl: kf.KCLayout,
+    layers: Layers,
+) -> None:
     c = kf.KCell()
     c2 = kf.KCell()
 
@@ -566,7 +682,10 @@ def test_transform(kcl: kf.KCLayout, layers: Layers) -> None:
     c2.delete()
 
 
-def test_factory_name(kcl: kf.KCLayout, layers: Layers) -> None:
+def test_factory_name(
+    kcl: kf.KCLayout,
+    layers: Layers,
+) -> None:
     cell = kf.factories.straight.straight_dbu_factory(kcl)(
         width=10, length=10, layer=layers.WG
     )
@@ -593,7 +712,9 @@ def test_prune(kcl: kf.KCLayout) -> None:
     assert len(kcl.factories["test2"]) == 0
 
 
-def test_return_none(kcl: kf.KCLayout) -> None:
+def test_return_none(
+    kcl: kf.KCLayout,
+) -> None:
     def test_no_return() -> kf.KCell:  # type: ignore[return]
         kcl.kcell()
 
@@ -610,7 +731,9 @@ def test_return_none(kcl: kf.KCLayout) -> None:
         kcl.vcell(functools.partial(test_no_return_vk))()
 
 
-def test_return_wrong_type(kcl: kf.KCLayout) -> None:
+def test_return_wrong_type(
+    kcl: kf.KCLayout,
+) -> None:
     def test_vk() -> kf.VKCell:
         return kcl.vkcell()
 

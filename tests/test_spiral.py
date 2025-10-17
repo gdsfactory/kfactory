@@ -1,4 +1,6 @@
 import warnings
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 
@@ -6,6 +8,7 @@ import kfactory as kf
 from tests.conftest import Layers
 
 
+@kf.cell
 def bend_circular(
     width: int,
     radius: int,
@@ -64,6 +67,7 @@ def bend_circular(
     return c
 
 
+@kf.cell
 def dbend_circular(
     width: float,
     radius: float,
@@ -125,8 +129,11 @@ def dbend_circular(
     return c
 
 
-def test_spiral(layers: Layers) -> None:
-    c = kf.KCell()
+def test_spiral(
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
+    c = kf.KCell("spiral")
 
     r1 = 1000
     r2 = 0
@@ -145,10 +152,14 @@ def test_spiral(layers: Layers) -> None:
         b = c << bend_circular(width=1000, radius=r2, layer=layers.WG)
         b.connect("W0", p)
         p = b.ports["N0"]
+    oasis_regression(c)
 
 
-def test_dspiral(layers: Layers) -> None:
-    c = kf.KCell()
+def test_dspiral(
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
+    c = kf.KCell("dspiral")
 
     r1 = 1
     r2 = 0
@@ -169,3 +180,4 @@ def test_dspiral(layers: Layers) -> None:
         b = c << dbend_circular(width=1, radius=r2, layer=layers.WG)
         b.connect("W0", p)
         p = b.ports["N0"]
+    oasis_regression(c)

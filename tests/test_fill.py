@@ -1,8 +1,15 @@
+from collections.abc import Callable
+from typing import Any
+
 import kfactory as kf
 from tests.conftest import Layers
 
 
-def test_tiled_fill_space(fill_cell: kf.KCell, layers: Layers) -> None:
+def test_tiled_fill_space(
+    fill_cell: kf.KCell,
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
     c.shapes(layers.WG).insert(kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512))
     c.shapes(layers.WGCLAD).insert(
@@ -28,7 +35,11 @@ def test_tiled_fill_space(fill_cell: kf.KCell, layers: Layers) -> None:
     )
 
 
-def test_tiled_fill_vector(fill_cell: kf.KCell, layers: Layers) -> None:
+def test_tiled_fill_vector(
+    fill_cell: kf.KCell,
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
     c.shapes(layers.WG).insert(kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512))
     c.shapes(layers.WGCLAD).insert(

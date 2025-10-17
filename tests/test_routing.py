@@ -34,6 +34,7 @@ def test_route_straight(
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     optical_port: kf.Port,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kf.KCell()
     p1 = optical_port.copy()
@@ -46,6 +47,7 @@ def test_route_straight(
         straight_factory=straight_factory_dbu,
         bend90_cell=bend90,
     )
+    oasis_regression(c)
 
 
 @pytest.mark.parametrize(
@@ -70,6 +72,7 @@ def test_route_bend90(
     x: int,
     y: int,
     angle2: int,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kf.KCell()
     p1 = optical_port.copy()
@@ -87,6 +90,7 @@ def test_route_bend90(
     )
 
     kf.config.logfilter.regex = None
+    oasis_regression(c)
 
 
 @pytest.mark.parametrize(
@@ -112,6 +116,7 @@ def test_route_bend90_invert(
     x: int,
     y: int,
     angle2: int,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kf.KCell()
     p1 = optical_port.copy()
@@ -129,6 +134,7 @@ def test_route_bend90_invert(
         route_kwargs={"invert": True},
     )
     kf.config.logfilter.regex = None
+    oasis_regression(c)
 
 
 @pytest.mark.parametrize(
@@ -146,6 +152,7 @@ def test_route_bend90_euler(
     x: int,
     y: int,
     angle2: int,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kf.KCell()
     p1 = optical_port.copy()
@@ -162,6 +169,7 @@ def test_route_bend90_euler(
         bend90_cell=bend90_euler,
     )
     kf.config.logfilter.regex = None
+    oasis_regression(c)
 
 
 def test_route_bundle(
@@ -169,6 +177,7 @@ def test_route_bundle(
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     kcl: kf.KCLayout,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell("TEST_ROUTE_BUNDLE")
 
@@ -223,6 +232,7 @@ def test_route_bundle(
         assert np.isclose(route.length, length)
 
     c.auto_rename_ports()
+    oasis_regression(c)
 
 
 def test_route_length_straight(
@@ -231,6 +241,7 @@ def test_route_length_straight(
     straight_factory_dbu: Callable[..., kf.KCell],
     kcl: kf.KCLayout,
     layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell("TEST_ROUTE_BUNDLE_AREA_LENGTH")
     p1 = kf.Port(name="o1", width=1000, trans=kf.kdb.Trans.R0, layer_info=layers.WG)
@@ -248,6 +259,7 @@ def test_route_length_straight(
     )
 
     assert [r.length for r in routes] == [10_000]
+    oasis_regression(c)
 
 
 def test_route_bundle_route_width(
@@ -255,6 +267,7 @@ def test_route_bundle_route_width(
     bend90_euler_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     kcl: kf.KCLayout,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell("TEST_ROUTE_BUNDLE")
 
@@ -297,6 +310,7 @@ def test_route_bundle_route_width(
         c.add_port(port=route.end_port)
 
     c.auto_rename_ports()
+    oasis_regression(c)
 
 
 def test_route_length(
@@ -304,6 +318,7 @@ def test_route_length(
     straight_factory_dbu: Callable[..., kf.KCell],
     optical_port: kf.Port,
     taper: kf.KCell,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     x, y, angle2 = (55000, 70000, 2)
 
@@ -329,6 +344,7 @@ def test_route_length(
     assert route.length_straights == 30196
     assert route.length_backbone == 125000
     assert route.n_bend90 == 2
+    oasis_regression(c)
 
 
 _test_smart_routing_kcl = kf.KCLayout("TEST_SMART_ROUTING", infos=Layers)
@@ -360,6 +376,7 @@ def test_smart_routing(
     z: bool,
     p1: bool,
     p2: bool,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     """Tests all possible smart routing configs."""
     kcl = _test_smart_routing_kcl
@@ -536,13 +553,15 @@ def test_smart_routing(
                 [route.length for route in routes]
         case _:
             rf()
+    oasis_regression(c)
 
 
 def test_custom_router(
     layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
-    kcl = kf.KCLayout("TEST_CUSTOM_ROUTER")
-    c = kcl.kcell("CustomRouter")
+    kcl = kf.KCLayout("test_custom_router")
+    c = kcl.kcell("customRouter")
     bend90 = kf.cells.circular.bend_circular(width=1, radius=10, layer=layers.WG)
     b90r = kf.routing.generic.get_radius(list(bend90.ports))
     sf = partial(kf.cells.straight.straight_dbu, layer=layers.WG)
@@ -587,14 +606,16 @@ def test_custom_router(
             "separation": 5000,
         },
     )
+    oasis_regression(c)
 
 
 def test_route_smart_waypoints_trans_sort(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
-    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_TRANS_SORT")
+    c = kf.KCell(name="test_smart_route_waypoints_trans_sort")
     l_ = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
@@ -622,14 +643,16 @@ def test_route_smart_waypoints_trans_sort(
         waypoints=kf.kdb.Trans(250_000, 0),
         sort_ports=True,
     )
+    oasis_regression(c)
 
 
 def test_route_smart_waypoints_pts_sort(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
-    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_PTS_SORT")
+    c = kf.KCell(name="test_smart_route_waypoints_pts_sort")
     l_ = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
@@ -657,14 +680,16 @@ def test_route_smart_waypoints_pts_sort(
         waypoints=[kf.kdb.Point(250_000, 0), kf.kdb.Point(250_000, 100_000)],
         sort_ports=True,
     )
+    oasis_regression(c)
 
 
 def test_route_waypoints_non_manhattan(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
-    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_NON_MANHATTAN")
+    c = kf.KCell(name="test_smart_route_waypoints_non_manhattan")
     l_ = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
@@ -708,8 +733,9 @@ def test_route_smart_waypoints_trans(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
-    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_TRANS")
+    c = kf.KCell(name="test_smart_route_waypoints_trans")
     l_ = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
@@ -737,14 +763,16 @@ def test_route_smart_waypoints_trans(
         bend90_cell=bend90_small,
         waypoints=kf.kdb.Trans(250_000, 0),
     )
+    oasis_regression(c)
 
 
 def test_route_smart_waypoints_pts(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
-    c = kf.KCell(name="TEST_SMART_ROUTE_WAYPOINTS_PTS")
+    c = kf.KCell(name="test_smart_route_waypoints_pts")
     l_ = 15
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)] + [
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
@@ -772,11 +800,13 @@ def test_route_smart_waypoints_pts(
         bend90_cell=bend90_small,
         waypoints=[kf.kdb.Point(250_000, 0), kf.kdb.Point(250_000, 100_000)],
     )
+    oasis_regression(c)
 
 
 def test_route_generic_reorient(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kf.KCell(name="test_route_generic_reorient")
 
@@ -815,11 +845,14 @@ def test_route_generic_reorient(
         end_angles=end_angles,
     )
 
+    oasis_regression(c)
+
 
 def test_placer_error(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kf.KCell(name="test_placer_error")
 
@@ -887,7 +920,10 @@ def test_clean_points() -> None:
     )
 
 
-def test_rf_bundle(layers: Layers) -> None:
+def test_rf_bundle(
+    layers: Layers,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
 
     layer = Layers()
@@ -998,12 +1034,15 @@ def test_rf_bundle(layers: Layers) -> None:
 
     c.add_ports(ports)
     c.shapes(c.kcl.layer(1, 0)).insert(b)
+    oasis_regression(c)
 
 
-def test_sbend_routing() -> None:
+def test_sbend_routing(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     layer_infos = Layers()
 
-    c = kf.KCell()
+    c = kf.KCell("test_sbend_routing")
     c.kcl.infos = layer_infos
 
     ps: list[kf.Port] = []
@@ -1085,10 +1124,13 @@ def test_sbend_routing() -> None:
         ),
         sbend_factory=sbend_factory,
     )
+    oasis_regression(c)
 
 
-def test_route_same_plane() -> None:
-    c = kf.KCell()
+def test_route_same_plane(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
+    c = kf.KCell("test_route_same_plane")
 
     layer = Layers()
 
@@ -1104,7 +1146,10 @@ def test_route_same_plane() -> None:
         kf.SymmetricalCrossSection(width=10_000, enclosure=enc, name="S")
     )
 
-    def bend_circular(radius: int, cross_section: kf.CrossSection) -> kf.KCell:
+    @kf.cell
+    def bend_circular_route_same_plane(
+        radius: int, cross_section: kf.CrossSection
+    ) -> kf.KCell:
         c = kf.cells.circular.bend_circular(
             radius=kf.kcl.to_um(radius),
             width=kf.kcl.to_um(cross_section.width),
@@ -1117,7 +1162,8 @@ def test_route_same_plane() -> None:
         c.kdb_cell.locked = True
         return c
 
-    def wire(length: int, cross_section: kf.CrossSection) -> kf.KCell:
+    @kf.cell
+    def wire_same_plane(length: int, cross_section: kf.CrossSection) -> kf.KCell:
         c = kf.cells.straight.straight_dbu(
             width=cross_section.width,
             length=length,
@@ -1167,3 +1213,4 @@ def test_route_same_plane() -> None:
     )
 
     c.add_ports(ports)
+    oasis_regression(c)

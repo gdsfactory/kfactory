@@ -1,10 +1,16 @@
 from collections.abc import Callable
-from random import randint, uniform
+from random import randint, seed, uniform
+from typing import Any
 
 import kfactory as kf
 
+seed(9000)
 
-def test_grid_dbu_1d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+
+def test_grid_dbu_1d(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
 
     kf.grid_dbu(
@@ -18,9 +24,13 @@ def test_grid_dbu_1d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         spacing=5000,
         align_x="origin",
     )
+    oasis_regression(c)
 
 
-def test_grid_dbu_2d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_grid_dbu_2d(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
 
     kf.grid_dbu(
@@ -37,9 +47,13 @@ def test_grid_dbu_2d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         spacing=5000,
         align_x="origin",
     )
+    oasis_regression(c)
 
 
-def test_grid_dbu_2d_uneven(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_grid_dbu_2d_uneven(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
 
     kf.grid_dbu(
@@ -57,9 +71,13 @@ def test_grid_dbu_2d_uneven(straight_factory_dbu: Callable[..., kf.KCell]) -> No
         align_x="xmin",
         align_y="ymax",
     )
+    oasis_regression(c)
 
 
-def test_grid_dbu_2d_rotation(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_grid_dbu_2d_rotation(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
 
     kf.grid_dbu(
@@ -78,9 +96,13 @@ def test_grid_dbu_2d_rotation(straight_factory_dbu: Callable[..., kf.KCell]) -> 
         align_x="xmin",
         align_y="ymin",
     )
+    oasis_regression(c)
 
 
-def test_grid_dbu_1d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_grid_dbu_1d_shape(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
 
     kf.grid_dbu(
@@ -95,9 +117,13 @@ def test_grid_dbu_1d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> Non
         align_x="origin",
         shape=(1, 10),
     )
+    oasis_regression(c)
 
 
-def test_grid_dbu_2d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_grid_dbu_2d_shape(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
 
     kf.grid_dbu(
@@ -115,10 +141,12 @@ def test_grid_dbu_2d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> Non
         align_x="origin",
         shape=(4, 5),
     )
+    oasis_regression(c)
 
 
 def test_grid_dbu_2d_shape_rotation(
     straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kf.KCell()
 
@@ -138,9 +166,13 @@ def test_grid_dbu_2d_shape_rotation(
         align_x="origin",
         shape=(3, 7),
     )
+    oasis_regression(c)
 
 
-def test_grid_1d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_grid_1d(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.DKCell()
 
     kf.grid(
@@ -154,9 +186,13 @@ def test_grid_1d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         spacing=5000,
         align_x="origin",
     )
+    oasis_regression(c)
 
 
-def test_grid_2d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_grid_2d(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.DKCell()
 
     kf.grid(
@@ -173,9 +209,13 @@ def test_grid_2d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         spacing=5000,
         align_x="origin",
     )
+    oasis_regression(c)
 
 
-def test_grid_2d_uneven(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_grid_2d_uneven(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.DKCell()
 
     kf.grid(
@@ -193,9 +233,13 @@ def test_grid_2d_uneven(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         align_x="xmin",
         align_y="ymax",
     )
+    oasis_regression(c)
 
 
-def test_grid_2d_rotation(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_grid_2d_rotation(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.DKCell()
 
     kf.grid(
@@ -214,9 +258,13 @@ def test_grid_2d_rotation(straight_factory_dbu: Callable[..., kf.KCell]) -> None
         align_x="xmin",
         align_y="ymin",
     )
+    oasis_regression(c)
 
 
-def test_grid_1d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_grid_1d_shape(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.DKCell()
 
     kf.grid(
@@ -234,9 +282,13 @@ def test_grid_1d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         align_x="origin",
         shape=(2, 10),
     )
+    oasis_regression(c)
 
 
-def test_grid_2d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_grid_2d_shape(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.DKCell()
 
     kf.grid(
@@ -254,10 +306,12 @@ def test_grid_2d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         align_x="origin",
         shape=(4, 5),
     )
+    oasis_regression(c)
 
 
 def test_grid_2d_shape_rotation(
     straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kf.DKCell()
 
@@ -277,9 +331,13 @@ def test_grid_2d_shape_rotation(
         align_x="origin",
         shape=(3, 7),
     )
+    oasis_regression(c)
 
 
-def test_flexgrid_dbu_1d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_flexgrid_dbu_1d(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
 
     kf.flexgrid_dbu(
@@ -293,9 +351,13 @@ def test_flexgrid_dbu_1d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         spacing=5000,
         align_x="origin",
     )
+    oasis_regression(c)
 
 
-def test_flexgrid_dbu_2d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_flexgrid_dbu_2d(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
 
     kf.flexgrid_dbu(
@@ -312,10 +374,12 @@ def test_flexgrid_dbu_2d(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
         spacing=5000,
         align_x="origin",
     )
+    oasis_regression(c)
 
 
 def test_flexgrid_dbu_2d_rotation(
     straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kf.KCell()
 
@@ -334,9 +398,13 @@ def test_flexgrid_dbu_2d_rotation(
         spacing=5000,
         align_x="center",
     )
+    oasis_regression(c)
 
 
-def test_flexgrid_dbu_1d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_flexgrid_dbu_1d_shape(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
 
     kf.flexgrid_dbu(
@@ -351,9 +419,13 @@ def test_flexgrid_dbu_1d_shape(straight_factory_dbu: Callable[..., kf.KCell]) ->
         align_x="origin",
         shape=(1, 10),
     )
+    oasis_regression(c)
 
 
-def test_flexgrid_dbu_2d_shape(straight_factory_dbu: Callable[..., kf.KCell]) -> None:
+def test_flexgrid_dbu_2d_shape(
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     c = kf.KCell()
 
     kf.flexgrid_dbu(
@@ -371,10 +443,12 @@ def test_flexgrid_dbu_2d_shape(straight_factory_dbu: Callable[..., kf.KCell]) ->
         align_x="origin",
         shape=(4, 5),
     )
+    oasis_regression(c)
 
 
 def test_flexgrid_dbu_2d_shape_rotation(
     straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kf.KCell()
 
@@ -395,9 +469,12 @@ def test_flexgrid_dbu_2d_shape_rotation(
         shape=(3, 7),
     )
 
+    oasis_regression(c)
+
 
 def test_flexgrid_2d_shape_rotation(
     straight_factory: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kf.DKCell()
 
@@ -418,3 +495,4 @@ def test_flexgrid_2d_shape_rotation(
         shape=(3, 7),
         target_trans=kf.kdb.DCplxTrans(1, 37, False, 0, 0),
     )
+    oasis_regression(c)
