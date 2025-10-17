@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
 import klayout.db as kdb
 import pytest
@@ -15,9 +15,6 @@ from kfactory.utilities import (
     pprint_ports,
 )
 from tests.conftest import Layers
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
 
 
 def test_convert_metadata_type() -> None:
@@ -100,11 +97,11 @@ def test_pprint_ports(layers: Layers, kcl: kf.KCLayout) -> None:
     ports = [straight.ports[0]]
     port2 = straight.ports[0].copy()
     port2.dcplx_trans = kdb.DCplxTrans(mag=2, rot=30)
-    a: list[tuple[Literal["um", "dbu"] | None, Iterable[Port]]] = (
+    a: list[tuple[Literal["um", "dbu"] | None, list[Port]]] = [
         ("um", ports),
         ("dbu", ports),
         (None, ports),
         (None, [port2]),
-    )
+    ]
     for case, ports_ in a:
         pprint_ports(ports_, case)

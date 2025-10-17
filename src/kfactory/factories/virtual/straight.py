@@ -7,7 +7,7 @@ from ... import kdb
 from ...conf import logger
 from ...enclosure import LayerEnclosure
 from ...kcell import VKCell
-from ...layout import KCLayout, vcell
+from ...layout import KCLayout
 from ...settings import Info
 from ...typings import MetaData
 from .utils import extrude_backbone
@@ -82,7 +82,7 @@ def virtual_straight_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @vcell
+    @kcl.vcell
     def virtual_straight(
         width: float,
         length: float,
@@ -106,7 +106,7 @@ def virtual_straight_factory(
             layer: Main layer of the waveguide.
             enclosure: Definition of slab/excludes. [dbu]
         """
-        c = VKCell(kcl=kcl)
+        c = kcl.vkcell()
         if length < 0:
             logger.critical(
                 f"Negative lengths are not allowed {length} as ports"

@@ -99,4 +99,4 @@ def test_virtual_connect(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
     b1 = c.create_vinst(e_bend)
 
     b1.connect("o1", wg1, "o2")
-    wg2.connect("o1", e_bend, "o2")
+    wg2.connect("o1", b1, "o2")

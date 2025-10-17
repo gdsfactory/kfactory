@@ -6,6 +6,7 @@ from threading import RLock
 import pytest
 
 import kfactory as kf
+import kfactory.cells
 
 
 class Layers(kf.LayerInfos):
@@ -126,7 +127,7 @@ def taper(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     return taper_cell(layers=layers.WG, wg_enc=wg_enc)
 
 
-@kf.kcl.cell(set_name=False)
+@kf.cells.demo.cell(set_name=False)
 def taper_cell(layers: kf.kdb.LayerInfo, wg_enc: kf.LayerEnclosure) -> kf.KCell:
     if kf.kcl.layout_cell("taper") is None:
         c = kf.cells.taper.taper(

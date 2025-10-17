@@ -6,7 +6,7 @@ Uses the klayout package as a backend.
 # The import order matters, we need to first import the important stuff.
 # isort:skip_file
 
-__version__ = "1.14.4"
+__version__ = "2.0.0rc5"
 
 import klayout.db as kdb
 from klayout import lay
@@ -30,7 +30,14 @@ from .instance import Instance, DInstance, VInstance
 from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
 from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
 from .netlist import Netlist
-from .schema import Schema, DSchema, get_schema, read_schema
+from .schematic import (
+    Schematic,
+    DSchematic,
+    get_schematic,
+    read_schematic,
+    Schema,
+    DSchema,
+)
 from .instances import Instances, DInstances, VInstances
 from .settings import KCellSettings, Info
 from .layout import Constants, KCLayout, cell, vcell, kcl, kcls
@@ -45,7 +52,6 @@ from .utilities import (
 )
 
 from . import (
-    cells,
     enclosure,
     factories,
     packing,
@@ -60,12 +66,20 @@ from . import (
     conf,
     layer,
     layout,
-    schema,
+    schematic,
 )
 from .routing.generic import ManhattanRoute
-from .typings import dbu  # noqa: F401
+from types import ModuleType
 
 ManhattanRoute.model_rebuild()
+
+
+def __getattr__(name: str) -> ModuleType:
+    if name == "cells":
+        import kfactory.cells
+
+        return kfactory.cells
+    raise AttributeError(f"module {__name__} has no attribute {name}")
 
 
 __all__ = [
@@ -85,6 +99,7 @@ __all__ = [
     "DPort",
     "DPorts",
     "DSchema",
+    "DSchematic",
     "Info",
     "Instance",
     "InstanceGroup",
@@ -107,6 +122,7 @@ __all__ = [
     "ProtoPort",
     "ProtoTKCell",
     "Schema",
+    "Schematic",
     "SymmetricalCrossSection",
     "VInstance",
     "VInstanceGroup",
@@ -124,7 +140,7 @@ __all__ = [
     "factories",
     "flexgrid",
     "flexgrid_dbu",
-    "get_schema",
+    "get_schematic",
     "grid",
     "grid_dbu",
     "kcell",
@@ -143,11 +159,11 @@ __all__ = [
     "pprint_ports",
     "protocols",
     "rdb",
-    "read_schema",
+    "read_schematic",
     "routing",
     "save_layout_options",
     "save_session",
-    "schema",
+    "schematic",
     "show",
     "technology",
     "typings",

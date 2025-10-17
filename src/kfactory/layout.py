@@ -2,13 +2,27 @@ from __future__ import annotations
 
 import functools
 import inspect
-from collections import UserDict, defaultdict
-from collections.abc import Callable, Iterable, Sequence  # noqa: TC003
+from collections import defaultdict
+from collections.abc import (
+    Callable,
+    Iterable,
+    Iterator,
+    Mapping,
+    Sequence,
+)
 from functools import cached_property
 from pathlib import Path
 from pprint import pformat
 from threading import RLock
-from typing import TYPE_CHECKING, Any, Concatenate, Literal, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Concatenate,
+    Generic,
+    Literal,
+    cast,
+    overload,
+)
 
 import ruamel.yaml
 from cachetools import Cache
@@ -61,9 +75,9 @@ from .typings import (
     KC,
     KCIN,
     VK,
+    F,
     KC_contra,
     KCellParams,
-    KCellSpec,
     MetaData,
     P,
     T,
@@ -73,7 +87,7 @@ from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
     from .ports import DPorts, Ports
-    from .schema import TSchema
+    from .schematic import TSchematic
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -92,31 +106,86 @@ def get_default_kcl() -> KCLayout:
     return kcl
 
 
-class Factories(UserDict[str, T]):
-    tags: dict[str, list[T]]
+class Factories(Mapping[str, F], Generic[F]):
+    _all: list[F]
+    _by_name: dict[str, int]
+    _by_tag: defaultdict[str, list[int]]
+    _by_function: dict[Callable[..., Any], int]
 
-    def __init__(self, data: dict[str, T]) -> None:
-        super().__init__(data)
-        self.tags = defaultdict(list)
+    def __init__(self) -> None:
+        self._all = []
+        self._by_name = {}
+        self._by_tag = defaultdict(list)
+        self._by_function = {}
 
-    def __getattr__(self, name: str) -> Any:
-        if name != "data":
-            try:
-                return self.data[name]
-            except KeyError as e:
-                try:
-                    return self.__getattribute__(name)
-                except AttributeError:
-                    raise KeyError from e
-        return self.__getattribute__(name)
+    def add(self, factory: F) -> None:
+        idx = len(self._all)
+        self._all.append(factory)
+        for tag in factory.tags:
+            self._by_tag[tag].append(idx)
+        self._by_name[factory.name] = idx
+        self._by_function[factory.__call__] = idx
 
-    def for_tags(self, tags: list[str]) -> list[T]:
-        if len(tags) > 0:
-            tag_set = set(self.tags[tags[0]])
-            for tag in tags[1:]:
-                tag_set &= set(self.tags[tag])
-            return list(tag_set)
-        raise NotImplementedError
+    def get_by_name(self, name: str) -> F:
+        return self._all[self._by_name[name]]
+
+    def is_unique(self) -> bool:
+        return len(self._all) == len(self._by_name)
+
+    def rebuild(self) -> None:
+        self._by_name = {}
+        self._by_tag = defaultdict(list)
+        self._by_function = {}
+
+        for idx, factory in enumerate(self._all):
+            for tag in factory.tags:
+                self._by_tag[tag].append(idx)
+            self._by_name[factory.name] = idx
+            self._by_function[factory.__call__] = idx
+
+    def get_by_tag(self, tag: str) -> list[F]:
+        return [self._all[idx] for idx in self._by_tag[tag]]
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._by_name)
+
+    def __len__(self) -> int:
+        return len(self._by_name)
+
+    def __contains__(self, key: Any) -> bool:
+        if isinstance(key, str):
+            return key in self._by_name
+        return key in self._all
+
+    def __getitem__(self, key: str) -> F:
+        try:
+            return self._all[self._by_name[key]]
+        except KeyError as e:
+            from rapidfuzz import process
+
+            results = pformat(
+                [
+                    result[0]
+                    for result in process.extract(
+                        key, list(self._by_name.keys()), limit=10
+                    )
+                ]
+            )
+
+            raise KeyError(
+                f"Unknown Factory {key!r}, closest 10 name matches: {results}"
+            ) from e
+
+    @overload
+    def get(self, key: str, /) -> F | None: ...
+
+    @overload
+    def get(self, key: str, /, default: T) -> F | T: ...
+
+    def get(self, key: str, /, default: T | None = None) -> F | T | None:
+        if key in self._by_name:
+            return self.get_by_name(key)
+        return default
 
 
 class KCLayout(
@@ -274,8 +343,8 @@ class KCLayout(
             enclosure=KCellEnclosure([]),
             infos=infos_,
             layers=LayerEnum,
-            factories=Factories({}),
-            virtual_factories=Factories({}),
+            factories=Factories[WrappedKCellFunc[Any, ProtoTKCell[Any]]](),
+            virtual_factories=Factories[WrappedVKCellFunc[Any, VKCell]](),
             sparameters_path=sparameters_path,
             interconnect_cml_path=interconnect_cml_path,
             constants=constants_,
@@ -537,7 +606,7 @@ class KCLayout(
     @overload
     def schematic_cell(
         self,
-        _func: Callable[KCellParams, TSchema[TUnit]],
+        _func: Callable[KCellParams, TSchematic[TUnit]],
         /,
     ) -> Callable[KCellParams, KCell]: ...
 
@@ -562,8 +631,26 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
+        factories: Mapping[
+            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
+        ]
+        | None = None,
+        cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
+        routing_strategies: dict[
+            str,
+            Callable[
+                Concatenate[
+                    ProtoTKCell[Any],
+                    Sequence[ProtoPort[Any]],
+                    Sequence[ProtoPort[Any]],
+                    ...,
+                ],
+                Any,
+            ],
+        ]
+        | None = None,
     ) -> Callable[
-        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KCell]
+        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KCell]
     ]: ...
 
     @overload
@@ -588,8 +675,26 @@ class KCLayout(
         post_process: Iterable[Callable[[KCell], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
+        factories: Mapping[
+            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
+        ]
+        | None = None,
+        cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
+        routing_strategies: dict[
+            str,
+            Callable[
+                Concatenate[
+                    ProtoTKCell[Any],
+                    Sequence[ProtoPort[Any]],
+                    Sequence[ProtoPort[Any]],
+                    ...,
+                ],
+                Any,
+            ],
+        ]
+        | None = None,
     ) -> Callable[
-        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KCell]
+        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KCell]
     ]: ...
 
     @overload
@@ -615,8 +720,26 @@ class KCLayout(
         post_process: Iterable[Callable[[KCell], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
+        factories: Mapping[
+            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
+        ]
+        | None = None,
+        cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
+        routing_strategies: dict[
+            str,
+            Callable[
+                Concatenate[
+                    ProtoTKCell[Any],
+                    Sequence[ProtoPort[Any]],
+                    Sequence[ProtoPort[Any]],
+                    ...,
+                ],
+                Any,
+            ],
+        ]
+        | None = None,
     ) -> Callable[
-        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KC]
+        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KC]
     ]: ...
 
     @overload
@@ -641,13 +764,31 @@ class KCLayout(
         info: dict[str, MetaData] | None = ...,
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
+        factories: Mapping[
+            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
+        ]
+        | None = None,
+        cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
+        routing_strategies: dict[
+            str,
+            Callable[
+                Concatenate[
+                    ProtoTKCell[Any],
+                    Sequence[ProtoPort[Any]],
+                    Sequence[ProtoPort[Any]],
+                    ...,
+                ],
+                Any,
+            ],
+        ]
+        | None = None,
     ) -> Callable[
-        [Callable[KCellParams, TSchema[TUnit]]], Callable[KCellParams, KC]
+        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KC]
     ]: ...
 
     def schematic_cell(
         self,
-        _func: Callable[KCellParams, TSchema[TUnit]] | None = None,
+        _func: Callable[KCellParams, TSchematic[TUnit]] | None = None,
         /,
         *,
         output_type: type[KC] | None = None,
@@ -668,14 +809,32 @@ class KCLayout(
         post_process: Iterable[Callable[[KCell], None]] | None = None,
         debug_names: bool | None = None,
         tags: list[str] | None = None,
+        factories: Mapping[
+            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
+        ]
+        | None = None,
+        cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
+        routing_strategies: dict[
+            str,
+            Callable[
+                Concatenate[
+                    ProtoTKCell[Any],
+                    Sequence[ProtoPort[Any]],
+                    Sequence[ProtoPort[Any]],
+                    ...,
+                ],
+                Any,
+            ],
+        ]
+        | None = None,
     ) -> (
         Callable[KCellParams, KCell]
         | Callable[
-            [Callable[KCellParams, TSchema[Any]]],
+            [Callable[KCellParams, TSchematic[Any]]],
             Callable[KCellParams, KC],
         ]
         | Callable[
-            [Callable[KCellParams, TSchema[Any]]],
+            [Callable[KCellParams, TSchematic[Any]]],
             Callable[KCellParams, KCell],
         ]
     ):
@@ -683,7 +842,7 @@ class KCLayout(
             if output_type is None:
 
                 def wrap_f(
-                    f: Callable[KCellParams, TSchema[TUnit]],
+                    f: Callable[KCellParams, TSchematic[TUnit]],
                 ) -> Callable[KCellParams, KCell]:
                     @self.cell(
                         output_type=KCell,
@@ -709,15 +868,24 @@ class KCLayout(
                     def kcell_func(
                         *args: KCellParams.args, **kwargs: KCellParams.kwargs
                     ) -> KCell:
-                        schema = f(*args, **kwargs)
-                        return schema.create_cell(KCell)
+                        schematic = f(*args, **kwargs)
+                        if set_name:
+                            schematic.name = self.future_cell_name
+                        c_ = schematic.create_cell(
+                            KCell,
+                            factories=factories,
+                            cross_sections=cross_sections,
+                            routing_strategies=routing_strategies,
+                        )
+                        c_.schematic = schematic
+                        return c_
 
                     return kcell_func
 
                 return wrap_f
 
             def custom_wrap_f(
-                f: Callable[KCellParams, TSchema[TUnit]],
+                f: Callable[KCellParams, TSchematic[TUnit]],
             ) -> Callable[KCellParams, KC]:
                 @self.cell(
                     output_type=output_type,
@@ -743,23 +911,41 @@ class KCLayout(
                 def custom_kcell_func(
                     *args: KCellParams.args, **kwargs: KCellParams.kwargs
                 ) -> KCell:
-                    schema = f(*args, **kwargs)
-                    return schema.create_cell(KCell)
+                    schematic = f(*args, **kwargs)
+                    if set_name:
+                        schematic.name = self.future_cell_name
+                    c_ = schematic.create_cell(
+                        KCell,
+                        factories=factories,
+                        cross_sections=cross_sections,
+                        routing_strategies=routing_strategies,
+                    )
+                    c_.schematic = schematic
+                    return c_
 
                 return custom_kcell_func
 
             return custom_wrap_f
 
         def simple_wrap_f(
-            f: Callable[KCellParams, TSchema[TUnit]],
+            f: Callable[KCellParams, TSchematic[TUnit]],
         ) -> Callable[KCellParams, KCell]:
             @functools.wraps(f)
-            @self.cell
+            @self.cell(output_type=KCell)
             def kcell_func(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
             ) -> KCell:
-                schema = f(*args, **kwargs)
-                return schema.create_cell(KCell)
+                schematic = f(*args, **kwargs)
+                if set_name:
+                    schematic.name = self.future_cell_name
+                c_ = schematic.create_cell(
+                    KCell,
+                    factories=factories,
+                    cross_sections=cross_sections,
+                    routing_strategies=routing_strategies,
+                )
+                c_.schematic = schematic
+                return c_
 
             return kcell_func
 
@@ -1016,10 +1202,7 @@ class KCLayout(
                 with self.thread_lock:
                     if wrapper_autocell.name is None:
                         raise ValueError(f"Function {f} has no name.")
-                    if tags:
-                        for tag in tags:
-                            self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
-                    self.factories[basename or wrapper_autocell.name] = wrapper_autocell  # type: ignore[assignment]
+                    self.factories.add(wrapper_autocell)  # type: ignore[arg-type]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
@@ -1175,12 +1358,7 @@ class KCLayout(
             if register_factory:
                 if wrapper_autocell.name is None:
                     raise ValueError(f"Function {f} has no name.")
-                if tags:
-                    for tag in tags:
-                        self.factories.tags[tag].append(wrapper_autocell)  # type: ignore[arg-type]
-                self.virtual_factories[basename or wrapper_autocell.name] = (
-                    wrapper_autocell  # type: ignore[assignment]
-                )
+                self.virtual_factories.add(wrapper_autocell)  # type: ignore[arg-type]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> VK:
@@ -1772,60 +1950,6 @@ class KCLayout(
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.name}, n={len(self.kcells)})"
-
-    @overload
-    def get_component(
-        self, spec: KCellSpec, *, output_type: type[KC], **cell_kwargs: Any
-    ) -> KC: ...
-
-    @overload
-    def get_component(
-        self,
-        spec: int,
-    ) -> KCell: ...
-
-    @overload
-    def get_component(
-        self,
-        spec: str,
-        **cell_kwargs: Any,
-    ) -> ProtoTKCell[Any]: ...
-
-    @overload
-    def get_component(
-        self,
-        spec: Callable[..., KC],
-        **cell_kwargs: Any,
-    ) -> KC: ...
-    @overload
-    def get_component(self, spec: KC) -> KC: ...
-
-    def get_component(
-        self,
-        spec: KCellSpec,
-        *,
-        output_type: type[KC] | None = None,
-        **cell_kwargs: Any,
-    ) -> ProtoTKCell[Any]:
-        """Get a component by specification."""
-        if output_type:
-            return output_type(base=self.get_component(spec, **cell_kwargs).base)
-        if callable(spec):
-            return spec(**cell_kwargs)
-        if isinstance(spec, dict):
-            settings = spec.get("settings", {}).copy()
-            settings.update(cell_kwargs)
-            return self.factories[spec["component"]](**settings)
-        if isinstance(spec, str):
-            if spec in self.factories:
-                return self.factories[spec](**cell_kwargs)
-            return self[spec]
-        if cell_kwargs:
-            raise ValueError(
-                "Cell kwargs are not allowed for retrieving static cells by integer "
-                "or the cell itself."
-            )
-        return self.kcells[spec] if isinstance(spec, int) else spec
 
     def delete(self) -> None:
         del kcls[self.name]

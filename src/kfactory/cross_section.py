@@ -238,6 +238,11 @@ class TCrossSection(ABC, Generic[TUnit]):
             return self.base == o
         return False
 
+    @property
+    def main_layer(self) -> kdb.LayerInfo:
+        """Main Layer of the enclosure and cross section."""
+        return self.base.main_layer
+
 
 class CrossSection(TCrossSection[int]):
     @overload
