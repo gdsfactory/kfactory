@@ -1290,6 +1290,54 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             save_options.set_format_from_filename(filename)
         self._base.kdb_cell.write(filename, save_options)
 
+    def write_bytes(
+        self,
+        save_options: kdb.SaveLayoutOptions | None = None,
+        convert_external_cells: bool = False,
+        set_meta_data: bool = True,
+    ) -> bytes:
+        """Write a KCell to a binary format as oasis.
+
+        See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
+        """
+        if save_options is None:
+            save_options = save_layout_options()
+        self.insert_vinsts()
+        match set_meta_data, convert_external_cells:
+            case True, True:
+                self.kcl.set_meta_data()
+                for kcell in (self.kcl[ci] for ci in self.called_cells()):
+                    if not kcell._destroyed():
+                        if kcell.is_library_cell():
+                            kcell.convert_to_static(recursive=True)
+                        kcell.set_meta_data()
+                if self.is_library_cell():
+                    self.convert_to_static(recursive=True)
+                self.set_meta_data()
+            case True, False:
+                self.kcl.set_meta_data()
+                for kcell in (self.kcl[ci] for ci in self.called_cells()):
+                    if not kcell._destroyed():
+                        kcell.set_meta_data()
+                self.set_meta_data()
+            case False, True:
+                for kcell in (self.kcl[ci] for ci in self.called_cells()):
+                    if kcell.is_library_cell() and not kcell._destroyed():
+                        kcell.convert_to_static(recursive=True)
+                if self.is_library_cell():
+                    self.convert_to_static(recursive=True)
+            case _:
+                ...
+
+        for kci in set(self._base.kdb_cell.called_cells()) & self.kcl.tkcells.keys():
+            kc = self.kcl[kci]
+            kc.insert_vinsts()
+
+        save_options.format = save_options.format or "OASIS"
+        save_options.clear_cells()
+        save_options.select_cell(self.cell_index())
+        return self.kcl.layout.write_bytes(save_options)
+
     def read(
         self,
         filename: str | Path,
