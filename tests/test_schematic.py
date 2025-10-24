@@ -1,4 +1,4 @@
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -82,8 +82,10 @@ ports:
     assert schema_str is not None
 
 
-def test_schema_create() -> None:
-    pdk = kf.KCLayout("SCHEMA_PDK", infos=Layers)
+def test_schematic_create(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+) -> None:
+    pdk = kcl
     layers = Layers()
 
     @pdk.cell
@@ -122,12 +124,16 @@ def test_schema_create() -> None:
 
     s1.place(x=1000, y=10_000)
 
-    schematic.create_cell(kf.KCell)
+    c = schematic.create_cell(kf.KCell)
+    c.name = "test_schematic_create"
+    oasis_regression(c)
 
 
-def test_schema_create_cell() -> None:
+def test_schematic_create_cell(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+) -> None:
     layers = Layers()
-    pdk = kf.KCLayout("SCHEMA_PDK_DECORATOR", infos=Layers)
+    pdk = kcl
 
     @pdk.cell
     def straight(length: int) -> kf.KCell:
@@ -169,10 +175,14 @@ def test_schema_create_cell() -> None:
 
         return schematic
 
+    oasis_regression(long_straight(2))
 
-def test_schema_mirror_connection() -> None:
+
+def test_schematic_mirror_connection(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+) -> None:
     layers = Layers()
-    pdk = kf.KCLayout("SCHEMA_PDK_DECORATOR", infos=Layers)
+    pdk = kcl
 
     @pdk.cell
     def straight(length: int) -> kf.KCell:
@@ -268,13 +278,15 @@ def test_schema_mirror_connection() -> None:
 
         return schematic
 
-    straight_sbend(length=10_000, offset=20_000).show()
+    oasis_regression(straight_sbend(length=10_000, offset=20_000))
 
 
-def test_schema_kcl_mix_netlist() -> None:
+def test_schematic_kcl_mix_netlist(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], layers: Layers
+) -> None:
     layers = Layers()
-    pdk = kf.KCLayout("SCHEMA_PDK_DECORATOR", infos=Layers)
-    pdk2 = kf.KCLayout("SCHEMA_PDK_DECORATOR_2", infos=Layers)
+    pdk = kf.KCLayout("schematic_pdk_decorator", infos=layers.__class__)
+    pdk2 = kf.KCLayout("schematic_pdk_decorator_2", infos=layers.__class__)
 
     @pdk.cell
     def straight(length: int) -> kf.KCell:
@@ -295,7 +307,7 @@ def test_schema_kcl_mix_netlist() -> None:
 
         return c
 
-    @pdk2.schematic_cell()
+    @pdk2.schematic_cell
     def long_straight(n: int) -> kf.schematic.TSchematic[int]:
         schematic = kf.Schematic(kcl=pdk2)
 
@@ -322,12 +334,16 @@ def test_schema_kcl_mix_netlist() -> None:
 
         return schematic
 
-    long_straight(n=2000).netlist()
+    c = long_straight(n=2000)
+    c.netlist()
+    oasis_regression(c)
 
 
-def test_schema_route() -> None:
+def test_schematic_route(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     layers = Layers()
-    pdk = kf.KCLayout("SCHEMA_PDK_ROUTING", infos=Layers)
+    pdk = kf.KCLayout("schematic_pdk_routing", infos=Layers)
 
     @pdk.cell
     def straight(width: int, length: int) -> kf.KCell:
@@ -387,8 +403,12 @@ def test_schema_route() -> None:
 
         return schematic
 
+    oasis_regression(route_example())
 
-def test_netlist() -> None:
+
+def test_netlist(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     class Layers(kf.LayerInfos):
         WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
         WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
@@ -405,7 +425,7 @@ def test_netlist() -> None:
 
     layers = Layers()
     pdk = kf.KCLayout(
-        "SCHEMA_PDK_NETLIST",
+        "schematic_pdk_netlist",
         infos=Layers,
         connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)],
     )
@@ -535,18 +555,22 @@ def test_netlist() -> None:
     schematic.add_port("o2", port=s2["o1"])
 
     c = schematic.create_cell(kf.KCell)
+    c.name = "test_schematic_anchor"
     nl = schematic.netlist()
     nl2 = c.netlist(
         ignore_unnamed=True,
         connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)],
     )
     assert nl == nl2[c.name]
+    oasis_regression(c)
 
 
-def test_netlist_equivalent() -> None:
+def test_netlist_equivalent(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
     layers = Layers()
     pdk = kf.KCLayout(
-        "SCHEMA_PDK_NETLIST_EQUIVALENT",
+        "schematic_pdk_netlist_equivalent",
         infos=Layers,
         connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)],
     )
@@ -701,10 +725,14 @@ def test_netlist_equivalent() -> None:
     schema_str = schematic.code_str()
 
     assert schema_str is not None
+    c.name = "test_schematic_anchor"
+    oasis_regression(c)
 
 
-def test_schematic_anchor() -> None:
-    pdk = kf.KCLayout("SCHEMA_PDK_ANCHOR_PORT", infos=Layers)
+def test_schematic_anchor(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+) -> None:
+    pdk = kf.KCLayout("schematic_pdk_anchor_port", infos=Layers)
     layers = Layers()
 
     @pdk.cell
@@ -748,7 +776,9 @@ def test_schematic_anchor() -> None:
         anchor={"port": "o1"},
     )
 
-    schematic.create_cell(kf.KCell).show()
+    c = schematic.create_cell(kf.KCell)
+    c.name = "test_schematic_anchor"
+    oasis_regression(c)
 
 
 @pytest.mark.parametrize(
