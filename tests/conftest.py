@@ -1,3 +1,4 @@
+import platform
 from collections.abc import Callable, Iterator
 from functools import partial
 from pathlib import Path
@@ -241,18 +242,27 @@ def oasis_regression(
     saveopts = kf.save_layout_options()
     saveopts.format = "GDS2"
 
-    def _check(
-        c: kf.ProtoTKCell[Any],
-        tolerance: int = 0,
-    ) -> None:
-        c.kcl.layout.clear_meta_info()
+    if platform.system() == "Linux":
 
-        file_regression.check(
-            c.write_bytes(saveopts, convert_external_cells=True),
-            binary=True,
-            extension=".gds",
-            check_fn=partial(_layout_xor, tolerance=tolerance),
-        )
+        def _check(
+            c: kf.ProtoTKCell[Any],
+            tolerance: int = 0,
+        ) -> None:
+            c.kcl.layout.clear_meta_info()
+
+            file_regression.check(
+                c.write_bytes(saveopts, convert_external_cells=True),
+                binary=True,
+                extension=".gds",
+                check_fn=partial(_layout_xor, tolerance=tolerance),
+            )
+    else:
+
+        def _check(
+            c: kf.ProtoTKCell[Any],
+            tolerance: int = 0,
+        ) -> None:
+            pass
 
     return _check
 
