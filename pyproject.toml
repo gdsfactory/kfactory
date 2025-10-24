@@ -1,6 +1,6 @@
-# [build-system]
-# requires = ["setuptools>=74", "wheel", "build", "setuptools_scm[toml]>=8.1"]
-# build-backend = "setuptools.build_meta"
+[build-system]
+requires = ["setuptools>=74", "wheel", "build", "setuptools_scm[toml]>=8.1"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "kfactory"
@@ -56,7 +56,6 @@ dev = [
 ]
 docs = [
     "kfactory[ipy]",
-    "erdantic>=1.1.1",
     "markdown-exec>=1.10.3",
     "mkdocs>=1.6.1",
     "mkdocs-gen-files>=0.5.0",
