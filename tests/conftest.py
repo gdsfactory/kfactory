@@ -37,6 +37,7 @@ kf.kcl.infos = Layers()
 cell_copy_lock = RLock()
 
 counter = 0
+counter_lock = RLock()
 
 
 @pytest.fixture(scope="session")
@@ -58,10 +59,11 @@ def layers() -> Layers:
 
 @pytest.fixture
 def kcl() -> kf.KCLayout:
-    global counter  # noqa: PLW0603
-    name = str(counter)
-    counter += 1
-    return kf.KCLayout(name=name, infos=Layers)
+    with counter_lock:
+        global counter  # noqa: PLW0603
+        name = str(counter)
+        counter += 1
+        return kf.KCLayout(name=name, infos=Layers)
 
 
 @pytest.fixture
