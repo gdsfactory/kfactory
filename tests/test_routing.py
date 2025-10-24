@@ -1146,6 +1146,7 @@ def test_sbend_routing(
 
 def test_route_same_plane(
     kcl: kf.KCLayout,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell("test_route_same_plane")
 
@@ -1163,11 +1164,13 @@ def test_route_same_plane(
         kf.SymmetricalCrossSection(width=10_000, enclosure=enc, name="S")
     )
 
+    bend_factory = kf.factories.circular.bend_circular_factory(kcl=kcl)
+
     @kf.cell
     def bend_circular_route_same_plane(
         radius: int, cross_section: kf.CrossSection
     ) -> kf.KCell:
-        c = kf.cells.circular.bend_circular(
+        c = bend_factory(
             radius=kf.kcl.to_um(radius),
             width=kf.kcl.to_um(cross_section.width),
             layer=cross_section.layer,
@@ -1179,9 +1182,11 @@ def test_route_same_plane(
         c.kdb_cell.locked = True
         return c
 
+    straight_dbu_factory = kf.factories.straight.straight_dbu_factory(kcl=kcl)
+
     @kf.cell
     def wire_same_plane(length: int, cross_section: kf.CrossSection) -> kf.KCell:
-        c = kf.cells.straight.straight_dbu(
+        c = straight_dbu_factory(
             width=cross_section.width,
             length=length,
             layer=cross_section.layer,
@@ -1230,3 +1235,4 @@ def test_route_same_plane(
     )
 
     c.add_ports(ports)
+    oasis_regression(c)

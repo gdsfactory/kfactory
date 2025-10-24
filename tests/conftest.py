@@ -3,7 +3,8 @@ from collections.abc import Callable, Iterator
 from functools import partial
 from pathlib import Path
 from threading import RLock
-from typing import Any
+from typing import Any, Literal
+from warnings import warn
 
 import pytest
 from pytest_regressions.file_regression import FileRegressionFixture
@@ -242,32 +243,32 @@ def oasis_regression(
     saveopts = kf.save_layout_options()
     saveopts.format = "GDS2"
 
-    if platform.system() == "Linux":
+    raises: Literal["error", "warning"] = (
+        "error" if platform.system() == "Linux" else "warning"
+    )
 
-        def _check(
-            c: kf.ProtoTKCell[Any],
-            tolerance: int = 0,
-        ) -> None:
-            c.kcl.layout.clear_meta_info()
+    def _check(
+        c: kf.ProtoTKCell[Any],
+        tolerance: int = 0,
+    ) -> None:
+        c.kcl.layout.clear_meta_info()
 
-            file_regression.check(
-                c.write_bytes(saveopts, convert_external_cells=True),
-                binary=True,
-                extension=".gds",
-                check_fn=partial(_layout_xor, tolerance=tolerance),
-            )
-    else:
-
-        def _check(
-            c: kf.ProtoTKCell[Any],
-            tolerance: int = 0,
-        ) -> None:
-            pass
+        file_regression.check(
+            c.write_bytes(saveopts, convert_external_cells=True),
+            binary=True,
+            extension=".gds",
+            check_fn=partial(_layout_xor, tolerance=tolerance, raises=raises),
+        )
 
     return _check
 
 
-def _layout_xor(path_a: Path, path_b: Path, tolerance: int = 0) -> None:
+def _layout_xor(
+    path_a: Path,
+    path_b: Path,
+    tolerance: int = 0,
+    raises: Literal["error", "warning"] = "error",
+) -> None:
     diff = kf.kdb.LayoutDiff()
     ly_a = kf.kdb.Layout()
     ly_a.read(str(path_a))
@@ -277,4 +278,12 @@ def _layout_xor(path_a: Path, path_b: Path, tolerance: int = 0) -> None:
     flags = kf.kdb.LayoutDiff.Verbose | kf.kdb.LayoutDiff.WithMetaInfo
 
     if not diff.compare(ly_a, ly_b, flags=flags, tolerance=tolerance):
-        raise AttributeError(f"Layouts {path_a!r} and {path_b!r} differ!")
+        match raises:
+            case "error":
+                raise AttributeError(
+                    f"Layouts {str(path_a)!r} and {str(path_b)!r} differ!"
+                )
+            case "warning":
+                warn(
+                    f"Layouts {str(path_a)!r} and {str(path_b)!r} differ!", stacklevel=3
+                )
