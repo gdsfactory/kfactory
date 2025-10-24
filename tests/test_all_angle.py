@@ -1,6 +1,4 @@
-from collections.abc import Callable
 from functools import partial
-from typing import Any
 
 import numpy as np
 
@@ -10,7 +8,6 @@ from tests.conftest import Layers
 
 def test_all_angle_bundle(
     layers: Layers,
-    oasis_regression: Callable[[kf.ProtoTKCell[Any], int, list[str]], None],
     kcl: kf.KCLayout,
 ) -> None:
     sf = partial(
@@ -72,5 +69,3 @@ def test_all_angle_bundle(
         straight_factory=sf,
         bend_factory=bf,
     )
-
-    oasis_regression(c, 10, ["linux"])

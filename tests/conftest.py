@@ -238,22 +238,14 @@ def unlink_merge_read_oas() -> Iterator[None]:
 def oasis_regression(
     file_regression: FileRegressionFixture,
 ) -> Callable[[kf.ProtoTKCell[Any]], None]:
-    import platform
-
     saveopts = kf.save_layout_options()
     saveopts.format = "GDS2"
 
     def _check(
         c: kf.ProtoTKCell[Any],
         tolerance: int = 0,
-        os_list: list[str] | None = None,
     ) -> None:
         c.kcl.layout.clear_meta_info()
-
-        current_os = platform.system().lower()
-
-        if os_list is not None and current_os not in [os.lower() for os in os_list]:
-            return
 
         file_regression.check(
             c.write_bytes(saveopts, convert_external_cells=True),
