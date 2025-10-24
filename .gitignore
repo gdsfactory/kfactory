@@ -47,3 +47,5 @@ demo.gds
 
 .coverage
 *.prof
+*.obtained.oas
+*.obtained.gds
