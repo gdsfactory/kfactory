@@ -25,7 +25,7 @@ def test_virtual_cell_insert(
 
     vc = kcl.vkcell(name="test_virtual_insert")
 
-    e_bend = kf.cells.virtual.euler.virtual_bend_euler(
+    e_bend = kf.factories.virtual.euler.virtual_bend_euler_factory(kcl=kcl)(
         width=0.5,
         radius=10,
         layer=layers.WG,
@@ -63,12 +63,12 @@ def test_all_angle_route(
         width=5,
         backbone=bb,
         straight_factory=partial(
-            kf.cells.virtual.straight.virtual_straight,
+            kf.factories.virtual.straight.virtual_straight_factory(kcl=kcl),
             layer=layers.WG,
             enclosure=wg_enc,
         ),
         bend_factory=partial(
-            kf.cells.virtual.euler.virtual_bend_euler,
+            kf.factories.virtual.euler.virtual_bend_euler_factory(kcl=kcl),
             width=5,
             radius=20,
             layer=layers.WG,
