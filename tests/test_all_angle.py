@@ -10,7 +10,7 @@ from tests.conftest import Layers
 
 def test_all_angle_bundle(
     layers: Layers,
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any], int, list[str]], None],
     kcl: kf.KCLayout,
 ) -> None:
     sf = partial(
@@ -73,4 +73,4 @@ def test_all_angle_bundle(
         bend_factory=bf,
     )
 
-    oasis_regression(c, tolerance=10)
+    oasis_regression(c, 10, ["linux"])
