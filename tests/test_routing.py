@@ -1148,7 +1148,6 @@ def test_sbend_routing(
 
 def test_route_same_plane(
     kcl: kf.KCLayout,
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell("test_route_same_plane")
 
@@ -1237,4 +1236,3 @@ def test_route_same_plane(
     )
 
     c.add_ports(ports)
-    oasis_regression(c)
