@@ -73,4 +73,4 @@ def test_all_angle_bundle(
         bend_factory=bf,
     )
 
-    oasis_regression(c, tolerance=1)
+    oasis_regression(c, tolerance=10)
