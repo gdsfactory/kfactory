@@ -941,7 +941,7 @@ def test_rf_bundle(
 
     layer = Layers()
 
-    kf.kcl.infos = Layers()
+    kcl.infos = Layers()
 
     enc = kf.LayerEnclosure(
         sections=[(layer.METAL1EX, 500), (layer.METAL2EX, -200, 2000)],
@@ -949,16 +949,18 @@ def test_rf_bundle(
         main_layer=layer.METAL1,
     )
 
-    xs_g = kf.kcl.get_icross_section(
+    xs_g = kcl.get_icross_section(
         kf.SymmetricalCrossSection(width=40_000, enclosure=enc, name="G")
     )
 
-    xs_s = kf.kcl.get_icross_section(
+    xs_s = kcl.get_icross_section(
         kf.SymmetricalCrossSection(width=10_000, enclosure=enc, name="S")
     )
 
+    bend_circular_factory = kf.factories.circular.bend_circular_factory(kcl=kcl)
+
     def bend_circular(radius: int, cross_section: kf.CrossSection) -> kf.KCell:
-        c = kf.cells.circular.bend_circular(
+        c = bend_circular_factory(
             radius=kf.kcl.to_um(radius),
             width=kf.kcl.to_um(cross_section.width),
             layer=cross_section.layer,
@@ -970,8 +972,10 @@ def test_rf_bundle(
         c.kdb_cell.locked = True
         return c
 
+    wire_factory = kf.factories.straight.straight_dbu_factory(kcl=kcl)
+
     def wire(length: int, cross_section: kf.CrossSection) -> kf.KCell:
-        c = kf.cells.straight.straight_dbu(
+        c = wire_factory(
             width=cross_section.width,
             length=length,
             layer=cross_section.layer,
