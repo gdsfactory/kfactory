@@ -78,8 +78,8 @@ ci = [
     "pytest-randomly>=3.16.0",
     "pytest-regressions>=2.7.0",
     "pytest-xdist>=3.6.1",
-    "pytest-regressions",
-    "pytest-datadir",
+    "pytest-regressions>=2.8.3",
+    "pytest-datadir>=1.8.0",
     "types-cachetools>=5.5.0.20240820",
     "types-requests>=2.32.0.20250328",
 ]
