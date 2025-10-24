@@ -1,0 +1,4 @@
+[submodule "tests/gdsfactory-yaml-pics"]
+	path = tests/gdsfactory-yaml-pics
+	url = https://github.com/gdsfactory/gdsfactory.git
+	branch = main

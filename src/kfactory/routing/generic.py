@@ -371,10 +371,8 @@ def route_bundle(
         c: Cell to place the route in.
         start_ports: List of start ports.
         end_ports: List of end ports.
-        starts: List of steps to use on each starting port or all of them.
-        ends: List of steps to use on each end port or all of them.
-        collision_check_layers: Layers to check for actual errors if manhattan routes
-            detect potential collisions.
+        route_width: Width of the route. If None, the width of the ports is used.
+        sort_ports: Automatically sort ports.
         on_collision: Define what to do on routing collision. Default behaviour is to
             open send the layout of c to klive and open an error lyrdb with the
             collisions. "error" will simply raise an error. None will ignore any error.
@@ -382,24 +380,8 @@ def route_bundle(
             handle the error. show_error will visualize it in klayout with the intended
             route along the already placed parts of c. Error will just throw an error.
             None will ignore the error.
-        bboxes: List of boxes to consider. Currently only boxes overlapping ports will
-            be considered.
-        route_width: Width of the route. If None, the width of the ports is used.
-        sort_ports: Automatically sort ports.
-        bbox_routing: "minimal": only route to the bbox so that it can be safely routed
-            around, but start or end bends might encroach on the bounding boxes when
-            leaving them.
-        bend90_radius: The radius with which the router will try to router. This should
-            normally be the maximal radius used.
-        placer_function: Function to place the routes. Must return a corresponding list
-            of OpticalManhattan routes.
-            Must accept the following protocol:
-            ```
-            placer_function(
-                c: KCell, p1: Port, p2: Port, pts: list[Point], **placer_kwargs
-            )
-            ```
-        placer_kwargs: Additional kwargs passed to the placer_function.
+        collision_check_layers: Layers to check for actual errors if manhattan routes
+            detect potential collisions.
         routing_function: Function to place the routes. Must return a corresponding list
             of OpticalManhattan routes.
             Must accept the following protocol:
@@ -409,10 +391,21 @@ def route_bundle(
             )
             ```
         routing_kwargs: Additional kwargs passed to the placer_function.
+        placer_function: Function to place the routes. Must return a corresponding list
+            of OpticalManhattan routes.
+            Must accept the following protocol:
+            ```
+            placer_function(
+                c: KCell, p1: Port, p2: Port, pts: list[Point], **placer_kwargs
+            )
+            ```
+        placer_kwargs: Additional kwargs passed to the placer_function.
         router_post_process_function: Function used to modify the routers returned by
             the routing function. This is particularly useful for operations such as
             path length matching.
         router_post_process_kwargs: Kwargs for router_post_process_function.
+        starts: List of steps to use on each starting port or all of them.
+        ends: List of steps to use on each end port or all of them.
         start_angles: Overwrite the port orientation of all start_ports together
             (single value) or each one (list of values which is as long as start_ports).
         end_angles: Overwrite the port orientation of all start_ports together
@@ -511,8 +504,8 @@ def route_bundle(
     if not routers:
         return []
 
-    start_mapping = {sp.trans: sp for sp in start_ports}
-    end_mapping = {ep.trans: ep for ep in end_ports}
+    start_mapping = {sp.get_trans(): sp for sp in start_ports}
+    end_mapping = {ep.get_trans(): ep for ep in end_ports}
     routes: list[ManhattanRoute] = []
     start_ports = []
     end_ports = []

@@ -168,7 +168,7 @@ class Pins(ProtoPins[int]):
         """Get all pins in a dictionary with names as keys."""
         return {v.name: Pin(base=v) for v in self._bases if v.name is not None}
 
-    def print(self, unit: Literal["dbu", "um", None] = None) -> None:
+    def print(self, unit: Literal["dbu", "um"] | None = None) -> None:
         """Pretty print ports."""
         config.console.print(pprint_pins(self, unit=unit))
 

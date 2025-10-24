@@ -58,7 +58,7 @@ def virtual_bend_circular_factory(
     Args:
         kcl: The KCLayout which will be owned
         additional_info: Add additional key/values to the
-            [`VKCell.info`][kfactory.kcell.VKCell.info]. Can be a static dict
+            [`VKCell.info`][kfactory.settings.Info]. Can be a static dict
             mapping info name to info value. Or can a callable which takes the straight
             functions' parameters as kwargs and returns a dict with the mapping.
         basename: Overwrite the prefix of the resulting VKCell's name. By default
@@ -104,7 +104,7 @@ def virtual_bend_circular_factory(
             angle: Angle amount of the bend.
             angle_step: Angle amount per backbone point of the bend.
         """
-        c = VKCell()
+        c = kcl.vkcell()
         if angle < 0:
             logger.critical(
                 f"Negative lengths are not allowed {angle} as ports"

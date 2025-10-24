@@ -9,6 +9,7 @@ from typing import Any, overload
 from .. import kdb
 from ..conf import config, logger
 from ..kcell import KCell, ProtoTKCell
+from ..typings import dbu, um
 
 __all__ = [
     "fix_spacing_minkowski_tiled",
@@ -19,47 +20,47 @@ __all__ = [
 
 @overload
 def fix_spacing_tiled(
-    c: KCell,
-    min_space: int,
+    c: ProtoTKCell[Any],
+    min_space: dbu,
     layer: kdb.LayerInfo,
     metrics: kdb.Metrics = kdb.Metrics.Euclidian,
     ignore_angle: float = 80,
     size_space_check: int = 5,
     n_threads: int = 4,
-    tile_size: tuple[float, float] | None = None,
-    overlap: float = 3,
+    tile_size: tuple[um, um] | None = None,
+    overlap: float = 2.2,
     smooth_factor: float = 0.05,
 ) -> kdb.Region: ...
 
 
 @overload
 def fix_spacing_tiled(
-    c: KCell,
-    min_space: int,
+    c: ProtoTKCell[Any],
+    min_space: dbu,
     layer: kdb.LayerInfo,
     metrics: kdb.Metrics = kdb.Metrics.Euclidian,
     ignore_angle: float = 80,
     size_space_check: int = 5,
     n_threads: int = 4,
-    tile_size: tuple[float, float] | None = None,
-    overlap: float = 3,
+    tile_size: tuple[um, um] | None = None,
+    overlap: float = 2.2,
     *,
-    smooth_absolute: int,
+    smooth_absolute: dbu,
 ) -> kdb.Region: ...
 
 
 def fix_spacing_tiled(
     c: ProtoTKCell[Any],
-    min_space: int,
+    min_space: dbu,
     layer: kdb.LayerInfo,
     metrics: kdb.Metrics = kdb.Metrics.Euclidian,
     ignore_angle: float = 80,
     size_space_check: int = 5,
     n_threads: int | None = None,
-    tile_size: tuple[float, float] | None = None,
-    overlap: float = 3,
+    tile_size: tuple[um, um] | None = None,
+    overlap: float = 2.2,
     smooth_factor: float = 0.05,
-    smooth_absolute: int | None = None,
+    smooth_absolute: dbu | None = None,
     smooth_keep_hv: bool = True,
 ) -> kdb.Region:
     """Fix minimum space violations.
@@ -76,7 +77,8 @@ def fix_spacing_tiled(
         size_space_check: Sizing in dbu of the offending edges towards the polygons
         n_threads: on how many threads to run the check simultaneously
         tile_size: tuple determining the size of each sub tile (in um), should be big
-            compared to the violation size
+            compared to the violation size. By default this will be at minimum 250 um or
+            25 times the violation size, whichever is bigger.
         overlap: how many times bigger to make the tile border in relation to the
             violation size. Smaller than 1 can lead to errors
         smooth_factor: how big to smooth the resulting region in relation to the
@@ -92,8 +94,8 @@ def fix_spacing_tiled(
     """
     c = KCell(base=c.base)
     if tile_size is None:
-        min(25 * min_space, 250)
-        tile_size = (30 * min_space * c.kcl.dbu, 30 * min_space * c.kcl.dbu)
+        tile_dim = min(25 * c.kcl.to_um(min_space), 250)
+        tile_size = (tile_dim, tile_dim)
     li = c.kcl.layer(layer)
     tp = kdb.TilingProcessor()
     tp.frame = c.kcl.to_um(c.bbox(li))  # type: ignore[misc, assignment]
@@ -146,12 +148,12 @@ def fix_spacing_tiled(
 
 
 def fix_spacing_sizing_tiled(
-    c: KCell,
-    min_space: int,
+    c: ProtoTKCell[Any],
+    min_space: dbu,
     layer: kdb.LayerInfo,
     n_threads: int | None = None,
-    tile_size: tuple[float, float] | None = None,
-    overlap: int = 2,
+    tile_size: tuple[um, um] | None = None,
+    overlap: float = 2.2,
 ) -> kdb.Region:
     """Fix min space issues by using a dilation & erosion.
 
@@ -161,7 +163,8 @@ def fix_spacing_sizing_tiled(
         layer: Input layer
         n_threads: on how many threads to run the check simultaneously
         tile_size: tuple determining the size of each sub tile (in um), should be big
-            compared to the violation size
+            compared to the violation size. By default this will be at minimum 250 um or
+            25 times the violation size, whichever is bigger.
         overlap: how many times bigger to make the tile border in relation to the
             violation size. Smaller than 1 can lead to errors
 
@@ -169,10 +172,11 @@ def fix_spacing_sizing_tiled(
         kdb.Region: Region containing the fixes for the violations
 
     """
+    c = KCell(base=c.base)
     tp = kdb.TilingProcessor()
     if tile_size is None:
-        size = min_space * 20 * c.kcl.dbu
-        tile_size = (size, size)
+        tile_dim = min(25 * c.kcl.to_um(min_space), 250)
+        tile_size = (tile_dim, tile_dim)
     li = c.kcl.layer(layer)
     tp.frame = c.kcl.to_um(c.bbox(li))  # type: ignore[misc, assignment]
     tp.dbu = c.kcl.dbu
@@ -201,13 +205,13 @@ def fix_spacing_sizing_tiled(
 
 
 def fix_spacing_minkowski_tiled(
-    c: KCell,
-    min_space: int,
+    c: ProtoTKCell[Any],
+    min_space: dbu,
     ref: kdb.LayerInfo | kdb.Region,
     n_threads: int | None = None,
-    tile_size: tuple[float, float] | None = None,
-    overlap: int = 1,
-    smooth: int | None = None,
+    tile_size: tuple[um, um] | None = None,
+    overlap: float = 2.2,
+    smooth: dbu | None = None,
 ) -> kdb.Region:
     """Fix min space issues by using a dilation & erosion with a box.
 
@@ -217,7 +221,8 @@ def fix_spacing_minkowski_tiled(
         ref: Input layer index or region
         n_threads: on how many threads to run the check simultaneously
         tile_size: tuple determining the size of each sub tile (in um), should be big
-            compared to the violation size
+            compared to the violation size. By default this will be at minimum 250 um or
+            25 times the violation size, whichever is bigger.
         overlap: how many times bigger to make the tile border in relation to the
             violation size. Smaller than 1 can lead to errors
         smooth: Apply smoothening (simplifying) at the end if > 0
@@ -225,6 +230,7 @@ def fix_spacing_minkowski_tiled(
     Returns:
         kdb.Region: Region containing the fixes for the violations
     """
+    c = KCell(base=c.base)
     tp = kdb.TilingProcessor()
     tp.frame = c.dbbox()  # type: ignore[misc, assignment]
     tp.dbu = c.kcl.dbu
@@ -276,12 +282,12 @@ def fix_spacing_minkowski_tiled(
 
 def fix_width_minkowski_tiled(
     c: ProtoTKCell[Any],
-    min_width: int,
+    min_width: dbu,
     ref: kdb.LayerInfo | kdb.Region,
     n_threads: int | None = None,
-    tile_size: tuple[float, float] | None = None,
-    overlap: int = 1,
-    smooth: int | None = None,
+    tile_size: tuple[um, um] | None = None,
+    overlap: float = 2.2,
+    smooth: dbu | None = None,
 ) -> kdb.Region:
     """Fix min space issues by using a dilation & erosion with a box.
 
@@ -291,7 +297,8 @@ def fix_width_minkowski_tiled(
         ref: Input layer index or region
         n_threads: on how many threads to run the check simultaneously
         tile_size: tuple determining the size of each sub tile (in um), should be big
-            compared to the violation size
+            compared to the violation size. By default this will be at minimum 250 um or
+            25 times the violation size, whichever is bigger.
         overlap: how many times bigger to make the tile border in relation to the
             violation size. Smaller than 1 can lead to errors
         smooth: Apply smoothening (simplifying) at the end if > 0
@@ -305,10 +312,9 @@ def fix_width_minkowski_tiled(
     tp.dbu = c.kcl.dbu
     tp.threads = n_threads or config.n_threads
 
-    min_tile_size_rec = 10 * min_width * tp.dbu
-
     if tile_size is None:
-        tile_size = (min_tile_size_rec * 2, min_tile_size_rec * 2)
+        tile_dim = min(25 * c.kcl.to_um(min_width), 250)
+        tile_size = (tile_dim, tile_dim)
 
     tp.tile_border(min_width * overlap * tp.dbu, min_width * overlap * tp.dbu)
 
@@ -355,9 +361,9 @@ def fix_width_and_spacing_minkowski_tiled(
     min_width: int,
     ref: kdb.LayerInfo | kdb.Region,
     n_threads: int | None = None,
-    tile_size: tuple[float, float] | None = None,
-    overlap: int = 1,
-    smooth: int | None = None,
+    tile_size: tuple[um, um] | None = None,
+    overlap: float = 2.2,
+    smooth: dbu | None = None,
 ) -> kdb.Region:
     """Fix min space and width issues by using a dilation & erosion with a box.
 
@@ -371,7 +377,8 @@ def fix_width_and_spacing_minkowski_tiled(
         ref: Input layer index or region
         n_threads: on how many threads to run the check simultaneously
         tile_size: tuple determining the size of each sub tile (in um), should be big
-            compared to the violation size
+            compared to the violation size. By default this will be at minimum 250 um or
+            25 times the violation size, whichever is bigger.
         overlap: how many times bigger to make the tile border in relation to the
             violation size. Smaller than 1 can lead to errors (overlap*min_space)
         smooth: Apply smoothening (simplifying) at the end if > 0
@@ -385,10 +392,9 @@ def fix_width_and_spacing_minkowski_tiled(
     tp.dbu = c.kcl.dbu
     tp.threads = n_threads or config.n_threads
 
-    min_tile_size_rec = 10 * min_space * tp.dbu
-
     if tile_size is None:
-        tile_size = (min_tile_size_rec * 2, min_tile_size_rec * 2)
+        tile_dim = min(25 * c.kcl.to_um(min_space), 250)
+        tile_size = (tile_dim, tile_dim)
 
     border = min_space * tp.dbu * overlap
     tp.tile_border(border, border)

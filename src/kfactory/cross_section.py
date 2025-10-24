@@ -115,6 +115,11 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
     ) -> SymmetricalCrossSection:
         return super().model_copy(update=update, deep=deep)
 
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, TCrossSection):
+            return o == self
+        return super().__eq__(o)
+
 
 class DSymmetricalCrossSection(BaseModel):
     """um based CrossSection."""
@@ -225,6 +230,18 @@ class TCrossSection(ABC, Generic[TUnit]):
     def model_copy(
         self, *, update: Mapping[str, Any] = {"name": None}, deep: bool
     ) -> Self: ...
+
+    def __eq__(self, o: object) -> bool:
+        if isinstance(o, TCrossSection):
+            return self.base == o.base
+        if isinstance(o, SymmetricalCrossSection):
+            return self.base == o
+        return False
+
+    @property
+    def main_layer(self) -> kdb.LayerInfo:
+        """Main Layer of the enclosure and cross section."""
+        return self.base.main_layer
 
 
 class CrossSection(TCrossSection[int]):
@@ -445,7 +462,7 @@ class DCrossSection(TCrossSection[float]):
         )
 
 
-class TCrossSectionSpec(Generic[TUnit], TypedDict):
+class TCrossSectionSpec(TypedDict, Generic[TUnit]):
     name: NotRequired[str]
     sections: NotRequired[
         list[tuple[kdb.LayerInfo, TUnit] | tuple[kdb.LayerInfo, TUnit, TUnit]]
@@ -550,7 +567,8 @@ class CrossSectionModel(BaseModel):
         if not xs == cross_section:
             raise ValueError(
                 "There is already a cross_section defined with name "
-                f"{cross_section.name}. Cannot overwrite cross_sections."
+                f"{cross_section.name}. Cannot overwrite cross_sections.\n"
+                f"old_xs={xs.model_dump()}\nnew_xs={cross_section.model_dump()}"
             )
         return xs
 

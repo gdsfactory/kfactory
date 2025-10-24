@@ -64,6 +64,9 @@ class LayerInfos(BaseModel):
                 )
         return self
 
+    def __getitem__(self, value: str) -> kdb.LayerInfo:
+        return getattr(self, value)  # type: ignore[no-any-return]
+
 
 class LayerEnum(int, Enum):  # type: ignore[misc]
     """Class for having the layers stored and a mapping int <-> layer,datatype.
@@ -97,7 +100,6 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
         Args:
             layer: Layer number of the layer.
             datatype: Datatype of the layer.
-            kcl: Base Layout object to register the layer to.
         """
         value = cls.layout.layer(layer, datatype)
         obj: int = int.__new__(cls, value)

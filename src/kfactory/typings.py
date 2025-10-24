@@ -18,6 +18,7 @@ from typing_extensions import TypeAliasType
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from .decorators import WrappedKCellFunc, WrappedVKCellFunc
     from .instance import ProtoInstance, ProtoTInstance
     from .kcell import BaseKCell, ProtoKCell, ProtoTKCell, VKCell
     from .layer import LayerEnum
@@ -45,19 +46,30 @@ TInstance_co = TypeVar("TInstance_co", bound="ProtoInstance[Any]", covariant=Tru
 TTInstance_co = TypeVar("TTInstance_co", bound="ProtoTInstance[Any]", covariant=True)
 TBaseCell_co = TypeVar("TBaseCell_co", bound="BaseKCell", covariant=True)
 KCellParams = ParamSpec("KCellParams")
+F = TypeVar(
+    "F",
+    bound="WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]",
+)
+F_co = TypeVar(
+    "F_co",
+    bound="WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]",
+    covariant=True,
+)
 P = ParamSpec("P")
+
 
 JSONSerializable = TypeAliasType(
     "JSONSerializable",
-    "int | float| bool | str | list[JSONSerializable] | tuple[JSONSerializable, ...] | dict[str, JSONSerializable]| None",  # noqa: E501
+    "int | float| bool | str | list[JSONSerializable] | tuple[JSONSerializable, ...] | dict[str, JSONSerializable] | None",  # noqa: E501
 )
 
 
-class KCellSpecDict(TypedDict):
+class KCellSpecDict(TypedDict, total=True):
     """Specification for a KCell."""
 
     component: str
     settings: NotRequired[dict[str, Any]]
+    kcl: NotRequired[str]
 
 
 AnyTrans = TypeVar(
@@ -143,3 +155,4 @@ Angle: TypeAlias = int
 KCellSpec: TypeAlias = (
     "int | str | KCellSpecDict | ProtoTKCell[Any] | Callable[..., ProtoTKCell[Any]]"
 )
+AnyCellSpec: TypeAlias = "int | str | KCellSpecDict | ProtoTKCell[Any] | VKCell | Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]"  # noqa: E501

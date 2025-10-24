@@ -26,6 +26,7 @@ from typing_extensions import Unpack
 from . import kdb
 from .conf import CheckInstances, logger
 from .exceptions import CellNameError
+from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
 from .serialization import (
     DecoratorDict,
     DecoratorList,
@@ -49,8 +50,8 @@ from .typings import (
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
 
-    from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
     from .layout import KCLayout
+    from .schematic import DSchematic, Schematic
 
 
 def _parse_params(
@@ -172,15 +173,22 @@ def _check_instances(
     match check_instances:
         case CheckInstances.RAISE:
             if any(inst.is_complex() for inst in cell.each_inst()):
+                instance_names = [
+                    inst.name for inst in cell.each_inst() if inst.is_complex()
+                ]
+                cell_names = [
+                    inst.cell.name for inst in cell.each_inst() if inst.is_complex()
+                ]
+                affected = "\n".join(
+                    f"Instance name: {iname}, Cell name: {cname}"
+                    for iname, cname in zip(instance_names, cell_names, strict=True)
+                )
                 raise ValueError(
                     "Found off-grid instances, which is not allowed in most "
                     "foundries.\n"
                     "Please run c.flatten() before returning "
                     "or add use @cell(check_instances=False).\n"
-                    "Cellnames of instances affected by this: "
-                    + "\n".join(
-                        inst.cell.name for inst in cell.each_inst() if inst.is_complex()
-                    )
+                    f"Instances affected by this:\n{affected}"
                 )
         case CheckInstances.FLATTEN:
             if any(inst.is_complex() for inst in cell.each_inst()):
@@ -315,12 +323,14 @@ def _post_process(
 class WrappedKCellFunc(Generic[KCellParams, KC]):
     _f: Callable[KCellParams, KC]
     _f_orig: Callable[KCellParams, ProtoTKCell[Any]]
+    _f_schematic: Callable[KCellParams, Schematic | DSchematic] | None = None
     cache: Cache[int, KC] | dict[int, Any]
     name: str
     kcl: KCLayout
     output_type: type[KC]
     lvs_equivalent_ports: list[list[str]] | None = None
     ports_definition: PortsDefinition | None = None
+    tags: set[str]
 
     @property
     def __name__(self) -> str:
@@ -356,11 +366,13 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         debug_names: bool,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
+        tags: Sequence[str] | None = None,
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
         self.name = _get_function_name(f)
         self.ports_definition = ports.copy() if ports is not None else None
+        self.tags = set(tags) if tags else set()
 
         @functools.wraps(f)
         def wrapper_autocell(
@@ -400,10 +412,16 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                     name_ = None
                 cell = f(**params)  # type: ignore[call-arg]
                 if cell is None:
-                    raise ValueError(
+                    raise TypeError(
                         f"The cell function {self.name!r} in {str(self.file)!r}"
                         " returned None. Did you forget to return the cell or component"
                         " at the end of the function?"
+                    )
+                if not isinstance(cell, ProtoTKCell):
+                    raise TypeError(
+                        f"The cell function {self.name!r} in {str(self.file)!r}"
+                        f" returned {type(cell)=}. The `@cell` decorator only supports"
+                        " KCell/DKCell or any SubClass such as Component."
                     )
 
                 logger.debug("Constructed {}", name_ or cell.name)
@@ -571,6 +589,7 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
     output_type: type[VK]
     lvs_equivalent_ports: list[list[str]] | None = None
     ports_definition: PortsDefinition | None = None
+    tags: set[str]
 
     @property
     def __name__(self) -> str:
@@ -601,11 +620,13 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
         post_process: Iterable[Callable[[VKCell], None]],
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
+        tags: Sequence[str] | None = None,
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
         self.name = _get_function_name(f)
         self.ports_definitions = ports.copy() if ports is not None else None
+        self.tags = set(tags) if tags else set()
 
         @functools.wraps(f)
         def wrapper_autocell(
@@ -631,10 +652,16 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
                     name_ = None
                 cell = f(**params)  # type: ignore[call-arg]
                 if cell is None:
-                    raise ValueError(
+                    raise TypeError(
                         f"The cell function {self.name!r} in {str(self.file)!r}"
                         " returned None. Did you forget to return the cell or component"
                         " at the end of the function?"
+                    )
+                if not isinstance(cell, VKCell):
+                    raise TypeError(
+                        f"The cell function {self.name!r} in {str(self.file)!r}"
+                        f" returned {type(cell)=}. The `@vcell` decorator only supports"
+                        " VKCell or any SubClass such as ComponentAllAngle."
                     )
 
                 logger.debug("Constructed {}", name_ or cell.name)

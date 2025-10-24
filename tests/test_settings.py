@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from kfactory.kcell import Info, KCellSettings, KCellSettingsUnits
+from kfactory.settings import Info, KCellSettings, KCellSettingsUnits
 
 
 def test_kcell_settings_initialization() -> None:
@@ -110,7 +110,3 @@ def test_info_str() -> None:
 def test_settings_str() -> None:
     settings = KCellSettings(param1=42)
     assert str(settings) == "KCellSettings(param1=42)"
-
-
-if __name__ == "__main__":
-    test_info_restrict_types()

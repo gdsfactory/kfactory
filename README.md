@@ -1,11 +1,11 @@
-# KFactory 1.12.2
+# KFactory 2.0.0
 
 [![codecov](https://codecov.io/gh/gdsfactory/kfactory/graph/badge.svg?token=dArcfnQE4w)](https://codecov.io/gh/gdsfactory/kfactory)
 
 Kfactory is the backend for [gdsfactory](https://github.com/gdsfactory/gdsfactory). It is built upon [KLayout](https://klayout.de).
 It offers basic operations like gdsfactory, so it can be used on its own as as layout tool as well.
 
-It is recommended to pin the version of KFactory in `requirements.txt` or `pyproject.toml` with `kfactory==1.12.2` for example.
+It is recommended to pin the version of KFactory in `requirements.txt` or `pyproject.toml` with `kfactory==2.0.0` for example.
 
 Features similar to gdsfactory:
 
@@ -17,12 +17,11 @@ Features similar to gdsfactory:
 - [x] PDK/package configuration
 - [x] Plugin system (simulations etc.) - Check [kplugins](https://github.com/gdsfactory/kplugins)
 - [x] Generic PDK example - Check [kgeneric](https://github.com/gdsfactory/kgeneric)
-
+- [x] CrossSection
+- [x] Netlist/Schematics and LVS
 
 Notable missing Features:
 
-- [ ] CrossSection
-- [ ] Netlist/Schematics and LVS
 - [ ] More advanced routing
 
 
@@ -37,11 +36,19 @@ New/Improved Features:
   which are built into KLayout
 
 
-## Installation
+## Getting Started
 
-kfactory is available on [pypi](https://pypi.org/project/kfactory/)
+### Installation
+
+kfactory is available as [`kfactory`](https://pypi.org/project/kfactory/) on PyPI
+
+Install kfactory with `uv`, or `pip`:
 
 ```bash
+# Add kfactory to your project.
+uv add kfactory
+
+# With pip.
 pip install kfactory
 ```
 
@@ -49,11 +56,10 @@ At the moment kfactory works only on python 3.11 and above
 
 ### Development Installation
 
-
 A development environment can be installed with
 
 ```bash
-python -m pip install -e .[dev]
+just dev
 ```
 
-It is defined in `pyproject.toml`. For committing `pre-commit` should be installed with `pre-commit install`.
+For committing `pre-commit` should be installed with `pre-commit install` (this is done with `just dev`).

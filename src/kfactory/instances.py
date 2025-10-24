@@ -29,7 +29,7 @@ __all__ = [
 ]
 
 
-class ProtoInstances(Generic[TUnit, TInstance_co], ABC):
+class ProtoInstances(ABC, Generic[TUnit, TInstance_co]):
     @abstractmethod
     def __iter__(self) -> Iterator[ProtoInstance[TUnit]]: ...
 

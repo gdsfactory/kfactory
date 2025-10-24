@@ -230,11 +230,14 @@ class ProtoPorts(Protocol[TUnit]):
             return all(b1 == b2 for b1, b2 in zip(iter(self), other, strict=False))
         return False
 
-    def print(self, unit: Literal["dbu", "um", None] = None) -> None:
+    def print(
+        self,
+        unit: Literal["dbu", "um"] | None = None,
+    ) -> None:
         """Pretty print ports."""
         config.console.print(pprint_ports(self, unit=unit))
 
-    def pformat(self, unit: Literal["dbu", "um", None] = None) -> str:
+    def pformat(self, unit: Literal["dbu", "um"] | None = None) -> str:
         """Pretty print ports."""
         with config.console.capture() as capture:
             config.console.print(pprint_ports(self, unit=unit))
@@ -343,6 +346,20 @@ class ICreatePort(ABC):
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> Port: ...
+    @overload
+    def create_port(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        cross_section: CrossSectionSpec
+        | DCrossSectionSpec
+        | CrossSection
+        | DCrossSection
+        | SymmetricalCrossSection,
+        name: str | None = None,
+        port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
+    ) -> Port: ...
 
     def create_port(
         self,
@@ -386,7 +403,7 @@ class ICreatePort(ABC):
                 )
             except ValidationError as e:
                 raise ValueError(
-                    "Port width width needs to be even to snap to grid properly "
+                    "Port width needs to be even to snap to grid properly "
                     "and greater than 0"
                     f". 1 DBU is {self.kcl.dbu} um."
                 ) from e
@@ -523,12 +540,26 @@ class DCreatePort(ABC):
     def create_port(
         self,
         *,
-        layer_info: kdb.LayerInfo,
         trans: kdb.Trans,
-        cross_section: DCrossSection
+        cross_section: CrossSectionSpec
+        | DCrossSectionSpec
         | CrossSection
-        | CrossSectionSpec
-        | DCrossSectionSpec,
+        | DCrossSection
+        | SymmetricalCrossSection,
+        name: str | None = None,
+        port_type: str = "optical",
+        info: dict[str, MetaData] | None = None,
+    ) -> DPort: ...
+    @overload
+    def create_port(
+        self,
+        *,
+        dcplx_trans: kdb.DCplxTrans,
+        cross_section: CrossSectionSpec
+        | DCrossSectionSpec
+        | CrossSection
+        | DCrossSection
+        | SymmetricalCrossSection,
         name: str | None = None,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
@@ -547,10 +578,11 @@ class DCreatePort(ABC):
         center: tuple[float, float] | None = None,
         orientation: float | None = None,
         mirror_x: bool = False,
-        cross_section: DCrossSection
-        | CrossSection
-        | CrossSectionSpec
+        cross_section: CrossSectionSpec
         | DCrossSectionSpec
+        | CrossSection
+        | DCrossSection
+        | SymmetricalCrossSection
         | None = None,
         info: dict[str, MetaData] | None = None,
     ) -> DPort:
@@ -574,7 +606,7 @@ class DCreatePort(ABC):
                 )
             except ValidationError as e:
                 raise ValueError(
-                    "Port width width needs to be even to snap to grid properly "
+                    "Port width needs to be even to snap to grid properly "
                     "and greater than 0"
                     f". 1 DBU is {self.kcl.dbu} um. Port width must be a "
                     f"multiple of {2 * self.kcl.dbu} um."
@@ -678,6 +710,8 @@ class Ports(ProtoPorts[int], ICreatePort):
             base.cross_section = self.kcl.get_symmetrical_cross_section(
                 port.cross_section.base.to_dtype(port.kcl)
             )
+            if name is not None:
+                base.name = name
             port_ = Port(base=base)
             port_.dcplx_trans = dcplx_trans
             self._bases.append(port_.base)
@@ -724,7 +758,7 @@ class Ports(ProtoPorts[int], ICreatePort):
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> Sequence[Port]:
+    ) -> list[Port]:
         """Filter ports.
 
         Args:
@@ -845,7 +879,7 @@ class DPorts(ProtoPorts[float], DCreatePort):
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> Sequence[DPort]:
+    ) -> list[DPort]:
         """Filter ports by name.
 
         Args:

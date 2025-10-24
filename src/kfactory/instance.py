@@ -22,7 +22,6 @@ from .exceptions import (
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .port import DPort, Port, ProtoPort
-from .serialization import clean_name, get_cell_name
 from .typings import TUnit
 
 if TYPE_CHECKING:
@@ -52,6 +51,10 @@ class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
     """Base class for instances."""
 
     _kcl: KCLayout
+    na: int
+    nb: int
+    a: kdb.Vector | kdb.DVector
+    b: kdb.Vector | kdb.DVector
 
     @property
     def kcl(self) -> KCLayout:
@@ -77,8 +80,9 @@ class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
         """Name of the cell the instance refers to."""
 
     @abstractmethod
-    def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]: ...
-
+    def __getitem__(
+        self, key: int | str | tuple[int | str | None, int, int] | None
+    ) -> ProtoPort[TUnit]: ...
     @property
     @abstractmethod
     def ports(self) -> ProtoInstancePorts[TUnit, ProtoInstance[TUnit]]: ...
@@ -110,11 +114,6 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     def to_dtype(self) -> DInstance:
         return DInstance(kcl=self.kcl, instance=self._instance)
-
-    @abstractmethod
-    def __getitem__(
-        self, key: int | str | tuple[int | str | None, int, int] | None
-    ) -> ProtoPort[TUnit]: ...
 
     def __getattr__(self, name: str) -> Any:
         """If we don't have an attribute, get it from the instance."""
@@ -315,7 +314,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         allow_type_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
-    ) -> None: ...
+    ) -> Self: ...
 
     @overload
     def connect(
@@ -330,7 +329,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         allow_type_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
-    ) -> None: ...
+    ) -> Self: ...
 
     @overload
     def connect(
@@ -345,7 +344,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         allow_type_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
-    ) -> None: ...
+    ) -> Self: ...
 
     def connect(
         self,
@@ -359,7 +358,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
         allow_type_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
-    ) -> None:
+    ) -> Self:
         """Align port with name `portname` to a port.
 
         Function to allow to transform this instance so that a port of this instance is
@@ -466,6 +465,8 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
                     self.dmirror_y(op.dcplx_trans.disp.y)
                 case _:
                     raise NotImplementedError("This shouldn't happen")
+
+        return self
 
     def __repr__(self) -> str:
         """Return a string representation of the instance."""
@@ -663,17 +664,30 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
     _name: str | None
     cell: AnyKCell
     trans: kdb.DCplxTrans
+    a: kdb.DVector
+    b: kdb.DVector
+    na: int = 1
+    nb: int = 1
 
     def __init__(
         self,
         cell: AnyKCell,
         trans: kdb.DCplxTrans | None = None,
         name: str | None = None,
+        *,
+        a: kdb.DVector = kdb.DVector(0, 0),  # noqa: B008
+        b: kdb.DVector = kdb.DVector(0, 0),  # noqa: B008
+        na: int = 1,
+        nb: int = 1,
     ) -> None:
         self.kcl = cell.kcl
         self._name = name
         self.cell = cell
         self.trans = trans or kdb.DCplxTrans()
+        self.a = a
+        self.b = b
+        self.na = na
+        self.nb = nb
 
     @property
     def name(self) -> str | None:
@@ -699,9 +713,18 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         return self.dbbox(layer).to_itype(self.kcl.dbu)
 
     def dbbox(self, layer: int | LayerEnum | None = None) -> kdb.DBox:
-        return self.cell.dbbox(layer).transformed(self.trans)
+        cell_bb = self.cell.dbbox(layer)
+        na_ = self.na - 1
+        nb_ = self.nb - 1
+        if na_ or nb_:
+            return cell_bb.transformed(self.trans) + cell_bb.transformed(
+                self.trans * kdb.DCplxTrans(na_ * self.a + nb_ * self.b)
+            )
+        return cell_bb.transformed(self.trans)
 
-    def __getitem__(self, key: int | str | None) -> DPort:
+    def __getitem__(
+        self, key: int | str | tuple[int | str | None, int, int] | None
+    ) -> DPort:
         """Returns port from instance.
 
         The key can either be an integer, in which case the nth port is
@@ -762,15 +785,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     f" name is 'None'. VKCell at {self.trans}"
                 )
             if trans_ != kdb.DCplxTrans():
-                trans_str = ""
-                if trans_.mirror:
-                    trans_str += "_M"
-                if trans_.angle != 0:
-                    f"_A{trans_.angle}"
-                if trans_.disp != kdb.DVector(0, 0):
-                    trans_str += f"_X{trans_.disp.x}_Y{trans_.disp.y}"
-                trans_str = trans_str.replace(".", "p")
-                cell_name = get_cell_name(cell_name + clean_name(trans_str))
+                cell_name += f"_{trans_.hash():x}"
             if cell.kcl.layout_cell(cell_name) is None:
                 cell_ = KCell(kcl=self.cell.kcl, name=cell_name)  # self.cell.dup()
                 for layer, shapes in self.cell.shapes().items():
@@ -801,7 +816,9 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     cell_._base.vtrans = trans_
             else:
                 cell_ = cell.kcl[cell_name]
-            inst_ = cell << cell_
+            inst_ = cell.create_inst(
+                cell=cell_, na=self.na, nb=self.nb, a=self.a, b=self.b
+            )
             inst_.transform(base_trans)
             if self._name:
                 inst_.name = self._name
@@ -815,17 +832,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         trans_ = base_trans.inverted() * trans_
         cell_name = self.cell.name
         if trans_ != kdb.DCplxTrans():
-            trans_str = ""
-            if trans_.mirror:
-                trans_str += "_M"
-            if trans_.angle != 0:
-                trans_str += f"_A{trans_.angle}"
-            if trans_.disp != kdb.DVector(0, 0):
-                trans_str += f"_X{trans_.disp.x}_Y{trans_.disp.y}"
-            trans_str = trans_str.replace(".", "p")
-            cell_name += trans_str
+            cell_name += f"_{trans_.hash():x}"
         else:
-            inst_ = cell << self.cell
+            inst_ = cell.create_inst(
+                cell=self.cell, na=self.na, nb=self.nb, a=self.a, b=self.b
+            )
             if self._name:
                 inst_.name = self._name
             inst_.transform(base_trans)
@@ -850,7 +861,9 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             tkcell._base.vtrans = trans_
         else:
             tkcell = cell.kcl[cell_name]
-        inst_ = cell << tkcell
+        inst_ = cell.create_inst(
+            cell=tkcell, na=self.na, nb=self.nb, a=self.a, b=self.b
+        )
         inst_.transform(base_trans)
         if self._name:
             inst_.name = self._name
@@ -1039,7 +1052,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             case False, True:
                 dconn_trans = (
                     kdb.DCplxTrans.M90
-                    if mirror ^ self.trans.mirror
+                    if mirror ^ self.dcplx_trans.mirror
                     else kdb.DCplxTrans.R180
                 )
                 opt = op.dcplx_trans

@@ -48,6 +48,7 @@ from pydantic import (
     PrivateAttr,
 )
 from ruamel.yaml.constructor import SafeConstructor
+from semver import Version
 
 from . import kdb, rdb
 from .conf import DEFAULT_TRANS, PROPID, CheckInstances, ShowFunction, config, logger
@@ -105,6 +106,7 @@ if TYPE_CHECKING:
     from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
     from .layout import KCLayout
+    from .schematic import TSchematic
 
 
 __all__ = [
@@ -143,7 +145,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
         yaml_tag: Tag for yaml serialization.
         ports: Manages the ports of the cell.
         settings: A dictionary containing settings populated by the
-            [cell][kfactory.kcell.cell] decorator.
+            [cell][kfactory.layout.KCLayout.cell] decorator.
         info: Dictionary for storing additional info if necessary. This is not
             passed to the GDS and therefore not reversible.
         d: UMKCell object for easy access to the KCell in um units.
@@ -188,7 +190,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     def name(self, value: str) -> None: ...
 
 
-class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
+class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # noqa: PYI059
     _base: TBaseCell_co
 
     @property
@@ -233,7 +235,7 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
 
     @property
     def settings(self) -> KCellSettings:
-        """Settings dictionary set by the [@vcell][kfactory.kcell.vcell] decorator."""
+        """Settings dictionary set by the `kfactory.layout.KCLayout.vcell` decorator."""
         return self._base.settings
 
     @settings.setter
@@ -362,11 +364,19 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):
     def has_factory_name(self) -> bool:
         return bool(self._base.basename or self._base.function_name)
 
-    def create_vinst(self, cell: AnyKCell) -> VInstance:
+    def create_vinst(
+        self,
+        cell: AnyKCell,
+        *,
+        a: kdb.DVector = kdb.DVector(0, 0),  # noqa: B008
+        b: kdb.DVector = kdb.DVector(0, 0),  # noqa: B008
+        na: int = 1,
+        nb: int = 1,
+    ) -> VInstance:
         """Insert the KCell as a VInstance into a VKCell or KCell."""
         if self.locked:
             raise LockedError(self)
-        vi = VInstance(cell)
+        vi = VInstance(cell, a=a.dup(), b=b.dup(), na=na, nb=nb)
         self._base.vinsts.append(vi)
         return vi
 
@@ -413,6 +423,8 @@ class TKCell(BaseKCell):
     lvs_equivalent_ports: list[list[str]] | None = None
     virtual: bool = False
     vtrans: kdb.DCplxTrans | None = None
+    _schematic: TSchematic[Any] | None = PrivateAttr(default=None)
+    _library_cell: KCell | None = PrivateAttr(default=None)
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -420,6 +432,14 @@ class TKCell(BaseKCell):
             return super().__getattr__(name)  # type: ignore[misc]
         except Exception:
             return getattr(self.kdb_cell, name)
+
+    @property
+    def schematic(self) -> TSchematic[Any] | None:
+        return self._schematic
+
+    @schematic.setter
+    def schematic(self, value: TSchematic[Any] | None) -> None:
+        self._schematic = value
 
     @property
     def locked(self) -> bool:
@@ -591,7 +611,7 @@ class TVCell(BaseKCell):
         self._name = value
 
 
-class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
+class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI059
     def __init__(
         self,
         *,
@@ -645,6 +665,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             self.get_meta_data()
         self.kcl.register_cell(self)
 
+    @property
+    def schematic(self) -> TSchematic[Any] | None:
+        return self._base.schematic
+
+    @schematic.setter
+    def schematic(self, value: TSchematic[Any] | None) -> None:
+        self._base.schematic = value
+
     @abstractmethod
     def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]:
         """Returns port from instance."""
@@ -660,6 +688,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
     @property
     def virtual(self) -> bool:
+        if self.kdb_cell.is_library_cell():
+            return self.library_cell.virtual
         return self._base.virtual
 
     @property
@@ -947,6 +977,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
             kcell = self.kcl[lib_ci]
             kcell.basename = cell.basename
             kcell.function_name = cell.function_name
+            kcell.base._library_cell = KCell(base=cell.base)
         if libcell_as_static:
             cell.set_meta_data()
             ci = self.kcl.layout.convert_cell_to_static(lib_ci)
@@ -954,6 +985,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 kcell = self.kcl[ci]
                 kcell.copy_meta_info(cell.kdb_cell)
                 kcell.name = cell.kcl.name + static_name_separator + cell.name
+                kcell.base.virtual = cell.virtual
                 if cell.kcl.dbu != self.kcl.dbu:
                     for port, lib_port in zip(kcell.ports, cell.ports, strict=False):
                         port.cross_section = CrossSection(
@@ -1079,6 +1111,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
     def library(self) -> kdb.Library:
         return self._base.kdb_cell.library()
+
+    @property
+    @abstractmethod
+    def library_cell(self) -> ProtoTKCell[TUnit]: ...
 
     @abstractmethod
     def __lshift__(self, cell: AnyTKCell) -> ProtoTInstance[TUnit]: ...
@@ -1253,6 +1289,54 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         if autoformat_from_file_extension:
             save_options.set_format_from_filename(filename)
         self._base.kdb_cell.write(filename, save_options)
+
+    def write_bytes(
+        self,
+        save_options: kdb.SaveLayoutOptions | None = None,
+        convert_external_cells: bool = False,
+        set_meta_data: bool = True,
+    ) -> bytes:
+        """Write a KCell to a binary format as oasis.
+
+        See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
+        """
+        if save_options is None:
+            save_options = save_layout_options()
+        self.insert_vinsts()
+        match set_meta_data, convert_external_cells:
+            case True, True:
+                self.kcl.set_meta_data()
+                for kcell in (self.kcl[ci] for ci in self.called_cells()):
+                    if not kcell._destroyed():
+                        if kcell.is_library_cell():
+                            kcell.convert_to_static(recursive=True)
+                        kcell.set_meta_data()
+                if self.is_library_cell():
+                    self.convert_to_static(recursive=True)
+                self.set_meta_data()
+            case True, False:
+                self.kcl.set_meta_data()
+                for kcell in (self.kcl[ci] for ci in self.called_cells()):
+                    if not kcell._destroyed():
+                        kcell.set_meta_data()
+                self.set_meta_data()
+            case False, True:
+                for kcell in (self.kcl[ci] for ci in self.called_cells()):
+                    if kcell.is_library_cell() and not kcell._destroyed():
+                        kcell.convert_to_static(recursive=True)
+                if self.is_library_cell():
+                    self.convert_to_static(recursive=True)
+            case _:
+                ...
+
+        for kci in set(self._base.kdb_cell.called_cells()) & self.kcl.tkcells.keys():
+            kc = self.kcl[kci]
+            kc.insert_vinsts()
+
+        save_options.format = save_options.format or "OASIS"
+        save_options.clear_cells()
+        save_options.select_cell(self.cell_index())
+        return self.kcl.layout.write_bytes(save_options)
 
     def read(
         self,
@@ -1832,7 +1916,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
 
         Args:
             port_types: The port types to consider for the netlist extraction.
-            exclude_purpose: List of purposes, if an instance has that purpose, it will
+            exclude_purposes: List of purposes, if an instance has that purpose, it will
                 be ignored.
             ignore_unnamed: Ignore any instance without `.name` set.
         Returns:
@@ -1879,7 +1963,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
         Uses electrical connectivity for extraction.
 
         Args:
-            port_types: The port types to consider for the netlist extraction.
+            mark_port_types: The port types to consider for the netlist extraction.
+            connectivity: Define connectivity between layers. These can be single
+                layers (just consider this layer as metal), two layers (two metals
+                which touch each other), or three layers (two metals with a via)
+            port_mapping: Remap ports of cells to others. This allows to define
+                equivalent ports in the lvs. E.g. `{"cell_A": {"o3": "o1", "o2"}}`
+                will remap "o2" and "o3" to "o1". Making the three ports the same
+                one for LVS.
         Returns:
             LayoutToNetlist extracted from electrical connectivity.
         """
@@ -1963,7 +2054,20 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                 c_ = self.kcl[ci]
                 eqps: list[list[str]] | None = c_.lvs_equivalent_ports or None
                 if c_.has_factory_name():
-                    if c_.virtual:
+                    if c_.is_library_cell():
+                        if c_.virtual:
+                            eqps = (
+                                _get_orig_cell(c_)
+                                .kcl.virtual_factories[c_.factory_name]
+                                .lvs_equivalent_ports
+                            )
+                        else:
+                            eqps = (
+                                _get_orig_cell(c_)
+                                .kcl.factories[c_.factory_name]
+                                .lvs_equivalent_ports
+                            )
+                    elif c_.virtual:
                         eqps = c_.kcl.virtual_factories[
                             c_.factory_name
                         ].lvs_equivalent_ports
@@ -2593,6 +2697,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                             )
                             shape_it.select_cells([inst.cell.cell_index()])
                             shape_it.min_depth = 1
+                            shape_it.shape_flags = kdb.Shapes.SRegions
                             for _it in shape_it.each():
                                 if _it.path()[0].inst() == inst.instance:
                                     inst_shapes.insert(
@@ -2607,6 +2712,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):
                                 )
                                 shape_it.select_cells([self.insts[j].cell.cell_index()])
                                 shape_it.min_depth = 1
+                                shape_it.shape_flags = kdb.Shapes.SRegions
                                 for _it in shape_it.each():
                                     if _it.path()[0].inst() == self.insts[j].instance:
                                         reg_.insert(
@@ -2767,7 +2873,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         return DInstances(cell=self._base)
 
     def __lshift__(self, cell: AnyTKCell) -> DInstance:
-        """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
+        """Convenience function for `DKCell.create_inst`.
 
         Args:
             cell: The cell to be added as an instance
@@ -2862,6 +2968,17 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
             f"{type(cross_section)=} and {cross_section_kwargs=}"
         )
 
+    @property
+    def library_cell(self) -> DKCell:
+        if self.kdb_cell.is_library_cell():
+            lib_cell = self.base._library_cell
+            assert lib_cell is not None
+            return DKCell(base=lib_cell.base)
+        raise ValueError(
+            "This is not a proxy cell referencing a library cell. Please check"
+            " with `.is_library_cell()` first if unsure."
+        )
+
 
 class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
     """Cell with integer units."""
@@ -2948,8 +3065,19 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         """Instances associated with the cell."""
         return Instances(cell=self._base)
 
+    @property
+    def library_cell(self) -> KCell:
+        if self.kdb_cell.is_library_cell():
+            lib_cell = self.base._library_cell
+            assert lib_cell is not None
+            return lib_cell
+        raise ValueError(
+            "This is not a proxy cell referencing a library cell. Please check"
+            " with `.is_library_cell()` first if unsure."
+        )
+
     def __lshift__(self, cell: AnyTKCell) -> Instance:
-        """Convenience function for [create_inst][kfactory.kcell.KCell.create_inst].
+        """Convenience function for `KCell.create_inst`.
 
         Args:
             cell: The cell to be added as an instance
@@ -3542,13 +3670,6 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
     def __lshift__(self, cell: AnyKCell) -> VInstance:
         return self.create_inst(cell=cell)
 
-    def create_vinst(self, cell: AnyKCell) -> VInstance:
-        if self.locked:
-            raise LockedError(self)
-        vi = VInstance(cell)
-        self.vinsts.append(vi)
-        return vi
-
     @overload
     def shapes(self, layer: None = ...) -> dict[int, VShapes]: ...
 
@@ -3694,6 +3815,7 @@ def show(
     use_libraries: bool = True,
     library_save_options: kdb.SaveLayoutOptions | None = None,
     set_technology: bool = True,
+    file_format: Literal["oas", "gds"] = "oas",
 ) -> None:
     """Show GDS in klayout.
 
@@ -3741,36 +3863,21 @@ def show(
     kcl_paths: list[dict[str, str]] = []
 
     if isinstance(layout, KCLayout):
-        file: Path | None = None
-        spec = importlib.util.find_spec("git")
-        if spec is not None:
-            import git
-
-            try:
-                repo = git.repo.Repo(".", search_parent_directories=True)
-            except git.InvalidGitRepositoryError:
-                pass
-            else:
-                wtd = repo.working_tree_dir
-                if wtd is not None:
-                    root = Path(wtd) / "build/gds"
-                    root.mkdir(parents=True, exist_ok=True)
-                    tf = root / Path(name).with_suffix(".oas")
-                    tf.parent.mkdir(parents=True, exist_ok=True)
-                    layout.write(str(tf), save_options)
-                    file = tf
-                    delete = False
+        gitpath = config.project_dir
+        if gitpath:
+            root = Path(gitpath) / "build/mask"
+            root.mkdir(parents=True, exist_ok=True)
+            tf = root / Path(name).with_suffix(f".{file_format}")
+            tf.parent.mkdir(parents=True, exist_ok=True)
+            layout.write(str(tf), save_options)
+            file = tf
+            delete = False
         else:
-            logger.info(
-                "git isn't installed. For better file storage, "
-                "please install kfactory[git] or gitpython."
-            )
-        if not file:
             try:
                 from __main__ import __file__ as mf
             except ImportError:
                 mf = "shell"
-            tf = Path(gettempdir()) / (name + ".oas")
+            tf = Path(gettempdir()) / f"{name}.{file_format}"
             tf.parent.mkdir(parents=True, exist_ok=True)
             layout.write(tf, save_options)
             file = tf
@@ -3783,47 +3890,32 @@ def show(
                 if save_options.gds2_max_cellname_length:
                     p = (
                         (dir_ / _kcl.name[: save_options.gds2_max_cellname_length])
-                        .with_suffix(".oas")
+                        .with_suffix(f".{file_format}")
                         .resolve()
                     )
                 else:
-                    p = (dir_ / _kcl.name).with_suffix(".oas").resolve()
+                    p = (dir_ / _kcl.name).with_suffix(f".{file_format}").resolve()
                 _kcl.write(p, library_save_options)
                 kcl_paths.append({"name": _kcl.name, "file": str(p)})
         if technology is None and layout.technology_file is not None:
             technology = layout.technology.name
 
     elif isinstance(layout, ProtoKCell):
-        file = None
-        spec = importlib.util.find_spec("git")
-        if spec is not None:
-            import git
-
-            try:
-                repo = git.repo.Repo(".", search_parent_directories=True)
-            except git.InvalidGitRepositoryError:
-                pass
-            else:
-                wtd = repo.working_tree_dir
-                if wtd is not None:
-                    root = Path(wtd) / "build/gds"
-                    root.mkdir(parents=True, exist_ok=True)
-                    tf = root / Path(name).with_suffix(".oas")
-                    tf.parent.mkdir(parents=True, exist_ok=True)
-                    layout.write(str(tf), save_options)
-                    file = tf
-                    delete = False
+        gitpath = config.project_dir
+        if gitpath:
+            root = Path(gitpath) / "build" / file_format
+            root.mkdir(parents=True, exist_ok=True)
+            tf = root / Path(name).with_suffix(f".{file_format}")
+            tf.parent.mkdir(parents=True, exist_ok=True)
+            layout.write(str(tf), save_options)
+            file = tf
+            delete = False
         else:
-            logger.info(
-                "git isn't installed. For better file storage, "
-                "please install kfactory[git] or gitpython."
-            )
-        if not file:
             try:
                 from __main__ import __file__ as mf
             except ImportError:
                 mf = "shell"
-            tf = Path(gettempdir()) / (name + ".gds")
+            tf = Path(gettempdir()) / f"{name}.{file_format}"
             tf.parent.mkdir(parents=True, exist_ok=True)
             layout.write(tf, save_options)
             file = tf
@@ -3833,7 +3925,7 @@ def show(
             kcls_ = list(kcls.values())
             kcls_.remove(layout.kcl)
             for _kcl in kcls_:
-                p = (dir_ / _kcl.name).with_suffix(".oas").resolve()
+                p = (dir_ / _kcl.name).with_suffix(f".{file_format}").resolve()
                 _kcl.write(p, library_save_options)
                 kcl_paths.append({"name": _kcl.name, "file": str(p)})
         if technology is None and layout.kcl.technology_file is not None:
@@ -3856,31 +3948,16 @@ def show(
 
     if lyrdb is not None:
         if isinstance(lyrdb, rdb.ReportDatabase):
-            lyrdbfile: Path | None = None
-            spec = importlib.util.find_spec("git")
-            if spec is not None:
-                import git
-
-                try:
-                    repo = git.repo.Repo(".", search_parent_directories=True)
-                except git.InvalidGitRepositoryError:
-                    pass
-                else:
-                    wtd = repo.working_tree_dir
-                    if wtd is not None:
-                        root = Path(wtd) / "build/gds"
-                        root.mkdir(parents=True, exist_ok=True)
-                        tf = root / Path(name).with_suffix(".lyrdb")
-                        tf.parent.mkdir(parents=True, exist_ok=True)
-                        lyrdb.save(str(tf))
-                        lyrdbfile = tf
-                        delete_lyrdb = False
+            gitpath = config.project_dir
+            if gitpath:
+                root = Path(gitpath) / "build/mask"
+                root.mkdir(parents=True, exist_ok=True)
+                tf = root / Path(name).with_suffix(".lyrdb")
+                tf.parent.mkdir(parents=True, exist_ok=True)
+                lyrdb.save(str(tf))
+                lyrdbfile = tf
+                delete_lyrdb = False
             else:
-                logger.info(
-                    "git isn't installed. For better file storage, "
-                    "please install kfactory[git] or gitpython."
-                )
-            if not lyrdbfile:
                 try:
                     from __main__ import __file__ as mf
                 except ImportError:
@@ -3902,31 +3979,16 @@ def show(
 
     if l2n is not None:
         if isinstance(l2n, kdb.LayoutToNetlist):
-            l2nfile: Path | None = None
-            spec = importlib.util.find_spec("git")
-            if spec is not None:
-                import git
-
-                try:
-                    repo = git.repo.Repo(".", search_parent_directories=True)
-                except git.InvalidGitRepositoryError:
-                    pass
-                else:
-                    wtd = repo.working_tree_dir
-                    if wtd is not None:
-                        root = Path(wtd) / "build/gds"
-                        root.mkdir(parents=True, exist_ok=True)
-                        tf = root / Path(name).with_suffix(".l2n")
-                        tf.parent.mkdir(parents=True, exist_ok=True)
-                        l2n.write(str(tf))
-                        l2nfile = tf
-                        delete_l2n = False
+            gitpath = config.project_dir
+            if gitpath:
+                root = Path(gitpath) / "build/mask"
+                root.mkdir(parents=True, exist_ok=True)
+                tf = root / Path(name).with_suffix(".l2n")
+                tf.parent.mkdir(parents=True, exist_ok=True)
+                l2n.write(str(tf))
+                l2nfile = tf
+                delete_l2n = False
             else:
-                logger.info(
-                    "git isn't installed. For better file storage, "
-                    "please install kfactory[git] or gitpython."
-                )
-            if not l2nfile:
                 try:
                     from __main__ import __file__ as mf
                 except ImportError:
@@ -4000,52 +4062,37 @@ def show(
                                 file=jmsg["file"],
                             )
                 # check klive version
-                klive_version = [int(s) for s in jmsg["version"].split(".")]
-                rec_klive_version = (0, 3, 3)
-                klive_ok = True
-                for dv in (
-                    kv - rkv
-                    for kv, rkv in zip(klive_version, rec_klive_version, strict=True)
-                ):
-                    if dv > 0:
-                        break
-                    if dv < 0:
-                        logger.warning(
-                            f"klive is out of date. Installed:{jmsg['version']}/"
-                            "Recommended:"
-                            f"{'.'.join(str(s) for s in rec_klive_version)}. Please "
-                            "update it in KLayout"
+                klive_version = Version.parse(jmsg["version"])
+                rec_klive_version = Version(major=0, minor=4, patch=1)
+                klive_ok = rec_klive_version.compare(klive_version) >= 0
+
+                if not klive_ok:
+                    logger.warning(
+                        f"klive is out of date. Installed:{jmsg['version']}/"
+                        "Recommended:"
+                        f"{rec_klive_version}. Please "
+                        "update it in KLayout"
+                    )
+                else:
+                    klayout_version = Version.parse(jmsg["klayout_version"])
+                    kfactory_version = Version.parse(_klayout_version)
+
+                    min_rec_klayout = Version(major=0, minor=28, patch=13)
+
+                    if kfactory_version.compare(min_rec_klayout) < 0:
+                        logger.error(
+                            f"KLayout GUI version ({jmsg['klayout_version']}) "
+                            "is older than the Python version "
+                            f"({_klayout_version}). This may cause issues. Please "
+                            "update the GUI to match or exceed the Python version."
                         )
-                        klive_ok = False
-                        break
-
-                if klive_ok:
-                    klayout_version = [
-                        int(s) for s in jmsg["klayout_version"].split(".")
-                    ]
-                    kfactory_version = [int(s) for s in _klayout_version.split(".")]
-
-                    for dv in (
-                        kv - kfkv
-                        for kv, kfkv in zip(
-                            klayout_version, kfactory_version, strict=True
+                    elif kfactory_version.compare(klayout_version) < 0:
+                        logger.debug(
+                            f"KLayout GUI version ({jmsg['klayout_version']}) "
+                            "is older than the Python version "
+                            f"({_klayout_version}). This may cause issues. Please "
+                            "update the GUI to match or exceed the Python version."
                         )
-                    ):
-                        if dv > 0:
-                            break
-                        if dv < 0:
-                            if klayout_version < [0, 28, 13]:
-                                log = logger.error
-                            else:
-                                log = logger.debug
-
-                            log(
-                                f"KLayout GUI version ({jmsg['klayout_version']}) "
-                                "is older than the Python version "
-                                f"({_klayout_version}). This may cause issues. Please "
-                                "update the GUI to match or exceed the Python version."
-                            )
-                            break
 
             except json.JSONDecodeError:
                 logger.info(f"Message from klive: {msg}")
@@ -4057,9 +4104,9 @@ def show(
     if delete:
         Path(file).unlink()
     if delete_lyrdb and lyrdb is not None:
-        Path(lyrdbfile).unlink()  # type: ignore[arg-type]
+        Path(lyrdbfile).unlink()
     if delete_l2n and l2n is not None:
-        Path(l2nfile).unlink()  # type: ignore[arg-type]
+        Path(l2nfile).unlink()
 
 
 class ProtoCells(Mapping[int, KC_co], ABC):
@@ -4292,3 +4339,17 @@ def _get_netlist(
                 nl.create_net(*net_refs)
     nl.sort()
     return nl
+
+
+@overload
+def _get_orig_cell(c: KCell) -> KCell: ...
+
+
+@overload
+def _get_orig_cell(c: DKCell) -> DKCell: ...
+
+
+def _get_orig_cell(c: KCell | DKCell) -> KCell | DKCell:
+    if c.is_library_cell():
+        return _get_orig_cell(c.library_cell)
+    return c

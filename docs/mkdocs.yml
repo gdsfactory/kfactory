@@ -18,6 +18,7 @@ nav:
       - DRC utils: notebooks/02_DRC.py
       - Enclosures: notebooks/03_Enclosures.py
       - Multiple KCLs: notebooks/04_KCL.py
+      - Schematics: notebooks/05_Schematics.py
   - Migration: migration.md
   - Config Class: config.md
   - API: reference/
@@ -53,6 +54,10 @@ markdown_extensions:
       check_paths: true
 
 plugins:
+  - gen-files:
+      scripts:
+        - scripts/gen_diagrams.py
+        - scripts/gen_ref_pages.py
   - mkdocstrings:
       enabled: true
       # custom_templates: templates
@@ -72,9 +77,6 @@ plugins:
               - dataclasses
               - griffe_inherited_docstrings
               - griffe_warnings_deprecated
-  - gen-files:
-      scripts:
-        - source/gen_ref_pages.py
   - mkdocs-video:
       is_video: true
       video_type: webm
@@ -90,6 +92,11 @@ plugins:
       execute_ignore:
         - "source/*.py"
       ignore: ["source/*.py"]
+      remove_tag_config:
+        remove_input_tags:
+          - hide
+        remove_output_tags:
+          - hide
   - literate-nav:
       nav_file: SUMMARY.md
   - section-index

@@ -87,7 +87,6 @@ class LayoutIPImage:
         widgets.append(self)
 
 
-
 class LayoutWidget:
     def __init__(
         self,
@@ -104,10 +103,11 @@ class LayoutWidget:
         self.layout_view.show_layout(cell.kcl.layout, False)
         self.layer_properties: Path | None = None
         if layer_properties is not None:
-            self.layer_properties = Path(layer_properties)
-            if self.layer_properties.exists() and self.layer_properties.is_file():
-                self.layer_properties = self.layer_properties
-                self.layout_view.load_layer_props(str(self.layer_properties))
+            layer_properties_path = Path(layer_properties)
+            if layer_properties_path.exists() and layer_properties_path.is_file():
+                self.layout_view.load_layer_props(str(layer_properties_path))
+            self.layer_properties = layer_properties_path
+
         self.show_cell(cell.kdb_cell)
         png_data = self.layout_view.get_screenshot_pixels().to_png_data()
 
@@ -347,18 +347,18 @@ class LayoutWidget:
 
         buttons = 0
         if shift:
-            buttons |= lay.ButtonState.ShiftKey
+            buttons |= lay.ButtonState.ShiftKey  # type: ignore[attr-defined]
         if alt:
-            buttons |= lay.ButtonState.AltKey
+            buttons |= lay.ButtonState.AltKey  # type: ignore[attr-defined]
         if ctrl:
-            buttons |= lay.ButtonState.ControlKey
+            buttons |= lay.ButtonState.ControlKey  # type: ignore[attr-defined]
 
         if mouse_buttons & 1:
-            buttons |= lay.ButtonState.LeftButton
+            buttons |= lay.ButtonState.LeftButton  # type: ignore[attr-defined]
         if mouse_buttons & 2:
-            buttons |= lay.ButtonState.RightButton
+            buttons |= lay.ButtonState.RightButton  # type: ignore[attr-defined]
         if mouse_buttons & 4:
-            buttons |= lay.ButtonState.MidButton
+            buttons |= lay.ButtonState.MidButton  # type: ignore[attr-defined]
 
         return buttons
 

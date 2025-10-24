@@ -1635,9 +1635,9 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
         if isinstance(enclosure, str):
             return self[enclosure]
         if isinstance(enclosure, dict):
-            if "dsections" not in enclosure:
+            if "dsections" in enclosure:
                 enclosure = LayerEnclosure(
-                    dsections=enclosure.get("sections", []),
+                    dsections=enclosure.get("dsections", []),
                     name=enclosure.get("name"),
                     main_layer=enclosure["main_layer"],
                     kcl=kcl,

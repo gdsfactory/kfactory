@@ -13,8 +13,8 @@ from itertools import takewhile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, Protocol, runtime_checkable
 
-import git
 import loguru
+import pygit2
 import rich.console
 from dotenv import find_dotenv
 from loguru import logger as logger  # noqa: PLC0414
@@ -316,15 +316,15 @@ class Settings(BaseSettings):
         return v
 
     @cached_property
-    def project_dir(self) -> Path:
+    def project_dir(self) -> Path | None:
+        """Find the current working directory's project dir.
+
+        This is the git repo if it exists, cwd otherwise."""
         try:
-            repo = git.repo.Repo(".", search_parent_directories=True)
-            wtd = repo.working_tree_dir
-            root = Path(wtd) if wtd is not None else Path.cwd()
-        except git.InvalidGitRepositoryError:
-            root = Path.cwd()
-        root.mkdir(parents=True, exist_ok=True)
-        return root
+            repo = pygit2.Repository(Path.cwd())
+            return Path(repo.workdir or repo.path).resolve()
+        except pygit2.GitError:
+            return None
 
     def __init__(self, **data: Any) -> None:
         """Set log filter and run pydantic."""

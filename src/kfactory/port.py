@@ -255,7 +255,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         )
 
 
-class ProtoPort(Generic[TUnit], ABC):
+class ProtoPort(Generic[TUnit], ABC):  # noqa: PYI059
     """Base class for kf.Port, kf.DPort."""
 
     yaml_tag: str = "!Port"
@@ -347,7 +347,9 @@ class ProtoPort(Generic[TUnit], ABC):
         This corresponds to the port's cross section's main layer converted to the
         index.
         """
-        return self.kcl.layout.layer(self.cross_section.layer)
+        return self.kcl.find_layer(
+            self.cross_section.layer, allow_undefined_layers=True
+        )
 
     @property
     def layer_info(self) -> kdb.LayerInfo:
@@ -599,7 +601,7 @@ class ProtoPort(Generic[TUnit], ABC):
         """Width of the port in um."""
         return self.kcl.to_um(self._base.cross_section.width)
 
-    def print(self, print_type: Literal["dbu", "um", None] = None) -> None:
+    def print(self, print_type: Literal["dbu", "um"] | None = None) -> None:
         """Print the port pretty."""
         config.console.print(pprint_ports([self], unit=print_type))
 

@@ -228,7 +228,7 @@ class ProtoTInstancePins(
                 for p in self.cell_pins
             )
 
-    def print(self, unit: Literal["dbu", "um", None] = None) -> None:
+    def print(self, unit: Literal["dbu", "um"] | None = None) -> None:
         config.console.print(pprint_pins(self.copy(), unit=unit))
 
     def copy(self, rename_function: Callable[[list[Pin]], None] | None = None) -> Pins:

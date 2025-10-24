@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from . import kdb
 from .instance_group import DInstanceGroup, InstanceGroup
-from .kcell import DKCell, KCell
+from .kcell import DKCell, KCell, ProtoTKCell
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -17,7 +17,7 @@ __all__ = ["flexgrid", "flexgrid_dbu", "grid", "grid_dbu"]
 
 
 def grid_dbu(
-    target: KCell,
+    target: ProtoTKCell[Any],
     kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
     spacing: int | tuple[int, int],
     target_trans: kdb.Trans | None = None,
@@ -85,6 +85,7 @@ def grid_dbu(
         mirror: Mirror the instances before placing them in the grid
 
     """
+    target = KCell(base=target.base)
     if isinstance(spacing, tuple):
         spacing_x, spacing_y = spacing
     else:
@@ -234,7 +235,7 @@ def grid_dbu(
 
 
 def flexgrid_dbu(
-    target: KCell,
+    target: ProtoTKCell[Any],
     kcells: Sequence[KCell | None] | Sequence[Sequence[KCell | None]],
     spacing: int | tuple[int, int],
     target_trans: kdb.Trans | None = None,
@@ -297,6 +298,7 @@ def flexgrid_dbu(
         mirror: Mirror the instances before placing them in the grid
 
     """
+    target = KCell(base=target.base)
     if isinstance(spacing, tuple):
         spacing_x, spacing_y = spacing
     else:
@@ -468,7 +470,7 @@ def flexgrid_dbu(
 
 
 def grid(
-    target: DKCell,
+    target: ProtoTKCell[Any],
     kcells: Sequence[DKCell | None] | Sequence[Sequence[DKCell | None]],
     spacing: float | tuple[float, float],
     target_trans: kdb.DCplxTrans | None = None,
@@ -536,6 +538,7 @@ def grid(
         mirror: Mirror the instances before placing them in the grid
 
     """
+    target = DKCell(base=target.base)
     if isinstance(spacing, tuple):
         spacing_x, spacing_y = spacing
     else:
@@ -686,7 +689,7 @@ def grid(
 
 
 def flexgrid(
-    target: DKCell,
+    target: ProtoTKCell[Any],
     kcells: Sequence[DKCell | None] | Sequence[Sequence[DKCell | None]],
     spacing: float | tuple[float, float],
     target_trans: kdb.DCplxTrans | None = None,
@@ -749,6 +752,7 @@ def flexgrid(
         mirror: Mirror the instances before placing them in the grid
 
     """
+    target = DKCell(base=target.base)
     if isinstance(spacing, tuple):
         spacing_x, spacing_y = spacing
     else:

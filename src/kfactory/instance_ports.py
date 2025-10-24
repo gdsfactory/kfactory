@@ -35,13 +35,13 @@ __all__ = [
 ]
 
 
-class HasCellPorts(Generic[TUnit], ABC):
+class HasCellPorts(ABC, Generic[TUnit]):
     @property
     @abstractmethod
     def cell_ports(self) -> ProtoPorts[TUnit]: ...
 
 
-class ProtoInstancePorts(HasCellPorts[TUnit], Generic[TUnit, TInstance_co], ABC):
+class ProtoInstancePorts(HasCellPorts[TUnit], ABC, Generic[TUnit, TInstance_co]):
     instance: TInstance_co
 
     @abstractmethod
@@ -64,7 +64,7 @@ class ProtoInstancePorts(HasCellPorts[TUnit], Generic[TUnit, TInstance_co], ABC)
 
 
 class ProtoTInstancePorts(
-    ProtoInstancePorts[TUnit, ProtoTInstance[TUnit]], Generic[TUnit], ABC
+    ProtoInstancePorts[TUnit, ProtoTInstance[TUnit]], ABC, Generic[TUnit]
 ):
     """Ports of an Instance.
 
@@ -411,10 +411,18 @@ class VInstancePorts(ProtoInstancePorts[float, VInstance]):
         """Return Port count."""
         return len(self.cell_ports)
 
-    def __getitem__(self, key: int | str | None) -> DPort:
-        """Get a port by name."""
-        p = self.cell_ports[key]
-        return p.copy(self.instance.trans)
+    def __getitem__(
+        self, key: int | str | tuple[int | str | None, int, int] | None
+    ) -> DPort:
+        if isinstance(key, tuple):
+            return self.cell_ports[key[0]].copy(
+                kdb.DCplxTrans(
+                    (self.instance.na - 1) * self.instance.a
+                    + (self.instance.nb - 1) * self.instance.b
+                )
+                * self.instance.trans
+            )
+        return self.cell_ports[key].copy(self.instance.trans)
 
     def __iter__(self) -> Iterator[DPort]:
         """Create a copy of the ports to iterate through."""

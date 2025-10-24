@@ -4,6 +4,7 @@ Use `kf --help` for more info.
 """
 
 import importlib
+import importlib.util
 import os
 import runpy
 import sys
@@ -11,10 +12,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Annotated
 
-import git
 import typer
 
-from ..conf import logger
+from ..conf import config, logger
 from ..kcell import KCell
 from ..kcell import show as kfshow
 from ..layout import kcls
@@ -155,17 +155,12 @@ def build(
 
                 cell = getattr(_mod, func)(**kwargs)
                 if isinstance(cell, KCell):
-                    try:
-                        repo = git.repo.Repo(".", search_parent_directories=True)
-                    except git.InvalidGitRepositoryError:
-                        pass
+                    gitpath = config.project_dir
+                    if gitpath:
+                        root = Path(gitpath) / "build/mask"
+                        root.mkdir(parents=True, exist_ok=True)
                     else:
-                        wtd = repo.working_tree_dir
-                        if wtd is not None:
-                            root = Path(wtd) / "build/gds"
-                            root.mkdir(parents=True, exist_ok=True)
-                        else:
-                            root = Path()
+                        root = Path()
                     if show:
                         cell.show()
                     if write_full:
@@ -224,17 +219,12 @@ def build(
 
                 cell = getattr(_mod, func)(**kwargs)
                 if isinstance(cell, KCell):
-                    try:
-                        repo = git.repo.Repo(".", search_parent_directories=True)
-                    except git.InvalidGitRepositoryError:
-                        pass
+                    gitpath = config.project_dir
+                    if gitpath:
+                        root = Path(gitpath) / "build/mask"
+                        root.mkdir(parents=True, exist_ok=True)
                     else:
-                        wtd = repo.working_tree_dir
-                        if wtd is not None:
-                            root = Path(wtd) / "build/gds"
-                            root.mkdir(parents=True, exist_ok=True)
-                        else:
-                            root = Path()
+                        root = Path()
                     if show:
                         cell.show()
                     if write_full:

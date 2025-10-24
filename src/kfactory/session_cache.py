@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 def save_session(
     c: ProtoTKCell[Any] | None = None, session_dir: Path | None = None
 ) -> None:
-    kcls_dir = session_dir or (config.project_dir / "build/session/kcls")
+    kcls_dir = session_dir or ((config.project_dir or Path()) / "build/session/kcls")
     if kcls_dir.exists():
         rmtree(kcls_dir)
     skip_cells: set[int] = set()
@@ -61,7 +61,7 @@ def save_session(
                         fd.add(pc.factory_name)
                 take_cell_indexes.add(ci)
 
-        for factory in kcl.factories.values():
+        for factory in kcl.factories._all:
             assert factory.name is not None
             for hk, cell in factory.cache.items():
                 if cell.cell_index() in take_cell_indexes:
@@ -89,7 +89,7 @@ def save_session(
 def load_session(
     session_dir: Path | None = None, warn_missing_dir: bool = True
 ) -> None:
-    kcls_dir = session_dir or (config.project_dir / "build/session/kcls")
+    kcls_dir = session_dir or ((config.project_dir or Path()) / "build/session/kcls")
     logger.debug("Loading session from {}", kcls_dir)
 
     if not kcls_dir.exists():
@@ -143,7 +143,7 @@ def load_kcl(kcl_path: Path) -> None:
     invalid_factories: set[str] = set()
     with (kcl_path / "facories.pkl").open("rb") as f:
         factory_infos = pickle.load(f)  # noqa: S301
-    for factory in kcl.factories.values():
+    for factory in kcl.factories._all:
         ph = _file_path_hash(factory.file)
         fh = _file_hash(factory.file)
         factory_info = factory_infos.get(factory.name)
@@ -154,7 +154,7 @@ def load_kcl(kcl_path: Path) -> None:
                 invalid_factories |= factory_dependencies
                 invalid_factories.add(factory.name)
     cells_to_add: defaultdict[int, list[tuple[int, KCell, str]]] = defaultdict(list)
-    for factory_name in set(kcl.factories.keys()) - invalid_factories:
+    for factory_name in set(kcl.factories._by_name.keys()) - invalid_factories:
         if factory_info := factory_infos.get(factory_name):
             cache_ = factory_info[1]
             for hk, cn in cache_:

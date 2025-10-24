@@ -51,7 +51,7 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
         )
 
 
-class ProtoPin(Generic[TUnit], ABC):
+class ProtoPin(ABC, Generic[TUnit]):
     """Base class for kf.Pin, kf.DPin."""
 
     yaml_tag: str = "!Pin"

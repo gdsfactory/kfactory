@@ -2,8 +2,6 @@
 
 from tempfile import NamedTemporaryFile
 
-import pytest
-
 import kfactory as kf
 from tests.conftest import Layers
 
@@ -179,7 +177,3 @@ def test_info_dump(kcl: kf.KCLayout) -> None:
         wg_read.get_meta_data()
         assert wg_read.info == c.info
         assert wg_read.info["d"] == {"a": 1, "b": 2}
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "-s"])

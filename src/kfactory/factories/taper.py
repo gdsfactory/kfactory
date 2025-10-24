@@ -10,11 +10,11 @@ from .. import kdb
 from ..conf import logger
 from ..enclosure import LayerEnclosure
 from ..kcell import KCell
-from ..layout import KCLayout, kcl
+from ..layout import KCLayout
 from ..settings import Info
 from ..typings import MetaData, dbu
 
-__all__ = ["taper"]
+__all__ = ["taper_factory"]
 
 
 class TaperFactory(Protocol):
@@ -80,7 +80,7 @@ def taper_factory(
     Args:
         kcl: The KCLayout which will be owned
         additional_info: Add additional key/values to the
-            [`KCell.info`][kfactory.kcell.KCell.info]. Can be a static dict
+            [`KCell.info`][kfactory.settings.Info]. Can be a static dict
             mapping info name to info value. Or can a callable which takes the straight
             functions' parameters as kwargs and returns a dict with the mapping.
         basename: Overwrite the prefix of the resulting KCell's name. By default
@@ -204,6 +204,3 @@ def taper_factory(
         return c
 
     return taper
-
-
-taper = taper_factory(kcl)
