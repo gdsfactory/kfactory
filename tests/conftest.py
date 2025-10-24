@@ -239,19 +239,19 @@ def oasis_regression(
     saveopts = kf.save_layout_options()
     saveopts.format = "GDS2"
 
-    def _check(c: kf.ProtoTKCell[Any]) -> None:
+    def _check(c: kf.ProtoTKCell[Any], tolerance: int = 0) -> None:
         c.kcl.layout.clear_meta_info()
         file_regression.check(
             c.write_bytes(saveopts, convert_external_cells=True),
             binary=True,
             extension=".gds",
-            check_fn=_layout_xor,
+            check_fn=partial(_layout_xor, tolerance=tolerance),
         )
 
     return _check
 
 
-def _layout_xor(path_a: Path, path_b: Path) -> None:
+def _layout_xor(path_a: Path, path_b: Path, tolerance: int = 0) -> None:
     diff = kf.kdb.LayoutDiff()
     ly_a = kf.kdb.Layout()
     ly_a.read(str(path_a))
@@ -260,5 +260,5 @@ def _layout_xor(path_a: Path, path_b: Path) -> None:
 
     flags = kf.kdb.LayoutDiff.Verbose | kf.kdb.LayoutDiff.WithMetaInfo
 
-    if not diff.compare(ly_a, ly_b, flags=flags):
+    if not diff.compare(ly_a, ly_b, flags=flags, tolerance=tolerance):
         raise AttributeError(f"Layouts {path_a!r} and {path_b!r} differ!")
