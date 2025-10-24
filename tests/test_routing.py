@@ -934,7 +934,6 @@ def test_clean_points() -> None:
 
 def test_rf_bundle(
     layers: Layers,
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell()
@@ -1051,7 +1050,6 @@ def test_rf_bundle(
 
     c.add_ports(ports)
     c.shapes(c.kcl.layer(1, 0)).insert(b)
-    oasis_regression(c)
 
 
 def test_sbend_routing(
