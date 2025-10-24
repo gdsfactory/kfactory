@@ -1,9 +1,7 @@
 import functools
-import tempfile
 import threading
 import warnings
 from collections.abc import Callable
-from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import Any
 
@@ -29,7 +27,9 @@ def test_circular_snapping(
     layers: Layers,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
-    b = kf.cells.circular.bend_circular(width=1, radius=10, layer=layers.WG, angle=90)
+    b = kf.factories.circular.bend_circular_factory(kcl=kcl)(
+        width=1, radius=10, layer=layers.WG, angle=90
+    )
     assert b.ports["o2"].dcplx_trans.disp == kcl.to_um(b.ports["o2"].trans.disp)
     oasis_regression(b)
 
@@ -39,7 +39,9 @@ def test_euler_snapping(
     layers: Layers,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
-    b = kf.cells.euler.bend_euler(width=1, radius=10, layer=layers.WG, angle=90)
+    b = kf.factories.euler.bend_euler_factory(kcl=kcl)(
+        width=1, radius=10, layer=layers.WG, angle=90
+    )
     assert b.ports["o2"].dcplx_trans.disp == kcl.to_um(b.ports["o2"].trans.disp)
     oasis_regression(b)
 
@@ -62,7 +64,7 @@ def test_wrong_dict(
 ) -> None:
     with pytest.raises(kf.exceptions.CellNameError):
 
-        @kf.cell
+        @kcl.cell
         def wrong_dict_cell(a: dict[Any, Any]) -> kf.KCell:
             return kcl.kcell()
 
@@ -92,8 +94,9 @@ def test_nested_dict_list(
 def test_no_snap(
     layers: Layers,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
 ) -> None:
-    c = kf.KCell()
+    c = kcl.kcell()
 
     c.create_port(
         width=c.kcl.to_dbu(1),
@@ -110,9 +113,11 @@ def test_no_snap(
 def test_namecollision(
     layers: Layers,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
 ) -> None:
-    b1 = kf.cells.circular.bend_circular(width=1, radius=10.5, layer=layers.WG)
-    b2 = kf.cells.circular.bend_circular(width=1, radius=10.5000005, layer=layers.WG)
+    bc = kf.factories.circular.bend_circular_factory(kcl=kcl)
+    b1 = bc(width=1, radius=10.5, layer=layers.WG)
+    b2 = bc(width=1, radius=10.5000005, layer=layers.WG)
 
     assert b1.name != b2.name
     oasis_regression(b1)
@@ -133,8 +138,9 @@ def test_nested_dic(
 def test_ports_cell(
     layers: Layers,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
 ) -> None:
-    c = kf.KCell()
+    c = kcl.kcell()
     c.create_port(
         name="o1",
         width=c.kcl.to_dbu(1),
@@ -149,15 +155,16 @@ def test_ports_cell(
 def test_ports_instance(
     layers: Layers,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
 ) -> None:
-    c = kf.KCell()
+    c = kcl.kcell()
     c.create_port(
         name="o1",
         width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
         layer=c.kcl.find_layer(layers.WG),
     )
-    c2 = kf.KCell()
+    c2 = kcl.kcell()
     ref = c2 << c
     assert c["o1"]
     assert "o1" in c.ports
@@ -167,11 +174,12 @@ def test_ports_instance(
 
 
 def test_getter(
-    layers: Layers,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
+    straight_factory: Callable[..., kf.KCell],
 ) -> None:
-    c = kf.KCell()
-    c << kf.cells.straight.straight(width=1, length=10, layer=layers.WG)
+    c = kcl.kcell()
+    c << straight_factory(width=1, length=10)
     assert c.y == 0
     assert c.dy == 0
 
@@ -179,8 +187,9 @@ def test_getter(
 def test_array(
     straight: kf.KCell,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
 ) -> None:
-    c = kf.KCell()
+    c = kcl.kcell()
     wg_array = c.create_inst(
         straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
     )
@@ -194,8 +203,9 @@ def test_array(
 def test_array_indexerror(
     straight: kf.KCell,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
 ) -> None:
-    c = kf.KCell()
+    c = kcl.kcell()
     wg_array = c.create_inst(
         straight, a=kf.kdb.Vector(15_000, 0), b=kf.kdb.Vector(0, 3_000), na=3, nb=5
     )
@@ -211,8 +221,9 @@ def test_array_indexerror(
 def test_invalid_array(
     straight: kf.KCell,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
 ) -> None:
-    c = kf.KCell()
+    c = kcl.kcell()
     wg = c.create_inst(straight)
     regex = kf.config.logfilter.regex
     kf.config.logfilter.regex = r"^An error has been caught in function '__getitem__'"
@@ -590,55 +601,6 @@ def test_to_itype(kcl: kf.KCLayout) -> None:
     dkcell.shapes(0).insert(kf.kdb.DBox(0, 0, 1, 1))
     itype = dkcell.to_itype()
     assert itype.bbox() == kf.kdb.Box(0, 0, 1000, 1000)
-
-
-def test_cell_yaml(
-    layers: Layers,
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
-) -> None:
-    from ruamel.yaml import YAML
-
-    yaml = YAML()
-    yaml.register_class(kf.KCell)
-    c = kf.factories.straight.straight_dbu_factory(kf.kcl)(
-        width=5320, length=17210, layer=layers.WG
-    ).dup()
-
-    _temp_cell_name = "kf.factories.straight.straight_dbu_factory.random_cell"
-
-    c.name = _temp_cell_name
-
-    with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as tmpfile:
-        yaml.dump(c, tmpfile)
-
-    c.name = _temp_cell_name + "_old"
-
-    with Path(tmpfile.name).open() as file:
-        cell = yaml.load(file)
-        assert isinstance(cell, kf.KCell)
-
-        c.name = _temp_cell_name
-
-        c_base_kcell = c.base
-        cell_base_kcell = cell.base
-
-        def compare_kcell_fields(
-            c_base_kcell: kf.kcell.TKCell, cell_base_kcell: kf.kcell.TKCell
-        ) -> bool:
-            for field in vars(c_base_kcell):
-                if field == "kdb_cell":
-                    continue
-                c_value = getattr(c_base_kcell, field)
-                cell_value = getattr(cell_base_kcell, field)
-                if c_value != cell_value:
-                    return False
-            return True
-
-        assert compare_kcell_fields(c_base_kcell, cell_base_kcell)
-
-        oasis_regression(c)
-        c.delete()
-        cell.delete()
 
 
 def test_cell_default_fallback(

@@ -91,8 +91,10 @@ def mzi() -> kf.KCell:
     return c
 
 
-def test_l2n(oasis_regression: Callable[[kf.ProtoTKCell[Any]], None]) -> None:
-    c = kf.KCell(name="L2N_TEST")
+def test_l2n(
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+) -> None:
+    c = kcl.kcell(name="L2N_TEST")
     mzi1 = c << mzi()
     mzi2 = c << mzi()
     mzi2.connect("o1", mzi1, "o2")

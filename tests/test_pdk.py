@@ -54,11 +54,11 @@ def test_multi_pdk(
     layers: Layers,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
-    base_pdk = kf.KCLayout("BASE", infos=Layers)
+    base_pdk = kf.KCLayout("BASE_MULTI", infos=Layers)
 
-    doe_pdk1 = kf.KCLayout(name="DOE1", infos=Layers)
-    doe_pdk2 = kf.KCLayout(name="DOE2", infos=Layers)
-    assembly_pdk = kf.KCLayout(name="ASSEMBLY", infos=Layers)
+    doe_pdk1 = kf.KCLayout(name="DOE1_MULTI", infos=Layers)
+    doe_pdk2 = kf.KCLayout(name="DOE2_MULTI", infos=Layers)
+    assembly_pdk = kf.KCLayout(name="ASSEMBLY_MULTI", infos=Layers)
 
     wg = kf.factories.straight.straight_dbu_factory(base_pdk)
     bend90_pdk1 = kf.factories.euler.bend_euler_factory(doe_pdk1)
@@ -101,11 +101,11 @@ def test_multi_pdk_convert(
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     with NamedTemporaryFile("a", suffix=".oas") as temp_file:
-        base_pdk = kf.KCLayout("BASE", infos=Layers)
+        base_pdk = kf.KCLayout("BASE_CONVERT", infos=Layers)
 
-        doe_pdk1 = kf.KCLayout(name="DOE1", infos=Layers)
-        doe_pdk2 = kf.KCLayout(name="DOE2", infos=Layers)
-        assembly_pdk = kf.KCLayout(name="ASSEMBLY", infos=Layers)
+        doe_pdk1 = kf.KCLayout(name="DOE1_CONVERT", infos=Layers)
+        doe_pdk2 = kf.KCLayout(name="DOE2_CONVERT", infos=Layers)
+        assembly_pdk = kf.KCLayout(name="ASSEMBLY_CONVERT", infos=Layers)
 
         wg = kf.factories.straight.straight_dbu_factory(base_pdk)
         bend90_pdk1 = kf.factories.euler.bend_euler_factory(doe_pdk1)
@@ -151,11 +151,11 @@ def test_multi_pdk_read_write(
     layers: Layers,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
-    base_pdk = kf.KCLayout("BASE", infos=Layers)
+    base_pdk = kf.KCLayout("BASE_RW", infos=Layers)
 
-    doe_pdk1_write = kf.KCLayout(name="DOE1_WRITE", infos=Layers)
-    doe_pdk2_write = kf.KCLayout(name="DOE2_WRITE", infos=Layers)
-    assembly_pdk = kf.KCLayout(name="ASSEMBLY", infos=Layers)
+    doe_pdk1_write = kf.KCLayout(name="DOE1_WRITE_RW", infos=Layers)
+    doe_pdk2_write = kf.KCLayout(name="DOE2_WRITE_RW", infos=Layers)
+    assembly_pdk = kf.KCLayout(name="ASSEMBLY_RW", infos=Layers)
 
     wg = kf.factories.straight.straight_dbu_factory(base_pdk)
     bend90_pdk1 = kf.factories.euler.bend_euler_factory(doe_pdk1_write)
@@ -290,11 +290,12 @@ def test_merge_properties() -> None:
 
 
 def test_pdk_cell_infosettings(
-    straight: kf.KCell, oasis_regression: Callable[[kf.ProtoTKCell[Any]], None]
+    straight: kf.KCell,
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
 ) -> None:
-    kcl = kf.KCLayout("INFOSETTINGS", infos=Layers)
-    c = kcl.kcell()
+    kcl_ = kf.KCLayout("INFOSETTINGS", infos=Layers)
+    c = kcl_.kcell()
     _wg = c << straight
     assert _wg.cell.settings == straight.settings
     assert _wg.cell.info == straight.info
-    oasis_regression(c)

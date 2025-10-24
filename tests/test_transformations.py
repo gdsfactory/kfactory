@@ -15,9 +15,12 @@ from tests.conftest import Layers
     ],
 )
 def test_rotation(
-    center: kf.kdb.Point | None, straight: kf.KCell, layers: Layers
+    center: kf.kdb.Point | None, straight: kf.KCell, layers: Layers, kcl: kf.KCLayout
 ) -> None:
-    c = kf.KCell()
+    if center is not None:
+        c = kcl.kcell(f"test_rotation_{center.x}_{center.y}")
+    else:
+        c = kcl.kcell("test_rotation")
 
     wg1 = c << straight
     wg2 = c << straight
@@ -46,9 +49,12 @@ def test_rotation(
     ],
 )
 def test_drotation(
-    center: kf.kdb.DPoint | None, straight: kf.KCell, layers: Layers
+    center: kf.kdb.DPoint | None, straight: kf.KCell, layers: Layers, kcl: kf.KCLayout
 ) -> None:
-    c = kf.KCell()
+    if center is not None:
+        c = kcl.kcell(f"test_drotation_{center.x}_{center.y}")
+    else:
+        c = kcl.kcell("test_drotation")
 
     wg1 = c << straight
     wg2 = c << straight
@@ -87,9 +93,10 @@ def test_connection_flags(
     use_mirror: bool,
     apply_mirror: bool,
     expected_transformation: kf.kdb.Trans,
+    kcl: kf.KCLayout,
 ) -> None:
     """Tests all the (relevant) connection flags."""
-    c = kf.KCell(name=f"{from_name=}_{use_mirror=}_{apply_mirror=}")
+    c = kcl.kcell(name=f"{from_name=}_{use_mirror=}_{apply_mirror=}")
     i1 = c << straight
     i2 = c << bend90
 

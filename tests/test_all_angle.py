@@ -11,13 +11,19 @@ from tests.conftest import Layers
 def test_all_angle_bundle(
     layers: Layers,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
 ) -> None:
-    sf = partial(kf.cells.virtual.straight.virtual_straight, layer=layers.WG)
+    sf = partial(
+        kf.factories.virtual.straight.virtual_straight_factory(kcl=kcl), layer=layers.WG
+    )
     bf = partial(
-        kf.cells.virtual.euler.virtual_bend_euler, layer=layers.WG, radius=10, width=1
+        kf.factories.virtual.euler.virtual_bend_euler_factory(kcl=kcl),
+        layer=layers.WG,
+        radius=10,
+        width=1,
     )
 
-    c = kf.KCell(name="test_all_angle_bundle")
+    c = kcl.kcell(name="test_all_angle_bundle")
 
     start_ports: list[kf.Port] = []
     end_ports: list[kf.Port] = []

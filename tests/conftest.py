@@ -36,6 +36,8 @@ kf.kcl.infos = Layers()
 
 cell_copy_lock = RLock()
 
+counter = 0
+
 
 @pytest.fixture(scope="session")
 def lazy_datadir() -> Path:
@@ -56,41 +58,51 @@ def layers() -> Layers:
 
 @pytest.fixture
 def kcl() -> kf.KCLayout:
-    import random
-    import string
-
-    random.seed(9000)
-
-    random_name = "".join(random.choices(string.ascii_letters, k=10))
-    kcl = kf.KCLayout(name=random_name)
-    kcl.infos = Layers()
-    return kcl
+    global counter  # noqa: PLW0603
+    name = str(counter)
+    counter += 1
+    return kf.KCLayout(name=name, infos=Layers)
 
 
 @pytest.fixture
-def wg_enc(layers: Layers) -> kf.LayerEnclosure:
-    return kf.LayerEnclosure(name="WGSTD", sections=[(layers.WGCLAD, 0, 2000)])
+def wg_enc(kcl: kf.KCLayout, layers: Layers) -> kf.LayerEnclosure:
+    return kcl.get_enclosure(
+        kf.LayerEnclosure(name="WGSTD", sections=[(layers.WGCLAD, 0, 2000)])
+    )
 
 
 @pytest.fixture
 def straight_factory_dbu(
-    layers: Layers, wg_enc: kf.LayerEnclosure
+    layers: Layers, wg_enc: kf.LayerEnclosure, kcl: kf.KCLayout
 ) -> Callable[..., kf.KCell]:
-    return partial(kf.cells.straight.straight_dbu, layer=layers.WG, enclosure=wg_enc)
+    return partial(
+        kf.factories.straight.straight_dbu_factory(kcl=kcl),
+        layer=layers.WG,
+        enclosure=wg_enc,
+    )
 
 
 @pytest.fixture
 def straight_factory(
-    layers: Layers, wg_enc: kf.LayerEnclosure
+    straight_factory_dbu: Callable[..., kf.KCell],
+    kcl: kf.KCLayout,
 ) -> Callable[..., kf.KCell]:
-    return partial(kf.cells.straight.straight, layer=layers.WG, enclosure=wg_enc)
+    def straight(width: float, length: float, *args: Any, **kwargs: Any) -> kf.KCell:
+        return straight_factory_dbu(
+            *args, width=kcl.to_dbu(width), length=kcl.to_dbu(length), **kwargs
+        )
+
+    return straight
 
 
 @pytest.fixture
-def straight(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
-    return kf.cells.straight.straight(
-        width=0.5, length=1, layer=layers.WG, enclosure=wg_enc
-    )
+def straight(
+    layers: Layers,
+    wg_enc: kf.LayerEnclosure,
+    straight_factory: Callable[..., kf.KCell],
+    kcl: kf.KCLayout,
+) -> kf.KCell:
+    return straight_factory(width=0.5, length=1, layer=layers.WG, enclosure=wg_enc)
 
 
 @pytest.fixture
@@ -99,67 +111,62 @@ def straight_blank(layers: Layers) -> kf.KCell:
 
 
 @pytest.fixture
-def bend90(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
-    return kf.cells.circular.bend_circular(
+def bend90(layers: Layers, wg_enc: kf.LayerEnclosure, kcl: kf.KCLayout) -> kf.KCell:
+    return kf.factories.circular.bend_circular_factory(kcl=kcl)(
         width=0.5, radius=10, layer=layers.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
-def bend90_small(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
-    return kf.cells.circular.bend_circular(
+def bend90_small(
+    layers: Layers, wg_enc: kf.LayerEnclosure, kcl: kf.KCLayout
+) -> kf.KCell:
+    return kf.factories.circular.bend_circular_factory(kcl=kcl)(
         width=0.5, radius=5, layer=layers.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
-def bend180(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
-    return kf.cells.circular.bend_circular(
+def bend180(layers: Layers, wg_enc: kf.LayerEnclosure, kcl: kf.KCLayout) -> kf.KCell:
+    return kf.factories.circular.bend_circular_factory(kcl=kcl)(
         width=0.5, radius=10, layer=layers.WG, enclosure=wg_enc, angle=180
     )
 
 
 @pytest.fixture
-def bend90_euler(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
-    return kf.cells.euler.bend_euler(
+def bend90_euler(
+    layers: Layers, wg_enc: kf.LayerEnclosure, kcl: kf.KCLayout
+) -> kf.KCell:
+    return kf.factories.euler.bend_euler_factory(kcl=kcl)(
         width=0.5, radius=10, layer=layers.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
-def bend90_euler_small(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
-    return kf.cells.euler.bend_euler(
+def bend90_euler_small(
+    layers: Layers, wg_enc: kf.LayerEnclosure, kcl: kf.KCLayout
+) -> kf.KCell:
+    return kf.factories.euler.bend_euler_factory(kcl=kcl)(
         width=0.1, radius=10, layer=layers.WG, enclosure=wg_enc, angle=90
     )
 
 
 @pytest.fixture
-def bend180_euler(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
-    return kf.cells.euler.bend_euler(
+def bend180_euler(
+    layers: Layers, wg_enc: kf.LayerEnclosure, kcl: kf.KCLayout
+) -> kf.KCell:
+    return kf.factories.euler.bend_euler_factory(kcl=kcl)(
         width=0.5, radius=10, layer=layers.WG, enclosure=wg_enc, angle=180
     )
 
 
 @pytest.fixture
-def taper(layers: Layers, wg_enc: kf.LayerEnclosure) -> kf.KCell:
-    return taper_cell(layers=layers.WG, wg_enc=wg_enc)
+def taper(layers: Layers, wg_enc: kf.LayerEnclosure, kcl: kf.KCLayout) -> kf.KCell:
+    taper_f = kf.factories.taper.taper_factory(kcl=kcl)
 
-
-@kf.cells.demo.cell(set_name=False)
-def taper_cell(layers: kf.kdb.LayerInfo, wg_enc: kf.LayerEnclosure) -> kf.KCell:
-    if kf.kcl.layout_cell("taper") is None:
-        c = kf.cells.taper.taper(
-            width1=0.5,
-            width2=1,
-            length=10,
-            layer=layers,
-            enclosure=wg_enc,
-        )
-        c = c.dup()
-        c.name = "taper"
-    else:
-        c = kf.kcl["taper"]
-    return c
+    return taper_f(
+        width1=500, width2=1000, length=10_000, layer=layers.WG, enclosure=wg_enc
+    )
 
 
 @pytest.fixture
@@ -208,16 +215,15 @@ def pdk() -> kf.KCLayout:
 
 
 @pytest.fixture
-def fill_cell() -> kf.KCell:
-    return fill_cell_fixture()
+def fill_cell(kcl: kf.KCLayout) -> kf.KCell:
+    @kcl.cell
+    def fill_cell() -> kf.KCell:
+        fc = kcl.kcell()
+        fc.shapes(fc.kcl.find_layer(Layers().WGCLAD)).insert(kf.kdb.DBox(20, 40))
+        fc.shapes(fc.kcl.find_layer(Layers().WGCLAD)).insert(kf.kdb.DBox(30, 15))
+        return fc
 
-
-@kf.kcl.cell(basename="fill_cell")
-def fill_cell_fixture() -> kf.KCell:
-    fc = kf.KCell()
-    fc.shapes(fc.kcl.find_layer(Layers().WGCLAD)).insert(kf.kdb.DBox(20, 40))
-    fc.shapes(fc.kcl.find_layer(Layers().WGCLAD)).insert(kf.kdb.DBox(30, 15))
-    return fc
+    return fill_cell()
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -231,10 +237,28 @@ def oasis_regression(
     file_regression: FileRegressionFixture,
 ) -> Callable[[kf.ProtoTKCell[Any]], None]:
     saveopts = kf.save_layout_options()
-    saveopts.format = "OASIS"
+    saveopts.format = "GDS2"
 
     def _check(c: kf.ProtoTKCell[Any]) -> None:
         c.kcl.layout.clear_meta_info()
-        file_regression.check(c.write_bytes(saveopts), binary=True, extension=".oas")
+        file_regression.check(
+            c.write_bytes(saveopts, convert_external_cells=True),
+            binary=True,
+            extension=".gds",
+            check_fn=_layout_xor,
+        )
 
     return _check
+
+
+def _layout_xor(path_a: Path, path_b: Path) -> None:
+    diff = kf.kdb.LayoutDiff()
+    ly_a = kf.kdb.Layout()
+    ly_a.read(str(path_a))
+    ly_b = kf.kdb.Layout()
+    ly_b.read(str(path_b))
+
+    flags = kf.kdb.LayoutDiff.Verbose | kf.kdb.LayoutDiff.WithMetaInfo
+
+    if not diff.compare(ly_a, ly_b, flags=flags):
+        raise AttributeError(f"Layouts {path_a!r} and {path_b!r} differ!")

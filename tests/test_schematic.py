@@ -83,9 +83,9 @@ ports:
 
 
 def test_schematic_create(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
-    pdk = kf.KCLayout("schematic_pdk", infos=Layers)
+    pdk = kcl
     layers = Layers()
 
     @pdk.cell
@@ -130,10 +130,10 @@ def test_schematic_create(
 
 
 def test_schematic_create_cell(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     layers = Layers()
-    pdk = kf.KCLayout("schematic_pdk_decorator", infos=Layers)
+    pdk = kcl
 
     @pdk.cell
     def straight(length: int) -> kf.KCell:
@@ -179,10 +179,10 @@ def test_schematic_create_cell(
 
 
 def test_schematic_mirror_connection(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     layers = Layers()
-    pdk = kf.KCLayout("schematic_pdk_decorator", infos=Layers)
+    pdk = kcl
 
     @pdk.cell
     def straight(length: int) -> kf.KCell:
@@ -282,11 +282,11 @@ def test_schematic_mirror_connection(
 
 
 def test_schematic_kcl_mix_netlist(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], layers: Layers
 ) -> None:
     layers = Layers()
-    pdk = kf.KCLayout("schematic_pdk_decorator", infos=Layers)
-    pdk2 = kf.KCLayout("schematic_pdk_decorator_2", infos=Layers)
+    pdk = kf.KCLayout("schematic_pdk_decorator", infos=layers.__class__)
+    pdk2 = kf.KCLayout("schematic_pdk_decorator_2", infos=layers.__class__)
 
     @pdk.cell
     def straight(length: int) -> kf.KCell:
@@ -307,7 +307,7 @@ def test_schematic_kcl_mix_netlist(
 
         return c
 
-    @pdk2.schematic_cell()
+    @pdk2.schematic_cell
     def long_straight(n: int) -> kf.schematic.TSchematic[int]:
         schematic = kf.Schematic(kcl=pdk2)
 

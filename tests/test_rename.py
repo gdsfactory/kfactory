@@ -12,40 +12,45 @@ port_y_coords = [0, -10000, 0, 10000, 0]
 offset = 50000
 
 
-@kf.cell
-def port_tests(rename_f: Callable[..., None] | None = None) -> kf.KCell:
-    c = kf.KCell()
+def _define_port_tests(kcl: kf.KCLayout) -> Callable[..., kf.KCell]:
+    @kcl.cell
+    def port_tests(rename_f: Callable[..., None] | None = None) -> kf.KCell:
+        c = kcl.kcell()
 
-    i = 0
-    for angle in range(4):
-        for x, y in zip(port_x_coords, port_y_coords, strict=False):
-            point = (
-                kf.kdb.Trans(angle, False, 0, 0) * kf.kdb.Trans(0, False, offset, 0)
-            ) * kf.kdb.Point(x, y)
+        i = 0
+        for angle in range(4):
+            for x, y in zip(port_x_coords, port_y_coords, strict=False):
+                point = (
+                    kf.kdb.Trans(angle, False, 0, 0) * kf.kdb.Trans(0, False, offset, 0)
+                ) * kf.kdb.Point(x, y)
 
-            c.create_port(
-                name=f"{i}",
-                trans=kf.kdb.Trans(
-                    angle,
-                    False,
-                    point.to_v(),
-                ),
-                layer=c.kcl.find_layer(1, 0),
-                width=c.kcl.to_dbu(1),
-            )
-    if rename_f is None:
-        c.auto_rename_ports()
-    else:
-        c.auto_rename_ports(rename_f)
-    c.draw_ports()
-    return c
+                c.create_port(
+                    name=f"{i}",
+                    trans=kf.kdb.Trans(
+                        angle,
+                        False,
+                        point.to_v(),
+                    ),
+                    layer=c.kcl.find_layer(1, 0),
+                    width=c.kcl.to_dbu(1),
+                )
+        if rename_f is None:
+            c.auto_rename_ports()
+        else:
+            c.auto_rename_ports(rename_f)
+        c.draw_ports()
+        return c
+
+    return port_tests
 
 
 @pytest.mark.parametrize("func", [None, port.rename_clockwise_multi])
 def test_rename_default(
     func: Callable[..., None],
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
 ) -> None:
+    port_tests = _define_port_tests(kcl)
     cell = port_tests(func)
     port_list = list(cell.ports)
     xl = len(port_x_coords)
@@ -75,8 +80,9 @@ def test_rename_default(
 
 
 def test_rename_orientation(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
+    port_tests = _define_port_tests(kcl)
     cell = port_tests(port.rename_by_direction)
 
     port_list = list(cell.ports)
@@ -101,7 +107,7 @@ def test_rename_setter(
 
     assert kcl.rename_function == kf.port.rename_clockwise_multi
 
-    c1 = kf.KCell(kcl=kcl)
+    c1 = kcl.kcell()
 
     for name, ang, x, y in [
         ("N0", 2, -100, 0),
@@ -144,7 +150,7 @@ def test_rename_setter(
 
     kcl.rename_function = kf.port.rename_by_direction
 
-    c2 = kf.KCell(kcl=kcl)
+    c2 = kcl.kcell()
     dir_list = [
         ("N0", 2, -100, 0),
         ("N1", 2, -100, 500),

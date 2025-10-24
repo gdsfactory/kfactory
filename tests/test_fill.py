@@ -9,8 +9,9 @@ def test_tiled_fill_space(
     fill_cell: kf.KCell,
     layers: Layers,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
 ) -> None:
-    c = kf.KCell()
+    c = kcl.kcell()
     c.shapes(layers.WG).insert(kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512))
     c.shapes(layers.WGCLAD).insert(
         kf.kdb.DPolygon(
@@ -39,8 +40,9 @@ def test_tiled_fill_vector(
     fill_cell: kf.KCell,
     layers: Layers,
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
 ) -> None:
-    c = kf.KCell()
+    c = kcl.kcell()
     c.shapes(layers.WG).insert(kf.kdb.DPolygon.ellipse(kf.kdb.DBox(5000, 3000), 512))
     c.shapes(layers.WGCLAD).insert(
         kf.kdb.DPolygon(
