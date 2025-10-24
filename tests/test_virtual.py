@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from functools import partial
 from pathlib import Path
 
@@ -12,19 +13,19 @@ def test_virtual_cell(kcl: kf.KCLayout) -> None:
     )
 
 
-def test_virtual_inst(straight: kf.KCell) -> None:
-    c = kf.VKCell()
+def test_virtual_inst(straight: kf.KCell, kcl: kf.KCLayout) -> None:
+    c = kcl.vkcell()
     c << straight
 
 
 def test_virtual_cell_insert(
-    layers: Layers, straight: kf.KCell, wg_enc: kf.LayerEnclosure
+    layers: Layers, straight: kf.KCell, wg_enc: kf.LayerEnclosure, kcl: kf.KCLayout
 ) -> None:
-    c = kf.KCell()
+    c = kcl.kcell()
 
-    vc = kf.VKCell(name="test_virtual_insert")
+    vc = kcl.vkcell(name="test_virtual_insert")
 
-    e_bend = kf.cells.virtual.euler.virtual_bend_euler(
+    e_bend = kf.factories.virtual.euler.virtual_bend_euler_factory(kcl=kcl)(
         width=0.5,
         radius=10,
         layer=layers.WG,
@@ -52,20 +53,22 @@ def test_virtual_cell_insert(
     vi.insert_into(c)
 
 
-def test_all_angle_route(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
+def test_all_angle_route(
+    layers: Layers, wg_enc: kf.LayerEnclosure, kcl: kf.KCLayout
+) -> None:
     bb = [kf.kdb.DPoint(x, y) for x, y in [(0, 0), (500, 0), (250, 200), (500, 250)]]
-    vc = kf.VKCell(name="test_all_angle")
+    vc = kcl.vkcell(name="test_all_angle")
     kf.routing.aa.optical.route(
         vc,
         width=5,
         backbone=bb,
         straight_factory=partial(
-            kf.cells.virtual.straight.virtual_straight,
+            kf.factories.virtual.straight.virtual_straight_factory(kcl=kcl),
             layer=layers.WG,
             enclosure=wg_enc,
         ),
         bend_factory=partial(
-            kf.cells.virtual.euler.virtual_bend_euler,
+            kf.factories.virtual.euler.virtual_bend_euler_factory(kcl=kcl),
             width=5,
             radius=20,
             layer=layers.WG,
@@ -78,8 +81,13 @@ def test_all_angle_route(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
     file.unlink()
 
 
-def test_virtual_connect(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
-    e_bend = kf.cells.virtual.euler.virtual_bend_euler(
+def test_virtual_connect(
+    layers: Layers,
+    wg_enc: kf.LayerEnclosure,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    kcl: kf.KCLayout,
+) -> None:
+    e_bend = kf.factories.virtual.euler.virtual_bend_euler_factory(kcl=kcl)(
         width=0.5,
         radius=10,
         layer=layers.WG,
@@ -87,11 +95,11 @@ def test_virtual_connect(layers: Layers, wg_enc: kf.LayerEnclosure) -> None:
         enclosure=wg_enc,
     )
 
-    wg = kf.cells.straight.straight_dbu(
+    wg = straight_factory_dbu(
         width=500, enclosure=wg_enc, layer=layers.WG, length=10_000
     )
 
-    c = kf.KCell()
+    c = kcl.kcell()
 
     wg1 = c << wg
     wg2 = c << wg

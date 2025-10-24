@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Any, TypeAlias
 
 import klayout.db as kdb
@@ -8,16 +9,20 @@ from kfactory import exceptions
 from tests.conftest import Layers
 
 
-def test_instance_xsize(layers: Layers) -> None:
-    c = kf.KCell()
-    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
+def test_instance_xsize(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=layers.WG)
     assert ref.xsize
 
 
-def test_instance_center(layers: Layers) -> None:
-    c = kf.KCell()
-    ref1 = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
-    ref2 = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
+def test_instance_center(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    c = kcl.kcell()
+    ref1 = c << straight_factory(width=0.5, length=1, layer=layers.WG)
+    ref2 = c << straight_factory(width=0.5, length=1, layer=layers.WG)
 
     ref1.center = ref2.center
     ref2.center = (ref1.center[0], ref2.center[1] + 1000)
@@ -25,9 +30,11 @@ def test_instance_center(layers: Layers) -> None:
     assert ref2.center == (ref1.center[0], ref1.center[1] + 11_000)
 
 
-def test_instance_d_move(layers: Layers) -> None:
-    c = kf.KCell()
-    ref = c << kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG)
+def test_instance_d_move(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    c = kcl.kcell()
+    ref = c << straight_factory(width=0.5, length=1, layer=layers.WG)
 
     ref.dmovex(10)
     ref.dmovex(10.0)
@@ -46,10 +53,12 @@ def test_instance_d_move(layers: Layers) -> None:
     ref.dmirror_x(0)
 
 
-def test_instance_array(layers: Layers) -> None:
-    c = kf.KCell()
+def test_instance_array(
+    layers: Layers, kcl: kf.KCLayout, straight_factory: Callable[..., kf.KCell]
+) -> None:
+    c = kcl.kcell()
     ref = c.create_inst(
-        kf.cells.straight.straight(width=0.5, length=1, layer=layers.WG),
+        straight_factory(width=0.5, length=1, layer=layers.WG),
         na=4,
         nb=6,
         a=kf.kdb.Vector(3000, 0),
@@ -104,10 +113,14 @@ def test_instance_array(layers: Layers) -> None:
             assert abs(disp_o2.y) < 0.0005
 
 
-def test_instance_mirror(layers: Layers) -> None:
+def test_instance_mirror(
+    layers: Layers,
+    kcl: kf.KCLayout,
+    bend90_euler: kf.KCell,
+) -> None:
     """Test arbitrary mirror."""
-    c = kf.KCell()
-    b = kf.cells.euler.bend_euler(width=1, radius=10, layer=layers.WG)
+    c = kcl.kcell()
+    b = bend90_euler
 
     c << b
     b2 = c << b
@@ -125,10 +138,10 @@ def test_instance_mirror(layers: Layers) -> None:
     )
 
 
-def test_dmirror(layers: Layers) -> None:
+def test_dmirror(layers: Layers, kcl: kf.KCLayout, bend90_euler: kf.KCell) -> None:
     """Test arbitrary mirror."""
-    c = kf.KCell()
-    b = kf.cells.euler.bend_euler(width=1, radius=10, layer=layers.WG)
+    c = kcl.kcell()
+    b = bend90_euler
 
     c << b
     b2 = c << b
@@ -167,11 +180,11 @@ _UMInstanceTuple: TypeAlias = tuple[
 
 
 @pytest.fixture
-def dbu_instance_tuple() -> _DBUInstanceTuple:
-    cell = kf.kcell.KCell()
+def dbu_instance_tuple(kcl: kf.KCLayout) -> _DBUInstanceTuple:
+    cell = kcl.kcell()
     layer = kf.kdb.LayerInfo(1, 0)
     cell.shapes(layer).insert(kf.kdb.Box(0, 0, 1000, 1000))
-    parent_cell = kf.kcell.KCell()
+    parent_cell = kcl.kcell()
     return (
         parent_cell << cell,
         parent_cell << cell,
@@ -180,11 +193,11 @@ def dbu_instance_tuple() -> _DBUInstanceTuple:
 
 
 @pytest.fixture
-def um_instance_tuple() -> _UMInstanceTuple:
-    cell = kf.kcell.DKCell()
+def um_instance_tuple(kcl: kf.KCLayout) -> _UMInstanceTuple:
+    cell = kcl.dkcell()
     layer = kf.kdb.LayerInfo(1, 0)
     cell.shapes(layer).insert(kf.kdb.Box(0, 0, 1000, 1000))
-    parent_cell = kf.kcell.DKCell()
+    parent_cell = kcl.dkcell()
     return (
         parent_cell << cell,
         parent_cell << cell,
@@ -673,11 +686,11 @@ def test_mirror_x_equal() -> None:
     assert parent_cell.bbox() == kf.kdb.DBox(-5, -5, 5, 5)
 
 
-def test_mirror_y_equal() -> None:
-    cell = kf.kcell.DKCell()
+def test_mirror_y_equal(kcl: kf.KCLayout) -> None:
+    cell = kcl.dkcell()
     layer = kf.kdb.LayerInfo(1, 0)
     cell.shapes(layer).insert(kf.kdb.DBox(-5, -5, 5, 5))
-    parent_cell = kf.kcell.DKCell()
+    parent_cell = kcl.dkcell()
     _ = parent_cell << cell
     ref2 = parent_cell << cell
     ref3 = parent_cell << cell
