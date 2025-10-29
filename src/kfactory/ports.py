@@ -622,13 +622,23 @@ class DCreatePort(ABC):
                 kcl=self.kcl,
             )
         elif dcplx_trans is not None:
-            port = DPort(
-                name=name,
-                dcplx_trans=dcplx_trans,
-                port_type=port_type,
-                cross_section=xs,
-                kcl=self.kcl,
-            )
+            if dcplx_trans.is_complex():
+                port = DPort(
+                    name=name,
+                    dcplx_trans=dcplx_trans,
+                    port_type=port_type,
+                    cross_section=xs,
+                    kcl=self.kcl,
+                )
+            else:
+                trans_ = kdb.Trans(rot=int(dcplx_trans.angle // 90), u=self.kcl.to_dbu(dcplx_trans.disp))
+                port = DPort(
+                    name=name,
+                    trans=trans_,
+                    port_type=port_type,
+                    cross_section=xs,
+                    kcl=self.kcl,
+                )
         elif orientation is not None and center is not None:
             port = DPort(
                 name=name,
