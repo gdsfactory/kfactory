@@ -793,7 +793,7 @@ def place_manhattan(
             "place_manhattan needs to be passed a fixed bend90 cell with two optical"
             " ports which are 90° apart from each other with port_type 'port_type'."
         )
-    
+
     if p1.dcplx_trans.is_complex() or p2.dcplx_trans.is_complex():
         raise ValueError(
             "place_manhattan does not support complex port transformations."

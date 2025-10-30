@@ -631,7 +631,10 @@ class DCreatePort(ABC):
                     kcl=self.kcl,
                 )
             else:
-                trans_ = kdb.Trans(rot=int(dcplx_trans.angle // 90), u=self.kcl.to_dbu(dcplx_trans.disp))
+                trans_ = kdb.Trans(
+                    rot=int(dcplx_trans.angle // 90),
+                    u=self.kcl.to_dbu(dcplx_trans.disp),
+                )
                 port = DPort(
                     name=name,
                     trans=trans_,
