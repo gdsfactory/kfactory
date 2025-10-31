@@ -794,9 +794,21 @@ def place_manhattan(
             " ports which are 90° apart from each other with port_type 'port_type'."
         )
     route_start_port = p1.copy()
+    route_end_port = p2.copy()
+    if p1.base.trans is None:
+        logger.warning(
+            f"{p1=} is not a manhattan port (either off-grid or angle not a multiple of"
+            " 90 degrees). Forcing port to be manhattan."
+        )
+        route_start_port.trans = route_start_port.trans
+    if p2.base.trans is None:
+        logger.warning(
+            f"{p2=} is not a manhattan port (either off-grid or angle not a multiple of"
+            " 90 degrees). Forcing port to be manhattan."
+        )
+        route_end_port.trans = route_end_port.trans
     route_start_port.name = None
     route_start_port.trans.angle = (route_start_port.angle + 2) % 4
-    route_end_port = p2.copy()
     route_end_port.name = None
     route_end_port.trans.angle = (route_end_port.angle + 2) % 4
 
