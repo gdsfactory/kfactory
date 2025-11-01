@@ -1162,10 +1162,11 @@ class DPort(ProtoPort[float]):
                 name=name,
                 kcl=kcl_,
                 cross_section=cross_section_,
-                dcplx_trans=dcplx_trans_,
+                trans=kdb.Trans.R0,
                 info=info_,
                 port_type=port_type,
             )
+            self.dcplx_trans = dcplx_trans_
         else:
             assert center is not None
             dcplx_trans_ = kdb.DCplxTrans.R0
