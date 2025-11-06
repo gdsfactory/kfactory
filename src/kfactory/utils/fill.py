@@ -13,8 +13,6 @@ from ..kcell import KCell, ProtoTKCell
 from ..layout import KCLayout
 from ..typings import um
 
-stop = False
-
 
 class FillOperator(kdb.TileOutputReceiver):
     """Output Receiver of the TilingProcessor."""
@@ -104,41 +102,9 @@ class FillOperator(kdb.TileOutputReceiver):
 class SparseFillOperator(kdb.TileOutputReceiver):
     """Output Receiver of the TilingProcessor."""
 
-    def __init__(
-        self,
-        kcl: KCLayout,
-        top_cell: KCell,
-        fill_cell: KCell,
-        # fc_bbox: kdb.Box,
-        # row_step: kdb.Vector,
-        # column_step: kdb.Vector,
-        # fill_margin: kdb.Vector | None = None,
-        # remaining_polygons: kdb.Region | None = None,
-        # multi: bool = False,
-    ) -> None:
+    def __init__(self) -> None:
         """Initialize the receiver."""
-        # if fill_margin is None:
-        #     fill_margin = kdb.Vector(0, 0)
-        self.kcl = kcl
-        self.top_cell = top_cell
-        self.fill_cell = fill_cell
-        self.fill_cell_index = fill_cell.cell_index()
-        # self.fc_bbox = fc_bbox
-        # self.row_step = row_step
-        # self.column_step = column_step
-        # self.fill_margin = fill_margin
-        # self.remaining_polygons = remaining_polygons
-        # self.multi = multi
-        self.origin = kdb.Point(0, 0)
-        self.filled_cells: list[kdb.Cell] = []
-        self.temp_ly = kdb.Layout()
-        self.temp_tc = self.temp_ly.create_cell(top_cell.name)
-        # fc = kcl.layout.cell(fill_cell_index)
-
-        self.fc_sizings = [50, 30, 10]
-        self.sizing_steps = 100
         self.f_region = kdb.Region()
-        self.f_region.merged_semantics = False
 
     def put(
         self,
@@ -335,7 +301,7 @@ def fill_tiled(
             c.kcl.end_changes()
 
 
-def fill_coverage(
+def add_coverage(
     c: ProtoTKCell[Any],
     max_distance: um,
     coverage_cell: ProtoTKCell[Any],
@@ -345,6 +311,7 @@ def fill_coverage(
     avoid_regions: Iterable[tuple[kdb.Region, um]] = [],
     n_threads: int | None = None,
     tile_size: tuple[um, um] = (500, 500),
+    fill_box_sizing: tuple[um, um] = (50, 25),
 ) -> None:
     """Cover a Cell with metrology or similar structures.
 
@@ -352,22 +319,14 @@ def fill_coverage(
 
     Args:
         c: Target cell.
-        fill_cell: The cell used as a cell to fill the regions.
-        fill_layers: Tuples of layer and keepout w.r.t. the regions.
-        fill_regions: Specific regions to fill. Also tuples like the layers.
-        exclude_layers: Layers to ignore. Tuples like the fill layers
-        exclude_regions: Specific regions to ignore. Tuples like the fill layers.
+        coverage_cell: The cell used as a cell to fill the regions.
+        coverage_layers: Tuples of layer and keepout w.r.t. the regions.
+        coverage_regions: Specific regions to fill. Also tuples like the layers.
+        avoid_layers: Layers to ignore. Tuples like the coverage layers
+        avoid_regions: Specific regions to ignore. Tuples like the fill layers.
         n_threads: Max number of threads used. Defaults to number of cores of the
             machine.
         tile_size: Size of the tiles in um.
-        row_step: DVector for steping to the next instance position in the row.
-            x-coordinate must be >= 0.
-        col_step: DVector for steping to the next instance position in the column.
-            y-coordinate must be >= 0.
-        x_space: Spacing between the fill cell bounding boxes in x-direction.
-        y_space: Spacing between the fill cell bounding boxes in y-direction.
-        tile_border: The tile border to consider for excludes
-        multi: Use the region_fill_multi strategy instead of single fill.
     """
     c = KCell(base=c.base)
     coverage_cell = KCell(base=coverage_cell.base)
@@ -420,23 +379,15 @@ def fill_coverage(
         tp.input(region_name, r)
         avoid_region_names.append(region_name)
 
-    coverage_operator = SparseFillOperator(
-        c.kcl,
-        c,
-        coverage_cell,
-    )
+    placement_operator = SparseFillOperator()
     tp.output(
-        "to_cover",
-        coverage_operator,
+        "placement",
+        placement_operator,
     )
-    avoid_operator = SparseFillOperator(
-        c.kcl,
-        c,
-        coverage_cell,
-    )
+    cover_operator = SparseFillOperator()
     tp.output(
-        "to_avoid",
-        avoid_operator,
+        "cover_area",
+        cover_operator,
     )
 
     if layer_names or region_names:
@@ -474,74 +425,79 @@ def fill_coverage(
         )
 
         if exlayer_names or avoid_region_names:
-            queue_str1 = (
+            queue_str = (
                 "var cover = "
                 + (
                     f"{coverage_layers_str} + {coverage_regions_str}"
                     if coverage_layers_str and coverage_regions_str
                     else coverage_layers_str + coverage_regions_str
                 )
-                + "; var cov_region = _tile & _frame & cover; "
-                "_output(to_coverage, cov_region);"
-            )
-
-            queue_str2 = (
-                "var avoid = "
+                + "; var avoid = "
                 + (
                     f"{avoid_layers_str} + {avoid_regions_str}"
                     if avoid_regions_str and avoid_layers_str
                     else avoid_regions_str + avoid_layers_str
                 )
-                + "; var avoid_region = _tile & _frame & fill - exclude; "
-                "_output(to_fill, fill_region)"
+                + "; var placement_region = "
+                "((_tile & _frame & cover) - (_tile & _frame & avoid))"
+                f".with_bbox_min(nil, {c.kcl.to_dbu(fill_box_sizing[1] * 2)}, true)"
+                ".decompose_convex_to_region()"
+                "; placement_region.merged_semantics = false; "
+                "placement_region = placement_region"
+                f".with_bbox_min(nil, {c.kcl.to_dbu(fill_box_sizing[1] * 2)}, true)"
+                "; placement_region.merge()"
+                "; _output(placement, placement_region); "
+                "_output(cover_area, _tile & _frame & cover)"
             )
         else:
-            queue_str1 = (
-                "var fill= "
+            queue_str = (
+                "var cover = "
                 + (
                     f"{coverage_layers_str} + {coverage_regions_str}"
                     if coverage_regions_str and coverage_layers_str
                     else coverage_regions_str + coverage_layers_str
                 )
-                + "; var fill_region = _tile & _frame & fill;"
-                " _output(to_fill, fill_region)"
+                + "; cover; var cov_region = _tile & _frame & cover; "
+                " _output(to_cover, cov_region)"
             )
-            queue_str2 = ""
-        tp.queue(queue_str1)
-        if queue_str2:
-            tp.queue(queue_str2)
+        tp.queue(queue_str)
         c.kcl.start_changes()
         try:
             logger.debug(
-                "Filling {} with {}",
+                "Adding coverage on '{}' with '{}'",
                 c.kcl.future_cell_name or c.name,
                 coverage_cell.name,
             )
-            logger.debug("Coverage string: '{}'", queue_str1)
+            logger.debug("Coverage string: '{}'", queue_str)
             tp.execute(f"Calculating sparse coverage for {c.name}")
-            logger.debug("done with calculating fill regions for {}", c.name)
+            c.kcl.end_changes()
+            logger.debug("done with calculating coverage regions for {}", c.name)
             cover(
                 top_cell=c,
                 fill_cell=coverage_cell,
                 margin=c.kcl.to_dbu(max_distance),
-                cover_region=coverage_operator.f_region,
-                avoid_region=avoid_operator.f_region if queue_str2 else kdb.Region(),
+                placement_region=placement_operator.f_region,
+                cover_region=cover_operator.f_region,
+                fc_bbox_sizing=(
+                    c.kcl.to_dbu(fill_box_sizing[0]),
+                    c.kcl.to_dbu(fill_box_sizing[1]),
+                ),
             )
-        finally:
+        except RuntimeError:
             c.kcl.end_changes()
+            raise
 
 
 def cover(
     top_cell: KCell,
     fill_cell: KCell,
     margin: int,
+    placement_region: kdb.Region,
     cover_region: kdb.Region,
-    avoid_region: kdb.Region,
+    fc_bbox_sizing: tuple[int, int],
 ) -> None:
-    """Insert fill cell into the regions."""
+    """Insert sparse cell into the regions."""
 
-    margin = 1_500_000
-    margine_sizing_steps = [i * 100_000 for i in range(1, 11)]
     logger.debug(
         "Applying static sparse fill to {cell} with {fc} at {margin} static spacing",
         cell=top_cell.name,
@@ -549,89 +505,97 @@ def cover(
         margin=margin,
     )
 
+    if fc_bbox_sizing[1] > fc_bbox_sizing[0]:
+        logger.warning(
+            "fill_cell_sizing for the second step should be smaller than the first {}",
+            fc_bbox_sizing,
+        )
+
     fill_cell_index = fill_cell.cell_index()
 
     margin_vec = kdb.Vector(margin, margin)
+    logger.debug(f"{margin_vec=}")
 
-    for origin in [kdb.Point(0, 0), kdb.Point(300_000, 300_000)]:
-        coverage = _get_coverage(top_cell, fill_cell_index, margin)
-        reg = cover_region - coverage
-        if reg.is_empty():
-            break
-        rem = kdb.Region()
+    logger.debug("Adding base coverage to {}", top_cell.name)
+    fc_bbox = fill_cell.bbox().enlarged(fc_bbox_sizing[0])
+    coverage = _get_coverage(top_cell, fill_cell_index, margin)
+    logger.debug("Filling uncovered region")
+    to_place = placement_region.merged()
+    to_place.merged_semantics = True
+    to_place.merge()
+    top_cell.kdb_cell.fill_region(
+        region=to_place.with_area(margin**2 // 4, None, False),
+        fill_cell_index=fill_cell_index,
+        fc_bbox=fc_bbox,
+        fill_margin=margin_vec,
+        row_step=kdb.Vector(margin, 0),
+        column_step=kdb.Vector(0, margin),
+        exclude_area=coverage,
+        origin=None,
+        remaining_parts=to_place,
+    )
+    to_place -= _get_coverage(top_cell, fill_cell_index, margin)
+    top_cell.kdb_cell.fill_region(
+        region=to_place,
+        fill_cell_index=fill_cell_index,
+        fc_bbox=fc_bbox,
+        fill_margin=margin_vec,
+        row_step=kdb.Vector(margin, 0),
+        column_step=kdb.Vector(0, margin),
+        exclude_area=coverage,
+        origin=None,
+        remaining_parts=to_place,
+    )
+    coverage = _get_coverage(top_cell, fill_cell_index, margin)
+    cover_region = cover_region.merged()
+
+    new_placement_options = (
+        (cover_region - coverage).size(margin // 4) & cover_region
+    ) & placement_region
+
+    while not new_placement_options.is_empty():
+        logger.debug("Filling remaining area ({})", new_placement_options.area())
         top_cell.kdb_cell.fill_region(
-            region=reg - avoid_region,
+            region=new_placement_options,
             fill_cell_index=fill_cell_index,
-            fc_box=fill_cell.bbox().enlarged(50_000),
-            origin=origin,
+            fc_bbox=fill_cell.bbox().enlarged(fc_bbox_sizing[1]),
             fill_margin=margin_vec,
-            remaining_parts=rem,
+            row_step=kdb.Vector(margin, 0),
+            column_step=kdb.Vector(0, margin),
+            origin=None,
+            remaining_parts=new_placement_options,
         )
-        while not rem.is_empty():
-            top_cell.kdb_cell.fill_region(
-                region=rem,
-                fill_cell_index=fill_cell_index,
-                fc_box=fill_cell.bbox().enlarged(50_000),
-                origin=origin,
-                fill_margin=margin_vec,
-                remaining_parts=rem,
-            )
+        coverage = _get_coverage(top_cell, fill_cell_index, margin)
+        new_placement_options = (
+            (cover_region - coverage).size(margin // 4) & cover_region
+        ) & placement_region
 
-    reg = cover_region - _get_coverage(top_cell, fill_cell_index, margin)
+    logger.debug("Finished simple sparse fill calculations")
 
-    if reg.is_empty():
-        return
-
-    hulls = cover_region.hulls()
-    outer_bbox = hulls.sized(margin) - hulls
-    for delta_margin in margine_sizing_steps:
-        delta_reg = (
-            (
-                (cover_region + outer_bbox)
-                - _get_coverage(top_cell, fill_cell_index, margin)
-            )
-            .holes()
-            .size(delta_margin)
-        )
-        rem = kdb.Region()
-        top_cell.kdb_cell.fill_region(
-            region=(delta_reg & cover_region) - avoid_region,
-            fill_cell_index=fill_cell_index,
-            fc_box=fill_cell.bbox().enlarged(50_000),
-            fill_margin=margin_vec - kdb.Vector(delta_margin, delta_margin),
-            remaining_parts=rem,
-        )
-        while not rem.is_empty():
-            top_cell.kdb_cell.fill_region(
-                region=rem,
-                fill_cell_index=fill_cell_index,
-                fc_box=fill_cell.bbox().enlarged(50_000),
-                fill_margin=margin_vec - kdb.Vector(delta_margin, delta_margin),
-                remaining_parts=rem,
-            )
-        reg = cover_region - _get_coverage(top_cell, fill_cell_index, margin)
-        if reg.is_empty():
-            return
-
-    raise ValueError(f"Failed to proper reach coverage in cell {top_cell.name!r}")
+    if not (cover_region - coverage).is_empty():
+        logger.warning("Sparse fill for {} was not successful", top_cell.name)
 
 
 def _get_coverage(top_cell: KCell, fill_cell_index: int, margin: int) -> kdb.Region:
-    box = kdb.Box(margin)
+    logger.debug("Calculating coverage")
+    box = kdb.Box(margin * 2)
     coverage = kdb.Region()
     for p in _get_placed_fc(top_cell, fill_cell_index):
         coverage.insert(box.transformed(kdb.Trans(p.to_v())))
+    coverage.merge()
     return coverage
 
 
-def _get_placed_fc(top_cell: KCell, fill_cell_index: int) -> list[kdb.Point]:
+def _get_placed_fc(top_cell: KCell, fill_cell_index: int) -> set[kdb.Point]:
+    logger.debug("Getting transformations of placed coverage cells")
     recit = top_cell.begin_instances_rec()
     recit.targets = [fill_cell_index]
+    recit.max_depth = 0
 
-    points: list[kdb.Point] = []
+    points: set[kdb.Point] = set()
 
     for it in recit.each():
         trans = it.trans() * it.inst_trans()
-        points.append(trans.disp.to_p())
+        points.add(trans.disp.to_p())
 
     return points
