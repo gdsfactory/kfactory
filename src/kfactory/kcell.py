@@ -1133,7 +1133,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         else:
             rename_func(self.ports)
 
-    def flatten(self, merge: bool = True) -> None:
+    def flatten(self, merge: bool = True, labels: bool = True) -> None:
         """Flatten the cell.
 
         Args:
@@ -1153,7 +1153,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                 texts = kdb.Texts(self.shapes(layer))
                 self.kdb_cell.clear(layer)
                 self.shapes(layer).insert(reg)
-                self.shapes(layer).insert(texts)
+                if labels:
+                    self.shapes(layer).insert(texts)
 
     def convert_to_static(self, recursive: bool = True) -> None:
         """Convert the KCell to a static cell if it is pdk KCell."""
