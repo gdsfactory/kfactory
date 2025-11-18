@@ -370,7 +370,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
-        self.name = _get_function_name(f)
+        self.name = basename or _get_function_name(f)
         self.ports_definition = ports.copy() if ports is not None else None
         self.tags = set(tags) if tags else set()
 
@@ -624,7 +624,7 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
-        self.name = _get_function_name(f)
+        self.name = basename or _get_function_name(f)
         self.ports_definitions = ports.copy() if ports is not None else None
         self.tags = set(tags) if tags else set()
 
