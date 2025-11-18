@@ -332,16 +332,6 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     ports_definition: PortsDefinition | None = None
     tags: set[str]
 
-    @property
-    def __name__(self) -> str:
-        if self.name is None:
-            raise ValueError(f"{self._f} does not have a name")
-        return self.name
-
-    @__name__.setter
-    def __name__(self, value: str) -> None:
-        self.name = value
-
     def __init__(
         self,
         *,
@@ -590,16 +580,6 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
     lvs_equivalent_ports: list[list[str]] | None = None
     ports_definition: PortsDefinition | None = None
     tags: set[str]
-
-    @property
-    def __name__(self) -> str:
-        if self.name is None:
-            raise ValueError(f"{self._f} does not have a name")
-        return self.name
-
-    @__name__.setter
-    def __name__(self, value: str) -> None:
-        self.name = value
 
     def __init__(
         self,
