@@ -1110,7 +1110,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         return self._base.kdb_cell.layout()
 
     def library(self) -> kdb.Library:
-        return self._base.kdb_cell.library()
+        return self._base.kdb_cell.library()  # type: ignore[return-value]
 
     @property
     @abstractmethod

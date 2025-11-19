@@ -347,18 +347,18 @@ class LayoutWidget:
 
         buttons = 0
         if shift:
-            buttons |= lay.ButtonState.ShiftKey  # type: ignore[attr-defined]
+            buttons |= lay.ButtonState.ShiftKey
         if alt:
-            buttons |= lay.ButtonState.AltKey  # type: ignore[attr-defined]
+            buttons |= lay.ButtonState.AltKey
         if ctrl:
-            buttons |= lay.ButtonState.ControlKey  # type: ignore[attr-defined]
+            buttons |= lay.ButtonState.ControlKey
 
         if mouse_buttons & 1:
-            buttons |= lay.ButtonState.LeftButton  # type: ignore[attr-defined]
+            buttons |= lay.ButtonState.LeftButton
         if mouse_buttons & 2:
-            buttons |= lay.ButtonState.RightButton  # type: ignore[attr-defined]
+            buttons |= lay.ButtonState.RightButton
         if mouse_buttons & 4:
-            buttons |= lay.ButtonState.MidButton  # type: ignore[attr-defined]
+            buttons |= lay.ButtonState.MidButton
 
         return buttons
 

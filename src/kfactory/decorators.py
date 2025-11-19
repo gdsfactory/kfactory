@@ -332,16 +332,6 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     ports_definition: PortsDefinition | None = None
     tags: set[str]
 
-    @property
-    def __name__(self) -> str:
-        if self.name is None:
-            raise ValueError(f"{self._f} does not have a name")
-        return self.name
-
-    @__name__.setter
-    def __name__(self, value: str) -> None:
-        self.name = value
-
     def __init__(
         self,
         *,
@@ -370,7 +360,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
-        self.name = _get_function_name(f)
+        self.name = basename or _get_function_name(f)
         self.ports_definition = ports.copy() if ports is not None else None
         self.tags = set(tags) if tags else set()
 
@@ -591,16 +581,6 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
     ports_definition: PortsDefinition | None = None
     tags: set[str]
 
-    @property
-    def __name__(self) -> str:
-        if self.name is None:
-            raise ValueError(f"{self._f} does not have a name")
-        return self.name
-
-    @__name__.setter
-    def __name__(self, value: str) -> None:
-        self.name = value
-
     def __init__(
         self,
         *,
@@ -624,7 +604,7 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
-        self.name = _get_function_name(f)
+        self.name = basename or _get_function_name(f)
         self.ports_definitions = ports.copy() if ports is not None else None
         self.tags = set(tags) if tags else set()
 
