@@ -175,6 +175,8 @@ def test_schematic_create_cell(
 
         return schematic
 
+    assert pdk.factories["long_straight"].schematic_driven()
+
     oasis_regression(long_straight(2))
 
 
@@ -277,6 +279,8 @@ def test_schematic_mirror_connection(
         s3.place(x=0, y=10_000)
 
         return schematic
+
+    assert pdk.factories["straight_sbend"].schematic_driven()
 
     oasis_regression(straight_sbend(length=10_000, offset=20_000))
 
@@ -402,6 +406,8 @@ def test_schematic_route(
         )
 
         return schematic
+
+    assert pdk.factories["route_example"]._f_orig is route_example.__wrapped__  # type: ignore[attr-defined]
 
     oasis_regression(route_example())
 
