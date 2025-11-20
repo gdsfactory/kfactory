@@ -226,6 +226,7 @@ def fill_tiled(
         row_step=row_step_,
         column_step=col_step_,
         origin=c.bbox().p1,
+        multi=multi,
     )
     tp.output(
         "to_fill",
