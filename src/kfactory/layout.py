@@ -863,6 +863,7 @@ class KCLayout(
                         post_process=post_process or [],
                         debug_names=debug_names,
                         tags=tags,
+                        schematic_function=f,
                     )
                     @functools.wraps(f)
                     def kcell_func(
@@ -906,6 +907,7 @@ class KCLayout(
                     post_process=post_process or [],
                     debug_names=debug_names,
                     tags=tags,
+                    schematic_function=f,
                 )
                 @functools.wraps(f)
                 def custom_kcell_func(
@@ -931,7 +933,7 @@ class KCLayout(
             f: Callable[KCellParams, TSchematic[TUnit]],
         ) -> Callable[KCellParams, KCell]:
             @functools.wraps(f)
-            @self.cell(output_type=KCell)
+            @self.cell(output_type=KCell, schematic_function=f)
             def kcell_func(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
             ) -> KCell:
@@ -981,6 +983,7 @@ class KCLayout(
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
+        schematic_function: Callable[KCellParams, TSchematic[Any]] | None = None,
     ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
     @overload
@@ -1007,6 +1010,7 @@ class KCLayout(
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
+        schematic_function: Callable[KCellParams, TSchematic[Any]] | None = None,
     ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
     @overload
@@ -1034,6 +1038,7 @@ class KCLayout(
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
+        schematic_function: Callable[KCellParams, TSchematic[Any]] | None = None,
     ) -> Callable[
         [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
     ]: ...
@@ -1062,6 +1067,7 @@ class KCLayout(
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
+        schematic_function: Callable[KCellParams, TSchematic[Any]] | None = None,
     ) -> Callable[
         [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
     ]: ...
@@ -1091,6 +1097,7 @@ class KCLayout(
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
+        schematic_function: Callable[KCellParams, TSchematic[Any]] | None = None,
     ) -> (
         Callable[KCellParams, KC]
         | Callable[
@@ -1196,6 +1203,7 @@ class KCLayout(
                 debug_names=debug_names,
                 lvs_equivalent_ports=lvs_equivalent_ports,
                 ports=ports,
+                schematic_function=schematic_function,
             )
 
             if register_factory:
