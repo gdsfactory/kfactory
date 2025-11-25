@@ -1,5 +1,6 @@
 # Development setup with all extras
 dev:
+    uv venv -p 3.13 --clear
     uv sync --all-extras
     uv pip install -e .
     uv run pre-commit install

@@ -544,24 +544,6 @@ wheels = [
 ]
 
 [[package]]
-name = "erdantic"
-version = "1.2.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pydantic" },
-    { name = "pydantic-core" },
-    { name = "pygraphviz" },
-    { name = "sortedcontainers-pydantic" },
-    { name = "typenames" },
-    { name = "typer" },
-    { name = "typing-extensions", marker = "python_full_version < '3.12'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/6f/17/5c9709349221b1a972b4470e735570eee3dd2e2ee0ed71f28fb0e8c0d79a/erdantic-1.2.0.tar.gz", hash = "sha256:165979caf26984055e476d0201b24cdf1c5f38b60a6f141e82f9352a40d12b65", size = 920914, upload-time = "2025-09-15T18:07:11.351Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/06/ee/dc88399e2a872fd7ce5a192cfbcf8bd996574bb6c7470912c8c2fca20527/erdantic-1.2.0-py3-none-any.whl", hash = "sha256:7c67adcf22150b77a24609734c7efc676f71824f8f5662fd21450ec1cdbe0a0c", size = 34428, upload-time = "2025-09-15T18:07:09.766Z" },
-]
-
-[[package]]
 name = "execnet"
 version = "2.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -933,7 +915,7 @@ wheels = [
 
 [[package]]
 name = "kfactory"
-version = "2.0.0"
+version = "2.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "aenum" },
@@ -988,7 +970,6 @@ dev = [
     { name = "types-setuptools" },
 ]
 docs = [
-    { name = "erdantic" },
     { name = "griffe-inherited-docstrings" },
     { name = "griffe-pydantic" },
     { name = "griffe-warnings-deprecated" },
@@ -1024,7 +1005,6 @@ dev = [
 requires-dist = [
     { name = "aenum", specifier = ">=3.1.15,<4" },
     { name = "cachetools", specifier = ">=5.2.0" },
-    { name = "erdantic", marker = "extra == 'docs'", specifier = ">=1.1.1" },
     { name = "griffe-inherited-docstrings", marker = "extra == 'docs'", specifier = ">=1.1.1" },
     { name = "griffe-pydantic", marker = "extra == 'docs'", specifier = ">=1.1.4" },
     { name = "griffe-warnings-deprecated", marker = "extra == 'docs'", specifier = ">=1.1.0" },
@@ -1034,7 +1014,7 @@ requires-dist = [
     { name = "ipywidgets", marker = "extra == 'ipy'", specifier = ">=8.1.5" },
     { name = "kfactory", extras = ["ci"], marker = "extra == 'dev'" },
     { name = "kfactory", extras = ["ipy"], marker = "extra == 'docs'" },
-    { name = "klayout", specifier = ">=0.30.4.post1,<0.31.0" },
+    { name = "klayout", specifier = ">=0.30.5,<0.31.0" },
     { name = "loguru", specifier = ">=0.7.3,<0.8" },
     { name = "markdown-exec", marker = "extra == 'docs'", specifier = ">=1.10.3" },
     { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.6.1" },
@@ -2219,12 +2199,6 @@ wheels = [
 ]
 
 [[package]]
-name = "pygraphviz"
-version = "1.14"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/66/ca/823d5c74a73d6b8b08e1f5aea12468ef334f0732c65cbb18df2a7f285c87/pygraphviz-1.14.tar.gz", hash = "sha256:c10df02377f4e39b00ae17c862f4ee7e5767317f1c6b2dfd04cea6acc7fc2bea", size = 106003, upload-time = "2024-09-29T18:31:12.471Z" }
-
-[[package]]
 name = "pylint"
 version = "3.3.9"
 source = { registry = "https://pypi.org/simple" }
@@ -3094,29 +3068,6 @@ wheels = [
 ]
 
 [[package]]
-name = "sortedcontainers"
-version = "2.4.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/e8/c4/ba2f8066cceb6f23394729afe52f3bf7adec04bf9ed2c820b39e19299111/sortedcontainers-2.4.0.tar.gz", hash = "sha256:25caa5a06cc30b6b83d11423433f65d1f9d76c4c6a0c90e3379eaa43b9bfdb88", size = 30594, upload-time = "2021-05-16T22:03:42.897Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/32/46/9cb0e58b2deb7f82b84065f37f3bffeb12413f947f9388e4cac22c4621ce/sortedcontainers-2.4.0-py2.py3-none-any.whl", hash = "sha256:a163dcaede0f1c021485e957a39245190e74249897e2ae4b2aa38595db237ee0", size = 29575, upload-time = "2021-05-16T22:03:41.177Z" },
-]
-
-[[package]]
-name = "sortedcontainers-pydantic"
-version = "2.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pydantic" },
-    { name = "pydantic-core" },
-    { name = "sortedcontainers" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/f5/39/c951f89cd289d207730d080ce24d973db18227ea09ba966e4fab9d75dab4/sortedcontainers_pydantic-2.0.0.tar.gz", hash = "sha256:0cb3abfbda64dc1fa2365b578ddc3a259c7d75daeae76d2f9087f5ebc1f8f1fe", size = 53829, upload-time = "2025-04-18T06:51:10.706Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/94/ef/a3a7cce565dcd624c5fd457709c0356038288eee1268d7efbb11376f6690/sortedcontainers_pydantic-2.0.0-py3-none-any.whl", hash = "sha256:1c38a05f1a8618189bdd8b87f0c3bc8cc1196e6c39f0e30f694b709ba3e2a508", size = 6446, upload-time = "2025-04-18T06:51:09.553Z" },
-]
-
-[[package]]
 name = "soupsieve"
 version = "2.8"
 source = { registry = "https://pypi.org/simple" }
@@ -3293,15 +3244,6 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/10/f8/d869492bdbb21ae8cf4c99b02f20812bbbf49aa187cfeb387dfaa03036a8/ty-0.0.1a26-py3-none-win32.whl", hash = "sha256:86689b90024810cac7750bf0c6e1652e4b4175a9de7b82b8b1583202aeb47287", size = 8645669, upload-time = "2025-11-10T18:02:23.23Z" },
     { url = "https://files.pythonhosted.org/packages/b4/18/8a907575d2b335afee7556cb92233ebb5efcefe17752fc9dcab21cffb23b/ty-0.0.1a26-py3-none-win_amd64.whl", hash = "sha256:829e6e6dbd7d9d370f97b2398b4804552554bdcc2d298114fed5e2ea06cbc05c", size = 9442975, upload-time = "2025-11-10T18:02:25.68Z" },
     { url = "https://files.pythonhosted.org/packages/e9/22/af92dcfdd84b78dd97ac6b7154d6a763781f04a400140444885c297cc213/ty-0.0.1a26-py3-none-win_arm64.whl", hash = "sha256:b8f431c784d4cf5b4195a3521b2eca9c15902f239b91154cb920da33f943c62b", size = 8958958, upload-time = "2025-11-10T18:02:28.071Z" },
-]
-
-[[package]]
-name = "typenames"
-version = "2.1.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ea/e3/43295dabe364f88d764be3595e942cb129469a99361a1af8fc77039912e2/typenames-2.1.0.tar.gz", hash = "sha256:af231a91e8c377a5497693944d604865164adaf8754d17f521e61b0fbb1f6bf9", size = 160235, upload-time = "2025-09-15T15:41:53.479Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/5d/77/5a1219258adf0b217e8f3d1df84847073580d9d304e6fba77d03fb4fe733/typenames-2.1.0-py3-none-any.whl", hash = "sha256:34616136b4d6b92ef598fd5a2d2524506ef437489c71d1305e805046c41dd07d", size = 10958, upload-time = "2025-09-15T15:41:51.894Z" },
 ]
 
 [[package]]
