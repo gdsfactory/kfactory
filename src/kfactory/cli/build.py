@@ -159,6 +159,11 @@ def build(
                     if gitpath:
                         root = Path(gitpath) / "build/mask"
                         root.mkdir(parents=True, exist_ok=True)
+
+                        # Create .gitignore in build directory to ignore all contents
+                        gitignore_path = Path(gitpath) / "build" / ".gitignore"
+                        if not gitignore_path.exists():
+                            gitignore_path.write_text("*\n")
                     else:
                         root = Path()
                     if show:
@@ -223,6 +228,11 @@ def build(
                     if gitpath:
                         root = Path(gitpath) / "build/mask"
                         root.mkdir(parents=True, exist_ok=True)
+
+                        # Create .gitignore in build directory to ignore all contents
+                        gitignore_path = Path(gitpath) / "build" / ".gitignore"
+                        if not gitignore_path.exists():
+                            gitignore_path.write_text("*\n")
                     else:
                         root = Path()
                     if show:

@@ -39,6 +39,12 @@ def save_session(
         save_options.clear_cells()
         kcl_dir = kcls_dir / kcl.name
         kcl_dir.mkdir(parents=True)
+
+        # Create .gitignore in build directory to ignore all contents
+        if config.project_dir:
+            gitignore_path = Path(config.project_dir) / "build" / ".gitignore"
+            if not gitignore_path.exists():
+                gitignore_path.write_text("*\n")
         cis = set(kcl.each_cell_bottom_up())
         factory_dependency: defaultdict[str, set[str]] = defaultdict(set)
         factory_cells: defaultdict[str, list[tuple[int, str]]] = defaultdict(list)

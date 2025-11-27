@@ -3867,6 +3867,12 @@ def show(
         if gitpath:
             root = Path(gitpath) / "build/mask"
             root.mkdir(parents=True, exist_ok=True)
+
+            # Create .gitignore in build directory to ignore all contents
+            gitignore_path = Path(gitpath) / "build" / ".gitignore"
+            if not gitignore_path.exists():
+                gitignore_path.write_text("*\n")
+
             tf = root / Path(name).with_suffix(f".{file_format}")
             tf.parent.mkdir(parents=True, exist_ok=True)
             layout.write(str(tf), save_options)
@@ -3905,6 +3911,12 @@ def show(
         if gitpath:
             root = Path(gitpath) / "build" / file_format
             root.mkdir(parents=True, exist_ok=True)
+
+            # Create .gitignore in build directory to ignore all contents
+            gitignore_path = Path(gitpath) / "build" / ".gitignore"
+            if not gitignore_path.exists():
+                gitignore_path.write_text("*\n")
+
             tf = root / Path(name).with_suffix(f".{file_format}")
             tf.parent.mkdir(parents=True, exist_ok=True)
             layout.write(str(tf), save_options)
@@ -3952,6 +3964,12 @@ def show(
             if gitpath:
                 root = Path(gitpath) / "build/mask"
                 root.mkdir(parents=True, exist_ok=True)
+
+                # Create .gitignore in build directory to ignore all contents
+                gitignore_path = Path(gitpath) / "build" / ".gitignore"
+                if not gitignore_path.exists():
+                    gitignore_path.write_text("*\n")
+
                 tf = root / Path(name).with_suffix(".lyrdb")
                 tf.parent.mkdir(parents=True, exist_ok=True)
                 lyrdb.save(str(tf))
@@ -3983,6 +4001,12 @@ def show(
             if gitpath:
                 root = Path(gitpath) / "build/mask"
                 root.mkdir(parents=True, exist_ok=True)
+
+                # Create .gitignore in build directory to ignore all contents
+                gitignore_path = Path(gitpath) / "build" / ".gitignore"
+                if not gitignore_path.exists():
+                    gitignore_path.write_text("*\n")
+
                 tf = root / Path(name).with_suffix(".l2n")
                 tf.parent.mkdir(parents=True, exist_ok=True)
                 l2n.write(str(tf))
