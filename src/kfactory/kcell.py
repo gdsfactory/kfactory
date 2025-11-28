@@ -95,6 +95,7 @@ from .typings import KC_co, MetaData, TBaseCell_co, TUnit
 from .utilities import (
     check_cell_ports,
     check_inst_ports,
+    get_build_path,
     instance_port_name,
     load_layout_options,
     save_layout_options,
@@ -3863,31 +3864,9 @@ def show(
     kcl_paths: list[dict[str, str]] = []
 
     if isinstance(layout, KCLayout):
-        gitpath = config.project_dir
-        if gitpath:
-            root = Path(gitpath) / "build/mask"
-            root.mkdir(parents=True, exist_ok=True)
-
-            # Create .gitignore in build directory to ignore all contents
-            gitignore_path = Path(gitpath) / "build" / ".gitignore"
-            if not gitignore_path.exists():
-                gitignore_path.write_text("*\n")
-
-            tf = root / Path(name).with_suffix(f".{file_format}")
-            tf.parent.mkdir(parents=True, exist_ok=True)
-            layout.write(str(tf), save_options)
-            file = tf
-            delete = False
-        else:
-            try:
-                from __main__ import __file__ as mf
-            except ImportError:
-                mf = "shell"
-            tf = Path(gettempdir()) / f"{name}.{file_format}"
-            tf.parent.mkdir(parents=True, exist_ok=True)
-            layout.write(tf, save_options)
-            file = tf
-            delete = True
+        tf, delete = get_build_path(name, "mask", file_format)
+        layout.write(str(tf), save_options)
+        file = tf
         if use_libraries:
             dir_ = tf.parent
             kcls_ = list(kcls.values())
@@ -3907,31 +3886,9 @@ def show(
             technology = layout.technology.name
 
     elif isinstance(layout, ProtoKCell):
-        gitpath = config.project_dir
-        if gitpath:
-            root = Path(gitpath) / "build" / file_format
-            root.mkdir(parents=True, exist_ok=True)
-
-            # Create .gitignore in build directory to ignore all contents
-            gitignore_path = Path(gitpath) / "build" / ".gitignore"
-            if not gitignore_path.exists():
-                gitignore_path.write_text("*\n")
-
-            tf = root / Path(name).with_suffix(f".{file_format}")
-            tf.parent.mkdir(parents=True, exist_ok=True)
-            layout.write(str(tf), save_options)
-            file = tf
-            delete = False
-        else:
-            try:
-                from __main__ import __file__ as mf
-            except ImportError:
-                mf = "shell"
-            tf = Path(gettempdir()) / f"{name}.{file_format}"
-            tf.parent.mkdir(parents=True, exist_ok=True)
-            layout.write(tf, save_options)
-            file = tf
-            delete = True
+        tf, delete = get_build_path(name, file_format, file_format)
+        layout.write(str(tf), save_options)
+        file = tf
         if use_libraries:
             dir_ = tf.parent
             kcls_ = list(kcls.values())
@@ -3960,31 +3917,9 @@ def show(
 
     if lyrdb is not None:
         if isinstance(lyrdb, rdb.ReportDatabase):
-            gitpath = config.project_dir
-            if gitpath:
-                root = Path(gitpath) / "build/mask"
-                root.mkdir(parents=True, exist_ok=True)
-
-                # Create .gitignore in build directory to ignore all contents
-                gitignore_path = Path(gitpath) / "build" / ".gitignore"
-                if not gitignore_path.exists():
-                    gitignore_path.write_text("*\n")
-
-                tf = root / Path(name).with_suffix(".lyrdb")
-                tf.parent.mkdir(parents=True, exist_ok=True)
-                lyrdb.save(str(tf))
-                lyrdbfile = tf
-                delete_lyrdb = False
-            else:
-                try:
-                    from __main__ import __file__ as mf
-                except ImportError:
-                    mf = "shell"
-                tf = Path(gettempdir()) / (name + ".lyrdb")
-                tf.parent.mkdir(parents=True, exist_ok=True)
-                lyrdb.save(str(tf))
-                lyrdbfile = tf
-                delete_lyrdb = True
+            tf, delete_lyrdb = get_build_path(name, "mask", "lyrdb")
+            lyrdb.save(str(tf))
+            lyrdbfile = tf
         elif isinstance(lyrdb, str | Path):
             lyrdbfile = Path(lyrdb).expanduser().resolve()
         else:
@@ -3997,31 +3932,9 @@ def show(
 
     if l2n is not None:
         if isinstance(l2n, kdb.LayoutToNetlist):
-            gitpath = config.project_dir
-            if gitpath:
-                root = Path(gitpath) / "build/mask"
-                root.mkdir(parents=True, exist_ok=True)
-
-                # Create .gitignore in build directory to ignore all contents
-                gitignore_path = Path(gitpath) / "build" / ".gitignore"
-                if not gitignore_path.exists():
-                    gitignore_path.write_text("*\n")
-
-                tf = root / Path(name).with_suffix(".l2n")
-                tf.parent.mkdir(parents=True, exist_ok=True)
-                l2n.write(str(tf))
-                l2nfile = tf
-                delete_l2n = False
-            else:
-                try:
-                    from __main__ import __file__ as mf
-                except ImportError:
-                    mf = "shell"
-                tf = Path(gettempdir()) / (name + ".l2n")
-                tf.parent.mkdir(parents=True, exist_ok=True)
-                l2n.write(str(tf))
-                l2nfile = tf
-                delete_l2n = True
+            tf, delete_l2n = get_build_path(name, "mask", "l2n")
+            l2n.write(str(tf))
+            l2nfile = tf
         elif isinstance(l2n, str | Path):
             l2nfile = Path(l2n).expanduser().resolve()
         else:

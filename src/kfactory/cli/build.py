@@ -18,7 +18,7 @@ from ..conf import config, logger
 from ..kcell import KCell
 from ..kcell import show as kfshow
 from ..layout import kcls
-from ..utilities import save_layout_options
+from ..utilities import ensure_build_directory, save_layout_options
 
 __all__ = ["build", "show"]
 
@@ -155,17 +155,7 @@ def build(
 
                 cell = getattr(_mod, func)(**kwargs)
                 if isinstance(cell, KCell):
-                    gitpath = config.project_dir
-                    if gitpath:
-                        root = Path(gitpath) / "build/mask"
-                        root.mkdir(parents=True, exist_ok=True)
-
-                        # Create .gitignore in build directory to ignore all contents
-                        gitignore_path = Path(gitpath) / "build" / ".gitignore"
-                        if not gitignore_path.exists():
-                            gitignore_path.write_text("*\n")
-                    else:
-                        root = Path()
+                    root = ensure_build_directory("mask") or Path()
                     if show:
                         cell.show()
                     if write_full:
@@ -224,17 +214,7 @@ def build(
 
                 cell = getattr(_mod, func)(**kwargs)
                 if isinstance(cell, KCell):
-                    gitpath = config.project_dir
-                    if gitpath:
-                        root = Path(gitpath) / "build/mask"
-                        root.mkdir(parents=True, exist_ok=True)
-
-                        # Create .gitignore in build directory to ignore all contents
-                        gitignore_path = Path(gitpath) / "build" / ".gitignore"
-                        if not gitignore_path.exists():
-                            gitignore_path.write_text("*\n")
-                    else:
-                        root = Path()
+                    root = ensure_build_directory("mask") or Path()
                     if show:
                         cell.show()
                     if write_full:
