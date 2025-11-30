@@ -51,6 +51,52 @@ def test_route_straight(
     oasis_regression(c)
 
 
+def test_route_length_match(
+    bend90: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    layers: Layers,
+    kcl: kf.KCLayout,
+) -> None:
+    c = kcl.kcell("route_length_match")
+
+    start_ports = [
+        kf.Port(
+            trans=kf.kdb.Trans(1, False, x1 * 200_000, -x1 * 300_000),
+            width=500,
+            layer_info=layers.WG,
+        )
+        for x1 in range(3)
+    ]
+    end_ports = [
+        kf.Port(
+            trans=kf.kdb.Trans(3, False, x1, 500_000),
+            width=500,
+            layer_info=layers.WG,
+        )
+        for x1 in [230_000, 400_000, 500_000]
+    ]
+
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90,
+        separation=10_000,
+        on_collision=None,
+        on_placer_error=None,
+        path_length_matching_config={
+            "element": -1,
+            "side": -1,
+            "loops": 4,
+            "loop_position": 0,
+        },
+    )
+    c.show()
+    oasis_regression(c)
+
+
 @pytest.mark.parametrize(
     ("x", "y", "angle2"),
     [

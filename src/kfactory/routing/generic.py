@@ -316,7 +316,7 @@ def route_bundle(
     placer_function: PlacerFunction,
     placer_kwargs: dict[str, Any] | None = None,
     router_post_process_function: RouterPostProcessFunction | None = None,
-    router_post_process_kwargs: dict[str, Any] | None = None,
+    router_post_process_kwargs: Any = None,
     starts: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | None = None,

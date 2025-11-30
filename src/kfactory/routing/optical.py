@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Literal, cast, overload
+from collections.abc import Sequence
+from enum import IntEnum
+from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast, overload
 
 from .. import kdb, rdb
 from ..conf import (
@@ -21,6 +23,7 @@ from .generic import (
 )
 from .manhattan import (
     ManhattanRoutePathFunction,
+    ManhattanRouter,
     _is_manhattan,
     route_manhattan,
     route_smart,
@@ -31,7 +34,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from ..factories import SBendFactoryDBU, StraightFactoryDBU, StraightFactoryUM
-    from ..port import DPort, Port
+    from ..port import BasePort, DPort, Port
     from ..typings import dbu, um
 
 __all__ = [
@@ -44,6 +47,142 @@ __all__ = [
     "route_loopback",
     "vec_angle",
 ]
+
+
+class Side(IntEnum):
+    left = -1
+    center = 0
+    right = 1
+
+
+class LoopPosition(IntEnum):
+    start = -1
+    center = 0
+    end = 1
+
+
+class PathLengthConfig(TypedDict, total=False):
+    loops: int
+    side: int
+    element: int
+    loop_position: int
+
+
+def path_length_match(
+    c: ProtoTKCell[Any],
+    routers: Sequence[ManhattanRouter],
+    start_ports: Sequence[BasePort],
+    end_ports: Sequence[BasePort],
+    element: int = -1,
+    loops: int = 1,
+    side: Side = Side.left,
+    loop_position: LoopPosition = LoopPosition.start,
+    **kwargs: Any,
+) -> None:
+    path_length = max(router.path_length for router in routers)
+
+    if element is None:
+        raise ValueError("Element to put path length matching must be defined")
+
+    for router in routers:
+        length = router.path_length
+        loop_length = (path_length - length) // (loops * 2)
+        br = router.bend90_radius
+
+        match side:
+            case Side.left:
+                pts = [
+                    kdb.Point(0, 0),
+                    kdb.Point(0, loop_length + 2 * br),
+                    kdb.Point(2 * br, loop_length + 2 * br),
+                    kdb.Point(2 * br, 0),
+                ]
+
+                for i in range(1, loops):
+                    t = kdb.Trans(i * 4 * br, 0)
+                    pts += [t * pt for pt in pts[:4]]
+            case Side.right:
+                pts = [
+                    kdb.Point(0, 0),
+                    kdb.Point(0, -(loop_length + 2 * br)),
+                    kdb.Point(2 * br, -(loop_length + 2 * br)),
+                    kdb.Point(2 * br, 0),
+                ]
+
+                for i in range(1, loops):
+                    t = kdb.Trans(i * 4 * br, 0)
+                    pts += [t * pt for pt in pts[:4]]
+
+            case Side.center:
+                lh1 = loop_length // 2
+                lh2 = loop_length - lh1
+
+                if lh1 > br:
+                    lh1 -= br
+                    lh2 += br
+
+                pts = [kdb.Point(0, 0)]
+                for i in range(loops):
+                    pts.extend(
+                        [
+                            kdb.Point(4 * br * i, lh1 + 2 * br),
+                            kdb.Point(4 * br * i + 2 * br, lh1 + 2 * br),
+                            kdb.Point(4 * br * i + 2 * br, -(lh2)),
+                            kdb.Point(4 * br * i + 4 * br, -(lh2)),
+                        ]
+                    )
+                pts.append(kdb.Point(4 * br, 0))
+            case _:
+                raise ValueError(
+                    f"Argument side must be of any value of {Side.__members__}"
+                    ". This can either be "
+                    "an enum value or the int representation."
+                )
+
+        if element < -1:
+            element_pts = router.start.pts[element - 1 : element + 1]
+        elif element == -1:
+            element_pts = router.start.pts[element - 1 :]
+        else:
+            element_pts = router.start.pts[element : element + 2]
+
+        v = element_pts[1] - element_pts[0]
+
+        if v.x != 0:
+            d = 0 if v.x > 0 else 2
+        elif v.y > 0:
+            d = 1
+        else:
+            d = 3
+
+        t = kdb.Trans(element_pts[0].to_v()) * kdb.Trans(d, False, 0, 0)
+
+        match loop_position:
+            case LoopPosition.start:
+                if element == 0 or element == -len(router.start.pts):
+                    t *= kdb.Trans(br, 0)
+                else:
+                    t *= kdb.Trans(2 * br, 0)
+            case LoopPosition.center:
+                t *= kdb.Trans(round((v.length() - pts[-1].x) / 2), 0)
+            case LoopPosition.end:
+                if element == 0 or element == -len(router.start.pts):
+                    t *= kdb.Trans(round(v.length() - br - pts[-1].x // 2), 0)
+                else:
+                    t *= kdb.Trans(round(v.length() - 2 * br - pts[-1].x), 0)
+            case _:
+                raise ValueError(
+                    "Argument loop_position must be of any value of "
+                    f"{LoopPosition.__members__}. This can either be "
+                    "an enum value or the int representation."
+                )
+
+        pts = [t * p for p in pts]
+
+        if element < 0:
+            router.start.pts[element:element] = pts
+        else:
+            router.start.pts[element + 1 : element + 1] = pts
 
 
 @overload
@@ -77,6 +216,7 @@ def route_bundle(
     end_angles: int | list[int] | None = None,
     purpose: str | None = "routing",
     sbend_factory: SBendFactoryDBU | None = None,
+    path_length_matching_config: PathLengthConfig | None = None,
 ) -> list[ManhattanRoute]: ...
 
 
@@ -111,6 +251,7 @@ def route_bundle(
     end_angles: float | list[float] | None = None,
     purpose: str | None = "routing",
     sbend_factory: SBendFactoryDBU | None = None,
+    path_length_matching_config: PathLengthConfig | None = None,
 ) -> list[ManhattanRoute]: ...
 
 
@@ -154,6 +295,7 @@ def route_bundle(
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
     sbend_factory: SBendFactoryDBU | None = None,
+    path_length_matching_config: PathLengthConfig | None = None,
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
 
@@ -269,6 +411,10 @@ def route_bundle(
     bend90_radius = get_radius(bend90_cell.ports.filter(port_type=place_port_type))
     start_ports_ = [p.base.model_copy() for p in start_ports]
     end_ports_ = [p.base.model_copy() for p in end_ports]
+    if path_length_matching_config is not None:
+        post_process_f = path_length_match
+    else:
+        post_process_f = None
     if sbend_factory is None:
         placer: PlacerFunction = place_manhattan
         placer_kwargs: dict[str, Any] = {
@@ -328,6 +474,8 @@ def route_bundle(
                 placer_kwargs=placer_kwargs,
                 start_angles=cast("list[int] | int", start_angles),
                 end_angles=cast("list[int] | int", end_angles),
+                router_post_process_function=post_process_f,
+                router_post_process_kwargs=path_length_matching_config,
             )
         except ValueError as e:
             if str(e).startswith("Found non-manhattan waypoints."):
@@ -468,6 +616,8 @@ def route_bundle(
                 "purpose": purpose,
                 "route_width": route_width,
             },
+            router_post_process_function=post_process_f,
+            router_post_process_kwargs=path_length_matching_config,
             start_angles=start_angles,
             end_angles=end_angles,
         )
