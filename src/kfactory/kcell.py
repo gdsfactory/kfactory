@@ -28,7 +28,6 @@ from collections.abc import (
     ValuesView,
 )
 from pathlib import Path
-from tempfile import gettempdir
 from typing import (
     TYPE_CHECKING,
     Any,

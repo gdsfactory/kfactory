@@ -10,7 +10,7 @@ from hashlib import sha256
 from shutil import rmtree
 from typing import TYPE_CHECKING
 
-from .conf import config, logger
+from .conf import logger
 from .layout import KCLayout, kcls
 from .utilities import get_session_directory, save_layout_options
 

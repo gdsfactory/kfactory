@@ -326,10 +326,9 @@ def get_build_path(
         filepath = build_dir / Path(filename).with_suffix(f".{file_format}")
         filepath.parent.mkdir(parents=True, exist_ok=True)
         return filepath, False
-    else:
-        filepath = Path(gettempdir()) / Path(filename).with_suffix(f".{file_format}")
-        filepath.parent.mkdir(parents=True, exist_ok=True)
-        return filepath, True
+    filepath = Path(gettempdir()) / Path(filename).with_suffix(f".{file_format}")
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    return filepath, True
 
 
 def get_session_directory(custom_dir: Path | None = None) -> Path:
@@ -347,6 +346,5 @@ def get_session_directory(custom_dir: Path | None = None) -> Path:
     build_dir = ensure_build_directory("session/kcls", create_gitignore=True)
     if build_dir:
         return build_dir
-    else:
-        # Fallback to current directory
-        return Path() / "build/session/kcls"
+    # Fallback to current directory
+    return Path() / "build/session/kcls"
