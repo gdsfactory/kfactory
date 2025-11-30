@@ -575,6 +575,16 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     def schematic_driven(self) -> bool:
         return self._f_schematic is not None
 
+    def get_schematic(
+        self, *args: KCellParams.args, **kwargs: KCellParams.kwargs
+    ) -> TSchematic[Any]:
+        if self._f_schematic is None:
+            raise ValueError(
+                f"(D)KCellFunction {self.name} is not schematic driven and therefore"
+                " cannot return a schematic."
+            )
+        return self._f_schematic(*args, **kwargs)
+
 
 class WrappedVKCellFunc(Generic[KCellParams, VK]):
     _f: Callable[KCellParams, VK]
