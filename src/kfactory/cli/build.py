@@ -14,11 +14,11 @@ from typing import Annotated
 
 import typer
 
-from ..conf import config, logger
+from ..conf import logger
 from ..kcell import KCell
 from ..kcell import show as kfshow
 from ..layout import kcls
-from ..utilities import save_layout_options
+from ..utilities import ensure_build_directory, save_layout_options
 
 __all__ = ["build", "show"]
 
@@ -155,12 +155,7 @@ def build(
 
                 cell = getattr(_mod, func)(**kwargs)
                 if isinstance(cell, KCell):
-                    gitpath = config.project_dir
-                    if gitpath:
-                        root = Path(gitpath) / "build/mask"
-                        root.mkdir(parents=True, exist_ok=True)
-                    else:
-                        root = Path()
+                    root = ensure_build_directory("mask") or Path()
                     if show:
                         cell.show()
                     if write_full:
@@ -219,12 +214,7 @@ def build(
 
                 cell = getattr(_mod, func)(**kwargs)
                 if isinstance(cell, KCell):
-                    gitpath = config.project_dir
-                    if gitpath:
-                        root = Path(gitpath) / "build/mask"
-                        root.mkdir(parents=True, exist_ok=True)
-                    else:
-                        root = Path()
+                    root = ensure_build_directory("mask") or Path()
                     if show:
                         cell.show()
                     if write_full:
