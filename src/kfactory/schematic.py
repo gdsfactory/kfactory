@@ -1093,7 +1093,8 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 elif "ymax" in placement:
                     anchor["y"] = "top"
                     placement["y"] = placement.pop("ymax")
-                placement["anchor"] = anchor
+                if anchor:
+                    placement["anchor"] = anchor
                 x_ = placement.get("x")
                 if isinstance(x_, str):
                     inst, port = x_.rsplit(",", 1)
