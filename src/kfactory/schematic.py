@@ -36,6 +36,7 @@ from typing import (
     overload,
 )
 
+from cachetools import Cache, cached
 from pydantic import (
     AfterValidator,
     BaseModel,
@@ -50,6 +51,7 @@ from ruamel.yaml import YAML
 
 from . import kdb
 from .conf import PROPID, logger
+from .decorators import WrappedKCellFunc, WrappedVKCellFunc
 from .instance import DInstance, Instance, VInstance
 from .kcell import DKCell, KCell, ProtoTKCell, VKCell
 from .layout import KCLayout, get_default_kcl, kcls
@@ -64,6 +66,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
     from .cross_section import CrossSection, DCrossSection
+    from .kcell import DKCell, KCell, ProtoTKCell, VKCell
 
 __all__ = ["DSchematic", "Schematic", "get_schematic", "read_schematic"]
 
@@ -73,6 +76,13 @@ yaml = YAML(typ="safe")
 _schematic_default_imports = {
     "kfactory": "kf",
 }
+
+
+class PortDirections(TypedDict, total=True):
+    right: list[str]
+    top: list[str]
+    left: list[str]
+    bottom: list[str]
 
 
 def _valid_varname(name: str) -> str:
@@ -670,11 +680,7 @@ class Link(
 
 
 class Connection(
-    RootModel[
-        tuple[
-            Port[TUnit] | PortArrayRef | PortRef, Port[TUnit] | PortArrayRef | PortRef
-        ]
-    ]
+    RootModel[tuple[Port[TUnit] | PortArrayRef | PortRef, PortArrayRef | PortRef]]
 ):
     """Hard connection between two ports.
 
@@ -1171,14 +1177,6 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         c = KCell(kcl=self.kcl)
         c.info = Info(**self.info)
 
-        # calculate islands -- islands are a bunch of directly connected instances and
-        # must be isolated from other islands either through no connection at all or
-        # routes
-        islands: dict[str, set[str]] = {}
-        instance_connections: defaultdict[str, list[Connection[TUnit]]] = defaultdict(
-            list
-        )
-
         if routing_strategies is None:
             routing_strategies = c.kcl.routing_strategies
 
@@ -1188,35 +1186,13 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 for name, xs in c.kcl.cross_sections.cross_sections.items()
             }
 
-        for connection in self.connections:
-            pr1, pr2 = connection.root
-            if isinstance(pr1, Port):
-                continue
-            instance_connections[pr1.instance].append(connection)
-            instance_connections[pr2.instance].append(connection)
-            islands1 = islands.get(pr1.instance)
-            islands2 = islands.get(pr2.instance)
-            match islands1 is None, islands2 is None:
-                case True, True:
-                    island = {pr1.instance, pr2.instance}
-                    islands[pr1.instance] = island
-                    islands[pr2.instance] = island
-                case False, True:
-                    island = islands[pr1.instance]
-                    island.add(pr2.instance)
-                    islands[pr2.instance] = island
-                case True, False:
-                    island = islands[pr2.instance]
-                    island.add(pr1.instance)
-                    islands[pr1.instance] = island
-                case False, False:
-                    island = islands[pr1.instance] | islands[pr2.instance]
-                    for instance_name in island:
-                        islands[instance_name] = island
+        # calculate islands -- islands are a bunch of directly connected instances and
+        # must be isolated from other islands either through no connection at all or
+        # routes
 
-        for inst_name in self.instances:
-            if inst_name not in islands:
-                islands[inst_name] = {inst_name}
+        islands, instance_connections = _get_island_connections(
+            self.instances, self.connections
+        )
 
         placed_insts: set[str] = set()
         placed_ports: set[str] = set()
@@ -1650,6 +1626,346 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 )
 
         return schematic_cell
+
+    def get_port_positions(
+        self,
+        factories: dict[
+            str,
+            WrappedKCellFunc[Any, ProtoTKCell[Any]] | WrappedVKCellFunc[Any, VKCell],
+        ],
+    ) -> PortDirections:
+        sorted_ports: PortDirections = PortDirections(
+            right=[], top=[], left=[], bottom=[]
+        )
+
+        @cached(cache=Cache(float("inf")))
+        def get_port_orientation_function(
+            component: str, /, **settings: Any
+        ) -> dict[str | None, float]:
+            factory = factories[component]
+            is_schematic_inst = False
+            if isinstance(factory, WrappedKCellFunc):
+                is_schematic_inst = factory.schematic_driven()
+                if is_schematic_inst:
+                    _schematic = factory._f_schematic(**settings)  # type: ignore[misc]
+                    port_positions = _schematic.get_port_positions(factories=factories)
+                    port_directions: dict[str | None, float] = {}
+                    for port_name in port_positions["right"]:
+                        port_directions[port_name] = 0
+                    for port_name in port_positions["top"]:
+                        port_directions[port_name] = 90
+                    for port_name in port_positions["left"]:
+                        port_directions[port_name] = 180
+                    for port_name in port_positions["bottom"]:
+                        port_directions[port_name] = 270
+                    return port_directions
+            cell = factory(**settings)
+
+            return {port.name: port.dcplx_trans.angle for port in cell.ports}
+
+        for port_name, port in self.ports.items():
+            if isinstance(port, Port):
+                if isinstance(port.orientation, PortRef):
+                    inst = self.instances[port.orientation.instance]
+
+                    orientation = _get_instance_orientation(
+                        port.orientation.instance,
+                        schematic=self,
+                        visited_instances=set(),
+                        get_port_orientation_f=get_port_orientation_function,
+                    )
+                    factory = factories[inst.component]
+                    is_schematic_inst = False
+                    if isinstance(factory, WrappedKCellFunc):
+                        is_schematic_inst = factory.schematic_driven()
+                        if is_schematic_inst:
+                            _schematic = factory._f_schematic(**inst.settings)  # type: ignore[misc]
+                            inst_ports = _schematic.get_port_positions(
+                                factories=factories
+                            )
+                            found = False
+
+                            port_orientation: float | None = None
+
+                            for inst_port in inst_ports["right"]:
+                                if inst_port == port:
+                                    port_orientation = 0
+                                    found = True
+                                    break
+                            if not found:
+                                for inst_port in inst_ports["top"]:
+                                    if inst_port == port:
+                                        port_orientation = 90
+                                        found = True
+                                        break
+                            if not found:
+                                for inst_port in inst_ports["left"]:
+                                    if inst_port == port:
+                                        port_orientation = 180
+                                        found = True
+                                        break
+                            if not found:
+                                for inst_port in inst_ports["bottom"]:
+                                    if inst_port == port:
+                                        port_orientation = 270
+                                        found = True
+                                        break
+                            if port_orientation is None:
+                                raise ValueError(
+                                    f"Port {port_name} does not exist for"
+                                    f" instance {inst.name} in the schematic\n{self}"
+                                )
+                        else:
+                            cell = factory(**inst.settings)
+                            port_orientation = cell.ports[port.name].dcplx_trans.angle
+                    if inst.mirror:
+                        orientation = (orientation - port_orientation) % 360  # type: ignore[operator]
+                    else:
+                        orientation = (orientation + port_orientation) % 360  # type: ignore[operator]
+
+                    match orientation:
+                        case 0:
+                            sorted_ports["right"].append(port_name)
+                        case 90:
+                            sorted_ports["top"].append(port_name)
+                        case 180:
+                            sorted_ports["left"].append(port_name)
+                        case 270:
+                            sorted_ports["bottom"].append(port_name)
+                else:
+                    match port.orientation:
+                        case 0:
+                            sorted_ports["right"].append(port_name)
+                        case 90:
+                            sorted_ports["top"].append(port_name)
+                        case 180:
+                            sorted_ports["left"].append(port_name)
+                        case 270:
+                            sorted_ports["bottom"].append(port_name)
+            else:
+                inst = self.instances[port.instance]
+
+                orientation = _get_instance_orientation(
+                    port.instance,
+                    schematic=self,
+                    visited_instances=set(),
+                    get_port_orientation_f=get_port_orientation_function,
+                )
+                factory = factories[inst.component]
+                is_schematic_inst = False
+                if isinstance(factory, WrappedKCellFunc):
+                    is_schematic_inst = factory.schematic_driven()
+                    if is_schematic_inst:
+                        _schematic = factory._f_schematic(**inst.settings)  # type: ignore[misc]
+                        inst_ports = _schematic.get_port_positions(factories=factories)
+                        found = False
+
+                        port_orientation = None
+
+                        for inst_port in inst_ports["right"]:
+                            if inst_port == port.port:
+                                port_orientation = 0
+                                found = True
+                                break
+                        if not found:
+                            for inst_port in inst_ports["top"]:
+                                if inst_port == port.port:
+                                    port_orientation = 90
+                                    found = True
+                                    break
+                        if not found:
+                            for inst_port in inst_ports["left"]:
+                                if inst_port == port.port:
+                                    port_orientation = 180
+                                    found = True
+                                    break
+                        if not found:
+                            for inst_port in inst_ports["bottom"]:
+                                if inst_port == port.port:
+                                    port_orientation = 270
+                                    found = True
+                                    break
+                        if port_orientation is None:
+                            raise ValueError(
+                                f"Port {port_name!r} does not exist for"
+                                f" instance {inst.name!r} in the schematic\n{self}"
+                            )
+                    else:
+                        cell = factory(**inst.settings)
+                        port_orientation = cell.ports[port.name].dcplx_trans.angle
+                if inst.mirror:
+                    orientation = (orientation - port_orientation) % 360  # type: ignore[operator]
+                else:
+                    orientation = (orientation + port_orientation) % 360  # type: ignore[operator]
+
+                match orientation:
+                    case 0:
+                        sorted_ports["right"].append(port_name)
+                    case 90:
+                        sorted_ports["top"].append(port_name)
+                    case 180:
+                        sorted_ports["left"].append(port_name)
+                    case 270:
+                        sorted_ports["bottom"].append(port_name)
+        for side in ("right", "top", "left", "bottom"):
+            sorted_ports[side].sort()  # type: ignore[literal-required]
+        return sorted_ports
+
+
+def _get_instance_orientation(
+    instance: str,
+    schematic: TSchematic[Any],
+    visited_instances: set[str],
+    get_port_orientation_f: Callable[..., dict[str | None, float]],
+    instance_connections: defaultdict[str, list[Connection[TUnit]]] | None = None,
+    instance_orientations: dict[str, float] | None = None,
+) -> float | None:
+    s_inst = schematic.instances[instance]
+    placement = s_inst.placement
+    if instance_orientations is None:
+        instance_orientations = {}
+    if isinstance(placement, Placement):
+        if isinstance(placement.orientation, PortRef):
+            return _get_instance_orientation(
+                placement.orientation,
+                schematic,
+                instance_connections=instance_connections,
+                instance_orientations=instance_orientations,
+            )
+        return placement.orientation
+    if instance_connections is None:
+        _, instance_connections = _get_island_connections(
+            schematic.instances, schematic.connections
+        )
+
+    visited_instances |= {instance}
+    potential_instances: set[str] = set()
+
+    s_inst_sign = -1 if s_inst.mirror else 1
+
+    for connection in instance_connections[instance]:
+        if isinstance(connection.root[0], Port):
+            if isinstance(connection.root[0].orientation, PortRef):
+                continue
+            return (
+                s_inst_sign
+                * (
+                    connection.root[0].orientation
+                    - get_port_orientation_f(s_inst.component, **s_inst.settings)[
+                        connection.root[1].port
+                    ]
+                )
+            ) % 360
+        if connection.root[0].instance == instance:
+            conn_inst = connection.root[1].instance
+            conn_orientation = _get_possible_orienation(conn_inst, schematic)
+            if conn_orientation is not None:
+                s_conn_inst = schematic.instances[conn_inst]
+                s_conn_sign = -1 if s_conn_inst.mirror else 1
+                return (
+                    s_conn_sign
+                    * (
+                        conn_orientation
+                        + get_port_orientation_f(
+                            s_conn_inst.component, **s_conn_inst.settings
+                        )[connection.root[1].port]
+                    )
+                    + 180
+                    - s_inst_sign
+                    * get_port_orientation_f(s_inst.component, **s_inst.settings)[
+                        connection.root[0].port
+                    ]
+                ) % 360
+            potential_instances.add(connection.root[1].instance)
+        else:
+            conn_inst = connection.root[0].instance
+            conn_orientation = _get_possible_orienation(conn_inst, schematic)
+            if conn_orientation is not None:
+                s_conn_inst = schematic.instances[conn_inst]
+                s_conn_sign = -1 if s_conn_inst.mirror else 1
+                return (
+                    s_conn_sign
+                    * (
+                        conn_orientation
+                        + get_port_orientation_f(
+                            s_conn_inst.component, **s_conn_inst.settings
+                        )[connection.root[0].port]
+                    )
+                    + 180
+                    - s_inst_sign
+                    * get_port_orientation_f(s_inst.component, **s_inst.settings)[
+                        connection.root[1].port
+                    ]
+                ) % 360
+
+            potential_instances.add(connection.root[0].instance)
+
+    visited_instances_ = visited_instances | potential_instances
+
+    for inst in potential_instances:
+        if inst in visited_instances:
+            continue
+        orientation = _get_instance_orientation(
+            inst,
+            schematic,
+            visited_instances_,
+            get_port_orientation_f=get_port_orientation_f,
+            instance_connections=instance_connections,
+        )
+        if orientation is not None:
+            for connection in instance_connections[instance]:
+                if isinstance(connection.root[0], Port):
+                    continue
+                if connection.root[0].instance == inst:
+                    s_conn_inst = schematic.instances[inst]
+                    s_conn_sign = -1 if s_conn_inst.mirror else 1
+                    return (
+                        s_conn_sign
+                        * (
+                            orientation
+                            + get_port_orientation_f(
+                                s_conn_inst.component, **s_conn_inst.settings
+                            )[connection.root[0].port]
+                        )
+                        + 180
+                        - s_inst_sign
+                        * get_port_orientation_f(s_inst.component, **s_inst.settings)[
+                            connection.root[1].port
+                        ]
+                    ) % 360
+                if connection.root[1].instance == inst:
+                    s_conn_inst = schematic.instances[inst]
+                    s_conn_sign = -1 if s_conn_inst.mirror else 1
+                    return (
+                        s_conn_sign
+                        * (
+                            orientation
+                            + get_port_orientation_f(
+                                s_conn_inst.component, **s_conn_inst.settings
+                            )[connection.root[1].port]
+                        )
+                        + 180
+                        - s_inst_sign
+                        * get_port_orientation_f(s_inst.component, **s_inst.settings)[
+                            connection.root[0].port
+                        ]
+                    ) % 360
+
+    return None
+
+
+def _get_possible_orienation(instance: str, schematic: TSchematic[Any]) -> float | None:
+    s_inst = schematic.instances[instance]
+    placement = s_inst.placement
+    if isinstance(placement, Placement):
+        if isinstance(placement.orientation, PortRef):
+            return None
+        return placement.orientation
+    return None
+
+
+def _get_schematic() -> TSchematic[Any]:
+    raise NotImplementedError
 
 
 class Schematic(TSchematic[dbu]):
@@ -2302,3 +2618,42 @@ def _get_full_settings(
     params.update(settings)
 
     return params
+
+
+def _get_island_connections(
+    instances: dict[str, SchematicInstance[TUnit]],
+    connections: list[Connection[TUnit]],
+) -> tuple[dict[str, set[str]], defaultdict[str, list[Connection[TUnit]]]]:
+    islands: dict[str, set[str]] = {}
+    instance_connections: defaultdict[str, list[Connection[TUnit]]] = defaultdict(list)
+    for connection in connections:
+        pr1, pr2 = connection.root
+        if isinstance(pr1, Port):
+            continue
+        instance_connections[pr1.instance].append(connection)
+        instance_connections[pr2.instance].append(connection)
+        islands1 = islands.get(pr1.instance)
+        islands2 = islands.get(pr2.instance)
+        match islands1 is None, islands2 is None:
+            case True, True:
+                island = {pr1.instance, pr2.instance}
+                islands[pr1.instance] = island
+                islands[pr2.instance] = island
+            case False, True:
+                island = islands[pr1.instance]
+                island.add(pr2.instance)
+                islands[pr2.instance] = island
+            case True, False:
+                island = islands[pr2.instance]
+                island.add(pr1.instance)
+                islands[pr1.instance] = island
+            case False, False:
+                island = islands[pr1.instance] | islands[pr2.instance]
+                for instance_name in island:
+                    islands[instance_name] = island
+
+    for inst_name in instances:
+        if inst_name not in islands:
+            islands[inst_name] = {inst_name}
+
+    return islands, instance_connections

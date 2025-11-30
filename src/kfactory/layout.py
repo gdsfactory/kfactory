@@ -187,6 +187,9 @@ class Factories(Mapping[str, F], Generic[F]):
             return self.get_by_name(key)
         return default
 
+    def as_dict(self) -> dict[str, F]:
+        return {name: self._all[i] for name, i in self._by_name.items()}
+
 
 class KCLayout(
     BaseModel, arbitrary_types_allowed=True, extra="allow", validate_assignment=True
@@ -932,8 +935,8 @@ class KCLayout(
         def simple_wrap_f(
             f: Callable[KCellParams, TSchematic[TUnit]],
         ) -> Callable[KCellParams, KCell]:
-            @functools.wraps(f)
             @self.cell(output_type=KCell, schematic_function=f)
+            @functools.wraps(f)
             def kcell_func(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
             ) -> KCell:

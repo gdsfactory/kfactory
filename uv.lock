@@ -933,7 +933,7 @@ wheels = [
 
 [[package]]
 name = "kfactory"
-version = "2.0.0"
+version = "2.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "aenum" },
@@ -1034,7 +1034,7 @@ requires-dist = [
     { name = "ipywidgets", marker = "extra == 'ipy'", specifier = ">=8.1.5" },
     { name = "kfactory", extras = ["ci"], marker = "extra == 'dev'" },
     { name = "kfactory", extras = ["ipy"], marker = "extra == 'docs'" },
-    { name = "klayout", specifier = ">=0.30.4.post1,<0.31.0" },
+    { name = "klayout", specifier = ">=0.30.5,<0.31.0" },
     { name = "loguru", specifier = ">=0.7.3,<0.8" },
     { name = "markdown-exec", marker = "extra == 'docs'", specifier = ">=1.10.3" },
     { name = "mkdocs", marker = "extra == 'docs'", specifier = ">=1.6.1" },
