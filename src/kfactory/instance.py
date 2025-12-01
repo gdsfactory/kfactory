@@ -945,7 +945,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         allow_type_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
-    ) -> None: ...
+    ) -> Self: ...
 
     @overload
     def connect(
@@ -960,7 +960,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         allow_type_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
-    ) -> None: ...
+    ) -> Self: ...
 
     @overload
     def connect(
@@ -975,7 +975,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         allow_type_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
-    ) -> None: ...
+    ) -> Self: ...
 
     def connect(
         self,
@@ -989,7 +989,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         allow_type_mismatch: bool | None = None,
         use_mirror: bool | None = None,
         use_angle: bool | None = None,
-    ) -> None:
+    ) -> Self:
         """Align port with name `portname` to a port.
 
         Function to allow to transform this instance so that a port of this instance is
@@ -1066,6 +1066,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 self.mirror_y(op.dcplx_trans.disp.y)
             case _:
                 ...
+
+        return self
 
     def transform(
         self,
