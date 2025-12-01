@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from enum import IntEnum
+from functools import partial
 from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast, overload
 
 from .. import kdb, rdb
@@ -49,7 +50,7 @@ __all__ = [
 ]
 
 
-class Side(IntEnum):
+class LoopSide(IntEnum):
     left = -1
     center = 0
     right = 1
@@ -63,7 +64,7 @@ class LoopPosition(IntEnum):
 
 class PathLengthConfig(TypedDict, total=False):
     loops: int
-    side: int
+    loop_side: int
     element: int
     loop_position: int
 
@@ -73,27 +74,35 @@ def path_length_match(
     routers: Sequence[ManhattanRouter],
     start_ports: Sequence[BasePort],
     end_ports: Sequence[BasePort],
+    separation: dbu,
     element: int = -1,
     loops: int = 1,
-    side: Side = Side.left,
+    loop_side: LoopSide = LoopSide.left,
     loop_position: LoopPosition = LoopPosition.start,
     **kwargs: Any,
 ) -> None:
     path_length = max(router.path_length for router in routers)
+    if path_length % 2:
+        logger.warning(
+            "path length matching target length "
+            "can only be done with a precision of 2 dbu. "
+            "Rounding path length matching to nearest 2 dbu length."
+        )
+        path_length += 1
 
     if element is None:
         raise ValueError("Element to put path length matching must be defined")
 
-    match side:
-        case Side.center:
+    match loop_side:
+        case LoopSide.center:
             loops += 1
+    br = max(routers[0].bend90_radius, routers[0].width + separation)
 
     for router in routers:
         length = router.path_length
-        br = router.bend90_radius
 
-        match side:
-            case Side.left:
+        match loop_side:
+            case LoopSide.left:
                 loop_length = (path_length - length) // (loops * 2)
                 pts = [
                     kdb.Point(0, 0),
@@ -105,7 +114,7 @@ def path_length_match(
                 for i in range(1, loops):
                     t = kdb.Trans(i * 4 * br, 0)
                     pts += [t * pt for pt in pts[:4]]
-            case Side.right:
+            case LoopSide.right:
                 loop_length = (path_length - length) // (loops * 2)
                 pts = [
                     kdb.Point(0, 0),
@@ -118,7 +127,7 @@ def path_length_match(
                     t = kdb.Trans(i * 4 * br, 0)
                     pts += [t * pt for pt in pts[:4]]
 
-            case Side.center:
+            case LoopSide.center:
                 loop_length = (path_length - length) // (loops * 2)
                 lh1 = loop_length // 2
                 lh2 = loop_length - lh1
@@ -146,7 +155,7 @@ def path_length_match(
                 )
             case _:
                 raise ValueError(
-                    f"Argument side must be of any value of {Side.__members__}"
+                    f"Argument side must be of any value of {LoopSide.__members__}"
                     ". This can either be "
                     "an enum value or the int representation."
                 )
@@ -188,6 +197,20 @@ def path_length_match(
                     f"{LoopPosition.__members__}. This can either be "
                     "an enum value or the int representation."
                 )
+        if length % 2:
+            logger.warning(
+                "path length matching can only be done with a precision of 2 dbu. "
+                "Rounding path length matching to nearest 2 dbu length."
+            )
+            length += 1
+        if loop_length * 2 * loops != path_length - length:
+            l_diff = (path_length - length - loop_length * 2 * loops) // 2
+            if loop_side == LoopSide.right:
+                pts[1].y -= l_diff
+                pts[2].y -= l_diff
+            else:
+                pts[1].y += l_diff
+                pts[2].y += l_diff
 
         pts = [t * p for p in pts]
 
@@ -423,10 +446,6 @@ def route_bundle(
     bend90_radius = get_radius(bend90_cell.ports.filter(port_type=place_port_type))
     start_ports_ = [p.base.model_copy() for p in start_ports]
     end_ports_ = [p.base.model_copy() for p in end_ports]
-    if path_length_matching_config is not None:
-        post_process_f = path_length_match
-    else:
-        post_process_f = None
     if sbend_factory is None:
         placer: PlacerFunction = place_manhattan
         placer_kwargs: dict[str, Any] = {
@@ -460,6 +479,12 @@ def route_bundle(
             "sbend_factory": sbend_factory,
         }
     if isinstance(c, KCell):
+        if path_length_matching_config is not None:
+            post_process_f = partial(
+                path_length_match, separation=cast("dbu", separation)
+            )
+        else:
+            post_process_f = None
         try:
             return route_bundle_generic(
                 c=c,
@@ -593,6 +618,10 @@ def route_bundle(
             ]
         else:
             waypoints = cast("kdb.DCplxTrans", waypoints).s_trans().to_itype(c.kcl.dbu)
+    if path_length_matching_config is not None:
+        post_process_f = partial(path_length_match, separation=c.kcl.to_dbu(separation))
+    else:
+        post_process_f = None
     try:
         return route_bundle_generic(
             c=c.kcl[c.cell_index()],

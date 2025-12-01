@@ -52,12 +52,12 @@ def test_route_straight(
 
 
 @pytest.mark.parametrize(
-    ("element", "loops", "side"), [(1, 1, 1), (2, 2, 0), (-1, 4, 0), (-2, 1, -1)]
+    ("element", "loops", "loop_side"), [(1, 1, 1), (2, 2, 0), (-1, 4, 0), (-2, 1, -1)]
 )
 def test_route_length_match(
     element: int,
     loops: int,
-    side: int,
+    loop_side: int,
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
@@ -74,6 +74,7 @@ def test_route_length_match(
         )
         for x1 in range(3)
     ]
+    start_ports[1].y -= 1
     end_ports = [
         kf.Port(
             trans=kf.kdb.Trans(3, False, x1, 500_000),
@@ -92,12 +93,13 @@ def test_route_length_match(
         separation=10_000,
         path_length_matching_config={
             "element": element,
-            "side": side,
+            "loop_side": loop_side,
             "loops": loops,
             "loop_position": 0,
         },
     )
     oasis_regression(c)
+    c.show()
 
 
 def test_route_length_match_errors(
@@ -134,7 +136,7 @@ def test_route_length_match_errors(
             separation=10_000,
             path_length_matching_config={
                 "element": None,
-                "side": 1,
+                "loop_side": 1,
                 "loops": 2,
                 "loop_position": 0,
             },
@@ -149,7 +151,7 @@ def test_route_length_match_errors(
             separation=10_000,
             path_length_matching_config={
                 "element": None,
-                "side": 1,
+                "loop_side": 1,
                 "loops": 2,
                 "loop_position": 0,
             },
@@ -164,7 +166,7 @@ def test_route_length_match_errors(
             separation=10_000,
             path_length_matching_config={
                 "element": 1,
-                "side": None,
+                "loop_side": None,
                 "loops": 2,
                 "loop_position": 0,
             },
@@ -179,7 +181,7 @@ def test_route_length_match_errors(
             separation=10_000,
             path_length_matching_config={
                 "element": 1,
-                "side": 1,
+                "loop_side": 1,
                 "loops": 2,
                 "loop_position": None,
             },

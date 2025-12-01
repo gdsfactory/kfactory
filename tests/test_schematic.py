@@ -1166,8 +1166,6 @@ def test_schematic_function_get_port_positions(
 
         return s
 
-    tree(n=3).show()
-
     factories: dict[
         str,
         kf.decorators.WrappedKCellFunc[Any, kf.ProtoTKCell[Any]]
