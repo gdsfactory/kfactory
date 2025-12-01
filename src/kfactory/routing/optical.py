@@ -84,13 +84,17 @@ def path_length_match(
     if element is None:
         raise ValueError("Element to put path length matching must be defined")
 
+    match side:
+        case Side.center:
+            loops += 1
+
     for router in routers:
         length = router.path_length
-        loop_length = (path_length - length) // (loops * 2)
         br = router.bend90_radius
 
         match side:
             case Side.left:
+                loop_length = (path_length - length) // (loops * 2)
                 pts = [
                     kdb.Point(0, 0),
                     kdb.Point(0, loop_length + 2 * br),
@@ -102,6 +106,7 @@ def path_length_match(
                     t = kdb.Trans(i * 4 * br, 0)
                     pts += [t * pt for pt in pts[:4]]
             case Side.right:
+                loop_length = (path_length - length) // (loops * 2)
                 pts = [
                     kdb.Point(0, 0),
                     kdb.Point(0, -(loop_length + 2 * br)),
@@ -114,6 +119,7 @@ def path_length_match(
                     pts += [t * pt for pt in pts[:4]]
 
             case Side.center:
+                loop_length = (path_length - length) // (loops * 2)
                 lh1 = loop_length // 2
                 lh2 = loop_length - lh1
 
@@ -128,10 +134,16 @@ def path_length_match(
                             kdb.Point(4 * br * i, lh1 + 2 * br),
                             kdb.Point(4 * br * i + 2 * br, lh1 + 2 * br),
                             kdb.Point(4 * br * i + 2 * br, -(lh2)),
-                            kdb.Point(4 * br * i + 4 * br, -(lh2)),
+                            kdb.Point(4 * br * (i + 1), -(lh2)),
                         ]
                     )
-                pts.append(kdb.Point(4 * br, 0))
+                pts.extend(
+                    [
+                        kdb.Point(4 * br * (i + 1), 2 * br),
+                        kdb.Point(4 * br * (i + 1) + 2 * br, 2 * br),
+                        kdb.Point(4 * br * (i + 1) + 2 * br, 0),
+                    ]
+                )
             case _:
                 raise ValueError(
                     f"Argument side must be of any value of {Side.__members__}"

@@ -51,7 +51,13 @@ def test_route_straight(
     oasis_regression(c)
 
 
+@pytest.mark.parametrize(
+    ("element", "loops", "side"), [(1, 1, 1), (2, 4, 0), (-1, 4, 0), (-2, 1, -1)]
+)
 def test_route_length_match(
+    element: int,
+    loops: int,
+    side: int,
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
@@ -84,12 +90,10 @@ def test_route_length_match(
         straight_factory=straight_factory_dbu,
         bend90_cell=bend90,
         separation=10_000,
-        on_collision=None,
-        on_placer_error=None,
         path_length_matching_config={
-            "element": -1,
-            "side": -1,
-            "loops": 4,
+            "element": element,
+            "side": side,
+            "loops": loops,
             "loop_position": 0,
         },
     )
