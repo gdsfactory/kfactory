@@ -1495,10 +1495,14 @@ class KCLayout(
             if allow_duplicate or (self.layout_cell(name) is None):
                 return self.layout.create_cell(name, *args)
             raise ValueError(
-                f"Cellname {name} already exists in the layout/KCLayout. "
-                "Please make sure the cellname is"
-                " unique or pass `allow_duplicate` when creating the library"
-            )
+                f"Cell name {name!r} already exists. "
+                "Cell names must be unique unless `allow_duplicate=True`. "
+                "To fix this, you can:\n"
+                "  • Rename the cell or ensure your function names are unique,\n"
+                "  • Pass `allow_duplicate=True` when creating the cell, or\n"
+                "  • Use the `@cell` decorator, which automatically prevents "
+                "duplicated cell generation by naming cells based on their parameters."
+                )
 
     def delete_cell(self, cell: AnyTKCell | int) -> None:
         """Delete a cell in the kcl object."""
