@@ -16,11 +16,11 @@ docs-clean:
 
 # Build documentation
 docs python_version="3.12":
-    uv run -p {{python_version}} --with . --extra docs --isolated mkdocs build -f docs/mkdocs.yml
+    uv run -p {{python_version}} --with . --extra docs --isolated mkdocs build --config-file docs/mkdocs.yml
 
 # Serve documentation locally
 docs-serve python_version="3.12":
-    uv run -p {{python_version}} --with . --extra docs --isolated mkdocs serve -f docs/mkdocs.yml
+    uv run -p {{python_version}} --with . --extra docs --isolated mkdocs serve --config-file docs/mkdocs.yml
 
 # Run tests (depends on init-submodule)
 test python_version="3.12": init-submodule
