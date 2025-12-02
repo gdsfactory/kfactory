@@ -1498,9 +1498,9 @@ class KCLayout(
                 f"Cell name {name!r} already exists. "
                 "Cell names must be unique unless `allow_duplicate=True`. "
                 "To fix this, you can:\n"
-                "  • Rename the cell or ensure your function names are unique,\n"
-                "  • Pass `allow_duplicate=True` when creating the cell, or\n"
-                "  • Use the `@cell` decorator, which automatically prevents "
+                "  - Rename the cell or ensure your function names are unique,\n"
+                "  - Pass `allow_duplicate=True` when creating the cell, or\n"
+                "  - Use the `@cell` decorator, which automatically prevents "
                 "duplicated cell generation by naming cells based on their parameters."
                 )
 
