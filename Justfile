@@ -1,5 +1,6 @@
 # Development setup with all extras
 dev:
+    uv venv -p 3.13 --clear
     uv sync --all-extras
     uv pip install -e .
     uv run pre-commit install
@@ -15,11 +16,11 @@ docs-clean:
 
 # Build documentation
 docs python_version="3.12":
-    uv run -p {{python_version}} --with . --extra docs --isolated mkdocs build -f docs/mkdocs.yml
+    uv run -p {{python_version}} --with . --extra docs --isolated zensical build --config-file docs/mkdocs.yml
 
 # Serve documentation locally
 docs-serve python_version="3.12":
-    uv run -p {{python_version}} --with . --extra docs --isolated mkdocs serve -f docs/mkdocs.yml
+    uv run -p {{python_version}} --with . --extra docs --isolated zensical serve --config-file docs/mkdocs.yml
 
 # Run tests (depends on init-submodule)
 test python_version="3.12": init-submodule

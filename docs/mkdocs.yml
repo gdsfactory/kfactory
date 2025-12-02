@@ -13,12 +13,12 @@ nav:
       - 5min Intro to KFactory: intro.md
       - Creating PCells: pcells.md
   - Tutorials:
-      - Basice Geometry in KLayout: notebooks/00_geometry.py
-      - KCell & Instance: notebooks/01_references.py
-      - DRC utils: notebooks/02_DRC.py
-      - Enclosures: notebooks/03_Enclosures.py
-      - Multiple KCLs: notebooks/04_KCL.py
-      - Schematics: notebooks/05_Schematics.py
+      - Basic Geometry in KLayout: notebooks/00_geometry.md
+      - KCell & Instance: notebooks/01_references.md
+      - DRC utils: notebooks/02_DRC.md
+      - Enclosures: notebooks/03_Enclosures.md
+      - Multiple KCLs: notebooks/04_KCL.md
+      - Schematics: notebooks/05_Schematics.md
   - Migration: migration.md
   - Config Class: config.md
   - API: reference/
@@ -56,7 +56,7 @@ markdown_extensions:
 plugins:
   - gen-files:
       scripts:
-        - scripts/gen_diagrams.py
+        # - scripts/gen_diagrams.py
         - scripts/gen_ref_pages.py
   - mkdocstrings:
       enabled: true
