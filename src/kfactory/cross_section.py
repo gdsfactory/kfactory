@@ -17,7 +17,7 @@ from typing import (
 from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
 from .enclosure import DLayerEnclosure, LayerEnclosure, LayerEnclosureSpec
-from .typings import TUnit
+from .typings import TUnit, dbu
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
@@ -37,21 +37,21 @@ __all__ = [
 class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=True):
     """CrossSection which is symmetrical to its main_layer/width."""
 
-    width: int
+    width: dbu
     enclosure: LayerEnclosure
     name: str = ""
-    radius: int | None = None
-    radius_min: int | None = None
-    bbox_sections: dict[kdb.LayerInfo, int]
+    radius: dbu | None = None
+    radius_min: dbu | None = None
+    bbox_sections: dict[kdb.LayerInfo, dbu]
 
     def __init__(
         self,
-        width: int,
+        width: dbu,
         enclosure: LayerEnclosure,
         name: str | None = None,
-        bbox_sections: dict[kdb.LayerInfo, int] | None = None,
-        radius: int | None = None,
-        radius_min: int | None = None,
+        bbox_sections: dict[kdb.LayerInfo, dbu] | None = None,
+        radius: dbu | None = None,
+        radius_min: dbu | None = None,
     ) -> None:
         """Initialized the CrossSection."""
         super().__init__(
