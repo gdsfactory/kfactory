@@ -8,9 +8,9 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.14.5
 #   kernelspec:
-#     display_name: kernel_name
+#     display_name: Python 3 (ipykernel)
 #     language: python
-#     name: kernel_name
+#     name: python3
 # ---
 
 # This code sets up custom layer definitions and an enclosure rule for a kfactory chip layout
