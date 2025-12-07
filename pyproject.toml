@@ -64,6 +64,12 @@ docs = [
     "griffe-pydantic>=1.1.4",
     "griffe-inherited-docstrings>=1.1.1",
     "griffe-warnings-deprecated>=1.1.0",
+    "mkdocs-section-index>=0.3.9",
+    "mkdocs-literate-nav>=0.6.2",
+    "mkdocs-video>=1.5.0",
+    "mkdocstrings[python]>=0.29.0",
+    "mkdocs-gen-files>=0.5.0",
+    "mkdocs-material>=9.6.9",
     "zensical>=0.0.9",
 ]
 ci = [

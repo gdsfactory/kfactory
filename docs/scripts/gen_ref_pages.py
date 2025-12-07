@@ -21,6 +21,7 @@
 # It uses the directory structure to create a nested navigation menu.
 # nav_file.writelines(nav.build_literate_nav()): After the loop is finished, it writes the complete, structured navigation menu to a SUMMARY.md file.
 # MkDocs uses this file to build the site's sidebar.
+from numpy._core.numeric import full
 
 from pathlib import Path
 import klayout
@@ -28,10 +29,13 @@ import mkdocs_gen_files
 
 nav = mkdocs_gen_files.Nav()
 
+ROOT = Path(__file__).parent.parent.parent
 
-for path in sorted(Path("src").rglob("*.py")):  #
-    module_path = path.relative_to("src").with_suffix("")  #
-    doc_path = path.relative_to("src").with_suffix(".md")  #
+SRC = ROOT / "src"
+
+for path in sorted((SRC).rglob("*.py")):  #
+    module_path = path.relative_to(SRC).with_suffix("")  #
+    doc_path = path.relative_to(SRC).with_suffix(".md")  #
     full_doc_path = Path("reference", doc_path)  #
 
     parts = list(module_path.parts)
@@ -44,6 +48,8 @@ for path in sorted(Path("src").rglob("*.py")):  #
         continue
 
     nav[parts] = doc_path.as_posix()  #
+
+    print(full_doc_path)
 
     with mkdocs_gen_files.open(full_doc_path, "w") as fd:
         ident = ".".join(parts)

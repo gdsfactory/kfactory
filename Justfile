@@ -12,7 +12,12 @@ test-venv:
 
 # Clean documentation build
 docs-clean:
-    rm -rf site
+    rm -rf docs/site
+
+prepare-docs:
+    uv run docs/scripts/build_notebooks.py
+    uv run gen_diagrams.py
+    cd docs && uv run gen_ref_pages.py
 
 # Build documentation
 docs python_version="3.12":
