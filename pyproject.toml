@@ -56,7 +56,10 @@ dev = [
 ]
 docs = [
     "kfactory[ipy]",
+    "jupytext",
     # "erdantic>=1.1.1",
+    "nbconvert",
+    "ipykernel",
     "markdown-exec>=1.10.3",
     "griffe-pydantic>=1.1.4",
     "griffe-inherited-docstrings>=1.1.1",
