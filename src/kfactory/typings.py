@@ -46,6 +46,7 @@ TInstance_co = TypeVar("TInstance_co", bound="ProtoInstance[Any]", covariant=Tru
 TTInstance_co = TypeVar("TTInstance_co", bound="ProtoTInstance[Any]", covariant=True)
 TBaseCell_co = TypeVar("TBaseCell_co", bound="BaseKCell", covariant=True)
 KCellParams = ParamSpec("KCellParams")
+SchematicParams = ParamSpec("SchematicParams")
 F = TypeVar(
     "F",
     bound="WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]",
