@@ -1,11 +1,46 @@
 """Factories for generating functions which can produce KCells or VKCells."""
 
-from typing import Any, Protocol
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, Any, Protocol, TypedDict
 
 from ..instance import ProtoTInstance
 from ..instance_group import ProtoTInstanceGroup
 from ..kcell import ProtoTKCell
+from ..typings import MetaData
 from . import bezier, circular, euler, straight, taper, virtual
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from cachetools import Cache
+
+    from ..conf import CheckInstances
+    from ..decorators import PortsDefinition
+    from ..kcell import ProtoTKCell
+    from ..schematic import TSchematic
+
+
+class CellKwargs(TypedDict, total=False):
+    set_settings: bool
+    set_name: bool
+    check_ports: bool
+    check_pins: bool
+    check_instances: CheckInstances
+    snap_ports: bool
+    add_port_layers: bool
+    cache: Cache[int, Any] | dict[int, Any]
+    basename: str
+    drop_params: list[str]
+    register_factory: bool
+    overwrite_existing: bool
+    layout_cache: bool
+    info: dict[str, MetaData]
+    post_process: Iterable[Callable[[ProtoTKCell[Any]], None]]
+    debug_names: bool
+    tags: list[str]
+    lvs_equivalent_ports: list[list[str]]
+    ports: PortsDefinition
+    schematic_function: Callable[..., TSchematic[Any]]
 
 
 class StraightFactoryDBU(Protocol):

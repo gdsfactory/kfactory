@@ -10,7 +10,7 @@ BendEulerCustom(KCell.kcl) and use that one.
 """
 
 from collections.abc import Callable
-from typing import Any, Protocol
+from typing import Any, Protocol, Unpack, cast, overload
 
 import numpy as np
 from scipy.optimize import brentq  # type:ignore[import-untyped,unused-ignore]
@@ -22,7 +22,8 @@ from ..enclosure import LayerEnclosure, extrude_path
 from ..kcell import KCell
 from ..layout import KCLayout
 from ..settings import Info
-from ..typings import MetaData, deg, um
+from ..typings import KC_co, MetaData, deg, um
+from . import CellKwargs
 
 __all__ = [
     "bend_euler_factory",
@@ -32,7 +33,7 @@ __all__ = [
 ]
 
 
-class BendEulerFactory(Protocol):
+class BendEulerFactory(Protocol[KC_co]):
     def __call__(
         self,
         width: um,
@@ -41,7 +42,7 @@ class BendEulerFactory(Protocol):
         enclosure: LayerEnclosure | None = None,
         angle: deg = 90,
         resolution: float = 150,
-    ) -> KCell:
+    ) -> KC_co:
         """Create a euler bend.
 
         Args:
@@ -55,7 +56,7 @@ class BendEulerFactory(Protocol):
         ...
 
 
-class BendSEulerFactory(Protocol):
+class BendSEulerFactory(Protocol[KC_co]):
     def __call__(
         self,
         offset: um,
@@ -64,7 +65,7 @@ class BendSEulerFactory(Protocol):
         layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
         resolution: float = 150,
-    ) -> KCell:
+    ) -> KC_co:
         """Create a euler s-bend.
 
         Args:
@@ -207,6 +208,7 @@ def euler_sbend_points(
     return spoints
 
 
+@overload
 def bend_euler_factory(
     kcl: KCLayout,
     additional_info: Callable[
@@ -215,11 +217,39 @@ def bend_euler_factory(
     ]
     | dict[str, MetaData]
     | None = None,
-    basename: str | None = None,
-    snap_ports: bool = False,
-    **cell_kwargs: Any,
-) -> BendEulerFactory:
+    **cell_kwargs: Unpack[CellKwargs],
+) -> BendEulerFactory[KCell]: ...
+@overload
+def bend_euler_factory(
+    kcl: KCLayout,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    *,
+    output_type: type[KC_co],
+    **cell_kwargs: Unpack[CellKwargs],
+) -> BendEulerFactory[KC_co]: ...
+
+
+def bend_euler_factory(
+    kcl: KCLayout,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    *,
+    output_type: type[KC_co] | None = None,
+    **cell_kwargs: Unpack[CellKwargs],
+) -> BendEulerFactory[KC_co]:
     """Returns a function generating euler bends.
+
+    By default this function will set `snap_ports` to True in cell_kwargs,
+    unless it is specified already.
 
     Args:
         kcl: The KCLayout which will be owned
@@ -227,11 +257,6 @@ def bend_euler_factory(
             [`KCell.info`][kfactory.settings.Info]. Can be a static dict
             mapping info name to info value. Or can a callable which takes the straight
             functions' parameters as kwargs and returns a dict with the mapping.
-        basename: Overwrite the prefix of the resulting KCell's name. By default
-            the KCell will be named 'straight_dbu[...]'.
-        snap_ports: Whether to snap ports to grid. If snapping is turned of, ports
-            ports are still snapped to grid if they are within 0.0001° of multiples
-            of 90°.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
     if callable(additional_info) and additional_info is not None:
@@ -250,10 +275,14 @@ def bend_euler_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
+    if output_type is None:
+        output_type = cast("type[KC_co]", KCell)
+
+    if "snap_ports" not in cell_kwargs:
+        cell_kwargs["snap_ports"] = False
+
     @kcl.cell(
-        snap_ports=snap_ports,
-        basename=basename,
-        output_type=KCell,
+        output_type=output_type,
         **cell_kwargs,
     )
     def bend_euler(
@@ -341,6 +370,7 @@ def bend_euler_factory(
     return bend_euler
 
 
+@overload
 def bend_s_euler_factory(
     kcl: KCLayout,
     additional_info: Callable[
@@ -349,9 +379,35 @@ def bend_s_euler_factory(
     ]
     | dict[str, MetaData]
     | None = None,
-    basename: str | None = None,
-    **cell_kwargs: Any,
-) -> BendSEulerFactory:
+    **cell_kwargs: Unpack[CellKwargs],
+) -> BendSEulerFactory[KCell]: ...
+@overload
+def bend_s_euler_factory(
+    kcl: KCLayout,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    *,
+    output_type: type[KC_co],
+    **cell_kwargs: Unpack[CellKwargs],
+) -> BendSEulerFactory[KC_co]: ...
+
+
+def bend_s_euler_factory(
+    kcl: KCLayout,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    *,
+    output_type: type[KC_co] | None = None,
+    **cell_kwargs: Unpack[CellKwargs],
+) -> BendSEulerFactory[KC_co]:
     """Returns a function generating euler s-bends.
 
     Args:
@@ -380,7 +436,10 @@ def bend_s_euler_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @kcl.cell(basename=basename, output_type=KCell, **cell_kwargs)
+    if output_type is None:
+        output_type = cast("type[KC_co]", KCell)
+
+    @kcl.cell(output_type=output_type, **cell_kwargs)
     def bend_s_euler(
         offset: um,
         width: um,

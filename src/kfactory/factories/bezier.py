@@ -1,7 +1,7 @@
 """Bezier curve based bends and functions."""
 
 from collections.abc import Callable, Sequence
-from typing import Any, Protocol
+from typing import Any, Protocol, Unpack, cast, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -12,12 +12,13 @@ from ..enclosure import LayerEnclosure
 from ..kcell import KCell
 from ..layout import KCLayout
 from ..settings import Info
-from ..typings import MetaData, um
+from ..typings import KC_co, MetaData, um
+from . import CellKwargs
 
 __all__ = ["bend_s_bezier_factory"]
 
 
-class BezierKCell(Protocol):
+class BezierKCell(Protocol[KC_co]):
     def __call__(
         self,
         width: um,
@@ -28,7 +29,7 @@ class BezierKCell(Protocol):
         t_start: float = 0,
         t_stop: float = 1,
         enclosure: LayerEnclosure | None = None,
-    ) -> KCell:
+    ) -> KC_co:
         """Creat a bezier bend.
 
         Args:
@@ -60,6 +61,7 @@ def bezier_curve(
     return [kdb.DPoint(float(x), float(y)) for x, y in zip(xs, ys, strict=False)]
 
 
+@overload
 def bend_s_bezier_factory(
     kcl: KCLayout,
     additional_info: Callable[
@@ -68,9 +70,35 @@ def bend_s_bezier_factory(
     ]
     | dict[str, MetaData]
     | None = None,
-    basename: str | None = None,
-    **cell_kwargs: Any,
-) -> BezierKCell:
+    **cell_kwargs: Unpack[CellKwargs],
+) -> BezierKCell[KCell]: ...
+@overload
+def bend_s_bezier_factory(
+    kcl: KCLayout,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    *,
+    output_type: type[KC_co],
+    **cell_kwargs: Unpack[CellKwargs],
+) -> BezierKCell[KC_co]: ...
+
+
+def bend_s_bezier_factory(
+    kcl: KCLayout,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    *,
+    output_type: type[KC_co] | None = None,
+    **cell_kwargs: Unpack[CellKwargs],
+) -> BezierKCell[KC_co]:
     """Returns a function generating bezier s-bends.
 
     Args:
@@ -99,7 +127,10 @@ def bend_s_bezier_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @kcl.cell(basename=basename, output_type=KCell, **cell_kwargs)
+    if output_type is None:
+        output_type = cast("type[KC_co]", KCell)
+
+    @kcl.cell(output_type=output_type, **cell_kwargs)
     def bend_s_bezier(
         width: um,
         height: um,
