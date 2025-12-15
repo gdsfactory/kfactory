@@ -21,10 +21,10 @@ repos:
         exclude: 'changelog\.d/.*|CHANGELOG\.md'
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.14.5
+    rev: v0.14.9
     hooks:
       # Run the linter.
-      - id: ruff
+      - id: ruff-check
       # Run the formatter.
       - id: ruff-format
   - repo: https://github.com/kynan/nbstripout
@@ -40,14 +40,14 @@ repos:
         additional_dependencies:
           - tomli
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.9.1
+    rev: 1.9.2
     hooks:
       - id: bandit
         args: [--exit-zero]
         # ignore all tests, not just tests data
         exclude: ^tests/
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v1.18.2" # Use the sha / tag you want to point at
+    rev: "v1.19.0" # Use the sha / tag you want to point at
     hooks:
       - id: mypy
         args: [--ignore-missing-imports, --strict, --config-file=pyproject.toml]
