@@ -12,8 +12,7 @@ from ..enclosure import LayerEnclosure
 from ..kcell import KCell
 from ..layout import KCLayout
 from ..settings import Info
-from ..typings import KC_co, MetaData, um
-from . import CellKwargs
+from ..typings import CellKwargs, KC_co, MetaData, um
 
 __all__ = ["bend_s_bezier_factory"]
 

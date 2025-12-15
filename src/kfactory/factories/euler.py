@@ -22,8 +22,7 @@ from ..enclosure import LayerEnclosure, extrude_path
 from ..kcell import KCell
 from ..layout import KCLayout
 from ..settings import Info
-from ..typings import KC_co, MetaData, deg, um
-from . import CellKwargs
+from ..typings import CellKwargs, KC_co, MetaData, deg, um
 
 __all__ = [
     "bend_euler_factory",

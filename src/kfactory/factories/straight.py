@@ -26,8 +26,7 @@ from ..enclosure import LayerEnclosure
 from ..kcell import KCell
 from ..layout import KCLayout
 from ..settings import Info
-from ..typings import KC_co, MetaData, dbu
-from . import CellKwargs
+from ..typings import CellKwargs, KC_co, MetaData, dbu
 
 __all__ = ["straight_dbu_factory"]
 
