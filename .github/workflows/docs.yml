@@ -28,5 +28,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: extractions/setup-just@v3
+      - name: Prepare documentation
+        run: just prepare-docs
       - name: Test coverage
         run: just docs
