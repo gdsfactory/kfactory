@@ -5,7 +5,7 @@ As an example we will build a small waveguide and incorporate a circular bend wa
 First let us create some layers. We will use the standard library for this.
 Create a `layers.py`. The full one can be downloaded here: [`layers.py`](./layers.py).
 
-Additionally we will create a `kfactory.enclosure.Enclosure`. Enclosures allow to automatically generate claddings with minkosky sums or use a function to apply claddings to a cell or region. This enclosure will add the cladding to the bend we will use later.
+Additionally we will create a `kfactory.enclosure.Enclosure`. Enclosures allow to automatically generate claddings with [minkoski sums](https://en.wikipedia.org/wiki/Minkowski_addition) or use a function to apply claddings to a cell or region. This enclosure will add the cladding to the bend we will use later.
 
 ```python
 import kfactory as kf
