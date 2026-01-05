@@ -1345,7 +1345,7 @@ class KCLayout(
 
             # Check for mutable default arguments
             # Only allow immutable defaults: None, bool, int, float, str, bytes,
-            # tuple, frozenset, enum, and type objects
+            # tuple, frozenset, enum, type objects, and callables (functions)
             def _is_mutable_default(val: Any) -> bool:
                 if val is inspect.Parameter.empty:
                     return False
@@ -1359,6 +1359,8 @@ class KCLayout(
                     return False  # Class objects are ok
                 if isinstance(val, enum.Enum):
                     return False
+                if callable(val):
+                    return False  # Functions/callables are ok
                 return True
 
             mutable_params = [
@@ -1582,7 +1584,7 @@ class KCLayout(
 
             # Check for mutable default arguments
             # Only allow immutable defaults: None, bool, int, float, str, bytes,
-            # tuple, frozenset, enum, and type objects
+            # tuple, frozenset, enum, type objects, and callables (functions)
             def _is_mutable_default(val: Any) -> bool:
                 if val is inspect.Parameter.empty:
                     return False
@@ -1596,6 +1598,8 @@ class KCLayout(
                     return False  # Class objects are ok
                 if isinstance(val, enum.Enum):
                     return False
+                if callable(val):
+                    return False  # Functions/callables are ok
                 return True
 
             mutable_params = [
