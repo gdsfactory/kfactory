@@ -1345,13 +1345,13 @@ class KCLayout(
 
             # Check for mutable default arguments
             # Only allow immutable defaults: None, bool, int, float, str, bytes,
-            # tuple, frozenset, enum, type objects, and callables (functions)
+            # tuple, frozenset, Path, enum, type objects, and callables (functions)
             def _is_mutable_default(val: Any) -> bool:
                 if val is inspect.Parameter.empty:
                     return False
                 if val is None:
                     return False
-                if isinstance(val, bool | int | float | str | bytes | frozenset):
+                if isinstance(val, bool | int | float | str | bytes | frozenset | Path):
                     return False
                 if isinstance(val, tuple):
                     return False  # Assume tuples are immutable
@@ -1584,13 +1584,13 @@ class KCLayout(
 
             # Check for mutable default arguments
             # Only allow immutable defaults: None, bool, int, float, str, bytes,
-            # tuple, frozenset, enum, type objects, and callables (functions)
+            # tuple, frozenset, Path, enum, type objects, and callables (functions)
             def _is_mutable_default(val: Any) -> bool:
                 if val is inspect.Parameter.empty:
                     return False
                 if val is None:
                     return False
-                if isinstance(val, bool | int | float | str | bytes | frozenset):
+                if isinstance(val, bool | int | float | str | bytes | frozenset | Path):
                     return False
                 if isinstance(val, tuple):
                     return False  # Assume tuples are immutable
