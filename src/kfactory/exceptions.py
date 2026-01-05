@@ -14,6 +14,7 @@ __all__ = [
     "InvalidLayerError",
     "LockedError",
     "MergeError",
+    "MutableDefaultArgumentError",
     "PortLayerMismatchError",
     "PortTypeMismatchError",
     "PortWidthMismatchError",
@@ -141,3 +142,18 @@ class CellNameError(ValueError):
 
 class InvalidLayerError(ValueError):
     """Raised when a layer is not valid."""
+
+
+class MutableDefaultArgumentError(ValueError):
+    """Raised when a cell function has mutable default arguments."""
+
+    def __init__(self, func_name: str, param_names: list[str]) -> None:
+        """Raise error for mutable defaults in cell function parameters."""
+        params = ", ".join(f"'{p}'" for p in param_names)
+        super().__init__(
+            f"Function {func_name!r} has mutable default argument(s): {params}. "
+            "Mutable defaults like `[]` or `{{}}` are not allowed in @cell decorated "
+            "functions. Use `None` as the default and handle it inside the function, "
+            "e.g.: `def my_cell(components: list | None = None)` and then "
+            "`components = components or []` inside the function body."
+        )
