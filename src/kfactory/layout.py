@@ -169,7 +169,9 @@ class Factories(Mapping[str, F], Generic[F]):
                 [
                     result[0]
                     for result in process.extract(
-                        key, list(self._by_name.keys()), limit=10,
+                        key,
+                        list(self._by_name.keys()),
+                        limit=10,
                     )
                 ],
             )
@@ -194,7 +196,10 @@ class Factories(Mapping[str, F], Generic[F]):
 
 
 class KCLayout(
-    BaseModel, arbitrary_types_allowed=True, extra="allow", validate_assignment=True,
+    BaseModel,
+    arbitrary_types_allowed=True,
+    extra="allow",
+    validate_assignment=True,
 ):
     """Small extension to the klayout.db.Layout.
 
@@ -387,7 +392,8 @@ class KCLayout(
     @classmethod
     def _validate_layers(cls, data: dict[str, Any]) -> dict[str, Any]:
         data["layers"] = layerenum_from_dict(
-            layers=data["infos"], layout=data["library"].layout(),
+            layers=data["infos"],
+            layout=data["library"].layout(),
         )
         data["library"].register(data["name"])
         return data
@@ -465,17 +471,27 @@ class KCLayout(
 
     @overload
     def find_layer(
-        self, name: str, *, allow_undefined_layers: Literal[True] = True,
+        self,
+        name: str,
+        *,
+        allow_undefined_layers: Literal[True] = True,
     ) -> LayerEnum | int: ...
 
     @overload
     def find_layer(
-        self, info: kdb.LayerInfo, *, allow_undefined_layers: Literal[True] = True,
+        self,
+        info: kdb.LayerInfo,
+        *,
+        allow_undefined_layers: Literal[True] = True,
     ) -> LayerEnum | int: ...
 
     @overload
     def find_layer(
-        self, layer: int, datatype: int, *, allow_undefined_layers: Literal[True] = True,
+        self,
+        layer: int,
+        datatype: int,
+        *,
+        allow_undefined_layers: Literal[True] = True,
     ) -> LayerEnum | int: ...
 
     @overload
@@ -498,7 +514,8 @@ class KCLayout(
         all three of layer, datatype, and name.
         """
         allow_undefined_layers = kwargs.pop(
-            "allow_undefined_layers", config.allow_undefined_layers,
+            "allow_undefined_layers",
+            config.allow_undefined_layers,
         )
         info = self.layout.get_info(self.layout.layer(*args, **kwargs))
         try:
@@ -637,7 +654,8 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         factories: Mapping[
-            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell],
+            str,
+            Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell],
         ]
         | None = None,
         cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
@@ -655,7 +673,8 @@ class KCLayout(
         ]
         | None = None,
     ) -> Callable[
-        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KCell],
+        [Callable[KCellParams, TSchematic[TUnit]]],
+        Callable[KCellParams, KCell],
     ]: ...
 
     @overload
@@ -681,7 +700,8 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         factories: Mapping[
-            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell],
+            str,
+            Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell],
         ]
         | None = None,
         cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
@@ -699,7 +719,8 @@ class KCLayout(
         ]
         | None = None,
     ) -> Callable[
-        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KCell],
+        [Callable[KCellParams, TSchematic[TUnit]]],
+        Callable[KCellParams, KCell],
     ]: ...
 
     @overload
@@ -726,7 +747,8 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         factories: Mapping[
-            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell],
+            str,
+            Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell],
         ]
         | None = None,
         cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
@@ -744,7 +766,8 @@ class KCLayout(
         ]
         | None = None,
     ) -> Callable[
-        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KC],
+        [Callable[KCellParams, TSchematic[TUnit]]],
+        Callable[KCellParams, KC],
     ]: ...
 
     @overload
@@ -770,7 +793,8 @@ class KCLayout(
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         factories: Mapping[
-            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell],
+            str,
+            Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell],
         ]
         | None = None,
         cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
@@ -788,7 +812,8 @@ class KCLayout(
         ]
         | None = None,
     ) -> Callable[
-        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KC],
+        [Callable[KCellParams, TSchematic[TUnit]]],
+        Callable[KCellParams, KC],
     ]: ...
 
     def schematic_cell(
@@ -815,7 +840,8 @@ class KCLayout(
         debug_names: bool | None = None,
         tags: list[str] | None = None,
         factories: Mapping[
-            str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell],
+            str,
+            Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell],
         ]
         | None = None,
         cross_sections: Mapping[str, CrossSection | DCrossSection] | None = None,
@@ -872,7 +898,8 @@ class KCLayout(
                     )
                     @functools.wraps(f)
                     def kcell_func(
-                        *args: KCellParams.args, **kwargs: KCellParams.kwargs,
+                        *args: KCellParams.args,
+                        **kwargs: KCellParams.kwargs,
                     ) -> KCell:
                         schematic = f(*args, **kwargs)
                         if set_name:
@@ -916,7 +943,8 @@ class KCLayout(
                 )
                 @functools.wraps(f)
                 def custom_kcell_func(
-                    *args: KCellParams.args, **kwargs: KCellParams.kwargs,
+                    *args: KCellParams.args,
+                    **kwargs: KCellParams.kwargs,
                 ) -> KCell:
                     schematic = f(*args, **kwargs)
                     if set_name:
@@ -940,7 +968,8 @@ class KCLayout(
             @self.cell(output_type=KCell, schematic_function=f)
             @functools.wraps(f)
             def kcell_func(
-                *args: KCellParams.args, **kwargs: KCellParams.kwargs,
+                *args: KCellParams.args,
+                **kwargs: KCellParams.kwargs,
             ) -> KCell:
                 schematic = f(*args, **kwargs)
                 if set_name:
@@ -1098,7 +1127,8 @@ class KCLayout(
         ports: PortsDefinition | None = None,
         schematic_function: Callable[KCellParams, TSchematic[Any]],
     ) -> Callable[
-        [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC],
+        [Callable[KCellParams, ProtoTKCell[Any]]],
+        Callable[KCellParams, KC],
     ]: ...
 
     @overload
@@ -1128,7 +1158,8 @@ class KCLayout(
         ports: PortsDefinition | None = None,
         schematic_function: None = None,
     ) -> Callable[
-        [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC],
+        [Callable[KCellParams, ProtoTKCell[Any]]],
+        Callable[KCellParams, KC],
     ]: ...
 
     @overload
@@ -1157,7 +1188,8 @@ class KCLayout(
         ports: PortsDefinition | None = None,
         schematic_function: Callable[KCellParams, TSchematic[Any]],
     ) -> Callable[
-        [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC],
+        [Callable[KCellParams, ProtoTKCell[Any]]],
+        Callable[KCellParams, KC],
     ]: ...
 
     @overload
@@ -1186,7 +1218,8 @@ class KCLayout(
         ports: PortsDefinition | None = None,
         schematic_function: None = None,
     ) -> Callable[
-        [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC],
+        [Callable[KCellParams, ProtoTKCell[Any]]],
+        Callable[KCellParams, KC],
     ]: ...
 
     def cell(
@@ -1359,9 +1392,7 @@ class KCLayout(
                     return False  # Class objects are ok
                 if isinstance(val, enum.Enum):
                     return False
-                if callable(val):
-                    return False  # Functions/callables are ok
-                return True
+                return not callable(val)
 
             mutable_params = [
                 p.name
@@ -1598,9 +1629,7 @@ class KCLayout(
                     return False  # Class objects are ok
                 if isinstance(val, enum.Enum):
                     return False
-                if callable(val):
-                    return False  # Functions/callables are ok
-                return True
+                return not callable(val)
 
             mutable_params = [
                 p.name
@@ -1652,7 +1681,10 @@ class KCLayout(
             self.layout.__setattr__(name, value)
 
     def layerenum_from_dict(
-        self, name: str = "LAYER", *, layers: LayerInfos,
+        self,
+        name: str = "LAYER",
+        *,
+        layers: LayerInfos,
     ) -> type[LayerEnum]:
         """Create a new [LayerEnum][kfactory.kcell.LayerEnum] from this KCLayout."""
         return layerenum_from_dict(layers=layers, name=name, layout=self.layout)
@@ -1787,7 +1819,8 @@ class KCLayout(
             for cell in self.cells("*"):
                 if cell.cell_index() not in self.tkcells:
                     self.tkcells[cell.cell_index()] = self.get_cell(
-                        cell.cell_index(), KCell,
+                        cell.cell_index(),
+                        KCell,
                     ).base
 
     def register_cell(self, kcell: AnyTKCell, allow_reregister: bool = False) -> None:
@@ -2152,7 +2185,8 @@ class KCLayout(
         self.tkcells = {}
 
     def get_enclosure(
-        self, enclosure: str | LayerEnclosure | LayerEnclosureSpec,
+        self,
+        enclosure: str | LayerEnclosure | LayerEnclosureSpec,
     ) -> LayerEnclosure:
         """Gets a layer enclosure by name specification or the layerenclosure itself."""
         return self.layer_enclosures.get_enclosure(enclosure, self)
@@ -2180,7 +2214,8 @@ class KCLayout(
     ) -> CrossSection:
         """Get a cross section by name or specification."""
         return CrossSection(
-            kcl=self, base=self.cross_sections.get_cross_section(cross_section),
+            kcl=self,
+            base=self.cross_sections.get_cross_section(cross_section),
         )
 
     def get_dcross_section(
@@ -2195,7 +2230,8 @@ class KCLayout(
     ) -> DCrossSection:
         """Get a cross section by name or specification."""
         return DCrossSection(
-            kcl=self, base=self.cross_sections.get_cross_section(cross_section),
+            kcl=self,
+            base=self.cross_sections.get_cross_section(cross_section),
         )
 
     def __repr__(self) -> str:
