@@ -12,7 +12,7 @@ from .. import kdb
 from ..conf import logger
 from ..enclosure import LayerEnclosure, extrude_path
 from ..kcell import KCell
-from ..layout import KCLayout
+from ..layout import CellKWargs, KCLayout
 from ..settings import Info
 from ..typings import KC, KC_co, MetaData, deg, um
 
@@ -21,7 +21,6 @@ if TYPE_CHECKING:
 
     from ..enclosure import LayerEnclosure
     from ..kcell import KCell
-    from ..layout import CellKWargs, KCLayout
 
 __all__ = ["bend_circular_factory"]
 

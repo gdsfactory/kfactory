@@ -10,7 +10,7 @@ from scipy.special import binom  # type:ignore[import-untyped,unused-ignore]
 from .. import kdb
 from ..enclosure import LayerEnclosure
 from ..kcell import KCell
-from ..layout import KCLayout
+from ..layout import CellKWargs, KCLayout
 from ..port import rename_by_direction, rename_clockwise
 from ..settings import Info
 from ..typings import KC, KC_co, MetaData, um
@@ -20,7 +20,6 @@ if TYPE_CHECKING:
 
     from ..enclosure import LayerEnclosure
     from ..kcell import KCell
-    from ..layout import CellKWargs, KCLayout
 
 __all__ = ["bend_s_bezier_factory"]
 

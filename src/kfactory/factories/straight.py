@@ -17,20 +17,17 @@ The slabs and excludes can be given in the form of an
 """
 
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Protocol, Unpack, cast, overload
+from typing import Any, Protocol, Unpack, cast, overload
 
 from .. import kdb
 from ..conf import logger
 from ..decorators import PortsDefinition
 from ..enclosure import LayerEnclosure
 from ..kcell import KCell
-from ..layout import KCLayout
+from ..layout import CellKWargs, KCLayout
 from ..port import rename_by_direction, rename_clockwise
 from ..settings import Info
 from ..typings import KC, KC_co, MetaData, dbu
-
-if TYPE_CHECKING:
-    from ..layout import CellKWargs, KCLayout
 
 __all__ = ["straight_dbu_factory"]
 
