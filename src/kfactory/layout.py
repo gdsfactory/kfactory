@@ -1330,6 +1330,7 @@ class KCLayout(
                 info=info,
                 post_process=post_process,  # type: ignore[arg-type]
                 debug_names=debug_names,
+                tags=tags,
                 lvs_equivalent_ports=lvs_equivalent_ports,
                 ports=ports,
                 schematic_function=schematic_function,
@@ -1541,6 +1542,7 @@ class KCLayout(
                 info=info,
                 check_ports=check_ports,
                 check_pins=check_pins,
+                tags=tags,
                 lvs_equivalent_ports=lvs_equivalent_ports,
                 ports=ports,
             )
