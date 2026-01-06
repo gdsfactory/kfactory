@@ -4,7 +4,7 @@ TODO: Non-linear tapers
 """
 
 from collections.abc import Callable
-from typing import Any, Protocol
+from typing import Any, Protocol, Unpack, cast, overload
 
 from .. import kdb
 from ..conf import logger
@@ -12,12 +12,12 @@ from ..enclosure import LayerEnclosure
 from ..kcell import KCell
 from ..layout import KCLayout
 from ..settings import Info
-from ..typings import MetaData, dbu
+from ..typings import CellKwargs, KC_co, MetaData, dbu
 
 __all__ = ["taper_factory"]
 
 
-class TaperFactory(Protocol):
+class TaperFactory(Protocol[KC_co]):
     def __call__(
         self,
         width1: dbu,
@@ -25,7 +25,7 @@ class TaperFactory(Protocol):
         length: dbu,
         layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
-    ) -> KCell:
+    ) -> KC_co:
         r"""Linear Taper [dbu].
 
                    __
@@ -51,17 +51,46 @@ class TaperFactory(Protocol):
         ...
 
 
+@overload
 def taper_factory(
     kcl: KCLayout,
-    basename: str | None = None,
     additional_info: Callable[
         ...,
         dict[str, MetaData],
     ]
     | dict[str, MetaData]
     | None = None,
-    **cell_kwargs: Any,
-) -> TaperFactory:
+    **cell_kwargs: Unpack[CellKwargs],
+) -> TaperFactory[KCell]: ...
+
+
+@overload
+def taper_factory(
+    kcl: KCLayout,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    *,
+    output_type: type[KC_co],
+    **cell_kwargs: Unpack[CellKwargs],
+) -> TaperFactory[KC_co]: ...
+
+
+def taper_factory(
+    kcl: KCLayout,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    *,
+    output_type: type[KC_co] | None = None,
+    **cell_kwargs: Unpack[CellKwargs],
+) -> TaperFactory[KC_co]:
     r"""Returns a function generating linear tapers [dbu].
 
                __
@@ -102,11 +131,13 @@ def taper_factory(
 
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
+    if "ports" not in cell_kwargs:
+        cell_kwargs["ports"] = {"left": ["o1"], "right": ["o2"]}
+    if output_type is None:
+        output_type = cast("type[KC_co]", KCell)
 
     @kcl.cell(
-        basename=basename,
-        output_type=KCell,
-        ports={"left": ["o1"], "right": ["o2"]},
+        output_type=output_type,
         **cell_kwargs,
     )
     def taper(
