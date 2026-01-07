@@ -107,6 +107,7 @@ if TYPE_CHECKING:
 
     from .layout import KCLayout
     from .schematic import TSchematic
+    from .typings import KCellParams
 
 
 __all__ = [
@@ -425,6 +426,7 @@ class TKCell(BaseKCell):
     vtrans: kdb.DCplxTrans | None = None
     _schematic: TSchematic[Any] | None = PrivateAttr(default=None)
     _library_cell: KCell | None = PrivateAttr(default=None)
+    _build_kwargs: dict[str, Any] | None = None
 
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
@@ -2785,6 +2787,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
     @property
     def lvs_equivalent_ports(self) -> list[list[str]] | None:
         return self._base.lvs_equivalent_ports
+
+    def rebuild(self, factory: Callable[KCellParams, ProtoTKCell[Any]]) -> Self:
+        if self.base._build_kwargs is None:
+            raise ValueError(
+                "This cell does not have the args stored for recreating the cell."
+            )
+        self._base = self.kcl.factories[self.factory_name](
+            **self.base._build_kwargs
+        ).base
+        return self
 
 
 class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):

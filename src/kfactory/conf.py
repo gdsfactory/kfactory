@@ -250,7 +250,11 @@ class Settings(BaseSettings):
     write_context_info: bool = True
     write_file_properties: bool = True
 
+    # custom show function
     show_function: ShowFunction | None = None
+
+    # automatically rebuild destroyed cells if possible
+    automatic_cell_rebuild: bool = False
 
     @field_validator("show_function", mode="before")
     @classmethod

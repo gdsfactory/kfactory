@@ -25,7 +25,7 @@ from cachetools import Cache, cached
 from typing_extensions import Unpack
 
 from . import kdb
-from .conf import CheckInstances, logger
+from .conf import CheckInstances, config, logger
 from .exceptions import CellNameError
 from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
 from .serialization import (
@@ -403,6 +403,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                     name_: str | None = name
                 else:
                     name_ = None
+
                 cell = f(**params)  # type: ignore[call-arg]
                 if cell is None:
                     raise TypeError(
@@ -416,6 +417,8 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                         f" returned {type(cell)=}. The `@cell` decorator only supports"
                         " KCell/DKCell or any SubClass such as Component."
                     )
+                if config.automatic_cell_rebuild:
+                    cell.base._build_kwargs = params
 
                 logger.debug("Constructed {}", name_ or cell.name)
 
@@ -518,7 +521,23 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                 return output_type(base=cell.base)
 
             with kcl.thread_lock:
-                cell_ = wrapped_cell(**params)
+                if config.automatic_cell_rebuild:
+                    try:
+                        cell_ = wrapped_cell(**params)
+                    except RuntimeError as e:
+                        if "destroyed" in str(e):
+                            for param_default in params.values():
+                                if (
+                                    isinstance(param_default, ProtoTKCell)
+                                    and param_default._destroyed()
+                                ):
+                                    factory = param_default.kcl.factories[
+                                        param_default.factory_name
+                                    ]
+                                    param_default.rebuild(factory)
+                            cell_ = wrapped_cell(**params)
+                else:
+                    cell_ = wrapped_cell(**params)
                 if cell_.destroyed():
                     # If any cell has been destroyed, we should clean up the cache.
                     # Delete all the KCell entrances in the cache which have
