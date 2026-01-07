@@ -20,6 +20,7 @@ from typing import (
     Concatenate,
     Generic,
     Literal,
+    TypedDict,
     cast,
     get_type_hints,
     overload,
@@ -2190,3 +2191,26 @@ cell = kcl.cell
 """Default kcl @cell decorator."""
 vcell = kcl.vcell
 """Default kcl @vcell decorator."""
+
+
+class CellKWargs(TypedDict, total=False):
+    set_settings: bool
+    set_name: bool
+    check_ports: bool
+    check_pins: bool
+    check_instances: CheckInstances
+    snap_ports: bool
+    add_port_layers: bool
+    cache: Cache[int, Any] | dict[int, Any]
+    basename: str
+    drop_params: list[str]
+    register_factory: bool
+    overwrite_existing: bool
+    layout_cache: bool
+    info: dict[str, MetaData]
+    post_process: Iterable[Callable[[KC_contra], None]]
+    debug_names: bool
+    tags: list[str]
+    lvs_equivalent_ports: list[list[str]]
+    ports: PortsDefinition
+    schematic_function: Callable[..., TSchematic[Any]]
