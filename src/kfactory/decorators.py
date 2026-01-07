@@ -531,9 +531,19 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                                     isinstance(param_default, ProtoTKCell)
                                     and param_default._destroyed()
                                 ):
-                                    factory = param_default.kcl.factories[
-                                        param_default.factory_name
-                                    ]
+                                    try:
+                                        factory = param_default.kcl.factories[
+                                            param_default.basename
+                                            or param_default.function_name  # type: ignore[index]
+                                        ]
+                                    except KeyError as e:
+                                        raise ValueError(
+                                            "Failed to rebuild cell. This cell has not "
+                                            "been decorated with `@cell` "
+                                            "and therefore cannot be rebuilt as no "
+                                            "reference so the function can be"
+                                            " restored."
+                                        ) from e
                                     param_default.rebuild(factory)
                             cell_ = wrapped_cell(**params)
                 else:

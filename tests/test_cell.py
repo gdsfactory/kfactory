@@ -706,3 +706,30 @@ def test_return_wrong_type(
         kcl.cell()(test_vk)()  # type: ignore[type-var]
     with pytest.raises(TypeError):
         kcl.vcell(test_kc)()  # type: ignore[type-var]
+
+
+def test_rebuild(kcl: kf.KCLayout) -> None:
+    kf.config.automatic_cell_rebuild = True
+
+    @kcl.cell
+    def inner() -> kf.KCell:
+        return kcl.kcell()
+
+    @kcl.cell
+    def outer(c: kf.KCell = inner()) -> kf.KCell:  # noqa: B008
+        return c.dup()
+
+    @kcl.cell
+    def always_fail(c: kf.KCell = kcl.kcell()) -> kf.KCell:  # noqa: B008
+        return c.dup()
+
+    kcl.clear_kcells()
+
+    kf.config.automatic_cell_rebuild = False
+    with pytest.raises(RuntimeError):
+        outer()
+    kf.config.automatic_cell_rebuild = True
+    outer()
+    with pytest.raises(ValueError):
+        always_fail()
+    kf.config.automatic_cell_rebuild = False

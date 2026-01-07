@@ -105,6 +105,7 @@ if TYPE_CHECKING:
 
     from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
+    from .decorators import WrappedKCellFunc
     from .layout import KCLayout
     from .schematic import TSchematic
     from .typings import KCellParams
@@ -2788,10 +2789,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
     def lvs_equivalent_ports(self) -> list[list[str]] | None:
         return self._base.lvs_equivalent_ports
 
-    def rebuild(self, factory: Callable[KCellParams, ProtoTKCell[Any]]) -> Self:
+    def rebuild(self, factory: WrappedKCellFunc[KCellParams, ProtoTKCell[Any]]) -> Self:
         if self.base._build_kwargs is None:
-            raise ValueError(
-                "This cell does not have the args stored for recreating the cell."
+            raise AttributeError(
+                f"Rebuilding f{factory.name} failed as there were no (kw)args stored."
+                " If you are trying to automatically rebuild default args, make sure"
+                " that the function of this cell is decorated with `@cell` and that the"
+                " kfactory/gdsfactory config `automatic_cell_rebuild` is set to true"
+                " before importing the cells which are defined. It is generally not"
+                " best practice to pass cells/components as default args, try to avoid"
+                f" that whenever possible. "
             )
         self._base = self.kcl.factories[self.factory_name](
             **self.base._build_kwargs
