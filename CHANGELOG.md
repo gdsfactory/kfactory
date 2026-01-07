@@ -8,6 +8,10 @@
 - Parse decorator tags to func wrapper [#842](https://github.com/gdsfactory/kfactory/pull/842)
 - Fix annotations [#841](https://github.com/gdsfactory/kfactory/pull/841)
 
+## Other changes
+
+- Fix docs typo intro.md minkowsky->minkowski [#844](https://github.com/gdsfactory/kfactory/pull/844)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.2.0...v2.2.1
 
 
