@@ -790,6 +790,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 cell_ = KCell(kcl=self.cell.kcl, name=cell_name)  # self.cell.dup()
                 for layer, shapes in self.cell.shapes().items():
                     for shape in shapes.transform(trans_):
+                        if isinstance(shape, kdb.DPolygon | kdb.DSimplePolygon):
+                            shape = shape.to_itype(cell.kcl.dbu)
                         cell_.shapes(layer).insert(shape)
                 for inst in self.cell.insts:
                     inst.insert_into(cell=cell_, trans=trans_)
@@ -902,6 +904,10 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         if isinstance(self.cell, VKCell):
             for layer, shapes in self.cell.shapes().items():
                 for shape in shapes.transform(trans * self.trans):
+                    if isinstance(cell, ProtoTKCell) and isinstance(
+                        shape, kdb.DPolygon | kdb.DSimplePolygon
+                    ):
+                        shape = shape.to_itype(cell.kcl.dbu)
                     cell.shapes(layer).insert(shape)
             for inst in self.cell.insts:
                 if levels is not None:
