@@ -510,7 +510,7 @@ def _get_partial_route2(
 ) -> tuple[kdb.DPoint, kdb.DPoint, float]:
     # we only care about the absolute angle as it needs to be between 0 and 180
     bend_angle = (180 - angle + start_port.dcplx_trans.angle) % 180
-    bend = bend_factory(width=start_port.width, angle=abs(bend_angle))
+    bend = bend_factory(width=start_port.dwidth, angle=abs(bend_angle))
     radius = _get_effective_radius(
         bend.ports[bend_ports[0]], bend.ports[bend_ports[1]], _p0, _p1
     )
@@ -523,7 +523,7 @@ def _get_partial_route2(
     if xe is None:
         return rp, kdb.DPoint(), np.inf
     bend2 = bend_factory(
-        width=start_port.width,
+        width=start_port.dwidth,
         angle=abs((-angle + end_port.dcplx_trans.angle + 180) % 360 - 180),
     )
     er2 = _get_effective_radius(
