@@ -787,6 +787,403 @@ def test_schematic_anchor(
     oasis_regression(c)
 
 
+def test_schematic_function_get_port_positions(
+    kcl: kf.KCLayout, layers: Layers
+) -> None:
+    xs = kcl.get_icross_section(
+        kf.SymmetricalCrossSection(
+            width=500,
+            enclosure=kcl.get_enclosure(
+                kf.LayerEnclosure(
+                    [(layers.WGEX, 3000)], name="WGENC", main_layer=layers.WG
+                )
+            ),
+            name="WG500",
+            radius=20_000,
+        )
+    )
+
+    @kcl.cell
+    def bend_euler(
+        cross_section: str,
+        angle: kf.typings.deg = 90,
+        resolution: float = 150,
+    ) -> kf.KCell:
+        """Create a euler bend.
+
+        Args:
+            width: Width of the core. [um]
+            radius: Radius off the backbone. [um]
+            layer: Layer index / LayerEnum of the core.
+            enclosure: Slab/exclude definition. [dbu]
+            angle: Angle of the bend.
+            resolution: Angle resolution for the backbone.
+        """
+        c = kcl.kcell()
+
+        xs = c.kcl.get_icross_section(cross_section)
+        width = c.kcl.to_um(xs.width)
+        radius = c.kcl.to_um(xs.radius)
+        assert radius is not None, "Radius of cross section must not be None"
+        layer = xs.layer
+        enclosure = xs.enclosure
+        if angle < 0:
+            kf.logger.critical(
+                f"Negative lengths are not allowed {angle} as ports"
+                " will be inverted. Please use a positive number. Forcing positive"
+                " lengths."
+            )
+            angle = -angle
+        if width < 0:
+            kf.logger.critical(
+                f"Negative widths are not allowed {width} as ports"
+                " will be inverted. Please use a positive number. Forcing positive"
+                " lengths."
+            )
+            width = -width
+        backbone = kf.factories.euler.euler_bend_points(
+            angle, radius=radius, resolution=resolution
+        )
+
+        center_path = kf.enclosure.extrude_path(
+            target=c,
+            layer=layer,
+            path=backbone,
+            width=width,
+            enclosure=enclosure,
+            start_angle=0,
+            end_angle=angle,
+        )
+        li = c.kcl.layer(layer)
+        c.create_port(
+            layer=li,
+            width=c.kcl.to_dbu(width),
+            trans=kf.kdb.Trans(2, False, c.kcl.to_dbu(backbone[0]).to_v()),
+        )
+
+        if abs(angle % 90) < 0.001:
+            _ang = round(angle)
+            c.create_port(
+                trans=kf.kdb.Trans(
+                    _ang // 90, False, c.kcl.to_dbu(backbone[-1]).to_v()
+                ),
+                width=round(width / c.kcl.dbu),
+                layer=li,
+            )
+        else:
+            c.create_port(
+                dcplx_trans=kf.kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
+                width=c.kcl.to_dbu(width),
+                layer=li,
+            )
+        c.boundary = center_path
+
+        c.auto_rename_ports()
+        return c
+
+    @kcl.cell
+    def bend_s_euler(
+        offset: kf.typings.um,
+        cross_section: str,
+        resolution: float = 150,
+    ) -> kf.KCell:
+        """Create a euler s-bend.
+
+        Args:
+            offset: Offset between left/right. [um]
+            width: Width of the core. [um]
+            radius: Radius off the backbone. [um]
+            layer: Layer index / LayerEnum of the core.
+            enclosure: Slab/exclude definition. [dbu]
+            resolution: Angle resolution for the backbone.
+        """
+        c = kcl.kcell()
+        xs = c.kcl.get_icross_section(cross_section)
+
+        width = c.kcl.to_um(xs.width)
+        radius = c.kcl.to_um(xs.radius)
+        if radius is None:
+            raise ValueError(
+                f"Radius of cross section must be defined cross_section={xs}"
+            )
+
+        backbone = kf.factories.euler.euler_sbend_points(
+            offset=offset,
+            radius=radius,
+            resolution=resolution,
+        )
+        center_path = kf.enclosure.extrude_path(
+            target=c,
+            layer=xs.layer,
+            path=backbone,
+            width=width,
+            enclosure=xs.enclosure,
+            start_angle=0,
+            end_angle=0,
+        )
+
+        v = backbone[-1] - backbone[0]
+        if v.x < 0:
+            p1 = c.kcl.to_dbu(backbone[-1])
+            p2 = c.kcl.to_dbu(backbone[0])
+        else:
+            p1 = c.kcl.to_dbu(backbone[0])
+            p2 = c.kcl.to_dbu(backbone[-1])
+        li = c.kcl.layer(xs.layer)
+        c.create_port(
+            trans=kf.kdb.Trans(2, False, p1.to_v()),
+            width=c.kcl.to_dbu(width),
+            port_type="optical",
+            layer=li,
+        )
+        c.create_port(
+            trans=kf.kdb.Trans(0, False, p2.to_v()),
+            width=c.kcl.to_dbu(width),
+            port_type="optical",
+            layer=li,
+        )
+        c.boundary = center_path
+        c.auto_rename_ports()
+        return c
+
+    @kcl.cell
+    def straight(length: kf.typings.um, cross_section: str) -> kf.KCell:
+        """Waveguide defined in dbu.
+
+            ┌──────────────────────────────┐
+            │         Slab/Exclude         │
+            ├──────────────────────────────┤
+            │                              │
+            │             Core             │
+            │                              │
+            ├──────────────────────────────┤
+            │         Slab/Exclude         │
+            └──────────────────────────────┘
+        Args:
+            width: Waveguide width. [dbu]
+            length: Waveguide length. [dbu]
+            layer: Main layer of the waveguide.
+            enclosure: Definition of slab/excludes. [dbu]
+        """
+        c = kcl.kcell()
+        xs = c.kcl.get_icross_section(cross_section)
+
+        length_ = c.kcl.to_dbu(length)
+
+        if length_ < 0:
+            kf.logger.critical(
+                f"Negative lengths are not allowed {length_} as ports"
+                " will be inverted. Please use a positive number. Forcing positive"
+                " lengths."
+            )
+            length_ = -length_
+
+        li = c.kcl.layer(xs.layer)
+        c.shapes(li).insert(kf.kdb.Box(0, -xs.width // 2, length_, xs.width // 2))
+        c.create_port(trans=kf.kdb.Trans(2, False, 0, 0), layer=li, width=xs.width)
+        c.create_port(
+            trans=kf.kdb.Trans(0, False, length_, 0), layer=li, width=xs.width
+        )
+
+        xs.enclosure.apply_minkowski_y(c, xs.layer)
+
+        c.boundary = c.dbbox()  # type: ignore[assignment]
+        c.auto_rename_ports()
+        return c
+
+    @kcl.schematic_cell
+    def dc(gap: int, length: int) -> kf.Schematic:
+        length_ = kcl.to_um(length)
+        s = kf.Schematic(kcl=kcl)
+
+        s1 = s.create_inst(
+            "s1",
+            "straight",
+            settings={"cross_section": xs.name, "length": length_},
+        )
+
+        s2 = s.create_inst(
+            "s2", "straight", settings={"cross_section": xs.name, "length": length_}
+        )
+
+        s1.place(orientation=90)
+        s2.place(x=-(gap + xs.width), orientation=90)
+
+        b1 = s.create_inst(
+            "b1",
+            "bend_s_euler",
+            settings={
+                "offset": 10,
+                "cross_section": xs.name,
+            },
+        )
+        b2 = s.create_inst(
+            "b2",
+            "bend_s_euler",
+            settings={
+                "offset": 10,
+                "cross_section": xs.name,
+            },
+        )
+        b3 = s.create_inst(
+            "b3",
+            "bend_s_euler",
+            settings={
+                "offset": 10,
+                "cross_section": xs.name,
+            },
+        )
+        b4 = s.create_inst(
+            "b4",
+            "bend_s_euler",
+            settings={
+                "offset": 10,
+                "cross_section": xs.name,
+            },
+        )
+
+        b1.connect("o1", s1.ports["o1"])
+        b2.connect("o1", s1.ports["o2"])
+        b3.connect("o1", s2.ports["o1"])
+        b4.connect("o1", s2.ports["o2"])
+
+        b2.mirror = True
+        b3.mirror = True
+
+        s.add_port("o1", port=b1.ports["o2"])
+        s.add_port("o4", port=b2.ports["o2"])
+        s.add_port("o2", port=b3.ports["o2"])
+        s.add_port("o3", port=b4.ports["o2"])
+
+        return s
+
+    @kcl.schematic_cell
+    def tree(n: int) -> kf.Schematic:
+        s = kf.Schematic(kcl=kcl)
+
+        dc1 = s.create_inst(
+            "dc1", component="dc", settings={"gap": 240, "length": 10_000}
+        )
+        dc2 = s.create_inst(
+            "dc2", component="dc", settings={"gap": 240, "length": 10_000}
+        )
+        dc3 = s.create_inst(
+            "dc3", component="dc", settings={"gap": 240, "length": 10_000}
+        )
+
+        dc1.place()
+        dc3.connect("o2", dc1.ports["o4"])
+        dc2.mirror = True
+        dc2.connect("o4", dc3.ports["o1"])
+
+        b1 = s.create_inst(
+            "b1", component="bend_euler", settings={"cross_section": xs.name}
+        )
+        b2 = s.create_inst(
+            "b2", component="bend_euler", settings={"cross_section": xs.name}
+        )
+        b3 = s.create_inst(
+            "b3", component="bend_euler", settings={"cross_section": xs.name}
+        )
+        b4 = s.create_inst(
+            "b4", component="bend_euler", settings={"cross_section": xs.name}
+        )
+
+        b1.mirror = True
+        b4.mirror = True
+        b1.connect("o1", dc1.ports["o2"])
+        b2.connect("o1", dc1.ports["o3"])
+        b3.connect("o1", dc2.ports["o2"])
+        b4.connect("o1", dc2.ports["o3"])
+        s.add_port("o1", port=b1.ports["o2"])
+        s.add_port("o2", port=b2.ports["o2"])
+        s.add_port(f"o{4 * n + 1}", port=b3.ports["o2"])
+        s.add_port(f"o{4 * n + 2}", port=b4.ports["o2"])
+        s.add_port(f"o{4 * n + 3}", port=dc2.ports["o1"])
+        s.add_port(f"o{4 * n + 4}", port=dc1.ports["o1"])
+
+        for i in range(1, n):
+            dc_i1 = s.create_inst(
+                f"dc{i * 3 + 1}",
+                component="dc",
+                settings={"gap": 240, "length": 10_000},
+            )
+            dc_i2 = s.create_inst(
+                f"dc{i * 3 + 2}",
+                component="dc",
+                settings={"gap": 240, "length": 10_000},
+            )
+            dc_i3 = s.create_inst(
+                f"dc{i * 3 + 3}",
+                component="dc",
+                settings={"gap": 240, "length": 10_000},
+            )
+
+            dc_i2.mirror = True
+            dc_i1.connect("o1", dc3.ports["o3"])
+            dc_i2.connect("o1", dc3.ports["o4"])
+            dc_i3.connect("o1", dc_i2.ports["o4"])
+            dc_i3.connect("o2", dc_i1.ports["o4"])
+
+            b_i1 = s.create_inst(
+                f"b{i * 4 + 1}",
+                component="bend_euler",
+                settings={"cross_section": xs.name},
+            )
+            b_i2 = s.create_inst(
+                f"b{i * 4 + 2}",
+                component="bend_euler",
+                settings={"cross_section": xs.name},
+            )
+            b_i3 = s.create_inst(
+                f"b{i * 4 + 3}",
+                component="bend_euler",
+                settings={"cross_section": xs.name},
+            )
+            b_i4 = s.create_inst(
+                f"b{i * 4 + 4}",
+                component="bend_euler",
+                settings={"cross_section": xs.name},
+            )
+
+            b_i1.mirror = True
+            b_i4.mirror = True
+            b_i1.connect("o1", dc_i1.ports["o2"])
+            b_i2.connect("o1", dc_i1.ports["o3"])
+            b_i3.connect("o1", dc_i2.ports["o2"])
+            b_i4.connect("o1", dc_i2.ports["o3"])
+            s.add_port(f"o{2 * i + 1}", port=b_i1.ports["o2"])
+            s.add_port(f"o{2 * i + 2}", port=b_i2.ports["o2"])
+            s.add_port(f"o{4 * n - 2 * i + 1}", port=b_i4.ports["o2"])
+            s.add_port(f"o{4 * n - 2 * i + 2}", port=b_i3.ports["o2"])
+
+            dc1 = dc_i1
+            dc2 = dc_i2
+            dc3 = dc_i3
+
+        s.add_port(f"o{2 * n + 1}", port=dc3.ports["o3"])
+        s.add_port(f"o{2 * n + 2}", port=dc3.ports["o4"])
+
+        return s
+
+    factories: dict[
+        str,
+        kf.decorators.WrappedKCellFunc[Any, kf.ProtoTKCell[Any]]
+        | kf.decorators.WrappedVKCellFunc[Any, kf.VKCell],
+    ] = {}
+    factories.update(kcl.virtual_factories.as_dict())
+    factories.update(kcl.factories.as_dict())
+    assert kcl.factories["dc"].get_schematic(gap=240, length=10_000).get_port_positions(
+        factories
+    ) == {"right": [], "top": ["o3", "o4"], "left": [], "bottom": ["o1", "o2"]}
+    assert kcl.factories["tree"].get_schematic(n=3).get_port_positions(factories) == {
+        "right": ["o10", "o11", "o12", "o13", "o14", "o9"],
+        "top": ["o7", "o8"],
+        "left": ["o1", "o2", "o3", "o4", "o5", "o6"],
+        "bottom": ["o15", "o16"],
+    }
+
+
 @pytest.mark.parametrize(
     "path",
     [

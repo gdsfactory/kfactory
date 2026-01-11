@@ -20,7 +20,9 @@ from typing import (
     Concatenate,
     Generic,
     Literal,
+    TypedDict,
     cast,
+    get_type_hints,
     overload,
 )
 
@@ -34,7 +36,7 @@ from pydantic import (
 )
 
 from . import __version__, kdb
-from .conf import CheckInstances, config
+from .conf import CheckInstances, config, logger
 from .cross_section import (
     CrossSection,
     CrossSectionModel,
@@ -186,6 +188,9 @@ class Factories(Mapping[str, F], Generic[F]):
         if key in self._by_name:
             return self.get_by_name(key)
         return default
+
+    def as_dict(self) -> dict[str, F]:
+        return {name: self._all[i] for name, i in self._by_name.items()}
 
 
 class KCLayout(
@@ -932,8 +937,8 @@ class KCLayout(
         def simple_wrap_f(
             f: Callable[KCellParams, TSchematic[TUnit]],
         ) -> Callable[KCellParams, KCell]:
-            @functools.wraps(f)
             @self.cell(output_type=KCell, schematic_function=f)
+            @functools.wraps(f)
             def kcell_func(
                 *args: KCellParams.args, **kwargs: KCellParams.kwargs
             ) -> KCell:
@@ -983,7 +988,33 @@ class KCLayout(
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
-        schematic_function: Callable[KCellParams, TSchematic[Any]] | None = None,
+        schematic_function: Callable[KCellParams, TSchematic[Any]],
+    ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
+
+    @overload
+    def cell(
+        self,
+        /,
+        *,
+        set_settings: bool = ...,
+        set_name: bool = ...,
+        check_ports: bool = ...,
+        check_pins: bool = ...,
+        check_instances: CheckInstances | None = ...,
+        snap_ports: bool = ...,
+        add_port_layers: bool = ...,
+        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        basename: str | None = ...,
+        drop_params: list[str] = ...,
+        register_factory: bool = ...,
+        overwrite_existing: bool | None = ...,
+        layout_cache: bool | None = ...,
+        info: dict[str, MetaData] | None = ...,
+        debug_names: bool | None = ...,
+        tags: list[str] | None = ...,
+        lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
+        schematic_function: None = None,
     ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
     @overload
@@ -1010,7 +1041,34 @@ class KCLayout(
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
-        schematic_function: Callable[KCellParams, TSchematic[Any]] | None = None,
+        schematic_function: Callable[KCellParams, TSchematic[Any]],
+    ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
+
+    @overload
+    def cell(
+        self,
+        /,
+        *,
+        set_settings: bool = ...,
+        set_name: bool = ...,
+        check_ports: bool = ...,
+        check_pins: bool = ...,
+        check_instances: CheckInstances | None = ...,
+        snap_ports: bool = ...,
+        add_port_layers: bool = ...,
+        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        basename: str | None = ...,
+        drop_params: list[str] = ...,
+        register_factory: bool = ...,
+        overwrite_existing: bool | None = ...,
+        layout_cache: bool | None = ...,
+        info: dict[str, MetaData] | None = ...,
+        post_process: Iterable[Callable[[KC_contra], None]],
+        debug_names: bool | None = ...,
+        tags: list[str] | None = ...,
+        lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
+        schematic_function: None = None,
     ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
     @overload
@@ -1038,7 +1096,37 @@ class KCLayout(
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
-        schematic_function: Callable[KCellParams, TSchematic[Any]] | None = None,
+        schematic_function: Callable[KCellParams, TSchematic[Any]],
+    ) -> Callable[
+        [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
+    ]: ...
+
+    @overload
+    def cell(
+        self,
+        /,
+        *,
+        output_type: type[KC],
+        set_settings: bool = ...,
+        set_name: bool = ...,
+        check_ports: bool = ...,
+        check_pins: bool = ...,
+        check_instances: CheckInstances | None = ...,
+        snap_ports: bool = ...,
+        add_port_layers: bool = ...,
+        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        basename: str | None = ...,
+        drop_params: list[str] = ...,
+        register_factory: bool = ...,
+        overwrite_existing: bool | None = ...,
+        layout_cache: bool | None = ...,
+        info: dict[str, MetaData] | None = ...,
+        post_process: Iterable[Callable[[KC_contra], None]],
+        debug_names: bool | None = ...,
+        tags: list[str] | None = ...,
+        lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
+        schematic_function: None = None,
     ) -> Callable[
         [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
     ]: ...
@@ -1067,7 +1155,36 @@ class KCLayout(
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
-        schematic_function: Callable[KCellParams, TSchematic[Any]] | None = None,
+        schematic_function: Callable[KCellParams, TSchematic[Any]],
+    ) -> Callable[
+        [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
+    ]: ...
+
+    @overload
+    def cell(
+        self,
+        /,
+        *,
+        output_type: type[KC],
+        set_settings: bool = ...,
+        set_name: bool = ...,
+        check_ports: bool = ...,
+        check_pins: bool = ...,
+        check_instances: CheckInstances | None = ...,
+        snap_ports: bool = ...,
+        add_port_layers: bool = ...,
+        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        basename: str | None = ...,
+        drop_params: list[str] = ...,
+        register_factory: bool = ...,
+        overwrite_existing: bool | None = ...,
+        layout_cache: bool | None = ...,
+        info: dict[str, MetaData] | None = ...,
+        debug_names: bool | None = ...,
+        tags: list[str] | None = ...,
+        lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
+        schematic_function: None = None,
     ) -> Callable[
         [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
     ]: ...
@@ -1172,7 +1289,19 @@ class KCLayout(
             if output_type is not None:
                 output_cell_type_ = output_type
             elif sig.return_annotation is not inspect.Signature.empty:
-                output_cell_type_ = sig.return_annotation
+                # Use get_type_hints to resolve string annotations
+                try:
+                    type_hints = get_type_hints(f, globalns=f.__globals__)
+                    output_cell_type_ = type_hints.get("return", sig.return_annotation)
+
+                except Exception:
+                    # Fallback to raw annotation if get_type_hints fails
+                    logger.opt(depth=2).warning(
+                        "Cannot determine output type ((D)KCell type)"
+                        f"from annotation {sig.return_annotation!r}. "
+                        "Trying to continue but likely this will fail.",
+                    )
+                    output_cell_type_ = sig.return_annotation
             else:
                 output_cell_type_ = self.default_cell_output_type
 
@@ -1201,6 +1330,7 @@ class KCLayout(
                 info=info,
                 post_process=post_process,  # type: ignore[arg-type]
                 debug_names=debug_names,
+                tags=tags,
                 lvs_equivalent_ports=lvs_equivalent_ports,
                 ports=ports,
                 schematic_function=schematic_function,
@@ -1239,6 +1369,26 @@ class KCLayout(
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
+        info: dict[str, MetaData] | None = None,
+        check_ports: bool = True,
+        check_pins: bool = True,
+        tags: list[str] | None = None,
+        lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
+    ) -> Callable[[Callable[KCellParams, VK]], Callable[KCellParams, VK]]: ...
+
+    @overload
+    def vcell(
+        self,
+        /,
+        *,
+        set_settings: bool = True,
+        set_name: bool = True,
+        add_port_layers: bool = True,
+        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        basename: str | None = None,
+        drop_params: Sequence[str] = ("self", "cls"),
+        register_factory: bool = True,
         post_process: Iterable[Callable[[VKCell], None]],
         info: dict[str, MetaData] | None = None,
         check_ports: bool = True,
@@ -1247,6 +1397,27 @@ class KCLayout(
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
     ) -> Callable[[Callable[KCellParams, VK]], Callable[KCellParams, VK]]: ...
+
+    @overload
+    def vcell(
+        self,
+        /,
+        *,
+        output_type: type[VK],
+        set_settings: bool = True,
+        set_name: bool = True,
+        add_port_layers: bool = True,
+        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        basename: str | None = None,
+        drop_params: Sequence[str] = ("self", "cls"),
+        register_factory: bool = True,
+        info: dict[str, MetaData] | None = None,
+        check_ports: bool = True,
+        check_pins: bool = True,
+        tags: list[str] | None = None,
+        lvs_equivalent_ports: list[list[str]] | None = None,
+        ports: PortsDefinition | None = None,
+    ) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VK]]: ...
 
     @overload
     def vcell(
@@ -1334,7 +1505,19 @@ class KCLayout(
             if output_type is not None:
                 output_cell_type_ = output_type
             elif sig.return_annotation is not inspect.Signature.empty:
-                output_cell_type_ = sig.return_annotation
+                # Use get_type_hints to resolve string annotations
+                try:
+                    type_hints = get_type_hints(f, globalns=f.__globals__)
+                    output_cell_type_ = type_hints.get("return", sig.return_annotation)
+
+                except Exception:
+                    # Fallback to raw annotation if get_type_hints fails
+                    logger.opt(depth=2).warning(
+                        "Cannot determine output type ((D)KCell type)"
+                        f"from annotation {sig.return_annotation!r}. "
+                        "Trying to continue but likely this will fail.",
+                    )
+                    output_cell_type_ = sig.return_annotation
             else:
                 output_cell_type_ = self.default_vcell_output_type
 
@@ -1359,6 +1542,7 @@ class KCLayout(
                 info=info,
                 check_ports=check_ports,
                 check_pins=check_pins,
+                tags=tags,
                 lvs_equivalent_ports=lvs_equivalent_ports,
                 ports=ports,
             )
@@ -2007,3 +2191,26 @@ cell = kcl.cell
 """Default kcl @cell decorator."""
 vcell = kcl.vcell
 """Default kcl @vcell decorator."""
+
+
+class CellKWargs(TypedDict, total=False):
+    set_settings: bool
+    set_name: bool
+    check_ports: bool
+    check_pins: bool
+    check_instances: CheckInstances
+    snap_ports: bool
+    add_port_layers: bool
+    cache: Cache[int, Any] | dict[int, Any]
+    basename: str
+    drop_params: list[str]
+    register_factory: bool
+    overwrite_existing: bool
+    layout_cache: bool
+    info: dict[str, MetaData]
+    post_process: Iterable[Callable[[KC_contra], None]]
+    debug_names: bool
+    tags: list[str]
+    lvs_equivalent_ports: list[list[str]]
+    ports: PortsDefinition
+    schematic_function: Callable[..., TSchematic[Any]]

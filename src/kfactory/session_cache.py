@@ -10,9 +10,9 @@ from hashlib import sha256
 from shutil import rmtree
 from typing import TYPE_CHECKING
 
-from .conf import config, logger
+from .conf import logger
 from .layout import KCLayout, kcls
-from .utilities import save_layout_options
+from .utilities import get_session_directory, save_layout_options
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 def save_session(
     c: ProtoTKCell[Any] | None = None, session_dir: Path | None = None
 ) -> None:
-    kcls_dir = session_dir or ((config.project_dir or Path()) / "build/session/kcls")
+    kcls_dir = get_session_directory(session_dir)
     if kcls_dir.exists():
         rmtree(kcls_dir)
     skip_cells: set[int] = set()
@@ -39,6 +39,7 @@ def save_session(
         save_options.clear_cells()
         kcl_dir = kcls_dir / kcl.name
         kcl_dir.mkdir(parents=True)
+
         cis = set(kcl.each_cell_bottom_up())
         factory_dependency: defaultdict[str, set[str]] = defaultdict(set)
         factory_cells: defaultdict[str, list[tuple[int, str]]] = defaultdict(list)
@@ -89,7 +90,7 @@ def save_session(
 def load_session(
     session_dir: Path | None = None, warn_missing_dir: bool = True
 ) -> None:
-    kcls_dir = session_dir or ((config.project_dir or Path()) / "build/session/kcls")
+    kcls_dir = get_session_directory(session_dir)
     logger.debug("Loading session from {}", kcls_dir)
 
     if not kcls_dir.exists():

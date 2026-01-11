@@ -329,6 +329,7 @@ class ManhattanRouterSide:
             for i in range(1, l_):
                 p2 = self.pts[i]
                 pl += int((p2 - p1).length())
+                p1 = p2
         return pl
 
 

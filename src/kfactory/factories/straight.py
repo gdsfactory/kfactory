@@ -17,21 +17,22 @@ The slabs and excludes can be given in the form of an
 """
 
 from collections.abc import Callable
-from typing import Any, Protocol
+from typing import Any, Protocol, Unpack, cast, overload
 
 from .. import kdb
 from ..conf import logger
 from ..decorators import PortsDefinition
 from ..enclosure import LayerEnclosure
 from ..kcell import KCell
-from ..layout import KCLayout
+from ..layout import CellKWargs, KCLayout
+from ..port import rename_by_direction, rename_clockwise
 from ..settings import Info
-from ..typings import MetaData, dbu
+from ..typings import KC, KC_co, MetaData, dbu
 
 __all__ = ["straight_dbu_factory"]
 
 
-class StraightKCellFactory(Protocol):
+class StraightFactory(Protocol[KC_co]):
     __name__: str
 
     def __call__(
@@ -40,7 +41,7 @@ class StraightKCellFactory(Protocol):
         length: dbu,
         layer: kdb.LayerInfo,
         enclosure: LayerEnclosure | None = None,
-    ) -> KCell:
+    ) -> KC_co:
         """Waveguide defined in dbu.
 
             ┌──────────────────────────────┐
@@ -64,6 +65,33 @@ class StraightKCellFactory(Protocol):
 _straight_default_ports = PortsDefinition(left=["o1"], right=["o2"])
 
 
+@overload
+def straight_dbu_factory(
+    kcl: KCLayout,
+    *,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    **cell_kwargs: Unpack[CellKWargs],
+) -> StraightFactory[KCell]: ...
+@overload
+def straight_dbu_factory(
+    kcl: KCLayout,
+    *,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    output_type: type[KC],
+    **cell_kwargs: Unpack[CellKWargs],
+) -> StraightFactory[KC]: ...
+
+
 def straight_dbu_factory(
     kcl: KCLayout,
     additional_info: Callable[
@@ -72,10 +100,9 @@ def straight_dbu_factory(
     ]
     | dict[str, MetaData]
     | None = None,
-    basename: str | None = None,
-    ports: PortsDefinition = _straight_default_ports,
-    **cell_kwargs: Any,
-) -> StraightKCellFactory:
+    output_type: type[KC] | None = None,
+    **cell_kwargs: Unpack[CellKWargs],
+) -> StraightFactory[KC]:
     """Returns a function generating straights [dbu].
 
         ┌──────────────────────────────┐
@@ -108,12 +135,19 @@ def straight_dbu_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @kcl.cell(
-        basename=basename,
-        output_type=KCell,
-        ports=ports,
-        **cell_kwargs,
-    )
+    ports = cell_kwargs.get("ports")
+    if ports is None:
+        if kcl.rename_function == rename_clockwise:
+            cell_kwargs["ports"] = {"left": ["o1"], "right": ["o2"]}
+        elif kcl.rename_function == rename_by_direction:
+            cell_kwargs["ports"] = {"left": ["W0"], "right": ["E0"]}
+
+    if output_type is not None:
+        cell = kcl.cell(output_type=output_type, **cell_kwargs)
+    else:
+        cell = kcl.cell(output_type=cast("type[KC]", KCell), **cell_kwargs)
+
+    @cell
     def straight(
         width: dbu,
         length: dbu,

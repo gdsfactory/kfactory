@@ -4,7 +4,7 @@ A circular bend has a constant radius.
 """
 
 from collections.abc import Callable
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, Unpack, cast, overload
 
 import numpy as np
 
@@ -12,14 +12,20 @@ from .. import kdb
 from ..conf import logger
 from ..enclosure import LayerEnclosure, extrude_path
 from ..kcell import KCell
-from ..layout import KCLayout
+from ..layout import CellKWargs, KCLayout
 from ..settings import Info
-from ..typings import MetaData, deg, um
+from ..typings import KC, KC_co, MetaData, deg, um
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from ..enclosure import LayerEnclosure
+    from ..kcell import KCell
 
 __all__ = ["bend_circular_factory"]
 
 
-class BendCircularKCell(Protocol):
+class BendCircularFactory(Protocol[KC_co]):
     def __call__(
         self,
         width: um,
@@ -28,7 +34,7 @@ class BendCircularKCell(Protocol):
         enclosure: LayerEnclosure | None = None,
         angle: deg = 90,
         angle_step: deg = 1,
-    ) -> KCell:
+    ) -> KC_co:
         """Circular radius bend [um].
 
         Args:
@@ -42,18 +48,45 @@ class BendCircularKCell(Protocol):
         ...
 
 
+@overload
 def bend_circular_factory(
     kcl: KCLayout,
+    *,
     additional_info: Callable[
         ...,
         dict[str, MetaData],
     ]
     | dict[str, MetaData]
     | None = None,
-    basename: str | None = None,
-    snap_ports: bool = False,
-    **cell_kwargs: Any,
-) -> BendCircularKCell:
+    **cell_kwargs: Unpack[CellKWargs],
+) -> BendCircularFactory[KCell]: ...
+@overload
+def bend_circular_factory(
+    kcl: KCLayout,
+    *,
+    output_type: type[KC],
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    **cell_kwargs: Unpack[CellKWargs],
+) -> BendCircularFactory[KC]: ...
+
+
+def bend_circular_factory(
+    kcl: KCLayout,
+    *,
+    output_type: type[KC] | None = None,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    **cell_kwargs: Unpack[CellKWargs],
+) -> BendCircularFactory[KC]:
     """Returns a function generating circular bends.
 
     Args:
@@ -83,12 +116,15 @@ def bend_circular_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @kcl.cell(
-        basename=basename,
-        snap_ports=snap_ports,
-        output_type=KCell,
-        **cell_kwargs,
-    )
+    if cell_kwargs.get("snap_ports") is None:
+        cell_kwargs["snap_ports"] = False
+
+    if output_type is not None:
+        cell = kcl.cell(output_type=output_type, **cell_kwargs)
+    else:
+        cell = kcl.cell(output_type=cast("type[KC]", KCell), **cell_kwargs)
+
+    @cell
     def bend_circular(
         width: um,
         radius: um,

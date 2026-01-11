@@ -267,3 +267,84 @@ def as_png_data(
     layout_view.add_missing_layers()
     layout_view.zoom_fit()
     return layout_view.get_screenshot_pixels().to_png_data()
+
+
+def ensure_build_directory(
+    subdirectory: str = "mask", create_gitignore: bool = True
+) -> Path | None:
+    """Ensure build directory exists with proper gitignore.
+
+    This function consolidates all build directory creation logic, including
+    git repository detection and .gitignore creation.
+
+    Args:
+        subdirectory: Subdirectory under build/ (e.g., 'mask', 'session/kcls').
+        create_gitignore: Whether to create .gitignore in build directory.
+
+    Returns:
+        Path to the build subdirectory or None if not in a git repo.
+    """
+    project_dir = config.project_dir
+    if not project_dir:
+        return None
+
+    build_dir = Path(project_dir) / "build"
+    target_dir = build_dir / subdirectory
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    if create_gitignore:
+        gitignore_path = build_dir / ".gitignore"
+        if not gitignore_path.exists():
+            gitignore_path.write_text("*\n")
+
+    return target_dir
+
+
+def get_build_path(
+    filename: str, subdirectory: str = "mask", file_format: str = "gds"
+) -> tuple[Path, bool]:
+    """Get the appropriate build path for a file.
+
+    Determines whether to use a git-tracked build directory or temp directory,
+    and creates necessary directories.
+
+    Args:
+        filename: Base filename (without extension).
+        subdirectory: Subdirectory under build/ (e.g., 'mask', 'gds', 'oas').
+        file_format: File extension/format (e.g., 'gds', 'oas', 'lyrdb').
+
+    Returns:
+        Tuple of (file_path, should_delete):
+        - If in git repo: returns build directory path, False
+        - Otherwise: returns temp directory path, True
+    """
+    from tempfile import gettempdir
+
+    build_dir = ensure_build_directory(subdirectory)
+
+    if build_dir:
+        filepath = build_dir / Path(filename).with_suffix(f".{file_format}")
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+        return filepath, False
+    filepath = Path(gettempdir()) / Path(filename).with_suffix(f".{file_format}")
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    return filepath, True
+
+
+def get_session_directory(custom_dir: Path | None = None) -> Path:
+    """Get or create session cache directory.
+
+    Args:
+        custom_dir: Optional custom directory override.
+
+    Returns:
+        Path to session/kcls directory.
+    """
+    if custom_dir:
+        return custom_dir
+
+    build_dir = ensure_build_directory("session/kcls", create_gitignore=True)
+    if build_dir:
+        return build_dir
+    # Fallback to current directory
+    return Path() / "build/session/kcls"

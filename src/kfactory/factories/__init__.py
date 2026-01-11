@@ -1,11 +1,14 @@
 """Factories for generating functions which can produce KCells or VKCells."""
 
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from ..instance import ProtoTInstance
 from ..instance_group import ProtoTInstanceGroup
 from ..kcell import ProtoTKCell
 from . import bezier, circular, euler, straight, taper, virtual
+
+if TYPE_CHECKING:
+    from ..kcell import ProtoTKCell
 
 
 class StraightFactoryDBU(Protocol):

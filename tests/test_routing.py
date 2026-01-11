@@ -52,6 +52,143 @@ def test_route_straight(
 
 
 @pytest.mark.parametrize(
+    ("element", "loops", "loop_side"), [(1, 1, 1), (2, 2, 0), (-1, 4, 0), (-2, 1, -1)]
+)
+def test_route_length_match(
+    element: int,
+    loops: int,
+    loop_side: int,
+    bend90: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    layers: Layers,
+    kcl: kf.KCLayout,
+) -> None:
+    c = kcl.kcell("route_length_match")
+
+    start_ports = [
+        kf.Port(
+            trans=kf.kdb.Trans(1, False, x1 * 200_000, -x1 * 150_000),
+            width=500,
+            layer_info=layers.WG,
+        )
+        for x1 in range(3)
+    ]
+    start_ports[1].y -= 1
+    end_ports = [
+        kf.Port(
+            trans=kf.kdb.Trans(3, False, x1, 500_000),
+            width=500,
+            layer_info=layers.WG,
+        )
+        for x1 in [230_000, 400_000, 500_000]
+    ]
+
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90,
+        separation=10_000,
+        path_length_matching_config={
+            "element": element,
+            "loop_side": loop_side,
+            "loops": loops,
+            "loop_position": 0,
+        },
+    )
+    oasis_regression(c)
+    c.show()
+
+
+def test_route_length_match_errors(
+    bend90: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
+    kcl: kf.KCLayout,
+) -> None:
+    c = kcl.kcell("route_length_match_errors")
+
+    start_ports = [
+        kf.Port(
+            trans=kf.kdb.Trans(1, False, x1 * 200_000, -x1 * 300_000),
+            width=500,
+            layer_info=layers.WG,
+        )
+        for x1 in range(3)
+    ]
+    end_ports = [
+        kf.Port(
+            trans=kf.kdb.Trans(3, False, x1, 500_000),
+            width=500,
+            layer_info=layers.WG,
+        )
+        for x1 in [230_000, 400_000, 500_000]
+    ]
+    with pytest.raises(ValueError):
+        kf.routing.optical.route_bundle(
+            c,
+            start_ports,
+            end_ports,
+            straight_factory=straight_factory_dbu,
+            bend90_cell=bend90,
+            separation=10_000,
+            path_length_matching_config={
+                "element": None,
+                "loop_side": 1,
+                "loops": 2,
+                "loop_position": 0,
+            },
+        )  # type: ignore[call-overload]
+    with pytest.raises(ValueError):
+        kf.routing.optical.route_bundle(
+            c,
+            start_ports,
+            end_ports,
+            straight_factory=straight_factory_dbu,
+            bend90_cell=bend90,
+            separation=10_000,
+            path_length_matching_config={
+                "element": None,
+                "loop_side": 1,
+                "loops": 2,
+                "loop_position": 0,
+            },
+        )  # type: ignore[call-overload]
+    with pytest.raises(ValueError):
+        kf.routing.optical.route_bundle(
+            c,
+            start_ports,
+            end_ports,
+            straight_factory=straight_factory_dbu,
+            bend90_cell=bend90,
+            separation=10_000,
+            path_length_matching_config={
+                "element": 1,
+                "loop_side": None,
+                "loops": 2,
+                "loop_position": 0,
+            },
+        )  # type: ignore[call-overload]
+    with pytest.raises(ValueError):
+        kf.routing.optical.route_bundle(
+            c,
+            start_ports,
+            end_ports,
+            straight_factory=straight_factory_dbu,
+            bend90_cell=bend90,
+            separation=10_000,
+            path_length_matching_config={
+                "element": 1,
+                "loop_side": 1,
+                "loops": 2,
+                "loop_position": None,
+            },
+        )  # type: ignore[call-overload]
+
+
+@pytest.mark.parametrize(
     ("x", "y", "angle2"),
     [
         (20000, 20000, 2),

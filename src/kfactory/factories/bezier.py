@@ -1,7 +1,7 @@
 """Bezier curve based bends and functions."""
 
 from collections.abc import Callable, Sequence
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol, Unpack, cast, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -10,14 +10,21 @@ from scipy.special import binom  # type:ignore[import-untyped,unused-ignore]
 from .. import kdb
 from ..enclosure import LayerEnclosure
 from ..kcell import KCell
-from ..layout import KCLayout
+from ..layout import CellKWargs, KCLayout
+from ..port import rename_by_direction, rename_clockwise
 from ..settings import Info
-from ..typings import MetaData, um
+from ..typings import KC, KC_co, MetaData, um
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from ..enclosure import LayerEnclosure
+    from ..kcell import KCell
 
 __all__ = ["bend_s_bezier_factory"]
 
 
-class BezierKCell(Protocol):
+class BezierFactory(Protocol[KC_co]):
     def __call__(
         self,
         width: um,
@@ -28,7 +35,7 @@ class BezierKCell(Protocol):
         t_start: float = 0,
         t_stop: float = 1,
         enclosure: LayerEnclosure | None = None,
-    ) -> KCell:
+    ) -> KC_co:
         """Creat a bezier bend.
 
         Args:
@@ -60,6 +67,33 @@ def bezier_curve(
     return [kdb.DPoint(float(x), float(y)) for x, y in zip(xs, ys, strict=False)]
 
 
+@overload
+def bend_s_bezier_factory(
+    kcl: KCLayout,
+    *,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    **cell_kwargs: Unpack[CellKWargs],
+) -> BezierFactory[KCell]: ...
+@overload
+def bend_s_bezier_factory(
+    kcl: KCLayout,
+    *,
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None = None,
+    output_type: type[KC],
+    **cell_kwargs: Unpack[CellKWargs],
+) -> BezierFactory[KC]: ...
+
+
 def bend_s_bezier_factory(
     kcl: KCLayout,
     additional_info: Callable[
@@ -68,9 +102,9 @@ def bend_s_bezier_factory(
     ]
     | dict[str, MetaData]
     | None = None,
-    basename: str | None = None,
-    **cell_kwargs: Any,
-) -> BezierKCell:
+    output_type: type[KC] | None = None,
+    **cell_kwargs: Unpack[CellKWargs],
+) -> BezierFactory[KC]:
     """Returns a function generating bezier s-bends.
 
     Args:
@@ -99,7 +133,19 @@ def bend_s_bezier_factory(
         _additional_info_func = additional_info_func
         _additional_info = additional_info or {}
 
-    @kcl.cell(basename=basename, output_type=KCell, **cell_kwargs)
+    ports = cell_kwargs.get("ports")
+    if ports is None:
+        if kcl.rename_function == rename_clockwise:
+            cell_kwargs["ports"] = {"left": ["o1"], "right": ["o2"]}
+        elif kcl.rename_function == rename_by_direction:
+            cell_kwargs["ports"] = {"left": ["W0"], "right": ["E0"]}
+
+    if output_type is not None:
+        cell = kcl.cell(output_type=output_type, **cell_kwargs)
+    else:
+        cell = kcl.cell(output_type=cast("type[KC]", KCell), **cell_kwargs)
+
+    @cell
     def bend_s_bezier(
         width: um,
         height: um,

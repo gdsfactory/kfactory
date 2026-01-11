@@ -1,3 +1,308 @@
+<a id="v2.2.1"></a>
+# [v2.2.1](https://github.com/gdsfactory/kfactory/releases/tag/v2.2.1) - 2025-12-15
+
+# What's Changed
+
+## Bug Fixes
+
+- Parse decorator tags to func wrapper [#842](https://github.com/gdsfactory/kfactory/pull/842)
+- Fix annotations [#841](https://github.com/gdsfactory/kfactory/pull/841)
+
+## Other changes
+
+- Fix docs typo intro.md minkowsky->minkowski [#844](https://github.com/gdsfactory/kfactory/pull/844)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.2.0...v2.2.1
+
+
+[Changes][v2.2.1]
+
+
+<a id="v2.2.0"></a>
+# [v2.2.0](https://github.com/gdsfactory/kfactory/releases/tag/v2.2.0) - 2025-12-01
+
+# What's Changed
+
+## New
+
+- add path length matching capabilities to route_bundle [#835](https://github.com/gdsfactory/kfactory/pull/835)
+- Added retrun self to VInstance.connect [#837](https://github.com/gdsfactory/kfactory/pull/837)
+- add  and a way to get schematis without building the cell [#834](https://github.com/gdsfactory/kfactory/pull/834)
+- Build gitignore [#833](https://github.com/gdsfactory/kfactory/pull/833)
+- add schematic function retrieval for factories [#830](https://github.com/gdsfactory/kfactory/pull/830)
+
+## Bug Fixes
+
+- Don't set anchor if it's not set [#832](https://github.com/gdsfactory/kfactory/pull/832)
+- add 'multi' parameter to FillOperator call in fill_tiled() [#831](https://github.com/gdsfactory/kfactory/pull/831)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.1.0...v2.2.0
+
+
+[Changes][v2.2.0]
+
+
+<a id="v2.1.0"></a>
+# [v2.1.0](https://github.com/gdsfactory/kfactory/releases/tag/v2.1.0) - 2025-11-19
+
+# What's Changed
+
+## New
+
+- Sparse coverage function [#828](https://github.com/gdsfactory/kfactory/pull/828)
+
+## Bug Fixes
+
+- fix factory names if basename is present [#829](https://github.com/gdsfactory/kfactory/pull/829)
+- Fix dport constructor and place_manhattan errors on non-manhattan ports [#825](https://github.com/gdsfactory/kfactory/pull/825)
+
+## Dependency Updates
+
+- Update typer requirement from <0.20,>=0.19.r20 to >=0.19.r20,<0.21 [#822](https://github.com/gdsfactory/kfactory/pull/822)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.0.0...v2.1.0
+
+
+[Changes][v2.1.0]
+
+
+<a id="v2.0.0"></a>
+# [v2.0.0](https://github.com/gdsfactory/kfactory/releases/tag/v2.0.0) - 2025-10-17
+
+# What's Changed
+
+## Breaking
+
+- Release 2.0 [#795](https://github.com/gdsfactory/kfactory/pull/795)
+
+## New
+
+- add ProtoTKCell.write_bytes [#820](https://github.com/gdsfactory/kfactory/pull/820)
+- Improve factories to mapping [#810](https://github.com/gdsfactory/kfactory/pull/810)
+- Refactor factories [#809](https://github.com/gdsfactory/kfactory/pull/809)
+
+## Bug Fixes
+
+- fix route_bundle allow_layer_mismatch params bug [#817](https://github.com/gdsfactory/kfactory/pull/817)
+- fix all notebooks and doc references [#818](https://github.com/gdsfactory/kfactory/pull/818)
+- added self as return value of ComponentReference.connect [#816](https://github.com/gdsfactory/kfactory/pull/816)
+
+## Documentation
+
+- Release 2.0 [#795](https://github.com/gdsfactory/kfactory/pull/795)
+- fix all notebooks and doc references [#818](https://github.com/gdsfactory/kfactory/pull/818)
+- kfactory notebook updates [#815](https://github.com/gdsfactory/kfactory/pull/815)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.14.4...v2.0.0
+
+
+[Changes][v2.0.0]
+
+
+<a id="v1.14.4"></a>
+# [v1.14.4](https://github.com/gdsfactory/kfactory/releases/tag/v1.14.4) - 2025-09-27
+
+# What's Changed
+
+## Bug Fixes
+
+- fix connectivity check for cells with text [#805](https://github.com/gdsfactory/kfactory/pull/805)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.14.3...v1.14.4
+
+
+[Changes][v1.14.4]
+
+
+<a id="v1.14.3"></a>
+# [v1.14.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.14.3) - 2025-09-26
+
+# What's Changed
+
+## Bug Fixes
+
+- fix version parsing by using the semver package [#804](https://github.com/gdsfactory/kfactory/pull/804)
+- Fix file format inconsistencies in show [#803](https://github.com/gdsfactory/kfactory/pull/803)
+
+## Maintenance
+
+- support pre-releases and other PEP440 conform versions [#800](https://github.com/gdsfactory/kfactory/pull/800)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.14.2...v1.14.3
+
+
+[Changes][v1.14.3]
+
+
+<a id="v1.14.2"></a>
+# [v1.14.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.14.2) - 2025-09-19
+
+# What's Changed
+
+## Bug Fixes
+
+- fix router erroring if the ports are not manhattan [#797](https://github.com/gdsfactory/kfactory/pull/797)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.14.1...v1.14.2
+
+
+[Changes][v1.14.2]
+
+
+<a id="v1.14.1"></a>
+# [v1.14.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.14.1) - 2025-09-17
+
+# What's Changed
+
+## Bug Fixes
+
+- make sure violation fixers use 250um as a min size for the tiling [#794](https://github.com/gdsfactory/kfactory/pull/794)
+- fix project_dir resolution [#793](https://github.com/gdsfactory/kfactory/pull/793)
+- Fix typo in ports error [#791](https://github.com/gdsfactory/kfactory/pull/791)
+
+## Documentation
+
+- make sure violation fixers use 250um as a min size for the tiling [#794](https://github.com/gdsfactory/kfactory/pull/794)
+- Update readme [#790](https://github.com/gdsfactory/kfactory/pull/790)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.14.0...v1.14.1
+
+
+[Changes][v1.14.1]
+
+
+<a id="v1.14.0"></a>
+# [v1.14.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.14.0) - 2025-09-12
+
+# What's Changed
+
+## New
+
+- autosort capabilities to waypoint routing [#781](https://github.com/gdsfactory/kfactory/pull/781)
+
+## Bug Fixes
+
+- fix layout read [#789](https://github.com/gdsfactory/kfactory/pull/789)
+- Remove unused dependency on tomli [#784](https://github.com/gdsfactory/kfactory/pull/784)
+- replace gitpython with pygit2 [#785](https://github.com/gdsfactory/kfactory/pull/785)
+- better waypoint errors [#780](https://github.com/gdsfactory/kfactory/pull/780)
+
+## Maintenance
+
+- Update lock file [#786](https://github.com/gdsfactory/kfactory/pull/786)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.13.1...v1.14.0
+
+
+[Changes][v1.14.0]
+
+
+<a id="v1.13.1"></a>
+# [v1.13.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.13.1) - 2025-09-01
+
+# What's Changed
+
+## Bug Fixes
+
+- fix routing ports are almost on top of each other in one dim [#778](https://github.com/gdsfactory/kfactory/pull/778)
+- show cell names [#766](https://github.com/gdsfactory/kfactory/pull/766)
+
+## Dependency Updates
+
+- fix pyproject config for versions [#779](https://github.com/gdsfactory/kfactory/pull/779)
+- Update typer requirement from <0.17,>=0.15.2 to >=0.15.2,<0.18 [#775](https://github.com/gdsfactory/kfactory/pull/775)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.13.0...v1.13.1
+
+
+[Changes][v1.13.1]
+
+
+<a id="v1.13.0"></a>
+# [v1.13.0](https://github.com/gdsfactory/kfactory/releases/tag/v1.13.0) - 2025-08-29
+
+# What's Changed
+
+## New
+
+- add mirror to SchemaInstance connect [#764](https://github.com/gdsfactory/kfactory/pull/764)
+- add better cross section retrieval and make it consistent [#763](https://github.com/gdsfactory/kfactory/pull/763)
+
+## Bug Fixes
+
+- fix route electrical width [#774](https://github.com/gdsfactory/kfactory/pull/774)
+- add better cross section retrieval and make it consistent [#763](https://github.com/gdsfactory/kfactory/pull/763)
+- fix some read errors [#761](https://github.com/gdsfactory/kfactory/pull/761)
+- fix netlist kcl factories retrieval [#760](https://github.com/gdsfactory/kfactory/pull/760)
+- catch errors if wrong class is returned [#759](https://github.com/gdsfactory/kfactory/pull/759)
+
+## Documentation
+
+- Update docs for `Schema` [#719](https://github.com/gdsfactory/kfactory/pull/719)
+- update readme [#762](https://github.com/gdsfactory/kfactory/pull/762)
+
+## Typing
+
+- Ty fixes [#770](https://github.com/gdsfactory/kfactory/pull/770)
+
+## Other changes
+
+- Remove `if __name__ == '__main__'` in test files [#771](https://github.com/gdsfactory/kfactory/pull/771)
+
+## Dependency Updates
+
+- Test against all gdsfactory yaml-pics [#765](https://github.com/gdsfactory/kfactory/pull/765)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.12.4...v1.13.0
+
+
+[Changes][v1.13.0]
+
+
+<a id="v1.12.4"></a>
+# [v1.12.4](https://github.com/gdsfactory/kfactory/releases/tag/v1.12.4) - 2025-08-11
+
+# What's Changed
+
+
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.12.3...v1.12.4
+
+
+[Changes][v1.12.4]
+
+
+<a id="v1.12.3"></a>
+# [v1.12.3](https://github.com/gdsfactory/kfactory/releases/tag/v1.12.3) - 2025-08-11
+
+# What's Changed
+
+## Bug Fixes
+
+- fix vectors in fill [#756](https://github.com/gdsfactory/kfactory/pull/756)
+- remove find_layer from standard kfactory cells and utils [#757](https://github.com/gdsfactory/kfactory/pull/757)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.12.2...v1.12.3
+
+
+[Changes][v1.12.3]
+
+
+<a id="v1.12.2"></a>
+# [v1.12.2](https://github.com/gdsfactory/kfactory/releases/tag/v1.12.2) - 2025-08-06
+
+# What's Changed
+
+## Bug Fixes
+
+- only pass parameters to show if they are not none [#755](https://github.com/gdsfactory/kfactory/pull/755)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v1.12.1...v1.12.2
+
+
+[Changes][v1.12.2]
+
+
 <a id="v1.12.1"></a>
 # [v1.12.1](https://github.com/gdsfactory/kfactory/releases/tag/v1.12.1) - 2025-08-04
 
@@ -2261,6 +2566,20 @@
 [Changes][v0.4.0]
 
 
+[v2.2.1]: https://github.com/gdsfactory/kfactory/compare/v2.2.0...v2.2.1
+[v2.2.0]: https://github.com/gdsfactory/kfactory/compare/v2.1.0...v2.2.0
+[v2.1.0]: https://github.com/gdsfactory/kfactory/compare/v2.0.0...v2.1.0
+[v2.0.0]: https://github.com/gdsfactory/kfactory/compare/v1.14.4...v2.0.0
+[v1.14.4]: https://github.com/gdsfactory/kfactory/compare/v1.14.3...v1.14.4
+[v1.14.3]: https://github.com/gdsfactory/kfactory/compare/v1.14.2...v1.14.3
+[v1.14.2]: https://github.com/gdsfactory/kfactory/compare/v1.14.1...v1.14.2
+[v1.14.1]: https://github.com/gdsfactory/kfactory/compare/v1.14.0...v1.14.1
+[v1.14.0]: https://github.com/gdsfactory/kfactory/compare/v1.13.1...v1.14.0
+[v1.13.1]: https://github.com/gdsfactory/kfactory/compare/v1.13.0...v1.13.1
+[v1.13.0]: https://github.com/gdsfactory/kfactory/compare/v1.12.4...v1.13.0
+[v1.12.4]: https://github.com/gdsfactory/kfactory/compare/v1.12.3...v1.12.4
+[v1.12.3]: https://github.com/gdsfactory/kfactory/compare/v1.12.2...v1.12.3
+[v1.12.2]: https://github.com/gdsfactory/kfactory/compare/v1.12.1...v1.12.2
 [v1.12.1]: https://github.com/gdsfactory/kfactory/compare/v1.12.0...v1.12.1
 [v1.12.0]: https://github.com/gdsfactory/kfactory/compare/v1.11.0...v1.12.0
 [v1.11.0]: https://github.com/gdsfactory/kfactory/compare/v1.10.1...v1.11.0
@@ -2376,4 +2695,4 @@
 [v0.4.1]: https://github.com/gdsfactory/kfactory/compare/v0.4.0...v0.4.1
 [v0.4.0]: https://github.com/gdsfactory/kfactory/tree/v0.4.0
 
-<!-- Generated by https://github.com/rhysd/changelog-from-release v3.9.0 -->
+<!-- Generated by https://github.com/rhysd/changelog-from-release v3.9.1 -->
