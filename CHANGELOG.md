@@ -5,8 +5,20 @@
 
 ## Bug Fixes
 
+- fix width call for bend_factory [#849](https://github.com/gdsfactory/kfactory/pull/849)
+- Fix annotations [#846](https://github.com/gdsfactory/kfactory/pull/846)
 - Parse decorator tags to func wrapper [#842](https://github.com/gdsfactory/kfactory/pull/842)
 - Fix annotations [#841](https://github.com/gdsfactory/kfactory/pull/841)
+
+## Maintenance
+
+- Remove matthew from codeowners [#851](https://github.com/gdsfactory/kfactory/pull/851)
+
+## Documentation
+
+- Remove matthew from codeowners [#851](https://github.com/gdsfactory/kfactory/pull/851)
+- fix width call for bend_factory [#849](https://github.com/gdsfactory/kfactory/pull/849)
+- Fix annotations [#846](https://github.com/gdsfactory/kfactory/pull/846)
 
 ## Other changes
 
@@ -26,7 +38,7 @@
 ## New
 
 - add path length matching capabilities to route_bundle [#835](https://github.com/gdsfactory/kfactory/pull/835)
-- Added return self to VInstance.connect [#837](https://github.com/gdsfactory/kfactory/pull/837)
+- Added retrun self to VInstance.connect [#837](https://github.com/gdsfactory/kfactory/pull/837)
 - add  and a way to get schematis without building the cell [#834](https://github.com/gdsfactory/kfactory/pull/834)
 - Build gitignore [#833](https://github.com/gdsfactory/kfactory/pull/833)
 - add schematic function retrieval for factories [#830](https://github.com/gdsfactory/kfactory/pull/830)
