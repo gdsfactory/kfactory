@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- Avoid implicit point simplification on itype conversion in Shape.insert [#850](https://github.com/gdsfactory/kfactory/pull/850)
 - fix width call for bend_factory [#849](https://github.com/gdsfactory/kfactory/pull/849)
 - Fix annotations [#846](https://github.com/gdsfactory/kfactory/pull/846)
 - Parse decorator tags to func wrapper [#842](https://github.com/gdsfactory/kfactory/pull/842)
