@@ -58,6 +58,7 @@ def bend_circular_factory(
     ]
     | dict[str, MetaData]
     | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BendCircularFactory[KCell]: ...
 @overload
@@ -71,6 +72,7 @@ def bend_circular_factory(
     ]
     | dict[str, MetaData]
     | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BendCircularFactory[KC]: ...
 
@@ -85,6 +87,7 @@ def bend_circular_factory(
     ]
     | dict[str, MetaData]
     | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BendCircularFactory[KC]:
     """Returns a function generating circular bends.
@@ -188,11 +191,13 @@ def bend_circular_factory(
             trans=kdb.Trans(2, False, 0, 0),
             width=int(width / c.kcl.dbu),
             layer=c.kcl.layer(layer),
+            port_type=port_type,
         )
         c.create_port(
             dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
             width=c.kcl.to_dbu(width),
             layer=c.kcl.layer(layer),
+            port_type=port_type,
         )
         c.auto_rename_ports()
         c.boundary = center_path

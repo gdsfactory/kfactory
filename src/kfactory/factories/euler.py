@@ -217,6 +217,7 @@ def bend_euler_factory(
     ]
     | dict[str, MetaData]
     | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BendEulerFactory[KCell]: ...
 @overload
@@ -230,6 +231,7 @@ def bend_euler_factory(
     ]
     | dict[str, MetaData]
     | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BendEulerFactory[KC]: ...
 def bend_euler_factory(
@@ -242,6 +244,7 @@ def bend_euler_factory(
     ]
     | dict[str, MetaData]
     | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BendEulerFactory[KC]:
     """Returns a function generating euler bends.
@@ -340,12 +343,14 @@ def bend_euler_factory(
                 trans=kdb.Trans(_ang // 90, False, c.kcl.to_dbu(backbone[-1]).to_v()),
                 width=round(width / c.kcl.dbu),
                 layer=li,
+                port_type=port_type,
             )
         else:
             c.create_port(
                 dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
                 width=c.kcl.to_dbu(width),
                 layer=li,
+                port_type=port_type,
             )
         _info: dict[str, MetaData] = {}
         _info.update(
@@ -378,6 +383,7 @@ def bend_s_euler_factory(
     ]
     | dict[str, MetaData]
     | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BendSEulerFactory[KCell]: ...
 @overload
@@ -391,6 +397,7 @@ def bend_s_euler_factory(
     ]
     | dict[str, MetaData]
     | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BendSEulerFactory[KC]: ...
 
@@ -404,6 +411,7 @@ def bend_s_euler_factory(
     ]
     | dict[str, MetaData]
     | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BendSEulerFactory[KC]:
     """Returns a function generating euler s-bends.
@@ -491,13 +499,13 @@ def bend_s_euler_factory(
         c.create_port(
             trans=kdb.Trans(2, False, p1.to_v()),
             width=c.kcl.to_dbu(width),
-            port_type="optical",
+            port_type=port_type,
             layer=li,
         )
         c.create_port(
             trans=kdb.Trans(0, False, p2.to_v()),
             width=c.kcl.to_dbu(width),
-            port_type="optical",
+            port_type=port_type,
             layer=li,
         )
         c.boundary = center_path
