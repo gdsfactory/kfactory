@@ -67,6 +67,7 @@ def taper_factory(
     ]
     | dict[str, MetaData]
     | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> TaperFactory[KCell]: ...
 @overload
@@ -80,6 +81,7 @@ def taper_factory(
     | dict[str, MetaData]
     | None = None,
     output_type: type[KC],
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> TaperFactory[KC]: ...
 
@@ -93,6 +95,7 @@ def taper_factory(
     | dict[str, MetaData]
     | None = None,
     output_type: type[KC] | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> TaperFactory[KC]:
     r"""Returns a function generating linear tapers [dbu].
@@ -214,8 +217,18 @@ def taper_factory(
             )
         )
 
-        c.create_port(trans=kdb.Trans(2, False, 0, 0), width=width1, layer=li)
-        c.create_port(trans=kdb.Trans(0, False, length, 0), width=width2, layer=li)
+        c.create_port(
+            trans=kdb.Trans(2, False, 0, 0),
+            width=width1,
+            layer=li,
+            port_type=port_type,
+        )
+        c.create_port(
+            trans=kdb.Trans(0, False, length, 0),
+            width=width2,
+            layer=li,
+            port_type=port_type,
+        )
 
         if enclosure is not None:
             enclosure.apply_minkowski_y(c, layer)
