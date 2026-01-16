@@ -786,13 +786,13 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 )
             if trans_ != kdb.DCplxTrans():
                 cell_name += f"_{trans_.hash():x}"
-            if cell.kcl.layout_cell(cell_name) is None:
+            if self.cell.kcl.layout.cell(cell_name) is None:
                 cell_ = KCell(kcl=self.cell.kcl, name=cell_name)  # self.cell.dup()
                 for layer, shapes in self.cell.shapes().items():
                     for shape in shapes.transform(trans_):
                         if isinstance(shape, kdb.DPolygon | kdb.DSimplePolygon):
-                            shape = shape.to_itype(cell.kcl.dbu)
-                        cell_.shapes(layer).insert(shape)
+                            shape_ = shape.to_itype(cell.kcl.dbu)
+                        cell_.shapes(layer).insert(shape_)
                 for inst in self.cell.insts:
                     inst.insert_into(cell=cell_, trans=trans_)
                 cell_.name = cell_name
@@ -816,8 +816,38 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 cell_._base.virtual = True
                 if trans_ != kdb.DCplxTrans.R0:
                     cell_._base.vtrans = trans_
+                is_lib_cell = cell.kcl != self.cell.kcl
+                if is_lib_cell:
+                    lib_ci = cell.kcl.layout.add_lib_cell(
+                        cell_.kcl.library, cell_.cell_index()
+                    )
+                    kcell = cell.kcl[lib_ci]
+                    kcell.copy_meta_info(cell_.kdb_cell)
+                    kcell.base.function_name = cell_.function_name
+                    kcell.base.basename = cell_.basename
+                    kcell.base.virtual = cell_.base.virtual
+                    kcell.base.vtrans = cell_.base.vtrans
+                    kcell.base._library_cell = cell_
+                    cell_ = kcell
+            elif cell.kcl.layout.cell(cell_name) is not None:
+                cell_ = self.cell.kcl[cell_name]
             else:
-                cell_ = cell.kcl[cell_name]
+                kdb_cell_ = self.cell.kcl.layout.cell(cell_name)
+                assert kdb_cell_ is not None, (
+                    "This should never happen, please open a bug report on https://github.com/gdsfactory/kfactory"
+                )
+                cell_ = self.cell.kcl[kdb_cell_.cell_index()]
+                lib_ci = cell.kcl.layout.add_lib_cell(
+                    cell_.kcl.library, cell_.cell_index()
+                )
+                kcell = cell.kcl[lib_ci]
+                kcell.copy_meta_info(cell_.kdb_cell)
+                kcell.base.function_name = cell_.function_name
+                kcell.base.basename = cell_.basename
+                kcell.base.virtual = cell_.base.virtual
+                kcell.base.vtrans = cell_.base.vtrans
+                kcell.base._library_cell = cell_
+                cell_ = kcell
             inst_ = cell.create_inst(
                 cell=cell_, na=self.na, nb=self.nb, a=self.a, b=self.b
             )
@@ -907,8 +937,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     if isinstance(cell, ProtoTKCell) and isinstance(
                         shape, kdb.DPolygon | kdb.DSimplePolygon
                     ):
-                        shape = shape.to_itype(cell.kcl.dbu)
-                    cell.shapes(layer).insert(shape)
+                        shape_ = shape.to_itype(cell.kcl.dbu)
+                    cell.shapes(layer).insert(shape_)
             for inst in self.cell.insts:
                 if levels is not None:
                     if levels > 0:
