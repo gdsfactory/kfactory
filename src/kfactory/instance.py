@@ -937,10 +937,11 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         if isinstance(self.cell, VKCell):
             for layer, shapes in self.cell.shapes().items():
                 for shape in shapes.transform(trans * self.trans):
+                    shape_ = shape
                     if isinstance(cell, ProtoTKCell) and isinstance(
-                        shape, kdb.DPolygon | kdb.DSimplePolygon
+                        shape_, kdb.DPolygon | kdb.DSimplePolygon
                     ):
-                        shape_ = shape.to_itype(cell.kcl.dbu)
+                        shape_ = shape_.to_itype(cell.kcl.dbu)
                     cell.shapes(layer).insert(shape_)
             for inst in self.cell.insts:
                 if levels is not None:
