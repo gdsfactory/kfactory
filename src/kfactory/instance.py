@@ -410,7 +410,10 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatchError(self, other, p, op)
-        if p.layer != op.layer and not allow_layer_mismatch:
+        if (
+            p.layer_info.layer != op.layer_info.layer
+            or p.layer_info.datatype != op.layer_info.datatype
+        ) and not allow_layer_mismatch:
             raise PortLayerMismatchError(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatchError(self, other, p, op)
@@ -1076,7 +1079,10 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
 
         if p.width != op.width and not allow_width_mismatch:
             raise PortWidthMismatchError(self, other, p, op)
-        if p.layer != op.layer and not allow_layer_mismatch:
+        if (
+            p.layer_info.layer != op.layer_info.layer
+            or p.layer_info.datatype != op.layer_info.datatype
+        ) and not allow_layer_mismatch:
             raise PortLayerMismatchError(self.cell.kcl, self, other, p, op)
         if p.port_type != op.port_type and not allow_type_mismatch:
             raise PortTypeMismatchError(self, other, p, op)
