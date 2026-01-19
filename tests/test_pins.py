@@ -6,7 +6,7 @@ from tests.conftest import Layers
 
 
 def test_pins(
-    layers: Layers, oasis_regression: Callable[[kf.ProtoTKCell[Any]], None]
+    layers: Layers, gds_regression: Callable[[kf.ProtoTKCell[Any]], None]
 ) -> None:
     kcl_1 = kf.KCLayout("PIN_PDK", infos=Layers)
 
@@ -104,7 +104,7 @@ def test_pins(
 
     ci = pad1.cell.cell_index()
     ci2 = pad2.cell.cell_index()
-    oasis_regression(pad())
+    gds_regression(pad())
     c.delete()
     kf.kcl[ci].delete()
     kf.kcl[ci2].delete()

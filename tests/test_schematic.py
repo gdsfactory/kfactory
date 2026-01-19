@@ -83,7 +83,7 @@ ports:
 
 
 def test_schematic_create(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     pdk = kcl
     layers = Layers()
@@ -126,11 +126,11 @@ def test_schematic_create(
 
     c = schematic.create_cell(kf.KCell)
     c.name = "test_schematic_create"
-    oasis_regression(c)
+    gds_regression(c)
 
 
 def test_schematic_create_cell(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     layers = Layers()
     pdk = kcl
@@ -177,11 +177,11 @@ def test_schematic_create_cell(
 
     assert pdk.factories["long_straight"].schematic_driven()
 
-    oasis_regression(long_straight(2))
+    gds_regression(long_straight(2))
 
 
 def test_schematic_mirror_connection(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     layers = Layers()
     pdk = kcl
@@ -282,11 +282,11 @@ def test_schematic_mirror_connection(
 
     assert pdk.factories["straight_sbend"].schematic_driven()
 
-    oasis_regression(straight_sbend(length=10_000, offset=20_000))
+    gds_regression(straight_sbend(length=10_000, offset=20_000))
 
 
 def test_schematic_kcl_mix_netlist(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], layers: Layers
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], layers: Layers
 ) -> None:
     layers = Layers()
     pdk = kf.KCLayout("schematic_pdk_decorator", infos=layers.__class__)
@@ -340,11 +340,11 @@ def test_schematic_kcl_mix_netlist(
 
     c = long_straight(n=2000)
     c.netlist()
-    oasis_regression(c)
+    gds_regression(c)
 
 
 def test_schematic_route(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     layers = Layers()
     pdk = kf.KCLayout("schematic_pdk_routing", infos=Layers)
@@ -409,11 +409,11 @@ def test_schematic_route(
 
     assert pdk.factories["route_example"]._f_orig is route_example.__wrapped__  # type: ignore[attr-defined]
 
-    oasis_regression(route_example())
+    gds_regression(route_example())
 
 
 def test_netlist(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     class Layers(kf.LayerInfos):
         WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
@@ -568,11 +568,11 @@ def test_netlist(
         connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)],
     )
     assert nl == nl2[c.name]
-    oasis_regression(c)
+    gds_regression(c)
 
 
 def test_netlist_equivalent(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     layers = Layers()
     pdk = kf.KCLayout(
@@ -732,11 +732,11 @@ def test_netlist_equivalent(
 
     assert schema_str is not None
     c.name = "test_schematic_anchor"
-    oasis_regression(c)
+    gds_regression(c)
 
 
 def test_schematic_anchor(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     pdk = kf.KCLayout("schematic_pdk_anchor_port", infos=Layers)
     layers = Layers()
@@ -784,7 +784,7 @@ def test_schematic_anchor(
 
     c = schematic.create_cell(kf.KCell)
     c.name = "test_schematic_anchor"
-    oasis_regression(c)
+    gds_regression(c)
 
 
 def test_schematic_function_get_port_positions(

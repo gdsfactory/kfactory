@@ -237,7 +237,7 @@ def unlink_merge_read_oas() -> Iterator[None]:
 
 
 @pytest.fixture
-def oasis_regression(
+def gds_regression(
     file_regression: FileRegressionFixture,
 ) -> Callable[[kf.ProtoTKCell[Any]], None]:
     saveopts = kf.save_layout_options()

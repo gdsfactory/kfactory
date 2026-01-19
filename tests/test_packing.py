@@ -6,7 +6,7 @@ import kfactory as kf
 
 def test_pack_kcells(
     kcl: kf.KCLayout,
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell()
     straight = kf.factories.straight.straight_dbu_factory(kcl)(
@@ -16,12 +16,12 @@ def test_pack_kcells(
         c, [straight] * 4, max_height=2000, max_width=2000
     )
     assert instance_group.bbox() == kf.kdb.DBox(0, 0, 2000, 2000)
-    oasis_regression(c)
+    gds_regression(c)
 
 
 def test_pack_instances(
     kcl: kf.KCLayout,
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell()
     straight = kf.factories.straight.straight_dbu_factory(kcl)(
@@ -35,4 +35,4 @@ def test_pack_instances(
         c, [ref, ref2, ref3, ref4], max_height=2000, max_width=2000
     )
     assert instance_group.bbox() == kf.kdb.DBox(0, 0, 2000, 2000)
-    oasis_regression(c)
+    gds_regression(c)

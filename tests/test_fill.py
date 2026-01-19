@@ -8,7 +8,7 @@ from tests.conftest import Layers
 def test_tiled_fill_space(
     fill_cell: kf.KCell,
     layers: Layers,
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell()
@@ -39,7 +39,7 @@ def test_tiled_fill_space(
 def test_tiled_fill_vector(
     fill_cell: kf.KCell,
     layers: Layers,
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell()
