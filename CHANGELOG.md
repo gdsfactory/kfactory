@@ -1,3 +1,22 @@
+<a id="v2.3.0"></a>
+# [v2.3.0](https://github.com/gdsfactory/kfactory/releases/tag/v2.3.0) - 2026-01-19
+
+# What's Changed
+
+## New
+
+- expose a port_type config in the factories [#852](https://github.com/gdsfactory/kfactory/pull/852)
+
+## Documentation
+
+- expose a port_type config in the factories [#852](https://github.com/gdsfactory/kfactory/pull/852)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.2.1...v2.3.0
+
+
+[Changes][v2.3.0]
+
+
 <a id="v2.2.1"></a>
 # [v2.2.1](https://github.com/gdsfactory/kfactory/releases/tag/v2.2.1) - 2026-01-13
 
@@ -39,7 +58,7 @@
 ## New
 
 - add path length matching capabilities to route_bundle [#835](https://github.com/gdsfactory/kfactory/pull/835)
-- Added return self to VInstance.connect [#837](https://github.com/gdsfactory/kfactory/pull/837)
+- Added retrun self to VInstance.connect [#837](https://github.com/gdsfactory/kfactory/pull/837)
 - add  and a way to get schematis without building the cell [#834](https://github.com/gdsfactory/kfactory/pull/834)
 - Build gitignore [#833](https://github.com/gdsfactory/kfactory/pull/833)
 - add schematic function retrieval for factories [#830](https://github.com/gdsfactory/kfactory/pull/830)
@@ -2579,6 +2598,7 @@
 [Changes][v0.4.0]
 
 
+[v2.3.0]: https://github.com/gdsfactory/kfactory/compare/v2.2.1...v2.3.0
 [v2.2.1]: https://github.com/gdsfactory/kfactory/compare/v2.2.0...v2.2.1
 [v2.2.0]: https://github.com/gdsfactory/kfactory/compare/v2.1.0...v2.2.0
 [v2.1.0]: https://github.com/gdsfactory/kfactory/compare/v2.0.0...v2.1.0
