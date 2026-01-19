@@ -437,7 +437,10 @@ class SchematicInstance(
     @mirror.setter
     def mirror(self, value: bool) -> None:
         if self.placement is None:
-            self.parent_schematic.placements[self.name] = MirrorPlacement(mirror=True)
+            if value:
+                self.parent_schematic.placements[self.name] = MirrorPlacement(
+                    mirror=True
+                )
         else:
             self.placement.mirror = value
 
@@ -1364,6 +1367,13 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         )
         self.routes[name] = route
         return route
+
+    def connect(
+        self, port1: PortRef | Port[TUnit], port2: PortRef
+    ) -> Connection[TUnit]:
+        conn = Connection[TUnit]((port1, port2))
+        self.connections.append(conn)
+        return conn
 
     def __getitem__(self, key: str) -> Port[TUnit] | PortRef:
         return self.ports[key]
