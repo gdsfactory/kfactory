@@ -77,6 +77,7 @@ def bend_s_bezier_factory(
     ]
     | dict[str, MetaData]
     | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BezierFactory[KCell]: ...
 @overload
@@ -90,6 +91,7 @@ def bend_s_bezier_factory(
     | dict[str, MetaData]
     | None = None,
     output_type: type[KC],
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BezierFactory[KC]: ...
 
@@ -103,6 +105,7 @@ def bend_s_bezier_factory(
     | dict[str, MetaData]
     | None = None,
     output_type: type[KC] | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> BezierFactory[KC]:
     """Returns a function generating bezier s-bends.
@@ -191,13 +194,13 @@ def bend_s_bezier_factory(
             width=int(width / c.kcl.dbu),
             trans=kdb.Trans(2, False, 0, 0),
             layer=c.kcl.layer(layer),
-            port_type="optical",
+            port_type=port_type,
         )
         c.create_port(
             width=int(width / c.kcl.dbu),
             trans=kdb.Trans(0, False, c.bbox().right, kcl.to_dbu(height)),
             layer=c.kcl.layer(layer),
-            port_type="optical",
+            port_type=port_type,
         )
         _info: dict[str, MetaData] = {}
         _info.update(

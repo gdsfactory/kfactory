@@ -47,7 +47,7 @@ def _define_port_tests(kcl: kf.KCLayout) -> Callable[..., kf.KCell]:
 @pytest.mark.parametrize("func", [None, port.rename_clockwise_multi])
 def test_rename_default(
     func: Callable[..., None],
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     port_tests = _define_port_tests(kcl)
@@ -76,11 +76,11 @@ def test_rename_default(
     assert [p.name for p in port_list] == [
         f"o{i + 1}" for i in inds_east + inds_north + inds_west + inds_south
     ]
-    oasis_regression(cell)
+    gds_regression(cell)
 
 
 def test_rename_orientation(
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     port_tests = _define_port_tests(kcl)
     cell = port_tests(port.rename_by_direction)
@@ -95,12 +95,12 @@ def test_rename_orientation(
     )
 
     assert [p.name for p in port_list] == names
-    oasis_regression(cell)
+    gds_regression(cell)
 
 
 def test_rename_setter(
     layers: Layers,
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     kcl = kf.KCLayout("TEST_RENAME", infos=Layers)
     kcl.layers = kcl.layerenum_from_dict(layers=layers)
@@ -198,5 +198,5 @@ def test_rename_setter(
     kcl.rename_function = kf.port.rename_clockwise_multi
 
     assert c1.ports[0].name == "o1"
-    oasis_regression(c1)
+    gds_regression(c1)
     assert c2.ports[0].name == "W0"

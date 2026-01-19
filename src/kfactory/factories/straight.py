@@ -75,6 +75,7 @@ def straight_dbu_factory(
     ]
     | dict[str, MetaData]
     | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> StraightFactory[KCell]: ...
 @overload
@@ -88,6 +89,7 @@ def straight_dbu_factory(
     | dict[str, MetaData]
     | None = None,
     output_type: type[KC],
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> StraightFactory[KC]: ...
 
@@ -101,6 +103,7 @@ def straight_dbu_factory(
     | dict[str, MetaData]
     | None = None,
     output_type: type[KC] | None = None,
+    port_type: str = "optical",
     **cell_kwargs: Unpack[CellKWargs],
 ) -> StraightFactory[KC]:
     """Returns a function generating straights [dbu].
@@ -193,8 +196,15 @@ def straight_dbu_factory(
 
         li = c.kcl.layer(layer)
         c.shapes(li).insert(kdb.Box(0, -width // 2, length, width // 2))
-        c.create_port(trans=kdb.Trans(2, False, 0, 0), layer=li, width=width)
-        c.create_port(trans=kdb.Trans(0, False, length, 0), layer=li, width=width)
+        c.create_port(
+            trans=kdb.Trans(2, False, 0, 0), layer=li, width=width, port_type=port_type
+        )
+        c.create_port(
+            trans=kdb.Trans(0, False, length, 0),
+            layer=li,
+            width=width,
+            port_type=port_type,
+        )
 
         if enclosure is not None:
             enclosure.apply_minkowski_y(c, layer)

@@ -92,11 +92,11 @@ def virtual_cell_params(wg_enc: kf.LayerEnclosure, layers: Layers) -> dict[str, 
 def test_cells(
     cell_name: str,
     cell_params: dict[str, Any],
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     """Ensure cells have the same geometry as their golden references."""
     cell = kf.kcl.factories[cell_name](**cell_params.get(cell_name, {}))
-    oasis_regression(cell)
+    gds_regression(cell)
 
 
 @pytest.mark.parametrize(
@@ -105,7 +105,7 @@ def test_cells(
 def test_virtual_cells(
     cell_name: str,
     virtual_cell_params: dict[str, Any],
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     """Ensure cells have the same geometry as their golden references."""
     cell = kf.KCell()
@@ -119,7 +119,7 @@ def test_virtual_cells(
     c = kf.kcl.kcell()
     c << cell
 
-    oasis_regression(c)
+    gds_regression(c)
     c.delete()
 
 
@@ -127,7 +127,7 @@ def test_additional_info(
     kcl: kf.KCLayout,
     layers: Layers,
     wg_enc: kf.LayerEnclosure,
-    oasis_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     test_bend_euler = partial(
         kf.factories.euler.bend_euler_factory(
@@ -144,6 +144,6 @@ def test_additional_info(
     assert bend.locked is True
     assert bend.info.creation_time == "2023-02-12Z23:00:00"  # type: ignore[attr-defined, unused-ignore]
 
-    oasis_regression(bend)
+    gds_regression(bend)
 
     bend.delete()
