@@ -108,3 +108,18 @@ def test_virtual_connect(
 
     b1.connect("o1", wg1, "o2")
     wg2.connect("o1", b1, "o2")
+
+
+def test_vinst_copy() -> None:
+    kcl = kf.KCLayout("VINST_DUP")
+    c = kcl.kcell()
+    vk = kcl.vkcell()
+    vk.name = "vinst_test"
+    c.create_vinst(vk)
+
+    c2 = c.dup()
+
+    c.insert_vinsts()
+
+    assert len(c2.vinsts) == 1
+    assert c2.vinsts[0].cell is vk
