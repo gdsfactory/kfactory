@@ -1085,3 +1085,17 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
         if isinstance(trans, kdb.Trans):
             trans = trans.to_dtype(self.kcl.dbu)
         self.trans = kdb.DCplxTrans(trans) * self.trans
+
+    def dup(self) -> VInstance:
+        return VInstance(
+            cell=self.cell,
+            trans=self.trans,
+            name=self.name,
+            a=self.a,
+            b=self.b,
+            na=self.na,
+            nb=self.nb,
+        )
+
+    def copy(self) -> VInstance:
+        return self.dup()

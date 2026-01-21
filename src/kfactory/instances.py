@@ -219,6 +219,10 @@ class VInstances(ProtoInstances[float, VInstance]):
         """Remove an instance."""
         self._vinsts.remove(inst)
 
+    def dup(self) -> VInstances:
+        """Copy the instances."""
+        return VInstances([vinst.dup() for vinst in self._vinsts])
+
     def copy(self) -> VInstances:
         """Copy the instances."""
-        return VInstances(self._vinsts)
+        return self.dup()
