@@ -246,9 +246,10 @@ class Settings(BaseSettings):
     debug_names: bool = False
 
     # default write settings
-    write_cell_properties: bool = True
     write_context_info: bool = True
+    write_cell_properties: bool = True
     write_file_properties: bool = True
+    write_timestamps: bool = False
 
     show_function: ShowFunction | None = None
 

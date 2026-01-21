@@ -69,6 +69,11 @@ def clean_name(name: str) -> str:
     return name
 
 
+def cell_name_hash(name: str) -> str:
+    """Return 8-char hash of a cell name."""
+    return sha3_512(name.encode()).hexdigest()[:8]
+
+
 def clean_value(
     value: float | np.float64 | dict[Any, Any] | AnyKCell | Callable[..., Any],
 ) -> str:
@@ -276,7 +281,7 @@ def get_cell_name(
         name += f"_{dict2name(None, **kwargs)}"
 
     if len(name) > max_cellname_length:
-        name_hash = sha3_512(name.encode()).hexdigest()[:8]
+        name_hash = cell_name_hash(name)
         name = f"{name[: (max_cellname_length - 9)]}_{name_hash}"
 
     return name
