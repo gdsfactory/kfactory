@@ -1958,6 +1958,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         ]
         | None = None,
         port_mapping: dict[str, dict[str | None, str]] | None = None,
+        use_pins: bool = False,
     ) -> kdb.LayoutToNetlist:
         """Generate a LayoutToNetlist object from the port types.
 
@@ -1990,6 +1991,17 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                 c_.name,
                 port_mapping.get(c_.factory_name, {}) if c_.has_factory_name() else {},
             )
+            if use_pins:
+                for pin in c_.pins:
+                    pin_name = mapping.get(pin.name)
+                    if (
+                        pin.name is not None
+                        and pin.name == pin_name
+                        and pin.pin_type in mark_port_types
+                    ):
+                        c.shapes(pin.ports[0].layer_info).insert(
+                            kdb.Text(string=pin_name, trans=pin.ports[0].trans)
+                        )
             for port in c_.ports:
                 port_name = mapping.get(port.name, port.name)
                 if (
@@ -2049,6 +2061,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         exclude_purposes: list[str] | None = None,
         allow_width_mismatch: bool = False,
     ) -> dict[str, Netlist]:
+        use_pins = False
         if equivalent_ports is None:
             equivalent_ports = {}
             for ci in [self.cell_index(), *self.called_cells()]:
@@ -2074,7 +2087,16 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                         ].lvs_equivalent_ports
                     else:
                         eqps = c_.kcl.factories[c_.factory_name].lvs_equivalent_ports
-                if eqps is not None:
+                if eqps is None:
+                    eqps = []
+                    for pin in c_.pins:
+                        eqps.append(
+                            [pin.name]  # type: ignore[arg-type]
+                            + [port.name for port in pin.ports if port.name is not None]
+                        )
+                    equivalent_ports[c_.name] = eqps
+                    use_pins = True
+                else:
                     equivalent_ports[c_.name] = eqps
         port_mapping: dict[str, dict[str | None, str]] = defaultdict(dict)
         for cell_name, list_of_port_lists in equivalent_ports.items():
@@ -2087,6 +2109,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             mark_port_types=mark_port_types,
             connectivity=connectivity,
             port_mapping=port_mapping,
+            use_pins=use_pins,
         )
         l2n_opt = self.l2n_ports(
             port_types=port_types,
@@ -4161,6 +4184,9 @@ def _get_netlist(
     exclude_purposes = exclude_purposes or []
     keep_name = not ignore_unnamed
 
+    for pin in opt_circ.each_pin():
+        nl.create_port(pin.name())
+
     for inst in c.insts:
         if (keep_name or inst.is_named()) and (inst.purpose not in exclude_purposes):
             if inst.cell.has_factory_name():
@@ -4223,6 +4249,8 @@ def _get_netlist(
         if len(net_refs) > 1:
             nl.nets.append(Net(net_refs))
     if elec_circ:
+        for pin in elec_circ.each_pin():
+            nl.create_port(pin.name())
         instances_per_transformation: dict[
             kdb.DCplxTrans, list[ProtoTInstance[Any]]
         ] = defaultdict(list)
