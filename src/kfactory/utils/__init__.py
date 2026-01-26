@@ -7,12 +7,14 @@ the `klayout.db.TilingProcessor` to calculate the regions to fill.
 calculate areas that violate min space violations.
 """
 
+from .check import check_instance_touching
 from .difftest import diff, difftest, xor
 from .fill import fill_tiled
 from .simplify import dsimplify, simplify
 from .violations import fix_spacing_minkowski_tiled, fix_spacing_tiled
 
 __all__ = [
+    "check_instance_touching",
     "diff",
     "difftest",
     "dsimplify",
