@@ -36,10 +36,10 @@ class VShapes:
             and shape.cell.layout().dbu != self.cell.kcl.dbu
         ):
             raise ValueError
+        if isinstance(shape, kdb.Box):
+            shape = self.cell.kcl.to_um(shape)
         if isinstance(shape, kdb.DBox):
             shape = kdb.DPolygon(shape)
-        elif isinstance(shape, kdb.Box):
-            shape = self.cell.kcl.to_um(shape)
         self._shapes.append(shape)
         b = shape.bbox()
         if isinstance(b, kdb.Box):
@@ -77,7 +77,8 @@ class VShapes:
             elif isinstance(shape, IShapeLike):
                 if isinstance(shape, kdb.Region):
                     new_shapes.extend(
-                        poly.to_dtype(self.cell.kcl.dbu) for poly in shape.each()
+                        poly.to_dtype(self.cell.kcl.dbu).transformed(trans)
+                        for poly in shape.each()
                     )
                 else:
                     new_shapes.append(
