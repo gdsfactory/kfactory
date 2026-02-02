@@ -70,8 +70,12 @@ from . import (
 )
 from .routing.generic import ManhattanRoute
 from types import ModuleType
+from typing import TYPE_CHECKING
 
 ManhattanRoute.model_rebuild()
+
+if TYPE_CHECKING:
+    from . import cells
 
 
 def __getattr__(name: str) -> ModuleType:
