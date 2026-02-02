@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from . import kdb
-from .typings import DShapeLike, IShapeLike, ShapeLike
+from .typings import DShapeLike, IShapeLike, ShapeLike, dshapes_guard, ishape_guard
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
@@ -72,9 +72,9 @@ class VShapes:
             trans = trans.to_itrans(self.cell.kcl.dbu)
 
         for shape in self._shapes:
-            if isinstance(shape, DShapeLike):
+            if dshapes_guard(shape):
                 new_shapes.append(shape.transformed(trans))
-            elif isinstance(shape, IShapeLike):
+            elif ishape_guard(shape):
                 if isinstance(shape, kdb.Region):
                     new_shapes.extend(
                         poly.to_dtype(self.cell.kcl.dbu) for poly in shape.each()
@@ -84,7 +84,7 @@ class VShapes:
                         shape.to_dtype(self.cell.kcl.dbu).transformed(trans)
                     )
             else:
-                new_shapes.append(shape.dpolygon.transform(trans))
+                new_shapes.append(shape.dpolygon.transform(trans))  # ty:ignore[possibly-missing-attribute]
 
         return VShapes(cell=self.cell, _shapes=new_shapes)
 

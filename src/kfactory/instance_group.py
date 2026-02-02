@@ -31,7 +31,7 @@ __all__ = [
 ]
 
 
-class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, TInstance_co], ABC):  # noqa: PYI059
+class ProtoInstanceGroup[TUnit, TInstance_co](GeometricObject[TUnit]):
     insts: list[TInstance_co]
     _base_ports: list[BasePort]
 
@@ -254,10 +254,9 @@ class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, TInstance_co], A
                     raise NotImplementedError("This shouldn't happen")
 
 
-class ProtoTInstanceGroup(
+class ProtoTInstanceGroup[TUnit, TTInstance_co](
     ProtoInstanceGroup[TUnit, TTInstance_co],
     GeometricObject[TUnit],
-    Generic[TUnit, TTInstance_co],
 ):
     def to_itype(self) -> InstanceGroup:
         return InstanceGroup(insts=[inst.to_itype() for inst in self.insts])

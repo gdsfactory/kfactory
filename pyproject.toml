@@ -7,12 +7,12 @@ name = "kfactory"
 description = "KLayout API implementation of gdsfactory"
 readme = "README.md"
 classifiers = [
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 
 
 version = "2.3.0"
@@ -97,32 +97,6 @@ kf = "kfactory.cli:app"
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.mypy]
-python_version = "3.11"
-strict = true
-exclude = ["src/kfactory/widgets/interactive.py"]
-plugins = ["pydantic.mypy"]
-
-follow_imports = "silent"
-warn_redundant_casts = true
-warn_unused_ignores = true
-disallow_any_generics = true
-no_implicit_reexport = true
-disallow_untyped_defs = true
-
-[tool.pydantic-mypy]
-init_forbid_extra = true
-init_typed = true
-warn_required_dynamic_aliases = true
-
-[[tool.mypy.overrides]]
-module = ["src.*"]
-ignore_missing_imports = true
-
-[tool.pylsp-mypy]
-enabled = true
-live_mode = true
-strict = true
 
 [tool.pytest.ini_options]
 testpaths = ["src", "tests"]
@@ -138,6 +112,7 @@ ignore-words-list = "euclidian,TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem"
 skip = "pyproject.toml, uv.lock"
 
 [tool.ty.src]
+include = ["src", "tests", "docs"]
 exclude = [
     "src/kfactory/widgets/interactive.py",
 ]
@@ -147,7 +122,7 @@ fix = true
 line-length = 88
 exclude = ["docs", "src/kfactory/widgets/interactive.py"]
 indent-width = 4
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["ALL"]

@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Generic, Self, overload
+from typing import TYPE_CHECKING, Any, Self, overload
 
 import numpy as np
 
 from . import kdb
-from .typings import TUnit
+from .typings import TUnit  # noqa: TC001
 
 if TYPE_CHECKING:
     from .layer import LayerEnum
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 __all__ = ["DBUGeometricObject", "GeometricObject", "SizeInfo", "UMGeometricObject"]
 
 
-class SizeInfo(Generic[TUnit]):
+class SizeInfo[TUnit]:
     _bf: BoxFunction[TUnit]
 
     def __init__(self, bbox: BoxFunction[TUnit]) -> None:
@@ -111,7 +111,7 @@ class SizeInfo(Generic[TUnit]):
         return (c.x, c.y)
 
 
-class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
+class GeometricObject[TUnit](ABC):
     @property
     @abstractmethod
     def kcl(self) -> KCLayout: ...
@@ -149,7 +149,7 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
     @x.setter
     def x(self, __val: TUnit, /) -> None:
         """Moves self so that the bbox's center x-coordinate."""
-        self.transform(self._standard_trans()(x=__val - self.bbox().center().x))
+        self.transform(self._standard_trans()(x=__val - self.bbox().center().x))  # ty:ignore[no-matching-overload]
 
     @property
     def y(self) -> TUnit:
@@ -159,7 +159,7 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
     @y.setter
     def y(self, __val: TUnit, /) -> None:
         """Moves self so that the bbox's center y-coordinate."""
-        self.transform(self._standard_trans()(y=__val - self.bbox().center().y))
+        self.transform(self._standard_trans()(y=__val - self.bbox().center().y))  # ty:ignore[no-matching-overload]
 
     @property
     def xmin(self) -> TUnit:
@@ -169,7 +169,7 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
     @xmin.setter
     def xmin(self, __val: TUnit, /) -> None:
         """Moves self so that the bbox's left edge x-coordinate."""
-        self.transform(self._standard_trans()(x=__val - self.bbox().left))
+        self.transform(self._standard_trans()(x=__val - self.bbox().left))  # ty:ignore[no-matching-overload]
 
     @property
     def ymin(self) -> TUnit:
@@ -179,7 +179,7 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
     @ymin.setter
     def ymin(self, __val: TUnit, /) -> None:
         """Moves self so that the bbox's bottom edge y-coordinate."""
-        self.transform(self._standard_trans()(y=__val - self.bbox().bottom))
+        self.transform(self._standard_trans()(y=__val - self.bbox().bottom))  # ty:ignore[no-matching-overload]
 
     @property
     def xmax(self) -> TUnit:
@@ -189,7 +189,7 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
     @xmax.setter
     def xmax(self, __val: TUnit, /) -> None:
         """Moves self so that the bbox's right edge x-coordinate."""
-        self.transform(self._standard_trans()(x=__val - self.bbox().right))
+        self.transform(self._standard_trans()(x=__val - self.bbox().right))  # ty:ignore[no-matching-overload]
 
     @property
     def ymax(self) -> TUnit:
@@ -199,7 +199,7 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
     @ymax.setter
     def ymax(self, __val: TUnit, /) -> None:
         """Moves self so that the bbox's top edge y-coordinate."""
-        self.transform(self._standard_trans()(y=__val - self.bbox().top))
+        self.transform(self._standard_trans()(y=__val - self.bbox().top))  # ty:ignore[no-matching-overload]
 
     @property
     def xsize(self) -> TUnit:
@@ -209,7 +209,7 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
     @xsize.setter
     def xsize(self, __val: TUnit, /) -> None:
         """Sets the width of the bounding box."""
-        self.transform(self._standard_trans()(x=__val - self.bbox().width()))
+        self.transform(self._standard_trans()(x=__val - self.bbox().width()))  # ty:ignore[no-matching-overload]
 
     @property
     def ysize(self) -> TUnit:
@@ -219,7 +219,7 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
     @ysize.setter
     def ysize(self, __val: TUnit, /) -> None:
         """Sets the height of the bounding box."""
-        self.transform(self._standard_trans()(y=__val - self.bbox().height()))
+        self.transform(self._standard_trans()(y=__val - self.bbox().height()))  # ty:ignore[no-matching-overload]
 
     @property
     def center(self) -> tuple[TUnit, TUnit]:
@@ -231,7 +231,7 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
     def center(self, __val: tuple[TUnit, TUnit], /) -> None:
         """Moves self so that the bbox's center coordinate."""
         self.transform(
-            self._standard_trans()(
+            self._standard_trans()(  # ty:ignore[no-matching-overload]
                 __val[0] - self.bbox().center().x, __val[1] - self.bbox().center().y
             )
         )
@@ -256,10 +256,10 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
             destination: move origin so that it will land on this coordinate [dbu]
         """
         if destination is None:
-            self.transform(self._standard_trans()(*origin))
+            self.transform(self._standard_trans()(*origin))  # ty:ignore[no-matching-overload]
         else:
             self.transform(
-                self._standard_trans()(
+                self._standard_trans()(  # ty:ignore[no-matching-overload]
                     destination[0] - origin[0], destination[1] - origin[1]
                 )
             )
@@ -279,9 +279,9 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
             destination: move origin so that it will land on this coordinate [dbu]
         """
         if destination is None:
-            self.transform(self._standard_trans()(x=origin))
+            self.transform(self._standard_trans()(x=origin))  # ty:ignore[no-matching-overload]
         else:
-            self.transform(self._standard_trans()(x=destination - origin))
+            self.transform(self._standard_trans()(x=destination - origin))  # ty:ignore[no-matching-overload]
         return self
 
     @overload
@@ -298,9 +298,9 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
             destination: move origin so that it will land on this coordinate [dbu]
         """
         if destination is None:
-            self.transform(self._standard_trans()(y=origin))
+            self.transform(self._standard_trans()(y=origin))  # ty:ignore[no-matching-overload]
         else:
-            self.transform(self._standard_trans()(y=destination - origin))
+            self.transform(self._standard_trans()(y=destination - origin))  # ty:ignore[no-matching-overload]
         return self
 
     @abstractmethod
@@ -756,7 +756,7 @@ class DBUGeometricObject(GeometricObject[int], ABC):
     def bbox(self, layer: int | None = None) -> kdb.Box:
         return self.ibbox(layer)
 
-    def _standard_trans(self) -> type[kdb.Trans]:
+    def _standard_trans(self) -> type[kdb.Trans]:  # ty:ignore[invalid-method-override]
         return kdb.Trans
 
     def rotate(self, angle: int, center: tuple[int, int] | None = None) -> Self:
@@ -778,7 +778,7 @@ class UMGeometricObject(GeometricObject[float], ABC):
     def bbox(self, layer: int | None = None) -> kdb.DBox:
         return self.dbbox(layer)
 
-    def _standard_trans(self) -> type[kdb.DCplxTrans]:
+    def _standard_trans(self) -> type[kdb.DCplxTrans]:  # ty:ignore[invalid-method-override]
         return kdb.DCplxTrans
 
     def rotate(self, angle: float, center: tuple[float, float] | None = None) -> Self:

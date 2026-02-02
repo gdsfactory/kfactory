@@ -3,27 +3,29 @@ from __future__ import annotations
 import functools
 import inspect
 from collections import UserDict, UserList
-from collections.abc import Callable, Hashable
+from collections.abc import Hashable
 from hashlib import sha3_512
 from types import FunctionType
-from typing import TYPE_CHECKING, Any, overload
+from typing import Any, overload
 
 import klayout.db as kdb
 import numpy as np
-import toolz  # type: ignore[import-untyped,unused-ignore]
+import toolz
 
 from .conf import config
 from .exceptions import CellNameError
-from .typings import JSONSerializable, MetaData, SerializableShape
-
-if TYPE_CHECKING:
-    from .kcell import AnyKCell
+from .typings import (
+    JSONSerializable,
+    MetaData,
+    metadata_guard,
+    serializible_shape_guard,
+)
 
 
 class DecoratorList(UserList[Any]):
     """Hashable decorator for a list."""
 
-    def __hash__(self) -> int:  # type: ignore[override]
+    def __hash__(self) -> int:
         """Hash the list."""
         return hash(tuple(self.data))
 
@@ -75,7 +77,7 @@ def cell_name_hash(name: str) -> str:
 
 
 def clean_value(
-    value: float | np.float64 | dict[Any, Any] | AnyKCell | Callable[..., Any],
+    value: Any,
 ) -> str:
     """Makes sure a value is representable in a limited character_space."""
     if isinstance(value, int):  # integer
@@ -96,7 +98,7 @@ def clean_value(
                 " for Cell/Component names or similar."
             ) from e
     if hasattr(value, "name"):
-        return clean_name(value.name)  # type: ignore[arg-type]
+        return clean_name(value.name)
     if callable(value):
         if isinstance(value, FunctionType) and value.__name__ == "<lambda>":
             msg = "Unable to serialize lambda function. Use a named function instead."
@@ -205,8 +207,6 @@ def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
 
 def convert_metadata_type(value: Any) -> MetaData:
     """Recursively clean up a MetaData for KCellSettings."""
-    if isinstance(value, int | float | bool | str | SerializableShape):
-        return value
     if value is None:
         return None
     if isinstance(value, tuple):
@@ -215,6 +215,8 @@ def convert_metadata_type(value: Any) -> MetaData:
         return [convert_metadata_type(tv) for tv in value]
     if isinstance(value, dict):
         return {k: convert_metadata_type(v) for k, v in value.items()}
+    if metadata_guard(value):
+        return value
     return clean_value(value)
 
 
@@ -222,14 +224,14 @@ def check_metadata_type(value: MetaData) -> MetaData:
     """Recursively check an info value whether it can be stored."""
     if value is None:
         return None
-    if isinstance(value, str | int | float | bool | SerializableShape):
+    if metadata_guard(value):
         return value
     if isinstance(value, tuple):
         return tuple(convert_metadata_type(tv) for tv in value)
     if isinstance(value, list):
         return [convert_metadata_type(tv) for tv in value]
     if isinstance(value, dict):
-        return {k: convert_metadata_type(v) for k, v in value.items()}
+        return {str(k): convert_metadata_type(v) for k, v in value.items()}
     msg = (
         "Values of the info dict only support int, float, string, tuple or list."
         f"{value=}, {type(value)=}"
@@ -240,14 +242,17 @@ def check_metadata_type(value: MetaData) -> MetaData:
 def serialize_setting(setting: MetaData) -> JSONSerializable:
     """Serialize a setting."""
     if isinstance(setting, dict):
-        return {name: serialize_setting(_setting) for name, _setting in setting.items()}
+        return {
+            str(name): serialize_setting(_setting)  # ty:ignore[invalid-argument-type]
+            for name, _setting in setting.items()
+        }
     if isinstance(setting, list):
-        return [serialize_setting(s) for s in setting]
+        return [serialize_setting(s) for s in setting]  # ty:ignore[invalid-argument-type]
     if isinstance(setting, tuple):
-        return tuple(serialize_setting(s) for s in setting)
-    if isinstance(setting, SerializableShape):
+        return tuple(serialize_setting(s) for s in setting)  # ty:ignore[invalid-argument-type]
+    if serializible_shape_guard(setting):
         return f"!#{setting.__class__.__name__} {setting!s}"
-    return setting
+    return setting  # ty:ignore[invalid-return-type]
 
 
 def deserialize_setting(setting: JSONSerializable) -> MetaData:
@@ -264,9 +269,9 @@ def deserialize_setting(setting: JSONSerializable) -> MetaData:
         cls_name, value = setting.removeprefix("!#").split(" ", 1)
         match cls_name:
             case "LayerInfo":
-                return getattr(kdb, cls_name).from_string(value)  # type: ignore[no-any-return]
+                return getattr(kdb, cls_name).from_string(value)
             case _:
-                return getattr(kdb, cls_name).from_s(value)  # type: ignore[no-any-return]
+                return getattr(kdb, cls_name).from_s(value)
     return setting
 
 

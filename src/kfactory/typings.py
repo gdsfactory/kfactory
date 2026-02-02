@@ -6,14 +6,13 @@ from typing import (
     Any,
     NotRequired,
     ParamSpec,
-    TypeAlias,
     TypedDict,
+    TypeGuard,
     TypeVar,
 )
 
 import klayout.db as kdb
 from klayout import lay
-from typing_extensions import TypeAliasType
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -63,9 +62,15 @@ F_co = TypeVar(
 P = ParamSpec("P")
 
 
-JSONSerializable = TypeAliasType(
-    "JSONSerializable",
-    "int | float| bool | str | list[JSONSerializable] | tuple[JSONSerializable, ...] | dict[str, JSONSerializable] | None",  # noqa: E501
+type JSONSerializable = (
+    int
+    | float
+    | bool
+    | str
+    | list[JSONSerializable]
+    | tuple[JSONSerializable, ...]
+    | dict[str, JSONSerializable]
+    | None
 )
 
 
@@ -81,8 +86,12 @@ AnyTrans = TypeVar(
     "AnyTrans", bound=kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans
 )
 
-SerializableShape: TypeAlias = (
-    kdb.Box
+type SingleMetaData = (
+    int
+    | float
+    | bool
+    | str
+    | kdb.Box
     | kdb.DBox
     | kdb.Edge
     | kdb.DEdge
@@ -115,7 +124,7 @@ SerializableShape: TypeAlias = (
     | kdb.DVector
     | kdb.LayerInfo
 )
-IShapeLike: TypeAlias = (
+type IShapeLike = (
     kdb.Polygon
     | kdb.Edge
     | kdb.Path
@@ -124,20 +133,20 @@ IShapeLike: TypeAlias = (
     | kdb.SimplePolygon
     | kdb.Region
 )
-DShapeLike: TypeAlias = (
+type DShapeLike = (
     kdb.DPolygon | kdb.DEdge | kdb.DPath | kdb.DBox | kdb.DText | kdb.DSimplePolygon
 )
-ShapeLike: TypeAlias = IShapeLike | DShapeLike | kdb.Shape
+type ShapeLike = IShapeLike | DShapeLike | kdb.Shape
 
-MetaData: TypeAlias = (
+type MetaData = (
     int
     | float
     | bool
     | str
-    | SerializableShape
-    | list["MetaData"]
-    | tuple["MetaData", ...]
-    | dict[str, "MetaData"]
+    | SingleMetaData
+    | list[MetaData]
+    | tuple[MetaData, ...]
+    | dict[str, MetaData]
     | None
 )
 
@@ -153,14 +162,22 @@ rad = Annotated[float, "rad"]
 layer = Annotated["int | LayerEnum", "layer"]
 """Integer or enum index of a Layer."""
 layer_info = Annotated[kdb.LayerInfo, "layer info"]
-Unit: TypeAlias = int | float
+type Unit = int | float
 """Database unit or micrometer."""
-Angle: TypeAlias = int
+type Angle = int
 """Integer in the range of `[0,1,2,3]` which are increments in 90°."""
-KCellSpec: TypeAlias = (
+type KCellSpec = (
     "int | str | KCellSpecDict | ProtoTKCell[Any] | Callable[..., ProtoTKCell[Any]]"
 )
-AnyCellSpec: TypeAlias = "int | str | KCellSpecDict | ProtoTKCell[Any] | VKCell | Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]"  # noqa: E501
+type AnyCellSpec = (
+    int
+    | str
+    | KCellSpecDict
+    | ProtoTKCell[Any]
+    | VKCell
+    | Callable[..., ProtoTKCell[Any]]
+    | Callable[..., VKCell]
+)
 
 
 class CellKwargs(TypedDict, total=False):
@@ -184,3 +201,147 @@ class CellKwargs(TypedDict, total=False):
     lvs_equivalent_ports: list[list[str]]
     ports: PortsDefinition
     schematic_function: Callable[..., TSchematic[Any]]
+
+
+def json_serializable_guard(value: object) -> TypeGuard[JSONSerializable]:
+    return isinstance(
+        value,
+        (
+            int,
+            float,
+            bool,
+            str,
+            list[JSONSerializable],
+            tuple[JSONSerializable, ...],
+            dict[str, JSONSerializable],
+            None,
+        ),
+    )
+
+
+def metadata_guard(value: object) -> TypeGuard[SingleMetaData]:
+    return isinstance(
+        value,
+        (
+            int,
+            float,
+            bool,
+            str,
+            kdb.Box,
+            kdb.DBox,
+            kdb.Edge,
+            kdb.DEdge,
+            kdb.EdgePair,
+            kdb.DEdgePair,
+            kdb.EdgePairs,
+            kdb.Edges,
+            lay.LayerProperties,
+            kdb.Matrix2d,
+            kdb.Matrix3d,
+            kdb.Path,
+            kdb.DPath,
+            kdb.Point,
+            kdb.DPoint,
+            kdb.Polygon,
+            kdb.DPolygon,
+            kdb.SimplePolygon,
+            kdb.DSimplePolygon,
+            kdb.Region,
+            kdb.Text,
+            kdb.DText,
+            kdb.Texts,
+            kdb.Trans,
+            kdb.DTrans,
+            kdb.CplxTrans,
+            kdb.ICplxTrans,
+            kdb.DCplxTrans,
+            kdb.VCplxTrans,
+            kdb.Vector,
+            kdb.DVector,
+            kdb.LayerInfo,
+        ),
+    )
+
+
+def serializible_shape_guard(value: object) -> TypeGuard[SingleMetaData]:
+    return isinstance(
+        value,
+        (
+            kdb.Box,
+            kdb.DBox,
+            kdb.Edge,
+            kdb.DEdge,
+            kdb.EdgePair,
+            kdb.DEdgePair,
+            kdb.EdgePairs,
+            kdb.Edges,
+            lay.LayerProperties,
+            kdb.Matrix2d,
+            kdb.Matrix3d,
+            kdb.Path,
+            kdb.DPath,
+            kdb.Point,
+            kdb.DPoint,
+            kdb.Polygon,
+            kdb.DPolygon,
+            kdb.SimplePolygon,
+            kdb.DSimplePolygon,
+            kdb.Region,
+            kdb.Text,
+            kdb.DText,
+            kdb.Texts,
+            kdb.Trans,
+            kdb.DTrans,
+            kdb.CplxTrans,
+            kdb.ICplxTrans,
+            kdb.DCplxTrans,
+            kdb.VCplxTrans,
+            kdb.Vector,
+            kdb.DVector,
+            kdb.LayerInfo,
+        ),
+    )
+
+
+def ishape_guard(value: object) -> TypeGuard[IShapeLike]:
+    return isinstance(
+        value,
+        (
+            kdb.Polygon,
+            kdb.Edge,
+            kdb.Path,
+            kdb.Box,
+            kdb.Text,
+            kdb.SimplePolygon,
+            kdb.Region,
+        ),
+    )
+
+
+def dshapes_guard(value: object) -> TypeGuard[DShapeLike]:
+    return isinstance(
+        value,
+        (kdb.DPolygon, kdb.DEdge, kdb.DPath, kdb.DBox, kdb.DText, kdb.DSimplePolygon),
+    )
+
+
+def shape_like_guard(value: object) -> TypeGuard[ShapeLike]:
+    return isinstance(
+        value,
+        (
+            kdb.Polygon,
+            kdb.Edge,
+            kdb.Path,
+            kdb.Box,
+            kdb.Text,
+            kdb.SimplePolygon,
+            kdb.Region,
+            kdb.DPolygon,
+            kdb.DEdge,
+            kdb.DPath,
+            kdb.DBox,
+            kdb.DText,
+            kdb.DSimplePolygon,
+            kdb.Shape,
+        ),
+    )

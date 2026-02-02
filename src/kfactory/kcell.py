@@ -32,7 +32,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Generic,
     Literal,
     Self,
     TypeAlias,
@@ -40,7 +39,7 @@ from typing import (
 )
 
 import ruamel.yaml
-from klayout import __version__ as _klayout_version  # type: ignore[attr-defined]
+from klayout import __version__ as _klayout_version
 from pydantic import (
     BaseModel,
     Field,
@@ -191,7 +190,7 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     def name(self, value: str) -> None: ...
 
 
-class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # noqa: PYI059
+class ProtoKCell[TUnit, TBaseCell_co](GeometricObject[TUnit], ABC):
     _base: TBaseCell_co
 
     @property
@@ -612,7 +611,7 @@ class TVCell(BaseKCell):
         self._name = value
 
 
-class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI059
+class ProtoTKCell[TUnit](ProtoKCell[TUnit, TKCell], ABC):
     def __init__(
         self,
         *,
@@ -694,7 +693,6 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         return self._base.virtual
 
     @property
-    @property
     @abstractmethod
     def pins(self) -> ProtoPins[TUnit]: ...
 
@@ -736,7 +734,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
         try:
-            return super().__getattr__(name)  # type: ignore[misc]
+            return super().__getattr__(name)
         except Exception:
             return getattr(self._base, name)
 
@@ -1418,14 +1416,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + yaml.dumps(dict(diff.layout_meta_diff))
+                        + yaml.dumps(dict(diff.layout_meta_diff))  # ty:ignore[unresolved-attribute]
                         + "\n```"
                     )
                 if diff.cells_meta_diff:
                     yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + yaml.dumps(dict(diff.cells_meta_diff))
+                        + yaml.dumps(dict(diff.cells_meta_diff))  # ty:ignore[unresolved-attribute]
                         + "\n```"
                     )
 
@@ -1546,9 +1544,9 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             return Instance(
                 self.kcl,
                 self._base.kdb_cell.transform(
-                    inst_or_trans,  # type: ignore[arg-type]
-                    trans,  # type: ignore[arg-type]
-                ),
+                    inst_or_trans,
+                    trans,
+                ),  # ty:ignore[no-matching-overload]
             )
         self._base.kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
         if transform_ports:
@@ -2174,7 +2172,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                 cell_ports[h] = {}
             if layer not in cell_ports[h]:
                 cell_ports[h][layer] = []
-            cell_ports[h][layer].append((i, port))
+            cell_ports[h][layer].append((i, Port(base=port.base)))
 
             if port.name:
                 portnames.add(port.name)
@@ -2217,7 +2215,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                         i,
                         j,
                         Instance(kcl=self.kcl, instance=inst.instance),
-                        port,
+                        Port(base=port.base),
                         subc,
                     )
                 )
@@ -2926,7 +2924,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         nb: int = 1,
         libcell_as_static: bool = False,
         static_name_separator: str = "__",
-    ) -> DInstance:
+    ) -> DInstance:  # ty:ignore[invalid-method-override]
         return DInstance(
             kcl=self.kcl,
             instance=self.dcreate_inst(
@@ -3130,7 +3128,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         nb: int = 1,
         libcell_as_static: bool = False,
         static_name_separator: str = "__",
-    ) -> Instance:
+    ) -> Instance:  # ty:ignore[invalid-method-override]
         return Instance(
             kcl=self.kcl,
             instance=self.icreate_inst(

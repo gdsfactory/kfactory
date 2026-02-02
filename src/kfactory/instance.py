@@ -118,7 +118,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
     def __getattr__(self, name: str) -> Any:
         """If we don't have an attribute, get it from the instance."""
         try:
-            return super().__getattr__(name)  # type: ignore[misc]
+            return super().__getattr__(name)
         except Exception:
             return getattr(self._instance, name)
 
@@ -152,7 +152,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
     @property
     def purpose(self) -> str | None:
         """Purpose value of instance in GDS."""
-        return self._instance.property(PROPID.PURPOSE)  # type: ignore[no-any-return]
+        return self._instance.property(PROPID.PURPOSE)
 
     @purpose.setter
     def purpose(self, value: str | None) -> None:
@@ -932,13 +932,14 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
             if isinstance(cell, ProtoTKCell):
                 for layer in cell.kcl.layer_indexes():
                     reg = kdb.Region(self.cell.kdb_cell.begin_shapes_rec(layer))
+                    reg.merge()
                     reg.transform(kdb.ICplxTrans((trans * self.trans), cell.kcl.dbu))
                     cell.shapes(layer).insert(reg)
             else:
-                for layer, shapes in self.cell._shapes.items():
+                for layer, shapes in self.cell.shapes.items():
                     for shape in shapes.transform(trans * self.trans):
                         cell.shapes(layer).insert(shape)
-                for vinst in self.cell.insts:
+                for vinst in self.cell.vinsts:
                     vinst.insert_into_flat(cell, trans=trans * self.trans)
 
     @overload
