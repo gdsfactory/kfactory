@@ -22,7 +22,6 @@ from .generic import ManhattanRoute
 from .generic import route_bundle as route_bundle_generic
 from .length_functions import get_length_from_backbone
 from .manhattan import (
-    ManhattanRoutePathFunction,
     _is_manhattan,
     route_manhattan,
     route_smart,
@@ -33,127 +32,11 @@ from .steps import Step, Straight
 __all__ = [
     "place_dual_rails",
     "place_single_wire",
-    "route_L",
     "route_bundle",
     "route_bundle_dual_rails",
     "route_bundle_rf",
     "route_dual_rails",
-    "route_elec",
 ]
-
-
-def route_elec(
-    c: KCell,
-    p1: Port,
-    p2: Port,
-    start_straight: int | None = None,
-    end_straight: int | None = None,
-    route_path_function: ManhattanRoutePathFunction = route_manhattan,
-    width: int | None = None,
-    layer: int | None = None,
-    minimum_straight: int | None = None,
-) -> None:
-    """Connect two ports with a wire.
-
-    A wire is a path object on a usually metal layer.
-
-
-    Args:
-        c: KCell to place the wire in.
-        p1: Beginning
-        p2: End
-        start_straight: Minimum length of straight at start port.
-        end_straight: Minimum length of straight at end port.
-        route_path_function: Function to calculate the path. Signature:
-            `route_path_function(p1, p2, bend90_radius, start_straight,
-            end_straight)`
-        width: Overwrite the width of the wire. Calculated by the width of the start
-            port if `None`.
-        layer: Layer to place the wire on. Calculated from the start port if `None`.
-        minimum_straight: require a minimum straight
-    """
-    c_ = c.to_itype()
-    p1_ = p1.to_itype()
-    p2_ = p2.to_itype()
-    if width is None:
-        width = p1_.width
-    if layer is None:
-        layer = p1.layer
-    if start_straight is None:
-        start_straight = round(width / 2)
-    if end_straight is None:
-        end_straight = round(width / 2)
-
-    if minimum_straight is not None:
-        start_straight = min(minimum_straight // 2, start_straight)
-        end_straight = min(minimum_straight // 2, end_straight)
-
-        pts = route_path_function(
-            p1_.copy(),
-            p2_.copy(),
-            bend90_radius=minimum_straight,
-            start_steps=[Straight(dist=start_straight)],
-            end_steps=[Straight(dist=end_straight)],
-        )
-    else:
-        pts = route_path_function(
-            p1_.copy(),
-            p2_.copy(),
-            bend90_radius=0,
-            start_steps=[Straight(dist=start_straight)],
-            end_steps=[Straight(dist=end_straight)],
-        )
-
-    path = kdb.Path(pts, width)
-    c_.shapes(layer).insert(path.polygon())
-
-
-def route_L(  # noqa: N802
-    c: KCell,
-    input_ports: Sequence[Port],
-    output_orientation: int = 1,
-    wire_spacing: int = 10000,
-) -> list[Port]:
-    """Route ports towards a bundle in an L shape.
-
-    This function takes a list of input ports and assume they are oriented in the west.
-    The output will be a list of ports that have the same y coordinates.
-    The function will produce a L-shape routing to connect input ports to output ports
-    without any crossings.
-    """
-    input_ports_ = [p.to_itype() for p in input_ports]
-    c_ = c.to_itype()
-    input_ports_.sort(key=lambda p: p.y)
-
-    y_max = input_ports_[-1].y
-    y_min = input_ports_[0].y
-    x_max = max(p.x for p in input_ports_)
-
-    output_ports: list[Port] = []
-    if output_orientation == 1:
-        for i, p in enumerate(input_ports_[::-1]):
-            temp_port = p.copy()
-            temp_port.trans = kdb.Trans(
-                3, False, x_max - wire_spacing * (i + 1), y_max + wire_spacing
-            )
-
-            route_elec(c_, p, temp_port)
-            temp_port.trans.angle = 1
-            output_ports.append(temp_port)
-    elif output_orientation == ANGLE_270:
-        for i, p in enumerate(input_ports_):
-            temp_port = p.copy()
-            temp_port.trans = kdb.Trans(
-                1, False, x_max - wire_spacing * (i + 1), y_min - wire_spacing
-            )
-            route_elec(c_, p, temp_port)
-            temp_port.trans.angle = 3
-            output_ports.append(temp_port)
-    else:
-        raise ValueError(
-            "Invalid L-shape routing. Please change output_orientaion to 1 or 3."
-        )
-    return output_ports
 
 
 @overload
