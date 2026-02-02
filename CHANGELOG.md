@@ -5,6 +5,7 @@
 
 ## New
 
+- deprecate route, route_elec, route_L [#871](https://github.com/gdsfactory/kfactory/pull/871)
 - Suffix using basename and name hash for show() [#857](https://github.com/gdsfactory/kfactory/pull/857)
 
 ## Bug Fixes
