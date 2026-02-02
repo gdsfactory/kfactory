@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- fix VInstances.dup/copy as it did not actually copy the instances [#860](https://github.com/gdsfactory/kfactory/pull/860)
 - Suffix using basename and name hash for show() [#857](https://github.com/gdsfactory/kfactory/pull/857)
 - Wire up write_cell_properties/write_file_properties to the config [#858](https://github.com/gdsfactory/kfactory/pull/858)
 
