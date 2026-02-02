@@ -470,3 +470,6 @@ class VInstancePorts(ProtoInstancePorts[float, VInstance]):
             kcl=self.instance.cell.kcl,
             bases=[b.transformed(self.instance.trans) for b in self.cell_ports.bases],
         )
+
+    def print(self) -> None:
+        config.console.print(pprint_ports(self.copy(), unit="um"))
