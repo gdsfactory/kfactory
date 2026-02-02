@@ -1,5 +1,5 @@
 <a id="v2.4.0"></a>
-# [v2.4.0](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.0) - 2026-01-20
+# [v2.4.0](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.0) - 2026-02-02
 
 # What's Changed
 
