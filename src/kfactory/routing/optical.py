@@ -461,7 +461,7 @@ def route_bundle(
         }
     else:
         # Not a type error
-        placer = place_manhattan_with_sbends
+        placer = place_manhattan_with_sbends  # type: ignore[assignment]
         placer_kwargs = {
             "straight_factory": straight_factory,
             "bend90_cell": bend90_cell,
@@ -689,7 +689,9 @@ def route_bundle(
                 cell = db.create_cell(c_.name)
                 wp_len = len(waypoints)
 
-                width_d = cast("float | None", route_width) or start_ports[0].width
+                width_d = cast("float | None", route_width) or cast(
+                    "float", start_ports[0].width
+                )
 
                 for i, wp_d in enumerate(waypoints):
                     it = db.create_item(cell=cell, category=wp_cat)
@@ -1278,7 +1280,8 @@ def place_manhattan_with_sbends(
     allow_layer_mismatch: bool | None = None,
     allow_type_mismatch: bool | None = None,
     purpose: str | None = "routing",
-    sbend_factory: SBendFactoryDBU | None = None,
+    *,
+    sbend_factory: SBendFactoryDBU,
     **kwargs: Any,
 ) -> ManhattanRoute:
     # configure and set up route and placers
@@ -1295,20 +1298,13 @@ def place_manhattan_with_sbends(
         allow_type_mismatch = config.allow_type_mismatch
     if straight_factory is None:
         raise ValueError(
-            "place_manhattan_with_sbends needs to have a straight_factory set. "
-            "Please pass a straight_factory which takes kwargs "
-            "'width: int' and 'length: int'."
+            "place_manhattan needs to have a straight_factory set. Please pass a "
+            "straight_factory which takes kwargs 'width: int' and 'length: int'."
         )
     if bend90_cell is None:
         raise ValueError(
-            "place_manhattan_with_sbends needs to be passed a fixed bend90 cell with "
-            "two optical ports which are 90° apart from each other with "
-            "port_type 'port_type'."
-        )
-    if sbend_factory is None:
-        raise ValueError(
-            "place_manhattan_with_sbends needs to be passed a sbend_factory with "
-            "two optical ports with port_type 'port_type'."
+            "place_manhattan needs to be passed a fixed bend90 cell with two optical"
+            " ports which are 90° apart from each other with port_type 'port_type'."
         )
     route_start_port = p1.copy()
     route_start_port.name = None
