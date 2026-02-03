@@ -8,16 +8,23 @@ from hashlib import sha3_512
 from types import FunctionType
 from typing import TYPE_CHECKING, Any, overload
 
-import klayout.db as kdb
 import numpy as np
 import toolz  # type: ignore[import-untyped,unused-ignore]
 
+from . import kdb, lay
 from .conf import config
 from .exceptions import CellNameError
-from .typings import JSONSerializable, MetaData, SerializableShape
 
 if TYPE_CHECKING:
     from .kcell import AnyKCell
+    from .typings import (
+        DShapeLike,
+        IShapeLike,
+        JSONSerializable,
+        MetaData,
+        SerializableShape,
+        TypeGuard,
+    )
 
 
 class DecoratorList(UserList[Any]):
@@ -205,10 +212,10 @@ def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
 
 def convert_metadata_type(value: Any) -> MetaData:
     """Recursively clean up a MetaData for KCellSettings."""
-    if isinstance(value, int | float | bool | str | SerializableShape):
-        return value
     if value is None:
         return None
+    if serializible_value_or_shape_guard(value):
+        return value
     if isinstance(value, tuple):
         return tuple(convert_metadata_type(tv) for tv in value)
     if isinstance(value, list):
@@ -218,11 +225,11 @@ def convert_metadata_type(value: Any) -> MetaData:
     return clean_value(value)
 
 
-def check_metadata_type(value: MetaData) -> MetaData:
+def check_metadata_type(value: Any) -> MetaData:
     """Recursively check an info value whether it can be stored."""
     if value is None:
         return None
-    if isinstance(value, str | int | float | bool | SerializableShape):
+    if serializible_value_or_shape_guard(value):
         return value
     if isinstance(value, tuple):
         return tuple(convert_metadata_type(tv) for tv in value)
@@ -231,21 +238,25 @@ def check_metadata_type(value: MetaData) -> MetaData:
     if isinstance(value, dict):
         return {k: convert_metadata_type(v) for k, v in value.items()}
     msg = (
-        "Values of the info dict only support int, float, string, tuple or list."
-        f"{value=}, {type(value)=}"
+        "MetaData values of the info dict only support int, float, string"
+        f", tuple or list. {value=}, {type(value)=}"
     )
     raise ValueError(msg)
 
 
 def serialize_setting(setting: MetaData) -> JSONSerializable:
     """Serialize a setting."""
+    if setting is None:
+        return None
     if isinstance(setting, dict):
-        return {name: serialize_setting(_setting) for name, _setting in setting.items()}
+        return {
+            str(name): serialize_setting(_setting) for name, _setting in setting.items()
+        }
     if isinstance(setting, list):
         return [serialize_setting(s) for s in setting]
     if isinstance(setting, tuple):
         return tuple(serialize_setting(s) for s in setting)
-    if isinstance(setting, SerializableShape):
+    if serializible_shape_guard(setting):
         return f"!#{setting.__class__.__name__} {setting!s}"
     return setting
 
@@ -285,3 +296,112 @@ def get_cell_name(
         name = f"{name[: (max_cellname_length - 9)]}_{name_hash}"
 
     return name
+
+
+def serializible_value_or_shape_guard(
+    value: Any,
+) -> TypeGuard[int | float | bool | str | SerializableShape]:
+    return isinstance(
+        value,
+        int
+        | float
+        | bool
+        | str
+        | kdb.Box
+        | kdb.DBox
+        | kdb.Edge
+        | kdb.DEdge
+        | kdb.EdgePair
+        | kdb.DEdgePair
+        | kdb.EdgePairs
+        | kdb.Edges
+        | lay.LayerProperties
+        | kdb.Matrix2d
+        | kdb.Matrix3d
+        | kdb.Path
+        | kdb.DPath
+        | kdb.Point
+        | kdb.DPoint
+        | kdb.Polygon
+        | kdb.DPolygon
+        | kdb.SimplePolygon
+        | kdb.DSimplePolygon
+        | kdb.Region
+        | kdb.Text
+        | kdb.DText
+        | kdb.Texts
+        | kdb.Trans
+        | kdb.DTrans
+        | kdb.CplxTrans
+        | kdb.ICplxTrans
+        | kdb.DCplxTrans
+        | kdb.VCplxTrans
+        | kdb.Vector
+        | kdb.DVector
+        | kdb.LayerInfo,
+    )
+
+
+def serializible_shape_guard(
+    value: Any,
+) -> TypeGuard[SerializableShape]:
+    return isinstance(
+        value,
+        kdb.Box
+        | kdb.DBox
+        | kdb.Edge
+        | kdb.DEdge
+        | kdb.EdgePair
+        | kdb.DEdgePair
+        | kdb.EdgePairs
+        | kdb.Edges
+        | lay.LayerProperties
+        | kdb.Matrix2d
+        | kdb.Matrix3d
+        | kdb.Path
+        | kdb.DPath
+        | kdb.Point
+        | kdb.DPoint
+        | kdb.Polygon
+        | kdb.DPolygon
+        | kdb.SimplePolygon
+        | kdb.DSimplePolygon
+        | kdb.Region
+        | kdb.Text
+        | kdb.DText
+        | kdb.Texts
+        | kdb.Trans
+        | kdb.DTrans
+        | kdb.CplxTrans
+        | kdb.ICplxTrans
+        | kdb.DCplxTrans
+        | kdb.VCplxTrans
+        | kdb.Vector
+        | kdb.DVector
+        | kdb.LayerInfo,
+    )
+
+
+def ishape_guard(value: Any) -> TypeGuard[IShapeLike]:
+    return isinstance(
+        value,
+        kdb.Polygon
+        | kdb.Edge
+        | kdb.Path
+        | kdb.Box
+        | kdb.Text
+        | kdb.SimplePolygon
+        | kdb.Region,
+    )
+
+
+def dshape_guard(value: Any) -> TypeGuard[DShapeLike]:
+    return isinstance(
+        value,
+        kdb.DPolygon
+        | kdb.DEdge
+        | kdb.DPath
+        | kdb.DBox
+        | kdb.DText
+        | kdb.DSimplePolygon,
+    )

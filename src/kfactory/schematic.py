@@ -27,7 +27,6 @@ from typing import (
     Annotated,
     Any,
     Concatenate,
-    Generic,
     Literal,
     Self,
     TypedDict,
@@ -200,7 +199,7 @@ _anchorref_mapping: dict[str, str] = {
 }
 
 
-class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
+class Placement[T: (int, float)](MirrorPlacement, extra="forbid"):
     """Absolute placement and orientation for an instance.
 
     Coordinates may be absolute (`x`, `y`) with
@@ -220,10 +219,10 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
         mirror: Whether the instance is to be mirrored or not.
     """
 
-    x: TUnit | PortRef | PortArrayRef | AnchorRefX = cast("TUnit", 0)
-    dx: TUnit = cast("TUnit", 0)
-    y: TUnit | PortRef | PortArrayRef | AnchorRefY = cast("TUnit", 0)
-    dy: TUnit = cast("TUnit", 0)
+    x: T | PortRef | PortArrayRef | AnchorRefX = 0
+    dx: T = 0
+    y: T | PortRef | PortArrayRef | AnchorRefY = 0
+    dy: T = 0
     orientation: float = 0
     anchor: FixedAnchor | PortAnchor | None = None
 
@@ -255,7 +254,7 @@ class Placement(MirrorPlacement, Generic[TUnit], extra="forbid"):
         return placeable
 
 
-class RegularArray(BaseModel, Generic[TUnit], extra="forbid"):
+class RegularArray[T: (int, float)](BaseModel, extra="forbid"):
     """Rectangular array with uniform row/column pitch.
 
     Attributes:
@@ -266,15 +265,15 @@ class RegularArray(BaseModel, Generic[TUnit], extra="forbid"):
     """
 
     columns: int = Field(gt=0, default=1)
-    column_pitch: TUnit
+    column_pitch: T
     rows: int = Field(gt=0, default=1)
-    row_pitch: TUnit
+    row_pitch: T
 
     def __repr__(self) -> str:
         return f"RegularArray(columns={self.columns}, columns_pitch=)"
 
 
-class Array(BaseModel, Generic[TUnit], extra="forbid"):
+class Array[T: (int, float)](BaseModel, extra="forbid"):
     """General 2D array parameterization using two pitch vectors.
 
     Attributes:
@@ -288,11 +287,11 @@ class Array(BaseModel, Generic[TUnit], extra="forbid"):
 
     na: int = Field(gt=1, default=1)
     nb: int = Field(gt=0, default=1)
-    pitch_a: tuple[Annotated[TUnit, AfterValidator(_gez)], TUnit]
-    pitch_b: tuple[TUnit, Annotated[TUnit, AfterValidator(_gez)]]
+    pitch_a: tuple[Annotated[T, AfterValidator(_gez)], T]
+    pitch_b: tuple[T, Annotated[T, AfterValidator(_gez)]]
 
 
-class Ports(BaseModel, Generic[TUnit]):
+class Ports[T: (int, float)](BaseModel):
     """Indexer for an instance's ports to produce `PortRef`/`PortArrayRef`.
 
     Example:
@@ -300,7 +299,7 @@ class Ports(BaseModel, Generic[TUnit]):
         `inst.ports["out", 1, 0]` -> `PortArrayRef` (requires instance array)
     """
 
-    instance: SchematicInstance[TUnit]
+    instance: SchematicInstance[T]
 
     def __getitem__(self, key: str | tuple[str, int, int]) -> PortRef | PortArrayRef:
         """Return a port reference for a (standard or array) port."""
@@ -316,8 +315,8 @@ class Ports(BaseModel, Generic[TUnit]):
         return PortRef(instance=self.instance.name, port=key)
 
 
-class SchematicInstance(
-    BaseModel, Generic[TUnit], extra="forbid", arbitrary_types_allowed=True
+class SchematicInstance[T: (int, float)](
+    BaseModel, extra="forbid", arbitrary_types_allowed=True
 ):
     """Instance record within a schematic.
 
@@ -343,10 +342,10 @@ class SchematicInstance(
     name: str = Field(exclude=True, frozen=True)
     component: str
     settings: dict[str, JSONSerializable] = Field(default_factory=dict)
-    array: RegularArray[TUnit] | Array[TUnit] | None = None
+    array: RegularArray[T] | Array[T] | None = None
     kcl: KCLayout = Field(default_factory=get_default_kcl)
     virtual: bool = False
-    _schematic: TSchematic[TUnit] = PrivateAttr()
+    _schematic: TSchematic[T] = PrivateAttr()
 
     @field_validator("kcl", mode="before")
     @classmethod
@@ -360,32 +359,32 @@ class SchematicInstance(
         return kcl.name
 
     @property
-    def parent_schematic(self) -> TSchematic[TUnit]:
+    def parent_schematic(self) -> TSchematic[T]:
         if self._schematic is None:
             raise RuntimeError("Schematic instance has no parent set.")
         return self._schematic
 
     @property
-    def placement(self) -> MirrorPlacement | Placement[TUnit] | None:
+    def placement(self) -> MirrorPlacement | Placement[T] | None:
         return self.parent_schematic.placements.get(self.name)
 
     def place(
         self,
-        x: TUnit | PortRef | AnchorRefX = 0,
-        y: TUnit | PortRef | AnchorRefY = 0,
-        dx: TUnit = 0,
-        dy: TUnit = 0,
+        x: T | PortRef | AnchorRefX = 0,
+        y: T | PortRef | AnchorRefY = 0,
+        dx: T = 0,
+        dy: T = 0,
         orientation: float = 0,
         mirror: bool = False,
         anchor: FixedAnchorDict | PortAnchorDict | None = None,
-    ) -> Placement[TUnit]:
+    ) -> Placement[T]:
         """Declare placement/orientation/mirroring for this instance.
 
         Returns:
             The created `Placement` (also stored under `self.placement` which references
             `self.parent_schematic.placements`).
         """
-        placement = Placement[TUnit](
+        placement = Placement[T](
             x=x,
             y=y,
             dx=dx,
@@ -415,8 +414,8 @@ class SchematicInstance(
     def connect(
         self,
         port: str | tuple[str, int, int],
-        other: Port[TUnit] | PortRef,
-    ) -> Connection[TUnit]:
+        other: Port[T] | PortRef,
+    ) -> Connection[T]:
         """Connect one of my ports to `other` and register it on the schematic."""
         if isinstance(port, str):
             pref = PortRef(instance=self.name, port=port)
@@ -424,7 +423,7 @@ class SchematicInstance(
             pref = PortArrayRef(
                 instance=self.name, port=port[0], ia=port[1], ib=port[2]
             )
-        conn = Connection[TUnit]((other, pref))
+        conn = Connection[T]((other, pref))
         self.parent_schematic.connections.append(conn)
         return conn
 
@@ -445,7 +444,7 @@ class SchematicInstance(
             self.placement.mirror = value
 
     @cached_property
-    def ports(self) -> Ports[TUnit]:
+    def ports(self) -> Ports[T]:
         return Ports(instance=self)
 
     @property
@@ -472,7 +471,7 @@ class SchematicInstance(
         )
 
 
-class Route(BaseModel, Generic[TUnit], extra="forbid"):
+class Route[T: (int, float)](BaseModel, extra="forbid"):
     """Bundle of `Link`s routed using a named strategy.
 
     Attributes:
@@ -484,7 +483,7 @@ class Route(BaseModel, Generic[TUnit], extra="forbid"):
     """
 
     name: str = Field(exclude=True)
-    links: list[Link[TUnit]]
+    links: list[Link[T]]
     routing_strategy: str = "route_bundle"
     settings: dict[str, JSONSerializable]
 
@@ -503,7 +502,7 @@ class Route(BaseModel, Generic[TUnit], extra="forbid"):
         return data
 
 
-class Port(BaseModel, Generic[TUnit], extra="forbid"):
+class Port[T: (int, float)](BaseModel, extra="forbid"):
     """A schematic-level, placeable port.
 
     This port is on the Schematic's cell's level, i.e. equivalent of `(D)KCell.ports`
@@ -527,10 +526,10 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
     """
 
     name: str = Field(exclude=True)
-    x: TUnit | PortRef | AnchorRefX
-    y: TUnit | PortRef | AnchorRefY
-    dx: TUnit = cast("TUnit", 0)
-    dy: TUnit = cast("TUnit", 0)
+    x: T | PortRef | AnchorRefX
+    y: T | PortRef | AnchorRefY
+    dx: T = 0
+    dy: T = 0
     cross_section: str
     orientation: Literal[0, 90, 180, 270] | PortRef
 
@@ -543,10 +542,10 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
         self,
     ) -> tuple[
         str,
-        TUnit | PortRef | AnchorRefX,
-        TUnit | PortRef | AnchorRefY,
-        TUnit,
-        TUnit,
+        T | PortRef | AnchorRefX,
+        T | PortRef | AnchorRefY,
+        T,
+        T,
         Literal[0, 90, 180, 270] | PortRef,
         str,
     ]:
@@ -573,7 +572,7 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
     def place(
         self,
         cell: KCell,
-        schematic: TSchematic[TUnit],
+        schematic: TSchematic[T],
         name: str,
         cross_sections: Mapping[str, CrossSection | DCrossSection],
     ) -> KCellPort:
@@ -659,22 +658,15 @@ class Port(BaseModel, Generic[TUnit], extra="forbid"):
         return f"{schematic_name}.ports[{self.name!r}]"
 
 
-class Link(
-    RootModel[
-        tuple[
-            PortArrayRef | PortRef | Port[TUnit], PortArrayRef | PortRef | Port[TUnit]
-        ]
-    ],
-    Generic[TUnit],
+class Link[T: (int, float)](
+    RootModel[tuple[PortArrayRef | PortRef | Port[T], PortArrayRef | PortRef | Port[T]]]
 ):
     """Undirected association between two ports (refs or schematic ports).
 
     The pair is stored in sorted order to ensure stable equality and hashing.
     """
 
-    root: tuple[
-        PortArrayRef | PortRef | Port[TUnit], PortArrayRef | PortRef | Port[TUnit]
-    ]
+    root: tuple[PortArrayRef | PortRef | Port[T], PortArrayRef | PortRef | Port[T]]
 
     @model_validator(mode="after")
     def _sort_data(self) -> Self:
@@ -682,8 +674,8 @@ class Link(
         return self
 
 
-class Connection(
-    RootModel[tuple[Port[TUnit] | PortArrayRef | PortRef, PortArrayRef | PortRef]]
+class Connection[T: (int, float)](
+    RootModel[tuple[Port[T] | PortArrayRef | PortRef, PortArrayRef | PortRef]]
 ):
     """Hard connection between two ports.
 
@@ -694,7 +686,7 @@ class Connection(
         TypeError: If connection attempts to join two `Port` objects.
     """
 
-    root: tuple[PortArrayRef | PortRef | Port[TUnit], PortArrayRef | PortRef]
+    root: tuple[PortArrayRef | PortRef | Port[T], PortArrayRef | PortRef]
 
     @model_validator(mode="after")
     def _sort_data(self) -> Self:
@@ -709,7 +701,7 @@ class Connection(
     @classmethod
     def from_list(
         cls, data: list[Any] | tuple[Any, ...] | dict[str, Any]
-    ) -> Connection[TUnit]:
+    ) -> Connection[T]:
         """Parse a Connection from a compact list/tuple/dict representation.
 
         Used for parsing legacy gdsfactory like connections.
@@ -740,7 +732,7 @@ class Connection(
         return Connection(**data)
 
 
-class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
+class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     """Schematic of a cell / component.
 
     Parameters:
@@ -760,13 +752,11 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     """
 
     name: str | None = None
-    instances: dict[str, SchematicInstance[TUnit]] = Field(default_factory=dict)
-    placements: dict[str, MirrorPlacement | Placement[TUnit]] = Field(
-        default_factory=dict
-    )
-    connections: list[Connection[TUnit]] = Field(default_factory=list)
-    routes: dict[str, Route[TUnit]] = Field(default_factory=dict)
-    ports: dict[str, Port[TUnit] | PortRef | PortArrayRef] = Field(default_factory=dict)
+    instances: dict[str, SchematicInstance[T]] = Field(default_factory=dict)
+    placements: dict[str, MirrorPlacement | Placement[T]] = Field(default_factory=dict)
+    connections: list[Connection[T]] = Field(default_factory=list)
+    routes: dict[str, Route[T]] = Field(default_factory=dict)
+    ports: dict[str, Port[T] | PortRef | PortArrayRef] = Field(default_factory=dict)
     kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
     unit: Literal["dbu", "um"]
     info: dict[str, JSONSerializable] = Field(default_factory=dict)
@@ -776,11 +766,11 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         name: str,
         component: str,
         settings: dict[str, JSONSerializable] | None = None,
-        array: RegularArray[TUnit] | Array[TUnit] | None = None,
-        placement: Placement[TUnit] | None = None,
+        array: RegularArray[T] | Array[T] | None = None,
+        placement: Placement[T] | None = None,
         kcl: KCLayout | None = None,
         virtual: bool = False,
-    ) -> SchematicInstance[TUnit]:
+    ) -> SchematicInstance[T]:
         """Create a schema instance.
 
         This would be an SREF or AREF in the resulting GDS cell.
@@ -800,7 +790,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         Returns:
             Schematic instance representing the args.
         """
-        inst = SchematicInstance[TUnit].model_validate(
+        inst = SchematicInstance[T].model_validate(
             {
                 "name": name,
                 "component": component,
@@ -845,12 +835,12 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         self,
         name: str,
         cross_section: str,
-        x: PortRef | PortArrayRef | TUnit,
-        y: PortRef | PortArrayRef | TUnit,
-        dx: TUnit = 0,
-        dy: TUnit = 0,
+        x: PortRef | PortArrayRef | T,
+        y: PortRef | PortArrayRef | T,
+        dx: T = 0,
+        dy: T = 0,
         orientation: Literal[0, 90, 180, 270] = 0,
-    ) -> Port[TUnit]:
+    ) -> Port[T]:
         """Create a schematic-level, placeable port.
 
         Returns:
@@ -869,8 +859,8 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         return p
 
     def create_connection(
-        self, port1: PortRef | Port[TUnit], port2: PortRef
-    ) -> Connection[TUnit]:
+        self, port1: PortRef | Port[T], port2: PortRef
+    ) -> Connection[T]:
         """Create and register a connection between two instance ports.
 
         Args:
@@ -884,7 +874,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
             The created `Connection`.
         """
 
-        conn = Connection[TUnit]((port1, port2))
+        conn = Connection[T]((port1, port2))
         if isinstance(port1, PortRef):
             if port1.instance not in self.instances:
                 raise ValueError(
@@ -1031,7 +1021,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 route["name"] = name
         connections = data.get("connections")
         if connections is not None and isinstance(connections, dict):
-            built_connections: list[Connection[TUnit]] = []
+            built_connections: list[Connection[T]] = []
             connections_: list[tuple[tuple[str, str], tuple[str, str]]] = [
                 (k.rsplit(",", 1), v.rsplit(",", 1)) for k, v in connections.items()
             ]
@@ -1282,8 +1272,8 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
                 )
 
         # verify connections
-        port_connection_transformation_errors: list[Connection[TUnit]] = []
-        connection_transformation_errors: list[Connection[TUnit]] = []
+        port_connection_transformation_errors: list[Connection[T]] = []
+        connection_transformation_errors: list[Connection[T]] = []
         for conn in self.connections:
             c1 = conn.root[0]
             c2 = conn.root[1]
@@ -1334,11 +1324,11 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
     def add_route(
         self,
         name: str,
-        start_ports: list[PortRef | Port[TUnit]],
-        end_ports: list[PortRef | Port[TUnit]],
+        start_ports: list[PortRef | Port[T]],
+        end_ports: list[PortRef | Port[T]],
         routing_strategy: str,
         **settings: JSONSerializable,
-    ) -> Route[TUnit]:
+    ) -> Route[T]:
         """Create a multi-link route bundle.
 
         Args:
@@ -1357,7 +1347,7 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
 
         if name in self.routes:
             raise ValueError(f"Route with name {name!r} already exists")
-        route = Route[TUnit](
+        route = Route[T](
             name=name,
             routing_strategy=routing_strategy,
             links=[
@@ -1368,14 +1358,12 @@ class TSchematic(BaseModel, Generic[TUnit], extra="forbid"):
         self.routes[name] = route
         return route
 
-    def connect(
-        self, port1: PortRef | Port[TUnit], port2: PortRef
-    ) -> Connection[TUnit]:
-        conn = Connection[TUnit]((port1, port2))
+    def connect(self, port1: PortRef | Port[T], port2: PortRef) -> Connection[T]:
+        conn = Connection[T]((port1, port2))
         self.connections.append(conn)
         return conn
 
-    def __getitem__(self, key: str) -> Port[TUnit] | PortRef:
+    def __getitem__(self, key: str) -> Port[T] | PortRef:
         return self.ports[key]
 
     def code_str(

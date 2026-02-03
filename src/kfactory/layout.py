@@ -18,7 +18,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Concatenate,
-    Generic,
     Literal,
     TypedDict,
     cast,
@@ -46,7 +45,13 @@ from .cross_section import (
     DSymmetricalCrossSection,
     SymmetricalCrossSection,
 )
-from .decorators import Decorators, PortsDefinition, WrappedKCellFunc, WrappedVKCellFunc
+from .decorators import (
+    Decorators,
+    PortsDefinition,
+    WrappedKCellFunc,
+    WrappedVKCellFunc,
+    _get_function_name,
+)
 from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
@@ -73,23 +78,23 @@ from .pin import BasePin
 from .port import BasePort, ProtoPort, rename_clockwise_multi
 from .routing.generic import ManhattanRoute
 from .settings import Info, KCellSettings
-from .typings import (
-    KC,
-    KCIN,
-    VK,
-    F,
-    KC_contra,
-    KCellParams,
-    MetaData,
-    P,
-    T,
-    TUnit,
-)
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
     from .ports import DPorts, Ports
     from .schematic import TSchematic
+    from .typings import (
+        KC,
+        KCIN,
+        VK,
+        F,
+        KC_contra,
+        KCellParams,
+        MetaData,
+        P,
+        T,
+        TUnit,
+    )
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -108,7 +113,9 @@ def get_default_kcl() -> KCLayout:
     return kcl
 
 
-class Factories(Mapping[str, F], Generic[F]):
+class Factories[F: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]](
+    Mapping[str, F]
+):
     _all: list[F]
     _by_name: dict[str, int]
     _by_tag: defaultdict[str, list[int]]
@@ -502,7 +509,7 @@ class KCLayout(
         )
         info = self.layout.get_info(self.layout.layer(*args, **kwargs))
         try:
-            return self.layers[info.name]  # type:ignore[no-any-return, index]
+            return self.layers[info.name]
         except KeyError as e:
             if allow_undefined_layers:
                 return self.layout.layer(info)
@@ -1291,7 +1298,7 @@ class KCLayout(
             elif sig.return_annotation is not inspect.Signature.empty:
                 # Use get_type_hints to resolve string annotations
                 try:
-                    type_hints = get_type_hints(f, globalns=f.__globals__)
+                    type_hints = get_type_hints(f, globalns=f.__globals__)  # ty:ignore[unresolved-attribute]
                     output_cell_type_ = type_hints.get("return", sig.return_annotation)
 
                 except Exception:
@@ -1340,7 +1347,7 @@ class KCLayout(
                 with self.thread_lock:
                     if wrapper_autocell.name is None:
                         raise ValueError(f"Function {f} has no name.")
-                    self.factories.add(wrapper_autocell)  # type: ignore[arg-type]
+                    self.factories.add(wrapper_autocell)
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
@@ -1507,7 +1514,7 @@ class KCLayout(
             elif sig.return_annotation is not inspect.Signature.empty:
                 # Use get_type_hints to resolve string annotations
                 try:
-                    type_hints = get_type_hints(f, globalns=f.__globals__)
+                    type_hints = get_type_hints(f, globalns=f.__globals__)  # ty:ignore[unresolved-attribute]
                     output_cell_type_ = type_hints.get("return", sig.return_annotation)
 
                 except Exception:
@@ -1893,14 +1900,14 @@ class KCLayout(
                         yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                         err_msg += (
                             "\nLayout Meta Diff:\n```\n"
-                            + yaml.dumps(dict(diff.layout_meta_diff))
+                            + yaml.dumps(dict(diff.layout_meta_diff))  # ty:ignore[unresolved-attribute]
                             + "\n```"
                         )
                     if diff.cells_meta_diff:
                         yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                         err_msg += (
                             "\nLayout Meta Diff:\n```\n"
-                            + yaml.dumps(dict(diff.cells_meta_diff))
+                            + yaml.dumps(dict(diff.cells_meta_diff))  # ty:ignore[unresolved-attribute]
                             + "\n```"
                         )
 
@@ -2167,7 +2174,7 @@ class KCLayout(
         ],
         list[ManhattanRoute],
     ]:
-        self.routing_strategies[f.__name__] = f
+        self.routing_strategies[_get_function_name(f)] = f
         return f
 
 

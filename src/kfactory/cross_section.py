@@ -6,7 +6,6 @@ from abc import ABC, abstractmethod
 from typing import (
     TYPE_CHECKING,
     Any,
-    Generic,
     Literal,
     NotRequired,
     Self,
@@ -17,13 +16,13 @@ from typing import (
 from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
 from .enclosure import DLayerEnclosure, LayerEnclosure, LayerEnclosureSpec
-from .typings import TUnit, dbu
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from . import kdb
     from .layout import KCLayout
+    from .typings import dbu
 
 __all__ = [
     "CrossSection",
@@ -143,7 +142,7 @@ class DSymmetricalCrossSection(BaseModel):
         )
 
 
-class TCrossSection(ABC, Generic[TUnit]):
+class TCrossSection[T: (int, float)](ABC):
     _base: SymmetricalCrossSection = PrivateAttr()
     kcl: KCLayout
 
@@ -156,26 +155,26 @@ class TCrossSection(ABC, Generic[TUnit]):
     def __init__(
         self,
         kcl: KCLayout,
-        width: TUnit,
+        width: T,
         layer: kdb.LayerInfo,
-        sections: Sequence[tuple[TUnit, TUnit] | tuple[TUnit]],
-        radius: TUnit | None = None,
-        radius_min: TUnit | None = None,
+        sections: Sequence[tuple[T, T] | tuple[T]],
+        radius: T | None = None,
+        radius_min: T | None = None,
         bbox_layers: Sequence[kdb.LayerInfo] | None = None,
-        bbox_offsets: Sequence[TUnit] | None = None,
+        bbox_offsets: Sequence[T] | None = None,
     ) -> None: ...
 
     @abstractmethod
     def __init__(
         self,
         kcl: KCLayout,
-        width: TUnit | None = None,
+        width: T | None = None,
         layer: kdb.LayerInfo | None = None,
-        sections: Sequence[tuple[TUnit, TUnit] | tuple[TUnit]] | None = None,
-        radius: TUnit | None = None,
-        radius_min: TUnit | None = None,
+        sections: Sequence[tuple[T, T] | tuple[T]] | None = None,
+        radius: T | None = None,
+        radius_min: T | None = None,
         bbox_layers: Sequence[kdb.LayerInfo] | None = None,
-        bbox_offsets: Sequence[TUnit] | None = None,
+        bbox_offsets: Sequence[T] | None = None,
         base: SymmetricalCrossSection | None = None,
     ) -> None: ...
 
@@ -185,7 +184,7 @@ class TCrossSection(ABC, Generic[TUnit]):
 
     @property
     @abstractmethod
-    def width(self) -> TUnit: ...
+    def width(self) -> T: ...
 
     @property
     def layer(self) -> kdb.LayerInfo:
@@ -207,24 +206,24 @@ class TCrossSection(ABC, Generic[TUnit]):
 
     @property
     @abstractmethod
-    def sections(self) -> dict[kdb.LayerInfo, list[tuple[TUnit | None, TUnit]]]: ...
+    def sections(self) -> dict[kdb.LayerInfo, list[tuple[T | None, T]]]: ...
 
     @property
     @abstractmethod
-    def radius(self) -> TUnit | None: ...
+    def radius(self) -> T | None: ...
 
     @property
     @abstractmethod
-    def radius_min(self) -> TUnit | None: ...
+    def radius_min(self) -> T | None: ...
 
     @property
     @abstractmethod
     def bbox_sections(
         self,
-    ) -> dict[kdb.LayerInfo, TUnit]: ...
+    ) -> dict[kdb.LayerInfo, T]: ...
 
     @abstractmethod
-    def get_xmin_xmax(self) -> tuple[TUnit, TUnit]: ...
+    def get_xmin_xmax(self) -> tuple[T, T]: ...
 
     @abstractmethod
     def model_copy(
@@ -462,15 +461,13 @@ class DCrossSection(TCrossSection[float]):
         )
 
 
-class TCrossSectionSpec(TypedDict, Generic[TUnit]):
+class TCrossSectionSpec[T: (int, float)](TypedDict):
     name: NotRequired[str]
-    sections: NotRequired[
-        list[tuple[kdb.LayerInfo, TUnit] | tuple[kdb.LayerInfo, TUnit, TUnit]]
-    ]
+    sections: NotRequired[list[tuple[kdb.LayerInfo, T] | tuple[kdb.LayerInfo, T, T]]]
     layer: kdb.LayerInfo
-    width: TUnit
+    width: T
     bbox_layers: NotRequired[Sequence[kdb.LayerInfo]]
-    bbox_offsets: NotRequired[Sequence[TUnit]]
+    bbox_offsets: NotRequired[Sequence[T]]
 
 
 class CrossSectionSpec(TCrossSectionSpec[int]):

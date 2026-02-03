@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Generic, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from . import kdb
 from .conf import config
-from .instance import DInstance, Instance, ProtoTInstance, VInstance
+from .instance import DInstance, Instance, ProtoInstance, ProtoTInstance, VInstance
 from .port import (
     BasePort,
     DPort,
@@ -18,7 +18,6 @@ from .port import (
     filter_regex,
 )
 from .ports import DPorts, Ports, ProtoPorts
-from .typings import TInstance_co, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
@@ -35,14 +34,14 @@ __all__ = [
 ]
 
 
-class HasCellPorts(ABC, Generic[TUnit]):
+class HasCellPorts[T: (int, float)](ABC):
     @property
     @abstractmethod
-    def cell_ports(self) -> ProtoPorts[TUnit]: ...
+    def cell_ports(self) -> ProtoPorts[T]: ...
 
 
-class ProtoInstancePorts(HasCellPorts[TUnit], ABC, Generic[TUnit, TInstance_co]):
-    instance: TInstance_co
+class ProtoInstancePorts[T: (int, float), TI: ProtoInstance[Any]](HasCellPorts[T], ABC):
+    instance: TI
 
     @abstractmethod
     def __len__(self) -> int: ...
@@ -51,10 +50,10 @@ class ProtoInstancePorts(HasCellPorts[TUnit], ABC, Generic[TUnit, TInstance_co])
     def __contains__(self, port: str | ProtoPort[Any]) -> bool: ...
 
     @abstractmethod
-    def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]: ...
+    def __getitem__(self, key: int | str | None) -> ProtoPort[T]: ...
 
     @abstractmethod
-    def __iter__(self) -> Iterator[ProtoPort[TUnit]]: ...
+    def __iter__(self) -> Iterator[ProtoPort[T]]: ...
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(n={len(self)})"
@@ -63,8 +62,8 @@ class ProtoInstancePorts(HasCellPorts[TUnit], ABC, Generic[TUnit, TInstance_co])
         return f"{self.__class__.__name__}(ports={list(self)})"
 
 
-class ProtoTInstancePorts(
-    ProtoInstancePorts[TUnit, ProtoTInstance[TUnit]], ABC, Generic[TUnit]
+class ProtoTInstancePorts[T: (int, float)](
+    ProtoInstancePorts[T, ProtoTInstance[T]], ABC
 ):
     """Ports of an Instance.
 
@@ -79,7 +78,7 @@ class ProtoTInstancePorts(
             This provides a way to dynamically calculate the ports.
     """
 
-    instance: ProtoTInstance[TUnit]
+    instance: ProtoTInstance[T]
 
     def __len__(self) -> int:
         """Return Port count."""
@@ -94,7 +93,7 @@ class ProtoTInstancePorts(
         return any(_port.name == port for _port in self.instance.ports)
 
     @property
-    def ports(self) -> ProtoTInstancePorts[TUnit]:
+    def ports(self) -> ProtoTInstancePorts[T]:
         return self.instance.ports
 
     @property
@@ -108,7 +107,7 @@ class ProtoTInstancePorts(
         layer: LayerEnum | int | None = None,
         port_type: str | None = None,
         regex: str | None = None,
-    ) -> Sequence[ProtoPort[TUnit]]:
+    ) -> Sequence[ProtoPort[T]]:
         """Filter ports by name.
 
         Args:
@@ -118,7 +117,7 @@ class ProtoTInstancePorts(
             port_type: Filter by port type.
             regex: Filter by regex of the name.
         """
-        ports: Iterable[ProtoPort[TUnit]] = list(self.ports)
+        ports: Iterable[ProtoPort[T]] = list(self.ports)
         if regex:
             ports = filter_regex(ports, regex)
         if layer is not None:
@@ -133,7 +132,7 @@ class ProtoTInstancePorts(
 
     def __getitem__(
         self, key: int | str | tuple[int | str | None, int, int] | None
-    ) -> ProtoPort[TUnit]:
+    ) -> ProtoPort[T]:
         """Returns port from instance.
 
         The key can either be an integer, in which case the nth port is
@@ -185,9 +184,9 @@ class ProtoTInstancePorts(
 
     @property
     @abstractmethod
-    def cell_ports(self) -> ProtoPorts[TUnit]: ...
+    def cell_ports(self) -> ProtoPorts[T]: ...
 
-    def each_port(self) -> Iterator[ProtoPort[TUnit]]:
+    def each_port(self) -> Iterator[ProtoPort[T]]:
         """Create a copy of the ports to iterate through."""
         if not self.instance.is_regular_array():
             if not self.instance.is_complex():
@@ -216,9 +215,9 @@ class ProtoTInstancePorts(
             )
 
     @abstractmethod
-    def __iter__(self) -> Iterator[ProtoPort[TUnit]]: ...
+    def __iter__(self) -> Iterator[ProtoPort[T]]: ...
 
-    def each_by_array_coord(self) -> Iterator[tuple[int, int, ProtoPort[TUnit]]]:
+    def each_by_array_coord(self) -> Iterator[tuple[int, int, ProtoPort[T]]]:
         if not self.instance.is_regular_array():
             if not self.instance.is_complex():
                 yield from (

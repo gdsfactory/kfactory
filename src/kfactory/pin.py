@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Generic
+from typing import TYPE_CHECKING, Any
 
 from pydantic import BaseModel
 from typing_extensions import TypedDict
@@ -10,12 +10,12 @@ from typing_extensions import TypedDict
 from . import kdb
 from .port import BasePort, DPort, Port, ProtoPort
 from .settings import Info
-from .typings import TPin, TPort_co, TUnit
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from .layout import KCLayout
+    from .typings import TPin, TPort_co, TUnit
 
 __all__ = ["DPin", "Pin", "ProtoPin"]
 
@@ -51,7 +51,7 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
         )
 
 
-class ProtoPin(ABC, Generic[TUnit]):
+class ProtoPin[TUnit](ABC):
     """Base class for kf.Pin, kf.DPin."""
 
     yaml_tag: str = "!Pin"
@@ -106,6 +106,7 @@ class ProtoPin(ABC, Generic[TUnit]):
     def ports(self) -> list[Any]: ...  # because mypy... should be list[ProtoPort[Any]]
 
     @ports.setter
+    @abstractmethod
     def ports(self, value: Iterable[TPort_co]) -> None: ...
 
     def to_itype(self) -> Pin:
