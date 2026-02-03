@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from .layout import KCLayout
-    from .typings import TPin, TPort_co, TUnit
+    from .typings import TPin, TPort_co
 
 __all__ = ["DPin", "Pin", "ProtoPin"]
 
@@ -51,7 +51,7 @@ class BasePin(BaseModel, arbitrary_types_allowed=True):
         )
 
 
-class ProtoPin[TUnit](ABC):
+class ProtoPin[T: (int, float)](ABC):
     """Base class for kf.Pin, kf.DPin."""
 
     yaml_tag: str = "!Pin"
@@ -125,7 +125,7 @@ class ProtoPin[TUnit](ABC):
         )
 
     @abstractmethod
-    def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]:
+    def __getitem__(self, key: int | str | None) -> ProtoPort[T]:
         """Get a port in the pin by index or name."""
         ...
 
@@ -134,7 +134,7 @@ class ProtoPin[TUnit](ABC):
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
-    ) -> ProtoPin[TUnit]:
+    ) -> ProtoPin[T]:
         """Copy the port with a transformation."""
         ...
 

@@ -16,13 +16,13 @@ from typing import (
 from pydantic import BaseModel, Field, PrivateAttr, model_validator
 
 from .enclosure import DLayerEnclosure, LayerEnclosure, LayerEnclosureSpec
+from .typings import dbu  # noqa: TC001
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
     from . import kdb
     from .layout import KCLayout
-    from .typings import dbu
 
 __all__ = [
     "CrossSection",

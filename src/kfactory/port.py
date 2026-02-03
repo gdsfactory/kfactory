@@ -10,8 +10,6 @@ from abc import ABC, abstractmethod
 from enum import IntEnum, IntFlag, auto
 from typing import TYPE_CHECKING, Any, Literal, Self, overload
 
-import klayout.db as kdb
-from klayout import rdb
 from pydantic import (
     BaseModel,
     model_serializer,
@@ -19,6 +17,7 @@ from pydantic import (
 )
 from typing_extensions import TypedDict
 
+from . import kdb, rdb
 from .conf import ANGLE_180, config
 from .cross_section import (
     CrossSection,
