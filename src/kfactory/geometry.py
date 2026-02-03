@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Generic, Self, overload
+from typing import TYPE_CHECKING, Any, Self, overload
 
 import numpy as np
 
 from . import kdb
-from .typings import TUnit
 
 if TYPE_CHECKING:
     from .layer import LayerEnum
@@ -16,10 +15,10 @@ if TYPE_CHECKING:
 __all__ = ["DBUGeometricObject", "GeometricObject", "SizeInfo", "UMGeometricObject"]
 
 
-class SizeInfo(Generic[TUnit]):
-    _bf: BoxFunction[TUnit]
+class SizeInfo[T: (int, float)]:
+    _bf: BoxFunction[T]
 
-    def __init__(self, bbox: BoxFunction[TUnit]) -> None:
+    def __init__(self, bbox: BoxFunction[T]) -> None:
         """Initialize this object."""
         super().__init__()
         self._bf = bbox
@@ -30,94 +29,94 @@ class SizeInfo(Generic[TUnit]):
             f" {self.south=}, {self.north=}"
         )
 
-    def __call__(self, layer: int | LayerEnum) -> SizeInfo[TUnit]:
-        def layer_bbox() -> BoxLike[TUnit]:
+    def __call__(self, layer: int | LayerEnum) -> SizeInfo[T]:
+        def layer_bbox() -> BoxLike[T]:
             return self._bf(layer)
 
-        return SizeInfo[TUnit](bbox=layer_bbox)  # type: ignore[arg-type]
+        return SizeInfo[T](bbox=layer_bbox)
 
     @property
-    def west(self) -> TUnit:
+    def west(self) -> T:
         return self._bf().left
 
     @property
-    def east(self) -> TUnit:
+    def east(self) -> T:
         return self._bf().right
 
     @property
-    def south(self) -> TUnit:
+    def south(self) -> T:
         return self._bf().bottom
 
     @property
-    def north(self) -> TUnit:
+    def north(self) -> T:
         return self._bf().top
 
     @property
-    def width(self) -> TUnit:
+    def width(self) -> T:
         return self._bf().width()
 
     @property
-    def height(self) -> TUnit:
+    def height(self) -> T:
         return self._bf().height()
 
     @property
-    def sw(self) -> tuple[TUnit, TUnit]:
+    def sw(self) -> tuple[T, T]:
         bb = self._bf()
         return (bb.left, bb.bottom)
 
     @property
-    def nw(self) -> tuple[TUnit, TUnit]:
+    def nw(self) -> tuple[T, T]:
         bb = self._bf()
         return (bb.left, bb.top)
 
     @property
-    def se(self) -> tuple[TUnit, TUnit]:
+    def se(self) -> tuple[T, T]:
         bb = self._bf()
         return (bb.right, bb.bottom)
 
     @property
-    def ne(self) -> tuple[TUnit, TUnit]:
+    def ne(self) -> tuple[T, T]:
         bb = self._bf()
         return (bb.right, bb.top)
 
     @property
-    def cw(self) -> tuple[TUnit, TUnit]:
+    def cw(self) -> tuple[T, T]:
         bb = self._bf()
         return (bb.left, bb.center().y)
 
     @property
-    def ce(self) -> tuple[TUnit, TUnit]:
+    def ce(self) -> tuple[T, T]:
         bb = self._bf()
         return (bb.right, bb.center().y)
 
     @property
-    def sc(self) -> tuple[TUnit, TUnit]:
+    def sc(self) -> tuple[T, T]:
         bb = self._bf()
         return (bb.center().x, bb.bottom)
 
     @property
-    def nc(self) -> tuple[TUnit, TUnit]:
+    def nc(self) -> tuple[T, T]:
         bb = self._bf()
         return (bb.center().x, bb.top)
 
     @property
-    def cc(self) -> tuple[TUnit, TUnit]:
+    def cc(self) -> tuple[T, T]:
         c = self._bf().center()
         return (c.x, c.y)
 
     @property
-    def center(self) -> tuple[TUnit, TUnit]:
+    def center(self) -> tuple[T, T]:
         c = self._bf().center()
         return (c.x, c.y)
 
 
-class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
+class GeometricObject[T: (int, float)](ABC):
     @property
     @abstractmethod
     def kcl(self) -> KCLayout: ...
 
     @abstractmethod
-    def bbox(self, layer: int | None = None) -> BoxLike[TUnit]: ...
+    def bbox(self, layer: int | None = None) -> BoxLike[T]: ...
 
     @abstractmethod
     def ibbox(self, layer: int | None = None) -> kdb.Box: ...
@@ -125,12 +124,6 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
     @abstractmethod
     def dbbox(self, layer: int | None = None) -> kdb.DBox: ...
 
-    @overload
-    @abstractmethod
-    def _standard_trans(self: GeometricObject[int]) -> type[kdb.Trans]: ...
-    @overload
-    @abstractmethod
-    def _standard_trans(self: GeometricObject[float]) -> type[kdb.DCplxTrans]: ...
     @abstractmethod
     def _standard_trans(self) -> type[kdb.Trans | kdb.DCplxTrans]: ...
 
@@ -142,93 +135,93 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
     ) -> Any: ...
 
     @property
-    def x(self) -> TUnit:
+    def x(self) -> T:
         """Returns the x-coordinate of the center of the bounding box."""
         return self.bbox().center().x
 
     @x.setter
-    def x(self, __val: TUnit, /) -> None:
+    def x(self, __val: T, /) -> None:
         """Moves self so that the bbox's center x-coordinate."""
         self.transform(self._standard_trans()(x=__val - self.bbox().center().x))
 
     @property
-    def y(self) -> TUnit:
+    def y(self) -> T:
         """Returns the y-coordinate of the center of the bounding box."""
         return self.bbox().center().y
 
     @y.setter
-    def y(self, __val: TUnit, /) -> None:
+    def y(self, __val: T, /) -> None:
         """Moves self so that the bbox's center y-coordinate."""
         self.transform(self._standard_trans()(y=__val - self.bbox().center().y))
 
     @property
-    def xmin(self) -> TUnit:
+    def xmin(self) -> T:
         """Returns the x-coordinate of the left edge of the bounding box."""
         return self.bbox().left
 
     @xmin.setter
-    def xmin(self, __val: TUnit, /) -> None:
+    def xmin(self, __val: T, /) -> None:
         """Moves self so that the bbox's left edge x-coordinate."""
         self.transform(self._standard_trans()(x=__val - self.bbox().left))
 
     @property
-    def ymin(self) -> TUnit:
+    def ymin(self) -> T:
         """Returns the y-coordinate of the bottom edge of the bounding box."""
         return self.bbox().bottom
 
     @ymin.setter
-    def ymin(self, __val: TUnit, /) -> None:
+    def ymin(self, __val: T, /) -> None:
         """Moves self so that the bbox's bottom edge y-coordinate."""
         self.transform(self._standard_trans()(y=__val - self.bbox().bottom))
 
     @property
-    def xmax(self) -> TUnit:
+    def xmax(self) -> T:
         """Returns the x-coordinate of the right edge of the bounding box."""
         return self.bbox().right
 
     @xmax.setter
-    def xmax(self, __val: TUnit, /) -> None:
+    def xmax(self, __val: T, /) -> None:
         """Moves self so that the bbox's right edge x-coordinate."""
         self.transform(self._standard_trans()(x=__val - self.bbox().right))
 
     @property
-    def ymax(self) -> TUnit:
+    def ymax(self) -> T:
         """Returns the y-coordinate of the top edge of the bounding box."""
         return self.bbox().top
 
     @ymax.setter
-    def ymax(self, __val: TUnit, /) -> None:
+    def ymax(self, __val: T, /) -> None:
         """Moves self so that the bbox's top edge y-coordinate."""
         self.transform(self._standard_trans()(y=__val - self.bbox().top))
 
     @property
-    def xsize(self) -> TUnit:
+    def xsize(self) -> T:
         """Returns the width of the bounding box."""
         return self.bbox().width()
 
     @xsize.setter
-    def xsize(self, __val: TUnit, /) -> None:
+    def xsize(self, __val: T, /) -> None:
         """Sets the width of the bounding box."""
         self.transform(self._standard_trans()(x=__val - self.bbox().width()))
 
     @property
-    def ysize(self) -> TUnit:
+    def ysize(self) -> T:
         """Returns the height of the bounding box."""
         return self.bbox().height()
 
     @ysize.setter
-    def ysize(self, __val: TUnit, /) -> None:
+    def ysize(self, __val: T, /) -> None:
         """Sets the height of the bounding box."""
         self.transform(self._standard_trans()(y=__val - self.bbox().height()))
 
     @property
-    def center(self) -> tuple[TUnit, TUnit]:
+    def center(self) -> tuple[T, T]:
         """Returns the coordinate center of the bounding box."""
         center = self.bbox().center()
         return center.x, center.y
 
     @center.setter
-    def center(self, __val: tuple[TUnit, TUnit], /) -> None:
+    def center(self, __val: tuple[T, T], /) -> None:
         """Moves self so that the bbox's center coordinate."""
         self.transform(
             self._standard_trans()(
@@ -237,17 +230,15 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
         )
 
     @overload
-    def move(self, destination: tuple[TUnit, TUnit], /) -> Self: ...
+    def move(self, destination: tuple[T, T], /) -> Self: ...
 
     @overload
-    def move(
-        self, origin: tuple[TUnit, TUnit], destination: tuple[TUnit, TUnit]
-    ) -> Self: ...
+    def move(self, origin: tuple[T, T], destination: tuple[T, T]) -> Self: ...
 
     def move(
         self,
-        origin: tuple[TUnit, TUnit],
-        destination: tuple[TUnit, TUnit] | None = None,
+        origin: tuple[T, T],
+        destination: tuple[T, T] | None = None,
     ) -> Self:
         """Move self in dbu.
 
@@ -266,12 +257,12 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
         return self
 
     @overload
-    def movex(self, destination: TUnit, /) -> Self: ...
+    def movex(self, destination: T, /) -> Self: ...
 
     @overload
-    def movex(self, origin: TUnit, destination: TUnit) -> Self: ...
+    def movex(self, origin: T, destination: T) -> Self: ...
 
-    def movex(self, origin: TUnit, destination: TUnit | None = None) -> Self:
+    def movex(self, origin: T, destination: T | None = None) -> Self:
         """Move self in x-direction in dbu.
 
         Args:
@@ -285,12 +276,12 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
         return self
 
     @overload
-    def movey(self, destination: TUnit, /) -> Self: ...
+    def movey(self, destination: T, /) -> Self: ...
 
     @overload
-    def movey(self, origin: TUnit, destination: TUnit) -> Self: ...
+    def movey(self, origin: T, destination: T) -> Self: ...
 
-    def movey(self, origin: TUnit, destination: TUnit | None = None) -> Self:
+    def movey(self, origin: T, destination: T | None = None) -> Self:
         """Move self in y-direction in dbu.
 
         Args:
@@ -304,24 +295,22 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
         return self
 
     @abstractmethod
-    def rotate(self, angle: TUnit, center: tuple[TUnit, TUnit] | None = None) -> Self:
+    def rotate(self, angle: T, center: tuple[T, T] | None = None) -> Self:
         """Rotate self."""
         ...
 
     @abstractmethod
-    def mirror(
-        self, p1: tuple[TUnit, TUnit] = ..., p2: tuple[TUnit, TUnit] = ...
-    ) -> Self:
+    def mirror(self, p1: tuple[T, T] = ..., p2: tuple[T, T] = ...) -> Self:
         """Mirror self at a line."""
         ...
 
     @abstractmethod
-    def mirror_x(self, x: TUnit = ...) -> Self:
+    def mirror_x(self, x: T = ...) -> Self:
         """Mirror self at an y-axis at position x."""
         ...
 
     @abstractmethod
-    def mirror_y(self, y: TUnit = ...) -> Self:
+    def mirror_y(self, y: T = ...) -> Self:
         """Mirror self at an x-axis at position y."""
         ...
 
@@ -740,8 +729,8 @@ class GeometricObject(Generic[TUnit], ABC):  # noqa: PYI059
         return self
 
     @property
-    def size_info(self) -> SizeInfo[TUnit]:
-        return SizeInfo[TUnit](self.bbox)
+    def size_info(self) -> SizeInfo[T]:
+        return SizeInfo[T](self.bbox)
 
     @property
     def isize_info(self) -> SizeInfo[int]:

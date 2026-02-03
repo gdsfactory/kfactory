@@ -28,19 +28,10 @@ from collections.abc import (
     ValuesView,
 )
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Generic,
-    Literal,
-    Self,
-    TypeAlias,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, Self, cast, overload
 
 import ruamel.yaml
-from klayout import __version__ as _klayout_version  # type: ignore[attr-defined]
+from klayout import __version__ as _klayout_version
 from pydantic import (
     BaseModel,
     Field,
@@ -91,7 +82,7 @@ from .serialization import (
 )
 from .settings import Info, KCellSettings, KCellSettingsUnits
 from .shapes import VShapes
-from .typings import KC_co, MetaData, TBaseCell_co, TUnit
+from .typings import KC_co, MetaData, TBaseCell_co
 from .utilities import (
     check_cell_ports,
     check_inst_ports,
@@ -191,8 +182,8 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     def name(self, value: str) -> None: ...
 
 
-class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # noqa: PYI059
-    _base: TBaseCell_co
+class ProtoKCell[T: (int, float), TB: BaseKCell[Any]](GeometricObject[T], ABC):
+    _base: TB
 
     @property
     def locked(self) -> bool:
@@ -281,14 +272,14 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # 
 
     @property
     @abstractmethod
-    def insts(self) -> ProtoInstances[TUnit, ProtoInstance[TUnit]]: ...
+    def insts(self) -> ProtoInstances[T, ProtoInstance[T]]: ...
 
     @abstractmethod
     def shapes(self, layer: int | kdb.LayerInfo) -> kdb.Shapes | VShapes: ...
 
     @property
     @abstractmethod
-    def ports(self) -> ProtoPorts[TUnit]: ...
+    def ports(self) -> ProtoPorts[T]: ...
 
     @ports.setter
     @abstractmethod
@@ -296,7 +287,7 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # 
 
     @property
     @abstractmethod
-    def pins(self) -> ProtoPins[TUnit]: ...
+    def pins(self) -> ProtoPins[T]: ...
 
     @pins.setter
     @abstractmethod
@@ -308,7 +299,7 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # 
         port: ProtoPort[Any],
         name: str | None = None,
         keep_mirror: bool = False,
-    ) -> ProtoPort[TUnit]:
+    ) -> ProtoPort[T]:
         """Add an existing port. E.g. from an instance to propagate the port.
 
         Args:
@@ -612,7 +603,9 @@ class TVCell(BaseKCell):
         self._name = value
 
 
-class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI059
+class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
+    _base: TKCell
+
     def __init__(
         self,
         *,
@@ -675,7 +668,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         self._base.schematic = value
 
     @abstractmethod
-    def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]:
+    def __getitem__(self, key: int | str | None) -> ProtoPort[T]:
         """Returns port from instance."""
         ...
 
@@ -694,9 +687,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         return self._base.virtual
 
     @property
-    @property
     @abstractmethod
-    def pins(self) -> ProtoPins[TUnit]: ...
+    def pins(self) -> ProtoPins[T]: ...
 
     @pins.setter
     @abstractmethod
@@ -736,7 +728,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
         try:
-            return super().__getattr__(name)  # type: ignore[misc]
+            return super().__getattr__(name)
         except Exception:
             return getattr(self._base, name)
 
@@ -749,7 +741,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
 
     @property
     @abstractmethod
-    def insts(self) -> ProtoTInstances[TUnit]: ...
+    def insts(self) -> ProtoTInstances[T]: ...
 
     def __copy__(self) -> Self:
         """Enables use of `copy.copy` and `copy.deep_copy`."""
@@ -912,7 +904,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         name: str | None = None,
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
-    ) -> ProtoPin[TUnit]: ...
+    ) -> ProtoPin[T]: ...
 
     @overload
     @abstractmethod
@@ -1115,10 +1107,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
 
     @property
     @abstractmethod
-    def library_cell(self) -> ProtoTKCell[TUnit]: ...
+    def library_cell(self) -> ProtoTKCell[T]: ...
 
     @abstractmethod
-    def __lshift__(self, cell: AnyTKCell) -> ProtoTInstance[TUnit]: ...
+    def __lshift__(self, cell: AnyTKCell) -> ProtoTInstance[T]: ...
 
     def auto_rename_ports(self, rename_func: Callable[..., None] | None = None) -> None:
         """Rename the ports with the schema angle -> "NSWE" and sort by x and y.
@@ -1418,14 +1410,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + yaml.dumps(dict(diff.layout_meta_diff))
+                        + yaml.dumps(dict(diff.layout_meta_diff))  # ty:ignore[unresolved-attribute]
                         + "\n```"
                     )
                 if diff.cells_meta_diff:
                     yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + yaml.dumps(dict(diff.cells_meta_diff))
+                        + yaml.dumps(dict(diff.cells_meta_diff))  # ty:ignore[unresolved-attribute]
                         + "\n```"
                     )
 
@@ -1542,15 +1534,20 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         transform_ports: bool = True,
     ) -> Instance | None:
         """Transforms the instance or cell with the transformation given."""
-        if trans:
+        if trans is not None:
             return Instance(
                 self.kcl,
                 self._base.kdb_cell.transform(
-                    inst_or_trans,  # type: ignore[arg-type]
-                    trans,  # type: ignore[arg-type]
+                    cast("kdb.Instance", inst_or_trans),
+                    trans,
                 ),
             )
-        self._base.kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
+        self._base.kdb_cell.transform(
+            cast(
+                "kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans",
+                inst_or_trans,
+            )
+        )
         if transform_ports:
             if isinstance(inst_or_trans, kdb.DTrans):
                 inst_or_trans = kdb.DCplxTrans(inst_or_trans)
@@ -2145,9 +2142,9 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
 
         inst_ports: dict[
             str,
-            dict[str, list[tuple[int, int, Instance, Port, kdb.SubCircuit]]],
+            dict[str, list[tuple[int, int, Instance, ProtoPort[Any], kdb.SubCircuit]]],
         ] = {}
-        cell_ports: dict[str, dict[str, list[tuple[int, Port]]]] = {}
+        cell_ports: dict[str, dict[str, list[tuple[int, ProtoPort[Any]]]]] = {}
 
         # sort the cell's ports by position and layer
 
@@ -2781,7 +2778,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         | Callable[..., CrossSection | DCrossSection]
         | SymmetricalCrossSection,
         **cross_section_kwargs: Any,
-    ) -> TCrossSection[TUnit]: ...
+    ) -> TCrossSection[T]: ...
 
     @property
     def lvs_equivalent_ports(self) -> list[list[str]] | None:
@@ -4144,8 +4141,8 @@ def get_cells(
     return cells
 
 
-AnyKCell: TypeAlias = ProtoKCell[Any, Any]
-AnyTKCell: TypeAlias = ProtoTKCell[Any]
+type AnyKCell = ProtoKCell[Any, Any]
+type AnyTKCell = ProtoTKCell[Any]
 
 
 def _get_netlist(

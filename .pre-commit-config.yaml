@@ -21,7 +21,7 @@ repos:
         exclude: 'changelog\.d/.*|CHANGELOG\.md'
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.14.13
+    rev: v0.14.14
     hooks:
       # Run the linter.
       - id: ruff
@@ -46,20 +46,3 @@ repos:
         args: [--exit-zero]
         # ignore all tests, not just tests data
         exclude: ^tests/
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v1.19.1" # Use the sha / tag you want to point at
-    hooks:
-      - id: mypy
-        args: [--ignore-missing-imports, --strict, --config-file=pyproject.toml]
-        additional_dependencies:
-          - pydantic
-          - numpy
-          - pytest
-          - "klayout>=0.30"
-          - types-cachetools
-          - loguru
-          - pydantic-settings
-          - typer
-          - types-PyYAML
-          - scipy
-        exclude: ^docs/|^tests/

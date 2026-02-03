@@ -39,7 +39,8 @@ class PortRef(BaseModel, extra="forbid"):
     @classmethod
     def _validate_portref(cls, data: dict[str, Any]) -> dict[str, Any]:
         if isinstance(data, str):
-            data = tuple(data.rsplit(",", 1))
+            data_ = tuple(data.rsplit(",", 1))
+            return {"instance": data_[0], "port": data_[1]}
         if isinstance(data, tuple):
             return {"instance": data[0], "port": data[1]}
         return data
@@ -95,7 +96,9 @@ class PortArrayRef(PortRef, extra="forbid"):
 
     @model_validator(mode="before")
     @classmethod
-    def _validate_array_portref(cls, data: dict[str, Any]) -> dict[str, Any]:
+    def _validate_array_portref(
+        cls, data: str | tuple[str, ...] | dict[str, Any]
+    ) -> dict[str, Any] | tuple[str, ...]:
         if isinstance(data, str):
             data = tuple(data.rsplit(",", 1))
         if isinstance(data, tuple):

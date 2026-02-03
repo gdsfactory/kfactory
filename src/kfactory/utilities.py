@@ -116,7 +116,7 @@ def check_cell_ports(p1: ProtoPort[Any], p2: ProtoPort[Any]) -> int:
     return check_int
 
 
-def instance_port_name(inst: Instance, port: Port) -> str:
+def instance_port_name(inst: Instance, port: ProtoPort[Any]) -> str:
     """Create a name for an instance port.
 
     Args:

@@ -8,10 +8,8 @@ from __future__ import annotations
 import re
 from abc import ABC, abstractmethod
 from enum import IntEnum, IntFlag, auto
-from typing import TYPE_CHECKING, Any, Generic, Literal, Self, overload
+from typing import TYPE_CHECKING, Any, Literal, Self, overload
 
-import klayout.db as kdb
-from klayout import rdb
 from pydantic import (
     BaseModel,
     model_serializer,
@@ -19,6 +17,7 @@ from pydantic import (
 )
 from typing_extensions import TypedDict
 
+from . import kdb, rdb
 from .conf import ANGLE_180, config
 from .cross_section import (
     CrossSection,
@@ -28,7 +27,6 @@ from .cross_section import (
     TCrossSection,
 )
 from .settings import Info
-from .typings import Angle, TPort, TUnit
 from .utilities import pprint_ports
 
 if TYPE_CHECKING:
@@ -37,6 +35,7 @@ if TYPE_CHECKING:
     from .kcell import AnyTKCell, KCell
     from .layer import LayerEnum
     from .layout import KCLayout
+    from .typings import Angle, TPort
 
 
 def create_port_error(
@@ -76,7 +75,9 @@ class PortCheck(IntFlag):
 
 
 def port_check(
-    p1: Port, p2: Port, checks: PortCheck | int = PortCheck.all_opposite
+    p1: ProtoPort[Any],
+    p2: ProtoPort[Any],
+    checks: PortCheck | int = PortCheck.all_opposite,
 ) -> None:
     """Check if two ports are equal."""
     if checks & PortCheck.opposite:
@@ -89,9 +90,11 @@ def port_check(
             f"Transformations of ports not matching for overlapping check {p1=} {p2=}"
         )
     if checks & PortCheck.width:
-        assert p1.width == p2.width, f"Width mismatch for {p1=} {p2=}"
+        assert p1.iwidth == p2.iwidth, f"Width mismatch for {p1=} {p2=}"
     if checks & PortCheck.layer:
-        assert p1.layer == p2.layer, f"Layer mismatch for {p1=} {p2=}"
+        assert p1.layer_info.is_equivalent(p2.layer_info), (
+            f"Layer mismatch for {p1=} {p2=}"
+        )
     if checks & PortCheck.port_type:
         assert p1.port_type == p2.port_type, f"Port type mismatch for {p1=} {p2=}"
 
@@ -255,7 +258,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         )
 
 
-class ProtoPort(Generic[TUnit], ABC):  # noqa: PYI059
+class ProtoPort[T: (int, float)](ABC):
     """Base class for kf.Port, kf.DPort."""
 
     yaml_tag: str = "!Port"
@@ -266,19 +269,19 @@ class ProtoPort(Generic[TUnit], ABC):  # noqa: PYI059
         self,
         name: str | None = None,
         *,
-        width: TUnit | None = None,
+        width: T | None = None,
         layer: int | None = None,
         layer_info: kdb.LayerInfo | None = None,
         port_type: str = "optical",
         trans: kdb.Trans | str | None = None,
         dcplx_trans: kdb.DCplxTrans | str | None = None,
-        angle: TUnit | None = None,
-        center: tuple[TUnit, TUnit] | None = None,
+        angle: T | None = None,
+        center: tuple[T, T] | None = None,
         mirror_x: bool = False,
         port: Port | None = None,
         kcl: KCLayout | None = None,
         info: dict[str, int | float | str] = ...,
-        cross_section: TCrossSection[TUnit] | None = None,
+        cross_section: TCrossSection[T] | None = None,
         base: BasePort | None = None,
     ) -> None:
         """Initialise a ProtoPort."""
@@ -300,7 +303,7 @@ class ProtoPort(Generic[TUnit], ABC):  # noqa: PYI059
 
     @property
     @abstractmethod
-    def cross_section(self) -> TCrossSection[TUnit]:
+    def cross_section(self) -> TCrossSection[T]:
         """Get the cross section of the port."""
         ...
 
@@ -465,43 +468,43 @@ class ProtoPort(Generic[TUnit], ABC):  # noqa: PYI059
         self,
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
-    ) -> ProtoPort[TUnit]:
+    ) -> ProtoPort[T]:
         """Copy the port with a transformation."""
         ...
 
     @property
-    def center(self) -> tuple[TUnit, TUnit]:
+    def center(self) -> tuple[T, T]:
         """Returns port center."""
         return (self.x, self.y)
 
     @center.setter
-    def center(self, value: tuple[TUnit, TUnit]) -> None:
+    def center(self, value: tuple[T, T]) -> None:
         self.x = value[0]
         self.y = value[1]
 
     @property
     @abstractmethod
-    def x(self) -> TUnit:
+    def x(self) -> T:
         """X coordinate of the port."""
         ...
 
     @x.setter
     @abstractmethod
-    def x(self, value: TUnit) -> None: ...
+    def x(self, value: T) -> None: ...
 
     @property
     @abstractmethod
-    def y(self) -> TUnit:
+    def y(self) -> T:
         """Y coordinate of the port."""
         ...
 
     @y.setter
     @abstractmethod
-    def y(self, value: TUnit) -> None: ...
+    def y(self, value: T) -> None: ...
 
     @property
     @abstractmethod
-    def width(self) -> TUnit:
+    def width(self) -> T:
         """Width of the port."""
         ...
 
