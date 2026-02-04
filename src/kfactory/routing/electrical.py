@@ -72,6 +72,10 @@ def route_elec(
         layer: Layer to place the wire on. Calculated from the start port if `None`.
         minimum_straight: require a minimum straight
     """
+    logger.opt(depth=2).warning(
+        "`kfactory.routing.electrical.route_elec` is deprecated, please use "
+        "`route_bundle` instead. `route_elec` will be removed in kfactory 3"
+    )
     c_ = c.to_itype()
     p1_ = p1.to_itype()
     p2_ = p2.to_itype()
@@ -121,6 +125,10 @@ def route_L(  # noqa: N802
     The function will produce a L-shape routing to connect input ports to output ports
     without any crossings.
     """
+    logger.opt(depth=2).warning(
+        "`kfactory.routing.electrical.route_L` is deprecated, please use `route_bundle`"
+        " instead. `route_L` will be removed in kfactory 3"
+    )
     input_ports_ = [p.to_itype() for p in input_ports]
     c_ = c.to_itype()
     input_ports_.sort(key=lambda p: p.y)

@@ -1908,6 +1908,10 @@ def route(
     Returns:
         ManhattanRoute: The route object with the placed components.
     """
+    logger.opt(depth=2).warning(
+        "`kfactory.routing.optical.route` is deprecated, please use `route_bundle`"
+        " instead. `route` will be removed in kfactory 3"
+    )
     if route_kwargs is None:
         route_kwargs = {}
     if allow_width_mismatch is None:

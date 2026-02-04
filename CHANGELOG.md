@@ -1,14 +1,32 @@
+<a id="v2.4.1"></a>
+# [v2.4.1](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.1) - 2026-02-02
+
+# What's Changed
+
+## Bug Fixes
+
+- fix  not being properly shown in IDEs due to lazy import [#874](https://github.com/gdsfactory/kfactory/pull/874)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.0...v2.4.1
+
+
+[Changes][v2.4.1]
+
+
 <a id="v2.4.0"></a>
-# [v2.4.0](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.0) - 2026-01-20
+# [v2.4.0](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.0) - 2026-02-02
 
 # What's Changed
 
 ## New
 
+- deprecate route, route_elec, route_L [#871](https://github.com/gdsfactory/kfactory/pull/871)
 - Suffix using basename and name hash for show() [#857](https://github.com/gdsfactory/kfactory/pull/857)
 
 ## Bug Fixes
 
+- Fix VInstance port print and shape insert [#864](https://github.com/gdsfactory/kfactory/pull/864)
+- fix VInstances.dup/copy as it did not actually copy the instances [#860](https://github.com/gdsfactory/kfactory/pull/860)
 - Suffix using basename and name hash for show() [#857](https://github.com/gdsfactory/kfactory/pull/857)
 - Wire up write_cell_properties/write_file_properties to the config [#858](https://github.com/gdsfactory/kfactory/pull/858)
 
@@ -2619,6 +2637,7 @@
 [Changes][v0.4.0]
 
 
+[v2.4.1]: https://github.com/gdsfactory/kfactory/compare/v2.4.0...v2.4.1
 [v2.4.0]: https://github.com/gdsfactory/kfactory/compare/v2.3.0...v2.4.0
 [v2.3.0]: https://github.com/gdsfactory/kfactory/compare/v2.2.1...v2.3.0
 [v2.2.1]: https://github.com/gdsfactory/kfactory/compare/v2.2.0...v2.2.1
