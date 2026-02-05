@@ -3559,6 +3559,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         for layer, shapes in self.shapes().items():
             for shape in shapes:
                 c.shapes(layer).insert(shape)
+        c._base.vinsts = self._base.vinsts.dup()
 
         return c
 
