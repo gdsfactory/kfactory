@@ -396,9 +396,7 @@ def route_bundle(
                 cell = db.create_cell(c_.name)
                 wp_len = len(waypoints)
 
-                width_d = cast("float | None", route_width) or cast(
-                    "float", start_ports[0].width
-                )
+                width_d = cast("float | None", route_width) or start_ports[0].width
 
                 for i, wp_d in enumerate(waypoints):
                     it = db.create_item(cell=cell, category=wp_cat)

@@ -1,15 +1,17 @@
 """Utility functions for virtual cells."""
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from functools import partial
+from typing import TypeGuard
 
-from ... import kdb
-from ...enclosure import (
+from .. import kdb
+from ..enclosure import (
     LayerEnclosure,
     extrude_path_dynamic_points,
     extrude_path_points,
 )
-from ...kcell import VKCell
+from ..kcell import VKCell
+from ..typings import MetaData
 
 __all__ = ["extrude_backbone", "extrude_backbone_dynamic"]
 
@@ -140,3 +142,14 @@ def extrude_backbone_dynamic(
                     )
                     outer_r.reverse()
                     c.shapes(_li).insert(kdb.DPolygon(outer_l + outer_r))
+
+
+def _is_additional_info_func(
+    additional_info: Callable[
+        ...,
+        dict[str, MetaData],
+    ]
+    | dict[str, MetaData]
+    | None,
+) -> TypeGuard[Callable[..., dict[str, MetaData]]]:
+    return callable(additional_info)

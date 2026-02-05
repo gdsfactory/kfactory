@@ -33,7 +33,7 @@ class SizeInfo[T: (int, float)]:
         def layer_bbox() -> BoxLike[T]:
             return self._bf(layer)
 
-        return SizeInfo[T](bbox=layer_bbox)
+        return SizeInfo[T](bbox=layer_bbox)  # ty:ignore[invalid-argument-type]
 
     @property
     def west(self) -> T:

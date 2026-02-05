@@ -12,7 +12,7 @@ from ...kcell import VKCell
 from ...layout import KCLayout
 from ...settings import Info
 from ...typings import MetaData
-from .utils import extrude_backbone
+from ..utils import _is_additional_info_func, extrude_backbone
 
 __all__ = ["virtual_bend_circular_factory"]
 
@@ -65,7 +65,8 @@ def virtual_bend_circular_factory(
             the VKCell will be named 'virtual_bend_circular[...]'.
         cell_kwargs: Additional arguments passed as `@kcl.vcell(**cell_kwargs)`.
     """
-    if callable(additional_info) and additional_info is not None:
+    _additional_info: dict[str, MetaData]
+    if _is_additional_info_func(additional_info):
         _additional_info_func: Callable[
             ...,
             dict[str, MetaData],
@@ -79,7 +80,7 @@ def virtual_bend_circular_factory(
             return {}
 
         _additional_info_func = additional_info_func
-        _additional_info = additional_info or {}
+        _additional_info = additional_info or {}  # ty:ignore[invalid-assignment]
 
     @kcl.vcell(
         basename=basename,
