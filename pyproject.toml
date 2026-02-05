@@ -83,6 +83,7 @@ ci = [
     "pytest-datadir>=1.8.0",
     "types-cachetools>=5.5.0.20240820",
     "types-requests>=2.32.0.20250328",
+    "uv >= 0.9.30",
 ]
 ipy = [
     "ipyevents>=2.0.2",
