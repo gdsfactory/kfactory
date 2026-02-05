@@ -38,11 +38,7 @@ K_contra = TypeVar("K_contra", bound="ProtoKCell[Any, Any]", contravariant=True)
 KC_contra = TypeVar("KC_contra", bound="ProtoTKCell[Any]", contravariant=True)
 VK_contra = TypeVar("VK_contra", bound="VKCell", contravariant=True)
 type TUnit = int | float
-TUnit_co = TypeVar("TUnit_co", bound=int | float, covariant=True)
-TUnit_contra = TypeVar("TUnit_contra", bound=int | float, contravariant=True)
-type TPort = ProtoPort[TUnit]
-TPort_co = TypeVar("TPort_co", bound="ProtoPort[Any]", covariant=True)
-TPort_contra = TypeVar("TPort_contra", bound="ProtoPort[Any]", contravariant=True)
+type TPort = ProtoPort[int | float]
 TPin = TypeVar("TPin", bound="ProtoPin[Any]")
 TInstance_co = TypeVar("TInstance_co", bound="ProtoInstance[Any]", covariant=True)
 TTInstance_co = TypeVar("TTInstance_co", bound="ProtoTInstance[Any]", covariant=True)

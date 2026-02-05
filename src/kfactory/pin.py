@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from .layout import KCLayout
-    from .typings import TPin, TPort_co
+    from .typings import TPin
 
 __all__ = ["DPin", "Pin", "ProtoPin"]
 
@@ -107,7 +107,7 @@ class ProtoPin[T: (int, float)](ABC):
 
     @ports.setter
     @abstractmethod
-    def ports(self, value: Iterable[TPort_co]) -> None: ...
+    def ports(self, value: Iterable[ProtoPort[T]]) -> None: ...
 
     def to_itype(self) -> Pin:
         """Convert the pin to a dbu pin."""

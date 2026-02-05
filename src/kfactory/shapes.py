@@ -86,7 +86,7 @@ class VShapes:
                         shape.to_dtype(self.cell.kcl.dbu).transformed(trans)
                     )
             else:
-                new_shapes.append(shape.dpolygon.transform(trans))
+                new_shapes.append(shape.dpolygon.transform(trans))  # ty:ignore[possibly-missing-attribute]
 
         return VShapes(cell=self.cell, _shapes=new_shapes)
 

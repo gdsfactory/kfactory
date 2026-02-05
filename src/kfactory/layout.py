@@ -50,7 +50,6 @@ from .decorators import (
     PortsDefinition,
     WrappedKCellFunc,
     WrappedVKCellFunc,
-    _get_function_name,
 )
 from .enclosure import (
     KCellEnclosure,
@@ -77,6 +76,7 @@ from .merge import MergeDiff
 from .pin import BasePin
 from .port import BasePort, ProtoPort, rename_clockwise_multi
 from .routing.generic import ManhattanRoute
+from .serialization import get_function_name
 from .settings import Info, KCellSettings
 from .utilities import load_layout_options, save_layout_options
 
@@ -2172,7 +2172,7 @@ class KCLayout(
         ],
         list[ManhattanRoute],
     ]:
-        self.routing_strategies[_get_function_name(f)] = f
+        self.routing_strategies[get_function_name(f)] = f
         return f
 
 

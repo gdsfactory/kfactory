@@ -31,6 +31,7 @@ from .serialization import (
     DecoratorDict,
     DecoratorList,
     get_cell_name,
+    get_function_name,
     hashable_to_original,
     to_hashable,
 )
@@ -249,14 +250,6 @@ def _check_pins(cell: ProtoTKCell[Any] | VKCell) -> None:
         )
 
 
-def _get_function_name(f: Callable[..., Any]) -> str:
-    if hasattr(f, "__name__"):
-        return str(f.__name__)
-    if hasattr(f, "func") and callable(f.func):
-        return _get_function_name(f.func)
-    raise ValueError(f"Function {f} has no name.")
-
-
 def _set_settings(
     cell: K,
     f: Callable[KCellParams, K],
@@ -265,7 +258,7 @@ def _set_settings(
     param_units: dict[str, Any],
     basename: str | None,
 ) -> None:
-    cell.function_name = _get_function_name(f)
+    cell.function_name = get_function_name(f)
     cell.basename = basename
 
     for param in drop_params:
@@ -359,7 +352,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
-        self.name = basename or _get_function_name(f)
+        self.name = basename or get_function_name(f)
         self.ports_definition = ports.copy() if ports is not None else None
         self.tags = set(tags) if tags else set()
         self._f_schematic = schematic_function
@@ -430,7 +423,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                             "line {lno}",
                             name=name_,
                             module=f.__module__,
-                            function_name=_get_function_name(f),
+                            function_name=get_function_name(f),
                             lno=inspect.getsourcelines(f)[1],
                         )
                         raise CellNameError(f"KCell with name {name_} exists already.")
@@ -613,7 +606,7 @@ class WrappedVKCellFunc[**VKCellParams, VK]:
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
-        self.name = basename or _get_function_name(f)
+        self.name = basename or get_function_name(f)
         self.ports_definitions = ports.copy() if ports is not None else None
         self.tags = set(tags) if tags else set()
 
@@ -829,9 +822,9 @@ def _module_cell(
     ) -> Callable[KCellParams, KC_co]:
         mod = f.__module__
         basename = (
-            _get_function_name(f)
+            get_function_name(f)
             if mod.startswith("__main")
-            else f"{mod}_{_get_function_name(f)}"
+            else f"{mod}_{get_function_name(f)}"
         )
         return cell_decorator(basename=basename, **kwargs)(f)
 
