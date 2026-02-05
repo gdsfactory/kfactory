@@ -139,8 +139,11 @@ ignore-words-list = "euclidian,TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem"
 skip = "pyproject.toml, uv.lock"
 
 [tool.ty.src]
+include = ["docs", "src", "tests"]
 exclude = [
     "src/kfactory/widgets/interactive.py",
+    "tests/gdsfactory-yaml-pics",
+    "docs"
 ]
 
 [tool.ruff]

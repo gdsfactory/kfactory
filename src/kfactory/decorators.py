@@ -26,7 +26,7 @@ from cachetools import Cache, cached
 from . import kdb
 from .conf import CheckInstances, logger
 from .exceptions import CellNameError
-from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
+from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
 from .serialization import (
     DecoratorDict,
     DecoratorList,
@@ -43,15 +43,14 @@ if TYPE_CHECKING:
     from .layout import KCLayout
     from .schematic import TSchematic
     from .typings import (
-        KC,
-        VK,
-        K,
-        K_contra,
-        KC_co,
-        KC_contra,
-        KCellParams,
+        #     KC,
+        #     VK,
+        #     K,
+        #     K_contra,
+        #     KC_contra,
+        #     KCellParams,
         MetaData,
-        VK_contra,
+        #     VK_contra,
     )
 
 
@@ -250,7 +249,7 @@ def _check_pins(cell: ProtoTKCell[Any] | VKCell) -> None:
         )
 
 
-def _set_settings(
+def _set_settings[**KCellParams, K: ProtoKCell[Any, Any]](
     cell: K,
     f: Callable[KCellParams, K],
     drop_params: Sequence[str],
@@ -289,23 +288,9 @@ def _check_cell(cell: AnyKCell, kcl: KCLayout) -> None:
         )
 
 
-@overload
-def _post_process(
-    cell: KC_contra,
-    post_process_functions: Iterable[Callable[[KC_contra], None]],
-) -> None: ...
-
-
-@overload
-def _post_process(
-    cell: VK_contra,
-    post_process_functions: Iterable[Callable[[VK_contra], None]],
-) -> None: ...
-
-
-def _post_process(
-    cell: K_contra,
-    post_process_functions: Iterable[Callable[[K_contra], None]],
+def _post_process[K: ProtoKCell[Any, Any]](
+    cell: K,
+    post_process_functions: Iterable[Callable[[K], None]],
 ) -> None:
     for pp in post_process_functions:
         pp(cell)
@@ -787,12 +772,12 @@ class KCellDecoratorKWargs(TypedDict, total=False):
     debug_names: bool | None
 
 
-class KCellDecorator(Protocol):
+class KCellDecorator[**KCellParams, K: ProtoKCell[Any, Any]](Protocol):
     """Signature of the `@cell` decorator."""
 
     def __call__(
         self, **kwargs: Unpack[KCellDecoratorKWargs]
-    ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
+    ) -> Callable[[Callable[KCellParams, K]], Callable[KCellParams, K]]:
         """__call__ implementation."""
         ...
 
@@ -800,26 +785,26 @@ class KCellDecorator(Protocol):
 class ModuleDecorator(Protocol):
     """Signature of the `@module_cell` decorator."""
 
-    def __call__(
+    def __call__[**KCellParams, K: ProtoKCell[Any, Any]](
         self, /, **kwargs: Unpack[ModuleCellKWargs]
-    ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
+    ) -> Callable[[Callable[KCellParams, K]], Callable[KCellParams, K]]:
         """__call__ implementation."""
         ...
 
 
-def _module_cell(
-    cell_decorator: KCellDecorator,
+def _module_cell[**KCellParams, K: ProtoKCell[Any, Any]](
+    cell_decorator: KCellDecorator[KCellParams, K],
     /,
     **kwargs: Unpack[ModuleCellKWargs],
-) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
+) -> Callable[[Callable[KCellParams, K]], Callable[KCellParams, K]]:
     """Constructs the actual decorator.
 
     Modifies the basename to the module if the module is not the main one.
     """
 
-    def decorator_cell(
-        f: Callable[KCellParams, KC_co],
-    ) -> Callable[KCellParams, KC_co]:
+    def decorator_cell[**KCP, KC: ProtoTKCell[Any]](
+        f: Callable[KCellParams, K],
+    ) -> Callable[KCellParams, K]:
         mod = f.__module__
         basename = (
             get_function_name(f)
@@ -839,31 +824,31 @@ class Decorators:
         self._cell = kcl.cell
 
     @overload
-    def module_cell(
+    def module_cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
-        _func: Callable[KCellParams, KC_co],
+        _func: Callable[KCellParams, KC],
         /,
-    ) -> Callable[KCellParams, KC_co]: ...
+    ) -> Callable[KCellParams, KC]: ...
 
     @overload
-    def module_cell(
+    def module_cell[**KCellParams, KC: ProtoTKCell[Any]](
         self, /, **kwargs: Unpack[ModuleCellKWargs]
-    ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]: ...
+    ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
-    def module_cell(
+    def module_cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
-        _func: Callable[KCellParams, KC_co] | None = None,
+        _func: Callable[KCellParams, KC] | None = None,
         /,
         **kwargs: Unpack[ModuleCellKWargs],
     ) -> (
-        Callable[KCellParams, KC_co]
-        | Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]
+        Callable[KCellParams, KC]
+        | Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]
     ):
         """Constructs the `@module_cell` decorator on KCLayout.decorators."""
 
         def mc(
             **kwargs: Unpack[ModuleCellKWargs],
-        ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
-            return _module_cell(self._cell, **kwargs)  # type: ignore[arg-type]
+        ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]:
+            return _module_cell(self._cell, **kwargs)  # ty:ignore[invalid-argument-type]
 
         return mc(**kwargs) if _func is None else mc(**kwargs)(_func)

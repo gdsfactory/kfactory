@@ -309,7 +309,7 @@ def test_overwrite(
 
     c1 = test_overwrite_cell()
 
-    @kcl.cell(overwrite_existing=True)  # type: ignore[no-redef]
+    @kcl.cell(overwrite_existing=True)
     def test_overwrite_cell() -> kf.KCell:
         return kcl.kcell()
 
@@ -609,13 +609,13 @@ def test_cell_default_fallback(
     kcl = kf.KCLayout("cell_default_fallback", default_cell_output_type=kf.DKCell)
 
     @kcl.cell
-    def my_cell():  # type: ignore[no-untyped-def]  # noqa: ANN202
+    def my_cell():  # noqa: ANN202
         return kcl.kcell()
 
     assert isinstance(my_cell(), kf.DKCell)
     kcl.default_cell_output_type = kf.KCell
 
-    def my_cell():  # type: ignore[no-untyped-def,no-redef]  # noqa: ANN202
+    def my_cell():  # noqa: ANN202
         return kcl.kcell()
 
     kf.layout.kcls.pop("cell_default_fallback")
@@ -703,6 +703,6 @@ def test_return_wrong_type(
         return kcl.kcell()
 
     with pytest.raises(TypeError):
-        kcl.cell()(test_vk)()  # type: ignore[type-var]
+        kcl.cell()(test_vk)()
     with pytest.raises(TypeError):
-        kcl.vcell(test_kc)()  # type: ignore[type-var]
+        kcl.vcell(test_kc)()

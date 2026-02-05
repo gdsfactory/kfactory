@@ -1194,7 +1194,7 @@ class KCLayout(
         [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
     ]: ...
 
-    def cell(
+    def cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         _func: Callable[KCellParams, ProtoTKCell[Any]] | None = None,
         /,
@@ -1214,7 +1214,7 @@ class KCLayout(
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KC_contra], None]] | None = None,
+        post_process: Iterable[Callable[[KC], None]] | None = None,
         debug_names: bool | None = None,
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,

@@ -46,3 +46,31 @@ repos:
         args: [--exit-zero]
         # ignore all tests, not just tests data
         exclude: ^tests/
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty check
+        entry: uvx --with-editable .[dev] ty check .
+        language: python
+        additional_dependencies:
+          - aenum
+          - pydantic
+          - pydantic-extra-types
+          - numpy
+          - pytest
+          - pytest-regressions
+          - "klayout>=0.30.5"
+          - types-cachetools
+          - loguru
+          - pydantic-settings
+          - typer
+          - types-PyYAML
+          - scipy
+          - "ruamel.yaml"
+          - ruamel.yaml.string
+          - toolz
+          - rapidfuzz
+          - rectangle-packer
+          - semver
+          - pygit2
+        pass_filenames: false
