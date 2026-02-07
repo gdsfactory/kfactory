@@ -5,6 +5,7 @@
 
 ## Bug Fixes
 
+- fix vkcell dup [#879](https://github.com/gdsfactory/kfactory/pull/879)
 - fix  not being properly shown in IDEs due to lazy import [#874](https://github.com/gdsfactory/kfactory/pull/874)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.0...v2.4.1
