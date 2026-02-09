@@ -1,12 +1,25 @@
+<a id="v2.4.2"></a>
+# [v2.4.2](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.2) - 2026-02-05
+
+# What's Changed
+
+* No changes
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.1...v2.4.2
+
+
+[Changes][v2.4.2]
+
+
 <a id="v2.4.1"></a>
-# [v2.4.1](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.1) - 2026-02-02
+# [v2.4.1](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.1) - 2026-02-05
 
 # What's Changed
 
 ## Bug Fixes
 
 - fix vkcell dup [#879](https://github.com/gdsfactory/kfactory/pull/879)
-- fix  not being properly shown in IDEs due to lazy import [#874](https://github.com/gdsfactory/kfactory/pull/874)
+- fix  cells not being properly shown in IDEs due to lazy import [#874](https://github.com/gdsfactory/kfactory/pull/874)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.0...v2.4.1
 
@@ -2638,6 +2651,7 @@
 [Changes][v0.4.0]
 
 
+[v2.4.2]: https://github.com/gdsfactory/kfactory/compare/v2.4.1...v2.4.2
 [v2.4.1]: https://github.com/gdsfactory/kfactory/compare/v2.4.0...v2.4.1
 [v2.4.0]: https://github.com/gdsfactory/kfactory/compare/v2.3.0...v2.4.0
 [v2.3.0]: https://github.com/gdsfactory/kfactory/compare/v2.2.1...v2.3.0
