@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 __all__ = ["DPorts", "Ports", "ProtoPorts"]
 
 
-def _filter_ports(
+def _filter_ports[TPort: ProtoPort[Any]](
     ports: Iterable[TPort],
     angle: Angle | None = None,
     orientation: float | None = None,

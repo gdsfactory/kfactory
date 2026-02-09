@@ -20,6 +20,7 @@ import re
 import subprocess
 from collections import defaultdict
 from functools import cached_property
+from numbers import Real
 from operator import attrgetter
 from pathlib import Path
 from typing import (
@@ -59,7 +60,7 @@ from .port import DPort as DKCellPort
 from .port import Port as KCellPort
 from .port import ProtoPort
 from .settings import Info
-from .typings import KC, JSONSerializable, TUnit, dbu, um
+from .typings import KC, JSONSerializable, dbu, um
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
@@ -75,6 +76,8 @@ yaml = YAML(typ="safe")
 _schematic_default_imports = {
     "kfactory": "kf",
 }
+
+Num = int | float
 
 
 class PortDirections(TypedDict, total=True):
@@ -93,7 +96,7 @@ def _valid_varname(name: str) -> str:
     return name if name.isidentifier() and not keyword.iskeyword(name) else f"_{name}"
 
 
-def _gez(value: TUnit) -> TUnit:
+def _gez[T: Real](value: T) -> T:
     """Validate that a unit-like value is >= 0.
 
     Raises:
@@ -219,10 +222,10 @@ class Placement[T: (int, float)](MirrorPlacement, extra="forbid"):
         mirror: Whether the instance is to be mirrored or not.
     """
 
-    x: T | PortRef | PortArrayRef | AnchorRefX = 0
-    dx: T = 0
-    y: T | PortRef | PortArrayRef | AnchorRefY = 0
-    dy: T = 0
+    x: int | T | PortRef | PortArrayRef | AnchorRefX = 0
+    dx: int | T = 0
+    y: int | T | PortRef | PortArrayRef | AnchorRefY = 0
+    dy: int | T = 0
     orientation: float = 0
     anchor: FixedAnchor | PortAnchor | None = None
 
@@ -254,7 +257,7 @@ class Placement[T: (int, float)](MirrorPlacement, extra="forbid"):
         return placeable
 
 
-class RegularArray[T: (int, float)](BaseModel, extra="forbid"):
+class RegularArray[T: Num](BaseModel, extra="forbid"):
     """Rectangular array with uniform row/column pitch.
 
     Attributes:
@@ -273,7 +276,7 @@ class RegularArray[T: (int, float)](BaseModel, extra="forbid"):
         return f"RegularArray(columns={self.columns}, columns_pitch=)"
 
 
-class Array[T: (int, float)](BaseModel, extra="forbid"):
+class Array[T: Num](BaseModel, extra="forbid"):
     """General 2D array parameterization using two pitch vectors.
 
     Attributes:
@@ -291,7 +294,7 @@ class Array[T: (int, float)](BaseModel, extra="forbid"):
     pitch_b: tuple[T, Annotated[T, AfterValidator(_gez)]]
 
 
-class Ports[T: (int, float)](BaseModel):
+class Ports[T: Num](BaseModel):
     """Indexer for an instance's ports to produce `PortRef`/`PortArrayRef`.
 
     Example:
@@ -367,6 +370,14 @@ class SchematicInstance[T: (int, float)](
     @property
     def placement(self) -> MirrorPlacement | Placement[T] | None:
         return self.parent_schematic.placements.get(self.name)
+
+    def get_placement(self) -> MirrorPlacement | Placement[T]:
+        placement = self.placement
+        if placement is None:
+            raise ValueError(
+                f"SchematicInstance {self.name!r} does not have a placement"
+            )
+        return placement
 
     def place(
         self,
@@ -471,7 +482,7 @@ class SchematicInstance[T: (int, float)](
         )
 
 
-class Route[T: (int, float)](BaseModel, extra="forbid"):
+class Route[T: Num](BaseModel, extra="forbid"):
     """Bundle of `Link`s routed using a named strategy.
 
     Attributes:
@@ -535,7 +546,7 @@ class Port[T: (int, float)](BaseModel, extra="forbid"):
 
     def __lt__(self, other: Port[Any] | PortRef) -> bool:
         if isinstance(other, Port):
-            return self._as_tuple() < other._as_tuple()
+            return self._as_tuple() < other._as_tuple()  # ty:ignore[unsupported-operator]
         return True
 
     def _as_tuple(
@@ -658,7 +669,7 @@ class Port[T: (int, float)](BaseModel, extra="forbid"):
         return f"{schematic_name}.ports[{self.name!r}]"
 
 
-class Link[T: (int, float)](
+class Link[T: Num](
     RootModel[tuple[PortArrayRef | PortRef | Port[T], PortArrayRef | PortRef | Port[T]]]
 ):
     """Undirected association between two ports (refs or schematic ports).
@@ -674,7 +685,7 @@ class Link[T: (int, float)](
         return self
 
 
-class Connection[T: (int, float)](
+class Connection[T: Num](
     RootModel[tuple[Port[T] | PortArrayRef | PortRef, PortArrayRef | PortRef]]
 ):
     """Hard connection between two ports.
@@ -855,8 +866,8 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             cross_section=cross_section,
             orientation=orientation,
         )
-        self.ports[p.name] = p
-        return p
+        self.ports[p.name] = p  # ty:ignore[invalid-assignment]
+        return p  # ty:ignore[invalid-return-type]
 
     def create_connection(
         self, port1: PortRef | Port[T], port2: PortRef
@@ -1184,7 +1195,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         # routes
 
         islands, instance_connections = _get_island_connections(
-            self.instances, self.connections
+            instances=self.instances, connections=self.connections
         )
 
         placed_insts: set[str] = set()
@@ -1806,16 +1817,16 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     case 270:
                         sorted_ports["bottom"].append(port_name)
         for side in ("right", "top", "left", "bottom"):
-            sorted_ports[side].sort()  # type: ignore[literal-required]
+            sorted_ports[side].sort()
         return sorted_ports
 
 
-def _get_instance_orientation(
+def _get_instance_orientation[T: Num](
     instance: str,
     schematic: TSchematic[Any],
     visited_instances: set[str],
     get_port_orientation_f: Callable[..., dict[str | None, float]],
-    instance_connections: defaultdict[str, list[Connection[TUnit]]] | None = None,
+    instance_connections: defaultdict[str, list[Connection[T]]] | None = None,
     instance_orientations: dict[str, float] | None = None,
 ) -> float | None:
     s_inst = schematic.instances[instance]
@@ -1829,6 +1840,8 @@ def _get_instance_orientation(
                 schematic,
                 instance_connections=instance_connections,
                 instance_orientations=instance_orientations,
+                visited_instances=visited_instances,
+                get_port_orientation_f=get_port_orientation_f,
             )
         return placement.orientation
     if instance_connections is None:
@@ -2022,9 +2035,9 @@ class DSchema(DSchematic):
         super().__init__(**data)
 
 
-def _create_kinst(
+def _create_kinst[T: Num](
     c: KCell,
-    schematic_inst: SchematicInstance[TUnit],
+    schematic_inst: SchematicInstance[T],
     factories: Mapping[
         str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
     ]
@@ -2179,15 +2192,19 @@ def _dvec(x: float, y: float, c: KCell, unit: Literal["dbu", "um"]) -> kdb.DVect
     return kdb.DVector(x, y)
 
 
-def _place_island(
+def _is_int_schematic(s: TSchematic[Any]) -> TypeGuard[Schematic[int]]:
+    return s.unit == "dbu"
+
+
+def _place_island[T: Num](
     c: KCell,
     schematic_island: set[str],
     instances: dict[str, Instance | VInstance],
-    connections: dict[str, list[Connection[TUnit]]],
-    schematic_instances: dict[str, SchematicInstance[TUnit]],
+    connections: dict[str, list[Connection[T]]],
+    schematic_instances: dict[str, SchematicInstance[T]],
     placed_insts: set[str],
     placed_ports: set[str],
-    schematic: TSchematic[TUnit],
+    schematic: TSchematic[T],
     cross_sections: Mapping[str, CrossSection | DCrossSection],
     factories: Mapping[
         str, Callable[..., KCell] | Callable[..., DKCell] | Callable[..., VKCell]
@@ -2201,13 +2218,13 @@ def _place_island(
         schema_inst = schematic_instances[inst]
         kinst = _create_kinst(c, schema_inst, factories=factories)
         instances[inst] = kinst
-        if schema_inst.placement and isinstance(schema_inst.placement, Placement):
+        p = schema_inst.placement
+        if isinstance(p, Placement):
+            p = cast("Placement[int]", p)
             logger.debug("Placing {}", schema_inst.name)
-            p = schema_inst.placement
-            assert p is not None
 
             if p.is_placeable(placed_insts, placed_ports):
-                if schematic.unit == "dbu":
+                if _is_int_schematic(schematic):
                     if isinstance(p.x, PortRef):
                         x: float = KCellPort(
                             base=instances[p.x.instance].ports[p.x.port].base
@@ -2422,12 +2439,12 @@ def _place_island(
     return placed_insts
 
 
-def _get_and_place_insts_and_ports(
+def _get_and_place_insts_and_ports[T: Num](
     c: KCell,
     placed_insts: set[str],
     placed_ports: set[str],
-    connections: dict[str, list[Connection[TUnit]]],
-    schematic: TSchematic[TUnit],
+    connections: dict[str, list[Connection[T]]],
+    schematic: TSchematic[T],
     instances: dict[str, Instance | VInstance],
     placed_island_insts: set[str],
     cross_sections: Mapping[str, CrossSection | DCrossSection],
@@ -2456,10 +2473,10 @@ def _get_and_place_insts_and_ports(
     return bool(placeable_insts) or bool(placeable_ports)
 
 
-def _connect_instances(
+def _connect_instances[T: Num](
     instances: dict[str, Instance | VInstance],
     place_insts: set[str],
-    connections: dict[str, list[Connection[TUnit]]],
+    connections: dict[str, list[Connection[T]]],
     placed_instances: set[str],
 ) -> None:
     for inst_name in place_insts:
@@ -2492,11 +2509,11 @@ def _connect_instances(
             raise ValueError("Could not connect all instances")
 
 
-def _get_placeable(
+def _get_placeable[T: Num](
     placed_insts: set[str],
-    connections: dict[str, list[Connection[TUnit]]],
+    connections: dict[str, list[Connection[T]]],
     placed_ports: set[str],
-    schematic: TSchematic[TUnit],
+    schematic: TSchematic[T],
 ) -> tuple[set[str], set[str]]:
     placeable_insts: set[str] = set()
     placeable_ports: set[str] = set()
@@ -2618,12 +2635,12 @@ def _get_full_settings(
     return params
 
 
-def _get_island_connections(
-    instances: dict[str, SchematicInstance[TUnit]],
-    connections: list[Connection[TUnit]],
-) -> tuple[dict[str, set[str]], defaultdict[str, list[Connection[TUnit]]]]:
+def _get_island_connections[T: Num](
+    instances: dict[str, SchematicInstance[T]],
+    connections: list[Connection[T]],
+) -> tuple[dict[str, set[str]], defaultdict[str, list[Connection[T]]]]:
     islands: dict[str, set[str]] = {}
-    instance_connections: defaultdict[str, list[Connection[TUnit]]] = defaultdict(list)
+    instance_connections: defaultdict[str, list[Connection[T]]] = defaultdict(list)
     for connection in connections:
         pr1, pr2 = connection.root
         if isinstance(pr1, Port):

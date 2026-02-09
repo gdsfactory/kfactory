@@ -252,7 +252,7 @@ def gds_regression(
         file_regression.check(
             c.write_bytes(saveopts, convert_external_cells=True),
             binary=True,
-            extension=".gds",
+            extension=".gds.gz",
             check_fn=partial(_layout_xor, tolerance=tolerance, raises=raises),
         )
 

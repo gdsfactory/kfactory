@@ -1,7 +1,7 @@
 # Development setup with all extras
 dev:
     uv sync --all-extras
-    uv pip install -e .
+    uv pip install -e . -U
     uv run pre-commit install
 
 # Test environment setup
@@ -14,18 +14,18 @@ docs-clean:
     rm -rf site
 
 # Build documentation
-docs python_version="3.12":
+docs python_version="3.14":
     uv run -p {{python_version}} --with . --extra docs --isolated mkdocs build -f docs/mkdocs.yml
 
 # Serve documentation locally
-docs-serve python_version="3.12":
+docs-serve python_version="3.14":
     uv run -p {{python_version}} --with . --extra docs --isolated mkdocs serve -f docs/mkdocs.yml
 
 # Run tests (depends on init-submodule)
-test python_version="3.12": init-submodule
+test python_version="3.14": init-submodule
     uv run -p {{python_version}} --with . --extra ci --isolated pytest -s -n logical
 
-test-gdsfactory python_version="3.12": init-submodule
+test-gdsfactory python_version="3.14": init-submodule
     uv run -p {{python_version}} --no-sync --extra ci --with gdsfactory --with . --isolated pytest -s -n logical tests/test_gdsfactory.py
 
 # Run tests with minimum dependencies
@@ -33,11 +33,11 @@ test-min python_version="3.12":
     uv run -p {{python_version}} --with . --extra ci --resolution lowest-direct --isolated pytest -s -n logical
 
 # Run tests with coverage report (XML)
-cov python_version="3.12":
+cov python_version="3.14":
     uv run -p {{python_version}} --with . --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
 
 # Run tests with coverage report (terminal)
-dev-cov python_version="3.12":
+dev-cov python_version="3.14":
     uv run -p {{python_version}} --with . --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered
 
 # Run linting

@@ -1443,7 +1443,7 @@ def rename_by_direction(
             p.name = f"{prefix}{dir_names[angle]}{i}"
 
 
-def filter_layer_pt_reg(
+def filter_layer_pt_reg[TPort: ProtoPort[Any]](
     ports: Iterable[TPort],
     layer: LayerEnum | int | None = None,
     port_type: str | None = None,
@@ -1461,7 +1461,9 @@ def filter_layer_pt_reg(
     return ports_
 
 
-def filter_direction(ports: Iterable[TPort], direction: int) -> filter[TPort]:
+def filter_direction[TPort: ProtoPort[Any]](
+    ports: Iterable[TPort], direction: int
+) -> filter[TPort]:
     """Filter iterable/sequence of ports by direction :py:class:~`DIRECTION`."""
 
     def f_func(p: TPort) -> bool:
@@ -1470,7 +1472,9 @@ def filter_direction(ports: Iterable[TPort], direction: int) -> filter[TPort]:
     return filter(f_func, ports)
 
 
-def filter_orientation(ports: Iterable[TPort], orientation: float) -> filter[TPort]:
+def filter_orientation[TPort: ProtoPort[Any]](
+    ports: Iterable[TPort], orientation: float
+) -> filter[TPort]:
     """Filter iterable/sequence of ports by direction :py:class:~`DIRECTION`."""
 
     def f_func(p: TPort) -> bool:
@@ -1479,7 +1483,9 @@ def filter_orientation(ports: Iterable[TPort], orientation: float) -> filter[TPo
     return filter(f_func, ports)
 
 
-def filter_port_type(ports: Iterable[TPort], port_type: str) -> filter[TPort]:
+def filter_port_type[TPort: ProtoPort[Any]](
+    ports: Iterable[TPort], port_type: str
+) -> filter[TPort]:
     """Filter iterable/sequence of ports by port_type."""
 
     def pt_filter(p: TPort) -> bool:
@@ -1488,7 +1494,9 @@ def filter_port_type(ports: Iterable[TPort], port_type: str) -> filter[TPort]:
     return filter(pt_filter, ports)
 
 
-def filter_layer(ports: Iterable[TPort], layer: int | LayerEnum) -> filter[TPort]:
+def filter_layer[TPort: ProtoPort[Any]](
+    ports: Iterable[TPort], layer: int | LayerEnum
+) -> filter[TPort]:
     """Filter iterable/sequence of ports by layer index / LayerEnum."""
 
     def layer_filter(p: TPort) -> bool:
@@ -1497,7 +1505,9 @@ def filter_layer(ports: Iterable[TPort], layer: int | LayerEnum) -> filter[TPort
     return filter(layer_filter, ports)
 
 
-def filter_regex(ports: Iterable[TPort], regex: str) -> filter[TPort]:
+def filter_regex[TPort: ProtoPort[Any]](
+    ports: Iterable[TPort], regex: str
+) -> filter[TPort]:
     """Filter iterable/sequence of ports by port name."""
     pattern = re.compile(regex)
 

@@ -50,7 +50,6 @@ from .decorators import (
     PortsDefinition,
     WrappedKCellFunc,
     WrappedVKCellFunc,
-    _get_function_name,
 )
 from .enclosure import (
     KCellEnclosure,
@@ -77,6 +76,7 @@ from .merge import MergeDiff
 from .pin import BasePin
 from .port import BasePort, ProtoPort, rename_clockwise_multi
 from .routing.generic import ManhattanRoute
+from .serialization import get_function_name
 from .settings import Info, KCellSettings
 from .utilities import load_layout_options, save_layout_options
 
@@ -1194,7 +1194,7 @@ class KCLayout(
         [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
     ]: ...
 
-    def cell(
+    def cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         _func: Callable[KCellParams, ProtoTKCell[Any]] | None = None,
         /,
@@ -1214,7 +1214,7 @@ class KCLayout(
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KC_contra], None]] | None = None,
+        post_process: Iterable[Callable[[KC], None]] | None = None,
         debug_names: bool | None = None,
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
@@ -2172,7 +2172,7 @@ class KCLayout(
         ],
         list[ManhattanRoute],
     ]:
-        self.routing_strategies[_get_function_name(f)] = f
+        self.routing_strategies[get_function_name(f)] = f
         return f
 
 

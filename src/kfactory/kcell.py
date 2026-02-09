@@ -2923,7 +2923,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         nb: int = 1,
         libcell_as_static: bool = False,
         static_name_separator: str = "__",
-    ) -> DInstance:
+    ) -> DInstance:  # ty:ignore[invalid-method-override]
         return DInstance(
             kcl=self.kcl,
             instance=self.dcreate_inst(
@@ -3127,7 +3127,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         nb: int = 1,
         libcell_as_static: bool = False,
         static_name_separator: str = "__",
-    ) -> Instance:
+    ) -> Instance:  # ty:ignore[invalid-method-override]
         return Instance(
             kcl=self.kcl,
             instance=self.icreate_inst(

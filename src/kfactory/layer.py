@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Self
 
 import klayout.db as kdb
-from aenum import Enum, constant  # type: ignore[import-untyped,unused-ignore]
+from aenum import Enum, constant
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .exceptions import InvalidLayerError
@@ -65,7 +65,7 @@ class LayerInfos(BaseModel):
         return self
 
     def __getitem__(self, value: str) -> kdb.LayerInfo:
-        return getattr(self, value)  # type: ignore[no-any-return]
+        return getattr(self, value)
 
 
 class LayerEnum(int, Enum):  # type: ignore[misc]
@@ -103,10 +103,10 @@ class LayerEnum(int, Enum):  # type: ignore[misc]
         """
         value = cls.layout.layer(layer, datatype)
         obj: int = int.__new__(cls, value)
-        obj._value_ = value  # type: ignore[attr-defined]
-        obj.layer = layer  # type: ignore[attr-defined]
-        obj.datatype = datatype  # type: ignore[attr-defined]
-        return obj  # type: ignore[return-value]
+        obj._value_ = value
+        obj.layer = layer
+        obj.datatype = datatype
+        return obj
 
     def __getitem__(self, key: int) -> int:
         """Retrieve layer number[0] / datatype[1] of a layer."""
@@ -274,4 +274,4 @@ def layerenum_from_dict(
     return LayerEnum(
         name,  # type: ignore[arg-type]
         members,  # type: ignore[arg-type]
-    )
+    )  # ty:ignore[invalid-return-type]

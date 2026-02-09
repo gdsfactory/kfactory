@@ -6,10 +6,10 @@ from collections import UserDict, UserList
 from collections.abc import Callable, Hashable
 from hashlib import sha3_512
 from types import FunctionType
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, TypeGuard, overload
 
 import numpy as np
-import toolz  # type: ignore[import-untyped,unused-ignore]
+import toolz
 
 from . import kdb, lay
 from .conf import config
@@ -23,14 +23,13 @@ if TYPE_CHECKING:
         JSONSerializable,
         MetaData,
         SerializableShape,
-        TypeGuard,
     )
 
 
 class DecoratorList(UserList[Any]):
     """Hashable decorator for a list."""
 
-    def __hash__(self) -> int:  # type: ignore[override]
+    def __hash__(self) -> int:
         """Hash the list."""
         return hash(tuple(self.data))
 
@@ -92,10 +91,10 @@ def clean_value(
     if isinstance(value, kdb.LayerInfo):
         return f"{value.name or str(value.layer) + '_' + str(value.datatype)}"
     if isinstance(value, list | tuple):
-        return "_".join(clean_value(v) for v in value)
+        return "_".join(clean_value(v) for v in value)  # ty:ignore[invalid-argument-type]
     if isinstance(value, dict):
         try:
-            return dict2name(**value)
+            return dict2name(**value)  # ty:ignore[invalid-argument-type]
         except TypeError as e:
             raise CellNameError(
                 "Dictionaries passed to functions as args/kwargs"
@@ -117,7 +116,7 @@ def clean_value(
             while hasattr(func, "func"):
                 func = func.func
             v = {
-                "function": func.__name__,
+                "function": get_function_name(func),  # ty:ignore[invalid-argument-type]
                 "module": func.__module__,
                 "settings": args_as_kwargs,
             }
@@ -250,15 +249,16 @@ def serialize_setting(setting: MetaData) -> JSONSerializable:
         return None
     if isinstance(setting, dict):
         return {
-            str(name): serialize_setting(_setting) for name, _setting in setting.items()
+            str(name): serialize_setting(_setting)  # ty:ignore[invalid-argument-type]
+            for name, _setting in setting.items()
         }
     if isinstance(setting, list):
-        return [serialize_setting(s) for s in setting]
+        return [serialize_setting(s) for s in setting]  # ty:ignore[invalid-argument-type]
     if isinstance(setting, tuple):
-        return tuple(serialize_setting(s) for s in setting)
+        return tuple(serialize_setting(s) for s in setting)  # ty:ignore[invalid-argument-type]
     if serializible_shape_guard(setting):
         return f"!#{setting.__class__.__name__} {setting!s}"
-    return setting
+    return setting  # ty:ignore[invalid-return-type]
 
 
 def deserialize_setting(setting: JSONSerializable) -> MetaData:
@@ -275,9 +275,9 @@ def deserialize_setting(setting: JSONSerializable) -> MetaData:
         cls_name, value = setting.removeprefix("!#").split(" ", 1)
         match cls_name:
             case "LayerInfo":
-                return getattr(kdb, cls_name).from_string(value)  # type: ignore[no-any-return]
+                return getattr(kdb, cls_name).from_string(value)
             case _:
-                return getattr(kdb, cls_name).from_s(value)  # type: ignore[no-any-return]
+                return getattr(kdb, cls_name).from_s(value)
     return setting
 
 
@@ -405,3 +405,11 @@ def dshape_guard(value: Any) -> TypeGuard[DShapeLike]:
         | kdb.DText
         | kdb.DSimplePolygon,
     )
+
+
+def get_function_name(f: Callable[..., Any]) -> str:
+    if hasattr(f, "__name__"):
+        return str(f.__name__)
+    if hasattr(f, "func") and callable(f.func):
+        return get_function_name(f.func)
+    raise ValueError(f"Function {f} has no name.")

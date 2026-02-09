@@ -83,6 +83,7 @@ ci = [
     "pytest-datadir>=1.8.0",
     "types-cachetools>=5.5.0.20240820",
     "types-requests>=2.32.0.20250328",
+    "uv >= 0.9.30",
 ]
 ipy = [
     "ipyevents>=2.0.2",
@@ -139,8 +140,11 @@ ignore-words-list = "euclidian,TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem"
 skip = "pyproject.toml, uv.lock"
 
 [tool.ty.src]
+include = ["docs", "src", "tests"]
 exclude = [
     "src/kfactory/widgets/interactive.py",
+    "tests/gdsfactory-yaml-pics",
+    "docs"
 ]
 
 [tool.ruff]

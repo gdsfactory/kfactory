@@ -529,7 +529,7 @@ class CrossSectionModel(BaseModel):
                     LayerEnclosureSpec(
                         sections=cross_section.get("sections", []),  # type: ignore[typeddict-item]
                         main_layer=cross_section["layer"],
-                        name=cross_section.get("enclosure", {}).get("name"),  # type: ignore[attr-defined]
+                        name=cross_section.get("enclosure", {}).get("name"),
                     ),
                     kcl=self.kcl,
                 ),
@@ -546,12 +546,12 @@ class CrossSectionModel(BaseModel):
                             else (
                                 section[0],
                                 self.kcl.to_dbu(section[1]),
-                                self.kcl.to_dbu(section[2]),
+                                self.kcl.to_dbu(section[2]),  # ty:ignore[index-out-of-bounds]
                             )
                             for section in cross_section.get("sections", [])
                         ],
                         main_layer=cross_section["layer"],
-                        name=cross_section.get("enclosure", {}).get("name"),  # type: ignore[attr-defined]
+                        name=cross_section.get("enclosure", {}).get("name"),
                     ),
                     kcl=self.kcl,
                 ),
