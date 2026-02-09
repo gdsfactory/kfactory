@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Protocol, Unpack, cast, overload
 
 import numpy as np
 import numpy.typing as npt
-from scipy.special import binom  # type:ignore[import-untyped,unused-ignore]
+from scipy.special import binom
 
 from .. import kdb
 from ..enclosure import LayerEnclosure
@@ -14,6 +14,7 @@ from ..layout import CellKWargs, KCLayout
 from ..port import rename_by_direction, rename_clockwise
 from ..settings import Info
 from ..typings import KC, KC_co, MetaData, um
+from .utils import _is_additional_info_func
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -120,12 +121,12 @@ def bend_s_bezier_factory(
             the KCell will be named 'straight_dbu[...]'.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
-    if callable(additional_info) and additional_info is not None:
+    _additional_info: dict[str, MetaData] = {}
+    if _is_additional_info_func(additional_info):
         _additional_info_func: Callable[
             ...,
             dict[str, MetaData],
         ] = additional_info
-        _additional_info: dict[str, MetaData] = {}
     else:
 
         def additional_info_func(
@@ -134,7 +135,7 @@ def bend_s_bezier_factory(
             return {}
 
         _additional_info_func = additional_info_func
-        _additional_info = additional_info or {}
+        _additional_info = additional_info or {}  # ty:ignore[invalid-assignment]
 
     ports = cell_kwargs.get("ports")
     if ports is None:

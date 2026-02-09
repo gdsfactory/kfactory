@@ -163,7 +163,7 @@ def get_show_function(value: str | ShowFunction) -> ShowFunction:
     if isinstance(value, str):
         mod, f = value.rsplit(".", 1)
         loaded_mod = importlib.import_module(mod)
-        return loaded_mod.__getattribute__(f)  # type: ignore[no-any-return]
+        return loaded_mod.__getattribute__(f)
     return value
 
 
@@ -175,7 +175,7 @@ def get_affinity() -> int:
     """
     threads = 0
     try:
-        return len(os.sched_getaffinity(0))  # type: ignore[attr-defined,unused-ignore]
+        return len(os.sched_getaffinity(0))
     except AttributeError:
         import multiprocessing
 

@@ -6,24 +6,30 @@ from collections import UserDict, UserList
 from collections.abc import Callable, Hashable
 from hashlib import sha3_512
 from types import FunctionType
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, TypeGuard, overload
 
-import klayout.db as kdb
 import numpy as np
-import toolz  # type: ignore[import-untyped,unused-ignore]
+import toolz
 
+from . import kdb, lay
 from .conf import config
 from .exceptions import CellNameError
-from .typings import JSONSerializable, MetaData, SerializableShape
 
 if TYPE_CHECKING:
     from .kcell import AnyKCell
+    from .typings import (
+        DShapeLike,
+        IShapeLike,
+        JSONSerializable,
+        MetaData,
+        SerializableShape,
+    )
 
 
 class DecoratorList(UserList[Any]):
     """Hashable decorator for a list."""
 
-    def __hash__(self) -> int:  # type: ignore[override]
+    def __hash__(self) -> int:
         """Hash the list."""
         return hash(tuple(self.data))
 
@@ -85,10 +91,10 @@ def clean_value(
     if isinstance(value, kdb.LayerInfo):
         return f"{value.name or str(value.layer) + '_' + str(value.datatype)}"
     if isinstance(value, list | tuple):
-        return "_".join(clean_value(v) for v in value)
+        return "_".join(clean_value(v) for v in value)  # ty:ignore[invalid-argument-type]
     if isinstance(value, dict):
         try:
-            return dict2name(**value)
+            return dict2name(**value)  # ty:ignore[invalid-argument-type]
         except TypeError as e:
             raise CellNameError(
                 "Dictionaries passed to functions as args/kwargs"
@@ -110,7 +116,7 @@ def clean_value(
             while hasattr(func, "func"):
                 func = func.func
             v = {
-                "function": func.__name__,
+                "function": get_function_name(func),  # ty:ignore[invalid-argument-type]
                 "module": func.__module__,
                 "settings": args_as_kwargs,
             }
@@ -205,10 +211,10 @@ def dict2name(prefix: str | None = None, **kwargs: dict[str, Any]) -> str:
 
 def convert_metadata_type(value: Any) -> MetaData:
     """Recursively clean up a MetaData for KCellSettings."""
-    if isinstance(value, int | float | bool | str | SerializableShape):
-        return value
     if value is None:
         return None
+    if serializible_value_or_shape_guard(value):
+        return value
     if isinstance(value, tuple):
         return tuple(convert_metadata_type(tv) for tv in value)
     if isinstance(value, list):
@@ -218,11 +224,11 @@ def convert_metadata_type(value: Any) -> MetaData:
     return clean_value(value)
 
 
-def check_metadata_type(value: MetaData) -> MetaData:
+def check_metadata_type(value: Any) -> MetaData:
     """Recursively check an info value whether it can be stored."""
     if value is None:
         return None
-    if isinstance(value, str | int | float | bool | SerializableShape):
+    if serializible_value_or_shape_guard(value):
         return value
     if isinstance(value, tuple):
         return tuple(convert_metadata_type(tv) for tv in value)
@@ -231,23 +237,28 @@ def check_metadata_type(value: MetaData) -> MetaData:
     if isinstance(value, dict):
         return {k: convert_metadata_type(v) for k, v in value.items()}
     msg = (
-        "Values of the info dict only support int, float, string, tuple or list."
-        f"{value=}, {type(value)=}"
+        "MetaData values of the info dict only support int, float, string"
+        f", tuple or list. {value=}, {type(value)=}"
     )
     raise ValueError(msg)
 
 
 def serialize_setting(setting: MetaData) -> JSONSerializable:
     """Serialize a setting."""
+    if setting is None:
+        return None
     if isinstance(setting, dict):
-        return {name: serialize_setting(_setting) for name, _setting in setting.items()}
+        return {
+            str(name): serialize_setting(_setting)  # ty:ignore[invalid-argument-type]
+            for name, _setting in setting.items()
+        }
     if isinstance(setting, list):
-        return [serialize_setting(s) for s in setting]
+        return [serialize_setting(s) for s in setting]  # ty:ignore[invalid-argument-type]
     if isinstance(setting, tuple):
-        return tuple(serialize_setting(s) for s in setting)
-    if isinstance(setting, SerializableShape):
+        return tuple(serialize_setting(s) for s in setting)  # ty:ignore[invalid-argument-type]
+    if serializible_shape_guard(setting):
         return f"!#{setting.__class__.__name__} {setting!s}"
-    return setting
+    return setting  # ty:ignore[invalid-return-type]
 
 
 def deserialize_setting(setting: JSONSerializable) -> MetaData:
@@ -264,9 +275,9 @@ def deserialize_setting(setting: JSONSerializable) -> MetaData:
         cls_name, value = setting.removeprefix("!#").split(" ", 1)
         match cls_name:
             case "LayerInfo":
-                return getattr(kdb, cls_name).from_string(value)  # type: ignore[no-any-return]
+                return getattr(kdb, cls_name).from_string(value)
             case _:
-                return getattr(kdb, cls_name).from_s(value)  # type: ignore[no-any-return]
+                return getattr(kdb, cls_name).from_s(value)
     return setting
 
 
@@ -285,3 +296,120 @@ def get_cell_name(
         name = f"{name[: (max_cellname_length - 9)]}_{name_hash}"
 
     return name
+
+
+def serializible_value_or_shape_guard(
+    value: Any,
+) -> TypeGuard[int | float | bool | str | SerializableShape]:
+    return isinstance(
+        value,
+        int
+        | float
+        | bool
+        | str
+        | kdb.Box
+        | kdb.DBox
+        | kdb.Edge
+        | kdb.DEdge
+        | kdb.EdgePair
+        | kdb.DEdgePair
+        | kdb.EdgePairs
+        | kdb.Edges
+        | lay.LayerProperties
+        | kdb.Matrix2d
+        | kdb.Matrix3d
+        | kdb.Path
+        | kdb.DPath
+        | kdb.Point
+        | kdb.DPoint
+        | kdb.Polygon
+        | kdb.DPolygon
+        | kdb.SimplePolygon
+        | kdb.DSimplePolygon
+        | kdb.Region
+        | kdb.Text
+        | kdb.DText
+        | kdb.Texts
+        | kdb.Trans
+        | kdb.DTrans
+        | kdb.CplxTrans
+        | kdb.ICplxTrans
+        | kdb.DCplxTrans
+        | kdb.VCplxTrans
+        | kdb.Vector
+        | kdb.DVector
+        | kdb.LayerInfo,
+    )
+
+
+def serializible_shape_guard(
+    value: Any,
+) -> TypeGuard[SerializableShape]:
+    return isinstance(
+        value,
+        kdb.Box
+        | kdb.DBox
+        | kdb.Edge
+        | kdb.DEdge
+        | kdb.EdgePair
+        | kdb.DEdgePair
+        | kdb.EdgePairs
+        | kdb.Edges
+        | lay.LayerProperties
+        | kdb.Matrix2d
+        | kdb.Matrix3d
+        | kdb.Path
+        | kdb.DPath
+        | kdb.Point
+        | kdb.DPoint
+        | kdb.Polygon
+        | kdb.DPolygon
+        | kdb.SimplePolygon
+        | kdb.DSimplePolygon
+        | kdb.Region
+        | kdb.Text
+        | kdb.DText
+        | kdb.Texts
+        | kdb.Trans
+        | kdb.DTrans
+        | kdb.CplxTrans
+        | kdb.ICplxTrans
+        | kdb.DCplxTrans
+        | kdb.VCplxTrans
+        | kdb.Vector
+        | kdb.DVector
+        | kdb.LayerInfo,
+    )
+
+
+def ishape_guard(value: Any) -> TypeGuard[IShapeLike]:
+    return isinstance(
+        value,
+        kdb.Polygon
+        | kdb.Edge
+        | kdb.Path
+        | kdb.Box
+        | kdb.Text
+        | kdb.SimplePolygon
+        | kdb.Region,
+    )
+
+
+def dshape_guard(value: Any) -> TypeGuard[DShapeLike]:
+    return isinstance(
+        value,
+        kdb.DPolygon
+        | kdb.DEdge
+        | kdb.DPath
+        | kdb.DBox
+        | kdb.DText
+        | kdb.DSimplePolygon,
+    )
+
+
+def get_function_name(f: Callable[..., Any]) -> str:
+    if hasattr(f, "__name__"):
+        return str(f.__name__)
+    if hasattr(f, "func") and callable(f.func):
+        return get_function_name(f.func)
+    raise ValueError(f"Function {f} has no name.")

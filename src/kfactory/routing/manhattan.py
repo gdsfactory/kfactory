@@ -2438,8 +2438,8 @@ def clean_points(
     del_points: list[int] = []
 
     for i, p_n in enumerate(points[2:], 2):
-        v2 = p_n - p  # type: ignore[operator]
-        v1 = p - p_p  # type: ignore[operator]
+        v2 = p_n - p
+        v1 = p - p_p  # ty:ignore[unsupported-operator]
 
         if (
             (np.sign(v1.x) == np.sign(v2.x)) and (np.sign(v1.y) == np.sign(v2.y))
@@ -2447,7 +2447,7 @@ def clean_points(
             del_points.append(i - 1)
         else:
             p_p = p
-            p = p_n  # type: ignore[assignment]
+            p = p_n
     for i in reversed(del_points):
         del points[i]
 

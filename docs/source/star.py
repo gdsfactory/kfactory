@@ -9,7 +9,10 @@ import random
 
 @kf.cell
 def star(
-    size: float, proportion: float, n_diamonds: int = 3, layer: kf.kdb.LayerInfo = LAYER.SI
+    size: float,
+    proportion: float,
+    n_diamonds: int = 3,
+    layer: kf.kdb.LayerInfo = LAYER.SI,
 ) -> kf.KCell:
     """Create a diamond star cell
 
@@ -50,7 +53,10 @@ def star(
 
 @kf.cell
 def merged_star(
-    size: float, proportion: float, n_diamonds: int = 3, layer: kf.kdb.LayerInfo = LAYER.SI
+    size: float,
+    proportion: float,
+    n_diamonds: int = 3,
+    layer: kf.kdb.LayerInfo = LAYER.SI,
 ) -> kf.KCell:
     """Same as star but use the star shapes and merge them to one polygon"""
 
@@ -84,7 +90,7 @@ def sky_with_stars() -> kf.KCell:
     for _ in range(50):
         x = random.uniform(10, 390)
         y = random.uniform(10, 390)
-        angle = random.uniform(0, 360)
+        angle = random.randint(0, 3)
         _star = c << merged_star(
             size=random.uniform(5, 25),
             proportion=random.uniform(0.2, 0.3),

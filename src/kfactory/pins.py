@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, ClassVar, Literal, Protocol
 from .conf import config
 from .pin import BasePin, DPin, Pin, ProtoPin, filter_type_reg
 from .settings import Info
-from .typings import TUnit
 from .utilities import pprint_pins
 
 if TYPE_CHECKING:
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
 __all__ = ["DPins", "Pins", "ProtoPins"]
 
 
-class ProtoPins(Protocol[TUnit]):
+class ProtoPins[T: (int, float)](Protocol):
     _kcl: KCLayout
     _bases: list[BasePin]
 
@@ -58,12 +57,12 @@ class ProtoPins(Protocol[TUnit]):
         return DPins(kcl=self.kcl, bases=self._bases)
 
     @abstractmethod
-    def __iter__(self) -> Iterator[ProtoPin[TUnit]]:
+    def __iter__(self) -> Iterator[ProtoPin[T]]:
         """Iterator over the Pins."""
         ...
 
     @abstractmethod
-    def __getitem__(self, key: int | str | None) -> ProtoPin[TUnit]:
+    def __getitem__(self, key: int | str | None) -> ProtoPin[T]:
         """Get a pin by index or name."""
         ...
 
@@ -83,12 +82,12 @@ class ProtoPins(Protocol[TUnit]):
         name: str | None = None,
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
-    ) -> ProtoPin[TUnit]:
+    ) -> ProtoPin[T]:
         """Add a pin."""
         ...
 
     @abstractmethod
-    def get_all_named(self) -> Mapping[str, ProtoPin[TUnit]]:
+    def get_all_named(self) -> Mapping[str, ProtoPin[T]]:
         """Get all pins in a dictionary with names as keys.
 
         This filters out Pins with `None` as name.
@@ -99,7 +98,7 @@ class ProtoPins(Protocol[TUnit]):
         self,
         pin_type: str | None = None,
         regex: str | None = None,
-    ) -> Sequence[ProtoPin[TUnit]]:
+    ) -> Sequence[ProtoPin[T]]:
         """Filter pins by name.
 
         Args:
@@ -108,7 +107,7 @@ class ProtoPins(Protocol[TUnit]):
         Returns:
             Filtered list of pins.
         """
-        pins: Iterable[ProtoPin[TUnit]] = list(self)
+        pins: Iterable[ProtoPin[T]] = list(self)
         return list(filter_type_reg(pins, pin_type=pin_type, regex=regex))
 
 

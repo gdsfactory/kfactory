@@ -60,12 +60,8 @@ def layers() -> Layers:
 
 
 @pytest.fixture
-def kcl() -> kf.KCLayout:
-    with counter_lock:
-        global counter  # noqa: PLW0603
-        name = str(counter)
-        counter += 1
-        return kf.KCLayout(name=name, infos=Layers)
+def kcl(request: pytest.FixtureRequest) -> kf.KCLayout:
+    return kf.KCLayout(name=kf.kcell.clean_name(request.node.name), infos=Layers)
 
 
 @pytest.fixture
@@ -256,7 +252,7 @@ def gds_regression(
         file_regression.check(
             c.write_bytes(saveopts, convert_external_cells=True),
             binary=True,
-            extension=".gds",
+            extension=".gds.gz",
             check_fn=partial(_layout_xor, tolerance=tolerance, raises=raises),
         )
 

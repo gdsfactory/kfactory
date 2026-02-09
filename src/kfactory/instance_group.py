@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from functools import cached_property
-from typing import TYPE_CHECKING, Any, Generic, NoReturn, overload
+from typing import TYPE_CHECKING, Any, NoReturn, overload
 
 from . import kdb
 from .conf import config
@@ -15,7 +15,6 @@ from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .instance import DInstance, Instance, ProtoTInstance, VInstance
 from .port import BasePort, DPort, Port, ProtoPort
 from .ports import DCreatePort, DPorts, ICreatePort, Ports, ProtoPorts
-from .typings import TInstance_co, TTInstance_co, TUnit
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
@@ -31,13 +30,15 @@ __all__ = [
 ]
 
 
-class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, TInstance_co], ABC):  # noqa: PYI059
-    insts: list[TInstance_co]
+class ProtoInstanceGroup[T: (int, float), TI: ProtoTInstance[Any] | VInstance[Any]](
+    GeometricObject[T], ABC
+):
+    insts: list[TI]
     _base_ports: list[BasePort]
 
     def __init__(
         self,
-        insts: Sequence[TInstance_co] | None = None,
+        insts: Sequence[TI] | None = None,
         ports: Sequence[ProtoPort[Any]] | None = None,
     ) -> None:
         """Initialize the InstanceGroup."""
@@ -56,7 +57,7 @@ class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, TInstance_co], A
 
     @cached_property
     @abstractmethod
-    def ports(self) -> ProtoPorts[TUnit]:
+    def ports(self) -> ProtoPorts[T]:
         """Ports of the instance."""
         ...
 
@@ -101,7 +102,7 @@ class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, TInstance_co], A
             bb += _bb
         return bb
 
-    def __iter__(self) -> Iterator[TInstance_co]:
+    def __iter__(self) -> Iterator[TI]:
         return iter(self.insts)
 
     @overload
@@ -254,10 +255,9 @@ class ProtoInstanceGroup(GeometricObject[TUnit], Generic[TUnit, TInstance_co], A
                     raise NotImplementedError("This shouldn't happen")
 
 
-class ProtoTInstanceGroup(
-    ProtoInstanceGroup[TUnit, TTInstance_co],
-    GeometricObject[TUnit],
-    Generic[TUnit, TTInstance_co],
+class ProtoTInstanceGroup[T: (int, float), TI: ProtoTInstance[Any]](
+    ProtoInstanceGroup[T, TI],
+    GeometricObject[T],
 ):
     def to_itype(self) -> InstanceGroup:
         return InstanceGroup(insts=[inst.to_itype() for inst in self.insts])

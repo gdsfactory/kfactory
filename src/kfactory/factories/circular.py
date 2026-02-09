@@ -15,6 +15,7 @@ from ..kcell import KCell
 from ..layout import CellKWargs, KCLayout
 from ..settings import Info
 from ..typings import KC, KC_co, MetaData, deg, um
+from .utils import _is_additional_info_func
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -103,12 +104,12 @@ def bend_circular_factory(
         snap_ports: Whether to snap ports to grid.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
-    if callable(additional_info):
+    _additional_info: dict[str, MetaData] = {}
+    if _is_additional_info_func(additional_info):
         _additional_info_func: Callable[
             ...,
             dict[str, MetaData],
         ] = additional_info
-        _additional_info: dict[str, MetaData] = {}
     else:
 
         def additional_info_func(
@@ -117,7 +118,7 @@ def bend_circular_factory(
             return {}
 
         _additional_info_func = additional_info_func
-        _additional_info = additional_info or {}
+        _additional_info = additional_info or {}  # ty:ignore[invalid-assignment]
 
     if cell_kwargs.get("snap_ports") is None:
         cell_kwargs["snap_ports"] = False

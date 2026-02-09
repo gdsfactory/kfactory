@@ -1,15 +1,11 @@
 # Migration
 
-## v0.13
+## kfactory 3.0
 
-### `KCLayout.cell`
+With kfactory 3.0, some modules and types have changed:
 
-Beginning with `kfactory>=0.12`, the [`@cell`][kfactory.layout.KCLayout.cell] decorator is now part of a KCLayout.
-This has a minor impact on the [`KCLayout`][kfactory.layout.KCLayout] as the function `kdb.Layout.cell` gets shadowed as a consequence. Please use `KCLayout.layout.cell` to access the function.
-
-
-# Deprecation
-
-## v 0.11.2
-
-- `@kf.cell` is depracted due to the integration into `kf.kcl`, use `@kf.kcl.cell` instead
+- `kfactory.factories.virtual.utils` was moved to unify it with other factory utils into `kfactory.factories.utils`
+- Old routing functions removed: `routing.electrical`'s `route_L` and `route_elec`, `routing.optical.route`.
+  - Use `routing.[...].route_bundle` instead
+- Routing interface for schematics:
+  - In order to enable

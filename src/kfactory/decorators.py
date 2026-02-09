@@ -14,45 +14,44 @@ from typing import (
     TYPE_CHECKING,
     Annotated,
     Any,
-    Generic,
     Protocol,
     TypedDict,
+    Unpack,
     get_origin,
     overload,
 )
 
 from cachetools import Cache, cached
-from typing_extensions import Unpack
 
 from . import kdb
 from .conf import CheckInstances, logger
 from .exceptions import CellNameError
-from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
+from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
 from .serialization import (
     DecoratorDict,
     DecoratorList,
     get_cell_name,
+    get_function_name,
     hashable_to_original,
     to_hashable,
 )
 from .settings import KCellSettings, KCellSettingsUnits
-from .typings import (
-    KC,
-    VK,
-    K,
-    K_contra,
-    KC_co,
-    KC_contra,
-    KCellParams,
-    MetaData,
-    VK_contra,
-)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
 
     from .layout import KCLayout
     from .schematic import TSchematic
+    from .typings import (
+        #     KC,
+        #     VK,
+        #     K,
+        #     K_contra,
+        #     KC_contra,
+        #     KCellParams,
+        MetaData,
+        #     VK_contra,
+    )
 
 
 def _parse_params(
@@ -250,17 +249,7 @@ def _check_pins(cell: ProtoTKCell[Any] | VKCell) -> None:
         )
 
 
-def _get_function_name(f: Callable[..., Any]) -> str:
-    if hasattr(f, "__name__"):
-        name = f.__name__
-    elif hasattr(f, "func"):
-        name = f.func.__name__
-    else:
-        raise ValueError(f"Function {f} has no name.")
-    return name
-
-
-def _set_settings(
+def _set_settings[**KCellParams, K: ProtoKCell[Any, Any]](
     cell: K,
     f: Callable[KCellParams, K],
     drop_params: Sequence[str],
@@ -268,7 +257,7 @@ def _set_settings(
     param_units: dict[str, Any],
     basename: str | None,
 ) -> None:
-    cell.function_name = _get_function_name(f)
+    cell.function_name = get_function_name(f)
     cell.basename = basename
 
     for param in drop_params:
@@ -299,29 +288,15 @@ def _check_cell(cell: AnyKCell, kcl: KCLayout) -> None:
         )
 
 
-@overload
-def _post_process(
-    cell: KC_contra,
-    post_process_functions: Iterable[Callable[[KC_contra], None]],
-) -> None: ...
-
-
-@overload
-def _post_process(
-    cell: VK_contra,
-    post_process_functions: Iterable[Callable[[VK_contra], None]],
-) -> None: ...
-
-
-def _post_process(
-    cell: K_contra,
-    post_process_functions: Iterable[Callable[[K_contra], None]],
+def _post_process[K: ProtoKCell[Any, Any]](
+    cell: K,
+    post_process_functions: Iterable[Callable[[K], None]],
 ) -> None:
     for pp in post_process_functions:
         pp(cell)
 
 
-class WrappedKCellFunc(Generic[KCellParams, KC]):
+class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
     _f: Callable[KCellParams, KC]
     _f_orig: Callable[KCellParams, ProtoTKCell[Any]]
     _f_schematic: Callable[KCellParams, TSchematic[Any]] | None = None
@@ -362,7 +337,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
-        self.name = basename or _get_function_name(f)
+        self.name = basename or get_function_name(f)
         self.ports_definition = ports.copy() if ports is not None else None
         self.tags = set(tags) if tags else set()
         self._f_schematic = schematic_function
@@ -433,7 +408,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                             "line {lno}",
                             name=name_,
                             module=f.__module__,
-                            function_name=f.__name__,
+                            function_name=get_function_name(f),
                             lno=inspect.getsourcelines(f)[1],
                         )
                         raise CellNameError(f"KCell with name {name_} exists already.")
@@ -458,7 +433,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
                 if self.ports_definition is not None:
                     port_lengths = 0
                     for direction in Direction:
-                        port_lengths += len(self.ports_definition.get(direction, []))  # type: ignore[arg-type]
+                        port_lengths += len(self.ports_definition.get(direction, []))
                     mapping = {0: "right", 1: "top", 2: "left", 3: "bottom"}
                     if len(cell.ports) != port_lengths:
                         received_ports = PortsDefinition()
@@ -555,11 +530,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
 
     @functools.cached_property
     def file(self) -> Path:
-        if isinstance(self._f_orig, FunctionType):
-            return Path(self._f_orig.__code__.co_filename).resolve()
-        if isinstance(self._f_orig, functools.partial):
-            return Path(self._f_orig.func.__code__.co_filename).resolve()
-        return Path(self._f_orig.__code__.co_filename).resolve()
+        return _get_path(self._f_orig)
 
     def prune(self) -> None:
         cells = [c for c in self.cache.values() if not c._destroyed()]
@@ -586,9 +557,9 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         return self._f_schematic(*args, **kwargs)
 
 
-class WrappedVKCellFunc(Generic[KCellParams, VK]):
-    _f: Callable[KCellParams, VK]
-    _f_orig: Callable[KCellParams, VKCell]
+class WrappedVKCellFunc[**VKCellParams, VK]:
+    _f: Callable[VKCellParams, VK]
+    _f_orig: Callable[VKCellParams, VKCell]
     cache: Cache[int, VK] | dict[int, Any]
     name: str
     kcl: KCLayout
@@ -601,7 +572,7 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
         self,
         *,
         kcl: KCLayout,
-        f: Callable[KCellParams, VKCell],
+        f: Callable[VKCellParams, VKCell],
         sig: inspect.Signature,
         output_type: type[VK],
         cache: Cache[int, VK] | dict[int, VK],
@@ -620,13 +591,13 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
-        self.name = basename or _get_function_name(f)
+        self.name = basename or get_function_name(f)
         self.ports_definitions = ports.copy() if ports is not None else None
         self.tags = set(tags) if tags else set()
 
         @functools.wraps(f)
         def wrapper_autocell(
-            *args: KCellParams.args, **kwargs: KCellParams.kwargs
+            *args: VKCellParams.args, **kwargs: VKCellParams.kwargs
         ) -> VK:
             params, param_units = _parse_params(sig, kcl, args, kwargs)
 
@@ -683,7 +654,7 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
                 if self.ports_definition is not None:
                     port_lengths = 0
                     for direction in Direction:
-                        port_lengths += len(self.ports_definition.get(direction, []))  # type: ignore[arg-type]
+                        port_lengths += len(self.ports_definition.get(direction, []))
                     mapping = {0: "right", 1: "top", 2: "left", 3: "bottom"}
                     if len(cell.ports) != port_lengths:
                         received_ports = PortsDefinition()
@@ -741,11 +712,23 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
 
     @functools.cached_property
     def file(self) -> Path:
+        return _get_path(self._f_orig)
         if isinstance(self._f_orig, FunctionType):
             return Path(self._f_orig.__code__.co_filename).resolve()
         if isinstance(self._f_orig, functools.partial):
             return Path(self._f_orig.func.__code__.co_filename).resolve()
         return Path(self._f_orig.__code__.co_filename).resolve()
+
+
+def _get_path(f: Callable[..., Any]) -> Path:
+    if isinstance(f, FunctionType):
+        return Path(f.__code__.co_filename).resolve()
+    if isinstance(f, functools.partial):
+        return _get_path(f.func)
+    try:
+        return Path(f.__code__.co_filename).resolve()  # ty:ignore[unresolved-attribute]
+    except Exception as e:
+        raise ValueError("Failed to retrieve path of code for function {f}") from e
 
 
 class ModuleCellKWargs(TypedDict, total=False):
@@ -789,12 +772,12 @@ class KCellDecoratorKWargs(TypedDict, total=False):
     debug_names: bool | None
 
 
-class KCellDecorator(Protocol):
+class KCellDecorator[**KCellParams, K: ProtoKCell[Any, Any]](Protocol):
     """Signature of the `@cell` decorator."""
 
     def __call__(
         self, **kwargs: Unpack[KCellDecoratorKWargs]
-    ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
+    ) -> Callable[[Callable[KCellParams, K]], Callable[KCellParams, K]]:
         """__call__ implementation."""
         ...
 
@@ -802,28 +785,32 @@ class KCellDecorator(Protocol):
 class ModuleDecorator(Protocol):
     """Signature of the `@module_cell` decorator."""
 
-    def __call__(
+    def __call__[**KCellParams, K: ProtoKCell[Any, Any]](
         self, /, **kwargs: Unpack[ModuleCellKWargs]
-    ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
+    ) -> Callable[[Callable[KCellParams, K]], Callable[KCellParams, K]]:
         """__call__ implementation."""
         ...
 
 
-def _module_cell(
-    cell_decorator: KCellDecorator,
+def _module_cell[**KCellParams, K: ProtoKCell[Any, Any]](
+    cell_decorator: KCellDecorator[KCellParams, K],
     /,
     **kwargs: Unpack[ModuleCellKWargs],
-) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
+) -> Callable[[Callable[KCellParams, K]], Callable[KCellParams, K]]:
     """Constructs the actual decorator.
 
     Modifies the basename to the module if the module is not the main one.
     """
 
-    def decorator_cell(
-        f: Callable[KCellParams, KC_co],
-    ) -> Callable[KCellParams, KC_co]:
+    def decorator_cell[**KCP, KC: ProtoTKCell[Any]](
+        f: Callable[KCellParams, K],
+    ) -> Callable[KCellParams, K]:
         mod = f.__module__
-        basename = f.__name__ if mod == "__main" else f"{mod}_{f.__name__}"
+        basename = (
+            get_function_name(f)
+            if mod.startswith("__main")
+            else f"{mod}_{get_function_name(f)}"
+        )
         return cell_decorator(basename=basename, **kwargs)(f)
 
     return decorator_cell
@@ -837,31 +824,31 @@ class Decorators:
         self._cell = kcl.cell
 
     @overload
-    def module_cell(
+    def module_cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
-        _func: Callable[KCellParams, KC_co],
+        _func: Callable[KCellParams, KC],
         /,
-    ) -> Callable[KCellParams, KC_co]: ...
+    ) -> Callable[KCellParams, KC]: ...
 
     @overload
-    def module_cell(
+    def module_cell[**KCellParams, KC: ProtoTKCell[Any]](
         self, /, **kwargs: Unpack[ModuleCellKWargs]
-    ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]: ...
+    ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
-    def module_cell(
+    def module_cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
-        _func: Callable[KCellParams, KC_co] | None = None,
+        _func: Callable[KCellParams, KC] | None = None,
         /,
         **kwargs: Unpack[ModuleCellKWargs],
     ) -> (
-        Callable[KCellParams, KC_co]
-        | Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]
+        Callable[KCellParams, KC]
+        | Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]
     ):
         """Constructs the `@module_cell` decorator on KCLayout.decorators."""
 
         def mc(
             **kwargs: Unpack[ModuleCellKWargs],
-        ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
-            return _module_cell(self._cell, **kwargs)  # type: ignore[arg-type]
+        ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]:
+            return _module_cell(self._cell, **kwargs)  # ty:ignore[invalid-argument-type]
 
         return mc(**kwargs) if _func is None else mc(**kwargs)(_func)

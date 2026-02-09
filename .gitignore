@@ -49,3 +49,4 @@ demo.gds
 *.prof
 *.obtained.oas
 *.obtained.gds
+*.obtained.gds.gz

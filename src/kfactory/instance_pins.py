@@ -1,28 +1,27 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Generic, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 from . import kdb
 from .conf import config
-from .instance import DInstance, Instance, ProtoTInstance, VInstance
+from .instance import DInstance, Instance, ProtoInstance, ProtoTInstance, VInstance
 from .pin import BasePin, DPin, Pin, ProtoPin, filter_type_reg
 from .pins import DPins, Pins, ProtoPins
-from .typings import TInstance_co, TUnit
 from .utilities import pprint_pins
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Iterator, Sequence
 
 
-class HasCellPins(ABC, Generic[TUnit]):
+class HasCellPins[T: (int, float)](ABC):
     @property
     @abstractmethod
-    def cell_pins(self) -> ProtoPins[TUnit]: ...
+    def cell_pins(self) -> ProtoPins[T]: ...
 
 
-class ProtoInstancePins(HasCellPins[TUnit], ABC, Generic[TUnit, TInstance_co]):
-    instance: TInstance_co
+class ProtoInstancePins[T: (int, float), TI: ProtoInstance[Any]](HasCellPins[T], ABC):
+    instance: TI
 
     @abstractmethod
     def __len__(self) -> int: ...
@@ -31,10 +30,10 @@ class ProtoInstancePins(HasCellPins[TUnit], ABC, Generic[TUnit, TInstance_co]):
     def __contains__(self, pin: str | ProtoPin[Any]) -> bool: ...
 
     @abstractmethod
-    def __getitem__(self, key: int | str | None) -> ProtoPin[TUnit]: ...
+    def __getitem__(self, key: int | str | None) -> ProtoPin[T]: ...
 
     @abstractmethod
-    def __iter__(self) -> Iterator[ProtoPin[TUnit]]: ...
+    def __iter__(self) -> Iterator[ProtoPin[T]]: ...
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(n={len(self)})"
@@ -43,9 +42,7 @@ class ProtoInstancePins(HasCellPins[TUnit], ABC, Generic[TUnit, TInstance_co]):
         return f"{self.__class__.__name__}(pins={list(self)})"
 
 
-class ProtoTInstancePins(
-    ProtoInstancePins[TUnit, ProtoTInstance[TUnit]], ABC, Generic[TUnit]
-):
+class ProtoTInstancePins[T: (int, float)](ProtoInstancePins[T, ProtoTInstance[T]], ABC):
     """Pins of an Instance.
 
     These act as virtual pins as the centers needs to change if the
@@ -59,7 +56,7 @@ class ProtoTInstancePins(
             This provides a way to dynamically calculate the pins.
     """
 
-    instance: ProtoTInstance[TUnit]
+    instance: ProtoTInstance[T]
 
     def __len__(self) -> int:
         """Return Pin count."""
@@ -74,7 +71,7 @@ class ProtoTInstancePins(
         return any(_pin.name == pin for _pin in self.instance.pins)
 
     @property
-    def pins(self) -> ProtoTInstancePins[TUnit]:
+    def pins(self) -> ProtoTInstancePins[T]:
         return self.instance.pins
 
     @property
@@ -85,7 +82,7 @@ class ProtoTInstancePins(
         self,
         pin_type: str | None = None,
         regex: str | None = None,
-    ) -> Sequence[ProtoPin[TUnit]]:
+    ) -> Sequence[ProtoPin[T]]:
         """Filter pins by name.
 
         Args:
@@ -94,12 +91,12 @@ class ProtoTInstancePins(
         Returns:
             Filtered list of pins.
         """
-        pins: Iterable[ProtoPin[TUnit]] = list(self)
+        pins: Iterable[ProtoPin[T]] = list(self)
         return list(filter_type_reg(pins, pin_type=pin_type, regex=regex))
 
     def __getitem__(
         self, key: int | str | tuple[int | str | None, int, int] | None
-    ) -> ProtoPin[TUnit]:
+    ) -> ProtoPin[T]:
         """Returns pin from instance.
 
         The key can either be an integer, in which case the nth pin is
@@ -158,9 +155,9 @@ class ProtoTInstancePins(
 
     @property
     @abstractmethod
-    def cell_pins(self) -> ProtoPins[TUnit]: ...
+    def cell_pins(self) -> ProtoPins[T]: ...
 
-    def each_pin(self) -> Iterator[ProtoPin[TUnit]]:
+    def each_pin(self) -> Iterator[ProtoPin[T]]:
         """Create a copy of the pins to iterate through."""
         if not self.instance.is_regular_array():
             if not self.instance.is_complex():
@@ -189,9 +186,9 @@ class ProtoTInstancePins(
             )
 
     @abstractmethod
-    def __iter__(self) -> Iterator[ProtoPin[TUnit]]: ...
+    def __iter__(self) -> Iterator[ProtoPin[T]]: ...
 
-    def each_by_array_coord(self) -> Iterator[tuple[int, int, ProtoPin[TUnit]]]:
+    def each_by_array_coord(self) -> Iterator[tuple[int, int, ProtoPin[T]]]:
         if not self.instance.is_regular_array():
             if not self.instance.is_complex():
                 yield from ((0, 0, p.copy(self.instance.trans)) for p in self.cell_pins)
