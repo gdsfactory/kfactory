@@ -45,8 +45,6 @@ def route_bundle(
     start_ports: Sequence[Port],
     end_ports: Sequence[Port],
     separation: dbu,
-    start_straights: dbu | list[dbu] = 0,
-    end_straights: dbu | list[dbu] = 0,
     place_layer: kdb.LayerInfo | None = None,
     route_width: dbu | list[dbu] | None = None,
     bboxes: Sequence[kdb.Box] | None = None,
@@ -70,8 +68,6 @@ def route_bundle(
     start_ports: Sequence[DPort],
     end_ports: Sequence[DPort],
     separation: um,
-    start_straights: um | list[um] = 0,
-    end_straights: um | list[um] = 0,
     place_layer: kdb.LayerInfo | None = None,
     route_width: um | list[um] | None = None,
     bboxes: Sequence[kdb.DBox] | None = None,
@@ -94,8 +90,6 @@ def route_bundle(
     start_ports: Sequence[Port] | Sequence[DPort],
     end_ports: Sequence[Port] | Sequence[DPort],
     separation: dbu | um,
-    start_straights: dbu | list[dbu] | um | list[um] = 0,
-    end_straights: dbu | list[dbu] | um | list[um] = 0,
     place_layer: kdb.LayerInfo | None = None,
     route_width: dbu | um | list[dbu] | list[um] | None = None,
     bboxes: Sequence[kdb.Box] | Sequence[kdb.DBox] | None = None,
@@ -178,8 +172,6 @@ def route_bundle(
         separation: Minimum space between wires. [dbu]
         starts: Minimal straight segment after `start_ports`.
         ends: Minimal straight segment before `end_ports`.
-        start_straights: Deprecated, use starts instead.
-        end_straights: Deprecated, use ends instead.
         place_layer: Override automatic detection of layers with specific layer.
         route_width: Width of the route. If None, the width of the ports is used.
         bboxes: List of boxes to consider. Currently only boxes overlapping ports will
@@ -420,8 +412,6 @@ def route_bundle_dual_rails(
     start_ports: list[Port],
     end_ports: list[Port],
     separation: dbu,
-    start_straights: dbu | list[dbu] | None = None,
-    end_straights: dbu | list[dbu] | None = None,
     place_layer: kdb.LayerInfo | None = None,
     width_rails: dbu | None = None,
     separation_rails: dbu | None = None,
@@ -494,8 +484,6 @@ def route_bundle_dual_rails(
         separation: Minimum space between wires. [dbu]
         starts: Minimal straight segment after `start_ports`.
         ends: Minimal straight segment before `end_ports`.
-        start_straights: Deprecated, use starts instead.
-        end_straights: Deprecated, use ends instead.
         place_layer: Override automatic detection of layers with specific layer.
         width_rails: Total width of the rails.
         separation_rails: Separation between the two rails.
@@ -531,12 +519,6 @@ def route_bundle_dual_rails(
         starts = []
     if bboxes is None:
         bboxes = []
-    if start_straights is not None:
-        logger.warning("start_straights is deprecated. Use `starts` instead.")
-        starts = start_straights
-    if end_straights is not None:
-        logger.warning("end_straights is deprecated. Use `starts` instead.")
-        ends = end_straights
     try:
         return route_bundle_generic(
             c=c,
