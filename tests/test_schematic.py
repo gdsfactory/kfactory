@@ -36,6 +36,7 @@ def _get_path_stem(p: Path) -> str | None:
 def test_schematic() -> None:
     yaml = YAML(typ=["rt", "safe", "string"])
     schema_yaml = """
+name: MMIs
 instances:
   mmi_long:
     component: mmi1x2
@@ -459,26 +460,72 @@ def test_netlist(
     def pad_m1() -> kf.KCell:
         c = pdk.kcell()
         c.shapes(layers.METAL1).insert(kf.kdb.Box(100_000))
-        c.create_port(
+        e1 = c.create_port(
             name="e1",
-            trans=kf.kdb.Trans(50_000, 0),
+            trans=kf.kdb.Trans(2, False, -50_000, 0),
             width=50_000,
             layer_info=layers.METAL1,
             port_type="electrical",
         )
+        e2 = c.create_port(
+            name="e2",
+            trans=kf.kdb.Trans(1, False, 0, 50_000),
+            width=50_000,
+            layer_info=layers.METAL1,
+            port_type="electrical",
+        )
+        e3 = c.create_port(
+            name="e3",
+            trans=kf.kdb.Trans(0, False, 50_000, 0),
+            width=50_000,
+            layer_info=layers.METAL1,
+            port_type="electrical",
+        )
+        e4 = c.create_port(
+            name="e4",
+            trans=kf.kdb.Trans(3, False, 0, -50_000),
+            width=50_000,
+            layer_info=layers.METAL1,
+            port_type="electrical",
+        )
+
+        c.create_pin(name="PAD_M1", ports=[e1, e2, e3, e4])
+
         return c
 
     @pdk.cell
     def pad_m2() -> kf.KCell:
         c = pdk.kcell()
         c.shapes(layers.METAL2).insert(kf.kdb.Box(100_000))
-        c.create_port(
+        e1 = c.create_port(
             name="e1",
-            trans=kf.kdb.Trans(50_000, 0),
+            trans=kf.kdb.Trans(2, False, -50_000, 0),
             width=50_000,
             layer_info=layers.METAL2,
             port_type="electrical",
         )
+        e2 = c.create_port(
+            name="e2",
+            trans=kf.kdb.Trans(1, False, 0, 50_000),
+            width=50_000,
+            layer_info=layers.METAL2,
+            port_type="electrical",
+        )
+        e3 = c.create_port(
+            name="e3",
+            trans=kf.kdb.Trans(0, False, 50_000, 0),
+            width=50_000,
+            layer_info=layers.METAL2,
+            port_type="electrical",
+        )
+        e4 = c.create_port(
+            name="e4",
+            trans=kf.kdb.Trans(3, False, 0, -50_000),
+            width=50_000,
+            layer_info=layers.METAL2,
+            port_type="electrical",
+        )
+        c.create_pin(name="PAD_M2", ports=[e1, e2, e3, e4])
         return c
 
     bend90_function = kf.factories.euler.bend_euler_factory(kcl=pdk)
@@ -562,12 +609,18 @@ def test_netlist(
 
     c = schematic.create_cell(kf.KCell)
     c.name = "test_schematic_anchor"
-    nl = schematic.netlist()
+    nl = schematic.netlist().lvs_equivalent(
+        c.name,
+        equivalent_ports={
+            "pad_m1": [["PAD_M1", "e1", "e2", "e3", "e4"]],
+            "pad_m2": [["PAD_M2", "e1", "e2", "e3", "e4"]],
+        },
+    )
     nl2 = c.netlist(
         ignore_unnamed=True,
         connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)],
-    )
-    assert nl == nl2[c.name]
+    )[c.name]
+    assert nl == nl2
     gds_regression(c)
 
 
