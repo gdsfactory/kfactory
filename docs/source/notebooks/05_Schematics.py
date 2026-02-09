@@ -25,7 +25,6 @@ from IPython.display import display, HTML
 import html
 
 
-
 def scrollable_text(
     text: str, max_height: int = 300, width: str = "100%", font_size: str = "14px"
 ) -> None:
@@ -106,6 +105,7 @@ def scrollable_text(
     """
     display(HTML(html_block))
 
+
 # %% [markdown]
 # ## Basic example with routing
 #
@@ -113,10 +113,12 @@ def scrollable_text(
 # A **PDK** (Process Design Kit) defines the available layers, devices, and design rules
 # for a given process. Here we’ll create a lightweight one for demonstration.
 
+
 # %%
 class Layers(kf.LayerInfos):
     WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
-    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2,0)
+    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
+
 
 layers = Layers()
 pdk = kf.KCLayout("SCHEMA_PDK_ROUTING", infos=Layers)
@@ -129,6 +131,7 @@ pdk = kf.KCLayout("SCHEMA_PDK_ROUTING", infos=Layers)
 # - A **90° Euler bend** for turning corners
 #
 # These primitives are enough to assemble larger routed networks.
+
 
 # %%
 @pdk.cell
@@ -163,6 +166,7 @@ bend90 = bend90_function(width=0.500, radius=10, layer=layers.WG)
 # - Reuses our basic cells (`straight`, `bend90`)
 # - Can be applied consistently across designs
 
+
 # %%
 @pdk.routing_strategy
 def route_bundle(
@@ -180,6 +184,7 @@ def route_bundle(
         bend90_cell=bend90,
     )
 
+
 # %% [markdown]
 # ### Example schematic with routing
 #
@@ -189,6 +194,7 @@ def route_bundle(
 # - Connected automatically by our routing strategy
 #
 # This shows how schematics carry both connectivity **and** layout placement information.
+
 
 # %%
 @pdk.schematic_cell
@@ -256,6 +262,7 @@ kf.kcl.get_icross_section(xs_wg1)
 # - Adds enclosures for cladding / fill excludes
 # - Creates ports in four directions for connectivity
 
+
 # %%
 @pdk.cell
 def cross(cross_section: str) -> kf.KCell:
@@ -311,6 +318,7 @@ def cross(cross_section: str) -> kf.KCell:
 
     return c
 
+
 # %% [markdown]
 # ### Virtual cells
 #
@@ -322,6 +330,7 @@ def cross(cross_section: str) -> kf.KCell:
 # - `bend_euler`: a parametric Euler bend
 # - `euler_term`: a bend tapering to a termination
 # - `straight`: a parametric straight section
+
 
 # %%
 @pdk.vcell
@@ -348,7 +357,7 @@ def bend_euler(
         angle, radius=radius, resolution=resolution
     )
 
-    kf.factories.virtual.utils.extrude_backbone(
+    kf.factories.utils.extrude_backbone(
         c=c,
         backbone=backbone,
         width=xs.width,
@@ -383,7 +392,7 @@ def euler_term(radius: float, cross_section: str, term_width: float) -> kf.VKCel
     backbone = kf.factories.virtual.euler.euler_bend_points(
         angle, radius=xs.radius, resolution=resolution
     )
-    kf.factories.virtual.utils.extrude_backbone_dynamic(
+    kf.factories.utils.extrude_backbone_dynamic(
         c=c,
         backbone=backbone,
         width1=xs.width,
@@ -408,7 +417,7 @@ def straight(length: float, cross_section: str) -> kf.VKCell:
     c = pdk.vkcell()
     xs = c.kcl.get_dcross_section(cross_section)
 
-    kf.factories.virtual.utils.extrude_backbone(
+    kf.factories.utils.extrude_backbone(
         c,
         [kf.kdb.DPoint(0, 0), kf.kdb.DPoint(length, 0)],
         start_angle=0,
@@ -442,6 +451,7 @@ def straight(length: float, cross_section: str) -> kf.VKCell:
 # - Places input/output ports systematically
 #
 # This results in a scalable crossing matrix driven entirely by schematic logic.
+
 
 # %%
 @kf.kcl.schematic_cell(output_type=kf.DKCell)
@@ -677,6 +687,7 @@ def crossing45(n: int, pitch: kf.typings.um, cross_section: str) -> kf.DSchemati
 
     return s
 
+
 c = crossing45(8, pitch=30, cross_section="WG1000")
 c
 
@@ -718,6 +729,7 @@ assert schematic_netlist == extracted_netlist
 
 # %%
 from IPython.display import Code
+
 Code(c.schematic.code_str())
 
 # %% [markdown]
