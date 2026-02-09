@@ -2759,19 +2759,20 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             for vi in self._base.vinsts:
                 vi.insert_into(self)
             self._base.vinsts.clear()
-            called_cell_indexes = self._base.kdb_cell.called_cells()
-            for c in sorted(
-                {
-                    self.kcl[ci]
-                    for ci in called_cell_indexes
-                    if not self.kcl[ci].kdb_cell._destroyed()
-                }
-                & self.kcl.tkcells.keys(),
-                key=lambda c: c.hierarchy_levels(),
-            ):
-                for vi in c._base.vinsts:
-                    vi.insert_into(c)
-                c._base.vinsts.clear()
+
+            if recursive:
+                called_cell_indexes = set(self._base.kdb_cell.called_cells())
+                for c in sorted(
+                    (
+                        self.kcl[ci]
+                        for ci in called_cell_indexes & self.kcl.tkcells.keys()
+                        if not self.kcl[ci].kdb_cell._destroyed()
+                    ),
+                    key=lambda c: c.hierarchy_levels(),
+                ):
+                    for vi in c._base.vinsts:
+                        vi.insert_into(c)
+                    c._base.vinsts.clear()
 
     @abstractmethod
     def get_cross_section(
