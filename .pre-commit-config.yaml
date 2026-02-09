@@ -53,6 +53,7 @@ repos:
         entry: uvx --with-editable .[dev] ty check .
         language: python
         additional_dependencies:
+          - uv
           - aenum
           - pydantic
           - pydantic-extra-types
