@@ -486,7 +486,6 @@ class Route[T: Num](BaseModel, extra="forbid"):
 
     Attributes:
         name: Route identifier (key in `(D)Schematic.routes`).
-        links: Pairs of start/end ports to be routed.
         routing_strategy: Name of routing function registered on the
             `Schematic.create_cell` or registered in `KCLayout` if none are given.
         settings: Keyword arguments forwarded to the routing strategy.
@@ -498,14 +497,7 @@ class Route[T: Num](BaseModel, extra="forbid"):
 
     @model_validator(mode="before")
     @classmethod
-    def _parse_links(cls, data: dict[str, Any]) -> dict[str, Any]:
-        links = cast("dict[str, str]| None", data.get("links"))
-
-        if isinstance(links, dict):
-            data["links"] = [
-                (tuple(str(k).rsplit(",", 1)), tuple(str(v).rsplit(",", 1)))
-                for k, v in links.items()
-            ]
+    def _parse_nets(cls, data: dict[str, Any]) -> dict[str, Any]:
         if "settings" not in data:
             data["settings"] = {}
         return data
@@ -712,15 +704,26 @@ class RouteNet[T: Num](SchematicNet[T]):
     """
 
     route: str
-    net: tuple[
-        PortArrayRef | PortRef,
-        PortArrayRef | PortRef,
-        *tuple[PortArrayRef | PortRef, ...],
-    ]
+    net: tuple[PortArrayRef | PortRef, ...]
 
     @model_validator(mode="after")
     def _sort_data(self) -> Self:
-        self.net = tuple(sorted(self.net))  # type: ignore[assignment]
+        self.net = tuple(sorted(self.net))
+        return self
+
+
+class VirtualConnection[T: Num](SchematicNet[T]):
+    type: Literal["virtual"] = "virtual"
+    net: tuple[PortArrayRef | PortRef | Port[T], ...]
+
+    @model_validator(mode="after")
+    def _sort_data(self) -> Self:
+        self.net = tuple(sorted(self.net))
+        if isinstance(self.net[1], Port):
+            raise TypeError(
+                "Two cell ports cannot be connected together. This would cause an "
+                "invalid netlist."
+            )
         return self
 
 
@@ -802,7 +805,9 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     name: str | None = None
     instances: dict[str, SchematicInstance[T]] = Field(default_factory=dict)
     placements: dict[str, MirrorPlacement | Placement[T]] = Field(default_factory=dict)
-    nets: list[RouteNet[T] | Connection[T]] = Field(default_factory=list)
+    nets: list[RouteNet[T] | Connection[T] | VirtualConnection[T]] = Field(
+        default_factory=list
+    )
     routes: dict[str, Route[T]] = Field(default_factory=dict)
     ports: dict[str, Port[T] | PortRef | PortArrayRef] = Field(default_factory=dict)
     kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
@@ -1044,49 +1049,53 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             for name, instance in instances.items():
                 instance["name"] = name
                 instance.pop("info", None)
+
+        nets: list[dict[str, str]] = data.get("nets", [])
+        built_nets: list[RouteNet[T] | Connection[T] | VirtualConnection[T]] = []
+        data["nets"] = built_nets
+        if nets:
+            built_nets.extend(
+                [
+                    VirtualConnection[T](
+                        net=(
+                            _get_instance_and_port(net["p1"]),
+                            _get_instance_and_port(net["p2"]),
+                        )
+                    )
+                    for net in nets
+                ]
+            )
+
+        connections = data.pop("connections", None)
+        if connections is not None and isinstance(connections, dict):
+            built_nets.extend(
+                [
+                    Connection[T](
+                        net=(
+                            _get_instance_and_port(conn_ref1),
+                            _get_instance_and_port(conn_ref2),
+                        )
+                    )
+                    for conn_ref1, conn_ref2 in connections.items()
+                ]
+            )
         routes = data.get("routes")
         if routes:
             for name, route in routes.items():
                 route["name"] = name
-        connections = data.get("connections")
-        if connections is not None and isinstance(connections, dict):
-            built_connections: list[Connection[T]] = []
-            connections_: list[tuple[tuple[str, str], tuple[str, str]]] = [
-                (k.rsplit(",", 1), v.rsplit(",", 1)) for k, v in connections.items()
-            ]
-            for connection_ in connections_:
-                connection_0: (
-                    tuple[str, str] | tuple[tuple[str, tuple[int, ...]], str]
-                ) = connection_[0]
-                match = re.match(r"(.*?)(<\d+\.\d+>)$", connection_[0][0])
-                if match:
-                    connection_0 = (
-                        (
-                            match.group(1),
-                            tuple(
-                                int(j) for j in match.group(2).strip("<>").split(".")
+                built_nets.extend(
+                    [
+                        RouteNet[T](
+                            route=name,
+                            net=(
+                                _get_instance_and_port(link1),
+                                _get_instance_and_port(link2),
                             ),
-                        ),
-                        connection_[0][1],
-                    )
-                connection_1: (
-                    tuple[str, str] | tuple[tuple[str, tuple[int, ...]], str]
-                ) = connection_[1]
-                match = re.match(r"(.*?)(<\d+\.\d+>)$", connection_[1][0])
-                if match:
-                    connection_1 = (
-                        (
-                            match.group(1),
-                            tuple(
-                                int(j) for j in match.group(2).strip("<>").split(".")
-                            ),
-                        ),
-                        connection_[1][1],
-                    )
-                built_connections.append(
-                    Connection.from_list((connection_0, connection_1))
+                        )
+                        for link1, link2 in route["links"].items()
+                    ]
                 )
-            data["connections"] = built_connections
+                route.pop("links")
         placements = data.get("placements")
         if placements:
             for placement in placements.values():
@@ -1259,7 +1268,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 placed_islands.append(island)
                 placed_insts |= island
 
-        nets_per_route = self.nets_per_route()
+        nets_per_route = self.routes_nets()
 
         # routes
         for route in self.routes.values():
@@ -1307,7 +1316,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         # verify connections
         port_connection_transformation_errors: list[Connection[T]] = []
         connection_transformation_errors: list[Connection[T]] = []
-        for conn in self.connections:
+        for conn in connections:
             c1 = conn.net[0]
             c2 = conn.net[1]
             if isinstance(c1, Port):
@@ -1390,9 +1399,35 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             self.nets.append(RouteNet(route=name, net=(sp, ep)))
         return route
 
-    def connect(self, port1: PortRef | Port[T], port2: PortRef) -> Connection[T]:
-        conn = Connection[T](net=(port1, port2))
-        self.connections.append(conn)
+    @overload
+    def connect(
+        self,
+        port1: PortRef | Port[T],
+        port2: PortRef,
+        *,
+        virtual: Literal[False] = False,
+    ) -> Connection[T]: ...
+
+    @overload
+    def connect(
+        self,
+        port1: PortRef | Port[T],
+        port2: PortRef | Port[T],
+        *ports: PortRef | Port[T],
+        virtual: Literal[True] = True,
+    ) -> VirtualConnection[T]: ...
+    def connect(
+        self,
+        port1: PortRef | Port[T],
+        port2: PortRef | Port[T],
+        *ports: PortRef | Port[T],
+        virtual: bool = False,
+    ) -> Connection[T] | VirtualConnection[T]:
+        if virtual:
+            conn = Connection[T](net=(port1, port2))  # ty:ignore[invalid-argument-type]
+        else:
+            conn = VirtualConnection[T](net=(port1, port2, *ports))
+        self.nets.append(conn)
         return conn
 
     def __getitem__(self, key: str) -> Port[T] | PortRef:
@@ -1565,11 +1600,11 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     schematic_cell += f"{_ind()})\n"
                 else:
                     schematic_cell += f"{_ind()}{inst_name}.mirror = True\n"
-
-        if self.connections:
+        connections = self.connections
+        if connections:
             schematic_cell += f"\n{_ind()}# Schematic connections\n"
 
-            for connection in self.connections:
+            for connection in connections:
                 ref1, ref2 = connection.net
                 if isinstance(ref1, PortRef):
                     schematic_cell += f"{_ind()}{names[ref1.instance]}.connect(\n"
@@ -1599,7 +1634,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     indent -= 2
                     schematic_cell += f"{_ind()})\n"
         if self.routes:
-            nets_per_route = self.nets_per_route()
+            nets_per_route = self.routes_nets()
             schematic_cell += f"\n{_ind()}# Schematic routes\n"
             for route in self.routes.values():
                 schematic_cell += f"{_ind()}schematic.add_route(\n"
@@ -1842,12 +1877,12 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             sorted_ports[side].sort()
         return sorted_ports
 
-    def nets_per_route(self) -> dict[str, list[RouteNet[T]]]:
-        routes_per_net: dict[str, list[RouteNet[T]]] = defaultdict(list)
+    def routes_nets(self) -> dict[str, list[RouteNet[T]]]:
+        nets: dict[str, list[RouteNet[T]]] = defaultdict(list)
         for net in self.nets:
-            if not isinstance(net, Connection):
-                routes_per_net[net.route].append(net)
-        return {}
+            if isinstance(net, RouteNet):
+                nets[net.route].append(net)
+        return nets
 
     @property
     def connections(self) -> list[Connection[T]]:
@@ -2713,3 +2748,16 @@ def _is_real(v: Any) -> TypeGuard[Real]:
 
 def _is_port_ref(v: Any) -> TypeGuard[PortRef]:
     return isinstance(v, PortRef)
+
+
+def _get_instance_and_port(s: str) -> PortRef:
+    instance, port = s.rsplit(",", 1)
+    match = re.match(r"(.*?)<(\d+)\.(\d+)>$", instance)
+    if match:
+        return PortArrayRef(
+            instance=match.group(0),
+            port=port,
+            ia=int(match.group(1)),
+            ib=int(match.group(2)),
+        )
+    return PortRef(instance=instance, port=port)
