@@ -1282,10 +1282,6 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             case _:
                 ...
 
-        for kci in set(self._base.kdb_cell.called_cells()) & self.kcl.tkcells.keys():
-            kc = self.kcl[kci]
-            kc.insert_vinsts()
-
         filename = str(filename)
         if autoformat_from_file_extension:
             save_options.set_format_from_filename(filename)
@@ -1329,10 +1325,6 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     self.convert_to_static(recursive=True)
             case _:
                 ...
-
-        for kci in set(self._base.kdb_cell.called_cells()) & self.kcl.tkcells.keys():
-            kc = self.kcl[kci]
-            kc.insert_vinsts()
 
         save_options.format = save_options.format or "OASIS"
         save_options.clear_cells()
