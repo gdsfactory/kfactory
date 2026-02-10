@@ -374,10 +374,19 @@ def test_schematic_route(
     @pdk.routing_strategy
     def route_bundle(
         c: kf.ProtoTKCell[Any],
-        start_ports: Sequence[kf.ProtoPort[Any]],
-        end_ports: Sequence[kf.ProtoPort[Any]],
+        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
         separation: int = 5000,
     ) -> list[kf.routing.generic.ManhattanRoute]:
+        start_ports: list[kf.Port] = []
+        end_ports: list[kf.Port] = []
+        for port_seq in ports:
+            if len(port_seq) != 2:
+                raise ValueError(
+                    "route_bundle does only support routing between two-port problems, "
+                    f"not multiple ports. Found {port_seq}"
+                )
+            start_ports.append(kf.Port(base=port_seq[0].base))
+            end_ports.append(kf.Port(base=port_seq[1].base))
         return kf.routing.optical.route_bundle(
             c=kf.KCell(base=c._base),
             start_ports=[kf.Port(base=sp.base) for sp in start_ports],
@@ -402,7 +411,7 @@ def test_schematic_route(
         s2.place(x=1000, y=210_000)
 
         schematic.add_route(
-            "s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000
+            "s1-s2", [[s1["o2"], s2["o2"]]], "route_bundle", separation=20_000
         )
 
         return schematic
@@ -487,10 +496,19 @@ def test_netlist(
     @pdk.routing_strategy
     def route_bundle(
         c: kf.ProtoTKCell[Any],
-        start_ports: Sequence[kf.ProtoPort[Any]],
-        end_ports: Sequence[kf.ProtoPort[Any]],
+        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
         separation: int = 5000,
     ) -> list[kf.routing.generic.ManhattanRoute]:
+        start_ports: list[kf.Port] = []
+        end_ports: list[kf.Port] = []
+        for port_seq in ports:
+            if len(port_seq) != 2:
+                raise ValueError(
+                    "route_bundle does only support routing between two-port problems, "
+                    f"not multiple ports. Found {port_seq}"
+                )
+            start_ports.append(kf.Port(base=port_seq[0].base))
+            end_ports.append(kf.Port(base=port_seq[1].base))
         return kf.routing.optical.route_bundle(
             c=kf.KCell(base=c._base),
             start_ports=[kf.Port(base=sp.base) for sp in start_ports],
@@ -503,12 +521,21 @@ def test_netlist(
     @pdk.routing_strategy
     def route_bundle_elec(
         c: kf.ProtoTKCell[Any],
-        start_ports: Sequence[kf.ProtoPort[Any]],
-        end_ports: Sequence[kf.ProtoPort[Any]],
+        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
         separation: int = 5000,
         start_straight: int = 0,
         end_straight: int = 0,
     ) -> list[kf.routing.generic.ManhattanRoute]:
+        start_ports: list[kf.Port] = []
+        end_ports: list[kf.Port] = []
+        for port_seq in ports:
+            if len(port_seq) != 2:
+                raise ValueError(
+                    "route_bundle does only support routing between two-port problems, "
+                    f"not multiple ports. Found {port_seq}"
+                )
+            start_ports.append(kf.Port(base=port_seq[0].base))
+            end_ports.append(kf.Port(base=port_seq[1].base))
         return kf.routing.electrical.route_bundle(
             c=kf.KCell(base=c._base),
             start_ports=[kf.Port(base=sp.base) for sp in start_ports],
@@ -541,19 +568,17 @@ def test_netlist(
     padm2_2.place(x=0, y=-100_000, orientation=90)
 
     schematic.add_route(
-        "s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000
+        "s1-s2", [[s1["o2"], s2["o2"]]], "route_bundle", separation=20_000
     )
     schematic.add_route(
         "pm1_1-pm1_2",
-        [padm1_1["e1"]],
-        [padm1_2["e1"]],
+        [[padm1_1["e1"], padm1_2["e1"]]],
         "route_bundle_elec",
         separation=20_000,
     )
     schematic.add_route(
         "pm2_1-pm2_2",
-        [padm2_1["e1"]],
-        [padm2_2["e1"]],
+        [[padm2_1["e1"], padm2_2["e1"]]],
         "route_bundle_elec",
         separation=20_000,
     )
@@ -640,10 +665,19 @@ def test_netlist_equivalent(
     @pdk.routing_strategy
     def route_bundle(
         c: kf.ProtoTKCell[Any],
-        start_ports: Sequence[kf.ProtoPort[Any]],
-        end_ports: Sequence[kf.ProtoPort[Any]],
+        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
         separation: int = 5000,
     ) -> list[kf.routing.generic.ManhattanRoute]:
+        start_ports: list[kf.Port] = []
+        end_ports: list[kf.Port] = []
+        for port_seq in ports:
+            if len(port_seq) != 2:
+                raise ValueError(
+                    "route_bundle does only support routing between two-port problems, "
+                    f"not multiple ports. Found {port_seq}"
+                )
+            start_ports.append(kf.Port(base=port_seq[0].base))
+            end_ports.append(kf.Port(base=port_seq[1].base))
         return kf.routing.optical.route_bundle(
             c=kf.KCell(base=c._base),
             start_ports=[kf.Port(base=sp.base) for sp in start_ports],
@@ -656,12 +690,21 @@ def test_netlist_equivalent(
     @pdk.routing_strategy
     def route_bundle_elec(
         c: kf.ProtoTKCell[Any],
-        start_ports: Sequence[kf.ProtoPort[Any]],
-        end_ports: Sequence[kf.ProtoPort[Any]],
+        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
         separation: int = 5000,
         start_straight: int = 0,
         end_straight: int = 0,
     ) -> list[kf.routing.generic.ManhattanRoute]:
+        start_ports: list[kf.Port] = []
+        end_ports: list[kf.Port] = []
+        for port_seq in ports:
+            if len(port_seq) != 2:
+                raise ValueError(
+                    "route_bundle does only support routing between two-port problems, "
+                    f"not multiple ports. Found {port_seq}"
+                )
+            start_ports.append(kf.Port(base=port_seq[0].base))
+            end_ports.append(kf.Port(base=port_seq[1].base))
         return kf.routing.electrical.route_bundle(
             c=kf.KCell(base=c._base),
             start_ports=[kf.Port(base=sp.base) for sp in start_ports],
@@ -689,29 +732,25 @@ def test_netlist_equivalent(
 
     schematic.add_route(
         "pm1_1-pm1_2",
-        [padm1_1["e3"]],
-        [padm1_2["e1"]],
+        [(padm1_1["e3"], padm1_2["e1"])],
         "route_bundle_elec",
         separation=20_000,
     )
     schematic.add_route(
         "pm1_2-pm1_4",
-        [padm1_2["e4"]],
-        [padm1_4["e2"]],
+        [[padm1_2["e4"], padm1_4["e2"]]],
         "route_bundle_elec",
         separation=20_000,
     )
     schematic.add_route(
         "pm1_3-pm1_4",
-        [padm1_1["e4"]],
-        [padm1_3["e2"]],
+        [[padm1_1["e4"], padm1_3["e2"]]],
         "route_bundle_elec",
         separation=20_000,
     )
     schematic.add_route(
         "pm1_4-pm1_1",
-        [padm1_4["e1"]],
-        [padm1_3["e3"]],
+        [[padm1_4["e1"], padm1_3["e3"]]],
         "route_bundle_elec",
         separation=20_000,
     )

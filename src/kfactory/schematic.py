@@ -704,7 +704,7 @@ class RouteNet[T: Num](SchematicNet[T]):
     """
 
     route: str
-    net: tuple[PortArrayRef | PortRef, ...]
+    net: tuple[PortRef, ...]
 
     @model_validator(mode="after")
     def _sort_data(self) -> Self:
@@ -714,7 +714,7 @@ class RouteNet[T: Num](SchematicNet[T]):
 
 class VirtualConnection[T: Num](SchematicNet[T]):
     type: Literal["virtual"] = "virtual"
-    net: tuple[PortArrayRef | PortRef | Port[T], ...]
+    net: tuple[PortRef | Port[T], ...]
 
     @model_validator(mode="after")
     def _sort_data(self) -> Self:
@@ -1176,8 +1176,13 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             Callable[
                 Concatenate[
                     ProtoTKCell[Any],
-                    Sequence[ProtoPort[Any]],
-                    Sequence[ProtoPort[Any]],
+                    Sequence[
+                        tuple[
+                            ProtoPort[Any],
+                            ProtoPort[Any],
+                            *tuple[ProtoPort[Any], ...],
+                        ]
+                    ],
                     ...,
                 ],
                 Any,
@@ -1272,44 +1277,31 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
 
         # routes
         for route in self.routes.values():
-            start_ports: list[ProtoPort[Any]] = []
-            end_ports: list[ProtoPort[Any]] = []
+            resolved_ports: list[tuple[ProtoPort[Any], ...]] = []
             for net in nets_per_route[route.name]:
-                l1, l2 = net.net[0], net.net[1]
-                if isinstance(l1, Port):
-                    p1: KCellPort | DKCellPort = c.ports[l1.name]
-                elif isinstance(l1, PortArrayRef):
-                    if self.instances[l1.instance].virtual:
-                        p1 = c.vinsts[l1.instance].ports[l1.port, l1.ia, l1.ib]
+                resolved_port_list: list[KCellPort | DKCellPort] = []
+                for port_ref in net.net:
+                    if isinstance(port_ref, Port):
+                        p: KCellPort | DKCellPort = c.ports[port_ref.name]
+                    inst = self.instances[port_ref.instance]
+                    if inst.virtual:
+                        p = port_ref.get_port(c.vinsts[port_ref.instance])
                     else:
-                        p1 = c.insts[l1.instance].ports[l1.port, l1.ia, l1.ib]
-                elif self.instances[l1.instance].virtual:
-                    p1 = c.vinsts[l1.instance].ports[l1.port]
-                else:
-                    p1 = c.insts[l1.instance].ports[l1.port]
-                start_ports.append(p1)
-                if isinstance(l2, Port):
-                    p2: KCellPort | DKCellPort = c.ports[l2.name]
-                elif isinstance(l2, PortArrayRef):
-                    if self.instances[l2.instance].virtual:
-                        p2 = c.vinsts[l2.instance].ports[l2.port, l2.ia, l2.ib]
-                    else:
-                        p2 = c.insts[l2.instance].ports[l2.port, l2.ia, l2.ib]
-                elif self.instances[l2.instance].virtual:
-                    p2 = c.vinsts[l2.instance].ports[l2.port]
-                else:
-                    p2 = c.insts[l2.instance].ports[l2.port]
-                end_ports.append(p2)
+                        p = port_ref.get_port(c.insts[port_ref.instance])
+                    resolved_port_list.append(p)
+                resolved_ports.append(tuple(resolved_port_list))
             route_c = output_type(base=c.base)
             if isinstance(route_c, KCell):
                 routing_strategies[route.routing_strategy](
-                    output_type(base=c.base), start_ports, end_ports, **route.settings
+                    output_type(base=c.base), resolved_ports, **route.settings
                 )
             else:
                 routing_strategies[route.routing_strategy](
                     output_type(base=c.base),
-                    [DKCellPort(base=sp.base) for sp in start_ports],
-                    [DKCellPort(base=ep.base) for ep in end_ports],
+                    [
+                        tuple(DKCellPort(base=p.base) for p in net_ports)
+                        for net_ports in resolved_ports
+                    ],
                     **route.settings,
                 )
 
@@ -1366,8 +1358,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     def add_route(
         self,
         name: str,
-        start_ports: list[PortRef | Port[T]],
-        end_ports: list[PortRef | Port[T]],
+        nets: Sequence[Sequence[PortRef]],
         routing_strategy: str,
         **settings: JSONSerializable,
     ) -> Route[T]:
@@ -1375,8 +1366,8 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
 
         Args:
             name: Route identifier (must be unique).
-            start_ports: Start ports for each link.
-            end_ports: End ports for each link.
+            nets: List of net tuples. Each tuple contains 2 or more ports
+                that belong to the same net.
             routing_strategy: Name of the routing strategy function.
             **settings: Extra keyword args forwarded to the strategy.
 
@@ -1384,7 +1375,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             The created `Route`.
 
         Raises:
-            ValueError: If `name` already exists.
+            ValueError: If `name` already exists or a net has fewer than 2 ports.
         """
 
         if name in self.routes:
@@ -1395,8 +1386,13 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             settings=settings,
         )
         self.routes[name] = route
-        for sp, ep in zip(start_ports, end_ports, strict=True):
-            self.nets.append(RouteNet(route=name, net=(sp, ep)))
+        for net in nets:
+            if len(net) < 2:  # noqa: PLR2004
+                raise ValueError(
+                    f"Each route net must have at least 2 ports, got {len(net)} in "
+                    f"route {name!r}"
+                )
+            self.nets.append(RouteNet(route=name, net=tuple(net)))
         return route
 
     @overload

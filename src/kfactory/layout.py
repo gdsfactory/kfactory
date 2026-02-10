@@ -2157,8 +2157,9 @@ class KCLayout(
         f: Callable[
             Concatenate[
                 ProtoTKCell[Any],
-                Sequence[ProtoPort[Any]],
-                Sequence[ProtoPort[Any]],
+                Sequence[
+                    tuple[ProtoPort[Any], ProtoPort[Any], *tuple[ProtoPort[Any], ...]]
+                ],
                 P,
             ],
             list[ManhattanRoute],
@@ -2166,8 +2167,9 @@ class KCLayout(
     ) -> Callable[
         Concatenate[
             ProtoTKCell[Any],
-            Sequence[ProtoPort[Any]],
-            Sequence[ProtoPort[Any]],
+            Sequence[
+                tuple[ProtoPort[Any], ProtoPort[Any], *tuple[ProtoPort[Any], ...]]
+            ],
             P,
         ],
         list[ManhattanRoute],
