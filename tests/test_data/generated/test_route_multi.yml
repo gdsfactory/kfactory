@@ -1,0 +1,89 @@
+name: multi_pad
+instances:
+  padm1_1:
+    component: pad_m1
+    kcl: schematic_route_multi
+  padm1_2:
+    component: pad_m1
+    kcl: schematic_route_multi
+  padm1_3:
+    component: pad_m1
+    kcl: schematic_route_multi
+  padm1_4:
+    component: pad_m1
+    kcl: schematic_route_multi
+  padm1_5:
+    component: pad_m1
+    kcl: schematic_route_multi
+  padm1_6:
+    component: pad_m1
+    kcl: schematic_route_multi
+placements:
+  padm1_1:
+    mirror: false
+    x: 0
+    dx: 0
+    y: 0
+    dy: 0
+    orientation: 0.0
+    anchor:
+  padm1_2:
+    mirror: false
+    x: 200000
+    dx: 0
+    y: 0
+    dy: 0
+    orientation: 0.0
+    anchor:
+  padm1_3:
+    mirror: false
+    x: 100000
+    dx: 0
+    y: 200000
+    dy: 0
+    orientation: 0.0
+    anchor:
+  padm1_4:
+    mirror: false
+    x: 400000
+    dx: 0
+    y: 0
+    dy: 0
+    orientation: 0.0
+    anchor:
+  padm1_5:
+    mirror: false
+    x: 600000
+    dx: 0
+    y: 0
+    dy: 0
+    orientation: 0.0
+    anchor:
+  padm1_6:
+    mirror: false
+    x: 500000
+    dx: 0
+    y: 200000
+    dy: 0
+    orientation: 0.0
+    anchor:
+nets:
+- net:
+  - instance: padm1_1
+    port: e2
+  - instance: padm1_2
+    port: e2
+  - instance: padm1_3
+    port: e4
+  - instance: padm1_4
+    port: e2
+  - instance: padm1_5
+    port: e2
+  - instance: padm1_6
+    port: e4
+  route: connect_all
+routes:
+  connect_all:
+    routing_strategy: route_bundle_elec
+    settings:
+      separation: 9000

@@ -8,6 +8,7 @@ from warnings import warn
 
 import pytest
 from pytest_regressions.file_regression import FileRegressionFixture
+from ruamel.yaml import YAML
 
 import kfactory as kf
 import kfactory.cells
@@ -254,6 +255,26 @@ def gds_regression(
             binary=True,
             extension=".gds.gz",
             check_fn=partial(_layout_xor, tolerance=tolerance, raises=raises),
+        )
+
+    return _check
+
+
+@pytest.fixture
+def yaml_regression(
+    file_regression: FileRegressionFixture,
+) -> Callable[[kf.schematic.TSchematic[Any]], None]:
+    yaml = YAML(typ=["rt", "safe", "string"])
+
+    def _check(
+        schematic: kf.schematic.TSchematic[Any],
+    ) -> None:
+        dumped = yaml.dump_to_string(  # ty:ignore[unresolved-attribute]
+            schematic.model_dump(exclude_defaults=True, warnings=False)
+        )
+        file_regression.check(
+            dumped,
+            extension=".yml",
         )
 
     return _check

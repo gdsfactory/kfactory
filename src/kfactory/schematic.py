@@ -367,10 +367,10 @@ class SchematicInstance[T: (int, float)](
         return self._schematic
 
     @property
-    def placement(self) -> MirrorPlacement | Placement[T] | None:
+    def placement(self) -> Placement[T] | MirrorPlacement | None:
         return self.parent_schematic.placements.get(self.name)
 
-    def get_placement(self) -> MirrorPlacement | Placement[T]:
+    def get_placement(self) -> Placement[T] | MirrorPlacement:
         placement = self.placement
         if placement is None:
             raise ValueError(
@@ -706,11 +706,6 @@ class RouteNet[T: Num](SchematicNet[T]):
     route: str
     net: tuple[PortRef, ...]
 
-    @model_validator(mode="after")
-    def _sort_data(self) -> Self:
-        self.net = tuple(sorted(self.net))
-        return self
-
 
 class VirtualConnection[T: Num](SchematicNet[T]):
     type: Literal["virtual"] = "virtual"
@@ -737,17 +732,35 @@ class Connection[T: Num](SchematicNet[T]):
         TypeError: If connection attempts to join two `Port` objects.
     """
 
-    net: tuple[PortArrayRef | PortRef | Port[T], PortArrayRef | PortRef]
+    net: tuple[PortArrayRef | PortRef | Port[T], PortArrayRef | PortRef] = Field(
+        frozen=True
+    )
 
-    @model_validator(mode="after")
-    def _sort_data(self) -> Self:
-        self.net = tuple(sorted(self.net))  # ty:ignore[invalid-assignment]
-        if isinstance(self.net[1], Port):
+    @field_validator("net", mode="before")
+    @classmethod
+    def _sort_and_validate_net(
+        cls,
+        v: tuple[PortArrayRef | PortRef | Port[T], ...],
+    ) -> tuple[PortArrayRef | PortRef | Port[T], ...]:
+        # Allow list/iterable input; normalize to a 2-tuple
+        if not isinstance(v, tuple):
+            v = tuple(v)
+        if len(v) != 2:  # noqa: PLR2004
+            raise TypeError("net must contain exactly two endpoints")
+
+        a, b = v
+
+        # Sort without mutating the model instance (important for frozen fields/models)
+        net_sorted = tuple(sorted((a, b)))
+
+        # After sorting, ensure the RHS isn't a cell Port (your original invariant)
+        if isinstance(net_sorted[1], Port):
             raise TypeError(
                 "Two cell ports cannot be connected together. This would cause an "
                 "invalid netlist."
             )
-        return self
+
+        return net_sorted
 
     @classmethod
     def from_list(
@@ -804,7 +817,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
 
     name: str | None = None
     instances: dict[str, SchematicInstance[T]] = Field(default_factory=dict)
-    placements: dict[str, MirrorPlacement | Placement[T]] = Field(default_factory=dict)
+    placements: dict[str, Placement[T] | MirrorPlacement] = Field(default_factory=dict)
     nets: list[RouteNet[T] | Connection[T] | VirtualConnection[T]] = Field(
         default_factory=list
     )
@@ -1157,6 +1170,13 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     raise NotImplementedError
         return data
 
+    @field_serializer("placements")
+    @classmethod
+    def _serialize_placements(
+        cls, v: dict[str, Placement[Any] | MirrorPlacement]
+    ) -> dict[str, dict[str, Any]]:
+        return {k: p.model_dump(warnings=False) for k, p in v.items()}
+
     @model_validator(mode="after")
     def assign_backrefs(self) -> Self:
         for inst in self.instances.values():
@@ -1360,7 +1380,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         name: str,
         nets: Sequence[Sequence[PortRef]],
         routing_strategy: str,
-        **settings: JSONSerializable,
+        settings: dict[str, JSONSerializable],
     ) -> Route[T]:
         """Create a multi-link route bundle.
 
@@ -1392,7 +1412,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     f"Each route net must have at least 2 ports, got {len(net)} in "
                     f"route {name!r}"
                 )
-            self.nets.append(RouteNet(route=name, net=tuple(net)))
+            self.nets.append(RouteNet[T](route=name, net=tuple(net)))
         return route
 
     @overload
