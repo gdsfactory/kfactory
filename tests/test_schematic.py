@@ -83,7 +83,7 @@ ports:
 
 
 def test_schematic_create(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     pdk = kcl
     layers = Layers()
@@ -126,11 +126,11 @@ def test_schematic_create(
 
     c = schematic.create_cell(kf.KCell)
     c.name = "test_schematic_create"
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_schematic_create_cell(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     layers = Layers()
     pdk = kcl
@@ -177,11 +177,11 @@ def test_schematic_create_cell(
 
     assert pdk.factories["long_straight"].schematic_driven()
 
-    gds_regression(long_straight(2))
+    oas_regression(long_straight(2))
 
 
 def test_schematic_mirror_connection(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     layers = Layers()
     pdk = kcl
@@ -282,11 +282,11 @@ def test_schematic_mirror_connection(
 
     assert pdk.factories["straight_sbend"].schematic_driven()
 
-    gds_regression(straight_sbend(length=10_000, offset=20_000))
+    oas_regression(straight_sbend(length=10_000, offset=20_000))
 
 
 def test_schematic_kcl_mix_netlist(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], layers: Layers
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None], layers: Layers
 ) -> None:
     layers = Layers()
     pdk = kf.KCLayout("schematic_pdk_decorator", infos=layers.__class__)
@@ -340,11 +340,11 @@ def test_schematic_kcl_mix_netlist(
 
     c = long_straight(n=2000)
     c.netlist()
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_schematic_route(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     layers = Layers()
     pdk = kf.KCLayout("schematic_pdk_routing", infos=Layers)
@@ -374,10 +374,19 @@ def test_schematic_route(
     @pdk.routing_strategy
     def route_bundle(
         c: kf.ProtoTKCell[Any],
-        start_ports: Sequence[kf.ProtoPort[Any]],
-        end_ports: Sequence[kf.ProtoPort[Any]],
+        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
         separation: int = 5000,
     ) -> list[kf.routing.generic.ManhattanRoute]:
+        start_ports: list[kf.Port] = []
+        end_ports: list[kf.Port] = []
+        for port_seq in ports:
+            if len(port_seq) != 2:
+                raise ValueError(
+                    "route_bundle does only support routing between two-port problems, "
+                    f"not multiple ports. Found {port_seq}"
+                )
+            start_ports.append(kf.Port(base=port_seq[0].base))
+            end_ports.append(kf.Port(base=port_seq[1].base))
         return kf.routing.optical.route_bundle(
             c=kf.KCell(base=c._base),
             start_ports=[kf.Port(base=sp.base) for sp in start_ports],
@@ -402,18 +411,21 @@ def test_schematic_route(
         s2.place(x=1000, y=210_000)
 
         schematic.add_route(
-            "s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000
+            "s1-s2",
+            [[s1["o2"], s2["o2"]]],
+            "route_bundle",
+            settings={"separation": 20_000},
         )
 
         return schematic
 
     assert pdk.factories["route_example"]._f_orig is route_example.__wrapped__  # type: ignore[attr-defined]
 
-    gds_regression(route_example())
+    oas_regression(route_example())
 
 
 def test_netlist(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     class Layers(kf.LayerInfos):
         WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
@@ -487,10 +499,19 @@ def test_netlist(
     @pdk.routing_strategy
     def route_bundle(
         c: kf.ProtoTKCell[Any],
-        start_ports: Sequence[kf.ProtoPort[Any]],
-        end_ports: Sequence[kf.ProtoPort[Any]],
+        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
         separation: int = 5000,
     ) -> list[kf.routing.generic.ManhattanRoute]:
+        start_ports: list[kf.Port] = []
+        end_ports: list[kf.Port] = []
+        for port_seq in ports:
+            if len(port_seq) != 2:
+                raise ValueError(
+                    "route_bundle does only support routing between two-port problems, "
+                    f"not multiple ports. Found {port_seq}"
+                )
+            start_ports.append(kf.Port(base=port_seq[0].base))
+            end_ports.append(kf.Port(base=port_seq[1].base))
         return kf.routing.optical.route_bundle(
             c=kf.KCell(base=c._base),
             start_ports=[kf.Port(base=sp.base) for sp in start_ports],
@@ -503,12 +524,21 @@ def test_netlist(
     @pdk.routing_strategy
     def route_bundle_elec(
         c: kf.ProtoTKCell[Any],
-        start_ports: Sequence[kf.ProtoPort[Any]],
-        end_ports: Sequence[kf.ProtoPort[Any]],
+        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
         separation: int = 5000,
         start_straight: int = 0,
         end_straight: int = 0,
     ) -> list[kf.routing.generic.ManhattanRoute]:
+        start_ports: list[kf.Port] = []
+        end_ports: list[kf.Port] = []
+        for port_seq in ports:
+            if len(port_seq) != 2:
+                raise ValueError(
+                    "route_bundle does only support routing between two-port problems, "
+                    f"not multiple ports. Found {port_seq}"
+                )
+            start_ports.append(kf.Port(base=port_seq[0].base))
+            end_ports.append(kf.Port(base=port_seq[1].base))
         return kf.routing.electrical.route_bundle(
             c=kf.KCell(base=c._base),
             start_ports=[kf.Port(base=sp.base) for sp in start_ports],
@@ -541,21 +571,19 @@ def test_netlist(
     padm2_2.place(x=0, y=-100_000, orientation=90)
 
     schematic.add_route(
-        "s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000
+        "s1-s2", [[s1["o2"], s2["o2"]]], "route_bundle", settings={"separation": 20_000}
     )
     schematic.add_route(
         "pm1_1-pm1_2",
-        [padm1_1["e1"]],
-        [padm1_2["e1"]],
+        [[padm1_1["e1"], padm1_2["e1"]]],
         "route_bundle_elec",
-        separation=20_000,
+        settings={"separation": 20_000},
     )
     schematic.add_route(
         "pm2_1-pm2_2",
-        [padm2_1["e1"]],
-        [padm2_2["e1"]],
+        [[padm2_1["e1"], padm2_2["e1"]]],
         "route_bundle_elec",
-        separation=20_000,
+        settings={"separation": 20_000},
     )
     schematic.add_port("o1", port=s1["o1"])
     schematic.add_port("o2", port=s2["o1"])
@@ -568,11 +596,11 @@ def test_netlist(
         connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)],
     )
     assert nl == nl2[c.name]
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_netlist_equivalent(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     layers = Layers()
     pdk = kf.KCLayout(
@@ -640,10 +668,19 @@ def test_netlist_equivalent(
     @pdk.routing_strategy
     def route_bundle(
         c: kf.ProtoTKCell[Any],
-        start_ports: Sequence[kf.ProtoPort[Any]],
-        end_ports: Sequence[kf.ProtoPort[Any]],
+        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
         separation: int = 5000,
     ) -> list[kf.routing.generic.ManhattanRoute]:
+        start_ports: list[kf.Port] = []
+        end_ports: list[kf.Port] = []
+        for port_seq in ports:
+            if len(port_seq) != 2:
+                raise ValueError(
+                    "route_bundle does only support routing between two-port problems, "
+                    f"not multiple ports. Found {port_seq}"
+                )
+            start_ports.append(kf.Port(base=port_seq[0].base))
+            end_ports.append(kf.Port(base=port_seq[1].base))
         return kf.routing.optical.route_bundle(
             c=kf.KCell(base=c._base),
             start_ports=[kf.Port(base=sp.base) for sp in start_ports],
@@ -656,12 +693,21 @@ def test_netlist_equivalent(
     @pdk.routing_strategy
     def route_bundle_elec(
         c: kf.ProtoTKCell[Any],
-        start_ports: Sequence[kf.ProtoPort[Any]],
-        end_ports: Sequence[kf.ProtoPort[Any]],
+        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
         separation: int = 5000,
         start_straight: int = 0,
         end_straight: int = 0,
     ) -> list[kf.routing.generic.ManhattanRoute]:
+        start_ports: list[kf.Port] = []
+        end_ports: list[kf.Port] = []
+        for port_seq in ports:
+            if len(port_seq) != 2:
+                raise ValueError(
+                    "route_bundle does only support routing between two-port problems, "
+                    f"not multiple ports. Found {port_seq}"
+                )
+            start_ports.append(kf.Port(base=port_seq[0].base))
+            end_ports.append(kf.Port(base=port_seq[1].base))
         return kf.routing.electrical.route_bundle(
             c=kf.KCell(base=c._base),
             start_ports=[kf.Port(base=sp.base) for sp in start_ports],
@@ -689,31 +735,27 @@ def test_netlist_equivalent(
 
     schematic.add_route(
         "pm1_1-pm1_2",
-        [padm1_1["e3"]],
-        [padm1_2["e1"]],
+        [(padm1_1["e3"], padm1_2["e1"])],
         "route_bundle_elec",
-        separation=20_000,
+        settings={"separation": 20_000},
     )
     schematic.add_route(
         "pm1_2-pm1_4",
-        [padm1_2["e4"]],
-        [padm1_4["e2"]],
+        [[padm1_2["e4"], padm1_4["e2"]]],
         "route_bundle_elec",
-        separation=20_000,
+        settings={"separation": 20_000},
     )
     schematic.add_route(
         "pm1_3-pm1_4",
-        [padm1_1["e4"]],
-        [padm1_3["e2"]],
+        [[padm1_1["e4"], padm1_3["e2"]]],
         "route_bundle_elec",
-        separation=20_000,
+        settings={"separation": 20_000},
     )
     schematic.add_route(
         "pm1_4-pm1_1",
-        [padm1_4["e1"]],
-        [padm1_3["e3"]],
+        [[padm1_4["e1"], padm1_3["e3"]]],
         "route_bundle_elec",
-        separation=20_000,
+        settings={"separation": 20_000},
     )
 
     nl = schematic.netlist()
@@ -732,11 +774,11 @@ def test_netlist_equivalent(
 
     assert schema_str is not None
     c.name = "test_schematic_anchor"
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_schematic_anchor(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     pdk = kf.KCLayout("schematic_pdk_anchor_port", infos=Layers)
     layers = Layers()
@@ -784,7 +826,7 @@ def test_schematic_anchor(
 
     c = schematic.create_cell(kf.KCell)
     c.name = "test_schematic_anchor"
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_schematic_function_get_port_positions(
@@ -1203,3 +1245,132 @@ def test_gdsfactory_yaml(path: Path) -> None:
     schematic = kf.read_schematic(path)
     for inst in schematic.instances.values():
         _ = inst.parent_schematic.name
+
+
+def test_route_multi(
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    yaml_regression: Callable[[kf.schematic.TSchematic[Any]], None],
+) -> None:
+    class Layers(kf.LayerInfos):
+        WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+        WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 0)
+        WGEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
+        WGCLADEXCLUDE: kf.kdb.LayerInfo = kf.kdb.LayerInfo(111, 1)
+        FILL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
+        FILL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
+        FILL3: kf.kdb.LayerInfo = kf.kdb.LayerInfo(10, 0)
+        METAL1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
+        METAL1EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 1)
+        VIA1: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
+        METAL2: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4, 0)
+        METAL2EX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(4, 1)
+
+    layers = Layers()
+    pdk = kf.KCLayout(
+        "schematic_route_multi",
+        infos=Layers,
+        connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)],
+    )
+
+    @pdk.routing_strategy
+    def route_bundle_elec(
+        c: kf.ProtoTKCell[Any],
+        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
+        separation: int = 5000,
+    ) -> list[kf.routing.generic.ManhattanRoute]:
+        routes: list[kf.routing.generic.ManhattanRoute] = []
+        kc = kf.KCell(base=c._base)
+        for ports_ in ports:
+            p = kf.kdb.Point()
+            for port in ports_:
+                p += port.trans.disp
+
+            center = p / len(ports_)
+
+            for port in ports_:
+                port_ = kf.Port(base=port.base)
+                pc = port_.copy()
+                pc.trans = kf.kdb.Trans(
+                    pc.trans.angle % 2, False, center.to_v()
+                ) * kf.kdb.Trans(x=-port.iwidth // 2, y=0)
+
+                routes_ = kf.routing.electrical.route_bundle(
+                    kc, start_ports=[port_], end_ports=[pc], separation=separation
+                )
+                routes.extend(routes_)
+        return routes
+
+    @pdk.cell
+    def pad_m1() -> kf.KCell:
+        c = pdk.kcell()
+        c.shapes(layers.METAL1).insert(kf.kdb.Box(100_000))
+        c.create_port(
+            name="e1",
+            trans=kf.kdb.Trans(2, False, -50_000, 0),
+            width=10_000,
+            layer_info=layers.METAL1,
+            port_type="electrical",
+        )
+        c.create_port(
+            name="e2",
+            trans=kf.kdb.Trans(1, False, 0, 50_000),
+            width=10_000,
+            layer_info=layers.METAL1,
+            port_type="electrical",
+        )
+        c.create_port(
+            name="e3",
+            trans=kf.kdb.Trans(0, False, 50_000, 0),
+            width=10_000,
+            layer_info=layers.METAL1,
+            port_type="electrical",
+        )
+        c.create_port(
+            name="e4",
+            trans=kf.kdb.Trans(3, False, 0, -50_000),
+            width=10_000,
+            layer_info=layers.METAL1,
+            port_type="electrical",
+        )
+        return c
+
+    @pdk.schematic_cell
+    def multi_pad() -> kf.Schematic:
+        schematic = kf.Schematic(kcl=pdk)
+
+        padm1_1 = schematic.create_inst(name="padm1_1", component="pad_m1")
+        padm1_2 = schematic.create_inst(name="padm1_2", component="pad_m1")
+        padm1_3 = schematic.create_inst(name="padm1_3", component="pad_m1")
+
+        padm1_4 = schematic.create_inst(name="padm1_4", component="pad_m1")
+        padm1_5 = schematic.create_inst(name="padm1_5", component="pad_m1")
+        padm1_6 = schematic.create_inst(name="padm1_6", component="pad_m1")
+
+        padm1_1.place(x=0, y=0)
+        padm1_2.place(x=200_000, y=0)
+        padm1_3.place(x=100_000, y=200_000)
+        padm1_4.place(x=400_000, y=0)
+        padm1_5.place(x=600_000, y=0)
+        padm1_6.place(x=500_000, y=200_000)
+
+        schematic.add_route(
+            name="connect_all",
+            nets=[
+                [
+                    padm1_1["e2"],
+                    padm1_2["e2"],
+                    padm1_3["e4"],
+                    padm1_4["e2"],
+                    padm1_5["e2"],
+                    padm1_6["e4"],
+                ],
+            ],
+            routing_strategy="route_bundle_elec",
+            settings={"separation": 9000},
+        )
+
+        return schematic
+
+    c = multi_pad()
+    oas_regression(c)
+    yaml_regression(c.schematic)  # ty:ignore[invalid-argument-type]

@@ -3,7 +3,7 @@
 Defines the [KCell][kfactory.kcell.KCell] providing klayout Cells with Ports
 and other convenience functions.
 
-[Instance][kfactory.kcell.Instance] are the kfactory instances used to also acquire
+[Instance][kfactory.instance.Instance] are the kfactory instances used to also acquire
 ports and other inf from instances.
 
 """
@@ -238,7 +238,7 @@ class ProtoKCell[T: (int, float), TB: BaseKCell[Any]](GeometricObject[T], ABC):
     def settings_units(self) -> KCellSettingsUnits:
         """Dictionary containing the units of the settings.
 
-        Set by the [@cell][kfactory.kcell.KCLayout.cell] decorator.
+        Set by the [@cell][kfactory.layout.KCLayout.cell] decorator.
         """
         return self._base.settings_units
 
@@ -1243,7 +1243,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
     ) -> None:
         """Write a KCell to a GDS.
 
-        See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
+        See [KCLayout.write][kfactory.layout.KCLayout.write] for more info.
         """
         if save_options is None:
             save_options = save_layout_options()
@@ -1291,7 +1291,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
     ) -> bytes:
         """Write a KCell to a binary format as oasis.
 
-        See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
+        See [KCLayout.write][kfactory.layout.KCLayout.write] for more info.
         """
         if save_options is None:
             save_options = save_layout_options()
@@ -2827,7 +2827,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
             kcl: KCLayout the cell should be attached to.
             kdb_cell: If not `None`, a KCell will be created from and existing
                 KLayout Cell
-            ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
+            ports: Attach an existing [Ports][kfactory.ports.Ports] object to the KCell,
                 if `None` create an empty one.
             info: Info object to attach to the KCell.
             settings: KCellSettings object to attach to the KCell.
@@ -3020,7 +3020,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
             kcl: KCLayout the cell should be attached to.
             kdb_cell: If not `None`, a KCell will be created from and existing
                 KLayout Cell
-            ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
+            ports: Attach an existing [Ports][kfactory.ports.Ports] object to the KCell,
                 if `None` create an empty one.
             info: Info object to attach to the KCell.
             settings: KCellSettings object to attach to the KCell.
@@ -3634,7 +3634,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         name: str | None = None,
         keep_mirror: bool = False,
     ) -> DPort:
-        """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
+        """Proxy for [Ports.create_port][kfactory.ports.Ports.create_port]."""
         if self.locked:
             raise LockedError(self)
         return self.ports.add_port(
@@ -3737,7 +3737,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
     ) -> None:
         """Write a KCell to a GDS.
 
-        See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
+        See [KCLayout.write][kfactory.layout.KCLayout.write] for more info.
         """
         if save_options is None:
             save_options = save_layout_options()

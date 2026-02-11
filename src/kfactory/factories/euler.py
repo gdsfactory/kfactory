@@ -250,17 +250,14 @@ def bend_euler_factory(
 ) -> BendEulerFactory[KC]:
     """Returns a function generating euler bends.
 
+    Will snap ports by default
+
     Args:
         kcl: The KCLayout which will be owned
         additional_info: Add additional key/values to the
             [`KCell.info`][kfactory.settings.Info]. Can be a static dict
             mapping info name to info value. Or can a callable which takes the straight
             functions' parameters as kwargs and returns a dict with the mapping.
-        basename: Overwrite the prefix of the resulting KCell's name. By default
-            the KCell will be named 'straight_dbu[...]'.
-        snap_ports: Whether to snap ports to grid. If snapping is turned of, ports
-            ports are still snapped to grid if they are within 0.0001° of multiples
-            of 90°.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
     _additional_info: dict[str, MetaData] = {}
@@ -423,8 +420,6 @@ def bend_s_euler_factory(
             [`KCell.info`][kfactory.settings.Info]. Can be a static dict
             mapping info name to info value. Or can a callable which takes the straight
             functions' parameters as kwargs and returns a dict with the mapping.
-        basename: Overwrite the prefix of the resulting KCell's name. By default
-            the KCell will be named 'straight_dbu[...]'.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
     _additional_info: dict[str, MetaData] = {}

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self, overload
 
 from pydantic import BaseModel, Field, RootModel, model_validator
 
@@ -18,8 +18,9 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from .cross_section import CrossSection, DCrossSection
+    from .instance import DInstance, Instance, VInstance
     from .kcell import KCell, ProtoTKCell
-    from .port import BasePort
+    from .port import BasePort, DPort, Port
     from .schematic import TSchematic
 
 __all__ = ["Netlist", "NetlistInstance", "NetlistPort", "PortArrayRef", "PortRef"]
@@ -86,6 +87,14 @@ class PortRef(BaseModel, extra="forbid"):
         return cell.add_port(
             port=cell.insts[self.instance].ports[self.port], name=name
         ).base
+
+    @overload
+    def get_port(self, inst: DInstance | VInstance) -> DPort: ...
+    @overload
+    def get_port(self, inst: Instance) -> Port: ...
+
+    def get_port(self, inst: Instance | DInstance | VInstance) -> Port | DPort:
+        return inst.ports[self.port]
 
 
 class PortArrayRef(PortRef, extra="forbid"):
@@ -156,6 +165,14 @@ class PortArrayRef(PortRef, extra="forbid"):
         return cell.add_port(
             port=cell.insts[self.instance].ports[self.port, self.ia, self.ib], name=name
         ).base
+
+    @overload
+    def get_port(self, inst: DInstance | VInstance) -> DPort: ...
+    @overload
+    def get_port(self, inst: Instance) -> Port: ...
+
+    def get_port(self, inst: Instance | DInstance | VInstance) -> Port | DPort:
+        return inst.ports[self.port, self.ia, self.ib]
 
 
 class NetlistPort(BaseModel):

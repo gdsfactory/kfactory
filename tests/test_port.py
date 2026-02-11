@@ -438,7 +438,7 @@ def test_dport_copy_polar() -> None:
 def test_autorename(
     kcl: kf.KCLayout,
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     cell = kf.factories.straight.straight_dbu_factory(kcl)(
         length=10000, width=2000, layer=layers.WG
@@ -451,13 +451,13 @@ def test_autorename(
     kf.port.autorename(cell, _rename_ports)
 
     assert cell.ports.get_all_named().keys() == {"o3", "o4"}
-    gds_regression(cell)
+    oas_regression(cell)
 
 
 def test_rename_clockwise(
     kcl: kf.KCLayout,
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     cell = kf.factories.straight.straight_dbu_factory(kcl)(
         length=10000, width=2000, layer=layers.WG
@@ -466,13 +466,13 @@ def test_rename_clockwise(
     kf.port.rename_clockwise(_ports, start=0)
     assert _ports[0].name == "o0"
     assert _ports[1].name == "o1"
-    gds_regression(cell)
+    oas_regression(cell)
 
 
 def test_filter_regex(
     kcl: kf.KCLayout,
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     cell = kf.factories.straight.straight_dbu_factory(kcl)(
         length=10000, width=2000, layer=layers.WG
@@ -484,13 +484,13 @@ def test_filter_regex(
     filtered[0].name = None
     filtered = list(kf.port.filter_regex(filtered, "o2"))
     assert len(list(filtered)) == 0
-    gds_regression(cell)
+    oas_regression(cell)
 
 
 def test_filter_layer_pt_reg(
     kcl: kf.KCLayout,
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     cell = kf.factories.straight.straight_dbu_factory(kcl)(
         length=10000, width=2000, layer=layers.WG
@@ -500,13 +500,13 @@ def test_filter_layer_pt_reg(
         ports, layer=0, port_type="optical", regex="o2"
     )
     assert len(list(filtered)) == 1
-    gds_regression(cell)
+    oas_regression(cell)
 
 
 def test_rename_clockwise_multi(
     kcl: kf.KCLayout,
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     cell = kf.factories.straight.straight_dbu_factory(kcl)(
         length=10000, width=2000, layer=layers.WG
@@ -516,13 +516,13 @@ def test_rename_clockwise_multi(
     ports["o2"].name = "o5"
     kf.port.rename_clockwise_multi(ports, layers=[0], regex="o4")
     assert len(list(ports)) == 2
-    gds_regression(cell)
+    oas_regression(cell)
 
 
 def test_create(
     kcl: kf.KCLayout,
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     cell = kcl.kcell()
 
@@ -534,4 +534,4 @@ def test_create(
         port_type="optical",
         trans=kf.kdb.Trans(1, 0),
     )
-    gds_regression(cell)
+    oas_regression(cell)

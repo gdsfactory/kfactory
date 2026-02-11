@@ -42,7 +42,6 @@ from pydantic import (
     BaseModel,
     Field,
     PrivateAttr,
-    RootModel,
     field_serializer,
     field_validator,
     model_validator,
@@ -368,10 +367,10 @@ class SchematicInstance[T: (int, float)](
         return self._schematic
 
     @property
-    def placement(self) -> MirrorPlacement | Placement[T] | None:
+    def placement(self) -> Placement[T] | MirrorPlacement | None:
         return self.parent_schematic.placements.get(self.name)
 
-    def get_placement(self) -> MirrorPlacement | Placement[T]:
+    def get_placement(self) -> Placement[T] | MirrorPlacement:
         placement = self.placement
         if placement is None:
             raise ValueError(
@@ -434,8 +433,8 @@ class SchematicInstance[T: (int, float)](
             pref = PortArrayRef(
                 instance=self.name, port=port[0], ia=port[1], ib=port[2]
             )
-        conn = Connection[T]((other, pref))
-        self.parent_schematic.connections.append(conn)
+        conn = Connection[T](net=(other, pref))
+        self.parent_schematic.nets.append(conn)
         return conn
 
     @property
@@ -487,27 +486,18 @@ class Route[T: Num](BaseModel, extra="forbid"):
 
     Attributes:
         name: Route identifier (key in `(D)Schematic.routes`).
-        links: Pairs of start/end ports to be routed.
         routing_strategy: Name of routing function registered on the
             `Schematic.create_cell` or registered in `KCLayout` if none are given.
         settings: Keyword arguments forwarded to the routing strategy.
     """
 
     name: str = Field(exclude=True)
-    links: list[Link[T]]
     routing_strategy: str = "route_bundle"
     settings: dict[str, JSONSerializable]
 
     @model_validator(mode="before")
     @classmethod
-    def _parse_links(cls, data: dict[str, Any]) -> dict[str, Any]:
-        links = cast("dict[str, str]| None", data.get("links"))
-
-        if isinstance(links, dict):
-            data["links"] = [
-                (tuple(str(k).rsplit(",", 1)), tuple(str(v).rsplit(",", 1)))
-                for k, v in links.items()
-            ]
+    def _parse_nets(cls, data: dict[str, Any]) -> dict[str, Any]:
         if "settings" not in data:
             data["settings"] = {}
         return data
@@ -544,31 +534,60 @@ class Port[T: (int, float)](BaseModel, extra="forbid"):
     cross_section: str
     orientation: Literal[0, 90, 180, 270] | PortRef
 
-    def __lt__(self, other: Port[Any] | PortRef) -> bool:
-        if isinstance(other, Port):
-            return self._as_tuple() < other._as_tuple()  # ty:ignore[unsupported-operator]
-        return True
+    def __lt__(self, other: Port[T] | PortRef) -> bool:
+        if not isinstance(other, Port):
+            return True
+        if self.name != other.name:
+            return self.name < other.name
+        x = self.x
+        ox = other.x
+        if _is_real(x):
+            if _is_real(ox):
+                return x < ox
+            if x != ox:
+                return False
+        elif _is_port_ref(x):
+            if _is_real(ox):
+                return False
+            if _is_port_ref(ox):
+                return x < ox
+            return True
+        else:
+            if _is_real(ox) or _is_port_ref(ox):
+                return False
+            return x < ox  # ty:ignore[unsupported-operator]
+        y = self.y
+        oy = other.y
+        if _is_real(y):
+            if _is_real(oy):
+                return y < oy
+            if y != oy:
+                return False
+        elif _is_port_ref(y):
+            if _is_real(oy):
+                return False
+            if _is_port_ref(oy):
+                return y < oy
+            return True
+        else:
+            if _is_real(oy) or _is_port_ref(oy):
+                return False
+            return y < oy  # ty:ignore[unsupported-operator]
 
-    def _as_tuple(
-        self,
-    ) -> tuple[
-        str,
-        T | PortRef | AnchorRefX,
-        T | PortRef | AnchorRefY,
-        T,
-        T,
-        Literal[0, 90, 180, 270] | PortRef,
-        str,
-    ]:
-        return (
-            self.name,
-            self.x,
-            self.y,
-            self.dx,
-            self.dy,
-            self.orientation,
-            self.cross_section,
-        )
+        if self.dx != other.dx:
+            return self.dx < other.dx
+        if self.dy != other.dy:
+            return self.dy < other.dy
+        if self.cross_section != other.cross_section:
+            return self.cross_section < other.cross_section
+        if isinstance(self.orientation, int | float):
+            if isinstance(other, int | float):
+                return self.orientation < other.orientation
+            return False
+        if isinstance(other.orientation, PortRef):
+            return self.orientation < other.orientation
+
+        return True
 
     def is_placeable(self, placed_instances: set[str]) -> bool:
         placeable = True
@@ -669,25 +688,41 @@ class Port[T: (int, float)](BaseModel, extra="forbid"):
         return f"{schematic_name}.ports[{self.name!r}]"
 
 
-class Link[T: Num](
-    RootModel[tuple[PortArrayRef | PortRef | Port[T], PortArrayRef | PortRef | Port[T]]]
-):
+class SchematicNet[T: Num](BaseModel):
     """Undirected association between two ports (refs or schematic ports).
 
     The pair is stored in sorted order to ensure stable equality and hashing.
     """
 
-    root: tuple[PortArrayRef | PortRef | Port[T], PortArrayRef | PortRef | Port[T]]
+    net: tuple[PortRef | Port[T], PortRef | Port[T]]
+
+
+class RouteNet[T: Num](SchematicNet[T]):
+    """Undirected association between two ports (refs or schematic ports).
+
+    The pair is stored in sorted order to ensure stable equality and hashing.
+    """
+
+    route: str
+    net: tuple[PortRef, ...]
+
+
+class VirtualConnection[T: Num](SchematicNet[T]):
+    type: Literal["virtual"] = "virtual"
+    net: tuple[PortRef | Port[T], ...]
 
     @model_validator(mode="after")
     def _sort_data(self) -> Self:
-        self.root = tuple(sorted(self.root))  # type: ignore[assignment]
+        self.net = tuple(sorted(self.net))
+        if isinstance(self.net[1], Port):
+            raise TypeError(
+                "Two cell ports cannot be connected together. This would cause an "
+                "invalid netlist."
+            )
         return self
 
 
-class Connection[T: Num](
-    RootModel[tuple[Port[T] | PortArrayRef | PortRef, PortArrayRef | PortRef]]
-):
+class Connection[T: Num](SchematicNet[T]):
     """Hard connection between two ports.
 
     Enforced as {PortRef | PortArrayRef | Port} x {PortRef | PortArrayRef}.
@@ -697,17 +732,35 @@ class Connection[T: Num](
         TypeError: If connection attempts to join two `Port` objects.
     """
 
-    root: tuple[PortArrayRef | PortRef | Port[T], PortArrayRef | PortRef]
+    net: tuple[PortArrayRef | PortRef | Port[T], PortArrayRef | PortRef] = Field(
+        frozen=True
+    )
 
-    @model_validator(mode="after")
-    def _sort_data(self) -> Self:
-        self.root = tuple(sorted(self.root))  # type: ignore[assignment]
-        if isinstance(self.root[1], Port):
+    @field_validator("net", mode="before")
+    @classmethod
+    def _sort_and_validate_net(
+        cls,
+        v: tuple[PortArrayRef | PortRef | Port[T], ...],
+    ) -> tuple[PortArrayRef | PortRef | Port[T], ...]:
+        # Allow list/iterable input; normalize to a 2-tuple
+        if not isinstance(v, tuple):
+            v = tuple(v)
+        if len(v) != 2:  # noqa: PLR2004
+            raise TypeError("net must contain exactly two endpoints")
+
+        a, b = v
+
+        # Sort without mutating the model instance (important for frozen fields/models)
+        net_sorted = tuple(sorted((a, b)))
+
+        # After sorting, ensure the RHS isn't a cell Port (your original invariant)
+        if isinstance(net_sorted[1], Port):
             raise TypeError(
                 "Two cell ports cannot be connected together. This would cause an "
                 "invalid netlist."
             )
-        return self
+
+        return net_sorted
 
     @classmethod
     def from_list(
@@ -739,17 +792,12 @@ class Connection[T: Num](
             else:
                 p2 = {"instance": data[1][0], "port": data[1][1]}
 
-            return Connection.model_validate((p1, p2))
-        return Connection(**data)
+            return Connection[T].model_validate({"net": (p1, p2)})
+        return Connection[T](**data)
 
 
 class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     """Schematic of a cell / component.
-
-    Parameters:
-        unit: Base coordinate unit ("dbu" or "um"). Fixed by subclass.
-        kcl: `KCLayout` context (excluded from model serialization). Needed for
-            referencing and creation of the cell.
 
     Attributes:
         name: Optional schematic name.
@@ -760,12 +808,17 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         ports: Mapping of port name -> `Port`/`PortRef`/`PortArrayRef`.
         info: dict which will be mapped to `KCell.info` (or any other derivate like
             Component).
+        unit: Base coordinate unit ("dbu" or "um"). Fixed by subclass.
+        kcl: `KCLayout` context (excluded from model serialization). Needed for
+            referencing and creation of the cell.
     """
 
     name: str | None = None
     instances: dict[str, SchematicInstance[T]] = Field(default_factory=dict)
-    placements: dict[str, MirrorPlacement | Placement[T]] = Field(default_factory=dict)
-    connections: list[Connection[T]] = Field(default_factory=list)
+    placements: dict[str, Placement[T] | MirrorPlacement] = Field(default_factory=dict)
+    nets: list[RouteNet[T] | Connection[T] | VirtualConnection[T]] = Field(
+        default_factory=list
+    )
     routes: dict[str, Route[T]] = Field(default_factory=dict)
     ports: dict[str, Port[T] | PortRef | PortArrayRef] = Field(default_factory=dict)
     kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
@@ -866,8 +919,8 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             cross_section=cross_section,
             orientation=orientation,
         )
-        self.ports[p.name] = p  # ty:ignore[invalid-assignment]
-        return p  # ty:ignore[invalid-return-type]
+        self.ports[p.name] = p
+        return p
 
     def create_connection(
         self, port1: PortRef | Port[T], port2: PortRef
@@ -885,7 +938,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             The created `Connection`.
         """
 
-        conn = Connection[T]((port1, port2))
+        conn = Connection[T](net=(port1, port2))
         if isinstance(port1, PortRef):
             if port1.instance not in self.instances:
                 raise ValueError(
@@ -897,7 +950,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             raise ValueError(
                 f"Cannot create connection to unknown instance {port2.instance}"
             )
-        self.connections.append(conn)
+        self.nets.append(conn)
         return conn
 
     def netlist(
@@ -917,34 +970,15 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         netlist is sorted for stable output.
         """
 
-        nets: list[Net] = []
-        if self.routes is not None:
-            nets.extend(
+        nets = [
+            Net(
                 [
-                    Net(
-                        [
-                            NetlistPort(name=port.name)
-                            if isinstance(port, Port)
-                            else port
-                            for port in link.root
-                        ]
-                    )
-                    for route in self.routes.values()
-                    for link in route.links
+                    NetlistPort(name=p.name) if isinstance(p, Port) else p
+                    for p in net.net
                 ]
             )
-        if self.connections:
-            nets.extend(
-                [
-                    Net(
-                        [
-                            NetlistPort(name=p.name) if isinstance(p, Port) else p
-                            for p in connection.root
-                        ]
-                    )
-                    for connection in self.connections
-                ]
-            )
+            for net in self.nets
+        ]
 
         if self.ports:
             nets.extend(
@@ -1026,49 +1060,53 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             for name, instance in instances.items():
                 instance["name"] = name
                 instance.pop("info", None)
+
+        nets: list[dict[str, str]] = data.get("nets", [])
+        built_nets: list[RouteNet[T] | Connection[T] | VirtualConnection[T]] = []
+        data["nets"] = built_nets
+        if nets:
+            built_nets.extend(
+                [
+                    VirtualConnection[T](
+                        net=(
+                            _get_instance_and_port(net["p1"]),
+                            _get_instance_and_port(net["p2"]),
+                        )
+                    )
+                    for net in nets
+                ]
+            )
+
+        connections = data.pop("connections", None)
+        if connections is not None and isinstance(connections, dict):
+            built_nets.extend(
+                [
+                    Connection[T](
+                        net=(
+                            _get_instance_and_port(conn_ref1),
+                            _get_instance_and_port(conn_ref2),
+                        )
+                    )
+                    for conn_ref1, conn_ref2 in connections.items()
+                ]
+            )
         routes = data.get("routes")
         if routes:
             for name, route in routes.items():
                 route["name"] = name
-        connections = data.get("connections")
-        if connections is not None and isinstance(connections, dict):
-            built_connections: list[Connection[T]] = []
-            connections_: list[tuple[tuple[str, str], tuple[str, str]]] = [
-                (k.rsplit(",", 1), v.rsplit(",", 1)) for k, v in connections.items()
-            ]
-            for connection_ in connections_:
-                connection_0: (
-                    tuple[str, str] | tuple[tuple[str, tuple[int, ...]], str]
-                ) = connection_[0]
-                match = re.match(r"(.*?)(<\d+\.\d+>)$", connection_[0][0])
-                if match:
-                    connection_0 = (
-                        (
-                            match.group(1),
-                            tuple(
-                                int(j) for j in match.group(2).strip("<>").split(".")
+                built_nets.extend(
+                    [
+                        RouteNet[T](
+                            route=name,
+                            net=(
+                                _get_instance_and_port(link1),
+                                _get_instance_and_port(link2),
                             ),
-                        ),
-                        connection_[0][1],
-                    )
-                connection_1: (
-                    tuple[str, str] | tuple[tuple[str, tuple[int, ...]], str]
-                ) = connection_[1]
-                match = re.match(r"(.*?)(<\d+\.\d+>)$", connection_[1][0])
-                if match:
-                    connection_1 = (
-                        (
-                            match.group(1),
-                            tuple(
-                                int(j) for j in match.group(2).strip("<>").split(".")
-                            ),
-                        ),
-                        connection_[1][1],
-                    )
-                built_connections.append(
-                    Connection.from_list((connection_0, connection_1))
+                        )
+                        for link1, link2 in route["links"].items()
+                    ]
                 )
-            data["connections"] = built_connections
+                route.pop("links")
         placements = data.get("placements")
         if placements:
             for placement in placements.values():
@@ -1130,6 +1168,13 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     raise NotImplementedError
         return data
 
+    @field_serializer("placements")
+    @classmethod
+    def _serialize_placements(
+        cls, v: dict[str, Placement[Any] | MirrorPlacement]
+    ) -> dict[str, dict[str, Any]]:
+        return {k: p.model_dump(warnings=False) for k, p in v.items()}
+
     @model_validator(mode="after")
     def assign_backrefs(self) -> Self:
         for inst in self.instances.values():
@@ -1149,8 +1194,13 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             Callable[
                 Concatenate[
                     ProtoTKCell[Any],
-                    Sequence[ProtoPort[Any]],
-                    Sequence[ProtoPort[Any]],
+                    Sequence[
+                        tuple[
+                            ProtoPort[Any],
+                            ProtoPort[Any],
+                            *tuple[ProtoPort[Any], ...],
+                        ]
+                    ],
                     ...,
                 ],
                 Any,
@@ -1194,8 +1244,10 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         # must be isolated from other islands either through no connection at all or
         # routes
 
+        connections = self.connections
+
         islands, instance_connections = _get_island_connections(
-            instances=self.instances, connections=self.connections
+            instances=self.instances, connections=connections
         )
 
         placed_insts: set[str] = set()
@@ -1239,55 +1291,44 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 placed_islands.append(island)
                 placed_insts |= island
 
+        nets_per_route = self.routes_nets()
+
         # routes
         for route in self.routes.values():
-            start_ports: list[ProtoPort[Any]] = []
-            end_ports: list[ProtoPort[Any]] = []
-            for link in route.links:
-                l1, l2 = link.root[0], link.root[1]
-                if isinstance(l1, Port):
-                    p1: KCellPort | DKCellPort = c.ports[l1.name]
-                elif isinstance(l1, PortArrayRef):
-                    if self.instances[l1.instance].virtual:
-                        p1 = c.vinsts[l1.instance].ports[l1.port, l1.ia, l1.ib]
+            resolved_ports: list[tuple[ProtoPort[Any], ...]] = []
+            for net in nets_per_route[route.name]:
+                resolved_port_list: list[KCellPort | DKCellPort] = []
+                for port_ref in net.net:
+                    if isinstance(port_ref, Port):
+                        p: KCellPort | DKCellPort = c.ports[port_ref.name]
+                    inst = self.instances[port_ref.instance]
+                    if inst.virtual:
+                        p = port_ref.get_port(c.vinsts[port_ref.instance])
                     else:
-                        p1 = c.insts[l1.instance].ports[l1.port, l1.ia, l1.ib]
-                elif self.instances[l1.instance].virtual:
-                    p1 = c.vinsts[l1.instance].ports[l1.port]
-                else:
-                    p1 = c.insts[l1.instance].ports[l1.port]
-                start_ports.append(p1)
-                if isinstance(l2, Port):
-                    p2: KCellPort | DKCellPort = c.ports[l2.name]
-                elif isinstance(l2, PortArrayRef):
-                    if self.instances[l2.instance].virtual:
-                        p2 = c.vinsts[l2.instance].ports[l2.port, l2.ia, l2.ib]
-                    else:
-                        p2 = c.insts[l2.instance].ports[l2.port, l2.ia, l2.ib]
-                elif self.instances[l2.instance].virtual:
-                    p2 = c.vinsts[l2.instance].ports[l2.port]
-                else:
-                    p2 = c.insts[l2.instance].ports[l2.port]
-                end_ports.append(p2)
+                        p = port_ref.get_port(c.insts[port_ref.instance])
+                    resolved_port_list.append(p)
+                resolved_ports.append(tuple(resolved_port_list))
             route_c = output_type(base=c.base)
             if isinstance(route_c, KCell):
                 routing_strategies[route.routing_strategy](
-                    output_type(base=c.base), start_ports, end_ports, **route.settings
+                    output_type(base=c.base), resolved_ports, **route.settings
                 )
             else:
                 routing_strategies[route.routing_strategy](
                     output_type(base=c.base),
-                    [DKCellPort(base=sp.base) for sp in start_ports],
-                    [DKCellPort(base=ep.base) for ep in end_ports],
+                    [
+                        tuple(DKCellPort(base=p.base) for p in net_ports)
+                        for net_ports in resolved_ports
+                    ],
                     **route.settings,
                 )
 
         # verify connections
         port_connection_transformation_errors: list[Connection[T]] = []
         connection_transformation_errors: list[Connection[T]] = []
-        for conn in self.connections:
-            c1 = conn.root[0]
-            c2 = conn.root[1]
+        for conn in connections:
+            c1 = conn.net[0]
+            c2 = conn.net[1]
             if isinstance(c1, Port):
                 p1 = c.ports[c1.name]
                 p2 = c.insts[c2.instance].ports[c2.port]
@@ -1321,7 +1362,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 f"Not all connections in schema {self.name}"
                 " could be satisfied. Missing or wrong connections:\n"
                 + "\n".join(
-                    f"{conn.root[0]} - {conn.root[1]}"
+                    f"{conn.net[0]} - {conn.net[1]}"
                     for conn in connection_transformation_errors
                     + port_connection_transformation_errors
                 )
@@ -1335,17 +1376,16 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     def add_route(
         self,
         name: str,
-        start_ports: list[PortRef | Port[T]],
-        end_ports: list[PortRef | Port[T]],
+        nets: Sequence[Sequence[PortRef]],
         routing_strategy: str,
-        **settings: JSONSerializable,
+        settings: dict[str, JSONSerializable],
     ) -> Route[T]:
         """Create a multi-link route bundle.
 
         Args:
             name: Route identifier (must be unique).
-            start_ports: Start ports for each link.
-            end_ports: End ports for each link.
+            nets: List of net tuples. Each tuple contains 2 or more ports
+                that belong to the same net.
             routing_strategy: Name of the routing strategy function.
             **settings: Extra keyword args forwarded to the strategy.
 
@@ -1353,7 +1393,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             The created `Route`.
 
         Raises:
-            ValueError: If `name` already exists.
+            ValueError: If `name` already exists or a net has fewer than 2 ports.
         """
 
         if name in self.routes:
@@ -1361,17 +1401,47 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         route = Route[T](
             name=name,
             routing_strategy=routing_strategy,
-            links=[
-                Link((sp, ep)) for sp, ep in zip(start_ports, end_ports, strict=True)
-            ],
             settings=settings,
         )
         self.routes[name] = route
+        for net in nets:
+            if len(net) < 2:  # noqa: PLR2004
+                raise ValueError(
+                    f"Each route net must have at least 2 ports, got {len(net)} in "
+                    f"route {name!r}"
+                )
+            self.nets.append(RouteNet[T](route=name, net=tuple(net)))
         return route
 
-    def connect(self, port1: PortRef | Port[T], port2: PortRef) -> Connection[T]:
-        conn = Connection[T]((port1, port2))
-        self.connections.append(conn)
+    @overload
+    def connect(
+        self,
+        port1: PortRef | Port[T],
+        port2: PortRef,
+        *,
+        virtual: Literal[False] = False,
+    ) -> Connection[T]: ...
+
+    @overload
+    def connect(
+        self,
+        port1: PortRef | Port[T],
+        port2: PortRef | Port[T],
+        *ports: PortRef | Port[T],
+        virtual: Literal[True] = True,
+    ) -> VirtualConnection[T]: ...
+    def connect(
+        self,
+        port1: PortRef | Port[T],
+        port2: PortRef | Port[T],
+        *ports: PortRef | Port[T],
+        virtual: bool = False,
+    ) -> Connection[T] | VirtualConnection[T]:
+        if virtual:
+            conn = Connection[T](net=(port1, port2))  # ty:ignore[invalid-argument-type]
+        else:
+            conn = VirtualConnection[T](net=(port1, port2, *ports))
+        self.nets.append(conn)
         return conn
 
     def __getitem__(self, key: str) -> Port[T] | PortRef:
@@ -1544,12 +1614,12 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     schematic_cell += f"{_ind()})\n"
                 else:
                     schematic_cell += f"{_ind()}{inst_name}.mirror = True\n"
-
-        if self.connections:
+        connections = self.connections
+        if connections:
             schematic_cell += f"\n{_ind()}# Schematic connections\n"
 
-            for connection in self.connections:
-                ref1, ref2 = connection.root
+            for connection in connections:
+                ref1, ref2 = connection.net
                 if isinstance(ref1, PortRef):
                     schematic_cell += f"{_ind()}{names[ref1.instance]}.connect(\n"
                     indent += 2
@@ -1578,6 +1648,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     indent -= 2
                     schematic_cell += f"{_ind()})\n"
         if self.routes:
+            nets_per_route = self.routes_nets()
             schematic_cell += f"\n{_ind()}# Schematic routes\n"
             for route in self.routes.values():
                 schematic_cell += f"{_ind()}schematic.add_route(\n"
@@ -1586,8 +1657,8 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 schematic_cell += f"{_ind()}name={route.name!r},\n"
                 start_ports: list[str] = []
                 end_ports: list[str] = []
-                for link in route.links:
-                    p1, p2 = link.root
+                for net in nets_per_route[route.name]:
+                    p1, p2 = net.net
                     if isinstance(p1, Port):
                         start_ports.append(p1.as_python_str())
                     else:
@@ -1820,10 +1891,21 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             sorted_ports[side].sort()
         return sorted_ports
 
+    def routes_nets(self) -> dict[str, list[RouteNet[T]]]:
+        nets: dict[str, list[RouteNet[T]]] = defaultdict(list)
+        for net in self.nets:
+            if isinstance(net, RouteNet):
+                nets[net.route].append(net)
+        return nets
+
+    @property
+    def connections(self) -> list[Connection[T]]:
+        return [net for net in self.nets if isinstance(net, Connection)]
+
 
 def _get_instance_orientation[T: Num](
     instance: str,
-    schematic: TSchematic[Any],
+    schematic: TSchematic[T],
     visited_instances: set[str],
     get_port_orientation_f: Callable[..., dict[str | None, float]],
     instance_connections: defaultdict[str, list[Connection[T]]] | None = None,
@@ -1855,20 +1937,20 @@ def _get_instance_orientation[T: Num](
     s_inst_sign = -1 if s_inst.mirror else 1
 
     for connection in instance_connections[instance]:
-        if isinstance(connection.root[0], Port):
-            if isinstance(connection.root[0].orientation, PortRef):
+        if isinstance(connection.net[0], Port):
+            if isinstance(connection.net[0].orientation, PortRef):
                 continue
             return (
                 s_inst_sign
                 * (
-                    connection.root[0].orientation
+                    connection.net[0].orientation
                     - get_port_orientation_f(s_inst.component, **s_inst.settings)[
-                        connection.root[1].port
+                        connection.net[1].port
                     ]
                 )
             ) % 360
-        if connection.root[0].instance == instance:
-            conn_inst = connection.root[1].instance
+        if connection.net[0].instance == instance:
+            conn_inst = connection.net[1].instance
             conn_orientation = _get_possible_orienation(conn_inst, schematic)
             if conn_orientation is not None:
                 s_conn_inst = schematic.instances[conn_inst]
@@ -1879,17 +1961,17 @@ def _get_instance_orientation[T: Num](
                         conn_orientation
                         + get_port_orientation_f(
                             s_conn_inst.component, **s_conn_inst.settings
-                        )[connection.root[1].port]
+                        )[connection.net[1].port]
                     )
                     + 180
                     - s_inst_sign
                     * get_port_orientation_f(s_inst.component, **s_inst.settings)[
-                        connection.root[0].port
+                        connection.net[0].port
                     ]
                 ) % 360
-            potential_instances.add(connection.root[1].instance)
+            potential_instances.add(connection.net[1].instance)
         else:
-            conn_inst = connection.root[0].instance
+            conn_inst = connection.net[0].instance
             conn_orientation = _get_possible_orienation(conn_inst, schematic)
             if conn_orientation is not None:
                 s_conn_inst = schematic.instances[conn_inst]
@@ -1900,16 +1982,16 @@ def _get_instance_orientation[T: Num](
                         conn_orientation
                         + get_port_orientation_f(
                             s_conn_inst.component, **s_conn_inst.settings
-                        )[connection.root[0].port]
+                        )[connection.net[0].port]
                     )
                     + 180
                     - s_inst_sign
                     * get_port_orientation_f(s_inst.component, **s_inst.settings)[
-                        connection.root[1].port
+                        connection.net[1].port
                     ]
                 ) % 360
 
-            potential_instances.add(connection.root[0].instance)
+            potential_instances.add(connection.net[0].instance)
 
     visited_instances_ = visited_instances | potential_instances
 
@@ -1925,9 +2007,9 @@ def _get_instance_orientation[T: Num](
         )
         if orientation is not None:
             for connection in instance_connections[instance]:
-                if isinstance(connection.root[0], Port):
+                if isinstance(connection.net[0], Port):
                     continue
-                if connection.root[0].instance == inst:
+                if connection.net[0].instance == inst:
                     s_conn_inst = schematic.instances[inst]
                     s_conn_sign = -1 if s_conn_inst.mirror else 1
                     return (
@@ -1936,15 +2018,15 @@ def _get_instance_orientation[T: Num](
                             orientation
                             + get_port_orientation_f(
                                 s_conn_inst.component, **s_conn_inst.settings
-                            )[connection.root[0].port]
+                            )[connection.net[0].port]
                         )
                         + 180
                         - s_inst_sign
                         * get_port_orientation_f(s_inst.component, **s_inst.settings)[
-                            connection.root[1].port
+                            connection.net[1].port
                         ]
                     ) % 360
-                if connection.root[1].instance == inst:
+                if connection.net[1].instance == inst:
                     s_conn_inst = schematic.instances[inst]
                     s_conn_sign = -1 if s_conn_inst.mirror else 1
                     return (
@@ -1953,12 +2035,12 @@ def _get_instance_orientation[T: Num](
                             orientation
                             + get_port_orientation_f(
                                 s_conn_inst.component, **s_conn_inst.settings
-                            )[connection.root[1].port]
+                            )[connection.net[1].port]
                         )
                         + 180
                         - s_inst_sign
                         * get_port_orientation_f(s_inst.component, **s_inst.settings)[
-                            connection.root[0].port
+                            connection.net[0].port
                         ]
                     ) % 360
 
@@ -2482,25 +2564,25 @@ def _connect_instances[T: Num](
     for inst_name in place_insts:
         inst = instances[inst_name]
         for conn in connections[inst_name]:
-            if isinstance(conn.root[0], Port):
+            if isinstance(conn.net[0], Port):
                 continue
             if (
-                conn.root[0].instance == inst_name
-                and conn.root[1].instance in placed_instances
+                conn.net[0].instance == inst_name
+                and conn.net[1].instance in placed_instances
             ):
                 inst.connect(
-                    conn.root[0].port,
-                    instances[conn.root[1].instance],
-                    conn.root[1].port,
+                    conn.net[0].port,
+                    instances[conn.net[1].instance],
+                    conn.net[1].port,
                     use_angle=True,
                     use_mirror=False,
                 )
                 break
-            if conn.root[0].instance in placed_instances:
+            if conn.net[0].instance in placed_instances:
                 inst.connect(
-                    conn.root[1].port,
-                    instances[conn.root[0].instance],
-                    conn.root[0].port,
+                    conn.net[1].port,
+                    instances[conn.net[0].instance],
+                    conn.net[0].port,
                     use_angle=True,
                     use_mirror=False,
                 )
@@ -2519,7 +2601,7 @@ def _get_placeable[T: Num](
     placeable_ports: set[str] = set()
     for inst in placed_insts:
         for connection in connections[inst]:
-            ref1, ref2 = connection.root
+            ref1, ref2 = connection.net
             if isinstance(ref1, Port):
                 if ref1 in placed_ports:
                     placeable_insts.add(ref2.instance)
@@ -2642,7 +2724,7 @@ def _get_island_connections[T: Num](
     islands: dict[str, set[str]] = {}
     instance_connections: defaultdict[str, list[Connection[T]]] = defaultdict(list)
     for connection in connections:
-        pr1, pr2 = connection.root
+        pr1, pr2 = connection.net
         if isinstance(pr1, Port):
             continue
         instance_connections[pr1.instance].append(connection)
@@ -2672,3 +2754,24 @@ def _get_island_connections[T: Num](
             islands[inst_name] = {inst_name}
 
     return islands, instance_connections
+
+
+def _is_real(v: Any) -> TypeGuard[Real]:
+    return isinstance(v, Real)
+
+
+def _is_port_ref(v: Any) -> TypeGuard[PortRef]:
+    return isinstance(v, PortRef)
+
+
+def _get_instance_and_port(s: str) -> PortRef:
+    instance, port = s.rsplit(",", 1)
+    match = re.match(r"(.*?)<(\d+)\.(\d+)>$", instance)
+    if match:
+        return PortArrayRef(
+            instance=match.group(0),
+            port=port,
+            ia=int(match.group(1)),
+            ib=int(match.group(2)),
+        )
+    return PortRef(instance=instance, port=port)

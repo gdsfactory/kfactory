@@ -171,10 +171,19 @@ bend90 = bend90_function(width=0.500, radius=10, layer=layers.WG)
 @pdk.routing_strategy
 def route_bundle(
     c: kf.KCell,
-    start_ports: list[kf.Port],
-    end_ports: list[kf.Port],
+    ports: Sequence[tuple[kf.Port, kf.port]],
     separation: int = 5000,
 ) -> list[kf.routing.generic.ManhattanRoute]:
+    start_ports: list[kf.Port] = []
+    end_ports: list[kf.Port] = []
+    for port_seq in ports:
+        if len(port_seq) != 2:
+            raise ValueError(
+                "route_bundle does only support routing between two-port problems, "
+                f"not multiple ports. Found {port_seq}"
+            )
+        start_ports.append(kf.Port(base=port_seq[0].base))
+        end_ports.append(kf.Port(base=port_seq[1].base))
     return kf.routing.optical.route_bundle(
         c=kf.KCell(base=c._base),
         start_ports=[kf.Port(base=sp.base) for sp in start_ports],
@@ -212,7 +221,7 @@ def route_example() -> kf.schematic.TSchematic[int]:
     s2.place(x=1000, y=210_000)
 
     schematic.add_route(
-        "s1-s2", [s1["o2"]], [s2["o2"]], "route_bundle", separation=20_000
+        "s1-s2", [[s1["o2"], s2["o2"]]], "route_bundle", settings={"separation": 20_000}
     )
 
     return schematic

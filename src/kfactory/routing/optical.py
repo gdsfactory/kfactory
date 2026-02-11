@@ -227,8 +227,6 @@ def route_bundle(
     straight_factory: StraightFactoryDBU,
     bend90_cell: KCell,
     taper_cell: KCell | None = None,
-    start_straights: dbu | list[dbu] | None = None,
-    end_straights: dbu | list[dbu] | None = None,
     min_straight_taper: dbu = 0,
     place_port_type: str = "optical",
     place_allow_small_routes: bool = False,
@@ -262,8 +260,6 @@ def route_bundle(
     straight_factory: StraightFactoryUM,
     bend90_cell: DKCell,
     taper_cell: DKCell | None = None,
-    start_straights: um | list[um] | None = None,
-    end_straights: um | list[um] | None = None,
     min_straight_taper: um = 0,
     place_port_type: str = "optical",
     place_allow_small_routes: bool = False,
@@ -296,8 +292,6 @@ def route_bundle(
     straight_factory: StraightFactoryDBU | StraightFactoryUM,
     bend90_cell: KCell | DKCell,
     taper_cell: KCell | DKCell | None = None,
-    start_straights: dbu | list[dbu] | um | list[um] | None = None,
-    end_straights: dbu | list[dbu] | um | list[um] | None = None,
     min_straight_taper: dbu | float = 0,
     place_port_type: str = "optical",
     place_allow_small_routes: bool = False,
@@ -382,10 +376,6 @@ def route_bundle(
         straight_factory: Factory function for straight cells. in DBU.
         bend90_cell: 90° bend cell.
         taper_cell: Taper cell.
-        start_straights: DEPRECATED[Use starts instead]
-            `p1`.
-        end_straights: DEPRECATED[Use ends instead]
-            `p2`.
         starts: Minimal straight segment after `start_ports`.
         ends: Minimal straight segment before `end_ports`.
         min_straight_taper: Minimum straight [dbu] before attempting to place tapers.
@@ -435,12 +425,6 @@ def route_bundle(
         starts = []
     if bboxes is None:
         bboxes = []
-    if start_straights is not None:
-        logger.warning("start_straights is deprecated. Use `starts` instead.")
-        starts = start_straights
-    if end_straights is not None:
-        logger.warning("end_straights is deprecated. Use `ends` instead.")
-        ends = end_straights
     bend90_radius = get_radius(bend90_cell.ports.filter(port_type=place_port_type))
     start_ports_ = [p.base.model_copy() for p in start_ports]
     end_ports_ = [p.base.model_copy() for p in end_ports]

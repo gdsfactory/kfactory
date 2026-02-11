@@ -92,11 +92,11 @@ def mzi() -> kf.KCell:
 
 
 def test_l2n(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     c = kcl.kcell(name="L2N_TEST")
     mzi1 = c << mzi()
     mzi2 = c << mzi()
     mzi2.connect("o1", mzi1, "o2")
     c.l2n()
-    gds_regression(c)
+    oas_regression(c)
