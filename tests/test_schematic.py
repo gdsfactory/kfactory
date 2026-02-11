@@ -83,7 +83,7 @@ ports:
 
 
 def test_schematic_create(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     pdk = kcl
     layers = Layers()
@@ -126,11 +126,11 @@ def test_schematic_create(
 
     c = schematic.create_cell(kf.KCell)
     c.name = "test_schematic_create"
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_schematic_create_cell(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     layers = Layers()
     pdk = kcl
@@ -177,11 +177,11 @@ def test_schematic_create_cell(
 
     assert pdk.factories["long_straight"].schematic_driven()
 
-    gds_regression(long_straight(2))
+    oas_regression(long_straight(2))
 
 
 def test_schematic_mirror_connection(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None], kcl: kf.KCLayout
 ) -> None:
     layers = Layers()
     pdk = kcl
@@ -282,11 +282,11 @@ def test_schematic_mirror_connection(
 
     assert pdk.factories["straight_sbend"].schematic_driven()
 
-    gds_regression(straight_sbend(length=10_000, offset=20_000))
+    oas_regression(straight_sbend(length=10_000, offset=20_000))
 
 
 def test_schematic_kcl_mix_netlist(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None], layers: Layers
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None], layers: Layers
 ) -> None:
     layers = Layers()
     pdk = kf.KCLayout("schematic_pdk_decorator", infos=layers.__class__)
@@ -340,11 +340,11 @@ def test_schematic_kcl_mix_netlist(
 
     c = long_straight(n=2000)
     c.netlist()
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_schematic_route(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     layers = Layers()
     pdk = kf.KCLayout("schematic_pdk_routing", infos=Layers)
@@ -421,11 +421,11 @@ def test_schematic_route(
 
     assert pdk.factories["route_example"]._f_orig is route_example.__wrapped__  # type: ignore[attr-defined]
 
-    gds_regression(route_example())
+    oas_regression(route_example())
 
 
 def test_netlist(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     class Layers(kf.LayerInfos):
         WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
@@ -596,11 +596,11 @@ def test_netlist(
         connectivity=[(layers.METAL1, layers.VIA1, layers.METAL2)],
     )
     assert nl == nl2[c.name]
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_netlist_equivalent(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     layers = Layers()
     pdk = kf.KCLayout(
@@ -774,11 +774,11 @@ def test_netlist_equivalent(
 
     assert schema_str is not None
     c.name = "test_schematic_anchor"
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_schematic_anchor(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     pdk = kf.KCLayout("schematic_pdk_anchor_port", infos=Layers)
     layers = Layers()
@@ -826,7 +826,7 @@ def test_schematic_anchor(
 
     c = schematic.create_cell(kf.KCell)
     c.name = "test_schematic_anchor"
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_schematic_function_get_port_positions(
@@ -1248,7 +1248,7 @@ def test_gdsfactory_yaml(path: Path) -> None:
 
 
 def test_route_multi(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     yaml_regression: Callable[[kf.schematic.TSchematic[Any]], None],
 ) -> None:
     class Layers(kf.LayerInfos):
@@ -1372,5 +1372,5 @@ def test_route_multi(
         return schematic
 
     c = multi_pad()
-    gds_regression(c)
+    oas_regression(c)
     yaml_regression(c.schematic)  # ty:ignore[invalid-argument-type]

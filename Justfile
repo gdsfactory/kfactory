@@ -56,26 +56,39 @@ mypy:
 ty:
     uv run ty check src/kfactory
 
-# Submodule variable
-SUBMOD := "tests/gdsfactory-yaml-pics"
+# Submodule variables
+YAML_PICS := "tests/gdsfactory-yaml-pics"
+TEST_DATA := "tests/test_data"
 
-# Initialize submodule
-init-submodule:
-    # init shallow
-    git submodule update --init --depth 1 {{SUBMOD}}
-    # ensure it tracks main on updates
-    git submodule set-branch --branch main {{SUBMOD}}
-    # restrict working tree to the yaml_pics folder
-    git -C {{SUBMOD}} sparse-checkout init --cone
-    git -C {{SUBMOD}} sparse-checkout set notebooks/yaml_pics
+# Initialize all submodules
+init-submodule: init-yaml-pics init-test-data
 
-update-submodule:
-    # pull latest main for the submodule, still shallow
-    git submodule update --remote --depth 1 {{SUBMOD}}
+# Initialize gdsfactory-yaml-pics submodule
+init-yaml-pics:
+    git submodule update --init --depth 1 {{YAML_PICS}}
+    git submodule set-branch --branch main {{YAML_PICS}}
+    git -C {{YAML_PICS}} sparse-checkout init --cone
+    git -C {{YAML_PICS}} sparse-checkout set notebooks/yaml_pics
 
+# Initialize test-data submodule
+init-test-data:
+    git submodule update --init --depth 1 {{TEST_DATA}}
+    git submodule set-branch --branch main {{TEST_DATA}}
+
+# Update all submodules to latest main
+update-submodule: update-yaml-pics update-test-data
+
+# Update gdsfactory-yaml-pics submodule to latest main
+update-yaml-pics:
+    git submodule update --remote --depth 1 {{YAML_PICS}}
+
+# Update test-data submodule to latest main
+update-test-data:
+    git submodule update --remote --depth 1 {{TEST_DATA}}
+
+# Clean gdsfactory-yaml-pics submodule working tree
 clean-submodule:
-    # remove only the checked-out files, keep the submodule entry
-    git -C {{SUBMOD}} clean -xdf
+    git -C {{YAML_PICS}} clean -xdf
 
 gds-download:
 	gh release download v0.6.0 -D gds/gds_ref/ --clobber

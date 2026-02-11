@@ -234,11 +234,11 @@ def unlink_merge_read_oas() -> Iterator[None]:
 
 
 @pytest.fixture
-def gds_regression(
+def oas_regression(
     file_regression: FileRegressionFixture,
 ) -> Callable[[kf.ProtoTKCell[Any]], None]:
     saveopts = kf.save_layout_options()
-    saveopts.format = "GDS2"
+    saveopts.format = "OASIS"
 
     raises: Literal["error", "warning"] = (
         "error" if platform.system() == "Linux" else "warning"
@@ -253,7 +253,7 @@ def gds_regression(
         file_regression.check(
             c.write_bytes(saveopts, convert_external_cells=True),
             binary=True,
-            extension=".gds.gz",
+            extension=".oas",
             check_fn=partial(_layout_xor, tolerance=tolerance, raises=raises),
         )
 

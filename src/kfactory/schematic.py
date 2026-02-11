@@ -799,11 +799,6 @@ class Connection[T: Num](SchematicNet[T]):
 class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     """Schematic of a cell / component.
 
-    Parameters:
-        unit: Base coordinate unit ("dbu" or "um"). Fixed by subclass.
-        kcl: `KCLayout` context (excluded from model serialization). Needed for
-            referencing and creation of the cell.
-
     Attributes:
         name: Optional schematic name.
         instances: Mapping of instance name -> `SchematicInstance`.
@@ -813,6 +808,9 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         ports: Mapping of port name -> `Port`/`PortRef`/`PortArrayRef`.
         info: dict which will be mapped to `KCell.info` (or any other derivate like
             Component).
+        unit: Base coordinate unit ("dbu" or "um"). Fixed by subclass.
+        kcl: `KCLayout` context (excluded from model serialization). Needed for
+            referencing and creation of the cell.
     """
 
     name: str | None = None
@@ -921,8 +919,8 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             cross_section=cross_section,
             orientation=orientation,
         )
-        self.ports[p.name] = p  # ty:ignore[invalid-assignment]
-        return p  # ty:ignore[invalid-return-type]
+        self.ports[p.name] = p
+        return p
 
     def create_connection(
         self, port1: PortRef | Port[T], port2: PortRef
