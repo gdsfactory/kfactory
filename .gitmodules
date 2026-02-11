@@ -1,8 +1,8 @@
 [submodule "tests/gdsfactory-yaml-pics"]
 	path = tests/gdsfactory-yaml-pics
-	url = https://github.com/gdsfactory/gdsfactory.git
+	url = git@github.com:/gdsfactory/gdsfactory.git
 	branch = main
 [submodule "tests/test_data"]
 	path = tests/test_data
-	url = https://github.com/gdsfactory/kfactory-test-data.git
+	url = git@github.com:/gdsfactory/kfactory-test-data.git
 	branch = main
