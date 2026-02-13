@@ -660,10 +660,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     f"Cell {kdb_cell_.name} in {kcl_.name}: {ports=}, {pins=}, {info=},"
                     f" {settings=}"
                 )
-            kcls[kdb_cell_.library().name()][
-                kdb_cell_.library_cell_index()
-            ].set_meta_data()
+            lib_cell = kcls[kdb_cell_.library().name()][kdb_cell_.library_cell_index()]
+            lib_cell.set_meta_data()
             self.get_meta_data()
+            self._base._library_cell = lib_cell
         self.kcl.register_cell(self)
 
     @property
