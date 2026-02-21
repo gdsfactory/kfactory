@@ -98,5 +98,5 @@ def test_l2n(
     mzi1 = c << mzi()
     mzi2 = c << mzi()
     mzi2.connect("o1", mzi1, "o2")
-    c.l2n()
+    c.l2n_ports()
     oas_regression(c)

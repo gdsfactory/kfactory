@@ -2002,10 +2002,11 @@ class KCLayout(
 
     def set_meta_data(self) -> None:
         """Set the info/settings of the KCLayout."""
-        for name, setting in self.settings.model_dump().items():
-            self.add_meta_info(
-                kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
-            )
+        if config.write_kfactory_settings:
+            for name, setting in self.settings.model_dump().items():
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
+                )
         for name, info in self.info.model_dump().items():
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)

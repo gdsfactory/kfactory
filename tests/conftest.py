@@ -244,6 +244,9 @@ def oas_regression(
         "error" if platform.system() == "Linux" else "warning"
     )
 
+    write_settings = kf.config.write_kfactory_settings
+    kf.config.write_kfactory_settings = False
+
     def _check(
         c: kf.ProtoTKCell[Any],
         tolerance: int = 0,
@@ -256,6 +259,7 @@ def oas_regression(
             extension=".oas",
             check_fn=partial(_layout_xor, tolerance=tolerance, raises=raises),
         )
+        kf.config.write_kfactory_settings = write_settings
 
     return _check
 
@@ -292,7 +296,11 @@ def _layout_xor(
     ly_b = kf.kdb.Layout()
     ly_b.read(str(path_b))
 
-    flags = kf.kdb.LayoutDiff.Verbose | kf.kdb.LayoutDiff.WithMetaInfo
+    flags = (
+        kf.kdb.LayoutDiff.Verbose
+        | kf.kdb.LayoutDiff.WithMetaInfo
+        | kf.kdb.LayoutDiff.NoLayerNames
+    )
 
     if not diff.compare(ly_a, ly_b, flags=flags, tolerance=tolerance):
         match raises:
