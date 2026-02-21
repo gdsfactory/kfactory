@@ -660,10 +660,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     f"Cell {kdb_cell_.name} in {kcl_.name}: {ports=}, {pins=}, {info=},"
                     f" {settings=}"
                 )
-            kcls[kdb_cell_.library().name()][
-                kdb_cell_.library_cell_index()
-            ].set_meta_data()
+            lib_cell = kcls[kdb_cell_.library().name()][kdb_cell_.library_cell_index()]
+            lib_cell.set_meta_data()
             self.get_meta_data()
+            self._base._library_cell = lib_cell
         self.kcl.register_cell(self)
 
     @property
@@ -1282,10 +1282,6 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             case _:
                 ...
 
-        for kci in set(self._base.kdb_cell.called_cells()) & self.kcl.tkcells.keys():
-            kc = self.kcl[kci]
-            kc.insert_vinsts()
-
         filename = str(filename)
         if autoformat_from_file_extension:
             save_options.set_format_from_filename(filename)
@@ -1329,10 +1325,6 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     self.convert_to_static(recursive=True)
             case _:
                 ...
-
-        for kci in set(self._base.kdb_cell.called_cells()) & self.kcl.tkcells.keys():
-            kc = self.kcl[kci]
-            kc.insert_vinsts()
 
         save_options.format = save_options.format or "OASIS"
         save_options.clear_cells()
@@ -2469,20 +2461,24 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     )
 
         inst_ports: dict[
-            LayerEnum | int, dict[tuple[int, int], list[tuple[Port, KCell]]]
+            LayerEnum | int,
+            dict[tuple[int, int], list[tuple[Port, KCell, str]]],
         ] = {}
         for inst in self.insts:
+            inst_name = inst.name
+            inst_cell = inst.cell.to_itype()
             for port in Ports(kcl=self.kcl, bases=[p.base for p in inst.ports]):
                 if (not port_types or port.port_type in port_types) and (
                     not layers or port.layer in layers
                 ):
                     xy = (port.x, port.y)
+                    entry = (port, inst_cell, inst_name)
                     if port.layer not in inst_ports:
-                        inst_ports[port.layer] = {xy: [(port, inst.cell.to_itype())]}
+                        inst_ports[port.layer] = {xy: [entry]}
                     elif xy not in inst_ports[port.layer]:
-                        inst_ports[port.layer][xy] = [(port, inst.cell.to_itype())]
+                        inst_ports[port.layer][xy] = [entry]
                     else:
-                        inst_ports[port.layer][xy].append((port, inst.cell.to_itype()))
+                        inst_ports[port.layer][xy].append(entry)
 
         for layer, port_coord_mapping in inst_ports.items():
             lc = layer_cat(layer)
@@ -2506,6 +2502,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                     db_cell,
                                     subc,
                                     self.kcl.dbu,
+                                    inst_name1=ports[0][2],
                                 )
 
                             if ccp & 2:
@@ -2521,6 +2518,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                     db_cell,
                                     subc,
                                     self.kcl.dbu,
+                                    inst_name1=ports[0][2],
                                 )
                             if ccp & 4:
                                 subc = db_.category_by_path(
@@ -2535,16 +2533,25 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                     db_cell,
                                     subc,
                                     self.kcl.dbu,
+                                    inst_name1=ports[0][2],
                                 )
                         else:
                             subc = db_.category_by_path(
                                 lc.path() + ".OrphanPort"
                             ) or db_.create_category(lc, "OrphanPort")
                             it = db_.create_item(db_cell, subc)
-                            it.add_value(
-                                f"Port Name: {ports[0][1].name}"
-                                f"{ports[0][0].name or str(ports[0][0])})"
-                            )
+                            port_name = ports[0][0].name or str(ports[0][0])
+                            cell_name = ports[0][1].name
+                            inst_name = ports[0][2]
+                            if inst_name:
+                                it.add_value(
+                                    f"Port Name: {inst_name}.{port_name}"
+                                    f" (cell: {cell_name})"
+                                )
+                            else:
+                                it.add_value(
+                                    f"Port Name: {cell_name}.{port_name}"
+                                )
                             if ports[0][0]._base.trans:
                                 it.add_value(
                                     self.kcl.to_um(
@@ -2575,6 +2582,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                 db_cell,
                                 subc,
                                 self.kcl.dbu,
+                                inst_name1=ports[0][2],
+                                inst_name2=ports[1][2],
                             )
 
                         if cip & 2:
@@ -2590,6 +2599,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                 db_cell,
                                 subc,
                                 self.kcl.dbu,
+                                inst_name1=ports[0][2],
+                                inst_name2=ports[1][2],
                             )
                         if cip & 4:
                             subc = db_.category_by_path(
@@ -2604,6 +2615,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                 db_cell,
                                 subc,
                                 self.kcl.dbu,
+                                inst_name1=ports[0][2],
+                                inst_name2=ports[1][2],
                             )
                         if layer in cell_ports and coord in cell_ports[layer]:
                             subc = db_.category_by_path(
@@ -2636,8 +2649,13 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                     )
                                 )
                             for _port in ports:
+                                _label = (
+                                    f"{_port[2]}."
+                                    if _port[2]
+                                    else f"{_port[1].name}."
+                                )
                                 text += (
-                                    f"{_port[1].name}."
+                                    f"{_label}"
                                     f"{_port[0].name or _port[0].trans.to_s()}/"
                                 )
 
@@ -2662,8 +2680,13 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                         text = "Port Names: "
                         values = []
                         for _port in ports:
+                            _label = (
+                                f"{_port[2]}."
+                                if _port[2]
+                                else f"{_port[1].name}."
+                            )
                             text += (
-                                f"{_port[1].name}."
+                                f"{_label}"
                                 f"{_port[0].name or _port[0].trans.to_s()}/"
                             )
 
@@ -2759,19 +2782,20 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             for vi in self._base.vinsts:
                 vi.insert_into(self)
             self._base.vinsts.clear()
-            called_cell_indexes = self._base.kdb_cell.called_cells()
-            for c in sorted(
-                {
-                    self.kcl[ci]
-                    for ci in called_cell_indexes
-                    if not self.kcl[ci].kdb_cell._destroyed()
-                }
-                & self.kcl.tkcells.keys(),
-                key=lambda c: c.hierarchy_levels(),
-            ):
-                for vi in c._base.vinsts:
-                    vi.insert_into(c)
-                c._base.vinsts.clear()
+
+            if recursive:
+                called_cell_indexes = set(self._base.kdb_cell.called_cells())
+                for c in sorted(
+                    (
+                        self.kcl[ci]
+                        for ci in called_cell_indexes & self.kcl.tkcells.keys()
+                        if not self.kcl[ci].kdb_cell._destroyed()
+                    ),
+                    key=lambda c: c.hierarchy_levels(),
+                ):
+                    for vi in c._base.vinsts:
+                        vi.insert_into(c)
+                    c._base.vinsts.clear()
 
     @abstractmethod
     def get_cross_section(
