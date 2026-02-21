@@ -1,9 +1,30 @@
-<a id="v2.4.2"></a>
-# [v2.4.2](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.2) - 2026-02-05
+<a id="v2.4.3"></a>
+# [v2.4.3](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.3) - 2026-02-14
 
 # What's Changed
 
-* No changes
+## Bug Fixes
+
+- Fix insert_vinsts and use its recursive argument [#882](https://github.com/gdsfactory/kfactory/pull/882)
+
+## Other changes
+
+- feat: include instance names in connectivity check reports [#887](https://github.com/gdsfactory/kfactory/pull/887)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.2...v2.4.3
+
+
+[Changes][v2.4.3]
+
+
+<a id="v2.4.2"></a>
+# [v2.4.2](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.2) - 2026-02-13
+
+# What's Changed
+
+## Bug Fixes
+
+- fix library_cell not working for deeper autoconstruction [#885](https://github.com/gdsfactory/kfactory/pull/885)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.1...v2.4.2
 
@@ -2651,6 +2672,7 @@
 [Changes][v0.4.0]
 
 
+[v2.4.3]: https://github.com/gdsfactory/kfactory/compare/v2.4.2...v2.4.3
 [v2.4.2]: https://github.com/gdsfactory/kfactory/compare/v2.4.1...v2.4.2
 [v2.4.1]: https://github.com/gdsfactory/kfactory/compare/v2.4.0...v2.4.1
 [v2.4.0]: https://github.com/gdsfactory/kfactory/compare/v2.3.0...v2.4.0
