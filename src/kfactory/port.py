@@ -48,11 +48,28 @@ def create_port_error(
     db_cell: rdb.RdbCell,
     cat: rdb.RdbCategory,
     dbu: float,
+    inst_name1: str | None = None,
+    inst_name2: str | None = None,
 ) -> None:
-    """Create an error report for two ports."""
+    """Create an error report for two ports.
+
+    Args:
+        p1: First port.
+        p2: Second port.
+        c1: Cell of the first port.
+        c2: Cell of the second port.
+        db: ReportDatabase to add the item to.
+        db_cell: RdbCell to add the item to.
+        cat: RdbCategory to add the item to.
+        dbu: Database unit.
+        inst_name1: Optional explicit instance name for first port's instance.
+        inst_name2: Optional explicit instance name for second port's instance.
+    """
     it = db.create_item(db_cell, cat)
     if p1.name and p2.name:
-        it.add_value(f"Port Names: {c1.name}.{p1.name}/{c2.name}.{p2.name}")
+        label1 = f"{inst_name1}.{p1.name}" if inst_name1 else f"{c1.name}.{p1.name}"
+        label2 = f"{inst_name2}.{p2.name}" if inst_name2 else f"{c2.name}.{p2.name}"
+        it.add_value(f"Port Names: {label1}/{label2}")
     it.add_value(
         port_polygon(p1.cross_section.width).transformed(p1.trans).to_dtype(dbu)
     )
