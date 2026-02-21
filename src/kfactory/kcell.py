@@ -2461,20 +2461,24 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     )
 
         inst_ports: dict[
-            LayerEnum | int, dict[tuple[int, int], list[tuple[Port, KCell]]]
+            LayerEnum | int,
+            dict[tuple[int, int], list[tuple[Port, KCell, str]]],
         ] = {}
         for inst in self.insts:
+            inst_name = inst.name
+            inst_cell = inst.cell.to_itype()
             for port in Ports(kcl=self.kcl, bases=[p.base for p in inst.ports]):
                 if (not port_types or port.port_type in port_types) and (
                     not layers or port.layer in layers
                 ):
                     xy = (port.x, port.y)
+                    entry = (port, inst_cell, inst_name)
                     if port.layer not in inst_ports:
-                        inst_ports[port.layer] = {xy: [(port, inst.cell.to_itype())]}
+                        inst_ports[port.layer] = {xy: [entry]}
                     elif xy not in inst_ports[port.layer]:
-                        inst_ports[port.layer][xy] = [(port, inst.cell.to_itype())]
+                        inst_ports[port.layer][xy] = [entry]
                     else:
-                        inst_ports[port.layer][xy].append((port, inst.cell.to_itype()))
+                        inst_ports[port.layer][xy].append(entry)
 
         for layer, port_coord_mapping in inst_ports.items():
             lc = layer_cat(layer)
@@ -2498,6 +2502,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                     db_cell,
                                     subc,
                                     self.kcl.dbu,
+                                    inst_name1=ports[0][2],
                                 )
 
                             if ccp & 2:
@@ -2513,6 +2518,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                     db_cell,
                                     subc,
                                     self.kcl.dbu,
+                                    inst_name1=ports[0][2],
                                 )
                             if ccp & 4:
                                 subc = db_.category_by_path(
@@ -2527,16 +2533,25 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                     db_cell,
                                     subc,
                                     self.kcl.dbu,
+                                    inst_name1=ports[0][2],
                                 )
                         else:
                             subc = db_.category_by_path(
                                 lc.path() + ".OrphanPort"
                             ) or db_.create_category(lc, "OrphanPort")
                             it = db_.create_item(db_cell, subc)
-                            it.add_value(
-                                f"Port Name: {ports[0][1].name}"
-                                f"{ports[0][0].name or str(ports[0][0])})"
-                            )
+                            port_name = ports[0][0].name or str(ports[0][0])
+                            cell_name = ports[0][1].name
+                            inst_name = ports[0][2]
+                            if inst_name:
+                                it.add_value(
+                                    f"Port Name: {inst_name}.{port_name}"
+                                    f" (cell: {cell_name})"
+                                )
+                            else:
+                                it.add_value(
+                                    f"Port Name: {cell_name}.{port_name}"
+                                )
                             if ports[0][0]._base.trans:
                                 it.add_value(
                                     self.kcl.to_um(
@@ -2567,6 +2582,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                 db_cell,
                                 subc,
                                 self.kcl.dbu,
+                                inst_name1=ports[0][2],
+                                inst_name2=ports[1][2],
                             )
 
                         if cip & 2:
@@ -2582,6 +2599,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                 db_cell,
                                 subc,
                                 self.kcl.dbu,
+                                inst_name1=ports[0][2],
+                                inst_name2=ports[1][2],
                             )
                         if cip & 4:
                             subc = db_.category_by_path(
@@ -2596,6 +2615,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                 db_cell,
                                 subc,
                                 self.kcl.dbu,
+                                inst_name1=ports[0][2],
+                                inst_name2=ports[1][2],
                             )
                         if layer in cell_ports and coord in cell_ports[layer]:
                             subc = db_.category_by_path(
@@ -2628,8 +2649,13 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                     )
                                 )
                             for _port in ports:
+                                _label = (
+                                    f"{_port[2]}."
+                                    if _port[2]
+                                    else f"{_port[1].name}."
+                                )
                                 text += (
-                                    f"{_port[1].name}."
+                                    f"{_label}"
                                     f"{_port[0].name or _port[0].trans.to_s()}/"
                                 )
 
@@ -2654,8 +2680,13 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                         text = "Port Names: "
                         values = []
                         for _port in ports:
+                            _label = (
+                                f"{_port[2]}."
+                                if _port[2]
+                                else f"{_port[1].name}."
+                            )
                             text += (
-                                f"{_port[1].name}."
+                                f"{_label}"
                                 f"{_port[0].name or _port[0].trans.to_s()}/"
                             )
 
