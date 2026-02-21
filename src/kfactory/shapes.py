@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from . import kdb
 from .serialization import dshape_guard, ishape_guard
@@ -86,7 +86,7 @@ class VShapes:
                         shape.to_dtype(self.cell.kcl.dbu).transformed(trans)
                     )
             else:
-                new_shapes.append(shape.dpolygon.transform(trans))  # ty:ignore[possibly-missing-attribute]
+                new_shapes.append(cast("kdb.Shape", shape).dpolygon.transform(trans))
 
         return VShapes(cell=self.cell, _shapes=new_shapes)
 

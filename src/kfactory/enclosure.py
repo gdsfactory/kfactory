@@ -237,14 +237,14 @@ def extrude_path_dynamic_points(
     if callable(widths):
         length = sum(((p2 - p1).abs() for p2, p1 in itertools.pairwise(path)))
         z: float = 0
-        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable]
         vector_top = [start_trans * ref_vector]
         vector_bot = [start_trans * kdb.DCplxTrans.R180 * ref_vector]
         p_old = path[0]
         p = path[1]
         z += (p - p_old).abs()
         for point in path[2:]:
-            ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))
+            ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable]
             p_new = point
             v = p_new - p_old
             angle = np.rad2deg(np.arctan2(v.y, v.x))
@@ -254,7 +254,7 @@ def extrude_path_dynamic_points(
             z += (p_new - p).abs()
             p_old = p
             p = p_new
-        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable]
     else:
         ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths[0] / 2))
         vector_top = [start_trans * ref_vector]
@@ -1650,11 +1650,11 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
                     main_layer=enclosure["main_layer"],
                     kcl=kcl,
                 )
-
-        if enclosure.name not in self.root:  # ty:ignore[possibly-missing-attribute]
-            self.root[enclosure.name] = enclosure  # ty:ignore[invalid-assignment, possibly-missing-attribute]
-            return enclosure  # ty:ignore[invalid-return-type]
-        return self.root[enclosure.name]  # ty:ignore[possibly-missing-attribute]
+        enclosure = cast("LayerEnclosure", enclosure)
+        if enclosure.name not in self.root:
+            self.root[enclosure.name] = enclosure
+            return enclosure
+        return self.root[enclosure.name]
 
 
 def _add_section(
