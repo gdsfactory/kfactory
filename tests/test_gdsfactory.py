@@ -13,7 +13,7 @@ gf = pytest.importorskip("gdsfactory")
 jinja2 = pytest.importorskip("jinja2")
 gf_factories = pytest.importorskip("gdsfactory.routing.factories")
 # Find all YAML files
-yaml_dir = Path(__file__).parent / "gdsfactory-yaml-pics" / "notebooks" / "yaml_pics"
+yaml_dir = Path(__file__).parent / "gdsfactory-yaml-pics/docs/notebooks/yaml_pics"
 yaml_files = sorted(yaml_dir.glob("**/*.pic.yml"))
 skip_files = [
     "aar_bundles02",

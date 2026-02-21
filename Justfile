@@ -61,11 +61,11 @@ YAML_PICS := "tests/gdsfactory-yaml-pics"
 TEST_DATA := "tests/test_data"
 
 init-submodule:
-    git submodule update --init --recursive --depth 1
+    git submodule update --init --recursive --depth 50
 
     # sparse checkout only after init
     git -C {{YAML_PICS}} sparse-checkout init --cone
-    git -C {{YAML_PICS}} sparse-checkout set notebooks/yaml_pics
+    git -C {{YAML_PICS}} sparse-checkout set docs/notebooks/yaml_pics:
 
 # Update all submodules to latest main
 update-submodule: update-yaml-pics update-test-data
