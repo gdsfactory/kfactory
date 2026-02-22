@@ -250,6 +250,8 @@ class Settings(BaseSettings):
     write_cell_properties: bool = True
     write_file_properties: bool = True
     write_timestamps: bool = False
+    write_kfactory_settings: bool = True
+    """Write kfactory version into the gds/oasis."""
 
     show_function: ShowFunction | None = None
 

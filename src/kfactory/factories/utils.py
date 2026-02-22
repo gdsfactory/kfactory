@@ -92,7 +92,8 @@ def extrude_backbone_dynamic(
     Args:
         c: target cell
         backbone: backbone to extrude
-        width: width to extrude (main layer)
+        width1: start width to extrude (main layer)
+        width2: end width to extrude (main layer)
         layer: main layer & reference for enclosure
         enclosure: enclosure to apply
         start_angle: force a certain start angle

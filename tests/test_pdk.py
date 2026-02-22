@@ -52,7 +52,7 @@ def test_kcell_delete(layers: Layers) -> None:
 
 def test_multi_pdk(
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     base_pdk = kf.KCLayout("BASE_MULTI", infos=Layers)
 
@@ -93,12 +93,12 @@ def test_multi_pdk(
     d1 = assembly << doe1
     d2 = assembly << doe2
     d2.connect("o1", d1, "o2")
-    gds_regression(assembly)
+    oas_regression(assembly)
 
 
 def test_multi_pdk_convert(
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     with NamedTemporaryFile("a", suffix=".oas") as temp_file:
         base_pdk = kf.KCLayout("BASE_CONVERT", infos=Layers)
@@ -144,12 +144,12 @@ def test_multi_pdk_convert(
         d2.connect("o1", d1, "o2")
 
         assembly.write(temp_file.name, convert_external_cells=True)
-        gds_regression(assembly)
+        oas_regression(assembly)
 
 
 def test_multi_pdk_read_write(
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     base_pdk = kf.KCLayout("BASE_RW", infos=Layers)
 
@@ -200,7 +200,7 @@ def test_multi_pdk_read_write(
     d1 = assembly << doe_pdk1_read[doe1.name]
     d2 = assembly << doe_pdk2_read[doe2.name]
     d2.connect("o1", d1, "o2")
-    gds_regression(assembly)
+    oas_regression(assembly)
 
 
 def test_merge_read_shapes(
@@ -291,7 +291,7 @@ def test_merge_properties() -> None:
 
 def test_pdk_cell_infosettings(
     straight: kf.KCell,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     kcl_ = kf.KCLayout("INFOSETTINGS", infos=Layers)
