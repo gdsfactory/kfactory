@@ -1,5 +1,6 @@
+from collections.abc import Callable, Sequence
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 from ruamel.yaml import YAML
@@ -9,9 +10,45 @@ import kfactory as kf
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-gf = pytest.importorskip("gdsfactory")
+    import gdsfactory as gf  # ty: ignore[unresolved-import, unused-ignore-comment]
+else:
+    gf = pytest.importorskip("gdsfactory")
 jinja2 = pytest.importorskip("jinja2")
 gf_factories = pytest.importorskip("gdsfactory.routing.factories")
+
+
+gf.gpdk.PDK.activate()
+
+
+def _wrap_routing_strategy(
+    rs: Callable[
+        ...,
+        Sequence[
+            kf.routing.optical.ManhattanRoute
+            | kf.routing.aa.optical.OpticalAllAngleRoute
+        ],
+    ],
+) -> Callable[
+    ...,
+    Sequence[
+        kf.routing.optical.ManhattanRoute | kf.routing.aa.optical.OpticalAllAngleRoute
+    ],
+]:
+    def new_route(
+        c: gf.Component, ports: Sequence[tuple[gf.Port, ...]], /, **settings: Any
+    ) -> Sequence[
+        kf.routing.optical.ManhattanRoute | kf.routing.aa.optical.OpticalAllAngleRoute
+    ]:
+        ports1: list[gf.Port] = []
+        ports2: list[gf.Port] = []
+        for port_tuple in ports:
+            ports1.append(port_tuple[0])
+            ports2.append(port_tuple[1])
+        return rs(c, ports1, ports2, **settings)
+
+    return new_route
+
+
 # Find all YAML files
 yaml_dir = Path(__file__).parent / "gdsfactory-yaml-pics/docs/notebooks/yaml_pics"
 yaml_files = sorted(yaml_dir.glob("**/*.pic.yml"))
@@ -178,7 +215,12 @@ def test_gdsfactory_yaml_build(path: Path) -> None:
     schematic.create_cell(
         output_type=gf.Component,
         factories=factories,
-        routing_strategies=pdk.routing_strategies or gf_factories.routing_strategies,
+        routing_strategies={
+            name: _wrap_routing_strategy(route)
+            for name, route in (
+                pdk.routing_strategies or gf_factories.routing_strategies
+            ).items()
+        },
         place_unknown=True,
     ).show()
     print(schematic.code_str())  # noqa: T201
@@ -194,6 +236,11 @@ def test_gdsfactory_yaml_samples(sample: str) -> None:
     schematic.create_cell(
         output_type=gf.Component,
         factories=factories,
-        routing_strategies=pdk.routing_strategies or gf_factories.routing_strategies,
+        routing_strategies={
+            name: _wrap_routing_strategy(route)
+            for name, route in (
+                pdk.routing_strategies or gf_factories.routing_strategies
+            ).items()
+        },
         place_unknown=True,
     )

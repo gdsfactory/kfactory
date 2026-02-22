@@ -26,7 +26,8 @@ test python_version="3.14": init-submodule
     uv run -p {{python_version}} --with . --extra ci --isolated pytest -s -n logical
 
 test-gdsfactory python_version="3.14": init-submodule
-    uv run -p {{python_version}} --no-sync --extra ci --with gdsfactory --with . --isolated pytest -s -n logical tests/test_gdsfactory.py
+    # uv run -p {{python_version}} --no-sync --extra ci --with gdsfactory --with . --isolated pytest -s -vvvv -n logical tests/test_gdsfactory.py
+    uv run -p {{python_version}} --extra ci --with gdsfactory --with jinja2 --with . --isolated pytest -s -vvvv tests/test_gdsfactory.py -x --pdb
 
 # Run tests with minimum dependencies
 test-min python_version="3.12":
