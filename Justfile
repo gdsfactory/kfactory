@@ -34,7 +34,7 @@ test-min python_version="3.12": init-submodule
     uv run -p {{python_version}} --with . --extra ci --resolution lowest-direct --isolated pytest -s -n logical
 
 # Run tests with coverage report (XML)
-cov python_version="3.14":
+cov python_version="3.14": init-submodule
     uv run -p {{python_version}} --with . --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
 
 # Run tests with coverage report (terminal)
