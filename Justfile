@@ -30,7 +30,7 @@ test-gdsfactory python_version="3.14": init-submodule
     uv run -p {{python_version}} --extra ci --with gdsfactory --with jinja2 --with . --isolated pytest -s -vvvv tests/test_gdsfactory.py -x --pdb
 
 # Run tests with minimum dependencies
-test-min python_version="3.12":
+test-min python_version="3.12": init-submodule
     uv run -p {{python_version}} --with . --extra ci --resolution lowest-direct --isolated pytest -s -n logical
 
 # Run tests with coverage report (XML)
