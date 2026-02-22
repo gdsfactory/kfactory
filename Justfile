@@ -38,7 +38,7 @@ cov python_version="3.14":
     uv run -p {{python_version}} --with . --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-branch --cov-report=xml
 
 # Run tests with coverage report (terminal)
-dev-cov python_version="3.14":
+dev-cov python_version="3.14": init-submodule
     uv run -p {{python_version}} --with . --extra ci --isolated pytest -n logical -s --cov=kfactory --cov-report=term-missing:skip-covered
 
 # Run linting
