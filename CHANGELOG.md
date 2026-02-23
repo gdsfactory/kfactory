@@ -1,5 +1,5 @@
 <a id="v2.4.3"></a>
-# [v2.4.3](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.3) - 2026-02-14
+# [v2.4.3](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.3) - 2026-02-23
 
 # What's Changed
 
@@ -7,16 +7,16 @@
 
 - Fix insert_vinsts and use its recursive argument [#882](https://github.com/gdsfactory/kfactory/pull/882)
 
-## Other changes
+## Other Changes
 
-- feat: include instance names in connectivity check reports [#887](https://github.com/gdsfactory/kfactory/pull/887)
+- include instance names in connectivity check reports [#887](https://github.com/gdsfactory/kfactory/pull/887)
 
 ## Dependency Updates
 
 - Update typer requirement from <0.22,>=0.21.1 to >=0.21.1,<0.25 [#886](https://github.com/gdsfactory/kfactory/pull/886)
 - Bump nbconvert from 7.16.6 to 7.17.0 [#883](https://github.com/gdsfactory/kfactory/pull/883)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.2...v2.4.3
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.2...v2.5.0
 
 
 [Changes][v2.4.3]
