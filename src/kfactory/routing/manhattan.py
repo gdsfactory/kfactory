@@ -28,7 +28,7 @@ from ..conf import (
     logger,
 )
 from ..port import BasePort, Port
-from ..routing.steps import Step, Steps, Straight
+from .steps import Step, Steps, Straight
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence

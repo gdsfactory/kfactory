@@ -2549,9 +2549,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                     f" (cell: {cell_name})"
                                 )
                             else:
-                                it.add_value(
-                                    f"Port Name: {cell_name}.{port_name}"
-                                )
+                                it.add_value(f"Port Name: {cell_name}.{port_name}")
                             if ports[0][0]._base.trans:
                                 it.add_value(
                                     self.kcl.to_um(
@@ -2650,13 +2648,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                                 )
                             for _port in ports:
                                 _label = (
-                                    f"{_port[2]}."
-                                    if _port[2]
-                                    else f"{_port[1].name}."
+                                    f"{_port[2]}." if _port[2] else f"{_port[1].name}."
                                 )
                                 text += (
-                                    f"{_label}"
-                                    f"{_port[0].name or _port[0].trans.to_s()}/"
+                                    f"{_label}{_port[0].name or _port[0].trans.to_s()}/"
                                 )
 
                                 values.append(
@@ -2680,15 +2675,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                         text = "Port Names: "
                         values = []
                         for _port in ports:
-                            _label = (
-                                f"{_port[2]}."
-                                if _port[2]
-                                else f"{_port[1].name}."
-                            )
-                            text += (
-                                f"{_label}"
-                                f"{_port[0].name or _port[0].trans.to_s()}/"
-                            )
+                            _label = f"{_port[2]}." if _port[2] else f"{_port[1].name}."
+                            text += f"{_label}{_port[0].name or _port[0].trans.to_s()}/"
 
                             values.append(
                                 rdb.RdbItemValue(
