@@ -1,3 +1,18 @@
+<a id="v2.5.0"></a>
+# [v2.5.0](https://github.com/gdsfactory/kfactory/releases/tag/v2.5.0) - 2026-02-25
+
+# What's Changed
+
+## New
+
+- add sbend router [#889](https://github.com/gdsfactory/kfactory/pull/889)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.3...v2.5.0
+
+
+[Changes][v2.5.0]
+
+
 <a id="v2.4.3"></a>
 # [v2.4.3](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.3) - 2026-02-23
 
@@ -2677,6 +2692,7 @@
 [Changes][v0.4.0]
 
 
+[v2.5.0]: https://github.com/gdsfactory/kfactory/compare/v2.4.3...v2.5.0
 [v2.4.3]: https://github.com/gdsfactory/kfactory/compare/v2.4.2...v2.4.3
 [v2.4.2]: https://github.com/gdsfactory/kfactory/compare/v2.4.1...v2.4.2
 [v2.4.1]: https://github.com/gdsfactory/kfactory/compare/v2.4.0...v2.4.1
