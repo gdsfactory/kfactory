@@ -16,7 +16,7 @@ from ..conf import (
     logger,
 )
 from ..instance import Instance, ProtoTInstance
-from ..instance_group import InstanceGroup
+from ..instance_group import InstanceGroup, ProtoTInstanceGroup
 from ..kcell import DKCell, KCell, ProtoTKCell
 from .generic import ManhattanRoute, PlacerFunction, get_radius
 from .generic import (
@@ -34,7 +34,12 @@ from .steps import Step, Straight
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from ..factories import SBendFactoryDBU, StraightFactoryDBU, StraightFactoryUM
+    from ..factories import (
+        SBendFactoryDBU,
+        SBendFactoryUM,
+        StraightFactoryDBU,
+        StraightFactoryUM,
+    )
     from ..port import BasePort, DPort, Port
     from ..typings import dbu, um
 
@@ -285,7 +290,7 @@ def route_bundle(
     start_angles: float | list[float] | None = None,
     end_angles: float | list[float] | None = None,
     purpose: str | None = "routing",
-    sbend_factory: SBendFactoryDBU | None = None,
+    sbend_factory: SBendFactoryUM | None = None,
     path_length_matching_config: PathLengthConfig | None = None,
 ) -> list[ManhattanRoute]: ...
 
@@ -329,7 +334,7 @@ def route_bundle(
     start_angles: list[int] | float | list[float] | None = None,
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
-    sbend_factory: SBendFactoryDBU | None = None,
+    sbend_factory: SBendFactoryDBU | SBendFactoryUM | None = None,
     path_length_matching_config: PathLengthConfig | None = None,
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
@@ -622,6 +627,50 @@ def route_bundle(
         post_process_f = partial(path_length_match, separation=c.kcl.to_dbu(separation))
     else:
         post_process_f = None
+    if sbend_factory is None:
+        placer = place_manhattan
+        placer_kwargs = {
+            "straight_factory": straight_factory,
+            "bend90_cell": bend90_cell,
+            "taper_cell": taper_cell,
+            "port_type": place_port_type,
+            "min_straight_taper": min_straight_taper,
+            "allow_small_routes": False,
+            "allow_width_mismatch": allow_width_mismatch,
+            "allow_layer_mismatch": allow_layer_mismatch,
+            "allow_type_mismatch": allow_type_mismatch,
+            "purpose": purpose,
+            "route_width": route_width,
+        }
+    else:
+        sbend_factory = cast("SBendFactoryUM", sbend_factory)
+
+        def _sbend_factory(
+            c: ProtoTKCell[Any], offset: dbu, length: dbu, width: dbu
+        ) -> ProtoTInstance[Any] | ProtoTInstanceGroup[Any, Any]:
+            return sbend_factory(
+                c=c,
+                offset=c.kcl.to_um(offset),
+                length=c.kcl.to_um(length),
+                width=c.kcl.to_um(width),
+            )
+
+        # Not a type error
+        placer = place_manhattan_with_sbends  # type: ignore[assignment]
+        placer_kwargs = {
+            "straight_factory": _straight_factory,
+            "bend90_cell": bend90_cell,
+            "taper_cell": taper_cell,
+            "port_type": place_port_type,
+            "min_straight_taper": min_straight_taper,
+            "allow_small_routes": False,
+            "allow_width_mismatch": allow_width_mismatch,
+            "allow_layer_mismatch": allow_layer_mismatch,
+            "allow_type_mismatch": allow_type_mismatch,
+            "purpose": purpose,
+            "route_width": route_width,
+            "sbend_factory": _sbend_factory,
+        }
     try:
         return route_bundle_generic(
             c=c.kcl[c.cell_index()],
@@ -643,20 +692,8 @@ def route_bundle(
                 "bboxes": list(bboxes_),
                 "waypoints": waypoints,
             },
-            placer_function=place_manhattan,
-            placer_kwargs={
-                "straight_factory": _straight_factory,
-                "bend90_cell": bend90_cell,
-                "taper_cell": taper_cell,
-                "port_type": place_port_type,
-                "min_straight_taper": min_straight_taper,
-                "allow_small_routes": False,
-                "allow_width_mismatch": allow_width_mismatch,
-                "allow_layer_mismatch": allow_layer_mismatch,
-                "allow_type_mismatch": allow_type_mismatch,
-                "purpose": purpose,
-                "route_width": route_width,
-            },
+            placer_function=placer,
+            placer_kwargs=placer_kwargs,
             router_post_process_function=post_process_f,
             router_post_process_kwargs=path_length_matching_config,
             start_angles=start_angles,

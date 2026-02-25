@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 from ..instance import ProtoTInstance
 from ..instance_group import ProtoTInstanceGroup
 from ..kcell import ProtoTKCell
+from ..typings import dbu, um
 from . import bezier, circular, euler, straight, taper, virtual
 
 if TYPE_CHECKING:
@@ -43,7 +44,13 @@ class StraightFactoryUM(Protocol):
 
 class SBendFactoryDBU(Protocol):
     def __call__(
-        self, *, c: ProtoTKCell[Any], offset: int, length: int, width: int
+        self, *, c: ProtoTKCell[Any], offset: dbu, length: dbu, width: dbu
+    ) -> ProtoTInstance[Any] | ProtoTInstanceGroup[Any, Any]: ...
+
+
+class SBendFactoryUM(Protocol):
+    def __call__(
+        self, *, c: ProtoTKCell[Any], offset: um, length: um, width: um
     ) -> ProtoTInstance[Any] | ProtoTInstanceGroup[Any, Any]: ...
 
 
