@@ -14,7 +14,7 @@
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.3...v2.4.4
 
 
-[Changes][v2.5.0]
+[Changes][v2.4.4]
 
 
 <a id="v2.4.3"></a>
