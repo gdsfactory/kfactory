@@ -1,18 +1,29 @@
-<a id="v2.4.4"></a>
-# [v2.4.4](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.4) - 2026-02-25
+<a id="v2.4.5"></a>
+# [v2.4.5](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.5) - 2026-02-27
 
 # What's Changed
 
-## New
+## Bug Fixes
 
-- add sbend router [#889](https://github.com/gdsfactory/kfactory/pull/889)
+- fix kfactory routes 1000x factor [#891](https://github.com/gdsfactory/kfactory/pull/891)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.4...v2.4.5
+
+
+[Changes][v2.4.5]
+
+
+<a id="v2.4.4"></a>
+# [v2.4.4](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.4) - 2026-02-27
+
+# What's Changed
 
 ## Bug Fixes
 
 - fix placement of sbend routes [#890](https://github.com/gdsfactory/kfactory/pull/890)
+- fix sbend router for um based routing [#889](https://github.com/gdsfactory/kfactory/pull/889)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.3...v2.4.4
-
 
 [Changes][v2.4.4]
 
@@ -35,7 +46,7 @@
 - Update typer requirement from <0.22,>=0.21.1 to >=0.21.1,<0.25 [#886](https://github.com/gdsfactory/kfactory/pull/886)
 - Bump nbconvert from 7.16.6 to 7.17.0 [#883](https://github.com/gdsfactory/kfactory/pull/883)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.2...v2.4.3
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.2...v2.5.0
 
 
 [Changes][v2.4.3]
@@ -2696,6 +2707,7 @@
 [Changes][v0.4.0]
 
 
+[v2.4.5]: https://github.com/gdsfactory/kfactory/compare/v2.4.4...v2.4.5
 [v2.4.4]: https://github.com/gdsfactory/kfactory/compare/v2.4.3...v2.4.4
 [v2.4.3]: https://github.com/gdsfactory/kfactory/compare/v2.4.2...v2.4.3
 [v2.4.2]: https://github.com/gdsfactory/kfactory/compare/v2.4.1...v2.4.2
