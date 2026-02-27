@@ -7,6 +7,10 @@
 
 - add sbend router [#889](https://github.com/gdsfactory/kfactory/pull/889)
 
+## Bug Fixes
+
+- fix placement of sbend routes [#890](https://github.com/gdsfactory/kfactory/pull/890)
+
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.3...v2.5.0
 
 
