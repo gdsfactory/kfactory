@@ -691,6 +691,7 @@ def route_bundle(
                 "bbox_routing": bbox_routing,
                 "bboxes": list(bboxes_),
                 "waypoints": waypoints,
+                "allow_sbend": sbend_factory is not None,
             },
             placer_function=placer,
             placer_kwargs=placer_kwargs,
@@ -1505,23 +1506,6 @@ def place_manhattan_with_sbends(
         new_pt = pts[i + 1]
         old_angle = old_bend_port.angle
 
-        if (pt.distance(old_pt) < b90r) and not allow_small_routes:
-            raise ValueError(
-                f"distance between points {old_pt!s} and {pt!s} is too small to"
-                f" safely place bends {pt.to_s()=}, {old_pt.to_s()=},"
-                f" {pt.distance(old_pt)=} < {b90r=}"
-            )
-        if (
-            pt.distance(old_pt) < 2 * b90r
-            and i not in {1, len(pts) - 1}
-            and not allow_small_routes
-        ):
-            raise ValueError(
-                f"distance between points {old_pt!s} and {pt!s} is too small to"
-                f" safely place bends {pt=!s}, {old_pt=!s},"
-                f" {pt.distance(old_pt)=} < {2 * b90r=}"
-            )
-
         vec = pt - old_pt
         if _is_sbend_vec(vec):
             sbend_vec = (kdb.Trans(-old_angle, False, 0, 0) * vec.to_p()).to_v()
@@ -1597,6 +1581,23 @@ def place_manhattan_with_sbends(
             old_pt = pt
             old_bend_port = p2_
             continue
+
+        if (pt.distance(old_pt) < b90r) and not allow_small_routes:
+            raise ValueError(
+                f"distance between points {old_pt!s} and {pt!s} is too small to"
+                f" safely place bends {pt.to_s()=}, {old_pt.to_s()=},"
+                f" {pt.distance(old_pt)=} < {b90r=}"
+            )
+        if (
+            pt.distance(old_pt) < 2 * b90r
+            and i not in {1, len(pts) - 1}
+            and not allow_small_routes
+        ):
+            raise ValueError(
+                f"distance between points {old_pt!s} and {pt!s} is too small to"
+                f" safely place bends {pt=!s}, {old_pt=!s},"
+                f" {pt.distance(old_pt)=} < {2 * b90r=}"
+            )
 
         bend90 = c << bend90_cell
         bend90.purpose = purpose
@@ -1682,7 +1683,7 @@ def place_manhattan_with_sbends(
         old_bend_port = bend_port
         route.end_port = bend_port
     else:
-        length = int((bend90.ports[b90p2.name].trans.disp - p2.trans.disp).length())
+        length = int((old_bend_port.trans.disp - p2.trans.disp).length())
         if length > 0:
             if (
                 taper_cell is None

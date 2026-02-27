@@ -572,8 +572,12 @@ class ManhattanRouter:
                     "Route  is not finished. The transformations are not properly "
                     f"aligned: Vector (as seen from t1): {tv.x=}, {tv.y=}"
                 )
-            if self.start.t.disp.to_p() != self.start.pts[-1]:
-                self.start.pts.append(self.start.t.disp.to_p())
+            start_point = self.start.t.disp.to_p()
+            if start_point != self.start.pts[-1]:
+                self.start.pts.append(start_point)
+            end_point = self.end.t.disp.to_p()
+            if end_point != self.end.pts[-1]:
+                self.end.pts.append(end_point)
         if self.end.pts[-1] != self.start.pts[-1]:
             self.start.pts.extend(reversed(self.end.pts))
         else:
@@ -1590,6 +1594,10 @@ def route_smart(
             )
 
     return all_routers
+
+
+def is_manhattan(vector: kdb.Vector) -> bool:
+    return vector.x == 0 or vector.y == 0
 
 
 def route_to_bbox(
