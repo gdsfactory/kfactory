@@ -1090,7 +1090,6 @@ def test_sbend_routing(
         length: int,
         width: int,
     ) -> kf.InstanceGroup:
-        c = kf.KCell(base=c.base)
         ig = kf.InstanceGroup()
 
         sbend = c << kf.cells.euler.bend_s_euler(
@@ -1100,14 +1099,14 @@ def test_sbend_routing(
             layer=layer_infos.WG,
             enclosure=enc,
         )
-        ig.insts.append(sbend)
+        ig.add(sbend)
 
         l_ = length - sbend.ibbox().width()
         ig.add_port(name="o1", port=sbend.ports["o1"])
 
         if l_ > 0:
             wg = c << straight_factory(width=width, length=l_)
-            ig.insts.append(wg)
+            ig.add(wg)
             wg.connect("o1", sbend.ports["o2"])
             ig.add_port(port=wg.ports["o2"], name="o2")
         else:

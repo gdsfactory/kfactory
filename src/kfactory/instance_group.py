@@ -45,6 +45,8 @@ class ProtoInstanceGroup[T: (int, float), TI: ProtoTInstance[Any] | VInstance[An
         self.insts = list(insts) if insts is not None else []
         self._base_ports = [p.base for p in ports] if ports is not None else []
 
+    @abstractmethod
+    def add(self, inst: ProtoTInstance[Any]) -> None: ...
     @property
     def name(self) -> str:
         return str(self)
@@ -291,6 +293,9 @@ class InstanceGroup(
     ) -> Port:
         return self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
 
+    def add(self, inst: ProtoTInstance[Any]) -> None:
+        self.insts.append(Instance(kcl=inst.kcl, instance=inst.instance))
+
 
 class DInstanceGroup(
     ProtoTInstanceGroup[float, DInstance], UMGeometricObject, DCreatePort
@@ -316,6 +321,9 @@ class DInstanceGroup(
         keep_mirror: bool = False,
     ) -> DPort:
         return self.ports.add_port(port=port, name=name, keep_mirror=keep_mirror)
+
+    def add(self, inst: ProtoTInstance[Any]) -> None:
+        self.insts.append(DInstance(kcl=inst.kcl, instance=inst.instance))
 
 
 class VInstanceGroup(

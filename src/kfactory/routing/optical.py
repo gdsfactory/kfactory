@@ -16,7 +16,7 @@ from ..conf import (
     logger,
 )
 from ..instance import Instance, ProtoTInstance
-from ..instance_group import InstanceGroup
+from ..instance_group import InstanceGroup, ProtoTInstanceGroup
 from ..kcell import DKCell, KCell, ProtoTKCell
 from .generic import ManhattanRoute, PlacerFunction, get_radius
 from .generic import (
@@ -33,7 +33,12 @@ from .steps import Step, Straight
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from ..factories import SBendFactoryDBU, StraightFactoryDBU, StraightFactoryUM
+    from ..factories import (
+        SBendFactoryDBU,
+        SBendFactoryUM,
+        StraightFactoryDBU,
+        StraightFactoryUM,
+    )
     from ..port import BasePort, DPort, Port
     from ..typings import dbu, um
 
@@ -279,7 +284,7 @@ def route_bundle(
     start_angles: float | list[float] | None = None,
     end_angles: float | list[float] | None = None,
     purpose: str | None = "routing",
-    sbend_factory: SBendFactoryDBU | None = None,
+    sbend_factory: SBendFactoryUM | None = None,
     path_length_matching_config: PathLengthConfig | None = None,
 ) -> list[ManhattanRoute]: ...
 
@@ -321,7 +326,7 @@ def route_bundle(
     start_angles: list[int] | float | list[float] | None = None,
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
-    sbend_factory: SBendFactoryDBU | None = None,
+    sbend_factory: SBendFactoryDBU | SBendFactoryUM | None = None,
     path_length_matching_config: PathLengthConfig | None = None,
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
@@ -604,6 +609,50 @@ def route_bundle(
         post_process_f = partial(path_length_match, separation=c.kcl.to_dbu(separation))
     else:
         post_process_f = None
+    if sbend_factory is None:
+        placer = place_manhattan
+        placer_kwargs = {
+            "straight_factory": straight_factory,
+            "bend90_cell": bend90_cell,
+            "taper_cell": taper_cell,
+            "port_type": place_port_type,
+            "min_straight_taper": min_straight_taper,
+            "allow_small_routes": False,
+            "allow_width_mismatch": allow_width_mismatch,
+            "allow_layer_mismatch": allow_layer_mismatch,
+            "allow_type_mismatch": allow_type_mismatch,
+            "purpose": purpose,
+            "route_width": route_width,
+        }
+    else:
+        sbend_factory = cast("SBendFactoryUM", sbend_factory)
+
+        def _sbend_factory(
+            c: ProtoTKCell[Any], offset: dbu, length: dbu, width: dbu
+        ) -> ProtoTInstance[Any] | ProtoTInstanceGroup[Any, Any]:
+            return sbend_factory(
+                c=c,
+                offset=c.kcl.to_um(offset),
+                length=c.kcl.to_um(length),
+                width=c.kcl.to_um(width),
+            )
+
+        # Not a type error
+        placer = place_manhattan_with_sbends  # type: ignore[assignment]
+        placer_kwargs = {
+            "straight_factory": _straight_factory,
+            "bend90_cell": bend90_cell,
+            "taper_cell": taper_cell,
+            "port_type": place_port_type,
+            "min_straight_taper": min_straight_taper,
+            "allow_small_routes": False,
+            "allow_width_mismatch": allow_width_mismatch,
+            "allow_layer_mismatch": allow_layer_mismatch,
+            "allow_type_mismatch": allow_type_mismatch,
+            "purpose": purpose,
+            "route_width": route_width,
+            "sbend_factory": _sbend_factory,
+        }
     try:
         return route_bundle_generic(
             c=c.kcl[c.cell_index()],
@@ -624,21 +673,10 @@ def route_bundle(
                 "bbox_routing": bbox_routing,
                 "bboxes": list(bboxes_),
                 "waypoints": waypoints,
+                "allow_sbend": sbend_factory is not None,
             },
-            placer_function=place_manhattan,
-            placer_kwargs={
-                "straight_factory": _straight_factory,
-                "bend90_cell": bend90_cell,
-                "taper_cell": taper_cell,
-                "port_type": place_port_type,
-                "min_straight_taper": min_straight_taper,
-                "allow_small_routes": False,
-                "allow_width_mismatch": allow_width_mismatch,
-                "allow_layer_mismatch": allow_layer_mismatch,
-                "allow_type_mismatch": allow_type_mismatch,
-                "purpose": purpose,
-                "route_width": route_width,
-            },
+            placer_function=placer,
+            placer_kwargs=placer_kwargs,
             router_post_process_function=post_process_f,
             router_post_process_kwargs=path_length_matching_config,
             start_angles=start_angles,
@@ -1453,23 +1491,6 @@ def place_manhattan_with_sbends(
         new_pt = pts[i + 1]
         old_angle = old_bend_port.angle
 
-        if (pt.distance(old_pt) < b90r) and not allow_small_routes:
-            raise ValueError(
-                f"distance between points {old_pt!s} and {pt!s} is too small to"
-                f" safely place bends {pt.to_s()=}, {old_pt.to_s()=},"
-                f" {pt.distance(old_pt)=} < {b90r=}"
-            )
-        if (
-            pt.distance(old_pt) < 2 * b90r
-            and i not in {1, len(pts) - 1}
-            and not allow_small_routes
-        ):
-            raise ValueError(
-                f"distance between points {old_pt!s} and {pt!s} is too small to"
-                f" safely place bends {pt=!s}, {old_pt=!s},"
-                f" {pt.distance(old_pt)=} < {2 * b90r=}"
-            )
-
         vec = pt - old_pt
         if _is_sbend_vec(vec):
             sbend_vec = (kdb.Trans(-old_angle, False, 0, 0) * vec.to_p()).to_v()
@@ -1545,6 +1566,23 @@ def place_manhattan_with_sbends(
             old_pt = pt
             old_bend_port = p2_
             continue
+
+        if (pt.distance(old_pt) < b90r) and not allow_small_routes:
+            raise ValueError(
+                f"distance between points {old_pt!s} and {pt!s} is too small to"
+                f" safely place bends {pt.to_s()=}, {old_pt.to_s()=},"
+                f" {pt.distance(old_pt)=} < {b90r=}"
+            )
+        if (
+            pt.distance(old_pt) < 2 * b90r
+            and i not in {1, len(pts) - 1}
+            and not allow_small_routes
+        ):
+            raise ValueError(
+                f"distance between points {old_pt!s} and {pt!s} is too small to"
+                f" safely place bends {pt=!s}, {old_pt=!s},"
+                f" {pt.distance(old_pt)=} < {2 * b90r=}"
+            )
 
         bend90 = c << bend90_cell
         bend90.purpose = purpose
@@ -1630,7 +1668,7 @@ def place_manhattan_with_sbends(
         old_bend_port = bend_port
         route.end_port = bend_port
     else:
-        length = int((bend90.ports[b90p2.name].trans.disp - p2.trans.disp).length())
+        length = int((old_bend_port.trans.disp - p2.trans.disp).length())
         if length > 0:
             if (
                 taper_cell is None
