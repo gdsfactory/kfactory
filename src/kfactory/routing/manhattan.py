@@ -572,8 +572,12 @@ class ManhattanRouter:
                     "Route  is not finished. The transformations are not properly "
                     f"aligned: Vector (as seen from t1): {tv.x=}, {tv.y=}"
                 )
-            if self.start.t.disp.to_p() != self.start.pts[-1]:
-                self.start.pts.append(self.start.t.disp.to_p())
+            start_point = self.start.t.disp.to_p()
+            if start_point != self.start.pts[-1]:
+                self.start.pts.append(start_point)
+            end_point = self.end.t.disp.to_p()
+            if end_point != self.end.pts[-1]:
+                self.end.pts.append(end_point)
         if self.end.pts[-1] != self.start.pts[-1]:
             self.start.pts.extend(reversed(self.end.pts))
         else:
@@ -947,7 +951,7 @@ def route_smart(
                 f"'sort_ports=True' with variable widths is not supported: {widths=}"
             )
         if waypoints is not None:
-            return _route_waypoints(
+            all_routers = _route_waypoints(
                 waypoints=waypoints,
                 widths=[w0 for _ in range(len(start_ts))],
                 separation=separation,
@@ -961,6 +965,8 @@ def route_smart(
                 bbox_routing=bbox_routing,
                 allow_sbends=allow_sbend,
             )
+            for router in all_routers:
+                _fix_sbends(router)
         default_start_bundle: list[kdb.Trans] = []
         start_bundles: dict[kdb.Box, list[kdb.Trans]] = defaultdict(list)
         mh_routers: list[ManhattanRouter] = []
@@ -1216,7 +1222,7 @@ def route_smart(
                     case _:
                         ...
 
-        all_routers: list[ManhattanRouter] = []
+        all_routers = []
         for ts, te, w, ss, es in zip(
             start_ts, end_ts, widths, starts, ends, strict=False
         ):
@@ -1236,7 +1242,7 @@ def route_smart(
 
     else:
         if waypoints is not None:
-            return _route_waypoints(
+            all_routers = _route_waypoints(
                 waypoints=waypoints,
                 widths=widths,
                 separation=separation,
@@ -1250,6 +1256,9 @@ def route_smart(
                 sort_ports=False,
                 allow_sbends=allow_sbend,
             )
+            for router in all_routers:
+                _fix_sbends(router)
+            return all_routers
 
         all_routers = []
         for ts, te, w, ss, es in zip(
@@ -1589,7 +1598,44 @@ def route_smart(
                 allow_sbend=allow_sbend,
             )
 
+    if allow_sbend:
+        for router in all_routers:
+            _fix_sbends(router)
+
     return all_routers
+
+
+def _fix_sbends(router: ManhattanRouter) -> None:
+    if not router.allow_sbends:
+        return
+    pt1 = router.start.pts[0]
+
+    base_vec = kdb.Vector(router.bend90_radius, 0)
+    vecs = {
+        0: base_vec,
+        1: kdb.Trans.R90 * base_vec,
+        2: kdb.Trans.R180 * base_vec,
+        3: kdb.Trans.R270 * base_vec,
+    }
+    l_ = len(router.start.pts) - 2
+
+    for i, pt2 in enumerate(router.start.pts[1:-1], start=1):
+        vec_ = pt2 - pt1
+        if not is_manhattan(vec_):
+            if i > 1:
+                pt0 = router.start.pts[i - 2]
+                a1 = vec_dir(pt1 - pt0)
+                router.start.pts[i - 1] = pt0 + vecs[a1]
+            if i < l_:
+                pt3 = router.start.pts[i + 1]
+                a2 = vec_dir(pt3 - pt2)
+                router.start.pts[i] = pt3 + vecs[a2]
+
+        pt1 = pt2
+
+
+def is_manhattan(vector: kdb.Vector) -> bool:
+    return vector.x == 0 or vector.y == 0
 
 
 def route_to_bbox(

@@ -691,6 +691,7 @@ def route_bundle(
                 "bbox_routing": bbox_routing,
                 "bboxes": list(bboxes_),
                 "waypoints": waypoints,
+                "allow_sbend": sbend_factory is not None,
             },
             placer_function=placer,
             placer_kwargs=placer_kwargs,
@@ -1682,7 +1683,7 @@ def place_manhattan_with_sbends(
         old_bend_port = bend_port
         route.end_port = bend_port
     else:
-        length = int((bend90.ports[b90p2.name].trans.disp - p2.trans.disp).length())
+        length = int((old_bend_port.trans.disp - p2.trans.disp).length())
         if length > 0:
             if (
                 taper_cell is None
