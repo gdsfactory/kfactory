@@ -1,5 +1,5 @@
-<a id="v2.5.0"></a>
-# [v2.5.0](https://github.com/gdsfactory/kfactory/releases/tag/v2.5.0) - 2026-02-25
+<a id="v2.4.4"></a>
+# [v2.4.4](https://github.com/gdsfactory/kfactory/releases/tag/v2.5.0) - 2026-02-25
 
 # What's Changed
 
@@ -11,7 +11,7 @@
 
 - fix placement of sbend routes [#890](https://github.com/gdsfactory/kfactory/pull/890)
 
-**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.3...v2.5.0
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.3...v2.4.4
 
 
 [Changes][v2.5.0]
