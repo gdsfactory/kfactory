@@ -1220,7 +1220,7 @@ def route_smart(
                     case _:
                         ...
 
-        all_routers = []
+        all_routers: list[ManhattanRouter] = []
         for ts, te, w, ss, es in zip(
             start_ts, end_ts, widths, starts, ends, strict=False
         ):
