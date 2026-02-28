@@ -100,7 +100,7 @@ def grid_dbu(
 
     if shape is None:
         if isinstance(kcells[0], KCell):  # noqa: SIM108
-            kcell_array = [list(kcells)]  # type:ignore[arg-type]
+            kcell_array = [list(kcells)]
         else:
             kcell_array = kcells  # type: ignore[assignment]
 
@@ -553,7 +553,7 @@ def grid(
 
     if shape is None:
         if isinstance(kcells[0], DKCell):  # noqa: SIM108
-            kcell_array = [list(kcells)]  # type:ignore[arg-type]
+            kcell_array = [list(kcells)]
         else:
             kcell_array = kcells  # type: ignore[assignment]
 

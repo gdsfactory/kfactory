@@ -2,7 +2,7 @@
 
 from collections.abc import Sequence
 
-import rpack  # type: ignore[import-untyped,unused-ignore]
+import rpack
 
 from . import kdb
 from .instance import Instance

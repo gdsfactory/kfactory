@@ -16,7 +16,7 @@ def test_cell_decorator(kcl: kf.KCLayout, layers: Layers) -> None:
         nonlocal count
         count += 1
 
-    @kcl.cell(post_process=[rectangle_post_process])  # type: ignore[type-var]
+    @kcl.cell(post_process=[rectangle_post_process])
     def rectangle(width: float, height: float, layer: kf.kdb.LayerInfo) -> kf.DKCell:
         c = kcl.dkcell()
         c.shapes(layer).insert(kf.kdb.DBox(0, 0, width, height))
@@ -222,7 +222,7 @@ def test_cell_decorator_types(kcl: kf.KCLayout) -> None:
     with pytest.raises(ValueError):
 
         @kcl.cell
-        def test_no_output_type():  # type: ignore[no-untyped-def]  # noqa: ANN202
+        def test_no_output_type():  # noqa: ANN202
             return kf.KCell()
 
         test_no_output_type()

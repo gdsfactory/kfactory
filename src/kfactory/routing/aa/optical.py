@@ -545,7 +545,7 @@ def _get_effective_radius(
 
     if xp is None:
         return float("inf")
-    return (xp - port1.dcplx_trans.disp.to_p()).abs()  # type: ignore[no-any-return]
+    return (xp - port1.dcplx_trans.disp.to_p()).abs()
 
 
 def _get_effective_radius_debug(
@@ -557,7 +557,7 @@ def _get_effective_radius_debug(
 
     if xp is None:
         return float("inf")
-    return (xp - port1.dcplx_trans.disp.to_p()).abs()  # type: ignore[no-any-return]
+    return (xp - port1.dcplx_trans.disp.to_p()).abs()
 
 
 def backbone2bundle(

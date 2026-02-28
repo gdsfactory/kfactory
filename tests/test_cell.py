@@ -15,40 +15,40 @@ from tests.conftest import Layers
 
 def test_enclosure_name(
     straight_factory_dbu: Callable[..., kf.KCell],
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     wg = straight_factory_dbu(width=1000, length=10000)
     assert wg.name == "straight_W1000_L10000_LWG_EWGSTD"
-    gds_regression(wg)
+    oas_regression(wg)
 
 
 def test_circular_snapping(
     kcl: kf.KCLayout,
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     b = kf.factories.circular.bend_circular_factory(kcl=kcl)(
         width=1, radius=10, layer=layers.WG, angle=90
     )
     assert b.ports["o2"].dcplx_trans.disp == kcl.to_um(b.ports["o2"].trans.disp)
-    gds_regression(b)
+    oas_regression(b)
 
 
 def test_euler_snapping(
     kcl: kf.KCLayout,
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     b = kf.factories.euler.bend_euler_factory(kcl=kcl)(
         width=1, radius=10, layer=layers.WG, angle=90
     )
     assert b.ports["o2"].dcplx_trans.disp == kcl.to_um(b.ports["o2"].trans.disp)
-    gds_regression(b)
+    oas_regression(b)
 
 
 def test_unnamed_cell(
     kcl: kf.KCLayout,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     @kcl.cell
     def unnamed_cell(name: str = "a") -> kf.KCell:
@@ -73,7 +73,7 @@ def test_wrong_dict(
 
 def test_nested_dict_list(
     kcl: kf.KCLayout,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     @kcl.cell
     def nested_list_dict(
@@ -88,12 +88,12 @@ def test_nested_dict_list(
     c = nested_list_dict(dl)
     assert dl == c.settings["arg1"]
     assert dl is not c.settings["arg1"]
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_no_snap(
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell()
@@ -107,12 +107,12 @@ def test_no_snap(
     p = c.ports[0]
 
     assert p.dcplx_trans.disp != c.kcl.to_um(p.trans.disp)
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_namecollision(
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     bc = kf.factories.circular.bend_circular_factory(kcl=kcl)
@@ -120,24 +120,24 @@ def test_namecollision(
     b2 = bc(width=1, radius=10.5000005, layer=layers.WG)
 
     assert b1.name != b2.name
-    gds_regression(b1)
+    oas_regression(b1)
 
 
 def test_nested_dic(
     kcl: kf.KCLayout,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     @kcl.cell
     def recursive_dict_cell(d: dict[str, dict[str, str] | str]) -> kf.KCell:
         return kcl.kcell()
 
     c = recursive_dict_cell({"test": {"test2": "test3"}, "test4": "test5"})
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_ports_cell(
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell()
@@ -149,12 +149,12 @@ def test_ports_cell(
     )
     assert c["o1"]
     assert "o1" in c.ports
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_ports_instance(
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell()
@@ -170,11 +170,11 @@ def test_ports_instance(
     assert "o1" in c.ports
     assert ref["o1"]
     assert "o1" in ref.ports
-    gds_regression(c2)
+    oas_regression(c2)
 
 
 def test_getter(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
     straight_factory: Callable[..., kf.KCell],
 ) -> None:
@@ -186,7 +186,7 @@ def test_getter(
 
 def test_array(
     straight: kf.KCell,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell()
@@ -197,12 +197,12 @@ def test_array(
         for a in range(3):
             wg_array["o1", a, b]
             wg_array["o1", a, b]
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_array_indexerror(
     straight: kf.KCell,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell()
@@ -215,12 +215,12 @@ def test_array_indexerror(
         wg_array["o1", 3, 5]
         wg_array["o1", 3, 5]
     kf.config.logfilter.regex = regex
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_invalid_array(
     straight: kf.KCell,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell()
@@ -233,7 +233,7 @@ def test_invalid_array(
                 wg["o1", a, b]
                 wg["o1", a, b]
     kf.config.logfilter.regex = regex
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_cell_decorator_error(
@@ -258,7 +258,7 @@ def test_cell_decorator_error(
 
 def test_info(
     kcl: kf.KCLayout,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     @kcl.cell(info={"test": 42})
     def test_info_cell(test: int) -> kf.KCell:
@@ -266,13 +266,13 @@ def test_info(
 
     c = test_info_cell(42)
     assert c.info["test"] == 42
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_flatten(
     kcl: kf.KCLayout,
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell()
     _ = c << kf.factories.straight.straight_dbu_factory(kcl)(
@@ -281,13 +281,13 @@ def test_flatten(
     assert len(c.insts) == 1, "c.insts should have 1 inst after adding a cell"
     c.flatten()
     assert len(c.insts) == 0, "c.insts should have 0 insts after flatten()"
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_size_info(
     kcl: kf.KCLayout,
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell()
     ref = c << kf.factories.straight.straight_dbu_factory(kcl)(
@@ -295,11 +295,11 @@ def test_size_info(
     )
     assert ref.size_info.ne[0] == 10000
     assert ref.dsize_info.ne[0] == 10
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_overwrite(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     kcl = kf.KCLayout("CELL_OVERWRITE")
 
@@ -309,7 +309,7 @@ def test_overwrite(
 
     c1 = test_overwrite_cell()
 
-    @kcl.cell(overwrite_existing=True)  # type: ignore[no-redef]
+    @kcl.cell(overwrite_existing=True)
     def test_overwrite_cell() -> kf.KCell:
         return kcl.kcell()
 
@@ -317,7 +317,7 @@ def test_overwrite(
 
     assert c2 is not c1
     assert c1.destroyed()
-    gds_regression(c2)
+    oas_regression(c2)
 
 
 def test_layout_cache() -> None:
@@ -377,7 +377,7 @@ def test_check_ports(
 def test_ports_in_cells(
     kcl: kf.KCLayout,
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     kcell = kcl.kcell(name="test")
     dkcell = kcell.to_dtype()
@@ -397,12 +397,12 @@ def test_ports_in_cells(
 
     assert new_port in kcell.ports
     assert new_port in dkcell.ports
-    gds_regression(dkcell)
+    oas_regression(dkcell)
 
 
 def test_kcell_attributes(
     kcl: kf.KCLayout,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell("test_kcell_attributes")
     c.shapes(1).insert(kf.kdb.Box(0, 0, 10, 10))
@@ -507,7 +507,7 @@ def test_kcell_attributes(
     assert c.size_info.cc == (5, 5)
     assert c.size_info.center == (5, 5)
 
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_lock(
@@ -552,7 +552,7 @@ def test_cell_in_threads(
     kcl: kf.KCLayout,
     layers: Layers,
     wg_enc: kf.LayerEnclosure,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     taper_factory = kf.factories.taper.taper_factory(kcl)
 
@@ -582,18 +582,18 @@ def test_cell_in_threads(
         == 1
     )
 
-    gds_regression(t)
+    oas_regression(t)
 
 
 def test_to_dtype(
     kcl: kf.KCLayout,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     kcell = kcl.kcell()
     kcell.shapes(0).insert(kf.kdb.Box(0, 0, 1000, 1000))
     dkcell = kcell.to_dtype()
     assert dkcell.bbox() == kf.kdb.DBox(0, 0, 1, 1)
-    gds_regression(dkcell)
+    oas_regression(dkcell)
 
 
 def test_to_itype(kcl: kf.KCLayout) -> None:
@@ -604,24 +604,24 @@ def test_to_itype(kcl: kf.KCLayout) -> None:
 
 
 def test_cell_default_fallback(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     kcl = kf.KCLayout("cell_default_fallback", default_cell_output_type=kf.DKCell)
 
     @kcl.cell
-    def my_cell():  # type: ignore[no-untyped-def]  # noqa: ANN202
+    def my_cell():  # noqa: ANN202
         return kcl.kcell()
 
     assert isinstance(my_cell(), kf.DKCell)
     kcl.default_cell_output_type = kf.KCell
 
-    def my_cell():  # type: ignore[no-untyped-def,no-redef]  # noqa: ANN202
+    def my_cell():  # noqa: ANN202
         return kcl.kcell()
 
     kf.layout.kcls.pop("cell_default_fallback")
 
     assert isinstance(my_cell(), kf.KCell)
-    gds_regression(my_cell())
+    oas_regression(my_cell())
 
 
 def test_transform(
@@ -703,6 +703,6 @@ def test_return_wrong_type(
         return kcl.kcell()
 
     with pytest.raises(TypeError):
-        kcl.cell()(test_vk)()  # type: ignore[type-var]
+        kcl.cell()(test_vk)()
     with pytest.raises(TypeError):
-        kcl.vcell(test_kc)()  # type: ignore[type-var]
+        kcl.vcell(test_kc)()

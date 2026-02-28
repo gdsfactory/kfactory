@@ -7,34 +7,34 @@ name = "kfactory"
 description = "KLayout API implementation of gdsfactory"
 readme = "README.md"
 classifiers = [
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 
 
 version = "2.4.5"
 authors = [{ name = "gdsfactory community", email = "contact@gdsfactory.com" }]
 dependencies = [
-    "aenum >= 3.1.16, < 4",
-    "cachetools >= 6.2.4",
-    "klayout >= 0.30.5, < 0.31.0",
-    "loguru >= 0.7.3, < 0.8",
-    "pydantic >= 2.12.5, < 2.13",
+    "aenum>=3.1.16,< 4",
+    "cachetools>= 6.2.4",
+    "klayout>=0.30.6,<0.31",
+    "loguru>=0.7.3,< 0.8",
+    "pydantic>= 2.12.5,< 2.13",
     "pydantic-extra-types>=2.11",
-    "pydantic-settings >= 2.12, < 3",
-    "pygit2 >= 1.19.1, < 2",
-    "rapidfuzz >= 3.14.3, < 4",
-    "rectangle-packer >= 2.0.5, < 3",
-    "requests >= 2.32.5, < 3",
-    "ruamel.yaml >= 0.19.1, < 0.20",
-    "ruamel.yaml.string >= 0.1.1, < 0.2",
-    "semver >= 3.0.4, < 4",
-    "scipy >= 1.17.0, < 2",
-    "toolz >= 1.1.0, < 2",
-    "typer >= 0.21.1, < 0.25",
+    "pydantic-settings>=2.12,<3",
+    "pygit2>=1.19.1,<2",
+    "rapidfuzz>=3.14.3,<4",
+    "rectangle-packer>=2.0.5,<3",
+    "requests>=2.32.5,<3",
+    "ruamel.yaml>=0.19.1,<0.20",
+    "ruamel.yaml.string>=0.1.1,<0.2",
+    "semver>=3.0.4,<4",
+    "scipy>=1.17.0,<2",
+    "toolz>=1.1.0,<2",
+    "typer>=0.21.1,<0.22",
 ]
 
 [project.optional-dependencies]
@@ -47,7 +47,7 @@ dev = [
     "ruff>=0.9.2",
     "rust-just>=1.42.4",
     "tbump>=6.11.0",
-    "ty>=0.0.1a17",
+    "ty>=0.0.16",
     "types-cachetools>=5.5.0.20240820",
     "types-docutils>=0.21.0.20241128",
     "types-pygments>=2.19.0.20250305",
@@ -83,6 +83,7 @@ ci = [
     "pytest-datadir>=1.8.0",
     "types-cachetools>=5.5.0.20240820",
     "types-requests>=2.32.0.20250328",
+    "uv >= 0.9.30",
 ]
 ipy = [
     "ipyevents>=2.0.2",
@@ -99,7 +100,7 @@ kf = "kfactory.cli:app"
 where = ["src"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
 exclude = ["src/kfactory/widgets/interactive.py"]
 plugins = ["pydantic.mypy"]
@@ -139,8 +140,11 @@ ignore-words-list = "euclidian,TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem"
 skip = "pyproject.toml, uv.lock"
 
 [tool.ty.src]
+include = ["docs", "src", "tests"]
 exclude = [
     "src/kfactory/widgets/interactive.py",
+    "tests/gdsfactory-yaml-pics",
+    "docs"
 ]
 
 [tool.ruff]
@@ -148,7 +152,7 @@ fix = true
 line-length = 88
 exclude = ["docs", "src/kfactory/widgets/interactive.py"]
 indent-width = 4
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["ALL"]

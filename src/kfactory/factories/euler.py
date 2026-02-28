@@ -13,8 +13,8 @@ from collections.abc import Callable
 from typing import Any, Protocol, Unpack, cast, overload
 
 import numpy as np
-from scipy.optimize import brentq  # type:ignore[import-untyped,unused-ignore]
-from scipy.special import fresnel  # type:ignore[import-untyped,unused-ignore]
+from scipy.optimize import brentq
+from scipy.special import fresnel
 
 from .. import kdb
 from ..conf import logger
@@ -23,6 +23,7 @@ from ..kcell import KCell
 from ..layout import CellKWargs, KCLayout
 from ..settings import Info
 from ..typings import KC, KC_co, MetaData, deg, um
+from .utils import _is_additional_info_func
 
 __all__ = [
     "bend_euler_factory",
@@ -249,25 +250,22 @@ def bend_euler_factory(
 ) -> BendEulerFactory[KC]:
     """Returns a function generating euler bends.
 
+    Will snap ports by default
+
     Args:
         kcl: The KCLayout which will be owned
         additional_info: Add additional key/values to the
             [`KCell.info`][kfactory.settings.Info]. Can be a static dict
             mapping info name to info value. Or can a callable which takes the straight
             functions' parameters as kwargs and returns a dict with the mapping.
-        basename: Overwrite the prefix of the resulting KCell's name. By default
-            the KCell will be named 'straight_dbu[...]'.
-        snap_ports: Whether to snap ports to grid. If snapping is turned of, ports
-            ports are still snapped to grid if they are within 0.0001° of multiples
-            of 90°.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
-    if callable(additional_info) and additional_info is not None:
+    _additional_info: dict[str, MetaData] = {}
+    if _is_additional_info_func(additional_info):
         _additional_info_func: Callable[
             ...,
             dict[str, MetaData],
         ] = additional_info
-        _additional_info: dict[str, MetaData] = {}
     else:
 
         def additional_info_func(
@@ -276,7 +274,7 @@ def bend_euler_factory(
             return {}
 
         _additional_info_func = additional_info_func
-        _additional_info = additional_info or {}
+        _additional_info = additional_info or {}  # ty:ignore[invalid-assignment]
     if cell_kwargs.get("snap_ports") is None:
         cell_kwargs["snap_ports"] = False
 
@@ -422,16 +420,14 @@ def bend_s_euler_factory(
             [`KCell.info`][kfactory.settings.Info]. Can be a static dict
             mapping info name to info value. Or can a callable which takes the straight
             functions' parameters as kwargs and returns a dict with the mapping.
-        basename: Overwrite the prefix of the resulting KCell's name. By default
-            the KCell will be named 'straight_dbu[...]'.
         cell_kwargs: Additional arguments passed as `@kcl.cell(**cell_kwargs)`.
     """
-    if callable(additional_info):
+    _additional_info: dict[str, MetaData] = {}
+    if _is_additional_info_func(additional_info):
         _additional_info_func: Callable[
             ...,
             dict[str, MetaData],
         ] = additional_info
-        _additional_info: dict[str, MetaData] = {}
     else:
 
         def additional_info_func(
@@ -440,7 +436,7 @@ def bend_s_euler_factory(
             return {}
 
         _additional_info_func = additional_info_func
-        _additional_info = additional_info or {}
+        _additional_info = additional_info or {}  # ty:ignore[invalid-assignment]
     if output_type is not None:
         cell = kcl.cell(output_type=output_type, **cell_kwargs)
     else:

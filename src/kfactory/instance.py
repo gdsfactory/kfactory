@@ -7,7 +7,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Generic,
     Self,
     overload,
 )
@@ -22,7 +21,6 @@ from .exceptions import (
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .port import DPort, Port, ProtoPort
-from .typings import TUnit
 
 if TYPE_CHECKING:
     from ruamel.yaml.representer import BaseRepresenter, MappingNode
@@ -47,7 +45,7 @@ if TYPE_CHECKING:
 __all__ = ["DInstance", "Instance", "ProtoInstance", "ProtoTInstance", "VInstance"]
 
 
-class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
+class ProtoInstance[T: (int, float)](GeometricObject[T]):
     """Base class for instances."""
 
     _kcl: KCLayout
@@ -82,13 +80,13 @@ class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
     @abstractmethod
     def __getitem__(
         self, key: int | str | tuple[int | str | None, int, int] | None
-    ) -> ProtoPort[TUnit]: ...
+    ) -> ProtoPort[T]: ...
     @property
     @abstractmethod
-    def ports(self) -> ProtoInstancePorts[TUnit, ProtoInstance[TUnit]]: ...
+    def ports(self) -> ProtoInstancePorts[T, ProtoInstance[T]]: ...
 
 
-class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
+class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
     _instance: kdb.Instance
 
     @property
@@ -118,7 +116,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
     def __getattr__(self, name: str) -> Any:
         """If we don't have an attribute, get it from the instance."""
         try:
-            return super().__getattr__(name)  # type: ignore[misc]
+            return super().__getattr__(name)
         except Exception:
             return getattr(self._instance, name)
 
@@ -147,12 +145,12 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @property
     @abstractmethod
-    def parent_cell(self) -> ProtoTKCell[TUnit]: ...
+    def parent_cell(self) -> ProtoTKCell[T]: ...
 
     @property
     def purpose(self) -> str | None:
         """Purpose value of instance in GDS."""
-        return self._instance.property(PROPID.PURPOSE)  # type: ignore[no-any-return]
+        return self._instance.property(PROPID.PURPOSE)
 
     @purpose.setter
     def purpose(self, value: str | None) -> None:
@@ -169,7 +167,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @property
     @abstractmethod
-    def cell(self) -> ProtoTKCell[TUnit]:
+    def cell(self) -> ProtoTKCell[T]:
         """Parent KCell  of the Instance."""
         ...
 
@@ -179,13 +177,13 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @property
     @abstractmethod
-    def ports(self) -> ProtoTInstancePorts[TUnit]:
+    def ports(self) -> ProtoTInstancePorts[T]:
         """Ports of the instance."""
         ...
 
     @property
     @abstractmethod
-    def pins(self) -> ProtoTInstancePins[TUnit]:
+    def pins(self) -> ProtoTInstancePins[T]:
         """Ports of the instance."""
         ...
 
@@ -935,10 +933,10 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     reg.transform(kdb.ICplxTrans((trans * self.trans), cell.kcl.dbu))
                     cell.shapes(layer).insert(reg)
             else:
-                for layer, shapes in self.cell._shapes.items():
+                for layer, shapes in self.cell.shapes.items():
                     for shape in shapes.transform(trans * self.trans):
                         cell.shapes(layer).insert(shape)
-                for vinst in self.cell.insts:
+                for vinst in self.cell.vinsts:
                     vinst.insert_into_flat(cell, trans=trans * self.trans)
 
     @overload

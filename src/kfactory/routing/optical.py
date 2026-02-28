@@ -23,7 +23,6 @@ from .generic import (
     route_bundle as route_bundle_generic,
 )
 from .manhattan import (
-    ManhattanRoutePathFunction,
     ManhattanRouter,
     _is_manhattan,
     route_manhattan,
@@ -48,7 +47,6 @@ __all__ = [
     "place90",
     "place_manhattan",
     "place_manhattan_with_sbends",
-    "route",
     "route_bundle",
     "route_loopback",
     "vec_angle",
@@ -234,8 +232,6 @@ def route_bundle(
     straight_factory: StraightFactoryDBU,
     bend90_cell: KCell,
     taper_cell: KCell | None = None,
-    start_straights: dbu | list[dbu] | None = None,
-    end_straights: dbu | list[dbu] | None = None,
     min_straight_taper: dbu = 0,
     place_port_type: str = "optical",
     place_allow_small_routes: bool = False,
@@ -269,8 +265,6 @@ def route_bundle(
     straight_factory: StraightFactoryUM,
     bend90_cell: DKCell,
     taper_cell: DKCell | None = None,
-    start_straights: um | list[um] | None = None,
-    end_straights: um | list[um] | None = None,
     min_straight_taper: um = 0,
     place_port_type: str = "optical",
     place_allow_small_routes: bool = False,
@@ -303,8 +297,6 @@ def route_bundle(
     straight_factory: StraightFactoryDBU | StraightFactoryUM,
     bend90_cell: KCell | DKCell,
     taper_cell: KCell | DKCell | None = None,
-    start_straights: dbu | list[dbu] | um | list[um] | None = None,
-    end_straights: dbu | list[dbu] | um | list[um] | None = None,
     min_straight_taper: dbu | float = 0,
     place_port_type: str = "optical",
     place_allow_small_routes: bool = False,
@@ -389,10 +381,6 @@ def route_bundle(
         straight_factory: Factory function for straight cells. in DBU.
         bend90_cell: 90° bend cell.
         taper_cell: Taper cell.
-        start_straights: DEPRECATED[Use starts instead]
-            `p1`.
-        end_straights: DEPRECATED[Use ends instead]
-            `p2`.
         starts: Minimal straight segment after `start_ports`.
         ends: Minimal straight segment before `end_ports`.
         min_straight_taper: Minimum straight [dbu] before attempting to place tapers.
@@ -442,12 +430,6 @@ def route_bundle(
         starts = []
     if bboxes is None:
         bboxes = []
-    if start_straights is not None:
-        logger.warning("start_straights is deprecated. Use `starts` instead.")
-        starts = start_straights
-    if end_straights is not None:
-        logger.warning("end_straights is deprecated. Use `ends` instead.")
-        ends = end_straights
     bend90_radius = get_radius(bend90_cell.ports.filter(port_type=place_port_type))
     start_ports_ = [p.base.model_copy() for p in start_ports]
     end_ports_ = [p.base.model_copy() for p in end_ports]
@@ -468,7 +450,7 @@ def route_bundle(
         }
     else:
         # Not a type error
-        placer = place_manhattan_with_sbends  # type: ignore[assignment]
+        placer = place_manhattan_with_sbends
         placer_kwargs = {
             "straight_factory": straight_factory,
             "bend90_cell": bend90_cell,
@@ -729,9 +711,7 @@ def route_bundle(
                 cell = db.create_cell(c_.name)
                 wp_len = len(waypoints)
 
-                width_d = cast("float | None", route_width) or cast(
-                    "float", start_ports[0].width
-                )
+                width_d = cast("float | None", route_width) or start_ports[0].width
 
                 for i, wp_d in enumerate(waypoints):
                     it = db.create_item(cell=cell, category=wp_cat)
@@ -1321,7 +1301,7 @@ def place_manhattan_with_sbends(
     allow_type_mismatch: bool | None = None,
     purpose: str | None = "routing",
     *,
-    sbend_factory: SBendFactoryDBU,
+    sbend_factory: SBendFactoryDBU | None = None,
     **kwargs: Any,
 ) -> ManhattanRoute:
     # configure and set up route and placers
@@ -1338,13 +1318,18 @@ def place_manhattan_with_sbends(
         allow_type_mismatch = config.allow_type_mismatch
     if straight_factory is None:
         raise ValueError(
-            "place_manhattan needs to have a straight_factory set. Please pass a "
-            "straight_factory which takes kwargs 'width: int' and 'length: int'."
+            "place_manhattan_with_sbends needs to have a straight_factory set. Please "
+            "pass a straight_factory which takes kwargs 'width: int' and 'length: int'."
         )
     if bend90_cell is None:
         raise ValueError(
-            "place_manhattan needs to be passed a fixed bend90 cell with two optical"
-            " ports which are 90° apart from each other with port_type 'port_type'."
+            "place_manhattan_with_sbends needs to be passed a fixed bend90 cell with "
+            "two optical ports which are 90° apart from each other with port_type "
+            "'port_type'."
+        )
+    if sbend_factory is None:
+        raise ValueError(
+            "place_manhattan_with_sbends needs to be passed a sbend_function."
         )
     route_start_port = p1.copy()
     route_start_port.name = None
@@ -1885,356 +1870,6 @@ def route_loopback(
         )
         + pts_end
     )
-
-
-def route(
-    c: KCell,
-    p1: Port,
-    p2: Port,
-    straight_factory: StraightFactoryDBU,
-    bend90_cell: KCell,
-    bend180_cell: KCell | None = None,
-    taper_cell: KCell | None = None,
-    start_straight: dbu = 0,
-    end_straight: dbu = 0,
-    route_path_function: ManhattanRoutePathFunction = route_manhattan,
-    port_type: str = "optical",
-    allow_small_routes: bool = False,
-    route_kwargs: dict[str, Any] | None = None,
-    route_width: dbu | None = None,
-    min_straight_taper: dbu = 0,
-    allow_width_mismatch: bool | None = None,
-    allow_layer_mismatch: bool | None = None,
-    allow_type_mismatch: bool | None = None,
-    purpose: str | None = "routing",
-) -> ManhattanRoute:
-    """Places a route between two ports.
-
-    Args:
-        c: Cell to place the route in.
-        p1: Start port.
-        p2: End port.
-        straight_factory: Factory function for straight cells. in DBU.
-        bend90_cell: 90° bend cell.
-        bend180_cell: 180° bend cell.
-        taper_cell: Taper cell.
-        start_straight: Minimal straight segment after `p1`.
-        end_straight: Minimal straight segment before `p2`.
-        route_path_function: Function to calculate the route path. If bend180_cell is
-            not None, this function must also take the kwargs `bend180_radius` as
-            specified in
-            [ManhattanRoutePathFunction180][kfactory.routing.manhattan.ManhattanRoutePathFunction180]
-        port_type: Port type to use for the bend90_cell.
-        allow_small_routes: Don't throw an error if two corners cannot be safely placed
-            due to small space and place them anyway.
-        route_kwargs: Additional keyword arguments for the route_path_function.
-        route_width: Width of the route. If None, the width of the ports is used.
-        min_straight_taper: Minimum straight [dbu] before attempting to place tapers.
-        allow_width_mismatch: If True, the width of the ports is ignored
-            (config default: False).
-        allow_layer_mismatch: If True, the layer of the ports is ignored
-            (config default: False).
-        allow_type_mismatch: If True, the type of the ports is ignored
-            (config default: False).
-        purpose: Set the property "purpose" (at id kf.kcell.PROPID.PURPOSE) to the
-            value. Not set if None.
-
-    Raises:
-        ValueError: If the route cannot be placed due to small space.
-        AttributeError: If the bend90_cell or taper_cell do not have the correct.
-
-    Returns:
-        ManhattanRoute: The route object with the placed components.
-    """
-    logger.opt(depth=2).warning(
-        "`kfactory.routing.optical.route` is deprecated, please use `route_bundle`"
-        " instead. `route` will be removed in kfactory 3"
-    )
-    if route_kwargs is None:
-        route_kwargs = {}
-    if allow_width_mismatch is None:
-        allow_width_mismatch = config.allow_width_mismatch
-    if allow_layer_mismatch is None:
-        allow_layer_mismatch = config.allow_layer_mismatch
-    if allow_type_mismatch is None:
-        allow_type_mismatch = config.allow_type_mismatch
-    if p1.width != p2.width and not allow_width_mismatch:
-        raise ValueError(
-            f"The ports have different widths {p1.width=} {p2.width=}. If this is"
-            "intentional, add `allow_width_mismatch=True` to override this."
-        )
-
-    p1 = p1.copy()
-    p1.trans.mirror = False
-    p2 = p2.copy()
-    p2.trans.mirror = False
-
-    # determine bend90_radius
-    bend90_ports = [p for p in bend90_cell.ports if p.port_type == port_type]
-
-    if len(bend90_ports) != NUM_PORTS_FOR_ROUTING:
-        raise ValueError(
-            f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
-        )
-
-    if abs((bend90_ports[0].trans.angle - bend90_ports[1].trans.angle) % 4) != 1:
-        raise ValueError(
-            f"{bend90_cell.name} bend ports should be 90° apart from each other. "
-            f"{bend90_ports[0]=} {bend90_ports[1]=}"
-        )
-    if (bend90_ports[1].trans.angle - bend90_ports[0].trans.angle) % 4 == ANGLE_270:
-        b90p1 = bend90_ports[1]
-        b90p2 = bend90_ports[0]
-    else:
-        b90p1 = bend90_ports[0]
-        b90p2 = bend90_ports[1]
-
-    b90c = kdb.Trans(
-        b90p1.trans.rot,
-        b90p1.trans.is_mirror(),
-        b90p1.trans.disp.x if b90p1.trans.angle % 2 else b90p2.trans.disp.x,
-        b90p2.trans.disp.y if b90p1.trans.angle % 2 else b90p1.trans.disp.y,
-    )
-
-    start_port: Port = p1.copy()
-    end_port: Port = p2.copy()
-    b90r = int(
-        max(
-            (b90p1.trans.disp - b90c.disp).length(),
-            (b90p2.trans.disp - b90c.disp).length(),
-        )
-    )
-
-    if bend180_cell is not None:
-        # Bend 180 is available
-        bend180_ports = list(bend180_cell.ports.filter(port_type=port_type))
-        if len(bend180_ports) != NUM_PORTS_FOR_ROUTING:
-            raise AttributeError(
-                f"{bend180_cell.name} should have 2 ports but has {len(bend180_ports)}"
-                " ports"
-            )
-        if abs((bend180_ports[0].trans.angle - bend180_ports[1].trans.angle) % 4) != 0:
-            raise AttributeError(
-                f"{bend180_cell.name} bend ports for bend180 should be 0° apart from"
-                f" each other, {bend180_ports[0]=} {bend180_ports[1]=}"
-            )
-        d = 1 if bend180_ports[0].trans.angle in [0, 3] else -1
-        b180p1, b180p2 = sorted(
-            bend180_ports,
-            key=lambda port: (d * port.trans.disp.x, d * port.trans.disp.y),
-        )
-
-        b180r = int((b180p2.trans.disp - b180p1.trans.disp).length())
-        start_port = p1.copy()
-        end_port = p2.copy()
-        pts = route_path_function(  # type: ignore[call-arg]
-            port1=start_port,
-            port2=end_port,
-            bend90_radius=b90r,
-            bend180_radius=b180r,
-            start_straight=start_straight,
-            end_straight=end_straight,
-        )
-
-        if len(pts) > 2:  # noqa: PLR2004
-            if (vec := pts[1] - pts[0]).length() == b180r:
-                match (p1.trans.angle - vec_angle(vec)) % 4:
-                    case 1:
-                        bend180 = c << bend180_cell
-                        bend180.purpose = purpose
-                        bend180.connect(
-                            b180p1.name,
-                            p1,
-                            allow_width_mismatch=allow_width_mismatch,
-                            allow_layer_mismatch=allow_layer_mismatch,
-                            allow_type_mismatch=allow_type_mismatch,
-                        )
-                        start_port = bend180.ports[b180p2.name]
-                        pts = pts[1:]
-                    case 3:
-                        bend180 = c << bend180_cell
-                        bend180.purpose = purpose
-                        bend180.connect(
-                            b180p2.name,
-                            p1,
-                            allow_width_mismatch=allow_width_mismatch,
-                            allow_layer_mismatch=allow_layer_mismatch,
-                            allow_type_mismatch=allow_type_mismatch,
-                        )
-                        start_port = bend180.ports[b180p1.name]
-                        pts = pts[1:]
-            if (vec := pts[-1] - pts[-2]).length() == b180r:
-                match (vec_angle(vec) - p2.trans.angle) % 4:
-                    case 1:
-                        bend180 = c << bend180_cell
-                        bend180.purpose = purpose
-                        bend180.connect(
-                            b180p1.name,
-                            p2,
-                            allow_width_mismatch=allow_width_mismatch,
-                            allow_layer_mismatch=allow_layer_mismatch,
-                            allow_type_mismatch=allow_type_mismatch,
-                        )
-                        end_port = bend180.ports[b180p2.name]
-                        pts = pts[:-1]
-                    case 3:
-                        bend180 = c << bend180_cell
-                        bend180.purpose = purpose
-                        bend180.connect(
-                            b180p2.name,
-                            p2,
-                            allow_width_mismatch=allow_width_mismatch,
-                            allow_layer_mismatch=allow_layer_mismatch,
-                            allow_type_mismatch=allow_type_mismatch,
-                        )
-                        end_port = bend180.ports[b180p1.name]
-                        pts = pts[:-1]
-
-            if len(pts) > 3:  # noqa: PLR2004
-                pt1, pt2, pt3 = pts[:3]
-                j = 0
-                for i in range(3, len(pts) - 2):
-                    pt4 = pts[i]
-                    vecp = pt2 - pt1
-                    vec = pt3 - pt2
-                    vecn = pt4 - pt3
-
-                    ang1 = vec_angle(vecp)
-                    ang2 = vec_angle(vec)
-                    ang3 = vec_angle(vecn)
-
-                    if vecp == vec and ang2 - ang1 == 0:
-                        bend180 = c << bend180_cell
-                        bend180.purpose = purpose
-                        if start_port.name == b180p2.name:
-                            bend180.connect(
-                                b180p1.name,
-                                start_port,
-                                allow_width_mismatch=allow_width_mismatch,
-                                allow_layer_mismatch=allow_layer_mismatch,
-                                allow_type_mismatch=allow_type_mismatch,
-                            )
-                            start_port = bend180.ports[b180p2.name]
-                        else:
-                            bend180.connect(
-                                b180p2.name,
-                                start_port,
-                                allow_width_mismatch=allow_width_mismatch,
-                                allow_layer_mismatch=allow_layer_mismatch,
-                                allow_type_mismatch=allow_type_mismatch,
-                            )
-                            start_port = bend180.ports[b180p1.name]
-                        j = i - 1
-                    elif (
-                        vec.length() == b180r
-                        and (ang2 - ang1) % 4 == 1
-                        and (ang3 - ang2) % 4 == 1
-                    ):
-                        bend180 = c << bend180_cell
-                        bend180.purpose = purpose
-                        bend180.transform(
-                            kdb.Trans((ang1 + 2) % 4, False, pt2.x, pt2.y)
-                            * b180p1.trans.inverted()
-                        )
-                        place_manhattan(
-                            c=c,
-                            p1=start_port.copy(),
-                            p2=bend180.ports[b180p1.name],
-                            pts=pts[j : i - 2],
-                            straight_factory=straight_factory,
-                            bend90_cell=bend90_cell,
-                            taper_cell=taper_cell,
-                            port_type=port_type,
-                            allow_small_routes=allow_small_routes,
-                            allow_width_mismatch=allow_width_mismatch,
-                            allow_layer_mismatch=allow_layer_mismatch,
-                            allow_type_mismatch=allow_type_mismatch,
-                            route_width=route_width,
-                        )
-                        j = i - 1
-                        start_port = bend180.ports[b180p2.name]
-                    elif (
-                        vec.length() == b180r
-                        and (ang2 - ang1) % 4 == ANGLE_270
-                        and (ang3 - ang2) % 4 == ANGLE_270
-                    ):
-                        bend180 = c << bend180_cell
-                        bend180.purpose = purpose
-                        bend180.transform(
-                            kdb.Trans((ang1 + 2) % 4, False, pt2.x, pt2.y)
-                            * b180p2.trans.inverted()
-                        )
-                        place_manhattan(
-                            c=c,
-                            p1=start_port.copy(),
-                            p2=bend180.ports[b180p2.name],
-                            pts=pts[j : i - 2],
-                            straight_factory=straight_factory,
-                            bend90_cell=bend90_cell,
-                            taper_cell=taper_cell,
-                            port_type=port_type,
-                            allow_small_routes=allow_small_routes,
-                            allow_width_mismatch=allow_width_mismatch,
-                            route_width=route_width,
-                        )
-                        j = i - 1
-                        start_port = bend180.ports[b180p1.name]
-
-                    pt1 = pt2
-                    pt2 = pt3
-                    pt3 = pt4
-
-        route = place_manhattan(
-            c=c,
-            p1=start_port.copy(),
-            p2=end_port.copy(),
-            pts=pts,
-            straight_factory=straight_factory,
-            bend90_cell=bend90_cell,
-            taper_cell=taper_cell,
-            min_straight_taper=min_straight_taper,
-            port_type=port_type,
-            allow_small_routes=allow_small_routes,
-            allow_width_mismatch=allow_width_mismatch,
-            route_width=route_width,
-        )
-
-    else:
-        start_port = p1.copy()
-        end_port = p2.copy()
-        if not route_kwargs:
-            pts = route_path_function(
-                start_port,
-                end_port,
-                bend90_radius=b90r,
-                start_steps=[Straight(dist=start_straight)],
-                end_steps=[Straight(dist=end_straight)],
-            )
-        else:
-            pts = route_path_function(
-                start_port,
-                end_port,
-                bend90_radius=b90r,
-                start_steps=[Straight(dist=start_straight)],
-                end_steps=[Straight(dist=end_straight)],
-                **route_kwargs,
-            )
-
-        route = place_manhattan(
-            c=c,
-            p1=p1.copy(),
-            p2=p2.copy(),
-            pts=pts,
-            straight_factory=straight_factory,
-            bend90_cell=bend90_cell,
-            taper_cell=taper_cell,
-            allow_small_routes=allow_small_routes,
-            min_straight_taper=min_straight_taper,
-            port_type=port_type,
-            allow_width_mismatch=allow_width_mismatch,
-            route_width=route_width,
-        )
-    return route
 
 
 def vec_angle(v: kdb.Vector) -> int:

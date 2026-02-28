@@ -18,6 +18,7 @@ from typing import (
     Any,
     NotRequired,
     TypeGuard,
+    cast,
     overload,
 )
 
@@ -236,14 +237,14 @@ def extrude_path_dynamic_points(
     if callable(widths):
         length = sum(((p2 - p1).abs() for p2, p1 in itertools.pairwise(path)))
         z: float = 0
-        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable]
         vector_top = [start_trans * ref_vector]
         vector_bot = [start_trans * kdb.DCplxTrans.R180 * ref_vector]
         p_old = path[0]
         p = path[1]
         z += (p - p_old).abs()
         for point in path[2:]:
-            ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))
+            ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable]
             p_new = point
             v = p_new - p_old
             angle = np.rad2deg(np.arctan2(v.y, v.x))
@@ -253,7 +254,7 @@ def extrude_path_dynamic_points(
             z += (p_new - p).abs()
             p_old = p
             p = p_new
-        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))
+        ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths(z / length) / 2))  # ty:ignore[call-top-callable]
     else:
         ref_vector = kdb.DCplxTrans(kdb.DVector(0, widths[0] / 2))
         vector_top = [start_trans * ref_vector]
@@ -464,8 +465,8 @@ class LayerSection(BaseModel):
             ):
                 sec.d_max = max(self.sections[i].d_max, sec.d_max)
                 sec.d_min = min(
-                    self.sections[i].d_min,
-                    sec.d_min,  # type: ignore[type-var]
+                    self.sections[i].d_min,  # ty:ignore[invalid-argument-type]
+                    sec.d_min,
                 )
                 self.sections.pop(i)
                 if i == len(self.sections):
@@ -550,7 +551,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
                         (
                             section[0],
                             kcl.to_dbu(section[1]),
-                            kcl.to_dbu(section[2]),
+                            kcl.to_dbu(section[2]),  # ty:ignore[index-out-of-bounds]
                         )
                     )
 
@@ -564,7 +565,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
                 ls = LayerSection()
                 layer_sections[sec[0]] = ls
             ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(  # noqa: PLR2004
-                Section(d_max=sec[2], d_min=sec[1])
+                Section(d_max=sec[2], d_min=sec[1])  # ty:ignore[index-out-of-bounds]
             )
         super().__init__(
             main_layer=main_layer,
@@ -572,7 +573,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             layer_sections=layer_sections,
             bbox_sections={t[0]: t[1] for t in bbox_sections},
         )
-        self._name = name
+        self._name = name  # ty:ignore[invalid-assignment]
 
     @model_serializer
     def _serialize(self) -> dict[str, Any]:
@@ -635,7 +636,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             return r.minkowski_sum(shape(d))
         shape_ = shape(abs(d))
         if isinstance(shape_, list):
-            box_shape = kdb.Polygon(shape_)
+            box_shape = kdb.Polygon(cast("list[kdb.Point]", shape_))
             bbox_maxsize = max(
                 box_shape.bbox().width(),
                 box_shape.bbox().height(),
@@ -1311,7 +1312,7 @@ class KCellEnclosure(BaseModel):
             return r.minkowski_sum(shape(d))
         shape_ = shape(abs(d))
         if isinstance(shape_, list):
-            box_shape = kdb.Polygon(shape_)
+            box_shape = kdb.Polygon(cast("list[kdb.Point]", shape_))
             bbox_maxsize = max(
                 box_shape.bbox().width(),
                 box_shape.bbox().height(),
@@ -1649,7 +1650,7 @@ class LayerEnclosureModel(RootModel[dict[str, LayerEnclosure]]):
                     main_layer=enclosure["main_layer"],
                     kcl=kcl,
                 )
-
+        enclosure = cast("LayerEnclosure", enclosure)
         if enclosure.name not in self.root:
             self.root[enclosure.name] = enclosure
             return enclosure
@@ -1671,6 +1672,12 @@ def _add_section(
         layer_sections[layer].add_section(section)
     else:
         layer_sections[layer] = LayerSection(sections=[section])
+
+
+def _point_list_guard(
+    shape: list[kdb.Point] | kdb.Box | kdb.Edge | kdb.Polygon,
+) -> TypeGuard[list[kdb.Point]]:
+    return isinstance(shape, list)
 
 
 LayerEnclosureModel.model_rebuild()

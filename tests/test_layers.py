@@ -62,8 +62,8 @@ def test_layer_enum_str(layers: Layers) -> None:
 
 def test_layer_enum_getitem(layers: Layers) -> None:
     layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
-    assert layer_enum["WG"][0] == 1  # type: ignore[index]
-    assert layer_enum["WG"][1] == 0  # type: ignore[index]
+    assert layer_enum["WG"][0] == 1
+    assert layer_enum["WG"][1] == 0
 
 
 def test_layer_enum_len(layers: Layers) -> None:
@@ -80,7 +80,7 @@ def test_layer_enum_iter(layers: Layers) -> None:
 def test_layer_enum_invalid_index(layers: Layers) -> None:
     layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
     with pytest.raises(ValueError):
-        layer_enum["WG"][2]  # type: ignore[index]
+        layer_enum["WG"][2]
 
 
 def test_layer_stack(pdk: kf.KCLayout) -> None:

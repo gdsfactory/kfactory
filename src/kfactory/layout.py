@@ -18,7 +18,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Concatenate,
-    Generic,
     Literal,
     TypedDict,
     cast,
@@ -46,7 +45,12 @@ from .cross_section import (
     DSymmetricalCrossSection,
     SymmetricalCrossSection,
 )
-from .decorators import Decorators, PortsDefinition, WrappedKCellFunc, WrappedVKCellFunc
+from .decorators import (
+    Decorators,
+    PortsDefinition,
+    WrappedKCellFunc,
+    WrappedVKCellFunc,
+)
 from .enclosure import (
     KCellEnclosure,
     LayerEnclosure,
@@ -72,24 +76,23 @@ from .merge import MergeDiff
 from .pin import BasePin
 from .port import BasePort, ProtoPort, rename_clockwise_multi
 from .routing.generic import ManhattanRoute
+from .serialization import get_function_name
 from .settings import Info, KCellSettings
-from .typings import (
-    KC,
-    KCIN,
-    VK,
-    F,
-    KC_contra,
-    KCellParams,
-    MetaData,
-    P,
-    T,
-    TUnit,
-)
 from .utilities import load_layout_options, save_layout_options
 
 if TYPE_CHECKING:
     from .ports import DPorts, Ports
     from .schematic import TSchematic
+    from .typings import (
+        KC,
+        KCIN,
+        VK,
+        KC_contra,
+        KCellParams,
+        MetaData,
+        P,
+        T,
+    )
 
 kcl: KCLayout
 kcls: dict[str, KCLayout] = {}
@@ -108,7 +111,9 @@ def get_default_kcl() -> KCLayout:
     return kcl
 
 
-class Factories(Mapping[str, F], Generic[F]):
+class Factories[F: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]](
+    Mapping[str, F]
+):
     _all: list[F]
     _by_name: dict[str, int]
     _by_tag: defaultdict[str, list[int]]
@@ -502,7 +507,7 @@ class KCLayout(
         )
         info = self.layout.get_info(self.layout.layer(*args, **kwargs))
         try:
-            return self.layers[info.name]  # type:ignore[no-any-return, index]
+            return self.layers[info.name]
         except KeyError as e:
             if allow_undefined_layers:
                 return self.layout.layer(info)
@@ -611,7 +616,7 @@ class KCLayout(
     @overload
     def schematic_cell(
         self,
-        _func: Callable[KCellParams, TSchematic[TUnit]],
+        _func: Callable[KCellParams, TSchematic[Any]],
         /,
     ) -> Callable[KCellParams, KCell]: ...
 
@@ -655,7 +660,7 @@ class KCLayout(
         ]
         | None = None,
     ) -> Callable[
-        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KCell]
+        [Callable[KCellParams, TSchematic[Any]]], Callable[KCellParams, KCell]
     ]: ...
 
     @overload
@@ -699,7 +704,7 @@ class KCLayout(
         ]
         | None = None,
     ) -> Callable[
-        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KCell]
+        [Callable[KCellParams, TSchematic[Any]]], Callable[KCellParams, KCell]
     ]: ...
 
     @overload
@@ -744,7 +749,7 @@ class KCLayout(
         ]
         | None = None,
     ) -> Callable[
-        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KC]
+        [Callable[KCellParams, TSchematic[Any]]], Callable[KCellParams, KC]
     ]: ...
 
     @overload
@@ -788,12 +793,12 @@ class KCLayout(
         ]
         | None = None,
     ) -> Callable[
-        [Callable[KCellParams, TSchematic[TUnit]]], Callable[KCellParams, KC]
+        [Callable[KCellParams, TSchematic[Any]]], Callable[KCellParams, KC]
     ]: ...
 
     def schematic_cell(
         self,
-        _func: Callable[KCellParams, TSchematic[TUnit]] | None = None,
+        _func: Callable[KCellParams, TSchematic[Any]] | None = None,
         /,
         *,
         output_type: type[KC] | None = None,
@@ -847,7 +852,7 @@ class KCLayout(
             if output_type is None:
 
                 def wrap_f(
-                    f: Callable[KCellParams, TSchematic[TUnit]],
+                    f: Callable[KCellParams, TSchematic[Any]],
                 ) -> Callable[KCellParams, KCell]:
                     @self.cell(
                         output_type=KCell,
@@ -891,7 +896,7 @@ class KCLayout(
                 return wrap_f
 
             def custom_wrap_f(
-                f: Callable[KCellParams, TSchematic[TUnit]],
+                f: Callable[KCellParams, TSchematic[Any]],
             ) -> Callable[KCellParams, KC]:
                 @self.cell(
                     output_type=output_type,
@@ -935,7 +940,7 @@ class KCLayout(
             return custom_wrap_f
 
         def simple_wrap_f(
-            f: Callable[KCellParams, TSchematic[TUnit]],
+            f: Callable[KCellParams, TSchematic[Any]],
         ) -> Callable[KCellParams, KCell]:
             @self.cell(output_type=KCell, schematic_function=f)
             @functools.wraps(f)
@@ -1189,7 +1194,7 @@ class KCLayout(
         [Callable[KCellParams, ProtoTKCell[Any]]], Callable[KCellParams, KC]
     ]: ...
 
-    def cell(
+    def cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         _func: Callable[KCellParams, ProtoTKCell[Any]] | None = None,
         /,
@@ -1209,7 +1214,7 @@ class KCLayout(
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KC_contra], None]] | None = None,
+        post_process: Iterable[Callable[[KC], None]] | None = None,
         debug_names: bool | None = None,
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
@@ -1291,7 +1296,7 @@ class KCLayout(
             elif sig.return_annotation is not inspect.Signature.empty:
                 # Use get_type_hints to resolve string annotations
                 try:
-                    type_hints = get_type_hints(f, globalns=f.__globals__)
+                    type_hints = get_type_hints(f, globalns=f.__globals__)  # ty:ignore[unresolved-attribute]
                     output_cell_type_ = type_hints.get("return", sig.return_annotation)
 
                 except Exception:
@@ -1340,7 +1345,7 @@ class KCLayout(
                 with self.thread_lock:
                     if wrapper_autocell.name is None:
                         raise ValueError(f"Function {f} has no name.")
-                    self.factories.add(wrapper_autocell)  # type: ignore[arg-type]
+                    self.factories.add(wrapper_autocell)
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:
@@ -1507,7 +1512,7 @@ class KCLayout(
             elif sig.return_annotation is not inspect.Signature.empty:
                 # Use get_type_hints to resolve string annotations
                 try:
-                    type_hints = get_type_hints(f, globalns=f.__globals__)
+                    type_hints = get_type_hints(f, globalns=f.__globals__)  # ty:ignore[unresolved-attribute]
                     output_cell_type_ = type_hints.get("return", sig.return_annotation)
 
                 except Exception:
@@ -1893,14 +1898,14 @@ class KCLayout(
                         yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                         err_msg += (
                             "\nLayout Meta Diff:\n```\n"
-                            + yaml.dumps(dict(diff.layout_meta_diff))
+                            + yaml.dumps(dict(diff.layout_meta_diff))  # ty:ignore[unresolved-attribute]
                             + "\n```"
                         )
                     if diff.cells_meta_diff:
                         yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                         err_msg += (
                             "\nLayout Meta Diff:\n```\n"
-                            + yaml.dumps(dict(diff.cells_meta_diff))
+                            + yaml.dumps(dict(diff.cells_meta_diff))  # ty:ignore[unresolved-attribute]
                             + "\n```"
                         )
 
@@ -1997,10 +2002,11 @@ class KCLayout(
 
     def set_meta_data(self) -> None:
         """Set the info/settings of the KCLayout."""
-        for name, setting in self.settings.model_dump().items():
-            self.add_meta_info(
-                kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
-            )
+        if config.write_kfactory_settings:
+            for name, setting in self.settings.model_dump().items():
+                self.add_meta_info(
+                    kdb.LayoutMetaInfo(f"kfactory:settings:{name}", setting, None, True)
+                )
         for name, info in self.info.model_dump().items():
             self.add_meta_info(
                 kdb.LayoutMetaInfo(f"kfactory:info:{name}", info, None, True)
@@ -2152,8 +2158,9 @@ class KCLayout(
         f: Callable[
             Concatenate[
                 ProtoTKCell[Any],
-                Sequence[ProtoPort[Any]],
-                Sequence[ProtoPort[Any]],
+                Sequence[
+                    tuple[ProtoPort[Any], ProtoPort[Any], *tuple[ProtoPort[Any], ...]]
+                ],
                 P,
             ],
             list[ManhattanRoute],
@@ -2161,13 +2168,14 @@ class KCLayout(
     ) -> Callable[
         Concatenate[
             ProtoTKCell[Any],
-            Sequence[ProtoPort[Any]],
-            Sequence[ProtoPort[Any]],
+            Sequence[
+                tuple[ProtoPort[Any], ProtoPort[Any], *tuple[ProtoPort[Any], ...]]
+            ],
             P,
         ],
         list[ManhattanRoute],
     ]:
-        self.routing_strategies[f.__name__] = f
+        self.routing_strategies[get_function_name(f)] = f
         return f
 
 

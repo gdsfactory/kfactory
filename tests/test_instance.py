@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, TypeAlias
+from typing import Any
 
 import klayout.db as kdb
 import pytest
@@ -169,12 +169,12 @@ def _instances_equal(
     )
 
 
-_DBUInstanceTuple: TypeAlias = tuple[
+type _DBUInstanceTuple = tuple[
     kf.instance.Instance, kf.instance.Instance, kf.instance.Instance
 ]
 
 
-_UMInstanceTuple: TypeAlias = tuple[
+type _UMInstanceTuple = tuple[
     kf.instance.DInstance, kf.instance.DInstance, kf.instance.DInstance
 ]
 
