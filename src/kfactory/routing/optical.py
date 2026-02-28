@@ -617,7 +617,7 @@ def route_bundle(
     if sbend_factory is None:
         placer = place_manhattan
         placer_kwargs = {
-            "straight_factory": straight_factory,
+            "straight_factory": _straight_factory,
             "bend90_cell": bend90_cell,
             "taper_cell": taper_cell,
             "port_type": place_port_type,
