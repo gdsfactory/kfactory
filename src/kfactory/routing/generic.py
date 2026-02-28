@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from ..kcell import KCell
+    from .utils import RouteDebug
 
 __all__ = [
     "ManhattanRoute",
@@ -321,6 +322,7 @@ def route_bundle(
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
 
@@ -428,6 +430,8 @@ def route_bundle(
         placer_kwargs = {}
     if routing_kwargs is None:
         routing_kwargs = {"bbox_routing": "minimal"}
+    if route_debug is not None:
+        routing_kwargs["route_debug"] = route_debug
     if not start_ports:
         return []
     if not (len(start_ports) == len(end_ports)):

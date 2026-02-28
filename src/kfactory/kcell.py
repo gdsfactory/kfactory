@@ -1212,7 +1212,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         ]
                     )
                 )
-                if w > 20:  # noqa: PLR2004
+                if w > 20:
                     poly -= kdb.Region(
                         kdb.Polygon(
                             [
@@ -2254,11 +2254,11 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                     )
 
                     net = circ.create_net(name)
-                    assert len(ports) <= 2, (  # noqa: PLR2004
+                    assert len(ports) <= 2, (
                         "Optical connection with more than two ports are not supported "
                         f"{[_port[3] for _port in ports]}"
                     )
-                    if len(ports) == 2:  # noqa: PLR2004
+                    if len(ports) == 2:
                         if allow_width_mismatch:
                             port_check(
                                 ports[0][3],
@@ -2664,7 +2664,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                             for value in values:
                                 it.add_value(value)
 
-                    case x if x > 2:  # noqa: PLR2004
+                    case x if x > 2:
                         subc = db_.category_by_path(
                             lc.path() + ".portoverlap"
                         ) or db_.create_category(lc, "portoverlap")
@@ -3714,7 +3714,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             if w in polys:
                 poly = polys[w]
             else:
-                if w < 2:  # noqa: PLR2004
+                if w < 2:
                     poly = kdb.DPolygon(
                         [
                             kdb.DPoint(0, -w / 2),

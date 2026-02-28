@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 import kfactory as kf
+from kfactory.routing.utils import RouteDebug
 from tests.conftest import Layers
 
 smart_bundle_routing_params = [
@@ -1218,3 +1219,221 @@ def test_route_same_plane(
     )
 
     c.add_ports(ports)
+
+
+def test_route_debug_waypoints_pts(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
+    kcl: kf.KCLayout,
+) -> None:
+    """RouteDebug regions are populated when routing with point waypoints."""
+    c = kcl.kcell(name="test_route_debug_waypoints_pts")
+    l_ = 3
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)]
+    start_ports = [
+        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for trans in transformations
+    ]
+    end_ports = [
+        kf.Port(
+            width=500,
+            layer_info=layers.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
+        )
+        for trans in transformations
+    ]
+    debug = RouteDebug()
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        waypoints=[
+            kf.kdb.Point(250_000, 0),
+            kf.kdb.Point(250_000, 100_000),
+            kf.kdb.Point(300_000, 100_000),
+        ],
+        sort_ports=True,
+        route_debug=debug,
+    )
+    assert not debug.fan_in_region.is_empty()
+    assert not debug.waypoints_region.is_empty()
+    assert not debug.fan_out_region.is_empty()
+
+    c.shapes(c.kcl.layer(9999, 0)).insert(debug.fan_in_region)
+    for poly in debug.fan_in_region.each():
+        for trans, string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 0)).insert(kf.kdb.Text(string, trans))
+    c.shapes(c.kcl.layer(9999, 1)).insert(debug.waypoints_region)
+    for poly in debug.waypoints_region.each():
+        for trans, string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 1)).insert(kf.kdb.Text(string, trans))
+    c.shapes(c.kcl.layer(9999, 2)).insert(debug.fan_out_region)
+    for poly in debug.fan_out_region.each():
+        for trans, string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 2)).insert(kf.kdb.Text(string, trans))
+    c.show()
+
+
+def test_route_debug(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
+    kcl: kf.KCLayout,
+) -> None:
+    """RouteDebug regions are populated when routing with point waypoints."""
+    c = kcl.kcell(name="test_route_debug_waypoints_pts")
+    l_ = 3
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)]
+    start_ports = [
+        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for trans in transformations
+    ]
+    end_ports = [
+        kf.Port(
+            width=500,
+            layer_info=layers.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(2, False, 500_000 + i * 200_000, 0) * trans,
+        )
+        for i, trans in enumerate(transformations)
+    ]
+    debug = RouteDebug()
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        sort_ports=True,
+        route_debug=debug,
+    )
+    assert not debug.fan_in_region.is_empty()
+    assert debug.waypoints_region.is_empty()
+    assert not debug.fan_out_region.is_empty()
+
+    c.shapes(c.kcl.layer(9999, 0)).insert(debug.fan_in_region)
+    for poly in debug.fan_in_region.each():
+        for trans, string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 0)).insert(kf.kdb.Text(string, trans))
+    c.shapes(c.kcl.layer(9999, 1)).insert(debug.waypoints_region)
+    for poly in debug.waypoints_region.each():
+        for trans, string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 1)).insert(kf.kdb.Text(string, trans))
+    c.shapes(c.kcl.layer(9999, 2)).insert(debug.fan_out_region)
+    for poly in debug.fan_out_region.each():
+        for trans, string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 2)).insert(kf.kdb.Text(string, trans))
+    c.show()
+
+
+def test_route_debug_opposite(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
+    kcl: kf.KCLayout,
+) -> None:
+    """RouteDebug regions are populated when routing with point waypoints."""
+    c = kcl.kcell(name="test_route_debug_waypoints_pts")
+    l_ = 3
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)]
+    start_ports = [
+        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for trans in transformations
+    ]
+    end_ports = [
+        kf.Port(
+            width=500,
+            layer_info=layers.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(0, False, 500_000 + i * 200_000, 0) * trans,
+        )
+        for i, trans in enumerate(transformations)
+    ]
+    debug = RouteDebug()
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        sort_ports=True,
+        route_debug=debug,
+    )
+    assert not debug.fan_in_region.is_empty()
+    assert debug.waypoints_region.is_empty()
+    assert not debug.fan_out_region.is_empty()
+
+    c.shapes(c.kcl.layer(9999, 0)).insert(debug.fan_in_region)
+    for poly in debug.fan_in_region.each():
+        for trans, string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 0)).insert(kf.kdb.Text(string, trans))
+    c.shapes(c.kcl.layer(9999, 1)).insert(debug.waypoints_region)
+    for poly in debug.waypoints_region.each():
+        for trans, string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 1)).insert(kf.kdb.Text(string, trans))
+    c.shapes(c.kcl.layer(9999, 2)).insert(debug.fan_out_region)
+    for poly in debug.fan_out_region.each():
+        for trans, string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 2)).insert(kf.kdb.Text(string, trans))
+    c.show()
+
+
+def test_route_debug_waypoints_trans(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
+    kcl: kf.KCLayout,
+) -> None:
+    """RouteDebug fan_in/fan_out regions are populated with Trans waypoints."""
+    c = kcl.kcell(name="test_route_debug_waypoints_trans")
+    l_ = 3
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)]
+    start_ports = [
+        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for trans in transformations
+    ]
+    end_ports = [
+        kf.Port(
+            width=500,
+            layer_info=layers.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
+        )
+        for trans in transformations
+    ]
+    debug = RouteDebug()
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        waypoints=kf.kdb.Trans(250_000, 50_000),
+        sort_ports=True,
+        route_debug=debug,
+    )
+    assert not debug.fan_in_region.is_empty()
+    assert debug.waypoints_region.is_empty()  # Trans waypoint = zero-length tunnel
+    assert not debug.fan_out_region.is_empty()
+
+    c.shapes(c.kcl.layer(111, 1)).insert(debug.fan_in_region)
+    for poly in debug.fan_in_region.each():
+        for trans, string in poly.properties().values():
+            c.shapes(c.kcl.layer(111, 1)).insert(kf.kdb.Text(string, trans))
+    c.shapes(c.kcl.layer(111, 2)).insert(debug.waypoints_region)
+    for poly in debug.waypoints_region.each():
+        for trans, string in poly.properties().values():
+            c.shapes(c.kcl.layer(111, 2)).insert(kf.kdb.Text(string, trans))
+    c.shapes(c.kcl.layer(111, 3)).insert(debug.fan_out_region)
+    for poly in debug.fan_out_region.each():
+        for trans, string in poly.properties().values():
+            c.shapes(c.kcl.layer(111, 3)).insert(kf.kdb.Text(string, trans))
+    c.show()

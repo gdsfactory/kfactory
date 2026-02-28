@@ -745,7 +745,7 @@ class Connection[T: Num](SchematicNet[T]):
         # Allow list/iterable input; normalize to a 2-tuple
         if not isinstance(v, tuple):
             v = tuple(v)
-        if len(v) != 2:  # noqa: PLR2004
+        if len(v) != 2:
             raise TypeError("net must contain exactly two endpoints")
 
         a, b = v
@@ -1405,7 +1405,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         )
         self.routes[name] = route
         for net in nets:
-            if len(net) < 2:  # noqa: PLR2004
+            if len(net) < 2:
                 raise ValueError(
                     f"Each route net must have at least 2 ports, got {len(net)} in "
                     f"route {name!r}"

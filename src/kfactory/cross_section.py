@@ -542,7 +542,7 @@ class CrossSectionModel(BaseModel):
                     LayerEnclosureSpec(
                         dsections=[
                             (section[0], self.kcl.to_dbu(section[1]))
-                            if len(section) == 2  # noqa: PLR2004
+                            if len(section) == 2
                             else (
                                 section[0],
                                 self.kcl.to_dbu(section[1]),
