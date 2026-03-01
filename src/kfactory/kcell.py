@@ -28,7 +28,15 @@ from collections.abc import (
     ValuesView,
 )
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, Self, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Literal,
+    Self,
+    cast,
+    overload,
+)
 
 import ruamel.yaml
 from klayout import __version__ as _klayout_version
@@ -82,7 +90,13 @@ from .serialization import (
 )
 from .settings import Info, KCellSettings, KCellSettingsUnits
 from .shapes import VShapes
-from .typings import KC_co, MetaData, TBaseCell_co
+from .typings import (
+    DShapeLike,
+    KC_co,
+    MarkerConfig,
+    MetaData,
+    TBaseCell_co,
+)
 from .utilities import (
     check_cell_ports,
     check_inst_ports,
@@ -830,6 +844,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         use_libraries: bool = True,
         library_save_options: kdb.SaveLayoutOptions | None = None,
         technology: str | None = None,
+        markers: list[tuple[DShapeLike, MarkerConfig]] | None = None,
     ) -> None:
         """Stream the gds to klive.
 
@@ -855,6 +870,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
             save_options=save_options,
             use_libraries=use_libraries,
             library_save_options=library_save_options,
+            markers=markers,
             **kwargs,
         )
 
@@ -3827,6 +3843,7 @@ def show(
     library_save_options: kdb.SaveLayoutOptions | None = None,
     set_technology: bool = True,
     file_format: Literal["oas", "gds"] = "oas",
+    markers: list[tuple[DShapeLike, MarkerConfig]] | None = None,
 ) -> None:
     """Show GDS in klayout.
 
@@ -3840,6 +3857,7 @@ def show(
         use_libraries: Save other KCLayouts as libraries on write.
         library_save_options: Specific saving options for Cells which are in a library
             and not the main KCLayout.
+        markers: lay.Marker list
     """
     from .layout import KCLayout, kcls
 
@@ -3965,6 +3983,14 @@ def show(
 
     if set_technology and technology is not None:
         data_dict["technology"] = technology
+
+    if markers:
+        json_markers: list[tuple[str, str, MarkerConfig]] = []
+        for marker_shape, marker_config in markers:
+            json_markers.append(
+                (marker_shape.__class__.__name__, marker_shape.to_s(), marker_config)
+            )
+        data_dict["markers"] = json_markers
 
     data = json.dumps(data_dict)
     try:

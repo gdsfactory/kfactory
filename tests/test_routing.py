@@ -71,7 +71,6 @@ def test_route_length_match(
         },
     )
     oas_regression(c)
-    c.show()
 
 
 def test_route_length_match_errors(
@@ -1266,17 +1265,16 @@ def test_route_debug_waypoints_pts(
 
     c.shapes(c.kcl.layer(9999, 0)).insert(debug.fan_in_region)
     for poly in debug.fan_in_region.each():
-        for trans, string in poly.properties().values():
-            c.shapes(c.kcl.layer(9999, 0)).insert(kf.kdb.Text(string, trans))
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 0)).insert(kf.kdb.Text.from_s(string))
     c.shapes(c.kcl.layer(9999, 1)).insert(debug.waypoints_region)
     for poly in debug.waypoints_region.each():
-        for trans, string in poly.properties().values():
-            c.shapes(c.kcl.layer(9999, 1)).insert(kf.kdb.Text(string, trans))
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 1)).insert(kf.kdb.Text.from_s(string))
     c.shapes(c.kcl.layer(9999, 2)).insert(debug.fan_out_region)
     for poly in debug.fan_out_region.each():
-        for trans, string in poly.properties().values():
-            c.shapes(c.kcl.layer(9999, 2)).insert(kf.kdb.Text(string, trans))
-    c.show()
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 2)).insert(kf.kdb.Text.from_s(string))
 
 
 def test_route_debug(
@@ -1319,17 +1317,16 @@ def test_route_debug(
 
     c.shapes(c.kcl.layer(9999, 0)).insert(debug.fan_in_region)
     for poly in debug.fan_in_region.each():
-        for trans, string in poly.properties().values():
-            c.shapes(c.kcl.layer(9999, 0)).insert(kf.kdb.Text(string, trans))
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 0)).insert(kf.kdb.Text.from_s(string))
     c.shapes(c.kcl.layer(9999, 1)).insert(debug.waypoints_region)
     for poly in debug.waypoints_region.each():
-        for trans, string in poly.properties().values():
-            c.shapes(c.kcl.layer(9999, 1)).insert(kf.kdb.Text(string, trans))
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 1)).insert(kf.kdb.Text.from_s(string))
     c.shapes(c.kcl.layer(9999, 2)).insert(debug.fan_out_region)
     for poly in debug.fan_out_region.each():
-        for trans, string in poly.properties().values():
-            c.shapes(c.kcl.layer(9999, 2)).insert(kf.kdb.Text(string, trans))
-    c.show()
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 2)).insert(kf.kdb.Text.from_s(string))
 
 
 def test_route_debug_opposite(
@@ -1372,17 +1369,16 @@ def test_route_debug_opposite(
 
     c.shapes(c.kcl.layer(9999, 0)).insert(debug.fan_in_region)
     for poly in debug.fan_in_region.each():
-        for trans, string in poly.properties().values():
-            c.shapes(c.kcl.layer(9999, 0)).insert(kf.kdb.Text(string, trans))
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 0)).insert(kf.kdb.Text.from_s(string))
     c.shapes(c.kcl.layer(9999, 1)).insert(debug.waypoints_region)
     for poly in debug.waypoints_region.each():
-        for trans, string in poly.properties().values():
-            c.shapes(c.kcl.layer(9999, 1)).insert(kf.kdb.Text(string, trans))
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 1)).insert(kf.kdb.Text.from_s(string))
     c.shapes(c.kcl.layer(9999, 2)).insert(debug.fan_out_region)
     for poly in debug.fan_out_region.each():
-        for trans, string in poly.properties().values():
-            c.shapes(c.kcl.layer(9999, 2)).insert(kf.kdb.Text(string, trans))
-    c.show()
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 2)).insert(kf.kdb.Text.from_s(string))
 
 
 def test_route_debug_waypoints_trans(
@@ -1426,14 +1422,13 @@ def test_route_debug_waypoints_trans(
 
     c.shapes(c.kcl.layer(111, 1)).insert(debug.fan_in_region)
     for poly in debug.fan_in_region.each():
-        for trans, string in poly.properties().values():
-            c.shapes(c.kcl.layer(111, 1)).insert(kf.kdb.Text(string, trans))
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(111, 1)).insert(kf.kdb.Text.from_s(string))
     c.shapes(c.kcl.layer(111, 2)).insert(debug.waypoints_region)
     for poly in debug.waypoints_region.each():
-        for trans, string in poly.properties().values():
-            c.shapes(c.kcl.layer(111, 2)).insert(kf.kdb.Text(string, trans))
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(111, 2)).insert(kf.kdb.Text.from_s(string))
     c.shapes(c.kcl.layer(111, 3)).insert(debug.fan_out_region)
     for poly in debug.fan_out_region.each():
-        for trans, string in poly.properties().values():
-            c.shapes(c.kcl.layer(111, 3)).insert(kf.kdb.Text(string, trans))
-    c.show()
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(111, 3)).insert(kf.kdb.Text.from_s(string))

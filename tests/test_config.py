@@ -18,6 +18,8 @@ def test_custom_show() -> None:
         use_libraries: bool = True,
         library_save_options: kf.kdb.SaveLayoutOptions = _layout_options,
         technology: str | None = None,
+        markers: list[tuple[kf.typings.DShapeLike, kf.typings.MarkerConfig]]
+        | None = None,
     ) -> None:
         nonlocal showed
         showed = True

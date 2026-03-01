@@ -1645,10 +1645,10 @@ def route_smart(
                         kdb.PathWithProperties(
                             kdb.Path(start_pts, router.width),
                             {
-                                0: (
-                                    router.start_transformation,
+                                0: kdb.Text(
                                     f"fan_in - {fan_in_name}",
-                                )
+                                    router.start_transformation,
+                                ).to_s()
                             },
                         )
                     )
@@ -1661,10 +1661,10 @@ def route_smart(
                         kdb.PathWithProperties(
                             kdb.Path(end_pts, router.width),
                             {
-                                0: (
-                                    router.end_transformation,
+                                0: kdb.Text(
                                     f"fan_out - {fan_out_name}",
-                                )
+                                    router.end_transformation,
+                                ).to_s()
                             },
                         )
                     )
@@ -2374,7 +2374,11 @@ def _route_waypoints(
                 route_debug.fan_in_region.insert(
                     kdb.PathWithProperties(
                         kdb.Path(sr.start.pts, sr.width),
-                        {0: (sr.start_transformation, f"fan_in - {fan_in_name}")},
+                        {
+                            0: kdb.Text(
+                                f"fan_in - {fan_in_name}", sr.start_transformation
+                            ).to_s()
+                        },
                     )
                 )
                 fan_out_name = (
@@ -2385,7 +2389,11 @@ def _route_waypoints(
                 route_debug.fan_out_region.insert(
                     kdb.PathWithProperties(
                         kdb.Path(list(reversed(er.start.pts)), er.width),
-                        {0: (er.start_transformation, f"fan_out - {fan_out_name}")},
+                        {
+                            0: kdb.Text(
+                                f"fan_out - {fan_out_name}", er.start_transformation
+                            ).to_s()
+                        },
                     )
                 )
         return all_routers
@@ -2521,14 +2529,18 @@ def _route_waypoints(
             route_debug.fan_in_region.insert(
                 kdb.PathWithProperties(
                     kdb.Path(sr.start.pts, sr.width),
-                    {0: (sr.start_transformation, f"fan_in - {fan_in_name}")},
+                    {
+                        0: kdb.Text(
+                            f"fan_in - {fan_in_name}", sr.start_transformation
+                        ).to_s()
+                    },
                 )
             )
-            wp_props: dict[int, tuple[kdb.Trans, str]] = {
-                i: (
-                    kdb.Trans(0, False, wp.x, wp.y),
+            wp_props: dict[int, str] = {
+                i: kdb.Text(
                     f"Waypoint {i}: {wp.x},{wp.y}",
-                )
+                    kdb.Trans(0, False, wp.x, wp.y),
+                ).to_s()
                 for i, wp in enumerate(waypoints)
             }
             route_debug.waypoints_region.insert(
@@ -2542,7 +2554,11 @@ def _route_waypoints(
             route_debug.fan_out_region.insert(
                 kdb.PathWithProperties(
                     kdb.Path(list(reversed(er.start.pts)), er.width),
-                    {0: (er.start_transformation, f"fan_out - {fan_out_name}")},
+                    {
+                        0: kdb.Text(
+                            f"fan_out - {fan_out_name}", er.start_transformation
+                        ).to_s()
+                    },
                 )
             )
     for sr, _bb, er in zip(

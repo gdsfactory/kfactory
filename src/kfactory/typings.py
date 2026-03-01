@@ -184,3 +184,28 @@ class CellKwargs(TypedDict, total=False):
     lvs_equivalent_ports: list[list[str]]
     ports: PortsDefinition
     schematic_function: Callable[..., TSchematic[Any]]
+
+
+class MarkerConfig(TypedDict, total=False):
+    """Configure marker to send through the show function.
+
+    Attrs:
+        color: 0xffffff type of color as int [default: None (let klayout decide)]
+        dismissable: bool whether dismissable [default: True]
+        dither_pattern: dither pattern to use [default: None (let klayout decide)]
+        frame_color: 0xffffff type of color as int [default: None (let klayout decide)]
+        halo: halo value [default: -1 (klayout default is applied)]
+        frame_color: 0xffffff type of color as int [default: None (let klayout decide)]
+        line_style: line style to show [default: None (let klayout decide)]
+        line_style: line width to show [default: 1]
+        vertex_size: size of vertices [default: 1]
+    """
+
+    color: int | None
+    dismissable: bool
+    dither_pattern: int | None
+    halo: int
+    frame_color: int | None
+    line_style: int | None
+    line_width: int
+    vertex_size: int

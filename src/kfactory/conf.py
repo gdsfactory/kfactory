@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from . import kdb, rdb
     from .kcell import AnyKCell
     from .layout import KCLayout
+    from .typings import DShapeLike, MarkerConfig
 
 __all__ = ["LogLevel", "config"]
 
@@ -85,6 +86,7 @@ class ShowFunction(Protocol):
         use_libraries: bool,
         library_save_options: kdb.SaveLayoutOptions,
         technology: str | None = None,
+        markers: list[tuple[DShapeLike, MarkerConfig]] | None = None,
     ) -> None: ...
 
 
