@@ -335,7 +335,7 @@ def bend_euler_factory(
             trans=kdb.Trans(2, False, c.kcl.to_dbu(backbone[0]).to_v()),
         )
 
-        if abs(angle % 90) < 0.001:  # noqa: PLR2004
+        if abs(angle % 90) < 0.001:
             _ang = round(angle)
             c.create_port(
                 trans=kdb.Trans(_ang // 90, False, c.kcl.to_dbu(backbone[-1]).to_v()),
