@@ -28,6 +28,7 @@ from .manhattan import (
 )
 from .optical import vec_angle
 from .steps import Step, Straight
+from .utils import RouteDebug
 
 __all__ = [
     "place_dual_rails",
@@ -59,6 +60,7 @@ def route_bundle(
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
     purpose: str | None = "routing",
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]: ...
 
 
@@ -82,6 +84,7 @@ def route_bundle(
     start_angles: float | list[float] | None = None,
     end_angles: float | list[float] | None = None,
     purpose: str | None = "routing",
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]: ...
 
 
@@ -114,6 +117,7 @@ def route_bundle(
     start_angles: list[int] | float | list[float] | None = None,
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]:
     r"""Connect multiple input ports to output ports.
 
@@ -236,6 +240,7 @@ def route_bundle(
                 start_angles=cast("int | list[int] | None", start_angles),
                 end_angles=cast("int | list[int]", end_angles),
                 route_width=cast("int", route_width),
+                route_debug=route_debug,
             )
         except ValueError as e:
             if str(e).startswith("Found non-manhattan waypoints."):
@@ -358,6 +363,7 @@ def route_bundle(
             start_angles=start_angles,
             end_angles=end_angles,
             route_width=route_width,
+            route_debug=route_debug,
         )
     except ValueError as e:
         if str(e).startswith("Found non-manhattan waypoints."):
@@ -426,6 +432,7 @@ def route_bundle_dual_rails(
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]:
     r"""Connect multiple input ports to output ports.
 
@@ -547,6 +554,7 @@ def route_bundle_dual_rails(
             collision_check_layers=collision_check_layers,
             start_angles=start_angles,
             end_angles=end_angles,
+            route_debug=route_debug,
         )
     except ValueError as e:
         if str(e).startswith("Found non-manhattan waypoints."):
@@ -1015,7 +1023,7 @@ def place_rf_rails(
         if d_angle == 1:
             bend90 = c << bend_factory(cross_section=cross_section, radius=inner_radius)
             b90c = b90c_inner
-        elif d_angle == 3:  # noqa: PLR2004
+        elif d_angle == 3:
             bend90 = c << bend_factory(cross_section=cross_section, radius=outer_radius)
             b90c = b90c_outer
         else:
@@ -1115,6 +1123,7 @@ def route_bundle_rf(
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
     minimum_radius: int = 0,
+    route_debug: RouteDebug | None = None,
     *,
     layer: kdb.LayerInfo,
     enclosure: LayerEnclosure | None = None,
@@ -1287,4 +1296,5 @@ def route_bundle_rf(
         },
         start_angles=cast("list[int] | int", start_angles),
         end_angles=cast("list[int] | int", end_angles),
+        route_debug=route_debug,
     )

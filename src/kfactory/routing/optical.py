@@ -41,6 +41,7 @@ if TYPE_CHECKING:
     )
     from ..port import BasePort, DPort, Port
     from ..typings import dbu, um
+    from .utils import RouteDebug
 
 __all__ = [
     "get_radius",
@@ -253,6 +254,7 @@ def route_bundle(
     purpose: str | None = "routing",
     sbend_factory: SBendFactoryDBU | None = None,
     path_length_matching_config: PathLengthConfig | None = None,
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]: ...
 
 
@@ -286,6 +288,7 @@ def route_bundle(
     purpose: str | None = "routing",
     sbend_factory: SBendFactoryUM | None = None,
     path_length_matching_config: PathLengthConfig | None = None,
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]: ...
 
 
@@ -328,6 +331,7 @@ def route_bundle(
     purpose: str | None = "routing",
     sbend_factory: SBendFactoryDBU | SBendFactoryUM | None = None,
     path_length_matching_config: PathLengthConfig | None = None,
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
 
@@ -500,6 +504,7 @@ def route_bundle(
                 end_angles=cast("list[int] | int", end_angles),
                 router_post_process_function=post_process_f,
                 router_post_process_kwargs=path_length_matching_config,
+                route_debug=route_debug,
             )
         except ValueError as e:
             if str(e).startswith("Found non-manhattan waypoints."):
@@ -681,6 +686,7 @@ def route_bundle(
             router_post_process_kwargs=path_length_matching_config,
             start_angles=start_angles,
             end_angles=end_angles,
+            route_debug=route_debug,
         )
     except ValueError as e:
         if str(e).startswith("Found non-manhattan waypoints."):

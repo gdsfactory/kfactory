@@ -28,7 +28,15 @@ from collections.abc import (
     ValuesView,
 )
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, ClassVar, Literal, Self, cast, overload
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    ClassVar,
+    Literal,
+    Self,
+    cast,
+    overload,
+)
 
 import ruamel.yaml
 from klayout import __version__ as _klayout_version
@@ -82,7 +90,13 @@ from .serialization import (
 )
 from .settings import Info, KCellSettings, KCellSettingsUnits
 from .shapes import VShapes
-from .typings import KC_co, MetaData, TBaseCell_co
+from .typings import (
+    DShapeLike,
+    KC_co,
+    MarkerConfig,
+    MetaData,
+    TBaseCell_co,
+)
 from .utilities import (
     check_cell_ports,
     check_inst_ports,
@@ -830,6 +844,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         use_libraries: bool = True,
         library_save_options: kdb.SaveLayoutOptions | None = None,
         technology: str | None = None,
+        markers: list[tuple[DShapeLike, MarkerConfig]] | None = None,
     ) -> None:
         """Stream the gds to klive.
 
@@ -855,6 +870,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
             save_options=save_options,
             use_libraries=use_libraries,
             library_save_options=library_save_options,
+            markers=markers,
             **kwargs,
         )
 
@@ -1212,7 +1228,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         ]
                     )
                 )
-                if w > 20:  # noqa: PLR2004
+                if w > 20:
                     poly -= kdb.Region(
                         kdb.Polygon(
                             [
@@ -2254,11 +2270,11 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                     )
 
                     net = circ.create_net(name)
-                    assert len(ports) <= 2, (  # noqa: PLR2004
+                    assert len(ports) <= 2, (
                         "Optical connection with more than two ports are not supported "
                         f"{[_port[3] for _port in ports]}"
                     )
-                    if len(ports) == 2:  # noqa: PLR2004
+                    if len(ports) == 2:
                         if allow_width_mismatch:
                             port_check(
                                 ports[0][3],
@@ -2664,7 +2680,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                             for value in values:
                                 it.add_value(value)
 
-                    case x if x > 2:  # noqa: PLR2004
+                    case x if x > 2:
                         subc = db_.category_by_path(
                             lc.path() + ".portoverlap"
                         ) or db_.create_category(lc, "portoverlap")
@@ -3714,7 +3730,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             if w in polys:
                 poly = polys[w]
             else:
-                if w < 2:  # noqa: PLR2004
+                if w < 2:
                     poly = kdb.DPolygon(
                         [
                             kdb.DPoint(0, -w / 2),
@@ -3827,6 +3843,7 @@ def show(
     library_save_options: kdb.SaveLayoutOptions | None = None,
     set_technology: bool = True,
     file_format: Literal["oas", "gds"] = "oas",
+    markers: list[tuple[DShapeLike, MarkerConfig]] | None = None,
 ) -> None:
     """Show GDS in klayout.
 
@@ -3840,6 +3857,7 @@ def show(
         use_libraries: Save other KCLayouts as libraries on write.
         library_save_options: Specific saving options for Cells which are in a library
             and not the main KCLayout.
+        markers: lay.Marker list
     """
     from .layout import KCLayout, kcls
 
@@ -3965,6 +3983,14 @@ def show(
 
     if set_technology and technology is not None:
         data_dict["technology"] = technology
+
+    if markers:
+        json_markers: list[tuple[str, str, MarkerConfig]] = []
+        for marker_shape, marker_config in markers:
+            json_markers.append(
+                (marker_shape.__class__.__name__, marker_shape.to_s(), marker_config)
+            )
+        data_dict["markers"] = json_markers
 
     data = json.dumps(data_dict)
     try:

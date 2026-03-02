@@ -543,10 +543,10 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             assert kcl is not None, "If sections in um are defined, kcl must be set"
             sections = list(sections)
             for section in dsections:
-                if len(section) == 2:  # noqa: PLR2004
+                if len(section) == 2:
                     sections.append((section[0], kcl.to_dbu(section[1])))
 
-                elif len(section) == 3:  # noqa: PLR2004
+                elif len(section) == 3:
                     sections.append(
                         (
                             section[0],
@@ -564,7 +564,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
             else:
                 ls = LayerSection()
                 layer_sections[sec[0]] = ls
-            ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(  # noqa: PLR2004
+            ls.add_section(Section(d_max=sec[1])) if len(sec) < 3 else ls.add_section(
                 Section(d_max=sec[2], d_min=sec[1])  # ty:ignore[index-out-of-bounds]
             )
         super().__init__(
