@@ -1,11 +1,11 @@
 <a id="v2.4.5"></a>
-# [v2.4.5](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.5) - 2026-02-27
+# [v2.4.5](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.5) - 2026-02-28
 
 # What's Changed
 
 ## Bug Fixes
 
-- fix kfactory routes 1000x factor [#891](https://github.com/gdsfactory/kfactory/pull/891)
+- fix 1000x factor for um routes straights [#891](https://github.com/gdsfactory/kfactory/pull/891)
 
 **Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.4...v2.4.5
 
