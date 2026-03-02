@@ -428,14 +428,41 @@ class Section(BaseModel):
         d_min: Start of the section. If `None`,
             the section will span all the way between the maxes.
         d_max: the maximum extent of the section from the reference.
+        port_names: Optional port names for each end of the section.
+        port_types: Port types for each end of the section.
+        name: Optional name for the section.
+        hidden: Whether this section is hidden.
     """
 
     d_min: int | None = None
     d_max: int
+    port_names: tuple[str | None, str | None] = (None, None)
+    port_types: tuple[str, str] = ("optical", "optical")
+    name: str | None = None
+    hidden: bool = False
+
+    @property
+    def has_metadata(self) -> bool:
+        """Check if this section carries non-default metadata."""
+        return (
+            self.port_names != (None, None)
+            or self.port_types != ("optical", "optical")
+            or self.name is not None
+            or self.hidden
+        )
+
+    def metadata_matches(self, other: Section) -> bool:
+        """Check if metadata matches another section."""
+        return (
+            self.port_names == other.port_names
+            and self.port_types == other.port_types
+            and self.name == other.name
+            and self.hidden == other.hidden
+        )
 
     def __hash__(self) -> int:
         """Hash of the section."""
-        return hash((self.d_min, self.d_max))
+        return hash((self.d_min, self.d_max, self.port_names, self.name, self.hidden))
 
 
 class LayerSection(BaseModel):
@@ -450,7 +477,8 @@ class LayerSection(BaseModel):
     def add_section(self, sec: Section) -> int:
         """Add a new section.
 
-        Checks for overlaps after.
+        Checks for overlaps after. Sections with different metadata
+        (port_names, name, hidden) are not merged even if they overlap.
         """
         if not self.sections:
             self.sections.append(sec)
@@ -462,10 +490,21 @@ class LayerSection(BaseModel):
             while (
                 i < len(self.sections) and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
             ):
-                sec.d_max = max(self.sections[i].d_max, sec.d_max)
-                sec.d_min = min(
-                    self.sections[i].d_min,
-                    sec.d_min,  # type: ignore[type-var]
+                existing = self.sections[i]
+                if sec.has_metadata or existing.has_metadata:
+                    if not sec.metadata_matches(existing):
+                        i += 1
+                        continue
+                sec = Section(
+                    d_max=max(existing.d_max, sec.d_max),
+                    d_min=min(
+                        existing.d_min,
+                        sec.d_min,  # type: ignore[type-var]
+                    ),
+                    port_names=sec.port_names,
+                    port_types=sec.port_types,
+                    name=sec.name,
+                    hidden=sec.hidden,
                 )
                 self.sections.pop(i)
                 if i == len(self.sections):
@@ -479,7 +518,7 @@ class LayerSection(BaseModel):
 
     def __hash__(self) -> int:
         """Unique hash of LayerSection."""
-        return hash(tuple((s.d_min, s.d_max) for s in self.sections))
+        return hash(tuple(hash(s) for s in self.sections))
 
     def __len__(self) -> int:
         return len(self.sections)

@@ -43,6 +43,7 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
     radius: dbu | None = None
     radius_min: dbu | None = None
     bbox_sections: dict[kdb.LayerInfo, dbu]
+    allow_odd_width: bool = False
 
     def __init__(
         self,
@@ -52,6 +53,7 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
         bbox_sections: dict[kdb.LayerInfo, dbu] | None = None,
         radius: dbu | None = None,
         radius_min: dbu | None = None,
+        allow_odd_width: bool = False,
     ) -> None:
         """Initialized the CrossSection."""
         super().__init__(
@@ -61,6 +63,7 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
             bbox_sections=bbox_sections or {},
             radius=radius,
             radius_min=radius_min,
+            allow_odd_width=allow_odd_width,
         )
 
     @model_validator(mode="before")
@@ -73,11 +76,11 @@ class SymmetricalCrossSection(BaseModel, frozen=True, arbitrary_types_allowed=Tr
     def _validate_enclosure_main_layer(self) -> Self:
         if self.enclosure.main_layer is None:
             raise ValueError("Enclosures of cross sections must have a main layer.")
-        if self.width % 2:
+        if not self.allow_odd_width and self.width % 2:
             raise ValueError(
                 "Width of symmetrical cross sections must have be a multiple of 2 dbu. "
                 "This could cause cross sections and extrusions to become unsymmetrical"
-                " otherwise."
+                " otherwise. Set allow_odd_width=True to allow odd widths."
             )
         if not self.width:
             raise ValueError("Cross section with width 0 is not allowed.")
