@@ -1,3 +1,18 @@
+<a id="v2.4.6"></a>
+# [v2.4.6](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.6) - 2026-03-08
+
+# What's Changed
+
+## Dependency Updates
+
+- pin klayout [#895](https://github.com/gdsfactory/kfactory/pull/895)
+
+**Full Changelog**: https://github.com/gdsfactory/kfactory/compare/v2.4.5...v2.4.6
+
+
+[Changes][v2.4.6]
+
+
 <a id="v2.4.5"></a>
 # [v2.4.5](https://github.com/gdsfactory/kfactory/releases/tag/v2.4.5) - 2026-02-28
 
@@ -2707,6 +2722,7 @@
 [Changes][v0.4.0]
 
 
+[v2.4.6]: https://github.com/gdsfactory/kfactory/compare/v2.4.5...v2.4.6
 [v2.4.5]: https://github.com/gdsfactory/kfactory/compare/v2.4.4...v2.4.5
 [v2.4.4]: https://github.com/gdsfactory/kfactory/compare/v2.4.3...v2.4.4
 [v2.4.3]: https://github.com/gdsfactory/kfactory/compare/v2.4.2...v2.4.3
