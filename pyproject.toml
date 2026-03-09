@@ -15,12 +15,12 @@ classifiers = [
 requires-python = ">=3.11"
 
 
-version = "2.3.0"
+version = "2.3.1"
 authors = [{ name = "gdsfactory community", email = "contact@gdsfactory.com" }]
 dependencies = [
     "aenum >= 3.1.15, < 4",
     "cachetools >= 5.2.0",
-    "klayout >= 0.30.5, < 0.31.0",
+    "klayout==0.30.6",
     "loguru >= 0.7.3, < 0.8",
     "pydantic >= 2.12, < 2.13",
     "pydantic-extra-types>=2.10.5",
