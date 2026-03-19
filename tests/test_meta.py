@@ -40,7 +40,6 @@ def sample(
             ]
         )
         c.info["e"] = None
-        c.info["f"] = ("a", (1, kf.kdb.DBox(5), kf.kdb.Box(500)))
         c.info["g"] = {"c": 1}
         c.write(temp_file.name)
 
