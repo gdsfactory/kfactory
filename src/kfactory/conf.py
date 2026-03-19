@@ -175,14 +175,15 @@ def get_affinity() -> int:
     On (most) linux we can get it through the scheduling affinity. Otherwise,
     fall back to the multiprocessing cpu count.
     """
-    threads = 0
     try:
         return len(os.sched_getaffinity(0))
     except AttributeError:
-        import multiprocessing
+        try:
+            import multiprocessing
 
-        threads = multiprocessing.cpu_count()
-    return threads
+            return multiprocessing.cpu_count()
+        except ModuleNotFoundError:
+            return 1
 
 
 dotenv_path = find_dotenv(usecwd=True)
@@ -279,7 +280,7 @@ class Settings(BaseSettings):
             sys.stdout,
             format=tracing_formatter,
             filter=logfilter,
-            enqueue=True,
+            enqueue=False,
             backtrace=True,
         )
         logger.debug("LogLevel: {}", logfilter.level)
