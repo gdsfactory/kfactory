@@ -92,6 +92,7 @@ from .settings import Info, KCellSettings, KCellSettingsUnits
 from .shapes import VShapes
 from .typings import (
     DShapeLike,
+    JSONSerializable,
     KC_co,
     MarkerConfig,
     MetaData,
@@ -3945,7 +3946,7 @@ def show(
     if not file.is_file():
         raise ValueError(f"{file} is not a File")
     logger.debug("klive file: {}", file)
-    data_dict = {
+    data_dict: JSONSerializable = {
         "gds": str(file),
         "keep_position": keep_position,
         "libraries": kcl_paths,
@@ -3990,7 +3991,7 @@ def show(
             json_markers.append(
                 (marker_shape.__class__.__name__, marker_shape.to_s(), marker_config)
             )
-        data_dict["markers"] = json_markers
+        data_dict["markers"] = json_markers  # ty:ignore[invalid-assignment]
 
     data = json.dumps(data_dict)
     try:

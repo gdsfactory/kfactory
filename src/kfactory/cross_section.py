@@ -540,7 +540,7 @@ class CrossSectionModel(BaseModel):
                 width=self.kcl.to_dbu(cross_section["width"]),
                 enclosure=self.kcl.layer_enclosures.get_enclosure(
                     LayerEnclosureSpec(
-                        dsections=[
+                        sections=[
                             (section[0], self.kcl.to_dbu(section[1]))
                             if len(section) == 2
                             else (

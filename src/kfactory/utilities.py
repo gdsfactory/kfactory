@@ -252,6 +252,7 @@ def as_png_data(
     c: ProtoTKCell[Any],
     layer_properties: str | Path | None = None,
     resolution: tuple[int, int] = (800, 600),
+    synchronous: bool = True,
 ) -> bytes:
     layout_view = lay.LayoutView()
     layout_view.show_layout(c.kcl.layout.dup(), False)
@@ -266,6 +267,10 @@ def as_png_data(
     layout_view.resize(*resolution)
     layout_view.add_missing_layers()
     layout_view.zoom_fit()
+    if synchronous:
+        return layout_view.get_pixels_with_options(
+            width=resolution[0], height=resolution[1]
+        ).to_png_data()
     return layout_view.get_screenshot_pixels().to_png_data()
 
 

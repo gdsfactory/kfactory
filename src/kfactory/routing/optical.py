@@ -643,7 +643,7 @@ def route_bundle(
             )
 
         # Not a type error
-        placer = place_manhattan_with_sbends  # type: ignore[assignment]
+        placer = place_manhattan_with_sbends
         placer_kwargs = {
             "straight_factory": _straight_factory,
             "bend90_cell": bend90_cell,

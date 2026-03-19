@@ -448,7 +448,8 @@ def route_bundle(
         if _is_steps_list(starts):
             starts = [starts for _ in range(len(start_ports))]
         else:
-            starts = [[Straight(dist=s) for s in starts]] * len(start_ports)  # ty:ignore[invalid-argument-type]
+            starts = cast("list[int]", starts)
+            starts = [[Straight(dist=s) for s in starts]] * len(start_ports)  # ty:ignore[invalid-assignment]
     if ends is None or ends == []:
         ends = [[]] * length
     elif isinstance(ends, int):
@@ -457,7 +458,8 @@ def route_bundle(
         if _is_steps_list(ends):
             ends = [ends for _ in range(len(end_ports))]
         else:
-            ends = [[Straight(dist=e) for e in ends]] * len(end_ports)  # ty:ignore[invalid-argument-type]
+            ends = cast("list[int]", ends)
+            ends = [[Straight(dist=e) for e in ends]] * len(end_ports)  # ty:ignore[invalid-assignment]
 
     if start_angles is not None:
         if isinstance(start_angles, int):

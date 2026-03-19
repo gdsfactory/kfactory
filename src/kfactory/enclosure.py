@@ -977,11 +977,9 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
         """
         if self._name is not None:
             return self._name
-        list_to_hash: Any = [
-            self.main_layer,
-        ]
+        list_to_hash: list[tuple[str, ...]] = [(str(self.main_layer),)]
         for layer, layer_section in self.layer_sections.items():
-            list_to_hash.append([str(layer), str(layer_section.sections)])
+            list_to_hash.append((str(layer), str(layer_section.sections)))
         return sha1(str(list_to_hash).encode("UTF-8")).hexdigest()[-8:]  # noqa: S324
 
     def extrude_path(

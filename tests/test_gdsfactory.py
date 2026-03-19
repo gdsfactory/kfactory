@@ -10,7 +10,7 @@ import kfactory as kf
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    import gdsfactory as gf  # ty: ignore[unresolved-import, unused-ignore-comment]
+    import gdsfactory as gf  # ty: ignore[unresolved-import, unused-ignore-comment, unused-ignore-comment]
 else:
     gf = pytest.importorskip("gdsfactory")
 jinja2 = pytest.importorskip("jinja2")

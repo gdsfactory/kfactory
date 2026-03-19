@@ -28,9 +28,20 @@ def sample(
                         kf.kdb.Point(250, 250),
                     ]
                 ),
+                "d": "hello",
             },
+            "d": "hello",
         }
+        c.info["poly"] = kf.kdb.Polygon(
+            pts=[
+                kf.kdb.Point(0, 0),
+                kf.kdb.Point(500, 0),
+                kf.kdb.Point(250, 250),
+            ]
+        )
         c.info["e"] = None
+        c.info["f"] = ("a", (1, kf.kdb.DBox(5), kf.kdb.Box(500)))
+        c.info["g"] = {"c": 1}
         c.write(temp_file.name)
 
         kcl2 = kf.KCLayout("TEST_META_SAMPLE")

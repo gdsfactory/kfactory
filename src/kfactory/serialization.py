@@ -265,8 +265,9 @@ def deserialize_setting(setting: JSONSerializable) -> MetaData:
     """Deserialize a setting."""
     if isinstance(setting, dict):
         return {
-            name: deserialize_setting(_setting) for name, _setting in setting.items()
-        }
+            name: deserialize_setting(_setting)  # ty:ignore[invalid-argument-type]
+            for name, _setting in setting.items()
+        }  # ty:ignore[invalid-return-type]
     if isinstance(setting, list):
         return [deserialize_setting(s) for s in setting]
     if isinstance(setting, tuple):
