@@ -81,7 +81,7 @@ def save_session(
             ]
             for k, v in factory_dependency.items()
         }
-        with (kcl_dir / "facories.pkl").open("wb") as f:
+        with (kcl_dir / "factories.pkl").open("wb") as f:
             pickle.dump(factory_infos, f)
     with (kcls_dir / "../kcl_dependencies.json").resolve().open("wt") as f:
         json.dump({k: list(v) for k, v in kcl_dependencies.items()}, f)
@@ -142,7 +142,7 @@ def load_kcl(kcl_path: Path) -> None:
     loaded_kcl = KCLayout("SESSION_LOAD")
     loaded_kcl.read(kcl_path / "cells.gds.gz")
     invalid_factories: set[str] = set()
-    with (kcl_path / "facories.pkl").open("rb") as f:
+    with (kcl_path / "factories.pkl").open("rb") as f:
         factory_infos = pickle.load(f)  # noqa: S301
     for factory in kcl.factories._all:
         ph = _file_path_hash(factory.file)
