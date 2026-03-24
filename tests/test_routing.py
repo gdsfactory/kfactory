@@ -1432,3 +1432,143 @@ def test_route_debug_waypoints_trans(
     for poly in debug.fan_out_region.each():
         for string in poly.properties().values():
             c.shapes(c.kcl.layer(111, 3)).insert(kf.kdb.Text.from_s(string))
+
+
+def test_route_bundle_single_return(
+    bend90_euler: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    optical_port: kf.Port,
+    taper: kf.KCell,
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
+) -> None:
+    x, y, angle2 = (0, 7000, 0)
+
+    c = kcl.kcell()
+    p1 = optical_port.copy()
+    p2 = optical_port.copy()
+    p2.trans = kf.kdb.Trans(angle2, False, x, y)
+    p2.x -= 100
+    kf.routing.optical.route_bundle(
+        c=c,
+        start_ports=[p1],
+        end_ports=[p2],
+        separation=5000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_euler,
+        taper_cell=taper,
+        allow_width_mismatch=True,
+    )[0]
+    c.show()
+    oas_regression(c)
+
+
+def test_route_bundle_multi_return(
+    bend90_euler: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    optical_port: kf.Port,
+    taper: kf.KCell,
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
+) -> None:
+    c = kcl.kcell()
+    ps = [
+        optical_port.copy(),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -2000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -14000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -24000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -84000)),
+        optical_port.copy(kf.kdb.Trans(3, False, -1000, -85000)),
+        optical_port.copy(kf.kdb.Trans(1, False, -50000, 5000)),
+        optical_port.copy(kf.kdb.Trans(0, False, -5000, 90_000)),
+    ]
+    pe = [
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 7000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 9000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 11_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 21_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 41_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 51_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 61_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, -5000, 75_000)),
+    ]
+
+    for i, (ps_, pe_) in enumerate(zip(ps, pe, strict=True)):
+        c.add_port(port=ps_, name=f"in_{i + 1}")
+        c.add_port(port=pe_, name=f"out_{i + 1}")
+    b1 = kf.kdb.Box()
+    b2 = kf.kdb.Box()
+
+    for p1, p2 in zip(ps[:-1], pe[:-1], strict=True):
+        b1 += p1.trans.disp.to_p()
+        b2 += p2.trans.disp.to_p()
+
+    kf.routing.optical.route_bundle(
+        c=c,
+        start_ports=ps,
+        end_ports=pe,
+        separation=1000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_euler,
+        taper_cell=taper,
+        allow_width_mismatch=True,
+        sort_ports=False,
+        bboxes=[b1, b2],
+    )[0]
+    c.show()
+    oas_regression(c)
+
+
+def test_route_bundle_multi_return_opposite(
+    bend90_euler: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    optical_port: kf.Port,
+    taper: kf.KCell,
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
+) -> None:
+    c = kcl.kcell()
+    ps = [
+        optical_port.copy(),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 2000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 14000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 24000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 84000)),
+        optical_port.copy(kf.kdb.Trans(1, False, -1000, 85000)),
+        # optical_port.copy(kf.kdb.Trans(3, False, -50000, -5000)),  # noqa: ERA001
+    ]
+    pe = [
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -7000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -9000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -11_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -21_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -41_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -51_000)),
+        # optical_port.copy(kf.kdb.Trans(0, False, 0, -61_000)),  # noqa: ERA001
+    ]
+
+    for i, (ps_, pe_) in enumerate(zip(ps, pe, strict=True)):
+        c.add_port(port=ps_, name=f"in_{i + 1}")
+        c.add_port(port=pe_, name=f"out_{i + 1}")
+
+    b1 = kf.kdb.Box()
+    b2 = kf.kdb.Box()
+
+    for p1, p2 in zip(ps, pe, strict=True):
+        b1 += p1.trans.disp.to_p()
+        b2 += p2.trans.disp.to_p()
+
+    kf.routing.optical.route_bundle(
+        c=c,
+        start_ports=ps,
+        end_ports=pe,
+        separation=1000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_euler,
+        taper_cell=taper,
+        allow_width_mismatch=True,
+        sort_ports=False,
+        bboxes=[b1, b2],
+    )[0]
+    c.show()
+    oas_regression(c)
