@@ -1361,6 +1361,8 @@ def route_smart(
         sorted_routers = _sort_routers(router_bundle)
 
         # simple (maybe error-prone) way to determine the ideal routing angle
+        # this would need to be expanded in order to allow for automatic single
+        # waypoint router (without transformation or similar)
         angle = router_bundle[0].end.t.angle
 
         r = router_bundle[0]
@@ -1370,6 +1372,13 @@ def route_smart(
         end_bbox = kdb.Box(r.end.pts[0], re.end.t * _p)
         start_bbox += re.start.t * kdb.Point(-1, 0)
         end_bbox += re.end.t * kdb.Point(-1, 0)
+
+        _route_p(
+            sorted_routers=sorted_routers,
+            start_bbox=start_bbox,
+            separation=separation,
+        )
+
         for r in router_bundle:
             start_bbox += kdb.Box(r.start.pts[0], r.start.t.disp.to_p()) + kdb.Box(
                 0, -r.width // 2, 0, r.width // 2
@@ -1723,6 +1732,138 @@ def route_to_bbox(
             )
 
 
+def _route_group(
+    router_groups: list[list[ManhattanRouter]],
+    separation: int,
+    bbox: kdb.Box,
+    reverse: bool = False,
+) -> None:
+    for router_group in router_groups:
+        delta = 0
+        routers = reversed(router_group) if reverse else iter(router_group)
+        for router in routers:
+            if not router.finished:
+                router.start.straight(delta)
+                delta += router.width + separation
+                router.auto_route(bbox=bbox)
+
+
+def _route_p(
+    sorted_routers: Sequence[ManhattanRouter],
+    start_bbox: kdb.Box,
+    separation: int,
+) -> None:
+    _route_p_side(
+        sorted_routers=sorted_routers,
+        start_bbox=start_bbox,
+        separation=separation,
+        reverse_order=False,
+    )
+    _route_p_side(
+        sorted_routers=sorted_routers,
+        start_bbox=start_bbox,
+        separation=separation,
+        reverse_order=True,
+    )
+
+
+def _route_p_side(
+    sorted_routers: Sequence[ManhattanRouter],
+    start_bbox: kdb.Box,
+    separation: int,
+    reverse_order: bool,
+) -> None:
+
+    box = kdb.Box()
+    extend: int = 0
+
+    if reverse_order:
+        _sorted_routers = list(reversed(sorted_routers))
+    else:
+        _sorted_routers = list(sorted_routers)
+
+    for i, r in enumerate(_sorted_routers):
+        if r.start.ta == 0:
+            v = r.start.tv
+            br = r.bend90_radius
+            p1 = r.start.t.disp.to_p()
+            if not box.empty():
+                match r.start.t.angle:
+                    case 0 | 2:
+                        p = kdb.Point(box.left, p1.y)
+                    case _:
+                        p = kdb.Point(p1.x, box.bottom)
+                contains_p = box.contains(p)
+            else:
+                contains_p = box.contains(p1)
+            ws = r.width // 2 + separation
+            if reverse_order:
+                comparison = v.y >= 0
+                d_p = kdb.Point(br, -(br + ws))
+            else:
+                comparison = v.y < 0
+                d_p = kdb.Point(br, (br + ws))
+
+            if contains_p or ((abs(v.y) < 2 * br) and comparison):
+                route_to_bbox([r.start], start_bbox, separation, bbox_routing="full")
+
+                br = 2 * r.bend90_radius
+
+                box += kdb.Box(p1, r.start.t * d_p).enlarged(r.width // 2 + separation)
+                extend += 1
+            else:
+                _box = start_bbox.dup()
+                for j in range(i - 1, i - extend - 1, -1):
+                    r_ = _sorted_routers[j]
+                    route_to_bbox([r_.start], _box, separation, bbox_routing="full")
+                    v = r_.start.tv
+
+                    _box += r_.start.t * kdb.Point(r_.width + separation, 0)
+
+                    if v.y < 0:
+                        r_.start.left()
+                        r_.start.right()
+                    else:
+                        r_.start.right()
+                        r_.start.left()
+
+                box = kdb.Box()
+                extend = 0
+        else:
+            _box = start_bbox.dup()
+            for j in range(i - 1, i - extend - 1, -1):
+                r_ = _sorted_routers[j]
+                route_to_bbox([r_.start], _box, separation, bbox_routing="full")
+                v = r_.start.tv
+
+                _box += r_.start.t * kdb.Point(r_.width + separation, 0)
+
+                if v.y < 0:
+                    r_.start.left()
+                    r_.start.right()
+                else:
+                    r_.start.right()
+                    r_.start.left()
+
+            box = kdb.Box()
+            extend = 0
+    _box = start_bbox.dup()
+    j_range: range | reversed[int] = range(i, i - extend, -1)
+    for j in j_range:
+        r_ = _sorted_routers[j]
+        route_to_bbox([r_.start], _box, separation, bbox_routing="full")
+        v = r_.start.tv
+
+        _box += r_.start.t * kdb.Point(r_.width + separation, 0)
+
+        if v.y < 0:
+            r_.start.left()
+            r_.start.right()
+        else:
+            r_.start.right()
+            r_.start.left()
+
+
 def route_loosely(
     routers: Sequence[ManhattanRouter],
     separation: int,
@@ -1885,21 +2026,8 @@ def route_loosely(
         elif s == -1 and group:
             reverse_groups.append(group)
 
-        for router_group in forward_groups:
-            delta = 0
-            for router in reversed(router_group):
-                if not router.finished:
-                    router.start.straight(delta)
-                    delta += router.width + separation
-                    router.auto_route(bbox=start_bbox)
-
-        for router_group in reverse_groups:
-            delta = 0
-            for router in router_group:
-                if not router.finished:
-                    router.start.straight(delta)
-                    delta += router.width + separation
-                    router.auto_route(bbox=start_bbox)
+        _route_group(forward_groups, separation, start_bbox, reverse=True)
+        _route_group(reverse_groups, separation, start_bbox, reverse=False)
 
 
 def vec_dir(vec: kdb.Vector) -> int:
