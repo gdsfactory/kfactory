@@ -87,8 +87,8 @@ class PortCheck(IntFlag):
     width = auto()
     layer = auto()
     port_type = auto()
-    all_opposite = opposite + width + port_type + layer  # type: ignore[operator]
-    all_overlap = width + port_type + layer  # type: ignore[operator]
+    all_opposite = opposite + width + port_type + layer  # ty:ignore[unsupported-operator]
+    all_overlap = width + port_type + layer  # ty:ignore[unsupported-operator]
 
 
 def port_check(
@@ -119,7 +119,7 @@ def port_check(
 class BasePortDict(TypedDict):
     """TypedDict for the BasePort."""
 
-    name: str | None
+    name: str
     kcl: KCLayout
     cross_section: SymmetricalCrossSection
     trans: kdb.Trans | None
@@ -134,7 +134,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
     This does not have any knowledge of units.
     """
 
-    name: str | None
+    name: str
     kcl: KCLayout
     cross_section: SymmetricalCrossSection
     trans: kdb.Trans | None = None
@@ -183,7 +183,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         if isinstance(post_trans, kdb.Trans):
             post_trans = kdb.DCplxTrans(post_trans.to_dtype(self.kcl.dbu))
         dcplx_trans = self.dcplx_trans or kdb.DCplxTrans(
-            t=self.trans.to_dtype(self.kcl.dbu)  # type: ignore[union-attr]
+            t=self.trans.to_dtype(self.kcl.dbu)  # ty:ignore[unresolved-attribute]
         )
 
         base.trans = None
@@ -195,7 +195,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
         post_trans: kdb.Trans | kdb.DCplxTrans = kdb.Trans.R0,
     ) -> Self:
-        """Get a transformed copy of the BasePort."""
+        """Transform self."""
         base = self
         if (
             base.trans is not None
@@ -210,7 +210,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         if isinstance(post_trans, kdb.Trans):
             post_trans = kdb.DCplxTrans(post_trans.to_dtype(self.kcl.dbu))
         dcplx_trans = self.dcplx_trans or kdb.DCplxTrans(
-            t=self.trans.to_dtype(self.kcl.dbu)  # type: ignore[union-attr]
+            t=self.trans.to_dtype(self.kcl.dbu)  # ty:ignore[unresolved-attribute]
         )
 
         base.trans = None
@@ -284,7 +284,7 @@ class ProtoPort[T: (int, float)](ABC):
     @abstractmethod
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         width: T | None = None,
         layer: int | None = None,
@@ -331,12 +331,12 @@ class ProtoPort[T: (int, float)](ABC):
     ) -> None: ...
 
     @property
-    def name(self) -> str | None:
+    def name(self) -> str:
         """Name of the port."""
         return self._base.name
 
     @name.setter
-    def name(self, value: str | None) -> None:
+    def name(self, value: str) -> None:
         self._base.name = value
 
     @property
@@ -671,7 +671,7 @@ class Port(ProtoPort[int]):
     def __init__(
         self,
         *,
-        name: str | None = None,
+        name: str,
         width: int,
         layer: LayerEnum | int,
         trans: kdb.Trans | str,
@@ -684,7 +684,7 @@ class Port(ProtoPort[int]):
     def __init__(
         self,
         *,
-        name: str | None = None,
+        name: str,
         width: int,
         layer: LayerEnum | int,
         dcplx_trans: kdb.DCplxTrans | str,
@@ -696,7 +696,7 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         width: int,
         layer: LayerEnum | int,
@@ -711,7 +711,7 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         width: int,
         layer_info: kdb.LayerInfo,
@@ -724,7 +724,7 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         width: int,
         layer_info: kdb.LayerInfo,
@@ -737,7 +737,7 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         width: int,
         layer_info: kdb.LayerInfo,
@@ -752,7 +752,7 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         cross_section: CrossSection | SymmetricalCrossSection,
         port_type: str = "optical",
@@ -766,7 +766,7 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         cross_section: CrossSection | SymmetricalCrossSection,
         trans: kdb.Trans | str,
@@ -778,7 +778,7 @@ class Port(ProtoPort[int]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         cross_section: CrossSection | SymmetricalCrossSection,
         dcplx_trans: kdb.DCplxTrans | str,
@@ -821,6 +821,12 @@ class Port(ProtoPort[int]):
         if port is not None:
             self._base = port.base.__copy__()
             return
+
+        if name is None:
+            raise ValueError(
+                "Port must have a name. Only when passing another port or port base"
+                " name can be None."
+            )
         info_ = Info(**info)
         from .layout import get_default_kcl
 
@@ -985,7 +991,7 @@ class DPort(ProtoPort[float]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         width: float,
         layer: LayerEnum | int,
@@ -998,7 +1004,7 @@ class DPort(ProtoPort[float]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         width: float,
         layer: LayerEnum | int,
@@ -1011,7 +1017,7 @@ class DPort(ProtoPort[float]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         width: float,
         layer: LayerEnum | int,
@@ -1026,7 +1032,7 @@ class DPort(ProtoPort[float]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         width: float,
         layer_info: kdb.LayerInfo,
@@ -1039,7 +1045,7 @@ class DPort(ProtoPort[float]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         width: float,
         layer_info: kdb.LayerInfo,
@@ -1052,7 +1058,7 @@ class DPort(ProtoPort[float]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         width: float,
         layer_info: kdb.LayerInfo,
@@ -1067,7 +1073,7 @@ class DPort(ProtoPort[float]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         cross_section: DCrossSection | SymmetricalCrossSection,
         port_type: str = "optical",
@@ -1081,7 +1087,7 @@ class DPort(ProtoPort[float]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         cross_section: DCrossSection | SymmetricalCrossSection,
         trans: kdb.Trans | str,
@@ -1093,7 +1099,7 @@ class DPort(ProtoPort[float]):
     @overload
     def __init__(
         self,
-        name: str | None = None,
+        name: str,
         *,
         cross_section: DCrossSection | SymmetricalCrossSection,
         dcplx_trans: kdb.DCplxTrans | str,
@@ -1136,6 +1142,12 @@ class DPort(ProtoPort[float]):
         if port is not None:
             self._base = port.base.__copy__()
             return
+
+        if name is None:
+            raise ValueError(
+                "DPort must have a name. Only when passing another port or port base"
+                " name can be None."
+            )
         info_ = Info(**info)
 
         from .layout import get_default_kcl

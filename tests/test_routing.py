@@ -40,6 +40,7 @@ def test_route_length_match(
 
     start_ports = [
         kf.Port(
+            name=f"in_{x1}",
             trans=kf.kdb.Trans(1, False, x1 * 200_000, -x1 * 150_000),
             width=500,
             layer_info=layers.WG,
@@ -49,6 +50,7 @@ def test_route_length_match(
     start_ports[1].y -= 1
     end_ports = [
         kf.Port(
+            name=f"out_{x1}",
             trans=kf.kdb.Trans(3, False, x1, 500_000),
             width=500,
             layer_info=layers.WG,
@@ -83,6 +85,7 @@ def test_route_length_match_errors(
 
     start_ports = [
         kf.Port(
+            name=f"in_{x1}",
             trans=kf.kdb.Trans(1, False, x1 * 200_000, -x1 * 300_000),
             width=500,
             layer_info=layers.WG,
@@ -91,11 +94,12 @@ def test_route_length_match_errors(
     ]
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             trans=kf.kdb.Trans(3, False, x1, 500_000),
             width=500,
             layer_info=layers.WG,
         )
-        for x1 in [230_000, 400_000, 500_000]
+        for i, x1 in enumerate([230_000, 400_000, 500_000])
     ]
     with pytest.raises(ValueError):
         kf.routing.optical.route_bundle(
@@ -111,7 +115,7 @@ def test_route_length_match_errors(
                 "loops": 2,
                 "loop_position": 0,
             },
-        )  # type: ignore[call-overload]
+        )  # ty:ignore[no-matching-overload]
     with pytest.raises(ValueError):
         kf.routing.optical.route_bundle(
             c,
@@ -126,7 +130,7 @@ def test_route_length_match_errors(
                 "loops": 2,
                 "loop_position": 0,
             },
-        )  # type: ignore[call-overload]
+        )  # ty:ignore[no-matching-overload]
     with pytest.raises(ValueError):
         kf.routing.optical.route_bundle(
             c,
@@ -141,7 +145,7 @@ def test_route_length_match_errors(
                 "loops": 2,
                 "loop_position": 0,
             },
-        )  # type: ignore[call-overload]
+        )  # ty:ignore[no-matching-overload]
     with pytest.raises(ValueError):
         kf.routing.optical.route_bundle(
             c,
@@ -156,7 +160,7 @@ def test_route_length_match_errors(
                 "loops": 2,
                 "loop_position": None,
             },
-        )  # type: ignore[call-overload]
+        )  # ty:ignore[no-matching-overload]
 
 
 def test_route_bundle(
@@ -610,17 +614,18 @@ def test_route_smart_waypoints_trans_sort(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name="in_{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
-        for trans in transformations
+        for i, trans in enumerate(transformations)
     ]
     kf.routing.optical.route_bundle(
         c,
@@ -648,17 +653,18 @@ def test_route_smart_waypoints_pts_sort(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name=f"in_{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
-        for trans in transformations
+        for i, trans in enumerate(transformations)
     ]
     kf.routing.optical.route_bundle(
         c,
@@ -686,17 +692,18 @@ def test_route_waypoints_non_manhattan(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name=f"in_{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
-        for trans in transformations
+        for i, trans in enumerate(transformations)
     ]
     with pytest.raises(
         ValueError,
@@ -733,18 +740,19 @@ def test_route_smart_waypoints_trans(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name=f"in_{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     start_ports.reverse()
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
-        for trans in transformations
+        for i, trans in enumerate(transformations)
     ]
     kf.routing.optical.route_bundle(
         c,
@@ -771,18 +779,19 @@ def test_route_smart_waypoints_pts(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name=f"in_{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     start_ports.reverse()
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
-        for trans in transformations
+        for i, trans in enumerate(transformations)
     ]
     kf.routing.optical.route_bundle(
         c,
@@ -1231,17 +1240,18 @@ def test_route_debug_waypoints_pts(
     l_ = 3
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name=f"in{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
-        for trans in transformations
+        for i, trans in enumerate(transformations)
     ]
     debug = RouteDebug()
     kf.routing.optical.route_bundle(
@@ -1288,11 +1298,12 @@ def test_route_debug(
     l_ = 3
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name=f"in{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
@@ -1340,11 +1351,12 @@ def test_route_debug_opposite(
     l_ = 3
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name=f"in{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
@@ -1392,17 +1404,18 @@ def test_route_debug_waypoints_trans(
     l_ = 3
     transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name=f"in{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
-        for trans in transformations
+        for i, trans in enumerate(transformations)
     ]
     debug = RouteDebug()
     kf.routing.optical.route_bundle(

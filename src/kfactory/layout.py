@@ -84,13 +84,10 @@ if TYPE_CHECKING:
     from .ports import DPorts, Ports
     from .schematic import TSchematic
     from .typings import (
-        KC,
         KCIN,
         VK,
-        KC_contra,
         KCellParams,
         MetaData,
-        P,
         T,
     )
 
@@ -278,8 +275,7 @@ class KCLayout(
         Callable[
             Concatenate[
                 ProtoTKCell[Any],
-                Sequence[ProtoPort[Any]],
-                Sequence[ProtoPort[Any]],
+                Sequence[Sequence[ProtoPort[Any]]],
                 ...,
             ],
             list[ManhattanRoute],
@@ -366,7 +362,7 @@ class KCLayout(
             future_cell_name=None,
             settings=KCellSettings(
                 version=__version__,
-                klayout_version=kdb.__version__,  # type: ignore[attr-defined]
+                klayout_version=kdb.__version__,  # ty:ignore[unresolved-attribute]
                 meta_format="v3",
             ),
             decorators=Decorators(self),
@@ -614,14 +610,14 @@ class KCLayout(
         return kdb.CplxTrans(self.layout.dbu).inverted() * other
 
     @overload
-    def schematic_cell(
+    def schematic_cell[**KCellParams](
         self,
         _func: Callable[KCellParams, TSchematic[Any]],
         /,
     ) -> Callable[KCellParams, KCell]: ...
 
     @overload
-    def schematic_cell(
+    def schematic_cell[**KCellParams](
         self,
         /,
         *,
@@ -664,7 +660,7 @@ class KCLayout(
     ]: ...
 
     @overload
-    def schematic_cell(
+    def schematic_cell[**KCellParams](
         self,
         /,
         *,
@@ -708,7 +704,7 @@ class KCLayout(
     ]: ...
 
     @overload
-    def schematic_cell(
+    def schematic_cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         /,
         *,
@@ -727,7 +723,7 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[KCell], None]],
+        post_process: Iterable[Callable[[KC], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         factories: Mapping[
@@ -753,7 +749,7 @@ class KCLayout(
     ]: ...
 
     @overload
-    def schematic_cell(
+    def schematic_cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         /,
         *,
@@ -796,7 +792,7 @@ class KCLayout(
         [Callable[KCellParams, TSchematic[Any]]], Callable[KCellParams, KC]
     ]: ...
 
-    def schematic_cell(
+    def schematic_cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         _func: Callable[KCellParams, TSchematic[Any]] | None = None,
         /,
@@ -816,7 +812,7 @@ class KCLayout(
         overwrite_existing: bool | None = None,
         layout_cache: bool | None = None,
         info: dict[str, MetaData] | None = None,
-        post_process: Iterable[Callable[[KCell], None]] | None = None,
+        post_process: Iterable[Callable[[KC], None]] | None = None,
         debug_names: bool | None = None,
         tags: list[str] | None = None,
         factories: Mapping[
@@ -829,8 +825,7 @@ class KCLayout(
             Callable[
                 Concatenate[
                     ProtoTKCell[Any],
-                    Sequence[ProtoPort[Any]],
-                    Sequence[ProtoPort[Any]],
+                    Sequence[Sequence[ProtoPort[Any]]],
                     ...,
                 ],
                 Any,
@@ -870,7 +865,9 @@ class KCLayout(
                         overwrite_existing=overwrite_existing,
                         layout_cache=layout_cache,
                         info=info,
-                        post_process=post_process or [],
+                        post_process=cast(
+                            "Iterable[Callable[[KCell], None]]", post_process or []
+                        ),
                         debug_names=debug_names,
                         tags=tags,
                         schematic_function=f,
@@ -895,6 +892,8 @@ class KCLayout(
 
                 return wrap_f
 
+            post_process = cast("Iterable[Callable[[KC], None]]", post_process or [])
+
             def custom_wrap_f(
                 f: Callable[KCellParams, TSchematic[Any]],
             ) -> Callable[KCellParams, KC]:
@@ -914,7 +913,7 @@ class KCLayout(
                     overwrite_existing=overwrite_existing,
                     layout_cache=layout_cache,
                     info=info,
-                    post_process=post_process or [],
+                    post_process=post_process,
                     debug_names=debug_names,
                     tags=tags,
                     schematic_function=f,
@@ -964,14 +963,14 @@ class KCLayout(
         return simple_wrap_f(_func)
 
     @overload
-    def cell(
+    def cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         _func: Callable[KCellParams, KC],
         /,
     ) -> Callable[KCellParams, KC]: ...
 
     @overload
-    def cell(
+    def cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         /,
         *,
@@ -997,7 +996,7 @@ class KCLayout(
     ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
     @overload
-    def cell(
+    def cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         /,
         *,
@@ -1023,7 +1022,7 @@ class KCLayout(
     ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
     @overload
-    def cell(
+    def cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         /,
         *,
@@ -1041,7 +1040,7 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[KC_contra], None]],
+        post_process: Iterable[Callable[[KC], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
@@ -1050,7 +1049,7 @@ class KCLayout(
     ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
     @overload
-    def cell(
+    def cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         /,
         *,
@@ -1068,7 +1067,7 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[KC_contra], None]],
+        post_process: Iterable[Callable[[KC], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
@@ -1077,7 +1076,7 @@ class KCLayout(
     ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
     @overload
-    def cell(
+    def cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         /,
         *,
@@ -1096,7 +1095,7 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[KC_contra], None]],
+        post_process: Iterable[Callable[[KC], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
@@ -1107,7 +1106,7 @@ class KCLayout(
     ]: ...
 
     @overload
-    def cell(
+    def cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         /,
         *,
@@ -1126,7 +1125,7 @@ class KCLayout(
         overwrite_existing: bool | None = ...,
         layout_cache: bool | None = ...,
         info: dict[str, MetaData] | None = ...,
-        post_process: Iterable[Callable[[KC_contra], None]],
+        post_process: Iterable[Callable[[KC], None]],
         debug_names: bool | None = ...,
         tags: list[str] | None = ...,
         lvs_equivalent_ports: list[list[str]] | None = None,
@@ -1137,7 +1136,7 @@ class KCLayout(
     ]: ...
 
     @overload
-    def cell(
+    def cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         /,
         *,
@@ -1166,7 +1165,7 @@ class KCLayout(
     ]: ...
 
     @overload
-    def cell(
+    def cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
         /,
         *,
@@ -1284,7 +1283,7 @@ class KCLayout(
         if debug_names is None:
             debug_names = config.debug_names
         if post_process is None:
-            post_process = ()
+            post_process = []
 
         def decorator_autocell(
             f: Callable[KCellParams, KCIN],
@@ -1333,7 +1332,7 @@ class KCLayout(
                 overwrite_existing=overwrite_existing,
                 layout_cache=layout_cache,
                 info=info,
-                post_process=post_process,  # type: ignore[arg-type]
+                post_process=post_process,  # ty:ignore[invalid-argument-type]
                 debug_names=debug_names,
                 tags=tags,
                 lvs_equivalent_ports=lvs_equivalent_ports,
@@ -1356,14 +1355,14 @@ class KCLayout(
         return decorator_autocell if _func is None else decorator_autocell(_func)
 
     @overload
-    def vcell(
+    def vcell[**KCellParams, VK: VKCell](
         self,
         _func: Callable[KCellParams, VK],
         /,
     ) -> Callable[KCellParams, VK]: ...
 
     @overload
-    def vcell(
+    def vcell[**KCellParams, VK: VKCell](
         self,
         /,
         *,
@@ -1383,7 +1382,7 @@ class KCLayout(
     ) -> Callable[[Callable[KCellParams, VK]], Callable[KCellParams, VK]]: ...
 
     @overload
-    def vcell(
+    def vcell[**KCellParams, VK: VKCell](
         self,
         /,
         *,
@@ -1404,7 +1403,7 @@ class KCLayout(
     ) -> Callable[[Callable[KCellParams, VK]], Callable[KCellParams, VK]]: ...
 
     @overload
-    def vcell(
+    def vcell[**KCellParams, VK: VKCell](
         self,
         /,
         *,
@@ -1425,7 +1424,7 @@ class KCLayout(
     ) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VK]]: ...
 
     @overload
-    def vcell(
+    def vcell[**KCellParams, VK: VKCell](
         self,
         /,
         *,
@@ -1446,7 +1445,7 @@ class KCLayout(
         ports: PortsDefinition | None = None,
     ) -> Callable[[Callable[KCellParams, VKCell]], Callable[KCellParams, VK]]: ...
 
-    def vcell(
+    def vcell[**KCellParams, VK: VKCell](
         self,
         _func: Callable[KCellParams, VKCell] | None = None,
         /,
@@ -1555,7 +1554,7 @@ class KCLayout(
             if register_factory:
                 if wrapper_autocell.name is None:
                     raise ValueError(f"Function {f} has no name.")
-                self.virtual_factories.add(wrapper_autocell)  # type: ignore[arg-type]
+                self.virtual_factories.add(wrapper_autocell)  # ty:ignore[invalid-argument-type]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> VK:
@@ -1762,10 +1761,10 @@ class KCLayout(
         """
         return self.get_cell(obj)
 
-    def get_cell(
+    def get_cell[KC: ProtoTKCell[Any]](
         self,
         obj: str | int,
-        cell_type: type[KC] = KCell,  # type: ignore[assignment]
+        cell_type: type[KC] = KCell,  # ty:ignore[invalid-parameter-default]
         error_search_limit: int | None = 10,
     ) -> KC:
         """Retrieve a cell by name(str) or index(int).
@@ -2158,20 +2157,16 @@ class KCLayout(
         f: Callable[
             Concatenate[
                 ProtoTKCell[Any],
-                Sequence[
-                    tuple[ProtoPort[Any], ProtoPort[Any], *tuple[ProtoPort[Any], ...]]
-                ],
-                P,
+                Sequence[Sequence[ProtoPort[Any]]],
+                ...,
             ],
             list[ManhattanRoute],
         ],
     ) -> Callable[
         Concatenate[
             ProtoTKCell[Any],
-            Sequence[
-                tuple[ProtoPort[Any], ProtoPort[Any], *tuple[ProtoPort[Any], ...]]
-            ],
-            P,
+            Sequence[Sequence[ProtoPort[Any]]],
+            ...,
         ],
         list[ManhattanRoute],
     ]:
@@ -2201,7 +2196,7 @@ vcell = kcl.vcell
 """Default kcl @vcell decorator."""
 
 
-class CellKWargs(TypedDict, total=False):
+class CellKWargs[KC: ProtoTKCell[Any]](TypedDict, total=False):
     set_settings: bool
     set_name: bool
     check_ports: bool
@@ -2216,7 +2211,7 @@ class CellKWargs(TypedDict, total=False):
     overwrite_existing: bool
     layout_cache: bool
     info: dict[str, MetaData]
-    post_process: Iterable[Callable[[KC_contra], None]]
+    post_process: Iterable[Callable[[KC], None]]
     debug_names: bool
     tags: list[str]
     lvs_equivalent_ports: list[list[str]]

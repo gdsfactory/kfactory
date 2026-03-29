@@ -30,7 +30,7 @@ class ProtoInstancePins[T: (int, float), TI: ProtoInstance[Any]](HasCellPins[T],
     def __contains__(self, pin: str | ProtoPin[Any]) -> bool: ...
 
     @abstractmethod
-    def __getitem__(self, key: int | str | None) -> ProtoPin[T]: ...
+    def __getitem__(self, key: int | str) -> ProtoPin[T]: ...
 
     @abstractmethod
     def __iter__(self) -> Iterator[ProtoPin[T]]: ...
@@ -94,9 +94,7 @@ class ProtoTInstancePins[T: (int, float)](ProtoInstancePins[T, ProtoTInstance[T]
         pins: Iterable[ProtoPin[T]] = list(self)
         return list(filter_type_reg(pins, pin_type=pin_type, regex=regex))
 
-    def __getitem__(
-        self, key: int | str | tuple[int | str | None, int, int] | None
-    ) -> ProtoPin[T]:
+    def __getitem__(self, key: int | str | tuple[int | str, int, int]) -> ProtoPin[T]:
         """Returns pin from instance.
 
         The key can either be an integer, in which case the nth pin is
@@ -120,7 +118,7 @@ class ProtoTInstancePins[T: (int, float)](ProtoInstancePins[T, ProtoTInstance[T]
         """
         if not self.instance.is_regular_array():
             try:
-                p = self.cell_pins[cast("int | str | None", key)]
+                p = self.cell_pins[cast("int | str", key)]
                 if not self.instance.is_complex():
                     return p.copy(self.instance.trans)
                 return p.copy(self.instance.dcplx_trans)
@@ -302,9 +300,7 @@ class InstancePins(ProtoTInstancePins[int]):
         pins: Iterable[Pin] = list(self)
         return list(filter_type_reg(pins, pin_type=pin_type, regex=regex))
 
-    def __getitem__(
-        self, key: int | str | tuple[int | str | None, int, int] | None
-    ) -> Pin:
+    def __getitem__(self, key: int | str | tuple[int | str, int, int]) -> Pin:
         return Pin(base=super().__getitem__(key).base)
 
     def __iter__(self) -> Iterator[Pin]:
@@ -340,9 +336,7 @@ class DInstancePins(ProtoTInstancePins[float]):
         pins: Iterable[DPin] = list(self)
         return list(filter_type_reg(pins, pin_type=pin_type, regex=regex))
 
-    def __getitem__(
-        self, key: int | str | tuple[int | str | None, int, int] | None
-    ) -> DPin:
+    def __getitem__(self, key: int | str | tuple[int | str, int, int]) -> DPin:
         return DPin(base=super().__getitem__(key).base)
 
     def __iter__(self) -> Iterator[DPin]:
@@ -381,7 +375,7 @@ class VInstancePins(ProtoInstancePins[float, VInstance]):
         """Return Pin count."""
         return len(self.cell_pins)
 
-    def __getitem__(self, key: int | str | None) -> DPin:
+    def __getitem__(self, key: int | str) -> DPin:
         """Get a pin by name."""
         p = self.cell_pins[key]
         return p.copy(self.instance.trans)

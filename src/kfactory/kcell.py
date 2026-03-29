@@ -436,7 +436,7 @@ class TKCell(BaseKCell):
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
         try:
-            return super().__getattr__(name)  # type: ignore[misc]
+            return super().__getattr__(name)  # ty:ignore[unresolved-attribute]
         except Exception:
             return getattr(self.kdb_cell, name)
 
@@ -743,7 +743,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
         try:
-            return super().__getattr__(name)
+            return ProtoKCell.__getattribute__(self, name)
         except Exception:
             return getattr(self._base, name)
 
@@ -917,8 +917,8 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
     def create_pin(
         self,
         *,
+        name: str,
         ports: Iterable[ProtoPort[Any]],
-        name: str | None = None,
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
     ) -> ProtoPin[T]: ...
@@ -1119,8 +1119,8 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
     def layout(self) -> kdb.Layout:
         return self._base.kdb_cell.layout()
 
-    def library(self) -> kdb.Library:
-        return self._base.kdb_cell.library()  # type: ignore[return-value]
+    def library(self) -> kdb.LibraryBase:
+        return self._base.kdb_cell.library()
 
     @property
     @abstractmethod
@@ -1568,7 +1568,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                     port.trans = inst_or_trans * port.trans
             else:
                 for port in self.ports:
-                    port.dcplx_trans = inst_or_trans * port.dcplx_trans  # type: ignore[operator]
+                    port.dcplx_trans = inst_or_trans * port.dcplx_trans  # ty:ignore[unsupported-operator]
         return None
 
     def set_meta_data(self) -> None:
@@ -1655,7 +1655,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
             meta_format = config.meta_format
         port_dict: dict[str, Any] = {}
         pin_dict: dict[str, Any] = {}
-        ports: dict[str, BasePort] = {}
+        ports: dict[str, Port] = {}
         settings: dict[str, MetaData] = {}
         settings_units: dict[str, str] = {}
         from .layout import kcls
@@ -1716,7 +1716,10 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         v = pin_dict[index]
                         self.create_pin(
                             name=v.get("name"),
-                            ports=[ports[port_index] for port_index in v["ports"]],  # type: ignore[misc]
+                            ports=[
+                                Port(base=ports[port_index].base)
+                                for port_index in v["ports"]
+                            ],
                             pin_type=v["pin_type"],
                             info=v["info"],
                         )
@@ -1752,7 +1755,10 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         v = pin_dict[index]
                         self.create_pin(
                             name=v.get("name"),
-                            ports=[ports[str(port_index)] for port_index in v["ports"]],  # type: ignore[misc]
+                            ports=[
+                                Port(base=ports[str(port_index)].base)
+                                for port_index in v["ports"]
+                            ],
                             pin_type=v["pin_type"],
                             info=v["info"],
                         )
@@ -1895,20 +1901,6 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         if layer is None:
             return self._base.kdb_cell.dbbox()
         return self._base.kdb_cell.dbbox(layer)
-
-    def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
-        """Generate a LayoutToNetlist object from the port types.
-
-        Args:
-            port_types: The port types to consider for the netlist extraction.
-        Returns:
-            LayoutToNetlist extracted from instance and cell port positions.
-        """
-        logger.warning(
-            "l2n is deprecated and will be removed in 2.0. Please use `l2n_ports`"
-            " instead."
-        )
-        return self.l2n_ports(port_types=port_types)
 
     def l2n_ports(
         self,
@@ -2927,8 +2919,8 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
     def create_pin(
         self,
         *,
+        name: str,
         ports: Iterable[ProtoPort[Any]],
-        name: str | None = None,
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
     ) -> DPin:
@@ -3131,8 +3123,8 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
     def create_pin(
         self,
         *,
+        name: str,
         ports: Iterable[ProtoPort[Any]],
-        name: str | None = None,
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
     ) -> Pin:
@@ -3255,19 +3247,19 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
                 margin = t.get("margin", DEFAULT_TRANS["margin"])
                 margin_x = margin.get(
                     "x",
-                    DEFAULT_TRANS["margin"]["x"],  # type: ignore[index]
+                    DEFAULT_TRANS["margin"]["x"],  # ty:ignore[not-subscriptable, invalid-argument-type]
                 )
                 margin_y = margin.get(
                     "y",
-                    DEFAULT_TRANS["margin"]["y"],  # type: ignore[index]
+                    DEFAULT_TRANS["margin"]["y"],  # ty:ignore[not-subscriptable, invalid-argument-type]
                 )
                 margin_x0 = margin.get(
                     "x0",
-                    DEFAULT_TRANS["margin"]["x0"],  # type: ignore[index]
+                    DEFAULT_TRANS["margin"]["x0"],  # ty:ignore[not-subscriptable, invalid-argument-type]
                 )
                 margin_y0 = margin.get(
                     "y0",
-                    DEFAULT_TRANS["margin"]["y0"],  # type: ignore[index]
+                    DEFAULT_TRANS["margin"]["y0"],  # ty:ignore[not-subscriptable, invalid-argument-type]
                 )
                 ref_yml = t.get("ref", DEFAULT_TRANS["ref"])
                 if isinstance(ref_yml, str):
@@ -3465,6 +3457,13 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
             "Cannot create a cross section from "
             f"{type(cross_section)=} and {cross_section_kwargs=}"
         )
+
+    def __getattr__(self, name: str) -> Any:
+        """If KCell doesn't have an attribute, look in the KLayout Cell."""
+        try:
+            return ProtoTKCell.__getattr__(self, name)
+        except Exception:
+            return getattr(self._base, name)
 
 
 class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):

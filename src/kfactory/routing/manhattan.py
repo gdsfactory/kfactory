@@ -295,7 +295,7 @@ class ManhattanRouterSide:
 
     @property
     def ta(self) -> Literal[0, 1, 2, 3]:
-        return (self.other.t.angle - self.t.angle) % 4  # type: ignore[return-value]
+        return (self.other.t.angle - self.t.angle) % 4  # ty:ignore[invalid-return-type]
 
     def right(self) -> None:
         self.pts.append(
@@ -708,7 +708,7 @@ def path_length_match_manhattan_route(
     modify_pts: tuple[kdb.Point, kdb.Point]
 
     for router in routers:
-        modify_pts = tuple(router.start.pts[-2:])  # type: ignore[assignment]
+        modify_pts = tuple(router.start.pts[-2:])  # ty:ignore[invalid-assignment]
         v = modify_pts[1] - modify_pts[0]
         match (v.x, v.y):
             case (x, 0) if x > 0:

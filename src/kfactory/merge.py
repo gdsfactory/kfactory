@@ -48,14 +48,14 @@ class MergeDiff:
         self.diff_a = kdb.Layout()
         self.diff_b = kdb.Layout()
         self.kdiff = kdb.LayoutDiff()
-        self.kdiff.on_begin_cell = self.on_begin_cell  # type: ignore[assignment]
-        self.kdiff.on_begin_layer = self.on_begin_layer  # type: ignore[assignment]
-        self.kdiff.on_end_layer = self.on_end_layer  # type: ignore[assignment]
-        self.kdiff.on_instance_in_a_only = self.on_instance_in_a_only  # type: ignore[assignment]
-        self.kdiff.on_instance_in_b_only = self.on_instance_in_b_only  # type: ignore[assignment]
-        self.kdiff.on_polygon_in_a_only = self.on_polygon_in_a_only  # type: ignore[assignment]
-        self.kdiff.on_polygon_in_b_only = self.on_polygon_in_b_only  # type: ignore[assignment]
-        self.kdiff.on_cell_meta_info_differs = self.on_cell_meta_info_differs  # type: ignore[assignment]
+        self.kdiff.on_begin_cell = self.on_begin_cell  # ty:ignore[invalid-assignment]
+        self.kdiff.on_begin_layer = self.on_begin_layer  # ty:ignore[invalid-assignment]
+        self.kdiff.on_end_layer = self.on_end_layer  # ty:ignore[invalid-assignment]
+        self.kdiff.on_instance_in_a_only = self.on_instance_in_a_only  # ty:ignore[invalid-assignment]
+        self.kdiff.on_instance_in_b_only = self.on_instance_in_b_only  # ty:ignore[invalid-assignment]
+        self.kdiff.on_polygon_in_a_only = self.on_polygon_in_a_only  # ty:ignore[invalid-assignment]
+        self.kdiff.on_polygon_in_b_only = self.on_polygon_in_b_only  # ty:ignore[invalid-assignment]
+        self.kdiff.on_cell_meta_info_differs = self.on_cell_meta_info_differs  # ty:ignore[invalid-assignment]
 
     def on_dbu_differs(self, dbu_a: float, dbu_b: float) -> None:
         """Called when the DBU differs between the two layouts."""

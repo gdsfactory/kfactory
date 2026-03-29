@@ -259,13 +259,13 @@ class ICreatePort(ABC):
     def create_port(
         self,
         *,
+        name: str,
         trans: kdb.Trans,
         cross_section: CrossSectionSpec
         | DCrossSectionSpec
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection,
-        name: str | None = None,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> Port: ...
@@ -274,10 +274,10 @@ class ICreatePort(ABC):
     def create_port(
         self,
         *,
+        name: str,
         trans: kdb.Trans,
         width: int,
         layer: int,
-        name: str | None = None,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> Port: ...
@@ -286,10 +286,10 @@ class ICreatePort(ABC):
     def create_port(
         self,
         *,
+        name: str,
         dcplx_trans: kdb.DCplxTrans,
         width: int,
         layer: LayerEnum | int,
-        name: str | None = None,
         port_type: str = "optical",
     ) -> Port: ...
 
@@ -297,11 +297,11 @@ class ICreatePort(ABC):
     def create_port(
         self,
         *,
+        name: str,
         width: int,
         layer: LayerEnum | int,
         center: tuple[int, int],
         angle: Angle,
-        name: str | None = None,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> Port: ...
@@ -310,10 +310,10 @@ class ICreatePort(ABC):
     def create_port(
         self,
         *,
+        name: str,
         trans: kdb.Trans,
         width: int,
         layer_info: kdb.LayerInfo,
-        name: str | None = None,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> Port: ...
@@ -322,11 +322,11 @@ class ICreatePort(ABC):
     def create_port(
         self,
         *,
+        name: str,
         width: int,
         layer_info: kdb.LayerInfo,
         center: tuple[int, int],
         angle: Angle,
-        name: str | None = None,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> Port: ...
@@ -335,6 +335,7 @@ class ICreatePort(ABC):
     def create_port(
         self,
         *,
+        name: str,
         layer_info: kdb.LayerInfo,
         trans: kdb.Trans,
         cross_section: CrossSectionSpec
@@ -342,7 +343,6 @@ class ICreatePort(ABC):
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection,
-        name: str | None = None,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> Port: ...
@@ -350,13 +350,13 @@ class ICreatePort(ABC):
     def create_port(
         self,
         *,
+        name: str,
         dcplx_trans: kdb.DCplxTrans,
         cross_section: CrossSectionSpec
         | DCrossSectionSpec
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection,
-        name: str | None = None,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> Port: ...
@@ -364,7 +364,7 @@ class ICreatePort(ABC):
     def create_port(
         self,
         *,
-        name: str | None = None,
+        name: str,
         width: int | None = None,
         layer: LayerEnum | int | None = None,
         layer_info: kdb.LayerInfo | None = None,
@@ -469,7 +469,7 @@ class DCreatePort(ABC):
         trans: kdb.Trans,
         width: float,
         layer: int,
-        name: str | None = None,
+        name: str,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
@@ -481,7 +481,7 @@ class DCreatePort(ABC):
         dcplx_trans: kdb.DCplxTrans,
         width: float,
         layer: LayerEnum | int,
-        name: str | None = None,
+        name: str,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
@@ -494,7 +494,7 @@ class DCreatePort(ABC):
         layer: LayerEnum | int,
         center: tuple[float, float],
         orientation: float,
-        name: str | None = None,
+        name: str,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
@@ -506,7 +506,7 @@ class DCreatePort(ABC):
         trans: kdb.Trans,
         width: float,
         layer_info: kdb.LayerInfo,
-        name: str | None = None,
+        name: str,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
@@ -518,7 +518,7 @@ class DCreatePort(ABC):
         dcplx_trans: kdb.DCplxTrans,
         width: float,
         layer_info: kdb.LayerInfo,
-        name: str | None = None,
+        name: str,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
@@ -531,7 +531,7 @@ class DCreatePort(ABC):
         layer_info: kdb.LayerInfo,
         center: tuple[float, float],
         orientation: float,
-        name: str | None = None,
+        name: str,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
@@ -546,7 +546,7 @@ class DCreatePort(ABC):
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection,
-        name: str | None = None,
+        name: str,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
@@ -560,7 +560,7 @@ class DCreatePort(ABC):
         | CrossSection
         | DCrossSection
         | SymmetricalCrossSection,
-        name: str | None = None,
+        name: str,
         port_type: str = "optical",
         info: dict[str, MetaData] | None = None,
     ) -> DPort: ...
@@ -568,7 +568,7 @@ class DCreatePort(ABC):
     def create_port(
         self,
         *,
-        name: str | None = None,
+        name: str,
         width: float | None = None,
         layer: LayerEnum | int | None = None,
         layer_info: kdb.LayerInfo | None = None,

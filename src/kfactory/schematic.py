@@ -1194,13 +1194,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             Callable[
                 Concatenate[
                     ProtoTKCell[Any],
-                    Sequence[
-                        tuple[
-                            ProtoPort[Any],
-                            ProtoPort[Any],
-                            *tuple[ProtoPort[Any], ...],
-                        ]
-                    ],
+                    Sequence[Sequence[ProtoPort[Any]]],
                     ...,
                 ],
                 Any,
@@ -1261,7 +1255,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     name=name,
                     cross_sections=cross_sections,
                 )
-                placed_ports.add(p.name)  # type: ignore[arg-type]
+                placed_ports.add(p.name)
 
         instances: dict[str, Instance | VInstance] = {}
         placed_islands: list[set[str]] = []
@@ -1727,7 +1721,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             if isinstance(factory, WrappedKCellFunc):
                 is_schematic_inst = factory.schematic_driven()
                 if is_schematic_inst:
-                    _schematic = factory._f_schematic(**settings)  # type: ignore[misc]
+                    _schematic = factory._f_schematic(**settings)  # ty:ignore[call-top-callable, call-non-callable]
                     port_positions = _schematic.get_port_positions(factories=factories)
                     port_directions: dict[str | None, float] = {}
                     for port_name in port_positions["right"]:
@@ -1759,7 +1753,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     if isinstance(factory, WrappedKCellFunc):
                         is_schematic_inst = factory.schematic_driven()
                         if is_schematic_inst:
-                            _schematic = factory._f_schematic(**inst.settings)  # type: ignore[misc]
+                            _schematic = factory._f_schematic(**inst.settings)  # ty:ignore[call-top-callable, call-non-callable]
                             inst_ports = _schematic.get_port_positions(
                                 factories=factories
                             )
@@ -1799,9 +1793,9 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                             cell = factory(**inst.settings)
                             port_orientation = cell.ports[port.name].dcplx_trans.angle
                     if inst.mirror:
-                        orientation = (orientation - port_orientation) % 360  # type: ignore[operator]
+                        orientation = (orientation - port_orientation) % 360  # ty:ignore[unsupported-operator]
                     else:
-                        orientation = (orientation + port_orientation) % 360  # type: ignore[operator]
+                        orientation = (orientation + port_orientation) % 360  # ty:ignore[unsupported-operator]
 
                     match orientation:
                         case 0:
@@ -1836,7 +1830,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 if isinstance(factory, WrappedKCellFunc):
                     is_schematic_inst = factory.schematic_driven()
                     if is_schematic_inst:
-                        _schematic = factory._f_schematic(**inst.settings)  # type: ignore[misc]
+                        _schematic = factory._f_schematic(**inst.settings)  # ty:ignore[call-non-callable, call-top-callable]
                         inst_ports = _schematic.get_port_positions(factories=factories)
                         found = False
 
@@ -1874,9 +1868,9 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                         cell = factory(**inst.settings)
                         port_orientation = cell.ports[port.name].dcplx_trans.angle
                 if inst.mirror:
-                    orientation = (orientation - port_orientation) % 360  # type: ignore[operator]
+                    orientation = (orientation - port_orientation) % 360  # ty:ignore[unsupported-operator]
                 else:
-                    orientation = (orientation + port_orientation) % 360  # type: ignore[operator]
+                    orientation = (orientation + port_orientation) % 360  # ty:ignore[unsupported-operator]
 
                 match orientation:
                     case 0:

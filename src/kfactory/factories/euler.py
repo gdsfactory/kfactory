@@ -330,6 +330,7 @@ def bend_euler_factory(
         )
         li = c.kcl.layer(layer)
         c.create_port(
+            name="o1",
             layer=li,
             width=c.kcl.to_dbu(width),
             trans=kdb.Trans(2, False, c.kcl.to_dbu(backbone[0]).to_v()),
@@ -338,6 +339,7 @@ def bend_euler_factory(
         if abs(angle % 90) < 0.001:
             _ang = round(angle)
             c.create_port(
+                name="o2",
                 trans=kdb.Trans(_ang // 90, False, c.kcl.to_dbu(backbone[-1]).to_v()),
                 width=round(width / c.kcl.dbu),
                 layer=li,
@@ -345,6 +347,7 @@ def bend_euler_factory(
             )
         else:
             c.create_port(
+                name="o2",
                 dcplx_trans=kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
                 width=c.kcl.to_dbu(width),
                 layer=li,
@@ -493,12 +496,14 @@ def bend_s_euler_factory(
             p2 = c.kcl.to_dbu(backbone[-1])
         li = c.kcl.layer(layer)
         c.create_port(
+            name="o1",
             trans=kdb.Trans(2, False, p1.to_v()),
             width=c.kcl.to_dbu(width),
             port_type=port_type,
             layer=li,
         )
         c.create_port(
+            name="o2",
             trans=kdb.Trans(0, False, p2.to_v()),
             width=c.kcl.to_dbu(width),
             port_type=port_type,

@@ -400,7 +400,7 @@ class DCrossSection(TCrossSection[float]):
                     width=kcl.to_dbu(width),
                     enclosure=LayerEnclosure(
                         sections=[
-                            (s[0], *[kcl.to_dbu(s[i]) for i in range(1, len(s))])  # type: ignore[misc, arg-type]
+                            (s[0], *[kcl.to_dbu(s[i]) for i in range(1, len(s))])  # ty:ignore[no-matching-overload]
                             for s in sections
                         ],
                         main_layer=layer,
@@ -524,10 +524,10 @@ class CrossSectionModel(BaseModel):
 
         elif cross_section.get("unit", "dbu") == "dbu":
             cross_section = SymmetricalCrossSection(
-                width=cross_section["width"],  # type: ignore[arg-type]
+                width=cross_section["width"],  # ty:ignore[invalid-argument-type]
                 enclosure=self.kcl.layer_enclosures.get_enclosure(
                     LayerEnclosureSpec(
-                        sections=cross_section.get("sections", []),  # type: ignore[typeddict-item]
+                        sections=cross_section.get("sections", []),  # ty:ignore[invalid-argument-type]
                         main_layer=cross_section["layer"],
                         name=cross_section.get("enclosure", {}).get("name"),
                     ),

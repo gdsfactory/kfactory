@@ -98,7 +98,7 @@ def fix_spacing_tiled(
         tile_size = (tile_dim, tile_dim)
     li = c.kcl.layer(layer)
     tp = kdb.TilingProcessor()
-    tp.frame = c.kcl.to_um(c.bbox(li))  # type: ignore[misc, assignment]
+    tp.frame = c.kcl.to_um(c.bbox(li))  # ty:ignore[invalid-assignment]
     tp.dbu = c.kcl.dbu
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
@@ -174,7 +174,7 @@ def fix_spacing_sizing_tiled(
         tile_dim = min(25 * c.kcl.to_um(min_space), 250)
         tile_size = (tile_dim, tile_dim)
     li = c.kcl.layer(layer)
-    tp.frame = c.kcl.to_um(c.bbox(li))  # type: ignore[misc, assignment]
+    tp.frame = c.kcl.to_um(c.bbox(li))  # ty:ignore[invalid-assignment]
     tp.dbu = c.kcl.dbu
     tp.tile_size(*tile_size)  # tile size in um
     tp.tile_border(min_space * overlap * tp.dbu, min_space * overlap * tp.dbu)
@@ -228,7 +228,7 @@ def fix_spacing_minkowski_tiled(
     """
     c = KCell(base=c.base)
     tp = kdb.TilingProcessor()
-    tp.frame = c.dbbox()  # type: ignore[misc, assignment]
+    tp.frame = c.dbbox()  # ty:ignore[invalid-assignment]
     tp.dbu = c.kcl.dbu
     tp.threads = n_threads or config.n_threads
 
@@ -304,7 +304,7 @@ def fix_width_minkowski_tiled(
     """
     c = KCell(base=c.base)
     tp = kdb.TilingProcessor()
-    tp.frame = c.dbbox()  # type: ignore[misc, assignment]
+    tp.frame = c.dbbox()  # ty:ignore[invalid-assignment]
     tp.dbu = c.kcl.dbu
     tp.threads = n_threads or config.n_threads
 
@@ -384,7 +384,7 @@ def fix_width_and_spacing_minkowski_tiled(
     """
     c = KCell(base=c.base)
     tp = kdb.TilingProcessor()
-    tp.frame = c.dbbox()  # type: ignore[misc, assignment]
+    tp.frame = c.dbbox()  # ty:ignore[invalid-assignment]
     tp.dbu = c.kcl.dbu
     tp.threads = n_threads or config.n_threads
 

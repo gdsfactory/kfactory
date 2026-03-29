@@ -201,9 +201,14 @@ def straight_dbu_factory(
         li = c.kcl.layer(layer)
         c.shapes(li).insert(kdb.Box(0, -width // 2, length, width // 2))
         c.create_port(
-            trans=kdb.Trans(2, False, 0, 0), layer=li, width=width, port_type=port_type
+            name="o1",
+            trans=kdb.Trans(2, False, 0, 0),
+            layer=li,
+            width=width,
+            port_type=port_type,
         )
         c.create_port(
+            name="o2",
             trans=kdb.Trans(0, False, length, 0),
             layer=li,
             width=width,
@@ -226,7 +231,7 @@ def straight_dbu_factory(
         _info.update(_additional_info)
         c.info = Info(**_info)
 
-        c.boundary = c.dbbox()  # type: ignore[assignment]
+        c.boundary = kdb.DPolygon(c.dbbox())
         c.auto_rename_ports()
         return c
 

@@ -9,10 +9,10 @@ def test_layer_infos_valid() -> None:
     layer_info = kf.LayerInfos(
         layer1=kf.kdb.LayerInfo(1, 0), layer2=kf.kdb.LayerInfo(2, 0)
     )
-    assert layer_info.layer1.layer == 1  # type: ignore[attr-defined]
-    assert layer_info.layer1.datatype == 0  # type: ignore[attr-defined]
-    assert layer_info.layer2.layer == 2  # type: ignore[attr-defined]
-    assert layer_info.layer2.datatype == 0  # type: ignore[attr-defined]
+    assert layer_info.layer1.layer == 1  # ty:ignore[unresolved-attribute]
+    assert layer_info.layer1.datatype == 0  # ty:ignore[unresolved-attribute]
+    assert layer_info.layer2.layer == 2  # ty:ignore[unresolved-attribute]
+    assert layer_info.layer2.datatype == 0  # ty:ignore[unresolved-attribute]
 
 
 def test_layer_infos_invalid_type() -> None:
@@ -41,12 +41,12 @@ def test_layer_infos_missing_datatype() -> None:
 
 def test_layer_infos_named_layer() -> None:
     layer_info = kf.LayerInfos(layer1=kf.kdb.LayerInfo(1, 0, name="Layer1"))
-    assert layer_info.layer1.name == "Layer1"  # type: ignore[attr-defined]
+    assert layer_info.layer1.name == "Layer1"  # ty:ignore[unresolved-attribute]
 
 
 def test_layer_infos_unnamed_layer() -> None:
     layer_info = kf.LayerInfos(layer1=kf.kdb.LayerInfo(1, 0))
-    assert layer_info.layer1.name == "layer1"  # type: ignore[attr-defined]
+    assert layer_info.layer1.name == "layer1"  # ty:ignore[unresolved-attribute]
 
 
 def test_layer_enum_creation(layers: Layers) -> None:
@@ -68,7 +68,7 @@ def test_layer_enum_getitem(layers: Layers) -> None:
 
 def test_layer_enum_len(layers: Layers) -> None:
     layer_enum = kf.layer.layerenum_from_dict(name="LAYER", layers=layers)
-    assert len(layer_enum) == 15  # type: ignore[arg-type]
+    assert len(layer_enum) == 15  # ty:ignore[invalid-argument-type]
 
 
 def test_layer_enum_iter(layers: Layers) -> None:

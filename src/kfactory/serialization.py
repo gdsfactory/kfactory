@@ -102,7 +102,7 @@ def clean_value(
                 " for Cell/Component names or similar."
             ) from e
     if hasattr(value, "name"):
-        return clean_name(value.name)  # type: ignore[arg-type]
+        return clean_name(value.name)  # ty:ignore[invalid-argument-type]
     if callable(value):
         if isinstance(value, FunctionType) and value.__name__ == "<lambda>":
             msg = "Unable to serialize lambda function. Use a named function instead."

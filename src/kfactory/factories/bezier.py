@@ -190,12 +190,14 @@ def bend_s_bezier_factory(
         )
 
         c.create_port(
+            name="o1",
             width=int(width / c.kcl.dbu),
             trans=kdb.Trans(2, False, 0, 0),
             layer=c.kcl.layer(layer),
             port_type=port_type,
         )
         c.create_port(
+            name="o2",
             width=int(width / c.kcl.dbu),
             trans=kdb.Trans(0, False, c.bbox().right, kcl.to_dbu(height)),
             layer=c.kcl.layer(layer),

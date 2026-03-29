@@ -388,13 +388,8 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                 return cell_
 
         @cached(cache=cache, lock=RLock())
-        @functools.wraps(f)
         def wrapped_cell(**params: Any) -> KC:
 
-            # Construct param_units
-            param_units = {
-                k: _all_param_units[k] for k in params if k in _all_param_units
-            }
             _params_to_original(params)
 
             old_future_name: str | None = None
@@ -421,7 +416,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                 name_: str | None = name
             else:
                 name_ = None
-            cell = f(**params)  # type: ignore[call-arg]
+            cell = f(**params)  # ty:ignore[missing-argument]
             if cell is None:
                 raise TypeError(
                     f"The cell function {self.name!r} in {str(self.file)!r}"
@@ -459,7 +454,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                 cell.name = name_
                 kcl.future_cell_name = old_future_name
             if set_settings:
-                _set_settings(cell, f, drop_params, params, param_units, basename)
+                _set_settings(cell, f, drop_params, params, _all_param_units, basename)
             if check_ports:
                 _check_ports(cell)
             if check_pins:
@@ -483,8 +478,8 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                     for port in cell.ports:
                         mapped: Direction = Direction(mapping[port.trans.angle])
                         if mapped not in received_ports:
-                            received_ports[mapped] = []  # type: ignore[literal-required]
-                        received_ports[mapped].append(port.name)  # type: ignore[literal-required]
+                            received_ports[mapped]: list[str] = []
+                        received_ports[mapped].append(port.name)  # ty:ignore[invalid-key]
                     raise ValueError(
                         "The `@cell` decorator defines ports, but they do not match"
                         " the extracted ports. Declared ports: "
@@ -498,7 +493,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                     for port in cell.ports:
                         if (
                             port.name
-                            not in self.ports_definition[mapping[port.trans.angle]]  # type: ignore[literal-required]
+                            not in self.ports_definition[mapping[port.trans.angle]]  # ty:ignore[invalid-key]
                         ):
                             found_errors = True
                     if found_errors:
@@ -506,8 +501,8 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                         for port in cell.ports:
                             mapped = Direction(mapping[port.trans.angle])
                             if mapped not in received_ports:
-                                received_ports[mapped] = []  # type: ignore[literal-required]
-                            received_ports[mapped].append(port.name)  # type: ignore[literal-required]
+                                received_ports[mapped]: list[str] = []
+                            received_ports[mapped].append(port.name)  # ty:ignore[invalid-key]
                         raise ValueError(
                             "The `@cell` decorator defines ports, but they do not"
                             " match the extracted ports. Declared ports: "
@@ -519,7 +514,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                     port_names: list[str | None] = []
                     for direction in Direction:
                         if direction in self.ports_definition:
-                            port_names.extend(self.ports_definition[direction])  # type: ignore[literal-required]
+                            port_names.extend(self.ports_definition[direction])  # ty:ignore[invalid-key]
 
                     for port in cell.ports:
                         if port.name not in port_names:
@@ -580,7 +575,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
         return self._f_schematic(*args, **kwargs)
 
 
-class WrappedVKCellFunc[**VKCellParams, VK]:
+class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
     _f: Callable[VKCellParams, VK]
     _f_orig: Callable[VKCellParams, VKCell]
     cache: Cache[int, VK] | dict[int, Any]
@@ -636,7 +631,6 @@ class WrappedVKCellFunc[**VKCellParams, VK]:
                 return cell_
 
         @cached(cache=cache, lock=RLock())
-        @functools.wraps(f)
         def wrapped_cell(**params: Any) -> VK:
 
             # Construct param_units
@@ -657,7 +651,7 @@ class WrappedVKCellFunc[**VKCellParams, VK]:
                 name_: str | None = name
             else:
                 name_ = None
-            cell = f(**params)  # type: ignore[call-arg]
+            cell = f(**params)  # ty:ignore[missing-argument]
             if cell is None:
                 raise TypeError(
                     f"The cell function {self.name!r} in {str(self.file)!r}"
@@ -701,8 +695,8 @@ class WrappedVKCellFunc[**VKCellParams, VK]:
                     for port in cell.ports:
                         mapped: Direction = Direction(mapping[port.trans.angle])
                         if mapped not in received_ports:
-                            received_ports[mapped] = []  # type: ignore[literal-required]
-                        received_ports[mapped].append(port.name)  # type: ignore[literal-required]
+                            received_ports[mapped] = []  # ty:ignore[invalid-assignment]
+                        received_ports[mapped].append(port.name)  # ty:ignore[invalid-key]
                     raise ValueError(
                         "The `@cell` decorator defines ports, but they do not match"
                         " the extracted ports. Declared ports: "
@@ -714,7 +708,7 @@ class WrappedVKCellFunc[**VKCellParams, VK]:
                 port_names: list[str | None] = []
                 for direction in Direction:
                     if direction in self.ports_definition:
-                        port_names.extend(self.ports_definition[direction])  # type: ignore[literal-required]
+                        port_names.extend(self.ports_definition[direction])  # ty:ignore[invalid-key]
 
                 for port in cell.ports:
                     if port.name not in port_names:
