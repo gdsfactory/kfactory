@@ -316,10 +316,14 @@ def cross(cross_section: str) -> kf.KCell:
 
     bb = c.bbox(c.kcl.layer(xs.main_layer))
 
-    c.create_port(trans=kf.kdb.Trans(0, False, bb.right, 0), cross_section=xs)
-    c.create_port(trans=kf.kdb.Trans(1, False, 0, bb.top), cross_section=xs)
-    c.create_port(trans=kf.kdb.Trans(2, False, bb.left, 0), cross_section=xs)
-    c.create_port(trans=kf.kdb.Trans(3, False, 0, bb.bottom), cross_section=xs)
+    c.create_port(
+        name="o1", trans=kf.kdb.Trans(0, False, bb.right, 0), cross_section=xs
+    )
+    c.create_port(name="o2", trans=kf.kdb.Trans(1, False, 0, bb.top), cross_section=xs)
+    c.create_port(name="o3", trans=kf.kdb.Trans(2, False, bb.left, 0), cross_section=xs)
+    c.create_port(
+        name="o4", trans=kf.kdb.Trans(3, False, 0, bb.bottom), cross_section=xs
+    )
 
     xs.enclosure.apply_minkowski_tiled(c, xs.main_layer)
 
