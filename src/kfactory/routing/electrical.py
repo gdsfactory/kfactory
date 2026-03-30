@@ -318,13 +318,13 @@ def route_bundle(
         starts = c.kcl.to_dbu(starts)
     elif isinstance(starts, list):
         if isinstance(starts[0], int | float):
-            starts = [c.kcl.to_dbu(start) for start in starts]  # type: ignore[arg-type]
+            starts = [c.kcl.to_dbu(cast("int|float", start)) for start in starts]
         starts = cast("int | list[int] | list[Step] | list[list[Step]]", starts)
     if isinstance(ends, int | float):
         ends = c.kcl.to_dbu(ends)
     elif isinstance(ends, list):
         if isinstance(ends[0], int | float):
-            ends = [c.kcl.to_dbu(end) for end in ends]  # type: ignore[arg-type]
+            ends = [c.kcl.to_dbu(cast("int|float", end)) for end in ends]
         ends = cast("int | list[int] | list[Step] | list[list[Step]]", ends)
     if waypoints is not None:
         if isinstance(waypoints, list):
@@ -855,10 +855,10 @@ def place_rf_rails(
         )
     )
     route_start_port = p1.copy()
-    route_start_port.name = None
+    route_start_port.name = "route_start"
     route_start_port.trans.angle = (route_start_port.angle + 2) % 4
     route_end_port = p2.copy()
-    route_end_port.name = None
+    route_end_port.name = "route_end"
     route_end_port.trans.angle = (route_end_port.angle + 2) % 4
 
     old_pt = pts[0]
@@ -988,7 +988,7 @@ def place_rf_rails(
         )
         route.instances.append(wg)
         route.start_port = Port(base=wg_p1.base.transformed())
-        route.start_port.name = None
+        route.start_port.name = "route_start"
         route.length_straights += int(length)
         return route
     for i in range(1, len(pts) - 1):
@@ -1082,12 +1082,12 @@ def place_rf_rails(
         )
         route.instances.append(wg)
         route.end_port = wg.ports[wg_p2.name].copy()
-        route.end_port.name = None
+        route.end_port.name = "route_end"
         route.length_straights += int(length)
 
     else:
         route.end_port = old_bend_port.copy()
-        route.end_port.name = None
+        route.end_port.name = "route_end"
     return route
 
 

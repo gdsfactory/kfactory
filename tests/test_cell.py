@@ -99,6 +99,7 @@ def test_no_snap(
     c = kcl.kcell()
 
     c.create_port(
+        name="o1",
         width=c.kcl.to_dbu(1),
         dcplx_trans=kf.kdb.DCplxTrans(1, 90, False, 0.0005, 0),
         layer=c.kcl.find_layer(layers.WG),
@@ -532,7 +533,7 @@ def test_lock(
         # create_port
         with pytest.raises(LockedError):
             straight.create_port(
-                trans=kf.kdb.Trans.R0, width=1000, layer_info=layers.WG
+                name="o1", trans=kf.kdb.Trans.R0, width=1000, layer_info=layers.WG
             )
         # name setter
         with pytest.raises(LockedError):
@@ -677,10 +678,10 @@ def test_prune(kcl: kf.KCLayout) -> None:
 def test_return_none(
     kcl: kf.KCLayout,
 ) -> None:
-    def test_no_return() -> kf.KCell:  # type: ignore[return]
+    def test_no_return() -> kf.KCell:  # ty:ignore[invalid-return-type]
         kcl.kcell()
 
-    def test_no_return_vk() -> kf.VKCell:  # type: ignore[return]
+    def test_no_return_vk() -> kf.VKCell:  # ty:ignore[invalid-return-type]
         kcl.vkcell()
 
     with pytest.raises(TypeError):

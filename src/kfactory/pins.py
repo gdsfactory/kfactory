@@ -62,7 +62,7 @@ class ProtoPins[T: (int, float)](Protocol):
         ...
 
     @abstractmethod
-    def __getitem__(self, key: int | str | None) -> ProtoPin[T]:
+    def __getitem__(self, key: int | str) -> ProtoPin[T]:
         """Get a pin by index or name."""
         ...
 
@@ -78,8 +78,8 @@ class ProtoPins[T: (int, float)](Protocol):
     def create_pin(
         self,
         *,
+        name: str,
         ports: Iterable[ProtoPort[Any]],
-        name: str | None = None,
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
     ) -> ProtoPin[T]:
@@ -133,8 +133,8 @@ class Pins(ProtoPins[int]):
     def create_pin(
         self,
         *,
+        name: str,
         ports: Iterable[ProtoPort[Any]],
-        name: str | None = None,
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
     ) -> Pin:
@@ -179,7 +179,7 @@ class DPins(ProtoPins[float]):
         """Iterator, that allows for loops etc to directly access the object."""
         yield from (DPin(base=b) for b in self._bases)
 
-    def __getitem__(self, key: int | str | None) -> DPin:
+    def __getitem__(self, key: int | str) -> DPin:
         """Get a specific pin by name."""
         if isinstance(key, int):
             return DPin(base=self._bases[key])
@@ -194,8 +194,8 @@ class DPins(ProtoPins[float]):
     def create_pin(
         self,
         *,
+        name: str,
         ports: Iterable[ProtoPort[Any]],
-        name: str | None = None,
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
     ) -> DPin:

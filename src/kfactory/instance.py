@@ -194,7 +194,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
 
     @a.setter
     def a(self, vec: kdb.Vector | kdb.DVector) -> None:
-        self._instance.a = vec  # type: ignore[assignment]
+        self._instance.a = vec  # ty:ignore[invalid-assignment]
 
     @property
     def b(self) -> kdb.Vector:
@@ -203,7 +203,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
 
     @b.setter
     def b(self, vec: kdb.Vector | kdb.DVector) -> None:
-        self._instance.b = vec  # type: ignore[assignment]
+        self._instance.b = vec  # ty:ignore[invalid-assignment]
 
     @property
     def cell_inst(self) -> kdb.CellInstArray:
@@ -212,7 +212,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
 
     @cell_inst.setter
     def cell_inst(self, cell_inst: kdb.CellInstArray | kdb.DCellInstArray) -> None:
-        self._instance.cell_inst = cell_inst  # type: ignore[assignment]
+        self._instance.cell_inst = cell_inst  # ty:ignore[invalid-assignment]
 
     @property
     def cplx_trans(self) -> kdb.ICplxTrans:
@@ -224,7 +224,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
 
     @cplx_trans.setter
     def cplx_trans(self, trans: kdb.ICplxTrans | kdb.DCplxTrans) -> None:
-        self._instance.cplx_trans = trans  # type: ignore[assignment]
+        self._instance.cplx_trans = trans  # ty:ignore[invalid-assignment]
 
     @property
     def dcplx_trans(self) -> kdb.DCplxTrans:
@@ -260,7 +260,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
 
     @trans.setter
     def trans(self, trans: kdb.Trans | kdb.DTrans) -> None:
-        self._instance.trans = trans  # type: ignore[assignment]
+        self._instance.trans = trans  # ty:ignore[invalid-assignment]
 
     @property
     def na(self) -> int:
@@ -397,7 +397,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
                     "complex connections (non-90 degree and floating point ports) use"
                     "route_cplx instead"
                 )
-            op = Port(base=other.ports[other_port_name].base)  # type: ignore[index]
+            op = Port(base=other.ports[other_port_name].base)  # ty:ignore[invalid-argument-type]
         if isinstance(port, ProtoPort):
             p = Port(base=port.base.transformed(self.dcplx_trans.inverted()))
         else:
@@ -1033,7 +1033,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     "complex connections (non-90 degree and floating point ports) use"
                     "route_cplx instead"
                 )
-            op = Port(base=other.ports[other_port_name].base)  # type: ignore[index]
+            op = Port(base=other.ports[other_port_name].base)  # ty:ignore[invalid-argument-type]
         else:
             op = Port(base=other.base)
         if isinstance(port, ProtoPort):

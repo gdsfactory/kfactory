@@ -238,12 +238,14 @@ def test_schematic_mirror_connection(
             p2 = c.kcl.to_dbu(backbone[-1])
         li = c.kcl.layer(pdk.infos["WG"])
         c.create_port(
+            name="o1",
             trans=kf.kdb.Trans(2, False, p1.to_v()),
             width=width,
             port_type="optical",
             layer=li,
         )
         c.create_port(
+            name="o2",
             trans=kf.kdb.Trans(0, False, p2.to_v()),
             width=width,
             port_type="optical",
@@ -374,7 +376,7 @@ def test_schematic_route(
     @pdk.routing_strategy
     def route_bundle(
         c: kf.ProtoTKCell[Any],
-        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
+        ports: Sequence[Sequence[kf.ProtoPort[Any]]],
         separation: int = 5000,
     ) -> list[kf.routing.generic.ManhattanRoute]:
         start_ports: list[kf.Port] = []
@@ -419,7 +421,7 @@ def test_schematic_route(
 
         return schematic
 
-    assert pdk.factories["route_example"]._f_orig is route_example.__wrapped__  # type: ignore[attr-defined]
+    assert pdk.factories["route_example"]._f_orig is route_example.__wrapped__  # ty:ignore[unresolved-attribute]
 
     oas_regression(route_example())
 
@@ -499,7 +501,7 @@ def test_netlist(
     @pdk.routing_strategy
     def route_bundle(
         c: kf.ProtoTKCell[Any],
-        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
+        ports: Sequence[Sequence[kf.ProtoPort[Any]]],
         separation: int = 5000,
     ) -> list[kf.routing.generic.ManhattanRoute]:
         start_ports: list[kf.Port] = []
@@ -524,7 +526,7 @@ def test_netlist(
     @pdk.routing_strategy
     def route_bundle_elec(
         c: kf.ProtoTKCell[Any],
-        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
+        ports: Sequence[Sequence[kf.ProtoPort[Any]]],
         separation: int = 5000,
         start_straight: int = 0,
         end_straight: int = 0,
@@ -668,7 +670,7 @@ def test_netlist_equivalent(
     @pdk.routing_strategy
     def route_bundle(
         c: kf.ProtoTKCell[Any],
-        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
+        ports: Sequence[Sequence[kf.ProtoPort[Any]]],
         separation: int = 5000,
     ) -> list[kf.routing.generic.ManhattanRoute]:
         start_ports: list[kf.Port] = []
@@ -693,7 +695,7 @@ def test_netlist_equivalent(
     @pdk.routing_strategy
     def route_bundle_elec(
         c: kf.ProtoTKCell[Any],
-        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
+        ports: Sequence[Sequence[kf.ProtoPort[Any]]],
         separation: int = 5000,
         start_straight: int = 0,
         end_straight: int = 0,
@@ -898,6 +900,7 @@ def test_schematic_function_get_port_positions(
         )
         li = c.kcl.layer(layer)
         c.create_port(
+            name="o1",
             layer=li,
             width=c.kcl.to_dbu(width),
             trans=kf.kdb.Trans(2, False, c.kcl.to_dbu(backbone[0]).to_v()),
@@ -906,6 +909,7 @@ def test_schematic_function_get_port_positions(
         if abs(angle % 90) < 0.001:
             _ang = round(angle)
             c.create_port(
+                name="o2",
                 trans=kf.kdb.Trans(
                     _ang // 90, False, c.kcl.to_dbu(backbone[-1]).to_v()
                 ),
@@ -914,6 +918,7 @@ def test_schematic_function_get_port_positions(
             )
         else:
             c.create_port(
+                name="o2",
                 dcplx_trans=kf.kdb.DCplxTrans(1, angle, False, backbone[-1].to_v()),
                 width=c.kcl.to_dbu(width),
                 layer=li,
@@ -973,12 +978,14 @@ def test_schematic_function_get_port_positions(
             p2 = c.kcl.to_dbu(backbone[-1])
         li = c.kcl.layer(xs.layer)
         c.create_port(
+            name="o1",
             trans=kf.kdb.Trans(2, False, p1.to_v()),
             width=c.kcl.to_dbu(width),
             port_type="optical",
             layer=li,
         )
         c.create_port(
+            name="o2",
             trans=kf.kdb.Trans(0, False, p2.to_v()),
             width=c.kcl.to_dbu(width),
             port_type="optical",
@@ -1022,14 +1029,19 @@ def test_schematic_function_get_port_positions(
 
         li = c.kcl.layer(xs.layer)
         c.shapes(li).insert(kf.kdb.Box(0, -xs.width // 2, length_, xs.width // 2))
-        c.create_port(trans=kf.kdb.Trans(2, False, 0, 0), layer=li, width=xs.width)
         c.create_port(
-            trans=kf.kdb.Trans(0, False, length_, 0), layer=li, width=xs.width
+            name="o1", trans=kf.kdb.Trans(2, False, 0, 0), layer=li, width=xs.width
+        )
+        c.create_port(
+            name="o2",
+            trans=kf.kdb.Trans(0, False, length_, 0),
+            layer=li,
+            width=xs.width,
         )
 
         xs.enclosure.apply_minkowski_y(c, xs.layer)
 
-        c.boundary = c.dbbox()  # type: ignore[assignment]
+        c.boundary = c.dbbox()  # ty:ignore[invalid-assignment]
         c.auto_rename_ports()
         return c
 
@@ -1275,7 +1287,7 @@ def test_route_multi(
     @pdk.routing_strategy
     def route_bundle_elec(
         c: kf.ProtoTKCell[Any],
-        ports: Sequence[tuple[kf.ProtoPort[Any], kf.ProtoPort[Any]]],
+        ports: Sequence[Sequence[kf.ProtoPort[Any]]],
         separation: int = 5000,
     ) -> list[kf.routing.generic.ManhattanRoute]:
         routes: list[kf.routing.generic.ManhattanRoute] = []

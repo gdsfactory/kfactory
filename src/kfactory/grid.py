@@ -102,7 +102,7 @@ def grid_dbu(
         if isinstance(kcells[0], KCell):  # noqa: SIM108
             kcell_array = [list(kcells)]
         else:
-            kcell_array = kcells  # type: ignore[assignment]
+            kcell_array = kcells  # ty:ignore[invalid-assignment]
 
         x0 = 0
         y0 = 0
@@ -555,7 +555,7 @@ def grid(
         if isinstance(kcells[0], DKCell):  # noqa: SIM108
             kcell_array = [list(kcells)]
         else:
-            kcell_array = kcells  # type: ignore[assignment]
+            kcell_array = kcells  # ty:ignore[invalid-assignment]
 
         x0: float = 0
         y0: float = 0

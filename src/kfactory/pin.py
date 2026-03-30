@@ -21,7 +21,7 @@ __all__ = ["DPin", "Pin", "ProtoPin"]
 
 
 class BasePinDict(TypedDict):
-    name: str | None
+    name: str
     kcl: KCLayout
     ports: list[BasePort]
     info: Info
@@ -29,7 +29,7 @@ class BasePinDict(TypedDict):
 
 
 class BasePin(BaseModel, arbitrary_types_allowed=True):
-    name: str | None
+    name: str
     kcl: KCLayout
     ports: list[BasePort]
     info: Info = Info()
@@ -71,7 +71,7 @@ class ProtoPin[T: (int, float)](ABC):
         return self._base.name
 
     @name.setter
-    def name(self, value: str | None) -> None:
+    def name(self, value: str) -> None:
         self._base.name = value
 
     @property

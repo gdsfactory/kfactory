@@ -581,13 +581,13 @@ def route_bundle(
         starts = c.kcl.to_dbu(starts)
     elif isinstance(starts, list):
         if isinstance(starts[0], int | float):
-            starts = [c.kcl.to_dbu(start) for start in starts]  # type: ignore[arg-type]
+            starts = [c.kcl.to_dbu(cast("int|float", start)) for start in starts]
         starts = cast("int | list[int] | list[Step] | list[list[Step]]", starts)
     if isinstance(ends, int | float):
         ends = c.kcl.to_dbu(ends)
     elif isinstance(ends, list):
         if isinstance(ends[0], int | float):
-            ends = [c.kcl.to_dbu(end) for end in ends]  # type: ignore[arg-type]
+            ends = [c.kcl.to_dbu(cast("int|float", end)) for end in ends]
         ends = cast("int | list[int] | list[Step] | list[list[Step]]", ends)
 
     def _straight_factory(width: int, length: int) -> KCell:
@@ -1022,9 +1022,9 @@ def place_manhattan(
             " 90 degrees). Forcing port to be manhattan."
         )
         route_end_port.trans = route_end_port.trans
-    route_start_port.name = None
+    route_start_port.name = "route_start"
     route_start_port.trans.angle = (route_start_port.angle + 2) % 4
-    route_end_port.name = None
+    route_end_port.name = "route_end"
     route_end_port.trans.angle = (route_end_port.angle + 2) % 4
 
     old_pt = pts[0]
@@ -1149,8 +1149,8 @@ def place_manhattan(
                 allow_type_mismatch=allow_type_mismatch,
                 taper_cell=taper_cell,
             )
-        p1_.name = None
-        p2_.name = None
+        p1_.name = "route_start"
+        p2_.name = "route_end"
         route.start_port = p1
         route.end_port = p2
         return route
@@ -1285,8 +1285,8 @@ def place_manhattan(
         route.end_port = p2_.copy()
     else:
         route.end_port = old_bend_port.copy()
-    route.start_port.name = None
-    route.end_port.name = None
+    route.start_port.name = "route_start"
+    route.end_port.name = "route_end"
     return route
 
 
@@ -1338,10 +1338,10 @@ def place_manhattan_with_sbends(
             "place_manhattan_with_sbends needs to be passed a sbend_function."
         )
     route_start_port = p1.copy()
-    route_start_port.name = None
+    route_start_port.name = "route_start"
     route_start_port.trans.angle = (route_start_port.angle + 2) % 4
     route_end_port = p2.copy()
-    route_end_port.name = None
+    route_end_port.name = "route_end"
     route_end_port.trans.angle = (route_end_port.angle + 2) % 4
 
     old_pt = pts[0]
@@ -1485,8 +1485,8 @@ def place_manhattan_with_sbends(
                     allow_type_mismatch=allow_type_mismatch,
                     taper_cell=taper_cell,
                 )
-        p1.name = None
-        p2.name = None
+        p1.name = "route_start"
+        p2.name = "route_end"
         route.start_port = p1
         route.end_port = p2
         return route
@@ -1718,8 +1718,8 @@ def place_manhattan_with_sbends(
             route.end_port = p2_.copy()
         else:
             route.end_port = old_bend_port.copy()
-    route.start_port.name = None
-    route.end_port.name = None
+    route.start_port.name = "route_start"
+    route.end_port.name = "route_end"
     return route
 
 

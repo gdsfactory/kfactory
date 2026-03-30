@@ -18,7 +18,7 @@ kcl.infos = layers
 
 def get_ports() -> _PortsType:
     base = kf.port.BasePort(
-        name=None,
+        name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
             CrossSectionSpec(layer=layers.WG, width=2000)
@@ -62,7 +62,7 @@ def test_create_port_error(kcl: kf.KCLayout, layers: Layers) -> None:
 def test_invalid_base_port_trans(kcl: kf.KCLayout, layers: Layers) -> None:
     with pytest.raises(ValueError, match=r"Both trans and dcplx_trans cannot be None."):
         kf.port.BasePort(
-            name=None,
+            name="o1",
             kcl=kcl,
             cross_section=kcl.get_symmetrical_cross_section(
                 CrossSectionSpec(layer=layers.WG, width=2000)
@@ -74,7 +74,7 @@ def test_invalid_base_port_trans(kcl: kf.KCLayout, layers: Layers) -> None:
         ValueError, match=r"Only one of trans or dcplx_trans can be set."
     ):
         kf.port.BasePort(
-            name=None,
+            name="o2",
             kcl=kcl,
             cross_section=kcl.get_symmetrical_cross_section(
                 CrossSectionSpec(layer=layers.WG, width=2000)
@@ -87,7 +87,7 @@ def test_invalid_base_port_trans(kcl: kf.KCLayout, layers: Layers) -> None:
 
 def test_base_port_ser_model(kcl: kf.KCLayout, layers: Layers) -> None:
     port = kf.port.BasePort(
-        name=None,
+        name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
             CrossSectionSpec(layer=layers.WG, width=2000)
@@ -97,7 +97,7 @@ def test_base_port_ser_model(kcl: kf.KCLayout, layers: Layers) -> None:
     )
     assert port.ser_model()
     port = kf.port.BasePort(
-        name=None,
+        name="o2",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
             CrossSectionSpec(layer=layers.WG, width=2000)
@@ -110,7 +110,7 @@ def test_base_port_ser_model(kcl: kf.KCLayout, layers: Layers) -> None:
 
 def test_base_port_get_trans(kcl: kf.KCLayout, layers: Layers) -> None:
     port = kf.port.BasePort(
-        name=None,
+        name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
             CrossSectionSpec(layer=layers.WG, width=2000)
@@ -123,7 +123,7 @@ def test_base_port_get_trans(kcl: kf.KCLayout, layers: Layers) -> None:
     assert port.get_dcplx_trans() == kf.kdb.DCplxTrans(0.001, 0)
 
     port = kf.port.BasePort(
-        name=None,
+        name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
             CrossSectionSpec(layer=layers.WG, width=2000)
@@ -138,7 +138,7 @@ def test_base_port_get_trans(kcl: kf.KCLayout, layers: Layers) -> None:
 
 def test_base_port_eq(kcl: kf.KCLayout, layers: Layers) -> None:
     port1 = kf.port.BasePort(
-        name=None,
+        name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
             CrossSectionSpec(layer=layers.WG, width=2000)
@@ -164,7 +164,7 @@ def test_port_eq(port: kf.port.ProtoPort[Any]) -> None:
 
 def test_port_kcl(kcl: kf.KCLayout, pdk: kf.KCLayout, layers: Layers) -> None:
     port = kf.port.Port(
-        name=None,
+        name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
             CrossSectionSpec(layer=layers.WG, width=2000)
@@ -179,7 +179,7 @@ def test_port_kcl(kcl: kf.KCLayout, pdk: kf.KCLayout, layers: Layers) -> None:
 
 def test_port_cross_section(kcl: kf.KCLayout, layers: Layers) -> None:
     base_port = kf.port.BasePort(
-        name=None,
+        name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
             CrossSectionSpec(layer=layers.WG, width=2000)
@@ -290,7 +290,7 @@ def test_to_itype() -> None:
 
 def test_port_copy(kcl: kf.KCLayout, layers: Layers) -> None:
     port = kf.DPort(
-        name=None,
+        name="o1",
         kcl=kcl,
         cross_section=kcl.get_symmetrical_cross_section(
             CrossSectionSpec(layer=layers.WG, width=2000)
@@ -300,7 +300,7 @@ def test_port_copy(kcl: kf.KCLayout, layers: Layers) -> None:
     )
     port2 = port.copy()
     port.trans = kf.kdb.Trans(2, 0)
-    assert port2.name is None
+    assert port2.name == "o1"
     assert port2.kcl is kcl
     assert port2.cross_section.base is kcl.get_symmetrical_cross_section(
         CrossSectionSpec(layer=layers.WG, width=2000)
@@ -374,13 +374,13 @@ def test_dport_init_with_port() -> None:
 
 def test_port_invalid_init() -> None:
     with pytest.raises(ValueError):
-        kf.Port(name="o1", layer=1, center=(1000, 1000), angle=1)  # type: ignore[call-overload]
+        kf.Port(name="o1", layer=1, center=(1000, 1000), angle=1)  # ty:ignore[no-matching-overload]
 
     with pytest.raises(ValueError):
-        kf.Port(name="o1", width=10, center=(1000, 1000), angle=1)  # type: ignore[call-overload]
+        kf.Port(name="o1", width=10, center=(1000, 1000), angle=1)  # ty:ignore[no-matching-overload]
 
     with pytest.raises(ValueError):
-        kf.Port(name="o1", layer=1, width=10)  # type: ignore[call-overload]
+        kf.Port(name="o1", layer=1, width=10)  # ty:ignore[no-matching-overload]
 
     with pytest.raises(ValueError, match=r"Width must be greater than 0."):
         kf.Port(name="o1", width=-10, layer=1, center=(1000, 1000), angle=1)
@@ -388,10 +388,10 @@ def test_port_invalid_init() -> None:
 
 def test_dport_invalid_init() -> None:
     with pytest.raises(ValueError):
-        kf.DPort(name="o1", layer=1, center=(1000, 1000), orientation=90)  # type: ignore[call-overload]
+        kf.DPort(name="o1", layer=1, center=(1000, 1000), orientation=90)  # ty:ignore[no-matching-overload]
 
     with pytest.raises(ValueError):
-        kf.DPort(name="o1", width=10, center=(1000, 1000), orientation=90)  # type: ignore[call-overload]
+        kf.DPort(name="o1", width=10, center=(1000, 1000), orientation=90)  # ty:ignore[no-matching-overload]
 
     with pytest.raises(ValueError, match=r"Width must be greater than 0."):
         kf.DPort(name="o1", width=-10, layer=1, center=(1000, 1000), orientation=90)
@@ -481,7 +481,7 @@ def test_filter_regex(
     filtered = list(kf.port.filter_regex(ports, "o2"))
     assert len(filtered) == 1
 
-    filtered[0].name = None
+    filtered[0].name = "o1"
     filtered = list(kf.port.filter_regex(filtered, "o2"))
     assert len(list(filtered)) == 0
     oas_regression(cell)

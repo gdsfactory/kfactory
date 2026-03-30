@@ -68,7 +68,7 @@ class LayerInfos(BaseModel):
         return getattr(self, value)
 
 
-class LayerEnum(int, Enum):  # type: ignore[misc]
+class LayerEnum(int, Enum):  # ty:ignore[unsupported-base]
     """Class for having the layers stored and a mapping int <-> layer,datatype.
 
     This Enum can also be treated as a tuple, i.e. it implements `__getitem__`
@@ -272,6 +272,6 @@ def layerenum_from_dict(
     for li in layers.model_dump().values():
         members[li.name] = li.layer, li.datatype
     return LayerEnum(
-        name,  # type: ignore[arg-type]
-        members,  # type: ignore[arg-type]
+        name,  # ty:ignore[invalid-argument-type]
+        members,  # ty:ignore[invalid-argument-type]
     )  # ty:ignore[invalid-return-type]

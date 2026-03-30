@@ -360,10 +360,7 @@ def extrude_path_dynamic(
         for layer_, layer_sec in layer_list.items():
             reg = kdb.Region()
             for section in layer_sec.sections:
-                max_widths = [
-                    w + 2 * section.d_max * target.kcl.dbu
-                    for w in widths  # type: ignore[union-attr]
-                ]
+                max_widths = [w + 2 * section.d_max * target.kcl.dbu for w in widths]  # ty:ignore[not-iterable]
                 r = kdb.Region(
                     target.kcl.to_dbu(
                         path_pts_to_polygon(
@@ -379,7 +376,7 @@ def extrude_path_dynamic(
                 if section.d_min is not None:
                     min_widths = [
                         w + 2 * section.d_min * target.kcl.dbu
-                        for w in widths  # type: ignore[union-attr]
+                        for w in widths  # ty:ignore[not-iterable]
                     ]
                     r -= kdb.Region(
                         target.kcl.to_dbu(
@@ -460,9 +457,7 @@ class LayerSection(BaseModel):
         if sec.d_min is not None:
             while i < len(self.sections) and sec.d_min > self.sections[i].d_max:
                 i += 1
-            while (
-                i < len(self.sections) and sec.d_max >= self.sections[i].d_min  # type: ignore[operator]
-            ):
+            while i < len(self.sections) and sec.d_max >= self.sections[i].d_min:  # ty:ignore[unsupported-operator]
                 sec.d_max = max(self.sections[i].d_max, sec.d_max)
                 sec.d_min = min(
                     self.sections[i].d_min,  # ty:ignore[invalid-argument-type]
@@ -796,7 +791,7 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
                     " Therefore the layer must be defined in calls"
                 )
         tp = kdb.TilingProcessor()
-        tp.frame = c.dbbox()  # type: ignore[misc, assignment]
+        tp.frame = c.dbbox()  # ty:ignore[invalid-assignment]
         tp.dbu = c.kcl.dbu
         tp.threads = n_threads or config.n_threads
         maxsize = 0
@@ -1126,8 +1121,8 @@ class KCellLayerEnclosures(BaseModel):
             )
 
         if enclosure not in self.enclosures:
-            self.enclosures.append(enclosure)  # type: ignore[arg-type]
-        return enclosure  # type: ignore[return-value]
+            self.enclosures.append(enclosure)  # ty:ignore[invalid-argument-type]
+        return enclosure  # ty:ignore[invalid-return-type]
 
 
 class RegionOperator(kdb.TileOutputReceiver):
@@ -1450,7 +1445,7 @@ class KCellEnclosure(BaseModel):
             carve_out_ports: Carves out a box of port_width +
         """
         tp = kdb.TilingProcessor()
-        tp.frame = c.dbbox()  # type: ignore[misc, assignment]
+        tp.frame = c.dbbox()  # ty:ignore[invalid-assignment]
         tp.dbu = c.kcl.dbu
         tp.threads = n_threads or config.n_threads
         inputs: set[str] = set()
