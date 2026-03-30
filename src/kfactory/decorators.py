@@ -47,6 +47,44 @@ if TYPE_CHECKING:
     )
 
 
+class SignatureParams:
+    sig: inspect.Signature
+
+    _defaults: dict[str, Any] | None
+    _names: list[str] | None
+    _units: dict[str, str] | None
+
+    def __init__(self, sig: inspect.Signature) -> None:
+        self.sig = sig
+        self._defaults = None
+        self._names = None
+        self._units = None
+
+    @property
+    def defaults(self) -> dict[str, Any]:
+        if self._defaults is None:
+            self._defaults, self._names, self._units = _precompute_sig_metadata(
+                self.sig
+            )
+        return self._defaults
+
+    @property
+    def names(self) -> list[str]:
+        if self._names is None:
+            self._defaults, self._names, self._units = _precompute_sig_metadata(
+                self.sig
+            )
+        return self._names
+
+    @property
+    def units(self) -> dict[str, str]:
+        if self._units is None:
+            self._defaults, self._names, self._units = _precompute_sig_metadata(
+                self.sig
+            )
+        return self._units
+
+
 def _precompute_sig_metadata(
     sig: inspect.Signature,
 ) -> tuple[dict[str, Any], list[str], dict[str, str]]:
@@ -359,13 +397,15 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
         self._f_schematic = schematic_function
 
         # Pre-compute static signature metadata once at decoration time
-        _param_defaults, _param_names, _all_param_units = _precompute_sig_metadata(sig)
+        sig_params = SignatureParams(sig)
 
         @functools.wraps(f)
         def wrapper_autocell(
             *args: KCellParams.args, **kwargs: KCellParams.kwargs
         ) -> KC:
-            params = _parse_params(_param_defaults, _param_names, kcl, args, kwargs)
+            params = _parse_params(
+                sig_params.defaults, sig_params.names, kcl, args, kwargs
+            )
 
             with kcl.thread_lock:
                 cell_ = wrapped_cell(**params)
@@ -454,7 +494,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                 cell.name = name_
                 kcl.future_cell_name = old_future_name
             if set_settings:
-                _set_settings(cell, f, drop_params, params, _all_param_units, basename)
+                _set_settings(cell, f, drop_params, params, sig_params.units, basename)
             if check_ports:
                 _check_ports(cell)
             if check_pins:
@@ -614,13 +654,15 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
         self.tags = set(tags) if tags else set()
 
         # Pre-compute static signature metadata once at decoration time
-        _param_defaults, _param_names, _all_param_units = _precompute_sig_metadata(sig)
+        sig_params = SignatureParams(sig)
 
         @functools.wraps(f)
         def wrapper_autocell(
             *args: VKCellParams.args, **kwargs: VKCellParams.kwargs
         ) -> VK:
-            params = _parse_params(_param_defaults, _param_names, kcl, args, kwargs)
+            params = _parse_params(
+                sig_params.defaults, sig_params.names, kcl, args, kwargs
+            )
 
             with kcl.thread_lock:
                 cell_ = wrapped_cell(**params)
@@ -633,10 +675,6 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
         @cached(cache=cache, lock=RLock())
         def wrapped_cell(**params: Any) -> VK:
 
-            # Construct param_units
-            param_units = {
-                k: _all_param_units[k] for k in params if k in _all_param_units
-            }
             _params_to_original(params)
 
             old_future_name: str | None = None
@@ -675,7 +713,7 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
                 cell.name = name_
                 kcl.future_cell_name = old_future_name
             if set_settings:
-                _set_settings(cell, f, drop_params, params, param_units, basename)
+                _set_settings(cell, f, drop_params, params, sig_params.units, basename)
             if check_ports:
                 _check_ports(cell)
             if check_pins:
