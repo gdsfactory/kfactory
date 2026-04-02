@@ -35,7 +35,7 @@ from pydantic import (
 )
 
 from . import __version__, kdb
-from .conf import CheckInstances, config, logger
+from .conf import CheckInstances, CheckUnnamedCells, config, logger
 from .cross_section import (
     CrossSection,
     CrossSectionModel,
@@ -979,6 +979,7 @@ class KCLayout(
         check_ports: bool = ...,
         check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
+        check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
         cache: Cache[int, Any] | dict[int, Any] | None = ...,
@@ -1005,6 +1006,7 @@ class KCLayout(
         check_ports: bool = ...,
         check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
+        check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
         cache: Cache[int, Any] | dict[int, Any] | None = ...,
@@ -1031,6 +1033,7 @@ class KCLayout(
         check_ports: bool = ...,
         check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
+        check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
         cache: Cache[int, Any] | dict[int, Any] | None = ...,
@@ -1058,6 +1061,7 @@ class KCLayout(
         check_ports: bool = ...,
         check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
+        check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
         cache: Cache[int, Any] | dict[int, Any] | None = ...,
@@ -1086,6 +1090,7 @@ class KCLayout(
         check_ports: bool = ...,
         check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
+        check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
         cache: Cache[int, Any] | dict[int, Any] | None = ...,
@@ -1116,6 +1121,7 @@ class KCLayout(
         check_ports: bool = ...,
         check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
+        check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
         cache: Cache[int, Any] | dict[int, Any] | None = ...,
@@ -1146,6 +1152,7 @@ class KCLayout(
         check_ports: bool = ...,
         check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
+        check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
         cache: Cache[int, Any] | dict[int, Any] | None = ...,
@@ -1175,6 +1182,7 @@ class KCLayout(
         check_ports: bool = ...,
         check_pins: bool = ...,
         check_instances: CheckInstances | None = ...,
+        check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
         cache: Cache[int, Any] | dict[int, Any] | None = ...,
@@ -1204,6 +1212,7 @@ class KCLayout(
         check_ports: bool = True,
         check_pins: bool = True,
         check_instances: CheckInstances | None = None,
+        check_unnamed_cells: CheckUnnamedCells | None = None,
         snap_ports: bool = True,
         add_port_layers: bool = True,
         cache: Cache[int, Any] | dict[int, Any] | None = None,
@@ -1245,6 +1254,9 @@ class KCLayout(
                 Depending on the setting, an error is raised, the cell is flattened,
                 a VInstance is created instead of a regular instance, or they are
                 ignored.
+            check_unnamed_cells: Check for unnamed child cells (matching
+                ``Unnamed_\\d+``). ``"error"`` raises, ``"warning"`` logs a warning,
+                ``"ignore"`` skips the check.
             snap_ports: Snap the centers of the ports onto the grid
                 (only x/y, not angle).
             add_port_layers: Add special layers of `KCLayout.netlist_layer_mapping`
@@ -1276,6 +1288,8 @@ class KCLayout(
         """
         if check_instances is None:
             check_instances = config.check_instances
+        if check_unnamed_cells is None:
+            check_unnamed_cells = config.check_unnamed_cells
         if overwrite_existing is None:
             overwrite_existing = config.cell_overwrite_existing
         if layout_cache is None:
@@ -1325,6 +1339,7 @@ class KCLayout(
                 check_ports=check_ports,
                 check_pins=check_pins,
                 check_instances=check_instances,
+                check_unnamed_cells=check_unnamed_cells,
                 snap_ports=snap_ports,
                 add_port_layers=add_port_layers,
                 basename=basename,
@@ -1376,6 +1391,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = None,
         check_ports: bool = True,
         check_pins: bool = True,
+        check_unnamed_cells: CheckUnnamedCells = ...,
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
@@ -1397,6 +1413,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = None,
         check_ports: bool = True,
         check_pins: bool = True,
+        check_unnamed_cells: CheckUnnamedCells = ...,
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
@@ -1418,6 +1435,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = None,
         check_ports: bool = True,
         check_pins: bool = True,
+        check_unnamed_cells: CheckUnnamedCells = ...,
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
@@ -1440,6 +1458,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = None,
         check_ports: bool = True,
         check_pins: bool = True,
+        check_unnamed_cells: CheckUnnamedCells = ...,
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
@@ -1462,6 +1481,7 @@ class KCLayout(
         info: dict[str, MetaData] | None = None,
         check_ports: bool = True,
         check_pins: bool = True,
+        check_unnamed_cells: CheckUnnamedCells = CheckUnnamedCells.WARNING,
         tags: list[str] | None = None,
         lvs_equivalent_ports: list[list[str]] | None = None,
         ports: PortsDefinition | None = None,
@@ -1482,6 +1502,9 @@ class KCLayout(
                 string created from the args/kwargs
             check_ports: Check uniqueness of port names.
             check_pins: Check uniqueness of pin names.
+            check_unnamed_cells: Check for unnamed child cells (matching
+                ``Unnamed_\\d+``). ``"error"`` raises, ``"warning"`` logs a warning,
+                ``"ignore"`` skips the check.
             add_port_layers: Add special layers of `KCLayout.netlist_layer_mapping`
                 to the ports if the port layer is in the mapping.
             cache: Provide a user defined cache instead of an internal one. This
@@ -1498,6 +1521,8 @@ class KCLayout(
             A wrapped vcell function which caches responses and modifies the VKCell
             according to settings.
         """
+        if check_unnamed_cells is None:
+            check_unnamed_cells = config.check_unnamed_cells
         if post_process is None:
             post_process = ()
 
@@ -1546,6 +1571,7 @@ class KCLayout(
                 info=info,
                 check_ports=check_ports,
                 check_pins=check_pins,
+                check_unnamed_cells=check_unnamed_cells,
                 tags=tags,
                 lvs_equivalent_ports=lvs_equivalent_ports,
                 ports=ports,

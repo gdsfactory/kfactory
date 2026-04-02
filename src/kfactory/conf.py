@@ -142,6 +142,12 @@ class CheckInstances(StrEnum):
     IGNORE = "ignore"
 
 
+class CheckUnnamedCells(StrEnum):
+    RAISE = "error"
+    WARNING = "warning"
+    IGNORE = "ignore"
+
+
 class LogFilter(BaseModel):
     """Filter certain messages by log level or regex.
 
@@ -245,6 +251,7 @@ class Settings(BaseSettings):
     connect_use_angle: bool = True
     connect_use_mirror: bool = True
     check_instances: CheckInstances = CheckInstances.RAISE
+    check_unnamed_cells: CheckUnnamedCells = CheckUnnamedCells.WARNING
     max_cellname_length: int = 99
     debug_names: bool = False
 

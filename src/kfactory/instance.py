@@ -908,7 +908,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     ):
                         cell.shapes(layer).insert(shape.to_itype(cell.kcl.dbu))
                     else:
-                        cell.shapes(layer).insert(shape)
+                        cell.shapes(layer).insert(shape)  # ty:ignore[no-matching-overload]
             for inst in self.cell.insts:
                 if levels is not None:
                     if levels > 0:
@@ -927,8 +927,8 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 logger.warning(
                     "Levels are not supported if the inserted Instance is a KCell."
                 )
-            if isinstance(cell, ProtoTKCell):
-                for layer in cell.kcl.layer_indexes():
+            if isinstance(self.cell, ProtoTKCell):
+                for layer in self.cell.kcl.layer_indexes():
                     reg = kdb.Region(self.cell.kdb_cell.begin_shapes_rec(layer))
                     reg.transform(kdb.ICplxTrans((trans * self.trans), cell.kcl.dbu))
                     cell.shapes(layer).insert(reg)
