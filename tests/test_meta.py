@@ -6,7 +6,7 @@ import kfactory as kf
 from tests.conftest import Layers
 
 
-@kf.cell  # type: ignore[misc, unused-ignore]
+@kf.cell
 def sample(
     s: str = "a", i: int = 3, f: float = 2.0, t: tuple[int, ...] = (1,)
 ) -> kf.KCell:
@@ -28,9 +28,19 @@ def sample(
                         kf.kdb.Point(250, 250),
                     ]
                 ),
+                "d": "hello",
             },
+            "d": "hello",
         }
+        c.info["poly"] = kf.kdb.Polygon(
+            pts=[
+                kf.kdb.Point(0, 0),
+                kf.kdb.Point(500, 0),
+                kf.kdb.Point(250, 250),
+            ]
+        )
         c.info["e"] = None
+        c.info["g"] = {"c": 1}
         c.write(temp_file.name)
 
         kcl2 = kf.KCLayout("TEST_META_SAMPLE")
@@ -163,7 +173,7 @@ def test_info_dump(kcl: kf.KCLayout) -> None:
     c = kcl.kcell()
     c.info = kf.Info(a="A")
     c.settings = kf.KCellSettings(a="A", c="C")
-    c.info.b = "B"  # type: ignore[attr-defined, unused-ignore]
+    c.info.b = "B"  # ty:ignore[unresolved-attribute]
     c.info["d"] = {"a": 1, "b": 2}
 
     assert c.info == c.info.model_copy()

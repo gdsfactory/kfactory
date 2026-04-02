@@ -7,7 +7,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Generic,
     Self,
     overload,
 )
@@ -22,7 +21,6 @@ from .exceptions import (
 )
 from .geometry import DBUGeometricObject, GeometricObject, UMGeometricObject
 from .port import DPort, Port, ProtoPort
-from .typings import TUnit
 
 if TYPE_CHECKING:
     from ruamel.yaml.representer import BaseRepresenter, MappingNode
@@ -47,7 +45,7 @@ if TYPE_CHECKING:
 __all__ = ["DInstance", "Instance", "ProtoInstance", "ProtoTInstance", "VInstance"]
 
 
-class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
+class ProtoInstance[T: (int, float)](GeometricObject[T]):
     """Base class for instances."""
 
     _kcl: KCLayout
@@ -82,13 +80,13 @@ class ProtoInstance(GeometricObject[TUnit], Generic[TUnit]):
     @abstractmethod
     def __getitem__(
         self, key: int | str | tuple[int | str | None, int, int] | None
-    ) -> ProtoPort[TUnit]: ...
+    ) -> ProtoPort[T]: ...
     @property
     @abstractmethod
-    def ports(self) -> ProtoInstancePorts[TUnit, ProtoInstance[TUnit]]: ...
+    def ports(self) -> ProtoInstancePorts[T, ProtoInstance[T]]: ...
 
 
-class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
+class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
     _instance: kdb.Instance
 
     @property
@@ -118,7 +116,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
     def __getattr__(self, name: str) -> Any:
         """If we don't have an attribute, get it from the instance."""
         try:
-            return super().__getattr__(name)  # type: ignore[misc]
+            return super().__getattr__(name)
         except Exception:
             return getattr(self._instance, name)
 
@@ -147,12 +145,12 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @property
     @abstractmethod
-    def parent_cell(self) -> ProtoTKCell[TUnit]: ...
+    def parent_cell(self) -> ProtoTKCell[T]: ...
 
     @property
     def purpose(self) -> str | None:
         """Purpose value of instance in GDS."""
-        return self._instance.property(PROPID.PURPOSE)  # type: ignore[no-any-return]
+        return self._instance.property(PROPID.PURPOSE)
 
     @purpose.setter
     def purpose(self, value: str | None) -> None:
@@ -169,7 +167,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @property
     @abstractmethod
-    def cell(self) -> ProtoTKCell[TUnit]:
+    def cell(self) -> ProtoTKCell[T]:
         """Parent KCell  of the Instance."""
         ...
 
@@ -179,13 +177,13 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @property
     @abstractmethod
-    def ports(self) -> ProtoTInstancePorts[TUnit]:
+    def ports(self) -> ProtoTInstancePorts[T]:
         """Ports of the instance."""
         ...
 
     @property
     @abstractmethod
-    def pins(self) -> ProtoTInstancePins[TUnit]:
+    def pins(self) -> ProtoTInstancePins[T]:
         """Ports of the instance."""
         ...
 
@@ -196,7 +194,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @a.setter
     def a(self, vec: kdb.Vector | kdb.DVector) -> None:
-        self._instance.a = vec  # type: ignore[assignment]
+        self._instance.a = vec  # ty:ignore[invalid-assignment]
 
     @property
     def b(self) -> kdb.Vector:
@@ -205,7 +203,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @b.setter
     def b(self, vec: kdb.Vector | kdb.DVector) -> None:
-        self._instance.b = vec  # type: ignore[assignment]
+        self._instance.b = vec  # ty:ignore[invalid-assignment]
 
     @property
     def cell_inst(self) -> kdb.CellInstArray:
@@ -214,7 +212,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @cell_inst.setter
     def cell_inst(self, cell_inst: kdb.CellInstArray | kdb.DCellInstArray) -> None:
-        self._instance.cell_inst = cell_inst  # type: ignore[assignment]
+        self._instance.cell_inst = cell_inst  # ty:ignore[invalid-assignment]
 
     @property
     def cplx_trans(self) -> kdb.ICplxTrans:
@@ -226,7 +224,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @cplx_trans.setter
     def cplx_trans(self, trans: kdb.ICplxTrans | kdb.DCplxTrans) -> None:
-        self._instance.cplx_trans = trans  # type: ignore[assignment]
+        self._instance.cplx_trans = trans  # ty:ignore[invalid-assignment]
 
     @property
     def dcplx_trans(self) -> kdb.DCplxTrans:
@@ -262,7 +260,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
 
     @trans.setter
     def trans(self, trans: kdb.Trans | kdb.DTrans) -> None:
-        self._instance.trans = trans  # type: ignore[assignment]
+        self._instance.trans = trans  # ty:ignore[invalid-assignment]
 
     @property
     def na(self) -> int:
@@ -399,7 +397,7 @@ class ProtoTInstance(ProtoInstance[TUnit], Generic[TUnit]):
                     "complex connections (non-90 degree and floating point ports) use"
                     "route_cplx instead"
                 )
-            op = Port(base=other.ports[other_port_name].base)  # type: ignore[index]
+            op = Port(base=other.ports[other_port_name].base)  # ty:ignore[invalid-argument-type]
         if isinstance(port, ProtoPort):
             p = Port(base=port.base.transformed(self.dcplx_trans.inverted()))
         else:
@@ -910,7 +908,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     ):
                         cell.shapes(layer).insert(shape.to_itype(cell.kcl.dbu))
                     else:
-                        cell.shapes(layer).insert(shape)
+                        cell.shapes(layer).insert(shape)  # ty:ignore[no-matching-overload]
             for inst in self.cell.insts:
                 if levels is not None:
                     if levels > 0:
@@ -929,16 +927,16 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                 logger.warning(
                     "Levels are not supported if the inserted Instance is a KCell."
                 )
-            if isinstance(cell, ProtoTKCell):
-                for layer in cell.kcl.layer_indexes():
+            if isinstance(self.cell, ProtoTKCell):
+                for layer in self.cell.kcl.layer_indexes():
                     reg = kdb.Region(self.cell.kdb_cell.begin_shapes_rec(layer))
                     reg.transform(kdb.ICplxTrans((trans * self.trans), cell.kcl.dbu))
                     cell.shapes(layer).insert(reg)
             else:
-                for layer, shapes in self.cell._shapes.items():
+                for layer, shapes in self.cell.shapes.items():
                     for shape in shapes.transform(trans * self.trans):
                         cell.shapes(layer).insert(shape)
-                for vinst in self.cell.insts:
+                for vinst in self.cell.vinsts:
                     vinst.insert_into_flat(cell, trans=trans * self.trans)
 
     @overload
@@ -1035,7 +1033,7 @@ class VInstance(ProtoInstance[float], UMGeometricObject):
                     "complex connections (non-90 degree and floating point ports) use"
                     "route_cplx instead"
                 )
-            op = Port(base=other.ports[other_port_name].base)  # type: ignore[index]
+            op = Port(base=other.ports[other_port_name].base)  # ty:ignore[invalid-argument-type]
         else:
             op = Port(base=other.base)
         if isinstance(port, ProtoPort):

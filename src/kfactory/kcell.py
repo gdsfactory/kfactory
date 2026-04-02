@@ -3,7 +3,7 @@
 Defines the [KCell][kfactory.kcell.KCell] providing klayout Cells with Ports
 and other convenience functions.
 
-[Instance][kfactory.kcell.Instance] are the kfactory instances used to also acquire
+[Instance][kfactory.instance.Instance] are the kfactory instances used to also acquire
 ports and other inf from instances.
 
 """
@@ -32,15 +32,14 @@ from typing import (
     TYPE_CHECKING,
     Any,
     ClassVar,
-    Generic,
     Literal,
     Self,
-    TypeAlias,
+    cast,
     overload,
 )
 
 import ruamel.yaml
-from klayout import __version__ as _klayout_version  # type: ignore[attr-defined]
+from klayout import __version__ as _klayout_version
 from pydantic import (
     BaseModel,
     Field,
@@ -91,7 +90,14 @@ from .serialization import (
 )
 from .settings import Info, KCellSettings, KCellSettingsUnits
 from .shapes import VShapes
-from .typings import KC_co, MetaData, TBaseCell_co, TUnit
+from .typings import (
+    DShapeLike,
+    JSONSerializable,
+    KC_co,
+    MarkerConfig,
+    MetaData,
+    TBaseCell_co,
+)
 from .utilities import (
     check_cell_ports,
     check_inst_ports,
@@ -191,8 +197,8 @@ class BaseKCell(BaseModel, ABC, arbitrary_types_allowed=True):
     def name(self, value: str) -> None: ...
 
 
-class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # noqa: PYI059
-    _base: TBaseCell_co
+class ProtoKCell[T: (int, float), TB: BaseKCell[Any]](GeometricObject[T], ABC):
+    _base: TB
 
     @property
     def locked(self) -> bool:
@@ -247,7 +253,7 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # 
     def settings_units(self) -> KCellSettingsUnits:
         """Dictionary containing the units of the settings.
 
-        Set by the [@cell][kfactory.kcell.KCLayout.cell] decorator.
+        Set by the [@cell][kfactory.layout.KCLayout.cell] decorator.
         """
         return self._base.settings_units
 
@@ -281,14 +287,14 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # 
 
     @property
     @abstractmethod
-    def insts(self) -> ProtoInstances[TUnit, ProtoInstance[TUnit]]: ...
+    def insts(self) -> ProtoInstances[T, ProtoInstance[T]]: ...
 
     @abstractmethod
     def shapes(self, layer: int | kdb.LayerInfo) -> kdb.Shapes | VShapes: ...
 
     @property
     @abstractmethod
-    def ports(self) -> ProtoPorts[TUnit]: ...
+    def ports(self) -> ProtoPorts[T]: ...
 
     @ports.setter
     @abstractmethod
@@ -296,7 +302,7 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # 
 
     @property
     @abstractmethod
-    def pins(self) -> ProtoPins[TUnit]: ...
+    def pins(self) -> ProtoPins[T]: ...
 
     @pins.setter
     @abstractmethod
@@ -308,7 +314,7 @@ class ProtoKCell(GeometricObject[TUnit], Generic[TUnit, TBaseCell_co], ABC):  # 
         port: ProtoPort[Any],
         name: str | None = None,
         keep_mirror: bool = False,
-    ) -> ProtoPort[TUnit]:
+    ) -> ProtoPort[T]:
         """Add an existing port. E.g. from an instance to propagate the port.
 
         Args:
@@ -430,7 +436,7 @@ class TKCell(BaseKCell):
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
         try:
-            return super().__getattr__(name)  # type: ignore[misc]
+            return super().__getattr__(name)  # ty:ignore[unresolved-attribute]
         except Exception:
             return getattr(self.kdb_cell, name)
 
@@ -612,7 +618,9 @@ class TVCell(BaseKCell):
         self._name = value
 
 
-class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI059
+class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
+    _base: TKCell
+
     def __init__(
         self,
         *,
@@ -675,7 +683,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         self._base.schematic = value
 
     @abstractmethod
-    def __getitem__(self, key: int | str | None) -> ProtoPort[TUnit]:
+    def __getitem__(self, key: int | str | None) -> ProtoPort[T]:
         """Returns port from instance."""
         ...
 
@@ -694,9 +702,8 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         return self._base.virtual
 
     @property
-    @property
     @abstractmethod
-    def pins(self) -> ProtoPins[TUnit]: ...
+    def pins(self) -> ProtoPins[T]: ...
 
     @pins.setter
     @abstractmethod
@@ -736,7 +743,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
     def __getattr__(self, name: str) -> Any:
         """If KCell doesn't have an attribute, look in the KLayout Cell."""
         try:
-            return super().__getattr__(name)  # type: ignore[misc]
+            return ProtoKCell.__getattribute__(self, name)
         except Exception:
             return getattr(self._base, name)
 
@@ -749,7 +756,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
 
     @property
     @abstractmethod
-    def insts(self) -> ProtoTInstances[TUnit]: ...
+    def insts(self) -> ProtoTInstances[T]: ...
 
     def __copy__(self) -> Self:
         """Enables use of `copy.copy` and `copy.deep_copy`."""
@@ -838,6 +845,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         use_libraries: bool = True,
         library_save_options: kdb.SaveLayoutOptions | None = None,
         technology: str | None = None,
+        markers: list[tuple[DShapeLike, MarkerConfig]] | None = None,
     ) -> None:
         """Stream the gds to klive.
 
@@ -863,6 +871,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             save_options=save_options,
             use_libraries=use_libraries,
             library_save_options=library_save_options,
+            markers=markers,
             **kwargs,
         )
 
@@ -908,11 +917,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
     def create_pin(
         self,
         *,
+        name: str,
         ports: Iterable[ProtoPort[Any]],
-        name: str | None = None,
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
-    ) -> ProtoPin[TUnit]: ...
+    ) -> ProtoPin[T]: ...
 
     @overload
     @abstractmethod
@@ -1110,15 +1119,15 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
     def layout(self) -> kdb.Layout:
         return self._base.kdb_cell.layout()
 
-    def library(self) -> kdb.Library:
-        return self._base.kdb_cell.library()  # type: ignore[return-value]
+    def library(self) -> kdb.LibraryBase:
+        return self._base.kdb_cell.library()
 
     @property
     @abstractmethod
-    def library_cell(self) -> ProtoTKCell[TUnit]: ...
+    def library_cell(self) -> ProtoTKCell[T]: ...
 
     @abstractmethod
-    def __lshift__(self, cell: AnyTKCell) -> ProtoTInstance[TUnit]: ...
+    def __lshift__(self, cell: AnyTKCell) -> ProtoTInstance[T]: ...
 
     def auto_rename_ports(self, rename_func: Callable[..., None] | None = None) -> None:
         """Rename the ports with the schema angle -> "NSWE" and sort by x and y.
@@ -1220,7 +1229,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                         ]
                     )
                 )
-                if w > 20:  # noqa: PLR2004
+                if w > 20:
                     poly -= kdb.Region(
                         kdb.Polygon(
                             [
@@ -1251,7 +1260,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
     ) -> None:
         """Write a KCell to a GDS.
 
-        See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
+        See [KCLayout.write][kfactory.layout.KCLayout.write] for more info.
         """
         if save_options is None:
             save_options = save_layout_options()
@@ -1295,7 +1304,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
     ) -> bytes:
         """Write a KCell to a binary format as oasis.
 
-        See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
+        See [KCLayout.write][kfactory.layout.KCLayout.write] for more info.
         """
         if save_options is None:
             save_options = save_layout_options()
@@ -1410,14 +1419,14 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + yaml.dumps(dict(diff.layout_meta_diff))
+                        + yaml.dumps(dict(diff.layout_meta_diff))  # ty:ignore[unresolved-attribute]
                         + "\n```"
                     )
                 if diff.cells_meta_diff:
                     yaml = ruamel.yaml.YAML(typ=["rt", "string"])
                     err_msg += (
                         "\nLayout Meta Diff:\n```\n"
-                        + yaml.dumps(dict(diff.cells_meta_diff))
+                        + yaml.dumps(dict(diff.cells_meta_diff))  # ty:ignore[unresolved-attribute]
                         + "\n```"
                     )
 
@@ -1534,15 +1543,20 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         transform_ports: bool = True,
     ) -> Instance | None:
         """Transforms the instance or cell with the transformation given."""
-        if trans:
+        if trans is not None:
             return Instance(
                 self.kcl,
                 self._base.kdb_cell.transform(
-                    inst_or_trans,  # type: ignore[arg-type]
-                    trans,  # type: ignore[arg-type]
+                    cast("kdb.Instance", inst_or_trans),
+                    trans,
                 ),
             )
-        self._base.kdb_cell.transform(inst_or_trans)  # type:ignore[arg-type]
+        self._base.kdb_cell.transform(
+            cast(
+                "kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans",
+                inst_or_trans,
+            )
+        )
         if transform_ports:
             if isinstance(inst_or_trans, kdb.DTrans):
                 inst_or_trans = kdb.DCplxTrans(inst_or_trans)
@@ -1554,7 +1568,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     port.trans = inst_or_trans * port.trans
             else:
                 for port in self.ports:
-                    port.dcplx_trans = inst_or_trans * port.dcplx_trans  # type: ignore[operator]
+                    port.dcplx_trans = inst_or_trans * port.dcplx_trans  # ty:ignore[unsupported-operator]
         return None
 
     def set_meta_data(self) -> None:
@@ -1641,7 +1655,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
             meta_format = config.meta_format
         port_dict: dict[str, Any] = {}
         pin_dict: dict[str, Any] = {}
-        ports: dict[str, BasePort] = {}
+        ports: dict[str, Port] = {}
         settings: dict[str, MetaData] = {}
         settings_units: dict[str, str] = {}
         from .layout import kcls
@@ -1702,7 +1716,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                         v = pin_dict[index]
                         self.create_pin(
                             name=v.get("name"),
-                            ports=[ports[port_index] for port_index in v["ports"]],  # type: ignore[misc]
+                            ports=[
+                                Port(base=ports[port_index].base)
+                                for port_index in v["ports"]
+                            ],
                             pin_type=v["pin_type"],
                             info=v["info"],
                         )
@@ -1738,7 +1755,10 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                         v = pin_dict[index]
                         self.create_pin(
                             name=v.get("name"),
-                            ports=[ports[str(port_index)] for port_index in v["ports"]],  # type: ignore[misc]
+                            ports=[
+                                Port(base=ports[str(port_index)].base)
+                                for port_index in v["ports"]
+                            ],
                             pin_type=v["pin_type"],
                             info=v["info"],
                         )
@@ -1881,20 +1901,6 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         if layer is None:
             return self._base.kdb_cell.dbbox()
         return self._base.kdb_cell.dbbox(layer)
-
-    def l2n(self, port_types: Iterable[str] = ("optical",)) -> kdb.LayoutToNetlist:
-        """Generate a LayoutToNetlist object from the port types.
-
-        Args:
-            port_types: The port types to consider for the netlist extraction.
-        Returns:
-            LayoutToNetlist extracted from instance and cell port positions.
-        """
-        logger.warning(
-            "l2n is deprecated and will be removed in 2.0. Please use `l2n_ports`"
-            " instead."
-        )
-        return self.l2n_ports(port_types=port_types)
 
     def l2n_ports(
         self,
@@ -2137,9 +2143,9 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
 
         inst_ports: dict[
             str,
-            dict[str, list[tuple[int, int, Instance, Port, kdb.SubCircuit]]],
+            dict[str, list[tuple[int, int, Instance, ProtoPort[Any], kdb.SubCircuit]]],
         ] = {}
-        cell_ports: dict[str, dict[str, list[tuple[int, Port]]]] = {}
+        cell_ports: dict[str, dict[str, list[tuple[int, ProtoPort[Any]]]]] = {}
 
         # sort the cell's ports by position and layer
 
@@ -2257,11 +2263,11 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                     )
 
                     net = circ.create_net(name)
-                    assert len(ports) <= 2, (  # noqa: PLR2004
+                    assert len(ports) <= 2, (
                         "Optical connection with more than two ports are not supported "
                         f"{[_port[3] for _port in ports]}"
                     )
-                    if len(ports) == 2:  # noqa: PLR2004
+                    if len(ports) == 2:
                         if allow_width_mismatch:
                             port_check(
                                 ports[0][3],
@@ -2667,7 +2673,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                             for value in values:
                                 it.add_value(value)
 
-                    case x if x > 2:  # noqa: PLR2004
+                    case x if x > 2:
                         subc = db_.category_by_path(
                             lc.path() + ".portoverlap"
                         ) or db_.create_category(lc, "portoverlap")
@@ -2793,7 +2799,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
         | Callable[..., CrossSection | DCrossSection]
         | SymmetricalCrossSection,
         **cross_section_kwargs: Any,
-    ) -> TCrossSection[TUnit]: ...
+    ) -> TCrossSection[T]: ...
 
     @property
     def lvs_equivalent_ports(self) -> list[list[str]] | None:
@@ -2842,7 +2848,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
             kcl: KCLayout the cell should be attached to.
             kdb_cell: If not `None`, a KCell will be created from and existing
                 KLayout Cell
-            ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
+            ports: Attach an existing [Ports][kfactory.ports.Ports] object to the KCell,
                 if `None` create an empty one.
             info: Info object to attach to the KCell.
             settings: KCellSettings object to attach to the KCell.
@@ -2913,8 +2919,8 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
     def create_pin(
         self,
         *,
+        name: str,
         ports: Iterable[ProtoPort[Any]],
-        name: str | None = None,
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
     ) -> DPin:
@@ -2938,7 +2944,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         nb: int = 1,
         libcell_as_static: bool = False,
         static_name_separator: str = "__",
-    ) -> DInstance:
+    ) -> DInstance:  # ty:ignore[invalid-method-override]
         return DInstance(
             kcl=self.kcl,
             instance=self.dcreate_inst(
@@ -2968,7 +2974,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         if isinstance(cross_section, SymmetricalCrossSection):
             return DCrossSection(kcl=self.kcl, base=cross_section)
         if callable(cross_section):
-            any_cross_section = cross_section(**cross_section_kwargs)
+            any_cross_section = cross_section(**cross_section_kwargs)  # ty:ignore[call-top-callable]
             return DCrossSection(kcl=self.kcl, base=any_cross_section._base)
         if isinstance(cross_section, dict):
             return DCrossSection(
@@ -3035,7 +3041,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
             kcl: KCLayout the cell should be attached to.
             kdb_cell: If not `None`, a KCell will be created from and existing
                 KLayout Cell
-            ports: Attach an existing [Ports][kfactory.kcell.Ports] object to the KCell,
+            ports: Attach an existing [Ports][kfactory.ports.Ports] object to the KCell,
                 if `None` create an empty one.
             info: Info object to attach to the KCell.
             settings: KCellSettings object to attach to the KCell.
@@ -3117,8 +3123,8 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
     def create_pin(
         self,
         *,
+        name: str,
         ports: Iterable[ProtoPort[Any]],
-        name: str | None = None,
         pin_type: str = "DC",
         info: dict[str, int | float | str] | None = None,
     ) -> Pin:
@@ -3142,7 +3148,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         nb: int = 1,
         libcell_as_static: bool = False,
         static_name_separator: str = "__",
-    ) -> Instance:
+    ) -> Instance:  # ty:ignore[invalid-method-override]
         return Instance(
             kcl=self.kcl,
             instance=self.icreate_inst(
@@ -3241,19 +3247,19 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
                 margin = t.get("margin", DEFAULT_TRANS["margin"])
                 margin_x = margin.get(
                     "x",
-                    DEFAULT_TRANS["margin"]["x"],  # type: ignore[index]
+                    DEFAULT_TRANS["margin"]["x"],  # ty:ignore[not-subscriptable, invalid-argument-type]
                 )
                 margin_y = margin.get(
                     "y",
-                    DEFAULT_TRANS["margin"]["y"],  # type: ignore[index]
+                    DEFAULT_TRANS["margin"]["y"],  # ty:ignore[not-subscriptable, invalid-argument-type]
                 )
                 margin_x0 = margin.get(
                     "x0",
-                    DEFAULT_TRANS["margin"]["x0"],  # type: ignore[index]
+                    DEFAULT_TRANS["margin"]["x0"],  # ty:ignore[not-subscriptable, invalid-argument-type]
                 )
                 margin_y0 = margin.get(
                     "y0",
-                    DEFAULT_TRANS["margin"]["y0"],  # type: ignore[index]
+                    DEFAULT_TRANS["margin"]["y0"],  # ty:ignore[not-subscriptable, invalid-argument-type]
                 )
                 ref_yml = t.get("ref", DEFAULT_TRANS["ref"])
                 if isinstance(ref_yml, str):
@@ -3439,7 +3445,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         if isinstance(cross_section, SymmetricalCrossSection):
             return CrossSection(kcl=self.kcl, base=cross_section)
         if callable(cross_section):
-            any_cross_section = cross_section(**cross_section_kwargs)
+            any_cross_section = cross_section(**cross_section_kwargs)  # ty:ignore[call-top-callable]
             return CrossSection(kcl=self.kcl, base=any_cross_section._base)
         if isinstance(cross_section, dict):
             return CrossSection(
@@ -3451,6 +3457,13 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
             "Cannot create a cross section from "
             f"{type(cross_section)=} and {cross_section_kwargs=}"
         )
+
+    def __getattr__(self, name: str) -> Any:
+        """If KCell doesn't have an attribute, look in the KLayout Cell."""
+        try:
+            return ProtoTKCell.__getattr__(self, name)
+        except Exception:
+            return getattr(self._base, name)
 
 
 class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
@@ -3649,7 +3662,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         name: str | None = None,
         keep_mirror: bool = False,
     ) -> DPort:
-        """Proxy for [Ports.create_port][kfactory.kcell.Ports.create_port]."""
+        """Proxy for [Ports.create_port][kfactory.ports.Ports.create_port]."""
         if self.locked:
             raise LockedError(self)
         return self.ports.add_port(
@@ -3717,7 +3730,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
             if w in polys:
                 poly = polys[w]
             else:
-                if w < 2:  # noqa: PLR2004
+                if w < 2:
                     poly = kdb.DPolygon(
                         [
                             kdb.DPoint(0, -w / 2),
@@ -3752,7 +3765,7 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
     ) -> None:
         """Write a KCell to a GDS.
 
-        See [KCLayout.write][kfactory.kcell.KCLayout.write] for more info.
+        See [KCLayout.write][kfactory.layout.KCLayout.write] for more info.
         """
         if save_options is None:
             save_options = save_layout_options()
@@ -3830,6 +3843,7 @@ def show(
     library_save_options: kdb.SaveLayoutOptions | None = None,
     set_technology: bool = True,
     file_format: Literal["oas", "gds"] = "oas",
+    markers: list[tuple[DShapeLike, MarkerConfig]] | None = None,
 ) -> None:
     """Show GDS in klayout.
 
@@ -3843,6 +3857,7 @@ def show(
         use_libraries: Save other KCLayouts as libraries on write.
         library_save_options: Specific saving options for Cells which are in a library
             and not the main KCLayout.
+        markers: lay.Marker list
     """
     from .layout import KCLayout, kcls
 
@@ -3930,7 +3945,7 @@ def show(
     if not file.is_file():
         raise ValueError(f"{file} is not a File")
     logger.debug("klive file: {}", file)
-    data_dict = {
+    data_dict: JSONSerializable = {
         "gds": str(file),
         "keep_position": keep_position,
         "libraries": kcl_paths,
@@ -3968,6 +3983,14 @@ def show(
 
     if set_technology and technology is not None:
         data_dict["technology"] = technology
+
+    if markers:
+        json_markers: list[tuple[str, str, MarkerConfig]] = []
+        for marker_shape, marker_config in markers:
+            json_markers.append(
+                (marker_shape.__class__.__name__, marker_shape.to_s(), marker_config)
+            )
+        data_dict["markers"] = json_markers  # ty:ignore[invalid-assignment]
 
     data = json.dumps(data_dict)
     try:
@@ -4157,8 +4180,8 @@ def get_cells(
     return cells
 
 
-AnyKCell: TypeAlias = ProtoKCell[Any, Any]
-AnyTKCell: TypeAlias = ProtoTKCell[Any]
+type AnyKCell = ProtoKCell[Any, Any]
+type AnyTKCell = ProtoTKCell[Any]
 
 
 def _get_netlist(

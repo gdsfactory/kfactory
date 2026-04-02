@@ -7,7 +7,7 @@ import os
 import re
 import sys
 import traceback
-from enum import Enum, IntEnum
+from enum import IntEnum, StrEnum
 from functools import cached_property
 from itertools import takewhile
 from pathlib import Path
@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from . import kdb, rdb
     from .kcell import AnyKCell
     from .layout import KCLayout
+    from .typings import DShapeLike, MarkerConfig
 
 __all__ = ["LogLevel", "config"]
 
@@ -85,6 +86,7 @@ class ShowFunction(Protocol):
         use_libraries: bool,
         library_save_options: kdb.SaveLayoutOptions,
         technology: str | None = None,
+        markers: list[tuple[DShapeLike, MarkerConfig]] | None = None,
     ) -> None: ...
 
 
@@ -121,7 +123,7 @@ def tracing_formatter(record: loguru.Record) -> str:
     )
 
 
-class LogLevel(str, Enum):
+class LogLevel(StrEnum):
     """KFactory logger levels."""
 
     TRACE = "TRACE"
@@ -133,10 +135,16 @@ class LogLevel(str, Enum):
     CRITICAL = "CRITICAL"
 
 
-class CheckInstances(str, Enum):
+class CheckInstances(StrEnum):
     RAISE = "error"
     FLATTEN = "flatten"
     VINSTANCES = "vinstances"
+    IGNORE = "ignore"
+
+
+class CheckUnnamedCells(StrEnum):
+    RAISE = "error"
+    WARNING = "warning"
     IGNORE = "ignore"
 
 
@@ -163,7 +171,7 @@ def get_show_function(value: str | ShowFunction) -> ShowFunction:
     if isinstance(value, str):
         mod, f = value.rsplit(".", 1)
         loaded_mod = importlib.import_module(mod)
-        return loaded_mod.__getattribute__(f)  # type: ignore[no-any-return]
+        return loaded_mod.__getattribute__(f)
     return value
 
 
@@ -173,14 +181,15 @@ def get_affinity() -> int:
     On (most) linux we can get it through the scheduling affinity. Otherwise,
     fall back to the multiprocessing cpu count.
     """
-    threads = 0
     try:
-        return len(os.sched_getaffinity(0))  # type: ignore[attr-defined,unused-ignore]
+        return len(os.sched_getaffinity(0))
     except AttributeError:
-        import multiprocessing
+        try:
+            import multiprocessing
 
-        threads = multiprocessing.cpu_count()
-    return threads
+            return multiprocessing.cpu_count()
+        except ModuleNotFoundError:
+            return 1
 
 
 dotenv_path = find_dotenv(usecwd=True)
@@ -242,6 +251,7 @@ class Settings(BaseSettings):
     connect_use_angle: bool = True
     connect_use_mirror: bool = True
     check_instances: CheckInstances = CheckInstances.RAISE
+    check_unnamed_cells: CheckUnnamedCells = CheckUnnamedCells.WARNING
     max_cellname_length: int = 99
     debug_names: bool = False
 
@@ -250,6 +260,8 @@ class Settings(BaseSettings):
     write_cell_properties: bool = True
     write_file_properties: bool = True
     write_timestamps: bool = False
+    write_kfactory_settings: bool = True
+    """Write kfactory version into the gds/oasis."""
 
     show_function: ShowFunction | None = None
 
@@ -275,7 +287,7 @@ class Settings(BaseSettings):
             sys.stdout,
             format=tracing_formatter,
             filter=logfilter,
-            enqueue=True,
+            enqueue=False,
             backtrace=True,
         )
         logger.debug("LogLevel: {}", logfilter.level)
