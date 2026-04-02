@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import inspect
+import re
 from collections import defaultdict
 from collections.abc import Callable
 from enum import StrEnum
@@ -24,7 +25,7 @@ from typing import (
 from cachetools import Cache, cached
 
 from . import kdb
-from .conf import CheckInstances, logger
+from .conf import CheckInstances, CheckUnnamedCells, logger
 from .exceptions import CellNameError
 from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
 from .serialization import (
@@ -45,6 +46,8 @@ if TYPE_CHECKING:
     from .typings import (
         MetaData,
     )
+
+_fixed_unnamed_pattern = re.compile(r"Unnamed_\d+")
 
 
 class SignatureParams:
@@ -375,6 +378,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
         check_ports: bool,
         check_pins: bool,
         check_instances: CheckInstances,
+        check_unnamed_cells: CheckUnnamedCells,
         snap_ports: bool,
         add_port_layers: bool,
         basename: str | None,
@@ -499,6 +503,28 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                 _check_ports(cell)
             if check_pins:
                 _check_pins(cell)
+            match check_unnamed_cells:
+                case CheckUnnamedCells.RAISE | CheckUnnamedCells.WARNING:
+                    unnamed_cells: list[str] = []
+                    for ci in cell.kdb_cell.each_child_cell():
+                        c = cell.kcl[ci]
+                        if re.fullmatch(_fixed_unnamed_pattern, c.name):
+                            factory_name = c.basename or c.function_name
+                            factory_string = (
+                                f"factory_name={factory_name!r}"
+                                if factory_name
+                                else "Cell without cell function"
+                            )
+                            unnamed_cells.append(f"{c.name} ({factory_string})")
+                    if unnamed_cells:
+                        msg = (
+                            f"Cell {cell.name!r} has"
+                            " unnamed cells instantiated:\n" + "\n".join(unnamed_cells)
+                        )
+                        if check_unnamed_cells == CheckUnnamedCells.RAISE:
+                            raise ValueError(msg)
+                        logger.warning(msg)
+
             _check_instances(cell, kcl, check_instances)
             cell.insert_vinsts(recursive=False)
             if snap_ports:
@@ -638,6 +664,7 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
         set_name: bool,
         check_ports: bool,
         check_pins: bool,
+        check_unnamed_cells: CheckUnnamedCells,
         add_port_layers: bool,
         basename: str | None,
         drop_params: Sequence[str],
@@ -718,6 +745,27 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
                 _check_ports(cell)
             if check_pins:
                 _check_pins(cell)
+            match check_unnamed_cells:
+                case CheckUnnamedCells.RAISE | CheckUnnamedCells.WARNING:
+                    unnamed_cells: set[str] = set()
+                    for inst in cell.insts:
+                        c = inst.cell
+                        if re.fullmatch(_fixed_unnamed_pattern, c.name or ""):
+                            factory_name = c.basename or c.function_name
+                            factory_string = (
+                                f"factory_name={factory_name!r}"
+                                if factory_name
+                                else "Cell without cell function"
+                            )
+                            unnamed_cells.add(f"{c.name} ({factory_string})")
+                    if unnamed_cells:
+                        msg = (
+                            f"Cell {cell.name!r} has"
+                            " unnamed cells instantiated:\n" + "\n".join(unnamed_cells)
+                        )
+                        if check_unnamed_cells == CheckUnnamedCells.RAISE:
+                            raise ValueError(msg)
+                        logger.warning(msg)
             if add_port_layers:
                 _add_port_layers_vkcell(cell, kcl)
             _post_process(cell, post_process)

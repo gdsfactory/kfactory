@@ -694,6 +694,81 @@ def test_return_none(
         kcl.vcell(functools.partial(test_no_return_vk))()
 
 
+def test_check_unnamed_cell_raise(
+    kcl: kf.KCLayout,
+) -> None:
+    """check_unnamed_cells='error' should raise on unnamed child cells."""
+    from kfactory.conf import CheckUnnamedCells
+
+    @kcl.cell(check_unnamed_cells=CheckUnnamedCells.RAISE)
+    def parent_with_unnamed() -> kf.KCell:
+        c = kcl.kcell()
+        child = kcl.kcell()  # creates an Unnamed_N cell
+        c << child
+        return c
+
+    regex = kf.config.logfilter.regex
+    kf.config.logfilter.regex = (
+        r"^An error has been caught in function 'wrapper_autocell'"
+    )
+    with pytest.raises(ValueError, match="unnamed cells instantiated"):
+        parent_with_unnamed()
+    kf.config.logfilter.regex = regex
+
+
+def test_check_unnamed_cell_warning(
+    kcl: kf.KCLayout,
+) -> None:
+    """check_unnamed_cells='warning' should log but not raise."""
+    from kfactory.conf import CheckUnnamedCells
+
+    @kcl.cell(check_unnamed_cells=CheckUnnamedCells.WARNING)
+    def parent_with_unnamed_warn() -> kf.KCell:
+        c = kcl.kcell()
+        child = kcl.kcell()  # creates an Unnamed_N cell
+        c << child
+        return c
+
+    # Should not raise
+    cell = parent_with_unnamed_warn()
+    assert cell is not None
+
+
+def test_check_unnamed_cell_ignore(
+    kcl: kf.KCLayout,
+) -> None:
+    """check_unnamed_cells='ignore' should silently allow unnamed child cells."""
+    from kfactory.conf import CheckUnnamedCells
+
+    @kcl.cell(check_unnamed_cells=CheckUnnamedCells.IGNORE)
+    def parent_with_unnamed_ignore() -> kf.KCell:
+        c = kcl.kcell()
+        child = kcl.kcell()  # creates an Unnamed_N cell
+        c << child
+        return c
+
+    cell = parent_with_unnamed_ignore()
+    assert cell is not None
+
+
+def test_check_unnamed_cell_no_unnamed(
+    kcl: kf.KCLayout,
+) -> None:
+    """check_unnamed_cells='error' should pass when all children are named."""
+    from kfactory.conf import CheckUnnamedCells
+
+    named_child = kcl.kcell("properly_named_child")
+
+    @kcl.cell(check_unnamed_cells=CheckUnnamedCells.RAISE)
+    def parent_all_named() -> kf.KCell:
+        c = kcl.kcell()
+        c << named_child
+        return c
+
+    cell = parent_all_named()
+    assert cell is not None
+
+
 def test_return_wrong_type(
     kcl: kf.KCLayout,
 ) -> None:
