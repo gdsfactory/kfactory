@@ -22,7 +22,9 @@ if TYPE_CHECKING:
 
 
 def save_session(
-    c: ProtoTKCell[Any] | None = None, session_dir: Path | None = None
+    c: ProtoTKCell[Any] | None = None,
+    session_dir: Path | None = None,
+    save_unnamed: bool = True,
 ) -> None:
     kcls_dir = get_session_directory(session_dir)
     if kcls_dir.exists():
