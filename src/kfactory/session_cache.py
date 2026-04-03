@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import functools
 import hashlib
+import importlib
 import json
 import operator
 import pickle
+import types
 from collections import defaultdict
 from hashlib import sha256
 from shutil import rmtree
@@ -15,10 +17,63 @@ from .layout import KCLayout, kcls
 from .utilities import get_session_directory, save_layout_options
 
 if TYPE_CHECKING:
+    from io import BufferedReader, BufferedWriter
     from pathlib import Path
     from typing import Any
 
     from .kcell import KCell, ProtoTKCell
+
+
+def _reconstruct_function(module_name: str, qualname: str) -> Any:
+    """Reconstruct a function from its module and qualified name."""
+    module = importlib.import_module(module_name)
+    obj: Any = module
+    for attr in qualname.split("."):
+        obj = getattr(obj, attr)
+    return obj
+
+
+def _reconstruct_partial(
+    func: Any, args: tuple[Any, ...], keywords: dict[str, Any]
+) -> functools.partial[Any]:
+    """Reconstruct a functools.partial from its components."""
+    return functools.partial(func, *args, **keywords)
+
+
+class FunctionPickler(pickle.Pickler):
+    """Custom pickler that can serialize non-lambda functions by reference."""
+
+    def reducer_override(self, obj: Any) -> Any:
+        if isinstance(obj, types.FunctionType):
+            if obj is _reconstruct_function or obj is _reconstruct_partial:
+                return NotImplemented
+            if obj.__name__ == "<lambda>":
+                raise pickle.PicklingError(
+                    "Cannot pickle lambda functions. Use a named function instead."
+                )
+            if "<locals>" in obj.__qualname__:
+                raise pickle.PicklingError(
+                    f"Cannot pickle nested function {obj.__qualname__!r}. "
+                    "Use a module-level function instead."
+                )
+            return _reconstruct_function, (obj.__module__, obj.__qualname__)
+        if isinstance(obj, functools.partial):
+            return _reconstruct_partial, (obj.func, obj.args, obj.keywords)
+        return NotImplemented
+
+
+class FunctionUnpickler(pickle.Unpickler):
+    """Custom unpickler paired with FunctionPickler."""
+
+
+def _dump(obj: Any, f: BufferedWriter) -> None:
+    """Pickle an object using FunctionPickler."""
+    FunctionPickler(f).dump(obj)
+
+
+def _load(f: BufferedReader) -> Any:
+    """Unpickle an object using FunctionUnpickler."""
+    return FunctionUnpickler(f).load()
 
 
 def save_session(
@@ -84,7 +139,7 @@ def save_session(
             for k, v in factory_dependency.items()
         }
         with (kcl_dir / "factories.pkl").open("wb") as f:
-            pickle.dump(factory_infos, f)
+            _dump(factory_infos, f)
     with (kcls_dir / "../kcl_dependencies.json").resolve().open("wt") as f:
         json.dump({k: list(v) for k, v in kcl_dependencies.items()}, f)
 
@@ -145,7 +200,7 @@ def load_kcl(kcl_path: Path) -> None:
     loaded_kcl.read(kcl_path / "cells.gds.gz")
     invalid_factories: set[str] = set()
     with (kcl_path / "factories.pkl").open("rb") as f:
-        factory_infos = pickle.load(f)  # noqa: S301
+        factory_infos = _load(f)
     for factory in kcl.factories._all:
         ph = _file_path_hash(factory.file)
         fh = _file_hash(factory.file)
