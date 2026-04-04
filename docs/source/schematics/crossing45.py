@@ -1,118 +1,43 @@
+# ---
+# jupyter:
+#   jupytext:
+#     custom_cell_magics: kql
+#     formats: py:percent
+#     text_representation:
+#       extension: .py
+#       format_name: percent
+#       format_version: '1.3'
+#       jupytext_version: 1.16.2
+#   kernelspec:
+#     display_name: Python 3 (ipykernel)
+#     language: python
+#     name: python3
+# ---
+
 # %% [markdown]
-# # Schematic Cells
+# # 45° Crossing with Virtual Cells
 #
-# This notebook demonstrates how to use `kfactory` for schematic-driven
-# photonic design. We will:
-# - Build higher-level schematic cells
-#     - Create basic parametric cells (PCell) such as straights and bends
-#     - Define routing strategies
-# - Compare schematic vs. extracted layouts (LVS)
-# - Generate reusable code from schematics
+# This page builds a **grid of 45° waveguide crossings** using schematic-driven design.
+# It demonstrates several advanced features working together:
+#
+# - Direct polygon construction for the crossing cell
+# - Virtual parametric cells (`@pdk.vcell` / `VKCell`) for lightweight bend and straight
+#   components
+# - `DSchematic` (µm-coordinate schematic) with `output_type=DKCell`
+# - Hierarchical grid assembly driven entirely by schematic logic
+# - LVS verification and code generation from the resulting schematic
 
 # %%
-# Imports
 import kfactory as kf
 import numpy as np
-
-from IPython.core.getipython import get_ipython
 from pprint import pformat
 
-# %% editable=true slideshow={"slide_type": ""} tags=["hide"]
-# For jupyter to show the big dicts/jsons correctly, we need a helper function `scrollable_text`
-# this is hidden from the docs build
-
-from IPython.display import display, HTML
-import html
-
-
-def scrollable_text(
-    text: str, max_height: int = 300, width: str = "100%", font_size: str = "14px"
-) -> None:
-    """Render scrollable, searchable text output for Jupyter and mkdocs-jupyter.
-
-    This function wraps text inside a scrollable <pre> block with a search box.
-    It adapts to light/dark mode automatically. The search highlights all matches
-    and pressing Enter jumps to the next match.
-
-    Args:
-        text (str): The text to display.
-        max_height (int, optional): Maximum height in pixels before scrolling.
-            Defaults to 300.
-        width (str, optional): CSS width (e.g. "100%", "800px").
-            Defaults to "100%".
-        font_size (str, optional): CSS font size (e.g. "14px", "0.9em").
-            Defaults to "14px".
-    """
-    safe = html.escape(str(text))
-
-    style = (
-        f"max-height:{max_height}px; overflow:auto; "
-        f"border:1px solid var(--st-border); padding:6px; "
-        f"background:var(--st-bg); color:var(--st-fg); "
-        f"width:{width}; font-size:{font_size}; white-space:pre-wrap;"
-    )
-
-    html_block = f"""
-    <style>
-    :root {{
-        --st-bg: #f9f9f9;
-        --st-fg: #111;
-        --st-border: #ccc;
-    }}
-    @media (prefers-color-scheme: dark) {{
-        :root {{
-            --st-bg: #1e1e1e;
-            --st-fg: #ddd;
-            --st-border: #555;
-        }}
-        mark {{
-            background: #ffb347;
-            color: black;
-        }}
-    }}
-    </style>
-    <div style="margin-bottom:0.5em;">
-      <input type="search" placeholder="Search (Enter = next match)"
-             style="margin-bottom:6px; width:98%; padding:4px;"
-             oninput="
-                var q=this.value;
-                var pre=this.nextElementSibling;
-                var orig=pre.dataset.orig;
-                pre.dataset.index=0;
-                if(!q) {{
-                    pre.innerHTML=orig;
-                    return;
-                }}
-                var regex=new RegExp('('+q.replace(/[.*+?^${{}}()|[\\]\\\\]/g,'\\\\$&')+')','gi');
-                pre.innerHTML=orig.replace(regex,'<mark>$1</mark>');
-                var marks=pre.querySelectorAll('mark');
-                if(marks.length) marks[0].scrollIntoView({{behavior:'smooth', block:'center'}});
-             "
-             onkeydown="
-                if(event.key==='Enter'){{
-                    event.preventDefault();
-                    var pre=this.nextElementSibling;
-                    var marks=pre.querySelectorAll('mark');
-                    if(!marks.length) return;
-                    var idx=parseInt(pre.dataset.index)||0;
-                    idx=(idx+1)%marks.length;
-                    pre.dataset.index=idx;
-                    marks[idx].scrollIntoView({{behavior:'smooth', block:'center'}});
-                }}
-             ">
-      <pre style="{style}" data-orig="{safe}" data-index="0">{safe}</pre>
-    </div>
-    """
-    display(HTML(html_block))
-
-
 # %% [markdown]
-# ## Basic example with routing
+# ## PDK setup
 #
-# In order to avoid name conflicts, let's create a new clean `KCLayout` (our PDK container).
-# A **PDK** (Process Design Kit) defines the available layers, devices, and design rules
-# for a given process. Here we’ll create a lightweight one for demonstration.
-
+# We create a dedicated `KCLayout` with a wide waveguide cross-section.  The
+# `SymmetricalCrossSection` bundles the core width, enclosure (cladding), and a name
+# that the schematic can reference as a plain string.
 
 # %%
 class Layers(kf.LayerInfos):
@@ -120,134 +45,8 @@ class Layers(kf.LayerInfos):
     WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
 
 
-layers = Layers()
-pdk = kf.KCLayout("SCHEMA_PDK_ROUTING", infos=Layers)
-
-# %% [markdown]
-# ### Cell functions
-#
-# To begin, we define the **basic building blocks** for routing:
-# - A **straight waveguide** of given length and width
-# - A **90° Euler bend** for turning corners
-#
-# These primitives are enough to assemble larger routed networks.
-
-
-# %%
-@pdk.cell
-def straight(width: int, length: int) -> kf.KCell:
-    c = pdk.kcell()
-    c.shapes(layers.WG).insert(kf.kdb.Box(0, -width // 2, length, width // 2))
-    c.create_port(
-        name="o1",
-        width=width,
-        trans=kf.kdb.Trans(rot=2, mirrx=False, x=0, y=0),
-        layer_info=layers.WG,
-    )
-    c.create_port(
-        name="o2",
-        width=width,
-        trans=kf.kdb.Trans(x=length, y=0),
-        layer_info=layers.WG,
-    )
-
-    return c
-
-
-bend90_function = kf.factories.euler.bend_euler_factory(kcl=pdk)
-bend90 = bend90_function(width=0.500, radius=10, layer=layers.WG)
-
-# %% [markdown]
-# ### Routing strategy
-#
-# Next we define a **routing strategy** (`route_bundle`).
-# This specifies how to connect groups of ports with straight sections and bends.
-# - It ensures separation between parallel routes
-# - Reuses our basic cells (`straight`, `bend90`)
-# - Can be applied consistently across designs
-
-
-# %%
-@pdk.routing_strategy
-def route_bundle(
-    c: kf.KCell,
-    ports: Sequence[tuple[kf.Port, kf.port]],
-    separation: int = 5000,
-) -> list[kf.routing.generic.ManhattanRoute]:
-    start_ports: list[kf.Port] = []
-    end_ports: list[kf.Port] = []
-    for port_seq in ports:
-        if len(port_seq) != 2:
-            raise ValueError(
-                "route_bundle does only support routing between two-port problems, "
-                f"not multiple ports. Found {port_seq}"
-            )
-        start_ports.append(kf.Port(base=port_seq[0].base))
-        end_ports.append(kf.Port(base=port_seq[1].base))
-    return kf.routing.optical.route_bundle(
-        c=kf.KCell(base=c._base),
-        start_ports=[kf.Port(base=sp.base) for sp in start_ports],
-        end_ports=[kf.Port(base=ep.base) for ep in end_ports],
-        separation=separation,
-        straight_factory=straight,
-        bend90_cell=bend90,
-    )
-
-
-# %% [markdown]
-# ### Example schematic with routing
-#
-# Now we can demonstrate usage in a schematic:
-# - Two straight sections (`s1` and `s2`)
-# - Positioned apart vertically
-# - Connected automatically by our routing strategy
-#
-# This shows how schematics carry both connectivity **and** layout placement information.
-
-
-# %%
-@pdk.schematic_cell
-def route_example() -> kf.schematic.TSchematic[int]:
-    schematic = kf.Schematic(kcl=pdk)
-
-    s1 = schematic.create_inst(
-        name="s1", component="straight", settings={"length": 5000, "width": 500}
-    )
-    s2 = schematic.create_inst(
-        name="s2", component="straight", settings={"length": 5000, "width": 500}
-    )
-
-    s1.place(x=1000, y=10_000)
-    s2.place(x=1000, y=210_000)
-
-    schematic.add_route(
-        "s1-s2", [[s1["o2"], s2["o2"]]], "route_bundle", settings={"separation": 20_000}
-    )
-
-    return schematic
-
-
-route_example()
-
-# %% [markdown]
-# ## Example: 45 Degrees Crossing with virtual cells
-#
-# We’ll now construct a more advanced schematic: a **grid of 45° crossings**.
-# This introduces:
-# - Direct polygon construction
-# - Use of virtual parametric cells (`vcell` and `VKCell`)
-# - Hierarchical design through schematic instantiation
-
-# %% [markdown]
-# ### Setup pdk
-#
-# Let’s define a new `KCLayout` for this example, including
-# a cross-section definition for a wide waveguide.
-
-# %%
-pdk = kf.KCLayout("CROSSING_PDK", infos=Layers)
-
 LAYER = Layers()
+pdk = kf.KCLayout("CROSSING_PDK", infos=Layers)
 
 xs_wg1 = pdk.get_icross_section(
     kf.SymmetricalCrossSection(
@@ -259,18 +58,20 @@ xs_wg1 = pdk.get_icross_section(
     )
 )
 
-# Ensure the same cross_section is also available in the target layout as well
+# The crossing45 schematic below is registered on kf.kcl, so ensure the same
+# cross-section is available there as well.
 kf.kcl.get_icross_section(xs_wg1)
 
 # %% [markdown]
-# #### PDK Cells
+# ## The `cross` cell
 #
-# The `cross` cell builds a single 45° crossing:
-# - Constructs polygons for waveguide arms
-# - Ensures spacing rules are met via `fix_spacing_tiled`
-# - Adds enclosures for cladding / fill excludes
-# - Creates ports in four directions for connectivity
-
+# A single 45° crossing: four waveguide arms radiating from the center.
+#
+# - Polygon points are generated per arm with a sinusoidal width profile
+# - All four rotations are merged with `Region.hulls()`
+# - `fix_spacing_tiled` resolves minimum-space DRC violations
+# - Enclosures are applied via `Minkowski` for cladding / fill-exclude layers
+# - Four ports (`o1`..`o4`) face the cardinal directions
 
 # %%
 @pdk.cell
@@ -278,7 +79,7 @@ def cross(cross_section: str) -> kf.KCell:
     c = pdk.kcell()
     xs = c.kcl.get_icross_section(cross_section)
 
-    # calculate points for one arm of the cross
+    # Calculate points for one arm of the cross
     points = [
         kf.kdb.DPoint(
             x * 0.075, c.kcl.to_um(xs.width // 2) + float(np.sin(x / 125 * np.pi))
@@ -287,12 +88,11 @@ def cross(cross_section: str) -> kf.KCell:
     ]
     mt = kf.kdb.DTrans.M0
 
-    poly = kf.kdb.DPolygon(points + list(reversed([mt * p for p in points]))).to_itype(
-        c.kcl.dbu
-    )
+    poly = kf.kdb.DPolygon(
+        points + list(reversed([mt * p for p in points]))
+    ).to_itype(c.kcl.dbu)
 
     center_dist = c.kcl.to_dbu(points[-1].y)
-
     base_trans = kf.kdb.Trans(-poly.bbox().right - center_dist, 0)
 
     r = kf.kdb.Region(
@@ -305,13 +105,9 @@ def cross(cross_section: str) -> kf.KCell:
     shapes = c.shapes(LAYER.WG)
     shapes.insert(r)
 
-    # fix minimum space violations for 300 dbu (.3um)
+    # Fix minimum space violations for 300 dbu (0.3 um)
     fix = kf.utils.fix_spacing_tiled(c, 300, layer=LAYER.WG)
-
-    # remove unfixed polygons
     shapes.clear()
-
-    # add fixed polygon
     shapes.insert(fix)
 
     bb = c.bbox(c.kcl.layer(xs.main_layer))
@@ -319,31 +115,28 @@ def cross(cross_section: str) -> kf.KCell:
     c.create_port(
         name="o1", trans=kf.kdb.Trans(0, False, bb.right, 0), cross_section=xs
     )
-    c.create_port(name="o2", trans=kf.kdb.Trans(1, False, 0, bb.top), cross_section=xs)
-    c.create_port(name="o3", trans=kf.kdb.Trans(2, False, bb.left, 0), cross_section=xs)
+    c.create_port(
+        name="o2", trans=kf.kdb.Trans(1, False, 0, bb.top), cross_section=xs
+    )
+    c.create_port(
+        name="o3", trans=kf.kdb.Trans(2, False, bb.left, 0), cross_section=xs
+    )
     c.create_port(
         name="o4", trans=kf.kdb.Trans(3, False, 0, bb.bottom), cross_section=xs
     )
 
     xs.enclosure.apply_minkowski_tiled(c, xs.main_layer)
-
     c.auto_rename_ports()
 
     return c
 
 
 # %% [markdown]
-# ### Virtual cells
+# ## Virtual cells
 #
-# Unlike physical cells, **virtual cells** are defined parametrically:
-# - Only generate geometry when needed
-# - Lightweight and efficient
-#
-# Here we define:
-# - `bend_euler`: a parametric Euler bend
-# - `euler_term`: a bend tapering to a termination
-# - `straight`: a parametric straight section
-
+# Unlike physical cells, **virtual cells** (`VKCell`) are defined parametrically and only
+# generate geometry when materialised.  They are lightweight and efficient for
+# repetitive routing primitives.
 
 # %%
 @pdk.vcell
@@ -353,17 +146,16 @@ def bend_euler(
     angle: float = 90,
     resolution: float = 150,
 ) -> kf.VKCell:
-    """Create a virtual euler bend.
+    """Virtual euler bend.
 
     Args:
         radius: Radius of the backbone. [um]
-        cross_section: Name of the CrossSection of the bend.
+        cross_section: Name of the CrossSection.
         angle: Angle of the bend.
         resolution: Angle resolution for the backbone.
     """
     c = pdk.vkcell()
     xs = c.kcl.get_dcross_section(cross_section)
-
     dbu = c.kcl.dbu
 
     backbone = kf.factories.virtual.euler.euler_bend_points(
@@ -396,37 +188,13 @@ def bend_euler(
 
 
 @pdk.vcell
-def euler_term(radius: float, cross_section: str, term_width: float) -> kf.VKCell:
-    angle = 45
-    resolution = 150
-    c = pdk.vkcell()
-    xs = c.kcl.get_dcross_section(cross_section)
-    dbu = c.kcl.dbu
-    backbone = kf.factories.virtual.euler.euler_bend_points(
-        angle, radius=xs.radius, resolution=resolution
-    )
-    kf.factories.utils.extrude_backbone_dynamic(
-        c=c,
-        backbone=backbone,
-        width1=xs.width,
-        width2=term_width,
-        layer=xs.main_layer,
-        enclosure=xs.enclosure,
-        start_angle=0,
-        end_angle=angle,
-        dbu=dbu,
-    )
-
-    c.create_port(
-        name="o1",
-        cross_section=xs,
-        dcplx_trans=kf.kdb.DCplxTrans(1, 180, False, backbone[0].to_v()),
-    )
-    return c
-
-
-@pdk.vcell
 def straight(length: float, cross_section: str) -> kf.VKCell:
+    """Virtual straight waveguide.
+
+    Args:
+        length: Length in um.
+        cross_section: Name of the CrossSection.
+    """
     c = pdk.vkcell()
     xs = c.kcl.get_dcross_section(cross_section)
 
@@ -442,13 +210,13 @@ def straight(length: float, cross_section: str) -> kf.VKCell:
     )
 
     c.create_port(
-        name="o2",
-        dcplx_trans=kf.kdb.DCplxTrans(mag=1, rot=0, mirrx=False, x=length, y=0),
+        name="o1",
+        dcplx_trans=kf.kdb.DCplxTrans(mag=1, rot=180, mirrx=False, x=0, y=0),
         cross_section=xs,
     )
     c.create_port(
-        name="o1",
-        dcplx_trans=kf.kdb.DCplxTrans(mag=1, rot=180, mirrx=False, x=0, y=0),
+        name="o2",
+        dcplx_trans=kf.kdb.DCplxTrans(mag=1, rot=0, mirrx=False, x=length, y=0),
         cross_section=xs,
     )
 
@@ -456,15 +224,15 @@ def straight(length: float, cross_section: str) -> kf.VKCell:
 
 
 # %% [markdown]
-# ### Crossing schematic
+# ## Crossing schematic
 #
-# The `crossing45` schematic builds an array of crossings:
-# - Tiles multiple `cross` instances
-# - Adds spacers and bends to enforce pitch
-# - Places input/output ports systematically
+# The `crossing45` schematic builds an n-by-n array of crossings:
 #
-# This results in a scalable crossing matrix driven entirely by schematic logic.
-
+# - Tiles `cross` instances on a 45° grid
+# - Inserts straight spacers between crossings when the pitch exceeds the crossing size
+# - Adds 45° euler bends and I/O straights at the edges so that all ports face
+#   horizontally
+# - Uses `DSchematic` (µm coordinates) and produces a `DKCell`
 
 # %%
 @kf.kcl.schematic_cell(output_type=kf.DKCell)
@@ -572,6 +340,7 @@ def crossing45(n: int, pitch: kf.typings.um, cross_section: str) -> kf.DSchemati
                         crossing.connect(
                             "o1", s.instances[f"crossing_{i - 1}_{j}"].ports["o3"]
                         )
+
     for i in range(n // 2):
         spacer_start_top = s.create_inst(
             name=f"io_spacer_{i}",
@@ -627,6 +396,7 @@ def crossing45(n: int, pitch: kf.typings.um, cross_section: str) -> kf.DSchemati
             "o1", s.instances[f"crossing_{i}_{n // 2 - 1}"].ports["o4"]
         )
         spacer_end_top.connect("o2", bend_end_top.ports["o2"])
+
         spacer_end_bot = s.create_inst(
             name=f"io_spacer_{2 * n - i - 1}",
             component="straight",
@@ -704,41 +474,34 @@ def crossing45(n: int, pitch: kf.typings.um, cross_section: str) -> kf.DSchemati
 c = crossing45(8, pitch=30, cross_section="WG1000")
 c
 
+# %% [markdown]
+# ## Inspecting the schematic model
+#
+# The schematic model contains every instance, placement, and connection as a
+# serialisable Pydantic structure.
+
 # %%
-scrollable_text(pformat(c.schematic.model_dump(exclude_defaults=True)))
+print(pformat(c.schematic.model_dump(exclude_defaults=True)))
 
 # %% [markdown]
-# ### Sample LVS of schematic vs extracted (Connection) Netlist
+# ## LVS: schematic vs extracted netlist
 #
-# With both schematic and extracted netlists, we can perform a partial **Layout vs. Schematic (LVS)**:
-# - `schematic_netlist`: direct from schematic definition
-# - `extracted_netlist`: derived from the physical layout
-#
-# Matching them ensures the layout faithfully implements the intended connectivity.
+# With both a schematic netlist (derived from declared connections) and an extracted
+# netlist (derived from physical geometry), we can verify they match.
 
 # %%
 schematic_netlist = c.schematic.netlist()
-scrollable_text(pformat(schematic_netlist.model_dump()))
+extracted_netlist = c.netlist()[c.name]
 
-# %%
-extracted_netlist = c.netlist()[
-    c.name
-]  # the extracted netlist is hierarchical by default
-scrollable_text(pformat(extracted_netlist.model_dump()))
+assert schematic_netlist == extracted_netlist, "LVS failed!"
+print("LVS passed: schematic and extracted netlists match.")
 
 # %% [markdown]
-# Let’s make an LVS check, i.e. compare the extracted netlist versus the netlist directly from the schematic.
-
-# %%
-assert schematic_netlist == extracted_netlist
-
-# %% [markdown]
-# ## Converting a Schematic to a cell function (parametric cell (PCell))
+# ## Code generation
 #
-# Another powerful feature: **exporting schematics as code**.
-# - `code_str()` generates a self-contained Python function
-# - The result is a reusable **parametric cell (PCell)**
-# - This makes schematics portable and automatable across environments
+# `code_str()` exports the schematic as a standalone Python function.  The generated
+# code re-creates the same layout without the schematic machinery and can be shared
+# with collaborators or archived for reproducibility.
 
 # %%
 from IPython.display import Code
@@ -746,32 +509,28 @@ from IPython.display import Code
 Code(c.schematic.code_str())
 
 # %% [markdown]
-# To avoid name conflicts with our existing schematic,
-# let’s make a copy and rename it before execution.
-
-# %%
-new_schematic = c.schematic.model_copy()
-new_schematic.name = new_schematic.name + "_copy"
-
-# %% [markdown]
-# ### Executing generated code
+# ## Summary
 #
-# We can directly execute the generated code string in this notebook,
-# which defines a new PCell function.
-# This closes the loop:
-# 1. Design a schematic
-# 2. Generate its layout and netlist
-# 3. Export as reusable code
-
-# %%
-get_ipython().run_cell(new_schematic.code_str())
+# This example combined several advanced kfactory features:
+#
+# | Feature | Where used |
+# |---------|-----------|
+# | Direct polygon construction | `cross` cell — sinusoidal arm profile with `Region.hulls()` |
+# | DRC fixing | `fix_spacing_tiled` inside the crossing cell |
+# | Minkowski enclosures | `apply_minkowski_tiled` for cladding layers |
+# | Virtual cells (`VKCell`) | `bend_euler` and `straight` — lightweight parametric geometry |
+# | `DSchematic` (µm coordinates) | `crossing45` — floating-point placement |
+# | `schematic_cell(output_type=DKCell)` | Produces a µm-based cell from the schematic |
+# | Grid assembly via schematic logic | Nested loops tile crossings, spacers, bends, and I/O |
+# | LVS verification | `schematic.netlist() == cell.netlist()` |
+# | Code generation | `schematic.code_str()` for portable export |
 
 # %% [markdown]
-# Now we can instantiate the newly generated PCell and visualize it.
-
-# %%
-c_new = crossing45_N8_P30_CSWG1000_copy()
-c_new
-
-# %%
-c_new.ports.print()
+# ## See Also
+#
+# | Topic | Where |
+# |-------|-------|
+# | Schematic basics (placement, connect, LVS) | [Schematics: Overview](overview.py) |
+# | Netlist data model & serialization | [Schematics: Netlist](netlist.py) |
+# | Virtual cells in detail | [Components: Virtual Cells](../components/virtual.py) |
+# | Cross-sections & enclosures | [Enclosures: Cross-Sections](../enclosures/cross_sections.py) |

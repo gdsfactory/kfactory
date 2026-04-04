@@ -4,6 +4,18 @@
 
 With kfactory 3.0, several modules, functions, and interfaces have changed.
 
+### 3.0 Change Summary
+
+| Area | What changed | Before (2.x) | After (3.0) |
+|---|---|---|---|
+| **Module** | `virtual.utils` moved | `kfactory.factories.virtual.utils` | `kfactory.factories.utils` |
+| **Routing** | `route_L` / `route_elec` removed | `route_elec(cell, p1, p2)` | `route_bundle(cell, [p1], [p2])` |
+| **Routing** | `routing.optical.route` removed | `route(cell, p1, p2, ...)` | `route_bundle(cell, [p1], [p2], ...)` |
+| **Routing** | `place90` deprecated | `place90(cell, p1, p2, pts)` | `place_manhattan(cell, p1, p2, pts)` |
+| **Parameters** | `start_straights` deprecated | `start_straights=100` | `starts=100` |
+| **Parameters** | `end_straights` deprecated | `end_straights=100` | `ends=100` |
+| **Schematics** | Routing via `KCLayout` registry | — | `@kcl.routing_strategy` + `schematic.add_route(...)` |
+
 ### Module Reorganization
 
 - `kfactory.factories.virtual.utils` has been moved to `kfactory.factories.utils` to unify it with other factory utilities.
