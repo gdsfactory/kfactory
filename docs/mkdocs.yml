@@ -7,18 +7,60 @@ nav:
   - Home:
       - Intro: index.md
       - gdsfactory.md
-      - dosdonts.md
-  - First Steps:
-      - Prerequisites: pre.md
-      - 5min Intro to KFactory: intro.md
-      - Creating PCells: pcells.md
-  - Tutorials:
-      - Basice Geometry in KLayout: notebooks/00_geometry.py
-      - KCell & Instance: notebooks/01_references.py
-      - DRC utils: notebooks/02_DRC.py
-      - Enclosures: notebooks/03_Enclosures.py
-      - Multiple KCLs: notebooks/04_KCL.py
-      - Schematics: notebooks/05_Schematics.py
+  - Getting Started:
+      - Prerequisites: getting_started/prerequisites.md
+      - Installation: getting_started/installation.md
+      - 5-Minute Quickstart: getting_started/quickstart.py
+      - KLive Setup: getting_started/klive_setup.md
+  - Core Concepts:
+      - KCell: concepts/kcell.py
+      - Layers: concepts/layers.py
+      - Ports: concepts/ports.py
+      - Instances: concepts/instances.py
+      - Geometry: concepts/geometry.py
+      - KCLayout: concepts/kclayout.py
+      - DBU vs µm: concepts/dbu_vs_um.py
+  - Routing:
+      - Overview: routing/overview.py
+      - Optical: routing/optical.py
+      - Electrical: routing/electrical.py
+      - Manhattan Primitives: routing/manhattan.py
+      - All-Angle: routing/all_angle.py
+      - Bundle Reference: routing/bundle.py
+      - Path-Length Matching: routing/path_length.py
+  - Components:
+      - Overview: components/overview.py
+      - Straight Waveguide: components/straight.py
+      - Euler Bends: components/euler.py
+      - Circular Bends: components/circular.py
+      - Taper: components/taper.py
+      - Bezier S-Bends: components/bezier.py
+      - Virtual Cells (VKCell): components/virtual.py
+      - Parameterized Cells: components/pcells.py
+      - Factory Functions: components/factories.py
+  - Enclosures:
+      - Cross-Sections: enclosures/cross_sections.py
+      - Layer Enclosure: enclosures/layer_enclosure.py
+      - KCell Enclosure: enclosures/kcell_enclosure.py
+  - Utilities:
+      - Grid Layout: utilities/grid.py
+      - DRC Fixing: utilities/drc_fix.py
+      - Packing: utilities/packing.py
+      - Regression Testing: utilities/difftest.py
+      - Fill: utilities/fill.py
+      - Session Cache: utilities/session_cache.py
+  - PDK:
+      - Creating a PDK: pdk/creating_pdk.py
+      - Technology & Layer Stack: pdk/technology.py
+  - Schematics:
+      - Overview: schematics/overview.py
+      - Netlist & I/O: schematics/netlist.py
+      - 45° Crossing: schematics/crossing45.py
+  - How-To Guides:
+      - Best Practices: howto/best_practices.py
+      - Common Patterns: howto/patterns.py
+      - FAQ: howto/faq.md
+      - Contributing: howto/contributing.md
   - Migration: migration.md
   - Config Class: config.md
   - API: reference/

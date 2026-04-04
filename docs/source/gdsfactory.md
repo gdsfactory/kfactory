@@ -13,7 +13,7 @@ Therefore a KCell will always be attached to a [KCLayout][kfactory.layout.KCLayo
 
 This KCLayout object contains all the KCells and also keeps track of the layers.
 
-Similar to the KCell,which cannot exist without a KCLayout, an instance cannot exist without being part of a KCell. It must be created through the KCell
+Similar to the KCell, which cannot exist without a KCLayout, an instance cannot exist without being part of a KCell. It must be created through the KCell.
 
 ## Layers
 
@@ -44,7 +44,7 @@ The first argument represents the name of the enum that will be used for the `__
 It is strongly recommended to name it the same as the variable it is assigned to.
 This will make sure that the behavior is the same as the one that was constructed first.
 
-The LayerEum also allows mapping from string to layer index and layer number and datatype:
+The LayerEnum also allows mapping from string to layer index and layer number and datatype:
 
 !!! example "Accessing LayerEnum by index or name and getting layer number & datatype"
 
@@ -71,33 +71,24 @@ The LayerEum also allows mapping from string to layer index and layer number and
 
 ## Shapes
 
-In contrast to gdsfactory, every geometrical dimension is represented as an object. All the objects are available in two flavors. Integer based for the mapping to the gridof gds/oasis in database units (dbu) or a floating version, which is measured in micrometer.
+In contrast to gdsfactory, every geometrical dimension is represented as an object. All the objects are available in two flavors. Integer based for the mapping to the grid of gds/oasis in database units (dbu) or a floating version, which is measured in micrometer.
 
 | Object (dbu) | Object (um)    | Description                                                                                              |
 |--------------|----------------|----------------------------------------------------------------------------------------------------------|
 | Point        | DPoint         | Holds x/y coordinate in dbu
-
 | Vector       | DVector        | Similar to a point, but can be used for geometry operations and can be multiplied
-
 | Edge         | DEdge          | Connection of two points (p1/p2) and is aware of the two sides
-
 | Box          | DBox           | A rectangle defined through two points. Rotating a box will result in a bigger box
-
 | SimplePolygon| DSimplePolygon | A polygon that has no holes (this is what all polygons will be converted to when inserting)
-
 | Polygon      | DPolygon       | Like the simple polygon but this one can have holes and allows operations like sizing
-
 | Text         | DText          | Labels. They can have a full transformation, but KLayout does not show full transformations by default
-
 | Shape        | -              | A generalized container for other geometric objects that allows storage and retrieval
-
 | Shapes       | -              | A flat collection of shapes. Used by KCells to access shapes in a cell
-
 | Region       | -              | Flat or deep collection of polygons. Any other dbu shape can be inserted (except Texts)
 
 In kfactory and KLayout these objects can live outside of a (K)Cell. Therefore it is not possible to create them through the KCell like in gdsfactory.
 
-These objects can be inserted into a KCell with `c.shapes(layer_index).insert(shabpe_like_object)`.
+These objects can be inserted into a KCell with `c.shapes(layer_index).insert(shape_like_object)`.
 
 ### gdsfactory's `add_polygon` in kfactory
 
@@ -155,7 +146,7 @@ Similar to the `add_polygon` function, `add_label` acts as a text record to a ce
 kfactory also offers `c.connect(port_name, other_port)` like gdsfactory does. It does not exactly do the same thing as in gdsfactory though. A [Port][kfactory.port.Port] in kfactory will always try to be on a grid. Additionally the port is using `kfactory.kdb.Trans` and `kfactory.kdb.DCplxTrans` by default, similar to an instance.
 This also means that a port is aware of mirroring. Since a `connect` can be simplified to `instance.trans = other_port.trans * kfactory.kdb.Trans.R180 * port.trans.inversed()` (for the 90° on-grid cases), it can be seen that the center, angle and mirror flag of the `instance` is overwritten. Therefore, any move / rotation / mirror of the instance `connect` is called on, will have no influence on the state after the connect.
 
-Also, as with gdsfactory `connect` , it is not final. It does not imply any shared link between the instances after the `connect`, it is simply a transformation with some checks concerning the layer, width and port type matching.
+Also, as with gdsfactory `connect`, it is not final. It does not imply any shared link between the instances after the `connect`, it is simply a transformation with some checks concerning the layer, width and port type matching.
 
 
 !!! example
@@ -169,11 +160,72 @@ Also, as with gdsfactory `connect` , it is not final. It does not imply any shar
     ### If inst2 "o2" had trans.is_mirror() == True, inst1's transformation now also has is_mirror() == True
     ```
 
-## LayerEnclosure / KCellEnclosure vs CrossSection
+## Cross-Sections & Enclosures
 
-kfactory does not have the concept of cross sections.
-Since cross sections are limited to have a path as a backbone, kfactory implemented a more generalized form as enclosures.
-[LayerEnclosures][kfactory.enclosure.LayerEnclosure] can use regions or even entire layers as a basis to apply excludes and claddings (or anything that depends on the base form).
-Additionally, kfactory has the extended concept of [KCellEnclosure][kfactory.enclosure.KCellEnclosure].
-These can apply enclosures to a whole KCell on all layers the KCellEnclosure is aware of.
-For further info, please head over to the [Tutorial](/kfactory/notebooks/03_Enclosures)
+kfactory has full support for cross-sections. [CrossSection][kfactory.cross_section.CrossSection] and
+[DCrossSection][kfactory.cross_section.DCrossSection] define port geometry — width, layer, and an
+optional [LayerEnclosure][kfactory.enclosure.LayerEnclosure] for cladding.
+[SymmetricalCrossSection][kfactory.cross_section.SymmetricalCrossSection] is the most common form:
+it defines a symmetric waveguide profile by combining a core layer with an enclosure.
+
+Cross-sections can be registered on a `KCLayout` and looked up by name, making them cacheable:
+
+```python
+import kfactory as kf
+
+class LAYER(kf.LayerInfos):
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+    WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 1)
+
+L = LAYER()
+kf.kcl.infos = L
+
+enc = kf.LayerEnclosure(sections=[(kf.kcl.find_layer(L.WGEX), 2000)],
+                         main_layer=kf.kcl.find_layer(L.WG))
+xs = kf.SymmetricalCrossSection(width=500, enclosure=enc,
+                                  layer=kf.kcl.find_layer(L.WG), name="xs_wg")
+kf.kcl.get_icross_section(xs)   # registers & returns the cross-section
+
+# Later — retrieve by name (hashable, safe inside @kf.cell):
+xs_retrieved = kf.kcl.get_icross_section("xs_wg")
+```
+
+See [Cross-Sections & Enclosures](enclosures/cross_sections.py) for a full walkthrough.
+
+Beyond cross-sections, kfactory provides a more generalised cladding system: enclosures are not limited
+to path-like backbones. [LayerEnclosure][kfactory.enclosure.LayerEnclosure] can apply
+cladding/exclusion to arbitrary regions or entire layers, and
+[KCellEnclosure][kfactory.enclosure.KCellEnclosure] can merge all sub-cell geometry before
+expanding — useful for complex multi-component assemblies.
+
+See [Layer Enclosures](enclosures/layer_enclosure.py) and [KCell Enclosures](enclosures/kcell_enclosure.py)
+for details.
+
+## Routing
+
+kfactory has comprehensive routing support across several sub-modules:
+
+| Sub-module | Use case |
+|---|---|
+| `kf.routing.optical` | Bend-based optical routing: `route_bundle`, `place_manhattan`, `route_loopback`, path-length matching |
+| `kf.routing.electrical` | Wire routing: `route_bundle`, dual-rail (`route_bundle_dual_rails`) |
+| `kf.routing.manhattan` | Low-level Manhattan backbone: `route_manhattan`, `route_manhattan_180`, Steps API |
+| `kf.routing.aa.optical` | All-angle (diagonal) routing via `route` / `route_bundle` |
+
+### Comparing with gdsfactory routing
+
+| gdsfactory | kfactory equivalent |
+|---|---|
+| `route_single` | `route_bundle` with one start/end port |
+| `route_bundle` | `kf.routing.optical.route_bundle` |
+| `get_bundle` | `kf.routing.optical.route_bundle` (returns `ManhattanRoute` objects) |
+| `get_route` | `kf.routing.optical.route_bundle` (single route) |
+| Cross-section in route | Pass `straight_factory` + `bend90_cell` built from your cross-section |
+
+!!! note "Effective bend radius"
+
+    Euler bends extend slightly beyond their nominal radius. Always use
+    `kf.routing.optical.get_radius(bend_cell)` (not the nominal µm value) when passing
+    `bend90_radius` to routing functions. See [Euler Bends](components/euler.py) for details.
+
+See the [Routing](routing/overview.py) section for full examples.
