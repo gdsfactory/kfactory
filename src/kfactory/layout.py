@@ -1303,9 +1303,8 @@ class KCLayout(
             f: Callable[KCellParams, KCIN],
         ) -> Callable[KCellParams, KC]:
             sig = inspect.signature(f)
-            output_cell_type_: type[KC | ProtoTKCell[Any]]
             if output_type is not None:
-                output_cell_type_ = output_type
+                output_cell_type_: type[KC | ProtoTKCell[Any]] = output_type
             elif sig.return_annotation is not inspect.Signature.empty:
                 # Use get_type_hints to resolve string annotations
                 try:
@@ -1328,7 +1327,9 @@ class KCLayout(
             cache_: Cache[int, KC] | dict[int, KC] = cache or Cache(
                 maxsize=float("inf")
             )
-            wrapper_autocell: WrappedKCellFunc[KCellParams, KC] = WrappedKCellFunc(
+            wrapper_autocell: WrappedKCellFunc[KCellParams, KC] = WrappedKCellFunc[
+                KCellParams, KC
+            ](
                 kcl=self,
                 f=f,
                 sig=sig,
@@ -1359,7 +1360,7 @@ class KCLayout(
                 with self.thread_lock:
                     if wrapper_autocell.name is None:
                         raise ValueError(f"Function {f} has no name.")
-                    self.factories.add(wrapper_autocell)
+                    self.factories.add(wrapper_autocell)  # ty:ignore[invalid-argument-type]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:

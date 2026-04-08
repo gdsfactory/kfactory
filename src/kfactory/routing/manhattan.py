@@ -187,7 +187,7 @@ def route_manhattan_180(
                 "`case (x, y, 0) if x > 0 and abs(y) == bend180_radius`"
                 " not supported yet"
             )
-        case (x, 0, 2):
+        case (_, 0, 2):
             if start_straight > 0:
                 t1 *= kdb.Trans(0, False, start_straight, 0)
             if end_straight > 0:
@@ -595,7 +595,6 @@ def route_manhattan(
     bend90_radius: int,
     start_steps: Sequence[Step] | None = None,
     end_steps: Sequence[Step] | None = None,
-    max_tries: int = 20,
     invert: bool = False,
 ) -> list[kdb.Point]:
     """Calculate manhattan route using um based points.
