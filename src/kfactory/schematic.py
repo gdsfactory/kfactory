@@ -18,6 +18,7 @@ import inspect
 import keyword
 import re
 import subprocess
+from abc import ABC, abstractmethod
 from collections import defaultdict
 from functools import cached_property
 from numbers import Real
@@ -51,23 +52,33 @@ from ruamel.yaml import YAML
 from . import kdb
 from .conf import PROPID, logger
 from .decorators import WrappedKCellFunc, WrappedVKCellFunc
-from .instance import DInstance, Instance, VInstance
+from .instance import Instance, VInstance
 from .kcell import DKCell, KCell, ProtoTKCell, VKCell
 from .layout import KCLayout, get_default_kcl, kcls
 from .netlist import Net, Netlist, NetlistInstance, NetlistPort, PortArrayRef, PortRef
 from .port import DPort as DKCellPort
 from .port import Port as KCellPort
 from .port import ProtoPort
+from .routing.generic import ManhattanRoute  # noqa: TC001
+from .routing.manhattan import ManhattanRouter  # noqa: TC001
 from .settings import Info
 from .typings import KC, JSONSerializable, dbu, um
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
-    from .cross_section import CrossSection, DCrossSection
-    from .kcell import DKCell, KCell, ProtoTKCell, VKCell
+    from klayout import rdb
 
-__all__ = ["DSchematic", "Schematic", "get_schematic", "read_schematic"]
+    from .cross_section import CrossSection, DCrossSection
+
+__all__ = [
+    "Constraint",
+    "DSchematic",
+    "PathLengthMatch",
+    "Schematic",
+    "get_schematic",
+    "read_schematic",
+]
 
 
 yaml = YAML(typ="safe")
@@ -75,8 +86,6 @@ yaml = YAML(typ="safe")
 _schematic_default_imports = {
     "kfactory": "kf",
 }
-
-Num = int | float
 
 
 class PortDirections(TypedDict, total=True):
@@ -256,7 +265,7 @@ class Placement[T: (int, float)](MirrorPlacement, extra="forbid"):
         return placeable
 
 
-class RegularArray[T: Num](BaseModel, extra="forbid"):
+class RegularArray[T: (int, float)](BaseModel, extra="forbid"):
     """Rectangular array with uniform row/column pitch.
 
     Attributes:
@@ -275,7 +284,7 @@ class RegularArray[T: Num](BaseModel, extra="forbid"):
         return f"RegularArray(columns={self.columns}, columns_pitch=)"
 
 
-class Array[T: Num](BaseModel, extra="forbid"):
+class Array[T: (int, float)](BaseModel, extra="forbid"):
     """General 2D array parameterization using two pitch vectors.
 
     Attributes:
@@ -293,7 +302,7 @@ class Array[T: Num](BaseModel, extra="forbid"):
     pitch_b: tuple[T, Annotated[T, AfterValidator(_gez)]]
 
 
-class Ports[T: Num](BaseModel):
+class Ports[T: (int, float)](BaseModel):
     """Indexer for an instance's ports to produce `PortRef`/`PortArrayRef`.
 
     Example:
@@ -481,7 +490,7 @@ class SchematicInstance[T: (int, float)](
         )
 
 
-class Route[T: Num](BaseModel, extra="forbid"):
+class Route[T: (int, float)](BaseModel, extra="forbid"):
     """Bundle of `Link`s routed using a named strategy.
 
     Attributes:
@@ -663,13 +672,13 @@ class Port[T: (int, float)](BaseModel, extra="forbid"):
                     y=cell.kcl.to_um(cast("int", y)),
                 ),
                 cross_section=cross_sections[self.cross_section],
-                name=self.name,
+                name=name,
             )
 
         return cell.create_port(
             dcplx_trans=kdb.DCplxTrans(rot=orientation, x=x, y=y),
             cross_section=cross_sections[self.cross_section],
-            name=self.name,
+            name=name,
         )
 
     def __str__(self) -> str:
@@ -688,7 +697,7 @@ class Port[T: (int, float)](BaseModel, extra="forbid"):
         return f"{schematic_name}.ports[{self.name!r}]"
 
 
-class SchematicNet[T: Num](BaseModel):
+class SchematicNet[T: (int, float)](BaseModel):
     """Undirected association between two ports (refs or schematic ports).
 
     The pair is stored in sorted order to ensure stable equality and hashing.
@@ -697,7 +706,7 @@ class SchematicNet[T: Num](BaseModel):
     net: tuple[PortRef | Port[T], PortRef | Port[T]]
 
 
-class RouteNet[T: Num](SchematicNet[T]):
+class RouteNet[T: (int, float)](SchematicNet[T]):
     """Undirected association between two ports (refs or schematic ports).
 
     The pair is stored in sorted order to ensure stable equality and hashing.
@@ -707,7 +716,7 @@ class RouteNet[T: Num](SchematicNet[T]):
     net: tuple[PortRef, ...]
 
 
-class VirtualConnection[T: Num](SchematicNet[T]):
+class VirtualConnection[T: (int, float)](SchematicNet[T]):
     type: Literal["virtual"] = "virtual"
     net: tuple[PortRef | Port[T], ...]
 
@@ -722,7 +731,7 @@ class VirtualConnection[T: Num](SchematicNet[T]):
         return self
 
 
-class Connection[T: Num](SchematicNet[T]):
+class Connection[T: (int, float)](SchematicNet[T]):
     """Hard connection between two ports.
 
     Enforced as {PortRef | PortArrayRef | Port} x {PortRef | PortArrayRef}.
@@ -796,6 +805,177 @@ class Connection[T: Num](SchematicNet[T]):
         return Connection[T](**data)
 
 
+class Constraint(BaseModel, ABC, arbitrary_types_allowed=True):
+    """Base class for schematic constraints.
+
+    Constraints operate in two phases:
+
+    1. **enforce** — called by the routing function during the post-process phase,
+       before instances are placed. Receives the `ManhattanRouter` objects and routing
+       context kwargs (e.g. ``separation``, ``bend90_radius``).
+
+    2. **check** — called by `TSchematic.create_cell` after routing is complete.
+       Receives the materialized cell, the schematic, the resolved `Instance` objects
+       for `instance_names`, and the `ManhattanRoute` results for `route_names`.
+
+    Attributes:
+        route_names: Names of the routes this constraint applies to.
+        instance_names: Names of the instances this constraint applies to.
+        on_failure: Behaviour when `check` returns False. ``"error"`` raises a
+            `ValueError`. ``"show_error"`` additionally opens the cell in KLayout
+            with an lyrdb marker database. ``None`` silently ignores failures.
+    """
+
+    route_names: list[str]
+    instance_names: list[str] = Field(default=[])
+    on_failure: Literal["error", "show_error"] | None = "error"
+    _routes: dict[str | None, list[ManhattanRoute]] = PrivateAttr(default={})
+    _routers: dict[str | None, list[ManhattanRouter]] = PrivateAttr(default={})
+
+    @abstractmethod
+    def enforce(
+        self,
+        c: KCell,
+        routers: Sequence[ManhattanRouter],
+        route_name: str | None,
+    ) -> None:
+        """Enforce the constraint on the routers before placement.
+
+        Called by the routing function. ``**kwargs`` contains routing context
+        such as ``separation`` and ``bend90_radius``.
+        """
+        ...
+
+    @abstractmethod
+    def check(
+        self,
+        c: KCell,
+        schematic: TSchematic[Any],
+        instances: dict[str, Instance],
+        routes: dict[str, list[ManhattanRoute]],
+    ) -> bool:
+        """Return True if the constraint is satisfied after routing."""
+        ...
+
+    def lyrdb_markers(
+        self,
+        c: KCell,
+        schematic: TSchematic[Any],
+        instances: dict[str, Instance],
+        routes: dict[str, list[ManhattanRoute]],
+    ) -> rdb.ReportDatabase:
+        """Build an lyrdb marker database for failing routes.
+
+        The default implementation highlights route backbones. Override for
+        constraint-specific visualisation.
+        """
+        from klayout import rdb as _rdb
+
+        db = _rdb.ReportDatabase(f"{self.__class__.__name__} Constraint Failure")
+        cat = db.create_category("Failing Routes")
+        cell = db.create_cell(c.name)
+        for name in self.route_names:
+            for route in routes.get(name, []):
+                if len(route.backbone) >= 2:
+                    item = db.create_item(cell, cat)
+                    item.add_value(
+                        kdb.DPath(
+                            [kdb.DPoint(p) * c.kcl.dbu for p in route.backbone],
+                            route.start_port.dwidth,
+                        ).polygon()
+                    )
+        return db
+
+
+class PathLengthMatch(Constraint):
+    """Constraint that equalises optical path lengths across a set of routes.
+
+    Uses the loop-based path-length matching already built into the optical
+    router.  The `enforce` method injects meander loops into the shorter
+    routers so that all routes reach the same length before instances are
+    placed.  The `check` method verifies the final `ManhattanRoute` lengths
+    are within `tolerance` of each other.
+
+    Attributes:
+        loops: Number of meander loops to use per route.
+        loop_side: Which side of the route to place the loop on.
+        loop_position: Where along the route to place the loop.
+        element: Index of the straight segment to insert the loop into.
+        tolerance: Maximum allowed length difference after enforcement.
+    """
+
+    loops: int = 1
+    loop_side: int = -1  # LoopSide.left
+    loop_position: int = -1  # LoopPosition.start
+    element: int = -1
+    tolerance: int = 0
+    length: int | None = None
+    all: bool = False
+
+    def enforce(
+        self,
+        c: KCell,
+        routers: Sequence[ManhattanRouter],
+        route_name: str | None,
+    ) -> None:
+        from .routing.optical import LoopPosition, LoopSide, path_length_match
+
+        if self.all or (len(self.route_names) - len(self._routers)) == 1:
+            path_length_match(
+                routers=routers,
+                element=self.element,
+                loops=self.loops,
+                loop_side=LoopSide(self.loop_side),
+                loop_position=LoopPosition(self.loop_position),
+                path_length=self.length,
+            )
+
+        self._routers[route_name] = list(routers)
+
+    def check(
+        self,
+        c: KCell,
+        schematic: TSchematic[Any],
+        instances: dict[str, Instance],
+        routes: dict[str, list[ManhattanRoute]],
+    ) -> bool:
+        all_routes = [r for name in self.route_names for r in routes.get(name, [])]
+        if not all_routes:
+            return True
+        lengths = [r.length for r in all_routes]
+        return (max(lengths) - min(lengths)) <= self.tolerance
+
+    def lyrdb_markers(
+        self,
+        c: KCell,
+        schematic: TSchematic[Any],
+        instances: dict[str, Instance],
+        routes: dict[str, list[ManhattanRoute]],
+    ) -> rdb.ReportDatabase:
+        from klayout import rdb as _rdb
+
+        all_routes = [r for name in self.route_names for r in routes.get(name, [])]
+        lengths = [r.length for r in all_routes] if all_routes else []
+        target = max(lengths) if lengths else 0
+
+        db = _rdb.ReportDatabase("PathLengthMatch Constraint Failure")
+        cat = db.create_category("Length Mismatch")
+        cell = db.create_cell(c.name)
+        for name in self.route_names:
+            for route in routes.get(name, []):
+                delta = target - route.length
+                if delta > self.tolerance and len(route.backbone) >= 2:
+                    item = db.create_item(cell, cat)
+                    item.add_value(
+                        kdb.DPath(
+                            [kdb.DPoint(p) * c.kcl.dbu for p in route.backbone],
+                            route.start_port.dwidth,
+                        ).polygon()
+                    )
+                    item.add_value(f"length={route.length}, delta={delta}")
+        return db
+
+
 class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     """Schematic of a cell / component.
 
@@ -821,6 +1001,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     )
     routes: dict[str, Route[T]] = Field(default_factory=dict)
     ports: dict[str, Port[T] | PortRef | PortArrayRef] = Field(default_factory=dict)
+    constraints: list[Constraint] = Field(default_factory=list)
     kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
     unit: Literal["dbu", "um"]
     info: dict[str, JSONSerializable] = Field(default_factory=dict)
@@ -989,16 +1170,15 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 ]
             )
         if add_defaults:
-            kcl_factories: dict[
-                str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]
-            ]
             if external_factories is None:
                 all_factories: dict[
                     str,
                     dict[str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]],
                 ] = defaultdict(dict)
                 for kcl_ in kcls.values():
-                    kcl_factories = {f.name: f._f for f in kcl_.factories._all}
+                    kcl_factories: dict[
+                        str, Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]
+                    ] = {f.name: f._f for f in kcl_.factories._all}
                     kcl_factories.update(
                         {vf.name: vf._f for vf in kcl_.virtual_factories._all}
                     )
@@ -1110,7 +1290,6 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         placements = data.get("placements")
         if placements:
             for placement in placements.values():
-                anchor: FixedAnchorDict | None = None
                 if "port" in placement:
                     port = placement.pop("port")
                     if port in [
@@ -1128,7 +1307,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                         placement["anchor"] = _anchor_mapping[port]
                     else:
                         placement["anchor"] = {"port": port}
-                anchor = placement.get("anchor", {})
+                anchor: FixedAnchorDict = placement.get("anchor", {})
                 if "xmin" in placement:
                     anchor["x"] = "left"
                     placement["x"] = placement.pop("xmin")
@@ -1288,6 +1467,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         nets_per_route = self.routes_nets()
 
         # routes
+        route_results: dict[str, list[Any]] = {}
         for route in self.routes.values():
             resolved_ports: list[tuple[ProtoPort[Any], ...]] = []
             for net in nets_per_route[route.name]:
@@ -1295,26 +1475,63 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 for port_ref in net.net:
                     if isinstance(port_ref, Port):
                         p: KCellPort | DKCellPort = c.ports[port_ref.name]
-                    inst = self.instances[port_ref.instance]
-                    if inst.virtual:
-                        p = port_ref.get_port(c.vinsts[port_ref.instance])
                     else:
-                        p = port_ref.get_port(c.insts[port_ref.instance])
+                        inst = self.instances[port_ref.instance]
+                        if inst.virtual:
+                            p = port_ref.get_port(c.vinsts[port_ref.instance])
+                        else:
+                            p = port_ref.get_port(c.insts[port_ref.instance])
                     resolved_port_list.append(p)
                 resolved_ports.append(tuple(resolved_port_list))
             route_c = output_type(base=c.base)
+            relevant_constraints = [
+                ct for ct in self.constraints if route.name in ct.route_names
+            ]
+            extra_kwargs: dict[str, Any] = (
+                {"constraints": relevant_constraints} if relevant_constraints else {}
+            )
             if isinstance(route_c, KCell):
-                routing_strategies[route.routing_strategy](
-                    output_type(base=c.base), resolved_ports, **route.settings
+                result = routing_strategies[route.routing_strategy](
+                    output_type(base=c.base),
+                    resolved_ports,
+                    **route.settings,
+                    **extra_kwargs,
                 )
             else:
-                routing_strategies[route.routing_strategy](
+                result = routing_strategies[route.routing_strategy](
                     output_type(base=c.base),
                     [
                         tuple(DKCellPort(base=p.base) for p in net_ports)
                         for net_ports in resolved_ports
                     ],
                     **route.settings,
+                    **extra_kwargs,
+                )
+            route_results[route.name] = result or []
+
+        # check constraints
+        if self.constraints:
+            failed: list[Constraint] = []
+            for ct in self.constraints:
+                resolved_instances = {
+                    n: c.insts[n] for n in ct.instance_names if n in c.insts
+                }
+                resolved_routes = {n: route_results.get(n, []) for n in ct.route_names}
+                if not ct.check(c, self, resolved_instances, resolved_routes):
+                    if ct.on_failure == "show_error":
+                        c_ = c.dup()
+                        c_.name = c.kcl.future_cell_name or c.name
+                        c_.show(
+                            lyrdb=ct.lyrdb_markers(
+                                c_, self, resolved_instances, resolved_routes
+                            )
+                        )
+                    if ct.on_failure in ("error", "show_error"):
+                        failed.append(ct)
+            if failed:
+                raise ValueError(
+                    f"Constraints not satisfied in schematic {self.name!r}:\n"
+                    + "\n".join(repr(ct) for ct in failed)
                 )
 
         # verify connections
@@ -1366,6 +1583,36 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             c.name = self.name
 
         return output_type(base=c.base)
+
+    def add_constraint(self, constraint: Constraint) -> Constraint:
+        """Register a constraint on this schematic.
+
+        Validates that all ``route_names`` and ``instance_names`` referenced by
+        the constraint already exist in the schematic.
+
+        Args:
+            constraint: The constraint to add.
+
+        Returns:
+            The added constraint (for chaining).
+
+        Raises:
+            ValueError: If any referenced route or instance name is unknown.
+        """
+        missing_routes = [n for n in constraint.route_names if n not in self.routes]
+        if missing_routes:
+            raise ValueError(
+                f"Constraint references unknown route(s): {missing_routes}"
+            )
+        missing_insts = [
+            n for n in constraint.instance_names if n not in self.instances
+        ]
+        if missing_insts:
+            raise ValueError(
+                f"Constraint references unknown instance(s): {missing_insts}"
+            )
+        self.constraints.append(constraint)
+        return constraint
 
     def add_route(
         self,
@@ -1717,7 +1964,6 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
             component: str, /, **settings: Any
         ) -> dict[str | None, float]:
             factory = factories[component]
-            is_schematic_inst = False
             if isinstance(factory, WrappedKCellFunc):
                 is_schematic_inst = factory.schematic_driven()
                 if is_schematic_inst:
@@ -1749,7 +1995,6 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                         get_port_orientation_f=get_port_orientation_function,
                     )
                     factory = factories[inst.component]
-                    is_schematic_inst = False
                     if isinstance(factory, WrappedKCellFunc):
                         is_schematic_inst = factory.schematic_driven()
                         if is_schematic_inst:
@@ -1782,7 +2027,6 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                                 for inst_port in inst_ports["bottom"]:
                                     if inst_port == port:
                                         port_orientation = 270
-                                        found = True
                                         break
                             if port_orientation is None:
                                 raise ValueError(
@@ -1826,7 +2070,6 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     get_port_orientation_f=get_port_orientation_function,
                 )
                 factory = factories[inst.component]
-                is_schematic_inst = False
                 if isinstance(factory, WrappedKCellFunc):
                     is_schematic_inst = factory.schematic_driven()
                     if is_schematic_inst:
@@ -1857,7 +2100,6 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                             for inst_port in inst_ports["bottom"]:
                                 if inst_port == port.port:
                                     port_orientation = 270
-                                    found = True
                                     break
                         if port_orientation is None:
                             raise ValueError(
@@ -1897,7 +2139,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         return [net for net in self.nets if isinstance(net, Connection)]
 
 
-def _get_instance_orientation[T: Num](
+def _get_instance_orientation[T: (int, float)](
     instance: str,
     schematic: TSchematic[T],
     visited_instances: set[str],
@@ -2111,7 +2353,7 @@ class DSchema(DSchematic):
         super().__init__(**data)
 
 
-def _create_kinst[T: Num](
+def _create_kinst[T: (int, float)](
     c: KCell,
     schematic_inst: SchematicInstance[T],
     factories: Mapping[
@@ -2119,9 +2361,7 @@ def _create_kinst[T: Num](
     ]
     | None,
 ) -> Instance | VInstance:
-    kinst: Instance | DInstance
     if factories:
-        is_factory = schematic_inst.component in factories
         cell_: ProtoTKCell[Any] | VKCell = factories[schematic_inst.component](
             **schematic_inst.settings
         )
@@ -2272,7 +2512,7 @@ def _is_int_schematic(s: TSchematic[Any]) -> TypeGuard[Schematic[int]]:
     return s.unit == "dbu"
 
 
-def _place_island[T: Num](
+def _place_island[T: (int, float)](
     c: KCell,
     schematic_island: set[str],
     instances: dict[str, Instance | VInstance],
@@ -2515,7 +2755,7 @@ def _place_island[T: Num](
     return placed_insts
 
 
-def _get_and_place_insts_and_ports[T: Num](
+def _get_and_place_insts_and_ports[T: (int, float)](
     c: KCell,
     placed_insts: set[str],
     placed_ports: set[str],
@@ -2549,7 +2789,7 @@ def _get_and_place_insts_and_ports[T: Num](
     return bool(placeable_insts) or bool(placeable_ports)
 
 
-def _connect_instances[T: Num](
+def _connect_instances[T: (int, float)](
     instances: dict[str, Instance | VInstance],
     place_insts: set[str],
     connections: dict[str, list[Connection[T]]],
@@ -2585,7 +2825,7 @@ def _connect_instances[T: Num](
             raise ValueError("Could not connect all instances")
 
 
-def _get_placeable[T: Num](
+def _get_placeable[T: (int, float)](
     placed_insts: set[str],
     connections: dict[str, list[Connection[T]]],
     placed_ports: set[str],
@@ -2634,7 +2874,6 @@ def get_schematic(
 
 def get_schematic(
     c: KCell | DKCell,
-    exclude_port_types: Sequence[str] | None = ("placement", "pad", "bump"),
 ) -> TSchematic[int] | TSchematic[float]:
     """NOT FUNCTIONAL YET.
 
@@ -2711,7 +2950,7 @@ def _get_full_settings(
     return params
 
 
-def _get_island_connections[T: Num](
+def _get_island_connections[T: (int, float)](
     instances: dict[str, SchematicInstance[T]],
     connections: list[Connection[T]],
 ) -> tuple[dict[str, set[str]], defaultdict[str, list[Connection[T]]]]:

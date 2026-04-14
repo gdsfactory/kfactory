@@ -33,7 +33,6 @@ from .steps import Step, Steps, Straight
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
 
-    from ..kcell import DKCell, KCell
     from ..layout import KCLayout
     from .utils import RouteDebug
 
@@ -340,6 +339,7 @@ class ManhattanRouter:
     """Class to store state of a routing between two ports or transformations."""
 
     bend90_radius: int
+    separation: int
     start_transformation: kdb.Trans
     end_transformation: kdb.Trans
     start: ManhattanRouterSide = field(init=False)
@@ -633,6 +633,7 @@ def route_manhattan(
 
     router = ManhattanRouter(
         bend90_radius=bend90_radius,
+        separation=0,
         start_transformation=t1,
         end_transformation=t2,
         start_steps=start_steps_,
@@ -654,32 +655,20 @@ class PathMatchDict(TypedDict):
 
 def path_length_match_manhattan_route(
     *,
-    c: KCell | DKCell,
     routers: Sequence[ManhattanRouter],
-    start_ports: Sequence[BasePort],
-    end_ports: Sequence[BasePort],
     bend90_radius: int | None = None,
     separation: int | None = None,
     path_length: int | None = None,
-    **kwargs: Any,
 ) -> None:
     """Simple path length matching router postprocess.
 
     Args:
-        c: KCell where the routes are placed into.
         routers: List of the manhattan routers to be modified.
-        start_ports: The start ports of the routes.
-        end_ports: The end ports of the routes.
         bend90_radius: Radius of a bend in the routes.
         separation: Separation between the routes.
         path_length: Match to a certain path length instead of the maximum
             of all routers.
-        kwargs: Compatibility with type checkers. Throws an error if defined.
     """
-    if kwargs:
-        raise ValueError(
-            f"Additional kwargs aren't supported in route_dual_rails {kwargs=}"
-        )
     if bend90_radius is None:
         raise ValueError(
             "bend90_radius must be passed to the function, please pass it"
@@ -704,10 +693,9 @@ def path_length_match_manhattan_route(
         2: [],
         3: [],
     }
-    modify_pts: tuple[kdb.Point, kdb.Point]
 
     for router in routers:
-        modify_pts = tuple(router.start.pts[-2:])  # ty:ignore[invalid-assignment]
+        modify_pts: tuple[kdb.Point, kdb.Point] = tuple(router.start.pts[-2:])  # ty:ignore[invalid-assignment]
         v = modify_pts[1] - modify_pts[0]
         match (v.x, v.y):
             case (x, 0) if x > 0:
@@ -768,7 +756,6 @@ def path_length_match_manhattan_route(
                     router_group = [(router, settings)]
                 else:
                     router_group.append((router, settings))
-                old_router = router
                 old_settings = settings
                 increasing = increasing_
             if not increasing:
@@ -991,6 +978,7 @@ def route_smart(
             mh_routers.append(
                 ManhattanRouter(
                     bend90_radius=bend90_radius,
+                    separation=separation,
                     start_transformation=s_t,
                     end_transformation=e_t,
                     start_steps=s,
@@ -1248,6 +1236,7 @@ def route_smart(
             all_routers.append(
                 ManhattanRouter(
                     bend90_radius=bend90_radius,
+                    separation=separation,
                     start_transformation=start_t,
                     end_transformation=end_t,
                     start_steps=ss,
@@ -1284,6 +1273,7 @@ def route_smart(
             all_routers.append(
                 ManhattanRouter(
                     bend90_radius=bend90_radius,
+                    separation=separation,
                     start_transformation=ts,
                     end_transformation=te,
                     start_steps=ss,
@@ -1489,8 +1479,7 @@ def route_smart(
             # anti-clockwise and vice-versa)
 
             if traverses0 or rg_angles[-1] in {0, 3}:
-                routers_clockwise: list[ManhattanRouter]
-                routers_clockwise = router_groups[0][1].copy()
+                routers_clockwise: list[ManhattanRouter] = router_groups[0][1].copy()
                 for i in range(1, len(router_groups)):
                     new_angle, new_routers = router_groups[i]
                     a = angle
@@ -1539,8 +1528,9 @@ def route_smart(
             # Route the rest of the groups anti-clockwise
             if i < len(router_groups) - 1:
                 angle = rg_angles[-1]
-                routers_anticlockwise: list[ManhattanRouter]
-                routers_anticlockwise = router_groups[-1][1].copy()
+                routers_anticlockwise: list[ManhattanRouter] = router_groups[-1][
+                    1
+                ].copy()
                 n = i
                 for i in reversed(range(n, len(router_groups) - 1)):
                     new_angle, new_routers = router_groups[i]
@@ -2483,6 +2473,7 @@ def _route_waypoints(
         for sr, er in zip(start_manhattan_routers, end_manhattan_routers, strict=False):
             router = ManhattanRouter(
                 bend90_radius=bend90_radius,
+                separation=separation,
                 start_transformation=sr.start_transformation,
                 end_transformation=er.start_transformation,
                 start_points=sr.start.pts[:-1] + list(reversed(er.start.pts[:-1])),
@@ -2693,6 +2684,7 @@ def _route_waypoints(
     ):
         router = ManhattanRouter(
             bend90_radius=bend90_radius,
+            separation=separation,
             start_transformation=sr.start_transformation,
             end_transformation=er.start_transformation,
             start_points=sr.start.pts[:-1]

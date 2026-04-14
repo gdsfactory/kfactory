@@ -1,7 +1,7 @@
 """Utilities for automatically routing electrical connections."""
 
 from collections.abc import Callable, Sequence
-from typing import Any, Literal, Protocol, cast, overload
+from typing import TYPE_CHECKING, Any, Literal, Protocol, cast, overload
 
 import numpy as np
 
@@ -29,6 +29,9 @@ from .manhattan import (
 from .optical import vec_angle
 from .steps import Step, Straight
 from .utils import RouteDebug
+
+if TYPE_CHECKING:
+    from ..schematic import Constraint
 
 __all__ = [
     "place_dual_rails",
@@ -60,6 +63,7 @@ def route_bundle(
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
     purpose: str | None = "routing",
+    constraints: Sequence[Constraint] | None = None,
     route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]: ...
 
@@ -84,6 +88,7 @@ def route_bundle(
     start_angles: float | list[float] | None = None,
     end_angles: float | list[float] | None = None,
     purpose: str | None = "routing",
+    constraints: Sequence[Constraint] | None = None,
     route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]: ...
 
@@ -117,6 +122,7 @@ def route_bundle(
     start_angles: list[int] | float | list[float] | None = None,
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
+    constraints: Sequence[Constraint] | None = None,
     route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]:
     r"""Connect multiple input ports to output ports.
@@ -212,12 +218,15 @@ def route_bundle(
     if bboxes is None:
         bboxes = []
 
+    start_ports_ = [p.base.model_copy() for p in start_ports]
+    end_ports_ = [p.base.model_copy() for p in end_ports]
+
     if isinstance(c, KCell):
         try:
             return route_bundle_generic(
                 c=c,
-                start_ports=[p.base for p in start_ports],
-                end_ports=[p.base for p in end_ports],
+                start_ports=start_ports_,
+                end_ports=end_ports_,
                 starts=cast("dbu | list[dbu] | list[Step] | list[list[Step]]", starts),
                 ends=cast("dbu | list[dbu] | list[Step] | list[list[Step]]", ends),
                 routing_function=route_smart,
@@ -239,6 +248,7 @@ def route_bundle(
                 start_angles=cast("int | list[int] | None", start_angles),
                 end_angles=cast("int | list[int]", end_angles),
                 route_width=cast("int", route_width),
+                constraints=constraints,
                 route_debug=route_debug,
             )
         except ValueError as e:
@@ -270,8 +280,9 @@ def route_bundle(
                     cell = db.create_cell(c_.name)
                     wp_len = len(waypoints)
 
-                    width = cast("int | None", route_width) or cast(
-                        "int", start_ports[0].width
+                    width = (
+                        cast("int | None", route_width)
+                        or Port(base=start_ports_[0]).width
                     )
 
                     for i, wp in enumerate(waypoints):
@@ -335,8 +346,8 @@ def route_bundle(
     try:
         return route_bundle_generic(
             c=c.kcl[c.cell_index()],
-            start_ports=[p.base for p in start_ports],
-            end_ports=[p.base for p in end_ports],
+            start_ports=start_ports_,
+            end_ports=end_ports_,
             starts=starts,
             ends=ends,
             routing_function=route_smart,
@@ -361,6 +372,7 @@ def route_bundle(
             start_angles=start_angles,
             end_angles=end_angles,
             route_width=route_width,
+            constraints=constraints,
             route_debug=route_debug,
         )
     except ValueError as e:
@@ -392,7 +404,10 @@ def route_bundle(
                 cell = db.create_cell(c_.name)
                 wp_len = len(waypoints)
 
-                width_d = cast("float | None", route_width) or start_ports[0].width
+                width_d = (
+                    cast("float | None", route_width)
+                    or DPort(base=start_ports_[0]).width
+                )
 
                 for i, wp_d in enumerate(waypoints):
                     it = db.create_item(cell=cell, category=wp_cat)
@@ -430,6 +445,7 @@ def route_bundle_dual_rails(
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
+    constraints: Sequence[Constraint] | None = None,
     route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]:
     r"""Connect multiple input ports to output ports.
@@ -551,6 +567,7 @@ def route_bundle_dual_rails(
             collision_check_layers=collision_check_layers,
             start_angles=start_angles,
             end_angles=end_angles,
+            constraints=constraints,
             route_debug=route_debug,
         )
     except ValueError as e:
@@ -1120,6 +1137,7 @@ def route_bundle_rf(
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
     minimum_radius: int = 0,
+    constraints: Sequence[Constraint] | None = None,
     route_debug: RouteDebug | None = None,
     *,
     layer: kdb.LayerInfo,
@@ -1292,5 +1310,6 @@ def route_bundle_rf(
         },
         start_angles=cast("list[int] | int", start_angles),
         end_angles=cast("list[int] | int", end_angles),
+        constraints=constraints,
         route_debug=route_debug,
     )

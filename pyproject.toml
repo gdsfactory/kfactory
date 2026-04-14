@@ -274,5 +274,7 @@ reportUnusedExpression = false
 
 [dependency-groups]
 dev = [
+    "pytest>=9.0.2",
+    "pytest-regressions>=2.10.0",
     "ty>=0.0.1a17",
 ]

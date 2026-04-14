@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from enum import IntEnum
-from functools import partial
 from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast, overload
 
 from .. import kdb, rdb
@@ -39,7 +38,8 @@ if TYPE_CHECKING:
         StraightFactoryDBU,
         StraightFactoryUM,
     )
-    from ..port import BasePort, DPort, Port
+    from ..port import DPort, Port
+    from ..schematic import Constraint
     from ..typings import dbu, um
     from .utils import RouteDebug
 
@@ -74,18 +74,15 @@ class PathLengthConfig[T: (int, float)](TypedDict, total=False):
 
 
 def path_length_match(
-    c: ProtoTKCell[Any],
     routers: Sequence[ManhattanRouter],
-    start_ports: Sequence[BasePort],
-    end_ports: Sequence[BasePort],
-    separation: dbu,
     element: int = -1,
     loops: int = 1,
     loop_side: LoopSide = LoopSide.left,
     loop_position: LoopPosition = LoopPosition.start,
-    **kwargs: Any,
+    path_length: int | None = None,
 ) -> None:
-    path_length = max(router.path_length for router in routers)
+    if path_length is None:
+        path_length = max(router.path_length for router in routers)
     if path_length % 2:
         logger.warning(
             "path length matching target length "
@@ -100,7 +97,7 @@ def path_length_match(
     match loop_side:
         case LoopSide.center:
             loops += 1
-    br = max(routers[0].bend90_radius, routers[0].width + separation)
+    br = max(routers[0].bend90_radius, routers[0].width + routers[0].separation)
 
     for router in routers:
         length = router.path_length
@@ -253,8 +250,9 @@ def route_bundle(
     end_angles: int | list[int] | None = None,
     purpose: str | None = "routing",
     sbend_factory: SBendFactoryDBU | None = None,
-    path_length_matching_config: PathLengthConfig | None = None,
+    constraints: Sequence[Constraint] | None = None,
     route_debug: RouteDebug | None = None,
+    route_name: str | None = None,
 ) -> list[ManhattanRoute]: ...
 
 
@@ -287,8 +285,9 @@ def route_bundle(
     end_angles: float | list[float] | None = None,
     purpose: str | None = "routing",
     sbend_factory: SBendFactoryUM | None = None,
-    path_length_matching_config: PathLengthConfig | None = None,
+    constraints: Sequence[Constraint] | None = None,
     route_debug: RouteDebug | None = None,
+    route_name: str | None = None,
 ) -> list[ManhattanRoute]: ...
 
 
@@ -330,8 +329,9 @@ def route_bundle(
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
     sbend_factory: SBendFactoryDBU | SBendFactoryUM | None = None,
-    path_length_matching_config: PathLengthConfig | None = None,
+    constraints: Sequence[Constraint] | None = None,
     route_debug: RouteDebug | None = None,
+    route_name: str | None = None,
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
 
@@ -470,12 +470,6 @@ def route_bundle(
             "sbend_factory": sbend_factory,
         }
     if isinstance(c, KCell):
-        if path_length_matching_config is not None:
-            post_process_f = partial(
-                path_length_match, separation=cast("dbu", separation)
-            )
-        else:
-            post_process_f = None
         try:
             return route_bundle_generic(
                 c=c,
@@ -501,9 +495,9 @@ def route_bundle(
                 placer_kwargs=placer_kwargs,
                 start_angles=cast("list[int] | int", start_angles),
                 end_angles=cast("list[int] | int", end_angles),
-                router_post_process_function=post_process_f,
-                router_post_process_kwargs=path_length_matching_config,
+                constraints=constraints,
                 route_debug=route_debug,
+                route_name=route_name,
             )
         except ValueError as e:
             if str(e).startswith("Found non-manhattan waypoints."):
@@ -609,10 +603,6 @@ def route_bundle(
             ]
         else:
             waypoints = cast("kdb.DCplxTrans", waypoints).s_trans().to_itype(c.kcl.dbu)
-    if path_length_matching_config is not None:
-        post_process_f = partial(path_length_match, separation=c.kcl.to_dbu(separation))
-    else:
-        post_process_f = None
     if sbend_factory is None:
         placer = place_manhattan
         placer_kwargs = {
@@ -680,11 +670,11 @@ def route_bundle(
             },
             placer_function=placer,
             placer_kwargs=placer_kwargs,
-            router_post_process_function=post_process_f,
-            router_post_process_kwargs=path_length_matching_config,
+            constraints=constraints,
             start_angles=start_angles,
             end_angles=end_angles,
             route_debug=route_debug,
+            route_name=route_name,
         )
     except ValueError as e:
         if str(e).startswith("Found non-manhattan waypoints."):
