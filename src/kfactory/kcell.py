@@ -808,6 +808,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
             ]
 
         c._base.settings = self.settings.model_copy()
+        c._base.settings_units = self.settings_units.model_copy()
         c._base.info = self.info.model_copy()
         c._base.vinsts = self._base.vinsts.dup()
 
