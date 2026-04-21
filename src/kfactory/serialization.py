@@ -225,11 +225,11 @@ def check_metadata_type(value: MetaData) -> MetaData:
     if isinstance(value, str | int | float | bool | SerializableShape):
         return value
     if isinstance(value, tuple):
-        return tuple(convert_metadata_type(tv) for tv in value)
+        return tuple(check_metadata_type(tv) for tv in value)
     if isinstance(value, list):
-        return [convert_metadata_type(tv) for tv in value]
+        return [check_metadata_type(tv) for tv in value]
     if isinstance(value, dict):
-        return {k: convert_metadata_type(v) for k, v in value.items()}
+        return {k: check_metadata_type(v) for k, v in value.items()}
     msg = (
         "Values of the info dict only support int, float, string, tuple or list."
         f"{value=}, {type(value)=}"
