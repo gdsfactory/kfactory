@@ -5,6 +5,7 @@ import inspect
 from collections import defaultdict
 from collections.abc import (
     Callable,
+    Hashable,
     Iterable,
     Iterator,
     Mapping,
@@ -628,7 +629,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -671,7 +672,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -716,7 +717,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -761,7 +762,7 @@ class KCLayout(
         check_instances: CheckInstances | None = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -805,7 +806,7 @@ class KCLayout(
         check_instances: CheckInstances | None = None,
         snap_ports: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -982,7 +983,7 @@ class KCLayout(
         check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -1009,7 +1010,7 @@ class KCLayout(
         check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -1036,7 +1037,7 @@ class KCLayout(
         check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -1064,7 +1065,7 @@ class KCLayout(
         check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -1093,7 +1094,7 @@ class KCLayout(
         check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -1124,7 +1125,7 @@ class KCLayout(
         check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -1155,7 +1156,7 @@ class KCLayout(
         check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -1185,7 +1186,7 @@ class KCLayout(
         check_unnamed_cells: CheckUnnamedCells = ...,
         snap_ports: bool = ...,
         add_port_layers: bool = ...,
-        cache: Cache[int, Any] | dict[int, Any] | None = ...,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = ...,
         basename: str | None = ...,
         drop_params: list[str] = ...,
         register_factory: bool = ...,
@@ -1215,7 +1216,7 @@ class KCLayout(
         check_unnamed_cells: CheckUnnamedCells | None = None,
         snap_ports: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -1325,10 +1326,12 @@ class KCLayout(
 
             output_cell_type__ = cast("type[KC]", output_cell_type_)
 
-            cache_: Cache[int, KC] | dict[int, KC] = cache or Cache(
+            cache_: Cache[Hashable, Any] | dict[Hashable, Any] = cache or Cache(
                 maxsize=float("inf")
             )
-            wrapper_autocell: WrappedKCellFunc[KCellParams, KC] = WrappedKCellFunc(
+            wrapper_autocell: WrappedKCellFunc[KCellParams, KC] = WrappedKCellFunc[
+                KCellParams, KC
+            ](
                 kcl=self,
                 f=f,
                 sig=sig,
@@ -1384,7 +1387,7 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -1405,7 +1408,7 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -1428,7 +1431,7 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -1450,7 +1453,7 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -1473,7 +1476,7 @@ class KCLayout(
         set_settings: bool = True,
         set_name: bool = True,
         add_port_layers: bool = True,
-        cache: Cache[int, Any] | dict[int, Any] | None = None,
+        cache: Cache[Hashable, Any] | dict[Hashable, Any] | None = None,
         basename: str | None = None,
         drop_params: Sequence[str] = ("self", "cls"),
         register_factory: bool = True,
@@ -1552,7 +1555,7 @@ class KCLayout(
 
             output_cell_type__ = cast("type[VK]", output_cell_type_)
             # previously was a KCellCache, but dict should do for most case
-            cache_: Cache[int, VK] | dict[int, VK] = cache or Cache(
+            cache_: Cache[Hashable, VK] | dict[Hashable, VK] = cache or Cache(
                 maxsize=float("inf")
             )
 
@@ -2230,7 +2233,7 @@ class CellKWargs[KC: ProtoTKCell[Any]](TypedDict, total=False):
     check_instances: CheckInstances
     snap_ports: bool
     add_port_layers: bool
-    cache: Cache[int, Any] | dict[int, Any]
+    cache: Cache[Hashable, Any] | dict[Hashable, Any]
     basename: str
     drop_params: list[str]
     register_factory: bool

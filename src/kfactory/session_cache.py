@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copyreg
 import functools
 import hashlib
 import importlib
@@ -12,11 +13,14 @@ from hashlib import sha256
 from shutil import rmtree
 from typing import TYPE_CHECKING
 
+from . import kdb
 from .conf import logger
 from .layout import KCLayout, kcls
+from .typings import DShapeLike, IShapeLike
 from .utilities import get_session_directory, save_layout_options
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Hashable
     from io import BufferedReader, BufferedWriter
     from pathlib import Path
     from typing import Any
@@ -79,7 +83,6 @@ def _load(f: BufferedReader) -> Any:
 def save_session(
     c: ProtoTKCell[Any] | None = None,
     session_dir: Path | None = None,
-    save_unnamed: bool = True,
 ) -> None:
     kcls_dir = get_session_directory(session_dir)
     if kcls_dir.exists():
@@ -99,7 +102,7 @@ def save_session(
 
         cis = set(kcl.each_cell_bottom_up())
         factory_dependency: defaultdict[str, set[str]] = defaultdict(set)
-        factory_cells: defaultdict[str, list[tuple[int, str]]] = defaultdict(list)
+        factory_cells: defaultdict[str, list[tuple[Hashable, Any]]] = defaultdict(list)
         take_cell_indexes: set[int] = set()
         for ci in cis:
             if ci in skip_cells:
@@ -109,8 +112,8 @@ def save_session(
                 take_cell_indexes.add(ci)
                 kcl_dependencies[kcl.name].add(kc.library().name())
                 continue
-            if kc.factory_name is None:
-                skip_cells |= set(ci)
+            if not kc.has_factory_name():
+                skip_cells.add(ci)
             else:
                 fd = factory_dependency[kc.factory_name]
                 for pi in kc.caller_cells():
@@ -277,3 +280,30 @@ def _file_hash(path: Path) -> str:
 @functools.cache
 def _file_path_hash(path: Path) -> str:
     return sha256(str(path).encode()).hexdigest()
+
+
+def _reduce_region(
+    obj: kdb.Region,
+) -> tuple[Callable[..., Any], tuple[tuple[str, ...]]]:
+    return (_read_region, (tuple([p.to_s() for p in obj.each()]),))
+
+
+def _read_region(polygons: tuple[str]) -> kdb.Region:
+    return kdb.Region([kdb.PolygonWithProperties.from_s(p) for p in polygons])
+
+
+def _reduce_klayout_shapes(
+    obj: IShapeLike | DShapeLike,
+) -> tuple[Callable[..., Any], tuple[str, ...] | tuple[tuple[str, ...]]]:
+    if isinstance(obj, kdb.Region):
+        return _reduce_region(obj)
+    return (obj.__class__.from_s, (obj.to_s(),))
+
+
+def _reduce_layer_info(obj: kdb.LayerInfo) -> tuple[Callable[..., Any], tuple[str]]:
+    return (kdb.LayerInfo.from_string, (obj.to_s(),))
+
+
+for cls in IShapeLike.__value__.__args__:
+    copyreg.pickle(cls, _reduce_klayout_shapes)
+copyreg.pickle(kdb.LayerInfo, _reduce_layer_info)
