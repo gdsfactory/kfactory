@@ -192,6 +192,10 @@ class Factories[F: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]](
             return self.get_by_name(key)
         return default
 
+    def get_by_path(self, path: str | Path) -> list[F]:
+        p = Path(path).expanduser().resolve()
+        return [factory for factory in self._all if p == factory.file]
+
     def as_dict(self) -> dict[str, F]:
         return {name: self._all[i] for name, i in self._by_name.items()}
 
