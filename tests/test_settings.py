@@ -58,11 +58,27 @@ def test_info_setitem() -> None:
     assert info["key1"] == 100
 
 
+def test_info_setitem_rejects_bad_type() -> None:
+    info = Info(key1=42)
+    with pytest.raises(ValidationError):
+        info["bad"] = object()
+    with pytest.raises(ValidationError):
+        info["bad"] = [object()]
+
+
 def test_info_update() -> None:
     info = Info(key1=42)
     info.update({"key1": 100, "key2": "new_value"})
     assert info["key1"] == 100
     assert info["key2"] == "new_value"
+
+
+def test_info_update_rejects_bad_type() -> None:
+    info = Info(key1=42)
+    with pytest.raises(ValidationError):
+        info.update({"bad": object()})
+    with pytest.raises(ValidationError):
+        info.update({"nested_bad": [{"deeper": object()}]})
 
 
 def test_info_contains() -> None:
