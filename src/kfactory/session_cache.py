@@ -82,6 +82,11 @@ def _load(f: BufferedReader) -> Any:
     return FunctionUnpickler(f).load()
 
 
+def _factory_key(name: str, file_path: str) -> str:
+    """Create a unique key for a factory based on name and file path."""
+    return f"{name}@{file_path}"
+
+
 def save_session(
     c: ProtoTKCell[Any] | None = None,
     session_dir: Path | None = None,
@@ -142,7 +147,7 @@ def save_session(
         kcl.end_changes()
         kcl.write(kcl_dir / "cells.gds.gz", options=save_options)
         factory_infos = {
-            k: [
+            _factory_key(k, _file_path(kcl.factories[k].file)): [
                 v,
                 factory_cells[k],
                 _file_path(kcl.factories[k].file),
@@ -226,7 +231,8 @@ def load_kcl(kcl_path: Path) -> None:
         logger.debug(f"Loading factory {factory.name!r}")
         p = _file_path(factory.file)
         fh = _file_hash(factory.file)
-        factory_info = factory_infos.get(factory.name)
+        factory_key = _factory_key(factory.name, p)
+        factory_info = factory_infos.get(factory_key)
         assert factory.name is not None
         logger.debug(f"{factory_info=}")
         if factory_info is not None:
@@ -238,53 +244,73 @@ def load_kcl(kcl_path: Path) -> None:
             )
             if p_loaded != p or fh_loaded != fh:
                 invalid_factories |= factory_dependencies
-                invalid_factories.add(factory.name)
+                invalid_factories.add(factory_key)
     cells_to_add: defaultdict[int, list[tuple[int, KCell, str]]] = defaultdict(list)
     logger.debug(f"{sorted(invalid_factories)=}")
-    for factory_name in sorted(set(kcl.factories._by_name.keys()) - invalid_factories):
-        logger.debug(f"Filling {factory_name!r}")
-        if factory_info := factory_infos.get(factory_name):
+    for factory in kcl.factories._all:
+        if factory.name is None:
+            continue
+        p = _file_path(factory.file)
+        factory_key = _factory_key(factory.name, p)
+        if factory_key in invalid_factories:
+            continue
+        logger.debug(f"Filling {factory.name!r}")
+        if factory_info := factory_infos.get(factory_key):
             cache_ = factory_info[1]
             logger.debug(cache_)
             for hk, cn in cache_:
                 kc = loaded_kcl[cn]
-                logger.debug(f"Adding {cn!r} to cache of {factory_name!r}")
+                logger.debug(f"Adding {cn!r} to cache of {factory.name!r}")
                 cells_to_add[kc.kdb_cell.hierarchy_levels()].append(
-                    (hk, kc, factory_name)
+                    (hk, kc, factory.name)
                 )
     for _, factory_cell_list in sorted(
         cells_to_add.items(), key=operator.itemgetter(0)
     ):
         for hk, kc, factory_name in factory_cell_list:
             factory = kcl.factories[factory_name]
-            kc_ = kcl.kcell(name=kc.name)
-            for inst in kc.insts:
-                if inst.cell.is_library_cell():
-                    lib_c = inst.cell.library().layout().cell(inst.cell.name)
-                    if lib_c is not None:
+            # Check if cell already exists in the layout
+            existing_kdb_cell = kcl.layout.cell(kc.name)
+            if existing_kdb_cell is not None:
+                # Cell already exists, use it and add to cache
+                existing_cell_index = existing_kdb_cell.cell_index()
+                kc_ = kcl[existing_cell_index]
+                logger.debug(
+                    f"Cell {kc.name!r} already exists (index {existing_cell_index}), "
+                    "reusing and adding to cache"
+                )
+                tkc_ = kc_._base
+                factory.cache[hk] = factory.output_type(base=tkc_)
+            else:
+                # Create new cell
+                kc_ = kcl.kcell(name=kc.name)
+                for inst in kc.insts:
+                    if inst.cell.is_library_cell():
+                        lib_c = inst.cell.library().layout().cell(inst.cell.name)
+                        if lib_c is not None:
+                            inst_ = kc_.icreate_inst(
+                                kcls[inst.cell.library().name()][lib_c.cell_index()],
+                                na=inst.na,
+                                nb=inst.nb,
+                                a=inst.a,
+                                b=inst.b,
+                            )
+
+                    else:
                         inst_ = kc_.icreate_inst(
-                            kcls[inst.cell.library().name()][lib_c.cell_index()],
+                            kc_.kcl[inst.cell.name],
                             na=inst.na,
                             nb=inst.nb,
                             a=inst.a,
                             b=inst.b,
                         )
+                    inst_.cplx_trans = inst.cplx_trans
+                kc_.copy_shapes(kc.kdb_cell)
+                kc_.copy_meta_info(kc.kdb_cell)
+                kc_.get_meta_data()
 
-                else:
-                    inst_ = kc_.icreate_inst(
-                        kc_.kcl[inst.cell.name],
-                        na=inst.na,
-                        nb=inst.nb,
-                        a=inst.a,
-                        b=inst.b,
-                    )
-                inst_.cplx_trans = inst.cplx_trans
-            kc_.copy_shapes(kc.kdb_cell)
-            kc_.copy_meta_info(kc.kdb_cell)
-            kc_.get_meta_data()
-
-            tkc_ = kc_._base
-            factory.cache[hk] = factory.output_type(base=tkc_)
+                tkc_ = kc_._base
+                factory.cache[hk] = factory.output_type(base=tkc_)
     loaded_kcl.delete()
 
 

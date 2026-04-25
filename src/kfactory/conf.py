@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from .layout import KCLayout
     from .typings import DShapeLike, MarkerConfig
 
-__all__ = ["LogLevel", "config"]
+__all__ = ["CheckInstances", "LogLevel", "config"]
 
 
 DEFAULT_TRANS: dict[str, str | int | float | dict[str, str | int | float]] = {
