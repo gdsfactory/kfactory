@@ -2806,6 +2806,24 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
     def lvs_equivalent_ports(self) -> list[list[str]] | None:
         return self._base.lvs_equivalent_ports
 
+    def __reduce__(
+        self,
+    ) -> tuple[Callable[..., ProtoTKCell[Any]], tuple[str, str, dict[str, Any]]]:
+        if self.has_factory_name():
+            return (
+                _reconstruct,
+                (self.kcl.name, self.factory_name, self.settings.model_dump()),
+            )
+        raise NotImplementedError
+
+
+def _reconstruct(
+    kcl_name: str, factory_name: str, settings: dict[str, Any]
+) -> ProtoTKCell[Any]:
+    from .layout import kcls
+
+    return kcls[kcl_name].factories[factory_name](**settings)
+
 
 class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
     """Cell with floating point units."""

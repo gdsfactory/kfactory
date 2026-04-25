@@ -33,6 +33,9 @@ class DecoratorList(UserList[Any]):
         """Hash the list."""
         return hash(tuple(self.data))
 
+    def __reduce__(self) -> tuple[type[DecoratorList], tuple[list[Any]]]:
+        return (DecoratorList, (self.data,))
+
 
 class DecoratorDict(UserDict[Hashable, Any]):
     """Hashable decorator for a dictionary."""
@@ -40,6 +43,9 @@ class DecoratorDict(UserDict[Hashable, Any]):
     def __hash__(self) -> int:
         """Hash the dictionary."""
         return hash(tuple(sorted(self.data.items())))
+
+    def __reduce__(self) -> tuple[type[DecoratorDict], tuple[dict[Hashable, Any]]]:
+        return (DecoratorDict, (self.data,))
 
 
 def clean_dict(d: dict[str, Any]) -> dict[str, Any]:
