@@ -76,6 +76,14 @@ def build(
             " not for '__main__' modules"
         ),
     ] = None,
+    out_dir: Annotated[
+        Path | None,
+        typer.Option(
+            "--out-dir",
+            "-o",
+            help="Output directory for written layouts. Defaults to build/mask.",
+        ),
+    ] = None,
     suffix: Annotated[
         LayoutSuffix, typer.Option(help="Format of the layout files")
     ] = LayoutSuffix.oas,
@@ -155,7 +163,12 @@ def build(
 
                 cell = getattr(_mod, func)(**kwargs)
                 if isinstance(cell, KCell):
-                    root = ensure_build_directory("mask") or Path()
+                    root = (
+                        out_dir.expanduser().resolve()
+                        if out_dir is not None
+                        else (ensure_build_directory("mask") or Path())
+                    )
+                    root.mkdir(parents=True, exist_ok=True)
                     if show:
                         cell.show()
                     if write_full:
@@ -214,7 +227,12 @@ def build(
 
                 cell = getattr(_mod, func)(**kwargs)
                 if isinstance(cell, KCell):
-                    root = ensure_build_directory("mask") or Path()
+                    root = (
+                        out_dir.expanduser().resolve()
+                        if out_dir is not None
+                        else (ensure_build_directory("mask") or Path())
+                    )
+                    root.mkdir(parents=True, exist_ok=True)
                     if show:
                         cell.show()
                     if write_full:
