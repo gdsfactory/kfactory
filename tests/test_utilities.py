@@ -43,6 +43,15 @@ def test_check_metadata_type() -> None:
     ):
         check_metadata_type({1, 2, 3})
 
+    with pytest.raises(ValueError, match=r"^Values of the info dict only support.*"):
+        check_metadata_type([object()])
+    with pytest.raises(ValueError, match=r"^Values of the info dict only support.*"):
+        check_metadata_type((object(),))
+    with pytest.raises(ValueError, match=r"^Values of the info dict only support.*"):
+        check_metadata_type({"k": object()})
+    with pytest.raises(ValueError, match=r"^Values of the info dict only support.*"):
+        check_metadata_type([[object()]])
+
 
 def test_load_layout_options() -> None:
     load = load_layout_options(gds2_allow_big_records=True)
