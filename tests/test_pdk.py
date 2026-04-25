@@ -298,4 +298,5 @@ def test_pdk_cell_infosettings(
     c = kcl_.kcell()
     _wg = c << straight
     assert _wg.cell.settings == straight.settings
+    assert _wg.cell.settings_units == straight.settings_units
     assert _wg.cell.info == straight.info
