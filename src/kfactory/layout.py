@@ -1328,7 +1328,9 @@ class KCLayout(
             cache_: Cache[int, KC] | dict[int, KC] = cache or Cache(
                 maxsize=float("inf")
             )
-            wrapper_autocell: WrappedKCellFunc[KCellParams, KC] = WrappedKCellFunc(
+            wrapper_autocell: WrappedKCellFunc[KCellParams, KC] = WrappedKCellFunc[
+                KCellParams, KC
+            ](
                 kcl=self,
                 f=f,
                 sig=sig,
@@ -1359,7 +1361,7 @@ class KCLayout(
                 with self.thread_lock:
                     if wrapper_autocell.name is None:
                         raise ValueError(f"Function {f} has no name.")
-                    self.factories.add(wrapper_autocell)
+                    self.factories.add(wrapper_autocell)  # ty:ignore[invalid-argument-type]
 
             @functools.wraps(f)
             def func(*args: KCellParams.args, **kwargs: KCellParams.kwargs) -> KC:

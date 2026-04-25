@@ -1049,7 +1049,6 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     @model_validator(mode="before")
     @classmethod
     def _validate_schematic(cls, data: dict[str, Any]) -> dict[str, Any]:
-        data.pop("nets", None)
         data.pop("warnings", None)
         if not isinstance(data, dict):
             return data
@@ -2763,9 +2762,9 @@ def _get_instance_and_port(s: str) -> PortRef:
     match = re.match(r"(.*?)<(\d+)\.(\d+)>$", instance)
     if match:
         return PortArrayRef(
-            instance=match.group(0),
+            instance=match.group(1),
             port=port,
-            ia=int(match.group(1)),
-            ib=int(match.group(2)),
+            ia=int(match.group(2)),
+            ib=int(match.group(3)),
         )
     return PortRef(instance=instance, port=port)

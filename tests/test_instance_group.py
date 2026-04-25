@@ -208,7 +208,7 @@ def test_instance_group_kcl(kcl: kf.KCLayout) -> None:
         _ = instance_group.kcl
 
     with pytest.raises(ValueError):
-        instance_group.kcl = kcl
+        instance_group.kcl = kcl  # ty:ignore[invalid-assignment]
 
 
 def test_instnace_group_iter(
