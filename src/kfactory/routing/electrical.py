@@ -22,146 +22,22 @@ from .generic import ManhattanRoute
 from .generic import route_bundle as route_bundle_generic
 from .length_functions import get_length_from_backbone
 from .manhattan import (
-    ManhattanRoutePathFunction,
     _is_manhattan,
     route_manhattan,
     route_smart,
 )
 from .optical import vec_angle
 from .steps import Step, Straight
+from .utils import RouteDebug
 
 __all__ = [
     "place_dual_rails",
     "place_single_wire",
-    "route_L",
     "route_bundle",
     "route_bundle_dual_rails",
     "route_bundle_rf",
     "route_dual_rails",
-    "route_elec",
 ]
-
-
-def route_elec(
-    c: KCell,
-    p1: Port,
-    p2: Port,
-    start_straight: int | None = None,
-    end_straight: int | None = None,
-    route_path_function: ManhattanRoutePathFunction = route_manhattan,
-    width: int | None = None,
-    layer: int | None = None,
-    minimum_straight: int | None = None,
-) -> None:
-    """Connect two ports with a wire.
-
-    A wire is a path object on a usually metal layer.
-
-
-    Args:
-        c: KCell to place the wire in.
-        p1: Beginning
-        p2: End
-        start_straight: Minimum length of straight at start port.
-        end_straight: Minimum length of straight at end port.
-        route_path_function: Function to calculate the path. Signature:
-            `route_path_function(p1, p2, bend90_radius, start_straight,
-            end_straight)`
-        width: Overwrite the width of the wire. Calculated by the width of the start
-            port if `None`.
-        layer: Layer to place the wire on. Calculated from the start port if `None`.
-        minimum_straight: require a minimum straight
-    """
-    logger.opt(depth=2).warning(
-        "`kfactory.routing.electrical.route_elec` is deprecated, please use "
-        "`route_bundle` instead. `route_elec` will be removed in kfactory 3"
-    )
-    c_ = c.to_itype()
-    p1_ = p1.to_itype()
-    p2_ = p2.to_itype()
-    if width is None:
-        width = p1_.width
-    if layer is None:
-        layer = p1.layer
-    if start_straight is None:
-        start_straight = round(width / 2)
-    if end_straight is None:
-        end_straight = round(width / 2)
-
-    if minimum_straight is not None:
-        start_straight = min(minimum_straight // 2, start_straight)
-        end_straight = min(minimum_straight // 2, end_straight)
-
-        pts = route_path_function(
-            p1_.copy(),
-            p2_.copy(),
-            bend90_radius=minimum_straight,
-            start_steps=[Straight(dist=start_straight)],
-            end_steps=[Straight(dist=end_straight)],
-        )
-    else:
-        pts = route_path_function(
-            p1_.copy(),
-            p2_.copy(),
-            bend90_radius=0,
-            start_steps=[Straight(dist=start_straight)],
-            end_steps=[Straight(dist=end_straight)],
-        )
-
-    path = kdb.Path(pts, width)
-    c_.shapes(layer).insert(path.polygon())
-
-
-def route_L(  # noqa: N802
-    c: KCell,
-    input_ports: Sequence[Port],
-    output_orientation: int = 1,
-    wire_spacing: int = 10000,
-) -> list[Port]:
-    """Route ports towards a bundle in an L shape.
-
-    This function takes a list of input ports and assume they are oriented in the west.
-    The output will be a list of ports that have the same y coordinates.
-    The function will produce a L-shape routing to connect input ports to output ports
-    without any crossings.
-    """
-    logger.opt(depth=2).warning(
-        "`kfactory.routing.electrical.route_L` is deprecated, please use `route_bundle`"
-        " instead. `route_L` will be removed in kfactory 3"
-    )
-    input_ports_ = [p.to_itype() for p in input_ports]
-    c_ = c.to_itype()
-    input_ports_.sort(key=lambda p: p.y)
-
-    y_max = input_ports_[-1].y
-    y_min = input_ports_[0].y
-    x_max = max(p.x for p in input_ports_)
-
-    output_ports: list[Port] = []
-    if output_orientation == 1:
-        for i, p in enumerate(input_ports_[::-1]):
-            temp_port = p.copy()
-            temp_port.trans = kdb.Trans(
-                3, False, x_max - wire_spacing * (i + 1), y_max + wire_spacing
-            )
-
-            route_elec(c_, p, temp_port)
-            temp_port.trans.angle = 1
-            output_ports.append(temp_port)
-    elif output_orientation == ANGLE_270:
-        for i, p in enumerate(input_ports_):
-            temp_port = p.copy()
-            temp_port.trans = kdb.Trans(
-                1, False, x_max - wire_spacing * (i + 1), y_min - wire_spacing
-            )
-            route_elec(c_, p, temp_port)
-            temp_port.trans.angle = 3
-            output_ports.append(temp_port)
-    else:
-        raise ValueError(
-            "Invalid L-shape routing. Please change output_orientaion to 1 or 3."
-        )
-    return output_ports
 
 
 @overload
@@ -170,8 +46,6 @@ def route_bundle(
     start_ports: Sequence[Port],
     end_ports: Sequence[Port],
     separation: dbu,
-    start_straights: dbu | list[dbu] = 0,
-    end_straights: dbu | list[dbu] = 0,
     place_layer: kdb.LayerInfo | None = None,
     route_width: dbu | list[dbu] | None = None,
     bboxes: Sequence[kdb.Box] | None = None,
@@ -186,6 +60,7 @@ def route_bundle(
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
     purpose: str | None = "routing",
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]: ...
 
 
@@ -195,8 +70,6 @@ def route_bundle(
     start_ports: Sequence[DPort],
     end_ports: Sequence[DPort],
     separation: um,
-    start_straights: um | list[um] = 0,
-    end_straights: um | list[um] = 0,
     place_layer: kdb.LayerInfo | None = None,
     route_width: um | list[um] | None = None,
     bboxes: Sequence[kdb.DBox] | None = None,
@@ -211,6 +84,7 @@ def route_bundle(
     start_angles: float | list[float] | None = None,
     end_angles: float | list[float] | None = None,
     purpose: str | None = "routing",
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]: ...
 
 
@@ -219,8 +93,6 @@ def route_bundle(
     start_ports: Sequence[Port] | Sequence[DPort],
     end_ports: Sequence[Port] | Sequence[DPort],
     separation: dbu | um,
-    start_straights: dbu | list[dbu] | um | list[um] = 0,
-    end_straights: dbu | list[dbu] | um | list[um] = 0,
     place_layer: kdb.LayerInfo | None = None,
     route_width: dbu | um | list[dbu] | list[um] | None = None,
     bboxes: Sequence[kdb.Box] | Sequence[kdb.DBox] | None = None,
@@ -245,6 +117,7 @@ def route_bundle(
     start_angles: list[int] | float | list[float] | None = None,
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]:
     r"""Connect multiple input ports to output ports.
 
@@ -303,8 +176,6 @@ def route_bundle(
         separation: Minimum space between wires. [dbu]
         starts: Minimal straight segment after `start_ports`.
         ends: Minimal straight segment before `end_ports`.
-        start_straights: Deprecated, use starts instead.
-        end_straights: Deprecated, use ends instead.
         place_layer: Override automatic detection of layers with specific layer.
         route_width: Width of the route. If None, the width of the ports is used.
         bboxes: List of boxes to consider. Currently only boxes overlapping ports will
@@ -369,6 +240,7 @@ def route_bundle(
                 start_angles=cast("int | list[int] | None", start_angles),
                 end_angles=cast("int | list[int]", end_angles),
                 route_width=cast("int", route_width),
+                route_debug=route_debug,
             )
         except ValueError as e:
             if str(e).startswith("Found non-manhattan waypoints."):
@@ -446,13 +318,13 @@ def route_bundle(
         starts = c.kcl.to_dbu(starts)
     elif isinstance(starts, list):
         if isinstance(starts[0], int | float):
-            starts = [c.kcl.to_dbu(start) for start in starts]  # type: ignore[arg-type]
+            starts = [c.kcl.to_dbu(cast("int|float", start)) for start in starts]
         starts = cast("int | list[int] | list[Step] | list[list[Step]]", starts)
     if isinstance(ends, int | float):
         ends = c.kcl.to_dbu(ends)
     elif isinstance(ends, list):
         if isinstance(ends[0], int | float):
-            ends = [c.kcl.to_dbu(end) for end in ends]  # type: ignore[arg-type]
+            ends = [c.kcl.to_dbu(cast("int|float", end)) for end in ends]
         ends = cast("int | list[int] | list[Step] | list[list[Step]]", ends)
     if waypoints is not None:
         if isinstance(waypoints, list):
@@ -491,6 +363,7 @@ def route_bundle(
             start_angles=start_angles,
             end_angles=end_angles,
             route_width=route_width,
+            route_debug=route_debug,
         )
     except ValueError as e:
         if str(e).startswith("Found non-manhattan waypoints."):
@@ -521,9 +394,7 @@ def route_bundle(
                 cell = db.create_cell(c_.name)
                 wp_len = len(waypoints)
 
-                width_d = cast("float | None", route_width) or cast(
-                    "float", start_ports[0].width
-                )
+                width_d = cast("float | None", route_width) or start_ports[0].width
 
                 for i, wp_d in enumerate(waypoints):
                     it = db.create_item(cell=cell, category=wp_cat)
@@ -547,8 +418,6 @@ def route_bundle_dual_rails(
     start_ports: list[Port],
     end_ports: list[Port],
     separation: dbu,
-    start_straights: dbu | list[dbu] | None = None,
-    end_straights: dbu | list[dbu] | None = None,
     place_layer: kdb.LayerInfo | None = None,
     width_rails: dbu | None = None,
     separation_rails: dbu | None = None,
@@ -563,6 +432,7 @@ def route_bundle_dual_rails(
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]:
     r"""Connect multiple input ports to output ports.
 
@@ -621,8 +491,6 @@ def route_bundle_dual_rails(
         separation: Minimum space between wires. [dbu]
         starts: Minimal straight segment after `start_ports`.
         ends: Minimal straight segment before `end_ports`.
-        start_straights: Deprecated, use starts instead.
-        end_straights: Deprecated, use ends instead.
         place_layer: Override automatic detection of layers with specific layer.
         width_rails: Total width of the rails.
         separation_rails: Separation between the two rails.
@@ -658,12 +526,6 @@ def route_bundle_dual_rails(
         starts = []
     if bboxes is None:
         bboxes = []
-    if start_straights is not None:
-        logger.warning("start_straights is deprecated. Use `starts` instead.")
-        starts = start_straights
-    if end_straights is not None:
-        logger.warning("end_straights is deprecated. Use `starts` instead.")
-        ends = end_straights
     try:
         return route_bundle_generic(
             c=c,
@@ -692,6 +554,7 @@ def route_bundle_dual_rails(
             collision_check_layers=collision_check_layers,
             start_angles=start_angles,
             end_angles=end_angles,
+            route_debug=route_debug,
         )
     except ValueError as e:
         if str(e).startswith("Found non-manhattan waypoints."):
@@ -992,10 +855,10 @@ def place_rf_rails(
         )
     )
     route_start_port = p1.copy()
-    route_start_port.name = None
+    route_start_port.name = "route_start"
     route_start_port.trans.angle = (route_start_port.angle + 2) % 4
     route_end_port = p2.copy()
-    route_end_port.name = None
+    route_end_port.name = "route_end"
     route_end_port.trans.angle = (route_end_port.angle + 2) % 4
 
     old_pt = pts[0]
@@ -1125,7 +988,7 @@ def place_rf_rails(
         )
         route.instances.append(wg)
         route.start_port = Port(base=wg_p1.base.transformed())
-        route.start_port.name = None
+        route.start_port.name = "route_start"
         route.length_straights += int(length)
         return route
     for i in range(1, len(pts) - 1):
@@ -1160,7 +1023,7 @@ def place_rf_rails(
         if d_angle == 1:
             bend90 = c << bend_factory(cross_section=cross_section, radius=inner_radius)
             b90c = b90c_inner
-        elif d_angle == 3:  # noqa: PLR2004
+        elif d_angle == 3:
             bend90 = c << bend_factory(cross_section=cross_section, radius=outer_radius)
             b90c = b90c_outer
         else:
@@ -1219,12 +1082,12 @@ def place_rf_rails(
         )
         route.instances.append(wg)
         route.end_port = wg.ports[wg_p2.name].copy()
-        route.end_port.name = None
+        route.end_port.name = "route_end"
         route.length_straights += int(length)
 
     else:
         route.end_port = old_bend_port.copy()
-        route.end_port.name = None
+        route.end_port.name = "route_end"
     return route
 
 
@@ -1260,6 +1123,7 @@ def route_bundle_rf(
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
     minimum_radius: int = 0,
+    route_debug: RouteDebug | None = None,
     *,
     layer: kdb.LayerInfo,
     enclosure: LayerEnclosure | None = None,
@@ -1432,4 +1296,5 @@ def route_bundle_rf(
         },
         start_angles=cast("list[int] | int", start_angles),
         end_angles=cast("list[int] | int", end_angles),
+        route_debug=route_debug,
     )

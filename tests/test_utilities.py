@@ -38,8 +38,10 @@ def test_check_metadata_type() -> None:
     assert check_metadata_type([1, 2, 3]) == [1, 2, 3]
     assert check_metadata_type({"key": "value"}) == {"key": "value"}
 
-    with pytest.raises(ValueError, match=r"^Values of the info dict only support.*"):
-        check_metadata_type({1, 2, 3})  # type: ignore[arg-type]
+    with pytest.raises(
+        ValueError, match=r"^MetaData values of the info dict only support.*"
+    ):
+        check_metadata_type({1, 2, 3})
 
     with pytest.raises(ValueError, match=r"^Values of the info dict only support.*"):
         check_metadata_type([object()])
@@ -63,9 +65,9 @@ def test_polygon_from_array() -> None:
 
 
 def test_check_inst_ports() -> None:
-    p1 = Port(width=10, angle=0, port_type="input", layer=1, center=(0, 0))
-    p2 = Port(width=10, angle=2, port_type="input", layer=1, center=(0, 0))
-    p3 = Port(width=6, angle=1, port_type="output", layer=1, center=(0, 0))
+    p1 = Port(name="o1", width=10, angle=0, port_type="input", layer=1, center=(0, 0))
+    p2 = Port(name="o2", width=10, angle=2, port_type="input", layer=1, center=(0, 0))
+    p3 = Port(name="o3", width=6, angle=1, port_type="output", layer=1, center=(0, 0))
 
     assert check_inst_ports(p1, p2) == 0
     assert check_inst_ports(p1, p3) == 7

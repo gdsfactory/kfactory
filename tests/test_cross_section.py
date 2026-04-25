@@ -5,7 +5,7 @@ def test_icross_section_creation(kcl: kf.KCLayout) -> None:
     xs = kcl.get_icross_section(
         kf.cross_section.CrossSectionSpec(
             name="WG_350",
-            sections=[(kf.kdb.LayerInfo(2, 0), 500)],
+            sections=[(kf.kdb.LayerInfo(2, 0), 500)],  # ty:ignore[invalid-argument-type]
             layer=kf.kdb.LayerInfo(1, 0),
             width=1000,
         )
@@ -25,14 +25,15 @@ def test_port_cross_section(kcl: kf.KCLayout, layers: kf.LayerInfos) -> None:
     xs = kcl.get_icross_section(
         kf.cross_section.CrossSectionSpec(
             name="WG_350",
-            sections=[(kf.kdb.LayerInfo(2, 0), 500)],
+            sections=[(kf.kdb.LayerInfo(2, 0), 500)],  # ty:ignore[invalid-argument-type]
             layer=kf.kdb.LayerInfo(1, 0),
             width=1000,
         )
     )
 
-    p1 = c.create_port(cross_section=xs, trans=kf.kdb.Trans.R0)
+    p1 = c.create_port(name="o1", cross_section=xs, trans=kf.kdb.Trans.R0)
     p2 = c.create_port(
+        name="o2",
         cross_section=kf.SymmetricalCrossSection(
             width=1000,
             enclosure=enc,

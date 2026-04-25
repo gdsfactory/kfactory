@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, TypeAlias
+from typing import Any
 
 import klayout.db as kdb
 import pytest
@@ -169,12 +169,12 @@ def _instances_equal(
     )
 
 
-_DBUInstanceTuple: TypeAlias = tuple[
+type _DBUInstanceTuple = tuple[
     kf.instance.Instance, kf.instance.Instance, kf.instance.Instance
 ]
 
 
-_UMInstanceTuple: TypeAlias = tuple[
+type _UMInstanceTuple = tuple[
     kf.instance.DInstance, kf.instance.DInstance, kf.instance.DInstance
 ]
 
@@ -635,7 +635,7 @@ def test_vinstance_errors(kcl: kf.KCLayout, layers: Layers) -> None:
     with pytest.raises(exceptions.PortTypeMismatchError):
         ref.connect("o1", ref4.ports["o1"])
     with pytest.raises(ValueError):
-        ref.connect("o1", ref5)  # type: ignore[call-overload]
+        ref.connect("o1", ref5)  # ty:ignore[invalid-argument-type]
 
 
 def test_mirror_y_default_arg(dbu_instance_tuple: _DBUInstanceTuple) -> None:

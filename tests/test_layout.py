@@ -1,4 +1,5 @@
 import functools
+from typing import Any
 
 import pytest
 
@@ -9,14 +10,14 @@ from tests.conftest import Layers
 def test_cell_decorator(kcl: kf.KCLayout, layers: Layers) -> None:
     count: int = 0
 
-    def rectangle_post_process(cell: kf.kcell.TKCell) -> None:
+    def rectangle_post_process(cell: kf.ProtoTKCell[Any]) -> None:
         assert cell.name == kf.serialization.clean_name(
             f"rectangle_W{cell.settings['width']}_H{cell.settings['height']}_LWG"
         )
         nonlocal count
         count += 1
 
-    @kcl.cell(post_process=[rectangle_post_process])  # type: ignore[type-var]
+    @kcl.cell(post_process=[rectangle_post_process])
     def rectangle(width: float, height: float, layer: kf.kdb.LayerInfo) -> kf.DKCell:
         c = kcl.dkcell()
         c.shapes(layer).insert(kf.kdb.DBox(0, 0, width, height))
@@ -143,7 +144,7 @@ def test_cell_parameters(kcl: kf.KCLayout) -> None:
         return kcl.kcell(name=name)
 
     with pytest.raises(TypeError):
-        test_cell_with_empty_parameters(name="test_cell_with_empty_parameters")  # type: ignore[call-arg]
+        test_cell_with_empty_parameters(name="test_cell_with_empty_parameters")  # ty:ignore[missing-argument]
 
 
 def test_check_instances(kcl: kf.KCLayout) -> None:
@@ -222,7 +223,7 @@ def test_cell_decorator_types(kcl: kf.KCLayout) -> None:
     with pytest.raises(ValueError):
 
         @kcl.cell
-        def test_no_output_type():  # type: ignore[no-untyped-def]  # noqa: ANN202
+        def test_no_output_type():  # noqa: ANN202
             return kf.KCell()
 
         test_no_output_type()

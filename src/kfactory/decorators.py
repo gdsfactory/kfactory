@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import inspect
+import re
 from collections import defaultdict
 from collections.abc import Callable
 from enum import StrEnum
@@ -14,62 +15,118 @@ from typing import (
     TYPE_CHECKING,
     Annotated,
     Any,
-    Generic,
     Protocol,
     TypedDict,
+    Unpack,
     get_origin,
     overload,
 )
 
 from cachetools import Cache, cached
-from typing_extensions import Unpack
 
 from . import kdb
-from .conf import CheckInstances, logger
+from .conf import CheckInstances, CheckUnnamedCells, logger
 from .exceptions import CellNameError
-from .kcell import AnyKCell, ProtoTKCell, TKCell, VKCell
+from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
 from .serialization import (
     DecoratorDict,
     DecoratorList,
     get_cell_name,
+    get_function_name,
     hashable_to_original,
     to_hashable,
 )
 from .settings import KCellSettings, KCellSettingsUnits
-from .typings import (
-    KC,
-    VK,
-    K,
-    K_contra,
-    KC_co,
-    KC_contra,
-    KCellParams,
-    MetaData,
-    VK_contra,
-)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Sequence
 
     from .layout import KCLayout
     from .schematic import TSchematic
+    from .typings import (
+        MetaData,
+    )
+
+_fixed_unnamed_pattern = re.compile(r"Unnamed_\d+")
 
 
-def _parse_params(
-    sig: inspect.Signature, kcl: KCLayout, args: Any, kwargs: Any
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    params: dict[str, Any] = {p.name: p.default for _, p in sig.parameters.items()}
-    param_units: dict[str, str] = {
+class SignatureParams:
+    sig: inspect.Signature
+
+    _defaults: dict[str, Any] | None
+    _names: list[str] | None
+    _units: dict[str, str] | None
+
+    def __init__(self, sig: inspect.Signature) -> None:
+        self.sig = sig
+        self._defaults = None
+        self._names = None
+        self._units = None
+
+    @property
+    def defaults(self) -> dict[str, Any]:
+        if self._defaults is None:
+            self._defaults, self._names, self._units = _precompute_sig_metadata(
+                self.sig
+            )
+        return self._defaults
+
+    @property
+    def names(self) -> list[str]:
+        if self._names is None:
+            self._defaults, self._names, self._units = _precompute_sig_metadata(
+                self.sig
+            )
+        return self._names
+
+    @property
+    def units(self) -> dict[str, str]:
+        if self._units is None:
+            self._defaults, self._names, self._units = _precompute_sig_metadata(
+                self.sig
+            )
+        return self._units
+
+
+def _precompute_sig_metadata(
+    sig: inspect.Signature,
+) -> tuple[dict[str, Any], list[str], dict[str, str]]:
+    """Pre-compute static signature metadata at decoration time.
+
+    Args:
+        sig: function signature
+
+    Returns:
+        param_defaults: dict of parameter name -> default value
+        param_names: ordered list of parameter names
+        all_param_units: dict of parameter name -> unit annotation
+    """
+    param_defaults: dict[str, Any] = {
+        p.name: p.default for p in sig.parameters.values()
+    }
+    param_names: list[str] = list(sig.parameters.keys())
+    all_param_units: dict[str, str] = {
         p.name: p.annotation.__metadata__[0]
         for p in sig.parameters.values()
         if get_origin(p.annotation) is Annotated
     }
-    arg_par = list(sig.parameters.items())[: len(args)]
-    for i, (k, _) in enumerate(arg_par):
-        params[k] = args[i]
+    return param_defaults, param_names, all_param_units
+
+
+def _parse_params(
+    param_defaults: dict[str, Any],
+    param_names: list[str],
+    kcl: KCLayout,
+    args: Any,
+    kwargs: Any,
+) -> dict[str, Any]:
+
+    params = param_defaults.copy()
+    for name, value in zip(param_names, args, strict=False):
+        params[name] = value
     params.update(kwargs)
 
-    del_parameters: list[str] = []
+    del_params: list[str] = []
 
     for key, value in params.items():
         if isinstance(value, dict | list):
@@ -77,13 +134,12 @@ def _parse_params(
         elif isinstance(value, kdb.LayerInfo):
             params[key] = kcl.get_info(kcl.layer(value))
         if value is inspect.Parameter.empty:
-            del_parameters.append(key)
+            del_params.append(key)
 
-    for param in del_parameters:
+    for param in del_params:
         params.pop(param, None)
-        param_units.pop(param, None)
 
-    return params, param_units
+    return params
 
 
 def _params_to_original(params: dict[str, Any]) -> None:
@@ -250,17 +306,7 @@ def _check_pins(cell: ProtoTKCell[Any] | VKCell) -> None:
         )
 
 
-def _get_function_name(f: Callable[..., Any]) -> str:
-    if hasattr(f, "__name__"):
-        name = f.__name__
-    elif hasattr(f, "func"):
-        name = f.func.__name__
-    else:
-        raise ValueError(f"Function {f} has no name.")
-    return name
-
-
-def _set_settings(
+def _set_settings[**KCellParams, K: ProtoKCell[Any, Any]](
     cell: K,
     f: Callable[KCellParams, K],
     drop_params: Sequence[str],
@@ -268,7 +314,7 @@ def _set_settings(
     param_units: dict[str, Any],
     basename: str | None,
 ) -> None:
-    cell.function_name = _get_function_name(f)
+    cell.function_name = get_function_name(f)
     cell.basename = basename
 
     for param in drop_params:
@@ -299,29 +345,15 @@ def _check_cell(cell: AnyKCell, kcl: KCLayout) -> None:
         )
 
 
-@overload
-def _post_process(
-    cell: KC_contra,
-    post_process_functions: Iterable[Callable[[KC_contra], None]],
-) -> None: ...
-
-
-@overload
-def _post_process(
-    cell: VK_contra,
-    post_process_functions: Iterable[Callable[[VK_contra], None]],
-) -> None: ...
-
-
-def _post_process(
-    cell: K_contra,
-    post_process_functions: Iterable[Callable[[K_contra], None]],
+def _post_process[K: ProtoKCell[Any, Any]](
+    cell: K,
+    post_process_functions: Iterable[Callable[[K], None]],
 ) -> None:
     for pp in post_process_functions:
         pp(cell)
 
 
-class WrappedKCellFunc(Generic[KCellParams, KC]):
+class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
     _f: Callable[KCellParams, KC]
     _f_orig: Callable[KCellParams, ProtoTKCell[Any]]
     _f_schematic: Callable[KCellParams, TSchematic[Any]] | None = None
@@ -346,6 +378,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         check_ports: bool,
         check_pins: bool,
         check_instances: CheckInstances,
+        check_unnamed_cells: CheckUnnamedCells,
         snap_ports: bool,
         add_port_layers: bool,
         basename: str | None,
@@ -362,160 +395,21 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
-        self.name = basename or _get_function_name(f)
+        self.name = basename or get_function_name(f)
         self.ports_definition = ports.copy() if ports is not None else None
         self.tags = set(tags) if tags else set()
         self._f_schematic = schematic_function
+
+        # Pre-compute static signature metadata once at decoration time
+        sig_params = SignatureParams(sig)
 
         @functools.wraps(f)
         def wrapper_autocell(
             *args: KCellParams.args, **kwargs: KCellParams.kwargs
         ) -> KC:
-            params, param_units = _parse_params(sig, kcl, args, kwargs)
-
-            @cached(cache=cache, lock=RLock())
-            @functools.wraps(f)
-            def wrapped_cell(**params: Any) -> KC:
-                _params_to_original(params)
-                old_future_name: str | None = None
-                if set_name:
-                    if basename is not None:
-                        name = get_cell_name(basename, **params)
-                    else:
-                        name = get_cell_name(self.name, **params)
-                    old_future_name = kcl.future_cell_name
-                    kcl.future_cell_name = name
-                    if layout_cache:
-                        if overwrite_existing:
-                            for c in list(kcl.cells(kcl.future_cell_name)):
-                                kcl[c.cell_index()].delete()
-                        else:
-                            layout_cell = kcl.layout_cell(kcl.future_cell_name)
-                            if layout_cell is not None:
-                                logger.debug(
-                                    "Loading {} from layout cache",
-                                    kcl.future_cell_name,
-                                )
-                                return kcl.get_cell(
-                                    layout_cell.cell_index(), output_type
-                                )
-                    logger.debug(f"Constructing {kcl.future_cell_name}")
-                    name_: str | None = name
-                else:
-                    name_ = None
-                cell = f(**params)  # type: ignore[call-arg]
-                if cell is None:
-                    raise TypeError(
-                        f"The cell function {self.name!r} in {str(self.file)!r}"
-                        " returned None. Did you forget to return the cell or component"
-                        " at the end of the function?"
-                    )
-                if not isinstance(cell, ProtoTKCell):
-                    raise TypeError(
-                        f"The cell function {self.name!r} in {str(self.file)!r}"
-                        f" returned {type(cell)=}. The `@cell` decorator only supports"
-                        " KCell/DKCell or any SubClass such as Component."
-                    )
-
-                logger.debug("Constructed {}", name_ or cell.name)
-
-                if cell.locked:
-                    # If the cell is locked, it comes from a cache (most likely)
-                    # and should be copied first
-                    cell = cell.dup(new_name=kcl.future_cell_name)
-                if overwrite_existing:
-                    _overwrite_existing(name_, cell, kcl)
-                if set_name and name_:
-                    if debug_names and cell.kcl.layout_cell(name_) is not None:
-                        logger.opt(depth=4).error(
-                            "KCell with name {name} exists already. Duplicate "
-                            "occurrence in module '{module}' at "
-                            "line {lno}",
-                            name=name_,
-                            module=f.__module__,
-                            function_name=f.__name__,
-                            lno=inspect.getsourcelines(f)[1],
-                        )
-                        raise CellNameError(f"KCell with name {name_} exists already.")
-
-                    cell.name = name_
-                    kcl.future_cell_name = old_future_name
-                if set_settings:
-                    _set_settings(cell, f, drop_params, params, param_units, basename)
-                if check_ports:
-                    _check_ports(cell)
-                if check_pins:
-                    _check_pins(cell)
-                _check_instances(cell, kcl, check_instances)
-                cell.insert_vinsts(recursive=False)
-                if snap_ports:
-                    _snap_ports(cell, kcl)
-                if add_port_layers:
-                    _add_port_layers(cell, kcl)
-                _post_process(cell, post_process)
-                cell.base.lock()
-                _check_cell(cell, kcl)
-                if self.ports_definition is not None:
-                    port_lengths = 0
-                    for direction in Direction:
-                        port_lengths += len(self.ports_definition.get(direction, []))  # type: ignore[arg-type]
-                    mapping = {0: "right", 1: "top", 2: "left", 3: "bottom"}
-                    if len(cell.ports) != port_lengths:
-                        received_ports = PortsDefinition()
-                        for port in cell.ports:
-                            mapped: Direction = Direction(mapping[port.trans.angle])
-                            if mapped not in received_ports:
-                                received_ports[mapped] = []  # type: ignore[literal-required]
-                            received_ports[mapped].append(port.name)  # type: ignore[literal-required]
-                        raise ValueError(
-                            "The `@cell` decorator defines ports, but they do not match"
-                            " the extracted ports. Declared ports: "
-                            f"{self.ports_definition}"
-                            ", Received ports: "
-                            f"{received_ports}"
-                        )
-
-                    if check_ports:
-                        found_errors = False
-                        for port in cell.ports:
-                            if (
-                                port.name
-                                not in self.ports_definition[mapping[port.trans.angle]]  # type: ignore[literal-required]
-                            ):
-                                found_errors = True
-                        if found_errors:
-                            received_ports = PortsDefinition()
-                            for port in cell.ports:
-                                mapped = Direction(mapping[port.trans.angle])
-                                if mapped not in received_ports:
-                                    received_ports[mapped] = []  # type: ignore[literal-required]
-                                received_ports[mapped].append(port.name)  # type: ignore[literal-required]
-                            raise ValueError(
-                                "The `@cell` decorator defines ports, but they do not"
-                                " match the extracted ports. Declared ports: "
-                                f"{self.ports_definition}"
-                                ", Received ports: "
-                                f"{received_ports}"
-                            )
-                    else:
-                        port_names: list[str | None] = []
-                        for direction in Direction:
-                            if direction in self.ports_definition:
-                                port_names.extend(self.ports_definition[direction])  # type: ignore[literal-required]
-
-                        for port in cell.ports:
-                            if port.name not in port_names:
-                                found_errors = True
-                        if found_errors:
-                            raise ValueError(
-                                "The `@cell` decorator defines ports, but they do not"
-                                " match the extracted ports. Declared ports: "
-                                f"{port_names}"
-                                ", Received ports: "
-                                f"{[p.name for p in cell.ports]}"
-                            )
-
-                return output_type(base=cell.base)
+            params = _parse_params(
+                sig_params.defaults, sig_params.names, kcl, args, kwargs
+            )
 
             with kcl.thread_lock:
                 cell_ = wrapped_cell(**params)
@@ -537,6 +431,171 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
 
                 return cell_
 
+        @cached(cache=cache, lock=RLock())
+        def wrapped_cell(**params: Any) -> KC:
+
+            _params_to_original(params)
+
+            old_future_name: str | None = None
+            if set_name:
+                if basename is not None:
+                    name = get_cell_name(basename, **params)
+                else:
+                    name = get_cell_name(self.name, **params)
+                old_future_name = kcl.future_cell_name
+                kcl.future_cell_name = name
+                if layout_cache:
+                    if overwrite_existing:
+                        for c in list(kcl.cells(kcl.future_cell_name)):
+                            kcl[c.cell_index()].delete()
+                    else:
+                        layout_cell = kcl.layout_cell(kcl.future_cell_name)
+                        if layout_cell is not None:
+                            logger.debug(
+                                "Loading {} from layout cache",
+                                kcl.future_cell_name,
+                            )
+                            return kcl.get_cell(layout_cell.cell_index(), output_type)
+                logger.debug(f"Constructing {kcl.future_cell_name}")
+                name_: str | None = name
+            else:
+                name_ = None
+            cell = f(**params)  # ty:ignore[missing-argument]
+            if cell is None:
+                raise TypeError(
+                    f"The cell function {self.name!r} in {str(self.file)!r}"
+                    " returned None. Did you forget to return the cell or component"
+                    " at the end of the function?"
+                )
+            if not isinstance(cell, ProtoTKCell):
+                raise TypeError(
+                    f"The cell function {self.name!r} in {str(self.file)!r}"
+                    f" returned {type(cell)=}. The `@cell` decorator only supports"
+                    " KCell/DKCell or any SubClass such as Component."
+                )
+
+            logger.debug("Constructed {}", name_ or cell.name)
+
+            if cell.locked:
+                # If the cell is locked, it likely comes
+                # from a cache and should be copied first
+                cell = cell.dup(new_name=kcl.future_cell_name)
+            if overwrite_existing:
+                _overwrite_existing(name_, cell, kcl)
+            if set_name and name_:
+                if debug_names and cell.kcl.layout_cell(name_) is not None:
+                    logger.opt(depth=4).error(
+                        "KCell with name {name} exists already. Duplicate "
+                        "occurrence in module '{module}' at "
+                        "line {lno}",
+                        name=name_,
+                        module=f.__module__,
+                        function_name=get_function_name(f),
+                        lno=inspect.getsourcelines(f)[1],
+                    )
+                    raise CellNameError(f"KCell with name {name_} exists already.")
+
+                cell.name = name_
+                kcl.future_cell_name = old_future_name
+            if set_settings:
+                _set_settings(cell, f, drop_params, params, sig_params.units, basename)
+            if check_ports:
+                _check_ports(cell)
+            if check_pins:
+                _check_pins(cell)
+            match check_unnamed_cells:
+                case CheckUnnamedCells.RAISE | CheckUnnamedCells.WARNING:
+                    unnamed_cells: list[str] = []
+                    for ci in cell.kdb_cell.each_child_cell():
+                        c = cell.kcl[ci]
+                        if re.fullmatch(_fixed_unnamed_pattern, c.name):
+                            factory_name = c.basename or c.function_name
+                            factory_string = (
+                                f"factory_name={factory_name!r}"
+                                if factory_name
+                                else "Cell without cell function"
+                            )
+                            unnamed_cells.append(f"{c.name} ({factory_string})")
+                    if unnamed_cells:
+                        msg = (
+                            f"Cell {cell.name!r} has"
+                            " unnamed cells instantiated:\n" + "\n".join(unnamed_cells)
+                        )
+                        if check_unnamed_cells == CheckUnnamedCells.RAISE:
+                            raise ValueError(msg)
+                        logger.warning(msg)
+
+            _check_instances(cell, kcl, check_instances)
+            cell.insert_vinsts(recursive=False)
+            if snap_ports:
+                _snap_ports(cell, kcl)
+            if add_port_layers:
+                _add_port_layers(cell, kcl)
+            _post_process(cell, post_process)
+            cell.base.lock()
+            _check_cell(cell, kcl)
+            if self.ports_definition is not None:
+                port_lengths = 0
+                for direction in Direction:
+                    port_lengths += len(self.ports_definition.get(direction, []))
+                mapping = {0: "right", 1: "top", 2: "left", 3: "bottom"}
+                if len(cell.ports) != port_lengths:
+                    received_ports = PortsDefinition()
+                    for port in cell.ports:
+                        mapped: Direction = Direction(mapping[port.trans.angle])
+                        if mapped not in received_ports:
+                            received_ports[mapped]: list[str] = []
+                        received_ports[mapped].append(port.name)  # ty:ignore[invalid-key]
+                    raise ValueError(
+                        "The `@cell` decorator defines ports, but they do not match"
+                        " the extracted ports. Declared ports: "
+                        f"{self.ports_definition}"
+                        ", Received ports: "
+                        f"{received_ports}"
+                    )
+
+                if check_ports:
+                    found_errors = False
+                    for port in cell.ports:
+                        if (
+                            port.name
+                            not in self.ports_definition[mapping[port.trans.angle]]  # ty:ignore[invalid-key]
+                        ):
+                            found_errors = True
+                    if found_errors:
+                        received_ports = PortsDefinition()
+                        for port in cell.ports:
+                            mapped = Direction(mapping[port.trans.angle])
+                            if mapped not in received_ports:
+                                received_ports[mapped]: list[str] = []
+                            received_ports[mapped].append(port.name)  # ty:ignore[invalid-key]
+                        raise ValueError(
+                            "The `@cell` decorator defines ports, but they do not"
+                            " match the extracted ports. Declared ports: "
+                            f"{self.ports_definition}"
+                            ", Received ports: "
+                            f"{received_ports}"
+                        )
+                else:
+                    port_names: list[str | None] = []
+                    for direction in Direction:
+                        if direction in self.ports_definition:
+                            port_names.extend(self.ports_definition[direction])  # ty:ignore[invalid-key]
+
+                    for port in cell.ports:
+                        if port.name not in port_names:
+                            found_errors = True
+                    if found_errors:
+                        raise ValueError(
+                            "The `@cell` decorator defines ports, but they do not"
+                            " match the extracted ports. Declared ports: "
+                            f"{port_names}"
+                            ", Received ports: "
+                            f"{[p.name for p in cell.ports]}"
+                        )
+
+            return output_type(base=cell.base)
+
         self._f = wrapper_autocell
         self._f_orig = f
         self.cache = cache
@@ -555,11 +614,7 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
 
     @functools.cached_property
     def file(self) -> Path:
-        if isinstance(self._f_orig, FunctionType):
-            return Path(self._f_orig.__code__.co_filename).resolve()
-        if isinstance(self._f_orig, functools.partial):
-            return Path(self._f_orig.func.__code__.co_filename).resolve()
-        return Path(self._f_orig.__code__.co_filename).resolve()
+        return _get_path(self._f_orig)
 
     def prune(self) -> None:
         cells = [c for c in self.cache.values() if not c._destroyed()]
@@ -586,9 +641,9 @@ class WrappedKCellFunc(Generic[KCellParams, KC]):
         return self._f_schematic(*args, **kwargs)
 
 
-class WrappedVKCellFunc(Generic[KCellParams, VK]):
-    _f: Callable[KCellParams, VK]
-    _f_orig: Callable[KCellParams, VKCell]
+class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
+    _f: Callable[VKCellParams, VK]
+    _f_orig: Callable[VKCellParams, VKCell]
     cache: Cache[int, VK] | dict[int, Any]
     name: str
     kcl: KCLayout
@@ -601,7 +656,7 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
         self,
         *,
         kcl: KCLayout,
-        f: Callable[KCellParams, VKCell],
+        f: Callable[VKCellParams, VKCell],
         sig: inspect.Signature,
         output_type: type[VK],
         cache: Cache[int, VK] | dict[int, VK],
@@ -609,6 +664,7 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
         set_name: bool,
         check_ports: bool,
         check_pins: bool,
+        check_unnamed_cells: CheckUnnamedCells,
         add_port_layers: bool,
         basename: str | None,
         drop_params: Sequence[str],
@@ -620,104 +676,20 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
-        self.name = basename or _get_function_name(f)
+        self.name = basename or get_function_name(f)
         self.ports_definitions = ports.copy() if ports is not None else None
         self.tags = set(tags) if tags else set()
 
+        # Pre-compute static signature metadata once at decoration time
+        sig_params = SignatureParams(sig)
+
         @functools.wraps(f)
         def wrapper_autocell(
-            *args: KCellParams.args, **kwargs: KCellParams.kwargs
+            *args: VKCellParams.args, **kwargs: VKCellParams.kwargs
         ) -> VK:
-            params, param_units = _parse_params(sig, kcl, args, kwargs)
-
-            @cached(cache=cache, lock=RLock())
-            @functools.wraps(f)
-            def wrapped_cell(**params: Any) -> VK:
-                _params_to_original(params)
-                old_future_name: str | None = None
-                if set_name:
-                    if basename is not None:
-                        name = get_cell_name(basename, **params)
-                    else:
-                        name = get_cell_name(self.name, **params)
-                    old_future_name = kcl.future_cell_name
-                    kcl.future_cell_name = name
-                    logger.debug(f"Constructing {kcl.future_cell_name}")
-                    name_: str | None = name
-                else:
-                    name_ = None
-                cell = f(**params)  # type: ignore[call-arg]
-                if cell is None:
-                    raise TypeError(
-                        f"The cell function {self.name!r} in {str(self.file)!r}"
-                        " returned None. Did you forget to return the cell or component"
-                        " at the end of the function?"
-                    )
-                if not isinstance(cell, VKCell):
-                    raise TypeError(
-                        f"The cell function {self.name!r} in {str(self.file)!r}"
-                        f" returned {type(cell)=}. The `@vcell` decorator only supports"
-                        " VKCell or any SubClass such as ComponentAllAngle."
-                    )
-
-                logger.debug("Constructed {}", name_ or cell.name)
-
-                if cell.locked:
-                    # If the cell is locked, it comes from a cache (most likely)
-                    # and should be copied first
-                    cell = cell.dup(new_name=kcl.future_cell_name)
-                if set_name and name_:
-                    cell.name = name_
-                    kcl.future_cell_name = old_future_name
-                if set_settings:
-                    _set_settings(cell, f, drop_params, params, param_units, basename)
-                if check_ports:
-                    _check_ports(cell)
-                if check_pins:
-                    _check_pins(cell)
-                if add_port_layers:
-                    _add_port_layers_vkcell(cell, kcl)
-                _post_process(cell, post_process)
-                cell.base.lock()
-                _check_cell(cell, kcl)
-                if self.ports_definition is not None:
-                    port_lengths = 0
-                    for direction in Direction:
-                        port_lengths += len(self.ports_definition.get(direction, []))  # type: ignore[arg-type]
-                    mapping = {0: "right", 1: "top", 2: "left", 3: "bottom"}
-                    if len(cell.ports) != port_lengths:
-                        received_ports = PortsDefinition()
-                        for port in cell.ports:
-                            mapped: Direction = Direction(mapping[port.trans.angle])
-                            if mapped not in received_ports:
-                                received_ports[mapped] = []  # type: ignore[literal-required]
-                            received_ports[mapped].append(port.name)  # type: ignore[literal-required]
-                        raise ValueError(
-                            "The `@cell` decorator defines ports, but they do not match"
-                            " the extracted ports. Declared ports: "
-                            f"{self.ports_definition}"
-                            ", Received ports: "
-                            f"{received_ports}"
-                        )
-
-                    port_names: list[str | None] = []
-                    for direction in Direction:
-                        if direction in self.ports_definition:
-                            port_names.extend(self.ports_definition[direction])  # type: ignore[literal-required]
-
-                    for port in cell.ports:
-                        if port.name not in port_names:
-                            found_errors = True
-                    if found_errors:
-                        raise ValueError(
-                            "The `@cell` decorator defines ports, but they do not"
-                            " match the extracted ports. Declared ports: "
-                            f"{port_names}"
-                            ", Received ports: "
-                            f"{[p.name for p in cell.ports]}"
-                        )
-
-                return output_type(base=cell.base)
+            params = _parse_params(
+                sig_params.defaults, sig_params.names, kcl, args, kwargs
+            )
 
             with kcl.thread_lock:
                 cell_ = wrapped_cell(**params)
@@ -726,6 +698,117 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
                     cell_.info.update(info)
 
                 return cell_
+
+        @cached(cache=cache, lock=RLock())
+        def wrapped_cell(**params: Any) -> VK:
+
+            _params_to_original(params)
+
+            old_future_name: str | None = None
+            if set_name:
+                if basename is not None:
+                    name = get_cell_name(basename, **params)
+                else:
+                    name = get_cell_name(self.name, **params)
+                old_future_name = kcl.future_cell_name
+                kcl.future_cell_name = name
+                logger.debug(f"Constructing {kcl.future_cell_name}")
+                name_: str | None = name
+            else:
+                name_ = None
+            cell = f(**params)  # ty:ignore[missing-argument]
+            if cell is None:
+                raise TypeError(
+                    f"The cell function {self.name!r} in {str(self.file)!r}"
+                    " returned None. Did you forget to return the cell or component"
+                    " at the end of the function?"
+                )
+            if not isinstance(cell, VKCell):
+                raise TypeError(
+                    f"The cell function {self.name!r} in {str(self.file)!r}"
+                    f" returned {type(cell)=}. The `@vcell` decorator only supports"
+                    " VKCell or any SubClass such as ComponentAllAngle."
+                )
+
+            logger.debug("Constructed {}", name_ or cell.name)
+
+            if cell.locked:
+                # If the cell is locked, it comes from a cache (most likely)
+                # and should be copied first
+                cell = cell.dup(new_name=kcl.future_cell_name)
+            if set_name and name_:
+                cell.name = name_
+                kcl.future_cell_name = old_future_name
+            if set_settings:
+                _set_settings(cell, f, drop_params, params, sig_params.units, basename)
+            if check_ports:
+                _check_ports(cell)
+            if check_pins:
+                _check_pins(cell)
+            match check_unnamed_cells:
+                case CheckUnnamedCells.RAISE | CheckUnnamedCells.WARNING:
+                    unnamed_cells: set[str] = set()
+                    for inst in cell.insts:
+                        c = inst.cell
+                        if re.fullmatch(_fixed_unnamed_pattern, c.name or ""):
+                            factory_name = c.basename or c.function_name
+                            factory_string = (
+                                f"factory_name={factory_name!r}"
+                                if factory_name
+                                else "Cell without cell function"
+                            )
+                            unnamed_cells.add(f"{c.name} ({factory_string})")
+                    if unnamed_cells:
+                        msg = (
+                            f"Cell {cell.name!r} has"
+                            " unnamed cells instantiated:\n" + "\n".join(unnamed_cells)
+                        )
+                        if check_unnamed_cells == CheckUnnamedCells.RAISE:
+                            raise ValueError(msg)
+                        logger.warning(msg)
+            if add_port_layers:
+                _add_port_layers_vkcell(cell, kcl)
+            _post_process(cell, post_process)
+            cell.base.lock()
+            _check_cell(cell, kcl)
+            if self.ports_definition is not None:
+                port_lengths = 0
+                for direction in Direction:
+                    port_lengths += len(self.ports_definition.get(direction, []))
+                mapping = {0: "right", 1: "top", 2: "left", 3: "bottom"}
+                if len(cell.ports) != port_lengths:
+                    received_ports = PortsDefinition()
+                    for port in cell.ports:
+                        mapped: Direction = Direction(mapping[port.trans.angle])
+                        if mapped not in received_ports:
+                            received_ports[mapped] = []  # ty:ignore[invalid-assignment]
+                        received_ports[mapped].append(port.name)  # ty:ignore[invalid-key]
+                    raise ValueError(
+                        "The `@cell` decorator defines ports, but they do not match"
+                        " the extracted ports. Declared ports: "
+                        f"{self.ports_definition}"
+                        ", Received ports: "
+                        f"{received_ports}"
+                    )
+
+                port_names: list[str | None] = []
+                for direction in Direction:
+                    if direction in self.ports_definition:
+                        port_names.extend(self.ports_definition[direction])  # ty:ignore[invalid-key]
+
+                for port in cell.ports:
+                    if port.name not in port_names:
+                        found_errors = True
+                if found_errors:
+                    raise ValueError(
+                        "The `@cell` decorator defines ports, but they do not"
+                        " match the extracted ports. Declared ports: "
+                        f"{port_names}"
+                        ", Received ports: "
+                        f"{[p.name for p in cell.ports]}"
+                    )
+
+            return output_type(base=cell.base)
 
         self._f = wrapper_autocell
         self._f_orig = f
@@ -741,11 +824,23 @@ class WrappedVKCellFunc(Generic[KCellParams, VK]):
 
     @functools.cached_property
     def file(self) -> Path:
+        return _get_path(self._f_orig)
         if isinstance(self._f_orig, FunctionType):
             return Path(self._f_orig.__code__.co_filename).resolve()
         if isinstance(self._f_orig, functools.partial):
             return Path(self._f_orig.func.__code__.co_filename).resolve()
         return Path(self._f_orig.__code__.co_filename).resolve()
+
+
+def _get_path(f: Callable[..., Any]) -> Path:
+    if isinstance(f, FunctionType):
+        return Path(f.__code__.co_filename).resolve()
+    if isinstance(f, functools.partial):
+        return _get_path(f.func)
+    try:
+        return Path(f.__code__.co_filename).resolve()  # ty:ignore[unresolved-attribute]
+    except Exception as e:
+        raise ValueError("Failed to retrieve path of code for function {f}") from e
 
 
 class ModuleCellKWargs(TypedDict, total=False):
@@ -789,12 +884,12 @@ class KCellDecoratorKWargs(TypedDict, total=False):
     debug_names: bool | None
 
 
-class KCellDecorator(Protocol):
+class KCellDecorator[**KCellParams, K: ProtoKCell[Any, Any]](Protocol):
     """Signature of the `@cell` decorator."""
 
     def __call__(
         self, **kwargs: Unpack[KCellDecoratorKWargs]
-    ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
+    ) -> Callable[[Callable[KCellParams, K]], Callable[KCellParams, K]]:
         """__call__ implementation."""
         ...
 
@@ -802,28 +897,32 @@ class KCellDecorator(Protocol):
 class ModuleDecorator(Protocol):
     """Signature of the `@module_cell` decorator."""
 
-    def __call__(
+    def __call__[**KCellParams, K: ProtoKCell[Any, Any]](
         self, /, **kwargs: Unpack[ModuleCellKWargs]
-    ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
+    ) -> Callable[[Callable[KCellParams, K]], Callable[KCellParams, K]]:
         """__call__ implementation."""
         ...
 
 
-def _module_cell(
-    cell_decorator: KCellDecorator,
+def _module_cell[**KCellParams, K: ProtoKCell[Any, Any]](
+    cell_decorator: KCellDecorator[KCellParams, K],
     /,
     **kwargs: Unpack[ModuleCellKWargs],
-) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
+) -> Callable[[Callable[KCellParams, K]], Callable[KCellParams, K]]:
     """Constructs the actual decorator.
 
     Modifies the basename to the module if the module is not the main one.
     """
 
-    def decorator_cell(
-        f: Callable[KCellParams, KC_co],
-    ) -> Callable[KCellParams, KC_co]:
+    def decorator_cell[**KCP, KC: ProtoTKCell[Any]](
+        f: Callable[KCellParams, K],
+    ) -> Callable[KCellParams, K]:
         mod = f.__module__
-        basename = f.__name__ if mod == "__main" else f"{mod}_{f.__name__}"
+        basename = (
+            get_function_name(f)
+            if mod.startswith("__main")
+            else f"{mod}_{get_function_name(f)}"
+        )
         return cell_decorator(basename=basename, **kwargs)(f)
 
     return decorator_cell
@@ -837,31 +936,31 @@ class Decorators:
         self._cell = kcl.cell
 
     @overload
-    def module_cell(
+    def module_cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
-        _func: Callable[KCellParams, KC_co],
+        _func: Callable[KCellParams, KC],
         /,
-    ) -> Callable[KCellParams, KC_co]: ...
+    ) -> Callable[KCellParams, KC]: ...
 
     @overload
-    def module_cell(
+    def module_cell[**KCellParams, KC: ProtoTKCell[Any]](
         self, /, **kwargs: Unpack[ModuleCellKWargs]
-    ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]: ...
+    ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]: ...
 
-    def module_cell(
+    def module_cell[**KCellParams, KC: ProtoTKCell[Any]](
         self,
-        _func: Callable[KCellParams, KC_co] | None = None,
+        _func: Callable[KCellParams, KC] | None = None,
         /,
         **kwargs: Unpack[ModuleCellKWargs],
     ) -> (
-        Callable[KCellParams, KC_co]
-        | Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]
+        Callable[KCellParams, KC]
+        | Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]
     ):
         """Constructs the `@module_cell` decorator on KCLayout.decorators."""
 
         def mc(
             **kwargs: Unpack[ModuleCellKWargs],
-        ) -> Callable[[Callable[KCellParams, KC_co]], Callable[KCellParams, KC_co]]:
-            return _module_cell(self._cell, **kwargs)  # type: ignore[arg-type]
+        ) -> Callable[[Callable[KCellParams, KC]], Callable[KCellParams, KC]]:
+            return _module_cell(self._cell, **kwargs)  # ty:ignore[invalid-argument-type]
 
         return mc(**kwargs) if _func is None else mc(**kwargs)(_func)

@@ -35,6 +35,7 @@ if TYPE_CHECKING:
 
     from ..kcell import DKCell, KCell
     from ..layout import KCLayout
+    from .utils import RouteDebug
 
 __all__ = [
     "ManhattanRoutePathFunction",
@@ -89,6 +90,7 @@ class ManhattanBundleRoutingFunction(Protocol):
         starts: Sequence[Sequence[Step]],
         ends: Sequence[Sequence[Step]],
         widths: Sequence[int] | None = None,
+        route_debug: RouteDebug | None = None,
         **kwargs: Any,
     ) -> list[ManhattanRouter]: ...
 
@@ -293,7 +295,7 @@ class ManhattanRouterSide:
 
     @property
     def ta(self) -> Literal[0, 1, 2, 3]:
-        return (self.other.t.angle - self.t.angle) % 4  # type: ignore[return-value]
+        return (self.other.t.angle - self.t.angle) % 4  # ty:ignore[invalid-return-type]
 
     def right(self) -> None:
         self.pts.append(
@@ -706,7 +708,7 @@ def path_length_match_manhattan_route(
     modify_pts: tuple[kdb.Point, kdb.Point]
 
     for router in routers:
-        modify_pts = tuple(router.start.pts[-2:])  # type: ignore[assignment]
+        modify_pts = tuple(router.start.pts[-2:])  # ty:ignore[invalid-assignment]
         v = modify_pts[1] - modify_pts[0]
         match (v.x, v.y):
             case (x, 0) if x > 0:
@@ -860,6 +862,7 @@ def route_smart(
     waypoints: Sequence[kdb.Point] | kdb.Trans | None = None,
     bbox_routing: Literal["minimal", "full"] = "minimal",
     allow_sbend: bool = False,
+    route_debug: RouteDebug | None = None,
     **kwargs: Any,
 ) -> list[ManhattanRouter]:
     """Route around start or end bboxes (obstacles on the way not implemented yet).
@@ -925,6 +928,20 @@ def route_smart(
 
     start_ts = [p.get_trans() if isinstance(p, BasePort) else p for p in start_ports]
     end_ts = [p.get_trans() if isinstance(p, BasePort) else p for p in end_ports]
+    start_port_names: dict[kdb.Trans, str] = {}
+    for i, p in enumerate(start_ports):
+        if isinstance(p, BasePort):
+            t = p.get_trans()
+            start_port_names[t] = p.name or f"{i}_{t.disp}"
+        else:
+            start_port_names[p] = f"{i}_{p.disp}"
+    end_port_names: dict[kdb.Trans, str] = {}
+    for i, p in enumerate(end_ports):
+        if isinstance(p, BasePort):
+            t = p.get_trans()
+            end_port_names[t] = p.name or f"{i}_{t.disp}"
+        else:
+            end_port_names[p] = f"{i}_{p.disp}"
     if widths is None:
         widths = [
             p.cross_section.width if isinstance(p, BasePort) else 0 for p in start_ports
@@ -964,6 +981,9 @@ def route_smart(
                 sort_ports=True,
                 bbox_routing=bbox_routing,
                 allow_sbends=allow_sbend,
+                route_debug=route_debug,
+                start_port_names=start_port_names,
+                end_port_names=end_port_names,
             )
         default_start_bundle: list[kdb.Trans] = []
         start_bundles: dict[kdb.Box, list[kdb.Trans]] = defaultdict(list)
@@ -1253,6 +1273,9 @@ def route_smart(
                 bend90_radius=bend90_radius,
                 sort_ports=False,
                 allow_sbends=allow_sbend,
+                route_debug=route_debug,
+                start_port_names=start_port_names,
+                end_port_names=end_port_names,
             )
 
         all_routers = []
@@ -1338,6 +1361,8 @@ def route_smart(
         sorted_routers = _sort_routers(router_bundle)
 
         # simple (maybe error-prone) way to determine the ideal routing angle
+        # this would need to be expanded in order to allow for automatic single
+        # waypoint router (without transformation or similar)
         angle = router_bundle[0].end.t.angle
 
         r = router_bundle[0]
@@ -1347,6 +1372,13 @@ def route_smart(
         end_bbox = kdb.Box(r.end.pts[0], re.end.t * _p)
         start_bbox += re.start.t * kdb.Point(-1, 0)
         end_bbox += re.end.t * kdb.Point(-1, 0)
+
+        _route_p(
+            sorted_routers=sorted_routers,
+            start_bbox=start_bbox,
+            separation=separation,
+        )
+
         for r in router_bundle:
             start_bbox += kdb.Box(r.start.pts[0], r.start.t.disp.to_p()) + kdb.Box(
                 0, -r.width // 2, 0, r.width // 2
@@ -1592,6 +1624,61 @@ def route_smart(
                 bbox_routing=bbox_routing,
                 allow_sbend=allow_sbend,
             )
+    if route_debug is not None:
+        for router in all_routers:
+            p_end_t = router.end.t.disp.to_p()
+
+            pt1 = router.start.pts[0]
+            for i in range(1, len(router.start.pts)):
+                pt2 = router.start.pts[i]
+                e = kdb.Edge(pt1, pt2)
+                if e.contains(p_end_t):
+                    if e.p1 == p_end_t:
+                        start_pts = router.start.pts[: i + 1]
+                        end_pts = router.start.pts[i:]
+                    elif e.p2 == p_end_t:
+                        start_pts = router.start.pts[: i + 2]
+                        end_pts = router.start.pts[i + 1 :]
+                        if e.p2 == router.start.pts[-1]:
+                            end_pts.append(router.start.pts[-1])
+                    else:
+                        start_pts = [*router.start.pts[:i], p_end_t]
+                        end_pts = [p_end_t, *router.start.pts[i:]]
+
+                    fan_in_name = (
+                        start_port_names.get(router.start_transformation, "")
+                        if start_port_names
+                        else ""
+                    )
+                    route_debug.fan_in_region.insert(
+                        kdb.PathWithProperties(
+                            kdb.Path(start_pts, router.width),
+                            {
+                                0: kdb.Text(
+                                    f"fan_in - {fan_in_name}",
+                                    router.start_transformation,
+                                ).to_s()
+                            },
+                        )
+                    )
+                    fan_out_name = (
+                        end_port_names.get(router.end_transformation, "")
+                        if end_port_names
+                        else ""
+                    )
+                    route_debug.fan_out_region.insert(
+                        kdb.PathWithProperties(
+                            kdb.Path(end_pts, router.width),
+                            {
+                                0: kdb.Text(
+                                    f"fan_out - {fan_out_name}",
+                                    router.end_transformation,
+                                ).to_s()
+                            },
+                        )
+                    )
+                    break
+                pt1 = pt2
 
     return all_routers
 
@@ -1643,6 +1730,138 @@ def route_to_bbox(
                 f"routing mode {bbox_routing=} is not supported, available modes"
                 " 'minimal', 'full'"
             )
+
+
+def _route_group(
+    router_groups: list[list[ManhattanRouter]],
+    separation: int,
+    bbox: kdb.Box,
+    reverse: bool = False,
+) -> None:
+    for router_group in router_groups:
+        delta = 0
+        routers = reversed(router_group) if reverse else iter(router_group)
+        for router in routers:
+            if not router.finished:
+                router.start.straight(delta)
+                delta += router.width + separation
+                router.auto_route(bbox=bbox)
+
+
+def _route_p(
+    sorted_routers: Sequence[ManhattanRouter],
+    start_bbox: kdb.Box,
+    separation: int,
+) -> None:
+    _route_p_side(
+        sorted_routers=sorted_routers,
+        start_bbox=start_bbox,
+        separation=separation,
+        reverse_order=False,
+    )
+    _route_p_side(
+        sorted_routers=sorted_routers,
+        start_bbox=start_bbox,
+        separation=separation,
+        reverse_order=True,
+    )
+
+
+def _route_p_side(
+    sorted_routers: Sequence[ManhattanRouter],
+    start_bbox: kdb.Box,
+    separation: int,
+    reverse_order: bool,
+) -> None:
+
+    box = kdb.Box()
+    extend: int = 0
+
+    if reverse_order:
+        _sorted_routers = list(reversed(sorted_routers))
+    else:
+        _sorted_routers = list(sorted_routers)
+
+    for i, r in enumerate(_sorted_routers):
+        if r.start.ta == 0:
+            v = r.start.tv
+            br = r.bend90_radius
+            p1 = r.start.t.disp.to_p()
+            if not box.empty():
+                match r.start.t.angle:
+                    case 0 | 2:
+                        p = kdb.Point(box.left, p1.y)
+                    case _:
+                        p = kdb.Point(p1.x, box.bottom)
+                contains_p = box.contains(p)
+            else:
+                contains_p = box.contains(p1)
+            ws = r.width // 2 + separation
+            if reverse_order:
+                comparison = v.y >= 0
+                d_p = kdb.Point(br, -(br + ws))
+            else:
+                comparison = v.y < 0
+                d_p = kdb.Point(br, (br + ws))
+
+            if contains_p or ((abs(v.y) < 2 * br) and comparison):
+                route_to_bbox([r.start], start_bbox, separation, bbox_routing="full")
+
+                br = 2 * r.bend90_radius
+
+                box += kdb.Box(p1, r.start.t * d_p).enlarged(r.width // 2 + separation)
+                extend += 1
+            else:
+                _box = start_bbox.dup()
+                for j in range(i - 1, i - extend - 1, -1):
+                    r_ = _sorted_routers[j]
+                    route_to_bbox([r_.start], _box, separation, bbox_routing="full")
+                    v = r_.start.tv
+
+                    _box += r_.start.t * kdb.Point(r_.width + separation, 0)
+
+                    if v.y < 0:
+                        r_.start.left()
+                        r_.start.right()
+                    else:
+                        r_.start.right()
+                        r_.start.left()
+
+                box = kdb.Box()
+                extend = 0
+        else:
+            _box = start_bbox.dup()
+            for j in range(i - 1, i - extend - 1, -1):
+                r_ = _sorted_routers[j]
+                route_to_bbox([r_.start], _box, separation, bbox_routing="full")
+                v = r_.start.tv
+
+                _box += r_.start.t * kdb.Point(r_.width + separation, 0)
+
+                if v.y < 0:
+                    r_.start.left()
+                    r_.start.right()
+                else:
+                    r_.start.right()
+                    r_.start.left()
+
+            box = kdb.Box()
+            extend = 0
+    _box = start_bbox.dup()
+    j_range: range | reversed[int] = range(i, i - extend, -1)
+    for j in j_range:
+        r_ = _sorted_routers[j]
+        route_to_bbox([r_.start], _box, separation, bbox_routing="full")
+        v = r_.start.tv
+
+        _box += r_.start.t * kdb.Point(r_.width + separation, 0)
+
+        if v.y < 0:
+            r_.start.left()
+            r_.start.right()
+        else:
+            r_.start.right()
+            r_.start.left()
 
 
 def route_loosely(
@@ -1807,21 +2026,8 @@ def route_loosely(
         elif s == -1 and group:
             reverse_groups.append(group)
 
-        for router_group in forward_groups:
-            delta = 0
-            for router in reversed(router_group):
-                if not router.finished:
-                    router.start.straight(delta)
-                    delta += router.width + separation
-                    router.auto_route(bbox=start_bbox)
-
-        for router_group in reverse_groups:
-            delta = 0
-            for router in router_group:
-                if not router.finished:
-                    router.start.straight(delta)
-                    delta += router.width + separation
-                    router.auto_route(bbox=start_bbox)
+        _route_group(forward_groups, separation, start_bbox, reverse=True)
+        _route_group(reverse_groups, separation, start_bbox, reverse=False)
 
 
 def vec_dir(vec: kdb.Vector) -> int:
@@ -2194,6 +2400,9 @@ def _route_waypoints(
     bbox_routing: Literal["minimal", "full"] = "minimal",
     sort_ports: bool = False,
     allow_sbends: bool = False,
+    route_debug: RouteDebug | None = None,
+    start_port_names: dict[kdb.Trans, str] | None = None,
+    end_port_names: dict[kdb.Trans, str] | None = None,
 ) -> list[ManhattanRouter]:
     if isinstance(waypoints, kdb.Trans):
         length_widths = len(widths)
@@ -2284,6 +2493,37 @@ def _route_waypoints(
             router.start.t = router.end_transformation * kdb.Trans.R180
             router.finished = True
             all_routers.append(router)
+            if route_debug is not None:
+                fan_in_name = (
+                    start_port_names.get(sr.start_transformation, "")
+                    if start_port_names
+                    else ""
+                )
+                route_debug.fan_in_region.insert(
+                    kdb.PathWithProperties(
+                        kdb.Path(sr.start.pts, sr.width),
+                        {
+                            0: kdb.Text(
+                                f"fan_in - {fan_in_name}", sr.start_transformation
+                            ).to_s()
+                        },
+                    )
+                )
+                fan_out_name = (
+                    end_port_names.get(er.start_transformation)
+                    if end_port_names
+                    else ""
+                )
+                route_debug.fan_out_region.insert(
+                    kdb.PathWithProperties(
+                        kdb.Path(list(reversed(er.start.pts)), er.width),
+                        {
+                            0: kdb.Text(
+                                f"fan_out - {fan_out_name}", er.start_transformation
+                            ).to_s()
+                        },
+                    )
+                )
         return all_routers
     if len(waypoints) < MIN_WAYPOINTS_FOR_ROUTING:
         raise ValueError(
@@ -2402,6 +2642,53 @@ def _route_waypoints(
             key=lambda pair: pair[0][0],
         )
     ]
+    if route_debug is not None:
+        for sr, _bb, er in zip(
+            start_manhattan_routers,
+            bundle_points,
+            end_manhattan_routers,
+            strict=False,
+        ):
+            fan_in_name = (
+                start_port_names.get(sr.start_transformation, "")
+                if start_port_names
+                else ""
+            )
+            route_debug.fan_in_region.insert(
+                kdb.PathWithProperties(
+                    kdb.Path(sr.start.pts, sr.width),
+                    {
+                        0: kdb.Text(
+                            f"fan_in - {fan_in_name}", sr.start_transformation
+                        ).to_s()
+                    },
+                )
+            )
+            wp_props: dict[int, str] = {
+                i: kdb.Text(
+                    f"Waypoint {i}: {wp.x},{wp.y}",
+                    kdb.Trans(0, False, wp.x, wp.y),
+                ).to_s()
+                for i, wp in enumerate(waypoints)
+            }
+            route_debug.waypoints_region.insert(
+                kdb.PathWithProperties(kdb.Path(_bb, sr.width), wp_props)
+            )
+            fan_out_name = (
+                end_port_names.get(er.start_transformation, "")
+                if end_port_names
+                else ""
+            )
+            route_debug.fan_out_region.insert(
+                kdb.PathWithProperties(
+                    kdb.Path(list(reversed(er.start.pts)), er.width),
+                    {
+                        0: kdb.Text(
+                            f"fan_out - {fan_out_name}", er.start_transformation
+                        ).to_s()
+                    },
+                )
+            )
     for sr, _bb, er in zip(
         start_manhattan_routers, bundle_points, end_manhattan_routers, strict=False
     ):
@@ -2446,8 +2733,8 @@ def clean_points(
     del_points: list[int] = []
 
     for i, p_n in enumerate(points[2:], 2):
-        v2 = p_n - p  # type: ignore[operator]
-        v1 = p - p_p  # type: ignore[operator]
+        v2 = p_n - p
+        v1 = p - p_p  # ty:ignore[unsupported-operator]
 
         if (
             (np.sign(v1.x) == np.sign(v2.x)) and (np.sign(v1.y) == np.sign(v2.y))
@@ -2455,7 +2742,7 @@ def clean_points(
             del_points.append(i - 1)
         else:
             p_p = p
-            p = p_n  # type: ignore[assignment]
+            p = p_n
     for i in reversed(del_points):
         del points[i]
 

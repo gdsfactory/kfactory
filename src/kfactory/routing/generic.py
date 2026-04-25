@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Literal, Protocol, cast
+from typing import TYPE_CHECKING, Any, Literal, Protocol, TypeGuard, cast
 
 import klayout.db as kdb
 from klayout import rdb
@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from ..kcell import KCell
+    from .utils import RouteDebug
 
 __all__ = [
     "ManhattanRoute",
@@ -321,6 +322,7 @@ def route_bundle(
     ends: dbu | list[dbu] | list[Step] | list[list[Step]] | None = None,
     start_angles: int | list[int] | None = None,
     end_angles: int | list[int] | None = None,
+    route_debug: RouteDebug | None = None,
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
 
@@ -428,6 +430,8 @@ def route_bundle(
         placer_kwargs = {}
     if routing_kwargs is None:
         routing_kwargs = {"bbox_routing": "minimal"}
+    if route_debug is not None:
+        routing_kwargs["route_debug"] = route_debug
     if not start_ports:
         return []
     if not (len(start_ports) == len(end_ports)):
@@ -436,18 +440,26 @@ def route_bundle(
             " the same size as the end ports and be the same length."
         )
     length = len(start_ports)
-    if starts == []:
-        starts = [starts] * length  # type: ignore[assignment]
+    if starts is None or starts == []:
+        starts = [[]] * length
     elif isinstance(starts, int):
-        starts = [[Straight(dist=starts)] for _ in range(length)]  # type: ignore[assignment]
-    elif isinstance(starts[0], Step):
-        starts = [starts for _ in range(len(start_ports))]  # type: ignore[assignment]
-    if ends == []:
-        ends = [ends] * length  # type: ignore[assignment]
+        starts = [[Straight(dist=starts)] for _ in range(length)]
+    elif isinstance(starts, list):
+        if _is_steps_list(starts):
+            starts = [starts for _ in range(len(start_ports))]
+        else:
+            starts = cast("list[int]", starts)
+            starts = [[Straight(dist=s) for s in starts]] * len(start_ports)  # ty:ignore[invalid-assignment]
+    if ends is None or ends == []:
+        ends = [[]] * length
     elif isinstance(ends, int):
-        ends = [[Straight(dist=ends)] for _ in range(length)]  # type: ignore[assignment]
-    elif isinstance(ends[0], Step):
-        ends = [ends for _ in range(len(start_ports))]  # type: ignore[assignment]
+        ends = [[Straight(dist=ends)] for _ in range(length)]
+    elif isinstance(ends, list):
+        if _is_steps_list(ends):
+            ends = [ends for _ in range(len(end_ports))]
+        else:
+            ends = cast("list[int]", ends)
+            ends = [[Straight(dist=e) for e in ends]] * len(end_ports)  # ty:ignore[invalid-assignment]
 
     if start_angles is not None:
         if isinstance(start_angles, int):
@@ -575,3 +587,9 @@ def route_bundle(
         routes=routes,
     )
     return routes
+
+
+def _is_steps_list(
+    step_list: list[Step] | list[int] | list[list[Step]],
+) -> TypeGuard[list[Step]]:
+    return isinstance(step_list[0], Step)

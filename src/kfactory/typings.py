@@ -1,19 +1,18 @@
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from typing import (
     TYPE_CHECKING,
     Annotated,
     Any,
     NotRequired,
     ParamSpec,
-    TypeAlias,
     TypedDict,
     TypeVar,
 )
 
 import klayout.db as kdb
 from klayout import lay
-from typing_extensions import TypeAliasType
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -39,12 +38,8 @@ KC_co = TypeVar("KC_co", bound="ProtoTKCell[Any]", covariant=True)
 K_contra = TypeVar("K_contra", bound="ProtoKCell[Any, Any]", contravariant=True)
 KC_contra = TypeVar("KC_contra", bound="ProtoTKCell[Any]", contravariant=True)
 VK_contra = TypeVar("VK_contra", bound="VKCell", contravariant=True)
-TUnit = TypeVar("TUnit", int, float)
-TUnit_co = TypeVar("TUnit_co", bound=int | float, covariant=True)
-TUnit_contra = TypeVar("TUnit_contra", bound=int | float, contravariant=True)
-TPort = TypeVar("TPort", bound="ProtoPort[Any]")
-TPort_co = TypeVar("TPort_co", bound="ProtoPort[Any]", covariant=True)
-TPort_contra = TypeVar("TPort_contra", bound="ProtoPort[Any]", contravariant=True)
+type TUnit = int | float
+type TPort = ProtoPort[int | float]
 TPin = TypeVar("TPin", bound="ProtoPin[Any]")
 TInstance_co = TypeVar("TInstance_co", bound="ProtoInstance[Any]", covariant=True)
 TTInstance_co = TypeVar("TTInstance_co", bound="ProtoTInstance[Any]", covariant=True)
@@ -63,9 +58,14 @@ F_co = TypeVar(
 P = ParamSpec("P")
 
 
-JSONSerializable = TypeAliasType(
-    "JSONSerializable",
-    "int | float| bool | str | list[JSONSerializable] | tuple[JSONSerializable, ...] | dict[str, JSONSerializable] | None",  # noqa: E501
+type JSONSerializable = (
+    int
+    | float
+    | bool
+    | str
+    | Sequence["JSONSerializable"]
+    | Mapping[str, "JSONSerializable"]
+    | None
 )
 
 
@@ -81,7 +81,7 @@ AnyTrans = TypeVar(
     "AnyTrans", bound=kdb.Trans | kdb.DTrans | kdb.ICplxTrans | kdb.DCplxTrans
 )
 
-SerializableShape: TypeAlias = (
+type SerializableShape = (
     kdb.Box
     | kdb.DBox
     | kdb.Edge
@@ -115,7 +115,7 @@ SerializableShape: TypeAlias = (
     | kdb.DVector
     | kdb.LayerInfo
 )
-IShapeLike: TypeAlias = (
+type IShapeLike = (
     kdb.Polygon
     | kdb.Edge
     | kdb.Path
@@ -124,20 +124,19 @@ IShapeLike: TypeAlias = (
     | kdb.SimplePolygon
     | kdb.Region
 )
-DShapeLike: TypeAlias = (
+type DShapeLike = (
     kdb.DPolygon | kdb.DEdge | kdb.DPath | kdb.DBox | kdb.DText | kdb.DSimplePolygon
 )
-ShapeLike: TypeAlias = IShapeLike | DShapeLike | kdb.Shape
+type ShapeLike = IShapeLike | DShapeLike | kdb.Shape
 
-MetaData: TypeAlias = (
+type MetaData = (
     int
     | float
     | bool
     | str
     | SerializableShape
-    | list["MetaData"]
-    | tuple["MetaData", ...]
-    | dict[str, "MetaData"]
+    | Sequence["MetaData"]
+    | Mapping[str, "MetaData"]
     | None
 )
 
@@ -153,14 +152,14 @@ rad = Annotated[float, "rad"]
 layer = Annotated["int | LayerEnum", "layer"]
 """Integer or enum index of a Layer."""
 layer_info = Annotated[kdb.LayerInfo, "layer info"]
-Unit: TypeAlias = int | float
+type Unit = int | float
 """Database unit or micrometer."""
-Angle: TypeAlias = int
+type Angle = int
 """Integer in the range of `[0,1,2,3]` which are increments in 90°."""
-KCellSpec: TypeAlias = (
+type KCellSpec = (
     "int | str | KCellSpecDict | ProtoTKCell[Any] | Callable[..., ProtoTKCell[Any]]"
 )
-AnyCellSpec: TypeAlias = "int | str | KCellSpecDict | ProtoTKCell[Any] | VKCell | Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]"  # noqa: E501
+type AnyCellSpec = "int | str | KCellSpecDict | ProtoTKCell[Any] | VKCell | Callable[..., ProtoTKCell[Any]] | Callable[..., VKCell]"  # noqa: E501
 
 
 class CellKwargs(TypedDict, total=False):
@@ -184,3 +183,28 @@ class CellKwargs(TypedDict, total=False):
     lvs_equivalent_ports: list[list[str]]
     ports: PortsDefinition
     schematic_function: Callable[..., TSchematic[Any]]
+
+
+class MarkerConfig(TypedDict, total=False):
+    """Configure marker to send through the show function.
+
+    Attrs:
+        color: 0xffffff type of color as int [default: None (let klayout decide)]
+        dismissable: bool whether dismissable [default: True]
+        dither_pattern: dither pattern to use [default: None (let klayout decide)]
+        frame_color: 0xffffff type of color as int [default: None (let klayout decide)]
+        halo: halo value [default: -1 (klayout default is applied)]
+        frame_color: 0xffffff type of color as int [default: None (let klayout decide)]
+        line_style: line style to show [default: None (let klayout decide)]
+        line_style: line width to show [default: 1]
+        vertex_size: size of vertices [default: 1]
+    """
+
+    color: int | None
+    dismissable: bool
+    dither_pattern: int | None
+    halo: int
+    frame_color: int | None
+    line_style: int | None
+    line_width: int
+    vertex_size: int

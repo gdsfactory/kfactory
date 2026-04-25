@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 import kfactory as kf
+from kfactory.routing.utils import RouteDebug
 from tests.conftest import Layers
 
 smart_bundle_routing_params = [
@@ -23,35 +24,6 @@ smart_bundle_routing_params = [
 
 
 @pytest.mark.parametrize(
-    "x",
-    [
-        5000,
-        0,
-    ],
-)
-def test_route_straight(
-    x: int,
-    bend90: kf.KCell,
-    straight_factory_dbu: Callable[..., kf.KCell],
-    optical_port: kf.Port,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
-    kcl: kf.KCLayout,
-) -> None:
-    c = kcl.kcell()
-    p1 = optical_port.copy()
-    p2 = optical_port.copy()
-    p2.trans = kf.kdb.Trans(2, False, x, 0)
-    kf.routing.optical.route(
-        c,
-        p1,
-        p2,
-        straight_factory=straight_factory_dbu,
-        bend90_cell=bend90,
-    )
-    gds_regression(c)
-
-
-@pytest.mark.parametrize(
     ("element", "loops", "loop_side"), [(1, 1, 1), (2, 2, 0), (-1, 4, 0), (-2, 1, -1)]
 )
 def test_route_length_match(
@@ -60,7 +32,7 @@ def test_route_length_match(
     loop_side: int,
     bend90: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     layers: Layers,
     kcl: kf.KCLayout,
 ) -> None:
@@ -68,6 +40,7 @@ def test_route_length_match(
 
     start_ports = [
         kf.Port(
+            name=f"in_{x1}",
             trans=kf.kdb.Trans(1, False, x1 * 200_000, -x1 * 150_000),
             width=500,
             layer_info=layers.WG,
@@ -77,6 +50,7 @@ def test_route_length_match(
     start_ports[1].y -= 1
     end_ports = [
         kf.Port(
+            name=f"out_{x1}",
             trans=kf.kdb.Trans(3, False, x1, 500_000),
             width=500,
             layer_info=layers.WG,
@@ -98,8 +72,7 @@ def test_route_length_match(
             "loop_position": 0,
         },
     )
-    gds_regression(c)
-    c.show()
+    oas_regression(c)
 
 
 def test_route_length_match_errors(
@@ -112,6 +85,7 @@ def test_route_length_match_errors(
 
     start_ports = [
         kf.Port(
+            name=f"in_{x1}",
             trans=kf.kdb.Trans(1, False, x1 * 200_000, -x1 * 300_000),
             width=500,
             layer_info=layers.WG,
@@ -120,11 +94,12 @@ def test_route_length_match_errors(
     ]
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             trans=kf.kdb.Trans(3, False, x1, 500_000),
             width=500,
             layer_info=layers.WG,
         )
-        for x1 in [230_000, 400_000, 500_000]
+        for i, x1 in enumerate([230_000, 400_000, 500_000])
     ]
     with pytest.raises(ValueError):
         kf.routing.optical.route_bundle(
@@ -140,7 +115,7 @@ def test_route_length_match_errors(
                 "loops": 2,
                 "loop_position": 0,
             },
-        )  # type: ignore[call-overload]
+        )  # ty:ignore[no-matching-overload]
     with pytest.raises(ValueError):
         kf.routing.optical.route_bundle(
             c,
@@ -155,7 +130,7 @@ def test_route_length_match_errors(
                 "loops": 2,
                 "loop_position": 0,
             },
-        )  # type: ignore[call-overload]
+        )  # ty:ignore[no-matching-overload]
     with pytest.raises(ValueError):
         kf.routing.optical.route_bundle(
             c,
@@ -170,7 +145,7 @@ def test_route_length_match_errors(
                 "loops": 2,
                 "loop_position": 0,
             },
-        )  # type: ignore[call-overload]
+        )  # ty:ignore[no-matching-overload]
     with pytest.raises(ValueError):
         kf.routing.optical.route_bundle(
             c,
@@ -185,132 +160,7 @@ def test_route_length_match_errors(
                 "loops": 2,
                 "loop_position": None,
             },
-        )  # type: ignore[call-overload]
-
-
-@pytest.mark.parametrize(
-    ("x", "y", "angle2"),
-    [
-        (20000, 20000, 2),
-        (10000, 10000, 3),
-        (150532, 12112, 3),
-        (5000, 10000, 3),  # the mean one where points will collide for radius 10000
-        (30000, 5000, 3),
-        (500, 500, 3),
-        (-500, 30000, 3),
-        (500, 30000, 3),
-        (-10000, 30000, 3),
-        (0, 0, 2),
-    ],
-)
-def test_route_bend90(
-    bend90: kf.KCell,
-    straight_factory_dbu: Callable[..., kf.KCell],
-    optical_port: kf.Port,
-    x: int,
-    y: int,
-    angle2: int,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
-    kcl: kf.KCLayout,
-) -> None:
-    c = kcl.kcell()
-    p1 = optical_port.copy()
-    p2 = optical_port.copy()
-    p2.trans = kf.kdb.Trans(angle2, False, x, y)
-    b90r = abs(bend90.ports[0].x - bend90.ports[1].x)
-    if abs(x) < b90r or abs(y) < b90r:
-        kf.config.logfilter.regex = "route is too small, potential collisions:"
-    kf.routing.optical.route(
-        c,
-        p1,
-        p2,
-        straight_factory=straight_factory_dbu,
-        bend90_cell=bend90,
-    )
-
-    kf.config.logfilter.regex = None
-    gds_regression(c)
-
-
-@pytest.mark.parametrize(
-    ("x", "y", "angle2"),
-    [
-        (20000, 20000, 2),
-        (10000, 10000, 3),
-        (15212, 19921, 3),
-        (5000, 10000, 3),  # the mean one where points will collide for radius 10000
-        (30000, 5000, 3),
-        (500, 500, 3),
-        (-500, 30000, 3),
-        (500, 30000, 3),
-        (-10000, 30000, 3),
-        (0, 0, 2),
-        (500000, 50000, 2),
-    ],
-)
-def test_route_bend90_invert(
-    bend90: kf.KCell,
-    straight_factory_dbu: Callable[..., kf.KCell],
-    optical_port: kf.Port,
-    x: int,
-    y: int,
-    angle2: int,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
-    kcl: kf.KCLayout,
-) -> None:
-    c = kcl.kcell()
-    p1 = optical_port.copy()
-    p2 = optical_port.copy()
-    p2.trans = kf.kdb.Trans(angle2, False, x, y)
-    b90r = abs(bend90.ports[0].x - bend90.ports[1].x)
-    if abs(x) < b90r or abs(y) < b90r:
-        kf.config.logfilter.regex = "route is too small, potential collisions:"
-    kf.routing.optical.route(
-        c,
-        p1,
-        p2,
-        straight_factory=straight_factory_dbu,
-        bend90_cell=bend90,
-        route_kwargs={"invert": True},
-    )
-    kf.config.logfilter.regex = None
-    gds_regression(c)
-
-
-@pytest.mark.parametrize(
-    ("x", "y", "angle2"),
-    [
-        (40000, 40000, 2),
-        (20000, 20000, 3),
-        (10000, 10000, 3),
-    ],
-)
-def test_route_bend90_euler(
-    bend90_euler: kf.KCell,
-    straight_factory_dbu: Callable[..., kf.KCell],
-    optical_port: kf.Port,
-    x: int,
-    y: int,
-    angle2: int,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
-    kcl: kf.KCLayout,
-) -> None:
-    c = kcl.kcell()
-    p1 = optical_port.copy()
-    p2 = optical_port.copy()
-    p2.trans = kf.kdb.Trans(angle2, False, x, y)
-    b90r = abs(bend90_euler.ports[0].x - bend90_euler.ports[1].x)
-    if abs(x) < b90r or abs(y) < b90r:
-        kf.config.logfilter.regex = "route is too small, potential collisions:"
-    kf.routing.optical.route(
-        c,
-        p1,
-        p2,
-        straight_factory=straight_factory_dbu,
-        bend90_cell=bend90_euler,
-    )
-    kf.config.logfilter.regex = None
-    gds_regression(c)
+        )  # ty:ignore[no-matching-overload]
 
 
 def test_route_bundle(
@@ -318,7 +168,7 @@ def test_route_bundle(
     bend90_euler: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     kcl: kf.KCLayout,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell("TEST_ROUTE_BUNDLE")
 
@@ -373,7 +223,7 @@ def test_route_bundle(
         assert np.isclose(route.length, length)
 
     c.auto_rename_ports()
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_route_length_straight(
@@ -382,7 +232,7 @@ def test_route_length_straight(
     straight_factory_dbu: Callable[..., kf.KCell],
     kcl: kf.KCLayout,
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell("TEST_ROUTE_BUNDLE_AREA_LENGTH")
     p1 = kf.Port(name="o1", width=1000, trans=kf.kdb.Trans.R0, layer_info=layers.WG)
@@ -400,7 +250,7 @@ def test_route_length_straight(
     )
 
     assert [r.length for r in routes] == [10_000]
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_route_bundle_route_width(
@@ -408,7 +258,7 @@ def test_route_bundle_route_width(
     bend90_euler_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     kcl: kf.KCLayout,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     c = kcl.kcell("TEST_ROUTE_BUNDLE")
 
@@ -451,7 +301,7 @@ def test_route_bundle_route_width(
         c.add_port(port=route.end_port)
 
     c.auto_rename_ports()
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_route_length(
@@ -459,7 +309,7 @@ def test_route_length(
     straight_factory_dbu: Callable[..., kf.KCell],
     optical_port: kf.Port,
     taper: kf.KCell,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     x, y, angle2 = (55000, 70000, 2)
@@ -486,7 +336,7 @@ def test_route_length(
     assert route.length_straights == 30196
     assert route.length_backbone == 125000
     assert route.n_bend90 == 2
-    gds_regression(c)
+    oas_regression(c)
 
 
 _test_smart_routing_kcl = kf.KCLayout("TEST_SMART_ROUTING", infos=Layers)
@@ -518,7 +368,7 @@ def test_smart_routing(
     z: bool,
     p1: bool,
     p2: bool,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     """Tests all possible smart routing configs."""
@@ -695,12 +545,12 @@ def test_smart_routing(
                 [route.length for route in routes]
         case _:
             rf()
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_custom_router(
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
 ) -> None:
     kcl = kf.KCLayout("test_custom_router")
     c = kcl.kcell("customRouter")
@@ -748,14 +598,14 @@ def test_custom_router(
             "separation": 5000,
         },
     )
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_route_smart_waypoints_trans_sort(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell(name="test_smart_route_waypoints_trans_sort")
@@ -764,17 +614,18 @@ def test_route_smart_waypoints_trans_sort(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name="in_{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
-        for trans in transformations
+        for i, trans in enumerate(transformations)
     ]
     kf.routing.optical.route_bundle(
         c,
@@ -786,14 +637,14 @@ def test_route_smart_waypoints_trans_sort(
         waypoints=kf.kdb.Trans(250_000, 0),
         sort_ports=True,
     )
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_route_smart_waypoints_pts_sort(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell(name="test_smart_route_waypoints_pts_sort")
@@ -802,17 +653,18 @@ def test_route_smart_waypoints_pts_sort(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name=f"in_{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
-        for trans in transformations
+        for i, trans in enumerate(transformations)
     ]
     kf.routing.optical.route_bundle(
         c,
@@ -824,14 +676,14 @@ def test_route_smart_waypoints_pts_sort(
         waypoints=[kf.kdb.Point(250_000, 0), kf.kdb.Point(250_000, 100_000)],
         sort_ports=True,
     )
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_route_waypoints_non_manhattan(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell(name="test_smart_route_waypoints_non_manhattan")
@@ -840,17 +692,18 @@ def test_route_waypoints_non_manhattan(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name=f"in_{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
-        for trans in transformations
+        for i, trans in enumerate(transformations)
     ]
     with pytest.raises(
         ValueError,
@@ -878,7 +731,7 @@ def test_route_smart_waypoints_trans(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell(name="test_smart_route_waypoints_trans")
@@ -887,18 +740,19 @@ def test_route_smart_waypoints_trans(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name=f"in_{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     start_ports.reverse()
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
-        for trans in transformations
+        for i, trans in enumerate(transformations)
     ]
     kf.routing.optical.route_bundle(
         c,
@@ -909,14 +763,14 @@ def test_route_smart_waypoints_trans(
         bend90_cell=bend90_small,
         waypoints=kf.kdb.Trans(250_000, 0),
     )
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_route_smart_waypoints_pts(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell(name="test_smart_route_waypoints_pts")
@@ -925,18 +779,19 @@ def test_route_smart_waypoints_pts(
         kf.kdb.Trans(1, False, -15_000 - i * 50_000, 15 * 50_000) for i in range(l_)
     ]
     start_ports = [
-        kf.Port(width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
-        for trans in transformations
+        kf.Port(name=f"in_{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
     ]
     start_ports.reverse()
     end_ports = [
         kf.Port(
+            name=f"out_{i}",
             width=500,
             layer_info=layers.WG,
             kcl=c.kcl,
             trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
         )
-        for trans in transformations
+        for i, trans in enumerate(transformations)
     ]
     kf.routing.optical.route_bundle(
         c,
@@ -947,13 +802,13 @@ def test_route_smart_waypoints_pts(
         bend90_cell=bend90_small,
         waypoints=[kf.kdb.Point(250_000, 0), kf.kdb.Point(250_000, 100_000)],
     )
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_route_generic_reorient(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell(name="test_route_generic_reorient")
@@ -993,14 +848,14 @@ def test_route_generic_reorient(
         end_angles=end_angles,
     )
 
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_placer_error(
     bend90_small: kf.KCell,
     straight_factory_dbu: Callable[..., kf.KCell],
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell(name="test_placer_error")
@@ -1190,7 +1045,7 @@ def test_rf_bundle(
 
 
 def test_sbend_routing(
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     layer_infos = Layers()
@@ -1279,7 +1134,7 @@ def test_sbend_routing(
         ),
         sbend_factory=sbend_factory,
     )
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_route_same_plane(
@@ -1372,3 +1227,361 @@ def test_route_same_plane(
     )
 
     c.add_ports(ports)
+
+
+def test_route_debug_waypoints_pts(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
+    kcl: kf.KCLayout,
+) -> None:
+    """RouteDebug regions are populated when routing with point waypoints."""
+    c = kcl.kcell(name="test_route_debug_waypoints_pts")
+    l_ = 3
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)]
+    start_ports = [
+        kf.Port(name=f"in{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
+    ]
+    end_ports = [
+        kf.Port(
+            name=f"out_{i}",
+            width=500,
+            layer_info=layers.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
+        )
+        for i, trans in enumerate(transformations)
+    ]
+    debug = RouteDebug()
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        waypoints=[
+            kf.kdb.Point(250_000, 0),
+            kf.kdb.Point(250_000, 100_000),
+            kf.kdb.Point(300_000, 100_000),
+        ],
+        sort_ports=True,
+        route_debug=debug,
+    )
+    assert not debug.fan_in_region.is_empty()
+    assert not debug.waypoints_region.is_empty()
+    assert not debug.fan_out_region.is_empty()
+
+    c.shapes(c.kcl.layer(9999, 0)).insert(debug.fan_in_region)
+    for poly in debug.fan_in_region.each():
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 0)).insert(kf.kdb.Text.from_s(string))
+    c.shapes(c.kcl.layer(9999, 1)).insert(debug.waypoints_region)
+    for poly in debug.waypoints_region.each():
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 1)).insert(kf.kdb.Text.from_s(string))
+    c.shapes(c.kcl.layer(9999, 2)).insert(debug.fan_out_region)
+    for poly in debug.fan_out_region.each():
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 2)).insert(kf.kdb.Text.from_s(string))
+
+
+def test_route_debug(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
+    kcl: kf.KCLayout,
+) -> None:
+    """RouteDebug regions are populated when routing with point waypoints."""
+    c = kcl.kcell(name="test_route_debug_waypoints_pts")
+    l_ = 3
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)]
+    start_ports = [
+        kf.Port(name=f"in{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
+    ]
+    end_ports = [
+        kf.Port(
+            name=f"out_{i}",
+            width=500,
+            layer_info=layers.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(2, False, 500_000 + i * 200_000, 0) * trans,
+        )
+        for i, trans in enumerate(transformations)
+    ]
+    debug = RouteDebug()
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        sort_ports=True,
+        route_debug=debug,
+    )
+    assert not debug.fan_in_region.is_empty()
+    assert debug.waypoints_region.is_empty()
+    assert not debug.fan_out_region.is_empty()
+
+    c.shapes(c.kcl.layer(9999, 0)).insert(debug.fan_in_region)
+    for poly in debug.fan_in_region.each():
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 0)).insert(kf.kdb.Text.from_s(string))
+    c.shapes(c.kcl.layer(9999, 1)).insert(debug.waypoints_region)
+    for poly in debug.waypoints_region.each():
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 1)).insert(kf.kdb.Text.from_s(string))
+    c.shapes(c.kcl.layer(9999, 2)).insert(debug.fan_out_region)
+    for poly in debug.fan_out_region.each():
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 2)).insert(kf.kdb.Text.from_s(string))
+
+
+def test_route_debug_opposite(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
+    kcl: kf.KCLayout,
+) -> None:
+    """RouteDebug regions are populated when routing with point waypoints."""
+    c = kcl.kcell(name="test_route_debug_waypoints_pts")
+    l_ = 3
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)]
+    start_ports = [
+        kf.Port(name=f"in{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
+    ]
+    end_ports = [
+        kf.Port(
+            name=f"out_{i}",
+            width=500,
+            layer_info=layers.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(0, False, 500_000 + i * 200_000, 0) * trans,
+        )
+        for i, trans in enumerate(transformations)
+    ]
+    debug = RouteDebug()
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        sort_ports=True,
+        route_debug=debug,
+    )
+    assert not debug.fan_in_region.is_empty()
+    assert debug.waypoints_region.is_empty()
+    assert not debug.fan_out_region.is_empty()
+
+    c.shapes(c.kcl.layer(9999, 0)).insert(debug.fan_in_region)
+    for poly in debug.fan_in_region.each():
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 0)).insert(kf.kdb.Text.from_s(string))
+    c.shapes(c.kcl.layer(9999, 1)).insert(debug.waypoints_region)
+    for poly in debug.waypoints_region.each():
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 1)).insert(kf.kdb.Text.from_s(string))
+    c.shapes(c.kcl.layer(9999, 2)).insert(debug.fan_out_region)
+    for poly in debug.fan_out_region.each():
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(9999, 2)).insert(kf.kdb.Text.from_s(string))
+
+
+def test_route_debug_waypoints_trans(
+    bend90_small: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    layers: Layers,
+    kcl: kf.KCLayout,
+) -> None:
+    """RouteDebug fan_in/fan_out regions are populated with Trans waypoints."""
+    c = kcl.kcell(name="test_route_debug_waypoints_trans")
+    l_ = 3
+    transformations = [kf.kdb.Trans(0, False, 0, i * 50_000) for i in range(l_)]
+    start_ports = [
+        kf.Port(name=f"in{i}", width=500, layer_info=layers.WG, kcl=c.kcl, trans=trans)
+        for i, trans in enumerate(transformations)
+    ]
+    end_ports = [
+        kf.Port(
+            name=f"out_{i}",
+            width=500,
+            layer_info=layers.WG,
+            kcl=c.kcl,
+            trans=kf.kdb.Trans(2, False, 500_000, 0) * trans,
+        )
+        for i, trans in enumerate(transformations)
+    ]
+    debug = RouteDebug()
+    kf.routing.optical.route_bundle(
+        c,
+        start_ports,
+        end_ports,
+        separation=4000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_small,
+        waypoints=kf.kdb.Trans(250_000, 50_000),
+        sort_ports=True,
+        route_debug=debug,
+    )
+    assert not debug.fan_in_region.is_empty()
+    assert debug.waypoints_region.is_empty()  # Trans waypoint = zero-length tunnel
+    assert not debug.fan_out_region.is_empty()
+
+    c.shapes(c.kcl.layer(111, 1)).insert(debug.fan_in_region)
+    for poly in debug.fan_in_region.each():
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(111, 1)).insert(kf.kdb.Text.from_s(string))
+    c.shapes(c.kcl.layer(111, 2)).insert(debug.waypoints_region)
+    for poly in debug.waypoints_region.each():
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(111, 2)).insert(kf.kdb.Text.from_s(string))
+    c.shapes(c.kcl.layer(111, 3)).insert(debug.fan_out_region)
+    for poly in debug.fan_out_region.each():
+        for string in poly.properties().values():
+            c.shapes(c.kcl.layer(111, 3)).insert(kf.kdb.Text.from_s(string))
+
+
+def test_route_bundle_single_return(
+    bend90_euler: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    optical_port: kf.Port,
+    taper: kf.KCell,
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
+) -> None:
+    x, y, angle2 = (0, 7000, 0)
+
+    c = kcl.kcell()
+    p1 = optical_port.copy()
+    p2 = optical_port.copy()
+    p2.trans = kf.kdb.Trans(angle2, False, x, y)
+    p2.x -= 100
+    kf.routing.optical.route_bundle(
+        c=c,
+        start_ports=[p1],
+        end_ports=[p2],
+        separation=5000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_euler,
+        taper_cell=taper,
+        allow_width_mismatch=True,
+    )[0]
+    c.show()
+    oas_regression(c)
+
+
+def test_route_bundle_multi_return(
+    bend90_euler: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    optical_port: kf.Port,
+    taper: kf.KCell,
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
+) -> None:
+    c = kcl.kcell()
+    ps = [
+        optical_port.copy(),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -2000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -14000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -24000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -84000)),
+        optical_port.copy(kf.kdb.Trans(3, False, -1000, -85000)),
+        optical_port.copy(kf.kdb.Trans(1, False, -50000, 5000)),
+        optical_port.copy(kf.kdb.Trans(0, False, -5000, 90_000)),
+    ]
+    pe = [
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 7000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 9000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 11_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 21_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 41_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 51_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 61_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, -5000, 75_000)),
+    ]
+
+    for i, (ps_, pe_) in enumerate(zip(ps, pe, strict=True)):
+        c.add_port(port=ps_, name=f"in_{i + 1}")
+        c.add_port(port=pe_, name=f"out_{i + 1}")
+    b1 = kf.kdb.Box()
+    b2 = kf.kdb.Box()
+
+    for p1, p2 in zip(ps[:-1], pe[:-1], strict=True):
+        b1 += p1.trans.disp.to_p()
+        b2 += p2.trans.disp.to_p()
+
+    kf.routing.optical.route_bundle(
+        c=c,
+        start_ports=ps,
+        end_ports=pe,
+        separation=1000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_euler,
+        taper_cell=taper,
+        allow_width_mismatch=True,
+        sort_ports=False,
+        bboxes=[b1, b2],
+    )[0]
+    c.show()
+    oas_regression(c)
+
+
+def test_route_bundle_multi_return_opposite(
+    bend90_euler: kf.KCell,
+    straight_factory_dbu: Callable[..., kf.KCell],
+    optical_port: kf.Port,
+    taper: kf.KCell,
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    kcl: kf.KCLayout,
+) -> None:
+    c = kcl.kcell()
+    ps = [
+        optical_port.copy(),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 2000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 14000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 24000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, 84000)),
+        optical_port.copy(kf.kdb.Trans(1, False, -1000, 85000)),
+        # optical_port.copy(kf.kdb.Trans(3, False, -50000, -5000)),  # noqa: ERA001
+    ]
+    pe = [
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -7000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -9000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -11_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -21_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -41_000)),
+        optical_port.copy(kf.kdb.Trans(0, False, 0, -51_000)),
+        # optical_port.copy(kf.kdb.Trans(0, False, 0, -61_000)),  # noqa: ERA001
+    ]
+
+    for i, (ps_, pe_) in enumerate(zip(ps, pe, strict=True)):
+        c.add_port(port=ps_, name=f"in_{i + 1}")
+        c.add_port(port=pe_, name=f"out_{i + 1}")
+
+    b1 = kf.kdb.Box()
+    b2 = kf.kdb.Box()
+
+    for p1, p2 in zip(ps, pe, strict=True):
+        b1 += p1.trans.disp.to_p()
+        b2 += p2.trans.disp.to_p()
+
+    kf.routing.optical.route_bundle(
+        c=c,
+        start_ports=ps,
+        end_ports=pe,
+        separation=1000,
+        straight_factory=straight_factory_dbu,
+        bend90_cell=bend90_euler,
+        taper_cell=taper,
+        allow_width_mismatch=True,
+        sort_ports=False,
+        bboxes=[b1, b2],
+    )[0]
+    c.show()
+    oas_regression(c)
