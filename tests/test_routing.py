@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from functools import partial
 from typing import Any
 
@@ -65,102 +65,30 @@ def test_route_length_match(
         straight_factory=straight_factory_dbu,
         bend90_cell=bend90,
         separation=10_000,
-        path_length_matching_config={
-            "element": element,
-            "loop_side": loop_side,
-            "loops": loops,
-            "loop_position": 0,
-        },
+        constraints=[
+            kf.PathLengthMatch(
+                route_names=["path_length_matching"],
+                element=element,
+                loop_side=loop_side,
+                loops=loops,
+                loop_position=0,
+            )
+        ],
+        route_name="path_length_matching",
     )
     oas_regression(c)
 
 
-def test_route_length_match_errors(
-    bend90: kf.KCell,
-    straight_factory_dbu: Callable[..., kf.KCell],
-    layers: Layers,
-    kcl: kf.KCLayout,
-) -> None:
-    c = kcl.kcell("route_length_match_errors")
+def test_route_length_match_errors() -> None:
+    # element, loop_side, loop_position must be int — Pydantic rejects non-int values
+    from pydantic import ValidationError
 
-    start_ports = [
-        kf.Port(
-            name=f"in_{x1}",
-            trans=kf.kdb.Trans(1, False, x1 * 200_000, -x1 * 300_000),
-            width=500,
-            layer_info=layers.WG,
-        )
-        for x1 in range(3)
-    ]
-    end_ports = [
-        kf.Port(
-            name=f"out_{i}",
-            trans=kf.kdb.Trans(3, False, x1, 500_000),
-            width=500,
-            layer_info=layers.WG,
-        )
-        for i, x1 in enumerate([230_000, 400_000, 500_000])
-    ]
-    with pytest.raises(ValueError):
-        kf.routing.optical.route_bundle(
-            c,
-            start_ports,
-            end_ports,
-            straight_factory=straight_factory_dbu,
-            bend90_cell=bend90,
-            separation=10_000,
-            path_length_matching_config={
-                "element": None,
-                "loop_side": 1,
-                "loops": 2,
-                "loop_position": 0,
-            },
-        )  # ty:ignore[no-matching-overload]
-    with pytest.raises(ValueError):
-        kf.routing.optical.route_bundle(
-            c,
-            start_ports,
-            end_ports,
-            straight_factory=straight_factory_dbu,
-            bend90_cell=bend90,
-            separation=10_000,
-            path_length_matching_config={
-                "element": None,
-                "loop_side": 1,
-                "loops": 2,
-                "loop_position": 0,
-            },
-        )  # ty:ignore[no-matching-overload]
-    with pytest.raises(ValueError):
-        kf.routing.optical.route_bundle(
-            c,
-            start_ports,
-            end_ports,
-            straight_factory=straight_factory_dbu,
-            bend90_cell=bend90,
-            separation=10_000,
-            path_length_matching_config={
-                "element": 1,
-                "loop_side": None,
-                "loops": 2,
-                "loop_position": 0,
-            },
-        )  # ty:ignore[no-matching-overload]
-    with pytest.raises(ValueError):
-        kf.routing.optical.route_bundle(
-            c,
-            start_ports,
-            end_ports,
-            straight_factory=straight_factory_dbu,
-            bend90_cell=bend90,
-            separation=10_000,
-            path_length_matching_config={
-                "element": 1,
-                "loop_side": 1,
-                "loops": 2,
-                "loop_position": None,
-            },
-        )  # ty:ignore[no-matching-overload]
+    with pytest.raises(ValidationError):
+        kf.PathLengthMatch(route_names=[], element=None)  # ty:ignore[invalid-argument-type]
+    with pytest.raises(ValidationError):
+        kf.PathLengthMatch(route_names=[], loop_side=None)  # ty:ignore[invalid-argument-type]
+    with pytest.raises(ValidationError):
+        kf.PathLengthMatch(route_names=[], loop_position=None)  # ty:ignore[invalid-argument-type]
 
 
 def test_route_bundle(
@@ -579,6 +507,19 @@ def test_custom_router(
         for i in range(10)
     ]
 
+    class ManhattanLengthMatch(kf.schematic.Constraint):
+        def enforce(
+            self,
+            c: kf.KCell,
+            routers: Sequence[kf.routing.manhattan.ManhattanRouter],
+            route_name: str | None,
+        ) -> None:
+            kf.routing.manhattan.path_length_match_manhattan_route(
+                routers=routers,
+                bend90_radius=b90r,
+                separation=5000,
+            )
+
     kf.routing.generic.route_bundle(
         c=c,
         start_ports=[p.base for p in start_ports],
@@ -592,11 +533,7 @@ def test_custom_router(
         },
         placer_function=kf.routing.optical.place_manhattan,
         placer_kwargs={"bend90_cell": bend90, "straight_factory": sf},
-        router_post_process_function=kf.routing.manhattan.path_length_match_manhattan_route,
-        router_post_process_kwargs={
-            "bend90_radius": b90r,
-            "separation": 5000,
-        },
+        constraints=[kf.schematic.PathLengthMatch(route_names=["path_length_math"])],
     )
     oas_regression(c)
 

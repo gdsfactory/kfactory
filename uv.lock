@@ -995,6 +995,8 @@ ipy = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "pytest" },
+    { name = "pytest-regressions" },
     { name = "ty" },
 ]
 
@@ -1066,7 +1068,11 @@ requires-dist = [
 provides-extras = ["dev", "docs", "ci", "ipy"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "ty", specifier = ">=0.0.1a17" }]
+dev = [
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "pytest-regressions", specifier = ">=2.10.0" },
+    { name = "ty", specifier = ">=0.0.1a17" },
+]
 
 [[package]]
 name = "klayout"
