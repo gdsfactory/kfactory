@@ -1201,6 +1201,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         ]
         | None = None,
         place_unknown: bool = False,
+        ignore_errors: bool = False,
     ) -> KC:
         """Materialize the schematic into a `KCell`/`DKCell`/`Component`.
 
@@ -1350,7 +1351,9 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                 if (t1 != t2 * kdb.DCplxTrans.R180) and (t1 != t2 * kdb.DCplxTrans.M90):
                     connection_transformation_errors.append(conn)
 
-        if connection_transformation_errors or port_connection_transformation_errors:
+        if not ignore_errors and (
+            connection_transformation_errors or port_connection_transformation_errors
+        ):
             raise ValueError(
                 f"Not all connections in schema {self.name}"
                 " could be satisfied. Missing or wrong connections:\n"

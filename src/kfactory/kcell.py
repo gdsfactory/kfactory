@@ -2254,35 +2254,29 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                     assert pin is not None
                     assert net is not None
                     subc.connect_pin(pin, net)
-                else:
+                elif len(ports) >= 2:
                     # connect instance ports to each other
-                    name = "-".join(
-                        [
-                            (inst.name or str(i)) + "_" + (port.name or str(j))
-                            for i, j, inst, port, _ in ports
-                        ]
-                    )
-
-                    net = circ.create_net(name)
-                    assert len(ports) <= 2, (
-                        "Optical connection with more than two ports are not supported "
-                        f"{[_port[3] for _port in ports]}"
-                    )
-                    if len(ports) == 2:
-                        if allow_width_mismatch:
-                            port_check(
-                                ports[0][3],
-                                ports[1][3],
-                                PortCheck.layer
-                                + PortCheck.port_type
-                                + PortCheck.opposite,
+                    check = PortCheck.position + PortCheck.opposite + PortCheck.layer
+                    for n, (i, j, inst, port, subc) in enumerate(ports):
+                        net_ports = [(i, j, inst, port, subc)]
+                        for i_, j_, inst_, port_, subc_ in ports[n:]:
+                            if port.base.check_connection(port_.base) & check == check:
+                                net_ports.append((i_, j_, inst_, port_, subc_))
+                        if len(net_ports) >= 2:
+                            net_name = "-".join(
+                                [
+                                    (inst.name or str(i)) + "_" + (port.name or str(j))
+                                    for i, j, inst, port, _ in ports
+                                ]
                             )
-                        else:
-                            port_check(ports[0][3], ports[1][3], PortCheck.all_opposite)
-                        for _, j, _, port, subc in ports:
-                            subc.connect_pin(
-                                subc.circuit_ref().pin_by_name(port.name or str(j)), net
-                            )
+                            net = circ.create_net(net_name)
+                            for _, j_, _, port_, subc_ in net_ports:
+                                subc_.connect_pin(
+                                    subc_.circuit_ref().pin_by_name(
+                                        port_.name or str(j_)
+                                    ),
+                                    net,
+                                )
 
         del_subcs: list[kdb.SubCircuit] = []
         if ignore_unnamed:
@@ -4211,6 +4205,8 @@ def _get_netlist(
                         k: serialize_setting(v)
                         for k, v in inst.cell.settings.model_dump().items()
                     },
+                    na=inst.na,
+                    nb=inst.nb,
                 )
             else:
                 nl.create_inst(
@@ -4223,8 +4219,9 @@ def _get_netlist(
                         k: serialize_setting(v)
                         for k, v in inst.cell.settings.model_dump().items()
                     },
+                    na=inst.na,
+                    nb=inst.nb,
                 )
-
     for net in opt_circ.each_net():
         net_refs: list[PortRef | NetlistPort] = []
         for pinref in net.each_pin():
@@ -4310,7 +4307,7 @@ def _get_netlist(
                         else:
                             net_refs.append(
                                 PortArrayRef(
-                                    instance=subc.name,
+                                    instance=inst.name,
                                     port=pin.name(),
                                     ia=inst_el.ia(),
                                     ib=inst_el.ib(),

@@ -84,9 +84,12 @@ class PortCheck(IntFlag):
     """
 
     opposite = auto()
+    same = auto()
     width = auto()
     layer = auto()
+    cross_section = auto()
     port_type = auto()
+    position = auto()
     all_opposite = opposite + width + port_type + layer  # ty:ignore[unsupported-operator]
     all_overlap = width + port_type + layer  # ty:ignore[unsupported-operator]
 
@@ -97,23 +100,24 @@ def port_check(
     checks: PortCheck | int = PortCheck.all_opposite,
 ) -> None:
     """Check if two ports are equal."""
-    if checks & PortCheck.opposite:
-        assert (
-            p1.trans == p2.trans * kdb.Trans.R180
-            or p1.trans == p2.trans * kdb.Trans.M90
-        ), f"Transformations of ports not matching for opposite check{p1=} {p2=}"
-    if (checks & PortCheck.opposite) == 0:
-        assert p1.trans == p2.trans or p1.trans == p2.trans * kdb.Trans.M0, (
+    if checks & PortCheck.opposite and not (
+        p1.trans == p2.trans * kdb.Trans.R180 or p1.trans == p2.trans * kdb.Trans.M90
+    ):
+        raise ValueError(
+            f"Transformations of ports not matching for opposite check{p1=} {p2=}"
+        )
+    if (checks & PortCheck.opposite) == 0 and not (
+        p1.trans == p2.trans or p1.trans == p2.trans * kdb.Trans.M0
+    ):
+        raise ValueError(
             f"Transformations of ports not matching for overlapping check {p1=} {p2=}"
         )
-    if checks & PortCheck.width:
-        assert p1.iwidth == p2.iwidth, f"Width mismatch for {p1=} {p2=}"
-    if checks & PortCheck.layer:
-        assert p1.layer_info.is_equivalent(p2.layer_info), (
-            f"Layer mismatch for {p1=} {p2=}"
-        )
-    if checks & PortCheck.port_type:
-        assert p1.port_type == p2.port_type, f"Port type mismatch for {p1=} {p2=}"
+    if checks & PortCheck.width and not (p1.iwidth == p2.iwidth):
+        raise ValueError(f"Width mismatch for {p1=} {p2=}")
+    if checks & PortCheck.layer and not p1.layer_info.is_equivalent(p2.layer_info):
+        raise ValueError(f"Layer mismatch for {p1=} {p2=}")
+    if checks & PortCheck.port_type and not p1.port_type == p2.port_type:
+        raise ValueError(f"Port type mismatch for {p1=} {p2=}")
 
 
 class BasePortDict(TypedDict):
@@ -273,6 +277,38 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
                 and self.info == other.info
             )
         )
+
+    def check_connection(
+        self, other: BasePort, tolerance: float = 0.1, angle_tolerance: float = 0.01
+    ) -> int:
+        tol_um = self.kcl.to_um(tolerance)  # ty:ignore[no-matching-overload]
+        check: int = 0
+        if self.trans is not None and other.trans is not None:
+            if self.trans.disp == other.trans.disp:
+                check += PortCheck.position
+            orientation = (self.trans.angle - other.trans.angle) % 4
+            if orientation == 2:
+                check += PortCheck.opposite
+            elif orientation == 0:
+                check += PortCheck.same
+        else:
+            dt1 = self.get_dcplx_trans()
+            dt2 = other.get_dcplx_trans()
+            if (dt1.disp - dt2.disp).length() < tol_um:
+                check += PortCheck.position
+            if abs((dt1.angle + dt2.angle) % 360 - 180) < angle_tolerance:
+                check += PortCheck.opposite
+        if self.cross_section == other.cross_section:
+            check += PortCheck.cross_section
+            check += PortCheck.layer
+        elif self.cross_section.main_layer.is_equivalent(
+            other.cross_section.main_layer
+        ):
+            check += PortCheck.layer
+        if self.port_type == other.port_type:
+            check += PortCheck.port_type
+
+        return check
 
 
 class ProtoPort[T: (int, float)](ABC):
