@@ -10,11 +10,14 @@ ports and other inf from instances.
 
 from __future__ import annotations
 
+import functools
 import importlib
 import importlib.util
 import inspect
 import json
+import os
 import socket
+import subprocess
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from collections.abc import (
@@ -3820,6 +3823,28 @@ class VKCell(ProtoKCell[float, TVCell], UMGeometricObject, DCreatePort):
         )
 
 
+@functools.cache
+def _running_under_wsl() -> bool:
+    return bool(os.environ.get("WSL_DISTRO_NAME"))
+
+
+def _klive_path(path: str | Path) -> str:
+    path = str(path)
+    if not _running_under_wsl():
+        return path
+
+    try:
+        return subprocess.run(  # noqa: S603
+            ["/usr/bin/wslpath", "-w", path],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+    except subprocess.CalledProcessError as err:
+        logger.warning("WSL path conversion failed for {}: {}", path, err)
+        return path
+
+
 def show(
     layout: KCLayout | AnyKCell | Path | str,
     lyrdb: rdb.ReportDatabase | Path | str | None = None,
@@ -3903,7 +3928,7 @@ def show(
                 else:
                     p = (dir_ / _kcl.name).with_suffix(f".{file_format}").resolve()
                 _kcl.write(p, library_save_options)
-                kcl_paths.append({"name": _kcl.name, "file": str(p)})
+                kcl_paths.append({"name": _kcl.name, "file": _klive_path(p)})
         if technology is None and layout.technology_file is not None:
             technology = layout.technology.name
 
@@ -3918,7 +3943,7 @@ def show(
             for _kcl in kcls_:
                 p = (dir_ / _kcl.name).with_suffix(f".{file_format}").resolve()
                 _kcl.write(p, library_save_options)
-                kcl_paths.append({"name": _kcl.name, "file": str(p)})
+                kcl_paths.append({"name": _kcl.name, "file": _klive_path(p)})
         if technology is None and layout.kcl.technology_file is not None:
             technology = layout.kcl.technology.name
 
@@ -3932,7 +3957,7 @@ def show(
         raise ValueError(f"{file} is not a File")
     logger.debug("klive file: {}", file)
     data_dict = {
-        "gds": str(file),
+        "gds": _klive_path(file),
         "keep_position": keep_position,
         "libraries": kcl_paths,
     }
@@ -3950,7 +3975,7 @@ def show(
             )
         if not lyrdbfile.is_file():
             raise ValueError(f"{lyrdbfile} is not a File")
-        data_dict["lyrdb"] = str(lyrdbfile)
+        data_dict["lyrdb"] = _klive_path(lyrdbfile)
 
     if l2n is not None:
         if isinstance(l2n, kdb.LayoutToNetlist):
@@ -3965,7 +3990,7 @@ def show(
             )
         if not l2nfile.is_file():
             raise ValueError(f"{lyrdbfile} is not a File")
-        data_dict["l2n"] = str(l2nfile)
+        data_dict["l2n"] = _klive_path(l2nfile)
 
     if set_technology and technology is not None:
         data_dict["technology"] = technology
