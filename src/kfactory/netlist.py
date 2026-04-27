@@ -305,13 +305,13 @@ class Netlist(BaseModel, extra="forbid"):
             kcl=kcl, component=component, settings=settings, name=name
         )
         self.instances[name] = inst
-        if na != 1 or nb != 1:
+        if na != 0 and nb != 0:
+            if na < 1 or nb < 1:
+                raise ValueError(
+                    "An instance array must have at least one instance in the array. "
+                    f"{na=!r} and {nb=!r} must be >= 1"
+                )
             inst.array = NetlistArray(na=na, nb=nb)
-        if na != 0 and nb != 0 and (na < 1 or nb < 1):
-            raise ValueError(
-                "An instance array must have at least one instance in the array. "
-                f"{na=!r} and {nb=!r} must be >= 1"
-            )
         return inst
 
     def create_net(self, *ports: PortRef | NetlistPort) -> None:
