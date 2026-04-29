@@ -1050,7 +1050,10 @@ def place_manhattan(
             f"{bend90_cell.name} should have 2 ports but has {len(bend90_ports)} ports"
             f"with {port_type=}"
         )
-    if abs((bend90_ports[0].trans.angle - bend90_ports[1].trans.angle) % 4) != 1:
+    if abs((bend90_ports[0].trans.angle - bend90_ports[1].trans.angle) % 4) not in [
+        1,
+        3,
+    ]:
         raise AttributeError(
             f"{bend90_cell.name} bend ports should be 90° apart from each other"
         )
