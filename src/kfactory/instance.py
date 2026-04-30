@@ -116,7 +116,7 @@ class ProtoTInstance[T: (int, float)](ProtoInstance[T]):
     def __getattr__(self, name: str) -> Any:
         """If we don't have an attribute, get it from the instance."""
         try:
-            return super().__getattr__(name)
+            return super().__getattr__(name)  # ty:ignore[unresolved-attribute]
         except Exception:
             return getattr(self._instance, name)
 

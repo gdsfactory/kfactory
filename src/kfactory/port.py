@@ -296,15 +296,22 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             dt2 = other.get_dcplx_trans()
             if (dt1.disp - dt2.disp).length() < tol_um:
                 check += PortCheck.position
-            if abs((dt1.angle + dt2.angle) % 360 - 180) < angle_tolerance:
+            angle_diff = (dt1.angle + dt2.angle) % 360
+            if abs(angle_diff - 180) < angle_tolerance:
                 check += PortCheck.opposite
+            elif abs(angle_diff) < angle_tolerance:
+                check += PortCheck.same
         if self.cross_section == other.cross_section:
             check += PortCheck.cross_section
             check += PortCheck.layer
-        elif self.cross_section.main_layer.is_equivalent(
-            other.cross_section.main_layer
-        ):
-            check += PortCheck.layer
+            check += PortCheck.width
+        else:
+            if self.cross_section.main_layer.is_equivalent(
+                other.cross_section.main_layer
+            ):
+                check += PortCheck.layer
+            if self.cross_section.width == other.cross_section.width:
+                check += PortCheck.width
         if self.port_type == other.port_type:
             check += PortCheck.port_type
 
