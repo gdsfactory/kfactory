@@ -24,7 +24,7 @@ jobs:
       - uses: extractions/setup-just@v4
       - name: Test coverage
         run: just docs
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           name: github-pages
           path: "./docs/site/"
