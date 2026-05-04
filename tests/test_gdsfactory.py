@@ -222,7 +222,7 @@ def test_gdsfactory_yaml_build(path: Path) -> None:
             ).items()
         },
         place_unknown=True,
-    ).show()
+    )
     print(schematic.code_str())  # noqa: T201
 
 

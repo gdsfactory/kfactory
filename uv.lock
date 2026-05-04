@@ -994,7 +994,8 @@ notebooks = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "ty" },
+    { name = "pytest" },
+    { name = "pytest-regressions" },
 ]
 
 [package.metadata]
@@ -1042,7 +1043,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.5,<3" },
     { name = "ruamel-yaml", specifier = ">=0.19.1,<0.20" },
     { name = "ruamel-yaml-string", specifier = ">=0.1.1,<0.2" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9.2" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.15.12" },
     { name = "ruff", marker = "extra == 'docs'", specifier = ">=0.9.2" },
     { name = "rust-just", marker = "extra == 'dev'", specifier = ">=1.42.4" },
     { name = "scipy", specifier = ">=1.17.0,<2" },
@@ -1050,7 +1051,7 @@ requires-dist = [
     { name = "semver", specifier = ">=3.0.4,<4" },
     { name = "tbump", marker = "extra == 'dev'", specifier = ">=6.11.0" },
     { name = "toolz", specifier = ">=1.1.0,<2" },
-    { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.16" },
+    { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.34" },
     { name = "typer", specifier = ">=0.21.1,<0.22" },
     { name = "types-cachetools", marker = "extra == 'ci'", specifier = ">=5.5.0.20240820" },
     { name = "types-cachetools", marker = "extra == 'dev'", specifier = ">=5.5.0.20240820" },
@@ -1065,7 +1066,10 @@ requires-dist = [
 provides-extras = ["dev", "docs", "ci", "ipy", "notebooks"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "ty", specifier = ">=0.0.1a17" }]
+dev = [
+    { name = "pytest", specifier = ">=9.0.2" },
+    { name = "pytest-regressions", specifier = ">=2.10.0" },
+]
 
 [[package]]
 name = "klayout"

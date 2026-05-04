@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from enum import IntEnum
-from functools import partial
 from typing import TYPE_CHECKING, Any, Literal, TypedDict, cast, overload
 
 from .. import kdb, rdb
@@ -39,13 +38,13 @@ if TYPE_CHECKING:
         StraightFactoryDBU,
         StraightFactoryUM,
     )
-    from ..port import BasePort, DPort, Port
+    from ..port import DPort, Port
+    from ..schematic import Constraint
     from ..typings import dbu, um
     from .utils import RouteDebug
 
 __all__ = [
     "get_radius",
-    "place90",
     "place_manhattan",
     "place_manhattan_with_sbends",
     "route_bundle",
@@ -66,26 +65,30 @@ class LoopPosition(IntEnum):
     end = 1
 
 
-class PathLengthConfig(TypedDict, total=False):
+class PathLengthConfig[T: (int, float)](TypedDict, total=False):
     loops: int
     loop_side: int
     element: int
     loop_position: int
+    total_length: int
 
 
 def path_length_match(
-    c: ProtoTKCell[Any],
     routers: Sequence[ManhattanRouter],
-    start_ports: Sequence[BasePort],
-    end_ports: Sequence[BasePort],
-    separation: dbu,
     element: int = -1,
     loops: int = 1,
     loop_side: LoopSide = LoopSide.left,
     loop_position: LoopPosition = LoopPosition.start,
-    **kwargs: Any,
+    path_length: int | None = None,
 ) -> None:
-    path_length = max(router.path_length for router in routers)
+    if path_length is None:
+        path_length = max(router.path_length for router in routers)
+    elif path_length < max(router.path_length for router in routers):
+        path_length_ = max(router.path_length for router in routers)
+        logger.warning(
+            f"Requesting path length matching to {path_length!r}[dbu], but the minimal"
+            f" possible path length is {path_length_!r}. Increasing to minimum."
+        )
     if path_length % 2:
         logger.warning(
             "path length matching target length "
@@ -100,7 +103,7 @@ def path_length_match(
     match loop_side:
         case LoopSide.center:
             loops += 1
-    br = max(routers[0].bend90_radius, routers[0].width + separation)
+    br = max(routers[0].bend90_radius, routers[0].width + routers[0].separation)
 
     for router in routers:
         length = router.path_length
@@ -253,8 +256,9 @@ def route_bundle(
     end_angles: int | list[int] | None = None,
     purpose: str | None = "routing",
     sbend_factory: SBendFactoryDBU | None = None,
-    path_length_matching_config: PathLengthConfig | None = None,
+    constraints: Sequence[Constraint] | None = None,
     route_debug: RouteDebug | None = None,
+    route_name: str | None = None,
 ) -> list[ManhattanRoute]: ...
 
 
@@ -287,8 +291,9 @@ def route_bundle(
     end_angles: float | list[float] | None = None,
     purpose: str | None = "routing",
     sbend_factory: SBendFactoryUM | None = None,
-    path_length_matching_config: PathLengthConfig | None = None,
+    constraints: Sequence[Constraint] | None = None,
     route_debug: RouteDebug | None = None,
+    route_name: str | None = None,
 ) -> list[ManhattanRoute]: ...
 
 
@@ -330,8 +335,9 @@ def route_bundle(
     end_angles: list[int] | float | list[float] | None = None,
     purpose: str | None = "routing",
     sbend_factory: SBendFactoryDBU | SBendFactoryUM | None = None,
-    path_length_matching_config: PathLengthConfig | None = None,
+    constraints: Sequence[Constraint] | None = None,
     route_debug: RouteDebug | None = None,
+    route_name: str | None = None,
 ) -> list[ManhattanRoute]:
     r"""Route a bundle from starting ports to end_ports.
 
@@ -445,7 +451,7 @@ def route_bundle(
             "taper_cell": taper_cell,
             "port_type": place_port_type,
             "min_straight_taper": min_straight_taper,
-            "allow_small_routes": False,
+            "allow_small_routes": place_allow_small_routes,
             "allow_width_mismatch": allow_width_mismatch,
             "allow_layer_mismatch": allow_layer_mismatch,
             "allow_type_mismatch": allow_type_mismatch,
@@ -461,7 +467,7 @@ def route_bundle(
             "taper_cell": taper_cell,
             "port_type": place_port_type,
             "min_straight_taper": min_straight_taper,
-            "allow_small_routes": False,
+            "allow_small_routes": place_allow_small_routes,
             "allow_width_mismatch": allow_width_mismatch,
             "allow_layer_mismatch": allow_layer_mismatch,
             "allow_type_mismatch": allow_type_mismatch,
@@ -470,12 +476,6 @@ def route_bundle(
             "sbend_factory": sbend_factory,
         }
     if isinstance(c, KCell):
-        if path_length_matching_config is not None:
-            post_process_f = partial(
-                path_length_match, separation=cast("dbu", separation)
-            )
-        else:
-            post_process_f = None
         try:
             return route_bundle_generic(
                 c=c,
@@ -484,7 +484,6 @@ def route_bundle(
                 starts=cast("dbu | list[dbu] | list[Step] | list[list[Step]]", starts),
                 ends=cast("dbu | list[dbu] | list[Step] | list[list[Step]]", ends),
                 route_width=cast("int", route_width),
-                sort_ports=sort_ports,
                 on_collision=on_collision,
                 on_placer_error=on_placer_error,
                 collision_check_layers=collision_check_layers,
@@ -502,9 +501,9 @@ def route_bundle(
                 placer_kwargs=placer_kwargs,
                 start_angles=cast("list[int] | int", start_angles),
                 end_angles=cast("list[int] | int", end_angles),
-                router_post_process_function=post_process_f,
-                router_post_process_kwargs=path_length_matching_config,
+                constraints=constraints,
                 route_debug=route_debug,
+                route_name=route_name,
             )
         except ValueError as e:
             if str(e).startswith("Found non-manhattan waypoints."):
@@ -610,10 +609,6 @@ def route_bundle(
             ]
         else:
             waypoints = cast("kdb.DCplxTrans", waypoints).s_trans().to_itype(c.kcl.dbu)
-    if path_length_matching_config is not None:
-        post_process_f = partial(path_length_match, separation=c.kcl.to_dbu(separation))
-    else:
-        post_process_f = None
     if sbend_factory is None:
         placer = place_manhattan
         placer_kwargs = {
@@ -622,7 +617,7 @@ def route_bundle(
             "taper_cell": taper_cell,
             "port_type": place_port_type,
             "min_straight_taper": min_straight_taper,
-            "allow_small_routes": False,
+            "allow_small_routes": place_allow_small_routes,
             "allow_width_mismatch": allow_width_mismatch,
             "allow_layer_mismatch": allow_layer_mismatch,
             "allow_type_mismatch": allow_type_mismatch,
@@ -650,7 +645,7 @@ def route_bundle(
             "taper_cell": taper_cell,
             "port_type": place_port_type,
             "min_straight_taper": min_straight_taper,
-            "allow_small_routes": False,
+            "allow_small_routes": place_allow_small_routes,
             "allow_width_mismatch": allow_width_mismatch,
             "allow_layer_mismatch": allow_layer_mismatch,
             "allow_type_mismatch": allow_type_mismatch,
@@ -666,7 +661,6 @@ def route_bundle(
             starts=starts,
             ends=ends,
             route_width=route_width,
-            sort_ports=sort_ports,
             on_collision=on_collision,
             on_placer_error=on_placer_error,
             collision_check_layers=collision_check_layers,
@@ -682,11 +676,11 @@ def route_bundle(
             },
             placer_function=placer,
             placer_kwargs=placer_kwargs,
-            router_post_process_function=post_process_f,
-            router_post_process_kwargs=path_length_matching_config,
+            constraints=constraints,
             start_angles=start_angles,
             end_angles=end_angles,
             route_debug=route_debug,
+            route_name=route_name,
         )
     except ValueError as e:
         if str(e).startswith("Found non-manhattan waypoints."):
@@ -747,7 +741,6 @@ def _place_straight(
     route_width: int | None,
     *,
     port_type: str,
-    allow_small_routes: bool,
     allow_width_mismatch: bool,
     allow_layer_mismatch: bool,
     allow_type_mismatch: bool,
@@ -755,7 +748,7 @@ def _place_straight(
     length = int((p1.trans.disp.to_p() - p2.trans.disp.to_p()).length())
     wg = c << straight_factory(width=w, length=length)
     wg.purpose = purpose
-    wg_p1, wg_p2 = (v for v in wg.ports if v.port_type == port_type)
+    wg_p1, _ = (v for v in wg.ports if v.port_type == port_type)
     wg.connect(
         wg_p1,
         p1,
@@ -777,10 +770,7 @@ def _place_sbend(
     route: ManhattanRoute,
     p1: Port,
     p2: Port,
-    route_width: int | None,
     *,
-    port_type: str,
-    allow_small_routes: bool,
     allow_width_mismatch: bool,
     allow_layer_mismatch: bool,
     allow_type_mismatch: bool,
@@ -840,7 +830,6 @@ def _place_tapered_straight(
     straight_factory: StraightFactoryDBU,
     taper_cell: KCell,
     purpose: str | None,
-    w: int,
     route: ManhattanRoute,
     p1: Port,
     p2: Port,
@@ -848,7 +837,6 @@ def _place_tapered_straight(
     taper_ports: tuple[Port, Port],
     *,
     port_type: str,
-    allow_small_routes: bool,
     allow_width_mismatch: bool,
     allow_layer_mismatch: bool,
     allow_type_mismatch: bool,
@@ -880,7 +868,7 @@ def _place_tapered_straight(
     if l_ != 0:
         p1_ = t1.ports[taperp2.name]
         p2_ = t2.ports[taperp2.name]
-        _, p2_ = _place_straight(
+        _place_straight(
             c=c,
             straight_factory=straight_factory,
             purpose=purpose,
@@ -890,13 +878,10 @@ def _place_tapered_straight(
             route_width=route_width,
             route=route,
             port_type=port_type,
-            allow_small_routes=allow_small_routes,
             allow_width_mismatch=allow_width_mismatch,
             allow_layer_mismatch=allow_layer_mismatch,
             allow_type_mismatch=allow_type_mismatch,
         )
-    else:
-        p2_ = t1.ports[taperp2.name]
 
     return t1.ports[taperp1.name], t2.ports[taperp1.name]
 
@@ -904,18 +889,14 @@ def _place_tapered_straight(
 def _place_tapered_sbend_or_straight(
     c: KCell,
     sbend_factory: SBendFactoryDBU,
-    straight_factory: StraightFactoryDBU,
     taper_cell: KCell,
     purpose: str | None,
-    w: int,
     route: ManhattanRoute,
     p1: Port,
     p2: Port,
     route_width: int | None,
     taper_ports: tuple[Port, Port],
     *,
-    port_type: str,
-    allow_small_routes: bool,
     allow_width_mismatch: bool,
     allow_layer_mismatch: bool,
     allow_type_mismatch: bool,
@@ -947,23 +928,18 @@ def _place_tapered_sbend_or_straight(
     if l_ != 0:
         p1_ = t1.ports[taperp2.name]
         p2_ = t2.ports[taperp2.name]
-        _, p2_ = _place_sbend(
+        _place_sbend(
             c=c,
             sbend_factory=sbend_factory,
             purpose=purpose,
             w=taperp2.width,
             p1=p1_,
             p2=p2_,
-            route_width=route_width,
             route=route,
-            port_type=port_type,
-            allow_small_routes=allow_small_routes,
             allow_width_mismatch=allow_width_mismatch,
             allow_layer_mismatch=allow_layer_mismatch,
             allow_type_mismatch=allow_type_mismatch,
         )
-    else:
-        p2_ = t1.ports[taperp2.name]
 
     return t1.ports[taperp1.name], t2.ports[taperp1.name]
 
@@ -1126,7 +1102,6 @@ def place_manhattan(
                 p2=route.end_port.copy_polar(),
                 route_width=w,
                 port_type=port_type,
-                allow_small_routes=allow_small_routes,
                 allow_width_mismatch=allow_width_mismatch,
                 allow_layer_mismatch=allow_layer_mismatch,
                 allow_type_mismatch=allow_type_mismatch,
@@ -1136,14 +1111,12 @@ def place_manhattan(
                 c=c,
                 straight_factory=straight_factory,
                 purpose=purpose,
-                w=w,
                 taper_ports=(taperp1, taperp2),
                 route=route,
                 p1=route.start_port.copy_polar(),
                 p2=route.end_port.copy_polar(),
                 route_width=w,
                 port_type=port_type,
-                allow_small_routes=allow_small_routes,
                 allow_width_mismatch=allow_width_mismatch,
                 allow_layer_mismatch=allow_layer_mismatch,
                 allow_type_mismatch=allow_type_mismatch,
@@ -1203,7 +1176,7 @@ def place_manhattan(
                 < (taperp1.trans.disp - taperp2.trans.disp).length() * 2
                 + min_straight_taper
             ):
-                p1_, p2_ = _place_straight(
+                p1_, _ = _place_straight(
                     c=c,
                     straight_factory=straight_factory,
                     purpose=purpose,
@@ -1213,25 +1186,22 @@ def place_manhattan(
                     p2=new_bend_port,
                     route_width=route_width,
                     port_type=port_type,
-                    allow_small_routes=allow_small_routes,
                     allow_layer_mismatch=allow_layer_mismatch,
                     allow_type_mismatch=allow_type_mismatch,
                     allow_width_mismatch=allow_width_mismatch,
                 )
             else:
-                p1_, p2_ = _place_tapered_straight(
+                p1_, _ = _place_tapered_straight(
                     c=c,
                     straight_factory=straight_factory,
                     taper_cell=taper_cell,
                     purpose=purpose,
-                    w=w,
                     route=route,
                     p1=old_bend_port,
                     p2=new_bend_port,
                     route_width=route_width,
                     taper_ports=(taperp1, taperp2),
                     port_type=port_type,
-                    allow_small_routes=allow_small_routes,
                     allow_width_mismatch=allow_width_mismatch,
                     allow_layer_mismatch=allow_layer_mismatch,
                     allow_type_mismatch=allow_type_mismatch,
@@ -1249,7 +1219,7 @@ def place_manhattan(
             < (taperp1.trans.disp - taperp2.trans.disp).length() * 2
             + min_straight_taper
         ):
-            p1_, p2_ = _place_straight(
+            _, p2_ = _place_straight(
                 c=c,
                 straight_factory=straight_factory,
                 purpose=purpose,
@@ -1259,25 +1229,22 @@ def place_manhattan(
                 p2=p2,
                 route_width=route_width,
                 port_type=port_type,
-                allow_small_routes=allow_small_routes,
                 allow_width_mismatch=allow_width_mismatch,
                 allow_layer_mismatch=allow_layer_mismatch,
                 allow_type_mismatch=allow_type_mismatch,
             )
         else:
-            p1_, p2_ = _place_tapered_straight(
+            _, p2_ = _place_tapered_straight(
                 c=c,
                 straight_factory=straight_factory,
                 taper_cell=taper_cell,
                 purpose=purpose,
-                w=w,
                 route=route,
                 p1=old_bend_port,
                 p2=p2,
                 route_width=route_width,
                 taper_ports=(taperp1, taperp2),
                 port_type=port_type,
-                allow_small_routes=allow_small_routes,
                 allow_width_mismatch=allow_width_mismatch,
                 allow_layer_mismatch=allow_layer_mismatch,
                 allow_type_mismatch=allow_type_mismatch,
@@ -1437,12 +1404,9 @@ def place_manhattan_with_sbends(
                 route=route,
                 p1=old_bend_port,
                 p2=old_bend_port.copy_polar(d=sbend_vec.x, d_orth=sbend_vec.y, angle=2),
-                route_width=route_width,
-                allow_small_routes=allow_small_routes,
                 allow_width_mismatch=allow_width_mismatch,
                 allow_layer_mismatch=allow_layer_mismatch,
                 allow_type_mismatch=allow_type_mismatch,
-                port_type=port_type,
             )
         else:
             length = int(vec.length())
@@ -1452,7 +1416,7 @@ def place_manhattan_with_sbends(
                 < (taperp1.trans.disp - taperp2.trans.disp).length() * 2
                 + min_straight_taper
             ):
-                p1_, p2_ = _place_straight(
+                _place_straight(
                     c=c,
                     straight_factory=straight_factory,
                     purpose=purpose,
@@ -1462,24 +1426,21 @@ def place_manhattan_with_sbends(
                     p2=route.end_port.copy_polar(),
                     route_width=w,
                     port_type=port_type,
-                    allow_small_routes=allow_small_routes,
                     allow_width_mismatch=allow_width_mismatch,
                     allow_layer_mismatch=allow_layer_mismatch,
                     allow_type_mismatch=allow_type_mismatch,
                 )
             else:
-                p1_, p2_ = _place_tapered_straight(
+                _place_tapered_straight(
                     c=c,
                     straight_factory=straight_factory,
                     purpose=purpose,
-                    w=w,
                     taper_ports=(taperp1, taperp2),
                     route=route,
                     p1=route.start_port.copy_polar(),
                     p2=route.end_port.copy_polar(),
                     route_width=w,
                     port_type=port_type,
-                    allow_small_routes=allow_small_routes,
                     allow_width_mismatch=allow_width_mismatch,
                     allow_layer_mismatch=allow_layer_mismatch,
                     allow_type_mismatch=allow_type_mismatch,
@@ -1511,12 +1472,9 @@ def place_manhattan_with_sbends(
                 route=route,
                 p1=old_bend_port,
                 p2=bend_port,
-                route_width=route_width,
-                allow_small_routes=allow_small_routes,
                 allow_width_mismatch=allow_width_mismatch,
                 allow_layer_mismatch=allow_layer_mismatch,
                 allow_type_mismatch=allow_type_mismatch,
-                port_type=port_type,
             )
             old_pt = pt
             old_bend_port = p2_
@@ -1536,7 +1494,7 @@ def place_manhattan_with_sbends(
                     < (taperp1.trans.disp - taperp2.trans.disp).length() * 2
                     + min_straight_taper
                 ):
-                    p1_, p2_ = _place_straight(
+                    _, p2_ = _place_straight(
                         c=c,
                         straight_factory=straight_factory,
                         purpose=purpose,
@@ -1546,25 +1504,22 @@ def place_manhattan_with_sbends(
                         p2=new_bend_port,
                         route_width=route_width,
                         port_type=port_type,
-                        allow_small_routes=allow_small_routes,
                         allow_layer_mismatch=allow_layer_mismatch,
                         allow_type_mismatch=allow_type_mismatch,
                         allow_width_mismatch=allow_width_mismatch,
                     )
                 else:
-                    p1_, p2_ = _place_tapered_straight(
+                    _, p2_ = _place_tapered_straight(
                         c=c,
                         straight_factory=straight_factory,
                         taper_cell=taper_cell,
                         purpose=purpose,
-                        w=w,
                         route=route,
                         p1=old_bend_port,
                         p2=new_bend_port,
                         route_width=route_width,
                         taper_ports=(taperp1, taperp2),
                         port_type=port_type,
-                        allow_small_routes=allow_small_routes,
                         allow_width_mismatch=allow_width_mismatch,
                         allow_layer_mismatch=allow_layer_mismatch,
                         allow_type_mismatch=allow_type_mismatch,
@@ -1623,7 +1578,6 @@ def place_manhattan_with_sbends(
                     p2=new_bend_port,
                     route_width=route_width,
                     port_type=port_type,
-                    allow_small_routes=allow_small_routes,
                     allow_layer_mismatch=allow_layer_mismatch,
                     allow_type_mismatch=allow_type_mismatch,
                     allow_width_mismatch=allow_width_mismatch,
@@ -1634,14 +1588,12 @@ def place_manhattan_with_sbends(
                     straight_factory=straight_factory,
                     taper_cell=taper_cell,
                     purpose=purpose,
-                    w=w,
                     route=route,
                     p1=old_bend_port,
                     p2=new_bend_port,
                     route_width=route_width,
                     taper_ports=(taperp1, taperp2),
                     port_type=port_type,
-                    allow_small_routes=allow_small_routes,
                     allow_width_mismatch=allow_width_mismatch,
                     allow_layer_mismatch=allow_layer_mismatch,
                     allow_type_mismatch=allow_type_mismatch,
@@ -1663,15 +1615,10 @@ def place_manhattan_with_sbends(
             route=route,
             p1=old_bend_port,
             p2=bend_port,
-            route_width=route_width,
-            allow_small_routes=allow_small_routes,
             allow_width_mismatch=allow_width_mismatch,
             allow_layer_mismatch=allow_layer_mismatch,
             allow_type_mismatch=allow_type_mismatch,
-            port_type=port_type,
         )
-        old_pt = pt
-        old_bend_port = bend_port
         route.end_port = bend_port
     else:
         length = int((old_bend_port.trans.disp - p2.trans.disp).length())
@@ -1682,7 +1629,7 @@ def place_manhattan_with_sbends(
                 < (taperp1.trans.disp - taperp2.trans.disp).length() * 2
                 + min_straight_taper
             ):
-                p1_, p2_ = _place_straight(
+                _, p2_ = _place_straight(
                     c=c,
                     straight_factory=straight_factory,
                     purpose=purpose,
@@ -1692,25 +1639,22 @@ def place_manhattan_with_sbends(
                     p2=p2,
                     route_width=route_width,
                     port_type=port_type,
-                    allow_small_routes=allow_small_routes,
                     allow_width_mismatch=allow_width_mismatch,
                     allow_layer_mismatch=allow_layer_mismatch,
                     allow_type_mismatch=allow_type_mismatch,
                 )
             else:
-                p1_, p2_ = _place_tapered_straight(
+                _, p2_ = _place_tapered_straight(
                     c=c,
                     straight_factory=straight_factory,
                     taper_cell=taper_cell,
                     purpose=purpose,
-                    w=w,
                     route=route,
                     p1=old_bend_port,
                     p2=p2,
                     route_width=route_width,
                     taper_ports=(taperp1, taperp2),
                     port_type=port_type,
-                    allow_small_routes=allow_small_routes,
                     allow_width_mismatch=allow_width_mismatch,
                     allow_layer_mismatch=allow_layer_mismatch,
                     allow_type_mismatch=allow_type_mismatch,
@@ -1721,54 +1665,6 @@ def place_manhattan_with_sbends(
     route.start_port.name = "route_start"
     route.end_port.name = "route_end"
     return route
-
-
-def place90(
-    c: ProtoTKCell[Any],
-    p1: Port,
-    p2: Port,
-    pts: Sequence[kdb.Point],
-    route_width: dbu | None = None,
-    straight_factory: StraightFactoryDBU | None = None,
-    bend90_cell: ProtoTKCell[Any] | None = None,
-    taper_cell: ProtoTKCell[Any] | None = None,
-    port_type: str = "optical",
-    min_straight_taper: dbu = 0,
-    allow_small_routes: bool = False,
-    allow_width_mismatch: bool | None = None,
-    allow_layer_mismatch: bool | None = None,
-    allow_type_mismatch: bool | None = None,
-    purpose: str | None = "routing",
-    sbend_factory: SBendFactoryDBU | None = None,
-    **kwargs: Any,
-) -> ManhattanRoute:
-    """Deprecated, use place_manhattan instead.
-
-    Will be removed with kfactory 2.0.
-    """
-    logger.warning(
-        "place90 is deprecated, please use kfactory.routing.optical.place_manhattan"
-        " instead. place90 will be removed in kfactory 2.0."
-    )
-
-    return place_manhattan(
-        c=c,
-        p1=p1,
-        p2=p2,
-        pts=pts,
-        route_width=route_width,
-        straight_factory=straight_factory,
-        bend90_cell=bend90_cell,
-        taper_cell=taper_cell,
-        port_type=port_type,
-        min_straight_taper=min_straight_taper,
-        allow_small_routes=allow_small_routes,
-        allow_width_mismatch=allow_width_mismatch,
-        allow_layer_mismatch=allow_layer_mismatch,
-        allow_type_mismatch=allow_type_mismatch,
-        purpose=purpose,
-        **kwargs,
-    )
 
 
 def route_loopback(

@@ -1308,9 +1308,8 @@ class KCLayout(
             f: Callable[KCellParams, KCIN],
         ) -> Callable[KCellParams, KC]:
             sig = inspect.signature(f)
-            output_cell_type_: type[KC | ProtoTKCell[Any]]
             if output_type is not None:
-                output_cell_type_ = output_type
+                output_cell_type_: type[KC | ProtoTKCell[Any]] = output_type
             elif sig.return_annotation is not inspect.Signature.empty:
                 # Use get_type_hints to resolve string annotations
                 try:
