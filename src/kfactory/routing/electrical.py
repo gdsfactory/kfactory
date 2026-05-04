@@ -1,6 +1,7 @@
 """Utilities for automatically routing electrical connections."""
 
-from collections.abc import Callable, Sequence
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any, Literal, Protocol, cast, overload
 
 import numpy as np
@@ -17,7 +18,6 @@ from ..cross_section import CrossSection, SymmetricalCrossSection
 from ..enclosure import LayerEnclosure
 from ..kcell import DKCell, KCell, ProtoTKCell
 from ..port import DPort, Port
-from ..typings import dbu, um
 from .generic import ManhattanRoute
 from .generic import route_bundle as route_bundle_generic
 from .length_functions import get_length_from_backbone
@@ -28,10 +28,13 @@ from .manhattan import (
 )
 from .optical import vec_angle
 from .steps import Step, Straight
-from .utils import RouteDebug
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Sequence
+
     from ..schematic import Constraint
+    from ..typings import dbu, um
+    from .utils import RouteDebug
 
 __all__ = [
     "place_dual_rails",
