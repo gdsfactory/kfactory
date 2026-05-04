@@ -88,10 +88,20 @@ watch:
 
 markdown_extensions:
   - admonition
+  - attr_list                         # required for {.md-button} and {.lg .middle}
+  - md_in_html                        # required for grid-card <div markdown> blocks
   - pymdownx.superfences
   - pymdownx.tasklist
   - pymdownx.tabbed
-  - pymdownx.emoji
+  - pymdownx.emoji:
+      # Render :material-foo: / :fontawesome-foo: as inline SVG.
+      # mkdocs-material exposes the helpers under `material.extensions`;
+      # zensical reads the same yaml and rewrites `material.extensions`
+      # → `zensical.extensions` at load time, so this works under both
+      # `just docs` and `just docs-zensical`. When mkdocs is dropped,
+      # switch to zensical.extensions.emoji.{twemoji,to_svg} directly.
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.snippets:
       check_paths: true
 
