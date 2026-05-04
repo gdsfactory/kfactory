@@ -2121,6 +2121,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                     port_mapping=port_mapping,
                 )
             netlists[name] = nl
+            nl.sort()
         return netlists
 
     def get_optical_nets(
@@ -2128,6 +2129,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         port_types: Sequence[str] = ("optical",),
         allow_width_mismatch: bool = False,
     ) -> list[Net]:
+
         def port_filter(num_port: tuple[int, ProtoPort[Any]]) -> bool:
             return num_port[1].port_type in port_types
 
@@ -2237,7 +2239,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         )
                     )
 
-        base_check = PortCheck.position + PortCheck.layer
+        base_check = PortCheck.position + PortCheck.layer + PortCheck.port_type
         if not allow_width_mismatch:
             base_check += PortCheck.width
         port_check_same = base_check + PortCheck.same
@@ -2272,7 +2274,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
 
                     for _, _, ia2, ib2, inst2, port2 in ports:
                         if (
-                            cellport.base.check_connection(port2.base)
+                            cellport.base.check_connection(port2.base, snapped=True)
                         ) & port_check_same == port_check_same:
                             nets.append(
                                 Net(

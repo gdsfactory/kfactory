@@ -279,14 +279,20 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
         )
 
     def check_connection(
-        self, other: BasePort, tolerance: float = 0.1, angle_tolerance: float = 0.01
+        self,
+        other: BasePort,
+        tolerance: float = 0.1,
+        angle_tolerance: float = 0.01,
+        snapped: bool = False,
     ) -> int:
-        tol_um = self.kcl.to_um(tolerance)  # ty:ignore[no-matching-overload]
+        tol_um = self.kcl.dbu * tolerance
         check: int = 0
-        if self.trans is not None and other.trans is not None:
-            if self.trans.disp == other.trans.disp:
+        if snapped or (self.trans is not None and other.trans is not None):
+            t1 = self.get_trans()
+            t2 = other.get_trans()
+            if t1.disp == t2.disp:
                 check += PortCheck.position
-            orientation = (self.trans.angle - other.trans.angle) % 4
+            orientation = (t1.angle - t2.angle) % 4
             if orientation == 2:
                 check += PortCheck.opposite
             elif orientation == 0:
@@ -296,7 +302,7 @@ class BasePort(BaseModel, arbitrary_types_allowed=True):
             dt2 = other.get_dcplx_trans()
             if (dt1.disp - dt2.disp).length() < tol_um:
                 check += PortCheck.position
-            angle_diff = (dt1.angle + dt2.angle) % 360
+            angle_diff = (dt1.angle - dt2.angle) % 360
             if abs(angle_diff - 180) < angle_tolerance:
                 check += PortCheck.opposite
             elif abs(angle_diff) < angle_tolerance:

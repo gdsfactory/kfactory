@@ -200,8 +200,11 @@ class Net(RootModel[list[PortArrayRef | PortRef | NetlistPort]]):
     def sort(self) -> Self:
         def _port_sort(port: PortRef | NetlistPort) -> tuple[Any, ...]:
             if isinstance(port, PortRef):
-                return (port.instance, port.port)
-            return (port.name,)
+                return (1, port.instance, port.port)
+            return (
+                0,
+                port.name,
+            )
 
         self.root.sort(key=_port_sort)
         return self
