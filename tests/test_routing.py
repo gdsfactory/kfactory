@@ -1418,7 +1418,6 @@ def test_route_bundle_single_return(
         taper_cell=taper,
         allow_width_mismatch=True,
     )[0]
-    c.show()
     oas_regression(c)
 
 
@@ -1474,7 +1473,6 @@ def test_route_bundle_multi_return(
         sort_ports=False,
         bboxes=[b1, b2],
     )[0]
-    c.show()
     oas_regression(c)
 
 
@@ -1529,5 +1527,4 @@ def test_route_bundle_multi_return_opposite(
         sort_ports=False,
         bboxes=[b1, b2],
     )[0]
-    c.show()
     oas_regression(c)

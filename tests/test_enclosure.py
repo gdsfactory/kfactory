@@ -169,8 +169,6 @@ def test_pdkenclosure(layers: Layers, straight_blank: kf.KCell) -> None:
 
     port_wg_ex.merge()
 
-    c.show()
-
     assert (
         kf.kdb.Region(c.shapes(c.kcl.find_layer(layers.WGEX))) & port_wg_ex
     ).is_empty()
