@@ -29,11 +29,22 @@
 
 # %%
 import warnings
+from pprint import pformat
 
 import kfactory as kf
 import numpy as np
-from IPython.core.getipython import get_ipython
-from pprint import pformat
+from IPython.display import HTML
+
+
+def scrollable_text(text: str, max_height: str = "400px") -> HTML:
+    """Render long text in a vertically scrollable, monospaced HTML block."""
+    import html
+
+    return HTML(
+        f'<div style="max-height: {max_height}; overflow-y: auto; '
+        f'font-family: monospace; white-space: pre; padding: 0.5em; '
+        f'border: 1px solid #ccc;">{html.escape(text)}</div>'
+    )
 
 # %% [markdown]
 # ## PDK setup

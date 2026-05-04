@@ -60,15 +60,30 @@ just docs-serve
 
 # Remove the build artefact
 just docs-clean
+
+# Optional: build with zensical (the mkdocs successor)
+just docs-zensical
 ```
 
-Documentation pages in `docs/source/**/*.py` are **executed** during the build
-(`mkdocs-jupyter`).  Any exception in a notebook stops the build.  Always run
-`just docs` locally before opening a docs PR.
+The build runs in two stages:
 
-When writing a new doc page, follow the jupytext percent format used throughout
-the repo — see `docs_overhaul/notes_build_system.md` in the repository for
-templates and gotchas.
+1. **Pre-build** (`docs-build-source`): `docs/scripts/build_docs_source.py`
+   converts every jupytext `.py` notebook under `docs/source/` to
+   executed `.md` + a downloadable `.ipynb`, and writes mkdocstrings
+   stub pages under `docs/source-built/reference/`. Outputs go to
+   `docs/source-built/` (gitignored). Runs are cached by content hash
+   in `docs/.build-cache/` — only changed notebooks re-execute.
+2. **Render**: mkdocs (or zensical) reads `docs/source-built/` and
+   produces the final HTML in `docs/site/`.
+
+Any exception in a notebook stops the build. Always run `just docs`
+locally before opening a docs PR.
+
+When writing a new doc page, follow the jupytext percent format used
+throughout the repo — see `docs_overhaul/notes_build_system.md` in the
+repository for templates and gotchas. Each rendered notebook page also
+gets a "Download notebook (.ipynb)" button at the top so readers can
+re-execute locally.
 
 ## Code quality
 
@@ -111,6 +126,8 @@ src/kfactory/          # library source
 tests/                 # pytest tests
 docs/
   source/              # documentation pages (Markdown + jupytext .py notebooks)
+  source-built/        # pre-build output (gitignored — created by docs-build-source)
+  scripts/             # build_docs_source.py (notebook → .md + .ipynb pipeline)
   mkdocs.yml           # navigation + plugin config
 Justfile               # common dev commands
 pyproject.toml         # package metadata + dependencies
@@ -122,7 +139,9 @@ pyproject.toml         # package metadata + dependencies
 |-------|---------|
 | `kfactory[dev]` | Full dev environment (CI + type stubs + pre-commit) |
 | `kfactory[ci]` | Test dependencies (`pytest`, coverage, etc.) |
-| `kfactory[docs]` | Documentation build (`mkdocs-material`, mkdocs-jupyter, etc.) |
+| `kfactory[notebooks]` | Notebook conversion pipeline (`jupytext`, `nbconvert`, `ipykernel`) |
+| `kfactory[docs]` | Documentation build via mkdocs (pulls in `[notebooks]`) |
+| `kfactory[docs-zensical]` | Documentation build via zensical (pulls in `[notebooks]`) |
 | `kfactory[ipy]` | Jupyter / IPython display helpers (`kf.show`, `.plot()`) |
 
 ## Getting help

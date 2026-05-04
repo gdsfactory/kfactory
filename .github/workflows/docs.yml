@@ -28,5 +28,14 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: extractions/setup-just@v3
-      - name: Test coverage
+      - name: Cache executed notebooks
+        uses: actions/cache@v4
+        with:
+          path: |
+            docs/.build-cache
+            docs/source-built
+          key: docs-source-built-${{ matrix.python-version }}-${{ hashFiles('docs/source/**/*.py', 'docs/source/**/*.md', 'src/kfactory/**/*.py', 'docs/scripts/build_docs_source.py') }}
+          restore-keys: |
+            docs-source-built-${{ matrix.python-version }}-
+      - name: Build docs
         run: just docs

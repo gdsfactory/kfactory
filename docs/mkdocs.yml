@@ -1,7 +1,7 @@
 site_name: KFactory
 repo_url: https://github.com/gdsfactory/kfactory
 site_url: https://gdsfactory.github.io/kfactory
-docs_dir: source
+docs_dir: source-built
 
 nav:
   - Home:
@@ -10,55 +10,55 @@ nav:
   - Getting Started:
       - Prerequisites: getting_started/prerequisites.md
       - Installation: getting_started/installation.md
-      - 5-Minute Quickstart: getting_started/quickstart.py
+      - 5-Minute Quickstart: getting_started/quickstart.md
       - KLive Setup: getting_started/klive_setup.md
   - Core Concepts:
-      - KCell: concepts/kcell.py
-      - Layers: concepts/layers.py
-      - Ports: concepts/ports.py
-      - Instances: concepts/instances.py
-      - Geometry: concepts/geometry.py
-      - KCLayout: concepts/kclayout.py
-      - DBU vs µm: concepts/dbu_vs_um.py
+      - KCell: concepts/kcell.md
+      - Layers: concepts/layers.md
+      - Ports: concepts/ports.md
+      - Instances: concepts/instances.md
+      - Geometry: concepts/geometry.md
+      - KCLayout: concepts/kclayout.md
+      - DBU vs µm: concepts/dbu_vs_um.md
   - Routing:
-      - Overview: routing/overview.py
-      - Optical: routing/optical.py
-      - Electrical: routing/electrical.py
-      - Manhattan Primitives: routing/manhattan.py
-      - All-Angle: routing/all_angle.py
-      - Bundle Reference: routing/bundle.py
-      - Path-Length Matching: routing/path_length.py
+      - Overview: routing/overview.md
+      - Optical: routing/optical.md
+      - Electrical: routing/electrical.md
+      - Manhattan Primitives: routing/manhattan.md
+      - All-Angle: routing/all_angle.md
+      - Bundle Reference: routing/bundle.md
+      - Path-Length Matching: routing/path_length.md
   - Components:
-      - Overview: components/overview.py
-      - Straight Waveguide: components/straight.py
-      - Euler Bends: components/euler.py
-      - Circular Bends: components/circular.py
-      - Taper: components/taper.py
-      - Bezier S-Bends: components/bezier.py
-      - Virtual Cells (VKCell): components/virtual.py
-      - Parameterized Cells: components/pcells.py
-      - Factory Functions: components/factories.py
+      - Overview: components/overview.md
+      - Straight Waveguide: components/straight.md
+      - Euler Bends: components/euler.md
+      - Circular Bends: components/circular.md
+      - Taper: components/taper.md
+      - Bezier S-Bends: components/bezier.md
+      - Virtual Cells (VKCell): components/virtual.md
+      - Parameterized Cells: components/pcells.md
+      - Factory Functions: components/factories.md
   - Enclosures:
-      - Cross-Sections: enclosures/cross_sections.py
-      - Layer Enclosure: enclosures/layer_enclosure.py
-      - KCell Enclosure: enclosures/kcell_enclosure.py
+      - Cross-Sections: enclosures/cross_sections.md
+      - Layer Enclosure: enclosures/layer_enclosure.md
+      - KCell Enclosure: enclosures/kcell_enclosure.md
   - Utilities:
-      - Grid Layout: utilities/grid.py
-      - DRC Fixing: utilities/drc_fix.py
-      - Packing: utilities/packing.py
-      - Regression Testing: utilities/difftest.py
-      - Fill: utilities/fill.py
-      - Session Cache: utilities/session_cache.py
+      - Grid Layout: utilities/grid.md
+      - DRC Fixing: utilities/drc_fix.md
+      - Packing: utilities/packing.md
+      - Regression Testing: utilities/difftest.md
+      - Fill: utilities/fill.md
+      - Session Cache: utilities/session_cache.md
   - PDK:
-      - Creating a PDK: pdk/creating_pdk.py
-      - Technology & Layer Stack: pdk/technology.py
+      - Creating a PDK: pdk/creating_pdk.md
+      - Technology & Layer Stack: pdk/technology.md
   - Schematics:
-      - Overview: schematics/overview.py
-      - Netlist & I/O: schematics/netlist.py
-      - 45° Crossing: schematics/crossing45.py
+      - Overview: schematics/overview.md
+      - Netlist & I/O: schematics/netlist.md
+      - 45° Crossing: schematics/crossing45.md
   - How-To Guides:
-      - Best Practices: howto/best_practices.py
-      - Common Patterns: howto/patterns.py
+      - Best Practices: howto/best_practices.md
+      - Common Patterns: howto/patterns.md
       - FAQ: howto/faq.md
       - Contributing: howto/contributing.md
   - Migration: migration.md
@@ -96,13 +96,8 @@ markdown_extensions:
       check_paths: true
 
 plugins:
-  - gen-files:
-      scripts:
-        - scripts/gen_diagrams.py
-        - scripts/gen_ref_pages.py
   - mkdocstrings:
       enabled: true
-      # custom_templates: templates
       default_handler: python
       handlers:
         python:
@@ -110,7 +105,6 @@ plugins:
             show_source: true
             allow_inspection: true
             docstring_style: google
-            # ignore_init_summary: true
             separate_signature: true
             show_signature_annotations: true
             members_order: alphabetical
@@ -124,22 +118,6 @@ plugins:
       video_type: webm
       video_muted: true
   - search
-  - mkdocs-jupyter:
-      include_source: true
-      # ignore_h1_titles: true
-      include_requirejs: true
-      execute: true
-      allow_errors: false
-      kernel_name: python3
-      execute_ignore:
-        - "source/*.py"
-      ignore: ["source/*.py"]
-      remove_tag_config:
-        remove_input_tags:
-          - hide
-        remove_output_tags:
-          - hide
   - literate-nav:
       nav_file: SUMMARY.md
   - section-index
-  - markdown-exec

@@ -6,6 +6,8 @@
 .idea
 Pipfile
 docs/_build/
+docs/source-built/
+docs/.build-cache/
 site/
 
 # Packages
