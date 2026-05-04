@@ -31,12 +31,13 @@ from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
 from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
 from .netlist import Netlist
 from .schematic import (
-    Schematic,
     DSchematic,
+    DSchema,
+    PathLengthMatch,
+    Schematic,
+    Schema,
     get_schematic,
     read_schematic,
-    Schema,
-    DSchema,
 )
 from .instances import Instances, DInstances, VInstances
 from .settings import KCellSettings, Info
@@ -118,6 +119,7 @@ __all__ = [
     "LayerInfos",
     "LayerStack",
     "Netlist",
+    "PathLengthMatch",
     "Pin",
     "Pins",
     "Port",
