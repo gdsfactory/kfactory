@@ -166,29 +166,30 @@ reference, not just the notebooks.
   `kfactory.cross_section.{CrossSection,DCrossSection}` (classes
   exist but lack class-level docstrings so mkdocstrings filters them).
 
-### Phase 2 — Cut over to zensical — **DONE 2026-05-04 (partial; mkdocs kept as primary)**
+### Phase 2 — Cut over to zensical — **DONE 2026-05-04**
 
 What's done:
-- [x] `mkdocs.yml` rewritten to point at `docs_dir: source-built/`
-  with all nav entries as `.md` (was `.py`). Removed the
-  `mkdocs-jupyter`, `mkdocs-gen-files`, and `markdown-exec` plugin
-  blocks (their work is now done by the pre-build script).
-- [x] `pyproject.toml` `docs` extra: dropped `mkdocs-jupyter`,
-  `mkdocs-gen-files`, `markdown-exec`. Added `kfactory[notebooks]`.
-- [x] New `docs-zensical` extra: `kfactory[ipy,notebooks]`,
-  `zensical>=0.0.40`, plus the same mkdocstrings/literate-nav/video
-  plugins (zensical reads mkdocs.yml natively).
-- [x] `Justfile` recipes:
+- [x] `docs/mkdocs.yml` → `docs/zensical.yml`. Points at
+  `docs_dir: source-built/` with all nav entries as `.md`. Removed
+  the `mkdocs-jupyter`, `mkdocs-gen-files`, and `markdown-exec`
+  plugin blocks (their work is now done by the pre-build script).
+- [x] `pyproject.toml` `docs` extra is now zensical-only:
+  `kfactory[ipy,notebooks]`, `zensical>=0.0.40`,
+  `mkdocs-literate-nav`, `mkdocs-video`, `mkdocstrings[python]`,
+  `pymdown-extensions`, `griffe-*`, `erdantic`. Dropped: `mkdocs`,
+  `mkdocs-material`, `mkdocs-jupyter`, `mkdocs-gen-files`,
+  `mkdocs-section-index`, `markdown-exec`. The transitional
+  `docs-zensical` extra has been folded back into `docs`.
+- [x] `Justfile` simplified to a single render path:
   - `docs-build-source` → runs the pre-build script
-  - `docs` / `docs-serve` → mkdocs against `mkdocs.yml` (depends on
-    `docs-build-source`)
-  - `docs-zensical` / `docs-zensical-serve` → zensical against the
-    same `mkdocs.yml` (also depends on `docs-build-source`)
-- [x] `.gitignore`: added `docs/source-built/` and
-  `docs/.build-cache/`.
-- [x] Verified: cold `just docs` = 22 s notebooks + 11 s mkdocs;
-  cold `just docs-zensical` = 22 s notebooks + 10 s zensical; warm
-  rebuilds drop to ~11 s and ~10 s respectively (notebooks cached).
+  - `docs` / `docs-serve` → zensical against `zensical.yml`
+    (depends on `docs-build-source`)
+- [x] `zensical.yml`: switched the `pymdownx.emoji` helpers from
+  `material.extensions.*` to `zensical.extensions.{twemoji,to_svg}`
+  directly — no compat shim needed now that mkdocs is gone.
+- [x] `.gitignore`: `docs/source-built/` and `docs/.build-cache/`.
+- [x] Verified: cold `just docs` = 22 s notebooks + ~11 s zensical;
+  warm rebuild = ~0.25 s pre-build + ~10 s render.
 
 Remaining zensical-specific gaps (not blocking, recorded for tracking):
 - 21 zensical warnings (vs 2 under mkdocs). All pre-existing source
@@ -214,16 +215,6 @@ Pipeline workarounds folded into the conversion script:
   every bracketed token (`kcls["..."]`) becomes a fake link reference.
 - `docs/overrides/main.html` did not need rewriting — MiniJinja
   accepts the existing template content.
-
-Decision: **Keep `just docs` (mkdocs) as the canonical docs build for
-now.** Zensical is one fix away (mkdocstrings module wiring) from
-producing warning-parity output. Switch the canonical path to
-`just docs-zensical` when:
-
-1. Zensical's mkdocstrings module starts resolving `[Text][module.path]`
-   references; OR
-2. We rewrite `gdsfactory.md` to use absolute URLs to the API ref
-   pages (eliminating the dependency on autorefs).
 
 ### Phase 3 — CI caching + contributor docs — **DONE 2026-05-04**
 

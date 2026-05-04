@@ -51,6 +51,9 @@ automatically before `just test`).
 
 ## Building the docs
 
+The docs build uses [zensical](https://zensical.org), the successor to
+mkdocs by the Material for MkDocs team.
+
 ```bash
 # Build once (outputs to docs/site/)
 just docs
@@ -60,9 +63,6 @@ just docs-serve
 
 # Remove the build artefact
 just docs-clean
-
-# Optional: build with zensical (the mkdocs successor)
-just docs-zensical
 ```
 
 The build runs in two stages:
@@ -73,8 +73,8 @@ The build runs in two stages:
    stub pages under `docs/source-built/reference/`. Outputs go to
    `docs/source-built/` (gitignored). Runs are cached by content hash
    in `docs/.build-cache/` — only changed notebooks re-execute.
-2. **Render**: mkdocs (or zensical) reads `docs/source-built/` and
-   produces the final HTML in `docs/site/`.
+2. **Render**: zensical reads `docs/source-built/` and produces the
+   final HTML in `docs/site/`.
 
 Any exception in a notebook stops the build. Always run `just docs`
 locally before opening a docs PR.
@@ -128,7 +128,7 @@ docs/
   source/              # documentation pages (Markdown + jupytext .py notebooks)
   source-built/        # pre-build output (gitignored — created by docs-build-source)
   scripts/             # build_docs_source.py (notebook → .md + .ipynb pipeline)
-  zensical.yml         # navigation + plugin config (read by both mkdocs and zensical)
+  zensical.yml         # navigation + plugin config
 Justfile               # common dev commands
 pyproject.toml         # package metadata + dependencies
 ```
@@ -140,8 +140,7 @@ pyproject.toml         # package metadata + dependencies
 | `kfactory[dev]` | Full dev environment (CI + type stubs + pre-commit) |
 | `kfactory[ci]` | Test dependencies (`pytest`, coverage, etc.) |
 | `kfactory[notebooks]` | Notebook conversion pipeline (`jupytext`, `nbconvert`, `ipykernel`) |
-| `kfactory[docs]` | Documentation build via mkdocs (pulls in `[notebooks]`) |
-| `kfactory[docs-zensical]` | Documentation build via zensical (pulls in `[notebooks]`) |
+| `kfactory[docs]` | Documentation build via zensical (pulls in `[notebooks]`) |
 | `kfactory[ipy]` | Jupyter / IPython display helpers (`kf.show`, `.plot()`) |
 
 ## Getting help
