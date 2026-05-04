@@ -983,7 +983,11 @@ ipy = [
     { name = "ipywidgets" },
 ]
 notebooks = [
+    { name = "ipyevents" },
     { name = "ipykernel" },
+    { name = "ipython" },
+    { name = "ipytree" },
+    { name = "ipywidgets" },
     { name = "jupytext" },
     { name = "nbconvert" },
 ]
@@ -1008,7 +1012,7 @@ requires-dist = [
     { name = "ipywidgets", marker = "extra == 'ipy'", specifier = ">=8.1.5" },
     { name = "jupytext", marker = "extra == 'notebooks'", specifier = ">=1.16.4" },
     { name = "kfactory", extras = ["ci"], marker = "extra == 'dev'" },
-    { name = "kfactory", extras = ["ipy"], marker = "extra == 'docs'" },
+    { name = "kfactory", extras = ["ipy"], marker = "extra == 'notebooks'" },
     { name = "kfactory", extras = ["notebooks"], marker = "extra == 'docs'" },
     { name = "klayout", specifier = "~=0.30.8" },
     { name = "loguru", specifier = ">=0.7.3,<0.8" },

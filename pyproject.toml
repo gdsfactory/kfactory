@@ -56,8 +56,7 @@ dev = [
     "scipy-stubs",
 ]
 docs = [
-    "kfactory[ipy]",
-    "kfactory[notebooks]",
+    "kfactory[notebooks]",  # transitively pulls in kfactory[ipy]
     "erdantic>=1.1.1",
     "zensical>=0.0.40",
     # Zensical's tailored fork of mike for versioned docs deployment
@@ -91,6 +90,10 @@ ipy = [
     "ipywidgets>=8.1.5",
 ]
 notebooks = [
+    # Notebook conversion needs the IPython display helpers
+    # (`c.plot()` lazy-imports kfactory.widgets.interactive, which
+    # pulls in ipyevents/ipywidgets/ipytree from the [ipy] extra).
+    "kfactory[ipy]",
     "jupytext>=1.16.4",
     "nbconvert>=7.16.4",
     "ipykernel>=6.29.5",
