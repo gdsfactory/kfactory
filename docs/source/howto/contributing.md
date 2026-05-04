@@ -128,7 +128,7 @@ docs/
   source/              # documentation pages (Markdown + jupytext .py notebooks)
   source-built/        # pre-build output (gitignored — created by docs-build-source)
   scripts/             # build_docs_source.py (notebook → .md + .ipynb pipeline)
-  mkdocs.yml           # navigation + plugin config
+  zensical.yml         # navigation + plugin config (read by both mkdocs and zensical)
 Justfile               # common dev commands
 pyproject.toml         # package metadata + dependencies
 ```
