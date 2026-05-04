@@ -236,8 +236,7 @@ kf.routing.optical.route_bundle(
             # With this start/end layout, right-side loops protrude east into
             # the next route's space; one big loop overlaps. Splitting into
             # two smaller loops keeps each loop short enough to clear the
-            # neighbour. Verify with c_right.connectivity_check() — only
-            # OrphanPort items (start/end ports) should remain.
+            # neighbour (verifiable with `c.connectivity_check()`).
             loops=2,
             loop_position=0,
         )
