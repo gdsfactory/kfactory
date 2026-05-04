@@ -4,15 +4,13 @@ site_url: https://gdsfactory.github.io/kfactory
 docs_dir: source-built
 
 nav:
-  - Home:
-      - Intro: index.md
-      - gdsfactory.md
+  - Home: index.md
   - Getting Started:
       - Prerequisites: getting_started/prerequisites.md
       - Installation: getting_started/installation.md
       - 5-Minute Quickstart: getting_started/quickstart.md
       - KLive Setup: getting_started/klive_setup.md
-  - Core Concepts:
+  - Concepts:
       - KCell: concepts/kcell.md
       - Layers: concepts/layers.md
       - Ports: concepts/ports.md
@@ -20,6 +18,21 @@ nav:
       - Geometry: concepts/geometry.md
       - KCLayout: concepts/kclayout.md
       - DBU vs µm: concepts/dbu_vs_um.md
+  - Components:
+      - Cells:
+          - Overview: components/overview.md
+          - Straight Waveguide: components/straight.md
+          - Euler Bends: components/euler.md
+          - Circular Bends: components/circular.md
+          - Taper: components/taper.md
+          - Bezier S-Bends: components/bezier.md
+          - Virtual Cells (VKCell): components/virtual.md
+          - Parameterized Cells: components/pcells.md
+          - Factory Functions: components/factories.md
+      - Enclosures:
+          - Cross-Sections: enclosures/cross_sections.md
+          - Layer Enclosure: enclosures/layer_enclosure.md
+          - KCell Enclosure: enclosures/kcell_enclosure.md
   - Routing:
       - Overview: routing/overview.md
       - Optical: routing/optical.md
@@ -28,20 +41,13 @@ nav:
       - All-Angle: routing/all_angle.md
       - Bundle Reference: routing/bundle.md
       - Path-Length Matching: routing/path_length.md
-  - Components:
-      - Overview: components/overview.md
-      - Straight Waveguide: components/straight.md
-      - Euler Bends: components/euler.md
-      - Circular Bends: components/circular.md
-      - Taper: components/taper.md
-      - Bezier S-Bends: components/bezier.md
-      - Virtual Cells (VKCell): components/virtual.md
-      - Parameterized Cells: components/pcells.md
-      - Factory Functions: components/factories.md
-  - Enclosures:
-      - Cross-Sections: enclosures/cross_sections.md
-      - Layer Enclosure: enclosures/layer_enclosure.md
-      - KCell Enclosure: enclosures/kcell_enclosure.md
+  - PDK:
+      - Creating a PDK: pdk/creating_pdk.md
+      - Technology & Layer Stack: pdk/technology.md
+      - Schematics:
+          - Overview: schematics/overview.md
+          - Netlist & I/O: schematics/netlist.md
+          - 45° Crossing: schematics/crossing45.md
   - Utilities:
       - Grid Layout: utilities/grid.md
       - DRC Fixing: utilities/drc_fix.md
@@ -49,22 +55,17 @@ nav:
       - Regression Testing: utilities/difftest.md
       - Fill: utilities/fill.md
       - Session Cache: utilities/session_cache.md
-  - PDK:
-      - Creating a PDK: pdk/creating_pdk.md
-      - Technology & Layer Stack: pdk/technology.md
-  - Schematics:
-      - Overview: schematics/overview.md
-      - Netlist & I/O: schematics/netlist.md
-      - 45° Crossing: schematics/crossing45.md
-  - How-To Guides:
+  - Guides:
       - Best Practices: howto/best_practices.md
       - Common Patterns: howto/patterns.md
       - FAQ: howto/faq.md
       - Contributing: howto/contributing.md
-  - Migration: migration.md
-  - Config Class: config.md
-  - API: reference/
-  - Changelog: changelog.md
+      - vs gdsfactory: gdsfactory.md
+  - Reference:
+      - API: reference/
+      - Config Class: config.md
+      - Migration: migration.md
+      - Changelog: changelog.md
 theme:
   name: "material"
   features:
