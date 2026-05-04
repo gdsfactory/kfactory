@@ -449,7 +449,7 @@ def route_bundle(
             starts = [starts for _ in range(len(start_ports))]
         else:
             starts = cast("list[int]", starts)
-            starts = [[Straight(dist=s) for s in starts]] * len(start_ports)  # ty:ignore[invalid-assignment]
+            starts = [[Straight(dist=s) for s in starts]] * len(start_ports)
     if ends is None or ends == []:
         ends = [[]] * length
     elif isinstance(ends, int):
@@ -459,7 +459,7 @@ def route_bundle(
             ends = [ends for _ in range(len(end_ports))]
         else:
             ends = cast("list[int]", ends)
-            ends = [[Straight(dist=e) for e in ends]] * len(end_ports)  # ty:ignore[invalid-assignment]
+            ends = [[Straight(dist=e) for e in ends]] * len(end_ports)
 
     if start_angles is not None:
         if isinstance(start_angles, int):
@@ -507,8 +507,8 @@ def route_bundle(
         start_ports=start_ports,
         end_ports=end_ports,
         widths=widths,
-        starts=cast("list[list[Step]]", starts),
-        ends=cast("list[list[Step]]", ends),
+        starts=starts,
+        ends=ends,
         **routing_kwargs,
     )
 

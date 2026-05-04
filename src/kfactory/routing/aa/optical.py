@@ -32,11 +32,11 @@ def _angle(v: kdb.DVector) -> float:
 
 
 class VirtualStraightFactory(Protocol):
-    def __call__(self, width: float, length: float) -> VKCell: ...
+    def __call__(self, *, width: float, length: float) -> VKCell: ...
 
 
 class VirtualBendFactory(Protocol):
-    def __call__(self, width: float, angle: float) -> VKCell: ...
+    def __call__(self, *, width: float, angle: float) -> VKCell: ...
 
 
 def route(

@@ -43,13 +43,21 @@ def test_check_metadata_type() -> None:
     ):
         check_metadata_type({1, 2, 3})
 
-    with pytest.raises(ValueError, match=r"^Values of the info dict only support.*"):
+    with pytest.raises(
+        ValueError, match=r"^MetaData values of the info dict only support.*"
+    ):
         check_metadata_type([object()])
-    with pytest.raises(ValueError, match=r"^Values of the info dict only support.*"):
+    with pytest.raises(
+        ValueError, match=r"^MetaData values of the info dict only support.*"
+    ):
         check_metadata_type((object(),))
-    with pytest.raises(ValueError, match=r"^Values of the info dict only support.*"):
+    with pytest.raises(
+        ValueError, match=r"^MetaData values of the info dict only support.*"
+    ):
         check_metadata_type({"k": object()})
-    with pytest.raises(ValueError, match=r"^Values of the info dict only support.*"):
+    with pytest.raises(
+        ValueError, match=r"^MetaData values of the info dict only support.*"
+    ):
         check_metadata_type([[object()]])
 
 
