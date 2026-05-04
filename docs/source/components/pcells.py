@@ -36,7 +36,7 @@
 # |---|---|---|
 # | `@kf.cell` | `KCell` (DBU integers) | DBU |
 # | `@kf.cell(output_type=kf.DKCell)` | `DKCell` (µm floats) | µm |
-# | `@kf.vcell` | `VKCell` (virtual, not cached in layout) | any |
+# | `@kf.vcell` | `VKCell` (virtual; geometry is materialised in the layout only when the cell is inserted into a `KCell`) | any |
 # | `@pdk.cell` | `KCell` bound to a specific `KCLayout` | DBU |
 #
 # ## Setup
