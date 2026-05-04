@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   update_release_draft:
-    if: github.base_ref == 'main'
+    if: github.event_name == 'push' || github.base_ref == 'main'
     permissions:
       contents: write
       pull-requests: write
