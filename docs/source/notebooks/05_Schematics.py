@@ -13,6 +13,7 @@
 # Imports
 import kfactory as kf
 import numpy as np
+import warnings
 
 from IPython.core.getipython import get_ipython
 from pprint import pformat
@@ -705,7 +706,10 @@ c = crossing45(8, pitch=30, cross_section="WG1000")
 c
 
 # %%
-scrollable_text(pformat(c.schematic.model_dump(exclude_defaults=True)))
+with warnings.catch_warnings():
+    # capture pydantic serialization warnings due to generic type mismatch
+    warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
+    scrollable_text(pformat(c.schematic.model_dump(exclude_defaults=True)))
 
 # %% [markdown]
 # ### Sample LVS of schematic vs extracted (Connection) Netlist

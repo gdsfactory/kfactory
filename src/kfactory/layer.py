@@ -103,10 +103,10 @@ class LayerEnum(int, Enum):  # ty:ignore[unsupported-base]
         """
         value = cls.layout.layer(layer, datatype)
         obj: int = int.__new__(cls, value)
-        obj._value_ = value
-        obj.layer = layer
-        obj.datatype = datatype
-        return obj
+        obj._value_ = value  # ty:ignore[unresolved-attribute]
+        obj.layer = layer  # ty:ignore[unresolved-attribute]
+        obj.datatype = datatype  # ty:ignore[unresolved-attribute]
+        return obj  # ty:ignore[invalid-return-type]
 
     def __getitem__(self, key: int) -> int:
         """Retrieve layer number[0] / datatype[1] of a layer."""
