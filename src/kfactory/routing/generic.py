@@ -9,7 +9,7 @@ import klayout.db as kdb
 from klayout import rdb
 from pydantic import BaseModel, Field
 
-from ..conf import config, logger
+from ..conf import logger
 from ..instance import Instance  # noqa: TC001
 from ..port import BasePort, Port, ProtoPort
 from ..typings import dbu  # noqa: TC001
@@ -161,7 +161,7 @@ def check_collisions(
         dbu = c.kcl.dbu
         db = rdb.ReportDatabase("Routing Errors")
         cat = db.create_category("Manhattan Routing Collisions")
-        c.name = c.name[: config.max_cellname_length]
+        c.name = c.kcl.future_cell_name or c.name
         cell = db.create_cell(c.name)
         for name, edges in collision_edges.items():
             item = db.create_item(cell, cat)
@@ -449,7 +449,7 @@ def route_bundle(
             starts = [starts for _ in range(len(start_ports))]
         else:
             starts = cast("list[int]", starts)
-            starts = [[Straight(dist=s) for s in starts]] * len(start_ports)  # ty:ignore[invalid-assignment]
+            starts = [[Straight(dist=s) for s in starts]] * len(start_ports)
     if ends is None or ends == []:
         ends = [[]] * length
     elif isinstance(ends, int):
@@ -459,7 +459,7 @@ def route_bundle(
             ends = [ends for _ in range(len(end_ports))]
         else:
             ends = cast("list[int]", ends)
-            ends = [[Straight(dist=e) for e in ends]] * len(end_ports)  # ty:ignore[invalid-assignment]
+            ends = [[Straight(dist=e) for e in ends]] * len(end_ports)
 
     if start_angles is not None:
         if isinstance(start_angles, int):
@@ -507,8 +507,8 @@ def route_bundle(
         start_ports=start_ports,
         end_ports=end_ports,
         widths=widths,
-        starts=cast("list[list[Step]]", starts),
-        ends=cast("list[list[Step]]", ends),
+        starts=starts,
+        ends=ends,
         **routing_kwargs,
     )
 
@@ -552,11 +552,8 @@ def route_bundle(
             error_routes.append((ps, pe, router.start.pts, router.width))
     if placer_errors and on_placer_error == "show_error":
         db = rdb.ReportDatabase("Route Placing Errors")
-        cell = db.create_cell(
-            c.name
-            if not c.name.startswith("Unnamed_")
-            else c.kcl.future_cell_name or c.name
-        )
+        c.name = c.kcl.future_cell_name or c.name
+        cell = db.create_cell(c.name)
         for error, (ps, pe, pts, width) in zip(
             placer_errors, error_routes, strict=False
         ):

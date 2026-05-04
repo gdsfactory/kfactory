@@ -1067,7 +1067,7 @@ def place_manhattan(
     )
     if taper_cell is not None:
         taper_cell = KCell(base=taper_cell.base)
-        taper_ports = [p for p in taper_cell.ports if p.port_type == "optical"]
+        taper_ports = [p for p in taper_cell.ports if p.port_type == port_type]
         if (
             len(taper_ports) != NUM_PORTS_FOR_ROUTING
             or (taper_ports[1].trans.angle + 2) % 4 != taper_ports[0].trans.angle

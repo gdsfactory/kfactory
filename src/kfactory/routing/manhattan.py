@@ -2733,7 +2733,7 @@ def clean_points(
     del_points: list[int] = []
 
     for i, p_n in enumerate(points[2:], 2):
-        v2 = p_n - p
+        v2 = p_n - p  # ty:ignore[unsupported-operator]
         v1 = p - p_p  # ty:ignore[unsupported-operator]
 
         if (

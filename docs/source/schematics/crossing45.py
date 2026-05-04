@@ -28,8 +28,11 @@
 # - LVS verification and code generation from the resulting schematic
 
 # %%
+import warnings
+
 import kfactory as kf
 import numpy as np
+from IPython.core.getipython import get_ipython
 from pprint import pformat
 
 # %% [markdown]
@@ -481,7 +484,10 @@ c
 # serialisable Pydantic structure.
 
 # %%
-print(pformat(c.schematic.model_dump(exclude_defaults=True)))
+with warnings.catch_warnings():
+    # capture pydantic serialization warnings due to generic type mismatch
+    warnings.filterwarnings("ignore", category=UserWarning, module="pydantic")
+    scrollable_text(pformat(c.schematic.model_dump(exclude_defaults=True)))
 
 # %% [markdown]
 # ## LVS: schematic vs extracted netlist

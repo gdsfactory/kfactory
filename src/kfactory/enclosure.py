@@ -505,6 +505,20 @@ class LayerEnclosure(BaseModel, arbitrary_types_allowed=True, frozen=True):
     main_layer: kdb.LayerInfo | None
     bbox_sections: dict[kdb.LayerInfo, int]
 
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, LayerEnclosure):
+            if self.main_layer is not None and other.main_layer is not None:
+                layer_info_equal = self.main_layer.is_equivalent(other.main_layer)
+            else:
+                layer_info_equal = self.main_layer == other.main_layer
+            return (
+                self.layer_sections == other.layer_sections
+                and self.name == other.name
+                and layer_info_equal
+                and self.bbox_sections == other.bbox_sections
+            )
+        return False
+
     def __init__(
         self,
         sections: Sequence[
