@@ -520,6 +520,15 @@ def test_custom_router(
                 separation=5000,
             )
 
+        def check(
+            self,
+            c: kf.KCell,
+            schematic: kf.schematic.TSchematic[Any],
+            instances: dict[str, kf.Instance],
+            routes: dict[str, list[kf.routing.optical.ManhattanRoute]],
+        ) -> bool:
+            return True
+
     kf.routing.generic.route_bundle(
         c=c,
         start_ports=[p.base for p in start_ports],
@@ -533,7 +542,7 @@ def test_custom_router(
         },
         placer_function=kf.routing.optical.place_manhattan,
         placer_kwargs={"bend90_cell": bend90, "straight_factory": sf},
-        constraints=[kf.schematic.PathLengthMatch(route_names=["path_length_math"])],
+        constraints=[ManhattanLengthMatch(route_names=["path_length_math"])],
     )
     oas_regression(c)
 

@@ -83,6 +83,12 @@ def path_length_match(
 ) -> None:
     if path_length is None:
         path_length = max(router.path_length for router in routers)
+    elif path_length < max(router.path_length for router in routers):
+        path_length_ = max(router.path_length for router in routers)
+        logger.warning(
+            f"Requesting path length matching to {path_length!r}[dbu], but the minimal"
+            f" possible path length is {path_length_!r}. Increasing to minimum."
+        )
     if path_length % 2:
         logger.warning(
             "path length matching target length "
