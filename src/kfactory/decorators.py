@@ -8,9 +8,10 @@ import re
 from collections import defaultdict
 from collections.abc import Callable
 from enum import StrEnum
+from operator import attrgetter
 from pathlib import Path
 from threading import RLock
-from types import FunctionType
+from types import FunctionType, UnionType
 from typing import (
     TYPE_CHECKING,
     Annotated,
@@ -23,8 +24,9 @@ from typing import (
 )
 
 from cachetools import Cache, cached
+from cachetools.keys import hashkey
 
-from . import kdb
+from . import CrossSection, DCrossSection, SymmetricalCrossSection, kdb
 from .conf import CheckInstances, CheckUnnamedCells, logger
 from .exceptions import CellNameError
 from .kcell import AnyKCell, ProtoKCell, ProtoTKCell, TKCell, VKCell
@@ -39,7 +41,7 @@ from .serialization import (
 from .settings import KCellSettings, KCellSettingsUnits
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Sequence
+    from collections.abc import Callable, Hashable, Iterable, Sequence
 
     from .layout import KCLayout
     from .schematic import TSchematic
@@ -357,7 +359,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
     _f: Callable[KCellParams, KC]
     _f_orig: Callable[KCellParams, ProtoTKCell[Any]]
     _f_schematic: Callable[KCellParams, TSchematic[Any]] | None = None
-    cache: Cache[int, KC] | dict[int, Any]
+    cache: Cache[Hashable, Any] | dict[Hashable, Any]
     name: str
     kcl: KCLayout
     output_type: type[KC]
@@ -372,7 +374,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
         f: Callable[KCellParams, ProtoTKCell[Any]],
         sig: inspect.Signature,
         output_type: type[KC],
-        cache: Cache[int, KC] | dict[int, KC],
+        cache: Cache[Hashable, KC] | dict[Hashable, KC],
         set_settings: bool,
         set_name: bool,
         check_ports: bool,
@@ -392,6 +394,12 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
         ports: PortsDefinition | None = None,
         tags: Sequence[str] | None = None,
         schematic_function: Callable[KCellParams, TSchematic[Any]] | None = None,
+        type_serializers: Sequence[tuple[type | UnionType, Callable[[Any], Any]]] = (
+            (
+                SymmetricalCrossSection | CrossSection | DCrossSection,
+                attrgetter("name"),
+            ),
+        ),
     ) -> None:
         self.kcl = kcl
         self.output_type = output_type
@@ -417,7 +425,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
                     # If any cell has been destroyed, we should clean up the cache.
                     # Delete all the KCell entrances in the cache which have
                     # `destroyed() == True`
-                    deleted_cell_hashes: list[int] = [
+                    deleted_cell_hashes: list[Hashable] = [
                         _hash_item
                         for _hash_item, _cell_item in cache.items()
                         if _cell_item.destroyed()
@@ -431,7 +439,13 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
 
                 return cell_
 
-        @cached(cache=cache, lock=RLock())
+        @cached(
+            cache=cache,
+            lock=RLock(),
+            key=get_keys_function(
+                drop_args=drop_params, serialize_types=type_serializers
+            ),
+        )
         def wrapped_cell(**params: Any) -> KC:
 
             _params_to_original(params)
@@ -644,7 +658,7 @@ class WrappedKCellFunc[**KCellParams, KC: ProtoTKCell[Any]]:
 class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
     _f: Callable[VKCellParams, VK]
     _f_orig: Callable[VKCellParams, VKCell]
-    cache: Cache[int, VK] | dict[int, Any]
+    cache: Cache[Hashable, VK] | dict[Hashable, Any]
     name: str
     kcl: KCLayout
     output_type: type[VK]
@@ -659,7 +673,7 @@ class WrappedVKCellFunc[**VKCellParams, VK: VKCell]:
         f: Callable[VKCellParams, VKCell],
         sig: inspect.Signature,
         output_type: type[VK],
-        cache: Cache[int, VK] | dict[int, VK],
+        cache: Cache[Hashable, VK] | dict[Hashable, VK],
         set_settings: bool,
         set_name: bool,
         check_ports: bool,
@@ -964,3 +978,26 @@ class Decorators:
             return _module_cell(self._cell, **kwargs)  # ty:ignore[invalid-argument-type]
 
         return mc(**kwargs) if _func is None else mc(**kwargs)(_func)
+
+
+def get_keys_function(
+    drop_args: Sequence[str],
+    serialize_types: Sequence[tuple[type | UnionType, Callable[[Any], Any]]],
+) -> Callable[..., tuple[Hashable, ...]]:
+    types_ = tuple(st[0] for st in serialize_types)
+
+    def _keys_function(*args: Any, **kwargs: Any) -> tuple[Hashable, ...]:
+        for arg in drop_args:
+            kwargs.pop(arg, None)
+
+        updates: dict[str, Any] = {}
+        for key, value in kwargs.items():
+            if isinstance(value, types_):
+                for type_, serializer in serialize_types:
+                    if isinstance(value, type_):
+                        updates[key] = serializer(value)
+                        break
+        kwargs.update(updates)
+        return hashkey(*args, **kwargs)
+
+    return _keys_function
