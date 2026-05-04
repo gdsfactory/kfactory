@@ -60,6 +60,9 @@ docs = [
     "kfactory[notebooks]",
     "erdantic>=1.1.1",
     "zensical>=0.0.40",
+    # Zensical's tailored fork of mike for versioned docs deployment
+    # (per https://zensical.org/docs/setup/versioning/).
+    "mike @ git+https://github.com/squidfunk/mike.git",
     "mkdocs-literate-nav>=0.6.2",
     "mkdocs-video>=1.5.0",
     "mkdocstrings[python]>=0.29.0",

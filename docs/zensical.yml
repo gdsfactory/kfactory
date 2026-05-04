@@ -83,6 +83,15 @@ theme:
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
+
+# Multi-version docs via mike (zensical fork). The CI workflow deploys
+# `main` → dev alias and tagged releases → <version> + latest alias.
+# https://zensical.org/docs/setup/versioning/
+extra:
+  version:
+    provider: mike
+    default: latest
+
 watch:
   - ../src/kfactory
 
