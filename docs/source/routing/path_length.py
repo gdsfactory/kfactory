@@ -33,10 +33,12 @@
 #
 # ## How it works in kfactory
 #
-# Pass `path_length_matching_config` to `route_bundle`.  After all backbones are computed
-# kfactory calls `path_length_match` as a post-processing step.  It measures the longest
-# route in the bundle, then inserts a "squiggle" loop (a 4-point detour made from two
-# 90° bends) into each shorter route until all lengths are equal.
+# Pass `kf.PathLengthMatch(...)` as a routing **constraint** to `route_bundle`, and
+# tag the bundle with `route_name=`.  After the backbones are computed but before any
+# instances are placed, the constraint runs `path_length_match` over the routers
+# whose `route_name` it matches.  It measures the longest router in the matched set,
+# then inserts a "squiggle" loop (a 4-point detour made from two 90° bends) into
+# each shorter router until all lengths are equal.
 #
 # ## Setup
 
@@ -129,9 +131,9 @@ c_baseline
 # %% [markdown]
 # ## 2 · Basic path-length matching
 #
-# Add `path_length_matching_config={"element": -1, "loop_side": -1, "loops": 1,
-# "loop_position": 0}` to insert loops in the last backbone segment (`element=-1`), on
-# the left side, centered in the segment.
+# Pass `constraints=[kf.PathLengthMatch(route_names=["..."], element=-1, loop_side=-1,
+# loops=1, loop_position=0)]` plus `route_name="..."` to insert loops in the last
+# backbone segment (`element=-1`), on the left side, centered in the segment.
 
 # %%
 c_plm = kf.KCell("plm_basic")
@@ -163,12 +165,16 @@ routes_plm = kf.routing.optical.route_bundle(
     straight_factory=straight_factory,
     bend90_cell=bend90,
     on_collision=None,
-    path_length_matching_config={
-        "element": -1,      # last backbone segment
-        "loop_side": -1,    # loops protrude to the left  (-1=left, 0=center, 1=right)
-        "loops": 1,         # one squiggle loop per route
-        "loop_position": 0, # loop is centered in the segment
-    },
+    constraints=[
+        kf.PathLengthMatch(
+            route_names=["plm_basic"],
+            element=-1,        # last backbone segment
+            loop_side=-1,      # loops protrude to the left (-1=left, 0=center, 1=right)
+            loops=1,           # one squiggle loop per route
+            loop_position=0,   # loop is centered in the segment
+        )
+    ],
+    route_name="plm_basic",
 )
 
 print("Matched lengths (µm):", [round(r.length / 1000, 1) for r in routes_plm])
@@ -222,12 +228,16 @@ kf.routing.optical.route_bundle(
     straight_factory=straight_factory,
     bend90_cell=bend90,
     on_collision=None,
-    path_length_matching_config={
-        "element": -1,
-        "loop_side": 1,     # ← right
-        "loops": 1,
-        "loop_position": 0,
-    },
+    constraints=[
+        kf.PathLengthMatch(
+            route_names=["plm_right"],
+            element=-1,
+            loop_side=1,       # ← right
+            loops=1,
+            loop_position=0,
+        )
+    ],
+    route_name="plm_right",
 )
 c_right
 
@@ -264,12 +274,16 @@ kf.routing.optical.route_bundle(
     straight_factory=straight_factory,
     bend90_cell=bend90,
     on_collision=None,
-    path_length_matching_config={
-        "element": -1,
-        "loop_side": 0,     # ← center (symmetric around route axis)
-        "loops": 1,
-        "loop_position": 0,
-    },
+    constraints=[
+        kf.PathLengthMatch(
+            route_names=["plm_center"],
+            element=-1,
+            loop_side=0,       # ← center (symmetric around route axis)
+            loops=1,
+            loop_position=0,
+        )
+    ],
+    route_name="plm_center",
 )
 c_center
 
@@ -312,12 +326,16 @@ kf.routing.optical.route_bundle(
     straight_factory=straight_factory,
     bend90_cell=bend90,
     on_collision=None,
-    path_length_matching_config={
-        "element": -1,
-        "loop_side": -1,
-        "loops": 1,
-        "loop_position": 1,  # ← near the end of the segment
-    },
+    constraints=[
+        kf.PathLengthMatch(
+            route_names=["plm_pos_end"],
+            element=-1,
+            loop_side=-1,
+            loops=1,
+            loop_position=1,   # ← near the end of the segment
+        )
+    ],
+    route_name="plm_pos_end",
 )
 c_pos_end
 
@@ -359,12 +377,16 @@ routes_l2 = kf.routing.optical.route_bundle(
     straight_factory=straight_factory,
     bend90_cell=bend90,
     on_collision=None,
-    path_length_matching_config={
-        "element": -1,
-        "loop_side": -1,
-        "loops": 2,         # ← two squiggle loops per route
-        "loop_position": 0,
-    },
+    constraints=[
+        kf.PathLengthMatch(
+            route_names=["plm_loops_2"],
+            element=-1,
+            loop_side=-1,
+            loops=2,           # ← two squiggle loops per route
+            loop_position=0,
+        )
+    ],
+    route_name="plm_loops_2",
 )
 
 print("Matched lengths (µm):", [round(r.length / 1000, 1) for r in routes_l2])
@@ -414,12 +436,16 @@ routes_ins = kf.routing.optical.route_bundle(
     straight_factory=straight_factory,
     bend90_cell=bend90,
     on_collision=None,
-    path_length_matching_config={
-        "element": -1,
-        "loop_side": -1,
-        "loops": 1,
-        "loop_position": 0,
-    },
+    constraints=[
+        kf.PathLengthMatch(
+            route_names=["plm_inspect"],
+            element=-1,
+            loop_side=-1,
+            loops=1,
+            loop_position=0,
+        )
+    ],
+    route_name="plm_inspect",
 )
 
 print(f"{'Route':<8} {'length (µm)':>14} {'straights (µm)':>16} {'n_bend90':>10}")
@@ -452,12 +478,17 @@ for i, r in enumerate(routes_ins):
 #
 # ## Summary
 #
-# | Config key | Type | Meaning |
+# `kf.PathLengthMatch` fields:
+#
+# | Field | Type | Meaning |
 # |---|---|---|
+# | `route_names` | `list[str]` | `route_name`s of the bundles to equalise |
 # | `element` | `int` | Backbone segment index. `-1` = last, `0` = first. |
 # | `loop_side` | `int` | `-1` left, `0` center (symmetric), `1` right |
 # | `loops` | `int` | Number of squiggle repetitions per route |
 # | `loop_position` | `int` | `-1` near start, `0` center, `1` near end of segment |
+# | `length` | `int \| None` | Target path length (DBU). `None` = match longest. |
+# | `tolerance` | `int` | Maximum allowed length spread (DBU) after enforcement |
 #
 # **Practical tips:**
 #
@@ -473,7 +504,7 @@ for i, r in enumerate(routes_ins):
 #
 # | Topic | Where |
 # |-------|-------|
-# | Bundle routing that `path_length_matching_config` is part of | [Routing: Bundle](bundle.py) |
+# | Bundle routing that `kf.PathLengthMatch` plugs into | [Routing: Bundle](bundle.py) |
 # | Optical route options including waypoints and stubs | [Routing: Optical](optical.py) |
 # | Routing overview and sub-module map | [Routing: Overview](overview.py) |
 # | Euler bend effective radius (affects loop spacing) | [Components: Euler Bends](../components/euler.py) |

@@ -24,7 +24,7 @@
 # |---|---|
 # | Waypoints | `route_bundle(..., waypoints=[...])` |
 # | Entry / exit stubs | `route_bundle(..., starts=..., ends=...)` |
-# | Path-length matching | `route_bundle(..., path_length_matching_config={...})` |
+# | Path-length matching | `route_bundle(..., constraints=[kf.PathLengthMatch(...)], route_name=...)` |
 # | Loopback — inside variant | `route_loopback(..., inside=True)` |
 # | Direct backbone placement | `place_manhattan(c, p1, p2, pts, ...)` |
 #
@@ -173,20 +173,26 @@ c_stubs
 # ## 3 · Path-length matching
 #
 # When routes travel different distances (e.g. fan-outs from an array where starts are
-# staggered), `path_length_matching_config` inserts small "squiggle" loops on the shorter
-# routes so that all waveguide lengths become equal.
+# staggered), `kf.PathLengthMatch` inserts small "squiggle" loops on the shorter
+# routes so that all waveguide lengths become equal.  It runs as a *constraint* on
+# `route_bundle`: backbones are computed first, then the constraint walks the routers
+# of every bundle whose `route_name` it matches and rewrites the shorter ones.
 #
-# **Config keys** (`PathLengthConfig`):
+# **`PathLengthMatch` fields:**
 #
-# | Key | Type | Meaning |
+# | Field | Type | Meaning |
 # |---|---|---|
+# | `route_names` | `list[str]` | `route_name`s of the bundles to equalise |
 # | `element` | `int` | Which backbone segment to insert the loop into. `-1` = last segment. |
 # | `loop_side` | `int` | `-1` = loop on left, `0` = centered, `1` = loop on right |
 # | `loops` | `int` | Number of loop repetitions |
 # | `loop_position` | `int` | `-1` = near start of segment, `0` = center, `1` = near end |
+# | `length` | `int \| None` | Target path length in DBU. `None` = match the longest router. |
+# | `tolerance` | `int` | Maximum allowed length spread (DBU) after enforcement |
 #
-# > **Note**: All routes must be routed first (the config is a post-processing step), so
-# > routes need enough room for the inserted loops — increase separation or d_loop as needed.
+# > **Note**: All routes must be routed first (the constraint runs after the
+# > backbones are generated), so routes need enough room for the inserted loops —
+# > increase `separation` or stagger ports as needed.
 
 # %%
 c_plm = kf.KCell("opt_path_length_match")
@@ -220,12 +226,16 @@ kf.routing.optical.route_bundle(
     separation=kf.kcl.to_dbu(10),
     straight_factory=straight_factory,
     bend90_cell=bend90,
-    path_length_matching_config={
-        "element": -1,      # insert loop in the last backbone segment
-        "loop_side": -1,    # loops on the left side
-        "loops": 1,
-        "loop_position": 0, # centered in the segment
-    },
+    constraints=[
+        kf.PathLengthMatch(
+            route_names=["plm_demo"],
+            element=-1,        # insert loop in the last backbone segment
+            loop_side=-1,      # loops on the left side
+            loops=1,
+            loop_position=0,   # centered in the segment
+        )
+    ],
+    route_name="plm_demo",
 )
 c_plm
 
@@ -333,7 +343,7 @@ c_pm
 # |---|---|
 # | Route through a fixed corridor | `waypoints=[kdb.Point(...), ...]` |
 # | Guarantee minimum straight before bend | `starts=dbu_length` (scalar or per-route list) |
-# | Equalise optical path lengths | `path_length_matching_config={"element": -1, "loop_side": -1, "loops": 1, "loop_position": 0}` |
+# | Equalise optical path lengths | `constraints=[kf.PathLengthMatch(route_names=["b"], element=-1, loop_side=-1, loops=1, loop_position=0)]`, `route_name="b"` |
 # | Compact inner U-turn | `route_loopback(..., inside=True)` |
 # | Custom routing algorithm output | `place_manhattan(c, p1, p2, pts, straight_factory=..., bend90_cell=...)` |
 #
