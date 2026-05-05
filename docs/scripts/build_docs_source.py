@@ -291,6 +291,17 @@ def gen_api_reference(out_root: Path, src_pkg: Path) -> list[Path]:
     summary = out_root / "reference" / "SUMMARY.md"
     summary.write_text("\n".join(nav_lines) + "\n")
     written.append(summary)
+
+    # Section landing page so the "API" tab itself resolves (without it
+    # the URL `/reference/` 404s — only the per-module pages exist).
+    index = out_root / "reference" / "index.md"
+    index.write_text(
+        "# API Reference\n\n"
+        "Auto-generated from kfactory's source tree. Browse the modules in "
+        "the side panel, or jump straight to the [top-level package]"
+        "(kfactory/index.md).\n"
+    )
+    written.append(index)
     return written
 
 
