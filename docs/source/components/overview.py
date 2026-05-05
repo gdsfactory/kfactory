@@ -129,8 +129,8 @@ wg_dbu.plot()
 # mode mismatch and reflection compared to a circular bend of the same nominal radius.
 #
 # Key parameters:
-# - `width` — waveguide core width [µm]
-# - `radius` — nominal radius of the backbone [µm]
+# - `width` — waveguide core width \[µm\]
+# - `radius` — nominal radius of the backbone \[µm\]
 # - `angle` — total angle swept (default 90°)
 # - `resolution` — number of backbone segments per 360° (default 150)
 
@@ -178,8 +178,8 @@ pdk_bend.plot()
 # an Euler bend but has higher mode mismatch at the junction with a straight waveguide.
 #
 # Key parameters:
-# - `width` — waveguide core width [µm]
-# - `radius` — constant bend radius [µm]
+# - `width` — waveguide core width \[µm\]
+# - `radius` — constant bend radius \[µm\]
 # - `angle` — angle swept (default 90°)
 # - `angle_step` — angular resolution (default 1° per point)
 
@@ -240,9 +240,9 @@ t_clad.plot()
 # offers more shape control than an Euler S-bend (via `t_start`/`t_stop`).
 #
 # Key parameters:
-# - `width` — waveguide width [µm]
-# - `height` — lateral offset between the two ports [µm]
-# - `length` — horizontal span of the bend [µm]
+# - `width` — waveguide width \[µm\]
+# - `height` — lateral offset between the two ports \[µm\]
+# - `length` — horizontal span of the bend \[µm\]
 # - `nb_points` — backbone resolution (default 99)
 
 # %%
