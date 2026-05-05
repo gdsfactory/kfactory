@@ -15,7 +15,7 @@
 # ---
 
 # %% [markdown]
-# # Straight Waveguide Factory
+# # Straight Waveguide
 #
 # `straight_dbu_factory(kcl)` returns a cached cell function whose arguments are
 # all in **DBU** (database units). Convert µm values with `kcl.to_dbu()`.
@@ -86,6 +86,4 @@ wg_clad
 #
 # | Topic | Where |
 # |-------|-------|
-# | Factory overview | [Factories: Overview](overview.py) |
-# | Straight cell page | [Components: Straight](../straight.py) |
 # | Cross-sections (alternative spec) | [Cross-Sections](../../cross_sections.py) |

@@ -21,18 +21,14 @@ nav:
   - Components:
       - Cells:
           - Overview: components/cells/overview.md
-          - Straight Waveguide: components/cells/straight.md
-          - Euler Bends: components/cells/euler.md
-          - Circular Bends: components/cells/circular.md
-          - Taper: components/cells/taper.md
-          - Bezier S-Bends: components/cells/bezier.md
-          - Virtual Cells (VKCell): components/cells/virtual.md
-          - Parameterized Cells: components/cells/pcells.md
+          - PCells: components/cells/pcells.md
+          - Virtual PCells: components/cells/virtual.md
           - Factories:
               - Overview: components/cells/factories/overview.md
               - Straight: components/cells/factories/straight.md
               - Euler: components/cells/factories/euler.md
               - Circular: components/cells/factories/circular.md
+              - Bezier: components/cells/factories/bezier.md
               - Taper: components/cells/factories/taper.md
       - Cross-Sections: components/cross_sections.md
       - Enclosures:

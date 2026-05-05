@@ -15,11 +15,11 @@
 # ---
 
 # %% [markdown]
-# # Virtual Cells (VKCell)
+# # Virtual PCells
 #
-# A **VKCell** (Virtual KCell) is an in-memory cell whose geometry lives entirely in
-# floating-point micrometres — no KLayout database, no DBU conversion, until you
-# explicitly materialise it.
+# A **Virtual PCell** (`VKCell`, short for *Virtual KCell*) is an in-memory PCell
+# whose geometry lives entirely in floating-point micrometres — no KLayout
+# database, no DBU conversion, until you explicitly materialise it.
 #
 # ```
 # ┌──────────────────────────────────────────────┐
@@ -323,7 +323,7 @@ c_flat.plot()
 #
 # | Topic | Where |
 # |-------|-------|
-# | Parameterised cells & caching | [Components: PCells](pcells.py) |
+# | PCells & caching | [Components: PCells](pcells.py) |
 # | Factory functions reference | [Components: Factories](factories/overview.py) |
 # | All-angle routing into VKCell | [Routing: All-Angle](../../routing/all_angle.py) |
 # | KCell / DKCell / VKCell basics | [Core Concepts: KCell](../../concepts/kcell.py) |

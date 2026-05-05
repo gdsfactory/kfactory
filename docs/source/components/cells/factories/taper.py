@@ -15,7 +15,7 @@
 # ---
 
 # %% [markdown]
-# # Taper Factory
+# # Taper
 #
 # `taper_factory(kcl)` returns a function whose dimensions are all in **DBU**.
 # Use `kcl.to_dbu(...)` to convert µm to DBU at the call site.
@@ -49,6 +49,4 @@ tp
 #
 # | Topic | Where |
 # |-------|-------|
-# | Factory overview | [Factories: Overview](overview.py) |
-# | Taper cell page | [Components: Tapers](../taper.py) |
 # | Cross-section based taper specification | [Cross-Sections](../../cross_sections.py) |

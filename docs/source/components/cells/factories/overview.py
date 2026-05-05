@@ -18,7 +18,7 @@
 # # Factory Functions
 #
 # A **factory** in kfactory is a function that returns another function — a
-# *cell-making function* bound to a specific `KCLayout` instance. Factories are the
+# *cell-making function* bound to a specific `KCLayout`. Factories are the
 # recommended way to build production PDKs because they:
 #
 # - **Tie cells to a specific layout** — every cell built by the factory lives in
@@ -38,6 +38,7 @@
 # | `straight_dbu_factory` | `kf.factories.straight` | [Straight](straight.py) |
 # | `bend_euler_factory` / `bend_s_euler_factory` | `kf.factories.euler` | [Euler](euler.py) |
 # | `bend_circular_factory` | `kf.factories.circular` | [Circular](circular.py) |
+# | `bend_s_bezier_factory` | `kf.factories.bezier` | [Bezier](bezier.py) |
 # | `taper_factory` | `kf.factories.taper` | [Taper](taper.py) |
 
 # %% [markdown]
@@ -64,8 +65,7 @@
 # ## Bundling factories in a PDK module
 #
 # The recommended pattern for a production PDK is to define all factories in one
-# place and import them wherever routing or assembly is needed. This keeps layer
-# indices and unit conventions consistent across the whole project.
+# place and import them wherever routing or assembly is needed:
 #
 # ```python
 # # my_pdk/factories.py
@@ -83,12 +83,6 @@
 #
 # __all__ = ["pdk", "straight", "bend_euler", "taper"]
 # ```
-#
-# Consumers then just import:
-#
-# ```python
-# from my_pdk.factories import pdk, straight, bend_euler
-# ```
 
 # %% [markdown]
 # ## Key rules
@@ -102,11 +96,7 @@
 #
 # | Topic | Where |
 # |-------|-------|
-# | Parameterised cells & caching | [Components: PCells](../pcells.py) |
-# | Straight waveguide | [Components: Straight](../straight.py) |
-# | Euler bends | [Components: Euler Bends](../euler.py) |
-# | Circular bends | [Components: Circular Bends](../circular.py) |
-# | Width tapers | [Components: Tapers](../taper.py) |
-# | Bezier S-bends | [Components: Bezier](../bezier.py) |
+# | PCells & caching | [Components: PCells](../pcells.py) |
+# | Cross-sections | [Cross-Sections](../../cross_sections.py) |
 # | Routing integration | [Routing: Overview](../../../routing/overview.py) |
 # | PDK bundling pattern | [PDK: Creating a PDK](../../../pdk/creating_pdk.py) |

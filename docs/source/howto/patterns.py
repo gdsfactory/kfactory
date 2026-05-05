@@ -368,5 +368,5 @@ c_routed.plot()
 # |-------|-------|
 # | Common pitfalls to avoid | [How-To: Best Practices](best_practices.py) |
 # | Frequently asked questions | [How-To: FAQ](faq.md) |
-# | Parameterised cells & caching | [Components: PCells](../components/cells/pcells.py) |
+# | PCells & caching | [Components: PCells](../components/cells/pcells.py) |
 # | Routing overview | [Routing: Overview](../routing/overview.py) |

@@ -15,7 +15,7 @@
 # ---
 
 # %% [markdown]
-# # Euler Bend Factories
+# # Euler Bends
 #
 # Two factory functions live in `kf.factories.euler`:
 #
@@ -91,6 +91,4 @@ sbend
 #
 # | Topic | Where |
 # |-------|-------|
-# | Factory overview | [Factories: Overview](overview.py) |
-# | Euler bend cell page | [Components: Euler Bends](../euler.py) |
 # | Optical routing with euler bends | [Routing: Optical](../../../routing/optical.py) |

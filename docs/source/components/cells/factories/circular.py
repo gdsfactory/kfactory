@@ -15,7 +15,7 @@
 # ---
 
 # %% [markdown]
-# # Circular Bend Factory
+# # Circular Bends
 #
 # `bend_circular_factory(kcl)` produces constant-radius arc bends. Unlike euler
 # bends, `kf.routing.optical.get_radius` returns exactly the nominal radius.
@@ -46,6 +46,3 @@ bc90
 #
 # | Topic | Where |
 # |-------|-------|
-# | Factory overview | [Factories: Overview](overview.py) |
-# | Circular bend cell page | [Components: Circular Bends](../circular.py) |
-# | Euler bend factory (clothoid alternative) | [Factories: Euler](euler.py) |

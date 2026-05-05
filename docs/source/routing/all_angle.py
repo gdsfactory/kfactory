@@ -282,6 +282,6 @@ c_real.plot()
 # |-------|-------|
 # | Manhattan (90°/180° bend) routing | [Routing: Optical](optical.py) |
 # | Virtual cells used as intermediate routing containers | [Components: Virtual Cells](../components/cells/virtual.py) |
-# | Euler bend cells and `virtual_bend_euler_factory` | [Components: Euler Bends](../components/cells/euler.py) |
+# | Euler bend cells and `virtual_bend_euler_factory` | [Components: Euler Bends](../components/cells/factories/euler.py) |
 # | Routing overview and choosing an approach | [Routing: Overview](overview.py) |
 # | Port construction and `DCplxTrans` | [Core Concepts: Ports](../concepts/ports.py) |

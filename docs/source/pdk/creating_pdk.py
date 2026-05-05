@@ -420,6 +420,6 @@ with tempfile.TemporaryDirectory() as tmp:
 # | Layer stacks & technology data | [PDK: Technology](technology.py) |
 # | Cross-sections (port geometry) | [Cross-Sections](../components/cross_sections.py) |
 # | Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](../enclosures/layer_enclosure.py) |
-# | Parameterised cells & caching | [Components: PCells](../components/cells/pcells.py) |
+# | PCells & caching | [Components: PCells](../components/cells/pcells.py) |
 # | Factory functions reference | [Components: Factories](../components/cells/factories/overview.py) |
 # | Session caching (fast reload) | [Utilities: Session Cache](../utilities/session_cache.py) |
