@@ -197,6 +197,11 @@ c_plm
 # side that avoids neighbouring structures.
 #
 # ### loop_side = right
+#
+# Right-side loops protrude east, *into* the space of the next route in the bundle,
+# so the routes need to be closer in path length than for left/center loops.  Here
+# we halve the y-stagger (`100` µm instead of `200`) so the squiggle stays compact
+# enough to clear the neighbour — verifiable with `c.connectivity_check()`.
 
 # %%
 c_right = kf.KCell("plm_loop_right")
@@ -204,7 +209,7 @@ c_right = kf.KCell("plm_loop_right")
 rs_starts = [
     kf.Port(
         name=f"in_{i}",
-        trans=kf.kdb.Trans(1, False, kf.kcl.to_dbu(i * 150), kf.kcl.to_dbu(-i * 200)),
+        trans=kf.kdb.Trans(1, False, kf.kcl.to_dbu(i * 150), kf.kcl.to_dbu(-i * 100)),
         width=WG_WIDTH,
         layer_info=L.WG,
     )
@@ -233,11 +238,7 @@ kf.routing.optical.route_bundle(
             route_names=["plm_right"],
             element=-1,
             loop_side=1,       # ← right
-            # With this start/end layout, right-side loops protrude east into
-            # the next route's space; one big loop overlaps. Splitting into
-            # two smaller loops keeps each loop short enough to clear the
-            # neighbour (verifiable with `c.connectivity_check()`).
-            loops=2,
+            loops=1,
             loop_position=0,
         )
     ],
