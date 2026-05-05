@@ -36,7 +36,7 @@ jobs:
           fetch-depth: 0   # mike needs full history of gh-pages
 
       - uses: astral-sh/setup-uv@v7
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v4
 
       - name: Cache executed notebooks
         uses: actions/cache@v4

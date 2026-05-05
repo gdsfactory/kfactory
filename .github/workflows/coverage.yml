@@ -30,7 +30,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v4
       - name: Test coverage
         run: just cov ${{ matrix.python-version }}
       - name: Upload coverage reports to Codecov
