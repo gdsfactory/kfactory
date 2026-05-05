@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
     from .layout import KCLayout
     from .port import ProtoPort
+    from .typings import MetaData
 
 __all__ = ["DPins", "Pins", "ProtoPins"]
 
@@ -81,7 +82,7 @@ class ProtoPins[T: (int, float)](Protocol):
         name: str,
         ports: Iterable[ProtoPort[Any]],
         pin_type: str = "DC",
-        info: dict[str, int | float | str] | None = None,
+        info: dict[str, MetaData] | None = None,
     ) -> ProtoPin[T]:
         """Add a pin."""
         ...
@@ -136,7 +137,7 @@ class Pins(ProtoPins[int]):
         name: str,
         ports: Iterable[ProtoPort[Any]],
         pin_type: str = "DC",
-        info: dict[str, int | float | str] | None = None,
+        info: dict[str, MetaData] | None = None,
     ) -> Pin:
         """Add a pin to Pins."""
         if info is None:
@@ -197,7 +198,7 @@ class DPins(ProtoPins[float]):
         name: str,
         ports: Iterable[ProtoPort[Any]],
         pin_type: str = "DC",
-        info: dict[str, int | float | str] | None = None,
+        info: dict[str, MetaData] | None = None,
     ) -> DPin:
         """Add a pin to Pins."""
         if info is None:

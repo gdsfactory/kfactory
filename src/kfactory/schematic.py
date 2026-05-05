@@ -50,7 +50,7 @@ from pydantic import (
 from ruamel.yaml import YAML
 
 from . import kdb
-from .conf import PROPID, logger
+from .conf import logger
 from .decorators import WrappedKCellFunc, WrappedVKCellFunc
 from .instance import Instance, VInstance
 from .kcell import DKCell, KCell, ProtoTKCell, VKCell
@@ -76,7 +76,6 @@ __all__ = [
     "DSchematic",
     "PathLengthMatch",
     "Schematic",
-    "get_schematic",
     "read_schematic",
 ]
 
@@ -302,7 +301,7 @@ class Array[T: (int, float)](BaseModel, extra="forbid"):
     pitch_b: tuple[T, Annotated[T, AfterValidator(_gez)]]
 
 
-class Ports[T: (int, float)](BaseModel):
+class Ports[T: (int, float)]:
     """Indexer for an instance's ports to produce `PortRef`/`PortArrayRef`.
 
     Example:
@@ -310,7 +309,10 @@ class Ports[T: (int, float)](BaseModel):
         `inst.ports["out", 1, 0]` -> `PortArrayRef` (requires instance array)
     """
 
-    instance: SchematicInstance[T]
+    __slots__ = ("instance",)
+
+    def __init__(self, instance: SchematicInstance[T]) -> None:
+        self.instance = instance
 
     def __getitem__(self, key: str | tuple[str, int, int]) -> PortRef | PortArrayRef:
         """Return a port reference for a (standard or array) port."""
@@ -324,6 +326,23 @@ class Ports[T: (int, float)](BaseModel):
                 instance=self.instance.name, port=key[0], ia=key[1], ib=key[2]
             )
         return PortRef(instance=self.instance.name, port=key)
+
+
+class Pins[T: (int, float)]:
+    """Indexer for an instance's pins to produce `PinRef`.
+
+    Example:
+        `inst.pins["dc"]` -> `PinRef`
+    """
+
+    __slots__ = ("instance",)
+
+    def __init__(self, instance: SchematicInstance[T]) -> None:
+        self.instance = instance
+
+    def __getitem__(self, key: str) -> PinRef:
+        """Return a pin reference."""
+        return PinRef(instance=self.instance.name, pin=key)
 
 
 class SchematicInstance[T: (int, float)](
@@ -465,6 +484,10 @@ class SchematicInstance[T: (int, float)](
     @cached_property
     def ports(self) -> Ports[T]:
         return Ports(instance=self)
+
+    @cached_property
+    def pins(self) -> Pins[T]:
+        return Pins(instance=self)
 
     @property
     def xmin(self) -> AnchorRefX:
@@ -695,6 +718,58 @@ class Port[T: (int, float)](BaseModel, extra="forbid"):
 
     def as_python_str(self, schematic_name: str = "schematic") -> str:
         return f"{schematic_name}.ports[{self.name!r}]"
+
+
+class PinRef(BaseModel, extra="forbid"):
+    """Reference to a pin on a schematic instance.
+
+    Produced by ``inst.pins["name"]`` and used as the ``pin`` argument of
+    :meth:`TSchematic.add_pin` to expose an instance pin as a top-level
+    schematic pin.
+    """
+
+    instance: str
+    pin: str
+
+    @property
+    def name(self) -> str:
+        return self.pin
+
+    def __lt__(self, other: PinRef) -> bool:
+        return (self.instance, self.pin) < (other.instance, other.pin)
+
+    def __hash__(self) -> int:
+        return hash((self.instance, self.pin))
+
+    def __eq__(self, other: object) -> bool:
+        return (
+            isinstance(other, PinRef)
+            and self.instance == other.instance
+            and self.pin == other.pin
+        )
+
+    def as_python_str(self, inst_name: str | None = None) -> str:
+        return f"{inst_name or self.instance}.pins[{self.pin!r}]"
+
+
+class Pin(BaseModel, extra="forbid"):
+    """A schematic-level pin grouping one or more schematic-level ports.
+
+    The pin will be materialized on the resulting cell at ``create_cell``
+    time as a :class:`kfactory.Pin`. The ``ports`` list references entries
+    in :attr:`TSchematic.ports` by name.
+
+    Attributes:
+        name: Pin name (key in :attr:`TSchematic.pins`).
+        ports: Names of schematic-level ports that belong to this pin.
+        pin_type: Pin type (default ``"DC"``).
+        info: Free-form info attached to the pin.
+    """
+
+    name: str = Field(exclude=True)
+    ports: list[str]
+    pin_type: str = "DC"
+    info: dict[str, JSONSerializable] = Field(default_factory=dict)
 
 
 class SchematicNet[T: (int, float)](BaseModel):
@@ -986,6 +1061,9 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         connections: List of `Connection`s.
         routes: Mapping of route name -> `Route`.
         ports: Mapping of port name -> `Port`/`PortRef`/`PortArrayRef`.
+        pins: Mapping of pin name -> `Pin`/`PinRef`. Pins are top-level
+            groupings of schematic ports (purely structural — they do not
+            participate in nets/connections).
         info: dict which will be mapped to `KCell.info` (or any other derivate like
             Component).
         unit: Base coordinate unit ("dbu" or "um"). Fixed by subclass.
@@ -1001,6 +1079,7 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
     )
     routes: dict[str, Route[T]] = Field(default_factory=dict)
     ports: dict[str, Port[T] | PortRef | PortArrayRef] = Field(default_factory=dict)
+    pins: dict[str, Pin | PinRef] = Field(default_factory=dict)
     constraints: list[Constraint] = Field(default_factory=list)
     kcl: KCLayout = Field(exclude=True, default_factory=get_default_kcl)
     unit: Literal["dbu", "um"]
@@ -1102,6 +1181,61 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         )
         self.ports[p.name] = p
         return p
+
+    def create_pin(
+        self,
+        name: str,
+        ports: list[str],
+        pin_type: str = "DC",
+        info: dict[str, JSONSerializable] | None = None,
+    ) -> Pin:
+        """Create a schematic-level pin grouping existing schematic ports.
+
+        Args:
+            name: Pin name. Must be unique within the schematic.
+            ports: Names of schematic ports (entries of ``self.ports``) that
+                belong to this pin. Each name must already be registered as a
+                schematic port.
+            pin_type: Pin type (default ``"DC"``).
+            info: Optional info dict attached to the pin.
+
+        Returns:
+            The created :class:`Pin`, also stored in :attr:`self.pins`.
+
+        Raises:
+            ValueError: If a pin with ``name`` already exists, ``ports`` is
+                empty, or any port name is not present in ``self.ports``.
+        """
+        if name in self.pins:
+            raise ValueError(f"Pin with name {name!r} already exists")
+        if not ports:
+            raise ValueError(
+                f"At least one port must be provided to create pin named {name!r}"
+            )
+        missing = [p for p in ports if p not in self.ports]
+        if missing:
+            raise ValueError(
+                f"Cannot create pin {name!r}: port(s) {missing!r} are not "
+                "registered as schematic ports."
+            )
+        pin = Pin(name=name, ports=list(ports), pin_type=pin_type, info=info or {})
+        self.pins[name] = pin
+        return pin
+
+    def add_pin(self, name: str | None = None, *, pin: PinRef) -> None:
+        """Expose an existing instance pin as a schematic top-level pin.
+
+        Args:
+            name: Name for the schematic pin; defaults to the underlying pin name.
+            pin: Pin reference to expose.
+
+        Raises:
+            ValueError: If a schematic pin with ``name`` already exists.
+        """
+        name = name or pin.pin
+        if name in self.pins:
+            raise ValueError(f"Pin with name {name!r} already exists")
+        self.pins[name] = pin
 
     def create_connection(
         self, port1: PortRef | Port[T], port2: PortRef
@@ -1344,6 +1478,14 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
 
                 if isinstance(placement.get("y"), str):
                     raise NotImplementedError
+        pins = data.get("pins")
+        if pins:
+            for name, pin in pins.items():
+                if isinstance(pin, str):
+                    inst, pname = pin.rsplit(",", 1)
+                    pins[name] = {"instance": inst, "pin": pname}
+                elif isinstance(pin, dict) and "ports" in pin:
+                    pin["name"] = name
         return data
 
     @field_serializer("placements")
@@ -1580,6 +1722,73 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                     + port_connection_transformation_errors
                 )
             )
+
+        # materialize pins on the resulting cell. ports must already be created.
+        if self.pins:
+            # map (instance, original port name) -> schematic-port key name
+            # only PortRef-style schematic ports map to instance ports; cell
+            # port names equal the schematic-port keys (see PortRef.place).
+            ref_to_schematic_port: dict[tuple[str, str], str] = {}
+            for sname, sport in self.ports.items():
+                if isinstance(sport, PortRef) and not isinstance(sport, PortArrayRef):
+                    ref_to_schematic_port[(sport.instance, sport.port)] = sname
+
+        for pin_name, pin_def in self.pins.items():
+            if isinstance(pin_def, PinRef):
+                inst = self.instances.get(pin_def.instance)
+                if inst is None:
+                    raise ValueError(
+                        f"Pin {pin_name!r} references unknown instance "
+                        f"{pin_def.instance!r}."
+                    )
+                if inst.virtual:
+                    inst_pins = c.vinsts[pin_def.instance].cell.pins
+                else:
+                    inst_pins = c.insts[pin_def.instance].cell.pins
+                if pin_def.pin not in [p.name for p in inst_pins]:
+                    raise ValueError(
+                        f"Pin {pin_name!r} references unknown pin "
+                        f"{pin_def.pin!r} on instance {pin_def.instance!r}."
+                    )
+                inst_pin = inst_pins[pin_def.pin]
+                cell_port_names: list[str] = []
+                missing: list[str] = []
+                for p in inst_pin.ports:
+                    if p.name is None:
+                        missing.append("<unnamed>")
+                        continue
+                    key = (pin_def.instance, p.name)
+                    if key not in ref_to_schematic_port:
+                        missing.append(p.name)
+                    else:
+                        cell_port_names.append(ref_to_schematic_port[key])
+                if missing:
+                    raise ValueError(
+                        f"Cannot materialize pin {pin_name!r} from "
+                        f"{pin_def.instance!r}.{pin_def.pin!r}: underlying "
+                        f"port(s) {missing!r} are not exposed as top-level"
+                        " schematic ports (use schematic.add_port for each)."
+                    )
+                c.create_pin(
+                    name=pin_name,
+                    ports=[c.ports[n] for n in cell_port_names],
+                    pin_type=inst_pin.pin_type,
+                    info=inst_pin.info.model_dump(),
+                )
+            else:
+                missing = [p for p in pin_def.ports if p not in c.ports]
+                if missing:
+                    raise ValueError(
+                        f"Cannot materialize pin {pin_name!r}: port(s) "
+                        f"{missing!r} are not registered on the cell."
+                    )
+                c.create_pin(
+                    name=pin_name,
+                    ports=[c.ports[p] for p in pin_def.ports],
+                    pin_type=pin_def.pin_type,
+                    info=dict(pin_def.info),
+                )
+
         c.schematic = self
         if self.name:
             c.name = self.name
@@ -1823,6 +2032,32 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                         f"{_ind()}schematic.add_port("
                         f"name={name!r},"
                         f"port={port.as_python_str(names[port.instance])})\n"
+                    )
+        if self.pins:
+            schematic_cell += f"\n{_ind()}# Schematic pins\n"
+            for name, pin in sorted(
+                self.pins.items(),
+                key=lambda named_pin: (
+                    named_pin[1].__class__.__name__,
+                    named_pin[0],
+                ),
+            ):
+                if isinstance(pin, Pin):
+                    schematic_cell += f"{_ind()}schematic.create_pin(\n"
+                    indent += 2
+                    schematic_cell += f"{_ind()}name={name!r},\n"
+                    schematic_cell += f"{_ind()}ports={pin.ports!r},\n"
+                    if pin.pin_type != "DC":
+                        schematic_cell += f"{_ind()}pin_type={pin.pin_type!r},\n"
+                    if pin.info:
+                        schematic_cell += f"{_ind()}info={pin.info!r},\n"
+                    indent -= 2
+                    schematic_cell += f"{_ind()})\n"
+                else:
+                    schematic_cell += (
+                        f"{_ind()}schematic.add_pin("
+                        f"name={name!r},"
+                        f"pin={pin.as_python_str(names[pin.instance])})\n"
                     )
         if self.placements:
             schematic_cell += f"\n{_ind()}# Schematic instance placements\n"
@@ -2858,50 +3093,6 @@ def _get_placeable[T: (int, float)](
             if port.instance in placed_insts:
                 placeable_ports.add(name)
     return placeable_insts - placed_insts, placeable_ports
-
-
-@overload
-def get_schematic(
-    c: KCell,
-    exclude_port_types: Sequence[str] | None = ("placement", "pad", "bump"),
-) -> TSchematic[int]: ...
-
-
-@overload
-def get_schematic(
-    c: DKCell,
-    exclude_port_types: Sequence[str] | None = ("placement", "pad", "bump"),
-) -> TSchematic[float]: ...
-
-
-def get_schematic(
-    c: KCell | DKCell,
-) -> TSchematic[int] | TSchematic[float]:
-    """NOT FUNCTIONAL YET.
-
-    Create a minimal `TSchematic` from an existing cell.
-
-    Currently extracts named instances only. Port extraction is not yet implemented.
-
-    Args:
-        c: Source cell.
-        exclude_port_types: Port types to ignore (reserved for future use).
-
-    Returns:
-        A `Schematic` if `c` is `KCell`, otherwise a `DSchematic`.
-    """
-
-    if isinstance(c, KCell):
-        schematic: TSchematic[int] | TSchematic[float] = Schematic(name=c.name)
-    else:
-        schematic = DSchematic(name=c.name)
-
-    for inst in c.insts:
-        name = inst.property(PROPID.NAME)
-        if name is not None:
-            schematic.create_inst(name, inst.cell.factory_name or inst.cell.name)
-
-    return schematic
 
 
 @overload

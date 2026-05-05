@@ -47,6 +47,7 @@ nav:
       - Schematics:
           - Overview: schematics/overview.md
           - Netlist & I/O: schematics/netlist.md
+          - Ports & Pins: schematics/ports_and_pins.md
           - 45° Crossing: schematics/crossing45.md
   - Utilities:
       - Grid Layout: utilities/grid.md

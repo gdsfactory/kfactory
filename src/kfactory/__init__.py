@@ -36,7 +36,6 @@ from .schematic import (
     PathLengthMatch,
     Schematic,
     Schema,
-    get_schematic,
     read_schematic,
 )
 from .instances import Instances, DInstances, VInstances
@@ -146,7 +145,6 @@ __all__ = [
     "factories",
     "flexgrid",
     "flexgrid_dbu",
-    "get_schematic",
     "grid",
     "grid_dbu",
     "kcell",
