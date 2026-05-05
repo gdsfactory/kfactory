@@ -87,7 +87,7 @@ def bundle_sorted() -> kf.KCell:
     start_ports = [
         c.create_port(
             name=f"in{i}",
-            trans=kf.kdb.Trans(2, False, -60_000, (2 - i) * 3_000),  # reversed Y
+            trans=kf.kdb.Trans(2, False, -60_000, (2 - i) * 5_000),  # reversed Y
             width=WG_WIDTH,
             layer=wl,
             port_type="optical",
@@ -97,7 +97,7 @@ def bundle_sorted() -> kf.KCell:
     end_ports = [
         c.create_port(
             name=f"out{i}",
-            trans=kf.kdb.Trans(0, False, 60_000, i * 3_000),  # normal Y
+            trans=kf.kdb.Trans(0, False, 60_000, i * 5_000),  # normal Y
             width=WG_WIDTH,
             layer=wl,
             port_type="optical",
