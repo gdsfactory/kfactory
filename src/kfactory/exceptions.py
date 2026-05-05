@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "CellNameError",
+    "FactoriesLockedError",
     "InvalidLayerError",
     "LockedError",
     "MergeError",
@@ -31,6 +32,10 @@ class LockedError(AttributeError):
             "update the code in the function or create a copy of "
             f"the {kcell.__class__.__name__}."
         )
+
+
+class FactoriesLockedError(RuntimeError):
+    """Raised when trying to add a factory to a locked Factories collection."""
 
 
 class MergeError(ValueError):

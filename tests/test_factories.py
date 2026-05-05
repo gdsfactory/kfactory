@@ -2,8 +2,9 @@ from collections.abc import Callable
 
 import pytest
 
-from kfactory import KCell, KCLayout, LayerEnclosure, factories
+from kfactory import KCell, KCLayout, LayerEnclosure, VKCell, factories
 from kfactory.cells import demo
+from kfactory.exceptions import FactoriesLockedError
 
 from .conftest import Layers
 
@@ -41,3 +42,47 @@ def test_factory_retrieval(
         ),
     ):
         demo.factories["straights"]
+
+
+def test_factories_unlocked_by_default(kcl: KCLayout) -> None:
+    assert kcl.factories.locked is False
+    assert kcl.virtual_factories.locked is False
+    assert kcl.factories_locked is False
+
+
+def test_lock_blocks_real_factory_registration(kcl: KCLayout) -> None:
+    kcl.lock_factories()
+    assert kcl.factories_locked is True
+
+    with pytest.raises(FactoriesLockedError, match="locked_cell"):
+
+        @kcl.cell
+        def locked_cell() -> KCell:
+            return kcl.kcell()
+
+
+def test_lock_blocks_virtual_factory_registration(kcl: KCLayout) -> None:
+    kcl.lock_factories()
+
+    with pytest.raises(FactoriesLockedError, match="locked_vcell"):
+
+        @kcl.vcell
+        def locked_vcell() -> VKCell:
+            return VKCell(kcl=kcl)
+
+
+def test_lock_factories_via_collection(kcl: KCLayout) -> None:
+    kcl.factories.lock()
+    assert kcl.factories.locked is True
+    assert kcl.virtual_factories.locked is False
+    assert kcl.factories_locked is False
+
+    with pytest.raises(FactoriesLockedError):
+        factories.straight.straight_dbu_factory(kcl=kcl)
+
+
+def test_factories_can_register_before_lock(kcl: KCLayout) -> None:
+    factories.straight.straight_dbu_factory(kcl=kcl)
+    kcl.lock_factories()
+    assert "straight" in kcl.factories
+    assert kcl.factories_locked is True
