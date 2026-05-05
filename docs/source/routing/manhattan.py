@@ -302,6 +302,6 @@ c_info
 # |-------|-------|
 # | High-level optical routing (`route_bundle`, loopbacks) | [Routing: Optical](optical.py) |
 # | Bundle routing built on top of manhattan | [Routing: Bundle](bundle.py) |
-# | Euler bend cells and effective radius | [Components: Euler Bends](../components/euler.py) |
+# | Euler bend cells and effective radius | [Components: Euler Bends](../components/cells/euler.py) |
 # | Port direction conventions (angle 0/1/2/3) | [Core Concepts: Ports](../concepts/ports.py) |
 # | DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](../concepts/dbu_vs_um.py) |

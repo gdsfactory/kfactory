@@ -31,7 +31,7 @@
 # | Factories | Functions that stamp cells into the layout (straight, bend, taper, …) |
 #
 # The section on [KCLayout](../concepts/kclayout.py) covers the layout object in depth.
-# The section on [Cross-Sections](../enclosures/cross_sections.py) covers cross-section
+# The section on [Cross-Sections](../components/cross_sections.py) covers cross-section
 # registration. This page shows how to wire everything together into a single reusable
 # module.
 
@@ -418,8 +418,8 @@ with tempfile.TemporaryDirectory() as tmp:
 # | Topic | Where |
 # |-------|-------|
 # | Layer stacks & technology data | [PDK: Technology](technology.py) |
-# | Cross-sections (port geometry) | [Enclosures: Cross-Sections](../enclosures/cross_sections.py) |
+# | Cross-sections (port geometry) | [Cross-Sections](../components/cross_sections.py) |
 # | Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](../enclosures/layer_enclosure.py) |
-# | Parameterised cells & caching | [Components: PCells](../components/pcells.py) |
-# | Factory functions reference | [Components: Factories](../components/factories.py) |
+# | Parameterised cells & caching | [Components: PCells](../components/cells/pcells.py) |
+# | Factory functions reference | [Components: Factories](../components/cells/factories/overview.py) |
 # | Session caching (fast reload) | [Utilities: Session Cache](../utilities/session_cache.py) |

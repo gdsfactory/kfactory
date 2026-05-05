@@ -293,4 +293,4 @@ Code(generated)
 # | Netlist data model | [Schematics: Netlist](netlist.py) |
 # | 45° crossing with virtual cells | [Schematics: 45° Crossing](crossing45.py) |
 # | Creating a full PDK | [PDK: Creating a PDK](../pdk/creating_pdk.py) |
-# | Parameterised cells & caching | [Components: PCells](../components/pcells.py) |
+# | Parameterised cells & caching | [Components: PCells](../components/cells/pcells.py) |

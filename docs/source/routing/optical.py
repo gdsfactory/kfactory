@@ -360,5 +360,5 @@ c_pm
 # | Equal path-length loops | [Routing: Path Length](path_length.py) |
 # | Low-level backbone + Steps API | [Routing: Manhattan](manhattan.py) |
 # | All-angle (non-manhattan) routing | [Routing: All-Angle](all_angle.py) |
-# | Euler bend effective radius | [Components: Euler Bends](../components/euler.py) |
+# | Euler bend effective radius | [Components: Euler Bends](../components/cells/euler.py) |
 # | Port construction and connection | [Core Concepts: Ports](../concepts/ports.py) |

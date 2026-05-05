@@ -225,5 +225,5 @@ print(f"Port o1 dwidth: {wg.ports['o1'].dwidth} µm")
 # |-------|-------|
 # | KCell and DKCell side-by-side | [Core Concepts: KCell](kcell.py) |
 # | Port width and position in DBU | [Core Concepts: Ports](ports.py) |
-# | Factory functions and their unit conventions | [Components: Factory Functions](../components/factories.py) |
+# | Factory functions and their unit conventions | [Components: Factory Functions](../components/cells/factories/overview.py) |
 # | FAQ — when to use DBU vs µm | [How-To: FAQ](../howto/faq.md) |

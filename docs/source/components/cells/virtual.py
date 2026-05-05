@@ -217,7 +217,7 @@ print(f"s1 bbox : {s1.dbbox(pdk.layer(L.WG))} µm")
 #
 # kfactory ships built-in virtual factories for straight waveguides and euler bends.
 # These are the building blocks for all-angle routing (see
-# [All-Angle Routing](../routing/all_angle.py)).
+# [All-Angle Routing](../../routing/all_angle.py)).
 #
 # | Factory | Source module | Parameter units |
 # |---|---|---|
@@ -324,6 +324,6 @@ c_flat.plot()
 # | Topic | Where |
 # |-------|-------|
 # | Parameterised cells & caching | [Components: PCells](pcells.py) |
-# | Factory functions reference | [Components: Factories](factories.py) |
-# | All-angle routing into VKCell | [Routing: All-Angle](../routing/all_angle.py) |
-# | KCell / DKCell / VKCell basics | [Core Concepts: KCell](../concepts/kcell.py) |
+# | Factory functions reference | [Components: Factories](factories/overview.py) |
+# | All-angle routing into VKCell | [Routing: All-Angle](../../routing/all_angle.py) |
+# | KCell / DKCell / VKCell basics | [Core Concepts: KCell](../../concepts/kcell.py) |

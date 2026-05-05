@@ -288,5 +288,5 @@ print("cell info:", dict(b_meta.info))
 # | Components overview & gallery | [Components: Overview](overview.py) |
 # | Euler (clothoid) bends | [Components: Euler Bends](euler.py) |
 # | Parameterised cells & caching | [Components: PCells](pcells.py) |
-# | Factory functions reference | [Components: Factories](factories.py) |
-# | Optical routing | [Routing: Optical](../routing/optical.py) |
+# | Factory functions reference | [Components: Factories](factories/overview.py) |
+# | Optical routing | [Routing: Optical](../../routing/optical.py) |

@@ -280,5 +280,5 @@ vpad
 # | Port system (position, direction, type) | [Core Concepts: Ports](ports.py) |
 # | Placing and connecting instances | [Core Concepts: Instances](instances.py) |
 # | DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](dbu_vs_um.py) |
-# | Parameterized cells and caching | [Components: Parameterized Cells](../components/pcells.py) |
-# | Virtual cells for routing | [Components: Virtual Cells](../components/virtual.py) |
+# | Parameterized cells and caching | [Components: Parameterized Cells](../components/cells/pcells.py) |
+# | Virtual cells for routing | [Components: Virtual Cells](../components/cells/virtual.py) |

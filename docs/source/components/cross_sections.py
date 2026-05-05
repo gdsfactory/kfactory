@@ -316,6 +316,6 @@ arm.plot()
 # |-------|-------|
 # | Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](layer_enclosure.py) |
 # | Cell-level enclosures (tiling) | [Enclosures: KCell Enclosure](kcell_enclosure.py) |
-# | Straight waveguide (uses xs) | [Components: Straight](../components/straight.py) |
-# | Width tapers (uses xs) | [Components: Tapers](../components/taper.py) |
+# | Straight waveguide (uses xs) | [Components: Straight](cells/straight.py) |
+# | Width tapers (uses xs) | [Components: Tapers](cells/taper.py) |
 # | Routing with cross-sections | [Routing: Overview](../routing/overview.py) |

@@ -368,6 +368,6 @@ bend_pair_diamond(radius=10, width=0.5).plot()
 # | Topic | Where |
 # |-------|-------|
 # | Layer enclosures (single-layer) | [Enclosures: Layer Enclosure](layer_enclosure.py) |
-# | Cross-sections (port geometry) | [Enclosures: Cross-Sections](cross_sections.py) |
+# | Cross-sections (port geometry) | [Cross-Sections](../components/cross_sections.py) |
 # | Boolean / region operations | [Core Concepts: Geometry](../concepts/geometry.py) |
 # | Tile-based fill | [Utilities: Fill](../utilities/fill.py) |

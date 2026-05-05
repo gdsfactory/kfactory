@@ -281,6 +281,6 @@ loop
 # | Topic | Where |
 # |-------|-------|
 # | Placing and connecting instances with ports | [Core Concepts: Instances](instances.py) |
-# | Cross-sections (port width + enclosure spec) | [Enclosures: Cross-Sections](../enclosures/cross_sections.py) |
+# | Cross-sections (port width + enclosure spec) | [Cross-Sections](../components/cross_sections.py) |
 # | Optical routing between ports | [Routing: Overview](../routing/overview.py) |
-# | Port-based component assembly | [Components: Overview](../components/overview.py) |
+# | Port-based component assembly | [Components: Overview](../components/cells/overview.py) |

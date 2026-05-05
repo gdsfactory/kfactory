@@ -404,8 +404,8 @@ sw
 #
 # | Topic | Where |
 # |-------|-------|
-# | Factory functions reference | [Components: Factories](factories.py) |
+# | Factory functions reference | [Components: Factories](factories/overview.py) |
 # | Virtual (non-physical) cells | [Components: Virtual Cells](virtual.py) |
-# | KCell / DKCell / VKCell basics | [Core Concepts: KCell](../concepts/kcell.py) |
-# | DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](../concepts/dbu_vs_um.py) |
-# | Creating a full PDK | [PDK: Creating a PDK](../pdk/creating_pdk.py) |
+# | KCell / DKCell / VKCell basics | [Core Concepts: KCell](../../concepts/kcell.py) |
+# | DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](../../concepts/dbu_vs_um.py) |
+# | Creating a full PDK | [PDK: Creating a PDK](../../pdk/creating_pdk.py) |

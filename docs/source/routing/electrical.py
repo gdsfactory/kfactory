@@ -363,5 +363,5 @@ c_dr
 # | Bundle routing details: sort, sbend, bbox modes | [Routing: Bundle](bundle.py) |
 # | Optical waveguide routing | [Routing: Optical](optical.py) |
 # | Layer definitions and metal layers | [Core Concepts: Layers](../concepts/layers.py) |
-# | Cross-sections for wire geometry | [Enclosures: Cross-Sections](../enclosures/cross_sections.py) |
+# | Cross-sections for wire geometry | [Cross-Sections](../components/cross_sections.py) |
 # | Port construction and connection | [Core Concepts: Ports](../concepts/ports.py) |

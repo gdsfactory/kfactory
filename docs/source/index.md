@@ -50,11 +50,11 @@ KFactory exposes KLayout's full geometry engine (boolean regions, Minkowski expa
 
     Straight waveguides, euler/circular bends, tapers, Bezier S-bends, and the factory pattern.
 
-    [:octicons-arrow-right-24: Overview](components/overview.py)
+    [:octicons-arrow-right-24: Overview](components/cells/overview.py)
     &nbsp;·&nbsp;
-    [:octicons-arrow-right-24: PCells](components/pcells.py)
+    [:octicons-arrow-right-24: PCells](components/cells/pcells.py)
     &nbsp;·&nbsp;
-    [:octicons-arrow-right-24: Factories](components/factories.py)
+    [:octicons-arrow-right-24: Factories](components/cells/factories/overview.py)
 
 -   :material-layers:{ .lg .middle } **Enclosures**
 
@@ -62,7 +62,7 @@ KFactory exposes KLayout's full geometry engine (boolean regions, Minkowski expa
 
     Layer enclosures via Minkowski sums, cross-sections, and KCell-level cladding.
 
-    [:octicons-arrow-right-24: Cross-Sections](enclosures/cross_sections.py)
+    [:octicons-arrow-right-24: Cross-Sections](components/cross_sections.py)
     &nbsp;·&nbsp;
     [:octicons-arrow-right-24: Layer Enclosure](enclosures/layer_enclosure.py)
 

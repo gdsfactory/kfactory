@@ -217,6 +217,6 @@ for name, level in pdk_stack.layers.items():
 # | Topic | Where |
 # |-------|-------|
 # | KCLayout — the layout registry that owns layers | [Core Concepts: KCLayout](kclayout.py) |
-# | Cross-sections built on top of layers | [Enclosures: Cross-Sections](../enclosures/cross_sections.py) |
+# | Cross-sections built on top of layers | [Cross-Sections](../components/cross_sections.py) |
 # | LayerLevel and full 3-D stack in a PDK | [PDK: Technology & Layer Stack](../pdk/technology.py) |
 # | Assembling a full PDK with layers | [PDK: Creating a PDK](../pdk/creating_pdk.py) |

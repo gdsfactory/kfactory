@@ -219,7 +219,7 @@ print(f"{width_um} µm → {width_dbu} DBU (even)")
 # |-------|-------|
 # | Width tapers (linear transitions) | [Components: Tapers](taper.py) |
 # | Parameterised cells & caching | [Components: PCells](pcells.py) |
-# | Cross-sections & cladding specs | [Enclosures: Cross-Sections](../enclosures/cross_sections.py) |
-# | Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](../enclosures/layer_enclosure.py) |
-# | Factory functions reference | [Components: Factories](factories.py) |
-# | Routing with straight waveguides | [Routing: Overview](../routing/overview.py) |
+# | Cross-sections & cladding specs | [Cross-Sections](../cross_sections.py) |
+# | Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](../../enclosures/layer_enclosure.py) |
+# | Factory functions reference | [Components: Factories](factories/overview.py) |
+# | Routing with straight waveguides | [Routing: Overview](../../routing/overview.py) |

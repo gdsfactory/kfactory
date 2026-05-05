@@ -261,7 +261,7 @@ print("cell info:", dict(t_meta.info))
 # | Topic | Where |
 # |-------|-------|
 # | Straight waveguide | [Components: Straight](straight.py) |
-# | Cross-sections & cladding specs | [Enclosures: Cross-Sections](../enclosures/cross_sections.py) |
-# | Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](../enclosures/layer_enclosure.py) |
+# | Cross-sections & cladding specs | [Cross-Sections](../cross_sections.py) |
+# | Layer enclosures (auto-cladding) | [Enclosures: Layer Enclosure](../../enclosures/layer_enclosure.py) |
 # | Parameterised cells & caching | [Components: PCells](pcells.py) |
-# | Factory functions reference | [Components: Factories](factories.py) |
+# | Factory functions reference | [Components: Factories](factories/overview.py) |

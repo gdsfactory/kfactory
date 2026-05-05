@@ -251,7 +251,7 @@ print("cell info:", dict(b_meta.info))
 # | Components overview & gallery | [Components: Overview](overview.py) |
 # | Circular (constant-radius) bends | [Components: Circular Bends](circular.py) |
 # | Parameterised cells & caching | [Components: PCells](pcells.py) |
-# | Factory functions reference | [Components: Factories](factories.py) |
-# | Optical routing with euler bends | [Routing: Optical](../routing/optical.py) |
-# | All-angle routing | [Routing: All-Angle](../routing/all_angle.py) |
-# | Effective radius vs nominal radius | [Routing: Manhattan](../routing/manhattan.py) |
+# | Factory functions reference | [Components: Factories](factories/overview.py) |
+# | Optical routing with euler bends | [Routing: Optical](../../routing/optical.py) |
+# | All-angle routing | [Routing: All-Angle](../../routing/all_angle.py) |
+# | Effective radius vs nominal radius | [Routing: Manhattan](../../routing/manhattan.py) |

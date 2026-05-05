@@ -512,5 +512,5 @@ for i, r in enumerate(routes_ins):
 # | Bundle routing that `kf.PathLengthMatch` plugs into | [Routing: Bundle](bundle.py) |
 # | Optical route options including waypoints and stubs | [Routing: Optical](optical.py) |
 # | Routing overview and sub-module map | [Routing: Overview](overview.py) |
-# | Euler bend effective radius (affects loop spacing) | [Components: Euler Bends](../components/euler.py) |
+# | Euler bend effective radius (affects loop spacing) | [Components: Euler Bends](../components/cells/euler.py) |
 # | DBU vs µm (route.length is in µm) | [Core Concepts: DBU vs µm](../concepts/dbu_vs_um.py) |

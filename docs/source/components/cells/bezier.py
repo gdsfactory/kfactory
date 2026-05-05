@@ -285,5 +285,5 @@ print("cell info:", dict(b_meta.info))
 # | Components overview & gallery | [Components: Overview](overview.py) |
 # | Euler (clothoid) bends | [Components: Euler Bends](euler.py) |
 # | Circular (constant-radius) bends | [Components: Circular Bends](circular.py) |
-# | Factory functions reference | [Components: Factories](factories.py) |
-# | All-angle routing | [Routing: All-Angle](../routing/all_angle.py) |
+# | Factory functions reference | [Components: Factories](factories/overview.py) |
+# | All-angle routing | [Routing: All-Angle](../../routing/all_angle.py) |

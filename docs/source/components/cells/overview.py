@@ -370,5 +370,5 @@ mzi.plot()
 # | Bezier S-bends | [Components: Bezier](bezier.py) |
 # | Virtual (non-physical) cells | [Components: Virtual Cells](virtual.py) |
 # | Parameterised cells & caching | [Components: PCells](pcells.py) |
-# | Factory functions reference | [Components: Factories](factories.py) |
-# | KCell / DKCell / VKCell | [Core Concepts: KCell](../concepts/kcell.py) |
+# | Factory functions reference | [Components: Factories](factories/overview.py) |
+# | KCell / DKCell / VKCell | [Core Concepts: KCell](../../concepts/kcell.py) |

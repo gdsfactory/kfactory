@@ -549,5 +549,5 @@ Code(c.schematic.code_str())
 # |-------|-------|
 # | Schematic basics (placement, connect, LVS) | [Schematics: Overview](overview.py) |
 # | Netlist data model & serialization | [Schematics: Netlist](netlist.py) |
-# | Virtual cells in detail | [Components: Virtual Cells](../components/virtual.py) |
-# | Cross-sections & enclosures | [Enclosures: Cross-Sections](../enclosures/cross_sections.py) |
+# | Virtual cells in detail | [Components: Virtual Cells](../components/cells/virtual.py) |
+# | Cross-sections & enclosures | [Cross-Sections](../components/cross_sections.py) |

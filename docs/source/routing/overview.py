@@ -344,5 +344,5 @@ ce
 # | All-angle (diagonal) routing | [Routing: All-Angle](all_angle.py) |
 # | Bundle routing: sort, separation, sbend, bbox modes | [Routing: Bundle](bundle.py) |
 # | Equal path-length routing | [Routing: Path Length](path_length.py) |
-# | Euler bend cells and effective radius | [Components: Euler Bends](../components/euler.py) |
+# | Euler bend cells and effective radius | [Components: Euler Bends](../components/cells/euler.py) |
 # | DBU vs µm coordinate systems | [Core Concepts: DBU vs µm](../concepts/dbu_vs_um.py) |
