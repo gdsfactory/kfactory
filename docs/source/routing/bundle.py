@@ -87,7 +87,7 @@ def bundle_sorted() -> kf.KCell:
     start_ports = [
         c.create_port(
             name=f"in{i}",
-            trans=kf.kdb.Trans(2, False, -60_000, (2 - i) * 5_000),  # reversed Y
+            trans=kf.kdb.Trans(2, False, -60_000, (2 - i) * 10_000),  # reversed Y
             width=WG_WIDTH,
             layer=wl,
             port_type="optical",
@@ -97,7 +97,7 @@ def bundle_sorted() -> kf.KCell:
     end_ports = [
         c.create_port(
             name=f"out{i}",
-            trans=kf.kdb.Trans(0, False, 60_000, i * 5_000),  # normal Y
+            trans=kf.kdb.Trans(0, False, 60_000, i * 10_000),  # normal Y
             width=WG_WIDTH,
             layer=wl,
             port_type="optical",
@@ -105,15 +105,17 @@ def bundle_sorted() -> kf.KCell:
         for i in range(3)
     ]
 
+    # Use a wider local separation matching the 10µm port pitch — the
+    # global SEP=2µm would require the router to bend each route to
+    # compress the bundle, which collides with adjacent route bends.
     kf.routing.optical.route_bundle(
         c,
         start_ports=start_ports,
         end_ports=end_ports,
-        separation=SEP,
+        separation=kf.kcl.to_dbu(10),
         straight_factory=straight_factory,
         bend90_cell=bend90,
         sort_ports=True,       # ← automatically matches by Y position
-        on_collision=None,
     )
     return c
 
