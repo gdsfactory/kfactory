@@ -143,7 +143,7 @@ norecursedirs = ["extra/*.py"]
 directory = "_build/coverage_html_report"
 
 [tool.codespell]
-ignore-words-list = "euclidian,TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem"
+ignore-words-list = "euclidian,TE,TE/TM,te,ba,FPR,fpr_spacing,ro,nd,donot,schem,commitish"
 skip = "pyproject.toml, uv.lock"
 
 [tool.ty.src]
