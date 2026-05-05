@@ -15,7 +15,7 @@
 # ---
 
 # %% [markdown]
-# # Bundle Routing — Reference
+# # Bundle Routing — Tutorial
 #
 # `route_bundle` routes *N* start ports to *N* end ports, maintaining spacing and
 # avoiding obstacles.  This page covers parameters that are not shown in the

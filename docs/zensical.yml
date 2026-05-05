@@ -39,7 +39,7 @@ nav:
       - Electrical: routing/electrical.md
       - Manhattan Primitives: routing/manhattan.md
       - All-Angle: routing/all_angle.md
-      - Bundle Reference: routing/bundle.md
+      - Bundle Routing Tutorial: routing/bundle.md
       - Path-Length Matching: routing/path_length.md
   - PDK:
       - Creating a PDK: pdk/creating_pdk.md
