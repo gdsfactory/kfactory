@@ -1,8 +1,11 @@
 name: docs to gh-pages
 
-# Multi-version deployment via mike (zensical fork):
-#   push to main      → `dev` alias  (in-progress docs)
-#   push to vX.Y.Z    → `<X.Y.Z>` version + `latest` alias
+# Multi-version deployment via mike (zensical fork, pinned in pyproject.toml):
+#   push to main      → `dev` version       (always tracks latest main)
+#   push to vX.Y.Z    → `<X.Y.Z>` version + `latest` alias (set as default)
+#
+# Pre-existing v2.5.x version dirs on gh-pages stay intact — mike only
+# rewrites the version it's deploying plus versions.json + the alias target.
 #
 # Requires: GitHub Pages source set to "Deploy from a branch" → gh-pages
 # (one-time switch in repo Settings → Pages).
@@ -57,11 +60,12 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git fetch origin gh-pages --depth=1 || echo "no gh-pages branch yet"
 
-      - name: Deploy main → dev alias
+      - name: Deploy main → dev version
         if: github.ref == 'refs/heads/main'
         run: |
           uv run --with . --extra docs --isolated mike deploy \
-            --config-file docs/zensical.yml \
+            --config-file docs/zensical-built.yml \
+            --alias-type=redirect \
             --push \
             --update-aliases \
             dev
@@ -71,11 +75,12 @@ jobs:
         run: |
           VERSION="${GITHUB_REF#refs/tags/v}"
           uv run --with . --extra docs --isolated mike deploy \
-            --config-file docs/zensical.yml \
+            --config-file docs/zensical-built.yml \
+            --alias-type=redirect \
             --push \
             --update-aliases \
             "$VERSION" latest
           uv run --with . --extra docs --isolated mike set-default \
-            --config-file docs/zensical.yml \
+            --config-file docs/zensical-built.yml \
             --push \
             latest
