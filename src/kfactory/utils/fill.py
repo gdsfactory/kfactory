@@ -165,7 +165,7 @@ def fill_tiled(
     dbb = c.dbbox()
     for r, ext in fill_regions:
         dbb += r.bbox().to_dtype(c.kcl.dbu).enlarged(ext)
-    tp.frame = dbb  # type: ignore[assignment, misc]
+    tp.frame = dbb  # ty:ignore[invalid-assignment]
     tp.dbu = c.kcl.dbu
     tp.threads = n_threads
 
@@ -337,7 +337,7 @@ def add_coverage(
     dbb = c.dbbox()
     for r, ext in coverage_regions:
         dbb += r.bbox().to_dtype(c.kcl.dbu).enlarged(ext)
-    tp.frame = dbb  # type: ignore[assignment, misc]
+    tp.frame = dbb  # ty:ignore[invalid-assignment]
     tp.dbu = c.kcl.dbu
     tp.threads = n_threads
 

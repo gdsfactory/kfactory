@@ -6,7 +6,7 @@ from tests.conftest import Layers
 
 
 def test_pins(
-    layers: Layers, gds_regression: Callable[[kf.ProtoTKCell[Any]], None]
+    layers: Layers, oas_regression: Callable[[kf.ProtoTKCell[Any]], None]
 ) -> None:
     kcl_1 = kf.KCLayout("PIN_PDK", infos=Layers)
 
@@ -20,21 +20,25 @@ def test_pins(
 
         c.shapes(layers.METAL1).insert(kf.kdb.Box(50_000, 50_000))
         p1 = c.create_port(
+            name="e1",
             trans=kf.kdb.Trans(0, False, 25_000, 0),
             cross_section=xs,
             info={"variable_name": "p1"},
         )
         p2 = c.create_port(
+            name="e2",
             trans=kf.kdb.Trans(1, False, 0, 25_000),
             cross_section=xs,
             info={"variable_name": "p2"},
         )
         p3 = c.create_port(
+            name="e3",
             trans=kf.kdb.Trans(2, False, -25_000, 0),
             cross_section=xs,
             info={"variable_name": "p3"},
         )
         p4 = c.create_port(
+            name="e4",
             trans=kf.kdb.Trans(3, False, 0, -25_000),
             cross_section=xs,
             info={"variable_name": "p4"},
@@ -51,21 +55,25 @@ def test_pins(
 
         c.shapes(layers.METAL1).insert(kf.kdb.Box(50_000, 50_000))
         p1 = c.create_port(
+            name="e1",
             trans=kf.kdb.Trans(0, False, 25_000, 0),
             cross_section=xs,
             info={"variable_name": "p1"},
         )
         p2 = c.create_port(
+            name="e2",
             trans=kf.kdb.Trans(1, False, 0, 25_000),
             cross_section=xs,
             info={"variable_name": "p2"},
         )
         p3 = c.create_port(
+            name="e3",
             trans=kf.kdb.Trans(2, False, -25_000, 0),
             cross_section=xs,
             info={"variable_name": "p3"},
         )
         p4 = c.create_port(
+            name="e4",
             trans=kf.kdb.Trans(3, False, 0, -25_000),
             cross_section=xs,
             info={"variable_name": "p4"},
@@ -104,7 +112,7 @@ def test_pins(
 
     ci = pad1.cell.cell_index()
     ci2 = pad2.cell.cell_index()
-    gds_regression(pad())
+    oas_regression(pad())
     c.delete()
     kf.kcl[ci].delete()
     kf.kcl[ci2].delete()

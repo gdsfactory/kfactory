@@ -31,8 +31,9 @@ def test_port_cross_section(kcl: kf.KCLayout, layers: kf.LayerInfos) -> None:
         )
     )
 
-    p1 = c.create_port(cross_section=xs, trans=kf.kdb.Trans.R0)
+    p1 = c.create_port(name="o1", cross_section=xs, trans=kf.kdb.Trans.R0)
     p2 = c.create_port(
+        name="o2",
         cross_section=kf.SymmetricalCrossSection(
             width=1000,
             enclosure=enc,

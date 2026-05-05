@@ -17,7 +17,7 @@ def test_l2n(layers: Layers) -> None:
     s1.connect("o1", b3, "o2")
     c.add_port(port=b1.ports["o1"])
     p = s1.ports["o2"].copy()
-    p.name = None
+    p.name = "o2"
     c.add_port(port=p)
 
-    c.l2n()
+    c.l2n_ports()

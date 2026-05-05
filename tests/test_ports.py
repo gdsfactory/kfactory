@@ -128,7 +128,11 @@ def test_keep_mirror(layers: Layers) -> None:
     c = kf.KCell()
 
     p1 = kf.Port(
-        trans=kf.kdb.Trans.M90, width=1000, layer=c.kcl.find_layer(layers.WG), kcl=c.kcl
+        name="o1",
+        trans=kf.kdb.Trans.M90,
+        width=1000,
+        layer=c.kcl.find_layer(layers.WG),
+        kcl=c.kcl,
     )
 
     c.add_port(port=p1, name="o1")
@@ -218,6 +222,7 @@ def test_dplx_port_dbu_port_conversion(layers: Layers, kcl: kf.KCLayout) -> None
     t1 = kf.kdb.DCplxTrans(1, 90, False, 10, 10)
     t2 = kf.kdb.Trans(1, False, 10_000, 10_000)
     p = kf.Port(
+        name="o1",
         width=kcl.to_dbu(1),
         dcplx_trans=t1,
         layer=kcl.find_layer(layers.WG),
@@ -304,13 +309,13 @@ def test_ports_create_port(kcl: kf.KCLayout, layers: Layers) -> None:
     assert port in ports
 
     with pytest.raises(ValueError):
-        ports.create_port(name="o1", layer=1, center=(1000, 1000), angle=1)  # type: ignore[call-overload]
+        ports.create_port(name="o1", layer=1, center=(1000, 1000), angle=1)  # ty:ignore[no-matching-overload]
 
     with pytest.raises(ValueError):
-        ports.create_port(name="o1", width=10, center=(1000, 1000), angle=1)  # type: ignore[call-overload]
+        ports.create_port(name="o1", width=10, center=(1000, 1000), angle=1)  # ty:ignore[no-matching-overload]
 
     with pytest.raises(ValueError):
-        ports.create_port(name="o1", layer=1, width=10)  # type: ignore[call-overload]
+        ports.create_port(name="o1", layer=1, width=10)  # ty:ignore[no-matching-overload]
 
     with pytest.raises(ValueError, match=r"and greater than 0."):
         ports.create_port(name="o1", width=-10, layer=1, center=(1000, 1000), angle=1)
@@ -417,13 +422,13 @@ def test_dports_create_port(kcl: kf.KCLayout, layers: Layers) -> None:
     assert port in ports
 
     with pytest.raises(ValueError):
-        ports.create_port(name="o1", layer=1, center=(1000, 1000), orientation=1)  # type: ignore[call-overload]
+        ports.create_port(name="o1", layer=1, center=(1000, 1000), orientation=1)  # ty:ignore[no-matching-overload]
 
     with pytest.raises(ValueError):
-        ports.create_port(name="o1", width=10, center=(1000, 1000), orientation=1)  # type: ignore[call-overload]
+        ports.create_port(name="o1", width=10, center=(1000, 1000), orientation=1)  # ty:ignore[no-matching-overload]
 
     with pytest.raises(ValueError):
-        ports.create_port(name="o1", layer=1, width=10)  # type: ignore[call-overload]
+        ports.create_port(name="o1", layer=1, width=10)  # ty:ignore[no-matching-overload]
 
     with pytest.raises(ValueError, match=r"and greater than 0."):
         ports.create_port(

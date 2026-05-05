@@ -10,7 +10,7 @@ from tests.conftest import Layers
 
 def test_spiral(
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell("spiral")
@@ -93,12 +93,12 @@ def test_spiral(
         b = c << bend_circular(width=1000, radius=r2, layer=layers.WG)
         b.connect("W0", p)
         p = b.ports["N0"]
-    gds_regression(c)
+    oas_regression(c)
 
 
 def test_dspiral(
     layers: Layers,
-    gds_regression: Callable[[kf.ProtoTKCell[Any]], None],
+    oas_regression: Callable[[kf.ProtoTKCell[Any]], None],
     kcl: kf.KCLayout,
 ) -> None:
     c = kcl.kcell()
@@ -186,4 +186,4 @@ def test_dspiral(
         b = c << dbend_circular(width=1, radius=r2, layer=layers.WG)
         b.connect("W0", p)
         p = b.ports["N0"]
-    gds_regression(c)
+    oas_regression(c)

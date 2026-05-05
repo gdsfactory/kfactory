@@ -8,6 +8,7 @@ from warnings import warn
 
 import pytest
 from pytest_regressions.file_regression import FileRegressionFixture
+from ruamel.yaml import YAML
 
 import kfactory as kf
 import kfactory.cells
@@ -60,12 +61,8 @@ def layers() -> Layers:
 
 
 @pytest.fixture
-def kcl() -> kf.KCLayout:
-    with counter_lock:
-        global counter  # noqa: PLW0603
-        name = str(counter)
-        counter += 1
-        return kf.KCLayout(name=name, infos=Layers)
+def kcl(request: pytest.FixtureRequest) -> kf.KCLayout:
+    return kf.KCLayout(name=kf.kcell.clean_name(request.node.name), infos=Layers)
 
 
 @pytest.fixture
@@ -237,15 +234,18 @@ def unlink_merge_read_oas() -> Iterator[None]:
 
 
 @pytest.fixture
-def gds_regression(
+def oas_regression(
     file_regression: FileRegressionFixture,
 ) -> Callable[[kf.ProtoTKCell[Any]], None]:
     saveopts = kf.save_layout_options()
-    saveopts.format = "GDS2"
+    saveopts.format = "OASIS"
 
     raises: Literal["error", "warning"] = (
         "error" if platform.system() == "Linux" else "warning"
     )
+
+    write_settings = kf.config.write_kfactory_settings
+    kf.config.write_kfactory_settings = False
 
     def _check(
         c: kf.ProtoTKCell[Any],
@@ -256,8 +256,29 @@ def gds_regression(
         file_regression.check(
             c.write_bytes(saveopts, convert_external_cells=True),
             binary=True,
-            extension=".gds",
+            extension=".oas",
             check_fn=partial(_layout_xor, tolerance=tolerance, raises=raises),
+        )
+        kf.config.write_kfactory_settings = write_settings
+
+    return _check
+
+
+@pytest.fixture
+def yaml_regression(
+    file_regression: FileRegressionFixture,
+) -> Callable[[kf.schematic.TSchematic[Any]], None]:
+    yaml = YAML(typ=["rt", "safe", "string"])
+
+    def _check(
+        schematic: kf.schematic.TSchematic[Any],
+    ) -> None:
+        dumped = yaml.dump_to_string(  # ty:ignore[unresolved-attribute]
+            schematic.model_dump(exclude_defaults=True, warnings=False)
+        )
+        file_regression.check(
+            dumped,
+            extension=".yml",
         )
 
     return _check
@@ -275,7 +296,11 @@ def _layout_xor(
     ly_b = kf.kdb.Layout()
     ly_b.read(str(path_b))
 
-    flags = kf.kdb.LayoutDiff.Verbose | kf.kdb.LayoutDiff.WithMetaInfo
+    flags = (
+        kf.kdb.LayoutDiff.Verbose
+        | kf.kdb.LayoutDiff.WithMetaInfo
+        | kf.kdb.LayoutDiff.NoLayerNames
+    )
 
     if not diff.compare(ly_a, ly_b, flags=flags, tolerance=tolerance):
         match raises:

@@ -17,7 +17,7 @@ class SettingMixin:
 
     def __getattr__(self, key: str) -> Any:
         """Get the value of a setting."""
-        return super().__getattr__(key)  # type: ignore[misc]
+        return super().__getattr__(key)  # ty:ignore[unresolved-attribute]
 
     def __getitem__(self, key: str) -> Any:
         """Get the value of a setting."""
@@ -72,8 +72,15 @@ class KCellSettingsUnits(
         return data
 
 
-class Info(SettingMixin, BaseModel, extra="allow", validate_assignment=True):
-    """Info for a KCell."""
+class Info(SettingMixin, BaseModel, extra="allow"):
+    """Info for a KCell.
+
+    `validate_assignment` is intentionally off: combined with a
+    `model_validator(mode="before")` it would re-run validation against the
+    entire extras dict on every per-field write, which historically silently
+    coerced previously-stored values via `clean_value()` (see #944). Per-write
+    validation is handled in `__setattr__` and only inspects the new value.
+    """
 
     def __init__(self, **kwargs: Any) -> None:
         """Initialize the settings."""
@@ -82,23 +89,34 @@ class Info(SettingMixin, BaseModel, extra="allow", validate_assignment=True):
     @model_validator(mode="before")
     @classmethod
     def restrict_types(cls, data: dict[str, MetaData]) -> dict[str, MetaData]:
-        """Restrict the types of the settings."""
+        """Restrict the types of the settings (runs at construction only)."""
         for name, value in data.items():
-            try:
-                data[name] = check_metadata_type(value)
-            except ValueError as e:
-                raise ValueError(
-                    "Values of the info dict only support int, float, string, "
-                    "tuple, list, dict or None."
-                    f"{name}: {value}, {type(value)}"
-                ) from e
-
+            data[name] = cls._check_value(name, value)
         return data
+
+    @staticmethod
+    def _check_value(name: str, value: MetaData) -> MetaData:
+        try:
+            return check_metadata_type(value)
+        except ValueError as e:
+            raise ValueError(
+                "Values of the info dict only support int, float, string, "
+                "tuple, list, dict or None."
+                f"{name}: {value}, {type(value)}"
+            ) from e
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        """Validate the assigned value, then store it."""
+        if name.startswith("_"):
+            super().__setattr__(name, value)
+            return
+        super().__setattr__(name, self._check_value(name, value))
 
     def update(self, data: dict[str, MetaData]) -> None:
         """Update the settings."""
-        for key, value in data.items():
-            setattr(self, key, value)
+        validated = {k: self._check_value(k, v) for k, v in data.items()}
+        for key, value in validated.items():
+            super().__setattr__(key, value)
 
     def __setitem__(self, key: str, value: MetaData) -> None:
         """Set the value of a setting."""

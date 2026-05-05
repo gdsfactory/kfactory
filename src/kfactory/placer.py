@@ -5,7 +5,7 @@ import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Self, TypeVar
+from typing import Any, Self
 
 from .port import Port
 from .ports import Ports
@@ -14,18 +14,18 @@ from ruamel.yaml import YAML
 from ruamel.yaml.constructor import SafeConstructor
 
 from .enclosure import LayerEnclosure
-from .kcell import KCell, AnyTKCell
+from .kcell import KCell
 from .layout import KCLayout
 from .layout import kcl as stdkcl
 
 __all__ = ["cells_from_yaml", "cells_to_yaml"]
 
-PathLike = TypeVar("PathLike", str, Path, None)
+type PathLike = str | Path | None
 
 
 def cells_to_yaml(
     output: PathLike,
-    cells: Sequence[AnyTKCell] | AnyTKCell | Sequence[TKCell] | TKCell,
+    cells: Sequence[ProtoTKCell[Any]] | ProtoTKCell[Any] | Sequence[TKCell] | TKCell,
 ) -> None:
     """Convert cell(s) to a yaml representations.
 

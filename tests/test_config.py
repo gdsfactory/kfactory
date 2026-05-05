@@ -18,6 +18,8 @@ def test_custom_show() -> None:
         use_libraries: bool = True,
         library_save_options: kf.kdb.SaveLayoutOptions = _layout_options,
         technology: str | None = None,
+        markers: list[tuple[kf.typings.DShapeLike, kf.typings.MarkerConfig]]
+        | None = None,
     ) -> None:
         nonlocal showed
         showed = True
@@ -35,6 +37,6 @@ def test_custom_show_string() -> None:
     kcl = kf.KCLayout("TEST_CUSTOM_SHOW_STRING")
     c = kcl.kcell("CustomShowString")
     _show = kf.config.show_function
-    kf.config.show_function = "tests.custom.show.show"  # type: ignore[assignment]
+    kf.config.show_function = "tests.custom.show.show"  # ty:ignore[invalid-assignment]
     c.show()
     kf.config.show_function = _show

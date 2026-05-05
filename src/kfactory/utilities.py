@@ -116,7 +116,7 @@ def check_cell_ports(p1: ProtoPort[Any], p2: ProtoPort[Any]) -> int:
     return check_int
 
 
-def instance_port_name(inst: Instance, port: Port) -> str:
+def instance_port_name(inst: Instance, port: ProtoPort[Any]) -> str:
     """Create a name for an instance port.
 
     Args:
@@ -143,6 +143,7 @@ def pprint_ports(
     table.add_column("Name")
     table.add_column("Width")
     table.add_column("Layer")
+    table.add_column("Type")
     table.add_column("X")
     table.add_column("Y")
     table.add_column("Angle")
@@ -157,6 +158,7 @@ def pprint_ports(
                         str(port.name) + " [dbu]",
                         f"{port.width:_}",
                         port.kcl.get_info(port.layer).to_s(),
+                        port.port_type,
                         f"{port.x:_}",
                         f"{port.y:_}",
                         str(port.angle),
@@ -174,6 +176,7 @@ def pprint_ports(
                         str(port.name) + " [um]",
                         f"{dwidth:_}",
                         port.kcl.get_info(port.layer).to_s(),
+                        port.port_type,
                         f"{dx:_}",
                         f"{dy:_}",
                         str(angle),
@@ -193,6 +196,7 @@ def pprint_ports(
                     str(dport.name) + " [um]",
                     f"{dwidth:_}",
                     dport.kcl.get_info(dport.layer).to_s(),
+                    dport.port_type,
                     f"{dx:_}",
                     f"{dy:_}",
                     str(angle),
@@ -206,6 +210,7 @@ def pprint_ports(
                     str(iport.name) + " [dbu]",
                     f"{iport.width:_}",
                     iport.kcl.get_info(iport.layer).to_s(),
+                    iport.port_type,
                     f"{iport.x:_}",
                     f"{iport.y:_}",
                     str(iport.angle),
@@ -252,6 +257,7 @@ def as_png_data(
     c: ProtoTKCell[Any],
     layer_properties: str | Path | None = None,
     resolution: tuple[int, int] = (800, 600),
+    synchronous: bool = True,
 ) -> bytes:
     layout_view = lay.LayoutView()
     layout_view.show_layout(c.kcl.layout.dup(), False)
@@ -266,6 +272,10 @@ def as_png_data(
     layout_view.resize(*resolution)
     layout_view.add_missing_layers()
     layout_view.zoom_fit()
+    if synchronous:
+        return layout_view.get_pixels_with_options(
+            width=resolution[0], height=resolution[1]
+        ).to_png_data()
     return layout_view.get_screenshot_pixels().to_png_data()
 
 

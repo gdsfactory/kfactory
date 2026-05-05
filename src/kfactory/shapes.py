@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from . import kdb
-from .typings import DShapeLike, IShapeLike, ShapeLike
+from .serialization import dshape_guard, ishape_guard
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
 
     from .kcell import VKCell
+    from .typings import DShapeLike, ShapeLike
 
 
 __all__ = ["VShapes"]
@@ -72,9 +73,9 @@ class VShapes:
             trans = trans.to_itrans(self.cell.kcl.dbu)
 
         for shape in self._shapes:
-            if isinstance(shape, DShapeLike):
+            if dshape_guard(shape):
                 new_shapes.append(shape.transformed(trans))
-            elif isinstance(shape, IShapeLike):
+            elif ishape_guard(shape):
                 if isinstance(shape, kdb.Region):
                     new_shapes.extend(
                         poly.to_dtype(self.cell.kcl.dbu).transformed(trans)
@@ -85,7 +86,7 @@ class VShapes:
                         shape.to_dtype(self.cell.kcl.dbu).transformed(trans)
                     )
             else:
-                new_shapes.append(shape.dpolygon.transform(trans))
+                new_shapes.append(cast("kdb.Shape", shape).dpolygon.transform(trans))
 
         return VShapes(cell=self.cell, _shapes=new_shapes)
 

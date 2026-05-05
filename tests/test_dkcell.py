@@ -39,7 +39,7 @@ def test_dkcell_ports() -> None:
     c = kcl.dkcell("test_dkcell_ports")
     assert isinstance(c.ports, kf.DPorts)
     assert list(c.ports) == []
-    p = c.create_port(width=1, layer=1, center=(0, 0), orientation=90)
+    p = c.create_port(name="o1", width=1, layer=1, center=(0, 0), orientation=90)
     assert p in c.ports
     assert c.ports == [p]
 
@@ -69,7 +69,7 @@ def test_dkcell_locked(layers: Layers) -> None:
         c.ports = []
 
     with pytest.raises(LockedError):
-        c.create_port(width=1, layer=1, center=(0, 0), orientation=90)
+        c.create_port(name="o1", width=1, layer=1, center=(0, 0), orientation=90)
 
     with pytest.raises(LockedError):
         c.add_port(port=p)

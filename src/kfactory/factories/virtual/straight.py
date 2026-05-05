@@ -10,7 +10,7 @@ from ...kcell import VKCell
 from ...layout import KCLayout
 from ...settings import Info
 from ...typings import MetaData
-from .utils import extrude_backbone
+from ..utils import _is_additional_info_func, extrude_backbone
 
 __all__ = ["virtual_straight_factory"]
 
@@ -66,7 +66,7 @@ def virtual_straight_factory(
             the VKCell will be named 'virtual_bend_euler[...]'.
         cell_kwargs: Additional arguments passed as `@kcl.vcell(**cell_kwargs)`.
     """
-    if callable(additional_info) and additional_info is not None:
+    if _is_additional_info_func(additional_info):
         _additional_info_func: Callable[
             ...,
             dict[str, MetaData],
@@ -142,7 +142,8 @@ def virtual_straight_factory(
                 enclosure=enclosure,
             )
         )
-        _info.update(_additional_info)
+
+        _info.update(_additional_info)  # ty:ignore[no-matching-overload]
         c.info = Info(**_info)
 
         c.create_port(

@@ -18,6 +18,8 @@ def show(
     use_libraries: bool = True,
     library_save_options: kfactory.kdb.SaveLayoutOptions | None = None,
     technology: str | None = None,
+    markers: list[tuple[kfactory.typings.DShapeLike, kfactory.typings.MarkerConfig]]
+    | None = None,
 ) -> None:
     import kfactory as kf
 

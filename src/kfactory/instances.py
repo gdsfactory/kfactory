@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Generic
+from typing import TYPE_CHECKING, Any
 
 import klayout.db as kdb
 
@@ -13,12 +13,12 @@ from .instance import (
     ProtoTInstance,
     VInstance,
 )
-from .typings import TInstance_co, TUnit
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from .kcell import TKCell
+    from .typings import TInstance_co
 
 __all__ = [
     "DInstances",
@@ -29,9 +29,9 @@ __all__ = [
 ]
 
 
-class ProtoInstances(ABC, Generic[TUnit, TInstance_co]):
+class ProtoInstances[T: (int, float), I: ProtoInstance[Any]](ABC):
     @abstractmethod
-    def __iter__(self) -> Iterator[ProtoInstance[TUnit]]: ...
+    def __iter__(self) -> Iterator[ProtoInstance[T]]: ...
 
     @abstractmethod
     def __len__(self) -> int: ...
@@ -40,7 +40,7 @@ class ProtoInstances(ABC, Generic[TUnit, TInstance_co]):
     def __delitem__(self, item: TInstance_co | int) -> None: ...
 
     @abstractmethod
-    def __getitem__(self, key: str | int) -> ProtoInstance[TUnit]: ...
+    def __getitem__(self, key: str | int) -> ProtoInstance[T]: ...
 
     @abstractmethod
     def __contains__(self, key: str | int | TInstance_co) -> bool: ...
@@ -60,7 +60,7 @@ class ProtoInstances(ABC, Generic[TUnit, TInstance_co]):
         return list(self) == list(other)
 
 
-class ProtoTInstances(ProtoInstances[TUnit, ProtoTInstance[TUnit]], ABC):
+class ProtoTInstances[T: (int, float)](ProtoInstances[T, ProtoTInstance[T]], ABC):
     _tkcell: TKCell
 
     def __init__(self, cell: TKCell) -> None:
@@ -68,7 +68,7 @@ class ProtoTInstances(ProtoInstances[TUnit, ProtoTInstance[TUnit]], ABC):
         self._tkcell = cell
 
     @abstractmethod
-    def __iter__(self) -> Iterator[ProtoTInstance[TUnit]]: ...
+    def __iter__(self) -> Iterator[ProtoTInstance[T]]: ...
 
     def __len__(self) -> int:
         """Length of the instances."""
@@ -107,7 +107,7 @@ class ProtoTInstances(ProtoInstances[TUnit, ProtoTInstance[TUnit]], ABC):
             return False
 
     @abstractmethod
-    def __getitem__(self, key: str | int) -> ProtoTInstance[TUnit]: ...
+    def __getitem__(self, key: str | int) -> ProtoTInstance[T]: ...
 
     def clear(self) -> None:
         for inst in self._insts:

@@ -8,18 +8,19 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Self
+from typing import TYPE_CHECKING, Any, Self, overload
 
 from pydantic import BaseModel, Field, RootModel, model_validator
 
 from .typings import JSONSerializable  # noqa: TC001
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Mapping, Sequence
 
     from .cross_section import CrossSection, DCrossSection
+    from .instance import DInstance, Instance, VInstance
     from .kcell import KCell, ProtoTKCell
-    from .port import BasePort
+    from .port import BasePort, DPort, Port
     from .schematic import TSchematic
 
 __all__ = ["Netlist", "NetlistInstance", "NetlistPort", "PortArrayRef", "PortRef"]
@@ -39,7 +40,8 @@ class PortRef(BaseModel, extra="forbid"):
     @classmethod
     def _validate_portref(cls, data: dict[str, Any]) -> dict[str, Any]:
         if isinstance(data, str):
-            data = tuple(data.rsplit(",", 1))
+            data_ = tuple(data.rsplit(",", 1))
+            return {"instance": data_[0], "port": data_[1]}
         if isinstance(data, tuple):
             return {"instance": data[0], "port": data[1]}
         return data
@@ -86,6 +88,14 @@ class PortRef(BaseModel, extra="forbid"):
             port=cell.insts[self.instance].ports[self.port], name=name
         ).base
 
+    @overload
+    def get_port(self, inst: DInstance | VInstance) -> DPort: ...
+    @overload
+    def get_port(self, inst: Instance) -> Port: ...
+
+    def get_port(self, inst: Instance | DInstance | VInstance) -> Port | DPort:
+        return inst.ports[self.port]
+
 
 class PortArrayRef(PortRef, extra="forbid"):
     """Reference to a port which is in an array instance."""
@@ -95,7 +105,9 @@ class PortArrayRef(PortRef, extra="forbid"):
 
     @model_validator(mode="before")
     @classmethod
-    def _validate_array_portref(cls, data: dict[str, Any]) -> dict[str, Any]:
+    def _validate_array_portref(
+        cls, data: str | tuple[str, ...] | dict[str, Any]
+    ) -> dict[str, Any] | tuple[str, ...]:
         if isinstance(data, str):
             data = tuple(data.rsplit(",", 1))
         if isinstance(data, tuple):
@@ -154,6 +166,14 @@ class PortArrayRef(PortRef, extra="forbid"):
             port=cell.insts[self.instance].ports[self.port, self.ia, self.ib], name=name
         ).base
 
+    @overload
+    def get_port(self, inst: DInstance | VInstance) -> DPort: ...
+    @overload
+    def get_port(self, inst: Instance) -> Port: ...
+
+    def get_port(self, inst: Instance | DInstance | VInstance) -> Port | DPort:
+        return inst.ports[self.port, self.ia, self.ib]
+
 
 class NetlistPort(BaseModel):
     """Cell level port in a netlsit."""
@@ -180,8 +200,11 @@ class Net(RootModel[list[PortArrayRef | PortRef | NetlistPort]]):
     def sort(self) -> Self:
         def _port_sort(port: PortRef | NetlistPort) -> tuple[Any, ...]:
             if isinstance(port, PortRef):
-                return (port.instance, port.port)
-            return (port.name,)
+                return (1, port.instance, port.port)
+            return (
+                0,
+                port.name,
+            )
 
         self.root.sort(key=_port_sort)
         return self
@@ -273,11 +296,26 @@ class Netlist(BaseModel, extra="forbid"):
         return p
 
     def create_inst(
-        self, name: str, kcl: str, component: str, settings: dict[str, JSONSerializable]
-    ) -> None:
-        self.instances[name] = NetlistInstance(
+        self,
+        name: str,
+        kcl: str,
+        component: str,
+        settings: dict[str, JSONSerializable],
+        na: int = 1,
+        nb: int = 1,
+    ) -> NetlistInstance:
+        inst = NetlistInstance(
             kcl=kcl, component=component, settings=settings, name=name
         )
+        self.instances[name] = inst
+        if na != 0 and nb != 0:
+            if na < 1 or nb < 1:
+                raise ValueError(
+                    "An instance array must have at least one instance in the array. "
+                    f"{na=!r} and {nb=!r} must be >= 1"
+                )
+            inst.array = NetlistArray(na=na, nb=nb)
+        return inst
 
     def create_net(self, *ports: PortRef | NetlistPort) -> None:
         net_ports: list[PortRef | NetlistPort] = []
@@ -305,13 +343,40 @@ class Netlist(BaseModel, extra="forbid"):
                     if port.ib > inst.array.nb:
                         raise ValueError(
                             f"Instance {port.instance} has only {inst.array.nb}"
-                            " elements in `na` direction"
+                            " elements in `nb` direction"
                         )
                 net_ports.append(port)
             else:
+                port_names = {p.name for p in self.ports}
+                if port.name not in port_names:
+                    raise ValueError("Undefined netlist port " + port.name)
                 net_ports.append(NetlistPort(name=port.name))
 
         self.nets.append(Net(net_ports))
+
+    def add_net(self, net: Net) -> None:
+        self.create_net(*net.root)
+
+    def flatten_instances(self, instances: Sequence[str]) -> None:
+        for inst_name in instances:
+            self.instances.pop(inst_name, None)
+
+            def is_from_inst(net: Net) -> bool:
+                return any(
+                    isinstance(port, PortRef) and port.instance == inst_name  # noqa: B023
+                    for port in net.root
+                )
+
+            nets = list(filter(is_from_inst, self.nets))
+            ports = [
+                port
+                for net in nets
+                for port in net.root
+                if not (isinstance(port, PortRef) and port.instance == inst_name)
+            ]
+            for net in nets:
+                self.nets.remove(net)
+            self.add_net(Net(ports))
 
     def lvs_equivalent(
         self,

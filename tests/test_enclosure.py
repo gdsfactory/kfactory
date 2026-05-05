@@ -125,11 +125,13 @@ def test_pdkenclosure(layers: Layers, straight_blank: kf.KCell) -> None:
     c.shapes(c.kcl.find_layer(layers.WG)).insert(wg_box)
     c.shapes(c.kcl.find_layer(layers.WGCLAD)).insert(wg_box.enlarged(0, 2500))
     c.create_port(
+        name="o1",
         trans=kf.kdb.Trans(0, False, wg_box.right, 0),
         width=wg_box.height(),
         layer=c.kcl.find_layer(layers.WG),
     )
     c.create_port(
+        name="o2",
         trans=kf.kdb.Trans(2, False, wg_box.left, 0),
         width=wg_box.height(),
         layer=c.kcl.find_layer(layers.WG),
@@ -166,8 +168,6 @@ def test_pdkenclosure(layers: Layers, straight_blank: kf.KCell) -> None:
         port_wg_ex.insert(box.transformed(port.trans))
 
     port_wg_ex.merge()
-
-    c.show()
 
     assert (
         kf.kdb.Region(c.shapes(c.kcl.find_layer(layers.WGEX))) & port_wg_ex

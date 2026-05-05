@@ -31,12 +31,12 @@ from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
 from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
 from .netlist import Netlist
 from .schematic import (
-    Schematic,
     DSchematic,
-    get_schematic,
-    read_schematic,
-    Schema,
     DSchema,
+    PathLengthMatch,
+    Schematic,
+    Schema,
+    read_schematic,
 )
 from .instances import Instances, DInstances, VInstances
 from .settings import KCellSettings, Info
@@ -118,6 +118,7 @@ __all__ = [
     "LayerInfos",
     "LayerStack",
     "Netlist",
+    "PathLengthMatch",
     "Pin",
     "Pins",
     "Port",
@@ -144,7 +145,6 @@ __all__ = [
     "factories",
     "flexgrid",
     "flexgrid_dbu",
-    "get_schematic",
     "grid",
     "grid_dbu",
     "kcell",

@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   update_release_draft:
+    if: github.event_name == 'push' || github.base_ref == 'main'
     permissions:
       contents: write
       pull-requests: write
@@ -19,6 +20,8 @@ jobs:
     steps:
       # Drafts your next Release notes as Pull Requests are merged into "master"
       - uses: release-drafter/release-drafter@v7
+        with:
+          commitish: main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   require_label:
