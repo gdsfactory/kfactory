@@ -30,7 +30,7 @@ jobs:
           ssh-key: ${{ secrets.SUBMODULE_SSH_KEY }}
           persist-credentials: false
       - uses: astral-sh/setup-uv@v7
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v4
       - name: Install dependencies
         env:
           GH_TOKEN: ${{ github.token }}
@@ -59,7 +59,7 @@ jobs:
           ssh-key: ${{ secrets.SUBMODULE_SSH_KEY }}
           persist-credentials: false
       - uses: astral-sh/setup-uv@v7
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v4
       - name: Install dependencies
         env:
           GH_TOKEN: ${{ github.token }}
