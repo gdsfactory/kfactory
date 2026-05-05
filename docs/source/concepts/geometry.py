@@ -247,8 +247,13 @@ _show("xor_demo", r1 ^ r2).plot()
 # Call `cell.write("output.gds")` to export to GDSII format.
 
 # %%
-anno.write("demo_geometry.gds")
-print("Wrote demo_geometry.gds")
+import tempfile
+from pathlib import Path
+
+with tempfile.TemporaryDirectory() as tmp:
+    out = Path(tmp) / "demo_geometry.gds"
+    anno.write(str(out))
+    print(f"Wrote {out.name} ({out.stat().st_size} bytes)")
 
 # %% [markdown]
 # ## Summary

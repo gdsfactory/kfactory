@@ -9,6 +9,7 @@ docs/_build/
 docs/source-built/
 docs/.build-cache/
 site/
+demo_geometry.gds
 
 # Packages
 *.egg
