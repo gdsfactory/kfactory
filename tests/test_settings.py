@@ -1,5 +1,5 @@
 import pytest
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from kfactory.settings import Info, KCellSettings, KCellSettingsUnits
 
@@ -60,10 +60,39 @@ def test_info_setitem() -> None:
 
 def test_info_setitem_rejects_bad_type() -> None:
     info = Info(key1=42)
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValueError, match=r"^Values of the info dict only support"):
         info["bad"] = object()  # ty:ignore[invalid-assignment]
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValueError, match=r"^Values of the info dict only support"):
         info["bad"] = [object()]  # ty:ignore[invalid-assignment]
+    assert "bad" not in info
+
+
+def test_info_setitem_does_not_corrupt_existing_keys() -> None:
+    """Regression for gdsfactory/kfactory#944.
+
+    Setting a second key must not silently mutate values stored under
+    earlier keys.
+    """
+    info = Info()
+    info["my_data"] = [1, 2, 3]
+    info["nested"] = {"a": (4, 5), "b": [6, 7]}
+    info["unrelated"] = "hello"
+    assert info["my_data"] == [1, 2, 3]
+    assert info["nested"] == {"a": (4, 5), "b": [6, 7]}
+    assert info["unrelated"] == "hello"
+
+
+def test_info_rejects_basemodel_in_list() -> None:
+    """Exact reproducer from gdsfactory/kfactory#944."""
+
+    class MyModel(BaseModel):
+        name: str = "important"
+        value: int = 42
+
+    info = Info()
+    with pytest.raises(ValueError, match=r"^Values of the info dict only support"):
+        info["my_data"] = [MyModel()]  # ty:ignore[invalid-assignment]
+    assert "my_data" not in info
 
 
 def test_info_update() -> None:
@@ -75,9 +104,9 @@ def test_info_update() -> None:
 
 def test_info_update_rejects_bad_type() -> None:
     info = Info(key1=42)
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValueError, match=r"^Values of the info dict only support"):
         info.update({"bad": object()})  # ty:ignore[invalid-argument-type]
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValueError, match=r"^Values of the info dict only support"):
         info.update({"nested_bad": [{"deeper": object()}]})  # ty:ignore[invalid-argument-type]
 
 
