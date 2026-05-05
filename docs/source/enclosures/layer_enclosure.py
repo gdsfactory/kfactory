@@ -280,7 +280,7 @@ print(f"main_layer:    {wg_xs.main_layer}")
 #
 # | Topic | Where |
 # |-------|-------|
-# | Cross-sections (port geometry) | [Enclosures: Cross-Sections](cross_sections.py) |
+# | Cross-sections (port geometry) | [Cross-Sections](cross_sections.py) |
 # | Cell-level enclosures (tiling) | [Enclosures: KCell Enclosure](kcell_enclosure.py) |
-# | Straight waveguide (uses enclosure) | [Components: Straight](../components/straight.py) |
-# | Width tapers (uses enclosure) | [Components: Tapers](../components/taper.py) |
+# | Straight waveguide (uses enclosure) | [Components: Straight](../components/cells/factories/straight.py) |
+# | Width tapers (uses enclosure) | [Components: Tapers](../components/cells/factories/taper.py) |

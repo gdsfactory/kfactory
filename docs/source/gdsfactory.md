@@ -190,7 +190,7 @@ kf.kcl.get_icross_section(xs)   # registers & returns the cross-section
 xs_retrieved = kf.kcl.get_icross_section("xs_wg")
 ```
 
-See [Cross-Sections & Enclosures](enclosures/cross_sections.py) for a full walkthrough.
+See [Cross-Sections & Enclosures](components/cross_sections.py) for a full walkthrough.
 
 Beyond cross-sections, kfactory provides a more generalised cladding system: enclosures are not limited
 to path-like backbones. [LayerEnclosure][kfactory.enclosure.LayerEnclosure] can apply
@@ -226,6 +226,6 @@ kfactory has comprehensive routing support across several sub-modules:
 
     Euler bends extend slightly beyond their nominal radius. Always use
     `kf.routing.optical.get_radius(bend_cell)` (not the nominal µm value) when passing
-    `bend90_radius` to routing functions. See [Euler Bends](components/euler.py) for details.
+    `bend90_radius` to routing functions. See [Euler Bends](components/cells/factories/euler.py) for details.
 
 See the [Routing](routing/overview.py) section for full examples.

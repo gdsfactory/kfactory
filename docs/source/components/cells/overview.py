@@ -363,12 +363,12 @@ mzi.plot()
 #
 # | Topic | Where |
 # |-------|-------|
-# | Straight waveguide deep-dive | [Components: Straight](straight.py) |
-# | Euler (clothoid) bends | [Components: Euler Bends](euler.py) |
-# | Circular (constant-radius) bends | [Components: Circular Bends](circular.py) |
-# | Width tapers | [Components: Tapers](taper.py) |
-# | Bezier S-bends | [Components: Bezier](bezier.py) |
+# | Straight waveguide deep-dive | [Components: Straight](factories/straight.py) |
+# | Euler (clothoid) bends | [Components: Euler Bends](factories/euler.py) |
+# | Circular (constant-radius) bends | [Components: Circular Bends](factories/circular.py) |
+# | Width tapers | [Components: Tapers](factories/taper.py) |
+# | Bezier S-bends | [Components: Bezier](factories/bezier.py) |
 # | Virtual (non-physical) cells | [Components: Virtual Cells](virtual.py) |
-# | Parameterised cells & caching | [Components: PCells](pcells.py) |
-# | Factory functions reference | [Components: Factories](factories.py) |
-# | KCell / DKCell / VKCell | [Core Concepts: KCell](../concepts/kcell.py) |
+# | PCells & caching | [Components: PCells](pcells.py) |
+# | Factory functions reference | [Components: Factories](factories/overview.py) |
+# | KCell / DKCell / VKCell | [Core Concepts: KCell](../../concepts/kcell.py) |

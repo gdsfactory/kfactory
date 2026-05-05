@@ -20,17 +20,18 @@ nav:
       - DBU vs µm: concepts/dbu_vs_um.md
   - Components:
       - Cells:
-          - Overview: components/overview.md
-          - Straight Waveguide: components/straight.md
-          - Euler Bends: components/euler.md
-          - Circular Bends: components/circular.md
-          - Taper: components/taper.md
-          - Bezier S-Bends: components/bezier.md
-          - Virtual Cells (VKCell): components/virtual.md
-          - Parameterized Cells: components/pcells.md
-          - Factory Functions: components/factories.md
+          - Overview: components/cells/overview.md
+          - PCells: components/cells/pcells.md
+          - Virtual PCells: components/cells/virtual.md
+          - Factories:
+              - Overview: components/cells/factories/overview.md
+              - Straight: components/cells/factories/straight.md
+              - Euler: components/cells/factories/euler.md
+              - Circular: components/cells/factories/circular.md
+              - Bezier: components/cells/factories/bezier.md
+              - Taper: components/cells/factories/taper.md
+      - Cross-Sections: components/cross_sections.md
       - Enclosures:
-          - Cross-Sections: enclosures/cross_sections.md
           - Layer Enclosure: enclosures/layer_enclosure.md
           - KCell Enclosure: enclosures/kcell_enclosure.md
   - Routing:

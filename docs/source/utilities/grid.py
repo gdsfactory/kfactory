@@ -253,6 +253,6 @@ top
 # | Topic | Where |
 # |-------|-------|
 # | Component packing (free placement) | [Utilities: Packing](packing.py) |
-# | Components overview & gallery | [Components: Overview](../components/overview.py) |
+# | Components overview & gallery | [Components: Overview](../components/cells/overview.py) |
 # | Creating a full PDK | [PDK: Creating a PDK](../pdk/creating_pdk.py) |
 # | Instance placement | [Core Concepts: Instances](../concepts/instances.py) |

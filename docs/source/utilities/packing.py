@@ -187,6 +187,6 @@ top
 # | Topic | Where |
 # |-------|-------|
 # | Array / grid layout | [Utilities: Grid](grid.py) |
-# | Components overview & gallery | [Components: Overview](../components/overview.py) |
+# | Components overview & gallery | [Components: Overview](../components/cells/overview.py) |
 # | Instance placement | [Core Concepts: Instances](../concepts/instances.py) |
 # | Creating a full PDK | [PDK: Creating a PDK](../pdk/creating_pdk.py) |

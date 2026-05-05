@@ -238,5 +238,5 @@ angled
 # |-------|-------|
 # | Port system used by `connect()` | [Core Concepts: Ports](ports.py) |
 # | Routing between instance ports | [Routing: Overview](../routing/overview.py) |
-# | Assembling multi-cell components | [Components: Overview](../components/overview.py) |
+# | Assembling multi-cell components | [Components: Overview](../components/cells/overview.py) |
 # | Grid and tiling arrays of instances | [Utilities: Grid Layout](../utilities/grid.py) |

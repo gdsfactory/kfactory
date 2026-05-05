@@ -238,5 +238,5 @@ print(json.dumps(d, indent=2, default=str))
 # |-------|-------|
 # | Creating a full PDK | [PDK: Creating a PDK](creating_pdk.py) |
 # | Layer definitions | [Core Concepts: Layers](../concepts/layers.py) |
-# | Cross-sections (port geometry) | [Enclosures: Cross-Sections](../enclosures/cross_sections.py) |
+# | Cross-sections (port geometry) | [Cross-Sections](../components/cross_sections.py) |
 # | KCLayout (owns the cell DB) | [Core Concepts: KCLayout](../concepts/kclayout.py) |
