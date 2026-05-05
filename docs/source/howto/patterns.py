@@ -26,8 +26,8 @@
 # 2. [Port propagation through hierarchy](#2-port-propagation-through-hierarchy)
 # 3. [Factory bundle (dataclass)](#3-factory-bundle-dataclass)
 # 4. [Cross-section lookup in cached cells](#4-cross-section-lookup-in-cached-cells)
-# 5. [Tile / array pattern](#5-tile--array-pattern)
-# 6. [VKCell route → KCell materialise](#6-vkcell-route--kcell-materialise)
+# 5. [Tile / array pattern](#5-tile-array-pattern)
+# 6. [VKCell route → KCell materialise](#6-vkcell-route-kcell-materialise)
 
 # %%
 import dataclasses
