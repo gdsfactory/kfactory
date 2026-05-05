@@ -13,13 +13,20 @@ test-venv:
 docs-clean:
     rm -rf site
 
-# Build documentation
-docs python_version="3.14":
-    uv run -p {{python_version}} --with . --extra docs --isolated mkdocs build -f docs/mkdocs.yml
+# Pre-build docs source: convert jupytext .py to .md+.ipynb (with download
+# button), generate mkdocstrings API reference stubs into docs/source-built/.
+# Cached: re-runs only re-execute notebooks whose source hash changed.
+docs-build-source python_version="3.14":
+    uv run -p {{python_version}} --extra notebooks --with . python docs/scripts/build_docs_source.py
 
-# Serve documentation locally
-docs-serve python_version="3.14":
-    uv run -p {{python_version}} --with . --extra docs --isolated mkdocs serve -f docs/mkdocs.yml
+# Build documentation (zensical) from the pre-built source
+docs python_version="3.14": docs-build-source
+    uv run -p {{python_version}} --with . --extra docs --isolated zensical build -f docs/zensical-built.yml
+
+# Serve documentation locally (zensical) from the pre-built source
+docs-serve python_version="3.14": docs-build-source
+    uv run -p {{python_version}} --with . --extra docs --isolated zensical serve -f docs/zensical-built.yml
+
 
 # Run tests (depends on init-submodule)
 test python_version="3.14": init-submodule

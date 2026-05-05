@@ -56,15 +56,13 @@ dev = [
     "scipy-stubs",
 ]
 docs = [
-    "kfactory[ipy]",
+    "kfactory[notebooks]",  # transitively pulls in kfactory[ipy]
     "erdantic>=1.1.1",
-    "markdown-exec>=1.10.3",
-    "mkdocs>=1.6.1",
-    "mkdocs-gen-files>=0.5.0",
-    "mkdocs-jupyter>=0.25.1",
+    "zensical>=0.0.40",
+    # Zensical's tailored fork of mike for versioned docs deployment
+    # (per https://zensical.org/docs/setup/versioning/).
+    "mike @ git+https://github.com/squidfunk/mike.git",
     "mkdocs-literate-nav>=0.6.2",
-    "mkdocs-material>=9.6.9",
-    "mkdocs-section-index>=0.3.9",
     "mkdocs-video>=1.5.0",
     "mkdocstrings[python]>=0.29.0",
     "pymdown-extensions>=10.14.3",
@@ -90,6 +88,15 @@ ipy = [
     "ipython>=9.0.2",
     "ipytree>=0.2.2",
     "ipywidgets>=8.1.5",
+]
+notebooks = [
+    # Notebook conversion needs the IPython display helpers
+    # (`c.plot()` lazy-imports kfactory.widgets.interactive, which
+    # pulls in ipyevents/ipywidgets/ipytree from the [ipy] extra).
+    "kfactory[ipy]",
+    "jupytext>=1.16.4",
+    "nbconvert>=7.16.4",
+    "ipykernel>=6.29.5",
 ]
 
 

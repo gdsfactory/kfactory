@@ -7,7 +7,10 @@ repos:
       - id: check-merge-conflict
       - id: check-symlinks
       - id: check-yaml
-        args: []
+        # mkdocs.yml uses Material's `!!python/name:` tag for the
+        # pymdownx.emoji index/generator; pyyaml's safe loader can't
+        # resolve that, so the safe-loader check would fail.
+        args: ["--unsafe"]
       - id: debug-statements
       - id: end-of-file-fixer
         exclude: 'changelog\.d/.*|CHANGLEOG\.md'

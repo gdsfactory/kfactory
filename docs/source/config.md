@@ -4,7 +4,45 @@ The config is managed by a pydantic [`SettingsModel`](https://docs.pydantic.dev/
 
 The config can configure the logger and display type of the jupyter widget among other things.
 
-Setting can be configured through environment variables
+Settings can be configured through environment variables or a `.env` file in the working directory.
+
+## Environment Variable Quick Reference
+
+All variables use the prefix `KFACTORY_`. Nested fields use `_` as a delimiter.
+
+| Environment Variable | Type | Default | Description |
+|---|---|---|---|
+| `KFACTORY_N_THREADS` | `int` | all cores | Threads used for tiled operations (DRC, fill, enclosures) |
+| `KFACTORY_DISPLAY_TYPE` | `"image"` \| `"widget"` | `"image"` | How cells render in Jupyter |
+| `KFACTORY_LOGFILTER_LEVEL` | `TRACE`…`CRITICAL` | `INFO` | Minimum log level to emit |
+| `KFACTORY_LOGFILTER_REGEX` | `str` | `None` | Suppress messages matching this regex |
+| `KFACTORY_SHOW_FUNCTION` | dotted import path | `None` | Custom `show()` function (e.g. `my_pkg.show.show`) |
+| `KFACTORY_META_FORMAT` | `"v1"` \| `"v2"` \| `"v3"` | `"v3"` | Metadata encoding in GDS/OASIS files |
+| `KFACTORY_ALLOW_WIDTH_MISMATCH` | `bool` | `False` | Allow connecting ports with different widths |
+| `KFACTORY_ALLOW_LAYER_MISMATCH` | `bool` | `False` | Allow connecting ports on different layers |
+| `KFACTORY_ALLOW_TYPE_MISMATCH` | `bool` | `False` | Allow connecting ports of different types |
+| `KFACTORY_ALLOW_UNDEFINED_LAYERS` | `bool` | `False` | Skip errors for layers not in the `LayerInfos` |
+| `KFACTORY_CELL_LAYOUT_CACHE` | `bool` | `False` | Cache cells per `KCLayout` instead of globally |
+| `KFACTORY_CELL_OVERWRITE_EXISTING` | `bool` | `False` | Overwrite existing cells with the same name |
+| `KFACTORY_CONNECT_USE_ANGLE` | `bool` | `True` | Use port angle when computing `connect()` transform |
+| `KFACTORY_CONNECT_USE_MIRROR` | `bool` | `True` | Use port mirror flag when computing `connect()` transform |
+| `KFACTORY_CHECK_INSTANCES` | `"error"` \| `"flatten"` \| `"vinstances"` \| `"ignore"` | `"error"` | How to handle instance check failures |
+| `KFACTORY_CHECK_UNNAMED_CELLS` | `"error"` \| `"warning"` \| `"ignore"` | `"warning"` | How to handle unnamed cells |
+| `KFACTORY_MAX_CELLNAME_LENGTH` | `int` | `99` | Maximum length of auto-generated cell names |
+| `KFACTORY_DEBUG_NAMES` | `bool` | `False` | Append debug info to cell names |
+| `KFACTORY_WRITE_CONTEXT_INFO` | `bool` | `True` | Write call-site context info into GDS/OASIS |
+| `KFACTORY_WRITE_CELL_PROPERTIES` | `bool` | `True` | Write cell properties (settings) into GDS/OASIS |
+| `KFACTORY_WRITE_FILE_PROPERTIES` | `bool` | `True` | Write file-level properties into GDS/OASIS |
+| `KFACTORY_WRITE_TIMESTAMPS` | `bool` | `False` | Write timestamps into GDS/OASIS (reproducible builds need `False`) |
+| `KFACTORY_WRITE_KFACTORY_SETTINGS` | `bool` | `True` | Write kfactory version into GDS/OASIS |
+
+!!! tip "Dotenv support"
+    Place a `.env` file in your project root to set these persistently without modifying shell profiles:
+    ```ini
+    KFACTORY_LOGFILTER_LEVEL=DEBUG
+    KFACTORY_DISPLAY_TYPE=image
+    KFACTORY_N_THREADS=4
+    ```
 
 
 ## Logging

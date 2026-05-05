@@ -1,46 +1,81 @@
 name: docs to gh-pages
 
+# Multi-version deployment via mike (zensical fork):
+#   push to main      → `dev` alias  (in-progress docs)
+#   push to vX.Y.Z    → `<X.Y.Z>` version + `latest` alias
+#
+# Requires: GitHub Pages source set to "Deploy from a branch" → gh-pages
+# (one-time switch in repo Settings → Pages).
+
 on:
   push:
-    # branches:
-    #   - main
+    branches:
+      - main
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+*"
   workflow_dispatch:
 
+permissions:
+  contents: write   # mike pushes to gh-pages
+
+concurrency:
+  group: docs-deploy
+  cancel-in-progress: false
+
 jobs:
-  build-docs:
+  deploy:
     runs-on: ubuntu-latest
-    name: build docs
     steps:
       - name: Install graphviz
         shell: bash -l {0}
         run: |
           DEBIAN_FRONTEND=noninteractive sudo apt install graphviz graphviz-dev
+
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0   # mike needs full history of gh-pages
+
       - uses: astral-sh/setup-uv@v7
-        with:
-          python-version: ${{ matrix.python-version }}
       - uses: extractions/setup-just@v3
-      - name: Test coverage
-        run: just docs
-      - uses: actions/upload-pages-artifact@v4
+
+      - name: Cache executed notebooks
+        uses: actions/cache@v4
         with:
-          name: github-pages
-          path: "./docs/site/"
+          path: |
+            docs/.build-cache
+            docs/source-built
+          key: docs-source-built-3.14-${{ hashFiles('docs/source/**/*.py', 'docs/source/**/*.md', 'src/kfactory/**/*.py', 'docs/scripts/build_docs_source.py') }}
+          restore-keys: |
+            docs-source-built-3.14-
 
-  deploy-docs:
-    needs: build-docs
-    permissions:
-      pages: write
-      id-token: write
+      - name: Pre-build docs source (notebooks → md, API ref stubs)
+        run: just docs-build-source
 
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      - name: Configure git for mike
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages --depth=1 || echo "no gh-pages branch yet"
 
-    runs-on: ubuntu-latest
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+      - name: Deploy main → dev alias
+        if: github.ref == 'refs/heads/main'
+        run: |
+          uv run --with . --extra docs --isolated mike deploy \
+            --config-file docs/zensical.yml \
+            --push \
+            --update-aliases \
+            dev
+
+      - name: Deploy tagged release → <version> + latest alias
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          uv run --with . --extra docs --isolated mike deploy \
+            --config-file docs/zensical.yml \
+            --push \
+            --update-aliases \
+            "$VERSION" latest
+          uv run --with . --extra docs --isolated mike set-default \
+            --config-file docs/zensical.yml \
+            --push \
+            latest
