@@ -21,11 +21,11 @@ docs-build-source python_version="3.14":
 
 # Build documentation (zensical) from the pre-built source
 docs python_version="3.14": docs-build-source
-    uv run -p {{python_version}} --with . --extra docs --isolated zensical build -f docs/zensical.yml
+    uv run -p {{python_version}} --with . --extra docs --isolated zensical build -f docs/zensical-built.yml
 
 # Serve documentation locally (zensical) from the pre-built source
 docs-serve python_version="3.14": docs-build-source
-    uv run -p {{python_version}} --with . --extra docs --isolated zensical serve -f docs/zensical.yml
+    uv run -p {{python_version}} --with . --extra docs --isolated zensical serve -f docs/zensical-built.yml
 
 
 # Run tests (depends on init-submodule)

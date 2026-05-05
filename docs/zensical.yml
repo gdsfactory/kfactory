@@ -62,7 +62,10 @@ nav:
       - Contributing: howto/contributing.md
       - vs gdsfactory: gdsfactory.md
   - Reference:
-      - API: reference/
+      # The "API" sub-tree is auto-generated and spliced in at build time
+      # by docs/scripts/build_docs_source.py — DO NOT enumerate modules
+      # here manually. Edit `gen_api_reference` to change the structure.
+      - API: reference/   # SPLICE_API
       - Config Class: config.md
       - Migration: migration.md
       - Changelog: changelog.md
@@ -126,6 +129,13 @@ plugins:
             separate_signature: true
             show_signature_annotations: true
             members_order: alphabetical
+            # Submodules are exposed via the literate-nav side panel, not
+            # inlined on the parent package page. Keeps the right-side
+            # "On this page" TOC focused on actual class / function /
+            # variable definitions in the current module.
+            show_submodules: false
+            show_root_heading: true
+            show_root_full_path: false
             extensions:
               - griffe_pydantic
               - dataclasses

@@ -17,6 +17,9 @@ demo_geometry.gds
 # stray copies land here — keep them out of git.
 docs/source/_static/logo.gds
 docs/source/_static/logo.svg
+# Spliced zensical config — built from docs/zensical.yml + the
+# auto-generated API nav by docs/scripts/build_docs_source.py.
+docs/zensical-built.yml
 
 # Packages
 *.egg
