@@ -68,6 +68,8 @@ nav:
       - Changelog: changelog.md
 theme:
   name: "material"
+  logo: _static/logo.svg
+  favicon: _static/logo.svg
   features:
     - navigation.tabs
     - navigation.tabs.sticky

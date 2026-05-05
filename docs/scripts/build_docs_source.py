@@ -436,9 +436,15 @@ def main(argv: list[str] | None = None) -> int:
     ref_files = gen_api_reference(out_root, REPO_ROOT / "src" / "kfactory")
     print(f"  wrote {len(ref_files)} reference pages", flush=True)
 
-    # Stage 4: diagrams (optional)
+    # Stage 4: logo (κ generated from a real kfactory KCell → GDS + SVG)
+    print("[stage4] generating κ logo …", flush=True)
+    from gen_logo import generate as generate_logo
+    logo_gds, logo_svg = generate_logo(out_root / "_static")
+    print(f"  wrote {logo_gds.name} + {logo_svg.name}", flush=True)
+
+    # Stage 5: diagrams (optional)
     if args.diagrams:
-        print("[stage4] generating diagrams …", flush=True)
+        print("[stage5] generating diagrams …", flush=True)
         diag_files = gen_diagrams(out_root)
         print(f"  wrote {len(diag_files)} diagram(s)", flush=True)
 
