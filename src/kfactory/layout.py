@@ -58,7 +58,7 @@ from .enclosure import (
     LayerEnclosureModel,
     LayerEnclosureSpec,
 )
-from .exceptions import MergeError
+from .exceptions import FactoriesLockedError, MergeError
 from .kcell import (
     AnyTKCell,
     BaseKCell,
@@ -116,14 +116,30 @@ class Factories[F: WrappedKCellFunc[Any, Any] | WrappedVKCellFunc[Any, Any]](
     _by_name: dict[str, int]
     _by_tag: defaultdict[str, list[int]]
     _by_function: dict[Callable[..., Any], int]
+    _locked: bool
 
     def __init__(self) -> None:
         self._all = []
         self._by_name = {}
         self._by_tag = defaultdict(list)
         self._by_function = {}
+        self._locked = False
+
+    @property
+    def locked(self) -> bool:
+        """Whether this collection rejects new factories via `add`."""
+        return self._locked
+
+    def lock(self) -> None:
+        """Prevent further additions through `add`. This is irreversible."""
+        self._locked = True
 
     def add(self, factory: F) -> None:
+        if self._locked:
+            raise FactoriesLockedError(
+                f"Cannot add factory {factory.name!r}: this Factories collection is "
+                "locked."
+            )
         idx = len(self._all)
         self._all.append(factory)
         for tag in factory.tags:
@@ -412,6 +428,22 @@ class KCLayout(
     def dbu(self) -> float:
         """Get the database unit."""
         return self.layout.dbu
+
+    @property
+    def factories_locked(self) -> bool:
+        """Whether both the real and virtual factory collections are locked."""
+        return self.factories.locked and self.virtual_factories.locked
+
+    def lock_factories(self) -> None:
+        """Prevent further factories (real and virtual) from being registered.
+
+        This is irreversible: once locked, a `KCLayout` will reject any new
+        factory registrations (e.g. via `@kcl.cell` / `@kcl.vcell` or direct
+        `factories.add` calls). Use this to seal a PDK after registering all
+        of its pcell functions.
+        """
+        self.factories.lock()
+        self.virtual_factories.lock()
 
     def create_layer_enclosure(
         self,
