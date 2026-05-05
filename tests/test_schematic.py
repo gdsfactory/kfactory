@@ -1386,3 +1386,201 @@ def test_route_multi(
     c = multi_pad()
     oas_regression(c)
     yaml_regression(c.schematic)  # ty:ignore[invalid-argument-type]
+
+
+def _two_port_factory(kcl: kf.KCLayout, layers: Layers) -> None:
+    """Register a `straight` cell on `kcl` with a "dc" pin grouping o1+o2."""
+
+    @kcl.cell
+    def straight(length: int = 1000) -> kf.KCell:
+        c = kcl.kcell()
+        c.shapes(layers.WG).insert(kf.kdb.Box(0, -250, length, 250))
+        p1 = c.create_port(
+            name="o1",
+            width=500,
+            trans=kf.kdb.Trans(rot=2, x=0, y=0),
+            layer_info=layers.WG,
+        )
+        p2 = c.create_port(
+            name="o2",
+            width=500,
+            trans=kf.kdb.Trans(x=length, y=0),
+            layer_info=layers.WG,
+        )
+        c.create_pin(name="dc", ports=[p1, p2], pin_type="DC", info={"role": "bus"})
+        return c
+
+
+def test_schematic_create_pin(kcl: kf.KCLayout) -> None:
+    _two_port_factory(kcl, Layers())
+
+    schematic = kf.Schematic(kcl=kcl)
+    a = schematic.create_inst(name="a", component="straight")
+    a.place(x=0, y=0)
+    schematic.add_port(name="left", port=a.ports["o1"])
+    schematic.add_port(name="right", port=a.ports["o2"])
+
+    pin = schematic.create_pin(
+        name="bus", ports=["left", "right"], pin_type="RF", info={"freq": 5}
+    )
+    assert pin.name == "bus"
+    assert pin.ports == ["left", "right"]
+    assert pin.pin_type == "RF"
+    assert pin.info == {"freq": 5}
+    assert "bus" in schematic.pins
+
+    c = schematic.create_cell(kf.KCell)
+    cell_pin_names = [p.name for p in c.pins]
+    assert "bus" in cell_pin_names
+    bus_pin = next(p for p in c.pins if p.name == "bus")
+    assert [p.name for p in bus_pin.ports] == ["left", "right"]
+    assert bus_pin.pin_type == "RF"
+
+
+def test_schematic_add_pin_forwards_instance_pin(kcl: kf.KCLayout) -> None:
+    _two_port_factory(kcl, Layers())
+
+    schematic = kf.Schematic(kcl=kcl)
+    a = schematic.create_inst(name="a", component="straight")
+    a.place(x=0, y=0)
+    schematic.add_port(name="left", port=a.ports["o1"])
+    schematic.add_port(name="right", port=a.ports["o2"])
+
+    pin_ref = a.pins["dc"]
+    assert isinstance(pin_ref, kf.schematic.PinRef)
+    assert pin_ref.instance == "a"
+    assert pin_ref.pin == "dc"
+
+    schematic.add_pin(name="forwarded", pin=pin_ref)
+    assert isinstance(schematic.pins["forwarded"], kf.schematic.PinRef)
+
+    c = schematic.create_cell(kf.KCell)
+    fwd = next(p for p in c.pins if p.name == "forwarded")
+    assert {p.name for p in fwd.ports} == {"left", "right"}
+    # pin_type and info are propagated from the underlying instance pin
+    assert fwd.pin_type == "DC"
+    assert fwd.info["role"] == "bus"
+
+
+def test_schematic_create_pin_unknown_port_raises(kcl: kf.KCLayout) -> None:
+    _two_port_factory(kcl, Layers())
+
+    schematic = kf.Schematic(kcl=kcl)
+    a = schematic.create_inst(name="a", component="straight")
+    a.place(x=0, y=0)
+    schematic.add_port(name="left", port=a.ports["o1"])
+
+    with pytest.raises(ValueError, match="not registered as schematic ports"):
+        schematic.create_pin(name="bus", ports=["left", "missing"])
+
+
+def test_schematic_create_pin_duplicate_raises(kcl: kf.KCLayout) -> None:
+    _two_port_factory(kcl, Layers())
+
+    schematic = kf.Schematic(kcl=kcl)
+    a = schematic.create_inst(name="a", component="straight")
+    a.place(x=0, y=0)
+    schematic.add_port(name="left", port=a.ports["o1"])
+    schematic.create_pin(name="bus", ports=["left"])
+
+    with pytest.raises(ValueError, match="already exists"):
+        schematic.create_pin(name="bus", ports=["left"])
+
+
+def test_schematic_create_pin_empty_ports_raises(kcl: kf.KCLayout) -> None:
+    _two_port_factory(kcl, Layers())
+
+    schematic = kf.Schematic(kcl=kcl)
+    with pytest.raises(ValueError, match="At least one port"):
+        schematic.create_pin(name="bus", ports=[])
+
+
+def test_schematic_add_pin_duplicate_raises(kcl: kf.KCLayout) -> None:
+    _two_port_factory(kcl, Layers())
+
+    schematic = kf.Schematic(kcl=kcl)
+    a = schematic.create_inst(name="a", component="straight")
+    a.place(x=0, y=0)
+    schematic.add_pin(name="dc", pin=a.pins["dc"])
+
+    with pytest.raises(ValueError, match="already exists"):
+        schematic.add_pin(name="dc", pin=a.pins["dc"])
+
+
+def test_schematic_add_pin_missing_underlying_port_raises(kcl: kf.KCLayout) -> None:
+    _two_port_factory(kcl, Layers())
+
+    schematic = kf.Schematic(kcl=kcl)
+    a = schematic.create_inst(name="a", component="straight")
+    a.place(x=0, y=0)
+    # only expose o1 as a top-level port; "dc" pin needs both o1 and o2.
+    schematic.add_port(name="left", port=a.ports["o1"])
+    schematic.add_pin(name="forwarded", pin=a.pins["dc"])
+
+    with pytest.raises(ValueError, match="not exposed as top-level"):
+        schematic.create_cell(kf.KCell)
+
+
+def test_schematic_pin_yaml_round_trip(kcl: kf.KCLayout) -> None:
+    _two_port_factory(kcl, Layers())
+
+    schematic = kf.Schematic(kcl=kcl)
+    a = schematic.create_inst(name="a", component="straight")
+    a.place(x=0, y=0)
+    schematic.add_port(name="left", port=a.ports["o1"])
+    schematic.add_port(name="right", port=a.ports["o2"])
+    schematic.create_pin(name="bus", ports=["left", "right"], pin_type="RF")
+    schematic.add_pin(name="forwarded", pin=a.pins["dc"])
+
+    dumped = schematic.model_dump()
+    dumped.pop("unit", None)
+    reloaded = kf.Schematic.model_validate(dumped)
+
+    bus = reloaded.pins["bus"]
+    assert isinstance(bus, kf.schematic.Pin)
+    assert bus.ports == ["left", "right"]
+    assert bus.pin_type == "RF"
+
+    fwd = reloaded.pins["forwarded"]
+    assert isinstance(fwd, kf.schematic.PinRef)
+    assert fwd.instance == "a"
+    assert fwd.pin == "dc"
+
+
+def test_schematic_pin_yaml_string_shorthand() -> None:
+    yaml = YAML(typ=["rt", "safe", "string"])
+    schema_yaml = """
+instances:
+  s:
+    component: straight
+    settings:
+      length: 5
+
+pins:
+  forwarded: s,dc
+"""
+    schematic = kf.DSchematic.model_validate(yaml.load(schema_yaml))
+    fwd = schematic.pins["forwarded"]
+    assert isinstance(fwd, kf.schematic.PinRef)
+    assert fwd.instance == "s"
+    assert fwd.pin == "dc"
+
+
+def test_schematic_pin_code_str(kcl: kf.KCLayout) -> None:
+    _two_port_factory(kcl, Layers())
+
+    schematic = kf.Schematic(name="schem", kcl=kcl)
+    a = schematic.create_inst(name="a", component="straight")
+    a.place(x=0, y=0)
+    schematic.add_port(name="left", port=a.ports["o1"])
+    schematic.add_port(name="right", port=a.ports["o2"])
+    schematic.create_pin(name="bus", ports=["left", "right"], pin_type="RF")
+    schematic.add_pin(name="forwarded", pin=a.pins["dc"])
+
+    code = schematic.code_str(ruff_format=False)
+    assert "schematic.create_pin(" in code
+    assert "name='bus'" in code
+    assert "ports=['left', 'right']" in code
+    assert "pin_type='RF'" in code
+    assert "schematic.add_pin(name='forwarded'" in code
+    assert "a.pins['dc']" in code

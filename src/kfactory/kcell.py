@@ -927,7 +927,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         name: str,
         ports: Iterable[ProtoPort[Any]],
         pin_type: str = "DC",
-        info: dict[str, int | float | str] | None = None,
+        info: dict[str, MetaData] | None = None,
     ) -> ProtoPin[T]: ...
 
     @overload
@@ -3126,7 +3126,7 @@ class DKCell(ProtoTKCell[float], UMGeometricObject, DCreatePort):
         name: str,
         ports: Iterable[ProtoPort[Any]],
         pin_type: str = "DC",
-        info: dict[str, int | float | str] | None = None,
+        info: dict[str, MetaData] | None = None,
     ) -> DPin:
         """Create a pin in the cell."""
         return self.pins.create_pin(
@@ -3330,7 +3330,7 @@ class KCell(ProtoTKCell[int], DBUGeometricObject, ICreatePort):
         name: str,
         ports: Iterable[ProtoPort[Any]],
         pin_type: str = "DC",
-        info: dict[str, int | float | str] | None = None,
+        info: dict[str, MetaData] | None = None,
     ) -> Pin:
         """Create a pin in the cell."""
         return self.pins.create_pin(
