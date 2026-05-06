@@ -43,6 +43,7 @@ from typing import (
 )
 
 import ruamel.yaml
+from kfnetlist import Net, Netlist, NetlistPort, PortArrayRef, PortRef
 from klayout import __version__ as _klayout_version
 from pydantic import (
     BaseModel,
@@ -72,7 +73,6 @@ from .instances import (
 )
 from .layer import LayerEnum
 from .merge import MergeDiff
-from .netlist import Net, Netlist, NetlistPort, PortArrayRef, PortRef
 from .pin import BasePin, DPin, Pin, ProtoPin
 from .pins import DPins, Pins, ProtoPins
 from .port import (

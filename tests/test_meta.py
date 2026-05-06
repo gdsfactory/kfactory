@@ -183,7 +183,7 @@ def test_info_dump(kcl: kf.KCLayout) -> None:
     c = kcl.kcell()
     c.info = kf.Info(a="A")
     c.settings = kf.KCellSettings(a="A", c="C")
-    c.info.b = "B"  # ty:ignore[unresolved-attribute]
+    c.info.b = "B"
     c.info["d"] = {"a": 1, "b": 2}
 
     assert c.info == c.info.model_copy()

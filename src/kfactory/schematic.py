@@ -38,6 +38,14 @@ from typing import (
 )
 
 from cachetools import Cache, cached
+from kfnetlist import (
+    Net,
+    Netlist,
+    NetlistInstance,
+    NetlistPort,
+    PortArrayRef,
+    PortRef,
+)
 from pydantic import (
     AfterValidator,
     BaseModel,
@@ -55,10 +63,9 @@ from .decorators import WrappedKCellFunc, WrappedVKCellFunc
 from .instance import Instance, VInstance
 from .kcell import DKCell, KCell, ProtoTKCell, VKCell
 from .layout import KCLayout, get_default_kcl, kcls
-from .netlist import Net, Netlist, NetlistInstance, NetlistPort, PortArrayRef, PortRef
+from .port import BasePort, ProtoPort
 from .port import DPort as DKCellPort
 from .port import Port as KCellPort
-from .port import ProtoPort
 from .routing.generic import ManhattanRoute  # noqa: TC001
 from .routing.manhattan import ManhattanRouter  # noqa: TC001
 from .settings import Info
@@ -555,7 +562,6 @@ class Port[T: (int, float)](BaseModel, extra="forbid"):
 
     Methods:
         is_placeable: True if all references resolve to already placed instances.
-        place: Materialize the port on a `KCell` using provided cross-sections.
     """
 
     name: str = Field(exclude=True)
@@ -630,79 +636,6 @@ class Port[T: (int, float)](BaseModel, extra="forbid"):
         if isinstance(self.orientation, PortRef):
             placeable = placeable and self.orientation.instance in placed_instances
         return placeable
-
-    def place(
-        self,
-        cell: KCell,
-        schematic: TSchematic[T],
-        name: str,
-        cross_sections: Mapping[str, CrossSection | DCrossSection],
-    ) -> KCellPort:
-        if isinstance(self.x, PortRef):
-            if isinstance(self.x, PortArrayRef):
-                x: float = (
-                    cell.insts[self.x.instance]
-                    .ports[self.x.port, self.x.ia, self.x.ib]
-                    .x
-                )
-            else:
-                x = cell.insts[self.x.instance].ports[self.x.port].x
-        elif isinstance(self.x, AnchorRefX):
-            match self.x.x:
-                case "left":
-                    x = cell.insts[self.x.instance].xmin
-                case "center":
-                    x = cell.insts[self.x.instance].bbox().center().x
-                case "right":
-                    x = cell.insts[self.x.instance].xmax
-        else:
-            x = self.x
-        x += self.dx
-        if isinstance(self.y, PortRef):
-            if isinstance(self.y, PortArrayRef):
-                y: float = (
-                    cell.insts[self.y.instance]
-                    .ports[self.y.port, self.y.ia, self.y.ib]
-                    .y
-                )
-            else:
-                y = cell.insts[self.y.instance].ports[self.y.port].y
-        elif isinstance(self.y, AnchorRefY):
-            match self.y.y:
-                case "bottom":
-                    y = cell.insts[self.y.instance].ymin
-                case "center":
-                    y = cell.insts[self.y.instance].bbox().center().y
-                case "top":
-                    y = cell.insts[self.y.instance].ymax
-        else:
-            y = self.y
-        y += self.dy
-        if isinstance(self.orientation, PortRef):
-            orientation = (
-                cell.insts[self.orientation.instance]
-                .ports[self.orientation.port]
-                .orientation
-            )
-        else:
-            orientation = self.orientation
-
-        if schematic.unit == "dbu":
-            return cell.create_port(
-                dcplx_trans=kdb.DCplxTrans(
-                    rot=orientation,
-                    x=cell.kcl.to_um(cast("int", x)),
-                    y=cell.kcl.to_um(cast("int", y)),
-                ),
-                cross_section=cross_sections[self.cross_section],
-                name=name,
-            )
-
-        return cell.create_port(
-            dcplx_trans=kdb.DCplxTrans(rot=orientation, x=x, y=y),
-            cross_section=cross_sections[self.cross_section],
-            name=name,
-        )
 
     def __str__(self) -> str:
         return self.as_python_str()
@@ -1182,6 +1115,107 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
         self.ports[p.name] = p
         return p
 
+    def place_port(
+        self,
+        name: str,
+        cell: KCell,
+        cross_sections: Mapping[str, CrossSection | DCrossSection],
+    ) -> BasePort:
+        """Materialize a schematic-level port on `cell`.
+
+        Looks up `self.ports[name]` and dispatches by port type:
+
+        - `PortArrayRef` / `PortRef`: forwards an instance port through
+          `cell.add_port` (using `cell.vinsts` for virtual instances).
+        - `Port[T]`: resolves `(x, y, orientation)` (which may themselves be
+          references), then creates the port via `cell.create_port`.
+        """
+        port = self.ports[name]
+        if isinstance(port, PortArrayRef):
+            if self.instances[port.instance].virtual:
+                return cell.add_port(
+                    port=cell.vinsts[port.instance].ports[port.port, port.ia, port.ib],
+                    name=name,
+                ).base
+            return cell.add_port(
+                port=cell.insts[port.instance].ports[port.port, port.ia, port.ib],
+                name=name,
+            ).base
+        if isinstance(port, PortRef):
+            if self.instances[port.instance].virtual:
+                return cell.add_port(
+                    port=cell.vinsts[port.instance].ports[port.port], name=name
+                ).base
+            return cell.add_port(
+                port=cell.insts[port.instance].ports[port.port], name=name
+            ).base
+
+        if isinstance(port.x, PortRef):
+            if isinstance(port.x, PortArrayRef):
+                x: float = (
+                    cell.insts[port.x.instance]
+                    .ports[port.x.port, port.x.ia, port.x.ib]
+                    .x
+                )
+            else:
+                x = cell.insts[port.x.instance].ports[port.x.port].x
+        elif isinstance(port.x, AnchorRefX):
+            match port.x.x:
+                case "left":
+                    x = cell.insts[port.x.instance].xmin
+                case "center":
+                    x = cell.insts[port.x.instance].bbox().center().x
+                case "right":
+                    x = cell.insts[port.x.instance].xmax
+        else:
+            x = port.x
+        x += port.dx
+        if isinstance(port.y, PortRef):
+            if isinstance(port.y, PortArrayRef):
+                y: float = (
+                    cell.insts[port.y.instance]
+                    .ports[port.y.port, port.y.ia, port.y.ib]
+                    .y
+                )
+            else:
+                y = cell.insts[port.y.instance].ports[port.y.port].y
+        elif isinstance(port.y, AnchorRefY):
+            match port.y.y:
+                case "bottom":
+                    y = cell.insts[port.y.instance].ymin
+                case "center":
+                    y = cell.insts[port.y.instance].bbox().center().y
+                case "top":
+                    y = cell.insts[port.y.instance].ymax
+        else:
+            y = port.y
+        y += port.dy
+        if isinstance(port.orientation, PortRef):
+            orientation = (
+                cell.insts[port.orientation.instance]
+                .ports[port.orientation.port]
+                .orientation
+            )
+        else:
+            orientation = port.orientation
+
+        if self.unit == "dbu":
+            return cell.create_port(
+                dcplx_trans=kdb.DCplxTrans(
+                    rot=orientation,
+                    x=cell.kcl.to_um(cast("int", x)),
+                    y=cell.kcl.to_um(cast("int", y)),
+                ),
+                cross_section=cross_sections[port.cross_section],
+                name=name,
+            ).base
+
+        return cell.create_port(
+            dcplx_trans=kdb.DCplxTrans(rot=orientation, x=x, y=y),
+            cross_section=cross_sections[port.cross_section],
+            name=name,
+        ).base
+
     def create_pin(
         self,
         name: str,
@@ -1570,10 +1604,9 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
 
         for name, port in self.ports.items():
             if port.is_placeable(placed_instances=placed_insts):
-                p = port.place(
+                p = self.place_port(
+                    name,
                     cell=c,
-                    schematic=self,
-                    name=name,
                     cross_sections=cross_sections,
                 )
                 placed_ports.add(p.name)
@@ -1619,10 +1652,15 @@ class TSchematic[T: (int, float)](BaseModel, extra="forbid"):
                         p: KCellPort | DKCellPort = c.ports[port_ref.name]
                     else:
                         inst = self.instances[port_ref.instance]
-                        if inst.virtual:
-                            p = port_ref.get_port(c.vinsts[port_ref.instance])
+                        target = (
+                            c.vinsts[port_ref.instance]
+                            if inst.virtual
+                            else c.insts[port_ref.instance]
+                        )
+                        if isinstance(port_ref, PortArrayRef):
+                            p = target.ports[port_ref.port, port_ref.ia, port_ref.ib]
                         else:
-                            p = port_ref.get_port(c.insts[port_ref.instance])
+                            p = target.ports[port_ref.port]
                     resolved_port_list.append(p)
                 resolved_ports.append(tuple(resolved_port_list))
             route_c = output_type(base=c.base)
@@ -3016,8 +3054,10 @@ def _get_and_place_insts_and_ports[T: (int, float)](
         placed_instances=placed_insts,
     )
     for port in placeable_ports:
-        schematic.ports[port].place(
-            cell=c, schematic=schematic, name=port, cross_sections=cross_sections
+        schematic.place_port(
+            port,
+            cell=c,
+            cross_sections=cross_sections,
         )
         placed_ports.add(port)
     placed_insts |= placeable_insts
