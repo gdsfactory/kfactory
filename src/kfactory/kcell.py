@@ -1706,7 +1706,7 @@ class ProtoTKCell(ProtoKCell[TUnit, TKCell], Generic[TUnit], ABC):  # noqa: PYI0
                         v = pin_dict[index]
                         self.create_pin(
                             name=v.get("name"),
-                            ports=[ports[port_index] for port_index in v["ports"]],  # type: ignore[misc]
+                            ports=[ports[str(port_index)] for port_index in v["ports"]],  # type: ignore[misc]
                             pin_type=v["pin_type"],
                             info=v["info"],
                         )
