@@ -1733,7 +1733,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                         self.create_pin(
                             name=v.get("name"),
                             ports=[
-                                Port(base=ports[port_index].base)
+                                Port(base=ports[str(port_index)].base)
                                 for port_index in v["ports"]
                             ],
                             pin_type=v["pin_type"],
