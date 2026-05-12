@@ -19,7 +19,6 @@ import os
 import socket
 import subprocess
 from abc import ABC, abstractmethod
-from collections import defaultdict
 from collections.abc import (
     Callable,
     ItemsView,
@@ -30,7 +29,6 @@ from collections.abc import (
     Sequence,
     ValuesView,
 )
-from itertools import chain
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -43,7 +41,6 @@ from typing import (
 )
 
 import ruamel.yaml
-from kfnetlist import Net, Netlist, NetlistPort, PortArrayRef, PortRef
 from klayout import __version__ as _klayout_version
 from pydantic import (
     BaseModel,
@@ -114,6 +111,7 @@ from .utilities import (
 if TYPE_CHECKING:
     from types import ModuleType
 
+    from kfnetlist import Net, Netlist
     from ruamel.yaml.representer import BaseRepresenter, MappingNode
 
     from .layout import KCLayout
@@ -754,6 +752,14 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
     def cell_index(self) -> int:
         """Gets the cell index."""
         return self._base.kdb_cell.cell_index()
+
+    def called_cells(self) -> list[int]:
+        """Cell indices for every cell transitively instantiated inside this cell."""
+        return self._base.kdb_cell.called_cells()
+
+    def is_library_cell(self) -> bool:
+        """True if this cell is imported from a klayout library."""
+        return self._base.kdb_cell.is_library_cell()
 
     def shapes(self, layer: int | kdb.LayerInfo) -> kdb.Shapes:
         return self._base.kdb_cell.shapes(layer)
@@ -1965,11 +1971,9 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
             | tuple[kdb.LayerInfo, kdb.LayerInfo, kdb.LayerInfo],
         ]
         | None = None,
-        port_mapping: dict[str, dict[str | None, str]] | None = None,
+        port_mapping: dict[str, dict[str, str]] | None = None,
     ) -> kdb.LayoutToNetlist:
-        """Generate a LayoutToNetlist object from the port types.
-
-        Uses electrical connectivity for extraction.
+        """Generate a LayoutToNetlist object from electrical connectivity.
 
         Args:
             mark_port_types: The port types to consider for the netlist extraction.
@@ -1977,70 +1981,16 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
                 layers (just consider this layer as metal), two layers (two metals
                 which touch each other), or three layers (two metals with a via)
             port_mapping: Remap ports of cells to others. This allows to define
-                equivalent ports in the lvs. E.g. `{"cell_A": {"o3": "o1", "o2"}}`
-                will remap "o2" and "o3" to "o1". Making the three ports the same
-                one for LVS.
-        Returns:
-            LayoutToNetlist extracted from electrical connectivity.
+                equivalent ports in the lvs.
         """
-        connectivity = connectivity or self.kcl.connectivity
-        ly_elec = self.kcl.layout.dup()
+        from kfnetlist.extract import l2n_elec as _kfnetlist_l2n_elec
 
-        port_mapping = port_mapping or {}
-        c_elec: kdb.Cell = ly_elec.cell(self.name)
-
-        for ci in [c_elec.cell_index(), *c_elec.called_cells()]:
-            c_ = self.kcl[ci]
-            c = ly_elec.cell(c_.name)
-            assert c_.name == c.name
-            c.locked = False
-            mapping = port_mapping.get(
-                c_.name,
-                port_mapping.get(c_.factory_name, {}) if c_.has_factory_name() else {},
-            )
-            for port in c_.ports:
-                port_name = mapping.get(port.name, port.name)
-                if (
-                    port_name == port.name
-                    and port.port_type in mark_port_types
-                    and port.name is not None
-                ):
-                    c.shapes(port.layer_info).insert(
-                        kdb.Text(string=port.name, trans=port.trans)
-                    )
-
-        l2n: kdb.LayoutToNetlist = kdb.LayoutToNetlist(
-            kdb.RecursiveShapeIterator(
-                ly_elec,
-                ly_elec.cell(self.name),
-                [],
-            )
+        return _kfnetlist_l2n_elec(
+            self,
+            mark_port_types=mark_port_types,
+            connectivity=connectivity,
+            port_mapping=port_mapping,
         )
-
-        connectivity = connectivity or self.kcl.connectivity
-
-        layers: dict[int, kdb.Region] = {}
-
-        layer_infos = {
-            ly_elec.get_info(ly_elec.layer(info))
-            for layer_set in connectivity
-            for info in layer_set
-        }
-        for info in layer_infos:
-            l_ = l2n.make_layer(ly_elec.layer(info), info.name)
-            layers[ly_elec.layer(info)] = l_
-            l2n.connect(l_)
-        for conn in connectivity:
-            old_layer = layers[ly_elec.layer(conn[0])]
-
-            for layer in conn[1:]:
-                li = layers[ly_elec.layer(layer)]
-                l2n.connect(old_layer, li)
-                old_layer = li
-        l2n.extract_netlist()
-        l2n.check_extraction_errors()
-
-        return l2n
 
     def netlist(
         self,
@@ -2057,263 +2007,33 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         exclude_purposes: list[str] | None = None,
         allow_width_mismatch: bool = False,
     ) -> dict[str, Netlist]:
-        if equivalent_ports is None:
-            equivalent_ports = {}
-            for ci in [self.cell_index(), *self.called_cells()]:
-                c_ = self.kcl[ci]
-                eqps: list[list[str]] | None = c_.lvs_equivalent_ports or None
-                if c_.has_factory_name():
-                    if c_.is_library_cell():
-                        if c_.virtual:
-                            eqps = (
-                                _get_orig_cell(c_)
-                                .kcl.virtual_factories[c_.factory_name]
-                                .lvs_equivalent_ports
-                            )
-                        else:
-                            eqps = (
-                                _get_orig_cell(c_)
-                                .kcl.factories[c_.factory_name]
-                                .lvs_equivalent_ports
-                            )
-                    elif c_.virtual:
-                        eqps = c_.kcl.virtual_factories[
-                            c_.factory_name
-                        ].lvs_equivalent_ports
-                    else:
-                        eqps = c_.kcl.factories[c_.factory_name].lvs_equivalent_ports
-                if eqps is not None:
-                    equivalent_ports[c_.name] = eqps
-        port_mapping: dict[str, dict[str | None, str]] = defaultdict(dict)
-        for cell_name, list_of_port_lists in equivalent_ports.items():
-            for port_list in list_of_port_lists:
-                if port_list:
-                    p1 = port_list[0]
-                    for port in port_list:
-                        port_mapping[cell_name][port] = p1
-        l2n_elec = self.l2n_elec(
+        from kfnetlist.extract import extract as _kfnetlist_extract
+
+        return _kfnetlist_extract(
+            self,
+            wrap_kdb_instance=lambda i: Instance(kcl=self.kcl, instance=i),
+            port_types=port_types,
             mark_port_types=mark_port_types,
             connectivity=connectivity,
-            port_mapping=port_mapping,
+            equivalent_ports=equivalent_ports,
+            ignore_unnamed=ignore_unnamed,
+            exclude_purposes=exclude_purposes,
+            allow_width_mismatch=allow_width_mismatch,
         )
-
-        netlists: dict[str, Netlist] = {}
-
-        for cell_name, eqps in equivalent_ports.items():
-            for eqp_list in eqps:
-                if eqp_list:
-                    p1 = eqp_list[0]
-                    for p in eqp_list:
-                        port_mapping[cell_name][p] = p1
-
-        for ci in [self.cell_index(), *self.called_cells()]:
-            c_ = self.kcl[ci]
-            name = c_.name
-
-            nl = _get_netlist(
-                c=c_,
-                optical_nets=c_.get_optical_nets(port_types=port_types),
-                l2n_elec=l2n_elec,
-                ignore_unnamed=ignore_unnamed,
-                exclude_purposes=exclude_purposes,
-            )
-            if equivalent_ports.get(c_.name) is not None:
-                nl = nl.lvs_equivalent(
-                    cell_name=c_.name,
-                    equivalent_ports=equivalent_ports,
-                    port_mapping=port_mapping,
-                )
-            netlists[name] = nl
-            nl.sort()
-        return netlists
 
     def get_optical_nets(
         self,
         port_types: Sequence[str] = ("optical",),
         allow_width_mismatch: bool = False,
     ) -> list[Net]:
+        """Extract geometric port-adjacency nets for the given port types."""
+        from kfnetlist.extract import get_optical_nets as _kfnetlist_get_optical_nets
 
-        def port_filter(num_port: tuple[int, ProtoPort[Any]]) -> bool:
-            return num_port[1].port_type in port_types
-
-        inst_ports: dict[
-            tuple[int, int],
-            dict[str, list[tuple[int, int, int, int, Instance, ProtoPort[Any]]]],
-        ] = {}
-        cell_ports: dict[
-            tuple[int, int], dict[str, list[tuple[int, ProtoPort[Any]]]]
-        ] = {}
-
-        # sort the cell's ports by position and layer
-
-        portnames: set[str] = set()
-
-        nets: list[Net] = []
-
-        for i, port in filter(
-            port_filter, enumerate(Ports(kcl=self.kcl, bases=self.ports.bases))
-        ):
-            trans = port.trans.dup()
-            trans.angle %= 2
-            trans.mirror = False
-            layer_info = self.kcl.layout.get_info(port.layer)
-            layer = f"{layer_info.layer}_{layer_info.datatype}"
-
-            if port.name in portnames:
-                raise ValueError(
-                    "Netlist extraction is not possible with"
-                    f" colliding port names. Duplicate name: {port.name}"
-                )
-
-            v = trans.disp
-            h = (v.x, v.y)
-            if h not in cell_ports:
-                cell_ports[h] = {}
-            if layer not in cell_ports[h]:
-                cell_ports[h][layer] = []
-            cell_ports[h][layer].append((i, port))
-
-            if port.name:
-                portnames.add(port.name)
-
-        # sort the ports of all instances by position and layer
-        for i, inst in enumerate(self.insts):
-            if inst.na > 1 or inst.nb > 1:
-                for ia in range(inst.na):
-                    for ib in range(inst.nb):
-                        inst_el = kdb.InstElement(inst.instance, ia, ib)
-                        for j, port in filter(
-                            port_filter,
-                            enumerate(
-                                Ports(
-                                    kcl=self.kcl,
-                                    bases=[
-                                        p.base.transform(inst_el.specific_trans())
-                                        for p in inst.ports
-                                    ],
-                                )
-                            ),
-                        ):
-                            trans = port.trans.dup()
-                            trans.angle %= 2
-                            trans.mirror = False
-                            v = trans.disp
-                            h = (v.x, v.y)
-                            layer_info = self.kcl.layout.get_info(port.layer)
-                            layer = f"{layer_info.layer}_{layer_info.datatype}"
-                            if h not in inst_ports:
-                                inst_ports[h] = {}
-                            if layer not in inst_ports[h]:
-                                inst_ports[h][layer] = []
-                            inst_ports[h][layer].append(
-                                (
-                                    i,
-                                    j,
-                                    ia,
-                                    ib,
-                                    Instance(kcl=self.kcl, instance=inst.instance),
-                                    port,
-                                )
-                            )
-            else:
-                for j, port in filter(
-                    port_filter,
-                    enumerate(Ports(kcl=self.kcl, bases=[p.base for p in inst.ports])),
-                ):
-                    trans = port.trans.dup()
-                    trans.angle %= 2
-                    trans.mirror = False
-                    v = trans.disp
-                    h = (v.x, v.y)
-                    layer_info = self.kcl.layout.get_info(port.layer)
-                    layer = f"{layer_info.layer}_{layer_info.datatype}"
-                    if h not in inst_ports:
-                        inst_ports[h] = {}
-                    if layer not in inst_ports[h]:
-                        inst_ports[h][layer] = []
-                    inst_ports[h][layer].append(
-                        (
-                            i,
-                            j,
-                            0,
-                            0,
-                            Instance(kcl=self.kcl, instance=inst.instance),
-                            port,
-                        )
-                    )
-
-        base_check = PortCheck.position + PortCheck.layer + PortCheck.port_type
-        if not allow_width_mismatch:
-            base_check += PortCheck.width
-        port_check_same = base_check + PortCheck.same
-        port_check_opposite = base_check + PortCheck.opposite
-
-        for h, cellport_layer_dict in cell_ports.items():
-            for layer, cellports in cellport_layer_dict.items():
-                additional_cellports = cell_ports.get((h[0] + 1, h[1]), {}).get(
-                    layer, []
-                ) + cell_ports.get((h[0], h[1] + 1), {}).get(layer, [])
-
-                hx = h[0]
-                hy = h[1]
-
-                ports: list[tuple[int, int, int, int, Instance, ProtoPort[Any]]] = []
-                for x in [hx - 1, hx, hx + 1]:
-                    for y in [hy - 1, hy, hy + 1]:
-                        ports.extend(inst_ports.get((x, y), {}).get(layer, []))
-
-                for n, (_, cellport) in enumerate(cellports):
-                    for _, cellport2 in chain(cellports[n + 1 :], additional_cellports):
-                        if (
-                            cellport.base.check_connection(cellport2.base)
-                        ) & port_check_opposite == port_check_opposite:
-                            net = Net(
-                                [
-                                    NetlistPort(name=cellport.name),
-                                    NetlistPort(name=cellport2.name),
-                                ]
-                            )
-                            nets.append(net)
-
-                    for _, _, ia2, ib2, inst2, port2 in ports:
-                        if (
-                            cellport.base.check_connection(port2.base, snapped=True)
-                        ) & port_check_same == port_check_same:
-                            nets.append(
-                                Net(
-                                    [
-                                        NetlistPort(name=cellport.name),
-                                        _get_net_ref(inst2, port2, ia2, ib2),
-                                    ]
-                                )
-                            )
-
-        # go through each position and layer and connect ports to their matching cell
-        # port or connect the instance ports
-        for h, inst_layer_dict in inst_ports.items():
-            for layer, ports in inst_layer_dict.items():
-                additional_ports = inst_ports.get((h[0] + 1, h[1]), {}).get(
-                    layer, []
-                ) + inst_ports.get((h[0], h[1] + 1), {}).get(layer, [])
-                # connect instance ports to each other
-                for n, (_, _, ia, ib, inst, port) in enumerate(ports):
-                    for _, _, ia2, ib2, inst2, port2 in chain(
-                        ports[n + 1 :], additional_ports
-                    ):
-                        if (
-                            port.base.check_connection(port2.base) & port_check_opposite
-                            == port_check_opposite
-                        ):
-                            nets.append(
-                                Net(
-                                    [
-                                        _get_net_ref(inst, port, ia, ib),
-                                        _get_net_ref(inst2, port2, ia2, ib2),
-                                    ]
-                                )
-                            )
-
-        return nets
+        return _kfnetlist_get_optical_nets(
+            self,
+            port_types=port_types,
+            allow_width_mismatch=allow_width_mismatch,
+        )
 
     def circuit(
         self,
@@ -4411,138 +4131,3 @@ def get_cells(
 
 type AnyKCell = ProtoKCell[Any, Any]
 type AnyTKCell = ProtoTKCell[Any]
-
-
-def _get_netlist(
-    c: ProtoTKCell[Any],
-    optical_nets: list[Net],
-    l2n_elec: kdb.LayoutToNetlist,
-    ignore_unnamed: bool = False,
-    exclude_purposes: list[str] | None = None,
-) -> Netlist:
-    elec_circ = l2n_elec.netlist().circuit_by_name(c.name)
-    nl = Netlist(nets=[])
-    exclude_purposes = exclude_purposes or []
-
-    for inst in c.insts:
-        if inst.cell.has_factory_name():
-            nl.create_inst(
-                name=inst.name,
-                kcl=inst.cell.library().name()
-                if inst.cell.is_library_cell()
-                else inst.cell.kcl.name,
-                component=inst.cell.factory_name,
-                settings={
-                    k: serialize_setting(v)
-                    for k, v in inst.cell.settings.model_dump().items()
-                },
-                na=inst.na,
-                nb=inst.nb,
-            )
-        else:
-            nl.create_inst(
-                name=inst.name,
-                kcl=inst.cell.library().name()
-                if inst.cell.is_library_cell()
-                else inst.cell.kcl.name,
-                component=inst.cell.name,
-                settings={
-                    k: serialize_setting(v)
-                    for k, v in inst.cell.settings.model_dump().items()
-                },
-                na=inst.na,
-                nb=inst.nb,
-            )
-    for port in c.ports:
-        nl.create_port(port.name)
-
-    for net in optical_nets:
-        nl.add_net(net)
-    if elec_circ:
-        instances_per_transformation: dict[
-            kdb.DCplxTrans, list[ProtoTInstance[Any]]
-        ] = defaultdict(list)
-        for inst in c.insts:
-            instances_per_transformation[inst.dcplx_trans].append(inst)
-        for net in elec_circ.each_net():
-            net_refs = []
-            for pinref in net.each_pin():
-                p = nl.create_port(pinref.pin().name())
-                net_refs.append(p)
-            for subc_pin in net.each_subcircuit_pin():
-                subc = subc_pin.subcircuit()
-                circ_ref = subc.circuit_ref()
-                circ = subc.circuit()
-                pin = subc_pin.pin()
-                recit = kdb.RecursiveInstanceIterator(
-                    c.kcl.layout,
-                    c.kcl.layout.cell(circ.name),
-                    box=kdb.Box(2).transformed(
-                        kdb.ICplxTrans(trans=subc.trans, dbu=c.kcl.dbu)
-                    ),
-                )
-                recit.max_depth = 0
-                recit.targets = [
-                    c.kcl[
-                        l2n_elec.internal_layout().cell(circ_ref.cell_index).name
-                    ].cell_index()
-                ]
-                recit.overlapping = True
-                for it in recit.each():
-                    inst_el = it.current_inst_element()
-                    if (
-                        inst_el.specific_cplx_trans()
-                        == kdb.ICplxTrans(trans=subc.trans, dbu=c.kcl.dbu)
-                        and pin.name() != ""
-                    ):
-                        inst = Instance(kcl=c.kcl, instance=inst_el.inst())
-                        if inst_el.ia() < 0:
-                            net_refs.append(
-                                PortRef(instance=inst.name, port=pin.name())
-                            )
-                        else:
-                            net_refs.append(
-                                PortArrayRef(
-                                    instance=inst.name,
-                                    port=pin.name(),
-                                    ia=inst_el.ia(),
-                                    ib=inst_el.ib(),
-                                )
-                            )
-                        break
-            if len(net_refs) > 1:
-                nl.create_net(*net_refs)
-    inst_names: set[str] = set()
-    if ignore_unnamed:
-        inst_names |= {inst.name for inst in c.insts if not inst.is_named()}
-    if exclude_purposes:
-        inst_names |= {
-            inst.name for inst in c.insts if inst.purpose in exclude_purposes
-        }
-    nl.flatten_instances(list(inst_names))
-    for inst_name in inst_names:
-        nl.instances.pop(inst_name, None)
-    nl.sort()
-    return nl
-
-
-@overload
-def _get_orig_cell(c: KCell) -> KCell: ...
-
-
-@overload
-def _get_orig_cell(c: DKCell) -> DKCell: ...
-
-
-def _get_orig_cell(c: KCell | DKCell) -> KCell | DKCell:
-    if c.is_library_cell():
-        return _get_orig_cell(c.library_cell)
-    return c
-
-
-def _get_net_ref(
-    inst: Instance, port: ProtoPort[Any], ia: int, ib: int
-) -> PortArrayRef | PortRef:
-    if inst.na > 0 and inst.nb > 0:
-        return PortArrayRef(instance=inst.name, port=port.name, ia=ia, ib=ib)
-    return PortRef(instance=inst.name, port=port.name)
