@@ -40,7 +40,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "kfactory[ci]",
-    "mypy>=1.20.2,<1.21",
+    "mypy>=1.20.2,<2.2",
     "pre-commit>=4.6.0,<4.7",
     "pylsp-mypy>=0.7.1,<0.8",
     "python-lsp-server[all]>=1.14.0,<1.15",
