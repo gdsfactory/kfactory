@@ -273,6 +273,15 @@ def gen_api_reference(out_root: Path, src_pkg: Path) -> list[Path]:
     so that `/reference/` itself is the top-level package API page,
     not a "click here to see the API" detour.
     """
+    # Wipe any previously-generated reference tree so a module removed
+    # from src/kfactory/ doesn't leave an orphan `::: kfactory.foo` page
+    # behind. CI restores docs/source-built/ via actions/cache restore-keys
+    # when the hash changes, and a stale directive for a now-removed
+    # module crashes mkdocstrings during the zensical build.
+    ref_root = out_root / "reference"
+    if ref_root.exists():
+        shutil.rmtree(ref_root)
+
     written: list[Path] = []
     # Tree of (depth, title, doc_rel) preserving traversal order.
     # Used to splice the API nav into zensical.yml since zensical 0.0.40
