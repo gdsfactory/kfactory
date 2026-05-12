@@ -90,13 +90,13 @@ kf.kcl.infos = L
 # DCrossSection — all dimensions in µm
 xs_wg = kf.DCrossSection(
     kcl=kf.kcl,
-    width=0.5,           # core width µm
+    width=0.5,  # core width µm
     layer=L.WG,
     sections=[
         (L.WGCLAD, 2.0),  # cladding: 0 → 2 µm from core edge (symmetric)
     ],
-    radius=10.0,         # preferred bend radius hint
-    radius_min=5.0,      # minimum bend radius hint (DRC)
+    radius=10.0,  # preferred bend radius hint
+    radius_min=5.0,  # minimum bend radius hint (DRC)
     name="WG_500",
 )
 
@@ -133,12 +133,12 @@ print(f"width (DBU): {xs_dbu.width}")  # 500 DBU at 1 nm/DBU
 # CrossSection — dimensions in DBU (1 DBU = 1 nm by default)
 xs_dbu_direct = kf.CrossSection(
     kcl=kf.kcl,
-    width=500,           # 500 DBU = 0.5 µm
+    width=500,  # 500 DBU = 0.5 µm
     layer=L.WG,
     sections=[
         (L.WGCLAD, 0, 2_000),  # (layer, d_min, d_max) in DBU
     ],
-    radius=10_000,       # 10 µm in DBU
+    radius=10_000,  # 10 µm in DBU
     name="WG_500_dbu",
 )
 
@@ -165,7 +165,7 @@ enc = kf.kcl.get_enclosure(
 )
 
 xs_base = SymmetricalCrossSection(
-    width=700,           # 700 DBU = 0.7 µm
+    width=700,  # 700 DBU = 0.7 µm
     enclosure=enc,
     name="WG_700_RIB",
     radius=15_000,
@@ -189,8 +189,8 @@ xs_implant = kf.DCrossSection(
     width=0.5,
     layer=L.WG,
     sections=[
-        (L.WGCLAD, 2.0),        # cladding: extends 0–2 µm from core
-        (L.SLAB,   0.5, 3.0),   # slab ring: starts 0.5 µm, ends 3 µm from core
+        (L.WGCLAD, 2.0),  # cladding: extends 0–2 µm from core
+        (L.SLAB, 0.5, 3.0),  # slab ring: starts 0.5 µm, ends 3 µm from core
     ],
     name="WG_IMPLANT",
 )
@@ -215,7 +215,7 @@ xs_with_fp = kf.DCrossSection(
         (L.WGCLAD, 2.0),
     ],
     bbox_layers=[L.FLOORPLAN],
-    bbox_offsets=[5.0],   # floorplan 5 µm outside bounding box
+    bbox_offsets=[5.0],  # floorplan 5 µm outside bounding box
     name="WG_FP",
 )
 
@@ -229,6 +229,7 @@ print(f"bbox_sections: {xs_fp_dbu.bbox_sections}")
 # `SymmetricalCrossSection` directly to `add_port`.
 # Because `@kf.cell` caches by parameters, factory functions should accept
 # the cross-section **name** (a string) and look it up inside:
+
 
 # %%
 @kf.cell
@@ -259,7 +260,7 @@ def mzi_arm(cross_section: str, length_um: float = 20.0) -> kf.KCell:
     c.add_port(
         port=kf.Port(
             name="o2",
-            trans=kf.kdb.Trans(0, False, length // 2, 0),   # East-facing
+            trans=kf.kdb.Trans(0, False, length // 2, 0),  # East-facing
             cross_section=xs.base,
             kcl=kf.kcl,
         )

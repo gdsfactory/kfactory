@@ -64,7 +64,6 @@ kf.kcl.infos = L
 # Here we use 1 µm (1000 dbu) as the minimum spacing so the violation is obvious.
 
 # %%
-import kfactory.utils.fill as fill_utils
 
 MIN_SPACE_DBU = 1000  # 1 µm minimum space rule
 

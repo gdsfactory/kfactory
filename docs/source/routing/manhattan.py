@@ -70,7 +70,7 @@ straight_factory = partial(
     enclosure=wg_enc,
 )
 
-WG_WIDTH = kf.kcl.to_dbu(0.5)       # 500 DBU
+WG_WIDTH = kf.kcl.to_dbu(0.5)  # 500 DBU
 BEND_RADIUS = kf.routing.optical.get_radius(bend90)  # actual footprint radius in DBU
 
 print(f"WG width:    {WG_WIDTH} DBU  ({WG_WIDTH / 1000:.3f} µm)")
@@ -91,7 +91,7 @@ print(f"Bend radius: {BEND_RADIUS} DBU  ({BEND_RADIUS / 1000:.3f} µm)")
 # Port 2: South-facing offset to the right and above
 p_start = kf.Port(
     name="p1",
-    trans=kf.kdb.Trans(1, False, 0, 0),          # angle=1 → North
+    trans=kf.kdb.Trans(1, False, 0, 0),  # angle=1 → North
     width=WG_WIDTH,
     layer_info=L.WG,
 )
@@ -102,7 +102,9 @@ p_end = kf.Port(
     layer_info=L.WG,
 )
 
-backbone = kf.routing.manhattan.route_manhattan(p_start, p_end, bend90_radius=BEND_RADIUS)
+backbone = kf.routing.manhattan.route_manhattan(
+    p_start, p_end, bend90_radius=BEND_RADIUS
+)
 print("Backbone points (DBU):", backbone)
 print("Backbone points (µm): ", [(p.x / 1000, p.y / 1000) for p in backbone])
 
@@ -142,7 +144,7 @@ c_basic
 # Import from `kfactory.routing.steps`:
 
 # %%
-from kfactory.routing.steps import Left, Right, Straight
+from kfactory.routing.steps import Left, Straight
 
 # Force a 30 µm straight stub at both ends before bending
 backbone_stubs = kf.routing.manhattan.route_manhattan(
@@ -152,7 +154,10 @@ backbone_stubs = kf.routing.manhattan.route_manhattan(
     start_steps=[Straight(dist=kf.kcl.to_dbu(30))],
     end_steps=[Straight(dist=kf.kcl.to_dbu(30))],
 )
-print("Backbone with 30 µm stubs (µm):", [(p.x / 1000, p.y / 1000) for p in backbone_stubs])
+print(
+    "Backbone with 30 µm stubs (µm):",
+    [(p.x / 1000, p.y / 1000) for p in backbone_stubs],
+)
 
 c_stubs = kf.KCell("manhattan_stubs")
 kf.routing.optical.place_manhattan(
@@ -172,7 +177,7 @@ c_stubs
 # Start facing East, then force an immediate left (North) exit stub before routing
 p_east = kf.Port(
     name="east_start",
-    trans=kf.kdb.Trans(0, False, 0, 0),           # angle=0 → East
+    trans=kf.kdb.Trans(0, False, 0, 0),  # angle=0 → East
     width=WG_WIDTH,
     layer_info=L.WG,
 )
@@ -218,7 +223,7 @@ c_left
 # Two East-facing ports on the same horizontal axis — standard U-turn scenario
 p_a = kf.Port(
     name="a",
-    trans=kf.kdb.Trans(0, False, 0, 0),           # East at origin
+    trans=kf.kdb.Trans(0, False, 0, 0),  # East at origin
     width=WG_WIDTH,
     layer_info=L.WG,
 )
@@ -233,7 +238,7 @@ backbone_180 = kf.routing.manhattan.route_manhattan_180(
     p_a,
     p_b,
     bend90_radius=BEND_RADIUS,
-    bend180_radius=kf.kcl.to_dbu(40),   # gap between legs
+    bend180_radius=kf.kcl.to_dbu(40),  # gap between legs
     start_straight=kf.kcl.to_dbu(10),
     end_straight=kf.kcl.to_dbu(10),
 )
@@ -271,7 +276,9 @@ p2_info = kf.Port(
     layer_info=L.WG,
 )
 
-pts_info = kf.routing.manhattan.route_manhattan(p1_info, p2_info, bend90_radius=BEND_RADIUS)
+pts_info = kf.routing.manhattan.route_manhattan(
+    p1_info, p2_info, bend90_radius=BEND_RADIUS
+)
 route = kf.routing.optical.place_manhattan(
     c_info,
     p1_info,

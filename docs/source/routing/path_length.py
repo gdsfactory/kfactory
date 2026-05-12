@@ -168,10 +168,10 @@ routes_plm = kf.routing.optical.route_bundle(
     constraints=[
         kf.PathLengthMatch(
             route_names=["plm_basic"],
-            element=-1,        # last backbone segment
-            loop_side=-1,      # loops protrude to the left (-1=left, 0=center, 1=right)
-            loops=1,           # one squiggle loop per route
-            loop_position=0,   # loop is centered in the segment
+            element=-1,  # last backbone segment
+            loop_side=-1,  # loops protrude to the left (-1=left, 0=center, 1=right)
+            loops=1,  # one squiggle loop per route
+            loop_position=0,  # loop is centered in the segment
         )
     ],
     route_name="plm_basic",
@@ -237,7 +237,7 @@ kf.routing.optical.route_bundle(
         kf.PathLengthMatch(
             route_names=["plm_right"],
             element=-1,
-            loop_side=1,       # ← right
+            loop_side=1,  # ← right
             loops=1,
             loop_position=0,
         )
@@ -283,7 +283,7 @@ kf.routing.optical.route_bundle(
         kf.PathLengthMatch(
             route_names=["plm_center"],
             element=-1,
-            loop_side=0,       # ← center (symmetric around route axis)
+            loop_side=0,  # ← center (symmetric around route axis)
             loops=1,
             loop_position=0,
         )
@@ -337,7 +337,7 @@ kf.routing.optical.route_bundle(
             element=-1,
             loop_side=-1,
             loops=1,
-            loop_position=1,   # ← near the end of the segment
+            loop_position=1,  # ← near the end of the segment
         )
     ],
     route_name="plm_pos_end",
@@ -387,7 +387,7 @@ routes_l2 = kf.routing.optical.route_bundle(
             route_names=["plm_loops_2"],
             element=-1,
             loop_side=-1,
-            loops=2,           # ← two squiggle loops per route
+            loops=2,  # ← two squiggle loops per route
             loop_position=0,
         )
     ],

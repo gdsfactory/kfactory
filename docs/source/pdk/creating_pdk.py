@@ -44,16 +44,16 @@
 
 # %%
 import kfactory as kf
-from kfactory.cross_section import SymmetricalCrossSection
 
 
 class LAYER(kf.LayerInfos):
-    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)      # waveguide core
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)  # waveguide core
     WGCLAD: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)  # cladding oxide
-    SLAB: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)    # slab (rib process)
+    SLAB: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)  # slab (rib process)
     METAL: kf.kdb.LayerInfo = kf.kdb.LayerInfo(20, 0)  # metal layer
     METALEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(20, 1)  # metal keep-out
     FLOORPLAN: kf.kdb.LayerInfo = kf.kdb.LayerInfo(99, 0)  # die outline
+
 
 # %% [markdown]
 # ## 2 · Create a named `KCLayout`
@@ -96,7 +96,7 @@ enc_strip = pdk.get_enclosure(
         name="STRIP",
         main_layer=L.WG,
         sections=[
-            (L.WGCLAD, 0, 2_000),   # 0–2 µm cladding
+            (L.WGCLAD, 0, 2_000),  # 0–2 µm cladding
         ],
     )
 )
@@ -107,8 +107,8 @@ enc_rib = pdk.get_enclosure(
         name="RIB",
         main_layer=L.WG,
         sections=[
-            (L.WGCLAD, 0, 2_000),   # 0–2 µm cladding
-            (L.SLAB,   0, 4_000),   # 0–4 µm slab
+            (L.WGCLAD, 0, 2_000),  # 0–2 µm cladding
+            (L.SLAB, 0, 4_000),  # 0–4 µm slab
         ],
     )
 )
@@ -130,13 +130,13 @@ print(f"rib   enclosure: {enc_rib.name}")
 # Strip waveguide — 500 nm core, 2 µm cladding, 10 µm nominal bend radius.
 xs_strip = kf.DCrossSection(
     kcl=pdk,
-    width=0.5,           # µm
+    width=0.5,  # µm
     layer=L.WG,
     sections=[
-        (L.WGCLAD, 2.0),   # cladding: 0 → 2 µm
+        (L.WGCLAD, 2.0),  # cladding: 0 → 2 µm
     ],
-    radius=10.0,         # preferred bend radius (µm) — routing hint
-    radius_min=5.0,      # minimum bend radius (µm) — DRC hint
+    radius=10.0,  # preferred bend radius (µm) — routing hint
+    radius_min=5.0,  # minimum bend radius (µm) — DRC hint
     name="WG_500",
 )
 
@@ -154,7 +154,7 @@ xs_rib = kf.DCrossSection(
     layer=L.WG,
     sections=[
         (L.WGCLAD, 2.0),
-        (L.SLAB,   4.0),
+        (L.SLAB, 4.0),
     ],
     radius=15.0,
     radius_min=8.0,
@@ -202,23 +202,23 @@ taper = kf.factories.taper.taper_factory(kcl=pdk)
 
 # %%
 wg = straight(
-    width=pdk.to_dbu(0.5),    # 500 nm → DBU
+    width=pdk.to_dbu(0.5),  # 500 nm → DBU
     length=pdk.to_dbu(20.0),  # 20 µm → DBU
     layer=L.WG,
     enclosure=enc_strip,
 )
 
 bend = bend_euler(
-    width=0.5,     # µm
-    radius=10.0,   # µm
+    width=0.5,  # µm
+    radius=10.0,  # µm
     layer=L.WG,
     enclosure=enc_strip,
     angle=90,
 )
 
 tp = taper(
-    width1=pdk.to_dbu(0.5),   # narrow end
-    width2=pdk.to_dbu(1.0),   # wide end
+    width1=pdk.to_dbu(0.5),  # narrow end
+    width2=pdk.to_dbu(1.0),  # wide end
     length=pdk.to_dbu(10.0),
     layer=L.WG,
     enclosure=enc_strip,
@@ -238,12 +238,13 @@ print(f"taper:     {tp}")
 # > custom PDK cell. Without it kfactory defaults to the global `kf.kcl` layout, which
 # > makes layer indices inconsistent.
 
+
 # %%
 @pdk.cell
 def mmi_1x2(
-    width: float = 0.5,        # µm — waveguide core width
-    gap: float = 0.2,          # µm — gap between output waveguides
-    length: float = 10.0,      # µm — MMI body length
+    width: float = 0.5,  # µm — waveguide core width
+    gap: float = 0.2,  # µm — gap between output waveguides
+    length: float = 10.0,  # µm — MMI body length
 ) -> kf.KCell:
     """1×2 multimode-interference splitter.
 
@@ -255,8 +256,8 @@ def mmi_1x2(
     c = pdk.kcell()
 
     # Convert µm to DBU for shape/port placement.
-    width_dbu  = pdk.to_dbu(width)
-    gap_dbu    = pdk.to_dbu(gap)
+    width_dbu = pdk.to_dbu(width)
+    gap_dbu = pdk.to_dbu(gap)
     length_dbu = pdk.to_dbu(length)
 
     # MMI body: wide enough for two waveguides + gap + margin.
@@ -266,8 +267,10 @@ def mmi_1x2(
     wg_li = pdk.find_layer(L.WG)
     c.shapes(wg_li).insert(
         kf.kdb.Box(
-            -length_dbu // 2, -body_width_dbu // 2,
-             length_dbu // 2,  body_width_dbu // 2,
+            -length_dbu // 2,
+            -body_width_dbu // 2,
+            length_dbu // 2,
+            body_width_dbu // 2,
         )
     )
     # Cladding rectangle.
@@ -276,8 +279,8 @@ def mmi_1x2(
         kf.kdb.Box(
             -length_dbu // 2 - clad_margin,
             -body_width_dbu // 2 - clad_margin,
-             length_dbu // 2 + clad_margin,
-             body_width_dbu // 2 + clad_margin,
+            length_dbu // 2 + clad_margin,
+            body_width_dbu // 2 + clad_margin,
         )
     )
 
@@ -290,7 +293,7 @@ def mmi_1x2(
             width=width_dbu,
             layer=wg_li,
             port_type="optical",
-            kcl=pdk,           # required when using a custom KCLayout
+            kcl=pdk,  # required when using a custom KCLayout
         )
     )
 
@@ -321,6 +324,7 @@ splitter.plot()
 # Use `<<` to place cells (returns an `Instance`) and `connect()` to snap ports together.
 # The following builds a simple Y-splitter + arms circuit to show the assembly pattern.
 
+
 # %%
 @pdk.cell
 def splitter_arms(arm_length: float = 50.0) -> kf.KCell:
@@ -350,9 +354,9 @@ def splitter_arms(arm_length: float = 50.0) -> kf.KCell:
     bot_arm.connect("o1", sp, "o3")
 
     # Expose the circuit ports (pass name= to rename on the parent).
-    c.add_port(port=sp.ports["o1"],       name="o1")
-    c.add_port(port=top_arm.ports["o2"],  name="o2")
-    c.add_port(port=bot_arm.ports["o2"],  name="o3")
+    c.add_port(port=sp.ports["o1"], name="o1")
+    c.add_port(port=top_arm.ports["o2"], name="o2")
+    c.add_port(port=bot_arm.ports["o2"], name="o3")
 
     return c
 
@@ -403,7 +407,8 @@ fork.plot()
 # All cells registered in `pdk` (including sub-cells) are written in one call.
 
 # %%
-import tempfile, pathlib
+import pathlib
+import tempfile
 
 with tempfile.TemporaryDirectory() as tmp:
     gds_path = pathlib.Path(tmp) / "my_pdk.gds"

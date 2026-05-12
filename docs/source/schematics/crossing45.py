@@ -31,9 +31,10 @@
 import warnings
 from pprint import pformat
 
-import kfactory as kf
 import numpy as np
 from IPython.display import HTML
+
+import kfactory as kf
 
 
 def scrollable_text(text: str, max_height: str = "400px") -> HTML:
@@ -42,9 +43,10 @@ def scrollable_text(text: str, max_height: str = "400px") -> HTML:
 
     return HTML(
         f'<div style="max-height: {max_height}; overflow-y: auto; '
-        f'font-family: monospace; white-space: pre; padding: 0.5em; '
+        f"font-family: monospace; white-space: pre; padding: 0.5em; "
         f'border: 1px solid #ccc;">{html.escape(text)}</div>'
     )
+
 
 # %% [markdown]
 # ## PDK setup
@@ -52,6 +54,7 @@ def scrollable_text(text: str, max_height: str = "400px") -> HTML:
 # We create a dedicated `KCLayout` with a wide waveguide cross-section.  The
 # `SymmetricalCrossSection` bundles the core width, enclosure (cladding), and a name
 # that the schematic can reference as a plain string.
+
 
 # %%
 class Layers(kf.LayerInfos):
@@ -87,6 +90,7 @@ kf.kcl.get_icross_section(xs_wg1)
 # - Enclosures are applied via `Minkowski` for cladding / fill-exclude layers
 # - Four ports (`o1`..`o4`) face the cardinal directions
 
+
 # %%
 @pdk.cell
 def cross(cross_section: str) -> kf.KCell:
@@ -102,9 +106,9 @@ def cross(cross_section: str) -> kf.KCell:
     ]
     mt = kf.kdb.DTrans.M0
 
-    poly = kf.kdb.DPolygon(
-        points + list(reversed([mt * p for p in points]))
-    ).to_itype(c.kcl.dbu)
+    poly = kf.kdb.DPolygon(points + list(reversed([mt * p for p in points]))).to_itype(
+        c.kcl.dbu
+    )
 
     center_dist = c.kcl.to_dbu(points[-1].y)
     base_trans = kf.kdb.Trans(-poly.bbox().right - center_dist, 0)
@@ -129,12 +133,8 @@ def cross(cross_section: str) -> kf.KCell:
     c.create_port(
         name="o1", trans=kf.kdb.Trans(0, False, bb.right, 0), cross_section=xs
     )
-    c.create_port(
-        name="o2", trans=kf.kdb.Trans(1, False, 0, bb.top), cross_section=xs
-    )
-    c.create_port(
-        name="o3", trans=kf.kdb.Trans(2, False, bb.left, 0), cross_section=xs
-    )
+    c.create_port(name="o2", trans=kf.kdb.Trans(1, False, 0, bb.top), cross_section=xs)
+    c.create_port(name="o3", trans=kf.kdb.Trans(2, False, bb.left, 0), cross_section=xs)
     c.create_port(
         name="o4", trans=kf.kdb.Trans(3, False, 0, bb.bottom), cross_section=xs
     )
@@ -151,6 +151,7 @@ def cross(cross_section: str) -> kf.KCell:
 # Unlike physical cells, **virtual cells** (`VKCell`) are defined parametrically and only
 # generate geometry when materialised.  They are lightweight and efficient for
 # repetitive routing primitives.
+
 
 # %%
 @pdk.vcell
@@ -247,6 +248,7 @@ def straight(length: float, cross_section: str) -> kf.VKCell:
 # - Adds 45° euler bends and I/O straights at the edges so that all ports face
 #   horizontally
 # - Uses `DSchematic` (µm coordinates) and produces a `DKCell`
+
 
 # %%
 @kf.kcl.schematic_cell(output_type=kf.DKCell)

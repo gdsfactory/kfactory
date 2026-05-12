@@ -41,15 +41,17 @@
 import kfactory as kf
 import kfactory.routing.optical as opt
 
+
 class LAYER(kf.LayerInfos):
-    WG:   kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
+    WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
     WGEX: kf.kdb.LayerInfo = kf.kdb.LayerInfo(2, 0)
     SLAB: kf.kdb.LayerInfo = kf.kdb.LayerInfo(3, 0)
+
 
 L = LAYER()
 kf.kcl.infos = L
 
-li_wg   = kf.kcl.find_layer(L.WG)
+li_wg = kf.kcl.find_layer(L.WG)
 li_wgex = kf.kcl.find_layer(L.WGEX)
 
 # %% [markdown]
@@ -79,28 +81,32 @@ li_wgex = kf.kcl.find_layer(L.WGEX)
 
 # %%
 # Convert µm → DBU explicitly at the boundary
-width_um  = 0.5   # user-facing µm value
+width_um = 0.5  # user-facing µm value
 length_um = 10.0
 
-w_dbu = kf.kcl.to_dbu(width_um)   # → 500  (int)
+w_dbu = kf.kcl.to_dbu(width_um)  # → 500  (int)
 l_dbu = kf.kcl.to_dbu(length_um)  # → 10000 (int)
 
 c = kf.KCell("bp_units_demo")
 c.shapes(li_wg).insert(kf.kdb.Box(l_dbu, w_dbu))
-c.add_port(port=kf.Port(
-    name="o1",
-    trans=kf.kdb.Trans(2, False, -l_dbu // 2, 0),
-    width=w_dbu,          # ← integer DBU
-    layer=li_wg,
-    port_type="optical",
-))
-c.add_port(port=kf.Port(
-    name="o2",
-    trans=kf.kdb.Trans(0, False,  l_dbu // 2, 0),
-    width=w_dbu,
-    layer=li_wg,
-    port_type="optical",
-))
+c.add_port(
+    port=kf.Port(
+        name="o1",
+        trans=kf.kdb.Trans(2, False, -l_dbu // 2, 0),
+        width=w_dbu,  # ← integer DBU
+        layer=li_wg,
+        port_type="optical",
+    )
+)
+c.add_port(
+    port=kf.Port(
+        name="o2",
+        trans=kf.kdb.Trans(0, False, l_dbu // 2, 0),
+        width=w_dbu,
+        layer=li_wg,
+        port_type="optical",
+    )
+)
 
 print(f"dbu setting : {kf.kcl.dbu} µm/DBU")
 print(f"width → DBU : {w_dbu}")
@@ -125,12 +131,14 @@ print(f"bbox (µm)   : {c.dbbox()}")
 # %%
 # CORRECT — always use port=
 example = kf.KCell("bp_add_port")
-p = kf.Port(name="o1", trans=kf.kdb.Trans(0), width=500, layer=li_wg, port_type="optical")
+p = kf.Port(
+    name="o1", trans=kf.kdb.Trans(0), width=500, layer=li_wg, port_type="optical"
+)
 example.add_port(port=p)  # ← keyword required
 
 # Renaming when exposing a child port on a parent cell:
 parent = kf.KCell("bp_parent")
-inst   = parent << example
+inst = parent << example
 parent.add_port(port=inst.ports["o1"], name="in")  # ← name= renames
 print(f"parent ports: {[p.name for p in parent.ports]}")
 
@@ -155,7 +163,7 @@ print(f"parent ports: {[p.name for p in parent.ports]}")
 # %%
 # Full correct initialisation for a new KCLayout
 pdk = kf.KCLayout("best_practices_pdk", infos=LAYER)
-L2  = pdk.infos   # already an instance; use this for layer lookups
+L2 = pdk.infos  # already an instance; use this for layer lookups
 
 print(f"pdk.dbu   : {pdk.dbu}")
 print(f"layer WG  : {pdk.find_layer(L2.WG)}")
@@ -193,29 +201,45 @@ _xs_spec = kf.DCrossSection(
     kcl=kf.kcl,
     width=0.5,
     layer=L.WG,
-    sections=[(L.WGEX, 1.0)],   # 1 µm cladding
+    sections=[(L.WGEX, 1.0)],  # 1 µm cladding
     name="wg_500",
 )
-kf.kcl.get_icross_section(_xs_spec)   # ← registers under the name "wg_500"
+kf.kcl.get_icross_section(_xs_spec)  # ← registers under the name "wg_500"
+
 
 @kf.cell
 def waveguide_xs(xs_name: str = "wg_500", length_um: float = 10.0) -> kf.KCell:
     """Waveguide using a cross-section looked up by name."""
-    xs  = kf.kcl.get_icross_section(xs_name)  # ← resolve here, not in signature
-    c   = kf.KCell()
-    l   = kf.kcl.to_dbu(length_um)
-    w   = xs.width                              # already in DBU
-    li  = kf.kcl.find_layer(xs.main_layer)
+    xs = kf.kcl.get_icross_section(xs_name)  # ← resolve here, not in signature
+    c = kf.KCell()
+    l = kf.kcl.to_dbu(length_um)
+    w = xs.width  # already in DBU
+    li = kf.kcl.find_layer(xs.main_layer)
     c.shapes(li).insert(kf.kdb.Box(l, w))
-    c.add_port(port=kf.Port(name="o1", trans=kf.kdb.Trans(2, False, -l//2, 0),
-                            width=w, layer=li, port_type="optical"))
-    c.add_port(port=kf.Port(name="o2", trans=kf.kdb.Trans(0, False,  l//2, 0),
-                            width=w, layer=li, port_type="optical"))
+    c.add_port(
+        port=kf.Port(
+            name="o1",
+            trans=kf.kdb.Trans(2, False, -l // 2, 0),
+            width=w,
+            layer=li,
+            port_type="optical",
+        )
+    )
+    c.add_port(
+        port=kf.Port(
+            name="o2",
+            trans=kf.kdb.Trans(0, False, l // 2, 0),
+            width=w,
+            layer=li,
+            port_type="optical",
+        )
+    )
     return c
+
 
 wg_a = waveguide_xs(xs_name="wg_500", length_um=10.0)
 wg_b = waveguide_xs(xs_name="wg_500", length_um=10.0)
-print(f"Same params → same object: {wg_a is wg_b}")   # True
+print(f"Same params → same object: {wg_a is wg_b}")  # True
 
 # %% [markdown]
 # ---
@@ -251,8 +275,8 @@ bend_euler_f = kf.factories.euler.bend_euler_factory(fac_pdk)
 
 # straight_dbu_factory: width and length in DBU (use to_dbu to convert µm)
 s = straight_f(
-    width=fac_pdk.to_dbu(0.5),     # 500 DBU = 0.5 µm
-    length=fac_pdk.to_dbu(10.0),   # 10000 DBU = 10 µm
+    width=fac_pdk.to_dbu(0.5),  # 500 DBU = 0.5 µm
+    length=fac_pdk.to_dbu(10.0),  # 10000 DBU = 10 µm
     layer=L.WG,
 )
 print(f"straight bbox (DBU): {s.bbox()}")
@@ -276,8 +300,8 @@ print(f"euler bbox   (µm):   {b.dbbox()}")
 # %%
 bend90 = bend_euler_f(width=0.5, radius=10.0, layer=L.WG)
 
-nominal_radius  = 10.0                              # what we asked for
-footprint_radius = opt.get_radius(bend90)           # what routing needs
+nominal_radius = 10.0  # what we asked for
+footprint_radius = opt.get_radius(bend90)  # what routing needs
 
 print(f"nominal radius  : {nominal_radius:.3f} µm")
 print(f"footprint radius: {footprint_radius:.3f} µm")
@@ -328,28 +352,38 @@ print(f"difference      : {footprint_radius - nominal_radius:.3f} µm")
 # p = kf.Port(name="o1", layer=pdk.find_layer(L.WG), kcl=pdk, ...)
 # ```
 
+
 # %%
 # Demonstrate: ports use pdk layout, not global kf.kcl
 @pdk.cell
 def pdk_straight(width: float = 0.5, length: float = 10.0) -> kf.KCell:
-    c  = kf.KCell(kcl=pdk)
-    w  = pdk.to_dbu(width)
+    c = kf.KCell(kcl=pdk)
+    w = pdk.to_dbu(width)
     ll = pdk.to_dbu(length)
     li = pdk.find_layer(L2.WG)
     c.shapes(li).insert(kf.kdb.Box(ll, w))
-    c.add_port(port=kf.Port(
-        name="o1",
-        trans=kf.kdb.Trans(2, False, -ll // 2, 0),
-        width=w, layer=li, port_type="optical",
-        kcl=pdk,   # ← attach to PDK layout
-    ))
-    c.add_port(port=kf.Port(
-        name="o2",
-        trans=kf.kdb.Trans(0, False,  ll // 2, 0),
-        width=w, layer=li, port_type="optical",
-        kcl=pdk,   # ← attach to PDK layout
-    ))
+    c.add_port(
+        port=kf.Port(
+            name="o1",
+            trans=kf.kdb.Trans(2, False, -ll // 2, 0),
+            width=w,
+            layer=li,
+            port_type="optical",
+            kcl=pdk,  # ← attach to PDK layout
+        )
+    )
+    c.add_port(
+        port=kf.Port(
+            name="o2",
+            trans=kf.kdb.Trans(0, False, ll // 2, 0),
+            width=w,
+            layer=li,
+            port_type="optical",
+            kcl=pdk,  # ← attach to PDK layout
+        )
+    )
     return c
+
 
 ps = pdk_straight()
 print(f"PDK cell layout : {ps.kcl.name}")
@@ -434,25 +468,24 @@ print(f"ring layer_sections:      {enc_ring.layer_sections}")
 # `max_width`, and `max_height` parameters are all in **DBU**.
 
 # %%
-import kfactory.packing as packing
+from kfactory import packing
 
 # Build a handful of small cells to pack
-cells = [
-    kf.KCell(f"pack_demo_{i}")
-    for i in range(5)
-]
+cells = [kf.KCell(f"pack_demo_{i}") for i in range(5)]
 for i, cell in enumerate(cells):
-    cell.shapes(li_wg).insert(kf.kdb.Box(
-        kf.kcl.to_dbu((i + 1) * 5.0),   # 5, 10, 15, 20, 25 µm wide
-        kf.kcl.to_dbu(2.0),             # 2 µm tall
-    ))
+    cell.shapes(li_wg).insert(
+        kf.kdb.Box(
+            kf.kcl.to_dbu((i + 1) * 5.0),  # 5, 10, 15, 20, 25 µm wide
+            kf.kcl.to_dbu(2.0),  # 2 µm tall
+        )
+    )
 
 container = kf.KCell("pack_container")
 packing.pack_kcells(
     kcells=cells,
     target=container,
-    spacing=kf.kcl.to_dbu(2.0),          # ← DBU (use to_dbu to convert from µm)
-    max_width=kf.kcl.to_dbu(100.0),      # ← DBU
+    spacing=kf.kcl.to_dbu(2.0),  # ← DBU (use to_dbu to convert from µm)
+    max_width=kf.kcl.to_dbu(100.0),  # ← DBU
 )
 print(f"packed bbox (µm): {container.dbbox()}")
 
@@ -479,7 +512,7 @@ tile.shapes(li_wg).insert(kf.kdb.Box(2000, 500))
 canvas = kf.KCell("dmove_demo_canvas")
 for i in range(4):
     inst = canvas << tile
-    inst.dmove((i * 3.0, 0.0))   # ← tuple, not DVector
+    inst.dmove((i * 3.0, 0.0))  # ← tuple, not DVector
 
 print(f"canvas bbox (µm): {canvas.dbbox()}")
 

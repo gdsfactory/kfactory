@@ -47,6 +47,7 @@ import kfactory as kf
 # looked up by name when `create_inst` is called — so every component you place must be
 # registered first.
 
+
 # %%
 class LAYER(kf.LayerInfos):
     WG: kf.kdb.LayerInfo = kf.kdb.LayerInfo(1, 0)
@@ -61,6 +62,7 @@ pdk = kf.KCLayout("SCHEM_OVERVIEW", infos=LAYER)
 #
 # PDK cells are plain `@pdk.cell`-decorated functions.  Their parameters must be
 # JSON-serialisable (int, float, str, bool) so the schematic can store them.
+
 
 # %%
 @pdk.cell
@@ -102,12 +104,14 @@ def bend90(width: int, radius: int) -> kf.KCell:
         layer=L.WG,
     )
 
+
 # %% [markdown]
 # ## Basic schematic: placement only
 #
 # The simplest schematic just places instances at known coordinates.
 # `schematic.create_inst` looks up the component by name in the PDK and records the
 # settings.  `inst.place(x, y)` sets the origin in dbu.
+
 
 # %%
 @pdk.schematic_cell
@@ -144,6 +148,7 @@ cell
 # `inst.connect(port_name, other_port)` aligns an instance so that the named port is
 # mated with `other_port`.  This is the schematic equivalent of the imperative
 # `instance.connect()` in a regular cell body.
+
 
 # %%
 @pdk.schematic_cell
@@ -188,11 +193,12 @@ chain
 # as a Pydantic model.  This includes instances, placements, nets, and routes.
 
 # %%
-from pprint import pformat
 
 model = chain.schematic
 print("Instances:", list(model.instances.keys()))
-print("Placements:", {k: (v.x, v.y, v.orientation) for k, v in model.placements.items()})
+print(
+    "Placements:", {k: (v.x, v.y, v.orientation) for k, v in model.placements.items()}
+)
 
 # %% [markdown]
 # ## Netlist extraction
@@ -207,7 +213,7 @@ for cell_name, net in netlist.items():
     print(f"\n=== {cell_name} ===")
     print(f"  instances: {list(net.instances.keys())}")
     for i, n in enumerate(net.nets):
-        print(f"  net[{i}]: {[f'{p.instance}.{p.port}' for p in n.root]}")
+        print(f"  net[{i}]: {[f'{p.instance}.{p.port}' for p in n]}")
     print(f"  ports: {[p.name for p in net.ports]}")
 
 # %% [markdown]
@@ -216,6 +222,7 @@ for cell_name, net in netlist.items():
 # For a schematic cell with declared nets (`schematic.nets`), kfactory can compare the
 # schematic connectivity against the extracted layout connectivity.  Here we use a version
 # with explicit nets to demonstrate the LVS flow.
+
 
 # %%
 @pdk.schematic_cell

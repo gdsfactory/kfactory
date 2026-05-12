@@ -139,9 +139,13 @@ ig_flex = kf.flexgrid(target_flex, components, spacing=2.0, shape=(2, 3))
 grid_area = target_2d.dbbox().width() * target_2d.dbbox().height()
 flex_area = target_flex.dbbox().width() * target_flex.dbbox().height()
 
-print(f"grid   bbox: {target_2d.dbbox().width():.1f} × {target_2d.dbbox().height():.1f} µm  ({grid_area:.0f} µm²)")
-print(f"flexgrid bbox: {target_flex.dbbox().width():.1f} × {target_flex.dbbox().height():.1f} µm  ({flex_area:.0f} µm²)")
-print(f"Area saving: {100*(1 - flex_area/grid_area):.0f}%")
+print(
+    f"grid   bbox: {target_2d.dbbox().width():.1f} × {target_2d.dbbox().height():.1f} µm  ({grid_area:.0f} µm²)"
+)
+print(
+    f"flexgrid bbox: {target_flex.dbbox().width():.1f} × {target_flex.dbbox().height():.1f} µm  ({flex_area:.0f} µm²)"
+)
+print(f"Area saving: {100 * (1 - flex_area / grid_area):.0f}%")
 target_flex
 
 # %% [markdown]
@@ -212,13 +216,9 @@ sub_b = kf.KCell(name="sub_b")
 kf.grid(sub_b, components[3:], spacing=2.0)
 inst_b = top << sub_b
 gap_dbu = kf.kcl.to_dbu(10)
-inst_b.transform(
-    kf.kdb.Trans(sub_a.bbox().width() + gap_dbu, 0)
-)
+inst_b.transform(kf.kdb.Trans(sub_a.bbox().width() + gap_dbu, 0))
 
-print(
-    f"Top bbox: {top.dbbox().width():.1f} µm × {top.dbbox().height():.1f} µm"
-)
+print(f"Top bbox: {top.dbbox().width():.1f} µm × {top.dbbox().height():.1f} µm")
 top
 
 # %% [markdown]

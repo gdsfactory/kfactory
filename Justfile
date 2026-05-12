@@ -81,10 +81,6 @@ lint:
 format:
     uv run ruff format .
 
-# Run type checking
-mypy:
-    uv run dmypy run src/kfactory
-
 # Run ty
 ty:
     uv run ty check src/kfactory

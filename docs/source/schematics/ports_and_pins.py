@@ -94,6 +94,7 @@ def straight(width: int = 500, length: int = 10_000) -> kf.KCell:
 # instance port. The schematic stores a `PortRef` lazily; the cell port is created
 # when `create_cell` runs.
 
+
 # %%
 @pdk.schematic_cell
 def forwarded_ports() -> kf.Schematic:
@@ -133,6 +134,7 @@ for name, port in cell.schematic.ports.items():
 #
 # Both absolute coordinates and `PortRef`s are accepted for `x`, `y`, and
 # `orientation`, so you can pin the new port to an instance:
+
 
 # %%
 @pdk.schematic_cell
@@ -187,6 +189,7 @@ def fanout_port() -> kf.Schematic:
 # with any single instance pin. The constituent port names must already exist in
 # `schematic.ports` (typically via `add_port`).
 
+
 # %%
 @pdk.schematic_cell
 def explicit_pin() -> kf.Schematic:
@@ -226,6 +229,7 @@ for pin in cell.pins:
 # top-level schematic port beforehand. The materialization step at `create_cell`
 # time looks up each port via that exposure — if any port is missing you'll get a
 # clear error.
+
 
 # %%
 @pdk.schematic_cell

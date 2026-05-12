@@ -97,9 +97,9 @@ bend_factory = partial(
 # %%
 backbone_single = [
     kf.kdb.DPoint(0, 0),
-    kf.kdb.DPoint(120, 0),    # horizontal run
-    kf.kdb.DPoint(120, 80),   # 90° turn upward
-    kf.kdb.DPoint(240, 80),   # horizontal run to exit
+    kf.kdb.DPoint(120, 0),  # horizontal run
+    kf.kdb.DPoint(120, 80),  # 90° turn upward
+    kf.kdb.DPoint(240, 80),  # horizontal run to exit
 ]
 
 c_single = kf.kcl.kcell("aa_single_route")
@@ -126,9 +126,9 @@ c_single.plot()
 # %%
 backbone_diag = [
     kf.kdb.DPoint(0, 0),
-    kf.kdb.DPoint(80, 60),    # diagonal up-right
-    kf.kdb.DPoint(200, 60),   # horizontal
-    kf.kdb.DPoint(280, 0),    # diagonal back down
+    kf.kdb.DPoint(80, 60),  # diagonal up-right
+    kf.kdb.DPoint(200, 60),  # horizontal
+    kf.kdb.DPoint(280, 0),  # diagonal back down
 ]
 
 c_diag = kf.kcl.kcell("aa_diagonal_route")
@@ -164,9 +164,9 @@ c_diag.plot()
 
 # %%
 # Place start ports fanned out at various angles on the left, end ports on the right
-r = 50   # radius of port fan-out cluster (µm)
-n = 1    # angle step centre
-_l = 5   # number of routes
+r = 50  # radius of port fan-out cluster (µm)
+n = 1  # angle step centre
+_l = 5  # number of routes
 
 c_bundle = kf.kcl.kcell("aa_bundle_route")
 
@@ -174,7 +174,7 @@ start_ports: list[kf.Port] = []
 end_ports: list[kf.Port] = []
 
 for i in range(_l):
-    a_start = (n - i) * 15          # angles spread around centre
+    a_start = (n - i) * 15  # angles spread around centre
     a_rad = np.deg2rad(a_start)
     a_end = 270 - n + i * 15
     ae_rad = np.deg2rad(a_end)
@@ -183,7 +183,9 @@ for i in range(_l):
         c_bundle.create_port(
             name=f"s{i}",
             dcplx_trans=kf.kdb.DCplxTrans(
-                1, a_start, False,
+                1,
+                a_start,
+                False,
                 -500 + r * np.cos(a_rad),
                 -100 + r * np.sin(a_rad),
             ),
@@ -195,7 +197,9 @@ for i in range(_l):
         c_bundle.create_port(
             name=f"e{i}",
             dcplx_trans=kf.kdb.DCplxTrans(
-                1, a_end, False,
+                1,
+                a_end,
+                False,
                 1510 + r * np.cos(ae_rad),
                 1410 + r * np.sin(ae_rad),
             ),
@@ -217,7 +221,7 @@ routes = kf.routing.aa.optical.route_bundle(
     start_ports=start_ports,
     end_ports=end_ports,
     backbone=backbone_bundle,
-    separation=2.0,          # µm between adjacent routes
+    separation=2.0,  # µm between adjacent routes
     straight_factory=straight_factory,
     bend_factory=bend_factory,
 )

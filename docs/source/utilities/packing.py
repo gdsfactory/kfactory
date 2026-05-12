@@ -58,9 +58,7 @@ sizes_um = [(5, 10), (20, 8), (3, 3), (15, 15), (8, 4), (12, 6), (6, 18), (9, 5)
 components = []
 for w, h in sizes_um:
     c = kf.KCell(name=f"box_{w}x{h}")
-    c.shapes(c.kcl.layer(L.WG)).insert(
-        kf.kdb.Box(kf.kcl.to_dbu(w), kf.kcl.to_dbu(h))
-    )
+    c.shapes(c.kcl.layer(L.WG)).insert(kf.kdb.Box(kf.kcl.to_dbu(w), kf.kcl.to_dbu(h)))
     components.append(c)
 
 print(f"Created {len(components)} components")
@@ -81,7 +79,9 @@ SPACING_DBU = kf.kcl.to_dbu(2)  # 2 µm gap between cells
 target = kf.KCell(name="packed_basic")
 ig = kf.packing.pack_kcells(target, components, spacing=SPACING_DBU)
 
-print(f"Bounding box: {target.dbbox().width():.1f} µm × {target.dbbox().height():.1f} µm")
+print(
+    f"Bounding box: {target.dbbox().width():.1f} µm × {target.dbbox().height():.1f} µm"
+)
 print(f"Placed {len(ig.insts)} instances")
 target
 
@@ -131,11 +131,15 @@ for i, inst in enumerate(insts):
     # Scatter them diagonally so the "before" layout is spread out
     inst.transform(kf.kdb.Trans(i * kf.kcl.to_dbu(30), i * kf.kcl.to_dbu(30)))
 
-print(f"Before packing — bbox: {target_inst.dbbox().width():.0f} µm × {target_inst.dbbox().height():.0f} µm")
+print(
+    f"Before packing — bbox: {target_inst.dbbox().width():.0f} µm × {target_inst.dbbox().height():.0f} µm"
+)
 
 ig_inst = kf.packing.pack_instances(target_inst, insts, spacing=SPACING_DBU)
 
-print(f"After  packing — bbox: {target_inst.dbbox().width():.0f} µm × {target_inst.dbbox().height():.0f} µm")
+print(
+    f"After  packing — bbox: {target_inst.dbbox().width():.0f} µm × {target_inst.dbbox().height():.0f} µm"
+)
 target_inst
 
 # %% [markdown]

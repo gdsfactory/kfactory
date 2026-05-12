@@ -317,13 +317,14 @@ wg_a = my_waveguide(width=0.5, length=10.0)
 wg_b = my_waveguide(width=0.5, length=10.0)
 wg_c = my_waveguide(width=0.5, length=20.0)  # different params → new cell
 
-print(f"wg_a is wg_b: {wg_a is wg_b}")   # True — same cached cell
-print(f"wg_a is wg_c: {wg_a is wg_c}")   # False — different length
+print(f"wg_a is wg_b: {wg_a is wg_b}")  # True — same cached cell
+print(f"wg_a is wg_c: {wg_a is wg_c}")  # False — different length
 
 # %% [markdown]
 # ## Assembling components
 #
 # Use the `<<` operator to place cell instances and `connect()` to snap ports:
+
 
 # %%
 @kf.cell
@@ -345,7 +346,9 @@ def mzi_stub() -> kf.KCell:
     b4.connect("o1", b3.ports["o2"])
 
     # Straight arm between b1 and b4
-    arm_length = kf.routing.optical.get_radius(bend_euler(width=0.5, radius=10.0, layer=L.WG))
+    arm_length = kf.routing.optical.get_radius(
+        bend_euler(width=0.5, radius=10.0, layer=L.WG)
+    )
     s1 = c << straight(width=0.5, length=arm_length * 2, layer=L.WG, enclosure=enc)
     s1.connect("o1", b4.ports["o2"])
 
