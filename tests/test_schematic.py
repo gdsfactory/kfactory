@@ -1237,6 +1237,27 @@ def test_schematic_function_get_port_positions(
         "bottom": ["o15", "o16"],
     }
 
+    # Port with PortRef orientation on a non-schematic-driven instance.
+    # Exercises the cell.ports[port.name] lookup: "o1" on `straight` faces
+    # left (180°) while "o2" faces right (0°). Using port.name="o1" must
+    # yield 180° (left), NOT 0° (right) which port.orientation.port would give.
+    s = kf.Schematic(kcl=kcl)
+    inst = s.create_inst(
+        "s1", "straight", settings={"cross_section": xs.name, "length": 10.0}
+    )
+    inst.place(x=0, y=0)
+    s.ports["p"] = kf.schematic.Port(
+        name="o1",
+        x=0,
+        y=0,
+        cross_section=xs.name,
+        orientation=kf.schematic.PortRef(instance="s1", port="o2"),
+    )
+    positions = s.get_port_positions(factories)
+    assert "p" in positions["left"], (
+        f"Expected port 'p' on 'left' (port.name='o1' → 180°), got {positions}"
+    )
+
 
 @pytest.mark.parametrize(
     "path",

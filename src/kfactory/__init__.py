@@ -6,7 +6,7 @@ Uses the klayout package as a backend.
 # The import order matters, we need to first import the important stuff.
 # isort:skip_file
 
-__version__ = "3.0.0rc0"
+__version__ = "3.0.0rc1"
 
 import klayout.db as kdb
 from klayout import lay
@@ -29,7 +29,7 @@ from .port import Port, DPort, ProtoPort
 from .instance import Instance, DInstance, VInstance
 from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
 from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
-from .netlist import Netlist
+from kfnetlist import Netlist
 from .schematic import (
     DSchematic,
     DSchema,
