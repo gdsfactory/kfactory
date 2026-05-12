@@ -34,7 +34,7 @@ import tempfile
 from pathlib import Path
 
 import kfactory as kf
-from kfactory.netlist import NetlistPort, PortRef
+from kfnetlist import NetlistPort, PortRef
 
 # %% [markdown]
 # ## PDK setup
