@@ -799,7 +799,7 @@ class ProtoTKCell[T: (int, float)](ProtoKCell[T, TKCell], ABC):
         c.ports = self.ports.copy()
 
         if self.pins:
-            port_mapping = {id(b): i for i, b in enumerate(self.ports._bases)}
+            port_mapping = {id(b): i for i, b in enumerate(self._base.ports)}
             c._base.pins = [
                 BasePin(
                     name=p.name,
