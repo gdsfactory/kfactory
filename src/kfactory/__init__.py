@@ -29,7 +29,7 @@ from .port import Port, DPort, ProtoPort
 from .instance import Instance, DInstance, VInstance
 from .instance_group import InstanceGroup, DInstanceGroup, VInstanceGroup
 from .instance_ports import InstancePorts, DInstancePorts, VInstancePorts
-from .netlist import Netlist
+from kfnetlist import Netlist
 from .schematic import (
     DSchematic,
     DSchema,
