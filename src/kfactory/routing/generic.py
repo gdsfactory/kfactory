@@ -480,7 +480,7 @@ def route_bundle(
                 )
             end_ports = [
                 p.transformed(post_trans=kdb.Trans(a - p.get_trans().angle))
-                for a, p in zip(end_angles, start_ports, strict=False)
+                for a, p in zip(end_angles, end_ports, strict=False)
             ]
 
     if route_width:
